@@ -90,7 +90,7 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
               <span
                 aria-hidden="true"
                 class="euiFormControlLayoutCustomIcon__icon"
-                data-euiicon-type="arrowDown"
+                data-euiicon-type="chevronSingleDown"
               />
             </span>
           </div>
@@ -283,7 +283,7 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiFormControlLayoutCustomIcon__icon"
-                    data-euiicon-type="arrowDown"
+                    data-euiicon-type="chevronSingleDown"
                   />
                 </span>
               </div>
@@ -632,7 +632,7 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiFormControlLayoutCustomIcon__icon"
-                    data-euiicon-type="arrowDown"
+                    data-euiicon-type="chevronSingleDown"
                   />
                 </span>
               </div>
@@ -735,7 +735,7 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
               <span
                 aria-hidden="true"
                 class="euiFormControlLayoutCustomIcon__icon"
-                data-euiicon-type="arrowDown"
+                data-euiicon-type="chevronSingleDown"
               />
             </span>
           </div>
@@ -1102,7 +1102,7 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
               <span
                 aria-hidden="true"
                 class="euiFormControlLayoutCustomIcon__icon"
-                data-euiicon-type="arrowDown"
+                data-euiicon-type="chevronSingleDown"
               />
             </span>
           </div>
@@ -1203,7 +1203,7 @@ exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
               <span
                 aria-hidden="true"
                 class="euiFormControlLayoutCustomIcon__icon"
-                data-euiicon-type="arrowDown"
+                data-euiicon-type="chevronSingleDown"
               />
             </span>
           </div>
@@ -1304,7 +1304,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
               <span
                 aria-hidden="true"
                 class="euiFormControlLayoutCustomIcon__icon"
-                data-euiicon-type="arrowDown"
+                data-euiicon-type="chevronSingleDown"
               />
             </span>
           </div>
@@ -1526,7 +1526,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
               <span
                 aria-hidden="true"
                 class="euiFormControlLayoutCustomIcon__icon"
-                data-euiicon-type="arrowDown"
+                data-euiicon-type="chevronSingleDown"
               />
             </span>
           </div>
@@ -1719,7 +1719,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiFormControlLayoutCustomIcon__icon"
-                    data-euiicon-type="arrowDown"
+                    data-euiicon-type="chevronSingleDown"
                   />
                 </span>
               </div>
@@ -2068,7 +2068,7 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiFormControlLayoutCustomIcon__icon"
-                    data-euiicon-type="arrowDown"
+                    data-euiicon-type="chevronSingleDown"
                   />
                 </span>
               </div>
@@ -2171,7 +2171,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
               <span
                 aria-hidden="true"
                 class="euiFormControlLayoutCustomIcon__icon"
-                data-euiicon-type="arrowDown"
+                data-euiicon-type="chevronSingleDown"
               />
             </span>
           </div>
@@ -2273,7 +2273,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
               <span
                 aria-hidden="true"
                 class="euiFormControlLayoutCustomIcon__icon"
-                data-euiicon-type="arrowDown"
+                data-euiicon-type="chevronSingleDown"
               />
             </span>
           </div>
@@ -2466,7 +2466,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiFormControlLayoutCustomIcon__icon"
-                    data-euiicon-type="arrowDown"
+                    data-euiicon-type="chevronSingleDown"
                   />
                 </span>
               </div>
@@ -2815,7 +2815,7 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiFormControlLayoutCustomIcon__icon"
-                    data-euiicon-type="arrowDown"
+                    data-euiicon-type="chevronSingleDown"
                   />
                 </span>
               </div>
@@ -2918,7 +2918,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
               <span
                 aria-hidden="true"
                 class="euiFormControlLayoutCustomIcon__icon"
-                data-euiicon-type="arrowDown"
+                data-euiicon-type="chevronSingleDown"
               />
             </span>
           </div>
@@ -3045,7 +3045,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
               <span
                 aria-hidden="true"
                 class="euiFormControlLayoutCustomIcon__icon"
-                data-euiicon-type="arrowDown"
+                data-euiicon-type="chevronSingleDown"
               />
             </span>
           </div>
@@ -3267,7 +3267,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
               <span
                 aria-hidden="true"
                 class="euiFormControlLayoutCustomIcon__icon"
-                data-euiicon-type="arrowDown"
+                data-euiicon-type="chevronSingleDown"
               />
             </span>
           </div>
@@ -3460,7 +3460,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiFormControlLayoutCustomIcon__icon"
-                    data-euiicon-type="arrowDown"
+                    data-euiicon-type="chevronSingleDown"
                   />
                 </span>
               </div>
@@ -3809,7 +3809,7 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiFormControlLayoutCustomIcon__icon"
-                    data-euiicon-type="arrowDown"
+                    data-euiicon-type="chevronSingleDown"
                   />
                 </span>
               </div>

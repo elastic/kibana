@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { getHistoryFilters } from '../actions/history_filter_storage';
+
 export type StaticPage =
   | 'base'
   | 'overview'
@@ -20,6 +22,7 @@ export type StaticPage =
 export type DynamicPage =
   | 'live_query_details'
   | 'history_details'
+  | 'history_scheduled_details'
   | 'pack_details'
   | 'pack_edit'
   | 'saved_query_edit';
@@ -39,11 +42,15 @@ export const PAGE_ROUTING_PATHS = {
   live_query_details: '/live_queries/:liveQueryId',
   history: '/history',
   history_details: '/history/:liveQueryId',
+  history_scheduled_details: '/history/scheduled/:scheduleId/:executionCount',
   new_query: '/new',
   packs: '/packs',
   pack_add: '/packs/add',
   pack_details: '/packs/:packId',
   pack_edit: '/packs/:packId/edit',
+  saved_queries: '/saved_queries',
+  saved_query_new: '/saved_queries/new',
+  saved_query_edit: '/saved_queries/:savedQueryId',
 };
 
 export const pagePathGetters: {
@@ -56,8 +63,11 @@ export const pagePathGetters: {
   live_queries: () => '/live_queries',
   live_query_new: () => '/live_queries/new',
   live_query_details: ({ liveQueryId }) => `/live_queries/${liveQueryId}`,
-  history: () => '/history',
+  // Note: unlike other getters, history() reads sessionStorage to restore persisted filters.
+  history: () => `/history${getHistoryFilters()}`,
   history_details: ({ liveQueryId }) => `/history/${liveQueryId}`,
+  history_scheduled_details: ({ scheduleId, executionCount }) =>
+    `/history/scheduled/${scheduleId}/${executionCount}`,
   new_query: () => '/new',
   saved_queries: () => '/saved_queries',
   saved_query_new: () => '/saved_queries/new',

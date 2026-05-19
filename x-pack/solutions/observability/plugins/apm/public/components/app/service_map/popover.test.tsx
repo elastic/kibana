@@ -17,7 +17,7 @@ import type {
   ServiceMapEdge,
 } from '../../../../common/service_map';
 import { MarkerType } from '@xyflow/react';
-import { MOCK_DEFAULT_COLOR, MOCK_EUI_THEME } from './constants';
+import { MOCK_DEFAULT_COLOR, MOCK_EUI_THEME_FOR_USE_THEME } from './constants';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
@@ -27,36 +27,12 @@ import {
   SPAN_TYPE,
 } from '@kbn/observability-shared-plugin/common';
 
-// Mock the EUI theme
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
     useEuiTheme: () => ({
-      euiTheme: {
-        colors: {
-          primary: MOCK_EUI_THEME.colors.primary,
-          backgroundBasePlain: MOCK_EUI_THEME.colors.backgroundBasePlain,
-          lightShade: MOCK_EUI_THEME.colors.lightShade,
-          textPrimary: MOCK_EUI_THEME.colors.textPrimary,
-          textParagraph: MOCK_EUI_THEME.colors.textParagraph,
-          text: MOCK_EUI_THEME.colors.textPrimary,
-          mediumShade: MOCK_EUI_THEME.colors.mediumShade,
-        },
-        size: {
-          xs: '4px',
-          s: '8px',
-          m: '12px',
-          l: '24px',
-          xxs: '2px',
-        },
-        border: {
-          radius: { medium: '4px' },
-          width: { thin: '1px', thick: '2px' },
-        },
-        levels: { header: 1000, menu: 2000 },
-        font: { family: 'Inter, sans-serif' },
-      },
+      euiTheme: MOCK_EUI_THEME_FOR_USE_THEME,
       colorMode: 'LIGHT',
     }),
   };
@@ -69,8 +45,17 @@ jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
       uiSettings: {
         get: jest.fn().mockReturnValue(false),
       },
+      application: {
+        capabilities: {
+          slo: { read: true },
+        },
+      },
     },
   }),
+}));
+
+jest.mock('../../../hooks/use_apm_route_path', () => ({
+  useApmRoutePath: () => '/services/{serviceName}/service-map',
 }));
 
 // Mock APM router
@@ -132,6 +117,11 @@ jest.mock('@xyflow/react', () => {
     }),
   };
 });
+
+// Mock service map components
+jest.mock('./popover/edge_contents', () => ({
+  EdgeContents: jest.fn(() => <div data-testid="edge-contents" />),
+}));
 
 describe('MapPopover', () => {
   const defaultProps = {
@@ -377,6 +367,59 @@ describe('MapPopover', () => {
       const heading = screen.getByTestId('serviceMapPopoverTitle');
       expect(heading.tagName).toBe('H3');
       expect(heading).toHaveTextContent('postgresql');
+    });
+  });
+
+  describe('Focus map button click behaviour', () => {
+    function focusedServiceNode(name: string): ServiceMapNode {
+      return {
+        id: name,
+        type: 'service',
+        position: { x: 100, y: 100 },
+        data: {
+          id: name,
+          label: name,
+          isService: true,
+        } as ServiceNodeData,
+      };
+    }
+
+    function clickFocusButton() {
+      const button = screen.getByTestId('apmServiceContentsFocusMapButton');
+      const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+      button.dispatchEvent(event);
+      return event;
+    }
+
+    it('re-centers the node (and prevents navigation) on the focused service by default', () => {
+      const onClose = jest.fn();
+      renderPopover({
+        selectedNode: focusedServiceNode('opbeans-go'),
+        focusedServiceName: 'opbeans-go',
+        onClose,
+        showFocusMap: true,
+      });
+
+      const event = clickFocusButton();
+      expect(event.defaultPrevented).toBe(true);
+      expect(mockSetCenter).toHaveBeenCalledTimes(1);
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it('navigates (closes popover, no preventDefault, no recentre) when alwaysNavigateOnFocus is set', () => {
+      const onClose = jest.fn();
+      renderPopover({
+        selectedNode: focusedServiceNode('opbeans-go'),
+        focusedServiceName: 'opbeans-go',
+        onClose,
+        showFocusMap: true,
+        alwaysNavigateOnFocus: true,
+      });
+
+      const event = clickFocusButton();
+      expect(event.defaultPrevented).toBe(false);
+      expect(mockSetCenter).not.toHaveBeenCalled();
+      expect(onClose).toHaveBeenCalledTimes(1);
     });
   });
 });

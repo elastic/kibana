@@ -12,6 +12,7 @@ import * as settings from '@kbn/management-settings-ids';
 const GENERAL_SETTINGS = [
   settings.CSV_QUOTE_VALUES_ID,
   settings.DATE_FORMAT_DOW_ID,
+  settings.DATE_FORMAT_ID,
   settings.DATE_FORMAT_SCALED_ID,
   settings.DATE_FORMAT_TZ_ID,
   settings.DATE_FORMAT_NANOS_ID,
@@ -25,6 +26,7 @@ const GENERAL_SETTINGS = [
   settings.META_FIELDS_ID,
   settings.TIMEPICKER_QUICK_RANGES_ID,
   settings.TIMEPICKER_TIME_DEFAULTS_ID,
+  settings.QUERY_ACTIVITY_MIN_RUNNING_TIME_ID,
 ];
 
 const ACCESSIBILITY_SETTINGS = [settings.ACCESSIBILITY_DISABLE_ANIMATIONS_ID];

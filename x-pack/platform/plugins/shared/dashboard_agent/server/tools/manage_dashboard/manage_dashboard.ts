@@ -6,47 +6,26 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
-import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { getToolResultId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import {
-  DASHBOARD_ATTACHMENT_TYPE,
-  DASHBOARD_PANEL_ADDED_EVENT,
-  DASHBOARD_PANELS_REMOVED_EVENT,
-  type AttachmentPanel,
-  type DashboardUiEvent,
-  type PanelAddedEventData,
-  type PanelsRemovedEventData,
-} from '@kbn/dashboard-agent-common';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import { getToolResultId } from '@kbn/agent-builder-server';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import { DASHBOARD_ATTACHMENT_TYPE, isSection } from '@kbn/dashboard-agent-common';
 
 import { dashboardTools } from '../../../common';
-import { checkDashboardToolsAvailability } from '../utils';
 import {
   retrieveLatestVersion,
   getErrorMessage,
-  resolveExistingVisualizations,
-  upsertMarkdownPanel,
-  getRemovedPanels,
+  resolvePanelsFromAttachments,
+  hasValidCreateMetadataOperations,
   type VisualizationFailure,
 } from './utils';
-import {
-  buildVisualizationsFromQueriesWithLLM,
-  type VisualizationQueryInput,
-} from './visualization_generation';
+import { createVisualizationResolver } from './inline_visualization';
+import { dashboardOperationSchema, executeDashboardOperations } from './operations';
 
-/**
- * Input schema for generating a visualization from natural language.
- */
-const visualizationQuerySchema = z.object({
-  query: z.string().describe('A natural language query describing the desired visualization.'),
-  index: z.string().optional().describe('(optional) Index, alias, or datastream to target.'),
-  chartType: z
-    .nativeEnum(SupportedChartType)
-    .optional()
-    .describe('(optional) The type of chart to create.'),
-  esql: z.string().optional().describe('(optional) An ES|QL query to use for the visualization.'),
-}) satisfies z.ZodType<VisualizationQueryInput>;
+const newDashboardMetadataErrorMessage =
+  'New dashboards require a set_metadata operation with a non-empty title.';
 
 const manageDashboardSchema = z.object({
   dashboardAttachmentId: z
@@ -55,169 +34,89 @@ const manageDashboardSchema = z.object({
     .describe(
       '(optional) The dashboard attachment ID to modify. If not provided, a new dashboard is created.'
     ),
-  title: z
-    .string()
-    .optional()
-    .describe('The title for the dashboard. Required when creating a new dashboard.'),
-  description: z
-    .string()
-    .optional()
-    .describe('The description for the dashboard. Required when creating a new dashboard.'),
-  markdownContent: z
-    .string()
-    .optional()
-    .describe('(optional) Markdown content for a summary panel at the top of the dashboard.'),
-  visualizationQueries: z
-    .array(visualizationQuerySchema)
-    .optional()
-    .describe(
-      '(optional) Array of natural language queries to generate new visualizations using LLM.'
-    ),
-  existingVisualizationIds: z
-    .array(z.string())
-    .optional()
-    .describe('(optional) Array of existing visualization attachment IDs to add to the dashboard.'),
-  removePanelIds: z
-    .array(z.string())
-    .optional()
-    .describe('(optional) Array of panel IDs to remove from the dashboard.'),
+  operations: z.array(dashboardOperationSchema).min(1),
 });
 
-export const manageDashboardTool = ({}: {}): BuiltinToolDefinition<
-  typeof manageDashboardSchema
-> => {
+export const manageDashboardTool = (): BuiltinSkillBoundedTool<typeof manageDashboardSchema> => {
   return {
     id: dashboardTools.manageDashboard,
     type: ToolType.builtin,
-    availability: {
-      cacheMode: 'space',
-      handler: checkDashboardToolsAvailability,
-    },
-    description: `Create or update an in-memory dashboard with visualizations.
+    description: `Create or update an dashboard with visualizations.
 
-This tool can:
-1. Create a new dashboard (when dashboardAttachmentId is not provided)
-2. Update an existing dashboard (when dashboardAttachmentId is provided)
-3. Add inline visualizations by describing them in natural language
-4. Add existing visualization attachments by ID
-5. Add markdown panels
-6. Remove panels by their panel ID
+This tool executes ordered dashboard operations against a dashboard attachment in conversation context.
 
-When creating a new dashboard, title and description are required.
-When updating, all fields are optional and only the provided ones are updated.
-
-The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) that can be used by the dashboard app to update its state in real-time.`,
+Use operations[] to:
+1. set metadata
+2. add panels (markdown, attachments, or inline Lens visualizations)
+3. edit existing visualization or markdown panel content
+4. update panel layouts without changing content
+5. add / remove sections, including inline section panels during add_section
+6. remove panels`,
     schema: manageDashboardSchema,
-    tags: [],
     handler: async (
-      {
-        dashboardAttachmentId: previousAttachmentId,
-        title,
-        description,
-        markdownContent,
-        visualizationQueries,
-        existingVisualizationIds,
-        removePanelIds,
-      },
-      { logger, attachments, esClient, modelProvider, events }
+      { dashboardAttachmentId: previousAttachmentId, operations },
+      { logger, attachments, events, esClient, modelProvider }
     ) => {
       try {
         const latestVersion = retrieveLatestVersion(attachments, previousAttachmentId);
         const isNewDashboard = !latestVersion;
 
-        const sendIncrementalEvents = (
-          panels: AttachmentPanel[],
-          eventType: DashboardUiEvent['data']['custom_event']
-        ) => {
-          if (panels.length === 0) {
-            return;
-          }
-
-          if (eventType === DASHBOARD_PANELS_REMOVED_EVENT) {
-            const removedPayload: PanelsRemovedEventData = {
-              dashboardAttachmentId,
-              panelIds: panels.map(({ panelId }) => panelId),
-            };
-            events.sendUiEvent(DASHBOARD_PANELS_REMOVED_EVENT, removedPayload);
-            return;
-          }
-
-          if (eventType === DASHBOARD_PANEL_ADDED_EVENT) {
-            for (const panel of panels) {
-              const addedPayload: PanelAddedEventData = {
-                dashboardAttachmentId,
-                panel,
-              };
-              events.sendUiEvent(DASHBOARD_PANEL_ADDED_EVENT, addedPayload);
-            }
-            return;
-          }
-        };
-
-        if (isNewDashboard && (!title || !description)) {
-          logger.error('Title and description are required when creating a new dashboard.');
-          return noTitleOrDescriptionErrorResult;
+        if (isNewDashboard && !hasValidCreateMetadataOperations(operations)) {
+          logger.error(newDashboardMetadataErrorMessage);
+          return missingNewDashboardMetadataErrorResult;
         }
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
-        let panels: AttachmentPanel[] = [...(latestVersion?.data.panels ?? [])];
-        // Track failures to report to the user
-        const failures: VisualizationFailure[] = [];
-
-        const markdownPanelUpdate = upsertMarkdownPanel(panels, markdownContent);
-        panels = markdownPanelUpdate.panels;
-
-        if (markdownPanelUpdate.changedPanel) {
-          sendIncrementalEvents([markdownPanelUpdate.changedPanel], DASHBOARD_PANEL_ADDED_EVENT);
-        }
-
-        const { panelsToRemove, panelsToKeep } = getRemovedPanels(panels, removePanelIds);
-
-        if (panelsToRemove.length > 0) {
-          panels = panelsToKeep;
-          // Emit panels removed events
-          sendIncrementalEvents(panelsToRemove, DASHBOARD_PANELS_REMOVED_EVENT);
-          logger.debug(`Removed ${panelsToRemove.length} panels from dashboard`);
-        }
-
-        const existingVisualizations = await resolveExistingVisualizations({
-          visualizationIds: existingVisualizationIds,
-          attachments,
+        const resolveVisualizationConfig = createVisualizationResolver({
           logger,
-        });
-        panels.push(...existingVisualizations.panels);
-        failures.push(...existingVisualizations.failures);
-        sendIncrementalEvents(existingVisualizations.panels, DASHBOARD_PANEL_ADDED_EVENT);
-
-        // Generate new visualizations from queries (slow - requires LLM)
-        const llmVisualizations = await buildVisualizationsFromQueriesWithLLM({
-          queries: visualizationQueries,
           modelProvider,
-          esClient,
           events,
-          sendIncrementalEvents,
-          logger,
+          esClient,
         });
-        panels.push(...llmVisualizations.panels);
-        failures.push(...llmVisualizations.failures);
+
+        const operationResult = await executeDashboardOperations({
+          dashboardData: latestVersion?.data,
+          operations,
+          logger,
+          resolvePanelsFromAttachments: (attachmentInputs) =>
+            resolvePanelsFromAttachments({
+              attachmentInputs,
+              attachments,
+              logger,
+            }),
+          resolveVisualizationConfig,
+        });
+
+        const failures: VisualizationFailure[] = operationResult.failures;
+        const updatedDashboardData = operationResult.dashboardData;
 
         const attachmentInput = {
           id: dashboardAttachmentId,
           type: DASHBOARD_ATTACHMENT_TYPE,
-          description: `Dashboard: ${title ?? latestVersion?.data.title}`,
-          data: {
-            title: title ?? latestVersion?.data.title,
-            description: description ?? latestVersion?.data.description,
-            panels,
-          },
+          description: `Dashboard: ${updatedDashboardData.title}`,
+          data: updatedDashboardData,
         };
 
         const attachment = isNewDashboard
           ? await attachments.add(attachmentInput)
-          : await attachments.update(dashboardAttachmentId, attachmentInput);
+          : await attachments.update(dashboardAttachmentId, {
+              data: updatedDashboardData,
+              description: attachmentInput.description,
+            });
+
+        if (!attachment) {
+          throw new Error(`Failed to persist dashboard attachment "${dashboardAttachmentId}".`);
+        }
+
+        const panelCount = updatedDashboardData.panels.reduce((count, widget) => {
+          if (isSection(widget)) {
+            return count + widget.panels.length;
+          }
+          return count + 1;
+        }, 0);
 
         logger.info(
-          `Dashboard ${isNewDashboard ? 'created' : 'updated'} with ${panels.length} panels`
+          `Dashboard ${isNewDashboard ? 'created' : 'updated'} with ${panelCount} panels`
         );
 
         return {
@@ -226,19 +125,33 @@ The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) that 
               type: ToolResultType.dashboard,
               tool_result_id: getToolResultId(),
               data: {
-                version: attachment?.current_version ?? 1,
+                version: attachment.current_version ?? 1,
                 failures: failures.length > 0 ? failures : undefined,
                 dashboardAttachment: {
-                  id: attachment?.id,
+                  id: attachment.id,
                   content: {
-                    ...attachmentInput.data,
-                    panels: attachmentInput.data.panels.map(
-                      ({ type, panelId, title: panelTitle }) => ({
-                        type,
-                        panelId,
-                        title: panelTitle ?? '',
-                      })
-                    ),
+                    title: updatedDashboardData.title,
+                    description: updatedDashboardData.description,
+                    panels: updatedDashboardData.panels.map((widget) => {
+                      if (isSection(widget)) {
+                        return {
+                          id: widget.id,
+                          title: widget.title,
+                          collapsed: widget.collapsed,
+                          grid: widget.grid,
+                          panels: widget.panels.map((panel) => ({
+                            type: panel.type,
+                            id: panel.id,
+                            grid: panel.grid,
+                          })),
+                        };
+                      }
+                      return {
+                        type: widget.type,
+                        id: widget.id,
+                        grid: widget.grid,
+                      };
+                    }),
                   },
                 },
               },
@@ -255,9 +168,8 @@ The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) that 
               data: {
                 message: `Failed to manage dashboard: ${errorMessage}`,
                 metadata: {
-                  title,
-                  description,
                   dashboardAttachmentId: previousAttachmentId,
+                  operations,
                 },
               },
             },
@@ -268,12 +180,12 @@ The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) that 
   };
 };
 
-const noTitleOrDescriptionErrorResult = {
+const missingNewDashboardMetadataErrorResult = {
   results: [
     {
       type: ToolResultType.error,
       data: {
-        message: 'Title and description are required when creating a new dashboard.',
+        message: newDashboardMetadataErrorMessage,
       },
     },
   ],

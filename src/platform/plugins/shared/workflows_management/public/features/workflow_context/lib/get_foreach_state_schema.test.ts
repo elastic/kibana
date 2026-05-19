@@ -125,6 +125,54 @@ describe('getForeachStateSchema', () => {
     );
   });
 
+  it('should return {key, value} item schema when object has | entries filter', () => {
+    const stepContext = DynamicStepContextSchema.extend({
+      consts: z.object({
+        settings: z.object({ name: z.string(), surname: z.string() }),
+      }),
+    });
+    const foreachStateSchema = getForeachStateSchema(stepContext, {
+      foreach: '{{consts.settings | entries}}',
+      type: 'foreach',
+      name: 'foreach-step',
+    });
+    expectZodSchemaEqual(
+      foreachStateSchema,
+      ForEachContextSchema.extend({
+        item: z.object({ key: z.string(), value: z.unknown() }),
+        items: z.array(z.object({ key: z.string(), value: z.unknown() })),
+      })
+    );
+  });
+
+  it('should return {key, value} item schema for deeply nested object with | entries filter and spaces', () => {
+    const stepContext = DynamicStepContextSchema.extend({
+      consts: z.object({
+        es_settings_response: z.object({
+          '.ds-logs-docker-000001': z.object({
+            settings: z.object({
+              index: z.object({
+                lifecycle: z.object({ name: z.literal('old-policy') }),
+              }),
+            }),
+          }),
+        }),
+      }),
+    });
+    const foreachStateSchema = getForeachStateSchema(stepContext, {
+      foreach: '{{ consts.es_settings_response | entries }}',
+      type: 'foreach',
+      name: 'foreach-step',
+    });
+    expectZodSchemaEqual(
+      foreachStateSchema,
+      ForEachContextSchema.extend({
+        item: z.object({ key: z.string(), value: z.unknown() }),
+        items: z.array(z.object({ key: z.string(), value: z.unknown() })),
+      })
+    );
+  });
+
   it('should return an unknown schema with a description if the foreach parameter is not a valid JSON', () => {
     const stepContext = DynamicStepContextSchema.extend({
       consts: z.object({

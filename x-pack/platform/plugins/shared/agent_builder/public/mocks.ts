@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EMPTY } from 'rxjs';
+import { BehaviorSubject, EMPTY } from 'rxjs';
 import type {
   AgentsServiceStartContract,
   AttachmentServiceStartContract,
@@ -50,6 +50,7 @@ const createToolStartMock = (): ToolServiceStartContractMock => {
     get: jest.fn(),
     list: jest.fn(),
     execute: jest.fn(),
+    listWorkflows: jest.fn(),
   };
 };
 
@@ -60,20 +61,25 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
     tools: createToolStartMock(),
     events: {
       chat$: EMPTY,
+      getChatEvents$: jest.fn().mockReturnValue(EMPTY),
+      ui: {
+        activeConversation$: new BehaviorSubject(null),
+      },
     },
-    setConversationFlyoutActiveConfig: jest.fn(),
-    clearConversationFlyoutActiveConfig: jest.fn(),
-    toggleConversationFlyout: jest.fn(),
-    openConversationFlyout: jest
-      .fn()
-      .mockImplementation((options: OpenConversationSidebarOptions) => {
-        const mockSidebarRef: ConversationSidebarRef = {
-          close: jest.fn(),
-        };
-        return {
-          flyoutRef: mockSidebarRef,
-        };
-      }),
+    setChatConfig: jest.fn(),
+    clearChatConfig: jest.fn(),
+    toggleChat: jest.fn(),
+    openChat: jest.fn().mockImplementation((options: OpenConversationSidebarOptions) => {
+      const mockSidebarRef: ConversationSidebarRef = {
+        close: jest.fn(),
+      };
+      return {
+        chatRef: mockSidebarRef,
+      };
+    }),
+    addAttachment: jest.fn(),
+    updateAttachmentOrigin: jest.fn(),
+    EmbeddableConversation: () => null,
   };
 };
 

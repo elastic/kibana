@@ -90,7 +90,7 @@ describe('runCheckPackageDocs', () => {
     expect(reportMetrics).toHaveBeenCalled();
     expect(process.exitCode).toBe(1);
     expect(log.error).toHaveBeenCalledWith(
-      expect.stringContaining('Validation failed for 1 plugin')
+      expect.stringContaining('Validation failed for 1 package')
     );
     expect(mockTx.end).toHaveBeenCalled();
   });
@@ -129,7 +129,7 @@ describe('runCheckPackageDocs', () => {
     await runCheckPackageDocs(log as any, { plugin: 'plugin-a' } as any);
 
     expect(process.exitCode).toBeUndefined();
-    expect(log.info).toHaveBeenCalledWith('All plugins passed validation.');
+    expect(log.info).toHaveBeenCalledWith('All packages passed validation.');
     expect(mockTx.end).toHaveBeenCalled();
   });
 });

@@ -11,12 +11,22 @@ import { css } from '@emotion/react';
 import { reduce } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
+import { getFieldValue } from '@kbn/discover-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { getTimelineFieldsDataFromHit } from '@kbn/timelines-plugin/common';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { EventHit } from '@kbn/timelines-plugin/common/search_strategy';
 import { useUpsellingMessage } from '../../../../hooks/use_upselling';
-import { BasicAlertDataContext } from '../../../../../flyout/document_details/left/components/investigation_guide_view';
 import { expandDottedObject } from '../../../../../../common/utils/expand_dotted';
-import OsqueryLogo from './osquery_icon/osquery.svg';
+import { AlertDataContext } from '../../../../../flyout_v2/document/tools/investigation_guide/components/investigation_guide_view';
+import { useKibana } from '../../../../lib/kibana';
 import { OsqueryFlyout } from '../../../../../detections/components/osquery/osquery_flyout';
+
+const OsqueryButtonIcon: React.FC = () => {
+  const { osquery } = useKibana().services;
+  const Icon = osquery?.OsqueryIcon;
+  return Icon ? <Icon size="m" /> : null;
+};
 
 export const OsqueryRenderer = ({
   configuration,
@@ -29,7 +39,14 @@ export const OsqueryRenderer = ({
   };
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
-  const { agentId, alertId, data } = useContext(BasicAlertDataContext);
+  const hit = useContext(AlertDataContext);
+  const agentId = useMemo(() => getFieldValue(hit, 'agent.id') as string | undefined, [hit]);
+  const alertId = useMemo(() => hit.raw._id, [hit]);
+  // This is a duplication of the code happening in the `timelineSearchStrategy`
+  // We're doing this here to avoid having to refactor the `OsqueryFlyout` to receive the data in a different format.
+  // The approach is to recreate the array similar to the one returned within the `timelineSearchStrategy` and that we often call in the call `dataFormattedForFieldBrowser`;
+  // We should eventually refactor the `OsqueryFlyout` to accept the raw hit.
+  const data = getTimelineFieldsDataFromHit(hit.raw as SearchHit<EventHit>);
 
   const handleOpen = useCallback(() => setShowFlyout(true), [setShowFlyout]);
 
@@ -53,7 +70,7 @@ export const OsqueryRenderer = ({
     <>
       <EuiToolTip content={interactionsUpsellingMessage}>
         <EuiButton
-          iconType={OsqueryLogo}
+          iconType={OsqueryButtonIcon}
           onClick={handleOpen}
           disabled={!!interactionsUpsellingMessage}
           css={css`

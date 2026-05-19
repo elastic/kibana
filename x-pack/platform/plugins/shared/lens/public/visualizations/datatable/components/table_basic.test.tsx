@@ -128,7 +128,7 @@ describe('DatatableComponent', () => {
     const props: DatatableRenderProps = {
       data,
       args,
-      formatFactory: () => ({ convert: (x) => x } as IFieldFormat),
+      formatFactory: () => ({ convert: (x) => x, reactConvert: (x) => x } as IFieldFormat),
       dispatchEvent: onDispatchEvent,
       getType: jest.fn().mockReturnValue({
         type: 'buckets',
@@ -350,6 +350,60 @@ describe('DatatableComponent', () => {
     );
   });
 
+  test('it sorts rows ascending by the specified string column', () => {
+    data.rows = [
+      { a: 'banana', b: 1588024800000, c: 2 },
+      { a: 'apple', b: 1588024800001, c: 1 },
+      { a: 'cherry', b: 1588024800002, c: 3 },
+    ];
+    renderDatatableComponent({
+      args: {
+        ...args,
+        sortingColumnId: 'a',
+        sortingDirection: 'asc',
+      },
+    });
+    const cells = screen.queryAllByRole('gridcell').map((cell) => cell.textContent);
+    expect(cells).toEqual([
+      'apple',
+      '1588024800001',
+      '1',
+      'banana',
+      '1588024800000',
+      '2',
+      'cherry',
+      '1588024800002',
+      '3',
+    ]);
+  });
+
+  test('it sorts rows descending by the specified string column', () => {
+    data.rows = [
+      { a: 'banana', b: 1588024800000, c: 2 },
+      { a: 'apple', b: 1588024800001, c: 1 },
+      { a: 'cherry', b: 1588024800002, c: 3 },
+    ];
+    renderDatatableComponent({
+      args: {
+        ...args,
+        sortingColumnId: 'a',
+        sortingDirection: 'desc',
+      },
+    });
+    const cells = screen.queryAllByRole('gridcell').map((cell) => cell.textContent);
+    expect(cells).toEqual([
+      'cherry',
+      '1588024800002',
+      '3',
+      'banana',
+      '1588024800000',
+      '2',
+      'apple',
+      '1588024800001',
+      '1',
+    ]);
+  });
+
   test('it does not render a hidden column', () => {
     renderDatatableComponent({
       args: {
@@ -565,7 +619,7 @@ describe('DatatableComponent', () => {
       });
       await userEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
       const sizeToChangeTo = 100;
-      fireEvent.click(screen.getByRole('button', { name: `${sizeToChangeTo} rows` }));
+      fireEvent.click(screen.getByRole('menuitem', { name: `${sizeToChangeTo} rows` }));
 
       expect(onDispatchEvent).toHaveBeenCalledTimes(1);
       expect(onDispatchEvent).toHaveBeenCalledWith({

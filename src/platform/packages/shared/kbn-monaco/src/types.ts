@@ -17,7 +17,7 @@ export interface LangModuleType {
   languageConfiguration?: monaco.languages.LanguageConfiguration;
   foldingRangeProvider?: monaco.languages.FoldingRangeProvider;
   getSuggestionProvider?: Function;
-  onLanguage?: () => void;
+  onLanguage?: () => void | Promise<void>;
   languageThemeResolver?: (args: UseEuiTheme) => monaco.editor.IStandaloneThemeData;
 }
 
@@ -40,6 +40,7 @@ interface LanguageProvidersModule<Deps = unknown, MarkerDataType = monaco.editor
   getHoverProvider?: (callbacks?: Deps) => monaco.languages.HoverProvider;
   getInlineCompletionsProvider?: (callbacks?: Deps) => monaco.languages.InlineCompletionsProvider;
   getCodeActionProvider?: (callbacks?: Deps) => monaco.languages.CodeActionProvider;
+  getDocumentHighlightProvider?: (callbacks?: Deps) => monaco.languages.DocumentHighlightProvider;
 }
 
 export interface CustomLangModuleType<Deps = unknown, MarkerDataType = monaco.editor.IMarkerData>

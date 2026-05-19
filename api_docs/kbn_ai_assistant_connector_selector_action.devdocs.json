@@ -99,6 +99,7 @@
             "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ConnectorSelectableComponentProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -200,7 +201,7 @@
               "EuiTextTruncateProps",
               ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
               "EuiToolTipProps",
-              ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & T & { key?: undefined; checked?: undefined; })[]"
+              ", \"children\" | \"content\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & T & { key?: undefined; checked?: undefined; })[]"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
             "lineNumber": 18,
@@ -224,7 +225,7 @@
               "EuiTextTruncateProps",
               ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
               "EuiToolTipProps",
-              ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & T & { key?: undefined; checked?: undefined; })[]"
+              ", \"children\" | \"content\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & T & { key?: undefined; checked?: undefined; })[]"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
             "lineNumber": 20,
@@ -364,6 +365,7 @@
                 "lineNumber": 31,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "EuiSelectableOption",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -410,7 +412,7 @@
               "EuiTextTruncateProps",
               ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
               "EuiToolTipProps",
-              ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement>) | (",
+              ", \"children\" | \"content\">> | undefined; } & React.HTMLAttributes<HTMLLIElement>) | (",
               "DisambiguateSet",
               "<",
               "EuiSelectableLIOption",

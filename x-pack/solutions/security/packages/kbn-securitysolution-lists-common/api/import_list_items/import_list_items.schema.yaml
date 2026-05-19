@@ -34,6 +34,10 @@ paths:
                     127.0.0.7
                     127.0.0.8
                     127.0.0.9
+            examples:
+              ipLinesFile:
+                value:
+                  file: list_values.txt
       parameters:
         - name: list_id
           in: query
@@ -56,29 +60,6 @@ paths:
           examples:
             ip:
               value: ip
-        - name: serializer
-          in: query
-          required: false
-          description: |
-            Determines how uploaded list item values are parsed. By default, list items are parsed using these named regex groups:
-
-            - `(?<value>.+)` - Single value item types, such as ip, long, date, keyword, and text.
-            - `(?<gte>.+)-(?<lte>.+)|(?<value>.+)` - Range value item types, such as `date_range`, `ip_range`, `double_range`, `float_range`, `integer_range`, and `long_range`.
-          schema:
-            type: string
-            example: (?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))
-        - name: deserializer
-          in: query
-          required: false
-          description: |
-            Determines how retrieved list item values are presented. By default list items are presented using these Handelbar expressions:
-
-            - `{{{value}}}` - Single value item types, such as `ip`, `long`, `date`, `keyword`, and `text`.
-            - `{{{gte}}}-{{{lte}}}` - Range value item types, such as `ip_range`, `double_range`, `float_range`, `integer_range`, and `long_range`.
-            - `{{{gte}}},{{{lte}}}` - Date range values.
-          schema:
-            type: string
-            example: '{{value}}'
         - name: refresh
           in: query
           required: false
@@ -153,6 +134,11 @@ paths:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                conflict:
+                  value:
+                    message: 'List with the specified list_id does not exist, create the list or fix list_id to import to an existing one'
+                    status_code: 409
         500:
           description: Internal server error response
           content:

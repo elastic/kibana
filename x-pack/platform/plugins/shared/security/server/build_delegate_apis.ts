@@ -44,6 +44,8 @@ export const buildSecurityApi = ({
         areCrossClusterAPIKeysEnabled: () => getAuthc().apiKeys.areAPIKeysEnabled(),
         grantAsInternalUser: (request, createParams) =>
           getAuthc().apiKeys.grantAsInternalUser(request, createParams),
+        cloneAsInternalUser: (request, cloneParams) =>
+          getAuthc().apiKeys.cloneAsInternalUser(request, cloneParams),
         create: (request, createParams) => getAuthc().apiKeys.create(request, createParams),
         update: (request, updateParams) => getAuthc().apiKeys.update(request, updateParams),
         validate: (apiKeyParams) => getAuthc().apiKeys.validate(apiKeyParams),
@@ -57,6 +59,7 @@ export const buildSecurityApi = ({
                 request: KibanaRequest,
                 invalidateUiamApiKeyParams: InvalidateUiamAPIKeyParams
               ) => getAuthc().apiKeys.uiam!.invalidate(request, invalidateUiamApiKeyParams),
+              convert: (keys: string[]) => getAuthc().apiKeys.uiam!.convert(keys),
             }
           : null,
       },

@@ -55,7 +55,7 @@ export function MetricTimesliceEventsChart({ slo, data, onBrushed }: Props) {
   };
 
   return (
-    <Chart size={{ height: 150, width: '100%' }} ref={chartRef}>
+    <Chart size={{ height: 200, width: '100%' }} ref={chartRef}>
       <ObservabilityAnnotations annotations={annotations} />
       <Settings
         baseTheme={baseTheme}

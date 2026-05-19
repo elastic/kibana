@@ -18,6 +18,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
+  const dashboardAddPanel = getService('dashboardAddPanel');
+  const flyout = getService('flyout');
 
   const { dashboardControls, discover, timePicker, dashboard } = getPageObjects([
     'dashboardControls',
@@ -81,9 +83,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('can not add a second time slider control', async () => {
-        await dashboardControls.openControlsMenu();
-        const createTimeSliderButton = await testSubjects.find('controls-create-timeslider-button');
-        expect(await createTimeSliderButton.getAttribute('disabled')).to.be('true');
+        await dashboardAddPanel.openAddPanelFlyout();
+        const timeSliderButton = await testSubjects.find('create-action-Time slider');
+        const disabledAttr = await timeSliderButton.getAttribute('disabled');
+        const ariaDisabled = await timeSliderButton.getAttribute('aria-disabled');
+        expect(disabledAttr === 'true' || ariaDisabled === 'true').to.be(true);
+        await flyout.ensureAllClosed();
       });
 
       it('can add a range list control', async () => {

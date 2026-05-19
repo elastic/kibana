@@ -8,10 +8,13 @@
 import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
 import {
+  coreFeatureFlagsMock,
   savedObjectsClientMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
+import type { SavedObject } from '@kbn/core/server';
+import type { RawRule } from '../../../../types';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
@@ -45,6 +48,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 import { alertsServiceMock } from '../../../../alerts_service/alerts_service.mock';
+import { RecoveredActionGroup } from '../../../../../common';
 
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -77,6 +81,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   namespace: 'default',
   getUserName: jest.fn(),
   createAPIKey: createAPIKeyMock,
+  cloneAPIKey: jest.fn(),
   logger,
   internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
@@ -94,6 +99,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   alertsService,
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  featureFlags: coreFeatureFlagsMock.createStart(),
+  isServerless: false,
 };
 
 beforeEach(() => {
@@ -115,7 +122,9 @@ describe('bulkEnableRules', () => {
   let actionsClient: jest.Mocked<ActionsClient>;
 
   const mockCreatePointInTimeFinderAsInternalUser = (
-    response = { saved_objects: [disabledRule1, disabledRule2] }
+    response: { saved_objects: Array<SavedObject<Partial<RawRule>>> } = {
+      saved_objects: [disabledRule1, disabledRule2],
+    }
   ) => {
     encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
       .fn()
@@ -177,12 +186,14 @@ describe('bulkEnableRules', () => {
           id: 'id1',
           attributes: expect.objectContaining({
             enabled: true,
+            lastEnabledAt: '2019-02-12T21:01:22.479Z',
           }),
         }),
         expect.objectContaining({
           id: 'id2',
           attributes: expect.objectContaining({
             enabled: true,
+            lastEnabledAt: '2019-02-12T21:01:22.479Z',
           }),
         }),
       ]),
@@ -200,6 +211,37 @@ describe('bulkEnableRules', () => {
       total: 2,
       taskIdsFailedToBeEnabled: [],
     });
+  });
+
+  test('does not leak stale uiamApiKey when bulk enabling a rule without apiKey', async () => {
+    const disabledRuleWithStaleUiam: SavedObject<RawRule> = {
+      ...disabledRule1,
+      attributes: {
+        ...disabledRule1.attributes,
+        apiKey: null,
+        apiKeyOwner: null,
+        uiamApiKey: Buffer.from('stale-uiam:stale-key').toString('base64'),
+      },
+    } as unknown as SavedObject<RawRule>;
+
+    mockCreatePointInTimeFinderAsInternalUser({
+      saved_objects: [disabledRuleWithStaleUiam],
+    });
+    mockUnsecuredSavedObjectFind(1);
+
+    rulesClientParams.createAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '123', name: '123', api_key: 'abc' },
+    });
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: [enabledRuleForBulkOps1],
+    });
+
+    await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
+
+    const bulkCreatePayload = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0];
+    const writtenAttributes = bulkCreatePayload[0].attributes;
+    expect(writtenAttributes).not.toHaveProperty('uiamApiKey');
   });
 
   test('should enable two rules and return right actions', async () => {
@@ -449,11 +491,16 @@ describe('bulkEnableRules', () => {
           id: 'id1',
           attributes: expect.objectContaining({
             enabled: true,
+            lastEnabledAt: '2019-02-12T21:01:22.479Z',
           }),
         }),
       ]),
       { overwrite: true }
     );
+
+    const bulkCreateArgs = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0];
+    const alreadyEnabledRule = bulkCreateArgs.find((so: { id?: string }) => so.id === 'id2');
+    expect(alreadyEnabledRule?.attributes).not.toHaveProperty('lastEnabledAt');
 
     expect(result).toStrictEqual({
       errors: [],
@@ -487,11 +534,16 @@ describe('bulkEnableRules', () => {
           id: 'id1',
           attributes: expect.objectContaining({
             enabled: true,
+            lastEnabledAt: '2019-02-12T21:01:22.479Z',
           }),
         }),
       ]),
       { overwrite: true }
     );
+
+    const bulkCreateArgs = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0];
+    const alreadyEnabledRule = bulkCreateArgs.find((so: { id?: string }) => so.id === 'id2');
+    expect(alreadyEnabledRule?.attributes).not.toHaveProperty('lastEnabledAt');
 
     expect(result).toStrictEqual({
       errors: [],
@@ -657,6 +709,110 @@ describe('bulkEnableRules', () => {
       rules: [returnedRuleForBulkOps1],
       total: 2,
       taskIdsFailedToBeEnabled: [],
+    });
+  });
+
+  describe('lastRun outcome message migration', () => {
+    test('migrates legacy string lastRun.outcomeMsg to string[] when bulk enabling', async () => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...disabledRule1,
+            attributes: {
+              ...disabledRule1.attributes,
+              lastRun: {
+                outcome: 'failed',
+                // @ts-expect-error test legacy outcomeMsg migration
+                outcomeMsg: 'legacy message',
+              },
+            },
+          },
+          disabledRule2,
+        ],
+      });
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2],
+      });
+
+      await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: 'id1',
+            attributes: expect.objectContaining({
+              lastRun: {
+                outcome: 'failed',
+                outcomeMsg: ['legacy message'],
+              },
+            }),
+          }),
+        ]),
+        { overwrite: true }
+      );
+    });
+
+    test('leaves lastRun unchanged when outcomeMsg is already a string array', async () => {
+      const lastRun = {
+        outcome: 'succeeded' as const,
+        outcomeMsg: ['msg a', 'msg b'],
+        alertsCount: {
+          new: 0,
+          ignored: 0,
+          recovered: 0,
+          active: 0,
+        },
+      };
+
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...disabledRule1,
+            attributes: {
+              ...disabledRule1.attributes,
+              lastRun,
+            },
+          },
+        ],
+      });
+      mockUnsecuredSavedObjectFind(1);
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [enabledRuleForBulkOps1],
+      });
+
+      await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: 'id1',
+            attributes: expect.objectContaining({
+              lastRun,
+            }),
+          }),
+        ]),
+        { overwrite: true }
+      );
+    });
+
+    test('does not add lastRun when the rule has no lastRun', async () => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [disabledRule1],
+      });
+      mockUnsecuredSavedObjectFind(1);
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [enabledRuleForBulkOps1],
+      });
+
+      await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
+
+      const bulkCreateObjects = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0] as Array<{
+        id: string;
+        attributes: Record<string, unknown>;
+      }>;
+      const attributesForRule = bulkCreateObjects.find((o) => o.id === 'id1')?.attributes;
+      expect(attributesForRule).toBeDefined();
+      expect(attributesForRule).not.toHaveProperty('lastRun');
     });
   });
 
@@ -1023,6 +1179,203 @@ describe('bulkEnableRules', () => {
 
       expect(auditLogger.log.mock.calls[0][0]?.event?.action).toEqual('rule_enable');
       expect(auditLogger.log.mock.calls[0][0]?.event?.outcome).toEqual('failure');
+    });
+  });
+
+  describe('change tracking', () => {
+    const createChangeTrackingService = () => ({
+      log: jest.fn().mockResolvedValue(undefined),
+      logBulk: jest.fn().mockResolvedValue(undefined),
+      getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
+    });
+
+    const setRuleType = (overrides: { trackChanges?: boolean } = {}) => {
+      ruleTypeRegistry.get.mockReturnValue({
+        id: 'fakeType',
+        name: 'Test',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        recoveryActionGroup: RecoveredActionGroup,
+        async executor() {
+          return { state: {} };
+        },
+        category: 'test',
+        producer: 'alerts',
+        solution: 'stack' as const,
+        validate: { params: { validate: (params) => params } },
+        validLegacyConsumers: [],
+        trackChanges: true,
+        ...overrides,
+      });
+    };
+
+    test('logs every successfully enabled rule with action "rule_enable"', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2],
+      });
+
+      await trackingClient.bulkEnableRules({ filter: 'fake_filter' });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+      // bulkCount comes from the original total returned by `find` (mocked to 2).
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({ objectId: 'id1' }),
+          expect.objectContaining({ objectId: 'id2' }),
+        ],
+        {
+          action: 'rule_enable',
+          spaceId: 'default',
+          data: { metadata: { bulkCount: 2 } },
+        }
+      );
+    });
+
+    test('captures the full post-enable attributes and references of each rule', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+      mockUnsecuredSavedObjectFind(1);
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [enabledRuleForBulkOps1],
+      });
+
+      await trackingClient.bulkEnableRules({ filter: 'fake_filter' });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [
+          {
+            // setGlobalDate pins Date.now() to mockedDateString.
+            timestamp: '2019-02-12T21:01:22.479Z',
+            objectId: enabledRuleForBulkOps1.id,
+            objectType: RULE_SAVED_OBJECT_TYPE,
+            module: 'stack',
+            snapshot: {
+              attributes: enabledRuleForBulkOps1.attributes,
+              references: enabledRuleForBulkOps1.references ?? [],
+            },
+          },
+        ],
+        expect.any(Object)
+      );
+    });
+
+    test('stamps every change with the time captured immediately before the bulkCreate', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2],
+      });
+
+      const startTimeMs = Date.parse('2030-06-01T08:00:00.000Z');
+      const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(startTimeMs);
+
+      try {
+        await trackingClient.bulkEnableRules({ filter: 'fake_filter' });
+
+        expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+        const [changes] = changeTrackingService.logBulk.mock.calls[0];
+        // All rules share the same operation timestamp.
+        expect(changes.map((c: { timestamp: string }) => c.timestamp)).toEqual([
+          '2030-06-01T08:00:00.000Z',
+          '2030-06-01T08:00:00.000Z',
+        ]);
+      } finally {
+        dateNowSpy.mockRestore();
+      }
+    });
+
+    test('skips rules whose saved object update failed (partial bulk failures)', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      // Non-409 errors are not retried, so the partial failure case is single-pass.
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [enabledRuleForBulkOps1, savedObjectWith500Error],
+      });
+
+      await trackingClient.bulkEnableRules({ filter: 'fake_filter' });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [expect.objectContaining({ objectId: 'id1' })],
+        expect.any(Object)
+      );
+    });
+
+    test('reports bulkCount as the original `find` total even when OCC retries shrink the batch', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      // Original operation targets 5 rules; bulkCount must reflect this even though
+      // each OCC pass operates on a smaller subset.
+      mockUnsecuredSavedObjectFind(5);
+
+      // First pass: id1 succeeds, id2 fails with 409. Retry pass: id2 succeeds.
+      unsecuredSavedObjectsClient.bulkCreate
+        .mockResolvedValueOnce({
+          saved_objects: [enabledRuleForBulkOps1, savedObjectWith409Error],
+        })
+        .mockResolvedValueOnce({
+          saved_objects: [enabledRuleForBulkOps2],
+        });
+
+      encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+        .fn()
+        .mockResolvedValueOnce({
+          close: jest.fn(),
+          find: function* asyncGenerator() {
+            yield { saved_objects: [disabledRule1, disabledRule2] };
+          },
+        })
+        .mockResolvedValueOnce({
+          close: jest.fn(),
+          find: function* asyncGenerator() {
+            yield { saved_objects: [disabledRule2] };
+          },
+        });
+
+      await trackingClient.bulkEnableRules({ ids: ['id1', 'id2'] });
+
+      // Both OCC passes log with bulkCount = 5 (the original `find` total),
+      // not the per-pass batch size (2 then 1).
+      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(2);
+      for (const [, opts] of changeTrackingService.logBulk.mock.calls) {
+        expect(opts.data).toEqual({ metadata: { bulkCount: 5 } });
+      }
+    });
+
+    test('does not log when rule type opts out of tracking', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType({ trackChanges: false });
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2],
+      });
+
+      await trackingClient.bulkEnableRules({ filter: 'fake_filter' });
+
+      expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
+    });
+
+    test('does nothing when no change tracking service is configured', async () => {
+      // Default rulesClient has no changeTrackingService configured.
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2],
+      });
+
+      await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
+
+      // Negative assertion is exercised at the helper level.
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalled();
     });
   });
 });

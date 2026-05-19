@@ -9,8 +9,8 @@
 
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
-import { getTabStateMock } from '../__mocks__/internal_state.mocks';
-import { fromTabStateToSavedObjectTab, internalStateActions } from '..';
+import { getPersistedTabMock, getTabStateMock } from '../__mocks__/internal_state.mocks';
+import { internalStateActions } from '..';
 import { selectHasUnsavedChanges } from './unsaved_changes';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
@@ -28,13 +28,9 @@ const setup = async () => {
     services,
     persistedDataViews: [dataViewWithTimefieldMock],
   });
-  const persistedTab = fromTabStateToSavedObjectTab({
-    tab: getTabStateMock({
-      id: 'persisted-tab',
-      initialInternalState: {
-        serializedSearchSource: { index: dataViewWithTimefieldMock.id },
-      },
-    }),
+  const persistedTab = getPersistedTabMock({
+    tabId: 'persisted-tab',
+    dataView: dataViewWithTimefieldMock,
     services,
   });
   const persistedDiscoverSession = createDiscoverSessionMock({
@@ -138,20 +134,16 @@ describe('selectHasUnsavedChanges', () => {
         persistedDataViews: [dataViewWithTimefieldMock],
       });
 
-      const persistedTab = fromTabStateToSavedObjectTab({
-        tab: getTabStateMock({
-          id: 'persisted-tab',
-          initialInternalState: {
-            serializedSearchSource: { index: dataViewWithTimefieldMock.id },
-          },
-          globalState: {
-            timeRange: { from: 'now-15m', to: 'now' },
-            refreshInterval: { pause: true, value: 0 },
-          },
-          attributes: {
-            timeRestore,
-          },
-        }),
+      const persistedTab = getPersistedTabMock({
+        tabId: 'persisted-tab',
+        dataView: dataViewWithTimefieldMock,
+        globalStateOverrides: {
+          timeRange: { from: 'now-15m', to: 'now' },
+          refreshInterval: { pause: true, value: 0 },
+        },
+        attributesOverrides: {
+          timeRestore,
+        },
         services,
       });
 

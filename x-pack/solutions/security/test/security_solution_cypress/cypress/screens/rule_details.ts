@@ -52,8 +52,6 @@ export const INDEX_PATTERNS_DETAILS = 'Index patterns';
 
 export const INVESTIGATION_FIELDS_DETAILS = 'Custom highlighted fields';
 
-export const ENDPOINT_EXCEPTIONS_TAB = 'a[data-test-subj="navigation-endpoint_exceptions"]';
-
 export const INDICATOR_INDEX_PATTERNS = 'Indicator index patterns';
 
 export const INDICATOR_INDEX_QUERY = 'Indicator index query';
@@ -146,11 +144,38 @@ export const DESCRIPTION_SETUP_GUIDE_CONTENT = '[data-test-subj="stepAboutDetail
 
 export const EXECUTIONS_TAB = 'a[data-test-subj="navigation-execution_results"]';
 
-export const EXECUTION_SHOWING = `[data-test-subj="executionsShowing"]`;
+export const EXECUTION_RESULTS_CONTAINER = `[data-test-subj="executionResultsContainer"]`;
 
-export const EXECUTION_TABLE = `[data-test-subj="executionsTable"]`;
+export const EXECUTION_RESULTS_TABLE = `[data-test-subj="executionResultsTable"]`;
 
-export const EXECUTION_LOG_CONTAINER = `[data-test-subj="executionLogContainer"]`;
+export const EXECUTION_DETAILS_FLYOUT = `[data-test-subj="executionDetailsFlyout"]`;
+
+export const EXECUTION_DETAILS_FLYOUT_MESSAGE_SECTION = `[data-test-subj="executionDetailsFlyoutMessageSection"]`;
+
+export const EXECUTION_RESULTS_TABLE_ACTION_VIEW_DETAILS = `[data-test-subj="executionResultsTableActionViewDetails"]`;
+
+// Execution results table cell selectors
+export const EXECUTION_RESULTS_TABLE_CELL_STATUS = `[data-test-subj="executionResultsTableCellStatus"]`;
+export const EXECUTION_RESULTS_TABLE_CELL_RUN_TYPE = `[data-test-subj="executionResultsTableCellRunType"]`;
+export const EXECUTION_RESULTS_TABLE_CELL_TIMESTAMP = `[data-test-subj="executionResultsTableCellTimestamp"]`;
+export const EXECUTION_RESULTS_TABLE_CELL_DURATION = `[data-test-subj="executionResultsTableCellDuration"]`;
+export const EXECUTION_RESULTS_TABLE_CELL_ALERTS = `[data-test-subj="executionResultsTableCellAlerts"]`;
+export const EXECUTION_RESULTS_TABLE_CELL_MESSAGE = `[data-test-subj="executionResultsTableCellMessage"]`;
+
+// Execution details flyout header selectors
+export const EXECUTION_DETAILS_FLYOUT_HEADER_STATUS = `[data-test-subj="executionDetailsFlyoutHeaderStatus"]`;
+export const EXECUTION_DETAILS_FLYOUT_HEADER_RUN_TYPE = `[data-test-subj="executionDetailsFlyoutHeaderRunType"]`;
+
+// Execution details flyout field value selectors
+export const EXECUTION_DETAILS_FLYOUT_ALERT_COUNT = `[data-test-subj="executionDetailsFlyoutAlertCount"]`;
+export const EXECUTION_DETAILS_FLYOUT_CANDIDATE_COUNT = `[data-test-subj="executionDetailsFlyoutCandidateCount"]`;
+export const EXECUTION_DETAILS_FLYOUT_MATCHED_INDICES = `[data-test-subj="executionDetailsFlyoutMatchedIndices"]`;
+export const EXECUTION_DETAILS_FLYOUT_FROZEN_INDICES = `[data-test-subj="executionDetailsFlyoutFrozenIndices"]`;
+export const EXECUTION_DETAILS_FLYOUT_GAP_DURATION = `[data-test-subj="executionDetailsFlyoutGapDuration"]`;
+export const EXECUTION_DETAILS_FLYOUT_SCHEDULING_DELAY = `[data-test-subj="executionDetailsFlyoutSchedulingDelay"]`;
+export const EXECUTION_DETAILS_FLYOUT_EXECUTION_DURATION = `[data-test-subj="executionDetailsFlyoutExecutionDuration"]`;
+export const EXECUTION_DETAILS_FLYOUT_SEARCH_DURATION = `[data-test-subj="executionDetailsFlyoutSearchDuration"]`;
+export const EXECUTION_DETAILS_FLYOUT_INDEX_DURATION = `[data-test-subj="executionDetailsFlyoutIndexDuration"]`;
 
 export const EXECUTION_RUN_TYPE_FILTER = `[data-test-subj="ExecutionRunTypeFilter"]`;
 

@@ -8,7 +8,7 @@
 import { renderRuleStats } from './rule_stats';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
-import type { RulesLocatorParams } from '@kbn/deeplinks-observability';
+import type { RulesLocatorParams } from '@kbn/rule-data-utils';
 
 const RULES_PAGE_LINK = '/app/rules';
 const STAT_CLASS = 'euiStat';

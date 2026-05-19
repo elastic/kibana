@@ -19,8 +19,7 @@ import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared/src/maintenance_
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
 
-import { rulesLocatorID, type RulesLocatorParams } from '@kbn/deeplinks-observability';
-import { getIsExperimentalFeatureEnabled } from '@kbn/triggers-actions-ui-plugin/public';
+import { rulesLocatorID, type RulesLocatorParams } from '@kbn/rule-data-utils';
 import { createUseRulesLink } from '../../hooks/create_use_rules_link';
 import { renderGroupPanel } from '../../components/alerts_table/grouping/render_group_panel';
 import { getGroupStats } from '../../components/alerts_table/grouping/get_group_stats';
@@ -144,7 +143,7 @@ function InternalAlertsPage() {
     },
   });
 
-  const useRulesLink = createUseRulesLink(getIsExperimentalFeatureEnabled('unifiedRulesPage'));
+  const useRulesLink = createUseRulesLink();
 
   const onGroupingsChange = useCallback(
     ({ activeGroups }: { activeGroups: string[] }) => {

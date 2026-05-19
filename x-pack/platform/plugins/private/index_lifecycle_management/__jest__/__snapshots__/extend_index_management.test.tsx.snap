@@ -140,8 +140,8 @@ exports[`extend index management ilm summary extension should render a phase def
             >
               Edit policy in ILM
               <span
-                class="emotion-EuiExternalLinkIcon"
-                data-euiicon-type="popout"
+                class="css-1j75qc1"
+                data-euiicon-type="external"
                 role="presentation"
               />
               <span
@@ -180,7 +180,7 @@ exports[`extend index management ilm summary extension should render a phase def
           >
             <span
               class="euiBadge emotion-euiBadge"
-              style="--euiBadgeBackgroundColor: #FF995E; --euiBadgeTextColor: #07101F;"
+              style="--euiBadgeBackgroundColor: #FF995E; --euiBadgeTextColor: #07101F; --euiBadgeBackgroundHoverColor: color-mix(in oklab, #FF995E, #07101F 10%); --euiBadgeBackgroundActiveColor: color-mix(in oklab, #FF995E, #07101F 15%);"
               title="Hot"
             >
               <span
@@ -312,8 +312,8 @@ exports[`extend index management ilm summary extension should render a step info
             >
               Edit policy in ILM
               <span
-                class="emotion-EuiExternalLinkIcon"
-                data-euiicon-type="popout"
+                class="css-1j75qc1"
+                data-euiicon-type="external"
                 role="presentation"
               />
               <span
@@ -352,7 +352,7 @@ exports[`extend index management ilm summary extension should render a step info
           >
             <span
               class="euiBadge emotion-euiBadge"
-              style="--euiBadgeBackgroundColor: #FF995E; --euiBadgeTextColor: #07101F;"
+              style="--euiBadgeBackgroundColor: #FF995E; --euiBadgeTextColor: #07101F; --euiBadgeBackgroundHoverColor: color-mix(in oklab, #FF995E, #07101F 10%); --euiBadgeBackgroundActiveColor: color-mix(in oklab, #FF995E, #07101F 15%);"
               title="Hot"
             >
               <span
@@ -480,8 +480,8 @@ exports[`extend index management ilm summary extension should render an error pa
             >
               Edit policy in ILM
               <span
-                class="emotion-EuiExternalLinkIcon"
-                data-euiicon-type="popout"
+                class="css-1j75qc1"
+                data-euiicon-type="external"
                 role="presentation"
               />
               <span
@@ -520,7 +520,7 @@ exports[`extend index management ilm summary extension should render an error pa
           >
             <span
               class="euiBadge emotion-euiBadge"
-              style="--euiBadgeBackgroundColor: #FF995E; --euiBadgeTextColor: #07101F;"
+              style="--euiBadgeBackgroundColor: #FF995E; --euiBadgeTextColor: #07101F; --euiBadgeBackgroundHoverColor: color-mix(in oklab, #FF995E, #07101F 10%); --euiBadgeBackgroundActiveColor: color-mix(in oklab, #FF995E, #07101F 15%);"
               title="Hot"
             >
               <span
@@ -649,8 +649,8 @@ exports[`extend index management ilm summary extension should render the tab whe
             >
               Edit policy in ILM
               <span
-                class="emotion-EuiExternalLinkIcon"
-                data-euiicon-type="popout"
+                class="css-1j75qc1"
+                data-euiicon-type="external"
                 role="presentation"
               />
               <span
@@ -749,7 +749,7 @@ exports[`extend index management ilm summary extension should render the tab whe
 exports[`extend index management remove lifecycle action extension should return extension when all indices have lifecycle policy 1`] = `
 Object {
   "buttonLabel": "Remove lifecycle policy",
-  "icon": "stopFilled",
+  "icon": "stopFill",
   "indexNames": Array [
     Array [
       "testy3",

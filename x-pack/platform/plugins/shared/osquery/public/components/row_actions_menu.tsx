@@ -150,8 +150,9 @@ const RowActionsMenuComponent: React.FC<RowActionsMenuProps> = ({
         closePopover={closePopover}
         panelPaddingSize="none"
         anchorPosition="leftCenter"
+        aria-label={actionsAriaLabel}
       >
-        <EuiContextMenuPanel size="s" items={menuItems} />
+        <EuiContextMenuPanel items={menuItems} />
       </EuiPopover>
       {isDeleteModalVisible && (
         <EuiConfirmModal

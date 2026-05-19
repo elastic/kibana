@@ -54,7 +54,7 @@
           "<any>>(requestBody: RequestBody, options?: {}) => Promise<ResponseType | null>; cancelRequest: () => void; isLoading: boolean; }"
         ],
         "path": "x-pack/platform/packages/private/ml/cancellable_search/src/use_cancellable_search.ts",
-        "lineNumber": 27,
+        "lineNumber": 31,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -76,9 +76,10 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/cancellable_search/src/use_cancellable_search.ts",
-            "lineNumber": 27,
+            "lineNumber": 31,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "DataPublicPluginStart",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -96,7 +97,7 @@
         "label": "UseCancellableSearch",
         "description": [],
         "path": "x-pack/platform/packages/private/ml/cancellable_search/src/use_cancellable_search.ts",
-        "lineNumber": 14,
+        "lineNumber": 18,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -125,10 +126,18 @@
                 "section": "def-common.IKibanaSearchResponse",
                 "text": "IKibanaSearchResponse"
               },
-              "<any>>(requestBody: RequestBody, options?: object | undefined) => Promise<ResponseType | null>"
+              "<any>>(requestBody: RequestBody, options?: ",
+              {
+                "pluginId": "@kbn/search-types",
+                "scope": "common",
+                "docId": "kibKbnSearchTypesPluginApi",
+                "section": "def-common.ISearchOptions",
+                "text": "ISearchOptions"
+              },
+              " | undefined) => Promise<ResponseType | null>"
             ],
             "path": "x-pack/platform/packages/private/ml/cancellable_search/src/use_cancellable_search.ts",
-            "lineNumber": 15,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -144,26 +153,35 @@
                   "RequestBody"
                 ],
                 "path": "x-pack/platform/packages/private/ml/cancellable_search/src/use_cancellable_search.ts",
-                "lineNumber": 19,
+                "lineNumber": 23,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "RequestBody",
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/ml-cancellable-search",
                 "id": "def-common.UseCancellableSearch.runRequest.$2",
-                "type": "Uncategorized",
+                "type": "Object",
                 "tags": [],
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "object | undefined"
+                  {
+                    "pluginId": "@kbn/search-types",
+                    "scope": "common",
+                    "docId": "kibKbnSearchTypesPluginApi",
+                    "section": "def-common.ISearchOptions",
+                    "text": "ISearchOptions"
+                  },
+                  " | undefined"
                 ],
                 "path": "x-pack/platform/packages/private/ml/cancellable_search/src/use_cancellable_search.ts",
-                "lineNumber": 20,
+                "lineNumber": 24,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ISearchOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -181,7 +199,7 @@
               "() => void"
             ],
             "path": "x-pack/platform/packages/private/ml/cancellable_search/src/use_cancellable_search.ts",
-            "lineNumber": 22,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -196,7 +214,7 @@
             "label": "isLoading",
             "description": [],
             "path": "x-pack/platform/packages/private/ml/cancellable_search/src/use_cancellable_search.ts",
-            "lineNumber": 23,
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

@@ -12,6 +12,7 @@ import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
+  coreFeatureFlagsMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
@@ -56,6 +57,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   minimumScheduleInterval: { value: '1m', enforce: false },
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
+  cloneAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
   internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
@@ -71,6 +73,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   isSystemAction: jest.fn(),
+  featureFlags: coreFeatureFlagsMock.createStart(),
+  isServerless: false,
 };
 
 beforeEach(() => {
@@ -236,6 +240,26 @@ describe('updateRuleApiKey()', () => {
     );
   });
 
+  test('does not leak stale uiamApiKey when new API key set has no UIAM key', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+      ...existingEncryptedAlert,
+      attributes: {
+        ...existingEncryptedAlert.attributes,
+        uiamApiKey: Buffer.from('stale-uiam:stale-key').toString('base64'),
+      },
+    });
+
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValueOnce(false);
+    rulesClientParams.createAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '234', name: '123', api_key: 'abc' },
+    });
+    await rulesClient.updateRuleApiKey({ id: '1' });
+
+    const writtenAttributes = unsecuredSavedObjectsClient.update.mock.calls[0][2];
+    expect(writtenAttributes).not.toHaveProperty('uiamApiKey');
+  });
+
   test('updates the API key for the alert and does not invalidate the old api key if created by a user authenticated using an api key', async () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
       ...existingEncryptedAlert,
@@ -396,6 +420,7 @@ describe('updateRuleApiKey()', () => {
         consumer: 'myApp',
         enabled: true,
         apiKey: Buffer.from('234:abc').toString('base64'),
+        apiKeyCreatedByUser: false,
         apiKeyOwner: 'elastic',
         revision: 0,
         updatedAt: '2019-02-12T21:01:22.479Z',
@@ -532,6 +557,200 @@ describe('updateRuleApiKey()', () => {
           },
         })
       );
+    });
+  });
+
+  describe('change tracking', () => {
+    const updatedRuleSO = {
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        name: ruleName,
+        alertTypeId: 'myType',
+        consumer: 'myApp',
+        enabled: true,
+        apiKey: Buffer.from('234:abc').toString('base64'),
+        apiKeyOwner: 'elastic',
+        apiKeyCreatedByUser: false,
+        revision: 0,
+        updatedBy: 'elastic',
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        actions: [],
+      },
+      references: [{ id: 'action-1', name: 'action_0', type: 'action' }],
+    };
+
+    const createChangeTrackingService = () => ({
+      log: jest.fn().mockResolvedValue(undefined),
+      logBulk: jest.fn().mockResolvedValue(undefined),
+      getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
+    });
+
+    const setRuleType = (overrides: { trackChanges?: boolean } = {}) => {
+      ruleTypeRegistry.get.mockReturnValue({
+        id: 'myType',
+        name: 'Test',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        async executor() {
+          return { state: {} };
+        },
+        category: 'test',
+        producer: 'alerts',
+        solution: 'stack' as const,
+        validate: { params: { validate: (params) => params } },
+        validLegacyConsumers: [],
+        trackChanges: true,
+        ...overrides,
+      });
+    };
+
+    test('logs the change exactly once after the saved object update succeeds', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      rulesClientParams.createAPIKey.mockResolvedValueOnce({
+        apiKeysEnabled: true,
+        result: { id: '234', name: '123', api_key: 'abc' },
+      });
+      unsecuredSavedObjectsClient.update.mockResolvedValueOnce(updatedRuleSO);
+
+      await trackingClient.updateRuleApiKey({ id: '1' });
+
+      expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
+      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+      // Single-rule callers fall back to ruleSOs.length for bulkCount.
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [expect.objectContaining({ objectId: '1', module: 'stack' })],
+        {
+          action: 'rule_update_api_key',
+          spaceId: 'default',
+        }
+      );
+    });
+
+    test('captures the full post-update attributes and references of the rule', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      rulesClientParams.createAPIKey.mockResolvedValueOnce({
+        apiKeysEnabled: true,
+        result: { id: '234', name: '123', api_key: 'abc' },
+      });
+      unsecuredSavedObjectsClient.update.mockResolvedValueOnce(updatedRuleSO);
+
+      await trackingClient.updateRuleApiKey({ id: '1' });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [
+          {
+            // setGlobalDate pins Date.now() to mockedDateString.
+            timestamp: '2019-02-12T21:01:22.479Z',
+            objectId: '1',
+            objectType: RULE_SAVED_OBJECT_TYPE,
+            module: 'stack',
+            snapshot: {
+              attributes: updatedRuleSO.attributes,
+              references: updatedRuleSO.references,
+            },
+          },
+        ],
+        expect.any(Object)
+      );
+    });
+
+    test('stamps the change with the time captured immediately before the SO update', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      const startTimeMs = Date.parse('2030-06-01T08:00:00.000Z');
+      const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(startTimeMs);
+
+      try {
+        rulesClientParams.createAPIKey.mockResolvedValueOnce({
+          apiKeysEnabled: true,
+          result: { id: '234', name: '123', api_key: 'abc' },
+        });
+        unsecuredSavedObjectsClient.update.mockResolvedValueOnce(updatedRuleSO);
+
+        await trackingClient.updateRuleApiKey({ id: '1' });
+
+        expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+        const [changes] = changeTrackingService.logBulk.mock.calls[0];
+        expect(changes[0].timestamp).toBe('2030-06-01T08:00:00.000Z');
+      } finally {
+        dateNowSpy.mockRestore();
+      }
+    });
+
+    test('logs the change only after the OCC retry succeeds (no logging on the failed attempt)', async () => {
+      const { SavedObjectsErrorHelpers } = jest.requireActual('@kbn/core/server');
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      rulesClientParams.createAPIKey
+        .mockResolvedValueOnce({
+          apiKeysEnabled: true,
+          result: { id: '234', name: '123', api_key: 'abc' },
+        })
+        .mockResolvedValueOnce({
+          apiKeysEnabled: true,
+          result: { id: '345', name: '345', api_key: 'def' },
+        });
+      // First attempt: SO update fails with a 409 conflict — `retryIfConflicts` retries.
+      // Second attempt: SO update succeeds — change tracking should be invoked exactly once.
+      unsecuredSavedObjectsClient.update
+        .mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, '1')
+        )
+        .mockResolvedValueOnce(updatedRuleSO);
+
+      await trackingClient.updateRuleApiKey({ id: '1' });
+
+      expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(2);
+      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [expect.objectContaining({ objectId: '1' })],
+        expect.objectContaining({ action: 'rule_update_api_key' })
+      );
+    });
+
+    test('does not log when the saved object update fails with a non-retryable error', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      rulesClientParams.createAPIKey.mockResolvedValueOnce({
+        apiKeysEnabled: true,
+        result: { id: '234', name: '123', api_key: 'abc' },
+      });
+      unsecuredSavedObjectsClient.update.mockRejectedValueOnce(new Error('boom'));
+
+      await expect(trackingClient.updateRuleApiKey({ id: '1' })).rejects.toThrow('boom');
+      expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
+    });
+
+    test('does not log when rule type opts out of tracking', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType({ trackChanges: false });
+
+      rulesClientParams.createAPIKey.mockResolvedValueOnce({
+        apiKeysEnabled: true,
+        result: { id: '234', name: '123', api_key: 'abc' },
+      });
+      unsecuredSavedObjectsClient.update.mockResolvedValueOnce(updatedRuleSO);
+
+      await trackingClient.updateRuleApiKey({ id: '1' });
+
+      expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
     });
   });
 });

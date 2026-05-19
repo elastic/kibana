@@ -31,9 +31,8 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
 
   const editMenuItem = (
     <EuiContextMenuItem
-      icon="documentEdit"
+      icon="pencil"
       key="edit"
-      size="s"
       onClick={() => {
         editTool(tool.id);
         setIsOpen(false);
@@ -47,7 +46,6 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
     <EuiContextMenuItem
       icon="trash"
       key="delete"
-      size="s"
       css={css`
         color: ${euiTheme.colors.textDanger};
       `}
@@ -64,7 +62,6 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
     <EuiContextMenuItem
       icon="play"
       key="test"
-      size="s"
       onClick={() => {
         testTool(tool.id);
         setIsOpen(false);
@@ -78,7 +75,6 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
     <EuiContextMenuItem
       icon="copy"
       key="clone"
-      size="s"
       onClick={() => {
         cloneTool(tool.id);
         setIsOpen(false);
@@ -92,7 +88,6 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
     <EuiContextMenuItem
       icon="eye"
       key="view"
-      size="s"
       onClick={() => {
         viewTool(tool.id);
         setIsOpen(false);
@@ -113,7 +108,7 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
       panelPaddingSize="s"
       button={
         <EuiButtonIcon
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           onClick={() => setIsOpen((openState) => !openState)}
           aria-label={labels.tools.toolContextMenuButtonLabel}
         />
@@ -121,7 +116,7 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
     >
-      <EuiContextMenuPanel size="s" items={menuItems} />
+      <EuiContextMenuPanel items={menuItems} />
     </EuiPopover>
   );
 };

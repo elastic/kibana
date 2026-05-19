@@ -15,7 +15,7 @@ import type { ClickTriggerEvent, MultiClickTriggerEvent } from '@kbn/charts-plug
 import type {
   EmbeddableComponentProps,
   TypedLensByValueInput,
-  XYState,
+  XYVisualizationState,
 } from '@kbn/lens-plugin/public';
 import { css } from '@emotion/react';
 import { PageScope } from '../../../data_view_manager/constants';
@@ -70,6 +70,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   disableOnClickFilter = false,
   casesAttachmentMetadata,
   signalIndexName,
+  excludedPatterns,
   esql,
 }) => {
   const styles = useMemo(
@@ -104,8 +105,10 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     title: '',
     esql,
     signalIndexName,
+    excludedPatterns,
   });
-  const preferredSeriesType = (attributes?.state?.visualization as XYState)?.preferredSeriesType;
+  const preferredSeriesType = (attributes?.state?.visualization as XYVisualizationState)
+    ?.preferredSeriesType;
 
   const LensComponent = lens.EmbeddableComponent;
 

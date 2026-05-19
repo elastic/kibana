@@ -15,12 +15,12 @@ import type {
   ESQLFunction,
   ESQLIdentifier,
   ESQLLocation,
-  ESQLMessage,
   ESQLSource,
-} from '../../../types';
+} from '@elastic/esql/types';
 import type {
   ErrorTypes,
   ErrorValues,
+  ESQLMessage,
   FunctionDefinition,
   Signature,
   SupportedDataType,
@@ -32,7 +32,11 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
 }: {
   messageId: K;
   values: ErrorValues<K>;
-}): { message: string; type?: 'error' | 'warning'; underlinedWarning?: boolean } {
+}): {
+  message: string;
+  type?: ESQLMessage['type'];
+  underlinedWarning?: ESQLMessage['underlinedWarning'];
+} {
   // Use a less strict type instead of doing a typecast on each message type
   const out = values as unknown as Record<string, string>;
   // i18n validation wants to the values prop to be declared inline, so need to unpack and redeclare again all props
@@ -57,6 +61,13 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.unknownIndex', {
           defaultMessage: 'Unknown index "{name}"',
+          values: { name: out.name },
+        }),
+      };
+    case 'unknownDataSource':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.unknownDataSource', {
+          defaultMessage: 'Unknown data source "{name}"',
           values: { name: out.name },
         }),
       };
@@ -208,6 +219,15 @@ Expected one of:
           values: {
             parentName: out.parentName.toUpperCase(),
             name: out.name.toUpperCase(),
+          },
+        }),
+      };
+    case 'expectedAggregationArgument':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.expectedAggregationArgument', {
+          defaultMessage: 'This argument of {parentName} must be an aggregation function.',
+          values: {
+            parentName: out.parentName.toUpperCase(),
           },
         }),
       };
@@ -422,29 +442,11 @@ Expected one of:
         }),
         type: 'error',
       };
-    case 'forkTooFewBranches':
-      return {
-        message: i18n.translate('kbn-esql-language.esql.validation.forkTooFewBranches', {
-          defaultMessage: '[FORK] Must include at least two branches.',
-        }),
-        type: 'error',
-      };
     case 'forkNotAllowedWithSubqueries':
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.forkNotAllowedWithSubqueries', {
           defaultMessage: '[FORK] Command is not allowed inside a subquery.',
         }),
-        type: 'error',
-      };
-    case 'inlineStatsNotAllowedAfterLimit':
-      return {
-        message: i18n.translate(
-          'kbn-esql-language.esql.validation.inlineStatsNotAllowedAfterLimit',
-          {
-            defaultMessage:
-              '[INLINE STATS] Command is not allowed at the root level when the query contains subqueries.',
-          }
-        ),
         type: 'error',
       };
     case 'invalidSettingValue':
@@ -479,6 +481,22 @@ Expected one of:
         }),
         type: 'error',
       };
+    case 'mmrQueryVectorWrongType':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.mmrQueryVectorWrongType', {
+          defaultMessage: '[MMR] Query vector must be of type dense_vector. Found {type}',
+          values: { type: out.type },
+        }),
+        type: 'error',
+      };
+    case 'mmrOnFieldWrongType':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.mmrOnFieldWrongType', {
+          defaultMessage: '[MMR] ON field must be of type dense_vector. Found {type}',
+          values: { type: out.type },
+        }),
+        type: 'error',
+      };
   }
   return { message: '' };
 }
@@ -496,11 +514,11 @@ export function getMessageFromId<K extends ErrorTypes>({
 }
 
 export function createMessage(
-  type: 'error' | 'warning',
+  type: ESQLMessage['type'],
   message: string,
-  location: ESQLLocation,
+  location: ESQLMessage['location'],
   messageId: string,
-  underlinedWarning?: boolean
+  underlinedWarning?: ESQLMessage['underlinedWarning']
 ): ESQLMessage {
   return {
     type,
@@ -588,6 +606,12 @@ export const errors = {
       'getSources'
     ),
 
+  unknownDataSource: (source: ESQLSource): ESQLMessage =>
+    tagSemanticError(
+      errors.byId('unknownDataSource', source.location, { name: source.name }),
+      'getSources'
+    ),
+
   unknownPolicy: (policyName: string, location: ESQLLocation): ESQLMessage =>
     tagSemanticError(errors.byId('unknownPolicy', location, { name: policyName }), 'getPolicies'),
 
@@ -604,6 +628,14 @@ export const errors = {
     errors.byId('nestedAggFunction', fn.location, {
       name: fn.name,
       parentName,
+    }),
+
+  expectedAggregationArgument: (
+    parentFn: ESQLFunction,
+    location: ESQLLocation = parentFn.location
+  ): ESQLMessage =>
+    errors.byId('expectedAggregationArgument', location, {
+      parentName: parentFn.name,
     }),
 
   unknownAggFunction: (
@@ -721,14 +753,8 @@ export const errors = {
   forkTooManyBranches: (command: ESQLAstAllCommands): ESQLMessage =>
     errors.byId('forkTooManyBranches', command.location, {}),
 
-  forkTooFewBranches: (command: ESQLAstAllCommands): ESQLMessage =>
-    errors.byId('forkTooFewBranches', command.location, {}),
-
   forkNotAllowedWithSubqueries: (command: ESQLAstAllCommands): ESQLMessage =>
     errors.byId('forkNotAllowedWithSubqueries', command.location, {}),
-
-  inlineStatsNotAllowedAfterLimit: (command: ESQLAstAllCommands): ESQLMessage =>
-    errors.byId('inlineStatsNotAllowedAfterLimit', command.location, {}),
 };
 
 export const buildSignatureTypes = (sig: Signature) =>

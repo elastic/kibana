@@ -8,7 +8,18 @@
  */
 
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type {
+  SearchInferenceEndpointsPluginSetup,
+  SearchInferenceEndpointsPluginStart,
+} from '@kbn/search-inference-endpoints/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type {
+  WorkflowsApiRequestHandlerContext,
+  WorkflowsClient,
+  WorkflowsClientProvider,
+} from '@kbn/workflows/server/types';
 import type { z } from '@kbn/zod/v4';
 import type { ServerStepDefinition } from './step_registry/types';
 import type { CommonTriggerDefinition } from '../common';
@@ -30,7 +41,7 @@ export interface WorkflowsExtensionsServerPluginSetup {
    * @param definition - The step server-side definition
    * @throws Error if definition for the same step type ID is already registered
    */
-  registerStepDefinition(definition: ServerStepDefinition): void;
+  registerStepDefinition(definition: ServerStepDefinitionOrLoader): void;
 
   /**
    * Register a workflow trigger definition.
@@ -40,32 +51,55 @@ export interface WorkflowsExtensionsServerPluginSetup {
    * @throws Error if trigger id is already registered, validation fails, or registration is attempted after setup
    */
   registerTriggerDefinition(definition: ServerTriggerDefinition): void;
-}
 
-/**
- * Server-side trigger list API exposed on start.
- */
-export interface WorkflowsExtensionsTriggerListStartContract {
   /**
-   * Get all registered trigger definitions.
-   * @returns Array of all registered trigger definitions
+   * Register the workflows client provider.
+   *
+   * @param provider - The workflows client provider
+   * @throws Error if provider is already registered
    */
-  getAllTriggerDefinitions(): ServerTriggerDefinition[];
+  registerWorkflowsClientProvider(provider: WorkflowsClientProvider): void;
 }
 
 /**
  * Server-side plugin start contract.
- * Exposes methods for retrieving registered server-side step implementations and triggers.
+ * Exposes step definitions (from common contract) and trigger definitions.
  */
 export type WorkflowsExtensionsServerPluginStart =
-  WorkflowsExtensionsStartContract<ServerStepDefinition> &
-    WorkflowsExtensionsTriggerListStartContract;
+  WorkflowsExtensionsStartContract<ServerStepDefinition> & {
+    /**
+     * Get all registered trigger definitions.
+     * @returns Array of all registered trigger definitions
+     */
+    getAllTriggerDefinitions(): ServerTriggerDefinition[];
+
+    /**
+     * Get a registered trigger definition by id.
+     * @returns The trigger definition, or undefined if not registered
+     */
+    getTriggerDefinition(triggerId: string): ServerTriggerDefinition | undefined;
+
+    /**
+     * Get the workflows client for the current request.
+     * @returns The workflows client
+     */
+    getClient(request: KibanaRequest): Promise<WorkflowsClient>;
+  };
 
 /**
  * Dependencies for the server plugin setup phase.
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WorkflowsExtensionsServerPluginSetupDeps {}
+export interface WorkflowsExtensionsServerPluginSetupDeps {
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
+}
+
+export type ServerStepDefinitionOrLoader<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject
+> =
+  | ServerStepDefinition<Input, Output, Config>
+  | (() => Promise<ServerStepDefinition<Input, Output, Config> | undefined>);
 
 /**
  * Dependencies for the server plugin start phase.
@@ -73,4 +107,10 @@ export interface WorkflowsExtensionsServerPluginSetupDeps {}
 export interface WorkflowsExtensionsServerPluginStartDeps {
   actions: ActionsPluginStartContract;
   inference: InferenceServerStart;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  spaces?: SpacesPluginStart;
 }
+
+export type WorkflowsExtensionsRequestHandlerContext = CustomRequestHandlerContext<{
+  workflows: WorkflowsApiRequestHandlerContext;
+}>;

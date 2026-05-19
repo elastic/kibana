@@ -56,6 +56,7 @@ import {
   generateTemplateIndexPattern,
   getTemplate,
   getTemplatePriority,
+  isNamespaceTemplate,
 } from './template';
 import { buildDefaultSettings, getILMMigrationStatus } from './default_settings';
 import { isUserSettingsTemplate } from './utils';
@@ -73,11 +74,17 @@ export const prepareToInstallTemplates = async (
   install: (esClient: ElasticsearchClient, logger: Logger) => Promise<IndexTemplateEntry[]>;
 }> => {
   const { packageInfo } = packageInstallContext;
-  // remove package installation's references to index templates
+  // Remove package installation's references to index templates, but preserve
+  // namespace-scoped index templates (e.g. `logs-nginx.access@namespace.production`)
+  // — they are rebuilt separately in handleNamespaceTemplateRestoreAfterPackageInstall
+  // after base templates are in place. Note: `<namespace>@custom` component template
+  // refs ARE removed here (they don't match `@namespace.`) and are re-added during
+  // the restore step.
   const assetsToRemove = esReferences.filter(
-    ({ type }) =>
-      type === ElasticsearchAssetType.indexTemplate ||
-      type === ElasticsearchAssetType.componentTemplate
+    ({ type, id }) =>
+      (type === ElasticsearchAssetType.indexTemplate ||
+        type === ElasticsearchAssetType.componentTemplate) &&
+      !isNamespaceTemplate(id)
   );
 
   const fieldAssetsMap: AssetsMap = new Map();

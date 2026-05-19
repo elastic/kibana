@@ -13,8 +13,8 @@ import type {
   ESQLCallbacks,
   ESQLFieldWithMetadata,
   InferenceEndpointAutocompleteItem,
+  EsqlDataset,
 } from '@kbn/esql-types';
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { METADATA_FIELDS } from '../../..';
 
 export const metadataFields: ESQLFieldWithMetadata[] = METADATA_FIELDS.map((field) => ({
@@ -71,17 +71,17 @@ export const policies = [
 export const joinIndices: IndexAutocompleteItem[] = [
   {
     name: 'join_index',
-    mode: 'lookup',
+    mode: 'Lookup',
     aliases: [],
   },
   {
     name: 'join_index_with_alias',
-    mode: 'lookup',
+    mode: 'Lookup',
     aliases: ['join_index_alias_1', 'join_index_alias_2'],
   },
   {
     name: 'lookup_index',
-    mode: 'lookup',
+    mode: 'Lookup',
     aliases: [],
   },
 ];
@@ -89,17 +89,17 @@ export const joinIndices: IndexAutocompleteItem[] = [
 export const timeseriesIndices: IndexAutocompleteItem[] = [
   {
     name: 'timeseries_index',
-    mode: 'time_series',
+    mode: 'Timeseries',
     aliases: [],
   },
   {
     name: 'timeseries_index_with_alias',
-    mode: 'time_series',
+    mode: 'Timeseries',
     aliases: ['timeseries_index_alias_1', 'timeseries_index_alias_2'],
   },
   {
     name: 'time_series_index',
-    mode: 'time_series',
+    mode: 'Timeseries',
     aliases: [],
   },
 ];
@@ -112,6 +112,19 @@ export const views = [
   {
     name: 'view_2',
     query: 'from logs* | STATS count(*) by user.name',
+  },
+];
+
+export const datasets: EsqlDataset[] = [
+  {
+    name: 'dataset_1',
+    data_source: 'data_source_1',
+    resource: 's3://bucket/path/**/*.parquet',
+  },
+  {
+    name: 'dataset_2',
+    data_source: 'data_source_2',
+    resource: 'db.schema.table',
   },
 ];
 
@@ -179,6 +192,7 @@ export function getCallbackMocks(): ESQLCallbacks {
     getJoinIndices: jest.fn(async () => ({ indices: joinIndices })),
     getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
     getViews: jest.fn(async () => ({ views })),
+    getDatasets: jest.fn(async () => ({ datasets })),
     getEditorExtensions: jest.fn(async (queryString: string) => {
       if (queryString.includes('logs*')) {
         return {
@@ -188,7 +202,9 @@ export function getCallbackMocks(): ESQLCallbacks {
       }
       return { recommendedQueries: [], recommendedFields: [] };
     }),
-    getInferenceEndpoints: jest.fn(async (taskType: InferenceTaskType) => ({ inferenceEndpoints })),
+    getInferenceEndpoints: jest.fn(async (taskType: string) => ({
+      inferenceEndpoints,
+    })),
   };
 }
 

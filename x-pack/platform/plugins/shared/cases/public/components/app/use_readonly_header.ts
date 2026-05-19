@@ -19,13 +19,13 @@ export function useReadonlyHeader() {
   const { permissions } = useCasesContext();
   const chrome = useKibana().services.chrome;
 
-  // if the user is read only then display the glasses badge in the global navigation header
+  // if the user is read only then display the readOnly badge in the global navigation header
   const setBadge = useCallback(() => {
     if (isReadOnlyPermissions(permissions)) {
       chrome.setBadge({
         text: i18n.READ_ONLY_BADGE_TEXT,
         tooltip: i18n.READ_ONLY_BADGE_TOOLTIP,
-        iconType: 'glasses',
+        iconType: 'readOnly',
       });
     }
   }, [chrome, permissions]);

@@ -1,5 +1,5 @@
 {
-  "sha1": "1f65d4ee46b4fb568ab3cfd8c79609675d146fe4",
+  "sha1": "e93f926ecf042e7a5760b5bf4f79c0cc25981f6c",
   "tests": [
     {
       "id": "240c93906b590cc-8ac2f2b8727a7d1",
@@ -693,6 +693,26 @@
       }
     },
     {
+      "id": "e6a0524edc0480b-41a5caa263fb528",
+      "title": "/internal/transform/transforms/{transformId} create should create a transform with deferValidation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_create.spec.ts",
+        "line": 166,
+        "column": 12
+      }
+    },
+    {
       "id": "e6a0524edc0480b-1863661ebbbe58b",
       "title": "/internal/transform/transforms/{transformId} create should ensure if pivot or latest is provided",
       "expectedStatus": "passed",
@@ -708,7 +728,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout/api/tests/transforms_create.spec.ts",
-        "line": 166,
+        "line": 196,
         "column": 12
       }
     },

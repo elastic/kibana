@@ -10,6 +10,7 @@
 import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { ChromeNext } from './chrome_next';
 import type { ChromeNavLink, ChromeNavLinks } from './nav_links';
 import type { ChromeRecentlyAccessed } from './recently_accessed';
 import type { ChromeDocTitle } from './doc_title';
@@ -52,9 +53,9 @@ export interface ChromeSetup {
  * @example
  * How to set the help dropdown extension:
  * ```tsx
- * core.chrome.setHelpExtension(elem => {
- *   ReactDOM.render(<MyHelpComponent />, elem);
- *   return () => ReactDOM.unmountComponentAtNode(elem);
+ * core.chrome.setHelpExtension({
+ *   appName: 'My App',
+ *   links: [{ linkType: 'documentation', href: docLinks.links.myApp.guide }],
  * });
  * ```
  *
@@ -69,6 +70,12 @@ export interface ChromeStart {
   recentlyAccessed: ChromeRecentlyAccessed;
   /** {@inheritdoc ChromeDocTitle} */
   docTitle: ChromeDocTitle;
+  /**
+   * Chrome Next rollout namespace.
+   *
+   * {@inheritdoc ChromeNext}
+   */
+  next: ChromeNext;
 
   /**
    * Get an observable of the current visibility state of the chrome.
@@ -84,18 +91,17 @@ export interface ChromeStart {
 
   /**
    * Get an observable of the current badge
+   * @deprecated Badges now render inline with breadcrumbs. Prefer {@link ChromeStart.setBreadcrumbsBadges}.
    */
   getBadge$(): Observable<ChromeBadge | undefined>;
 
   /**
-   * Override the current badge
+   * Override the current badge.
+   * Internally delegates to {@link ChromeStart.setBreadcrumbsBadges} so the badge
+   * renders inline with breadcrumbs in both classic and project layouts.
+   * @deprecated Use {@link ChromeStart.setBreadcrumbsBadges} directly for full control.
    */
   setBadge(badge?: ChromeBadge): void;
-
-  /**
-   * Set global footer; Meant to be used by developer toolbar
-   */
-  setGlobalFooter(node: ReactNode): void;
 
   /**
    * Get an observable of the current list of breadcrumbs
@@ -149,7 +155,19 @@ export interface ChromeStart {
   getBreadcrumbsAppendExtensions$(): Observable<ChromeBreadcrumbsAppendExtension[]>;
 
   /**
-   * Mount an element next to the last breadcrumb
+   * Render an element next to the last breadcrumb.
+   *
+   * @example
+   * ```tsx
+   * import { dynamic } from '@kbn/shared-ux-utility';
+   *
+   * const LazyBadge = dynamic(() => import('./my_badge'));
+   *
+   * const unregister = chrome.setBreadcrumbsAppendExtension({
+   *   content: <LazyBadge />,
+   *   order: 10,
+   * });
+   * ```
    */
   setBreadcrumbsAppendExtension(
     breadcrumbsAppendExtension: ChromeBreadcrumbsAppendExtension
@@ -192,6 +210,11 @@ export interface ChromeStart {
   setCustomNavLink(newCustomNavLink?: Partial<ChromeNavLink>): void;
 
   /**
+   * Get an observable of the current help menu links
+   */
+  getHelpMenuLinks$(): Observable<ChromeHelpMenuLink[]>;
+
+  /**
    * Override the default links shown in the help menu
    */
   setHelpMenuLinks(links: ChromeHelpMenuLink[]): void;
@@ -214,7 +237,7 @@ export interface ChromeStart {
   getHelpExtension$(): Observable<ChromeHelpExtension | undefined>;
 
   /**
-   * Override the current set of custom help content
+   * Override the current set of custom help content.
    */
   setHelpExtension(helpExtension?: ChromeHelpExtension): void;
 
@@ -242,6 +265,11 @@ export interface ChromeStart {
   hasHeaderBanner$(): Observable<boolean>;
 
   /**
+   * Get the current header banner presence synchronously.
+   */
+  hasHeaderBanner(): boolean;
+
+  /**
    * Sets the style type of the chrome.
    * @param style The style type to apply to the chrome.
    */
@@ -252,6 +280,11 @@ export interface ChromeStart {
    */
   getChromeStyle$(): Observable<ChromeStyle>;
 
+  /**
+   * Get the current style type synchronously.
+   */
+  getChromeStyle(): ChromeStyle;
+
   sideNav: {
     /**
      * Get an observable of the current collapsed state of the side nav.
@@ -259,10 +292,25 @@ export interface ChromeStart {
     getIsCollapsed$(): Observable<boolean>;
 
     /**
+     * Get the current collapsed state of the side nav synchronously.
+     */
+    getIsCollapsed(): boolean;
+
+    /**
      * Set the collapsed state of the side nav.
      * @param isCollapsed The collapsed state of the side nav.
      */
     setIsCollapsed(isCollapsed: boolean): void;
+
+    /**
+     * Get an observable of the current width of the side nav.
+     */
+    getWidth$(): Observable<number>;
+
+    /**
+     * Get the current width of the side nav synchronously.
+     */
+    getWidth(): number;
   };
 
   /**
@@ -274,6 +322,11 @@ export interface ChromeStart {
    * Get the id of the currently active project navigation or `null` otherwise.
    */
   getActiveSolutionNavId$(): Observable<SolutionId | null>;
+
+  /**
+   * Get the id of the currently active project navigation synchronously.
+   */
+  getActiveSolutionNavId(): SolutionId | null;
 
   /**
    * Used only by the rendering service and KibanaRenderingContextProvider to wrap the rendering tree in the Chrome context providers

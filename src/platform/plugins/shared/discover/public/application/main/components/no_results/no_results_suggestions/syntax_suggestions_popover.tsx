@@ -71,6 +71,7 @@ export const SyntaxSuggestionsPopover: React.FC<SyntaxSuggestionsPopoverProps> =
       isOpen={isOpen}
       display="inlineBlock"
       panelPaddingSize="none"
+      aria-label={title}
       closePopover={() => setIsOpen(false)}
       initialFocus="#querySyntaxBasicTableId"
     >

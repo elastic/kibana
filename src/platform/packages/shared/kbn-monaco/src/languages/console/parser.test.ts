@@ -195,4 +195,27 @@ describe('console parser', () => {
       { startOffset: 22, endOffset: 32 },
     ]);
   });
+
+  describe('CRLF line endings (Windows)', () => {
+    it('parses a single request with CRLF line endings without errors', () => {
+      const input = 'GET _search\r\n';
+      const { requests, errors } = parser(input)!;
+      expect(errors).toEqual([]);
+      expect(requests.length).toBe(1);
+    });
+
+    it('parses a bulk request with CRLF line endings without errors', () => {
+      const input = 'POST /_bulk\r\n{"create": {}}\r\n{"field": "value"}\r\n';
+      const { requests, errors } = parser(input)!;
+      expect(errors).toEqual([]);
+      expect(requests.length).toBe(1);
+    });
+
+    it('parses multiple requests separated by CRLF without errors', () => {
+      const input = 'GET _search\r\nPOST _test_index\r\n';
+      const { requests, errors } = parser(input)!;
+      expect(errors).toEqual([]);
+      expect(requests.length).toBe(2);
+    });
+  });
 });

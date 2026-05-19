@@ -45,7 +45,6 @@ import {
   deleteListItems,
   updateBasicSoAttributes,
 } from '../../utils/saved_objects_utils/update_basic_attributes';
-import { checkForDuplicateTitle } from '../../utils/saved_objects_utils/check_for_duplicate_title';
 import { showNewVisModal } from '../../wizard';
 import { getTypes } from '../../services';
 import type { VisualizeServices } from '../types';
@@ -54,6 +53,11 @@ import {
   toTableListViewSavedObject,
   type VisualizeUserContent,
 } from '../../utils/to_table_list_view_saved_object';
+import { hasLibraryItemWithTitle } from '../../utils/saved_objects_utils';
+
+const visualizeLibraryPageTitle = i18n.translate('visualizations.listingPageTitle', {
+  defaultMessage: 'Visualize library',
+});
 
 const visualizeListingStyles = {
   table: getVisualizationListingTableStyles,
@@ -82,6 +86,7 @@ const useTableListViewProps = (
       application,
       history,
       savedObjectsTagging,
+      stateTransferService,
       toastNotifications,
       visualizeCapabilities,
       contentManagement,
@@ -93,8 +98,18 @@ const useTableListViewProps = (
   const visualizedUserContent = useRef<VisualizeUserContent[]>();
 
   const createNewVis = useCallback(() => {
-    closeNewVisModal.current = showNewVisModal();
-  }, [closeNewVisModal]);
+    closeNewVisModal.current = showNewVisModal({
+      originatingApp: VisualizeConstants.APP_ID,
+      breadcrumbs: [
+        {
+          text: visualizeLibraryPageTitle,
+          href: application.getUrlForApp(VisualizeConstants.APP_ID, {
+            path: `#${VisualizeConstants.LANDING_PAGE_PATH}`,
+          }),
+        },
+      ],
+    });
+  }, [closeNewVisModal, application]);
 
   const editItem = useCallback(
     async ({ attributes: { id }, editor = { editUrl: '' } }: VisualizeUserContent) => {
@@ -105,13 +120,16 @@ const useTableListViewProps = (
 
       const { editApp, editUrl } = editor;
       if (editApp) {
-        application.navigateToApp(editApp, { path: editUrl });
+        await stateTransferService.navigateToEditor(editApp, {
+          path: editUrl,
+          state: { originatingApp: VisualizeConstants.APP_ID },
+        });
         return;
       }
       // for visualizations the edit and view URLs are the same
       history.push(editUrl);
     },
-    [application, history]
+    [history, stateTransferService]
   );
 
   const noItemsFragment = useMemo(() => getNoItemsMessage(createNewVis), [createNewVis]);
@@ -179,33 +197,29 @@ const useTableListViewProps = (
         {
           type: 'warning',
           async fn(value, id) {
-            if (id) {
-              const content = visualizedUserContent.current?.find((c) => c.id === id);
-              if (content) {
-                try {
-                  await checkForDuplicateTitle(
-                    {
-                      id,
-                      title: value,
-                      lastSavedTitle: content.title,
-                    },
-                    false,
-                    false,
-                    () => {}
-                  );
-                } catch (e) {
-                  return i18n.translate(
-                    'visualizations.visualizeListingDeleteErrorTitle.duplicateWarning',
-                    {
-                      defaultMessage: 'Saving "{value}" creates a duplicate title.',
-                      values: {
-                        value,
-                      },
-                    }
-                  );
-                }
-              }
+            if (!id) return;
+
+            const content = visualizedUserContent.current?.find((c) => c.id === id);
+            if (!content) return;
+
+            if (value.toLowerCase() === content.title.toLowerCase()) {
+              return;
             }
+
+            let hasDuplicateTitle = false;
+            try {
+              hasDuplicateTitle = await hasLibraryItemWithTitle(value);
+            } catch (e) {
+              // ignore error checking for duplicate title
+            }
+            return hasDuplicateTitle
+              ? i18n.translate('visualizations.visualizeListingDeleteErrorTitle.duplicateWarning', {
+                  defaultMessage: 'Saving "{value}" creates a duplicate title.',
+                  values: {
+                    value,
+                  },
+                })
+              : undefined;
           },
         },
       ],
@@ -314,16 +328,12 @@ export const VisualizeListing = () => {
     } else {
       chrome.setBreadcrumbs([
         {
-          text: i18n.translate('visualizations.visualizeListingBreadcrumbsTitle', {
-            defaultMessage: 'Visualize library',
-          }),
+          text: visualizeLibraryPageTitle,
         },
       ]);
     }
 
-    chrome.docTitle.change(
-      i18n.translate('visualizations.listingPageTitle', { defaultMessage: 'Visualize library' })
-    );
+    chrome.docTitle.change(visualizeLibraryPageTitle);
   });
   useUnmount(() => closeNewVisModal.current());
 
@@ -336,10 +346,6 @@ export const VisualizeListing = () => {
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
   const tableViewProps = useTableListViewProps(closeNewVisModal, listingLimit);
-
-  const visualizeLibraryTitle = i18n.translate('visualizations.listing.table.listTitle', {
-    defaultMessage: 'Visualize library',
-  });
 
   const visualizeTab: TableListTab<VisualizeUserContent> = useMemo(() => {
     const calloutMessage = (
@@ -399,9 +405,10 @@ export const VisualizeListing = () => {
                   : () => tableViewProps.editItem?.(item)
               }
               getDetailViewLink={getVisualizeListItemLink}
-              tableCaption={visualizeLibraryTitle}
+              tableCaption={visualizeLibraryPageTitle}
               {...tableViewProps}
-              {...propsFromParent}
+              onFetchSuccess={propsFromParent.onFetchSuccess}
+              setPageDataTestSubject={propsFromParent.setPageDataTestSubject}
             />
           </div>
         </>
@@ -413,7 +420,6 @@ export const VisualizeListing = () => {
     application,
     dashboardCapabilities.createNew,
     initialPageSize,
-    visualizeLibraryTitle,
     tableViewProps,
     getVisualizeListItemLink,
   ]);
@@ -428,7 +434,7 @@ export const VisualizeListing = () => {
   return (
     <TabbedTableListView
       headingId="visualizeListingHeading"
-      title={visualizeLibraryTitle}
+      title={visualizeLibraryPageTitle}
       tabs={tabs}
       activeTabId={activeTab}
       changeActiveTab={(id) => {

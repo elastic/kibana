@@ -21,7 +21,7 @@
           "\nGet prompt by promptId\nprovide either model + provider or connector to avoid additional calls to get connector"
         ],
         "signature": [
-          "({ actionsClient, connector, connectorId, localPrompts, model: providedModel, promptGroupId, promptId, provider: providedProvider, savedObjectsClient, }: ",
+          "({ connectorId, getInferenceConnectorById, localPrompts, model: providedModel, promptGroupId, promptId, provider: providedProvider, savedObjectsClient, }: ",
           {
             "pluginId": "@kbn/security-ai-prompts",
             "scope": "server",
@@ -42,7 +42,7 @@
             "id": "def-server.getPrompt.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  actionsClient,\n  connector,\n  connectorId,\n  localPrompts,\n  model: providedModel,\n  promptGroupId,\n  promptId,\n  provider: providedProvider,\n  savedObjectsClient,\n}",
+            "label": "{\n  connectorId,\n  getInferenceConnectorById,\n  localPrompts,\n  model: providedModel,\n  promptGroupId,\n  promptId,\n  provider: providedProvider,\n  savedObjectsClient,\n}",
             "description": [],
             "signature": [
               {
@@ -57,6 +57,7 @@
             "lineNumber": 90,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "GetPromptArgs",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -74,7 +75,7 @@
           "\nGet prompts by feature (promptGroupId)\nprovide either model + provider or connector to avoid additional calls to get connector"
         ],
         "signature": [
-          "({ actionsClient, connector, connectorId, localPrompts, model: providedModel, promptGroupId, promptIds, provider: providedProvider, savedObjectsClient, }: ",
+          "({ connectorId, getInferenceConnectorById, localPrompts, model: providedModel, promptGroupId, promptIds, provider: providedProvider, savedObjectsClient, }: ",
           {
             "pluginId": "@kbn/security-ai-prompts",
             "scope": "server",
@@ -93,7 +94,7 @@
           ">"
         ],
         "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
-        "lineNumber": 29,
+        "lineNumber": 31,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -103,7 +104,7 @@
             "id": "def-server.getPromptsByGroupId.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  actionsClient,\n  connector,\n  connectorId,\n  localPrompts,\n  model: providedModel,\n  promptGroupId,\n  promptIds,\n  provider: providedProvider,\n  savedObjectsClient,\n}",
+            "label": "{\n  connectorId,\n  getInferenceConnectorById,\n  localPrompts,\n  model: providedModel,\n  promptGroupId,\n  promptIds,\n  provider: providedProvider,\n  savedObjectsClient,\n}",
             "description": [],
             "signature": [
               {
@@ -115,9 +116,10 @@
               }
             ],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
-            "lineNumber": 29,
+            "lineNumber": 31,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "GetPromptsByGroupIdArgs",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -133,34 +135,18 @@
         "label": "resolveProviderAndModel",
         "description": [],
         "signature": [
-          "({ providedProvider, providedModel, connectorId, actionsClient, providedConnector, }: { providedProvider?: string | undefined; providedModel?: string | undefined; connectorId?: string | undefined; actionsClient?: ",
+          "({ providedProvider, providedModel, connectorId, getInferenceConnectorById, }: { providedProvider?: string | undefined; providedModel?: string | undefined; connectorId?: string | undefined; getInferenceConnectorById?: ((id: string) => Promise<",
           {
-            "pluginId": "@kbn/utility-types",
+            "pluginId": "@kbn/inference-common",
             "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.PublicMethodsOf",
-            "text": "PublicMethodsOf"
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.InferenceConnector",
+            "text": "InferenceConnector"
           },
-          "<",
-          {
-            "pluginId": "actions",
-            "scope": "server",
-            "docId": "kibActionsPluginApi",
-            "section": "def-server.ActionsClient",
-            "text": "ActionsClient"
-          },
-          "> | undefined; providedConnector?: ",
-          {
-            "pluginId": "actions",
-            "scope": "server",
-            "docId": "kibActionsPluginApi",
-            "section": "def-server.Connector",
-            "text": "Connector"
-          },
-          " | undefined; }) => Promise<{ provider?: string | undefined; model?: string | undefined; }>"
+          ">) | undefined; }) => Promise<{ provider?: string | undefined; model?: string | undefined; }>"
         ],
         "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
-        "lineNumber": 132,
+        "lineNumber": 130,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -170,10 +156,10 @@
             "id": "def-server.resolveProviderAndModel.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  providedProvider,\n  providedModel,\n  connectorId,\n  actionsClient,\n  providedConnector,\n}",
+            "label": "{\n  providedProvider,\n  providedModel,\n  connectorId,\n  getInferenceConnectorById,\n}",
             "description": [],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
-            "lineNumber": 138,
+            "lineNumber": 135,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -189,7 +175,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
-                "lineNumber": 139,
+                "lineNumber": 136,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -205,7 +191,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
-                "lineNumber": 140,
+                "lineNumber": 137,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -221,64 +207,54 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
-                "lineNumber": 141,
+                "lineNumber": 138,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/security-ai-prompts",
-                "id": "def-server.resolveProviderAndModel.$1.actionsClient",
-                "type": "Object",
+                "id": "def-server.resolveProviderAndModel.$1.getInferenceConnectorById",
+                "type": "Function",
                 "tags": [],
-                "label": "actionsClient",
+                "label": "getInferenceConnectorById",
                 "description": [],
                 "signature": [
+                  "((id: string) => Promise<",
                   {
-                    "pluginId": "@kbn/utility-types",
+                    "pluginId": "@kbn/inference-common",
                     "scope": "common",
-                    "docId": "kibKbnUtilityTypesPluginApi",
-                    "section": "def-common.PublicMethodsOf",
-                    "text": "PublicMethodsOf"
+                    "docId": "kibKbnInferenceCommonPluginApi",
+                    "section": "def-common.InferenceConnector",
+                    "text": "InferenceConnector"
                   },
-                  "<",
-                  {
-                    "pluginId": "actions",
-                    "scope": "server",
-                    "docId": "kibActionsPluginApi",
-                    "section": "def-server.ActionsClient",
-                    "text": "ActionsClient"
-                  },
-                  "> | undefined"
+                  ">) | undefined"
                 ],
                 "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
-                "lineNumber": 142,
+                "lineNumber": 139,
                 "columnNumber": 3,
                 "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/security-ai-prompts",
-                "id": "def-server.resolveProviderAndModel.$1.providedConnector",
-                "type": "Object",
-                "tags": [],
-                "label": "providedConnector",
-                "description": [],
-                "signature": [
+                "trackAdoption": false,
+                "children": [
                   {
-                    "pluginId": "actions",
-                    "scope": "server",
-                    "docId": "kibActionsPluginApi",
-                    "section": "def-server.Connector",
-                    "text": "Connector"
-                  },
-                  " | undefined"
+                    "parentPluginId": "@kbn/security-ai-prompts",
+                    "id": "def-server.resolveProviderAndModel.$1.getInferenceConnectorById.$1",
+                    "type": "string",
+                    "tags": [],
+                    "label": "id",
+                    "description": [],
+                    "signature": [
+                      "string"
+                    ],
+                    "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
+                    "lineNumber": 139,
+                    "columnNumber": 32,
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
                 ],
-                "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
-                "lineNumber": 143,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
+                "returnComment": []
               }
             ]
           }
@@ -303,60 +279,6 @@
         "children": [
           {
             "parentPluginId": "@kbn/security-ai-prompts",
-            "id": "def-server.GetPromptArgs.actionsClient",
-            "type": "Object",
-            "tags": [],
-            "label": "actionsClient",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.PublicMethodsOf",
-                "text": "PublicMethodsOf"
-              },
-              "<",
-              {
-                "pluginId": "actions",
-                "scope": "server",
-                "docId": "kibActionsPluginApi",
-                "section": "def-server.ActionsClient",
-                "text": "ActionsClient"
-              },
-              "> | undefined"
-            ],
-            "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
-            "lineNumber": 27,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/security-ai-prompts",
-            "id": "def-server.GetPromptArgs.connector",
-            "type": "Object",
-            "tags": [],
-            "label": "connector",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "actions",
-                "scope": "server",
-                "docId": "kibActionsPluginApi",
-                "section": "def-server.Connector",
-                "text": "Connector"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
-            "lineNumber": 28,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/security-ai-prompts",
             "id": "def-server.GetPromptArgs.connectorId",
             "type": "string",
             "tags": [],
@@ -366,10 +288,54 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
-            "lineNumber": 29,
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-ai-prompts",
+            "id": "def-server.GetPromptArgs.getInferenceConnectorById",
+            "type": "Function",
+            "tags": [],
+            "label": "getInferenceConnectorById",
+            "description": [],
+            "signature": [
+              "((id: string) => Promise<",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.InferenceConnector",
+                "text": "InferenceConnector"
+              },
+              ">) | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-ai-prompts",
+                "id": "def-server.GetPromptArgs.getInferenceConnectorById.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+                "lineNumber": 28,
+                "columnNumber": 32,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/security-ai-prompts",
@@ -389,7 +355,7 @@
               "[]"
             ],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
-            "lineNumber": 30,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -405,7 +371,7 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
-            "lineNumber": 31,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -418,7 +384,7 @@
             "label": "promptId",
             "description": [],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
-            "lineNumber": 32,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -431,7 +397,7 @@
             "label": "promptGroupId",
             "description": [],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
-            "lineNumber": 33,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -447,7 +413,7 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
-            "lineNumber": 34,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -463,7 +429,7 @@
               "SavedObjectsClientContract"
             ],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
-            "lineNumber": 35,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -497,7 +463,7 @@
           ", \"promptId\">"
         ],
         "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
-        "lineNumber": 37,
+        "lineNumber": 36,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -510,7 +476,7 @@
             "label": "promptGroupId",
             "description": [],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
-            "lineNumber": 38,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -526,7 +492,7 @@
               "string[]"
             ],
             "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
-            "lineNumber": 39,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

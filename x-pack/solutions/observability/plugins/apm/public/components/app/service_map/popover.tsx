@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiPopover, useEuiTheme } from '@elastic/eui';
+import { EuiPopover, EuiPortal, useEuiTheme } from '@elastic/eui';
 import type { MouseEvent } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactFlowInstance, Viewport } from '@xyflow/react';
@@ -116,6 +116,14 @@ interface MapPopoverProps {
   start: string;
   end: string;
   onClose: () => void;
+  /** When true, hides navigation actions like "Focus map" that don't apply in dashboard embeds. */
+  isEmbedded?: boolean;
+  /** Optional override for the Focus map button visibility. Defaults to `!isEmbedded`. */
+  showFocusMap?: boolean;
+  /** Focus button always navigates, even for the currently focused service (default re-centers). */
+  alwaysNavigateOnFocus?: boolean;
+  /** Strip `kuery` from popover-built URLs (env still flows through). */
+  clearKueryOnNavigation?: boolean;
 }
 
 export function MapPopover({
@@ -127,6 +135,10 @@ export function MapPopover({
   start,
   end,
   onClose,
+  isEmbedded,
+  showFocusMap,
+  alwaysNavigateOnFocus,
+  clearKueryOnNavigation,
 }: MapPopoverProps) {
   const { euiTheme } = useEuiTheme();
   const popoverRef = useRef<EuiPopover>(null);
@@ -180,9 +192,10 @@ export function MapPopover({
 
   const isAlreadyFocused = focusedServiceName === selectedNodeId;
 
-  const onFocusClick = isAlreadyFocused
-    ? centerSelectedNode
-    : (_event: MouseEvent<HTMLAnchorElement>) => onClose();
+  const onFocusClick =
+    isAlreadyFocused && !alwaysNavigateOnFocus
+      ? centerSelectedNode
+      : (_event: MouseEvent<HTMLAnchorElement>) => onClose();
 
   const isOpen = !!selectedNode || !!selectedEdge;
 
@@ -216,7 +229,8 @@ export function MapPopover({
         closePopover={onClose}
         isOpen={isOpen}
         ref={popoverRef}
-        zIndex={Number(euiTheme.levels.menu)}
+        // Below EUI flyouts so nested SLO / alert flyouts stay on top; above map canvas (content).
+        zIndex={Number(euiTheme.levels.flyout) - 1}
         data-test-subj="serviceMapPopover"
         aria-label={popoverAriaLabel}
         panelProps={{
@@ -234,14 +248,31 @@ export function MapPopover({
           end={end}
           onFocusClick={onFocusClick}
           onOpenDiagnostic={handleOpenDiagnostic}
+          isEmbedded={isEmbedded}
+          showFocusMap={showFocusMap}
+          clearKueryOnNavigation={clearKueryOnNavigation}
         />
       </EuiPopover>
       {diagnosticFlyoutSelection && (
-        <DiagnosticFlyout
-          selection={diagnosticFlyoutSelection}
-          isOpen
-          onClose={() => setDiagnosticFlyoutSelection(null)}
-        />
+        <>
+          <EuiPortal>
+            <div
+              role="presentation"
+              style={{
+                position: 'fixed',
+                inset: 0,
+                zIndex: Number(euiTheme.levels.header),
+                cursor: 'default',
+              }}
+              onClick={() => setDiagnosticFlyoutSelection(null)}
+            />
+          </EuiPortal>
+          <DiagnosticFlyout
+            selection={diagnosticFlyoutSelection}
+            isOpen
+            onClose={() => setDiagnosticFlyoutSelection(null)}
+          />
+        </>
       )}
     </div>
   );

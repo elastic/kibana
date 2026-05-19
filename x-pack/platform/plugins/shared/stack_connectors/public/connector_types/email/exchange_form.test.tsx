@@ -6,21 +6,26 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import ExchangeFormFields from './exchange_form';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { act, render, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
+  ...jest.requireActual(
+    '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
+  ),
+  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
+}));
 
 describe('ExchangeFormFields renders', () => {
   const actionConnector = createMockActionConnector({
     secrets: {
       clientSecret: 'secret',
     },
-    id: 'test',
+    id: 'email',
     actionTypeId: '.email',
     name: 'email',
     isDeprecated: false,
@@ -33,14 +38,14 @@ describe('ExchangeFormFields renders', () => {
   });
 
   test('should display exchange form fields', () => {
-    const wrapper = mountWithIntl(
+    render(
       <ConnectorFormTestProvider connector={actionConnector}>
         <ExchangeFormFields readOnly={false} />
       </ConnectorFormTestProvider>
     );
-    expect(wrapper.find('[data-test-subj="emailClientSecret"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="emailClientId"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="emailTenantId"]').length > 0).toBeTruthy();
+    expect(screen.getByTestId('emailClientSecret')).toBeInTheDocument();
+    expect(screen.getByTestId('emailClientId')).toBeInTheDocument();
+    expect(screen.getByTestId('emailTenantId')).toBeInTheDocument();
   });
 
   test('exchange field defaults to empty when not defined', () => {
@@ -52,19 +57,19 @@ describe('ExchangeFormFields renders', () => {
       },
     };
 
-    const wrapper = mountWithIntl(
+    render(
       <ConnectorFormTestProvider connector={connector}>
         <ExchangeFormFields readOnly={false} />
       </ConnectorFormTestProvider>
     );
-    expect(wrapper.find('[data-test-subj="emailClientSecret"]').length > 0).toBeTruthy();
-    expect(wrapper.find('input[data-test-subj="emailClientSecret"]').prop('value')).toEqual('');
+    expect(screen.getByTestId('emailClientSecret')).toBeInTheDocument();
+    expect(screen.getByTestId('emailClientSecret')).toHaveValue('');
 
-    expect(wrapper.find('[data-test-subj="emailClientId"]').length > 0).toBeTruthy();
-    expect(wrapper.find('input[data-test-subj="emailClientId"]').prop('value')).toEqual('');
+    expect(screen.getByTestId('emailClientId')).toBeInTheDocument();
+    expect(screen.getByTestId('emailClientId')).toHaveValue('');
 
-    expect(wrapper.find('[data-test-subj="emailTenantId"]').length > 0).toBeTruthy();
-    expect(wrapper.find('input[data-test-subj="emailTenantId"]').prop('value')).toEqual('');
+    expect(screen.getByTestId('emailTenantId')).toBeInTheDocument();
+    expect(screen.getByTestId('emailTenantId')).toHaveValue('');
   });
 
   describe('Validation', () => {
@@ -81,15 +86,13 @@ describe('ExchangeFormFields renders', () => {
     ];
 
     it('connector validation succeeds when connector config is valid', async () => {
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
           <ExchangeFormFields readOnly={false} />
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
         expect(onSubmit).toBeCalledWith({
@@ -97,7 +100,7 @@ describe('ExchangeFormFields renders', () => {
             secrets: {
               clientSecret: 'secret',
             },
-            id: 'test',
+            id: 'email',
             actionTypeId: '.email',
             name: 'email',
             isDeprecated: false,
@@ -127,7 +130,9 @@ describe('ExchangeFormFields renders', () => {
 
       await userEvent.click(res.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      });
     });
   });
 });

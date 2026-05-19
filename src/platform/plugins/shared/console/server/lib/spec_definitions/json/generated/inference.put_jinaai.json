@@ -25,6 +25,7 @@
       "_inference/{task_type}/{jinaai_inference_id}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-jinaai",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-inference-put-jinaai",
     "availability": {
       "stack": true,
       "serverless": true

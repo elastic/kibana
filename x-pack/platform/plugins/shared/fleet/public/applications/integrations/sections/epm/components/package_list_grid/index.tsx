@@ -280,7 +280,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
                     <EuiButtonIcon
                       display="base"
                       onClick={onButtonClick}
-                      iconType="boxesHorizontal"
+                      iconType="boxesVertical"
                       aria-label="Show more subcategories"
                       size="s"
                     />
@@ -290,7 +290,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
                   panelPaddingSize="none"
                   anchorPosition="downLeft"
                 >
-                  <EuiContextMenuPanel size="s" items={hiddenSubCategoriesItems} />
+                  <EuiContextMenuPanel items={hiddenSubCategoriesItems} />
                 </EuiPopover>
               </EuiFlexItem>
             ) : null}

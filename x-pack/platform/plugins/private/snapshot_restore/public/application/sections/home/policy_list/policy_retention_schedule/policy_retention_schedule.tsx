@@ -161,13 +161,17 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
                   return (
                     <EuiPopover
                       id="retentionActionMenu"
+                      aria-label={i18n.translate(
+                        'xpack.snapshotRestore.policyRetentionSchedulePanel.retentionActionMenuAriaLabel',
+                        { defaultMessage: 'Retention options' }
+                      )}
                       button={
                         <EuiButton
                           data-test-subj="retentionActionMenuButton"
                           iconSide="right"
                           color="warning"
                           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-                          iconType="arrowDown"
+                          iconType="chevronSingleDown"
                         >
                           <FormattedMessage
                             id="xpack.snapshotRestore.policyRetentionSchedulePanel.manageRetentionButtonLabel"
@@ -211,7 +215,7 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
                                     defaultMessage: 'Schedule',
                                   }
                                 ),
-                                icon: 'plusInCircle',
+                                icon: 'plusCircle',
                                 onClick: () =>
                                   updateRetentionSettingsPrompt(
                                     undefined,

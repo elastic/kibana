@@ -22,7 +22,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
-import { WithHeaderLayout } from '../../../components/layouts';
+import { WithHeaderLayout, fullWidthContentCss } from '../../../components/layouts';
 import { usePack } from '../../../packs/use_pack';
 import { useCopyPack } from '../../../packs/use_copy_pack';
 import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
@@ -66,17 +66,22 @@ const PackDetailsPageComponent = () => {
     [data]
   );
 
+  const backLink = useMemo(
+    () => (
+      <EuiButtonEmpty iconType="chevronSingleLeft" {...packsListProps} flush="left" size="xs">
+        <FormattedMessage
+          id="xpack.osquery.packDetails.viewAllPackListTitle"
+          defaultMessage="View all packs"
+        />
+      </EuiButtonEmpty>
+    ),
+    [packsListProps]
+  );
+
   const LeftColumn = useMemo(
     () => (
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
-        <EuiFlexItem>
-          <EuiButtonEmpty iconType="arrowLeft" {...packsListProps} flush="left" size="xs">
-            <FormattedMessage
-              id="xpack.osquery.packDetails.viewAllPackListTitle"
-              defaultMessage="View all packs"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
+        <EuiFlexItem>{backLink}</EuiFlexItem>
         <EuiFlexItem>
           <EuiText>
             <h1>
@@ -101,7 +106,7 @@ const PackDetailsPageComponent = () => {
         )}
       </EuiFlexGroup>
     ),
-    [data?.description, data?.name, packsListProps]
+    [backLink, data?.description, data?.name]
   );
 
   const RightColumn = useMemo(
@@ -168,6 +173,45 @@ const PackDetailsPageComponent = () => {
       permissions,
     ]
   );
+
+  if (queryHistoryRework) {
+    return (
+      <div css={fullWidthContentCss}>
+        <EuiSpacer size="l" />
+        {backLink}
+        <EuiSpacer size="m" />
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiText>
+              <h1>
+                <FormattedMessage
+                  id="xpack.osquery.packDetails.pageTitle"
+                  defaultMessage="{queryName} details"
+                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                  values={{
+                    queryName: data?.name,
+                  }}
+                />
+              </h1>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{RightColumn}</EuiFlexItem>
+        </EuiFlexGroup>
+        {data?.description && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiText color="subdued" size="s">
+              {data.description}
+            </EuiText>
+          </>
+        )}
+        <EuiSpacer size="l" />
+        {data && (
+          <PackQueriesStatusTable agentIds={agentIds} packName={data.name} data={queriesArray} />
+        )}
+      </div>
+    );
+  }
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>

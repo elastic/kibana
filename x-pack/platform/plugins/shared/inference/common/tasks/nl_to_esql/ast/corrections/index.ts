@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ESQLAstQueryExpression } from '@kbn/esql-language';
+import type { ESQLAstQueryExpression } from '@elastic/esql/types';
 import type { QueryCorrection } from './types';
 import { correctTimespanLiterals } from './timespan_literals';
 import { correctLikeWildcards } from './like';

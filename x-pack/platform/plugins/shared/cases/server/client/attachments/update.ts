@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 
-import { AttachmentPatchRequestRt } from '../../../common/types/api';
+import { AttachmentPatchRequestRtV2 } from '../../../common/types/api';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
 import { isCommentRequestTypeExternalReference } from '../../../common/utils/attachments';
@@ -15,10 +15,11 @@ import type { Case } from '../../../common/types/domain';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasesClientArgs } from '..';
-import { decodeCommentRequest } from '../utils';
+import { decodeCommentRequestV2 } from '../utils';
 import { Operations } from '../../authorization';
 import type { UpdateArgs } from './types';
 import { validateMaxUserActions } from '../../common/validators';
+import { validateRegisteredAttachments } from './validators';
 
 /**
  * Update an attachment.
@@ -26,7 +27,7 @@ import { validateMaxUserActions } from '../../common/validators';
  * @ignore
  */
 export async function update(
-  { caseID, updateRequest: queryParams }: UpdateArgs,
+  { caseID, updateRequest: queryParams, mode = 'legacy' }: UpdateArgs,
   clientArgs: CasesClientArgs
 ): Promise<Case> {
   const {
@@ -34,6 +35,8 @@ export async function update(
     logger,
     authorization,
     externalReferenceAttachmentTypeRegistry,
+    persistableStateAttachmentTypeRegistry,
+    unifiedAttachmentTypeRegistry,
   } = clientArgs;
 
   try {
@@ -41,17 +44,32 @@ export async function update(
       id: queryCommentId,
       version: queryCommentVersion,
       ...queryRestAttributes
-    } = decodeWithExcessOrThrow(AttachmentPatchRequestRt)(queryParams);
+    } = decodeWithExcessOrThrow(AttachmentPatchRequestRtV2)(queryParams);
     await validateMaxUserActions({
       caseId: caseID,
       userActionService,
       userActionsToAdd: 1,
     });
 
-    decodeCommentRequest(queryRestAttributes, externalReferenceAttachmentTypeRegistry);
+    decodeCommentRequestV2(
+      queryRestAttributes,
+      externalReferenceAttachmentTypeRegistry,
+      unifiedAttachmentTypeRegistry
+    );
+
+    // Also enforce registry registration and the unified zod schema for
+    // migrated legacy subtypes (e.g. `.files`); mirrors the add/bulk_create
+    // paths so PATCH stays in sync with POST.
+    validateRegisteredAttachments({
+      query: queryRestAttributes,
+      persistableStateAttachmentTypeRegistry,
+      externalReferenceAttachmentTypeRegistry,
+      unifiedAttachmentTypeRegistry,
+    });
 
     const myComment = await attachmentService.getter.get({
-      attachmentId: queryCommentId,
+      savedObjectId: queryCommentId,
+      mode,
     });
 
     if (myComment == null) {
@@ -101,9 +119,10 @@ export async function update(
       updateRequest: queryParams,
       updatedAt: updatedDate,
       owner: myComment.attributes.owner,
+      mode,
     });
 
-    return await updatedModel.encodeWithComments();
+    return await updatedModel.encodeWithComments({ mode });
   } catch (error) {
     throw createCaseError({
       message: `Failed to patch comment case id: ${caseID}: ${error}`,

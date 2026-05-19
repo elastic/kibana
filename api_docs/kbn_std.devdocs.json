@@ -188,6 +188,7 @@
             "lineNumber": 22,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "IterableInput",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -208,6 +209,7 @@
             "lineNumber": 22,
             "columnNumber": 67,
             "deprecated": false,
+            "docsReferencedTypeName": "AsyncMapFn",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -254,6 +256,7 @@
             "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "IterableInput",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -293,6 +296,7 @@
             "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AsyncMapFn",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -339,6 +343,7 @@
             "lineNumber": 29,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "IterableInput",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -359,6 +364,7 @@
             "lineNumber": 29,
             "columnNumber": 69,
             "deprecated": false,
+            "docsReferencedTypeName": "AsyncMapFn",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -405,6 +411,7 @@
             "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "IterableInput",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -444,6 +451,7 @@
             "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AsyncMapFn",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -547,6 +555,7 @@
             "lineNumber": 22,
             "columnNumber": 49,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -728,6 +737,7 @@
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -767,6 +777,7 @@
             "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CFG",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -821,6 +832,7 @@
             "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CFG",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -875,6 +887,7 @@
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CFG",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -929,6 +942,7 @@
             "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CFG",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -983,6 +997,7 @@
             "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CFG",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1037,6 +1052,7 @@
             "lineNumber": 45,
             "columnNumber": 55,
             "deprecated": false,
+            "docsReferencedTypeName": "CFG",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1074,7 +1090,7 @@
           "(rootValue: Record<string, any>) => { [key: string]: any; }"
         ],
         "path": "src/platform/packages/shared/kbn-std/src/get_flattened_object.ts",
-        "lineNumber": 14,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1090,8 +1106,349 @@
               "Record<string, any>"
             ],
             "path": "src/platform/packages/shared/kbn-std/src/get_flattened_object.ts",
-            "lineNumber": 25,
+            "lineNumber": 45,
             "columnNumber": 36,
+            "deprecated": false,
+            "docsReferencedTypeName": "Record",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/std",
+        "id": "def-common.getSafe",
+        "type": "Function",
+        "tags": [],
+        "label": "getSafe",
+        "description": [
+          "\nLike ",
+          {
+            "pluginId": "@kbn/std",
+            "scope": "common",
+            "docId": "kibKbnStdPluginApi",
+            "section": "def-common.get",
+            "text": "get"
+          },
+          ", but returns `T | undefined` instead of `T`, accounting for\nthe possibility that the key may not exist in the object.\nThis is useful as a type-safe alternative to calling object[key] in types that are defined\nas something like: { [key: string]: Type }. Because Kibana does not use noUncheckedIndexedAccess\nin its tsconfig, calls to object[key] for this kind of type will never account for the possibility\nof `key` not existing in `object`."
+        ],
+        "signature": [
+          "(obj: CFG, path: [A, B, C, D, E]) => CFG[A][B][C][D][E] | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-std/src/get_safe.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.getSafe.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "obj",
+            "description": [],
+            "signature": [
+              "CFG"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/get_safe.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "CFG",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.getSafe.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "signature": [
+              "[A, B, C, D, E]"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/get_safe.ts",
+            "lineNumber": 27,
+            "columnNumber": 13,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/std",
+        "id": "def-common.getSafe",
+        "type": "Function",
+        "tags": [],
+        "label": "getSafe",
+        "description": [],
+        "signature": [
+          "(obj: CFG, path: [A, B, C, D]) => CFG[A][B][C][D] | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-std/src/get_safe.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.getSafe.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "obj",
+            "description": [],
+            "signature": [
+              "CFG"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/get_safe.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "CFG",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.getSafe.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "signature": [
+              "[A, B, C, D]"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/get_safe.ts",
+            "lineNumber": 34,
+            "columnNumber": 13,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/std",
+        "id": "def-common.getSafe",
+        "type": "Function",
+        "tags": [],
+        "label": "getSafe",
+        "description": [],
+        "signature": [
+          "(obj: CFG, path: [A, B, C]) => CFG[A][B][C] | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-std/src/get_safe.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.getSafe.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "obj",
+            "description": [],
+            "signature": [
+              "CFG"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/get_safe.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "CFG",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.getSafe.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "signature": [
+              "[A, B, C]"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/get_safe.ts",
+            "lineNumber": 40,
+            "columnNumber": 13,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/std",
+        "id": "def-common.getSafe",
+        "type": "Function",
+        "tags": [],
+        "label": "getSafe",
+        "description": [],
+        "signature": [
+          "(obj: CFG, path: [A, B]) => CFG[A][B] | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-std/src/get_safe.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.getSafe.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "obj",
+            "description": [],
+            "signature": [
+              "CFG"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/get_safe.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "CFG",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.getSafe.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "signature": [
+              "[A, B]"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/get_safe.ts",
+            "lineNumber": 45,
+            "columnNumber": 13,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/std",
+        "id": "def-common.getSafe",
+        "type": "Function",
+        "tags": [],
+        "label": "getSafe",
+        "description": [],
+        "signature": [
+          "(obj: CFG, path: A | [A]) => CFG[A] | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-std/src/get_safe.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.getSafe.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "obj",
+            "description": [],
+            "signature": [
+              "CFG"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/get_safe.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "CFG",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.getSafe.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "signature": [
+              "A | [A]"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/get_safe.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/std",
+        "id": "def-common.getSafe",
+        "type": "Function",
+        "tags": [],
+        "label": "getSafe",
+        "description": [],
+        "signature": [
+          "(obj: CFG, path: string | string[]) => unknown"
+        ],
+        "path": "src/platform/packages/shared/kbn-std/src/get_safe.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.getSafe.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "obj",
+            "description": [],
+            "signature": [
+              "CFG"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/get_safe.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "CFG",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.getSafe.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "signature": [
+              "string | string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/get_safe.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1273,6 +1630,49 @@
       },
       {
         "parentPluginId": "@kbn/std",
+        "id": "def-common.isValidSlugIdentifier",
+        "type": "Function",
+        "tags": [],
+        "label": "isValidSlugIdentifier",
+        "description": [
+          "\nValidates whether a string is already a valid slug identifier.\n"
+        ],
+        "signature": [
+          "(value: string) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-std/src/slug_identifier.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.isValidSlugIdentifier.$1",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [
+              "- The string to validate"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/slug_identifier.ts",
+            "lineNumber": 53,
+            "columnNumber": 39,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "True if the value is a valid slug identifier"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/std",
         "id": "def-common.map$",
         "type": "Function",
         "tags": [],
@@ -1312,6 +1712,7 @@
             "lineNumber": 26,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "IterableInput",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1332,6 +1733,7 @@
             "lineNumber": 26,
             "columnNumber": 59,
             "deprecated": false,
+            "docsReferencedTypeName": "AsyncMapFn",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1369,6 +1771,7 @@
             "lineNumber": 10,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "ReadonlyMap",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1417,6 +1820,7 @@
             "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "IterableInput",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1456,6 +1860,7 @@
             "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AsyncMapFn",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1556,6 +1961,7 @@
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TBase",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1573,6 +1979,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TSource1",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1610,6 +2017,7 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TBase",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1627,6 +2035,7 @@
             "lineNumber": 26,
             "columnNumber": 19,
             "deprecated": false,
+            "docsReferencedTypeName": "TSource1",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1644,6 +2053,7 @@
             "lineNumber": 26,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "TSource2",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1681,6 +2091,7 @@
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TBase",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1698,6 +2109,7 @@
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TSource1",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1715,6 +2127,7 @@
             "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TSource2",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1752,6 +2165,7 @@
             "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1769,6 +2183,7 @@
             "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1973,6 +2388,7 @@
             "lineNumber": 10,
             "columnNumber": 59,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -2064,6 +2480,7 @@
             "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PrettyCompactStringifyOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -2265,6 +2682,7 @@
             "lineNumber": 37,
             "columnNumber": 49,
             "deprecated": false,
+            "docsReferencedTypeName": "StableStringifyOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -2305,6 +2723,43 @@
             "path": "src/platform/packages/shared/kbn-std/src/strip_version_qualifier.ts",
             "lineNumber": 14,
             "columnNumber": 39,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/std",
+        "id": "def-common.toSlugIdentifier",
+        "type": "Function",
+        "tags": [],
+        "label": "toSlugIdentifier",
+        "description": [],
+        "signature": [
+          "(value: string) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-std/src/slug_identifier.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.toSlugIdentifier.$1",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/slug_identifier.ts",
+            "lineNumber": 28,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

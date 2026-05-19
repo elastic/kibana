@@ -166,9 +166,10 @@ describe('config validation', () => {
     // empty object
     expect(() => {
       validateConfig(connectorType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: Field \\"from\\": Required"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating connector type config: ✖ Invalid input: expected string, received undefined
+        → at from"
+    `);
 
     // no service or host/port
     expect(() => {
@@ -506,10 +507,234 @@ describe('params validation', () => {
     expect(() => {
       validateParams(connectorType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: 2 errors:
-       [1]: Field \\"subject\\": Required;
-       [2]: Field \\"message\\": Required"
+      "error validating action params: ✖ Invalid input: expected string, received undefined
+        → at subject
+      ✖ Invalid input: expected string, received undefined
+        → at message"
     `);
+  });
+
+  test('params validation fails when no recipients are provided', () => {
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: [],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities }
+      );
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: At least one entry in [to], [cc], or [bcc] is required"`
+    );
+  });
+
+  test('params validation fails when recipients only contain empty/whitespace strings', () => {
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['', ' '],
+          cc: [''],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities }
+      );
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: At least one entry in [to], [cc], or [bcc] is required"`
+    );
+  });
+
+  test('params validation fails when email has invalid format (leading hyphen in local part)', () => {
+    const configUtils = getActionsConfigUtils({});
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['-user@example.com'],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowError(/not valid emails/);
+  });
+
+  test('params validation fails when email has invalid format (leading hyphen in domain)', () => {
+    const configUtils = getActionsConfigUtils({});
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['user@-example.com'],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowError(/not valid emails/);
+  });
+
+  test('params validation fails when email has invalid format (trailing hyphen in domain)', () => {
+    const configUtils = getActionsConfigUtils({});
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['user@example-.com'],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowError(/not valid emails/);
+  });
+
+  test('params validation fails when email starts with @ sign', () => {
+    const configUtils = getActionsConfigUtils({});
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['@something@example.com'],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowError(/not valid emails/);
+  });
+
+  test('params validation fails when email has double @ sign', () => {
+    const configUtils = getActionsConfigUtils({});
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['user@@example.com'],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowError(/not valid emails/);
+  });
+
+  test('params validation fails when email has double dots in domain', () => {
+    const configUtils = getActionsConfigUtils({});
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['user@example..com'],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowError(/not valid emails/);
+  });
+
+  test('params validation fails when email has space in domain', () => {
+    const configUtils = getActionsConfigUtils({});
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['user@exam ple.com'],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowError(/not valid emails/);
+  });
+
+  test('params validation accepts email with single-label domain (on-prem MTA)', () => {
+    const configUtils = getActionsConfigUtils({});
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['user@localhost'],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).not.toThrowError();
+  });
+
+  test('params validation fails when email has path traversal characters', () => {
+    const configUtils = getActionsConfigUtils({});
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['../etc/passwd@example.com'],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowError(/not valid emails/);
+  });
+
+  test('params validation succeeds for valid email with hyphens and subdomains', () => {
+    const configUtils = getActionsConfigUtils({});
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['first-last@my-domain.example.com'],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).not.toThrow();
+  });
+
+  test('params validation succeeds for RFC 5322 quoted local part', () => {
+    const configUtils = getActionsConfigUtils({});
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['"quoted"@example.com'],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).not.toThrow();
   });
 
   test('params validation for emails calls validateEmailAddresses', async () => {
@@ -634,9 +859,10 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: Field \\"to.0\\": String must contain at most 512 character(s)"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: ✖ Too big: expected string to have <=512 characters
+        → at to[0]"
+    `);
   });
   test('throws for too long "cc" address ', async () => {
     const configUtils = actionsConfigMock.create();
@@ -656,9 +882,10 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: Field \\"cc.0\\": String must contain at most 512 character(s)"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: ✖ Too big: expected string to have <=512 characters
+        → at cc[0]"
+    `);
   });
   test('throws for too long "bcc" address ', async () => {
     const configUtils = actionsConfigMock.create();
@@ -678,9 +905,10 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: Field \\"bcc.0\\": String must contain at most 512 character(s)"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: ✖ Too big: expected string to have <=512 characters
+        → at bcc[0]"
+    `);
   });
 
   test('params validation succeeds with valid replyTo', async () => {
@@ -753,9 +981,10 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: Field \\"replyTo.0\\": String must contain at most 512 character(s)"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: ✖ Too big: expected string to have <=512 characters
+        → at replyTo[0]"
+    `);
   });
 
   test('throws for more than 10 "replyTo" addresses', async () => {
@@ -774,9 +1003,10 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: Field \\"replyTo\\": Array must contain at most 10 element(s)"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: ✖ Too big: expected array to have <=10 items
+        → at replyTo"
+    `);
   });
 });
 
@@ -1317,6 +1547,56 @@ describe('execute()', () => {
         },
       }
     `);
+  });
+
+  test('returns error when all recipient arrays are empty', async () => {
+    sendEmailMock.mockReset();
+
+    const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
+      ...executorOptions,
+      params: {
+        ...params,
+        to: [],
+        cc: [],
+        bcc: [],
+      },
+    };
+
+    const result = await connectorType.executor(customExecutorOptions);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "errorSource": "user",
+        "message": "At least one entry in [to], [cc], or [bcc] is required",
+        "status": "error",
+      }
+    `);
+    expect(sendEmailMock).not.toHaveBeenCalled();
+  });
+
+  test('returns error when all recipients are empty strings', async () => {
+    sendEmailMock.mockReset();
+
+    const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
+      ...executorOptions,
+      params: {
+        ...params,
+        to: ['', ' '],
+        cc: [''],
+        bcc: [],
+      },
+    };
+
+    const result = await connectorType.executor(customExecutorOptions);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "errorSource": "user",
+        "message": "At least one entry in [to], [cc], or [bcc] is required",
+        "status": "error",
+      }
+    `);
+    expect(sendEmailMock).not.toHaveBeenCalled();
   });
 
   test('returns expected result when an error is thrown', async () => {

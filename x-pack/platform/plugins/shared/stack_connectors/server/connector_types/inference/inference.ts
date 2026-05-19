@@ -201,19 +201,20 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       {
         method: 'POST',
         path: `_inference/chat_completion/${this.inferenceId}/_stream`,
+        querystring: {
+          timeout: '180s',
+        },
         body,
       },
       {
         asStream: true,
         meta: true,
+        requestTimeout: 180_000,
         signal: params.signal,
-        ...(params.telemetryMetadata?.pluginId
-          ? {
-              headers: {
-                'X-Elastic-Product-Use-Case': params.telemetryMetadata?.pluginId,
-              },
-            }
-          : {}),
+        headers: {
+          // always send a value for EIS
+          'X-Elastic-Product-Use-Case': params.telemetryMetadata?.pluginId ?? 'inference',
+        },
       }
     );
     // errors should be thrown as it will not be a stream response
@@ -285,7 +286,10 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       false,
       signal
     );
-    return response.rerank!.map(({ relevance_score: score, ...rest }) => ({ score, ...rest }));
+    return (response?.rerank ?? []).map(({ relevance_score: score, ...rest }) => ({
+      score,
+      ...rest,
+    }));
   }
 
   /**
@@ -302,7 +306,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       false,
       signal
     );
-    return response.sparse_embedding!;
+    return response?.sparse_embedding ?? [];
   }
 
   /**
@@ -327,7 +331,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       false,
       signal
     );
-    return response.text_embedding!;
+    return response?.text_embedding ?? [];
   }
 
   /**
@@ -368,7 +372,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       false,
       signal
     );
-    return response.completion!;
+    return response?.completion ?? [];
   }
 
   /**

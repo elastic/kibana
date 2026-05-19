@@ -25,10 +25,9 @@ import type { DownloadSourceFormInputsType } from './use_download_source_flyout_
 
 export const DownloadSourceHeaders: React.FunctionComponent<{
   inputs: DownloadSourceFormInputsType;
-}> = (props) => {
-  const { inputs } = props;
+}> = ({ inputs }) => {
   const {
-    props: { onChange },
+    props: { onChange, disabled },
     value: keyValuePairs,
     formRowProps: { error: errors },
   } = inputs.headersInput;
@@ -65,9 +64,9 @@ export const DownloadSourceHeaders: React.FunctionComponent<{
     [keyValuePairs, onChange]
   );
 
-  const deleteButtonDisabled = false;
+  const deleteButtonDisabled = disabled;
   const hasEmptyRow = keyValuePairs.some((pair) => pair.key === '' && pair.value === '');
-  const addKeyValuePairButtonDisabled = hasEmptyRow;
+  const addKeyValuePairButtonDisabled = disabled || hasEmptyRow;
 
   const displayErrors = (errorMessages?: string[]) => {
     return errorMessages?.length
@@ -126,6 +125,7 @@ export const DownloadSourceHeaders: React.FunctionComponent<{
               <EuiFlexItem>
                 <EuiFormRow
                   fullWidth
+                  isDisabled={disabled}
                   label={
                     index === 0 ? (
                       <FormattedMessage
@@ -155,6 +155,7 @@ export const DownloadSourceHeaders: React.FunctionComponent<{
               <EuiFlexItem>
                 <EuiFormRow
                   fullWidth
+                  isDisabled={disabled}
                   label={
                     index === 0 ? (
                       <FormattedMessage
@@ -207,7 +208,7 @@ export const DownloadSourceHeaders: React.FunctionComponent<{
         disabled={addKeyValuePairButtonDisabled}
         size="xs"
         flush="left"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={addKeyValuePair}
       >
         <FormattedMessage

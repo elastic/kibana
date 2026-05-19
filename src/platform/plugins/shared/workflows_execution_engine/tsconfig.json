@@ -13,6 +13,7 @@
     "integration_tests/**/*"
   ],
   "kbn_references": [
+    "@kbn/apm-utils",
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/actions-plugin",
@@ -29,7 +30,12 @@
     "@kbn/es-mappings",
     "@kbn/workflows-extensions",
     "@kbn/licensing-plugin",
-    "@kbn/logging-mocks"
+    "@kbn/usage-api-plugin",
+    "@kbn/logging-mocks",
+    "@kbn/crypto",
+    "@kbn/es-errors",
+    "@kbn/spaces-plugin",
+    "@kbn/spaces-utils"
   ],
   "exclude": ["target/**/*"]
 }

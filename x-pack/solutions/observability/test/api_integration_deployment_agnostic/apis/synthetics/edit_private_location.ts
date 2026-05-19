@@ -14,7 +14,10 @@ import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
-import { PrivateLocationTestService } from '../../services/synthetics_private_location';
+import {
+  PrivateLocationTestService,
+  cleanSyntheticsTestData,
+} from '../../services/synthetics_private_location';
 import { addMonitorAPIHelper, omitMonitorKeys } from './create_monitor';
 import type { SupertestWithRoleScopeType } from '../../services';
 
@@ -43,7 +46,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         withInternalHeaders: true,
       });
 
-      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanSyntheticsTestData(kibanaServer);
       await testPrivateLocations.installSyntheticsPackage();
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
 
@@ -53,7 +56,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     after(async () => {
       await supertestEditorWithApiKey.destroy();
       await samlAuth.invalidateM2mApiKeyWithRoleScope(editorUser);
-      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanSyntheticsTestData(kibanaServer);
     });
 
     it('adds a test fleet policy', async () => {
@@ -161,8 +164,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       );
 
       const packagePolicy: PackagePolicy = apiResponse.body.items.find(
-        (pkgPolicy: PackagePolicy) =>
-          pkgPolicy.id === newMonitor.id + '-' + testFleetPolicyID + '-default'
+        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newMonitor.id + '-' + testFleetPolicyID
       );
       expect(packagePolicy.name).to.contain(NEW_LOCATION_LABEL);
     });
@@ -196,7 +198,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       let defaultSpaceMonitorId = '';
 
       it('add a test private location in multiple spaces', async () => {
-        const apiRes = await testPrivateLocations.addFleetPolicy('Test Fleet Policy 2');
+        const apiRes = await testPrivateLocations.addFleetPolicy('Test Fleet Policy 2', [
+          'default',
+          SPACE_ID,
+        ]);
         testFleetPolicyID = apiRes.body.item.id;
 
         privateLocations = await testPrivateLocations.setTestLocations(

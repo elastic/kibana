@@ -8,7 +8,8 @@
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
     "public/**/*",
-    "common/**/*"
+    "common/**/*",
+    "test/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -23,6 +24,7 @@
     "@kbn/features-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/kibana-utils-plugin",
+    "@kbn/uiam-api-keys-provisioning-status",
     "@kbn/utility-types",
     "@kbn/config-schema",
     "@kbn/data-plugin",
@@ -40,6 +42,7 @@
     "@kbn/share-plugin",
     "@kbn/safer-lodash-set",
     "@kbn/alerting-types",
+    "@kbn/change-history",
     "@kbn/alerts-as-data-utils",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/rrule",
@@ -74,6 +77,15 @@
     "@kbn/maintenance-windows-plugin",
     "@kbn/config",
     "@kbn/expect",
+    "@kbn/core-feature-flags-server-mocks",
+    "@kbn/core-feature-flags-server",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-saved-objects-server-mocks",
+    "@kbn/scout",
+    "@kbn/encrypted-saved-objects-shared",
+    "@kbn/core-analytics-server-mocks",
+    "@kbn/cps-server-utils",
+    "@kbn/cps-utils",
   ],
   "exclude": ["target/**/*"]
 }

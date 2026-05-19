@@ -71,7 +71,6 @@
     "@kbn/search-response-warnings",
     "@kbn/content-management-utils",
     "@kbn/react-hooks",
-    "@kbn/presentation-panel-plugin",
     "@kbn/deeplinks-analytics",
     "@kbn/core-saved-objects-api-server",
     "@kbn/css-utils",
@@ -79,7 +78,8 @@
     "@kbn/lens-common",
     "@kbn/visualization-listing-components",
     "@kbn/cps",
-    "@kbn/kql"
+    "@kbn/kql",
+    "@kbn/cps-utils"
   ],
   "exclude": ["target/**/*"]
 }

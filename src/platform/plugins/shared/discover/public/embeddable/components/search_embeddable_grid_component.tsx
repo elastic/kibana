@@ -16,9 +16,8 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   getSortArray,
 } from '@kbn/discover-utils';
-import type { FetchContext } from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects, type FetchContext } from '@kbn/presentation-publishing';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import type { DataGridDensity } from '@kbn/unified-data-table';
@@ -34,7 +33,7 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getAllowedSampleSize, getMaxAllowedSampleSize } from '../../utils/get_allowed_sample_size';
 import { isEsqlMode } from '../initialize_fetch';
 import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types';
-import { DiscoverGridEmbeddable } from './saved_search_grid';
+import { DiscoverGridEmbeddable, type InlineEditing } from './saved_search_grid';
 import { getSearchEmbeddableDefaults } from '../get_search_embeddable_defaults';
 import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
 import { useAdditionalCellActions } from '../../context_awareness';
@@ -49,7 +48,9 @@ interface SavedSearchEmbeddableComponentProps {
   };
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
+  onRefreshData?: () => void;
   enableDocumentViewer: boolean;
+  inlineEditing: InlineEditing;
   stateManager: SearchEmbeddableStateManager;
 }
 
@@ -59,12 +60,16 @@ export function SearchEmbeddableGridComponent({
   api,
   dataView,
   onAddFilter,
+  onRefreshData,
   enableDocumentViewer,
+  inlineEditing,
   stateManager,
 }: SavedSearchEmbeddableComponentProps) {
   const discoverServices = useDiscoverServices();
-  const esqlVariables$ = apiPublishesESQLVariables(api.parentApi)
-    ? api.parentApi.esqlVariables$
+  const parentApi = api.parentApi;
+
+  const esqlVariables$ = apiPublishesESQLVariables(parentApi)
+    ? parentApi.esqlVariables$
     : undefined;
 
   const [emptyEsqlVariables$] = useState(() => new BehaviorSubject(undefined));
@@ -226,10 +231,12 @@ export function SearchEmbeddableGridComponent({
   return (
     <DiscoverGridEmbeddableMemoized
       {...onStateEditedProps}
+      onUpdateSampleSize={isEsql ? undefined : onStateEditedProps.onUpdateSampleSize}
       columns={columns}
       dataView={dataView}
       interceptedWarnings={interceptedWarnings}
       onFilter={onAddFilter}
+      onRefreshData={onRefreshData}
       rows={rows}
       rowsPerPageState={savedSearch.rowsPerPage ?? defaults.rowsPerPage}
       sampleSizeState={fetchedSampleSize}
@@ -261,6 +268,7 @@ export function SearchEmbeddableGridComponent({
       showTimeCol={!discoverServices.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false)}
       dataGridDensityState={savedSearch.density}
       enableDocumentViewer={enableDocumentViewer}
+      inlineEditing={inlineEditing}
     />
   );
 }

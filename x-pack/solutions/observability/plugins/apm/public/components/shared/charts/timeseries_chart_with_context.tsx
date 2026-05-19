@@ -62,7 +62,7 @@ export function TimeseriesChartWithContext({
     query: { comparisonEnabled, offset },
   } = useAnyOfApmParams('/services', '/dependencies/*', '/services/{serviceName}');
   const { core } = useApmPluginContext();
-  const timeZone = getTimeZone(core.uiSettings);
+  const timeZone = getTimeZone(core?.uiSettings);
   const { euiTheme } = useEuiTheme();
   const annotationColor = euiTheme.colors.accentSecondary;
   const { annotations } = useAnnotationsContext();
@@ -82,7 +82,7 @@ export function TimeseriesChartWithContext({
       style={{
         line: { strokeWidth: 1, stroke: annotationColor, opacity: 1 },
       }}
-      marker={<EuiIcon type="dot" color={annotationColor} />}
+      marker={<EuiIcon type="dot" color={annotationColor} aria-hidden={true} />}
       markerPosition={Position.Top}
     />,
   ];

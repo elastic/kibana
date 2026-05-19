@@ -18,7 +18,7 @@
         "label": "SslConfig",
         "description": [],
         "path": "src/platform/packages/shared/kbn-server-http-tools/src/ssl/ssl_config.ts",
-        "lineNumber": 85,
+        "lineNumber": 86,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -31,7 +31,7 @@
             "label": "enabled",
             "description": [],
             "path": "src/platform/packages/shared/kbn-server-http-tools/src/ssl/ssl_config.ts",
-            "lineNumber": 86,
+            "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -47,7 +47,7 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-server-http-tools/src/ssl/ssl_config.ts",
-            "lineNumber": 87,
+            "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -63,7 +63,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-server-http-tools/src/ssl/ssl_config.ts",
-            "lineNumber": 88,
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -79,7 +79,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-server-http-tools/src/ssl/ssl_config.ts",
-            "lineNumber": 89,
+            "lineNumber": 90,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -95,7 +95,7 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-server-http-tools/src/ssl/ssl_config.ts",
-            "lineNumber": 90,
+            "lineNumber": 91,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -111,7 +111,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-server-http-tools/src/ssl/ssl_config.ts",
-            "lineNumber": 91,
+            "lineNumber": 92,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -124,7 +124,7 @@
             "label": "requestCert",
             "description": [],
             "path": "src/platform/packages/shared/kbn-server-http-tools/src/ssl/ssl_config.ts",
-            "lineNumber": 92,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -137,7 +137,7 @@
             "label": "rejectUnauthorized",
             "description": [],
             "path": "src/platform/packages/shared/kbn-server-http-tools/src/ssl/ssl_config.ts",
-            "lineNumber": 93,
+            "lineNumber": 94,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -153,7 +153,7 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-server-http-tools/src/ssl/ssl_config.ts",
-            "lineNumber": 94,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -169,7 +169,7 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-server-http-tools/src/ssl/ssl_config.ts",
-            "lineNumber": 95,
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -187,7 +187,7 @@
               "() => number"
             ],
             "path": "src/platform/packages/shared/kbn-server-http-tools/src/ssl/ssl_config.ts",
-            "lineNumber": 148,
+            "lineNumber": 149,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -213,7 +213,7 @@
               ") => boolean"
             ],
             "path": "src/platform/packages/shared/kbn-server-http-tools/src/ssl/ssl_config.ts",
-            "lineNumber": 168,
+            "lineNumber": 169,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -235,9 +235,10 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-server-http-tools/src/ssl/ssl_config.ts",
-                "lineNumber": 168,
+                "lineNumber": 169,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "SslConfig",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -285,6 +286,7 @@
             "lineNumber": 13,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "ServerOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -337,6 +339,7 @@
             "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Request",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -354,6 +357,7 @@
             "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ResponseToolkit",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -371,6 +375,7 @@
             "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Error",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -415,6 +420,7 @@
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Request",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -517,6 +523,7 @@
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "IHttpConfig",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -534,6 +541,7 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "GetServerListenerOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -588,6 +596,7 @@
             "lineNumber": 20,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "IHttpConfig",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -664,6 +673,7 @@
             "lineNumber": 17,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "ISslConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -716,6 +726,7 @@
             "lineNumber": 19,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "HapiServer",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -739,6 +750,7 @@
             "lineNumber": 19,
             "columnNumber": 54,
             "deprecated": false,
+            "docsReferencedTypeName": "ISslConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1432,7 +1444,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<\"none\" | \"required\" | \"optional\">; }>"
+          "<\"none\" | \"optional\" | \"required\">; }>"
         ],
         "path": "src/platform/packages/shared/kbn-server-http-tools/src/ssl/ssl_config.ts",
         "lineNumber": 25,

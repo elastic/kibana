@@ -13,7 +13,7 @@ describe('validateJobParams', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: 'dashboard',
       forceNow: '2024-01-01T00:00:00Z',
@@ -38,7 +38,7 @@ describe('validateJobParams', () => {
     const validParams = {
       title: 'Monthly Report<script>alert("xss")</script>',
       version: '8.0.0',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: 'dashboard',
       forceNow: '2024-01-01T00:00:00Z',
@@ -52,7 +52,7 @@ describe('validateJobParams', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: 'dashboard<script>alert("xss")</script>',
       forceNow: '2024-01-01T00:00:00Z',
@@ -66,7 +66,7 @@ describe('validateJobParams', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0<script>alert("")</script>',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: 'dashboard',
       forceNow: '2024-01-01T00:00:00Z',
@@ -80,7 +80,7 @@ describe('validateJobParams', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: 'dashboard',
       forceNow: '2024-01-01T00:00:00<script/>',
@@ -94,7 +94,7 @@ describe('validateJobParams', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'invalid/timezone',
       objectType: 'dashboard',
       forceNow: '2024-01-01T00:00:00',
@@ -104,10 +104,10 @@ describe('validateJobParams', () => {
       "[
         {
           \\"code\\": \\"custom\\",
-          \\"message\\": \\"Invalid timezone\\",
           \\"path\\": [
             \\"browserTimezone\\"
-          ]
+          ],
+          \\"message\\": \\"Invalid timezone\\"
         }
       ]"
     `);
@@ -117,7 +117,7 @@ describe('validateJobParams', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: true,
       forceNow: '2024-01-01T00:00:00',
@@ -126,13 +126,12 @@ describe('validateJobParams', () => {
     expect(() => validateJobParams(validParams)).toThrowErrorMatchingInlineSnapshot(`
       "[
         {
-          \\"code\\": \\"invalid_type\\",
           \\"expected\\": \\"string\\",
-          \\"received\\": \\"boolean\\",
+          \\"code\\": \\"invalid_type\\",
           \\"path\\": [
             \\"objectType\\"
           ],
-          \\"message\\": \\"Expected string, received boolean\\"
+          \\"message\\": \\"Invalid input: expected string, received boolean\\"
         }
       ]"
     `);
@@ -142,7 +141,7 @@ describe('validateJobParams', () => {
     const validParams = {
       title: true,
       version: '8.0.0',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: 'dashboard',
       forceNow: '2024-01-01T00:00:00',
@@ -151,13 +150,12 @@ describe('validateJobParams', () => {
     expect(() => validateJobParams(validParams)).toThrowErrorMatchingInlineSnapshot(`
       "[
         {
-          \\"code\\": \\"invalid_type\\",
           \\"expected\\": \\"string\\",
-          \\"received\\": \\"boolean\\",
+          \\"code\\": \\"invalid_type\\",
           \\"path\\": [
             \\"title\\"
           ],
-          \\"message\\": \\"Expected string, received boolean\\"
+          \\"message\\": \\"Invalid input: expected string, received boolean\\"
         }
       ]"
     `);
@@ -167,7 +165,7 @@ describe('validateJobParams', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0 very long version that exceeds the maximum length of thirty-two characters',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: 'dashboard',
       forceNow: '2024-01-01T00:00:00',
@@ -176,15 +174,14 @@ describe('validateJobParams', () => {
     expect(() => validateJobParams(validParams)).toThrowErrorMatchingInlineSnapshot(`
       "[
         {
+          \\"origin\\": \\"string\\",
           \\"code\\": \\"too_big\\",
           \\"maximum\\": 32,
-          \\"type\\": \\"string\\",
           \\"inclusive\\": true,
-          \\"exact\\": false,
-          \\"message\\": \\"String must contain at most 32 character(s)\\",
           \\"path\\": [
             \\"version\\"
-          ]
+          ],
+          \\"message\\": \\"Too big: expected string to have <=32 characters\\"
         }
       ]"
     `);
@@ -194,7 +191,7 @@ describe('validateJobParams', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: 'dashboard',
       forceNow: 'very long version that exceeds the maximum length of thirty-two characters',
@@ -203,15 +200,14 @@ describe('validateJobParams', () => {
     expect(() => validateJobParams(validParams)).toThrowErrorMatchingInlineSnapshot(`
       "[
         {
+          \\"origin\\": \\"string\\",
           \\"code\\": \\"too_big\\",
           \\"maximum\\": 32,
-          \\"type\\": \\"string\\",
           \\"inclusive\\": true,
-          \\"exact\\": false,
-          \\"message\\": \\"String must contain at most 32 character(s)\\",
           \\"path\\": [
             \\"forceNow\\"
-          ]
+          ],
+          \\"message\\": \\"Too big: expected string to have <=32 characters\\"
         }
       ]"
     `);
@@ -221,7 +217,7 @@ describe('validateJobParams', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: 'dashboard',
       forceNow: '2024-01-01T00:00:00',
@@ -231,16 +227,15 @@ describe('validateJobParams', () => {
     expect(() => validateJobParams(validParams)).toThrowErrorMatchingInlineSnapshot(`
       "[
         {
-          \\"received\\": \\"invalid_strategy\\",
-          \\"code\\": \\"invalid_enum_value\\",
-          \\"options\\": [
+          \\"code\\": \\"invalid_value\\",
+          \\"values\\": [
             \\"pit\\",
             \\"scroll\\"
           ],
           \\"path\\": [
             \\"pagingStrategy\\"
           ],
-          \\"message\\": \\"Invalid enum value. Expected 'pit' | 'scroll', received 'invalid_strategy'\\"
+          \\"message\\": \\"Invalid option: expected one of \\\\\\"pit\\\\\\"|\\\\\\"scroll\\\\\\"\\"
         }
       ]"
     `);
@@ -259,9 +254,8 @@ describe('validateJobParams', () => {
     expect(() => validateJobParams(validParams)).toThrowErrorMatchingInlineSnapshot(`
       "[
         {
-          \\"received\\": \\"invalid-id\\",
-          \\"code\\": \\"invalid_enum_value\\",
-          \\"options\\": [
+          \\"code\\": \\"invalid_value\\",
+          \\"values\\": [
             \\"preserve_layout\\",
             \\"print\\",
             \\"canvas\\",
@@ -271,7 +265,7 @@ describe('validateJobParams', () => {
             \\"layout\\",
             \\"id\\"
           ],
-          \\"message\\": \\"Invalid enum value. Expected 'preserve_layout' | 'print' | 'canvas' | 'png', received 'invalid-id'\\"
+          \\"message\\": \\"Invalid option: expected one of \\\\\\"preserve_layout\\\\\\"|\\\\\\"print\\\\\\"|\\\\\\"canvas\\\\\\"|\\\\\\"png\\\\\\"\\"
         }
       ]"
     `);
@@ -281,7 +275,7 @@ describe('validateJobParams', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0',
-      layout: { id: idSchema.Enum.print, dimensions: { width: -800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: -800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: 'dashboard',
       forceNow: '2024-01-01T00:00:00',
@@ -290,17 +284,16 @@ describe('validateJobParams', () => {
     expect(() => validateJobParams(validParams)).toThrowErrorMatchingInlineSnapshot(`
       "[
         {
+          \\"origin\\": \\"number\\",
           \\"code\\": \\"too_small\\",
           \\"minimum\\": 0,
-          \\"type\\": \\"number\\",
           \\"inclusive\\": false,
-          \\"exact\\": false,
-          \\"message\\": \\"Number must be greater than 0\\",
           \\"path\\": [
             \\"layout\\",
             \\"dimensions\\",
             \\"width\\"
-          ]
+          ],
+          \\"message\\": \\"Too small: expected number to be >0\\"
         }
       ]"
     `);
@@ -311,7 +304,7 @@ describe('validateJobParams', () => {
       title: 'Monthly Report',
       version: '8.0.0',
       layout: {
-        id: idSchema.Enum.print,
+        id: idSchema.enum.print,
         dimensions: { width: 800, height: 600 },
         unknownField: 'value',
       },
@@ -330,7 +323,7 @@ describe('validateJobParams', () => {
           \\"path\\": [
             \\"layout\\"
           ],
-          \\"message\\": \\"Unrecognized key(s) in object: 'unknownField'\\"
+          \\"message\\": \\"Unrecognized key: \\\\\\"unknownField\\\\\\"\\"
         }
       ]"
     `);
@@ -341,7 +334,7 @@ describe('validateJobParams', () => {
       title: 'Monthly Report',
       version: '8.0.0',
       layout: {
-        id: idSchema.Enum.print,
+        id: idSchema.enum.print,
         dimensions: { width: 800, height: 600, unknownField: 'value' },
       },
       browserTimezone: 'UTC',
@@ -360,9 +353,26 @@ describe('validateJobParams', () => {
             \\"layout\\",
             \\"dimensions\\"
           ],
-          \\"message\\": \\"Unrecognized key(s) in object: 'unknownField'\\"
+          \\"message\\": \\"Unrecognized key: \\\\\\"unknownField\\\\\\"\\"
         }
       ]"
     `);
+  });
+
+  it('validates multiple locator params', () => {
+    const validParams = {
+      title: 'Monthly Report',
+      version: '8.0.0',
+      layout: {
+        id: idSchema.enum.print,
+        dimensions: { width: 800, height: 600 },
+      },
+      browserTimezone: 'UTC',
+      objectType: 'dashboard',
+      forceNow: '2024-01-01T00:00:00',
+      locatorParams: [{ id: 'some-id' }, { version: 'some-version' }],
+    } as unknown as BaseParams;
+
+    expect(() => validateJobParams(validParams)).not.toThrow();
   });
 });

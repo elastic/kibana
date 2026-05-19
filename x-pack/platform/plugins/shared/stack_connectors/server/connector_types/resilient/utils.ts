@@ -190,7 +190,7 @@ export function prepareAdditionalFieldsForCreation(
   fields: ResilientFieldMeta[],
   additionalFields: NonNullable<Incident['additionalFields']>
 ): Partial<CreateIncidentData> {
-  const { properties, ...rest } = additionalFields;
+  const { properties, ...rest } = additionalFields as Record<string, unknown>;
   const flattenedAdditionalFields = { ...(properties ?? {}), ...rest };
   const data: Partial<CreateIncidentData> = {};
   const fieldsMetaData = transformFieldMetadataToRecord(fields);

@@ -42,6 +42,7 @@ components:
       enum:
         - splunk
         - qradar
+        - microsoft-sentinel
 
     MigrationComment:
       type: object
@@ -267,6 +268,7 @@ components:
           description: The resource content value. Can be an empty string.
         metadata:
           type: object
+          additionalProperties: true
           description: The resource arbitrary metadata.
 
     SiemMigrationResourceData:

@@ -8,7 +8,7 @@
  */
 
 import type { ContentListClientState, ContentListAction } from './types';
-import { CONTENT_LIST_ACTIONS, DEFAULT_FILTERS } from './types';
+import { CONTENT_LIST_ACTIONS } from './types';
 
 /**
  * Default selection state.
@@ -20,35 +20,29 @@ export const DEFAULT_SELECTION = {
 /**
  * State reducer for client-controlled state.
  *
- * Handles user-driven state mutations (search, filters, sort, pagination, selection).
+ * Handles user-driven state mutations (query text, sort, pagination, selection).
  * Query data (items, loading, error) is managed by React Query directly.
  *
- * Selection is cleared whenever search, filters, sort, or pagination change so that
+ * Selection is cleared whenever the query text, sort, or pagination changes so that
  * `selectedIds` never references items the user can no longer see.
- *
- * @param state - Current client state.
- * @param action - Action to apply.
- * @returns New client state.
  */
 export const reducer = (
   state: ContentListClientState,
   action: ContentListAction
 ): ContentListClientState => {
   switch (action.type) {
-    case CONTENT_LIST_ACTIONS.SET_SEARCH:
+    case CONTENT_LIST_ACTIONS.SET_QUERY:
       return {
         ...state,
-        search: { queryText: action.payload.queryText },
-        filters: action.payload.filters,
+        queryText: action.payload.queryText,
         page: { ...state.page, index: 0 },
         selection: { ...DEFAULT_SELECTION },
       };
 
-    case CONTENT_LIST_ACTIONS.CLEAR_FILTERS:
+    case CONTENT_LIST_ACTIONS.RESET_QUERY:
       return {
         ...state,
-        filters: { ...DEFAULT_FILTERS },
-        search: { queryText: '' },
+        queryText: '',
         page: { ...state.page, index: 0 },
         selection: { ...DEFAULT_SELECTION },
       };

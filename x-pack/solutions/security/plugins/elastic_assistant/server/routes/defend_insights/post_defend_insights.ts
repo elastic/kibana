@@ -88,6 +88,8 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
 
           const actions = assistantContext.actions;
           const actionsClient = await actions.getActionsClientWithRequest(request);
+          const inference = assistantContext.inference;
+          const inferenceClient = inference.getClient({ request });
           const dataClient = await assistantContext.getDefendInsightsDataClient();
           const kbDataClient = await assistantContext.getAIAssistantKnowledgeBaseDataClient();
           const authenticatedUser = await assistantContext.getCurrentUser();
@@ -137,7 +139,7 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
             assistantContext,
           });
           if (
-            insightType === DefendInsightType.Enum.policy_response_failure &&
+            insightType === DefendInsightType.enum.policy_response_failure &&
             !isPolicyResponseFailureEnabled
           ) {
             throw new InvalidDefendInsightTypeError();
@@ -147,10 +149,13 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
             insightType,
             endpointIds,
             actionsClient,
+            getInferenceConnectorById: (id) =>
+              assistantContext.inference.getConnectorById(id, request),
             anonymizationFields,
             apiConfig,
             connectorTimeout: CONNECTOR_TIMEOUT,
             esClient,
+            inferenceClient,
             langSmithProject,
             langSmithApiKey,
             latestReplacements,

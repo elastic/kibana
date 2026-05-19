@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
@@ -25,17 +25,26 @@ export function StreamNotFoundPrompt({ streamName }: StreamNotFoundPromptProps) 
       iconType="search"
       title={
         <h2>
-          <FormattedMessage
-            id="xpack.streams.streamNotFound.description"
-            defaultMessage="The stream {streamName} does not exist."
-            values={{ streamName }}
-          />
+          {i18n.translate('xpack.streams.streamNotFound.title', {
+            defaultMessage: 'Stream not found',
+          })}
         </h2>
+      }
+      body={
+        <EuiText data-test-subj="streamNotFoundPromptBody">
+          <p>
+            <FormattedMessage
+              id="xpack.streams.streamNotFound.body"
+              defaultMessage="We could not load stream {streamName}. It may have been deleted. Open the streams list to see your streams or create this stream again."
+              values={{ streamName: <strong>{streamName}</strong> }}
+            />
+          </p>
+        </EuiText>
       }
       actions={
         <EuiButton data-test-subj="streamNotFoundBackButton" fill href={router.link('/')}>
           {i18n.translate('xpack.streams.streamNotFound.backButton', {
-            defaultMessage: 'Back to Streams',
+            defaultMessage: 'Go to streams list',
           })}
         </EuiButton>
       }

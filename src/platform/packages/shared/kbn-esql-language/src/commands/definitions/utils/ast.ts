@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EDITOR_MARKER } from '../constants';
-import { isColumn, isIdentifier, isList, isOptionNode, isSource } from '../../../ast/is';
+import { isColumn, isIdentifier, isList, isOptionNode, isSource, Walker } from '@elastic/esql';
 import type {
   ESQLFunction,
   ESQLSingleAstItem,
@@ -18,8 +17,9 @@ import type {
   ESQLAstAllCommands,
   ESQLAstHeaderCommand,
   ESQLAstQueryExpression,
-} from '../../../types';
-import { Walker } from '../../../..';
+} from '@elastic/esql/types';
+import { EDITOR_MARKER } from '../constants';
+import { endsWithComma } from './regex';
 
 export function isMarkerNode(node: ESQLAstItem | undefined): boolean {
   if (Array.isArray(node)) {
@@ -81,23 +81,61 @@ const removeMarkerNode = (node: ESQLAstExpression) => {
   });
 };
 
-export function removeMarkerArgFromArgsList<T extends ESQLSingleAstItem | ESQLAstAllCommands>(
+function removeMarkerArgFromArgsList<T extends ESQLSingleAstItem | ESQLAstAllCommands>(
   node: T | undefined
 ) {
   if (!node) {
     return;
   }
   if (node.type === 'command' || node.type === 'option' || node.type === 'function') {
-    return {
+    const cleanedNode = {
       ...node,
+      text: node.text.replace(EDITOR_MARKER, ''),
       args: node.args.filter(isNotMarkerNodeOrArray).map(mapToNonMarkerNode),
     };
+
+    if (cleanedNode.type === 'command' && 'expression' in cleanedNode && cleanedNode.expression) {
+      cleanedNode.expression = isMarkerNode(cleanedNode.expression)
+        ? undefined
+        : (mapToNonMarkerNode(cleanedNode.expression) as ESQLAstExpression);
+    }
+
+    return cleanedNode;
   }
   return node;
 }
 
 export function mapToNonMarkerNode(arg: ESQLAstItem): ESQLAstItem {
-  return Array.isArray(arg) ? arg.filter(isNotMarkerNodeOrArray).map(mapToNonMarkerNode) : arg;
+  if (Array.isArray(arg)) {
+    return arg.filter(isNotMarkerNodeOrArray).map(mapToNonMarkerNode);
+  }
+
+  if ('args' in arg) {
+    return {
+      ...arg,
+      text: arg.text.replace(EDITOR_MARKER, ''),
+      args: arg.args.filter(isNotMarkerNodeOrArray).map(mapToNonMarkerNode) as typeof arg.args,
+    } as typeof arg;
+  }
+
+  if ('values' in arg) {
+    return {
+      ...arg,
+      text: arg.text.replace(EDITOR_MARKER, ''),
+      values: arg.values
+        .filter((value) => !isMarkerNode(value))
+        .map((value) => mapToNonMarkerNode(value) as ESQLAstExpression) as typeof arg.values,
+    } as typeof arg;
+  }
+
+  if ('text' in arg && typeof arg.text === 'string' && arg.text.includes(EDITOR_MARKER)) {
+    return {
+      ...arg,
+      text: arg.text.replace(EDITOR_MARKER, ''),
+    } as typeof arg;
+  }
+
+  return arg;
 }
 
 function cleanMarkerNode(node: ESQLSingleAstItem | undefined): ESQLSingleAstItem | undefined {
@@ -261,7 +299,7 @@ export function correctQuerySyntax(_query: string) {
   const bracketsToAppend = getBracketsToClose(query);
 
   const endsWithBinaryOperatorRegex =
-    /(?:\+|\/|==|>=|>|in|<=|<|like|:|%|\*|-|not in|not like|not rlike|!=|rlike|and|or|not|=|as)\s+$/i;
+    /(?:\+|\/|==|>=|>|<=|<|:|%|\*|-|!=|=|\b(?:in|like|not in|not like|not rlike|rlike|and|or|not|as)\b)\s+$/i;
   const endsWithCastingOperatorRegex = /::\s*$/i;
   const endsWithCommaRegex = /,\s+$/;
 
@@ -278,7 +316,6 @@ export function correctQuerySyntax(_query: string) {
   return query;
 }
 
-const PROMQL_TRAILING_COMMA_REGEX = /,\s*$/;
 const PROMQL_TRAILING_COLON_REGEX = /:\s*$/;
 
 /**
@@ -291,7 +328,7 @@ export function correctPromqlQuerySyntax(input: string): string {
 
   if (
     !query.includes(EDITOR_MARKER) &&
-    (PROMQL_TRAILING_COMMA_REGEX.test(query) || PROMQL_TRAILING_COLON_REGEX.test(query))
+    (endsWithComma(query) || PROMQL_TRAILING_COLON_REGEX.test(query))
   ) {
     query += ` ${EDITOR_MARKER}`;
   }

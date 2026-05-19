@@ -202,6 +202,19 @@ export function buildUserMessagesHelpers(
       }) ?? []),
       ...(activeVisualization?.getUserMessages?.(activeVisualizationState, {
         frame: framePublicAPI,
+        setState: (newStateOrUpdater) => {
+          const newVisState =
+            typeof newStateOrUpdater === 'function'
+              ? newStateOrUpdater(activeVisualizationState)
+              : newStateOrUpdater;
+          internalApi.updateAttributes({
+            ...activeAttributes,
+            state: {
+              ...activeAttributes.state,
+              visualization: newVisState,
+            },
+          });
+        },
       }) ?? [])
     );
 

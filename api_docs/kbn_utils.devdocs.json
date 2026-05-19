@@ -54,6 +54,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -76,6 +77,7 @@
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TransformOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -122,6 +124,7 @@
             "lineNumber": 34,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -390,6 +393,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -496,6 +500,47 @@
       },
       {
         "parentPluginId": "@kbn/utils",
+        "id": "def-server.loadJsonFile",
+        "type": "Function",
+        "tags": [],
+        "label": "loadJsonFile",
+        "description": [
+          "\nSynchronously reads and parses a JSON file at the given path.\n"
+        ],
+        "signature": [
+          "(path: string) => T"
+        ],
+        "path": "src/platform/packages/shared/kbn-utils/src/json/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/utils",
+            "id": "def-server.loadJsonFile.$1",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [
+              "Absolute path to the JSON file."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-utils/src/json/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 43,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utils",
         "id": "def-server.prettyPrintAndSortKeys",
         "type": "Function",
         "tags": [],
@@ -507,7 +552,7 @@
           "(object: object) => string"
         ],
         "path": "src/platform/packages/shared/kbn-utils/src/json/index.ts",
-        "lineNumber": 10,
+        "lineNumber": 21,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -523,7 +568,7 @@
               "object"
             ],
             "path": "src/platform/packages/shared/kbn-utils/src/json/index.ts",
-            "lineNumber": 14,
+            "lineNumber": 25,
             "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,

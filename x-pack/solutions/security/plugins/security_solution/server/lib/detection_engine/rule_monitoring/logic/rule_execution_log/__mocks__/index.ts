@@ -5,29 +5,19 @@
  * 2.0.
  */
 
-import {
-  getRuleExecutionEventsResponseMock,
-  getRuleExecutionResultsResponseMock,
-} from '../../../../../../../common/api/detection_engine/rule_monitoring/mocks';
-
 import type { IRuleExecutionLogForRoutes } from '../client_for_routes/client_interface';
 import type {
   IRuleExecutionLogForExecutors,
   RuleExecutionContext,
 } from '../client_for_executors/client_interface';
 
-type GetExecutionEvents = IRuleExecutionLogForRoutes['getExecutionEvents'];
-type GetExecutionResults = IRuleExecutionLogForRoutes['getExecutionResults'];
+type GetUnifiedExecutionResults = IRuleExecutionLogForRoutes['getUnifiedExecutionResults'];
 
 const ruleExecutionLogForRoutesMock = {
   create: (): jest.Mocked<IRuleExecutionLogForRoutes> => ({
-    getExecutionEvents: jest
-      .fn<ReturnType<GetExecutionEvents>, Parameters<GetExecutionEvents>>()
-      .mockResolvedValue(getRuleExecutionEventsResponseMock.getSomeResponse()),
-
-    getExecutionResults: jest
-      .fn<ReturnType<GetExecutionResults>, Parameters<GetExecutionResults>>()
-      .mockResolvedValue(getRuleExecutionResultsResponseMock.getSomeResponse()),
+    getUnifiedExecutionResults: jest
+      .fn<ReturnType<GetUnifiedExecutionResults>, Parameters<GetUnifiedExecutionResults>>()
+      .mockResolvedValue({ data: [], total: 0, page: 1, per_page: 20 }),
   }),
 };
 
@@ -51,7 +41,11 @@ const ruleExecutionLogForExecutorsMock = {
     warn: jest.fn(),
     error: jest.fn(),
 
-    logStatusChange: jest.fn(),
+    logMetric: jest.fn(),
+    logMetrics: jest.fn(),
+
+    closed: jest.fn(),
+    close: jest.fn(),
   }),
 };
 

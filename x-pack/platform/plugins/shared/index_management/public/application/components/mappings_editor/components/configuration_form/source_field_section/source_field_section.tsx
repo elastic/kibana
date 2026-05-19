@@ -18,8 +18,10 @@ import type { ComboBoxOption } from '../../../types';
 import { sourceOptionLabels, sourceOptionDescriptions } from './i18n_texts';
 import type { SourceOptionKey } from './constants';
 import { STORED_SOURCE_OPTION, DISABLED_SOURCE_OPTION, SYNTHETIC_SOURCE_OPTION } from './constants';
+import type { IndexMode } from '../../../../../../../common/types/data_streams';
+import { LOGSDB_INDEX_MODE } from '../../../../../../../common/constants';
 
-export const SourceFieldSection = () => {
+export const SourceFieldSection = ({ indexMode }: { indexMode?: IndexMode }) => {
   const { canUseSyntheticSource } = useAppContext();
 
   const renderOptionDropdownDisplay = (option: SourceOptionKey) => (
@@ -238,7 +240,6 @@ export const SourceFieldSection = () => {
             componentProps={{
               euiFieldProps: {
                 fullWidth: false,
-                hasDividers: true,
                 'data-test-subj': 'sourceValueField',
                 options: sourceValueOptions,
               },
@@ -259,7 +260,9 @@ export const SourceFieldSection = () => {
             ? renderFormFields()
             : sourceField?.option === DISABLED_SOURCE_OPTION
             ? renderDisableWarning()
-            : renderSyntheticWarning();
+            : indexMode === LOGSDB_INDEX_MODE
+            ? renderSyntheticWarning()
+            : null;
         }}
       </FormDataProvider>
     </FormRow>

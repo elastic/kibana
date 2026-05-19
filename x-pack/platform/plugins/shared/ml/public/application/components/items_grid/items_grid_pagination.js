@@ -66,7 +66,7 @@ export class ItemsGridPagination extends Component {
       <EuiButtonEmpty
         size="s"
         color="text"
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         iconSide="right"
         onClick={this.onButtonClick}
       >
@@ -104,6 +104,9 @@ export class ItemsGridPagination extends Component {
           <EuiPopover
             data-test-subj="mlItemsGridPaginationPopover"
             id="customizablePagination"
+            aria-label={i18n.translate('xpack.ml.itemsGrid.itemsPerPagePopoverAriaLabel', {
+              defaultMessage: 'Items per page',
+            })}
             button={button}
             isOpen={this.state.isPopoverOpen}
             closePopover={this.closePopover}

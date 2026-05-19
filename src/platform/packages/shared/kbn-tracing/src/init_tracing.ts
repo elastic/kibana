@@ -20,6 +20,7 @@ import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-ho
 import { castArray } from 'lodash';
 import { cleanupBeforeExit } from '@kbn/cleanup-before-exit';
 import { EvalSpanProcessor } from './eval_span_processor';
+import { InferencePreservingSampler } from './inference_preserving_sampler';
 import { OTLPSpanProcessor } from './otlp_span_processor';
 import { LateBindingSpanProcessor } from '..';
 
@@ -54,12 +55,12 @@ export function initTracing({
 
   const traceIdSampler = new tracing.TraceIdRatioBasedSampler(tracingConfig.sample_rate);
 
+  const baseSampler = new tracing.ParentBasedSampler({
+    root: traceIdSampler,
+  });
+
   const nodeTracerProvider = new node.NodeTracerProvider({
-    // by default, base sampling on parent context,
-    // or for root spans, based on the configured sample rate
-    sampler: new tracing.ParentBasedSampler({
-      root: traceIdSampler,
-    }),
+    sampler: new InferencePreservingSampler(baseSampler),
     spanProcessors: allSpanProcessors,
     resource,
   });
@@ -90,12 +91,6 @@ export function initTracing({
   });
 
   trace.setGlobalTracerProvider(nodeTracerProvider);
-
-  propagation.setGlobalPropagator(
-    new core.CompositePropagator({
-      propagators: [new core.W3CTraceContextPropagator(), new core.W3CBaggagePropagator()],
-    })
-  );
 
   const shutdown = async () => {
     await Promise.all(allSpanProcessors.map((processor) => processor.shutdown()));

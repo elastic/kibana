@@ -36,7 +36,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
@@ -45,16 +45,14 @@ import { AgentIcon } from '@kbn/custom-icons';
 import type { SloTabId } from '@kbn/deeplinks-observability';
 import { ALERTS_TAB_ID } from '@kbn/deeplinks-observability';
 import type { AgentName } from '@kbn/elastic-agent-utils';
-import type { ApmPluginStartDeps } from '../../../plugin';
+import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher, isPending } from '../../../hooks/use_fetcher';
 import { useManageSlosUrl } from '../../../hooks/use_manage_slos_url';
-import {
-  APM_SLO_INDICATOR_TYPES,
-  type ApmIndicatorType,
-} from '../../../../common/slo_indicator_types';
+import { APM_SLO_INDICATOR_TYPES } from '../../../../common/slo_indicator_types';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { DEFAULT_INDICATOR_TYPE } from '../constants';
 
 type SloStatusFilter = 'VIOLATED' | 'DEGRADING' | 'HEALTHY' | 'NO_DATA';
 
@@ -111,22 +109,37 @@ const ITEMS_PER_PAGE_OPTIONS = [10, 25, 50];
 export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'sloOverviewFlyout' });
   const { euiTheme } = useEuiTheme();
-  const { uiSettings, slo: sloPlugin } = useKibana<ApmPluginStartDeps>().services;
+  const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
+  const { uiSettings, slo: sloPlugin, telemetry } = services;
   const { link } = useApmRouter();
-  const { query } = useAnyOfApmParams('/services', '/services/{serviceName}');
+  const { query } = useAnyOfApmParams(
+    '/services',
+    '/services/{serviceName}',
+    '/service-map',
+    '/services/{serviceName}/service-map',
+    '/mobile-services/{serviceName}/service-map'
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+
+  useEffect(() => {
+    telemetry.reportSloOverviewFlyoutViewed();
+  }, [telemetry]);
+
   useDebounce(
     () => {
       setDebouncedSearchQuery(searchQuery);
       setPage(0);
+      if (searchQuery.trim()) {
+        telemetry.reportSloOverviewFlyoutSearchQueried({ searchQuery });
+      }
     },
     SEARCH_DEBOUNCE_MS,
     [searchQuery]
   );
   const [selectedStatuses, setSelectedStatuses] = useState<SloStatusFilter[]>([]);
   const [isStatusPopoverOpen, setIsStatusPopoverOpen] = useState(false);
-  const [selectedSloId, setSelectedSloId] = useState<string | null>(null);
+  const [selectedSlo, setSelectedSlo] = useState<SLOWithSummaryResponse | null>(null);
   const [selectedSloTabId, setSelectedSloTabId] = useState<SloTabId | undefined>(undefined);
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(10);
@@ -180,18 +193,18 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const getActiveAlertsForSlo = useCallback(
     (sloItem: SLOWithSummaryResponse) => {
       const key = `${sloItem.id}|${sloItem.instanceId ?? ALL_VALUE}`;
-      return activeAlerts.get(key) ?? 0;
+      return activeAlerts?.get(key) ?? 0;
     },
     [activeAlerts]
   );
 
   const handleActiveAlertsClick = useCallback((sloItem: SLOWithSummaryResponse) => {
+    setSelectedSlo(null);
     setSelectedSloTabId(undefined);
-    setSelectedSloId(null);
 
     requestAnimationFrame(() => {
+      setSelectedSlo(sloItem);
       setSelectedSloTabId(ALERTS_TAB_ID);
-      setSelectedSloId(sloItem.id);
     });
   }, []);
 
@@ -210,8 +223,8 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     if (!sloData.length) return [];
 
     return [...sloData].sort((a, b) => {
-      const alertsA = activeAlerts.get(`${a.id}|${a.instanceId ?? ALL_VALUE}`) ?? 0;
-      const alertsB = activeAlerts.get(`${b.id}|${b.instanceId ?? ALL_VALUE}`) ?? 0;
+      const alertsA = activeAlerts?.get(`${a.id}|${a.instanceId ?? ALL_VALUE}`) ?? 0;
+      const alertsB = activeAlerts?.get(`${b.id}|${b.instanceId ?? ALL_VALUE}`) ?? 0;
 
       if (alertsA !== alertsB) {
         return alertsB - alertsA;
@@ -242,29 +255,34 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     }));
   }, [selectedStatuses]);
 
-  const handleStatusFilterChange = useCallback((options: EuiSelectableOption[]) => {
-    const selected = options
-      .filter((option) => option.checked === 'on')
-      .map((option) => option.key as SloStatusFilter);
-    setSelectedStatuses(selected);
-    setPage(0);
-  }, []);
+  const handleStatusFilterChange = useCallback(
+    (options: EuiSelectableOption[]) => {
+      const selected = options
+        .filter((option) => option.checked === 'on')
+        .map((option) => option.key as SloStatusFilter);
+      setSelectedStatuses(selected);
+      setPage(0);
+      if (selected.length > 0) {
+        telemetry.reportSloOverviewFlyoutStatusFiltered({ statuses: selected });
+      }
+    },
+    [telemetry]
+  );
 
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   }, []);
 
-  const handleSloClick = useCallback((sloId: string) => {
-    setSelectedSloId(null);
+  const handleSloClick = useCallback((sloItem: SLOWithSummaryResponse) => {
+    setSelectedSlo(null);
     setSelectedSloTabId(undefined);
-
     requestAnimationFrame(() => {
-      setSelectedSloId(sloId);
+      setSelectedSlo(sloItem);
     });
   }, []);
 
   const handleCloseSloDetails = useCallback(() => {
-    setSelectedSloId(null);
+    setSelectedSlo(null);
     setSelectedSloTabId(undefined);
   }, []);
 
@@ -279,14 +297,12 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     refetch();
   }, [refetch]);
 
-  const defaultIndicatorType: ApmIndicatorType = 'sli.apm.transactionDuration';
-
   const CreateSloFlyout = createSloFlyoutOpen
     ? sloPlugin?.getCreateSLOFormFlyout({
         initialValues: {
           name: `APM SLO for ${serviceName}`,
           indicator: {
-            type: defaultIndicatorType,
+            type: DEFAULT_INDICATOR_TYPE,
             params: {
               service: serviceName,
               environment: environment === ENVIRONMENT_ALL.value ? '*' : environment,
@@ -338,6 +354,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
                   { defaultMessage: 'active alerts badge' }
                 )}
                 data-test-subj="apmSloActiveAlertsBadge"
+                data-event-element="activeAlertsTableBadge"
                 css={{ cursor: 'pointer' }}
               >
                 {alertCount}
@@ -368,7 +385,8 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
           <EuiToolTip position="top" content={name} anchorProps={{ css: { display: 'flex' } }}>
             <EuiLink
               data-test-subj="apmSloNameLink"
-              onClick={() => handleSloClick(sloItem.id)}
+              data-event-element="sloNameTable"
+              onClick={() => handleSloClick(sloItem)}
               css={{
                 display: 'flex',
                 alignItems: 'center',
@@ -376,7 +394,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
                 fontWeight: euiTheme.font.weight.regular,
               }}
             >
-              <EuiIcon type="expand" color="subdued" aria-hidden={true} />
+              <EuiIcon type="maximize" color="subdued" aria-hidden={true} />
               {name}
             </EuiLink>
           </EuiToolTip>
@@ -425,11 +443,17 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
       flyoutMenuProps={{
         title: flyoutTitle,
       }}
+      data-event-location="sloOverviewFlyout"
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 id={flyoutTitleId}>
-            <EuiLink href={sloAppUrl} target="_blank" data-test-subj="sloOverviewFlyoutSloLink">
+            <EuiLink
+              href={sloAppUrl}
+              target="_blank"
+              data-test-subj="sloOverviewFlyoutSloLink"
+              data-event-element="linkOpenInSlosApp"
+            >
               {flyoutTitle}
             </EuiLink>
           </h2>
@@ -442,6 +466,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
           color="hollow"
           css={{ color: euiTheme.colors.textPrimary }}
           data-test-subj="sloOverviewFlyoutServiceLink"
+          data-event-element="linkServiceName"
         >
           <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
             {agentName && (
@@ -526,6 +551,12 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
           <EuiFlexItem grow={false}>
             <EuiFilterGroup compressed>
               <EuiPopover
+                aria-label={i18n.translate(
+                  'xpack.apm.sloOverviewFlyout.statusFilterPopoverAriaLabel',
+                  {
+                    defaultMessage: 'Status filter popover',
+                  }
+                )}
                 button={
                   <EuiFilterButton
                     iconType="filter"
@@ -602,6 +633,10 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
               i18n.translate('xpack.apm.sloOverviewFlyout.loading', {
                 defaultMessage: 'Loading SLOs...',
               })
+            ) : selectedStatuses.length || kqlQuery ? (
+              i18n.translate('xpack.apm.sloOverviewFlyout.noSlos', {
+                defaultMessage: 'No SLOs found for this service with the current filters',
+              })
             ) : (
               <EuiEmptyPrompt
                 title={
@@ -653,9 +688,10 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
           </>
         )}
       </EuiFlyoutBody>
-      {selectedSloId && sloPlugin?.getSLODetailsFlyout && (
+      {selectedSlo && sloPlugin?.getSLODetailsFlyout && (
         <sloPlugin.getSLODetailsFlyout
-          sloId={selectedSloId}
+          sloId={selectedSlo.id}
+          sloInstanceId={selectedSlo.instanceId}
           onClose={handleCloseSloDetails}
           size="m"
           hideFooter
@@ -667,3 +703,5 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     </EuiFlyout>
   );
 }
+
+export { useSloOverviewFlyout } from './use_slo_overview_flyout';

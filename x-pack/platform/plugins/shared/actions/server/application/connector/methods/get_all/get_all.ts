@@ -20,9 +20,9 @@ import { findConnectorsSo, searchConnectorsSo } from '../../../../data/connector
 import type { GetAllParams, InjectExtraFindDataParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { connectorFromSavedObject, isConnectorDeprecated } from '../../lib';
+import { getAuthMode } from '../../lib/get_auth_mode';
 import type { ConnectorWithExtraFindData } from '../../types';
 import type { GetAllUnsecuredParams } from './types/params';
-
 interface GetAllHelperOpts {
   auditLogger?: AuditLogger;
   esClient: ElasticsearchClient;
@@ -72,7 +72,8 @@ export async function getAllUnsecured({
   spaceId,
   connectorTypeRegistry,
 }: GetAllUnsecuredParams): Promise<ConnectorWithExtraFindData[]> {
-  const namespace = spaceId && spaceId !== 'default' ? spaceId : undefined;
+  const isUnsetOrDefaultSpace = !spaceId || spaceId === 'default';
+  const namespace = isUnsetOrDefaultSpace ? undefined : spaceId;
 
   return await getAllHelper({
     esClient,
@@ -129,6 +130,7 @@ async function getAllHelper({
         isDeprecated: isConnectorDeprecated(connector),
         isSystemAction: connector.isSystemAction,
         isConnectorTypeDeprecated: connectorTypeRegistry.isDeprecated(connector.actionTypeId),
+        authMode: getAuthMode(connector.authMode),
         ...(connector.exposeConfig ? { config: connector.config } : {}),
       };
     }),
@@ -179,17 +181,20 @@ export async function getAllSystemConnectors({
   );
 
   const transformedSystemConnectors = systemConnectors
-    .map((systemConnector) => ({
-      id: systemConnector.id,
-      actionTypeId: systemConnector.actionTypeId,
-      name: systemConnector.name,
-      isPreconfigured: systemConnector.isPreconfigured,
-      isDeprecated: isConnectorDeprecated(systemConnector),
-      isSystemAction: systemConnector.isSystemAction,
-      isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(
-        systemConnector.actionTypeId
-      ),
-    }))
+    .map((systemConnector) => {
+      return {
+        id: systemConnector.id,
+        actionTypeId: systemConnector.actionTypeId,
+        name: systemConnector.name,
+        isPreconfigured: systemConnector.isPreconfigured,
+        isDeprecated: isConnectorDeprecated(systemConnector),
+        isSystemAction: systemConnector.isSystemAction,
+        isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(
+          systemConnector.actionTypeId
+        ),
+        authMode: getAuthMode(systemConnector.authMode),
+      };
+    })
     .sort((a, b) => a.name.localeCompare(b.name));
 
   const connectors = await injectExtraFindData({

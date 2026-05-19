@@ -21,22 +21,37 @@ jest.mock('fs', () => ({
   rmSync: jest.fn(),
 }));
 
-jest.mock('../src/diff/run_bump_diff', () => ({
-  runBumpDiff: jest.fn(),
-  BumpServiceError: class BumpServiceError extends Error {
-    constructor(message: string) {
-      super(message);
-      this.name = 'BumpServiceError';
-    }
-  },
+jest.mock('../src/diff/run_oasdiff', () => ({
+  runOasdiff: jest.fn(),
 }));
 
-jest.mock('../src/diff/parse_bump_diff', () => ({
-  parseBumpDiff: jest.fn(),
+jest.mock('../src/diff/run_oasdiff_structural', () => ({
+  runOasdiffStructural: jest.fn(),
+}));
+
+jest.mock('../src/diff/parse_oasdiff', () => ({
+  parseOasdiff: jest.fn(),
+}));
+
+jest.mock('../src/input/load_oas', () => ({
+  loadOas: jest.fn().mockResolvedValue({
+    openapi: '3.0.0',
+    info: { title: 't', version: '1' },
+    paths: {},
+    components: { schemas: {} },
+  }),
 }));
 
 jest.mock('../src/terraform/check_terraform_impact', () => ({
   checkTerraformImpact: jest.fn(),
+}));
+
+jest.mock('../src/terraform/load_terraform_apis', () => ({
+  loadTerraformApis: jest.fn().mockReturnValue([]),
+}));
+
+jest.mock('../src/terraform/build_match_path', () => ({
+  buildMatchPath: jest.fn().mockReturnValue(undefined),
 }));
 
 jest.mock('../src/allowlist/load_allowlist', () => ({
@@ -52,20 +67,23 @@ jest.mock('../src/report/format_failure', () => ({
 }));
 
 import { execSync } from 'child_process';
-import { rmSync } from 'fs';
-import { runBumpDiff } from '../src/diff/run_bump_diff';
-import { BumpServiceError } from '../src/diff/errors';
-import { parseBumpDiff } from '../src/diff/parse_bump_diff';
+import { writeFileSync, rmSync } from 'fs';
+import { runOasdiff, runOasdiffStructural, parseOasdiff, applyAllowlist } from '../src/diff';
+import type { BreakingChange } from '../src/diff';
+import { loadOas } from '../src/input/load_oas';
 import { checkTerraformImpact } from '../src/terraform/check_terraform_impact';
 import { loadAllowlist } from '../src/allowlist/load_allowlist';
-import { applyAllowlist } from '../src/diff/breaking_rules';
 import { formatFailure } from '../src/report/format_failure';
-import type { BreakingChange } from '../src/diff/breaking_rules';
 
 const mockRun = jest.requireMock('@kbn/dev-cli-runner').run as jest.Mock;
 const mockExecSync = execSync as jest.MockedFunction<typeof execSync>;
-const mockRunBumpDiff = runBumpDiff as jest.MockedFunction<typeof runBumpDiff>;
-const mockParseBumpDiff = parseBumpDiff as jest.MockedFunction<typeof parseBumpDiff>;
+const mockWriteFileSync = writeFileSync as jest.MockedFunction<typeof writeFileSync>;
+const mockRunOasdiff = runOasdiff as jest.MockedFunction<typeof runOasdiff>;
+const mockRunOasdiffStructural = runOasdiffStructural as jest.MockedFunction<
+  typeof runOasdiffStructural
+>;
+const mockParseOasdiff = parseOasdiff as jest.MockedFunction<typeof parseOasdiff>;
+const mockLoadOas = loadOas as jest.MockedFunction<typeof loadOas>;
 const mockCheckTerraformImpact = checkTerraformImpact as jest.MockedFunction<
   typeof checkTerraformImpact
 >;
@@ -98,6 +116,12 @@ describe('check_contracts', () => {
       error: jest.fn(),
     };
     mockExecSync.mockReturnValue('openapi: 3.0.0\npaths: {}');
+    mockLoadOas.mockResolvedValue({
+      openapi: '3.0.0',
+      info: { title: 't', version: '1' },
+      paths: {},
+      components: { schemas: {} },
+    });
   });
 
   const defaultFlags = {
@@ -140,7 +164,7 @@ describe('check_contracts', () => {
     await runCallback({ flags: defaultFlags, log: mockLog });
 
     expect(mockLog.warning).toHaveBeenCalledWith('No base OAS found - skipping check');
-    expect(mockRunBumpDiff).not.toHaveBeenCalled();
+    expect(mockRunOasdiff).not.toHaveBeenCalled();
   });
 
   it('throws when git show fails for unexpected reasons', async () => {
@@ -154,12 +178,34 @@ describe('check_contracts', () => {
     });
 
     await expect(runCallback({ flags: defaultFlags, log: mockLog })).rejects.toThrow('ENOBUFS');
-    expect(mockRunBumpDiff).not.toHaveBeenCalled();
+    expect(mockRunOasdiff).not.toHaveBeenCalled();
+  });
+
+  it('warns and skips when oasdiff fails due to example $ref parsing', async () => {
+    mockRunOasdiff.mockImplementation(() => {
+      throw new Error('bad data in "#/components/schemas/Foo" (expecting ref to example object)');
+    });
+
+    await runCallback({ flags: defaultFlags, log: mockLog });
+
+    expect(mockLog.warning).toHaveBeenCalledWith(
+      expect.stringContaining('oasdiff cannot parse the base spec')
+    );
+  });
+
+  it('still throws on non-example oasdiff errors', async () => {
+    mockRunOasdiff.mockImplementation(() => {
+      throw new Error('some other oasdiff failure');
+    });
+
+    await expect(runCallback({ flags: defaultFlags, log: mockLog })).rejects.toThrow(
+      'some other oasdiff failure'
+    );
   });
 
   it('reports success when no breaking changes', async () => {
-    mockRunBumpDiff.mockReturnValue([]);
-    mockParseBumpDiff.mockReturnValue([]);
+    mockRunOasdiff.mockReturnValue([]);
+    mockParseOasdiff.mockReturnValue([]);
 
     await runCallback({ flags: defaultFlags, log: mockLog });
 
@@ -170,8 +216,8 @@ describe('check_contracts', () => {
     const changes: BreakingChange[] = [
       { type: 'path_removed', path: '/api/some/internal', reason: 'Endpoint removed' },
     ];
-    mockRunBumpDiff.mockReturnValue([]);
-    mockParseBumpDiff.mockReturnValue(changes);
+    mockRunOasdiff.mockReturnValue([]);
+    mockParseOasdiff.mockReturnValue(changes);
     mockCheckTerraformImpact.mockReturnValue({ hasImpact: false, impactedChanges: [] });
 
     await runCallback({ flags: defaultFlags, log: mockLog });
@@ -185,11 +231,13 @@ describe('check_contracts', () => {
     const changes: BreakingChange[] = [
       { type: 'path_removed', path: '/api/spaces/space', reason: 'Endpoint removed' },
     ];
-    mockRunBumpDiff.mockReturnValue([]);
-    mockParseBumpDiff.mockReturnValue(changes);
+    mockRunOasdiff.mockReturnValue([]);
+    mockParseOasdiff.mockReturnValue(changes);
     mockCheckTerraformImpact.mockReturnValue({
       hasImpact: true,
-      impactedChanges: [{ change: changes[0], terraformResource: 'elasticstack_kibana_space' }],
+      impactedChanges: [
+        { change: changes[0], terraformResource: 'elasticstack_kibana_space', owners: [] },
+      ],
     });
     mockLoadAllowlist.mockReturnValue({ entries: [] });
     mockApplyAllowlist.mockReturnValue({ breakingChanges: [], allowlistedChanges: changes });
@@ -207,10 +255,12 @@ describe('check_contracts', () => {
     ];
     const terraformImpact = {
       hasImpact: true,
-      impactedChanges: [{ change: changes[0], terraformResource: 'elasticstack_kibana_space' }],
+      impactedChanges: [
+        { change: changes[0], terraformResource: 'elasticstack_kibana_space', owners: [] },
+      ],
     };
-    mockRunBumpDiff.mockReturnValue([]);
-    mockParseBumpDiff.mockReturnValue(changes);
+    mockRunOasdiff.mockReturnValue([]);
+    mockParseOasdiff.mockReturnValue(changes);
     mockCheckTerraformImpact.mockReturnValue(terraformImpact);
     mockLoadAllowlist.mockReturnValue({ entries: [] });
     mockApplyAllowlist.mockReturnValue({ breakingChanges: changes, allowlistedChanges: [] });
@@ -225,8 +275,8 @@ describe('check_contracts', () => {
   });
 
   it('uses default specPath based on distribution', async () => {
-    mockRunBumpDiff.mockReturnValue([]);
-    mockParseBumpDiff.mockReturnValue([]);
+    mockRunOasdiff.mockReturnValue([]);
+    mockParseOasdiff.mockReturnValue([]);
 
     await runCallback({
       flags: { distribution: 'serverless', baseBranch: 'main' },
@@ -238,8 +288,8 @@ describe('check_contracts', () => {
 
   describe('merge base (CI path)', () => {
     it('uses git show with merge base SHA when --mergeBase is provided', async () => {
-      mockRunBumpDiff.mockReturnValue([]);
-      mockParseBumpDiff.mockReturnValue([]);
+      mockRunOasdiff.mockReturnValue([]);
+      mockParseOasdiff.mockReturnValue([]);
 
       await runCallback({
         flags: { ...defaultFlags, mergeBase: 'abc123def' },
@@ -254,8 +304,8 @@ describe('check_contracts', () => {
     });
 
     it('does not resolve remote when mergeBase is provided', async () => {
-      mockRunBumpDiff.mockReturnValue([]);
-      mockParseBumpDiff.mockReturnValue([]);
+      mockRunOasdiff.mockReturnValue([]);
+      mockParseOasdiff.mockReturnValue([]);
 
       await runCallback({
         flags: { ...defaultFlags, mergeBase: 'abc123def' },
@@ -272,8 +322,8 @@ describe('check_contracts', () => {
         if (cmd === 'git remote -v') return gitRemoteOutput;
         return 'openapi: 3.0.0';
       });
-      mockRunBumpDiff.mockReturnValue([]);
-      mockParseBumpDiff.mockReturnValue([]);
+      mockRunOasdiff.mockReturnValue([]);
+      mockParseOasdiff.mockReturnValue([]);
 
       await runCallback({ flags: defaultFlags, log: mockLog });
 
@@ -294,8 +344,8 @@ describe('check_contracts', () => {
         if (cmd === 'git remote -v') return noElasticRemotes;
         return 'openapi: 3.0.0';
       });
-      mockRunBumpDiff.mockReturnValue([]);
-      mockParseBumpDiff.mockReturnValue([]);
+      mockRunOasdiff.mockReturnValue([]);
+      mockParseOasdiff.mockReturnValue([]);
 
       await runCallback({ flags: defaultFlags, log: mockLog });
 
@@ -317,8 +367,8 @@ describe('check_contracts', () => {
         if (typeof cmd === 'string' && cmd.startsWith('git fetch')) return '';
         return '';
       });
-      mockRunBumpDiff.mockReturnValue([]);
-      mockParseBumpDiff.mockReturnValue([]);
+      mockRunOasdiff.mockReturnValue([]);
+      mockParseOasdiff.mockReturnValue([]);
 
       await runCallback({ flags: defaultFlags, log: mockLog });
 
@@ -330,16 +380,41 @@ describe('check_contracts', () => {
   });
 
   it('cleans up temp files even on error', async () => {
-    mockRunBumpDiff.mockImplementation(() => {
-      throw new Error('bump-cli failed');
+    mockRunOasdiff.mockImplementation(() => {
+      throw new Error('oasdiff failed');
     });
-    mockParseBumpDiff.mockReturnValue([]);
+    mockParseOasdiff.mockReturnValue([]);
 
     await expect(runCallback({ flags: defaultFlags, log: mockLog })).rejects.toThrow(
-      'bump-cli failed'
+      'oasdiff failed'
     );
 
     expect(rmSync).toHaveBeenCalled();
+  });
+
+  describe('temp filename includes distribution', () => {
+    it('includes distribution in temp filename for remote path', async () => {
+      mockRunOasdiff.mockReturnValue([]);
+      mockParseOasdiff.mockReturnValue([]);
+
+      await runCallback({ flags: defaultFlags, log: mockLog });
+
+      const writtenPath = mockWriteFileSync.mock.calls[0][0] as string;
+      expect(writtenPath).toMatch(/base-stack-\d+\.yaml$/);
+    });
+
+    it('includes distribution in temp filename for merge base path', async () => {
+      mockRunOasdiff.mockReturnValue([]);
+      mockParseOasdiff.mockReturnValue([]);
+
+      await runCallback({
+        flags: { ...defaultFlags, distribution: 'serverless', mergeBase: 'abc123' },
+        log: mockLog,
+      });
+
+      const writtenPath = mockWriteFileSync.mock.calls[0][0] as string;
+      expect(writtenPath).toMatch(/base-serverless-\d+\.yaml$/);
+    });
   });
 
   it('logs allowlisted change count when some are allowlisted', async () => {
@@ -352,11 +427,15 @@ describe('check_contracts', () => {
         reason: 'Method removed',
       },
     ];
-    mockRunBumpDiff.mockReturnValue([]);
-    mockParseBumpDiff.mockReturnValue(changes);
+    mockRunOasdiff.mockReturnValue([]);
+    mockParseOasdiff.mockReturnValue(changes);
     mockCheckTerraformImpact.mockReturnValue({
       hasImpact: true,
-      impactedChanges: changes.map((c) => ({ change: c, terraformResource: 'test_resource' })),
+      impactedChanges: changes.map((c) => ({
+        change: c,
+        terraformResource: 'test_resource',
+        owners: [],
+      })),
     });
     mockLoadAllowlist.mockReturnValue({ entries: [] });
     mockApplyAllowlist.mockReturnValue({
@@ -370,30 +449,87 @@ describe('check_contracts', () => {
     expect(mockLog.info).toHaveBeenCalledWith('1 allowlisted change(s) ignored');
   });
 
-  it('warns and does not fail when bump.sh service is unavailable', async () => {
-    mockRunBumpDiff.mockImplementation(() => {
-      throw new BumpServiceError(
-        'bump.sh service unavailable — the API diff could not be computed.'
+  describe('additionalProperties tightening (E2E reverse-index path)', () => {
+    const realParseOasdiff = jest.requireActual('../src/diff/parse_oasdiff')
+      .parseOasdiff as typeof parseOasdiff;
+
+    it('surfaces a synthetic component-level entry exactly once for the consumer endpoint', async () => {
+      const consumerPath = '/api/data_views/data_view';
+      const componentName = 'Data_views_create_data_view_request_object';
+
+      mockLoadOas.mockResolvedValue({
+        openapi: '3.0.0',
+        info: { title: 't', version: '1' },
+        paths: {
+          [consumerPath]: {
+            post: {
+              requestBody: {
+                content: {
+                  'application/json': {
+                    schema: { $ref: `#/components/schemas/${componentName}` },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            [componentName]: { type: 'object' },
+          },
+        },
+      });
+
+      mockRunOasdiff.mockReturnValue([]);
+      mockRunOasdiffStructural.mockReturnValue({
+        components: {
+          schemas: {
+            modified: {
+              [componentName]: {
+                additionalPropertiesAllowed: { from: null, to: false },
+              },
+            },
+          },
+        },
+      });
+
+      // Use the real parseOasdiff so the synthetic entry flows through the
+      // same parse pipeline as oasdiff entries; pass-through applyAllowlist so
+      // nothing is filtered out.
+      mockParseOasdiff.mockImplementation(realParseOasdiff);
+      mockApplyAllowlist.mockImplementation((changes) => ({
+        breakingChanges: changes,
+        allowlistedChanges: [],
+      }));
+
+      mockCheckTerraformImpact.mockImplementation((changes) => ({
+        hasImpact: changes.length > 0,
+        impactedChanges: changes.map((change) => ({
+          change,
+          terraformResource: 'elasticstack_kibana_data_view',
+          owners: ['@elastic/kibana-data-discovery'],
+        })),
+      }));
+      mockLoadAllowlist.mockReturnValue({ entries: [] });
+      mockFormatFailure.mockReturnValue('FAILURE REPORT');
+
+      await expect(runCallback({ flags: defaultFlags, log: mockLog })).rejects.toThrow(
+        'Found 1 breaking change(s)'
       );
+
+      expect(mockFormatFailure).toHaveBeenCalledTimes(1);
+      const breakingChanges = mockFormatFailure.mock.calls[0][0];
+      expect(breakingChanges).toEqual([
+        {
+          type: 'request_body_tightened',
+          path: consumerPath,
+          method: 'POST',
+          reason:
+            'Request body schema disallows extra fields (additionalProperties: false). Clients sending unknown keys will now receive 400.',
+          oasdiffId: 'kbn:request-additional-properties-tightened',
+          source: `/components/schemas/${componentName}`,
+        },
+      ]);
     });
-
-    await runCallback({ flags: defaultFlags, log: mockLog });
-
-    expect(mockLog.warning).toHaveBeenCalledWith(
-      expect.stringContaining('bump.sh service unavailable')
-    );
-    expect(mockLog.warning).toHaveBeenCalledWith(
-      expect.stringContaining('Skipping API contract check')
-    );
-  });
-
-  it('still cleans up temp files when bump.sh service is unavailable', async () => {
-    mockRunBumpDiff.mockImplementation(() => {
-      throw new BumpServiceError('bump.sh service unavailable');
-    });
-
-    await runCallback({ flags: defaultFlags, log: mockLog });
-
-    expect(rmSync).toHaveBeenCalled();
   });
 });

@@ -27,7 +27,8 @@ export const significantItem = schema.object({
         doc_count_significant_item: schema.number(),
         key: schema.number(),
         key_as_string: schema.string(),
-      })
+      }),
+      { maxSize: 10000 }
     )
   ),
   unique: schema.maybe(schema.boolean()),
@@ -35,8 +36,8 @@ export const significantItem = schema.object({
 
 const overridesV2 = schema.object({
   loaded: schema.maybe(schema.number()),
-  remainingFieldCandidates: schema.maybe(schema.arrayOf(schema.string())),
-  significantItems: schema.maybe(schema.arrayOf(significantItem)),
+  remainingFieldCandidates: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
+  significantItems: schema.maybe(schema.arrayOf(significantItem, { maxSize: 10000 })),
   regroupOnly: schema.maybe(schema.boolean()),
 });
 
@@ -60,6 +61,7 @@ export const aiopsLogRateAnalysisBase = schema.object({
   flushFix: schema.maybe(schema.boolean()),
   /** Probability used for the random sampler aggregations */
   sampleProbability: schema.maybe(schema.number()),
+  projectRouting: schema.maybe(schema.string()),
 });
 
 export const aiopsLogRateAnalysisSchemaV2 = schema.intersection([

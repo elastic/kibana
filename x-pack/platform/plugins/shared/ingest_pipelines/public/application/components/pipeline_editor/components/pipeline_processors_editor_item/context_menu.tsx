@@ -9,6 +9,7 @@ import React, { useState, forwardRef } from 'react';
 import { css } from '@emotion/react';
 
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiPopover, EuiButtonIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { i18nTexts } from './i18n_texts';
 
@@ -78,6 +79,10 @@ export const ContextMenu = forwardRef<HTMLButtonElement, Props>((props, ref) => 
     <div css={styles.container}>
       <EuiPopover
         data-test-subj={props['data-test-subj']}
+        aria-label={i18n.translate(
+          'xpack.ingestPipelines.pipelineEditor.item.contextMenuAriaLabel',
+          { defaultMessage: 'Processor actions' }
+        )}
         anchorPosition="leftCenter"
         panelPaddingSize="none"
         isOpen={isOpen}
@@ -88,7 +93,7 @@ export const ContextMenu = forwardRef<HTMLButtonElement, Props>((props, ref) => 
             data-test-subj="button"
             disabled={disabled}
             onClick={() => setIsOpen((v) => !v)}
-            iconType="boxesHorizontal"
+            iconType="boxesVertical"
             aria-label={i18nTexts.moreButtonAriaLabel}
           />
         }

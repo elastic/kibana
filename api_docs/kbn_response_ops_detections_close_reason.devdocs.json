@@ -1,0 +1,161 @@
+{
+  "id": "@kbn/response-ops-detections-close-reason",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/response-ops-detections-close-reason",
+        "id": "def-public.getDefaultClosingReasonLabel",
+        "type": "Function",
+        "tags": [],
+        "label": "getDefaultClosingReasonLabel",
+        "description": [],
+        "signature": [
+          "(closeReason: string) => string"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/detections-close-reason/components/default_closing_reasons.ts",
+        "lineNumber": 36,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-detections-close-reason",
+            "id": "def-public.getDefaultClosingReasonLabel.$1",
+            "type": "string",
+            "tags": [],
+            "label": "closeReason",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/detections-close-reason/components/default_closing_reasons.ts",
+            "lineNumber": 36,
+            "columnNumber": 46,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-detections-close-reason",
+        "id": "def-public.useBulkClosingReasonItems",
+        "type": "Function",
+        "tags": [],
+        "label": "useBulkClosingReasonItems",
+        "description": [
+          "\nReturns menu items and panels to be used in a EuiContextMenu component"
+        ],
+        "signature": [
+          "({ isEnabled, onSubmitCloseReason, buttonLabel, }?: UseBulkClosingReasonItemsProps) => { item: { key: string; 'data-test-subj': string; label: string; panel: string; } | undefined; panels: ",
+          "ContentPanelConfig",
+          "[]; getPanels: ({ onSubmitCloseReason: onSubmitCloseReasonCb, }: { onSubmitCloseReason?: ((params: OnSubmitClosingReasonParams) => void) | undefined; }) => ",
+          "ContentPanelConfig",
+          "[]; }"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/detections-close-reason/hooks/use_bulk_closing_reason_items.tsx",
+        "lineNumber": 38,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-detections-close-reason",
+            "id": "def-public.useBulkClosingReasonItems.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  isEnabled = true,\n  onSubmitCloseReason,\n  buttonLabel,\n}",
+            "description": [],
+            "signature": [
+              "UseBulkClosingReasonItemsProps"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/detections-close-reason/hooks/use_bulk_closing_reason_items.tsx",
+            "lineNumber": 38,
+            "columnNumber": 43,
+            "deprecated": false,
+            "docsReferencedTypeName": "UseBulkClosingReasonItemsProps",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/response-ops-detections-close-reason",
+        "id": "def-public.ALERT_CLOSING_REASON_PANEL_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ALERT_CLOSING_REASON_PANEL_ID",
+        "description": [],
+        "signature": [
+          "\"ALERT_CLOSING_REASON_PANEL_ID\""
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/detections-close-reason/hooks/use_bulk_closing_reason_items.tsx",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-detections-close-reason",
+        "id": "def-public.DEFAULT_CLOSING_REASON_OPTIONS",
+        "type": "Array",
+        "tags": [],
+        "label": "DEFAULT_CLOSING_REASON_OPTIONS",
+        "description": [],
+        "signature": [
+          "DefaultClosingReasonOption[]"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/detections-close-reason/components/default_closing_reasons.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-detections-close-reason",
+        "id": "def-public.DEFAULT_DETECTIONS_CLOSE_REASONS_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_DETECTIONS_CLOSE_REASONS_KEY",
+        "description": [],
+        "signature": [
+          "\"securitySolution:detectionsCloseReasons\""
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/detections-close-reason/components/default_closing_reasons.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

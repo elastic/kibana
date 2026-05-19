@@ -432,9 +432,9 @@ describe('createBulkIndexOperationTuple', () => {
       _source: { type: 'cases', title: 'no originId' },
     };
     const [operation] = createBulkIndexOperationTuple(document);
-    expect(operation.index).toBeDefined();
-    expect((operation.index as any).if_seq_no).toBe(10);
-    expect((operation.index as any).if_primary_term).toBe(20);
+    expect(operation!.index).toBeDefined();
+    expect((operation!.index as any).if_seq_no).toBe(10);
+    expect((operation!.index as any).if_primary_term).toBe(20);
   });
 
   it('includes if_seq_no and if_primary_term when originId === _id', () => {
@@ -445,9 +445,9 @@ describe('createBulkIndexOperationTuple', () => {
       _source: { type: 'cases', title: 'originId equals _id', originId: 'doc2' },
     };
     const [operation] = createBulkIndexOperationTuple(document);
-    expect(operation.index).toBeDefined();
-    expect((operation.index as any).if_seq_no).toBe(11);
-    expect((operation.index as any).if_primary_term).toBe(21);
+    expect(operation!.index).toBeDefined();
+    expect((operation!.index as any).if_seq_no).toBe(11);
+    expect((operation!.index as any).if_primary_term).toBe(21);
   });
 
   it('does NOT include if_seq_no and if_primary_term when originId !== _id', () => {
@@ -458,9 +458,9 @@ describe('createBulkIndexOperationTuple', () => {
       _source: { type: 'cases', title: 'originId not equal _id', originId: 'other-id' },
     };
     const [operation] = createBulkIndexOperationTuple(document);
-    expect(operation.index).toBeDefined();
-    expect((operation.index as any).if_seq_no).toBeUndefined();
-    expect((operation.index as any).if_primary_term).toBeUndefined();
+    expect(operation!.index).toBeDefined();
+    expect((operation!.index as any).if_seq_no).toBeUndefined();
+    expect((operation!.index as any).if_primary_term).toBeUndefined();
   });
 });
 

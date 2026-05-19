@@ -48,11 +48,24 @@ import type {
 } from '@kbn/osquery-plugin/common/api/saved_query/saved_query.gen';
 import type {
   OsqueryCreateLiveQueryRequestBodyInput,
+  OsqueryExportLiveQueryResultsRequestQueryInput,
+  OsqueryExportLiveQueryResultsRequestParamsInput,
+  OsqueryExportLiveQueryResultsRequestBodyInput,
   OsqueryFindLiveQueriesRequestQueryInput,
   OsqueryGetLiveQueryDetailsRequestParamsInput,
   OsqueryGetLiveQueryResultsRequestQueryInput,
   OsqueryGetLiveQueryResultsRequestParamsInput,
 } from '@kbn/osquery-plugin/common/api/live_query/live_queries.gen';
+import type {
+  OsqueryExportScheduledQueryResultsRequestQueryInput,
+  OsqueryExportScheduledQueryResultsRequestParamsInput,
+  OsqueryExportScheduledQueryResultsRequestBodyInput,
+  OsqueryGetScheduledActionResultsRequestQueryInput,
+  OsqueryGetScheduledActionResultsRequestParamsInput,
+  OsqueryGetScheduledQueryResultsRequestQueryInput,
+  OsqueryGetScheduledQueryResultsRequestParamsInput,
+} from '@kbn/osquery-plugin/common/api/scheduled_results/scheduled_results.gen';
+import type { OsqueryGetUnifiedHistoryRequestQueryInput } from '@kbn/osquery-plugin/common/api/unified_history/unified_history.gen';
 import type {
   ReadAssetsStatusRequestQueryInput,
   UpdateAssetsStatusRequestQueryInput,
@@ -161,7 +174,7 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .send(props.body as object);
   },
   /**
-   * Create and run a saved query.
+   * Create and save a query for later use.
    */
   osqueryCreateSavedQuery(props: OsqueryCreateSavedQueryProps, kibanaSpace: string = 'default') {
     return supertest
@@ -197,6 +210,59 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
+      * Export the results of a live query action as a downloadable file. The response is a streaming file attachment in the requested format.
+This endpoint is gated behind the `exportResults` experimental feature flag and must be enabled in `kibana.yml` before use:
+```yaml xpack.osquery.enableExperimental:
+  - exportResults
+```
+
+      */
+  osqueryExportLiveQueryResults(
+    props: OsqueryExportLiveQueryResultsProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams('/api/osquery/live_queries/{id}/results/{actionId}/_export', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object)
+      .query(props.query);
+  },
+  /**
+      * Export all result rows for a specific scheduled query execution as a downloadable file. The response is a streaming file attachment in the requested format.
+This endpoint is gated behind the `exportResults` experimental feature flag and must be enabled in `kibana.yml` before use:
+```yaml xpack.osquery.enableExperimental:
+  - exportResults
+```
+
+      */
+  osqueryExportScheduledQueryResults(
+    props: OsqueryExportScheduledQueryResultsProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams(
+            '/api/osquery/scheduled_results/{scheduleId}/{executionCount}/_export',
+            props.params
+          ),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object)
+      .query(props.query);
   },
   /**
    * Get a list of all live queries.
@@ -297,6 +363,64 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
+      * Get paginated per-agent action results for a specific scheduled query execution, with success/failure aggregation and execution metadata (pack name, query name/text, timestamp).
+
+      */
+  osqueryGetScheduledActionResults(
+    props: OsqueryGetScheduledActionResultsProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .get(
+        getRouteUrlForSpace(
+          replaceParams(
+            '/api/osquery/scheduled_results/{scheduleId}/{executionCount}',
+            props.params
+          ),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+      * Get paginated query result rows (the actual osquery output data) for a specific scheduled query execution.
+
+      */
+  osqueryGetScheduledQueryResults(
+    props: OsqueryGetScheduledQueryResultsProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .get(
+        getRouteUrlForSpace(
+          replaceParams(
+            '/api/osquery/scheduled_results/{scheduleId}/{executionCount}/results',
+            props.params
+          ),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+      * Get a unified, time-sorted history of live, rule-triggered, and scheduled osquery executions. The response uses cursor-based pagination.
+
+      */
+  osqueryGetUnifiedHistory(props: OsqueryGetUnifiedHistoryProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/osquery/history', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
       * Update a query pack using the pack ID.
 > info
 > You cannot update a prebuilt pack.
@@ -367,11 +491,11 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
 
   return {
     ...securitySolutionApiServiceFactory(supertestService),
-    withUser: (user: { username: string; password: string }) => {
+    withUser: (user: { username: string; password?: string }) => {
       const kbnUrl = formatUrl({ ...config.get('servers.kibana'), auth: false });
 
       return securitySolutionApiServiceFactory(
-        supertest_.agent(kbnUrl).auth(user.username, user.password)
+        supertest_.agent(kbnUrl).auth(user.username, user.password ?? 'changeme')
       );
     },
   };
@@ -407,6 +531,16 @@ export interface OsqueryDeletePacksProps {
 export interface OsqueryDeleteSavedQueryProps {
   params: OsqueryDeleteSavedQueryRequestParamsInput;
 }
+export interface OsqueryExportLiveQueryResultsProps {
+  query: OsqueryExportLiveQueryResultsRequestQueryInput;
+  params: OsqueryExportLiveQueryResultsRequestParamsInput;
+  body: OsqueryExportLiveQueryResultsRequestBodyInput;
+}
+export interface OsqueryExportScheduledQueryResultsProps {
+  query: OsqueryExportScheduledQueryResultsRequestQueryInput;
+  params: OsqueryExportScheduledQueryResultsRequestParamsInput;
+  body: OsqueryExportScheduledQueryResultsRequestBodyInput;
+}
 export interface OsqueryFindLiveQueriesProps {
   query: OsqueryFindLiveQueriesRequestQueryInput;
 }
@@ -428,6 +562,17 @@ export interface OsqueryGetPacksDetailsProps {
 }
 export interface OsqueryGetSavedQueryDetailsProps {
   params: OsqueryGetSavedQueryDetailsRequestParamsInput;
+}
+export interface OsqueryGetScheduledActionResultsProps {
+  query: OsqueryGetScheduledActionResultsRequestQueryInput;
+  params: OsqueryGetScheduledActionResultsRequestParamsInput;
+}
+export interface OsqueryGetScheduledQueryResultsProps {
+  query: OsqueryGetScheduledQueryResultsRequestQueryInput;
+  params: OsqueryGetScheduledQueryResultsRequestParamsInput;
+}
+export interface OsqueryGetUnifiedHistoryProps {
+  query: OsqueryGetUnifiedHistoryRequestQueryInput;
 }
 export interface OsqueryUpdatePacksProps {
   params: OsqueryUpdatePacksRequestParamsInput;

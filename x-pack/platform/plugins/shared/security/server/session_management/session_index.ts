@@ -9,7 +9,7 @@ import { errors } from '@elastic/elasticsearch';
 import type {
   AggregateName,
   AggregationsMultiTermsAggregate,
-  BulkOperationContainer,
+  BulkDeleteOperation,
   IndicesCreateRequest,
   MsearchRequestItem,
   SearchHit,
@@ -877,6 +877,10 @@ export class SessionIndex {
       });
     }
 
+    // Only 404 is passed in `ignore` so the client returns it as a normal response rather than
+    // throwing. Any other error status (including 503 / no_shard_available_action_exception) is
+    // thrown as a ResponseError and caught by the `cleanUp` caller, which handles it via the
+    // `shardMissingCounter` retry mechanism.
     let response = await this.options.elasticsearchClient.openPointInTime(
       {
         index: this.aliasName,
@@ -896,8 +900,6 @@ export class SessionIndex {
         },
         { meta: true }
       );
-    } else if (response.statusCode === 503) {
-      throw new errors.ResponseError(response);
     }
 
     const openPitResponse = response.body;
@@ -1104,9 +1106,7 @@ export class SessionIndex {
    * @param deleteOperations Bulk delete operations.
    * @returns Returns `true` if the bulk delete affected any session document.
    */
-  private async bulkDeleteSessions(
-    deleteOperations: Array<Required<Pick<BulkOperationContainer, 'delete'>>>
-  ) {
+  private async bulkDeleteSessions(deleteOperations: Array<{ delete: BulkDeleteOperation }>) {
     if (deleteOperations.length === 0) {
       return false;
     }

@@ -1,0 +1,295 @@
+openapi: 3.0.0
+info:
+  title: Scheduled Results Schema
+  version: '2023-10-31'
+paths:
+  /api/osquery/scheduled_results/{scheduleId}/{executionCount}:
+    get:
+      summary: Get scheduled action results
+      description: >
+        Get paginated per-agent action results for a specific scheduled query
+        execution, with success/failure aggregation and execution metadata
+        (pack name, query name/text, timestamp).
+      operationId: OsqueryGetScheduledActionResults
+      x-codegen-enabled: true
+      x-labels: [ serverless, ess ]
+      x-state: Generally available; Added in 9.4.0
+      parameters:
+        - name: scheduleId
+          in: path
+          required: true
+          description: 'The schedule ID of the scheduled query.'
+          schema:
+            description: 'The schedule ID of the scheduled query.'
+            type: string
+            example: 'pack_my_pack_uptime'
+        - name: executionCount
+          in: path
+          required: true
+          description: 'The execution count for this scheduled query run.'
+          schema:
+            description: 'The execution count for this scheduled query run.'
+            type: integer
+            example: 3
+        - name: kuery
+          in: query
+          required: false
+          description: 'The kuery to filter the results by.'
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/KueryOrUndefined'
+        - name: page
+          in: query
+          required: false
+          description: 'The page number to return. The default is 1.'
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageOrUndefined'
+        - name: pageSize
+          in: query
+          required: false
+          description: 'The number of results to return per page. The default is 20.'
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageSizeOrUndefined'
+        - name: sort
+          in: query
+          required: false
+          description: 'The field that is used to sort the results.'
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrUndefined'
+        - name: sortOrder
+          in: query
+          required: false
+          description: 'Specifies the sort order.'
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrderOrUndefined'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: './get_scheduled_action_results.schema.yaml#/components/schemas/GetScheduledActionResultsResponse'
+              examples:
+                scheduledActionResultsExample:
+                  summary: Example scheduled action results response
+                  value:
+                    metadata:
+                      scheduleId: 'pack_my_pack_uptime'
+                      executionCount: 3
+                      packId: '42ba9c50-0cc5-11ed-aa1d-2b27890bc90d'
+                      packName: 'My Pack'
+                      queryName: 'uptime'
+                      queryText: 'select * from uptime;'
+                      timestamp: '2024-07-26T09:00:00.000Z'
+                    edges:
+                      - _id: 'result-001'
+                        fields:
+                          agent_id: '16d7caf5-efd2-4212-9b62-73dafc91fa13'
+                          status: 'success'
+                          rows_count: 5
+                    total: 10
+                    currentPage: 0
+                    pageSize: 20
+                    totalPages: 1
+                    aggregations:
+                      totalRowCount: 42
+                      totalResponded: 10
+                      successful: 9
+                      failed: 1
+                      pending: 0
+
+  /api/osquery/scheduled_results/{scheduleId}/{executionCount}/results:
+    get:
+      summary: Get scheduled query results
+      description: >
+        Get paginated query result rows (the actual osquery output data)
+        for a specific scheduled query execution.
+      operationId: OsqueryGetScheduledQueryResults
+      x-codegen-enabled: true
+      x-labels: [ serverless, ess ]
+      x-state: Generally available; Added in 9.4.0
+      parameters:
+        - name: scheduleId
+          in: path
+          required: true
+          description: 'The schedule ID of the scheduled query.'
+          schema:
+            description: 'The schedule ID of the scheduled query.'
+            type: string
+            example: 'pack_my_pack_uptime'
+        - name: executionCount
+          in: path
+          required: true
+          description: 'The execution count for this scheduled query run.'
+          schema:
+            description: 'The execution count for this scheduled query run.'
+            type: integer
+            example: 3
+        - name: kuery
+          in: query
+          required: false
+          description: 'The kuery to filter the results by.'
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/KueryOrUndefined'
+        - name: page
+          in: query
+          required: false
+          description: 'The page number to return. The default is 1.'
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageOrUndefined'
+        - name: pageSize
+          in: query
+          required: false
+          description: 'The number of results to return per page. The default is 20.'
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageSizeOrUndefined'
+        - name: sort
+          in: query
+          required: false
+          description: 'The field that is used to sort the results.'
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrUndefined'
+        - name: sortOrder
+          in: query
+          required: false
+          description: 'Specifies the sort order.'
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrderOrUndefined'
+        - name: startDate
+          in: query
+          required: false
+          description: 'The start date filter (ISO 8601) to narrow down results.'
+          schema:
+            description: 'The start date filter (ISO 8601) to narrow down results.'
+            example: '2024-01-01T00:00:00Z'
+            type: string
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: './get_scheduled_query_results.schema.yaml#/components/schemas/GetScheduledQueryResultsResponse'
+              examples:
+                scheduledQueryResultsExample:
+                  summary: Example scheduled query results response
+                  value:
+                    data:
+                      total: 2
+                      edges:
+                        - _id: 'row-001'
+                          fields:
+                            host.uptime:
+                              - '12345'
+                        - _id: 'row-002'
+                          fields:
+                            host.uptime:
+                              - '67890'
+  /api/osquery/scheduled_results/{scheduleId}/{executionCount}/_export:
+    post:
+      summary: Export scheduled query results
+      description: >
+        Export all result rows for a specific scheduled query execution as a
+        downloadable file. The response is a streaming file attachment in the
+        requested format.
+
+        This endpoint is gated behind the `exportResults` experimental feature
+        flag and must be enabled in `kibana.yml` before use:
+
+        ```yaml
+        xpack.osquery.enableExperimental:
+          - exportResults
+        ```
+      operationId: OsqueryExportScheduledQueryResults
+      x-codegen-enabled: true
+      x-labels: [ ]
+      # TODO: Uncomment when feature flag exportResults is set to true
+      #      x-labels: [ess]
+      #      x-state: Added in 9.5.0
+      parameters:
+        - name: scheduleId
+          in: path
+          required: true
+          description: 'The schedule ID of the scheduled query.'
+          schema:
+            description: 'The schedule ID of the scheduled query.'
+            type: string
+            example: '90f342ee-9c05-4844-849b-173993234f22'
+        - name: executionCount
+          in: path
+          required: true
+          description: 'The execution counter for the scheduled query run whose results are exported. Must be a non-negative integer.'
+          schema:
+            description: 'The execution counter for this scheduled query run.'
+            type: integer
+            minimum: 0
+            example: 17384
+        - name: format
+          in: query
+          required: true
+          description: 'The output format of the exported file.'
+          schema:
+            $ref: '../export/export_results.schema.yaml#/components/schemas/ExportFormat'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '../export/export_results.schema.yaml#/components/schemas/ExportRequestBody'
+      responses:
+        '200':
+          description: >
+            A downloadable file in the requested format. The `Content-Disposition`
+            header contains the suggested filename.
+          headers:
+            Content-Disposition:
+              description: 'Attachment disposition with a generated filename, e.g. `attachment; filename="osquery-scheduled-results-{scheduleId}-{executionCount}-{timestamp}.csv"`.'
+              schema:
+                type: string
+                example: 'attachment; filename="osquery-scheduled-results-90f342ee-9c05-4844-849b-173993234f22-17384-2026-04-30T09-12-00-000Z.csv"'
+          content:
+            application/ndjson:
+              schema:
+                description: >
+                  Newline-delimited JSON stream. The first line is a metadata
+                  object (includes `execution_count`); each subsequent line is a
+                  result row.
+                type: string
+                format: binary
+              example: |
+                {"_meta":{"action_id":"90f342ee-9c05-4844-849b-173993234f22","execution_count":17384,"timestamp":"2026-04-30T09:12:00.000Z","exported_by":"elastic","format":"ndjson","total_results":32}}
+                {"@timestamp":"2026-04-30T09:11:58.321Z","agent":{"id":"5b1bb334-a23d-4006-80fe-bd129b979c9f","name":"prod-host-1"},"osquery":{"uid":"1000","username":"ubuntu"}}
+            application/json:
+              schema:
+                description: >
+                  A JSON object with `_meta` (export metadata) and `results` (all
+                  result rows). Rows are held in memory before writing; prefer
+                  `ndjson` for large exports.
+                $ref: '../export/export_results.schema.yaml#/components/schemas/ExportJsonResponse'
+            text/csv:
+              schema:
+                description: >
+                  CSV file with a header row. No metadata block is included in
+                  CSV output.
+                type: string
+                format: binary
+              example: |
+                osquery.description,agent.name,agent.id,osquery.uid,osquery.username
+                Ubuntu,prod-host-1,5b1bb334-a23d-4006-80fe-bd129b979c9f,1000,ubuntu
+                root,prod-host-1,5b1bb334-a23d-4006-80fe-bd129b979c9f,0,root
+        '400':
+          description: >
+            Bad request. Possible causes: invalid or missing `format` query
+            parameter, malformed KQL in the request body, invalid `esFilters`,
+            or the result count exceeds the 500,000-row limit.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Export limited to 500,000 results. Found 500,001. Please add filters to narrow results.'
+        '403':
+          description: >
+            The authenticated user does not have the `osquery-read` privilege
+            required to export scheduled query results.

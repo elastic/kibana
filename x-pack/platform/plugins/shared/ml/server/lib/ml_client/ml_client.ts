@@ -9,12 +9,12 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { JobType } from '@kbn/ml-common-types/saved_objects';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { MlLicense } from '../../../common/license/ml_license';
-import type { MLSavedObjectService } from '../../saved_objects';
 import { getJobDetailsFromTrainedModel } from '../../saved_objects/util';
-import type { JobType } from '../../../common/types/saved_objects';
-
-import type { Job, Datafeed } from '../../../common/types/anomaly_detection_jobs';
+import type { MLSavedObjectService } from '../../saved_objects';
 import { searchProvider } from './search';
 
 import { MLJobNotFound, MLModelNotFound } from './errors';
@@ -27,12 +27,14 @@ import type {
   MlGetTrainedModelParams,
 } from './types';
 import type { MlAuditLogger } from './ml_audit_logger';
+import type { ServerlessInfo } from '../../types';
 
 export function getMlClient(
   client: IScopedClusterClient,
   mlSavedObjectService: MLSavedObjectService,
   auditLogger: MlAuditLogger,
-  mlLicense: MlLicense
+  mlLicense: MlLicense,
+  serverless: ServerlessInfo
 ): MlClient {
   const mlClient = client.asInternalUser.ml;
 
@@ -756,7 +758,7 @@ export function getMlClient(
       return mlClient.getMemoryStats(...p);
     },
 
-    ...searchProvider(client, mlSavedObjectService),
+    ...searchProvider(client, mlSavedObjectService, serverless),
   } as MlClient;
 }
 

@@ -28,6 +28,7 @@ import {
   BehaviorSubject,
   debounceTime,
   distinctUntilChanged,
+  filter,
   map,
   merge,
   pipe,
@@ -35,13 +36,19 @@ import {
   tap,
   type Subscription,
 } from 'rxjs';
+import { apm } from '@elastic/apm-rum';
 import { getEditPath } from '../../common/constants';
 import { prepareCallbacks } from './expressions/callbacks';
 import { getExpressionRendererParams } from './expressions/expression_params';
 import { getMergedSearchContext } from './expressions/merged_search_context';
 import { getLogError } from './expressions/telemetry';
 import { getUsedDataViews } from './expressions/update_data_views';
-import { getParentContext, getRenderMode } from './helper';
+import {
+  getParentContext,
+  getRenderMode,
+  hasAnnotationGroupReference,
+  updateAttributesWithAnnotation,
+} from './helper';
 import { addLog } from './logger';
 import { apiHasLensComponentCallbacks, apiHasUserMessages } from './type_guards';
 import type { LensEmbeddableStartServices } from './types';
@@ -55,7 +62,7 @@ const blockingMessageDisplayLocations: UserMessagesDisplayLocationId[] = [
 export type ReloadReason =
   | 'ESQLvariables'
   | 'attributes'
-  | 'savedObjectId'
+  | 'refId'
   | 'overrides'
   | 'disableTriggers'
   | 'viewMode'
@@ -176,7 +183,7 @@ export function loadEmbeddableData(
           id: uuid || 'new',
           description: lastState.attributes.title || lastState.title || '',
           url: `${services.coreStart.application.getUrlForApp('lens')}${getEditPath(
-            lastState.savedObjectId
+            lastState.ref_id
           )}`,
         };
 
@@ -302,7 +309,7 @@ export function loadEmbeddableData(
     ),
     api.savedObjectId$.pipe(
       waitUntilChanged(),
-      map(() => 'savedObjectId' as ReloadReason)
+      map(() => 'refId' as ReloadReason)
     ),
     internalApi.overrides$.pipe(
       waitUntilChanged(),
@@ -320,6 +327,30 @@ export function loadEmbeddableData(
       .pipe(debounceTime(0))
       .subscribe((fetchContext) => reload('searchContext' as ReloadReason, fetchContext)),
     mergedSubscriptions.pipe(debounceTime(0)).subscribe(reload),
+    // Capture blocking errors in APM for observability
+    internalApi.blockingError$
+      .pipe(filter((error): error is Error => error != null))
+      .subscribe((error) => {
+        const currentState = getState();
+        const parentContext = getParentContext(parentApi);
+        const meta = parentContext?.meta as Record<string, string | undefined> | undefined;
+        const transaction = apm.getCurrentTransaction();
+        if (transaction) {
+          const span = transaction.startSpan('lens-chart-error', 'lens-embeddable');
+
+          if (span) {
+            span.addLabels({
+              kibana_meta_metric_type: currentState.attributes?.visualizationType ?? 'unknown',
+              kibana_meta_profile_id: meta?.profile_id ?? 'unknown',
+              kibana_meta_metric_id: meta?.metric_id ?? 'unknown',
+            });
+            apm.captureError(error);
+            // @ts-expect-error RUM types don't include outcome
+            span.outcome = 'failure';
+            span.end();
+          }
+        }
+      }),
     // make sure to reload on viewMode change
     api.viewMode$.subscribe(() => {
       // only reload if drilldowns are set
@@ -327,6 +358,23 @@ export function loadEmbeddableData(
         reload('viewMode');
       }
     }),
+    // When a library annotation group is updated, fetch the latest data and push it
+    // into attributes$ so the chart re-renders.
+    services.eventAnnotationService.annotationGroupUpdated$
+      .pipe(filter((updatedGroupId) => hasAnnotationGroupReference(getState(), updatedGroupId)))
+      .subscribe(async (updatedGroupId) => {
+        try {
+          const libraryGroup = await services.eventAnnotationService.loadAnnotationGroup(
+            updatedGroupId
+          );
+          const updated = updateAttributesWithAnnotation(getState(), updatedGroupId, libraryGroup);
+          if (updated) {
+            internalApi.updateAttributes(updated.attributes);
+          }
+        } catch (err) {
+          addLog(`Failed to fetch annotation group ${updatedGroupId}: ${err}`);
+        }
+      }),
   ];
   // There are few key moments when errors are checked and displayed:
   // * at setup time (here) before the first expression evaluation

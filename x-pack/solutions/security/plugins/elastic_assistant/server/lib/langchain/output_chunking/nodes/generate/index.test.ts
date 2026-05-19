@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ActionsClientLlm } from '@kbn/langchain/server';
-import type { ZodType } from '@kbn/zod';
+import type { ZodType } from '@kbn/zod/v4';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import { FakeLLM } from '@langchain/core/utils/testing';
 
@@ -176,7 +176,7 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
       ...initialGraphState,
       combinedGenerations: '{"key": "value"}',
       errors: [
-        'generate node is unable to parse (fake) response from attempt 0; (this may be an incomplete response from the model): [\n  {\n    "code": "invalid_type",\n    "expected": "array",\n    "received": "undefined",\n    "path": [\n      "insights"\n    ],\n    "message": "Required"\n  }\n]',
+        'generate node is unable to parse (fake) response from attempt 0; (this may be an incomplete response from the model): [\n  {\n    "expected": "array",\n    "code": "invalid_type",\n    "path": [\n      "insights"\n    ],\n    "message": "Invalid input: expected array, received undefined"\n  }\n]',
       ],
       generationAttempts: 1,
       generations: ['{"key": "value"}'],

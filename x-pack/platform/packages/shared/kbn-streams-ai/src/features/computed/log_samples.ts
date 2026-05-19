@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { getSampleDocuments } from '@kbn/ai-tools';
+import { compact } from 'lodash';
+import { getSampleDocumentsEsql } from '@kbn/ai-tools';
 import { LOG_SAMPLES_FEATURE_TYPE } from '@kbn/streams-schema';
 import type { ComputedFeatureGenerator } from './types';
+import { formatRawDocument } from '../utils/format_raw_document';
 
 const SAMPLE_SIZE = 5;
 
@@ -21,18 +23,16 @@ Use the \`properties.samples\` array to see actual log entries and their field v
 This is useful for understanding the format of logs, identifying patterns, and seeing real examples of data in the stream.`,
 
   generate: async ({ stream, start, end, esClient }) => {
-    const { hits } = await getSampleDocuments({
+    const { hits } = await getSampleDocumentsEsql({
       esClient,
       index: stream.name,
       start,
       end,
-      size: SAMPLE_SIZE,
+      sampleSize: SAMPLE_SIZE,
     });
 
-    const samples = hits.map((hit) => hit.fields ?? {});
-
     return {
-      samples,
+      samples: compact(hits.map((hit) => formatRawDocument({ hit })?.fields)),
     };
   },
 };

@@ -188,12 +188,11 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
           content={i18n.translate('dataGridInTableSearch.inputPlaceholder', {
             defaultMessage: 'Find in table',
           })}
-          delay="long"
         >
           <EuiButtonIcon
             data-test-subj={BUTTON_TEST_SUBJ}
             buttonRef={buttonRef}
-            iconType="search"
+            iconType="magnify"
             size="xs"
             color="text"
             className="dataGridInTableSearch__button"

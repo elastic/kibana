@@ -8,6 +8,7 @@
  */
 
 import { FlagsReader } from '@kbn/dev-cli-runner';
+import { ScoutTestTarget } from '@kbn/scout-info';
 import * as testFilesUtils from '../../common/utils';
 import * as configValidator from './config_validator';
 import { parseTestFlags } from './flags';
@@ -38,6 +39,7 @@ describe('parseTestFlags', () => {
       domain: 'classic',
       headed: false,
       logToFile: false,
+      preserveEsData: false,
       serverConfigSet: 'default',
     });
 
@@ -54,6 +56,7 @@ describe('parseTestFlags', () => {
       arch: 'stateful',
       domain: 'classic',
       logToFile: false,
+      preserveEsData: false,
       headed: false,
       serverConfigSet: 'default',
     });
@@ -69,6 +72,7 @@ describe('parseTestFlags', () => {
       arch: true,
       domain: 'classic',
       logToFile: false,
+      preserveEsData: false,
       headed: false,
       serverConfigSet: 'default',
     });
@@ -82,6 +86,7 @@ describe('parseTestFlags', () => {
       arch: 'stateful',
       domain: true,
       logToFile: false,
+      preserveEsData: false,
       headed: false,
       serverConfigSet: 'default',
     });
@@ -95,6 +100,7 @@ describe('parseTestFlags', () => {
       arch: 'stateful',
       domain: 'classic',
       logToFile: false,
+      preserveEsData: false,
       headed: false,
       serverConfigSet: 'default',
     });
@@ -110,6 +116,7 @@ describe('parseTestFlags', () => {
       arch: 'bad_arch',
       domain: 'classic',
       logToFile: false,
+      preserveEsData: false,
       headed: false,
       serverConfigSet: 'default',
     });
@@ -125,6 +132,7 @@ describe('parseTestFlags', () => {
       arch: 'stateful',
       domain: 'rainbow-barfing-unicorns',
       logToFile: false,
+      preserveEsData: false,
       headed: false,
       serverConfigSet: 'default',
     });
@@ -141,6 +149,7 @@ describe('parseTestFlags', () => {
       domain: 'observability_complete',
       config: '/path/to/config',
       logToFile: false,
+      preserveEsData: false,
       headed: false,
       serverConfigSet: 'default',
     });
@@ -151,14 +160,12 @@ describe('parseTestFlags', () => {
       configPath: '/path/to/config',
       esFrom: undefined,
       headed: false,
+      repeatEach: undefined,
       installDir: undefined,
       logsDir: undefined,
+      preserveEsData: false,
       serverConfigSet: 'default',
-      testTarget: {
-        arch: 'serverless',
-        domain: 'observability_complete',
-        location: 'local',
-      },
+      testTarget: new ScoutTestTarget('local', 'serverless', 'observability_complete'),
     });
   });
 
@@ -169,6 +176,7 @@ describe('parseTestFlags', () => {
       domain: 'classic',
       config: '/path/to/config',
       logToFile: false,
+      preserveEsData: false,
       headed: true,
       esFrom: 'snapshot',
       serverConfigSet: 'default',
@@ -180,14 +188,12 @@ describe('parseTestFlags', () => {
       configPath: '/path/to/config',
       esFrom: 'snapshot',
       headed: true,
+      repeatEach: undefined,
       installDir: undefined,
       logsDir: undefined,
+      preserveEsData: false,
       serverConfigSet: 'default',
-      testTarget: {
-        arch: 'stateful',
-        domain: 'classic',
-        location: 'local',
-      },
+      testTarget: new ScoutTestTarget('local', 'stateful', 'classic'),
     });
   });
 
@@ -198,6 +204,7 @@ describe('parseTestFlags', () => {
       domain: 'security_ease',
       config: '/path/to/config',
       logToFile: false,
+      preserveEsData: false,
       headed: false,
       serverConfigSet: 'default',
     });
@@ -208,14 +215,12 @@ describe('parseTestFlags', () => {
       configPath: '/path/to/config',
       esFrom: undefined,
       headed: false,
+      repeatEach: undefined,
       installDir: undefined,
       logsDir: undefined,
+      preserveEsData: false,
       serverConfigSet: 'default',
-      testTarget: {
-        arch: 'serverless',
-        domain: 'security_ease',
-        location: 'cloud',
-      },
+      testTarget: new ScoutTestTarget('cloud', 'serverless', 'security_ease'),
     });
   });
 
@@ -226,6 +231,7 @@ describe('parseTestFlags', () => {
       domain: 'classic',
       config: '/path/to/config',
       logToFile: false,
+      preserveEsData: false,
       headed: true,
       esFrom: 'snapshot',
       serverConfigSet: 'default',
@@ -237,15 +243,95 @@ describe('parseTestFlags', () => {
       configPath: '/path/to/config',
       esFrom: 'snapshot',
       headed: true,
+      repeatEach: undefined,
       installDir: undefined,
       logsDir: undefined,
+      preserveEsData: false,
       serverConfigSet: 'default',
-      testTarget: {
-        arch: 'stateful',
-        domain: 'classic',
-        location: 'cloud',
-      },
+      testTarget: new ScoutTestTarget('cloud', 'stateful', 'classic'),
     });
+  });
+
+  it(`should parse with --repeatEach flag`, async () => {
+    const flags = new FlagsReader({
+      location: 'local',
+      arch: 'stateful',
+      domain: 'classic',
+      config: '/path/to/config',
+      logToFile: false,
+      preserveEsData: false,
+      headed: false,
+      repeatEach: '5',
+      serverConfigSet: 'default',
+    });
+    validatePlaywrightConfigMock.mockResolvedValueOnce();
+    const result = await parseTestFlags(flags);
+
+    expect(result).toEqual({
+      configPath: '/path/to/config',
+      esFrom: undefined,
+      headed: false,
+      repeatEach: 5,
+      installDir: undefined,
+      logsDir: undefined,
+      preserveEsData: false,
+      serverConfigSet: 'default',
+      testTarget: new ScoutTestTarget('local', 'stateful', 'classic'),
+    });
+  });
+
+  it(`should throw an error when '--repeatEach' is not a number`, async () => {
+    const flags = new FlagsReader({
+      location: 'local',
+      arch: 'stateful',
+      domain: 'classic',
+      config: '/path/to/config',
+      logToFile: false,
+      preserveEsData: false,
+      headed: false,
+      repeatEach: 'abc',
+      serverConfigSet: 'default',
+    });
+
+    await expect(parseTestFlags(flags)).rejects.toThrow(
+      `unable to parse --repeatEach value [abc] as a number`
+    );
+  });
+
+  it(`should throw an error when '--repeatEach' is zero`, async () => {
+    const flags = new FlagsReader({
+      location: 'local',
+      arch: 'stateful',
+      domain: 'classic',
+      config: '/path/to/config',
+      logToFile: false,
+      preserveEsData: false,
+      headed: false,
+      repeatEach: '0',
+      serverConfigSet: 'default',
+    });
+
+    await expect(parseTestFlags(flags)).rejects.toThrow(
+      `'--repeatEach' must be a positive integer, got '0'`
+    );
+  });
+
+  it(`should throw an error when '--repeatEach' is a decimal`, async () => {
+    const flags = new FlagsReader({
+      location: 'local',
+      arch: 'stateful',
+      domain: 'classic',
+      config: '/path/to/config',
+      logToFile: false,
+      preserveEsData: false,
+      headed: false,
+      repeatEach: '2.5',
+      serverConfigSet: 'default',
+    });
+
+    await expect(parseTestFlags(flags)).rejects.toThrow(
+      `'--repeatEach' must be a positive integer, got '2.5'`
+    );
   });
 
   describe('testFiles flag', () => {
@@ -271,6 +357,7 @@ describe('parseTestFlags', () => {
         domain: 'classic',
         testFiles: testFile,
         logToFile: false,
+        preserveEsData: false,
         headed: false,
         serverConfigSet: 'default',
       });
@@ -282,15 +369,13 @@ describe('parseTestFlags', () => {
         configPath: derivedConfig,
         esFrom: undefined,
         headed: false,
+        repeatEach: undefined,
         installDir: undefined,
         logsDir: undefined,
+        preserveEsData: false,
         serverConfigSet: 'default',
         testFiles: [testFile],
-        testTarget: {
-          arch: 'stateful',
-          domain: 'classic',
-          location: 'local',
-        },
+        testTarget: new ScoutTestTarget('local', 'stateful', 'classic'),
       });
     });
 
@@ -314,6 +399,7 @@ describe('parseTestFlags', () => {
         domain: 'classic',
         testFiles: testFilesString,
         logToFile: false,
+        preserveEsData: false,
         headed: false,
         serverConfigSet: 'default',
       });
@@ -325,15 +411,13 @@ describe('parseTestFlags', () => {
         configPath: derivedConfig,
         esFrom: undefined,
         headed: false,
+        repeatEach: undefined,
         installDir: undefined,
         logsDir: undefined,
+        preserveEsData: false,
         serverConfigSet: 'default',
         testFiles,
-        testTarget: {
-          arch: 'stateful',
-          domain: 'classic',
-          location: 'local',
-        },
+        testTarget: new ScoutTestTarget('local', 'stateful', 'classic'),
       });
     });
 
@@ -354,6 +438,7 @@ describe('parseTestFlags', () => {
         domain: 'classic',
         testFiles: testFile,
         logToFile: false,
+        preserveEsData: false,
         headed: false,
         serverConfigSet: 'default',
       });
@@ -381,6 +466,7 @@ describe('parseTestFlags', () => {
         domain: 'classic',
         testFiles: testFile,
         logToFile: false,
+        preserveEsData: false,
         headed: false,
         serverConfigSet: 'default',
       });
@@ -405,6 +491,7 @@ describe('parseTestFlags', () => {
         domain: 'classic',
         testFiles: testFile,
         logToFile: false,
+        preserveEsData: false,
         headed: false,
         serverConfigSet: 'default',
       });
@@ -419,6 +506,7 @@ describe('parseTestFlags', () => {
         domain: 'classic',
         config: '/path/to/config',
         logToFile: false,
+        preserveEsData: false,
         headed: false,
         serverConfigSet: 'default',
       });

@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { EsqlFieldType } from '@kbn/esql-types';
-import { getMessageFromId } from '../../definitions/utils/errors';
-import { isLiteral, isInlineCast, isOptionNode } from '../../../ast/is';
+import { isLiteral, isInlineCast, isOptionNode } from '@elastic/esql';
 import type {
   ESQLColumn,
   ESQLAstAllCommands,
-  ESQLMessage,
   ESQLCommandOption,
   ESQLAst,
-} from '../../../types';
+} from '@elastic/esql/types';
+import { getMessageFromId } from '../../definitions/utils/errors';
 import type { ICommandContext, ICommandCallbacks } from '../types';
 import { validateCommandArguments } from '../../definitions/utils/validation';
+import type { ESQLMessage } from '../../definitions/types';
 
 const validateColumnForGrokDissect = (command: ESQLAstAllCommands, context?: ICommandContext) => {
   const acceptedColumnTypes: EsqlFieldType[] = ['keyword', 'text'];

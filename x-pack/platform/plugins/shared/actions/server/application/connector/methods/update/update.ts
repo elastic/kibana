@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectAttributes } from '@kbn/core/server';
 import { isUndefined, omitBy } from 'lodash';
@@ -14,9 +15,17 @@ import type { ConnectorUpdateParams } from './types';
 import { PreconfiguredActionDisabledModificationError } from '../../../../lib/errors/preconfigured_action_disabled_modification';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { validateConfig, validateConnector, validateSecrets } from '../../../../lib';
-import { isConnectorDeprecated } from '../../lib';
+import { ensureConfigAuthType } from '../../../../lib/ensure_config_auth_type';
+import { inferAuthMode } from '../../../../lib/infer_auth_mode';
+import { getAuthMode, isConnectorDeprecated } from '../../lib';
 import type { RawAction, HookServices } from '../../../../types';
 import { tryCatch } from '../../../../lib';
+
+const getAuthTypeId = (
+  secrets?: Record<string, unknown>,
+  config?: Record<string, unknown>
+): string | undefined =>
+  (secrets as { authType?: string })?.authType ?? (config as { authType?: string })?.authType;
 
 export async function update({ context, id, action }: ConnectorUpdateParams): Promise<Connector> {
   try {
@@ -60,8 +69,38 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   }
   const { attributes, references, version } =
     await context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
-  const { actionTypeId } = attributes;
+  const { actionTypeId, authMode } = attributes;
   const { name, config, secrets } = action;
+
+  const currentAuthMode = authMode ?? 'shared';
+  const currentAuthTypeId = getAuthTypeId(attributes.secrets, attributes.config);
+  const requestedAuthTypeId = getAuthTypeId(secrets, config);
+  const requestedAuthMode = inferAuthMode({
+    authTypeRegistry: context.authTypeRegistry,
+    secrets,
+    config,
+  });
+
+  if (currentAuthMode === 'per-user') {
+    if (requestedAuthTypeId !== currentAuthTypeId) {
+      throw Boom.badRequest(
+        i18n.translate('xpack.actions.serverSideErrors.perUserConnectorAuthTypeChangeForbidden', {
+          defaultMessage:
+            'Authentication type cannot be changed for per-user connectors. Connector: {id}.',
+          values: { id },
+        })
+      );
+    }
+  } else if (requestedAuthMode === 'per-user') {
+    throw Boom.badRequest(
+      i18n.translate('xpack.actions.serverSideErrors.sharedConnectorPerUserAuthTypeForbidden', {
+        defaultMessage:
+          'Authentication type cannot be changed to a per-user type for shared connectors. Connector: {id}.',
+        values: { id },
+      })
+    );
+  }
+
   const actionType = context.actionTypeRegistry.get(actionTypeId);
   const configurationUtilities = context.actionTypeRegistry.getUtils();
   const validatedActionTypeConfig = validateConfig(actionType, config, {
@@ -111,6 +150,14 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     })
   );
 
+  const configForSave =
+    actionType.source === ACTION_TYPE_SOURCES.spec
+      ? ensureConfigAuthType(
+          validatedActionTypeConfig as Record<string, unknown>,
+          validatedActionTypeSecrets as Record<string, unknown>
+        )
+      : validatedActionTypeConfig;
+
   const result = await tryCatch(
     async () =>
       await context.unsecuredSavedObjectsClient.create<RawAction>(
@@ -120,7 +167,7 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
           actionTypeId,
           name,
           isMissingSecrets: false,
-          config: validatedActionTypeConfig as SavedObjectAttributes,
+          config: configForSave as SavedObjectAttributes,
           secrets: validatedActionTypeSecrets as SavedObjectAttributes,
         },
         omitBy(
@@ -163,12 +210,16 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   }
 
   try {
-    await context.connectorTokenClient.deleteConnectorTokens({ connectorId: id });
+    await context.connectorTokenClient.deleteConnectorTokens({ connectorId: id, authMode });
   } catch (e) {
     context.logger.error(
       `Failed to delete auth tokens for connector "${id}" after update: ${e.message}`
     );
   }
+
+  const resolvedAuthMode = getAuthMode(
+    result.attributes.authMode as Connector['authMode'] | undefined
+  );
 
   return {
     id,
@@ -180,5 +231,6 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     isSystemAction: false,
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
+    authMode: resolvedAuthMode,
   };
 }

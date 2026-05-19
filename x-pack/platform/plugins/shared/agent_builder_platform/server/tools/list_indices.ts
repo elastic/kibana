@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { listSearchSources } from '@kbn/agent-builder-genai-utils';
@@ -43,7 +43,6 @@ e.g. if the user provided one. Otherwise, do not try to invent or guess a patter
       } = await listSearchSources({
         pattern,
         includeHidden: false,
-        includeKibanaIndices: false,
         excludeIndicesRepresentedAsAlias: false,
         excludeIndicesRepresentedAsDatastream: true,
         esClient: esClient.asCurrentUser,

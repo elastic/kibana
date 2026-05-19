@@ -367,6 +367,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // click on first rule
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(ruleName);
 
+        const actionsButton = await testSubjects.find('ruleActionsButton');
+        await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
         expect(await testSubjects.exists('hasActionsDisabled')).to.eql(false);
@@ -400,6 +402,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // click on first rule
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(updatedRuleName);
 
+        const actionsButton = await testSubjects.find('ruleActionsButton');
+        await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
 
@@ -412,6 +416,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
         await find.waitForDeletedByCssSelector('[data-test-subj="rulePageFooterCancelButton"]');
 
+        await actionsButton.click();
         await editButton.click();
 
         const nameInputAfterCancel = await testSubjects.find('ruleDetailsNameInput');
@@ -474,6 +479,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToApp('rules');
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
 
+        const actionsButton = await testSubjects.find('ruleActionsButton');
+        await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
         expect(await testSubjects.exists('hasActionsDisabled')).to.eql(false);
@@ -535,10 +542,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToApp('rules');
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
 
+        const actionsButton = await testSubjects.find('ruleActionsButton');
+        await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
 
-        await find.clickByButtonText('Settings');
         const notifyWhenSelect = await testSubjects.find('notifyWhenSelect');
         expect(await notifyWhenSelect.getVisibleText()).to.eql('On custom action intervals');
         const throttleInput = await testSubjects.find('throttleInput');
@@ -908,6 +916,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // Verify we're on the rule details page by checking for rule-specific elements
         await testSubjects.existOrFail('statusDropdown');
+        const actionsButton = await testSubjects.find('ruleActionsButton');
+        await actionsButton.click();
         await testSubjects.existOrFail('openEditRuleFlyoutButton');
       });
 
@@ -933,6 +943,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // Verify we're on the rule details page by checking for rule-specific elements
         await testSubjects.existOrFail('statusDropdown');
+        const actionsButton = await testSubjects.find('ruleActionsButton');
+        await actionsButton.click();
         await testSubjects.existOrFail('openEditRuleFlyoutButton');
 
         // Assert that we're still within the correct space by checking the URL

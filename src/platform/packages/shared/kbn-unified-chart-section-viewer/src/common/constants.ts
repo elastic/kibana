@@ -11,7 +11,6 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 // Full screen classes
 export const METRICS_GRID_CLASS = 'metricsGrid';
-export const METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS = 'metricsGridWrapper--fullScreen';
 export const METRICS_GRID_FULL_SCREEN_CLASS = `${METRICS_GRID_CLASS}--fullScreen`;
 export const METRICS_GRID_RESTRICT_BODY_CLASS = `${METRICS_GRID_CLASS}--restrictBody`;
 
@@ -59,3 +58,6 @@ export const DIMENSION_TYPES = [
   ES_FIELD_TYPES.BYTE,
   ES_FIELD_TYPES.UNSIGNED_LONG,
 ];
+
+// Metric instrument types allowed in the Metrics experience.
+export const ALLOWED_METRIC_TYPES = ['gauge', 'counter', 'histogram'];

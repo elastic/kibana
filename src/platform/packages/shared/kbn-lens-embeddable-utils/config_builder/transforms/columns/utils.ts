@@ -22,16 +22,18 @@ import type {
   ReferableMetricLensStateColumn,
 } from './types';
 import type { LensApiAllOperations, LensApiBucketOperations } from '../../schema';
+import type { LensApiFilterType } from '../../schema/filter';
 
 export const LENS_EMPTY_AS_NULL_DEFAULT_VALUE = false;
 
 const LENS_DEFAULT_LABEL = '';
+
 export function getLensStateMetricSharedProps(
   options: {
     time_scale?: TimeScaleUnit;
     reduced_time_range?: string;
     time_shift?: string;
-    filter?: { query: string; language: 'kuery' | 'lucene' };
+    filter?: LensApiFilterType;
     label?: string;
   },
   dataType: DataType = 'number'

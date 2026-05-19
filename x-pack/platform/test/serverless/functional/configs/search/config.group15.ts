@@ -15,7 +15,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [
       require.resolve('../../test_suites/discover/embeddable'), // 5 min
       require.resolve('../../test_suites/context'), // 6 min
-      require.resolve('../../test_suites/discover/esql'), // 7min
     ],
     junit: {
       reportName: 'Serverless Search Functional Tests - Common Group 15',

@@ -9,9 +9,9 @@ import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { EuiFlexGrid } from '@elastic/eui';
 import { MLOverviewCard } from './overview_ml_page';
-import { ML_PAGES } from '../../locator';
 
 export const DataVisualizerGrid: FC<{ isEsqlEnabled: boolean; cardTitleSize?: 's' | 'xs' }> = ({
   isEsqlEnabled,
@@ -46,7 +46,7 @@ export const DataVisualizerGrid: FC<{ isEsqlEnabled: boolean; cardTitleSize?: 's
     ) : null}
     <MLOverviewCard
       layout="horizontal"
-      iconType="visTagCloud"
+      iconType="chartTagCloud"
       path="/data_drift_index_select"
       title={
         <FormattedMessage
@@ -83,7 +83,7 @@ export const DataVisualizerGrid: FC<{ isEsqlEnabled: boolean; cardTitleSize?: 's
       buttonDataTestSubj="mlDataVisualizerUploadFileButton"
     />
     <MLOverviewCard
-      iconType="tableDensityCompact"
+      iconType="tableDensityHigh"
       layout="horizontal"
       path="/datavisualizer_index_select"
       title={i18n.translate('xpack.ml.datavisualizer.selector.selectDataViewTitle', {

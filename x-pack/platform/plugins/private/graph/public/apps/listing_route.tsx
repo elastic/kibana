@@ -181,7 +181,7 @@ function getNoItemsMessage(
         <EuiButton
           onClick={createItem}
           fill
-          iconType="plusInCircle"
+          iconType="plusCircle"
           data-test-subj="graphCreateGraphPromptButton"
         >
           <FormattedMessage

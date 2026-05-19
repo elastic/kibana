@@ -40,9 +40,9 @@ steps:
       diskSizeGb: 115
     key: build_scout_tests
     timeout_in_minutes: 30
-    depends_on:
-      - build
     env:
+      SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
+      SCOUT_CONFIGS_DEPS: 'build_scout_tests,build'
       UIAM_DOCKER_IMAGE: $UIAM_IMAGE
       SERVERLESS_TESTS_ONLY: 'true'
       SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'

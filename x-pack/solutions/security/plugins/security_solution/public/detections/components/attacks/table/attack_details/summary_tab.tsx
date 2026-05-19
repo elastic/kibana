@@ -6,7 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import { TableId } from '@kbn/securitysolution-data-table';
@@ -16,6 +17,7 @@ import { getTacticMetadata } from '../../../../../attack_discovery/helpers';
 import { AttackChain } from '../../../../../attack_discovery/pages/results/attack_discovery_panel/tabs/attack_discovery_tab/attack/attack_chain';
 import { AttackDiscoveryMarkdownFormatter } from '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
 import { buildAlertsKqlFilter } from '../../../alerts_table/actions';
+import { AttackAiAssistantButton } from './attack_ai_assistant_button';
 
 import * as i18n from './translations';
 
@@ -40,6 +42,7 @@ interface SummaryTabProps {
  * and optionally the attack chain visualization.
  */
 export const SummaryTab = React.memo<SummaryTabProps>(({ attack, showAnonymized = false }) => {
+  const { euiTheme } = useEuiTheme();
   const { detailsMarkdown, summaryMarkdown } = useMemo(() => attack, [attack]);
 
   const summaryMarkdownWithReplacements = useMemo(
@@ -112,26 +115,43 @@ export const SummaryTab = React.memo<SummaryTabProps>(({ attack, showAnonymized 
         </>
       )}
 
-      <InvestigateInTimelineButton
-        asEmptyButton={true}
-        dataProviders={null}
-        filters={investigateInTimelineFilters}
-      >
-        <EuiFlexGroup
-          alignItems="center"
-          data-test-subj={INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID}
-          gutterSize="xs"
-          responsive={false}
-          wrap={false}
+      <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <AttackAiAssistantButton attack={attack} pathway="attacks_page_group_summary" />
+        </EuiFlexItem>
+        <EuiFlexItem
+          css={css`
+            margin-left: ${euiTheme.size.m};
+            margin-top: ${euiTheme.size.xs};
+          `}
+          grow={false}
         >
-          <EuiFlexItem grow={false}>
-            <EuiIcon data-test-subj={TIMELINE_ICON_TEST_ID} type="timeline" />
-          </EuiFlexItem>
-          <EuiFlexItem data-test-subj={INVESTIGATE_IN_TIMELINE_LABEL_TEST_ID} grow={false}>
-            {i18n.INVESTIGATE_IN_TIMELINE}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </InvestigateInTimelineButton>
+          <InvestigateInTimelineButton
+            asEmptyButton={true}
+            dataProviders={null}
+            filters={investigateInTimelineFilters}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              data-test-subj={INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID}
+              gutterSize="xs"
+              responsive={false}
+              wrap={false}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiIcon
+                  data-test-subj={TIMELINE_ICON_TEST_ID}
+                  type="timeline"
+                  aria-hidden={true}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem data-test-subj={INVESTIGATE_IN_TIMELINE_LABEL_TEST_ID} grow={false}>
+                {i18n.INVESTIGATE_IN_TIMELINE}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </InvestigateInTimelineButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 });

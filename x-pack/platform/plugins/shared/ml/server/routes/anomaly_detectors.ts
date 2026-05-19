@@ -465,7 +465,10 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
           response: {
             200: {
               body: () =>
-                schema.object({ count: schema.number(), buckets: schema.arrayOf(schema.any()) }),
+                schema.object({
+                  count: schema.number(),
+                  buckets: schema.arrayOf(schema.any(), { maxSize: 10000 }),
+                }),
             },
           },
         },
@@ -553,7 +556,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
         try {
           const body = await mlClient.getCategories({
             job_id: request.params.jobId,
-            category_id: request.params.categoryId,
+            category_id: Number(request.params.categoryId),
           });
           return response.ok({
             body,

@@ -5,21 +5,8 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
-
 export const LOGSTASH_DEFAULT_START_TIME = '2015-09-19T06:31:44.000Z';
 export const LOGSTASH_DEFAULT_END_TIME = '2015-09-23T18:31:44.000Z';
-
-export const TSDB_LOGS_DEFAULT_START_TIME = '2023-03-28T09:17:00.000Z';
-export const TSDB_LOGS_DEFAULT_END_TIME = '2023-06-28T09:17:00.000Z';
-
-export const METRICS_TEST_INDEX_NAME = 'test-metrics-experience';
-
-export const ESQL_QUERIES = {
-  TS_TSDB_LOGS: 'TS kibana_sample_data_logstsdb',
-  FROM_TSDB_LOGS: 'FROM kibana_sample_data_logstsdb',
-  TS_METRICS_TEST: `TS ${METRICS_TEST_INDEX_NAME}`,
-};
 
 /**
  * Should be used in "single thread" tests to set default Data View
@@ -39,7 +26,6 @@ export const DATA_VIEW_NAME = {
   ECOMMERCE: 'ecommerce',
   LOGSTASH: 'logstash-*',
   NO_TIME_FIELD: 'without-timefield',
-  TSDB_LOGS: 'Kibana Sample Data Logs (TSDB)',
 };
 
 export const LOGSTASH_OUT_OF_RANGE_DATES = {
@@ -57,7 +43,6 @@ export const ES_ARCHIVES = {
   NO_TIME_FIELD:
     'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield',
   ECOMMERCE: 'x-pack/platform/test/fixtures/es_archives/reporting/ecommerce',
-  TSDB_LOGS: 'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb',
 };
 
 export const KBN_ARCHIVES = {
@@ -69,10 +54,4 @@ export const KBN_ARCHIVES = {
     'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard_drilldowns/drilldowns',
   DISCOVER: 'src/platform/test/functional/fixtures/kbn_archiver/discover',
   ECOMMERCE: 'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/ecommerce.json',
-  TSDB_LOGS: 'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_logs_tsdb.json',
 };
-
-export const METRICS_EXPERIENCE_TAGS = [
-  ...tags.stateful.all,
-  ...tags.serverless.observability.complete,
-];

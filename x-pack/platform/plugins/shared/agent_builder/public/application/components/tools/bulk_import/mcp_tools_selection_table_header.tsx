@@ -101,7 +101,7 @@ export const McpToolsSelectionTableHeader = memo<McpToolsSelectionTableHeaderPro
                     <EuiPopover
                       button={
                         <EuiButtonEmpty
-                          iconType="arrowDown"
+                          iconType="chevronSingleDown"
                           iconSide="right"
                           iconSize="s"
                           size="xs"
@@ -118,7 +118,6 @@ export const McpToolsSelectionTableHeader = memo<McpToolsSelectionTableHeaderPro
                       anchorPosition="downLeft"
                     >
                       <EuiContextMenuPanel
-                        size="s"
                         items={[
                           <EuiContextMenuItem
                             key="selectAll"

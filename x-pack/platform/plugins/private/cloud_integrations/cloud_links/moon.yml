@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/cloud-links-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/cloud-links-plugin'
+  title: '@kbn/cloud-links-plugin'
   description: Moon project for @kbn/cloud-links-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/private/cloud_integrations/cloud_links
+  sourceRoot: x-pack/platform/plugins/private/cloud_integrations/cloud_links
 dependsOn:
   - '@kbn/core'
   - '@kbn/cloud-plugin'
@@ -46,16 +45,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

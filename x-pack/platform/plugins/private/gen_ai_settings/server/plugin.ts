@@ -8,10 +8,13 @@
 import type { CoreSetup, CoreStart, Plugin, KibanaRequest } from '@kbn/core/server';
 import type { Logger, PluginInitializerContext } from '@kbn/core/server';
 import {
+  AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+  GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
 } from '@kbn/management-settings-ids';
 import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 import { registerServerRoutes } from './routes/register_routes';
 import type {
   GenAiSettingsPluginSetupDependencies,
@@ -100,6 +103,31 @@ export class GenAiSettingsPlugin
 
     core.uiSettings.register({
       [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: {
+        readonlyMode: 'ui',
+        readonly: true,
+        schema: schema.boolean(),
+        value: false,
+      },
+    });
+
+    core.uiSettings.register({
+      [AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS]: {
+        readonlyMode: 'ui',
+        readonly: true,
+        schema: schema.arrayOf(schema.string(), { maxSize: 100 }),
+        value: [],
+      },
+    });
+
+    core.uiSettings.register({
+      [GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING]: {
+        name: i18n.translate('genAiSettings.tokenUsageTracking.name', {
+          defaultMessage: 'Token usage tracking',
+        }),
+        description: i18n.translate('genAiSettings.tokenUsageTracking.description', {
+          defaultMessage:
+            'Track token usage for AI features. When enabled, token counts are logged for each LLM request, and a dashboard is available to monitor usage.',
+        }),
         readonlyMode: 'ui',
         readonly: true,
         schema: schema.boolean(),

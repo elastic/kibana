@@ -72,6 +72,7 @@
             "type": "keyword"
           },
           "params": {
+            "ignore_above": 4096,
             "type": "flattened"
           }
         },
@@ -284,6 +285,18 @@
         },
         "type": "nested"
       },
+      "snoozedInstances": {
+        "properties": {
+          "instanceId": {
+            "type": "keyword"
+          },
+          "snoozeSnapshot": {
+            "dynamic": false,
+            "type": "object"
+          }
+        },
+        "type": "nested"
+      },
       "tags": {
         "type": "keyword"
       },
@@ -292,6 +305,209 @@
       },
       "uiamApiKey": {
         "type": "binary"
+      },
+      "updatedAt": {
+        "type": "date"
+      },
+      "updatedBy": {
+        "type": "keyword"
+      }
+    }
+  },
+  "alerting_action_policy": {
+    "dynamic": false,
+    "properties": {
+      "auth": {
+        "properties": {
+          "apiKey": {
+            "type": "binary"
+          },
+          "createdByUser": {
+            "type": "boolean"
+          },
+          "owner": {
+            "type": "keyword"
+          }
+        },
+        "type": "object"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "createdBy": {
+        "type": "keyword"
+      },
+
+      "description": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "destinations": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "type": {
+            "type": "keyword"
+          }
+        },
+        "type": "object"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "groupBy": {
+        "type": "keyword"
+      },
+      "groupingMode": {
+        "type": "keyword"
+      },
+      "name": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "ruleId": {
+        "type": "keyword"
+      },
+      "snoozedUntil": {
+        "type": "date"
+      },
+      "tags": {
+        "type": "keyword"
+      },
+      "throttle": {
+        "properties": {
+          "strategy": {
+            "type": "keyword"
+          }
+        },
+        "type": "object"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "updatedAt": {
+        "type": "date"
+      },
+      "updatedBy": {
+        "type": "keyword"
+      }
+    }
+  },
+  "alerting_api_key_pending_invalidation": {
+    "dynamic": false,
+    "properties": {
+      "apiKeyId": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "uiamApiKey": {
+        "type": "binary"
+      }
+    }
+  },
+  "alerting_rule": {
+    "dynamic": false,
+    "properties": {
+      "createdAt": {
+        "type": "date"
+      },
+      "createdBy": {
+        "type": "keyword"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "evaluation": {
+        "properties": {
+          "query": {
+            "properties": {
+              "base": {
+                "type": "text"
+              }
+            }
+          }
+        }
+      },
+      "grouping": {
+        "properties": {
+          "fields": {
+            "type": "keyword"
+          }
+        }
+      },
+      "kind": {
+        "type": "keyword"
+      },
+      "metadata": {
+        "properties": {
+          "description": {
+            "type": "text"
+          },
+          "name": {
+            "fields": {
+              "keyword": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
+          },
+          "owner": {
+            "type": "keyword"
+          },
+          "tags": {
+            "type": "keyword"
+          }
+        }
+      },
+      "no_data": {
+        "properties": {
+          "behavior": {
+            "type": "keyword"
+          },
+          "timeframe": {
+            "type": "keyword"
+          }
+        }
+      },
+      "recovery_policy": {
+        "properties": {
+          "query": {
+            "properties": {
+              "base": {
+                "type": "text"
+              }
+            }
+          },
+          "type": {
+            "type": "keyword"
+          }
+        }
+      },
+      "schedule": {
+        "properties": {
+          "every": {
+            "type": "keyword"
+          },
+          "lookback": {
+            "type": "keyword"
+          }
+        }
+      },
+      "time_field": {
+        "type": "keyword"
       },
       "updatedAt": {
         "type": "date"
@@ -323,6 +539,10 @@
         "type": "keyword"
       }
     }
+  },
+  "anonymization-salt": {
+    "dynamic": false,
+    "properties": {}
   },
   "api_key_pending_invalidation": {
     "properties": {
@@ -614,6 +834,9 @@
       "duration": {
         "type": "unsigned_long"
       },
+      "extended_fields": {
+        "type": "flattened"
+      },
       "external_service": {
         "properties": {
           "connector_name": {
@@ -695,6 +918,17 @@
       },
       "tags": {
         "type": "keyword"
+      },
+      "template": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "version": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
       },
       "title": {
         "fields": {
@@ -1116,31 +1350,6 @@
       }
     }
   },
-  "data_connector": {
-    "dynamic": false,
-    "properties": {
-      "kscIds": {
-        "type": "keyword"
-      },
-      "name": {
-        "fields": {
-          "keyword": {
-            "type": "keyword"
-          }
-        },
-        "type": "text"
-      },
-      "toolIds": {
-        "type": "keyword"
-      },
-      "type": {
-        "type": "keyword"
-      },
-      "workflowIds": {
-        "type": "keyword"
-      }
-    }
-  },
   "data_stream-config": {
     "dynamic": false,
     "properties": {
@@ -1172,6 +1381,9 @@
       },
       "result": {
         "properties": {}
+      },
+      "title": {
+        "type": "text"
       }
     }
   },
@@ -1413,12 +1625,31 @@
       }
     }
   },
+  "entity-store-ccs-state": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "entity-store-global-state": {
+    "dynamic": false,
+    "properties": {}
+  },
   "epm-packages": {
     "dynamic": false,
     "properties": {
       "additional_spaces_installed_kibana": {
         "index": false,
         "type": "flattened"
+      },
+      "dependencies": {
+        "properties": {
+          "name": {
+            "type": "keyword"
+          },
+          "version": {
+            "type": "keyword"
+          }
+        },
+        "type": "nested"
       },
       "es_index_patterns": {
         "dynamic": false,
@@ -1459,6 +1690,9 @@
       "install_version": {
         "type": "keyword"
       },
+      "installed_as_dependency": {
+        "type": "boolean"
+      },
       "installed_es": {
         "properties": {
           "deferred": {
@@ -1486,6 +1720,10 @@
       "internal": {
         "type": "boolean"
       },
+      "is_dependency_of": {
+        "dynamic": false,
+        "properties": {}
+      },
       "keep_policies_up_to_date": {
         "index": false,
         "type": "boolean"
@@ -1502,6 +1740,14 @@
         "type": "keyword"
       },
       "package_assets": {
+        "dynamic": false,
+        "properties": {}
+      },
+      "pending_upgrade_review": {
+        "dynamic": false,
+        "properties": {}
+      },
+      "previous_dependency_versions": {
         "dynamic": false,
         "properties": {}
       },
@@ -1985,8 +2231,14 @@
       "is_protected": {
         "type": "boolean"
       },
+      "is_verifier": {
+        "type": "boolean"
+      },
       "keep_monitoring_alive": {
         "type": "boolean"
+      },
+      "min_agent_version": {
+        "type": "keyword"
       },
       "monitoring_enabled": {
         "index": false,
@@ -2004,6 +2256,10 @@
       "overrides": {
         "index": false,
         "type": "flattened"
+      },
+      "package_agent_version_conditions": {
+        "dynamic": false,
+        "properties": {}
       },
       "required_versions": {
         "index": false,
@@ -2058,6 +2314,15 @@
       },
       "vars": {
         "type": "flattened"
+      },
+      "verification_failed_at": {
+        "type": "date"
+      },
+      "verification_started_at": {
+        "type": "date"
+      },
+      "verification_status": {
+        "type": "keyword"
       }
     }
   },
@@ -2153,6 +2418,9 @@
             "type": "keyword"
           }
         }
+      },
+      "package_agent_version_condition": {
+        "type": "keyword"
       },
       "policy_id": {
         "type": "keyword"
@@ -2327,6 +2595,10 @@
       }
     }
   },
+  "inference-settings": {
+    "dynamic": false,
+    "properties": {}
+  },
   "infra-custom-dashboards": {
     "dynamic": false,
     "properties": {
@@ -2411,8 +2683,14 @@
       "is_protected": {
         "type": "boolean"
       },
+      "is_verifier": {
+        "type": "boolean"
+      },
       "keep_monitoring_alive": {
         "type": "boolean"
+      },
+      "min_agent_version": {
+        "type": "keyword"
       },
       "monitoring_diagnostics": {
         "index": false,
@@ -2442,6 +2720,10 @@
       "overrides": {
         "index": false,
         "type": "flattened"
+      },
+      "package_agent_version_conditions": {
+        "dynamic": false,
+        "properties": {}
       },
       "required_versions": {
         "index": false,
@@ -2582,6 +2864,12 @@
       },
       "name": {
         "type": "keyword"
+      },
+      "otel_disable_beatsauth": {
+        "type": "boolean"
+      },
+      "otel_exporter_config_yaml": {
+        "type": "text"
       },
       "output_id": {
         "index": false,
@@ -2774,6 +3062,9 @@
           }
         }
       },
+      "package_agent_version_condition": {
+        "type": "keyword"
+      },
       "policy_id": {
         "type": "keyword"
       },
@@ -2866,6 +3157,9 @@
   "integration-config": {
     "dynamic": false,
     "properties": {
+      "connector_id": {
+        "type": "keyword"
+      },
       "created_by": {
         "type": "keyword"
       },
@@ -2912,6 +3206,10 @@
     "properties": {}
   },
   "kql-telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "lead-generation-config": {
     "dynamic": false,
     "properties": {}
   },
@@ -3039,6 +3337,21 @@
       },
       "version": {
         "type": "integer"
+      }
+    }
+  },
+  "markdown": {
+    "dynamic": false,
+    "properties": {
+      "content": {
+        "index": false,
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "title": {
+        "type": "text"
       }
     }
   },
@@ -3172,6 +3485,20 @@
       }
     }
   },
+  "oauth_state": {
+    "dynamic": false,
+    "properties": {
+      "connectorId": {
+        "type": "keyword"
+      },
+      "expiresAt": {
+        "type": "date"
+      },
+      "state": {
+        "type": "keyword"
+      }
+    }
+  },
   "observability-onboarding-state": {
     "properties": {
       "progress": {
@@ -3203,6 +3530,9 @@
         "type": "date"
       },
       "created_by": {
+        "type": "keyword"
+      },
+      "created_by_profile_uid": {
         "type": "keyword"
       },
       "description": {
@@ -3249,6 +3579,9 @@
         "type": "date"
       },
       "updated_by": {
+        "type": "keyword"
+      },
+      "updated_by_profile_uid": {
         "type": "keyword"
       },
       "version": {
@@ -3310,6 +3643,9 @@
       "created_by": {
         "type": "text"
       },
+      "created_by_profile_uid": {
+        "type": "keyword"
+      },
       "description": {
         "type": "text"
       },
@@ -3337,6 +3673,9 @@
       },
       "updated_by": {
         "type": "text"
+      },
+      "updated_by_profile_uid": {
+        "type": "keyword"
       },
       "version": {
         "type": "keyword"
@@ -3567,6 +3906,9 @@
   "security-rule": {
     "dynamic": false,
     "properties": {
+      "deprecated": {
+        "type": "boolean"
+      },
       "name": {
         "fields": {
           "keyword": {
@@ -3604,6 +3946,65 @@
       },
       "version": {
         "type": "long"
+      }
+    }
+  },
+  "security:endpoint-scripts-library": {
+    "dynamic": false,
+    "properties": {
+      "created_at": {
+        "type": "date"
+      },
+      "created_by": {
+        "type": "keyword"
+      },
+      "description": {
+        "type": "keyword"
+      },
+      "example": {
+        "type": "keyword"
+      },
+      "file_hash_sha256": {
+        "type": "keyword"
+      },
+      "file_id": {
+        "type": "keyword"
+      },
+      "file_name": {
+        "type": "keyword"
+      },
+      "file_size": {
+        "type": "long"
+      },
+      "file_type": {
+        "type": "keyword"
+      },
+      "id": {
+        "type": "keyword"
+      },
+      "instructions": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "path_to_executable": {
+        "type": "keyword"
+      },
+      "platform": {
+        "type": "keyword"
+      },
+      "requires_input": {
+        "type": "boolean"
+      },
+      "tags": {
+        "type": "keyword"
+      },
+      "updated_at": {
+        "type": "date"
+      },
+      "updated_by": {
+        "type": "keyword"
       }
     }
   },
@@ -4041,6 +4442,60 @@
       }
     }
   },
+  "slo-composite": {
+    "dynamic": false,
+    "properties": {
+      "budgetingMethod": {
+        "ignore_above": 256,
+        "type": "keyword"
+      },
+      "compositeMethod": {
+        "ignore_above": 256,
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "description": {
+        "type": "text"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "id": {
+        "ignore_above": 256,
+        "type": "keyword"
+      },
+      "members": {
+        "properties": {
+          "instanceId": {
+            "ignore_above": 256,
+            "type": "keyword"
+          },
+          "sloId": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        }
+      },
+      "name": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "tags": {
+        "ignore_above": 256,
+        "type": "keyword"
+      },
+      "updatedAt": {
+        "type": "date"
+      }
+    }
+  },
   "slo-settings": {
     "dynamic": false,
     "properties": {}
@@ -4385,6 +4840,9 @@
       "attempts": {
         "type": "integer"
       },
+      "cost": {
+        "type": "keyword"
+      },
       "enabled": {
         "type": "boolean"
       },
@@ -4426,6 +4884,9 @@
         "properties": {
           "apiKeyId": {
             "type": "keyword"
+          },
+          "uiamApiKeyId": {
+            "type": "keyword"
           }
         }
       }
@@ -4453,6 +4914,28 @@
     "properties": {
       "count": {
         "type": "integer"
+      }
+    }
+  },
+  "uiam_api_keys_provisioning_status": {
+    "properties": {
+      "@timestamp": {
+        "type": "date"
+      },
+      "entityId": {
+        "type": "keyword"
+      },
+      "entityType": {
+        "type": "keyword"
+      },
+      "errorCode": {
+        "type": "keyword"
+      },
+      "message": {
+        "type": "text"
+      },
+      "status": {
+        "type": "keyword"
       }
     }
   },
@@ -4540,6 +5023,36 @@
       }
     }
   },
+  "user-storage": {
+    "dynamic": false,
+    "properties": {
+      "userId": {
+        "type": "keyword"
+      }
+    }
+  },
+  "user-storage-global": {
+    "dynamic": false,
+    "properties": {
+      "userId": {
+        "type": "keyword"
+      }
+    }
+  },
+  "user_connector_token": {
+    "dynamic": false,
+    "properties": {
+      "connectorId": {
+        "type": "keyword"
+      },
+      "credentialType": {
+        "type": "keyword"
+      },
+      "profileUid": {
+        "type": "keyword"
+      }
+    }
+  },
   "visualization": {
     "dynamic": false,
     "properties": {
@@ -4571,6 +5084,33 @@
       },
       "riskModifier": {
         "type": "float"
+      }
+    }
+  },
+  "watchlist-entity-source": {
+    "dynamic": false,
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "managed": {
+        "type": "boolean"
+      },
+      "name": {
+        "type": "text"
+      },
+      "range": {
+        "properties": {
+          "end": {
+            "type": "keyword"
+          },
+          "start": {
+            "type": "keyword"
+          }
+        }
+      },
+      "type": {
+        "type": "keyword"
       }
     }
   },

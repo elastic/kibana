@@ -20,7 +20,7 @@ import {
   TelemetryControlCancelledReason,
 } from '@kbn/esql-types';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { dismissAllFlyoutsExceptFor, DiscoverFlyouts } from '@kbn/discover-utils';
 import { openLazyFlyout } from '@kbn/presentation-util';
@@ -48,6 +48,7 @@ interface Context {
   initialState?: OptionsListESQLControlState;
   parentApi?: unknown;
   triggerSource?: ControlTriggerSource;
+  controlId?: string;
 }
 
 export class CreateESQLControlAction implements Action<Context> {
@@ -85,6 +86,7 @@ export class CreateESQLControlAction implements Action<Context> {
     initialState,
     parentApi,
     triggerSource,
+    controlId,
   }: Context) {
     if (!isActionCompatible(this.core, variableType)) {
       throw new IncompatibleActionError();
@@ -135,13 +137,14 @@ export class CreateESQLControlAction implements Action<Context> {
       },
       flyoutProps: {
         'data-test-subj': 'create_esql_control_flyout',
+        focusedPanelId: controlId,
         isResizable: true,
         maxWidth: 800,
         triggerId: 'dashboard-controls-menu-button',
-        // When queryString is present (i.e. flyout opened from the ES|QL editor),
+        // When `onCancelControl` is present (i.e. flyout opened from the ES|QL editor),
         // use the local onClose as the onClose handler to ensure proper nested flyout closing behavior.
         // In other scenarios (opened directly from the dashboard), we keep the default close behavior.
-        ...(queryString && { onClose }),
+        ...(onCancelControl && { onClose }),
       },
     });
   }

@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import type { Logger } from '@kbn/logging';
+import type {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+  Logger,
+} from '@kbn/core/server';
 import type {
   DashboardAgentSetupDependencies,
   DashboardAgentStartDependencies,
   DashboardAgentPluginSetup,
   DashboardAgentPluginStart,
 } from './types';
-import { registerDashboardAgent } from './register_agent';
-import { manageDashboardTool } from './tools';
-import { getIsDashboardAgentEnabled } from './utils/get_is_dashboard_agent_enabled';
-import { DASHBOARD_AGENT_FEATURE_FLAG } from '../common/constants';
+import { registerSkills } from './skills';
 import { createDashboardAttachmentType } from './attachment_types';
+import { createDashboardSmlType } from './sml_types';
 
 export class DashboardAgentPlugin
   implements
@@ -28,50 +31,30 @@ export class DashboardAgentPlugin
       DashboardAgentStartDependencies
     >
 {
-  private logger: Logger;
+  private readonly logger: Logger;
 
-  constructor(context: PluginInitializerContext) {
-    this.logger = context.logger.get();
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
   }
 
   setup(
     coreSetup: CoreSetup<DashboardAgentStartDependencies, DashboardAgentPluginStart>,
     setupDeps: DashboardAgentSetupDependencies
   ): DashboardAgentPluginSetup {
-    this.logger.debug('Setting up Dashboard Agent plugin');
+    const getDashboardClient = async () => {
+      const [, startDeps] = await coreSetup.getStartServices();
+      return startDeps.dashboard.client;
+    };
 
-    getIsDashboardAgentEnabled(coreSetup)
-      .then((isDashboardAgentEnabled) => {
-        if (!isDashboardAgentEnabled) {
-          this.logger.debug(
-            `Skipping dashboard agent registration because feature flag "${DASHBOARD_AGENT_FEATURE_FLAG}" is set to false`
-          );
-          return;
-        }
-
-        this.registerToolsAndAgent(coreSetup, setupDeps).catch((error) => {
-          this.logger.error(`Error registering dashboard agent and tools: ${error}`);
-        });
-      })
-      .catch((error) => {
-        this.logger.error(`Error checking whether the dashboard agent is enabled: ${error}`);
-      });
-
+    setupDeps.agentBuilder.attachments.registerType(
+      createDashboardAttachmentType({
+        logger: this.logger,
+        getDashboardClient,
+      }) as Parameters<typeof setupDeps.agentBuilder.attachments.registerType>[0]
+    );
+    setupDeps.agentContextLayer.registerType(createDashboardSmlType({ getDashboardClient }));
+    registerSkills(setupDeps.agentBuilder);
     return {};
-  }
-
-  private async registerToolsAndAgent(
-    coreSetup: CoreSetup<DashboardAgentStartDependencies, DashboardAgentPluginStart>,
-    setupDeps: DashboardAgentSetupDependencies
-  ) {
-    // Register the dashboard attachment type
-    setupDeps.agentBuilder.attachments.registerType(createDashboardAttachmentType() as any);
-
-    // Register the consolidated manage_dashboard tool
-    setupDeps.agentBuilder.tools.register(manageDashboardTool({}));
-
-    // Register the dashboard agent
-    registerDashboardAgent(setupDeps.agentBuilder);
   }
 
   start(

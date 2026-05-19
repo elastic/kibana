@@ -8,11 +8,13 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
-import type { ESQLColumn, ESQLIdentifier } from '../../../types';
+import type { ESQLColumn, ESQLIdentifier } from '@elastic/esql/types';
+import type { ESQLAstItem } from '@elastic/esql/types';
 import type { ESQLUserDefinedColumn, ICommandContext } from '../../registry/types';
 import { getLastNonWhitespaceChar } from './autocomplete/helpers';
-import type { ESQLAstItem } from '../../../types';
 import type { SupportedDataType } from '../types';
+
+export { getTrailingIdentifier } from './regex';
 
 export const techPreviewLabel = i18n.translate(
   'kbn-esql-language.esql.autocomplete.techPreviewLabel',

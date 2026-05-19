@@ -269,6 +269,48 @@
       },
       {
         "parentPluginId": "@kbn/actions-types",
+        "id": "def-common.ConnectorAuthStatusMap",
+        "type": "Type",
+        "tags": [],
+        "label": "ConnectorAuthStatusMap",
+        "description": [],
+        "signature": [
+          "{ [x: string]: { userAuthStatus: ",
+          {
+            "pluginId": "@kbn/actions-types",
+            "scope": "common",
+            "docId": "kibKbnActionsTypesPluginApi",
+            "section": "def-common.ConnectorUserAuthStatus",
+            "text": "ConnectorUserAuthStatus"
+          },
+          "; }; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/actions-types",
+        "id": "def-common.ConnectorUserAuthStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "ConnectorUserAuthStatus",
+        "description": [],
+        "signature": [
+          "\"connected\" | \"not_connected\" | \"not_applicable\""
+        ],
+        "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/actions-types",
         "id": "def-common.RewriteRequestCase",
         "type": "Type",
         "tags": [],
@@ -314,6 +356,7 @@
             "lineNumber": 22,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "AsApiContract",
             "trackAdoption": false
           }
         ],
@@ -366,6 +409,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false
           }
         ],

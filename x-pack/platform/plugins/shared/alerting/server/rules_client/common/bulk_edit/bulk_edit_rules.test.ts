@@ -7,6 +7,7 @@
 
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import {
+  coreFeatureFlagsMock,
   loggingSystemMock,
   savedObjectsClientMock,
   savedObjectsRepositoryMock,
@@ -64,6 +65,7 @@ const rulesClientContext: RulesClientContext = {
   namespace: 'default',
   getUserName: jest.fn(),
   createAPIKey: createAPIKeyMock,
+  cloneAPIKey: jest.fn(),
   logger,
   internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
@@ -83,6 +85,8 @@ const rulesClientContext: RulesClientContext = {
   uiSettings: uiSettingsServiceMock.createStartContract(),
   fieldsToExcludeFromPublicApi: [],
   minimumScheduleIntervalInMs: 0,
+  featureFlags: coreFeatureFlagsMock.createStart(),
+  isServerless: false,
 };
 
 const MOCK_API_KEY_1 = Buffer.from('123:abc').toString('base64');

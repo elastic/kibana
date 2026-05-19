@@ -101,11 +101,11 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
           }
         }}
         singleSelection={true}
-        listProps={{ bordered: false }}
+        listProps={{ bordered: false, paddingSize: 's' }}
       >
         {(list) => list}
       </EuiSelectable>
-      <EuiHorizontalRule margin="none" />
+      <EuiHorizontalRule margin="xs" />
       <EuiContextMenuItem
         key={'documentation'}
         icon={'documentation'}
@@ -126,6 +126,9 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
       closePopover={() => setIsPopoverOpen(false)}
       repositionOnScroll
       panelPaddingSize="none"
+      aria-label={i18n.translate('kql.query.queryBar.syntaxOptionsPopover.ariaLabel', {
+        defaultMessage: 'Syntax options',
+      })}
     >
       <EuiPopoverTitle paddingSize="s">
         <FormattedMessage

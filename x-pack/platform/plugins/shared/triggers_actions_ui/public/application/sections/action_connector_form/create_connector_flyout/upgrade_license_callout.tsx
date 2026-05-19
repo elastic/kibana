@@ -51,7 +51,7 @@ const UpgradeLicenseCallOutComponent: React.FC = () => {
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             href={VIEW_LICENSE_OPTIONS_LINK}
-            iconType="popout"
+            iconType="external"
             iconSide="right"
             target="_blank"
           >

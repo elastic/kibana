@@ -27,7 +27,9 @@
         "tags": [],
         "label": "HelperDelegateFixed",
         "description": [
-          "\nA {@link https://handlebarsjs.com/api-reference/helpers.html helper-function} type.\n\nWhen registering a helper function, it should be of this type."
+          "\nA ",
+          "helper-function",
+          " type.\n\nWhen registering a helper function, it should be of this type."
         ],
         "signature": [
           "HelperDelegate"
@@ -41,7 +43,7 @@
           {
             "parentPluginId": "@kbn/handlebars",
             "id": "def-common.HelperDelegateFixed.Unnamed",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "Unnamed",
             "description": [],
@@ -52,7 +54,27 @@
             "lineNumber": 124,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/handlebars",
+                "id": "def-common.HelperDelegateFixed.Unnamed.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+                "lineNumber": 124,
+                "columnNumber": 4,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -64,7 +86,9 @@
         "tags": [],
         "label": "HelperOptions",
         "description": [
-          "\nThe last argument being passed to a helper function is a an {@link https://handlebarsjs.com/api-reference/helpers.html#the-options-parameter options object}."
+          "\nThe last argument being passed to a helper function is a an ",
+          "options object",
+          "."
         ],
         "signature": [
           {
@@ -129,6 +153,7 @@
                 "lineNumber": 137,
                 "columnNumber": 4,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false
               },
               {
@@ -152,6 +177,7 @@
                 "lineNumber": 137,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "RuntimeOptions",
                 "trackAdoption": false
               }
             ]
@@ -188,6 +214,7 @@
                 "lineNumber": 137,
                 "columnNumber": 4,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false
               },
               {
@@ -211,6 +238,7 @@
                 "lineNumber": 137,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "RuntimeOptions",
                 "trackAdoption": false
               }
             ]
@@ -262,6 +290,7 @@
                 "lineNumber": 167,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false
               },
               {
@@ -370,7 +399,11 @@
         "tags": [],
         "label": "TemplateDelegateFixed",
         "description": [
-          "\nA template-function type.\n\nThis type is primarily used for the return value of by calls to\n{@link https://handlebarsjs.com/api-reference/compilation.html#handlebars-compile-template-options Handlebars.compile},\nHandlebars.compileAST and {@link https://handlebarsjs.com/api-reference/compilation.html#handlebars-precompile-template-options Handlebars.template}."
+          "\nA template-function type.\n\nThis type is primarily used for the return value of by calls to\n",
+          "Handlebars.compile",
+          ",\nHandlebars.compileAST and ",
+          "Handlebars.template",
+          "."
         ],
         "signature": [
           "TemplateDelegate",
@@ -385,7 +418,7 @@
           {
             "parentPluginId": "@kbn/handlebars",
             "id": "def-common.TemplateDelegateFixed.Unnamed",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "Unnamed",
             "description": [],
@@ -396,7 +429,53 @@
             "lineNumber": 137,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/handlebars",
+                "id": "def-common.TemplateDelegateFixed.Unnamed.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "T | undefined"
+                ],
+                "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+                "lineNumber": 137,
+                "columnNumber": 4,
+                "deprecated": false,
+                "docsReferencedTypeName": "T",
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/handlebars",
+                "id": "def-common.TemplateDelegateFixed.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/handlebars",
+                    "scope": "common",
+                    "docId": "kibKbnHandlebarsPluginApi",
+                    "section": "def-common.RuntimeOptions",
+                    "text": "RuntimeOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/private/kbn-handlebars/src/types.ts",
+                "lineNumber": 137,
+                "columnNumber": 17,
+                "deprecated": false,
+                "docsReferencedTypeName": "RuntimeOptions",
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/handlebars",
@@ -482,7 +561,9 @@
         "tags": [],
         "label": "DecoratorDelegate",
         "description": [
-          "\nA {@link https://github.com/handlebars-lang/handlebars.js/blob/master/docs/decorators-api.md decorator-function} type.\n\nWhen registering a decorator function, it should be of this type."
+          "\nA ",
+          "decorator-function",
+          " type.\n\nWhen registering a decorator function, it should be of this type."
         ],
         "signature": [
           "(prog: ",
@@ -513,6 +594,7 @@
             "lineNumber": 155,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TemplateDelegateFixed",
             "trackAdoption": false,
             "returnComment": [],
             "children": [
@@ -530,6 +612,7 @@
                 "lineNumber": 137,
                 "columnNumber": 4,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false
               },
               {
@@ -553,6 +636,7 @@
                 "lineNumber": 137,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "RuntimeOptions",
                 "trackAdoption": false
               }
             ]
@@ -571,6 +655,7 @@
             "lineNumber": 156,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false
           },
           {
@@ -587,6 +672,7 @@
             "lineNumber": 157,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Container",
             "trackAdoption": false
           },
           {

@@ -7,7 +7,6 @@
 
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server/plugin';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { CoreStart } from '@kbn/core/server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type {
   ConcreteTaskInstance,
@@ -25,18 +24,14 @@ import {
 import { DeployPrivateLocationMonitors } from './deploy_private_location_monitors';
 import { cleanUpDuplicatedPackagePolicies } from './clean_up_duplicate_policies';
 import type { HeartbeatConfig } from '../../common/runtime_types';
-import {
-  MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL,
-  DYNAMIC_SETTINGS_DEFAULTS,
-} from '../../common/constants';
+import { MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL } from '../../common/constants';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
 import type { SyntheticsServerSetup } from '../types';
-import { getSyntheticsDynamicSettings } from '../saved_objects/synthetics_settings';
 
 const TASK_TYPE = 'Synthetics:Sync-Private-Location-Monitors';
 export const PRIVATE_LOCATIONS_SYNC_TASK_ID = `${TASK_TYPE}-single-instance`;
-export const DEFAULT_TASK_SCHEDULE = `${DYNAMIC_SETTINGS_DEFAULTS.privateLocationsSyncInterval}m`;
+export const DEFAULT_TASK_SCHEDULE = `${MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL}m`;
 
 export interface SyncTaskState extends Record<string, unknown> {
   lastStartedAt: string;
@@ -105,8 +100,8 @@ export class SyncPrivateLocationMonitorsTask {
     }
     const taskState = this.getNewTaskState({ taskInstance });
 
-    // Resolve the sync interval from dynamic settings, falling back to task schedule, then default
-    const resolvedInterval = await this.resolveSyncInterval(savedObjects, taskInstance);
+    const interval =
+      (taskInstance.schedule as IntervalSchedule | undefined)?.interval ?? DEFAULT_TASK_SCHEDULE;
 
     try {
       const soClient = savedObjects.createInternalRepository([
@@ -133,9 +128,7 @@ export class SyncPrivateLocationMonitorsTask {
 
       const defaultState = {
         state: taskState,
-        schedule: {
-          interval: resolvedInterval,
-        },
+        schedule: { interval },
       };
 
       const { performCleanupSync } = await this.cleanUpDuplicatedPackagePolicies(
@@ -145,18 +138,15 @@ export class SyncPrivateLocationMonitorsTask {
 
       if (allPrivateLocations.length === 0) {
         this.debugLog(`No private locations found, skipping sync of private location monitors`);
-        return {
-          state: taskState,
-          schedule: {
-            interval: resolvedInterval,
-          },
-        };
+        return { state: taskState, schedule: { interval } };
       }
       if (performCleanupSync) {
-        this.debugLog(`Syncing private location monitors because cleanup performed a change`);
+        this.debugLog(
+          `Syncing private location monitors because cleanup performed a change, ` +
+            `locations count: ${allPrivateLocations.length}`
+        );
 
         if (allPrivateLocations.length > 1) {
-          // if there are multiple locations, we run a task per location to optimize it
           for (const location of allPrivateLocations) {
             await runTaskPerPrivateLocation({
               server: this.serverSetup,
@@ -170,6 +160,7 @@ export class SyncPrivateLocationMonitorsTask {
             encryptedSavedObjects,
           });
         }
+        this.debugLog(`Completed post-cleanup sync`);
         return defaultState;
       }
 
@@ -219,21 +210,10 @@ export class SyncPrivateLocationMonitorsTask {
       }
     } catch (error) {
       logger.error(`Sync of private location monitors failed: ${error.message}`);
-      return {
-        error,
-        state: taskState,
-        schedule: {
-          interval: resolvedInterval,
-        },
-      };
+      return { error, state: taskState, schedule: { interval } };
     }
 
-    return {
-      state: taskState,
-      schedule: {
-        interval: resolvedInterval,
-      },
-    };
+    return { state: taskState, schedule: { interval } };
   }
 
   getNewTaskState({ taskInstance }: { taskInstance: CustomTaskInstance }): SyncTaskState {
@@ -247,50 +227,28 @@ export class SyncPrivateLocationMonitorsTask {
     };
   }
 
-  async resolveSyncInterval(
-    savedObjects: Pick<CoreStart['savedObjects'], 'createInternalRepository'>,
-    taskInstance: CustomTaskInstance
-  ): Promise<string> {
-    try {
-      const soClient = savedObjects.createInternalRepository();
-      const dynamicSettings = await getSyntheticsDynamicSettings(soClient);
-      const { privateLocationsSyncInterval } = dynamicSettings;
-      if (
-        privateLocationsSyncInterval &&
-        privateLocationsSyncInterval >= MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL
-      ) {
-        this.debugLog(`Using configured sync interval: ${privateLocationsSyncInterval}m`);
-        return `${privateLocationsSyncInterval}m`;
-      } else if (privateLocationsSyncInterval) {
-        this.debugLog(
-          `Configured sync interval ${privateLocationsSyncInterval}m is below minimum ${MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL}m, using fallback: ${
-            (taskInstance.schedule as IntervalSchedule | undefined)?.interval ??
-            DEFAULT_TASK_SCHEDULE
-          }`
-        );
-      }
-    } catch (error) {
-      this.debugLog(
-        `Failed to read dynamic settings for sync interval, using fallback: ${error.message}`
-      );
-    }
-
-    // Fall back to the task's current schedule, then the default
-    const currentSchedule = taskInstance.schedule as IntervalSchedule | undefined;
-    return currentSchedule?.interval ?? DEFAULT_TASK_SCHEDULE;
-  }
-
   start = async () => {
     const {
       pluginsStart: { taskManager },
     } = this.serverSetup;
     this.debugLog(`Scheduling private location task`);
+
+    // Read the existing task schedule so ensureScheduled doesn't reset a user-configured interval
+    // on every Kibana restart. Falls back to DEFAULT_TASK_SCHEDULE only on first creation.
+    let schedule: IntervalSchedule = { interval: DEFAULT_TASK_SCHEDULE };
+    try {
+      const existingTask = await taskManager.get(PRIVATE_LOCATIONS_SYNC_TASK_ID);
+      if (existingTask.schedule) {
+        schedule = existingTask.schedule as IntervalSchedule;
+      }
+    } catch (_err) {
+      // task doesn't exist yet — default schedule will be used on creation
+    }
+
     await taskManager.ensureScheduled({
       id: PRIVATE_LOCATIONS_SYNC_TASK_ID,
       state: {},
-      schedule: {
-        interval: DEFAULT_TASK_SCHEDULE,
-      },
+      schedule,
       taskType: TASK_TYPE,
       params: {},
     });

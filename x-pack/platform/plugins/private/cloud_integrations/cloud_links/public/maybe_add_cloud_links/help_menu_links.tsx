@@ -23,9 +23,10 @@ export const createHelpMenuLinks = ({
   const helpMenuLinks: ChromeHelpMenuLink[] = [
     {
       title: i18n.translate('xpack.cloudLinks.helpMenuLinks.documentation', {
-        defaultMessage: 'Documentation',
+        defaultMessage: 'Kibana documentation',
       }),
       href: docLinks.links.elasticStackGetStarted,
+      iconType: 'documentation',
     },
     ...(isServerless
       ? [
@@ -34,14 +35,16 @@ export const createHelpMenuLinks = ({
               defaultMessage: 'Release notes',
             }),
             href: docLinks.links.serverlessReleaseNotes,
+            iconType: 'popper',
           },
         ]
       : []),
     {
       title: i18n.translate('xpack.cloudLinks.helpMenuLinks.support', {
-        defaultMessage: 'Support',
+        defaultMessage: 'Ask support',
       }),
       href: helpSupportUrl,
+      iconType: 'question',
     },
     {
       title: i18n.translate('xpack.cloudLinks.helpMenuLinks.connectionDetails', {
@@ -51,6 +54,7 @@ export const createHelpMenuLinks = ({
       onClick: () => {
         openWiredConnectionDetails();
       },
+      iconType: 'plugs',
     },
   ];
 

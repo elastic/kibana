@@ -7,7 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ExportExceptionListRequestQuery } from '@kbn/securitysolution-exceptions-common/api';
 import { EXCEPTIONS_API_READ } from '@kbn/security-solution-features/constants';
 

@@ -41,7 +41,7 @@ import { MUTE_SELECTED, UNMUTE_SELECTED } from '../translations';
 
 interface BulkActionsProps {
   ruleTypeIds?: string[];
-  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
+  query: Partial<Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>>;
   alertsCount: number;
   casesConfig?: PublicAlertsDataGridProps['casesConfiguration'];
   additionalBulkActions?: PublicAlertsDataGridProps['additionalBulkActions'];

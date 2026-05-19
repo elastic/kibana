@@ -15,7 +15,7 @@ import type {
   ControlTriggerSource,
   TelemetryLatencyProps,
 } from '@kbn/esql-types';
-import { BasicPrettyPrinter, Parser } from '@kbn/esql-language';
+import { BasicPrettyPrinter, Parser } from '@elastic/esql';
 import {
   hasLimitBeforeAggregate,
   missingSortBeforeLimit,
@@ -37,6 +37,7 @@ import {
 } from './events_registration';
 import type { IndexEditorCommandArgs } from '../lookup_join/use_lookup_index_editor';
 import { COMMAND_ID as LOOKUP_INDEX_EDITOR_COMMAND } from '../lookup_join/use_lookup_index_editor';
+import { reportEsqlError } from '../report_error';
 
 export enum ResourceBrowserType {
   DATA_SOURCES = 'data_sources',
@@ -54,8 +55,10 @@ export class ESQLEditorTelemetryService {
     try {
       this._analytics.reportEvent(eventType, eventData);
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log('Failed to report telemetry event', error);
+      reportEsqlError(error, {
+        errorType: 'TelemetryEvent',
+        labels: { event_type: eventType },
+      });
     }
   }
 
@@ -63,8 +66,10 @@ export class ESQLEditorTelemetryService {
     try {
       reportPerformanceMetricEvent(this._analytics, eventData);
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log('Failed to report performance metric event', error);
+      reportEsqlError(error, {
+        errorType: 'TelemetryPerformance',
+        labels: { event_name: eventData.eventName },
+      });
     }
   }
 
@@ -76,6 +81,11 @@ export class ESQLEditorTelemetryService {
       value1: payload.queryLength,
       key2: 'query_lines' as const,
       value2: payload.queryLines,
+
+      ...(payload.callbacksDuration !== undefined
+        ? { key3: 'callbacks_duration' as const, value3: Math.round(payload.callbacksDuration) }
+        : {}),
+
       meta: {
         ...(payload.sessionId ? { session_id: payload.sessionId } : {}),
         ...(payload.isInitialLoad !== undefined ? { is_initial_load: payload.isInitialLoad } : {}),
@@ -110,8 +120,7 @@ export class ESQLEditorTelemetryService {
         commandData = JSON.parse(decodedData) as IndexEditorCommandArgs;
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log('Failed to parse hover message command data', error);
+      reportEsqlError(error, { errorType: 'HoverMessageParse' });
     }
 
     if (commandData) {

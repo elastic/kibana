@@ -5,14 +5,37 @@
  * 2.0.
  */
 
-import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { useEffect, useRef } from 'react';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { StreamDocsStat } from '@kbn/streams-plugin/common';
 import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
 import { useKibana } from './use_kibana';
 import { useTimefilter } from './use_timefilter';
+import {
+  buildStreamIngestHistogramEsql,
+  getMeaningfulBucketMs,
+} from '../util/stream_overview_esql';
 import { executeEsqlQuery } from './use_execute_esql_query';
+
+/**
+ * Default bucket count for ES|QL time histograms (`BUCKET(@timestamp, …)`). Use the same value
+ * for the streams list and stream overview so doc counts stay comparable for the time range.
+ */
+export const STREAMS_HISTOGRAM_NUM_DATA_POINTS = 25;
+
+/**
+ * Returns true if the error is an ES|QL "Unknown index" error.
+ * This happens when a failure-store backing index does not yet exist — it is created lazily
+ * on the first failed document, so an enabled failure store with no failures is normal.
+ */
+function isUnknownIndexError(error: unknown): boolean {
+  if (error instanceof Error) {
+    return (
+      error.message.includes('Unknown index') || error.message.includes('index_not_found_exception')
+    );
+  }
+  return false;
+}
 
 export interface StreamDocCountsFetch {
   docCount: Promise<StreamDocsStat[]>;
@@ -22,13 +45,14 @@ export interface StreamDocCountsFetch {
 
 interface UseDocCountFetchProps {
   groupTotalCountByTimestamp: boolean;
-  canReadFailureStore: boolean;
+  /** When `streamName` is omitted (streams listing), this decides whether to fetch failed-doc counts for all streams. */
+  getCanReadFailureStore: (streamName?: string) => boolean;
   numDataPoints: number;
 }
 
 export function useStreamDocCountsFetch({
   groupTotalCountByTimestamp: _groupTotalCountByTimestamp,
-  canReadFailureStore,
+  getCanReadFailureStore,
   numDataPoints,
 }: UseDocCountFetchProps): {
   getStreamDocCounts(streamName?: string): StreamDocCountsFetch;
@@ -53,12 +77,8 @@ export function useStreamDocCountsFetch({
     abortControllerRef.current = new AbortController();
   }
 
-  useUpdateEffect(() => {
-    docCountsPromiseCache.current = null;
-    histogramPromiseCache.current = {};
-    abortControllerRef.current?.abort();
-    abortControllerRef.current = new AbortController();
-  }, [canReadFailureStore]);
+  // No longer need to clear cache based on global canReadFailureStore
+  // since we now check per-stream privileges
 
   useEffect(() => {
     return () => {
@@ -109,6 +129,8 @@ export function useStreamDocCountsFetch({
           : {}),
       });
 
+      const canReadFailureStore = getCanReadFailureStore(streamName);
+
       const failedCountPromise = canReadFailureStore
         ? streamsRepositoryClient.fetch('GET /internal/streams/doc_counts/failed', {
             signal: abortController.signal,
@@ -149,7 +171,8 @@ export function useStreamDocCountsFetch({
       return docCountsFetch;
     },
     getStreamHistogram(streamName: string): Promise<UnparsedEsqlResponse> {
-      const cachedPromise = histogramPromiseCache.current[streamName];
+      const cacheKey = `${streamName}::${timeState.start}::${timeState.end}`;
+      const cachedPromise = histogramPromiseCache.current[cacheKey];
       if (cachedPromise) {
         return cachedPromise;
       }
@@ -159,21 +182,30 @@ export function useStreamDocCountsFetch({
         throw new Error('Abort controller not set');
       }
 
-      const minInterval = Math.floor((timeState.end - timeState.start) / numDataPoints);
-
+      const minInterval = getMeaningfulBucketMs(timeState.end - timeState.start, numDataPoints);
+      // Check per-stream privilege
+      const canReadFailureStore = getCanReadFailureStore(streamName);
       const source = canReadFailureStore ? `${streamName},${streamName}::failures` : streamName;
-
       const timezone = uiSettings?.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
+
       const histogramPromise = executeEsqlQuery({
-        query: `FROM ${source} | STATS doc_count = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${minInterval} ms)`,
+        query: buildStreamIngestHistogramEsql(source, minInterval),
         search: data.search.search,
         timezone,
         signal: abortController.signal,
         start: timeState.start,
         end: timeState.end,
+        uiSettings,
+      }).catch((error: unknown) => {
+        // The ::failures backing index is created lazily (only when a document first fails).
+        // An enabled failure store with no data yet returns "Unknown index" — treat it as empty.
+        if (isUnknownIndexError(error)) {
+          return { columns: [], values: [] };
+        }
+        throw error;
       }) as Promise<UnparsedEsqlResponse>;
 
-      histogramPromiseCache.current[streamName] = histogramPromise;
+      histogramPromiseCache.current[cacheKey] = histogramPromise;
 
       return histogramPromise;
     },

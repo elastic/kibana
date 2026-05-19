@@ -30,6 +30,7 @@ import { useLink, useStartServices } from '../../hooks';
 
 import {
   AgentPolicyDebugger,
+  AgentlessResourcesToggle,
   IntegrationDebugger,
   PreconfigurationDebugger,
   FleetIndexDebugger,
@@ -91,6 +92,13 @@ const panels = [
     }),
     id: 'orphanedIntegrationPolicyDebugger',
     component: <OrphanedIntegrationPolicyDebugger />,
+  },
+  {
+    title: i18n.translate('xpack.fleet.debug.agentlessResourcesToggle.title', {
+      defaultMessage: 'Show Agentless Resources',
+    }),
+    id: 'agentlessResourcesToggle',
+    component: <AgentlessResourcesToggle />,
   },
 ];
 
@@ -206,7 +214,7 @@ export const DebugPage: React.FunctionComponent<{
                     defaultMessage: 'Troubleshooting Guide',
                   }),
                   href: 'https://www.elastic.co/guide/en/fleet/current/fleet-troubleshooting.html',
-                  iconType: 'popout',
+                  iconType: 'external',
                   target: '_blank',
                 },
               ]}

@@ -306,6 +306,10 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                     onDismiss={() => {
                       setCriteriaCalloutActive(false);
                     }}
+                    aria-label={i18n.translate(
+                      'xpack.search.queryRulesetDetail.queryRuleFlyout.allCriteriaCallout.ariaLabel',
+                      { defaultMessage: 'All criteria must be met for the rule to be applied' }
+                    )}
                     title={
                       <FormattedMessage
                         id="xpack.search.queryRulesetDetail.queryRuleFlyout.allCriteriaCallout"
@@ -367,7 +371,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                   <EuiButton
                     data-test-subj="searchQueryRulesQueryRuleMetadataEditorAddCriteriaButton"
                     onClick={handleAddCriteria}
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     iconSide="left"
                     size="s"
                     color={criteriaCount === 0 ? 'primary' : 'text'}

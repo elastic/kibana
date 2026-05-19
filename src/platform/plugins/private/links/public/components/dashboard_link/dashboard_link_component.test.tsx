@@ -21,7 +21,7 @@ import type { ResolvedLink } from '../../types';
 import { BehaviorSubject } from 'rxjs';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { EuiThemeProvider } from '@elastic/eui';
-import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-plugin/public';
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
 
 function createMockLinksParent({
   initialQuery,
@@ -31,7 +31,7 @@ function createMockLinksParent({
   initialFilters?: Filter[];
 }) {
   const parent = {
-    ...getMockLinksParentApi({ savedObjectId: '456' }),
+    ...getMockLinksParentApi({ ref_id: '456' }),
     locator: {
       getRedirectUrl: jest.fn().mockReturnValue('https://my-kibana.com/dashboard/123'),
       navigate: jest.fn(),
@@ -46,12 +46,12 @@ function createMockLinksParent({
 describe('Dashboard link component', () => {
   const resolvedLink: ResolvedLink = {
     id: 'foo',
-    order: 0,
     type: 'dashboardLink',
     label: '',
     destination: '456',
     title: 'Dashboard 1',
     description: 'Dashboard 1 description',
+    options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
   };
 
   const renderComponent = (overrides?: Partial<DashboardLinkProps>) => {
@@ -98,11 +98,11 @@ describe('Dashboard link component', () => {
     renderComponent({ parentApi });
 
     // renders dashboard title
-    const link = screen.getByTestId('dashboardLink--foo');
+    const link = screen.getByTestId('dashboardLink--Dashboard 1');
     expect(link).toHaveTextContent('Dashboard 1');
 
     // does not render external link icon
-    const externalIcon = link.querySelector('[data-euiicon-type="popout"]');
+    const externalIcon = link.querySelector('[data-euiicon-type="external"]');
     expect(externalIcon).toBeNull();
 
     // calls `navigate` on click
@@ -120,7 +120,7 @@ describe('Dashboard link component', () => {
 
   test('modified click does not trigger event.preventDefault', async () => {
     renderComponent();
-    const link = screen.getByTestId('dashboardLink--foo');
+    const link = screen.getByTestId('dashboardLink--Dashboard 1');
     const clickEvent = createEvent.click(link, { ctrlKey: true });
     const preventDefault = jest.spyOn(clickEvent, 'preventDefault');
     fireEvent(link, clickEvent);
@@ -137,10 +137,10 @@ describe('Dashboard link component', () => {
       parentApi,
     });
 
-    const link = screen.getByTestId('dashboardLink--foo');
+    const link = screen.getByTestId('dashboardLink--Dashboard 1');
     expect(link).toBeInTheDocument();
     // external link icon is rendered
-    const externalIcon = link.querySelector('[data-euiicon-type="popout"]');
+    const externalIcon = link.querySelector('[data-euiicon-type="external"]');
     expect(externalIcon).toBeInTheDocument();
 
     // calls `window.open`
@@ -179,7 +179,7 @@ describe('Dashboard link component', () => {
       dashboardId: '456',
       time_range: { from: 'now-7d', to: 'now' },
       filters: initialFilters,
-      query: initialQuery,
+      query: initialQuery as Query,
     });
   });
 
@@ -215,7 +215,7 @@ describe('Dashboard link component', () => {
     expect(parentApi.locator?.getRedirectUrl).toBeCalledWith({
       dashboardId: '456',
       filters: initialFilters,
-      query: initialQuery,
+      query: initialQuery as Query,
     });
   });
 
@@ -264,7 +264,7 @@ describe('Dashboard link component', () => {
       },
     });
 
-    const link = await screen.findByTestId('dashboardLink--foo--error');
+    const link = await screen.findByTestId('dashboardLink--Error fetching dashboard--error');
     expect(link).toHaveTextContent(DashboardLinkStrings.getDashboardErrorLabel());
   });
 
@@ -282,7 +282,7 @@ describe('Dashboard link component', () => {
       parentApi,
     });
 
-    const link = screen.getByTestId('dashboardLink--bar');
+    const link = screen.getByTestId('dashboardLink--Dashboard 1');
     expect(link).toHaveTextContent('current dashboard');
     await userEvent.click(link);
     expect(parentApi.locator?.navigate).toBeCalledTimes(0);
@@ -298,9 +298,9 @@ describe('Dashboard link component', () => {
       },
     });
 
-    const link = screen.getByTestId('dashboardLink--foo');
+    const link = screen.getByTestId('dashboardLink--another dashboard');
     await userEvent.hover(link);
-    const tooltip = await screen.findByTestId('dashboardLink--foo--tooltip');
+    const tooltip = await screen.findByTestId('dashboardLink--another dashboard--tooltip');
     expect(tooltip).toHaveTextContent('another dashboard'); // title
     expect(tooltip).toHaveTextContent('something awesome'); // description
   });
@@ -322,7 +322,7 @@ describe('Dashboard link component', () => {
       parentApi,
     });
 
-    expect(await screen.findByTestId('dashboardLink--bar')).toHaveTextContent('old title');
+    expect(await screen.findByTestId('dashboardLink--Dashboard 1')).toHaveTextContent('old title');
 
     parentApi.title$.next('new title');
     rerender({
@@ -333,7 +333,7 @@ describe('Dashboard link component', () => {
         label: undefined,
       },
     });
-    expect(await screen.findByTestId('dashboardLink--bar')).toHaveTextContent('new title');
+    expect(await screen.findByTestId('dashboardLink--Dashboard 1')).toHaveTextContent('new title');
   });
 
   test('can override link label', async () => {
@@ -345,10 +345,10 @@ describe('Dashboard link component', () => {
       },
     });
 
-    const link = screen.getByTestId('dashboardLink--foo');
+    const link = screen.getByTestId('dashboardLink--Dashboard 1');
     expect(link).toHaveTextContent(label);
     await userEvent.hover(link);
-    const tooltip = await screen.findByTestId('dashboardLink--foo--tooltip');
+    const tooltip = await screen.findByTestId('dashboardLink--Dashboard 1--tooltip');
     expect(tooltip).toHaveTextContent(label);
   });
 
@@ -367,7 +367,7 @@ describe('Dashboard link component', () => {
       parentApi,
     });
 
-    const link = screen.getByTestId('dashboardLink--bar');
+    const link = screen.getByTestId('dashboardLink--Dashboard 1');
     expect(link).toHaveTextContent(customLabel);
   });
 });

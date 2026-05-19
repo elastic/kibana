@@ -24,17 +24,15 @@ const ThroughputChartContent = ({
   color,
   title,
 }: ThroughputChartContentProps) => {
-  const { services, fetchParams, discoverFetch$, indexes, onBrushEnd, onFilter, actions } =
+  const { services, fetchParams, discoverFetch$, onBrushEnd, onFilter, actions, profileId } =
     useTraceMetricsContext();
 
   const chartLayers = useChartLayers({
-    metric: {
-      name: 'id',
-      instrument: 'counter',
-      unit,
-      index: indexes,
-      dimensions: [],
-      type: ES_FIELD_TYPES.DOUBLE,
+    metricItem: {
+      metricName: 'id',
+      metricTypes: ['counter'],
+      units: ['count'],
+      fieldTypes: [ES_FIELD_TYPES.DOUBLE],
     },
     color,
     seriesType,
@@ -43,6 +41,7 @@ const ThroughputChartContent = ({
 
   return (
     <Chart
+      id="throughput"
       esqlQuery={esqlQuery}
       size="s"
       discoverFetch$={discoverFetch$}
@@ -56,6 +55,7 @@ const ThroughputChartContent = ({
       syncTooltips
       syncCursor
       extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
+      profileId={profileId}
     />
   );
 };

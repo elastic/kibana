@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { orderBy } from 'lodash';
 import { getTotalHits } from '../../utils/get_total_hits';
@@ -75,8 +74,7 @@ async function getLogChangePoint({
               change_point: {
                 buckets_path: 'time_series>_count',
               },
-              // elasticsearch@9.0.0 change_point aggregation is missing in the types: https://github.com/elastic/elasticsearch-specification/issues/3671
-            } as AggregationsAggregationContainer,
+            },
           },
         },
       },

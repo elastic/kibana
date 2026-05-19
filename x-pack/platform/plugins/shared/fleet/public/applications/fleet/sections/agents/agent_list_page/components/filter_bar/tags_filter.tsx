@@ -54,7 +54,7 @@ export const TagsFilter: React.FunctionComponent<Props> = ({
       zIndex={Number(euiTheme.levels.header) - 1}
       button={
         <EuiFilterButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           onClick={() => setIsTagsFilterOpen(!isTagsFilterOpen)}
           isSelected={isTagsFilterOpen}
           hasActiveFilters={selectedTags.length > 0}
@@ -68,7 +68,7 @@ export const TagsFilter: React.FunctionComponent<Props> = ({
       }
       isOpen={isTagsFilterOpen}
       closePopover={() => setIsTagsFilterOpen(false)}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
     >
       <EuiSelectable
         options={options}
@@ -90,7 +90,6 @@ export const TagsFilter: React.FunctionComponent<Props> = ({
         }}
         data-test-subj="agentList.agentPolicyFilterOptions"
         listProps={{
-          paddingSize: 's',
           style: {
             minWidth: 140,
           },

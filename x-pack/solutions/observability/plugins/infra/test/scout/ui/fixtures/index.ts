@@ -12,15 +12,18 @@ import type {
   ObltApiServicesFixture,
 } from '@kbn/scout-oblt';
 import {
+  mergeTests,
   test as base,
   createLazyPageObject,
   globalSetupHook as baseGlobalSetupHook,
-  getSynthtraceClient,
 } from '@kbn/scout-oblt';
+import type { SynthtraceFixture } from '@kbn/scout-synthtrace';
+import { getSynthtraceClient, synthtraceFixture } from '@kbn/scout-synthtrace';
 import type { InfraDocument, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { Readable } from 'stream';
 import { InventoryPage } from './page_objects/inventory';
 import { AssetDetailsPage } from './page_objects/asset_details/asset_details';
+import { HostsPage } from './page_objects/hosts_page';
 import { getInventoryViewsApiService, type InventoryViewApiService } from './apis/inventory_views';
 import { NodeDetailsPage } from './page_objects/node_details/node_details';
 import { SavedViews } from './page_objects/saved_views';
@@ -29,6 +32,7 @@ export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
   pageObjects: ObltPageObjects & {
     inventoryPage: InventoryPage;
     assetDetailsPage: AssetDetailsPage;
+    hostsPage: HostsPage;
     nodeDetailsPage: NodeDetailsPage;
     savedViews: SavedViews;
   };
@@ -41,7 +45,12 @@ export interface ExtendedScoutWorkerFixtures extends ObltWorkerFixtures {
   };
 }
 
-export const test = base.extend<ExtendedScoutTestFixtures, ExtendedScoutWorkerFixtures>({
+const baseWithSynthtrace = mergeTests(base, synthtraceFixture);
+
+export const test = baseWithSynthtrace.extend<
+  ExtendedScoutTestFixtures,
+  ExtendedScoutWorkerFixtures & SynthtraceFixture
+>({
   pageObjects: async (
     { pageObjects, page, kbnUrl },
     use: (pageObjects: ExtendedScoutTestFixtures['pageObjects']) => Promise<void>
@@ -52,6 +61,7 @@ export const test = base.extend<ExtendedScoutTestFixtures, ExtendedScoutWorkerFi
       ...pageObjects,
       inventoryPage: createLazyPageObject(InventoryPage, page, kbnUrl, savedViews),
       assetDetailsPage: createLazyPageObject(AssetDetailsPage, page, kbnUrl),
+      hostsPage: createLazyPageObject(HostsPage, page, kbnUrl),
       nodeDetailsPage: createLazyPageObject(NodeDetailsPage, page, kbnUrl),
       savedViews,
     };
@@ -74,7 +84,9 @@ export const test = base.extend<ExtendedScoutTestFixtures, ExtendedScoutWorkerFi
   },
 });
 
-export const globalSetupHook = baseGlobalSetupHook.extend({
+const globalSetupWithSynthtrace = mergeTests(baseGlobalSetupHook, synthtraceFixture);
+
+export const globalSetupHook = globalSetupWithSynthtrace.extend({
   infraSynthtraceEsClient: async ({ esClient, config, kbnUrl, log }, use) => {
     const { infraEsClient } = await getSynthtraceClient(
       'infraEsClient',

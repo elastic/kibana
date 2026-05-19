@@ -10,17 +10,20 @@
 import { i18n } from '@kbn/i18n';
 import type {
   FetchContext,
-  HasAppContext,
   HasEditCapabilities,
   PublishesDataViews,
   PublishesSavedObjectId,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
-import { apiHasAppContext } from '@kbn/presentation-publishing';
+import { apiHasAppContext, apiIsPresentationContainer } from '@kbn/presentation-publishing';
+import { getAllEsqlControls } from '@kbn/esql-utils';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DiscoverServices } from '../build_services';
-import type { PublishesSavedSearch } from './types';
+import type { PublishesSavedSearch, PublishesSelectedTabId } from './types';
 import { getDiscoverLocatorParams } from './utils/get_discover_locator_params';
-import { fromSavedSearchToSavedObjectTab } from '../application/main/state_management/redux/tab_mapping_utils';
+import { fromSavedSearchToSavedObjectTab } from '../application/main/state_management/redux';
+import type { DiscoverSessionByValueInput } from '../plugin_imports/embeddable_editor_service';
 
 type SavedSearchPartialApi = PublishesSavedSearch &
   PublishesSavedObjectId &
@@ -53,10 +56,7 @@ export async function getAppTarget(
   };
 }
 
-export function initializeEditApi<
-  ParentApiType = unknown,
-  ReturnType = ParentApiType extends HasAppContext ? HasEditCapabilities : {}
->({
+export function initializeEditApi({
   uuid,
   parentApi,
   partialApi,
@@ -65,21 +65,23 @@ export function initializeEditApi<
   getTitle,
 }: {
   uuid: string;
-  parentApi?: ParentApiType;
+  parentApi?: unknown;
   partialApi: PublishesSavedSearch &
     PublishesSavedObjectId &
+    PublishesSelectedTabId &
     PublishesDataViews & { fetchContext$: PublishingSubject<FetchContext | undefined> };
   isEditable: () => boolean;
   getTitle: () => string | undefined;
   discoverServices: DiscoverServices;
-}): ReturnType {
+}): HasEditCapabilities | undefined {
   /**
    * If the parent is providing context, then the embeddable state transfer service can be used
    * and editing should be allowed; otherwise, do not provide editing capabilities
    */
   if (!parentApi || !apiHasAppContext(parentApi)) {
-    return {} as ReturnType;
+    return;
   }
+
   const parentApiContext = parentApi.getAppContext();
 
   return {
@@ -90,27 +92,37 @@ export function initializeEditApi<
     onEdit: async () => {
       const stateTransfer = discoverServices.embeddable.getStateTransfer();
       const isByReference = Boolean(partialApi.savedObjectId$.getValue());
-      const valueInput = isByReference
+      const locatorParams = getDiscoverLocatorParams({ ...partialApi, parentApi });
+      const valueInput: DiscoverSessionByValueInput | undefined = isByReference
         ? undefined
-        : fromSavedSearchToSavedObjectTab({
-            tab: {
-              id: uuid,
-              label:
-                getTitle() ||
-                i18n.translate('discover.embeddable.byValueTabName', {
-                  defaultMessage: 'By-value Discover session',
-                }),
-            },
-            savedSearch: partialApi.savedSearch$.getValue(),
-            services: discoverServices,
-          });
+        : {
+            discoverSessionTab: fromSavedSearchToSavedObjectTab({
+              tab: {
+                id: uuid,
+                label:
+                  getTitle() ||
+                  i18n.translate('discover.embeddable.byValueTabName', {
+                    defaultMessage: 'By-value Discover session',
+                  }),
+              },
+              savedSearch: {
+                ...partialApi.savedSearch$.getValue(),
+                controlGroupJson: locatorParams.esqlControls
+                  ? JSON.stringify(locatorParams.esqlControls)
+                  : undefined,
+              },
+              services: discoverServices,
+            }),
+            dashboardControlGroupState: apiIsPresentationContainer(parentApi)
+              ? (getAllEsqlControls(parentApi) as ControlPanelsState<OptionsListESQLControlState>)
+              : undefined,
+          };
+
       let app: string;
       let path: string | undefined;
 
       if (isByReference) {
-        ({ app, path } = await discoverServices.locator.getLocation(
-          getDiscoverLocatorParams(partialApi)
-        ));
+        ({ app, path } = await discoverServices.locator.getLocation(locatorParams));
       } else {
         ({ app, path } = await discoverServices.locator.getLocation({}));
       }
@@ -130,5 +142,5 @@ export function initializeEditApi<
     getEditHref: async () => {
       return (await getAppTarget(partialApi, discoverServices))?.editPath;
     },
-  } as ReturnType;
+  };
 }

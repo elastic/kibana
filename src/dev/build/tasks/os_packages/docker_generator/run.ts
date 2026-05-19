@@ -52,7 +52,7 @@ export async function runDockerGenerator(
    */
   if (flags.baseImage === 'wolfi')
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:568df5fb0e237c3a2139399d4bd8e80994f24321fa8469aec565b8566704e83a';
+      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:e59b9c13d32a840b2f3111d561470ce2902476fb2bad9e472e8092ac10f9c733';
 
   let imageFlavor = '';
   if (flags.baseImage === 'wolfi' && !flags.serverless && !flags.cloud) imageFlavor += `-wolfi`;
@@ -82,7 +82,8 @@ export async function runDockerGenerator(
   if (flags.serverless) artifactVariant = '-serverless';
   if (flags.solution) artifactSolution = `-${flags.solution.artifact}`;
   const artifactPrefix = `kibana${artifactVariant}${artifactSolution}-${version}-linux`;
-  const artifactTarball = `${artifactPrefix}-${artifactArchitecture}.tar.gz`;
+  const tarExt = config.getTarZstd() ? 'tar.zst' : 'tar.gz';
+  const artifactTarball = `${artifactPrefix}-${artifactArchitecture}.${tarExt}`;
   const beatsArchitecture = flags.architecture === 'aarch64' ? 'arm64' : 'x86_64';
   const metricbeatTarball = `metricbeat${
     flags.fips ? '-fips' : ''
@@ -138,6 +139,8 @@ export async function runDockerGenerator(
     revision: config.getBuildSha(),
     publicArtifactSubdomain,
     fips: flags.fips,
+    tarZstd: config.getTarZstd(),
+    tarExt,
   };
 
   type HostArchitectureToDocker = Record<string, string>;

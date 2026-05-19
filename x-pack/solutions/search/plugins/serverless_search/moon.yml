@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/serverless-search'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/search-kibana'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/serverless-search'
+  title: '@kbn/serverless-search'
   description: Moon project for @kbn/serverless-search
   channel: ''
   owner: '@elastic/search-kibana'
-  metadata:
-    sourceRoot: x-pack/solutions/search/plugins/serverless_search
+  sourceRoot: x-pack/solutions/search/plugins/serverless_search
 dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'
@@ -50,7 +49,6 @@ dependsOn:
   - '@kbn/react-kibana-context-render'
   - '@kbn/search-inference-endpoints'
   - '@kbn/security-plugin-types-common'
-  - '@kbn/search-indices'
   - '@kbn/search-homepage'
   - '@kbn/core-http-server'
   - '@kbn/logging'
@@ -76,16 +74,6 @@ fileGroups:
     - public/**/*.tsx
     - server/**/*.ts
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

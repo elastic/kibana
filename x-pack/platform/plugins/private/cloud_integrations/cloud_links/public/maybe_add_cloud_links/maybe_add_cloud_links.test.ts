@@ -71,7 +71,7 @@ describe('maybeAddCloudLinks', () => {
       },
       {
         href: 'billing-url',
-        iconType: 'visGauge',
+        iconType: 'chartGauge',
         label: 'Billing',
         order: 200,
       },
@@ -82,6 +82,7 @@ describe('maybeAddCloudLinks', () => {
         order: 300,
       },
       expect.any(Object),
+      expect.any(Object),
     ]);
 
     expect(chrome.setHelpMenuLinks).toHaveBeenCalledTimes(1);
@@ -90,14 +91,17 @@ describe('maybeAddCloudLinks', () => {
         Array [
           Object {
             "href": "https://www.elastic.co/docs/get-started",
-            "title": "Documentation",
+            "iconType": "documentation",
+            "title": "Kibana documentation",
           },
           Object {
             "href": "https://www.elastic.co/support",
-            "title": "Support",
+            "iconType": "question",
+            "title": "Ask support",
           },
           Object {
             "dataTestSubj": "connectionDetailsHelpLink",
+            "iconType": "plugs",
             "onClick": [Function],
             "title": "Connection details",
           },
@@ -147,7 +151,7 @@ describe('maybeAddCloudLinks', () => {
       },
       {
         href: 'billing-url',
-        iconType: 'visGauge',
+        iconType: 'chartGauge',
         label: 'Billing',
         order: 200,
       },
@@ -158,6 +162,7 @@ describe('maybeAddCloudLinks', () => {
         order: 300,
       },
       expect.any(Object),
+      expect.any(Object),
     ]);
     expect(chrome.setHelpMenuLinks).toHaveBeenCalledTimes(1);
     expect(chrome.setHelpMenuLinks.mock.calls[0]).toMatchInlineSnapshot(`
@@ -165,14 +170,17 @@ describe('maybeAddCloudLinks', () => {
         Array [
           Object {
             "href": "https://www.elastic.co/docs/get-started",
-            "title": "Documentation",
+            "iconType": "documentation",
+            "title": "Kibana documentation",
           },
           Object {
             "href": "https://www.elastic.co/support",
-            "title": "Support",
+            "iconType": "question",
+            "title": "Ask support",
           },
           Object {
             "dataTestSubj": "connectionDetailsHelpLink",
+            "iconType": "plugs",
             "onClick": [Function],
             "title": "Connection details",
           },

@@ -14,10 +14,17 @@ import type {
   ConfigSchema,
 } from './types';
 import { AgentBuilderPlugin } from './plugin';
-import { AGENTBUILDER_FEATURE_ID } from '../common/features';
+import { AGENTBUILDER_FEATURE_ID, uiPrivileges } from '../common/features';
 
-export type { AgentBuilderPluginSetup, AgentBuilderPluginStart };
-export { AGENTBUILDER_FEATURE_ID };
+export type {
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+  PublicEmbeddableConversationProps,
+} from './types';
+export type { EmbeddableConversationProps } from './embeddable/types';
+export { AGENTBUILDER_FEATURE_ID, uiPrivileges };
+export { ConversationInputShell } from '@kbn/agent-builder-browser';
+export type { ConversationInputShellProps } from '@kbn/agent-builder-browser';
 export const plugin: PluginInitializer<
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,

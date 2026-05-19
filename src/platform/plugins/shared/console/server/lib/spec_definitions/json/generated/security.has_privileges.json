@@ -15,6 +15,7 @@
       "_security/user/{user}/_has_privileges"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-has-privileges",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-security-has-privileges",
     "availability": {
       "stack": true,
       "serverless": true

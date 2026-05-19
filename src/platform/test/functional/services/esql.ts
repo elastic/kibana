@@ -250,9 +250,11 @@ export class ESQLService extends FtrService {
 
   public async selectEsqlBadgeHoverOption(badgeClassName: string, optionText: string) {
     await this.retry.try(async () => {
+      await this.browser.moveMouseTo({ x: 0, y: 0 });
       const badge = await this.findService.byCssSelector(`.${badgeClassName}`);
       await badge.moveMouseTo();
 
+      await this.findService.byCssSelector(`.monaco-hover`);
       const options = await this.findService.allByCssSelector(`.monaco-hover .hover-row`);
       let optionToSelect;
       for (const option of options) {
@@ -280,7 +282,17 @@ export class ESQLService extends FtrService {
 
   public async toggleDatasourceDropdown(open: boolean) {
     if (open) {
-      await this.testSubjects.click('visorSourcesDropdownButton');
+      await this.retry.try(async () => {
+        try {
+          await this.testSubjects.click('visorSourcesDropdownButton');
+        } catch (error) {
+          if (error instanceof Error && error.message.includes('ElementClickInterceptedError')) {
+            // Monaco suggestions can overlap the visor datasource button; dismiss and retry.
+            await this.browser.pressKeys(Key.ESCAPE);
+          }
+          throw error;
+        }
+      });
     } else {
       await this.browser.pressKeys(Key.ESCAPE);
     }

@@ -25,6 +25,7 @@ export const findMlSignals = async ({
   to,
   maxSignals,
   exceptionFilter,
+  additionalFilters,
   isLoggedRequestsEnabled,
 }: {
   ml: MlPluginSetup;
@@ -36,6 +37,7 @@ export const findMlSignals = async ({
   to: string;
   maxSignals: number;
   exceptionFilter: Filter | undefined;
+  additionalFilters?: Filter[];
   isLoggedRequestsEnabled: boolean;
 }): Promise<{ anomalyResults: AnomalyResults; loggedRequests?: RulePreviewLoggedRequest[] }> => {
   const loggedRequests: RulePreviewLoggedRequest[] = [];
@@ -48,6 +50,7 @@ export const findMlSignals = async ({
     latestMs: dateMath.parse(to)?.valueOf() ?? 0,
     maxRecords: maxSignals,
     exceptionFilter,
+    additionalFilters,
   };
 
   const anomalyResults = await getAnomalies(params, mlAnomalySearch);

@@ -13,20 +13,21 @@ import type {
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
 import type {
-  DefendInsight,
-  DefendInsightType,
   DefendInsightsGetRequestQuery,
   DefendInsightsPostRequestBody,
 } from '@kbn/elastic-assistant-common';
 import { CallbackIds } from '@kbn/elastic-assistant-plugin/server/types';
 import { combineLatest, firstValueFrom, ReplaySubject } from 'rxjs';
 import { cloneDeep } from 'lodash';
-
-import {
-  ActionType,
-  type SearchParams,
-  type SecurityWorkflowInsight,
+import type {
+  DefendInsight,
+  WorkflowInsightType,
+  SearchParams,
+  SecurityWorkflowInsight,
 } from '../../../../common/endpoint/types/workflow_insights';
+import { WorkflowInsightActionType } from '../../../../common/endpoint/types/workflow_insights';
+
+import { ENDPOINT_WORKFLOW_INSIGHTS_CREATED_EVENT } from '../../../lib/telemetry/event_based/events';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { SecurityWorkflowInsightsFailedInitialized } from './errors';
 import {
@@ -143,7 +144,7 @@ class SecurityWorkflowInsightsService {
     });
 
     if (remediationExists) {
-      insightToCreate.action.type = ActionType.Remediated;
+      insightToCreate.action.type = WorkflowInsightActionType.enum.remediated;
     }
 
     const id = generateInsightId(insightToCreate);
@@ -252,12 +253,12 @@ class SecurityWorkflowInsightsService {
     registerCallback(CallbackIds.DefendInsightsPostFetch, this.onAfterFetch.bind(this));
   }
 
-  private async suppressExistingInsights(endpointIds: string[], types: DefendInsightType[]) {
+  private async suppressExistingInsights(endpointIds: string[], types: WorkflowInsightType[]) {
     const existingInsights = await this.fetch({
       size: DEFAULT_SUPPRESS_SIZE,
       targetIds: endpointIds,
       types,
-      actionTypes: [ActionType.Refreshed],
+      actionTypes: [WorkflowInsightActionType.enum.refreshed],
     });
 
     return Promise.all(
@@ -269,7 +270,7 @@ class SecurityWorkflowInsightsService {
         const source = existingInsight._source as SecurityWorkflowInsight;
         return this.update(
           existingInsight._id as string,
-          { action: { ...source.action, type: ActionType.Suppressed } },
+          { action: { ...source.action, type: WorkflowInsightActionType.enum.suppressed } },
           existingInsight._index
         );
       })
@@ -293,7 +294,7 @@ class SecurityWorkflowInsightsService {
   public async createFromDefendInsights(
     defendInsights: DefendInsight[],
     endpointIds: string[],
-    insightType: DefendInsightType,
+    insightType: WorkflowInsightType,
     connectorId: string,
     model: string = ''
   ) {
@@ -321,7 +322,19 @@ class SecurityWorkflowInsightsService {
 
     const uniqueInsights = getUniqueInsights(workflowInsights);
 
-    return Promise.all(uniqueInsights.map((insight) => this.create(insight)));
+    const results = await Promise.all(uniqueInsights.map((insight) => this.create(insight)));
+
+    try {
+      const telemetry = this.endpointContext.getTelemetryService();
+      telemetry.reportEvent(ENDPOINT_WORKFLOW_INSIGHTS_CREATED_EVENT.eventType, {
+        insightType,
+        count: uniqueInsights.length,
+      });
+    } catch (e) {
+      this.logger.debug(`Failed to report insight creation telemetry: ${e.message}`);
+    }
+
+    return results;
   }
 
   public async ensureAgentIdsInCurrentSpace(

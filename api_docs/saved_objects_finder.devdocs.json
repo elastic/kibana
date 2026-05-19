@@ -75,6 +75,7 @@
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ContentClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -92,6 +93,7 @@
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "IUiSettingsClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -116,6 +118,7 @@
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SavedObjectsTaggingApi",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -188,6 +191,7 @@
             "lineNumber": 19,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "HOCProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -292,6 +296,7 @@
                 "lineNumber": 50,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectCommon",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -343,6 +348,7 @@
                 "lineNumber": 51,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectCommon",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -394,6 +400,7 @@
                 "lineNumber": 52,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectCommon",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -445,6 +452,7 @@
                 "lineNumber": 53,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectCommon",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -496,7 +504,7 @@
           "SavedObjectFinderFixedPage | SavedObjectFinderInitialPageSize"
         ],
         "path": "src/platform/plugins/shared/saved_objects_finder/public/finder/saved_object_finder.tsx",
-        "lineNumber": 104,
+        "lineNumber": 106,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

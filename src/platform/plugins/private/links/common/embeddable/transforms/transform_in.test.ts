@@ -7,14 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
 import { DASHBOARD_LINK_TYPE } from '../../content_management';
 import { transformIn } from './transform_in';
+
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValueOnce('fb1b3fc7-6e12-4542-bcf5-c61ad77241c5'),
+}));
 
 describe('transformIn', () => {
   test('should extract saved object reference from "by reference" state', () => {
     const byReferenceState = {
       title: 'Custom title',
-      savedObjectId: '123',
+      ref_id: '123',
     };
     expect(transformIn(byReferenceState)).toMatchInlineSnapshot(`
       Object {
@@ -37,10 +42,9 @@ describe('transformIn', () => {
       title: 'Custom title',
       links: [
         {
-          id: 'fb1b3fc7-6e12-4542-bcf5-c61ad77241c5',
           type: DASHBOARD_LINK_TYPE as typeof DASHBOARD_LINK_TYPE,
           destination: '19e149f0-e95e-404b-b6f8-fc751317c6be',
-          order: 0,
+          options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
         },
       ],
     };
@@ -57,8 +61,11 @@ describe('transformIn', () => {
           "links": Array [
             Object {
               "destinationRefName": "link_fb1b3fc7-6e12-4542-bcf5-c61ad77241c5_dashboard",
-              "id": "fb1b3fc7-6e12-4542-bcf5-c61ad77241c5",
-              "order": 0,
+              "options": Object {
+                "open_in_new_tab": false,
+                "use_filters": true,
+                "use_time_range": true,
+              },
               "type": "dashboardLink",
             },
           ],

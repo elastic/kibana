@@ -6,12 +6,14 @@
  */
 
 import type { CasesPublicSetup } from '@kbn/cases-plugin/public';
+import { ML_SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { casesSchemaValidator } from '../../common/util/cases_utils';
 import { PLUGIN_ICON } from '../../common/constants/app';
-import { CASE_ATTACHMENT_TYPE_ID_SINGLE_METRIC_VIEWER } from '../../common/constants/cases';
 import type { MlStartDependencies } from '../plugin';
 import { getSingleMetricViewerComponent } from '../shared_components/single_metric_viewer';
 import type { MlDependencies } from '../application/app';
@@ -20,10 +22,11 @@ import { getMlServices } from '../embeddables/single_metric_viewer/get_services'
 export function registerSingleMetricViewerCasesAttachment(
   cases: CasesPublicSetup,
   coreStart: CoreStart,
-  pluginStart: MlStartDependencies
+  pluginStart: MlStartDependencies,
+  usageCollection?: UsageCollectionSetup
 ) {
-  cases.attachmentFramework.registerPersistableState({
-    id: CASE_ATTACHMENT_TYPE_ID_SINGLE_METRIC_VIEWER,
+  cases.attachmentFramework.registerUnified({
+    id: ML_SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE,
     icon: PLUGIN_ICON,
     displayName: i18n.translate('xpack.ml.cases.registerSingleMetricViewer.displayName', {
       defaultMessage: 'Single metric viewer',
@@ -39,7 +42,7 @@ export function registerSingleMetricViewerCasesAttachment(
       children: React.lazy(async () => {
         const [{ initComponent }, mlServices] = await Promise.all([
           import('./single_metric_viewer_attachment'),
-          getMlServices(coreStart, pluginStart),
+          getMlServices(coreStart, pluginStart, usageCollection),
         ]);
         const SingleMetricViewerComponent = getSingleMetricViewerComponent(
           coreStart,
@@ -51,5 +54,6 @@ export function registerSingleMetricViewerCasesAttachment(
         };
       }),
     }),
+    schemaValidator: casesSchemaValidator,
   });
 }

@@ -9,6 +9,7 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 import { test } from '../../fixtures';
 import { generateLogsData } from '../../fixtures/generators';
+import { saveFailureStoreChanges } from '../../fixtures/retention_helpers';
 
 const TEST_STREAM = 'logs-nginx-default';
 
@@ -21,7 +22,7 @@ test.describe(
       const generateLogs = generateLogsData(logsSynthtraceEsClient);
 
       // Create a test stream with routing rules first
-      await apiServices.streams.forkStream('logs', 'logs.nginx', {
+      await apiServices.streams.forkStream('logs.otel', 'logs.otel.nginx', {
         field: 'service.name',
         eq: 'nginx',
       });
@@ -73,7 +74,7 @@ test.describe(
 
     test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
       // Clear existing rules
-      await apiServices.streams.clearStreamChildren('logs');
+      await apiServices.streams.clearStreamChildren('logs.otel');
       // Clean up the test stream
       await apiServices.streams.deleteStream(TEST_STREAM);
       // Clean up synthetic logs
@@ -110,7 +111,7 @@ test.describe(
       await pageObjects.datePicker.setAbsoluteRange(mainTimeRange);
 
       // Go to Data Quality tab
-      await pageObjects.streams.clickStreamNameLink('logs.nginx');
+      await pageObjects.streams.clickStreamNameLink('logs.otel.nginx');
       await pageObjects.streams.clickDataQualityTab();
       await pageObjects.streams.verifyDatePickerTimeRange(mainTimeRange);
     });
@@ -198,7 +199,7 @@ test.describe(
       await pageObjects.streams.verifyDatePickerTimeRange(timeRange);
 
       // Navigate to a different stream and verify time persists
-      await pageObjects.streams.clickStreamNameLink('logs.nginx');
+      await pageObjects.streams.clickStreamNameLink('logs.otel.nginx');
       await pageObjects.streams.clickDataQualityTab();
       await pageObjects.streams.verifyDatePickerTimeRange(timeRange);
     });
@@ -285,9 +286,9 @@ test.describe(
       // Click the link to Discover in the flyout
       await page.getByTestId('datasetQualityDetailsDegradedFieldFlyoutTitleLinkToDiscover').click();
 
-      // Should navigate to Discover with _ignored filter for log.level
+      // Should navigate to Discover in ES|QL mode with field-specific _ignored query
       await expect(page).toHaveURL(/.*\/app\/discover/);
-      await expect(page).toHaveURL(/.*_ignored.*log\.level/);
+      await expect(page).toHaveURL(/.*esql.*FROM.*MV_CONTAINS.*_ignored.*log\.level/);
     });
 
     test('should edit failure store for wired streams', async ({ page }) => {
@@ -305,7 +306,7 @@ test.describe(
 
       // Toggle the inherit failure store switch
       await page.getByTestId('inheritFailureStoreSwitch').click();
-      await page.getByTestId('failureStoreModalSaveButton').click();
+      await saveFailureStoreChanges(page);
 
       // Verify the modal is closed
       await expect(page.getByTestId('editFailureStoreModal')).toBeHidden();

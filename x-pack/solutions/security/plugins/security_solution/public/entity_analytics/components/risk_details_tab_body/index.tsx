@@ -8,7 +8,8 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
-
+import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
+import { useUiSetting } from '../../../common/lib/kibana';
 import { useUpsellingComponent } from '../../../common/hooks/use_upselling';
 import { EnableRiskScore } from '../enable_risk_score';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -36,9 +37,11 @@ type ComponentsQueryProps = HostsComponentsQueryProps | UsersComponentsQueryProp
 const RiskDetailsTabBodyComponent: React.FC<
   Pick<ComponentsQueryProps, 'startDate' | 'endDate' | 'setQuery' | 'deleteQuery'> & {
     entityName: string;
+    entityId?: string;
     riskEntity: EntityType;
   }
-> = ({ entityName, startDate, endDate, setQuery, deleteQuery, riskEntity }) => {
+> = ({ entityName, startDate, endDate, setQuery, deleteQuery, riskEntity, entityId }) => {
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
   const queryId = useMemo(
     () =>
       riskEntity === EntityType.host
@@ -64,10 +67,13 @@ const RiskDetailsTabBodyComponent: React.FC<
   const { toggleStatus: contributorsToggleStatus, setToggleStatus: setContributorsToggleStatus } =
     useQueryToggle(`${queryId} contributors`);
 
-  const filterQuery = useMemo(
-    () => (entityName ? buildEntityNameFilter(riskEntity, [entityName]) : {}),
-    [entityName, riskEntity]
-  );
+  const filterQuery = useMemo(() => {
+    if (entityStoreV2Enabled && entityId != null) {
+      return buildEntityNameFilter(riskEntity, [entityId]);
+    }
+
+    return entityName ? buildEntityNameFilter(riskEntity, [entityName]) : {};
+  }, [entityStoreV2Enabled, entityId, entityName, riskEntity]);
 
   const { data, loading, refetch, inspect, hasEngineBeenInstalled } = useRiskScore({
     filterQuery,

@@ -15,6 +15,14 @@ jest.mock('../field_types/field_renderer', () => ({
   TemplateFieldRenderer: jest.fn(() => <div data-test-subj="template-field-renderer" />),
 }));
 
+jest.mock('../../cases_context/use_cases_context', () => ({
+  useCasesContext: () => ({ owner: ['securitySolution'] }),
+}));
+
+jest.mock('../hooks/use_parent_template_definition', () => ({
+  useParentTemplateDefinition: jest.fn(() => ({ definition: undefined, isFetched: true })),
+}));
+
 describe('CreateTemplatePreview', () => {
   const renderPreview = (definition: string) => {
     const Wrapper = () => {
@@ -59,10 +67,11 @@ describe('CreateTemplatePreview', () => {
     );
   });
 
-  it('renders parse errors when YAML is invalid', () => {
+  it('renders nothing when YAML is invalid (no last valid template)', () => {
     renderPreview('name: [');
 
-    expect(screen.getByText(/"message":/)).toBeInTheDocument();
+    // Component returns null when there's no valid template
+    expect(screen.queryByTestId('template-field-renderer')).not.toBeInTheDocument();
     expect(TemplateFieldRenderer).not.toHaveBeenCalled();
   });
 });

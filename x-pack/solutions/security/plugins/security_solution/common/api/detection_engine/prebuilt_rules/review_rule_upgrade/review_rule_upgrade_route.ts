@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { SortOrder, type RuleObjectId, type RuleSignatureId, type RuleTagArray } from '../../model';
 import type { PartialThreeWayRuleDiff } from '../model';
 import type { RuleResponse, RuleVersion } from '../../model/rule_schema';
@@ -34,7 +34,7 @@ export const ReviewRuleUpgradeRequestBody = z
     /**
      * Rules per page
      */
-    per_page: z.coerce.number().int().min(0).optional().default(20),
+    per_page: z.coerce.number().int().min(0).max(500).optional().default(20),
   })
   .nullable();
 

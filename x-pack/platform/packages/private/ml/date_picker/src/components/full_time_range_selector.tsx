@@ -99,11 +99,13 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
     http,
     notifications: { toasts },
     showFrozenDataTierChoice,
+    cps,
   } = useDatePickerContext();
 
   // wrapper around setFullTimeRange to allow for the calling of the optional callBack prop
   const setRange = useCallback(async () => {
     try {
+      const projectRouting = cps?.cpsManager?.getProjectRouting();
       const fullTimeRange = await setFullTimeRange(
         timefilter,
         dataView,
@@ -113,7 +115,8 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
         showFrozenDataTierChoice === false
           ? false
           : frozenDataPreference === FROZEN_TIER_PREFERENCE.EXCLUDE,
-        apiPath
+        apiPath,
+        projectRouting
       );
       if (typeof callback === 'function' && fullTimeRange !== undefined) {
         callback(fullTimeRange);
@@ -139,6 +142,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
     frozenDataPreference,
     apiPath,
     callback,
+    cps?.cpsManager,
   ]);
 
   const [isPopoverOpen, setPopover] = useState(false);
@@ -238,6 +242,12 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
         <EuiFlexItem grow={false}>
           <EuiPopover
             id={'mlFullTimeRangeSelectorOption'}
+            aria-label={i18n.translate(
+              'xpack.ml.datePicker.fullTimeRangeSelector.frozenDataTierOptionsAriaLabel',
+              {
+                defaultMessage: 'Frozen data tier options',
+              }
+            )}
             button={
               <EuiButtonIcon
                 data-test-subj="mlDatePickerButtonDataTierOptions"

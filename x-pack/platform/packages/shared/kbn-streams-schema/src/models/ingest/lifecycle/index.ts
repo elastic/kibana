@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { NonEmptyString } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { NonEmptyString } from '@kbn/zod-helpers/v4';
 import { createIsNarrowSchema } from '../../../shared/type_guards';
 
 export interface IngestStreamLifecycleDSL {
@@ -71,22 +71,41 @@ const dslLifecycleSchema = z.object({
     downsample: z.optional(z.array(downsampleStepSchema)),
   }),
 });
-const ilmLifecycleSchema = z.object({ ilm: z.object({ policy: NonEmptyString }) });
+const ilmLifecycleSchema = z.object({
+  ilm: z.object({
+    policy: NonEmptyString,
+  }),
+});
 const inheritLifecycleSchema = z.object({ inherit: z.strictObject({}) });
 const disabledLifecycleSchema = z.object({ disabled: z.strictObject({}) });
-const errorLifecycleSchema = z.object({ error: z.strictObject({ message: NonEmptyString }) });
+const errorLifecycleSchema = z.object({
+  error: z.strictObject({
+    message: NonEmptyString,
+  }),
+});
 
-export const ingestStreamLifecycleSchema: z.Schema<IngestStreamLifecycle> = z.union([
-  dslLifecycleSchema,
-  ilmLifecycleSchema,
-  inheritLifecycleSchema,
-]);
+export const ingestStreamLifecycleSchema: z.Schema<IngestStreamLifecycle> = z
+  .union([dslLifecycleSchema, ilmLifecycleSchema, inheritLifecycleSchema])
+  .meta({ id: 'IngestStreamLifecycle' });
 
 export const classicIngestStreamEffectiveLifecycleSchema: z.Schema<ClassicIngestStreamEffectiveLifecycle> =
-  z.union([ingestStreamLifecycleSchema, disabledLifecycleSchema, errorLifecycleSchema]);
+  z
+    .union([
+      dslLifecycleSchema,
+      ilmLifecycleSchema,
+      inheritLifecycleSchema,
+      disabledLifecycleSchema,
+      errorLifecycleSchema,
+    ])
+    .meta({ id: 'ClassicIngestStreamEffectiveLifecycle' });
 
 export const wiredIngestStreamEffectiveLifecycleSchema: z.Schema<WiredIngestStreamEffectiveLifecycle> =
-  z.union([dslLifecycleSchema, ilmLifecycleSchema]).and(z.object({ from: NonEmptyString }));
+  z
+    .union([
+      dslLifecycleSchema.extend({ from: NonEmptyString }),
+      ilmLifecycleSchema.extend({ from: NonEmptyString }),
+    ])
+    .meta({ id: 'WiredIngestStreamEffectiveLifecycle' });
 
 export const ingestStreamEffectiveLifecycleSchema: z.Schema<IngestStreamEffectiveLifecycle> =
   z.union([classicIngestStreamEffectiveLifecycleSchema, wiredIngestStreamEffectiveLifecycleSchema]);

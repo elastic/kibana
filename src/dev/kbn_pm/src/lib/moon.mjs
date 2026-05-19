@@ -14,7 +14,11 @@ const getMoonExec = (() => {
 
   return async () => {
     if (!moonExecPath) {
-      moonExecPath = (await run('yarn', ['--silent', 'which', 'moon'])).trim();
+      moonExecPath = (
+        await run('yarn', ['--silent', 'which', 'moon'], {
+          env: { NODE_NO_WARNINGS: '1' },
+        })
+      ).trim();
       console.warn(`Using moon at ${moonExecPath}`);
     }
     return moonExecPath;
@@ -36,7 +40,7 @@ export async function moonRun(commandOrCommands, opts = {}) {
 
   const moonArgs = [];
   if (opts.noCache) {
-    moonArgs.push('-u');
+    moonArgs.push('--force');
   }
   if (opts.noActions) {
     moonArgs.push('--no-actions');
@@ -55,6 +59,13 @@ export async function moonRun(commandOrCommands, opts = {}) {
   opts.filter = combinePredicates(
     ...[opts.filter, excludeShallowCloneWarnings, excludeRemoteWarnings].filter(Boolean)
   );
+
+  if (opts.noCache) {
+    opts.env = {
+      ...opts.env,
+      MOON_CACHE: 'off',
+    };
+  }
 
   return run(moonExec, args, opts);
 }

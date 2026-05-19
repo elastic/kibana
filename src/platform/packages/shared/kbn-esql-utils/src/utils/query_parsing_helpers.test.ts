@@ -8,8 +8,8 @@
  */
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { monaco } from '@kbn/monaco';
-import type { ESQLColumn } from '@kbn/esql-language';
-import { Parser, walk } from '@kbn/esql-language';
+import type { ESQLColumn } from '@elastic/esql/types';
+import { Parser, walk } from '@elastic/esql';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import {
   getRemoteClustersFromESQLQuery,
@@ -32,6 +32,8 @@ import {
   hasLimitBeforeAggregate,
   missingSortBeforeLimit,
   hasOnlySourceCommand,
+  hasTimeseriesInfoCommand,
+  getSparklineColumns,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -227,6 +229,21 @@ describe('esql query helpers', () => {
       );
       expect(code).toEqual(
         'FROM index1 /* cmt */\n  | KEEP field1, field2 /* cmt */\n  | SORT field1 /* cmt */'
+      );
+    });
+
+    it('should respect custom lineWidth when provided', function () {
+      const query =
+        'FROM kibana_sample_data_logs | STATS count = COUNT(*), avg = AVG(bytes), p95 = PERCENTILE(bytes, 95), ext = VALUES(tags.keyword) BY ip | EVAL newField = CASE(count < 100, "groupA", count > 100 AND count < 500, "groupB", "Other") | KEEP newField';
+      const codeWithNarrowWidth = prettifyQuery(query, 40);
+      const codeWithWideWidth = prettifyQuery(query, 120);
+      const maxLineLength = (code: string) =>
+        Math.max(...code.split('\n').map((line) => line.length));
+      expect(maxLineLength(codeWithNarrowWidth)).toBeLessThanOrEqual(40);
+      expect(maxLineLength(codeWithWideWidth)).toBeLessThanOrEqual(120);
+      // Wider width should allow longer lines (fewer wraps)
+      expect(maxLineLength(codeWithWideWidth)).toBeGreaterThanOrEqual(
+        maxLineLength(codeWithNarrowWidth)
       );
     });
   });
@@ -974,6 +991,92 @@ describe('esql query helpers', () => {
     });
   });
 
+  describe('getSparklineColumns', () => {
+    it('should return sparkline alias and not inner column refs (patterns-style query)', () => {
+      const esql =
+        'FROM kibana_sample_data_logs | STATS Count = COUNT(*), Sparkline=SPARKLINE(Count(*), @timestamp, 40, ?_tstart, ?_tend) BY Pattern=CATEGORIZE(message) | SORT Count DESC';
+      expect(getSparklineColumns(esql)).toEqual(['Sparkline']);
+    });
+
+    it('should return bare SPARKLINE expression as column id using source text', () => {
+      const esql =
+        'FROM index | STATS SPARKLINE(COUNT(*), @timestamp, 10, ?_tstart, ?_tend) BY Pattern=CATEGORIZE(msg)';
+      expect(getSparklineColumns(esql)).toEqual([
+        'SPARKLINE(COUNT(*), @timestamp, 10, ?_tstart, ?_tend)',
+      ]);
+    });
+
+    it('should not treat unrelated stats columns as sparklines based on name text', () => {
+      const esql = 'FROM index | STATS my_sparkline_metric = COUNT(*) BY Pattern=CATEGORIZE(msg)';
+      expect(getSparklineColumns(esql)).toEqual([]);
+    });
+
+    it('should apply every RENAME command in pipeline order', () => {
+      const esql =
+        'FROM index | STATS Sparkline=SPARKLINE(COUNT(*), @ts, 5, ?_a, ?_b) BY Pattern=CATEGORIZE(m) | RENAME Sparkline AS S1 | RENAME S1 AS S2';
+      expect(getSparklineColumns(esql)).toEqual(['S2']);
+    });
+
+    it('should return sparkline alias from INLINE STATS', () => {
+      const esql =
+        'FROM index | INLINE STATS my_spark = SPARKLINE(COUNT(*), @timestamp, 10, ?_tstart, ?_tend)';
+      expect(getSparklineColumns(esql)).toEqual(['my_spark']);
+    });
+
+    it('should return bare SPARKLINE expression from INLINE STATS as column id using source text', () => {
+      const esql =
+        'FROM index | INLINE STATS SPARKLINE(COUNT(*), @timestamp, 10, ?_tstart, ?_tend)';
+      expect(getSparklineColumns(esql)).toEqual([
+        'SPARKLINE(COUNT(*), @timestamp, 10, ?_tstart, ?_tend)',
+      ]);
+    });
+
+    it('should collect sparkline columns from both STATS and INLINE STATS in the same query', () => {
+      const esql =
+        'FROM index | STATS stats_spark = SPARKLINE(bytes) BY host | INLINE STATS inline_spark = SPARKLINE(requests)';
+      expect(getSparklineColumns(esql)).toEqual(['stats_spark', 'inline_spark']);
+    });
+
+    it('should apply RENAME to INLINE STATS sparkline columns', () => {
+      const esql =
+        'FROM index | INLINE STATS Spark = SPARKLINE(COUNT(*), @ts, 5, ?_a, ?_b) | RENAME Spark AS MySpark';
+      expect(getSparklineColumns(esql)).toEqual(['MySpark']);
+    });
+
+    it('should return source text for bare SPARKLINE alongside an aliased SPARKLINE in the same STATS', () => {
+      const esql =
+        'FROM logs | STATS sparkline = SPARKLINE(AVG(bytes), timestamp, 50, ?_tstart, ?_tend), SPARKLINE(COUNT(*), timestamp, 50, ?_tstart, ?_tend), Count = COUNT(*) BY clientip';
+      expect(getSparklineColumns(esql)).toEqual([
+        'sparkline',
+        'SPARKLINE(COUNT(*), timestamp, 50, ?_tstart, ?_tend)',
+      ]);
+    });
+
+    it('should handle SPARKLINE with an aggregate inline WHERE filter', () => {
+      const esql =
+        'FROM employees | STATS sparkline = SPARKLINE(COUNT(*), hire_date, 20, "1985-01-01T00:00:00Z", "1985-12-31T00:00:00Z") WHERE gender == "M"';
+      expect(getSparklineColumns(esql)).toEqual(['sparkline']);
+    });
+
+    it('should collect sparkline columns from multiple consecutive STATS commands', () => {
+      const esql =
+        'FROM employees | STATS s1 = SPARKLINE(MAX(salary), hire_date, 20, "1985-01-01T00:00:00Z", "1986-12-31T00:00:00Z") BY bucket_date = BUCKET(hire_date, 1year) | STATS s2 = SPARKLINE(SUM(salary), bucket_date, 12, "1985-01-01T00:00:00Z", "1985-12-31T00:00:00Z")';
+      expect(getSparklineColumns(esql)).toEqual(['s1', 's2']);
+    });
+
+    it('should not include non-sparkline aggregates from mixed STATS', () => {
+      const esql =
+        'FROM employees | STATS s = SPARKLINE(COUNT(*), hire_date, 20, "1985-01-01T00:00:00Z", "1985-12-31T00:00:00Z"), c = COUNT(*), m = MAX(salary)';
+      expect(getSparklineColumns(esql)).toEqual(['s']);
+    });
+
+    it('should detect sparkline in STATS after INLINE STATS that has no sparkline', () => {
+      const esql =
+        'FROM employees | INLINE STATS avg_height = AVG(height) BY gender | STATS s1 = SPARKLINE(AVG(salary), hire_date, 20, "1985-01-01T00:00:00Z", "1985-12-31T00:00:00Z")';
+      expect(getSparklineColumns(esql)).toEqual(['s1']);
+    });
+  });
+
   describe('getRemoteClustersFromESQLQuery', () => {
     it('should return undefined for queries without remote clusters', () => {
       expect(getRemoteClustersFromESQLQuery('FROM foo')).toBeUndefined();
@@ -1093,6 +1196,28 @@ describe('esql query helpers', () => {
           'PROMQL index = index1 step="5m" start=?_tstart end=?_tend avg(bytes) '
         )
       ).toBe(false);
+    });
+  });
+
+  describe('hasInfoCommand', () => {
+    it('should return true when query contains METRICS_INFO command', () => {
+      expect(hasTimeseriesInfoCommand('TS index | METRICS_INFO')).toBe(true);
+    });
+
+    it('should return true when query contains TS_INFO command', () => {
+      expect(hasTimeseriesInfoCommand('TS index | TS_INFO')).toBe(true);
+    });
+
+    it('should return true when METRICS_INFO appears with other commands', () => {
+      expect(hasTimeseriesInfoCommand('TS index | METRICS_INFO | LIMIT 10')).toBe(true);
+    });
+
+    it('should return true when TS_INFO appears with other commands', () => {
+      expect(hasTimeseriesInfoCommand('TS index | TS_INFO | LIMIT 10')).toBe(true);
+    });
+
+    it('should return false when query does not contain METRICS_INFO or TS_INFO', () => {
+      expect(hasTimeseriesInfoCommand('FROM index | STATS count()')).toBe(false);
     });
   });
 });

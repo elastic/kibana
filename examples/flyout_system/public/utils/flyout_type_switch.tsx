@@ -11,24 +11,30 @@ import React from 'react';
 import { EuiSwitch } from '@elastic/eui';
 
 export interface FlyoutTypeSwitchProps {
+  title: string;
   flyoutType: 'overlay' | 'push';
   onChange: (type: 'overlay' | 'push') => void;
   label?: string;
+  disabled?: boolean;
 }
 
 /**
  * Shared switch component for toggling between overlay and push flyout types
  */
 export const FlyoutTypeSwitch: React.FC<FlyoutTypeSwitchProps> = ({
+  title,
   flyoutType,
   onChange,
   label = 'Push',
+  disabled = false,
 }) => {
   return (
     <EuiSwitch
+      data-test-subj={`flyoutTypeSwitch-${title}`}
       label={label}
       checked={flyoutType === 'push'}
       onChange={(e) => onChange(e.target.checked ? 'push' : 'overlay')}
+      disabled={disabled}
     />
   );
 };

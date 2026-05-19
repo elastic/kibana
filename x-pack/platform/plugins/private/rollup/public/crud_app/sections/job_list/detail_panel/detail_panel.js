@@ -161,7 +161,7 @@ export class DetailPanel extends Component {
                 jobs={[job]}
                 anchorPosition="upRight"
                 detailPanel={true}
-                iconType="arrowUp"
+                iconType="chevronSingleUp"
                 label={i18n.translate('xpack.rollupJobs.detailPanel.jobActionMenu.buttonLabel', {
                   defaultMessage: 'Manage',
                 })}
@@ -210,7 +210,7 @@ export class DetailPanel extends Component {
         <EuiFlyoutBody data-test-subj="rollupJobDetailJobNotFound">
           <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon size="m" type="warning" color="danger" />
+              <EuiIcon size="m" type="warning" color="danger" aria-hidden={true} />
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>

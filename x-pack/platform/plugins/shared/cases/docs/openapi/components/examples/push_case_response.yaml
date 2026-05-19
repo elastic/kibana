@@ -4,15 +4,19 @@ value:
     "id": "b917f300-0ed9-11ed-bd18-65557fe66949",
     "version": "WzE3NjgsM10=",
     "comments": [],
+    "observables": [],
     "totalComment": 0,
     "totalAlerts": 0,
+    "totalEvents": 0,
+    "total_observables": 0,
     "description": "A case description.",
     "title": "Case title 1",
     "tags": [
       "tag 1"
     ],
     "settings": {
-      "syncAlerts": true
+      "syncAlerts": true,
+      "extractObservables": false
     },
     "owner": "cases",
     "duration": null,
@@ -20,17 +24,22 @@ value:
     "closed_at": null,
     "closed_by": null,
     "created_at": "2022-07-29T00:59:39.444Z",
+    "assignees": [],
+    "category": null,
+    "customFields": [],
     "created_by": {
       "username": "elastic",
       "email": null,
-      "full_name": null
+      "full_name": null,
+      "profile_uid": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
     },
     "status": "open",
     "updated_at": "2022-07-29T01:20:58.436Z",
     "updated_by": {
       "username": "elastic",
       "full_name": null,
-      "email": null
+      "email": null,
+      "profile_uid": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
     },
     "connector": {
       "id": "09f8c0b0-0eda-11ed-bd18-65557fe66949",

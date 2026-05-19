@@ -1,0 +1,94 @@
+{
+  "id": "@kbn/dashboard-navigation-options-schema",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/dashboard-navigation-options-schema",
+        "id": "def-server.DashboardNavigationOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "DashboardNavigationOptions",
+        "description": [],
+        "signature": [
+          "{ readonly use_filters: boolean; readonly use_time_range: boolean; readonly open_in_new_tab: boolean; }"
+        ],
+        "path": "src/platform/packages/private/dashboard/dashboard-navigation-options-schema/index.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/dashboard-navigation-options-schema",
+        "id": "def-server.dashboardNavigationOptionsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "dashboardNavigationOptionsSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ use_filters: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; use_time_range: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; open_in_new_tab: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; }>"
+        ],
+        "path": "src/platform/packages/private/dashboard/dashboard-navigation-options-schema/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

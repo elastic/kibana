@@ -6,7 +6,6 @@
  */
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import type { ChangePointType } from '@kbn/es-types/src';
-import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import { intervalToSeconds } from '@kbn/apm-data-access-plugin/common/utils/get_preferred_bucket_size_and_data_source';
 import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
@@ -56,8 +55,7 @@ function getChangePointsAggs(bucketsPath: string) {
     change_point: {
       buckets_path: bucketsPath,
     },
-    // elasticsearch@9.0.0 change_point aggregation is missing in the types: https://github.com/elastic/elasticsearch-specification/issues/3671
-  } as AggregationsAggregationContainer;
+  };
   return changePointAggs;
 }
 

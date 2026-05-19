@@ -10,15 +10,18 @@
 import React, { useCallback, useEffect } from 'react';
 import { keys } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { useFetchMetricsData } from './hooks/use_fetch_metrics_data';
 import { METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ } from '../../../common/constants';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { ChartsGrid } from '../../charts_grid';
 import { EmptyState } from '../../empty_state/empty_state';
 import { useToolbarActions } from '../../toolbar/hooks/use_toolbar_actions';
 import { SearchButton } from '../../toolbar/right_side_actions/search_button';
-import { useMetricFields } from './hooks';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
-import type { UnifiedMetricsGridProps } from '../../../types';
+import { MetricsInfoError } from './metrics_info_error';
+import type { Dimension, UnifiedMetricsGridProps } from '../../../types';
+import { useDimensionsWipe, useDiscoverFieldForBreakdown, useMetricFieldsFilter } from './hooks';
+import { isSuppressedFetchError } from './utils/is_suppressed_fetch_error';
 
 export const MetricsExperienceGrid = ({
   renderToggleActions,
@@ -30,17 +33,66 @@ export const MetricsExperienceGrid = ({
   services,
   fetch$: discoverFetch$,
   fetchParams,
-  isChartLoading: isDiscoverLoading,
   isComponentVisible,
+  isTabSelected,
+  breakdownField,
+  onBreakdownFieldChange,
 }: UnifiedMetricsGridProps) => {
-  const { searchTerm, isFullscreen, onSearchTermChange, onToggleFullscreen } =
-    useMetricsExperienceState();
+  const {
+    searchTerm,
+    isFullscreen,
+    onSearchTermChange,
+    onToggleFullscreen,
+    selectedDimensions,
+    onDimensionsChange,
+  } = useMetricsExperienceState();
 
-  const { allMetricFields, visibleMetricFields, dimensions } = useMetricFields();
+  const {
+    metricItems,
+    allDimensions,
+    activeDimensions,
+    loading: isDiscoverLoading,
+    error: metricsInfoError,
+  } = useFetchMetricsData({
+    fetchParams,
+    services,
+    isComponentVisible,
+    selectedDimensionNames: selectedDimensions,
+  });
+
+  const { filteredMetricItems } = useMetricFieldsFilter({
+    metricItems,
+    searchTerm,
+  });
+
+  useDiscoverFieldForBreakdown(
+    breakdownField,
+    allDimensions,
+    selectedDimensions,
+    onDimensionsChange
+  );
+
+  const onToolbarDimensionsChange = useCallback(
+    (nextSelectedDimensions: Dimension[]) => {
+      onDimensionsChange(nextSelectedDimensions);
+      onBreakdownFieldChange?.(nextSelectedDimensions[0]?.name);
+    },
+    [onDimensionsChange, onBreakdownFieldChange]
+  );
+
+  useDimensionsWipe({
+    selectedDimensions,
+    allDimensions,
+    isLoading: isDiscoverLoading,
+    hasError: metricsInfoError != null,
+    breakdownField,
+    onSelectedDimensionsChange: onDimensionsChange,
+    onBreakdownFieldChange,
+  });
 
   const { onPageReady } = usePerformanceContext();
   useEffect(() => {
-    if (!isDiscoverLoading && allMetricFields.length > 0) {
+    if (!isDiscoverLoading && metricItems.length > 0) {
       onPageReady({
         meta: {
           rangeFrom: fetchParams.timeRange?.from,
@@ -48,12 +100,12 @@ export const MetricsExperienceGrid = ({
         },
         customMetrics: {
           key1: 'metric_experience_fields_count',
-          value1: allMetricFields.length,
+          value1: metricItems.length,
         },
       });
     }
   }, [
-    allMetricFields.length,
+    metricItems.length,
     onPageReady,
     fetchParams.timeRange?.from,
     fetchParams.timeRange?.to,
@@ -61,9 +113,10 @@ export const MetricsExperienceGrid = ({
   ]);
 
   const { toggleActions, leftSideActions, rightSideActions } = useToolbarActions({
-    allMetricFields,
-    dimensions,
+    allDimensions,
+    metricItems,
     renderToggleActions,
+    onDimensionsChange: onToolbarDimensionsChange,
     isLoading: isDiscoverLoading,
   });
 
@@ -77,8 +130,15 @@ export const MetricsExperienceGrid = ({
     [isFullscreen, onToggleFullscreen]
   );
 
-  if (allMetricFields.length === 0) {
+  if (metricItems.length === 0 && isDiscoverLoading) {
     return <EmptyState isLoading={isDiscoverLoading} />;
+  }
+
+  const showMetricsInfoError =
+    metricsInfoError != null && !isDiscoverLoading && !isSuppressedFetchError(metricsInfoError);
+
+  if (showMetricsInfoError) {
+    return <MetricsInfoError />;
   }
 
   return (
@@ -107,7 +167,8 @@ export const MetricsExperienceGrid = ({
       onKeyDown={onKeyDown}
     >
       <MetricsExperienceGridContent
-        fields={visibleMetricFields}
+        metricItems={filteredMetricItems}
+        activeDimensions={activeDimensions}
         services={services}
         discoverFetch$={discoverFetch$}
         fetchParams={fetchParams}
@@ -116,6 +177,7 @@ export const MetricsExperienceGrid = ({
         actions={actions}
         histogramCss={histogramCss}
         isDiscoverLoading={isDiscoverLoading}
+        isTabSelected={isTabSelected}
       />
     </ChartsGrid>
   );

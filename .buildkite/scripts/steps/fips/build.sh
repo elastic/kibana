@@ -8,7 +8,8 @@ source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/steps/artifacts/env.sh
 
 mkdir -p target
-download_artifact "kibana-$FULL_VERSION-linux-x86_64.tar.gz" ./target --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+download_tmp_artifact "kibana-default.tar.zst" ./target "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+mv ./target/kibana-default.tar.zst ./target/kibana-$FULL_VERSION-linux-x86_64.tar.zst
 
 echo "--- Build FIPS image"
 node scripts/build \
@@ -17,6 +18,7 @@ node scripts/build \
     --skip-platform-folders \
     --skip-cdn-assets \
     --skip-archives \
+    --tar-zstd \
     --docker-images \
     --docker-namespace="kibana-ci" \
     --docker-tag-qualifier="$BUILDKITE_COMMIT" \

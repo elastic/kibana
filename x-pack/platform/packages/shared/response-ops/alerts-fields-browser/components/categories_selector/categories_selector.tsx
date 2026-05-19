@@ -131,7 +131,7 @@ const CategoriesSelectorComponent: React.FC<CategoriesSelectorProps> = ({
           <EuiFilterButton
             data-test-subj="categories-filter-button"
             hasActiveFilters={selectedCategoryIds.length > 0}
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             isSelected={isPopoverOpen}
             numActiveFilters={selectedCategoryIds.length}
             numFilters={totalCategories}
@@ -142,7 +142,7 @@ const CategoriesSelectorComponent: React.FC<CategoriesSelectorProps> = ({
         }
         isOpen={isPopoverOpen}
         closePopover={closePopover}
-        panelPaddingSize="none"
+        panelPaddingSize="s"
         aria-label={i18n.FILTER_OPTIONS_LABEL}
       >
         <div

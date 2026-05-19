@@ -3,10 +3,6 @@
 ## Cloud settings
 xpack.cloud.serverless.product_tier: complete
 
-# Cross Project Search
-cps.enabled: true
-cps.cpsEnabled: false
-
 xpack.features.overrides:
   ### Workflows Management should be moved from Analytics category to the Security one.
   workflowsManagement.category: "security"
@@ -14,6 +10,10 @@ xpack.features.overrides:
   agentBuilder:
     category: "security"
     order: 1101
+  ### Agent Context Layer should match Agent Builder for role management.
+  agentContextLayer:
+    category: "security"
+    order: 1102
 
 # Elastic Managed LLMs
 xpack.actions.preconfigured:

@@ -84,8 +84,7 @@ export default function (providerContext: FtrProviderContext) {
   });
 
   describe('GET /internal/cloud_security_posture/benchmarks', () => {
-    // FLAKY: https://github.com/elastic/kibana/issues/249641
-    describe.skip('Get Benchmark API', async () => {
+    describe('Get Benchmark API', async () => {
       beforeEach(async () => {
         await findingsIndex.deleteAll();
         await kibanaServer.savedObjects.clean({

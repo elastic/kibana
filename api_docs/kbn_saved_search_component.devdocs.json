@@ -42,6 +42,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -390,6 +391,7 @@
                 "lineNumber": 58,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedSearchTableConfig",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -517,10 +519,10 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/unified-data-table",
-                "scope": "public",
-                "docId": "kibKbnUnifiedDataTablePluginApi",
-                "section": "def-public.DataGridDensity",
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataGridDensity",
                 "text": "DataGridDensity"
               },
               " | undefined"

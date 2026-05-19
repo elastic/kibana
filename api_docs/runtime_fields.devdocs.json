@@ -47,6 +47,7 @@
             "lineNumber": 23,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -98,6 +99,7 @@
             "lineNumber": 76,
             "columnNumber": 49,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -185,7 +187,7 @@
                   "React.FormEvent<HTMLFormElement> | React.MouseEvent<Element, MouseEvent> | undefined"
                 ],
                 "path": "src/platform/plugins/shared/es_ui_shared/static/forms/hook_form_lib/types.ts",
-                "lineNumber": 30,
+                "lineNumber": 34,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false
@@ -254,6 +256,7 @@
                 "lineNumber": 57,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "RuntimeField",
                 "trackAdoption": false,
                 "isRequired": true
               }

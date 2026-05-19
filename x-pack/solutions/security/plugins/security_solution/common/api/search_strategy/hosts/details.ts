@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { HostsQueries } from '../model/factory_query_type';
 import { inspect } from '../model/inspect';
 import { pagination } from '../model/pagination';
@@ -21,6 +21,7 @@ export const hostDetailsSchema = requestBasicOptionsSchema.extend({
   timerange,
   sort,
   factoryQueryType: z.literal(HostsQueries.details),
+  entityStoreV2: z.boolean().optional(),
 });
 
 export type HostDetailsRequestOptionsInput = z.input<typeof hostDetailsSchema>;

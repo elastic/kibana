@@ -17,7 +17,6 @@ const requiredFieldsForHit = {
   'transaction.id': ['abc123def456'],
   'transaction.duration.us': [2500],
   'transaction.name': ['POST /api/test'],
-  'transaction.sampled': [true],
   'transaction.type': ['request'],
 };
 
@@ -105,6 +104,45 @@ describe('getTransaction', () => {
     });
     expect(result).toBeDefined();
     expect(result?.server).toEqual({ address: 'test.address', port: undefined });
+  });
+
+  it('returns transaction when transaction.sampled is missing', async () => {
+    const apmEventClient = createMockApmEventClient({
+      hits: {
+        hits: [{ fields: requiredFieldsForHit, _source: {} }],
+      },
+    });
+    const result = await getTransaction({
+      transactionId: 'abc123def456',
+      traceId: 'a1b2c3d4e5f67890abcdef1234567890',
+      apmEventClient,
+      start: 0,
+      end: 50000,
+    });
+    expect(result).toBeDefined();
+    expect(result?.transaction.sampled).toBeUndefined();
+  });
+
+  it('returns transaction.sampled when present', async () => {
+    const apmEventClient = createMockApmEventClient({
+      hits: {
+        hits: [
+          {
+            fields: { ...requiredFieldsForHit, 'transaction.sampled': [true] },
+            _source: {},
+          },
+        ],
+      },
+    });
+    const result = await getTransaction({
+      transactionId: 'abc123def456',
+      traceId: 'a1b2c3d4e5f67890abcdef1234567890',
+      apmEventClient,
+      start: 0,
+      end: 50000,
+    });
+    expect(result).toBeDefined();
+    expect(result?.transaction.sampled).toBe(true);
   });
 
   it('includes transaction.marks and span from _source when present', async () => {

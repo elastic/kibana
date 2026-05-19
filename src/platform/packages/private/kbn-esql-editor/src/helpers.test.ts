@@ -10,11 +10,13 @@
 import {
   filterDataErrors,
   filterOutWarningsOverlappingWithErrors,
+  getToggleCommentLines,
   parseErrors,
   parseWarning,
   filterDuplicatedWarnings,
+  shouldAutoTriggerSuggestions,
 } from './helpers';
-import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
+import type { MonacoMessage } from '@kbn/code-editor';
 
 describe('helpers', function () {
   describe('parseErrors', function () {
@@ -73,6 +75,34 @@ describe('helpers', function () {
           startColumn: 1,
           startLineNumber: 1,
           code: 'unknownError',
+        },
+      ]);
+    });
+
+    it('should return one marker per problem when ES reports multiple problems with colon-containing index names', function () {
+      const error = new Error(
+        '[esql] > Unexpected error from Elasticsearch: verification_exception - Found 2 problems\nline 3:19: Cannot use field [fields.varnish_cache_hit_rate] due to ambiguities being mapped as [2] incompatible types: [float] in [smops_tv_bmbg10:tv-poc_metrics_cdn-2026.04.03-000716] and [102] other indices, [long] in [smops_tv_bmbg10:tv-poc_metrics_cdn-2026.04.04-000720] and [25] other indices\nline 3:64: Cannot use field [fields.varnish_cache_miss_rate] due to ambiguities being mapped as [2] incompatible types: [float] in [smops_tv_bmbg10:tv-poc_metrics_cdn-2026.04.03-000716] and [106] other indices, [long] in [smops_tv_bmbg10:tv-poc_metrics_cdn-2026.04.06-000730] and [21] other indices'
+      );
+      expect(parseErrors([error], 'FROM smops_tv_bmbg10:tv-poc_metrics_cdn-*')).toEqual([
+        {
+          message:
+            ' Cannot use field [fields.varnish_cache_hit_rate] due to ambiguities being mapped as [2] incompatible types: [float] in [smops_tv_bmbg10:tv-poc_metrics_cdn-2026.04.03-000716] and [102] other indices, [long] in [smops_tv_bmbg10:tv-poc_metrics_cdn-2026.04.04-000720] and [25] other indices',
+          startColumn: 19,
+          startLineNumber: 3,
+          endColumn: 19 + 'fields.varnish_cache_hit_rate'.length + 1,
+          endLineNumber: 3,
+          severity: 8,
+          code: 'errorFromES',
+        },
+        {
+          message:
+            ' Cannot use field [fields.varnish_cache_miss_rate] due to ambiguities being mapped as [2] incompatible types: [float] in [smops_tv_bmbg10:tv-poc_metrics_cdn-2026.04.03-000716] and [106] other indices, [long] in [smops_tv_bmbg10:tv-poc_metrics_cdn-2026.04.06-000730] and [21] other indices',
+          startColumn: 64,
+          startLineNumber: 3,
+          endColumn: 64 + 'fields.varnish_cache_miss_rate'.length + 1,
+          endLineNumber: 3,
+          severity: 8,
+          code: 'errorFromES',
         },
       ]);
     });
@@ -344,6 +374,56 @@ describe('helpers', function () {
         createMessage('unmappedColumnWarning', 'Field a is unmapped'),
         createMessage('unmappedColumnWarning', 'Field b is unmapped'),
       ]);
+    });
+  });
+
+  describe('getToggleCommentLines', function () {
+    it('should comment all lines when none are commented', function () {
+      const lines = ['FROM logs-*', '| WHERE host.name == "server1"', '| LIMIT 10'];
+      expect(getToggleCommentLines(lines)).toEqual([
+        '//FROM logs-*',
+        '//| WHERE host.name == "server1"',
+        '//| LIMIT 10',
+      ]);
+    });
+
+    it('should uncomment all lines when all are commented', function () {
+      const lines = ['//FROM logs-*', '//| WHERE host.name == "server1"', '//| LIMIT 10'];
+      expect(getToggleCommentLines(lines)).toEqual([
+        'FROM logs-*',
+        '| WHERE host.name == "server1"',
+        '| LIMIT 10',
+      ]);
+    });
+
+    it('should comment all lines when selection has a mix of commented and uncommented', function () {
+      const lines = ['//| WHERE host.name == "server1"', '| LIMIT 10'];
+      expect(getToggleCommentLines(lines)).toEqual([
+        '//| WHERE host.name == "server1"',
+        '//| LIMIT 10',
+      ]);
+    });
+
+    it('should comment the single uncommented line', function () {
+      expect(getToggleCommentLines(['| LIMIT 10'])).toEqual(['//| LIMIT 10']);
+    });
+
+    it('should uncomment the single commented line', function () {
+      expect(getToggleCommentLines(['//| LIMIT 10'])).toEqual(['| LIMIT 10']);
+    });
+  });
+
+  describe('shouldAutoTriggerSuggestions', function () {
+    it.each([
+      ['space', 'FROM ', true],
+      ['inline cast ::', 'field::', true],
+      ['dot', 'index.', true],
+      ['word character', 'FRO', true],
+      ['backtick', 'FROM `', true],
+      ['empty string', '', false],
+      ['comma', 'field1,', false],
+    ])('should return %s for %s', (_label, input, expected) => {
+      expect(shouldAutoTriggerSuggestions(input as string)).toBe(expected);
     });
   });
 });

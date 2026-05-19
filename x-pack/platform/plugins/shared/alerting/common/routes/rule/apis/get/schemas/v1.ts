@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import path from 'node:path';
 import { schema } from '@kbn/config-schema';
+
+export const getRuleParamsExamples = () => path.join(__dirname, 'examples_get_rule.yaml');
 
 export const getRuleRequestParamsSchema = schema.object({
   id: schema.string({

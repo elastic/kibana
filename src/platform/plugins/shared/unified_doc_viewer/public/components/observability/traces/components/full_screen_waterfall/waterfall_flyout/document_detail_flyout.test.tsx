@@ -44,7 +44,6 @@ jest.mock('./use_document_flyout_data', () => ({
 }));
 
 jest.mock('./span_flyout', () => ({
-  spanFlyoutId: 'spanDetailFlyout',
   SpanFlyoutContent: ({ hit, dataView, activeSection }: any) => (
     <div
       data-test-subj="spanFlyoutContent"
@@ -57,7 +56,6 @@ jest.mock('./span_flyout', () => ({
 }));
 
 jest.mock('./logs_flyout', () => ({
-  logsFlyoutId: 'logsFlyout',
   LogFlyoutContent: ({ hit, logDataView }: any) => (
     <div data-test-subj="logFlyoutContent" data-hit-id={hit?.id}>
       Log Flyout Content
@@ -66,12 +64,21 @@ jest.mock('./logs_flyout', () => ({
 }));
 
 jest.mock('.', () => ({
-  WaterfallFlyout: ({ onCloseFlyout, dataView, hit, loading, title, children }: any) => (
+  WaterfallFlyout: ({
+    onCloseFlyout,
+    dataView,
+    hit,
+    loading,
+    title,
+    children,
+    dataTestSubj,
+  }: any) => (
     <div
       data-test-subj="waterfallFlyout"
       data-loading={loading}
       data-title={title}
       data-has-hit={!!hit}
+      data-flyout-test-subj={dataTestSubj}
     >
       {loading ? (
         <div data-test-subj="loadingSkeleton">Loading...</div>
@@ -86,7 +93,7 @@ jest.mock('.', () => ({
 
 describe('DocumentDetailFlyout', () => {
   const defaultSpanProps: DocumentDetailFlyoutProps = {
-    type: 'spanDetailFlyout',
+    type: 'span',
     docId: 'test-span-id',
     traceId: 'test-trace-id',
     dataView: dataViewMock,
@@ -94,7 +101,7 @@ describe('DocumentDetailFlyout', () => {
   };
 
   const defaultLogProps: DocumentDetailFlyoutProps = {
-    type: 'logsFlyout',
+    type: 'log',
     docId: 'test-log-id',
     traceId: 'test-trace-id',
     dataView: dataViewMock,
@@ -108,7 +115,7 @@ describe('DocumentDetailFlyout', () => {
   describe('hook calls', () => {
     it('should call useDocumentFlyoutData with correct params for span type', () => {
       mockUseDocumentFlyoutData.mockReturnValue({
-        type: 'spanDetailFlyout',
+        type: 'span',
         hit: mockSpanHit,
         loading: false,
         title: 'Span document',
@@ -119,7 +126,7 @@ describe('DocumentDetailFlyout', () => {
       render(<DocumentDetailFlyout {...defaultSpanProps} />);
 
       expect(mockUseDocumentFlyoutData).toHaveBeenCalledWith({
-        type: 'spanDetailFlyout',
+        type: 'span',
         docId: 'test-span-id',
         traceId: 'test-trace-id',
         docIndex: undefined,
@@ -128,7 +135,7 @@ describe('DocumentDetailFlyout', () => {
 
     it('should call useDocumentFlyoutData with correct params for log type', () => {
       mockUseDocumentFlyoutData.mockReturnValue({
-        type: 'logsFlyout',
+        type: 'log',
         hit: mockLogHit,
         loading: false,
         title: 'Log document',
@@ -139,7 +146,7 @@ describe('DocumentDetailFlyout', () => {
       render(<DocumentDetailFlyout {...defaultLogProps} docIndex="logs-*" />);
 
       expect(mockUseDocumentFlyoutData).toHaveBeenCalledWith({
-        type: 'logsFlyout',
+        type: 'log',
         docId: 'test-log-id',
         traceId: 'test-trace-id',
         docIndex: 'logs-*',
@@ -150,7 +157,7 @@ describe('DocumentDetailFlyout', () => {
   describe('content rendering based on type', () => {
     it('should render SpanFlyoutContent when type is span', () => {
       mockUseDocumentFlyoutData.mockReturnValue({
-        type: 'spanDetailFlyout',
+        type: 'span',
         hit: mockSpanHit,
         loading: false,
         title: 'Span document',
@@ -166,7 +173,7 @@ describe('DocumentDetailFlyout', () => {
 
     it('should render LogFlyoutContent when type is log', () => {
       mockUseDocumentFlyoutData.mockReturnValue({
-        type: 'logsFlyout',
+        type: 'log',
         hit: mockLogHit,
         loading: false,
         title: 'Log document',
@@ -182,7 +189,7 @@ describe('DocumentDetailFlyout', () => {
 
     it('should pass activeSection to SpanFlyoutContent', () => {
       mockUseDocumentFlyoutData.mockReturnValue({
-        type: 'spanDetailFlyout',
+        type: 'span',
         hit: mockSpanHit,
         loading: false,
         title: 'Span document',
@@ -200,7 +207,7 @@ describe('DocumentDetailFlyout', () => {
   describe('WaterfallFlyout props', () => {
     it('should pass correct props to WaterfallFlyout for span type', () => {
       mockUseDocumentFlyoutData.mockReturnValue({
-        type: 'spanDetailFlyout',
+        type: 'span',
         hit: mockSpanHit,
         loading: false,
         title: 'Span document',
@@ -216,9 +223,29 @@ describe('DocumentDetailFlyout', () => {
       expect(flyout).toHaveAttribute('data-has-hit', 'true');
     });
 
+    it('should forward the flyout test subject to WaterfallFlyout', () => {
+      mockUseDocumentFlyoutData.mockReturnValue({
+        type: 'span',
+        hit: mockSpanHit,
+        loading: false,
+        title: 'Span document',
+        logDataView: null,
+        error: null,
+      });
+
+      render(
+        <DocumentDetailFlyout {...defaultSpanProps} dataTestSubj="traceWaterfallDocumentFlyout" />
+      );
+
+      expect(screen.getByTestId('waterfallFlyout')).toHaveAttribute(
+        'data-flyout-test-subj',
+        'traceWaterfallDocumentFlyout'
+      );
+    });
+
     it('should pass correct props to WaterfallFlyout for log type', () => {
       mockUseDocumentFlyoutData.mockReturnValue({
-        type: 'logsFlyout',
+        type: 'log',
         hit: mockLogHit,
         loading: false,
         title: 'Log document',
@@ -238,7 +265,7 @@ describe('DocumentDetailFlyout', () => {
   describe('loading states', () => {
     it('should show loading state when data is loading', () => {
       mockUseDocumentFlyoutData.mockReturnValue({
-        type: 'spanDetailFlyout',
+        type: 'span',
         hit: null,
         loading: true,
         title: 'Span document',
@@ -256,7 +283,7 @@ describe('DocumentDetailFlyout', () => {
 
     it('should not render content when hit is null (even if not loading)', () => {
       mockUseDocumentFlyoutData.mockReturnValue({
-        type: 'spanDetailFlyout',
+        type: 'span',
         hit: null,
         loading: false,
         title: 'Span document',
@@ -273,7 +300,7 @@ describe('DocumentDetailFlyout', () => {
   describe('log flyout edge cases', () => {
     it('should render EuiCallOut when data has error', () => {
       mockUseDocumentFlyoutData.mockReturnValue({
-        type: 'logsFlyout',
+        type: 'log',
         hit: mockLogHit,
         loading: false,
         title: 'Log document',
@@ -289,7 +316,7 @@ describe('DocumentDetailFlyout', () => {
 
     it('should not render LogFlyoutContent when logDataView is null', () => {
       mockUseDocumentFlyoutData.mockReturnValue({
-        type: 'logsFlyout',
+        type: 'log',
         hit: mockLogHit,
         loading: false,
         title: 'Log document',
@@ -307,7 +334,7 @@ describe('DocumentDetailFlyout', () => {
     it('should correctly switch from span to log type', () => {
       mockUseDocumentFlyoutData
         .mockReturnValueOnce({
-          type: 'spanDetailFlyout',
+          type: 'span',
           hit: mockSpanHit,
           loading: false,
           title: 'Span document',
@@ -315,7 +342,7 @@ describe('DocumentDetailFlyout', () => {
           error: null,
         })
         .mockReturnValueOnce({
-          type: 'logsFlyout',
+          type: 'log',
           hit: mockLogHit,
           loading: false,
           title: 'Log document',

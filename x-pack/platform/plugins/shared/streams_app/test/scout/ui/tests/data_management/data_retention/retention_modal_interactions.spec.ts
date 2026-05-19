@@ -24,35 +24,42 @@ test.describe(
   'Stream data retention - modal interactions',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
-      await browserAuth.loginAsAdmin();
-      await apiServices.streams.clearStreamChildren('logs');
-
-      // Reset parent 'logs' stream to default indefinite retention (DSL with no data_retention)
-      const logsDefinition = await apiServices.streams.getStreamDefinition('logs');
-      await apiServices.streams.updateStream('logs', {
+    test.beforeAll(async ({ apiServices }) => {
+      await apiServices.streams.clearStreamChildren('logs.otel');
+      const logsDefinition = await apiServices.streams.getStreamDefinition('logs.otel');
+      await apiServices.streams.updateStream('logs.otel', {
         ingest: {
           ...logsDefinition.stream.ingest,
           processing: omit(logsDefinition.stream.ingest.processing, 'updated_at'),
           lifecycle: { dsl: {} },
         },
       });
-
-      await apiServices.streams.forkStream('logs', 'logs.nginx', {
+      await apiServices.streams.forkStream('logs.otel', 'logs.otel.nginx', {
         field: 'service.name',
         eq: 'nginx',
       });
-      await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
     });
 
-    test.afterEach(async ({ apiServices, page }) => {
+    test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
+      await browserAuth.loginAsAdmin();
+      // Reset only the child stream's retention via API — no fork/delete cycle
+      const childDefinition = await apiServices.streams.getStreamDefinition('logs.otel.nginx');
+      await apiServices.streams.updateStream('logs.otel.nginx', {
+        ingest: {
+          ...childDefinition.stream.ingest,
+          processing: omit(childDefinition.stream.ingest.processing, 'updated_at'),
+          lifecycle: { dsl: {} },
+        },
+      });
+      await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
+    });
+
+    test.afterEach(async ({ page }) => {
       await closeToastsIfPresent(page);
-      await apiServices.streams.clearStreamChildren('logs');
     });
 
     test.afterAll(async ({ apiServices }) => {
-      // Clear existing rules
-      await apiServices.streams.clearStreamChildren('logs');
+      await apiServices.streams.clearStreamChildren('logs.otel');
     });
 
     test('should open and close modal', async ({ page }) => {

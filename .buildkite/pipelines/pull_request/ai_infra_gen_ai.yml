@@ -3,11 +3,6 @@ steps:
     key: ai-infra-gen-ai
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
     steps:
       - command: .buildkite/scripts/steps/test/ftr_configs.sh
         env:

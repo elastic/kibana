@@ -15,11 +15,11 @@ import {
   WrappingPrettyPrinter,
   BasicPrettyPrinter,
   isStringLiteral,
-  esqlCommandRegistry,
-  TRANSFORMATIONAL_COMMANDS,
-} from '@kbn/esql-language';
+} from '@elastic/esql';
+import { CommandNames, esqlCommandRegistry, TRANSFORMATIONAL_COMMANDS } from '@kbn/esql-language';
 
 import type {
+  ESQLAstItem,
   ESQLSource,
   ESQLFunction,
   ESQLColumn,
@@ -27,7 +27,7 @@ import type {
   ESQLInlineCast,
   ESQLCommandOption,
   ESQLAstForkCommand,
-} from '@kbn/esql-language';
+} from '@elastic/esql/types';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { monaco } from '@kbn/monaco';
@@ -273,9 +273,17 @@ export const getKqlSearchQueries = (esql: string) => {
     .filter((query) => query !== '');
 };
 
-export const prettifyQuery = (src: string): string => {
+/**
+ * Prettifies an ES|QL query with configurable line wrapping.
+ * @param src - The raw ES|QL query string
+ * @param lineWidth - Optional line width in characters; when provided, output is wrapped to fit. Otherwise uses the library default (80).
+ */
+export const prettifyQuery = (src: string, lineWidth?: number): string => {
   const { root } = Parser.parse(src, { withFormatting: true });
-  return WrappingPrettyPrinter.print(root, { multiline: true });
+  return WrappingPrettyPrinter.print(root, {
+    multiline: true,
+    ...(lineWidth !== undefined && { wrap: lineWidth }),
+  });
 };
 
 export const retrieveMetadataColumns = (esql: string): string[] => {
@@ -526,6 +534,79 @@ export const getCategorizeColumns = (esql: string): string[] => {
   return columns;
 };
 
+export const getSparklineColumns = (esql: string): string[] => {
+  const { root } = Parser.parse(esql);
+  // SPARKLINE can appear in both STATS and INLINE STATS commands
+  const statsCommands = root.commands.filter(
+    ({ name }) => name === 'stats' || name === 'inline stats'
+  );
+  if (statsCommands.length === 0) {
+    return [];
+  }
+  const columns: string[] = [];
+
+  const collectFromArg = (arg: ESQLAstItem): void => {
+    if (!isFunctionExpression(arg)) {
+      return;
+    }
+    if (arg.name === 'where') {
+      // Aggregate inline WHERE filter: "sparkline = SPARKLINE(...) WHERE condition"
+      // is a 'where' function expression where args[0] is the aggregate expression
+      if (arg.args.length === 0) return;
+      collectFromArg(arg.args[0]);
+      return;
+    }
+    if (arg.name === 'sparkline') {
+      // Bare (unaliased) SPARKLINE — extract the column name from the original query source
+      // rather than arg.text, because Elasticsearch names bare aggregate expressions using
+      // the source text (e.g. "SPARKLINE(COUNT(*), ts, 50, ...)") while arg.text is the
+      // compact printer form without spaces, which would not match the column ID in results.
+      columns.push(esql.substring(arg.location.min, arg.location.max + 1));
+      return;
+    }
+    if (
+      arg.name === '=' &&
+      isColumn(arg.args[0]) &&
+      Walker.match(arg, { type: 'function', name: 'sparkline' })
+    ) {
+      // STATS/INLINE STATS col = SPARKLINE(...) — Walker finds the call regardless of RHS shape
+      columns.push((arg.args[0] as ESQLColumn).name);
+    }
+  };
+
+  for (const statsCommand of statsCommands) {
+    for (const arg of statsCommand.args) {
+      if ((arg as ESQLCommandOption).type === 'option') {
+        // Skip BY and other command options (grouping, not aggregates)
+        continue;
+      }
+      collectFromArg(arg);
+    }
+  }
+
+  const renameCommands = root.commands.filter(({ name }) => name === 'rename');
+  if (renameCommands.length === 0) {
+    return columns;
+  }
+  const renameFunctions: ESQLFunction[] = [];
+  renameCommands.forEach((renameCommand) => {
+    walk(renameCommand, {
+      visitFunction: (node) => renameFunctions.push(node),
+    });
+  });
+
+  renameFunctions.forEach((renameFunction) => {
+    const { original, renamed } = getArgsFromRenameFunction(renameFunction);
+    const oldColumn = original.name;
+    const newColumn = renamed.name;
+    if (columns.includes(oldColumn)) {
+      columns[columns.indexOf(oldColumn)] = newColumn;
+    }
+  });
+
+  return columns;
+};
+
 /**
  * Extracts the original and renamed columns from a rename function.
  * RENAME original AS renamed Vs RENAME renamed = original
@@ -611,5 +692,19 @@ export const hasOnlySourceCommand = (query: string): boolean => {
     root.commands.length > 0 &&
     root.commands.every(({ name }) => name !== 'promql') &&
     root.commands.every((command) => sourceCommands.includes(command.name))
+  );
+};
+
+/**
+ * Determines if an ES|QL query contains the METRICS_INFO or TS_INFO commands.
+ *
+ * @param esql - The ES|QL query string to analyze
+ * @returns true if the query contains the METRICS_INFO or TS_INFO commands, false otherwise
+ */
+export const hasTimeseriesInfoCommand = (esql?: string): boolean => {
+  if (!esql) return false;
+  const { root } = Parser.parse(esql);
+  return root.commands.some(
+    ({ name }) => name === CommandNames.METRICS_INFO || name === CommandNames.TS_INFO
   );
 };

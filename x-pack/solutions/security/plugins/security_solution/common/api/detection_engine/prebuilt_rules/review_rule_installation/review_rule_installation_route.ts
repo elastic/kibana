@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { RuleTagArray } from '../../model';
 import type { RuleResponse } from '../../model/rule_schema';
 import { PrebuiltRuleAssetsFilter } from '../common/prebuilt_rule_assets_filter';
@@ -20,7 +20,7 @@ export const ReviewRuleInstallationRequestBody = z.object({
   /**
    * Rules per page
    */
-  per_page: z.number().int().min(1).max(10_000).default(20),
+  per_page: z.number().int().min(1).max(500).default(20),
 
   /**
    * Filtering criteria

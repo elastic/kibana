@@ -9,9 +9,13 @@
 
 import type { JsonValue } from '@kbn/utility-types';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  isEventDrivenWorkflowTriggerSource,
+  isFailedBeforeSteps,
+} from '@kbn/workflows';
 
-export type TriggerType = 'alert' | 'scheduled' | 'manual';
+export type TriggerType = 'alert' | 'scheduled' | 'manual' | 'document' | 'event';
 
 export interface TriggerContextFromExecution {
   triggerType: TriggerType;
@@ -19,22 +23,28 @@ export interface TriggerContextFromExecution {
 }
 
 export function buildTriggerContextFromExecution(
-  executionContext: Record<string, unknown> | undefined | null
+  executionContext: Record<string, unknown> | undefined | null,
+  triggeredBy?: string
 ): TriggerContextFromExecution | null {
   if (!executionContext) {
     return null;
   }
-
   let triggerType: TriggerType = 'manual'; // Default to manual trigger type
 
-  const hasEvent = executionContext.event !== undefined;
   const isScheduled =
     (executionContext.event as { type?: string } | undefined)?.type === 'scheduled';
 
   if (isScheduled) {
     triggerType = 'scheduled';
-  } else if (hasEvent) {
-    triggerType = 'alert';
+  } else if (executionContext.event != null) {
+    const event = executionContext.event as Record<string, unknown>;
+    if (event.alerts != null || event.type === 'alert') {
+      triggerType = 'alert';
+    } else if (isEventDrivenWorkflowTriggerSource(triggeredBy)) {
+      triggerType = 'event';
+    } else {
+      triggerType = 'document';
+    }
   }
 
   const inputData = (executionContext as { event?: JsonValue; inputs?: JsonValue }).event
@@ -51,20 +61,27 @@ export function buildTriggerStepExecutionFromContext(
   workflowExecution: WorkflowExecutionDto
 ): WorkflowStepExecutionDto | null {
   const triggerContext = buildTriggerContextFromExecution(
-    workflowExecution.context as Record<string, unknown> | undefined | null
+    workflowExecution.context as Record<string, unknown> | undefined | null,
+    workflowExecution.triggeredBy
   );
 
   if (!triggerContext) {
     return null;
   }
 
+  const failedBeforeSteps = isFailedBeforeSteps(
+    workflowExecution.status,
+    workflowExecution.stepExecutions
+  );
+
   return {
     id: 'trigger',
     stepId: triggerContext.triggerType,
     stepType: `trigger_${triggerContext.triggerType}`,
-    status: ExecutionStatus.COMPLETED,
+    status: failedBeforeSteps ? ExecutionStatus.FAILED : ExecutionStatus.COMPLETED,
     input: triggerContext.input,
-    output: undefined,
+    output: (workflowExecution.context?.output as JsonValue | undefined) ?? undefined,
+    error: failedBeforeSteps ? workflowExecution.error ?? undefined : undefined,
     scopeStack: [],
     workflowRunId: workflowExecution.id,
     workflowId: workflowExecution.workflowId || '',
@@ -91,6 +108,22 @@ export function buildOverviewStepExecutionFromContext(
       trace: {
         traceId: workflowExecution.traceId,
         entryTransactionId: workflowExecution.entryTransactionId,
+      },
+    };
+  }
+
+  // Surface document-level error on Overview kv tree when the trigger row does not
+  // already attach the same execution.error (failed-before-steps → trigger pseudo-step only).
+  const failedBeforeSteps = isFailedBeforeSteps(
+    workflowExecution.status,
+    workflowExecution.stepExecutions
+  );
+  if (workflowExecution.error && !failedBeforeSteps) {
+    contextData = {
+      ...contextData,
+      executionError: {
+        type: workflowExecution.error.type,
+        message: workflowExecution.error.message,
       },
     };
   }

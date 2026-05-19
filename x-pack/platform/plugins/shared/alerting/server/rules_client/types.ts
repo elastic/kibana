@@ -13,6 +13,7 @@ import type {
   ISavedObjectsRepository,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
 import type {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
@@ -38,6 +39,7 @@ import type { ConnectorAdapterRegistry } from '../connector_adapters/connector_a
 import type { GetAlertIndicesAlias } from '../lib';
 import type { AlertsService } from '../alerts_service';
 import type { BackfillClient } from '../backfill_client/backfill_client';
+import type { IScopedChangeTrackingService } from './lib/change_tracking';
 
 export type {
   BulkEditOperation,
@@ -56,6 +58,11 @@ export type {
 } from './methods/get_execution_kpi';
 export type { GetGlobalExecutionSummaryParams } from './methods/get_execution_summary';
 export type { GetActionErrorLogByIdParams } from './methods/get_action_error_log';
+export type {
+  GetRuleHistoryParams,
+  GetRuleHistoryResult,
+  RuleChangeHistoryDocument,
+} from './methods/get_rule_history';
 
 export interface RulesClientContext {
   readonly logger: Logger;
@@ -78,9 +85,12 @@ export interface RulesClientContext {
   readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   readonly auditLogger?: AuditLogger;
   readonly eventLogger?: IEventLogger;
+  readonly changeTrackingService?: IScopedChangeTrackingService;
   readonly fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule>;
   readonly isAuthenticationTypeAPIKey: () => boolean;
   readonly getAuthenticationAPIKey: (name: string) => CreateAPIKeyResult;
+  readonly cloneAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
+  readonly cloneApiKeysOnCreate?: boolean;
   readonly connectorAdapterRegistry: ConnectorAdapterRegistry;
   readonly getAlertIndicesAlias: GetAlertIndicesAlias;
   readonly alertsService: AlertsService | null;
@@ -88,6 +98,8 @@ export interface RulesClientContext {
   readonly isSystemAction: (actionId: string) => boolean;
   readonly uiSettings: UiSettingsServiceStart;
   readonly shouldGrantUiam?: boolean;
+  readonly isServerless: boolean;
+  readonly featureFlags: FeatureFlagsStart;
 }
 
 export type NormalizedAlertAction = DistributiveOmit<RuleAction, 'actionTypeId'>;

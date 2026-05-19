@@ -16,6 +16,8 @@ import {
   getDummyWorkflowYaml,
   getIncompleteStepTypeYaml,
   getInvalidWorkflowYaml,
+  getRootLevelAutocompleteYaml,
+  getWorkflowWithCommentedVariablesYaml,
 } from '../fixtures/workflows';
 
 test.describe(
@@ -130,6 +132,37 @@ test.describe(
       await page.keyboard.type('ind');
 
       await expect(suggestWidget.getByRole('option', { name: 'index' })).toBeVisible();
+    });
+
+    test('should show root-level property suggestions on empty lines', async ({ pageObjects }) => {
+      await pageObjects.workflowEditor.gotoNewWorkflow();
+      const workflowName = 'Root Autocomplete Test';
+
+      const suggestWidget = pageObjects.workflowEditor.getYamlEditorSuggestWidget();
+
+      await pageObjects.workflowEditor.triggerAutocompleteAfter(
+        getRootLevelAutocompleteYaml(workflowName),
+        'message: "hello"\n'
+      );
+
+      await expect(suggestWidget).toBeVisible();
+
+      await expect(suggestWidget.getByRole('option', { name: 'consts' })).toBeVisible();
+      await expect(suggestWidget.getByRole('option', { name: 'tags' })).toBeVisible();
+      await expect(suggestWidget.getByRole('option', { name: 'outputs' })).toBeVisible();
+    });
+
+    test('should not show validation errors for YAML comment lines with liquid variables', async ({
+      pageObjects,
+    }) => {
+      await pageObjects.workflowEditor.gotoNewWorkflow();
+      const workflowName = 'Commented Variables Workflow';
+      await pageObjects.workflowEditor.setYamlEditorValue(
+        getWorkflowWithCommentedVariablesYaml(workflowName)
+      );
+
+      const validationAccordion = pageObjects.workflowEditor.validationErrorsAccordion;
+      await expect(validationAccordion).toContainText('No validation errors');
     });
   }
 );

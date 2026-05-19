@@ -57,6 +57,7 @@ import {
   INITIAL_TOUR_CONFIG,
   FILES_TOUR_STEP,
   EXPORT_FILE_NAME,
+  EXPORT_REQUESTS_METRIC_ID,
 } from './constants';
 
 interface MainProps {
@@ -128,7 +129,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
 
   const {
     docLinks,
-    services: { notifications, routeHistory },
+    services: { notifications, routeHistory, trackUiMetric },
   } = useServicesContext();
 
   const [tourStepProps, actions, tourState] = useEuiTour(
@@ -269,14 +270,15 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
                 <>
                   <EuiToolTip content={MAIN_PANEL_LABELS.exportButtonTooltip}>
                     <EuiButtonEmpty
-                      iconType="exportAction"
+                      iconType="upload"
                       disabled={inputEditorValue === ''}
-                      onClick={() =>
+                      onClick={() => {
                         downloadFileAs(EXPORT_FILE_NAME, {
                           content: inputEditorValue,
                           type: 'text/plain',
-                        })
-                      }
+                        });
+                        trackUiMetric.count(EXPORT_REQUESTS_METRIC_ID);
+                      }}
                       size="xs"
                       data-test-subj="consoleExportButton"
                       aria-label={MAIN_PANEL_LABELS.exportButtonTooltip}
@@ -287,7 +289,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
                   <>
                     <EuiToolTip content={MAIN_PANEL_LABELS.importButtonTooltip}>
                       <EuiButtonEmpty
-                        iconType="importAction"
+                        iconType="download"
                         onClick={() => document.getElementById('importConsoleFile')?.click()}
                         size="xs"
                         data-test-subj="consoleImportButton"
@@ -375,7 +377,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
         >
           <EuiButtonEmpty
             onClick={() => updateTab(CONFIG_TAB_ID)}
-            iconType="editorCodeBlock"
+            iconType="code"
             size="xs"
             color="text"
             aria-label={MAIN_PANEL_LABELS.variablesButton}

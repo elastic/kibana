@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCallbacks } from '@kbn/esql-types';
-import { EsqlQuery } from '../../composer';
-import { type ESQLSource } from '../../types';
+import { EsqlQuery } from '@elastic/esql';
+import type { ESQLSource } from '@elastic/esql/types';
 import {
   getRecommendedQueriesTemplates,
   getTimeAndCategorizationFields,
@@ -106,15 +106,17 @@ async function getFromCommand(
 }
 
 /**
- * Fetches extension-based suggestions
+ * Fetches extension-based suggestions using the user's query text so
+ * the centralized source-completeness check in getEditorExtensions can
+ * correctly decide whether to fetch or return empty.
  */
 async function getExtensionSuggestions(
-  fromCommand: string,
+  queryText: string,
   range: InlineSuggestionItem['range'],
   callbacks?: ESQLCallbacks
 ): Promise<InlineSuggestionItem[]> {
   const editorExtensions = await callbacks
-    ?.getEditorExtensions?.(fromCommand)
+    ?.getEditorExtensions?.(queryText)
     .then((result) => result ?? { recommendedQueries: [] });
 
   return (editorExtensions?.recommendedQueries || []).map((query) => ({
@@ -178,10 +180,11 @@ async function fetchAllSuggestions(
   timeField: string,
   categorizationField: string | undefined,
   range: InlineSuggestionItem['range'],
-  callbacks?: ESQLCallbacks
+  callbacks?: ESQLCallbacks,
+  queryText: string = fromCommand
 ): Promise<InlineSuggestionItem[]> {
   const [extensionSuggestions, historySuggestions] = await Promise.all([
-    getExtensionSuggestions(fromCommand, range, callbacks),
+    getExtensionSuggestions(queryText, range, callbacks),
     getHistorySuggestions(range, callbacks),
   ]);
 
@@ -234,6 +237,20 @@ export async function inlineSuggest(
     const trimmedText = processQuery(textBeforeCursor).toLowerCase();
     const trimmedFullText = processQuery(fullText).toLowerCase();
 
+    // If the full text is empty, don't show any suggestions
+    if (!trimmedFullText) {
+      return { items: [] };
+    }
+
+    const lastLine = textBeforeCursor.split('\n').pop() ?? '';
+    if (!lastLine.trim()) {
+      return { items: [] };
+    }
+
+    if (lastLine.trim().startsWith('//')) {
+      return { items: [] };
+    }
+
     if (trimmedText !== trimmedFullText) {
       // Don't show suggestions if cursor is not at the end of the query
       return { items: [] };
@@ -252,7 +269,8 @@ export async function inlineSuggest(
       timeField,
       categorizationField,
       range,
-      callbacks
+      callbacks,
+      textBeforeCursor
     );
 
     // Process suggestions: remove duplicates, filter by prefix, and trim prefix
