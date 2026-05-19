@@ -76,7 +76,7 @@ const getDownsamplingLayout = (segments: DownsamplingSegment[]) => {
 };
 
 export interface DownsamplingBarProps {
-  segments?: DownsamplingSegment[] | null;
+  segments: DownsamplingSegment[];
   gridTemplateColumns: string;
   onRemoveStep?: (stepNumber: number) => void;
   onEditStep?: (stepNumber: number, phaseName?: string) => void;
@@ -99,7 +99,7 @@ export const DownsamplingBar = ({
   const phaseColors = usePhaseColors();
   const { getDownsamplingColor } = useDownsamplingColors();
 
-  const hasDownsamplingSteps = Boolean(segments?.some((segment) => Boolean(segment.step)));
+  const hasDownsamplingSteps = segments.some((segment) => Boolean(segment.step));
   const noDownsamplingLabel = i18n.translate('xpack.streams.dataLifecycleSummary.noDownsampling', {
     defaultMessage: 'No downsampling',
   });
@@ -118,10 +118,6 @@ export const DownsamplingBar = ({
     hasDownsamplingSteps,
     deletePanelColor: phaseColors.delete,
   });
-
-  if (!segments) {
-    return null;
-  }
 
   return (
     <>

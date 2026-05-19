@@ -276,7 +276,7 @@ export const getPhaseColumnSpans = (phases: SegmentPhase[], segments: TimelineSe
 export const buildDownsamplingSegments = (
   phases: SegmentPhase[],
   dslSegments: ReturnType<typeof buildDslSegments> | null
-): DownsamplingSegment[] | null => {
+): DownsamplingSegment[] => {
   if (dslSegments) {
     return dslSegments.downsamplingSegments;
   }

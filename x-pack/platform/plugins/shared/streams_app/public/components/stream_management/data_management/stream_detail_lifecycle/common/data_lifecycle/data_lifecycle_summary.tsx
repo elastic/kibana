@@ -164,16 +164,18 @@ export const DataLifecycleSummary = ({
                   canManageLifecycle={canManageLifecycle}
                   isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
                 />
-                <DownsamplingBar
-                  segments={downsamplingSegments}
-                  gridTemplateColumns={gridTemplateColumns}
-                  onRemoveStep={downsamplingActions?.onRemoveDownsampleStep}
-                  onEditStep={downsamplingActions?.onEditDownsampleStep}
-                  editedPhaseName={editedPhaseName}
-                  editedDownsampleStepIndex={editedDownsampleStepIndex}
-                  canManageLifecycle={canManageLifecycle}
-                  isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
-                />
+                {showDownsampling && downsamplingSegments && (
+                  <DownsamplingBar
+                    segments={downsamplingSegments}
+                    gridTemplateColumns={gridTemplateColumns}
+                    onRemoveStep={downsamplingActions?.onRemoveDownsampleStep}
+                    onEditStep={downsamplingActions?.onEditDownsampleStep}
+                    editedPhaseName={editedPhaseName}
+                    editedDownsampleStepIndex={editedDownsampleStepIndex}
+                    canManageLifecycle={canManageLifecycle}
+                    isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
+                  />
+                )}
                 <EuiSpacer size="xs" />
                 <DataLifecycleTimeline
                   phases={phases}
