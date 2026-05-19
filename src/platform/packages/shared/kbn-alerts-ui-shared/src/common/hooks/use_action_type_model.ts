@@ -65,7 +65,7 @@ export function useActionTypeModel({
   const shouldFetchSpec = actionType != null && actionType.source === ACTION_TYPE_SOURCES.spec;
 
   const {
-    data = null,
+    data: specBaseModel = null,
     isLoading,
     error,
     refetch,
@@ -90,8 +90,8 @@ export function useActionTypeModel({
   // renders, preventing infinite re-render loops in React Query (which re-runs select when its
   // function reference changes).
   const specBasedModel = useMemo(
-    () => (data ? transformSpecToActionTypeModel(data, uiSettings) : null),
-    [data, uiSettings]
+    () => (specBaseModel ? transformSpecToActionTypeModel(specBaseModel, uiSettings) : null),
+    [specBaseModel, uiSettings]
   );
 
   return {

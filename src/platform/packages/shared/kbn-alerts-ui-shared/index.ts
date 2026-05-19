@@ -25,5 +25,9 @@ export * from './src/check_action_type_enabled';
 export * from './src/action_variables';
 
 export { useFetchFlappingSettings } from './src/common/hooks/use_fetch_flapping_settings';
+export {
+  useActionTypeModel,
+  type UseActionTypeModelResult,
+} from './src/common/hooks/use_action_type_model';
 
 export type { AlertRuleFromVisUIActionData } from './src/alert_rule_from_vis_ui_action/types';
