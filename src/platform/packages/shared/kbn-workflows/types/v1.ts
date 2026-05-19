@@ -59,6 +59,10 @@ export enum ExecutionType {
 export type ExecutionTypeUnion = `${ExecutionType}`;
 export const ExecutionTypeValues = Object.values(ExecutionType);
 
+export const WorkflowExecutionSortFields = ['createdAt', 'finishedAt'] as const;
+export type WorkflowExecutionSortField = (typeof WorkflowExecutionSortFields)[number];
+export type WorkflowExecutionSortOrder = 'asc' | 'desc';
+
 /**
  * An interface representing the state of a step scope during workflow execution.
  */
