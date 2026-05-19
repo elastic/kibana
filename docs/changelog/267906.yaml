@@ -7,4 +7,4 @@ products:
 - product: cloud-serverless
   target: 2026-05-14
 title: Update Agent Builder announcement modal revert flow
-description: 'Update the Agent Builder announcement modal so that the revert button immediately switches all space users back to AI Assistant and shows a confirmation toast with a link to "GenAI Settings".'
+description: 'Updates the Agent Builder announcement modal so that the revert button immediately switches all space users back to AI Assistant and shows a confirmation toast with a link to "GenAI Settings".'

@@ -9,4 +9,4 @@ products:
 areas:
 - Dashboards and visualizations
 title: Show "Go to dashboard" button in save success toast
-description: 'Add a "Go to dashboard" navigation button to the dashboard save toast when saving from outside the Dashboard app.'
+description: 'Adds a "Go to dashboard" navigation button to the dashboard save toast when saving from outside the Dashboard app.'
