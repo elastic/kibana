@@ -206,6 +206,7 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
       navigateToPath={navigateToPath}
       DataViewPickerComponent={DataViewPicker}
       SavedObjectFinderComponent={SavedObjectFinder}
+      filterEsql
     />
   ) : undefined;
 

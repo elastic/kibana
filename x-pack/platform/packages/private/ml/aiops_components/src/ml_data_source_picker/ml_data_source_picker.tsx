@@ -41,6 +41,8 @@ export interface MlDataSourcePickerProps {
   navigateToPath: (path: string) => void | Promise<void>;
   DataViewPickerComponent: ComponentType<DataViewPickerProps>;
   SavedObjectFinderComponent: MlOpenSessionFlyoutProps['SavedObjectFinderComponent'];
+  /** When true, ES|QL-based sessions are hidden from the session picker */
+  filterEsql?: boolean;
 }
 
 export const MlDataSourcePicker: FC<MlDataSourcePickerProps> = ({
@@ -49,6 +51,7 @@ export const MlDataSourcePicker: FC<MlDataSourcePickerProps> = ({
   navigateToPath,
   DataViewPickerComponent,
   SavedObjectFinderComponent,
+  filterEsql = false,
 }) => {
   const [savedDataViews, setSavedDataViews] = useState<DataViewListItem[]>([]);
   const [isOpenSessionPanelVisible, setOpenSessionPanelVisible] = useState(false);
@@ -158,6 +161,7 @@ export const MlDataSourcePicker: FC<MlDataSourcePickerProps> = ({
           onClose={() => setOpenSessionPanelVisible(false)}
           onOpenSavedSearch={onOpenSavedSearch}
           SavedObjectFinderComponent={SavedObjectFinderComponent}
+          filterEsql={filterEsql}
         />
       ) : null}
     </>
