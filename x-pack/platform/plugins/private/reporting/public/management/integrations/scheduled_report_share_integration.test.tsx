@@ -21,12 +21,12 @@ describe('getReportingShareIntegrationConfig', () => {
   const mockShareContext = {
     sharingData: { exportType: 'pngV2' },
   } as unknown as ShareContext;
-  const config = getReportingShareIntegrationConfig(mockApiClient, mockServices, mockShareContext);
+  const { shouldRender } = getReportingShareIntegrationConfig(mockApiClient, mockServices, mockShareContext);
 
   describe('shouldRender', () => {
     it('should return true when at least one supported export type is available', async () => {
       expect(
-        config.shouldRender({
+        shouldRender({
           availableExportItems: [
             { config: { exportType: 'pngV2' } },
             { config: { exportType: 'printablePdfV2' } },
@@ -37,7 +37,7 @@ describe('getReportingShareIntegrationConfig', () => {
 
     it('should return false when no supported export type is available', async () => {
       expect(
-        config.shouldRender({
+        shouldRender({
           availableExportItems: [
             { config: { exportType: 'lens_csv' } },
           ] as unknown as ExportShareConfig[],
