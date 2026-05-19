@@ -67,7 +67,7 @@ export const OverviewTabMetadata = ({ metricItem, sourceRow }: OverviewTabMetada
                 `}
                 data-test-subj={SOURCE_TEST_SUBJ[sourceRow.kind]}
               >
-                {sourceRow.streamLink ?? <EuiText size="s">{sourceRow.indexName}</EuiText>}
+                {sourceRow.streamLink ?? <EuiText size="xs">{sourceRow.indexName}</EuiText>}
               </div>
             ),
           },
