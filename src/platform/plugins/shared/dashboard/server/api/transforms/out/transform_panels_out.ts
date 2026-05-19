@@ -9,15 +9,12 @@
 
 import { flow } from 'lodash';
 
-import type { Type, TypeOf } from '@kbn/config-schema';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
-import type { DiscriminatedUnionType } from '@kbn/config-schema/src/types';
 
 import type { SavedDashboardPanel, SavedDashboardSection } from '../../../dashboard_saved_object';
 import { embeddableService } from '../../../kibana_services';
-import { getPanelSchema, type getDashboardStateSchema } from '../../dashboard_state_schemas';
 import type { DashboardPanel, DashboardSection, DashboardState, Warnings } from '../../types';
 import { getPanelReferences } from './get_panel_references';
 import { panelBwc } from './panel_bwc';
@@ -26,16 +23,8 @@ export function transformPanelsOut(
   panelsJSON: string = '[]',
   sections: SavedDashboardSection[] = [],
   containerReferences: SavedObjectReference[] = [],
-  panelsStateSchema: Type<TypeOf<ReturnType<typeof getDashboardStateSchema>>['panels']>,
   isDashboardAppRequest: boolean = false
 ): { panels: DashboardState['panels']; warnings: Warnings } {
-  const panelSchema = getPanelSchema() as DiscriminatedUnionType<any, any, any>;
-  console.log({
-    discriminatedValues: panelSchema.discriminatedValues,
-    looseSchema: panelsStateSchema.getSchemaStructure(),
-    strictSchema: panelSchema.getSchemaStructure(),
-  });
-
   const topLevelPanels: DashboardPanel[] = [];
   const warnings: Warnings = [];
   const sectionsMap: { [uuid: string]: DashboardSection } = {};
@@ -63,14 +52,6 @@ export function transformPanelsOut(
         containerReferences,
         isDashboardAppRequest
       );
-
-      if (
-        panelProperties.type !== LENS_EMBEDDABLE_TYPE &&
-        panelSchema.discriminatedValues.includes(panelProperties.type)
-      ) {
-        console.log('VALIDATE!!!', panelProperties.type);
-        panelSchema.validate(panelProperties);
-      }
     } catch (e) {
       warnings.push({
         type: 'dropped_panel',
@@ -97,8 +78,6 @@ export function transformPanelsOut(
       topLevelPanels.push(panelProperties);
     }
   });
-
-  console.log({ warnings: JSON.stringify(warnings) });
 
   return {
     panels: [...topLevelPanels, ...Object.values(sectionsMap)],
@@ -127,11 +106,14 @@ function transformPanel(
   // TODO remove when lens as code transforms are ready for production
   const transformType =
     type === LENS_EMBEDDABLE_TYPE && isDashboardAppRequest ? 'lens-dashboard-app' : type;
-  const transforms = embeddableService?.getTransforms(transformType);
 
+  const transforms = embeddableService?.getTransforms(transformType);
   const transformedPanelConfig =
     transforms?.transformOut?.(embeddableConfig, panelReferences, containerReferences) ??
     defaultTransform(embeddableConfig);
+
+  const registeredSchemas = embeddableService ? embeddableService.getAllEmbeddableSchemas() : {};
+  registeredSchemas[transformType]?.schema?.validate(transformedPanelConfig);
 
   return {
     grid: restOfGrid,

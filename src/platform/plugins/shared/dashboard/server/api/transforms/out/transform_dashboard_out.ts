@@ -55,7 +55,6 @@ export function transformDashboardOut(
     panelsJSON,
     sections,
     references,
-    strictPropsSchemas.panels,
     isDashboardAppRequest
   );
 
