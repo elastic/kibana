@@ -52,7 +52,6 @@ export interface PlaygroundState {
   };
   item: {
     getHref: boolean;
-    getEditUrl: boolean;
     onEdit: boolean;
     onDelete: boolean;
     onInspect: boolean;
@@ -236,7 +235,6 @@ export const INITIAL_STATE: PlaygroundState = {
   },
   item: {
     getHref: true,
-    getEditUrl: false,
     onEdit: false,
     onDelete: false,
     onInspect: false,
