@@ -49,20 +49,25 @@ interface Props {
   knowledgeIndicator: KnowledgeIndicator;
   occurrencesByQueryId: Record<string, Array<{ x: number; y: number }>>;
   onClose: () => void;
-  streamFeatures: Feature[];
+  features: Feature[];
 }
 
 export function KnowledgeIndicatorDetailsFlyout({
   knowledgeIndicator,
   occurrencesByQueryId,
   onClose,
-  streamFeatures,
+  features,
 }: Props) {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'knowledgeIndicatorDetailsFlyoutTitle' });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
 
   const streamName = getKnowledgeIndicatorStreamName(knowledgeIndicator);
+
+  const streamFeatures = useMemo(
+    () => features.filter((f) => f.stream_name === streamName),
+    [features, streamName]
+  );
 
   const {
     excludeFeature,
@@ -283,7 +288,7 @@ export function KnowledgeIndicatorDetailsFlyout({
             <KnowledgeIndicatorQueryDetailsContent
               query={knowledgeIndicator.query}
               occurrences={occurrencesByQueryId[knowledgeIndicator.query.id]}
-              features={streamFeatures}
+              streamFeatures={streamFeatures}
             />
           )}
         </EuiFlyoutBody>

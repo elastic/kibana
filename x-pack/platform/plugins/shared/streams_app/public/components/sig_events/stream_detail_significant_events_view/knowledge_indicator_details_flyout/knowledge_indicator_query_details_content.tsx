@@ -23,27 +23,26 @@ import { SeverityBadge } from '../../significant_events_discovery/components/sev
 import { InfoPanel } from '../../../info_panel';
 import { SparkPlot } from '../../../spark_plot';
 
+const COMPUTED_FEATURE_TYPE_SET = new Set<string>(COMPUTED_FEATURE_TYPES);
+
 interface Props {
   query: StreamQuery;
   occurrences?: Array<{ x: number; y: number }>;
-  features?: Feature[];
+  streamFeatures?: Feature[];
 }
 
 export function KnowledgeIndicatorQueryDetailsContent({
   query,
   occurrences,
-  features = [],
+  streamFeatures = [],
 }: Props) {
-  const featureIdSet = useMemo(() => new Set(features.map((f) => f.id)), [features]);
+  const featureIdSet = useMemo(() => new Set(streamFeatures.map((f) => f.id)), [streamFeatures]);
 
   const inferredFeatureIds = useMemo(
     () =>
       (query.features ?? [])
         .map((f) => f.id)
-        .filter(
-          (id) =>
-            !(COMPUTED_FEATURE_TYPES as readonly string[]).includes(id) && featureIdSet.has(id)
-        ),
+        .filter((id) => !COMPUTED_FEATURE_TYPE_SET.has(id) && featureIdSet.has(id)),
     [query.features, featureIdSet]
   );
   const hasFeatureIds = inferredFeatureIds.length > 0;

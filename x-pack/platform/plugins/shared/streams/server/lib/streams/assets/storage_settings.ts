@@ -52,7 +52,7 @@ export const queryStorageSettings = {
       [QUERY_DESCRIPTION]: types.text(),
       [QUERY_SEVERITY_SCORE]: types.long(),
       [QUERY_TYPE]: types.keyword(),
-      [QUERY_FEATURES]: types.nested({
+      [QUERY_FEATURES]: types.object({
         properties: {
           id: { type: 'keyword' as const },
           run_id: { type: 'keyword' as const },

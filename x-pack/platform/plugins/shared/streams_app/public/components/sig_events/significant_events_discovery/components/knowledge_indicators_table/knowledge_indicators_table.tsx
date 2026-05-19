@@ -19,9 +19,9 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
-import type { Feature } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAIFeatures } from '../../../../../hooks/use_ai_features';
+import { getFeaturesFromKIs } from '../../../stream_detail_significant_events_view/utils/get_features_from_kis';
 import { AssetImage } from '../../../../asset_image';
 import { LoadingPanel } from '../../../../loading_panel';
 import { KnowledgeIndicatorDetailsFlyout } from '../../../stream_detail_significant_events_view/knowledge_indicator_details_flyout';
@@ -156,15 +156,7 @@ export function KnowledgeIndicatorsTable() {
     }
   }, [isGenerating, refetch]);
 
-  const streamFeatures = useMemo<Feature[]>(
-    () =>
-      knowledgeIndicators
-        .filter(
-          (ki): ki is Extract<KnowledgeIndicator, { kind: 'feature' }> => ki.kind === 'feature'
-        )
-        .map((ki) => ki.feature),
-    [knowledgeIndicators]
-  );
+  const features = useMemo(() => getFeaturesFromKIs(knowledgeIndicators), [knowledgeIndicators]);
 
   const columns = useKnowledgeIndicatorsColumns({
     occurrencesByQueryId,
@@ -333,7 +325,7 @@ export function KnowledgeIndicatorsTable() {
           knowledgeIndicator={selectedKnowledgeIndicator}
           occurrencesByQueryId={occurrencesByQueryId}
           onClose={closeFlyout}
-          streamFeatures={streamFeatures}
+          features={features}
         />
       ) : null}
       {knowledgeIndicatorsToDelete.length > 0 ? (
