@@ -32,7 +32,7 @@ import { flyoutProviders } from '../../../shared/components/flyout_provider';
 import { DocumentFlyoutWrapper } from '../../main/document_flyout_wrapper';
 import { useDefaultDocumentFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
 import { Network } from '../../../network/main';
-import type { FlowTargetSourceDest } from '../../../../../common/search_strategy';
+import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 import { HostPanel } from '../../../../flyout/entity_details/host_right';
 import { UserPanel } from '../../../../flyout/entity_details/user_right';
 import { ServicePanel } from '../../../../flyout/entity_details/service_right';
@@ -103,13 +103,13 @@ export const GraphDetails = memo(
     );
 
     const onOpenNetworkPreview = useCallback(
-      (ip: string, flowTarget: FlowTargetSourceDest) =>
+      (ip: string) =>
         overlays.openSystemFlyout(
           flyoutProviders({
             services,
             store,
             history,
-            children: <Network ip={ip} flowTarget={flowTarget} />,
+            children: <Network ip={ip} flowTarget={FlowTargetSourceDest.source} />,
           }),
           { ...defaultFlyoutProperties, historyKey, session: 'inherit' }
         ),

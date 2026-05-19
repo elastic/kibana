@@ -60,8 +60,30 @@ export const GRAPH_ID = 'graph-visualization' as const;
 
 const MAX_DOCUMENTS_TO_LOAD = 50;
 
+/** Node-click override callbacks. When provided, replace the default `openPreviewPanel` behaviour. */
+interface GraphNodeOverrides {
+  /** Override for opening a single document (event or alert) node. */
+  onOpenDocumentPreview?: (id: string, indexName?: string) => void;
+  /** Override for opening an entity node (host/user/service/generic). */
+  onOpenEntityPreview?: (params: {
+    engineType: string | undefined;
+    entityId: string;
+    entityName: string | undefined;
+  }) => void;
+  /** Override for opening a grouped-entities or grouped-events node. */
+  onOpenGroupedPreview?: (
+    params: Omit<GraphGroupedNodePreviewPanelProps, 'scopeId' | 'showLoadingState'>
+  ) => void;
+  /**
+   * Override for opening a network (IP) node.
+   * Note: `GraphInvestigation` does not expose flow direction — callers always receive
+   * `FlowTargetSourceDest.source`, matching the legacy `openPreviewPanel` behaviour.
+   */
+  onOpenNetworkPreview?: (ip: string) => void;
+}
+
 /** Props for event/alert mode — drives the graph from an alert/event document */
-interface EventGraphVisualizationProps {
+interface EventGraphVisualizationProps extends GraphNodeOverrides {
   mode: 'event';
   /** Scope ID for the flyout panel */
   scopeId: string;
@@ -71,43 +93,15 @@ interface EventGraphVisualizationProps {
   timestamp: string;
   /** Whether the source document is an alert */
   isAlert: boolean;
-  /** Override for opening a single document (event or alert) node — replaces `openPreviewPanel` when provided. */
-  onOpenDocumentPreview?: (id: string, indexName?: string) => void;
-  /** Override for opening an entity node (host/user/service/generic) — replaces `openPreviewPanel` when provided. */
-  onOpenEntityPreview?: (params: {
-    engineType: string | undefined;
-    entityId: string;
-    entityName: string | undefined;
-  }) => void;
-  /** Override for opening a grouped-entities or grouped-events node — replaces `openPreviewPanel` when provided. */
-  onOpenGroupedPreview?: (
-    params: Omit<GraphGroupedNodePreviewPanelProps, 'scopeId' | 'showLoadingState'>
-  ) => void;
-  /** Override for opening a network (IP) node — replaces `openPreviewPanel` when provided. */
-  onOpenNetworkPreview?: (ip: string, flowTarget: FlowTargetSourceDest) => void;
 }
 
 /** Props for entity mode — drives the graph from an Entity Store entity ID */
-interface EntityGraphVisualizationProps {
+interface EntityGraphVisualizationProps extends GraphNodeOverrides {
   mode: 'entity';
   /** Scope ID for the flyout panel */
   scopeId: string;
   /** Entity Store v2 entity ID (`entity.id`) to center the graph on */
   entityId: string;
-  /** Override for opening a single document (event or alert) node — replaces `openPreviewPanel` when provided. */
-  onOpenDocumentPreview?: (id: string, indexName?: string) => void;
-  /** Override for opening an entity node (host/user/service/generic) — replaces `openPreviewPanel` when provided. */
-  onOpenEntityPreview?: (params: {
-    engineType: string | undefined;
-    entityId: string;
-    entityName: string | undefined;
-  }) => void;
-  /** Override for opening a grouped-entities or grouped-events node — replaces `openPreviewPanel` when provided. */
-  onOpenGroupedPreview?: (
-    params: Omit<GraphGroupedNodePreviewPanelProps, 'scopeId' | 'showLoadingState'>
-  ) => void;
-  /** Override for opening a network (IP) node — replaces `openPreviewPanel` when provided. */
-  onOpenNetworkPreview?: (ip: string, flowTarget: FlowTargetSourceDest) => void;
 }
 
 export type GraphVisualizationProps = EventGraphVisualizationProps | EntityGraphVisualizationProps;
@@ -124,7 +118,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
     onOpenDocumentPreview,
     onOpenEntityPreview,
     onOpenGroupedPreview,
-    onOpenNetworkPreview: onNetworkPreviewOverride,
+    onOpenNetworkPreview,
   } = props;
 
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -148,10 +142,10 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
 
   const { openPreviewPanel } = useExpandableFlyoutApi();
 
-  const onOpenNetworkPreview = useCallback(
+  const onOpenNetworkPreviewCallback = useCallback(
     (ip: string, previewScopeId: string) => {
-      if (onNetworkPreviewOverride) {
-        onNetworkPreviewOverride(ip, FlowTargetSourceDest.source);
+      if (onOpenNetworkPreview) {
+        onOpenNetworkPreview(ip);
         return;
       }
       openPreviewPanel({
@@ -165,7 +159,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
         },
       });
     },
-    [openPreviewPanel, onNetworkPreviewOverride]
+    [openPreviewPanel, onOpenNetworkPreview]
   );
 
   const onOpenEventPreview = useCallback(
@@ -405,7 +399,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
             showToggleSearch={true}
             onInvestigateInTimeline={openTimelineCallback}
             onOpenEventPreview={onOpenEventPreview}
-            onOpenNetworkPreview={onOpenNetworkPreview}
+            onOpenNetworkPreview={onOpenNetworkPreviewCallback}
           />
         </React.Suspense>
       )}
