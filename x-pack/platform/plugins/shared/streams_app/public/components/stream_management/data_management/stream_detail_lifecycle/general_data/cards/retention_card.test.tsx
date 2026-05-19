@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { Streams } from '@kbn/streams-schema';
@@ -13,7 +13,10 @@ import { RetentionCard } from './retention_card';
 import { LifecycleAfterSaveProvider } from '../../common/hooks/lifecycle_after_save';
 import { useLifecycleAfterSave } from '../../common/hooks/lifecycle_after_save';
 import type { LifecyclePreviewState } from '../../common/hooks/lifecycle_preview';
-import { LifecyclePreviewProvider } from '../../common/hooks/lifecycle_preview';
+import {
+  LifecyclePreviewProvider,
+  useLifecyclePreview,
+} from '../../common/hooks/lifecycle_preview';
 
 import { useStreamsAppFetch } from '../../../../../../hooks/use_streams_app_fetch';
 
@@ -48,6 +51,45 @@ const AfterSaveTrigger = () => {
   );
 };
 
+const PreviewInitializer = ({ initialState }: { initialState: Partial<LifecyclePreviewState> }) => {
+  const {
+    setIsActive,
+    setRetentionPeriod,
+    setDataPhasesCount,
+    setDownsampleStepsCount,
+    setHasUnsavedChanges,
+  } = useLifecyclePreview();
+  const didInit = useRef(false);
+
+  useLayoutEffect(() => {
+    if (didInit.current) return;
+    didInit.current = true;
+
+    if (initialState.isActive !== undefined) setIsActive(initialState.isActive);
+    if (initialState.retentionPeriod !== undefined)
+      setRetentionPeriod(initialState.retentionPeriod);
+    if (initialState.dataPhasesCount !== undefined)
+      setDataPhasesCount(initialState.dataPhasesCount);
+    if (initialState.downsampleStepsCount !== undefined)
+      setDownsampleStepsCount(initialState.downsampleStepsCount);
+    if (initialState.hasUnsavedChanges !== undefined)
+      setHasUnsavedChanges(initialState.hasUnsavedChanges);
+  }, [
+    initialState.dataPhasesCount,
+    initialState.downsampleStepsCount,
+    initialState.hasUnsavedChanges,
+    initialState.isActive,
+    initialState.retentionPeriod,
+    setDataPhasesCount,
+    setDownsampleStepsCount,
+    setHasUnsavedChanges,
+    setIsActive,
+    setRetentionPeriod,
+  ]);
+
+  return null;
+};
+
 describe('RetentionCard', () => {
   const mockOpenEditModal = jest.fn();
 
@@ -57,7 +99,10 @@ describe('RetentionCard', () => {
   ) => {
     return render(
       <LifecycleAfterSaveProvider>
-        <LifecyclePreviewProvider initialState={initialState}>{ui}</LifecyclePreviewProvider>
+        <LifecyclePreviewProvider>
+          {initialState ? <PreviewInitializer initialState={initialState} /> : null}
+          {ui}
+        </LifecyclePreviewProvider>
       </LifecycleAfterSaveProvider>
     );
   };

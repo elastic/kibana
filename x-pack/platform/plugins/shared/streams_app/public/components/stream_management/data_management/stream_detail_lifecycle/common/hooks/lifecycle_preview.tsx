@@ -46,17 +46,8 @@ const defaultState: LifecyclePreviewState = {
   timelineDownsampleSteps: null,
 };
 
-export const LifecyclePreviewProvider = ({
-  children,
-  initialState,
-}: {
-  children: React.ReactNode;
-  initialState?: Partial<LifecyclePreviewState>;
-}) => {
-  const [state, setState] = useState<LifecyclePreviewState>({
-    ...defaultState,
-    ...initialState,
-  });
+export const LifecyclePreviewProvider = ({ children }: { children: React.ReactNode }) => {
+  const [state, setState] = useState<LifecyclePreviewState>(defaultState);
 
   const setIsActive = useCallback((isActive: boolean) => {
     setState((prev) => {
