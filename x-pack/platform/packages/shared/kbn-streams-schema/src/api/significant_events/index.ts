@@ -9,7 +9,12 @@ import type { Observable } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import { z } from '@kbn/zod/v4';
-import { esqlQuerySchema, queryTypeSchema, type StreamQuery } from '../../queries';
+import {
+  esqlQuerySchema,
+  queryFeatureSchema,
+  queryTypeSchema,
+  type StreamQuery,
+} from '../../queries';
 import type { TaskStatus } from '../../tasks/types';
 
 /**
@@ -84,6 +89,7 @@ export const generatedSignificantEventQuerySchema = z.object({
   description: z.string(),
   evidence: z.array(z.string()).optional(),
   replaces: z.string().optional(),
+  features: z.array(queryFeatureSchema),
 });
 
 type GeneratedSignificantEventQuery = z.infer<typeof generatedSignificantEventQuerySchema>;
