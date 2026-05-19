@@ -87,13 +87,19 @@ const buildSourceFields = (
  * `entityStoreIndexExists` is the result of a single upstream existence check
  * (see fetchGraph). Returns an empty map when the index is absent or no IDs were given.
  */
-export const fetchEntityEnrichment = async (
-  esClient: IScopedClusterClient,
-  logger: Logger,
-  entityIds: string[],
-  spaceId: string,
-  entityStoreIndexExists: boolean
-): Promise<Map<string, EntityEnrichmentFields>> => {
+export const fetchEntityEnrichment = async ({
+  esClient,
+  logger,
+  entityIds,
+  spaceId,
+  entityStoreIndexExists,
+}: {
+  esClient: IScopedClusterClient;
+  logger: Logger;
+  entityIds: string[];
+  spaceId: string;
+  entityStoreIndexExists: boolean;
+}): Promise<Map<string, EntityEnrichmentFields>> => {
   if (entityIds.length === 0 || !entityStoreIndexExists) {
     return new Map();
   }

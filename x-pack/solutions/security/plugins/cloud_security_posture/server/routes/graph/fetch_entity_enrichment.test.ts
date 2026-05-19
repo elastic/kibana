@@ -26,13 +26,25 @@ describe('fetchEntityEnrichment', () => {
   afterEach(() => jest.resetAllMocks());
 
   it('returns empty map when entityIds is empty', async () => {
-    const result = await fetchEntityEnrichment(esClient, logger, [], 'default', true);
+    const result = await fetchEntityEnrichment({
+      esClient,
+      logger,
+      entityIds: [],
+      spaceId: 'default',
+      entityStoreIndexExists: true,
+    });
     expect(result.size).toBe(0);
     expect(esClient.asInternalUser.helpers.esql).not.toHaveBeenCalled();
   });
 
   it('returns empty map when entity store index does not exist', async () => {
-    const result = await fetchEntityEnrichment(esClient, logger, ['user:alice'], 'default', false);
+    const result = await fetchEntityEnrichment({
+      esClient,
+      logger,
+      entityIds: ['user:alice'],
+      spaceId: 'default',
+      entityStoreIndexExists: false,
+    });
     expect(result.size).toBe(0);
     // Existence is decided upstream; this function no longer calls indices.exists itself
     expect(esClient.asInternalUser.helpers.esql).not.toHaveBeenCalled();
@@ -54,7 +66,13 @@ describe('fetchEntityEnrichment', () => {
       }),
     });
 
-    const result = await fetchEntityEnrichment(esClient, logger, ['user:alice'], 'default', true);
+    const result = await fetchEntityEnrichment({
+      esClient,
+      logger,
+      entityIds: ['user:alice'],
+      spaceId: 'default',
+      entityStoreIndexExists: true,
+    });
     const enrichment = result.get('user:alice');
     expect(enrichment?.name).toBe('Alice');
     expect(enrichment?.type).toBe('user');
@@ -86,13 +104,13 @@ describe('fetchEntityEnrichment', () => {
       }),
     });
 
-    const result = await fetchEntityEnrichment(
+    const result = await fetchEntityEnrichment({
       esClient,
       logger,
-      ['user:alice@example.com'],
-      'default',
-      true
-    );
+      entityIds: ['user:alice@example.com'],
+      spaceId: 'default',
+      entityStoreIndexExists: true,
+    });
     const enrichment = result.get('user:alice@example.com');
     expect(enrichment?.sourceFields).toBeDefined();
     expect(enrichment?.sourceFields?.['user.email']).toBe('alice@example.com');
@@ -125,13 +143,13 @@ describe('fetchEntityEnrichment', () => {
       }),
     });
 
-    const result = await fetchEntityEnrichment(
+    const result = await fetchEntityEnrichment({
       esClient,
       logger,
-      ['host:my-server'],
-      'default',
-      true
-    );
+      entityIds: ['host:my-server'],
+      spaceId: 'default',
+      entityStoreIndexExists: true,
+    });
     const enrichment = result.get('host:my-server');
     expect(enrichment?.sourceFields?.['host.id']).toBe('my-server');
     expect(enrichment?.sourceFields?.['host.name']).toBe('my-server');
@@ -160,7 +178,13 @@ describe('fetchEntityEnrichment', () => {
       }),
     });
 
-    const result = await fetchEntityEnrichment(esClient, logger, ['user:alice'], 'default', true);
+    const result = await fetchEntityEnrichment({
+      esClient,
+      logger,
+      entityIds: ['user:alice'],
+      spaceId: 'default',
+      entityStoreIndexExists: true,
+    });
     const enrichment = result.get('user:alice');
     expect(enrichment?.sourceFields).toBeUndefined();
   });
@@ -171,7 +195,13 @@ describe('fetchEntityEnrichment', () => {
     });
 
     const ids = Array.from({ length: 101 }, (_, i) => `user:entity${i}`);
-    await fetchEntityEnrichment(esClient, logger, ids, 'default', true);
+    await fetchEntityEnrichment({
+      esClient,
+      logger,
+      entityIds: ids,
+      spaceId: 'default',
+      entityStoreIndexExists: true,
+    });
     expect(esClient.asInternalUser.helpers.esql).toHaveBeenCalledTimes(2);
   });
 
@@ -185,7 +215,13 @@ describe('fetchEntityEnrichment', () => {
       });
 
     const ids = Array.from({ length: 101 }, (_, i) => `user:entity${i}`);
-    const result = await fetchEntityEnrichment(esClient, logger, ids, 'default', true);
+    const result = await fetchEntityEnrichment({
+      esClient,
+      logger,
+      entityIds: ids,
+      spaceId: 'default',
+      entityStoreIndexExists: true,
+    });
     // Should not throw, should return partial (empty) map
     expect(result).toBeInstanceOf(Map);
     expect(logger.warn).toHaveBeenCalled();
@@ -207,7 +243,13 @@ describe('fetchEntityEnrichment', () => {
       }),
     });
 
-    const result = await fetchEntityEnrichment(esClient, logger, ['host:myhost'], 'default', true);
+    const result = await fetchEntityEnrichment({
+      esClient,
+      logger,
+      entityIds: ['host:myhost'],
+      spaceId: 'default',
+      entityStoreIndexExists: true,
+    });
     expect(result.get('host:myhost')?.hostIps).toEqual(['192.168.1.1', '10.0.0.1']);
   });
 
@@ -235,7 +277,13 @@ describe('fetchEntityEnrichment', () => {
       }),
     });
 
-    const result = await fetchEntityEnrichment(esClient, logger, ['user:alice'], 'default', true);
+    const result = await fetchEntityEnrichment({
+      esClient,
+      logger,
+      entityIds: ['user:alice'],
+      spaceId: 'default',
+      entityStoreIndexExists: true,
+    });
     expect(result.get('user:alice')?.name).toBe('First Alice');
   });
 
@@ -244,7 +292,13 @@ describe('fetchEntityEnrichment', () => {
       toRecords: jest.fn().mockResolvedValue({ records: [] }),
     });
 
-    await fetchEntityEnrichment(esClient, logger, ['user:alice'], 'default', true);
+    await fetchEntityEnrichment({
+      esClient,
+      logger,
+      entityIds: ['user:alice'],
+      spaceId: 'default',
+      entityStoreIndexExists: true,
+    });
 
     const esqlCallArgs = (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mock
       .calls[0];

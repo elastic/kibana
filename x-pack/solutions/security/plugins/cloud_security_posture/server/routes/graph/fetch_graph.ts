@@ -160,13 +160,13 @@ export const fetchGraph = async ({
 
   const enrichmentMap =
     allEntityIds.size > 0
-      ? await fetchEntityEnrichment(
+      ? await fetchEntityEnrichment({
           esClient,
           logger,
-          [...allEntityIds],
+          entityIds: [...allEntityIds],
           spaceId,
-          entityStoreIndexExists
-        )
+          entityStoreIndexExists,
+        })
       : new Map<string, EntityEnrichmentFields>();
 
   return {
