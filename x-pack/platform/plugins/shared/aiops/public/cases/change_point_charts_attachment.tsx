@@ -14,24 +14,17 @@ import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescriptionList } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
-import type { ChangePointChartEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/change_point_chart';
+import {
+  normalizeChangePointChartLegacyFields,
+  type RawChangePointChartState,
+} from '../../common/embeddables/change_point_chart/normalize_legacy_state';
 import type {
   ChangePointDetectionProps,
   ChangePointDetectionSharedComponent,
 } from '../shared_components/change_point_detection';
 
-// Pre-9.5 case attachments stored these fields in camelCase.
-interface LegacyAttachmentFields {
-  timeRange?: TimeRange;
-  viewType?: ChangePointChartEmbeddableState['view_type'];
-  dataViewId?: string;
-  fn?: ChangePointChartEmbeddableState['aggregation_function'];
-  metricField?: string;
-  splitField?: string;
-  maxSeriesToPlot?: number;
-}
-
-type RawAttachmentState = Partial<ChangePointChartEmbeddableState> & LegacyAttachmentFields;
+// Pre-9.5 case attachments stored time_range as timeRange.
+type RawAttachmentState = RawChangePointChartState & { timeRange?: TimeRange };
 
 export const initComponent = memoize(
   (
@@ -45,15 +38,16 @@ export const initComponent = memoize(
         });
 
         const rawState = props.data.state as RawAttachmentState;
+        const normalized = normalizeChangePointChartLegacyFields(rawState);
         const inputProps = {
           timeRange: rawState.time_range ?? rawState.timeRange,
-          viewType: rawState.view_type ?? rawState.viewType,
-          dataViewId: rawState.data_view_id ?? rawState.dataViewId,
-          fn: rawState.aggregation_function ?? rawState.fn,
-          metricField: rawState.metric_field ?? rawState.metricField,
-          splitField: rawState.split_field ?? rawState.splitField,
-          partitions: rawState.partitions,
-          maxSeriesToPlot: rawState.max_series_to_plot ?? rawState.maxSeriesToPlot,
+          viewType: normalized.view_type,
+          dataViewId: normalized.data_view_id,
+          fn: normalized.aggregation_function,
+          metricField: normalized.metric_field,
+          splitField: normalized.split_field,
+          partitions: normalized.partitions,
+          maxSeriesToPlot: normalized.max_series_to_plot,
         } as ChangePointDetectionProps;
 
         const listItems = [

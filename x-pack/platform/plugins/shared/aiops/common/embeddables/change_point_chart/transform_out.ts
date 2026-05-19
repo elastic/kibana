@@ -7,24 +7,14 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
-import {
-  CHANGE_POINT_CHART_DATA_VIEW_REF_NAME,
-  CHANGE_POINT_CHART_DEFAULT_SERIES,
-  CHANGE_POINT_DETECTION_VIEW_TYPE,
-} from '@kbn/aiops-change-point-detection/constants';
+import { CHANGE_POINT_CHART_DATA_VIEW_REF_NAME } from '@kbn/aiops-change-point-detection/constants';
 import type { ChangePointChartEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/change_point_chart';
 import { flow } from 'lodash';
+import {
+  type LegacyChangePointChartFields,
+  normalizeChangePointChartLegacyFields,
+} from './normalize_legacy_state';
 import type { StoredChangePointChartEmbeddableState } from './types';
-
-// Pre-9.5 stored state used camelCase for these fields.
-interface LegacyChangePointChartFields {
-  fn?: ChangePointChartEmbeddableState['aggregation_function'];
-  viewType?: ChangePointChartEmbeddableState['view_type'];
-  dataViewId?: string;
-  metricField?: string;
-  splitField?: string;
-  maxSeriesToPlot?: number;
-}
 
 export function transformOut(
   storedState: StoredChangePointChartEmbeddableState,
@@ -40,20 +30,15 @@ export function transformOut(
   const dataViewId = references?.find(
     (ref) => ref.name === CHANGE_POINT_CHART_DATA_VIEW_REF_NAME
   )?.id;
-  const aggregationFunction = state.aggregation_function ?? state.fn;
-  const metricField = state.metric_field ?? state.metricField;
-  const splitField = state.split_field ?? state.splitField;
-  const viewType = state.view_type ?? state.viewType ?? CHANGE_POINT_DETECTION_VIEW_TYPE.CHARTS;
-  const maxSeriesToPlot =
-    state.max_series_to_plot ?? state.maxSeriesToPlot ?? CHANGE_POINT_CHART_DEFAULT_SERIES;
+  const normalized = normalizeChangePointChartLegacyFields(state);
 
   if (!dataViewId) {
     throw new Error('Invalid change point chart embeddable state: missing data_view_id reference');
   }
-  if (!aggregationFunction) {
+  if (!normalized.aggregation_function) {
     throw new Error('Invalid change point chart embeddable state: missing aggregation_function');
   }
-  if (!metricField) {
+  if (!normalized.metric_field) {
     throw new Error('Invalid change point chart embeddable state: missing metric_field');
   }
 
@@ -70,10 +55,10 @@ export function transformOut(
   return {
     ...passthrough,
     data_view_id: dataViewId,
-    aggregation_function: aggregationFunction,
-    view_type: viewType,
-    metric_field: metricField,
-    ...(splitField ? { split_field: splitField } : {}),
-    max_series_to_plot: maxSeriesToPlot,
+    aggregation_function: normalized.aggregation_function,
+    view_type: normalized.view_type,
+    metric_field: normalized.metric_field,
+    ...(normalized.split_field ? { split_field: normalized.split_field } : {}),
+    max_series_to_plot: normalized.max_series_to_plot,
   };
 }
