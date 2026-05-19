@@ -11,7 +11,11 @@ import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { ENTITY_RELATIONSHIP_FIELDS } from '@kbn/cloud-security-posture-common/constants';
-import { type EuidSourceFields, GRAPH_ACTOR_EUID_SOURCE_FIELDS } from './constants';
+import {
+  type EuidSourceFields,
+  GRAPH_ACTOR_EUID_SOURCE_FIELDS,
+  TYPED_ENTITY_PREFIXES,
+} from './constants';
 import {
   checkIfEntitiesIndexExists,
   concatJsonObjectPropertyBool,
@@ -321,8 +325,6 @@ export const fetchEntities = async ({
     throw error;
   }
 };
-
-const TYPED_ENTITY_PREFIXES = ['user', 'host', 'service'];
 
 const buildSourceFieldsJson = (fields: EuidSourceFields): string => {
   const properties = Object.keys(fields)

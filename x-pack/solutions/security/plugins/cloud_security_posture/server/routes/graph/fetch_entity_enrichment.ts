@@ -8,7 +8,7 @@
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { checkIfEntitiesIndexExists } from './utils';
-import { GRAPH_ACTOR_EUID_SOURCE_FIELDS } from './constants';
+import { GRAPH_ACTOR_EUID_SOURCE_FIELDS, TYPED_ENTITY_PREFIXES } from './constants';
 
 export interface EntityEnrichmentFields {
   name?: string | null;
@@ -18,8 +18,6 @@ export interface EntityEnrichmentFields {
   engineType?: string | null;
   sourceFields?: Record<string, string | string[]>;
 }
-
-const TYPED_ENTITY_PREFIXES = ['user', 'host', 'service'] as const;
 
 const BASE_ENRICHMENT_COLUMNS = new Set([
   'entity.id',

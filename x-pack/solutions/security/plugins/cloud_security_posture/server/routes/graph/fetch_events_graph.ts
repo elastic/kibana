@@ -35,6 +35,7 @@ import {
   type EuidSourceFields,
   GRAPH_ACTOR_EUID_SOURCE_FIELDS,
   GRAPH_TARGET_EUID_SOURCE_FIELDS,
+  TYPED_ENTITY_PREFIXES,
 } from './constants';
 import { getTargetEuidEsqlEvaluation } from './target_euid';
 import { SECURITY_ALERTS_PARTIAL_IDENTIFIER } from '../../../common/constants';
@@ -201,7 +202,7 @@ const buildV2ActorResolution = (): string => {
   // entity.id is excluded: its EUID is the raw value (no CONCAT),
   // and multi-value is handled by the downstream MV_EXPAND actorEntityId.
   const typedActorFields = Object.keys(GRAPH_ACTOR_EUID_SOURCE_FIELDS)
-    .filter((f) => TYPED_ENTITY_PREFIXES.includes(f))
+    .filter((f) => (TYPED_ENTITY_PREFIXES as readonly string[]).includes(f))
     .map((f) => GRAPH_ACTOR_EUID_SOURCE_FIELDS[f as keyof EuidSourceFields])
     .flat();
   const mvExpandStatements = typedActorFields
@@ -251,7 +252,7 @@ const buildV2TargetResolution = (): string => {
   // entity.target.id is excluded: its EUID is the raw value (no CONCAT),
   // and multi-value is handled by the downstream MV_EXPAND targetEntityId.
   const typedTargetFields = Object.keys(GRAPH_TARGET_EUID_SOURCE_FIELDS)
-    .filter((f) => TYPED_ENTITY_PREFIXES.includes(f))
+    .filter((f) => (TYPED_ENTITY_PREFIXES as readonly string[]).includes(f))
     .map((f) => GRAPH_TARGET_EUID_SOURCE_FIELDS[f as keyof EuidSourceFields])
     .flat();
   const mvExpandStatements = typedTargetFields
@@ -342,8 +343,6 @@ const buildSaveSourceFieldsEsql = (): string => {
     .join(', ');
   return `| EVAL ${assignments}`;
 };
-
-const TYPED_ENTITY_PREFIXES = ['user', 'host', 'service'];
 
 /**
  * Generates an ESQL CONCAT fragment that builds a JSON "sourceFields" object.
