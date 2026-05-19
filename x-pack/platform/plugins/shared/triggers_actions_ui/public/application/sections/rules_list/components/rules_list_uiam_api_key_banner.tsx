@@ -27,7 +27,7 @@ export const RulesListUiamApiKeyBanner = () => {
         <p>
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.rulesList.uiamApiKeyBannerDescription"
-            defaultMessage="We're upgrading Kibana alerting security. Elasticsearch API keys are being progressively replaced by UIAM API keys in Serverless projects. Failure to migrate may limit certain functionalities. Click here [link] to learn more."
+            defaultMessage="We're upgrading Kibana alerting security. Elasticsearch API keys are being progressively replaced by UIAM API keys in Serverless projects. Failure to migrate may limit certain functionalities."
           />
         </p>
       </EuiCallOut>
