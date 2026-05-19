@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { getHoverItem } from '@kbn/esql-language';
 import { FIX_WITH_AI_COMMAND_ID } from '@kbn/esql-types';
-import type { monaco } from '../../../../monaco_imports';
+import { monaco } from '../../../../monaco_imports';
 import { createCancellableCallbacks, createMonacoProvider } from './providers_factory';
 import { getDecorationHoveredMessages, monacoPositionToOffset } from '../shared/utils';
 import type { ESQLDependencies } from './types';
