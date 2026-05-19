@@ -71,6 +71,13 @@ export const ELASTIC_CLOUD_SERVICE: SMTPConnection.Options = {
 
 const EMAIL_FOOTER_DIVIDER = '\n\n---\n\n';
 
+const NO_RECIPIENTS_ERROR_MESSAGE = i18n.translate(
+  'xpack.stackConnectors.email.noRecipientsErrorMessage',
+  { defaultMessage: 'At least one entry in [to], [cc], or [bcc] is required' }
+);
+
+const isNonBlankRecipient = (email: string) => email.trim().length > 0;
+
 function validateConfig(
   configObject: ConnectorTypeConfigType,
   validatorServices: ValidatorServices
@@ -178,21 +185,27 @@ function validateParams(paramsObject: unknown, validatorServices: ValidatorServi
   const params = paramsObject as ActionParamsType;
 
   const { to, cc, bcc } = params;
-  const addrs = to.length + cc.length + bcc.length;
+  // Mirror the executor's filter so that empty/whitespace-only entries don't
+  // trick the recipients-required check, and aren't surfaced as confusing
+  // "Invalid email addresses" errors below.
+  const validTo = to.filter(isNonBlankRecipient);
+  const validCc = cc.filter(isNonBlankRecipient);
+  const validBcc = bcc.filter(isNonBlankRecipient);
 
-  if (addrs === 0) {
-    throw new Error('no [to], [cc], or [bcc] entries');
+  if (validTo.length + validCc.length + validBcc.length === 0) {
+    throw new Error(NO_RECIPIENTS_ERROR_MESSAGE);
   }
 
   try {
-    emailSchema.parse(to);
-    emailSchema.parse(cc);
-    emailSchema.parse(bcc);
+    emailSchema.parse(validTo);
+    emailSchema.parse(validCc);
+    emailSchema.parse(validBcc);
   } catch (error) {
     throw new Error(`Invalid email addresses: ${error}`);
   }
 
-  const emails = withoutMustacheTemplate(to.concat(cc).concat(bcc));
+  const emails = withoutMustacheTemplate(validTo.concat(validCc).concat(validBcc));
+
   const invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails, {
     treatMustacheTemplatesAsValid: true,
   });
@@ -293,7 +306,18 @@ async function executor(
   const awsSesConfig = configurationUtilities.getAwsSesConfig();
 
   const emails = params.to.concat(params.cc).concat(params.bcc);
-  let invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails);
+  const validEmails = emails.filter(isNonBlankRecipient);
+
+  if (validEmails.length === 0) {
+    return {
+      status: 'error',
+      actionId,
+      message: NO_RECIPIENTS_ERROR_MESSAGE,
+      errorSource: TaskErrorSource.USER,
+    };
+  }
+
+  let invalidEmailsMessage = configurationUtilities.validateEmailAddresses(validEmails);
   if (invalidEmailsMessage) {
     return { status: 'error', actionId, message: `[to/cc/bcc]: ${invalidEmailsMessage}` };
   }

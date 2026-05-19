@@ -19,6 +19,7 @@ apiTest.describe('find - basic', { tag: tags.deploymentAgnostic }, () => {
 
   apiTest.beforeAll(async ({ requestAuth, kbnClient }) => {
     adminCredentials = await requestAuth.getApiKey('viewer');
+    await kbnClient.savedObjects.cleanStandardList();
     await kbnClient.importExport.load(KBN_ARCHIVES.BASIC);
   });
 

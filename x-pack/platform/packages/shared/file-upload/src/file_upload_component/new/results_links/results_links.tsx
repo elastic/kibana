@@ -181,7 +181,7 @@ export const ResultsLinks: FC<Props> = ({
         <EuiFlexItem>
           <EuiCard
             hasBorder
-            icon={<EuiIcon size="xxl" type={`discoverApp`} />}
+            icon={<EuiIcon aria-hidden={true} size="xxl" type={`discoverApp`} />}
             title={
               <FormattedMessage
                 id="xpack.fileUpload.resultsLinks.viewIndexInDiscoverTitle"
@@ -197,7 +197,7 @@ export const ResultsLinks: FC<Props> = ({
         <EuiFlexItem>
           <EuiCard
             hasBorder
-            icon={<EuiIcon size="xxl" type={`managementApp`} />}
+            icon={<EuiIcon aria-hidden={true} size="xxl" type={`managementApp`} />}
             title={
               <FormattedMessage
                 id="xpack.fileUpload.resultsLinks.indexManagementTitle"
@@ -213,7 +213,7 @@ export const ResultsLinks: FC<Props> = ({
         <EuiFlexItem>
           <EuiCard
             hasBorder
-            icon={<EuiIcon size="xxl" type={`managementApp`} />}
+            icon={<EuiIcon aria-hidden={true} size="xxl" type={`managementApp`} />}
             title={
               <FormattedMessage
                 id="xpack.fileUpload.resultsLinks.dataViewManagementTitle"
@@ -229,7 +229,7 @@ export const ResultsLinks: FC<Props> = ({
         <EuiFlexItem>
           <EuiCard
             hasBorder
-            icon={<EuiIcon size="xxl" type={`filebeatApp`} />}
+            icon={<EuiIcon aria-hidden={true} size="xxl" type={`filebeatApp`} />}
             data-test-subj="fileDataVisFilebeatConfigLink"
             title={
               <FormattedMessage
@@ -247,8 +247,7 @@ export const ResultsLinks: FC<Props> = ({
         <EuiFlexItem>
           <EuiCard
             hasBorder
-            icon={<EuiIcon size="xxl" type={`logoElasticsearch`} />}
-            data-test-subj="fileDataVisFilebeatConfigLink"
+            icon={<EuiIcon aria-hidden={true} size="xxl" type="logoElasticsearch" />}
             title={
               <FormattedMessage
                 id="xpack.fileUpload.resultsLinks.playground"
@@ -266,7 +265,7 @@ export const ResultsLinks: FC<Props> = ({
           <EuiFlexItem key={link.title}>
             <EuiCard
               hasBorder
-              icon={<EuiIcon size="xxl" type={link.icon} />}
+              icon={<EuiIcon aria-hidden={true} size="xxl" type={link.icon} />}
               data-test-subj="fileDataVisLink"
               title={link.title}
               description={link.description}

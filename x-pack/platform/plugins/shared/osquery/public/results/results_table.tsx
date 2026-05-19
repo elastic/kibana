@@ -30,6 +30,7 @@ import React, { createContext, useEffect, useState, useCallback, useContext, use
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { AddToTimelineButton } from '../timelines/add_to_timeline_button';
+import type { AddToTimelineHandler } from '../types';
 import { useAllResults } from './use_all_results';
 import type { ResultEdges } from '../../common/search_strategy';
 import { Direction } from '../../common/search_strategy';
@@ -99,6 +100,7 @@ export interface ResultsTableComponentProps {
   startDate?: string;
   liveQueryActionId?: string;
   error?: string;
+  addToTimeline?: AddToTimelineHandler;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
@@ -109,6 +111,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   endDate,
   liveQueryActionId,
   error,
+  addToTimeline,
 }) => {
   const [isLive, setIsLive] = useState(true);
 
@@ -126,7 +129,6 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   const {
     application: { getUrlForApp },
     appName,
-    timelines,
     notifications: { toasts },
     i18n: i18nStart,
     theme,
@@ -369,7 +371,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
     const edges = allResultsData?.edges;
-    if (timelines && edges) {
+    if (addToTimeline && edges) {
       return [
         {
           id: 'timeline',
@@ -381,14 +383,21 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             };
             const eventId = edges[visibleRowIndex]?._id;
 
-            return <AddToTimelineButton field="_id" value={eventId!} isIcon={true} />;
+            return (
+              <AddToTimelineButton
+                field="_id"
+                value={eventId!}
+                isIcon={true}
+                addToTimeline={addToTimeline}
+              />
+            );
           },
         },
       ];
     }
 
     return [];
-  }, [allResultsData?.edges, timelines]);
+  }, [addToTimeline, allResultsData?.edges]);
 
   const toolbarVisibility = useMemo(
     () => ({
@@ -408,14 +417,14 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             endDate={endDate}
             startDate={startDate}
           />
-          <AddToTimelineButton field="action_id" value={actionId} />
+          <AddToTimelineButton field="action_id" value={actionId} addToTimeline={addToTimeline} />
           {liveQueryActionId && (
             <AddToCaseWrapper actionId={liveQueryActionId} queryId={actionId} agentIds={agentIds} />
           )}
         </>
       ),
     }),
-    [actionId, agentIds, appName, endDate, liveQueryActionId, startDate]
+    [actionId, addToTimeline, agentIds, appName, endDate, liveQueryActionId, startDate]
   );
 
   useEffect(

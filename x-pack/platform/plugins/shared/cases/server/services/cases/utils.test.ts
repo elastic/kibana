@@ -219,7 +219,7 @@ const searchFieldQuery: estypes.QueryDslQueryContainer[] = [
     },
   },
   {
-    multi_match: {
+    simple_query_string: {
       query: search,
       fields: DEFAULT_CASE_SEARCH_FIELDS,
     },
@@ -272,7 +272,7 @@ describe('constructSearchQuery', () => {
 
     expect(result).toEqual({
       bool: {
-        should: searchFieldQuery.slice(0, 2), // id and multi_match
+        should: searchFieldQuery.slice(0, 2), // id and simple_query_string
         minimum_should_match: 1,
       },
     });

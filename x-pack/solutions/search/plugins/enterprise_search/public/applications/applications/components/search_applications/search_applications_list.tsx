@@ -59,7 +59,7 @@ export const CreateSearchApplicationButton: React.FC<CreateSearchApplicationButt
       title={
         <EuiFlexGroup justifyContent="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="beaker" />
+            <EuiIcon type="beaker" aria-hidden />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <FormattedMessage

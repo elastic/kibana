@@ -149,6 +149,10 @@ export const getLegendActions = (
 
     return (
       <EuiPopover
+        aria-label={i18n.translate('expressionPartitionVis.legend.filterOptionsLegend', {
+          defaultMessage: '{legendDataLabel}, filter options',
+          values: { legendDataLabel: title },
+        })}
         button={Button}
         isOpen={popoverOpen}
         closePopover={() => {
