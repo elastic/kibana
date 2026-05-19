@@ -75,7 +75,7 @@ describe('ExecuteRuleQueryStep', () => {
 
     expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(
       expect.objectContaining({
-        query: 'FROM metrics-* | STATS avg(cpu) BY host.name | WHERE avg(cpu) > 0.9',
+        query: 'FROM metrics-* | STATS AVG(cpu) BY host.name | WHERE AVG(cpu) > 0.9',
       }),
       expect.any(Object)
     );

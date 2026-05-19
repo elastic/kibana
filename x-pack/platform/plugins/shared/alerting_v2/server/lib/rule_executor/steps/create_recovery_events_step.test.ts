@@ -268,10 +268,10 @@ describe('CreateRecoveryEventsStep', () => {
           kind: 'alert',
           query: {
             format: 'composed',
-            base: 'FROM metrics-* | STATS avg(cpu) BY host.name',
+            base: 'FROM metrics-* | STATS AVG(cpu) BY host.name',
             blocks: {
-              breach: ' | WHERE avg(cpu) > 0.9',
-              recover: ' | WHERE avg(cpu) < 0.5',
+              breach: ' | WHERE AVG(cpu) > 0.9',
+              recover: ' | WHERE AVG(cpu) < 0.5',
             },
           },
         }),
@@ -284,7 +284,7 @@ describe('CreateRecoveryEventsStep', () => {
 
       expect(scopedEsClient.esql.query).toHaveBeenCalledWith(
         expect.objectContaining({
-          query: 'FROM metrics-* | STATS avg(cpu) BY host.name | WHERE avg(cpu) < 0.5',
+          query: 'FROM metrics-* | STATS AVG(cpu) BY host.name | WHERE AVG(cpu) < 0.5',
         }),
         expect.any(Object)
       );
