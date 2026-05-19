@@ -9,8 +9,12 @@
 
 import path from 'path';
 import { schema, type Type } from '@kbn/config-schema';
-import type { ExecutionStatus, ExecutionType } from '@kbn/workflows';
-import { ExecutionStatusValues, ExecutionTypeValues } from '@kbn/workflows';
+import type { ExecutionStatus, ExecutionType, WorkflowExecutionSortField } from '@kbn/workflows';
+import {
+  ExecutionStatusValues,
+  ExecutionTypeValues,
+  WorkflowExecutionSortFields,
+} from '@kbn/workflows';
 import type { SearchWorkflowExecutionsParams } from '../../workflows_management_service';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, MAX_PAGE_SIZE, OAS_TAG } from '../utils/route_constants';
@@ -25,7 +29,6 @@ const executionStatusSchema = schema.oneOf(
 const executionTypeSchema = schema.oneOf(
   ExecutionTypeValues.map((type) => schema.literal(type)) as [Type<ExecutionType>]
 );
-
 export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
     .get({
@@ -92,6 +95,31 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
                   meta: { description: 'Whether to exclude step-level execution data.' },
                 })
               ),
+              finishedAfter: schema.maybe(
+                schema.string({
+                  meta: { description: 'Filter executions finished at or after this timestamp.' },
+                })
+              ),
+              finishedBefore: schema.maybe(
+                schema.string({
+                  meta: { description: 'Filter executions finished at or before this timestamp.' },
+                })
+              ),
+              sortField: schema.maybe(
+                schema.oneOf(
+                  WorkflowExecutionSortFields.map((field) => schema.literal(field)) as [
+                    Type<WorkflowExecutionSortField>
+                  ],
+                  {
+                    meta: { description: 'Field to sort executions by.' },
+                  }
+                )
+              ),
+              sortOrder: schema.maybe(
+                schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+                  meta: { description: 'Sort order.' },
+                })
+              ),
               page: schema.maybe(schema.number({ min: 1, meta: { description: 'Page number.' } })),
               size: schema.maybe(
                 schema.number({
@@ -122,6 +150,10 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
             page: request.query.page,
             size: request.query.size,
             omitStepRuns: request.query.omitStepRuns,
+            finishedAfter: request.query.finishedAfter,
+            finishedBefore: request.query.finishedBefore,
+            sortField: request.query.sortField,
+            sortOrder: request.query.sortOrder,
           };
           return response.ok({
             body: await api.getWorkflowExecutions(params, spaceId),
