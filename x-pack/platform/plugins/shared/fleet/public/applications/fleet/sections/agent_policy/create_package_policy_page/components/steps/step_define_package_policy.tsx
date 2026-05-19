@@ -53,7 +53,12 @@ import type { PackagePolicyValidationResults } from '../../services';
 
 import { ExperimentalFeaturesService } from '../../../../../services';
 
-import { PackagePolicyInputVarField, VarGroupSelector, useVarGroupSelections } from './components';
+import {
+  PackagePolicyConditionField,
+  PackagePolicyInputVarField,
+  VarGroupSelector,
+  useVarGroupSelections,
+} from './components';
 import { useOutputs } from './components/hooks';
 import { useNamespaceCustomization } from './use_namespace_customization';
 
@@ -757,6 +762,15 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                       </EuiFlexItem>
                     );
                   })}
+                  {/* Integration-level condition */}
+                  <EuiFlexItem>
+                    <PackagePolicyConditionField
+                      value={packagePolicy.condition ?? ''}
+                      onChange={(v) => updatePackagePolicy({ condition: v })}
+                      isInvalid={submitAttempted && Boolean(validationResults?.condition)}
+                      errors={validationResults?.condition ?? null}
+                    />
+                  </EuiFlexItem>
                   {/* Custom fields — agentless only */}
                   {isAgentlessSelected && (
                     <EuiFlexItem>

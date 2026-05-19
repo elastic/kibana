@@ -334,6 +334,16 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
       inputValidationResults,
     ]);
 
+    // Show the input-level panel when:
+    // - multi-stream/input: condition field scopes across streams so always expose it
+    // - single-stream with input vars: preserve original access to those vars
+    // - single-stream consolidation: stream's advanced vars are hoisted here and stream panel
+    //   is hidden, so this is the only place to reach those vars and the condition field
+    const showInputLevelPanel =
+      !isSingleInputAndStreams ||
+      Boolean(packageInput.vars?.length) ||
+      shouldConsolidateAdvancedSections;
+
     const topLevelDescription = showTopLevelDescription && (
       <EuiText size="s" color="subdued">
         <ReactMarkdown>{String(inputStreams[0]?.packageInputStream?.description)}</ReactMarkdown>
@@ -530,14 +540,10 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
         </EuiFlexGroup>
 
         {/* Spacing if we are showing rest of content */}
-        {isShowingStreams &&
-        hasInputStreams &&
-        ((packageInput.vars && packageInput.vars.length) || !shouldConsolidateAdvancedSections) ? (
-          <EuiSpacer size="m" />
-        ) : null}
+        {isShowingStreams && hasInputStreams && showInputLevelPanel ? <EuiSpacer size="m" /> : null}
 
         {/* Input level policy */}
-        {isShowingStreams && packageInput.vars && packageInput.vars.length ? (
+        {isShowingStreams && showInputLevelPanel ? (
           <>
             <PackagePolicyInputConfig
               data-test-subj="PackagePolicy.InputConfig"

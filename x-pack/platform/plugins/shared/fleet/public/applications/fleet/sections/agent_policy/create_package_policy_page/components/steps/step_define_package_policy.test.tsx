@@ -100,6 +100,7 @@ describe('StepDefinePackagePolicy', () => {
     description: null,
     additional_datastreams_permissions: null,
     namespace: null,
+    condition: null,
     inputs: {},
     vars: {
       'Required var': ['Required var is required'],

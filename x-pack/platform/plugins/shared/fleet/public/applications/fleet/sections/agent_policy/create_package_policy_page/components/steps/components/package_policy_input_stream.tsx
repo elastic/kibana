@@ -64,6 +64,7 @@ import { useIndexTemplateExists } from '../../datastream_hooks';
 import { shouldShowVar, isVarRequiredByVarGroup } from '../../../services/var_group_helpers';
 import { ExperimentalFeaturesService } from '../../../../../../services';
 
+import { PackagePolicyConditionField } from './package_policy_condition_field';
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 import { useDataStreamId, useVarGroupSelections } from './hooks';
 import { sortDatastreamsByDataset } from './sort_datastreams';
@@ -265,9 +266,14 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
 
     // Showing advanced options toggle state
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(isDefaultDatastream);
+    const showConditionField = true; // TODO: restrict for agentless / otelcol inputs
     const hasAdvancedOptions = useMemo(() => {
-      return advancedVars.length > 0 || (isPackagePolicyEdit && showPipelinesAndMappings);
-    }, [advancedVars.length, isPackagePolicyEdit, showPipelinesAndMappings]);
+      return (
+        showConditionField ||
+        advancedVars.length > 0 ||
+        (isPackagePolicyEdit && showPipelinesAndMappings)
+      );
+    }, [advancedVars.length, isPackagePolicyEdit, showConditionField, showPipelinesAndMappings]);
 
     const isBiggerScreen = useIsWithinMinBreakpoint('xxl');
     const flexWidth = isBiggerScreen ? 7 : 5;
@@ -553,6 +559,20 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                               name="dataStreamType"
                             />
                           </EuiFormRow>
+                        </EuiFlexItem>
+                      )}
+                      {showConditionField && (
+                        <EuiFlexItem>
+                          <PackagePolicyConditionField
+                            value={packagePolicyInputStream.condition ?? ''}
+                            onChange={(v) => updatePackagePolicyInputStream({ condition: v })}
+                            isInvalid={
+                              Boolean(forceShowErrors) &&
+                              Boolean(inputStreamValidationResults?.condition)
+                            }
+                            errors={inputStreamValidationResults?.condition ?? null}
+                            dataTestSubj="packagePolicyStreamConditionInput"
+                          />
                         </EuiFlexItem>
                       )}
                       {advancedVars.map((varDef) => {
