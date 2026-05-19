@@ -10,6 +10,7 @@ import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
+import { useNavigateToAgentBuilder } from '../../hooks/use_navigate_to_agent_builder';
 import { RuleCreateOptionsPanel } from '../../components/rule_create_options/rule_create_options_panel';
 import { paths } from '../../constants';
 
@@ -18,6 +19,7 @@ export const RuleCreateOptionsPage = () => {
   const { flyout, openCreateFlyout } = useComposeDiscoverFlyout({
     createSuccessRedirectPath: paths.ruleList,
   });
+  const navigateToAgentBuilder = useNavigateToAgentBuilder();
 
   return (
     <div>
@@ -30,7 +32,10 @@ export const RuleCreateOptionsPage = () => {
         }
       />
       <EuiSpacer size="m" />
-      <RuleCreateOptionsPanel onCreateEsqlRule={openCreateFlyout} />
+      <RuleCreateOptionsPanel
+        onCreateEsqlRule={openCreateFlyout}
+        onCreateWithAgent={navigateToAgentBuilder}
+      />
       {flyout}
     </div>
   );

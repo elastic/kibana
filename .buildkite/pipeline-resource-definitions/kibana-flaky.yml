@@ -22,6 +22,15 @@ spec:
       default_branch: refs/pull/INSERT_PR_NUMBER/head
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/flaky_tests/pipeline.sh
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite
+              - .node-version
+              - package.json
+              - tsconfig.base.json
+              - versions.json
+            cleanup_sparse_state: true
       provider_settings:
         build_branches: true
         build_pull_requests: false
