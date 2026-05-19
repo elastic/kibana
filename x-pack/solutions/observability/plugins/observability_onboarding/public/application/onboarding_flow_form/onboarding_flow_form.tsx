@@ -405,6 +405,10 @@ function scrollIntoViewWithOffset(element: HTMLElement, offset = 0) {
 }
 
 function parseSearchQuery(searchQuery: string | null) {
+  if (searchQuery === null) {
+    return '';
+  }
+
   try {
     EuiSearchBar.Query.parse(searchQuery ?? '');
     return searchQuery;
