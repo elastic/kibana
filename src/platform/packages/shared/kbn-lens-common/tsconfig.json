@@ -49,7 +49,6 @@
     "@kbn/spaces-plugin",
     "@kbn/unified-search-plugin",
     "@kbn/usage-collection-plugin",
-    "@kbn/saved-objects-plugin",
     "@kbn/i18n",
     "@kbn/alerts-ui-shared",
     "@kbn/cps",

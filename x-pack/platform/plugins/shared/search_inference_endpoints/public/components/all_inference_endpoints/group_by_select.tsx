@@ -34,12 +34,6 @@ const GROUP_BY_OPTIONS = [
     }),
   },
   {
-    key: GroupByOptions.Model,
-    label: i18n.translate('xpack.searchInferenceEndpoints.groupBy.options.models.label', {
-      defaultMessage: 'Model Author',
-    }),
-  },
-  {
     key: GroupByOptions.Service,
     label: i18n.translate('xpack.searchInferenceEndpoints.groupBy.options.service.label', {
       defaultMessage: 'Service',
@@ -49,8 +43,6 @@ const GROUP_BY_OPTIONS = [
 
 function parseGroupByValue(value: string | undefined): GroupByOptions {
   switch (value) {
-    case GroupByOptions.Model:
-      return GroupByOptions.Model;
     case GroupByOptions.Service:
       return GroupByOptions.Service;
     case GroupByOptions.None:
@@ -90,6 +82,9 @@ export const GroupBySelect = ({ value, onChange }: GroupBySelectProps) => {
   return (
     <EuiFilterGroup data-test-subj="group-by-select">
       <EuiPopover
+        aria-label={i18n.translate('xpack.searchInferenceEndpoints.groupBy.popover.ariaLabel', {
+          defaultMessage: 'Group by options',
+        })}
         ownFocus
         button={
           <EuiFilterButton
@@ -125,6 +120,7 @@ export const GroupBySelect = ({ value, onChange }: GroupBySelectProps) => {
           )}
           listProps={{
             onFocusBadge: false,
+            paddingSize: 's',
           }}
         >
           {(list, _search) => <div css={GroupBySelectableContainer}>{list}</div>}

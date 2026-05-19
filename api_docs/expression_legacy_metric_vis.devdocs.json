@@ -55,7 +55,7 @@
         "label": "DimensionsVisParam",
         "description": [],
         "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-        "lineNumber": 23,
+        "lineNumber": 24,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -79,7 +79,7 @@
               ")[]"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "lineNumber": 24,
+            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -103,7 +103,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "lineNumber": 25,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -362,7 +362,7 @@
         "label": "MetricOptions",
         "description": [],
         "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-        "lineNumber": 55,
+        "lineNumber": 56,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -370,12 +370,15 @@
           {
             "parentPluginId": "expressionLegacyMetricVis",
             "id": "def-common.MetricOptions.value",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "value",
             "description": [],
+            "signature": [
+              "React.ReactNode"
+            ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "lineNumber": 56,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -388,7 +391,7 @@
             "label": "label",
             "description": [],
             "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "lineNumber": 57,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -404,7 +407,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "lineNumber": 58,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -420,7 +423,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "lineNumber": 59,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -433,7 +436,7 @@
             "label": "lightText",
             "description": [],
             "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "lineNumber": 60,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -446,7 +449,7 @@
             "label": "colIndex",
             "description": [],
             "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "lineNumber": 61,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -459,7 +462,7 @@
             "label": "rowIndex",
             "description": [],
             "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "lineNumber": 62,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -475,7 +478,7 @@
         "label": "MetricVisParam",
         "description": [],
         "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-        "lineNumber": 35,
+        "lineNumber": 36,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -492,7 +495,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "lineNumber": 36,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -505,7 +508,7 @@
             "label": "percentageMode",
             "description": [],
             "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "lineNumber": 37,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -521,7 +524,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "lineNumber": 38,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -537,7 +540,7 @@
               "\"Labels\" | \"Background\" | \"None\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "lineNumber": 39,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -560,7 +563,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "lineNumber": 40,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -593,7 +596,7 @@
               "; }"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "lineNumber": 41,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -624,7 +627,7 @@
               ", \"bgColor\" | \"labelColor\">"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "lineNumber": 42,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -637,7 +640,7 @@
             "label": "colorFullBackground",
             "description": [],
             "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "lineNumber": 43,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -653,7 +656,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "lineNumber": 44,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -768,7 +771,7 @@
         "label": "VisParams",
         "description": [],
         "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-        "lineNumber": 47,
+        "lineNumber": 48,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -781,7 +784,7 @@
             "label": "addTooltip",
             "description": [],
             "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "lineNumber": 48,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -794,7 +797,7 @@
             "label": "addLegend",
             "description": [],
             "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "lineNumber": 49,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -816,7 +819,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "lineNumber": 50,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -838,7 +841,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "lineNumber": 51,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -854,7 +857,7 @@
               "\"metric\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "lineNumber": 52,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

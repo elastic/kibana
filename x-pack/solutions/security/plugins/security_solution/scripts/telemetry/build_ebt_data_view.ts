@@ -6,7 +6,6 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import axios from 'axios';
 import { events as genAiEvents } from '@kbn/elastic-assistant-plugin/server/lib/telemetry/event_based_telemetry';
 
 import { isObject } from 'lodash';
@@ -77,13 +76,16 @@ async function cli(): Promise<void> {
 
   try {
     logger.info(`Fetching data view "${dataViewName}"...`);
-    const {
-      data: { data_view: ourDataView },
-    } = await axios.get(dataViewApiUrl, {
+    const response = await fetch(dataViewApiUrl, {
       headers: requestHeaders,
     });
+    if (!response.ok) {
+      throw new Error(`${response.status}:${await response.text()}`);
+    }
 
-    if (!ourDataView) {
+    const responseBody = (await response.json()) as { data_view: unknown };
+
+    if (!responseBody.data_view) {
       throw new Error(
         `Data view "${dataViewName}" not found, check your data view is spelled correctly and is defined in the ${spaceId} space`
       );
@@ -210,9 +212,14 @@ export async function upsertRuntimeFields(
       };
 
       try {
-        await axios.put(requestUrl, payload, {
+        const response = await fetch(requestUrl, {
+          method: 'PUT',
           headers: requestHeaders,
+          body: JSON.stringify(payload),
         });
+        if (!response.ok) {
+          throw new Error(`${response.status}:${await response.text()}`);
+        }
       } catch (error) {
         throw new Error(`Error upserting field '${fieldName}: ${fieldType}' - ${error.message}`);
       }

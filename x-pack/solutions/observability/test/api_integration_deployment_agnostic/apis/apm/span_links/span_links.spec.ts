@@ -63,7 +63,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             entryTransactionId: string;
           }) {
             return await apmApiClient.readUser({
-              endpoint: `GET /internal/apm/traces/{traceId}`,
+              endpoint: `GET /internal/apm/unified_traces/{traceId}`,
               params: {
                 path: { traceId },
                 query: {
@@ -75,84 +75,82 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             });
           }
 
+          function getSpanLinksCountById(
+            traceItems: Array<{ id: string; spanLinksCount: { incoming: number } }>
+          ) {
+            const result: Record<string, number> = {};
+            for (const item of traceItems) {
+              if (item.spanLinksCount.incoming > 0) {
+                result[item.id] = item.spanLinksCount.incoming;
+              }
+            }
+            return result;
+          }
+
           describe('producer-internal-only trace', () => {
-            let traces: Awaited<ReturnType<typeof fetchTraces>>['body'];
+            let spanLinksCountById: Record<string, number>;
             before(async () => {
               const tracesResponse = await fetchTraces({
                 traceId: ids.producerInternalOnly.traceId,
                 entryTransactionId: ids.producerInternalOnly.transactionAId,
               });
-              traces = tracesResponse.body;
+              spanLinksCountById = getSpanLinksCountById(tracesResponse.body.traceItems);
             });
 
             it('contains two children link on Span A', () => {
-              expect(Object.values(traces.traceItems.spanLinksCountById).length).to.equal(1);
-              expect(
-                traces.traceItems.spanLinksCountById[ids.producerInternalOnly.spanAId]
-              ).to.equal(2);
+              expect(Object.values(spanLinksCountById).length).to.equal(1);
+              expect(spanLinksCountById[ids.producerInternalOnly.spanAId]).to.equal(2);
             });
           });
 
           describe('producer-external-only trace', () => {
-            let traces: Awaited<ReturnType<typeof fetchTraces>>['body'];
+            let spanLinksCountById: Record<string, number>;
             before(async () => {
               const tracesResponse = await fetchTraces({
                 traceId: ids.producerExternalOnly.traceId,
                 entryTransactionId: ids.producerExternalOnly.transactionBId,
               });
-              traces = tracesResponse.body;
+              spanLinksCountById = getSpanLinksCountById(tracesResponse.body.traceItems);
             });
 
             it('contains two children link on Span B', () => {
-              expect(Object.values(traces.traceItems.spanLinksCountById).length).to.equal(2);
-              expect(
-                traces.traceItems.spanLinksCountById[ids.producerExternalOnly.spanBId]
-              ).to.equal(1);
-              expect(
-                traces.traceItems.spanLinksCountById[ids.producerExternalOnly.transactionBId]
-              ).to.equal(1);
+              expect(Object.values(spanLinksCountById).length).to.equal(2);
+              expect(spanLinksCountById[ids.producerExternalOnly.spanBId]).to.equal(1);
+              expect(spanLinksCountById[ids.producerExternalOnly.transactionBId]).to.equal(1);
             });
           });
 
           describe('producer-consumer trace', () => {
-            let traces: Awaited<ReturnType<typeof fetchTraces>>['body'];
+            let spanLinksCountById: Record<string, number>;
             before(async () => {
               const tracesResponse = await fetchTraces({
                 traceId: ids.producerConsumer.traceId,
                 entryTransactionId: ids.producerConsumer.transactionCId,
               });
-              traces = tracesResponse.body;
+              spanLinksCountById = getSpanLinksCountById(tracesResponse.body.traceItems);
             });
 
             it('contains one children link on transaction C and two on span C', () => {
-              expect(Object.values(traces.traceItems.spanLinksCountById).length).to.equal(2);
-              expect(
-                traces.traceItems.spanLinksCountById[ids.producerConsumer.transactionCId]
-              ).to.equal(1);
-              expect(traces.traceItems.spanLinksCountById[ids.producerConsumer.spanCId]).to.equal(
-                1
-              );
+              expect(Object.values(spanLinksCountById).length).to.equal(2);
+              expect(spanLinksCountById[ids.producerConsumer.transactionCId]).to.equal(1);
+              expect(spanLinksCountById[ids.producerConsumer.spanCId]).to.equal(1);
             });
           });
 
           describe('consumer-multiple trace', () => {
-            let traces: Awaited<ReturnType<typeof fetchTraces>>['body'];
+            let spanLinksCountById: Record<string, number>;
             before(async () => {
               const tracesResponse = await fetchTraces({
                 traceId: ids.producerMultiple.traceId,
                 entryTransactionId: ids.producerMultiple.transactionDId,
               });
-              traces = tracesResponse.body;
+              spanLinksCountById = getSpanLinksCountById(tracesResponse.body.traceItems);
             });
 
             it('contains no children', () => {
-              expect(Object.values(traces.traceItems.spanLinksCountById).length).to.equal(0);
-              expect(
-                traces.traceItems.spanLinksCountById[ids.producerMultiple.transactionDId]
-              ).to.equal(undefined);
-              expect(traces.traceItems.spanLinksCountById[ids.producerMultiple.spanEId]).to.equal(
-                undefined
-              );
+              expect(Object.values(spanLinksCountById).length).to.equal(0);
+              expect(spanLinksCountById[ids.producerMultiple.transactionDId]).to.equal(undefined);
+              expect(spanLinksCountById[ids.producerMultiple.spanEId]).to.equal(undefined);
             });
           });
         });

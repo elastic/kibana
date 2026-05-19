@@ -481,10 +481,8 @@ export class QueryClient {
 
   /**
    * Shared bool-query shape for the promotable-unbacked set: `rule_backed=false`
-   * AND `type != STATS`, with optional severity floor. Keeps
-   * {@link countPromotableUnbackedQueries} and {@link getPromotableUnbackedQueries}
-   * structurally aligned so the UI callout count and the Promote-All set
-   * can't diverge.
+   * AND `type != STATS`, with optional severity floor. Used by
+   * {@link getPromotableUnbackedQueries} and {@link promoteUnbackedQueries}.
    */
   private promotableUnbackedBoolQuery(filters?: { minSeverityScore?: number }) {
     return {
@@ -498,26 +496,7 @@ export class QueryClient {
   }
 
   /**
-   * Counts queries promotable to rules — unbacked AND non-STATS. Pairs with
-   * {@link getPromotableUnbackedQueries}.
-   *
-   * Pre-migration docs lacking QUERY_TYPE are safe: STATS were introduced
-   * alongside the type field, so any doc without it is a match query.
-   */
-  async countPromotableUnbackedQueries(filters?: { minSeverityScore?: number }): Promise<number> {
-    const assetsResponse = await this.dependencies.storageClient.search({
-      size: 0,
-      track_total_hits: true,
-      query: { bool: this.promotableUnbackedBoolQuery(filters) },
-    });
-
-    const total = assetsResponse.hits.total;
-    return typeof total === 'number' ? total : total?.value ?? 0;
-  }
-
-  /**
-   * Returns all unbacked, non-STATS queries across streams — the list whose
-   * size is {@link countPromotableUnbackedQueries}.
+   * Returns all unbacked, non-STATS queries across streams.
    */
   async getPromotableUnbackedQueries(filters?: {
     minSeverityScore?: number;

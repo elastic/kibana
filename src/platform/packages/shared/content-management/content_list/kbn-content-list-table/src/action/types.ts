@@ -9,7 +9,7 @@
 
 import type { ReactNode } from 'react';
 import type { DefaultItemAction, EuiButtonIconProps } from '@elastic/eui';
-import type { ContentListItem } from '@kbn/content-list-provider';
+import type { ActionId, ContentListItem, KnownActionId } from '@kbn/content-list-provider';
 import type { BuilderContext } from '../column/types';
 
 /**
@@ -28,13 +28,21 @@ export type ActionBuilderContext = BuilderContext;
 /**
  * Props for the `Action` component (custom actions).
  *
- * Custom actions are identified by `props.id` and provide their own
- * behavior. Pre-built actions (like `Action.Edit`) have dedicated
- * preset components with their own props interfaces.
+ * Custom actions are purely declarative: behavior is supplied at the
+ * provider level via `itemConfig.actions[id]`. The `id` prop ties the JSX
+ * declaration to the matching config entry.
+ *
+ * Built-in IDs ({@link KnownActionId}) are intentionally excluded —
+ * use `Action.Edit`, `Action.Delete`, or `Action.Inspect` for those so
+ * preset defaults (read-only gating, danger color, etc.) are applied.
  */
 export interface ActionProps {
-  /** Unique identifier for the action. */
-  id: string;
+  /**
+   * Unique identifier for the action. Must NOT be one of the built-in
+   * IDs (`'edit'`, `'delete'`, `'inspect'`) — use the matching preset
+   * (`Action.Edit`, `Action.Delete`, `Action.Inspect`) for those.
+   */
+  id: Exclude<ActionId, KnownActionId>;
   /** Display name for the action (shown in menu and tooltip). */
   name: string | ((item: ContentListItem) => ReactNode);
   /** Accessible description for the action. */
@@ -45,10 +53,6 @@ export interface ActionProps {
   type?: 'icon' | 'button';
   /** Icon/button color (matches EUI button color palette). */
   color?: EuiButtonIconProps['color'];
-  /** Click handler. */
-  onClick?: (item: ContentListItem) => void;
-  /** Link href (string or function returning href per item). */
-  href?: string | ((item: ContentListItem) => string);
   /** Whether the action is enabled for a given item. */
   enabled?: (item: ContentListItem) => boolean;
   /** Whether the action is available (visible) for a given item. */
@@ -94,6 +98,14 @@ export interface DeleteActionProps {
  * Props for the `Action.Inspect` preset component.
  */
 export interface InspectActionProps {
-  /** Custom label for the inspect action. Defaults to `'View {itemTitle} details'`. */
+  /**
+   * Custom label for the inspect action. Defaults to `'View details'`.
+   *
+   * Pass a function to derive the label from the item (e.g.
+   * `'View {itemTitle} details'`); the default deliberately omits the
+   * item title to keep the icon-button affordance terse.
+   */
   label?: string | ((item: ContentListItem) => ReactNode);
+  /** Per-item guard. When provided, disables the action for items where this returns `false`. */
+  enabled?: (item: ContentListItem) => boolean;
 }

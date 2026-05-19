@@ -7,22 +7,15 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
-import type { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
 import {
   ENDPOINT_DEFAULT_SORT_DIRECTION,
   ENDPOINT_DEFAULT_SORT_FIELD,
   HOST_METADATA_LIST_ROUTE,
   METADATA_DATASTREAM,
   METADATA_UNITED_INDEX,
-  METADATA_UNITED_TRANSFORM,
-  METADATA_UNITED_TRANSFORM_V2,
-  metadataTransformPrefix,
-  METADATA_CURRENT_TRANSFORM_V2,
-  METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import { indexFleetEndpointPolicy } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import { TRANSFORM_STATES } from '@kbn/security-solution-plugin/common/constants';
 import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 
 import type { MetadataListResponse } from '@kbn/security-solution-plugin/common/endpoint/types';
@@ -46,11 +39,9 @@ export default function ({ getService }: FtrProviderContext) {
   // @skipInServerlessMKI - if you are removing this annotation, make sure to add the test suite to the MKI pipeline in .buildkite/pipelines/security_solution_quality_gate/mki_periodic/mki_periodic_defend_workflows.yml
   describe.skip('@ess @serverless @skipInServerlessMKI test metadata apis', function () {
     let adminSupertest: TestAgent;
-    let t1AnalystSupertest: TestAgent;
 
     before(async () => {
       adminSupertest = await utils.createSuperTest();
-      t1AnalystSupertest = await utils.createSuperTest('t1_analyst');
     });
 
     describe('list endpoints GET route', () => {
@@ -429,89 +420,6 @@ export default function ({ getService }: FtrProviderContext) {
             expect(body.sortField).to.eql(field);
           });
         }
-      });
-    });
-
-    // FLAKY: https://github.com/elastic/kibana/issues/175791
-    describe.skip('get metadata transforms', () => {
-      const testRegex = /(endpoint|logs-endpoint)\.metadata_(united|current)-default-*/;
-      let currentTransformName = metadataTransformPrefix;
-      let unitedTransformName = METADATA_UNITED_TRANSFORM;
-
-      before(async () => {
-        const isPackageV2 = await endpointTestResources.isEndpointPackageV2();
-        if (isPackageV2) {
-          currentTransformName = METADATA_CURRENT_TRANSFORM_V2;
-          unitedTransformName = METADATA_UNITED_TRANSFORM_V2;
-        }
-      });
-
-      it('should respond forbidden if no fleet access', async () => {
-        const config = getService('config');
-        const ca = config.get('servers.kibana').certificateAuthorities;
-
-        await t1AnalystSupertest
-          .get(METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE)
-          .set('kbn-xsrf', 'xxx')
-          .set('Elastic-Api-Version', '1')
-          .ca(ca)
-          .expect(401);
-      });
-
-      it('correctly returns stopped transform stats', async () => {
-        await endpointDataStreamHelpers.stopTransform(getService, `${currentTransformName}*`);
-        await endpointDataStreamHelpers.stopTransform(getService, `${unitedTransformName}*`);
-
-        const { body } = await adminSupertest
-          .get(METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE)
-          .set('kbn-xsrf', 'xxx')
-          .set('Elastic-Api-Version', '1')
-          .expect(200);
-
-        const transforms = (body.transforms as TransformGetTransformStatsTransformStats[]).filter(
-          (transform) =>
-            testRegex.test(transform.id) && transform.state === TRANSFORM_STATES.STOPPED
-        );
-
-        expect(transforms.length).to.eql(2);
-
-        const currentTransform = transforms.find((transform) =>
-          transform.id.startsWith(currentTransformName)
-        );
-        expect(currentTransform).to.be.ok();
-
-        const unitedTransform = transforms.find((transform) =>
-          transform.id.startsWith(unitedTransformName)
-        );
-        expect(unitedTransform).to.be.ok();
-
-        await endpointDataStreamHelpers.startTransform(getService, currentTransformName);
-        await endpointDataStreamHelpers.startTransform(getService, unitedTransformName);
-      });
-
-      it('correctly returns started transform stats', async () => {
-        const { body } = await adminSupertest
-          .get(METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE)
-          .set('kbn-xsrf', 'xxx')
-          .set('Elastic-Api-Version', '1')
-          .expect(200);
-
-        const transforms = (body.transforms as TransformGetTransformStatsTransformStats[]).filter(
-          (transform) =>
-            testRegex.test(transform.id) && transform.state === TRANSFORM_STATES.STARTED
-        );
-
-        expect(transforms.length).to.eql(2);
-
-        const currentTransform = transforms.find((transform) =>
-          transform.id.startsWith(currentTransformName)
-        );
-        expect(currentTransform).to.be.ok();
-
-        const unitedTransform = transforms.find((transform) =>
-          transform.id.startsWith(unitedTransformName)
-        );
-        expect(unitedTransform).to.be.ok();
       });
     });
   });

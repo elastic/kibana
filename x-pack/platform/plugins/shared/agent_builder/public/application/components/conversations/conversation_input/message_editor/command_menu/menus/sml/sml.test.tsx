@@ -48,6 +48,14 @@ jest.mock('../../../../../../../hooks/sml/use_sml_search', () => ({
   useSmlSearch: () => mockUseSmlSearchReturn,
 }));
 
+jest.mock('../../../../../../../hooks/use_conversation', () => ({
+  useAgentId: () => 'test-agent-id',
+}));
+
+jest.mock('../../../../../../../hooks/agents/use_agent_by_id', () => ({
+  useAgentBuilderAgentById: () => ({ agent: null, isLoading: false, error: null }),
+}));
+
 beforeEach(() => {
   mockUseSmlSearchReturn = {
     results: defaultMockResults,

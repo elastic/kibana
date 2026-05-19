@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const ENTITY_INDEX = '.entities*';
+export const ENTITY_INDEX = 'entities-latest-*';
 
 export const getAggsQuery = (
   termsField: string,

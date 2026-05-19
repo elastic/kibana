@@ -24,8 +24,16 @@ interface Options<I> {
   onChange?: (formData: I) => void;
 }
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export type HookReturn<I extends object = FormData, T extends object = I> = [I, () => T, boolean];
 
+/**
+ * @deprecated `hook_form_lib` is deprecated and will no longer be supported. Consider using
+ * `react-hook-form` for new and existing forms.
+ */
 export const useFormData = <I extends object = FormData, T extends object = I>(
   options: Options<I> = {}
 ): HookReturn<I, T> => {

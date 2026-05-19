@@ -34,7 +34,7 @@
         "signature": [
           "\"data_view_reference\""
         ],
-        "path": "src/platform/packages/shared/as-code/data-views-schema/src/constants.ts",
+        "path": "src/platform/packages/shared/as-code/data-views-schema/src/data_views/constants.ts",
         "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
@@ -53,7 +53,7 @@
         "signature": [
           "\"data_view_spec\""
         ],
-        "path": "src/platform/packages/shared/as-code/data-views-schema/src/constants.ts",
+        "path": "src/platform/packages/shared/as-code/data-views-schema/src/data_views/constants.ts",
         "lineNumber": 14,
         "columnNumber": 14,
         "deprecated": false,
@@ -73,7 +73,7 @@
           "\"esql\""
         ],
         "path": "src/platform/packages/shared/as-code/data-views-schema/src/constants.ts",
-        "lineNumber": 17,
+        "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -90,7 +90,7 @@
           "{ readonly script?: string | undefined; readonly type: \"composite\"; readonly fields: Record<string, Readonly<{ format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; }>>; }"
         ],
         "path": "src/platform/packages/shared/as-code/data-views-schema/src/types.ts",
-        "lineNumber": 24,
+        "lineNumber": 33,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -107,7 +107,7 @@
           "Readonly<{} & { type: \"data_view_reference\"; ref_id: string; }> | Readonly<{ time_field?: string | undefined; field_settings?: Record<string, Readonly<{ format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & {}> | Readonly<{ script?: string | undefined; } & { type: \"composite\"; fields: Record<string, Readonly<{ format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; }>>; }> | Readonly<{ script?: string | undefined; format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; }>> | undefined; } & { type: \"data_view_spec\"; index_pattern: string; }>"
         ],
         "path": "src/platform/packages/shared/as-code/data-views-schema/src/types.ts",
-        "lineNumber": 29,
+        "lineNumber": 38,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -124,7 +124,7 @@
           "{ readonly type: \"data_view_reference\"; readonly ref_id: string; }"
         ],
         "path": "src/platform/packages/shared/as-code/data-views-schema/src/types.ts",
-        "lineNumber": 27,
+        "lineNumber": 36,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -141,7 +141,7 @@
           "{ readonly time_field?: string | undefined; readonly field_settings?: Record<string, Readonly<{ format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & {}> | Readonly<{ script?: string | undefined; } & { type: \"composite\"; fields: Record<string, Readonly<{ format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; }>>; }> | Readonly<{ script?: string | undefined; format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; }>> | undefined; readonly type: \"data_view_spec\"; readonly index_pattern: string; }"
         ],
         "path": "src/platform/packages/shared/as-code/data-views-schema/src/types.ts",
-        "lineNumber": 28,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -158,7 +158,7 @@
           "{ readonly type: \"esql\"; readonly query: string; }"
         ],
         "path": "src/platform/packages/shared/as-code/data-views-schema/src/types.ts",
-        "lineNumber": 30,
+        "lineNumber": 39,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -175,7 +175,7 @@
           "Readonly<{ format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & {}> | Readonly<{ script?: string | undefined; } & { type: \"composite\"; fields: Record<string, Readonly<{ format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; }>>; }> | Readonly<{ script?: string | undefined; format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; }>"
         ],
         "path": "src/platform/packages/shared/as-code/data-views-schema/src/types.ts",
-        "lineNumber": 23,
+        "lineNumber": 32,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -192,7 +192,7 @@
           "{ readonly format?: Readonly<{ params?: any; } & { type: string; }> | undefined; readonly custom_label?: string | undefined; readonly custom_description?: string | undefined; readonly type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; }"
         ],
         "path": "src/platform/packages/shared/as-code/data-views-schema/src/types.ts",
-        "lineNumber": 25,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -209,7 +209,92 @@
           "Readonly<{ script?: string | undefined; } & { type: \"composite\"; fields: Record<string, Readonly<{ format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; }>>; }> | Readonly<{ script?: string | undefined; format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; }>"
         ],
         "path": "src/platform/packages/shared/as-code/data-views-schema/src/types.ts",
-        "lineNumber": 26,
+        "lineNumber": 35,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-data-views-schema",
+        "id": "def-common.AsCodeSavedCompositeRuntimeField",
+        "type": "Type",
+        "tags": [],
+        "label": "AsCodeSavedCompositeRuntimeField",
+        "description": [],
+        "signature": [
+          "{ readonly script?: string | undefined; readonly type: \"composite\"; readonly fields: Record<string, Readonly<{ format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; popularity?: number | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; }>>; }"
+        ],
+        "path": "src/platform/packages/shared/as-code/data-views-schema/src/types.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-data-views-schema",
+        "id": "def-common.AsCodeSavedDataView",
+        "type": "Type",
+        "tags": [],
+        "label": "AsCodeSavedDataView",
+        "description": [],
+        "signature": [
+          "{ readonly id?: string | undefined; readonly name?: string | undefined; readonly time_field?: string | undefined; readonly field_settings?: Record<string, Readonly<{ format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; popularity?: number | undefined; } & {}> | Readonly<{ script?: string | undefined; } & { type: \"composite\"; fields: Record<string, Readonly<{ format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; popularity?: number | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; }>>; }> | Readonly<{ script?: string | undefined; format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; popularity?: number | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; }>> | undefined; readonly allow_hidden_indices?: boolean | undefined; readonly index_pattern: string; }"
+        ],
+        "path": "src/platform/packages/shared/as-code/data-views-schema/src/types.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-data-views-schema",
+        "id": "def-common.AsCodeSavedFieldSettings",
+        "type": "Type",
+        "tags": [],
+        "label": "AsCodeSavedFieldSettings",
+        "description": [],
+        "signature": [
+          "Readonly<{ format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; popularity?: number | undefined; } & {}> | Readonly<{ script?: string | undefined; } & { type: \"composite\"; fields: Record<string, Readonly<{ format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; popularity?: number | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; }>>; }> | Readonly<{ script?: string | undefined; format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; popularity?: number | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; }>"
+        ],
+        "path": "src/platform/packages/shared/as-code/data-views-schema/src/types.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-data-views-schema",
+        "id": "def-common.AsCodeSavedPrimitiveRuntimeField",
+        "type": "Type",
+        "tags": [],
+        "label": "AsCodeSavedPrimitiveRuntimeField",
+        "description": [],
+        "signature": [
+          "{ readonly script?: string | undefined; readonly format?: Readonly<{ params?: any; } & { type: string; }> | undefined; readonly custom_label?: string | undefined; readonly custom_description?: string | undefined; readonly popularity?: number | undefined; readonly type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; }"
+        ],
+        "path": "src/platform/packages/shared/as-code/data-views-schema/src/types.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-data-views-schema",
+        "id": "def-common.AsCodeSavedRuntimeField",
+        "type": "Type",
+        "tags": [],
+        "label": "AsCodeSavedRuntimeField",
+        "description": [],
+        "signature": [
+          "Readonly<{ script?: string | undefined; } & { type: \"composite\"; fields: Record<string, Readonly<{ format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; popularity?: number | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; }>>; }> | Readonly<{ script?: string | undefined; format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; popularity?: number | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; }>"
+        ],
+        "path": "src/platform/packages/shared/as-code/data-views-schema/src/types.ts",
+        "lineNumber": 45,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -250,8 +335,8 @@
           },
           "<string>; }>"
         ],
-        "path": "src/platform/packages/shared/as-code/data-views-schema/src/schema_data_view.ts",
-        "lineNumber": 27,
+        "path": "src/platform/packages/shared/as-code/data-views-schema/src/data_views/schema_embedded_data_view.ts",
+        "lineNumber": 31,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -274,8 +359,8 @@
           },
           "<Readonly<{} & { type: \"data_view_reference\"; ref_id: string; }> | Readonly<{ time_field?: string | undefined; field_settings?: Record<string, Readonly<{ format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & {}> | Readonly<{ script?: string | undefined; } & { type: \"composite\"; fields: Record<string, Readonly<{ format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; }>>; }> | Readonly<{ script?: string | undefined; format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; }>> | undefined; } & { type: \"data_view_spec\"; index_pattern: string; }>>"
         ],
-        "path": "src/platform/packages/shared/as-code/data-views-schema/src/schema_data_view.ts",
-        "lineNumber": 64,
+        "path": "src/platform/packages/shared/as-code/data-views-schema/src/data_views/schema_embedded_data_view.ts",
+        "lineNumber": 56,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -330,8 +415,8 @@
           },
           "<Record<string, Readonly<{ format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & {}> | Readonly<{ script?: string | undefined; } & { type: \"composite\"; fields: Record<string, Readonly<{ format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; }>>; }> | Readonly<{ script?: string | undefined; format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; }>> | undefined>; }>"
         ],
-        "path": "src/platform/packages/shared/as-code/data-views-schema/src/schema_data_view.ts",
-        "lineNumber": 40,
+        "path": "src/platform/packages/shared/as-code/data-views-schema/src/data_views/schema_embedded_data_view.ts",
+        "lineNumber": 44,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -372,6 +457,78 @@
         ],
         "path": "src/platform/packages/shared/as-code/data-views-schema/src/schema_esql_data_source.ts",
         "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-data-views-schema",
+        "id": "def-common.savedDataViewSpecSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "savedDataViewSpecSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ id: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; name: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; allow_hidden_indices: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean | undefined>; index_pattern: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string>; time_field: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; field_settings: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<Record<string, Readonly<{ format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; popularity?: number | undefined; } & {}> | Readonly<{ script?: string | undefined; } & { type: \"composite\"; fields: Record<string, Readonly<{ format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; popularity?: number | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; }>>; }> | Readonly<{ script?: string | undefined; format?: Readonly<{ params?: any; } & { type: string; }> | undefined; custom_label?: string | undefined; custom_description?: string | undefined; popularity?: number | undefined; } & { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\"; }>> | undefined>; }>"
+        ],
+        "path": "src/platform/packages/shared/as-code/data-views-schema/src/data_views/schema_saved_data_view.ts",
+        "lineNumber": 34,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

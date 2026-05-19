@@ -13,6 +13,8 @@ import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-se
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type {
   ClientAuthentication,
+  CloneAPIKeyParams,
+  CloneAPIKeyResult,
   CreateAPIKeyParams,
   CreateAPIKeyResult,
   CreateRestAPIKeyParams,
@@ -322,6 +324,55 @@ export class APIKeys implements NativeAPIKeysType {
     }
 
     return result;
+  }
+
+  /**
+   * Clones an existing API key using the internal user. Extracts the source key credential
+   * from the request's Authorization header and calls the ES clone endpoint to create a new
+   * independent key with the same role descriptors and no expiration.
+   */
+  async cloneAsInternalUser(
+    request: KibanaRequest,
+    cloneParams: CloneAPIKeyParams
+  ): Promise<CloneAPIKeyResult | null> {
+    if (!this.license.isEnabled()) {
+      return null;
+    }
+
+    this.logger.debug('Trying to clone an API key');
+
+    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+    if (authorizationHeader == null) {
+      throw new Error(
+        'Unable to clone an API key, request does not contain an authorization header'
+      );
+    }
+
+    if (authorizationHeader.scheme.toLowerCase() !== 'apikey') {
+      throw new Error(
+        `Unable to clone an API key, expected ApiKey authorization scheme but got "${authorizationHeader.scheme}"`
+      );
+    }
+
+    try {
+      const result = await this.clusterClient.asInternalUser.transport.request<CloneAPIKeyResult>({
+        method: 'POST',
+        path: '/_security/api_key/clone',
+        body: {
+          api_key: authorizationHeader.credentials,
+          name: cloneParams.name,
+          expiration: null,
+          ...(cloneParams.metadata ? { metadata: cloneParams.metadata } : {}),
+        },
+      });
+
+      this.logger.debug('API key was cloned successfully');
+      return result;
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      this.logger.debug(`Failed to clone API key: ${message}`);
+      throw e;
+    }
   }
 
   /**
