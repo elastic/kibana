@@ -25,12 +25,19 @@ Scout uses a custom Playwright reporter (`@kbn/scout-reporting`) that produces s
 
 ### How to retrieve
 
+`bk artifacts download` takes an artifact ID, not a glob, so the standard recipe is **list → filter by path → download by ID**. Always scope to the failed job's UUID (see "Buildkite mechanics" below for why) and use `bk` (never `curl` with a token):
+
 ```sh
-bk artifact download <build> ".scout/reports/scout-playwright-test-failures-*/test-failures-summary.json" .
-bk artifact download <build> ".scout/reports/scout-playwright-test-failures-*/<testId>.html" .
-bk artifact download <build> ".scout/reports/scout-playwright-test-failures-*/scout-failures-*.ndjson" .
-bk artifact download <build> "**/.scout/test-artifacts/**/test-failed-*.png" .
+# 1. List artifacts for the failed job, filter the paths you want, capture the IDs:
+bk artifacts list <build> -p <pipeline> --job-uuid <jobId> --output json \
+  | jq -r '.[] | select(.path | test("scout-playwright-test-failures-.*/(test-failures-summary\\.json|scout-failures-.*\\.ndjson|.+\\.html)$") or test("\\.scout/test-artifacts/.+/test-failed-.+\\.png$")) | .id' \
+  > /tmp/scout-artifact-ids.txt
+
+# 2. Download each ID (files land at their original path under ./):
+xargs -I{} bk artifacts download {} --build <build> -p <pipeline> < /tmp/scout-artifact-ids.txt
 ```
+
+If you don't need to be selective and the job is small, `bk artifacts download --build <build> -p <pipeline> --job-uuid <jobId>` pulls every artifact from that job into `artifacts-build-<build>/`.
 
 ### Common patterns the screenshot reveals
 
@@ -41,26 +48,24 @@ bk artifact download <build> "**/.scout/test-artifacts/**/test-failed-*.png" .
 
 ## Buildkite mechanics for Scout failures
 
-Four sharp edges to be aware of when investigating a Scout failure via the Buildkite API directly (with `$BUILDKITE_API_TOKEN`). Skipping any of them frequently leads to wrong conclusions like "no screenshot was uploaded" or "no lane neighbors to look at".
+Four sharp edges to be aware of when investigating a Scout failure via Buildkite. Skipping any of them frequently leads to wrong conclusions like "no screenshot was uploaded" or "no lane neighbors to look at". Always use the `bk` CLI (`bk api`, `bk artifacts ...`) rather than calling `api.buildkite.com` directly with a token — see the parent `SKILL.md` for the rationale.
 
 ### 1. Failed-attempt jobs are hidden by default
 
 `/builds/<n>` returns only the most recent attempt for each step. If a job failed and a retry passed, the original failing job UUID — the one cited in `failed-test` issue comments — looks "not found". Always append `?include_retried_jobs=true`:
 
 ```sh
-curl -H "Authorization: Bearer $BUILDKITE_API_TOKEN" \
-  "https://api.buildkite.com/v2/organizations/elastic/pipelines/<pipeline>/builds/<n>?include_retried_jobs=true"
+bk api "/organizations/elastic/pipelines/<pipeline>/builds/<n>?include_retried_jobs=true"
 ```
 
 On the original job object, `retried: true` and `retried_in_job_id: <new-uuid>` link the two.
 
 ### 2. Per-job artifacts live on a different endpoint than build-wide artifacts
 
-The build-level `/builds/<n>/artifacts` endpoint only returns artifacts from the _latest_ attempt for each step. The screenshot, Scout HTML, and NDJSON from a failed attempt live on the _job-level_ endpoint and are only reachable if you know the failed job's UUID:
+The build-level artifact listing only returns artifacts from the _latest_ attempt for each step. The screenshot, Scout HTML, and NDJSON from a failed attempt live on the _job-level_ listing and are only reachable if you know the failed job's UUID:
 
 ```sh
-curl -H "Authorization: Bearer $BUILDKITE_API_TOKEN" \
-  "https://api.buildkite.com/v2/organizations/elastic/pipelines/<pipeline>/builds/<n>/jobs/<jobId>/artifacts"
+bk artifacts list <n> -p <pipeline> --job-uuid <jobId>
 ```
 
 If a build retried to green, the failure artifacts are _only_ on the failed job's endpoint. Do not conclude "no screenshot uploaded" until you've checked there.

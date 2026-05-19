@@ -15,16 +15,6 @@ Investigate a flaky Scout, FTR, or Jest test failure and determine what should b
 - The outcome should be an accurate diagnosis, not a quick fix that treats the symptom.
 - Valid outcomes include "this is a real product bug, escalate to the owning team", "this is environmental and will likely self-resolve", or "there isn't enough data to draw a confident conclusion".
 
-## Prerequisites
-
-### Buildkite access
-
-Run `bk user --me` to confirm `bk` is authenticated.
-
-### GitHub access
-
-Run `gh auth status` to confirm `gh` is authenticated.
-
 ## Investigation
 
 ### Identify the failing GitHub issue

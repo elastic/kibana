@@ -28,11 +28,23 @@ When an FTR test fails, the test runner writes diagnostic artifacts that Buildki
 
 ### How to retrieve
 
+`bk artifacts download` takes an artifact ID, not a glob, so the standard recipe is **list → filter by path → download by ID**. Use `bk` (never `curl` with a token). Replace `<hash>` with the content hash from the `failed-test` issue / the `.json` record:
+
 ```sh
-bk artifact download <build> "target/test_failures/<jobId>_*.json" .
-bk artifact download <build> "**/screenshots/failure/*<hash>*.png" .
-bk artifact download <build> "**/failure_debug/html/*<hash>*.html" .
+# 1. List artifacts for the failing FTR job, filter the three useful paths, capture IDs:
+bk artifacts list <build> -p <pipeline> --job-uuid <jobId> --output json \
+  | jq -r --arg h "<hash>" '.[] | select(
+      (.path | test("target/test_failures/.+_" + $h + "\\.json$"))
+      or (.path | test("screenshots/failure/.*" + $h + ".*\\.png$"))
+      or (.path | test("failure_debug/html/.*" + $h + ".*\\.html$"))
+    ) | .id' \
+  > /tmp/ftr-artifact-ids.txt
+
+# 2. Download each ID (files land at their original path under ./):
+xargs -I{} bk artifacts download {} --build <build> -p <pipeline> < /tmp/ftr-artifact-ids.txt
 ```
+
+The `.json` record is the source of truth — pull it first, then use its `system-out` (Kibana stdout) and the resolved `<hash>` to fetch the screenshot and DOM only if the failure is UI-side.
 
 ### QA Cloud pipelines (`appex-qa-serverless-kibana-ftr-tests` and similar)
 
