@@ -33,7 +33,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getColorsFromMapping } from '@kbn/coloring';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { getKbnPalettes, useKbnPalettes, KbnPalette } from '@kbn/palettes';
-import { getDateHistogramEmptyRowsPolicyForVisualizationState } from '@kbn/lens-common';
+import { getDateHistogramEmptyRowsDefaultForVisualizationState } from '@kbn/lens-common';
 
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type {
@@ -503,7 +503,7 @@ export const getXyVisualization = ({
       );
       colors = palette.getCategoricalColors(10, dataLayer.palette?.params);
     }
-    const dateHistogramEmptyRowsPolicy = getDateHistogramEmptyRowsPolicyForVisualizationState(
+    const dateHistogramEmptyRowsDefault = getDateHistogramEmptyRowsDefaultForVisualizationState(
       'lnsXY',
       state
     );
@@ -514,7 +514,7 @@ export const getXyVisualization = ({
           groupId: 'x',
           groupLabel: getAxisName('x', { isHorizontal }),
           paramEditorCustomProps: {
-            dateHistogramEmptyRowsPolicy,
+            dateHistogramEmptyRowsDefault,
           },
           accessors: dataLayer.xAccessor ? [{ columnId: dataLayer.xAccessor }] : [],
           filterOperations: isBucketed,
@@ -538,7 +538,7 @@ export const getXyVisualization = ({
             defaultMessage: 'Breakdown',
           }),
           paramEditorCustomProps: {
-            dateHistogramEmptyRowsPolicy,
+            dateHistogramEmptyRowsDefault,
           },
           accessors: dataLayer.splitAccessors
             ? dataLayer.splitAccessors.map((splitAccessor, i) => ({

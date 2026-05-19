@@ -127,9 +127,7 @@ const createVisualizationGroups = (defaultValue: boolean): VisualizationDimensio
     supportsMoreColumns: true,
     filterOperations: () => true,
     paramEditorCustomProps: {
-      dateHistogramEmptyRowsPolicy: {
-        defaultValue,
-      },
+      dateHistogramEmptyRowsDefault: defaultValue,
     },
   },
 ];

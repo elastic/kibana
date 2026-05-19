@@ -14,7 +14,6 @@ import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type {
   TimeScaleUnit,
   ReferenceBasedIndexPatternColumn,
-  DateHistogramEmptyRowsPolicy,
   DateRange,
   FormBasedLayer,
   GenericIndexPatternColumn,
@@ -82,20 +81,21 @@ interface ColumnCopy {
 }
 
 interface DateHistogramEmptyRowsParamEditorCustomProps {
-  dateHistogramEmptyRowsPolicy?: DateHistogramEmptyRowsPolicy;
+  dateHistogramEmptyRowsDefault?: boolean;
 }
 
-const getDateHistogramEmptyRowsPolicyForTargetGroup = (
+// Visualization configs pass per-dimension defaults through paramEditorCustomProps.
+const getDateHistogramEmptyRowsDefaultForTargetGroup = (
   visualizationGroups: VisualizationDimensionGroupConfig[],
   targetGroup?: string
 ) => {
   const customProps = targetGroup
     ? visualizationGroups.find((group) => group.groupId === targetGroup)?.paramEditorCustomProps
     : undefined;
-  const policy = (customProps as DateHistogramEmptyRowsParamEditorCustomProps | undefined)
-    ?.dateHistogramEmptyRowsPolicy;
+  const defaultValue = (customProps as DateHistogramEmptyRowsParamEditorCustomProps | undefined)
+    ?.dateHistogramEmptyRowsDefault;
 
-  return typeof policy?.defaultValue === 'boolean' ? policy : undefined;
+  return typeof defaultValue === 'boolean' ? defaultValue : undefined;
 };
 
 const applyDateHistogramEmptyRowsDefault = (
@@ -108,14 +108,17 @@ const applyDateHistogramEmptyRowsDefault = (
     return columnParams;
   }
 
-  const policy = getDateHistogramEmptyRowsPolicyForTargetGroup(visualizationGroups, targetGroup);
-  if (!policy) {
+  const defaultValue = getDateHistogramEmptyRowsDefaultForTargetGroup(
+    visualizationGroups,
+    targetGroup
+  );
+  if (defaultValue === undefined) {
     return columnParams;
   }
 
   return {
     ...(columnParams ?? {}),
-    includeEmptyRows: policy.defaultValue,
+    includeEmptyRows: defaultValue,
   };
 };
 

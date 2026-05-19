@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type { DateHistogramIndexPatternColumn, TypedLensByValueInput } from '@kbn/lens-common';
 import { LensConfigBuilder } from './config_builder';
 import { mockDataViewsService } from './charts/mock_utils';
+import { multiMetricRowSplitByDatatableWithAdhocDataView } from './tests/datatable/lens_api_config_dsl.mock';
+import { basicTagcloudWithDataView } from './tests/tagcloud/lens_api_config.mock';
+import { apiXYWithNoYTitleAndInsideLegend } from './tests/xy/basicXY.mock';
 
 type LensAttributes = TypedLensByValueInput['attributes'];
 
@@ -46,7 +50,7 @@ describe('LensConfigBuilder', () => {
     expect(getDateHistogramColumn(result)?.params.includeEmptyRows).toBe(false);
   });
 
-  it('forces empty rows off for built bar charts', async () => {
+  it('defaults empty rows off for built bar charts', async () => {
     const builder = new LensConfigBuilder(mockDataViewsService() as any);
 
     const result = (await builder.build({
@@ -75,5 +79,76 @@ describe('LensConfigBuilder', () => {
 
     expect(result.state.visualization).toMatchObject({ preferredSeriesType: 'bar' });
     expect(getDateHistogramColumn(result)?.params.includeEmptyRows).toBe(false);
+  });
+
+  it('defaults empty rows off when converting XY API configs', () => {
+    const builder = new LensConfigBuilder();
+    const { include_empty_rows: _includeEmptyRows, ...x } =
+      apiXYWithNoYTitleAndInsideLegend.layers[0].x;
+
+    const result = builder.fromAPIFormat({
+      ...apiXYWithNoYTitleAndInsideLegend,
+      layers: [{ ...apiXYWithNoYTitleAndInsideLegend.layers[0], x }],
+    }) as LensAttributes;
+
+    expect(result.state.visualization).toMatchObject({ preferredSeriesType: 'bar_stacked' });
+    expect(getDateHistogramColumn(result)?.params.includeEmptyRows).toBe(false);
+  });
+
+  it('defaults empty rows off when converting tag cloud API configs', () => {
+    const builder = new LensConfigBuilder();
+    const { include_empty_rows: _includeEmptyRows, ...tagBy } = basicTagcloudWithDataView.tag_by;
+
+    const result = builder.fromAPIFormat({
+      ...basicTagcloudWithDataView,
+      tag_by: tagBy,
+    }) as LensAttributes;
+
+    expect(getDateHistogramColumn(result)?.params.includeEmptyRows).toBe(false);
+  });
+
+  it('defaults empty rows off when converting partition API configs', () => {
+    const builder = new LensConfigBuilder();
+
+    const result = builder.fromAPIFormat({
+      title: 'Pie',
+      type: 'pie',
+      data_source: {
+        type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+        ref_id: 'test-data-view',
+      },
+      ignore_global_filters: false,
+      sampling: 1,
+      metrics: [{ operation: 'count', empty_as_null: true }],
+      group_by: [
+        {
+          operation: 'date_histogram',
+          field: '@timestamp',
+          suggested_interval: 'auto',
+          use_original_time_range: false,
+        },
+      ],
+    }) as LensAttributes;
+
+    expect(getDateHistogramColumn(result)?.params.includeEmptyRows).toBe(false);
+  });
+
+  it('keeps empty rows on when converting datatable API configs', () => {
+    const builder = new LensConfigBuilder();
+    const rows = multiMetricRowSplitByDatatableWithAdhocDataView.rows.map((row) => {
+      if (row.operation !== 'date_histogram') {
+        return row;
+      }
+
+      const { include_empty_rows: _includeEmptyRows, ...dateHistogramRow } = row;
+      return dateHistogramRow;
+    });
+
+    const result = builder.fromAPIFormat({
+      ...multiMetricRowSplitByDatatableWithAdhocDataView,
+      rows,
+    }) as LensAttributes;
+
+    expect(getDateHistogramColumn(result)?.params.includeEmptyRows).toBe(true);
   });
 });

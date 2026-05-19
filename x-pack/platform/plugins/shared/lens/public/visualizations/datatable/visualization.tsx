@@ -46,7 +46,7 @@ import {
   DEFAULT_HEADER_ROW_HEIGHT,
   DEFAULT_ROW_HEIGHT_LINES,
   DEFAULT_HEADER_ROW_HEIGHT_LINES,
-  getDateHistogramEmptyRowsPolicyForVisualizationState,
+  getDateHistogramEmptyRowsDefaultForVisualizationState,
   LENS_ROW_HEIGHT_MODE,
   LENS_DATAGRID_DENSITY,
 } from '@kbn/lens-common';
@@ -347,7 +347,7 @@ export const getDatatableVisualization = ({
       return { groups: [] };
     }
     const isTextBasedLanguage = datasource?.isTextBasedLanguage();
-    const dateHistogramEmptyRowsPolicy = getDateHistogramEmptyRowsPolicyForVisualizationState(
+    const dateHistogramEmptyRowsDefault = getDateHistogramEmptyRowsDefaultForVisualizationState(
       'lnsDatatable',
       state
     );
@@ -440,7 +440,7 @@ export const getDatatableVisualization = ({
             defaultMessage: 'Split metrics by',
           }),
           paramEditorCustomProps: {
-            dateHistogramEmptyRowsPolicy,
+            dateHistogramEmptyRowsDefault,
           },
           dimensionEditorGroupLabel: i18n.translate('xpack.lens.datatable.breakdownColumn', {
             defaultMessage: 'Split metrics by',

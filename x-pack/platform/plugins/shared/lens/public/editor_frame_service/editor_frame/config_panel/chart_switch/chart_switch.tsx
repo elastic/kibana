@@ -18,6 +18,7 @@ import type {
   DatasourceStates,
   Suggestion,
 } from '@kbn/lens-common';
+import { applyDateHistogramEmptyRowsDefaultToDatasourceState } from '@kbn/lens-common';
 import { ExperimentalBadge } from '../../../../shared_components';
 import { getSuggestions, switchToSuggestion } from '../../suggestion_helpers';
 import { showMemoizedErrorNotification } from '../../../../lens_ui_errors';
@@ -35,8 +36,6 @@ import type { SelectableEntry } from './chart_switch_selectable';
 import { ChartSwitchSelectable } from './chart_switch_selectable';
 import { ChartSwitchOptionPrepend } from './chart_option';
 import { useEditorFrameService } from '../../../editor_frame_service_context';
-import { applyDateHistogramEmptyRowsPolicyToDatasourceState } from '../../../../datasources/form_based/date_histogram_empty_rows_policy';
-
 type VisChartSwitchPosition = VisualizationType & {
   visualizationId: string;
   selection: VisualizationSelection;
@@ -107,10 +106,11 @@ export const ChartSwitch = memo(function ChartSwitch({
     const updatedDatasourceState =
       selection.datasourceState ??
       (selection.sameDatasources && currentDatasourceState !== undefined
-        ? applyDateHistogramEmptyRowsPolicyToDatasourceState(
+        ? applyDateHistogramEmptyRowsDefaultToDatasourceState(
             currentDatasourceState,
             selection.visualizationId,
-            visualizationState
+            visualizationState,
+            { overwriteExisting: true }
           )
         : undefined);
 

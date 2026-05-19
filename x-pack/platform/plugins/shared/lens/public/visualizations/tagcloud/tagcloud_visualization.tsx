@@ -18,7 +18,7 @@ import type { PaletteRegistry } from '@kbn/coloring';
 import { getColorsFromMapping } from '@kbn/coloring';
 import { IconChartTagcloud } from '@kbn/chart-icons';
 import type { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
-import { getDateHistogramEmptyRowsPolicyForVisualizationState } from '@kbn/lens-common';
+import { getDateHistogramEmptyRowsDefaultForVisualizationState } from '@kbn/lens-common';
 import useObservable from 'react-use/lib/useObservable';
 import { getKbnPalettes } from '@kbn/palettes';
 import type { FormatFactory } from '@kbn/visualization-ui-components';
@@ -142,7 +142,7 @@ export const getTagcloudVisualization = ({
         .get(state.palette?.name || 'default')
         .getCategoricalColors(10, state.palette?.params);
     }
-    const dateHistogramEmptyRowsPolicy = getDateHistogramEmptyRowsPolicyForVisualizationState(
+    const dateHistogramEmptyRowsDefault = getDateHistogramEmptyRowsDefaultForVisualizationState(
       'lnsTagcloud',
       state
     );
@@ -154,7 +154,7 @@ export const getTagcloudVisualization = ({
             defaultMessage: 'Tags',
           }),
           paramEditorCustomProps: {
-            dateHistogramEmptyRowsPolicy,
+            dateHistogramEmptyRowsDefault,
           },
           layerId: state.layerId,
           accessors: state.tagAccessor

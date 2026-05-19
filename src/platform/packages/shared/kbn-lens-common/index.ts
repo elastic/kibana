@@ -303,8 +303,6 @@ export type {
   LensAppLocator,
 } from './locator_types';
 export type { NavigateToLensLayer, NavigateToLensContext } from './convert_to_lens_types';
-export type { DateHistogramEmptyRowsPolicy } from './date_histogram_empty_rows_policy';
-
 /**
  * Constants are used by both the expression language and the lens code
  */
@@ -401,9 +399,10 @@ export {
 export { LENS_SHARE_STATE_ACTION } from './locator_types';
 export { defaultSeriesType } from './visualizations/xy/types';
 export {
-  getDateHistogramEmptyRowsPolicy,
-  getDateHistogramEmptyRowsPolicyForVisualizationState,
-} from './date_histogram_empty_rows_policy';
+  applyDateHistogramEmptyRowsDefaultToDatasourceState,
+  applyDateHistogramEmptyRowsDefaultToDatasourceStates,
+  getDateHistogramEmptyRowsDefaultForVisualizationState,
+} from './date_histogram_empty_rows_default';
 export {
   getLensLayerTypeTabDisplayName,
   lensLayerTypeTabDisplayNames,

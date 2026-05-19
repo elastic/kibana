@@ -8,6 +8,7 @@
  */
 
 import type { LensEmbeddableInput } from '@kbn/lens-common';
+import { applyDateHistogramEmptyRowsDefaultToDatasourceStates } from '@kbn/lens-common';
 import { v4 as uuidv4 } from 'uuid';
 import type { LensAttributes, LensConfig, LensConfigOptions, DataViewsCommon } from './types';
 import {
@@ -56,8 +57,6 @@ import {
 import type { LensApiConfig, LensApiConfigChartType } from './schema';
 import { filtersAndQueryToApiFormat, filtersAndQueryToLensState } from './transforms/utils';
 import { isLensLegacyFormat } from './utils';
-import { applyDateHistogramEmptyRowsPolicyToDatasourceStates } from './date_histogram_empty_rows_policy';
-
 const compatibilityMap: Record<string, LensApiConfigChartType> = {
   lnsMetric: 'metric',
   lnsLegacyMetric: 'legacy_metric',
@@ -221,7 +220,8 @@ export class LensConfigBuilder {
         query: options.query || { language: 'kuery', query: '' },
       },
     };
-    const datasourceStates = applyDateHistogramEmptyRowsPolicyToDatasourceStates(
+    // Normalize visualization-specific datasource defaults after building the chart state.
+    const datasourceStates = applyDateHistogramEmptyRowsDefaultToDatasourceStates(
       chartState.state.datasourceStates,
       chartState.visualizationType,
       chartState.state.visualization
@@ -262,10 +262,7 @@ export class LensConfigBuilder {
       config,
       attributes.references ?? []
     );
-
-    return {
-      // @TODO investigate why it complains about missing type
-      // type: 'lens',
+    const lensState = {
       ...attributes,
       references: [...(attributes.references ?? []), ...references],
       state: {
@@ -273,6 +270,24 @@ export class LensConfigBuilder {
         query: { language: 'kuery', query: '' },
         ...(query ? { query } : {}),
         filters,
+      },
+    };
+    // Normalize visualization-specific datasource defaults after API conversion, too.
+    const datasourceStates = applyDateHistogramEmptyRowsDefaultToDatasourceStates(
+      lensState.state.datasourceStates,
+      lensState.visualizationType,
+      lensState.state.visualization
+    );
+
+    if (datasourceStates === lensState.state.datasourceStates) {
+      return lensState;
+    }
+
+    return {
+      ...lensState,
+      state: {
+        ...lensState.state,
+        datasourceStates,
       },
     };
   }

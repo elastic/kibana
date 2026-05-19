@@ -30,7 +30,7 @@ import type {
   UserMessage,
   Visualization,
 } from '@kbn/lens-common';
-import { getDateHistogramEmptyRowsPolicyForVisualizationState } from '@kbn/lens-common';
+import { getDateHistogramEmptyRowsDefaultForVisualizationState } from '@kbn/lens-common';
 import type { HeatmapVisualizationState } from './types';
 import { getSuggestions } from './suggestions';
 import {
@@ -214,7 +214,7 @@ export const getHeatmapVisualization = ({
       state.valueAccessor,
       state?.palette && state.palette.accessor === state.valueAccessor ? state.palette : undefined
     );
-    const dateHistogramEmptyRowsPolicy = getDateHistogramEmptyRowsPolicyForVisualizationState(
+    const dateHistogramEmptyRowsDefault = getDateHistogramEmptyRowsDefaultForVisualizationState(
       LENS_HEATMAP_ID,
       state
     );
@@ -226,7 +226,7 @@ export const getHeatmapVisualization = ({
           groupId: GROUP_ID.X,
           groupLabel: getAxisName(GROUP_ID.X),
           paramEditorCustomProps: {
-            dateHistogramEmptyRowsPolicy,
+            dateHistogramEmptyRowsDefault,
           },
           accessors: state.xAccessor ? [{ columnId: state.xAccessor }] : [],
           filterOperations: filterOperationsAxis,
@@ -239,7 +239,7 @@ export const getHeatmapVisualization = ({
           groupId: GROUP_ID.Y,
           groupLabel: getAxisName(GROUP_ID.Y),
           paramEditorCustomProps: {
-            dateHistogramEmptyRowsPolicy,
+            dateHistogramEmptyRowsDefault,
           },
           accessors: state.yAccessor ? [{ columnId: state.yAccessor }] : [],
           filterOperations: filterOperationsAxis,

@@ -27,6 +27,9 @@ export const SeriesTypes = {
   BAR_HORIZONTAL_PERCENTAGE_STACKED: 'bar_horizontal_percentage_stacked',
 } as const;
 
+/**
+ * XY series subtypes that default `includeEmptyRows` off for `date_histogram`.
+ */
 export const BAR_SERIES_TYPES = [
   SeriesTypes.BAR,
   SeriesTypes.BAR_STACKED,
@@ -38,6 +41,9 @@ export const BAR_SERIES_TYPES = [
 
 const barSeriesTypeSet = new Set<string>(BAR_SERIES_TYPES);
 
+/**
+ * Returns true when the XY subtype belongs to the bar family.
+ */
 export const isBarSeriesType = (
   seriesType: string | null | undefined
 ): seriesType is (typeof BAR_SERIES_TYPES)[number] =>

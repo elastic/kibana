@@ -31,7 +31,7 @@ import type {
   LensPartitionVisualizationState,
   FormBasedPersistedState,
 } from '@kbn/lens-common';
-import { getDateHistogramEmptyRowsPolicyForVisualizationState } from '@kbn/lens-common';
+import { getDateHistogramEmptyRowsDefaultForVisualizationState } from '@kbn/lens-common';
 import {
   getColumnToLabelMap,
   getSortedAccessorsForGroup,
@@ -225,7 +225,7 @@ export const getPieVisualization = ({
       })
       .unsubscribe();
 
-    const dateHistogramEmptyRowsPolicy = getDateHistogramEmptyRowsPolicyForVisualizationState(
+    const dateHistogramEmptyRowsDefault = getDateHistogramEmptyRowsDefaultForVisualizationState(
       'lnsPie',
       state
     );
@@ -253,7 +253,7 @@ export const getPieVisualization = ({
         enableDimensionEditor: true,
         filterOperations: bucketedOperations,
         paramEditorCustomProps: {
-          dateHistogramEmptyRowsPolicy,
+          dateHistogramEmptyRowsDefault,
         },
       };
 
@@ -356,7 +356,7 @@ export const getPieVisualization = ({
         enableDimensionEditor: true,
         filterOperations: bucketedOperations,
         paramEditorCustomProps: {
-          dateHistogramEmptyRowsPolicy,
+          dateHistogramEmptyRowsDefault,
         },
       };
 
