@@ -22,6 +22,11 @@ const ebtAction = {
     AGENT_SELECTOR_OPEN: 'agent_selector_open',
     MANAGE_ALL_AGENTS_CLICK: 'manage_all_agents_click',
   },
+  conversationList: {
+    CONVERSATION_START: 'conversation_start',
+    CONVERSATION_RESUME: 'conversation_resume',
+    CONVERSATION_SEARCH: 'conversation_search',
+  },
 } as const;
 
 const ebtDetail = {

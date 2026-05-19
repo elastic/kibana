@@ -100,6 +100,10 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
               onClick={() =>
                 navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }))
               }
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.SIDEBAR,
+                action: AGENT_BUILDER_UI_EBT.action.conversationList.CONVERSATION_START,
+              })}
             />
           </EuiFlexItem>
         )}
