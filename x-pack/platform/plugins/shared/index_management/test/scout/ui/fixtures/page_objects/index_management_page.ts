@@ -122,6 +122,48 @@ export class IndexManagement extends AbstractPageObject {
     await this.page.testSubj.locator(tabMap[tab]).click();
   }
 
+  async clickDataStreamNameLink(name: string) {
+    await this.page.testSubj.locator('nameLink').filter({ hasText: name }).click();
+  }
+
+  async clickBulkEditDataRetention(names: string[]) {
+    for (const name of names) {
+      await this.page.testSubj.locator(`checkboxSelectRow-${name}`).click();
+    }
+    await this.page.testSubj.locator('dataStreamActionsPopoverButton').click();
+    await this.page.testSubj.locator('bulkEditDataRetentionButton').click();
+  }
+
+  async clickEnrichPolicyAt(index: number) {
+    const links = this.page.testSubj.locator('enrichPolicyDetailsLink');
+    // eslint-disable-next-line playwright/no-nth-methods
+    await links.nth(index).click();
+  }
+
+  async clickExecuteEnrichPolicyAt(index: number) {
+    const buttons = this.page.testSubj.locator('executePolicyButton');
+    // eslint-disable-next-line playwright/no-nth-methods
+    await buttons.nth(index).click();
+  }
+
+  async clickDeleteEnrichPolicyAt(index: number) {
+    const buttons = this.page.testSubj.locator('deletePolicyButton');
+    // eslint-disable-next-line playwright/no-nth-methods
+    await buttons.nth(index).click();
+  }
+
+  async clickConfirmModalButton() {
+    await this.page.testSubj.locator('confirmModalConfirmButton').click();
+  }
+
+  async clickIndexTemplate(name: string) {
+    await this.page.testSubj.locator(`templateDetailsLink-${name}`).click();
+  }
+
+  async clickIndexTemplateNameLink(name: string) {
+    await this.page.testSubj.locator(`templateDetailsLink-${name}`).click();
+  }
+
   indexDetailsPage = {
     expectIndexDetailsPageIsLoaded: async () => {
       await expect(this.page.testSubj.locator('indexDetailsTab-overview')).toBeVisible();

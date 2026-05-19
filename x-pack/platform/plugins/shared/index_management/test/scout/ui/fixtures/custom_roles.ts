@@ -27,4 +27,40 @@ export const CUSTOM_ROLES: Record<string, KibanaRole> = {
       },
     ],
   },
+  indexManagementMonitorEnrichOnly: {
+    elasticsearch: {
+      cluster: ['monitor', 'manage_enrich'],
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        base: ['read'],
+        feature: {},
+        spaces: ['*'],
+      },
+    ],
+  },
+  indexManagementMonitorOnly: {
+    elasticsearch: {
+      cluster: ['monitor'],
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        base: ['read'],
+        feature: {},
+        spaces: ['*'],
+      },
+    ],
+  },
 };
