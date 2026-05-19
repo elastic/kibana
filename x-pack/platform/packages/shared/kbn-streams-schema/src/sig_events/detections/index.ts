@@ -17,7 +17,7 @@ export const detectionSchema = z.object({
   silent: z.boolean(),
   processed: z.boolean(),
   detection_id: z.string().optional(),
-  rule_uuid: z.string().optional(),
+  rule_uuid: z.string(),
   rule_name: z.string(),
   stream_name: z.string().optional(),
   alert_count: z.number().optional(),
