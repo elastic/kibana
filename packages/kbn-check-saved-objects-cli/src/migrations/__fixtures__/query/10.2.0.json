@@ -1,0 +1,76 @@
+{
+  "10.1.0": [
+    {
+      "title": "My saved query",
+      "description": "A fixture saved query for migration checks",
+      "query": {
+        "language": "kuery",
+        "query": "host.name : *"
+      },
+      "filters": [
+        {
+          "meta": {
+            "alias": null,
+            "negate": false,
+            "disabled": false
+          },
+          "query": {
+            "match_phrase": {
+              "host.name": "localhost"
+            }
+          }
+        }
+      ],
+      "timefilter": {
+        "from": "now-15m",
+        "to": "now"
+      }
+    },
+    {
+      "title": "Minimal saved query",
+      "description": "",
+      "query": {
+        "language": "lucene",
+        "query": "status:200"
+      }
+    }
+  ],
+  "10.2.0": [
+    {
+      "title": "My saved query",
+      "description": "A fixture saved query for migration checks",
+      "query": {
+        "language": "kuery",
+        "query": "host.name : *"
+      },
+      "filters": [
+        {
+          "meta": {
+            "alias": null,
+            "negate": false,
+            "disabled": false
+          },
+          "query": {
+            "match_phrase": {
+              "host.name": "localhost"
+            }
+          }
+        }
+      ],
+      "timefilter": {
+        "from": "now-15m",
+        "to": "now"
+      },
+      "titleKeyword": "My saved query"
+    },
+    {
+      "title": "Minimal saved query",
+      "description": "",
+      "query": {
+        "language": "lucene",
+        "query": "status:200"
+      },
+      "titleKeyword": "Minimal saved query"
+    }
+  ]
+}
