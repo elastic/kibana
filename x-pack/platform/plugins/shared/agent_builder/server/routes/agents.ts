@@ -503,7 +503,7 @@ export function registerAgentRoutes({
       access: 'public',
       summary: "Get an agent's access control list",
       description:
-        'Get the ACL for a specific agent. Callers without permission to manage the ACL receive `can_manage: false` and an empty `entries` list — the principal list itself is sensitive.',
+        'Get the access control list (ACL) for a specific agent. Callers without permission to manage the ACL receive `can_manage: false` and an empty `entries` list — the principal list itself is sensitive. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: { since: '9.5.0' },
@@ -516,10 +516,13 @@ export function registerAgentRoutes({
           request: {
             params: schema.object({
               id: schema.string({
-                meta: { description: 'The unique identifier of the agent.' },
+                meta: { description: 'The unique identifier of the agent whose ACL to retrieve.' },
               }),
             }),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/agents_acl_get.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -543,7 +546,7 @@ export function registerAgentRoutes({
       access: 'public',
       summary: "Update an agent's access control list",
       description:
-        "Replace the per-agent access control list. ACL editing is bundled into write access on the agent: the agent owner, cluster admins, and anyone the agent's ACL grants Editor or higher (or anyone with `manageAgents` on a Public agent) may call this endpoint. The PUT replaces the entire entries list with last-write-wins semantics.",
+        'Replace the per-agent access control list (ACL). The agent owner, cluster admins, and anyone the ACL grants Editor or higher can call this endpoint (or anyone with `manageAgents` on a Public agent). Each call replaces the entire entries list — the most recent successful update wins. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: { since: '9.5.0' },
@@ -556,24 +559,48 @@ export function registerAgentRoutes({
           request: {
             params: schema.object({
               id: schema.string({
-                meta: { description: 'The unique identifier of the agent.' },
+                meta: { description: 'The unique identifier of the agent whose ACL to update.' },
               }),
             }),
             body: schema.object({
               entries: schema.arrayOf(
                 schema.object({
                   type: schema.literal('user'),
-                  name: schema.string({ minLength: 1, maxLength: 1024 }),
-                  role: schema.oneOf([
-                    schema.literal(AgentAclRole.User),
-                    schema.literal(AgentAclRole.Editor),
-                    schema.literal(AgentAclRole.Manager),
-                  ]),
+                  name: schema.string({
+                    minLength: 1,
+                    maxLength: 1024,
+                    meta: {
+                      description:
+                        'Case-sensitive Kibana username of the principal to grant access to.',
+                    },
+                  }),
+                  role: schema.oneOf(
+                    [
+                      schema.literal(AgentAclRole.User),
+                      schema.literal(AgentAclRole.Editor),
+                      schema.literal(AgentAclRole.Manager),
+                    ],
+                    {
+                      meta: {
+                        description:
+                          'Role granted to the principal. Roles are hierarchical: `user` allows viewing, listing, reading, and running the agent; `editor` adds updating the agent and its ACL; `manager` adds deleting the agent and changing visibility.',
+                      },
+                    }
+                  ),
                 }),
-                { maxSize: 100 }
+                {
+                  maxSize: 100,
+                  meta: {
+                    description:
+                      'Access control entries to apply to the agent. Each entry has a `type` (currently only `user` is supported; role-based grants are planned for a future release), a `name` (the principal username), and a `role`. Submitting this field replaces the existing ACL entirely; submit an empty array to clear all grants.',
+                  },
+                }
               ),
             }),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/agents_acl_update.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
