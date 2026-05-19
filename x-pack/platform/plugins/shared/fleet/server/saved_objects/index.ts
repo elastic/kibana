@@ -1978,7 +1978,7 @@ export function registerEncryptedSavedObjects(
   encryptedSavedObjects.registerType({
     type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['secrets']),
-    attributesToIncludeInAAD: new Set(['provider', 'connectorId', 'mechanisms']),
+    attributesToIncludeInAAD: new Set(['provider', 'connectorId']),
     enforceRandomId: false,
   });
 }

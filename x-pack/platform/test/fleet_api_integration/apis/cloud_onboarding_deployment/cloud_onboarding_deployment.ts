@@ -350,6 +350,83 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('Space isolation', () => {
+      const TEST_SPACE = 'test-cloud-onboarding-space';
+      const spaceUrl = (path: string) => `/s/${TEST_SPACE}${path}`;
+      let defaultSpaceId: string;
+      let testSpaceId: string;
+
+      after(async () => {
+        try {
+          await supertest
+            .delete(`${BASE_URL}/${defaultSpaceId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .catch(() => {});
+          await supertest
+            .delete(spaceUrl(`${BASE_URL}/${testSpaceId}`))
+            .set('kbn-xsrf', 'xxxx')
+            .catch(() => {});
+        } finally {
+          await kibanaServer.spaces.delete(TEST_SPACE).catch(() => {});
+        }
+      });
+
+      before(async () => {
+        await kibanaServer.spaces.create({ id: TEST_SPACE, name: TEST_SPACE }).catch(() => {});
+        const { body: defaultBody } = await supertest
+          .post(BASE_URL)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ ...VALID_CREATE_BODY, connectorId: 'space-isolation-default' })
+          .expect(200);
+        defaultSpaceId = defaultBody.item.id;
+
+        const { body: spaceBody } = await supertest
+          .post(spaceUrl(BASE_URL))
+          .set('kbn-xsrf', 'xxxx')
+          .send({ ...VALID_CREATE_BODY, connectorId: 'space-isolation-test' })
+          .expect(200);
+        testSpaceId = spaceBody.item.id;
+      });
+
+      it('GET by ID returns a deployment from the same space', async () => {
+        const { body } = await supertest.get(spaceUrl(`${BASE_URL}/${testSpaceId}`)).expect(200);
+        expect(body.item.id).to.equal(testSpaceId);
+        expect(body.item.connectorId).to.equal('space-isolation-test');
+      });
+
+      it('GET by ID returns 404 for a deployment created in a different space', async () => {
+        // default-space deployment is invisible from the test space
+        await supertest.get(spaceUrl(`${BASE_URL}/${defaultSpaceId}`)).expect(404);
+        // test-space deployment is invisible from the default space
+        await supertest.get(`${BASE_URL}/${testSpaceId}`).expect(404);
+      });
+
+      it('GET by connector ID only returns deployments from the same space', async () => {
+        const { body: testSpaceBody } = await supertest
+          .get(spaceUrl(`${BASE_URL}/connector/space-isolation-test`))
+          .expect(200);
+        expect(testSpaceBody.items).to.have.length(1);
+        expect(testSpaceBody.items[0].id).to.equal(testSpaceId);
+
+        const { body: defaultSpaceBody } = await supertest
+          .get(`${BASE_URL}/connector/space-isolation-default`)
+          .expect(200);
+        expect(defaultSpaceBody.items).to.have.length(1);
+        expect(defaultSpaceBody.items[0].id).to.equal(defaultSpaceId);
+
+        // Cross-space connector queries return nothing
+        const { body: crossDefault } = await supertest
+          .get(`${BASE_URL}/connector/space-isolation-test`)
+          .expect(200);
+        expect(crossDefault.items).to.eql([]);
+
+        const { body: crossTest } = await supertest
+          .get(spaceUrl(`${BASE_URL}/connector/space-isolation-default`))
+          .expect(200);
+        expect(crossTest.items).to.eql([]);
+      });
+    });
+
     describe('DELETE /api/fleet/cloud_onboarding_deployments/{id}', () => {
       it('should delete a deployment and return its ID', async () => {
         const { body: created } = await supertest

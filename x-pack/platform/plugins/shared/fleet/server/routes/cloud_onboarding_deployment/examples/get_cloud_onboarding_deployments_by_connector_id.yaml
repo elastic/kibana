@@ -23,8 +23,6 @@ responses:
                     role_arn: 'arn:aws:iam::123456789012:role/ElasticIntegrationRole'
                   packagePolicyIds:
                     - 'package-policy-id-1'
-                  createdAt: '2025-01-15T10:00:00.000Z'
-                  updatedAt: '2025-01-15T10:30:00.000Z'
                 - id: 'onboarding-deployment-id-2'
                   provider: 'aws'
                   connectorId: 'cloud-connector-id-1'
@@ -43,8 +41,6 @@ responses:
                       - regions:
                           - 'us-east-1'
                         s3_bucket_arn: 'arn:aws:s3:::my-cloudfront-logs-bucket'
-                  createdAt: '2025-01-16T09:00:00.000Z'
-                  updatedAt: '2025-01-16T09:05:00.000Z'
   400:
     description: 'Bad Request'
     content:

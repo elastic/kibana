@@ -12,7 +12,7 @@ import type { FleetAuthzRouter } from '../../services/security';
 import { API_VERSIONS, CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES } from '../../../common/constants';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 
-import { genericErrorResponse } from '../schema/errors';
+import { genericErrorResponse, notFoundResponse } from '../schema/errors';
 import {
   CreateCloudOnboardingDeploymentRequestSchema,
   CreateCloudOnboardingDeploymentResponseSchema,
@@ -130,7 +130,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
               description: 'A bad request.',
             },
             404: {
-              body: genericErrorResponse,
+              body: notFoundResponse,
               description: 'Not found.',
             },
           },
@@ -233,6 +233,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
               body: genericErrorResponse,
               description: 'A bad request.',
             },
+            404: {
+              body: notFoundResponse,
+              description: 'Not found.',
+            },
           },
         },
       },
@@ -282,6 +286,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
             400: {
               body: genericErrorResponse,
               description: 'A bad request.',
+            },
+            404: {
+              body: notFoundResponse,
+              description: 'Not found.',
             },
           },
         },

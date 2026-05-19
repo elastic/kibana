@@ -34,8 +34,6 @@ responses:
                   role_arn: 'arn:aws:iam::123456789012:role/ElasticIntegrationRole'
                 packagePolicyIds:
                   - 'package-policy-id-1'
-                createdAt: '2025-01-15T10:00:00.000Z'
-                updatedAt: '2025-01-15T10:05:00.000Z'
   400:
     description: 'Bad Request'
     content:

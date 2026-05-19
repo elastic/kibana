@@ -95,14 +95,8 @@ describe('cloudOnboardingDeploymentService', () => {
       expect(result.secrets).toEqual({ external_id: 'ext-123' });
     });
 
-    it('throws FleetError when SO creation returns an error', async () => {
-      soClient.create.mockResolvedValue({
-        id: 'deploy-1',
-        type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-        references: [],
-        attributes: makeAttributes(),
-        error: { statusCode: 500, error: 'Internal Server Error', message: 'write failed' },
-      });
+    it('propagates errors thrown by soClient.create', async () => {
+      soClient.create.mockRejectedValue(new Error('write failed'));
 
       await expect(
         cloudOnboardingDeploymentService.create(soClient, {
@@ -150,15 +144,9 @@ describe('cloudOnboardingDeploymentService', () => {
       );
     });
 
-    it('throws FleetError when the SO has an error field', async () => {
+    it('propagates errors thrown by getDecryptedAsInternalUser', async () => {
       const esoClientMock = {
-        getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
-          id: 'deploy-1',
-          type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-          references: [],
-          attributes: makeAttributes(),
-          error: { statusCode: 404, error: 'Not Found', message: 'not found' },
-        }),
+        getDecryptedAsInternalUser: jest.fn().mockRejectedValue(new Error('not found')),
         createPointInTimeFinderDecryptedAsInternalUser: jest.fn(),
       } as jest.Mocked<EncryptedSavedObjectsClient>;
       mockedAppContextService.getEncryptedSavedObjects.mockReturnValue(esoClientMock);

@@ -15,7 +15,6 @@ import type {
   UpdateCloudOnboardingDeploymentInput,
 } from '../../common/types/models/cloud_onboarding_deployment';
 import type { CloudOnboardingDeploymentSOAttributes } from '../types/so_attributes';
-import { FleetError } from '../errors';
 
 import { appContextService } from './app_context';
 
@@ -42,10 +41,6 @@ class CloudOnboardingDeploymentService {
       attributes
     );
 
-    if (so.error) {
-      throw new FleetError(so.error.message);
-    }
-
     return { id: so.id, ...so.attributes };
   }
 
@@ -60,17 +55,13 @@ class CloudOnboardingDeploymentService {
         { namespace: soClient.getCurrentNamespace() }
       );
 
-    if (so.error) {
-      throw new FleetError(so.error.message);
-    }
-
     return { id: so.id, ...so.attributes };
   }
 
   public async getByConnectorId(
     soClient: SavedObjectsClientContract,
     connectorId: string
-  ): Promise<CloudOnboardingDeployment[]> {
+  ): Promise<Array<Omit<CloudOnboardingDeployment, 'secrets'>>> {
     const finder = soClient.createPointInTimeFinder<CloudOnboardingDeploymentSOAttributes>({
       type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
       filter: nodeBuilder.is(
@@ -80,11 +71,12 @@ class CloudOnboardingDeploymentService {
       perPage: CLOUD_ONBOARDING_DEPLOYMENT_LIMIT,
     });
 
-    const deployments: CloudOnboardingDeployment[] = [];
+    const deployments: Array<Omit<CloudOnboardingDeployment, 'secrets'>> = [];
     try {
       for await (const result of finder.find()) {
         for (const so of result.saved_objects) {
-          deployments.push({ id: so.id, ...so.attributes });
+          const { secrets: _, ...rest } = so.attributes;
+          deployments.push({ id: so.id, ...rest });
         }
       }
     } finally {
