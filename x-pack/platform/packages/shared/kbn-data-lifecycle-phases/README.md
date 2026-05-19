@@ -61,6 +61,23 @@ import { InspectIlmPolicyFlyout } from '@kbn/data-lifecycle-phases';
 />
 ```
 
+### `EnterpriseGatingModal`
+
+A stateless modal for gating Enterprise-only data lifecycle actions (for example, enabling the frozen data phase). Consumers control visibility via `isOpen` and should hide/unmount the modal when `onCancel` is called.
+
+The primary action is intentionally callback-based through `onPrimaryAction` because the final action behavior is consumer-defined. The component chooses the visible primary action from the environment/permission/trial inputs:
+
+- Self-managed: primary action is `contactUs`
+- Cloud + no subscription management permission: no primary action
+- Cloud + subscription management permission: `startTrial` (default) or `upgrade` when `trialStatus` is `expired`
+
+The “Review subscription features” link defaults to:
+
+- Cloud: `https://www.elastic.co/subscriptions/cloud`
+- Self-managed: `https://www.elastic.co/subscriptions`
+
+Consumers can override this via `subscriptionFeaturesUrl`.
+
 ## Development
 
 ### Storybook

@@ -6,6 +6,7 @@
       "jest",
       "node",
       "react",
+      "@kbn/ambient-ui-types",
       "@emotion/react/types/css-prop"
     ]
   },
@@ -20,6 +21,7 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/storybook",
+    "@kbn/test-jest-helpers",
     "@kbn/index-lifecycle-management-common-shared"
   ]
 }
