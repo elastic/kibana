@@ -10,7 +10,7 @@
 import { evaluateExpression } from './evaluate_expression';
 import type { ExecutionContext } from '../execution_context/build_execution_context';
 
-describe('evaluateExpression', async () => {
+describe('evaluateExpression', () => {
   const mockContext: ExecutionContext = {
     inputs: {
       userId: 'user-123',
@@ -48,7 +48,7 @@ describe('evaluateExpression', async () => {
     },
   };
 
-  describe('simple path resolution', async () => {
+  describe('simple path resolution', () => {
     it('should resolve top-level context properties', async () => {
       expect(await evaluateExpression({ expression: 'inputs', context: mockContext })).toEqual({
         userId: 'user-123',
@@ -101,7 +101,7 @@ describe('evaluateExpression', async () => {
     });
   });
 
-  describe('filter support', async () => {
+  describe('filter support', () => {
     it('should apply string filters', async () => {
       expect(
         await evaluateExpression({ expression: 'inputs.greeting | upcase', context: mockContext })
@@ -212,7 +212,7 @@ describe('evaluateExpression', async () => {
     });
   });
 
-  describe('foreach.item support', async () => {
+  describe('foreach.item support', () => {
     it('should resolve foreach.item when foreach step exists', async () => {
       const contextWithForeach: ExecutionContext = {
         ...mockContext,
@@ -331,7 +331,7 @@ describe('evaluateExpression', async () => {
     });
   });
 
-  describe('error handling', async () => {
+  describe('error handling', () => {
     it('should handle invalid filter with strictFilters', async () => {
       // With strictFilters: true, unknown filters should throw an error
       // The error is caught and we fallback to path resolution
@@ -355,7 +355,7 @@ describe('evaluateExpression', async () => {
     });
   });
 
-  describe('bracket notation', async () => {
+  describe('bracket notation', () => {
     it('should resolve numeric array index', async () => {
       const result = await evaluateExpression({
         expression: 'steps.search_data.output.hits.hits[0]._source.name',
@@ -407,7 +407,7 @@ describe('evaluateExpression', async () => {
     });
   });
 
-  describe('complex real-world scenarios', async () => {
+  describe('complex real-world scenarios', () => {
     it('should handle foreach with json filter', async () => {
       const contextWithForeach: ExecutionContext = {
         ...mockContext,
