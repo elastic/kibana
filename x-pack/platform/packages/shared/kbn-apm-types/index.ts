@@ -6,7 +6,7 @@
  */
 
 export * from './es_fields';
-export * from './es_schemas_raw';
+export type * from './es_schemas_raw';
 export type * from './es_schemas_ui';
 export * from './src/agent_explorer';
 export * from './src/aggregation_type';
@@ -16,7 +16,6 @@ export type * from './src/apm_event';
 export type * from './src/apm_ml_job';
 export type * from './src/apm_telemetry';
 export * from './src/apm_timeseries';
-export * from './src/config_schema';
 export * from './src/connections';
 export type * from './src/container_type';
 export type * from './src/coordinate';
