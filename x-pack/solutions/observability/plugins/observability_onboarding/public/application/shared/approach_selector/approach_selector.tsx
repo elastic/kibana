@@ -12,6 +12,7 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormFieldset,
   EuiSpacer,
   EuiText,
   htmlIdGenerator,
@@ -39,7 +40,10 @@ export const ApproachSelector: React.FC<ApproachSelectorProps> = ({
   const radioGroupId = useMemo(() => htmlIdGenerator('approachSelector')(), []);
 
   return (
-    <nav aria-label={legend} data-test-subj="approachSelector">
+    <EuiFormFieldset
+      legend={{ children: legend, display: 'hidden' }}
+      data-test-subj="approachSelector"
+    >
       <EuiFlexGrid columns={2}>
         {options.map((option) => {
           const isSelected = option.id === selectedId;
@@ -96,21 +100,12 @@ export const ApproachSelector: React.FC<ApproachSelectorProps> = ({
                 }
                 css={css`
                   flex-grow: 1;
-
-                  & > .euiPanel {
-                    display: flex;
-
-                    & > .euiCheckableCard__label {
-                      display: flex;
-                      flex-direction: column;
-                    }
-                  }
                 `}
               />
             </EuiFlexItem>
           );
         })}
       </EuiFlexGrid>
-    </nav>
+    </EuiFormFieldset>
   );
 };

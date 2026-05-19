@@ -130,6 +130,6 @@ describe('ApproachSelector', () => {
 
   it('exposes the group with its accessible label', () => {
     renderSelector('otel');
-    expect(screen.getByRole('navigation', { name: 'Choose approach' })).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Choose approach' })).toBeInTheDocument();
   });
 });

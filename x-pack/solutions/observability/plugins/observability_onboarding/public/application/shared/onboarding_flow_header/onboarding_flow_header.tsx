@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageTemplate,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -79,13 +80,13 @@ export const OnboardingFlowHeader: React.FC<OnboardingFlowHeaderProps> = ({
       <EuiSpacer size="m" />
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
-          <div
+          <EuiPanel
+            hasBorder
+            color="subdued"
+            paddingSize="m"
+            grow={false}
             css={css`
-              background-color: ${euiTheme.colors.backgroundBaseSubdued};
-              border: ${euiTheme.border.thin};
               border-radius: 14px;
-              padding: ${euiTheme.size.m};
-              line-height: 0;
             `}
           >
             <LogoIcon
@@ -95,9 +96,10 @@ export const OnboardingFlowHeader: React.FC<OnboardingFlowHeaderProps> = ({
               css={css`
                 width: 40px;
                 height: 40px;
+                display: block;
               `}
             />
-          </div>
+          </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="l">
