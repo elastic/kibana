@@ -25,7 +25,7 @@ import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import { useAlertsContext } from '../../../detections/components/alerts_table/alerts_context';
+import { useFlyoutPagination } from '../../../common/utils/flyout_pagination/use_flyout_pagination';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutMissingAlertsPrivilege } from './components/flyout_missing_alerts_privilege';
 import { EventKind } from './constants/event_kinds';
@@ -105,13 +105,25 @@ export interface DocumentFlyoutProps {
    * Optional test subject applied to the existing flyout header.
    */
   dataTestSubj?: string;
+  /**
+   * Per-source-instance UUID forwarded from the V2 paginated wrapper.
+   * Passed down to `Header` and used to look up the loading/pagination state
+   * from `flyoutPaginationStore`. Absent for non-paginated flyout opens.
+   */
+  paginationInstanceId?: string;
 }
 
 /**
  * Content for the document flyout, combining the header and overview tab.
  */
 export const DocumentFlyout = memo(
-  ({ hit, onAlertUpdated, renderCellActions, dataTestSubj }: DocumentFlyoutProps) => {
+  ({
+    hit,
+    onAlertUpdated,
+    renderCellActions,
+    dataTestSubj,
+    paginationInstanceId,
+  }: DocumentFlyoutProps) => {
     const { openNotes, openDocumentFlyoutFromIndex } = useFlyoutApi();
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
@@ -125,7 +137,7 @@ export const DocumentFlyout = memo(
     // page than the alerts table is showing, render a centered spinner in the
     // body and keep the previous alert's header (with the new pagination
     // position) visible. Mirrors the V1 `RightPanel` loading branch.
-    const { isFlyoutAlertLoading } = useAlertsContext();
+    const { isFlyoutAlertLoading } = useFlyoutPagination(paginationInstanceId);
 
     // The Table and JSON tabs are only available in Security Solution, not in Discover.
     // The selected tab is persisted to localStorage.
@@ -230,7 +242,8 @@ export const DocumentFlyout = memo(
               hit={hit}
               renderCellActions={renderCellActions}
               onAlertUpdated={onAlertUpdated}
-              onShowNotes={onShowNotes}
+              onShowNotes={onShowNotesFromHeader}
+              paginationInstanceId={paginationInstanceId}
             />
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
@@ -258,6 +271,7 @@ export const DocumentFlyout = memo(
             renderCellActions={renderCellActions}
             onAlertUpdated={onAlertUpdated}
             onShowNotes={onShowNotesFromHeader}
+            paginationInstanceId={paginationInstanceId}
           />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>

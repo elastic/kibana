@@ -32,7 +32,7 @@ import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { ShareUrlIconButton } from '../../shared/components/share_url_icon_button';
 import { useGetFlyoutLink } from '../../../flyout/document_details/right/hooks/use_get_flyout_link';
 import { isRulePreviewDocument } from '../../shared/utils/is_rule_preview_document';
-import { useAlertsContext } from '../../../detections/components/alerts_table/alerts_context';
+import { useFlyoutPagination } from '../../../common/utils/flyout_pagination/use_flyout_pagination';
 import { FLYOUT_V2_ALERT_PAGINATION_TEST_ID } from './components/test_ids';
 
 const SHARE_ALERT_LABEL = i18n.translate(
@@ -75,6 +75,13 @@ export interface HeaderProps {
    * Callback that opens the notes details view.
    */
   onShowNotes: () => void;
+  /**
+   * Per-source-instance UUID passed in from the V2 paginated wrapper
+   * (`PaginatedDocumentFlyout` / `PaginatedTimelineDocumentFlyout`). When
+   * present the header renders in-flyout `EuiPagination` chevrons keyed to
+   * the caller's slice. Absent for non-paginated flyout opens.
+   */
+  paginationInstanceId?: string;
 }
 
 /**
@@ -83,7 +90,13 @@ export interface HeaderProps {
  * and alert-only summary blocks (status, risk score assignees, and notes).
  */
 export const Header: FC<HeaderProps> = memo(
-  ({ hit, renderCellActions = noopCellActionRenderer, onAlertUpdated, onShowNotes }) => {
+  ({
+    hit,
+    renderCellActions = noopCellActionRenderer,
+    onAlertUpdated,
+    onShowNotes,
+    paginationInstanceId,
+  }) => {
     const { euiTheme } = useEuiTheme();
     const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
     const isAlert = useMemo(
@@ -98,12 +111,15 @@ export const Header: FC<HeaderProps> = memo(
       timestamp: String(hit.flattened?.['@timestamp'] ?? ''),
     });
 
-    const { flyoutAlertIndex, totalAlertCount, openAlertFlyout } = useAlertsContext();
-    // Show the in-flyout pagination only when an alerts table is driving the
-    // flyout (`flyoutAlertIndex != null`) and there is more than one alert
-    // to walk. `pageCount` is the absolute total and `activePage` is the
-    // absolute index, mirroring V1's `AlertHeaderTitle`.
-    const showPagination = totalAlertCount > 1 && flyoutAlertIndex != null && flyoutAlertIndex >= 0;
+    const { flyoutAlertIndex, totalAlertCount, openAlertFlyout } =
+      useFlyoutPagination(paginationInstanceId);
+    // Show pagination only when the flyout was opened from a paginated source
+    // (paginationInstanceId set) and there is more than one document to walk.
+    const showPagination =
+      paginationInstanceId != null &&
+      totalAlertCount > 1 &&
+      flyoutAlertIndex != null &&
+      flyoutAlertIndex >= 0;
 
     // When pagination is rendered on the right side of the row it would sit
     // underneath the absolutely-positioned EuiFlyout close button (top: 8px,

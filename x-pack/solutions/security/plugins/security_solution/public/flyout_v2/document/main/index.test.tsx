@@ -29,9 +29,9 @@ import type { OpenFlyoutLinkRenderer } from '../../shared/components/open_flyout
 import { TestProviders } from '../../../common/mock';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 import {
-  __resetAlertsTablePaginationStoreForTests,
-  alertsTablePaginationStore,
-} from '../../../detections/components/alerts_table/alerts_table_pagination_store';
+  __resetFlyoutPaginationStoreForTests,
+  flyoutPaginationStore,
+} from '../../../common/utils/flyout_pagination/store';
 import { FLYOUT_V2_LOADING_SPINNER_TEST_ID } from './components/test_ids';
 
 jest.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
@@ -84,17 +84,19 @@ const createAlertHit = (extra: DataTableRecord['flattened'] = {}): DataTableReco
     isAnchor: false,
   } as DataTableRecord);
 
+const INSTANCE_ID = 'test-instance-uuid';
+
 describe('<DocumentFlyout />', () => {
   const startServices = createStartServicesMock();
 
   beforeEach(() => {
     jest.clearAllMocks();
     (useIsInSecurityApp as jest.Mock).mockReturnValue(true);
-    __resetAlertsTablePaginationStoreForTests();
+    __resetFlyoutPaginationStoreForTests();
   });
 
   afterEach(() => {
-    __resetAlertsTablePaginationStoreForTests();
+    __resetFlyoutPaginationStoreForTests();
   });
 
   it('renders FlyoutMissingAlertsPrivilege when document is an alert and user lacks alerts read privilege', () => {
@@ -268,7 +270,7 @@ describe('<DocumentFlyout />', () => {
     it('renders the header and a centered spinner instead of the body when isFlyoutAlertLoading is true', () => {
       (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
       act(() => {
-        alertsTablePaginationStore.setState({ isFlyoutAlertLoading: true });
+        flyoutPaginationStore.setSlice(INSTANCE_ID, { isFlyoutAlertLoading: true });
       });
 
       const { getByTestId, queryByTestId } = render(
@@ -277,6 +279,7 @@ describe('<DocumentFlyout />', () => {
             hit={createAlertHit()}
             renderCellActions={jest.fn()}
             onAlertUpdated={jest.fn()}
+            paginationInstanceId={INSTANCE_ID}
           />
         </TestProviders>
       );
