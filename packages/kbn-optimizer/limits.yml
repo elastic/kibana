@@ -9,7 +9,7 @@ pageLoadAssetSize:
   aiops: 15227
   alerting: 22371
   alertingVTwo: 76778
-  apm: 28027
+  apm: 54371
   apmSourcesAccess: 2278
   automaticImport: 18629
   banners: 4006
@@ -45,7 +45,7 @@ pageLoadAssetSize:
   dataViews: 66000
   dataVisualizer: 32727
   developerToolbar: 5000
-  devTools: 8109
+  devTools: 8107
   discover: 30501
   discoverEnhanced: 5353
   discoverShared: 2322
@@ -78,7 +78,7 @@ pageLoadAssetSize:
   files: 6037
   filesManagement: 5208
   fileUpload: 22957
-  fleet: 230612
+  fleet: 229970
   genAiSettings: 6342
   globalSearch: 6890
   globalSearchBar: 26122
@@ -173,7 +173,7 @@ pageLoadAssetSize:
   serverlessVectordb: 7618
   serverlessWorkplaceAI: 4855
   sessionView: 47912
-  share: 64066
+  share: 64059
   slo: 40437
   snapshotRestore: 22068
   spaces: 28871
@@ -188,7 +188,7 @@ pageLoadAssetSize:
   transform: 16515
   triggersActionsUi: 123512
   uiActions: 35180
-  unifiedDocViewer: 15000
+  unifiedDocViewer: 16519
   unifiedSearch: 19500
   upgradeAssistant: 6898
   uptime: 48171
