@@ -72,15 +72,6 @@ interface UseIlmLifecycleSummaryResult {
   isEditLifecycleFlyoutOpen: boolean;
   hasUnsavedEditLifecycleFlyoutChanges: boolean;
   flyoutInvalidPhases: PhaseName[];
-  /**
-   * Current phases shown in the edit flyout (may be null until flyout is opened).
-   * When the flyout is open, this is used by the lifecycle summary to show preview state.
-   */
-  previewPhases: IlmPolicyPhases | null;
-  /**
-   * Initial policy phases when opening the flyout.
-   */
-  editFlyoutInitialPhases: IlmPolicyPhases | null;
 }
 
 export const useIlmLifecycleSummary = ({
@@ -610,7 +601,5 @@ export const useIlmLifecycleSummary = ({
     isEditLifecycleFlyoutOpen: uiState.isEditLifecycleFlyoutOpen,
     hasUnsavedEditLifecycleFlyoutChanges,
     flyoutInvalidPhases: uiState.flyoutInvalidPhases,
-    previewPhases: uiState.previewPhases,
-    editFlyoutInitialPhases: uiState.editFlyoutInitialPhases,
   };
 };
