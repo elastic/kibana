@@ -29,10 +29,10 @@ import {
 import type { SkillReferencedContent } from '@kbn/agent-builder-common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  type CreateSkillResponse,
+  AGENTBUILDER_APP_ID,
   SKILLS_API_PATH,
-} from '@kbn/agent-builder-plugin/common/http_api/skills';
-import { AGENTBUILDER_APP_ID } from '@kbn/agent-builder-plugin/public';
+  type CreateSkillResponse,
+} from '@kbn/agent-builder-plugin/public';
 import {
   SKILL_ATTACHMENT_TYPE,
   type SkillAttachment,
