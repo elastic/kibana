@@ -22,13 +22,17 @@ Prefer `line`/`side` anchoring over `position` (less error-prone):
 - For multi-line ranges, add `start_line` + `start_side`.
 - The `line`/`side` approach uses absolute file line numbers (visible in the GitHub diff UI), so there is no off-by-one math to get wrong.
 
-If you must use `position` (diff-relative, 0-indexed from the `@@` header):
+Avoid `position` unless `line`/`side` cannot express the anchor. GitHub's REST docs
+describe `position` as closing down, and say it is "the number of lines down from
+the first `@@` hunk header" where the line just below that header is position 1.
 
 - Fetch the file's `patch` from `GET /repos/{o}/{r}/pulls/{n}/files`.
-- Split by newlines. The `@@` hunk header at index 0 = position 0 (not a valid comment target). The first content line at index 1 = position 1.
-- In short: the 0-based array index of the split **is** the position value.
+- Count from the first `@@` hunk header using GitHub's definition; do not treat
+  source-file line numbers as positions.
 - If a file has multiple hunks (or repeated target lines), create separate comments and verify the correct hunk/occurrence.
 - Common trap: the patch changes when new commits are pushed. Always re-fetch the patch from the current PR head before computing positions.
+- After posting, read back the returned comment and confirm the `path`, `line`,
+  `side`, and `position` match the intended anchor.
 
 ## Verification
 

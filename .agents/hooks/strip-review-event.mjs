@@ -322,7 +322,12 @@ export const analyzeReviewCommand = (raw) => {
   if (filePath) {
     try {
       const payload = JSON.parse(readFileSync(filePath, 'utf-8'));
-      if ('event' in payload) {
+      if (
+        payload !== null &&
+        typeof payload === 'object' &&
+        !Array.isArray(payload) &&
+        'event' in payload
+      ) {
         delete payload.event;
         writeFileSync(filePath, JSON.stringify(payload, null, 2));
       }
