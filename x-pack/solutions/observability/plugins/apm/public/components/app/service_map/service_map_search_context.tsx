@@ -12,9 +12,16 @@ export interface ServiceMapEsQuery {
   bool: BoolQuery;
 }
 
+/**
+ * `null`      — search bar mounted but hasn't computed the query yet (gate fetch).
+ * `undefined` — no search bar provider (embeddable path — don't gate).
+ * `object`    — query is ready.
+ */
+export type ServiceMapEsQueryState = ServiceMapEsQuery | null | undefined;
+
 interface ServiceMapSearchContextValue {
-  esQuery: ServiceMapEsQuery | undefined;
-  setEsQuery: (q: ServiceMapEsQuery | undefined) => void;
+  esQuery: ServiceMapEsQueryState;
+  setEsQuery: (q: ServiceMapEsQuery) => void;
 }
 
 const ServiceMapSearchContext = createContext<ServiceMapSearchContextValue>({
@@ -23,9 +30,9 @@ const ServiceMapSearchContext = createContext<ServiceMapSearchContextValue>({
 });
 
 export function ServiceMapSearchProvider({ children }: { children: React.ReactNode }) {
-  const [esQuery, setEsQueryState] = useState<ServiceMapEsQuery | undefined>(undefined);
+  const [esQuery, setEsQueryState] = useState<ServiceMapEsQueryState>(null);
 
-  const setEsQuery = useCallback((q: ServiceMapEsQuery | undefined) => {
+  const setEsQuery = useCallback((q: ServiceMapEsQuery) => {
     setEsQueryState(q);
   }, []);
 

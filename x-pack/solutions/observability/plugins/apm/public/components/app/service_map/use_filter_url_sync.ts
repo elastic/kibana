@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
@@ -71,17 +71,16 @@ export function useFilterUrlSync() {
     notifications: { toasts },
   } = services;
 
-  const storageRef = useRef<IKbnUrlStateStorage | null>(null);
-  if (!storageRef.current) {
-    storageRef.current = createKbnUrlStateStorage({
+  const [storage] = useState<IKbnUrlStateStorage>(() =>
+    createKbnUrlStateStorage({
       useHash: false,
       history,
       ...withNotifyOnErrors(toasts),
-    });
-  }
+    })
+  );
 
   useEffect(() => {
-    const kbnUrlStateStorage = storageRef.current!;
+    const kbnUrlStateStorage = storage;
 
     // Try kbnUrlStateStorage first, fall back to raw URL parsing
     // (the typed router strips `_a` from history.location.search).
@@ -116,32 +115,35 @@ export function useFilterUrlSync() {
     return () => {
       sub.unsubscribe();
     };
-  }, [filterManager, toasts]);
+  }, [filterManager, storage, toasts]);
 
-  const persistControlSelections = useCallback((selections: ControlSelections) => {
-    if (!storageRef.current) return;
-    const currentUrlState = storageRef.current.get<AppFilterState>(APP_STATE_KEY) ?? {};
+  const persistControlSelections = useCallback(
+    (selections: ControlSelections) => {
+      const currentUrlState = storage.get<AppFilterState>(APP_STATE_KEY) ?? {};
 
-    const nonEmpty = Object.fromEntries(Object.entries(selections).filter(([, v]) => v.length > 0));
+      const nonEmpty = Object.fromEntries(
+        Object.entries(selections).filter(([, v]) => v.length > 0)
+      );
 
-    storageRef.current.set<AppFilterState>(
-      APP_STATE_KEY,
-      {
-        ...currentUrlState,
-        controlSelections: Object.keys(nonEmpty).length > 0 ? nonEmpty : undefined,
-      },
-      { replace: true }
-    );
-  }, []);
+      storage.set<AppFilterState>(
+        APP_STATE_KEY,
+        {
+          ...currentUrlState,
+          controlSelections: Object.keys(nonEmpty).length > 0 ? nonEmpty : undefined,
+        },
+        { replace: true }
+      );
+    },
+    [storage]
+  );
 
   const getRestoredControlSelections = useCallback((): ControlSelections | undefined => {
-    if (!storageRef.current) return undefined;
-    let state = storageRef.current.get<AppFilterState>(APP_STATE_KEY);
+    let state = storage.get<AppFilterState>(APP_STATE_KEY);
     if (!state) {
       state = readInitialAppStateFromRawUrl();
     }
     return state?.controlSelections ?? undefined;
-  }, []);
+  }, [storage]);
 
   return { persistControlSelections, getRestoredControlSelections };
 }

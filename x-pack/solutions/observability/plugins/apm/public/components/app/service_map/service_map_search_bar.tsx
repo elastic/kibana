@@ -128,10 +128,12 @@ export function ServiceMapSearchBar() {
   }, [panelFilters]);
 
   // Persist control selections to _a.controlSelections whenever they change.
+  // Exclude service.environment — it has a dedicated ?environment= URL param.
   useEffect(() => {
     if (!hasControlsFired.current) return;
     const selections = extractSelectionsFromFilters(panelFilters);
-    persistControlSelections(selections);
+    const { 'service.environment': _env, ...selectionsWithoutEnv } = selections;
+    persistControlSelections(selectionsWithoutEnv);
   }, [panelFilters, extractSelectionsFromFilters, persistControlSelections]);
 
   // Write environment back to the dedicated URL param.
@@ -147,35 +149,45 @@ export function ServiceMapSearchBar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [envFromControls, history, location.search]);
 
-  // Rebuild esQuery whenever any input changes.
+  // Exclude environment from panelFilters — it's handled via the dedicated
+  // `?environment=` URL param and server-side `environmentQuery()`.
+  const panelFiltersWithoutEnv = useMemo(
+    () => panelFilters.filter((f) => f.meta?.key !== 'service.environment'),
+    [panelFilters]
+  );
+
+  // Rebuild esQuery whenever any input changes, but only propagate a new
+  // reference when the serialized form actually differs (avoids refetches
+  // from semantically identical object references).
+  const prevEsQueryStringRef = useRef<string | undefined>(undefined);
   useEffect(() => {
     if (!dataView) return;
-    const esQuery = buildEsQuery(
+    const built = buildEsQuery(
       dataView,
-      [{ query: kuery, language: 'kuery' }],
-      [...filterBarFilters, ...panelFilters],
+      [{ query: '', language: 'kuery' }],
+      [...filterBarFilters, ...panelFiltersWithoutEnv],
       kibanaQuerySettings
     );
-    setEsQuery(esQuery as Parameters<typeof setEsQuery>[0]);
-  }, [dataView, kuery, filterBarFilters, panelFilters, kibanaQuerySettings, setEsQuery]);
+    const serialized = JSON.stringify(built);
+    if (serialized !== prevEsQueryStringRef.current) {
+      prevEsQueryStringRef.current = serialized;
+      setEsQuery(built);
+    }
+  }, [dataView, filterBarFilters, panelFiltersWithoutEnv, kibanaQuerySettings, setEsQuery]);
 
   // Seed the Controls dropdowns from the URL on mount.
   // Environment falls back to the dedicated `?environment=` URL param.
   // Other controls restore from `_a.controlSelections`.
-  const initialSelections = useMemo(
-    () => {
-      const restored = getRestoredControlSelections() ?? {};
-      return {
-        ...restored,
-        'service.environment':
-          restored['service.environment'] ??
-          (environment !== ENVIRONMENT_ALL.value ? [environment] : []),
-      };
-    },
-    // Only computed once — Controls are not re-initialised when the URL changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
+  // Uses a ref so Controls don't re-initialise when the URL changes.
+  const [initialSelections] = useState(() => {
+    const restored = getRestoredControlSelections() ?? {};
+    return {
+      ...restored,
+      'service.environment':
+        restored['service.environment'] ??
+        (environment !== ENVIRONMENT_ALL.value ? [environment] : []),
+    };
+  });
 
   return (
     <>

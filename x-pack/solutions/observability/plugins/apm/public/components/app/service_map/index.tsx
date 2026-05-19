@@ -11,6 +11,7 @@ import type { ReactNode } from 'react';
 import React, { useLayoutEffect, useMemo, useRef, useState, useCallback } from 'react';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import { cx } from '@emotion/css';
+import type { BoolQuery } from '@kbn/es-query';
 import {
   useServiceMapFullScreen,
   applyServiceMapFullScreenBodyClasses,
@@ -29,7 +30,6 @@ import { useServiceName } from '../../../hooks/use_service_name';
 import { useApmParams, useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import type { Environment } from '../../../../common/environment_rt';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { DisabledPrompt } from './disabled_prompt';
 import { SloOverviewFlyout, useSloOverviewFlyout } from '../../shared/slo_overview_flyout';
@@ -68,7 +68,7 @@ export function ServiceMapHome() {
       start={start}
       end={end}
       serviceGroupId={serviceGroup}
-      esQuery={esQuery}
+      esQuery={esQuery ?? undefined}
     />
   );
 }
@@ -84,7 +84,7 @@ export function ServiceMapServiceDetail() {
   const { esQuery } = useServiceMapSearchContext();
 
   return (
-    <ServiceMap environment={environment} kuery={kuery} start={start} end={end} esQuery={esQuery} />
+    <ServiceMap environment={environment} kuery={kuery} start={start} end={end} esQuery={esQuery ?? undefined} />
   );
 }
 
@@ -101,7 +101,7 @@ export function ServiceMap({
   start: string;
   end: string;
   serviceGroupId?: string;
-  esQuery?: Parameters<typeof useServiceMap>[0]['esQuery'];
+  esQuery?: { bool: BoolQuery };
 }) {
   const license = useLicenseContext();
   const serviceName = useServiceName();
@@ -119,6 +119,8 @@ export function ServiceMap({
             rangeFrom: query.rangeFrom,
             rangeTo: query.rangeTo,
             environment: query.environment,
+            // Drop kuery when navigating to the full map — filtering moves to
+            // the Controls API / filter bar on the destination page.
             kuery: '',
             comparisonEnabled: query.comparisonEnabled,
             offset: query.offset,
@@ -131,10 +133,7 @@ export function ServiceMap({
   const { onPageReady } = usePerformanceContext();
 
   const { data, status, error } = useServiceMap({
-    // When esQuery is set, environment filtering is already encoded inside it
-    // (from the Controls API environment dropdown). Pass ENVIRONMENT_ALL so the
-    // server doesn't also apply the URL `environment` param and double-filter.
-    environment: esQuery !== undefined ? ENVIRONMENT_ALL.value : environment,
+    environment,
     kuery,
     start,
     end,

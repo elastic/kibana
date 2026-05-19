@@ -27,6 +27,7 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import type { APMConfig } from '../..';
+import { extractEsQueryFilters } from './extract_es_query_filters';
 
 export async function getTraceSampleIds({
   serviceName,
@@ -50,29 +51,7 @@ export async function getTraceSampleIds({
   /** Pre-built ES query from the client (includes KQL query + filter bar + Controls API). */
   esQuery?: { bool: BoolQuery };
 }) {
-  // Collect extra filter clauses from the pre-built esQuery.
-  // We only consume the bool.filter / bool.must / bool.should / bool.must_not
-  // clauses so we don't accidentally duplicate range/environment filters.
-  const esQueryFilters: QueryDslQueryContainer[] = esQuery
-    ? [
-        ...(esQuery.bool.filter
-          ? Array.isArray(esQuery.bool.filter)
-            ? esQuery.bool.filter
-            : [esQuery.bool.filter]
-          : []),
-        ...(esQuery.bool.must
-          ? Array.isArray(esQuery.bool.must)
-            ? esQuery.bool.must
-            : [esQuery.bool.must]
-          : []),
-      ]
-    : [];
-
-  const esQueryMustNot: QueryDslQueryContainer[] = esQuery?.bool.must_not
-    ? Array.isArray(esQuery.bool.must_not)
-      ? esQuery.bool.must_not
-      : [esQuery.bool.must_not]
-    : [];
+  const { filter: esQueryFilters, mustNot: esQueryMustNot } = extractEsQueryFilters(esQuery);
 
   const query = {
     bool: {

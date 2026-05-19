@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
+// snake_case field names match the addOptionsListControl API shape.
 export interface ServiceMapControlConfig {
   field_name: string;
   title: string;

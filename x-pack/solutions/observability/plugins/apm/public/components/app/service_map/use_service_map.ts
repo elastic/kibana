@@ -62,8 +62,12 @@ export const useServiceMap = ({
   serviceName?: string;
   /** Drop cross-env spans before transforming when `environment` is a specific env. */
   strictEnvironmentScope?: boolean;
-  /** Pre-built ES query from buildEsQuery() (query + filter bar + Controls API). */
-  esQuery?: { bool: BoolQuery };
+  /**
+   * Pre-built ES query from buildEsQuery() (filter bar + Controls API selections).
+   * `null` = search bar mounted but query not yet computed (gate fetch).
+   * `undefined` = no search bar provider (embeddable — fetch immediately).
+   */
+  esQuery?: { bool: BoolQuery } | null;
 }): UseServiceMapResult => {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
@@ -71,6 +75,10 @@ export const useServiceMap = ({
   const fetcherResult = useFetcher(
     (callApmApi) => {
       if (!license || !isActivePlatinumLicense(license) || !config.serviceMapEnabled) {
+        return;
+      }
+      // esQuery === null means search bar hasn't computed yet — wait.
+      if (esQuery === null) {
         return;
       }
 

@@ -16,7 +16,11 @@ export interface ServiceMapUrlParams {
   kuery?: string;
   serviceName?: string;
   serviceGroupId?: string;
-  /** Field-value pairs to pre-populate as filter bar pills. */
+  /**
+   * Field-value pairs to pre-populate as filter bar pills.
+   * Each `field` is used unescaped in a match_phrase query — only pass trusted
+   * field names (e.g. TRANSACTION_NAME, TRANSACTION_TYPE constants).
+   */
   filterPills?: Array<{ field: string; value: string }>;
 }
 

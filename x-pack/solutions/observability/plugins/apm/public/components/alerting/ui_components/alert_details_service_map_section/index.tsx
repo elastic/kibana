@@ -70,10 +70,10 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
     const pills: Array<{ field: string; value: string }> = [];
     const transactionType = alert.fields[TRANSACTION_TYPE];
     const transactionName = alert.fields[TRANSACTION_NAME];
-    if (transactionType != null && String(transactionType).trim() !== '') {
+    if (transactionType != null) {
       pills.push({ field: 'transaction.type', value: String(transactionType) });
     }
-    if (transactionName != null && String(transactionName).trim() !== '') {
+    if (transactionName != null) {
       pills.push({ field: 'transaction.name', value: String(transactionName) });
     }
     return pills;

@@ -8,13 +8,13 @@
 import { kqlQuery, rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/common';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ServicesResponse } from '../../../common/service_map/types';
 import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import type { IEnvOptions } from './get_service_map';
+import { extractEsQueryFilters } from './extract_es_query_filters';
 
 export async function getServiceStats({
   environment,
@@ -31,26 +31,7 @@ export async function getServiceStats({
   const processorEvent = getProcessorEventForTransactions(searchAggregatedTransactions);
   const shouldQueryMetrics = processorEvent === ProcessorEvent.metric;
 
-  const esQueryFilters: QueryDslQueryContainer[] = esQuery
-    ? [
-        ...(esQuery.bool.filter
-          ? Array.isArray(esQuery.bool.filter)
-            ? esQuery.bool.filter
-            : [esQuery.bool.filter]
-          : []),
-        ...(esQuery.bool.must
-          ? Array.isArray(esQuery.bool.must)
-            ? esQuery.bool.must
-            : [esQuery.bool.must]
-          : []),
-      ]
-    : [];
-
-  const esQueryMustNot: QueryDslQueryContainer[] = esQuery?.bool.must_not
-    ? Array.isArray(esQuery.bool.must_not)
-      ? esQuery.bool.must_not
-      : [esQuery.bool.must_not]
-    : [];
+  const { filter: esQueryFilters, mustNot: esQueryMustNot } = extractEsQueryFilters(esQuery);
 
   const sharedRequestBody = {
     track_total_hits: false,

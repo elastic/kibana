@@ -84,6 +84,8 @@ export function ServiceContents({
 
   const isLoading = status === FETCH_STATUS.LOADING;
 
+  // Clear all app-level filter pills when focusing a single service — the
+  // focused view starts fresh with only the service.name scope.
   const handleFocusClick = useCallback(
     (event: React.MouseEvent<HTMLAnchorElement>) => {
       filterManager?.setAppFilters([]);
