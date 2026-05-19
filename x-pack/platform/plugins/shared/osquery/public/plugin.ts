@@ -37,7 +37,7 @@ import {
   getLazyOsqueryAction,
   getLazyLiveQueryField,
   useIsOsqueryAvailableSimple,
-  getExternalReferenceAttachmentRegular,
+  getOsqueryCaseAttachment,
 } from './shared_components';
 import type { ServicesWrapperProps } from './shared_components/services_wrapper';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
@@ -91,16 +91,23 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       },
     });
 
-    core.getStartServices().then(([coreStart, depsStart]) => {
-      plugins.cases?.attachmentFramework.registerExternalReference(
-        getExternalReferenceAttachmentRegular({
-          ...coreStart,
-          ...depsStart,
-          storage,
-          kibanaVersion,
-        } as unknown as ServicesWrapperProps['services'])
-      );
-    });
+    core
+      .getStartServices()
+      .then(([coreStart, depsStart]) => {
+        plugins.cases?.attachmentFramework.registerUnified(
+          getOsqueryCaseAttachment({
+            ...coreStart,
+            ...depsStart,
+            storage,
+            kibanaVersion,
+          } as unknown as ServicesWrapperProps['services'])
+        );
+      })
+      .catch((err) => {
+        core.notifications.toasts.addError(err, {
+          title: 'Failed to register osquery case attachment',
+        });
+      });
 
     // Return methods that should be available to other plugins
     return {};
