@@ -8,12 +8,12 @@
  */
 
 import {
-  createServerStepDefinition,
+  createPollServerStepDefinition,
   type ServerStepDefinition,
 } from '@kbn/workflows-extensions/server';
 import { durablePollStepCommonDefinition } from '../../common/step_types/durable_poll_step';
 
-export const durablePollStepDefinition = createServerStepDefinition({
+export const durablePollStepDefinition = createPollServerStepDefinition({
   ...durablePollStepCommonDefinition,
   run: async (context) => {
     // await new Promise((resolve) => setTimeout(resolve, 1000));

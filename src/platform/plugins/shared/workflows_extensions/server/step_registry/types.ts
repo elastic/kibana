@@ -168,7 +168,7 @@ export type OnCancelHandler<
 export type PollPolicy<
   Input extends z.ZodType = z.ZodType,
   Config extends z.ZodObject = z.ZodObject,
-  State = unknown
+  State extends Record<string, unknown> = Record<string, unknown>
 > =
   | { strategy: 'fixed'; intervalMs: number }
   | {
@@ -201,7 +201,7 @@ export interface PollLifecycle<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
   Config extends z.ZodObject = z.ZodObject,
-  State = unknown
+  State extends Record<string, unknown> = Record<string, unknown>
 > {
   handler: PollHandler<Input, Output, Config, State>;
   policy: PollPolicy<Input, Config, State>;
@@ -270,7 +270,7 @@ export type ServerStepDefinition<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
   Config extends z.ZodObject = z.ZodObject,
-  State = unknown
+  State extends Record<string, unknown> = Record<string, unknown>
 > = CommonStepDefinition<Input, Output, Config> & {
   onCancel?: OnCancelHandler<Input, Config>;
 } & (
@@ -305,7 +305,7 @@ export interface PollOnlyMode<
   Input extends z.ZodType,
   Output extends z.ZodType,
   Config extends z.ZodObject,
-  State
+  State extends Record<string, unknown> = Record<string, unknown>
 > {
   handler?: never;
   run?: never;
@@ -322,6 +322,41 @@ export interface RunPlusPollMode<
   run: RunWithHandoffHandler<Input, Output, Config, State>;
   poll: PollLifecycle<Input, Output, Config, State>;
 }
+
+/**
+ * Full server definition for **`run` + `poll`**. Same fields as the corresponding
+ * branch of {@link ServerStepDefinition}, kept separate for overload-friendly helpers.
+ */
+export type RunPlusPollStepDefinition<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject,
+  State extends Record<string, unknown> = Record<string, unknown>
+> = CommonStepDefinition<Input, Output, Config> &
+  RunPlusPollMode<Input, Output, Config, State> & {
+    onCancel?: OnCancelHandler<Input, Config>;
+  };
+
+/**
+ * Full server definition for **`poll` only**. Same fields as the corresponding
+ * branch of {@link ServerStepDefinition}, kept separate for overload-friendly helpers.
+ */
+export type PollOnlyStepDefinition<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject,
+  State extends Record<string, unknown> = Record<string, unknown>
+> = CommonStepDefinition<Input, Output, Config> &
+  PollOnlyMode<Input, Output, Config, State> & {
+    onCancel?: OnCancelHandler<Input, Config>;
+  };
+
+/**
+ * Continuation from `run` into `poll` — same persisted shape as {@link PollContinueResult}.
+ * Kept as a named alias for authors who think in terms of a "hand-off" result.
+ */
+export type RunHandoffResult<State extends Record<string, unknown> = Record<string, unknown>> =
+  PollContinueResult<State>;
 
 // -----------------------------------------------------------------------------
 // Helper: createServerStepDefinition (overloaded)
@@ -346,7 +381,7 @@ export function createServerStepDefinition<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
   Config extends z.ZodObject = z.ZodObject,
-  State = unknown
+  State extends Record<string, unknown> = Record<string, unknown>
 >(
   definition: CommonStepDefinition<Input, Output, Config> &
     RunPlusPollMode<Input, Output, Config, State> & {
@@ -358,7 +393,7 @@ export function createServerStepDefinition<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
   Config extends z.ZodObject = z.ZodObject,
-  State = unknown
+  State extends Record<string, unknown> = Record<string, unknown>
 >(
   definition: CommonStepDefinition<Input, Output, Config> &
     PollOnlyMode<Input, Output, Config, State> & {
@@ -382,6 +417,35 @@ export function createServerStepDefinition(
 ): ServerStepDefinition {
   validateStepDefinitionShape(definition);
   return applyPollDefaults(definition);
+}
+
+/**
+ * Like {@link createServerStepDefinition} but only for definitions that include **`poll`**
+ * (`run` + `poll` or **`poll` only**). Narrows inference so single-`handler` steps are excluded.
+ */
+export function createPollServerStepDefinition<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject,
+  State extends Record<string, unknown> = Record<string, unknown>
+>(
+  definition: RunPlusPollStepDefinition<Input, Output, Config, State>
+): RunPlusPollStepDefinition<Input, Output, Config, State>;
+export function createPollServerStepDefinition<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject,
+  State extends Record<string, unknown> = Record<string, unknown>
+>(
+  definition: PollOnlyStepDefinition<Input, Output, Config, State>
+): PollOnlyStepDefinition<Input, Output, Config, State>;
+export function createPollServerStepDefinition(
+  definition: PollOnlyStepDefinition | RunPlusPollStepDefinition
+): PollOnlyStepDefinition | RunPlusPollStepDefinition {
+  validateStepDefinitionShape(definition as ServerStepDefinition);
+  return applyPollDefaults(definition as ServerStepDefinition) as
+    | PollOnlyStepDefinition
+    | RunPlusPollStepDefinition;
 }
 
 /**

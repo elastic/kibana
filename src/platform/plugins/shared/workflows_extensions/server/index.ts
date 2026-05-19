@@ -49,6 +49,8 @@ export type {
   RunOnlyMode,
   PollOnlyMode,
   RunPlusPollMode,
+  PollOnlyStepDefinition,
+  RunPlusPollStepDefinition,
   StepHandler,
   StepHandlerContext,
   StepHandlerResult,
@@ -64,12 +66,12 @@ export type {
   PhaseErrorResult,
   DurablePhaseResult,
   PollContinueResult,
+  RunHandoffResult,
 } from './step_registry/types';
 
 export {
   createServerStepDefinition,
-  validateStepDefinitionShape,
-  pollCeilingsAreDefault,
+  createPollServerStepDefinition,
   DEFAULT_POLL_CEILINGS,
 } from './step_registry/types';
 
