@@ -1966,7 +1966,6 @@ Object {
               },
               "required": Array [
                 "summary",
-                "otherFields",
               ],
               "type": "object",
             },
@@ -3078,7 +3077,6 @@ Object {
               },
               "required": Array [
                 "short_description",
-                "additional_fields",
               ],
               "type": "object",
             },
@@ -3917,7 +3915,6 @@ Object {
               },
               "required": Array [
                 "short_description",
-                "additional_fields",
               ],
               "type": "object",
             },

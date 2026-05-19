@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
+import { NO_DEFAULT_MODEL } from '../../../common/constants';
 import type { EndpointDeprecationInfo } from '../../types';
 import { SubFeatureCard } from './sub_feature_card';
 
@@ -38,7 +39,7 @@ interface FeatureSectionProps {
   deprecatedEndpointsMap: Map<string, EndpointDeprecationInfo>;
   isTechPreview?: boolean;
   isBeta?: boolean;
-  globalDefaultId: string;
+  globalDefaultId: string | undefined;
 }
 
 export const FeatureSection: React.FC<FeatureSectionProps> = ({
@@ -118,7 +119,11 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
                     deprecatedEndpointsMap={deprecatedEndpointsMap}
                     hasSavedObject={hasSavedObject}
                     isFeatureDirty={isFeatureDirty}
-                    globalDefaultId={globalDefaultId}
+                    globalDefaultId={
+                      feature.ignoreGlobalDefault
+                        ? NO_DEFAULT_MODEL
+                        : globalDefaultId ?? NO_DEFAULT_MODEL
+                    }
                   />
                 </EuiFlexItem>
               )
