@@ -48,8 +48,12 @@ export function getDashboardCRUResponseBody(
       warnings.push(...scopeWarnings);
     }
 
-    // Route does not apply defaults to response
-    // Instead, call validate to ensure defaults are applied to response
+    /**
+     * Route does not apply defaults to response.
+     * Instead, call validate to ensure dashboard-level defaults are applied to response;
+     * note that some nested properties add their own validation on transform to inject
+     * their own defaults as necessary.
+     */
     sanatizedDashboardState = dashboardStateSchema.validate(dashboardState);
   } catch (transformOutError) {
     throw Boom.badRequest(`Invalid response. ${transformOutError.message}`);

@@ -8,7 +8,10 @@
  */
 
 import type { Writable } from '@kbn/utility-types';
-import type { DashboardState } from '../../types';
+import type { Type, TypeOf } from '@kbn/config-schema';
+
+import type { DashboardState, Warnings } from '../../types';
+import type { getDashboardStateSchema } from '../../dashboard_state_schemas';
 
 const savedObjectToAPIOptionsKeys = {
   hidePanelTitles: 'hide_panel_titles',
@@ -23,8 +26,11 @@ type ParsedSavedObjectOptions = { [key in keyof typeof savedObjectToAPIOptionsKe
 
 export function transformOptionsOut(
   optionsJSON: string,
-  controlGroupShowApplyButtonSetting?: boolean
-): Partial<DashboardState['options']> {
+  controlGroupShowApplyButtonSetting: boolean | undefined,
+  schema: Type<TypeOf<ReturnType<typeof getDashboardStateSchema>>['options']>
+): { options: Partial<DashboardState['options']>; warning: Warnings[number] | undefined } {
+  let warning: Warnings[number] | undefined;
+
   const options = JSON.parse(optionsJSON) as ParsedSavedObjectOptions;
   const apiOptions: Writable<Partial<DashboardState['options']>> = {};
   Object.keys(options).forEach((key) => {
@@ -33,11 +39,23 @@ export function transformOptionsOut(
     if (apiKey) apiOptions[apiKey] = options[savedObjectKey];
   });
 
-  return {
+  let transformedOptions = {
     ...apiOptions,
     ...(apiOptions.auto_apply_filters === undefined &&
       controlGroupShowApplyButtonSetting !== undefined && {
         auto_apply_filters: !controlGroupShowApplyButtonSetting,
       }),
   };
+
+  try {
+    transformedOptions = schema.validate(transformOptionsOut);
+  } catch (e) {
+    warning = {
+      type: 'dropped_property',
+      message: `Unable to validate dashboard options. Error:  ${e.messaged}`,
+      key: 'options',
+      value: transformedOptions,
+    };
+  }
+  return { options: transformedOptions, warning };
 }
