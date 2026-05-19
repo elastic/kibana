@@ -450,7 +450,7 @@ describe('getColumnsWithTimeField', () => {
         }
         return undefined;
       },
-    }) as unknown as IUiSettingsClient;
+    } as unknown as IUiSettingsClient);
 
   it('should prepend the time field for a non-transformational ES|QL query', () => {
     expect(
@@ -470,12 +470,9 @@ describe('getColumnsWithTimeField', () => {
 
   it('should not prepend for a transformational ES|QL query', () => {
     expect(
-      getColumnsWithTimeField(
-        ['bytes', 'extension'],
-        '@timestamp',
-        createUiSettingsMock(false),
-        { esql: 'from logstash-* | keep bytes, extension' }
-      )
+      getColumnsWithTimeField(['bytes', 'extension'], '@timestamp', createUiSettingsMock(false), {
+        esql: 'from logstash-* | keep bytes, extension',
+      })
     ).toEqual(['bytes', 'extension']);
   });
 
@@ -489,23 +486,17 @@ describe('getColumnsWithTimeField', () => {
 
   it('should not prepend when time field already in columns', () => {
     expect(
-      getColumnsWithTimeField(
-        ['@timestamp', 'bytes'],
-        '@timestamp',
-        createUiSettingsMock(false),
-        { esql: 'from logstash-*' }
-      )
+      getColumnsWithTimeField(['@timestamp', 'bytes'], '@timestamp', createUiSettingsMock(false), {
+        esql: 'from logstash-*',
+      })
     ).toEqual(['@timestamp', 'bytes']);
   });
 
   it('should not prepend when hideTimeColumn setting is true', () => {
     expect(
-      getColumnsWithTimeField(
-        ['bytes', 'extension'],
-        '@timestamp',
-        createUiSettingsMock(true),
-        { esql: 'from logstash-*' }
-      )
+      getColumnsWithTimeField(['bytes', 'extension'], '@timestamp', createUiSettingsMock(true), {
+        esql: 'from logstash-*',
+      })
     ).toEqual(['bytes', 'extension']);
   });
 });
