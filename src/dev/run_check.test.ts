@@ -263,6 +263,31 @@ describe('run_check', () => {
     expect(output).toContain('lint  ✓ 10 files (fixed 2 files)');
   });
 
+  it('skips fast path when changed test files are integration tests', async () => {
+    mockResolveValidationBaseContext.mockResolvedValue({
+      ...baseContext,
+      runContext: {
+        ...baseContext.runContext,
+        changedFiles: ['src/core/server/integration_tests/user_storage/remove.test.ts'],
+      },
+    });
+
+    mockExistsSync.mockImplementation((p: string) => {
+      // Simulate a jest.integration.config.js in the test file's directory
+      if (p === '/repo/src/core/server/integration_tests/user_storage/jest.integration.config.js') {
+        return true;
+      }
+      return p === '/repo/packages/foo/jest.config.js' || p === '/repo/packages/bar/jest.config.js';
+    });
+
+    await handler(createArgs());
+
+    // Fast path (execa) must not have been called
+    expect(mockExeca).not.toHaveBeenCalled();
+    // Should fall through to the Moon path instead
+    expect(mockRunJestViaMoon).toHaveBeenCalled();
+  });
+
   it('uses test-only fast path when all changed files are test files', async () => {
     mockResolveValidationBaseContext.mockResolvedValue({
       ...baseContext,

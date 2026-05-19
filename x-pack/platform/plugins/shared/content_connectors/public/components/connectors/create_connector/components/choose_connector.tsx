@@ -96,10 +96,10 @@ export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({
     [connectorTypes]
   );
   const { selectedConnector } = useValues(
-    NewConnectorLogic({ http, navigateToUrl: application?.navigateToUrl })
+    NewConnectorLogic({ http, navigateToApp: application?.navigateToApp })
   );
   const { setSelectedConnector } = useActions(
-    NewConnectorLogic({ http, navigateToUrl: application?.navigateToUrl })
+    NewConnectorLogic({ http, navigateToApp: application?.navigateToApp })
   );
 
   const getInitialOptions = () => {
