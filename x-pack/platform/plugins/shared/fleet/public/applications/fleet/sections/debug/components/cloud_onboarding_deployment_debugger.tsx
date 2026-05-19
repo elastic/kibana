@@ -128,7 +128,7 @@ export const CloudOnboardingDeploymentDebugger: React.FunctionComponent = () => 
         cloudProvider: 'aws',
         vars: {
           role_arn: { value: newConnectorRoleArn, type: 'text' },
-          external_id: { type: 'text', value: newConnectorExternalId }, // password
+          external_id: { type: 'password', value: newConnectorExternalId }, // password
         },
       },
       version: API_VERSIONS.public.v1,

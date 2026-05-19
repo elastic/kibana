@@ -37,7 +37,6 @@ class CloudOnboardingDeploymentService {
 
     const attributes: CloudOnboardingDeploymentSOAttributes = {
       ...input,
-      mechanisms: input.mechanisms,
       status: 'pending',
       attemptCount: 1,
     };

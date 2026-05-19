@@ -64,11 +64,13 @@ export const createCloudConnectorHandler: FleetRequestHandler<
     ) {
       logger.debug('external_id is a plain string — creating Fleet secret');
       const [secret] = await createSecrets({ esClient, values: [externalIdVar.value] });
-      createdSecretId = Array.isArray(secret) ? secret[0].id : secret.id;
-      body.vars = {
-        ...body.vars,
-        external_id: { type: 'password', value: { isSecretRef: true, id: createdSecretId } },
-      };
+      if ('id' in secret) {
+        createdSecretId = secret.id;
+        body.vars = {
+          ...body.vars,
+          external_id: { type: 'password', value: { isSecretRef: true, id: createdSecretId } },
+        };
+      }
     }
 
     let cloudConnector;

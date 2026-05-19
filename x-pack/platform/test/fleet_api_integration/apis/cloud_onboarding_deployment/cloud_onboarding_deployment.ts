@@ -10,16 +10,7 @@ import { skipIfNoDockerRegistry } from '../../helpers';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 const BASE_URL = '/api/fleet/cloud_onboarding_deployments';
-const CONNECTORS_URL = '/api/fleet/cloud_connectors';
-
-const connectorFixture = (name: string) => ({
-  name,
-  cloudProvider: 'aws',
-  vars: {
-    role_arn: { value: 'arn:aws:iam::123456789012:role/test', type: 'text' },
-    external_id: { type: 'password', value: { isSecretRef: true, id: 'test1234567890123456' } },
-  },
-});
+const SO_API = '/api/saved_objects';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -37,14 +28,24 @@ export default function (providerContext: FtrProviderContext) {
     let listConnectorId: string;
 
     let connectorSeq = 0;
+    // Create a fleet-cloud-connector SO directly (bypasses Fleet API validation).
+    // The connectorId validation in the deployment service only checks that the SO exists.
     const createConnector = async (urlPrefix = '') => {
       const name = `test-connector-${++connectorSeq}`;
       const { body } = await supertest
-        .post(`${urlPrefix}${CONNECTORS_URL}`)
+        .post(`${urlPrefix}${SO_API}/fleet-cloud-connector`)
         .set('kbn-xsrf', 'xxxx')
-        .send(connectorFixture(name))
+        .send({
+          attributes: {
+            name,
+            cloudProvider: 'aws',
+            vars: {},
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+        })
         .expect(200);
-      return body.item.id as string;
+      return body.id as string;
     };
 
     before(async () => {
