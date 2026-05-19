@@ -284,7 +284,14 @@ describe('WorkflowApi', () => {
 
   describe('getWorkflowExecutions', () => {
     it('should call GET /api/workflows/workflow/{id}/executions with query', async () => {
-      const params = { page: 1, size: 10 };
+      const params = {
+        page: 1,
+        size: 10,
+        finishedAfter: '2026-05-01T00:00:00.000Z',
+        finishedBefore: '2026-05-14T00:00:00.000Z',
+        sortField: 'finishedAt' as const,
+        sortOrder: 'desc' as const,
+      };
       await api.getWorkflowExecutions('wf-1', params);
 
       expect(http.get).toHaveBeenCalledWith('/api/workflows/workflow/wf-1/executions', {
