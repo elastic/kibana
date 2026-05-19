@@ -147,7 +147,6 @@ src/core/packages/chrome/browser-internal-types @elastic/appex-sharedux
 src/core/packages/chrome/browser-mocks @elastic/appex-sharedux
 src/core/packages/chrome/feature-flags @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout @elastic/appex-sharedux
-src/core/packages/chrome/layout/core-chrome-layout-components @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout-constants @elastic/appex-sharedux
 src/core/packages/chrome/layout/core-chrome-layout-utils @elastic/appex-sharedux
 src/core/packages/chrome/sidebar/sidebar @elastic/appex-sharedux
@@ -357,6 +356,7 @@ src/core/packages/user-storage/server-mocks @elastic/appex-sharedux
 src/core/packages/user-storage/test/plugins/user_storage_test @elastic/appex-sharedux
 src/core/test-helpers/kbn-server @elastic/kibana-core
 src/core/test-helpers/model-versions @elastic/kibana-core
+src/platform/kbn-ui/chrome-layout @elastic/appex-sharedux
 src/platform/kbn-ui/side-navigation @elastic/appex-sharedux
 src/platform/packages/private/analytics/utils/analytics_collection_utils @elastic/kibana-core
 src/platform/packages/private/dashboard/dashboard-navigation-options-common @elastic/kibana-presentation
@@ -3313,6 +3313,7 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 # Shared UX
 /src/core/packages/chrome @elastic/appex-sharedux
 /src/platform/kbn-ui/_tooling @elastic/appex-sharedux
+/src/platform/kbn-ui/chrome-layout @elastic/appex-sharedux
 /src/platform/kbn-ui/side-navigation @elastic/appex-sharedux
 /x-pack/platform/test/serverless/api_integration/test_suites/favorites @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200985
 /src/platform/test/api_integration/apis/short_url/**/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files#r1846654156

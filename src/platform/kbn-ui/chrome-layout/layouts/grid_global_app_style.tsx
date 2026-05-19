@@ -15,7 +15,8 @@ import {
   APP_MAIN_SCROLL_CONTAINER_ID,
   layoutVar,
 } from '@kbn/core-chrome-layout-constants';
-import { CommonGlobalAppStyles } from '../common/global_app_styles';
+import { CommonGlobalAppStyles } from './global_app_styles';
+import type { ChromeStyle } from '../layout.types';
 
 const globalLayoutStyles = (euiThemeContext: UseEuiTheme) => {
   return css`
@@ -185,10 +186,7 @@ const globalTempHackStyles = (_euiTheme: UseEuiTheme['euiTheme'], chromeStyle: C
   }
 `;
 
-// TODO: https://github.com/elastic/kibana/issues/251035
-type ChromeStyle = 'project' | 'classic';
-
-interface GridLayoutGlobalStylesProps {
+export interface GridLayoutGlobalStylesProps {
   chromeStyle?: ChromeStyle;
 }
 
