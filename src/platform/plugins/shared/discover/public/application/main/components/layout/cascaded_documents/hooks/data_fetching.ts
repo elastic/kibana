@@ -88,6 +88,15 @@ export const useGroupedCascadeData = ({
                     } else if (isNil(existingValue)) {
                       allValues[identifier] = currentValue;
                     }
+                  } else if (typeof currentValue === 'string') {
+                    if (!columnTypes.has(identifier)) {
+                      columnTypes.set(identifier, 'array');
+                    }
+                    if (Array.isArray(existingValue)) {
+                      allValues[identifier] = [...existingValue, currentValue];
+                    } else if (isNil(existingValue)) {
+                      allValues[identifier] = [currentValue];
+                    }
                   } else if (Array.isArray(currentValue)) {
                     if (!columnTypes.has(identifier)) {
                       columnTypes.set(identifier, 'array');

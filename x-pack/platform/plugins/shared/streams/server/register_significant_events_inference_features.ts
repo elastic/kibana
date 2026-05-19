@@ -78,6 +78,7 @@ export function registerSignificantEventsInferenceFeatures(
     featureName: string;
     featureDescription: string;
     recommendedEndpoints: string[];
+    ignoreGlobalDefault: boolean;
   }> = [
     {
       featureId: STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
@@ -88,6 +89,7 @@ export function registerSignificantEventsInferenceFeatures(
         defaultMessage: 'Model used to extract Knowledge Indicators.',
       }),
       recommendedEndpoints: KI_EXTRACTION_RECOMMENDED_MODELS,
+      ignoreGlobalDefault: true,
     },
     {
       featureId: STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
@@ -101,6 +103,7 @@ export function registerSignificantEventsInferenceFeatures(
         }
       ),
       recommendedEndpoints: KI_QUERY_GENERATION_RECOMMENDED_MODELS,
+      ignoreGlobalDefault: true,
     },
     {
       featureId: STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
@@ -111,6 +114,7 @@ export function registerSignificantEventsInferenceFeatures(
         defaultMessage: 'Model used during Discovery and Significant Event generation.',
       }),
       recommendedEndpoints: DISCOVERY_RECOMMENDED_MODELS,
+      ignoreGlobalDefault: true,
     },
   ];
 
@@ -122,6 +126,7 @@ export function registerSignificantEventsInferenceFeatures(
       featureDescription: child.featureDescription,
       taskType: 'chat_completion',
       recommendedEndpoints: child.recommendedEndpoints,
+      ignoreGlobalDefault: child.ignoreGlobalDefault,
     });
     if (childResult.ok) {
       logger.debug(`Registered child inference feature "${child.featureId}"`);
