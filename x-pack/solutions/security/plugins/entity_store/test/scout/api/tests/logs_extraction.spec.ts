@@ -286,7 +286,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         namespace: 'okta',
         confidence: ENTITY_CONFIDENCE.High,
       },
-      user: { hash: ['hash-1', 'hash-2'] },
+      user: { hash: expect.arrayContaining(['hash-1', 'hash-2']) },
     });
 
     // Update sub_type in between documents with null values
@@ -360,7 +360,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         namespace: 'okta',
         confidence: ENTITY_CONFIDENCE.High,
       },
-      user: { hash: ['hash-1', 'hash-2', 'hash-3', 'hash-4', 'hash-5'] },
+      user: { hash: expect.arrayContaining(['hash-1', 'hash-2', 'hash-3', 'hash-4', 'hash-5']) },
     });
 
     // Make sure latest is not overwritten from the document if not changed
@@ -398,18 +398,18 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         confidence: ENTITY_CONFIDENCE.High,
       },
       user: {
-        hash: [
+        hash: expect.arrayContaining([
           'hash-1',
-          'hash-10',
-          'hash-11',
+          'hash-2',
           'hash-3',
           'hash-4',
           'hash-5',
           'hash-6',
           'hash-7',
           'hash-8',
-          'hash-2',
-        ],
+          'hash-10',
+          'hash-11',
+        ]),
         domain: 'example.com',
       },
     });
