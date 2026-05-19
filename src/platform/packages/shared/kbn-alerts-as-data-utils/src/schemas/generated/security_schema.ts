@@ -227,6 +227,8 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.workflow_status_updated_at': schemaDate,
   'kibana.alert.workflow_tags': schemaStringArray,
   'kibana.alert.workflow_user': schemaString,
+  'kibana.cps_scope.expression': schemaString,
+  'kibana.cps_scope.linked_projects': schemaUnknownArray,
   'kibana.version': schemaString,
   'service.asset.criticality': schemaString,
   'service.risk.calculated_level': schemaString,

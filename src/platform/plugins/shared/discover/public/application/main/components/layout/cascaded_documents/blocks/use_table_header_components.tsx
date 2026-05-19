@@ -98,7 +98,7 @@ function CascadeGroupingSelectionPopover({
       })}
       isOpen={cascadeSelectOpen}
       closePopover={closeSelectionPopover}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
       button={
         <EuiToolTip
           title={i18n.translate('discover.dataCascade.header.techPreviewLabel', {

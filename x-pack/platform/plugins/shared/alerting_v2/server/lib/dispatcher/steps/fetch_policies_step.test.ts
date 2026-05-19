@@ -19,6 +19,8 @@ describe('FetchPoliciesStep', () => {
       createActionPolicySavedObjectService());
   });
 
+  const buildStep = () => new FetchPoliciesStep(npSoService);
+
   it('fetches all decrypted policies via findAllDecrypted', async () => {
     mockFindAllDecrypted.mockResolvedValue([
       {
@@ -26,6 +28,7 @@ describe('FetchPoliciesStep', () => {
         attributes: {
           name: 'Policy 1',
           description: 'Test',
+          type: 'global',
           destinations: [{ type: 'workflow' as const, id: 'w1' }],
           matcher: null,
           groupBy: null,
@@ -39,10 +42,7 @@ describe('FetchPoliciesStep', () => {
       },
     ]);
 
-    const step = new FetchPoliciesStep(npSoService);
-    const state = createDispatcherPipelineState();
-
-    const result = await step.execute(state);
+    const result = await buildStep().execute(createDispatcherPipelineState());
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -63,10 +63,7 @@ describe('FetchPoliciesStep', () => {
   it('returns empty map when no policies exist', async () => {
     mockFindAllDecrypted.mockResolvedValue([]);
 
-    const step = new FetchPoliciesStep(npSoService);
-    const state = createDispatcherPipelineState();
-
-    const result = await step.execute(state);
+    const result = await buildStep().execute(createDispatcherPipelineState());
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -78,14 +75,66 @@ describe('FetchPoliciesStep', () => {
       { id: 'p1', error: { statusCode: 500, message: 'Decryption failed', error: 'Error' } },
     ]);
 
-    const step = new FetchPoliciesStep(npSoService);
-    const state = createDispatcherPipelineState();
-
-    const result = await step.execute(state);
+    const result = await buildStep().execute(createDispatcherPipelineState());
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     expect(result.data?.policies?.size).toBe(0);
+  });
+
+  describe('type and ruleId', () => {
+    it('maps an explicit "global" policy', async () => {
+      mockFindAllDecrypted.mockResolvedValue([
+        {
+          id: 'p-global',
+          attributes: {
+            name: 'G',
+            type: 'global',
+            destinations: [{ type: 'workflow' as const, id: 'w1' }],
+            auth: { apiKey: 'k', owner: 'elastic', createdByUser: false },
+            createdBy: null,
+            updatedBy: null,
+            createdAt: '2026-01-01T00:00:00.000Z',
+            updatedAt: '2026-01-01T00:00:00.000Z',
+          },
+        },
+      ]);
+
+      const result = await buildStep().execute(createDispatcherPipelineState());
+
+      if (result.type !== 'continue') throw new Error('expected continue');
+      const policy = result.data?.policies?.get('p-global');
+      expect(policy?.type).toBe('global');
+      expect(policy && 'ruleId' in policy ? policy.ruleId : undefined).toBeUndefined();
+    });
+
+    it('maps a "single_rule" policy and surfaces the linked ruleId', async () => {
+      mockFindAllDecrypted.mockResolvedValue([
+        {
+          id: 'p-single',
+          attributes: {
+            name: 'S',
+            type: 'single_rule',
+            ruleId: 'rule-7',
+            destinations: [{ type: 'workflow' as const, id: 'w1' }],
+            auth: { apiKey: 'k', owner: 'elastic', createdByUser: false },
+            createdBy: null,
+            updatedBy: null,
+            createdAt: '2026-01-01T00:00:00.000Z',
+            updatedAt: '2026-01-01T00:00:00.000Z',
+          },
+        },
+      ]);
+
+      const result = await buildStep().execute(createDispatcherPipelineState());
+
+      if (result.type !== 'continue') throw new Error('expected continue');
+      const policy = result.data?.policies?.get('p-single');
+      expect(policy?.type).toBe('single_rule');
+      if (policy?.type === 'single_rule') {
+        expect(policy.ruleId).toBe('rule-7');
+      }
+    });
   });
 
   it('fetches multiple policies', async () => {
@@ -94,6 +143,7 @@ describe('FetchPoliciesStep', () => {
         id: 'p1',
         attributes: {
           name: 'Policy 1',
+          type: 'global',
           destinations: [{ type: 'workflow' as const, id: 'w1' }],
           auth: { apiKey: 'key-1', owner: 'elastic', createdByUser: false },
           createdBy: null,
@@ -106,6 +156,7 @@ describe('FetchPoliciesStep', () => {
         id: 'p2',
         attributes: {
           name: 'Policy 2',
+          type: 'global',
           destinations: [],
           auth: { apiKey: 'key-2', owner: 'elastic', createdByUser: false },
           createdBy: null,
@@ -116,10 +167,7 @@ describe('FetchPoliciesStep', () => {
       },
     ]);
 
-    const step = new FetchPoliciesStep(npSoService);
-    const state = createDispatcherPipelineState();
-
-    const result = await step.execute(state);
+    const result = await buildStep().execute(createDispatcherPipelineState());
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;

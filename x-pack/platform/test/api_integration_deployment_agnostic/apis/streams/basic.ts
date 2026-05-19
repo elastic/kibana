@@ -129,6 +129,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await kibanaServer.uiSettings.update({
             [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: true,
           });
+          await kibanaServer.uiSettings.waitForEventualCacheRefresh();
         }
       }
     });
@@ -138,6 +139,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await kibanaServer.uiSettings.update({
           [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: false,
         });
+        await kibanaServer.uiSettings.waitForEventualCacheRefresh();
       }
     });
 
