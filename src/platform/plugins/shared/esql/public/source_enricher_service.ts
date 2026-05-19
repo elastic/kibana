@@ -9,6 +9,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ESQLSourceResult } from '@kbn/esql-types';
+import { reportEsqlError } from '@kbn/esql-editor';
 
 type SourceEnricher = (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
 
@@ -32,6 +33,7 @@ export class SourceEnricherService {
         enriched = await enricher(enriched);
       } catch (error) {
         this.logger.error(error);
+        reportEsqlError(error, { errorType: 'SourceEnricher' });
       }
     }
     return enriched;
