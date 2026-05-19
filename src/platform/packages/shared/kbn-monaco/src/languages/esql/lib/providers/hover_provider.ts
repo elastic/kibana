@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import { getHoverItem } from '@kbn/esql-language';
+import { FIX_WITH_AI_COMMAND_ID } from '@kbn/esql-types';
 import type { monaco } from '../../../../monaco_imports';
 import { createCancellableCallbacks, createMonacoProvider } from './providers_factory';
 import { getDecorationHoveredMessages, monacoPositionToOffset } from '../shared/utils';
@@ -28,9 +30,8 @@ export function getHoverProvider(deps?: ESQLDependencies): monaco.languages.Hove
           const fullText = safeModel.getValue();
           const offset = monacoPositionToOffset(fullText, position);
           const hoveredWord = safeModel.getWordAtPosition(position);
-
           // Monaco triggers the hover event on each char of the word,
-          // we only want to track the Hover if the word changed.
+          // we only want to track the hover event if the word changed.
           if (
             hoveredWord &&
             hoveredWord.word !== lastHoveredWord &&
@@ -43,8 +44,53 @@ export function getHoverProvider(deps?: ESQLDependencies): monaco.languages.Hove
               deps?.telemetry?.onDecorationHoverShown(hoverMessages.join(', '));
             }
           }
+
           const cancellableCallbacks = createCancellableCallbacks(deps, token);
-          return getHoverItem(fullText, offset, cancellableCallbacks);
+          const hoverResult = await getHoverItem(fullText, offset, cancellableCallbacks);
+
+          if (!deps?.isSuggestFixEnabled) {
+            return hoverResult;
+          }
+
+          const markers = monaco.editor.getModelMarkers({ resource: model.uri });
+          const errorAtPosition = markers.find(
+            (m) =>
+              m.severity === monaco.MarkerSeverity.Error &&
+              m.startLineNumber <= position.lineNumber &&
+              position.lineNumber <= m.endLineNumber &&
+              (m.startLineNumber < position.lineNumber || m.startColumn <= position.column) &&
+              (m.endLineNumber > position.lineNumber || position.column <= m.endColumn)
+          );
+
+          if (!errorAtPosition) {
+            return hoverResult;
+          }
+
+          const rawCode = errorAtPosition.code;
+          const errorCode = typeof rawCode === 'string' ? rawCode : rawCode?.value;
+
+          const args = [
+            fullText,
+            errorAtPosition.message,
+            errorCode,
+            errorAtPosition.startLineNumber,
+            model.uri.toString(),
+          ];
+          const commandUri = `command:${FIX_WITH_AI_COMMAND_ID}?${encodeURIComponent(
+            JSON.stringify(args)
+          )}`;
+          const fixLink: monaco.IMarkdownString = {
+            value: `[${i18n.translate('monaco.esql.fixWithAI.hoverLink', {
+              defaultMessage: '✨ Fix with AI',
+            })}](${commandUri})`,
+            isTrusted: true,
+          };
+
+          if (!hoverResult) {
+            return { contents: [fixLink] };
+          }
+
+          return { ...hoverResult, contents: [...hoverResult.contents, fixLink] };
         },
         emptyResult: null,
       });
