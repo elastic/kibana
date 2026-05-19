@@ -109,9 +109,9 @@ export async function executor(
         spacePrefix,
         services: {
           share,
-          scopedClusterClient,
           logger,
           ruleResultService,
+          getAsyncSearchClient: services.getAsyncSearchClient,
         },
         dateStart,
         dateEnd,

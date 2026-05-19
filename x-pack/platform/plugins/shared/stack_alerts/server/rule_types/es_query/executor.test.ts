@@ -22,6 +22,7 @@ import { ALERT_GROUPING } from '@kbn/rule-data-utils';
 
 const logger = loggerMock.create();
 const scopedClusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
+const getAsyncSearchClientMock = jest.fn();
 const createSearchSourceClientMock = () => {
   const searchSourceMock = createSearchSourceMock();
   searchSourceMock.fetch$ = jest.fn().mockImplementation(() => of({ rawResponse: { took: 5 } }));
@@ -108,6 +109,7 @@ describe('es_query executor', () => {
       logger,
       shouldWriteAlerts: () => true,
       getDataViews: jest.fn(),
+      getAsyncSearchClient: getAsyncSearchClientMock,
     };
     const coreMock = {
       http: { basePath: { publicBaseUrl: 'https://localhost:5601' } },
@@ -237,9 +239,9 @@ describe('es_query executor', () => {
         alertLimit: 1000,
         params: { ...defaultProps, searchType: 'esqlQuery' },
         services: {
-          scopedClusterClient: scopedClusterClientMock,
           logger,
           share: undefined,
+          getAsyncSearchClient: getAsyncSearchClientMock,
         },
         spacePrefix: '',
         dateStart: new Date().toISOString(),
