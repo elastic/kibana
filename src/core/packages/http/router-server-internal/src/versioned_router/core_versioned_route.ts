@@ -237,6 +237,8 @@ export class CoreVersionedRoute implements VersionedRoute {
         });
         validator.getBody(response.payload, 'response body');
       } catch (e) {
+        // console.log('response', JSON.stringify(response.payload, null, 2));
+
         return responseFactory.custom({
           statusCode: 500,
           body: `Failed output validation: ${e.message}`,

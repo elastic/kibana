@@ -16,11 +16,15 @@ import { transformSearchSourceOut } from './transform_search_source_out';
 import { transformOptionsOut } from './transform_options_out';
 import { transformPanelsOut } from './transform_panels_out';
 import type { Warnings } from '../../types';
+import { getDashboardStateSchema } from '../../dashboard_state_schemas';
 
 export function transformDashboardOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
-  references?: SavedObjectReference[],
-  isDashboardAppRequest: boolean = false
+  references: SavedObjectReference[] | undefined,
+  isDashboardAppRequest: boolean = false,
+  dashboardStateSchema: ReturnType<typeof getDashboardStateSchema> = getDashboardStateSchema(
+    isDashboardAppRequest
+  )
 ): {
   dashboardState: Partial<
     Omit<DashboardState, 'options'> & { options: Partial<DashboardState['options']> }
@@ -48,18 +52,27 @@ export function transformDashboardOut(
     ? references.filter(({ type }) => type === tagSavedObjectTypeName).map(({ id }) => id)
     : [];
 
+  const propsSchemas = dashboardStateSchema.getPropSchemas();
+
   const { panels, warnings } = transformPanelsOut(
     panelsJSON,
     sections,
     references,
+    propsSchemas.panels,
     isDashboardAppRequest
   );
 
   const { panels: pinnedPanels, warnings: pinnedPanelWarnings } = transformPinnedPanelsOut(
     legacyControls,
     pinned_panels,
-    references ?? []
+    references,
+    propsSchemas.pinned_panels
   );
+
+  // console.log({
+  //   pinnedPanels: JSON.stringify(pinnedPanels, null, 2),
+  //   warnings: pinnedPanelWarnings,
+  // });
 
   const timeRange =
     timeRestore && timeFrom && timeTo

@@ -37,7 +37,8 @@ export function getDashboardCRUResponseBody(
     let { dashboardState, warnings: dashboardStateWarnings } = transformDashboardOut(
       savedObject.attributes,
       savedObject.references,
-      isDashboardAppRequest
+      isDashboardAppRequest,
+      dashboardStateSchema
     );
     warnings.push(...dashboardStateWarnings);
     if (!isDashboardAppRequest && operation === 'read') {
@@ -47,9 +48,19 @@ export function getDashboardCRUResponseBody(
       dashboardState = scopedDashboardState;
       warnings.push(...scopeWarnings);
     }
-
+    // console.log({ dashboardState: JSON.stringify(dashboardState, null, 2) });
     // Route does not apply defaults to response
     // Instead, call validate to ensure defaults are applied to response
+
+    const propsSchemas = dashboardStateSchema.getPropSchemas();
+    const test = {
+      panels: propsSchemas.panels.validate(dashboardState.panels),
+    };
+
+    console.log({
+      dashboardStateSchema: JSON.stringify(dashboardStateSchema.getSchemaStructure(), null, 2),
+    });
+
     sanatizedDashboardState = dashboardStateSchema.validate(dashboardState);
   } catch (transformOutError) {
     throw Boom.badRequest(`Invalid response. ${transformOutError.message}`);

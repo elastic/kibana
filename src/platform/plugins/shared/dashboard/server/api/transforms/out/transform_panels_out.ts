@@ -7,21 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectReference } from '@kbn/core/server';
-import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
 import { flow } from 'lodash';
+
+import type { Type, TypeOf } from '@kbn/config-schema';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
+
 import type { SavedDashboardPanel, SavedDashboardSection } from '../../../dashboard_saved_object';
-import type { DashboardState, DashboardPanel, DashboardSection } from '../../types';
 import { embeddableService } from '../../../kibana_services';
+import type { getDashboardStateSchema } from '../../dashboard_state_schemas';
+import type { DashboardPanel, DashboardSection, DashboardState, Warnings } from '../../types';
 import { getPanelReferences } from './get_panel_references';
 import { panelBwc } from './panel_bwc';
-import type { Warnings } from '../../types';
 
 export function transformPanelsOut(
   panelsJSON: string = '[]',
   sections: SavedDashboardSection[] = [],
-  containerReferences?: SavedObjectReference[],
+  containerReferences: SavedObjectReference[] = [],
+  panelsStateSchema: Type<TypeOf<ReturnType<typeof getDashboardStateSchema>>['panels']>,
   isDashboardAppRequest: boolean = false
 ): { panels: DashboardState['panels']; warnings: Warnings } {
   const topLevelPanels: DashboardPanel[] = [];
@@ -51,6 +55,7 @@ export function transformPanelsOut(
         containerReferences,
         isDashboardAppRequest
       );
+      // panelsStateSchema.validate(panelProperties);
     } catch (e) {
       warnings.push({
         type: 'dropped_panel',
