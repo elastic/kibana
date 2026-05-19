@@ -17,16 +17,7 @@ import {
 
 const packageNames = ['other-package', 'side-navigation'];
 
-const createProject = (sourceRoot: string): MoonProject => ({
-  config: {
-    project: {
-      metadata: {
-        sourceRoot,
-      },
-    },
-  },
-  source: sourceRoot,
-});
+const createProject = (sourceRoot: string): MoonProject => ({ id: sourceRoot, sourceRoot });
 
 describe('affected_packages', () => {
   it('maps Moon project source roots to kbn-ui package directories', () => {

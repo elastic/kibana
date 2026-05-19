@@ -7,9 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { execFileSync, spawnSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
+
+import {
+  getMoonChangedFiles,
+  getAffectedMoonProjectsFromChangedFiles,
+  type MoonProject,
+} from '@kbn/moon';
+
+export { type MoonProject };
 
 export const KBN_UI_ROOT_RELATIVE = 'src/platform/kbn-ui';
 export const FORCE_ALL_CHANGED_PATHS = new Set<string>([
@@ -18,34 +25,11 @@ export const FORCE_ALL_CHANGED_PATHS = new Set<string>([
   '.buildkite/pipeline-resource-definitions/kibana-kbn-ui-publish.yml',
 ]);
 
-export interface MoonProject {
-  config?: {
-    project?: {
-      metadata?: {
-        sourceRoot?: string;
-      };
-    };
-  };
-  source?: string;
-}
-
-interface MoonAffectedProjectsResponse {
-  projects?: MoonProject[];
-}
-
 interface ResolveAffectedPackagesOptions {
   changedFiles: string[];
   affectedProjects: MoonProject[];
   packageNames: string[];
 }
-
-interface RevisionRangeOptions {
-  repoRoot: string;
-  baseRef: string;
-  headRef: string;
-}
-
-const normalizeRepoPath = (filePath: string): string => filePath.split(path.sep).join('/');
 
 const getAllPackageNames = (kbnUiRoot: string): string[] =>
   fs
@@ -60,9 +44,6 @@ export const shouldForceAllPackages = (changedFiles: string[]): boolean =>
       filePath.startsWith(`${KBN_UI_ROOT_RELATIVE}/_tooling/`) ||
       FORCE_ALL_CHANGED_PATHS.has(filePath)
   );
-
-const getProjectSourceRoot = (project: MoonProject): string =>
-  normalizeRepoPath(project.config?.project?.metadata?.sourceRoot ?? project.source ?? '');
 
 export const getPackageNameFromSourceRoot = (
   sourceRoot: string,
@@ -91,7 +72,7 @@ export const resolveAffectedPackages = ({
 
   const affectedPackageNames = new Set<string>();
   for (const project of affectedProjects) {
-    const packageName = getPackageNameFromSourceRoot(getProjectSourceRoot(project), packageNames);
+    const packageName = getPackageNameFromSourceRoot(project.sourceRoot, packageNames);
     if (packageName) {
       affectedPackageNames.add(packageName);
     }
@@ -100,72 +81,9 @@ export const resolveAffectedPackages = ({
   return Array.from(affectedPackageNames).sort();
 };
 
-const getMoonExecutable = (repoRoot: string): string => {
-  const moonBinPath = path.resolve(repoRoot, 'node_modules/.bin/moon');
-  if (fs.existsSync(moonBinPath)) {
-    return moonBinPath;
-  }
-
-  return execFileSync('yarn', ['--silent', 'which', 'moon'], {
-    cwd: repoRoot,
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'inherit'],
-  }).trim();
-};
-
-const listChangedFiles = ({ repoRoot, baseRef, headRef }: RevisionRangeOptions): string[] => {
-  const stdout = execFileSync('git', ['diff', '--name-only', baseRef, headRef, '--'], {
-    cwd: repoRoot,
-    encoding: 'utf8',
-    maxBuffer: 30 * 1024 * 1024,
-    stdio: ['ignore', 'pipe', 'inherit'],
-  });
-
-  return stdout
-    .split('\n')
-    .map((filePath) => filePath.trim())
-    .filter(Boolean)
-    .map(normalizeRepoPath);
-};
-
-const queryMoonAffectedProjects = ({
-  moonExecutable,
-  repoRoot,
-  changedFilesJson,
-}: {
-  moonExecutable: string;
-  repoRoot: string;
-  changedFilesJson: string;
-}): MoonAffectedProjectsResponse => {
-  const result = spawnSync(
-    moonExecutable,
-    ['query', 'projects', '--affected', '--downstream', 'deep', '--source', KBN_UI_ROOT_RELATIVE],
-    {
-      cwd: repoRoot,
-      input: changedFilesJson,
-      encoding: 'utf8',
-      maxBuffer: 60 * 1024 * 1024,
-      env: {
-        ...process.env,
-        CI_STATS_DISABLED: 'true',
-      },
-    }
-  );
-
-  if (result.error) {
-    throw result.error;
-  }
-
-  if (result.status !== 0) {
-    throw new Error(result.stderr || `moon query projects exited with status ${result.status}`);
-  }
-
-  return JSON.parse(result.stdout) as MoonAffectedProjectsResponse;
-};
-
 const usage = (): string => 'usage: affected_packages.ts <base-ref> [head-ref]';
 
-const main = (argv = process.argv.slice(2)): void => {
+const main = async (argv = process.argv.slice(2)): Promise<void> => {
   if (argv.length < 1) {
     process.stderr.write(`${usage()}\n`);
     process.exitCode = 2;
@@ -173,25 +91,16 @@ const main = (argv = process.argv.slice(2)): void => {
   }
 
   const [baseRef, headRef = 'HEAD'] = argv;
-  const toolingDir = __dirname;
-  const kbnUiRoot = path.dirname(toolingDir);
-  const repoRoot = path.resolve(kbnUiRoot, '../../..');
-  const moonExecutable = getMoonExecutable(repoRoot);
+  const kbnUiRoot = path.dirname(__dirname);
   const packageNames = getAllPackageNames(kbnUiRoot);
-  const changedFiles = listChangedFiles({
-    repoRoot,
-    baseRef,
-    headRef,
-  });
+  const changedFiles = await getMoonChangedFiles({ scope: 'branch', base: baseRef, head: headRef });
 
   let affectedProjects: MoonProject[] = [];
   if (changedFiles.length > 0 && !shouldForceAllPackages(changedFiles)) {
-    const affectedProjectsResponse = queryMoonAffectedProjects({
-      moonExecutable,
-      repoRoot,
+    affectedProjects = await getAffectedMoonProjectsFromChangedFiles({
       changedFilesJson: JSON.stringify({ files: changedFiles }),
+      downstream: 'deep',
     });
-    affectedProjects = affectedProjectsResponse.projects ?? [];
   }
 
   for (const packageName of resolveAffectedPackages({
@@ -204,5 +113,8 @@ const main = (argv = process.argv.slice(2)): void => {
 };
 
 if (require.main === module) {
-  main();
+  main().catch((err) => {
+    process.stderr.write(`${(err as Error).stack ?? err}\n`);
+    process.exit(1);
+  });
 }
