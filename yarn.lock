@@ -10734,10 +10734,10 @@
   resolved "https://registry.yarnpkg.com/@open-draft/until/-/until-2.1.0.tgz#0acf32f470af2ceaf47f095cdecd40d68666efda"
   integrity sha512-U69T3ItWHvLwGg5eJ0n3I62nWuE6ilHlmz7zM0npLBRvPRd7e6NYmg54vvRtP5mZG7kZqZCFVdsTWo7BPtBujg==
 
-"@openfeature/core@1.9.1":
-  version "1.9.1"
-  resolved "https://registry.yarnpkg.com/@openfeature/core/-/core-1.9.1.tgz#9925a04ed0745e92dd7b3793b35cff1ed89d54c1"
-  integrity sha512-YySPtH4s/rKKnHRU0xyFGrqMU8XA+OIPNWDrlEFxE6DCVWCIrxE5YpiB94YD2jMFn6SSdA0cwQ8vLkCkl8lm8A==
+"@openfeature/core@1.10.0":
+  version "1.10.0"
+  resolved "https://registry.yarnpkg.com/@openfeature/core/-/core-1.10.0.tgz#6fdcc2e00909bc0de45eae602c6650604bff1ed0"
+  integrity sha512-C3ynxtPYhe5qVJgQIqCNxZXeRXo4t1Eo86uiROr8+sD6F2OjEJGIp6VOGxz+r6jkad2s8Br9BnUJOvskhai/3A==
 
 "@openfeature/launchdarkly-client-provider@0.3.3":
   version "0.3.3"
@@ -10746,15 +10746,15 @@
   dependencies:
     lodash.isempty "^4.4.0"
 
-"@openfeature/server-sdk@1.20.1":
-  version "1.20.1"
-  resolved "https://registry.yarnpkg.com/@openfeature/server-sdk/-/server-sdk-1.20.1.tgz#bd7e2c85ede1958eb64f73e0b97440b99d9fd61c"
-  integrity sha512-jzz++kblADniuc7hONZ4DlRsoektCMDX5PPHoltn0hYWWw/Zm6sh3f7z5mGUX2XOikWKNVCtUQ3gWsdmIdHHXg==
+"@openfeature/server-sdk@1.21.0":
+  version "1.21.0"
+  resolved "https://registry.yarnpkg.com/@openfeature/server-sdk/-/server-sdk-1.21.0.tgz#66ad00402c7580ae91845574af082f6b5342eeb0"
+  integrity sha512-ZBVAiyMeN+dxurcXGJlvuOpYg9X7V923MVCI5dq/kE/5o8ys7MCOPhW44e4PS+XABHzSRTw44hcgWez93xwifw==
 
-"@openfeature/web-sdk@1.7.2":
-  version "1.7.2"
-  resolved "https://registry.yarnpkg.com/@openfeature/web-sdk/-/web-sdk-1.7.2.tgz#a0169df47f4cac057176be0576f9b908119d441e"
-  integrity sha512-8QwhoxVNN2bFFkpWjbCyHCdkVjt/UTVn0o+OwcUUQoZnvPn46Oo1BxJQxUTibl/D/dAM/YQhxmg7ep7gYRxX4g==
+"@openfeature/web-sdk@1.8.0":
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/@openfeature/web-sdk/-/web-sdk-1.8.0.tgz#0c18a125fa920d14398ba2779086708e6dd718b5"
+  integrity sha512-B7NTG/mm9blV1Z7YjjcWhuoOHcDzyrHKwMRMcku9i9vvQGAE6ilVJPS3C/SsdvnOn2tDqm2lAg9SxvaJTRgp+Q==
 
 "@opentelemetry/api-logs@0.214.0":
   version "0.214.0"
