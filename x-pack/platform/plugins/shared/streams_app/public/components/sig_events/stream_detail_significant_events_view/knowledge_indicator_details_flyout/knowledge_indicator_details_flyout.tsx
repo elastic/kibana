@@ -46,14 +46,18 @@ import { KnowledgeIndicatorQueryDetailsContent } from './knowledge_indicator_que
 
 interface Props {
   knowledgeIndicator: KnowledgeIndicator;
+  allKnowledgeIndicators?: KnowledgeIndicator[];
   occurrencesByQueryId: Record<string, Array<{ x: number; y: number }>>;
   onClose: () => void;
+  onNavigateTo?: (ki: KnowledgeIndicator) => void;
 }
 
 export function KnowledgeIndicatorDetailsFlyout({
   knowledgeIndicator,
+  allKnowledgeIndicators,
   occurrencesByQueryId,
   onClose,
+  onNavigateTo,
 }: Props) {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'knowledgeIndicatorDetailsFlyoutTitle' });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -275,7 +279,11 @@ export function KnowledgeIndicatorDetailsFlyout({
 
         <EuiFlyoutBody>
           {knowledgeIndicator.kind === 'feature' ? (
-            <KnowledgeIndicatorFeatureDetailsContent feature={knowledgeIndicator.feature} />
+            <KnowledgeIndicatorFeatureDetailsContent
+              feature={knowledgeIndicator.feature}
+              allKnowledgeIndicators={allKnowledgeIndicators}
+              onNavigateTo={onNavigateTo}
+            />
           ) : (
             <KnowledgeIndicatorQueryDetailsContent
               query={knowledgeIndicator.query}

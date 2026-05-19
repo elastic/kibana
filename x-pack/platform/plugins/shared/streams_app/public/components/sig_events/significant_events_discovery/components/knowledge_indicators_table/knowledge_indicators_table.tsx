@@ -108,6 +108,7 @@ export function KnowledgeIndicatorsTable() {
     selectedKnowledgeIndicator,
     selectedKnowledgeIndicatorId,
     selectedKnowledgeIndicators,
+    setSelectedKnowledgeIndicator,
     setSelectedKnowledgeIndicators,
     knowledgeIndicatorsToDelete,
     setKnowledgeIndicatorsToDelete,
@@ -320,8 +321,10 @@ export function KnowledgeIndicatorsTable() {
       {selectedKnowledgeIndicator ? (
         <KnowledgeIndicatorDetailsFlyout
           knowledgeIndicator={selectedKnowledgeIndicator}
+          allKnowledgeIndicators={knowledgeIndicators}
           occurrencesByQueryId={occurrencesByQueryId}
           onClose={closeFlyout}
+          onNavigateTo={setSelectedKnowledgeIndicator}
         />
       ) : null}
       {knowledgeIndicatorsToDelete.length > 0 ? (

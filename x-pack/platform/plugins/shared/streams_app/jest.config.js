@@ -14,9 +14,9 @@ module.exports = {
     '<rootDir>/x-pack/platform/plugins/shared/streams_app/server',
   ],
   setupFiles: ['<rootDir>/x-pack/platform/plugins/shared/streams_app/.storybook/jest_setup.js'],
-  collectCoverage: true,
   collectCoverageFrom: [
     '<rootDir>/x-pack/platform/plugins/shared/streams_app/{public,common,server}/**/*.{js,ts,tsx}',
+    '!<rootDir>/x-pack/platform/plugins/shared/streams_app/**/*.stories.{js,ts,tsx}',
   ],
 
   coverageReporters: ['html'],

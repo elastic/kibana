@@ -309,8 +309,10 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       {selectedKnowledgeIndicator ? (
         <KnowledgeIndicatorDetailsFlyout
           knowledgeIndicator={selectedKnowledgeIndicator}
+          allKnowledgeIndicators={knowledgeIndicators}
           occurrencesByQueryId={occurrencesByQueryId}
           onClose={closeFlyout}
+          onNavigateTo={setSelectedKnowledgeIndicator}
         />
       ) : null}
     </>
