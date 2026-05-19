@@ -9,7 +9,7 @@ pageLoadAssetSize:
   aiops: 15227
   alerting: 22371
   alertingVTwo: 76778
-  apm: 28027
+  apm: 48558
   apmSourcesAccess: 2278
   automaticImport: 18629
   banners: 4006
@@ -173,7 +173,7 @@ pageLoadAssetSize:
   serverlessVectordb: 7618
   serverlessWorkplaceAI: 4855
   sessionView: 47912
-  share: 64066
+  share: 64059
   slo: 40437
   snapshotRestore: 22068
   spaces: 28871
@@ -212,5 +212,5 @@ pageLoadAssetSize:
   visualizations: 52092
   watcher: 10485
   workflowsExtensions: 38938
-  workflowsManagement: 38954
+  workflowsManagement: 39968
   workplaceAIApp: 6234

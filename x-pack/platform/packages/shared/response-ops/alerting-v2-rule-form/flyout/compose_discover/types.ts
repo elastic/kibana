@@ -10,7 +10,7 @@ import type { UseFormReturn } from 'react-hook-form';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import type { ComposeFormValues } from './compose_form_types';
 
-export type ComposeDiscoverMode = 'create' | 'edit';
+export type ComposeDiscoverMode = 'create' | 'edit' | 'clone';
 
 export type RecoveryType = 'default' | 'custom' | 'none';
 
