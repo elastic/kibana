@@ -20,7 +20,7 @@ apiTest.describe('monitor state scoping', { tag: '@local-stateful-classic' }, ()
     adminCredentials = await requestAuth.getApiKey('admin');
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.BLANK);
     await esClient.deleteByQuery({
-      index: 'heartbeat-8-generated-test',
+      index: testData.GENERATED_INDEX,
       body: { query: { match_all: {} } },
       refresh: true,
       conflicts: 'proceed',
@@ -49,6 +49,7 @@ apiTest.describe('monitor state scoping', { tag: '@local-stateful-classic' }, ()
       });
 
       expect(response.statusCode).toBe(200);
+      expect(response.body.summaries).toHaveLength(0);
     }
   );
 

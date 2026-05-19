@@ -10,16 +10,10 @@ import { apiTest, testData } from '../../fixtures';
 
 apiTest.describe('feature controls', { tag: '@local-stateful-classic' }, () => {
   const space1Id = 'space_1';
-  const space2Id = 'space_2';
 
   apiTest.beforeAll(async ({ kbnClient }) => {
     try {
       await kbnClient.spaces.create({ id: space1Id, name: space1Id, disabledFeatures: [] });
-    } catch {
-      // space already exists
-    }
-    try {
-      await kbnClient.spaces.create({ id: space2Id, name: space2Id, disabledFeatures: [] });
     } catch {
       // space already exists
     }
@@ -28,11 +22,6 @@ apiTest.describe('feature controls', { tag: '@local-stateful-classic' }, () => {
   apiTest.afterAll(async ({ kbnClient }) => {
     try {
       await kbnClient.spaces.delete(space1Id);
-    } catch {
-      // ignore
-    }
-    try {
-      await kbnClient.spaces.delete(space2Id);
     } catch {
       // ignore
     }
@@ -48,7 +37,7 @@ apiTest.describe('feature controls', { tag: '@local-stateful-classic' }, () => {
       from: testData.PINGS_DATE_RANGE_START,
       to: testData.PINGS_DATE_RANGE_END,
     });
-    const response = await apiClient.get(`internal/uptime/pings?${params}`, {
+    const response = await apiClient.get(`${testData.API_URLS.PINGS.slice(1)}?${params}`, {
       headers: { ...credentials.cookieHeader, ...testData.COMMON_HEADERS },
       responseType: 'json',
     });
@@ -72,7 +61,7 @@ apiTest.describe('feature controls', { tag: '@local-stateful-classic' }, () => {
         from: testData.PINGS_DATE_RANGE_START,
         to: testData.PINGS_DATE_RANGE_END,
       });
-      const response = await apiClient.get(`internal/uptime/pings?${params}`, {
+      const response = await apiClient.get(`${testData.API_URLS.PINGS.slice(1)}?${params}`, {
         headers: { ...credentials.cookieHeader, ...testData.COMMON_HEADERS },
         responseType: 'json',
       });
@@ -103,7 +92,7 @@ apiTest.describe('feature controls', { tag: '@local-stateful-classic' }, () => {
         from: testData.PINGS_DATE_RANGE_START,
         to: testData.PINGS_DATE_RANGE_END,
       });
-      const response = await apiClient.get(`internal/uptime/pings?${params}`, {
+      const response = await apiClient.get(`${testData.API_URLS.PINGS.slice(1)}?${params}`, {
         headers: { ...credentials.cookieHeader, ...testData.COMMON_HEADERS },
         responseType: 'json',
       });
@@ -132,7 +121,7 @@ apiTest.describe('feature controls', { tag: '@local-stateful-classic' }, () => {
       from: testData.PINGS_DATE_RANGE_START,
       to: testData.PINGS_DATE_RANGE_END,
     });
-    const response = await apiClient.get(`s/${space1Id}/internal/uptime/pings?${params}`, {
+    const response = await apiClient.get(`s/${space1Id}/${testData.API_URLS.PINGS.slice(1)}?${params}`, {
       headers: { ...credentials.cookieHeader, ...testData.COMMON_HEADERS },
       responseType: 'json',
     });
@@ -162,7 +151,7 @@ apiTest.describe('feature controls', { tag: '@local-stateful-classic' }, () => {
         from: testData.PINGS_DATE_RANGE_START,
         to: testData.PINGS_DATE_RANGE_END,
       });
-      const response = await apiClient.get(`internal/uptime/pings?${params}`, {
+      const response = await apiClient.get(`${testData.API_URLS.PINGS.slice(1)}?${params}`, {
         headers: { ...credentials.cookieHeader, ...testData.COMMON_HEADERS },
         responseType: 'json',
       });

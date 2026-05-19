@@ -10,6 +10,8 @@ export const COMMON_HEADERS = {
   'x-elastic-internal-origin': 'kibana',
 };
 
+export const GENERATED_INDEX = 'heartbeat-8-generated-test';
+
 export const ES_ARCHIVES = {
   FULL_HEARTBEAT: 'x-pack/solutions/observability/test/fixtures/es_archives/uptime/full_heartbeat',
   BLANK: 'x-pack/solutions/observability/test/fixtures/es_archives/uptime/blank',

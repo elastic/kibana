@@ -18,7 +18,7 @@ apiTest.describe('indexStatus query', { tag: '@local-stateful-classic' }, () => 
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.FULL_HEARTBEAT);
   });
 
-  apiTest(`will fetch the index's count`, async ({ apiClient }) => {
+  apiTest('returns index status for heartbeat indices', async ({ apiClient }) => {
     const response = await apiClient.get(testData.API_URLS.INDEX_STATUS.slice(1), {
       headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
       responseType: 'json',

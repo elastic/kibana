@@ -102,7 +102,7 @@ apiTest.describe('UptimeIntegrationDeprecation', { tag: '@local-stateful-classic
     expect(response.body.hasIntegrationMonitors).toBe(false);
   });
 
-  apiTest('returns true when zip url policies exist', async ({ apiClient }) => {
+  apiTest('returns true when non-managed synthetics policies exist', async ({ apiClient }) => {
     const createPolicyResponse = await apiClient.post('api/fleet/package_policies', {
       headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
       body: {

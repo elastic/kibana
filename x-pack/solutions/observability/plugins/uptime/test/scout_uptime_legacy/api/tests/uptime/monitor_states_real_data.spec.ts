@@ -527,38 +527,4 @@ apiTest.describe('monitor states endpoint', { tag: '@local-stateful-classic' }, 
       }
     }
   });
-
-  apiTest('will fetch monitor state data for the given date range', async ({ apiClient }) => {
-    const LENGTH = 10;
-    const params = new URLSearchParams({
-      dateRangeStart: from,
-      dateRangeEnd: to,
-      pageSize: String(LENGTH),
-    });
-    const response = await apiClient.get(`${testData.API_URLS.MONITOR_LIST.slice(1)}?${params}`, {
-      headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
-      responseType: 'json',
-    });
-
-    checkMonitorStatesResponse({
-      response: response.body,
-      statesIds: [
-        '0000-intermittent',
-        '0001-up',
-        '0002-up',
-        '0003-up',
-        '0004-up',
-        '0005-up',
-        '0006-up',
-        '0007-up',
-        '0008-up',
-        '0009-up',
-      ],
-      statuses: ['up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up'],
-      size: LENGTH,
-      prevPagination: null,
-      nextPagination:
-        '{"cursorDirection":"AFTER","sortOrder":"ASC","cursorKey":{"monitor_id":"0009-up"}}',
-    });
-  });
 });

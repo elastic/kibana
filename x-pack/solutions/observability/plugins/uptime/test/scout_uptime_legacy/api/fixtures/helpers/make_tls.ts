@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-import crypto from 'crypto';
-
 export interface TlsProps {
   valid?: boolean;
   commonName?: string;
   expiry?: string;
   sha256?: string;
 }
-
-export const getSha256 = () => {
-  return crypto.randomBytes(64).toString('hex').toUpperCase();
-};
 
 export const makeTls = ({
   valid = true,

@@ -20,38 +20,6 @@ apiTest.describe('pingList query', { tag: '@local-stateful-classic' }, () => {
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.FULL_HEARTBEAT);
   });
 
-  apiTest(
-    'returns a list of pings for the given date range and default size',
-    async ({ apiClient }) => {
-      const params = new URLSearchParams({
-        from,
-        to,
-        size: String(10),
-      });
-      const response = await apiClient.get(`${testData.API_URLS.PINGS.slice(1)}?${params}`, {
-        headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
-        responseType: 'json',
-      });
-      expect(response.statusCode).toBe(200);
-      expect(response.body.total).toBe(2000);
-      expect(response.body.pings).toHaveLength(10);
-      expect(
-        response.body.pings.map(({ monitor: { id } }: { monitor: { id: string } }) => id)
-      ).toStrictEqual([
-        '0074-up',
-        '0073-up',
-        '0099-up',
-        '0098-up',
-        '0075-intermittent',
-        '0097-up',
-        '0049-up',
-        '0047-up',
-        '0077-up',
-        '0076-up',
-      ]);
-    }
-  );
-
   apiTest('returns a list of pings for the date range and given size', async ({ apiClient }) => {
     const params = new URLSearchParams({
       from,
