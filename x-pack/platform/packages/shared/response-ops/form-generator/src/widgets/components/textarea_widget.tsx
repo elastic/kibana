@@ -76,11 +76,7 @@ const SensitiveTextareaField: React.FC<SensitiveTextareaFieldProps> = ({
   // `inputRef`, so spreading `euiFieldProps` can't silently drop either
   // side. Supports both callback and object refs, matching EUI's
   // `inputRef` contract.
-  const {
-    inputRef: callerInputRef,
-    style: callerStyle,
-    ...restEuiFieldProps
-  } = euiFieldProps ?? {};
+  const { inputRef: callerInputRef, ...restEuiFieldProps } = euiFieldProps ?? {};
   const setInputRef = (el: HTMLTextAreaElement | null) => {
     textareaRef.current = el;
     if (typeof callerInputRef === 'function') {
@@ -118,7 +114,6 @@ const SensitiveTextareaField: React.FC<SensitiveTextareaFieldProps> = ({
         rows={DEFAULT_ROWS}
         data-test-subj="input"
         data-is-masked={!isVisible}
-        style={{ fontFamily: 'monospace', ...(callerStyle ?? {}) }}
       />
     </EuiFormRow>
   );
@@ -153,8 +148,6 @@ export const TextareaWidget: React.FC<TextareaWidgetProps> = ({
         ...fieldProps,
         euiFieldProps: {
           rows: DEFAULT_ROWS,
-          // Monospace surfaces PEM structure better than the default proportional font.
-          style: { fontFamily: 'monospace' },
           ...fieldProps?.euiFieldProps,
         },
       }}

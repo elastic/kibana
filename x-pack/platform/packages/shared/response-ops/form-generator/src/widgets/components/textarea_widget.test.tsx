@@ -105,25 +105,6 @@ describe('TextareaWidget', () => {
     expect(input.value).toBe('new-pem');
   });
 
-  it('renders in monospace font by default', () => {
-    render(
-      <TestFormWrapper>
-        <TextareaWidget
-          meta={meta}
-          formConfig={{}}
-          path="certificate"
-          schema={z.string()}
-          fieldProps={{ label: 'Certificate', euiFieldProps: {} }}
-          fieldConfig={{ validations: [{ validator: () => undefined }] }}
-        />
-      </TestFormWrapper>,
-      { wrapper }
-    );
-
-    const input = screen.getByLabelText('Certificate') as HTMLTextAreaElement;
-    expect(input.style.fontFamily).toMatch(/monospace/);
-  });
-
   it('allows overriding euiFieldProps (e.g. rows)', () => {
     render(
       <TestFormWrapper>
@@ -273,7 +254,7 @@ describe('TextareaWidget - sensitive mode (schema has sensitive: true)', () => {
     expect(input.getAttribute('data-is-masked')).toBe('true');
   });
 
-  it('merges caller-provided style with the internal monospace fontFamily', () => {
+  it('passes caller-provided style through to the textarea', () => {
     render(
       <TestFormWrapper>
         <TextareaWidget
@@ -292,7 +273,6 @@ describe('TextareaWidget - sensitive mode (schema has sensitive: true)', () => {
     );
 
     const input = screen.getByLabelText('Private key') as HTMLTextAreaElement;
-    expect(input.style.fontFamily).toBe('monospace');
     expect(input.style.backgroundColor).toBe('rgb(240, 240, 240)');
   });
 });
