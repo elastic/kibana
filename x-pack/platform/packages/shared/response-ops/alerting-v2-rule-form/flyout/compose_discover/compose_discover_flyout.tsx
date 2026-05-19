@@ -158,9 +158,10 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
    * When the persisted rule has a custom recovery query, the initial state
    * infers that tracking was active and reconstructs the split.
    */
-  const initialMapped = mode === 'edit' && rule ? mapRuleToComposeFormValues(rule) : undefined;
+  const initialMapped =
+    (mode === 'edit' || mode === 'clone') && rule ? mapRuleToComposeFormValues(rule) : undefined;
   const [uiState, dispatch] = useComposeDiscoverState({
-    mode,
+    mode: mode === 'clone' ? 'edit' : mode,
     initialQuery: getBreachQuery(initialMapped?.query),
     initialRecoveryQuery: getRecoverQuery(initialMapped?.query)?.trim() || undefined,
   });
@@ -183,15 +184,26 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   });
 
   // ── Form values (submitted to the API) ──
-  const defaultValues = useMemo<ComposeFormValues>(
-    () => (rule ? mapRuleToComposeFormValues(rule) : EMPTY_FORM_VALUES),
-    [rule]
-  );
+  const defaultValues = useMemo<ComposeFormValues>(() => {
+    if (!rule) return EMPTY_FORM_VALUES;
+    const mapped = mapRuleToComposeFormValues(rule);
+    if (mode === 'clone') {
+      return {
+        ...mapped,
+        metadata: {
+          ...mapped.metadata,
+          name: `${mapped.metadata.name} (clone)`,
+        },
+      };
+    }
+    return mapped;
+  }, [rule, mode]);
 
   const methods = useForm<ComposeFormValues>({ mode: 'onBlur', defaultValues });
 
-  const isCreate = mode === 'create';
-  const title = isCreate ? 'Create alert rule' : 'Edit alert rule';
+  const isCreate = mode === 'create' || mode === 'clone';
+  const title =
+    mode === 'clone' ? 'Clone alert rule' : isCreate ? 'Create alert rule' : 'Edit alert rule';
 
   const steps = getSteps(uiState.tracking);
   const currentStep = steps[uiState.step];
