@@ -35,11 +35,12 @@ export async function getAlertSnoozeSnapshot({
   esClient,
 }: GetAlertSnoozeSnapshotParamsWithDeps): Promise<Record<string, unknown> | null> {
   try {
-    const response = await esClient.search<Record<string, unknown>>({
+    const response = await esClient.search({
       index: indices,
       allow_no_indices: true,
       size: 1,
-      _source: fields,
+      fields,
+      _source: false,
       query: {
         bool: {
           must: [
@@ -51,24 +52,19 @@ export async function getAlertSnoozeSnapshot({
       },
     });
 
-    const source = response.hits.hits[0]?._source;
-
-    if (!source) {
+    const hit = response.hits.hits[0];
+    if (!hit) {
       return null;
     }
-    return fields.reduce<Record<string, unknown>>((snapshot, field) => {
-      // ES documents may store alert fields as flat dot-notation keys or as nested objects.
 
-      if (Object.prototype.hasOwnProperty.call(source, field)) {
-        snapshot[field] = source[field];
+    const hitFields = hit.fields ?? {};
+    return fields.reduce<Record<string, unknown>>((snapshot, field) => {
+      const values = hitFields[field] as unknown[] | undefined;
+      if (values && values.length > 0) {
+        // Return single value for scalar fields; keep array for multi-value fields.
+        snapshot[field] = values.length === 1 ? values[0] : values;
       } else {
-        const value = field.split('.').reduce<unknown>((obj, key) => {
-          if (obj && typeof obj === 'object' && Object.prototype.hasOwnProperty.call(obj, key)) {
-            return (obj as Record<string, unknown>)[key];
-          }
-          return null;
-        }, source);
-        snapshot[field] = value;
+        snapshot[field] = null;
       }
       return snapshot;
     }, {});

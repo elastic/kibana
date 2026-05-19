@@ -42,7 +42,14 @@ export const evaluatePerAlertSnoozeConditions = (
       continue;
     }
 
-    if (shouldUnsnoozeByConditions(instance, alertAsData)) {
+    if (
+      shouldUnsnoozeByConditions(
+        instance.conditions,
+        instance.conditionOperator,
+        instance.snoozeSnapshot,
+        alertAsData
+      )
+    ) {
       conditionExpiredInstances.push(instance);
     }
   }
@@ -64,20 +71,21 @@ const getAlertFieldValue = (alertAsData: Record<string, unknown>, fieldPath: str
 };
 
 const shouldUnsnoozeByConditions = (
-  instance: RawRuleSnoozedInstance,
+  conditions: NonNullable<RawRuleSnoozedInstance['conditions']>,
+  conditionOperator: RawRuleSnoozedInstance['conditionOperator'],
+  snoozeSnapshot: RawRuleSnoozedInstance['snoozeSnapshot'],
   alertAsData: Record<string, unknown>
 ): boolean => {
-  const conditions = instance.conditions!;
-  const operator = instance.conditionOperator ?? 'any';
+  const operator = conditionOperator ?? 'any';
 
   if (operator === 'all') {
     return conditions.every((condition) =>
-      evaluateSingleCondition(condition, instance.snoozeSnapshot, alertAsData)
+      evaluateSingleCondition(condition, snoozeSnapshot, alertAsData)
     );
   }
 
   return conditions.some((condition) =>
-    evaluateSingleCondition(condition, instance.snoozeSnapshot, alertAsData)
+    evaluateSingleCondition(condition, snoozeSnapshot, alertAsData)
   );
 };
 
@@ -106,5 +114,8 @@ const evaluateFieldChange = (
   if (!snoozeSnapshot || !(fieldPath in snoozeSnapshot)) {
     return false;
   }
-  return getAlertFieldValue(alertAsData, fieldPath) !== snoozeSnapshot[fieldPath];
+  const current = getAlertFieldValue(alertAsData, fieldPath);
+  const snapshot = snoozeSnapshot[fieldPath];
+  // Use JSON.stringify for structural comparison to handle objects and arrays correctly.
+  return JSON.stringify(current) !== JSON.stringify(snapshot);
 };

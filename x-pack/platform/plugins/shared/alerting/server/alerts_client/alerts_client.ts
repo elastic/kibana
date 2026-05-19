@@ -14,6 +14,8 @@ import {
   ALERT_SCHEDULED_ACTION_GROUP,
   ALERT_SCHEDULED_ACTION_DATE,
   ALERT_SCHEDULED_ACTION_THROTTLING,
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
 } from '@kbn/rule-data-utils';
 import { get, isEmpty } from 'lodash';
 import type {
@@ -112,7 +114,7 @@ export class AlertsClient<
   private indexTemplateAndPattern: IIndexPatternString;
 
   private reportedAlerts: Record<string, DeepPartial<AlertData>> = {};
-  private builtAlertDataCache: Map<string, Record<string, unknown>> = new Map();
+  private activeAlertsDataCache: Map<string, Record<string, unknown>> = new Map();
   private _isUsingDataStreams: boolean;
   private ruleInfoMessage: string;
   private logTags: { tags: string[] };
@@ -319,14 +321,14 @@ export class AlertsClient<
   }
 
   /**
-   * Returns the built alert document for a given alert instance ID as it was
+   * Returns the alert document for a given alert instance ID as it was
    * constructed and indexed during `persistAlerts()` for this execution.
    * Returns undefined when the alert was not indexed this execution.
    */
   public getBuiltActiveAlertDataByInstanceId(
     instanceId: string
   ): Record<string, unknown> | undefined {
-    return this.builtAlertDataCache.get(instanceId);
+    return this.activeAlertsDataCache.get(instanceId);
   }
 
   public factory() {
@@ -427,11 +429,12 @@ export class AlertsClient<
 
     const alertsToIndex = alertBuilder.buildAlerts();
 
-    this.builtAlertDataCache = new Map();
+    this.activeAlertsDataCache = new Map();
     for (const alert of alertsToIndex) {
       const instanceId = get(alert, ALERT_INSTANCE_ID) as string | undefined;
-      if (instanceId) {
-        this.builtAlertDataCache.set(instanceId, alert as Record<string, unknown>);
+      const status = get(alert, ALERT_STATUS) as string | undefined;
+      if (instanceId && status === ALERT_STATUS_ACTIVE) {
+        this.activeAlertsDataCache.set(instanceId, alert as Record<string, unknown>);
       }
     }
 

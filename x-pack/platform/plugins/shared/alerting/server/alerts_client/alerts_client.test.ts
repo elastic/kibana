@@ -1969,7 +1969,7 @@ describe('Alerts Client', () => {
           expect(alertsClient.getBuiltActiveAlertDataByInstanceId('unknown-id')).toBeUndefined();
         });
 
-        test('caches only active alerts needed for condition evaluation', async () => {
+        test('does not cache recovered alerts', async () => {
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
           );
@@ -2000,6 +2000,42 @@ describe('Alerts Client', () => {
           // Recovered alerts are not in the cache — only active alerts matter for
           // condition-based snooze evaluation.
           expect(alertsClient.getBuiltActiveAlertDataByInstanceId('1')).toBeUndefined();
+        });
+
+        test('caches only active alert when both active and recovered alerts exist in the same execution', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+          // Seed alert '1' as tracked so it can recover, alert '2' will be new/active
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            activeAlertsFromState: {
+              '1': {
+                state: {},
+                meta: {
+                  uuid: 'uuid-1',
+                  flappingHistory: [],
+                  flapping: false,
+                  pendingRecoveredCount: 0,
+                  activeCount: 1,
+                },
+              },
+            },
+          });
+          // '1' is not re-scheduled → it recovers; '2' fires for the first time
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('2').scheduleActions('default');
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          // '1' is recovered — must not be in the cache
+          expect(alertsClient.getBuiltActiveAlertDataByInstanceId('1')).toBeUndefined();
+          // '2' is active — must be in the cache
+          expect(alertsClient.getBuiltActiveAlertDataByInstanceId('2')).toBeDefined();
         });
 
         test('cache is cleared and repopulated on each persistAlerts() call', async () => {
