@@ -32,12 +32,16 @@ export {
   ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH,
 } from '@kbn/alerting-v2-constants';
 
+export const CREATE_WITH_AGENT_INITIAL_PROMPT =
+  'Load the rule-management skill and help me create a new alerting v2 rule. Ask me what I want to monitor and guide me through the setup.';
+
+export const AGENT_BUILDER_NEW_CONVERSATION_PATH = '/agents/elastic-ai-agent/conversations/new';
+
 export const paths = {
   ruleCreate: `${ALERTING_V2_RULES_BASE_PATH}/create`,
   ruleEdit: (id: string) => `${ALERTING_V2_RULES_BASE_PATH}/edit/${encodeURIComponent(id)}`,
   ruleDetails: (id: string) => `${ALERTING_V2_RULES_BASE_PATH}/${encodeURIComponent(id)}`,
   ruleList: ALERTING_V2_RULES_BASE_PATH,
-  ruleCreateOptions: `${ALERTING_V2_RULES_BASE_PATH}/create_options`,
   actionPolicyCreate: `${ALERTING_V2_ACTION_POLICIES_BASE_PATH}/create`,
   actionPolicyEdit: (id: string) =>
     `${ALERTING_V2_ACTION_POLICIES_BASE_PATH}/edit/${encodeURIComponent(id)}`,
