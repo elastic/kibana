@@ -95,12 +95,15 @@ export const AlertsDetailsTable = memo(
     value,
     entityId,
     entityType,
+    onExpandAlert,
   }: {
     field: CloudPostureEntityIdentifier;
     value: string;
     /** Canonical entity store id (`host.entity.id` / `user.entity.id`); when set with Entity Store v2, identity is loaded from the store for EUID DSL. */
     entityId?: string;
     entityType?: 'host' | 'user';
+    /** When provided, called instead of `openPreviewPanel` when the expand icon is clicked on an alert row. Use this in system-flyout contexts where the expandable flyout is not rendered. */
+    onExpandAlert?: (eventId: string, indexName: string) => void;
   }) => {
     const { euiTheme } = useEuiTheme();
 
@@ -332,18 +335,22 @@ export const AlertsDetailsTable = memo(
 
     const handleOnEventAlertDetailPanelOpened = useCallback(
       (eventId: string, indexName: string, tableId: string) => {
-        openPreviewPanel({
-          id: DocumentDetailsPreviewPanelKey,
-          params: {
-            id: eventId,
-            indexName,
-            scopeId: tableId,
-            isPreviewMode: true,
-            banner: ALERT_PREVIEW_BANNER,
-          },
-        });
+        if (onExpandAlert) {
+          onExpandAlert(eventId, indexName);
+        } else {
+          openPreviewPanel({
+            id: DocumentDetailsPreviewPanelKey,
+            params: {
+              id: eventId,
+              indexName,
+              scopeId: tableId,
+              isPreviewMode: true,
+              banner: ALERT_PREVIEW_BANNER,
+            },
+          });
+        }
       },
-      [openPreviewPanel]
+      [onExpandAlert, openPreviewPanel]
     );
 
     const tableId = TableId.alertsOnRuleDetailsPage;
@@ -435,7 +442,7 @@ export const AlertsDetailsTable = memo(
               {i18n.translate('xpack.securitySolution.flyout.left.insights.alerts.tableTitle', {
                 defaultMessage: 'Alerts ',
               })}
-              <EuiIcon type="external" />
+              <EuiIcon type="external" aria-hidden={true} />
             </h1>
           </EuiLink>
 

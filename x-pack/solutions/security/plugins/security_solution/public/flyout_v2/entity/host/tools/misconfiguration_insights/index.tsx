@@ -6,12 +6,14 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
+import { EuiFlyoutHeader } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { MisconfigurationFindingDetailFields } from '@kbn/cloud-security-posture';
-import { EntityIdentifierFields, EntityType } from '../../../../../../common/entity_analytics/types';
+import {
+  EntityIdentifierFields,
+  EntityType,
+} from '../../../../../../common/entity_analytics/types';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
-import { MISCONFIGURATION_INSIGHTS_TOOL_TEST_ID } from './test_ids';
 import { MisconfigurationFindingsDetailsTable } from '../../../../../cloud_security_posture/components/csp_details/misconfiguration_findings_details_table';
 
 const MOCK_DATA: {
@@ -71,16 +73,14 @@ export const MisconfigurationInsights = memo(
             iconType="storage"
           />
         </EuiFlyoutHeader>
-        <EuiFlyoutBody data-test-subj={MISCONFIGURATION_INSIGHTS_TOOL_TEST_ID}>
-          <MisconfigurationFindingsDetailsTable
-            field={EntityIdentifierFields.hostName}
-            value={value}
-            scopeId={scopeId}
-            entityId={entityId}
-            entityType={EntityType.host}
-            mockData={MOCK_DATA}
-          />
-        </EuiFlyoutBody>
+        <MisconfigurationFindingsDetailsTable
+          field={EntityIdentifierFields.hostName}
+          value={value}
+          scopeId={scopeId}
+          entityId={entityId}
+          entityType={EntityType.host}
+          mockData={MOCK_DATA}
+        />
       </>
     );
   }

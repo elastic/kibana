@@ -21,6 +21,8 @@ import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { documentFlyoutHistoryKey } from '../constants/flyout_history';
 import { OPEN_FLYOUT_LINK_TEST_ID } from './test_ids';
 import { buildFlyoutContent } from '../utils/build_flyout_content';
+import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
+import { InputsModelId } from '../../../common/store/inputs/constants';
 
 export interface OpenFlyoutLinkProps {
   /**
@@ -72,6 +74,10 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
 
   const onClick = useCallback(() => {
     if (flyoutContent) {
+      const tf = services.data.query.timefilter.timefilter;
+      const { from, to } = tf.getAbsoluteTime();
+      store.dispatch(setAbsoluteRangeDatePicker({ id: InputsModelId.global, from, to }));
+
       const baseFlyoutProperties = asParent
         ? defaultToolsFlyoutProperties
         : defaultDocumentFlyoutProperties;

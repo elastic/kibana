@@ -5,13 +5,25 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
+import React, { memo, useCallback } from 'react';
+import { EuiFlyoutHeader } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EntityIdentifierFields, EntityType } from '../../../../../../common/entity_analytics/types';
+import { useHistory } from 'react-router-dom';
+import { useStore } from 'react-redux';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
+import {
+  EntityIdentifierFields,
+  EntityType,
+} from '../../../../../../common/entity_analytics/types';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
-import { ALERTS_INSIGHTS_TOOL_TEST_ID } from './test_ids';
 import { AlertsDetailsTable } from '../../../../../cloud_security_posture/components/csp_details/alerts_findings_details_table';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { flyoutProviders } from '../../../../shared/components/flyout_provider';
+import { useDefaultDocumentFlyoutProperties } from '../../../../shared/hooks/use_default_flyout_properties';
+import { DocumentFlyoutWrapper } from '../../../../document/main/document_flyout_wrapper';
+import { cellActionRenderer } from '../../../../shared/components/cell_actions';
+import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
+import { documentFlyoutHistoryKey } from '../../../../shared/constants/flyout_history';
 
 const TITLE = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.host.alertsInsights.title',
@@ -28,6 +40,39 @@ export interface AlertsInsightsProps {
 }
 
 export const AlertsInsights = memo(({ value, entityId, onOpenHost }: AlertsInsightsProps) => {
+  const { services } = useKibana();
+  const store = useStore();
+  const history = useHistory();
+  const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const isInSecurityApp = useIsInSecurityApp();
+  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+
+  const onExpandAlert = useCallback(
+    (eventId: string, indexName: string) => {
+      services.overlays.openSystemFlyout(
+        flyoutProviders({
+          services,
+          store,
+          history,
+          children: (
+            <DocumentFlyoutWrapper
+              documentId={eventId}
+              indexName={indexName}
+              renderCellActions={cellActionRenderer}
+              onAlertUpdated={() => {}}
+            />
+          ),
+        }),
+        {
+          ...defaultFlyoutProperties,
+          historyKey,
+          session: 'inherit',
+        }
+      );
+    },
+    [services, store, history, defaultFlyoutProperties, historyKey]
+  );
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -38,14 +83,13 @@ export const AlertsInsights = memo(({ value, entityId, onOpenHost }: AlertsInsig
           iconType="storage"
         />
       </EuiFlyoutHeader>
-      <EuiFlyoutBody data-test-subj={ALERTS_INSIGHTS_TOOL_TEST_ID}>
-        <AlertsDetailsTable
-          field={EntityIdentifierFields.hostName}
-          value={value}
-          entityId={entityId}
-          entityType={EntityType.host}
-        />
-      </EuiFlyoutBody>
+      <AlertsDetailsTable
+        field={EntityIdentifierFields.hostName}
+        value={value}
+        entityId={entityId}
+        entityType={EntityType.host}
+        onExpandAlert={onExpandAlert}
+      />
     </>
   );
 });
