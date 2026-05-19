@@ -25,8 +25,8 @@ jest.mock('./round_error_thinking_panel', () => ({
   ),
 }));
 
-jest.mock('../round_thinking/steps/round_steps', () => ({
-  RoundSteps: () => <div data-test-subj="roundSteps" />,
+jest.mock('../round_events/round_events', () => ({
+  RoundEvents: () => <div data-test-subj="roundEvents" />,
 }));
 
 const renderWithIntl = (ui: React.ReactElement) =>
@@ -51,7 +51,7 @@ describe('RoundError', () => {
 
     expect(screen.getByTestId('agentBuilderErrorHookExecution')).toBeInTheDocument();
     expect(screen.queryByTestId('thinkingPanel')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('roundSteps')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('roundEvents')).not.toBeInTheDocument();
   });
 
   it('shows workflow execution callout and skips thinking panel', () => {
@@ -61,7 +61,7 @@ describe('RoundError', () => {
 
     expect(screen.getByTestId('agentBuilderErrorWorkflow')).toBeInTheDocument();
     expect(screen.queryByTestId('thinkingPanel')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('roundSteps')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('roundEvents')).not.toBeInTheDocument();
   });
 
   it('shows workflow aborted callout and skips thinking panel', () => {
@@ -71,7 +71,7 @@ describe('RoundError', () => {
 
     expect(screen.getByTestId('agentBuilderErrorWorkflow')).toBeInTheDocument();
     expect(screen.queryByTestId('thinkingPanel')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('roundSteps')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('roundEvents')).not.toBeInTheDocument();
   });
 
   it('shows generic errors inside the thinking panel', () => {
@@ -79,6 +79,6 @@ describe('RoundError', () => {
 
     expect(screen.getByTestId('agentBuilderGenericRoundError')).toBeInTheDocument();
     expect(screen.getByTestId('thinkingPanel')).toBeInTheDocument();
-    expect(screen.getByTestId('roundSteps')).toBeInTheDocument();
+    expect(screen.getByTestId('roundEvents')).toBeInTheDocument();
   });
 });

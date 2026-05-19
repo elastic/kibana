@@ -23,7 +23,7 @@ import { WorkflowError } from './workflow_error';
 import { HookError } from './hook_error';
 import { GenericRoundError } from './generic_round_error';
 import { RoundErrorThinkingPanel } from './round_error_thinking_panel';
-import { RoundSteps } from '../round_thinking/steps/round_steps';
+import { RoundEvents } from '../round_events/round_events';
 
 const shouldShowThinkingPanel = (error: unknown): boolean => {
   return (
@@ -97,7 +97,7 @@ export const RoundError: React.FC<RoundErrorProps> = ({ error, errorSteps, onRet
     >
       {shouldShowThinkingPanel(error) ? (
         <RoundErrorThinkingPanel>
-          <RoundSteps isLoading={false} steps={errorSteps} />
+          <RoundEvents steps={errorSteps} isReloadedRound={false} />
           {errorContent}
         </RoundErrorThinkingPanel>
       ) : (
