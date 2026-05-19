@@ -129,8 +129,6 @@ export const HostAutoDetectPage: React.FC<HostAutoDetectPageProps> = ({
     () => [
       {
         title: HOST_APPROACH_STEP_TITLE,
-        // URL-driven branch picker, not a wizard step the user finishes.
-        status: 'current' as const,
         children: (
           <ApproachSelector
             legend={HOST_APPROACH_SELECTOR_LEGEND}

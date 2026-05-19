@@ -240,9 +240,6 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
       showApproachSelector && eaNavigateTo
         ? {
             title: HOST_APPROACH_STEP_TITLE,
-            // The approach step is a URL-driven branch picker, not a wizard step
-            // the user can finish — 'current' avoids the "step done" reading of 'complete'.
-            status: 'current' as const,
             children: (
               <ApproachSelector
                 legend={HOST_APPROACH_SELECTOR_LEGEND}
@@ -256,11 +253,6 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
           }
         : null;
 
-    // OTel flow does not auto-mark steps as `complete` because the only
-    // signals we have (window-blur + has-data) are heuristics, and a green
-    // checkmark before the user has actually finished is misleading. Steps
-    // stay on `current` / `incomplete` and the body of each step shows the
-    // real progress (e.g. visualize gets a deeplink panel once data arrives).
     const installStep = error
       ? {
           title: installStepTitle,
@@ -276,7 +268,6 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
         }
       : {
           title: installStepTitle,
-          status: 'current' as const,
           children: (
             <OtelLogsInstallStep
               os={os}
@@ -299,7 +290,6 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
       title: i18n.translate('xpack.observability_onboarding.otelLogsPanel.steps.start', {
         defaultMessage: 'Start the collector',
       }),
-      status: 'incomplete' as const,
       children: <OtelLogsStartStep os={os} />,
     };
 
@@ -307,7 +297,11 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
       title: i18n.translate('xpack.observability_onboarding.otelLogsPanel.steps.visualize', {
         defaultMessage: 'Visualize your data',
       }),
-      status: isMonitoringStepActive ? ('current' as const) : ('incomplete' as const),
+      ...(hasData || hasPreExistingDataFinal
+        ? { status: 'complete' as const }
+        : isMonitoringStepActive
+        ? { status: 'current' as const }
+        : {}),
       children: (
         <OtelLogsVisualizeStep
           isMonitoringStepActive={isMonitoringStepActive}
