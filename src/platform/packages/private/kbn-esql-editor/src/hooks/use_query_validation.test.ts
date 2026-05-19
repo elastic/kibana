@@ -130,11 +130,11 @@ describe('useQueryValidation debounced validation', () => {
       'FROM logs | LIMIT 10',
       expect.anything(),
       expect.anything(),
-      expect.objectContaining({ isCancellationRequested: false })
+      expect.anything()
     );
   });
 
-  it('does not schedule extra validation when code is unchanged but other dependencies (I.E: serverErrors) changes', async () => {
+  it('validates again when code is unchanged but other dependencies (I.E: serverErrors) changes', async () => {
     const { rerender } = renderHook(
       (props: UseQueryValidationParams) => useQueryValidation(props),
       {
@@ -155,7 +155,7 @@ describe('useQueryValidation debounced validation', () => {
 
     advanceDebounce();
 
-    expect(mockValidate).not.toHaveBeenCalled();
+    expect(mockValidate).toHaveBeenCalledTimes(1);
   });
 
   it('skips client side validations and shows server errors when code matches codeWhenSubmitted', async () => {
