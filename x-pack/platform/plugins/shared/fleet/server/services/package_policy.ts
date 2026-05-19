@@ -473,7 +473,7 @@ const extractPackagePolicyVars = (
 
 function validateAgentlessForPackagePolicy(
   packagePolicy: { supports_agentless?: boolean | null; inputs: NewPackagePolicyInput[] },
-  agentPolicy: { supports_agentless?: boolean } | undefined,
+  agentPolicy: { supports_agentless?: boolean | null } | undefined,
   pkgInfo: PackageInfo | undefined
 ): void {
   const isAgentless = Boolean(agentPolicy?.supports_agentless || packagePolicy.supports_agentless);
