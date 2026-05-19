@@ -164,7 +164,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
               title={
                 <FormattedMessage
                   id="xpack.snapshotRestore.repositoryList.defaultRepositoryLoadErrorCalloutTitle"
-                  defaultMessage="Default repository feature is currently unavailable"
+                  defaultMessage="The default repository feature is currently unavailable"
                 />
               }
             >
