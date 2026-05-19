@@ -15,6 +15,14 @@ export const RULE_IDS = {
   EXISTING_TYPE_MAPPINGS_WITHOUT_NEW_MODEL_VERSION:
     'existing-type/mappings-changed-without-new-model-version',
   EXISTING_TYPE_MUTATED_MODEL_VERSION: 'existing-type/mutated-existing-model-version',
+  EXISTING_TYPE_REMOVED_MAPPED_PROPERTIES: 'existing-type/removed-mapped-properties',
+  EXISTING_TYPE_VIRTUAL_VERSION_DOWNGRADE: 'existing-type/virtual-version-downgrade',
+  EXISTING_TYPE_SCHEMA_BREAKING_CHANGES: 'existing-type/schema-breaking-changes',
+  EXISTING_TYPE_SCHEMA_UNDIFFABLE: 'existing-type/schema-undiffable-legacy-hash',
+  EXISTING_TYPE_NEW_MAPPINGS_NOT_IN_MODEL_VERSION:
+    'existing-type/new-mappings-not-in-model-version',
+  EXISTING_TYPE_KEYWORD_MISSING_IGNORE_ABOVE: 'existing-type/keyword-missing-ignore-above',
+  EXISTING_TYPE_INVALID_NAME_TITLE_FIELD_TYPE: 'existing-type/invalid-name-title-field-type',
   // new types
   NEW_TYPE_LEGACY_MIGRATIONS: 'new-type/legacy-migrations',
   NEW_TYPE_MISSING_INITIAL_MODEL_VERSION: 'new-type/missing-initial-model-version',
@@ -24,6 +32,9 @@ export const RULE_IDS = {
   MODEL_VERSION_MISSING_SCHEMAS: 'model-version/missing-schemas',
   MODEL_VERSION_MISSING_FORWARD_COMPATIBILITY: 'model-version/missing-forward-compatibility',
   MODEL_VERSION_MISSING_CREATE_SCHEMA: 'model-version/missing-create-schema',
+  MODEL_VERSION_MAPPINGS_NOT_IN_SCHEMA: 'model-version/mappings-not-in-schema',
+  MODEL_VERSION_MAPPING_INDEX_FALSE: 'model-version/mapping-index-false',
+  MODEL_VERSION_MAPPING_ENABLED_FALSE: 'model-version/mapping-enabled-false',
   // removed types
   REMOVED_TYPE_NAME_REUSED: 'removed-type/name-reused',
   REMOVED_TYPE_NEEDS_UPDATE: 'removed-type/registry-needs-update',

@@ -9,9 +9,10 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RuleCreateOptionsPage } from './rule_create_options_page';
-import { paths } from '../../constants';
+import { paths, CREATE_WITH_AGENT_INITIAL_PROMPT } from '../../constants';
 
 const mockNavigateToUrl = jest.fn();
+const mockNavigateToApp = jest.fn();
 
 jest.mock('../../application/breadcrumb_context', () => ({
   useSetBreadcrumbs: () => jest.fn(),
@@ -26,7 +27,7 @@ jest.mock('@kbn/core-di-browser', () => ({
       return {};
     }
     if (token === 'application') {
-      return { navigateToUrl: mockNavigateToUrl };
+      return { navigateToUrl: mockNavigateToUrl, navigateToApp: mockNavigateToApp };
     }
     if (token === 'chrome') {
       return { docTitle: { change: jest.fn() } };
@@ -111,5 +112,16 @@ describe('RuleCreateOptionsPage', () => {
     fireEvent.click(screen.getByTestId('composeDiscoverFlyout'));
 
     expect(mockNavigateToUrl).toHaveBeenCalledWith(paths.ruleList);
+  });
+
+  it('navigates to the agent builder when the AI Agent card is clicked', () => {
+    renderPage();
+
+    fireEvent.click(screen.getByRole('button', { name: /create with ai agent/i }));
+
+    expect(mockNavigateToApp).toHaveBeenCalledWith('agent_builder', {
+      path: '/agents/elastic-ai-agent/conversations/new',
+      state: { initialMessage: CREATE_WITH_AGENT_INITIAL_PROMPT },
+    });
   });
 });
