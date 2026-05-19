@@ -499,6 +499,7 @@ src/platform/packages/shared/kbn-alerts-ui-shared @elastic/response-ops
 src/platform/packages/shared/kbn-ambient-storybook-types @elastic/kibana-operations
 src/platform/packages/shared/kbn-ambient-ui-types @elastic/kibana-operations
 src/platform/packages/shared/kbn-analytics @elastic/kibana-core
+src/platform/packages/shared/kbn-apm-common @elastic/obs-presentation-team @elastic/obs-exploration-team
 src/platform/packages/shared/kbn-apm-data-view @elastic/obs-presentation-team @elastic/obs-exploration-team
 src/platform/packages/shared/kbn-apm-types-shared @elastic/obs-presentation-team @elastic/obs-exploration-team
 src/platform/packages/shared/kbn-apm-ui-shared @elastic/obs-presentation-team @elastic/obs-exploration-team

@@ -9,6 +9,5 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/elastic-agent-utils",
-    "@kbn/io-ts-utils"
   ]
 }

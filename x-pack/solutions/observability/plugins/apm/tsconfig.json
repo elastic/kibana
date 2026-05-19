@@ -162,7 +162,8 @@
     "@kbn/presentation-util",
     "@kbn/unified-doc-viewer-plugin",
     "@kbn/ebt-click",
-    "@kbn/apm-types-shared"
+    "@kbn/apm-types-shared",
+    "@kbn/apm-common"
   ],
   "exclude": ["target/**/*"]
 }
