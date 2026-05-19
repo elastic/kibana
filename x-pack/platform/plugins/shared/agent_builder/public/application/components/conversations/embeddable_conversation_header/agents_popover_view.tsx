@@ -19,11 +19,12 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
-import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT, AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useStreamingContext } from '../../../context/streaming/streaming_context';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
 import { useAgentOptions } from '../../common/agent_selector/use_agent_options';
@@ -59,6 +60,9 @@ export const AgentsPopoverView: React.FC<AgentsPopoverViewProps> = ({
   const { euiTheme } = useEuiTheme();
   const { agentId, setAgentId } = useConversationContext();
   const { removeAllErrors } = useStreamingContext();
+  const {
+    services: { analytics },
+  } = useKibana();
   const { agents } = useAgentBuilderAgents();
   const { agentOptions, renderAgentOption } = useAgentOptions({ agents, selectedAgentId: agentId });
 
@@ -81,6 +85,7 @@ export const AgentsPopoverView: React.FC<AgentsPopoverViewProps> = ({
   ) => {
     const { checked, key: newAgentId } = changedOption;
     if (checked === 'on' && newAgentId) {
+      analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.InappAgentSwitch, { agent_id: newAgentId });
       removeAllErrors();
       setAgentId?.(newAgentId);
       onClose();

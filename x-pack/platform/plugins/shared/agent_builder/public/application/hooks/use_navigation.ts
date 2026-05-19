@@ -14,6 +14,7 @@ import { useKibana } from './use_kibana';
 export interface LocationState {
   shouldStickToBottom?: boolean;
   initialMessage?: string;
+  entryPointSource?: 'inapp_chat' | 'direct';
 }
 
 export const INFERENCE_MANAGEMENT_APP_ID = 'management';

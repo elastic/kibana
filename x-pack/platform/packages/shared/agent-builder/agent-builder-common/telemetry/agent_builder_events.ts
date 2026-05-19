@@ -31,6 +31,10 @@ export const AGENT_BUILDER_EVENT_TYPES = {
   ManageEntityListView: `${TELEMETRY_PREFIX}_manage_entity_list_view`,
   UsedByWarningShown: `${TELEMETRY_PREFIX}_used_by_warning_shown`,
   UsedByWarningProceeded: `${TELEMETRY_PREFIX}_used_by_warning_proceeded`,
+  InappChatOpen: `${TELEMETRY_PREFIX}_inapp_chat_open`,
+  InappAgentSwitch: `${TELEMETRY_PREFIX}_inapp_agent_switch`,
+  InappOpenFullscreen: `${TELEMETRY_PREFIX}_inapp_open_fullscreen`,
+  FullscreenEntryPoint: `${TELEMETRY_PREFIX}_fullscreen_entry_point`,
 } as const;
 
 export type OptInSource =
@@ -259,6 +263,27 @@ export interface ReportUsedByWarningProceededParams {
   agent_count: number;
 }
 
+export interface ReportInappChatOpenParams {
+  agent_id: string;
+}
+
+export interface ReportInappAgentSwitchParams {
+  agent_id: string;
+}
+
+export interface ReportInappOpenFullscreenParams {
+  agent_id: string;
+  conversation_id?: string;
+}
+
+export type FullscreenEntryPointSource = 'inapp_chat' | 'direct';
+
+export interface ReportFullscreenEntryPointParams {
+  agent_id: string;
+  conversation_id: string;
+  source: FullscreenEntryPointSource;
+}
+
 export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.OptInAction]: ReportOptInActionParams;
   [AGENT_BUILDER_EVENT_TYPES.OptOut]: ReportOptOutParams;
@@ -284,6 +309,10 @@ export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.ManageEntityListView]: ReportManageEntityListViewParams;
   [AGENT_BUILDER_EVENT_TYPES.UsedByWarningShown]: ReportUsedByWarningShownParams;
   [AGENT_BUILDER_EVENT_TYPES.UsedByWarningProceeded]: ReportUsedByWarningProceededParams;
+  [AGENT_BUILDER_EVENT_TYPES.InappChatOpen]: ReportInappChatOpenParams;
+  [AGENT_BUILDER_EVENT_TYPES.InappAgentSwitch]: ReportInappAgentSwitchParams;
+  [AGENT_BUILDER_EVENT_TYPES.InappOpenFullscreen]: ReportInappOpenFullscreenParams;
+  [AGENT_BUILDER_EVENT_TYPES.FullscreenEntryPoint]: ReportFullscreenEntryPointParams;
 }
 
 export type AgentBuilderTelemetryEvent =
@@ -305,7 +334,11 @@ export type AgentBuilderTelemetryEvent =
   | EventTypeOpts<ReportToolCallErrorParams>
   | EventTypeOpts<ReportManageEntityListViewParams>
   | EventTypeOpts<ReportUsedByWarningShownParams>
-  | EventTypeOpts<ReportUsedByWarningProceededParams>;
+  | EventTypeOpts<ReportUsedByWarningProceededParams>
+  | EventTypeOpts<ReportInappChatOpenParams>
+  | EventTypeOpts<ReportInappAgentSwitchParams>
+  | EventTypeOpts<ReportInappOpenFullscreenParams>
+  | EventTypeOpts<ReportFullscreenEntryPointParams>;
 // Type union of all event type strings for use in union types
 export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.OptInAction
@@ -326,7 +359,11 @@ export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.ToolCallError
   | typeof AGENT_BUILDER_EVENT_TYPES.ManageEntityListView
   | typeof AGENT_BUILDER_EVENT_TYPES.UsedByWarningShown
-  | typeof AGENT_BUILDER_EVENT_TYPES.UsedByWarningProceeded;
+  | typeof AGENT_BUILDER_EVENT_TYPES.UsedByWarningProceeded
+  | typeof AGENT_BUILDER_EVENT_TYPES.InappChatOpen
+  | typeof AGENT_BUILDER_EVENT_TYPES.InappAgentSwitch
+  | typeof AGENT_BUILDER_EVENT_TYPES.InappOpenFullscreen
+  | typeof AGENT_BUILDER_EVENT_TYPES.FullscreenEntryPoint;
 
 const OPT_IN_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.OptInAction,
@@ -1129,6 +1166,67 @@ const USED_BY_WARNING_PROCEEDED_EVENT: AgentBuilderTelemetryEvent = {
   },
 };
 
+const INAPP_CHAT_OPEN_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.InappChatOpen,
+  schema: {
+    agent_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'ID of the agent active when the in-app chat panel opened',
+        optional: false,
+      },
+    },
+  },
+};
+
+const INAPP_AGENT_SWITCH_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.InappAgentSwitch,
+  schema: {
+    agent_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'ID of the agent the user switched to in the in-app chat',
+        optional: false,
+      },
+    },
+  },
+};
+
+const INAPP_OPEN_FULLSCREEN_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.InappOpenFullscreen,
+  schema: {
+    agent_id: {
+      type: 'keyword',
+      _meta: { description: 'ID of the active agent when full-screen was opened', optional: false },
+    },
+    conversation_id: {
+      type: 'keyword',
+      _meta: { description: 'ID of the conversation carried into full-screen', optional: true },
+    },
+  },
+};
+
+const FULLSCREEN_ENTRY_POINT_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.FullscreenEntryPoint,
+  schema: {
+    agent_id: {
+      type: 'keyword',
+      _meta: { description: 'ID of the agent in the full-screen conversation', optional: false },
+    },
+    conversation_id: {
+      type: 'keyword',
+      _meta: { description: 'ID of the conversation opened in full-screen', optional: false },
+    },
+    source: {
+      type: 'keyword',
+      _meta: {
+        description: 'How the user arrived at full-screen (inapp_chat|direct)',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
   OPT_IN_EVENT,
   OPT_OUT_EVENT,
@@ -1137,6 +1235,10 @@ export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unk
   MANAGE_ENTITY_LIST_VIEW_EVENT,
   USED_BY_WARNING_SHOWN_EVENT,
   USED_BY_WARNING_PROCEEDED_EVENT,
+  INAPP_CHAT_OPEN_EVENT,
+  INAPP_AGENT_SWITCH_EVENT,
+  INAPP_OPEN_FULLSCREEN_EVENT,
+  FULLSCREEN_ENTRY_POINT_EVENT,
 ];
 
 export const agentBuilderServerEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [

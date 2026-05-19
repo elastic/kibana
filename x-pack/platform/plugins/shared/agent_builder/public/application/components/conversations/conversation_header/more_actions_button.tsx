@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
-import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT, AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useNavigation } from '../../../hooks/use_navigation';
 import {
@@ -89,7 +89,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
   const conversationRounds = useConversationRounds();
 
   const {
-    services: { application, plugins },
+    services: { application, plugins, analytics },
   } = useKibana();
   const hasAccessToGenAiSettings = useHasConnectorsAllPrivileges();
 
@@ -161,12 +161,17 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
     setIsPopoverOpen(false);
     onCloseSidebar?.();
 
+    analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.InappOpenFullscreen, {
+      agent_id: agentId!,
+      conversation_id: conversationId,
+    });
+
     const path = conversationId
       ? appPaths.agent.conversations.byId({ agentId: agentId!, conversationId: conversationId! })
       : appPaths.agent.conversations.new({ agentId: agentId! });
 
-    navigateToAgentBuilderUrl(path);
-  }, [application, agentId, conversationId, navigateToAgentBuilderUrl, onCloseSidebar]);
+    navigateToAgentBuilderUrl(path, undefined, { entryPointSource: 'inapp_chat' });
+  }, [application, agentId, analytics, conversationId, navigateToAgentBuilderUrl, onCloseSidebar]);
 
   const fullScreenMenuItemLabel = useMemo(() => {
     if (conversationId) {
