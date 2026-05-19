@@ -39,6 +39,17 @@ describe('change point chart embeddable transforms', () => {
     ).toThrow();
   });
 
+  it('rejects partitions when split_field is missing', () => {
+    expect(() =>
+      changePointChartEmbeddableStateSchema.validate({
+        data_view_id: 'data-view-id',
+        aggregation_function: 'avg',
+        metric_field: 'bytes',
+        partitions: ['host-a'],
+      })
+    ).toThrow('`partitions` requires `split_field` to be set');
+  });
+
   it('extracts the data view reference from snake_case state', () => {
     expect(
       transformIn({

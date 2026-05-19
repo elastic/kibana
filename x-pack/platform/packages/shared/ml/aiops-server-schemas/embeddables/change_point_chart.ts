@@ -77,8 +77,13 @@ export const changePointChartEmbeddableStateSchema = schema.object(
     }),
   },
   {
+    validate: (value) => {
+      if (value.partitions !== undefined && value.split_field === undefined) {
+        return '`partitions` requires `split_field` to be set';
+      }
+    },
     meta: {
-      id: 'aiops-change-point-chart-embeddable',
+      id: 'aiops_change_point_chart',
       description: 'Change point detection chart embeddable schema',
     },
   }
