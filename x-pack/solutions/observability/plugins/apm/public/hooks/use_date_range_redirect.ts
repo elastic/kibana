@@ -18,6 +18,10 @@ function tryParseDate(date: string | string[] | null | undefined): Moment | unde
   return typeof date === 'string' ? datemath.parse(date) : undefined;
 }
 
+function isValidDateRange(start: Moment | undefined, end: Moment | undefined): boolean {
+  return Boolean(start?.isValid() && end?.isValid() && start.isBefore(end));
+}
+
 export function useDateRangeRedirect() {
   const history = useHistory();
   const location = useLocation();
@@ -35,21 +39,24 @@ export function useDateRangeRedirect() {
     const start = tryParseDate(query.rangeFrom);
     const end = tryParseDate(query.rangeTo);
 
-    return Boolean(start?.isValid() && end?.isValid());
+    return Boolean(start?.isValid() && end?.isValid()) && isValidDateRange(start, end);
   }, [query.rangeFrom, query.rangeTo]);
 
   const redirect = () => {
     const start = tryParseDate(query.rangeFrom);
     const end = tryParseDate(query.rangeTo);
+    const isRangeInverted = start?.isValid() && end?.isValid() && !isValidDateRange(start, end);
 
     const nextQuery = {
       ...query,
-      rangeFrom: start?.isValid()
-        ? query.rangeFrom
-        : timePickerSharedState.from ?? timePickerTimeDefaults.from,
-      rangeTo: end?.isValid()
-        ? query.rangeTo
-        : timePickerSharedState.to ?? timePickerTimeDefaults.to,
+      rangeFrom:
+        start?.isValid() && !isRangeInverted
+          ? query.rangeFrom
+          : timePickerSharedState.from ?? timePickerTimeDefaults.from,
+      rangeTo:
+        end?.isValid() && !isRangeInverted
+          ? query.rangeTo
+          : timePickerSharedState.to ?? timePickerTimeDefaults.to,
     };
 
     try {

@@ -179,6 +179,22 @@ describe('useDateRangeRedirect', () => {
     });
   });
 
+  describe('when rangeFrom resolves to after rangeTo (inverted range)', () => {
+    it('returns isDateRangeSet as false and redirect replaces both with defaults', () => {
+      setLocation('?rangeFrom=now-11m&rangeTo=2020-01-01T00:00:00.000Z');
+
+      const { result } = renderHook(() => useDateRangeRedirect());
+
+      expect(result.current.isDateRangeSet).toBe(false);
+
+      result.current.redirect();
+
+      const search = getReplacedSearch();
+      expect(search.rangeFrom).toBe('now-15m');
+      expect(search.rangeTo).toBe('now');
+    });
+  });
+
   describe('error handling', () => {
     it('swallows inactive history errors', () => {
       setLocation('?otherParam=foo');
