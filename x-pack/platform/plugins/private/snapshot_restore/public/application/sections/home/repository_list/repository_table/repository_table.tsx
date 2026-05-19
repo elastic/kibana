@@ -38,6 +38,7 @@ interface Props {
   managedRepository?: string;
   defaultRepository: string | null;
   canSetDefaultRepository?: boolean;
+  isDefaultRepositoryFeatureAvailable?: boolean;
   onSetDefaultRepository: (name: string) => Promise<any>;
   reload: UseRequestResponse['resendRequest'];
   openRepositoryDetailsUrl: (name: Repository['name']) => string;
@@ -49,6 +50,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
   managedRepository,
   defaultRepository,
   canSetDefaultRepository = true,
+  isDefaultRepositoryFeatureAvailable = true,
   onSetDefaultRepository,
   reload,
   openRepositoryDetailsUrl,
@@ -222,12 +224,20 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
                     <EuiContextMenuItem
                       key="setDefault"
                       icon="flag"
-                      disabled={isDefault || isReadOnly}
+                      disabled={isDefault || isReadOnly || !isDefaultRepositoryFeatureAvailable}
                       toolTipContent={
                         isDefault
                           ? i18n.translate(
                               'xpack.snapshotRestore.repositoryList.table.actionSetDefaultAlreadyDefaultTooltip',
                               { defaultMessage: 'This repository is already the default.' }
+                            )
+                          : !isDefaultRepositoryFeatureAvailable
+                          ? i18n.translate(
+                              'xpack.snapshotRestore.repositoryList.table.actionSetDefaultUnavailableTooltip',
+                              {
+                                defaultMessage:
+                                  'Default repository feature is currently unavailable.',
+                              }
                             )
                           : isReadOnly
                           ? i18n.translate(
@@ -240,7 +250,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
                           : undefined
                       }
                       onClick={
-                        !isDefault && !isReadOnly
+                        !isDefault && !isReadOnly && isDefaultRepositoryFeatureAvailable
                           ? () => {
                               closeActionsMenu();
                               if (defaultRepository) {

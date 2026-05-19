@@ -44,17 +44,20 @@ jest.mock('../../components/repository_form', () => ({
     saveError,
     onToggleDefault,
     isDefaultRepository,
+    isDefaultRepositoryFeatureAvailable = true,
   }: {
     onSave: (repository: unknown) => void;
     saveError?: React.ReactNode;
     onToggleDefault?: (isDefault: boolean) => void;
     isDefaultRepository?: boolean;
+    isDefaultRepositoryFeatureAvailable?: boolean;
   }) => (
     <div>
       {onToggleDefault ? (
         <button
           data-test-subj="repositoryFormToggleDefault"
           onClick={() => onToggleDefault(!isDefaultRepository)}
+          disabled={!isDefaultRepositoryFeatureAvailable}
         >
           toggle default
         </button>
@@ -136,30 +139,6 @@ describe('<RepositoryEdit />', () => {
     });
   });
 
-  it('SHOULD not show default repository load error callout when no default repository is set', async () => {
-    const history = createMemoryHistory({
-      initialEntries: [`/edit_repository/${mockDecodedRepositoryName}`],
-    });
-    render(
-      <I18nProvider>
-        <Router history={history}>
-          <RepositoryEdit
-            history={history}
-            location={history.location}
-            match={{
-              params: { name: mockDecodedRepositoryName },
-              isExact: true,
-              path: '',
-              url: '',
-            }}
-          />
-        </Router>
-      </I18nProvider>
-    );
-
-    expect(screen.queryByText('Default repository could not be loaded')).not.toBeInTheDocument();
-  });
-
   it('SHOULD not show default toggle or attempt setting default when missing privilege', async () => {
     mockUseCanSetDefaultRepository.mockReturnValue(false);
 
@@ -203,7 +182,7 @@ describe('<RepositoryEdit />', () => {
     });
   });
 
-  it('SHOULD not show default toggle or attempt setting default when default repository failed to load', async () => {
+  it('SHOULD disable default toggle and not attempt setting default when default repository feature is unavailable', async () => {
     const setDefaultRepository = jest.fn().mockResolvedValue({ data: null, error: null });
     mockUseDefaultRepository.mockReturnValue({
       defaultRepository: null,
@@ -232,8 +211,7 @@ describe('<RepositoryEdit />', () => {
       </I18nProvider>
     );
 
-    expect(screen.getByText('Default repository could not be loaded')).toBeInTheDocument();
-    expect(screen.queryByTestId('repositoryFormToggleDefault')).not.toBeInTheDocument();
+    expect(screen.getByTestId('repositoryFormToggleDefault')).toBeDisabled();
 
     fireEvent.click(screen.getByTestId('repositoryFormSave'));
 

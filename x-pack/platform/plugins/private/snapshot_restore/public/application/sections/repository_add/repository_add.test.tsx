@@ -32,11 +32,13 @@ jest.mock('../../components/repository_form', () => ({
     saveError,
     onToggleDefault,
     isDefaultRepository,
+    isDefaultRepositoryFeatureAvailable = true,
   }: {
     onSave: (repository: unknown) => void;
     saveError?: React.ReactNode;
     onToggleDefault?: (isDefault: boolean) => void;
     isDefaultRepository?: boolean;
+    isDefaultRepositoryFeatureAvailable?: boolean;
   }) => (
     <div>
       <div data-test-subj="repositoryFormIsDefault">{String(Boolean(isDefaultRepository))}</div>
@@ -44,6 +46,7 @@ jest.mock('../../components/repository_form', () => ({
         <button
           data-test-subj="repositoryFormToggleDefault"
           onClick={() => onToggleDefault(!isDefaultRepository)}
+          disabled={!isDefaultRepositoryFeatureAvailable}
         >
           toggle default
         </button>
@@ -370,7 +373,7 @@ describe('<RepositoryAdd />', () => {
     });
   });
 
-  it('SHOULD not show default toggle or attempt setting default when default repository failed to load', async () => {
+  it('SHOULD disable default toggle and not attempt setting default when default repository feature is unavailable', async () => {
     const { addRepository, useLoadRepositories } = await import('../../services/http');
     jest.mocked(addRepository).mockResolvedValueOnce({ data: null, error: null });
     jest.mocked(useLoadRepositories).mockReturnValue({
@@ -401,8 +404,7 @@ describe('<RepositoryAdd />', () => {
       </I18nProvider>
     );
 
-    expect(screen.getByText('Default repository could not be loaded')).toBeInTheDocument();
-    expect(screen.queryByTestId('repositoryFormToggleDefault')).not.toBeInTheDocument();
+    expect(screen.getByTestId('repositoryFormToggleDefault')).toBeDisabled();
 
     fireEvent.click(screen.getByTestId('repositoryFormSave'));
 

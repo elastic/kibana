@@ -57,7 +57,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
     setDefaultRepository,
   } = useDefaultRepository();
   const defaultRepositoryLoadError = defaultRepositoryStatus === 'error';
-  const canSetOrChangeDefaultRepository = canSetDefaultRepository && !defaultRepositoryLoadError;
+  const isDefaultRepositoryFeatureAvailable = !defaultRepositoryLoadError;
 
   const reloadRepositoriesAndDefault = () => {
     reload();
@@ -164,13 +164,13 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
               title={
                 <FormattedMessage
                   id="xpack.snapshotRestore.repositoryList.defaultRepositoryLoadErrorCalloutTitle"
-                  defaultMessage="Default repository could not be loaded"
+                  defaultMessage="Default repository feature is currently unavailable"
                 />
               }
             >
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryList.defaultRepositoryLoadErrorCalloutDescription"
-                defaultMessage="Try clicking Reload in the table or refresh the page."
+                defaultMessage="Please try refreshing the page or returning at a later time."
               />
             </EuiCallOut>
             <EuiSpacer size="m" />
@@ -180,7 +180,8 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
           repositories={repositories || []}
           managedRepository={managedRepository?.name}
           defaultRepository={defaultRepository}
-          canSetDefaultRepository={canSetOrChangeDefaultRepository}
+          canSetDefaultRepository={canSetDefaultRepository}
+          isDefaultRepositoryFeatureAvailable={isDefaultRepositoryFeatureAvailable}
           onSetDefaultRepository={setDefaultRepository}
           reload={reloadRepositoriesAndDefault}
           openRepositoryDetailsUrl={openRepositoryDetailsUrl}

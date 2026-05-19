@@ -28,6 +28,7 @@ interface Props {
   isDefaultRepository?: boolean;
   isAlreadyDefaultRepository?: boolean;
   isFirstRepository?: boolean;
+  isDefaultRepositoryFeatureAvailable?: boolean;
   onToggleDefault?: (value: boolean) => void;
 }
 
@@ -43,6 +44,7 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
   isDefaultRepository,
   isAlreadyDefaultRepository,
   isFirstRepository,
+  isDefaultRepositoryFeatureAvailable,
   onToggleDefault,
 }) => {
   const [currentStep, setCurrentStep] = useState<1 | 2>(isEditing ? 2 : 1);
@@ -129,6 +131,7 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
       isDefaultRepository={isDefaultRepository}
       isAlreadyDefaultRepository={isAlreadyDefaultRepository}
       isFirstRepository={isFirstRepository}
+      isDefaultRepositoryFeatureAvailable={isDefaultRepositoryFeatureAvailable}
       onToggleDefault={onToggleDefault}
     />
   );

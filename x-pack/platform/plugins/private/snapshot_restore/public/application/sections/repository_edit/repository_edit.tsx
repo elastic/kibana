@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RouteComponentProps } from 'react-router-dom';
 
-import { EuiCallOut, EuiPageSection, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { EuiPageSection, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import type { Repository, EmptyRepository } from '../../../../common/types';
 
 import type { Error } from '../../../shared_imports';
@@ -231,28 +231,6 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
 
       <EuiSpacer size="l" />
 
-      {defaultRepositoryLoadError && (
-        <>
-          <EuiCallOut
-            announceOnMount={false}
-            color="warning"
-            iconType="warning"
-            title={
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryForm.defaultRepositoryLoadErrorCalloutTitle"
-                defaultMessage="Default repository could not be loaded"
-              />
-            }
-          >
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.defaultRepositoryLoadErrorCalloutDescription"
-              defaultMessage="You can still save repositories, but you can’t set or change the default repository right now. Try refreshing the page."
-            />
-          </EuiCallOut>
-          <EuiSpacer size="l" />
-        </>
-      )}
-
       {isManagedRepository ? (
         <>
           <EuiCallOut
@@ -282,7 +260,8 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
         onCancel={onCancel}
         isAlreadyDefaultRepository={isAlreadyDefaultRepository}
         isDefaultRepository={isAlreadyDefaultRepository ? true : isDefaultRepository}
-        onToggleDefault={canSetOrChangeDefaultRepository ? setIsDefaultRepository : undefined}
+        isDefaultRepositoryFeatureAvailable={!defaultRepositoryLoadError}
+        onToggleDefault={canSetDefaultRepository ? setIsDefaultRepository : undefined}
       />
     </EuiPageSection>
   );

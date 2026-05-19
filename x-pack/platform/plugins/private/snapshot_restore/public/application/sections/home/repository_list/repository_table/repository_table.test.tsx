@@ -94,6 +94,7 @@ describe('<RepositoryTable /> default repository actions', () => {
           defaultRepository={props.defaultRepository ?? null}
           managedRepository={props.managedRepository}
           canSetDefaultRepository={props.canSetDefaultRepository}
+          isDefaultRepositoryFeatureAvailable={props.isDefaultRepositoryFeatureAvailable}
           onSetDefaultRepository={onSetDefaultRepository}
           reload={jest.fn()}
           openRepositoryDetailsUrl={(name) => `/repositories/${encodeURIComponent(name)}`}
@@ -159,6 +160,22 @@ describe('<RepositoryTable /> default repository actions', () => {
     fireEvent.click(screen.getByTestId('repositoryActionsMenuButton-repo1'));
 
     expect(await screen.findByTestId('setDefaultRepositoryButton-repo1')).toBeDisabled();
+  });
+
+  it('disables "Set as default" action when default repository feature is unavailable', async () => {
+    renderTable({
+      repositories: [
+        { name: 'repo1', type: 'fs', settings: { location: '/tmp' } } as any,
+        { name: 'repo2', type: 'fs', settings: { location: '/tmp' } } as any,
+      ],
+      defaultRepository: null,
+      canSetDefaultRepository: true,
+      isDefaultRepositoryFeatureAvailable: false,
+    });
+
+    fireEvent.click(screen.getByTestId('repositoryActionsMenuButton-repo2'));
+
+    expect(await screen.findByTestId('setDefaultRepositoryButton-repo2')).toBeDisabled();
   });
 
   it('confirms before changing the default repository from the table', async () => {

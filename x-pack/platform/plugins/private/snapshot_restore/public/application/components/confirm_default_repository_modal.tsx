@@ -56,7 +56,7 @@ export const ConfirmDefaultRepositoryModal = ({
       <p>
         <FormattedMessage
           id="xpack.snapshotRestore.defaultRepository.confirmDefaultModal.description"
-          defaultMessage="By making this change, all data streams will now write their snapshots to {newDefault} instead of {currentDefault}. Are you sure you wish to proceed?"
+          defaultMessage="By making this change, all data stream lifecycles with a frozen data phase will now write their snapshots to {newDefault} instead of {currentDefault}. Are you sure you wish to proceed?"
           values={{
             currentDefault: <strong>{currentDefaultRepository}</strong>,
             newDefault: <strong>{newDefaultRepository}</strong>,

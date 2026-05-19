@@ -10,7 +10,7 @@ import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RouteComponentProps } from 'react-router-dom';
 
-import { EuiCallOut, EuiPageSection, EuiSpacer, EuiPageHeader } from '@elastic/eui';
+import { EuiPageSection, EuiSpacer, EuiPageHeader } from '@elastic/eui';
 import { SectionError } from '@kbn/es-ui-shared-plugin/public';
 import type { Repository, EmptyRepository } from '../../../../common/types';
 
@@ -200,28 +200,6 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
         }
       />
 
-      {defaultRepositoryLoadError && (
-        <>
-          <EuiSpacer size="l" />
-          <EuiCallOut
-            announceOnMount={false}
-            color="warning"
-            iconType="warning"
-            title={
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryForm.defaultRepositoryLoadErrorCalloutTitle"
-                defaultMessage="Default repository could not be loaded"
-              />
-            }
-          >
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.defaultRepositoryLoadErrorCalloutDescription"
-              defaultMessage="You can still save repositories, but you can’t set or change the default repository right now. Try refreshing the page."
-            />
-          </EuiCallOut>
-        </>
-      )}
-
       <EuiSpacer size="l" />
 
       <RepositoryForm
@@ -233,7 +211,8 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
         onCancel={onCancel}
         isFirstRepository={isFirstRepository}
         isDefaultRepository={effectiveIsDefaultRepository}
-        onToggleDefault={canSetOrChangeDefaultRepository ? onToggleDefault : undefined}
+        isDefaultRepositoryFeatureAvailable={!defaultRepositoryLoadError}
+        onToggleDefault={canSetDefaultRepository ? onToggleDefault : undefined}
       />
     </EuiPageSection>
   );

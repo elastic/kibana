@@ -44,6 +44,7 @@ interface Props {
   isDefaultRepository?: boolean;
   isAlreadyDefaultRepository?: boolean;
   isFirstRepository?: boolean;
+  isDefaultRepositoryFeatureAvailable?: boolean;
   onToggleDefault?: (value: boolean) => void;
 }
 
@@ -60,6 +61,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
   onCancel,
   isDefaultRepository,
   isAlreadyDefaultRepository,
+  isDefaultRepositoryFeatureAvailable = true,
   onToggleDefault,
 }) => {
   const { docLinks } = useCore();
@@ -137,9 +139,16 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
       return null;
     }
 
-    const isDisabled = Boolean(isAlreadyDefaultRepository || isReadOnly);
+    const isDisabled = Boolean(
+      isAlreadyDefaultRepository || isReadOnly || !isDefaultRepositoryFeatureAvailable
+    );
 
-    const tooltipContent = isAlreadyDefaultRepository ? (
+    const tooltipContent = !isDefaultRepositoryFeatureAvailable ? (
+      <FormattedMessage
+        id="xpack.snapshotRestore.repositoryForm.fields.defaultRepositoryUnavailableTooltip"
+        defaultMessage="Default repository feature is currently unavailable."
+      />
+    ) : isAlreadyDefaultRepository ? (
       <FormattedMessage
         id="xpack.snapshotRestore.repositoryForm.fields.defaultRepositoryDisabledTooltip"
         defaultMessage="This is currently the default repository. To unassign it, you must set another repository as the default."
