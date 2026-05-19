@@ -20,10 +20,10 @@ Then run the tests in another terminal:
 
 ```bash
 // ESS (stateful)
-npx playwright test --config=src/platform/plugins/shared/dashboard/test/scout_oas_schema/api/playwright.config.ts --grep=@local-stateful-classic --project=local
+node scripts/playwright test --config=src/platform/plugins/shared/dashboard/test/scout_oas_schema/api/playwright.config.ts --grep=@local-stateful-classic --project=local
 
 // Serverless
-npx playwright test --config=src/platform/plugins/shared/dashboard/test/scout_oas_schema/api/playwright.config.ts --grep=@local-serverless-search --project=local
+node scripts/playwright test --config=src/platform/plugins/shared/dashboard/test/scout_oas_schema/api/playwright.config.ts --grep=@local-serverless-search --project=local
 ```
 
 ### Server Configuration
