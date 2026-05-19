@@ -65,7 +65,7 @@ mark_index_passed() {
 
 # Extract the load IDs (Scout test config paths) assigned to this lane from the loads file
 read_load_ids() {
-  mapfile -t LOAD_IDS < <(jq -r --arg key "$BUILDKITE_STEP_KEY" '.[$key][]' "$SCOUT_TEST_LANE_LOADS_PATH")
+  mapfile -t LOAD_IDS < <(jq -r --arg key "$BUILDKITE_STEP_KEY" '.[$key].loadIDs[]' "$SCOUT_TEST_LANE_LOADS_PATH")
 
   if [[ ${#LOAD_IDS[@]} -eq 0 ]]; then
     echo "No test lane load IDs found for step key '$BUILDKITE_STEP_KEY'"
