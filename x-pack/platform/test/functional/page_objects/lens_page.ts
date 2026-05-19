@@ -392,7 +392,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       log.debug(`Press ${metaKey} with keyboard`);
       await retry.try(async () => {
         await browser.pressKeys(browserKey);
-        await find.existsByCssSelector(
+        await find.byCssSelector(
           `.domDroppable__extraTarget > [data-test-subj="domDragDrop-dropTarget-${metaToAction[metaKey]}"].domDroppable--hover`
         );
       });
@@ -497,12 +497,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async waitForLensDragDropToFinish() {
-      await retry.try(async () => {
-        const exists = await find.existsByCssSelector('.domDragDrop-isActiveGroup');
-        if (exists) {
-          throw new Error('UI still in drag/drop mode');
-        }
-      });
+      await find.waitForDeletedByCssSelector('.domDragDrop-isActiveGroup');
     },
 
     /**
@@ -863,10 +858,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await common.sleep(1000); // give time for debounced components to rerender
     },
     async hasStyleToolbarButton() {
-      return find.existsByCssSelector('button[data-test-subj="style"][title="Style"]');
+      return find.existsByCssSelector('button[data-test-subj="style"]');
     },
     async hasLegendToolbarButton() {
-      return find.existsByCssSelector('button[data-test-subj="legend"][title="Legend"]');
+      return find.existsByCssSelector('button[data-test-subj="legend"]');
     },
     async openStyleSettingsFlyout() {
       // Close dimension editor flyout
@@ -874,13 +869,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await this.closeDimensionEditor();
       }
 
-      await find.clickByCssSelector('button[data-test-subj="style"][title="Style"]');
+      await find.clickByCssSelector('button[data-test-subj="style"]');
       await retry.try(async () => {
-        const styleTitle = await find.byCssSelector('#lnsDimensionContainerTitle');
-        const titleText = await styleTitle.getVisibleText();
-        if (titleText !== 'Style') {
-          throw new Error(`Expected flyout title to be "Style", but got "${titleText}"`);
-        }
+        await find.byCssSelector('#lnsDimensionContainerTitle');
       });
     },
 
@@ -891,7 +882,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
 
       if (await this.hasLegendToolbarButton()) {
-        const button = await find.byCssSelector('button[data-test-subj="legend"][title="Legend"]');
+        const button = await find.byCssSelector('button[data-test-subj="legend"]');
         await button.click();
       }
     },

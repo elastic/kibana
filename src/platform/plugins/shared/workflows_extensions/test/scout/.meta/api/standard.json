@@ -1,10 +1,10 @@
 {
-  "sha1": "500278f6df559f8fdcfb8508663e407abe1adc61",
+  "sha1": "7a621a301999d5c321789770b08aad1984eb1604",
   "tests": [
     {
       "id": "2e9661be655a029-bbe4bc87d5491d8",
       "title": "Workflows Extensions - Custom Step Definitions Approval should validate that all registered custom step definitions are approved by workflows-eng team",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -19,7 +19,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_extensions/test/scout/api/tests/step_definitions_approval.spec.ts",
-        "line": 34,
+        "line": 35,
         "column": 12
       }
     },

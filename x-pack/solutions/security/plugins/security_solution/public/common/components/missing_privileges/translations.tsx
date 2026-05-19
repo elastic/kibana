@@ -8,7 +8,7 @@
 import { EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import React, { type ComponentProps } from 'react';
 import {
   DEFAULT_ITEMS_INDEX,
   DEFAULT_LISTS_INDEX,
@@ -17,7 +17,8 @@ import {
 } from '../../../../common/constants';
 import { CommaSeparatedValues } from './comma_separated_values';
 import type { MissingPrivileges } from '../../hooks/use_missing_privileges';
-import { DetectionsRequirementsLink, SecuritySolutionRequirementsLink } from '../links_to_docs';
+import { DocLink } from '../links_to_docs/doc_link';
+import * as linksI18n from '../links_to_docs/links_translations';
 
 export const PRIVILEGES_MISSING_TITLE = i18n.translate(
   'xpack.securitySolution.common.onboarding.assistantCard.missingPrivileges.title',
@@ -68,63 +69,83 @@ const CANNOT_EDIT_ALERTS = i18n.translate(
   }
 );
 
+const DEFAULT_DOC_LINKS = [
+  {
+    docPath: linksI18n.DETECTIONS_REQUIREMENTS_LINK_PATH,
+    linkText: linksI18n.DETECTIONS_REQUIREMENTS_LINK_TEXT,
+  },
+  {
+    docPath: linksI18n.SOLUTION_REQUIREMENTS_LINK_PATH,
+    linkText: linksI18n.SOLUTION_REQUIREMENTS_LINK_TEXT,
+  },
+];
+
 export const missingPrivilegesCallOutBody = ({
   indexPrivileges,
   featurePrivileges = [],
-}: MissingPrivileges) => (
-  <FormattedMessage
-    id="xpack.securitySolution.common.missingPrivilegesCallOut.messageBody.messageDetail"
-    defaultMessage="{essence} {indexPrivileges} {featurePrivileges} Related documentation: {docs}"
-    values={{
-      essence: (
-        <p>
-          <FormattedMessage
-            id="xpack.securitySolution.common.missingPrivilegesCallOut.messageBody.essenceDescription"
-            defaultMessage="You need the following privileges to fully access this functionality. Contact your administrator for further assistance."
-          />
-        </p>
-      ),
-      indexPrivileges:
-        indexPrivileges.length > 0 ? (
-          <>
+  docs = DEFAULT_DOC_LINKS,
+}: MissingPrivileges & { docs?: Array<ComponentProps<typeof DocLink>> }) => {
+  return (
+    <FormattedMessage
+      id="xpack.securitySolution.common.missingPrivilegesCallOut.messageBody.messageDetail"
+      defaultMessage="{essence} {indexPrivileges} {featurePrivileges} {docs}"
+      values={{
+        essence: (
+          <p>
             <FormattedMessage
-              id="xpack.securitySolution.common.missingPrivilegesCallOut.messageBody.indexPrivilegesTitle"
-              defaultMessage="Missing Elasticsearch index privileges:"
+              id="xpack.securitySolution.common.missingPrivilegesCallOut.messageBody.essenceDescription"
+              defaultMessage="You need the following privileges to fully access this functionality. Contact your administrator for further assistance."
             />
-            <ul>
-              {indexPrivileges.map(([index, missingPrivileges]) => (
-                <li key={index}>{missingPrivilegesMessage(index, missingPrivileges)}</li>
-              ))}
-            </ul>
-          </>
-        ) : null,
-      featurePrivileges:
-        featurePrivileges.length > 0 ? (
-          <>
-            <FormattedMessage
-              id="xpack.securitySolution.common.missingPrivilegesCallOut.messageBody.featurePrivilegesTitle"
-              defaultMessage="Missing Kibana feature privileges:"
-            />
-            <ul>
-              {featurePrivileges.map(([feature, missingPrivileges]) => (
-                <li key={feature}>{missingFeaturePrivileges(feature, missingPrivileges)}</li>
-              ))}
-            </ul>
-          </>
-        ) : null,
-      docs: (
-        <ul>
-          <li>
-            <DetectionsRequirementsLink />
-          </li>
-          <li>
-            <SecuritySolutionRequirementsLink />
-          </li>
-        </ul>
-      ),
-    }}
-  />
-);
+          </p>
+        ),
+        indexPrivileges:
+          indexPrivileges.length > 0 ? (
+            <>
+              <FormattedMessage
+                id="xpack.securitySolution.common.missingPrivilegesCallOut.messageBody.indexPrivilegesTitle"
+                defaultMessage="Missing Elasticsearch index privileges:"
+              />
+              <ul>
+                {indexPrivileges.map(([index, missingPrivileges]) => (
+                  <li key={index}>{missingPrivilegesMessage(index, missingPrivileges)}</li>
+                ))}
+              </ul>
+            </>
+          ) : null,
+        featurePrivileges:
+          featurePrivileges.length > 0 ? (
+            <>
+              <FormattedMessage
+                id="xpack.securitySolution.common.missingPrivilegesCallOut.messageBody.featurePrivilegesTitle"
+                defaultMessage="Missing Kibana feature privileges:"
+              />
+              <ul>
+                {featurePrivileges.map(([feature, missingPrivileges]) => (
+                  <li key={feature}>{missingFeaturePrivileges(feature, missingPrivileges)}</li>
+                ))}
+              </ul>
+            </>
+          ) : null,
+        docs:
+          docs.length > 0 ? (
+            <>
+              <FormattedMessage
+                id="xpack.securitySolution.common.missingPrivilegesCallOut.messageBody.docsTitle"
+                defaultMessage="Related documentation:"
+              />
+              <ul>
+                {docs.map(({ docPath, linkText }) => (
+                  <li key={docPath}>
+                    <DocLink docPath={docPath} linkText={linkText} />
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : null,
+      }}
+    />
+  );
+};
 
 interface PrivilegeExplanations {
   [key: string]: {

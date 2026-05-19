@@ -237,12 +237,15 @@ export const SelectSeverityUI: FC<
     [onChange, allSeverityOptions]
   );
 
+  const anomalyScoreLabel = i18n.translate('xpack.ml.explorer.severityThresholdLabel', {
+    defaultMessage: 'Anomaly score',
+  });
+
   return (
     <div data-test-subj={'mlAnomalySeverityThresholdControls'} className={classNames}>
       <MultiSuperSelect
-        prepend={i18n.translate('xpack.ml.explorer.severityThresholdLabel', {
-          defaultMessage: 'Anomaly score',
-        })}
+        prepend={anomalyScoreLabel}
+        aria-label={anomalyScoreLabel}
         inputDisplay={inputDisplay}
         options={multiSelectOptions}
         onOptionsChange={handleOptionsChange}

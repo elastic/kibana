@@ -93,7 +93,13 @@ describe('SearchEmbeddableGridComponent', () => {
     jest.clearAllMocks();
   });
 
-  const renderComponent = ({ isEsql }: { isEsql: boolean }) => {
+  const renderComponent = ({
+    isEsql,
+    onRefreshData,
+  }: {
+    isEsql: boolean;
+    onRefreshData?: () => void;
+  }) => {
     const savedSearch = createSavedSearch(isEsql);
     const api = createApi(savedSearch);
     const stateManager = createStateManager();
@@ -106,6 +112,7 @@ describe('SearchEmbeddableGridComponent', () => {
           api={api}
           dataView={dataViewMock}
           stateManager={stateManager}
+          onRefreshData={onRefreshData}
           enableDocumentViewer={true}
           inlineEditing={{
             isActive: false,
@@ -140,6 +147,20 @@ describe('SearchEmbeddableGridComponent', () => {
       const lastCallProps = mockDiscoverGridEmbeddableProps.mock.calls.at(-1)?.[0];
       expect(lastCallProps?.onUpdateSampleSize).toBeDefined();
       expect(typeof lastCallProps?.onUpdateSampleSize).toBe('function');
+    });
+  });
+
+  describe('refresh action wiring', () => {
+    it('passes onRefreshData to DiscoverGridEmbeddable', async () => {
+      const onRefreshData = jest.fn();
+      renderComponent({ isEsql: false, onRefreshData });
+
+      await waitFor(() => {
+        expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
+      });
+
+      const lastCallProps = mockDiscoverGridEmbeddableProps.mock.calls.at(-1)?.[0];
+      expect(lastCallProps?.onRefreshData).toBe(onRefreshData);
     });
   });
 });

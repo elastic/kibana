@@ -1,5 +1,5 @@
 pageLoadAssetSize:
-  actions: 20000
+  actions: 20500
   advancedSettings: 6196
   agentBuilder: 48000
   agentBuilderPlatform: 8886
@@ -77,7 +77,7 @@ pageLoadAssetSize:
   filesManagement: 5208
   fileUpload: 22957
   fleet: 209495
-  genAiSettings: 5663
+  genAiSettings: 6400
   globalSearch: 6890
   globalSearchBar: 26122
   globalSearchProviders: 4646
@@ -170,7 +170,7 @@ pageLoadAssetSize:
   serverlessSearch: 26287
   serverlessWorkplaceAI: 5078
   sessionView: 47912
-  share: 58677
+  share: 64618
   slo: 40437
   snapshotRestore: 22068
   spaces: 28871

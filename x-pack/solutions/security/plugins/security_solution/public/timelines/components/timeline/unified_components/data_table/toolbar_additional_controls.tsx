@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
-import React, { useMemo, useCallback, useRef } from 'react';
+
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import React, { useCallback, useMemo, useRef } from 'react';
 
 import { isActiveTimeline } from '../../../../../helpers';
 import { TimelineId } from '../../../../../../common/types/timeline';
@@ -69,10 +70,18 @@ export const ToolbarAdditionalControlsComponent: React.FC<Props> = ({ timelineId
 
   return (
     <>
-      <RowRendererSwitch timelineId={timelineId} />
-      <StatefulRowRenderersBrowser timelineId={timelineId} />
-      <LastUpdatedContainer updatedAt={updatedAt} />
-      <span className="rightPosition">
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <RowRendererSwitch timelineId={timelineId} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <StatefulRowRenderersBrowser timelineId={timelineId} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <LastUpdatedContainer updatedAt={updatedAt} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <span style={{ position: 'absolute', right: 0 }}>
         <EuiToolTip
           ref={toolTipRef}
           content={fullScreen ? i18n.EXIT_FULL_SCREEN : i18n.FULL_SCREEN}
@@ -81,7 +90,7 @@ export const ToolbarAdditionalControlsComponent: React.FC<Props> = ({ timelineId
           <EuiButtonIcon
             aria-label={fullScreen ? i18n.EXIT_FULL_SCREEN : i18n.FULL_SCREEN}
             className={`${fullScreen ? EXIT_FULL_SCREEN_CLASS_NAME : ''}`}
-            color={fullScreen ? 'text' : 'primary'}
+            color="text"
             data-test-subj={
               // a full screen button gets created for timeline and for the host page
               // this sets the data-test-subj for each case so that tests can differentiate between them
