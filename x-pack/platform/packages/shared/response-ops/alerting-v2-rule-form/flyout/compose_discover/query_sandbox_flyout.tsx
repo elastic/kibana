@@ -205,10 +205,9 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
 
   // Auto-run the active query when the sandbox opens. No-ops if the query is
   // empty, so a blank editor on first open shows the "Run your query" prompt.
-
   useEffect(() => {
     run();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
