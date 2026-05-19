@@ -110,6 +110,7 @@ export {
   getRoot,
   MAX_NESTING_LEVEL,
   isRoot,
+  isRootStreamBaseField,
   ROOT_STREAM_NAMES,
   LOGS_ROOT_STREAM_NAME,
   LOGS_OTEL_STREAM_NAME,
@@ -310,6 +311,7 @@ export { mergeSourceIntoDocuments } from './src/helpers/merge_esql_source';
 
 export { streamMatchesIndexPatterns } from './src/helpers/stream_matches_index_patterns';
 export { DEFAULT_INDEX_PATTERNS } from './src/helpers/default_index_patterns';
+export { ECS_BASE_FIELD_NAMES, OTEL_BASE_FIELD_NAMES } from './src/helpers/root_stream_base_fields';
 
 export {
   STREAMS_SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,

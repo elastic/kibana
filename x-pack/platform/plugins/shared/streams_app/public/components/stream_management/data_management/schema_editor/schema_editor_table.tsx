@@ -22,7 +22,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Streams } from '@kbn/streams-schema';
+import { isRootStreamBaseField, type Streams } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import { css } from '@emotion/css';
 import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
@@ -316,6 +316,7 @@ export const isSelectableField = (streamName: string, field: SchemaField) => {
     field.status !== 'inherited' &&
     field.parent === streamName &&
     !field.alias_for &&
-    field.type !== 'system'
+    field.type !== 'system' &&
+    !isRootStreamBaseField(streamName, field.name)
   );
 };

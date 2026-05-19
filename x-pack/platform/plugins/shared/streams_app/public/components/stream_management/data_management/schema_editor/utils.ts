@@ -46,21 +46,15 @@ export const getGeoPointSuggestion = ({
   return null;
 };
 
-export const convertToFieldDefinitionConfig = (field: MappedSchemaField): FieldDefinitionConfig => {
-  if (field.type === 'system') {
-    // `system` is a UI-only pseudo-type and must never be persisted in a stream definition.
-    throw new Error('Cannot convert system-managed field type to FieldDefinitionConfig');
-  }
-
-  return {
+export const convertToFieldDefinitionConfig = (field: MappedSchemaField): FieldDefinitionConfig =>
+  ({
     type: field.type,
     ...(field.format && field.type === 'date' ? { format: field.format as string } : {}),
     ...(field.description ? { description: field.description } : {}),
     ...(field.additionalParameters && Object.keys(field.additionalParameters).length > 0
       ? field.additionalParameters
       : {}),
-  } as FieldDefinitionConfig;
-};
+  } as FieldDefinitionConfig);
 
 export function isFieldUncommitted(field: SchemaEditorField, storedFields: SchemaEditorField[]) {
   const fieldDefaults = {
@@ -123,10 +117,6 @@ export const buildSchemaSavePayload = (
     // - doc-only overrides (description-only), even if status is 'unmapped' (wired streams only)
     // - inherited fields with description overrides defined on THIS stream (wired streams only)
     if (field.status === 'mapped') {
-      // UI-only pseudo-type; never persist.
-      if (field.type === 'system') {
-        return acc;
-      }
       acc[field.name] = convertToFieldDefinitionConfig(field as MappedSchemaField);
     } else if (field.status === 'unmapped' && hasNonEmptyDescription && isWired) {
       // Classic streams don't support description-only field overrides

@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { ECS_BASE_FIELD_NAMES, OTEL_BASE_FIELD_NAMES } from '../helpers/root_stream_base_fields';
+
 export const LOGS_ROOT_STREAM_NAME = 'logs';
 export const LOGS_OTEL_STREAM_NAME = 'logs.otel' as const;
 export const LOGS_ECS_STREAM_NAME = 'logs.ecs' as const;
@@ -19,6 +22,18 @@ export type RootStreamName = (typeof ROOT_STREAM_NAMES)[number];
 const SORTED_ROOT_STREAM_NAMES: readonly RootStreamName[] = [...ROOT_STREAM_NAMES].sort(
   (a, b) => b.length - a.length
 );
+
+export const isRootStreamBaseField = (streamName: string, fieldName: string): boolean => {
+  switch (streamName) {
+    case LOGS_ECS_STREAM_NAME:
+      return ECS_BASE_FIELD_NAMES.has(fieldName);
+    case LOGS_OTEL_STREAM_NAME:
+    case LOGS_ROOT_STREAM_NAME:
+      return OTEL_BASE_FIELD_NAMES.has(fieldName);
+    default:
+      return false;
+  }
+};
 
 /**
  * Returns the matched root, or undefined if no match.

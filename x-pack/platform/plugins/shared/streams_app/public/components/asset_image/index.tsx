@@ -61,16 +61,6 @@ const imageSets = {
       defaultMessage: 'Your preview will appear here image for the streams app',
     }),
   },
-  processorsCannotBeAddedToRootStreams: {
-    light: () => import('./processors_cannot_be_added_to_root_streams_light.svg'),
-    dark: () => import('./processors_cannot_be_added_to_root_streams_dark.svg'),
-    alt: i18n.translate(
-      'xpack.streams.streamDetailView.processorsCannotBeAddedToRootStreamsImage',
-      {
-        defaultMessage: 'Processors cannot be added to root streams image for the streams app',
-      }
-    ),
-  },
   extractFields: {
     light: () => import('./extract_fields_light.svg'),
     dark: () => import('./extract_fields_dark.svg'),

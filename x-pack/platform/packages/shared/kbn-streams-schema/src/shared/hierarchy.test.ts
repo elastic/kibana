@@ -14,6 +14,7 @@ import {
   isChildOf,
   isDescendantOf,
   isParentName,
+  isRootStreamBaseField,
   getSegments,
 } from './hierarchy';
 
@@ -451,6 +452,53 @@ describe('hierarchy', () => {
       expect(getSegments('metrics')).toEqual(['metrics']);
       expect(getSegments('metrics.system')).toEqual(['metrics', 'system']);
       expect(getSegments('traces.app.endpoint')).toEqual(['traces', 'app', 'endpoint']);
+    });
+  });
+
+  describe('isRootStreamBaseField', () => {
+    describe('logs.ecs root', () => {
+      it('should return true for ECS fields', () => {
+        expect(isRootStreamBaseField('logs.ecs', 'message')).toBe(true);
+      });
+
+      it('should return false for OTel fields', () => {
+        expect(isRootStreamBaseField('logs.ecs', 'severity_text')).toBe(false);
+      });
+    });
+
+    describe('logs.otel root', () => {
+      it('should return true for OTel fields', () => {
+        expect(isRootStreamBaseField('logs.otel', 'severity_text')).toBe(true);
+      });
+
+      it('should return false for ECS fields', () => {
+        expect(isRootStreamBaseField('logs.otel', 'message')).toBe(false);
+      });
+    });
+
+    describe('logs root uses OTel base fields', () => {
+      it('should return true for OTel fields', () => {
+        expect(isRootStreamBaseField('logs', 'severity_text')).toBe(true);
+      });
+
+      it('should return false for ECS fields', () => {
+        expect(isRootStreamBaseField('logs', 'message')).toBe(false);
+      });
+    });
+
+    describe('custom field mappings', () => {
+      it('should return false for custom fields on any root stream', () => {
+        expect(isRootStreamBaseField('logs.ecs', 'my_custom_field')).toBe(false);
+        expect(isRootStreamBaseField('logs.otel', 'my_custom_field')).toBe(false);
+        expect(isRootStreamBaseField('logs', 'my_custom_field')).toBe(false);
+      });
+    });
+
+    describe('unknown root streams', () => {
+      it('should return false for unknown root streams', () => {
+        expect(isRootStreamBaseField('metrics', 'host.name')).toBe(false);
+        expect(isRootStreamBaseField('custom', 'severity_text')).toBe(false);
+      });
     });
   });
 
