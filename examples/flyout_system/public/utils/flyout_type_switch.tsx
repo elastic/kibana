@@ -15,6 +15,7 @@ export interface FlyoutTypeSwitchProps {
   flyoutType: 'overlay' | 'push';
   onChange: (type: 'overlay' | 'push') => void;
   label?: string;
+  disabled?: boolean;
 }
 
 /**
@@ -25,6 +26,7 @@ export const FlyoutTypeSwitch: React.FC<FlyoutTypeSwitchProps> = ({
   flyoutType,
   onChange,
   label = 'Push',
+  disabled = false,
 }) => {
   return (
     <EuiSwitch
@@ -32,6 +34,7 @@ export const FlyoutTypeSwitch: React.FC<FlyoutTypeSwitchProps> = ({
       label={label}
       checked={flyoutType === 'push'}
       onChange={(e) => onChange(e.target.checked ? 'push' : 'overlay')}
+      disabled={disabled}
     />
   );
 };

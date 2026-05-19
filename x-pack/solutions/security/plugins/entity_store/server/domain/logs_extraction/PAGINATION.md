@@ -196,3 +196,76 @@ This is why the base filter is always `>=` and the compound cursor owns exclusio
 ### Exact full page (`total_logs == maxLogsPerPage`)
 
 When the probe returns `total_logs == maxLogsPerPage` the slice is marked `isLastPage = true` and no further probe is issued. This is correct: `total_logs` is the `INLINE STATS count(*)` computed before the `LIMIT`, so an exactly full count means the window is exhausted by this slice.
+
+---
+
+## Volume cap
+
+Two independent knobs bound how much work a single run does:
+
+| Knob | Purpose |
+|------|---------|
+| `maxLogsPerPage` | Upper bound on raw log docs in **one slice** (probe `LIMIT`). |
+| `maxLogsPerWindow` | Upper bound on raw log docs across **the entire run**. 0 = disabled. |
+
+### Why logs, not entities
+
+`maxLogsPerWindow` caps **raw log documents scanned**, not entity rows produced. Entities are aggregated outputs (one entity per unique `entity.id`) and can be far fewer than the logs they summarise. Capping on entities would allow unbounded log scanning, which is what operators want to prevent.
+
+### How the cap is computed
+
+After each probe the slice's log count is derived and accumulated:
+
+```
+sliceLogCount = min(probe.total_logs, maxLogsPerPage)
+totalLogs    += sliceLogCount   // runs across all slices in the window
+```
+
+The cap fires **after** the slice's entity pages are ingested and state is persisted:
+
+```
+if maxLogsPerWindow > 0 && totalLogs >= maxLogsPerWindow:
+    logsCapApplied = true
+    break
+```
+
+This ensures every slice that starts is fully processed before stopping.
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant ES as Elasticsearch
+
+    C->>ES: probe → total_logs=5, sliceEnd=(T1,id1)
+    Note over C: sliceLogCount=min(5,maxLogsPerPage), totalLogs+=sliceLogCount
+    C->>ES: extract slice → entities
+    C->>ES: ingest + persist cursor
+    Note over C: totalLogs >= maxLogsPerWindow? → cap fires, break
+
+    alt maxLogsPerWindowCapBehavior = defer
+        Note over C: lastSearchTimestamp = T1 (resume point)
+    else maxLogsPerWindowCapBehavior = drop
+        Note over C: lastSearchTimestamp = toDateISO (skip remainder)
+    end
+```
+
+### Across sub-windows (lagging environments)
+
+When the time range is split into sub-windows (see [Lagging environment](#lagging-environment-multiple-sub-windows-in-one-run)), the remaining budget shrinks across sub-windows:
+
+```
+remainingCap = maxLogsPerWindow - totalLogsAcrossSubWindows
+```
+
+Each sub-window receives `remainingCap` as its own `maxLogsPerWindow`. The cap fires in the first sub-window that exhausts the budget.
+
+### Defer vs drop on cap
+
+| `maxLogsPerWindowCapBehavior` | `lastSearchTimestamp` returned | Next run behaviour |
+|---|---|---|
+| `defer` | Slice end where cap fired | Resumes from cursor; processes remaining logs |
+| `drop` | `toDateISO` (window end) | Cursor advances past uncapped logs; they are skipped |
+
+### Disabling the cap
+
+`maxLogsPerWindow = 0` disables the cap entirely — the per-slice check is skipped and the run processes all logs in the window.
