@@ -22,7 +22,7 @@ Run **1 → 5** for a full prototype. For a single step (e.g. only run Kibana), 
 ## Principles
 
 - New prototypes → **`examples/`** + `yarn start --run-examples` (see [run-kibana](references/run-kibana.md)).
-- **Plan before code** (step 1): **EUI vs KUI** per element, plugin vs tweak, data and version needs.
+- **Plan before code** (step 1): route each element via [eui-vs-kbnui](references/eui-vs-kbnui.md) (default raw EUI).
 - **Ask** in step 1 and step 4 when choices are unclear (host path, data type).
 
 Repo root: `kibana/`. New example plugins: `yarn kbn bootstrap` after scaffold ([implement](references/implement.md)).

@@ -37,11 +37,11 @@ Do **not** use `plugins/` + `node scripts/generate_plugin` for throwaway prototy
 
 ### Implement UI
 
-Follow the **EUI vs KUI map** from [process-and-plan](process-and-plan.md); import KUI packages as listed, do not reimplement them with raw EUI.
+Follow the plan’s table from [eui-vs-kbnui.md](eui-vs-kbnui.md) — use listed wrappers, never `EuiPageTemplate` in Kibana.
 
 | Topic | Guidance |
 |-------|----------|
-| Components | Plan’s EUI list → `@elastic/eui`; plan’s KUI list → `@kbn/ui-*` / `@kbn/shared-ux-*` |
+| Components | Raw EUI per plan; kbn-ui / shared-ux packages per [eui-vs-kbnui](eui-vs-kbnui.md) |
 | Styling | `@emotion/react`; theme tokens over raw hex |
 | Layout | [kbn-ui README](../../../../src/platform/kbn-ui/README.md); side nav → [side-navigation](../../../../src/platform/kbn-ui/side-navigation/README.md) |
 | Copy | Sentence case, EUI voice |
