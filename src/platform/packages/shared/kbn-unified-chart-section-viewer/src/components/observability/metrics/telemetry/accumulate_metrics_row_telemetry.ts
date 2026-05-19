@@ -22,6 +22,7 @@ export const accumulateMetricsRowTelemetry = (telemetry: MetricsTelemetry, metri
   telemetry.multi_value_counts.data_streams += +(dataStreams.length > 1);
   telemetry.multi_value_counts.field_types += +(fieldTypes.length > 1);
   telemetry.multi_value_counts.metric_types += +(metricTypes.length > 1);
+  telemetry.multi_value_counts.units += +(units.length > 1);
 
   for (const type of metricTypes) {
     increment(telemetry.metrics_by_type, type);

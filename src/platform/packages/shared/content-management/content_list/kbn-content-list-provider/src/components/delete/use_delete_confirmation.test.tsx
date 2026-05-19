@@ -32,7 +32,7 @@ const createWrapper =
         id="test-list"
         labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
         dataSource={{ findItems: mockFindItems }}
-        item={{ onDelete: mockOnDelete }}
+        item={{ actions: { delete: { onBulkAction: mockOnDelete } } }}
       >
         {children}
       </ContentListProvider>
