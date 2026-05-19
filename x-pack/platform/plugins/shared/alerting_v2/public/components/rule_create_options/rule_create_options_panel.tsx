@@ -23,10 +23,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 interface RuleCreateOptionsPanelProps {
   onCreateEsqlRule: () => void;
+  onCreateWithAgent: () => void;
 }
 
 export const RuleCreateOptionsPanel: React.FC<RuleCreateOptionsPanelProps> = ({
   onCreateEsqlRule,
+  onCreateWithAgent,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -78,16 +80,11 @@ export const RuleCreateOptionsPanel: React.FC<RuleCreateOptionsPanelProps> = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiCard
-              betaBadgeProps={{
-                label: i18n.translate('xpack.alertingV2.ruleCreateOptionsPanel.comingSoonLabel', {
-                  defaultMessage: 'Coming soon',
-                }),
-                color: 'hollow',
-                size: 'm',
-              }}
               layout="horizontal"
+              display="plain"
               titleElement="h3"
               titleSize="xs"
+              hasBorder={true}
               title={i18n.translate(
                 'xpack.alertingV2.ruleCreateOptionsPanel.createWithAiAgentTitle',
                 {
@@ -98,13 +95,8 @@ export const RuleCreateOptionsPanel: React.FC<RuleCreateOptionsPanelProps> = ({
                 'xpack.alertingV2.ruleCreateOptionsPanel.createWithAiAgentDescription',
                 { defaultMessage: 'Set up an Alerting rule with the help of the AI Agent.' }
               )}
-              aria-disabled={true}
-              display="subdued"
+              onClick={onCreateWithAgent}
               icon={<EuiIcon type="productAgent" color="text" size="l" aria-hidden={true} />}
-              css={{
-                cursor: 'default',
-                pointerEvents: 'none',
-              }}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

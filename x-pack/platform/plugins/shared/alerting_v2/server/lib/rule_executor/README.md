@@ -151,11 +151,11 @@ Step order is defined in `setup/bind_rule_executor.ts`.
 
 Recovery is implemented in `CreateRecoveryEventsStep` after `CreateAlertEventsStep`, so the current batch already contains breach documents when recovery logic runs.
 
-Recovery only applies to `kind: alert` rules.
+Recovery only applies to `kind: alert` rules and is optional. A rule without a `recovery_policy` never emits recovery events.
 
 ### `no_breach` recovery
 
-Default mode. The executor:
+Selected when `recovery_policy.type` is `no_breach`. The executor:
 
 1. queries `.rule-events` for group hashes that still have non-inactive episode state
 2. compares that active set to the current breach batch
@@ -163,12 +163,13 @@ Default mode. The executor:
 
 ### `query` recovery
 
-If `recovery_policy.query.base` is configured, the executor runs a separate recovery ES|QL query and only emits recovery events for rows whose computed `group_hash` matches the active set.
+If `recovery_policy.type` is `query`, the executor runs the configured `recovery_policy.query.base` ES|QL query and only emits recovery events for rows whose computed `group_hash` matches the active set.
 
 ### Summary
 
-| Mode | Recovery is emitted when |
+| `recovery_policy` | Recovery is emitted when |
 | --- | --- |
+| _absent_ | Never. The executor skips the active-group lookup entirely. |
 | `no_breach` | An active group is absent from the current breach batch. |
 | `query` | A recovery query row matches a currently active group. |
 
