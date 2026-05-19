@@ -9,12 +9,11 @@ import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import {
   mockAgentToolCall,
   mockFinalAnswer,
-  mockHandoverToAnswer,
   mockTitleGeneration,
 } from '../../../scout_agent_builder_shared/lib/proxy_scenario/calls';
 
 /**
- * Answer agent calls an invalid tool on first call and then responds on the second call.
+ * Agent calls an invalid tool on first call and then responds on the second call.
  */
 export async function setupAnswerAgentCallsInvalidTool({
   response,
@@ -30,8 +29,6 @@ export async function setupAnswerAgentCallsInvalidTool({
   if (!continueConversation) {
     mockTitleGeneration(proxy, title);
   }
-
-  mockHandoverToAnswer(proxy, 'ready to answer');
 
   mockAgentToolCall({
     llmProxy: proxy,

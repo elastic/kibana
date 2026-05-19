@@ -122,11 +122,11 @@ apiTest.describe(
           conversationIds.push(body.conversation_id);
           await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-          const handoverRequest = llmProxy.interceptedRequests.find(
-            (request) => request.matchingInterceptorName === 'handover-to-answer'
+          const finalRequest = llmProxy.interceptedRequests.find(
+            (request) => request.matchingInterceptorName === 'final-assistant-response'
           )?.requestBody;
-          expect(handoverRequest).toBeDefined();
-          const esqlToolCallMsg = handoverRequest!.messages[handoverRequest!.messages.length - 1]!;
+          expect(finalRequest).toBeDefined();
+          const esqlToolCallMsg = finalRequest!.messages[finalRequest!.messages.length - 1]!;
           expect(esqlToolCallMsg.role).toBe('tool');
           const toolCallContent = parseToolMessageContent(String(esqlToolCallMsg.content));
           const [queryResult, esqlResults] = toolCallContent.results;
