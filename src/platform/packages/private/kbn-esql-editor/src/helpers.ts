@@ -11,11 +11,10 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { euiShadow } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { monaco } from '@kbn/monaco';
+import { monaco, type MonacoMessage } from '@kbn/code-editor';
 import { uniqBy, type MapCache } from 'lodash';
 import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 import {
   EDITOR_MAX_HEIGHT,
   EDITOR_MIN_HEIGHT,
@@ -199,13 +198,15 @@ export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
 };
 
 // refresh the esql cache entry after 10 minutes
-const CACHE_INVALIDATE_DELAY = 10 * 60 * 1000;
+export const CACHE_INVALIDATE_DELAY = 10 * 60 * 1000;
+export const DATA_SOURCES_CACHE_KEY = 'dataSources';
+export const HISTORY_STARRED_ITEMS_CACHE_KEY = 'historyStarredItems';
 
-export const clearCacheWhenOld = (cache: MapCache, esqlQuery: string) => {
-  if (cache.has(esqlQuery)) {
-    const cacheEntry = cache.get(esqlQuery);
+export const clearCacheWhenOld = (cache: MapCache, key: string) => {
+  if (cache.has(key)) {
+    const cacheEntry = cache.get(key);
     if (Date.now() - cacheEntry.timestamp > CACHE_INVALIDATE_DELAY) {
-      cache.delete(esqlQuery);
+      cache.delete(key);
     }
   }
 };
