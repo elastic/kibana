@@ -18,7 +18,8 @@ import { PageLoading, PageError, useExecutionContext } from '../../../../shared_
 import { useDecodedParams } from '../../../lib';
 import { BASE_PATH, UIM_REPOSITORY_LIST_LOAD } from '../../../constants';
 import { useAppContext, useServices } from '../../../app_context';
-import { useLoadRepositories } from '../../../services/http';
+import { useLoadRepositories, deleteRepositories } from '../../../services/http';
+import { useDefaultRepository } from '../../../services/use_default_repository';
 import { linkToAddRepository, linkToRepository } from '../../../services/navigation';
 
 import { RepositoryDetails } from './repository_details';
@@ -46,6 +47,8 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   const { uiMetricService } = useServices();
   const { core } = useAppContext();
+  const { defaultRepository, setDefaultRepository, clearDefaultRepository } =
+    useDefaultRepository();
 
   const openRepositoryDetailsUrl = (newRepositoryName: Repository['name']): string => {
     return linkToRepository(newRepositoryName);
@@ -53,6 +56,18 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   const closeRepositoryDetails = () => {
     history.push(`${BASE_PATH}/repositories`);
+  };
+
+  const handleDeleteAll = async () => {
+    const allNames = (repositories || []).map((r) => r.name);
+    if (allNames.length) {
+      await deleteRepositories(allNames);
+    }
+    await clearDefaultRepository();
+    if (repositoryName) {
+      closeRepositoryDetails();
+    }
+    reload();
   };
 
   const onRepositoryDeleted = (repositoriesDeleted: Array<Repository['name']>): void => {
@@ -144,10 +159,14 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
           reload={reload}
           openRepositoryDetailsUrl={openRepositoryDetailsUrl}
           onRepositoryDeleted={onRepositoryDeleted}
+          defaultRepository={defaultRepository}
+          onSetDefaultRepository={setDefaultRepository}
         />
       </section>
     );
   }
+
+  const hasRepositories = Boolean(repositories && repositories.length > 0);
 
   return (
     <>
@@ -156,9 +175,35 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
           repositoryName={repositoryName}
           onClose={closeRepositoryDetails}
           onRepositoryDeleted={onRepositoryDeleted}
+          isDefaultRepository={repositoryName === defaultRepository}
         />
       ) : null}
       {content}
+      {hasRepositories ? (
+        <button
+          onClick={handleDeleteAll}
+          data-test-subj="resetPrototypeButton"
+          style={{
+            position: 'fixed',
+            bottom: '24px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'white',
+            border: 'none',
+            borderRadius: '9999px',
+            padding: '10px 24px',
+            boxShadow: '0 2px 12px rgba(0, 0, 0, 0.25)',
+            cursor: 'pointer',
+            fontSize: '13px',
+            fontWeight: 500,
+            color: '#343741',
+            whiteSpace: 'nowrap',
+            zIndex: 1000,
+          }}
+        >
+          Reset prototype
+        </button>
+      ) : null}
     </>
   );
 };

@@ -103,3 +103,14 @@ export const deleteRepositories = async (names: Array<Repository['name']>) => {
   );
   return result;
 };
+
+// Prototype-only: default repository persistence via Kibana saved objects
+
+export const getDefaultRepository = () =>
+  sendRequest({ path: `${API_BASE_PATH}default_repository`, method: 'get' });
+
+export const setDefaultRepositoryApi = (name: string) =>
+  sendRequest({ path: `${API_BASE_PATH}default_repository`, method: 'put', body: { name } });
+
+export const clearDefaultRepositoryApi = () =>
+  sendRequest({ path: `${API_BASE_PATH}default_repository`, method: 'delete' });

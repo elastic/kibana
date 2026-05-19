@@ -8,6 +8,7 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -21,6 +22,7 @@ import {
   EuiLink,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
   EuiCodeBlock,
   EuiText,
 } from '@elastic/eui';
@@ -58,12 +60,14 @@ interface Props {
   repositoryName: Repository['name'];
   onClose: () => void;
   onRepositoryDeleted: (repositoriesDeleted: Array<Repository['name']>) => void;
+  isDefaultRepository?: boolean;
 }
 
 export const RepositoryDetails: React.FunctionComponent<Props> = ({
   repositoryName,
   onClose,
   onRepositoryDeleted,
+  isDefaultRepository,
 }) => {
   const { i18n, history } = useServices();
   const { docLinks } = useCore();
@@ -407,30 +411,46 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
               <EuiFlexItem grow={false}>
                 <RepositoryDeleteProvider>
                   {(deleteRepositoryPrompt) => {
-                    return (
+                    const isRemoveDisabled =
+                      repositoryDetails.isManagedRepository || isDefaultRepository;
+                    const removeTooltipContent = isDefaultRepository
+                      ? i18n.translate(
+                          'xpack.snapshotRestore.repositoryDetails.removeDefaultRepositoryButtonTitle',
+                          {
+                            defaultMessage: 'The default repository cannot be removed.',
+                          }
+                        )
+                      : repositoryDetails.isManagedRepository
+                      ? i18n.translate(
+                          'xpack.snapshotRestore.repositoryDetails.removeManagedRepositoryButtonTitle',
+                          {
+                            defaultMessage: 'You cannot delete a managed repository.',
+                          }
+                        )
+                      : undefined;
+
+                    const removeButton = (
                       <EuiButtonEmpty
                         color="danger"
                         data-test-subj="srRepositoryDetailsDeleteActionButton"
-                        onClick={() =>
-                          deleteRepositoryPrompt([repositoryName], onRepositoryDeleted)
-                        }
-                        isDisabled={repositoryDetails.isManagedRepository}
-                        title={
-                          repositoryDetails.isManagedRepository
-                            ? i18n.translate(
-                                'xpack.snapshotRestore.repositoryDetails.removeManagedRepositoryButtonTitle',
-                                {
-                                  defaultMessage: 'You cannot delete a managed repository.',
-                                }
-                              )
+                        onClick={
+                          !isRemoveDisabled
+                            ? () => deleteRepositoryPrompt([repositoryName], onRepositoryDeleted)
                             : undefined
                         }
+                        isDisabled={isRemoveDisabled}
                       >
                         <FormattedMessage
                           id="xpack.snapshotRestore.repositoryDetails.removeButtonLabel"
                           defaultMessage="Remove"
                         />
                       </EuiButtonEmpty>
+                    );
+
+                    return removeTooltipContent ? (
+                      <EuiToolTip content={removeTooltipContent}>{removeButton}</EuiToolTip>
+                    ) : (
+                      removeButton
                     );
                   }}
                 </RepositoryDeleteProvider>
@@ -466,7 +486,19 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
       <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h2 id="srRepositoryDetailsFlyoutTitle" data-test-subj="title">
-            {repositoryName}
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
+              <EuiFlexItem grow={false}>{repositoryName}</EuiFlexItem>
+              {isDefaultRepository ? (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge>
+                    <FormattedMessage
+                      id="xpack.snapshotRestore.repositoryDetails.defaultRepositoryBadgeLabel"
+                      defaultMessage="Default"
+                    />
+                  </EuiBadge>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
