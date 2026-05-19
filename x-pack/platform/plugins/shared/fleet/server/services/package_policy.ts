@@ -55,6 +55,7 @@ import {
   getInputEffectiveName,
   getRegistryStreamWithDataStreamForInputType,
   syncDataStreamTypeFromVar,
+  validateFleetSavedObjectId,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -520,6 +521,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     request?: KibanaRequest
   ): Promise<PackagePolicy> {
     const logger = this.getLogger('create');
+
+    const idError = validateFleetSavedObjectId(options?.id);
+    if (idError) {
+      throw new FleetError(idError);
+    }
 
     logger.debug(
       () =>

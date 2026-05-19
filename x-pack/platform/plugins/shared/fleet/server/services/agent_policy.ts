@@ -46,6 +46,7 @@ import {
   policyHasEndpointSecurity,
   policyHasFleetServer,
   policyHasSyntheticsIntegration,
+  validateFleetSavedObjectId,
 } from '../../common/services';
 
 import {
@@ -468,6 +469,11 @@ class AgentPolicyService {
     } = {}
   ): Promise<AgentPolicy> {
     const logger = this.getLogger('create');
+
+    const idError = validateFleetSavedObjectId(options.id);
+    if (idError) {
+      throw new FleetError(idError);
+    }
 
     const savedObjectType = await getAgentPolicySavedObjectType();
     // Ensure an ID is provided, so we can include it in the audit logs below

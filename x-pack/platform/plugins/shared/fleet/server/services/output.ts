@@ -60,7 +60,7 @@ import {
   FLEET_SERVER_PACKAGE,
 } from '../../common/constants';
 import type { ValueOf } from '../../common/types';
-import { normalizeHostsForAgents } from '../../common/services';
+import { normalizeHostsForAgents, validateFleetSavedObjectId } from '../../common/services';
 import {
   FleetEncryptedSavedObjectEncryptionKeyRequired,
   OutputInvalidError,
@@ -552,6 +552,11 @@ class OutputService {
   ): Promise<Output> {
     const logger = appContextService.getLogger();
     logger.debug(`Creating new output`);
+
+    const idError = validateFleetSavedObjectId(options?.id);
+    if (idError) {
+      throw new FleetError(idError);
+    }
 
     const data: OutputSOAttributes = { ...omit(output, ['ssl', 'secrets']) };
 

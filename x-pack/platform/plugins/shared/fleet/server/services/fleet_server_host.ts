@@ -15,7 +15,7 @@ import type {
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
-import { normalizeHostsForAgents } from '../../common/services';
+import { normalizeHostsForAgents, validateFleetSavedObjectId } from '../../common/services';
 import {
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
@@ -35,6 +35,7 @@ import {
   FleetServerHostUnauthorizedError,
   FleetServerHostNotFoundError,
   FleetEncryptedSavedObjectEncryptionKeyRequired,
+  FleetError,
 } from '../errors';
 
 import { appContextService } from './app_context';
@@ -84,6 +85,11 @@ class FleetServerHostService {
   ): Promise<FleetServerHost> {
     const logger = appContextService.getLogger();
     const data: FleetServerHostSOAttributes = { ...omit(fleetServerHost, ['ssl', 'secrets']) };
+
+    const idError = validateFleetSavedObjectId(options?.id);
+    if (idError) {
+      throw new FleetError(idError);
+    }
 
     if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
       throw new FleetEncryptedSavedObjectEncryptionKeyRequired(
