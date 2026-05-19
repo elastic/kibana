@@ -9,7 +9,7 @@
 
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
-import { getShowTimeCol } from './get_show_time_col';
+import { getColumnsWithTimeField, getShowTimeCol } from './get_show_time_col';
 
 const createUiSettingsMock = (hideTimeColumn: boolean) =>
   ({
@@ -50,5 +50,55 @@ describe('getShowTimeCol', () => {
     expect(
       getShowTimeCol(createUiSettingsMock(true), { esql: 'from logstash-* | where bytes > 0' })
     ).toBe(false);
+  });
+});
+
+describe('getColumnsWithTimeField', () => {
+  it('should prepend the time field for a non-transformational ES|QL query', () => {
+    expect(
+      getColumnsWithTimeField(['bytes', 'extension'], '@timestamp', createUiSettingsMock(false), {
+        esql: 'from logstash-*',
+      })
+    ).toEqual(['@timestamp', 'bytes', 'extension']);
+  });
+
+  it('should not prepend when columns are empty', () => {
+    expect(
+      getColumnsWithTimeField([], '@timestamp', createUiSettingsMock(false), {
+        esql: 'from logstash-*',
+      })
+    ).toEqual([]);
+  });
+
+  it('should not prepend for a transformational ES|QL query', () => {
+    expect(
+      getColumnsWithTimeField(['bytes', 'extension'], '@timestamp', createUiSettingsMock(false), {
+        esql: 'from logstash-* | keep bytes, extension',
+      })
+    ).toEqual(['bytes', 'extension']);
+  });
+
+  it('should not prepend when timeFieldName is undefined', () => {
+    expect(
+      getColumnsWithTimeField(['bytes', 'extension'], undefined, createUiSettingsMock(false), {
+        esql: 'from logstash-*',
+      })
+    ).toEqual(['bytes', 'extension']);
+  });
+
+  it('should not prepend when time field already in columns', () => {
+    expect(
+      getColumnsWithTimeField(['@timestamp', 'bytes'], '@timestamp', createUiSettingsMock(false), {
+        esql: 'from logstash-*',
+      })
+    ).toEqual(['@timestamp', 'bytes']);
+  });
+
+  it('should not prepend when hideTimeColumn setting is true', () => {
+    expect(
+      getColumnsWithTimeField(['bytes', 'extension'], '@timestamp', createUiSettingsMock(true), {
+        esql: 'from logstash-*',
+      })
+    ).toEqual(['bytes', 'extension']);
   });
 });

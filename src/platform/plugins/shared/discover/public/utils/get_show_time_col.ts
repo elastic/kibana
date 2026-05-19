@@ -25,3 +25,20 @@ export const getShowTimeCol = (
   }
   return true;
 };
+
+export const getColumnsWithTimeField = (
+  columns: string[],
+  timeFieldName: string | undefined,
+  uiSettings: IUiSettingsClient,
+  query?: AggregateQuery | Query
+): string[] => {
+  if (
+    columns.length > 0 &&
+    timeFieldName &&
+    getShowTimeCol(uiSettings, query) &&
+    !columns.includes(timeFieldName)
+  ) {
+    return [timeFieldName, ...columns];
+  }
+  return columns;
+};
