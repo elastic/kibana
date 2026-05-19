@@ -129,6 +129,7 @@
     "@kbn/observability-agent-builder-plugin",
     "@kbn/agent-builder-browser",
     "@kbn/core-analytics-browser",
-    "@kbn/inspector-plugin"
+    "@kbn/inspector-plugin",
+    "@kbn/zod-helpers"
   ]
 }

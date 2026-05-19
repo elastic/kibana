@@ -128,6 +128,7 @@
     "@kbn/agent-builder-browser",
     "@kbn/scout-oblt",
     "@kbn/core-saved-objects-utils-server",
+    "@kbn/zod-helpers",
   ],
   "exclude": ["target/**/*"]
 }
