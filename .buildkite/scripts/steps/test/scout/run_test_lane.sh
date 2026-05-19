@@ -5,6 +5,7 @@ set -euo pipefail
 source .buildkite/scripts/steps/functional/common.sh
 
 SCOUT_SERVER_LOG=".scout/server.log"
+PLAYWRIGHT_BIN="./node_modules/.bin/playwright"
 
 LOAD_IDS=()
 PASSED_INDICES=""
@@ -142,17 +143,26 @@ run_scout_tests() {
   local config_path="$2"
 
   echo "--- Running: $config_path"
+
+  local pw_args=(
+    test
+    "--config=$config_path"
+    "--grep=$PLAYWRIGHT_GREP_TAG"
+    "--project=$PLAYWRIGHT_PROJECT"
+  )
+
+  local pw_env=(
+    "SCOUT_TARGET_LOCATION=$SCOUT_TEST_TARGET_LOCATION"
+    "SCOUT_TARGET_ARCH=$SCOUT_TEST_TARGET_ARCH"
+    "SCOUT_TARGET_DOMAIN=$SCOUT_TEST_TARGET_DOMAIN"
+    "NODE_OPTIONS=${NODE_OPTIONS:-} --require=@kbn/babel-register/install"
+  )
+
   local start_time
   start_time=$(date +%s)
 
   set +e
-
-  node scripts/scout run-tests \
-    --location "$SCOUT_TEST_TARGET_LOCATION" \
-    --arch "$SCOUT_TEST_TARGET_ARCH" \
-    --domain "$SCOUT_TEST_TARGET_DOMAIN" \
-    --config "$config_path"
-
+  env "${pw_env[@]}" "$PLAYWRIGHT_BIN" "${pw_args[@]}"
   local exit_code=$?
   set -e
 
@@ -279,6 +289,8 @@ check_required_env_vars \
   KIBANA_BUILD_LOCATION
 
 PASSED_LOAD_INDICES_META_KEY="${BUILDKITE_STEP_KEY}_passed"
+PLAYWRIGHT_GREP_TAG="@${SCOUT_TEST_TARGET_LOCATION}-${SCOUT_TEST_TARGET_ARCH}-${SCOUT_TEST_TARGET_DOMAIN}"
+PLAYWRIGHT_PROJECT="local"
 
 download_test_lane_loads
 read_load_ids
