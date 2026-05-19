@@ -49,7 +49,7 @@ export const RuleCreateOptionsFlyout = ({
               <h2>
                 <FormattedMessage
                   id="xpack.alertingV2.ruleCreateOptionsFlyout.title"
-                  defaultMessage="Create Alerting V2 rule"
+                  defaultMessage="Create rule"
                 />
               </h2>
             </EuiTitle>
