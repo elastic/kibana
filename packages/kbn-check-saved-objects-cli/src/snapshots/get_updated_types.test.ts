@@ -63,13 +63,17 @@ describe('getUpdatedTypes', () => {
 
   it('returns a type when a new model version is added', () => {
     const from = buildSnapshot([buildRecord('foo', [buildModelVersion('1')])]);
-    const to = buildSnapshot([buildRecord('foo', [buildModelVersion('1'), buildModelVersion('2')])]);
+    const to = buildSnapshot([
+      buildRecord('foo', [buildModelVersion('1'), buildModelVersion('2')]),
+    ]);
     expect(getUpdatedTypes({ from, to })).toEqual(['foo']);
   });
 
   it('returns a type when a schema changes within an existing model version', () => {
     const from = buildSnapshot([
-      buildRecord('foo', [buildModelVersion('1', { schemas: { create: false, forwardCompatibility: false } })]),
+      buildRecord('foo', [
+        buildModelVersion('1', { schemas: { create: false, forwardCompatibility: false } }),
+      ]),
     ]);
     const to = buildSnapshot([
       buildRecord('foo', [
@@ -83,7 +87,9 @@ describe('getUpdatedTypes', () => {
 
   it('returns a type when top-level mappings change', () => {
     const from = buildSnapshot([buildRecord('foo', [], { mappings: {} })]);
-    const to = buildSnapshot([buildRecord('foo', [], { mappings: { 'properties.title': { type: 'text' } } })]);
+    const to = buildSnapshot([
+      buildRecord('foo', [], { mappings: { 'properties.title': { type: 'text' } } }),
+    ]);
     expect(getUpdatedTypes({ from, to })).toEqual(['foo']);
   });
 
@@ -120,18 +126,25 @@ describe('getTypesWithNewModelVersions', () => {
 
   it('returns a type when an additional model version is added', () => {
     const from = buildSnapshot([buildRecord('foo', [buildModelVersion('1')])]);
-    const to = buildSnapshot([buildRecord('foo', [buildModelVersion('1'), buildModelVersion('2')])]);
+    const to = buildSnapshot([
+      buildRecord('foo', [buildModelVersion('1'), buildModelVersion('2')]),
+    ]);
     expect(getTypesWithNewModelVersions({ from, to })).toEqual(['foo']);
   });
 
   it('does NOT return a type that only has schema changes in existing model versions', () => {
     const from = buildSnapshot([
-      buildRecord('foo', [buildModelVersion('1', { schemas: { create: false, forwardCompatibility: false } })]),
+      buildRecord('foo', [
+        buildModelVersion('1', { schemas: { create: false, forwardCompatibility: false } }),
+      ]),
     ]);
     const to = buildSnapshot([
       buildRecord('foo', [
         buildModelVersion('1', {
-          schemas: { create: { type: 'object', keys: { title: { type: 'string' } } }, forwardCompatibility: false },
+          schemas: {
+            create: { type: 'object', keys: { title: { type: 'string' } } },
+            forwardCompatibility: false,
+          },
         }),
       ]),
     ]);
@@ -142,7 +155,9 @@ describe('getTypesWithNewModelVersions', () => {
   it('does NOT return a type that only has mapping changes without a new model version', () => {
     const from = buildSnapshot([buildRecord('foo', [buildModelVersion('1')], { mappings: {} })]);
     const to = buildSnapshot([
-      buildRecord('foo', [buildModelVersion('1')], { mappings: { 'properties.title': { type: 'text' } } }),
+      buildRecord('foo', [buildModelVersion('1')], {
+        mappings: { 'properties.title': { type: 'text' } },
+      }),
     ]);
     expect(getTypesWithNewModelVersions({ from, to })).toEqual([]);
   });
@@ -160,7 +175,9 @@ describe('getTypesWithNewModelVersions', () => {
     // 'new-mv' added a model version
     // 'unchanged' is identical
     const from = buildSnapshot([
-      buildRecord('schema-only', [buildModelVersion('1', { schemas: { create: false, forwardCompatibility: false } })]),
+      buildRecord('schema-only', [
+        buildModelVersion('1', { schemas: { create: false, forwardCompatibility: false } }),
+      ]),
       buildRecord('new-mv', [v1]),
       buildRecord('unchanged', [v1]),
     ]);
@@ -179,7 +196,9 @@ describe('getTypesWithNewModelVersions', () => {
 
   it('returns a type that has both a new model version AND schema changes in existing versions', () => {
     const from = buildSnapshot([
-      buildRecord('foo', [buildModelVersion('1', { schemas: { create: false, forwardCompatibility: false } })]),
+      buildRecord('foo', [
+        buildModelVersion('1', { schemas: { create: false, forwardCompatibility: false } }),
+      ]),
     ]);
     const to = buildSnapshot([
       buildRecord('foo', [
