@@ -110,7 +110,7 @@ export const MlDataSourcePicker: FC<MlDataSourcePickerProps> = ({
 
   const triggerLabel =
     currentDataView?.getName() ??
-    i18n.translate('xpack.ml.mlDataSourcePicker.selectDataViewLabel', {
+    i18n.translate('xpack.aiops.mlDataSourcePicker.selectDataViewLabel', {
       defaultMessage: 'Select data view',
     });
 
@@ -134,7 +134,7 @@ export const MlDataSourcePicker: FC<MlDataSourcePickerProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip
-            content={i18n.translate('xpack.ml.mlDataSourcePicker.openButton.tooltip', {
+            content={i18n.translate('xpack.aiops.mlDataSourcePicker.openButton.tooltip', {
               defaultMessage: 'Open Discover session',
             })}
           >
@@ -145,7 +145,7 @@ export const MlDataSourcePicker: FC<MlDataSourcePickerProps> = ({
               color="text"
               onClick={() => setOpenSessionPanelVisible(true)}
               data-test-subj="mlOpenDiscoverSessionButton"
-              aria-label={i18n.translate('xpack.ml.mlDataSourcePicker.openButton.ariaLabel', {
+              aria-label={i18n.translate('xpack.aiops.mlDataSourcePicker.openButton.ariaLabel', {
                 defaultMessage: 'Open Discover session',
               })}
             />

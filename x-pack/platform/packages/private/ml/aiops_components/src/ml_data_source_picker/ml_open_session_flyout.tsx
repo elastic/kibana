@@ -70,7 +70,7 @@ export const MlOpenSessionFlyout: FC<MlOpenSessionFlyoutProps> = ({
         <EuiTitle size="m">
           <h2 id={modalTitleId}>
             <FormattedMessage
-              id="xpack.ml.dataSourcePicker.openSessionFlyout.title"
+              id="xpack.aiops.dataSourcePicker.openSessionFlyout.title"
               defaultMessage="Open Discover session"
             />
           </h2>
@@ -86,7 +86,7 @@ export const MlOpenSessionFlyout: FC<MlOpenSessionFlyoutProps> = ({
           }}
           noItemsMessage={
             <FormattedMessage
-              id="xpack.ml.dataSourcePicker.openSessionFlyout.noSessionsFound"
+              id="xpack.aiops.dataSourcePicker.openSessionFlyout.noSessionsFound"
               defaultMessage="No matching Discover sessions found."
             />
           }
@@ -94,7 +94,7 @@ export const MlOpenSessionFlyout: FC<MlOpenSessionFlyoutProps> = ({
             {
               type: SavedSearchType,
               getIconForSavedObject: () => 'discoverApp',
-              name: i18n.translate('xpack.ml.dataSourcePicker.openSessionFlyout.savedObjectName', {
+              name: i18n.translate('xpack.aiops.dataSourcePicker.openSessionFlyout.savedObjectName', {
                 defaultMessage: 'Discover session',
               }),
             },
@@ -123,7 +123,7 @@ export const MlOpenSessionFlyout: FC<MlOpenSessionFlyoutProps> = ({
                 )}
               >
                 <FormattedMessage
-                  id="xpack.ml.dataSourcePicker.openSessionFlyout.manageSessionsButton"
+                  id="xpack.aiops.dataSourcePicker.openSessionFlyout.manageSessionsButton"
                   defaultMessage="Manage Discover sessions"
                 />
               </EuiButton>
