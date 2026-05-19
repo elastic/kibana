@@ -29,12 +29,6 @@ const executionStatusSchema = schema.oneOf(
 const executionTypeSchema = schema.oneOf(
   ExecutionTypeValues.map((type) => schema.literal(type)) as [Type<ExecutionType>]
 );
-const executionSortFieldSchema = schema.oneOf(
-  WorkflowExecutionSortFields.map((field) => schema.literal(field)) as [
-    Type<WorkflowExecutionSortField>
-  ]
-);
-
 export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
     .get({
@@ -111,7 +105,16 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
                   meta: { description: 'Filter executions finished at or before this timestamp.' },
                 })
               ),
-              sortField: schema.maybe(executionSortFieldSchema),
+              sortField: schema.maybe(
+                schema.oneOf(
+                  WorkflowExecutionSortFields.map((field) => schema.literal(field)) as [
+                    Type<WorkflowExecutionSortField>
+                  ],
+                  {
+                    meta: { description: 'Field to sort executions by.' },
+                  }
+                )
+              ),
               sortOrder: schema.maybe(
                 schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
                   meta: { description: 'Sort order.' },
