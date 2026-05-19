@@ -35,7 +35,7 @@ export interface ResolvedColumn {
  * Default columns when no children are provided.
  *
  * Provides Name, Last updated, and Actions columns out of the box.
- * The Actions column auto-hides when the provider has no edit/delete handlers
+ * The Actions column auto-hides when the provider has no action handlers
  * configured, and individual actions are shown/hidden based on the item config.
  * Any explicit `<Column.*>` child replaces **all** defaults.
  */
@@ -90,7 +90,7 @@ const parseColumnParts = (children: ReactNode): ParsedPart[] => {
  * 4. Fall back to the default columns if none are found.
  *
  * @param children - React children containing `Column` declarative components.
- * @param onDelete - Optional callback invoked by the default Delete action.
+ * @param onDelete - Optional callback invoked by the default Delete action to open the modal.
  * @returns Array of {@link ResolvedColumn} entries — each pairing an
  *   `EuiBasicTableColumn` (for the real table) with a `SkeletonOutput`
  *   (for the loading skeleton).
