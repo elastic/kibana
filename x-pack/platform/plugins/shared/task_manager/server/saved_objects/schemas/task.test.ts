@@ -28,7 +28,7 @@ test('returns error message for invalid duration', () => {
   expect(validateDuration('1hr')).toBe('string is not a valid duration: 1hr');
 });
 
-test('allows any cost', () => {
+test('allows any cost value up to 100 characters', () => {
   const taskSchema = getLatestModelVersion()?.schemas?.create;
   expect(taskSchema).toBeDefined();
 
@@ -37,6 +37,15 @@ test('allows any cost', () => {
     const task = getTask({ cost });
     expect(taskSchema?.validate(task)).toEqual(task);
   });
+});
+
+test('throws error message for cost > 100 characters', () => {
+  const taskSchema = getLatestModelVersion()?.schemas?.create;
+  expect(taskSchema).toBeDefined();
+
+  const longCost = 'a'.repeat(101);
+  const task = getTask({ cost: longCost });
+  expect(() => taskSchema?.validate(task)).toThrowError('cost');
 });
 
 function getTask(overrides = {}) {
