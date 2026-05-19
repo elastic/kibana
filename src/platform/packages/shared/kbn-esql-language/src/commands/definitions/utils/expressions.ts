@@ -13,6 +13,7 @@ import {
   isInlineCast,
   isLiteral,
   isParamLiteral,
+  isSubQuery,
   lastItem,
   type PromQLAstExpression,
 } from '@elastic/esql';
@@ -23,6 +24,7 @@ import { getMatchingSignatures } from './signatures';
 import { getColumnForASTNode } from './shared';
 import type { ESQLColumnData } from '../../registry/types';
 import { UnmappedFieldsStrategy } from '../../registry/types';
+import { inOperators } from '../all_operators';
 import { TIME_SYSTEM_PARAMS } from './literals';
 import { isMarkerNode } from './ast';
 import { getUnmappedFieldType } from './settings';
@@ -132,6 +134,15 @@ export function getExpressionType(
        * userDefinedColumns and fields to be nullable anyways and account for that during validation.
        */
       return getExpressionType(root.args[root.args.length - 1], columns, unmappedFieldsStrategy);
+    }
+
+    const rightArg = root.args[1];
+    if (
+      inOperators.some(({ name }) => name === fnDefinition.name) &&
+      !Array.isArray(rightArg) &&
+      isSubQuery(rightArg)
+    ) {
+      return 'boolean';
     }
 
     const { argTypes, literalMask } = resolveArgumentTypes(root.args, {
