@@ -12,6 +12,7 @@ import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { useHistory } from 'react-router-dom';
 import { useLocation } from 'react-router-dom-v5-compat';
 import { syntheticsAddMonitorLocatorID } from '@kbn/observability-plugin/common';
+import { INGEST_HUB_ONBOARDING_ENABLED_FLAG } from '@kbn/ingest-hub-plugin/common/constants';
 import { ObservabilityOnboardingPricingFeature } from '../../../common/pricing_features';
 import type { ObservabilityOnboardingAppServices } from '../..';
 import { LogoIcon } from '../shared/logo_icon';
@@ -27,6 +28,7 @@ export function useCustomCards(
     services: {
       application,
       http,
+      featureFlags,
       context: { isServerless, isCloud, isDev },
       share,
     },
@@ -38,6 +40,10 @@ export function useCustomCards(
     ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
   );
   const isManagedOtlpServiceAvailable = useManagedOtlpServiceAvailability();
+  const isIngestHubOnboardingEnabled = featureFlags.getBooleanValue(
+    INGEST_HUB_ONBOARDING_ENABLED_FLAG,
+    false
+  );
 
   const { href: autoDetectUrl } = reactRouterNavigate(history, `/auto-detect/${location.search}`);
   const { href: otelLogsUrl } = reactRouterNavigate(history, `/otel-logs/${location.search}`);
@@ -421,27 +427,59 @@ export function useCustomCards(
       isCollectionCard: true,
       onCardClick: createCollectionCardHandler('azure'),
     },
-    {
-      id: 'aws-logs-virtual',
-      type: 'virtual',
-      title: i18n.translate('xpack.observability_onboarding.useCustomCardsForCategory.awsTitle', {
-        defaultMessage: 'AWS',
-      }),
-      description: i18n.translate(
-        'xpack.observability_onboarding.useCustomCardsForCategory.awsDescription',
-        {
-          defaultMessage: 'Collect logs from Amazon Web Services (AWS)',
-        }
-      ),
-      name: 'aws',
-      categories: ['observability'],
-      icons: [],
-      url: 'https://aws.com',
-      version: '',
-      integration: '',
-      isCollectionCard: true,
-      onCardClick: createCollectionCardHandler('aws'),
-    },
+    ...(isIngestHubOnboardingEnabled
+      ? [
+          {
+            id: 'aws-logs-virtual',
+            type: 'virtual',
+            title: i18n.translate(
+              'xpack.observability_onboarding.useCustomCardsForCategory.awsOnboardingTitle',
+              { defaultMessage: 'Amazon Web Services' }
+            ),
+            description: i18n.translate(
+              'xpack.observability_onboarding.useCustomCardsForCategory.awsOnboardingDescription',
+              { defaultMessage: 'Collect logs and metrics from Amazon Web Services (AWS).' }
+            ),
+            name: 'aws',
+            categories: ['observability'],
+            icons: [{ type: 'eui' as const, src: 'logoAWS' }],
+            url: '',
+            version: '',
+            integration: '',
+            isCollectionCard: false,
+            onCardClick: () => {
+              application?.navigateToApp('onboarding', {
+                path: '/aws',
+                state: {
+                  title: 'Amazon Web Services',
+                  description: 'Collect logs and metrics from Amazon Web Services (AWS).',
+                },
+              });
+            },
+          } as IntegrationCardItem,
+        ]
+      : [
+          {
+            id: 'aws-logs-virtual',
+            type: 'virtual',
+            title: i18n.translate(
+              'xpack.observability_onboarding.useCustomCardsForCategory.awsTitle',
+              { defaultMessage: 'AWS' }
+            ),
+            description: i18n.translate(
+              'xpack.observability_onboarding.useCustomCardsForCategory.awsDescription',
+              { defaultMessage: 'Collect logs from Amazon Web Services (AWS)' }
+            ),
+            name: 'aws',
+            categories: ['observability'],
+            icons: [],
+            url: 'https://aws.com',
+            version: '',
+            integration: '',
+            isCollectionCard: true,
+            onCardClick: createCollectionCardHandler('aws'),
+          } as IntegrationCardItem,
+        ]),
     {
       id: 'gcp-logs-virtual',
       type: 'virtual',
@@ -494,14 +532,18 @@ export function useCustomCards(
      * as Firehose integration requires additional proxy,
      * which is not available for on-prem customers.
      * Also visible in dev mode for local development.
+     * Hidden when the new AWS onboarding flow is enabled.
      */
-    ...(isCloud || isDev ? [firehoseQuickstartCard] : []),
+    ...((isCloud || isDev) && !isIngestHubOnboardingEnabled ? [firehoseQuickstartCard] : []),
     /**
      * The EDOT Cloud Forwarder card should only be visible on Serverless
      * as it requires Elastic Cloud infrastructure.
      * Also visible in dev mode for local development.
+     * Hidden when the new AWS onboarding flow is enabled.
      */
-    ...(isServerless || isDev ? [cloudforwarderQuickstartCard] : []),
+    ...((isServerless || isDev) && !isIngestHubOnboardingEnabled
+      ? [cloudforwarderQuickstartCard]
+      : []),
   ];
 }
 

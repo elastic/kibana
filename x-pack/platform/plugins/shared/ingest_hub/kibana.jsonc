@@ -11,6 +11,7 @@
     "server": false,
     "configPath": ["xpack", "ingestHub"],
     "requiredPlugins": [],
-    "optionalPlugins": ["spaces", "cloud"]
+    "optionalPlugins": ["spaces", "cloud"],
+    "extraPublicDirs": ["common"]
   }
 }
