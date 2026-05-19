@@ -45,12 +45,12 @@ export const fetchEvents = async ({
   indexPatterns,
   spaceId,
 }: FetchEventsParams): Promise<EsqlToRecords<EventRecord>> => {
-  const isLookupIndexAvailable = await checkIfEntitiesIndexExists(esClient, logger, spaceId);
+  const entityStoreIndexExists = await checkIfEntitiesIndexExists(esClient, logger, spaceId);
 
   const query = buildEventsEsqlQuery({
     indexPatterns,
     eventCount: eventIds.length,
-    isLookupIndexAvailable,
+    entityStoreIndexExists,
     spaceId,
   });
 
@@ -89,14 +89,14 @@ const buildDslFilter = (eventIds: string[], start: string | number, end: string 
 interface BuildEventsQueryParams {
   indexPatterns: string[];
   eventCount: number;
-  isLookupIndexAvailable: boolean;
+  entityStoreIndexExists: boolean;
   spaceId: string;
 }
 
 const buildEventsEsqlQuery = ({
   indexPatterns,
   eventCount,
-  isLookupIndexAvailable,
+  entityStoreIndexExists,
   spaceId,
 }: BuildEventsQueryParams): string => {
   // Generate document ID params
@@ -105,7 +105,7 @@ const buildEventsEsqlQuery = ({
   );
 
   const indexName = getEntitiesLatestIndexName(spaceId);
-  const enrichmentEsql = isLookupIndexAvailable
+  const enrichmentEsql = entityStoreIndexExists
     ? `| DROP entity.id
 | DROP entity.target.id
 // rename entity.*fields before next pipeline to avoid name collisions

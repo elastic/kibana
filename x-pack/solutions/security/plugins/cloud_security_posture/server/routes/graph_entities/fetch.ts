@@ -46,12 +46,12 @@ export const fetchEntities = async ({
     'logs-*',
   ];
 
-  const isLookupIndexAvailable = await checkIfEntitiesIndexExists(esClient, logger, spaceId);
+  const entityStoreIndexExists = await checkIfEntitiesIndexExists(esClient, logger, spaceId);
 
   const query = buildEntitiesEsqlQuery({
     indexPatterns: resolvedIndexPatterns,
     lookupIndexName,
-    isLookupIndexAvailable,
+    entityStoreIndexExists,
     entityCount: entityIds.length,
   });
 
@@ -98,14 +98,14 @@ const buildDslFilter = (entityIds: string[], start: string | number, end: string
 interface BuildEntitiesQueryParams {
   indexPatterns: string[];
   lookupIndexName: string;
-  isLookupIndexAvailable: boolean;
+  entityStoreIndexExists: boolean;
   entityCount: number;
 }
 
 const buildEntitiesEsqlQuery = ({
   indexPatterns,
   lookupIndexName,
-  isLookupIndexAvailable,
+  entityStoreIndexExists,
   entityCount,
 }: BuildEntitiesQueryParams): string => {
   const entityIdParams = Array.from({ length: entityCount }, (_, idx) => `?entity_id${idx}`).join(
@@ -130,7 +130,7 @@ ${entityFieldHintCases},
 | EVAL timestamp = TO_STRING(\`@timestamp\`)
 | EVAL sourceIps = source.ip
 | EVAL sourceCountryCodes = source.geo.country_iso_code
-${buildSingleEntityEnrichment(isLookupIndexAvailable, lookupIndexName)}
+${buildSingleEntityEnrichment(entityStoreIndexExists, lookupIndexName)}
 | STATS ecsParentField = MIN(ecsParentField),
   entityName = MIN(entityName),
   entityType = MIN(entityType),
@@ -149,10 +149,10 @@ ${buildSingleEntityEnrichment(isLookupIndexAvailable, lookupIndexName)}
  * this enriches a single entityId field.
  */
 const buildSingleEntityEnrichment = (
-  isLookupIndexAvailable: boolean,
+  entityStoreIndexExists: boolean,
   lookupIndexName: string
 ): string => {
-  if (isLookupIndexAvailable) {
+  if (entityStoreIndexExists) {
     return `// Drop existing entity.id from source docs before LOOKUP JOIN to avoid conflicts
 | DROP entity.id
 | EVAL entity.id = entityId
