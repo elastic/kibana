@@ -10,19 +10,16 @@ import React, { useCallback, useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EmbeddableRendererContext } from '@kbn/embeddable-plugin/public';
-
-// Mirror QuickActionIds shape from @kbn/embeddable-plugin/public (not re-exported there yet):
-// up to 8 string entries promoted as the "view" quick-action row.
-type QuickActionIds = [string?, string?, string?, string?, string?, string?, string?, string?];
+import type { QuickActionIds } from '@kbn/embeddable-plugin/public';
 import type { LensProps } from './hooks/use_lens_props';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
 import { resolveEsqlVariables } from './helpers/resolve_esql_variables';
-import { ACTION_EXPLORE_IN_DISCOVER_TAB } from '../../common/constants';
+import { ACTION_EXPLORE_IN_DISCOVER_TAB, OPEN_INSPECTOR_ACTION_ID } from '../../common/constants';
 import type { UnifiedMetricsGridProps } from '../../types';
 
 const DEFAULT_QUICK_ACTION_VIEW: ReadonlyArray<string> = [
   ACTION_EXPLORE_IN_DISCOVER_TAB,
-  'openInspector',
+  OPEN_INSPECTOR_ACTION_ID,
 ];
 
 export type LensWrapperProps = {
@@ -119,6 +116,8 @@ export function LensWrapper({
 
   const disabledActions = [...DEFAULT_DISABLED_ACTIONS, ...extraDisabledActions];
 
+  // EmbeddableRendererContext is the only way to configure the visible quick-action row because
+  // Lens does not expose a first-class prop for it (tracked in https://github.com/elastic/kibana/issues/236787).
   const quickActionView = (quickActionIds ?? DEFAULT_QUICK_ACTION_VIEW) as QuickActionIds;
 
   return (
