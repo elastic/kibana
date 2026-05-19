@@ -17,7 +17,10 @@ import type { RouterRoute, KibanaRouteOptions } from '@kbn/core-http-server';
 import type { AuthStateStorage } from '../auth_state_storage';
 import type { AuthHeadersStorage } from '../auth_headers_storage';
 import type { FastifyResponseAdapter } from './fastify_response_adapter';
-import { buildHapiCompatRequestFromFastify } from './fastify_to_hapi_request';
+import {
+  buildHapiCompatRequestFromFastify,
+  isHapiRouteAuthDisabled,
+} from './fastify_to_hapi_request';
 import { isReplyCommitted } from './fastify_reply_utils';
 
 const authToolkit: AuthToolkit = {
@@ -76,7 +79,7 @@ export function registerFastifyAuthentication(params: {
     }
 
     // Hapi does not run the `registerAuth` handler when `route.settings.auth === false`.
-    if (compat.route.settings.auth === false) {
+    if (isHapiRouteAuthDisabled(compat.route.settings.auth)) {
       return;
     }
 

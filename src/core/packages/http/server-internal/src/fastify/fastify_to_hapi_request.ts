@@ -96,6 +96,15 @@ export function mapRouteSecurityToHapiAuthSettings(
 }
 
 /**
+ * Hapi allows `route.settings.auth === false` to disable auth; `@hapi/hapi` types omit that literal.
+ *
+ * @internal
+ */
+export function isHapiRouteAuthDisabled(auth: unknown): boolean {
+  return auth === false;
+}
+
+/**
  * Builds an object that satisfies the subset of the Hapi `Request` interface read by
  * {@link CoreKibanaRequest.from} so the existing Kibana request machinery can be reused
  * unchanged when running on Fastify.
