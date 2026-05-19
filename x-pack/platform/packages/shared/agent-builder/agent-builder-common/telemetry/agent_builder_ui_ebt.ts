@@ -27,6 +27,13 @@ const ebtAction = {
     CONVERSATION_RESUME: 'conversation_resume',
     CONVERSATION_SEARCH: 'conversation_search',
   },
+  agentCustomization: {
+    ENTITY_ADD_FROM_LIBRARY: 'entity_add_from_library',
+    ENTITY_CREATE_NEW: 'entity_create_new',
+    ENTITY_REMOVE: 'entity_remove',
+    ENTITY_DETAIL_VIEW: 'entity_detail_view',
+    ENTITY_EDIT_FROM_AGENT: 'entity_edit_from_agent',
+  },
 } as const;
 
 const ebtDetail = {
@@ -36,7 +43,10 @@ const ebtDetail = {
   },
 } as const;
 
-const ebtEntity = {} as const;
+const ebtEntity = {
+  TOOL: 'tool',
+  PLUGIN: 'plugin',
+} as const;
 const ebtFormat = {} as const;
 
 export const AGENT_BUILDER_UI_EBT = {

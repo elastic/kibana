@@ -20,7 +20,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { ToolDefinition } from '@kbn/agent-builder-common';
-import { defaultAgentToolIds } from '@kbn/agent-builder-common';
+import { defaultAgentToolIds, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { useQueryState } from '../../../hooks/use_query_state';
 import { searchParamNames } from '../../../search_param_names';
 import { labels } from '../../../utils/i18n';
@@ -95,6 +96,11 @@ const ActiveToolsList: React.FC<{
               ) : undefined
             }
             canEditAgent={canEditAgent}
+            ebtProps={getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.agentCustomization.ENTITY_DETAIL_VIEW,
+              detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+            })}
           />
         );
       })}
@@ -248,7 +254,18 @@ export const AgentTools: React.FC = () => {
                   </EuiFlexItem>
                   {canEditAgent && (
                     <EuiFlexItem grow={false}>
-                      <EuiButton fill iconType="plusInCircle" iconSide="left" onClick={openLibrary}>
+                      <EuiButton
+                        fill
+                        iconType="plusInCircle"
+                        iconSide="left"
+                        onClick={openLibrary}
+                        {...getEbtProps({
+                          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                          action:
+                            AGENT_BUILDER_UI_EBT.action.agentCustomization.ENTITY_ADD_FROM_LIBRARY,
+                          detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+                        })}
+                      >
                         {labels.agentTools.addToolButton}
                       </EuiButton>
                     </EuiFlexItem>
