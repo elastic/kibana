@@ -915,7 +915,7 @@ describe('RulesListPage', () => {
     });
   });
 
-  it('navigates to the create page with cloneFrom query param when clone is clicked', async () => {
+  it('opens the clone flyout when clone is clicked', async () => {
     mockUseFetchRules.mockReturnValue({
       data: { items: mockRules, total: 2, page: 1, perPage: 20 },
       isLoading: false,
@@ -928,9 +928,7 @@ describe('RulesListPage', () => {
     fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
     fireEvent.click(screen.getByTestId('cloneRule-rule-1'));
 
-    expect(mockNavigateToUrl).toHaveBeenCalledWith(
-      '/app/management/alertingV2/rules/create?cloneFrom=rule-1'
-    );
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
   });
 
   describe('selection', () => {
