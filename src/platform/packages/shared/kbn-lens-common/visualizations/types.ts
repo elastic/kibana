@@ -539,6 +539,12 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     annotationGroups: AnnotationGroups
   ) => boolean;
 
+  /**
+   * Normalizes a LensDocument before comparing it for equality during dirty-state checking.
+   * This allows a visualization to strip or reset runtime-only fields (e.g., fields hydrated
+   * after load from data view metadata) so that those transient values do not cause the
+   * document to appear modified when it has not actually been changed by the user.
+   */
   normalizeForEquality?: (doc: LensDocument) => LensDocument;
 
   getVisualizationInfo?: (state: T, frame?: FramePublicAPI) => VisualizationInfo;
