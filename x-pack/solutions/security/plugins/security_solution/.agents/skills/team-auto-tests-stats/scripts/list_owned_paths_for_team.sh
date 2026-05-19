@@ -27,5 +27,7 @@ else
   TEAM_FULL="@elastic/$raw"
 fi
 
-grep -Ev '^\s*#' "$ROOT/.github/CODEOWNERS" | grep -F "$TEAM_FULL" | awk '{ print $1 }' \
+# Whole-token match only: grep -F would match @elastic/security inside @elastic/security-*.
+TEAM_ESC="$(printf '%s' "$TEAM_FULL" | sed 's/[.[\*^$()+?{|]/\\&/g')"
+grep -Ev '^\s*#' "$ROOT/.github/CODEOWNERS" | grep -E "(^|[[:space:]])${TEAM_ESC}([[:space:]]|$)" | awk '{ print $1 }' \
   | grep -Ev '^$' | node "$SCRIPT_DIR/merge_team_inventory_path_overrides.mjs" "$TEAM_FULL" | sort -u
