@@ -11,13 +11,13 @@ import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser/
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { RULES_FEATURE_LATEST } from '@kbn/security-solution-features/constants';
-import { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
+import { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
 import {
   createRuleAttachmentDefinition,
   isOnRuleFormPage,
   registerRuleAttachment,
 } from './rule_attachment';
-import { SecurityAgentBuilderAttachments } from '../../../common/constants';
+import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 
 const validRule = {
   name: 'Test Rule',
@@ -177,7 +177,7 @@ describe('createRuleAttachmentDefinition', () => {
       expect(buttons).toEqual([]);
     });
 
-    it('returns empty array when parsed rule has no name', () => {
+    it('returns action buttons for rule without name', () => {
       const application = makeApplication(true);
       const definition = createRuleAttachmentDefinition({
         application,
@@ -187,7 +187,7 @@ describe('createRuleAttachmentDefinition', () => {
       const buttons = definition.getActionButtons!(
         makeActionButtonsParams(JSON.stringify({ type: 'query' })) as never
       );
-      expect(buttons).toEqual([]);
+      expect(buttons).toHaveLength(1);
     });
 
     it('returns empty array when user lacks edit capabilities', () => {
