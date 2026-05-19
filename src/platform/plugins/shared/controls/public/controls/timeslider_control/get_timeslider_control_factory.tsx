@@ -22,7 +22,7 @@ import {
 } from '@kbn/presentation-publishing';
 
 import { DEFAULT_TIME_SLIDER_STATE, TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { TimeSlice, TimeSliderControlState } from '@kbn/controls-schemas';
@@ -47,7 +47,7 @@ const displayName = i18n.translate('controls.timesliderControl.displayName', {
   defaultMessage: 'Time slider',
 });
 
-export const getTimesliderControlFactory = (): EmbeddableFactory<
+export const getTimesliderControlFactory = (): EmbeddablePublicDefinition<
   TimeSliderControlState,
   TimeSliderControlApi
 > => {

@@ -13,7 +13,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
   apiPublishesESQLVariables,
   isStaticESQLControl,
@@ -37,15 +37,18 @@ import type {
   ESQLOptionsListComponentApi,
   ESQLOptionsListRuntimeState,
 } from './types';
+import { getPlacementHints, LAYOUT_CONSTRAINTS } from '../constants';
 
 export const getESQLControlFactory = <
   State extends OptionsListESQLControlState = OptionsListESQLControlState
->(): EmbeddableFactory<
+>(): EmbeddablePublicDefinition<
   State extends { control_type: 'STATIC_VALUES' } ? StaticESQLControl : QueryESQLControl,
   ESQLControlApi<State>
 > => {
   return {
     type: ESQL_CONTROL,
+    getPlacementHints,
+    layoutConstraints: LAYOUT_CONSTRAINTS,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
 
