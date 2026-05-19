@@ -8,6 +8,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   EuiBadge,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -46,6 +47,7 @@ export const AIDigestPanel: React.FC<AIDigestPanelProps> = ({
   const [isStreaming, setIsStreaming] = useState(false);
   const [isDone, setIsDone] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const subRef = useRef<{ unsubscribe: () => void } | null>(null);
 
   useEffect(() => {
@@ -65,7 +67,9 @@ export const AIDigestPanel: React.FC<AIDigestPanelProps> = ({
         additional_data: {
           recent_dashboards: JSON.stringify(context.recentDashboards.map((d) => d.title)),
           recent_searches: JSON.stringify(context.recentSearches.map((s) => s.title)),
-          total_rules: String(context.totalRules),
+          alert_firing: String(context.alertStats.firing),
+          alert_ok: String(context.alertStats.ok),
+          alert_total: String(context.alertStats.total),
         },
       },
     };
@@ -104,7 +108,12 @@ export const AIDigestPanel: React.FC<AIDigestPanelProps> = ({
 
     subRef.current = sub;
     return () => sub.unsubscribe();
-  }, [http, context, isContextLoading]);
+  }, [http, context, isContextLoading, refreshKey]);
+
+  const handleRefresh = () => {
+    if (subRef.current) subRef.current.unsubscribe();
+    setRefreshKey((k) => k + 1);
+  };
 
   const cursorStyle = css`
     display: inline-block;
@@ -120,6 +129,8 @@ export const AIDigestPanel: React.FC<AIDigestPanelProps> = ({
   const panelBorderStyle = css`
     border-left: 3px solid ${euiTheme.colors.primary};
   `;
+
+  const isLoading = isContextLoading || (isStreaming && !digestText);
 
   return (
     <EuiPanel hasBorder css={panelBorderStyle}>
@@ -142,11 +153,22 @@ export const AIDigestPanel: React.FC<AIDigestPanelProps> = ({
             <EuiBadge color="success">Done</EuiBadge>
           </EuiFlexItem>
         )}
+        <EuiFlexItem />
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="refresh"
+            aria-label="Regenerate digest"
+            onClick={handleRefresh}
+            isDisabled={isStreaming}
+            size="s"
+            color="text"
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
 
-      {isContextLoading && !digestText ? (
+      {isLoading ? (
         <EuiSkeletonText lines={3} />
       ) : hasError ? (
         <EuiText color="subdued" size="s">

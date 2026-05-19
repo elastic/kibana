@@ -17,32 +17,21 @@ import {
   EuiStat,
   EuiText,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import type { AlertStats } from '../../../server/routes/space_context';
 
 interface AlertsWidgetProps {
-  totalRules: number;
+  alertStats: AlertStats;
 }
 
-export const AlertsWidget: React.FC<AlertsWidgetProps> = ({ totalRules }) => {
-  const { euiTheme } = useEuiTheme();
-
-  const statColor = totalRules === 0 ? euiTheme.colors.success : euiTheme.colors.warning;
-
-  const statStyle = css`
-    .euiStat__title {
-      color: ${statColor};
-      font-size: ${euiTheme.size.xxl};
-      font-weight: ${euiTheme.font.weight.bold};
-    }
-  `;
+export const AlertsWidget: React.FC<AlertsWidgetProps> = ({ alertStats }) => {
+  const { firing, ok, error, total } = alertStats;
 
   return (
     <EuiPanel hasBorder style={{ height: '100%' }}>
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="bell" size="m" color={totalRules > 0 ? 'warning' : 'success'} />
+          <EuiIcon type="bell" size="m" color={firing > 0 ? 'danger' : 'success'} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="xs">
@@ -53,23 +42,40 @@ export const AlertsWidget: React.FC<AlertsWidgetProps> = ({ totalRules }) => {
 
       <EuiHorizontalRule margin="s" />
 
-      <div css={statStyle}>
-        <EuiStat
-          title={String(totalRules)}
-          description="Total rules configured"
-          titleSize="l"
-          textAlign="center"
-        />
-      </div>
+      <EuiFlexGroup justifyContent="spaceAround" gutterSize="s">
+        <EuiFlexItem>
+          <EuiStat
+            title={String(firing)}
+            description="Firing"
+            titleColor="danger"
+            titleSize="m"
+            textAlign="center"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiStat
+            title={String(ok)}
+            description="OK"
+            titleColor="success"
+            titleSize="m"
+            textAlign="center"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiStat
+            title={String(error)}
+            description="Error"
+            titleColor="warning"
+            titleSize="m"
+            textAlign="center"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
 
       <EuiText size="xs" color="subdued" textAlign="center">
-        <p>
-          {totalRules === 0
-            ? 'No alerting rules configured yet.'
-            : `${totalRules} rule${totalRules !== 1 ? 's' : ''} are monitoring your data.`}
-        </p>
+        <p>{total} rule{total !== 1 ? 's' : ''} total</p>
       </EuiText>
 
       <EuiSpacer size="s" />

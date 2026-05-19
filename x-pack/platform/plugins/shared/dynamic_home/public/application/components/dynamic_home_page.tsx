@@ -11,9 +11,7 @@ import {
   EuiFlexItem,
   EuiPage,
   EuiPageBody,
-  EuiPanel,
   EuiSpacer,
-  EuiText,
   EuiTitle,
   EuiSkeletonRectangle,
   useEuiTheme,
@@ -107,18 +105,12 @@ export const DynamicHomePage: React.FC<DynamicHomePageProps> = ({ http }) => {
               <RecentSearchesWidget searches={context?.recentSearches ?? []} />
             </EuiFlexItem>
             <EuiFlexItem>
-              <AlertsWidget totalRules={context?.totalRules ?? 0} />
+              <AlertsWidget
+                alertStats={context?.alertStats ?? { firing: 0, ok: 0, error: 0, total: 0 }}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
-
-        <EuiSpacer size="xl" />
-
-        <EuiPanel color="subdued" paddingSize="s">
-          <EuiText size="xs" color="subdued" textAlign="center">
-            <p>Dynamic Home · PoC</p>
-          </EuiText>
-        </EuiPanel>
       </EuiPageBody>
     </EuiPage>
   );
