@@ -50,7 +50,7 @@ export const ControlLabelTooltip = ({
       ? i18n.translate('controls.controlGroup.noRelatedPanels', {
           defaultMessage:
             // In practice, this message can only appear for ES|QL controls
-            "This variable isn't used in any visualizations.",
+            "This variable control isn't used by any visualization on the dashboard. Variable controls only apply to ES|QL visualizations that include them in their query.",
         })
       : isIndicatingRelatedPanels
       ? i18n.translate('controls.controlGroup.clickToStopHighlighting', {
