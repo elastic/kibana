@@ -9,18 +9,20 @@ import type { CoreSetup } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { AiPromptStepCommonDefinition } from '../../../../common/steps/ai';
 import type { InferenceWorkflowsStartDeps } from '../../../types';
+import { AI_PROMPT_FEATURE_ID } from '../ai_feature_ids';
 import { resolveConnectorId } from '../utils/resolve_connector_id';
 
 export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsStartDeps>) =>
   createServerStepDefinition({
     ...AiPromptStepCommonDefinition,
     handler: async (context) => {
-      const [, { inference }] = await coreSetup.getStartServices();
+      const [, { inference, searchInferenceEndpoints }] = await coreSetup.getStartServices();
 
       const resolvedConnectorId = await resolveConnectorId(
         context.config['connector-id'],
         inference,
-        context.contextManager.getFakeRequest()
+        context.contextManager.getFakeRequest(),
+        { featureId: AI_PROMPT_FEATURE_ID, searchInferenceEndpoints }
       );
 
       const chatModel = await inference.getChatModel({

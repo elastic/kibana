@@ -16,18 +16,20 @@ import {
 } from './build_prompts';
 import { AiSummarizeStepCommonDefinition } from '../../../../common/steps/ai';
 import type { InferenceWorkflowsStartDeps } from '../../../types';
+import { AI_SUMMARIZE_FEATURE_ID } from '../ai_feature_ids';
 import { resolveConnectorId } from '../utils/resolve_connector_id';
 
 export const aiSummarizeStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsStartDeps>) =>
   createServerStepDefinition({
     ...AiSummarizeStepCommonDefinition,
     handler: async (context) => {
-      const [, { inference }] = await coreSetup.getStartServices();
+      const [, { inference, searchInferenceEndpoints }] = await coreSetup.getStartServices();
 
       const resolvedConnectorId = await resolveConnectorId(
         context.config['connector-id'],
         inference,
-        context.contextManager.getFakeRequest()
+        context.contextManager.getFakeRequest(),
+        { featureId: AI_SUMMARIZE_FEATURE_ID, searchInferenceEndpoints }
       );
 
       const chatModel = await inference.getChatModel({
