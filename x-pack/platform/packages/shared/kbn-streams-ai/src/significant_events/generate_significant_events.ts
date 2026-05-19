@@ -129,7 +129,7 @@ export async function generateSignificantEvents({
       )
     : '';
 
-  const returnedFeatureMap = new Map<string, string>();
+  const returnedFeatureMap = new Map<string, string | undefined>();
   const validatedQueries: ParsedToolQuery[] = [];
 
   logger.trace('Generating significant events via reasoning agent');
@@ -165,7 +165,7 @@ export async function generateSignificantEvents({
             const llmFeatures = features.map(toFeatureForLlmContext);
 
             for (const feature of features) {
-              returnedFeatureMap.set(feature.id, feature.run_id ?? '');
+              returnedFeatureMap.set(feature.id, feature.run_id);
             }
 
             return {
@@ -242,7 +242,7 @@ export async function generateSignificantEvents({
 
                 const queryFeatures: QueryFeature[] = validFeatureIds.map((id) => ({
                   id,
-                  run_id: returnedFeatureMap.get(id) ?? '',
+                  run_id: returnedFeatureMap.get(id),
                 }));
 
                 const sourceRewritten = replaceFromSources(query.esql, targetSources);

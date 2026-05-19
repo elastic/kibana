@@ -41,7 +41,7 @@ export const queryTypeSchema = z.enum([QUERY_TYPE_MATCH, QUERY_TYPE_STATS]);
 
 export const queryFeatureSchema = z.object({
   id: z.string(),
-  run_id: z.string(),
+  run_id: z.string().optional(),
 });
 
 export type QueryFeature = z.infer<typeof queryFeatureSchema>;

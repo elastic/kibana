@@ -19,7 +19,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import type { Feature } from '@kbn/streams-schema';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAIFeatures } from '../../../../../hooks/use_ai_features';
 import { AssetImage } from '../../../../asset_image';
 import { LoadingPanel } from '../../../../loading_panel';
@@ -154,6 +155,16 @@ export function KnowledgeIndicatorsTable() {
       refetch();
     }
   }, [isGenerating, refetch]);
+
+  const streamFeatures = useMemo<Feature[]>(
+    () =>
+      knowledgeIndicators
+        .filter(
+          (ki): ki is Extract<KnowledgeIndicator, { kind: 'feature' }> => ki.kind === 'feature'
+        )
+        .map((ki) => ki.feature),
+    [knowledgeIndicators]
+  );
 
   const columns = useKnowledgeIndicatorsColumns({
     occurrencesByQueryId,
@@ -322,7 +333,7 @@ export function KnowledgeIndicatorsTable() {
           knowledgeIndicator={selectedKnowledgeIndicator}
           occurrencesByQueryId={occurrencesByQueryId}
           onClose={closeFlyout}
-          knowledgeIndicators={knowledgeIndicators}
+          streamFeatures={streamFeatures}
         />
       ) : null}
       {knowledgeIndicatorsToDelete.length > 0 ? (

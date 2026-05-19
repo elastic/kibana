@@ -22,6 +22,7 @@ import { useDebouncedValue } from '@kbn/react-hooks';
 import { useQueryClient } from '@kbn/react-query';
 import {
   TaskStatus,
+  type Feature,
   type OnboardingResult,
   type Streams,
   type TaskResult,
@@ -165,6 +166,17 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       ),
     [knowledgeIndicators]
   );
+
+  const streamFeatures = useMemo<Feature[]>(
+    () =>
+      knowledgeIndicators
+        .filter(
+          (ki): ki is Extract<KnowledgeIndicator, { kind: 'feature' }> => ki.kind === 'feature'
+        )
+        .map((ki) => ki.feature),
+    [knowledgeIndicators]
+  );
+
   const selectedKnowledgeIndicatorId = selectedKnowledgeIndicator
     ? getKnowledgeIndicatorItemId(selectedKnowledgeIndicator)
     : undefined;
@@ -311,7 +323,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
           knowledgeIndicator={selectedKnowledgeIndicator}
           occurrencesByQueryId={occurrencesByQueryId}
           onClose={closeFlyout}
-          knowledgeIndicators={knowledgeIndicators}
+          streamFeatures={streamFeatures}
         />
       ) : null}
     </>
