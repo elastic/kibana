@@ -16,7 +16,7 @@ export const loadTightPrompts = (): Promise<EsqlPrompts> => {
     cachedPrompts = Promise.all([
       readFile(Path.join(__dirname, 'prompts_static', 'syntax.txt'), 'utf-8'),
       readFile(Path.join(__dirname, 'prompts_static', 'examples.txt'), 'utf-8'),
-    ]).then(([syntax, examples]) => ({ syntax, examples }));
+    ]).then(([syntax, examples]) => ({ syntax, examples, instructions: '' }));
   }
-  return cachedPrompts;
+  return cachedPrompts!;
 };
