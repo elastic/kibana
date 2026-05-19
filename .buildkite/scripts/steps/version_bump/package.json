@@ -1,0 +1,9 @@
+{
+  "name": "kibana-version-bump-scripts",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@octokit/rest": "^22.0.1",
+    "@slack/web-api": "^7.0.0"
+  }
+}
