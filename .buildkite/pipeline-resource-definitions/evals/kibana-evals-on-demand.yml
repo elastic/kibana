@@ -3,7 +3,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
   name: bk-kibana-evals-on-demand
-  description: 'Runs a single @kbn/evals suite and model on demand (manual New build or API trigger)'
+  description: 'Runs a single @kbn/evals suite and model on demand'
   links:
     - url: 'https://buildkite.com/elastic/kibana-evals-on-demand'
       title: Pipeline link
@@ -39,12 +39,8 @@ spec:
           access_level: MANAGE_BUILD_AND_READ
         obs-ai-team:
           access_level: MANAGE_BUILD_AND_READ
-        security-generative_ai:
-          access_level: MANAGE_BUILD_AND_READ
-        workchat-eng:
-          access_level: MANAGE_BUILD_AND_READ
         everyone:
-          access_level: READ_ONLY
+          access_level: BUILD_AND_READ
       tags:
         - kibana
         - kbn-evals

@@ -216,7 +216,7 @@ The CLI uses suite metadata from:
 
 Run a single suite and model on any branch without opening a PR or waiting for the full Kibana PR pipeline:
 
-1. Open [kibana-evals-on-demand](https://buildkite.com/elastic/kibana-evals-on-demand) on Buildkite (after RRE registration)
+1. Open [kibana-evals-on-demand](https://buildkite.com/elastic/kibana-evals-on-demand) on Buildkite
 2. Click **New build**, select the branch (or commit) to evaluate
 3. Under **Environment variables** (in New build options), add the required variables below — one `KEY=value` per line. These are build-level env vars read by `run_suite.sh`.
 
