@@ -61,8 +61,12 @@ apiTest.describe('Ingest pipelines structure tree API', { tag: tags.stateful.cla
       const processors: IngestProcessorContainer[] = [{ set: { field: 'foo', value: 'bar' } }];
 
       if (currentLevel < levels) {
-        for (let index = 0; index < childrenPerNode; index++) {
-          const childId = await createNode(currentLevel + 1, [...path, index]);
+        const childIds = await Promise.all(
+          Array.from({ length: childrenPerNode }, (_, index) =>
+            createNode(currentLevel + 1, [...path, index])
+          )
+        );
+        for (const childId of childIds) {
           processors.push({ pipeline: { name: childId } });
         }
       }
