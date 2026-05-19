@@ -44,3 +44,13 @@ Different layout: one self-contained HTML per failure at `<config-path-with-unde
 - **Loading indicator still visible** → assertion ran before UI settled; missing `retry.waitFor` upstream.
 - **Unexpected error toast** → real product error; find the matching `proc [kibana] [...][ERROR]` line in `system-out`.
 - **Page is logged-out / in a different space** → cleanup / auth / spaces issue in `before` / `after` hooks.
+
+## Common error signatures (FTR)
+
+Specific error shapes that come up repeatedly in FTR failures. Use these as a first pass when you see one in `system-out` or the failure record — each points at a category of root cause that is rarely "tweak the failing test".
+
+| Error signature | Category | Notes |
+| --- | --- | --- |
+| `Unexpected dialog type beforeunload` (or any unexpected-dialog `InvalidArgumentError` during navigation) | Product / test interaction | A page is showing a `beforeunload` (or similar) prompt that blocks WebDriver navigation. Investigate which product code is registering the prompt and whether the test's navigation step needs to dismiss or avoid it — do not just retry the navigation. |
+| `WebDriverError: tab crashed` | CI worker / client-side perf | The browser process died, usually under resource pressure on the CI worker, occasionally a real client-side perf regression. Validate worker load and recent client-side perf changes for the page under test before treating it as a test bug. |
+| `Error: expected false to equal true` (or any boolean-only assertion message) | Test design | The assertion carries no diagnostic information — you cannot tell from the message what was actually false or why. Recommend redesigning the assertion to fail with a meaningful value (assert the actual data, not a boolean derived from it) rather than chasing the symptom from logs alone. |
