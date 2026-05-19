@@ -42,8 +42,10 @@ export type { EmbeddableSetup, EmbeddableStart } from './types';
 export {
   EmbeddableRenderer,
   EmbeddableRendererContext,
+  PlacementStrategy,
   type DefaultEmbeddableApi,
-  type EmbeddableFactory,
+  type EmbeddablePublicDefinition,
+  type LayoutConstraints,
   type QuickActionIds,
 } from './react_embeddable_system';
 

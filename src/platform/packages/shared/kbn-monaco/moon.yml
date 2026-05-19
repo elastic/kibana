@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/repo-info'
   - '@kbn/esql-language'
   - '@kbn/esql-types'
+  - '@kbn/std'
 tags:
   - shared-common
   - package

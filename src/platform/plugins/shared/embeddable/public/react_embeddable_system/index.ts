@@ -13,4 +13,5 @@ export { registerEmbeddablePublicDefinition } from './react_embeddable_registry'
 export { EmbeddableRenderer } from './react_embeddable_renderer';
 export { EmbeddableRendererContext } from './embeddable_renderer_context';
 export type { QuickActionIds } from './embeddable_renderer_context';
-export type { DefaultEmbeddableApi, EmbeddableFactory } from './types';
+export { PlacementStrategy } from './constants';
+export type { DefaultEmbeddableApi, EmbeddablePublicDefinition, LayoutConstraints } from './types';

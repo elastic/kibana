@@ -208,7 +208,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.snapshotRestore.navToRepositories();
         await pageObjects.snapshotRestore.createSourceOnlyRepositoryStepOne(sourceOnlyRepository);
         await pageObjects.snapshotRestore.createSourceOnlyRepositoryStepTwo('/tmp/es-backups/');
-        await pageObjects.snapshotRestore.closeRepositoriesFlyout();
 
         // Create a policy
         await pageObjects.snapshotRestore.navToPolicies();
