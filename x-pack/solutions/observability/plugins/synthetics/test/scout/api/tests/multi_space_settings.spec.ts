@@ -67,7 +67,12 @@ apiTest.describe(
   () => {
     let adminHeaders: Record<string, string>;
 
-    apiTest.beforeAll(async ({ samlAuth, kbnClient }) => {
+    apiTest.beforeAll(async ({ samlAuth, kbnClient, apiServices }) => {
+      await apiServices.core.settings({
+        'feature_flags.overrides': {
+          'synthetics.multiSpaceSettings': 'true',
+        },
+      });
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       adminHeaders = { ...KIBANA_HEADERS, ...cookieHeader };
       await kbnClient.spaces
