@@ -5,14 +5,26 @@
  * 2.0.
  */
 
-import { verdictSchema, type Verdict } from '@kbn/streams-schema';
+import { verdictEnum, verdictSchema, type Verdict } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 
+const verdictSortEnum = z.enum(['@timestamp:asc', '@timestamp:desc']);
+
+const verdictsSearchBody = z.object({
+  from: z.iso.datetime().optional(),
+  to: z.iso.datetime().optional(),
+  verdict: z.array(verdictEnum).optional(),
+  discovery_id: z.array(z.string()).optional(),
+  prioritize_slug: z.array(z.string()).optional(),
+  size: z.number().int().positive().optional(),
+  sort: z.array(verdictSortEnum).optional(),
+});
+
 const verdictsSearchRoute = createServerRoute({
-  endpoint: 'GET /internal/sig_events/verdicts',
+  endpoint: 'POST /internal/sig_events/verdicts/_search',
   options: {
     access: 'internal',
     summary: 'Get latest verdicts',
@@ -24,22 +36,77 @@ const verdictsSearchRoute = createServerRoute({
     },
   },
   params: z.object({
-    query: z.object({
-      from: z.iso.datetime().optional(),
-      to: z.iso.datetime().optional(),
-    }),
+    body: verdictsSearchBody,
   }),
   handler: async ({ params, request, getScopedClients, server }): Promise<{ hits: Verdict[] }> => {
     const { getVerdictClient, licensing, uiSettingsClient } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    return getVerdictClient().findLatest(params.query);
+    return getVerdictClient().findLatest(params.body);
+  },
+});
+
+const verdictsCurrentPerSlugRoute = createServerRoute({
+  endpoint: 'POST /internal/sig_events/verdicts/_current_per_slug',
+  options: {
+    access: 'internal',
+    summary: 'Get current verdict per slug',
+    description:
+      'Return the current verdict per discovery_slug (collapsed before filtering). A slug whose latest verdict does not match the filters is omitted, even if older matching verdicts exist.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    body: verdictsSearchBody,
+  }),
+  handler: async ({ params, request, getScopedClients, server }): Promise<{ hits: Verdict[] }> => {
+    const { getVerdictClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    return getVerdictClient().findCurrentPerSlug(params.body);
+  },
+});
+
+const verdictsReviewedSummaryRoute = createServerRoute({
+  endpoint: 'POST /internal/sig_events/verdicts/_reviewed_summary',
+  options: {
+    access: 'internal',
+    summary: 'Get reviewed discovery summary',
+    description:
+      'Return the distinct discovery_ids and discovery_slugs that have at least one verdict in the time window.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    body: z.object({
+      from: z.iso.datetime().optional(),
+      to: z.iso.datetime().optional(),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<{ reviewed_discovery_ids: string[]; reviewed_slugs: string[] }> => {
+    const { getVerdictClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    return getVerdictClient().getReviewedSummary(params.body);
   },
 });
 
 const verdictsBulkCreateRoute = createServerRoute({
-  endpoint: 'POST /internal/sig_events/verdicts',
+  endpoint: 'POST /internal/sig_events/verdicts/_bulk',
   options: {
     access: 'internal',
     summary: 'Bulk create verdicts',
@@ -51,18 +118,22 @@ const verdictsBulkCreateRoute = createServerRoute({
     },
   },
   params: z.object({
-    body: z.array(verdictSchema),
+    body: z.object({
+      verdicts: z.array(verdictSchema),
+    }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
     const { getVerdictClient, licensing, uiSettingsClient } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    return getVerdictClient().bulkCreate(params.body);
+    return getVerdictClient().bulkCreate(params.body.verdicts);
   },
 });
 
 export const internalSigEventsVerdictsRoutes = {
   ...verdictsSearchRoute,
+  ...verdictsCurrentPerSlugRoute,
+  ...verdictsReviewedSummaryRoute,
   ...verdictsBulkCreateRoute,
 };

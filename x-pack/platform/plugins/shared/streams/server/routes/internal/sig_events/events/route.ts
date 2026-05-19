@@ -5,14 +5,35 @@
  * 2.0.
  */
 
-import { sigEventSchema, type SigEvent } from '@kbn/streams-schema';
+import { sigEventSchema, verdictEnum, type SigEvent } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 
+const eventSortEnum = z.enum([
+  '@timestamp:asc',
+  '@timestamp:desc',
+  'last_reviewed_at:asc',
+  'last_reviewed_at:desc',
+]);
+
+const eventsSearchBody = z.object({
+  from: z.iso.datetime().optional(),
+  to: z.iso.datetime().optional(),
+  verdict: z.array(verdictEnum).optional(),
+  slug: z.array(z.string()).optional(),
+  exclude_slug: z.array(z.string()).optional(),
+  discovery_id: z.array(z.string()).optional(),
+  exclude_grouped: z.boolean().optional(),
+  last_reviewed_before: z.iso.datetime().optional(),
+  or_last_reviewed_lte: z.iso.datetime().optional(),
+  size: z.number().int().positive().optional(),
+  sort: z.array(eventSortEnum).optional(),
+});
+
 const eventsSearchRoute = createServerRoute({
-  endpoint: 'GET /internal/sig_events/events',
+  endpoint: 'POST /internal/sig_events/events/_search',
   options: {
     access: 'internal',
     summary: 'Get latest events',
@@ -24,22 +45,19 @@ const eventsSearchRoute = createServerRoute({
     },
   },
   params: z.object({
-    query: z.object({
-      from: z.iso.datetime().optional(),
-      to: z.iso.datetime().optional(),
-    }),
+    body: eventsSearchBody,
   }),
   handler: async ({ params, request, getScopedClients, server }): Promise<{ hits: SigEvent[] }> => {
     const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    return getEventClient().findLatest(params.query);
+    return getEventClient().findLatest(params.body);
   },
 });
 
 const eventsBulkCreateRoute = createServerRoute({
-  endpoint: 'POST /internal/sig_events/events',
+  endpoint: 'POST /internal/sig_events/events/_bulk',
   options: {
     access: 'internal',
     summary: 'Bulk create events',
@@ -51,14 +69,16 @@ const eventsBulkCreateRoute = createServerRoute({
     },
   },
   params: z.object({
-    body: z.array(sigEventSchema),
+    body: z.object({
+      events: z.array(sigEventSchema),
+    }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
     const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    return getEventClient().bulkCreate(params.body);
+    return getEventClient().bulkCreate(params.body.events);
   },
 });
 

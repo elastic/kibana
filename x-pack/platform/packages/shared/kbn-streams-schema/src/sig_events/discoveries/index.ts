@@ -6,23 +6,75 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import {
+  causeKiSchema,
+  changePointOccurrenceEnum,
+  dependencyEdgeSchema,
+  evidenceSchema,
+  impactEnum,
+  infraComponentSchema,
+} from '../common';
 
-export const discoverySchema = z.object({
+const discoveryDetectionEntrySchema = z.object({
+  detection_id: z.string(),
+  rule_name: z.string(),
+  rule_uuid: z.string(),
+  stream_name: z.string(),
+  change_point_type: z.string(),
+  event_count: z.number().int(),
+  detected_at: z.string(),
+});
+
+const baseDiscoveryFields = {
   '@timestamp': z.iso.datetime(),
-  status: z.string().optional(),
   discovery_id: z.string(),
   discovery_slug: z.string(),
+  title: z.string(),
+  summary: z.string(),
+  root_cause: z.string(),
+  criticality: z.number().int(),
+  confidence: z.number().int(),
+  impact: impactEnum,
   rule_names: z.array(z.string()),
   stream_names: z.array(z.string()),
-  grouped_discovery_ids: z.array(z.string()),
-  title: z.string().optional(),
-  summary: z.string().optional(),
-  root_cause: z.string().optional(),
-  detections: z.array(
-    z.object({
-      rule_uuid: z.string(),
-    })
-  ),
+  detections: z.array(discoveryDetectionEntrySchema),
+};
+
+const findingFields = {
+  ...baseDiscoveryFields,
+  kind: z.literal('finding'),
+  workflow_execution_id: z.string(),
+  conversation_id: z.string(),
+  change_point_occurrence: changePointOccurrenceEnum,
+  dependency_edges: z.array(dependencyEdgeSchema),
+  infra_components: z.array(infraComponentSchema),
+  cause_kis: z.array(causeKiSchema),
+  evidences: z.array(evidenceSchema),
+  grouped_into: z.string().optional(),
+};
+
+const nonGroupFindingSchema = z.object({
+  ...findingFields,
+  previous_discovery_id: z.string().nullable(),
 });
+
+const groupFindingSchema = z.object({
+  ...findingFields,
+  grouped_discovery_ids: z.array(z.string()).min(1),
+  grouping_rationale: z.string(),
+});
+
+const clearanceSchema = z.object({
+  ...baseDiscoveryFields,
+  kind: z.literal('clearance'),
+  closes: z.string(),
+  closed_by_execution_id: z.string(),
+});
+
+export const discoverySchema = z.union([
+  groupFindingSchema,
+  nonGroupFindingSchema,
+  clearanceSchema,
+]);
 
 export type Discovery = z.infer<typeof discoverySchema>;

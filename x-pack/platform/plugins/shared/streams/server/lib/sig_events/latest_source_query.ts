@@ -5,61 +5,17 @@
  * 2.0.
  */
 
-import { esql, type ComposerQueryTagHole, type ComposerSortShorthand } from '@elastic/esql';
-import type { ESQLAstExpression } from '@elastic/esql/types';
+import { esql, type ComposerQuery } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { type CommonSearchOptions } from './query_utils';
 
-export type LatestSourceWhereCondition = ESQLAstExpression & ComposerQueryTagHole;
+export const baseSpaceScopedQuery = (index: string, space: string): ComposerQuery =>
+  esql.from([index], ['_id', '_source']).where`\`kibana.space_ids\` == ${space}`;
 
-interface RunLatestSourceEsqlQueryArgs {
-  esClient: ElasticsearchClient;
-  space: string;
-  options: CommonSearchOptions;
-  index: string;
-  where?: LatestSourceWhereCondition;
-  sort?: ComposerSortShorthand[];
-  groupBy: string;
-}
-
-export const runLatestSourceEsqlQuery = async <T>({
-  esClient,
-  space,
-  options,
-  index,
-  where,
-  sort,
-  groupBy,
-}: RunLatestSourceEsqlQueryArgs): Promise<{ hits: T[] }> => {
-  let query = esql.from([index], ['_id', '_source']).where`\`kibana.space_ids\` == ${space}`;
-
-  if (options.from !== undefined) {
-    query = query.where`@timestamp >= TO_DATETIME(${esql.str(options.from)})`;
-  }
-
-  if (options.to !== undefined) {
-    query = query.where`@timestamp <= TO_DATETIME(${esql.str(options.to)})`;
-  }
-
-  if (where) {
-    query = query.where`${where}`;
-  }
-
-  // pick the latest events by group
-  query = query.pipe`INLINE STATS latest_ts = MAX(@timestamp) BY ${esql.col(groupBy)}`
-    .where`@timestamp == latest_ts`;
-
-  // use _id as a tiebreak in case multiple events share the same timestamp
-  query = query.pipe`INLINE STATS tiebreaker_id = MAX(_id) BY ${esql.col(groupBy)}`
-    .where`_id == tiebreaker_id`;
-
-  if (sort?.length) {
-    query = query.sort(sort[0], ...sort.slice(1));
-  }
-
-  query = query.keep('_source');
-
+export const executeSourceQuery = async <T>(
+  esClient: ElasticsearchClient,
+  query: ComposerQuery
+): Promise<{ hits: T[] }> => {
   const response = (await esClient.esql.query({
     query: query.print(),
   })) as ESQLSearchResponse;
@@ -72,8 +28,6 @@ export const runLatestSourceEsqlQuery = async <T>({
   return {
     hits: response.values.map((row) => {
       const source = (row[sourceIdx] ?? {}) as Record<string, unknown>;
-      // `kibana.space_ids` is added by IDataStreamClient on write; strip the
-      // whole `kibana` object so consumers only see the typed payload.
       const { kibana: _kibana, ...rest } = source;
       return rest as T;
     }),

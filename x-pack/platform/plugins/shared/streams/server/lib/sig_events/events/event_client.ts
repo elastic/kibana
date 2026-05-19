@@ -6,9 +6,20 @@
  */
 
 import type { IDataStreamClient } from '@kbn/data-streams';
+import { esql } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { type CommonSearchOptions } from '../query_utils';
-import { runLatestSourceEsqlQuery } from '../latest_source_query';
+import type { z } from '@kbn/zod/v4';
+import type { verdictEnum } from '@kbn/streams-schema';
+import {
+  type CommonSearchOptions,
+  type TimestampSort,
+  applyFilter,
+  applyTimeWindow,
+  collapseToLatest,
+  inList,
+  parseSort,
+} from '../query_utils';
+import { baseSpaceScopedQuery, executeSourceQuery } from '../latest_source_query';
 import {
   EVENTS_DATA_STREAM,
   type SigEvent,
@@ -17,6 +28,28 @@ import {
 } from './data_stream';
 
 export type EventDataStreamClient = IDataStreamClient<typeof eventsMappings, StoredEvent>;
+
+export type EventSort = TimestampSort | 'last_reviewed_at:asc' | 'last_reviewed_at:desc';
+
+export type EventVerdictValue = z.infer<typeof verdictEnum>;
+
+export interface EventsSearchOptions extends CommonSearchOptions {
+  verdict?: EventVerdictValue[];
+  slug?: string[];
+  exclude_slug?: string[];
+  discovery_id?: string[];
+  exclude_grouped?: boolean;
+  /** ISO 8601 datetime; strict less-than against `last_reviewed_at`. */
+  last_reviewed_before?: string;
+  /**
+   * ISO 8601 datetime; when combined with {@link last_reviewed_before} produces
+   * `(last_reviewed_at < before OR last_reviewed_at <= lte)`. When only this
+   * field is set, produces `last_reviewed_at <= lte`.
+   */
+  or_last_reviewed_lte?: string;
+  size?: number;
+  sort?: EventSort[];
+}
 
 export class EventClient {
   constructor(
@@ -34,13 +67,44 @@ export class EventClient {
     });
   }
 
-  async findLatest(options: CommonSearchOptions = {}): Promise<{ hits: SigEvent[] }> {
-    return runLatestSourceEsqlQuery<SigEvent>({
-      esClient: this.clients.esClient,
-      space: this.clients.space,
-      options,
-      index: EVENTS_DATA_STREAM,
-      groupBy: 'event_id',
-    });
+  async findLatest(options: EventsSearchOptions = {}): Promise<{ hits: SigEvent[] }> {
+    let query = baseSpaceScopedQuery(EVENTS_DATA_STREAM, this.clients.space);
+
+    query = applyTimeWindow(query, options);
+
+    query = applyFilter({ query, options, key: 'slug', column: 'discovery_slug' });
+    if (options.exclude_slug?.length) {
+      query = query.where`NOT (${inList('discovery_slug', options.exclude_slug)})`;
+    }
+
+    query = collapseToLatest(query, 'event_id');
+
+    query = applyFilter({ query, options, key: 'verdict' });
+    query = applyFilter({ query, options, key: 'discovery_id' });
+    if (options.exclude_grouped) {
+      query = query.where`${esql.col('grouped_into')} IS NULL`;
+    }
+
+    const { last_reviewed_before: before, or_last_reviewed_lte: lte } = options;
+    if (before && lte) {
+      query = query.where`(${esql.col('last_reviewed_at')} < TO_DATETIME(${esql.str(
+        before
+      )}) OR ${esql.col('last_reviewed_at')} <= TO_DATETIME(${esql.str(lte)}))`;
+    } else if (before) {
+      query = query.where`${esql.col('last_reviewed_at')} < TO_DATETIME(${esql.str(before)})`;
+    } else if (lte) {
+      query = query.where`${esql.col('last_reviewed_at')} <= TO_DATETIME(${esql.str(lte)})`;
+    }
+
+    if (options.sort?.length) {
+      const sort = options.sort.map(parseSort);
+      query = query.sort(sort[0], ...sort.slice(1));
+    }
+    query = query.keep('_source');
+    if (options.size !== undefined) {
+      query = query.limit(options.size);
+    }
+
+    return executeSourceQuery<SigEvent>(this.clients.esClient, query);
   }
 }

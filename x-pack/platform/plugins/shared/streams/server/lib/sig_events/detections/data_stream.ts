@@ -23,6 +23,13 @@ export const detectionsMappings = {
     rule_uuid: mappings.keyword(),
     rule_name: mappings.keyword(),
     stream: mappings.keyword(),
+    processed_by: mappings.keyword(),
+    peak_30m_alert_count: mappings.integer(),
+    detection_evidence: mappings.object({
+      properties: {
+        p_value: { type: 'double' } as const,
+      },
+    }),
   },
 } satisfies MappingsDefinition;
 
@@ -34,7 +41,7 @@ export const detectionsDataStream: DataStreamDefinition<
   StoredDetection
 > = {
   name: DETECTIONS_DATA_STREAM,
-  version: 2,
+  version: 3,
   hidden: true,
   template: {
     priority: 500,

@@ -6,22 +6,55 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import {
+  causeKiSchema,
+  dependencyEdgeSchema,
+  evidenceSchema,
+  impactEnum,
+  infraComponentSchema,
+  recommendedActionEnum,
+  verdictEnum,
+} from '../common';
 
-export const verdictSchema = z.object({
+const sharedVerdictFields = {
   '@timestamp': z.iso.datetime(),
-  verdict: z.string().optional(),
-  verdict_id: z.string(),
   discovery_id: z.string(),
   discovery_slug: z.string(),
+  workflow_execution_id: z.string(),
+  criticality: z.number().int(),
+  confidence: z.number().int(),
   rule_names: z.array(z.string()),
   stream_names: z.array(z.string()),
-  recommended_action: z.string().optional(),
-  title: z.string().optional(),
-  summary: z.string().optional(),
-  root_cause: z.string().optional(),
-  verdict_summary: z.string().optional(),
-  assessment_note: z.string().optional(),
-  recommendations: z.string().optional(),
+  title: z.string(),
+  summary: z.string(),
+  root_cause: z.string(),
+  verdict_summary: z.string(),
+  cause_kis: z.array(causeKiSchema),
+};
+
+const judgeVerdictSchema = z.object({
+  ...sharedVerdictFields,
+  verdict: verdictEnum,
+  verdict_id: z.string(),
+  recommended_action: recommendedActionEnum,
+  assessment_note: z.string(),
+  recommendations: z.array(z.string()),
+  impact: impactEnum,
+  original_verdict: verdictEnum,
+  verdict_source: z.literal('judge_discoveries'),
+  conversation_id: z.string(),
+  dependency_edges: z.array(dependencyEdgeSchema),
+  infra_components: z.array(infraComponentSchema),
+  evidences: z.array(evidenceSchema),
+  grouped_discovery_ids: z.array(z.string()).optional(),
 });
+
+const groupedSourceVerdictSchema = z.object({
+  ...sharedVerdictFields,
+  verdict: z.literal('grouped'),
+  grouped_into: z.string(),
+});
+
+export const verdictSchema = z.union([judgeVerdictSchema, groupedSourceVerdictSchema]);
 
 export type Verdict = z.infer<typeof verdictSchema>;
