@@ -32,6 +32,7 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
     query: {
       properties: {
         format: { type: 'keyword' },
+        recovery_type: { type: 'keyword' },
         base: { type: 'text' },
         blocks: {
           properties: {

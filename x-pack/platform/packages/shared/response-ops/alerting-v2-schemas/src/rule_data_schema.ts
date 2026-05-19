@@ -94,6 +94,10 @@ export const queryFormatSchema = z.enum(['composed', 'standalone']);
 export const queryFormat = queryFormatSchema.enum;
 export type QueryFormat = z.infer<typeof queryFormatSchema>;
 
+/** Interim field to make episode recovery optional */
+export const recoveryTypeSchema = z.enum(['skip']);
+export type RecoveryType = z.infer<typeof recoveryTypeSchema>;
+
 /**
  * Appendable ES|QL fragment (e.g. `| WHERE …`). Not a complete program on its
  * own, so we only enforce length bounds here — full parser validation is
@@ -108,6 +112,7 @@ export const esqlQueryBlockSchema = z
 export const composedQuerySchema = z
   .object({
     format: z.literal(queryFormat.composed),
+    recovery_type: recoveryTypeSchema.optional(),
     base: esqlQuerySchema.describe(
       'Base ES|QL query. Time filters are applied automatically via the lookback window.'
     ),
@@ -128,6 +133,7 @@ export const composedQuerySchema = z
 export const standaloneQuerySchema = z
   .object({
     format: z.literal(queryFormat.standalone),
+    recovery_type: recoveryTypeSchema.optional(),
     no_data: esqlQuerySchema.optional().describe('Full ES|QL query for no-data detection.'),
     breach: esqlQuerySchema.describe('Full ES|QL query for breach detection (required).'),
     recover: esqlQuerySchema.optional().describe('Full ES|QL query for recovery detection.'),

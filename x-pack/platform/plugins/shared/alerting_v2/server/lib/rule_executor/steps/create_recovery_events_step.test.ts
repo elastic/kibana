@@ -41,13 +41,16 @@ describe('CreateRecoveryEventsStep', () => {
   }
 
   describe('no_recovery', () => {
-    it('skips recovery entirely when no recover query is configured', async () => {
+    it('skips recovery entirely when recovery_type: skip', async () => {
       const { step, internalEsClient, scopedEsClient } = createStep();
 
       const breachedEvents = [createAlertEvent({ group_hash: 'hash-1' })];
 
       const state = createRulePipelineState({
-        rule: createRuleResponse({ kind: 'alert' }),
+        rule: createRuleResponse({
+          kind: 'alert',
+          query: { format: 'standalone', recovery_type: 'skip', breach: 'FROM logs-* | LIMIT 10' },
+        }),
         alertEventsBatch: breachedEvents,
       });
 

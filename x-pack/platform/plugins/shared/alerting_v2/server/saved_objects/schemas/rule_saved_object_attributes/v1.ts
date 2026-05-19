@@ -33,6 +33,7 @@ export const ruleSavedObjectAttributesSchema = schema.object({
   query: schema.oneOf([
     schema.object({
       format: schema.literal('composed'),
+      recovery_type: schema.maybe(schema.oneOf([schema.literal('skip')])),
       base: schema.string(),
       blocks: schema.object({
         breach: schema.string(),
@@ -41,6 +42,7 @@ export const ruleSavedObjectAttributesSchema = schema.object({
     }),
     schema.object({
       format: schema.literal('standalone'),
+      recovery_type: schema.maybe(schema.oneOf([schema.literal('skip')])),
       no_data: schema.maybe(schema.string()),
       breach: schema.string(),
       recover: schema.maybe(schema.string()),

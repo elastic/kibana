@@ -50,11 +50,10 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
         return;
       }
 
-      const effectiveQuery = getRecoverEsqlQuery(rule.query);
-
-      if (!effectiveQuery) {
+      // NOTE: This is an interim fix using recovery_type: skip until we work out the schema changes
+      if (rule.query.recovery_type && rule.query.recovery_type === 'skip') {
         step.logger.debug({
-          message: `[${step.name}] Skipping recovery for rule ${input.ruleId} (no recover query configured)`,
+          message: `[${step.name}] Skipping recovery for rule ${input.ruleId}`,
         });
         yield { type: 'continue', state };
         return;
@@ -73,6 +72,7 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
         return;
       }
 
+      const effectiveQuery = getRecoverEsqlQuery(rule.query);
       const recoveryEvents = effectiveQuery
         ? await step.executeRecoveryQuery({ rule, effectiveQuery, input, activeGroupHashes })
         : buildRecoveryAlertEvents({

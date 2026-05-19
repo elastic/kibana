@@ -143,6 +143,7 @@
     "query.format",
     "query.no_data",
     "query.recover",
+    "query.recovery_type",
     "schedule",
     "schedule.every",
     "schedule.lookback",

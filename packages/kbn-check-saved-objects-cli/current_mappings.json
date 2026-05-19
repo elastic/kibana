@@ -487,6 +487,9 @@
           },
           "recover": {
             "type": "text"
+          }, 
+          "recovery_type": {
+            "type": "text"
           }
         }
       },

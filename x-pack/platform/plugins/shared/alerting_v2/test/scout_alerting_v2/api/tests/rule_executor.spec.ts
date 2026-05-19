@@ -823,7 +823,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
-    'does not emit recovery events for alert rules created without a recovery query',
+    'does not emit recovery events for alert rules created with recovery_type: skip',
     async ({ apiServices }) => {
       await apiServices.alertingV2.sourceIndex.indexDocs({
         index: SOURCE_INDEX,
@@ -843,6 +843,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
           metadata: { name: 'executor-alert-no-recovery-query' },
           query: {
             format: 'standalone',
+            recovery_type: 'skip',
             breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-alert-no-recovery-query" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
         })
