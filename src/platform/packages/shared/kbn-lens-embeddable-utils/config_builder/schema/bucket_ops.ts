@@ -116,7 +116,7 @@ const bucketTermsRankByCustomOperationSchema = bucketTermsRankByCustomSharedSche
 const bucketTermsRankByCustomCountOperationSchema = bucketTermsRankByCustomSharedSchema
   .extend({
     operation: z.literal('count'),
-    field: z.string().meta({
+    field: z.string().optional().meta({
       description: 'Numeric field to be used for the custom operation.',
     }),
   })

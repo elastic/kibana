@@ -242,7 +242,7 @@ const groupConditionSchema: z.ZodType<AsCodeGroupFilterRecursive> = z
   })
   .strict()
   .meta({
-    description: 'Conditions or nested group conditions',
+    description: 'Logical group that combines one or more conditions or nested groups.',
     id: 'kbn-as-code-filters-schema_groupConditionSchema',
   });
 

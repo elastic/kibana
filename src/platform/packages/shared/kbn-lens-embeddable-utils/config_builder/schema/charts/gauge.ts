@@ -22,9 +22,7 @@ import { simpleOrientationSchema } from '../enums';
 const bulletShapeSchema = z
   .object({
     type: z.literal('bullet'),
-    orientation: simpleOrientationSchema.meta({
-      defaultValue: 'horizontal',
-    }),
+    orientation: simpleOrientationSchema.default('horizontal'),
   })
   .strict()
   .meta({

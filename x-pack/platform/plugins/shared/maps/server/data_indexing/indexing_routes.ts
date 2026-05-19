@@ -58,7 +58,7 @@ export function initIndexingRoutes({
             body: z
               .object({
                 index: z.string(),
-                mappings: z.any(),
+                mappings: z.any().optional(),
               })
               .strict(),
           },
@@ -119,7 +119,7 @@ export function initIndexingRoutes({
             body: z
               .object({
                 index: z.string(),
-                data: z.any(),
+                data: z.any().optional(),
               })
               .strict(),
           },

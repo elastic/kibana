@@ -43,6 +43,7 @@ export const markdownAttributesSchemaZod = z
         open_links_in_new_tab: z.boolean().default(true),
       })
       .strict()
-      .default({ open_links_in_new_tab: true }),
+      .default({ open_links_in_new_tab: true })
+      .optional(),
   })
   .strict();

@@ -16,7 +16,7 @@ import { styleFieldSchema } from './style_field_schema';
 
 export const categoryColorStop = z
   .object({
-    stop: z.string().nullable(),
+    stop: z.string().nullable().default(null),
     color: z.string(),
   })
   .strict();

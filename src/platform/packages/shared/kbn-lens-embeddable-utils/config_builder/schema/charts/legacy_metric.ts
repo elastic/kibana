@@ -13,6 +13,7 @@ import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { layerSettingsSchema, sharedPanelInfoSchema, dslOnlyPanelInfoSchema } from '../shared';
 import {
   applyColorToSchema,
+  AUTO_COLOR,
   colorByValueAbsoluteSchema,
   legacyColorByValueAbsoluteSchema,
   autoColorSchema,
@@ -33,6 +34,7 @@ const legacyMetricConfigMetricOptionsShape = {
       z.literal('xl'),
       z.literal('xxl'),
     ])
+    .default('m')
     .optional()
     .meta({ description: 'Font size for the label and value' }),
   labels: z
@@ -73,6 +75,7 @@ const legacyMetricConfigMetricOptionsShape = {
    */
   color: z
     .union([colorByValueAbsoluteSchema, legacyColorByValueAbsoluteSchema, autoColorSchema])
+    .default(AUTO_COLOR)
     .optional()
     .meta({ description: 'Color configuration based on the metric value.' }),
 };

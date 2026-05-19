@@ -19,7 +19,7 @@ export const searchRequestQuerySchema = z
   .object({
     query: z.string().optional().meta({
       description:
-        'An Elasticsearch simple_query_string query that filters markdown library items by "title" and "description"',
+        'Filters results by `title` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-simple-query-string-query) syntax. Multi-word terms require all words to match.',
     }),
     ...asCodePaginationParamsSchema.shape,
   })

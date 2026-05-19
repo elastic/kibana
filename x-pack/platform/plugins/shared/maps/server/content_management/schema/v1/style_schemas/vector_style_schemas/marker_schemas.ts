@@ -47,7 +47,7 @@ const iconSource = z.union([z.literal(ICON_SOURCE.CUSTOM), z.literal(ICON_SOURCE
 
 export const iconStop = z
   .object({
-    stop: z.string().nullable(),
+    stop: z.string().nullable().default(null),
     icon: z.string(),
     iconSource,
   })
@@ -55,7 +55,7 @@ export const iconStop = z
 
 export const iconDynamicOptions = z
   .object({
-    iconPaletteId: z.string().nullable(),
+    iconPaletteId: z.string().nullable().default(null),
     customIconStops: z.array(iconStop).optional(),
     useCustomIconMap: z.boolean().optional(),
     field: styleFieldSchema.optional(),
