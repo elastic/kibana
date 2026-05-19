@@ -137,9 +137,10 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       allowAPIUpdate: true,
     }),
     /*
-     * NOTE: entity.attributes.summary (including summary.staleness) is intentionally
-     * excluded from ESQL extraction. It is API-written only and persisted via
-     * crudClient.updateEntity with force=true. Schema: entity.schema.yaml / entity.gen.ts.
+     * NOTE: entity.attributes.summary is intentionally excluded from ESQL extraction.
+     * It is API-written only (crudClient.updateEntity with force=true).
+     * Application schema: entity.schema.yaml / entity.gen.ts.
+     * Elasticsearch mappings: entity_summary_index_mappings.ts (latest component templates).
      */
 
     // LIFECYCLE ------------------------------------------------------------

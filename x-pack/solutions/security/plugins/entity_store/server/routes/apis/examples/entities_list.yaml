@@ -6,7 +6,10 @@ responses:
         examples:
           pageModeExample:
             summary: "Page mode response with host entities"
-            description: "A paginated list of host entities sorted by timestamp in descending order, including query inspection data."
+            description: >
+              A paginated list of host entities sorted by timestamp in descending order, including query inspection data.
+              By default, `entity.attributes.summary` is excluded from `_source` to keep list payloads small; pass
+              `include_summary=true` to return persisted AI summaries (see pageModeWithSummaryExample).
             value:
               records:
                 - "@timestamp": "2026-04-10T08:30:00.000Z"
@@ -46,9 +49,46 @@ responses:
                   - '{"index":["entities-latest-default"],"body":{"terms":{"entity.EngineMetadata.Type":["host"]}}}'
                 response:
                   - '{"took":1,"timed_out":false,"hits":{"total":{"value":1,"relation":"eq"}}}'
+          pageModeWithSummaryExample:
+            summary: "Page mode with AI summary included"
+            description: >
+              Same as page mode, but requested with `include_summary=true` so `entity.attributes.summary` is present
+              on entities that have a persisted AI summary.
+            value:
+              records:
+                - "@timestamp": "2026-04-10T08:30:00.000Z"
+                  entity:
+                    id: "host:web-server-prod-01"
+                    name: "web-server-prod-01"
+                    type: "host"
+                    attributes:
+                      asset: true
+                      summary:
+                        highlights:
+                          - title: "Risk overview"
+                            text: "Moderate risk driven by recent detections and asset criticality."
+                        recommendedActions:
+                          - "Review top alerts in the last 24 hours"
+                        generated_at: 1712736600000
+                        generated_by: "analyst@example.com"
+                        staleness:
+                          enabled_signals:
+                            - risk_score
+                            - rule_names
+                          snapshot:
+                            risk_score: 47.5
+                            rule_names:
+                              - "Suspicious PowerShell"
+                  host:
+                    name: "web-server-prod-01"
+              total: 1
+              page: 1
+              per_page: 10
           searchAfterModeExample:
             summary: "Search-after mode response"
-            description: "A cursor-based response with entities and a search_after token for the next page."
+            description: >
+              A cursor-based response with entities and a search_after token for the next page.
+              `entity.attributes.summary` is excluded unless `include_summary=true`.
             value:
               entities:
                 - "@timestamp": "2026-04-10T08:30:00.000Z"
@@ -95,6 +135,13 @@ x-codeSamples:
     source: |
       curl -X GET -H "Authorization: ApiKey ${API_KEY}" \
         "${KIBANA_URL}/api/security/entity_store/entities?entity_types=host&page=1&per_page=10&sort_field=%40timestamp&sort_order=desc"
+  - lang: curl
+    source: |
+      curl -X GET -H "Authorization: ApiKey ${API_KEY}" \
+        "${KIBANA_URL}/api/security/entity_store/entities?entity_types=host&page=1&per_page=10&sort_field=%40timestamp&sort_order=desc&include_summary=true"
   - lang: Console
     source: |
       GET kbn://api/security/entity_store/entities?entity_types=host&page=1&per_page=10&sort_field=@timestamp&sort_order=desc
+  - lang: Console
+    source: |
+      GET kbn://api/security/entity_store/entities?entity_types=host&page=1&per_page=10&sort_field=@timestamp&sort_order=desc&include_summary=true

@@ -17,7 +17,7 @@ describe('entity_summary_staleness', () => {
       expect(
         buildEntitySummaryStaleness(
           {
-            riskScore: 82.97,
+            riskScoreNorm: 82.97,
             anomalyJobIds: ['job-a'],
             ruleNames: ['Rule A'],
           },
@@ -50,7 +50,7 @@ describe('entity_summary_staleness', () => {
 
       expect(
         computeEntitySummaryStalenessReasons(summary, {
-          riskScore: 70,
+          riskScoreNorm: 70,
           anomalyJobIds: ['new-job'],
         })
       ).toEqual([]);
@@ -66,7 +66,7 @@ describe('entity_summary_staleness', () => {
       } as EntitySummaryAttribute;
 
       expect(
-        computeEntitySummaryStalenessReasons(summary, { riskScore: 82.97 })
+        computeEntitySummaryStalenessReasons(summary, { riskScoreNorm: 82.97 })
       ).toEqual(['Risk score changed from 70 to 82.97']);
     });
 
@@ -79,12 +79,14 @@ describe('entity_summary_staleness', () => {
         },
       } as EntitySummaryAttribute;
 
-      expect(computeEntitySummaryStalenessReasons(summary, { riskScore: 70.005 })).toEqual([]);
+      expect(computeEntitySummaryStalenessReasons(summary, { riskScoreNorm: 70.005 })).toEqual(
+        []
+      );
     });
 
     it('builds risk_score snapshot when enabled', () => {
       expect(
-        buildEntitySummaryStaleness({ riskScore: 82.97 }, ['risk_score'])
+        buildEntitySummaryStaleness({ riskScoreNorm: 82.97 }, ['risk_score'])
       ).toEqual({
         enabled_signals: ['risk_score'],
         snapshot: { risk_score: 82.97 },

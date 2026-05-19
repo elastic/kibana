@@ -50,7 +50,8 @@ export const DEFAULT_ENTITY_SUMMARY_STALENESS_SIGNALS: EntitySummaryStalenessSig
 
 /** Normalized entity fields used when capturing and comparing staleness snapshots. */
 export interface EntitySummaryStalenessEntitySnapshot {
-  riskScore?: number | null;
+  /** `entity.risk.calculated_score_norm` — same value shown in the entity flyout risk summary. */
+  riskScoreNorm?: number | null;
   anomalyJobIds?: string[];
   ruleNames?: string[];
 }
@@ -99,9 +100,9 @@ const isKnownStalenessSignal = (signal: string): signal is EntitySummaryStalenes
  */
 const ENTITY_SUMMARY_STALENESS_SIGNALS_REGISTRY = {
   risk_score: {
-    capture: (entity) => ({ risk_score: entity.riskScore ?? null }),
+    capture: (entity) => ({ risk_score: entity.riskScoreNorm ?? null }),
     staleReason: (stored, current) =>
-      staleReasonWhenBothPresent(stored.risk_score, current.riskScore, (baseline, score) =>
+      staleReasonWhenBothPresent(stored.risk_score, current.riskScoreNorm, (baseline, score) =>
         Math.abs(score - baseline) <= RISK_SCORE_EPSILON
           ? undefined
           : `Risk score changed from ${baseline} to ${score}`

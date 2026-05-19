@@ -61,6 +61,12 @@ const querySchema = z
     entity_types: ArrayFromString(entityTypeSchema)
       .optional()
       .describe('Entity types to include in the results.'),
+    include_summary: z.coerce
+      .boolean()
+      .optional()
+      .describe(
+        'When true, include persisted AI summary (`entity.attributes.summary`) in hits. Omitted by default to keep list payloads small.'
+      ),
   })
   .superRefine((data, ctx) => {
     const usesPagePagination = data.page !== undefined || data.per_page !== undefined;
@@ -152,6 +158,7 @@ export function registerCRUDGet(router: EntityStorePluginRouter) {
               perPage: req.query.per_page ?? 10,
               sortField: req.query.sort_field ?? '@timestamp',
               sortOrder: req.query.sort_order ?? 'desc',
+              includeSummary: req.query.include_summary,
             };
 
             const result = await crudClient.listEntities(listParams);
@@ -184,6 +191,7 @@ export function registerCRUDGet(router: EntityStorePluginRouter) {
             ),
             source: req.query.source,
             fields: req.query.fields,
+            includeSummary: req.query.include_summary,
           };
 
           const { entities, nextSearchAfter, fields } = await crudClient.listEntities(listParams);

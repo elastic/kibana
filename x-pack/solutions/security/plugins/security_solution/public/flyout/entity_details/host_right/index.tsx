@@ -327,6 +327,7 @@ export const HostPanel = memo(function HostPanel({
             onAssetCriticalityChange={onAssetCriticalityChanged}
             isPreviewMode={isPreviewMode}
             entityRecord={observedHost.entityRecord ?? undefined}
+            refetchEntityRecord={entityFromStoreResult.refetch}
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
           />

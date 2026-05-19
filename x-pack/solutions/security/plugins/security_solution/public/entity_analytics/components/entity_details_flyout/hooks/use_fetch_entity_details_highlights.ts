@@ -89,6 +89,7 @@ export const useFetchEntityDetailsHighlights = ({
   entityIdentifier,
   storedSummary,
   entitySnapshot,
+  refetchEntityRecord,
 }: {
   connectorId: string;
   anonymizationFields: AnonymizationFieldResponse[];
@@ -97,6 +98,8 @@ export const useFetchEntityDetailsHighlights = ({
   storedSummary?: EntitySummaryAttribute | null;
   /** Current entity signal values — snapshotted into the summary at generation time for staleness detection. */
   entitySnapshot?: EntitySummaryStalenessEntitySnapshot | null;
+  /** Refetch entity store record after persist so `storedSummary` and staleness snapshot stay in sync. */
+  refetchEntityRecord?: () => void;
 }) => {
   const { inference } = useKibana().services;
   const { fetchEntityDetailsHighlights, saveEntityAiSummary } = useEntityAnalyticsRoutes();
@@ -113,6 +116,10 @@ export const useFetchEntityDetailsHighlights = ({
   // Prevents the async entity record arrival from overwriting a freshly generated result.
   const userTriggeredGeneration = useRef(false);
 
+  // Entity signals at generation time — suppresses false staleness until live signals drift.
+  const [generationBaseline, setGenerationBaseline] =
+    useState<EntitySummaryStalenessEntitySnapshot | null>(null);
+
   // The entity record (and therefore storedSummary) may arrive AFTER initial render
   // because the flyout fetches it asynchronously. This effect hydrates the result
   // from the stored summary once it becomes available, but only if the user hasn't
@@ -122,6 +129,11 @@ export const useFetchEntityDetailsHighlights = ({
       setAssistantResult(buildResultFromStoredSummary(storedSummary));
     }
   }, [storedSummary]);
+
+  useEffect(() => {
+    setGenerationBaseline(null);
+    userTriggeredGeneration.current = false;
+  }, [entityType, entityIdentifier]);
 
   const fetchEntityHighlights = useCallback(async () => {
     const errorTitle = i18n.translate(
@@ -179,6 +191,7 @@ export const useFetchEntityDetailsHighlights = ({
       const generatedBy = currentUser?.username ?? 'unknown';
 
       userTriggeredGeneration.current = true;
+      setGenerationBaseline(entitySnapshot ?? null);
       setAssistantResult({
         summaryAsText: summaryFormatted,
         response: typedOutput,
@@ -196,21 +209,26 @@ export const useFetchEntityDetailsHighlights = ({
           recommendedActions: typedOutput.recommendedActions,
           generated_at: generatedAt,
           staleness: buildEntitySummaryStaleness({
-            riskScore: entitySnapshot?.riskScore ?? null,
+            riskScoreNorm: entitySnapshot?.riskScoreNorm ?? null,
             anomalyJobIds: entitySnapshot?.anomalyJobIds ?? [],
             ruleNames: entitySnapshot?.ruleNames ?? [],
           }),
         },
-      }).catch((persistError: Error) => {
-        // Persist is best-effort — the in-memory result is still usable this session.
-        // Surface a non-blocking toast so the user is aware the summary was not saved.
-        addError(persistError, {
-          title: i18n.translate(
-            'xpack.securitySolution.flyout.entityDetails.highlights.persistError',
-            { defaultMessage: 'Could not save AI summary — it will not persist after refresh.' }
-          ),
+      })
+        .then(() => {
+          setGenerationBaseline(null);
+          refetchEntityRecord?.();
+        })
+        .catch((persistError: Error) => {
+          // Persist is best-effort — the in-memory result is still usable this session.
+          // Surface a non-blocking toast so the user is aware the summary was not saved.
+          addError(persistError, {
+            title: i18n.translate(
+              'xpack.securitySolution.flyout.entityDetails.highlights.persistError',
+              { defaultMessage: 'Could not save AI summary — it will not persist after refresh.' }
+            ),
+          });
         });
-      });
     } catch (e) {
       if (isInferenceRequestAbortedError(e)) {
         return;
@@ -235,6 +253,7 @@ export const useFetchEntityDetailsHighlights = ({
     addError,
     currentUser,
     entitySnapshot,
+    refetchEntityRecord,
   ]);
 
   const abortStream = useCallback(() => {
@@ -251,10 +270,7 @@ export const useFetchEntityDetailsHighlights = ({
     abortStream,
     result: assistantResult,
     error,
-    // True once the user has generated a fresh summary this mount cycle.
-    // Used to suppress the staleness banner after regeneration (entity record
-    // is not re-fetched after persist, so the old snapshot would otherwise
-    // keep triggering the banner).
-    isFreshGeneration: userTriggeredGeneration.current,
+    /** Signals at last in-session generation; used to avoid false staleness until entity data drifts. */
+    generationBaseline,
   };
 };

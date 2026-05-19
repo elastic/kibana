@@ -93,6 +93,7 @@ export const entityDetailsAiSummaryRoute = ({
           // force=true bypasses field-level validation — required because
           // entity.attributes.summary is not in getEntityFieldsDescriptions()
           // (it is a purely API-written field, never present in source logs).
+          // preserveTimestamp avoids bumping @timestamp when only summary metadata changes.
           await crudClient.updateEntity(
             entityType,
             {
@@ -103,7 +104,8 @@ export const entityDetailsAiSummaryRoute = ({
                 },
               },
             } as Entity,
-            true
+            true,
+            { preserveTimestamp: true }
           );
 
           return response.ok({ body: { updated: true } });

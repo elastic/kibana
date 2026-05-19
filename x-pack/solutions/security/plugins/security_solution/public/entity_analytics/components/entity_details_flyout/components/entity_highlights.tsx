@@ -44,6 +44,7 @@ import type { StalenessDisplayMode } from './entity_highlights_result';
 import type { Entity } from '../../../../../common/api/entity_analytics';
 import {
   type EntitySummaryAttribute,
+  buildEntitySummaryStaleness,
   computeEntitySummaryStalenessReasons,
 } from '@kbn/entity-store/common';
 import { buildEntitySummaryStalenessEntitySnapshot } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
@@ -53,7 +54,8 @@ export const EntityHighlightsAccordion: React.FC<{
   entityIdentifier: string;
   entityType: EntityType;
   entityRecord?: Entity | null;
-}> = ({ entityType, entityIdentifier, entityRecord }) => {
+  refetchEntityRecord?: () => void;
+}> = ({ entityType, entityIdentifier, entityRecord, refetchEntityRecord }) => {
   // Degrade gracefully on surfaces that render outside `AssistantProvider` (e.g. the Agent
   // Builder attachment Canvas). The Elastic Assistant–backed summary cannot work without it.
   const assistantContext = useMaybeAssistantContext();
@@ -131,21 +133,12 @@ export const EntityHighlightsAccordion: React.FC<{
     [entityRecord]
   );
 
-  // Staleness check — compare stored snapshot against current entity signals.
-  // This is computed client-side using already-loaded entity data (no extra API call).
-  // NOTE: Per the RFC, this should move to a dedicated server-side endpoint
-  // before GA so all surfaces (Agent Builder, external clients) share the same logic.
-  const stalenessReasons = useMemo((): string[] => {
-    if (!storedSummary) return [];
-    return computeEntitySummaryStalenessReasons(storedSummary, entitySnapshot);
-  }, [storedSummary, entitySnapshot]);
-
   const {
     fetchEntityHighlights,
     isChatLoading,
     result: assistantResult,
     error,
-    isFreshGeneration,
+    generationBaseline,
   } = useFetchEntityDetailsHighlights({
     connectorId,
     anonymizationFields: anonymizationFields?.data ?? [],
@@ -153,7 +146,34 @@ export const EntityHighlightsAccordion: React.FC<{
     entityIdentifier,
     storedSummary,
     entitySnapshot,
+    refetchEntityRecord,
   });
+
+  // Staleness check — compare stored snapshot against current entity signals.
+  // This is computed client-side using already-loaded entity data (no extra API call).
+  // NOTE: Per the RFC, this should move to a dedicated server-side endpoint
+  // before GA so all surfaces (Agent Builder, external clients) share the same logic.
+  const stalenessReasons = useMemo((): string[] => {
+    if (!storedSummary) return [];
+
+    // After in-session generation the entity record is not refetched immediately, so
+    // comparing the old persisted snapshot would false-positive. Suppress until live
+    // signals drift from the generation-time baseline.
+    if (generationBaseline) {
+      const driftSinceGeneration = computeEntitySummaryStalenessReasons(
+        {
+          ...storedSummary,
+          staleness: buildEntitySummaryStaleness(generationBaseline),
+        },
+        entitySnapshot
+      );
+      if (driftSinceGeneration.length === 0) {
+        return [];
+      }
+    }
+
+    return computeEntitySummaryStalenessReasons(storedSummary, entitySnapshot);
+  }, [storedSummary, entitySnapshot, generationBaseline]);
 
   const onAddConnectorClick = useCallback(() => {
     setIsConnectorModalVisible(true);
@@ -323,7 +343,7 @@ export const EntityHighlightsAccordion: React.FC<{
             showAnonymizedValues={showAnonymizedValues}
             generatedAt={assistantResult?.generatedAt ?? null}
             generatedBy={assistantResult?.generatedBy ?? ''}
-            stalenessReasons={isFreshGeneration ? [] : stalenessReasons}
+            stalenessReasons={stalenessReasons}
             stalenessDisplayMode={stalenessDisplayMode}
             onRefresh={fetchEntityHighlights}
           />

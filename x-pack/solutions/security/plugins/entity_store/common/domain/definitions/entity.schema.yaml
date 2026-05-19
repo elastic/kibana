@@ -195,7 +195,7 @@ components:
                         risk_score:
                           type: number
                           nullable: true
-                          description: entity.risk.calculated_score at generation time.
+                          description: entity.risk.calculated_score_norm at generation time (flyout risk gauge).
                         anomaly_job_ids:
                           type: array
                           nullable: true

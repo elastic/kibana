@@ -25,7 +25,8 @@ export function buildEntitySummaryStalenessEntitySnapshot(
 ): EntitySummaryStalenessEntitySnapshot {
   const risk = record ? getRiskFromEntityRecord(record) : null;
   return {
-    riskScore: risk?.calculated_score ?? null,
+    // Matches flyout risk summary (`entity.risk.calculated_score_norm`), not raw calculated_score.
+    riskScoreNorm: risk?.calculated_score_norm ?? null,
     anomalyJobIds: record?.entity?.behaviors?.anomaly_job_ids ?? [],
     ruleNames: record?.entity?.behaviors?.rule_names ?? [],
   };

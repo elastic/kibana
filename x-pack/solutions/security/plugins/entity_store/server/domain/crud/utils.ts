@@ -59,13 +59,22 @@ export interface ValidatedDoc {
   doc: Record<string, unknown>;
 }
 
+export interface ValidateAndTransformDocOptions {
+  /**
+   * When true, omit `@timestamp` from the update document so metadata-only writes
+   * (e.g. AI summary persistence) do not reorder entities by last activity.
+   */
+  preserveTimestamp?: boolean;
+}
+
 export function validateAndTransformDoc(
   operation: CrudOperation,
   entityType: EntityType,
   namespace: string,
   doc: Entity,
   generatedId: string | undefined,
-  force: boolean
+  force: boolean,
+  options?: ValidateAndTransformDocOptions
 ): ValidatedDoc {
   const id = validateDocIdentification(doc, generatedId, { force, operation, entityType });
 
@@ -86,10 +95,11 @@ export function validateAndTransformDoc(
     doc.entity.name = id;
   }
 
-  const transformedDoc: Record<string, unknown> = {
-    ...doc,
-    '@timestamp': new Date().toISOString(),
-  };
+  const transformedDoc: Record<string, unknown> = { ...doc };
+
+  if (!(operation === 'update' && options?.preserveTimestamp)) {
+    transformedDoc['@timestamp'] = new Date().toISOString();
+  }
 
   return { id, doc: transformedDoc };
 }

@@ -11,6 +11,7 @@ import type {
   EntityType,
 } from '../../../common/domain/definitions/entity_schema';
 import { ENTITY_BASE_PREFIX, ENTITY_SCHEMA_VERSION_V2 } from '../../../common/domain/entity_index';
+import { ENTITY_SUMMARY_INDEX_MAPPING } from './entity_summary_index_mappings';
 
 type MappingProperties = NonNullable<MappingTypeMapping['properties']>;
 const BASE_ENTITY_INDEX_MAPPING = {
@@ -43,6 +44,7 @@ export const getEntityDefinitionComponentTemplate = (
 const getIndexMappings = (definition: EntityDefinition): MappingTypeMapping => ({
   properties: {
     ...BASE_ENTITY_INDEX_MAPPING,
+    ...ENTITY_SUMMARY_INDEX_MAPPING,
     ...Object.fromEntries(
       definition.fields
         .filter(({ mapping }) => mapping)

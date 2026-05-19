@@ -226,6 +226,7 @@ export function useEntityFromStore(
           perPage: 1,
           sortField: '@timestamp',
           sortOrder: 'desc',
+          includeSummary: true,
         },
       });
     },
