@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { DataSourceType } from '../../common/datasource_types';
+import type { DataSourceType, DataSourceWithSecrets } from '../../common/datasource_types';
+
+/** React-hook-form values; data source `type` is flyout UI state, not a form field. */
+export type CreateDataSourceFlyoutFormValues = Omit<DataSourceWithSecrets, 'type'>;
 
 /**
  * In-memory form values for the create flyout, keyed by data source type.

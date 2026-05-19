@@ -10,7 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 
 import type { Control, UseFormUnregister } from 'react-hook-form';
-import type { DataSourceType, DataSourceWithSecrets } from '../../common/datasource_types';
+import type { DataSourceType } from '../../common/datasource_types';
+import type { CreateDataSourceFlyoutFormValues } from './create_data_source_flyout_form_state';
 import { CreateDataSourceFlyoutTypeSettingsAzureBlob } from './create_data_source_flyout_type_settings_azure_blob';
 // import { CreateDataSourceFlyoutTypeSettingsFlight } from './create_data_source_flyout_type_settings_flight';
 import { CreateDataSourceFlyoutTypeSettingsGcs } from './create_data_source_flyout_type_settings_gcs';
@@ -24,8 +25,8 @@ export function CreateDataSourceFlyoutTypeSettings({
   unregister,
 }: {
   dataSourceType: DataSourceType;
-  control: Control<DataSourceWithSecrets, any>;
-  unregister: UseFormUnregister<DataSourceWithSecrets>;
+  control: Control<CreateDataSourceFlyoutFormValues, any>;
+  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   if (dataSourceType === 's3') {
     return <CreateDataSourceFlyoutTypeSettingsS3 control={control} unregister={unregister} />;
@@ -62,8 +63,8 @@ export function CreateDataSourceFlyoutTypeSettings({
  */
 export function CreateDataSourceFlyoutTypeSettingsBlock(props: {
   dataSourceType: DataSourceType;
-  control: Control<DataSourceWithSecrets, any>;
-  unregister: UseFormUnregister<DataSourceWithSecrets>;
+  control: Control<CreateDataSourceFlyoutFormValues, any>;
+  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   return (
     <>

@@ -11,14 +11,14 @@ import { EuiFieldPassword, EuiFieldText, EuiFormRow, EuiSwitch } from '@elastic/
 
 import type { UseFormUnregister } from 'react-hook-form';
 import { type Control, useController } from 'react-hook-form';
-import type { DataSourceWithSecrets } from '../../common/datasource_types';
+import type { CreateDataSourceFlyoutFormValues } from './create_data_source_flyout_form_state';
 
 export function CreateDataSourceFlyoutTypeSettingsJdbc({
   control,
   unregister,
 }: {
-  control: Control<DataSourceWithSecrets, any>;
-  unregister: UseFormUnregister<DataSourceWithSecrets>;
+  control: Control<CreateDataSourceFlyoutFormValues, any>;
+  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   const { field: hostField } = useController({
     defaultValue: '',

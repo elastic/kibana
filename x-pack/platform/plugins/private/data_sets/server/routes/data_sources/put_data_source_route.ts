@@ -38,8 +38,17 @@ export function registerPutDataSourceRoute(router: IRouter): void {
       const { id } = request.params;
       const { client } = (await context.core).elasticsearch;
       const dataSourcesClient = new DataSourcesClient(client.asCurrentUser);
-      await dataSourcesClient.put(id, request.body);
-      return response.ok();
+      try {
+        const responseBody = await dataSourcesClient.put(id, request.body);
+        console.log('responseBody', responseBody);
+        return response.ok();
+      } catch (error) {
+        return response.badRequest({
+          body: {
+            message: error.message,
+          },
+        });
+      }
     })
   );
 }

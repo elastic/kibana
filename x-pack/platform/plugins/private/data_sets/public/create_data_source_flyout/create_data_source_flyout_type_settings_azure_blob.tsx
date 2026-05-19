@@ -11,15 +11,15 @@ import { EuiFieldPassword, EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 import type { UseFormUnregister } from 'react-hook-form';
 import { type Control, useController } from 'react-hook-form';
-import type { DataSourceWithSecrets } from '../../common/datasource_types';
+import type { CreateDataSourceFlyoutFormValues } from './create_data_source_flyout_form_state';
 import type { AzureBlobAuthenticationMode } from './create_data_source_flyout_authentication';
 
 export function CreateDataSourceFlyoutTypeSettingsAzureBlob({
   control,
   unregister,
 }: {
-  control: Control<DataSourceWithSecrets, any>;
-  unregister: UseFormUnregister<DataSourceWithSecrets>;
+  control: Control<CreateDataSourceFlyoutFormValues, any>;
+  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   const { field: endpointField } = useController({
     defaultValue: '',
@@ -59,8 +59,8 @@ export function CreateDataSourceFlyoutTypeSettingsAzureBlobAuthenticationFields(
   unregister,
 }: {
   authenticationMode: AzureBlobAuthenticationMode;
-  control: Control<DataSourceWithSecrets, any>;
-  unregister: UseFormUnregister<DataSourceWithSecrets>;
+  control: Control<CreateDataSourceFlyoutFormValues, any>;
+  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   if (authenticationMode === 'default_credential_chain') {
     return null;
@@ -96,8 +96,8 @@ function CreateDataSourceFlyoutTypeSettingsAzureBlobCredentialsFields({
   control,
   unregister,
 }: {
-  control: Control<DataSourceWithSecrets, any>;
-  unregister: UseFormUnregister<DataSourceWithSecrets>;
+  control: Control<CreateDataSourceFlyoutFormValues, any>;
+  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   const { field: accountField } = useController({
     defaultValue: '',
@@ -160,8 +160,8 @@ function CreateDataSourceFlyoutTypeSettingsAzureBlobConnectionStringField({
   control,
   unregister,
 }: {
-  control: Control<DataSourceWithSecrets, any>;
-  unregister: UseFormUnregister<DataSourceWithSecrets>;
+  control: Control<CreateDataSourceFlyoutFormValues, any>;
+  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   const { field: connectionStringField } = useController({
     defaultValue: '',
@@ -200,8 +200,8 @@ function CreateDataSourceFlyoutTypeSettingsAzureBlobSasTokenField({
   control,
   unregister,
 }: {
-  control: Control<DataSourceWithSecrets, any>;
-  unregister: UseFormUnregister<DataSourceWithSecrets>;
+  control: Control<CreateDataSourceFlyoutFormValues, any>;
+  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   const { field: sasTokenField } = useController({
     defaultValue: '',

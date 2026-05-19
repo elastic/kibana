@@ -9,7 +9,8 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
 import type { Control, UseFormUnregister } from 'react-hook-form';
-import type { DataSourceType, DataSourceWithSecrets } from '../../common/datasource_types';
+import type { DataSourceType } from '../../common/datasource_types';
+import type { CreateDataSourceFlyoutFormValues } from './create_data_source_flyout_form_state';
 import {
   DATA_SOURCE_TYPES_WITH_AUTHENTICATION,
   showsAuthenticationCredentialFields,
@@ -28,8 +29,8 @@ export function CreateDataSourceFlyoutAuthenticationFields({
 }: {
   authenticationMode: CreateDataSourceAuthenticationMode;
   dataSourceType: DataSourceType;
-  control: Control<DataSourceWithSecrets, any>;
-  unregister: UseFormUnregister<DataSourceWithSecrets>;
+  control: Control<CreateDataSourceFlyoutFormValues, any>;
+  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   if (
     !DATA_SOURCE_TYPES_WITH_AUTHENTICATION.has(dataSourceType) ||

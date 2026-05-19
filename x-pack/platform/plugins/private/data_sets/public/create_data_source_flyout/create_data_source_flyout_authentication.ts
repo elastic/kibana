@@ -9,13 +9,13 @@ import { i18n } from '@kbn/i18n';
 
 import type { DataSourceType, DataSourceWithSecrets } from '../../common/datasource_types';
 
-/** S3 / GCS authentication modes (UI-only; maps to `settings.auth` on save). */
+/** S3 / GCS authentication modes (UI-only; not submitted except `anonymous` → `settings.auth: 'none'`). */
 export type S3GcsAuthenticationMode =
   | 'access_and_secret_keys'
   | 'default_credential_chain'
   | 'anonymous';
 
-/** Azure Blob authentication modes (UI-only; maps to `settings.auth` on save). */
+/** Azure Blob authentication modes (UI-only; `settings.auth` is never submitted). */
 export type AzureBlobAuthenticationMode =
   | 'credentials'
   | 'connection_string'
@@ -118,16 +118,21 @@ export const applyAuthenticationModeToDataSource = (
   data: DataSourceWithSecrets,
   mode: CreateDataSourceAuthenticationMode
 ): DataSourceWithSecrets => {
-  const auth = mode;
+  const authSettings = mode === 'anonymous' ? { auth: 'none' as const } : {};
 
   switch (data.type) {
     case 's3': {
-      const { access_key: _accessKey, secret_key: _secretKey, ...rest } = data.settings;
+      const {
+        access_key: _accessKey,
+        secret_key: _secretKey,
+        auth: _auth,
+        ...rest
+      } = data.settings;
       return {
         ...data,
         settings: {
           ...rest,
-          auth,
+          ...authSettings,
           ...(mode === 'access_and_secret_keys'
             ? { access_key: data.settings.access_key, secret_key: data.settings.secret_key }
             : {}),
@@ -135,13 +140,13 @@ export const applyAuthenticationModeToDataSource = (
       };
     }
     case 'gcs': {
-      const { credentials: _credentials, ...rest } = data.settings;
+      const { credentials: _credentials, auth: _auth, ...rest } = data.settings;
       const credentialsText = data.settings.credentials?.trim();
       return {
         ...data,
         settings: {
           ...rest,
-          auth,
+          ...authSettings,
           ...(mode === 'access_and_secret_keys' && credentialsText
             ? { credentials: credentialsText }
             : {}),
@@ -154,10 +159,11 @@ export const applyAuthenticationModeToDataSource = (
         connection_string: _connectionString,
         key: _key,
         sas_token: _sasToken,
+        auth: _auth,
         ...rest
       } = data.settings;
 
-      const base = { ...rest, auth };
+      const base = { ...rest };
 
       if (mode === 'credentials') {
         return {

@@ -38,6 +38,7 @@ import { CreateDataSourceFlyoutAuthenticationFields } from './create_data_source
 import { CreateDataSourceFlyoutAuthenticationSelect } from './create_data_source_flyout_authentication_select';
 import { CreateDataSourceFlyoutTypeSettingsBlock } from './create_data_source_flyout_type_settings';
 import { getDataSourceTypeLabel } from '../get_data_source_type_label';
+import type { CreateDataSourceFlyoutFormValues } from './create_data_source_flyout_form_state';
 
 export interface CreateDataSourceFlyoutProps {
   onClose: () => void;
@@ -56,17 +57,13 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     control,
     // formState: { errors },
     unregister,
-  } = useForm<DataSourceWithSecrets>();
+  } = useForm<CreateDataSourceFlyoutFormValues>();
 
   const nameError: string | undefined = undefined;
   const saveError: string | undefined = undefined;
   const isSaving = false;
 
-  const { field: dataSourceTypeField } = useController({
-    defaultValue: 's3' as DataSourceType,
-    name: 'type',
-    control,
-  });
+  const [dataSourceType, setDataSourceType] = useState<DataSourceType>('s3');
 
   const { field: nameField } = useController({
     defaultValue: '',
@@ -92,8 +89,6 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
       })),
     []
   );
-
-  const dataSourceType = dataSourceTypeField.value as DataSourceType;
 
   const [authenticationMode, setAuthenticationMode] = useState<CreateDataSourceAuthenticationMode>(
     () => getDefaultAuthenticationMode(dataSourceType)
@@ -136,8 +131,13 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
   }, [dataSourceType, description, formSettings, name, onClose, onSave]);
   */
 
-  const handleSave = (data: DataSourceWithSecrets) =>
-    onSave(applyAuthenticationModeToDataSource(data, authenticationMode));
+  const handleSave = (data: CreateDataSourceFlyoutFormValues) =>
+    onSave(
+      applyAuthenticationModeToDataSource(
+        { ...data, type: dataSourceType } as DataSourceWithSecrets,
+        authenticationMode
+      )
+    );
 
   return (
     <EuiFlyout
@@ -168,10 +168,8 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
               data-test-subj="createDataSourceFlyoutType"
               fullWidth
               aria-label={createDataSourceFlyoutStrings.typeAriaLabel()}
-              value={dataSourceTypeField.value as DataSourceType}
-              onChange={(e) => dataSourceTypeField.onChange(e.target.value as DataSourceType)}
-              name={dataSourceTypeField.name}
-              inputRef={dataSourceTypeField.ref}
+              value={dataSourceType}
+              onChange={(e) => setDataSourceType(e.target.value as DataSourceType)}
             />
           </EuiFormRow>
           <EuiFormRow
