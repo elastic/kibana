@@ -42,6 +42,7 @@ import type {
   PackagePolicyAssetsMap,
   PackageKnowledgeBase,
   RegistryPolicyIntegrationTemplate,
+  ArchiveIterator,
 } from '../../../../common/types';
 
 import {
@@ -712,6 +713,8 @@ export async function getPackageDependencies(
 export interface PackageResponse {
   paths: string[];
   packageInfo: ArchivePackage | RegistryPackage;
+  assetsMap?: AssetsMap;
+  archiveIterator?: ArchiveIterator;
 }
 type GetPackageResponse = PackageResponse | undefined;
 
@@ -786,6 +789,8 @@ export async function getPackageFromSource(options: {
   return {
     paths: res.paths,
     packageInfo: res.packageInfo,
+    assetsMap: res.assetsMap,
+    archiveIterator: res.archiveIterator,
   };
 }
 
