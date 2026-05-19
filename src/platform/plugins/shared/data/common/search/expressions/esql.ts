@@ -340,7 +340,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
         const { rawResponse, requestParams } = await searchService.searchESQL(
           {
             query: fixedQuery,
-            params: params.params as Array<{ name: string; value: unknown }> | undefined,
+            params: params.params,
             filter: params.filter as estypes.QueryDslQueryContainer | undefined,
             timeZone: params.time_zone,
             locale: params.locale,
