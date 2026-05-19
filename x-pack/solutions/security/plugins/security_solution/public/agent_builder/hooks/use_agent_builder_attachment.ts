@@ -25,9 +25,10 @@ export interface UseAgentBuilderAttachmentParams {
    */
   attachmentData: Record<string, unknown>;
   /**
-   * Prompt/input text for the agent builder conversation
+   * Prompt/input text for the agent builder conversation. When omitted the chat
+   * opens with the attachment loaded and no pre-filled message.
    */
-  attachmentPrompt: string;
+  attachmentPrompt?: string;
 }
 
 export interface UseAgentBuilderAttachmentResult {
@@ -71,7 +72,7 @@ export const useAgentBuilderAttachment = ({
     agentBuilder.openChat({
       autoSendInitialMessage: false,
       newConversation: true,
-      initialMessage: attachmentPrompt,
+      ...(attachmentPrompt && { initialMessage: attachmentPrompt }),
       attachments: [attachment],
       sessionTag: 'security',
     });
