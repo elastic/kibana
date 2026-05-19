@@ -11,6 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { AbstractDataView } from '@kbn/data-views-plugin/common';
 import type { ProjectRouting } from '@kbn/es-query';
+import type { ESQLSearchParams } from '@kbn/es-types';
 import type { SanitizedConnectionRequestParams } from './types';
 
 /**
@@ -180,7 +181,7 @@ export interface IESQLSearchParams {
   /**
    * Query parameters for parameterized queries
    */
-  params?: Array<{ name: string; value: unknown }>;
+  params?: ESQLSearchParams['params'];
 
   /**
    * Additional filter to apply
