@@ -197,7 +197,6 @@ export class TypedSearchService implements ITypedSearchService {
     return {
       ...this.mapBaseOptions(options),
       strategy: 'ese' as typeof ENHANCED_ES_SEARCH_STRATEGY,
-      legacyHitsTotal: options?.legacyHitsTotal,
       indexPattern: typeof params?.index === 'object' ? params.index : undefined,
     };
   }

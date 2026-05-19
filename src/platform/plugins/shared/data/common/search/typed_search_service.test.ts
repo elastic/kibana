@@ -164,30 +164,6 @@ describe('TypedSearchService', () => {
       );
     });
 
-    it('passes DSL-specific options', async () => {
-      const mockResponse = { hits: { hits: [], total: 0 } };
-      mockSearch.mockReturnValue(createMockResponse(mockResponse));
-
-      const options = {
-        legacyHitsTotal: false,
-      };
-
-      await service.searchDSL(
-        {
-          index: 'logs-*',
-          query: { match_all: {} },
-        },
-        options
-      );
-
-      expect(mockSearch).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({
-          legacyHitsTotal: options.legacyHitsTotal,
-        })
-      );
-    });
-
     it('accepts data view as index', async () => {
       const mockResponse = { hits: { hits: [], total: 0 } };
       mockSearch.mockReturnValue(createMockResponse(mockResponse));

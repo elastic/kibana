@@ -103,11 +103,6 @@ export interface IDSLSearchParams {
  */
 export interface IDSLSearchOptions extends IBaseSearchOptions {
   /**
-   * Request the legacy format for the total number of hits
-   */
-  legacyHitsTotal?: boolean;
-
-  /**
    * Control total hits counting precision
    */
   trackTotalHits?: boolean | number;
