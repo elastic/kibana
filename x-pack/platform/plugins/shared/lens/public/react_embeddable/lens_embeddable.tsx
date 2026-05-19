@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { initializeTitleManager } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { merge } from 'rxjs';
@@ -35,7 +35,7 @@ import type { LensEmbeddableStartServices } from './types';
 
 export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices
-): EmbeddableFactory<LensWireAPIConfig, LensApi> => {
+): EmbeddablePublicDefinition<LensWireAPIConfig, LensApi> => {
   return {
     type: LENS_EMBEDDABLE_TYPE,
     /**
