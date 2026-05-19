@@ -1,9 +1,9 @@
 ---
-navigation_title: "Key concepts"
+navigation_title: "Platform architecture"
 description: "An introduction to the Kibana platform and how to use it to build a plugin."
 ---
 
-# Key concepts
+# Plugins, packages, and the platform
 
 From an end user perspective, Kibana is a tool for interacting with Elasticsearch, providing an easy way to visualize and analyze data.
 

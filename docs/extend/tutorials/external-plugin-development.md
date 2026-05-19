@@ -11,7 +11,7 @@ The {{kib}} plugin interfaces are in a state of constant development.  We cannot
 ::::
 
 
-Most developers who contribute code directly to the {{kib}} repo are writing code inside plugins, so our [*Contributing*](/extend/contributing/principles/developer-principles.md) docs are the best place to start. However, there are a few differences when developing plugins outside the {{kib}} repo. These differences are covered here.
+Most developers who contribute code directly to the {{kib}} repo are writing code inside plugins, so our [*Contributing*](/extend/contributing/index.md) docs are the best place to start. However, there are a few differences when developing plugins outside the {{kib}} repo. These differences are covered here.
 
 ## Important differences from in-repo plugins
 

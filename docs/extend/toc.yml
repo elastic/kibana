@@ -2,7 +2,7 @@ toc:
   - file: index.md
   - folder: ./getting-started
     children:
-      - file: welcome.md
+      - file: index.md
       - file: set-up-a-development-environment.md
       - file: hello-world.md
       - file: add-data.md
@@ -12,6 +12,7 @@ toc:
       - file: troubleshooting.md
   - folder: contributing
     children:
+      - file: index.md
       - folder: principles
         children:
           - file: developer-principles.md
@@ -52,6 +53,7 @@ toc:
           - file: debugging-fips-test-failures.md
   - folder: key-concepts
     children:
+      - file: index.md
       - folder: platform-architecture
         children:
           - file: plugins-packages-and-the-platform.md

@@ -48,7 +48,7 @@ Internal plugin details can be kept alongside the code it describes. Information
 
 ### Structure
 
-The high-level developer documentation located in the [docs/extend](https://github.com/elastic/kibana/tree/main/docs/extend) folder attempts to follow [divio documentation](https://documentation.divio.com/) guidance. [Getting started](../../getting-started/welcome.md) and [Key concepts](../../key-concepts/platform-architecture/plugins-packages-and-the-platform.md) sections are _explanation_ oriented, while
+The high-level developer documentation located in the [docs/extend](https://github.com/elastic/kibana/tree/main/docs/extend) folder attempts to follow [divio documentation](https://documentation.divio.com/) guidance. [Getting started](../../getting-started/index.md) and [Key concepts](../../key-concepts/index.md) sections are _explanation_ oriented, while
 [Tutorials](../ci-and-build/debugging-in-development.md) falls under both _tutorials_ and _how to_. The [API documentation](../../key-concepts/platform-architecture/api-documentation.md) section is _reference_ material.
 
 Developers may choose to keep information that is specific to a particular plugin or package alongside the code.

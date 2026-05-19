@@ -1,9 +1,9 @@
 ---
-navigation_title: "Contributing"
+navigation_title: "Principles"
 description: "Follow our development principles to help keep our code base stable, maintainable and scalable."
 ---
 
-# Contributing
+# Developer principles
 
 Over time, the {{kib}} project has been shaped by certain principles. Like {{kib}} itself, some of these principles were formed by intention while others were the result of evolution and circumstance, but today all are important for the continued success and maintainability of {{kib}}.
 

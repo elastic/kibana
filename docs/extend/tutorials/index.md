@@ -4,7 +4,7 @@ navigation_title: Tutorials
 
 # Tutorials [tutorials]
 
-Hands-on, task-focused guides for working with the {{kib}} platform from inside a plugin. If you're new to {{kib}} development, start with [Getting started](../getting-started/welcome.md) instead.
+Hands-on, task-focused guides for working with the {{kib}} platform from inside a plugin. If you're new to {{kib}} development, start with [Getting started](../getting-started/index.md) instead.
 
 ## Data access
 
