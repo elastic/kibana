@@ -54,7 +54,6 @@ export type LogsOverviewProps = DocViewRenderProps &
     renderFlyoutStreamField?: ObservabilityStreamsFeature['renderFlyoutStreamField'];
     renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
     cpsHasLinkedProjects?: boolean;
-    renderCpsWarning?: boolean;
     indexes: ObservabilityIndexes;
     showTraceWaterfall?: boolean;
     docViewActions?: DocViewActions;
@@ -80,7 +79,6 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
       renderFlyoutStreamField,
       renderFlyoutStreamProcessingLink,
       cpsHasLinkedProjects,
-      renderCpsWarning,
       indexes,
       showTraceWaterfall = true,
       docViewActions,
@@ -143,7 +141,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
             formattedDoc={parsedDoc}
             hit={hit}
             renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
-            renderCpsWarning={renderCpsWarning}
+            cpsHasLinkedProjects={cpsHasLinkedProjects}
             filter={filter}
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
@@ -157,7 +155,6 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
                   renderFlyoutStreamField({
                     dataView,
                     doc: hit,
-                    renderCpsWarning,
                     cpsHasLinkedProjects,
                   })}
               </div>

@@ -106,8 +106,6 @@ const LogOverviewTab = ({
   );
   useAccordionExpansionEffect(logOverviewContext$, logsOverviewApi, props.hit.id);
 
-  const renderCpsWarning = Boolean(streamsFeature) && cpsHasLinkedProjects && !props.hit.raw._index;
-
   return (
     <UnifiedDocViewerLogsOverview
       {...props}
@@ -118,7 +116,6 @@ const LogOverviewTab = ({
       renderFlyoutStreamField={streamsFeature?.renderFlyoutStreamField}
       renderFlyoutStreamProcessingLink={streamsFeature?.renderFlyoutStreamProcessingLink}
       cpsHasLinkedProjects={cpsHasLinkedProjects}
-      renderCpsWarning={renderCpsWarning}
       indexes={indexes}
       profileId={OBSERVABILITY_LOG_DOCUMENT_PROFILE_ID}
     />

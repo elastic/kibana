@@ -43,12 +43,11 @@ export interface ObservabilityStreamsFeatureRenderDeps {
   doc: DataTableRecord;
   dataView: DataView;
   cpsHasLinkedProjects?: boolean;
-  renderCpsWarning?: boolean;
 }
 
 export interface ObservabilityStreamsFeatureRenderByStreamNameDeps {
   streamName: string;
-  renderCpsWarning?: boolean;
+  cpsHasLinkedProjects?: boolean;
 }
 
 export interface ObservabilityStreamsFeature {

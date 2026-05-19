@@ -32,21 +32,21 @@ export interface DiscoverFlyoutStreamProcessingLinkProps {
   fieldFormats: FieldFormatsStart;
   locator: StreamsAppLocator;
   streamsRepositoryClient: StreamsRepositoryClient;
-  renderCpsWarning?: boolean;
+  cpsHasLinkedProjects?: boolean;
 }
 
 export function DiscoverFlyoutStreamProcessingLink({
   doc,
   locator,
   streamsRepositoryClient,
-  renderCpsWarning,
+  cpsHasLinkedProjects,
 }: DiscoverFlyoutStreamProcessingLinkProps) {
   const { index, fallbackStreamName } = adaptDocToResolverInputs(doc);
   const { value, loading, error } = useResolvedDefinitionName({
     streamsRepositoryClient,
     index,
     fallbackStreamName,
-    cpsHasLinkedProjects: renderCpsWarning,
+    cpsHasLinkedProjects,
   });
 
   if (loading) return <EuiLoadingSpinner size="s" />;
@@ -79,7 +79,7 @@ export function DiscoverFlyoutStreamProcessingLink({
           </EuiFlexGroup>
         </EuiToolTip>
       </EuiLink>
-      {renderCpsWarning && (
+      {cpsHasLinkedProjects && !index && (
         <EuiIconTip
           content={CPS_WARNING_MESSAGE}
           type="warning"
