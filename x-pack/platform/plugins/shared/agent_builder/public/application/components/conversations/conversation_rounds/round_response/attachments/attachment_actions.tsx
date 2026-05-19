@@ -76,7 +76,7 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
                   aria-label={button.label}
                   color="text"
                   size="s"
-                  iconType={button.icon}
+                  iconType={button.icon ?? ''}
                   isDisabled={button.disabled}
                   {...getNavProps(button)}
                 />
@@ -107,7 +107,7 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
                   aria-label={button.label}
                   color="text"
                   size="s"
-                  iconType={button.icon}
+                  iconType={button.icon ?? ''}
                   isDisabled={button.disabled}
                   {...getNavProps(button)}
                 />
