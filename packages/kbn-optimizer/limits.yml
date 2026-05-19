@@ -134,14 +134,14 @@ pageLoadAssetSize:
   observabilityShared: 75022
   osquery: 47422
   painlessLab: 6299
-  presentationUtil: 8985
+  presentationUtil: 8391
   productDocBase: 5678
   productIntercept: 9860
   profiling: 20716
   queryActivity: 4326
   reindexService: 3469
   remoteClusters: 10170
-  reporting: 46602
+  reporting: 48178
   rollup: 12692
   runtimeFields: 11828
   sampleDataIngest: 2640
