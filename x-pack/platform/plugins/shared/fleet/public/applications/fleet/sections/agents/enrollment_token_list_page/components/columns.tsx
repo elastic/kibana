@@ -42,9 +42,7 @@ export const getColumns = ({
     render: (policyId: string) => {
       const agentPolicy = agentPoliciesById[policyId];
       const value = agentPolicy ? agentPolicy.name : policyId;
-      return (
-        <EuiTextTruncate text={value} />
-      );
+      return <EuiTextTruncate text={value} />;
     },
   },
   {
