@@ -32,7 +32,7 @@ export async function setupAnswerAgentCallsInvalidTool({
 
   mockAgentToolCall({
     llmProxy: proxy,
-    toolName: 'platform_core_search',
+    toolName: 'nonexistent_tool',
     toolArg: {
       query: 'just a query',
     },
