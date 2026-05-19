@@ -59,6 +59,7 @@ describe('openLazyFlyout', () => {
         type: 'push',
       })
     );
+    expect(openFlyout.mock.calls[0][1]).not.toHaveProperty('container');
   });
 
   it('opens overlay flyout scoped to parent container when provided', () => {

@@ -85,8 +85,9 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
     outsideClickCloses: true,
     className: 'kbnPresentationLazyFlyout',
     'aria-labelledby': ariaLabelledBy,
-    container: lazyFlyoutContainer ?? undefined,
     onClose,
+    // Omit `container` when unset so Eui keeps its `#app-main-scroll` default for push flyouts.
+    ...(lazyFlyoutContainer ? { container: lazyFlyoutContainer } : {}),
     ...flyoutProps,
   });
 
