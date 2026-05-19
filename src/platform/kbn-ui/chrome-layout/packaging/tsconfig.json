@@ -21,30 +21,8 @@
   "include": [
     "react/**/*.ts",
     "react/**/*.tsx",
-    "../layout.tsx",
-    "../layout.component.tsx",
-    "../layout.styles.ts",
-    "../layout.types.ts",
-    "../layout_config_context.tsx",
-    "../layout_global_css.tsx",
-    "../layout_state_context.tsx",
-    "../types.ts",
-    "../application/**/*.ts",
-    "../application/**/*.tsx",
-    "../banner/**/*.ts",
-    "../banner/**/*.tsx",
-    "../debug/**/*.ts",
-    "../debug/**/*.tsx",
-    "../footer/**/*.ts",
-    "../footer/**/*.tsx",
-    "../header/**/*.ts",
-    "../header/**/*.tsx",
-    "../navigation/**/*.ts",
-    "../navigation/**/*.tsx",
-    "../sidebar/**/*.ts",
-    "../sidebar/**/*.tsx",
-    "../layouts/**/*.ts",
-    "../layouts/**/*.tsx"
+    "../src/**/*.ts",
+    "../src/**/*.tsx"
   ],
   "exclude": [
     "node_modules"

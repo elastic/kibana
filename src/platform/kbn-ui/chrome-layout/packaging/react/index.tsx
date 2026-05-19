@@ -11,21 +11,21 @@
 import './type_validation';
 
 import React from 'react';
-import { ChromeLayout } from '../../layout';
-import type { ChromeLayoutProps } from '../../layout';
+import { ChromeLayout } from '../../src/layout';
+import type { ChromeLayoutProps } from '../../src/layout';
 import {
   LayoutConfigProvider,
   useLayoutConfig,
   useLayoutUpdate,
-} from '../../layout_config_context';
-import type { LayoutConfig, LayoutConfigProviderProps } from '../../layout_config_context';
-import type { ChromeStyle } from '../../layout.types';
+} from '../../src/layout_config_context';
+import type { LayoutConfig, LayoutConfigProviderProps } from '../../src/layout_config_context';
+import type { ChromeStyle } from '../../src/layout.types';
 import {
   GridLayoutGlobalStyles,
   type GridLayoutGlobalStylesProps,
-} from '../../layouts/grid_global_app_style';
-import { CommonGlobalAppStyles } from '../../layouts/global_app_styles';
-import { LayoutDebugOverlay } from '../../debug/layout_debug_overlay';
+} from '../../src/layouts/grid_global_app_style';
+import { CommonGlobalAppStyles } from '../../src/layouts/global_app_styles';
+import { LayoutDebugOverlay } from '../../src/debug/layout_debug_overlay';
 
 // React import is needed for JSX transform.
 void React;

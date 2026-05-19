@@ -26,9 +26,9 @@
  */
 
 // Source types.
-import type { LayoutConfig as SourceLayoutConfig } from '../../layout_config_context';
-import type { ChromeStyle as SourceChromeStyle } from '../../layout.types';
-import type { GridLayoutGlobalStylesProps as SourceGridLayoutGlobalStylesProps } from '../../layouts/grid_global_app_style';
+import type { LayoutConfig as SourceLayoutConfig } from '../../src/layout_config_context';
+import type { ChromeStyle as SourceChromeStyle } from '../../src/layout.types';
+import type { GridLayoutGlobalStylesProps as SourceGridLayoutGlobalStylesProps } from '../../src/layouts/grid_global_app_style';
 
 // Packaged types.
 import type {
