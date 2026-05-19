@@ -65,6 +65,7 @@ export function getPanelSchema() {
   };
 
   const embeddableSchemas = embeddableService ? embeddableService.getAllEmbeddableSchemas() : {};
+
   const panelSchemas = Object.entries(embeddableSchemas)
     // sort to ensure consistent order in OAS documenation
     .sort(([aType, { title: aTitle }], [bType, { title: bTitle }]) => aTitle.localeCompare(bTitle))
@@ -237,7 +238,11 @@ export const accessControlSchema = schema.maybe(
   )
 );
 
-export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
+export function getDashboardStateSchema(
+  isDashboardAppRequest: boolean,
+  isWriteRequest: boolean = false
+) {
+  console.log({ isDashboardAppRequest, isWriteRequest });
   return schema.object(
     {
       pinned_panels: getPinnedPanelsSchema(isDashboardAppRequest),

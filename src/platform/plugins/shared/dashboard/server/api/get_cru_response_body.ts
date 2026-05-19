@@ -37,8 +37,7 @@ export function getDashboardCRUResponseBody(
     let { dashboardState, warnings: dashboardStateWarnings } = transformDashboardOut(
       savedObject.attributes,
       savedObject.references,
-      isDashboardAppRequest,
-      dashboardStateSchema
+      isDashboardAppRequest
     );
     warnings.push(...dashboardStateWarnings);
     if (!isDashboardAppRequest && operation === 'read') {
@@ -52,14 +51,14 @@ export function getDashboardCRUResponseBody(
     // Route does not apply defaults to response
     // Instead, call validate to ensure defaults are applied to response
 
-    const propsSchemas = dashboardStateSchema.getPropSchemas();
-    const test = {
-      panels: propsSchemas.panels.validate(dashboardState.panels),
-    };
+    // const propsSchemas = dashboardStateSchema.getPropSchemas();
+    // const test = {
+    //   panels: propsSchemas.panels.validate(dashboardState.panels),
+    // };
 
-    console.log({
-      dashboardStateSchema: JSON.stringify(dashboardStateSchema.getSchemaStructure(), null, 2),
-    });
+    // console.log({
+    //   dashboardStateSchema: JSON.stringify(dashboardStateSchema.getSchemaStructure(), null, 2),
+    // });
 
     sanatizedDashboardState = dashboardStateSchema.validate(dashboardState);
   } catch (transformOutError) {

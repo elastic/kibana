@@ -66,11 +66,6 @@ export function transformDashboardOut(
     strictPropsSchemas.pinned_panels
   );
 
-  // console.log({
-  //   pinnedPanels: JSON.stringify(pinnedPanels, null, 2),
-  //   warnings: pinnedPanelWarnings,
-  // });
-
   const timeRange =
     timeRestore && timeFrom && timeTo
       ? {
