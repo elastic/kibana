@@ -37,6 +37,32 @@ describe('findRelatedAlerts', () => {
     }
   });
 
+  it('skips alert GET when entity shortcut params are provided', async () => {
+    (esClient.search as jest.Mock).mockResolvedValue({
+      hits: {
+        total: { value: 1, relation: 'eq' },
+        hits: [
+          {
+            _id: 'related-1',
+            _index: '.alerts-security.alerts-default',
+            _source: { message: 'related' },
+          },
+        ],
+      },
+    });
+
+    const result = await findRelatedAlerts(esClient, {
+      alertId: 'alert-1',
+      alertsIndex: '.alerts-security.alerts-default',
+      timeWindowHours: 24,
+      hostNames: ['host-a'],
+      userNames: ['user-a'],
+    });
+
+    expect(esClient.get).not.toHaveBeenCalled();
+    expect(result.ok).toBe(true);
+  });
+
   it('uses token-budgeted defaults and emits truncation metadata', async () => {
     (esClient.search as jest.Mock).mockResolvedValue({
       hits: {

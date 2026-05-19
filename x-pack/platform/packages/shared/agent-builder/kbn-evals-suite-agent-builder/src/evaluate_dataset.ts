@@ -248,6 +248,13 @@ function configureExperiment({
             explanation: 'No traceId available for skill invocation check',
           };
         }
+        if (!/^[a-zA-Z0-9_-]+$/.test(traceId)) {
+          return {
+            score: null,
+            label: 'error',
+            explanation: `Invalid traceId for skill invocation check: ${traceId}`,
+          };
+        }
 
         const query = `FROM traces-*
 | WHERE trace_id == "${traceId}"

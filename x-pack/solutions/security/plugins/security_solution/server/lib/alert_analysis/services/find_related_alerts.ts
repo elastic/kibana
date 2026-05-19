@@ -47,7 +47,11 @@ export interface FindRelatedAlertsError {
 
 export type FindRelatedAlertsResult = FindRelatedAlertsSuccess | FindRelatedAlertsError;
 
-const DEFAULT_MAX_RESULTS = 25;
+/** Default for REST/API callers; inline tool passes a higher cap for fewer follow-up calls. */
+export const RELATED_ALERTS_DEFAULT_MAX_RESULTS = 25;
+/** Matches legacy inline-tool behavior and 15-rep eval token budget. */
+export const RELATED_ALERTS_INLINE_MAX_RESULTS = 50;
+const MAX_ENTITY_VALUES_PER_FIELD = 50;
 
 const RELATED_ALERT_SOURCE_ALLOWLIST = [
   '@timestamp',
@@ -76,7 +80,7 @@ export const findRelatedAlerts = async (
     alertId,
     alertsIndex,
     timeWindowHours,
-    maxResults = DEFAULT_MAX_RESULTS,
+    maxResults = RELATED_ALERTS_DEFAULT_MAX_RESULTS,
     hostNames: providedHostNames,
     userNames: providedUserNames,
     sourceIps: providedSourceIps,
@@ -94,10 +98,10 @@ export const findRelatedAlerts = async (
   try {
     if (hasProvidedEntities) {
       sourceEntities = {
-        hostNames: Array.isArray(providedHostNames) ? providedHostNames : [],
-        userNames: Array.isArray(providedUserNames) ? providedUserNames : [],
-        sourceIps: Array.isArray(providedSourceIps) ? providedSourceIps : [],
-        destIps: Array.isArray(providedDestIps) ? providedDestIps : [],
+        hostNames: trimEntityValues(providedHostNames),
+        userNames: trimEntityValues(providedUserNames),
+        sourceIps: trimEntityValues(providedSourceIps),
+        destIps: trimEntityValues(providedDestIps),
       };
     } else {
       const alertResult = await esClient.get({
@@ -114,10 +118,10 @@ export const findRelatedAlerts = async (
       }
 
       sourceEntities = {
-        hostNames: getNestedValues(alertSource, 'host.name'),
-        userNames: getNestedValues(alertSource, 'user.name'),
-        sourceIps: getNestedValues(alertSource, 'source.ip'),
-        destIps: getNestedValues(alertSource, 'destination.ip'),
+        hostNames: trimEntityValues(getNestedValues(alertSource, 'host.name')),
+        userNames: trimEntityValues(getNestedValues(alertSource, 'user.name')),
+        sourceIps: trimEntityValues(getNestedValues(alertSource, 'source.ip')),
+        destIps: trimEntityValues(getNestedValues(alertSource, 'destination.ip')),
       };
     }
 
@@ -220,6 +224,15 @@ const getTotalMatched = (
   }
   return 0;
 };
+
+function trimEntityValues(values: string[] | undefined): string[] {
+  if (!Array.isArray(values)) {
+    return [];
+  }
+  return values
+    .filter((value): value is string => typeof value === 'string' && value.length > 0)
+    .slice(0, MAX_ENTITY_VALUES_PER_FIELD);
+}
 
 function getNestedValues(obj: Record<string, unknown>, path: string): string[] {
   const parts = path.split('.');

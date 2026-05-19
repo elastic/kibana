@@ -8,8 +8,18 @@
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills/tools';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
+import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
+import { WORKFLOW_EXECUTE_STEP_TOOL_ID } from '@kbn/agent-builder-workflows-plugin/server';
 import { createToolHandlerContext, createToolTestMocks } from '../../__mocks__/test_helpers';
 import { alertAnalysisSkill } from './alert_analysis_skill';
+import type { FindRelatedAlertsResult } from '../../../lib/alert_analysis/services/find_related_alerts';
+import { RELATED_ALERTS_INLINE_MAX_RESULTS } from '../../../lib/alert_analysis/services/find_related_alerts';
+
+jest.mock('../../../lib/alert_analysis/services/find_related_alerts');
+
+const { findRelatedAlerts } = jest.requireMock(
+  '../../../lib/alert_analysis/services/find_related_alerts'
+) as { findRelatedAlerts: jest.MockedFunction<() => Promise<FindRelatedAlertsResult>> };
 
 interface ResultData {
   message?: string;
@@ -25,26 +35,59 @@ interface ResultData {
 const getData = (result: ToolHandlerStandardReturn, idx = 0): ResultData =>
   result.results[idx].data as unknown as ResultData;
 
+const makeSuccess = (
+  overrides: Partial<FindRelatedAlertsResult> = {}
+): FindRelatedAlertsResult => ({
+  ok: true,
+  message: 'Found 0 related alerts sharing entities with alert test-alert-id.',
+  relatedAlerts: [],
+  sourceEntities: { hostNames: [], userNames: [], sourceIps: [], destIps: [] },
+  totalMatched: 0,
+  returnedCount: 0,
+  isTruncated: false,
+  ...overrides,
+});
+
 describe('alertAnalysisSkill', () => {
   describe('skill definition', () => {
-    it('has correct metadata', () => {
+    it('has stable skill identity', () => {
       expect(alertAnalysisSkill.id).toBe('alert-analysis');
       expect(alertAnalysisSkill.name).toBe('alert-analysis');
       expect(alertAnalysisSkill.basePath).toBe('skills/security/alerts');
-      expect(alertAnalysisSkill.description).toContain('Alert triage');
     });
 
-    it('returns expected registry tool IDs', () => {
+    it('validates successfully', async () => {
+      await expect(validateSkillDefinition(alertAnalysisSkill)).resolves.toBeDefined();
+    });
+
+    it('returns 3 registry tool IDs', () => {
       const tools = alertAnalysisSkill.getRegistryTools?.();
-      expect(tools).toBeDefined();
       expect(tools).toHaveLength(3);
     });
 
-    it('returns one inline tool', async () => {
+    it('does not register workflow_execute_step', () => {
+      const tools = alertAnalysisSkill.getRegistryTools?.();
+      expect(tools).not.toContain(WORKFLOW_EXECUTE_STEP_TOOL_ID);
+    });
+
+    it('defines one inline tool with the correct id', async () => {
       const inlineTools = await alertAnalysisSkill.getInlineTools?.();
-      expect(inlineTools).toBeDefined();
       expect(inlineTools).toHaveLength(1);
       expect(inlineTools![0].id).toBe('security.alert-analysis.get-related-alerts');
+    });
+
+    it('inline tool schema exposes alertId, timeWindowHours, and optional entity shortcut params', async () => {
+      const inlineTools = await alertAnalysisSkill.getInlineTools?.();
+      const tool = inlineTools![0] as BuiltinSkillBoundedTool;
+      const shape = (tool.schema as { shape?: Record<string, unknown> }).shape ?? {};
+      expect(Object.keys(shape)).toEqual([
+        'alertId',
+        'timeWindowHours',
+        'hostNames',
+        'userNames',
+        'sourceIps',
+        'destIps',
+      ]);
     });
   });
 
@@ -76,208 +119,84 @@ describe('alertAnalysisSkill', () => {
       ) as Promise<ToolHandlerStandardReturn>;
     };
 
-    const mockGetResponse = (source: Record<string, unknown> | undefined) => {
-      mockEsClient.asCurrentUser.get.mockResponseOnce({
-        _id: 'alert-123',
-        _index: '.alerts-security.alerts-default',
-        found: true,
-        _source: source,
-      } as ReturnType<typeof mockEsClient.asCurrentUser.get> extends Promise<infer R> ? R : never);
-    };
-
-    const mockSearchResponse = (
-      hits: Array<{ _id: string; _index: string; _source: Record<string, unknown> }> = []
-    ) => {
-      mockEsClient.asCurrentUser.search.mockResponseOnce({
-        hits: { hits },
-      } as ReturnType<typeof mockEsClient.asCurrentUser.search> extends Promise<infer R> ? R : never);
-    };
-
-    it('returns error when alert is not found', async () => {
-      mockGetResponse(undefined);
-
-      const result = await callHandler({ alertId: 'alert-123' });
-
-      expect(result.results).toHaveLength(1);
-      expect(result.results[0].type).toBe(ToolResultType.error);
-      expect(getData(result).message).toContain('not found or has no source data');
-    });
-
-    it('returns empty when alert has no entity values', async () => {
-      mockGetResponse({ 'kibana.alert.rule.name': 'Test Rule' });
-
-      const result = await callHandler({ alertId: 'alert-123' });
-
-      expect(result.results).toHaveLength(1);
-      expect(result.results[0].type).toBe(ToolResultType.other);
-      expect(getData(result).message).toContain('No entity values found');
-      expect(getData(result).relatedAlerts).toEqual([]);
-    });
-
-    it('builds correct query with host.name entity', async () => {
-      mockGetResponse({ host: { name: 'host-1' } });
-      mockSearchResponse([
-        {
-          _id: 'related-1',
-          _index: '.alerts-security.alerts-default',
-          _source: { 'kibana.alert.rule.name': 'Related Rule' },
-        },
-      ]);
-
-      const result = await callHandler({ alertId: 'alert-123', timeWindowHours: 48 });
-
-      expect(mockEsClient.asCurrentUser.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          index: '.alerts-security.alerts-default',
-          query: expect.objectContaining({
-            bool: expect.objectContaining({
-              should: [{ terms: { 'host.name': ['host-1'] } }],
-              minimum_should_match: 1,
-              must_not: [{ ids: { values: ['alert-123'] } }],
-              must: [{ range: { '@timestamp': { gte: 'now-48h' } } }],
-            }),
-          }),
+    it('calls findRelatedAlerts with alertId, alertsIndex, timeWindowHours, and inline maxResults', async () => {
+      findRelatedAlerts.mockResolvedValueOnce(
+        makeSuccess({
+          message: 'Found 1 related alerts sharing entities with alert alert-123.',
+          relatedAlerts: [{ _id: 'rel-1', _index: '.alerts-security.alerts-default' }],
+          sourceEntities: { hostNames: ['host-1'], userNames: [], sourceIps: [], destIps: [] },
         })
       );
 
-      expect(result.results).toHaveLength(1);
+      await callHandler({ alertId: 'alert-123', timeWindowHours: 48 });
+
+      expect(findRelatedAlerts).toHaveBeenCalledWith(
+        mockEsClient.asCurrentUser,
+        expect.objectContaining({
+          alertId: 'alert-123',
+          alertsIndex: '.alerts-security.alerts-default',
+          timeWindowHours: 48,
+          maxResults: RELATED_ALERTS_INLINE_MAX_RESULTS,
+        })
+      );
+    });
+
+    it('passes entity shortcut params through to findRelatedAlerts when provided', async () => {
+      findRelatedAlerts.mockResolvedValueOnce(makeSuccess());
+
+      await callHandler({ alertId: 'alert-123', hostNames: ['host-1'], userNames: ['user-1'] });
+
+      expect(findRelatedAlerts).toHaveBeenCalledWith(
+        mockEsClient.asCurrentUser,
+        expect.objectContaining({
+          hostNames: ['host-1'],
+          userNames: ['user-1'],
+        })
+      );
+    });
+
+    it('uses the correct space-scoped alerts index', async () => {
+      findRelatedAlerts.mockResolvedValueOnce(makeSuccess());
+
+      await callHandler({ alertId: 'alert-abc' }, 'prod');
+
+      expect(findRelatedAlerts).toHaveBeenCalledWith(
+        mockEsClient.asCurrentUser,
+        expect.objectContaining({
+          alertsIndex: '.alerts-security.alerts-prod',
+        })
+      );
+    });
+
+    it('returns message, sourceEntities, and relatedAlerts only — no surplus metadata', async () => {
+      findRelatedAlerts.mockResolvedValueOnce(
+        makeSuccess({
+          message: 'Found 2 related alerts sharing entities with alert alert-123.',
+          relatedAlerts: [
+            { _id: 'r1', _index: 'idx' },
+            { _id: 'r2', _index: 'idx' },
+          ],
+          sourceEntities: { hostNames: ['h1'], userNames: [], sourceIps: [], destIps: [] },
+        })
+      );
+
+      const result = await callHandler({ alertId: 'alert-123' });
+
       expect(result.results[0].type).toBe(ToolResultType.other);
-      expect(getData(result).relatedAlerts).toHaveLength(1);
-      expect(getData(result).sourceEntities?.hostNames).toEqual(['host-1']);
+      expect(getData(result).relatedAlerts).toHaveLength(2);
+      expect(getData(result).sourceEntities?.hostNames).toEqual(['h1']);
+      expect(getData(result)).not.toHaveProperty('totalMatched');
+      expect(getData(result)).not.toHaveProperty('returnedCount');
+      expect(getData(result)).not.toHaveProperty('isTruncated');
     });
 
-    it('builds query with multiple entity types', async () => {
-      mockGetResponse({
-        host: { name: 'host-1' },
-        user: { name: 'admin' },
-        source: { ip: '10.0.0.1' },
-        destination: { ip: '192.168.1.1' },
-      });
-      mockSearchResponse();
+    it('returns error result when findRelatedAlerts returns ok: false', async () => {
+      findRelatedAlerts.mockResolvedValueOnce({ ok: false, message: 'Alert not found' });
 
-      const result = await callHandler({ alertId: 'alert-123' });
+      const result = await callHandler({ alertId: 'missing-alert' });
 
-      const searchCall = mockEsClient.asCurrentUser.search.mock.calls[0][0] as Record<
-        string,
-        unknown
-      >;
-      const query = searchCall.query as Record<string, Record<string, unknown>>;
-      expect(query.bool.should).toEqual([
-        { terms: { 'host.name': ['host-1'] } },
-        { terms: { 'user.name': ['admin'] } },
-        { terms: { 'source.ip': ['10.0.0.1'] } },
-        { terms: { 'destination.ip': ['192.168.1.1'] } },
-      ]);
-
-      expect(getData(result).sourceEntities).toEqual({
-        hostNames: ['host-1'],
-        userNames: ['admin'],
-        sourceIps: ['10.0.0.1'],
-        destIps: ['192.168.1.1'],
-      });
-    });
-
-    it('uses correct space-scoped alerts index', async () => {
-      mockEsClient.asCurrentUser.get.mockResponseOnce({
-        _id: 'alert-1',
-        _index: '.alerts-security.alerts-custom',
-        found: true,
-        _source: { host: { name: 'h1' } },
-      } as ReturnType<typeof mockEsClient.asCurrentUser.get> extends Promise<infer R> ? R : never);
-
-      mockSearchResponse();
-
-      await callHandler({ alertId: 'alert-1' }, 'custom');
-
-      expect(mockEsClient.asCurrentUser.get).toHaveBeenCalledWith(
-        expect.objectContaining({ index: '.alerts-security.alerts-custom' })
-      );
-      expect(mockEsClient.asCurrentUser.search).toHaveBeenCalledWith(
-        expect.objectContaining({ index: '.alerts-security.alerts-custom' })
-      );
-    });
-
-    it('handles multi-valued entity fields (arrays)', async () => {
-      mockGetResponse({ host: { name: ['host-a', 'host-b'] } });
-      mockSearchResponse();
-
-      const result = await callHandler({ alertId: 'alert-123' });
-
-      const searchCall = mockEsClient.asCurrentUser.search.mock.calls[0][0] as Record<
-        string,
-        unknown
-      >;
-      const query = searchCall.query as Record<string, Record<string, unknown>>;
-      expect(query.bool.should).toEqual([{ terms: { 'host.name': ['host-a', 'host-b'] } }]);
-      expect(getData(result).sourceEntities?.hostNames).toEqual(['host-a', 'host-b']);
-    });
-
-    it('skips GET when entity fields are provided', async () => {
-      mockSearchResponse([
-        {
-          _id: 'related-1',
-          _index: '.alerts-security.alerts-default',
-          _source: { 'kibana.alert.rule.name': 'Related Rule' },
-        },
-      ]);
-
-      const result = await callHandler({
-        alertId: 'alert-123',
-        hostNames: ['host-1'],
-        userNames: ['admin'],
-      });
-
-      expect(mockEsClient.asCurrentUser.get).not.toHaveBeenCalled();
-      expect(mockEsClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
-
-      const searchCall = mockEsClient.asCurrentUser.search.mock.calls[0][0] as Record<
-        string,
-        unknown
-      >;
-      const query = searchCall.query as Record<string, Record<string, unknown>>;
-      expect(query.bool.should).toEqual([
-        { terms: { 'host.name': ['host-1'] } },
-        { terms: { 'user.name': ['admin'] } },
-      ]);
-
-      expect(result.results).toHaveLength(1);
-      expect(getData(result).relatedAlerts).toHaveLength(1);
-      expect(getData(result).sourceEntities).toEqual({
-        hostNames: ['host-1'],
-        userNames: ['admin'],
-        sourceIps: [],
-        destIps: [],
-      });
-    });
-
-    it('falls back to GET when no entity fields are provided', async () => {
-      mockGetResponse({ host: { name: 'host-1' } });
-      mockSearchResponse();
-
-      await callHandler({ alertId: 'alert-123' });
-
-      expect(mockEsClient.asCurrentUser.get).toHaveBeenCalledTimes(1);
-    });
-
-    it('returns error result when ES get throws', async () => {
-      mockEsClient.asCurrentUser.get.mockRejectedValueOnce(new Error('ES connection failed'));
-
-      const result = await callHandler({ alertId: 'alert-123' });
-
-      expect(result.results).toHaveLength(1);
       expect(result.results[0].type).toBe(ToolResultType.error);
-      expect(getData(result).message).toContain('ES connection failed');
-    });
-
-    it('returns error result when ES search throws', async () => {
-      mockGetResponse({ host: { name: 'host-1' } });
-      mockEsClient.asCurrentUser.search.mockRejectedValueOnce(new Error('Search timeout'));
-
-      const result = await callHandler({ alertId: 'alert-123' });
-
-      expect(result.results).toHaveLength(1);
-      expect(result.results[0].type).toBe(ToolResultType.error);
-      expect(getData(result).message).toContain('Search timeout');
+      expect(getData(result).message).toBe('Alert not found');
     });
   });
 });

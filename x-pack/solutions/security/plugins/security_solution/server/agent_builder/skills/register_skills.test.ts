@@ -9,11 +9,7 @@ import type { ExperimentalFeatures } from '../../../common/experimental_features
 import { registerSkills } from './register_skills';
 
 jest.mock('./alert_analysis', () => ({
-  alertAnalysisSkill: { id: 'alert-analysis-legacy' },
-}));
-
-jest.mock('./alert_analysis/alert_analysis_skill_api_driven', () => ({
-  alertAnalysisApiDrivenSkill: { id: 'alert-analysis-api-driven' },
+  alertAnalysisSkill: { id: 'alert-analysis' },
 }));
 
 jest.mock('./threat_hunting', () => ({
@@ -56,9 +52,8 @@ describe('registerSkills', () => {
     jest.clearAllMocks();
   });
 
-  it('registers legacy alert-analysis skill when API-driven flag is disabled', async () => {
+  it('registers alert-analysis skill unconditionally', async () => {
     const experimentalFeatures = {
-      alertAnalysisApiDrivenSkill: false,
       automaticTroubleshootingSkill: false,
       entityAnalyticsEntityStoreV2: false,
       pciComplianceAgentBuilder: false,
@@ -70,16 +65,15 @@ describe('registerSkills', () => {
     });
 
     const ids = register.mock.calls.map(([skill]) => skill.id);
-    expect(ids).toContain('alert-analysis-legacy');
-    expect(ids).not.toContain('alert-analysis-api-driven');
+    expect(ids).toContain('alert-analysis');
+    expect(ids).toContain('threat-hunting');
   });
 
-  it('registers API-driven alert-analysis skill when flag is enabled', async () => {
+  it('registers pci-compliance skill only when experimental flag is enabled', async () => {
     const experimentalFeatures = {
-      alertAnalysisApiDrivenSkill: true,
       automaticTroubleshootingSkill: false,
       entityAnalyticsEntityStoreV2: false,
-      pciComplianceAgentBuilder: false,
+      pciComplianceAgentBuilder: true,
     } as ExperimentalFeatures;
 
     await registerSkills({
@@ -88,8 +82,6 @@ describe('registerSkills', () => {
     });
 
     const ids = register.mock.calls.map(([skill]) => skill.id);
-    expect(ids).toContain('alert-analysis-api-driven');
-    expect(ids).not.toContain('alert-analysis-legacy');
-    expect(ids).toContain('threat-hunting');
+    expect(ids).toContain('pci-compliance');
   });
 });

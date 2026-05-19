@@ -15,7 +15,10 @@ import {
   SECURITY_LABS_SEARCH_TOOL_ID,
 } from '../../tools';
 import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
-import { findRelatedAlerts } from '../../../lib/alert_analysis/services/find_related_alerts';
+import {
+  findRelatedAlerts,
+  RELATED_ALERTS_INLINE_MAX_RESULTS,
+} from '../../../lib/alert_analysis/services/find_related_alerts';
 
 export const alertAnalysisSkill = defineSkillType({
   id: 'alert-analysis',
@@ -131,14 +134,17 @@ Use this skill when:
             'Optional: destination.ip values from the alert. If provided along with other entity fields, skips refetching the alert.'
           ),
       }),
-      handler: async ({ alertId, timeWindowHours, hostNames, userNames, sourceIps, destIps }, context) => {
+      handler: async (
+        { alertId, timeWindowHours, hostNames, userNames, sourceIps, destIps },
+        context
+      ) => {
         const alertsIndex = `${DEFAULT_ALERTS_INDEX}-${context.spaceId}`;
 
         const result = await findRelatedAlerts(context.esClient.asCurrentUser, {
           alertId,
           alertsIndex,
           timeWindowHours,
-          maxResults: 50,
+          maxResults: RELATED_ALERTS_INLINE_MAX_RESULTS,
           hostNames,
           userNames,
           sourceIps,
