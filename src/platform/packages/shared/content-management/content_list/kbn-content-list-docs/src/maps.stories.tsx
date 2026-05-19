@@ -82,10 +82,14 @@ const useMapsProviderProps = ({
   const item = useMemo(
     () => ({
       getHref: (content: ContentListItem) => `#/maps/map/${content.id}`,
-      onDelete: async () => {
-        await wait(250);
+      actions: {
+        delete: {
+          onBulkAction: async () => {
+            await wait(250);
+          },
+        },
+        ...(onInspect ? { inspect: { onItemAction: onInspect } } : {}),
       },
-      ...(onInspect ? { onInspect } : {}),
     }),
     [onInspect]
   );
