@@ -312,7 +312,7 @@ export const useQueryValidation = ({
           return;
         }
 
-        await queryValidation({ cancellationToken }).catch(() => {});
+        await queryValidation({ cancellationToken });
       } catch (error) {
         reportEsqlError(error, { errorType: 'ValidationDebounced' });
       } finally {
@@ -323,7 +323,7 @@ export const useQueryValidation = ({
     },
     { skipFirstRender: false },
     VALIDATION_DEBOUNCE_MS,
-    [code]
+    [serverErrors, serverWarning, code, codeWhenSubmitted]
   );
 
   return {

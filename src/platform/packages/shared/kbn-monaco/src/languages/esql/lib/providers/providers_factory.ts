@@ -26,6 +26,7 @@ export type ProviderEmptyResultErrorCode =
 export class ProviderEmptyResultError extends Error {
   constructor(public readonly code: ProviderEmptyResultErrorCode) {
     super(code);
+    this.name = 'ProviderEmptyResultError';
   }
 }
 
