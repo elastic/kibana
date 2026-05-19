@@ -16,14 +16,17 @@ import {
 } from './common';
 import { fieldSettingsBaseSchema } from '../schema_field_settings';
 
-export const runtimeFieldBaseSchema = fieldSettingsBaseSchema.extend({
-  type: primitiveTypeSchema,
-});
+export const runtimeFieldBaseSchema = fieldSettingsBaseSchema
+  .extend({
+    type: primitiveTypeSchema,
+  })
+  .strict();
 
 export const primitiveRuntimeFieldSchema = runtimeFieldBaseSchema
   .extend({
     script: scriptSchema,
   })
+  .strict()
   .meta({ id: 'kbn-runtime-field-schema', title: 'Runtime field' });
 
 export const compositeRuntimeFieldSchema = z
@@ -32,6 +35,7 @@ export const compositeRuntimeFieldSchema = z
     fields: z.record(z.string().min(1).max(MAX_NAME_LENGTH), runtimeFieldBaseSchema),
     script: scriptSchema,
   })
+  .strict()
   .meta({ id: 'kbn-composite-runtime-field-schema', title: 'Composite runtime field' });
 
 export const runtimeFieldSchema = z.discriminatedUnion('type', [

@@ -72,23 +72,26 @@ export const bucketDateHistogramOperationSchema = z
       description: 'When `true`, drops partial intervals from the results.',
     }),
   })
+  .strict()
   .meta({ id: 'dateHistogramOperation', title: BUCKET_OP_TITLES.dateHistogram });
-const bucketTermsRankByCustomSharedSchema = z.object({
-  type: z.literal('custom'),
-  /**
-   * Field to be used for the custom operation
-   */
-  field: z.string().meta({
-    description: 'Numeric field to be used for the custom operation.',
-  }),
-  /**
-   * Direction of the custom operation
-   */
-  direction: directionSchema.meta({
-    id: 'termsRankByCustomDirection',
-    description: 'Sort direction for custom ranking.',
-  }),
-});
+const bucketTermsRankByCustomSharedSchema = z
+  .object({
+    type: z.literal('custom'),
+    /**
+     * Field to be used for the custom operation
+     */
+    field: z.string().meta({
+      description: 'Numeric field to be used for the custom operation.',
+    }),
+    /**
+     * Direction of the custom operation
+     */
+    direction: directionSchema.meta({
+      id: 'termsRankByCustomDirection',
+      description: 'Sort direction for custom ranking.',
+    }),
+  })
+  .strict();
 
 const bucketTermsRankByCustomOperationSchema = bucketTermsRankByCustomSharedSchema
   .extend({
@@ -103,6 +106,7 @@ const bucketTermsRankByCustomOperationSchema = bucketTermsRankByCustomSharedSche
       z.literal('last_value'),
     ]),
   })
+  .strict()
   .meta({
     id: 'termsRankByCustomOperation',
     title: 'Terms Rank By Custom Operation',
@@ -116,6 +120,7 @@ const bucketTermsRankByCustomCountOperationSchema = bucketTermsRankByCustomShare
       description: 'Numeric field to be used for the custom operation.',
     }),
   })
+  .strict()
   .meta({
     id: 'termsRankByCustomCountOperation',
     title: 'Terms Rank By Custom Count Operation',
@@ -130,6 +135,7 @@ const bucketTermsRankByPercentileOperationSchema = bucketTermsRankByCustomShared
         'The percentile threshold (0–100) at which to compute the field value used for ranking terms.',
     }),
   })
+  .strict()
   .meta({
     id: 'termsRankByPercentileOperation',
     title: 'Terms Rank By Percentile Operation',
@@ -144,6 +150,7 @@ const bucketTermsRankByPercentileRankOperationSchema = bucketTermsRankByCustomSh
         'The numeric value for which to compute the percentile rank (the percentage of field values at or below this value).',
     }),
   })
+  .strict()
   .meta({
     id: 'termsRankByPercentileRankOperation',
     title: 'Terms Rank By Percentile Rank Operation',
@@ -196,6 +203,7 @@ export const bucketTermsOperationSchema = z
           description: 'When `true`, treats the values as regular expressions.',
         }),
       })
+      .strict()
       .optional(),
     /**
      * Excludes
@@ -213,6 +221,7 @@ export const bucketTermsOperationSchema = z
           description: 'When `true`, treats the values as regular expressions.',
         }),
       })
+      .strict()
       .optional(),
     /**
      * Other bucket
@@ -223,6 +232,7 @@ export const bucketTermsOperationSchema = z
           description: 'When `true`, includes documents that do not have the specified field.',
         }),
       })
+      .strict()
       .optional(),
     /**
      * Rank by
@@ -240,6 +250,7 @@ export const bucketTermsOperationSchema = z
               description: 'Sort direction for alphabetical ranking.',
             }),
           })
+          .strict()
           .meta({
             id: 'termsRankByAlphabetical',
             title: 'Terms Rank By Alphabetical',
@@ -255,6 +266,7 @@ export const bucketTermsOperationSchema = z
               description: 'Maximum number of rare terms to include.',
             }),
           })
+          .strict()
           .meta({
             id: 'termsRankByRare',
             title: 'Terms Rank By Rarity',
@@ -264,6 +276,7 @@ export const bucketTermsOperationSchema = z
           .object({
             type: z.literal('significant'),
           })
+          .strict()
           .meta({
             id: 'termsRankBySignificant',
             title: 'Terms Rank By Significance',
@@ -282,6 +295,7 @@ export const bucketTermsOperationSchema = z
               description: 'Sort direction for metric-based ranking.',
             }),
           })
+          .strict()
           .meta({
             id: 'termsRankByMetric',
             title: 'Terms Rank By Metric',
@@ -294,6 +308,7 @@ export const bucketTermsOperationSchema = z
       ])
       .optional(),
   })
+  .strict()
   .meta({ id: 'termsOperation', title: BUCKET_OP_TITLES.terms });
 
 export const bucketFiltersOperationSchema = z
@@ -305,6 +320,7 @@ export const bucketFiltersOperationSchema = z
      */
     filters: z.array(filterWithLabelSchema).max(100),
   })
+  .strict()
   .meta({ id: 'filtersOperation', title: BUCKET_OP_TITLES.filters });
 
 export const bucketHistogramOperationSchema = z
@@ -342,6 +358,7 @@ export const bucketHistogramOperationSchema = z
       description: 'When `true`, includes empty rows in the results.',
     }),
   })
+  .strict()
   .meta({ id: 'histogramOperation', title: BUCKET_OP_TITLES.histogram });
 
 export const bucketRangesOperationSchema = z
@@ -366,29 +383,32 @@ export const bucketRangesOperationSchema = z
      */
     ranges: z
       .array(
-        z.object({
-          /**
-           * Less than or equal to
-           */
-          lte: z.number().optional().meta({
-            description: 'Less than or equal to.',
-          }),
-          /**
-           * Greater than
-           */
-          gt: z.number().optional().meta({
-            description: 'Greater than.',
-          }),
-          /**
-           * Label
-           */
-          label: z.string().optional().meta({
-            description: 'Label.',
-          }),
-        })
+        z
+          .object({
+            /**
+             * Less than or equal to
+             */
+            lte: z.number().optional().meta({
+              description: 'Less than or equal to.',
+            }),
+            /**
+             * Greater than
+             */
+            gt: z.number().optional().meta({
+              description: 'Greater than.',
+            }),
+            /**
+             * Label
+             */
+            label: z.string().optional().meta({
+              description: 'Label.',
+            }),
+          })
+          .strict()
       )
       .max(100),
   })
+  .strict()
   .meta({ id: 'rangesOperation', title: BUCKET_OP_TITLES.ranges });
 
 export const bucketOperationDefinitionSchema = z

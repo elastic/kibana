@@ -29,19 +29,23 @@ import { orientationSchema } from '../enums';
 import { bucketOperationDefinitionSchema } from '../bucket_ops';
 import { positionSchema } from '../alignments';
 
-const legendSchema = z.object({
-  truncate_after_lines: legendTruncateAfterLinesSchema,
-  visibility: baseLegendVisibilitySchema,
-  position: positionSchema.optional(),
-  size: legendSizeSchema,
-});
+const legendSchema = z
+  .object({
+    truncate_after_lines: legendTruncateAfterLinesSchema,
+    visibility: baseLegendVisibilitySchema,
+    position: positionSchema.optional(),
+    size: legendSizeSchema,
+  })
+  .strict();
 
-const labelsSchema = z.object({
-  visible: z.boolean().default(true).optional().meta({ description: 'Show axis labels' }),
-  orientation: orientationSchema.default('horizontal').optional().meta({
-    description: 'Orientation of the axis labels',
-  }),
-});
+const labelsSchema = z
+  .object({
+    visible: z.boolean().default(true).optional().meta({ description: 'Show axis labels' }),
+    orientation: orientationSchema.default('horizontal').optional().meta({
+      description: 'Orientation of the axis labels',
+    }),
+  })
+  .strict();
 
 const simpleLabelsSchema = labelsSchema.omit({ orientation: true });
 
@@ -61,61 +65,69 @@ const heatmapStylingSchema = z
               .optional()
               .meta({ description: 'Show cell labels' }),
           })
+          .strict()
           .optional(),
       })
+      .strict()
       .optional()
       .meta({ id: 'heatmapCells', title: 'Cells', description: 'Cells configuration' }),
   })
+  .strict()
   .meta({
     id: 'heatmapStyling',
     title: 'Heatmap styling',
     description: 'Visual chart styling options',
   });
 
-const heatmapSharedConfigSchema = z.object({
-  type: z.literal('heatmap'),
-  legend: legendSchema.optional().meta({
-    id: 'heatmapLegend',
-    title: 'Legend',
-    description: 'Legend configuration',
-  }),
-  ...sharedPanelInfoSchema.shape,
-  ...layerSettingsSchema.shape,
-  axis: z
-    .object({
-      x: z
-        .object({
-          title: axisTitleSchema.optional(),
-          labels: labelsSchema.optional(),
-          sort: heatmapSortPredicateSchema.optional(),
-          scale: xScaleSchema,
-        })
-        .optional()
-        .meta({
-          id: 'heatmapXAxis',
-          title: 'X Axis',
-          description: 'X axis configuration',
-        }),
-      y: z
-        .object({
-          title: axisTitleSchema.optional(),
-          labels: simpleLabelsSchema.optional(),
-          sort: heatmapSortPredicateSchema.optional(),
-        })
-        .optional()
-        .meta({
-          id: 'heatmapYAxis',
-          title: 'Y Axis',
-          description: 'Y axis configuration',
-        }),
-    })
-    .optional()
-    .meta({
-      id: 'heatmapAxes',
-      title: 'Axes',
-      description: 'Axis configuration for X and Y axes',
+const heatmapSharedConfigSchema = z
+  .object({
+    type: z.literal('heatmap'),
+    legend: legendSchema.optional().meta({
+      id: 'heatmapLegend',
+      title: 'Legend',
+      description: 'Legend configuration',
     }),
-});
+    ...sharedPanelInfoSchema.shape,
+    ...layerSettingsSchema.shape,
+    axis: z
+      .object({
+        x: z
+          .object({
+            title: axisTitleSchema.optional(),
+            labels: labelsSchema.optional(),
+            sort: heatmapSortPredicateSchema.optional(),
+            scale: xScaleSchema,
+          })
+          .strict()
+          .optional()
+          .meta({
+            id: 'heatmapXAxis',
+            title: 'X Axis',
+            description: 'X axis configuration',
+          }),
+        y: z
+          .object({
+            title: axisTitleSchema.optional(),
+            labels: simpleLabelsSchema.optional(),
+            sort: heatmapSortPredicateSchema.optional(),
+          })
+          .strict()
+          .optional()
+          .meta({
+            id: 'heatmapYAxis',
+            title: 'Y Axis',
+            description: 'Y axis configuration',
+          }),
+      })
+      .strict()
+      .optional()
+      .meta({
+        id: 'heatmapAxes',
+        title: 'Axes',
+        description: 'Axis configuration for X and Y axes',
+      }),
+  })
+  .strict();
 
 const heatmapAxesConfigShape = {
   x: bucketOperationDefinitionSchema,
@@ -142,9 +154,10 @@ export const heatmapConfigSchemaNoESQL = heatmapSharedConfigSchema
     ...dataSourceSchema.shape,
     styling: heatmapStylingSchema.optional(),
     metric: getMetricsWithChartDimensionSchemaWithRefBasedOps('heatmapMetric').and(
-      z.object(heatmapConfigMetricOptionsShape)
+      z.object(heatmapConfigMetricOptionsShape).strict()
     ),
   })
+  .strict()
   .meta({
     id: 'heatmapNoESQL',
     title: 'Heatmap Chart (DSL)',
@@ -156,8 +169,9 @@ export const heatmapConfigSchemaESQL = heatmapSharedConfigSchema
     ...heatmapAxesConfigESQLShape,
     ...dataSourceEsqlTableSchema.shape,
     styling: heatmapStylingSchema.optional(),
-    metric: esqlColumnWithFormatSchema.extend(heatmapConfigMetricOptionsShape),
+    metric: esqlColumnWithFormatSchema.extend(heatmapConfigMetricOptionsShape).strict(),
   })
+  .strict()
   .meta({
     id: 'heatmapESQL',
     title: 'Heatmap Chart (ES|QL)',

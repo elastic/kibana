@@ -12,9 +12,11 @@ import {
   DISCOVER_DRILLDOWN_TYPE,
 } from '../../common/constants';
 
-export const discoverDrilldownSchema = z.object({
-  open_in_new_tab: z.boolean().default(true),
-});
+export const discoverDrilldownSchema = z
+  .object({
+    open_in_new_tab: z.boolean().default(true),
+  })
+  .strict();
 
 export function registerDiscoverDrilldown(embeddableSetup: EmbeddableSetup) {
   embeddableSetup.registerDrilldown(DISCOVER_DRILLDOWN_TYPE, {

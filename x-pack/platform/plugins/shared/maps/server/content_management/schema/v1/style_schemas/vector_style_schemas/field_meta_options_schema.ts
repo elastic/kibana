@@ -16,6 +16,7 @@ export const fieldMetaOptionsSchema = z
     sigma: z.number().optional(),
     percentiles: z.array(z.number()).optional(),
   })
+  .strict()
   .meta({
     description:
       'Use to configure how dynamic styling domain ranges and categories are calculated and mapped to feature values.',

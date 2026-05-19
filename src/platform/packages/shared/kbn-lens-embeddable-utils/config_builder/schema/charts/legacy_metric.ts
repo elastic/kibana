@@ -46,6 +46,7 @@ const legacyMetricConfigMetricOptionsShape = {
         description: 'Label alignment',
       }),
     })
+    .strict()
     .optional()
     .meta({ description: 'Labels configuration' }),
   values: z
@@ -60,6 +61,7 @@ const legacyMetricConfigMetricOptionsShape = {
         description: 'Value alignment',
       }),
     })
+    .strict()
     .optional()
     .meta({ description: 'Values configuration' }),
   /**
@@ -86,9 +88,10 @@ export const legacyMetricConfigSchemaNoESQL = z
      * Metric configuration, must define operation.
      */
     metric: getMetricsWithChartDimensionSchema('legacyMetric').and(
-      z.object(legacyMetricConfigMetricOptionsShape)
+      z.object(legacyMetricConfigMetricOptionsShape).strict()
     ),
   })
+  .strict()
   .meta({
     id: 'legacyMetricNoESQL',
     title: 'Legacy Metric Chart (DSL)',
@@ -105,8 +108,9 @@ const esqlLegacyMetricConfig = z
     /**
      * Metric configuration, must define operation.
      */
-    metric: esqlColumnWithFormatSchema.extend(legacyMetricConfigMetricOptionsShape),
+    metric: esqlColumnWithFormatSchema.extend(legacyMetricConfigMetricOptionsShape).strict(),
   })
+  .strict()
   .meta({ id: 'legacyMetricESQL', title: 'Legacy Metric Chart (ES|QL)' });
 
 // Legacy metric is not currently supported for ES|QL datasets

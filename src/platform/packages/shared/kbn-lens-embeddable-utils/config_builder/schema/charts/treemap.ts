@@ -41,6 +41,7 @@ const treemapSharedConfigShape = {
       visibility: legendVisibilitySchemaWithAuto,
       size: legendSizeSchema,
     })
+    .strict()
     .optional()
     .meta({
       id: 'treemapLegend',
@@ -59,9 +60,11 @@ const treemapStylingSchema = z
       .object({
         visible: z.boolean().optional().meta({ description: 'Show category labels' }),
       })
+      .strict()
       .optional()
       .meta({ description: 'Labels configuration' }),
   })
+  .strict()
   .meta({
     id: 'treemapStyling',
     title: 'Treemap styling',
@@ -129,7 +132,7 @@ export const treemapConfigSchemaNoESQL = z
     metrics: z
       .array(
         getMetricsWithChartDimensionSchemaWithRefBasedOps('treemapMetric').and(
-          z.object(partitionConfigPrimaryMetricOptionsShape)
+          z.object(partitionConfigPrimaryMetricOptionsShape).strict()
         )
       )
       .min(1)
@@ -141,7 +144,7 @@ export const treemapConfigSchemaNoESQL = z
     group_by: z
       .array(
         getBucketsWithChartDimensionSchema('treemapGroupBy').and(
-          z.object(partitionConfigBreakdownByOptionsShape)
+          z.object(partitionConfigBreakdownByOptionsShape).strict()
         )
       )
       .min(1)
@@ -149,6 +152,7 @@ export const treemapConfigSchemaNoESQL = z
       .optional()
       .meta({ description: 'Array of breakdown dimensions (minimum 1)' }),
   })
+  .strict()
   .superRefine((data, ctx) => {
     const msg = validateForMultipleMetrics({
       metrics: data.metrics as PartitionMetric[],
@@ -177,7 +181,7 @@ export const treemapConfigSchemaESQL = z
      * Primary value configuration, must define operation. In ES|QL mode, uses column-based configuration.
      */
     metrics: z
-      .array(esqlColumnWithFormatSchema.extend(partitionConfigPrimaryMetricOptionsShape))
+      .array(esqlColumnWithFormatSchema.extend(partitionConfigPrimaryMetricOptionsShape).strict())
       .min(1)
       .max(100)
       .meta({ description: 'Array of metric configurations (minimum 1)' }),
@@ -185,12 +189,13 @@ export const treemapConfigSchemaESQL = z
      * Configure how to break down the metric (e.g. show one metric per term). In ES|QL mode, uses column-based configuration.
      */
     group_by: z
-      .array(esqlColumnWithFormatSchema.extend(partitionConfigBreakdownByOptionsShape))
+      .array(esqlColumnWithFormatSchema.extend(partitionConfigBreakdownByOptionsShape).strict())
       .min(1)
       .max(100)
       .optional()
       .meta({ description: 'Array of breakdown dimensions (minimum 1)' }),
   })
+  .strict()
   .superRefine((data, ctx) => {
     const msg = validateForMultipleMetrics({
       metrics: data.metrics as PartitionMetric[],

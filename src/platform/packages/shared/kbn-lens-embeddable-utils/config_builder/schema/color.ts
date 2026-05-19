@@ -36,6 +36,7 @@ const colorByValueStepSchema = z
      */
     color: z.string().meta({ description: 'The color to use for this step.' }),
   })
+  .strict()
   .superRefine((step, ctx) => {
     if (isNil(step.gte) && isNil(step.lt) && isNil(step.lte)) {
       ctx.addIssue({
@@ -119,22 +120,24 @@ export const colorByValueStepsSchema = z
     description: 'Array of ordered color steps defining the range each color is applied.',
   });
 
-const colorByValueBaseSchema = z.object({
-  type: z.literal('dynamic'),
+const colorByValueBaseSchema = z
+  .object({
+    type: z.literal('dynamic'),
 
-  /**
-   * Determines whether the range is interpreted as absolute or as a percentage of the data.
-   */
-  range: z.union([z.literal('absolute'), z.literal('percentage')]).meta({
-    description:
-      'Determines whether the range is interpreted as absolute or as a percentage of the data.',
-  }),
+    /**
+     * Determines whether the range is interpreted as absolute or as a percentage of the data.
+     */
+    range: z.union([z.literal('absolute'), z.literal('percentage')]).meta({
+      description:
+        'Determines whether the range is interpreted as absolute or as a percentage of the data.',
+    }),
 
-  /**
-   * Array of color steps defining the mapping from values to colors.
-   */
-  steps: colorByValueStepsSchema,
-});
+    /**
+     * Array of color steps defining the mapping from values to colors.
+     */
+    steps: colorByValueStepsSchema,
+  })
+  .strict();
 
 export const legacyColorByValueSchema = colorByValueBaseSchema
   .extend({
@@ -149,6 +152,7 @@ export const legacyColorByValueSchema = colorByValueBaseSchema
         'When `true`, shifts the palette colors so they start from a different offset. Defaults to `false`.',
     }),
   })
+  .strict()
   .meta({
     id: 'legacyColorByValue',
     title: 'Legacy color by value',
@@ -160,6 +164,7 @@ export const legacyColorByValueAbsoluteSchema = legacyColorByValueSchema
   .extend({
     range: z.literal('absolute'),
   })
+  .strict()
   .meta({
     id: 'legacyColorByValueAbsolute',
     title: 'Legacy color by value (absolute)',
@@ -171,6 +176,7 @@ export const colorByValueAbsoluteSchema = colorByValueBaseSchema
   .extend({
     range: z.literal('absolute'),
   })
+  .strict()
   .meta({
     id: 'colorByValueAbsolute',
     title: 'Color By Value (Absolute)',
@@ -181,6 +187,7 @@ export const colorByValuePercentageSchema = colorByValueBaseSchema
   .extend({
     range: z.literal('percentage'),
   })
+  .strict()
   .meta({
     id: 'colorByValuePercentage',
     title: 'Color By Value (Percentage)',
@@ -204,6 +211,7 @@ export const staticColorSchema = z
      */
     color: z.string().meta({ description: 'The static color to be used for all values.' }),
   })
+  .strict()
   .meta({
     id: 'staticColor',
     title: 'Static Color',
@@ -219,6 +227,7 @@ const colorFromPaletteSchema = z
         "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`.",
     }),
   })
+  .strict()
   .meta({
     id: 'colorFromPalette',
     title: 'Color From Palette',
@@ -230,6 +239,7 @@ const colorCodeSchema = z
     type: z.literal('color_code'),
     value: z.string().meta({ description: 'The static color value to use.' }),
   })
+  .strict()
   .meta({
     id: 'color_code',
     title: 'Color Code',
@@ -252,14 +262,17 @@ const categoricalColorMappingSchema = z
     }),
     mapping: z
       .array(
-        z.object({
-          values: z.array(serializedValueSchema).max(1000),
-          color: colorDefSchema,
-        })
+        z
+          .object({
+            values: z.array(serializedValueSchema).max(1000),
+            color: colorDefSchema,
+          })
+          .strict()
       )
       .max(1000),
     unassigned: unassignedColorSchema.optional(),
   })
+  .strict()
   .meta({
     id: 'categoricalColorMapping',
     title: 'Categorical Color Mapping',
@@ -280,15 +293,18 @@ const gradientColorMappingSchema = z
       .meta({ description: 'Sort direction' }),
     mapping: z
       .array(
-        z.object({
-          values: z.array(serializedValueSchema).max(100),
-        })
+        z
+          .object({
+            values: z.array(serializedValueSchema).max(100),
+          })
+          .strict()
       )
       .max(100)
       .optional(),
     gradient: z.array(colorDefSchema).max(3).optional(),
     unassigned: unassignedColorSchema.optional(),
   })
+  .strict()
   .meta({
     id: 'gradientColorMapping',
     title: 'Gradient Color Mapping',
@@ -322,13 +338,17 @@ export const colorMappingSchema = z
 
 export const noColorSchema = z
   .object({ type: z.literal('none') })
+  .strict()
   .meta({ id: 'noColor', title: 'No Color', description: 'Explicitly disables coloring' });
 
-export const autoColorSchema = z.object({ type: z.literal('auto') }).meta({
-  id: 'autoColor',
-  title: 'Auto Color',
-  description: 'Coloring determined at runtime based on chart defaults',
-});
+export const autoColorSchema = z
+  .object({ type: z.literal('auto') })
+  .strict()
+  .meta({
+    id: 'autoColor',
+    title: 'Auto Color',
+    description: 'Coloring determined at runtime based on chart defaults',
+  });
 
 export const allColoringTypeSchema = z
   .union([

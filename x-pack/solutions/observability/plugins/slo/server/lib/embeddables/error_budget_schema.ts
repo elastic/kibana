@@ -11,15 +11,17 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { SLO_ERROR_BUDGET_SUPPORTED_TRIGGERS } from '../../../common/embeddables/error_budget/constants';
 
-const ErrorBudgetCustomSchema = z.object({
-  slo_id: z.string().meta({
-    description: 'The ID of the SLO to display the error budget for',
-  }),
-  slo_instance_id: z.string().default(ALL_VALUE).meta({
-    description:
-      'ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. Defaults to * (all instances).',
-  }),
-});
+const ErrorBudgetCustomSchema = z
+  .object({
+    slo_id: z.string().meta({
+      description: 'The ID of the SLO to display the error budget for',
+    }),
+    slo_instance_id: z.string().default(ALL_VALUE).meta({
+      description:
+        'ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. Defaults to * (all instances).',
+    }),
+  })
+  .strict();
 
 export const getErrorBudgetEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => {
   return z
@@ -28,6 +30,7 @@ export const getErrorBudgetEmbeddableSchema = (getDrilldownsSchema: GetDrilldown
       ...getDrilldownsSchema(SLO_ERROR_BUDGET_SUPPORTED_TRIGGERS).shape,
       ...serializedTitlesSchema.shape,
     })
+    .strict()
     .meta({
       id: 'slo-error-budget-embeddable',
       description: 'SLO Error Budget embeddable schema',

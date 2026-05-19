@@ -12,17 +12,19 @@ import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import { SLO_EMBEDDABLE_SUPPORTED_TRIGGERS } from '../../../common/embeddables/overview/constants';
 
-const SingleOverviewCustomSchema = z.object({
-  slo_id: z.string().meta({
-    description: 'The ID of the SLO',
-  }),
-  slo_instance_id: z.string().default(ALL_VALUE).meta({
-    description:
-      'ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. Defaults to * (all instances).',
-  }),
-  remote_name: z.string().optional().meta({ description: 'The name of the remote SLO' }),
-  overview_mode: z.literal('single'),
-});
+const SingleOverviewCustomSchema = z
+  .object({
+    slo_id: z.string().meta({
+      description: 'The ID of the SLO',
+    }),
+    slo_instance_id: z.string().default(ALL_VALUE).meta({
+      description:
+        'ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. Defaults to * (all instances).',
+    }),
+    remote_name: z.string().optional().meta({ description: 'The name of the remote SLO' }),
+    overview_mode: z.literal('single'),
+  })
+  .strict();
 
 const groupBySchema = z
   .union([
@@ -33,19 +35,22 @@ const groupBySchema = z
   ])
   .default('status');
 
-const GroupOverviewCustomSchema = z.object({
-  group_filters: z
-    .object({
-      group_by: groupBySchema,
-      // Bounded to avoid unbounded-array warnings; 100 aligns with other embeddable list limits.
-      groups: z.array(z.string()).max(100).optional(),
-      // Bounded to avoid unbounded-array warnings; 500 matches dashboard filters limit.
-      filters: z.array(asCodeFilterSchema).max(500).optional(),
-      kql_query: z.string().optional(),
-    })
-    .default({ group_by: 'status' }),
-  overview_mode: z.literal('groups'),
-});
+const GroupOverviewCustomSchema = z
+  .object({
+    group_filters: z
+      .object({
+        group_by: groupBySchema,
+        // Bounded to avoid unbounded-array warnings; 100 aligns with other embeddable list limits.
+        groups: z.array(z.string()).max(100).optional(),
+        // Bounded to avoid unbounded-array warnings; 500 matches dashboard filters limit.
+        filters: z.array(asCodeFilterSchema).max(500).optional(),
+        kql_query: z.string().optional(),
+      })
+      .strict()
+      .default({ group_by: 'status' }),
+    overview_mode: z.literal('groups'),
+  })
+  .strict();
 
 function getSingleOverviewEmbeddableSchema(getDrilldownsSchema: GetDrilldownsSchemaFnType) {
   return z
@@ -54,6 +59,7 @@ function getSingleOverviewEmbeddableSchema(getDrilldownsSchema: GetDrilldownsSch
       ...getDrilldownsSchema(SLO_EMBEDDABLE_SUPPORTED_TRIGGERS).shape,
       ...serializedTitlesSchema.shape,
     })
+    .strict()
     .meta({
       id: 'slo-single-overview-embeddable',
       description: 'SLO Single Overview embeddable schema',
@@ -67,6 +73,7 @@ function getGroupOverviewEmbeddableSchema(getDrilldownsSchema: GetDrilldownsSche
       ...getDrilldownsSchema(SLO_EMBEDDABLE_SUPPORTED_TRIGGERS).shape,
       ...serializedTitlesSchema.shape,
     })
+    .strict()
     .meta({
       id: 'slo-group-overview-embeddable',
       description: 'SLO Group Overview embeddable schema',

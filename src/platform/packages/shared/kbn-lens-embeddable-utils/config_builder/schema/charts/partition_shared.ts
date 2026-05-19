@@ -28,6 +28,7 @@ export const valueDisplaySchema = z
       .optional()
       .meta({ description: 'Decimal places for percentage display (0-10)' }),
   })
+  .strict()
   .optional()
   .meta({
     id: 'valueDisplay',

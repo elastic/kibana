@@ -30,9 +30,11 @@ export const createEmbeddableStartMock = (): jest.Mocked<EmbeddableStart> => ({
 export const mockGetDrilldownsSchema: GetDrilldownsSchemaFnType = (supportedTriggers) => {
   const registry = getDrilldownRegistry();
   registry.registerDrilldown('test-drilldown', {
-    schema: z.object({
-      foo: z.string().optional(),
-    }),
+    schema: z
+      .object({
+        foo: z.string().optional(),
+      })
+      .strict(),
     supportedTriggers,
   });
 

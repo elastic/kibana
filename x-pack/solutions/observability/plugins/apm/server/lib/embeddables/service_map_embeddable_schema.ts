@@ -13,12 +13,14 @@ import {
 } from '@kbn/presentation-publishing-schemas';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
-export const serviceMapCustomStateSchema = z.object({
-  environment: z.string().default(ENVIRONMENT_ALL.value),
-  kuery: z.string().optional(),
-  service_name: z.string().optional(),
-  service_group_id: z.string().optional(),
-});
+export const serviceMapCustomStateSchema = z
+  .object({
+    environment: z.string().default(ENVIRONMENT_ALL.value),
+    kuery: z.string().optional(),
+    service_name: z.string().optional(),
+    service_group_id: z.string().optional(),
+  })
+  .strict();
 
 export type ServiceMapCustomState = z.output<typeof serviceMapCustomStateSchema>;
 
@@ -29,6 +31,7 @@ export const getServiceMapEmbeddableSchema = (_getDrilldownsSchema: GetDrilldown
       ...serializedTimeRangeSchema.shape,
       ...serviceMapCustomStateSchema.shape,
     })
+    .strict()
     .meta({
       id: 'apm-service-map-embeddable',
       description: 'APM service map embeddable schema',

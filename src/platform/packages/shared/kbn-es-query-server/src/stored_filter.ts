@@ -56,6 +56,8 @@ export const storedFilterSchema = z
       .object({
         store: filterStateStoreSchema,
       })
+      .strict()
       .optional(),
   })
+  .strict()
   .meta({ id: 'kbn-es-query-server-storedFilterSchema' });

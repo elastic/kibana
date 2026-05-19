@@ -40,6 +40,7 @@ const pieStateSharedShape = {
       visibility: legendVisibilitySchemaWithAuto,
       size: legendSizeSchema,
     })
+    .strict()
     .optional()
     .meta({
       id: 'pieLegend',
@@ -67,6 +68,7 @@ const pieStylingSchema = z
             description: 'Slice label position: `inside` or `outside`.',
           }),
       })
+      .strict()
       .optional()
       .meta({
         description: 'Label configuration for pie chart slice labels inside or outside the pie',
@@ -78,6 +80,7 @@ const pieStylingSchema = z
         description: 'Donut hole size. Accepted values: `none` (full pie), `s`, `m`, `l`.',
       }),
   })
+  .strict()
   .meta({
     id: 'pieStyling',
     title: 'Pie chart styling',
@@ -136,7 +139,7 @@ export const pieConfigSchemaNoESQL = z
     metrics: z
       .array(
         getMetricsWithChartDimensionSchemaWithRefBasedOps('pieMetric').and(
-          z.object(partitionConfigPrimaryMetricOptionsShape)
+          z.object(partitionConfigPrimaryMetricOptionsShape).strict()
         )
       )
       .min(1)
@@ -145,7 +148,7 @@ export const pieConfigSchemaNoESQL = z
     group_by: z
       .array(
         getBucketsWithChartDimensionSchema('pieGroupBy').and(
-          z.object(partitionConfigBreakdownByOptionsShape)
+          z.object(partitionConfigBreakdownByOptionsShape).strict()
         )
       )
       .min(1)
@@ -153,6 +156,7 @@ export const pieConfigSchemaNoESQL = z
       .optional()
       .meta({ description: 'Array of breakdown dimensions (minimum 1)' }),
   })
+  .strict()
   .superRefine((data, ctx) => {
     const msg = validateForMultipleMetrics(data);
     if (msg) {
@@ -178,7 +182,7 @@ export const pieConfigSchemaESQL = z
     styling: pieStylingSchema.optional(),
     metrics: z
       .array(
-        esqlColumnWithFormatSchema.extend(partitionConfigPrimaryMetricOptionsShape).meta({
+        esqlColumnWithFormatSchema.extend(partitionConfigPrimaryMetricOptionsShape).strict().meta({
           description: 'ES|QL column reference for primary metric',
         })
       )
@@ -186,12 +190,13 @@ export const pieConfigSchemaESQL = z
       .max(100)
       .meta({ description: 'Array of metric configurations (minimum 1)' }),
     group_by: z
-      .array(esqlColumnWithFormatSchema.extend(partitionConfigBreakdownByOptionsShape))
+      .array(esqlColumnWithFormatSchema.extend(partitionConfigBreakdownByOptionsShape).strict())
       .min(1)
       .max(100)
       .optional()
       .meta({ description: 'Array of breakdown dimensions (minimum 1)' }),
   })
+  .strict()
   .superRefine((data, ctx) => {
     const msg = validateForMultipleMetrics(data);
     if (msg) {

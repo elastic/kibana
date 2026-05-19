@@ -35,6 +35,7 @@ const numericFormatSchema = z
         'When `true`, uses compact notation (for example, 1.2k instead of 1,200). Defaults to `false`.',
     }),
   })
+  .strict()
   .meta({
     id: 'numericFormat',
     title: 'Numeric Format',
@@ -60,6 +61,7 @@ const byteFormatSchema = z
       description: 'Suffix appended to the formatted value.',
     }),
   })
+  .strict()
   .meta({
     id: 'byteFormat',
     title: 'Byte Format',
@@ -90,6 +92,7 @@ const durationFormatSchema = z
       description: 'Suffix appended to the formatted value.',
     }),
   })
+  .strict()
   .meta({
     id: 'durationFormat',
     title: 'Duration Format',
@@ -106,6 +109,7 @@ const customFormatSchema = z
       description: 'Kibana field format pattern string.',
     }),
   })
+  .strict()
   .meta({
     id: 'customFormat',
     title: 'Custom Format',
@@ -123,9 +127,11 @@ export const formatTypeSchema = z
     description: 'Number display format for the dimension value.',
   });
 
-export const formatSchema = z.object({
-  /**
-   * Format configuration
-   */
-  format: formatTypeSchema.optional(),
-});
+export const formatSchema = z
+  .object({
+    /**
+     * Format configuration
+     */
+    format: formatTypeSchema.optional(),
+  })
+  .strict();

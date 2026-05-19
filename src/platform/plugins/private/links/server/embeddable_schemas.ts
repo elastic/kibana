@@ -16,18 +16,22 @@ import {
 import { linksArraySchema, layoutSchema } from './content_management/schema/v1/cm_services';
 
 // Links by-value state schema (contains layout and links)
-const linksByValueStateSchema = z.object({
-  layout: layoutSchema,
-  links: linksArraySchema,
-});
+const linksByValueStateSchema = z
+  .object({
+    layout: layoutSchema,
+    links: linksArraySchema,
+  })
+  .strict();
 
 // Links by-reference state schema (contains ref_id)
-const linksByReferenceStateSchema = z.object({
-  ref_id: z.string().meta({
-    title: 'Reference ID',
-    description: 'The unique identifier of the Links library item',
-  }),
-});
+const linksByReferenceStateSchema = z
+  .object({
+    ref_id: z.string().meta({
+      title: 'Reference ID',
+      description: 'The unique identifier of the Links library item',
+    }),
+  })
+  .strict();
 
 // Complete links embeddable schema (union of by-value and by-reference embeddables)
 export const linksEmbeddableSchema = z
@@ -37,12 +41,14 @@ export const linksEmbeddableSchema = z
         ...linksByValueStateSchema.shape,
         ...serializedTitlesSchema.shape,
       })
+      .strict()
       .meta(BY_VALUE_SCHEMA_META),
     z
       .object({
         ...linksByReferenceStateSchema.shape,
         ...serializedTitlesSchema.shape,
       })
+      .strict()
       .meta(BY_REF_SCHEMA_META),
   ])
   .meta({

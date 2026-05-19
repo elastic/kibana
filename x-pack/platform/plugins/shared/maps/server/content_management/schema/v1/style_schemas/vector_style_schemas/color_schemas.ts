@@ -14,56 +14,68 @@ import {
 import { fieldMetaOptionsSchema } from './field_meta_options_schema';
 import { styleFieldSchema } from './style_field_schema';
 
-export const categoryColorStop = z.object({
-  stop: z.string().nullable(),
-  color: z.string(),
-});
+export const categoryColorStop = z
+  .object({
+    stop: z.string().nullable(),
+    color: z.string(),
+  })
+  .strict();
 
-export const ordinalColorStop = z.object({
-  stop: z.number(),
-  color: z.string(),
-});
+export const ordinalColorStop = z
+  .object({
+    stop: z.number(),
+    color: z.string(),
+  })
+  .strict();
 
-export const colorDynamicOptions = z.object({
-  // ordinal color properties
-  color: z.string().optional(),
-  customColorRamp: z.array(ordinalColorStop).optional(),
-  useCustomColorRamp: z.boolean().optional(),
-  dataMappingFunction: z
-    .union([
-      z.literal(DATA_MAPPING_FUNCTION.INTERPOLATE),
-      z.literal(DATA_MAPPING_FUNCTION.PERCENTILES),
-    ])
-    .optional(),
-  invert: z.boolean().optional(),
+export const colorDynamicOptions = z
+  .object({
+    // ordinal color properties
+    color: z.string().optional(),
+    customColorRamp: z.array(ordinalColorStop).optional(),
+    useCustomColorRamp: z.boolean().optional(),
+    dataMappingFunction: z
+      .union([
+        z.literal(DATA_MAPPING_FUNCTION.INTERPOLATE),
+        z.literal(DATA_MAPPING_FUNCTION.PERCENTILES),
+      ])
+      .optional(),
+    invert: z.boolean().optional(),
 
-  // category color properties
-  colorCategory: z.string().optional(),
-  customColorPalette: z.array(categoryColorStop).optional(),
-  useCustomColorPalette: z.boolean().optional(),
-  otherCategoryColor: z.string().optional(),
+    // category color properties
+    colorCategory: z.string().optional(),
+    customColorPalette: z.array(categoryColorStop).optional(),
+    useCustomColorPalette: z.boolean().optional(),
+    otherCategoryColor: z.string().optional(),
 
-  field: styleFieldSchema.optional(),
-  fieldMetaOptions: fieldMetaOptionsSchema,
+    field: styleFieldSchema.optional(),
+    fieldMetaOptions: fieldMetaOptionsSchema,
 
-  type: z
-    .union([z.literal(COLOR_MAP_TYPE.CATEGORICAL), z.literal(COLOR_MAP_TYPE.ORDINAL)])
-    .optional(),
-});
+    type: z
+      .union([z.literal(COLOR_MAP_TYPE.CATEGORICAL), z.literal(COLOR_MAP_TYPE.ORDINAL)])
+      .optional(),
+  })
+  .strict();
 
-export const colorStaticOptions = z.object({
-  color: z.string(),
-});
+export const colorStaticOptions = z
+  .object({
+    color: z.string(),
+  })
+  .strict();
 
-export const colorStaticSchema = z.object({
-  type: z.literal(STYLE_TYPE.STATIC),
-  options: colorStaticOptions,
-});
+export const colorStaticSchema = z
+  .object({
+    type: z.literal(STYLE_TYPE.STATIC),
+    options: colorStaticOptions,
+  })
+  .strict();
 
-export const colorDynamicSchema = z.object({
-  type: z.literal(STYLE_TYPE.DYNAMIC),
-  options: colorDynamicOptions,
-});
+export const colorDynamicSchema = z
+  .object({
+    type: z.literal(STYLE_TYPE.DYNAMIC),
+    options: colorDynamicOptions,
+  })
+  .strict();
 
 export const colorSchema = z.union([colorStaticSchema, colorDynamicSchema]);
 export const fillColorSchema = z

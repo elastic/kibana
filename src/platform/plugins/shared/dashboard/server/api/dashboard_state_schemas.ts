@@ -54,6 +54,7 @@ const basePanelSchema = z
     // TODO: enforce Serializable type, see https://github.com/elastic/kibana/pull/269196
     config: z.object({}).loose() as z.ZodType<{}>,
   })
+  .strict()
   .meta({
     id: 'kbn-dashboard-panel-type-unknown',
   });
@@ -76,6 +77,7 @@ export function getPanelSchema(isDashboardAppRequest: boolean) {
           // TODO: enforce Serializable type, see https://github.com/elastic/kibana/pull/269196
           config: configSchema as z.ZodType<{}>,
         })
+        .strict()
         .meta({
           id: `kbn-dashboard-panel-type-${type}`,
           title,
@@ -87,9 +89,11 @@ export function getPanelSchema(isDashboardAppRequest: boolean) {
   return z.discriminatedUnion('type', panelSchemas as [PanelSchema, ...PanelSchema[]]);
 }
 
-const sectionGridSchema = z.object({
-  y: z.number().meta({ description: 'The y coordinate of the section in grid units.' }),
-});
+const sectionGridSchema = z
+  .object({
+    y: z.number().meta({ description: 'The y coordinate of the section in grid units.' }),
+  })
+  .strict();
 
 export function getSectionSchema(isDashboardAppRequest: boolean) {
   return z
@@ -107,6 +111,7 @@ export function getSectionSchema(isDashboardAppRequest: boolean) {
         .meta({ description: 'The panels that belong to the section.' }),
       id: z.string().optional().meta({ description: 'The unique ID of the section.' }),
     })
+    .strict()
     .meta({
       description: 'A collapsible group of panels.',
       id: 'kbn-dashboard-section',
@@ -144,6 +149,7 @@ export const optionsSchema = z
         'When `true`, the cursor position is synchronized across panels. Defaults to `true`.',
     }),
   })
+  .strict()
   .default(DEFAULT_DASHBOARD_OPTIONS)
   .meta({
     id: 'kbn-dashboard-options',
@@ -161,6 +167,7 @@ export const accessControlSchema = z
           'Controls edit access to the dashboard. Set to `write_restricted` to prevent edits by users without explicit write permission. Defaults to `default` (all viewers can edit).',
       }),
   })
+  .strict()
   .optional()
   .meta({
     description: 'Access control settings for the dashboard.',
@@ -205,6 +212,7 @@ export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
       title: z.string().min(1).meta({ description: 'A human-readable title for the dashboard.' }),
       access_control: accessControlSchema,
     })
+    .strict()
     .meta({
       id: isDashboardAppRequest ? 'kbn-dashboard-app-data' : 'kbn-dashboard-data',
     });

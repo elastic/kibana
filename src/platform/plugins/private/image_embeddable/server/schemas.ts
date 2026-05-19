@@ -17,6 +17,7 @@ const imageFileSrcSchema = z
     type: z.literal('file'),
     file_id: z.string(),
   })
+  .strict()
   .meta({
     title: 'file',
   });
@@ -26,20 +27,23 @@ const imageUrlSrcSchema = z
     type: z.literal('url'),
     url: z.string().meta({ description: 'URL of the image' }),
   })
+  .strict()
   .meta({
     title: 'url',
   });
 
-const imageConfigSchema = z.object({
-  src: z.union([imageFileSrcSchema, imageUrlSrcSchema]).meta({ description: 'Image source' }),
-  alt_text: z.string().optional(),
-  object_fit: z
-    .union([z.literal('fill'), z.literal('contain'), z.literal('cover'), z.literal('none')])
-    .default(DEFAULT_OBJECT_FIT)
-    .meta({ description: 'How the image should be sized within its container' }),
+const imageConfigSchema = z
+  .object({
+    src: z.union([imageFileSrcSchema, imageUrlSrcSchema]).meta({ description: 'Image source' }),
+    alt_text: z.string().optional(),
+    object_fit: z
+      .union([z.literal('fill'), z.literal('contain'), z.literal('cover'), z.literal('none')])
+      .default(DEFAULT_OBJECT_FIT)
+      .meta({ description: 'How the image should be sized within its container' }),
 
-  background_color: z.string().optional(),
-});
+    background_color: z.string().optional(),
+  })
+  .strict();
 
 export function getImageEmbeddableSchema(getDrilldownsSchemas: GetDrilldownsSchemaFnType) {
   return z
@@ -48,6 +52,7 @@ export function getImageEmbeddableSchema(getDrilldownsSchemas: GetDrilldownsSche
       ...serializedTitlesSchema.shape,
       image_config: imageConfigSchema,
     })
+    .strict()
     .meta({
       description: 'Image embeddable schema',
     });

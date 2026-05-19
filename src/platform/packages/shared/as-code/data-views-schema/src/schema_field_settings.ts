@@ -16,6 +16,7 @@ export const fieldSettingsBaseSchema = z
         type: z.string(),
         params: z.any().optional(),
       })
+      .strict()
       .optional()
       .meta({
         id: 'kbn-field-format',
@@ -36,6 +37,7 @@ export const fieldSettingsBaseSchema = z
         "Add a description to the field. It's displayed next to the field on the Discover, Lens, and Data View Management pages.",
     }),
   })
+  .strict()
   .meta({
     id: 'kbn-data-view-field-setting',
     title: 'Field settings',
@@ -54,6 +56,7 @@ export const fieldSettingsWithPopularitySchema = fieldSettingsBaseSchema
   .extend({
     popularity: popularitySchema,
   })
+  .strict()
   .meta({
     id: 'kbn-field-settings-with-popularity',
     title: 'Field settings',

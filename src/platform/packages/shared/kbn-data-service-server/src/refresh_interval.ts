@@ -18,6 +18,7 @@ export const refreshIntervalSchema = z
       description: 'The refresh interval in milliseconds.',
     }),
   })
+  .strict()
   .meta({
     id: 'kbn-data-service-server-refreshIntervalSchema',
     title: 'Refresh interval',

@@ -22,21 +22,25 @@ import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
 import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
-const columnSettingsEntrySchema = z.object({
-  width: z.number().min(0).optional().meta({
-    description: 'Optional width of the column in pixels.',
-  }),
-});
+const columnSettingsEntrySchema = z
+  .object({
+    width: z.number().min(0).optional().meta({
+      description: 'Optional width of the column in pixels.',
+    }),
+  })
+  .strict();
 
-const sortSchema = z.object({
-  name: z.string().meta({
-    description: 'The name of the field to sort by.',
-  }),
-  direction: z.union([z.literal('asc'), z.literal('desc')]).meta({
-    description:
-      'The direction to sort the field by: Use "asc" for ascending or "desc" for descending.',
-  }),
-});
+const sortSchema = z
+  .object({
+    name: z.string().meta({
+      description: 'The name of the field to sort by.',
+    }),
+    direction: z.union([z.literal('asc'), z.literal('desc')]).meta({
+      description:
+        'The direction to sort the field by: Use "asc" for ascending or "desc" for descending.',
+    }),
+  })
+  .strict();
 
 export const viewModeSchema = z
   .union([
@@ -61,6 +65,7 @@ const dataTableLimitsSchema = z
         'The number of documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".',
     }),
   })
+  .strict()
   .meta({ id: 'discoverSessionEmbeddableDataTableLimitsSchema' });
 
 const dataTableSchema = z
@@ -114,6 +119,7 @@ const dataTableSchema = z
           'Data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".',
       }),
   })
+  .strict()
   .meta({ id: 'discoverSessionEmbeddableDataTableSchema' });
 
 const panelOverridesSchema = z
@@ -176,23 +182,27 @@ const panelOverridesSchema = z
         'Number of documents to sample. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the advanced setting "discover:sampleSize".',
     }),
   })
+  .strict()
   .default({});
 
-const classicTabSchema = z.object({
-  ...dataTableSchema.shape,
-  ...dataTableLimitsSchema.shape,
-  query: asCodeQuerySchema.optional(),
-  filters: z.array(asCodeFilterSchema).max(100).default([]).meta({
-    description: 'List of filters to apply to the data in the tab.',
-  }),
-  data_source: dataViewSchema,
-  view_mode: viewModeSchema,
-});
+const classicTabSchema = z
+  .object({
+    ...dataTableSchema.shape,
+    ...dataTableLimitsSchema.shape,
+    query: asCodeQuerySchema.optional(),
+    filters: z.array(asCodeFilterSchema).max(100).default([]).meta({
+      description: 'List of filters to apply to the data in the tab.',
+    }),
+    data_source: dataViewSchema,
+    view_mode: viewModeSchema,
+  })
+  .strict();
 
 const esqlTabSchema = dataTableSchema
   .extend({
     data_source: esqlDataSourceSchema,
   })
+  .strict()
   .meta({
     description: 'ES|QL (Elasticsearch Query Language) data source.',
   });
@@ -217,29 +227,34 @@ function withPanelSchemas<T extends z.ZodRawShape>(
         ...getDrilldownsSchema(DISCOVER_SUPPORTED_DRILLDOWN_TRIGGERS).shape,
         ...embeddableSchema.shape,
       })
+      .strict()
       .meta(allMeta);
   };
 }
 
-const discoverSessionByValuePropsSchema = z.object({
-  tabs: z.array(tabSchema).min(1).max(1).meta({
-    description:
-      'Inline tab configuration. Used when no `ref_id` is set. Currently supports one tab.',
-  }),
-});
+const discoverSessionByValuePropsSchema = z
+  .object({
+    tabs: z.array(tabSchema).min(1).max(1).meta({
+      description:
+        'Inline tab configuration. Used when no `ref_id` is set. Currently supports one tab.',
+    }),
+  })
+  .strict();
 const getDiscoverSessionByValueEmbeddableSchema = withPanelSchemas(
   discoverSessionByValuePropsSchema,
   BY_VALUE_SCHEMA_META
 );
 
-const discoverSessionByReferencePropsSchema = z.object({
-  ref_id: z.string(),
-  selected_tab_id: z.string().optional().meta({
-    description:
-      'Tab to select from the referenced saved object. If omitted, defaults to the first tab.',
-  }),
-  overrides: panelOverridesSchema,
-});
+const discoverSessionByReferencePropsSchema = z
+  .object({
+    ref_id: z.string(),
+    selected_tab_id: z.string().optional().meta({
+      description:
+        'Tab to select from the referenced saved object. If omitted, defaults to the first tab.',
+    }),
+    overrides: panelOverridesSchema,
+  })
+  .strict();
 const getDiscoverSessionByReferenceEmbeddableSchema = withPanelSchemas(
   discoverSessionByReferencePropsSchema,
   BY_REF_SCHEMA_META

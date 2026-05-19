@@ -11,25 +11,33 @@ import { z } from '@kbn/zod';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { BY_REF_SCHEMA_META, BY_VALUE_SCHEMA_META } from '@kbn/presentation-publishing-schemas';
 
-export const markdownByValueStateSchema = z.object({
-  content: z.string(),
-  settings: z.object({
-    open_links_in_new_tab: z.boolean().default(true),
-  }),
-});
+export const markdownByValueStateSchema = z
+  .object({
+    content: z.string(),
+    settings: z
+      .object({
+        open_links_in_new_tab: z.boolean().default(true),
+      })
+      .strict(),
+  })
+  .strict();
 
-const markdownByReferenceStateSchema = z.object({
-  ref_id: z.string().meta({
-    description: 'The unique identifier of the markdown library item.',
-  }),
-});
+const markdownByReferenceStateSchema = z
+  .object({
+    ref_id: z.string().meta({
+      description: 'The unique identifier of the markdown library item.',
+    }),
+  })
+  .strict();
 
 export const markdownByValueEmbeddableSchema = markdownByValueStateSchema
   .extend(serializedTitlesSchema.shape)
+  .strict()
   .meta(BY_VALUE_SCHEMA_META);
 
 const markdownByReferenceEmbeddableSchema = markdownByReferenceStateSchema
   .extend(serializedTitlesSchema.shape)
+  .strict()
   .meta(BY_REF_SCHEMA_META);
 
 export const markdownEmbeddableSchema = z

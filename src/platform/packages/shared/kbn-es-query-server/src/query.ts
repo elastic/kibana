@@ -20,10 +20,12 @@ export const querySchema = z
     ]),
     language: z.string(),
   })
+  .strict()
   .meta({ id: 'kbn-es-query-server-querySchema' });
 
 export const aggregateQuerySchema = z
   .object({
     esql: z.string(),
   })
+  .strict()
   .meta({ id: 'kbn-es-query-server-aggregateQuerySchema' });

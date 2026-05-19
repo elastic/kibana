@@ -12,11 +12,14 @@ import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 
 export function getUpdateResponseBodySchema(isDashboardAppRequest: boolean) {
-  return z.object({
-    id: z.string().meta({
-      description: 'The unique ID of the dashboard, as returned by the create or search endpoints.',
-    }),
-    data: getDashboardStateSchema(isDashboardAppRequest),
-    meta: asCodeMetaSchema,
-  });
+  return z
+    .object({
+      id: z.string().meta({
+        description:
+          'The unique ID of the dashboard, as returned by the create or search endpoints.',
+      }),
+      data: getDashboardStateSchema(isDashboardAppRequest),
+      meta: asCodeMetaSchema,
+    })
+    .strict();
 }

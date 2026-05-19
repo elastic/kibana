@@ -10,18 +10,22 @@ import { z } from '@kbn/zod';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { SLO_ALERTS_SUPPORTED_TRIGGERS } from '../../../common/embeddables/alerts/constants';
 
-const sloItemSchema = z.object({
-  slo_id: z.string().meta({ description: 'SLO ID' }),
-  slo_instance_id: z.string().default('*').meta({ description: 'SLO instance ID' }),
-});
+const sloItemSchema = z
+  .object({
+    slo_id: z.string().meta({ description: 'SLO ID' }),
+    slo_instance_id: z.string().default('*').meta({ description: 'SLO instance ID' }),
+  })
+  .strict();
 
-const AlertsCustomSchema = z.object({
-  slos: z
-    .array(sloItemSchema)
-    .max(100)
-    .default([])
-    .meta({ description: 'List of SLOs to display alerts for' }),
-});
+const AlertsCustomSchema = z
+  .object({
+    slos: z
+      .array(sloItemSchema)
+      .max(100)
+      .default([])
+      .meta({ description: 'List of SLOs to display alerts for' }),
+  })
+  .strict();
 
 export const getAlertsEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => {
   return z
@@ -30,6 +34,7 @@ export const getAlertsEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSche
       ...getDrilldownsSchema(SLO_ALERTS_SUPPORTED_TRIGGERS).shape,
       ...serializedTitlesSchema.shape,
     })
+    .strict()
     .meta({
       id: 'slo-alerts-embeddable',
       description: 'SLO Alerts embeddable schema',

@@ -23,6 +23,7 @@ const regionMapConfigRegionOptionsShape = {
       boundaries: z.string().meta({ description: 'EMS boundaries' }),
       join: z.string().meta({ description: 'EMS join field' }),
     })
+    .strict()
     .optional(),
 };
 
@@ -41,9 +42,10 @@ export const regionMapConfigSchemaNoESQL = z
      * Configure how to break down to regions
      */
     region: getBucketsWithChartDimensionSchema('regionMapRegion').and(
-      z.object(regionMapConfigRegionOptionsShape)
+      z.object(regionMapConfigRegionOptionsShape).strict()
     ),
   })
+  .strict()
   .meta({
     id: 'regionMapNoESQL',
     title: 'Region Map (DSL)',
@@ -64,8 +66,9 @@ export const regionMapConfigSchemaESQL = z
     /**
      * Configure how to break down to regions
      */
-    region: esqlColumnSchema.extend(regionMapConfigRegionOptionsShape),
+    region: esqlColumnSchema.extend(regionMapConfigRegionOptionsShape).strict(),
   })
+  .strict()
   .meta({
     id: 'regionMapESQL',
     title: 'Region Map (ES|QL)',

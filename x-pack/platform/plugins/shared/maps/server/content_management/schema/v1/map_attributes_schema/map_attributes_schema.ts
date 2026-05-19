@@ -18,19 +18,21 @@ export const mapCenterSchema = z
   })
   .strict();
 
-export const adhocDataViewSchema = z.object({
-  allowHidden: z.boolean().optional(),
-  id: z.string(),
-  name: z.string().optional().meta({
-    description: 'Human readable name used to differentiate the data view.',
-  }),
-  timeFieldName: z.string().optional(),
-  title: z.string().meta({
-    description:
-      'Contrary to its name, this property sets the index pattern of the data view. (e.g. `logs-*,metrics-*`)',
-  }),
-  // TODO runtime fields is missing
-});
+export const adhocDataViewSchema = z
+  .object({
+    allowHidden: z.boolean().optional(),
+    id: z.string(),
+    name: z.string().optional().meta({
+      description: 'Human readable name used to differentiate the data view.',
+    }),
+    timeFieldName: z.string().optional(),
+    title: z.string().meta({
+      description:
+        'Contrary to its name, this property sets the index pattern of the data view. (e.g. `logs-*,metrics-*`)',
+    }),
+    // TODO runtime fields is missing
+  })
+  .strict();
 
 export const mapAttributesSchema = z
   .object({

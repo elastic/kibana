@@ -28,9 +28,11 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
       version: INTERNAL_API_VERSION,
       validate: {
         request: {
-          params: z.object({
-            id: asCodeIdSchema,
-          }),
+          params: z
+            .object({
+              id: asCodeIdSchema,
+            })
+            .strict(),
           body: updateRequestBodySchema,
         },
         response: {

@@ -18,14 +18,17 @@ const rangeKeySchema = z
     to: rangeValueSchema,
     ranges: z
       .array(
-        z.object({
-          from: rangeValueSchema,
-          to: rangeValueSchema,
-          label: z.string(),
-        })
+        z
+          .object({
+            from: rangeValueSchema,
+            to: rangeValueSchema,
+            label: z.string(),
+          })
+          .strict()
       )
       .max(100),
   })
+  .strict()
   .meta({ id: 'range_key', title: 'Range Key' });
 
 const multiFieldKeySchema = z
@@ -33,6 +36,7 @@ const multiFieldKeySchema = z
     type: z.literal('multi_field_key'),
     keys: z.array(z.string()).max(100),
   })
+  .strict()
   .meta({ id: 'multi_field_key', title: 'Multi Field Key' });
 
 export const serializedValueSchema = z.union([

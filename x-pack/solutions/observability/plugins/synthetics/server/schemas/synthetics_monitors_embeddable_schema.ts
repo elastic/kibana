@@ -12,15 +12,17 @@ import { monitorFiltersSchema } from './common_schemas';
 /**
  * Schema for the custom state of the monitors embeddable
  */
-const monitorsCustomStateSchema = z.object({
-  filters: monitorFiltersSchema.optional(),
-  view: z
-    .union([z.literal('cardView'), z.literal('compactView')])
-    .optional()
-    .meta({
-      description: 'View mode for the monitors embeddable (defaults to cardView)',
-    }),
-});
+const monitorsCustomStateSchema = z
+  .object({
+    filters: monitorFiltersSchema.optional(),
+    view: z
+      .union([z.literal('cardView'), z.literal('compactView')])
+      .optional()
+      .meta({
+        description: 'View mode for the monitors embeddable (defaults to cardView)',
+      }),
+  })
+  .strict();
 
 /**
  * Complete schema for the Synthetics Monitors embeddable
@@ -31,6 +33,7 @@ export const syntheticsMonitorsEmbeddableSchema = z
     ...serializedTitlesSchema.shape,
     ...monitorsCustomStateSchema.shape,
   })
+  .strict()
   .meta({
     description: 'Synthetics monitors embeddable schema',
   });

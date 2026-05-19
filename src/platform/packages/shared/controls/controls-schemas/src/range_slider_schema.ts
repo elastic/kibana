@@ -16,10 +16,12 @@ export const rangeValueSchema = z.array(z.string()).length(2).meta({
     'The selected range as a two-element array of strings representing the lower and upper bound values, for example `["10", "50"]`.',
 });
 
-export const rangeSliderControlSchema = z.object({
-  ...dataControlSchema.shape,
-  value: rangeValueSchema.optional(),
-  step: z.number().min(0).default(DEFAULT_RANGE_SLIDER_STATE.step).meta({
-    description: 'The step size between selectable range values.',
-  }),
-});
+export const rangeSliderControlSchema = z
+  .object({
+    ...dataControlSchema.shape,
+    value: rangeValueSchema.optional(),
+    step: z.number().min(0).default(DEFAULT_RANGE_SLIDER_STATE.step).meta({
+      description: 'The step size between selectable range values.',
+    }),
+  })
+  .strict();

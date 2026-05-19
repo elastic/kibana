@@ -36,10 +36,12 @@ export function initRoutes(coreSetup: CoreSetup<StartDeps>, logger: Logger) {
         version: '1',
         validate: {
           request: {
-            params: z.object({
-              fontstack: z.string(),
-              range: z.string(),
-            }),
+            params: z
+              .object({
+                fontstack: z.string(),
+                range: z.string(),
+              })
+              .strict(),
           },
         },
       },
@@ -82,9 +84,11 @@ export function initRoutes(coreSetup: CoreSetup<StartDeps>, logger: Logger) {
         version: '1',
         validate: {
           request: {
-            query: z.object({
-              indexPatternTitle: z.string(),
-            }),
+            query: z
+              .object({
+                indexPatternTitle: z.string(),
+              })
+              .strict(),
           },
         },
       },

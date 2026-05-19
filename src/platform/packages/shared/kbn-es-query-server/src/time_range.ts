@@ -27,6 +27,7 @@ export const timeRangeSchema = z
         'The time range mode. Use `absolute` for fixed start and end timestamps. Use `relative` for [date math](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/common-options#date-math) expressions that are re-evaluated at query time (for example, `now-7d`).',
     }),
   })
+  .strict()
   .meta({
     id: 'kbn-es-query-server-timeRangeSchema',
     title: 'Time range',
@@ -37,10 +38,12 @@ export const absoluteTimeRangeSchema = timeRangeSchema
   .extend({
     mode: absoluteTimeRangeMode,
   })
+  .strict()
   .meta({ id: 'kbn-es-query-server-absoluteTimeRangeSchema' });
 
 export const relativeTimeRangeSchema = timeRangeSchema
   .extend({
     mode: relativeTimeRangeMode,
   })
+  .strict()
   .meta({ id: 'kbn-es-query-server-relativeTimeRangeSchema' });

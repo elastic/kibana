@@ -70,6 +70,7 @@ const compareToSchemaShared = z
       .optional()
       .meta({ description: 'When `true`, displays the secondary value.' }),
   })
+  .strict()
   .meta({
     id: 'metricChartCompareToShared',
     title: 'Compare To Shared',
@@ -86,6 +87,7 @@ const barBackgroundChartSchema = z
      */
     orientation: simpleOrientationSchema.optional(),
   })
+  .strict()
   .meta({
     id: 'metricBarBackgroundChart',
     title: 'Bar Background Chart',
@@ -94,15 +96,19 @@ const barBackgroundChartSchema = z
 
 export const complementaryVizSchemaNoESQL = z
   .union([
-    barBackgroundChartSchema.extend({
-      /**
-       * Max value
-       */
-      max_value: metricOperationDefinitionSchema,
-    }),
-    z.object({
-      type: z.literal('trend'),
-    }),
+    barBackgroundChartSchema
+      .extend({
+        /**
+         * Max value
+         */
+        max_value: metricOperationDefinitionSchema,
+      })
+      .strict(),
+    z
+      .object({
+        type: z.literal('trend'),
+      })
+      .strict(),
   ])
   .meta({
     id: 'metricComplementaryViz',
@@ -119,6 +125,7 @@ export const complementaryVizSchemaESQL = barBackgroundChartSchema
      */
     max_value: esqlColumnSchema,
   })
+  .strict()
   .meta({ id: 'metricComplementaryBar', title: 'Complementary Bar' });
 
 const metricConfigBackgroundChartShapeNoESQL = {
@@ -178,6 +185,7 @@ const metricStylingSchema = z
             description: 'Icon alignment. Accepted values: `left`, `right`. Defaults to `right`.',
           }),
       })
+      .strict()
       .optional()
       .meta({
         id: 'metricIconConfig',
@@ -214,6 +222,7 @@ const metricStylingSchema = z
                   'Horizontal alignment for the title and subtitle text. Accepted values: `left`, `center`, `right`. Defaults to `left`.',
               }),
           })
+          .strict()
           .optional()
           .meta({ description: 'Labels (title and subtitle) configuration' }),
         /**
@@ -249,9 +258,11 @@ const metricStylingSchema = z
                   "Controls how the primary value text is sized within the panel. 'auto' selects a font size from predefined breakpoints based on panel height, then shrinks if the text overflows horizontally. 'fill' scales the text to be as large as possible, filling all available space.",
               }),
           })
+          .strict()
           .optional()
           .meta({ description: 'Primary metric value configuration' }),
       })
+      .strict()
       .optional(),
     secondary: z
       .object({
@@ -278,6 +289,7 @@ const metricStylingSchema = z
                 'Label placement relative to the secondary metric value (before or after).',
             }),
           })
+          .strict()
           .optional(),
         value: z
           .object({
@@ -295,11 +307,14 @@ const metricStylingSchema = z
                   'Alignment for secondary values. Accepted values: `left`, `center`, `right`. Defaults to `right`.',
               }),
           })
+          .strict()
           .optional()
           .meta({ description: 'Secondary metric value configuration' }),
       })
+      .strict()
       .optional(),
   })
+  .strict()
   .meta({
     id: 'metricStyling',
     description: 'Visual chart styling options',
@@ -343,11 +358,13 @@ const metricConfigSecondaryMetricOptionsShape = {
           to: z.literal('baseline'),
           baseline: z.number().default(0).meta({ description: 'Baseline value.' }),
         })
+        .strict()
         .meta({ id: 'metricCompareToBaseline', title: 'Compare To Baseline' }),
       compareToSchemaShared
         .extend({
           to: z.literal('primary'),
         })
+        .strict()
         .meta({ id: 'metricCompareToPrimary', title: 'Compare To Primary' }),
     ])
     .optional()
@@ -412,15 +429,17 @@ function validateMetrics(metrics: (PrimaryMetricType | SecondaryMetricType)[]) {
 export const primaryMetricSchemaNoESQL = getMetricsWithChartDimensionSchemaWithRefBasedOps(
   'metricPrimary'
 ).and(
-  z.object({
-    ...metricConfigPrimaryMetricOptionsShape,
-    ...metricConfigBackgroundChartShapeNoESQL,
-  })
+  z
+    .object({
+      ...metricConfigPrimaryMetricOptionsShape,
+      ...metricConfigBackgroundChartShapeNoESQL,
+    })
+    .strict()
 );
 
 const secondaryMetricSchemaNoESQL = getMetricsWithChartDimensionSchemaWithRefBasedOps(
   'metricSecondary'
-).and(z.object(metricConfigSecondaryMetricOptionsShape));
+).and(z.object(metricConfigSecondaryMetricOptionsShape).strict());
 
 export const metricConfigSchemaNoESQL = z
   .object({
@@ -451,9 +470,10 @@ export const metricConfigSchemaNoESQL = z
      * Configure how to break down the metric (e.g. show one metric per term).
      */
     breakdown_by: getBucketsWithChartDimensionSchema('metricBreakdown')
-      .and(z.object(metricConfigBreakdownByOptionsShape))
+      .and(z.object(metricConfigBreakdownByOptionsShape).strict())
       .optional(),
   })
+  .strict()
   .superRefine(({ metrics, breakdown_by }, ctx) => {
     const primaryMetric = metrics.find((metric) => isPrimaryMetric(metric));
 
@@ -475,11 +495,13 @@ export const metricConfigSchemaNoESQL = z
 
 const primaryMetricESQL = esqlColumnWithFormatSchema
   .extend(metricConfigPrimaryMetricOptionsShape)
-  .extend(metricConfigBackgroundChartShapeESQL);
+  .strict()
+  .extend(metricConfigBackgroundChartShapeESQL)
+  .strict();
 
-const secondaryMetricESQL = esqlColumnWithFormatSchema.extend(
-  metricConfigSecondaryMetricOptionsShape
-);
+const secondaryMetricESQL = esqlColumnWithFormatSchema
+  .extend(metricConfigSecondaryMetricOptionsShape)
+  .strict();
 
 export const metricConfigSchemaESQL = z
   .object({
@@ -508,8 +530,12 @@ export const metricConfigSchemaESQL = z
     /**
      * Configure how to break down the metric (e.g. show one metric per term).
      */
-    breakdown_by: esqlColumnWithFormatSchema.extend(metricConfigBreakdownByOptionsShape).optional(),
+    breakdown_by: esqlColumnWithFormatSchema
+      .extend(metricConfigBreakdownByOptionsShape)
+      .strict()
+      .optional(),
   })
+  .strict()
   .superRefine(({ metrics, breakdown_by }, ctx) => {
     const primaryMetric = metrics.find((metric) => isPrimaryMetric(metric));
 

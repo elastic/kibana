@@ -11,8 +11,10 @@ import { z } from '@kbn/zod';
 import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
 import { markdownLibraryItemSchema } from '../schema';
 
-export const readResponseBodySchema = z.object({
-  id: z.string(),
-  data: markdownLibraryItemSchema,
-  meta: asCodeMetaSchema,
-});
+export const readResponseBodySchema = z
+  .object({
+    id: z.string(),
+    data: markdownLibraryItemSchema,
+    meta: asCodeMetaSchema,
+  })
+  .strict();

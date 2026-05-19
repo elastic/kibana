@@ -25,12 +25,14 @@ import {
   LINKS_VERTICAL_LAYOUT,
 } from '../../../../common/content_management/v1/constants';
 
-const baseLinkSchema = z.object({
-  label: z
-    .string()
-    .optional()
-    .meta({ description: 'The label of the link to be displayed in the UI' }),
-});
+const baseLinkSchema = z
+  .object({
+    label: z
+      .string()
+      .optional()
+      .meta({ description: 'The label of the link to be displayed in the UI' }),
+  })
+  .strict();
 
 export const dashboardLinkSchema = baseLinkSchema
   .extend({
@@ -38,6 +40,7 @@ export const dashboardLinkSchema = baseLinkSchema
     type: z.literal(DASHBOARD_LINK_TYPE),
     options: dashboardNavigationOptionsSchema,
   })
+  .strict()
   .meta({
     id: `kbn-link-panel-type-${DASHBOARD_LINK_TYPE}`,
   });
@@ -60,6 +63,7 @@ export const externalLinkSchema = baseLinkSchema
     destination: z.string().meta({ description: 'The external URL to link to' }),
     options: externalLinkOptionsSchema,
   })
+  .strict()
   .meta({
     id: `kbn-link-type-${EXTERNAL_LINK_TYPE}`,
   });
@@ -93,16 +97,20 @@ export const linksSearchOptionsSchema = z
   .strict()
   .optional();
 
-export const linksCreateOptionsSchema = z.object({
-  overwrite: createOptionsSchema.shape.overwrite,
-});
+export const linksCreateOptionsSchema = z
+  .object({
+    overwrite: createOptionsSchema.shape.overwrite,
+  })
+  .strict();
 
 // update references needed because visualize listing table uses content management
 // to update title/description/tags and tags passes references in this use case
 // TODO remove linksUpdateOptionsSchema once visualize listing table updated to pass in tags without references
-export const linksUpdateOptionsSchema = z.object({
-  references: updateOptionsSchema.shape.references,
-});
+export const linksUpdateOptionsSchema = z
+  .object({
+    references: updateOptionsSchema.shape.references,
+  })
+  .strict();
 
 export const linksGetResultSchema = objectTypeToGetResultSchema(linksSavedObjectSchema);
 export const linksCreateResultSchema = createResultSchema(linksSavedObjectSchema);

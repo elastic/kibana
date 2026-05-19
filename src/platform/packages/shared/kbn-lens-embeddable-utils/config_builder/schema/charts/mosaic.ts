@@ -35,6 +35,7 @@ const mosaicConfigSharedShape = {
       visibility: legendVisibilitySchemaWithAuto,
       size: legendSizeSchema,
     })
+    .strict()
     .optional()
     .meta({
       id: 'mosaicLegend',
@@ -47,30 +48,33 @@ const mosaicStylingSchema = z
   .object({
     values: valueDisplaySchema,
   })
+  .strict()
   .meta({
     id: 'mosaicStyling',
     title: 'Mosaic styling',
     description: 'Visual chart styling options',
   });
 
-const partitionConfigBreakdownByOptionsSchema = z.object({
-  /**
-   * Color configuration: color mapping
-   */
-  color: colorMappingSchema.optional(),
-  /**
-   * Collapse by function. This parameter is used to collapse the
-   * metric chart when the number of columns is bigger than the
-   * number of columns specified in the columns parameter.
-   * Possible values:
-   * - 'avg': Collapse by average
-   * - 'sum': Collapse by sum
-   * - 'max': Collapse by max
-   * - 'min': Collapse by min
-   * - 'none': Do not collapse
-   */
-  collapse_by: collapseBySchema.optional(),
-});
+const partitionConfigBreakdownByOptionsSchema = z
+  .object({
+    /**
+     * Color configuration: color mapping
+     */
+    color: colorMappingSchema.optional(),
+    /**
+     * Collapse by function. This parameter is used to collapse the
+     * metric chart when the number of columns is bigger than the
+     * number of columns specified in the columns parameter.
+     * Possible values:
+     * - 'avg': Collapse by average
+     * - 'sum': Collapse by sum
+     * - 'max': Collapse by max
+     * - 'min': Collapse by min
+     * - 'none': Do not collapse
+     */
+    collapse_by: collapseBySchema.optional(),
+  })
+  .strict();
 
 function validateMosaicGroupings({
   group_by,
@@ -125,7 +129,7 @@ export const mosaicConfigSchemaNoESQL = z
     group_breakdown_by: z
       .array(
         getBucketsWithChartDimensionSchema('mosaicGroupBreakdownBy').and(
-          z.object({ collapse_by: collapseBySchema.optional() })
+          z.object({ collapse_by: collapseBySchema.optional() }).strict()
         )
       )
       .min(1)
@@ -133,6 +137,7 @@ export const mosaicConfigSchemaNoESQL = z
       .optional()
       .meta({ description: 'Array of group breakdown dimensions (minimum 1)' }),
   })
+  .strict()
   .superRefine((data, ctx) => {
     const msg = validateMosaicGroupings(data);
     if (msg) {
@@ -165,19 +170,24 @@ export const mosaicConfigSchemaESQL = z
      * Configure how to break down the metric (e.g. show one metric per term). In ES|QL mode, uses column-based configuration.
      */
     group_by: z
-      .array(esqlColumnWithFormatSchema.extend(partitionConfigBreakdownByOptionsSchema.shape))
+      .array(
+        esqlColumnWithFormatSchema.extend(partitionConfigBreakdownByOptionsSchema.shape).strict()
+      )
       .min(1)
       .max(100)
       .optional()
       .meta({ description: 'Array of breakdown dimensions (minimum 1)' }),
     group_breakdown_by: z
-      .array(esqlColumnWithFormatSchema.extend(partitionConfigBreakdownByOptionsSchema.shape))
+      .array(
+        esqlColumnWithFormatSchema.extend(partitionConfigBreakdownByOptionsSchema.shape).strict()
+      )
       .min(1)
       .max(100)
 
       .optional()
       .meta({ description: 'Array of group breakdown dimensions (minimum 1)' }),
   })
+  .strict()
   .superRefine((data, ctx) => {
     const msg = validateMosaicGroupings(data);
     if (msg) {

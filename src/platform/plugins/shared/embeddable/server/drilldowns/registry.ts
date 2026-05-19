@@ -48,18 +48,20 @@ export function getDrilldownRegistry() {
         .map(([type, drilldownSetup]) =>
           drilldownSetup.schema
             .and(
-              z.object({
-                label: z.string(),
-                trigger: z.union(
-                  drilldownSetup.supportedTriggers
-                    // narrow drilldown triggers to only those that intersect with supported triggers
-                    .filter((trigger) => supportedTriggers.includes(trigger))
-                    // sort to ensure consistent order in OAS documenation
-                    .sort()
-                    .map((trigger) => z.literal(trigger))
-                ),
-                type: z.literal(type),
-              })
+              z
+                .object({
+                  label: z.string(),
+                  trigger: z.union(
+                    drilldownSetup.supportedTriggers
+                      // narrow drilldown triggers to only those that intersect with supported triggers
+                      .filter((trigger) => supportedTriggers.includes(trigger))
+                      // sort to ensure consistent order in OAS documenation
+                      .sort()
+                      .map((trigger) => z.literal(trigger))
+                  ),
+                  type: z.literal(type),
+                })
+                .strict()
             )
             .meta({ title: type })
         );
@@ -70,9 +72,11 @@ export function getDrilldownRegistry() {
         );
       }
 
-      return z.object({
-        drilldowns: z.array(z.union(drilldownSchemas)).max(100).optional(),
-      });
+      return z
+        .object({
+          drilldowns: z.array(z.union(drilldownSchemas)).max(100).optional(),
+        })
+        .strict();
     },
   };
 }

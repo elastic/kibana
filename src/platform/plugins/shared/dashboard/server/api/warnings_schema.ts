@@ -27,6 +27,7 @@ const droppedPanelWarningSchema = z
       .optional()
       .meta({ description: 'Saved object references used by the dropped panel.' }),
   })
+  .strict()
   .meta({
     id: 'kbn-dashboard-dropped-panel-warning',
     title: 'Dropped panel',

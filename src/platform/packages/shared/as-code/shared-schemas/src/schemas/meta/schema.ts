@@ -39,6 +39,7 @@ export const asCodeMetaSchema = z
       .optional()
       .meta({ description: 'Internal version identifier for optimistic concurrency control.' }),
   })
+  .strict()
   .meta({
     id: 'kbn-as-code-meta',
   });

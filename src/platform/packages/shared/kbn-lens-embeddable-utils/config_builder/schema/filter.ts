@@ -22,6 +22,7 @@ export const filterSchema = z
       description: 'A query expression in KQL or Lucene syntax',
     }),
   })
+  .strict()
   .meta({
     id: 'filterSimple',
     title: 'Filter',
@@ -42,6 +43,7 @@ export const filterWithLabelSchema = z
       description: 'Label for the filter',
     }),
   })
+  .strict()
   .meta({
     id: 'filterWithLabel',
     title: 'Filter with Label',

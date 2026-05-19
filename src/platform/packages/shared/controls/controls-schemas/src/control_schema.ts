@@ -10,26 +10,28 @@
 import { z } from '@kbn/zod';
 import { DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 
-export const controlTitleSchema = z.object({
-  title: z.string().optional().meta({ description: 'A human-readable title for the control.' }),
-});
+export const controlTitleSchema = z
+  .object({
+    title: z.string().optional().meta({ description: 'A human-readable title for the control.' }),
+  })
+  .strict();
 
-export const dataControlSchema = z.object({
-  ...controlTitleSchema.shape,
-  data_view_id: z
-    .string()
-    .min(1)
-    .meta({ description: 'The ID of the data view that provides field options for this control.' }), // this will generate a reference
-  field_name: z
-    .string()
-    .min(1)
-    .meta({ description: 'The name of the field in the data view that this control filters on.' }),
-  use_global_filters: z.boolean().default(DEFAULT_DATA_CONTROL_STATE.use_global_filters).meta({
-    description:
-      "When `true`, the control's available options are narrowed by the page's active filters. Defaults to `true`.",
-  }),
-  ignore_validations: z.boolean().default(DEFAULT_DATA_CONTROL_STATE.ignore_validations).meta({
-    description:
-      'When `true`, the control skips selection validation and does not report which selections are responsible for returning zero results. Defaults to `false`.',
-  }),
-});
+export const dataControlSchema = z
+  .object({
+    ...controlTitleSchema.shape,
+    data_view_id: z.string().min(1).meta({
+      description: 'The ID of the data view that provides field options for this control.',
+    }), // this will generate a reference
+    field_name: z.string().min(1).meta({
+      description: 'The name of the field in the data view that this control filters on.',
+    }),
+    use_global_filters: z.boolean().default(DEFAULT_DATA_CONTROL_STATE.use_global_filters).meta({
+      description:
+        "When `true`, the control's available options are narrowed by the page's active filters. Defaults to `true`.",
+    }),
+    ignore_validations: z.boolean().default(DEFAULT_DATA_CONTROL_STATE.ignore_validations).meta({
+      description:
+        'When `true`, the control skips selection validation and does not report which selections are responsible for returning zero results. Defaults to `false`.',
+    }),
+  })
+  .strict();

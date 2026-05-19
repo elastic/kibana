@@ -12,8 +12,10 @@ import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { warningsSchema } from '../warnings_schema';
 
 export function getSanitizeResponseBodySchema() {
-  return z.object({
-    data: getDashboardStateSchema(false),
-    warnings: warningsSchema.optional(),
-  });
+  return z
+    .object({
+      data: getDashboardStateSchema(false),
+      warnings: warningsSchema.optional(),
+    })
+    .strict();
 }

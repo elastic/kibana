@@ -33,6 +33,7 @@ export const dataViewReferenceSchema = z
         'The id of the Kibana data view to use as the data source. Example: "my-data-view".',
     }),
   })
+  .strict()
   .meta({ id: 'kbn-data-view-reference-schema', title: 'Data view reference' });
 
 export const dataViewSpecSchema = z
@@ -42,6 +43,7 @@ export const dataViewSpecSchema = z
     time_field: timeFieldSchema,
     field_settings: z.record(fieldSettingsFieldNameSchema, fieldSettingsSchema).optional(),
   })
+  .strict()
   .meta({ id: 'kbn-data-view-spec-schema', title: 'Data view inline spec' });
 
 export const dataViewSchema = z.discriminatedUnion('type', [

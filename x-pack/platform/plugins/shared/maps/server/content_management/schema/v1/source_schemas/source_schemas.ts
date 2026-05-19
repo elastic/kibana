@@ -90,10 +90,12 @@ export const XYZTMSSourceSchema = z
     description: 'Raster source from Tile Map Service (TMS)',
   });
 
-export const MVTFieldSchema = z.object({
-  name: z.string(),
-  type: z.union([z.literal(MVT_FIELD_TYPE.NUMBER), z.literal(MVT_FIELD_TYPE.STRING)]),
-});
+export const MVTFieldSchema = z
+  .object({
+    name: z.string(),
+    type: z.union([z.literal(MVT_FIELD_TYPE.NUMBER), z.literal(MVT_FIELD_TYPE.STRING)]),
+  })
+  .strict();
 
 export const TiledSingleLayerVectorSourceSchema = z
   .object({

@@ -57,6 +57,7 @@ const sortingSchema = z
           .meta({ description: 'Index of the column or row to sort by (0-based).' }),
         direction: directionSchema.meta({ description: 'Sort direction.' }),
       })
+      .strict()
       .meta({ description: 'Sort by a metric or row column' }),
     z
       .object({
@@ -70,6 +71,7 @@ const sortingSchema = z
         }),
         direction: directionSchema.meta({ description: 'Sort direction.' }),
       })
+      .strict()
       .meta({
         description:
           'Sort by a pivoted metric column (created when metrics are pivoted by split_metrics_by)',
@@ -102,11 +104,13 @@ const datatableStylingSchema = z
           .object({
             header: z
               .union([
-                z.object({ type: z.literal('auto') }),
-                z.object({
-                  type: z.literal('custom'),
-                  max_lines: z.number().min(1).max(5).default(DEFAULT_HEADER_ROW_HEIGHT_LINES),
-                }),
+                z.object({ type: z.literal('auto') }).strict(),
+                z
+                  .object({
+                    type: z.literal('custom'),
+                    max_lines: z.number().min(1).max(5).default(DEFAULT_HEADER_ROW_HEIGHT_LINES),
+                  })
+                  .strict(),
               ])
               .optional()
               .meta({
@@ -114,19 +118,23 @@ const datatableStylingSchema = z
               }),
             value: z
               .union([
-                z.object({ type: z.literal('auto') }),
-                z.object({
-                  type: z.literal('custom'),
-                  lines: z.number().min(1).max(20).default(DEFAULT_ROW_HEIGHT_LINES),
-                }),
+                z.object({ type: z.literal('auto') }).strict(),
+                z
+                  .object({
+                    type: z.literal('custom'),
+                    lines: z.number().min(1).max(20).default(DEFAULT_ROW_HEIGHT_LINES),
+                  })
+                  .strict(),
               ])
               .optional()
               .meta({
                 description: 'Number of lines to display per table body cell.',
               }),
           })
+          .strict()
           .optional(),
       })
+      .strict()
       .optional()
       .meta({
         id: 'datatableDensity',
@@ -153,114 +161,125 @@ const datatableStylingSchema = z
       .object({
         visible: z.boolean().meta({ description: 'When `true`, displays row numbers.' }),
       })
+      .strict()
       .optional()
       .meta({
         description: 'Configuration for row numbers',
       }),
   })
+  .strict()
   .meta({
     id: 'datatableStyling',
     title: 'Datatable styling',
     description: 'Visual chart styling options',
   });
 
-const datatableConfigCommonOptionsSchema = z.object({
-  /**
-   * Where to apply the color (background, value or badge)
-   */
-  apply_color_to: applyColorToDatatableSchema.optional(),
-  /**
-   * Show the column
-   */
-  visible: z
-    .boolean()
-    .default(true)
-    .optional()
-    .meta({ description: 'When `false`, hides the column from the datatable.' }),
-  /**
-   * Column width in pixels
-   */
-  width: z.number().min(0).optional().meta({ description: 'Column width in pixels.' }),
-});
+const datatableConfigCommonOptionsSchema = z
+  .object({
+    /**
+     * Where to apply the color (background, value or badge)
+     */
+    apply_color_to: applyColorToDatatableSchema.optional(),
+    /**
+     * Show the column
+     */
+    visible: z
+      .boolean()
+      .default(true)
+      .optional()
+      .meta({ description: 'When `false`, hides the column from the datatable.' }),
+    /**
+     * Column width in pixels
+     */
+    width: z.number().min(0).optional().meta({ description: 'Column width in pixels.' }),
+  })
+  .strict();
 
-const datatableConfigRowsOptionsNoESQLSchema = datatableConfigCommonOptionsSchema.extend({
-  /**
-   * Alignment of the rows
-   */
-  alignment: horizontalAlignmentSchema.default('left').optional().meta({
-    description: 'Alignment of the rows.',
-  }),
-  /**
-   * Color configuration
-   */
-  color: z.union([colorMappingSchema, autoColorSchema]).default(AUTO_COLOR).optional(),
-  /**
-   * Whether to enable the one click filter
-   */
-  click_filter: z
-    .boolean()
-    .default(false)
-    .optional()
-    .meta({ description: 'When `true`, enables one-click filtering on cell values.' }),
-  /**
-   * Collapse by function. This parameter is used to collapse the
-   * metric chart when the number of columns is bigger than the
-   * number of columns specified in the columns parameter.
-   */
-  collapse_by: collapseBySchema.optional(),
-});
-
-const datatableConfigRowsOptionsESQLSchema = datatableConfigRowsOptionsNoESQLSchema.extend({
-  /**
-   * Color configuration
-   */
-  color: z
-    .union([colorByValueSchema, colorMappingSchema, autoColorSchema])
-    .default(AUTO_COLOR)
-    .optional()
-    .meta({
-      description:
-        'Color configuration for ESQL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
+const datatableConfigRowsOptionsNoESQLSchema = datatableConfigCommonOptionsSchema
+  .extend({
+    /**
+     * Alignment of the rows
+     */
+    alignment: horizontalAlignmentSchema.default('left').optional().meta({
+      description: 'Alignment of the rows.',
     }),
-});
+    /**
+     * Color configuration
+     */
+    color: z.union([colorMappingSchema, autoColorSchema]).default(AUTO_COLOR).optional(),
+    /**
+     * Whether to enable the one click filter
+     */
+    click_filter: z
+      .boolean()
+      .default(false)
+      .optional()
+      .meta({ description: 'When `true`, enables one-click filtering on cell values.' }),
+    /**
+     * Collapse by function. This parameter is used to collapse the
+     * metric chart when the number of columns is bigger than the
+     * number of columns specified in the columns parameter.
+     */
+    collapse_by: collapseBySchema.optional(),
+  })
+  .strict();
 
-const datatableConfigMetricsOptionsSchema = datatableConfigCommonOptionsSchema.extend({
-  /**
-   * Color configuration
-   */
-  color: z
-    .union([colorByValueSchema, colorMappingSchema, autoColorSchema])
-    .default(AUTO_COLOR)
-    .optional()
-    .meta({
-      description:
-        'Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
+const datatableConfigRowsOptionsESQLSchema = datatableConfigRowsOptionsNoESQLSchema
+  .extend({
+    /**
+     * Color configuration
+     */
+    color: z
+      .union([colorByValueSchema, colorMappingSchema, autoColorSchema])
+      .default(AUTO_COLOR)
+      .optional()
+      .meta({
+        description:
+          'Color configuration for ESQL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
+      }),
+  })
+  .strict();
+
+const datatableConfigMetricsOptionsSchema = datatableConfigCommonOptionsSchema
+  .extend({
+    /**
+     * Color configuration
+     */
+    color: z
+      .union([colorByValueSchema, colorMappingSchema, autoColorSchema])
+      .default(AUTO_COLOR)
+      .optional()
+      .meta({
+        description:
+          'Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
+      }),
+    /**
+     * Alignment of the columns
+     */
+    alignment: horizontalAlignmentSchema.default('right').optional().meta({
+      description: 'Alignment of the columns.',
     }),
-  /**
-   * Alignment of the columns
-   */
-  alignment: horizontalAlignmentSchema.default('right').optional().meta({
-    description: 'Alignment of the columns.',
-  }),
-  /**
-   * Summary configuration
-   */
-  summary: z
-    .object({
-      type: z
-        .union([
-          z.literal('sum'),
-          z.literal('avg'),
-          z.literal('count'),
-          z.literal('min'),
-          z.literal('max'),
-        ])
-        .meta({ description: 'Type of summary function to apply to the column.' }),
-      label: z.string().optional().meta({ description: 'Summary row label.' }),
-    })
-    .optional()
-    .meta({ description: 'Summary row configuration' }),
-});
+    /**
+     * Summary configuration
+     */
+    summary: z
+      .object({
+        type: z
+          .union([
+            z.literal('sum'),
+            z.literal('avg'),
+            z.literal('count'),
+            z.literal('min'),
+            z.literal('max'),
+          ])
+          .meta({ description: 'Type of summary function to apply to the column.' }),
+        label: z.string().optional().meta({ description: 'Summary row label.' }),
+      })
+      .strict()
+      .optional()
+      .meta({ description: 'Summary row configuration' }),
+  })
+  .strict();
 
 interface SortByValidationInput {
   metrics?: Array<{}>;
@@ -363,6 +382,7 @@ export const datatableConfigSchemaNoESQL = z
       .optional()
       .meta({ description: 'Array of operations to split the metric columns by' }),
   })
+  .strict()
 
   .superRefine((data, ctx) => {
     const msg = validateSortBy(data);
@@ -388,7 +408,7 @@ export const datatableConfigSchemaESQL = z
      */
     metrics: z
       .array(
-        esqlColumnWithFormatSchema.extend(datatableConfigMetricsOptionsSchema.shape).meta({
+        esqlColumnWithFormatSchema.extend(datatableConfigMetricsOptionsSchema.shape).strict().meta({
           id: 'datatableESQLMetric',
           title: 'Datatable Metric (ES|QL)',
         })
@@ -401,7 +421,7 @@ export const datatableConfigSchemaESQL = z
      * Row configuration, optional operations.
      */
     rows: z
-      .array(esqlColumnWithFormatSchema.extend(datatableConfigRowsOptionsESQLSchema.shape))
+      .array(esqlColumnWithFormatSchema.extend(datatableConfigRowsOptionsESQLSchema.shape).strict())
       .min(1)
       .max(50)
       .optional()
@@ -416,6 +436,7 @@ export const datatableConfigSchemaESQL = z
       .optional()
       .meta({ description: 'Array of operations to split the metric columns by' }),
   })
+  .strict()
   .superRefine((data, ctx) => {
     const sortByError = validateSortBy(data);
     if (sortByError) {

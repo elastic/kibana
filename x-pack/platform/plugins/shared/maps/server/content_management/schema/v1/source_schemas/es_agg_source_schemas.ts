@@ -21,37 +21,44 @@ const aggMaskSchema = z
     operator: z.union([z.literal(MASK_OPERATOR.ABOVE), z.literal(MASK_OPERATOR.BELOW)]),
     value: z.number(),
   })
+  .strict()
   .meta({
     description: 'Hide cluster when metric value meets mask criteria.',
   });
 
-export const countAggSchema = z.object({
-  label: z.string().optional(),
-  mask: aggMaskSchema.optional(),
-  type: z.literal(AGG_TYPE.COUNT),
-});
+export const countAggSchema = z
+  .object({
+    label: z.string().optional(),
+    mask: aggMaskSchema.optional(),
+    type: z.literal(AGG_TYPE.COUNT),
+  })
+  .strict();
 
-export const fieldedAggSchema = z.object({
-  field: z.string().optional(),
-  label: z.string().optional(),
-  mask: aggMaskSchema.optional(),
-  type: z.union([
-    z.literal(AGG_TYPE.UNIQUE_COUNT),
-    z.literal(AGG_TYPE.MAX),
-    z.literal(AGG_TYPE.MIN),
-    z.literal(AGG_TYPE.SUM),
-    z.literal(AGG_TYPE.AVG),
-    z.literal(AGG_TYPE.TERMS),
-  ]),
-});
+export const fieldedAggSchema = z
+  .object({
+    field: z.string().optional(),
+    label: z.string().optional(),
+    mask: aggMaskSchema.optional(),
+    type: z.union([
+      z.literal(AGG_TYPE.UNIQUE_COUNT),
+      z.literal(AGG_TYPE.MAX),
+      z.literal(AGG_TYPE.MIN),
+      z.literal(AGG_TYPE.SUM),
+      z.literal(AGG_TYPE.AVG),
+      z.literal(AGG_TYPE.TERMS),
+    ]),
+  })
+  .strict();
 
-export const percentileAggSchema = z.object({
-  field: z.string().optional(),
-  label: z.string().optional(),
-  mask: aggMaskSchema.optional(),
-  percentile: z.number().optional(),
-  type: z.literal(AGG_TYPE.PERCENTILE),
-});
+export const percentileAggSchema = z
+  .object({
+    field: z.string().optional(),
+    label: z.string().optional(),
+    mask: aggMaskSchema.optional(),
+    percentile: z.number().optional(),
+    type: z.literal(AGG_TYPE.PERCENTILE),
+  })
+  .strict();
 
 export const AggSchema = z.union([countAggSchema, fieldedAggSchema, percentileAggSchema]);
 

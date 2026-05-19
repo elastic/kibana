@@ -45,11 +45,13 @@ export function registerReadRoute(
       version: routeVersion,
       validate: () => ({
         request: {
-          params: z.object({
-            id: z.string().meta({
-              description: 'The dashboard ID, as returned by the create or search endpoints.',
-            }),
-          }),
+          params: z
+            .object({
+              id: z.string().meta({
+                description: 'The dashboard ID, as returned by the create or search endpoints.',
+              }),
+            })
+            .strict(),
         },
         response: {
           200: {

@@ -15,19 +15,22 @@ import {
 } from '../../../../../../common/constants';
 import { styleFieldSchema } from './style_field_schema';
 
-export const labelBorderSizeOptions = z.object({
-  size: z.union([
-    z.literal(LABEL_BORDER_SIZES.NONE),
-    z.literal(LABEL_BORDER_SIZES.SMALL),
-    z.literal(LABEL_BORDER_SIZES.MEDIUM),
-    z.literal(LABEL_BORDER_SIZES.LARGE),
-  ]),
-});
+export const labelBorderSizeOptions = z
+  .object({
+    size: z.union([
+      z.literal(LABEL_BORDER_SIZES.NONE),
+      z.literal(LABEL_BORDER_SIZES.SMALL),
+      z.literal(LABEL_BORDER_SIZES.MEDIUM),
+      z.literal(LABEL_BORDER_SIZES.LARGE),
+    ]),
+  })
+  .strict();
 
 export const labelBorderSizeSchema = z
   .object({
     options: labelBorderSizeOptions,
   })
+  .strict()
   .default({
     options: {
       size: LABEL_BORDER_SIZES.SMALL,
@@ -39,14 +42,17 @@ export const labelBorderSizeSchema = z
 
 export const labelPositionSchema = z
   .object({
-    options: z.object({
-      position: z.union([
-        z.literal(LABEL_POSITIONS.BOTTOM),
-        z.literal(LABEL_POSITIONS.CENTER),
-        z.literal(LABEL_POSITIONS.TOP),
-      ]),
-    }),
+    options: z
+      .object({
+        position: z.union([
+          z.literal(LABEL_POSITIONS.BOTTOM),
+          z.literal(LABEL_POSITIONS.CENTER),
+          z.literal(LABEL_POSITIONS.TOP),
+        ]),
+      })
+      .strict(),
   })
+  .strict()
   .default({
     options: {
       position: LABEL_POSITIONS.CENTER,
@@ -58,12 +64,15 @@ export const labelPositionSchema = z
 
 export const labelZoomRangeSchema = z
   .object({
-    options: z.object({
-      useLayerZoomRange: z.boolean(),
-      minZoom: z.number(),
-      maxZoom: z.number(),
-    }),
+    options: z
+      .object({
+        useLayerZoomRange: z.boolean(),
+        minZoom: z.number(),
+        maxZoom: z.number(),
+      })
+      .strict(),
   })
+  .strict()
   .default({
     options: {
       useLayerZoomRange: true,
@@ -75,26 +84,34 @@ export const labelZoomRangeSchema = z
     description: 'Configure to set the zoom range for which labels are displayed',
   });
 
-export const labelDynamicOptions = z.object({
-  field: styleFieldSchema.optional(),
-});
+export const labelDynamicOptions = z
+  .object({
+    field: styleFieldSchema.optional(),
+  })
+  .strict();
 
-export const labelStaticOptions = z.object({
-  value: z.string().meta({
-    description: 'Provided value displayed as feature label',
-  }),
-});
+export const labelStaticOptions = z
+  .object({
+    value: z.string().meta({
+      description: 'Provided value displayed as feature label',
+    }),
+  })
+  .strict();
 
 export const labelSchema = z
   .union([
-    z.object({
-      type: z.literal(STYLE_TYPE.STATIC),
-      options: labelStaticOptions,
-    }),
-    z.object({
-      type: z.literal(STYLE_TYPE.DYNAMIC),
-      options: labelDynamicOptions,
-    }),
+    z
+      .object({
+        type: z.literal(STYLE_TYPE.STATIC),
+        options: labelStaticOptions,
+      })
+      .strict(),
+    z
+      .object({
+        type: z.literal(STYLE_TYPE.DYNAMIC),
+        options: labelDynamicOptions,
+      })
+      .strict(),
   ])
   .default({
     type: STYLE_TYPE.STATIC,

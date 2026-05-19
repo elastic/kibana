@@ -25,6 +25,7 @@ export const dashboardNavigationOptionsSchema = z
         description: 'When enabled, the dashboard opens in a new browser tab.',
       }),
   })
+  .strict()
   .default(DEFAULT_DASHBOARD_NAVIGATION_OPTIONS);
 
 export type DashboardNavigationOptions = z.output<typeof dashboardNavigationOptionsSchema>;

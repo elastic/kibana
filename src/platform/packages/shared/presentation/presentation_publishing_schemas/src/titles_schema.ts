@@ -9,9 +9,11 @@
 
 import { z } from '@kbn/zod';
 
-export const serializedTitlesSchema = z.object({
-  description: z.string().optional(),
-  hide_title: z.boolean().optional(),
-  title: z.string().optional(),
-  hide_border: z.boolean().optional(),
-});
+export const serializedTitlesSchema = z
+  .object({
+    description: z.string().optional(),
+    hide_title: z.boolean().optional(),
+    title: z.string().optional(),
+    hide_border: z.boolean().optional(),
+  })
+  .strict();

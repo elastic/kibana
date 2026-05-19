@@ -47,6 +47,7 @@ export const savedDataViewSpecSchema = z
     time_field: timeFieldSchema,
     field_settings: z.record(fieldSettingsFieldNameSchema, savedFieldSettingsSchema).optional(),
   })
+  .strict()
   .meta({
     id: 'kbn-saved-data-view-spec-schema',
     title: 'Saved data view spec',

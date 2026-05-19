@@ -27,11 +27,13 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
       version: INTERNAL_API_VERSION,
       validate: {
         request: {
-          params: z.object({
-            id: z.string().meta({
-              description: 'A unique identifier for the markdown library item.',
-            }),
-          }),
+          params: z
+            .object({
+              id: z.string().meta({
+                description: 'A unique identifier for the markdown library item.',
+              }),
+            })
+            .strict(),
         },
         response: {
           200: {

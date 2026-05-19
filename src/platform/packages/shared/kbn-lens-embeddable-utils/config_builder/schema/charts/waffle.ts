@@ -42,6 +42,7 @@ const waffleConfigSharedShape = {
       visibility: legendVisibilitySchemaWithAuto,
       size: legendSizeSchema,
     })
+    .strict()
     .optional()
     .meta({
       id: 'waffleLegend',
@@ -54,6 +55,7 @@ const waffleStylingSchema = z
   .object({
     values: valueDisplaySchema,
   })
+  .strict()
 
   .meta({
     id: 'waffleStyling',
@@ -94,7 +96,7 @@ export const waffleConfigSchemaNoESQL = z
     metrics: z
       .array(
         getMetricsWithChartDimensionSchemaWithRefBasedOps('waffleMetric').and(
-          z.object(partitionConfigPrimaryMetricOptionsShape)
+          z.object(partitionConfigPrimaryMetricOptionsShape).strict()
         )
       )
       .min(1)
@@ -103,7 +105,7 @@ export const waffleConfigSchemaNoESQL = z
     group_by: z
       .array(
         getBucketsWithChartDimensionSchema('waffleGroupBy').and(
-          z.object(partitionConfigBreakdownByOptionsShape)
+          z.object(partitionConfigBreakdownByOptionsShape).strict()
         )
       )
       .min(1)
@@ -111,6 +113,7 @@ export const waffleConfigSchemaNoESQL = z
       .optional()
       .meta({ description: 'Array of breakdown dimensions (minimum 1)' }),
   })
+  .strict()
   .superRefine((data, ctx) => {
     const msg = validateMultipleMetricsCriteria(data);
     if (msg) {
@@ -135,17 +138,18 @@ export const waffleConfigSchemaESQL = z
     ...waffleConfigSharedShape,
     styling: waffleStylingSchema.optional(),
     metrics: z
-      .array(esqlColumnWithFormatSchema.extend(partitionConfigPrimaryMetricOptionsShape))
+      .array(esqlColumnWithFormatSchema.extend(partitionConfigPrimaryMetricOptionsShape).strict())
       .min(1)
       .max(100)
       .meta({ description: 'Array of metric configurations (minimum 1)' }),
     group_by: z
-      .array(esqlColumnWithFormatSchema.extend(partitionConfigBreakdownByOptionsShape))
+      .array(esqlColumnWithFormatSchema.extend(partitionConfigBreakdownByOptionsShape).strict())
       .min(1)
       .max(100)
       .optional()
       .meta({ description: 'Array of ES|QL breakdown columns (minimum 1)' }),
   })
+  .strict()
   .superRefine((data, ctx) => {
     const msg = validateMultipleMetricsCriteria(data);
     if (msg) {

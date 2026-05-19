@@ -26,11 +26,13 @@ export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContex
       version: INTERNAL_API_VERSION,
       validate: {
         request: {
-          params: z.object({
-            id: z.string().meta({
-              description: 'A unique identifier for the markdown library item.',
-            }),
-          }),
+          params: z
+            .object({
+              id: z.string().meta({
+                description: 'A unique identifier for the markdown library item.',
+              }),
+            })
+            .strict(),
         },
         response: {
           204: {

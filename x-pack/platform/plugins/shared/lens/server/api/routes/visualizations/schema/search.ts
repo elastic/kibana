@@ -14,23 +14,25 @@ import {
 } from '@kbn/as-code-shared-schemas';
 import { lensResponseItemSchema } from './common';
 
-export const lensSearchRequestQuerySchema = z.object({
-  fields: z.array(z.string()).max(100).optional().meta({
-    description:
-      'The saved object fields to include in each result. When omitted, all fields are returned.',
-  }),
-  search_fields: z
-    .union([z.string(), z.array(z.string()).max(100)])
-    .optional()
-    .meta({
+export const lensSearchRequestQuerySchema = z
+  .object({
+    fields: z.array(z.string()).max(100).optional().meta({
       description:
-        'The fields to match the `query` text against. Defaults to `title` when omitted.',
+        'The saved object fields to include in each result. When omitted, all fields are returned.',
     }),
-  query: z.string().optional().meta({
-    description: 'Text to match against `search_fields`.',
-  }),
-  ...asCodePaginationParamsSchema.shape,
-});
+    search_fields: z
+      .union([z.string(), z.array(z.string()).max(100)])
+      .optional()
+      .meta({
+        description:
+          'The fields to match the `query` text against. Defaults to `title` when omitted.',
+      }),
+    query: z.string().optional().meta({
+      description: 'Text to match against `search_fields`.',
+    }),
+    ...asCodePaginationParamsSchema.shape,
+  })
+  .strict();
 
 export const lensSearchResponseBodySchema = z
   .object({

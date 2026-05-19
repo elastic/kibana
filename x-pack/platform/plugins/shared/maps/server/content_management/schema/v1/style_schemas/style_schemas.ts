@@ -14,6 +14,7 @@ export const EMSVectorTileStyleSchema = z
     color: z.string(),
     type: z.literal(LAYER_STYLE_TYPE.EMS_VECTOR_TILE),
   })
+  .strict()
   .meta({
     description: 'Elastic Maps Service (EMS) Vector Tile style configuration.',
   });
@@ -35,6 +36,7 @@ export const heatmapStyleSchema = z
       .optional(),
     type: z.literal(LAYER_STYLE_TYPE.HEATMAP),
   })
+  .strict()
   .meta({
     description: 'Heatmap style configuration.',
   });

@@ -44,6 +44,7 @@ const tagcloudStylingSchema = z
           .default(LENS_TAGCLOUD_DEFAULT_STATE.maxFontSize)
           .meta({ description: 'Maximum font size.' }),
       })
+      .strict()
       .optional()
       .meta({ description: 'Font size range for tags.' }),
     /**
@@ -56,12 +57,14 @@ const tagcloudStylingSchema = z
           .default(LENS_TAGCLOUD_DEFAULT_STATE.showCaption)
           .meta({ description: 'When `true`, displays the caption.' }),
       })
+      .strict()
       .optional()
       .meta({
         description:
           'Caption configuration representing the metric and the tag_by operations labels',
       }),
   })
+  .strict()
   .meta({
     id: 'tagcloudStyling',
     title: 'Tag cloud styling',
@@ -84,9 +87,10 @@ export const tagcloudConfigSchemaNoESQL = z
      * Configure how to break down to tags
      */
     tag_by: getBucketsWithChartDimensionSchema('tagcloudTag').and(
-      z.object(tagcloudConfigTagsByOptionsShape)
+      z.object(tagcloudConfigTagsByOptionsShape).strict()
     ),
   })
+  .strict()
   .meta({
     id: 'tagcloudNoESQL',
     title: 'Tag Cloud Chart (DSL)',
@@ -107,8 +111,9 @@ export const tagcloudConfigSchemaESQL = z
     /**
      * Configure how to break down the metric (e.g. show one metric per term).
      */
-    tag_by: esqlColumnWithFormatSchema.extend(tagcloudConfigTagsByOptionsShape),
+    tag_by: esqlColumnWithFormatSchema.extend(tagcloudConfigTagsByOptionsShape).strict(),
   })
+  .strict()
   .meta({
     id: 'tagcloudESQL',
     title: 'Tag Cloud Chart (ES|QL)',

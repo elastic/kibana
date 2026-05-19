@@ -14,9 +14,11 @@ import { SYNTHETICS_STATS_SUPPORTED_TRIGGERS } from '../../common/embeddables/st
 /**
  * Schema for the custom state of the stats overview embeddable
  */
-export const statsOverviewCustomStateSchema = z.object({
-  filters: monitorFiltersSchema.optional(),
-});
+export const statsOverviewCustomStateSchema = z
+  .object({
+    filters: monitorFiltersSchema.optional(),
+  })
+  .strict();
 
 /**
  * Complete schema for the Synthetics Stats Overview embeddable
@@ -28,6 +30,7 @@ export function getStatsOverviewEmbeddableSchema(getDrilldownsSchema: GetDrilldo
       ...getDrilldownsSchema(SYNTHETICS_STATS_SUPPORTED_TRIGGERS).shape,
       ...statsOverviewCustomStateSchema.shape,
     })
+    .strict()
     .meta({
       description: 'Synthetics stats overview embeddable schema',
     });

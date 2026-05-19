@@ -26,6 +26,7 @@ const bulletShapeSchema = z
       defaultValue: 'horizontal',
     }),
   })
+  .strict()
   .meta({
     id: 'gaugeShapeBullet',
     title: 'Shape (Bullet)',
@@ -36,6 +37,7 @@ const circularShapeSchema = z
   .object({
     type: z.union([z.literal('circle'), z.literal('semi_circle'), z.literal('arc')]),
   })
+  .strict()
   .meta({
     id: 'gaugeShapeCircular',
     title: 'Shape (Circular)',
@@ -49,6 +51,7 @@ const gaugeStylingSchema = z
       .default({ type: 'bullet', orientation: 'horizontal' })
       .optional(),
   })
+  .strict()
   .meta({
     id: 'gaugeStyling',
     title: 'Gauge styling',
@@ -101,6 +104,7 @@ const gaugeConfigMetricOptionsShape = {
         .meta({ description: 'When `true`, displays the title.' }),
       text: z.string().optional().meta({ description: 'Title text.' }),
     })
+    .strict()
     .optional()
     .meta({ description: 'Title configuration' }),
   /**
@@ -134,6 +138,7 @@ const gaugeConfigMetricOptionsShape = {
         .optional()
         .meta({ description: 'Tick placement mode.' }),
     })
+    .strict()
 
     .optional()
     .meta({ description: 'Ticks configuration' }),
@@ -151,12 +156,15 @@ export const gaugeConfigSchemaNoESQL = z
      * Primary value configuration, must define operation.
      */
     metric: getMetricsWithChartDimensionSchema('gaugeMetric').and(
-      z.object({
-        ...gaugeConfigMetricOptionsShape,
-        ...gaugeConfigMetricInnerNoESQLOpsShape,
-      })
+      z
+        .object({
+          ...gaugeConfigMetricOptionsShape,
+          ...gaugeConfigMetricInnerNoESQLOpsShape,
+        })
+        .strict()
     ),
   })
+  .strict()
   .meta({
     id: 'gaugeNoESQL',
     title: 'Gauge Chart (DSL)',
@@ -173,11 +181,14 @@ export const gaugeConfigSchemaESQL = z
     /**
      * Primary value configuration, must define operation.
      */
-    metric: esqlColumnWithFormatSchema.extend({
-      ...gaugeConfigMetricOptionsShape,
-      ...gaugeConfigMetricInnerESQLOpsShape,
-    }),
+    metric: esqlColumnWithFormatSchema
+      .extend({
+        ...gaugeConfigMetricOptionsShape,
+        ...gaugeConfigMetricInnerESQLOpsShape,
+      })
+      .strict(),
   })
+  .strict()
   .meta({
     id: 'gaugeESQL',
     title: 'Gauge Chart (ES|QL)',

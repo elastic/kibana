@@ -12,7 +12,9 @@ import { z } from '@kbn/zod';
 import { markdownAttributesSchemaZod } from '../markdown_saved_object/schema/v1/v1';
 import { markdownByValueStateSchema } from '../embeddable/schemas';
 
-export const markdownLibraryItemSchema = z.object({
-  ...markdownAttributesSchemaZod.shape,
-  ...markdownByValueStateSchema.shape,
-});
+export const markdownLibraryItemSchema = z
+  .object({
+    ...markdownAttributesSchemaZod.shape,
+    ...markdownByValueStateSchema.shape,
+  })
+  .strict();

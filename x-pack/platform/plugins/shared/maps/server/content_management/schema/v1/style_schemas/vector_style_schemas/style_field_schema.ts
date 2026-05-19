@@ -8,7 +8,9 @@
 import { z } from '@kbn/zod';
 import { FIELD_ORIGIN } from '../../../../../../common/constants';
 
-export const styleFieldSchema = z.object({
-  name: z.string(),
-  origin: z.union([z.literal(FIELD_ORIGIN.SOURCE), z.literal(FIELD_ORIGIN.JOIN)]),
-});
+export const styleFieldSchema = z
+  .object({
+    name: z.string(),
+    origin: z.union([z.literal(FIELD_ORIGIN.SOURCE), z.literal(FIELD_ORIGIN.JOIN)]),
+  })
+  .strict();

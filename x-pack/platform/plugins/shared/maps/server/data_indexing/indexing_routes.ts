@@ -55,10 +55,12 @@ export function initIndexingRoutes({
         version: '1',
         validate: {
           request: {
-            body: z.object({
-              index: z.string(),
-              mappings: z.any(),
-            }),
+            body: z
+              .object({
+                index: z.string(),
+                mappings: z.any(),
+              })
+              .strict(),
           },
         },
       },
@@ -114,10 +116,12 @@ export function initIndexingRoutes({
         version: '1',
         validate: {
           request: {
-            body: z.object({
-              index: z.string(),
-              data: z.any(),
-            }),
+            body: z
+              .object({
+                index: z.string(),
+                data: z.any(),
+              })
+              .strict(),
           },
         },
       },
@@ -157,12 +161,16 @@ export function initIndexingRoutes({
         version: '1',
         validate: {
           request: {
-            params: z.object({
-              featureId: z.string(),
-            }),
-            body: z.object({
-              index: z.string(),
-            }),
+            params: z
+              .object({
+                featureId: z.string(),
+              })
+              .strict(),
+            body: z
+              .object({
+                index: z.string(),
+              })
+              .strict(),
           },
         },
       },
@@ -226,9 +234,11 @@ export function initIndexingRoutes({
         version: '1',
         validate: {
           request: {
-            query: z.object({
-              indexPattern: z.string(),
-            }),
+            query: z
+              .object({
+                indexPattern: z.string(),
+              })
+              .strict(),
           },
         },
       },
@@ -260,9 +270,11 @@ export function initIndexingRoutes({
         version: '1',
         validate: {
           request: {
-            query: z.object({
-              index: z.string(),
-            }),
+            query: z
+              .object({
+                index: z.string(),
+              })
+              .strict(),
           },
         },
       },

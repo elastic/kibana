@@ -10,6 +10,8 @@
 import { z } from '@kbn/zod';
 import { timeRangeSchema } from '@kbn/es-query-server';
 
-export const serializedTimeRangeSchema = z.object({
-  time_range: timeRangeSchema.optional(),
-});
+export const serializedTimeRangeSchema = z
+  .object({
+    time_range: timeRangeSchema.optional(),
+  })
+  .strict();

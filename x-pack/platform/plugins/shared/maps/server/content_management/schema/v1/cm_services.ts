@@ -34,12 +34,14 @@ export const mapsCreateOptionsSchema = z
   .object({
     references: referencesSchema.optional(),
   })
+  .strict()
   .optional();
 
 export const mapsUpdateOptionsSchema = z
   .object({
     references: referencesSchema.optional(),
   })
+  .strict()
   .optional();
 
 export const mapsGetResultSchema = objectTypeToGetResultSchema(mapSavedObjectSchema);

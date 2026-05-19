@@ -13,8 +13,10 @@ import { markdownLibraryItemSchema } from '../schema';
 
 export const createRequestBodySchema = markdownLibraryItemSchema;
 
-export const createResponseBodySchema = z.object({
-  id: z.string(),
-  data: markdownLibraryItemSchema,
-  meta: asCodeMetaSchema,
-});
+export const createResponseBodySchema = z
+  .object({
+    id: z.string(),
+    data: markdownLibraryItemSchema,
+    meta: asCodeMetaSchema,
+  })
+  .strict();

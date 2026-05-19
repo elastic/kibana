@@ -75,12 +75,14 @@ export function registerLensEmbeddableTransforms(
 }
 
 const getSharedPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
-  z.object({
-    references: referencesSchema.optional(),
-    ...serializedTimeRangeSchema.shape,
-    ...serializedTitlesSchema.shape,
-    ...getDrilldownsSchema(LENS_SUPPORTED_DRILLDOWN_TRIGGERS).shape,
-  });
+  z
+    .object({
+      references: referencesSchema.optional(),
+      ...serializedTimeRangeSchema.shape,
+      ...serializedTitlesSchema.shape,
+      ...getDrilldownsSchema(LENS_SUPPORTED_DRILLDOWN_TRIGGERS).shape,
+    })
+    .strict();
 
 export const getLensByValuePanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => {
   return lensApiConfigSchema
@@ -94,6 +96,7 @@ const getLensByRefPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType)
       ref_id: z.string(),
     })
     .extend(getSharedPanelSchema(getDrilldownsSchema).shape)
+    .strict()
     .meta(BY_REF_SCHEMA_META);
 
 export const getLensPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>

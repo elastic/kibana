@@ -45,6 +45,7 @@ const rangeSchema = z
         'Elasticsearch [date format](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/mapping-date-format) string applied when parsing date boundary values. For example, `strict_date_optional_time` or `epoch_millis`.',
     }),
   })
+  .strict()
   .meta({
     description: 'Boundary values for a range comparison.',
   });
@@ -64,28 +65,30 @@ const negatePropertySchema = z.boolean().optional().meta({
 /**
  * Common top-level properties shared by all as code filters
  */
-const commonBasePropertiesSchema = z.object({
-  disabled: z.boolean().optional().meta({
-    description:
-      'When `true`, the filter is inactive and does not affect query results. Defaults to `false`.',
-  }),
-  negate: negatePropertySchema,
-  controlled_by: z.string().optional().meta({
-    description:
-      'Identifier of the panel that manages this filter. When set, the filter is treated as owned by that panel.',
-  }),
-  data_view_id: z.string().optional().meta({
-    description: 'Identifier of the data view used as context for this filter.',
-  }),
-  label: z
-    .string()
-    .optional()
-    .meta({ description: 'Human-readable label for the filter, used for display purposes.' }),
-  is_multi_index: z.boolean().optional().meta({
-    description:
-      'When `true`, the filter can be applied across multiple indices. Defaults to `false`.',
-  }),
-});
+const commonBasePropertiesSchema = z
+  .object({
+    disabled: z.boolean().optional().meta({
+      description:
+        'When `true`, the filter is inactive and does not affect query results. Defaults to `false`.',
+    }),
+    negate: negatePropertySchema,
+    controlled_by: z.string().optional().meta({
+      description:
+        'Identifier of the panel that manages this filter. When set, the filter is treated as owned by that panel.',
+    }),
+    data_view_id: z.string().optional().meta({
+      description: 'Identifier of the data view used as context for this filter.',
+    }),
+    label: z
+      .string()
+      .optional()
+      .meta({ description: 'Human-readable label for the filter, used for display purposes.' }),
+    is_multi_index: z.boolean().optional().meta({
+      description:
+        'When `true`, the filter can be applied across multiple indices. Defaults to `false`.',
+    }),
+  })
+  .strict();
 
 // ====================================================================
 // FILTER CONDITION SCHEMAS
@@ -94,10 +97,12 @@ const commonBasePropertiesSchema = z.object({
 /**
  * Common field property for all filter conditions
  */
-const baseConditionSchema = z.object({
-  field: z.string().meta({ description: 'Name of the document field the condition evaluates.' }),
-  negate: negatePropertySchema,
-});
+const baseConditionSchema = z
+  .object({
+    field: z.string().meta({ description: 'Name of the document field the condition evaluates.' }),
+    negate: negatePropertySchema,
+  })
+  .strict();
 
 /**
  * Schema for 'is' operator with single value
@@ -119,6 +124,7 @@ const singleConditionSchema = baseConditionSchema
       ])
       .meta({ description: 'Single value to compare against the field.' }),
   })
+  .strict()
   .meta({
     description: 'Matches documents where `field` equals a single specified value.',
     title: ASCODE_FILTER_OPERATOR.IS,
@@ -141,6 +147,7 @@ const oneOfConditionSchema = baseConditionSchema
         description: 'Homogeneous array of values to match against the field.',
       }),
   })
+  .strict()
   .meta({
     description: 'Matches documents where `field` equals any value in a provided list.',
     title: ASCODE_FILTER_OPERATOR.IS_ONE_OF,
@@ -155,6 +162,7 @@ const rangeConditionSchema = baseConditionSchema
     operator: z.literal(ASCODE_FILTER_OPERATOR.RANGE),
     value: rangeSchema,
   })
+  .strict()
   .meta({
     description: 'Matches documents where `field` falls within a specified numeric or date range.',
     title: ASCODE_FILTER_OPERATOR.RANGE,
@@ -169,6 +177,7 @@ const existsConditionSchema = baseConditionSchema
     operator: z.literal(ASCODE_FILTER_OPERATOR.EXISTS),
     // value is intentionally omitted for exists operator
   })
+  .strict()
   .meta({
     description: 'Matches documents where `field` exists and contains a non-null value.',
     title: ASCODE_FILTER_OPERATOR.EXISTS,
@@ -207,6 +216,7 @@ export const asCodeConditionFilterSchema = commonBasePropertiesSchema
     type: z.literal(ASCODE_FILTER_TYPE.CONDITION),
     condition: conditionSchema,
   })
+  .strict()
   .meta({
     description:
       'A filter that evaluates a single field condition such as equality, range, or existence.',
@@ -230,6 +240,7 @@ const groupConditionSchema: z.ZodType<AsCodeGroupFilterRecursive> = z
       description: 'Ordered list of conditions or nested groups combined by the group `operator`.',
     }),
   })
+  .strict()
   .meta({
     description: 'Conditions or nested group conditions',
     id: 'kbn-as-code-filters-schema_groupConditionSchema',
@@ -240,6 +251,7 @@ export const asCodeGroupFilterSchema = commonBasePropertiesSchema
     type: z.literal(ASCODE_FILTER_TYPE.GROUP),
     group: groupConditionSchema,
   })
+  .strict()
   .meta({
     description:
       'A filter that combines multiple conditions or nested groups using a logical `and` or `or` operator.',
@@ -265,6 +277,7 @@ export const asCodeDSLFilterSchema = commonBasePropertiesSchema
         'Filter parameters metadata. May contain display values, formats, and parameters for scripted filters.',
     }),
   })
+  .strict()
   .meta({
     description:
       'A filter expressed as a raw [Elasticsearch Query DSL](https://www.elastic.co/docs/reference/query-languages/querydsl) object, used for queries that cannot be represented by condition or group filters.',
@@ -283,6 +296,7 @@ export const asCodeSpatialFilterSchema = commonBasePropertiesSchema
       description: 'Elasticsearch geo query DSL object.',
     }),
   })
+  .strict()
   .meta({
     description:
       'A filter that applies an Elasticsearch geo query, used for geographic boundary and shape matching.',

@@ -19,23 +19,29 @@ const mlEntityFieldOperationSchema = z.union([
   z.literal(ML_ENTITY_FIELD_OPERATIONS.REMOVE),
 ]);
 
-export const influencerSchema = z.object({
-  fieldName: z.string(),
-  fieldValue: z.any().optional(),
-});
+export const influencerSchema = z
+  .object({
+    fieldName: z.string(),
+    fieldValue: z.any().optional(),
+  })
+  .strict();
 
-export const criteriaFieldSchema = z.object({
-  fieldName: z.string(),
-  fieldValue: z.any().optional(),
-  fieldType: mlEntityFieldTypeSchema.optional(),
-});
+export const criteriaFieldSchema = z
+  .object({
+    fieldName: z.string(),
+    fieldValue: z.any().optional(),
+    fieldType: mlEntityFieldTypeSchema.optional(),
+  })
+  .strict();
 
 export const mlEntityFieldValueSchema = z.union([z.string(), z.number()]);
 
-export const mlEntityFieldSchema = z.object({
-  fieldName: z.string(),
-  fieldValue: mlEntityFieldValueSchema.optional(),
-  fieldType: mlEntityFieldTypeSchema.optional(),
-  operation: mlEntityFieldOperationSchema.optional(),
-  cardinality: z.number().optional(),
-});
+export const mlEntityFieldSchema = z
+  .object({
+    fieldName: z.string(),
+    fieldValue: mlEntityFieldValueSchema.optional(),
+    fieldType: mlEntityFieldTypeSchema.optional(),
+    operation: mlEntityFieldOperationSchema.optional(),
+    cardinality: z.number().optional(),
+  })
+  .strict();

@@ -23,6 +23,7 @@ export const esqlDataSourceSchema = z
         'An ES|QL query that drives the data source. The query must produce a tabular result set; column names are used as field references. Example: "FROM logs-* | STATS count = COUNT(*) BY host.name".',
     }),
   })
+  .strict()
   .meta({
     id: 'esqlDataSource',
     title: 'ES|QL Data Source',
