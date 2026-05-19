@@ -97,6 +97,8 @@ export const ALERTS_TABLE_COUNT = `[data-test-subj="toolbar-alerts-count"]`;
 
 export const STAR_ICON = '[data-test-subj="timeline-favorite-empty-star"]';
 
+export const STAR_ICON_FILLED = '[data-test-subj="timeline-favorite-filled-star"]';
+
 export const TIMELINE_COLLAPSED_ITEMS_BTN = '[data-test-subj="euiCollapsedItemActionsButton"]';
 
 export const TIMELINE_CREATE_TEMPLATE_FROM_TIMELINE_BTN =
