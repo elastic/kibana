@@ -1,0 +1,12 @@
+import type { DateMapping, KeywordMapping, TextMapping, DateNanosMapping, IntegerMapping, LongMapping, ShortMapping, BooleanMapping, FlattenedMapping, ObjectMapping } from './types';
+import type { WithoutTypeField } from './types_helpers';
+export declare function object<T>(def: WithoutTypeField<ObjectMapping<T>>): ObjectMapping<T>;
+export declare function text(def?: WithoutTypeField<TextMapping>): TextMapping;
+export declare function keyword(def?: WithoutTypeField<KeywordMapping>): KeywordMapping;
+export declare function date(def?: WithoutTypeField<DateMapping>): DateMapping;
+export declare function dateNanos(def?: WithoutTypeField<DateNanosMapping>): DateNanosMapping;
+export declare function integer(def?: WithoutTypeField<IntegerMapping>): IntegerMapping;
+export declare function long(def?: WithoutTypeField<LongMapping>): LongMapping;
+export declare function short(def?: WithoutTypeField<ShortMapping>): ShortMapping;
+export declare function boolean(def?: WithoutTypeField<BooleanMapping>): BooleanMapping;
+export declare function flattened(def?: WithoutTypeField<FlattenedMapping>): FlattenedMapping;

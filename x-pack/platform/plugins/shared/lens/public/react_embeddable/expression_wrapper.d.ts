@@ -1,0 +1,33 @@
+import React from 'react';
+import type { ExpressionRendererEvent, ReactExpressionRendererProps, ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import type { ExecutionContextSearch } from '@kbn/es-query';
+import type { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
+import type { UserMessage, LensInspector } from '@kbn/lens-common';
+export interface ExpressionWrapperProps {
+    ExpressionRenderer: ReactExpressionRendererType;
+    expression: string | null;
+    variables?: Record<string, unknown>;
+    interactive?: boolean;
+    searchContext: ExecutionContextSearch;
+    searchSessionId?: string;
+    handleEvent: (event: ExpressionRendererEvent) => void;
+    onData$: (data: unknown, inspectorAdapters?: Partial<DefaultInspectorAdapters> | undefined) => void;
+    onRender$: (count: number) => void;
+    renderMode?: RenderMode;
+    syncColors?: boolean;
+    syncTooltips?: boolean;
+    syncCursor?: boolean;
+    hasCompatibleActions?: ReactExpressionRendererProps['hasCompatibleActions'];
+    getCompatibleCellValueActions?: ReactExpressionRendererProps['getCompatibleCellValueActions'];
+    style?: React.CSSProperties;
+    className?: string;
+    addUserMessages: (messages: UserMessage[]) => void;
+    onRuntimeError: (error: Error) => void;
+    executionContext?: KibanaExecutionContext;
+    lensInspector: LensInspector;
+    noPadding?: boolean;
+    paddingTop?: boolean;
+    abortController?: AbortController;
+}
+export declare function ExpressionWrapper({ ExpressionRenderer: ExpressionRendererComponent, expression, searchContext, variables, handleEvent, interactive, searchSessionId, onData$, onRender$, renderMode, syncColors, syncTooltips, syncCursor, hasCompatibleActions, getCompatibleCellValueActions, style, className, onRuntimeError, addUserMessages, executionContext, lensInspector, noPadding, paddingTop, abortController, }: ExpressionWrapperProps): React.JSX.Element | null;

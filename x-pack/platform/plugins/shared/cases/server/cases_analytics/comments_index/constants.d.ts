@@ -1,0 +1,12 @@
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { Owner } from '../../../common/constants/types';
+export declare const CAI_COMMENTS_INDEX_NAME_BASE = ".internal.cases-comments";
+export declare function getCommentsDestinationIndexName(spaceId: string, owner: Owner): string;
+export declare const CAI_COMMENTS_INDEX_ALIAS_BASE = ".cases-comments";
+export declare function getCommentsDestinationIndexAlias(spaceId: string, owner: Owner): string;
+export declare const CAI_COMMENTS_INDEX_VERSION = 1;
+export declare const CAI_COMMENTS_SYNC_TYPE = "cai_comments_sync";
+export declare const getCommentsSourceQuery: (spaceId: string, owner: Owner) => QueryDslQueryContainer;
+export declare const CAI_COMMENTS_SOURCE_INDEX = ".kibana_alerting_cases";
+export declare const getCAICommentsBackfillTaskId: (spaceId: string, owner: Owner) => string;
+export declare const getCommentsSynchronizationSourceQuery: (lastSyncAt: Date, spaceId: string, owner: Owner) => QueryDslQueryContainer;

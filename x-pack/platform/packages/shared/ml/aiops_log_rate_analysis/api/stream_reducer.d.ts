@@ -1,0 +1,128 @@
+import type { PayloadAction } from '@reduxjs/toolkit';
+import type { SignificantItem, SignificantItemGroup, SignificantItemHistogram, SignificantItemGroupHistogram } from '@kbn/ml-agg-utils';
+import type { WindowParameters } from '../window_parameters';
+import type { LogRateAnalysisType } from '../log_rate_analysis_type';
+export interface StreamState {
+    ccsWarning: boolean;
+    currentAnalysisType?: LogRateAnalysisType;
+    currentAnalysisWindowParameters?: WindowParameters;
+    significantItems: SignificantItem[];
+    significantItemsGroups: SignificantItemGroup[];
+    errors: string[];
+    loaded: number;
+    loadingState: string;
+    remainingKeywordFieldCandidates?: string[];
+    remainingTextFieldCandidates?: string[];
+    groupsMissing?: boolean;
+    zeroDocsFallback: boolean;
+}
+export declare const getDefaultState: () => StreamState;
+export declare const logRateAnalysisResultsSlice: import("@reduxjs/toolkit").Slice<StreamState, {
+    addSignificantItems: (state: import("immer/dist/internal").WritableDraft<StreamState>, action: PayloadAction<SignificantItem[]>) => void;
+    addSignificantItemsHistogram: (state: import("immer/dist/internal").WritableDraft<StreamState>, action: PayloadAction<SignificantItemHistogram[]>) => void;
+    addSignificantItemsGroup: (state: import("immer/dist/internal").WritableDraft<StreamState>, action: PayloadAction<SignificantItemGroup[]>) => void;
+    addSignificantItemsGroupHistogram: (state: import("immer/dist/internal").WritableDraft<StreamState>, action: PayloadAction<SignificantItemGroupHistogram[]>) => void;
+    addError: (state: import("immer/dist/internal").WritableDraft<StreamState>, action: PayloadAction<string>) => void;
+    ping: () => void;
+    resetErrors: (state: import("immer/dist/internal").WritableDraft<StreamState>) => void;
+    resetGroups: (state: import("immer/dist/internal").WritableDraft<StreamState>) => void;
+    resetResults: (state: import("immer/dist/internal").WritableDraft<StreamState>) => {
+        currentAnalysisType: LogRateAnalysisType | undefined;
+        currentAnalysisWindowParameters: import("immer/dist/internal").WritableDraft<WindowParameters> | undefined;
+        ccsWarning: boolean;
+        significantItems: SignificantItem[];
+        significantItemsGroups: SignificantItemGroup[];
+        errors: string[];
+        loaded: number;
+        loadingState: string;
+        remainingKeywordFieldCandidates?: string[];
+        remainingTextFieldCandidates?: string[];
+        groupsMissing?: boolean;
+        zeroDocsFallback: boolean;
+    };
+    updateLoadingState: (state: import("immer/dist/internal").WritableDraft<StreamState>, action: PayloadAction<{
+        ccsWarning: boolean;
+        loaded: number;
+        loadingState: string;
+        remainingKeywordFieldCandidates?: string[];
+        remainingTextFieldCandidates?: string[];
+        groupsMissing?: boolean;
+    }>) => {
+        ccsWarning: boolean;
+        loaded: number;
+        loadingState: string;
+        remainingKeywordFieldCandidates?: string[];
+        remainingTextFieldCandidates?: string[];
+        groupsMissing?: boolean;
+        currentAnalysisType?: LogRateAnalysisType | undefined;
+        currentAnalysisWindowParameters?: import("immer/dist/internal").WritableDraft<WindowParameters> | undefined;
+        significantItems: import("immer/dist/internal").WritableDraft<SignificantItem>[];
+        significantItemsGroups: import("immer/dist/internal").WritableDraft<SignificantItemGroup>[];
+        errors: string[];
+        zeroDocsFallback: boolean;
+    };
+    setZeroDocsFallback: (state: import("immer/dist/internal").WritableDraft<StreamState>, action: PayloadAction<boolean>) => void;
+    setCurrentAnalysisType: (state: import("immer/dist/internal").WritableDraft<StreamState>, action: PayloadAction<LogRateAnalysisType | undefined>) => void;
+    setCurrentAnalysisWindowParameters: (state: import("immer/dist/internal").WritableDraft<StreamState>, action: PayloadAction<WindowParameters | undefined>) => void;
+}, "logRateAnalysisResults">;
+export declare const streamReducer: import("redux").Reducer<StreamState>;
+export declare const streamReducerActions: import("@reduxjs/toolkit").CaseReducerActions<{
+    addSignificantItems: (state: import("immer/dist/internal").WritableDraft<StreamState>, action: PayloadAction<SignificantItem[]>) => void;
+    addSignificantItemsHistogram: (state: import("immer/dist/internal").WritableDraft<StreamState>, action: PayloadAction<SignificantItemHistogram[]>) => void;
+    addSignificantItemsGroup: (state: import("immer/dist/internal").WritableDraft<StreamState>, action: PayloadAction<SignificantItemGroup[]>) => void;
+    addSignificantItemsGroupHistogram: (state: import("immer/dist/internal").WritableDraft<StreamState>, action: PayloadAction<SignificantItemGroupHistogram[]>) => void;
+    addError: (state: import("immer/dist/internal").WritableDraft<StreamState>, action: PayloadAction<string>) => void;
+    ping: () => void;
+    resetErrors: (state: import("immer/dist/internal").WritableDraft<StreamState>) => void;
+    resetGroups: (state: import("immer/dist/internal").WritableDraft<StreamState>) => void;
+    resetResults: (state: import("immer/dist/internal").WritableDraft<StreamState>) => {
+        currentAnalysisType: LogRateAnalysisType | undefined;
+        currentAnalysisWindowParameters: import("immer/dist/internal").WritableDraft<WindowParameters> | undefined;
+        ccsWarning: boolean;
+        significantItems: SignificantItem[];
+        significantItemsGroups: SignificantItemGroup[];
+        errors: string[];
+        loaded: number;
+        loadingState: string;
+        remainingKeywordFieldCandidates?: string[];
+        remainingTextFieldCandidates?: string[];
+        groupsMissing?: boolean;
+        zeroDocsFallback: boolean;
+    };
+    updateLoadingState: (state: import("immer/dist/internal").WritableDraft<StreamState>, action: PayloadAction<{
+        ccsWarning: boolean;
+        loaded: number;
+        loadingState: string;
+        remainingKeywordFieldCandidates?: string[];
+        remainingTextFieldCandidates?: string[];
+        groupsMissing?: boolean;
+    }>) => {
+        ccsWarning: boolean;
+        loaded: number;
+        loadingState: string;
+        remainingKeywordFieldCandidates?: string[];
+        remainingTextFieldCandidates?: string[];
+        groupsMissing?: boolean;
+        currentAnalysisType?: LogRateAnalysisType | undefined;
+        currentAnalysisWindowParameters?: import("immer/dist/internal").WritableDraft<WindowParameters> | undefined;
+        significantItems: import("immer/dist/internal").WritableDraft<SignificantItem>[];
+        significantItemsGroups: import("immer/dist/internal").WritableDraft<SignificantItemGroup>[];
+        errors: string[];
+        zeroDocsFallback: boolean;
+    };
+    setZeroDocsFallback: (state: import("immer/dist/internal").WritableDraft<StreamState>, action: PayloadAction<boolean>) => void;
+    setCurrentAnalysisType: (state: import("immer/dist/internal").WritableDraft<StreamState>, action: PayloadAction<LogRateAnalysisType | undefined>) => void;
+    setCurrentAnalysisWindowParameters: (state: import("immer/dist/internal").WritableDraft<StreamState>, action: PayloadAction<WindowParameters | undefined>) => void;
+}, "logRateAnalysisResults">;
+type StreamReducerActions = typeof streamReducerActions;
+export type ApiActionName = keyof StreamReducerActions;
+export type AiopsLogRateAnalysisApiAction = ReturnType<StreamReducerActions[ApiActionName]>;
+export declare const addError: import("@reduxjs/toolkit").ActionCreatorWithPayload<string, "logRateAnalysisResults/addError">, addSignificantItems: import("@reduxjs/toolkit").ActionCreatorWithPayload<SignificantItem[], "logRateAnalysisResults/addSignificantItems">, addSignificantItemsGroup: import("@reduxjs/toolkit").ActionCreatorWithPayload<SignificantItemGroup[], "logRateAnalysisResults/addSignificantItemsGroup">, addSignificantItemsGroupHistogram: import("@reduxjs/toolkit").ActionCreatorWithPayload<SignificantItemGroupHistogram[], "logRateAnalysisResults/addSignificantItemsGroupHistogram">, addSignificantItemsHistogram: import("@reduxjs/toolkit").ActionCreatorWithPayload<SignificantItemHistogram[], "logRateAnalysisResults/addSignificantItemsHistogram">, ping: import("@reduxjs/toolkit").ActionCreatorWithoutPayload<"logRateAnalysisResults/ping">, resetResults: import("@reduxjs/toolkit").ActionCreatorWithoutPayload<"logRateAnalysisResults/resetResults">, resetErrors: import("@reduxjs/toolkit").ActionCreatorWithoutPayload<"logRateAnalysisResults/resetErrors">, resetGroups: import("@reduxjs/toolkit").ActionCreatorWithoutPayload<"logRateAnalysisResults/resetGroups">, setCurrentAnalysisType: import("@reduxjs/toolkit").ActionCreatorWithOptionalPayload<LogRateAnalysisType | undefined, "logRateAnalysisResults/setCurrentAnalysisType">, setCurrentAnalysisWindowParameters: import("@reduxjs/toolkit").ActionCreatorWithOptionalPayload<WindowParameters | undefined, "logRateAnalysisResults/setCurrentAnalysisWindowParameters">, setZeroDocsFallback: import("@reduxjs/toolkit").ActionCreatorWithPayload<boolean, "logRateAnalysisResults/setZeroDocsFallback">, updateLoadingState: import("@reduxjs/toolkit").ActionCreatorWithPayload<{
+    ccsWarning: boolean;
+    loaded: number;
+    loadingState: string;
+    remainingKeywordFieldCandidates?: string[];
+    remainingTextFieldCandidates?: string[];
+    groupsMissing?: boolean;
+}, "logRateAnalysisResults/updateLoadingState">;
+export {};

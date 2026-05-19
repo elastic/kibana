@@ -1,0 +1,5 @@
+import type { IScopedClusterClient } from '@kbn/core/server';
+export declare function newJobChartsProvider(client: IScopedClusterClient): {
+    newJobLineChart: (indexPatternTitle: string, timeField: string, start: number, end: number, intervalMs: number, query: object, aggFieldNamePairs: import("@kbn/ml-anomaly-utils").AggFieldNamePair[], splitFieldName: string | null, splitFieldValue: string | null, runtimeMappings: import("@kbn/ml-runtime-field-utils").RuntimeMappings | undefined, indicesOptions: import("@kbn/ml-common-types/anomaly_detection_jobs/datafeed").IndicesOptions | undefined) => Promise<import("./line_chart").ProcessedResults>;
+    newJobPopulationChart: (indexPatternTitle: string, timeField: string, start: number, end: number, intervalMs: number, query: object, aggFieldNamePairs: import("@kbn/ml-anomaly-utils").AggFieldNamePair[], splitFieldName: string | null, runtimeMappings: import("@kbn/ml-runtime-field-utils").RuntimeMappings | undefined, indicesOptions: import("@kbn/ml-common-types/anomaly_detection_jobs/datafeed").IndicesOptions | undefined) => Promise<import("./population_chart").ProcessedResults>;
+};

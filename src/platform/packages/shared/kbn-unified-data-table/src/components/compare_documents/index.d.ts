@@ -1,0 +1,1 @@
+export declare const CompareDocuments: import("react").ForwardRefExoticComponent<import("./compare_documents").CompareDocumentsProps & import("@kbn/shared-ux-utility").WithSuspenseExtendedDeps & import("react").RefAttributes<{}>>;

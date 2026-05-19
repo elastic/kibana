@@ -1,0 +1,80 @@
+import type { ReactNode } from 'react';
+import type { DataView, DataViewLazy, DataViewField, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { NotificationsStart } from '@kbn/core/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { ISearchStart } from '@kbn/data-plugin/public';
+import type { PreviewState } from './types';
+import type { BehaviorObservable } from '../../state_utils';
+import type { ScriptErrorCodes, Params, FieldPreview } from './types';
+import type { FieldFormatsStart } from '../../shared_imports';
+import type { Field } from '../../types';
+import type { InternalFieldType } from '../../types';
+export declare const defaultValueFormatter: (value: unknown) => string;
+interface PreviewControllerArgs {
+    dataView: DataViewLazy;
+    dataViewToUpdate: DataView | DataViewLazy;
+    onSave: (field: DataViewField[]) => void;
+    fieldToEdit?: Field;
+    fieldTypeToProcess: InternalFieldType;
+    deps: PreviewControllerDependencies;
+}
+export interface PreviewControllerDependencies {
+    search: ISearchStart;
+    fieldFormats: FieldFormatsStart;
+    usageCollection: UsageCollectionStart;
+    notifications: NotificationsStart;
+    dataViews: DataViewsPublicPluginStart;
+}
+export declare class PreviewController {
+    constructor({ deps, dataView, dataViewToUpdate, onSave, fieldToEdit, fieldTypeToProcess, }: PreviewControllerArgs);
+    private dataView;
+    private dataViewToUpdate;
+    private deps;
+    private onSave;
+    private fieldToEdit?;
+    private fieldTypeToProcess;
+    private internalState$;
+    state$: BehaviorObservable<PreviewState>;
+    private previewCount;
+    private updateState;
+    private lastExecutePainlessRequestParams;
+    private setFieldList;
+    private setExistingConcreteFields;
+    updateConcreteField: (updatedField: Field) => Promise<DataViewField[]>;
+    updateRuntimeField: (updatedField: Field) => Promise<DataViewField[]>;
+    saveField: (updatedField: Field) => Promise<void>;
+    getInternalFieldType: () => InternalFieldType;
+    togglePinnedField: (fieldName: string) => void;
+    private setDocuments;
+    goToNextDocument: () => void;
+    goToPreviousDocument: () => void;
+    setPreviewError: (error: PreviewState["previewResponse"]["error"]) => void;
+    setPreviewResponse: (previewResponse: PreviewState["previewResponse"]) => void;
+    setCustomDocIdToLoad: (customDocIdToLoad: string | null) => void;
+    private getIsPreviewAvailable;
+    clearPreviewError: (errorCode: ScriptErrorCodes) => void;
+    private setIsSaving;
+    private setIsFetchingDocument;
+    private setFetchDocError;
+    setIsLoadingPreview: (isLoadingPreview: boolean) => void;
+    setInitialPreviewComplete: (initialPreviewComplete: boolean) => void;
+    getIsFirstDoc: () => boolean;
+    getIsLastDoc: () => boolean;
+    setLastExecutePainlessRequestParams: (lastExecutePainlessRequestParams: Partial<typeof this.lastExecutePainlessRequestParams>) => void;
+    valueFormatter: ({ value, format, type, }: {
+        value: unknown;
+        format: Params["format"];
+        type: Params["type"];
+    }) => ReactNode;
+    fetchSampleDocuments: (limit?: number) => Promise<void>;
+    loadDocument: (id: string) => Promise<void>;
+    debouncedLoadDocument: import("lodash").DebouncedFuncLeading<(id: string) => Promise<void>>;
+    reset: () => void;
+    hasSomeParamsChanged: (type: Params["type"], script: string | undefined, currentDocId: string | undefined) => boolean;
+    getPreviewCount: () => number;
+    incrementPreviewCount: () => number;
+    allParamsDefined: (type: Params["type"], script: string | undefined, currentDocIndex: string) => boolean;
+    updateSingleFieldPreview: (fieldName: string, values: unknown[], type: Params["type"], format: Params["format"]) => void;
+    updateCompositeFieldPreview: (compositeValues: Record<string, unknown[]>, parentName: string | null, name: string, fieldName$Value: string, type: Params["type"], format: Params["format"], onNext: (fields: FieldPreview[]) => void) => void;
+}
+export {};

@@ -1,0 +1,10 @@
+import type { ESQLSingleAstItem, ESQLAstItem, ESQLFunction, ESQLLiteral, ESQLColumn } from '@elastic/esql/types';
+import type { ESQLStringLiteral, ESQLDateTruncFunction, ESQLBucketFunction, ESQLLikeOperator } from './types';
+export declare function isSingleItem(item: ESQLAstItem): item is ESQLSingleAstItem;
+export declare function isFunctionNode(node: ESQLAstItem): node is ESQLFunction;
+export declare function isColumnNode(node: ESQLAstItem): node is ESQLColumn;
+export declare function isLiteralNode(node: ESQLAstItem): node is ESQLLiteral;
+export declare function isStringLiteralNode(node: ESQLAstItem): node is ESQLStringLiteral;
+export declare function isDateTruncFunctionNode(node: ESQLAstItem): node is ESQLDateTruncFunction;
+export declare function isBucketFunctionNode(node: ESQLAstItem): node is ESQLBucketFunction;
+export declare function isLikeOperatorNode(node: ESQLAstItem): node is ESQLLikeOperator;

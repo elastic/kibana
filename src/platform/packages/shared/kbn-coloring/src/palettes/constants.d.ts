@@ -1,0 +1,12 @@
+import type { PaletteContinuity } from './types';
+export declare const DEFAULT_PALETTE_NAME = "positive";
+export declare const FIXED_PROGRESSION: "fixed";
+export declare const CUSTOM_PALETTE = "custom";
+export declare const DEFAULT_CONTINUITY: PaletteContinuity;
+export declare const DEFAULT_RANGE_TYPE = "percent";
+export declare const DEFAULT_MIN_STOP = 0;
+export declare const DEFAULT_MAX_STOP = 100;
+export declare const DEFAULT_COLOR_STEPS = 5;
+export declare const DEFAULT_FALLBACK_PALETTE = "default";
+export declare const LEGACY_COMPLIMENTARY_PALETTE = "complimentary";
+export declare const COMPLEMENTARY_PALETTE = "complementary";

@@ -1,0 +1,14 @@
+export declare const DISCOVER_APP_LOCATOR = "DISCOVER_APP_LOCATOR";
+export declare const CANVAS_APP_LOCATOR = "CANVAS_APP_LOCATOR";
+export declare const DISCOVER_APP_ID = "discover";
+export declare const DASHBOARD_APP_ID = "dashboards";
+export declare const VISUALIZE_APP_ID = "visualize";
+export declare const MAPS_APP_ID = "maps";
+export declare const CANVAS_APP_ID = "canvas";
+export declare const GRAPH_APP_ID = "graph";
+export declare const DISCOVER_ESQL_LOCATOR = "DISCOVER_ESQL_LOCATOR";
+export declare const DASHBOARD_APP_LOCATOR = "DASHBOARD_APP_LOCATOR";
+export declare const DASHBOARD_SAVED_OBJECT_TYPE = "dashboard";
+export declare const LENS_APP_LOCATOR = "LENS_APP_LOCATOR";
+export declare const VISUALIZE_APP_LOCATOR = "VISUALIZE_APP_LOCATOR";
+export declare const AI_VALUE_REPORT_LOCATOR = "AI_VALUE_REPORT_LOCATOR";

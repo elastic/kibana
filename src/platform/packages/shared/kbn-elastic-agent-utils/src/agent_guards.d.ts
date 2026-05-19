@@ -1,0 +1,17 @@
+import type { ElasticAgentName, JavaAgentName, OpenTelemetryAgentName, RumAgentName, ServerlessType } from './agent_names';
+export declare function getAgentName(agentName: string | null, telemetryAgentName: string | null, telemetrySdkName: string | null): string | null;
+export declare function hasOpenTelemetryPrefix(agentName?: string, language?: string): boolean;
+export declare function isOpenTelemetryAgentName(agentName: string): agentName is OpenTelemetryAgentName;
+export declare const isElasticAgentName: (agentName: string) => agentName is ElasticAgentName;
+export declare function isEDOTAgentName(agentName: string): agentName is OpenTelemetryAgentName;
+export declare function isOTELAgentName(agentName: string): agentName is OpenTelemetryAgentName;
+export declare function isJavaAgentName(agentName?: string): agentName is JavaAgentName;
+export declare function isRumAgentName(agentName?: string): agentName is RumAgentName;
+export declare function isMobileAgentName(agentName?: string): boolean;
+export declare function isRumOrMobileAgentName(agentName?: string): boolean;
+export declare function isIosAgentName(agentName?: string): boolean;
+export declare function isAndroidAgentName(agentName?: string): boolean;
+export declare function isJRubyAgentName(agentName?: string, runtimeName?: string): boolean;
+export declare function isServerlessAgentName(serverlessType?: string): serverlessType is ServerlessType;
+export declare function isAWSLambdaAgentName(serverlessType?: string): serverlessType is ServerlessType;
+export declare function isAzureFunctionsAgentName(serverlessType?: string): serverlessType is ServerlessType;

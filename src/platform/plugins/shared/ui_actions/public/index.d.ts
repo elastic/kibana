@@ -1,0 +1,12 @@
+import type { PluginInitializerContext } from '@kbn/core/public';
+import { UiActionsPlugin } from './plugin';
+export declare function plugin(initializerContext: PluginInitializerContext): UiActionsPlugin;
+export type { UiActionsPublicSetup as UiActionsSetup, UiActionsPublicStart as UiActionsStart, } from './plugin';
+export type { Action, ActionDefinition as UiActionsActionDefinition } from './actions';
+export { ActionInternal, createAction, IncompatibleActionError } from './actions';
+export { buildContextMenuForActions } from './context_menu';
+export type { Presentable as UiActionsPresentable, PresentableGroup as UiActionsPresentableGroup, PresentableGrouping as UiActionsPresentableGrouping, } from '@kbn/ui-actions-browser/src/types';
+export type { Trigger, RowClickContext, VisualizeFieldContext } from './types';
+export { ACTION_VISUALIZE_FIELD, ACTION_VISUALIZE_GEO_FIELD, ACTION_VISUALIZE_LENS_FIELD, } from './types';
+export type { ActionExecutionContext, ActionExecutionMeta, ActionMenuItemProps, FrequentCompatibilityChangeAction, } from './actions';
+export { triggers } from './triggers';

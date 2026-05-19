@@ -1,0 +1,12 @@
+export { DEFAULT_INDEX_TYPES_MAP, HASH_TO_VERSION_MAP } from './src/constants';
+export { LEGACY_URL_ALIAS_TYPE, type LegacyUrlAlias } from './src/legacy_alias';
+export { getProperty, getRootProperties, getRootPropertiesObjects, getTypes, type IndexMapping, type IndexMappingSafe, type IndexMappingMeta, type IndexTypesMap, type SavedObjectsTypeMappingDefinitions, type IndexMappingMigrationStateMeta, } from './src/mappings';
+export { SavedObjectsSerializer } from './src/serialization';
+export { SavedObjectsTypeValidator } from './src/validation';
+export { decodeRequestVersion, decodeVersion, encodeVersion, encodeHitVersion, } from './src/version';
+export { savedObjectsConfig, savedObjectsMigrationConfig, SavedObjectConfig, type SavedObjectsConfigType, type SavedObjectsMigrationConfigType, } from './src/saved_objects_config';
+export type { ISavedObjectTypeRegistryInternal } from './src/saved_objects_type_registry';
+export { SavedObjectTypeRegistry } from './src/saved_objects_type_registry';
+export type { IKibanaMigrator, KibanaMigratorStatus, MigrationResult, MigrationStatus, MigrateDocumentOptions, IDocumentMigrator, DocumentMigrateOptions, IsDowngradeRequiredOptions, } from './src/migration';
+export { parseObjectKey, getObjectKey, getIndexForType, getFieldListFromTypeMapping, getFieldListMapFromMappingDefinitions, type FieldListMap, } from './src/utils';
+export { modelVersionVirtualMajor, initialModelVersion, globalSwitchToModelVersionAt, assertValidModelVersion, isVirtualModelVersion, virtualVersionToModelVersion, modelVersionToVirtualVersion, getModelVersionMapForTypes, getLatestModelVersion, getCurrentVirtualVersion, getVirtualVersionMap, getLatestMappingsVirtualVersionMap, type ModelVersionMap, type VirtualVersionMap, compareVirtualVersions, type CompareModelVersionMapParams, type CompareModelVersionStatus, type CompareModelVersionDetails, type CompareModelVersionResult, getVirtualVersionsFromMappings, getVirtualVersionsFromMappingMeta, getModelVersionDelta, buildModelVersionTransformFn, aggregateMappingAdditions, convertModelVersionBackwardConversionSchema, getVersionAddedMappings, getVersionAddedFields, } from './src/model_version';

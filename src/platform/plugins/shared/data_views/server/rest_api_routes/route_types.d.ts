@@ -1,0 +1,135 @@
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { IFieldSubType } from '@kbn/es-query';
+import type { estypes } from '@elastic/elasticsearch';
+import type { RuntimePrimitiveTypes, RuntimeType } from '../../common/types';
+export type SourceFilterRestResponse = {
+    value: string;
+    clientId?: string | number;
+};
+export type AggregationRestrictionsRestResponse = Record<string, {
+    agg?: string;
+    interval?: number;
+    fixed_interval?: string;
+    calendar_interval?: string;
+    delay?: string;
+    time_zone?: string;
+}>;
+export type TypeMetaRestResponse = {
+    aggs?: Record<string, AggregationRestrictionsRestResponse>;
+    params?: {
+        rollup_index: string;
+    };
+};
+export type FieldAttrSetRestResponse = {
+    customLabel?: string;
+    customDescription?: string;
+    count?: number;
+};
+export type FieldAttrsRestResponse = {
+    [key: string]: FieldAttrSetRestResponse;
+};
+export type FieldFormatParamsRestRespons<P = {}> = SerializableRecord & P;
+export type SerializedFieldFormatRestResponse<P = {}, TParams extends FieldFormatParamsRestRespons<P> = FieldFormatParamsRestRespons<P>> = {
+    id?: string;
+    params?: TParams;
+};
+export type RuntimeFieldBaseRestResponse = {
+    type: RuntimeType;
+    script?: {
+        source: string;
+    };
+};
+export type RuntimeFieldSpecRestResponse = RuntimeFieldBaseRestResponse & {
+    fields?: Record<string, {
+        type: RuntimePrimitiveTypes;
+    }>;
+};
+export type DataViewFieldBaseRestResponse = {
+    name: string;
+    type: string;
+    subType?: IFieldSubType;
+    script?: string;
+    lang?: estypes.ScriptLanguage;
+    scripted?: boolean;
+    esTypes?: string[];
+};
+export type FieldSpecRestResponse = DataViewFieldBaseRestResponse & {
+    count?: number;
+    conflictDescriptions?: Record<string, string[]>;
+    format?: SerializedFieldFormatRestResponse;
+    esTypes?: string[];
+    searchable: boolean;
+    aggregatable: boolean;
+    readFromDocValues?: boolean;
+    indexed?: boolean;
+    customLabel?: string;
+    customDescription?: string;
+    runtimeField?: RuntimeFieldSpecRestResponse;
+    fixedInterval?: string[];
+    timeZone?: string[];
+    timeSeriesDimension?: boolean;
+    timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter' | 'position';
+    shortDotsEnable?: boolean;
+    isMapped?: boolean;
+    parentName?: string;
+};
+export type DataViewFieldMap = Record<string, FieldSpecRestResponse>;
+export type DataViewSpecRestResponse = {
+    id?: string;
+    version?: string;
+    title?: string;
+    timeFieldName?: string;
+    sourceFilters?: SourceFilterRestResponse[];
+    fields?: DataViewFieldMap;
+    typeMeta?: TypeMetaRestResponse;
+    type?: string;
+    fieldFormats?: Record<string, SerializedFieldFormatRestResponse>;
+    runtimeFieldMap?: Record<string, RuntimeFieldSpecRestResponse>;
+    fieldAttrs?: FieldAttrsRestResponse;
+    allowNoIndex?: boolean;
+    namespaces?: string[];
+    name?: string;
+    allowHidden?: boolean;
+};
+export interface DataViewListItemRestResponse {
+    id: string;
+    namespaces?: string[];
+    title: string;
+    type?: string;
+    typeMeta?: TypeMetaRestResponse;
+    name?: string;
+}
+export interface DataViewsRuntimeResponseType {
+    data_view: DataViewSpecRestResponse;
+    fields: FieldSpecRestResponse[];
+}
+export interface IndexPatternsRuntimeResponseType {
+    index_pattern: DataViewSpecRestResponse;
+    field: FieldSpecRestResponse;
+}
+export interface RuntimeResponseType {
+    body: DataViewsRuntimeResponseType | IndexPatternsRuntimeResponseType;
+}
+export interface FieldSubTypeRestResponse {
+    multi?: {
+        parent: string;
+    };
+    nested?: {
+        path: string;
+    };
+}
+export interface FieldDescriptorRestResponse {
+    aggregatable: boolean;
+    name: string;
+    readFromDocValues: boolean;
+    searchable: boolean;
+    type: string;
+    esTypes: string[];
+    subType?: FieldSubTypeRestResponse;
+    metadata_field?: boolean;
+    fixedInterval?: string[];
+    timeZone?: string[];
+    timeSeriesMetric?: 'histogram' | 'summary' | 'counter' | 'gauge' | 'position';
+    timeSeriesDimension?: boolean;
+    conflictDescriptions?: Record<string, string[]>;
+}

@@ -1,0 +1,11 @@
+import type { PluginInitializerContext } from '@kbn/core/public';
+import { DiscoverPlugin } from './plugin';
+export type { DiscoverSetup, DiscoverStart } from './types';
+export declare function plugin(initializerContext: PluginInitializerContext): DiscoverPlugin;
+export type { DiscoverAppState } from './application/main/state_management/redux';
+export type { DataDocumentsMsg } from './application/main/state_management/discover_data_state_container';
+export type { DiscoverContainerProps } from './components/discover_container';
+export type { ExtendedDiscoverStateContainer, CustomizationCallback, DiscoverCustomization, DiscoverCustomizationService, SearchBarCustomization, UnifiedHistogramCustomization, } from './customizations';
+export { SEARCH_EMBEDDABLE_TYPE, apiPublishesSavedSearch, type PublishesSavedSearch, type PublishesWritableSavedSearch, type HasTimeRange, type SearchEmbeddableRuntimeState, type SearchEmbeddableApi, type SearchEmbeddablePanelApiState, } from './embeddable';
+export type { DiscoverServices } from './build_services';
+export declare const loadSharingDataHelpers: () => Promise<typeof import("./utils/get_sharing_data")>;

@@ -1,0 +1,22 @@
+import type { UseEuiTheme } from '@elastic/eui';
+import { VisorMode } from './mode_selector';
+export declare const visorWidthPercentage = 0.5;
+export declare const dropdownWidthPercentage = 0.35;
+export declare const MODE_SELECT_WIDTH_KQL = 80;
+export declare const MODE_SELECT_WIDTH_NL = 160;
+export declare const NL_TEXTAREA_MAX_HEIGHT = "calc(35vh - 100px)";
+export declare const visorStyles: (euiThemeContext: UseEuiTheme, comboBoxWidth: number, isSpaceReduced: boolean, isVisible: boolean, mode: VisorMode) => {
+    visorContainer: import("@emotion/react").SerializedStyles;
+    visorWrapper: import("@emotion/react").SerializedStyles;
+    visorBox: import("@emotion/react").SerializedStyles;
+    comboBoxWrapper: import("@emotion/react").SerializedStyles;
+    closeButtonWrapper: import("@emotion/react").SerializedStyles;
+    closeButton: import("@emotion/react").SerializedStyles;
+    separator: import("@emotion/react").SerializedStyles;
+    searchWrapper: import("@emotion/react").SerializedStyles;
+    techPreviewIcon: import("@emotion/react").SerializedStyles;
+    modeSelectWrapper: import("@emotion/react").SerializedStyles;
+    nlInputWrapper: import("@emotion/react").SerializedStyles;
+    nlInput: import("@emotion/react").SerializedStyles;
+    searchFieldStyles: import("@emotion/react").SerializedStyles;
+};

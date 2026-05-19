@@ -1,0 +1,26 @@
+import type { FindFileStructureResponse } from '@kbn/file-upload-common';
+export declare const SUPPORTED_FIELD_TYPES: {
+    readonly BOOLEAN: "boolean";
+    readonly CONFLICT: "conflict";
+    readonly DATE: "date";
+    readonly DATE_RANGE: "date_range";
+    readonly GEO_POINT: "geo_point";
+    readonly GEO_SHAPE: "geo_shape";
+    readonly HISTOGRAM: "histogram";
+    readonly IP: "ip";
+    readonly IP_RANGE: "ip_range";
+    readonly KEYWORD: "keyword";
+    readonly MURMUR3: "murmur3";
+    readonly NUMBER: "number";
+    readonly NESTED: "nested";
+    readonly STRING: "string";
+    readonly TEXT: "text";
+    readonly SEMANTIC_TEXT: "semantic_text";
+    readonly DENSE_VECTOR: "dense_vector";
+    readonly SPARSE_VECTOR: "sparse_vector";
+    readonly VERSION: "version";
+    readonly UNKNOWN: "unknown";
+};
+export type SupportedFieldType = (typeof SUPPORTED_FIELD_TYPES)[keyof typeof SUPPORTED_FIELD_TYPES];
+export declare function getFieldNames(results: FindFileStructureResponse): string[];
+export declare function getSupportedFieldType(type: string): SupportedFieldType;

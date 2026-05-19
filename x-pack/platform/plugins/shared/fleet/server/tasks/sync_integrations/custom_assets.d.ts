@@ -1,0 +1,10 @@
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ClusterGetComponentTemplateResponse, IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { CustomAssetsData, IntegrationsData, SyncIntegrationsData } from './model';
+export declare const CUSTOM_ASSETS_PREFIX = "*@custom";
+export declare const findIntegration: (assetName: string, integrations: IntegrationsData[]) => IntegrationsData | undefined;
+export declare function getComponentTemplate(esClient: ElasticsearchClient, name: string, abortController: AbortController): Promise<ClusterGetComponentTemplateResponse>;
+export declare function getPipeline(esClient: ElasticsearchClient, name: string, abortController: AbortController): Promise<IngestGetPipelineResponse>;
+export declare const getCustomAssets: (esClient: ElasticsearchClient, soClient: SavedObjectsClientContract, integrations: IntegrationsData[], abortController: AbortController, previousSyncIntegrationsData: SyncIntegrationsData | undefined) => Promise<CustomAssetsData[]>;
+export declare function getPipelinesFromVars(esClient: ElasticsearchClient, soClient: SavedObjectsClientContract, abortController: AbortController): Promise<CustomAssetsData[]>;
+export declare function installCustomAsset(customAsset: CustomAssetsData, esClient: ElasticsearchClient, abortController: AbortController, logger: Logger): Promise<import("@elastic/elasticsearch/lib/api/types").AcknowledgedResponseBase | undefined>;

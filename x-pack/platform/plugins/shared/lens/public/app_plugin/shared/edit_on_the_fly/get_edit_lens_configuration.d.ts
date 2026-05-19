@@ -1,0 +1,11 @@
+import React from 'react';
+import type { MiddlewareAPI, Dispatch, Action } from '@reduxjs/toolkit';
+import type { CoreStart } from '@kbn/core/public';
+import type { DatasourceMap, VisualizationMap } from '@kbn/lens-common';
+import type { LensPluginStartDependencies } from '../../../plugin';
+import type { EditConfigPanelProps } from './types';
+export type EditLensConfigurationProps = Omit<EditConfigPanelProps, 'startDependencies' | 'coreStart' | 'visualizationMap' | 'datasourceMap' | 'saveByRef' | 'setCurrentAttributes' | 'previousAttributes'>;
+type UpdaterType = (datasourceState: unknown, visualizationState: unknown, visualizationType?: string) => void;
+export declare const updatingMiddleware: (updater: UpdaterType) => (store: MiddlewareAPI) => (next: Dispatch) => (action: Action) => void;
+export declare function getEditLensConfiguration(coreStart: CoreStart, startDependencies: LensPluginStartDependencies, visualizationMap?: VisualizationMap, datasourceMap?: DatasourceMap): Promise<(props: EditLensConfigurationProps) => React.JSX.Element>;
+export {};

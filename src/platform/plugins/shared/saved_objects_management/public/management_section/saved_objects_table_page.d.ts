@@ -1,0 +1,20 @@
+import React from 'react';
+import type { CoreStart, ChromeBreadcrumb } from '@kbn/core/public';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedObjectManagementTypeInfo } from '../../common/types';
+import type { SavedObjectsManagementActionServiceStart, SavedObjectsManagementColumnServiceStart } from '../services';
+declare const SavedObjectsTablePage: ({ coreStart, dataStart, dataViewsApi, taggingApi, spacesApi, allowedTypes, actionRegistry, columnRegistry, setBreadcrumbs, }: {
+    coreStart: CoreStart;
+    dataStart: DataPublicPluginStart;
+    dataViewsApi: DataViewsContract;
+    taggingApi?: SavedObjectsTaggingApi;
+    spacesApi?: SpacesApi;
+    allowedTypes: SavedObjectManagementTypeInfo[];
+    actionRegistry: SavedObjectsManagementActionServiceStart;
+    columnRegistry: SavedObjectsManagementColumnServiceStart;
+    setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+}) => React.JSX.Element;
+export { SavedObjectsTablePage as default };

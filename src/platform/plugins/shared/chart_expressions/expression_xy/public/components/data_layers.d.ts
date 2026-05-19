@@ -1,0 +1,35 @@
+import type { FC } from 'react';
+import type { PaletteRegistry } from '@kbn/coloring';
+import type { FormatFactory } from '@kbn/field-formats-plugin/common';
+import type { PersistedState } from '@kbn/visualizations-common';
+import type { KbnPalettes } from '@kbn/palettes';
+import type { CommonXYDataLayerConfig, EndValue, FittingFunction, ValueLabelMode, XScaleType, PointVisibility } from '../../common';
+import type { GroupsConfiguration, DatatablesWithFormatInfo, LayersAccessorsTitles, LayersFieldFormats } from '../helpers';
+interface Props {
+    titles?: LayersAccessorsTitles;
+    layers: CommonXYDataLayerConfig[];
+    formatFactory: FormatFactory;
+    chartHasMoreThanOneBarSeries?: boolean;
+    yAxesConfiguration: GroupsConfiguration;
+    xAxisConfiguration?: GroupsConfiguration[number];
+    fittingFunction?: FittingFunction;
+    endValue?: EndValue | undefined;
+    paletteService: PaletteRegistry;
+    palettes: KbnPalettes;
+    formattedDatatables: DatatablesWithFormatInfo;
+    syncColors: boolean;
+    timeZone: string;
+    emphasizeFitting?: boolean;
+    fillOpacity?: number;
+    minBarHeight: number;
+    shouldShowValueLabels?: boolean;
+    valueLabels: ValueLabelMode;
+    defaultXScaleType: XScaleType;
+    fieldFormats: LayersFieldFormats;
+    uiState?: PersistedState;
+    singleTable?: boolean;
+    isDarkMode: boolean;
+    pointVisibility?: PointVisibility;
+}
+export declare const DataLayers: FC<Props>;
+export {};

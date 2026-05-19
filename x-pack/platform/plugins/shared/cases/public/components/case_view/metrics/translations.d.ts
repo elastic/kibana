@@ -1,0 +1,11 @@
+export declare const TOTAL_ALERTS_METRIC: string;
+export declare const ASSOCIATED_USERS_METRIC: string;
+export declare const ASSOCIATED_HOSTS_METRIC: string;
+export declare const ISOLATED_HOSTS_METRIC: string;
+export declare const TOTAL_CONNECTORS_METRIC: string;
+export declare const CASE_CREATED: string;
+export declare const CASE_IN_PROGRESS_DURATION: string;
+export declare const CASE_OPEN_DURATION: string;
+export declare const CASE_OPEN_TO_CLOSE_DURATION: string;
+export declare const CASE_REOPENED: string;
+export declare const CASE_REOPENED_ON: string;

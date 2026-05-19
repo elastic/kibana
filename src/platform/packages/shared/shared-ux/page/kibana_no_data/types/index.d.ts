@@ -1,0 +1,45 @@
+import type { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
+import type { NoDataViewsPromptServices, NoDataViewsPromptKibanaDependencies } from '@kbn/shared-ux-prompt-no-data-views-types';
+import type { NoDataCardServices, NoDataCardKibanaDependencies } from '@kbn/shared-ux-card-no-data-types';
+export interface Services {
+    /** True if the cluster contains data, false otherwise. */
+    hasESData: () => Promise<boolean>;
+    /** True if Kibana instance contains user-created data view, false otherwise. */
+    hasUserDataView: () => Promise<boolean>;
+    /** if set to true allows creation of an ad-hoc data view from data view editor */
+    allowAdHocDataView?: boolean;
+}
+/**
+ * A list of Services that are consumed by this component..
+ */
+export type KibanaNoDataPageServices = Services & NoDataCardServices & NoDataViewsPromptServices;
+export interface KibanaDependencies {
+    dataViews: {
+        hasData: {
+            hasESData: () => Promise<boolean>;
+            hasUserDataView: () => Promise<boolean>;
+        };
+    };
+}
+/**
+ * An interface containing a collection of Kibana plugins and services required to
+ * render this component and its dependencies.
+ */
+export type KibanaNoDataPageKibanaDependencies = KibanaDependencies & NoDataViewsPromptKibanaDependencies & NoDataCardKibanaDependencies;
+/**
+ * Props for `KibanaNoDataPage`.
+ */
+export interface KibanaNoDataPageProps {
+    /** Handler for successfully creating a new data view. */
+    onDataViewCreated: (dataView: unknown) => void;
+    /** `NoDataPage` configuration; see `NoDataPageProps`. */
+    noDataConfig: NoDataPageProps;
+    /** if set to true allows creation of an ad-hoc dataview from data view editor */
+    allowAdHocDataView?: boolean;
+    /** Set to true if the kibana is customly branded */
+    showPlainSpinner: boolean;
+    /** If the cluster has data, this handler allows the user to try ES|QL */
+    onTryESQL?: () => void;
+    /** Handler for when try ES|QL is clicked and user has been navigated to try ES|QL in discover. */
+    onESQLNavigationComplete?: () => void;
+}

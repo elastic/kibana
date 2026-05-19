@@ -1,0 +1,10 @@
+import React from 'react';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { ContentClient } from '@kbn/content-management-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { HOCProps } from '@kbn/shared-ux-table-persist';
+import type { SavedObjectFinderItem, SavedObjectFinderProps } from './saved_object_finder';
+declare const SavedObjectFinder: (props: HOCProps<SavedObjectFinderItem, SavedObjectFinderProps>) => React.JSX.Element;
+export declare const getSavedObjectFinder: (contentClient: ContentClient, uiSettings: IUiSettingsClient, savedObjectsTagging?: SavedObjectsTaggingApi) => (props: HOCProps<SavedObjectFinderItem, SavedObjectFinderProps>) => React.JSX.Element;
+export type { SavedObjectMetaData, SavedObjectFinderProps } from './saved_object_finder';
+export { SavedObjectFinder };

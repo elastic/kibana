@@ -1,0 +1,10 @@
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { PreconfiguredOutput, SOSecret } from '../../../common/types';
+import type { FleetConfigType } from '../../config';
+export declare const MAX_CONCURRENT_OUTPUTS_OPERATIONS = 50;
+export declare function getPreconfiguredOutputFromConfig(config?: FleetConfigType): PreconfiguredOutput[];
+export declare function ensurePreconfiguredOutputs(soClient: SavedObjectsClientContract, esClient: ElasticsearchClient, outputs: PreconfiguredOutput[]): Promise<void>;
+export declare function createOrUpdatePreconfiguredOutputs(soClient: SavedObjectsClientContract, esClient: ElasticsearchClient, outputs: PreconfiguredOutput[]): Promise<void>;
+export declare function hashSecret(secret: string): Promise<string>;
+export declare function cleanPreconfiguredOutputs(soClient: SavedObjectsClientContract, esClient: ElasticsearchClient, outputs: PreconfiguredOutput[]): Promise<void>;
+export declare function isSecretDifferent(preconfiguredValue: SOSecret | undefined, existingSecret: SOSecret | undefined): Promise<boolean>;

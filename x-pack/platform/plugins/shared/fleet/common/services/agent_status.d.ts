@@ -1,0 +1,14 @@
+import type { Agent, AgentStatus, FleetServerAgent } from '../types';
+export declare function getPreviousAgentStatusForOfflineAgents(agent: Agent | FleetServerAgent): AgentStatus | undefined;
+export declare function buildKueryForUnenrolledAgents(): string;
+export declare function buildKueryForUninstalledAgents(): string;
+export declare function buildKueryForOrphanedAgents(): string;
+export declare function buildKueryForOnlineAgents(): string;
+export declare function buildKueryForErrorAgents(): string;
+export declare function buildKueryForOfflineAgents(): string;
+export declare function buildKueryForUpdatingAgents(): string;
+export declare function buildKueryForInactiveAgents(): string;
+export declare function buildKueryForActiveAgents(): string;
+export declare const AGENT_UPDATING_TIMEOUT_HOURS = 2;
+export declare function isStuckInUpdating(agent: Agent): boolean;
+export declare function isAgentInFailedUpgradeState(upgradeDetails?: Agent['upgrade_details']): boolean;

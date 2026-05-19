@@ -1,0 +1,10 @@
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { AggExpressionType, AggExpressionFunctionArgs } from '..';
+import { METRIC_TYPES } from '..';
+export declare const aggGeoCentroidFnName = "aggGeoCentroid";
+type Input = any;
+type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.GEO_CENTROID>;
+type Output = AggExpressionType;
+type FunctionDefinition = ExpressionFunctionDefinition<typeof aggGeoCentroidFnName, Input, AggArgs, Output>;
+export declare const aggGeoCentroid: () => FunctionDefinition;
+export {};

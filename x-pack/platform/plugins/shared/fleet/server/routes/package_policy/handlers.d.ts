@@ -1,0 +1,14 @@
+import type { TypeOf } from '@kbn/config-schema';
+import type { RequestHandler } from '@kbn/core/server';
+import type { GetPackagePoliciesRequestSchema, GetOnePackagePolicyRequestSchema, CreatePackagePolicyRequestSchema, UpdatePackagePolicyRequestSchema, DeletePackagePoliciesRequestSchema, UpgradePackagePoliciesRequestSchema, DryRunPackagePoliciesRequestSchema, FleetRequestHandler, DeleteOnePackagePolicyRequestSchema, BulkGetPackagePoliciesRequestSchema } from '../../types';
+export declare const isNotNull: <T>(value: T | null) => value is T;
+export declare const getPackagePoliciesHandler: FleetRequestHandler<undefined, TypeOf<typeof GetPackagePoliciesRequestSchema.query>>;
+export declare const bulkGetPackagePoliciesHandler: FleetRequestHandler<undefined, TypeOf<typeof BulkGetPackagePoliciesRequestSchema.query>, TypeOf<typeof BulkGetPackagePoliciesRequestSchema.body>>;
+export declare const getOnePackagePolicyHandler: FleetRequestHandler<TypeOf<typeof GetOnePackagePolicyRequestSchema.params>, TypeOf<typeof GetOnePackagePolicyRequestSchema.query>>;
+export declare const getOrphanedPackagePolicies: RequestHandler<undefined, undefined>;
+export declare const createPackagePolicyHandler: FleetRequestHandler<undefined, TypeOf<typeof CreatePackagePolicyRequestSchema.query>, TypeOf<typeof CreatePackagePolicyRequestSchema.body>>;
+export declare const updatePackagePolicyHandler: FleetRequestHandler<TypeOf<typeof UpdatePackagePolicyRequestSchema.params>, TypeOf<typeof UpdatePackagePolicyRequestSchema.query>, TypeOf<typeof UpdatePackagePolicyRequestSchema.body>>;
+export declare const deletePackagePolicyHandler: RequestHandler<unknown, unknown, TypeOf<typeof DeletePackagePoliciesRequestSchema.body>>;
+export declare const deleteOnePackagePolicyHandler: RequestHandler<TypeOf<typeof DeleteOnePackagePolicyRequestSchema.params>, TypeOf<typeof DeleteOnePackagePolicyRequestSchema.query>, unknown>;
+export declare const upgradePackagePolicyHandler: RequestHandler<unknown, unknown, TypeOf<typeof UpgradePackagePoliciesRequestSchema.body>>;
+export declare const dryRunUpgradePackagePolicyHandler: RequestHandler<unknown, unknown, TypeOf<typeof DryRunPackagePoliciesRequestSchema.body>>;

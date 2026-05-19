@@ -1,0 +1,15 @@
+import type { Optional } from 'utility-types';
+import type { TypeOf } from '@kbn/config-schema';
+import type { lensCreateRequestBodySchema, lensCreateResponseBodySchema, lensDeleteRequestParamsSchema, lensGetRequestParamsSchema, lensGetResponseBodySchema, lensSearchRequestQuerySchema, lensSearchResponseBodySchema, lensUpdateRequestBodySchema, lensUpdateRequestParamsSchema, lensUpdateResponseBodySchema } from './schema';
+import type { lensResponseItemSchema } from './schema/common';
+export type LensResponseItem = TypeOf<typeof lensResponseItemSchema>;
+export type LensCreateRequestBody = TypeOf<typeof lensCreateRequestBodySchema>;
+export type LensCreateResponseBody = TypeOf<typeof lensCreateResponseBodySchema>;
+export type LensUpdateRequestParams = TypeOf<typeof lensUpdateRequestParamsSchema>;
+export type LensUpdateRequestBody = TypeOf<typeof lensUpdateRequestBodySchema>;
+export type LensUpdateResponseBody = TypeOf<typeof lensUpdateResponseBodySchema>;
+export type LensGetRequestParams = TypeOf<typeof lensGetRequestParamsSchema>;
+export type LensGetResponseBody = TypeOf<typeof lensGetResponseBodySchema>;
+export type LensSearchRequestQuery = Optional<TypeOf<typeof lensSearchRequestQuerySchema>, 'page' | 'per_page'>;
+export type LensSearchResponseBody = TypeOf<typeof lensSearchResponseBodySchema>;
+export type LensDeleteRequestParams = TypeOf<typeof lensDeleteRequestParamsSchema>;

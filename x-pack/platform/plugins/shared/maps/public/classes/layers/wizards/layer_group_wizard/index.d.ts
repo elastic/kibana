@@ -1,0 +1,1 @@
+export { layerGroupWizardConfig } from './config';

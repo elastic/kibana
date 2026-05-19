@@ -1,0 +1,1 @@
+export { registerHealthRoute } from './health';

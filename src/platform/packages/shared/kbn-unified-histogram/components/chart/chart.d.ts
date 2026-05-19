@@ -1,0 +1,33 @@
+import type { ReactElement } from 'react';
+import React from 'react';
+import type { EmbeddableComponentProps, LensEmbeddableInput, LensEmbeddableOutput } from '@kbn/lens-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
+import type { UnifiedHistogramChartContext, UnifiedHistogramChartLoadEvent, UnifiedHistogramFetch$, UnifiedHistogramFetchParams, UnifiedHistogramHitsContext, UnifiedHistogramServices, LensVisServiceState } from '../../types';
+import { UnifiedHistogramFetchStatus } from '../../types';
+import type { LensVisService } from '../../services/lens_vis_service';
+export interface UnifiedHistogramChartProps {
+    isChartAvailable: boolean;
+    hiddenPanel?: boolean;
+    services: UnifiedHistogramServices;
+    lensVisService: LensVisService;
+    lensVisServiceState: LensVisServiceState;
+    hits: UnifiedHistogramHitsContext | undefined;
+    chart: UnifiedHistogramChartContext | undefined;
+    renderToggleActions: () => ReactElement | undefined;
+    disableTriggers?: LensEmbeddableInput['disableTriggers'];
+    disabledActions?: LensEmbeddableInput['disabledActions'];
+    fetch$: UnifiedHistogramFetch$;
+    fetchParams: UnifiedHistogramFetchParams;
+    lensAdapters: UnifiedHistogramChartLoadEvent['adapters'] | undefined;
+    dataLoading$: LensEmbeddableOutput['dataLoading$'] | undefined;
+    isChartLoading?: boolean;
+    onChartHiddenChange?: (chartHidden: boolean) => void;
+    onTimeIntervalChange?: (timeInterval: string) => void;
+    onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
+    onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
+    onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
+    onFilter?: LensEmbeddableInput['onFilter'];
+    onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
+    withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
+}
+export declare function UnifiedHistogramChart({ isChartAvailable, services, hits, chart, lensVisService, lensVisServiceState, renderToggleActions, fetch$, fetchParams, lensAdapters, dataLoading$, isChartLoading, onChartHiddenChange, onTimeIntervalChange, onBreakdownFieldChange, onTotalHitsChange, onChartLoad, ...histogramProps }: UnifiedHistogramChartProps): React.JSX.Element;

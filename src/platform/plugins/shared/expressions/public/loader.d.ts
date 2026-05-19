@@ -1,0 +1,34 @@
+import type { Observable } from 'rxjs';
+import type { Adapters } from '@kbn/inspector-plugin/public';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import type { IExpressionLoaderParams } from './types';
+import type { ExpressionAstExpression } from '../common';
+import type { ExecutionContract } from '../common/execution/execution_contract';
+import { ExpressionRenderHandler } from './render';
+export declare class ExpressionLoader {
+    data$: ReturnType<ExecutionContract['getData']>;
+    update$: ExpressionRenderHandler['update$'];
+    render$: ExpressionRenderHandler['render$'];
+    events$: ExpressionRenderHandler['events$'];
+    loading$: Observable<void>;
+    private execution;
+    private renderHandler;
+    private dataSubject;
+    private loadingSubject;
+    private data;
+    private params;
+    private subscription?;
+    constructor(element: HTMLElement, expression?: string | ExpressionAstExpression, params?: IExpressionLoaderParams);
+    destroy(): void;
+    cancel(reason?: AbortReason): void;
+    getExpression(): string | undefined;
+    getAst(): ExpressionAstExpression | undefined;
+    getElement(): HTMLElement;
+    inspect(): Adapters | undefined;
+    update(expression?: string | ExpressionAstExpression, params?: IExpressionLoaderParams): void;
+    private loadData;
+    private render;
+    private setParams;
+}
+export type IExpressionLoader = (element: HTMLElement, expression?: string | ExpressionAstExpression, params?: IExpressionLoaderParams) => Promise<ExpressionLoader>;
+export declare const loader: IExpressionLoader;

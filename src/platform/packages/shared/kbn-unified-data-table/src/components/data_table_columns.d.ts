@@ -1,0 +1,50 @@
+import type { MutableRefObject } from 'react';
+import type { EuiDataGridRefProps, RenderCellValue } from '@elastic/eui';
+import { type EuiDataGridColumn, type EuiDataGridColumnCellAction, type EuiDataGridControlColumn, type EuiDataGridColumnSortingConfig } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type { CustomGridColumnsConfiguration, UnifiedDataTableSettings } from '../types';
+import type { ValueToStringConverter, DataTableColumnsMeta } from '../types';
+import type { UnifiedDataTableProps } from './data_table';
+export declare const getColumnDisplayName: (columnName: string, dataViewFieldDisplayName: string | undefined, columnDisplay: string | undefined) => string;
+export declare const OPEN_DETAILS = "openDetails";
+export declare const SELECT_ROW = "select";
+export declare function getLeadControlColumns({ rows, canSetExpandedDoc, }: {
+    rows: DataTableRecord[];
+    canSetExpandedDoc: boolean;
+}): {
+    leadColumns: EuiDataGridControlColumn[];
+    leadColumnsExtraContent: RenderCellValue[];
+};
+export declare const deserializeHeaderRowHeight: (headerRowHeightLines: number) => number | undefined;
+export declare function getEuiGridColumns({ columns, columnsCellActions, cellActionsHandling, rowsCount, settings, dataView, defaultColumns, isSortEnabled, disableCellActions, isPlainRecord, services, hasEditDataViewPermission, valueToStringConverter, onFilter, editField, visibleCellActions, columnsMeta, showColumnTokens, headerRowHeightLines, customGridColumnsConfiguration, onResize, sortedColumns, dataGridRef, hideFilteringOnComputedColumns, }: {
+    columns: string[];
+    columnsCellActions?: EuiDataGridColumnCellAction[][];
+    cellActionsHandling: 'replace' | 'append';
+    rowsCount: number;
+    settings: UnifiedDataTableSettings | undefined;
+    dataView: DataView;
+    defaultColumns: boolean;
+    isSortEnabled: boolean;
+    isPlainRecord?: boolean;
+    disableCellActions?: boolean;
+    services: {
+        uiSettings: IUiSettingsClient;
+        toastNotifications: ToastsStart;
+    };
+    hasEditDataViewPermission: () => boolean;
+    valueToStringConverter: ValueToStringConverter;
+    onFilter?: DocViewFilterFn;
+    editField?: (fieldName: string) => void;
+    visibleCellActions?: number;
+    columnsMeta?: DataTableColumnsMeta;
+    showColumnTokens?: boolean;
+    headerRowHeightLines: number;
+    customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
+    onResize: UnifiedDataTableProps['onResize'];
+    sortedColumns?: EuiDataGridColumnSortingConfig[];
+    dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
+    hideFilteringOnComputedColumns?: boolean;
+}): EuiDataGridColumn[];

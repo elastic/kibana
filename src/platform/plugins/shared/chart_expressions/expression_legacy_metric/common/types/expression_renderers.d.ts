@@ -1,0 +1,45 @@
+import type { ReactNode } from 'react';
+import type { $Values } from '@kbn/utility-types';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
+import type { ColorMode, Labels, CustomPaletteState, Style as ChartStyle } from '@kbn/charts-plugin/common';
+import type { Style } from '@kbn/expressions-plugin/common';
+import type { LabelPosition } from '../constants';
+export declare const visType = "metric";
+export interface DimensionsVisParam {
+    metrics: Array<ExpressionValueVisDimension | string>;
+    bucket?: ExpressionValueVisDimension | string;
+}
+export type LabelPositionType = $Values<typeof LabelPosition>;
+export type MetricStyle = Style & Pick<ChartStyle, 'bgColor' | 'labelColor'>;
+export type LabelsConfig = Labels & {
+    style: Style;
+    position: LabelPositionType;
+};
+export type MetricAlignment = 'left' | 'center' | 'right';
+export interface MetricVisParam {
+    autoScaleMetricAlignment?: MetricAlignment;
+    percentageMode: boolean;
+    percentageFormatPattern?: string;
+    metricColorMode: ColorMode;
+    palette?: CustomPaletteState;
+    labels: LabelsConfig;
+    style: MetricStyle;
+    colorFullBackground: boolean;
+    autoScale?: boolean;
+}
+export interface VisParams {
+    addTooltip: boolean;
+    addLegend: boolean;
+    dimensions: DimensionsVisParam;
+    metric: MetricVisParam;
+    type: typeof visType;
+}
+export interface MetricOptions {
+    value: ReactNode;
+    label: string;
+    color?: string;
+    bgColor?: string;
+    lightText: boolean;
+    colIndex: number;
+    rowIndex: number;
+}

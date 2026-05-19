@@ -1,0 +1,1 @@
+export declare const getUiSettingsService: import("@kbn/kibana-utils-plugin/public").Get<import("@kbn/core/public").IUiSettingsClient>, setUiSettingsService: import("@kbn/kibana-utils-plugin/public").Set<import("@kbn/core/public").IUiSettingsClient>;

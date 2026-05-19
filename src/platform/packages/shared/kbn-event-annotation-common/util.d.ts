@@ -1,0 +1,23 @@
+import type { EventAnnotationConfig, RangeEventAnnotationConfig, PointInTimeEventAnnotationConfig, QueryPointEventAnnotationConfig } from './types';
+export declare const AUTO_ANNOTATION_COLOR = "auto";
+export declare const defaultAnnotationColor = "#2B394F";
+export declare const darkModeDefaultAnnotationColor = "#FFFFFF";
+export declare const defaultAnnotationRangeColor = "#2B394F1A";
+export declare const darkModeDefaultAnnotationRangeColor = "#FFFFFF1A";
+export declare const getDefaultAnnotationColor: (isDarkMode?: boolean) => "#2B394F" | "#FFFFFF";
+export declare const getDefaultAnnotationRangeColor: (isDarkMode?: boolean) => "#2B394F1A" | "#FFFFFF1A";
+export declare const isAutoAnnotationColor: (color?: string) => color is "auto";
+export declare const getResolvedAnnotationColor: ({ color, isDarkMode, isRange, }: {
+    color?: string;
+    isDarkMode?: boolean;
+    isRange?: boolean;
+}) => string;
+export declare const getPersistedAnnotationColor: (color?: string) => string;
+export declare const isRangeAnnotationConfig: (annotation?: EventAnnotationConfig) => annotation is RangeEventAnnotationConfig;
+export declare const isManualPointAnnotationConfig: (annotation?: EventAnnotationConfig) => annotation is PointInTimeEventAnnotationConfig;
+export declare const isQueryAnnotationConfig: (annotation?: EventAnnotationConfig) => annotation is QueryPointEventAnnotationConfig;
+export declare const createCopiedAnnotation: (newId: string, timestamp: string, source?: EventAnnotationConfig) => EventAnnotationConfig;
+export declare const defaultAnnotationLabel: string;
+export declare const defaultRangeAnnotationLabel: string;
+export declare const getDefaultManualAnnotation: (id: string, timestamp: string) => EventAnnotationConfig;
+export declare const getDefaultQueryAnnotation: (id: string, fieldName: string, timeField: string) => EventAnnotationConfig;

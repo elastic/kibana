@@ -1,0 +1,17 @@
+import type { CoreStart } from '@kbn/core/public';
+import type { FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
+import { UnifiedSearchPublicPlugin } from './plugin';
+export type { IndexPatternSelectProps } from './index_pattern_select';
+export type { StatefulSearchBarProps, SearchBarProps } from './search_bar';
+export type { UnifiedSearchPublicPluginStart, UnifiedSearchPluginSetup, IUnifiedSearchPluginServices, UnifiedSearchDraft, } from './types';
+export type { FilterItemsProps } from './filter_bar';
+export type { DataViewPickerProps } from './dataview_picker';
+export type { ApplyGlobalFilterActionContext } from './actions/apply_filter_action/apply_filter_action';
+export { SearchBar } from './search_bar';
+export { createSearchBar } from './search_bar/create_search_bar';
+export { FilterItem, FilterItems } from './filter_bar';
+export { FilterBadgeGroup } from './filter_badge';
+export { DataViewPicker, DataViewSelector, DataViewsList } from './dataview_picker';
+export { ACTION_GLOBAL_APPLY_FILTER, UPDATE_FILTER_REFERENCES_ACTION } from './actions/constants';
+export declare function createFilterAction(filterManager: FilterManager, timeFilter: TimefilterContract, coreStart: CoreStart, id: string, type: string): Promise<import("../../ui_actions/public").UiActionsActionDefinition<import("./actions/apply_filter_action/apply_filter_action").ApplyGlobalFilterActionContext>>;
+export declare function plugin(): UnifiedSearchPublicPlugin;

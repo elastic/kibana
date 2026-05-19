@@ -1,0 +1,10 @@
+import type { CoreStart, PluginInitializer } from '@kbn/core/public';
+import type { SecurityPluginSetup } from '@kbn/security-plugin-types-public';
+import type { PluginSetupDependencies, PluginStartDependencies, SecurityPluginStart } from './plugin';
+export type { SecurityPluginStart, SecurityPluginSetup };
+export type { AuthenticatedUser, SecurityLicenseFeatures, SecurityLicense } from '../common';
+export type { UiApi, ChangePasswordProps, PersonalInfoProps } from './ui_api';
+export { ALL_SPACES_ID } from '../common/constants';
+export type { AuthenticationServiceStart, AuthenticationServiceSetup, AuthorizationServiceStart, AuthorizationServiceSetup, SecurityNavControlServiceStart, UserMenuLink, UserProfileBulkGetParams, UserProfileGetCurrentParams, UserProfileSuggestParams, } from '@kbn/security-plugin-types-public';
+export declare const plugin: PluginInitializer<SecurityPluginSetup, SecurityPluginStart, PluginSetupDependencies, PluginStartDependencies>;
+export type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile' | 'rendering'>;

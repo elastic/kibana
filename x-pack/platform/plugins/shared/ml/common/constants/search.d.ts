@@ -1,0 +1,2 @@
+export declare const ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE = 500;
+export declare const ANOMALIES_TABLE_DEFAULT_QUERY_SIZE = 500;

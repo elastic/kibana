@@ -1,0 +1,1 @@
+export declare const getThemeService: import("@kbn/kibana-utils-plugin/public").Get<Omit<import("../../../../charts/public/services").ThemeService, "init">>, setThemeService: import("@kbn/kibana-utils-plugin/public").Set<Omit<import("../../../../charts/public/services").ThemeService, "init">>;

@@ -1,0 +1,12 @@
+export declare const STATUS_CODE = "status.code";
+export declare const OTEL_EVENT_NAME = "event_name";
+export declare const EXCEPTION_TYPE = "exception.type";
+export declare const EXCEPTION_MESSAGE = "exception.message";
+export declare const DURATION = "duration";
+export declare const KIND = "kind";
+export declare const RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE = "resource.attributes.telemetry.sdk.language";
+export declare const LINKS_TRACE_ID = "links.trace_id";
+export declare const LINKS_SPAN_ID = "links.span_id";
+export declare const ATTRIBUTE_HTTP_SCHEME = "attributes.http.scheme";
+export declare const ATTRIBUTE_HTTP_STATUS_CODE = "attributes.http.status_code";
+export declare const PROCESS_RUNTIME_VERSION = "process.runtime.version";

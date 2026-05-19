@@ -1,0 +1,1 @@
+export { createPromptApi } from './api';

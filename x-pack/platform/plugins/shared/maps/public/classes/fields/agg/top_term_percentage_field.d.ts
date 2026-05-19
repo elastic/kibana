@@ -1,0 +1,30 @@
+import type { IESAggField } from './agg_field_types';
+import type { IVectorSource } from '../../sources/vector_source';
+import type { ITooltipProperty } from '../../tooltips/tooltip_property';
+import type { FIELD_ORIGIN } from '../../../../common/constants';
+import type { TileMetaFeature } from '../../../../common/descriptor_types';
+export declare class TopTermPercentageField implements IESAggField {
+    private readonly _topTermAggField;
+    constructor(topTermAggField: IESAggField);
+    supportsFieldMetaFromEs(): boolean;
+    supportsFieldMetaFromLocalData(): boolean;
+    getSource(): IVectorSource;
+    getMbFieldName(): string;
+    getOrigin(): FIELD_ORIGIN;
+    getName(): string;
+    getRootName(): string;
+    getLabel(): Promise<string>;
+    isValid(): boolean;
+    getDataType(): Promise<string>;
+    createTooltipProperty(value: string | string[] | undefined): Promise<ITooltipProperty>;
+    getValueAggDsl(): null;
+    getBucketCount(): number;
+    isCount(): boolean;
+    getExtendedStatsFieldMetaRequest(): Promise<null>;
+    getPercentilesFieldMetaRequest(percentiles: number[]): Promise<null>;
+    getCategoricalFieldMetaRequest(): Promise<null>;
+    canValueBeFormatted(): boolean;
+    isEqual(field: IESAggField): boolean;
+    pluckRangeFromTileMetaFeature(metaFeature: TileMetaFeature): null;
+    getMask(): undefined;
+}

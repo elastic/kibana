@@ -1,0 +1,1 @@
+export { newVectorLayerWizardConfig } from './config';

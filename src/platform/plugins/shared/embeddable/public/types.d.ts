@@ -1,0 +1,75 @@
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { registerAddFromLibraryType } from './add_from_library/registry';
+import type { registerEmbeddablePublicDefinition } from './react_embeddable_system';
+import type { EmbeddableStateTransfer } from './state_transfer';
+import type { DrilldownTransforms, EmbeddableTransforms } from '../common';
+import type { AddFromLibraryFormProps, AddFromLibraryContentProps } from './add_from_library/add_from_library_flyout';
+import type { registerDrilldown } from './drilldowns/registry';
+export interface EmbeddableSetupDependencies {
+    uiActions: UiActionsSetup;
+}
+export interface EmbeddableStartDependencies {
+    uiActions: UiActionsStart;
+    inspector: InspectorStart;
+    usageCollection: UsageCollectionStart;
+    contentManagement: ContentManagementPublicStart;
+    savedObjectsManagement: SavedObjectsManagementPluginStart;
+    savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
+    licensing?: LicensingPluginStart;
+}
+export interface EmbeddableSetup {
+    /**
+     * Register a saved object type with the "Add from library" flyout.
+     *
+     * `onAdd` receives the container and the saved object. You may pass a second boolean parameter
+     *  to `addNewPanel` to enable a success message and automatic scrolling.
+     *
+     * @example
+     *  registerAddFromLibraryType({
+     *    onAdd: (container, savedObject) => {
+     *     container.addNewPanel(
+     *         {
+     *           panelType: MY_EMBEDDABLE_TYPE,
+     *           serializedState: {
+     *             rawState: savedObject.attributes,
+     *           },
+     *         },
+     *         true // shows a toast and scrolls to panel
+     *       );
+     *    },
+     *    savedObjectType: MAP_SAVED_OBJECT_TYPE,
+     *    savedObjectName: i18n.translate('xpack.maps.mapSavedObjectLabel', {
+     *      defaultMessage: 'Map',
+     *    }),
+     *    getIconForSavedObject: () => APP_ICON,
+     *  });
+     */
+    registerAddFromLibraryType: typeof registerAddFromLibraryType;
+    /**
+     * Registers an async {@link DrilldownDefintion} getter.
+     */
+    registerDrilldown: typeof registerDrilldown;
+    /**
+     * Registers an async {@link ReactEmbeddableFactory} getter.
+     */
+    registerEmbeddablePublicDefinition: typeof registerEmbeddablePublicDefinition;
+    /**
+     * Register legacyURLTransform for an embeddable type.
+     * LegacyURLTransform is used to convert StoredEmbeddableState from URL into EmbeddableState.
+     */
+    registerLegacyURLTransform: (type: string, getTransformOut: (transformDrilldownsOut: DrilldownTransforms['transformOut']) => Promise<EmbeddableTransforms['transformOut']>) => void;
+}
+export interface EmbeddableStart {
+    getAddFromLibraryComponent: () => Promise<React.FC<AddFromLibraryFormProps>>;
+    getAddFromLibraryContentComponent: () => Promise<React.FC<AddFromLibraryContentProps>>;
+    getStateTransfer: (storage?: Storage) => EmbeddableStateTransfer;
+    getLegacyURLTransform: (type: string) => Promise<EmbeddableTransforms['transformOut'] | undefined>;
+    hasLegacyURLTransform: (type: string) => boolean;
+}

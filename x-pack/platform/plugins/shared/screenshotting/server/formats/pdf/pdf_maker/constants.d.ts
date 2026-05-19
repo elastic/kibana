@@ -1,0 +1,14 @@
+import { assetPath } from '../../../constants';
+export declare const tableBorderWidth = 1;
+export declare const pageMarginTop = 40;
+export declare const pageMarginBottom = 80;
+export declare const pageMarginWidth = 40;
+export declare const headingFontSize = 14;
+export declare const headingMarginTop = 10;
+export declare const headingMarginBottom = 5;
+export declare const headingHeight: number;
+export declare const subheadingFontSize = 12;
+export declare const subheadingMarginTop = 0;
+export declare const subheadingMarginBottom = 5;
+export declare const subheadingHeight: number;
+export { assetPath };

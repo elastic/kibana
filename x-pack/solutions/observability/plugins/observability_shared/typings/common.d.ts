@@ -1,0 +1,1 @@
+export type ObservabilityApp = 'infra_metrics' | 'infra_logs' | 'apm' | 'slo' | 'uptime' | 'synthetics' | 'alerts' | 'observability-overview' | 'ux' | 'fleet' | 'profiling' | 'observability-onboarding';

@@ -1,0 +1,2 @@
+import type { ModelStage } from '../types';
+export declare const cleanupUnknownAndExcludedDocs: ModelStage<'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS', 'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_WAIT_FOR_TASK' | 'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_REFRESH' | 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT' | 'FATAL'>;

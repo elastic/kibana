@@ -1,0 +1,11 @@
+export declare const DEFAULT_PAGELOAD_SELECTOR = ".kbnAppWrapper";
+export declare const CONTEXT_GETNUMBEROFITEMS = "GetNumberOfItems";
+export declare const CONTEXT_INJECTCSS = "InjectCss";
+export declare const CONTEXT_WAITFORRENDER = "WaitForRender";
+export declare const CONTEXT_GETRENDERERRORS = "GetVisualisationsRenderErrors";
+export declare const CONTEXT_GETTIMERANGE = "GetTimeRange";
+export declare const CONTEXT_ELEMENTATTRIBUTES = "ElementPositionAndAttributes";
+export declare const CONTEXT_WAITFORELEMENTSTOBEINDOM = "WaitForElementsToBeInDOM";
+export declare const CONTEXT_SKIPTELEMETRY = "SkipTelemetry";
+export declare const CONTEXT_READMETADATA = "ReadVisualizationsMetadata";
+export declare const CONTEXT_DEBUG = "Debug";

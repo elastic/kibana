@@ -1,0 +1,1 @@
+export { createObservabilityTracesDocumentProfileProvider } from './profile';

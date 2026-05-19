@@ -1,0 +1,15 @@
+import { LRUCache } from 'lru-cache';
+import type { TemplateDelegate } from '@kbn/handlebars';
+import type { AssetsMap, PackagePolicyAssetsMap } from '../../../../common/types';
+import type { PackageInfo } from '../../../../common';
+export declare function getPackageInfoCache(pkgName: string, pkgVersion: string): PackageInfo | undefined;
+export declare function setPackageInfoCache(pkgName: string, pkgVersion: string, packageInfo: PackageInfo): LRUCache<string, PackageInfo, unknown> | undefined;
+export declare function getPackageAssetsMapCache(pkgName: string, pkgVersion: string): AssetsMap | undefined;
+export declare function getIsSpaceAwarenessEnabledCache(): boolean | undefined;
+export declare function setIsSpaceAwarenessEnabledCache(val: boolean): void | undefined;
+export declare function setPackageAssetsMapCache(pkgName: string, pkgVersion: string, assetsMap: AssetsMap): LRUCache<string, AssetsMap, unknown> | undefined;
+export declare function getAgentTemplateAssetsMapCache(pkgName: string, pkgVersion: string): PackagePolicyAssetsMap | undefined;
+export declare function setAgentTemplateAssetsMapCache(pkgName: string, pkgVersion: string, assetsMap: PackagePolicyAssetsMap): LRUCache<string, PackagePolicyAssetsMap, unknown> | undefined;
+export declare function getHandlebarsCompiledTemplateCache(tplStr: string): TemplateDelegate<any> | undefined;
+export declare function setHandlebarsCompiledTemplateCache(tplStr: string, tpl: TemplateDelegate): LRUCache<string, TemplateDelegate<any>, unknown> | undefined;
+export declare function runWithCache<T = any>(cb: () => Promise<T>): Promise<T>;

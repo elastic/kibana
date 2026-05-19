@@ -1,0 +1,1 @@
+export { SpaceSolutionBadge } from './badge';

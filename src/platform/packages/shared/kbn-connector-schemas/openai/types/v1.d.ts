@@ -1,0 +1,11 @@
+import type { z } from '@kbn/zod/v4';
+import type { ConfigSchema, SecretsSchema, RunActionParamsSchema, RunActionResponseSchema, DashboardActionParamsSchema, DashboardActionResponseSchema, StreamActionParamsSchema, InvokeAIActionParamsSchema, InvokeAIActionResponseSchema } from '../schemas/v1';
+export type Config = z.input<typeof ConfigSchema>;
+export type Secrets = z.infer<typeof SecretsSchema>;
+export type RunActionParams = z.infer<typeof RunActionParamsSchema>;
+export type InvokeAIActionParams = z.infer<typeof InvokeAIActionParamsSchema>;
+export type InvokeAIActionResponse = z.infer<typeof InvokeAIActionResponseSchema>;
+export type RunActionResponse = z.infer<typeof RunActionResponseSchema>;
+export type DashboardActionParams = z.infer<typeof DashboardActionParamsSchema>;
+export type DashboardActionResponse = z.infer<typeof DashboardActionResponseSchema>;
+export type StreamActionParams = z.infer<typeof StreamActionParamsSchema>;

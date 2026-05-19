@@ -1,0 +1,20 @@
+import React from 'react';
+import type { EuiMarkdownEditorProps } from '@elastic/eui';
+import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { type MarkdownEditorRef } from './types';
+type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
+    id: string;
+    field: FieldHook<string>;
+    dataTestSubj: string;
+    idAria: string;
+    isDisabled?: boolean;
+    bottomRightContent?: React.ReactNode;
+    caseTitle?: string;
+    caseId?: string;
+    caseTags?: string[];
+    draftStorageKey?: string;
+    disabledUiPlugins?: string[];
+    initialValue?: string;
+};
+export declare const MarkdownEditorForm: React.MemoExoticComponent<React.ForwardRefExoticComponent<MarkdownEditorFormProps & React.RefAttributes<MarkdownEditorRef>>>;
+export {};

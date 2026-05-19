@@ -1,0 +1,2 @@
+import { RevertToBasic as PresentationComponent } from './revert_to_basic';
+export declare const RevertToBasic: import("react-redux").ConnectedComponent<typeof PresentationComponent, import("react-redux").Omit<import("react").ClassAttributes<PresentationComponent> & import("./revert_to_basic").Props, "messages" | "licenseType" | "needsAcknowledgement" | "shouldShowRevertToBasicLicense" | "startBasicLicense" | "cancelStartBasicLicense">>;

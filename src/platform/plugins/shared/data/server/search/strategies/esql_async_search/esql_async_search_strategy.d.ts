@@ -1,0 +1,10 @@
+import type { Logger } from '@kbn/core/server';
+import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
+import type { SqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { EsqlAsyncQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ESQLSearchParams } from '@kbn/es-types';
+import type { ISearchStrategy } from '../../types';
+import type { SearchConfigSchema } from '../../../config';
+type ESQLQueryRequest = ESQLSearchParams & SqlQueryRequest;
+export declare const esqlAsyncSearchStrategyProvider: (searchConfig: SearchConfigSchema, logger: Logger) => ISearchStrategy<IKibanaSearchRequest<ESQLQueryRequest>, IKibanaSearchResponse<EsqlAsyncQueryResponse>>;
+export {};

@@ -1,0 +1,17 @@
+import type { SERVERLESS_ES_CONNECTORS_ID, SERVERLESS_ES_WEB_CRAWLERS_ID, ENTERPRISE_SEARCH_APP_ID, ENTERPRISE_SEARCH_CONTENT_APP_ID, ENTERPRISE_SEARCH_APPLICATIONS_APP_ID, ENTERPRISE_SEARCH_ANALYTICS_APP_ID, ES_SEARCH_PLAYGROUND_ID, SEARCH_HOMEPAGE, ES_SEARCH_SYNONYMS_ID, SEARCH_QUERY_RULES_ID, SEARCH_INDEX_MANAGEMENT, SEARCH_GETTING_STARTED } from './constants';
+export type EnterpriseSearchApp = typeof ENTERPRISE_SEARCH_APP_ID;
+export type EnterpriseSearchContentApp = typeof ENTERPRISE_SEARCH_CONTENT_APP_ID;
+export type EnterpriseSearchApplicationsApp = typeof ENTERPRISE_SEARCH_APPLICATIONS_APP_ID;
+export type EnterpriseSearchAnalyticsApp = typeof ENTERPRISE_SEARCH_ANALYTICS_APP_ID;
+export type ConnectorsId = typeof SERVERLESS_ES_CONNECTORS_ID;
+export type ServerlessWebCrawlers = typeof SERVERLESS_ES_WEB_CRAWLERS_ID;
+export type SearchPlaygroundId = typeof ES_SEARCH_PLAYGROUND_ID;
+export type SearchSynonymsId = typeof ES_SEARCH_SYNONYMS_ID;
+export type SearchQueryRulesId = typeof SEARCH_QUERY_RULES_ID;
+export type SearchHomepage = typeof SEARCH_HOMEPAGE;
+export type SearchIndexManagement = typeof SEARCH_INDEX_MANAGEMENT;
+export type SearchGettingStarted = typeof SEARCH_GETTING_STARTED;
+export type ContentLinkId = 'connectors' | 'webCrawlers';
+export type ApplicationsLinkId = 'searchApplications';
+export type SynonymsLinkId = 'synonyms';
+export type DeepLinkId = EnterpriseSearchApp | EnterpriseSearchContentApp | EnterpriseSearchApplicationsApp | EnterpriseSearchAnalyticsApp | ConnectorsId | ServerlessWebCrawlers | SearchPlaygroundId | SearchSynonymsId | SearchQueryRulesId | SearchHomepage | `${EnterpriseSearchContentApp}:${ContentLinkId}` | `${EnterpriseSearchApplicationsApp}:${ApplicationsLinkId}` | `${SearchSynonymsId}:${SynonymsLinkId}` | SearchIndexManagement | SearchGettingStarted;

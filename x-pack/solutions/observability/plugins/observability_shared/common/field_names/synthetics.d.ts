@@ -1,0 +1,17 @@
+export declare const MONITOR_DURATION_US = "monitor.duration.us";
+export declare const SYNTHETICS_CLS = "browser.experience.cls";
+export declare const SYNTHETICS_LCP = "browser.experience.lcp.us";
+export declare const SYNTHETICS_FCP = "browser.experience.fcp.us";
+export declare const SYNTHETICS_DOCUMENT_ONLOAD = "browser.experience.load.us";
+export declare const SYNTHETICS_DCL = "browser.experience.dcl.us";
+export declare const SYNTHETICS_STEP_NAME = "synthetics.step.name.keyword";
+export declare const SYNTHETICS_STEP_DURATION = "synthetics.step.duration.us";
+export declare const SYNTHETICS_DNS_TIMINGS = "synthetics.payload.timings.dns";
+export declare const SYNTHETICS_SSL_TIMINGS = "synthetics.payload.timings.ssl";
+export declare const SYNTHETICS_BLOCKED_TIMINGS = "synthetics.payload.timings.blocked";
+export declare const SYNTHETICS_CONNECT_TIMINGS = "synthetics.payload.timings.connect";
+export declare const SYNTHETICS_RECEIVE_TIMINGS = "synthetics.payload.timings.receive";
+export declare const SYNTHETICS_SEND_TIMINGS = "synthetics.payload.timings.send";
+export declare const SYNTHETICS_WAIT_TIMINGS = "synthetics.payload.timings.wait";
+export declare const SYNTHETICS_TOTAL_TIMINGS = "synthetics.payload.timings.total";
+export declare const NETWORK_TIMINGS_FIELDS: string[];

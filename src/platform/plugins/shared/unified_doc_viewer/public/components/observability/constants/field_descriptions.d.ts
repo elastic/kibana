@@ -1,0 +1,1 @@
+export declare const SPAN_DESTINATION_SERVICE_RESOURCE_DESCRIPTION: string;
