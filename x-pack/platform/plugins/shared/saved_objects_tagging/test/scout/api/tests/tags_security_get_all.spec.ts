@@ -35,7 +35,7 @@ apiTest.describe('Saved Objects Tagging - get all tags', { tag: tags.stateful.cl
       });
       expect(response).toHaveStatusCode(200);
       expect(response.body.tags).toBeInstanceOf(Array);
-      // filter out managed tags because this test is just to esnure space isolation, not full tag inventory
+      // filter out managed tags because this test is just to ensure space isolation, not full tag inventory
       const sortedTags = (response.body.tags as Array<{ id: string; managed: boolean }>)
         .filter((tag) => !tag.managed)
         .sort((a, b) => a.id.localeCompare(b.id));
@@ -67,7 +67,7 @@ apiTest.describe('Saved Objects Tagging - get all tags', { tag: tags.stateful.cl
       });
       expect(response).toHaveStatusCode(200);
       expect(response.body.tags).toBeInstanceOf(Array);
-      // filter out managed tags because this test is just to esnure space isolation, not full tag inventory
+      // filter out managed tags because this test is just to ensure space isolation, not full tag inventory
       const sortedTags = (response.body.tags as Array<{ id: string; managed: boolean }>)
         .filter((tag) => !tag.managed)
         .sort((a, b) => a.id.localeCompare(b.id));
