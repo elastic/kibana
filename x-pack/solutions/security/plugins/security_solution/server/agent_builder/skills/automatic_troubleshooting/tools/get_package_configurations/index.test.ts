@@ -97,7 +97,7 @@ describe('automaticTroubleshootingGetPackageConfigurationsTool', () => {
           version: '9.4.0',
           title: 'Elastic Defend',
           description: 'Endpoint security package',
-          owner: { github: 'elastic/fleet' },
+          owner: { github: 'elastic/security-defend-workflows' },
         },
       } as Awaited<ReturnType<typeof mockPackageClient.getPackage>>;
 
@@ -316,7 +316,7 @@ describe('automaticTroubleshootingGetPackageConfigurationsTool', () => {
           version: '9.4.0',
           title: 'Elastic Defend',
           description: 'Endpoint security package',
-          owner: { github: 'elastic/fleet' },
+          owner: { github: 'elastic/security-defend-workflows' },
         },
       } as Awaited<ReturnType<typeof mockPackageClient.getPackage>>;
 
@@ -395,7 +395,7 @@ describe('automaticTroubleshootingGetPackageConfigurationsTool', () => {
           version: '9.4.0',
           title: 'Elastic Defend',
           description: 'Endpoint security package',
-          owner: { github: 'elastic/fleet' },
+          owner: { github: 'elastic/security-defend-workflows' },
         },
       } as Awaited<ReturnType<typeof mockPackageClient.getPackage>>;
 
@@ -609,7 +609,7 @@ describe('automaticTroubleshootingGetPackageConfigurationsTool', () => {
           version: '9.4.0',
           title: 'Elastic Defend',
           description: 'Endpoint security package',
-          owner: { github: 'elastic/fleet' },
+          owner: { github: 'elastic/security-defend-workflows' },
         },
       } as Awaited<ReturnType<typeof mockPackageClient.getPackage>>;
 

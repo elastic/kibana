@@ -770,6 +770,10 @@ export async function getPackageFromSource(options: {
         // in the unlikely event its missing from cache, storage, and never installed from registry
       }
     }
+    if (!res && pkgInstallSource === 'bundled') {
+      res = await Registry.getBundledArchive(pkgName, pkgVersion);
+      logger.debug(`retrieved bundled package ${pkgName}-${pkgVersion} from bundled archive`);
+    }
   } else {
     try {
       res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });

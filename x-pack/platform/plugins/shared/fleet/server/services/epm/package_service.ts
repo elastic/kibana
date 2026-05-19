@@ -363,14 +363,9 @@ class PackageClientImpl implements PackageClient {
     options?: { ignoreUnverified?: boolean }
   ) {
     await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
-    const installedPkg = await getInstallation({
-      pkgName: packageName,
-      savedObjectsClient: this.internalSoClient,
-    });
     return getPackageFromSource({
       pkgName: packageName,
       pkgVersion: packageVersion,
-      installedPkg,
       savedObjectsClient: this.internalSoClient,
       ignoreUnverified: options?.ignoreUnverified,
     });
