@@ -27,7 +27,7 @@ import type { ActionsConfigurationUtilities } from '../actions_config';
 import { OAUTH_API_TAG } from '../feature';
 
 class OAuthRouteError extends Error {
-  constructor(message: string, readonly statusCode: number) {
+  constructor(message: string, public readonly statusCode: number) {
     super(message);
     this.name = 'OAuthRouteError';
   }
