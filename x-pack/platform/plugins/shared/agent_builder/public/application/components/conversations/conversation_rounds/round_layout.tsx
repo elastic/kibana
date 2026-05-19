@@ -20,7 +20,7 @@ import { findTodosStep } from '@kbn/agent-builder-common/chat/conversation';
 import { isConfirmationPrompt } from '@kbn/agent-builder-common/agents';
 import { RoundInput } from './round_input';
 import { RoundEventsHeader } from './round_events_header';
-import { RoundSteps } from './round_thinking/steps/round_steps';
+import { RoundEvents } from './round_events/round_events';
 import { RoundResponse } from './round_response/round_response';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { RoundError } from './round_error/round_error';
@@ -92,6 +92,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     retry: retrySendMessage,
     resumeRound,
     isResuming,
+    agentReasoning,
   } = useConversationStream();
   // HITL Approve / Cancel is per-conversation: streamActions are closure-bound to
   // vars.conversationId, so other in-flight conversations cannot corrupt this cache.
@@ -201,9 +202,9 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
       {/* Steps container — last step hidden when shown as agentReasoning label */}
       {displayedSteps.length > 0 && (
         <EuiFlexItem grow={false}>
-          <RoundSteps
+          <RoundEvents
             steps={displayedSteps}
-            isLoading={isLoadingCurrentRound || Boolean(isAwaitingPrompt)}
+            isReloadedRound={!(isLoadingCurrentRound || hasBeenLoading)}
           />
         </EuiFlexItem>
       )}
