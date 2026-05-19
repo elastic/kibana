@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/266697
+issues:
+- https://github.com/elastic/kibana/issues/266430
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-14
+title: Change grouping in the Feature Registry
+description: 'Consolidate the Security AI Assistant inference endpoint configuration under the Security group on the "Inference Endpoints" page. Remove a duplicate AI Assistant section and hide the AI-Assistant-for-Security entry when the classic chat experience is not selected.'
