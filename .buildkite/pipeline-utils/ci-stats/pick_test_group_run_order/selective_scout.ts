@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Minimatch } from 'minimatch';
+import { allChangedFilesInScope } from '../../affected-packages';
 
 /**
  * Scout-tests-only fast path for the Jest/FTR orchestrator.
@@ -33,17 +33,6 @@ const SCOUT_TESTS_ONLY_SCOPE_GLOBS: readonly string[] = [
   '**/test/scout{_*,}/.meta/{api,ui}/**',
 ];
 
-// Don't add a `Minimatch[]` return type: the installed @types/minimatch
-// exports `Minimatch` as a value (not a type), and ts-node will reject it.
-const compile = (patterns: readonly string[]) =>
-  patterns.map((p) => new Minimatch(p, { dot: true }));
-
-const ignoreMatchers = compile(SCOUT_TESTS_ONLY_IGNORE_PATTERNS);
-const scopeMatchers = compile(SCOUT_TESTS_ONLY_SCOPE_GLOBS);
-
-const matchesAny = (file: string, matchers: ReturnType<typeof compile>): boolean =>
-  matchers.some((m) => m.match(file));
-
 /**
  * Returns `true` only when every changed file is either documentation noise
  * (README, *.md, CHANGELOG*) or sits inside a Scout test scope. Falls back
@@ -51,11 +40,9 @@ const matchesAny = (file: string, matchers: ReturnType<typeof compile>): boolean
  * keep using the default test discovery.
  */
 export function isScoutTestsOnlyDiff(changedFiles: readonly string[]): boolean {
-  let hasScopedChange = false;
-  for (const file of changedFiles) {
-    if (matchesAny(file, ignoreMatchers)) continue;
-    if (!matchesAny(file, scopeMatchers)) return false;
-    hasScopedChange = true;
-  }
-  return hasScopedChange;
+  return allChangedFilesInScope(
+    changedFiles,
+    SCOUT_TESTS_ONLY_SCOPE_GLOBS,
+    SCOUT_TESTS_ONLY_IGNORE_PATTERNS
+  );
 }
