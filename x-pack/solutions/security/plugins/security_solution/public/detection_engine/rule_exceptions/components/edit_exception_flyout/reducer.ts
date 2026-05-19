@@ -22,6 +22,7 @@ export interface State {
   wildcardWarningExists: boolean;
   partialCodeSignatureWarningExists: boolean;
   malformedMatchesValueExists: boolean;
+  malformedMatchesFields: string[];
 }
 
 export type Action =
@@ -76,6 +77,7 @@ export type Action =
   | {
       type: 'setMalformedMatchesValue';
       warningExists: boolean;
+      fields: string[];
     };
 
 export const createExceptionItemsReducer =
@@ -180,10 +182,11 @@ export const createExceptionItemsReducer =
         };
       }
       case 'setMalformedMatchesValue': {
-        const { warningExists } = action;
+        const { warningExists, fields } = action;
         return {
           ...state,
           malformedMatchesValueExists: warningExists,
+          malformedMatchesFields: fields,
         };
       }
       default:

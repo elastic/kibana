@@ -1128,6 +1128,27 @@ export const hasMalformedMatchesValue = (
   });
 };
 
+export const getMalformedMatchesFields = (
+  items: ExceptionsBuilderReturnExceptionItem[]
+): string[] => {
+  const multipleEntries = items.flatMap((item) => item.entries);
+  const allEntries = multipleEntries.flatMap((item) => {
+    if (item.type === 'nested') {
+      return item.entries;
+    }
+    return item;
+  });
+
+  return allEntries.reduce<string[]>((acc, e) => {
+    if (e.type === 'wildcard' && 'value' in e && typeof e.value === 'string') {
+      if (ESCAPED_WILDCARD_REGEX.test(e.value)) {
+        acc.push(e.field);
+      }
+    }
+    return acc;
+  }, []);
+};
+
 /**
  * Event filters helper where given an exceptions list,
  * determine if both 'subject_name' and 'trusted' are

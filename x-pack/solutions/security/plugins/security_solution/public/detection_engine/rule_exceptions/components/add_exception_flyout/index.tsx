@@ -30,7 +30,7 @@ import type {
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
 import {
-  hasMalformedMatchesValue,
+  getMalformedMatchesFields,
   hasPartialCodeSignatureEntry,
   hasWrongOperatorWithWildcard,
 } from '@kbn/securitysolution-list-utils';
@@ -175,6 +175,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       wildcardWarningExists,
       partialCodeSignatureWarningExists,
       malformedMatchesValueExists,
+      malformedMatchesFields,
     },
     dispatch,
   ] = useReducer(createExceptionItemsReducer(), {
@@ -211,9 +212,11 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         type: 'setPartialCodeSignature',
         warningExists: hasPartialCodeSignatureEntry(items),
       });
+      const fields = getMalformedMatchesFields(items);
       dispatch({
         type: 'setMalformedMatchesValue',
-        warningExists: hasMalformedMatchesValue(items),
+        warningExists: fields.length > 0,
+        fields,
       });
       dispatch({
         type: 'setExceptionItems',
@@ -520,7 +523,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       listType === ExceptionListTypeEnum.ENDPOINT ? ENDPOINT_EXCEPTION : RULE_EXCEPTION,
       {
         hasWildcardWithWrongOperator: wildcardWarningExists,
-        hasMalformedMatchesValue: malformedMatchesValueExists,
+        hasMalformedMatchesValue: malformedMatchesFields,
       },
       links
     );
@@ -533,7 +536,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         data-test-subj="artifactConfirmModal"
       />
     );
-  }, [links, listType, submitException, wildcardWarningExists, malformedMatchesValueExists]);
+  }, [links, listType, submitException, wildcardWarningExists, malformedMatchesFields]);
 
   return (
     <EuiFlyout

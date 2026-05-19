@@ -27,7 +27,7 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
-  hasMalformedMatchesValue,
+  getMalformedMatchesFields,
   hasWrongOperatorWithWildcard,
   hasPartialCodeSignatureEntry,
 } from '@kbn/securitysolution-list-utils';
@@ -137,6 +137,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       wildcardWarningExists,
       partialCodeSignatureWarningExists,
       malformedMatchesValueExists,
+      malformedMatchesFields,
     },
     dispatch,
   ] = useReducer(createExceptionItemsReducer(), {
@@ -153,6 +154,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     wildcardWarningExists: false,
     partialCodeSignatureWarningExists: false,
     malformedMatchesValueExists: false,
+    malformedMatchesFields: [],
   });
 
   const allowLargeValueLists = useMemo((): boolean => {
@@ -197,9 +199,11 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
         type: 'setPartialCodeSignature',
         warningExists: hasPartialCodeSignatureEntry(items),
       });
+      const fields = getMalformedMatchesFields(items);
       dispatch({
         type: 'setMalformedMatchesValue',
-        warningExists: hasMalformedMatchesValue(items),
+        warningExists: fields.length > 0,
+        fields,
       });
       dispatch({
         type: 'setExceptionItems',
@@ -407,7 +411,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       listType === ExceptionListTypeEnum.ENDPOINT ? ENDPOINT_EXCEPTION : RULE_EXCEPTION,
       {
         hasWildcardWithWrongOperator: wildcardWarningExists,
-        hasMalformedMatchesValue: malformedMatchesValueExists,
+        hasMalformedMatchesValue: malformedMatchesFields,
       },
       links
     );
@@ -420,7 +424,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
         data-test-subj="artifactConfirmModal"
       />
     );
-  }, [listType, wildcardWarningExists, links, handleSubmitException, malformedMatchesValueExists]);
+  }, [listType, wildcardWarningExists, links, handleSubmitException, malformedMatchesFields]);
 
   return (
     <EuiFlyout
