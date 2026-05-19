@@ -49,7 +49,10 @@ describe(`create`, () => {
     ({ server, createRouter, handlerContext } = await setupServer());
     savedObjectsClient = handlerContext.savedObjects.client;
     const { versioned } = createRouter<RequestHandlerContext>('/');
-    registerCreateRoute(versioned, undefined, false, { debug: jest.fn(), warn: jest.fn() } as Logger);
+    registerCreateRoute(versioned, undefined, false, {
+      debug: jest.fn(),
+      warn: jest.fn(),
+    } as Logger);
 
     savedObjectsClient.create.mockResolvedValue({
       id: 'test-dashboard',
