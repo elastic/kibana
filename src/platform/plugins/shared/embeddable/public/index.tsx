@@ -44,6 +44,7 @@ export {
   EmbeddableRendererContext,
   type DefaultEmbeddableApi,
   type EmbeddableFactory,
+  type QuickActionIds,
 } from './react_embeddable_system';
 
 export type { PresentationPanelProps } from './react_embeddable_system/panel_component/types';
