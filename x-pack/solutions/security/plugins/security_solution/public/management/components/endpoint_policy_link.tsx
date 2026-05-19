@@ -119,7 +119,7 @@ export const EndpointPolicyLink = memo<EndpointPolicyLinkProps>(
             className="eui-textNoWrap"
             data-test-subj={testId('policyNotFoundMsg')}
           >
-            <EuiIcon size="m" type="warning" color="warning" />
+            <EuiIcon size="m" type="warning" color="warning" aria-hidden={true} />
             &nbsp;
             {POLICY_NOT_FOUND_MESSAGE}
           </EuiText>
@@ -184,7 +184,13 @@ export const EndpointPolicyLink = memo<EndpointPolicyLinkProps>(
           {isOutdated && (
             <EuiFlexItem grow={false}>
               <EuiText color="subdued" size="xs" className="eui-textTruncate">
-                <EuiIcon size="m" type="warning" color="warning" className="eui-alignTop" />
+                <EuiIcon
+                  size="m"
+                  type="warning"
+                  color="warning"
+                  className="eui-alignTop"
+                  aria-hidden={true}
+                />
                 <span className="eui-displayInlineBlock" data-test-subj={testId('outdatedMsg')}>
                   <FormattedMessage
                     id="xpack.securitySolution.endpointPolicyLink.outdatedMessage"
