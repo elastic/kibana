@@ -359,7 +359,7 @@ export const JobDetails: FC<PropsWithChildren<Props>> = ({
           >
             <EuiFlexItem grow={false}>
               <EuiText size="s">
-                <EuiIcon type="checkCircleFill" color="success" />
+                <EuiIcon aria-hidden={true} type="checkCircleFill" color="success" />
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>

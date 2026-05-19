@@ -108,6 +108,8 @@ function buildServices({
 
   const http = createHttpMock({ observabilityConversationCount, securityTotal });
 
+  const addSuccess = jest.fn();
+
   const services = {
     settings: {
       client: {
@@ -115,7 +117,7 @@ function buildServices({
         get$: jest.fn((key: string) =>
           key === AI_CHAT_EXPERIENCE_TYPE ? of(chatExperience) : of(undefined)
         ),
-        set: jest.fn(),
+        set: jest.fn().mockResolvedValue(undefined),
       },
       globalClient: {
         get: (key: string) => (key === HIDE_ANNOUNCEMENTS_ID ? hideAnnouncements : undefined),
@@ -126,12 +128,28 @@ function buildServices({
       getActiveSpace$: () => space$.asObservable(),
     },
     analytics: { reportEvent },
-    application: { navigateToApp, capabilities: chatExperienceCapabilities },
+    application: {
+      navigateToApp,
+      getUrlForApp: jest.fn().mockReturnValue('/app/management/ai/genAiSettings'),
+      capabilities: chatExperienceCapabilities,
+    },
+    notifications: { toasts: { addSuccess } },
+    i18n: { Context: ({ children }: { children: React.ReactNode }) => <>{children}</> },
+    theme: {},
     userProfile,
     http,
   };
 
-  return { services, reportEvent, navigateToApp, partialUpdate, userProfile, space$, http };
+  return {
+    services,
+    reportEvent,
+    navigateToApp,
+    addSuccess,
+    partialUpdate,
+    userProfile,
+    space$,
+    http,
+  };
 }
 
 function renderController(services: ReturnType<typeof buildServices>['services']) {
@@ -280,9 +298,9 @@ describe('AgentBuilderAnnouncementModalController', () => {
     expect(screen.queryByTestId('agentBuilderAnnouncementContinueButton')).not.toBeInTheDocument();
   });
 
-  it('calls partialUpdate, reports OptOut telemetry, navigates to GenAI settings, and hides the modal on revert', async () => {
+  it('calls partialUpdate, reports OptOut telemetry, sets Classic experience, shows success toast, and hides the modal on revert', async () => {
     const user = userEvent.setup();
-    const { services, reportEvent, navigateToApp, partialUpdate } = buildServices({
+    const { services, reportEvent, addSuccess, partialUpdate } = buildServices({
       observabilityConversationCount: 1,
     });
     renderController(services);
@@ -305,7 +323,13 @@ describe('AgentBuilderAnnouncementModalController', () => {
       announcement_variant: '1b',
       had_prior_ai_assistant_usage: true,
     });
-    expect(navigateToApp).toHaveBeenCalledWith('management', { path: '/ai/genAiSettings' });
+    expect(services.settings.client.set).toHaveBeenCalledWith(
+      AI_CHAT_EXPERIENCE_TYPE,
+      AIChatExperience.Classic
+    );
+    expect(addSuccess).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Reverted to AI Assistant' })
+    );
     expect(screen.queryByTestId('agentBuilderAnnouncementRevertButton')).not.toBeInTheDocument();
   });
 

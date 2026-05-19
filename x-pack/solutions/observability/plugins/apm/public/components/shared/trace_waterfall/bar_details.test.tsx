@@ -455,6 +455,52 @@ describe('BarDetails', () => {
     });
   });
 
+  describe('in case of missing destination', () => {
+    const mockItemWithMissingDestination = {
+      ...mockItem,
+      missingDestination: true,
+    } as unknown as TraceWaterfallItem;
+
+    it('renders missing destination icon when missingDestination is true', () => {
+      const { getByTestId } = render(
+        <BarDetails item={mockItemWithMissingDestination} left={10} />
+      );
+      expect(getByTestId('apmBarDetailsMissingDestinationIcon')).toBeInTheDocument();
+    });
+
+    it('does not render missing destination icon when missingDestination is false', () => {
+      const item = {
+        ...mockItem,
+        missingDestination: false,
+      } as unknown as TraceWaterfallItem;
+      const { queryByTestId } = render(<BarDetails item={item} left={10} />);
+      expect(queryByTestId('apmBarDetailsMissingDestinationIcon')).not.toBeInTheDocument();
+    });
+
+    it('does not render missing destination icon when missingDestination is undefined', () => {
+      const { queryByTestId } = render(<BarDetails item={mockItem} left={10} />);
+      expect(queryByTestId('apmBarDetailsMissingDestinationIcon')).not.toBeInTheDocument();
+    });
+
+    it('shows a tooltip on hover', async () => {
+      const user = userEvent.setup();
+      const { getByTestId, getByText } = render(
+        <BarDetails item={mockItemWithMissingDestination} left={10} />
+      );
+
+      await user.hover(getByTestId('apmBarDetailsMissingDestinationIcon'));
+
+      await waitFor(() => {
+        expect(getByTestId('apmBarDetailsMissingDestinationTooltip')).toBeInTheDocument();
+        expect(
+          getByText(
+            'This exit span is missing the span.destination.service.resource field which might prevent linking it to downstream transactions on features that depend on this information. i.e.: Service map. Make sure the instrumentation of this exit span follows OTel Semantic Conventions'
+          )
+        ).toBeInTheDocument();
+      });
+    });
+  });
+
   describe('in case of cold start', () => {
     it('renders cold start badge when coldstart is true', () => {
       const mockItemWithColdStart = {
