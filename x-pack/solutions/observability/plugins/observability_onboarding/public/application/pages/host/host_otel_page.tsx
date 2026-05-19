@@ -16,7 +16,8 @@ import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import type { ObservabilityOnboardingAppServices } from '../../..';
-import { HostOsLayout, type HostOs } from '../../shared/host_os_layout';
+import { OnboardingFlowLayout } from '../../shared/onboarding_flow_layout';
+import type { HostOs } from './host_os';
 import { ApproachSelector } from '../../shared/approach_selector';
 import type { SupportedLogo } from '../../shared/logo_icon';
 import { usePreExistingDataCheck } from '../../quickstart_flows/shared/use_pre_existing_data_check';
@@ -340,11 +341,13 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
   ]);
 
   return (
-    <HostOsLayout
-      os={os}
+    <OnboardingFlowLayout
       title={title}
       subtitle={subtitle}
       logo={logo}
+      returnTo="/"
+      bodyDataTestSubj={`observabilityOnboardingHostV2Layout-${os}`}
+      returnDataTestSubj="observabilityOnboardingHostV2Return"
       banners={
         <>
           <MultiIntegrationInstallBanner />

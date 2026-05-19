@@ -14,30 +14,35 @@ import {
   useEuiTheme,
   type EuiStepsProps,
 } from '@elastic/eui';
+import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { css } from '@emotion/react';
-import type { SupportedLogo } from './logo_icon';
-import { OnboardingFlowHeader } from './onboarding_flow_header';
+import type { SupportedLogo } from '../logo_icon';
+import { OnboardingFlowHeader } from '../onboarding_flow_header';
 
-export type HostOs = 'linux' | 'mac' | 'windows';
-
-interface HostOsLayoutProps {
-  os: HostOs;
+export interface OnboardingFlowLayoutProps {
   title: string;
   subtitle: string;
-  logo: SupportedLogo;
+  returnTo: string;
+  logo?: SupportedLogo;
+  euiIconType?: EuiIconType;
   banners?: React.ReactNode;
   steps: EuiStepsProps['steps'];
   feedback?: React.ReactNode;
+  bodyDataTestSubj?: string;
+  returnDataTestSubj?: string;
 }
 
-export const HostOsLayout: React.FC<HostOsLayoutProps> = ({
-  os,
+export const OnboardingFlowLayout: React.FC<OnboardingFlowLayoutProps> = ({
   title,
   subtitle,
+  returnTo,
   logo,
+  euiIconType,
   banners,
   steps,
   feedback,
+  bodyDataTestSubj,
+  returnDataTestSubj,
 }) => {
   const { euiTheme } = useEuiTheme();
   return (
@@ -46,11 +51,12 @@ export const HostOsLayout: React.FC<HostOsLayoutProps> = ({
         title={title}
         subtitle={subtitle}
         logo={logo}
-        returnTo="/"
-        returnDataTestSubj="observabilityOnboardingHostV2Return"
+        euiIconType={euiIconType}
+        returnTo={returnTo}
+        returnDataTestSubj={returnDataTestSubj}
       />
       <EuiPageTemplate.Section paddingSize="xl" restrictWidth>
-        <div data-test-subj={`observabilityOnboardingHostV2Layout-${os}`}>
+        <div data-test-subj={bodyDataTestSubj}>
           <EuiFlexGroup direction="column" gutterSize="m">
             {banners && <EuiFlexItem grow={false}>{banners}</EuiFlexItem>}
 
