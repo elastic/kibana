@@ -66,9 +66,9 @@ describe('evaluateExpression', async () => {
         'user-123'
       );
 
-      expect(await evaluateExpression({ expression: 'consts.indexName', context: mockContext })).toBe(
-        'test-index'
-      );
+      expect(
+        await evaluateExpression({ expression: 'consts.indexName', context: mockContext })
+      ).toBe('test-index');
 
       expect(
         await evaluateExpression({
@@ -108,7 +108,10 @@ describe('evaluateExpression', async () => {
       ).toBe('HELLO');
 
       expect(
-        await evaluateExpression({ expression: 'inputs.greeting | capitalize', context: mockContext })
+        await evaluateExpression({
+          expression: 'inputs.greeting | capitalize',
+          context: mockContext,
+        })
       ).toBe('Hello');
     });
 
@@ -284,13 +287,13 @@ describe('evaluateExpression', async () => {
         },
       };
 
-      expect(await evaluateExpression({ expression: 'foreach.index', context: contextWithForeach })).toBe(
-        0
-      );
+      expect(
+        await evaluateExpression({ expression: 'foreach.index', context: contextWithForeach })
+      ).toBe(0);
 
-      expect(await evaluateExpression({ expression: 'foreach.total', context: contextWithForeach })).toBe(
-        3
-      );
+      expect(
+        await evaluateExpression({ expression: 'foreach.total', context: contextWithForeach })
+      ).toBe(3);
     });
 
     it('should return undefined for foreach.item when no foreach step exists', async () => {
