@@ -162,6 +162,7 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
     },
     schedule_type: {
       type: 'keyword',
+      ignore_above: 1024,
     },
     interval: {
       type: 'integer',

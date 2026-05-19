@@ -81,7 +81,7 @@ export const packSavedObjectModelVersion3: SavedObjectsModelVersion = {
     {
       type: 'mappings_addition',
       addedMappings: {
-        schedule_type: { type: 'keyword' },
+        schedule_type: { type: 'keyword', ignore_above: 1024 },
         interval: { type: 'integer' },
         rrule_schedule: { dynamic: false, properties: {} },
       },
