@@ -7,7 +7,6 @@
 
 export * from './routes';
 export { validateFleetSavedObjectId } from './validate_fleet_id';
-export { buildAgentPolicyIdKuery, escapeKueryValue } from './build_agent_policy_id_kuery';
 export * as AgentStatusKueryHelper from './agent_status';
 export * from './package_helpers';
 export {
