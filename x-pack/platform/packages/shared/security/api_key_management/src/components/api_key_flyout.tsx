@@ -842,22 +842,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                           </EuiFlexItem>
                         </EuiFlexGroup>
                       </EuiPanel>
-                      <FormRow
-                        helpText={
-                          <EuiLink
-                            href={docLinks!.links.apis.createApiKeyRoleDescriptors}
-                            target="_blank"
-                            external
-                          >
-                            <FormattedMessage
-                              id="xpack.security.accountManagement.apiKeyFlyout.roleDescriptorsHelpText"
-                              defaultMessage="Learn how to structure role descriptors."
-                            />
-                          </EuiLink>
-                        }
-                        fullWidth
-                        data-test-subj="apiKeysRoleDescriptorsCodeEditor"
-                      >
+                      <FormRow fullWidth data-test-subj="apiKeysRoleDescriptorsCodeEditor">
                         <FormField
                           as={CodeEditorField}
                           name="role_descriptors"
@@ -892,6 +877,18 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                           height={200}
                         />
                       </FormRow>
+                      <EuiText size="xs">
+                        <EuiLink
+                          href={docLinks!.links.apis.createApiKeyRoleDescriptors}
+                          target="_blank"
+                          external
+                        >
+                          <FormattedMessage
+                            id="xpack.security.accountManagement.apiKeyFlyout.roleDescriptorsHelpText"
+                            defaultMessage="Learn how to structure role descriptors."
+                          />
+                        </EuiLink>
+                      </EuiText>
                     </>
                   )}
                 </EuiPanel>
@@ -928,22 +925,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                 {formik.values.includeMetadata && (
                   <>
                     <EuiSpacer />
-                    <FormRow
-                      data-test-subj="apiKeysMetadataCodeEditor"
-                      helpText={
-                        <EuiLink
-                          href={docLinks!.links.apis.createApiKeyMetadata}
-                          target="_blank"
-                          external
-                        >
-                          <FormattedMessage
-                            id="xpack.security.accountManagement.apiKeyFlyout.metadataHelpText"
-                            defaultMessage="Learn how to structure metadata."
-                          />
-                        </EuiLink>
-                      }
-                      fullWidth
-                    >
+                    <FormRow data-test-subj="apiKeysMetadataCodeEditor" fullWidth>
                       <FormField
                         as={CodeEditorField}
                         name="metadata"
@@ -977,6 +959,18 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                         height={200}
                       />
                     </FormRow>
+                    <EuiText size="xs">
+                      <EuiLink
+                        href={docLinks!.links.apis.createApiKeyMetadata}
+                        target="_blank"
+                        external
+                      >
+                        <FormattedMessage
+                          id="xpack.security.accountManagement.apiKeyFlyout.metadataHelpText"
+                          defaultMessage="Learn how to structure metadata."
+                        />
+                      </EuiLink>
+                    </EuiText>
                   </>
                 )}
               </EuiPanel>
