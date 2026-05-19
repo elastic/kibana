@@ -125,14 +125,14 @@ export class ColoredFormat extends FieldFormat {
 // Public plugin
 export class MyPlugin implements Plugin {
   setup(core, { fieldFormats }) {
-    fieldFormats.register([MyCustomFormat]);
+    fieldFormats.register([MyFormat]);
   }
 }
 
 // Server plugin
 export class MyServerPlugin implements Plugin {
   setup(core, { fieldFormats }) {
-    fieldFormats.register(MyCustomFormat);
+    fieldFormats.register(MyFormat);
   }
 }
 ```
