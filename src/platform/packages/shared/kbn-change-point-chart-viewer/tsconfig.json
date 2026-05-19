@@ -6,7 +6,6 @@
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["target/**/*"],
   "kbn_references": [
-    "@elastic/esql",
     "@kbn/data-plugin",
     "@kbn/es-query",
     "@kbn/esql-utils",
@@ -20,6 +19,7 @@
     "@kbn/ui-actions-plugin",
     "@kbn/unified-histogram",
     "@kbn/embeddable-plugin",
-    "@kbn/esql-types"
+    "@kbn/esql-types",
+    "@kbn/esql-language"
   ]
 }
