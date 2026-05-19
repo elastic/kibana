@@ -70,7 +70,9 @@ export function TraceOverview({
             contentProps: {
               style: {
                 display: 'flex',
+                flexDirection: 'column',
                 flexGrow: 1,
+                minInlineSize: 0,
               },
             },
           }}
