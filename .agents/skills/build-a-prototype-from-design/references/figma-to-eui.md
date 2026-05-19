@@ -14,11 +14,49 @@ For full prop APIs, usage examples, and detailed visual descriptions, read:
 
 ## Mode A — Figma file URL provided
 
-Code Connect handles the Figma component → code mapping automatically.
+Code Connect handles the Figma component → code mapping automatically via
+the **Figma MCP server**. The MCP must be installed and connected before
+any of the tool calls below will work.
 
-1. Call `get_design_context(url)` to extract the layer tree.
-2. Call `get_code_connect_map()` to get the Figma → EUI mappings.
-3. For any components not covered by Code Connect, call `get_code_connect_suggestions()`.
+### Pre-flight: verify the Figma MCP is available
+
+Before calling any Figma tool, confirm the MCP is running:
+
+- In **Claude Code**: run `/mcp` in the chat — the Figma server should
+  appear with a green ● status.
+- In **Claude.ai** (desktop app): open Settings → Integrations → MCP
+  and check that the Figma server is listed and enabled.
+
+**If the Figma MCP is not installed**, direct the user to set it up:
+
+1. Install the Figma MCP globally:
+   ```bash
+   npx figma-mcp install
+   ```
+   Or follow the official guide:
+   https://help.figma.com/hc/en-us/articles/32132100833559
+
+2. Provide a personal access token when prompted
+   (Figma → Settings → Security → Personal access tokens).
+
+3. Restart Claude Code / the Claude desktop app.
+
+4. Confirm with `/mcp` that the Figma server now shows a green ● status.
+
+> **If the MCP cannot be installed** (e.g. corporate environment, no
+> network access to Figma), fall back to **Mode B** — ask the user to
+> export the design as a PNG/JPG screenshot and continue from there.
+
+---
+
+### Mode A workflow (MCP confirmed available)
+
+1. Call `get_design_context(url)` to extract the layer tree and Code
+   Connect snippets for the provided Figma URL.
+2. Call `get_code_connect_map()` to get the full Figma → EUI mappings
+   for the file.
+3. For any components not covered by Code Connect, call
+   `get_code_connect_suggestions()` to get the closest matches.
 4. Check each resolved component against [`eui-vs-kbnui.md`](./eui-vs-kbnui.md)
    to confirm whether to use the raw EUI component or a Kibana wrapper.
 
