@@ -127,7 +127,7 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
       useActionResultsMock.mockReturnValue({
         data: {
           edges: mockEdges,
-          totalAgents: 3,
+          total: 3,
           aggregations: {
             totalRowCount: 30,
             totalResponded: 3,
@@ -154,14 +154,14 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
       expect(container.querySelector('.euiPagination')).toBeInTheDocument();
     });
 
-    it('should use server totalAgents for pagination count', () => {
+    it('should use server total for pagination count', () => {
       const mockAgents = ['agent-1', 'agent-2'];
       const mockEdges = mockAgents.map((id) => createMockEdge(id, true));
 
       useActionResultsMock.mockReturnValue({
         data: {
           edges: mockEdges,
-          totalAgents: 502,
+          total: 502,
           aggregations: {
             totalRowCount: 30,
             totalResponded: 2,
@@ -181,21 +181,23 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
         <ActionResultsSummary actionId="test-action" agentIds={mockAgents} />
       );
 
-      // Verify pagination uses server totalAgents (502) not agentIds.length (2)
+      // Verify pagination uses server total (502) not agentIds.length (2)
       expect(container.querySelector('.euiPagination')).toBeInTheDocument();
     });
 
-    it('should fallback to agentIds.length when totalAgents is undefined', () => {
-      const mockAgents = ['agent-1', 'agent-2', 'agent-3'];
-      const mockEdges = mockAgents.map((id) => createMockEdge(id, true));
+    it('disables Next on a scheduled-query single-page result set', async () => {
+      // Regression coverage for #269670: scheduled queries don't pass agentIds.
+      // `data.total` must drive pageCount so Next is disabled when total ≤ pageSize.
+      const scheduledEdges = [createMockEdge('agent-1', true)];
 
       useActionResultsMock.mockReturnValue({
         data: {
-          edges: mockEdges,
+          edges: scheduledEdges,
+          total: 1,
           aggregations: {
-            totalRowCount: 30,
-            totalResponded: 3,
-            successful: 3,
+            totalRowCount: 1,
+            totalResponded: 1,
+            successful: 1,
             failed: 0,
             pending: 0,
           },
@@ -205,14 +207,30 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
         isFetching: false,
       } as never);
 
-      mockHttpPost.mockResolvedValue({ agents: [] });
+      mockHttpPost.mockResolvedValue({
+        agents: [{ id: 'agent-1', local_metadata: { host: { name: 'h1' } } }],
+      });
 
       const { container } = renderWithContext(
-        <ActionResultsSummary actionId="test-action" agentIds={mockAgents} />
+        <ActionResultsSummary
+          actionId="test-schedule"
+          scheduleId="test-schedule"
+          executionCount={1}
+        />
       );
 
-      // Verify pagination fallback works
-      expect(container.querySelector('.euiPagination')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(container.querySelector('.euiBasicTable')).toBeInTheDocument();
+      });
+
+      const nextButton = container.querySelector(
+        '[data-test-subj="pagination-button-next"]'
+      ) as HTMLButtonElement | null;
+      // Either the Next button is omitted (no pagination needed) or it's disabled.
+      // What must NOT happen is an enabled Next that opens an empty page.
+      if (nextButton) {
+        expect(nextButton.disabled).toBe(true);
+      }
     });
 
     it('should initialize with default page index 0 and page size 20', () => {
@@ -222,7 +240,7 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
       useActionResultsMock.mockReturnValue({
         data: {
           edges: mockEdges,
-          totalAgents: 100,
+          total: 100,
           aggregations: {
             totalRowCount: 200,
             totalResponded: 20,
@@ -257,7 +275,7 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
       useActionResultsMock.mockReturnValue({
         data: {
           edges: mockEdgesPage0,
-          totalAgents: 100,
+          total: 100,
           aggregations: {
             totalRowCount: 1000,
             totalResponded: 20,
@@ -282,7 +300,7 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
       useActionResultsMock.mockReturnValue({
         data: {
           edges: mockEdgesPage2,
-          totalAgents: 100,
+          total: 100,
           aggregations: {
             totalRowCount: 1000,
             totalResponded: 20,
@@ -337,7 +355,7 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
         useActionResultsMock.mockReturnValue({
           data: {
             edges: mockEdges,
-            totalAgents: 500,
+            total: 500,
             aggregations: {
               totalRowCount: pageSize * 10,
               totalResponded: pageSize,
@@ -376,7 +394,7 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
       useActionResultsMock.mockReturnValue({
         data: {
           edges: mockEdges,
-          totalAgents: 100,
+          total: 100,
           aggregations: {
             totalRowCount: 1000,
             totalResponded: 20,
@@ -420,7 +438,7 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
       useActionResultsMock.mockReturnValue({
         data: {
           edges: [],
-          totalAgents: 0,
+          total: 0,
           aggregations: {
             totalRowCount: 0,
             totalResponded: 0,
@@ -709,7 +727,7 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
       useActionResultsMock.mockReturnValue({
         data: {
           edges: mockEdges,
-          totalAgents,
+          total: totalAgents,
           aggregations: {
             totalRowCount: 0,
             totalResponded: 0,
@@ -764,7 +782,7 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
       useActionResultsMock.mockReturnValue({
         data: {
           edges: mockEdges,
-          totalAgents: 15000,
+          total: 15000,
           aggregations: {
             totalRowCount: 10000,
             totalResponded: 7500,
@@ -813,7 +831,7 @@ describe('ActionResultsSummary - Server-side Pagination', () => {
       useActionResultsMock.mockReturnValue({
         data: {
           edges: mockEdges,
-          totalAgents,
+          total: totalAgents,
           aggregations: {
             totalRowCount: 0,
             totalResponded: 0,
