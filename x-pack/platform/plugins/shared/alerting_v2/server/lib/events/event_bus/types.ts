@@ -26,13 +26,13 @@ export interface Subscription {
 }
 
 /**
- * Generic in-process pub/sub for alerting v2 domain events.
+ * Generic in-process pub/sub for alerting domain events.
  *
  * The bus is intentionally minimal:
  *  - `publish` is synchronous from the caller's perspective and never throws.
  *    Handlers are dispatched asynchronously (next microtask) so a publisher
  *    is never blocked or coupled to subscriber latency / errors.
- *  - Each handler is isolated; one handler's failure never affects others.
+ *  - Each handler is isolated. One handler's failure never affects others.
  *  - Subscribers register by event `type` discriminator and receive the
  *    correctly narrowed event instance.
  */
@@ -56,7 +56,7 @@ export interface EventBusSubscriber<TEvent extends DomainEvent = DomainEvent> {
 }
 
 /**
- * Inversify token for the singleton {@link EventBus} carrying alerting-v2
+ * Inversify token for the singleton {@link EventBus} carrying alerting
  * domain events.
  */
 export const EventBusToken = Symbol.for('alerting_v2.EventBus') as ServiceIdentifier<
