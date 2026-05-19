@@ -69,6 +69,7 @@ export function getHoverProvider(deps?: ESQLDependencies): monaco.languages.Hove
             errorAtPosition.message,
             errorCode,
             errorAtPosition.startLineNumber,
+            model.uri.toString(),
           ];
           const commandUri = `command:${FIX_WITH_AI_COMMAND_ID}?${encodeURIComponent(
             JSON.stringify(args)

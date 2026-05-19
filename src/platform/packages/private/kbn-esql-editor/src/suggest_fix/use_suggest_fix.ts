@@ -18,18 +18,15 @@ import { ReviewActionsWidget } from '../comment_to_esql/review_actions_widget';
 import { CODE_ADDED_CLASS, GENERATING_HINT_CLASS, LINE_REPLACED_CLASS } from '../editor_ai.styles';
 import { findChangedRegion } from './utils';
 
-// The command is registered once for the lifetime of
-// the app; the handler reads _runSuggestFixFn so we never need to re-register.
-const _runSuggestFixFn: {
-  current:
-    | ((
-        queryString: string,
-        errorMessage: string,
-        errorCode?: string | null,
-        errorLineNumber?: number
-      ) => void)
-    | undefined;
-} = { current: undefined };
+type SuggestFixHandler = (
+  queryString: string,
+  errorMessage: string,
+  errorCode?: string | null,
+  errorLineNumber?: number
+) => void;
+
+// Keyed by model URI so multiple editors on the same page each dispatch to the correct instance.
+const _suggestFixHandlers = new Map<string, SuggestFixHandler>();
 let _commandRegistered = false;
 
 function ensureCommandRegistered() {
@@ -42,9 +39,11 @@ function ensureCommandRegistered() {
       queryString: string,
       errorMessage: string,
       errorCode?: string | null,
-      errorLineNumber?: number
+      errorLineNumber?: number,
+      modelUri?: string
     ) => {
-      _runSuggestFixFn.current?.(queryString, errorMessage, errorCode, errorLineNumber);
+      const handler = modelUri ? _suggestFixHandlers.get(modelUri) : undefined;
+      handler?.(queryString, errorMessage, errorCode, errorLineNumber);
     }
   );
 }
@@ -336,19 +335,16 @@ export const useSuggestFix = ({
     ]
   );
 
-  // Register the Monaco command once (module-level) and keep the handler ref
-  // up-to-date so clicks always invoke the latest runSuggestFix closure.
+  // Register the Monaco command once.
   useEffect(() => {
-    if (!isEnabled) {
-      _runSuggestFixFn.current = undefined;
-      return;
-    }
+    const uri = editorModel.current?.uri.toString();
+    if (!isEnabled || !uri) return;
 
     ensureCommandRegistered();
-    _runSuggestFixFn.current = runSuggestFix;
+    _suggestFixHandlers.set(uri, runSuggestFix);
 
     return () => {
-      _runSuggestFixFn.current = undefined;
+      _suggestFixHandlers.delete(uri);
     };
-  }, [isEnabled, runSuggestFix]);
+  }, [isEnabled, runSuggestFix, editorModel]);
 };
