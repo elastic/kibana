@@ -56,6 +56,37 @@ describe('FastifyResponseAdapter', () => {
     expect(reply.send).toHaveBeenCalledWith(body);
   });
 
+  it('sets octet-stream and content-length for Buffer bodies without an explicit content-type', async () => {
+    const recordedHeaders = new Map<string, string | number | string[]>();
+
+    const reply = {
+      code: jest.fn().mockReturnThis(),
+      header(this: void, name: string, value: string | number | string[]) {
+        recordedHeaders.set(name.toLowerCase(), value);
+      },
+      hasHeader(name: string) {
+        return recordedHeaders.has(name.toLowerCase());
+      },
+      send: jest.fn().mockReturnThis(),
+    } as unknown as FastifyReply;
+
+    const body = Buffer.alloc(1028, '.');
+    const adapter = new FastifyResponseAdapter();
+    await adapter.handle(
+      new KibanaResponse(200, body, {
+        headers: {
+          'content-encoding': 'binary',
+        },
+      }),
+      reply
+    );
+
+    expect(recordedHeaders.get('content-encoding')).toBe('binary');
+    expect(recordedHeaders.get('content-length')).toBe('1028');
+    expect(recordedHeaders.get('content-type')).toBe('application/octet-stream');
+    expect(reply.send).toHaveBeenCalledWith(body);
+  });
+
   it('formats customError bodies that nest a Boom on `message` (content_management wrapError)', async () => {
     const reply = {
       code: jest.fn().mockReturnThis(),

@@ -771,7 +771,7 @@ describe('prototypeHardening', () => {
 });
 
 describe('experimental.framework', () => {
-  it('defaults to "hapi"', () => {
+  it('defaults to "fastify" while the migration is in progress', () => {
     expect(config.schema.validate({}).experimental.framework).toBe('fastify');
   });
 

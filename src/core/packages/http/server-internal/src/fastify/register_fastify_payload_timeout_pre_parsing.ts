@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isReadable, type Readable } from 'node:stream';
+import type { Readable } from 'node:stream';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { RouterRoute } from '@kbn/core-http-server';
 
@@ -16,17 +16,7 @@ function methodMayHaveBody(method: string): boolean {
   return m === 'POST' || m === 'PUT' || m === 'PATCH' || m === 'DELETE';
 }
 
-function isPayloadStream(payload: unknown): payload is Readable {
-  if (payload === null || typeof payload !== 'object') {
-    return false;
-  }
-  return Boolean(isReadable(payload as Readable));
-}
-
-function resolvePayloadSource(payload: unknown, req: FastifyRequest): Readable | undefined {
-  if (isPayloadStream(payload)) {
-    return payload;
-  }
+function resolvePayloadSource(req: FastifyRequest): Readable | undefined {
   if (!methodMayHaveBody(String(req.method ?? ''))) {
     return undefined;
   }
@@ -38,16 +28,13 @@ function resolvePayloadSource(payload: unknown, req: FastifyRequest): Readable |
 }
 
 /**
- * Arms {@link RouterRoute} `options.timeout.payload` for the current `preParsing` payload stream.
- * Must run in the same `preParsing` hook that populated `req.app.matchedRoute` (before `done(null, payload)`).
+ * Arms {@link RouterRoute} `options.timeout.payload` on the raw request stream.
+ * Must run from `onRequest` after `req.app.matchedRoute` is populated and before Fastify's
+ * content-type parsers buffer the entity body.
  *
  * @internal
  */
-export function attachFastifyPayloadReceiveTimeout(
-  req: FastifyRequest,
-  reply: FastifyReply,
-  payload: unknown
-): void {
+export function attachFastifyPayloadReceiveTimeout(req: FastifyRequest, reply: FastifyReply): void {
   const route = (req as { app?: { matchedRoute?: RouterRoute } }).app?.matchedRoute;
   const payloadTimeoutMs = route?.options?.timeout?.payload;
 
@@ -59,7 +46,20 @@ export function attachFastifyPayloadReceiveTimeout(
     return;
   }
 
-  const source = resolvePayloadSource(payload, req);
+  const timeoutError = new Error('Request Timeout');
+  const onPayloadTimeout = () => {
+    // Hapi aborts the socket during slow uploads; supertest's chunked writer rejects with
+    // "socket hang up" rather than resolving an HTTP 408 while bytes are still in flight.
+    const source = resolvePayloadSource(req);
+    source?.destroy(timeoutError);
+    req.raw.destroy(timeoutError);
+    const socket = req.raw.socket;
+    if (socket && !socket.destroyed) {
+      socket.destroy(timeoutError);
+    }
+  };
+
+  const source = resolvePayloadSource(req);
   if (source === undefined) {
     return;
   }
@@ -74,14 +74,7 @@ export function attachFastifyPayloadReceiveTimeout(
       return;
     }
     finished = true;
-    if (!reply.raw.headersSent && !reply.sent) {
-      reply.raw.statusCode = 408;
-      reply.raw.statusMessage = 'Request Timeout';
-      reply.raw.setHeader('connection', 'close');
-      reply.raw.end('Request Timeout');
-    }
-    source.destroy(new Error('Request Timeout'));
-    req.raw.destroy(new Error('Request Timeout'));
+    onPayloadTimeout();
   }, payloadTimeoutMs);
 
   source.once('error', cleanup);

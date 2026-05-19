@@ -8,6 +8,7 @@
  */
 
 import type { IncomingMessage } from 'http';
+import { STATUS_CODES } from 'http';
 import * as stream from 'stream';
 import typeDetect from 'type-detect';
 import type { FastifyReply } from 'fastify';
@@ -18,6 +19,9 @@ import { KibanaResponse } from '@kbn/core-http-router-server-internal';
 
 /** Mirrors `getServerOptions` default `routes.cache` for Hapi (`@kbn/server-http-tools`). */
 const HAPI_DEFAULT_CACHE_CONTROL = 'private, no-cache, no-store, must-revalidate';
+
+const INTERNAL_ERROR_MESSAGE =
+  'An internal server error occurred. Check Kibana server logs for details.';
 
 const statusHelpers = {
   isSuccess: (code: number) => code >= 100 && code < 300,
@@ -149,11 +153,116 @@ export class FastifyResponseAdapter {
     );
   }
 
+  private formatHapiEtagHeader(value: string): string {
+    if (value.startsWith('"') && value.endsWith('"')) {
+      return value;
+    }
+    return `"${value}"`;
+  }
+
   private applyHeaders(reply: FastifyReply, headers?: Record<string, string | string[]>) {
     if (!headers) return;
     for (const [name, value] of Object.entries(headers)) {
       if (value === undefined) continue;
+      if (name.toLowerCase() === 'etag' && typeof value === 'string') {
+        reply.header(name, this.formatHapiEtagHeader(value));
+        continue;
+      }
       reply.header(name, value);
+    }
+  }
+
+  private shouldReturnNotModified(
+    reply: FastifyReply,
+    headers?: Record<string, string | string[]>
+  ): boolean {
+    if (!headers) {
+      return false;
+    }
+    const etagHeader = Object.keys(headers).find((name) => name.toLowerCase() === 'etag');
+    if (!etagHeader) {
+      return false;
+    }
+    const etagValue = headers[etagHeader];
+    const etag = Array.isArray(etagValue) ? etagValue[0] : etagValue;
+    const ifNoneMatch = reply.request.headers['if-none-match'];
+    if (typeof etag !== 'string' || typeof ifNoneMatch !== 'string') {
+      return false;
+    }
+    const normalize = (raw: string) =>
+      raw.trim().replace(/^W\//, '').replace(/^"/, '').replace(/"$/, '');
+    return normalize(ifNoneMatch) === normalize(etag);
+  }
+
+  private applyHapiCompatiblePayloadHeaders(
+    reply: FastifyReply,
+    payload: unknown,
+    hasExplicitContentType: boolean,
+    headers?: Record<string, string | string[]>
+  ): void {
+    if (Buffer.isBuffer(payload)) {
+      if (!hasExplicitContentType && !reply.hasHeader('content-type')) {
+        reply.header('content-type', 'application/octet-stream');
+      }
+      if (!reply.hasHeader('content-length')) {
+        reply.header('content-length', String(payload.length));
+      }
+      const explicitType =
+        headers &&
+        (Object.entries(headers).find(([name]) => name.toLowerCase() === 'content-type')?.[1] ??
+          undefined);
+      const typeStr = Array.isArray(explicitType) ? explicitType[0] : explicitType;
+      if (
+        typeof typeStr === 'string' &&
+        typeStr.toLowerCase().startsWith('text/plain') &&
+        !typeStr.toLowerCase().includes('charset=')
+      ) {
+        reply.header('content-type', `${typeStr}; charset=utf-8`);
+      }
+      return;
+    }
+
+    const isStreamBody =
+      !isIncomingMessagePayload(payload) &&
+      (payload instanceof stream.Readable ||
+        stream.isReadable(payload as stream.Readable) === true ||
+        (typeof payload === 'object' &&
+          payload !== null &&
+          typeof (payload as { pipe?: unknown }).pipe === 'function'));
+
+    if (isStreamBody && !hasExplicitContentType && !reply.hasHeader('content-type')) {
+      reply.header('content-type', 'application/octet-stream');
+    }
+
+    const explicitType =
+      headers &&
+      (Object.entries(headers).find(([name]) => name.toLowerCase() === 'content-type')?.[1] ??
+        undefined);
+    const typeStr = Array.isArray(explicitType) ? explicitType[0] : explicitType;
+    if (
+      typeof typeStr === 'string' &&
+      typeStr.toLowerCase().startsWith('text/plain') &&
+      !typeStr.toLowerCase().includes('charset=')
+    ) {
+      reply.header('content-type', `${typeStr}; charset=utf-8`);
+    }
+  }
+
+  private ensureJsonSerializablePayload(payload: unknown): boolean {
+    if (payload === null || typeof payload !== 'object') {
+      return true;
+    }
+    if (Buffer.isBuffer(payload) || isIncomingMessagePayload(payload)) {
+      return true;
+    }
+    if (payload instanceof stream.Readable || stream.isReadable(payload as stream.Readable)) {
+      return true;
+    }
+    try {
+      JSON.stringify(payload);
+      return true;
+    } catch {
+      return false;
     }
   }
 
@@ -169,6 +278,12 @@ export class FastifyResponseAdapter {
   }
 
   private toSuccess(kibanaResponse: KibanaResponse, reply: FastifyReply): FastifyReply {
+    if (this.shouldReturnNotModified(reply, kibanaResponse.options.headers)) {
+      reply.code(304);
+      this.applyHeaders(reply, kibanaResponse.options.headers);
+      this.applyDefaultCacheControl(reply, kibanaResponse);
+      return reply.send();
+    }
     reply.code(kibanaResponse.status);
     this.applyHeaders(reply, kibanaResponse.options.headers);
     const payload = kibanaResponse.payload;
@@ -186,7 +301,22 @@ export class FastifyResponseAdapter {
     ) {
       reply.header('content-type', 'text/html; charset=utf-8');
     }
+    this.applyHapiCompatiblePayloadHeaders(
+      reply,
+      payload,
+      hasExplicitContentType,
+      kibanaResponse.options.headers
+    );
     this.applyDefaultCacheControl(reply, kibanaResponse);
+    if (!this.ensureJsonSerializablePayload(payload)) {
+      // Hapi fails while serializing the response (e.g. circular JSON) without logging.
+      reply.code(500);
+      return reply.send({
+        statusCode: 500,
+        error: 'Internal Server Error',
+        message: INTERNAL_ERROR_MESSAGE,
+      });
+    }
     return reply.send(payload);
   }
 
@@ -198,7 +328,10 @@ export class FastifyResponseAdapter {
     }
     this.applyHeaders(reply, kibanaResponse.options.headers);
     this.applyDefaultCacheControl(reply, kibanaResponse);
-    return reply.code(kibanaResponse.status).redirect(location);
+    reply.code(kibanaResponse.status);
+    reply.header('location', location);
+    const payload = kibanaResponse.payload;
+    return reply.send(payload !== undefined && payload !== null ? payload : '');
   }
 
   private toError(
@@ -240,19 +373,11 @@ export class FastifyResponseAdapter {
 }
 
 function httpStatusToErrorLabel(statusCode: number): string {
-  const labels: Record<number, string> = {
-    400: 'Bad Request',
-    401: 'Unauthorized',
-    403: 'Forbidden',
-    404: 'Not Found',
-    409: 'Conflict',
-    413: 'Payload Too Large',
-    429: 'Too Many Requests',
-    500: 'Internal Server Error',
-    502: 'Bad Gateway',
-    503: 'Service Unavailable',
-  };
-  return labels[statusCode] ?? 'Error';
+  // Hapi/Boom use lowercase "teapot" for 418 (Node's `http.STATUS_CODES` title-cases it).
+  if (statusCode === 418) {
+    return "I'm a teapot";
+  }
+  return STATUS_CODES[statusCode] ?? 'Error';
 }
 
 function getErrorMessage(payload?: ResponseError): string {

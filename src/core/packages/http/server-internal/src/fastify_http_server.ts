@@ -35,7 +35,13 @@ import type {
   InternalRouteHandler,
   Router,
 } from '@kbn/core-http-router-server-internal';
-import { getInternalRouteHandler } from '@kbn/core-http-router-server-internal';
+import {
+  KibanaResponse,
+  formatErrorMeta,
+  getInternalRouteHandler,
+  kibanaResponseFactory,
+} from '@kbn/core-http-router-server-internal';
+import { isResponseError as isElasticsearchUnauthorizedError } from '@kbn/es-errors';
 import type {
   IRouter,
   AuthenticationHandler,
@@ -85,6 +91,9 @@ import { attachFastifyPayloadReceiveTimeout } from './fastify/register_fastify_p
 
 /** Upper bound for Fastify's raw body limit — must cover saved_objects `_import` (see `savedObjects.maxImportPayloadBytes`). */
 const FASTIFY_BODY_LIMIT_CEILING_BYTES = 36 * 1024 * 1024;
+
+const INTERNAL_ERROR_MESSAGE =
+  'An internal server error occurred. Check Kibana server logs for details.';
 
 const isSafeMethod = (method: string) => method === 'get' || method === 'options';
 
@@ -209,6 +218,11 @@ export class FastifyHttpServer {
   private readonly authResponseHeaders: AuthHeadersStorage;
   private readonly responseAdapter = new FastifyResponseAdapter();
 
+  /**
+   * Hapi-shaped facade over the Node listener (see {@link HttpServer.server}).
+   * Integration tests reach `http.httpServer.server.listener` via supertest.
+   */
+  private server?: { listener: ReturnType<typeof getServerListener> };
   private fastify?: FastifyInstance;
   private fmw?: FmwInstance<FmwHTTPVersion.V1>;
   private fallbackHandler?: FmwHandler;
@@ -247,7 +261,7 @@ export class FastifyHttpServer {
   }
 
   public isListening(): boolean {
-    return this.listening;
+    return this.server?.listener?.listening === true || this.listening;
   }
 
   /** @internal */
@@ -364,6 +378,7 @@ export class FastifyHttpServer {
       },
     });
     const serverFacade = this.createHapiShapedServerFacade(this.fastify, hapiCompat, listener);
+    this.server = serverFacade as FastifyHttpServer['server'];
 
     return {
       server: serverFacade as any,
@@ -753,21 +768,25 @@ export class FastifyHttpServer {
   }
 
   /**
-   * Registers a `preParsing` Fastify hook that performs the find-my-way lookup ahead of
-   * `onPreAuth`/`onPostAuth`/handler. The matched route, params, and Kibana-specific
-   * options (security, access, xsrfRequired, etc.) are stashed on `req.app` so the
-   * Hapi-shaped Kibana request builders downstream can expose them via
+   * Registers an `onRequest` Fastify hook that performs the find-my-way lookup ahead of
+   * body parsing, `onPreAuth`/`onPostAuth`, and the route handler. The matched route,
+   * params, and Kibana-specific options (security, access, xsrfRequired, etc.) are stashed
+   * on `req.app` so the Hapi-shaped Kibana request builders downstream can expose them via
    * `KibanaRequest.route.options.security`.
    *
-   * Registered before any consumer has a chance to call `registerOnPreAuth`, so it runs
-   * first in the `preParsing` phase and is observable by every user-registered hook.
+   * Must run in `onRequest` (not `preParsing`) so per-route `timeout.payload` can arm on
+   * `req.raw` before Fastify's JSON parser buffers the entity body — otherwise slow uploads
+   * never hit the receive timeout (Hapi `payload.timeout` parity).
+   *
+   * Registered during `setup()` before consumers call `registerOnPreAuth` (which adds a
+   * `preParsing` hook), so route metadata is always available to later lifecycle hooks.
    */
   private installRouteLookupHook(
     fastify: FastifyInstance,
     fmw: FmwInstance<FmwHTTPVersion.V1>,
     defaultSocketTimeoutMs: number
   ): void {
-    fastify.addHook('preParsing', (req, reply, _payload, done) => {
+    fastify.addHook('onRequest', (req, reply, done) => {
       const lookupPath = getFindMyWayLookupPath(req);
       const match = fmw.find(req.method as any, lookupPath);
       const app = ((req as any).app = (req as any).app ?? {});
@@ -823,8 +842,8 @@ export class FastifyHttpServer {
         (req as { params: unknown }).params = plainParams;
       }
       applyHapiCompatRequestTimeouts(req, reply, matchedKibanaRoute, defaultSocketTimeoutMs);
-      attachFastifyPayloadReceiveTimeout(req, reply, _payload);
-      done(null, _payload);
+      attachFastifyPayloadReceiveTimeout(req, reply);
+      done();
     });
   }
 
@@ -928,8 +947,8 @@ export class FastifyHttpServer {
     internalHandler: InternalRouteHandler
   ) {
     return async (req: FastifyRequest, reply: FastifyReply) => {
+      const app = ((req as any).app = (req as any).app ?? {});
       try {
-        const app = ((req as any).app = (req as any).app ?? {});
         let compat = app[KIBANA_HAPI_COMPAT_REQUEST] as ReturnType<
           typeof buildHapiCompatRequestFromFastify
         > | null;
@@ -946,15 +965,48 @@ export class FastifyHttpServer {
         const kibanaResponse = await internalHandler(compat);
         return await this.responseAdapter.handle(kibanaResponse, reply);
       } catch (error) {
+        apm.captureError(error);
+        let compatForError = app[KIBANA_HAPI_COMPAT_REQUEST] as ReturnType<
+          typeof buildHapiCompatRequestFromFastify
+        > | null;
+        if (!compatForError) {
+          compatForError = buildHapiCompatRequestFromFastify(
+            req,
+            reply,
+            route,
+            routeApp,
+            this.authRegistered
+          );
+        }
+        const requestForLogging = compatForError as unknown as Request;
+
+        if (isElasticsearchUnauthorizedError(error)) {
+          this.log.error(
+            '401 Unauthorized',
+            formatErrorMeta(401, { request: requestForLogging, error })
+          );
+          return await this.responseAdapter.handle(
+            kibanaResponseFactory.unauthorized({
+              body: error.message,
+              headers: {
+                'www-authenticate':
+                  Object.entries(error.headers ?? {}).find(
+                    ([key]) => key.toLowerCase() === 'www-authenticate'
+                  )?.[1] ?? 'Basic realm="Authorization Required"',
+              },
+            }),
+            reply
+          );
+        }
+
         this.log.error(
-          `Unhandled error in Fastify route handler for ${route.method.toUpperCase()} ${
-            route.path
-          }: ${error?.message ?? error}`
+          '500 Server Error',
+          formatErrorMeta(500, { request: requestForLogging, error })
         );
-        // Delegate to {@link installFastifyGlobalErrorHandler}: Fastify also attaches a rejection
-        // handler to the route promise; sending here after the global handler runs causes
-        // ERR_HTTP_HEADERS_SENT and can terminate the process (e.g. CCS FTR when a route throws).
-        throw error;
+        return await this.responseAdapter.handle(
+          new KibanaResponse(500, { message: INTERNAL_ERROR_MESSAGE }, {}),
+          reply
+        );
       }
     };
   }

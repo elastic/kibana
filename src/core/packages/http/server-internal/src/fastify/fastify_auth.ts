@@ -75,12 +75,22 @@ export function registerFastifyAuthentication(params: {
       app[KIBANA_HAPI_COMPAT_REQUEST] = compat;
     }
 
+    // Hapi does not run the `registerAuth` handler when `route.settings.auth === false`.
+    if (compat.route.settings.auth === false) {
+      return;
+    }
+
     const kibanaRequest = CoreKibanaRequest.from(compat, undefined, false);
+    const authNotMandatory = kibanaRequest.route.options.authRequired !== true;
 
     try {
       const result = await fn(kibanaRequest, lifecycleResponseFactory, authToolkit);
 
       if (isKibanaResponse(result)) {
+        // Hapi `auth.mode: 'try'` (optional routes): invalid credentials must not short-circuit the request.
+        if (authNotMandatory && result.status >= 400) {
+          return;
+        }
         await responseAdapter.handle(result, reply);
         return reply;
       }
@@ -103,8 +113,6 @@ export function registerFastifyAuthentication(params: {
         }
         return;
       }
-
-      const authNotMandatory = kibanaRequest.route.options.authRequired !== true;
 
       if (result.type === AuthResultType.redirected) {
         // Mirrors Hapi: `auth: false` / optional strategies do not force login redirects.

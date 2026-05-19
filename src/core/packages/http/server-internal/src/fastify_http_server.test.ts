@@ -1369,6 +1369,24 @@ describe('FastifyHttpServer', () => {
     });
   });
 
+  it('exposes server.listener on the instance for integration supertest helpers', async () => {
+    const ctx = createCoreContext();
+    const config = createHttpConfig(PORT);
+    const config$ = new BehaviorSubject(config);
+
+    const server = new FastifyHttpServer(
+      ctx,
+      'Kibana',
+      new BehaviorSubject(config.shutdownTimeout)
+    );
+    await server.setup({ config$ });
+
+    const listener = (server as unknown as { server: { listener: http.Server } }).server.listener;
+    expect(listener).toBeDefined();
+    expect(typeof listener.listen).toBe('function');
+    await server.stop();
+  });
+
   it('onPreAuth lifecycle requests emit completed$ when the response closes', async () => {
     const ctx = createCoreContext();
     const config = createHttpConfig(PORT);

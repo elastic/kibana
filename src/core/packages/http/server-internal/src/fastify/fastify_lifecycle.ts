@@ -186,19 +186,24 @@ export function adoptToFastifyOnPreRouting(fn: OnPreRoutingHandler, log: Logger)
         // and would respond 404 on top of our short-circuit.
         return reply;
       }
+      if (result.type === OnPreRoutingResultType.next) {
+        return;
+      }
       if (result.type === OnPreRoutingResultType.rewriteUrl) {
+        const appState = (req as any).app as KibanaRequestState | undefined;
+        if (appState) {
+          // Mirror Hapi `on_pre_routing`: preserve the incoming URL before rewriting the request.
+          appState.rewrittenUrl =
+            appState.rewrittenUrl ?? new URL(getKibanaCompatRequestUrl(req), 'http://internal/');
+        }
         // Fastify exposes the underlying Node IncomingMessage on `req.raw`; updating its
         // url before the framework picks a route is the analogue of Hapi's `request.setUrl`.
         req.raw.url = result.url;
-        const appState = (req as any).app as KibanaRequestState | undefined;
-        if (appState) {
-          try {
-            appState.rewrittenUrl = new URL(result.url, 'http://internal/');
-          } catch {
-            appState.rewrittenUrl = appState.rewrittenUrl ?? new URL(req.url, 'http://internal/');
-          }
-        }
+        return;
       }
+      throw new Error(
+        `Unexpected result from OnPreRouting. Expected OnPreRoutingResult or KibanaResponse, but given: ${result}.`
+      );
     } catch (error) {
       log.error(error);
       return sendInternalError(reply, log);
@@ -222,6 +227,12 @@ export function adoptToFastifyOnPreAuth(fn: OnPreAuthHandler, log: Logger) {
         await adapter.handle(result, reply);
         return reply;
       }
+      if (result.type === OnPreAuthResultType.next) {
+        return;
+      }
+      throw new Error(
+        `Unexpected result from OnPreAuth. Expected OnPreAuthResult or KibanaResponse, but given: ${result}.`
+      );
     } catch (error) {
       log.error(error);
       return sendInternalError(reply, log);
@@ -245,6 +256,9 @@ export function adoptToFastifyOnPostAuth(fn: OnPostAuthHandler, log: Logger) {
         await adapter.handle(result, reply);
         return reply;
       }
+      if (result.type === OnPostAuthResultType.next) {
+        return;
+      }
       if (result.type === OnPostAuthResultType.authzResult) {
         const app = (req as any).app ?? ((req as any).app = {});
         Object.defineProperty(app, 'authzResult', {
@@ -253,7 +267,11 @@ export function adoptToFastifyOnPostAuth(fn: OnPostAuthHandler, log: Logger) {
           writable: false,
           enumerable: false,
         });
+        return;
       }
+      throw new Error(
+        `Unexpected result from OnPostAuth. Expected OnPostAuthResult or KibanaResponse, but given: ${result}.`
+      );
     } catch (error) {
       log.error(error);
       return sendInternalError(reply, log);
@@ -275,10 +293,13 @@ export function adoptToFastifyOnPreResponse(fn: OnPreResponseHandler, log: Logge
         { statusCode },
         preResponseToolkit
       );
-      if (result.type === OnPreResponseResultType.next && result.headers) {
-        for (const [name, value] of Object.entries(result.headers)) {
-          if (value !== undefined) reply.header(name, value);
+      if (result.type === OnPreResponseResultType.next) {
+        if (result.headers) {
+          for (const [name, value] of Object.entries(result.headers)) {
+            if (value !== undefined) reply.header(name, value);
+          }
         }
+        return payload;
       }
       if (result.type === OnPreResponseResultType.render) {
         if (result.headers) {
@@ -288,9 +309,14 @@ export function adoptToFastifyOnPreResponse(fn: OnPreResponseHandler, log: Logge
         }
         return result.body;
       }
-      return payload;
+      throw new Error(
+        `Unexpected result from OnPreResponse. Expected OnPreResponseResult, but given: ${result}.`
+      );
     } catch (error) {
       log.error(error);
+      if (!isReplyCommitted(reply)) {
+        sendInternalError(reply, log);
+      }
       return payload;
     }
   };
