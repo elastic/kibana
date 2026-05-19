@@ -89,6 +89,7 @@ export const packSavedObjectModelVersion3: SavedObjectsModelVersion = {
   ],
   schemas: {
     forwardCompatibility: packSchemaV3.extends({}, { unknowns: 'ignore' }),
+    create: packSchemaV3,
   },
 };
 
