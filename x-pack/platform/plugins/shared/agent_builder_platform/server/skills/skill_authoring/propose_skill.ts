@@ -11,10 +11,7 @@ import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/t
 import { skillCreateRequestSchema } from '@kbn/agent-builder-common';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import {
-  SKILL_DRAFT_ATTACHMENT_TYPE,
-  type SkillDraftAttachmentData,
-} from '../../../common/attachments';
+import { SKILL_ATTACHMENT_TYPE, type SkillAttachmentData } from '../../../common/attachments';
 
 const referencedContentSchema = z.object({
   name: z
@@ -75,7 +72,7 @@ const proposeSkillSchema = z.object({
 export type ProposeSkillInput = z.infer<typeof proposeSkillSchema>;
 
 /**
- * Inline tool that captures a draft skill payload as a versioned `skill_draft`
+ * Inline tool that captures a draft skill payload as a versioned `skill`
  * attachment in the conversation.
  *
  * Validation flow:
@@ -93,7 +90,7 @@ export const createProposeSkillTool = (): BuiltinSkillBoundedTool<typeof propose
   id: 'propose_skill',
   type: ToolType.builtin,
   description:
-    'Propose a new skill as an inline draft. Creates a versioned `skill_draft` attachment containing the full skill payload (id, name, description, content, tool_ids, referenced_content). After this call, render the draft inline by emitting `<render_attachment id="ATTACHMENT_ID" />`. Use `patch_skill_draft` to refine the draft instead of calling `propose_skill` again unless the user wants to start over.',
+    'Propose a new skill as an inline draft. Creates a versioned `skill` attachment containing the full skill payload (id, name, description, content, tool_ids, referenced_content). After this call, render the draft inline by emitting `<render_attachment id="ATTACHMENT_ID" />`. Use `patch_skill` to refine the draft instead of calling `propose_skill` again unless the user wants to start over.',
   schema: proposeSkillSchema,
   confirmation: { askUser: 'never' },
   handler: async (input, context) => {
@@ -112,12 +109,12 @@ export const createProposeSkillTool = (): BuiltinSkillBoundedTool<typeof propose
       };
     }
 
-    const data: SkillDraftAttachmentData = parsed.data;
+    const data: SkillAttachmentData = parsed.data;
 
     try {
       const attachment = await attachments.add(
         {
-          type: SKILL_DRAFT_ATTACHMENT_TYPE,
+          type: SKILL_ATTACHMENT_TYPE,
           data,
           description: data.description,
         },

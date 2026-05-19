@@ -7,4 +7,4 @@
 
 export { skillAuthoringSkill } from './skill_authoring_skill';
 export { createProposeSkillTool } from './propose_skill';
-export { createPatchSkillDraftTool } from './patch_skill_draft';
+export { createPatchSkillTool } from './patch_skill';

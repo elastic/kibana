@@ -12,10 +12,10 @@ import type {
 } from '@kbn/agent-builder-server/tools';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import { SKILL_DRAFT_ATTACHMENT_TYPE } from '../../../common/attachments';
-import { createSkillDraftAttachmentType } from '../../attachment_types/skill_draft';
+import { SKILL_ATTACHMENT_TYPE } from '../../../common/attachments';
+import { createSkillAttachmentType } from '../../attachment_types/skill';
 import { createProposeSkillTool } from './propose_skill';
-import { createPatchSkillDraftTool } from './patch_skill_draft';
+import { createPatchSkillTool } from './patch_skill';
 
 /**
  * Build a minimal `ToolHandlerContext` carrying a real `AttachmentStateManager`.
@@ -27,11 +27,11 @@ const createTestContext = (): {
   context: ToolHandlerContext;
   attachments: ReturnType<typeof createAttachmentStateManager>;
 } => {
-  const skillDraftType = createSkillDraftAttachmentType();
+  const skillAttachmentType = createSkillAttachmentType();
   const attachments = createAttachmentStateManager([], {
     getTypeDefinition: (type) =>
-      type === SKILL_DRAFT_ATTACHMENT_TYPE
-        ? (skillDraftType as AttachmentTypeDefinition)
+      type === SKILL_ATTACHMENT_TYPE
+        ? (skillAttachmentType as AttachmentTypeDefinition)
         : undefined,
   });
 
@@ -51,7 +51,7 @@ const validProposeInput = {
 };
 
 describe('propose_skill tool', () => {
-  it('creates a skill_draft attachment with version 1 and returns its id', async () => {
+  it('creates a skill attachment with version 1 and returns its id', async () => {
     const tool = createProposeSkillTool();
     const { context, attachments } = createTestContext();
 
@@ -66,7 +66,7 @@ describe('propose_skill tool', () => {
     expect(data.version).toBe(1);
 
     const stored = attachments.get(data.attachment_id);
-    expect(stored?.type).toBe(SKILL_DRAFT_ATTACHMENT_TYPE);
+    expect(stored?.type).toBe(SKILL_ATTACHMENT_TYPE);
     expect(stored?.data.data).toMatchObject({
       id: 'incident-triage',
       tool_ids: ['platform.core.execute_esql'],
@@ -88,8 +88,8 @@ describe('propose_skill tool', () => {
   });
 });
 
-describe('patch_skill_draft tool', () => {
-  const seedDraft = async () => {
+describe('patch_skill tool', () => {
+  const seedSkill = async () => {
     const { context, attachments } = createTestContext();
     const proposeResult = (await createProposeSkillTool().handler(
       validProposeInput,
@@ -100,9 +100,9 @@ describe('patch_skill_draft tool', () => {
   };
 
   it('renames the draft and bumps the version', async () => {
-    const { context, attachments, attachmentId } = await seedDraft();
+    const { context, attachments, attachmentId } = await seedSkill();
 
-    const result = (await createPatchSkillDraftTool().handler(
+    const result = (await createPatchSkillTool().handler(
       {
         attachment_id: attachmentId,
         name: 'Incident triage v2',
@@ -117,9 +117,9 @@ describe('patch_skill_draft tool', () => {
   });
 
   it('applies a search-replace patch to content', async () => {
-    const { context, attachments, attachmentId } = await seedDraft();
+    const { context, attachments, attachmentId } = await seedSkill();
 
-    const result = (await createPatchSkillDraftTool().handler(
+    const result = (await createPatchSkillTool().handler(
       {
         attachment_id: attachmentId,
         content_patches: [
@@ -140,10 +140,10 @@ describe('patch_skill_draft tool', () => {
   });
 
   it('returns an error and does not mutate state when a patch text is missing', async () => {
-    const { context, attachments, attachmentId } = await seedDraft();
+    const { context, attachments, attachmentId } = await seedSkill();
     const before = attachments.get(attachmentId);
 
-    const result = (await createPatchSkillDraftTool().handler(
+    const result = (await createPatchSkillTool().handler(
       {
         attachment_id: attachmentId,
         content_patches: [{ find: 'this string is not in the content', replace: 'x' }],
@@ -158,7 +158,7 @@ describe('patch_skill_draft tool', () => {
 
   it('returns an error when the attachment id is unknown', async () => {
     const { context } = createTestContext();
-    const result = (await createPatchSkillDraftTool().handler(
+    const result = (await createPatchSkillTool().handler(
       { attachment_id: 'does-not-exist', name: 'New name' },
       context
     )) as ToolHandlerStandardReturn;
@@ -167,9 +167,9 @@ describe('patch_skill_draft tool', () => {
   });
 
   it('adds and removes referenced files', async () => {
-    const { context, attachments, attachmentId } = await seedDraft();
+    const { context, attachments, attachmentId } = await seedSkill();
 
-    const addResult = (await createPatchSkillDraftTool().handler(
+    const addResult = (await createPatchSkillTool().handler(
       {
         attachment_id: attachmentId,
         referenced_files_to_add: [
@@ -185,7 +185,7 @@ describe('patch_skill_draft tool', () => {
       (stored?.data.data as { referenced_content?: Array<{ name: string }> }).referenced_content
     ).toHaveLength(1);
 
-    const removeResult = (await createPatchSkillDraftTool().handler(
+    const removeResult = (await createPatchSkillTool().handler(
       {
         attachment_id: attachmentId,
         referenced_files_to_remove: [{ name: 'examples', relativePath: './examples' }],

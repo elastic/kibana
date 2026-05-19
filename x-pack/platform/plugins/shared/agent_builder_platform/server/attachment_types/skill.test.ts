@@ -7,13 +7,10 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import { createSkillDraftAttachmentType } from './skill_draft';
-import {
-  SKILL_DRAFT_ATTACHMENT_TYPE,
-  type SkillDraftAttachmentData,
-} from '../../common/attachments';
+import { createSkillAttachmentType } from './skill';
+import { SKILL_ATTACHMENT_TYPE, type SkillAttachmentData } from '../../common/attachments';
 
-const validDraft: SkillDraftAttachmentData = {
+const validSkill: SkillAttachmentData = {
   id: 'incident-triage',
   name: 'Incident triage',
   description: 'Use when investigating production incidents.',
@@ -34,19 +31,19 @@ const formatContext = {
 };
 
 const buildAttachment = (
-  data: SkillDraftAttachmentData
-): Attachment<typeof SKILL_DRAFT_ATTACHMENT_TYPE, SkillDraftAttachmentData> => ({
+  data: SkillAttachmentData
+): Attachment<typeof SKILL_ATTACHMENT_TYPE, SkillAttachmentData> => ({
   id: 'test-attachment-id',
-  type: SKILL_DRAFT_ATTACHMENT_TYPE,
+  type: SKILL_ATTACHMENT_TYPE,
   data,
 });
 
-describe('skill_draft attachment type', () => {
-  const definition = createSkillDraftAttachmentType();
+describe('skill attachment type', () => {
+  const definition = createSkillAttachmentType();
 
   describe('validate', () => {
-    it('accepts a fully populated draft', async () => {
-      const result = await definition.validate(validDraft);
+    it('accepts a fully populated payload', async () => {
+      const result = await definition.validate(validSkill);
       expect(result.valid).toBe(true);
       if (result.valid) {
         expect(result.data.id).toBe('incident-triage');
@@ -54,18 +51,18 @@ describe('skill_draft attachment type', () => {
     });
 
     it('rejects an empty content body', async () => {
-      const result = await definition.validate({ ...validDraft, content: '' });
+      const result = await definition.validate({ ...validSkill, content: '' });
       expect(result.valid).toBe(false);
     });
 
     it('rejects an id with uppercase letters', async () => {
-      const result = await definition.validate({ ...validDraft, id: 'Incident-Triage' });
+      const result = await definition.validate({ ...validSkill, id: 'Incident-Triage' });
       expect(result.valid).toBe(false);
     });
 
     it('rejects a referenced file with a path outside ./', async () => {
       const result = await definition.validate({
-        ...validDraft,
+        ...validSkill,
         referenced_content: [{ name: 'examples', relativePath: '/examples', content: 'x' }],
       });
       expect(result.valid).toBe(false);
@@ -73,7 +70,7 @@ describe('skill_draft attachment type', () => {
 
     it('rejects more than 5 tool_ids', async () => {
       const result = await definition.validate({
-        ...validDraft,
+        ...validSkill,
         tool_ids: Array.from({ length: 6 }, (_, i) => `tool_${i}`),
       });
       expect(result.valid).toBe(false);
@@ -82,12 +79,12 @@ describe('skill_draft attachment type', () => {
 
   describe('format', () => {
     it('produces a markdown text representation containing the content body', async () => {
-      const attachment = buildAttachment(validDraft);
+      const attachment = buildAttachment(validSkill);
       const formatted = await definition.format(attachment, formatContext);
       const repr = await formatted.getRepresentation?.();
       expect(repr?.type).toBe('text');
-      expect(repr?.value).toContain('Skill draft (id: incident-triage)');
-      expect(repr?.value).toContain(validDraft.content);
+      expect(repr?.value).toContain('Skill (id: incident-triage)');
+      expect(repr?.value).toContain(validSkill.content);
       expect(repr?.value).toContain('platform.core.execute_esql');
     });
   });

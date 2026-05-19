@@ -7,31 +7,28 @@
 
 import { skillCreateRequestSchema } from '@kbn/agent-builder-common';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import {
-  SKILL_DRAFT_ATTACHMENT_TYPE,
-  type SkillDraftAttachmentData,
-} from '../../common/attachments';
+import { SKILL_ATTACHMENT_TYPE, type SkillAttachmentData } from '../../common/attachments';
 
 /**
- * Server-side definition for the `skill_draft` attachment type.
+ * Server-side definition for the `skill` attachment type.
  *
  * Notes:
- * - `validate` reuses `skillCreateRequestSchema` so the draft is guaranteed
+ * - `validate` reuses `skillCreateRequestSchema` so the payload is guaranteed
  *   to round-trip into `POST /api/agent_builder/skills` without a separate
  *   schema in this package.
  * - `format` returns a compact text representation so the LLM can self-correct
  *   on subsequent turns without re-fetching the full attachment.
- * - There is no `resolve()` because drafts always start as by-value
- *   attachments. Once persisted, the UI calls `updateOrigin(skill.id)` which
- *   stores the persisted skill id as opaque metadata; we don't need to
- *   re-resolve content from origin (the draft is the authoritative source
- *   until it's persisted).
+ * - There is no `resolve()` because these attachments always start as by-value.
+ *   Once persisted, the UI calls `updateOrigin(skill.id)` which stores the
+ *   persisted skill id as opaque metadata; we don't need to re-resolve content
+ *   from origin (the attachment is the authoritative source until it's
+ *   persisted).
  */
-export const createSkillDraftAttachmentType = (): AttachmentTypeDefinition<
-  typeof SKILL_DRAFT_ATTACHMENT_TYPE,
-  SkillDraftAttachmentData
+export const createSkillAttachmentType = (): AttachmentTypeDefinition<
+  typeof SKILL_ATTACHMENT_TYPE,
+  SkillAttachmentData
 > => ({
-  id: SKILL_DRAFT_ATTACHMENT_TYPE,
+  id: SKILL_ATTACHMENT_TYPE,
   validate: (input) => {
     const parsed = skillCreateRequestSchema.safeParse(input);
     if (parsed.success) {
@@ -52,7 +49,7 @@ export const createSkillDraftAttachmentType = (): AttachmentTypeDefinition<
           .map((item) => `- ${item.relativePath}/${item.name}.md`)
           .join('\n');
         const value = [
-          `Skill draft (id: ${data.id})`,
+          `Skill (id: ${data.id})`,
           `Name: ${data.name}`,
           `Description: ${data.description}`,
           `Tools: ${data.tool_ids.join(', ') || '(none)'}`,
@@ -68,6 +65,6 @@ export const createSkillDraftAttachmentType = (): AttachmentTypeDefinition<
     };
   },
   getAgentDescription: () => {
-    return `A \`skill_draft\` attachment is a versioned, by-value snapshot of a candidate Agent Builder skill. The user reviews it as an inline card with a "Create" button. Render it inline by emitting <render_attachment id="ATTACHMENT_ID" />. After patching, re-render the same attachment id so the card refreshes in place. Do not invent attachment ids — only render ids returned by propose_skill or patch_skill_draft.`;
+    return `A \`skill\` attachment is a versioned, by-value snapshot of a candidate Agent Builder skill. The user reviews it as an inline card with a "Create" button. Render it inline by emitting <render_attachment id="ATTACHMENT_ID" />. After patching, re-render the same attachment id so the card refreshes in place. Do not invent attachment ids — only render ids returned by propose_skill or patch_skill.`;
   },
 });

@@ -9,12 +9,12 @@ import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser'
 import type { ILocatorClient } from '@kbn/share-plugin/common/url_service';
 import type { CoreStart } from '@kbn/core/public';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-import { GRAPH_ATTACHMENT_TYPE, SKILL_DRAFT_ATTACHMENT_TYPE } from '../../common/attachments';
+import { GRAPH_ATTACHMENT_TYPE, SKILL_ATTACHMENT_TYPE } from '../../common/attachments';
 import { createEsqlAttachmentDefinition } from './esql_attachment';
 import { textAttachmentDefinition } from './text_attachment';
 import { screenContextAttachmentDefinition } from './screen_context_attachment';
 import { graphAttachmentDefinition } from './graph_attachment/graph_attachment';
-import { createSkillDraftAttachmentDefinition } from './skill_draft_attachment/skill_draft_attachment';
+import { createSkillAttachmentDefinition } from './skill_attachment/skill_attachment';
 
 export const registerAttachmentUiDefinitions = ({
   attachments,
@@ -30,8 +30,8 @@ export const registerAttachmentUiDefinitions = ({
   attachments.addAttachmentType(AttachmentType.esql, createEsqlAttachmentDefinition({ locators }));
   attachments.addAttachmentType(GRAPH_ATTACHMENT_TYPE, graphAttachmentDefinition);
   attachments.addAttachmentType(
-    SKILL_DRAFT_ATTACHMENT_TYPE,
-    createSkillDraftAttachmentDefinition({
+    SKILL_ATTACHMENT_TYPE,
+    createSkillAttachmentDefinition({
       http: core.http,
       notifications: core.notifications,
       application: core.application,

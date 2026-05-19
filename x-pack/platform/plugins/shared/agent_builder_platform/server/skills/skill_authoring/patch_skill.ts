@@ -11,10 +11,7 @@ import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/t
 import { skillCreateRequestSchema } from '@kbn/agent-builder-common';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import {
-  SKILL_DRAFT_ATTACHMENT_TYPE,
-  type SkillDraftAttachmentData,
-} from '../../../common/attachments';
+import { SKILL_ATTACHMENT_TYPE, type SkillAttachmentData } from '../../../common/attachments';
 
 const contentPatchSchema = z.object({
   find: z
@@ -59,10 +56,10 @@ const referencedFileRemoveSchema = z.object({
     .describe('Optional `relativePath` to disambiguate when names collide.'),
 });
 
-const patchSkillDraftSchema = z.object({
+const patchSkillSchema = z.object({
   attachment_id: z
     .string()
-    .describe('Attachment id of the existing `skill_draft` (returned by `propose_skill`).'),
+    .describe('Attachment id of the existing `skill` (returned by `propose_skill`).'),
   name: z.string().optional().describe('Replacement display name.'),
   description: z.string().optional().describe('Replacement one-line description.'),
   tool_ids: z
@@ -91,7 +88,7 @@ const patchSkillDraftSchema = z.object({
     .describe('Referenced files to remove (matched by `name`, optionally `relativePath`).'),
 });
 
-export type PatchSkillDraftInput = z.infer<typeof patchSkillDraftSchema>;
+export type PatchSkillInput = z.infer<typeof patchSkillSchema>;
 
 /**
  * Apply a single search-replace patch to a string.
@@ -131,7 +128,7 @@ const matchesReferencedFile = (
 };
 
 /**
- * Inline tool that refines an existing `skill_draft` attachment.
+ * Inline tool that refines an existing `skill` attachment.
  *
  * Strategy:
  * - Pull the latest version of the attachment from the conversation state.
@@ -145,14 +142,12 @@ const matchesReferencedFile = (
  * - Call `attachments.update`, which auto-bumps the attachment version when
  *   the content hash changes.
  */
-export const createPatchSkillDraftTool = (): BuiltinSkillBoundedTool<
-  typeof patchSkillDraftSchema
-> => ({
-  id: 'patch_skill_draft',
+export const createPatchSkillTool = (): BuiltinSkillBoundedTool<typeof patchSkillSchema> => ({
+  id: 'patch_skill',
   type: ToolType.builtin,
   description:
-    'Refine an existing `skill_draft` attachment by applying targeted edits (rename, edit description, swap tool_ids, search-replace on `content` or referenced files, add/remove referenced files). Preferred over calling `propose_skill` again, which discards the draft history. After patching, re-render the draft via `<render_attachment id="ATTACHMENT_ID" />`.',
-  schema: patchSkillDraftSchema,
+    'Refine an existing `skill` attachment by applying targeted edits (rename, edit description, swap tool_ids, search-replace on `content` or referenced files, add/remove referenced files). Preferred over calling `propose_skill` again, which discards the draft history. After patching, re-render the draft via `<render_attachment id="ATTACHMENT_ID" />`.',
+  schema: patchSkillSchema,
   confirmation: { askUser: 'never' },
   handler: async (input, context) => {
     const { attachments } = context;
@@ -173,17 +168,17 @@ export const createPatchSkillDraftTool = (): BuiltinSkillBoundedTool<
         results: [createErrorResult({ message: `No attachment found for id "${attachmentId}".` })],
       };
     }
-    if ((stored.type as string) !== SKILL_DRAFT_ATTACHMENT_TYPE) {
+    if ((stored.type as string) !== SKILL_ATTACHMENT_TYPE) {
       return {
         results: [
           createErrorResult({
-            message: `Attachment "${attachmentId}" is not a skill_draft (type: ${stored.type}).`,
+            message: `Attachment "${attachmentId}" is not a skill (type: ${stored.type}).`,
           }),
         ],
       };
     }
 
-    const current = stored.data.data as SkillDraftAttachmentData;
+    const current = stored.data.data as SkillAttachmentData;
     let nextContent = current.content;
     let nextReferenced = current.referenced_content
       ? current.referenced_content.map((item) => ({ ...item }))
@@ -257,7 +252,7 @@ export const createPatchSkillDraftTool = (): BuiltinSkillBoundedTool<
       };
     }
 
-    const merged: SkillDraftAttachmentData = {
+    const merged: SkillAttachmentData = {
       id: current.id,
       name: name ?? current.name,
       description: description ?? current.description,
@@ -271,7 +266,7 @@ export const createPatchSkillDraftTool = (): BuiltinSkillBoundedTool<
       return {
         results: [
           createErrorResult({
-            message: `Patched draft is invalid: ${validated.error.issues
+            message: `Patched skill is invalid: ${validated.error.issues
               .map((issue) => `${issue.path.join('.') || '<root>'}: ${issue.message}`)
               .join('; ')}`,
           }),
@@ -319,7 +314,7 @@ export const createPatchSkillDraftTool = (): BuiltinSkillBoundedTool<
       return {
         results: [
           createErrorResult({
-            message: `Failed to update skill draft: ${(error as Error).message}`,
+            message: `Failed to update skill: ${(error as Error).message}`,
           }),
         ],
       };
@@ -334,7 +329,7 @@ export const createPatchSkillDraftTool = (): BuiltinSkillBoundedTool<
       {
         ...result,
         data: {
-          summary: `Patched skill draft "${data.skill_id}" (v${data.version}, attachment ${data.attachment_id}).`,
+          summary: `Patched skill "${data.skill_id}" (v${data.version}, attachment ${data.attachment_id}).`,
           attachment_id: data.attachment_id,
           version: data.version,
           skill_id: data.skill_id,

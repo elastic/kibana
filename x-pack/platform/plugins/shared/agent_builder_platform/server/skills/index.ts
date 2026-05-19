@@ -10,6 +10,6 @@ export { visualizationCreationSkill } from './visualization_creation_skill';
 export {
   skillAuthoringSkill,
   createProposeSkillTool,
-  createPatchSkillDraftTool,
+  createPatchSkillTool,
 } from './skill_authoring';
 export { registerSkills } from './register_skills';

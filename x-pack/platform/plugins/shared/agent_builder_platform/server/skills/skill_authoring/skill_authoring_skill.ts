@@ -8,7 +8,7 @@
 import dedent from 'dedent';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { createProposeSkillTool } from './propose_skill';
-import { createPatchSkillDraftTool } from './patch_skill_draft';
+import { createPatchSkillTool } from './patch_skill';
 
 const SKILL_AUTHORING_REFERENCE_NAME = 'skill-authoring-examples';
 
@@ -16,8 +16,8 @@ const SKILL_AUTHORING_REFERENCE_NAME = 'skill-authoring-examples';
  * Built-in skill that teaches the agent how to author Agent Builder skills
  * conversationally. When the user asks for a new skill, the agent reads this
  * SKILL.md (which triggers `loadSkillToolsAfterRead` to expose
- * `propose_skill` and `patch_skill_draft`), drafts the payload, captures it
- * as a `skill_draft` attachment, and renders it inline so the user can review
+ * `propose_skill` and `patch_skill`), drafts the payload, captures it
+ * as a `skill` attachment, and renders it inline so the user can review
  * and click "Create".
  *
  * The `content` follows the Anthropic skill-authoring guide structure:
@@ -48,8 +48,8 @@ Do **not** use this skill when:
 
 After reading this SKILL.md, two inline tools become available:
 
-- **propose_skill** — Captures a complete first-draft payload (id, name, description, content, tool_ids, optional referenced_content) as a versioned \`skill_draft\` attachment in the conversation. Returns \`attachment_id\` and \`version\`.
-- **patch_skill_draft** — Refines an existing draft by attachment_id. Supports field replacement (name, description, tool_ids), search-replace patches on \`content\`, and add/remove/patch operations on referenced files. Each call bumps the attachment version when content changes.
+- **propose_skill** — Captures a complete first-draft payload (id, name, description, content, tool_ids, optional referenced_content) as a versioned \`skill\` attachment in the conversation. Returns \`attachment_id\` and \`version\`.
+- **patch_skill** — Refines an existing draft by attachment_id. Supports field replacement (name, description, tool_ids), search-replace patches on \`content\`, and add/remove/patch operations on referenced files. Each call bumps the attachment version when content changes.
 
 You also have the regular tool registry available; use \`list_tools\` if you need to confirm a tool id exists before adding it to \`tool_ids\`.
 
@@ -97,8 +97,8 @@ You also have the regular tool registry available; use \`list_tools\` if you nee
    - Immediately emit \`<render_attachment id="ATTACHMENT_ID" />\` (replacing \`ATTACHMENT_ID\` with the value from the tool result) so the user sees the draft card with **Create** / **Open in editor** buttons. Do not surround it with quotes or a code fence.
    - Keep your prose response short — just summarize what you proposed and prompt the user to review the card.
 
-9. **Iterate on feedback via \`patch_skill_draft\`.**
-   - When the user asks for changes ("make it shorter", "add the X tool", "rename to Y"), call \`patch_skill_draft\` with the existing \`attachment_id\` and only the fields that need to change.
+9. **Iterate on feedback via \`patch_skill\`.**
+   - When the user asks for changes ("make it shorter", "add the X tool", "rename to Y"), call \`patch_skill\` with the existing \`attachment_id\` and only the fields that need to change.
    - Prefer search-replace patches over full rewrites; it's cheaper and easier for the user to follow.
    - After each patch, re-render the attachment so the card refreshes in place.
 
@@ -160,7 +160,7 @@ I drafted a skill called esql-query-debug with three associated tools. Review th
 
 User said: "Drop the generate_esql tool and add a section about histogram() pitfalls."
 
-\`patch_skill_draft\` payload:
+\`patch_skill\` payload:
 
 \`\`\`json
 {
@@ -218,5 +218,5 @@ The model can then use the filestore tools to read \`./examples/slow-query-check
       `),
     },
   ],
-  getInlineTools: () => [createProposeSkillTool(), createPatchSkillDraftTool()],
+  getInlineTools: () => [createProposeSkillTool(), createPatchSkillTool()],
 });

@@ -10,23 +10,20 @@ import type { skillCreateRequestObjectSchema } from '@kbn/agent-builder-common/s
 import type { z } from '@kbn/zod';
 
 /**
- * Attachment type id for skill drafts authored via chat.
+ * Attachment type id for skills authored via chat.
  *
- * A `skill_draft` attachment is a versioned, by-value snapshot of a candidate
+ * A `skill` attachment is a versioned, by-value snapshot of a candidate
  * skill payload (matching the public `POST /api/agent_builder/skills` request
  * body). It is created by the skill-authoring inline tools and rendered as an
  * inline card with a primary "Create" action. Once persisted, the attachment's
  * `origin` is set to the persisted skill id via `updateOrigin` so the same
  * card can show "Created" state on subsequent renders.
  */
-export const SKILL_DRAFT_ATTACHMENT_TYPE = 'skill_draft' as const;
+export const SKILL_ATTACHMENT_TYPE = 'skill' as const;
 
 /**
- * Data shape stored on a `skill_draft` attachment version.
+ * Data shape stored on a `skill` attachment version.
  */
-export type SkillDraftAttachmentData = z.infer<typeof skillCreateRequestObjectSchema>;
+export type SkillAttachmentData = z.infer<typeof skillCreateRequestObjectSchema>;
 
-export type SkillDraftAttachment = Attachment<
-  typeof SKILL_DRAFT_ATTACHMENT_TYPE,
-  SkillDraftAttachmentData
->;
+export type SkillAttachment = Attachment<typeof SKILL_ATTACHMENT_TYPE, SkillAttachmentData>;
