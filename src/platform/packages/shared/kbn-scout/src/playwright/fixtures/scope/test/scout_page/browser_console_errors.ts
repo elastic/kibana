@@ -10,16 +10,25 @@
 import { BROWSER_CONSOLE_ERRORS_ATTACHMENT } from '@kbn/scout-info';
 import type { ConsoleMessage, Page, TestInfo } from '@playwright/test';
 
-/**
- * Starts collecting browser console errors on the given page.
- * Returns a function that stops collecting and returns all captured error messages.
- */
+// Set SCOUT_REPORT_ALL_CONSOLE_LOGS=true to disable filtering and capture every console error.
+const filteringEnabled = process.env.SCOUT_REPORT_ALL_CONSOLE_LOGS !== 'true';
+
+// Known non-actionable errors that are expected in Kibana's environment and would
+// only add noise to failure reports when no filtering opt-out is set.
+const IGNORED_ERROR_PATTERNS = [
+  // CSP violations from inline scripts are expected in Kibana's dev/test environment
+  'Executing inline script violates the following Content Security Policy directive',
+];
+
+const isIgnored = (message: string) =>
+  IGNORED_ERROR_PATTERNS.some((pattern) => message.includes(pattern));
+
 export const collectBrowserConsoleErrors = (page: Page): (() => string[]) => {
   const errors: string[] = [];
   const onConsole = (msg: ConsoleMessage) => {
-    if (msg.type() === 'error') {
-      errors.push(msg.text());
-    }
+    if (msg.type() !== 'error') return;
+    if (filteringEnabled && isIgnored(msg.text())) return;
+    errors.push(msg.text());
   };
   page.on('console', onConsole);
 
@@ -29,11 +38,6 @@ export const collectBrowserConsoleErrors = (page: Page): (() => string[]) => {
   };
 };
 
-/**
- * Attaches collected browser console errors to the Playwright test result.
- * No-op if the errors array is empty. Best-effort: attachment failure does not
- * propagate so it cannot mask the original test failure.
- */
 export const attachBrowserConsoleErrors = async (
   testInfo: TestInfo,
   errors: string[]
