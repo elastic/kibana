@@ -77,6 +77,7 @@ import { HapiCompatServer } from './fastify/hapi_compat_server';
 import { createFastifyCookieSessionStorageFactory } from './fastify/fastify_cookie_session_storage';
 import { KIBANA_HAPI_COMPAT_REQUEST, registerFastifyAuthentication } from './fastify/fastify_auth';
 import { installHapiCompatibleJsonBodyParser } from './fastify/install_hapi_compatible_json_body_parser';
+import { installHapiCompatibleUrlEncodedBodyParser } from './fastify/install_hapi_compatible_urlencoded_body_parser';
 import { installFastifyGlobalErrorHandler } from './fastify/fastify_global_error_handler';
 import { registerFastifyMultipartAndKibanaBodyHook } from './fastify/fastify_multipart_kibana_body';
 import { registerFastifyFallbackStreamBodyParser } from './fastify/register_fastify_fallback_stream_body_parser';
@@ -520,6 +521,7 @@ export class FastifyHttpServer {
     config: HttpConfig
   ): Promise<void> {
     installHapiCompatibleJsonBodyParser(fastify);
+    installHapiCompatibleUrlEncodedBodyParser(fastify);
     await registerFastifyMultipartAndKibanaBodyHook({
       fastify,
       maxPayloadBytes: config.maxPayload.getValueInBytes(),

@@ -95,7 +95,7 @@ const httpRequest = (
   port: number,
   path: string,
   method: string = 'GET',
-  options?: { headers?: http.OutgoingHttpHeaders }
+  options?: { headers?: http.OutgoingHttpHeaders; body?: string }
 ) =>
   new Promise<{ statusCode: number; body: string; headers: http.IncomingHttpHeaders }>(
     (resolve, reject) => {
@@ -114,6 +114,9 @@ const httpRequest = (
         }
       );
       req.on('error', reject);
+      if (options?.body !== undefined) {
+        req.write(options.body);
+      }
       req.end();
     }
   );
@@ -322,6 +325,58 @@ describe('FastifyHttpServer', () => {
       });
       expect(res.statusCode).toBe(200);
       expect(JSON.parse(res.body)).toEqual({ body: {} });
+    }, 15000);
+
+    it('parses application/x-www-form-urlencoded for validated routes (SAML callback parity)', async () => {
+      const ctx = createCoreContext();
+      const config = createHttpConfig(PORT);
+      const config$ = new BehaviorSubject(config);
+
+      server = new FastifyHttpServer(ctx, 'Kibana', new BehaviorSubject(config.shutdownTimeout));
+      const setup = await server.setup({ config$ });
+
+      const enhanceHandler = (handler: any) => async (req: any, res: any) =>
+        handler({} as any, req, res);
+
+      const router = new Router('/api/fastify-mvp', ctx.logger.get('router'), enhanceHandler, {
+        env,
+      });
+
+      router.post(
+        {
+          path: '/saml-callback',
+          security: { authz: { enabled: false, reason: 'test' } },
+          validate: {
+            body: schema.object(
+              { SAMLResponse: schema.string(), RelayState: schema.maybe(schema.string()) },
+              { unknowns: 'ignore' }
+            ),
+          },
+          options: { xsrfRequired: false, access: 'public' },
+        },
+        async (_context, req, res) =>
+          res.redirected({
+            headers: { location: '/app/home' },
+          })
+      );
+
+      setup.registerRouter(router);
+      await server.start();
+
+      const address = (setup.server as any).server.address();
+      listenPort = typeof address === 'object' && address ? address.port : 0;
+      expect(listenPort).toBeGreaterThan(0);
+
+      const formBody = 'SAMLResponse=mock-saml-response&RelayState=%2Fapp';
+      const res = await httpRequest(listenPort, '/api/fastify-mvp/saml-callback', 'POST', {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': String(Buffer.byteLength(formBody)),
+        },
+        body: formBody,
+      });
+      expect(res.statusCode).toBe(302);
+      expect(res.headers.location).toBe('/app/home');
     }, 15000);
 
     it('keeps application/json as a Readable for routes with body output stream + parse false (Console proxy parity)', async () => {
