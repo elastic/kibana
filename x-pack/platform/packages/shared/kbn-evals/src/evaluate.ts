@@ -345,12 +345,6 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
 
       await use(executorClient);
 
-      if (!currentExperimentId) {
-        throw new Error(
-          'experiment ID must be provided via TEST_RUN_ID environment variable before exporting scores'
-        );
-      }
-
       const experiments = await executorClient.getRanExperiments();
       const ingestRequests = buildIngestRequest({
         source: { kind: 'experiments', experiments },
