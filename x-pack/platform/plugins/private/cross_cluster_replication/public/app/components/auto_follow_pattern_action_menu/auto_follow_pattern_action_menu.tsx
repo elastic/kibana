@@ -140,6 +140,10 @@ const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate(
+        'xpack.crossClusterReplication.autoFollowPatternActionMenu.popoverAriaLabel',
+        { defaultMessage: 'Auto-follow pattern options' }
+      )}
       isOpen={showPopover}
       closePopover={() => setShowPopover(false)}
       button={button}
