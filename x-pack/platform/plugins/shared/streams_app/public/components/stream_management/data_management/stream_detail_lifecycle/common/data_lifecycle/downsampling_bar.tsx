@@ -14,6 +14,10 @@ import type { DownsamplingSegment } from './data_lifecycle_segments';
 import { DownsamplingPhase } from './downsampling_phase';
 import { useDownsamplingBarStyles } from './downsampling_bar_styles';
 
+const noDownsamplingLabel = i18n.translate('xpack.streams.dataLifecycleSummary.noDownsampling', {
+  defaultMessage: 'No downsampling',
+});
+
 const getDownsamplingLayout = (segments: DownsamplingSegment[]) => {
   const deleteIndex = segments.findIndex((segment) => segment.isDelete);
   const spanEndIndex = deleteIndex === -1 ? segments.length - 1 : Math.max(deleteIndex - 1, 0);
@@ -100,9 +104,6 @@ export const DownsamplingBar = ({
   const { getDownsamplingColor } = useDownsamplingColors();
 
   const hasDownsamplingSteps = segments.some((segment) => Boolean(segment.step));
-  const noDownsamplingLabel = i18n.translate('xpack.streams.dataLifecycleSummary.noDownsampling', {
-    defaultMessage: 'No downsampling',
-  });
 
   const {
     containerCss,
