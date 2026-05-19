@@ -14,6 +14,7 @@ import {
   contentListQueryClient,
   type ContentListItem,
 } from '@kbn/content-list-provider';
+import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import type { ContentEditorConfig } from './types';
 
 const MANAGED_READONLY_REASON = i18n.translate(
@@ -22,37 +23,37 @@ const MANAGED_READONLY_REASON = i18n.translate(
 );
 
 /**
- * Creates an inspect callback that opens the Kibana content editor flyout.
+ * Builds the per-item callback for `features.contentEditor.open` by wrapping
+ * `openContentEditor` (from `useOpenContentEditor()`) with the consumer's
+ * {@link ContentEditorConfig}. Returns `undefined` when no config is supplied
+ * so `<Action.ContentEditor />` self-skips.
  *
- * Returns `undefined` when `contentEditor` is not provided.
- *
- * @internal Used by `ContentListClientProvider` to populate
- * `itemConfig.actions.inspect.onItemAction`.
+ * @internal Used by `ContentListClientProvider`.
  */
-export const useContentEditorInspect = ({
+export const useContentEditorOpen = ({
   contentEditor,
+  openContentEditor,
   entityName,
   isReadOnly,
   queryKeyScope,
 }: {
   contentEditor?: ContentEditorConfig;
+  openContentEditor: (params: OpenContentEditorParams) => () => void;
   entityName: string;
   isReadOnly?: boolean;
   queryKeyScope: string;
 }): ((item: ContentListItem) => void) | undefined => {
-  const inspectItem = useCallback(
+  const open = useCallback(
     (item: ContentListItem) => {
       if (!contentEditor) {
         return;
       }
 
-      const { openContentEditor, onSave, isReadonly, customValidators, appendRows } = contentEditor;
+      const { onSave, isReadonly, customValidators, appendRows } = contentEditor;
 
-      // Read-only by default: the flyout opens in view mode unless the consumer
-      // explicitly opts in to editing by setting `isReadonly: false` AND providing
-      // `onSave`. Managed items always force read-only regardless of config.
-      // This matches the existing TableListView behavior and prevents a runtime
-      // throw from useOpenContentEditor when onSave is absent.
+      // Read-only unless the consumer opts in (`isReadonly: false` + `onSave`).
+      // Managed items always force read-only — matches TableListView and avoids
+      // a runtime throw from useOpenContentEditor when `onSave` is absent.
       const itemIsReadonly = item.managed || isReadonly !== false || isReadOnly || !onSave;
 
       const close = openContentEditor({
@@ -84,8 +85,8 @@ export const useContentEditorInspect = ({
         appendRows: appendRows ? appendRows(item) : undefined,
       });
     },
-    [contentEditor, entityName, isReadOnly, queryKeyScope]
+    [contentEditor, openContentEditor, entityName, isReadOnly, queryKeyScope]
   );
 
-  return contentEditor ? inspectItem : undefined;
+  return contentEditor ? open : undefined;
 };
