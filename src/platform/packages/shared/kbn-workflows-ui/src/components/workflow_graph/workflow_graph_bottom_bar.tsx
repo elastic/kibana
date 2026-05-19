@@ -380,11 +380,13 @@ export function WorkflowDetailBottomBar({
   }, []);
 
   useEffect(() => {
-    window.addEventListener('wheel', triggerActivity, { passive: true });
+    // capture:true so the wheel event reaches us even when React Flow calls
+    // stopPropagation on it during the bubble phase (canvas pan/zoom).
+    window.addEventListener('wheel', triggerActivity, { passive: true, capture: true });
     document.addEventListener('keydown', triggerActivity, { passive: true });
     document.addEventListener('pointerdown', triggerActivity, { passive: true });
     return () => {
-      window.removeEventListener('wheel', triggerActivity);
+      window.removeEventListener('wheel', triggerActivity, { capture: true });
       document.removeEventListener('keydown', triggerActivity);
       document.removeEventListener('pointerdown', triggerActivity);
       if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
