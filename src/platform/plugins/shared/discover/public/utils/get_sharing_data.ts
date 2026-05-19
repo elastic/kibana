@@ -17,31 +17,13 @@ import type {
 import type { Filter } from '@kbn/es-query';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
   getSortForSearchSource,
   isNestedFieldParent,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
-import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { DiscoverAppState } from '../application/main/state_management/redux';
 import { isEqualFilters } from '../application/main/state_management/utils/state_comparators';
-import { getShowTimeCol } from './get_show_time_col';
-
-export const getColumnsWithTimeField = (
-  columns: string[],
-  timeFieldName: string | undefined,
-  uiSettings: IUiSettingsClient,
-  query?: AggregateQuery | Query
-): string[] => {
-  if (
-    columns.length > 0 &&
-    timeFieldName &&
-    getShowTimeCol(uiSettings, query) &&
-    !columns.includes(timeFieldName)
-  ) {
-    return [timeFieldName, ...columns];
-  }
-  return columns;
-};
 
 /**
  * Preparing data to share the current state as link or CSV/Report
@@ -71,10 +53,19 @@ export async function getSharingData(
   searchSource.removeField('size');
 
   // Columns that the user has selected in the saved search
-  const columns =
-    isEsqlMode && !state.query
-      ? state.columns || []
-      : getColumnsWithTimeField(state.columns || [], index?.timeFieldName, uiSettings, state.query);
+  let columns = state.columns || [];
+
+  if (columns && columns.length > 0) {
+    // conditionally add the time field column:
+    let timeFieldName: string | undefined;
+    const hideTimeColumn = uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING);
+    if (!hideTimeColumn && index && index.timeFieldName && !isEsqlMode) {
+      timeFieldName = index.timeFieldName;
+    }
+    if (timeFieldName && !columns.includes(timeFieldName)) {
+      columns = [timeFieldName, ...columns];
+    }
+  }
 
   const absoluteTimeFilter = data.query.timefilter.timefilter.createFilter(index);
   const relativeTimeFilter = data.query.timefilter.timefilter.createRelativeFilter(index);

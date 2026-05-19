@@ -16,7 +16,7 @@ import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_so
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { buildDataViewMock, dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { createDiscoverServicesMock } from '../__mocks__/services';
-import { getColumnsWithTimeField, getSharingData, showPublicUrlSwitch } from './get_sharing_data';
+import { getSharingData, showPublicUrlSwitch } from './get_sharing_data';
 
 describe('getSharingData', () => {
   let services: DiscoverServices;
@@ -187,7 +187,7 @@ describe('getSharingData', () => {
     `);
   });
 
-  test('fields do not have prepended timeField for transformational ES|QL', async () => {
+  test('fields do not have prepended timeField for ES|QL', async () => {
     const index = { ...dataViewMock } as DataView;
     index.timeFieldName = 'cool-timefield';
 
@@ -203,51 +203,13 @@ describe('getSharingData', () => {
           'cool-field-5',
           'cool-field-6',
         ],
-        query: {
-          esql: 'from logstash-* | keep cool-field-1, cool-field-2, cool-field-3, cool-field-4, cool-field-5, cool-field-6',
-        },
       },
-      services
+      services,
+      true
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
         "columns": Array [
-          "cool-field-1",
-          "cool-field-2",
-          "cool-field-3",
-          "cool-field-4",
-          "cool-field-5",
-          "cool-field-6",
-        ],
-        "getSearchSource": [Function],
-      }
-    `);
-  });
-
-  test('fields have prepended timeField for non-transformational ES|QL', async () => {
-    const index = { ...dataViewMock } as DataView;
-    index.timeFieldName = 'cool-timefield';
-
-    const searchSourceMock = createSearchSourceMock({ index });
-    const result = await getSharingData(
-      searchSourceMock,
-      {
-        columns: [
-          'cool-field-1',
-          'cool-field-2',
-          'cool-field-3',
-          'cool-field-4',
-          'cool-field-5',
-          'cool-field-6',
-        ],
-        query: { esql: 'from logstash-* | where bytes > 0' },
-      },
-      services
-    );
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "columns": Array [
-          "cool-timefield",
           "cool-field-1",
           "cool-field-2",
           "cool-field-3",
@@ -438,65 +400,5 @@ describe('showPublicUrlSwitch', () => {
     const result = showPublicUrlSwitch(anonymousUserCapabilities);
 
     expect(result).toBe(true);
-  });
-});
-
-describe('getColumnsWithTimeField', () => {
-  const createUiSettingsMock = (hideTimeColumn: boolean) =>
-    ({
-      get: (key: string) => {
-        if (key === DOC_HIDE_TIME_COLUMN_SETTING) {
-          return hideTimeColumn;
-        }
-        return undefined;
-      },
-    } as unknown as IUiSettingsClient);
-
-  it('should prepend the time field for a non-transformational ES|QL query', () => {
-    expect(
-      getColumnsWithTimeField(['bytes', 'extension'], '@timestamp', createUiSettingsMock(false), {
-        esql: 'from logstash-*',
-      })
-    ).toEqual(['@timestamp', 'bytes', 'extension']);
-  });
-
-  it('should not prepend when columns are empty', () => {
-    expect(
-      getColumnsWithTimeField([], '@timestamp', createUiSettingsMock(false), {
-        esql: 'from logstash-*',
-      })
-    ).toEqual([]);
-  });
-
-  it('should not prepend for a transformational ES|QL query', () => {
-    expect(
-      getColumnsWithTimeField(['bytes', 'extension'], '@timestamp', createUiSettingsMock(false), {
-        esql: 'from logstash-* | keep bytes, extension',
-      })
-    ).toEqual(['bytes', 'extension']);
-  });
-
-  it('should not prepend when timeFieldName is undefined', () => {
-    expect(
-      getColumnsWithTimeField(['bytes', 'extension'], undefined, createUiSettingsMock(false), {
-        esql: 'from logstash-*',
-      })
-    ).toEqual(['bytes', 'extension']);
-  });
-
-  it('should not prepend when time field already in columns', () => {
-    expect(
-      getColumnsWithTimeField(['@timestamp', 'bytes'], '@timestamp', createUiSettingsMock(false), {
-        esql: 'from logstash-*',
-      })
-    ).toEqual(['@timestamp', 'bytes']);
-  });
-
-  it('should not prepend when hideTimeColumn setting is true', () => {
-    expect(
-      getColumnsWithTimeField(['bytes', 'extension'], '@timestamp', createUiSettingsMock(true), {
-        esql: 'from logstash-*',
-      })
-    ).toEqual(['bytes', 'extension']);
   });
 });
