@@ -8,15 +8,15 @@
  */
 
 // bypasses linking full package to @kbn/lens-plugin, only needed for script
-// eslint-disable-next-line import/no-extraneous-dependencies
-require('@kbn/babel-register').install();
+// uncomment these lines when running locally
+// require('@kbn/babel-register').install();
+// const { migrateAttributes } = require('@kbn/lens-plugin/common/transforms/transform_out');
 
 const fs = require('fs').promises;
 const path = require('path');
 const zlib = require('zlib');
 const { promisify } = require('util');
 const { execSync } = require('child_process');
-const { migrateAttributes } = require('@kbn/lens-plugin/common/transforms/transform_out');
 
 const gzipAsync = promisify(zlib.gzip);
 
@@ -95,6 +95,7 @@ async function processDashboardFile(filePath, packageName) {
 
         // Check if type is "lens"
         if (originalAttrs.type === 'lens') {
+          // eslint-disable-next-line no-undef
           const attrs = migrateAttributes(originalAttrs);
           results.push({
             package_name: packageName,
