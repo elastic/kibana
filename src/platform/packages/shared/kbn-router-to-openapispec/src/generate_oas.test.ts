@@ -434,6 +434,290 @@ describe('generateOpenApiDocument', () => {
     });
   });
 
+  describe('request validation error responses', () => {
+    it('merges unversioned request validation error responses with route responses', async () => {
+      const oas = await generateOpenApiDocument(
+        {
+          routers: [
+            createRouter({
+              routes: [
+                {
+                  isVersioned: false,
+                  path: '/request-validation-error',
+                  method: 'post',
+                  validationSchemas: {
+                    request: {
+                      body: schema.object({ value: schema.string() }),
+                    },
+                    response: {
+                      200: {
+                        description: 'Success',
+                        body: () => schema.object({ ok: schema.boolean() }),
+                      },
+                    },
+                  },
+                  onRequestValidationError: {
+                    response: {
+                      400: {
+                        description: 'Validation failed',
+                        body: () => schema.object({ error: schema.string() }),
+                      },
+                    },
+                    handler: jest.fn(),
+                  },
+                  options: { tags: ['foo'], access: 'public' },
+                  handler: jest.fn(),
+                } as never,
+              ],
+            }),
+          ],
+          versionedRouters: [],
+        },
+        {
+          title: 'test',
+          baseUrl: 'https://test.oas',
+          version: '99.99.99',
+        }
+      );
+
+      expect(oas.paths['/request-validation-error']!.post!.responses).toMatchObject({
+        200: { description: 'Success' },
+        400: { description: 'Validation failed' },
+      });
+    });
+
+    it('merges compatible versioned duplicate status codes with distinct content types', async () => {
+      const oas = await generateOpenApiDocument(
+        {
+          routers: [],
+          versionedRouters: [
+            createVersionedRouter({
+              routes: [
+                {
+                  method: 'post',
+                  path: '/versioned-request-validation-error',
+                  isVersioned: true,
+                  options: {
+                    summary: 'versioned route',
+                    access: 'public',
+                    security: {
+                      authz: {
+                        requiredPrivileges: ['foo'],
+                      },
+                    },
+                    options: {},
+                  },
+                  handlers: [
+                    {
+                      fn: jest.fn(),
+                      options: {
+                        version: '2023-10-31',
+                        validate: {
+                          request: { body: schema.object({ value: schema.string() }) },
+                          response: {
+                            400: {
+                              description: 'Validation failed',
+                              body: () => schema.object({ error: schema.string() }),
+                            },
+                          },
+                        },
+                        onRequestValidationError: {
+                          response: {
+                            400: {
+                              description: 'Validation failed',
+                              bodyContentType: 'text/plain',
+                              body: () => schema.string(),
+                            },
+                          },
+                          handler: jest.fn(),
+                        },
+                      } as never,
+                    },
+                  ],
+                },
+              ],
+            }),
+          ],
+        },
+        {
+          title: 'test',
+          baseUrl: 'https://test.oas',
+          version: '99.99.99',
+        }
+      );
+
+      expect(oas.paths['/versioned-request-validation-error']!.post!.responses[400]).toMatchObject({
+        description: 'Validation failed',
+        content: {
+          'application/json': expect.any(Object),
+          'text/plain': expect.any(Object),
+        },
+      });
+    });
+
+    it('fails with source context for conflicting duplicate response declarations', async () => {
+      await expect(
+        generateOpenApiDocument(
+          {
+            routers: [
+              createRouter({
+                routes: [
+                  {
+                    isVersioned: false,
+                    path: '/conflicting-request-validation-error',
+                    method: 'post',
+                    validationSchemas: {
+                      request: { body: schema.object({ value: schema.string() }) },
+                      response: {
+                        400: {
+                          description: 'Validation failed',
+                          body: () => schema.object({ routeError: schema.string() }),
+                        },
+                      },
+                    },
+                    onRequestValidationError: {
+                      response: {
+                        400: {
+                          description: 'Validation failed',
+                          body: () => schema.object({ requestError: schema.string() }),
+                        },
+                      },
+                      handler: jest.fn(),
+                    },
+                    options: { tags: ['foo'], access: 'public' },
+                    handler: jest.fn(),
+                  } as never,
+                ],
+              }),
+            ],
+            versionedRouters: [],
+          },
+          {
+            title: 'test',
+            baseUrl: 'https://test.oas',
+            version: '99.99.99',
+          }
+        )
+      ).rejects.toThrow(
+        "Error generating OpenAPI for route '/conflicting-request-validation-error': Conflicting response declaration for [post /conflicting-request-validation-error] status [400] content type [application/json] from [route response validation] and [request validation error response]"
+      );
+    });
+
+    it('fails with source context for conflicting duplicate versioned response declarations', async () => {
+      await expect(
+        generateOpenApiDocument(
+          {
+            routers: [],
+            versionedRouters: [
+              createVersionedRouter({
+                routes: [
+                  {
+                    method: 'post',
+                    path: '/versioned-conflicting-request-validation-error',
+                    isVersioned: true,
+                    options: {
+                      summary: 'versioned route',
+                      access: 'public',
+                      security: {
+                        authz: {
+                          requiredPrivileges: ['foo'],
+                        },
+                      },
+                      options: {},
+                    },
+                    handlers: [
+                      {
+                        fn: jest.fn(),
+                        options: {
+                          version: '2023-10-31',
+                          validate: {
+                            request: { body: schema.object({ value: schema.string() }) },
+                            response: {
+                              400: {
+                                description: 'Validation failed',
+                                body: () => schema.object({ routeError: schema.string() }),
+                              },
+                            },
+                          },
+                          onRequestValidationError: {
+                            response: {
+                              400: {
+                                description: 'Validation failed',
+                                body: () => schema.object({ requestError: schema.string() }),
+                              },
+                            },
+                            handler: jest.fn(),
+                          },
+                        } as never,
+                      },
+                    ],
+                  },
+                ],
+              }),
+            ],
+          },
+          {
+            title: 'test',
+            baseUrl: 'https://test.oas',
+            version: '99.99.99',
+          }
+        )
+      ).rejects.toThrow(
+        "Error generating OpenAPI for route '/versioned-conflicting-request-validation-error' using newest version '2023-10-31': Conflicting response declaration for [post /versioned-conflicting-request-validation-error] status [400] content type [application/json] from [route response validation] and [request validation error response]"
+      );
+    });
+
+    it('fails with source context for ambiguous duplicate response descriptions', async () => {
+      await expect(
+        generateOpenApiDocument(
+          {
+            routers: [
+              createRouter({
+                routes: [
+                  {
+                    isVersioned: false,
+                    path: '/ambiguous-request-validation-error',
+                    method: 'post',
+                    validationSchemas: {
+                      request: { body: schema.object({ value: schema.string() }) },
+                      response: {
+                        400: {
+                          description: 'Route validation failed',
+                          bodyContentType: 'application/json',
+                          body: () => schema.object({ error: schema.string() }),
+                        },
+                      },
+                    },
+                    onRequestValidationError: {
+                      response: {
+                        400: {
+                          description: 'Request validation failed',
+                          bodyContentType: 'text/plain',
+                          body: () => schema.string(),
+                        },
+                      },
+                      handler: jest.fn(),
+                    },
+                    options: { tags: ['foo'], access: 'public' },
+                    handler: jest.fn(),
+                  } as never,
+                ],
+              }),
+            ],
+            versionedRouters: [],
+          },
+          {
+            title: 'test',
+            baseUrl: 'https://test.oas',
+            version: '99.99.99',
+          }
+        )
+      ).rejects.toThrow(
+        "Error generating OpenAPI for route '/ambiguous-request-validation-error': Conflicting response declaration for [post /ambiguous-request-validation-error] status [400] content type [*] from [route response validation] and [request validation error response]"
+      );
+    });
+  });
+
   describe('tags', () => {
     it('handles tags as expected', async () => {
       const [routers, versionedRouters] = createTestRouters({
