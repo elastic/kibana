@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RuleCreateOptionsFlyout } from './rule_create_options_flyout';
@@ -34,9 +35,7 @@ describe('RuleCreateOptionsFlyout', () => {
     renderFlyout();
 
     expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
-    expect(
-      screen.getByRole('heading', { level: 2, name: 'Create Alerting V2 rule' })
-    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2, name: 'Create rule' })).toBeInTheDocument();
     expect(screen.getByText('Create ES|QL rule')).toBeInTheDocument();
     expect(screen.getByText('Create with AI Agent')).toBeInTheDocument();
     expect(screen.getByText('Threshold Alert')).toBeInTheDocument();

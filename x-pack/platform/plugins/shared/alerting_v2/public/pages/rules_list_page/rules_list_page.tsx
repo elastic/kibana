@@ -149,12 +149,14 @@ export const RulesListPage = () => {
             ? [
                 <EuiSplitButton
                   key="create-rule-split"
-                  color="primary"
+                  color="text"
+                  fill={false}
                   data-test-subj="createRuleSplitButton"
                 >
                   <EuiSplitButton.ActionPrimary
                     onClick={openCreateOptionsFlyout}
                     data-test-subj="createRuleButton"
+                    iconType="plusInCircle"
                   >
                     <FormattedMessage
                       id="xpack.alertingV2.rulesList.createRuleButton"
