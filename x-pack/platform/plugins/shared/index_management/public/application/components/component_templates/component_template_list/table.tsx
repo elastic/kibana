@@ -222,6 +222,10 @@ export const ComponentTable: FunctionComponent<Props> = ({
                   isOpen={isPopoverOpen}
                   closePopover={closePopover}
                   panelPaddingSize="none"
+                  aria-label={i18n.translate(
+                    'xpack.idxMgmt.componentTemplatesList.table.filtersPopoverAriaLabel',
+                    { defaultMessage: 'Component templates filters' }
+                  )}
                 >
                   <EuiSelectable
                     allowExclusions

@@ -88,6 +88,7 @@ export function QualitiesSelector({
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="none"
+      aria-label={qualitiesSelectorLabel}
     >
       <EuiSelectable
         data-test-subj="datasetQualityQualitiesSelectable"
