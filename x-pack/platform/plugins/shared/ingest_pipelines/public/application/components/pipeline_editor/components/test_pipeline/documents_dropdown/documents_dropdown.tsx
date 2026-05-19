@@ -99,6 +99,7 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
             },
           }),
         }))}
+        listProps={{ paddingSize: 's' }}
         onChange={(newOptions) => {
           const selectedOption = newOptions.find((option) => option.checked === 'on');
           if (selectedOption) {

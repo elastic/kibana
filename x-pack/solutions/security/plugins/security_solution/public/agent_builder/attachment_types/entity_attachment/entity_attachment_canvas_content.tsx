@@ -108,6 +108,8 @@ export const EntityAttachmentCanvasContent: React.FC<EntityAttachmentCanvasConte
             chrome={chrome}
             openSidebarConversation={openSidebarConversation}
             searchSession={searchSession}
+            riskStats={parsed.riskStats}
+            resolutionRiskStats={parsed.resolutionRiskStats}
           />
         </QueryClientProvider>
       </EuiPanel>

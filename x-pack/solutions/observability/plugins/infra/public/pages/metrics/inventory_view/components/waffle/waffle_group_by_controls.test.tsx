@@ -93,16 +93,16 @@ describe('WaffleGroupByControls', () => {
 
     // Check for default options
     defaultProps.options.forEach((option) => {
-      expect(screen.getByRole('button', { name: option.text })).toBeInTheDocument();
+      expect(screen.getByRole('menuitem', { name: option.text })).toBeInTheDocument();
     });
 
     // Check for custom options
     customOptions.forEach((option) => {
-      expect(screen.getByRole('button', { name: option.text })).toBeInTheDocument();
+      expect(screen.getByRole('menuitem', { name: option.text })).toBeInTheDocument();
     });
 
     // Check for custom field button
-    expect(screen.getByRole('button', { name: 'Custom field' })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: 'Custom field' })).toBeInTheDocument();
   });
 
   it('calls onChange when an option is selected or unselected', async () => {
@@ -116,7 +116,7 @@ describe('WaffleGroupByControls', () => {
 
     // Click on an option
     const optionToSelect = defaultProps.options[0];
-    const optionButton = screen.getByRole('button', { name: optionToSelect.text });
+    const optionButton = screen.getByRole('menuitem', { name: optionToSelect.text });
     await user.click(optionButton);
 
     expect(mockOnChange).toHaveBeenCalledWith([{ field: optionToSelect.field }]);
@@ -132,7 +132,7 @@ describe('WaffleGroupByControls', () => {
     await user.click(screen.getByTestId('waffleGroupByDropdown'));
 
     // Click on the selected option to remove it
-    const selectedOptionButton = screen.getByRole('button', { name: optionToSelect.text });
+    const selectedOptionButton = screen.getByRole('menuitem', { name: optionToSelect.text });
     await user.click(selectedOptionButton);
 
     expect(mockOnChange).toHaveBeenCalledWith([]);
@@ -151,7 +151,7 @@ describe('WaffleGroupByControls', () => {
 
     // Check that all options not already selected are disabled
     defaultProps.options.forEach((option) => {
-      const optionButton = screen.getByRole('button', { name: option.text });
+      const optionButton = screen.getByRole('menuitem', { name: option.text });
       if (groupBy.find((g) => g.field === option.field)) {
         expect(optionButton).toBeEnabled();
       } else {
@@ -160,6 +160,6 @@ describe('WaffleGroupByControls', () => {
     });
 
     // Check for custom field button
-    expect(screen.getByRole('button', { name: 'Custom field' })).toBeDisabled();
+    expect(screen.getByRole('menuitem', { name: 'Custom field' })).toBeDisabled();
   });
 });

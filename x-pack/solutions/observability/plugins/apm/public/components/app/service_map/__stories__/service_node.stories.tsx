@@ -10,11 +10,14 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { useEuiTheme } from '@elastic/eui';
 import type { ElasticAgentName, OpenTelemetryAgentName } from '@kbn/apm-types';
-import { ServiceNode } from '../service_node';
+import { ServiceNode } from '../../../shared/service_map/service_node';
 import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import type { ServiceNodeData } from '../../../../../common/service_map';
 import { ServiceMapSearchProvider } from '../../../shared/service_map/service_map_search_context';
+import { ServiceMapAlertsNavigateProvider } from '../../../shared/service_map/service_map_alerts_navigate_context';
 import { WithSearchHighlight } from './search_highlight_helper';
+
+const noopMakeAlertsNavigateHandler = () => () => {};
 
 const LabelText = ({ children }: { children: React.ReactNode }) => {
   const { euiTheme } = useEuiTheme();
@@ -31,9 +34,13 @@ const meta: Meta<typeof ServiceNode> = {
       <MockApmPluginStorybook routePath="/service-map?rangeFrom=now-15m&rangeTo=now">
         <ReactFlowProvider>
           <ServiceMapSearchProvider>
-            <div style={{ padding: 40, display: 'flex', justifyContent: 'center' }}>
-              <Story />
-            </div>
+            <ServiceMapAlertsNavigateProvider
+              makeAlertsNavigateHandler={noopMakeAlertsNavigateHandler}
+            >
+              <div style={{ padding: 40, display: 'flex', justifyContent: 'center' }}>
+                <Story />
+              </div>
+            </ServiceMapAlertsNavigateProvider>
           </ServiceMapSearchProvider>
         </ReactFlowProvider>
       </MockApmPluginStorybook>
@@ -278,6 +285,173 @@ export const OpenTelemetryAgents: StoryObj = {
       </div>
     );
   },
+};
+
+export const AlertBadges: StoryObj = {
+  render: () => (
+    <div style={{ display: 'flex', gap: 48, flexWrap: 'wrap' }}>
+      <div style={{ textAlign: 'center' }}>
+        <ServiceNode
+          {...createNodeProps({
+            id: 'single-alert',
+            label: 'single-alert',
+            isService: true,
+            agentName: 'java',
+            alertsCount: 1,
+          })}
+        />
+        <LabelText>1 active alert</LabelText>
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <ServiceNode
+          {...createNodeProps({
+            id: 'multiple-alerts',
+            label: 'multiple-alerts',
+            isService: true,
+            agentName: 'nodejs',
+            alertsCount: 5,
+          })}
+        />
+        <LabelText>5 active alerts</LabelText>
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <ServiceNode
+          {...createNodeProps({
+            id: 'many-alerts',
+            label: 'many-alerts',
+            isService: true,
+            agentName: 'python',
+            alertsCount: 23,
+          })}
+        />
+        <LabelText>23 active alerts</LabelText>
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <ServiceNode
+          {...createNodeProps({
+            id: 'no-alerts',
+            label: 'no-alerts',
+            isService: true,
+            agentName: 'go',
+            alertsCount: 0,
+          })}
+        />
+        <LabelText>0 alerts (hidden)</LabelText>
+      </div>
+    </div>
+  ),
+};
+
+export const SloBadges: StoryObj = {
+  render: () => (
+    <div style={{ display: 'flex', gap: 48, flexWrap: 'wrap' }}>
+      <div style={{ textAlign: 'center' }}>
+        <ServiceNode
+          {...createNodeProps({
+            id: 'slo-violated',
+            label: 'slo-violated',
+            isService: true,
+            agentName: 'java',
+            sloStatus: 'violated',
+            sloCount: 2,
+          })}
+        />
+        <LabelText>Violated (2 SLOs)</LabelText>
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <ServiceNode
+          {...createNodeProps({
+            id: 'slo-degrading',
+            label: 'slo-degrading',
+            isService: true,
+            agentName: 'nodejs',
+            sloStatus: 'degrading',
+            sloCount: 3,
+          })}
+        />
+        <LabelText>Degrading (3 SLOs)</LabelText>
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <ServiceNode
+          {...createNodeProps({
+            id: 'slo-healthy',
+            label: 'slo-healthy',
+            isService: true,
+            agentName: 'python',
+            sloStatus: 'healthy',
+            sloCount: 5,
+          })}
+        />
+        <LabelText>Healthy (hidden on map)</LabelText>
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <ServiceNode
+          {...createNodeProps({
+            id: 'slo-no-data',
+            label: 'slo-no-data',
+            isService: true,
+            agentName: 'go',
+            sloStatus: 'noData',
+            sloCount: 1,
+          })}
+        />
+        <LabelText>No data (hidden on map)</LabelText>
+      </div>
+    </div>
+  ),
+};
+
+export const AlertAndSloCombined: StoryObj = {
+  render: () => (
+    <div style={{ display: 'flex', gap: 48, flexWrap: 'wrap' }}>
+      <div style={{ textAlign: 'center' }}>
+        <ServiceNode
+          {...createNodeProps({
+            id: 'alerts-and-violated',
+            label: 'alerts-and-violated',
+            isService: true,
+            agentName: 'java',
+            alertsCount: 3,
+            sloStatus: 'violated',
+            sloCount: 1,
+          })}
+        />
+        <LabelText>Alerts + Violated SLO</LabelText>
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <ServiceNode
+          {...createNodeProps({
+            id: 'alerts-and-degrading',
+            label: 'alerts-and-degrading',
+            isService: true,
+            agentName: 'nodejs',
+            alertsCount: 2,
+            sloStatus: 'degrading',
+            sloCount: 4,
+          })}
+        />
+        <LabelText>Alerts + Degrading SLOs</LabelText>
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <ServiceNode
+          {...createNodeProps({
+            id: 'alerts-anomaly-slo',
+            label: 'alerts-anomaly-slo',
+            isService: true,
+            agentName: 'python',
+            alertsCount: 7,
+            sloStatus: 'violated',
+            sloCount: 2,
+            serviceAnomalyStats: {
+              transactionType: 'request',
+              anomalyScore: 85,
+            },
+          })}
+        />
+        <LabelText>Alerts + SLO + Critical anomaly</LabelText>
+      </div>
+    </div>
+  ),
 };
 
 export const HighlightStates: StoryObj = {

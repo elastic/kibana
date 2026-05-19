@@ -924,6 +924,46 @@ class MyPlugin {
 }
 ```
 
+### Chat events: per-conversation streams
+
+`events.chat$` exposes a hot observable of every chat event from every in-flight
+conversation. Concurrent per-conversation streams are now supported, so this stream
+interleaves events across conversations, and most event payloads do not carry a
+`conversation_id` you can filter on directly. **`chat$` is deprecated.**
+
+Use `events.getChatEvents$(conversationId)` instead. It returns a hot observable
+scoped to a single conversation — every event is tagged with the conversation that
+produced it, and the returned stream filters to the matching tag.
+
+```ts
+// Before — works only when a single conversation streams at a time.
+agentBuilder.events.chat$
+  .pipe(filter(isRoundCompleteEvent))
+  .subscribe((event) => { ... });
+
+// After — scope to a known conversation id.
+agentBuilder.events
+  .getChatEvents$(conversationId)
+  .pipe(filter(isRoundCompleteEvent))
+  .subscribe((event) => { ... });
+
+// After — scope to whichever conversation the chat surface is currently focused on.
+agentBuilder.events.ui.activeConversation$
+  .pipe(
+    filter((c): c is ActiveConversation => c?.id != null),
+    switchMap((c) => agentBuilder.events.getChatEvents$(c.id!))
+  )
+  .subscribe((event) => { ... });
+```
+
+`switchMap` cancels the previous per-conversation subscription whenever the active
+conversation changes — e.g. when a consumer follows the user's focus.
+
+All chat in Kibana is initiated through the agent_builder UI (sidebar, embeddable,
+or full-page chat), and the UI generates a client-side conversation UUID before
+each request. Plugins consuming this contract have access to that id via
+`events.ui.activeConversation$` and can pass it straight to `getChatEvents$`.
+
 ## Registering skills
 
 **Note**: Skills are currently an experimental feature. You need to enable the `agentBuilder:experimentalFeatures` uiSetting to enable and use them.
@@ -1016,7 +1056,7 @@ does; the skill tells it *when* to do it.
 
 ### Marking a skill as experimental
 
-Individual built-in skills can be flagged as experimental by setting `experimental: true` on their definition. 
+Individual built-in skills can be flagged as experimental by setting `experimental: true` on their definition.
 Experimental skills are only visible and usable when the `agentBuilder:experimentalFeatures` uiSetting is enabled.
 
 **Example:**
@@ -1282,36 +1322,51 @@ The full implementation is ~130 lines and serves as the reference for new types.
 
 ## Streams lifecycle (frontend)
 
-The chat streaming layer lives in `public/application/context/send_message/`. This section
-documents how mutations, lifted state, and the React Query cache fit together. Read this
-before touching any of:
-`send_message_context.tsx`, `use_send_message.ts`, `use_send_message_mutation.ts`,
-`use_resume_round_mutation.ts`, `use_subscribe_to_chat_events.ts`,
+The chat streaming layer lives across two folders:
+
+- `public/application/context/streaming/` — the lifted provider, its context hook, the
+  send/regenerate and resume mutation hooks, the chat-events subscriber, and shared types.
+- `public/application/hooks/` — the per-conversation convenience hook
+  (`use_conversation_stream.ts`) and the "any stream active?" derived hook
+  (`use_is_any_conversation_streaming.ts`). They live here because they compose
+  `useConversation` (a sibling in `hooks/`) with the streaming context.
+
+This section documents how mutations, lifted state, and the React Query cache fit
+together. Read this before touching any of: `streaming_context.tsx`,
+`use_send_message_mutation.ts`, `use_resume_round_mutation.ts`,
+`use_subscribe_to_chat_events.ts`, `use_conversation_stream.ts`,
 `use_is_any_conversation_streaming.ts`.
 
 ### The lift
 
-`<SendMessageProvider>` is mounted **once** above the routes/sidebar:
+`<StreamingProvider>` is mounted **once** above the routes/sidebar:
 
 - Routed app: in `mount.tsx`, above `<AgentBuilderRoutes>`. The sidebar is part of the
   routes, so it can read streaming state directly.
 - Embeddable: in `embeddable_conversations_provider.tsx`, one provider per embeddable
   instance because each instance has its own `QueryClient`.
 
-The sidebar uses `useIsAnyConversationStreaming()` and `useSendMessageContext()` directly.
-Anything inside the conversation tree should use the per-conversation scoped hook,
-`useSendMessage()` (in `use_send_message.ts`).
+The sidebar uses `useStreamingContext()` directly. `useIsAnyConversationStreaming()`
+is derived from the same context and is used by the page-leave guard and the
+embeddable welcome-message dismiss — both genuinely care about "is anything in
+flight, anywhere?". Anything inside the conversation tree should use the per-conversation
+scoped hook, `useConversationStream()` (in `hooks/use_conversation_stream.ts`).
+
 
 ### Lifted state
 
-`SendMessageProvider` owns:
+`StreamingProvider` owns two slices with split lifecycles:
 
-- `activeStream: { conversationId, type, agentReasoning } | undefined` — points at the
-  conversation that is currently streaming. Set synchronously when each mutation kicks
-  off; cleared in the mutation's `finally`.
-- `byConversationId: Record<string, StreamRecord>` — per-conversation `pendingMessage`,
-  `error`, `errorSteps`. Persists across stream end so a user can hit Retry after a
-  failure.
+- `activeStreams: Map<conversationId, { type, agentReasoning }>` — one entry per
+  in-flight stream. Set synchronously when each mutation kicks off; deleted in the
+  mutation's `finally`. Multiple entries can coexist — concurrent streams are
+  supported, one per conversation. Native `Map` rather than `Record` because the
+  same key shape pairs with the `Map<conversationId, AbortController>` ref each
+  mutation hook holds, and `cancelAllStreams` iterates this map's keys.
+- `byConversationId: Record<string, StreamRecord>` — per-conversation
+  `pendingMessage`, `error`, `errorSteps`. Persists across stream end so a user
+  can hit Retry after a failure. Mutated via immer; lifecycle is unrelated to
+  in-flight streams so it stayed a plain record.
 
 ### Mutations: single-scope `mutationFn`
 
@@ -1334,10 +1389,16 @@ mutationFn: async (vars) => {
     throw err;
   } finally {
     // cleanup: invalidate cache (skipped if round paused on HITL),
-    // clear `activeStream`, clear abort ref.
+    // delete this conversation's `activeStreams` entry, delete its abort controller.
   }
 }
 ```
+
+Each mutation hook holds a `Map<conversationId, AbortController>` ref so concurrent
+streams have independent cancel signals. The map is keyed by `vars.conversationId`,
+the cancel helper takes the same key, and the `finally` block deletes only the
+entry it installed (compared by reference so a re-mutate's controller isn't
+clobbered).
 
 **Why not lifecycle methods?** Streams aren't typical mutations — the bulk of the work
 happens *during* `mutationFn`, with state mutations flowing for many seconds. Splitting
@@ -1365,13 +1426,27 @@ or with the resume mutation about to fire on Approve (HITL). Other conversations
 free to refetch — switch to conversation B while A streams and B loads cleanly. See the
 inline comment on the `enabled` predicate for details.
 
-### Single-stream vs concurrent streams
+### Concurrent streams
 
-Today the app enforces single-stream-at-a-time. The global gates (HITL Approve,
-submit button, page-leave guard) all read `useIsAnyConversationStreaming()`.
+The app supports concurrent per-conversation streams. Submitting on conversation B
+while A is mid-stream starts a second stream alongside A — A keeps writing to its
+cache, B writes to its own. Cancelling one doesn't affect the other.
 
-The architecture supports concurrent streams in principle — per-conversation cache,
-mutation-scoped `streamActions`, lifted `byConversationId`. The follow-up PR removes
-the global gates, moves the abort controller into a per-conversation slot so each
-stream can be cancelled independently, and enables concurrent streams.
+What this means in practice:
+
+- **Submit gate** (`conversation_input.tsx`) is per-conversation: `isResponseLoading`
+  from `useConversationStream()`. The new-conversation route (`/conversations/new`) has
+  no `conversationId`, so `isResponseLoading` is `false` and submit is always
+  allowed there even while other conversations stream.
+- **HITL Approve / Cancel gate** (`round_layout.tsx`) is per-conversation:
+  `isResponseLoading && !isResuming`. Other in-flight conversations cannot
+  corrupt this conversation's cache because `streamActions` are closure-bound
+  to `vars.conversationId`.
+- **Per-conversation cancel** is wired through `cancelStream(id)` on the context.
+  The mutation hooks hold `Map<conversationId, AbortController>` refs so cancels
+  hit only the targeted controller.
+- **Page-leave guard** is the lone remaining global check. If any stream is in
+  flight when the user navigates away, a confirm dialog appears; on confirm,
+  `cancelAllStreams()` aborts every controller in the map before the platform
+  proceeds.
 

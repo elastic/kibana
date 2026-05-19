@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/developer-examples-plugin'
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/shared-ux-page-kibana-template'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -32,5 +33,6 @@ fileGroups:
     - common/**/*.ts
     - public/**/*.ts
     - public/**/*.tsx
+    - test/scout_examples/**/*
     - '!target/**/*'
 tasks: {}

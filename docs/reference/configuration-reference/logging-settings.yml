@@ -232,6 +232,28 @@ groups:
           self: ga
           ech: unavailable
 
+      - setting: logging.appenders[].<appender-name>.ssl
+        description: |
+          Optional TLS settings for the OTLP endpoint, including mutual TLS (client certificates). Applies to the `otel` appender for all protocols (`http`, `proto`, `grpc`).
+
+          * `certificateAuthorities`: PEM-encoded CA bundle(s) used to verify the server certificate. Use a filesystem path to a PEM file (recommended), an inline PEM string (must contain `-----BEGIN`), or an array of paths when multiple CAs are required.
+          * `certificate` / `key`: Client certificate and private key for mTLS. Both must be set together. Values may be paths or inline PEM strings.
+          * `keyPassphrase`: Passphrase when the private key is encrypted (requires `key`).
+          * `verificationMode`: How strictly to verify the server certificate: `full` (default), `certificate` (verify chain but not hostname), or `none` (insecure; not recommended outside controlled environments).
+
+          For `http` and `proto`, these map to Node.js `https.Agent` TLS options. For `grpc`, they map to `@grpc/grpc-js` `credentials.createSsl` channel credentials.
+
+          Prefer file paths readable by the Kibana process (for example under `/etc/kibana/certs/`). Ensure private keys are not world-readable. TLS material is never written to Kibana logs on success or failure.
+
+          ::::{warning}
+          The passphrase and the certificates (if provided as inline PEM strings) are stored in plain text in `kibana.yml`. Use a secrets management solution or environment variable substitution to avoid exposing credentials.
+          ::::
+        datatype: object
+        applies_to:
+          stack: ga 9.5
+          self: ga
+          ech: unavailable
+
       - setting: logging.appenders[].<appender-name>.attributes
         description: |
           Optional map of additional OpenTelemetry resource attributes merged on top of the auto-detected host, process, OS, and service attributes. Applies to the `otel` appender type only. Can be used to set or override attributes such as `service.name` or `deployment.environment`.

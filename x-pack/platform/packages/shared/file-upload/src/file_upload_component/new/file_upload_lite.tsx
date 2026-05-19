@@ -52,6 +52,7 @@ export const FileDataVisualizerLite: FC<Props> = ({
           fileUpload,
           http: dependencies.http,
           notifications: dependencies.notifications,
+          capabilities: application.capabilities,
         },
         autoAddInference ?? null,
         autoCreateDataView,
@@ -71,6 +72,7 @@ export const FileDataVisualizerLite: FC<Props> = ({
       fileUpload,
       indexSettings,
       location,
+      application.capabilities,
     ]
   );
 

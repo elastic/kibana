@@ -22,6 +22,7 @@ import {
   useEuiTheme,
   EuiButton,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import type { EuiAccordionProps } from '@elastic/eui/src/components/accordion';
 
@@ -297,6 +298,19 @@ export const IntegrationStatus: React.FunctionComponent<{
                           : customAsset.sync_status === SyncStatus.WARNING
                           ? 'warning'
                           : 'checkCircleFill'
+                      }
+                      aria-label={
+                        customAsset.sync_status === SyncStatus.FAILED
+                          ? i18n.translate('xpack.fleet.integrationSyncStatus.failedIconLabel', {
+                              defaultMessage: 'Sync failed',
+                            })
+                          : customAsset.sync_status === SyncStatus.WARNING
+                          ? i18n.translate('xpack.fleet.integrationSyncStatus.warningIconLabel', {
+                              defaultMessage: 'Sync warning',
+                            })
+                          : i18n.translate('xpack.fleet.integrationSyncStatus.syncedIconLabel', {
+                              defaultMessage: 'Synced',
+                            })
                       }
                     />
                   )

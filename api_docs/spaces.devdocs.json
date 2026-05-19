@@ -5508,7 +5508,7 @@
         "label": "SolutionView",
         "description": [],
         "signature": [
-          "\"security\" | \"es\" | \"workplaceai\" | \"oblt\" | \"classic\""
+          "\"security\" | \"es\" | \"workplaceai\" | \"vectordb\" | \"oblt\" | \"classic\""
         ],
         "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
         "lineNumber": 13,

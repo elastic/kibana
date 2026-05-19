@@ -45,7 +45,7 @@ export function TransactionDistribution({
   const { traceId, transactionId } = urlParams;
 
   const {
-    query: { rangeFrom, rangeTo, showCriticalPath, environment },
+    query: { rangeFrom, rangeTo, showCriticalPath },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view'
@@ -192,7 +192,6 @@ export function TransactionDistribution({
 
         <EuiSpacer size="s" />
         <WaterfallWithSummary
-          environment={environment}
           onSampleClick={onSampleClick}
           onTabClick={onTabClick}
           serviceName={serviceName}
