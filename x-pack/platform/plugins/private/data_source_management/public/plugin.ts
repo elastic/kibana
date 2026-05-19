@@ -16,10 +16,10 @@ export class DataSourceManagementPlugin
   implements Plugin<void, DataSourceManagementPluginStart, SetupDependencies, StartDependencies>
 {
   public setup(core: CoreSetup<StartDependencies>, { management }: SetupDependencies): void {
-    management.sections.section.kibana.registerApp({
+    management.sections.section.data.registerApp({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
-      order: 2,
+      order: 9,
       async mount(params: ManagementAppMountParams) {
         const { mountManagementSection } = await import('./mount_management_section');
         const [coreStart, { triggersActionsUi }] = await core.getStartServices();

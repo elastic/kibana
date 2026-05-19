@@ -68,7 +68,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // Order of the sections in Stack Management might change in the future
         // so we need to find the sections by their id
         const dataSection = sections.find((section) => section.sectionId === 'data');
-        expect(dataSection?.sectionLinks).to.eql(['data_quality', 'content_connectors']);
+        expect(dataSection?.sectionLinks).to.eql([
+          'data_quality',
+          'content_connectors',
+          'data_source_management',
+        ]);
         const insightsAndAlertingSection = sections.find(
           (section) => section.sectionId === 'insightsAndAlerting'
         );
@@ -99,7 +103,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(kibanaSection?.sectionLinks).to.eql([
           'dataViews',
           'filesManagement',
-          'data_source_management',
           'objects',
           'tags',
           'search_sessions',

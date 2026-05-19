@@ -38,6 +38,6 @@ export const registerConnectorFailedMessage = () =>
 export const LIST_BREADCRUMB = [
   {
     text: PLUGIN_NAME,
-    href: '#/management/kibana/data_source_management',
+    href: '#/management/data/data_source_management',
   },
 ];

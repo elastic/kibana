@@ -238,13 +238,13 @@ export const buildOSSFeatures = ({
       app: ['kibana'],
       catalogue: [],
       management: {
-        kibana: ['data_source_management'],
+        data: ['data_source_management'],
       },
       privileges: {
         all: {
           app: ['kibana'],
           management: {
-            kibana: ['data_source_management'],
+            data: ['data_source_management'],
           },
           savedObject: {
             all: [],
@@ -255,7 +255,7 @@ export const buildOSSFeatures = ({
         read: {
           app: ['kibana'],
           management: {
-            kibana: ['data_source_management'],
+            data: ['data_source_management'],
           },
           savedObject: {
             all: [],
