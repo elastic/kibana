@@ -235,5 +235,37 @@ describe('WorkflowExecuteManualForm', () => {
         owner: { name: 'Jane Doe' },
       });
     });
+
+    it('prefills optional built-in #/kibana/definitions $ref with structural defaults from applyInputDefaults', () => {
+      expect(
+        getInitialJson({
+          properties: {
+            alert: { $ref: '#/kibana/definitions/alertingRuleV2EventContextV1' },
+          },
+        } as JsonModelSchemaType)
+      ).toEqual({
+        alert: {
+          alerts: [],
+          rule: { tags: [] },
+        },
+      });
+    });
+
+    it('prefills required built-in #/kibana/definitions $ref using generated samples', () => {
+      const initial = getInitialJson({
+        properties: {
+          alert: { $ref: '#/kibana/definitions/alertingRuleV2EventContextV1' },
+        },
+        required: ['alert'],
+      } as JsonModelSchemaType);
+      expect(initial.alert).toMatchObject({
+        spaceId: INPUT_STRING_PLACEHOLDER,
+        rule: {
+          id: INPUT_STRING_PLACEHOLDER,
+          name: INPUT_STRING_PLACEHOLDER,
+        },
+        alerts: expect.any(Array),
+      });
+    });
   });
 });

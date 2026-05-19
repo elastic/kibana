@@ -169,4 +169,51 @@ describe('generateSampleFromJsonSchema', () => {
       expect(generateSampleFromJsonSchema({})).toBeUndefined();
     });
   });
+
+  describe('$ref resolution (inputs root)', () => {
+    it('resolves local #/definitions when inputs root is provided', () => {
+      const inputsRoot = {
+        properties: {
+          user: { $ref: '#/definitions/User' },
+        },
+        definitions: {
+          User: {
+            type: 'object',
+            properties: {
+              name: { type: 'string' },
+            },
+            required: ['name'],
+          },
+        },
+      };
+      expect(generateSampleFromJsonSchema({ $ref: '#/definitions/User' }, inputsRoot)).toEqual({
+        name: INPUT_STRING_PLACEHOLDER,
+      });
+    });
+
+    it('resolves built-in #/kibana/definitions when inputs root is provided', () => {
+      const inputsRoot = {
+        properties: {
+          alert: { $ref: '#/kibana/definitions/alertingRuleV2EventContextV1' },
+        },
+      };
+      const sample = generateSampleFromJsonSchema(
+        { $ref: '#/kibana/definitions/alertingRuleV2EventContextV1' },
+        inputsRoot
+      ) as Record<string, unknown>;
+      expect(sample.spaceId).toBe(INPUT_STRING_PLACEHOLDER);
+      expect(sample.rule).toEqual({
+        id: INPUT_STRING_PLACEHOLDER,
+        name: INPUT_STRING_PLACEHOLDER,
+        tags: [INPUT_STRING_PLACEHOLDER],
+        consumer: INPUT_STRING_PLACEHOLDER,
+        producer: INPUT_STRING_PLACEHOLDER,
+        ruleTypeId: INPUT_STRING_PLACEHOLDER,
+      });
+      expect(Array.isArray(sample.alerts)).toBe(true);
+      expect((sample.alerts as unknown[])[0]).toMatchObject({
+        _id: INPUT_STRING_PLACEHOLDER,
+      });
+    });
+  });
 });
