@@ -82,6 +82,13 @@ export class SearchSessionsService extends FtrService {
     );
   }
 
+  public async expectCompletedSearchToast() {
+    await this.retry.waitFor(
+      'the toast appears indicating that the search session is completed',
+      () => this.testSubjects.exists('backgroundSearchCompletedToastLink')
+    );
+  }
+
   public async openCompletedSearchFromToast() {
     await this.retry.try(async () => {
       const link = await this.testSubjects.find('backgroundSearchCompletedToastLink');
