@@ -15,10 +15,10 @@ export const javaSettings: RawSettingDefinition[] = [
     key: 'application_packages',
     type: 'text',
     defaultValue: '',
-    label: i18n.translate('xpack.apm.agentConfig.applicationPackages.label', {
+    label: i18n.translate('apmCommon.agentConfig.applicationPackages.label', {
       defaultMessage: 'Application packages',
     }),
-    description: i18n.translate('xpack.apm.agentConfig.applicationPackages.description', {
+    description: i18n.translate('apmCommon.agentConfig.applicationPackages.description', {
       defaultMessage:
         'Used to determine whether a stack trace frame is an in-app frame or a library frame. ' +
         'This allows the APM app to collapse the stack frames of library code, and highlight the stack frames that originate from your application. ' +
@@ -35,10 +35,10 @@ export const javaSettings: RawSettingDefinition[] = [
     key: 'enable_log_correlation',
     type: 'boolean',
     defaultValue: 'false',
-    label: i18n.translate('xpack.apm.agentConfig.enableLogCorrelation.label', {
+    label: i18n.translate('apmCommon.agentConfig.enableLogCorrelation.label', {
       defaultMessage: 'Enable log correlation',
     }),
-    description: i18n.translate('xpack.apm.agentConfig.enableLogCorrelation.description', {
+    description: i18n.translate('apmCommon.agentConfig.enableLogCorrelation.description', {
       defaultMessage:
         "A boolean specifying if the agent should integrate into SLF4J's MDC to enable trace-log correlation. If set to `true`, the agent will set the `trace.id` and `transaction.id` for the currently active spans and transactions to the MDC. Since Java agent version 1.16.0, the agent also adds `error.id` of captured error to the MDC just before the error message is logged. NOTE: While it's allowed to enable this setting at runtime, you can't disable it without a restart.",
     }),
@@ -50,13 +50,13 @@ export const javaSettings: RawSettingDefinition[] = [
    **/
   {
     key: 'circuit_breaker_enabled',
-    label: i18n.translate('xpack.apm.agentConfig.circuitBreakerEnabled.label', {
+    label: i18n.translate('apmCommon.agentConfig.circuitBreakerEnabled.label', {
       defaultMessage: 'Circuit breaker enabled',
     }),
     type: 'boolean',
     category: 'Circuit-Breaker',
     defaultValue: 'false',
-    description: i18n.translate('xpack.apm.agentConfig.circuitBreakerEnabled.description', {
+    description: i18n.translate('apmCommon.agentConfig.circuitBreakerEnabled.description', {
       defaultMessage:
         'A boolean specifying whether the circuit breaker should be enabled or not.  When enabled, the agent periodically polls stress monitors to detect system/process/JVM stress state. If ANY of the monitors detects a stress indication, the agent will pause, as if the `recording` configuration option has been set to `false`, thus reducing resource consumption to a minimum. When paused, the agent continues polling the same monitors in order to detect whether the stress state has been relieved. If ALL monitors approve that the system/process/JVM is not under stress anymore, the agent will resume and become fully functional.',
     }),
@@ -67,11 +67,11 @@ export const javaSettings: RawSettingDefinition[] = [
     key: 'enable_experimental_instrumentations',
     type: 'boolean',
     defaultValue: 'false',
-    label: i18n.translate('xpack.apm.agentConfig.enableExperimentalInstrumentations.label', {
+    label: i18n.translate('apmCommon.agentConfig.enableExperimentalInstrumentations.label', {
       defaultMessage: 'Enable experimental instrumentations',
     }),
     description: i18n.translate(
-      'xpack.apm.agentConfig.enableExperimentalInstrumentations.description',
+      'apmCommon.agentConfig.enableExperimentalInstrumentations.description',
       {
         defaultMessage:
           'Whether to apply experimental instrumentations.\n' +
@@ -87,10 +87,10 @@ export const javaSettings: RawSettingDefinition[] = [
     key: 'enable_instrumentations',
     type: 'text',
     defaultValue: '',
-    label: i18n.translate('xpack.apm.agentConfig.enableInstrumentations.label', {
+    label: i18n.translate('apmCommon.agentConfig.enableInstrumentations.label', {
       defaultMessage: 'Disable instrumentations',
     }),
-    description: i18n.translate('xpack.apm.agentConfig.enableInstrumentations.description', {
+    description: i18n.translate('apmCommon.agentConfig.enableInstrumentations.description', {
       defaultMessage:
         'A list of instrumentations which should be selectively enabled. ' +
         'Valid options are listed in the ' +
@@ -108,10 +108,10 @@ export const javaSettings: RawSettingDefinition[] = [
     key: 'log_sending',
     type: 'boolean',
     defaultValue: 'false',
-    label: i18n.translate('xpack.apm.agentConfig.logSending.label', {
+    label: i18n.translate('apmCommon.agentConfig.logSending.label', {
       defaultMessage: 'Log sending (experimental)',
     }),
-    description: i18n.translate('xpack.apm.agentConfig.logSending.description', {
+    description: i18n.translate('apmCommon.agentConfig.logSending.description', {
       defaultMessage:
         'Experimental, requires latest version of the Java agent.\n' +
         '\n' +
@@ -126,10 +126,10 @@ export const javaSettings: RawSettingDefinition[] = [
     type: 'duration',
     defaultValue: '0ms',
     min: '0ms',
-    label: i18n.translate('xpack.apm.agentConfig.spanMinDuration.label', {
+    label: i18n.translate('apmCommon.agentConfig.spanMinDuration.label', {
       defaultMessage: 'Span minimum duration',
     }),
-    description: i18n.translate('xpack.apm.agentConfig.spanMinDuration.description', {
+    description: i18n.translate('apmCommon.agentConfig.spanMinDuration.description', {
       defaultMessage:
         'Sets the minimum duration of spans. Spans that execute faster than this threshold are attempted to be discarded.\n' +
         '\n' +
@@ -144,14 +144,14 @@ export const javaSettings: RawSettingDefinition[] = [
 
   {
     key: 'stress_monitor_gc_stress_threshold',
-    label: i18n.translate('xpack.apm.agentConfig.stressMonitorGcStressThreshold.label', {
+    label: i18n.translate('apmCommon.agentConfig.stressMonitorGcStressThreshold.label', {
       defaultMessage: 'Stress monitor gc stress threshold',
     }),
     type: 'float',
     category: 'Circuit-Breaker',
     defaultValue: '0.95',
     description: i18n.translate(
-      'xpack.apm.agentConfig.stressMonitorGcStressThreshold.description',
+      'apmCommon.agentConfig.stressMonitorGcStressThreshold.description',
       {
         defaultMessage:
           'The threshold used by the GC monitor to rely on for identifying heap stress. The same threshold will be used for all heap pools, so that if ANY has a usage percentage that crosses it, the agent will consider it as a heap stress. The GC monitor relies only on memory consumption measured after a recent GC.',
@@ -161,7 +161,7 @@ export const javaSettings: RawSettingDefinition[] = [
   },
   {
     key: 'stress_monitor_gc_relief_threshold',
-    label: i18n.translate('xpack.apm.agentConfig.stressMonitorGcReliefThreshold.label', {
+    label: i18n.translate('apmCommon.agentConfig.stressMonitorGcReliefThreshold.label', {
       defaultMessage: 'Stress monitor gc relief threshold',
     }),
 
@@ -169,7 +169,7 @@ export const javaSettings: RawSettingDefinition[] = [
     category: 'Circuit-Breaker',
     defaultValue: '0.75',
     description: i18n.translate(
-      'xpack.apm.agentConfig.stressMonitorGcReliefThreshold.description',
+      'apmCommon.agentConfig.stressMonitorGcReliefThreshold.description',
       {
         defaultMessage:
           'The threshold used by the GC monitor to rely on for identifying when the heap is not under stress. If `stress_monitor_gc_stress_threshold` has been crossed, the agent will consider it a heap-stress state. In order to determine that the stress state is over, percentage of occupied memory in ALL heap pools should be lower than this threshold. The GC monitor relies only on memory consumption measured after a recent GC.',
@@ -179,14 +179,14 @@ export const javaSettings: RawSettingDefinition[] = [
   },
   {
     key: 'stress_monitor_cpu_duration_threshold',
-    label: i18n.translate('xpack.apm.agentConfig.stressMonitorCpuDurationThreshold.label', {
+    label: i18n.translate('apmCommon.agentConfig.stressMonitorCpuDurationThreshold.label', {
       defaultMessage: 'Stress monitor cpu duration threshold',
     }),
     type: 'duration',
     category: 'Circuit-Breaker',
     defaultValue: '1m',
     description: i18n.translate(
-      'xpack.apm.agentConfig.stressMonitorCpuDurationThreshold.description',
+      'apmCommon.agentConfig.stressMonitorCpuDurationThreshold.description',
       {
         defaultMessage:
           'The minimal time required in order to determine whether the system is either currently under stress, or that the stress detected previously has been relieved. All measurements during this time must be consistent in comparison to the relevant threshold in order to detect a change of stress state. Must be at least `1m`.',
@@ -197,14 +197,14 @@ export const javaSettings: RawSettingDefinition[] = [
   },
   {
     key: 'stress_monitor_system_cpu_stress_threshold',
-    label: i18n.translate('xpack.apm.agentConfig.stressMonitorSystemCpuStressThreshold.label', {
+    label: i18n.translate('apmCommon.agentConfig.stressMonitorSystemCpuStressThreshold.label', {
       defaultMessage: 'Stress monitor system cpu stress threshold',
     }),
     type: 'float',
     category: 'Circuit-Breaker',
     defaultValue: '0.95',
     description: i18n.translate(
-      'xpack.apm.agentConfig.stressMonitorSystemCpuStressThreshold.description',
+      'apmCommon.agentConfig.stressMonitorSystemCpuStressThreshold.description',
       {
         defaultMessage:
           'The threshold used by the system CPU monitor to detect system CPU stress. If the system CPU crosses this threshold for a duration of at least `stress_monitor_cpu_duration_threshold`, the monitor considers this as a stress state.',
@@ -214,14 +214,14 @@ export const javaSettings: RawSettingDefinition[] = [
   },
   {
     key: 'stress_monitor_system_cpu_relief_threshold',
-    label: i18n.translate('xpack.apm.agentConfig.stressMonitorSystemCpuReliefThreshold.label', {
+    label: i18n.translate('apmCommon.agentConfig.stressMonitorSystemCpuReliefThreshold.label', {
       defaultMessage: 'Stress monitor system cpu relief threshold',
     }),
     type: 'float',
     category: 'Circuit-Breaker',
     defaultValue: '0.8',
     description: i18n.translate(
-      'xpack.apm.agentConfig.stressMonitorSystemCpuReliefThreshold.description',
+      'apmCommon.agentConfig.stressMonitorSystemCpuReliefThreshold.description',
       {
         defaultMessage:
           'The threshold used by the system CPU monitor to determine that the system is not under CPU stress. If the monitor detected a CPU stress, the measured system CPU needs to be below this threshold for a duration of at least `stress_monitor_cpu_duration_threshold` in order for the monitor to decide that the CPU stress has been relieved.',
@@ -236,13 +236,13 @@ export const javaSettings: RawSettingDefinition[] = [
 
   {
     key: 'profiling_inferred_spans_enabled',
-    label: i18n.translate('xpack.apm.agentConfig.profilingInferredSpansEnabled.label', {
+    label: i18n.translate('apmCommon.agentConfig.profilingInferredSpansEnabled.label', {
       defaultMessage: 'Profiling inferred spans enabled',
     }),
     type: 'boolean',
     category: 'Profiling',
     defaultValue: 'false',
-    description: i18n.translate('xpack.apm.agentConfig.profilingInferredSpansEnabled.description', {
+    description: i18n.translate('apmCommon.agentConfig.profilingInferredSpansEnabled.description', {
       defaultMessage:
         'Set to `true` to make the agent create spans for method executions based on async-profiler, a sampling aka statistical profiler. Due to the nature of how sampling profilers work, the duration of the inferred spans are not exact, but only estimations. The `profiling_inferred_spans_sampling_interval` lets you fine tune the trade-off between accuracy and overhead. The inferred spans are created after a profiling session has ended. This means there is a delay between the regular and the inferred spans being visible in the UI. NOTE: This feature is not available on Windows.',
     }),
@@ -250,14 +250,14 @@ export const javaSettings: RawSettingDefinition[] = [
   },
   {
     key: 'profiling_inferred_spans_sampling_interval',
-    label: i18n.translate('xpack.apm.agentConfig.profilingInferredSpansSamplingInterval.label', {
+    label: i18n.translate('apmCommon.agentConfig.profilingInferredSpansSamplingInterval.label', {
       defaultMessage: 'Profiling inferred spans sampling interval',
     }),
     type: 'duration',
     category: 'Profiling',
     defaultValue: '50ms',
     description: i18n.translate(
-      'xpack.apm.agentConfig.profilingInferredSpansSamplingInterval.description',
+      'apmCommon.agentConfig.profilingInferredSpansSamplingInterval.description',
       {
         defaultMessage:
           'The frequency at which stack traces are gathered within a profiling session. The lower you set it, the more accurate the durations will be. This comes at the expense of higher overhead and more spans for potentially irrelevant operations. The minimal duration of a profiling-inferred span is the same as the value of this setting.',
@@ -269,14 +269,14 @@ export const javaSettings: RawSettingDefinition[] = [
   },
   {
     key: 'profiling_inferred_spans_min_duration',
-    label: i18n.translate('xpack.apm.agentConfig.profilingInferredSpansMinDuration.label', {
+    label: i18n.translate('apmCommon.agentConfig.profilingInferredSpansMinDuration.label', {
       defaultMessage: 'Profiling inferred spans min duration',
     }),
     type: 'duration',
     category: 'Profiling',
     defaultValue: '0ms',
     description: i18n.translate(
-      'xpack.apm.agentConfig.profilingInferredSpansMinDuration.description',
+      'apmCommon.agentConfig.profilingInferredSpansMinDuration.description',
       {
         defaultMessage:
           'The minimum duration of an inferred span. Note that the min duration is also implicitly set by the sampling interval. However, increasing the sampling interval also decreases the accuracy of the duration of inferred spans.',
@@ -287,14 +287,14 @@ export const javaSettings: RawSettingDefinition[] = [
   },
   {
     key: 'profiling_inferred_spans_included_classes',
-    label: i18n.translate('xpack.apm.agentConfig.profilingInferredSpansIncludedClasses.label', {
+    label: i18n.translate('apmCommon.agentConfig.profilingInferredSpansIncludedClasses.label', {
       defaultMessage: 'Profiling inferred spans included classes',
     }),
     type: 'text',
     category: 'Profiling',
     defaultValue: '*',
     description: i18n.translate(
-      'xpack.apm.agentConfig.profilingInferredSpansIncludedClasses.description',
+      'apmCommon.agentConfig.profilingInferredSpansIncludedClasses.description',
       {
         defaultMessage:
           'If set, the agent will only create inferred spans for methods which match this list. Setting a value may slightly reduce overhead and can reduce clutter by only creating spans for the classes you are interested in. This option supports the wildcard `*`, which matches zero or more characters. Example: `org.example.myapp.*`. Matching is case insensitive by default. Prepending an element with `(?-i)` makes the matching case sensitive.',
@@ -304,7 +304,7 @@ export const javaSettings: RawSettingDefinition[] = [
   },
   {
     key: 'profiling_inferred_spans_excluded_classes',
-    label: i18n.translate('xpack.apm.agentConfig.profilingInferredSpansExcludedClasses.label', {
+    label: i18n.translate('apmCommon.agentConfig.profilingInferredSpansExcludedClasses.label', {
       defaultMessage: 'Profiling inferred spans excluded classes',
     }),
     type: 'text',
@@ -312,7 +312,7 @@ export const javaSettings: RawSettingDefinition[] = [
     defaultValue:
       '(?-i)java.*,(?-i)javax.*,(?-i)sun.*,(?-i)com.sun.*,(?-i)jdk.*,(?-i)org.apache.tomcat.*,(?-i)org.apache.catalina.*,(?-i)org.apache.coyote.*,(?-i)org.jboss.as.*,(?-i)org.glassfish.*,(?-i)org.eclipse.jetty.*,(?-i)com.ibm.websphere.*,(?-i)io.undertow.*',
     description: i18n.translate(
-      'xpack.apm.agentConfig.profilingInferredSpansExcludedClasses.description',
+      'apmCommon.agentConfig.profilingInferredSpansExcludedClasses.description',
       {
         defaultMessage:
           'Excludes classes for which no profiler-inferred spans should be created. This option supports the wildcard `*`, which matches zero or more characters. Matching is case insensitive by default. Prepending an element with `(?-i)` makes the matching case sensitive.',
@@ -325,10 +325,10 @@ export const javaSettings: RawSettingDefinition[] = [
     key: 'capture_jmx_metrics',
     type: 'text',
     defaultValue: '',
-    label: i18n.translate('xpack.apm.agentConfig.captureJmxMetrics.label', {
+    label: i18n.translate('apmCommon.agentConfig.captureJmxMetrics.label', {
       defaultMessage: 'Capture JMX metrics',
     }),
-    description: i18n.translate('xpack.apm.agentConfig.captureJmxMetrics.description', {
+    description: i18n.translate('apmCommon.agentConfig.captureJmxMetrics.description', {
       defaultMessage:
         'Report metrics from JMX to the APM Server\n' +
         '\n' +
@@ -346,10 +346,10 @@ export const javaSettings: RawSettingDefinition[] = [
     key: 'ignore_exceptions',
     type: 'text',
     defaultValue: '',
-    label: i18n.translate('xpack.apm.agentConfig.ignoreExceptions.label', {
+    label: i18n.translate('apmCommon.agentConfig.ignoreExceptions.label', {
       defaultMessage: 'Ignore exceptions',
     }),
-    description: i18n.translate('xpack.apm.agentConfig.ignoreExceptions.description', {
+    description: i18n.translate('apmCommon.agentConfig.ignoreExceptions.description', {
       defaultMessage:
         'A list of exceptions that should be ignored and not reported as errors.\n' +
         'This allows to ignore exceptions thrown in regular control flow that are not actual errors.',
@@ -361,10 +361,10 @@ export const javaSettings: RawSettingDefinition[] = [
     key: 'trace_methods',
     type: 'text',
     defaultValue: '',
-    label: i18n.translate('xpack.apm.agentConfig.traceMethods.label', {
+    label: i18n.translate('apmCommon.agentConfig.traceMethods.label', {
       defaultMessage: 'Trace methods',
     }),
-    description: i18n.translate('xpack.apm.agentConfig.traceMethods.description', {
+    description: i18n.translate('apmCommon.agentConfig.traceMethods.description', {
       defaultMessage:
         'A list of methods for which to create a transaction or span.\n' +
         '\n' +
@@ -388,10 +388,10 @@ export const javaSettings: RawSettingDefinition[] = [
     key: 'unnest_exceptions',
     type: 'text',
     defaultValue: '',
-    label: i18n.translate('xpack.apm.agentConfig.unnestExceptions.label', {
+    label: i18n.translate('apmCommon.agentConfig.unnestExceptions.label', {
       defaultMessage: 'Unnest exceptions',
     }),
-    description: i18n.translate('xpack.apm.agentConfig.unnestExceptions.description', {
+    description: i18n.translate('apmCommon.agentConfig.unnestExceptions.description', {
       defaultMessage:
         'When reporting exceptions,\n' +
         'un-nests the exceptions matching the wildcard pattern.\n' +
