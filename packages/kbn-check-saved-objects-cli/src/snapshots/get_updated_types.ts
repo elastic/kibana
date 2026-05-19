@@ -10,19 +10,55 @@
 import equal from 'fast-deep-equal';
 import type { MigrationSnapshot } from '../types';
 
-export function getUpdatedTypes({
+export interface ClassifiedUpdatedTypes {
+  /** All types whose snapshot entry changed between the two snapshots. */
+  updatedTypes: string[];
+  /**
+   * Subset of `updatedTypes` where the model version count increased.
+   * Types with only schema-only mutations in existing model versions are excluded:
+   * they don't require fixture verification or rollback tests.
+   */
+  typesWithNewModelVersions: string[];
+}
+
+/**
+ * Classifies updated SO types in a single pass over the snapshot diff.
+ * Prefer this over calling `getUpdatedTypes` + `getTypesWithNewModelVersions` separately
+ * to guarantee that `typesWithNewModelVersions` is always a strict subset of `updatedTypes`
+ * and to avoid iterating the snapshot twice.
+ */
+export function classifyUpdatedTypes({
   from,
   to,
 }: {
   from: MigrationSnapshot;
   to: MigrationSnapshot;
-}): string[] {
-  return Object.keys(to.typeDefinitions).filter((type) => {
-    if (!Object.prototype.hasOwnProperty.call(to.typeDefinitions, type)) {
-      return false;
-    }
+}): ClassifiedUpdatedTypes {
+  const updatedTypes: string[] = [];
+  const typesWithNewModelVersions: string[] = [];
+
+  for (const type of Object.keys(to.typeDefinitions)) {
     const infoBefore = from.typeDefinitions[type];
     const infoAfter = to.typeDefinitions[type]!;
-    return infoBefore && !equal(infoBefore, infoAfter);
-  });
+    if (!infoBefore || equal(infoBefore, infoAfter)) continue;
+
+    updatedTypes.push(type);
+    if (infoAfter.modelVersions.length > infoBefore.modelVersions.length) {
+      typesWithNewModelVersions.push(type);
+    }
+  }
+
+  return { updatedTypes, typesWithNewModelVersions };
 }
+
+/** @deprecated Prefer `classifyUpdatedTypes` to avoid iterating the snapshot twice. */
+export const getUpdatedTypes = (args: {
+  from: MigrationSnapshot;
+  to: MigrationSnapshot;
+}): string[] => classifyUpdatedTypes(args).updatedTypes;
+
+/** @deprecated Prefer `classifyUpdatedTypes` to avoid iterating the snapshot twice. */
+export const getTypesWithNewModelVersions = (args: {
+  from: MigrationSnapshot;
+  to: MigrationSnapshot;
+}): string[] => classifyUpdatedTypes(args).typesWithNewModelVersions;

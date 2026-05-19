@@ -41,6 +41,7 @@ describe('interpretLogPaginationCursorRows', () => {
       hasLogsToProcess: true,
       logsPaginationCursor: row.logsPaginationCursor,
       isLastLogsPage: false,
+      sliceLogCount: 100,
     });
   });
 
@@ -53,6 +54,7 @@ describe('interpretLogPaginationCursorRows', () => {
       hasLogsToProcess: true,
       logsPaginationCursor: row.logsPaginationCursor,
       isLastLogsPage: true,
+      sliceLogCount: 100,
     });
   });
 
@@ -65,6 +67,7 @@ describe('interpretLogPaginationCursorRows', () => {
       hasLogsToProcess: true,
       logsPaginationCursor: row.logsPaginationCursor,
       isLastLogsPage: true,
+      sliceLogCount: 3,
     });
   });
 });
