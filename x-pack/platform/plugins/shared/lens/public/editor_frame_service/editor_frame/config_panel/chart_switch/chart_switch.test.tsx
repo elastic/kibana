@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { screen, within, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
 import {
   createMockVisualization,
   mockStoreDeps,
@@ -261,7 +261,7 @@ describe('chart_switch', () => {
     // Disable pointer-events check: JSDOM doesn't compute CSS styles, so
     // elements rendered with pointer-events:none (e.g. EUI overlays) would
     // otherwise cause userEvent clicks to fail even though they work in browsers.
-    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    const user = userEvent.setup({ pointerEventsCheck: PointerEventsCheckLevel.Never });
 
     const openChartSwitch = async () => {
       await user.click(screen.getByTestId('lnsChartSwitchPopover'));
