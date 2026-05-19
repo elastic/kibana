@@ -116,7 +116,54 @@ describe('resolveConflictingFieldTypes', () => {
     });
   });
 
+  describe('counter families (TSDB)', () => {
+    // counter_double / counter_long are not members of the ES_FIELD_TYPES enum but
+    // appear as raw ES field types. Cast via the string value so callers matching
+    // real ES|QL responses are covered.
+    const COUNTER_DOUBLE = 'counter_double' as ES_FIELD_TYPES;
+    const COUNTER_LONG = 'counter_long' as ES_FIELD_TYPES;
+
+    it('should resolve counter_double + double to double', () => {
+      const result = resolveConflictingFieldTypes([COUNTER_DOUBLE, ES_FIELD_TYPES.DOUBLE]);
+      expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
+    });
+
+    it('should resolve counter_double + float to double', () => {
+      const result = resolveConflictingFieldTypes([COUNTER_DOUBLE, ES_FIELD_TYPES.FLOAT]);
+      expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
+    });
+
+    it('should resolve counter_long + long to long', () => {
+      const result = resolveConflictingFieldTypes([COUNTER_LONG, ES_FIELD_TYPES.LONG]);
+      expect(result).toBe(ES_FIELD_TYPES.LONG);
+    });
+
+    it('should resolve counter_long + integer to long', () => {
+      const result = resolveConflictingFieldTypes([COUNTER_LONG, ES_FIELD_TYPES.INTEGER]);
+      expect(result).toBe(ES_FIELD_TYPES.LONG);
+    });
+
+    it('should resolve counter_double + long to double (mixed numeric families)', () => {
+      const result = resolveConflictingFieldTypes([COUNTER_DOUBLE, ES_FIELD_TYPES.LONG]);
+      expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
+    });
+
+    it('should resolve counter_long + double to double (mixed numeric families)', () => {
+      const result = resolveConflictingFieldTypes([COUNTER_LONG, ES_FIELD_TYPES.DOUBLE]);
+      expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
+    });
+
+    it('should resolve counter_double + counter_long to double', () => {
+      const result = resolveConflictingFieldTypes([COUNTER_DOUBLE, COUNTER_LONG]);
+      expect(result).toBe(ES_FIELD_TYPES.DOUBLE);
+    });
+  });
+
   describe('incompatible types', () => {
+    // counter_* raw strings used for histogram vs counter conflict coverage.
+    const COUNTER_DOUBLE = 'counter_double' as ES_FIELD_TYPES;
+    const COUNTER_LONG = 'counter_long' as ES_FIELD_TYPES;
+
     it('should return undefined for keyword + double', () => {
       const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.DOUBLE]);
       expect(result).toBeUndefined();
@@ -138,6 +185,42 @@ describe('resolveConflictingFieldTypes', () => {
         ES_FIELD_TYPES.LONG,
         ES_FIELD_TYPES.KEYWORD,
       ]);
+      expect(result).toBeUndefined();
+    });
+
+    // Histogram-class conflicts intentionally fall through: ES|QL has no safe cast,
+    // so the field is passed uncast and ES surfaces a verification_exception.
+    it('should return undefined for histogram + exponential_histogram', () => {
+      const result = resolveConflictingFieldTypes([
+        ES_FIELD_TYPES.HISTOGRAM,
+        ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM,
+      ]);
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined for histogram + double', () => {
+      const result = resolveConflictingFieldTypes([
+        ES_FIELD_TYPES.HISTOGRAM,
+        ES_FIELD_TYPES.DOUBLE,
+      ]);
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined for tdigest + exponential_histogram', () => {
+      const result = resolveConflictingFieldTypes([
+        ES_FIELD_TYPES.TDIGEST,
+        ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM,
+      ]);
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined for histogram + counter_long', () => {
+      const result = resolveConflictingFieldTypes([ES_FIELD_TYPES.HISTOGRAM, COUNTER_LONG]);
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined for counter_double + histogram', () => {
+      const result = resolveConflictingFieldTypes([COUNTER_DOUBLE, ES_FIELD_TYPES.HISTOGRAM]);
       expect(result).toBeUndefined();
     });
   });
