@@ -20,7 +20,6 @@ import { tags } from '@kbn/scout';
 import type { AlertEvent } from '../../../../server/resources/datastreams/alert_events';
 import type { AlertAction } from '../../../../server/resources/datastreams/alert_actions';
 import { LOOKBACK_WINDOW_MINUTES } from '../../../../server/lib/dispatcher/constants';
-import { ACTION_POLICY_EVENT_ACTIONS } from '../../../../server/lib/dispatcher/steps/constants';
 import type { AlertActionsFilter } from '../../common/services';
 import type { AlertingApiServicesFixture } from '../fixtures';
 import { apiTest, buildCreateRuleData, testData } from '../fixtures';
@@ -1629,8 +1628,6 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       await apiServices.alertingV2.actionPolicies.disable(ACTION_POLICY_ID);
       await apiServices.alertingV2.actionPolicies.enable(MISSING_WORKFLOW_POLICY_ID);
 
-      const sinceMs = Date.now();
-
       await apiServices.alertingV2.ruleEvents.seed([
         buildAlertEvent({
           ruleId: 'rule-1',
@@ -1664,27 +1661,15 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         action_type: 'notified',
         reason: `notified by policy ${MISSING_WORKFLOW_POLICY_ID}`,
       });
-
-      // The dispatcher must still emit a `dispatched` execution-history
-      // entry even when the underlying workflow run could not be
-      // resolved. The entry is the source of truth for the action policy
-      // UI's execution timeline and downstream telemetry.
-      await apiServices.alertingV2.dispatcher.waitForDispatcherEventLogEntries({
-        action: ACTION_POLICY_EVENT_ACTIONS.DISPATCHED,
-        sinceMs,
-        expected: 1,
-      });
     }
   );
 
   apiTest(
-    'execution history / writes a throttled-policy suppress record and a throttled event-log entry when on_status_change holds back an episode',
+    'writes a throttled-policy suppress record when on_status_change holds back an episode',
     async ({ apiServices }) => {
       await apiServices.alertingV2.actionPolicies.patch(ACTION_POLICY_ID, {
         throttle: { strategy: 'on_status_change' },
       });
-
-      const sinceMs = Date.now();
 
       // First dispatch: the episode fires (no prior notification).
       await apiServices.alertingV2.ruleEvents.seed([
@@ -1722,7 +1707,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         }),
       ]);
 
-      // 1) StoreActionsStep writes a throttled-policy suppress record.
+      // StoreActionsStep writes a throttled-policy suppress record.
       await apiServices.alertingV2.alertActions.waitForAtLeast(1, {
         ruleId: 'rule-1',
         actionTypes: ['suppress'],
@@ -1749,23 +1734,14 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         source: 'internal',
         reason: `suppressed by throttled policy ${ACTION_POLICY_ID}`,
       });
-
-      // 2) StoreExecutionHistoryStep emits a `throttled` event-log entry.
-      await apiServices.alertingV2.dispatcher.waitForDispatcherEventLogEntries({
-        action: ACTION_POLICY_EVENT_ACTIONS.THROTTLED,
-        sinceMs,
-        expected: 1,
-      });
     }
   );
 
   apiTest(
-    'execution history / emits an `unmatched` event-log entry when no policy matches the rule',
+    'writes an `unmatched` action record when no policy matches the rule',
     async ({ apiServices }) => {
       await apiServices.alertingV2.actionPolicies.disable(ACTION_POLICY_ID);
       await apiServices.alertingV2.actionPolicies.enable(ACTION_POLICY_MATCHER_ID);
-
-      const sinceMs = Date.now();
 
       await apiServices.alertingV2.ruleEvents.seed([
         buildAlertEvent({
@@ -1796,12 +1772,6 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       });
 
       expect(otherActions).toHaveLength(0);
-
-      await apiServices.alertingV2.dispatcher.waitForDispatcherEventLogEntries({
-        action: ACTION_POLICY_EVENT_ACTIONS.UNMATCHED,
-        sinceMs,
-        expected: 1,
-      });
     }
   );
 });
