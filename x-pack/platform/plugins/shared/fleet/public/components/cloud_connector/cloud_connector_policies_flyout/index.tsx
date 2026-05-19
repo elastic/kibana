@@ -498,7 +498,6 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
             tableCaption={tableCaption}
             itemId="id"
             itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-            isExpandable
             data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.POLICIES_TABLE}
           />
         )}

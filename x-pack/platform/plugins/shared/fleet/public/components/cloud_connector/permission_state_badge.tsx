@@ -160,20 +160,29 @@ export const PermissionStateBadge: React.FC<PermissionStateBadgeProps> = ({
 }) => {
   const visual = visualFor(state, hideCount);
 
-  const commonProps: Partial<EuiBadgeProps> = {
-    color: visual.color,
-    iconType: visual.iconType,
-    'aria-label': visual.ariaLabel,
-    'data-test-subj': PERMISSION_STATUS_TEST_SUBJECTS.BADGE,
-  };
-
   if (isClickable && onClick) {
     return (
-      <EuiBadge {...commonProps} onClick={onClick} onClickAriaLabel={visual.ariaLabel}>
+      <EuiBadge
+        color={visual.color}
+        iconType={visual.iconType}
+        aria-label={visual.ariaLabel}
+        data-test-subj={PERMISSION_STATUS_TEST_SUBJECTS.BADGE}
+        onClick={onClick}
+        onClickAriaLabel={visual.ariaLabel}
+      >
         {visual.label}
       </EuiBadge>
     );
   }
 
-  return <EuiBadge {...commonProps}>{visual.label}</EuiBadge>;
+  return (
+    <EuiBadge
+      color={visual.color}
+      iconType={visual.iconType}
+      aria-label={visual.ariaLabel}
+      data-test-subj={PERMISSION_STATUS_TEST_SUBJECTS.BADGE}
+    >
+      {visual.label}
+    </EuiBadge>
+  );
 };
