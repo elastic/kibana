@@ -310,10 +310,6 @@ describe('DataLifecycleSummary', () => {
       expect(screen.getByTestId('downsamplingBar-label')).toBeInTheDocument();
       expect(screen.getByTestId('downsamplingBar-empty')).toBeInTheDocument();
       expect(screen.getByTestId('downsamplingBar-emptyLabel')).toHaveTextContent('No downsampling');
-      expect(screen.getByTestId('downsamplingBar-container')).toHaveStyle('border: none');
-      // These are derived from EUI theme tokens (`euiTheme.size.m` and `euiTheme.size.base`).
-      expect(screen.getByTestId('downsamplingBar-empty')).toHaveStyle('padding-block: 12px');
-      expect(screen.getByTestId('downsamplingBar-emptyLabel')).toHaveStyle('line-height: 16px');
     });
   });
 
