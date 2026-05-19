@@ -22,7 +22,8 @@ import {
   DASHBOARD_DEFAULT_BACKGROUND_TOKEN,
   DASHBOARD_DEFAULT_PANEL_BACKGROUND_TOKEN,
 } from './dashboard_background_tokens';
-import { DASHBOARD_HORIZONTAL_PADDING_PX, DASHBOARD_MARGIN_SIZE } from './constants';
+import { DASHBOARD_MARGIN_SIZE } from './constants';
+import { DASHBOARD_DEFAULT_MAX_WIDTH_PX } from './dashboard_layout_max_width';
 
 /** A named bundle of layout tweak values for the dashboard Tweakpane. */
 export interface DashboardLayoutTweakpanePreset {
@@ -47,7 +48,7 @@ export function getDashboardLayoutTweakpanePresets(
       label: 'Current state',
       values: {
         marginGutterPx: DASHBOARD_MARGIN_SIZE,
-        horizontalPaddingPx: DASHBOARD_HORIZONTAL_PADDING_PX,
+        maxWidthPx: DASHBOARD_DEFAULT_MAX_WIDTH_PX,
         panelBorderRadiusPx: defaultPanelBorderRadiusPx,
         panelPaddingVerticalPx: 0,
         panelPaddingHorizontalPx: 0,
@@ -63,7 +64,7 @@ export function getDashboardLayoutTweakpanePresets(
       label: 'Preset A',
       values: {
         marginGutterPx: 14,
-        horizontalPaddingPx: 50,
+        maxWidthPx: 1920,
         panelBorderRadiusPx: 8,
         panelPaddingVerticalPx: 10,
         panelPaddingHorizontalPx: 12,
@@ -71,7 +72,7 @@ export function getDashboardLayoutTweakpanePresets(
         markdownCornerPaddingRightPx: 80,
         dashboardBackgroundToken: 'backgroundBaseSubdued',
         lightModePanelBackgroundToken: 'backgroundBasePlain',
-        darkModePanelBackgroundToken: 'backgroundBaseSubdued',
+        darkModePanelBackgroundToken: 'backgroundBasePlain',
       },
     },
   ];

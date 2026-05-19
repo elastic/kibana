@@ -58,7 +58,8 @@ import type { ReadBodyWithResolve } from '../dashboard_client/dashboard_client';
 
 export interface DashboardLayoutTweakpaneValues {
   marginGutterPx: number;
-  horizontalPaddingPx: number;
+  /** Max width (px) of dashboard content; Tweakpane range 800–5000. */
+  maxWidthPx: number;
   panelBorderRadiusPx: number;
   /** Inset inside each dashboard panel (embeddable chrome), 0–30 px. */
   panelPaddingVerticalPx: number;

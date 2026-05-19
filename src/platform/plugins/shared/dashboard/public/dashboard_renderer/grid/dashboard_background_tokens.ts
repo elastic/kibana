@@ -21,6 +21,8 @@ export type DashboardBackgroundToken = string;
 export interface DashboardBackgroundListOption {
   readonly text: string;
   readonly value: string;
+  /** Resolved CSS color in the active theme (for Tweakpane list swatches). */
+  readonly color: string;
 }
 
 /**
@@ -48,6 +50,7 @@ export function getDashboardBackgroundTokenOptions(
     .map((value) => ({
       text: formatBackgroundTokenLabel(value),
       value,
+      color: record[value] as string,
     }));
 }
 
@@ -62,6 +65,7 @@ export function getDashboardBackgroundBaseTokenOptions(
     .map((value) => ({
       text: formatBackgroundTokenLabel(value),
       value,
+      color: record[value] as string,
     }));
 }
 

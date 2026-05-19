@@ -51,6 +51,7 @@ import type { DashboardEmbedSettings, DashboardRedirect } from '../dashboard_app
 import { openSettingsFlyout } from '../dashboard_renderer/settings/open_settings_flyout';
 import { resolveDashboardBackgroundBaseColor } from '../dashboard_renderer/grid/dashboard_background_tokens';
 import { INITIAL_DASHBOARD_LAYOUT_TWEAK } from '../dashboard_renderer/grid/constants';
+import { getDashboardLayoutMaxWidthStyleObject } from '../dashboard_renderer/grid/dashboard_layout_max_width';
 import { getDashboardRecentlyAccessedService } from '../services/dashboard_recently_accessed_service';
 import {
   coreServices,
@@ -159,22 +160,16 @@ export function InternalDashboardTopNav({
             euiTheme.colors,
             layoutTweak.dashboardBackgroundToken
           ),
-          paddingLeft: `${layoutTweak.horizontalPaddingPx}px`,
-          paddingRight: `${layoutTweak.horizontalPaddingPx}px`,
         },
-        '.controlGroup': {
+        '.kbnBody & .controlGroup': {
+          ...getDashboardLayoutMaxWidthStyleObject(layoutTweak.maxWidthPx),
           paddingTop: 0,
           paddingBottom: euiTheme.size.s,
           paddingLeft: 0,
           paddingRight: 0,
         },
       }),
-    [
-      euiTheme.colors,
-      euiTheme.size.s,
-      layoutTweak.dashboardBackgroundToken,
-      layoutTweak.horizontalPaddingPx,
-    ]
+    [euiTheme.colors, euiTheme.size.s, layoutTweak.dashboardBackgroundToken, layoutTweak.maxWidthPx]
   );
 
   /**

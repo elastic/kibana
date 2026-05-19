@@ -11,16 +11,19 @@ import { useEuiTheme } from '@elastic/eui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import type { DashboardLayoutTweakpaneValues } from '../../dashboard_api/types';
+import { DASHBOARD_MARGIN_SIZE, DASHBOARD_MARKDOWN_CORNER_PADDING_MAX_PX } from './constants';
 import {
-  DASHBOARD_HORIZONTAL_PADDING_PX,
-  DASHBOARD_MARGIN_SIZE,
-  DASHBOARD_MARKDOWN_CORNER_PADDING_MAX_PX,
-} from './constants';
+  clampDashboardMaxWidthPx,
+  DASHBOARD_DEFAULT_MAX_WIDTH_PX,
+  DASHBOARD_MAX_WIDTH_MAX_PX,
+  DASHBOARD_MAX_WIDTH_MIN_PX,
+} from './dashboard_layout_max_width';
 import {
   DASHBOARD_DEFAULT_BACKGROUND_TOKEN,
   DASHBOARD_DEFAULT_PANEL_BACKGROUND_TOKEN,
   getDashboardBackgroundBaseTokenOptions,
   getDashboardBackgroundTokenOptions,
+  resolveDashboardBackgroundColor,
   type DashboardBackgroundBaseToken,
   type DashboardBackgroundToken,
 } from './dashboard_background_tokens';
@@ -28,6 +31,8 @@ import {
   DASHBOARD_LAYOUT_TWEAKPANE_CURRENT_STATE_PRESET_ID,
   getDashboardLayoutTweakpanePresets,
 } from './dashboard_layout_tweakpane_presets';
+import { applyDashboardLayoutTweakpaneColorListSwatches } from './dashboard_layout_tweakpane_list_swatch';
+import type { DashboardBackgroundListOption } from './dashboard_background_tokens';
 
 /** Parse EUI border radius tokens (e.g. `6px`, `0.375rem`) into pixels for Tweakpane. */
 export function parseCssLengthToPx(value: string | number): number {
@@ -51,6 +56,7 @@ export function parseCssLengthToPx(value: string | number): number {
 type TweakpaneChangeHandler = (ev: { value: unknown }) => void;
 
 interface TweakpaneBindingApi {
+  readonly element: HTMLElement;
   on(type: 'change', handler: TweakpaneChangeHandler): void;
 }
 
@@ -70,7 +76,7 @@ interface DashboardLayoutTweakpanePane {
 /**
  * Live dashboard layout tuning via [Tweakpane](https://tweakpane.github.io/docs/): presets
  * (named bundles of all layout values), then grid gutter
- * (when margins are on), viewport left/right padding, panel corner radius (defaults to the
+ * (when margins are on), viewport max width (800–5000 px), panel corner radius (defaults to the
  * active EUI theme `border.radius.medium` value), per-panel inner padding (vertical and horizontal,
  * 0–30 px), optional markdown-only corner padding (right/bottom, 0–400 px, linked to panel paddings until
  * changed), and dashboard canvas background using EUI `backgroundBase*` tokens (see
@@ -90,7 +96,7 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
   defaultPanelRadiusRef.current = defaultPanelBorderRadiusPx;
 
   const [marginGutterPx, setMarginGutterPx] = useState(DASHBOARD_MARGIN_SIZE);
-  const [horizontalPaddingPx, setHorizontalPaddingPx] = useState(DASHBOARD_HORIZONTAL_PADDING_PX);
+  const [maxWidthPx, setMaxWidthPx] = useState(DASHBOARD_DEFAULT_MAX_WIDTH_PX);
   const [panelBorderRadiusPx, setPanelBorderRadiusPx] = useState(defaultPanelBorderRadiusPx);
   const [panelPaddingVerticalPx, setPanelPaddingVerticalPx] = useState(0);
   const [panelPaddingHorizontalPx, setPanelPaddingHorizontalPx] = useState(0);
@@ -131,7 +137,7 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
 
       const params = {
         marginGutterPx: DASHBOARD_MARGIN_SIZE,
-        horizontalPaddingPx: DASHBOARD_HORIZONTAL_PADDING_PX,
+        maxWidthPx: DASHBOARD_DEFAULT_MAX_WIDTH_PX,
         panelBorderRadiusPx: defaultPanelRadiusRef.current,
         panelPaddingVerticalPx: 0,
         panelPaddingHorizontalPx: 0,
@@ -159,9 +165,25 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
         pane.refresh();
       };
 
+      const colorListBindings: Array<{
+        binding: TweakpaneBindingApi;
+        getSelectedValue: () => string;
+        getOptions: () => readonly DashboardBackgroundListOption[];
+      }> = [];
+
+      const refreshColorListSwatches = () => {
+        colorListBindings.forEach(({ binding, getSelectedValue, getOptions }) => {
+          applyDashboardLayoutTweakpaneColorListSwatches(
+            binding.element,
+            getOptions(),
+            getSelectedValue()
+          );
+        });
+      };
+
       const applyLayoutTweakValues = (next: DashboardLayoutTweakpaneValues) => {
         params.marginGutterPx = next.marginGutterPx;
-        params.horizontalPaddingPx = next.horizontalPaddingPx;
+        params.maxWidthPx = clampDashboardMaxWidthPx(next.maxWidthPx);
         params.panelBorderRadiusPx = next.panelBorderRadiusPx;
         params.panelPaddingVerticalPx = Math.min(30, Math.max(0, next.panelPaddingVerticalPx));
         params.panelPaddingHorizontalPx = Math.min(30, Math.max(0, next.panelPaddingHorizontalPx));
@@ -190,7 +212,7 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
           params.markdownCornerPaddingBottomPx !== panelV;
 
         setMarginGutterPx(params.marginGutterPx);
-        setHorizontalPaddingPx(params.horizontalPaddingPx);
+        setMaxWidthPx(params.maxWidthPx);
         setPanelBorderRadiusPx(params.panelBorderRadiusPx);
         setPanelPaddingVerticalPx(params.panelPaddingVerticalPx);
         setPanelPaddingHorizontalPx(params.panelPaddingHorizontalPx);
@@ -200,6 +222,7 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
         setLightModePanelBackgroundToken(params.lightModePanelBackgroundToken);
         setDarkModePanelBackgroundToken(params.darkModePanelBackgroundToken);
         pane.refresh();
+        refreshColorListSwatches();
       };
 
       const presetUi = { preset: DASHBOARD_LAYOUT_TWEAKPANE_CURRENT_STATE_PRESET_ID };
@@ -243,16 +266,16 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
         });
 
       pane
-        .addBinding(params, 'horizontalPaddingPx', {
-          label: 'Side padding (px)',
-          min: 0,
-          max: 200,
-          step: 1,
+        .addBinding(params, 'maxWidthPx', {
+          label: 'Max width',
+          min: DASHBOARD_MAX_WIDTH_MIN_PX,
+          max: DASHBOARD_MAX_WIDTH_MAX_PX,
+          step: 10,
         })
         .on('change', (ev) => {
-          const next = readNumber(ev.value) ?? params.horizontalPaddingPx;
-          params.horizontalPaddingPx = next;
-          setHorizontalPaddingPx(next);
+          const next = clampDashboardMaxWidthPx(readNumber(ev.value) ?? params.maxWidthPx);
+          params.maxWidthPx = next;
+          setMaxWidthPx(next);
         });
 
       pane
@@ -328,50 +351,84 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
           setMarkdownCornerPaddingBottomPx(clamped);
         });
 
-      pane
-        .addBinding(params, 'dashboardBackgroundToken', {
-          label: 'Dashboard background',
-          options:
-            dashboardBgOptions.length > 0
-              ? dashboardBgOptions
-              : [{ text: 'Subdued', value: DASHBOARD_DEFAULT_BACKGROUND_TOKEN }],
-        })
-        .on('change', (ev) => {
-          const next = typeof ev.value === 'string' ? ev.value : params.dashboardBackgroundToken;
-          params.dashboardBackgroundToken = next;
-          setDashboardBackgroundToken(next);
-        });
+      const dashboardBgListOptions: DashboardBackgroundListOption[] =
+        dashboardBgOptions.length > 0
+          ? dashboardBgOptions
+          : [
+              {
+                text: 'Plain',
+                value: DASHBOARD_DEFAULT_BACKGROUND_TOKEN,
+                color: resolveDashboardBackgroundColor(
+                  euiThemeRef.current.colors,
+                  DASHBOARD_DEFAULT_BACKGROUND_TOKEN
+                ),
+              },
+            ];
 
-      const panelBgListOptions =
+      const dashboardBgBinding = pane.addBinding(params, 'dashboardBackgroundToken', {
+        label: 'Dashboard background',
+        options: dashboardBgListOptions,
+      });
+      colorListBindings.push({
+        binding: dashboardBgBinding,
+        getSelectedValue: () => params.dashboardBackgroundToken,
+        getOptions: () => dashboardBgListOptions,
+      });
+      dashboardBgBinding.on('change', (ev) => {
+        const next = typeof ev.value === 'string' ? ev.value : params.dashboardBackgroundToken;
+        params.dashboardBackgroundToken = next;
+        setDashboardBackgroundToken(next);
+        refreshColorListSwatches();
+      });
+
+      const panelBgListOptions: DashboardBackgroundListOption[] =
         panelBgOptions.length > 0
           ? panelBgOptions
-          : [{ text: 'Plain', value: DASHBOARD_DEFAULT_PANEL_BACKGROUND_TOKEN }];
+          : [
+              {
+                text: 'Plain',
+                value: DASHBOARD_DEFAULT_PANEL_BACKGROUND_TOKEN,
+                color: resolveDashboardBackgroundColor(
+                  euiThemeRef.current.colors,
+                  DASHBOARD_DEFAULT_PANEL_BACKGROUND_TOKEN
+                ),
+              },
+            ];
 
-      pane
-        .addBinding(params, 'lightModePanelBackgroundToken', {
-          label: 'Light mode panel BG',
-          options: panelBgListOptions,
-        })
-        .on('change', (ev) => {
-          const next =
-            typeof ev.value === 'string' ? ev.value : params.lightModePanelBackgroundToken;
-          params.lightModePanelBackgroundToken = next;
-          setLightModePanelBackgroundToken(next);
-        });
+      const lightPanelBgBinding = pane.addBinding(params, 'lightModePanelBackgroundToken', {
+        label: 'Light mode panel BG',
+        options: panelBgListOptions,
+      });
+      colorListBindings.push({
+        binding: lightPanelBgBinding,
+        getSelectedValue: () => params.lightModePanelBackgroundToken,
+        getOptions: () => panelBgListOptions,
+      });
+      lightPanelBgBinding.on('change', (ev) => {
+        const next = typeof ev.value === 'string' ? ev.value : params.lightModePanelBackgroundToken;
+        params.lightModePanelBackgroundToken = next;
+        setLightModePanelBackgroundToken(next);
+        refreshColorListSwatches();
+      });
 
-      pane
-        .addBinding(params, 'darkModePanelBackgroundToken', {
-          label: 'Dark mode panel BG',
-          options: panelBgListOptions,
-        })
-        .on('change', (ev) => {
-          const next =
-            typeof ev.value === 'string' ? ev.value : params.darkModePanelBackgroundToken;
-          params.darkModePanelBackgroundToken = next;
-          setDarkModePanelBackgroundToken(next);
-        });
+      const darkPanelBgBinding = pane.addBinding(params, 'darkModePanelBackgroundToken', {
+        label: 'Dark mode panel BG',
+        options: panelBgListOptions,
+      });
+      colorListBindings.push({
+        binding: darkPanelBgBinding,
+        getSelectedValue: () => params.darkModePanelBackgroundToken,
+        getOptions: () => panelBgListOptions,
+      });
+      darkPanelBgBinding.on('change', (ev) => {
+        const next = typeof ev.value === 'string' ? ev.value : params.darkModePanelBackgroundToken;
+        params.darkModePanelBackgroundToken = next;
+        setDarkModePanelBackgroundToken(next);
+        refreshColorListSwatches();
+      });
 
       applyLayoutTweakValues(params);
+      refreshColorListSwatches();
 
       disposePane = () => {
         pane.dispose();
@@ -387,7 +444,7 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
 
   return {
     marginGutterPx,
-    horizontalPaddingPx,
+    maxWidthPx,
     panelBorderRadiusPx,
     panelPaddingVerticalPx,
     panelPaddingHorizontalPx,

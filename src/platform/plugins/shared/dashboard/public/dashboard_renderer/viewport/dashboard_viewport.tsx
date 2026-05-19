@@ -26,6 +26,7 @@ import {
   resolveDashboardBackgroundColor,
 } from '../grid/dashboard_background_tokens';
 import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
+import { dashboardLayoutMaxWidthStyles } from '../grid/dashboard_layout_max_width';
 import { DashboardTechnicalFooter } from './dashboard_technical_footer';
 
 export const DashboardViewport = () => {
@@ -78,7 +79,7 @@ export const DashboardViewport = () => {
   );
   const {
     marginGutterPx,
-    horizontalPaddingPx,
+    maxWidthPx,
     panelBorderRadiusPx,
     panelPaddingVerticalPx,
     panelPaddingHorizontalPx,
@@ -118,13 +119,9 @@ export const DashboardViewport = () => {
     [euiTheme.colors, dashboardBackgroundToken]
   );
 
-  const viewportSidePaddingStyle = useMemo(
-    () =>
-      css({
-        paddingLeft: `${horizontalPaddingPx}px`,
-        paddingRight: `${horizontalPaddingPx}px`,
-      }),
-    [horizontalPaddingPx]
+  const viewportMaxWidthStyle = useMemo(
+    () => dashboardLayoutMaxWidthStyles(maxWidthPx),
+    [maxWidthPx]
   );
 
   const viewportPanelRadiusStyle = useMemo(
@@ -179,7 +176,7 @@ export const DashboardViewport = () => {
       )}
       <div
         className={classes}
-        css={[styles.viewport, viewportSidePaddingStyle, viewportPanelRadiusStyle]}
+        css={[styles.viewport, viewportMaxWidthStyle, viewportPanelRadiusStyle]}
         data-shared-items-container
         data-title={dashboardTitle}
         data-description={description}

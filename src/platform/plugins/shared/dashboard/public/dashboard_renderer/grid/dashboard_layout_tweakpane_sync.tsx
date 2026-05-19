@@ -14,13 +14,13 @@ import { useDashboardLayoutTweakpane } from './use_dashboard_layout_tweakpane';
 
 /**
  * Pushes Tweakpane-driven layout values into {@link DashboardInternalApi.layoutTweak$} so
- * siblings of the viewport (e.g. top nav) can align padding and background with the canvas.
+ * siblings of the viewport (e.g. top nav) can align max width and background with the canvas.
  */
 export function DashboardLayoutTweakpaneSync() {
   const internalApi = useDashboardInternalApi();
   const {
     marginGutterPx,
-    horizontalPaddingPx,
+    maxWidthPx,
     panelBorderRadiusPx,
     panelPaddingVerticalPx,
     panelPaddingHorizontalPx,
@@ -34,7 +34,7 @@ export function DashboardLayoutTweakpaneSync() {
   useEffect(() => {
     internalApi.layoutTweak$.next({
       marginGutterPx,
-      horizontalPaddingPx,
+      maxWidthPx,
       panelBorderRadiusPx,
       panelPaddingVerticalPx,
       panelPaddingHorizontalPx,
@@ -47,7 +47,7 @@ export function DashboardLayoutTweakpaneSync() {
   }, [
     internalApi,
     marginGutterPx,
-    horizontalPaddingPx,
+    maxWidthPx,
     panelBorderRadiusPx,
     panelPaddingVerticalPx,
     panelPaddingHorizontalPx,

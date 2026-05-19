@@ -35,6 +35,7 @@ import { GlobalPrintStyles } from './print_styles';
 import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
 import { DashboardLayoutTweakpaneSync } from './grid/dashboard_layout_tweakpane_sync';
 import { INITIAL_DASHBOARD_LAYOUT_TWEAK } from './grid/constants';
+import { getDashboardLayoutMaxWidthStyleObject } from './grid/dashboard_layout_max_width';
 
 const dashboardRendererBaseStyles = css({
   display: 'flex',
@@ -89,21 +90,19 @@ function DashboardLoadedBody({
     dashboardInternalApi.layoutTweak$,
     INITIAL_DASHBOARD_LAYOUT_TWEAK
   );
-  const controlGroupPaddingStyle = useMemo(
+  const controlGroupMaxWidthStyle = useMemo(
     () =>
       css({
-        '& .controlGroup': {
-          padding: `0 ${layoutTweak.horizontalPaddingPx}px`,
-        },
+        '& .controlGroup': getDashboardLayoutMaxWidthStyleObject(layoutTweak.maxWidthPx),
       }),
-    [layoutTweak.horizontalPaddingPx]
+    [layoutTweak.maxWidthPx]
   );
 
   return (
     <div
       className="dashboardContainer"
       data-test-subj="dashboardContainer"
-      css={[dashboardRendererBaseStyles, controlGroupPaddingStyle]}
+      css={[dashboardRendererBaseStyles, controlGroupMaxWidthStyle]}
       ref={(e) => {
         if (dashboardInternalApi.dashboardContainerRef$.value !== e) {
           dashboardInternalApi.setDashboardContainerRef(e);

@@ -11,12 +11,9 @@ import { css } from '@emotion/react';
 import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import useObservable from 'react-use/lib/useObservable';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
-import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
-import { INITIAL_DASHBOARD_LAYOUT_TWEAK } from '../grid/constants';
 import { dashboardKibanaVersion } from '../../services/kibana_services';
 
 const FOOTER_HEIGHT_PX = 100;
@@ -45,13 +42,7 @@ function formatRelativeRefreshAge(msAgo: number): string {
 
 export const DashboardTechnicalFooter = () => {
   const dashboardApi = useDashboardApi();
-  const dashboardInternalApi = useDashboardInternalApi();
   const { euiTheme } = useEuiTheme();
-  const layoutTweak = useObservable(
-    dashboardInternalApi.layoutTweak$,
-    INITIAL_DASHBOARD_LAYOUT_TWEAK
-  );
-  const { horizontalPaddingPx } = layoutTweak;
   const [viewMode, dataViews] = useBatchedPublishingSubjects(
     dashboardApi.viewMode$,
     dashboardApi.dataViews$
@@ -123,7 +114,7 @@ export const DashboardTechnicalFooter = () => {
     <div
       className="dshDashboardTechnicalFooter"
       data-test-subj="dshDashboardTechnicalFooter"
-      css={footerStyles(euiTheme, horizontalPaddingPx)}
+      css={footerStyles(euiTheme)}
     >
       <div css={rowStyles(euiTheme)}>
         <div css={leftClusterStyles}>
@@ -190,13 +181,11 @@ const rightClusterStyles = ({ size }: UseEuiTheme['euiTheme']) =>
     flex: '0 0 auto',
   });
 
-const footerStyles = (theme: UseEuiTheme['euiTheme'], horizontalPaddingPx: number) =>
+const footerStyles = (theme: UseEuiTheme['euiTheme']) =>
   css({
     boxSizing: 'border-box',
-    width: horizontalPaddingPx > 0 ? `calc(100% + ${horizontalPaddingPx * 2}px)` : '100%',
-    marginLeft: horizontalPaddingPx > 0 ? `-${horizontalPaddingPx}px` : 0,
-    marginRight: horizontalPaddingPx > 0 ? `-${horizontalPaddingPx}px` : 0,
-    paddingInline: `max(10px, ${horizontalPaddingPx}px)`,
+    width: '100%',
+    paddingInline: theme.size.s,
     paddingTop: theme.size.s,
     paddingBottom: theme.size.s,
     minHeight: `${FOOTER_HEIGHT_PX}px`,
