@@ -21,7 +21,11 @@ describe('getReportingShareIntegrationConfig', () => {
   const mockShareContext = {
     sharingData: { exportType: 'pngV2' },
   } as unknown as ShareContext;
-  const { shouldRender } = getReportingShareIntegrationConfig(mockApiClient, mockServices, mockShareContext);
+  const { shouldRender } = getReportingShareIntegrationConfig(
+    mockApiClient,
+    mockServices,
+    mockShareContext
+  );
 
   describe('shouldRender', () => {
     it('should return true when at least one supported export type is available', async () => {

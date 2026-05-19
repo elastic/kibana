@@ -206,8 +206,7 @@ export interface ExportShareParameters extends Record<string, unknown> {
  * @description Share integration implementation definition that build off exports within kibana,
  * reach out to the shared ux team before settling on using this interface
  */
-export interface ExportShareDerivatives
-  extends ShareIntegration<ExportShareParameters> {
+export interface ExportShareDerivatives extends ShareIntegration<ExportShareParameters> {
   groupId: 'exportDerivatives';
 }
 
