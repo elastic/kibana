@@ -752,7 +752,7 @@ describe('EndpointActionsClient', () => {
             parameters: { id: 'action-123' },
           })
         )
-      ).rejects.toThrow('Cancel does not support response action [cancel]');
+      ).rejects.toThrow('[cancel] response action cannot be canceled.');
     });
   });
 

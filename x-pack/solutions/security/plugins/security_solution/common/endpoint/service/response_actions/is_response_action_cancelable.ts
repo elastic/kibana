@@ -6,6 +6,7 @@
  */
 
 import type { DeepReadonly } from 'utility-types';
+import { isActionSupportedByAgentType } from './is_response_action_supported';
 import type { ResponseActionAgentType, ResponseActionsApiCommandNames } from './constants';
 import { RESPONSE_ACTION_API_COMMANDS_NAMES } from './constants';
 
@@ -97,7 +98,10 @@ export const isResponseActionCancelable = (
   command: ResponseActionsApiCommandNames,
   agentType: ResponseActionAgentType
 ): boolean => {
-  return CANCELABLE_RESPONSE_ACTIONS[command]?.[agentType] ?? false;
+  return (
+    (CANCELABLE_RESPONSE_ACTIONS[command]?.[agentType] ?? false) &&
+    isActionSupportedByAgentType(agentType, command, 'manual')
+  );
 };
 
 /**

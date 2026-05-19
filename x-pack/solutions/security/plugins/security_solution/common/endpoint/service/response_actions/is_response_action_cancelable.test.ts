@@ -71,9 +71,14 @@ describe('cancelable response actions util', () => {
     });
 
     describe('when agentType is `microsoft_defender_endpoint`', () => {
+      it.each(['isolate', 'unisolate', 'runscript'] as const)(
+        'should return true for command `%s`',
+        (command) => {
+          expect(isResponseActionCancelable(command, 'microsoft_defender_endpoint')).toBe(true);
+        }
+      );
+
       it.each([
-        'isolate',
-        'unisolate',
         'kill-process',
         'suspend-process',
         'running-processes',
@@ -81,13 +86,9 @@ describe('cancelable response actions util', () => {
         'execute',
         'upload',
         'scan',
-        'runscript',
+        'cancel',
         'memory-dump',
-      ] as const)('should return true for command `%s`', (command) => {
-        expect(isResponseActionCancelable(command, 'microsoft_defender_endpoint')).toBe(true);
-      });
-
-      it('should return false for command `cancel`', () => {
+      ])('should return false for command: %s', () => {
         expect(isResponseActionCancelable('cancel', 'microsoft_defender_endpoint')).toBe(false);
       });
     });
@@ -117,15 +118,7 @@ describe('cancelable response actions util', () => {
       expect(getListOfCancelableResponseActions('microsoft_defender_endpoint')).toEqual([
         'isolate',
         'unisolate',
-        'kill-process',
-        'suspend-process',
-        'running-processes',
-        'get-file',
-        'execute',
-        'upload',
-        'scan',
         'runscript',
-        'memory-dump',
       ]);
     });
   });
