@@ -200,11 +200,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
         warningExists: hasPartialCodeSignatureEntry(items),
       });
       const fields = getMalformedMatchesFields(items);
-      dispatch({
-        type: 'setMalformedMatchesValue',
-        warningExists: fields.length > 0,
-        fields,
-      });
+      dispatch({ type: 'setMalformedMatchesValue', fields });
       dispatch({
         type: 'setExceptionItems',
         items,

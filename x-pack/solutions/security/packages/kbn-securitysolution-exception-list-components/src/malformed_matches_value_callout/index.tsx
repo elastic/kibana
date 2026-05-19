@@ -27,12 +27,38 @@ export const MalformedMatchesValueCallout = () => {
           id="exceptionList-components.malformedMatchesValueCallout.body"
           defaultMessage="An entry uses {matches} with a value containing escape sequences (e.g. {escapedStar}, {escapedQuestion}). These will {literalCharacters}, not wildcard patterns (for example {escapedStar} matches a literal asterisk). If you intended an exact match, {changeOperator} to {is}."
           values={{
-            matches: <strong>{'matches'}</strong>,
-            is: <strong>{'is'}</strong>,
+            matches: (
+              <strong>
+                {i18n.translate('exceptionList-components.malformedMatchesValueCallout.matches', {
+                  defaultMessage: 'matches',
+                })}
+              </strong>
+            ),
+            is: (
+              <strong>
+                {i18n.translate('exceptionList-components.malformedMatchesValueCallout.is', {
+                  defaultMessage: 'is',
+                })}
+              </strong>
+            ),
             escapedStar: <code>{'\\*'}</code>,
             escapedQuestion: <code>{'\\?'}</code>,
-            literalCharacters: <strong>{'match literal characters'}</strong>,
-            changeOperator: <strong>{'change the operator'}</strong>,
+            literalCharacters: (
+              <strong>
+                {i18n.translate(
+                  'exceptionList-components.malformedMatchesValueCallout.literalCharacters',
+                  { defaultMessage: 'match literal characters' }
+                )}
+              </strong>
+            ),
+            changeOperator: (
+              <strong>
+                {i18n.translate(
+                  'exceptionList-components.malformedMatchesValueCallout.changeOperator',
+                  { defaultMessage: 'change the operator' }
+                )}
+              </strong>
+            ),
           }}
         />
       </p>

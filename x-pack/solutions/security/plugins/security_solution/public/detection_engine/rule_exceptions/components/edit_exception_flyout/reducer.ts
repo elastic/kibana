@@ -76,7 +76,6 @@ export type Action =
     }
   | {
       type: 'setMalformedMatchesValue';
-      warningExists: boolean;
       fields: string[];
     };
 
@@ -182,10 +181,10 @@ export const createExceptionItemsReducer =
         };
       }
       case 'setMalformedMatchesValue': {
-        const { warningExists, fields } = action;
+        const { fields } = action;
         return {
           ...state,
-          malformedMatchesValueExists: warningExists,
+          malformedMatchesValueExists: fields.length > 0,
           malformedMatchesFields: fields,
         };
       }
