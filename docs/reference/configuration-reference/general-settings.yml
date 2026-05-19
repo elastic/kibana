@@ -895,7 +895,7 @@ groups:
         default: 100000
         applies_to:
           - "stack: deprecated 8.3"
-          - "ech: unavailable"
+          - "ech: ga"
           - "self: ga"
         deprecation_details: "Deprecated in 8.3.0. Use `unifiedSearch.autocomplete.valueSuggestions.terminateAfter` instead."
         note: |
@@ -909,7 +909,7 @@ groups:
         default: 1000
         applies_to:
           - "stack: deprecated 8.3"
-          - "ech: unavailable"
+          - "ech: ga"
           - "self: ga"
         deprecation_details: "Deprecated in 8.3.0. Use `unifiedSearch.autocomplete.valueSuggestions.timeout` instead."
         note: |
@@ -922,7 +922,7 @@ groups:
         datatype: int
         default: 1000
         applies_to:
-          stack: ga
+          stack: ga 8.3
           ech: ga
           self: ga
 
@@ -932,7 +932,7 @@ groups:
         datatype: int
         default: 100000
         applies_to:
-          stack: ga
+          stack: ga 8.3
           ech: ga
           self: ga
         note: "To reload the logging settings, send a SIGHUP signal to {{kib}}. For more logging configuration options, see the [Configure Logging in {{kib}}](docs-content://deploy-manage/monitor/logging-configuration/kibana-logging.md) guide."
