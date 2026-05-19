@@ -97,6 +97,12 @@ export const WatchActionsDropdown: React.FunctionComponent<Props> = ({ settings,
       closePopover={() => setIsPopOverOpen(false)}
       panelPaddingSize="none"
       anchorPosition="downLeft"
+      aria-label={i18n.translate(
+        'xpack.watcher.sections.watchEdit.actions.addActionPopoverAriaLabel',
+        {
+          defaultMessage: 'Add action',
+        }
+      )}
     >
       <EuiContextMenuPanel
         items={actions.map((action, index) => {
