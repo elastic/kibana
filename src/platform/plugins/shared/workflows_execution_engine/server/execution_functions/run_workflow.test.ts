@@ -226,10 +226,9 @@ describe('runWorkflow', () => {
         workflowDefinition: { name: 'Test Workflow', steps: [] },
       });
 
-      it('calls getWorkflowExecutionById for queue drain but not for metering when meteringService is omitted', async () => {
+      it('loads execution after loop even when metering is omitted', async () => {
         await runWorkflowWithDefaults();
 
-        expect(workflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledTimes(1);
         expect(workflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledWith(
           workflowRunId,
           spaceId
@@ -363,10 +362,9 @@ describe('runWorkflow', () => {
         status: ExecutionStatus.COMPLETED,
       };
 
-      it('calls getWorkflowExecutionById for queue drain but not for metering when meteringService is omitted', async () => {
+      it('does not report metering when meteringService is omitted but still loads execution after loop', async () => {
         await runWorkflowWithDefaults();
 
-        expect(workflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledTimes(1);
         expect(workflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledWith(
           workflowRunId,
           spaceId
@@ -411,7 +409,7 @@ describe('runWorkflow', () => {
 
         expect(logger.warn).toHaveBeenCalledWith(
           expect.stringContaining(
-            `Failed to fetch execution for metering (execution=${workflowRunId}): fetch failed`
+            `Failed to fetch execution after loop (execution=${workflowRunId}): fetch failed`
           )
         );
         expect(reportWorkflowExecution).not.toHaveBeenCalled();
@@ -447,7 +445,7 @@ describe('runWorkflow', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       dependencies = mockContextDependencies();
-      mockGetWorkflowExecutionById = jest.fn();
+      mockGetWorkflowExecutionById = jest.fn().mockResolvedValue(null);
       mockGetLastFailedStepContext = jest.fn().mockReturnValue(undefined);
       mockGetWorkflowExecutionStatus = jest.fn();
       mockGetWorkflowExecution = jest.fn();
@@ -586,7 +584,7 @@ describe('runWorkflow', () => {
       expect(emittedPayload.error).not.toHaveProperty('stepName');
     });
 
-    it('queries execution for queue drain but not for metering when triggerEvents path completes without metering', async () => {
+    it('loads execution after loop when metering is omitted (post-loop fetch)', async () => {
       mockWorkflowExecutionLoop.mockResolvedValue(undefined);
       mockGetWorkflowExecutionStatus.mockReturnValue(ExecutionStatus.COMPLETED);
 
@@ -601,7 +599,6 @@ describe('runWorkflow', () => {
         workflowsExecutionEngine: mockWorkflowExecutionEngineLocal,
       });
 
-      expect(mockGetWorkflowExecutionById).toHaveBeenCalledTimes(1);
       expect(mockGetWorkflowExecutionById).toHaveBeenCalledWith(workflowRunId, spaceId);
     });
 

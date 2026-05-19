@@ -17,7 +17,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { ExecutionStatus, isTerminalStatus, WorkflowRepository } from '@kbn/workflows';
+import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
 import type {
   BulkScheduleWorkflowResult,
   ConcurrencySettings,
@@ -32,11 +32,11 @@ import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import { drainConcurrencyQueueSlots } from './concurrency/concurrency_queue_drainer';
 import type { WorkflowsExecutionEngineConfig } from './config';
 import {
+  cancelWorkflow,
   checkAndSkipIfExistingScheduledExecution,
   resumeWorkflow,
   runWorkflow,
 } from './execution_functions';
-import { cancelWaitingWorkflow } from './lib/cancel_waiting_workflow';
 import { checkLicense } from './lib/check_license';
 import { ensureWorkflowsDataStreamsRolledOver } from './lib/data_streams/ensure_data_streams_rolled_over';
 import { getAuthenticatedUser } from './lib/get_user';
@@ -50,7 +50,6 @@ import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execu
 import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import { WorkflowsMeteringService } from './metering/metering_service';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
-import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
 import type {
@@ -58,6 +57,7 @@ import type {
   CancelWorkflowExecution,
   ExecuteWorkflow,
   ExecuteWorkflowStep,
+  InternalResumeWorkflowExecution,
   ResumeWorkflowExecution,
   ScheduleWorkflow,
   TriggerEventsContract,
@@ -126,6 +126,8 @@ export class WorkflowsExecutionEnginePlugin
   >;
   private meteringService?: WorkflowsMeteringService;
   private initializePromise?: Promise<void>;
+  /** Set in start(); used by task runners to pass parent-resume into run/resume without exposing it on the public plugin contract. */
+  private internalResumeWorkflowExecutionHandler?: InternalResumeWorkflowExecution;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -247,6 +249,7 @@ export class WorkflowsExecutionEnginePlugin
                   dependencies,
                   workflowsExecutionEngine,
                   meteringService: this.meteringService,
+                  internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
                 });
               } catch (error) {
                 await resolveExhaustedWorkflowRunTask({
@@ -355,6 +358,7 @@ export class WorkflowsExecutionEnginePlugin
                   dependencies,
                   workflowsExecutionEngine,
                   meteringService: this.meteringService,
+                  internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
                 });
               } catch (error) {
                 await resolveExhaustedWorkflowRunTask({
@@ -599,6 +603,7 @@ export class WorkflowsExecutionEnginePlugin
                 dependencies,
                 workflowsExecutionEngine,
                 meteringService: this.meteringService,
+                internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
               });
 
               const scheduleType = rruleTriggers.length > 0 ? 'RRule' : 'interval/cron';
@@ -635,18 +640,6 @@ export class WorkflowsExecutionEnginePlugin
       workflowTaskManager,
       workflowExecutionRepository
     );
-
-    const nudgeTaskManagerBestEffort = async (workflowExecutionId: string, context: string) => {
-      try {
-        await workflowTaskManager.forceRunIdleTasks(workflowExecutionId);
-      } catch (err) {
-        this.logger.debug(
-          `Task Manager nudge failed (${context}) for execution ${workflowExecutionId}: ${
-            err instanceof Error ? err.message : String(err)
-          }`
-        );
-      }
-    };
 
     const dependencies: ContextDependencies = {
       ...this.setupDependencies,
@@ -909,6 +902,7 @@ export class WorkflowsExecutionEnginePlugin
           dependencies,
           workflowsExecutionEngine,
           meteringService: this.meteringService,
+          internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
         });
       } else {
         // Schedule a task: either we're not in a task, or this is a child execution (must not run inline)
@@ -1218,74 +1212,20 @@ export class WorkflowsExecutionEnginePlugin
     const cancelWorkflowExecution: CancelWorkflowExecution = async (
       workflowExecutionId,
       spaceId,
-      cancelRequest
+      schedulingRequest
     ) => {
       await checkLicense(plugins.licensing);
-
       await this.initialize(coreStart);
-      const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
+
+      await cancelWorkflow({
         workflowExecutionId,
-        spaceId
-      );
-
-      if (!workflowExecution) {
-        throw new WorkflowExecutionNotFoundError(workflowExecutionId);
-      }
-
-      if (isTerminalStatus(workflowExecution.status)) {
-        return;
-      }
-
-      if (workflowExecution.status === ExecutionStatus.WAITING_FOR_INPUT) {
-        await cancelWaitingWorkflow({
-          workflowExecution,
-          workflowExecutionRepository,
-          stepExecutionRepository: new StepExecutionRepository(
-            coreStart.elasticsearch.client.asInternalUser
-          ),
-        });
-        return;
-      }
-
-      const freesConcurrencySlotImmediately =
-        workflowExecution.status === ExecutionStatus.PENDING ||
-        workflowExecution.status === ExecutionStatus.QUEUED;
-
-      await workflowExecutionRepository.updateWorkflowExecution({
-        id: workflowExecution.id,
-        ...(freesConcurrencySlotImmediately ? { status: ExecutionStatus.CANCELLED } : {}),
-        cancelRequested: true,
-        cancellationReason: 'Cancelled by user',
-        cancelledAt: new Date().toISOString(),
-        cancelledBy: 'system', // TODO: set user if available
+        spaceId,
+        schedulingRequest,
+        workflowExecutionRepository,
+        workflowTaskManager,
+        taskManager: plugins.taskManager,
+        logger: this.logger,
       });
-      await nudgeTaskManagerBestEffort(workflowExecution.id, 'persisting cancel intent');
-
-      const concAfterCancel = workflowExecution.workflowDefinition?.settings?.concurrency;
-      if (
-        freesConcurrencySlotImmediately &&
-        concAfterCancel?.strategy === 'queue' &&
-        workflowExecution.concurrencyGroupKey &&
-        cancelRequest
-      ) {
-        try {
-          await drainConcurrencyQueueSlots({
-            workflowExecutionRepository,
-            taskManager: plugins.taskManager,
-            logger: this.logger,
-            spaceId: workflowExecution.spaceId,
-            concurrencyGroupKey: workflowExecution.concurrencyGroupKey,
-            concurrencySettings: concAfterCancel,
-            request: cancelRequest,
-          });
-        } catch (drainErr) {
-          this.logger.debug(
-            `Concurrency queue drain after cancel failed: ${
-              drainErr instanceof Error ? drainErr.message : String(drainErr)
-            }`
-          );
-        }
-      }
     };
 
     const cancelAllActiveWorkflowExecutions: CancelAllActiveWorkflowExecutions = async ({
@@ -1374,15 +1314,30 @@ export class WorkflowsExecutionEnginePlugin
         coreStart.elasticsearch.client
       );
 
-      await workflowExecutionRepository.updateWorkflowExecution({
-        id: executionId,
-        context: {
-          ...workflowExecution.context,
-          resumeInput: input,
-          resumedBy,
-          resumedAt: new Date().toISOString(),
-        },
-      });
+      const resumeContext = {
+        ...workflowExecution.context,
+        resumeInput: input,
+        resumedBy,
+        resumedAt: new Date().toISOString(),
+      };
+
+      await internalResumeWorkflowExecution(executionId, spaceId, resumeContext, request);
+
+      return { resumedBy };
+    };
+
+    const internalResumeWorkflowExecution: InternalResumeWorkflowExecution = async (
+      executionId,
+      spaceId,
+      context,
+      request
+    ) => {
+      if (context) {
+        await workflowExecutionRepository.updateWorkflowExecution({
+          id: executionId,
+          context,
+        });
+      }
 
       await workflowTaskManager.scheduleImmediateResume({
         executionId,
@@ -1390,11 +1345,14 @@ export class WorkflowsExecutionEnginePlugin
         fakeRequest: request,
       });
 
-      // Same idea as cancel: best-effort nudge TM so the resume task runs as soon as possible
-      await nudgeTaskManagerBestEffort(executionId, 'scheduling resume');
-
-      return { resumedBy };
+      // Same idea as cancel: nudge TM so the resume task runs as soon as possible
+      await workflowTaskManager.forceRunIdleTasks(executionId, {
+        spaceId,
+        fakeRequest: request,
+      });
     };
+
+    this.internalResumeWorkflowExecutionHandler = internalResumeWorkflowExecution;
 
     const workflowEventLoggerService = new WorkflowEventLoggerService(
       coreStart.dataStreams,
