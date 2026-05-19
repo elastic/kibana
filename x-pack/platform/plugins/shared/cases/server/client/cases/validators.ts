@@ -201,16 +201,18 @@ export const validateExtendedFieldsInRequest = async ({
   fieldDefinitionsService: FieldDefinitionsService;
 }): Promise<void> => {
   if (!updateReq.extended_fields) return;
-  if (updateReq.template === null) {
-    throw Boom.badRequest('extended_fields cannot be set when template is being cleared');
-  }
 
   const owner = originalCase.attributes.owner;
   const globalKeys = await resolveGlobalFieldKeys(owner, fieldDefinitionsService);
 
-  const templateId = updateReq.template?.id ?? originalCase.attributes.template?.id;
+  // null means the template is being cleared; undefined means it is not changing.
+  const templateId =
+    updateReq.template === null
+      ? null
+      : (updateReq.template?.id ?? originalCase.attributes.template?.id);
+
   if (!templateId) {
-    // No template — only global field keys are permitted
+    // No template (either never set or being cleared) — only global field keys are permitted.
     const invalidKeys = Object.keys(updateReq.extended_fields).filter((k) => !globalKeys.has(k));
     if (invalidKeys.length) {
       throw Boom.badRequest(

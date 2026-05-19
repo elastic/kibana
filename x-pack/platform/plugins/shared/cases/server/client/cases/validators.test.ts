@@ -881,7 +881,7 @@ describe('validators', () => {
       ).rejects.toThrow('Template tpl-1 has an invalid definition');
     });
 
-    it('throws when template is explicitly null and extended_fields are provided', async () => {
+    it('throws when template is explicitly null and non-global extended_fields are provided', async () => {
       await expect(
         validateExtendedFieldsInRequest({
           updateReq: {
@@ -894,7 +894,29 @@ describe('validators', () => {
           templatesService: templatesService as unknown as TemplatesService,
           fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
         })
-      ).rejects.toThrow('extended_fields cannot be set when template is being cleared');
+      ).rejects.toThrow(
+        'extended_fields keys [summary_as_keyword] are not global (renderInAllCases) field definitions'
+      );
+
+      expect(templatesService.getTemplate).not.toHaveBeenCalled();
+    });
+
+    it('allows global field keys when template is explicitly null', async () => {
+      fieldDefinitionsService = makeFieldDefinitionsService([{ name: 'summary', type: 'keyword' }]);
+
+      await expect(
+        validateExtendedFieldsInRequest({
+          updateReq: {
+            id: 'case-1',
+            version: '1',
+            template: null,
+            extended_fields: { summary_as_keyword: 'hi' },
+          },
+          originalCase: makeOriginalCase('tpl-from-original'),
+          templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
+        })
+      ).resolves.toBeUndefined();
 
       expect(templatesService.getTemplate).not.toHaveBeenCalled();
     });
