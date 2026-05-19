@@ -11,6 +11,7 @@ import { isBoom } from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { stripMetadata } from '@kbn/streams-schema';
+import { MATCH_LOOKBACK_MINUTES } from '../../../sig_events/rules/esql/common';
 import {
   STREAMS_RULE_CONSUMER,
   STREAMS_ESQL_RULE_TYPE_ID,
@@ -18,6 +19,8 @@ import {
   type IRulesManagementClient,
   type UpdateRuleBody,
 } from './rules_management_client';
+
+const V2_MATCH_LOOKBACK = `${MATCH_LOOKBACK_MINUTES}m` as const;
 
 /**
  * Wraps alerting_v2 `RulesClientApi` to implement IRulesManagementClient.
@@ -67,10 +70,7 @@ export class V2RulesAdapter implements IRulesManagementClient {
       .createRule({ data: toV2CreateBody(body), options: { id } })
       .catch((error) => {
         if (isBoom(error) && error.output.statusCode === 409) {
-          this.logger.debug(
-            `V2 create rule ${id} (from 404 fallback) got 409 — concurrent writer won, treating as success.`
-          );
-          return;
+          return this.updateRule(id, toUpdateBodyFromCreate(body));
         }
         throw error;
       });
@@ -102,7 +102,8 @@ export class V2RulesUnavailableAdapter implements IRulesManagementClient {
 
 /**
  * v1 tags arrive as `['streams', '<streamName>']`. v2 uses a single structured tag
- * `sigevents:stream:<streamName>` so the read side can filter `.rule-events` by stream.
+ * `sigevents:stream:<streamName>` for operations and future filtering; significant-events
+ * reads scope `.rule-events` by `rule.id` from stored query links, not by this tag.
  */
 function toV2Tags(v1Tags: string[]): string[] {
   const streamName = v1Tags.find((t) => t !== 'streams');
@@ -114,8 +115,9 @@ function toV2Tags(v1Tags: string[]): string[] {
  *
  * Each MATCH row corresponds to one source document; using `_id` makes the group hash
  * stable across overlapping evaluation windows (with `lookback: 2m` and `every: 1m`,
- * adjacent runs see the same documents). This mirrors v1's per-document deduplication
- * via `kibana.alert.uuid` derived from `_id`. Without an explicit grouping, v2 falls
+ * adjacent runs see the same documents). v1 additionally dedupes re-emissions via
+ * executor state; v2 may index the same breached row on each run until recovery.
+ * Without an explicit grouping, v2 falls
  * back to a per-row hash that includes the execution UUID, producing a fresh group on
  * every run and a duplicate signal per document per evaluation.
  *
@@ -134,7 +136,7 @@ function toV2CreateBody(body: CreateRuleBody) {
       tags: toV2Tags(body.tags),
     },
     time_field: body.params.timestampField,
-    schedule: { every: body.schedule.interval, lookback: '2m' },
+    schedule: { every: body.schedule.interval, lookback: V2_MATCH_LOOKBACK },
     grouping: { fields: [...V2_MATCH_GROUPING_FIELDS] },
     evaluation: {
       query: { base: stripMetadata(body.params.query, V2_QUERY_METADATA_TO_STRIP) },
@@ -148,7 +150,7 @@ function toV2UpdateBody(body: UpdateRuleBody) {
       name: body.name,
       tags: toV2Tags(body.tags),
     },
-    schedule: { every: body.schedule.interval, lookback: '2m' },
+    schedule: { every: body.schedule.interval, lookback: V2_MATCH_LOOKBACK },
     grouping: { fields: [...V2_MATCH_GROUPING_FIELDS] },
     evaluation: {
       query: { base: stripMetadata(body.params.query, V2_QUERY_METADATA_TO_STRIP) },

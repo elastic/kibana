@@ -14,6 +14,7 @@ import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository'
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
+import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { ContentClient } from '../lib/content/content_client';
 import type { AttachmentClient } from '../lib/streams/attachments/attachment_client';
 import type { QueryClient } from '../lib/streams/assets/query/query_client';
@@ -46,6 +47,7 @@ export interface RouteHandlerScopedClients extends SignificantEventsClients {
   inferenceClient: InferenceClient;
   contentClient: ContentClient;
   getQueryClient: () => Promise<QueryClient>;
+  getAlertingV2RulesClient: () => Promise<RulesClientApi | undefined>;
   licensing: LicensingPluginStart;
   uiSettingsClient: IUiSettingsClient;
   globalUiSettingsClient: IUiSettingsClient;

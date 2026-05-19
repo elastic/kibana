@@ -11,10 +11,7 @@ import type {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import {
-  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
-  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2,
-} from '@kbn/management-settings-ids';
+import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import {
   ensureMetadata,
@@ -54,6 +51,11 @@ import {
   type SigEventsTuningConfig,
 } from '../../../../../common/sig_events_tuning_config';
 import { getInferenceIdFromIndex } from '../../helpers/get_inference_id_from_index';
+import {
+  isSignificantEventsAlertingV2Active,
+  logAlertingV2PluginUnavailable,
+  readSignificantEventsAlertingV2UiEnabled,
+} from '../../../sig_events/significant_events_alerting_v2';
 
 export class QueryService {
   constructor(
@@ -79,26 +81,17 @@ export class QueryService {
     const uiSettings = core.uiSettings.asScopedToClient(soClient);
     const [isSignificantEventsEnabled, alertingV2UiEnabled] = await Promise.all([
       uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS).then((v) => v ?? false),
-      uiSettings
-        .get(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2)
-        .then((v) => v ?? false)
-        .catch((err) => {
-          this.logger.warn(
-            `Failed to read alerting v2 feature flag, defaulting to v1: ${
-              err instanceof Error ? err.message : String(err)
-            }`
-          );
-          return false;
-        }),
+      readSignificantEventsAlertingV2UiEnabled(uiSettings, this.logger),
     ]);
 
     if (alertingV2UiEnabled && !alertingV2RulesClient) {
-      this.logger.warn(
-        'Observability Streams alerting v2 UI setting is enabled but the alerting v2 plugin is not available; using v1 rules only.'
-      );
+      logAlertingV2PluginUnavailable(this.logger);
     }
 
-    const alertingV2Enabled = alertingV2UiEnabled && alertingV2RulesClient != null;
+    const alertingV2Enabled = isSignificantEventsAlertingV2Active(
+      alertingV2UiEnabled,
+      alertingV2RulesClient
+    );
 
     const existingInferenceId = await getInferenceIdFromIndex(
       esClient,

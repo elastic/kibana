@@ -30,6 +30,11 @@ export const V1_ALERTS_SOURCE: AlertsSource = {
   ruleIdField: 'kibana.alert.rule.uuid',
 };
 
+/**
+ * v2 breached signal rows only; v1 `.alerts-streams` indices do not use these fields.
+ * Histograms bucket on `@timestamp`, which v2 sets to rule evaluation write time, not
+ * source log time — see alerting_v2 `build_alert_events`.
+ */
 export const V2_ALERTS_SOURCE: AlertsSource = {
   index: '.rule-events',
   ruleIdField: 'rule.id',

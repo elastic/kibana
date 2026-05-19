@@ -25,6 +25,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { RulesClient, RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
+import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { StreamsConfig } from '../common/config';
 import {
   STREAMS_API_PRIVILEGES,
@@ -40,6 +41,11 @@ import { registerRules } from './lib/sig_events/rules/register_rules';
 import { getSigEventsTuningConfig } from './lib/sig_events/helpers/get_sig_events_tuning_config';
 import { AttachmentService } from './lib/streams/attachments/attachment_service';
 import { QueryService } from './lib/streams/assets/query/query_service';
+import {
+  isSignificantEventsAlertingV2Active,
+  logAlertingV2PluginUnavailable,
+  readSignificantEventsAlertingV2UiEnabled,
+} from './lib/sig_events/significant_events_alerting_v2';
 import { StreamsService } from './lib/streams/service';
 import { EbtTelemetryService, StatsTelemetryService } from './lib/telemetry';
 import { streamsRouteRepository } from './routes';
@@ -202,13 +208,19 @@ export class StreamsPlugin
         space,
       });
 
-      let queryClientPromise: Promise<QueryClient> | undefined;
-      const getQueryClient = (): Promise<QueryClient> => {
-        queryClientPromise ??= (async () => {
-          const rulesClient = await pluginsStart.alerting.getRulesClientWithRequestInSpace(
-            request,
-            DEFAULT_SPACE_ID,
-            rulesClientOptions
+      let significantEventsAlertingV2StatePromise:
+        | Promise<{
+            alertingV2UiEnabled: boolean;
+            alertingV2Active: boolean;
+            alertingV2RulesClient?: RulesClientApi;
+          }>
+        | undefined;
+
+      const getSignificantEventsAlertingV2State = () => {
+        significantEventsAlertingV2StatePromise ??= (async () => {
+          const alertingV2UiEnabled = await readSignificantEventsAlertingV2UiEnabled(
+            uiSettingsClient,
+            this.logger
           );
           const alertingV2RulesClient = pluginsStart.alertingVTwo
             ? await pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(
@@ -216,6 +228,32 @@ export class StreamsPlugin
                 DEFAULT_SPACE_ID
               )
             : undefined;
+
+          if (alertingV2UiEnabled && !alertingV2RulesClient) {
+            logAlertingV2PluginUnavailable(this.logger);
+          }
+
+          return {
+            alertingV2UiEnabled,
+            alertingV2Active: isSignificantEventsAlertingV2Active(
+              alertingV2UiEnabled,
+              alertingV2RulesClient
+            ),
+            alertingV2RulesClient,
+          };
+        })();
+        return significantEventsAlertingV2StatePromise;
+      };
+
+      let queryClientPromise: Promise<QueryClient> | undefined;
+      const getQueryClient = (): Promise<QueryClient> => {
+        queryClientPromise ??= (async () => {
+          const { alertingV2RulesClient } = await getSignificantEventsAlertingV2State();
+          const rulesClient = await pluginsStart.alerting.getRulesClientWithRequestInSpace(
+            request,
+            DEFAULT_SPACE_ID,
+            rulesClientOptions
+          );
           return queryService.getClient({
             esClient: coreStart.elasticsearch.client.asInternalUser,
             soClient,
@@ -225,6 +263,11 @@ export class StreamsPlugin
           });
         })();
         return queryClientPromise;
+      };
+
+      const getAlertingV2RulesClient = async (): Promise<RulesClientApi | undefined> => {
+        const { alertingV2RulesClient } = await getSignificantEventsAlertingV2State();
+        return alertingV2RulesClient;
       };
 
       const license = await licensing.getLicense();
@@ -256,6 +299,7 @@ export class StreamsPlugin
         inferenceClient,
         contentClient,
         getQueryClient,
+        getAlertingV2RulesClient,
         fieldsMetadataClient,
         licensing,
         uiSettingsClient,

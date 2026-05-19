@@ -157,9 +157,13 @@ export function registerFeatureFlags(
                 {
                   defaultMessage:
                     'Back significant event queries with Alerting v2 (kind: signal) instead of the custom streams.rules.esql rule type. ' +
-                    'Requires the write-alerting-v2-rules privilege. ' +
+                    'Requires the alertingVTwo plugin and the write-alerting-v2-rules privilege. ' +
+                    'SigEvents rules are stored in the default Kibana space regardless of the current space. ' +
                     'When disabled, rules are created via Alerting v1 (default). ' +
-                    'Note: turning this flag OFF after it was ON does not automatically remove orphaned v2 rules.',
+                    'Turning this ON does not migrate existing v1-backed queries — promote or change queries to create v2 rules. ' +
+                    'Reads and writes both require the plugin; flag-on without alertingVTwo keeps v1 rules and v1 alert indices. ' +
+                    'Under v2, the discovery histogram buckets on rule evaluation time, not source log time. ' +
+                    'Note: turning this flag OFF after it was ON does not automatically remove orphaned v2 rules; uninstalling alertingVTwo leaves v2 rules running until manual cleanup or a write that triggers dual cleanup.',
                 }
               ),
               type: 'boolean',

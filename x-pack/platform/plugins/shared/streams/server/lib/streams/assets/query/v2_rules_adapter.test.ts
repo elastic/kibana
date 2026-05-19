@@ -247,12 +247,17 @@ describe('V2RulesAdapter', () => {
       expect(lastCreateCall(mock).options).toEqual({ id: 'rule-1' });
     });
 
-    it('treats 409 on fallback create as success', async () => {
+    it('falls back to updateRule on 409 during fallback create', async () => {
       const mock = makeRulesClientMock();
-      mock.updateRule.mockRejectedValueOnce(Boom.notFound('missing'));
+      mock.updateRule
+        .mockRejectedValueOnce(Boom.notFound('missing'))
+        .mockResolvedValueOnce({} as never);
       mock.createRule.mockRejectedValueOnce(Boom.conflict('race'));
       const adapter = makeAdapter(mock);
       await expect(adapter.updateRule('rule-1', updateBody)).resolves.toBeUndefined();
+
+      expect(mock.createRule).toHaveBeenCalledTimes(1);
+      expect(mock.updateRule).toHaveBeenCalledTimes(2);
     });
 
     it('throws on non-404 errors', async () => {
