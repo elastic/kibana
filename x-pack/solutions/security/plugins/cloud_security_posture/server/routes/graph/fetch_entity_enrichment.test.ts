@@ -26,26 +26,19 @@ describe('fetchEntityEnrichment', () => {
   afterEach(() => jest.resetAllMocks());
 
   it('returns empty map when entityIds is empty', async () => {
-    const result = await fetchEntityEnrichment(esClient, logger, [], 'default');
+    const result = await fetchEntityEnrichment(esClient, logger, [], 'default', true);
     expect(result.size).toBe(0);
-    expect(esClient.asInternalUser.indices.exists).not.toHaveBeenCalled();
+    expect(esClient.asInternalUser.helpers.esql).not.toHaveBeenCalled();
   });
 
   it('returns empty map when entity store index does not exist', async () => {
-    (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
-      .fn()
-      .mockResolvedValueOnce(false);
-
-    const result = await fetchEntityEnrichment(esClient, logger, ['user:alice'], 'default');
+    const result = await fetchEntityEnrichment(esClient, logger, ['user:alice'], 'default', false);
     expect(result.size).toBe(0);
-    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('does not exist'));
+    // Existence is decided upstream; this function no longer calls indices.exists itself
+    expect(esClient.asInternalUser.helpers.esql).not.toHaveBeenCalled();
   });
 
   it('returns enrichment data for known entity IDs', async () => {
-    (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
-      .fn()
-      .mockResolvedValueOnce(true);
-
     (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
       toRecords: jest.fn().mockResolvedValue({
         records: [
@@ -61,7 +54,7 @@ describe('fetchEntityEnrichment', () => {
       }),
     });
 
-    const result = await fetchEntityEnrichment(esClient, logger, ['user:alice'], 'default');
+    const result = await fetchEntityEnrichment(esClient, logger, ['user:alice'], 'default', true);
     const enrichment = result.get('user:alice');
     expect(enrichment?.name).toBe('Alice');
     expect(enrichment?.type).toBe('user');
@@ -71,10 +64,6 @@ describe('fetchEntityEnrichment', () => {
   });
 
   it('builds typed sourceFields for user entities', async () => {
-    (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
-      .fn()
-      .mockResolvedValueOnce(true);
-
     (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
       toRecords: jest.fn().mockResolvedValue({
         records: [
@@ -101,7 +90,8 @@ describe('fetchEntityEnrichment', () => {
       esClient,
       logger,
       ['user:alice@example.com'],
-      'default'
+      'default',
+      true
     );
     const enrichment = result.get('user:alice@example.com');
     expect(enrichment?.sourceFields).toBeDefined();
@@ -115,10 +105,6 @@ describe('fetchEntityEnrichment', () => {
   });
 
   it('builds typed sourceFields for host entities', async () => {
-    (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
-      .fn()
-      .mockResolvedValueOnce(true);
-
     (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
       toRecords: jest.fn().mockResolvedValue({
         records: [
@@ -139,7 +125,13 @@ describe('fetchEntityEnrichment', () => {
       }),
     });
 
-    const result = await fetchEntityEnrichment(esClient, logger, ['host:my-server'], 'default');
+    const result = await fetchEntityEnrichment(
+      esClient,
+      logger,
+      ['host:my-server'],
+      'default',
+      true
+    );
     const enrichment = result.get('host:my-server');
     expect(enrichment?.sourceFields?.['host.id']).toBe('my-server');
     expect(enrichment?.sourceFields?.['host.name']).toBe('my-server');
@@ -149,10 +141,6 @@ describe('fetchEntityEnrichment', () => {
   });
 
   it('omits sourceFields entirely when all source columns are null', async () => {
-    (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
-      .fn()
-      .mockResolvedValueOnce(true);
-
     (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
       toRecords: jest.fn().mockResolvedValue({
         records: [
@@ -172,30 +160,22 @@ describe('fetchEntityEnrichment', () => {
       }),
     });
 
-    const result = await fetchEntityEnrichment(esClient, logger, ['user:alice'], 'default');
+    const result = await fetchEntityEnrichment(esClient, logger, ['user:alice'], 'default', true);
     const enrichment = result.get('user:alice');
     expect(enrichment?.sourceFields).toBeUndefined();
   });
 
   it('chunks 101 entity IDs into two queries', async () => {
-    (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
-      .fn()
-      .mockResolvedValue(true);
-
     (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
       toRecords: jest.fn().mockResolvedValue({ records: [] }),
     });
 
     const ids = Array.from({ length: 101 }, (_, i) => `user:entity${i}`);
-    await fetchEntityEnrichment(esClient, logger, ids, 'default');
+    await fetchEntityEnrichment(esClient, logger, ids, 'default', true);
     expect(esClient.asInternalUser.helpers.esql).toHaveBeenCalledTimes(2);
   });
 
   it('returns partial map when one chunk fails', async () => {
-    (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
-      .fn()
-      .mockResolvedValue(true);
-
     (esClient.asInternalUser.helpers.esql as unknown as jest.Mock)
       .mockReturnValueOnce({
         toRecords: jest.fn().mockRejectedValue(new Error('ES error')),
@@ -205,17 +185,13 @@ describe('fetchEntityEnrichment', () => {
       });
 
     const ids = Array.from({ length: 101 }, (_, i) => `user:entity${i}`);
-    const result = await fetchEntityEnrichment(esClient, logger, ids, 'default');
+    const result = await fetchEntityEnrichment(esClient, logger, ids, 'default', true);
     // Should not throw, should return partial (empty) map
     expect(result).toBeInstanceOf(Map);
     expect(logger.warn).toHaveBeenCalled();
   });
 
   it('handles array host.ip values', async () => {
-    (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
-      .fn()
-      .mockResolvedValueOnce(true);
-
     (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
       toRecords: jest.fn().mockResolvedValue({
         records: [
@@ -231,26 +207,11 @@ describe('fetchEntityEnrichment', () => {
       }),
     });
 
-    const result = await fetchEntityEnrichment(esClient, logger, ['host:myhost'], 'default');
+    const result = await fetchEntityEnrichment(esClient, logger, ['host:myhost'], 'default', true);
     expect(result.get('host:myhost')?.hostIps).toEqual(['192.168.1.1', '10.0.0.1']);
   });
 
-  it('returns empty map when index existence check throws', async () => {
-    (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
-      .fn()
-      .mockRejectedValueOnce(new Error('Network error'));
-
-    const result = await fetchEntityEnrichment(esClient, logger, ['user:alice'], 'default');
-    expect(result.size).toBe(0);
-    // checkIfEntitiesIndexExists logs via logger.error on unexpected errors
-    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Network error'));
-  });
-
   it('first-seen value wins when entity.id appears twice', async () => {
-    (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
-      .fn()
-      .mockResolvedValueOnce(true);
-
     (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
       toRecords: jest.fn().mockResolvedValue({
         records: [
@@ -274,20 +235,16 @@ describe('fetchEntityEnrichment', () => {
       }),
     });
 
-    const result = await fetchEntityEnrichment(esClient, logger, ['user:alice'], 'default');
+    const result = await fetchEntityEnrichment(esClient, logger, ['user:alice'], 'default', true);
     expect(result.get('user:alice')?.name).toBe('First Alice');
   });
 
   it('uses parameterized query format', async () => {
-    (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
-      .fn()
-      .mockResolvedValueOnce(true);
-
     (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
       toRecords: jest.fn().mockResolvedValue({ records: [] }),
     });
 
-    await fetchEntityEnrichment(esClient, logger, ['user:alice'], 'default');
+    await fetchEntityEnrichment(esClient, logger, ['user:alice'], 'default', true);
 
     const esqlCallArgs = (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mock
       .calls[0];

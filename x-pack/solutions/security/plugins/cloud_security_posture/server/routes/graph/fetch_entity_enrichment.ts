@@ -8,7 +8,6 @@
 import { chunk } from 'lodash';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
-import { checkIfEntitiesIndexExists } from './utils';
 import { GRAPH_ACTOR_EUID_SOURCE_FIELDS, TYPED_ENTITY_PREFIXES } from './constants';
 
 export interface EntityEnrichmentFields {
@@ -85,26 +84,21 @@ const buildSourceFields = (
  * entity store, bypassing any CPS routing that might redirect asCurrentUser queries to
  * remote indices. The parent route is already authz-gated, so this is safe.
  *
- * Returns an empty map when the entity store index does not exist or on error.
+ * `entityStoreIndexExists` is the result of a single upstream existence check
+ * (see fetchGraph). Returns an empty map when the index is absent or no IDs were given.
  */
 export const fetchEntityEnrichment = async (
   esClient: IScopedClusterClient,
   logger: Logger,
   entityIds: string[],
-  spaceId: string
+  spaceId: string,
+  entityStoreIndexExists: boolean
 ): Promise<Map<string, EntityEnrichmentFields>> => {
-  if (entityIds.length === 0) {
+  if (entityIds.length === 0 || !entityStoreIndexExists) {
     return new Map();
   }
 
   const indexName = getEntitiesLatestIndexName(spaceId);
-
-  const exists = await checkIfEntitiesIndexExists(esClient, logger, spaceId);
-  if (!exists) {
-    logger.debug(`Entity store index does not exist for space [${spaceId}], skipping enrichment`);
-    return new Map();
-  }
-
   const result = new Map<string, EntityEnrichmentFields>();
 
   // Chunks run in parallel. If one chunk fails, its entities get availableInEntityStore=false

@@ -16,7 +16,6 @@ import {
   TYPED_ENTITY_PREFIXES,
 } from './constants';
 import {
-  checkIfEntitiesIndexExists,
   concatJsonObjectPropertyBool,
   concatJsonObjectPropertyString,
   concatJsonObjectPropertyEsqlExprSafe,
@@ -201,21 +200,19 @@ export const fetchEntityRelationships = async ({
   logger,
   entityIds,
   spaceId,
+  entityStoreIndexExists,
 }: {
   esClient: IScopedClusterClient;
   logger: Logger;
   entityIds: EntityId[];
   spaceId: string;
+  entityStoreIndexExists: boolean;
 }): Promise<EsqlToRecords<RelationshipEdge>> => {
-  const indexName = getEntitiesLatestIndexName(spaceId);
-
-  // Relationships require the entity store index to exist
-  const indexExists = await checkIfEntitiesIndexExists(esClient, logger, spaceId);
-  if (!indexExists) {
-    logger.debug(`Entities index [${indexName}] does not exist, skipping relationship fetch`);
+  if (!entityStoreIndexExists) {
     return { columns: [], records: [] };
   }
 
+  const indexName = getEntitiesLatestIndexName(spaceId);
   logger.trace(`Fetching relationships from index [${indexName}] for ${entityIds.length} entities`);
 
   const query = buildRelationshipsEsqlQuery({
@@ -227,26 +224,17 @@ export const fetchEntityRelationships = async ({
   logger.trace(`Relationships ES|QL query: ${query}`);
   logger.trace(`Relationships filter: ${JSON.stringify(filter)}`);
 
-  try {
-    const response = await esClient.asCurrentUser.helpers
-      .esql({
-        columnar: false,
-        filter,
-        query,
-      })
-      .toRecords<RelationshipEdge>();
+  const response = await esClient.asCurrentUser.helpers
+    .esql({
+      columnar: false,
+      filter,
+      query,
+    })
+    .toRecords<RelationshipEdge>();
 
-    logger.trace(`Fetched [${response.records.length}] relationship records`);
+  logger.trace(`Fetched [${response.records.length}] relationship records`);
 
-    return response;
-  } catch (error) {
-    // If the index doesn't exist, return empty result
-    if (error.statusCode === 404) {
-      logger.debug(`Entities index ${indexName} does not exist, skipping relationship fetch`);
-      return { columns: [], records: [] };
-    }
-    throw error;
-  }
+  return response;
 };
 
 export const fetchEntities = async ({
@@ -254,13 +242,15 @@ export const fetchEntities = async ({
   logger,
   entityIds,
   spaceId,
+  entityStoreIndexExists,
 }: {
   esClient: IScopedClusterClient;
   logger: Logger;
   entityIds: EntityId[];
   spaceId: string;
+  entityStoreIndexExists: boolean;
 }): Promise<EsqlToRecords<EntityRecord>> => {
-  if (entityIds.length === 0) {
+  if (entityIds.length === 0 || !entityStoreIndexExists) {
     return { columns: [], records: [] };
   }
 
@@ -304,26 +294,17 @@ export const fetchEntities = async ({
     | KEEP id, name, type, sub_type, docData`;
   logger.trace(`Entities ES|QL query: ${esqlQuery}`);
 
-  try {
-    const response = await esClient.asCurrentUser.helpers
-      .esql({
-        columnar: false,
-        query: esqlQuery,
-        // @ts-ignore - types are not up to date
-        params: [...entityIds.map((entity, idx) => ({ [`entityId${idx}`]: entity.id }))],
-      })
-      .toRecords<EntityRecord>();
+  const response = await esClient.asCurrentUser.helpers
+    .esql({
+      columnar: false,
+      query: esqlQuery,
+      // @ts-ignore - types are not up to date
+      params: [...entityIds.map((entity, idx) => ({ [`entityId${idx}`]: entity.id }))],
+    })
+    .toRecords<EntityRecord>();
 
-    logger.trace(`Fetched [${response.records.length}] entity records`);
-    return response;
-  } catch (error) {
-    // If the index doesn't exist, return empty result
-    if (error.statusCode === 404) {
-      logger.debug(`Entities index ${indexName} does not exist, skipping entities fetch`);
-      return { columns: [], records: [] };
-    }
-    throw error;
-  }
+  logger.trace(`Fetched [${response.records.length}] entity records`);
+  return response;
 };
 
 const buildSourceFieldsJson = (fields: EuidSourceFields): string => {

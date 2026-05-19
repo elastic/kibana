@@ -17,6 +17,7 @@ import {
   enrichEntityRecords,
 } from './fetch_entity_relationships_graph';
 import { fetchEntityEnrichment, type EntityEnrichmentFields } from './fetch_entity_enrichment';
+import { checkIfEntitiesIndexExists } from './utils';
 import type {
   EsQuery,
   EntityId,
@@ -77,7 +78,12 @@ export const fetchGraph = async ({
     !!esQuery?.bool.should?.length ||
     !!esQuery?.bool.must_not?.length;
 
-  const eventsPromise =
+  const hasEntityIds = entityIds && entityIds.length > 0;
+
+  // Single existence check upfront, reused by all entity-store-backed fetches and the
+  // downstream enrichment query. Runs in parallel with the events fetch since events
+  // hit logs/alerts indices and don't depend on the result.
+  const [eventsResult, entityStoreIndexExists] = await Promise.all([
     hasOriginEventIds || hasEsQuery
       ? fetchEvents({
           esClient,
@@ -94,17 +100,18 @@ export const fetchGraph = async ({
           logger.error(`Failed to fetch events: ${error.message}`);
           throw error;
         })
-      : Promise.resolve(emptyEventsResult);
+      : Promise.resolve(emptyEventsResult),
+    checkIfEntitiesIndexExists(esClient, logger, spaceId),
+  ]);
 
-  // Optionally fetch relationships in parallel when entityIds are provided
-  const hasEntityIds = entityIds && entityIds.length > 0;
-
+  // Relationships and pinned entities both require the entity store index.
   const relationshipsPromise = hasEntityIds
     ? fetchEntityRelationships({
         esClient,
         logger,
         entityIds,
         spaceId,
+        entityStoreIndexExists,
       }).catch((error) => {
         logger.error(`Failed to fetch entity relationships: ${error.message}`);
         throw error;
@@ -119,15 +126,14 @@ export const fetchGraph = async ({
         logger,
         entityIds,
         spaceId,
+        entityStoreIndexExists,
       }).catch((error) => {
         logger.error(`Failed to fetch entities: ${error.message}`);
         throw error;
       })
     : Promise.resolve(emptyEntitiesResult);
 
-  // Wait for all in parallel
-  const [eventsResult, relationshipsResult, entitiesResult] = await Promise.all([
-    eventsPromise,
+  const [relationshipsResult, entitiesResult] = await Promise.all([
     relationshipsPromise,
     entitiesPromise,
   ]);
@@ -154,7 +160,13 @@ export const fetchGraph = async ({
 
   const enrichmentMap =
     allEntityIds.size > 0
-      ? await fetchEntityEnrichment(esClient, logger, [...allEntityIds], spaceId)
+      ? await fetchEntityEnrichment(
+          esClient,
+          logger,
+          [...allEntityIds],
+          spaceId,
+          entityStoreIndexExists
+        )
       : new Map<string, EntityEnrichmentFields>();
 
   return {

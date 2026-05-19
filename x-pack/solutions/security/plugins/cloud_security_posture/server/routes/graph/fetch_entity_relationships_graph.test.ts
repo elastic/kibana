@@ -39,11 +39,6 @@ describe('fetchEntityRelationships', () => {
     it('should NOT use LOOKUP JOIN and should query when entities index exists', async () => {
       const indexName = getEntitiesLatestIndexName('default');
 
-      // Mock index exists check
-      (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
-        .fn()
-        .mockResolvedValueOnce(true);
-
       const toRecordsMock = jest.fn().mockResolvedValue({ records: [] });
       esClient.asCurrentUser.helpers.esql.mockReturnValue({
         toRecords: toRecordsMock,
@@ -58,6 +53,7 @@ describe('fetchEntityRelationships', () => {
         logger,
         entityIds,
         spaceId: 'default',
+        entityStoreIndexExists: true,
       });
 
       expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
@@ -71,11 +67,6 @@ describe('fetchEntityRelationships', () => {
     });
 
     it('should return empty result when entities index does not exist', async () => {
-      // Mock index does NOT exist
-      (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
-        .fn()
-        .mockResolvedValueOnce(false);
-
       const entityIds: EntityId[] = [{ id: 'entity-1', isOrigin: false }];
 
       const result = await fetchEntityRelationships({
@@ -83,24 +74,17 @@ describe('fetchEntityRelationships', () => {
         logger,
         entityIds,
         spaceId: 'default',
+        entityStoreIndexExists: false,
       });
 
       // Should not call ESQL when index does not exist
       expect(esClient.asCurrentUser.helpers.esql).not.toHaveBeenCalled();
       expect(result).toEqual({ columns: [], records: [] });
-      expect(logger.debug).toHaveBeenCalledWith(
-        expect.stringContaining('does not exist, skipping relationship fetch')
-      );
     });
   });
 
   describe('DSL filter building', () => {
     it('should build correct terms filter from entityIds', async () => {
-      // Mock index exists
-      (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
-        .fn()
-        .mockResolvedValueOnce(true);
-
       const toRecordsMock = jest.fn().mockResolvedValue({ records: [] });
       esClient.asCurrentUser.helpers.esql.mockReturnValue({
         toRecords: toRecordsMock,
@@ -119,6 +103,7 @@ describe('fetchEntityRelationships', () => {
         logger,
         entityIds,
         spaceId: 'default',
+        entityStoreIndexExists: true,
       });
 
       expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
@@ -154,11 +139,6 @@ describe('fetchEntityRelationships', () => {
     });
 
     it('should handle empty entityIds array', async () => {
-      // Mock index exists
-      (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
-        .fn()
-        .mockResolvedValueOnce(true);
-
       const toRecordsMock = jest.fn().mockResolvedValue({ records: [] });
       esClient.asCurrentUser.helpers.esql.mockReturnValue({
         toRecords: toRecordsMock,
@@ -173,6 +153,7 @@ describe('fetchEntityRelationships', () => {
         logger,
         entityIds,
         spaceId: 'default',
+        entityStoreIndexExists: true,
       });
 
       expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
@@ -184,41 +165,7 @@ describe('fetchEntityRelationships', () => {
   });
 
   describe('error handling', () => {
-    it('should return empty result when ESQL query returns 404', async () => {
-      // Mock index exists (passes the existence check)
-      (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
-        .fn()
-        .mockResolvedValueOnce(true);
-
-      // Mock ESQL query throwing 404 error
-      esClient.asCurrentUser.helpers.esql.mockReturnValue({
-        toRecords: jest.fn().mockRejectedValue({ statusCode: 404 }),
-        toArrowTable: jest.fn(),
-        toArrowReader: jest.fn(),
-      });
-
-      const entityIds: EntityId[] = [{ id: 'entity-1', isOrigin: true }];
-
-      const result = await fetchEntityRelationships({
-        esClient,
-        logger,
-        entityIds,
-        spaceId: 'default',
-      });
-
-      expect(result).toEqual({ columns: [], records: [] });
-      expect(logger.debug).toHaveBeenCalledWith(
-        expect.stringContaining('does not exist, skipping relationship fetch')
-      );
-    });
-
-    it('should throw error on non-404 errors', async () => {
-      // Mock index exists
-      (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
-        .fn()
-        .mockResolvedValueOnce(true);
-
-      // Mock ESQL query throwing generic error
+    it('should propagate ESQL errors to the caller', async () => {
       const genericError = new Error('Connection refused');
       esClient.asCurrentUser.helpers.esql.mockReturnValue({
         toRecords: jest.fn().mockRejectedValue(genericError),
@@ -234,6 +181,7 @@ describe('fetchEntityRelationships', () => {
           logger,
           entityIds,
           spaceId: 'default',
+          entityStoreIndexExists: true,
         })
       ).rejects.toThrow('Connection refused');
     });
@@ -241,11 +189,6 @@ describe('fetchEntityRelationships', () => {
 
   describe('query structure', () => {
     it('should include actorsDocData and targetsDocData in query without LOOKUP JOIN', async () => {
-      // Mock index exists
-      (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
-        .fn()
-        .mockResolvedValueOnce(true);
-
       const toRecordsMock = jest.fn().mockResolvedValue({ records: [] });
       esClient.asCurrentUser.helpers.esql.mockReturnValue({
         toRecords: toRecordsMock,
@@ -260,6 +203,7 @@ describe('fetchEntityRelationships', () => {
         logger,
         entityIds,
         spaceId: 'default',
+        entityStoreIndexExists: true,
       });
 
       const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
