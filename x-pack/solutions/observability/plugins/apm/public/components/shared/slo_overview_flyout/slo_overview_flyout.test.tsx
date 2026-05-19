@@ -413,13 +413,48 @@ describe('SloOverviewFlyout', () => {
 
     renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
 
-    expect(screen.getByTestId('apmSloNameLink')).toBeInTheDocument();
+    const nameCell = screen.getByTestId('apmSloNameCell');
+    expect(nameCell).toBeInTheDocument();
+    // Name cell is no longer an interactive link; clicking it should not open SLO details.
+    expect(nameCell.tagName).not.toBe('A');
+    expect(nameCell.tagName).not.toBe('BUTTON');
 
-    const sloLink = screen.getByTestId('apmSloNameLink');
-    fireEvent.mouseOver(sloLink);
+    fireEvent.mouseOver(nameCell);
 
     await waitFor(() => {
       expect(screen.getByRole('tooltip')).toHaveTextContent(sloName);
+    });
+  });
+
+  it('renders the expand button with maximize icon by default and switches to minimize when expanded', async () => {
+    const mockSlos = [createMockSlo({ id: 'slo-1', name: 'Test SLO', instanceId: '*' })];
+
+    mockUseFetcher.mockReturnValue({
+      data: {
+        results: mockSlos,
+        total: 1,
+        page: 1,
+        perPage: 10,
+        activeAlerts: {},
+        statusCounts: { violated: 0, degrading: 0, healthy: 1, noData: 0 },
+      },
+      status: FETCH_STATUS.SUCCESS,
+      refetch: jest.fn(),
+    });
+
+    renderWithIntl(<SloOverviewFlyout serviceName="test-service" onClose={mockOnClose} />);
+
+    const expandButton = screen.getByTestId('apmSloExpandButton');
+    expect(expandButton).toBeInTheDocument();
+    expect(expandButton).toHaveAttribute('aria-label', 'Open SLO details');
+
+    fireEvent.click(expandButton);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('apmSloExpandButton')).toHaveAttribute(
+        'aria-label',
+        'Close SLO details'
+      );
     });
   });
 
