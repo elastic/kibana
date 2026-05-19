@@ -51,7 +51,6 @@ const AgentsPolicyLinkComponent: React.FC<AgentsPolicyLinkProps> = ({ policyId }
   );
 
   return (
-    // eslint-disable-next-line @elastic/eui/href-or-on-click
     <EuiLink href={href} onClick={handleClick} css={euiLinkCss}>
       {data?.name ?? policyId}
     </EuiLink>

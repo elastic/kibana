@@ -81,7 +81,7 @@ export const FooterLinkItem = React.memo<FooterLinkItemProps>(
           <EuiText size="xs">{description}</EuiText>
           <EuiSpacer size="m" />
           <EuiText size="xs">
-            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+            {}
             <EuiLink
               data-test-subj="footerLinkItem"
               onClick={onClickWithReport}

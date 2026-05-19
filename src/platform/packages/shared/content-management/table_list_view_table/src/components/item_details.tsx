@@ -75,7 +75,7 @@ export function ItemDetails<T extends UserContentCommonSchema>({
 
     return (
       <>
-        {/* eslint-disable-next-line  @elastic/eui/href-or-on-click */}
+        {}
         <EuiLink
           href={getDetailViewLink?.(item)}
           onClick={onClickTitleHandler}
