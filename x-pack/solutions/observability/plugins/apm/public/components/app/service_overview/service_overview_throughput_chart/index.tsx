@@ -8,7 +8,7 @@
 import { EuiPanel, EuiTitle, EuiIconTip, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
-import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
+
 import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
@@ -220,7 +220,6 @@ export function ServiceOverviewThroughputChart({
                   sortDirection: 'DESC',
                 }}
                 ebt={{
-                  action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
                   element: APM_CHART_EBT_ELEMENTS.THROUGHPUT,
                 }}
               />

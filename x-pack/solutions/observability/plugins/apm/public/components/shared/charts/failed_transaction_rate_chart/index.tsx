@@ -7,7 +7,7 @@
 
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
+
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
@@ -214,7 +214,6 @@ export function FailedTransactionRateChart({ height, showAnnotations = true, kue
                   sortDirection: 'DESC',
                 }}
                 ebt={{
-                  action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
                   element: APM_CHART_EBT_ELEMENTS.FAILED_TRANSACTION_RATE,
                 }}
               />

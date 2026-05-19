@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
 import type { SavedSearchTableConfig } from '@kbn/saved-search-component';
-import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
+
 import { TransactionSummary } from '../../../shared/summary/transaction_summary';
 import { TransactionActionMenu } from '../../../shared/transaction_action_menu/transaction_action_menu';
 import { MaybeViewTraceLink } from './maybe_view_trace_link';
@@ -203,7 +203,6 @@ export function WaterfallWithSummary<TSample extends {}>({
                     sortDirection: 'ASC',
                   }}
                   ebt={{
-                    action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
                     element: TRACE_WATERFALL_EBT_ELEMENTS.WATERFALL_HEADER,
                   }}
                 />

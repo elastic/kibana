@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
+
 import { isTimeComparison } from '../../time_comparison/get_comparison_options';
 import { getLatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
@@ -170,7 +170,6 @@ export function LatencyChart({ height, kuery }: Props) {
                     sortDirection: 'DESC',
                   }}
                   ebt={{
-                    action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
                     element: APM_CHART_EBT_ELEMENTS.LATENCY,
                   }}
                 />
