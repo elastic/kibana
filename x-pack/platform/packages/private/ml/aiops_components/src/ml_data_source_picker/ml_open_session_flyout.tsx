@@ -94,9 +94,12 @@ export const MlOpenSessionFlyout: FC<MlOpenSessionFlyoutProps> = ({
             {
               type: SavedSearchType,
               getIconForSavedObject: () => 'discoverApp',
-              name: i18n.translate('xpack.aiops.dataSourcePicker.openSessionFlyout.savedObjectName', {
-                defaultMessage: 'Discover session',
-              }),
+              name: i18n.translate(
+                'xpack.aiops.dataSourcePicker.openSessionFlyout.savedObjectName',
+                {
+                  defaultMessage: 'Discover session',
+                }
+              ),
             },
           ]}
           onChoose={(id) => {
