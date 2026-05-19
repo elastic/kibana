@@ -12,6 +12,8 @@ Answer all six using evidence gathered from your parallel research tasks:
 
 6. _"Am I threading data around the problem, or fixing the layer that owns it?"_ — When the root cause is a data model change (e.g., which fields an entity exposes), fix the layer that constructs queries/filters from that data, not the component tree above it. Passing a "correct" value down via props is a band-aid; the right fix lives in the shared utility that builds the query from the data record. Before writing a fix, check if such a utility already exists.
 
+7. _"Does the mutation return the updated object?"_ — If yes, call `setState(result)` in `onSuccess` directly — no extra network call needed. If no, check whether the API can be made to return it (often a one-line change). Only fall back to `queryClient.invalidateQueries` if the mutation truly cannot return the updated state. **Never** call initialization or setup functions in `onSuccess` — read every function's implementation before using it there.
+
 ## Root Cause Analysis Template
 
 Present your analysis and plan to the user in the following format:

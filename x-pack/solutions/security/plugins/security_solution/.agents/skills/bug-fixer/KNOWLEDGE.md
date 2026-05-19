@@ -30,3 +30,8 @@ Generic rules extracted from these incidents live in `SKILL.md` (Phase 3 self-ch
 - **Date**: 2026-04-16
 - **Incident**: The agent added an initialization function as a direct import into a route handler owned by a different plugin. The team replaced it with a dedicated endpoint called from the owning plugin's install flow. The agent also placed the logic in a generic enable route (covers both install and re-enable) when it should only run during first-time install.
 - **Generic rule**: → SKILL.md Phase 4, SELF-CHECK #3 items 3–4; classification-guide.md Pre-Fix Checklist items 3–4
+
+### Exception list mutation — initializeList misuse in onSuccess (PR #269186)
+- **Date**: 2026-05-19
+- **Incident**: Fixing a `stale_data_after_mutation` bug, the agent called `initializeList` inside the mutation's `onSuccess` callback. The reviewer (denar50) pointed out that `initializeList` does more than refetch — it has setup side effects. The correct fix was to make `updateList` (in `public/exceptions/api/list_api.ts`) return the updated list object, then call `setList(updated)` directly in `onSuccess`. The agent chose a function that seemed to refresh state without reading its implementation.
+- **Generic rule**: → classification-guide.md Fix Strategies `stale_data_after_mutation`; fix-workflow.md SELF-CHECK #3 question 7

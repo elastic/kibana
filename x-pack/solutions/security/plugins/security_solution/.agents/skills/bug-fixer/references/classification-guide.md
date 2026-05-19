@@ -46,7 +46,7 @@ When fix touches both server and client, write tests at **both** layers.
 | Pattern | Fix Strategy |
 |---------|-------------|
 | `missing_permission_check` | Add `requiredPrivileges` or `authorization.ensureAuthorized()` to the missing code path |
-| `stale_data_after_mutation` | Add `queryClient.invalidateQueries([...])` in mutation's `onSuccess` callback |
+| `stale_data_after_mutation` | **Preferred — use mutation return value directly:** if the API returns the updated object, call `setState(result)` in `onSuccess` — no extra network round-trip. **Fallback — cache invalidation:** if the mutation returns nothing and cannot be made to return the updated object, add `queryClient.invalidateQueries([...])` in `onSuccess`. **Never** call initialization or setup functions (e.g. `initializeList`) in `onSuccess` — these have side effects beyond refetching. Before using any function in `onSuccess`, read its implementation. |
 | `hardcoded_size_limit` | Replace `size: N` with `search_after`, `scroll`, or `findAll` loop |
 | `ui_restriction_without_api_enforcement` | Add server-side authorization check to the API route handler |
 | `event_propagation` | Add `e.stopPropagation()` at top of inner element's click handler |
