@@ -210,7 +210,7 @@ describe('aiClassifyStepDefinition', () => {
         'test-connector-id',
         mockInference,
         expect.any(Object),
-        { featureId: 'ai.classify', searchInferenceEndpoints: undefined }
+        { featureId: 'ai_classify', searchInferenceEndpoints: undefined }
       );
       expect(mockInference.getChatModel).toHaveBeenCalledWith({
         connectorId: 'resolved-connector-id',
@@ -492,7 +492,7 @@ describe('aiClassifyStepDefinition', () => {
         'test-connector-id',
         mockInference,
         expect.any(Object),
-        { featureId: 'ai.classify', searchInferenceEndpoints: undefined }
+        { featureId: 'ai_classify', searchInferenceEndpoints: undefined }
       );
     });
 
@@ -506,7 +506,7 @@ describe('aiClassifyStepDefinition', () => {
         undefined,
         mockInference,
         expect.any(Object),
-        { featureId: 'ai.classify', searchInferenceEndpoints: undefined }
+        { featureId: 'ai_classify', searchInferenceEndpoints: undefined }
       );
     });
 
@@ -622,7 +622,7 @@ describe('aiClassifyStepDefinition', () => {
         'test-connector-id',
         mockInference,
         fakeRequest,
-        { featureId: 'ai.classify', searchInferenceEndpoints: undefined }
+        { featureId: 'ai_classify', searchInferenceEndpoints: undefined }
       );
       expect(mockInference.getChatModel).toHaveBeenCalledWith(
         expect.objectContaining({
