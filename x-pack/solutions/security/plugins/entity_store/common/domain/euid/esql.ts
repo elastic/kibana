@@ -14,7 +14,12 @@ import type {
 } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
-import { esqlIsNotNullOrEmpty, esqlIsNullOrEmpty, esqlPresentColumnName } from '../../esql/strings';
+import {
+  esqlIsNotNullOrEmpty,
+  esqlIsNullOrEmpty,
+  esqlPresentOrNullColumnName,
+  esqlPresentColumnName,
+} from '../../esql/strings';
 import {
   applyWhenConditionTrueSetFields,
   documentPassesCalculatedIdentityPipelineGate,
@@ -312,20 +317,21 @@ function collectRankingFields(
 
 function buildPresentPrelude(presentFields: Set<string>): string | null {
   if (presentFields.size === 0) return null;
-  const assignments = [...presentFields]
+  const presentAssignments = [...presentFields]
     .map((f) => `${esqlPresentColumnName(f)} = ${esqlIsNotNullOrEmpty(f)}`)
     .join(',\n ');
-  return `| EVAL ${assignments}`;
+  const nullableAssignments = [...presentFields]
+    .map((f) => `${esqlPresentOrNullColumnName(f)} = CASE(${esqlPresentColumnName(f)}, ${f})`)
+    .join(',\n ');
+  return `| EVAL ${presentAssignments},\n ${nullableAssignments}`;
 }
 
-function buildRankingCaseEsql(
-  ranking: EuidAttribute[][],
-  presentAliases: Map<string, string>
-): string {
+function buildRankingCaseEsql(ranking: EuidAttribute[][]): string {
   if (ranking.length === 0) {
     throw new Error('No euid fields found, invalid euid logic definition');
   }
 
+  // Trivial: single arm, single field — return the field directly, no null guard needed.
   if (ranking.length === 1) {
     const comp = ranking[0];
     const firstAttr = comp[0];
@@ -337,34 +343,30 @@ function buildRankingCaseEsql(
     }
   }
 
-  const euidLogic = ranking.map((composedField) => {
+  // Build one nullable expression per arm using _present_or_null aliases.
+  // CONCAT returns null when any argument is null, so no explicit condition guards are needed.
+  // COALESCE then picks the first non-null result across arms.
+  const armExprs = ranking.map((composedField) => {
     if (composedField.length === 1 && isEuidSeparator(composedField[0])) {
       throw new Error('Separator found in single field, invalid euid logic definition');
     }
-
-    const compositionConditions = composedField
-      .filter(isEuidField)
-      .map((f) => presentAliases.get(f.field) ?? esqlIsNotNullOrEmpty(f.field))
-      .join(' AND ');
-
     if (isEuidSeparator(composedField[0])) {
       throw new Error('The first field of a composed field cannot be a separator');
     }
 
     if (composedField.length === 1) {
-      return `(${compositionConditions}), ${(composedField[0] as { field: string }).field}`;
+      return esqlPresentOrNullColumnName((composedField[0] as { field: string }).field);
     }
 
-    const evaluations = composedField
-      .map((attr) => (isEuidField(attr) ? attr.field : `"${escapeEsqlString(attr.sep)}"`))
-      .join(', ');
-
-    const concatLogic = `CONCAT(${evaluations})`;
-
-    return `(${compositionConditions}), ${concatLogic}`;
+    const parts = composedField.map((attr) =>
+      isEuidField(attr)
+        ? esqlPresentOrNullColumnName(attr.field)
+        : `"${escapeEsqlString(attr.sep)}"`
+    );
+    return `CONCAT(${parts.join(', ')})`;
   });
 
-  return `CASE(${euidLogic.join(',\n')}, NULL)`;
+  return armExprs.length === 1 ? armExprs[0] : `COALESCE(${armExprs.join(', ')})`;
 }
 
 export function getEuidEsqlEvaluation(
@@ -384,18 +386,17 @@ export function getEuidEsqlEvaluation(
   const { euidRanking } = identityField;
   const branches = euidRanking.branches;
   const presentFields = collectRankingFields(branches);
-  const presentAliases = new Map([...presentFields].map((f) => [f, esqlPresentColumnName(f)]));
   const prelude = buildPresentPrelude(presentFields);
 
   const hasConditionalBranch = branches.some((b) => b.when != null);
   if (!hasConditionalBranch && branches.length === 1) {
-    const idLogic = buildRankingCaseEsql(branches[0].ranking, presentAliases);
+    const idLogic = buildRankingCaseEsql(branches[0].ranking);
     return { prelude, expression: appendTypeIdIfNeeded(entityType, idLogic, mustPrependTypeId) };
   }
 
   const branchCaseParts: string[] = [];
   for (const branch of branches) {
-    const rankingCase = buildRankingCaseEsql(branch.ranking, presentAliases);
+    const rankingCase = buildRankingCaseEsql(branch.ranking);
     if (branch.when) {
       const whenCondition = conditionToESQL(branch.when);
       branchCaseParts.push(`(${whenCondition}), ${rankingCase}`);

@@ -269,26 +269,27 @@ describe('getEuidEsqlEvaluation', () => {
     expect(expression).toBe('entity.id');
   });
 
-  it('returns hoisted *_present prelude and CASE expression for host', () => {
+  it('returns _present + _n prelude and COALESCE expression for host', () => {
     const { prelude, expression } = getEuidEsqlEvaluation('host');
 
     expect(normalize(prelude!)).toBe(
       normalize(
         `| EVAL host_id_present = host.id IS NOT NULL AND host.id != "",
                host_name_present = host.name IS NOT NULL AND host.name != "",
-               host_hostname_present = host.hostname IS NOT NULL AND host.hostname != ""`
+               host_hostname_present = host.hostname IS NOT NULL AND host.hostname != "",
+               host_id_present_or_null = CASE(host_id_present, host.id),
+               host_name_present_or_null = CASE(host_name_present, host.name),
+               host_hostname_present_or_null = CASE(host_hostname_present, host.hostname)`
       )
     );
     expect(normalize(expression)).toBe(
       normalize(
-        `CONCAT("host:", CASE((host_id_present), host.id,
-                              (host_name_present), host.name,
-                              (host_hostname_present), host.hostname, NULL))`
+        `CONCAT("host:", COALESCE(host_id_present_or_null, host_name_present_or_null, host_hostname_present_or_null))`
       )
     );
   });
 
-  it('returns hoisted *_present prelude and conditional CASE expression for user', () => {
+  it('returns _present + _n prelude and COALESCE(CONCAT) expression for user', () => {
     const { prelude, expression } = getEuidEsqlEvaluation('user');
 
     expect(normalize(prelude!)).toBe(
@@ -298,16 +299,19 @@ describe('getEuidEsqlEvaluation', () => {
                entity_namespace_present = entity.namespace IS NOT NULL AND entity.namespace != "",
                user_email_present = user.email IS NOT NULL AND user.email != "",
                user_id_present = user.id IS NOT NULL AND user.id != "",
-               user_domain_present = user.domain IS NOT NULL AND user.domain != ""`
+               user_domain_present = user.domain IS NOT NULL AND user.domain != "",
+               user_name_present_or_null = CASE(user_name_present, user.name),
+               host_id_present_or_null = CASE(host_id_present, host.id),
+               entity_namespace_present_or_null = CASE(entity_namespace_present, entity.namespace),
+               user_email_present_or_null = CASE(user_email_present, user.email),
+               user_id_present_or_null = CASE(user_id_present, user.id),
+               user_domain_present_or_null = CASE(user_domain_present, user.domain)`
       )
     );
     expect(normalize(expression)).toBe(
       normalize(
-        `CONCAT("user:", CASE((COALESCE(\`entity.namespace\` == "local", FALSE)), CASE((user_name_present AND host_id_present AND entity_namespace_present), CONCAT(user.name, "@", host.id, "@", entity.namespace), NULL),
-true, CASE((user_email_present AND entity_namespace_present), CONCAT(user.email, "@", entity.namespace),
-(user_id_present AND entity_namespace_present), CONCAT(user.id, "@", entity.namespace),
-(user_name_present AND user_domain_present AND entity_namespace_present), CONCAT(user.name, "@", user.domain, "@", entity.namespace),
-(user_name_present AND entity_namespace_present), CONCAT(user.name, "@", entity.namespace), NULL), NULL))`
+        `CONCAT("user:", CASE((COALESCE(\`entity.namespace\` == "local", FALSE)), CONCAT(user_name_present_or_null, "@", host_id_present_or_null, "@", entity_namespace_present_or_null),
+true, COALESCE(CONCAT(user_email_present_or_null, "@", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, "@", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, "@", user_domain_present_or_null, "@", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, "@", entity_namespace_present_or_null)), NULL))`
       )
     );
   });

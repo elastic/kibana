@@ -13,6 +13,10 @@ export function esqlPresentColumnName(field: string): string {
   return `${field.replace(/\./g, '_')}_present`;
 }
 
+export function esqlPresentOrNullColumnName(field: string): string {
+  return `${field.replace(/\./g, '_')}_present_or_null`;
+}
+
 export function esqlIsNullOrEmpty(field: string) {
   return `(${field} IS NULL OR ${field} == "")`;
 }
