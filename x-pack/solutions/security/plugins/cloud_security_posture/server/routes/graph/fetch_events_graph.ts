@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createHash } from 'crypto';
 import { castArray } from 'lodash';
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import {
@@ -29,6 +28,7 @@ import {
   JSON_OBJECT_SEPARATOR,
   concatJsonObjectPropertyEsqlExprAsString,
   concatJsonObjectPropertyString,
+  hashIds,
   rebuildDocData,
 } from './utils';
 import {
@@ -626,17 +626,14 @@ export const regroupEvents = (
     const actorEntityIds = [...new Set(group.actorEntityIds)];
     const targetEntityIds = [...new Set(group.targetEntityIds)];
 
-    const actorNodeId =
-      actorEntityIds.length === 1
-        ? actorEntityIds[0]
-        : createHash('sha256').update(actorEntityIds.sort().join(',')).digest('hex');
+    const actorNodeId = actorEntityIds.length === 1 ? actorEntityIds[0] : hashIds(actorEntityIds);
 
     const targetNodeId =
       targetEntityIds.length === 0
         ? null
         : targetEntityIds.length === 1
         ? targetEntityIds[0]
-        : createHash('sha256').update(targetEntityIds.sort().join(',')).digest('hex');
+        : hashIds(targetEntityIds);
 
     // Recompute labelNodeId from all document _ids embedded in docs JSON
     const allDocIds = [
@@ -651,13 +648,13 @@ export const regroupEvents = (
           })
           .filter((id): id is string => id != null)
       ),
-    ].sort();
+    ];
     const labelNodeId =
       allDocIds.length === 0
         ? group.labelNodeId
         : allDocIds.length === 1
         ? allDocIds[0]
-        : createHash('sha256').update(allDocIds.join(',')).digest('hex');
+        : hashIds(allDocIds);
 
     const actorNames = actorEntityIds
       .map((id) => enrichmentMap.get(id)?.name)

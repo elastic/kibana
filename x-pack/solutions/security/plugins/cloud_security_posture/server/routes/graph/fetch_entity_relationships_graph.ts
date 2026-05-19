@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createHash } from 'crypto';
 import { castArray } from 'lodash';
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
@@ -25,6 +24,7 @@ import {
   JSON_OBJECT_SEPARATOR,
   JSON_OBJECT_START,
   concatJsonObjectPropertyEsqlExprAsString,
+  hashIds,
   rebuildDocData,
 } from './utils';
 import type { EntityId, EntityRecord, RelationshipEdge } from './types';
@@ -442,11 +442,7 @@ export const regroupRelationships = (
   return Array.from(groups.values()).map((group): RelationshipEdge => {
     const targetIds = [...new Set(group.targetIds)];
     const targetNodeId =
-      targetIds.length === 0
-        ? ''
-        : targetIds.length === 1
-        ? targetIds[0]
-        : createHash('sha256').update(targetIds.sort().join(',')).digest('hex');
+      targetIds.length === 0 ? '' : targetIds.length === 1 ? targetIds[0] : hashIds(targetIds);
 
     const targetNames = targetIds
       .map((id) => enrichmentMap.get(id)?.name)

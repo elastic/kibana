@@ -5,10 +5,21 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import { castArray } from 'lodash';
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import type { EntityEnrichmentFields } from '../fetch_entity_enrichment';
+
+/**
+ * SHA-256 hash of a sorted, comma-joined id list. Used to derive a stable node id when
+ * multiple entity ids collapse into a single graph node (group node, label node).
+ * Input is sorted internally so callers don't need to remember.
+ */
+export const hashIds = (ids: string[]): string =>
+  createHash('sha256')
+    .update([...ids].sort().join(','))
+    .digest('hex');
 
 /**
  * Checks if the entities latest index exists.
