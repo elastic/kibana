@@ -15,4 +15,3 @@ export * from './use_load_alerting_framework_health';
 export * from './use_get_rule_types_permissions';
 export * from './use_load_ui_health';
 export * from './use_fetch_unified_alerts_fields';
-export * from './use_action_type_model';
