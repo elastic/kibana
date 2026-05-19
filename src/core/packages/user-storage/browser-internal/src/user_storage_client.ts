@@ -8,8 +8,8 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { Subject, concat, defer, of, type Observable } from 'rxjs';
-import { filter, map } from 'rxjs';
+import { Observable, Subject, concat, defer, of } from 'rxjs';
+import { filter, map, share } from 'rxjs';
 
 import type { IUserStorageClient, UserStorageUpdate } from '@kbn/core-user-storage-browser';
 import type { UserStorageApi } from './user_storage_api';
@@ -22,7 +22,18 @@ export interface UserStorageClientParams {
 
 /**
  * Browser-side {@link IUserStorageClient}: a synchronous in-memory cache
- * seeded from server-injected metadata, with HTTP-backed writes.
+ * seeded from server-injected metadata (for keys with `serverInject: true`),
+ * with HTTP-backed writes and per-key lazy fetching for non-injected keys.
+ *
+ * Lazy fetch behaviour:
+ * - The first `get(key)` / `get$(key)` call for a key that is absent from
+ *   the cache triggers a fire-and-forget `GET /internal/user_storage/{key}`
+ *   request. Once the response arrives, the cache is populated and `get$`
+ *   subscribers for that key receive the resolved value.
+ * - Fetch failures are published to `getHttpError$` but do not cause `get$`
+ *   to error or complete. The cache entry remains absent.
+ * - `getUpdate$()` does **not** emit for lazy-fetch hydrations; only explicit
+ *   `set` / `remove` calls produce update events.
  *
  * @internal
  */
@@ -30,7 +41,11 @@ export class UserStorageClient implements IUserStorageClient {
   private cache: Record<string, unknown>;
   private readonly api: UserStorageApi;
   private readonly update$ = new Subject<UserStorageUpdate>();
-  private readonly updateErrors$ = new Subject<Error>();
+  private readonly httpErrors$ = new Subject<Error>();
+  /** Emits whenever the cache is hydrated by a lazy fetch. */
+  private readonly loaded$ = new Subject<{ key: string; value: unknown }>();
+  /** Set of keys for which a lazy fetch has already been initiated. */
+  private readonly fetchInitiated = new Set<string>();
 
   constructor({ api, initialValues, done$ }: UserStorageClientParams) {
     this.api = api;
@@ -39,7 +54,8 @@ export class UserStorageClient implements IUserStorageClient {
     done$.subscribe({
       complete: () => {
         this.update$.complete();
-        this.updateErrors$.complete();
+        this.httpErrors$.complete();
+        this.loaded$.complete();
       },
     });
   }
@@ -48,7 +64,9 @@ export class UserStorageClient implements IUserStorageClient {
   public get<T = unknown>(key: string, defaultValue: T): T;
   public get<T = unknown>(key: string, defaultValue?: T): T | undefined {
     const cached = this.cache[key];
-    return cached !== undefined ? (cached as T) : defaultValue;
+    if (cached !== undefined) return cached as T;
+    this.triggerLazyFetch(key);
+    return defaultValue;
   }
 
   public get$<T = unknown>(key: string): Observable<T | undefined>;
@@ -56,13 +74,34 @@ export class UserStorageClient implements IUserStorageClient {
   public get$<T = unknown>(key: string, defaultValue?: T): Observable<T | undefined> {
     const getCurrent = () =>
       defaultValue !== undefined ? this.get<T>(key, defaultValue) : this.get<T>(key);
+
+    // The lazy fetch is triggered inside getCurrent() → get() on first eval.
     return concat(
       defer(() => of(getCurrent())),
-      this.update$.pipe(
-        filter((u) => u.key === key),
-        map(() => getCurrent())
-      )
-    );
+      // Merge explicit writes and lazy-fetch hydrations for this key.
+      new Observable<T | undefined>((subscriber) => {
+        const writeSub = this.update$
+          .pipe(
+            filter((u) => u.key === key),
+            map(() => getCurrent())
+          )
+          .subscribe(subscriber);
+
+        const loadSub = this.loaded$
+          .pipe(
+            filter((e) => e.key === key),
+            map(() =>
+              defaultValue !== undefined ? this.get<T>(key, defaultValue) : this.get<T>(key)
+            )
+          )
+          .subscribe(subscriber);
+
+        return () => {
+          writeSub.unsubscribe();
+          loadSub.unsubscribe();
+        };
+      })
+    ).pipe(share());
   }
 
   public async set<T = unknown>(key: string, value: T): Promise<void> {
@@ -70,7 +109,7 @@ export class UserStorageClient implements IUserStorageClient {
       await this.api.set(key, value);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      this.updateErrors$.next(err);
+      this.httpErrors$.next(err);
       throw err;
     }
 
@@ -84,7 +123,7 @@ export class UserStorageClient implements IUserStorageClient {
       await this.api.remove(key);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      this.updateErrors$.next(err);
+      this.httpErrors$.next(err);
       throw err;
     }
 
@@ -97,7 +136,30 @@ export class UserStorageClient implements IUserStorageClient {
     return this.update$.asObservable();
   }
 
-  public getUpdateErrors$(): Observable<Error> {
-    return this.updateErrors$.asObservable();
+  public getHttpError$(): Observable<Error> {
+    return this.httpErrors$.asObservable();
+  }
+
+  /**
+   * Initiates a single fire-and-forget GET for `key` if it is not yet cached
+   * and no prior fetch has been triggered for it in the lifetime of this client.
+   */
+  private triggerLazyFetch(key: string): void {
+    if (this.cache[key] !== undefined || this.fetchInitiated.has(key)) return;
+    this.fetchInitiated.add(key);
+
+    this.api.get(key).then(
+      (value) => {
+        this.cache[key] = value;
+        this.loaded$.next({ key, value });
+      },
+      (error: unknown) => {
+        const err = error instanceof Error ? error : new Error(String(error));
+        this.httpErrors$.next(err);
+        // Remove key from the initiated set so callers can retry on
+        // re-mount if they want to (same session, same client instance).
+        this.fetchInitiated.delete(key);
+      }
+    );
   }
 }

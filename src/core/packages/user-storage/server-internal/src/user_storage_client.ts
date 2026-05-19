@@ -64,10 +64,15 @@ export class UserStorageClient implements IUserStorageClient {
     return definition.defaultValue as T;
   }
 
-  async getAll(): Promise<Record<string, unknown>> {
+  async getForInjection(): Promise<Record<string, unknown>> {
+    const injectableEntries = [...this.definitions.entries()].filter(
+      ([, d]) => d.serverInject === true
+    );
+    if (injectableEntries.length === 0) return {};
+
     let hasSpace = false;
     let hasGlobal = false;
-    for (const d of this.definitions.values()) {
+    for (const [, d] of injectableEntries) {
       if (d.scope === 'space') hasSpace = true;
       else if (d.scope === 'global') hasGlobal = true;
       if (hasSpace && hasGlobal) break;
@@ -96,7 +101,7 @@ export class UserStorageClient implements IUserStorageClient {
     }
 
     const result: Record<string, unknown> = {};
-    for (const [key, definition] of this.definitions) {
+    for (const [key, definition] of injectableEntries) {
       const data = definition.scope === 'space' ? spaceData : globalData;
       const raw = data?.[key];
       if (raw != null) {

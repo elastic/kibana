@@ -773,17 +773,19 @@ describe('RenderingService', () => {
       globalClient: uiSettingsServiceMock.createClient(),
     });
 
-    it('injects values returned by userStorage.asScoped().getAll()', async () => {
+    it('injects values returned by userStorage.asScoped().getForInjection()', async () => {
       const { render } = await service.setup(mockRenderingSetupDeps);
 
-      const getAll = jest.fn().mockResolvedValue({ 'navigation:layout': { hidden: ['discover'] } });
-      const asScoped = jest.fn().mockReturnValue({ getAll });
+      const getForInjection = jest
+        .fn()
+        .mockResolvedValue({ 'navigation:layout': { hidden: ['discover'] } });
+      const asScoped = jest.fn().mockReturnValue({ getForInjection });
       service.start({ ...mockRenderingStartDeps, userStorage: { asScoped } });
 
       const content = await render(createKibanaRequest(), buildUiSettings());
 
       expect(asScoped).toHaveBeenCalledTimes(1);
-      expect(getAll).toHaveBeenCalledTimes(1);
+      expect(getForInjection).toHaveBeenCalledTimes(1);
       expect(await renderAndReadUserStorage(content)).toEqual({
         values: { 'navigation:layout': { hidden: ['discover'] } },
       });
@@ -815,11 +817,11 @@ describe('RenderingService', () => {
       expect(await renderAndReadUserStorage(content)).toEqual({ values: {} });
     });
 
-    it('rejects when getAll() rejects', async () => {
+    it('rejects when getForInjection() rejects', async () => {
       const { render } = await service.setup(mockRenderingSetupDeps);
 
-      const getAll = jest.fn().mockRejectedValue(new Error('ES exploded'));
-      const asScoped = jest.fn().mockReturnValue({ getAll });
+      const getForInjection = jest.fn().mockRejectedValue(new Error('ES exploded'));
+      const asScoped = jest.fn().mockReturnValue({ getForInjection });
       service.start({ ...mockRenderingStartDeps, userStorage: { asScoped } });
 
       await expect(render(createKibanaRequest(), buildUiSettings())).rejects.toThrow('ES exploded');

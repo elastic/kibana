@@ -57,7 +57,7 @@ describe('UserStorageService', () => {
     const client = service.setup(buildDeps());
 
     const update$ = client.getUpdate$();
-    const errors$ = client.getUpdateErrors$();
+    const errors$ = client.getHttpError$();
 
     service.stop();
 

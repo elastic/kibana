@@ -53,7 +53,7 @@ export interface IUserStorageClient {
    * Persists a new value via `PUT /internal/user_storage/{key}`. On success
    * the local cache is updated and subscribers to `get$` / `getUpdate$` are
    * notified. On HTTP failure the cache is left untouched, the error is
-   * published to `getUpdateErrors$`, and the returned promise rejects.
+   * published to `getHttpError$`, and the returned promise rejects.
    */
   set<T = unknown>(key: string, value: T): Promise<void>;
 
@@ -65,13 +65,14 @@ export interface IUserStorageClient {
   remove(key: string): Promise<void>;
 
   /**
-   * Stream of every successful key update.
+   * Stream of every successful key update (write or remove).
+   * Does **not** emit for lazy-fetch cache hydrations.
    */
   getUpdate$(): Observable<UserStorageUpdate>;
 
   /**
-   * Stream of HTTP errors raised by `set` / `remove` after the call returned
-   * to the caller. Suitable for centralised toast / telemetry handling.
+   * Stream of HTTP errors raised by `set`, `remove`, or lazy-fetch calls.
+   * Suitable for centralised toast / telemetry handling.
    */
-  getUpdateErrors$(): Observable<Error>;
+  getHttpError$(): Observable<Error>;
 }

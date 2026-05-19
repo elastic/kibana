@@ -64,11 +64,13 @@ The Zod schema runs:
 
 1. At registration, against the `defaultValue` (catches drift between the default and the schema at boot).
 2. At every `set`, against the incoming value (rejects invalid writes with `400`).
-3. At every `get` / `getAll`, against the stored value. If the stored value fails to parse — usually because the schema has been narrowed since the value was written — the registered default is returned and a warning is logged. This means you can safely tighten a schema without writing a migration, but consumers should treat the resulting value reset as a possible UX outcome.
+3. At every `get`, against the stored value. If the stored value fails to parse — usually because the schema has been narrowed since the value was written — the registered default is returned and a warning is logged. This means you can safely tighten a schema without writing a migration, but consumers should treat the resulting value reset as a possible UX outcome.
 
 ### Server-rendered injection
 
-On every page render, Core calls `userStorage.asScoped(request).getAll()` and inlines the merged map into `<kbn-injected-metadata>` under `userStorage.values`. The browser client uses this map to seed its synchronous cache before the first React render, so consumers can read the user's value during initial paint without a fetch. The fetch is bounded by a 50 ms timeout and falls back to `{}` (everything reads as default) on slow ES or network errors — User Storage will never block first paint.
+By default, browser-side reads are **lazy**: the cache starts empty for a given key and the first `get(key)` / `get$(key)` call fires a `GET /internal/user_storage/{key}` request to hydrate it. While the request is in-flight `get(key)` returns `undefined` (or the provided `defaultValue`) and `get$(key)` emits `undefined` then emits again once the value arrives.
+
+For keys on the critical rendering path, opt in to **eager injection** by setting `serverInject: true` in the key's `UserStorageDefinition`. Core then calls `getForInjection()` during server-side rendering and embeds only the opted-in keys into `<kbn-injected-metadata>` under `userStorage.values`, so those values are available synchronously before the first React render without any in-browser fetch.
 
 ## Registering keys (server)
 
@@ -88,11 +90,13 @@ export class MyPlugin implements Plugin {
         }),
         defaultValue: { hidden: [], order: [] },
         scope: 'space',
+        serverInject: true, // embed in HTML at first paint; needed on the critical render path
       },
       'myPlugin:tour-dismissed': {
         schema: z.boolean(),
         defaultValue: false,
         scope: 'global',
+        // serverInject omitted — lazy-loaded on first access
       },
     });
   }
@@ -114,7 +118,6 @@ if (!client) {
 }
 
 const layout = await client.get<NavLayout>('myPlugin:nav-layout');
-const all = await client.getAll();             // every registered key, merged with defaults
 
 await client.set('myPlugin:nav-layout', { hidden: ['discover'], order: [] });
 await client.remove('myPlugin:tour-dismissed'); // resets the key to its default
@@ -126,11 +129,11 @@ Server reads always return the resolved value (user override or registered defau
 
 Three internal routes are exposed for the browser client; consumers do not normally call them directly:
 
-| Method | Path                                  | Body              | Returns                                   |
-|--------|---------------------------------------|-------------------|-------------------------------------------|
-| `GET`  | `/internal/user_storage`              | —                 | Every registered key merged with defaults |
-| `PUT`  | `/internal/user_storage/{key}`        | `{ value }`       | `200` on success, `400` on validation     |
-| `DELETE` | `/internal/user_storage/{key}`      | —                 | `200` on success                          |
+| Method | Path                                  | Body              | Returns                                              |
+|--------|---------------------------------------|-------------------|------------------------------------------------------|
+| `GET`  | `/internal/user_storage/{key}`        | —                 | `{ value }` — the stored value or registered default |
+| `PUT`  | `/internal/user_storage/{key}`        | `{ value }`       | `200` on success, `400` on validation                |
+| `DELETE` | `/internal/user_storage/{key}`      | —                 | `200` on success                                     |
 
 All three return `403` when the request has no `profile_uid`.
 
@@ -143,26 +146,28 @@ import type { IUserStorageClient } from '@kbn/core-user-storage-browser';
 
 // somewhere with access to core:
 const layout = core.userStorage.get<NavLayout>('myPlugin:nav-layout', defaultLayout);
-const all = core.userStorage.getAll();
 await core.userStorage.set('myPlugin:nav-layout', nextLayout);
 await core.userStorage.remove('myPlugin:tour-dismissed');
 ```
 
-Pass a `defaultValue` to `get(key, default)` so that consumers of the value never see `undefined` if the key was not in the injected metadata snapshot (e.g. during anonymous-page rendering). Server-side defaults are the source of truth, but the browser client does not currently know about them — it only knows about cached values.
+Pass a `defaultValue` to `get(key, default)` so that consumers never see `undefined`. For keys with `serverInject: true` the cache is pre-populated at first paint so `get` is truly synchronous. For lazy-loaded keys, the first `get` triggers a background fetch and returns `undefined` (or `defaultValue`) until the response arrives.
 
-The client also exposes RxJS observables for live updates and write errors:
+The client also exposes RxJS observables for live updates and HTTP errors:
 
 ```typescript
 core.userStorage.get$<NavLayout>('myPlugin:nav-layout').subscribe((layout) => {
-  // emits the cached value on subscribe and again on every successful write to this key
+  // emits the cached value (or undefined) on subscribe, again when a lazy fetch lands,
+  // and again on every successful set/remove for this key
 });
 
-core.userStorage.getUpdate$().subscribe(({ key, newValue, oldValue }) => {
-  // fires on every successful write across all keys
+core.userStorage.getUpdate$().subscribe((update) => {
+  // fires on every successful set/remove across all keys (not on lazy fetches)
+  if (update.type === 'set') console.log(update.key, update.newValue);
+  if (update.type === 'remove') console.log(update.key, 'removed');
 });
 
-core.userStorage.getUpdateErrors$().subscribe((err) => {
-  // fires when a set/remove HTTP call fails after the call returned to the caller
+core.userStorage.getHttpError$().subscribe((err) => {
+  // fires when a set/remove/lazy-fetch HTTP call fails
 });
 ```
 
@@ -199,9 +204,9 @@ const NavLayoutEditor = () => {
 };
 ```
 
-`useUserStorage(key, defaultValue?)` returns `[value, setter]`. The value reflects the synchronous cache and re-renders on change. The setter persists via HTTP and refreshes the cache on success. If the HTTP write fails, the cache is unchanged, the returned promise rejects, and the error is published to `getUpdateErrors$`.
+`useUserStorage(key, defaultValue?)` returns `[value, setter]`. The value reflects the synchronous cache and re-renders on change. The setter persists via HTTP and refreshes the cache on success. If the HTTP write fails, the cache is unchanged, the returned promise rejects, and the error is published to `getHttpError$`.
 
-For the less common operations — `remove`, `getUpdate$`, `getUpdateErrors$`, multi-key reads — reach for the underlying client:
+For the less common operations — `remove`, `getUpdate$`, `getHttpError$` — reach for the underlying client:
 
 ```tsx
 const client = useUserStorageClient();
@@ -234,7 +239,7 @@ import { userStorageServiceMock } from '@kbn/core-user-storage-server-mocks';
 const userStorage = userStorageServiceMock.createStartContract();
 userStorage.asScoped.mockReturnValue({
   get: jest.fn().mockResolvedValue({ hidden: ['discover'], order: [] }),
-  getAll: jest.fn().mockResolvedValue({}),
+  getForInjection: jest.fn().mockResolvedValue({}),
   set: jest.fn().mockResolvedValue(undefined),
   remove: jest.fn().mockResolvedValue(undefined),
 });

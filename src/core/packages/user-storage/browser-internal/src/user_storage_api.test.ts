@@ -15,9 +15,19 @@ describe('UserStorageApi', () => {
   let api: UserStorageApi;
 
   beforeEach(() => {
+    http.get.mockReset();
     http.put.mockReset();
     http.delete.mockReset();
     api = new UserStorageApi(http);
+  });
+
+  it('GETs /internal/user_storage/{key} and unwraps the value field', async () => {
+    http.get.mockResolvedValue({ value: { hidden: ['discover'] } });
+
+    const result = await api.get('navigation:layout');
+
+    expect(http.get).toHaveBeenCalledWith('/internal/user_storage/navigation%3Alayout');
+    expect(result).toEqual({ hidden: ['discover'] });
   });
 
   it('PUTs /internal/user_storage/{key} with a value-wrapped body', async () => {

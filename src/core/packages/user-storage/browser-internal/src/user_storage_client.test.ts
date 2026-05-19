@@ -13,7 +13,7 @@ import type { UserStorageApi } from './user_storage_api';
 
 const apiMock = (): jest.Mocked<UserStorageApi> =>
   ({
-    getAll: jest.fn(),
+    get: jest.fn().mockReturnValue(new Promise(() => {})), // never resolves by default
     set: jest.fn(),
     remove: jest.fn(),
   } as unknown as jest.Mocked<UserStorageApi>);
@@ -39,6 +39,35 @@ describe('UserStorageClient', () => {
 
       expect(client.get('missing', 'fallback')).toBe('fallback');
     });
+
+    it('triggers a lazy fetch on first access for an uncached key', () => {
+      const { client, api } = buildClient({});
+      api.get.mockResolvedValue('lazy-value');
+
+      client.get('uncached');
+
+      expect(api.get).toHaveBeenCalledWith('uncached');
+    });
+
+    it('does not trigger a second fetch when the key is already cached', () => {
+      const { client, api } = buildClient({ key: 'present' });
+
+      client.get('key');
+      client.get('key');
+
+      expect(api.get).not.toHaveBeenCalled();
+    });
+
+    it('does not trigger a second fetch when one is already in flight', () => {
+      const { client, api } = buildClient({});
+      // never resolves — simulates in-flight request
+      api.get.mockReturnValue(new Promise(() => {}));
+
+      client.get('key');
+      client.get('key');
+
+      expect(api.get).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('get$', () => {
@@ -54,14 +83,48 @@ describe('UserStorageClient', () => {
     });
 
     it('does not emit for unrelated keys', async () => {
-      const { client, api } = buildClient({});
+      const { client, api } = buildClient({ a: 'initial' });
       api.set.mockResolvedValue(undefined);
 
       const first = firstValueFrom(client.get$('a'));
       await client.set('b', 99);
 
       // only the initial emission resolves; if `b` had leaked we'd see 99.
-      await expect(first).resolves.toBeUndefined();
+      await expect(first).resolves.toBe('initial');
+    });
+
+    it('emits the lazy-fetched value once the fetch resolves', async () => {
+      const { client, api } = buildClient({});
+
+      let resolveFetch!: (v: string) => void;
+      api.get.mockReturnValue(new Promise<string>((resolve) => (resolveFetch = resolve)));
+
+      const emissions = lastValueFrom(client.get$<string>('key').pipe(take(2), toArray()));
+
+      // Trigger the lazy fetch (first emission is undefined)
+      resolveFetch('lazy-value');
+      // Allow promise microtasks to flush
+      await Promise.resolve();
+
+      expect(await emissions).toEqual([undefined, 'lazy-value']);
+    });
+
+    it('emits to getHttpError$ and retries on next subscription if fetch fails', async () => {
+      const { client, api } = buildClient({});
+
+      api.get.mockRejectedValueOnce(new Error('network-error'));
+
+      const httpError = firstValueFrom(client.getHttpError$());
+
+      // First get triggers the fetch
+      client.get('key');
+
+      await expect(httpError).resolves.toMatchObject({ message: 'network-error' });
+
+      // After failure the key is removed from fetchInitiated — a new get should re-trigger
+      api.get.mockResolvedValue('retry-value');
+      client.get('key');
+      expect(api.get).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -87,7 +150,7 @@ describe('UserStorageClient', () => {
       const { client, api } = buildClient({ key: 'old' });
       api.set.mockRejectedValue(new Error('boom'));
 
-      const errors = firstValueFrom(client.getUpdateErrors$());
+      const errors = firstValueFrom(client.getHttpError$());
 
       await expect(client.set('key', 'new')).rejects.toThrow('boom');
       expect(client.get('key')).toBe('old');
@@ -108,11 +171,11 @@ describe('UserStorageClient', () => {
       await expect(updates).resolves.toEqual({ type: 'remove', key: 'key', oldValue: 'old' });
     });
 
-    it('rejects and emits on errors$ when the HTTP call fails', async () => {
+    it('rejects and emits on getHttpError$ when the HTTP call fails', async () => {
       const { client, api } = buildClient({ key: 'old' });
       api.remove.mockRejectedValue(new Error('nope'));
 
-      const errors = firstValueFrom(client.getUpdateErrors$());
+      const errors = firstValueFrom(client.getHttpError$());
 
       await expect(client.remove('key')).rejects.toThrow('nope');
       expect(client.get('key')).toBe('old');
@@ -121,11 +184,11 @@ describe('UserStorageClient', () => {
   });
 
   describe('done$', () => {
-    it('completes update$ and updateErrors$ when done$ completes', async () => {
+    it('completes update$ and getHttpError$ when done$ completes', async () => {
       const { client, done$ } = buildClient({});
 
       const update$ = client.getUpdate$();
-      const errors$ = client.getUpdateErrors$();
+      const errors$ = client.getHttpError$();
 
       done$.complete();
 

@@ -408,7 +408,7 @@ export class RenderingService {
     const client = userStorage.asScoped(request);
     if (!client) return {};
 
-    return client.getAll();
+    return client.getForInjection();
   }
 }
 

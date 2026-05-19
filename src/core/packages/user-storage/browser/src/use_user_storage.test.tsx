@@ -36,7 +36,7 @@ const buildClient = (initial: Record<string, unknown> = {}): IUserStorageClient 
     }) as IUserStorageClient['remove'],
     getUpdate$: () =>
       new BehaviorSubject({ type: 'remove' as const, key: '', oldValue: undefined }),
-    getUpdateErrors$: () => new BehaviorSubject(new Error('noop')),
+    getHttpError$: () => new BehaviorSubject(new Error('noop')),
   };
   return client;
 };
