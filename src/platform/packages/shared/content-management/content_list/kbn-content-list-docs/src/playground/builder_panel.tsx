@@ -245,28 +245,21 @@ export const BuilderPanel = ({ state, dispatch }: BuilderPanelProps) => {
               onChange={(v) => dispatch({ type: 'SET_ITEM_PROP', key: 'getHref', value: v })}
             />
           </JsxPropDisplay>
-          <JsxPropDisplay name="getEditUrl">
-            <InlineCheckbox
-              id={`${idPrefix}-getEditUrl`}
-              checked={item.getEditUrl}
-              onChange={(v) => dispatch({ type: 'SET_ITEM_PROP', key: 'getEditUrl', value: v })}
-            />
-          </JsxPropDisplay>
-          <JsxPropDisplay name="onEdit">
+          <JsxPropDisplay name="actions.edit">
             <InlineCheckbox
               id={`${idPrefix}-onEdit`}
               checked={item.onEdit}
               onChange={(v) => dispatch({ type: 'SET_ITEM_PROP', key: 'onEdit', value: v })}
             />
           </JsxPropDisplay>
-          <JsxPropDisplay name="onDelete">
+          <JsxPropDisplay name="actions.delete">
             <InlineCheckbox
               id={`${idPrefix}-onDelete`}
               checked={item.onDelete}
               onChange={(v) => dispatch({ type: 'SET_ITEM_PROP', key: 'onDelete', value: v })}
             />
           </JsxPropDisplay>
-          <JsxPropDisplay name="onInspect">
+          <JsxPropDisplay name="actions.inspect">
             <InlineCheckbox
               id={`${idPrefix}-onInspect`}
               checked={item.onInspect}
@@ -409,7 +402,7 @@ export const BuilderPanel = ({ state, dispatch }: BuilderPanelProps) => {
                         !item.onDelete &&
                         !item.onInspect &&
                         !col.actions.some((a) => !['edit', 'delete', 'inspect'].includes(a.type))
-                          ? 'This column is hidden because no item actions (onEdit, onDelete, onInspect) are configured on the provider and no custom actions are present.'
+                          ? 'This column is hidden because no item actions (actions.edit, actions.delete, actions.inspect) are configured on the provider and no custom actions are present.'
                           : undefined
                       }
                     />

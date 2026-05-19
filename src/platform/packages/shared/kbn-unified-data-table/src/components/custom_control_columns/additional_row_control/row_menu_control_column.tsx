@@ -76,6 +76,7 @@ export const RowMenuControlCell = ({
     <EuiPopover
       id={`rowMenuActionsPopover_${props.rowIndex}`}
       className="unifiedDataTable__rowControl"
+      aria-label={buttonLabel}
       button={
         <EuiToolTip content={buttonLabel} disableScreenReaderOutput>
           <EuiButtonIcon
@@ -95,7 +96,7 @@ export const RowMenuControlCell = ({
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <EuiContextMenuPanel size="s" items={popoverMenuItems} />
+      <EuiContextMenuPanel items={popoverMenuItems} />
     </EuiPopover>
   );
 };

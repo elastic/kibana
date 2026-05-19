@@ -1,6 +1,6 @@
 ---
 # This file is used to generate the "General settings in Kibana" page in the product docs.
-# For the schema and an example refer to the automated settings reference: 
+# For the schema and an example refer to the automated settings reference:
 # https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md
 
 product: Kibana
@@ -125,6 +125,17 @@ groups:
       - setting: status.allowAnonymous
         description: |
           If authentication is enabled, setting this to `true` enables unauthenticated users to access the {{kib}} server status API and status page.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+      - setting: status.statusPageBypassMonitorPrivilege
+        description: |
+          Allow all authenticated users to access the full {{kib}} server status API. When `false`, users are required to have the Elasticsearch `monitor` cluster privilege.
+          NOTE: This setting is only relevant if `status.allowAnonymous` is `false` (default).
         datatype: bool
         default: false
         applies_to:
@@ -269,6 +280,15 @@ groups:
           - "ech: unavailable"
           - "self: ga"
         deprecation_details: "This setting is deprecated in favor of `csp.object_src`."
+
+      - setting: csp.report_only.connect_src
+        description: |
+          Add sources for the [Content Security Policy `connect-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/connect-src) in reporting mode.
+        datatype: string
+        applies_to:
+          - "stack: ga 9.5"
+          - "ech: ga"
+          - "self: ga"
 
       - setting: csp.report_uri
         description: |
@@ -958,6 +978,7 @@ groups:
         id: server-maxpayload
         description: |
           The maximum payload size in bytes for incoming server requests.
+          This option controls the maximum payload size Kibana can handle, rather than the incoming request size, which also limits the inflated size when compression is used.
         datatype: int
         default: 1048576
         applies_to:
@@ -1515,12 +1536,22 @@ groups:
           - "ech: ga"
           - "self: ga"
 
+      - setting: vis_type_timelion.enabled
+        description: |
+          Set to `false` to disable Timelion visualizations.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
       - setting: vis_type_table.legacyVisEnabled
         description: |
           Starting from version 7.11, a new datatable visualization is used. Set to `true` to enable the legacy version. In version 8.0 and later, the old implementation is removed and this setting is no longer supported.
         datatype: bool
         applies_to:
-          stack: ga
+          stack: removed 8.0
           ech: ga
           self: ga
 
