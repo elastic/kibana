@@ -39,6 +39,18 @@ export function prepareResponseValidation(
   return Object.fromEntries(responses);
 }
 
+export function prepareOnRequestValidationError<
+  T extends { response: RouteValidatorFullConfigResponse } | undefined
+>(onRequestValidationError: T): T {
+  if (!onRequestValidationError || !onRequestValidationError.response) {
+    return onRequestValidationError;
+  }
+  return {
+    ...onRequestValidationError,
+    response: prepareResponseValidation(onRequestValidationError.response),
+  };
+}
+
 function prepareValidation<P, Q, B>(validator: RouteValidator<P, Q, B>) {
   if (isFullValidatorContainer(validator) && validator.response) {
     return {
@@ -59,15 +71,20 @@ export function prepareRouteConfigValidation<P, Q, B>(
     const validate = config.validate;
     return {
       ...config,
+      onRequestValidationError: prepareOnRequestValidationError(config.onRequestValidationError),
       validate: once(() => prepareValidation(validate())),
     };
   } else if (typeof config.validate === 'object' && typeof config.validate !== null) {
     return {
       ...config,
+      onRequestValidationError: prepareOnRequestValidationError(config.onRequestValidationError),
       validate: prepareValidation(config.validate),
     };
   }
-  return config;
+  return {
+    ...config,
+    onRequestValidationError: prepareOnRequestValidationError(config.onRequestValidationError),
+  };
 }
 
 /**

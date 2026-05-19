@@ -9,7 +9,11 @@
 
 import { schema } from '@kbn/config-schema';
 import type { RouteValidator } from '@kbn/core-http-server';
-import { injectResponseHeaders, prepareResponseValidation } from './util';
+import {
+  injectResponseHeaders,
+  prepareOnRequestValidationError,
+  prepareResponseValidation,
+} from './util';
 import { kibanaResponseFactory } from './response';
 
 describe('prepareResponseValidation', () => {
@@ -48,6 +52,24 @@ describe('prepareResponseValidation', () => {
     expect(validation.response![200].body).toHaveBeenCalledTimes(1);
     expect(validation.response![404].body).toHaveBeenCalledTimes(1);
     expect(validation.response![500].body).toBeUndefined();
+  });
+});
+
+describe('prepareOnRequestValidationError', () => {
+  it('prepares lazy response schemas without instantiating them', () => {
+    const body = jest.fn(() => schema.string());
+
+    const prepared = prepareOnRequestValidationError({
+      response: {
+        422: { description: 'Validation failed', body },
+      },
+      handler: (_error, _request, res) => res.badRequest(),
+    });
+
+    expect(body).not.toHaveBeenCalled();
+    prepared.response[422].body!();
+    prepared.response[422].body!();
+    expect(body).toHaveBeenCalledTimes(1);
   });
 });
 

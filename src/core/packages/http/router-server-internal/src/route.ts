@@ -18,6 +18,8 @@ import type {
   RouteSecurity,
   AnyKibanaRequest,
   IKibanaResponse,
+  OnRequestValidationError,
+  RequestValidationError,
   RouteAccess,
   RouteConfigOptions,
   PostValidationMetadata,
@@ -106,13 +108,28 @@ interface ValidationContext {
   log: Logger;
   routeSchemas?: RouteValidator<unknown, unknown, unknown>;
   version?: string;
+  shouldLogDefaultValidationError?: boolean;
+}
+
+interface ValidationFailure {
+  error: RequestValidationError;
+  request: AnyKibanaRequest;
 }
 
 /** @internal */
 export function validateHapiRequest(
   request: Request,
-  { routeInfo, router, log, routeSchemas, version }: ValidationContext
-): { ok: AnyKibanaRequest; error?: never } | { ok?: never; error: IKibanaResponse } {
+  {
+    routeInfo,
+    router,
+    log,
+    routeSchemas,
+    version,
+    shouldLogDefaultValidationError = true,
+  }: ValidationContext
+):
+  | { ok: AnyKibanaRequest; error?: never; failure?: never }
+  | { ok?: never; error: IKibanaResponse; failure: ValidationFailure } {
   let kibanaRequest: Mutable<AnyKibanaRequest>;
   try {
     kibanaRequest = CoreKibanaRequest.from(request, routeSchemas) as Mutable<AnyKibanaRequest>;
@@ -121,15 +138,18 @@ export function validateHapiRequest(
     kibanaRequest = CoreKibanaRequest.from(request) as Mutable<AnyKibanaRequest>;
     kibanaRequest.apiVersion = version;
 
-    log.error('400 Bad Request', formatErrorMeta(400, { request, error }));
+    const validationError = normalizeRequestValidationError(error);
 
     const response = kibanaResponseFactory.badRequest({
-      body: error.message,
+      body: validationError.message,
       headers: isPublicAccessApiRoute(routeInfo)
         ? getVersionHeader(BASE_PUBLIC_VERSION)
         : undefined,
     });
-    return { error: response };
+    if (shouldLogDefaultValidationError) {
+      log.error('400 Bad Request', formatErrorMeta(400, { request, error }));
+    }
+    return { error: response, failure: { error: validationError, request: kibanaRequest } };
   } finally {
     router.emitPostValidate(
       kibanaRequest!,
@@ -145,7 +165,11 @@ export const handle = async (
   request: Request,
   { router, route, handler, routeSchemas, log }: HandlerDependencies
 ) => {
-  const { error, ok: kibanaRequest } = validateHapiRequest(request, {
+  const {
+    error,
+    failure,
+    ok: kibanaRequest,
+  } = validateHapiRequest(request, {
     routeInfo: {
       access: route.options?.access,
       httpResource: route.options?.httpResource,
@@ -154,9 +178,22 @@ export const handle = async (
     router,
     log,
     routeSchemas,
+    shouldLogDefaultValidationError: !route.onRequestValidationError,
   });
   if (error) {
-    return error;
+    if (!route.onRequestValidationError) {
+      return error;
+    }
+    const customResponse = await route.onRequestValidationError.handler(
+      failure.error,
+      failure.request,
+      kibanaResponseFactory
+    );
+    if (isPublicAccessApiRoute(route.options)) {
+      injectVersionHeader(BASE_PUBLIC_VERSION, customResponse);
+    }
+    logRequestValidationError(log, request, customResponse.status, failure.error.rawError);
+    return customResponse;
   }
   const kibanaResponse = await handler(kibanaRequest, kibanaResponseFactory);
   if (isPublicAccessApiRoute(route.options)) {
@@ -173,6 +210,41 @@ function isPublicAccessApiRoute({
   httpResource?: boolean;
 } = {}): boolean {
   return !httpResource && access === 'public';
+}
+
+function normalizeRequestValidationError(rawError: unknown): RequestValidationError {
+  const message = rawError instanceof Error ? rawError.message : String(rawError);
+  return {
+    message,
+    source: getRequestValidationErrorSource(message),
+    rawError,
+  };
+}
+
+function getRequestValidationErrorSource(message: string): RequestValidationError['source'] {
+  if (message.startsWith('[request params')) {
+    return 'params';
+  }
+  if (message.startsWith('[request query')) {
+    return 'query';
+  }
+  if (message.startsWith('[request body')) {
+    return 'body';
+  }
+  return 'unknown';
+}
+
+function logRequestValidationError(
+  log: Logger,
+  request: Request,
+  statusCode: number,
+  rawError: unknown
+) {
+  const error = rawError instanceof Error ? rawError : new Error(String(rawError));
+  log.error(
+    `${statusCode} Request Validation Error`,
+    formatErrorMeta(statusCode, { request, error })
+  );
 }
 
 /**
@@ -193,6 +265,8 @@ function routeSchemasFromRouteConfig<P, Q, B>(
     );
   }
 
+  validateOnRequestValidationError(route, routeMethod);
+
   if (route.validate !== false) {
     const validation = getRequestValidation(route.validate);
     Object.entries(validation).forEach(([key, schema]) => {
@@ -203,6 +277,34 @@ function routeSchemasFromRouteConfig<P, Q, B>(
       }
     });
     return RouteValidator.from(validation);
+  }
+}
+
+function validateOnRequestValidationError<P, Q, B>(
+  route: InternalRouteConfig<P, Q, B, typeof routeMethod>,
+  routeMethod: RouteMethod
+) {
+  const { onRequestValidationError } = route;
+  if (!onRequestValidationError) {
+    return;
+  }
+
+  if (route.validate === false) {
+    throw new Error(
+      `The [${routeMethod}] at [${route.path}] cannot configure 'onRequestValidationError' when 'validate' is false.`
+    );
+  }
+
+  const { handler, response } = onRequestValidationError as Partial<OnRequestValidationError>;
+  if (typeof handler !== 'function') {
+    throw new Error(
+      `The [${routeMethod}] at [${route.path}] has an invalid 'onRequestValidationError.handler'. Expected a function.`
+    );
+  }
+  if (!response) {
+    throw new Error(
+      `The [${routeMethod}] at [${route.path}] has an invalid 'onRequestValidationError.response'. Expected response metadata.`
+    );
   }
 }
 

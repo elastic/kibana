@@ -8,7 +8,7 @@
  */
 
 import { hapiMocks } from '@kbn/hapi-mocks';
-import { validateHapiRequest, handle } from './route';
+import { buildRoute, validateHapiRequest, handle } from './route';
 import { createRouter } from './versioned_router/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Logger } from '@kbn/logging';
@@ -111,6 +111,114 @@ describe('handle', () => {
         isPublicAccess: false,
       });
     });
+  });
+
+  it('maps request validation failures with onRequestValidationError', async () => {
+    const response = await handle(createRequest({ query: { foo: 'bar' } }), {
+      router,
+      handler,
+      log,
+      method: 'get',
+      route: {
+        path: '/test',
+        validate: { query: schema.object({ foo: schema.number() }) },
+        onRequestValidationError: {
+          response: {
+            422: {
+              description: 'Validation failed',
+              body: () => schema.object({ message: schema.string(), source: schema.string() }),
+            },
+          },
+          handler: (error, request, res) => {
+            expect(error).toMatchObject({
+              message: '[request query.foo]: expected value of type [number] but got [string]',
+              source: 'query',
+            });
+            expect(request.query).toEqual({});
+            return res.custom({
+              statusCode: 422,
+              body: { message: error.message, source: error.source },
+            });
+          },
+        },
+      },
+      routeSchemas: RouteValidator.from({ query: schema.object({ foo: schema.number() }) }),
+    });
+
+    expect(handler).not.toHaveBeenCalled();
+    expect(response.status).toEqual(422);
+    expect(response.payload).toEqual({
+      message: '[request query.foo]: expected value of type [number] but got [string]',
+      source: 'query',
+    });
+    expect(log.error).toHaveBeenCalledWith('422 Request Validation Error', {
+      error: { message: '[request query.foo]: expected value of type [number] but got [string]' },
+      http: { request: { method: undefined, path: undefined }, response: { status_code: 422 } },
+    });
+  });
+
+  it('adds the public API version header to custom request validation error responses', async () => {
+    const response = await handle(createRequest({ query: { foo: 'bar' } }), {
+      router,
+      handler,
+      log,
+      method: 'get',
+      route: {
+        path: '/test',
+        validate: { query: schema.object({ foo: schema.number() }) },
+        options: { access: 'public' },
+        onRequestValidationError: {
+          response: { 418: { description: 'Validation failed' } },
+          handler: (_error, _request, res) =>
+            res.custom({ statusCode: 418, body: { error: 'validation_failed' } }),
+        },
+      },
+      routeSchemas: RouteValidator.from({ query: schema.object({ foo: schema.number() }) }),
+    });
+
+    expect(response.status).toEqual(418);
+    expect(response.options.headers).toEqual({ 'elastic-api-version': '2023-10-31' });
+  });
+
+  it('rejects onRequestValidationError when validate is false', () => {
+    expect(() =>
+      buildRoute({
+        router,
+        handler,
+        log,
+        method: 'get',
+        route: {
+          path: '/test',
+          validate: false,
+          onRequestValidationError: {
+            response: { 400: { description: 'Validation failed' } },
+            handler: (_error, _request, res) => res.badRequest(),
+          },
+        },
+      })
+    ).toThrow(
+      "The [get] at [/test] cannot configure 'onRequestValidationError' when 'validate' is false."
+    );
+  });
+
+  it('rejects incomplete onRequestValidationError config', () => {
+    expect(() =>
+      buildRoute({
+        router,
+        handler,
+        log,
+        method: 'get',
+        route: {
+          path: '/test',
+          validate: { query: schema.object({ foo: schema.number() }) },
+          onRequestValidationError: {
+            handler: (_error, _request, res) => res.badRequest(),
+          } as never,
+        },
+      })
+    ).toThrow(
+      "The [get] at [/test] has an invalid 'onRequestValidationError.response'. Expected response metadata."
+    );
   });
 });
 
