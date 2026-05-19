@@ -95,7 +95,11 @@ export function buildCcsLogsExtractionEsqlQuery({
   }
 
   // Builds the id
-  parts.push(`| EVAL ${MAIN_ENTITY_ID_FIELD} = ${getEuidEsqlEvaluation(type)}`);
+  const { prelude: euidPrelude, expression: euidExpression } = getEuidEsqlEvaluation(type);
+  if (euidPrelude) {
+    parts.push(euidPrelude);
+  }
+  parts.push(`| EVAL ${MAIN_ENTITY_ID_FIELD} = ${euidExpression}`);
 
   // Main stats aggregation from incoming data
   parts.push(`| STATS

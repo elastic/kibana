@@ -9,6 +9,10 @@ export function esqlIsNotNullOrEmpty(field: string) {
   return `${field} IS NOT NULL AND ${field} != ""`;
 }
 
+export function esqlPresentColumnName(field: string): string {
+  return `${field.replace(/\./g, '_')}_present`;
+}
+
 export function esqlIsNullOrEmpty(field: string) {
   return `(${field} IS NULL OR ${field} == "")`;
 }

@@ -262,31 +262,54 @@ describe('getFieldEvaluationsEsql', () => {
 });
 
 describe('getEuidEsqlEvaluation', () => {
-  it('returns raw field for generic (skipTypePrepend: no type prefix)', () => {
-    const result = getEuidEsqlEvaluation('generic');
+  it('returns raw field for generic with null prelude (skipTypePrepend: no type prefix)', () => {
+    const { prelude, expression } = getEuidEsqlEvaluation('generic');
 
-    const expected = 'entity.id';
-    expect(normalize(result)).toBe(normalize(expected));
+    expect(prelude).toBeNull();
+    expect(expression).toBe('entity.id');
   });
 
-  it('returns full CONCAT(type:, CASE(...), NULL) for calculated identity (host)', () => {
-    const result = getEuidEsqlEvaluation('host');
+  it('returns hoisted *_present prelude and CASE expression for host', () => {
+    const { prelude, expression } = getEuidEsqlEvaluation('host');
 
-    const expected = `CONCAT("host:", CASE((host.id IS NOT NULL AND host.id != ""), host.id,
-                      (host.name IS NOT NULL AND host.name != ""), host.name,
-                      (host.hostname IS NOT NULL AND host.hostname != ""), host.hostname, NULL))`;
-    expect(normalize(result)).toBe(normalize(expected));
+    expect(normalize(prelude!)).toBe(
+      normalize(
+        `| EVAL host_id_present = host.id IS NOT NULL AND host.id != "",
+               host_name_present = host.name IS NOT NULL AND host.name != "",
+               host_hostname_present = host.hostname IS NOT NULL AND host.hostname != ""`
+      )
+    );
+    expect(normalize(expression)).toBe(
+      normalize(
+        `CONCAT("host:", CASE((host_id_present), host.id,
+                              (host_name_present), host.name,
+                              (host_hostname_present), host.hostname, NULL))`
+      )
+    );
   });
 
-  it('returns conditional CASE for user: when local uses user.name@host.id@entity.namespace, else 4-option ranking', () => {
-    const result = getEuidEsqlEvaluation('user');
+  it('returns hoisted *_present prelude and conditional CASE expression for user', () => {
+    const { prelude, expression } = getEuidEsqlEvaluation('user');
 
-    const expected = `CONCAT("user:", CASE((COALESCE(\`entity.namespace\` == "local", FALSE)), CASE((user.name IS NOT NULL AND user.name != "" AND host.id IS NOT NULL AND host.id != "" AND entity.namespace IS NOT NULL AND entity.namespace != ""), CONCAT(user.name, "@", host.id, "@", entity.namespace), NULL),
-true, CASE((user.email IS NOT NULL AND user.email != "" AND entity.namespace IS NOT NULL AND entity.namespace != ""), CONCAT(user.email, "@", entity.namespace),
-(user.id IS NOT NULL AND user.id != "" AND entity.namespace IS NOT NULL AND entity.namespace != ""), CONCAT(user.id, "@", entity.namespace),
-(user.name IS NOT NULL AND user.name != "" AND user.domain IS NOT NULL AND user.domain != "" AND entity.namespace IS NOT NULL AND entity.namespace != ""), CONCAT(user.name, "@", user.domain, "@", entity.namespace),
-(user.name IS NOT NULL AND user.name != "" AND entity.namespace IS NOT NULL AND entity.namespace != ""), CONCAT(user.name, "@", entity.namespace), NULL), NULL))`;
-    expect(normalize(result)).toBe(normalize(expected));
+    expect(normalize(prelude!)).toBe(
+      normalize(
+        `| EVAL user_name_present = user.name IS NOT NULL AND user.name != "",
+               host_id_present = host.id IS NOT NULL AND host.id != "",
+               entity_namespace_present = entity.namespace IS NOT NULL AND entity.namespace != "",
+               user_email_present = user.email IS NOT NULL AND user.email != "",
+               user_id_present = user.id IS NOT NULL AND user.id != "",
+               user_domain_present = user.domain IS NOT NULL AND user.domain != ""`
+      )
+    );
+    expect(normalize(expression)).toBe(
+      normalize(
+        `CONCAT("user:", CASE((COALESCE(\`entity.namespace\` == "local", FALSE)), CASE((user_name_present AND host_id_present AND entity_namespace_present), CONCAT(user.name, "@", host.id, "@", entity.namespace), NULL),
+true, CASE((user_email_present AND entity_namespace_present), CONCAT(user.email, "@", entity.namespace),
+(user_id_present AND entity_namespace_present), CONCAT(user.id, "@", entity.namespace),
+(user_name_present AND user_domain_present AND entity_namespace_present), CONCAT(user.name, "@", user.domain, "@", entity.namespace),
+(user_name_present AND entity_namespace_present), CONCAT(user.name, "@", entity.namespace), NULL), NULL))`
+      )
+    );
   });
 });
 

@@ -14,7 +14,7 @@ import type {
 } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
-import { esqlIsNotNullOrEmpty, esqlIsNullOrEmpty } from '../../esql/strings';
+import { esqlIsNotNullOrEmpty, esqlIsNullOrEmpty, esqlPresentColumnName } from '../../esql/strings';
 import {
   applyWhenConditionTrueSetFields,
   documentPassesCalculatedIdentityPipelineGate,
@@ -290,7 +290,38 @@ export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
  * @param withTypeId - Whether to prepend the entity type to the evaluation. Defaults to true.
  * @returns An ESQL evaluation string that computes the entity id.
  */
-function buildRankingCaseEsql(ranking: EuidAttribute[][]): string {
+function collectRankingFields(
+  branches: Array<{ when?: unknown; ranking: EuidAttribute[][] }>
+): Set<string> {
+  const fields = new Set<string>();
+  for (const branch of branches) {
+    const { ranking } = branch;
+    if (ranking.length === 1 && ranking[0].length === 1 && isEuidField(ranking[0][0])) {
+      continue;
+    }
+    for (const composedField of ranking) {
+      for (const attr of composedField) {
+        if (isEuidField(attr)) {
+          fields.add(attr.field);
+        }
+      }
+    }
+  }
+  return fields;
+}
+
+function buildPresentPrelude(presentFields: Set<string>): string | null {
+  if (presentFields.size === 0) return null;
+  const assignments = [...presentFields]
+    .map((f) => `${esqlPresentColumnName(f)} = ${esqlIsNotNullOrEmpty(f)}`)
+    .join(',\n ');
+  return `| EVAL ${assignments}`;
+}
+
+function buildRankingCaseEsql(
+  ranking: EuidAttribute[][],
+  presentAliases: Map<string, string>
+): string {
   if (ranking.length === 0) {
     throw new Error('No euid fields found, invalid euid logic definition');
   }
@@ -313,7 +344,7 @@ function buildRankingCaseEsql(ranking: EuidAttribute[][]): string {
 
     const compositionConditions = composedField
       .filter(isEuidField)
-      .map((f) => `${esqlIsNotNullOrEmpty(f.field)}`)
+      .map((f) => presentAliases.get(f.field) ?? esqlIsNotNullOrEmpty(f.field))
       .join(' AND ');
 
     if (isEuidSeparator(composedField[0])) {
@@ -339,24 +370,32 @@ function buildRankingCaseEsql(ranking: EuidAttribute[][]): string {
 export function getEuidEsqlEvaluation(
   entityType: EntityType,
   { withTypeId = true }: { withTypeId?: boolean } = {}
-) {
+): { prelude: string | null; expression: string } {
   const { identityField } = getEntityDefinitionWithoutId(entityType);
   const mustPrependTypeId = withTypeId && !identityField.skipTypePrepend;
 
   if (isSingleFieldIdentity(identityField)) {
-    return appendTypeIdIfNeeded(entityType, identityField.singleField, mustPrependTypeId);
+    return {
+      prelude: null,
+      expression: appendTypeIdIfNeeded(entityType, identityField.singleField, mustPrependTypeId),
+    };
   }
 
   const { euidRanking } = identityField;
   const branches = euidRanking.branches;
+  const presentFields = collectRankingFields(branches);
+  const presentAliases = new Map([...presentFields].map((f) => [f, esqlPresentColumnName(f)]));
+  const prelude = buildPresentPrelude(presentFields);
+
   const hasConditionalBranch = branches.some((b) => b.when != null);
   if (!hasConditionalBranch && branches.length === 1) {
-    const idLogic = buildRankingCaseEsql(branches[0].ranking);
-    return appendTypeIdIfNeeded(entityType, idLogic, mustPrependTypeId);
+    const idLogic = buildRankingCaseEsql(branches[0].ranking, presentAliases);
+    return { prelude, expression: appendTypeIdIfNeeded(entityType, idLogic, mustPrependTypeId) };
   }
+
   const branchCaseParts: string[] = [];
   for (const branch of branches) {
-    const rankingCase = buildRankingCaseEsql(branch.ranking);
+    const rankingCase = buildRankingCaseEsql(branch.ranking, presentAliases);
     if (branch.when) {
       const whenCondition = conditionToESQL(branch.when);
       branchCaseParts.push(`(${whenCondition}), ${rankingCase}`);
@@ -366,7 +405,7 @@ export function getEuidEsqlEvaluation(
   }
   const idLogic =
     branchCaseParts.length > 0 ? `CASE(${branchCaseParts.join(',\n')}, NULL)` : 'NULL';
-  return appendTypeIdIfNeeded(entityType, idLogic, mustPrependTypeId);
+  return { prelude, expression: appendTypeIdIfNeeded(entityType, idLogic, mustPrependTypeId) };
 }
 
 function appendTypeIdIfNeeded(

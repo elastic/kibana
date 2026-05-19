@@ -126,11 +126,13 @@ export function buildLogsExtractionEsqlQuery({
   }
 
   // Evaluation of the id without type so we can fallback to name
-  parts.push(
-    `| EVAL ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} = ${getEuidEsqlEvaluation(type, {
-      withTypeId: false,
-    })}`
-  );
+  const { prelude: euidPrelude, expression: euidExpression } = getEuidEsqlEvaluation(type, {
+    withTypeId: false,
+  });
+  if (euidPrelude) {
+    parts.push(euidPrelude);
+  }
+  parts.push(`| EVAL ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} = ${euidExpression}`);
 
   // Main stats aggregation from incoming data
   parts.push(`| STATS
