@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { HttpStart } from '@kbn/core/public';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -26,6 +27,7 @@ interface SavedSearch {
 
 interface RecentSearchesWidgetProps {
   searches: SavedSearch[];
+  http: HttpStart;
 }
 
 const relativeTime = (isoDate: string): string => {
@@ -37,7 +39,7 @@ const relativeTime = (isoDate: string): string => {
   return `${Math.floor(hours / 24)}d ago`;
 };
 
-export const RecentSearchesWidget: React.FC<RecentSearchesWidgetProps> = ({ searches }) => {
+export const RecentSearchesWidget: React.FC<RecentSearchesWidgetProps> = ({ searches, http }) => {
   return (
     <EuiPanel hasBorder style={{ height: '100%' }}>
       <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -66,7 +68,7 @@ export const RecentSearchesWidget: React.FC<RecentSearchesWidgetProps> = ({ sear
             <EuiFlexItem key={s.id}>
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
                 <EuiFlexItem>
-                  <EuiLink href={`/app/discover#/?savedSearchId=${s.id}`} target="_self">
+                  <EuiLink href={http.basePath.prepend(`/app/discover#/?savedSearchId=${s.id}`)} target="_self">
                     <EuiText size="s">
                       <p>{s.title}</p>
                     </EuiText>

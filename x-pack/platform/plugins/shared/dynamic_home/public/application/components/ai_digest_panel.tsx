@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
@@ -31,6 +32,46 @@ interface AIDigestPanelProps {
   context: SpaceContextResponse | null;
   isContextLoading: boolean;
 }
+
+const CACHE_KEY = 'kbn_dynamic_home_digest';
+const CACHE_TTL_MS = 30 * 60 * 1000;
+
+const readCache = (): { text: string; age: number } | null => {
+  try {
+    const raw = window.localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const { text, ts }: { text: string; ts: number } = JSON.parse(raw);
+    const age = Date.now() - ts;
+    if (age > CACHE_TTL_MS) {
+      window.localStorage.removeItem(CACHE_KEY);
+      return null;
+    }
+    return { text, age };
+  } catch {
+    return null;
+  }
+};
+
+const writeCache = (text: string) => {
+  try {
+    window.localStorage.setItem(CACHE_KEY, JSON.stringify({ text, ts: Date.now() }));
+  } catch {
+    // quota exceeded or unavailable
+  }
+};
+
+const clearCache = () => {
+  try {
+    window.localStorage.removeItem(CACHE_KEY);
+  } catch {}
+};
+
+const formatAge = (ms: number): string => {
+  const minutes = Math.floor(ms / 60_000);
+  if (minutes < 1) return 'just now';
+  if (minutes < 60) return `${minutes}m ago`;
+  return `${Math.floor(minutes / 60)}h ago`;
+};
 
 const blink = keyframes`
   0%, 100% { opacity: 1; }
@@ -47,16 +88,29 @@ export const AIDigestPanel: React.FC<AIDigestPanelProps> = ({
   const [isStreaming, setIsStreaming] = useState(false);
   const [isDone, setIsDone] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [cacheAge, setCacheAge] = useState<number | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const subRef = useRef<{ unsubscribe: () => void } | null>(null);
+  const accumulatedRef = useRef('');
 
   useEffect(() => {
     if (isContextLoading || !context) return;
+
+    const cached = readCache();
+    if (cached) {
+      setDigestText(cached.text);
+      setIsDone(true);
+      setIsStreaming(false);
+      setCacheAge(cached.age);
+      return;
+    }
 
     setIsStreaming(true);
     setDigestText('');
     setIsDone(false);
     setHasError(false);
+    setCacheAge(null);
+    accumulatedRef.current = '';
 
     const attachment = {
       hidden: true,
@@ -89,9 +143,12 @@ export const AIDigestPanel: React.FC<AIDigestPanelProps> = ({
       .subscribe({
         next: (event: unknown) => {
           if (isMessageChunkEvent(event as any)) {
-            setDigestText((prev) => prev + (event as any).data.text_chunk);
+            const chunk = (event as any).data.text_chunk as string;
+            accumulatedRef.current += chunk;
+            setDigestText((prev) => prev + chunk);
           }
           if (isRoundCompleteEvent(event as any)) {
+            writeCache(accumulatedRef.current);
             setIsDone(true);
             setIsStreaming(false);
           }
@@ -101,6 +158,7 @@ export const AIDigestPanel: React.FC<AIDigestPanelProps> = ({
           setIsStreaming(false);
         },
         complete: () => {
+          writeCache(accumulatedRef.current);
           setIsDone(true);
           setIsStreaming(false);
         },
@@ -111,7 +169,9 @@ export const AIDigestPanel: React.FC<AIDigestPanelProps> = ({
   }, [http, context, isContextLoading, refreshKey]);
 
   const handleRefresh = () => {
+    clearCache();
     if (subRef.current) subRef.current.unsubscribe();
+    accumulatedRef.current = '';
     setRefreshKey((k) => k + 1);
   };
 
@@ -148,21 +208,30 @@ export const AIDigestPanel: React.FC<AIDigestPanelProps> = ({
             <EuiBadge color="primary">AI · live</EuiBadge>
           </EuiFlexItem>
         )}
-        {isDone && (
+        {isDone && cacheAge !== null && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              {formatAge(cacheAge)}
+            </EuiText>
+          </EuiFlexItem>
+        )}
+        {isDone && cacheAge === null && (
           <EuiFlexItem grow={false}>
             <EuiBadge color="success">Done</EuiBadge>
           </EuiFlexItem>
         )}
         <EuiFlexItem />
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="refresh"
-            aria-label="Regenerate digest"
-            onClick={handleRefresh}
-            isDisabled={isStreaming}
-            size="s"
-            color="text"
-          />
+          <EuiToolTip content="Regenerate digest">
+            <EuiButtonIcon
+              iconType="refresh"
+              aria-label="Regenerate digest"
+              onClick={handleRefresh}
+              isDisabled={isStreaming}
+              size="s"
+              color="text"
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
 
