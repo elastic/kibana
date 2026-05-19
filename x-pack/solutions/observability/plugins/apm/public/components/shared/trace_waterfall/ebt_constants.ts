@@ -14,6 +14,7 @@ export const TRACE_WATERFALL_EBT_ELEMENTS = {
   WATERFALL_ROW: 'waterfallRow',
   WATERFALL_ERROR_BADGE: 'waterfallErrorBadge',
   WATERFALL_SERVICE_BADGE: 'waterfallServiceBadge',
+  WATERFALL_HEADER: 'waterfallHeader',
   FLYOUT_WATERFALL_ROW: 'flyoutWaterfallRow',
   FLYOUT_WATERFALL_ERROR_BADGE: 'flyoutWaterfallErrorBadge',
   FLYOUT_WATERFALL_SERVICE_BADGE: 'flyoutWaterfallServiceBadge',
