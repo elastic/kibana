@@ -2655,6 +2655,8 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/solutions/security/test/security_solution_cypress/cypress/support @elastic/security-detection-engine @elastic/security-detection-rule-management @elastic/security-threat-hunting
 /x-pack/solutions/security/test/security_solution_cypress/cypress/urls @elastic/security-threat-hunting-investigations @elastic/security-detection-engine
 
+/x-pack/solutions/security/plugins/security_solution/public/agent_builder/attachment_types/rule @elastic/security-threat-hunting @elastic/security-generative-ai @elastic/security-detection-engine
+
 /x-pack/solutions/security/plugins/security_solution/common/test @elastic/security-detection-engine @elastic/security-detection-rule-management @elastic/security-threat-hunting
 
 /x-pack/solutions/security/plugins/security_solution/public/common/components/callouts @elastic/security-detection-rule-management

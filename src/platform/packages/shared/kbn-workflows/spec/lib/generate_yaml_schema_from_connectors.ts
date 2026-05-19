@@ -149,6 +149,17 @@ function createRecursiveStepSchema(
   return stepSchema;
 }
 
+/**
+ * Returns true when a step's params schema has no required fields, meaning `with` can be omitted.
+ * This covers steps like `data.parseJson` whose inputs are all optional or entirely absent.
+ */
+function hasNoRequiredFields(schema: z.ZodType): boolean {
+  if (!(schema instanceof z.ZodObject)) return false;
+  return Object.values(schema.shape).every(
+    (field) => field instanceof z.ZodOptional || field instanceof z.ZodDefault
+  );
+}
+
 function generateStepSchemaForConnector(
   connector: ConnectorContractUnion,
   stepSchema: z.ZodType,
@@ -161,11 +172,17 @@ function generateStepSchemaForConnector(
       connector.hasConnectorId === 'required' ? z.string() : z.string().optional();
   }
 
+  // If all params are optional (or there are none), `with` itself should be optional so users
+  // don't have to write an empty `with: {}` block for steps that need no inputs.
+  const withSchema = hasNoRequiredFields(connector.paramsSchema)
+    ? connector.paramsSchema.optional()
+    : connector.paramsSchema;
+
   return BaseConnectorStepSchema.extend({
     type: connector.description
       ? z.literal(connector.type).describe(connector.description)
       : z.literal(connector.type),
-    with: connector.paramsSchema,
+    with: withSchema,
     ...connectorIdSchema,
     'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
     ...(connector.configSchema && connector.configSchema.shape),

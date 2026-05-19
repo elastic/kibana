@@ -191,10 +191,10 @@ function getLegendLayout(
       placement: 'inside',
       layout: {
         type: 'grid',
-        truncate: {
-          max_lines,
+        truncate: stripUndefined({
           enabled,
-        },
+          max_lines,
+        }),
       },
       ...(legend.floatingColumns ? { columns: legend.floatingColumns } : {}),
       ...getLegendAlignment(legend),
@@ -216,10 +216,10 @@ function getLegendLayout(
         }
       : {
           type: 'grid',
-          truncate: {
-            max_lines,
+          truncate: stripUndefined({
             enabled,
-          },
+            max_lines,
+          }),
         },
   }) satisfies XYLegendOutsideHorizontal | XYLegendOutsideVertical;
 }
@@ -236,7 +236,7 @@ function getApiLegendTruncate(
 
   return {
     max_lines: maxLines ?? 1,
-    enabled: shouldTruncate,
+    ...(shouldTruncate !== undefined ? { enabled: shouldTruncate } : {}),
   };
 }
 
