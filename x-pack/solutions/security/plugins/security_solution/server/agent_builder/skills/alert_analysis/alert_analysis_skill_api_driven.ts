@@ -47,6 +47,13 @@ Hard rules:
   inside a workflow YAML — they are not workflow step types.
 - If \`workflow_execute_step\` returns \`"alert not found"\` or any explicit error,
   STOP and report the error verbatim. Do NOT verify by listing all alerts.
+- When \`security.alerts\` returns results, do NOT fall back to
+  \`platform.core.search\` or \`platform.core.list_indices\` to "verify" or
+  "enrich" those results. The alert documents already include source-event
+  context. If you need richer context, re-issue a more specific
+  \`security.alerts\` query (e.g. narrow by host, time, or rule). Use
+  \`security.security_labs_search\` only for threat-intel context, not for
+  event correlation.
 - If \`security.security_labs_search\` returns an install-not-completed error
   pointing at the GenAI Settings page, surface that link to the user as the
   final answer; do NOT retry the tool, do NOT call other tools to compensate,

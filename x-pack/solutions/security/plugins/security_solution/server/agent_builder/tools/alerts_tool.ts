@@ -23,7 +23,7 @@ const alertsSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Specific alerts index to search against. If not provided, will search against .alerts-security.alerts-* pattern.'
+      'Specific alerts index to search against. If not provided, will search against the .alerts-security.alerts-* wildcard pattern (use the wildcard form, NOT the per-space alias .alerts-security.alerts-<space>, which ES|QL cannot resolve).'
     ),
   isCount: z
     .boolean()
@@ -36,6 +36,34 @@ const alertsSchema = z.object({
 export const SECURITY_ALERTS_TOOL_ID = securityTool('alerts');
 
 /**
+ * Wildcard pattern that targets ALL backing indices behind the
+ * security alerts alias. Using the wildcard form (rather than the
+ * alias `${DEFAULT_ALERTS_INDEX}-${spaceId}`) is load-bearing for two
+ * reasons:
+ *
+ * 1. **ES|QL cannot resolve aliases as data sources.** Quoting
+ *    `FROM .alerts-security.alerts-default` against ES|QL fails with
+ *    `Unknown data source ".alerts-security.alerts-default"` even
+ *    though the alias resolves cleanly via `_search`. The wildcard
+ *    pattern resolves to the underlying `.internal.alerts-*` indices
+ *    that ES|QL CAN read. (See REPORT_ITER3.md for the empirical
+ *    trace evidence — alias-form FROM clauses produced
+ *    `Unknown data source` errors on 4/5 reps.)
+ *
+ * 2. **Cross-space safety.** The alerts alias is per-space; using the
+ *     wildcard avoids the alerts tool unintentionally returning
+ *     results from a different space than the caller's. RBAC at the
+ *     security-solution layer scopes the underlying indices the
+ *     calling user can actually read.
+ *
+ * Combined with `allowPatternTarget: true` on `runSearchTool`, this
+ * pattern bypasses the search-tool dispatcher's per-call LLM index
+ * selection entirely — saving an LLM round-trip and removing
+ * non-determinism in the FROM-clause output.
+ */
+const ALERTS_INDEX_PATTERN = `${DEFAULT_ALERTS_INDEX}-*` as const;
+
+/**
  * Checks if the given index is a security alerts index
  */
 const isAlertsIndex = (index: string): boolean => {
@@ -43,24 +71,26 @@ const isAlertsIndex = (index: string): boolean => {
 };
 
 /**
- * Enhances the natural language query with instructions to use KEEP clause for alert searches.
- * This ensures the LLM generates ES|QL queries that filter to only essential fields.
- * Additionally, for count queries, ensures optimal count query generation.
+ * Static, prompt-cacheable guidance the search subgraph injects via its
+ * `## Additional Instructions` section (see search/prompts.ts). Building these
+ * strings once at module load — instead of concatenating them onto every
+ * user-supplied NL query — keeps the per-call NL query clean (so the
+ * conversation history doesn't bloat with ~3KB of boilerplate per tool call)
+ * and lets the upstream prompt cache hit on the static prefix across calls.
  */
-const enhanceQueryForAlerts = (nlQuery: string, index: string, isCount?: boolean): string => {
+const ALERTS_FIELDS_LIST = ESSENTIAL_ALERT_FIELDS.map((field) => `\`${field}\``).join(', ');
+
+const ALERTS_KEEP_INSTRUCTION = `When generating ES|QL queries against the security alerts index, you MUST include a KEEP clause limited to these essential fields: ${ALERTS_FIELDS_LIST}. This reduces context window usage by filtering out unnecessary nested data like DLL lists, call stacks, and memory regions. Add the KEEP clause before any LIMIT clause, or at the end if there's no LIMIT. Always preserve the leading dot in the FROM clause AND target the wildcard pattern (e.g. FROM .alerts-security.alerts-*). Do not target the per-space alias FROM .alerts-security.alerts-<space>; ES|QL cannot resolve that alias as a data source.`;
+
+const ALERTS_COUNT_INSTRUCTION = `This is a count query. Generate an ES|QL query that returns ONLY a count result, not individual document rows. Use STATS count = COUNT(*) to return a single number. If grouping is needed (e.g., "count by severity"), use STATS count = COUNT(*) BY <field> but ensure the result is aggregated counts, not individual document rows. Do NOT include a LIMIT clause for count queries unless grouping is used.`;
+
+const buildAlertsCustomInstructions = (index: string, isCount?: boolean): string | undefined => {
   if (!isAlertsIndex(index)) {
-    return nlQuery;
+    return undefined;
   }
-
-  const fieldsList = ESSENTIAL_ALERT_FIELDS.map((field) => `\`${field}\``).join(', ');
-  let instruction = ` IMPORTANT: When generating ES|QL queries, you MUST include a KEEP clause to limit results to only these essential fields: ${fieldsList}. This reduces context window usage by filtering out unnecessary nested data like DLL lists, call stacks, and memory regions. Add the KEEP clause before any LIMIT clause, or at the end if there's no LIMIT.`;
-
-  // For count queries, add specific instructions to ensure optimal count query generation
-  if (isCount) {
-    instruction += ` CRITICAL: This is a count query. You MUST generate an ES|QL query that returns ONLY a count result, not individual document rows. Use STATS count = COUNT(*) to return a single number. If grouping is needed (e.g., "count by severity"), use STATS count = COUNT(*) BY [field] but ensure the result is aggregated counts, not individual document rows. Do NOT include a LIMIT clause for count queries unless grouping is used.`;
-  }
-
-  return `${nlQuery}${instruction}`;
+  return isCount
+    ? `${ALERTS_KEEP_INSTRUCTION}\n\n${ALERTS_COUNT_INSTRUCTION}`
+    : ALERTS_KEEP_INSTRUCTION;
 };
 
 export const alertsTool = (
@@ -80,12 +110,11 @@ export const alertsTool = (
     },
     handler: async (
       { query: nlQuery, index, isCount },
-      { esClient, modelProvider, spaceId, events }
+      { esClient, modelProvider, spaceId: _spaceId, events }
     ) => {
-      const searchIndex = index ?? `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
+      const searchIndex = index ?? ALERTS_INDEX_PATTERN;
 
-      // Enhance the query with KEEP clause instructions if searching alerts index
-      const enhancedQuery = enhanceQueryForAlerts(nlQuery, searchIndex, isCount);
+      const customInstructions = buildAlertsCustomInstructions(searchIndex, isCount);
 
       logger.debug(
         `alerts tool called with query: ${nlQuery}, index: ${searchIndex}, isCount: ${
@@ -93,8 +122,14 @@ export const alertsTool = (
         }`
       );
       const results = await runSearchTool({
-        nlQuery: enhancedQuery,
+        nlQuery,
         index: searchIndex,
+        // The default index `${DEFAULT_ALERTS_INDEX}-*` is an index pattern,
+        // not a single concrete index. Allow the search subgraph to honor
+        // the pattern verbatim (skipping its per-call index-explorer LLM)
+        // so ES|QL receives the wildcard form it can actually resolve.
+        allowPatternTarget: true,
+        customInstructions,
         esClient: esClient.asCurrentUser,
         model: await modelProvider.getDefaultModel(),
         events,

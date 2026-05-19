@@ -60,6 +60,18 @@ describe('alertAnalysisApiDrivenSkill', () => {
     );
   });
 
+  it('documents the no-fallback-to-platform-core rule after security.alerts returns', () => {
+    expect(alertAnalysisApiDrivenSkill.content).toContain(
+      'When `security.alerts` returns results, do NOT fall back to'
+    );
+    expect(alertAnalysisApiDrivenSkill.content).toContain('`platform.core.search`');
+    expect(alertAnalysisApiDrivenSkill.content).toContain('`platform.core.list_indices`');
+    expect(alertAnalysisApiDrivenSkill.content).toContain('re-issue a more specific');
+    expect(alertAnalysisApiDrivenSkill.content).toContain(
+      '`security.security_labs_search` only for threat-intel context'
+    );
+  });
+
   it('guards against retrying security.security_labs_search when content is not installed', () => {
     expect(alertAnalysisApiDrivenSkill.content).toContain('install-not-completed error');
     expect(alertAnalysisApiDrivenSkill.content).toContain('GenAI Settings');
