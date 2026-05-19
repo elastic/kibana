@@ -27,6 +27,8 @@ import { useKibana } from '../../hooks/use_kibana';
 import { PromptModal } from './prompt_modal';
 import { buildPrompt } from './util';
 import { AgentBuilderPanelContainer } from './styles';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 const AgentInstallPanel: React.FC<{
   icon: string;
@@ -62,6 +64,7 @@ export const AgentInstallSection = () => {
   const { services } = useKibana();
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
   const [modalPrompt, setModalPrompt] = useState('');
+  const usageTracker = useUsageTracker();
 
   const closePromptModal = useCallback(() => setIsPromptModalOpen(false), []);
 
@@ -73,13 +76,14 @@ export const AgentInstallSection = () => {
   }, []);
 
   const handleOpenInAgentBuilder = useCallback(() => {
+    usageTracker.click(AnalyticsEvents.agentBuilderOpened);
     services.agentBuilder?.openChat({
       initialMessage: buildPrompt('agent-builder'),
       autoSendInitialMessage: true,
       newConversation: true,
       sessionTag: 'search-getting-started',
     });
-  }, [services.agentBuilder]);
+  }, [services.agentBuilder, usageTracker]);
 
   return (
     <>
