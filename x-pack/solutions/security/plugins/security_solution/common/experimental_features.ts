@@ -247,6 +247,11 @@ export const allowedExperimentalValues = Object.freeze({
   entityAnalyticsEntityStoreV2: false,
 
   /**
+   * Enables entity ML job behavior maintainer
+   */
+  entityAnalyticsMlJobBehaviorMaintainer: false,
+
+  /**
    * Enables the deprecated prebuilt rules UI
    * Release: 9.4
    */
