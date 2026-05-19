@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { v5 as uuidv5 } from 'uuid';
+import { escapeQuotes } from '@kbn/es-query';
 import { omit } from 'lodash';
 import { parse } from 'yaml';
 import deepEqual from 'fast-deep-equal';
@@ -135,12 +136,18 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
   const internalSoClientWithoutSpaceExtension =
     appContextService.getInternalUserSOClientWithoutSpaceExtension();
   let agentPoliciesKuery: string;
-  const packagePoliciesKuery: string = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.output_id:"${outputId}"`;
+  const packagePoliciesKuery: string = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.output_id:"${escapeQuotes(
+    outputId!
+  )}"`;
   if (outputId) {
     if (isDefault) {
-      agentPoliciesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}" or not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
+      agentPoliciesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${escapeQuotes(
+        outputId
+      )}" or not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
     } else {
-      agentPoliciesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}"`;
+      agentPoliciesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${escapeQuotes(
+        outputId
+      )}"`;
     }
   } else {
     if (isDefault) {
