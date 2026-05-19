@@ -103,6 +103,7 @@ dependsOn:
   - '@kbn/inbox-plugin'
   - '@kbn/inbox-common'
   - '@kbn/core-saved-objects-common'
+  - '@kbn/datemath'
 tags:
   - plugin
   - prod
