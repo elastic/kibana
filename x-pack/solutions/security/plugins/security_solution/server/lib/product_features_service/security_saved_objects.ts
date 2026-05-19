@@ -8,6 +8,7 @@
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
 import { EngineDescriptorTypeName, EntityStoreGlobalStateTypeName } from '@kbn/entity-store/server';
+import { SO_ENTITY_DEFINITION_TYPE } from '@kbn/entityManager-plugin/server/saved_objects';
 import {
   timelineSavedObjectTypes,
   notesSavedObjectTypes,
@@ -30,6 +31,7 @@ export const securityV1SavedObjects = [
   CLOUD_POSTURE_SAVED_OBJECT_RULE_TYPE,
   CLOUD_SECURITY_POSTURE_SETTINGS,
   CLOUD_SECURITY_POSTURE_BENCHMARK_RULE_TEMPLATE,
+  SO_ENTITY_DEFINITION_TYPE,
   ...savedObjectTypes,
 ];
 
@@ -40,6 +42,7 @@ export const securityV2SavedObjects = [
   CLOUD_POSTURE_SAVED_OBJECT_RULE_TYPE,
   CLOUD_SECURITY_POSTURE_SETTINGS,
   CLOUD_SECURITY_POSTURE_BENCHMARK_RULE_TEMPLATE,
+  SO_ENTITY_DEFINITION_TYPE,
   ...savedObjectTypes.filter(
     (type) => ![noteType.name, pinnedEventType.name, timelineType.name].includes(type)
   ),
@@ -57,6 +60,7 @@ export const securityV5SavedObjects = [
   CLOUD_SECURITY_POSTURE_SETTINGS,
   CLOUD_SECURITY_POSTURE_BENCHMARK_RULE_TEMPLATE,
   EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
+  SO_ENTITY_DEFINITION_TYPE,
   // Entity Store v2 saved objects
   EngineDescriptorTypeName,
   EntityStoreGlobalStateTypeName,
