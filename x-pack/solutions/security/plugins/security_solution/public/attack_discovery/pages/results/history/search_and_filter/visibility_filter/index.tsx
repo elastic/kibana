@@ -163,7 +163,7 @@ const VisibilityFilterComponent: React.FC<Props> = ({ isLoading = false, setShar
         closePopover={closePopover}
         id={filterGroupPopoverId}
         isOpen={isPopoverOpen}
-        panelPaddingSize="none"
+        panelPaddingSize="s"
       >
         <EuiSelectable
           aria-label={i18n.VISIBILITY}

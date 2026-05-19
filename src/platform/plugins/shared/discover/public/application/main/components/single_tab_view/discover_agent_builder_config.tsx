@@ -241,6 +241,7 @@ export const DiscoverAgentBuilderConfig = () => {
     documentState.esqlQueryColumns,
     documentState.result,
     hasEsqlResults,
+    isEsqlMode,
     query,
     timeRange,
     totalHits,
