@@ -348,6 +348,27 @@ const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({ at
           <ScheduleDisplay interval={interval} from={from} />
         </>
       )}
+
+      <EuiSpacer size="s" />
+      <EuiCallOut
+        size="s"
+        color="primary"
+        iconType="iInCircle"
+        title={i18n.translate(
+          'xpack.securitySolution.agentBuilder.ruleAttachment.limitationsTitle',
+          { defaultMessage: 'AI rule creation limitations' }
+        )}
+      >
+        <EuiText size="xs">
+          {i18n.translate(
+            'xpack.securitySolution.agentBuilder.ruleAttachment.limitationsBody',
+            {
+              defaultMessage:
+                'Only ES|QL rules are supported. Requires existing index data. Severity and risk score default to Low / 21 — ask the assistant to change them.',
+            }
+          )}
+        </EuiText>
+      </EuiCallOut>
     </EuiPanel>
   );
 };

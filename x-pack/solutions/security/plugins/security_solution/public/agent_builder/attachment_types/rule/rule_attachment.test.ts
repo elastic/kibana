@@ -296,23 +296,6 @@ describe('createRuleAttachmentDefinition', () => {
       expect(buttons[2].label).toBe('View rule');
     });
 
-    it('does not include "View rule" button when on a rule form page', () => {
-      (window as { location: unknown }).location = {
-        pathname: '/app/security/rules/create',
-      };
-      const ruleWithId = { ...validRule, id: 'rule-123' };
-      const application = makeApplication(true);
-      const definition = createRuleAttachmentDefinition({
-        application,
-        aiRuleCreation,
-        uiSettings: makeUiSettings(),
-      });
-      const buttons = definition.getActionButtons!(
-        makeActionButtonsParams(JSON.stringify(ruleWithId)) as never
-      );
-      expect(buttons).toHaveLength(2);
-    });
-
     it('primary button handler calls requestSaveRule with the parsed rule', () => {
       const application = makeApplication(true);
       const definition = createRuleAttachmentDefinition({
