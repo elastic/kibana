@@ -10,36 +10,25 @@
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { getMigrationHash, getTypeHashes } from '@kbn/core-test-helpers-so-type-serializer';
 import type { Root } from '@kbn/core-root-server-internal';
-import {
-  createTestServers,
-  createRootWithCorePlugins,
-  type TestElasticsearchUtils,
-} from '@kbn/core-test-helpers-kbn-server';
+import type { InternalCoreSetup } from '@kbn/core-lifecycle-server-internal';
+import { createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
 import { SAVED_OBJECT_TYPES_COUNT } from '@kbn/core-saved-objects-server-internal';
 import { sortBy } from 'lodash';
 import { getVirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
 
 describe('checking migration metadata changes on all registered SO types', () => {
-  let esServer: TestElasticsearchUtils;
   let root: Root;
   let typeRegistry: ISavedObjectTypeRegistry;
 
   beforeAll(async () => {
-    const { startES } = createTestServers({
-      adjustTimeout: (t: number) => jest.setTimeout(t),
-    });
-
-    esServer = await startES();
     root = createRootWithCorePlugins({}, { oss: false });
     await root.preboot();
-    await root.setup();
-    const coreStart = await root.start();
-    typeRegistry = coreStart.savedObjects.getTypeRegistry();
+    const coreSetup: InternalCoreSetup = await root.setup();
+    typeRegistry = coreSetup.savedObjects.getTypeRegistry();
   });
 
   afterAll(async () => {
     await root?.shutdown();
-    await esServer?.stop();
   });
 
   // This test is meant to fail when any change is made in registered types that could potentially impact the SO migration.
@@ -60,7 +49,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "action": "3ab1aa6b6d32d7704fa2dc5fe34c65d632d869af3736f5d08a761d09b93430e2",
         "action_task_params": "6751dc8a4707a432bc9b90f5a025f183aefc84bca5ec26c29ce6939b24ea81e4",
         "ad_hoc_run_params": "9c372f2a8f8b468e9b699a6df633c7f14fab7f13216c9ec160813e75bae56098",
-        "alert": "0652df24a4ec968c4aec201cb94a6492d5124d43d837dad4364f5f1c819d05b6",
+        "alert": "7b187cdde57e887606e9eb422435707caf0c099002c8156e35085f39806175e8",
         "alerting_rule_template": "a26521005d8a51af336ec95a2097c4bd073980c050e3c675cec3851acff78fd9",
         "anonymization-salt": "487fee82ef036b64199d1eb26b9834c0f67d94d2ed7b74e5c10e04fa8616554a",
         "api_key_pending_invalidation": "c1c0f5cbb1175a7d25c762b290d9d46c04557e4a8ae6a2c7bf77b8fd99b2146d",
@@ -278,8 +267,9 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "ad_hoc_run_params|10.1.0: 2189eaa92bd66dfcc4ea2e5ec0e63ead9341a96eddd671def942ffd51bb2be0e",
         "==========================================================================================",
         "alert|global: 8365bd1a75d780902feb5f272ed0d6c430d3d63f",
-        "alert|mappings: bd90b2061275655e3dad670cf7d9c3aaace56c6b",
+        "alert|mappings: 015e522046daf4844ff5079c8285a1d80607e77b",
         "alert|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        "alert|10.12.0: 8919265ede1e62439888add7f180e5c0740ae9f27048ae77b5b87e9e34e55d9b",
         "alert|10.11.0: 733056b6ebff34603bf990f09f8776c5b7231967f447ad166310c57618c4e830",
         "alert|10.10.0: 34ac91258cc70cff691a8c2549ef5a834ee3b6ef6348ddee6c582b8e23aea704",
         "alert|10.9.0: 2d45844f7ac6873a16c579f4bee9086e8059a2ec52803a3ab94b990795bf1aa2",
@@ -1436,7 +1426,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "action": "10.2.0",
         "action_task_params": "10.2.0",
         "ad_hoc_run_params": "10.3.0",
-        "alert": "10.11.0",
+        "alert": "10.12.0",
         "alerting_rule_template": "10.3.0",
         "anonymization-salt": "10.1.0",
         "api_key_pending_invalidation": "10.2.0",
@@ -1604,7 +1594,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "action": "10.2.0",
         "action_task_params": "10.2.0",
         "ad_hoc_run_params": "10.3.0",
-        "alert": "10.11.0",
+        "alert": "10.12.0",
         "alerting_rule_template": "10.3.0",
         "anonymization-salt": "10.1.0",
         "api_key_pending_invalidation": "10.2.0",
