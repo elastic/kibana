@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { PluginEntry } from '../types';
 /**
  * Find the index entry file for a given target directory within a plugin.
@@ -24,11 +33,14 @@ export declare function findTargetEntry(contextDir: string, target?: string): st
  * group targets under the same `webpackChunkName`, ensuring rspack merges
  * them into a single chunk per plugin.
  */
-export declare function collectPluginEntries(repoRoot: string, plugins: PluginEntry[]): Array<{
-    id: string;
-    path: string;
-    bundleId: string;
-    pluginId: string;
+export declare function collectPluginEntries(
+  repoRoot: string,
+  plugins: PluginEntry[]
+): Array<{
+  id: string;
+  path: string;
+  bundleId: string;
+  pluginId: string;
 }>;
 /**
  * Create a unified entry module with ALL-ASYNC loading:
@@ -42,9 +54,13 @@ export declare function collectPluginEntries(repoRoot: string, plugins: PluginEn
  * before window.__kbnPluginsLoaded resolves, ensuring core is registered
  * before __kbnBootstrap__() runs.
  */
-export declare function createUnifiedEntry(wrapperDir: string, repoRoot: string, pluginEntries: Array<{
+export declare function createUnifiedEntry(
+  wrapperDir: string,
+  repoRoot: string,
+  pluginEntries: Array<{
     id: string;
     path: string;
     bundleId: string;
     pluginId: string;
-}>): string;
+  }>
+): string;

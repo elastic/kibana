@@ -1,23 +1,32 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /**
  * Return type for the {@link useContentListPagination} hook.
  */
 export interface UseContentListPaginationReturn {
-    /** Whether pagination is supported (enabled via features). */
-    isSupported: boolean;
-    /** Current page index (0-based). */
-    pageIndex: number;
-    /** Current number of items per page. */
-    pageSize: number;
-    /** Total number of items matching the current query. */
-    totalItems: number;
-    /** Total number of pages. */
-    pageCount: number;
-    /** Available page size options for the dropdown. */
-    pageSizeOptions: number[];
-    /** Navigate to a specific page index. No-op if pagination is disabled. */
-    setPageIndex: (index: number) => void;
-    /** Change the page size (resets to page 0). No-op if pagination is disabled. Persists to `localStorage`. */
-    setPageSize: (size: number) => void;
+  /** Whether pagination is supported (enabled via features). */
+  isSupported: boolean;
+  /** Current page index (0-based). */
+  pageIndex: number;
+  /** Current number of items per page. */
+  pageSize: number;
+  /** Total number of items matching the current query. */
+  totalItems: number;
+  /** Total number of pages. */
+  pageCount: number;
+  /** Available page size options for the dropdown. */
+  pageSizeOptions: number[];
+  /** Navigate to a specific page index. No-op if pagination is disabled. */
+  setPageIndex: (index: number) => void;
+  /** Change the page size (resets to page 0). No-op if pagination is disabled. Persists to `localStorage`. */
+  setPageSize: (size: number) => void;
 }
 /**
  * Hook to access and control pagination functionality.

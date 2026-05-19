@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { FC } from 'react';
 /**
  * Generates the static property key (Symbol) for an assembly's part.
@@ -41,11 +50,14 @@ export declare const getPresetKey: (assembly: string) => symbol;
  * });
  * ```
  */
-export declare const tagDeclarativeComponent: <C extends (...args: any[]) => null>(component: C, config: {
+export declare const tagDeclarativeComponent: <C extends (...args: any[]) => null>(
+  component: C,
+  config: {
     assembly: string;
     part: string;
     preset?: string;
-}) => C;
+  }
+) => C;
 /**
  * Creates a declarative component that returns `null`.
  *
@@ -60,7 +72,7 @@ export declare const tagDeclarativeComponent: <C extends (...args: any[]) => nul
  * @returns A React functional component that returns `null`.
  */
 export declare const createDeclarativeComponent: <P>(config: {
-    assembly: string;
-    part: string;
-    preset?: string;
+  assembly: string;
+  part: string;
+  preset?: string;
 }) => FC<P>;

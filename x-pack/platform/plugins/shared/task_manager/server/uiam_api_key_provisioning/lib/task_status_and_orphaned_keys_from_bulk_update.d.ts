@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import type { InvalidationTarget } from '../../api_key_strategy';
 import type { UiamKeyResult } from '../types';
 import { type TaskUiamProvisioningStatusDoc } from './task_uiam_provisioning_observability_status';
@@ -6,18 +13,21 @@ import { type TaskUiamProvisioningStatusDoc } from './task_uiam_provisioning_obs
  * Mirrors `BulkUpdateResultItem` in alerting's `provisioning_status.ts`.
  */
 export interface TaskBulkUpdateResultItem {
-    id: string;
-    error?: {
-        message?: string;
-    };
+  id: string;
+  error?: {
+    message?: string;
+  };
 }
 /**
  * Builds status docs from bulk update results and collects invalidation targets for tasks
  * that failed to update (orphaned), shaped like {@link InvalidationTarget} in `api_key_strategy`
  * and Alerting’s notion of “orphan” UIAM material to queue for the invalidate pipeline.
  */
-export declare const statusDocsAndOrphanedUiamKeysFromTaskBulkUpdate: (savedObjects: Array<TaskBulkUpdateResultItem>, uiamKeyByTaskId: Map<string, UiamKeyResult>) => {
-    provisioningStatusForCompletedTasks: TaskUiamProvisioningStatusDoc[];
-    provisioningStatusForFailedTasks: TaskUiamProvisioningStatusDoc[];
-    orphanedInvalidationTargets: InvalidationTarget[];
+export declare const statusDocsAndOrphanedUiamKeysFromTaskBulkUpdate: (
+  savedObjects: Array<TaskBulkUpdateResultItem>,
+  uiamKeyByTaskId: Map<string, UiamKeyResult>
+) => {
+  provisioningStatusForCompletedTasks: TaskUiamProvisioningStatusDoc[];
+  provisioningStatusForFailedTasks: TaskUiamProvisioningStatusDoc[];
+  orphanedInvalidationTargets: InvalidationTarget[];
 };

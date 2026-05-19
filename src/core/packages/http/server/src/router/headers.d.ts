@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { IncomingHttpHeaders } from 'http';
 /**
  * Converts an object type to a new object type where each string
@@ -8,7 +17,7 @@ import type { IncomingHttpHeaders } from 'http';
  * @public
  */
 export type StringKeysAsVals<T> = {
-    [K in keyof T]: string extends K ? never : number extends K ? never : K;
+  [K in keyof T]: string extends K ? never : number extends K ? never : K;
 };
 /**
  * Creates a Union type of all known keys of a given interface.
@@ -25,8 +34,10 @@ export type StringKeysAsVals<T> = {
  * @public
  */
 export type KnownKeys<T> = StringKeysAsVals<T> extends {
-    [_ in keyof T]: infer U;
-} ? U : never;
+  [_ in keyof T]: infer U;
+}
+  ? U
+  : never;
 /**
  * Set of well-known HTTP headers.
  * @public
@@ -37,12 +48,14 @@ export type KnownHeaders = KnownKeys<IncomingHttpHeaders>;
  * @public
  */
 export type Headers = {
-    [header in KnownHeaders]?: string | string[] | undefined;
+  [header in KnownHeaders]?: string | string[] | undefined;
 } & {
-    [header: string]: string | string[] | undefined;
+  [header: string]: string | string[] | undefined;
 };
 /**
  * Http response headers to set.
  * @public
  */
-export type ResponseHeaders = Record<KnownHeaders, string | string[]> | Record<string, string | string[]>;
+export type ResponseHeaders =
+  | Record<KnownHeaders, string | string[]>
+  | Record<string, string | string[]>;

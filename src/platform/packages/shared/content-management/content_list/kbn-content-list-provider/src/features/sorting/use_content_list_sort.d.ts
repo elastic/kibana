@@ -1,15 +1,24 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /**
  * Return type for the `useContentListSort` hook.
  */
 export interface UseContentListSortReturn {
-    /** Current sort field name. */
-    field: string;
-    /** Current sort direction. */
-    direction: 'asc' | 'desc';
-    /** Updates the sort configuration. No-op if sorting is disabled. */
-    setSort: (field: string, direction: 'asc' | 'desc') => void;
-    /** Whether sorting is supported (enabled via features). */
-    isSupported: boolean;
+  /** Current sort field name. */
+  field: string;
+  /** Current sort direction. */
+  direction: 'asc' | 'desc';
+  /** Updates the sort configuration. No-op if sorting is disabled. */
+  setSort: (field: string, direction: 'asc' | 'desc') => void;
+  /** Whether sorting is supported (enabled via features). */
+  isSupported: boolean;
 }
 /**
  * Hook to access and control sorting functionality.

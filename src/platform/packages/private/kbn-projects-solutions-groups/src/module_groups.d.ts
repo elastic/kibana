@@ -1,11 +1,27 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /**
  * The base group, for all modules that are commonly used across solutions.
  */
-export declare const KIBANA_PLATFORM: "platform";
+export declare const KIBANA_PLATFORM: 'platform';
 /**
  * A list of all Kibana groups (platform + solutions).
  */
-export declare const KIBANA_GROUPS: readonly ["platform", "observability", "security", "search", "workplaceai", "vectordb"];
+export declare const KIBANA_GROUPS: readonly [
+  'platform',
+  'observability',
+  'security',
+  'search',
+  'workplaceai',
+  'vectordb'
+];
 /**
  * A type that defines the existing groups (platform + solutions).
  */

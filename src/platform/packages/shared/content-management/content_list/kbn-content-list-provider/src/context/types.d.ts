@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { DataSourceConfig } from '../datasource';
 import type { ContentListItemConfig } from '../item';
 /**
@@ -13,13 +22,15 @@ import type { ContentListItemConfig } from '../item';
  * - **Both**: `queryKeyScope` is used for caching/persistence, `id` is available for other
  *   purposes (e.g., `data-test-subj`, analytics).
  */
-export type ContentListIdentity = {
-    id: string;
-    queryKeyScope?: string;
-} | {
-    id?: string;
-    queryKeyScope: string;
-};
+export type ContentListIdentity =
+  | {
+      id: string;
+      queryKeyScope?: string;
+    }
+  | {
+      id?: string;
+      queryKeyScope: string;
+    };
 /**
  * User-facing labels for the content type.
  *
@@ -34,24 +45,24 @@ export type ContentListIdentity = {
  * ```
  */
 export interface ContentListLabels {
-    /** Singular form of the entity name (e.g., "dashboard"). Should be i18n-translated. */
-    entity: string;
-    /** Plural form of the entity name (e.g., "dashboards"). Should be i18n-translated. */
-    entityPlural: string;
-    /** Placeholder text for the search input. Should be i18n-translated. */
-    searchPlaceholder?: string;
+  /** Singular form of the entity name (e.g., "dashboard"). Should be i18n-translated. */
+  entity: string;
+  /** Plural form of the entity name (e.g., "dashboards"). Should be i18n-translated. */
+  entityPlural: string;
+  /** Placeholder text for the search input. Should be i18n-translated. */
+  searchPlaceholder?: string;
 }
 /**
  * Base configuration fields shared by all content list variants.
  * @internal
  */
 interface ContentListCoreConfigBase {
-    /** User-facing labels for the content type. Should be i18n-translated strings. */
-    labels: ContentListLabels;
-    /** Optional, per-item configuration. */
-    item?: ContentListItemConfig;
-    /** When `true`, disables selection and editing actions. */
-    isReadOnly?: boolean;
+  /** User-facing labels for the content type. Should be i18n-translated strings. */
+  labels: ContentListLabels;
+  /** Optional, per-item configuration. */
+  item?: ContentListItemConfig;
+  /** When `true`, disables selection and editing actions. */
+  isReadOnly?: boolean;
 }
 /**
  * Core configuration - entity metadata and base settings.
@@ -63,6 +74,6 @@ export type ContentListCoreConfig = ContentListCoreConfigBase & ContentListIdent
  * @template T The raw item type from the datasource (defaults to `UserContentCommonSchema`).
  */
 export type ContentListConfig = ContentListCoreConfig & {
-    dataSource: DataSourceConfig;
+  dataSource: DataSourceConfig;
 };
 export type { ContentListServices } from '../services';

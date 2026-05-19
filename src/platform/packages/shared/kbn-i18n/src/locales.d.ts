@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /**
  * A supported locale code (e.g., `"en"`, `"fr-FR"`). Widened to `string` so
  * deployments can configure additional locales via `kibana.yml` (`i18n.locales`)
@@ -34,15 +43,18 @@ export declare const getLocaleLabel: (id: SupportedLocaleId) => string;
  * lowercases locales internally (so `fr-FR` becomes `fr-fr`), but UI
  * options and persistence expect canonical casing (`fr-FR`).
  */
-export declare const toCanonicalLocaleId: (locale: string, availableLocales?: ReadonlyArray<{
+export declare const toCanonicalLocaleId: (
+  locale: string,
+  availableLocales?: ReadonlyArray<{
     id: string;
-}>) => SupportedLocaleId;
+  }>
+) => SupportedLocaleId;
 /**
  * A locale that the running Kibana instance offers in the language picker.
  */
 export interface AvailableLocale {
-    id: SupportedLocaleId;
-    label: string;
+  id: SupportedLocaleId;
+  label: string;
 }
 /**
  * Sets the list of locales the current Kibana instance offers in the

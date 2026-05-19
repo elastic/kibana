@@ -1,4 +1,13 @@
-import React from 'react';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type React from 'react';
 import type { ContentListItem } from '../../item';
 import type { BulkActionSkippedItem } from '../../bulk_actions';
 /**
@@ -9,22 +18,22 @@ import type { BulkActionSkippedItem } from '../../bulk_actions';
  * predicate, with reasons).
  */
 export interface DeleteConfirmationComponentProps {
-    /** Items that will actually be deleted on confirm. */
-    permitted: ContentListItem[];
-    /** Items rejected by the delete restriction, with reasons. */
-    skipped: BulkActionSkippedItem[];
-    /** Singular entity name (e.g., "dashboard"). */
-    entityName: string;
-    /** Plural entity name (e.g., "dashboards"). */
-    entityNamePlural: string;
-    /** Whether a delete operation is currently executing. */
-    isDeleting: boolean;
-    /** Error message from the last failed attempt, displayed inline. */
-    error?: string | null;
-    /** Called when the user cancels (or closes the informational dialog). */
-    onCancel: () => void;
-    /** Called when the user confirms the delete. Never invoked in informational mode. */
-    onConfirm: () => void;
+  /** Items that will actually be deleted on confirm. */
+  permitted: ContentListItem[];
+  /** Items rejected by the delete restriction, with reasons. */
+  skipped: BulkActionSkippedItem[];
+  /** Singular entity name (e.g., "dashboard"). */
+  entityName: string;
+  /** Plural entity name (e.g., "dashboards"). */
+  entityNamePlural: string;
+  /** Whether a delete operation is currently executing. */
+  isDeleting: boolean;
+  /** Error message from the last failed attempt, displayed inline. */
+  error?: string | null;
+  /** Called when the user cancels (or closes the informational dialog). */
+  onCancel: () => void;
+  /** Called when the user confirms the delete. Never invoked in informational mode. */
+  onConfirm: () => void;
 }
 /**
  * Stateless confirmation/explanation modal for delete operations.
@@ -38,4 +47,13 @@ export interface DeleteConfirmationComponentProps {
  * This dialog explains any partition that survives selection.
  * Use {@link DeleteConfirmationModal} for the connected version.
  */
-export declare const DeleteConfirmationComponent: ({ permitted, skipped, entityName, entityNamePlural, isDeleting, error, onCancel, onConfirm, }: DeleteConfirmationComponentProps) => React.JSX.Element;
+export declare const DeleteConfirmationComponent: ({
+  permitted,
+  skipped,
+  entityName,
+  entityNamePlural,
+  isDeleting,
+  error,
+  onCancel,
+  onConfirm,
+}: DeleteConfirmationComponentProps) => React.JSX.Element;

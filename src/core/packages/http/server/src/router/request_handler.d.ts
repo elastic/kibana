@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { RouteMethod } from './route';
 import type { KibanaRequest } from './request';
 import type { RequestHandlerContextBase } from './request_handler_context';
@@ -39,7 +48,18 @@ import type { KibanaResponseFactory } from './response_factory';
  * ```
  * @public
  */
-export type RequestHandler<P = unknown, Q = unknown, B = unknown, Context extends RequestHandlerContextBase = RequestHandlerContextBase, Method extends RouteMethod = any, ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory> = (context: Context, request: KibanaRequest<P, Q, B, Method>, response: ResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
+export type RequestHandler<
+  P = unknown,
+  Q = unknown,
+  B = unknown,
+  Context extends RequestHandlerContextBase = RequestHandlerContextBase,
+  Method extends RouteMethod = any,
+  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
+> = (
+  context: Context,
+  request: KibanaRequest<P, Q, B, Method>,
+  response: ResponseFactory
+) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 /**
  * Type-safe wrapper for {@link RequestHandler} function.
  * @example
@@ -53,4 +73,13 @@ export type RequestHandler<P = unknown, Q = unknown, B = unknown, Context extend
  * ```
  * @public
  */
-export type RequestHandlerWrapper = <P, Q, B, Context extends RequestHandlerContextBase = RequestHandlerContextBase, Method extends RouteMethod = any, ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory>(handler: RequestHandler<P, Q, B, Context, Method, ResponseFactory>) => RequestHandler<P, Q, B, Context, Method, ResponseFactory>;
+export type RequestHandlerWrapper = <
+  P,
+  Q,
+  B,
+  Context extends RequestHandlerContextBase = RequestHandlerContextBase,
+  Method extends RouteMethod = any,
+  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
+>(
+  handler: RequestHandler<P, Q, B, Context, Method, ResponseFactory>
+) => RequestHandler<P, Q, B, Context, Method, ResponseFactory>;

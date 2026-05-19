@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /**
  * Shared utilities for the Elastic Inference Service (EIS) development setup.
  *
@@ -16,25 +25,31 @@ import type http from 'http';
 import type https from 'https';
 import type { ToolingLog } from '@kbn/tooling-log';
 /** QA environment URL for the Elastic Inference Service. */
-export declare const EIS_QA_URL = "https://inference.eu-west-1.aws.svc.qa.elastic.cloud";
+export declare const EIS_QA_URL = 'https://inference.eu-west-1.aws.svc.qa.elastic.cloud';
 /** Elasticsearch `-E` argument that points the inference plugin at the QA EIS. */
-export declare const EIS_ES_ARG = "xpack.inference.elastic.url=https://inference.eu-west-1.aws.svc.qa.elastic.cloud";
+export declare const EIS_ES_ARG =
+  'xpack.inference.elastic.url=https://inference.eu-west-1.aws.svc.qa.elastic.cloud';
 export interface EisElasticsearchConnection {
-    baseUrl: string;
-    credentials: {
-        username: string;
-        password: string;
-    };
-    ssl: boolean;
+  baseUrl: string;
+  credentials: {
+    username: string;
+    password: string;
+  };
+  ssl: boolean;
 }
 /**
  * Minimal HTTP/HTTPS request helper. Returns the status code and raw body.
  * Shared between EIS setup (PUT _inference/_ccm) and connector discovery
  * (GET _inference/chat_completion/_all).
  */
-export declare const eisHttpRequest: (requestUrl: string, options: http.RequestOptions | https.RequestOptions, body?: string, ssl?: boolean) => Promise<{
-    statusCode: number;
-    data: string;
+export declare const eisHttpRequest: (
+  requestUrl: string,
+  options: http.RequestOptions | https.RequestOptions,
+  body?: string,
+  ssl?: boolean
+) => Promise<{
+  statusCode: number;
+  data: string;
 }>;
 export declare const createBasicAuth: (username: string, password: string) => string;
 /**
@@ -54,10 +69,18 @@ export declare const resolveCcmApiKey: (log: ToolingLog) => Promise<string>;
  * Defaults `readyTimeoutMs` to 5 minutes — large enough to cover a cold
  * snapshot install/start, small enough to surface real problems.
  */
-export declare const waitForEisEsReady: (es: EisElasticsearchConnection, log: ToolingLog, options?: {
+export declare const waitForEisEsReady: (
+  es: EisElasticsearchConnection,
+  log: ToolingLog,
+  options?: {
     readyTimeoutMs?: number;
-}) => Promise<void>;
+  }
+) => Promise<void>;
 /**
  * Sets the CCM API key in Elasticsearch via PUT _inference/_ccm.
  */
-export declare const setCcmApiKey: (apiKey: string, es: EisElasticsearchConnection, log: ToolingLog) => Promise<void>;
+export declare const setCcmApiKey: (
+  apiKey: string,
+  es: EisElasticsearchConnection,
+  log: ToolingLog
+) => Promise<void>;

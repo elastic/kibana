@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ContentListFeatures } from '../types';
 import type { ParsedQuery, UrlStateSlices } from './types';
 /**
@@ -7,8 +16,8 @@ import type { ParsedQuery, UrlStateSlices } from './types';
  * @property direction - The direction to sort in.
  */
 export interface SortState {
-    field: string;
-    direction: 'asc' | 'desc';
+  field: string;
+  direction: 'asc' | 'desc';
 }
 /**
  * The configuration for a sorting URL.
@@ -17,8 +26,8 @@ export interface SortState {
  * @property validSortFields - The valid sort fields.
  */
 export interface SortingUrlConfig {
-    initialSort: SortState;
-    validSortFields: ReadonlySet<string>;
+  initialSort: SortState;
+  validSortFields: ReadonlySet<string>;
 }
 /**
  * Gets the sorting configuration key from the sorting configuration.
@@ -26,7 +35,7 @@ export interface SortingUrlConfig {
  * @param sorting - The sorting configuration.
  * @returns The sorting configuration key.
  */
-export declare const getSortingConfigKey: (sorting: ContentListFeatures["sorting"]) => string;
+export declare const getSortingConfigKey: (sorting: ContentListFeatures['sorting']) => string;
 /**
  * Gets the sorting URL configuration from the sorting configuration key.
  *
@@ -40,7 +49,7 @@ export declare const getSortingUrlConfigFromKey: (key: string) => SortingUrlConf
  * @param search - The search configuration.
  * @returns The initial query text.
  */
-export declare const getInitialQueryText: (search: ContentListFeatures["search"]) => string;
+export declare const getInitialQueryText: (search: ContentListFeatures['search']) => string;
 /**
  * The codec for query text.
  *
@@ -49,9 +58,9 @@ export declare const getInitialQueryText: (search: ContentListFeatures["search"]
  * @property decode - Decodes the query text.
  */
 export declare const queryTextCodec: {
-    key: string;
-    encode: (queryText: string) => Partial<ParsedQuery>;
-    decode: (params: ParsedQuery) => string | undefined;
+  key: string;
+  encode: (queryText: string) => Partial<ParsedQuery>;
+  decode: (params: ParsedQuery) => string | undefined;
 };
 /**
  * The codec for sort.
@@ -60,10 +69,14 @@ export declare const queryTextCodec: {
  * @property encode - Encodes the sort.
  * @property decode - Decodes the sort.
  */
-export declare const sortCodec: (validSortFields: ReadonlySet<string>, initialSort: SortState, onUnknownField?: (field: string) => void) => {
-    key: string;
-    encode: (sort: SortState | undefined) => Partial<ParsedQuery>;
-    decode: (params: ParsedQuery) => SortState | undefined;
+export declare const sortCodec: (
+  validSortFields: ReadonlySet<string>,
+  initialSort: SortState,
+  onUnknownField?: (field: string) => void
+) => {
+  key: string;
+  encode: (sort: SortState | undefined) => Partial<ParsedQuery>;
+  decode: (params: ParsedQuery) => SortState | undefined;
 };
 /**
  * Parses the search string into a {@link ParsedQuery} object.
@@ -89,7 +102,10 @@ export declare const stringifySearch: (params: ParsedQuery) => string;
  * @param initialSort - The initial sort.
  * @returns The encoded URL state.
  */
-export declare const encodeUrlState: (state: UrlStateSlices, initialSort: SortState) => Partial<ParsedQuery>;
+export declare const encodeUrlState: (
+  state: UrlStateSlices,
+  initialSort: SortState
+) => Partial<ParsedQuery>;
 /**
  * Decodes the new shape of the URL state.
  *
@@ -99,7 +115,12 @@ export declare const encodeUrlState: (state: UrlStateSlices, initialSort: SortSt
  * @param onUnknownField - A callback to call when an unknown field is encountered.
  * @returns The decoded URL state.
  */
-export declare const decodeNewShape: (search: string, validSortFields: ReadonlySet<string>, initialSort: SortState, onUnknownField?: (field: string) => void) => UrlStateSlices;
+export declare const decodeNewShape: (
+  search: string,
+  validSortFields: ReadonlySet<string>,
+  initialSort: SortState,
+  onUnknownField?: (field: string) => void
+) => UrlStateSlices;
 /**
  * Checks if the URL parameters have the new shape.
  *
@@ -115,4 +136,8 @@ export declare const hasNewShapeParams: (params: ParsedQuery) => boolean;
  * @param consumed - The consumed keys.
  * @returns The merged and stringified search.
  */
-export declare const mergeAndStringify: (currentSearch: string, updates: Partial<ParsedQuery>, consumed?: ReadonlyArray<string>) => string;
+export declare const mergeAndStringify: (
+  currentSearch: string,
+  updates: Partial<ParsedQuery>,
+  consumed?: ReadonlyArray<string>
+) => string;

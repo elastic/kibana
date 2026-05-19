@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ContentListItem } from '../item';
 /**
  * One row in the `skipped` partition: an item that cannot have the bulk
@@ -5,10 +14,10 @@ import type { ContentListItem } from '../item';
  * the action's restriction predicate.
  */
 export interface BulkActionSkippedItem {
-    /** The original item the consumer asked the action to apply to. */
-    item: ContentListItem;
-    /** Reason string from the action's restriction predicate. */
-    reason: string;
+  /** The original item the consumer asked the action to apply to. */
+  item: ContentListItem;
+  /** Reason string from the action's restriction predicate. */
+  reason: string;
 }
 /**
  * The result of partitioning a bulk-action request through one action's
@@ -20,8 +29,8 @@ export interface BulkActionSkippedItem {
  * knows up-front that not every requested item will be affected.
  */
 export interface BulkActionPartition {
-    permitted: ContentListItem[];
-    skipped: BulkActionSkippedItem[];
+  permitted: ContentListItem[];
+  skipped: BulkActionSkippedItem[];
 }
 /**
  * Partition `items` into permitted and non-permitted subsets using a
@@ -31,4 +40,7 @@ export interface BulkActionPartition {
  * (with reason), and only `permitted` items reach the action handler.
  * When `restriction` is `undefined`, every item is permitted.
  */
-export declare const partitionByRestriction: (items: ContentListItem[], restriction?: (item: ContentListItem) => string | undefined) => BulkActionPartition;
+export declare const partitionByRestriction: (
+  items: ContentListItem[],
+  restriction?: (item: ContentListItem) => string | undefined
+) => BulkActionPartition;

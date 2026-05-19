@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
 import type { TaskPollingLifecycle } from '../polling_lifecycle';
@@ -8,24 +15,30 @@ import type { TaskRunMetric } from './task_run_metrics_aggregator';
 import type { TaskOverdueMetric } from './task_overdue_metrics_aggregator';
 import type { TaskManagerMetricsCollector } from './task_metrics_collector';
 export interface Metrics {
-    last_update: string;
-    metrics: {
-        task_claim?: Metric<TaskClaimMetric>;
-        task_run?: Metric<TaskRunMetric>;
-        task_overdue?: Metric<TaskOverdueMetric>;
-    };
+  last_update: string;
+  metrics: {
+    task_claim?: Metric<TaskClaimMetric>;
+    task_run?: Metric<TaskRunMetric>;
+    task_overdue?: Metric<TaskOverdueMetric>;
+  };
 }
 export interface Metric<T> {
-    timestamp: string;
-    value: T;
+  timestamp: string;
+  value: T;
 }
 interface CreateMetricsAggregatorsOpts {
-    config: TaskManagerConfig;
-    logger: Logger;
-    reset$: Observable<boolean>;
-    taskPollingLifecycle?: TaskPollingLifecycle;
-    taskManagerMetricsCollector?: TaskManagerMetricsCollector;
+  config: TaskManagerConfig;
+  logger: Logger;
+  reset$: Observable<boolean>;
+  taskPollingLifecycle?: TaskPollingLifecycle;
+  taskManagerMetricsCollector?: TaskManagerMetricsCollector;
 }
-export declare function createMetricsAggregators({ config, reset$, logger, taskPollingLifecycle, taskManagerMetricsCollector, }: CreateMetricsAggregatorsOpts): AggregatedStatProvider;
+export declare function createMetricsAggregators({
+  config,
+  reset$,
+  logger,
+  taskPollingLifecycle,
+  taskManagerMetricsCollector,
+}: CreateMetricsAggregatorsOpts): AggregatedStatProvider;
 export declare function createMetricsStream(provider$: AggregatedStatProvider): Observable<Metrics>;
 export {};

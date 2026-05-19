@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { ShallowPromise } from '@kbn/utility-types';
 import type { HandlerParameters, IContextProvider } from './context_provider';
@@ -73,28 +82,35 @@ import type { RequestHandlerContextBase } from './request_handler_context';
  * @public
  */
 export interface IContextContainer {
-    /**
-     * Register a new context provider.
-     *
-     * @remarks
-     * The value (or resolved Promise value) returned by the `provider` function will be attached to the context object
-     * on the key specified by `contextName`.
-     *
-     * Throws an exception if more than one provider is registered for the same `contextName`.
-     *
-     * @param pluginOpaqueId - The plugin opaque ID for the plugin that registers this context.
-     * @param contextName - The key of the `TContext` object this provider supplies the value for.
-     * @param provider - A {@link IContextProvider} to be called each time a new context is created.
-     * @returns The {@link IContextContainer} for method chaining.
-     */
-    registerContext<Context extends RequestHandlerContextBase, ContextName extends keyof Context>(pluginOpaqueId: PluginOpaqueId, contextName: ContextName, provider: IContextProvider<Context, ContextName>): this;
-    /**
-     * Create a new handler function pre-wired to context for the plugin.
-     *
-     * @param pluginOpaqueId - The plugin opaque ID for the plugin that registers this handler.
-     * @param handler - Handler function to pass context object to.
-     * @returns A function that takes `RequestHandler` parameters, calls `handler` with a new context, and returns a Promise of
-     * the `handler` return value.
-     */
-    createHandler(pluginOpaqueId: PluginOpaqueId, handler: RequestHandler): (...rest: HandlerParameters<RequestHandler>) => ShallowPromise<ReturnType<RequestHandler>>;
+  /**
+   * Register a new context provider.
+   *
+   * @remarks
+   * The value (or resolved Promise value) returned by the `provider` function will be attached to the context object
+   * on the key specified by `contextName`.
+   *
+   * Throws an exception if more than one provider is registered for the same `contextName`.
+   *
+   * @param pluginOpaqueId - The plugin opaque ID for the plugin that registers this context.
+   * @param contextName - The key of the `TContext` object this provider supplies the value for.
+   * @param provider - A {@link IContextProvider} to be called each time a new context is created.
+   * @returns The {@link IContextContainer} for method chaining.
+   */
+  registerContext<Context extends RequestHandlerContextBase, ContextName extends keyof Context>(
+    pluginOpaqueId: PluginOpaqueId,
+    contextName: ContextName,
+    provider: IContextProvider<Context, ContextName>
+  ): this;
+  /**
+   * Create a new handler function pre-wired to context for the plugin.
+   *
+   * @param pluginOpaqueId - The plugin opaque ID for the plugin that registers this handler.
+   * @param handler - Handler function to pass context object to.
+   * @returns A function that takes `RequestHandler` parameters, calls `handler` with a new context, and returns a Promise of
+   * the `handler` return value.
+   */
+  createHandler(
+    pluginOpaqueId: PluginOpaqueId,
+    handler: RequestHandler
+  ): (...rest: HandlerParameters<RequestHandler>) => ShallowPromise<ReturnType<RequestHandler>>;
 }

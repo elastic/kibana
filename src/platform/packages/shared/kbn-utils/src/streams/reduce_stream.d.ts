@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { Transform } from 'stream';
 /**
  *  Create a transform stream that consumes each chunk it receives
@@ -12,4 +21,7 @@ import type { Transform } from 'stream';
  *                        initial value.
  *  @return {Transform}
  */
-export declare function createReduceStream<T>(reducer: (value: any, chunk: T, enc: string) => T, initial?: T): Transform;
+export declare function createReduceStream<T>(
+  reducer: (value: any, chunk: T, enc: string) => T,
+  initial?: T
+): Transform;

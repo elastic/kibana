@@ -1,4 +1,13 @@
-import React from 'react';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type React from 'react';
 import { type EuiFilterButtonProps } from '@elastic/eui';
 /**
  * Hook for managing filter popover open/close state.
@@ -6,36 +15,36 @@ import { type EuiFilterButtonProps } from '@elastic/eui';
  * @returns An object containing `isOpen` state, `toggle` function, and `close` function.
  */
 export declare const useFilterPopover: () => {
-    isOpen: boolean;
-    toggle: () => void;
-    close: () => void;
+  isOpen: boolean;
+  toggle: () => void;
+  close: () => void;
 };
 /**
  * Props for the {@link FilterPopover} component.
  */
 export interface FilterPopoverProps extends Pick<EuiFilterButtonProps, 'data-test-subj'> {
-    /** Title displayed in the popover header. */
-    title: string;
-    /** Label displayed on the filter button (defaults to `title`). */
-    buttonLabel?: string;
-    /** Total item count shown in parens next to the title (e.g. "Tags (1000)"). */
-    totalCount?: number;
-    /** Number of active filters (shows badge on button). */
-    activeCount?: number;
-    /** Whether the popover is open. */
-    isOpen: boolean;
-    /** Toggle popover open/closed. */
-    onToggle: () => void;
-    /** Close the popover. */
-    onClose: () => void;
-    /** Width of the popover panel. */
-    panelWidth?: number | string;
-    /** Minimum width of the popover panel. */
-    panelMinWidth?: number | string;
-    /** Anchor position for the popover. */
-    anchorPosition?: 'downCenter' | 'downLeft' | 'downRight';
-    /** Popover content. */
-    children: React.ReactNode;
+  /** Title displayed in the popover header. */
+  title: string;
+  /** Label displayed on the filter button (defaults to `title`). */
+  buttonLabel?: string;
+  /** Total item count shown in parens next to the title (e.g. "Tags (1000)"). */
+  totalCount?: number;
+  /** Number of active filters (shows badge on button). */
+  activeCount?: number;
+  /** Whether the popover is open. */
+  isOpen: boolean;
+  /** Toggle popover open/closed. */
+  onToggle: () => void;
+  /** Close the popover. */
+  onClose: () => void;
+  /** Width of the popover panel. */
+  panelWidth?: number | string;
+  /** Minimum width of the popover panel. */
+  panelMinWidth?: number | string;
+  /** Anchor position for the popover. */
+  anchorPosition?: 'downCenter' | 'downLeft' | 'downRight';
+  /** Popover content. */
+  children: React.ReactNode;
 }
 /**
  * `FilterPopover` component.
@@ -64,4 +73,17 @@ export interface FilterPopoverProps extends Pick<EuiFilterButtonProps, 'data-tes
  * </FilterPopover>
  * ```
  */
-export declare const FilterPopover: ({ title, buttonLabel, totalCount, activeCount, isOpen, onToggle, onClose, panelWidth, panelMinWidth, anchorPosition, "data-test-subj": dataTestSubj, children, }: FilterPopoverProps) => React.JSX.Element;
+export declare const FilterPopover: ({
+  title,
+  buttonLabel,
+  totalCount,
+  activeCount,
+  isOpen,
+  onToggle,
+  onClose,
+  panelWidth,
+  panelMinWidth,
+  anchorPosition,
+  'data-test-subj': dataTestSubj,
+  children,
+}: FilterPopoverProps) => React.JSX.Element;

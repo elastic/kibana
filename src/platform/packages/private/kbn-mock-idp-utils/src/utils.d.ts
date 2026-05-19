@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { Client } from '@elastic/elasticsearch';
 /**
  * Creates XML metadata for our mock identity provider.
@@ -29,51 +38,66 @@ export declare function createMockIdpMetadata(): Promise<string>;
  * ```
  */
 export declare function createSAMLResponse(options: {
-    /** ID from SAML authentication request */
-    authnRequestId?: string;
-    /** SP entity ID for AudienceRestriction (required by UIAM, optional for ES) */
-    spEntityId?: string;
-    username: string;
-    full_name?: string;
-    email?: string;
-    roles: string[];
-    serverless?: {
+  /** ID from SAML authentication request */
+  authnRequestId?: string;
+  /** SP entity ID for AudienceRestriction (required by UIAM, optional for ES) */
+  spEntityId?: string;
+  username: string;
+  full_name?: string;
+  email?: string;
+  roles: string[];
+  serverless?:
+    | {
         organizationId: string;
         projectType: string;
         uiamEnabled: false;
-    } | {
+      }
+    | {
         organizationId: string;
         projectType: string;
         uiamEnabled: true;
         accessTokenLifetimeSec?: number;
         refreshTokenLifetimeSec?: number;
-    };
+      };
 }): Promise<string>;
 /**
  * Creates the role mapping required for developers to authenticate using SAML.
  */
 export declare function ensureSAMLRoleMapping(client: Client): Promise<unknown>;
-export declare function generateCosmosDBApiRequestHeaders(httpVerb: 'POST' | 'PUT', resourceType: 'dbs' | 'colls' | 'docs', resourceId: string): {
-    Authorization: string;
-    'x-ms-date': string;
-    'x-ms-version': string;
-    'Content-Type': string;
+export declare function generateCosmosDBApiRequestHeaders(
+  httpVerb: 'POST' | 'PUT',
+  resourceType: 'dbs' | 'colls' | 'docs',
+  resourceId: string
+): {
+  Authorization: string;
+  'x-ms-date': string;
+  'x-ms-version': string;
+  'Content-Type': string;
 };
 export declare const projectTypeToAlias: Map<string, string>;
-export declare function createUiamSessionTokens({ username, organizationId, projectType: rawProjectType, roles, fullName, email, accessTokenLifetimeSec, refreshTokenLifetimeSec, }: {
-    username: string;
-    organizationId: string;
-    projectType: string;
-    roles: string[];
-    fullName?: string;
-    email?: string;
-    accessTokenLifetimeSec?: number;
-    refreshTokenLifetimeSec?: number;
+export declare function createUiamSessionTokens({
+  username,
+  organizationId,
+  projectType: rawProjectType,
+  roles,
+  fullName,
+  email,
+  accessTokenLifetimeSec,
+  refreshTokenLifetimeSec,
+}: {
+  username: string;
+  organizationId: string;
+  projectType: string;
+  roles: string[];
+  fullName?: string;
+  email?: string;
+  accessTokenLifetimeSec?: number;
+  refreshTokenLifetimeSec?: number;
 }): Promise<{
-    accessToken: string;
-    accessTokenExpiresAt: number;
-    refreshToken: string;
-    refreshTokenExpiresAt: number;
+  accessToken: string;
+  accessTokenExpiresAt: number;
+  refreshToken: string;
+  refreshTokenExpiresAt: number;
 }>;
 /**
  * Creates a UIAM OAuth access token that can be used to test the OAuth token exchange flow.
@@ -81,20 +105,29 @@ export declare function createUiamSessionTokens({ username, organizationId, proj
  * Unlike {@link createUiamSessionTokens}, this creates a token with `typ: 'oauth-access-token'`
  * that includes OAuth-specific claims (audience, scope, client_id, connection_id).
  */
-export declare function createUiamOAuthAccessToken({ username, organizationId, projectType, roles, audience, fullName, email, accessTokenLifetimeSec, }: {
-    username: string;
-    organizationId: string;
-    projectType: string;
-    roles: string[];
-    audience: string;
-    fullName?: string;
-    email?: string;
-    accessTokenLifetimeSec?: number;
+export declare function createUiamOAuthAccessToken({
+  username,
+  organizationId,
+  projectType,
+  roles,
+  audience,
+  fullName,
+  email,
+  accessTokenLifetimeSec,
+}: {
+  username: string;
+  organizationId: string;
+  projectType: string;
+  roles: string[];
+  audience: string;
+  fullName?: string;
+  email?: string;
+  accessTokenLifetimeSec?: number;
 }): Promise<string>;
 export interface SAMLRequestInfo {
-    requestId: string;
-    acsUrl?: string;
-    issuer?: string;
+  requestId: string;
+  acsUrl?: string;
+  issuer?: string;
 }
 /**
  * Parses a SAML AuthnRequest from the redirect URL and extracts the request ID

@@ -1,5 +1,26 @@
-import type { IContextContainer, IContextProvider, IRouter, RequestHandlerContextBase, RouterDeprecatedApiDetails } from './router';
-import type { AuthenticationHandler, OnPostAuthHandler, OnPreAuthHandler, OnPreResponseHandler, OnPreRoutingHandler } from './lifecycle';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type {
+  IContextContainer,
+  IContextProvider,
+  IRouter,
+  RequestHandlerContextBase,
+  RouterDeprecatedApiDetails,
+} from './router';
+import type {
+  AuthenticationHandler,
+  OnPostAuthHandler,
+  OnPreAuthHandler,
+  OnPreResponseHandler,
+  OnPreRoutingHandler,
+} from './lifecycle';
 import type { IBasePath } from './base_path';
 import type { IStaticAssets } from './static_assets';
 import type { ICspConfig } from './csp';
@@ -9,16 +30,16 @@ import type { SessionStorageCookieOptions, SessionStorageFactory } from './sessi
  * @public
  */
 export interface HttpAuth {
-    /**
-     * Gets authentication state for a request. Returned by `auth` interceptor.
-     * {@link GetAuthState}
-     */
-    get: GetAuthState;
-    /**
-     * Returns authentication status for a request.
-     * {@link IsAuthenticated}
-     */
-    isAuthenticated: IsAuthenticated;
+  /**
+   * Gets authentication state for a request. Returned by `auth` interceptor.
+   * {@link GetAuthState}
+   */
+  get: GetAuthState;
+  /**
+   * Returns authentication status for a request.
+   * {@link IsAuthenticated}
+   */
+  isAuthenticated: IsAuthenticated;
 }
 /**
  * Kibana HTTP Service provides an abstraction to work with the HTTP stack at the `preboot` stage. This functionality
@@ -81,34 +102,39 @@ export interface HttpAuth {
  * ```
  * @public
  */
-export interface HttpServicePreboot<DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase> {
-    /**
-     * Provides ability to acquire `preboot` {@link IRouter} instance for a particular top-level path and register handler
-     * functions for any number of nested routes.
-     *
-     * @remarks
-     * Each route can have only one handler function, which is executed when the route is matched.
-     * See the {@link IRouter} documentation for more information.
-     *
-     * @example
-     * ```ts
-     * registerRoutes('my-plugin', (router) => {
-     *   // handler is called when '/my-plugin/path' resource is requested with `GET` method
-     *   router.get({ path: '/path', validate: false }, (context, req, res) => res.ok({ content: 'ok' }));
-     * });
-     * ```
-     * @public
-     */
-    registerRoutes<ContextType extends DefaultRequestHandlerType = DefaultRequestHandlerType>(path: string, callback: (router: IRouter<ContextType>) => void): void;
-    /**
-     * Access or manipulate the Kibana base path
-     * See {@link IBasePath}.
-     */
-    basePath: IBasePath;
-    /**
-     * Provides common {@link HttpServerInfo | information} about the running preboot http server.
-     */
-    getServerInfo: () => HttpServerInfo;
+export interface HttpServicePreboot<
+  DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase
+> {
+  /**
+   * Provides ability to acquire `preboot` {@link IRouter} instance for a particular top-level path and register handler
+   * functions for any number of nested routes.
+   *
+   * @remarks
+   * Each route can have only one handler function, which is executed when the route is matched.
+   * See the {@link IRouter} documentation for more information.
+   *
+   * @example
+   * ```ts
+   * registerRoutes('my-plugin', (router) => {
+   *   // handler is called when '/my-plugin/path' resource is requested with `GET` method
+   *   router.get({ path: '/path', validate: false }, (context, req, res) => res.ok({ content: 'ok' }));
+   * });
+   * ```
+   * @public
+   */
+  registerRoutes<ContextType extends DefaultRequestHandlerType = DefaultRequestHandlerType>(
+    path: string,
+    callback: (router: IRouter<ContextType>) => void
+  ): void;
+  /**
+   * Access or manipulate the Kibana base path
+   * See {@link IBasePath}.
+   */
+  basePath: IBasePath;
+  /**
+   * Provides common {@link HttpServerInfo | information} about the running preboot http server.
+   */
+  getServerInfo: () => HttpServerInfo;
 }
 /**
  * Kibana HTTP Service provides own abstraction for work with HTTP stack.
@@ -182,159 +208,171 @@ export interface HttpServicePreboot<DefaultRequestHandlerType extends RequestHan
  * ```
  * @public
  */
-export interface HttpServiceSetup<DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase> {
-    /**
-     * Creates cookie based session storage factory {@link SessionStorageFactory}
-     * @param cookieOptions {@link SessionStorageCookieOptions} - options to configure created cookie session storage.
-     */
-    createCookieSessionStorageFactory: <T extends object>(cookieOptions: SessionStorageCookieOptions<T>) => Promise<SessionStorageFactory<T>>;
-    /**
-     * To define custom logic to perform for incoming requests before server performs a route lookup.
-     *
-     * @remarks
-     * It's the only place when you can forward a request to another URL right on the server.
-     * Can register any number of registerOnPreRouting, which are called in sequence
-     * (from the first registered to the last). See {@link OnPreRoutingHandler}.
-     *
-     * @param handler {@link OnPreRoutingHandler} - function to call.
-     */
-    registerOnPreRouting: (handler: OnPreRoutingHandler) => void;
-    /**
-     * To define custom logic to perform for incoming requests before
-     * the Auth interceptor performs a check that user has access to requested resources.
-     *
-     * @remarks
-     * Can register any number of registerOnPreAuth, which are called in sequence
-     * (from the first registered to the last). See {@link OnPreAuthHandler}.
-     *
-     * @param handler {@link OnPreRoutingHandler} - function to call.
-     */
-    registerOnPreAuth: (handler: OnPreAuthHandler) => void;
-    /**
-     * To define custom authentication and/or authorization mechanism for incoming requests.
-     *
-     * @remarks
-     * A handler should return a state to associate with the incoming request.
-     * The state can be retrieved later via http.auth.get(..)
-     * Only one AuthenticationHandler can be registered. See {@link AuthenticationHandler}.
-     *
-     * @param handler {@link AuthenticationHandler} - function to perform authentication.
-     */
-    registerAuth: (handler: AuthenticationHandler) => void;
-    /**
-     * To define custom logic after Auth interceptor did make sure a user has access to the requested resource.
-     *
-     * @remarks
-     * The auth state is available at stage via http.auth.get(..)
-     * Can register any number of registerOnPostAuth, which are called in sequence
-     * (from the first registered to the last). See {@link OnPostAuthHandler}.
-     *
-     * @param handler {@link OnPostAuthHandler} - function to call.
-     */
-    registerOnPostAuth: (handler: OnPostAuthHandler) => void;
-    /**
-     * To define custom logic to perform for the server response.
-     *
-     * @remarks
-     * Doesn't provide the whole response object.
-     * Supports extending response with custom headers.
-     * See {@link OnPreResponseHandler}.
-     *
-     * @param handler {@link OnPreResponseHandler} - function to call.
-     */
-    registerOnPreResponse: (handler: OnPreResponseHandler) => void;
-    /**
-     * Access or manipulate the Kibana base path
-     * See {@link IBasePath}.
-     */
-    basePath: IBasePath;
-    /**
-     * APIs for creating hrefs to static assets.
-     * See {@link IStaticAssets}
-     */
-    staticAssets: IStaticAssets;
-    /**
-     * The CSP config used for Kibana.
-     */
-    csp: ICspConfig;
-    /**
-     * Provides ability to declare a handler function for a particular path and HTTP request method.
-     *
-     * @remarks
-     * Each route can have only one handler function, which is executed when the route is matched.
-     * See the {@link IRouter} documentation for more information.
-     *
-     * @example
-     * ```ts
-     * const router = createRouter();
-     * // handler is called when '/path' resource is requested with `GET` method
-     * router.get({ path: '/path', validate: false }, (context, req, res) => res.ok({ content: 'ok' }));
-     * ```
-     * @public
-     */
-    createRouter: <Context extends DefaultRequestHandlerType = DefaultRequestHandlerType>() => IRouter<Context>;
-    /**
-     * Register a context provider for a route handler.
-     * @example
-     * ```ts
-     *  // my-plugin.ts
-     *  interface MyRequestHandlerContext extends RequestHandlerContext {
-     *    myApp: { search(id: string): Promise<Result> };
-     *  }
-     *  deps.http.registerRouteHandlerContext<MyRequestHandlerContext, 'myApp'>(
-     *    'myApp',
-     *    (context, req) => {
-     *     async function search (id: string) {
-     *       return await context.elasticsearch.client.asCurrentUser.find(id);
-     *     }
-     *     return { search };
-     *    }
-     *  );
-     *
-     * // my-route-handler.ts
-     *  import type { MyRequestHandlerContext } from './my-plugin.ts';
-     *  const router = createRouter<MyRequestHandlerContext>();
-     *  router.get({ path: '/', validate: false }, async (context, req, res) => {
-     *    const response = await context.myApp.search(...);
-     *    return res.ok(response);
-     *  });
-     * ```
-     * @public
-     */
-    registerRouteHandlerContext: <Context extends DefaultRequestHandlerType, ContextName extends keyof Omit<Context, 'resolve'>>(contextName: ContextName, provider: IContextProvider<Context, ContextName>) => IContextContainer;
-    /**
-     * Provides common {@link HttpServerInfo | information} about the running http server.
-     */
-    getServerInfo: () => HttpServerInfo;
-    /**
-     * Provides a list of all registered deprecated routes {{@link RouterDeprecatedApiDetails | information}}.
-     * The routers will be evaluated everytime this function gets called to
-     * accommodate for any late route registrations
-     * @returns {RouterDeprecatedApiDetails[]}
-     */
-    getDeprecatedRoutes: () => RouterDeprecatedApiDetails[];
+export interface HttpServiceSetup<
+  DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase
+> {
+  /**
+   * Creates cookie based session storage factory {@link SessionStorageFactory}
+   * @param cookieOptions {@link SessionStorageCookieOptions} - options to configure created cookie session storage.
+   */
+  createCookieSessionStorageFactory: <T extends object>(
+    cookieOptions: SessionStorageCookieOptions<T>
+  ) => Promise<SessionStorageFactory<T>>;
+  /**
+   * To define custom logic to perform for incoming requests before server performs a route lookup.
+   *
+   * @remarks
+   * It's the only place when you can forward a request to another URL right on the server.
+   * Can register any number of registerOnPreRouting, which are called in sequence
+   * (from the first registered to the last). See {@link OnPreRoutingHandler}.
+   *
+   * @param handler {@link OnPreRoutingHandler} - function to call.
+   */
+  registerOnPreRouting: (handler: OnPreRoutingHandler) => void;
+  /**
+   * To define custom logic to perform for incoming requests before
+   * the Auth interceptor performs a check that user has access to requested resources.
+   *
+   * @remarks
+   * Can register any number of registerOnPreAuth, which are called in sequence
+   * (from the first registered to the last). See {@link OnPreAuthHandler}.
+   *
+   * @param handler {@link OnPreRoutingHandler} - function to call.
+   */
+  registerOnPreAuth: (handler: OnPreAuthHandler) => void;
+  /**
+   * To define custom authentication and/or authorization mechanism for incoming requests.
+   *
+   * @remarks
+   * A handler should return a state to associate with the incoming request.
+   * The state can be retrieved later via http.auth.get(..)
+   * Only one AuthenticationHandler can be registered. See {@link AuthenticationHandler}.
+   *
+   * @param handler {@link AuthenticationHandler} - function to perform authentication.
+   */
+  registerAuth: (handler: AuthenticationHandler) => void;
+  /**
+   * To define custom logic after Auth interceptor did make sure a user has access to the requested resource.
+   *
+   * @remarks
+   * The auth state is available at stage via http.auth.get(..)
+   * Can register any number of registerOnPostAuth, which are called in sequence
+   * (from the first registered to the last). See {@link OnPostAuthHandler}.
+   *
+   * @param handler {@link OnPostAuthHandler} - function to call.
+   */
+  registerOnPostAuth: (handler: OnPostAuthHandler) => void;
+  /**
+   * To define custom logic to perform for the server response.
+   *
+   * @remarks
+   * Doesn't provide the whole response object.
+   * Supports extending response with custom headers.
+   * See {@link OnPreResponseHandler}.
+   *
+   * @param handler {@link OnPreResponseHandler} - function to call.
+   */
+  registerOnPreResponse: (handler: OnPreResponseHandler) => void;
+  /**
+   * Access or manipulate the Kibana base path
+   * See {@link IBasePath}.
+   */
+  basePath: IBasePath;
+  /**
+   * APIs for creating hrefs to static assets.
+   * See {@link IStaticAssets}
+   */
+  staticAssets: IStaticAssets;
+  /**
+   * The CSP config used for Kibana.
+   */
+  csp: ICspConfig;
+  /**
+   * Provides ability to declare a handler function for a particular path and HTTP request method.
+   *
+   * @remarks
+   * Each route can have only one handler function, which is executed when the route is matched.
+   * See the {@link IRouter} documentation for more information.
+   *
+   * @example
+   * ```ts
+   * const router = createRouter();
+   * // handler is called when '/path' resource is requested with `GET` method
+   * router.get({ path: '/path', validate: false }, (context, req, res) => res.ok({ content: 'ok' }));
+   * ```
+   * @public
+   */
+  createRouter: <
+    Context extends DefaultRequestHandlerType = DefaultRequestHandlerType
+  >() => IRouter<Context>;
+  /**
+   * Register a context provider for a route handler.
+   * @example
+   * ```ts
+   *  // my-plugin.ts
+   *  interface MyRequestHandlerContext extends RequestHandlerContext {
+   *    myApp: { search(id: string): Promise<Result> };
+   *  }
+   *  deps.http.registerRouteHandlerContext<MyRequestHandlerContext, 'myApp'>(
+   *    'myApp',
+   *    (context, req) => {
+   *     async function search (id: string) {
+   *       return await context.elasticsearch.client.asCurrentUser.find(id);
+   *     }
+   *     return { search };
+   *    }
+   *  );
+   *
+   * // my-route-handler.ts
+   *  import type { MyRequestHandlerContext } from './my-plugin.ts';
+   *  const router = createRouter<MyRequestHandlerContext>();
+   *  router.get({ path: '/', validate: false }, async (context, req, res) => {
+   *    const response = await context.myApp.search(...);
+   *    return res.ok(response);
+   *  });
+   * ```
+   * @public
+   */
+  registerRouteHandlerContext: <
+    Context extends DefaultRequestHandlerType,
+    ContextName extends keyof Omit<Context, 'resolve'>
+  >(
+    contextName: ContextName,
+    provider: IContextProvider<Context, ContextName>
+  ) => IContextContainer;
+  /**
+   * Provides common {@link HttpServerInfo | information} about the running http server.
+   */
+  getServerInfo: () => HttpServerInfo;
+  /**
+   * Provides a list of all registered deprecated routes {{@link RouterDeprecatedApiDetails | information}}.
+   * The routers will be evaluated everytime this function gets called to
+   * accommodate for any late route registrations
+   * @returns {RouterDeprecatedApiDetails[]}
+   */
+  getDeprecatedRoutes: () => RouterDeprecatedApiDetails[];
 }
 /** @public */
 export interface HttpServiceStart {
-    /**
-     * Access or manipulate the Kibana base path
-     * See {@link IBasePath}.
-     */
-    basePath: IBasePath;
-    /**
-     * APIs for creating hrefs to static assets.
-     * See {@link IStaticAssets}
-     */
-    staticAssets: IStaticAssets;
-    /**
-     * Auth status.
-     * See {@link HttpAuth}
-     */
-    auth: HttpAuth;
-    /**
-     * Provides common {@link HttpServerInfo | information} about the running http server.
-     */
-    getServerInfo: () => HttpServerInfo;
+  /**
+   * Access or manipulate the Kibana base path
+   * See {@link IBasePath}.
+   */
+  basePath: IBasePath;
+  /**
+   * APIs for creating hrefs to static assets.
+   * See {@link IStaticAssets}
+   */
+  staticAssets: IStaticAssets;
+  /**
+   * Auth status.
+   * See {@link HttpAuth}
+   */
+  auth: HttpAuth;
+  /**
+   * Provides common {@link HttpServerInfo | information} about the running http server.
+   */
+  getServerInfo: () => HttpServerInfo;
 }
 /**
  * Information about what hostname, port, and protocol the server process is
@@ -343,14 +381,14 @@ export interface HttpServiceStart {
  * @public
  */
 export interface HttpServerInfo {
-    /** The name of the Kibana server */
-    name: string;
-    /** The hostname of the server */
-    hostname: string;
-    /** The port the server is listening on */
-    port: number;
-    /** The protocol used by the server */
-    protocol: 'http' | 'https' | 'socket';
+  /** The name of the Kibana server */
+  name: string;
+  /** The hostname of the server */
+  hostname: string;
+  /** The port the server is listening on */
+  port: number;
+  /** The protocol used by the server */
+  protocol: 'http' | 'https' | 'socket';
 }
 /**
  * Defines an http protocol.

@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import type { TaskClaimerOpts, ClaimOwnershipResult } from '.';
-export declare function claimAvailableTasksMget(opts: TaskClaimerOpts): Promise<ClaimOwnershipResult>;
+export declare function claimAvailableTasksMget(
+  opts: TaskClaimerOpts
+): Promise<ClaimOwnershipResult>;
 export declare const NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL = 60000;

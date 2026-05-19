@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ContentListState } from '../state/types';
 import type { ContentListPhase } from './types';
 /**
@@ -5,21 +14,21 @@ import type { ContentListPhase } from './types';
  * so this function can be tested without constructing a full state object.
  */
 export interface DerivePhaseInput {
-    /** `true` only on the first fetch before any data has been received. */
-    readonly isLoading: boolean;
-    /** `true` during any fetch, including background refetches. */
-    readonly isFetching: boolean;
-    /** `true` when the content type has zero objects and no query is active. */
-    readonly hasNoItems: boolean;
-    /** `true` when a search or filter is active and returned zero hits. */
-    readonly hasNoResults: boolean;
-    /**
-     * `true` when at least one search term, flag, or field filter is active.
-     *
-     * Computed once from the parsed `activeFilters` so phase derivation does
-     * not have to re-interpret raw `queryText`.
-     */
-    readonly hasActiveQuery: boolean;
+  /** `true` only on the first fetch before any data has been received. */
+  readonly isLoading: boolean;
+  /** `true` during any fetch, including background refetches. */
+  readonly isFetching: boolean;
+  /** `true` when the content type has zero objects and no query is active. */
+  readonly hasNoItems: boolean;
+  /** `true` when a search or filter is active and returned zero hits. */
+  readonly hasNoResults: boolean;
+  /**
+   * `true` when at least one search term, flag, or field filter is active.
+   *
+   * Computed once from the parsed `activeFilters` so phase derivation does
+   * not have to re-interpret raw `queryText`.
+   */
+  readonly hasActiveQuery: boolean;
 }
 /**
  * Pure derivation of the render phase from Content List state.

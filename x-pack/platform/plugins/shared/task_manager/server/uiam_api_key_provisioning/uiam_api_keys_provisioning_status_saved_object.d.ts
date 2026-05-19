@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 /**
  * Saved object type id for UIAM API key provisioning status documents.
  *
@@ -16,4 +23,5 @@
  * saved object type and is expected to be removed once a migration path to a longer-term
  * storage or telemetry strategy is completed.
  */
-export declare const UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE = "uiam_api_keys_provisioning_status";
+export declare const UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE =
+  'uiam_api_keys_provisioning_status';

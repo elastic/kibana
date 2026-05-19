@@ -1,22 +1,31 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /**
  * {@link ContentListItem} fields that contain user UIDs.
  *
  * Used to seed the user-profile cache from fetched items and to resolve
  * display values typed into the query bar.
  */
-export declare const USER_UID_FIELDS: readonly ["createdBy"];
+export declare const USER_UID_FIELDS: readonly ['createdBy'];
 /**
  * Sentinel filter key for managed items (e.g. bundled with a package).
  *
  * Used in `getCreatorKey`, filter facets, and field definitions to
  * distinguish managed items from real user-authored ones.
  */
-export declare const MANAGED_USER_FILTER = "__managed__";
+export declare const MANAGED_USER_FILTER = '__managed__';
 /**
  * Sentinel filter key for items with no `createdBy` value
  * (e.g. created via API or before Kibana 7.14).
  */
-export declare const NO_CREATOR_USER_FILTER = "__no_creator__";
+export declare const NO_CREATOR_USER_FILTER = '__no_creator__';
 /** Display label for the {@link MANAGED_USER_FILTER} sentinel. */
 export declare const MANAGED_USER_LABEL: string;
 /** Display label for the {@link NO_CREATOR_USER_FILTER} sentinel. */
@@ -32,10 +41,7 @@ export declare const SENTINEL_KEYS: ReadonlySet<string>;
  * this when implementing `findItems` filtering against `createdBy` values,
  * which may contain sentinel keys.
  */
-export declare const getCreatorKey: (item: {
-    managed?: boolean;
-    createdBy?: string;
-}) => string;
+export declare const getCreatorKey: (item: { managed?: boolean; createdBy?: string }) => string;
 /**
  * Standardized item structure for rendering components (tables, grids, etc.).
  *
@@ -46,26 +52,26 @@ export declare const getCreatorKey: (item: {
  * @template T Additional properties to include on the item type.
  */
 export type ContentListItem<T = Record<string, unknown>> = T & {
-    /** Unique identifier for the item. */
-    id: string;
-    /** Display title for the item. */
-    title: string;
-    /** Optional description text. */
-    description?: string;
-    /** Item type identifier (e.g., "dashboard", "visualization"). */
-    type?: string;
-    /** Last update timestamp. */
-    updatedAt?: Date;
-    /** Optional array of tag IDs associated with this item. */
-    tags?: string[];
-    /** Creation timestamp (ISO string). Used by the content editor. */
-    createdAt?: string;
-    /** User ID or profile ID of the item creator. Used by the content editor. */
-    createdBy?: string;
-    /** User ID or profile ID of the last editor. Used by the content editor. */
-    updatedBy?: string;
-    /** Whether this item is managed (system-owned). Used by the content editor. */
-    managed?: boolean;
+  /** Unique identifier for the item. */
+  id: string;
+  /** Display title for the item. */
+  title: string;
+  /** Optional description text. */
+  description?: string;
+  /** Item type identifier (e.g., "dashboard", "visualization"). */
+  type?: string;
+  /** Last update timestamp. */
+  updatedAt?: Date;
+  /** Optional array of tag IDs associated with this item. */
+  tags?: string[];
+  /** Creation timestamp (ISO string). Used by the content editor. */
+  createdAt?: string;
+  /** User ID or profile ID of the item creator. Used by the content editor. */
+  createdBy?: string;
+  /** User ID or profile ID of the last editor. Used by the content editor. */
+  updatedBy?: string;
+  /** Whether this item is managed (system-owned). Used by the content editor. */
+  managed?: boolean;
 };
 /**
  * Action identifiers known to the package.
@@ -86,12 +92,12 @@ export type KnownActionId = 'edit' | 'delete' | 'inspect';
  */
 export type ActionId = KnownActionId | (string & {});
 interface ActionConfigBase {
-    /**
-     * Per-item restriction. Returns a reason string when the action is
-     * not permitted on the item; `undefined` otherwise. Drives row icon
-     * disabling and tooltip reasons.
-     */
-    restriction?: ActionRestriction;
+  /**
+   * Per-item restriction. Returns a reason string when the action is
+   * not permitted on the item; `undefined` otherwise. Drives row icon
+   * disabling and tooltip reasons.
+   */
+  restriction?: ActionRestriction;
 }
 /** Per-item action guard. Returns a reason when the action is not permitted. */
 export type ActionRestriction = (item: ContentListItem) => string | undefined;
@@ -111,28 +117,33 @@ export type BulkActionHandler = (items: ContentListItem[]) => Promise<void>;
  * The discriminated union enforces that at least one of `onItemAction`,
  * `getItemActionHref`, or `onBulkAction` is supplied.
  */
-export type ActionConfig = ActionConfigBase & ({
-    /** Single-item click handler. */
-    onItemAction: ItemActionHandler;
-    getItemActionHref?: never;
-    /** Optional bulk handler. */
-    onBulkAction?: BulkActionHandler;
-} | {
-    onItemAction?: never;
-    /**
-     * Per-item href. When set, the row icon renders as an `<a>`
-     * link, preserving native link affordances (right-click,
-     * middle-click, keyboard activation, screen reader URL).
-     */
-    getItemActionHref: ItemActionHref;
-    /** Optional bulk handler. */
-    onBulkAction?: BulkActionHandler;
-} | {
-    onItemAction?: never;
-    getItemActionHref?: never;
-    /** Bulk-only handler (e.g. delete). */
-    onBulkAction: BulkActionHandler;
-});
+export type ActionConfig = ActionConfigBase &
+  (
+    | {
+        /** Single-item click handler. */
+        onItemAction: ItemActionHandler;
+        getItemActionHref?: never;
+        /** Optional bulk handler. */
+        onBulkAction?: BulkActionHandler;
+      }
+    | {
+        onItemAction?: never;
+        /**
+         * Per-item href. When set, the row icon renders as an `<a>`
+         * link, preserving native link affordances (right-click,
+         * middle-click, keyboard activation, screen reader URL).
+         */
+        getItemActionHref: ItemActionHref;
+        /** Optional bulk handler. */
+        onBulkAction?: BulkActionHandler;
+      }
+    | {
+        onItemAction?: never;
+        getItemActionHref?: never;
+        /** Bulk-only handler (e.g. delete). */
+        onBulkAction: BulkActionHandler;
+      }
+  );
 /**
  * Action configuration map.
  *
@@ -141,23 +152,23 @@ export type ActionConfig = ActionConfigBase & ({
  * fields are tied to {@link KnownActionId} so the two stay in sync.
  */
 export type ContentListActions = {
-    [Id in KnownActionId]?: ActionConfig;
+  [Id in KnownActionId]?: ActionConfig;
 } & {
-    /** Custom actions, identified by a consumer-chosen string ID. */
-    [customId: string]: ActionConfig | undefined;
+  /** Custom actions, identified by a consumer-chosen string ID. */
+  [customId: string]: ActionConfig | undefined;
 };
 /**
  * Per-item configuration for link behavior and actions.
  */
 export interface ContentListItemConfig {
-    /**
-     * Function to generate the href for an item link.
-     * When provided, item titles become clickable links.
-     */
-    getHref?: (item: ContentListItem) => string;
-    /**
-     * Action handlers and per-item restrictions, keyed by action ID.
-     */
-    actions?: ContentListActions;
+  /**
+   * Function to generate the href for an item link.
+   * When provided, item titles become clickable links.
+   */
+  getHref?: (item: ContentListItem) => string;
+  /**
+   * Action handlers and per-item restrictions, keyed by action ID.
+   */
+  actions?: ContentListActions;
 }
 export {};

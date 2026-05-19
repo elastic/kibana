@@ -1,18 +1,29 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { FC, PropsWithChildren } from 'react';
 import type { ContentInsightsClientPublic } from './client';
 /**
  * Abstract external services for this component.
  */
 export interface ContentInsightsServices {
-    contentInsightsClient: ContentInsightsClientPublic;
-    /**
-     * Whether versioning is enabled for the current kibana instance. (aka is Serverless)
-     * This is used to determine if we should show the version mentions in the help text.
-     */
-    isKibanaVersioningEnabled: boolean;
+  contentInsightsClient: ContentInsightsClientPublic;
+  /**
+   * Whether versioning is enabled for the current kibana instance. (aka is Serverless)
+   * This is used to determine if we should show the version mentions in the help text.
+   */
+  isKibanaVersioningEnabled: boolean;
 }
 /**
  * Abstract external service Provider.
  */
-export declare const ContentInsightsProvider: FC<PropsWithChildren<Partial<ContentInsightsServices>>>;
+export declare const ContentInsightsProvider: FC<
+  PropsWithChildren<Partial<ContentInsightsServices>>
+>;
 export declare function useServices(): ContentInsightsServices | null;

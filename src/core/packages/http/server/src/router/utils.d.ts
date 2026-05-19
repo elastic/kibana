@@ -1,4 +1,18 @@
-import type { RouteValidator, RouteValidatorFullConfigRequest, RouteValidatorFullConfigResponse, RouteValidatorRequestAndResponses } from './route_validator';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type {
+  RouteValidator,
+  RouteValidatorFullConfigRequest,
+  RouteValidatorFullConfigResponse,
+  RouteValidatorRequestAndResponses,
+} from './route_validator';
 type AnyRouteValidator = RouteValidator<unknown, unknown, unknown>;
 /**
  * {@link RouteValidator} is a union type of all possible ways that validation
@@ -6,17 +20,25 @@ type AnyRouteValidator = RouteValidator<unknown, unknown, unknown>;
  * by indicating whether it is {@link RouteValidatorRequestAndResponses} or not.
  * @public
  */
-export declare function isFullValidatorContainer(value: AnyRouteValidator): value is RouteValidatorRequestAndResponses<unknown, unknown, unknown>;
+export declare function isFullValidatorContainer(
+  value: AnyRouteValidator
+): value is RouteValidatorRequestAndResponses<unknown, unknown, unknown>;
 /**
  * Extracts {@link RouteValidatorFullConfigRequest} from the validation container.
  * This utility is intended to be used by code introspecting router validation configuration.
  * @public
  */
-export declare function getRequestValidation<P, Q, B>(value: RouteValidator<P, Q, B> | (() => RouteValidator<P, Q, B>)): RouteValidatorFullConfigRequest<P, Q, B>;
+export declare function getRequestValidation<P, Q, B>(
+  value: RouteValidator<P, Q, B> | (() => RouteValidator<P, Q, B>)
+): RouteValidatorFullConfigRequest<P, Q, B>;
 /**
  * Extracts {@link RouteValidatorFullConfigRequest} from the validation container.
  * This utility is intended to be used by code introspecting router validation configuration.
  * @public
  */
-export declare function getResponseValidation(value: RouteValidator<unknown, unknown, unknown> | (() => RouteValidator<unknown, unknown, unknown>)): undefined | RouteValidatorFullConfigResponse;
+export declare function getResponseValidation(
+  value:
+    | RouteValidator<unknown, unknown, unknown>
+    | (() => RouteValidator<unknown, unknown, unknown>)
+): undefined | RouteValidatorFullConfigResponse;
 export {};

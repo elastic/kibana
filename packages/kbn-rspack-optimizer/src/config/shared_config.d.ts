@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import { type RuleSetRule, type Configuration, type RspackPluginInstance } from '@rspack/core';
 import type { ThemeTag } from '../types';
 /**
@@ -35,7 +44,12 @@ export declare function getCssLoaderRule(dist: boolean): RuleSetRule;
  *
  * At runtime, `window.__kbnThemeTag__` determines which compiled stylesheet to use.
  */
-export declare function getScssLoaderRule(repoRoot: string, dist: boolean, themeTags?: ThemeTag[], bundleId?: string): RuleSetRule;
+export declare function getScssLoaderRule(
+  repoRoot: string,
+  dist: boolean,
+  themeTags?: ThemeTag[],
+  bundleId?: string
+): RuleSetRule;
 /**
  * Get SCSS loader rule for node_modules (no theme switching).
  * Node modules SCSS is compiled with light theme globals only.
@@ -72,7 +86,14 @@ export declare function getPeggyLoaderRule(): RuleSetRule;
  * @param bundleId - Bundle ID for theme loader
  * @param useBabel - Use Babel instead of SWC (default: false)
  */
-export declare function getSharedModuleRules(repoRoot: string, dist: boolean, themeTags?: ThemeTag[], bundleId?: string, useBabel?: boolean, hmr?: boolean): RuleSetRule[];
+export declare function getSharedModuleRules(
+  repoRoot: string,
+  dist: boolean,
+  themeTags?: ThemeTag[],
+  bundleId?: string,
+  useBabel?: boolean,
+  hmr?: boolean
+): RuleSetRule[];
 /**
  * Shared warnings to ignore.
  * These are known warnings that don't affect functionality.

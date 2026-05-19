@@ -1,5 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 interface GenericObject {
-    [key: string]: unknown;
+  [key: string]: unknown;
 }
 export declare const unflattenObject: <T extends object = GenericObject>(object: object) => T;
 export {};

@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ProfileCache } from './profile_cache';
 import type { UserProfileEntry } from './types';
 /**
@@ -5,7 +14,7 @@ import type { UserProfileEntry } from './types';
  *
  * `undefined` when user profiles are not configured.
  */
-export declare const ProfileCacheContext: import("react").Context<ProfileCache | undefined>;
+export declare const ProfileCacheContext: import('react').Context<ProfileCache | undefined>;
 /**
  * Get the {@link ProfileCache} instance (stable, never changes identity).
  *

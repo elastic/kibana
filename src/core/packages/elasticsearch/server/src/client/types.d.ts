@@ -1,11 +1,20 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { Headers, KibanaRequest } from '@kbn/core-http-server';
 /**
  * Fake request object created manually by Kibana plugins.
  * @public
  */
 export interface FakeRequest {
-    /** Headers used for authentication against Elasticsearch */
-    headers: Headers;
+  /** Headers used for authentication against Elasticsearch */
+  headers: Headers;
 }
 /**
  * A minimal synthetic request for space-level CPS routing (`projectRouting: 'space'`) in
@@ -18,11 +27,11 @@ export interface FakeRequest {
  * @public
  */
 export interface UrlRequest extends FakeRequest {
-    /**
-     * URL used to resolve the space for CPS. Synthetic callers set this to a path that includes
-     * `/s/<spaceId>/...` when applicable; there is no `rewrittenUrl` on this shape.
-     */
-    url: URL;
+  /**
+   * URL used to resolve the space for CPS. Synthetic callers set this to a path that includes
+   * `/s/<spaceId>/...` when applicable; there is no `rewrittenUrl` on this shape.
+   */
+  url: URL;
 }
 /**
  * Union of all request types accepted by `asScoped`. Carries the credentials used to

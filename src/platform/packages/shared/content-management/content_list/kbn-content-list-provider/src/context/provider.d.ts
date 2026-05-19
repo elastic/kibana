@@ -1,4 +1,14 @@
-import React, { type ReactNode } from 'react';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type React from 'react';
+import { type ReactNode } from 'react';
 import type { ContentListCoreConfig, ContentListConfig, ContentListServices } from './types';
 import type { ContentListFeatures, ContentListSupports } from '../features';
 import type { DataSourceConfig } from '../datasource';
@@ -6,19 +16,22 @@ import type { ProfileCache } from '../services';
 /**
  * Internal context value type.
  */
-export type ContentListProviderContextValue = Omit<ContentListCoreConfig, 'id' | 'queryKeyScope'> & {
-    /** Optional identifier (may be undefined if only `queryKeyScope` was provided). */
-    id?: string;
-    /** Resolved query key scope (always present after provider initialization). */
-    queryKeyScope: string;
-    /** Data source configuration. */
-    dataSource: DataSourceConfig;
-    /** Feature configuration. */
-    features: ContentListFeatures;
-    /** Resolved feature support flags. */
-    supports: ContentListSupports;
-    /** Services provided to the provider. */
-    services?: ContentListServices;
+export type ContentListProviderContextValue = Omit<
+  ContentListCoreConfig,
+  'id' | 'queryKeyScope'
+> & {
+  /** Optional identifier (may be undefined if only `queryKeyScope` was provided). */
+  id?: string;
+  /** Resolved query key scope (always present after provider initialization). */
+  queryKeyScope: string;
+  /** Data source configuration. */
+  dataSource: DataSourceConfig;
+  /** Feature configuration. */
+  features: ContentListFeatures;
+  /** Resolved feature support flags. */
+  supports: ContentListSupports;
+  /** Services provided to the provider. */
+  services?: ContentListServices;
 };
 /**
  * Context for the content list configuration.
@@ -30,18 +43,18 @@ export declare const ContentListContext: React.Context<ContentListProviderContex
  * Props for the `ContentListProvider` component.
  */
 export type ContentListProviderProps = ContentListConfig & {
-    /** Child components that will have access to the content list context. */
-    children: ReactNode;
-    /** Optional services for the provider. */
-    services?: ContentListServices;
-    /** Feature configuration for enabling/customizing capabilities. */
-    features?: ContentListFeatures;
-    /**
-     * Shared profile cache instance (created by the client provider).
-     * When provided, enables user-profile resolution in field definitions,
-     * table cells, and filter popovers.
-     */
-    profileCache?: ProfileCache;
+  /** Child components that will have access to the content list context. */
+  children: ReactNode;
+  /** Optional services for the provider. */
+  services?: ContentListServices;
+  /** Feature configuration for enabling/customizing capabilities. */
+  features?: ContentListFeatures;
+  /**
+   * Shared profile cache instance (created by the client provider).
+   * When provided, enables user-profile resolution in field definitions,
+   * table cells, and filter popovers.
+   */
+  profileCache?: ProfileCache;
 };
 /**
  * Main provider component for content list functionality, including data fetching
@@ -62,7 +75,18 @@ export type ContentListProviderProps = ContentListConfig & {
  * - **User profiles** (`services.userProfiles`): wraps with `ProfileCacheContext.Provider`,
  *   providing a shared {@link ProfileCache} for synchronous profile resolution.
  */
-export declare const ContentListProvider: ({ children, dataSource, labels, item, isReadOnly, id, queryKeyScope: queryKeyScopeProp, features, services, profileCache, }: ContentListProviderProps) => JSX.Element;
+export declare const ContentListProvider: ({
+  children,
+  dataSource,
+  labels,
+  item,
+  isReadOnly,
+  id,
+  queryKeyScope: queryKeyScopeProp,
+  features,
+  services,
+  profileCache,
+}: ContentListProviderProps) => JSX.Element;
 /**
  * Hook to access the content list configuration context.
  *

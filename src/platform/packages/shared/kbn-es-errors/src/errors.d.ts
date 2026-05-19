@@ -1,10 +1,19 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { errors } from '@elastic/elasticsearch';
 /**
  * An unauthorized (401) error returned by elasticsearch
  * @public
  */
 export type UnauthorizedError = errors.ResponseError & {
-    statusCode: 401;
+  statusCode: 401;
 };
 /**
  * Checks if the provided `error` is an {@link errors.ResponseError | elasticsearch response error}
@@ -12,7 +21,7 @@ export type UnauthorizedError = errors.ResponseError & {
  */
 export declare function isResponseError(error: unknown): error is errors.ResponseError;
 export declare function isNotFoundError(error: unknown): error is errors.ResponseError & {
-    statusCode: 404;
+  statusCode: 404;
 };
 /**
  * Checks if the provided `error` is an {@link UnauthorizedError | elasticsearch unauthorized error}
@@ -24,4 +33,6 @@ export declare function isUnauthorizedError(error: unknown): error is Unauthoriz
  * @public
  */
 export declare function isRequestAbortedError(error: unknown): error is errors.RequestAbortedError;
-export declare function isMaximumResponseSizeExceededError(error: unknown): error is errors.RequestAbortedError;
+export declare function isMaximumResponseSizeExceededError(
+  error: unknown
+): error is errors.RequestAbortedError;

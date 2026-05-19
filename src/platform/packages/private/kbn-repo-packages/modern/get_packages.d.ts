@@ -1,5 +1,14 @@
-export type PkgDirMap = Map<string, import("./package").Package>;
-export type PkgsById = Map<string, import("./package").Package>;
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+export type PkgDirMap = Map<string, import('./package').Package>;
+export type PkgsById = Map<string, import('./package').Package>;
 /**
  * Resolves to an array of Package instances which parse the manifest files,
  * package.json files, and provide useful metadata about each package.
@@ -28,7 +37,10 @@ export function updatePackageMap(repoRoot: string, manifestPaths: string[]): boo
  * @param {string[]} names
  * @param {string=} packageMapPath
  */
-export function removePackagesFromPackageMap(names: string[], packageMapPath?: string | undefined): void;
+export function removePackagesFromPackageMap(
+  names: string[],
+  packageMapPath?: string | undefined
+): void;
 /**
  * Find the package which contains this path, if one exists
  * @param {string} repoRoot
@@ -46,4 +58,4 @@ export function readPackageMap(packageMapPath?: string | undefined): Map<string,
  * @returns {string}
  */
 export function readHashOfPackageMap(): string;
-import type { Package } from "./package";
+import type { Package } from './package';

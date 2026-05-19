@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import { type ObjectType, SchemaTypeError, type Type } from '@kbn/config-schema';
 import type { ZodType } from '@kbn/zod/v4';
 /**
@@ -5,7 +14,7 @@ import type { ZodType } from '@kbn/zod/v4';
  * @public
  */
 export declare class RouteValidationError extends SchemaTypeError {
-    constructor(error: Error | string, path?: string[]);
+  constructor(error: Error | string, path?: string[]);
 }
 /**
  * Validation result factory to be used in the custom validation function to return the valid data or validation errors
@@ -15,12 +24,15 @@ export declare class RouteValidationError extends SchemaTypeError {
  * @public
  */
 export interface RouteValidationResultFactory {
-    ok: <T>(value: T) => {
-        value: T;
-    };
-    badRequest: (error: Error | string, path?: string[]) => {
-        error: RouteValidationError;
-    };
+  ok: <T>(value: T) => {
+    value: T;
+  };
+  badRequest: (
+    error: Error | string,
+    path?: string[]
+  ) => {
+    error: RouteValidationError;
+  };
 }
 /**
  * The custom validation function if @kbn/config-schema is not a valid solution for your specific plugin requirements.
@@ -47,13 +59,18 @@ export interface RouteValidationResultFactory {
  *
  * @public
  */
-export type RouteValidationFunction<T> = (data: any, validationResult: RouteValidationResultFactory) => {
-    value: T;
-    error?: never;
-} | {
-    value?: never;
-    error: RouteValidationError;
-};
+export type RouteValidationFunction<T> = (
+  data: any,
+  validationResult: RouteValidationResultFactory
+) =>
+  | {
+      value: T;
+      error?: never;
+    }
+  | {
+      value?: never;
+      error: RouteValidationError;
+    };
 /**
  * Allowed property validation options: either @kbn/config-schema validations or custom validation functions
  *
@@ -69,21 +86,21 @@ export type RouteValidationSpec<T> = ObjectType | Type<T> | ZodType<T> | RouteVa
  * @public
  */
 export interface RouteValidatorConfig<P, Q, B> {
-    /**
-     * Validation logic for the URL params
-     * @public
-     */
-    params?: RouteValidationSpec<P>;
-    /**
-     * Validation logic for the Query params
-     * @public
-     */
-    query?: RouteValidationSpec<Q>;
-    /**
-     * Validation logic for the body payload
-     * @public
-     */
-    body?: RouteValidationSpec<B>;
+  /**
+   * Validation logic for the URL params
+   * @public
+   */
+  params?: RouteValidationSpec<P>;
+  /**
+   * Validation logic for the Query params
+   * @public
+   */
+  query?: RouteValidationSpec<Q>;
+  /**
+   * Validation logic for the body payload
+   * @public
+   */
+  body?: RouteValidationSpec<B>;
 }
 /**
  * Additional options for the RouteValidator class to modify its default behaviour.
@@ -91,21 +108,22 @@ export interface RouteValidatorConfig<P, Q, B> {
  * @public
  */
 export interface RouteValidatorOptions {
-    /**
-     * Set the `unsafe` config to avoid running some additional internal *safe* validations on top of your custom validation
-     * @public
-     */
-    unsafe?: {
-        params?: boolean;
-        query?: boolean;
-        body?: boolean;
-    };
+  /**
+   * Set the `unsafe` config to avoid running some additional internal *safe* validations on top of your custom validation
+   * @public
+   */
+  unsafe?: {
+    params?: boolean;
+    query?: boolean;
+    body?: boolean;
+  };
 }
 /**
  * Route validations config and options merged into one object
  * @public
  */
-export type RouteValidatorFullConfigRequest<P, Q, B> = RouteValidatorConfig<P, Q, B> & RouteValidatorOptions;
+export type RouteValidatorFullConfigRequest<P, Q, B> = RouteValidatorConfig<P, Q, B> &
+  RouteValidatorOptions;
 /**
  * Map of status codes to response schemas.
  *
@@ -144,41 +162,43 @@ export type RouteValidatorFullConfigRequest<P, Q, B> = RouteValidatorConfig<P, Q
  * @public
  */
 export interface RouteValidatorFullConfigResponse {
-    [statusCode: number]: {
-        /**
-         * A description of the response. This is required input for complete OAS documentation.
-         */
-        description?: string;
-        /**
-         * A string representing the mime type of the response body.
-         */
-        bodyContentType?: string;
-        body?: LazyValidator;
-    };
-    unsafe?: {
-        body?: boolean;
-    };
+  [statusCode: number]: {
+    /**
+     * A description of the response. This is required input for complete OAS documentation.
+     */
+    description?: string;
+    /**
+     * A string representing the mime type of the response body.
+     */
+    bodyContentType?: string;
+    body?: LazyValidator;
+  };
+  unsafe?: {
+    body?: boolean;
+  };
 }
 /**
  * An alternative form to register both request schema and all response schemas.
  * @public
  */
 export interface RouteValidatorRequestAndResponses<P, Q, B> {
-    request: RouteValidatorFullConfigRequest<P, Q, B>;
-    /**
-     * Response schemas for your route.
-     */
-    response?: RouteValidatorFullConfigResponse;
+  request: RouteValidatorFullConfigRequest<P, Q, B>;
+  /**
+   * Response schemas for your route.
+   */
+  response?: RouteValidatorFullConfigResponse;
 }
 /**
  * Type container for schemas used in route related validations
  * @public
  */
-export type RouteValidator<P, Q, B> = RouteValidatorFullConfigRequest<P, Q, B> | (RouteValidatorRequestAndResponses<P, Q, B> & NotRouteValidatorFullConfigRequest);
+export type RouteValidator<P, Q, B> =
+  | RouteValidatorFullConfigRequest<P, Q, B>
+  | (RouteValidatorRequestAndResponses<P, Q, B> & NotRouteValidatorFullConfigRequest);
 interface NotRouteValidatorFullConfigRequest {
-    params?: never;
-    query?: never;
-    body?: never;
+  params?: never;
+  query?: never;
+  body?: never;
 }
 /**
  * A validation schema factory.

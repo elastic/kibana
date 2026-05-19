@@ -1,12 +1,31 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import { type TypeOf } from '@kbn/config-schema';
-import type { versionSchema, throttledActionSchema, rawAlertInstanceSchema, metaSchema, lastScheduledActionsSchema } from './schema';
+import type {
+  versionSchema,
+  throttledActionSchema,
+  rawAlertInstanceSchema,
+  metaSchema,
+  lastScheduledActionsSchema,
+} from './schema';
 type VersionSchema = TypeOf<typeof versionSchema>;
 type ThrottledActionsSchema = TypeOf<typeof throttledActionSchema>;
 type LastScheduledActionsSchema = TypeOf<typeof lastScheduledActionsSchema>;
 type RawAlertInstanceSchema = TypeOf<typeof rawAlertInstanceSchema>;
-export declare function migrateThrottledActions(throttledActions: unknown): ThrottledActionsSchema | undefined;
-export declare function migrateLastScheduledActions(lastScheduledActions: unknown): LastScheduledActionsSchema | undefined;
+export declare function migrateThrottledActions(
+  throttledActions: unknown
+): ThrottledActionsSchema | undefined;
+export declare function migrateLastScheduledActions(
+  lastScheduledActions: unknown
+): LastScheduledActionsSchema | undefined;
 export declare function migrateMeta(meta: unknown): TypeOf<typeof metaSchema> | undefined;
-export declare function migrateAlertInstances(alertInstances: unknown): Record<string, RawAlertInstanceSchema> | undefined;
+export declare function migrateAlertInstances(
+  alertInstances: unknown
+): Record<string, RawAlertInstanceSchema> | undefined;
 export declare const upMigration: (state: Record<string, unknown>) => VersionSchema;
 export {};

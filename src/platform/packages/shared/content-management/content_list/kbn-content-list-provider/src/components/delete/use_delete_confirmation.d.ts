@@ -1,23 +1,32 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ReactNode } from 'react';
 import type { ContentListItem } from '../../item/types';
 /**
  * Options for {@link useDeleteConfirmation}.
  */
 export interface UseDeleteConfirmationOptions {
-    /**
-     * Called after the modal closes (cancel or successful delete).
-     * Use for side effects like clearing selection state.
-     */
-    onClose?: () => void;
+  /**
+   * Called after the modal closes (cancel or successful delete).
+   * Use for side effects like clearing selection state.
+   */
+  onClose?: () => void;
 }
 /**
  * Return value of {@link useDeleteConfirmation}.
  */
 export interface UseDeleteConfirmationReturn {
-    /** Trigger the delete confirmation modal for the given items. */
-    requestDelete: (items: ContentListItem[]) => void;
-    /** The modal element to render, or `null` when inactive. */
-    deleteModal: ReactNode;
+  /** Trigger the delete confirmation modal for the given items. */
+  requestDelete: (items: ContentListItem[]) => void;
+  /** The modal element to render, or `null` when inactive. */
+  deleteModal: ReactNode;
 }
 /**
  * Encapsulates the open/close state for a {@link DeleteConfirmationModal}.
@@ -50,4 +59,6 @@ export interface UseDeleteConfirmationReturn {
  * );
  * ```
  */
-export declare const useDeleteConfirmation: (options?: UseDeleteConfirmationOptions) => UseDeleteConfirmationReturn;
+export declare const useDeleteConfirmation: (
+  options?: UseDeleteConfirmationOptions
+) => UseDeleteConfirmationReturn;

@@ -1,6 +1,13 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 export declare class MsearchError extends Error {
-    private _statusCode?;
-    constructor(statusCode?: number);
-    get statusCode(): number | undefined;
+  private _statusCode?;
+  constructor(statusCode?: number);
+  get statusCode(): number | undefined;
 }
 export declare function getMsearchStatusCode(error: Error | MsearchError): number | undefined;

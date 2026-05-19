@@ -1,4 +1,23 @@
-export type { ConfigDeprecationFactory, AddConfigDeprecation, ConfigDeprecationProvider, DeprecatedConfigDetails, ConfigDeprecationWithContext, ConfigDeprecation, ConfigDeprecationCommand, ConfigDeprecationContext, ChangedDeprecatedPaths, } from './src/deprecation';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+export type {
+  ConfigDeprecationFactory,
+  AddConfigDeprecation,
+  ConfigDeprecationProvider,
+  DeprecatedConfigDetails,
+  ConfigDeprecationWithContext,
+  ConfigDeprecation,
+  ConfigDeprecationCommand,
+  ConfigDeprecationContext,
+  ChangedDeprecatedPaths,
+} from './src/deprecation';
 export { applyDeprecations, configDeprecationFactory } from './src/deprecation';
 export type { RawConfigurationProvider, RawConfigAdapter } from './src/raw';
 export { RawConfigService, getConfigFromFiles } from './src/raw';

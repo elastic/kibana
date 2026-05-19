@@ -1,27 +1,42 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /**
  * Constant for the Kibana Observability serverless project type.
  */
-export declare const KIBANA_OBSERVABILITY_PROJECT: "oblt";
+export declare const KIBANA_OBSERVABILITY_PROJECT: 'oblt';
 /**
  * Constant for the Kibana Security serverless project type.
  */
-export declare const KIBANA_SECURITY_PROJECT: "security";
+export declare const KIBANA_SECURITY_PROJECT: 'security';
 /**
  * Constant for the Kibana Search serverless project type.
  */
-export declare const KIBANA_SEARCH_PROJECT: "es";
+export declare const KIBANA_SEARCH_PROJECT: 'es';
 /**
  * Constant for the Kibana Workplace AI serverless project type.
  */
-export declare const KIBANA_WORKPLACE_AI_PROJECT: "workplaceai";
+export declare const KIBANA_WORKPLACE_AI_PROJECT: 'workplaceai';
 /**
  * Constant for the Kibana Vectordb serverless project type.
  */
-export declare const KIBANA_VECTORDB_PROJECT: "vectordb";
+export declare const KIBANA_VECTORDB_PROJECT: 'vectordb';
 /**
  * A list of all Kibana serverless project types.
  */
-export declare const KIBANA_PROJECTS: readonly ["oblt", "security", "es", "workplaceai", "vectordb"];
+export declare const KIBANA_PROJECTS: readonly [
+  'oblt',
+  'security',
+  'es',
+  'workplaceai',
+  'vectordb'
+];
 /**
  * A type that defines the existing serverless project types.
  */

@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { SearchFilterConfig } from '@elastic/eui';
 /**
  * Props for the {@link SortFilter} declarative component.
@@ -35,23 +44,31 @@ export type StarredFilterProps = Record<never, never>;
 export type CreatedByFilterProps = Record<never, never>;
 /** Preset-to-props mapping for toolbar filters. */
 export interface FilterPresets {
-    sort: SortFilterProps;
-    tags: TagFilterProps;
-    starred: StarredFilterProps;
-    createdBy: CreatedByFilterProps;
+  sort: SortFilterProps;
+  tags: TagFilterProps;
+  starred: StarredFilterProps;
+  createdBy: CreatedByFilterProps;
 }
 /** Context passed to filter `resolve` callbacks. */
 export interface FilterContext {
-    /** Whether sorting is available from the provider. */
-    hasSorting: boolean;
-    /** Whether tags filtering is available from the provider. */
-    hasTags: boolean;
-    /** Whether starred filtering is available from the provider. */
-    hasStarred: boolean;
-    /** Whether created by filtering is available from the provider. */
-    hasCreatedBy: boolean;
+  /** Whether sorting is available from the provider. */
+  hasSorting: boolean;
+  /** Whether tags filtering is available from the provider. */
+  hasTags: boolean;
+  /** Whether starred filtering is available from the provider. */
+  hasStarred: boolean;
+  /** Whether created by filtering is available from the provider. */
+  hasCreatedBy: boolean;
 }
 /** Part factory for toolbar filters. */
-export declare const filter: import("@kbn/content-list-assembly").PartFactory<FilterPresets, SearchFilterConfig, FilterContext>;
+export declare const filter: import('@kbn/content-list-assembly').PartFactory<
+  FilterPresets,
+  SearchFilterConfig,
+  FilterContext
+>;
 /** Part factory for the toolbar filters container (no presets). */
-export declare const filtersPart: import("@kbn/content-list-assembly").PartFactory<Record<string, unknown>, import("react").ReactNode, void>;
+export declare const filtersPart: import('@kbn/content-list-assembly').PartFactory<
+  Record<string, unknown>,
+  import('react').ReactNode,
+  void
+>;

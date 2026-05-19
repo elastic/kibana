@@ -1,4 +1,13 @@
-import React from 'react';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type React from 'react';
 import { type Query } from '@elastic/eui';
 /**
  * Props for the {@link TagFilterRenderer} component.
@@ -8,12 +17,12 @@ import { type Query } from '@elastic/eui';
  * state directly with the search bar query text.
  */
 export interface TagFilterRendererProps {
-    /** Query object from `EuiSearchBar`. */
-    query?: Query;
-    /** `onChange` callback from `EuiSearchBar`. */
-    onChange?: (query: Query) => void;
-    /** Optional `data-test-subj` attribute for testing. */
-    'data-test-subj'?: string;
+  /** Query object from `EuiSearchBar`. */
+  query?: Query;
+  /** `onChange` callback from `EuiSearchBar`. */
+  onChange?: (query: Query) => void;
+  /** Optional `data-test-subj` attribute for testing. */
+  'data-test-subj'?: string;
 }
 /**
  * `TagFilterRenderer` component for `EuiSearchBar` `custom_component` filter.
@@ -30,4 +39,8 @@ export interface TagFilterRendererProps {
  * Requires `ContentManagementTagsProvider` in the component tree (automatically
  * provided when `services.tags` is configured on the `ContentListProvider`).
  */
-export declare const TagFilterRenderer: ({ query, onChange, "data-test-subj": dataTestSubj, }: TagFilterRendererProps) => React.JSX.Element | null;
+export declare const TagFilterRenderer: ({
+  query,
+  onChange,
+  'data-test-subj': dataTestSubj,
+}: TagFilterRendererProps) => React.JSX.Element | null;

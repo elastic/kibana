@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import type { estypes } from '@elastic/elasticsearch';
 /**
  * Interface representing an API key the way it is returned by Elasticsearch GET endpoint.
@@ -9,7 +16,7 @@ export type ApiKey = RestApiKey | CrossClusterApiKey;
  * TODO: Remove this type when `@elastic/elasticsearch` has been updated.
  */
 export interface RestApiKey extends BaseApiKey {
-    type: 'rest';
+  type: 'rest';
 }
 /**
  * Interface representing a cross-cluster API key the way it is returned by Elasticsearch GET endpoint.
@@ -17,12 +24,12 @@ export interface RestApiKey extends BaseApiKey {
  * TODO: Remove this type when `@elastic/elasticsearch` has been updated.
  */
 export interface CrossClusterApiKey extends BaseApiKey {
-    type: 'cross_cluster';
-    /**
-     * The access to be granted to this API key. The access is composed of permissions for cross-cluster
-     * search and cross-cluster replication. At least one of them must be specified.
-     */
-    access: CrossClusterApiKeyAccess;
+  type: 'cross_cluster';
+  /**
+   * The access to be granted to this API key. The access is composed of permissions for cross-cluster
+   * search and cross-cluster replication. At least one of them must be specified.
+   */
+  access: CrossClusterApiKeyAccess;
 }
 /**
  * Fixing up `estypes.SecurityApiKey` type since some fields are marked as optional even though they are guaranteed to be returned.
@@ -30,77 +37,80 @@ export interface CrossClusterApiKey extends BaseApiKey {
  * TODO: Remove this type when `@elastic/elasticsearch` has been updated to make `role_descriptors` required.
  */
 export interface BaseApiKey extends estypes.SecurityApiKey {
-    role_descriptors: Required<estypes.SecurityApiKey>['role_descriptors'];
+  role_descriptors: Required<estypes.SecurityApiKey>['role_descriptors'];
 }
 export interface CrossClusterApiKeyAccess {
-    /**
-     * A list of indices permission entries for cross-cluster search.
-     */
-    search?: CrossClusterApiKeySearch[];
-    /**
-     * A list of indices permission entries for cross-cluster replication.
-     */
-    replication?: CrossClusterApiKeyReplication[];
+  /**
+   * A list of indices permission entries for cross-cluster search.
+   */
+  search?: CrossClusterApiKeySearch[];
+  /**
+   * A list of indices permission entries for cross-cluster replication.
+   */
+  replication?: CrossClusterApiKeyReplication[];
 }
-type CrossClusterApiKeySearch = Pick<estypes.SecurityIndicesPrivileges, 'names' | 'field_security' | 'query' | 'allow_restricted_indices'>;
+type CrossClusterApiKeySearch = Pick<
+  estypes.SecurityIndicesPrivileges,
+  'names' | 'field_security' | 'query' | 'allow_restricted_indices'
+>;
 type CrossClusterApiKeyReplication = Pick<estypes.SecurityIndicesPrivileges, 'names'>;
 export type ApiKeyRoleDescriptors = Record<string, estypes.SecurityRoleDescriptor>;
 export interface ApiKeyToInvalidate {
-    id: string;
-    name: string;
+  id: string;
+  name: string;
 }
 export interface ApiKeyAggregations {
-    usernames?: estypes.AggregationsStringTermsAggregate;
-    types?: estypes.AggregationsStringTermsAggregate;
-    expired?: estypes.AggregationsFilterAggregateKeys;
-    managed?: {
-        buckets: {
-            metadataBased: estypes.AggregationsFilterAggregateKeys;
-            namePrefixBased: estypes.AggregationsFilterAggregateKeys;
-        };
+  usernames?: estypes.AggregationsStringTermsAggregate;
+  types?: estypes.AggregationsStringTermsAggregate;
+  expired?: estypes.AggregationsFilterAggregateKeys;
+  managed?: {
+    buckets: {
+      metadataBased: estypes.AggregationsFilterAggregateKeys;
+      namePrefixBased: estypes.AggregationsFilterAggregateKeys;
     };
+  };
 }
 /**
  * Response of Kibana Query API keys endpoint.
  */
 export type QueryApiKeyResult = SuccessQueryApiKeyResult | ErrorQueryApiKeyResult;
 interface SuccessQueryApiKeyResult extends BaseQueryApiKeyResult {
-    apiKeys: ApiKey[];
-    count: number;
-    total: number;
-    queryError: never;
-    /**
-     * The search_after cursor for the next page of results.
-     * Use this value in the next request to get the following page.
-     */
-    searchAfter?: estypes.SortResults;
+  apiKeys: ApiKey[];
+  count: number;
+  total: number;
+  queryError: never;
+  /**
+   * The search_after cursor for the next page of results.
+   * Use this value in the next request to get the following page.
+   */
+  searchAfter?: estypes.SortResults;
 }
 interface ErrorQueryApiKeyResult extends BaseQueryApiKeyResult {
-    queryError: {
-        name: string;
-        message: string;
-    };
-    apiKeys: never;
-    total: never;
+  queryError: {
+    name: string;
+    message: string;
+  };
+  apiKeys: never;
+  total: never;
 }
 interface BaseQueryApiKeyResult {
-    canManageCrossClusterApiKeys: boolean;
-    canManageApiKeys: boolean;
-    canManageOwnApiKeys: boolean;
-    aggregationTotal: number;
-    aggregations: Record<string, estypes.SecurityQueryApiKeysApiKeyAggregate> | undefined;
+  canManageCrossClusterApiKeys: boolean;
+  canManageApiKeys: boolean;
+  canManageOwnApiKeys: boolean;
+  aggregationTotal: number;
+  aggregations: Record<string, estypes.SecurityQueryApiKeysApiKeyAggregate> | undefined;
 }
 /**
  * Interface representing a REST API key that is managed by Kibana.
  */
 export interface ManagedApiKey extends Omit<BaseApiKey, 'type'> {
-    type: estypes.SecurityApiKeyType | 'managed';
+  type: estypes.SecurityApiKeyType | 'managed';
 }
 /**
  * Interface representing an API key the way it is presented in the Kibana UI  (with Kibana system
  * API keys given its own dedicated `managed` type).
  */
 export type CategorizedApiKey = (ApiKey | ManagedApiKey) & {
-    expired: boolean;
+  expired: boolean;
 };
 export {};

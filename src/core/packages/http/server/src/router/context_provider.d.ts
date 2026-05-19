@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { MaybePromise } from '@kbn/utility-types';
 import type { RequestHandler } from './request_handler';
 import type { RequestHandlerContextBase } from './request_handler_context';
@@ -14,7 +23,13 @@ import type { RequestHandlerContextBase } from './request_handler_context';
  *
  * @public
  */
-export type IContextProvider<Context extends RequestHandlerContextBase, ContextName extends keyof Context> = (context: Omit<Context, ContextName>, ...rest: HandlerParameters<RequestHandler>) => MaybePromise<Awaited<Context[ContextName]>>;
+export type IContextProvider<
+  Context extends RequestHandlerContextBase,
+  ContextName extends keyof Context
+> = (
+  context: Omit<Context, ContextName>,
+  ...rest: HandlerParameters<RequestHandler>
+) => MaybePromise<Awaited<Context[ContextName]>>;
 /**
  * A function that accepts a context object and an optional number of additional arguments. Used for the generic types
  * in {@link IContextContainer}
@@ -27,11 +42,18 @@ export type HandlerFunction<T extends object> = (context: T, ...args: any[]) => 
  *
  * @public
  */
-export type HandlerContextType<T extends HandlerFunction<any>> = T extends HandlerFunction<infer U> ? U : never;
+export type HandlerContextType<T extends HandlerFunction<any>> = T extends HandlerFunction<infer U>
+  ? U
+  : never;
 /**
  * Extracts the types of the additional arguments of a {@link HandlerFunction}, excluding the
  * {@link HandlerContextType}.
  *
  * @public
  */
-export type HandlerParameters<T extends HandlerFunction<any>> = T extends (context: any, ...args: infer U) => any ? U : never;
+export type HandlerParameters<T extends HandlerFunction<any>> = T extends (
+  context: any,
+  ...args: infer U
+) => any
+  ? U
+  : never;

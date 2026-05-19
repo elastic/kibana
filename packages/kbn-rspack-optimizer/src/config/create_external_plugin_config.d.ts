@@ -1,22 +1,31 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import { type Configuration } from '@rspack/core';
 import type { ThemeTag } from '../types';
 export interface ExternalPluginConfigOptions {
-    /** Path to the Kibana repository root */
-    repoRoot: string;
-    /** Path to the plugin source directory */
-    pluginDir: string;
-    /** Plugin ID from kibana.json */
-    pluginId: string;
-    /** Output directory for the built bundle */
-    outputDir: string;
-    /** Build for production (minified) */
-    dist?: boolean;
-    /** Watch mode */
-    watch?: boolean;
-    /** Enable caching */
-    cache?: boolean;
-    /** Theme tags to compile (default: borealislight, borealisdark) */
-    themeTags?: ThemeTag[];
+  /** Path to the Kibana repository root */
+  repoRoot: string;
+  /** Path to the plugin source directory */
+  pluginDir: string;
+  /** Plugin ID from kibana.json */
+  pluginId: string;
+  /** Output directory for the built bundle */
+  outputDir: string;
+  /** Build for production (minified) */
+  dist?: boolean;
+  /** Watch mode */
+  watch?: boolean;
+  /** Enable caching */
+  cache?: boolean;
+  /** Theme tags to compile (default: borealislight, borealisdark) */
+  themeTags?: ThemeTag[];
 }
 /**
  * Create an RSPack configuration for building an EXTERNAL/third-party plugin.
@@ -31,7 +40,9 @@ export interface ExternalPluginConfigOptions {
  * The output bundle can be loaded after kibana.bundle.js and will integrate
  * seamlessly with the Kibana plugin system.
  */
-export declare function createExternalPluginConfig(options: ExternalPluginConfigOptions): Promise<Configuration>;
+export declare function createExternalPluginConfig(
+  options: ExternalPluginConfigOptions
+): Promise<Configuration>;
 /**
  * Create callback-style externals function for cross-plugin imports.
  *
@@ -55,12 +66,22 @@ export declare function createExternalPluginConfig(options: ExternalPluginConfig
  *
  * @see packages/kbn-optimizer/src/worker/bundle_remotes_plugin.ts (legacy equivalent)
  */
-export declare function createCrossPluginExternals(pluginTargets: Map<string, {
-    pluginId: string;
-    targets: string[];
-}>): ({ request }: {
+export declare function createCrossPluginExternals(
+  pluginTargets: Map<
+    string,
+    {
+      pluginId: string;
+      targets: string[];
+    }
+  >
+): (
+  {
+    request,
+  }: {
     request?: string;
-}, callback: (err?: Error, result?: string) => void) => void;
+  },
+  callback: (err?: Error, result?: string) => void
+) => void;
 /**
  * Create a wrapper entry module that:
  * 1. Imports each target entry of the plugin
@@ -72,4 +93,9 @@ export declare function createCrossPluginExternals(pluginTargets: Map<string, {
  *
  * @param targets - The plugin's resolved targets (['public', ...extraPublicDirs])
  */
-export declare function createPluginWrapper(wrapperDir: string, pluginId: string, pluginDir: string, targets: string[]): string;
+export declare function createPluginWrapper(
+  wrapperDir: string,
+  pluginId: string,
+  pluginDir: string,
+  targets: string[]
+): string;
