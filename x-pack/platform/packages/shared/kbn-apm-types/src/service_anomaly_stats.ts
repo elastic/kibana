@@ -4,12 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ServiceHealthStatus } from './service_health_status';
 
 export interface ServiceAnomalyStats {
   transactionType?: string;
   anomalyScore?: number;
   actualValue?: number;
   jobId?: string;
-  healthStatus: ServiceHealthStatus;
 }
