@@ -194,7 +194,15 @@ const handleConversationExecution = async ({
   const chatModel = (await modelProvider.getDefaultModel()).chatModel;
   const connectorProvider = getConnectorProvider(chatModel.getConnector());
 
-  return withConverseSpan({ agentId, conversationId: effectiveConversationId }, () =>
+  const { headers } = request;
+  const opikTraceId = headers.opik_trace_id as string | undefined;
+  const opikParentSpanId = headers.opik_parent_span_id as string | undefined;
+  const opikHeaders =
+    opikTraceId && opikParentSpanId
+      ? { opik_trace_id: opikTraceId, opik_parent_span_id: opikParentSpanId }
+      : undefined;
+
+  return withConverseSpan({ agentId, conversationId: effectiveConversationId, opikHeaders }, () =>
     merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
       handleCancellation(abortSignal),
       tap((event) => {

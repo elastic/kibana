@@ -63,12 +63,7 @@ export const MetricChartWrapper = React.memo(
         {loading && !loadedOnce.current ? (
           <ChartPlaceholder style={style} />
         ) : (
-          <EuiToolTip
-            className="eui-fullWidth"
-            delay="regular"
-            content={toolTip}
-            anchorClassName="eui-fullWidth"
-          >
+          <EuiToolTip className="eui-fullWidth" content={toolTip} anchorClassName="eui-fullWidth">
             <Chart
               size={style}
               css={css`

@@ -95,6 +95,8 @@ dependsOn:
   - '@kbn/workflows-management-plugin'
   - '@kbn/workflows'
   - '@kbn/agent-builder-plugin'
+  - '@kbn/data-streams'
+  - '@kbn/es-mappings'
 tags:
   - plugin
   - prod

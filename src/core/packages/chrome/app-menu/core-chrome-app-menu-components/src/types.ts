@@ -229,6 +229,14 @@ export type AppMenuItemType = AppMenuItemCommon & {
   separator?: 'above' | 'below';
 };
 
+export type AppMenuStaticItem = AppMenuItemType & {
+  /**
+   * Global static items are singleton items that are registered once
+   * and are shared across all app menus.
+   */
+  global?: boolean;
+};
+
 /**
  * Popover item type for use in `items` arrays.
  */

@@ -21,6 +21,12 @@ const ALERT_STATE_NAMESPACE = `${ALERT_NAMESPACE}.state` as const;
 // kibana.space_ids - space ID(s) of the rule that created this alert
 const SPACE_IDS = `${KIBANA_NAMESPACE}.space_ids` as const;
 
+// kibana.cps_scope_expression - resolved NPRE expression for the CPS scope of the rule that created this alert
+const CPS_SCOPE_EXPRESSION = `${KIBANA_NAMESPACE}.cps_scope.expression` as const;
+
+// kibana.cps_scope_linked_projects - project IDs that linked in the CPS scope of the rule that created this alert
+const CPS_SCOPE_LINKED_PROJECTS = `${KIBANA_NAMESPACE}.cps_scope.linked_projects` as const;
+
 // kibana.version - Kibana version that this alert was created
 const VERSION = `${KIBANA_NAMESPACE}.version` as const;
 
@@ -84,6 +90,9 @@ const ALERT_UPDATED_BY_USER_ID = `${ALERT_NAMESPACE}.updated_by.user.id` as cons
 
 // kibana.alert.updated_by.user.name - user name of the user that last updated the alert
 const ALERT_UPDATED_BY_USER_NAME = `${ALERT_NAMESPACE}.updated_by.user.name` as const;
+
+// kibana.alert.severity - severity level of the alert
+const ALERT_SEVERITY = `${ALERT_NAMESPACE}.severity` as const;
 
 // kibana.alert.status - active/recovered status of alert
 const ALERT_STATUS = `${ALERT_NAMESPACE}.status` as const;
@@ -187,6 +196,7 @@ export const fields = {
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
+  ALERT_SEVERITY,
   ALERT_SEVERITY_IMPROVING,
   ALERT_START,
   ALERT_UPDATED_AT,
@@ -203,6 +213,8 @@ export const fields = {
   ALERT_SCHEDULED_ACTION_DATE,
   ALERT_SCHEDULED_ACTION_THROTTLING,
   SPACE_IDS,
+  CPS_SCOPE_EXPRESSION,
+  CPS_SCOPE_LINKED_PROJECTS,
   TIMESTAMP,
   VERSION,
   ALERT_MUTED,
@@ -244,6 +256,7 @@ export {
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
+  ALERT_SEVERITY,
   ALERT_SEVERITY_IMPROVING,
   ALERT_START,
   ALERT_UPDATED_AT,
@@ -260,6 +273,8 @@ export {
   ALERT_SCHEDULED_ACTION_DATE,
   ALERT_SCHEDULED_ACTION_THROTTLING,
   SPACE_IDS,
+  CPS_SCOPE_EXPRESSION,
+  CPS_SCOPE_LINKED_PROJECTS,
   TIMESTAMP,
   VERSION,
   ALERT_MUTED,

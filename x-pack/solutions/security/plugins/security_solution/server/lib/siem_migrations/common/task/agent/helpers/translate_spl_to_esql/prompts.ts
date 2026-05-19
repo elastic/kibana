@@ -15,7 +15,8 @@ export const TASK_DESCRIPTION = {
 
 export const ESQL_SYNTAX_TRANSLATION_PROMPT =
   ChatPromptTemplate.fromTemplate(`You are a helpful cybersecurity (SIEM) expert agent. {task_description}
-Your goal is to translate the SPL query syntax into an equivalent Elastic Search Query Language (ES|QL) query without changing any of the field names, except for lookup lists when relevant, and focusing only on translating the syntax and structure.
+Your goal is to translate the SPL query syntax into an equivalent Elastic Search Query Language (ES|QL) query.
+{field_mapping_instructions}
 Also you'll need to write a summary at the end in markdown language.
 
 Here are some context for you to reference for your task, read it carefully as you will get questions about it later:
@@ -24,7 +25,7 @@ Here are some context for you to reference for your task, read it carefully as y
 {splunk_query}
 </splunk_query>
 <index_knowledge_base>
-The following is the sample documents and more knowledge for the target index. Use this to ensure field names in your ES|QL query match the actual fields available in the index:
+The following is the index knowledge base containing mappings, sample documents and any extra knowledge for the target index. This can be used to ensure correct field names and sometimes values that are used when generating the query.
 \`\`\`json
 {index_knowledge_base}
 \`\`\`
@@ -61,17 +62,15 @@ ${ECS_CATEGORIZATION_REFERENCE}
 
 Go through each step and part of the splunk_query while following the below guide to produce the resulting ES|QL query:
 - Analyze all the information about the related splunk query and try to determine the intent of the query, in order to translate into an equivalent ES|QL query.
-- Go through each part of the SPL query and determine the steps required to produce the same end results using ES|QL. Only focus on translating the structure without modifying any of the field names.
-- Do NOT map any of the field names to the Elastic Common Schema (ECS), this will happen in a later step.
+{field_mapping_steps}
 - However, DO use the ecs_categorization reference above to add appropriate ECS categorization fields (event.category, event.type, and event.outcome) as WHERE clauses in the ES|QL query, based on the intent of the rule. Only use the allowed values defined in the reference. If no categorization fits, leave these fields out.
 - Always remember to translate any lookup list using the lookup_syntax above
 
 <guidelines>
 - Analyze the SPL query and identify the key components.
-- Do NOT translate the field names of the SPL query.
-- If index mapping is provided, use it to ensure the field names in your ES|QL query match the actual fields available in the index. Only use fields that exist in the mapping.
-- Always start the resulting ES|QL query with "FROM {index_pattern}". We will set the correct index pattern later on, so do not mention anything about index patterns in the summary.
-- Always remember to leave placeholders defined in the placeholders_syntax context as they are, don't replace them.
+{field_mapping_guidelines}
+- Always start the resulting ES|QL query with "FROM {index_pattern}". We will set the correct index pattern later on, so do not mention anything about index patterns in the summary. DO NOT make up any other index pattern
+- Always remember to leave placeholders matching the ones defined in the placeholders_syntax context as they are, don't replace or drop them. Others can be dropped for the sake of a valid query.
 - Always remember to translate any lookup (that are not inside a placeholder) using the lookup_syntax rules above.
 </guidelines>
 

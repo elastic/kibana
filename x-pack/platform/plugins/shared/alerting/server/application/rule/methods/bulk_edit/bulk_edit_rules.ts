@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { cloneDeep } from 'lodash';
 import type { SavedObjectsFindResult } from '@kbn/core/server';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { UntypedNormalizedRuleType } from '../../../../rule_type_registry';
 import { updateRuleInMemory } from '../../../../rules_client/common/bulk_edit';
 import type {
@@ -66,6 +67,7 @@ export async function bulkEditRules<Params extends RuleParams>(
     auditAction,
     requiredAuthOperation,
     shouldInvalidateApiKeys,
+    changeTrackingAction: RuleChangeTrackingAction.ruleUpdate,
     shouldValidateSchedule: options.operations.some((operation) => operation.field === 'schedule'),
     updateFn: (opts: UpdateOperationOpts) =>
       updateRuleAttributesAndParamsInMemory<Params>({

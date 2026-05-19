@@ -107,10 +107,14 @@ const useFilesProviderProps = (onInspect?: (item: ContentListItem) => void) => {
 
   const item = useMemo(
     () => ({
-      onDelete: async () => {
-        await wait(250);
+      actions: {
+        delete: {
+          onBulkAction: async () => {
+            await wait(250);
+          },
+        },
+        ...(onInspect ? { inspect: { onItemAction: onInspect } } : {}),
       },
-      ...(onInspect ? { onInspect } : {}),
     }),
     [onInspect]
   );
@@ -165,7 +169,7 @@ const OriginalStory = () => {
                 return formatBytes(size !== undefined && Number.isFinite(size) ? size : undefined);
               }}
             />
-            <Column.Actions width="96px">
+            <Column.Actions>
               <Action.Delete />
             </Column.Actions>
           </ContentListTable>
@@ -212,7 +216,7 @@ const ProposalStory = () => {
               </Filters>
             </ContentListToolbar>
             <ContentListTable title="Files">
-              <Column.Name showDescription width="44%" />
+              <Column.Name showDescription />
               <Column
                 id="fileKind"
                 name="Type"
@@ -236,8 +240,8 @@ const ProposalStory = () => {
                   );
                 }}
               />
-              <Column.UpdatedAt width="160px" />
-              <Column.Actions width="128px">
+              <Column.UpdatedAt />
+              <Column.Actions>
                 <Action.Inspect />
                 <Action.Delete />
               </Column.Actions>

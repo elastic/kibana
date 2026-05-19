@@ -11,6 +11,11 @@ import { OnboardingHomePage } from './onboarding_home';
 import { CustomLogsPage } from './custom_logs';
 import { ObservabilityNavigation } from './observability_navigation';
 
+export {
+  OBSERVABILITY_PRIMARY_NAV_LOAD_TIMEOUT_MS,
+  OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+} from './observability_navigation';
+
 export interface ObltPageObjects extends PageObjects {
   onboardingHome: OnboardingHomePage;
   customLogs: CustomLogsPage;
