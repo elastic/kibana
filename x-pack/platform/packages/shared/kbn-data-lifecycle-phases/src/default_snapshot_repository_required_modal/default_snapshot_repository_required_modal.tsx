@@ -22,6 +22,8 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
+const I18N_PREFIX = 'xpack.dataLifecyclePhases.defaultSnapshotRepositoryRequiredModal';
+
 export interface DefaultSnapshotRepositoryRequiredModalProps {
   onCancel: () => void;
   createDefaultRepositoryUrl: string;
@@ -44,7 +46,7 @@ export const DefaultSnapshotRepositoryRequiredModal = ({
     <EuiModal onClose={onCancel} aria-labelledby={titleId} maxWidth={euiTheme.breakpoint.s}>
       <EuiModalHeader>
         <EuiModalHeaderTitle id={titleId} data-test-subj={`${dataTestSubj}Title`}>
-          {i18n.translate('xpack.streams.defaultSnapshotRepositoryRequiredModal.title', {
+          {i18n.translate(`${I18N_PREFIX}.title`, {
             defaultMessage: 'Default snapshot repository required',
           })}
         </EuiModalHeaderTitle>
@@ -52,9 +54,9 @@ export const DefaultSnapshotRepositoryRequiredModal = ({
 
       <EuiModalBody>
         <EuiText>
-          {i18n.translate('xpack.streams.defaultSnapshotRepositoryRequiredModal.description', {
+          {i18n.translate(`${I18N_PREFIX}.description`, {
             defaultMessage:
-              'To add a frozen phase to a stream using a data stream lifecycle, first create a default snapshot repository, then refresh this panel.',
+              'To add a frozen phase, you need a default snapshot repository first. Create one in Snapshot and Restore, then refresh this panel.',
           })}
         </EuiText>
       </EuiModalBody>
@@ -67,7 +69,7 @@ export const DefaultSnapshotRepositoryRequiredModal = ({
               flush="left"
               onClick={onCancel}
             >
-              {i18n.translate('xpack.streams.defaultSnapshotRepositoryRequiredModal.cancel', {
+              {i18n.translate(`${I18N_PREFIX}.cancel`, {
                 defaultMessage: 'Cancel',
               })}
             </EuiButtonEmpty>
@@ -80,23 +82,17 @@ export const DefaultSnapshotRepositoryRequiredModal = ({
                 href={createDefaultRepositoryUrl}
                 target="_blank"
               >
-                {i18n.translate(
-                  'xpack.streams.defaultSnapshotRepositoryRequiredModal.createDefaultRepository',
-                  {
-                    defaultMessage: 'Create default repository',
-                  }
-                )}
+                {i18n.translate(`${I18N_PREFIX}.createDefaultRepository`, {
+                  defaultMessage: 'Create default repository',
+                })}
               </EuiSplitButton.ActionPrimary>
               <EuiSplitButton.ActionSecondary
                 iconType="refresh"
                 isLoading={Boolean(isRefreshing)}
                 disabled={Boolean(isRefreshing)}
-                aria-label={i18n.translate(
-                  'xpack.streams.defaultSnapshotRepositoryRequiredModal.refreshAriaLabel',
-                  {
-                    defaultMessage: 'Refresh snapshot repositories',
-                  }
-                )}
+                aria-label={i18n.translate(`${I18N_PREFIX}.refreshAriaLabel`, {
+                  defaultMessage: 'Refresh snapshot repositories',
+                })}
                 data-test-subj={`${dataTestSubj}RefreshButton`}
                 onClick={onRefresh}
               />
