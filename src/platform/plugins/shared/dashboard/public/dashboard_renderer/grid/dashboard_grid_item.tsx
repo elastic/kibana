@@ -272,10 +272,6 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>((props,
   return isEnabled ? <ObservedItem ref={ref} {...props} /> : <Item ref={ref} {...props} />;
 });
 
-/**
- * There's no easy way to override CSS box shadow color while preserving opacity and pixel size,
- * so set a base shadow opacity and adjust it to the same proportions that EuiPanel does it
- */
 const dashboardGridItemStyles = {
   item: (context: UseEuiTheme) =>
     css([
