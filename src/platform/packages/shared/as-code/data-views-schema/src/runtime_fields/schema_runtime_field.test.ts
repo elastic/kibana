@@ -8,6 +8,7 @@
  */
 
 import type { z } from '@kbn/zod';
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import {
   PRIMITIVE_RUNTIME_FIELD_TYPES,
   RUNTIME_FIELD_COMPOSITE_TYPE,
@@ -48,7 +49,7 @@ describe.each([
       };
 
       // When/Then
-      expect(() => runtimeFieldSchemaType.parse(runtimeField)).toThrow(/type|invalid|union/i);
+      expectPrettyError(runtimeFieldSchemaType.safeParse(runtimeField)).toMatchSnapshot();
     });
   });
 
@@ -84,9 +85,7 @@ describe.each([
         };
 
         // When/Then
-        expect(() => runtimeFieldSchemaType.parse(runtimeField)).toThrow(
-          /fields|required|invalid/i
-        );
+        expectPrettyError(runtimeFieldSchemaType.safeParse(runtimeField)).toMatchSnapshot();
       });
     });
 
@@ -99,9 +98,7 @@ describe.each([
         });
 
         // When/Then
-        expect(() => runtimeFieldSchemaType.parse(runtimeField)).toThrow(
-          /fields|required|invalid/i
-        );
+        expectPrettyError(runtimeFieldSchemaType.safeParse(runtimeField)).toMatchSnapshot();
       });
     });
 
@@ -119,9 +116,7 @@ describe.each([
           });
 
           // When/Then
-          expect(() => runtimeFieldSchemaType.parse(runtimeField)).toThrow(
-            /my_runtime_subfield|fields|type/i
-          );
+          expectPrettyError(runtimeFieldSchemaType.safeParse(runtimeField)).toMatchSnapshot();
         });
       });
 
@@ -138,9 +133,7 @@ describe.each([
           });
 
           // When/Then
-          expect(() => runtimeFieldSchemaType.parse(runtimeField)).toThrow(
-            /my_runtime_subfield|fields|type/i
-          );
+          expectPrettyError(runtimeFieldSchemaType.safeParse(runtimeField)).toMatchSnapshot();
         });
       });
 
@@ -152,9 +145,7 @@ describe.each([
           });
 
           // When/Then
-          expect(() => runtimeFieldSchemaType.parse(runtimeField)).toThrow(
-            /invalid_key|invalid|key|""/i
-          );
+          expectPrettyError(runtimeFieldSchemaType.safeParse(runtimeField)).toMatchSnapshot();
         });
       });
 
@@ -167,9 +158,7 @@ describe.each([
           });
 
           // When/Then
-          expect(() => runtimeFieldSchemaType.parse(runtimeField)).toThrow(
-            /too_big|maximum|1000|length|key/i
-          );
+          expectPrettyError(runtimeFieldSchemaType.safeParse(runtimeField)).toMatchSnapshot();
         });
       });
 
@@ -187,27 +176,27 @@ describe.each([
     });
 
     describe('when it has top-level field formatting settings', () => {
-      it('strips unknown keys (composite object is not strict)', () => {
+      it('should throw an error', () => {
         // Given
         const runtimeField = buildCompositeRuntimeField({
           // @ts-expect-error - we want to test an invalid type
           format: { type: 'number', params: { decimals: 2 } },
         });
 
-        // When/Then — plain z.object() strips keys not in the schema
-        expect(runtimeFieldSchemaType.parse(runtimeField)).toEqual(buildCompositeRuntimeField({}));
+        // When/Then
+        expectPrettyError(runtimeFieldSchemaType.safeParse(runtimeField)).toMatchSnapshot();
       });
     });
 
     describe.each(['custom_label', 'custom_description'])('when it has a top-level %s', (field) => {
-      it('strips unknown keys (composite object is not strict)', () => {
+      it('should throw an error', () => {
         // Given
         const runtimeField = buildCompositeRuntimeField({
           [field]: 'my_runtime_field',
         });
 
-        // When/Then — plain z.object() strips keys not in the schema
-        expect(runtimeFieldSchemaType.parse(runtimeField)).toEqual(buildCompositeRuntimeField({}));
+        // When/Then
+        expectPrettyError(runtimeFieldSchemaType.safeParse(runtimeField)).toMatchSnapshot();
       });
     });
   });
@@ -245,9 +234,7 @@ describe.each([
         const runtimeField = build({ script: '' });
 
         // When/Then
-        expect(() => runtimeFieldSchemaType.parse(runtimeField)).toThrow(
-          /script|Too small|length|empty/i
-        );
+        expectPrettyError(runtimeFieldSchemaType.safeParse(runtimeField)).toMatchSnapshot();
       });
     });
 
@@ -258,9 +245,7 @@ describe.each([
         const runtimeField = build({ script: { source: 'some script' } });
 
         // When/Then
-        expect(() => runtimeFieldSchemaType.parse(runtimeField)).toThrow(
-          /script|string|invalid_type|expected/i
-        );
+        expectPrettyError(runtimeFieldSchemaType.safeParse(runtimeField)).toMatchSnapshot();
       });
     });
 
@@ -282,7 +267,7 @@ describe.each([
           const runtimeField = buildWithFields({ format: { type: 1, params: 1 } });
 
           // When/Then
-          expect(() => runtimeFieldSchemaType.parse(runtimeField)).toThrow(/format/);
+          expectPrettyError(runtimeFieldSchemaType.safeParse(runtimeField)).toContain('format');
         });
       });
 
@@ -330,7 +315,7 @@ describe.each([
           const runtimeField = buildWithFields({ [field]: 1 });
 
           // When/Then
-          expect(() => runtimeFieldSchemaType.parse(runtimeField)).toThrow(new RegExp(field));
+          expectPrettyError(runtimeFieldSchemaType.safeParse(runtimeField)).toContain(field);
         });
       });
 
@@ -341,7 +326,7 @@ describe.each([
             const runtimeField = buildWithFields({ [field]: '' });
 
             // When/Then
-            expect(() => runtimeFieldSchemaType.parse(runtimeField)).toThrow(new RegExp(field));
+            expectPrettyError(runtimeFieldSchemaType.safeParse(runtimeField)).toContain(field);
           });
         });
 

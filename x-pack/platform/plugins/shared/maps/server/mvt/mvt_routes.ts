@@ -48,20 +48,24 @@ export function initMVTRoutes({
         version: '1',
         validate: {
           request: {
-            params: zod.object({
-              x: zod.coerce.number(),
-              y: zod.coerce.number(),
-              z: zod.coerce.number(),
-            }),
-            query: zod.object({
-              buffer: zod.coerce.number().optional(),
-              geometryFieldName: zod.string(),
-              hasLabels: zod.stringbool({ truthy: ['true'], falsy: ['false'] }),
-              requestBody: zod.string(),
-              index: zod.string(),
-              token: zod.string().optional(),
-              executionContextId: zod.string().optional(),
-            }),
+            params: zod
+              .object({
+                x: zod.coerce.number(),
+                y: zod.coerce.number(),
+                z: zod.coerce.number(),
+              })
+              .strict(),
+            query: zod
+              .object({
+                buffer: zod.coerce.number().optional(),
+                geometryFieldName: zod.string(),
+                hasLabels: zod.stringbool({ truthy: ['true'], falsy: ['false'] }),
+                requestBody: zod.string(),
+                index: zod.string(),
+                token: zod.string().optional(),
+                executionContextId: zod.string().optional(),
+              })
+              .strict(),
           },
         },
       },
@@ -134,22 +138,26 @@ export function initMVTRoutes({
         version: '1',
         validate: {
           request: {
-            params: zod.object({
-              x: zod.coerce.number(),
-              y: zod.coerce.number(),
-              z: zod.coerce.number(),
-            }),
-            query: zod.object({
-              buffer: zod.coerce.number().optional(),
-              geometryFieldName: zod.string(),
-              hasLabels: zod.stringbool({ truthy: ['true'], falsy: ['false'] }),
-              requestBody: zod.string(),
-              index: zod.string(),
-              renderAs: zod.string(),
-              token: zod.string().optional(),
-              gridPrecision: zod.coerce.number(),
-              executionContextId: zod.string().optional(),
-            }),
+            params: zod
+              .object({
+                x: zod.coerce.number(),
+                y: zod.coerce.number(),
+                z: zod.coerce.number(),
+              })
+              .strict(),
+            query: zod
+              .object({
+                buffer: zod.coerce.number().optional(),
+                geometryFieldName: zod.string(),
+                hasLabels: zod.stringbool({ truthy: ['true'], falsy: ['false'] }),
+                requestBody: zod.string(),
+                index: zod.string(),
+                renderAs: zod.string(),
+                token: zod.string().optional(),
+                gridPrecision: zod.coerce.number(),
+                executionContextId: zod.string().optional(),
+              })
+              .strict(),
           },
         },
       },
