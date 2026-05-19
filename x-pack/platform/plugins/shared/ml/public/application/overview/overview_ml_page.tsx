@@ -304,9 +304,7 @@ export const OverviewPage: FC = () => {
                         <EuiButton
                           color="text"
                           target="_self"
-                          onClick={() =>
-                            navigateToPath('/aiops/change_point_detection')
-                          }
+                          onClick={() => navigateToPath('/aiops/change_point_detection')}
                           data-test-subj="mlOverviewCardChangePointDetectionButton"
                           aria-label={i18n.translate(
                             'xpack.ml.overview.changePointDetection.findChangesButton',

@@ -47,7 +47,9 @@ const mockNavigateToPath = jest.fn();
 const mockGetIdsWithTitle = jest.fn().mockResolvedValue([]);
 const mockOpenEditor = jest.fn().mockResolvedValue(() => {});
 
-const buildServices = (overrides?: Partial<MlDataSourcePickerServices>): MlDataSourcePickerServices =>
+const buildServices = (
+  overrides?: Partial<MlDataSourcePickerServices>
+): MlDataSourcePickerServices =>
   ({
     dataViews: { getIdsWithTitle: mockGetIdsWithTitle },
     dataViewEditor: {
@@ -168,9 +170,7 @@ describe('MlDataSourcePicker', () => {
       await capturedDataViewPickerProps.onDataViewCreated({ id: 'new-dv-id' });
     });
 
-    expect(mockNavigateToPath).toHaveBeenCalledWith(
-      '/jobs/new_job/step/data_view?index=new-dv-id'
-    );
+    expect(mockNavigateToPath).toHaveBeenCalledWith('/jobs/new_job/step/data_view?index=new-dv-id');
     expect(mockGetIdsWithTitle).toHaveBeenCalledTimes(2);
   });
 
