@@ -149,7 +149,7 @@ export function DashboardRenderer({
         if (!canceled) {
           apm.captureError(err, {
             labels: {
-              error_type: 'RenderDashboardFailure',
+              error_type: 'LoadDashboardFailure',
             },
           });
           setError(err);
