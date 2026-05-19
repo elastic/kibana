@@ -3064,6 +3064,9 @@ x-pack/solutions/security/test/moon.yml @elastic/kibana-operations
 /.agents/skills/scout-migrate-from-ftr/** @elastic/appex-qa
 /.agents/skills/scout-ui-testing/** @elastic/appex-qa
 
+
+/.mise.toml @elastic/kibana-operations
+
 ####
 ## These rules are always last so they take ultimate priority over everything else
 ####
