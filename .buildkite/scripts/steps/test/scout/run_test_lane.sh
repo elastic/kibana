@@ -171,7 +171,6 @@ run_scout_tests() {
       PASSED+=("$config_path ($duration)")
       ;;
     *)
-      echo "^^^ +++"
       upload_report_events "$config_path"
       FAILED+=("$config_path")
       echo "Exited with code $exit_code for $config_path"
