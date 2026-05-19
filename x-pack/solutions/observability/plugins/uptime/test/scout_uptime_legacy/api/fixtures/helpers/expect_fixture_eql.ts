@@ -20,6 +20,14 @@ const excludeFieldsFrom = (from: any, excluder?: (d: any) => any): any => {
   return clone;
 };
 
+export const stripInspect = (obj: any) => {
+  const clone = cloneDeep(obj);
+  if (clone && typeof clone === 'object' && '_inspect' in clone) {
+    delete clone._inspect;
+  }
+  return clone;
+};
+
 export const expectFixtureEql = <T>(data: T, fixtureName: string, excluder?: (d: T) => void) => {
   expect(data).not.toBeNull();
   expect(data).toBeDefined();
@@ -27,7 +35,7 @@ export const expectFixtureEql = <T>(data: T, fixtureName: string, excluder?: (d:
   const fixturePath = join(fixturesDir, `${fixtureName}.json`);
 
   excluder = excluder || ((d) => d);
-  const dataExcluded = excludeFieldsFrom(data, excluder);
+  const dataExcluded = stripInspect(excludeFieldsFrom(data, excluder));
   expect(dataExcluded).toBeDefined();
   const fixtureExists = () => fs.existsSync(fixturePath);
   const fixtureChanged = () =>

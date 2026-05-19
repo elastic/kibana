@@ -39,7 +39,7 @@ const checkMonitorStatesResponse = ({
     summaries?.map((s) => (s.state.summary?.up && !s.state.summary?.down ? 'up' : 'down'))
   ).toStrictEqual(statuses);
   (summaries ?? []).forEach((s) => {
-    expect(s.state.url.full).toBeTruthy();
+    expect(s.state.url.full).toBeDefined();
   });
   expect(prevPagePagination).toBe(prevPagination);
   expect(nextPagePagination).toStrictEqual(nextPagination);
@@ -53,26 +53,22 @@ apiTest.describe('monitor states endpoint', { tag: '@local-stateful-classic' }, 
 
   apiTest.beforeAll(async ({ requestAuth, esArchiver }) => {
     adminCredentials = await requestAuth.getApiKey('admin');
-    await esArchiver.load(testData.ES_ARCHIVES.FULL_HEARTBEAT);
-  });
-
-  apiTest.afterAll(async ({ esArchiver }) => {
-    await esArchiver.unload(testData.ES_ARCHIVES.FULL_HEARTBEAT);
+    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.FULL_HEARTBEAT);
   });
 
   apiTest(
     'will fetch monitor state data for the given filters and range',
     async ({ apiClient }) => {
-      const response = await apiClient.get(testData.API_URLS.MONITOR_LIST.slice(1), {
+      const params = new URLSearchParams({
+        dateRangeStart: from,
+        dateRangeEnd: to,
+        statusFilter: 'up',
+        filters:
+          '{"bool":{"must":[{"match":{"monitor.id":{"query":"0002-up","operator":"and"}}}]}}',
+        pageSize: String(10),
+      });
+      const response = await apiClient.get(`${testData.API_URLS.MONITOR_LIST.slice(1)}?${params}`, {
         headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
-        query: {
-          dateRangeStart: from,
-          dateRangeEnd: to,
-          statusFilter: 'up',
-          filters:
-            '{"bool":{"must":[{"match":{"monitor.id":{"query":"0002-up","operator":"and"}}}]}}',
-          pageSize: 10,
-        },
         responseType: 'json',
       });
 
@@ -88,14 +84,14 @@ apiTest.describe('monitor states endpoint', { tag: '@local-stateful-classic' }, 
   );
 
   apiTest('will fetch monitor state data for the given down filters', async ({ apiClient }) => {
-    const response = await apiClient.get(testData.API_URLS.MONITOR_LIST.slice(1), {
+    const params = new URLSearchParams({
+      dateRangeStart: from,
+      dateRangeEnd: to,
+      statusFilter: 'down',
+      pageSize: String(2),
+    });
+    const response = await apiClient.get(`${testData.API_URLS.MONITOR_LIST.slice(1)}?${params}`, {
       headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
-      query: {
-        dateRangeStart: from,
-        dateRangeEnd: to,
-        statusFilter: 'down',
-        pageSize: 2,
-      },
       responseType: 'json',
     });
 
@@ -113,7 +109,7 @@ apiTest.describe('monitor states endpoint', { tag: '@local-stateful-classic' }, 
         expect(summary.state.summary.down).toBe(1);
         expect(summary.state.summary.up).toBe(0);
         expect(summary.state.summary.status).toBe('down');
-        expect(summary.state.url.full).toBeTruthy();
+        expect(summary.state.url.full).toBeDefined();
       }
     );
   });
@@ -488,16 +484,18 @@ apiTest.describe('monitor states endpoint', { tag: '@local-stateful-classic' }, 
 
     let pagination: string | null = null;
     for (let page = 1; page <= expectedPageCount; page++) {
-      const nextResponse = await apiClient.get(testData.API_URLS.MONITOR_LIST.slice(1), {
-        headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
-        query: {
-          dateRangeStart: from,
-          dateRangeEnd: to,
-          pageSize: size,
-          pagination: pagination ?? '',
-        },
-        responseType: 'json',
-      });
+      const nextParams = new URLSearchParams();
+      nextParams.set('dateRangeStart', from);
+      nextParams.set('dateRangeEnd', to);
+      nextParams.set('pageSize', String(size));
+      nextParams.set('pagination', pagination ?? '');
+      const nextResponse = await apiClient.get(
+        `${testData.API_URLS.MONITOR_LIST.slice(1)}?${nextParams}`,
+        {
+          headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
+          responseType: 'json',
+        }
+      );
       const nextData = nextResponse.body;
       pagination = nextData.nextPagePagination;
       checkMonitorStatesResponse({
@@ -507,16 +505,20 @@ apiTest.describe('monitor states endpoint', { tag: '@local-stateful-classic' }, 
       });
 
       if (page > 1) {
-        const prevResponse = await apiClient.get(testData.API_URLS.MONITOR_LIST.slice(1), {
-          headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
-          query: {
-            dateRangeStart: from,
-            dateRangeEnd: to,
-            pageSize: size,
-            pagination: nextData.prevPagePagination,
-          },
-          responseType: 'json',
-        });
+        const prevParams = new URLSearchParams();
+        prevParams.set('dateRangeStart', from);
+        prevParams.set('dateRangeEnd', to);
+        prevParams.set('pageSize', String(size));
+        if (nextData.prevPagePagination) {
+          prevParams.set('pagination', nextData.prevPagePagination);
+        }
+        const prevResponse = await apiClient.get(
+          `${testData.API_URLS.MONITOR_LIST.slice(1)}?${prevParams}`,
+          {
+            headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
+            responseType: 'json',
+          }
+        );
         checkMonitorStatesResponse({
           response: prevResponse.body,
           ...expectedPrevResults[page - 2],
@@ -528,13 +530,13 @@ apiTest.describe('monitor states endpoint', { tag: '@local-stateful-classic' }, 
 
   apiTest('will fetch monitor state data for the given date range', async ({ apiClient }) => {
     const LENGTH = 10;
-    const response = await apiClient.get(testData.API_URLS.MONITOR_LIST.slice(1), {
+    const params = new URLSearchParams({
+      dateRangeStart: from,
+      dateRangeEnd: to,
+      pageSize: String(LENGTH),
+    });
+    const response = await apiClient.get(`${testData.API_URLS.MONITOR_LIST.slice(1)}?${params}`, {
       headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
-      query: {
-        dateRangeStart: from,
-        dateRangeEnd: to,
-        pageSize: LENGTH,
-      },
       responseType: 'json',
     });
 

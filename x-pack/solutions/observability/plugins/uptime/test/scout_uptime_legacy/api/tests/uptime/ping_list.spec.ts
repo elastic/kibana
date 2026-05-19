@@ -17,23 +17,19 @@ apiTest.describe('pingList query', { tag: '@local-stateful-classic' }, () => {
 
   apiTest.beforeAll(async ({ requestAuth, esArchiver }) => {
     adminCredentials = await requestAuth.getApiKey('admin');
-    await esArchiver.load(testData.ES_ARCHIVES.FULL_HEARTBEAT);
-  });
-
-  apiTest.afterAll(async ({ esArchiver }) => {
-    await esArchiver.unload(testData.ES_ARCHIVES.FULL_HEARTBEAT);
+    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.FULL_HEARTBEAT);
   });
 
   apiTest(
     'returns a list of pings for the given date range and default size',
     async ({ apiClient }) => {
-      const response = await apiClient.get(testData.API_URLS.PINGS.slice(1), {
+      const params = new URLSearchParams({
+        from,
+        to,
+        size: String(10),
+      });
+      const response = await apiClient.get(`${testData.API_URLS.PINGS.slice(1)}?${params}`, {
         headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
-        query: {
-          from,
-          to,
-          size: 10,
-        },
         responseType: 'json',
       });
       expect(response.statusCode).toBe(200);
@@ -57,13 +53,13 @@ apiTest.describe('pingList query', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest('returns a list of pings for the date range and given size', async ({ apiClient }) => {
-    const response = await apiClient.get(testData.API_URLS.PINGS.slice(1), {
+    const params = new URLSearchParams({
+      from,
+      to,
+      size: String(50),
+    });
+    const response = await apiClient.get(`${testData.API_URLS.PINGS.slice(1)}?${params}`, {
       headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
-      query: {
-        from,
-        to,
-        size: 50,
-      },
       responseType: 'json',
     });
     expect(response.statusCode).toBe(200);
@@ -126,14 +122,14 @@ apiTest.describe('pingList query', { tag: '@local-stateful-classic' }, () => {
   });
 
   apiTest('returns a list of pings for a monitor ID', async ({ apiClient }) => {
-    const response = await apiClient.get(testData.API_URLS.PINGS.slice(1), {
+    const params = new URLSearchParams({
+      from,
+      to,
+      monitorId: '0001-up',
+      size: String(15),
+    });
+    const response = await apiClient.get(`${testData.API_URLS.PINGS.slice(1)}?${params}`, {
       headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
-      query: {
-        from,
-        to,
-        monitorId: '0001-up',
-        size: 15,
-      },
       responseType: 'json',
     });
     expect(response.statusCode).toBe(200);
@@ -163,15 +159,15 @@ apiTest.describe('pingList query', { tag: '@local-stateful-classic' }, () => {
   });
 
   apiTest('returns a list of pings sorted ascending', async ({ apiClient }) => {
-    const response = await apiClient.get(testData.API_URLS.PINGS.slice(1), {
+    const params = new URLSearchParams({
+      from,
+      to,
+      monitorId: '0001-up',
+      size: String(5),
+      sort: 'asc',
+    });
+    const response = await apiClient.get(`${testData.API_URLS.PINGS.slice(1)}?${params}`, {
       headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
-      query: {
-        from,
-        to,
-        monitorId: '0001-up',
-        size: 5,
-        sort: 'asc',
-      },
       responseType: 'json',
     });
     expect(response.statusCode).toBe(200);

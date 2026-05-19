@@ -8,17 +8,14 @@
 import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, testData } from '../../fixtures';
+import { stripInspect } from '../../fixtures/helpers/expect_fixture_eql';
 
 apiTest.describe('indexStatus query', { tag: '@local-stateful-classic' }, () => {
   let adminCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth, esArchiver }) => {
     adminCredentials = await requestAuth.getApiKey('admin');
-    await esArchiver.load(testData.ES_ARCHIVES.FULL_HEARTBEAT);
-  });
-
-  apiTest.afterAll(async ({ esArchiver }) => {
-    await esArchiver.unload(testData.ES_ARCHIVES.FULL_HEARTBEAT);
+    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.FULL_HEARTBEAT);
   });
 
   apiTest(`will fetch the index's count`, async ({ apiClient }) => {
@@ -27,7 +24,7 @@ apiTest.describe('indexStatus query', { tag: '@local-stateful-classic' }, () => 
       responseType: 'json',
     });
     expect(response.statusCode).toBe(200);
-    expect(response.body).toStrictEqual({
+    expect(stripInspect(response.body)).toStrictEqual({
       indexExists: true,
       indices: 'heartbeat-*',
     });

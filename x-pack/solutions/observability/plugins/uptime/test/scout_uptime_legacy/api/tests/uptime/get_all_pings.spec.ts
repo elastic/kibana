@@ -14,21 +14,17 @@ apiTest.describe('get_all_pings', { tag: '@local-stateful-classic' }, () => {
 
   apiTest.beforeAll(async ({ requestAuth, esArchiver }) => {
     adminCredentials = await requestAuth.getApiKey('admin');
-    await esArchiver.load(testData.ES_ARCHIVES.FULL_HEARTBEAT);
-  });
-
-  apiTest.afterAll(async ({ esArchiver }) => {
-    await esArchiver.unload(testData.ES_ARCHIVES.FULL_HEARTBEAT);
+    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.FULL_HEARTBEAT);
   });
 
   apiTest('should get all pings stored in index', async ({ apiClient }) => {
-    const response = await apiClient.get(testData.API_URLS.PINGS.slice(1), {
+    const params = new URLSearchParams({
+      sort: 'desc',
+      from: testData.PINGS_DATE_RANGE_START,
+      to: testData.PINGS_DATE_RANGE_END,
+    });
+    const response = await apiClient.get(`${testData.API_URLS.PINGS.slice(1)}?${params}`, {
       headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
-      query: {
-        sort: 'desc',
-        from: testData.PINGS_DATE_RANGE_START,
-        to: testData.PINGS_DATE_RANGE_END,
-      },
       responseType: 'json',
     });
     expect(response.statusCode).toBe(200);
@@ -38,13 +34,13 @@ apiTest.describe('get_all_pings', { tag: '@local-stateful-classic' }, () => {
   });
 
   apiTest('should sort pings according to timestamp', async ({ apiClient }) => {
-    const response = await apiClient.get(testData.API_URLS.PINGS.slice(1), {
+    const params = new URLSearchParams({
+      sort: 'asc',
+      from: testData.PINGS_DATE_RANGE_START,
+      to: testData.PINGS_DATE_RANGE_END,
+    });
+    const response = await apiClient.get(`${testData.API_URLS.PINGS.slice(1)}?${params}`, {
       headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
-      query: {
-        sort: 'asc',
-        from: testData.PINGS_DATE_RANGE_START,
-        to: testData.PINGS_DATE_RANGE_END,
-      },
       responseType: 'json',
     });
     expect(response.statusCode).toBe(200);
@@ -55,14 +51,14 @@ apiTest.describe('get_all_pings', { tag: '@local-stateful-classic' }, () => {
   });
 
   apiTest('should return results of n length', async ({ apiClient }) => {
-    const response = await apiClient.get(testData.API_URLS.PINGS.slice(1), {
+    const params = new URLSearchParams({
+      sort: 'desc',
+      size: String(1),
+      from: testData.PINGS_DATE_RANGE_START,
+      to: testData.PINGS_DATE_RANGE_END,
+    });
+    const response = await apiClient.get(`${testData.API_URLS.PINGS.slice(1)}?${params}`, {
       headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
-      query: {
-        sort: 'desc',
-        size: 1,
-        from: testData.PINGS_DATE_RANGE_START,
-        to: testData.PINGS_DATE_RANGE_END,
-      },
       responseType: 'json',
     });
     expect(response.statusCode).toBe(200);
@@ -74,9 +70,12 @@ apiTest.describe('get_all_pings', { tag: '@local-stateful-classic' }, () => {
   apiTest('should miss pings outside of date range', async ({ apiClient }) => {
     const from = new Date('2002-01-01').valueOf();
     const to = new Date('2002-01-02').valueOf();
-    const response = await apiClient.get(testData.API_URLS.PINGS.slice(1), {
+    const params = new URLSearchParams({
+      from: String(from),
+      to: String(to),
+    });
+    const response = await apiClient.get(`${testData.API_URLS.PINGS.slice(1)}?${params}`, {
       headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
-      query: { from, to },
       responseType: 'json',
     });
     expect(response.statusCode).toBe(200);

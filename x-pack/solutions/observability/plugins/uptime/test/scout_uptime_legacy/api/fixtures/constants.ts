@@ -15,8 +15,8 @@ export const ES_ARCHIVES = {
   BLANK: 'x-pack/solutions/observability/test/fixtures/es_archives/uptime/blank',
 } as const;
 
-export const PINGS_DATE_RANGE_START = new Date('2019-09-11T03:31:04.396Z').valueOf();
-export const PINGS_DATE_RANGE_END = new Date('2020-10-31T00:00:00.889Z').valueOf();
+export const PINGS_DATE_RANGE_START = String(new Date('2019-09-11T03:31:04.396Z').valueOf());
+export const PINGS_DATE_RANGE_END = String(new Date('2020-10-31T00:00:00.889Z').valueOf());
 
 export const API_URLS = {
   PINGS: '/internal/uptime/pings',

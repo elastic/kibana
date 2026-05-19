@@ -15,21 +15,17 @@ apiTest.describe('get monitor latest status API', { tag: '@local-stateful-classi
 
   apiTest.beforeAll(async ({ requestAuth, esArchiver }) => {
     adminCredentials = await requestAuth.getApiKey('admin');
-    await esArchiver.load(testData.ES_ARCHIVES.FULL_HEARTBEAT);
-  });
-
-  apiTest.afterAll(async ({ esArchiver }) => {
-    await esArchiver.unload(testData.ES_ARCHIVES.FULL_HEARTBEAT);
+    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.FULL_HEARTBEAT);
   });
 
   apiTest('returns the status for only the given monitor', async ({ apiClient }) => {
-    const response = await apiClient.get(testData.API_URLS.MONITOR_STATUS.slice(1), {
+    const params = new URLSearchParams({
+      monitorId: '0002-up',
+      dateStart: '2018-01-28T17:40:08.078Z',
+      dateEnd: '2025-01-28T19:00:16.078Z',
+    });
+    const response = await apiClient.get(`${testData.API_URLS.MONITOR_STATUS.slice(1)}?${params}`, {
       headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
-      query: {
-        monitorId: '0002-up',
-        dateStart: '2018-01-28T17:40:08.078Z',
-        dateEnd: '2025-01-28T19:00:16.078Z',
-      },
       responseType: 'json',
     });
     expect(response.statusCode).toBe(200);

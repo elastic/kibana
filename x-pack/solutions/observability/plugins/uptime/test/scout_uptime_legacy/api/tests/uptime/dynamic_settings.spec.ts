@@ -16,15 +16,23 @@ apiTest.describe('dynamic settings', { tag: '@local-stateful-classic' }, () => {
     adminCredentials = await requestAuth.getApiKey('admin');
   });
 
-  apiTest.beforeEach(async ({ kbnClient }) => {
+  const cleanupSettings = async (kbnClient: any) => {
     try {
       await kbnClient.savedObjects.delete({
         type: 'uptime-dynamic-settings',
         id: 'uptime-dynamic-settings-singleton',
       });
     } catch (e: any) {
-      if (e.response?.status !== 404) throw e;
+      if (!e.message?.includes('404') && e.response?.status !== 404) throw e;
     }
+  };
+
+  apiTest.beforeEach(async ({ kbnClient }) => {
+    await cleanupSettings(kbnClient);
+  });
+
+  apiTest.afterEach(async ({ kbnClient }) => {
+    await cleanupSettings(kbnClient);
   });
 
   apiTest('returns the defaults when no user settings have been saved', async ({ apiClient }) => {
@@ -38,6 +46,7 @@ apiTest.describe('dynamic settings', { tag: '@local-stateful-classic' }, () => {
       certAgeThreshold: 730,
       certExpirationThreshold: 30,
       defaultConnectors: [],
+      defaultEmail: { to: [], cc: [], bcc: [] },
     });
   });
 

@@ -19,13 +19,15 @@ import { makeChecksWithStatus } from '../../fixtures/helpers/make_checks';
 apiTest.describe('certs api', { tag: '@local-stateful-classic' }, () => {
   let adminCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ requestAuth, esArchiver }) => {
+  apiTest.beforeAll(async ({ requestAuth, esArchiver, esClient }) => {
     adminCredentials = await requestAuth.getApiKey('admin');
-    await esArchiver.load(testData.ES_ARCHIVES.BLANK);
-  });
-
-  apiTest.afterAll(async ({ esArchiver }) => {
-    await esArchiver.unload(testData.ES_ARCHIVES.BLANK);
+    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.BLANK);
+    await esClient.deleteByQuery({
+      index: 'heartbeat-8-generated-test',
+      body: { query: { match_all: {} } },
+      refresh: true,
+      conflicts: 'proceed',
+    });
   });
 
   apiTest('returns empty array for no data', async ({ apiClient }) => {

@@ -19,21 +19,17 @@ apiTest.describe('pingHistogram', { tag: '@local-stateful-classic' }, () => {
 
   apiTest.beforeAll(async ({ requestAuth, esArchiver }) => {
     adminCredentials = await requestAuth.getApiKey('admin');
-    await esArchiver.load(testData.ES_ARCHIVES.FULL_HEARTBEAT);
-  });
-
-  apiTest.afterAll(async ({ esArchiver }) => {
-    await esArchiver.unload(testData.ES_ARCHIVES.FULL_HEARTBEAT);
+    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.FULL_HEARTBEAT);
   });
 
   apiTest('will fetch histogram data for all monitors', async ({ apiClient }) => {
-    const response = await apiClient.get(testData.API_URLS.PING_HISTOGRAM.slice(1), {
+    const params = new URLSearchParams({
+      dateStart,
+      dateEnd,
+      timeZone,
+    });
+    const response = await apiClient.get(`${testData.API_URLS.PING_HISTOGRAM.slice(1)}?${params}`, {
       headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
-      query: {
-        dateStart,
-        dateEnd,
-        timeZone,
-      },
       responseType: 'json',
     });
     expect(response.statusCode).toBe(200);
@@ -41,14 +37,14 @@ apiTest.describe('pingHistogram', { tag: '@local-stateful-classic' }, () => {
   });
 
   apiTest('will fetch histogram data for a given monitor id', async ({ apiClient }) => {
-    const response = await apiClient.get(testData.API_URLS.PING_HISTOGRAM.slice(1), {
+    const params = new URLSearchParams({
+      monitorId: '0002-up',
+      dateStart,
+      dateEnd,
+      timeZone,
+    });
+    const response = await apiClient.get(`${testData.API_URLS.PING_HISTOGRAM.slice(1)}?${params}`, {
       headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
-      query: {
-        monitorId: '0002-up',
-        dateStart,
-        dateEnd,
-        timeZone,
-      },
       responseType: 'json',
     });
     expect(response.statusCode).toBe(200);
@@ -56,14 +52,14 @@ apiTest.describe('pingHistogram', { tag: '@local-stateful-classic' }, () => {
   });
 
   apiTest('will fetch histogram data for a given filter', async ({ apiClient }) => {
-    const response = await apiClient.get(testData.API_URLS.PING_HISTOGRAM.slice(1), {
+    const params = new URLSearchParams({
+      dateStart,
+      dateEnd,
+      timeZone,
+      filters: '{"bool":{"must":[{"match":{"monitor.status":{"query":"up","operator":"and"}}}]}}',
+    });
+    const response = await apiClient.get(`${testData.API_URLS.PING_HISTOGRAM.slice(1)}?${params}`, {
       headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
-      query: {
-        dateStart,
-        dateEnd,
-        timeZone,
-        filters: '{"bool":{"must":[{"match":{"monitor.status":{"query":"up","operator":"and"}}}]}}',
-      },
       responseType: 'json',
     });
     expect(response.statusCode).toBe(200);

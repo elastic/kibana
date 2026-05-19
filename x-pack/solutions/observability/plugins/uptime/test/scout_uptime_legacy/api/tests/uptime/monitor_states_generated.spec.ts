@@ -16,13 +16,15 @@ apiTest.describe('monitor state scoping', { tag: '@local-stateful-classic' }, ()
 
   const numIps = 4;
 
-  apiTest.beforeAll(async ({ requestAuth, esArchiver }) => {
+  apiTest.beforeAll(async ({ requestAuth, esArchiver, esClient }) => {
     adminCredentials = await requestAuth.getApiKey('admin');
-    await esArchiver.load(testData.ES_ARCHIVES.BLANK);
-  });
-
-  apiTest.afterAll(async ({ esArchiver }) => {
-    await esArchiver.unload(testData.ES_ARCHIVES.BLANK);
+    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.BLANK);
+    await esClient.deleteByQuery({
+      index: 'heartbeat-8-generated-test',
+      body: { query: { match_all: {} } },
+      refresh: true,
+      conflicts: 'proceed',
+    });
   });
 
   apiTest(
@@ -36,13 +38,13 @@ apiTest.describe('monitor state scoping', { tag: '@local-stateful-classic' }, ()
         return d;
       });
 
-      const response = await apiClient.get(testData.API_URLS.MONITOR_LIST.slice(1), {
+      const params = new URLSearchParams({
+        dateRangeStart,
+        dateRangeEnd: new Date().toISOString(),
+        pageSize: String(10),
+      });
+      const response = await apiClient.get(`${testData.API_URLS.MONITOR_LIST.slice(1)}?${params}`, {
         headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
-        query: {
-          dateRangeStart,
-          dateRangeEnd: new Date().toISOString(),
-          pageSize: 10,
-        },
         responseType: 'json',
       });
 
@@ -87,17 +89,20 @@ apiTest.describe('monitor state scoping', { tag: '@local-stateful-classic' }, ()
         'should not match non summary documents if the check status does not match the document status',
         async () => {
           const filters = makeApiParams(testMonitorId, [{ match: { 'monitor.ip': nonSummaryIp } }]);
-          const response = await apiClient.get(testData.API_URLS.MONITOR_LIST.slice(1), {
-            headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
-            query: {
-              dateRangeStart,
-              dateRangeEnd,
-              pageSize: 10,
-              filters,
-              statusFilter: 'down',
-            },
-            responseType: 'json',
+          const params = new URLSearchParams({
+            dateRangeStart,
+            dateRangeEnd,
+            pageSize: String(10),
+            filters,
+            statusFilter: 'down',
           });
+          const response = await apiClient.get(
+            `${testData.API_URLS.MONITOR_LIST.slice(1)}?${params}`,
+            {
+              headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
+              responseType: 'json',
+            }
+          );
           expect(response.body.summaries).toHaveLength(0);
         }
       );
@@ -106,17 +111,20 @@ apiTest.describe('monitor state scoping', { tag: '@local-stateful-classic' }, ()
         'should not match non summary documents if the check status does not match',
         async () => {
           const filters = makeApiParams(testMonitorId, [{ match: { 'monitor.ip': nonSummaryIp } }]);
-          const response = await apiClient.get(testData.API_URLS.MONITOR_LIST.slice(1), {
-            headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
-            query: {
-              dateRangeStart,
-              dateRangeEnd,
-              pageSize: 10,
-              filters,
-              statusFilter: 'up',
-            },
-            responseType: 'json',
+          const params = new URLSearchParams({
+            dateRangeStart,
+            dateRangeEnd,
+            pageSize: String(10),
+            filters,
+            statusFilter: 'up',
           });
+          const response = await apiClient.get(
+            `${testData.API_URLS.MONITOR_LIST.slice(1)}?${params}`,
+            {
+              headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
+              responseType: 'json',
+            }
+          );
           expect(response.body.summaries).toHaveLength(0);
         }
       );
@@ -129,17 +137,20 @@ apiTest.describe('monitor state scoping', { tag: '@local-stateful-classic' }, ()
         const futureEnd = futureDate.toISOString();
 
         const filters = makeApiParams(testMonitorId);
-        const response = await apiClient.get(testData.API_URLS.MONITOR_LIST.slice(1), {
-          headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
-          query: {
-            dateRangeStart: futureStart,
-            dateRangeEnd: futureEnd,
-            pageSize: 10,
-            filters,
-            statusFilter: 'up',
-          },
-          responseType: 'json',
+        const params = new URLSearchParams({
+          dateRangeStart: futureStart,
+          dateRangeEnd: futureEnd,
+          pageSize: String(10),
+          filters,
+          statusFilter: 'up',
         });
+        const response = await apiClient.get(
+          `${testData.API_URLS.MONITOR_LIST.slice(1)}?${params}`,
+          {
+            headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
+            responseType: 'json',
+          }
+        );
         expect(response.body.summaries).toHaveLength(0);
       });
     }
@@ -178,17 +189,17 @@ apiTest.describe('monitor state scoping', { tag: '@local-stateful-classic' }, ()
   apiTest(
     'should return all monitors when no status filter',
     async ({ apiClient, esClient, esArchiver }) => {
-      await esArchiver.load(testData.ES_ARCHIVES.BLANK);
+      await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.BLANK);
       const { dateRangeStart, dateRangeEnd, downMonitorId, mixMonitorId, upMonitorId } =
         await setupStatusFilterMonitors(esClient);
 
-      const response = await apiClient.get(testData.API_URLS.MONITOR_LIST.slice(1), {
+      const params = new URLSearchParams({
+        dateRangeStart,
+        dateRangeEnd,
+        pageSize: String(10),
+      });
+      const response = await apiClient.get(`${testData.API_URLS.MONITOR_LIST.slice(1)}?${params}`, {
         headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
-        query: {
-          dateRangeStart,
-          dateRangeEnd,
-          pageSize: 10,
-        },
         responseType: 'json',
       });
 
@@ -205,19 +216,19 @@ apiTest.describe('monitor state scoping', { tag: '@local-stateful-classic' }, ()
   apiTest(
     'should return a monitor with mix state if check status filter is down',
     async ({ apiClient, esClient, esArchiver }) => {
-      await esArchiver.load(testData.ES_ARCHIVES.BLANK);
+      await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.BLANK);
       const { upMonitorId, dateRangeStart, dateRangeEnd } = await setupStatusFilterMonitors(
         esClient
       );
 
-      const response = await apiClient.get(testData.API_URLS.MONITOR_LIST.slice(1), {
+      const params = new URLSearchParams({
+        dateRangeStart,
+        dateRangeEnd,
+        pageSize: String(10),
+        statusFilter: 'down',
+      });
+      const response = await apiClient.get(`${testData.API_URLS.MONITOR_LIST.slice(1)}?${params}`, {
         headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
-        query: {
-          dateRangeStart,
-          dateRangeEnd,
-          pageSize: 10,
-          statusFilter: 'down',
-        },
         responseType: 'json',
       });
 
@@ -232,27 +243,40 @@ apiTest.describe('monitor state scoping', { tag: '@local-stateful-classic' }, ()
   apiTest(
     'should not return a monitor with mix state if check status filter is up',
     async ({ apiClient, esClient, esArchiver }) => {
-      await esArchiver.load(testData.ES_ARCHIVES.BLANK);
+      await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.BLANK);
       const { upMonitorId, dateRangeStart, dateRangeEnd } = await setupStatusFilterMonitors(
         esClient
       );
 
-      await expect(async () => {
-        const response = await apiClient.get(testData.API_URLS.MONITOR_LIST.slice(1), {
-          headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
-          query: {
+      const deadline = Date.now() + 10000;
+      let lastError: Error | undefined;
+      while (Date.now() < deadline) {
+        try {
+          const params = new URLSearchParams({
             dateRangeStart,
             dateRangeEnd,
-            pageSize: 10,
+            pageSize: String(10),
             statusFilter: 'up',
-          },
-          responseType: 'json',
-        });
+          });
+          const response = await apiClient.get(
+            `${testData.API_URLS.MONITOR_LIST.slice(1)}?${params}`,
+            {
+              headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
+              responseType: 'json',
+            }
+          );
 
-        const { summaries } = response.body;
-        expect(summaries).toHaveLength(1);
-        expect(summaries[0].monitor_id).toStrictEqual(upMonitorId);
-      }).toPass({ timeout: 10000 });
+          const { summaries } = response.body;
+          expect(summaries).toHaveLength(1);
+          expect(summaries[0].monitor_id).toStrictEqual(upMonitorId);
+          lastError = undefined;
+          break;
+        } catch (e: any) {
+          lastError = e;
+          await new Promise((r) => setTimeout(r, 1000));
+        }
+      }
+      if (lastError) throw lastError;
     }
   );
 });

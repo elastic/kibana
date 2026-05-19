@@ -8,31 +8,34 @@
 import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, testData } from '../../fixtures';
+import { stripInspect } from '../../fixtures/helpers/expect_fixture_eql';
 import { makeChecksWithStatus, getChecksDateRange } from '../../fixtures/helpers/make_checks';
 
 apiTest.describe('snapshot count', { tag: '@local-stateful-classic' }, () => {
   let adminCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ requestAuth, esArchiver }) => {
+  apiTest.beforeAll(async ({ requestAuth, esArchiver, esClient }) => {
     adminCredentials = await requestAuth.getApiKey('admin');
-    await esArchiver.load(testData.ES_ARCHIVES.BLANK);
-  });
-
-  apiTest.afterAll(async ({ esArchiver }) => {
-    await esArchiver.unload(testData.ES_ARCHIVES.BLANK);
+    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.BLANK);
+    await esClient.deleteByQuery({
+      index: 'heartbeat-8-generated-test',
+      body: { query: { match_all: {} } },
+      refresh: true,
+      conflicts: 'proceed',
+    });
   });
 
   apiTest('returns null snapshot when no data', async ({ apiClient }) => {
-    const response = await apiClient.get(testData.API_URLS.SNAPSHOT_COUNT.slice(1), {
+    const params = new URLSearchParams({
+      dateRangeStart: new Date().toISOString(),
+      dateRangeEnd: new Date().toISOString(),
+    });
+    const response = await apiClient.get(`${testData.API_URLS.SNAPSHOT_COUNT.slice(1)}?${params}`, {
       headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
-      query: {
-        dateRangeStart: new Date().toISOString(),
-        dateRangeEnd: new Date().toISOString(),
-      },
       responseType: 'json',
     });
 
-    expect(response.body).toStrictEqual({
+    expect(stripInspect(response.body)).toStrictEqual({
       total: 0,
       up: 0,
       down: 0,
@@ -69,16 +72,19 @@ apiTest.describe('snapshot count', { tag: '@local-stateful-classic' }, () => {
           const allResults = await Promise.all(promises);
           const dateRange = getChecksDateRange(allResults);
 
-          const response = await apiClient.get(testData.API_URLS.SNAPSHOT_COUNT.slice(1), {
-            headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
-            query: {
-              dateRangeStart: dateRange.start,
-              dateRangeEnd: dateRange.end,
-            },
-            responseType: 'json',
+          const params = new URLSearchParams({
+            dateRangeStart: dateRange.start,
+            dateRangeEnd: dateRange.end,
           });
+          const response = await apiClient.get(
+            `${testData.API_URLS.SNAPSHOT_COUNT.slice(1)}?${params}`,
+            {
+              headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
+              responseType: 'json',
+            }
+          );
 
-          expect(response.body).toStrictEqual({
+          expect(stripInspect(response.body)).toStrictEqual({
             total: 17,
             up: 10,
             down: 7,
