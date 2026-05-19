@@ -37,13 +37,6 @@ xargs -I{} bk artifacts download {} --build <build> -p <pipeline> < /tmp/scout-a
 
 If you don't need to be selective and the job is small, `bk artifacts download --build <build> -p <pipeline> --job-uuid <jobId>` pulls every artifact from that job into `artifacts-build-<build>/`.
 
-### Common patterns the screenshot reveals
-
-- **Locator queried before the matching element rendered** → missing `waitForResponse` / `waitForSelector` upstream.
-- **Page navigated mid-action** → race between in-flight response and next test step.
-- **Neighbor test left state in the shared server** (unexpected pre-existing data) → lane pollution.
-- **Screenshot shows what you expect but assertion failed** → assertion is testing a different attribute than the visible one.
-
 ## Buildkite mechanics for Scout failures
 
 Four sharp edges to be aware of when investigating a Scout failure via Buildkite. Skipping any of them frequently leads to wrong conclusions like "no screenshot was uploaded" or "no lane neighbors to look at". Always use the `bk` CLI (`bk api`, `bk artifacts ...`) rather than calling `api.buildkite.com` directly with a token — see the parent `SKILL.md` for the rationale.
