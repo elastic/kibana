@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getHighlightReact } from './highlight_react';
-export { getInlineEmSnippetHighlightReact } from './inline_em_snippet_highlight_react';
-export { getHighlightRequest } from './highlight_request';
+export function getColumnsToHighlight(query: string): Set<string> {
+  return new Set(['lala']);
+}

@@ -53,13 +53,12 @@ export interface DataTableRecord {
 /**
  * Custom column types per column name
  */
-export type DataTableColumnsMeta = Record<
-  string,
-  {
-    type: DatatableColumnMeta['type'];
-    esType?: DatatableColumnMeta['esType'];
-  }
->;
+export interface DataTableColumnMeta {
+  type: DatatableColumnMeta['type'];
+  esType?: DatatableColumnMeta['esType'];
+  hasHighlights?: DatatableColumnMeta['hasHighlights'];
+}
+export type DataTableColumnsMeta = Record<string, DataTableColumnMeta>;
 
 import type { ReactNode } from 'react';
 

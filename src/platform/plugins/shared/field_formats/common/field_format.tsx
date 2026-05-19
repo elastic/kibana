@@ -24,7 +24,7 @@ import type {
   FieldFormatParams,
 } from './types';
 import { textContentTypeSetup, TEXT_CONTEXT_TYPE } from './content_types';
-import { getHighlightReact } from './utils/highlight';
+import { getHighlightReact, getInlineEmSnippetHighlightReact } from './utils/highlight';
 import type {
   ReactContextTypeConvert,
   ReactContextTypeSingleConvert,
@@ -112,10 +112,18 @@ export abstract class FieldFormat {
       : this.convert(val, TEXT_CONTEXT_TYPE, options);
     const fieldName = options?.field?.name;
     const highlights = fieldName ? options?.hit?.highlight?.[fieldName] : undefined;
-    // getHighlightReact expects a string; guard against edge cases where convert() returns non-string
-    return highlights && typeof formatted === 'string'
-      ? getHighlightReact(formatted, highlights)
-      : formatted;
+    if (typeof formatted !== 'string') {
+      return formatted;
+    }
+    // Classic search: parallel hit.highlight snippets (Kibana highlight tags).
+    if (highlights) {
+      return getHighlightReact(formatted, highlights);
+    }
+    // ES|QL: inline <em> markup in the cell value.
+    if (options?.hasHighlights) {
+      return getInlineEmSnippetHighlightReact(formatted);
+    }
+    return formatted;
   };
 
   /**

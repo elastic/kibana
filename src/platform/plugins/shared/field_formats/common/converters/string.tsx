@@ -9,7 +9,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { asPrettyString, getHighlightReact, shortenDottedString } from '../utils';
+import {
+  asPrettyString,
+  getHighlightReact,
+  getInlineEmSnippetHighlightReact,
+  shortenDottedString,
+} from '../utils';
 import { FieldFormat } from '../field_format';
 import type { ReactContextTypeSingleConvert, TextContextTypeConvert } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
@@ -130,15 +135,24 @@ export class StringFormat extends FieldFormat {
     }
   };
 
-  reactConvertSingle: ReactContextTypeSingleConvert = (val, { hit, field } = {}) => {
+  reactConvertSingle: ReactContextTypeSingleConvert = (val, options = {}) => {
     const missing = this.checkForMissingValueReact(val);
     if (missing) return missing;
 
+    const { hit, field, hasHighlights } = options;
+    const formatted = this.textConvert(val);
     const fieldName = field?.name;
+
+    // Clasic mode
     if (fieldName && hit?.highlight?.[fieldName]) {
-      return getHighlightReact(this.textConvert(val), hit.highlight[fieldName]);
+      return getHighlightReact(formatted, hit.highlight[fieldName]);
     }
 
-    return this.textConvert(val);
+    // ES|QL mode
+    if (hasHighlights && typeof formatted === 'string') {
+      return getInlineEmSnippetHighlightReact(formatted);
+    }
+
+    return formatted;
   };
 }

@@ -63,6 +63,8 @@ export function formatHitReact(
   const renderedPairs: PartialHitReactPair[] = [];
   const otherPairs: PartialHitReactPair[] = [];
 
+  // HD TODO: contemplate ES|QL highlights when ordering.
+
   // Add each flattened field into the corresponding array for rendered or other pairs,
   // depending on whether the original hit had a highlight for it. That way we can ensure
   // highlighted fields are shown first in the document summary.
@@ -114,13 +116,13 @@ export function formatHitReact(
       fieldName: key,
       columnMeta: columnsMeta?.[key],
     });
-
     pair[1] = formatFieldValueReact({
       value: flattened[key],
       hit: hit.raw,
       fieldFormats,
       dataView,
       field,
+      columnMeta: columnsMeta?.[key],
     });
   }
 

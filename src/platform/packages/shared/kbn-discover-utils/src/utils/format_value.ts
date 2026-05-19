@@ -16,7 +16,7 @@ import type {
   ReactContextTypeOptions,
   TextContextTypeOptions,
 } from '@kbn/field-formats-plugin/common/types';
-import type { EsHitRecord } from '../types';
+import type { DataTableColumnMeta, EsHitRecord } from '../types';
 
 /** Base parameters for field value formatting functions */
 interface FormatFieldValueBaseParams {
@@ -28,6 +28,7 @@ interface FormatFieldValueBaseParams {
 
 export interface FormatFieldValueReactParams extends FormatFieldValueBaseParams {
   hit: EsHitRecord;
+  columnMeta?: DataTableColumnMeta;
   options?: ReactContextTypeOptions;
 }
 
@@ -61,9 +62,15 @@ export const formatFieldValueReact = ({
   fieldFormats,
   dataView,
   field,
+  columnMeta,
   options,
 }: FormatFieldValueReactParams): ReactNode => {
-  const converterOptions: ReactContextTypeOptions = { ...options, hit, field };
+  const converterOptions: ReactContextTypeOptions = {
+    ...options,
+    hit,
+    field,
+    hasHighlights: columnMeta?.hasHighlights ?? options?.hasHighlights,
+  };
 
   return getFieldFormatter(fieldFormats, dataView, field).reactConvert(value, converterOptions);
 };

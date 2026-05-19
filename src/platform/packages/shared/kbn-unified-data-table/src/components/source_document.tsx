@@ -68,7 +68,8 @@ export function SourceDocument({
         dataView,
         shouldShowFieldHandler,
         fieldFormats,
-        columnsMeta
+        columnsMeta,
+        isPlainRecord
       ).slice(0, maxEntries)
     : formatHitReact(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats, columnsMeta);
 
@@ -117,7 +118,8 @@ function getTopLevelObjectPairsReact(
   dataView: DataView,
   shouldShowFieldHandler: ShouldShowFieldInTableHandler,
   fieldFormats: FieldFormatsStart,
-  columnsMeta: DataTableColumnsMeta | undefined
+  columnsMeta: DataTableColumnsMeta | undefined,
+  isPlainRecord?: boolean
 ): FormattedHit {
   const innerColumns = getInnerColumns(row.fields as Record<string, unknown[]>, columnId);
   // Put the most important fields first
@@ -137,7 +139,14 @@ function getTopLevelObjectPairsReact(
     const formatted: ReactNode = values.map((value: unknown, idx) => (
       <Fragment key={`${key}-${idx}`}>
         {idx > 0 ? ', ' : null}
-        {formatFieldValueReact({ value, hit: row, fieldFormats, dataView, field: subField })}
+        {formatFieldValueReact({
+          value,
+          hit: row,
+          fieldFormats,
+          dataView,
+          field: subField,
+          columnMeta: isPlainRecord ? columnsMeta?.[key] : undefined,
+        })}
       </Fragment>
     ));
     const pairs = highlights[key] ? highlightPairs : sourcePairs;

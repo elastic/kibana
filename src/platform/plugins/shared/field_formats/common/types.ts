@@ -25,6 +25,8 @@ export interface ReactContextTypeOptions {
   field?: { name: string };
   hit?: { highlight?: Record<string, string[]> };
   skipFormattingInStringifiedJSON?: boolean;
+  /** When true, string values may include inline `<em>` markup to render as highlights. (ES|QL) */
+  hasHighlights?: boolean;
 }
 
 /**

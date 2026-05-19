@@ -72,6 +72,7 @@ export {
   hasTimeseriesInfoCommand,
   isComputedColumn,
   getQuerySummary,
+  getColumnsToHighlight,
   getEsqlControls,
   getAllEsqlControls,
   convertFiltersToESQLExpression,

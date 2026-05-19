@@ -28,6 +28,7 @@ import {
   mapVariableToColumn,
   isComputedColumn,
   getQuerySummary,
+  getColumnsToHighlight,
 } from '@kbn/esql-utils';
 import { zipObject } from 'lodash';
 import type { Observable } from 'rxjs';
@@ -368,6 +369,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
 
           // Get query summary to identify computed columns
           const querySummary = getQuerySummary(query);
+          const highlightColumnNames = getColumnsToHighlight(query);
 
           const allColumns =
             (body.all_columns ?? body.columns)?.map(({ name, type, original_types }) => {
@@ -382,6 +384,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                 meta: {
                   type: kibanaFieldType,
                   esType: type,
+                  hasHighlights: highlightColumnNames.has(name),
                   sourceParams:
                     type === 'date'
                       ? {
