@@ -158,25 +158,39 @@ function buildOneFieldEvaluationEsql(evaluation: FieldEvaluation): string {
   const fallbackExpression =
     fallbackValue === null ? 'NULL' : `"${escapeEsqlString(fallbackValue)}"`;
 
-  const destinationCaseParts: string[] = [];
-  for (const clause of whenClauses) {
-    if ('sourceMatchesAny' in clause) {
-      const conditions = clause.sourceMatchesAny
-        .map((v) => `${effectiveSourceName} == "${escapeEsqlString(v)}"`)
-        .join(' OR ');
-      destinationCaseParts.push(`(${conditions}), "${escapeEsqlString(clause.then)}"`);
-    } else {
-      destinationCaseParts.push(
-        `(${conditionToESQL(clause.condition)}), "${escapeEsqlString(clause.then)}"`
-      );
-    }
-  }
-  destinationCaseParts.push(
-    `(${effectiveSourceName} IS NULL OR ${effectiveSourceName} == ""), ${fallbackExpression}`
-  );
-  destinationCaseParts.push(effectiveSourceName);
+  // Pre-compute condition-based arm predicates as boolean columns so the single-arm
+  // CASE conditions below are cheap attribute reads.
+  const conditionPrecomputes: Array<{ colName: string; esql: string }> = [];
+  const destBase = `_eval_${destination.replace(/\./g, '_')}`;
 
-  const destinationCaseExpr = `CASE(${destinationCaseParts.join(', ')})`;
+  // Build the destination expression.
+  // When there are whenClauses, replace the multi-arm CaseLazyEvaluator with a COALESCE of
+  // single-arm CaseEagerEvaluators. Single-arm CASEs are always vectorized (CaseEagerEvaluator)
+  // regardless of condition complexity, while multi-arm CASEs use per-row CaseLazyEvaluator.
+  let destinationCaseExpr: string;
+  if (whenClauses.length === 0) {
+    // 0 whenClauses: the single fallback arm is already CaseEagerEvaluator.
+    destinationCaseExpr = `CASE((${effectiveSourceName} IS NULL OR ${effectiveSourceName} == ""), ${fallbackExpression}, ${effectiveSourceName})`;
+  } else {
+    const coalesceArms: string[] = [];
+    for (const [i, clause] of whenClauses.entries()) {
+      let condition: string;
+      if ('sourceMatchesAny' in clause) {
+        const inList = clause.sourceMatchesAny.map((v) => `"${escapeEsqlString(v)}"`).join(', ');
+        condition = `COALESCE(${effectiveSourceName} IN (${inList}), FALSE)`;
+      } else {
+        const colName = `${destBase}_arm${i}`;
+        conditionPrecomputes.push({ colName, esql: conditionToESQL(clause.condition) });
+        condition = `COALESCE(${colName}, FALSE)`;
+      }
+      coalesceArms.push(`CASE(${condition}, "${escapeEsqlString(clause.then)}")`);
+    }
+    coalesceArms.push(
+      `CASE(${effectiveSourceName} IS NULL OR ${effectiveSourceName} == "", ${fallbackExpression})`
+    );
+    coalesceArms.push(effectiveSourceName);
+    destinationCaseExpr = `COALESCE(${coalesceArms.join(', ')})`;
+  }
 
   const assignments: string[] = [];
 
@@ -186,14 +200,18 @@ function buildOneFieldEvaluationEsql(evaluation: FieldEvaluation): string {
     for (let i = 0; i < sourceExpressions.length; i++) {
       assignments.push(`${sourceVariablesBaseName}${i} = ${sourceExpressions[i]}`);
     }
-    const sourceVarCaseParts = sourceExpressions.flatMap((_, i) => {
+    // Replace multi-arm CaseLazyEvaluator with COALESCE of single-arm CaseEagerEvaluators.
+    // Each CASE(field IS NOT NULL AND != "", field) is CaseEagerEvaluator (vectorized).
+    const nnExprs = sourceExpressions.map((_, i) => {
       const v = `${sourceVariablesBaseName}${i}`;
-      return [`(${v} IS NOT NULL AND ${v} != "")`, v];
+      return `CASE(${v} IS NOT NULL AND ${v} != "", ${v})`;
     });
-    sourceVarCaseParts.push('NULL');
-    assignments.push(`${effectiveSourceName} = CASE(${sourceVarCaseParts.join(', ')})`);
+    assignments.push(`${effectiveSourceName} = COALESCE(${nnExprs.join(', ')})`);
   }
 
+  for (const { colName, esql } of conditionPrecomputes) {
+    assignments.push(`${colName} = (${esql})`);
+  }
   assignments.push(`${destination} = ${destinationCaseExpr}`);
 
   return assignments.join(',\n ');
@@ -394,19 +412,39 @@ export function getEuidEsqlEvaluation(
     return { prelude, expression: appendTypeIdIfNeeded(entityType, idLogic, mustPrependTypeId) };
   }
 
-  const branchCaseParts: string[] = [];
-  for (const branch of branches) {
-    const rankingCase = buildRankingCaseEsql(branch.ranking);
+  // Multi-branch: pre-compute each branch's condition AND ranking formula as named columns,
+  // then use them in a CASE so both operands are plain Attributes → CaseEagerEvaluator (vectorized).
+  // Without pre-computing the formula, CASE(Attribute[bool], CONCAT(...)) still uses
+  // CaseLazyEvaluator because the value expression is complex (not a simple Attribute).
+  const precomputeAssignments: string[] = [];
+  const branchAssignments: string[] = [];
+  const branchVarNames: string[] = [];
+  for (const [i, branch] of branches.entries()) {
+    const varName = `_euid_branch_${i}`;
+    branchVarNames.push(varName);
+    const rankingFormula = buildRankingCaseEsql(branch.ranking);
     if (branch.when) {
       const whenCondition = conditionToESQL(branch.when);
-      branchCaseParts.push(`(${whenCondition}), ${rankingCase}`);
+      const condVar = `_euid_branch_${i}_cond`;
+      const formulaVar = `_euid_branch_${i}_formula`;
+      precomputeAssignments.push(`${condVar} = (${whenCondition})`);
+      precomputeAssignments.push(`${formulaVar} = ${rankingFormula}`);
+      branchAssignments.push(`${varName} = CASE(${condVar}, ${formulaVar})`);
     } else {
-      branchCaseParts.push(`true, ${rankingCase}`);
+      branchAssignments.push(`${varName} = ${rankingFormula}`);
     }
   }
+
+  const precomputePrelude =
+    precomputeAssignments.length > 0 ? `| EVAL ${precomputeAssignments.join(',\n ')}` : null;
+  const branchPrelude = `| EVAL ${branchAssignments.join(',\n ')}`;
+  const combinedPrelude = [prelude, precomputePrelude, branchPrelude].filter(Boolean).join('\n');
   const idLogic =
-    branchCaseParts.length > 0 ? `CASE(${branchCaseParts.join(',\n')}, NULL)` : 'NULL';
-  return { prelude, expression: appendTypeIdIfNeeded(entityType, idLogic, mustPrependTypeId) };
+    branchVarNames.length === 1 ? branchVarNames[0] : `COALESCE(${branchVarNames.join(', ')})`;
+  return {
+    prelude: combinedPrelude,
+    expression: appendTypeIdIfNeeded(entityType, idLogic, mustPrependTypeId),
+  };
 }
 
 function appendTypeIdIfNeeded(

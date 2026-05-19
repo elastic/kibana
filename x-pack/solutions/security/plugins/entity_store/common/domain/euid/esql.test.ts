@@ -227,7 +227,8 @@ describe('getFieldEvaluationsEsql', () => {
       expect(result).toContain('_src_entity_source0 = MV_FIRST(event.module)');
       expect(result).toContain('_src_entity_source1 = MV_FIRST(event.dataset)');
       expect(result).toContain('_src_entity_source2 = MV_FIRST(data_stream.dataset)');
-      expect(result).toContain('_src_entity_source = CASE(');
+      // Multi-source picker now uses COALESCE of single-arm CaseEagerEvaluators
+      expect(result).toContain('_src_entity_source = COALESCE(');
       expect(result).toContain('entity.source = CASE(');
       expect(result).toContain('NULL, _src_entity_source)');
     }
@@ -238,22 +239,22 @@ describe('getFieldEvaluationsEsql', () => {
     const base = '_src_entity_namespace';
     const v0 = `${base}0`;
     const v1 = `${base}1`;
+    // Multi-source picker now uses COALESCE of single-arm CaseEagerEvaluators
     const namespacePart = [
       `${v0} = MV_FIRST(event.module)`,
       `${v1} = MV_FIRST(SPLIT(MV_FIRST(data_stream.dataset), "."))`,
-      `${base} = CASE((${v0} IS NOT NULL AND ${v0} != ""), ${v0}, (${v1} IS NOT NULL AND ${v1} != ""), ${v1}, NULL)`,
+      `${base} = COALESCE(CASE(${v0} IS NOT NULL AND ${v0} != "", ${v0}), CASE(${v1} IS NOT NULL AND ${v1} != "", ${v1}))`,
     ].join(', ');
     expect(result).toBeDefined();
     expect(result?.replace(/\s+/g, ' ').trim()).toContain(
       namespacePart.replace(/\s+/g, ' ').trim()
     );
-    expect(result).toContain('entity.namespace = CASE(');
-    expect(result).toContain(
-      '(_src_entity_namespace == "okta" OR _src_entity_namespace == "entityanalytics_okta")'
-    );
+    // Destination CASE now uses COALESCE of single-arm CaseEagerEvaluators
+    expect(result).toContain('entity.namespace = COALESCE(');
+    expect(result).toContain('_src_entity_namespace IN ("okta", "entityanalytics_okta")');
     expect(result).toContain('"local"');
     expect(result).toContain(
-      '(_src_entity_namespace IS NULL OR _src_entity_namespace == ""), "unknown"'
+      'CASE(_src_entity_namespace IS NULL OR _src_entity_namespace == "", "unknown")'
     );
     expect(result).not.toContain('_fe_inner_entity_namespace');
     expect(result).not.toContain('entity.confidence');
@@ -292,6 +293,7 @@ describe('getEuidEsqlEvaluation', () => {
   it('returns _present + _n prelude and COALESCE(CONCAT) expression for user', () => {
     const { prelude, expression } = getEuidEsqlEvaluation('user');
 
+    // Prelude now includes: present booleans, branch condition pre-compute, and branch formulas.
     expect(normalize(prelude!)).toBe(
       normalize(
         `| EVAL user_name_present = user.name IS NOT NULL AND user.name != "",
@@ -305,14 +307,16 @@ describe('getEuidEsqlEvaluation', () => {
                entity_namespace_present_or_null = CASE(entity_namespace_present, entity.namespace),
                user_email_present_or_null = CASE(user_email_present, user.email),
                user_id_present_or_null = CASE(user_id_present, user.id),
-               user_domain_present_or_null = CASE(user_domain_present, user.domain)`
+               user_domain_present_or_null = CASE(user_domain_present, user.domain)
+| EVAL _euid_branch_0_cond = (COALESCE(\`entity.namespace\` == "local", FALSE)),
+       _euid_branch_0_formula = CONCAT(user_name_present_or_null, "@", host_id_present_or_null, "@", entity_namespace_present_or_null)
+| EVAL _euid_branch_0 = CASE(_euid_branch_0_cond, _euid_branch_0_formula),
+       _euid_branch_1 = COALESCE(CONCAT(user_email_present_or_null, "@", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, "@", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, "@", user_domain_present_or_null, "@", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, "@", entity_namespace_present_or_null))`
       )
     );
+    // Expression is now COALESCE of the pre-computed branch variables.
     expect(normalize(expression)).toBe(
-      normalize(
-        `CONCAT("user:", CASE((COALESCE(\`entity.namespace\` == "local", FALSE)), CONCAT(user_name_present_or_null, "@", host_id_present_or_null, "@", entity_namespace_present_or_null),
-true, COALESCE(CONCAT(user_email_present_or_null, "@", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, "@", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, "@", user_domain_present_or_null, "@", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, "@", entity_namespace_present_or_null)), NULL))`
-      )
+      normalize(`CONCAT("user:", COALESCE(_euid_branch_0, _euid_branch_1))`)
     );
   });
 });

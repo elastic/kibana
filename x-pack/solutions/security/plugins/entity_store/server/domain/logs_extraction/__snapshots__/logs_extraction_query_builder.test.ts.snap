@@ -9,7 +9,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
 | EVAL _src_entity_source0 = MV_FIRST(event.module),
  _src_entity_source1 = MV_FIRST(event.dataset),
  _src_entity_source2 = MV_FIRST(data_stream.dataset),
- _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
+ _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
  entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
 | EVAL recent.entity.EngineMetadata.UntypedId = entity.id
 | STATS
@@ -285,7 +285,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
 | EVAL _src_entity_source0 = MV_FIRST(event.module),
  _src_entity_source1 = MV_FIRST(event.dataset),
  _src_entity_source2 = MV_FIRST(data_stream.dataset),
- _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
+ _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
  entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
 | EVAL host_id_present = host.id IS NOT NULL AND host.id != \\"\\",
  host_name_present = host.name IS NOT NULL AND host.name != \\"\\",
@@ -603,7 +603,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
 | EVAL _src_entity_source0 = MV_FIRST(event.module),
  _src_entity_source1 = MV_FIRST(event.dataset),
  _src_entity_source2 = MV_FIRST(data_stream.dataset),
- _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
+ _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
  entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
 | EVAL host_id_present = host.id IS NOT NULL AND host.id != \\"\\",
  host_name_present = host.name IS NOT NULL AND host.name != \\"\\",
@@ -924,7 +924,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
 | EVAL _src_entity_source0 = MV_FIRST(event.module),
  _src_entity_source1 = MV_FIRST(event.dataset),
  _src_entity_source2 = MV_FIRST(data_stream.dataset),
- _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
+ _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
  entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
 | EVAL host_id_present = host.id IS NOT NULL AND host.id != \\"\\",
  host_name_present = host.name IS NOT NULL AND host.name != \\"\\",
@@ -1245,7 +1245,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
 | EVAL _src_entity_source0 = MV_FIRST(event.module),
  _src_entity_source1 = MV_FIRST(event.dataset),
  _src_entity_source2 = MV_FIRST(data_stream.dataset),
- _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
+ _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
  entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
 | EVAL recent.entity.EngineMetadata.UntypedId = service.name
 | STATS
@@ -1492,12 +1492,13 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
 | EVAL _src_entity_source0 = MV_FIRST(event.module),
  _src_entity_source1 = MV_FIRST(event.dataset),
  _src_entity_source2 = MV_FIRST(data_stream.dataset),
- _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
+ _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
  entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source),
  _src_entity_namespace0 = MV_FIRST(event.module),
  _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(data_stream.dataset), \\".\\")),
- _src_entity_namespace = CASE((_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\"), _src_entity_namespace0, (_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\"), _src_entity_namespace1, NULL),
- entity.namespace = CASE((user.name IS NOT NULL AND user.name != \\"\\" AND host.id IS NOT NULL AND host.id != \\"\\" AND NOT (COALESCE(\`user.name\` IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\"), FALSE)) AND (COALESCE(MV_CONTAINS(\`event.kind\`, \\"asset\\"), FALSE) OR NOT (COALESCE(MV_CONTAINS(\`event.kind\`, \\"asset\\"), FALSE) OR (COALESCE(\`event.kind\` != \\"enrichment\\", TRUE) OR \`event.kind\` IS NULL) AND COALESCE(MV_CONTAINS(\`event.category\`, \\"iam\\"), FALSE) AND (COALESCE(MV_CONTAINS(\`event.type\`, \\"user\\"), FALSE) OR COALESCE(MV_CONTAINS(\`event.type\`, \\"creation\\"), FALSE) OR COALESCE(MV_CONTAINS(\`event.type\`, \\"deletion\\"), FALSE) OR COALESCE(MV_CONTAINS(\`event.type\`, \\"group\\"), FALSE))))), \\"local\\", (_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", (_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", _src_entity_namespace)
+ _src_entity_namespace = COALESCE(CASE(_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\", _src_entity_namespace0), CASE(_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\", _src_entity_namespace1)),
+ _eval_entity_namespace_arm0 = (user.name IS NOT NULL AND user.name != \\"\\" AND host.id IS NOT NULL AND host.id != \\"\\" AND NOT (COALESCE(\`user.name\` IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\"), FALSE)) AND (COALESCE(MV_CONTAINS(\`event.kind\`, \\"asset\\"), FALSE) OR NOT (COALESCE(MV_CONTAINS(\`event.kind\`, \\"asset\\"), FALSE) OR (COALESCE(\`event.kind\` != \\"enrichment\\", TRUE) OR \`event.kind\` IS NULL) AND COALESCE(MV_CONTAINS(\`event.category\`, \\"iam\\"), FALSE) AND (COALESCE(MV_CONTAINS(\`event.type\`, \\"user\\"), FALSE) OR COALESCE(MV_CONTAINS(\`event.type\`, \\"creation\\"), FALSE) OR COALESCE(MV_CONTAINS(\`event.type\`, \\"deletion\\"), FALSE) OR COALESCE(MV_CONTAINS(\`event.type\`, \\"group\\"), FALSE))))),
+ entity.namespace = COALESCE(CASE(COALESCE(_eval_entity_namespace_arm0, FALSE), \\"local\\"), CASE(COALESCE(_src_entity_namespace IN (\\"okta\\", \\"entityanalytics_okta\\"), FALSE), \\"okta\\"), CASE(COALESCE(_src_entity_namespace IN (\\"azure\\", \\"entityanalytics_entra_id\\"), FALSE), \\"entra_id\\"), CASE(COALESCE(_src_entity_namespace IN (\\"o365\\", \\"o365_metrics\\"), FALSE), \\"microsoft_365\\"), CASE(COALESCE(_src_entity_namespace IN (\\"entityanalytics_ad\\"), FALSE), \\"active_directory\\"), CASE(_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\", \\"unknown\\"), _src_entity_namespace)
 | EVAL user_name_present = user.name IS NOT NULL AND user.name != \\"\\",
  host_id_present = host.id IS NOT NULL AND host.id != \\"\\",
  entity_namespace_present = entity.namespace IS NOT NULL AND entity.namespace != \\"\\",
@@ -1510,8 +1511,11 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
  user_email_present_or_null = CASE(user_email_present, user.email),
  user_id_present_or_null = CASE(user_id_present, user.id),
  user_domain_present_or_null = CASE(user_domain_present, user.domain)
-| EVAL recent.entity.EngineMetadata.UntypedId = CASE((COALESCE(\`entity.namespace\` == \\"local\\", FALSE)), CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
-true, COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)), NULL)
+| EVAL _euid_branch_0_cond = (COALESCE(\`entity.namespace\` == \\"local\\", FALSE)),
+ _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null)
+| EVAL _euid_branch_0 = CASE(_euid_branch_0_cond, _euid_branch_0_formula),
+ _euid_branch_1 = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null))
+| EVAL recent.entity.EngineMetadata.UntypedId = COALESCE(_euid_branch_0, _euid_branch_1)
 | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
