@@ -19,6 +19,13 @@ import type { RouteMethod, RouteConfigOptions, RouteSecurity, RouteDeprecationIn
 import type { Headers } from './headers';
 import type { RequestTiming, TimingEvent } from './timing';
 
+/**
+ * The ID of the default Kibana space.
+ * Available from Core so consumers do not need to depend on `@kbn/spaces-utils`.
+ * @public
+ */
+export const DEFAULT_SPACE_ID = 'default';
+
 export type RouteSecurityGetter = (request?: {
   headers: KibanaRequest['headers'];
   query?: KibanaRequest['query'];

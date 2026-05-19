@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export { DEFAULT_SPACE_ID } from './src/types';
 export type {
   HttpSetup,
   HttpStart,

@@ -22,8 +22,10 @@ export type HttpSetupMock = jest.Mocked<HttpSetup> & {
 const createServiceMock = ({
   basePath = '',
   publicBaseUrl,
-}: { basePath?: string; publicBaseUrl?: string } = {}): HttpSetupMock =>
+  spaceId = 'default',
+}: { basePath?: string; publicBaseUrl?: string; spaceId?: string } = {}): HttpSetupMock =>
   lazyObject({
+    spaceId,
     fetch: jest.fn(),
     get: jest.fn(),
     head: jest.fn(),

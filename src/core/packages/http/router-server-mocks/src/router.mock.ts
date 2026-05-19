@@ -59,6 +59,11 @@ export interface RequestFixtureOptions<P = any, Q = any, B = any> {
   kibanaRouteOptions?: KibanaRouteOptions;
   kibanaRequestState?: KibanaRequestState;
   routeAuthRequired?: false;
+  /**
+   * The resolved Kibana space ID to set on the request.
+   * When not provided, defaults to `'default'`.
+   */
+  spaceId?: string;
   validation?: {
     params?: RouteValidationSpec<P>;
     query?: RouteValidationSpec<Q>;
@@ -84,14 +89,19 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
     requestUuid: '123e4567-e89b-12d3-a456-426614174000',
     startTime: new Date('2025-01-01T00:00:00.000Z').getTime(),
   },
+  spaceId,
   auth = { isAuthenticated: true },
 }: RequestFixtureOptions<P, Q, B> = {}): KibanaRequest<P, Q, B> {
   const queryString = stringify(query, { sort: false });
   const url = new URL(`${path}${queryString ? `?${queryString}` : ''}`, 'http://localhost');
 
+  // Allow the caller to override spaceId without having to reconstruct the entire kibanaRequestState.
+  const resolvedState: KibanaRequestState =
+    spaceId !== undefined ? { ...kibanaRequestState, spaceId } : kibanaRequestState;
+
   return kibanaRequestFactory<P, Q, B>(
     hapiMocks.createRequest({
-      app: kibanaRequestState,
+      app: resolvedState,
       auth,
       headers,
       params,

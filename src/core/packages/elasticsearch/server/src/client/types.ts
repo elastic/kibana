@@ -16,13 +16,25 @@ import type { Headers, KibanaRequest } from '@kbn/core-http-server';
 export interface FakeRequest {
   /** Headers used for authentication against Elasticsearch */
   headers: Headers;
+  /**
+   * The Kibana space ID this synthetic request should be scoped to.
+   * When not provided, consumers should treat it as `'default'`.
+   *
+   * @remarks
+   * This is the preferred mechanism for space-scoped background tasks.
+   * Prefer setting `spaceId` directly over constructing a fake URL with `/s/{spaceId}`.
+   */
+  spaceId?: string;
 }
 
 /**
  * A minimal synthetic request for space-level CPS routing (`projectRouting: 'space'`) in
  * non-HTTP contexts - for example, background tasks or scheduled jobs - where no real
- * {@link KibanaRequest} is available. The space is derived from the URL pathname
- * (e.g. `/s/<spaceId>/...`) using `getSpaceNPRE` from `@kbn/cps-server-utils`.
+ * {@link KibanaRequest} is available.
+ *
+ * @deprecated Prefer setting {@link FakeRequest.spaceId} directly on a plain {@link FakeRequest}
+ * instead of constructing a space-aware URL. `UrlRequest` will be removed in a future phase once
+ * all consumers have migrated.
  *
  * In route handlers, pass the incoming {@link KibanaRequest} directly - it already satisfies
  * {@link ScopeableUrlRequest} without needing this type.
@@ -32,6 +44,8 @@ export interface UrlRequest extends FakeRequest {
   /**
    * URL used to resolve the space for CPS. Synthetic callers set this to a path that includes
    * `/s/<spaceId>/...` when applicable; there is no `rewrittenUrl` on this shape.
+   *
+   * @deprecated Use {@link FakeRequest.spaceId} on a plain {@link FakeRequest} instead.
    */
   url: URL;
 }

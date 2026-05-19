@@ -25,7 +25,6 @@ import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-
 import type { InternalUserActivityServiceSetup } from '@kbn/core-user-activity-server-internal';
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
 import { CoreKibanaRequest, isSafeMethod } from '@kbn/core-http-router-server-internal';
-import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import type {
   AuthenticationHandler,
   HttpAuth,
@@ -65,6 +64,7 @@ import { AuthStateStorage } from './auth_state_storage';
 import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
+import { DEFAULT_SPACE_ID, getSpaceIdFromPath } from './spaces_utils';
 import { type InternalStaticAssets, StaticAssets } from './static_assets';
 
 /**
@@ -297,10 +297,12 @@ export class HttpServer {
       this.subscriptions.push(configSubscription);
     }
 
+    // basePathService must be created before setupRequestStateAssignment so that the space
+    // onPreRouting handler (registered there) can call basePath.set().
+    const basePathService = new BasePath(config.basePath, config.publicBaseUrl);
     // It's important to have setupRequestStateAssignment call the very first, otherwise context passing will be broken.
     // That's the only reason why context initialization exists in this method.
-    this.setupRequestStateAssignment(config, executionContext, userActivity);
-    const basePathService = new BasePath(config.basePath, config.publicBaseUrl);
+    this.setupRequestStateAssignment(config, basePathService, executionContext, userActivity);
     this.setupBasePathRewrite(config, basePathService);
     this.setupConditionalCompression(config);
     this.setupResponseLogging();
@@ -575,6 +577,7 @@ export class HttpServer {
 
   private setupRequestStateAssignment(
     config: HttpConfig,
+    basePathService: BasePath,
     executionContext?: InternalExecutionContextSetup,
     userActivity?: InternalUserActivityServiceSetup
   ) {
@@ -623,12 +626,12 @@ export class HttpServer {
 
       const parentContext = executionContext?.getParentContextFrom(request.headers);
 
-      let spaceId: string | undefined;
-      // try to getspace from URL (`/s/<id>`); fall back to `x-kbn-context` when parsing fails/missing.
+      // Resolve space ID from URL, falling back to x-kbn-context header value, then 'default'.
+      let spaceId: string;
       try {
         spaceId = getSpaceIdFromPath(request.url.pathname, config.basePath).spaceId;
       } catch {
-        spaceId = parentContext?.space;
+        spaceId = parentContext?.space ?? DEFAULT_SPACE_ID;
       }
 
       userActivity?.setInjectedContext({
@@ -657,6 +660,7 @@ export class HttpServer {
       app.startTime = performance.now();
       app.requestId = requestId;
       app.requestUuid = uuidv4();
+      app.spaceId = spaceId;
       app.measureElu = stop;
       // Kibana stores trace.id until https://github.com/elastic/apm-agent-nodejs/issues/2353 is resolved
       // The current implementation of the APM agent ends a request transaction before "response" log is emitted.
@@ -666,6 +670,25 @@ export class HttpServer {
       app.otelSubSpan = this.createSubspan('pre-route handler middlewares');
 
       return responseToolkit.continue;
+    });
+
+    // Absorbs the Spaces plugin's onPreRouting interceptor: if the request URL contains an
+    // explicit /s/{spaceId} prefix, set the request-scoped basePath and strip the prefix from
+    // the URL so that route matching sees the un-prefixed path.
+    // Must run before setupBasePathRewrite so the space segment is stripped first.
+    this.registerOnPreRouting((request, _response, toolkit) => {
+      const path = request.url.pathname;
+      const { spaceId: urlSpaceId, pathHasExplicitSpaceIdentifier } = getSpaceIdFromPath(
+        path,
+        basePathService.serverBasePath
+      );
+      if (pathHasExplicitSpaceIdentifier) {
+        const reqBasePath = `/s/${urlSpaceId}`;
+        basePathService.set(request, reqBasePath);
+        const newPathname = path.substr(reqBasePath.length) || '/';
+        return toolkit.rewriteUrl(`${newPathname}${request.url.search}`);
+      }
+      return toolkit.next();
     });
 
     this.server!.ext('onPostAuth', async (request, responseToolkit) => {

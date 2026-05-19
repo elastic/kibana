@@ -135,6 +135,7 @@ export type {
   RequestTimingState,
 } from './src/router';
 export {
+  DEFAULT_SPACE_ID,
   validBodyOutput,
   RouteValidationError,
   getRequestValidation,

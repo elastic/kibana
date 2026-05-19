@@ -21,6 +21,7 @@ export type {
   ResponseHeaders,
   StringKeysAsVals,
 } from './headers';
+export { DEFAULT_SPACE_ID } from './request';
 export type {
   KibanaRequest,
   KibanaRequestAuth,

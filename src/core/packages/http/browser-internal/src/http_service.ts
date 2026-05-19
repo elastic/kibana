@@ -11,6 +11,7 @@ import type { CoreService } from '@kbn/core-base-browser-internal';
 import type { ExecutionContextSetup } from '@kbn/core-execution-context-browser';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
+import { DEFAULT_SPACE_ID } from '@kbn/core-http-browser';
 import type { InternalHttpSetup, InternalHttpStart } from './types';
 import { BasePath } from './base_path';
 import { StaticAssets } from './static_assets';
@@ -48,7 +49,14 @@ export class HttpService implements CoreService<InternalHttpSetup, InternalHttpS
     const loadingCount = this.loadingCount.setup({ fatalErrors });
     loadingCount.addLoadingCountSource(fetchService.getRequestCount$());
 
+    // Derive spaceId from the basePath at boot time. Space changes trigger a full page navigation
+    // so this value is stable for the lifetime of the current page.
+    const spacePathSegment = basePath.get().slice(basePath.serverBasePath.length);
+    const spaceMatch = spacePathSegment.match(/^\/s\/([a-z0-9_-]+)/);
+    const spaceId = spaceMatch ? spaceMatch[1] : DEFAULT_SPACE_ID;
+
     this.service = {
+      spaceId,
       basePath,
       staticAssets,
       anonymousPaths: this.anonymousPaths.setup({ basePath }),

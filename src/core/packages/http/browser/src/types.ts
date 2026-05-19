@@ -12,8 +12,25 @@ import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { ApiVersion } from '@kbn/core-http-common';
 
+/**
+ * The ID of the default Kibana space.
+ * Available from Core so consumers do not need to depend on `@kbn/spaces-utils`.
+ * @public
+ */
+export const DEFAULT_SPACE_ID = 'default';
+
 /** @public */
 export interface HttpSetup {
+  /**
+   * The resolved Kibana space ID for the current browser session.
+   *
+   * @remarks
+   * Always populated. Derived from the basePath at boot time (space changes trigger a full page
+   * navigation). Defaults to `'default'` when the current URL does not contain a `/s/{spaceId}`
+   * prefix.
+   */
+  readonly spaceId: string;
+
   /**
    * APIs for manipulating the basePath on URL segments.
    * See {@link IBasePath}
