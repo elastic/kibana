@@ -10,6 +10,7 @@ This document provides more information on Kibana's CI testing setup. Tests run 
 - Projects and deployments are created in the QA environment via the internal QAF tool, which calls the Elastic Cloud API.
 - Cloud runs happen only three times a day because they are expensive.
 - **No server configuration overrides are allowed on Cloud.** Projects and deployments are provisioned exactly as a customer would have them — you cannot override YAML settings or pass custom Kibana/Elasticsearch arguments.
+  - FTR tests may rely on a custom flag or argument defined in the FTR config which however won't be applied in the Cloud project or deployment.
 - Scout Cloud pipelines run Scout tests tagged `@cloud-*`.
 
 ## Local pipelines
