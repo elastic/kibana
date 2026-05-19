@@ -322,7 +322,9 @@ describe('Perform Rule Upgrade Route Schemas', () => {
       const invalid = { mode: 'INVALID_MODE' };
       const result = PerformRuleUpgradeRequestBody.safeParse(invalid);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"mode: Invalid input"`);
+      expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+        `"mode: Invalid discriminator value. Expected 'ALL_RULES' | 'SPECIFIC_RULES'"`
+      );
     });
   });
 
