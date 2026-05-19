@@ -11,11 +11,7 @@ import type { ListrTask } from 'listr2';
 import { defaultKibanaIndex } from '@kbn/migrator-test-kit';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type { Task, TaskContext } from '../types';
-import {
-  classifyUpdatedTypes,
-  validateChangesExistingType,
-  gcsSnapshotUrl,
-} from '../../snapshots';
+import { classifyUpdatedTypes, validateChangesExistingType, gcsSnapshotUrl } from '../../snapshots';
 import { isSavedObjectsCheckError, SavedObjectsCheckError } from '../../findings';
 import { getLatestTypeFixtures } from '../../migrations/fixtures';
 import { getVersions } from '../../migrations';
