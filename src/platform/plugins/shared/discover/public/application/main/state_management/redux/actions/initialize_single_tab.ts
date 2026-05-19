@@ -308,10 +308,18 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     // tab to fetch when selected
     if (isCurrentTabActive()) {
       dispatch(initializeAndSync({ tabId }));
-      dispatch(fetchData({ tabId, initial: true }));
+
+      // Skip the initial fetch for fresh tabs created via "+".
+      // This mimics the searchOnPageLoad=false flow, showing the empty state instead.
+      if (!tabState.skipInitialFetch) {
+        dispatch(fetchData({ tabId, initial: true }));
+      }
     } else {
       dispatch(
-        internalStateSlice.actions.setForceFetchOnSelect({ tabId, forceFetchOnSelect: true })
+        internalStateSlice.actions.setForceFetchOnSelect({
+          tabId,
+          forceFetchOnSelect: !tabState.skipInitialFetch,
+        })
       );
     }
 

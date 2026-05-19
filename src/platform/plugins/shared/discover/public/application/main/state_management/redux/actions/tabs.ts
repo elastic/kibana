@@ -212,6 +212,8 @@ export const updateTabs: InternalStateThunkActionCreator<
           return tab;
         }
 
+        tab.skipInitialFetch = true;
+
         tab.appState = {
           ...(isOfAggregateQueryType(currentQuery)
             ? { query: { esql: getInitialESQLQuery(currentDataView) } }
