@@ -7,14 +7,14 @@
 
 import expect from 'expect';
 import type { SiemMigrationResource } from '@kbn/security-solution-plugin/common/siem_migrations/model/common.gen';
-import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 import {
   deleteAllRuleMigrations,
   ruleMigrationResourcesRouteHelpersFactory,
   ruleMigrationRouteHelpersFactory,
   sentinelArmResourcesWithWatchlist,
   splunkRuleWithResources,
-} from '../../../../utils';
+} from '../../../../../utils';
 
 const LOOKUP_INDEX_NAME = 'lookup_default_allowed-ports';
 const RESOURCES_INDEX = '.kibana-siem-rule-migrations-resources-default';
@@ -53,7 +53,7 @@ export default ({ getService }: FtrProviderContext) => {
       await es.indices.delete({ index: LOOKUP_INDEX_NAME, ignore_unavailable: true });
     });
 
-    it('normalizes Sentinel watchlists and creates a denormalized lookup index', async () => {
+    it('should normalize Sentinel watchlists and create a denormalized lookup index', async () => {
       const {
         body: { migration_id: migrationId },
       } = await ruleMigrationRoutes.create({});
@@ -92,6 +92,7 @@ export default ({ getService }: FtrProviderContext) => {
           itemsSearchKey: 'Ports',
         },
       });
+      expect(resource?.metadata).toMatchObject({ itemsSearchKey: 'Ports' });
 
       await es.indices.refresh({ index: LOOKUP_INDEX_NAME });
       const lookupResponse = await es.search({
@@ -109,7 +110,7 @@ export default ({ getService }: FtrProviderContext) => {
       );
     });
 
-    it('rejects unsupported Sentinel watchlist contentType values', async () => {
+    it('should reject unsupported Sentinel watchlist contentType values', async () => {
       const {
         body: { migration_id: migrationId },
       } = await ruleMigrationRoutes.create({});
@@ -143,7 +144,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    it('rejects Sentinel watchlist uploads for non-Sentinel migrations', async () => {
+    it('should reject Sentinel watchlist uploads for non-Sentinel migrations', async () => {
       const {
         body: { migration_id: migrationId },
       } = await ruleMigrationRoutes.create({});
