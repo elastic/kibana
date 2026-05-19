@@ -43,11 +43,15 @@ export async function pickTestGroupRunOrder() {
   const ciStats = new CiStatsClient();
   const config = loadRunOrderConfig();
 
+  // Holds the merge base only when selective testing is enabled; the two
+  // `if` blocks below both use it (Scout skip check, then Jest filter).
+  const selectiveTestingMergeBase = config.useSelectiveTesting ? config.prMergeBase : undefined;
+
   // Fast path: a PR whose diff is exclusively Scout test files cannot affect
   // any Jest unit/integration or FTR config — skip emitting them entirely.
   // The Scout pipeline still runs its own selective testing in parallel.
-  if (config.useSelectiveTesting && config.prMergeBase) {
-    const changedFiles = listChangedFiles({ mergeBase: config.prMergeBase, commit: 'HEAD' });
+  if (selectiveTestingMergeBase) {
+    const changedFiles = listChangedFiles({ mergeBase: selectiveTestingMergeBase, commit: 'HEAD' });
     if (isScoutTestsOnlyDiff(changedFiles)) {
       console.log('Scout-tests-only diff detected — skipping Jest/FTR test steps');
       bk.setAnnotation(
@@ -73,8 +77,8 @@ export async function pickTestGroupRunOrder() {
   );
   if (!ftrConfigsIncluded) ftrConfigsByQueue.clear();
 
-  if (config.useSelectiveTesting && config.prMergeBase) {
-    const selectiveCtx = await resolveSelectiveTestingContext(config.prMergeBase);
+  if (selectiveTestingMergeBase) {
+    const selectiveCtx = await resolveSelectiveTestingContext(selectiveTestingMergeBase);
     if (selectiveCtx !== null) {
       jestUnitConfigs = filterJestUnitConfigsByAffected(jestUnitConfigs, selectiveCtx);
       jestIntegrationConfigs = filterJestIntegrationConfigsByAffected(
