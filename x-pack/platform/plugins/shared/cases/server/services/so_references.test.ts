@@ -187,7 +187,10 @@ describe('so_references', () => {
 
   describe('extractAttachmentSORefsFromAttributes', () => {
     it('should extract the references from the attributes correctly (external reference savedObject)', () => {
-      const res = extractAttachmentSORefsFromAttributes(externalReferenceAttachmentSOAttributes, []);
+      const res = extractAttachmentSORefsFromAttributes(
+        externalReferenceAttachmentSOAttributes,
+        []
+      );
 
       expect(res).toEqual({
         attributes: {
@@ -205,7 +208,10 @@ describe('so_references', () => {
     });
 
     it('should extract the references from the attributes correctly (external reference elasticSearchDoc)', () => {
-      const res = extractAttachmentSORefsFromAttributes(externalReferenceAttachmentESAttributes, []);
+      const res = extractAttachmentSORefsFromAttributes(
+        externalReferenceAttachmentESAttributes,
+        []
+      );
 
       expect(res).toEqual({
         attributes: externalReferenceAttachmentESAttributes,

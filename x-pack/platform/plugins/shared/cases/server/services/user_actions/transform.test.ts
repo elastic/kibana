@@ -145,9 +145,7 @@ describe('transform', () => {
           ...createUserActionSO({ action: UserActionActions.create, commentId: '5' }),
           references: [],
         };
-        const transformed = transformer(
-          createSOFindResponse([createUserActionFindSO(userAction)])
-        );
+        const transformed = transformer(createSOFindResponse([createUserActionFindSO(userAction)]));
 
         expect(transformed.saved_objects[0].attributes.comment_id).toBeNull();
       });
@@ -158,9 +156,7 @@ describe('transform', () => {
           commentId: '5',
         });
 
-        const transformed = transformer(
-          createSOFindResponse([createUserActionFindSO(userAction)])
-        );
+        const transformed = transformer(createSOFindResponse([createUserActionFindSO(userAction)]));
 
         expect(transformed.saved_objects[0].attributes.comment_id).toEqual('5');
       });
@@ -224,9 +220,7 @@ describe('transform', () => {
           references: [],
         };
 
-        const transformed = transformer(
-          createSOFindResponse([createUserActionFindSO(userAction)])
-        );
+        const transformed = transformer(createSOFindResponse([createUserActionFindSO(userAction)]));
 
         const payload = transformed.saved_objects[0].attributes.payload as {
           comment: { attachmentId?: string };
@@ -249,9 +243,7 @@ describe('transform', () => {
           references: [],
         } as typeof base;
 
-        const transformed = transformer(
-          createSOFindResponse([createUserActionFindSO(userAction)])
-        );
+        const transformed = transformer(createSOFindResponse([createUserActionFindSO(userAction)]));
 
         const payload = transformed.saved_objects[0].attributes.payload as {
           comment: { attachmentId?: string };

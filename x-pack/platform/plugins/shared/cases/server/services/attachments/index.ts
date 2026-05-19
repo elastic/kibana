@@ -553,7 +553,10 @@ export class AttachmentService {
               // Mirror the unified create path: lift `attachmentId` into refs
               // for savedObject-backed unified subtypes (those with `metadata.soType`).
               const { attributes: extractedAttributes, references: extractedReferences } =
-                extractAttachmentSORefsFromAttributes(unifiedAttributes, attachment.references ?? []);
+                extractAttachmentSORefsFromAttributes(
+                  unifiedAttributes,
+                  attachment.references ?? []
+                );
 
               return {
                 type: CASE_ATTACHMENT_SAVED_OBJECT,
