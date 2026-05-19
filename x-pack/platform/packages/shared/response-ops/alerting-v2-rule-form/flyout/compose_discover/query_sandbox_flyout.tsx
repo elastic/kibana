@@ -59,7 +59,7 @@ import { ComposeDiscoverTabs, TAB_DEFINITIONS, visibleTabIds } from './compose_d
  * `QuerySandboxFlyout` is a **props-only component** — it owns no query state.
  * The parent is responsible for:
  * - Holding `SandboxDraft` (editing buffer) via `useSandboxDraft`
- * - Holding `timeField` in RHF (`ComposeFormValues.timeField`)
+ * - Holding `timeField` in `SandboxDraft` (editing buffer); committed to RHF on Apply
  * - Owning `activeTab` in the UI-state reducer
  * - Calling `draftToRuleQuery(draft, tracking)` and writing to RHF on Apply
  *
@@ -70,18 +70,11 @@ export interface QuerySandboxFlyoutProps {
   /** Editing buffer for all query strings and the preview date range. */
   draft: SandboxDraft;
   /**
-   * Called with a partial update on every editor keystroke and date-picker change.
-   * When absent, all query editors are read-only (mirrors the uncontrolled-input pattern).
-   * The time field selector remains interactive regardless of this prop.
+   * Called with a partial update on every editor keystroke, date-picker change,
+   * and time field selection. When absent, all editors and the time field selector
+   * are read-only (mirrors the uncontrolled-input pattern).
    */
   onDraftChange?: (update: Partial<SandboxDraft>) => void;
-  /**
-   * The ES|QL field used as the time axis (e.g. `@timestamp`). This is a rule
-   * configuration value stored in RHF — kept separate from `draft` so the selector
-   * remains interactive even when query editors are read-only.
-   */
-  timeField: string;
-  onTimeFieldChange?: (field: string) => void;
   /** Controls whether the Sandbox renders a single editor or a split Base/Alert/Recovery layout. */
   tabConfig: SandboxTabConfig;
   /** Active tab, owned by the parent reducer and passed down as a controlled value. */
@@ -121,8 +114,6 @@ const RUN_SHORTCUT_LABEL = isMac ? '⌘⏎' : 'Ctrl+Enter';
 export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
   draft,
   onDraftChange,
-  timeField,
-  onTimeFieldChange,
   tabConfig,
   activeTab,
   onTabChange,
@@ -180,11 +171,11 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
       .map((f) => f.name);
 
     if (dateFieldNames.length === 0) {
-      if (timeField !== '@timestamp') onTimeFieldChange?.('@timestamp');
-    } else if (!dateFieldNames.includes(timeField)) {
-      onTimeFieldChange?.(dateFieldNames[0]);
+      if (draft.timeField !== '@timestamp') onDraftChange?.({ timeField: '@timestamp' });
+    } else if (!dateFieldNames.includes(draft.timeField)) {
+      onDraftChange?.({ timeField: dateFieldNames[0] });
     }
-  }, [fieldMap, timeField, onTimeFieldChange]);
+  }, [fieldMap, draft.timeField, onDraftChange]);
 
   const {
     columns,
@@ -198,7 +189,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
     lastExecutedQuery,
   } = useQueryExecution({
     query: activeQuery,
-    timeField,
+    timeField: draft.timeField,
     timeRange,
     data: services.data,
   });
@@ -315,9 +306,9 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
           <EuiFlexItem grow={false} style={{ width: 200, minWidth: 0 }}>
             <EuiSelect
               options={timeFieldOptions}
-              value={timeField}
+              value={draft.timeField}
               aria-label="Time field for rule execution"
-              onChange={(e) => onTimeFieldChange?.(e.target.value)}
+              onChange={(e) => onDraftChange?.({ timeField: e.target.value })}
               compressed
               prepend="Time field"
               data-test-subj="composeDiscoverTimeField"
@@ -438,7 +429,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
           <>
             <ComposeDiscoverChart
               query={lastExecutedQuery ?? activeQuery}
-              timeField={timeField}
+              timeField={draft.timeField}
               timeRange={timeRange}
               columns={columns}
             />

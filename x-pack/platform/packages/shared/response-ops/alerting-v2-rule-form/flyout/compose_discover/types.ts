@@ -28,6 +28,7 @@ export interface SandboxDraft {
   base: string;
   breach: string;
   recover: string;
+  timeField: string;
   dateStart: string;
   dateEnd: string;
 }

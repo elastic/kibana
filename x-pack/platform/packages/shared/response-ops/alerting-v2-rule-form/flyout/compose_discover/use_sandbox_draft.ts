@@ -36,12 +36,17 @@ export function draftToRuleQuery(draft: SandboxDraft, tracking: boolean): RuleQu
 export const useSandboxDraft = (methods: UseFormReturn<ComposeFormValues>) => {
   const [draft, setDraft] = useState<SandboxDraft>(() => ({
     ...queryToDraftFields(methods.getValues('query')),
+    timeField: methods.getValues('timeField'),
     dateStart: 'now-15m',
     dateEnd: 'now',
   }));
 
   const syncForm = useCallback(() => {
-    setDraft((d) => ({ ...d, ...queryToDraftFields(methods.getValues('query')) }));
+    setDraft((d) => ({
+      ...d,
+      ...queryToDraftFields(methods.getValues('query')),
+      timeField: methods.getValues('timeField'),
+    }));
   }, [methods]);
 
   return { draft, setDraft, syncForm };

@@ -323,8 +323,9 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   const handleSandboxApply = useCallback(() => {
     const updatedQuery = draftToRuleQuery(draft, uiState.tracking);
     methods.setValue('query', updatedQuery);
+    methods.setValue('timeField', draft.timeField);
     if (uiState.yamlMode) {
-      const current = { ...methods.getValues(), query: updatedQuery };
+      const current = { ...methods.getValues(), query: updatedQuery, timeField: draft.timeField };
       setYamlText(serializeFormToYaml(composeFormValuesForYamlSerialize(current)));
     }
     dispatch({ type: 'COMMIT_QUERY' });
@@ -336,8 +337,6 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
     },
     [setDraft]
   );
-
-  const timeField = methods.watch('timeField');
 
   const handleSubmit = methods.handleSubmit((values) => {
     if (isCreate) {
@@ -522,8 +521,6 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
             <QuerySandboxFlyout
               draft={draft}
               onDraftChange={handleDraftChange}
-              timeField={timeField}
-              onTimeFieldChange={(field) => methods.setValue('timeField', field)}
               tabConfig={getSandboxTabConfig(uiState)}
               activeTab={uiState.activeTab}
               onTabChange={(tab) => dispatch({ type: 'SET_TAB', tab })}
