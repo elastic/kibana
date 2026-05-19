@@ -39,10 +39,6 @@ function normalizeBreakdown(
 }
 
 function buildVisualizationState(config: LensXYConfig): XYVisualizationState {
-  const firstSeriesLayer = config.layers.find(
-    (layer): layer is LensSeriesLayer => layer.type === 'series'
-  );
-
   return {
     axisTitlesVisibilitySettings: {
       x: config.axisTitleVisibility?.showXAxisTitle ?? true,
@@ -55,7 +51,7 @@ function buildVisualizationState(config: LensXYConfig): XYVisualizationState {
       ...(config.legend?.legendStats ? { legendStats: config.legend.legendStats } : {}),
     },
     hideEndzones: true,
-    preferredSeriesType: firstSeriesLayer?.seriesType ?? 'line',
+    preferredSeriesType: 'line',
     valueLabels: config.valueLabels ?? 'hide',
     emphasizeFitting: config?.emphasizeFitting ?? true,
     fittingFunction: config?.fittingFunction ?? 'Linear',

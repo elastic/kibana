@@ -138,7 +138,7 @@ test('generates xy chart config', async () => {
             "isVisible": true,
             "position": "left",
           },
-          "preferredSeriesType": "bar",
+          "preferredSeriesType": "line",
           "tickLabelsVisibilitySettings": Object {
             "x": true,
             "yLeft": true,

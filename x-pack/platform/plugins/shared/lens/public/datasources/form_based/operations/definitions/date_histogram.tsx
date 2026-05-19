@@ -579,12 +579,6 @@ export const dateHistogramOperation: OperationDefinition<
         </p>
 
         <EuiBasicTable
-          tableCaption={i18n.translate(
-            'xpack.lens.indexPattern.dateHistogram.autoIntervalLogicTableCaption',
-            {
-              defaultMessage: 'Auto interval thresholds and the resulting interval selection',
-            }
-          )}
           items={search.aggs.boundsDescendingRaw.map(({ bound, boundLabel, intervalLabel }) => ({
             bound: typeof bound === 'number' ? infiniteBound : `${upToLabel} ${boundLabel}`,
             interval: intervalLabel,
