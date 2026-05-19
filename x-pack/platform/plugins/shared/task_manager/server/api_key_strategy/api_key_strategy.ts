@@ -24,6 +24,12 @@ export interface ApiKeySOFields {
   userScope: TaskUserScope;
 }
 
+/** Optional flags passed to {@link ApiKeyStrategy.grantApiKeys}. */
+export interface GrantApiKeysOpts {
+  /** When true, grant only the Elasticsearch API key (skip UIAM). */
+  onEsKey?: boolean;
+}
+
 export interface InvalidationTarget {
   apiKeyId: string;
   uiamApiKey?: string;
@@ -37,7 +43,8 @@ export interface ApiKeyStrategy {
     taskInstances: TaskInstance[],
     request: KibanaRequest,
     security: SecurityServiceStart,
-    basePath: IBasePath
+    basePath: IBasePath,
+    opts?: GrantApiKeysOpts
   ): Promise<Map<string, ApiKeySOFields>>;
 
   getApiKeyForFakeRequest(taskInstance: ConcreteTaskInstance): string | undefined;

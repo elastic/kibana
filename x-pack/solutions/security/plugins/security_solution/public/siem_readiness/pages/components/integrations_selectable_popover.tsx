@@ -191,6 +191,7 @@ export const IntegrationSelectablePopover = (props: IntegrationSelectablePopover
         }}
         listProps={{
           showIcons: false,
+          paddingSize: 's',
         }}
         options={options}
         onChange={handleChange}
