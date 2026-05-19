@@ -64,6 +64,7 @@ describe('data table dimension editor', () => {
   });
 
   afterAll(() => {
+    jest.runOnlyPendingTimers();
     jest.useRealTimers();
   });
 

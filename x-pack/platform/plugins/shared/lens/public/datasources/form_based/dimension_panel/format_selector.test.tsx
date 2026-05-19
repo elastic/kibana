@@ -36,15 +36,19 @@ const renderFormatSelector = (propsOverrides?: Partial<FormatSelectorProps>) => 
 describe('FormatSelector', () => {
   let user: UserEvent;
 
-  beforeEach(() => {
-    (props.onChange as jest.Mock).mockClear();
+  beforeAll(() => {
     jest.useFakeTimers();
-    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
   });
 
-  afterEach(() => {
+  afterAll(() => {
+    jest.runOnlyPendingTimers();
     jest.useRealTimers();
+  });
+
+  beforeEach(() => {
+    (props.onChange as jest.Mock).mockClear();
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
   });
   it('updates the format decimals', async () => {
     renderFormatSelector();
