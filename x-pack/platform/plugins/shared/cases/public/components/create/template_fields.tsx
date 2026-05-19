@@ -112,6 +112,9 @@ export const CreateCaseTemplateFields: React.FC = () => {
 
   const templateFieldsFragment = useMemo(() => {
     if (!templateId || template?.definition?.fields === undefined) {
+      // When global fields are already visible, suppress the callout to avoid
+      // redundant messaging — the user can see there's something to fill in.
+      if (globalInlineFields.length) return null;
       return (
         <>
           <EuiSpacer />
@@ -132,7 +135,7 @@ export const CreateCaseTemplateFields: React.FC = () => {
         <FieldsRenderer resolvedFields={templateFields} />
       </>
     );
-  }, [templateId, template, templateFields]);
+  }, [templateId, template, templateFields, globalInlineFields.length]);
 
   if (isLoading || isLoadingFields || isLoadingGlobalDefs) {
     return null;

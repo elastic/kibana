@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { screen } from '@testing-library/react';
+import yaml from 'js-yaml';
 
 import { CreateCaseTemplateFields } from './template_fields';
 import { renderWithTestingProviders } from '../../common/mock';
@@ -161,5 +162,35 @@ describe('CreateCaseTemplateFields', () => {
     renderWithTestingProviders(<CreateCaseTemplateFields />);
 
     expect(screen.getByText('Template not selected')).toBeInTheDocument();
+  });
+
+  it('renders global fields when no template is selected but renderInAllCases defs exist', () => {
+    mockUseFormData.mockReturnValue([{ templateId: undefined }]);
+    mockUseTemplateFormSync.mockReturnValue({ template: undefined, isLoading: false });
+    mockUseGetFieldDefinitions.mockReturnValue({
+      data: {
+        fieldDefinitions: [
+          {
+            fieldDefinitionId: 'fd-1',
+            name: 'incident_type',
+            definition: yaml.dump({
+              name: 'incident_type',
+              type: 'keyword',
+              control: 'INPUT_TEXT',
+              label: 'Incident Type',
+            }),
+            owner: 'securitySolution',
+            renderInAllCases: true,
+          },
+        ],
+      },
+      isLoading: false,
+    });
+
+    renderWithTestingProviders(<CreateCaseTemplateFields />);
+
+    expect(screen.getByText('Global fields')).toBeInTheDocument();
+    expect(screen.getByTestId('control-incident_type')).toBeInTheDocument();
+    expect(screen.queryByText('Template not selected')).not.toBeInTheDocument();
   });
 });

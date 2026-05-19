@@ -46,7 +46,10 @@ export const useTemplateFormSync = (
 ): UseTemplateFormSyncReturn => {
   const { setFieldValue } = useFormContext();
   const [{ templateId }] = useFormData<{ templateId?: string }>({ watch: ['templateId'] });
-  const { data: template, isLoading } = useGetTemplate(templateId || undefined);
+  const { data: template, isLoading: isTemplateLoading } = useGetTemplate(templateId || undefined);
+  // A disabled query (no templateId) can sit in "loading" state indefinitely in react-query v4;
+  // treat it as not-loading so the create form renders global fields without a template selected.
+  const isLoading = Boolean(templateId) && isTemplateLoading;
   const { data: fieldDefsData, isLoading: isLoadingFieldDefs } = useGetFieldDefinitions({
     owner: template?.owner,
   });
