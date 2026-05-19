@@ -143,6 +143,41 @@ describe('FindingsCollector', () => {
     );
   });
 
+  it('merges fixHint and docsAnchor from duplicate findings when absent on the first occurrence', () => {
+    const collector = new FindingsCollector();
+    // First occurrence has no fixHint/docsAnchor (e.g. regular baseline check)
+    const firstErr = new SavedObjectsCheckError({
+      ruleId: RULE_IDS.MODEL_VERSION_MISSING_CREATE_SCHEMA,
+      severity: 'error',
+      typeName: 'my-type',
+      message: "Missing 'create' schema.",
+      baselineUrl: 'https://storage.googleapis.com/kibana-so-types-snapshots/abc.json',
+    });
+    // Second occurrence carries the hints (e.g. serverless baseline check)
+    const secondErr = new SavedObjectsCheckError({
+      ruleId: RULE_IDS.MODEL_VERSION_MISSING_CREATE_SCHEMA,
+      severity: 'error',
+      typeName: 'my-type',
+      message: "Missing 'create' schema.",
+      serverlessBaselineUrl: 'https://storage.googleapis.com/kibana-so-types-snapshots/def.json',
+      fixHint: 'Add a create schema to the model version.',
+      docsAnchor: '#defining-model-versions',
+    });
+
+    collector.ingestErrors([firstErr, secondErr]);
+
+    const [finding] = collector.getFindings();
+    expect(finding.fixHint).toBe('Add a create schema to the model version.');
+    expect(finding.docsAnchor).toBe('#defining-model-versions');
+    // Both URLs are preserved
+    expect(finding.baselineUrl).toBe(
+      'https://storage.googleapis.com/kibana-so-types-snapshots/abc.json'
+    );
+    expect(finding.serverlessBaselineUrl).toBe(
+      'https://storage.googleapis.com/kibana-so-types-snapshots/def.json'
+    );
+  });
+
   it('keeps findings that share a ruleId but differ in typeName', () => {
     const collector = new FindingsCollector();
     const errFoo = new SavedObjectsCheckError({

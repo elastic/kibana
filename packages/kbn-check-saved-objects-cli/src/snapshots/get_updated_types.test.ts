@@ -8,7 +8,11 @@
  */
 
 import type { MigrationInfoRecord, MigrationSnapshot, ModelVersionSummary } from '../types';
-import { getUpdatedTypes, getTypesWithNewModelVersions } from './get_updated_types';
+import {
+  classifyUpdatedTypes,
+  getUpdatedTypes,
+  getTypesWithNewModelVersions,
+} from './get_updated_types';
 
 function buildModelVersion(
   version: string,
@@ -209,5 +213,49 @@ describe('getTypesWithNewModelVersions', () => {
       ]),
     ]);
     expect(getTypesWithNewModelVersions({ from, to })).toEqual(['foo']);
+  });
+});
+
+describe('classifyUpdatedTypes', () => {
+  it('returns both lists in a single pass', () => {
+    const v1 = buildModelVersion('1');
+    const v2 = buildModelVersion('2');
+    const from = buildSnapshot([
+      buildRecord('schema-only', [
+        buildModelVersion('1', { schemas: { create: false, forwardCompatibility: false } }),
+      ]),
+      buildRecord('new-mv', [v1]),
+      buildRecord('unchanged', [v1]),
+    ]);
+    const to = buildSnapshot([
+      buildRecord('schema-only', [
+        buildModelVersion('1', {
+          schemas: { create: { type: 'object', keys: {} }, forwardCompatibility: false },
+        }),
+      ]),
+      buildRecord('new-mv', [v1, v2]),
+      buildRecord('unchanged', [v1]),
+    ]);
+
+    const result = classifyUpdatedTypes({ from, to });
+    expect(result.updatedTypes).toEqual(['schema-only', 'new-mv']);
+    expect(result.typesWithNewModelVersions).toEqual(['new-mv']);
+  });
+
+  it('guarantees that typesWithNewModelVersions is always a subset of updatedTypes', () => {
+    const v1 = buildModelVersion('1');
+    const v2 = buildModelVersion('2');
+    const from = buildSnapshot([buildRecord('foo', [v1]), buildRecord('bar', [v1])]);
+    const to = buildSnapshot([buildRecord('foo', [v1, v2]), buildRecord('bar', [v1, v2])]);
+
+    const { updatedTypes, typesWithNewModelVersions } = classifyUpdatedTypes({ from, to });
+    expect(typesWithNewModelVersions.every((t) => updatedTypes.includes(t))).toBe(true);
+  });
+
+  it('returns empty lists when both snapshots are identical', () => {
+    const snapshot = buildSnapshot([buildRecord('foo', [buildModelVersion('1')])]);
+    const result = classifyUpdatedTypes({ from: snapshot, to: snapshot });
+    expect(result.updatedTypes).toEqual([]);
+    expect(result.typesWithNewModelVersions).toEqual([]);
   });
 });

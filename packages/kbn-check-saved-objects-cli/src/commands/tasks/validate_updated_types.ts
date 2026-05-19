@@ -12,8 +12,7 @@ import { defaultKibanaIndex } from '@kbn/migrator-test-kit';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type { Task, TaskContext } from '../types';
 import {
-  getUpdatedTypes,
-  getTypesWithNewModelVersions,
+  classifyUpdatedTypes,
   validateChangesExistingType,
   gcsSnapshotUrl,
 } from '../../snapshots';
@@ -25,15 +24,21 @@ import { getVersions } from '../../migrations';
  * Catches any SavedObjectsCheckError thrown by `fn` and re-throws it with
  * each finding annotated with the snapshot URL that was used as a baseline.
  * Plain errors (programming bugs, I/O failures) are re-thrown as-is.
+ *
+ * Typed as async so that if `validateChangesExistingType` is ever made async,
+ * the returned Promise is awaited rather than silently dropped.
  */
-const withBaselineContext = (
+const withBaselineContext = async (
   url: string | undefined,
   isServerless: boolean,
-  fn: () => void
-): void => {
-  if (!url) return fn();
+  fn: () => void | Promise<void>
+): Promise<void> => {
+  if (!url) {
+    await fn();
+    return;
+  }
   try {
-    fn();
+    await fn();
   } catch (err) {
     if (!isSavedObjectsCheckError(err)) throw err;
     const field = isServerless ? ('serverlessBaselineUrl' as const) : ('baselineUrl' as const);
@@ -46,11 +51,8 @@ export const validateUpdatedTypes: Task = (ctx, task) => {
     {
       title: 'Detecting updated types',
       task: () => {
-        const updatedList = getUpdatedTypes({ from: ctx.from!, to: ctx.to! });
-        const withNewModelVersionList = getTypesWithNewModelVersions({
-          from: ctx.from!,
-          to: ctx.to!,
-        });
+        const { updatedTypes: updatedList, typesWithNewModelVersions: withNewModelVersionList } =
+          classifyUpdatedTypes({ from: ctx.from!, to: ctx.to! });
         const toMigratorIndex = (type: SavedObjectsType<any>) => ({
           ...type,
           indexPattern: defaultKibanaIndex,

@@ -10,40 +10,55 @@
 import equal from 'fast-deep-equal';
 import type { MigrationSnapshot } from '../types';
 
-export function getUpdatedTypes({
-  from,
-  to,
-}: {
-  from: MigrationSnapshot;
-  to: MigrationSnapshot;
-}): string[] {
-  return Object.keys(to.typeDefinitions).filter((type) => {
-    if (!Object.prototype.hasOwnProperty.call(to.typeDefinitions, type)) {
-      return false;
-    }
-    const infoBefore = from.typeDefinitions[type];
-    const infoAfter = to.typeDefinitions[type]!;
-    return infoBefore && !equal(infoBefore, infoAfter);
-  });
+export interface ClassifiedUpdatedTypes {
+  /** All types whose snapshot entry changed between the two snapshots. */
+  updatedTypes: string[];
+  /**
+   * Subset of `updatedTypes` where the model version count increased.
+   * Types with only schema-only mutations in existing model versions are excluded:
+   * they don't require fixture verification or rollback tests.
+   */
+  typesWithNewModelVersions: string[];
 }
 
 /**
- * Returns the names of updated types that introduced at least one new model version
- * (i.e. the model version count increased between the two snapshots).
- *
- * Types whose only changes are schema-only mutations in existing model versions are
- * intentionally excluded: they don't require fixture verification or rollback tests.
+ * Classifies updated SO types in a single pass over the snapshot diff.
+ * Prefer this over calling `getUpdatedTypes` + `getTypesWithNewModelVersions` separately
+ * to guarantee that `typesWithNewModelVersions` is always a strict subset of `updatedTypes`
+ * and to avoid iterating the snapshot twice.
  */
-export function getTypesWithNewModelVersions({
+export function classifyUpdatedTypes({
   from,
   to,
 }: {
   from: MigrationSnapshot;
   to: MigrationSnapshot;
-}): string[] {
-  return Object.keys(to.typeDefinitions).filter((type) => {
+}): ClassifiedUpdatedTypes {
+  const updatedTypes: string[] = [];
+  const typesWithNewModelVersions: string[] = [];
+
+  for (const type of Object.keys(to.typeDefinitions)) {
     const infoBefore = from.typeDefinitions[type];
     const infoAfter = to.typeDefinitions[type]!;
-    return infoBefore && infoAfter.modelVersions.length > infoBefore.modelVersions.length;
-  });
+    if (!infoBefore || equal(infoBefore, infoAfter)) continue;
+
+    updatedTypes.push(type);
+    if (infoAfter.modelVersions.length > infoBefore.modelVersions.length) {
+      typesWithNewModelVersions.push(type);
+    }
+  }
+
+  return { updatedTypes, typesWithNewModelVersions };
 }
+
+/** @deprecated Prefer `classifyUpdatedTypes` to avoid iterating the snapshot twice. */
+export const getUpdatedTypes = (args: {
+  from: MigrationSnapshot;
+  to: MigrationSnapshot;
+}): string[] => classifyUpdatedTypes(args).updatedTypes;
+
+/** @deprecated Prefer `classifyUpdatedTypes` to avoid iterating the snapshot twice. */
+export const getTypesWithNewModelVersions = (args: {
+  from: MigrationSnapshot;
+  to: MigrationSnapshot;
+}): string[] => classifyUpdatedTypes(args).typesWithNewModelVersions;

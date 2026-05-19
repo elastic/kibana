@@ -42,8 +42,15 @@ export class FindingsCollector {
   /**
    * Returns deduplicated findings. When the same rule fires for the same type
    * in both the regular and serverless baseline checks, the two findings are
-   * merged into one: the first occurrence is kept and any `baselineUrl` /
-   * `serverlessBaselineUrl` from subsequent duplicates are folded in.
+   * merged into one: the first occurrence is kept and fields from subsequent
+   * duplicates are folded in when the existing value is absent.
+   *
+   * Merge strategy per field:
+   * - `baselineUrl` / `serverlessBaselineUrl`: accumulate both links.
+   * - `fixHint` / `docsAnchor`: first non-null value wins. Both occurrences should
+   *   carry identical hints (same rule, same type), but if one is absent the other
+   *   is used rather than silently discarding it.
+   *
    * Deduplication key: ruleId + typeName + message.
    */
   getFindings(): SavedObjectsCheckFinding[] {
@@ -52,10 +59,10 @@ export class FindingsCollector {
       const key = `${f.ruleId}:${f.typeName ?? ''}:${f.message}`;
       const existing = seen.get(key);
       if (existing) {
-        if (f.baselineUrl && !existing.baselineUrl) existing.baselineUrl = f.baselineUrl;
-        if (f.serverlessBaselineUrl && !existing.serverlessBaselineUrl) {
-          existing.serverlessBaselineUrl = f.serverlessBaselineUrl;
-        }
+        existing.baselineUrl ??= f.baselineUrl;
+        existing.serverlessBaselineUrl ??= f.serverlessBaselineUrl;
+        existing.fixHint ??= f.fixHint;
+        existing.docsAnchor ??= f.docsAnchor;
       } else {
         seen.set(key, { ...f });
       }

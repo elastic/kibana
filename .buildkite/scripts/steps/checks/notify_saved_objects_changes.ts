@@ -12,9 +12,14 @@ import parseArgs from 'minimist';
 import { upsertComment } from '#pipeline-utils';
 
 /**
- * Mirrors the report types in `@kbn/check-saved-objects-cli/src/findings`.
- * Inlined here so this Buildkite script keeps the same dependency surface as the
- * other notifiers (only `#pipeline-utils`).
+ * SOURCE OF TRUTH: packages/kbn-check-saved-objects-cli/src/findings/types.ts
+ *
+ * This interface is intentionally inlined rather than imported so that this
+ * Buildkite script keeps the same minimal dependency surface as the other
+ * notifiers (only `#pipeline-utils`, no Kibana package deps).
+ *
+ * When adding, removing, or changing fields in `SavedObjectsCheckFinding` or
+ * `SavedObjectsCheckReport` in the canonical file above, mirror the change here.
  */
 export interface SavedObjectsCheckFinding {
   ruleId: string;
