@@ -63,7 +63,7 @@ export class CliLog implements Log {
 
   write(...args: any[]) {
     // eslint-disable-next-line no-console
-    // console.log(...args);
+    console.log(...args);
   }
 }
 
