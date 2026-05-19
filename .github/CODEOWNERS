@@ -664,6 +664,7 @@ src/platform/packages/shared/kbn-server-route-repository @elastic/observability-
 src/platform/packages/shared/kbn-server-route-repository-client @elastic/observability-ui
 src/platform/packages/shared/kbn-server-route-repository-utils @elastic/observability-ui
 src/platform/packages/shared/kbn-shared-svg @elastic/obs-presentation-team
+src/platform/packages/shared/kbn-shared-url-state @elastic/appex-sharedux
 src/platform/packages/shared/kbn-shared-ux-utility @elastic/appex-sharedux
 src/platform/packages/shared/kbn-sort-predicates @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-spaces-utils @elastic/kibana-security
@@ -1324,6 +1325,7 @@ x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics @elastic/sec
 x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance @elastic/security-defend-workflows
 x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations @elastic/security-threat-hunting
+x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression @elastic/security-detection-platform
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa @elastic/security-engineering-productivity
 x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-securitysolution-autocomplete @elastic/security-detection-engine
@@ -2516,6 +2518,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/alienvault_otx/** @el
 src/platform/packages/shared/kbn-connector-specs/src/specs/amazon_s3/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/atlassian/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_lambda/** @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/bigquery/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/azure_blob/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/gcp_cloud_functions/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/brave_search/** @elastic/workchat-eng
@@ -2787,6 +2790,8 @@ src/platform/packages/shared/kbn-connector-schemas/thehive @elastic/kibana-cases
 /x-pack/solutions/security/test/security_solution_cypress/cypress/screens/common @elastic/security-detection-engine @elastic/security-detection-rule-management @elastic/security-threat-hunting
 /x-pack/solutions/security/test/security_solution_cypress/cypress/support @elastic/security-detection-engine @elastic/security-detection-rule-management @elastic/security-threat-hunting
 /x-pack/solutions/security/test/security_solution_cypress/cypress/urls @elastic/security-threat-hunting @elastic/security-detection-engine
+
+/x-pack/solutions/security/plugins/security_solution/public/agent_builder/attachment_types/rule @elastic/security-threat-hunting @elastic/security-generative-ai @elastic/security-detection-engine
 
 /x-pack/solutions/security/plugins/security_solution/common/test @elastic/security-detection-engine @elastic/security-detection-rule-management @elastic/security-threat-hunting
 
@@ -3481,6 +3486,10 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 
 # Inbox FTR test directory (no kibana.jsonc — manual entry)
 /x-pack/platform/test/inbox_api_integration/ @elastic/security-genai-research-and-development
+
+# FTR config manifests have no single owner — touched by all solutions.
+# Leaving this unowned avoids routing every edit through Kibana Operations.
+/.buildkite/ftr-manifests/
 
 ####
 ## These rules are always last so they take ultimate priority over everything else

@@ -8,7 +8,7 @@
  */
 
 import type { VersionedRouter } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '@kbn/core/server';
+import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { z } from '@kbn/zod';
 import { once } from 'lodash';
@@ -22,7 +22,8 @@ import { writeErrorHandler } from '../write_error_handler';
 export function registerUpdateRoute(
   router: VersionedRouter<RequestHandlerContext>,
   usageCounter: UsageCounter | undefined,
-  isDashboardAppRequest: boolean
+  isDashboardAppRequest: boolean,
+  logger: Logger
 ) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
   const updateRoute = router.put({
@@ -46,7 +47,9 @@ export function registerUpdateRoute(
           params: z.object({
             // Can not validate id at route level
             // existing dashboards may have invalid "as code" ids
-            id: z.string(),
+            id: z.string().meta({
+              description: 'The unique ID of the dashboard to be created or updated',
+            }),
           }),
           body: getDashboardStateSchema(isDashboardAppRequest),
         },
@@ -84,7 +87,7 @@ export function registerUpdateRoute(
           );
           return operation === 'create' ? res.created({ body }) : res.ok({ body });
         } catch (e) {
-          return writeErrorHandler(e, res);
+          return writeErrorHandler(e, res, logger, req);
         }
       })
   );

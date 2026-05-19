@@ -99,7 +99,6 @@ const bucketTermsRankByCustomOperationSchema = bucketTermsRankByCustomSharedSche
       z.literal('median'),
       z.literal('standard_deviation'),
       z.literal('unique_count'),
-      z.literal('count'),
       z.literal('sum'),
       z.literal('last_value'),
     ]),
@@ -108,6 +107,19 @@ const bucketTermsRankByCustomOperationSchema = bucketTermsRankByCustomSharedSche
     id: 'termsRankByCustomOperation',
     title: 'Terms Rank By Custom Operation',
     description: 'Terms ranked by custom operation.',
+  });
+
+const bucketTermsRankByCustomCountOperationSchema = bucketTermsRankByCustomSharedSchema
+  .extend({
+    operation: z.literal('count'),
+    field: z.string().meta({
+      description: 'Numeric field to be used for the custom operation.',
+    }),
+  })
+  .meta({
+    id: 'termsRankByCustomCountOperation',
+    title: 'Terms Rank By Custom Count Operation',
+    description: 'Terms ranked by count, either of all documents or of a specific field.',
   });
 
 const bucketTermsRankByPercentileOperationSchema = bucketTermsRankByCustomSharedSchema
@@ -276,6 +288,7 @@ export const bucketTermsOperationSchema = z
             description: 'Terms ranked by a linked metric.',
           }),
         bucketTermsRankByCustomOperationSchema,
+        bucketTermsRankByCustomCountOperationSchema,
         bucketTermsRankByPercentileOperationSchema,
         bucketTermsRankByPercentileRankOperationSchema,
       ])
@@ -394,6 +407,9 @@ export const bucketOperationDefinitionSchema = z
 
 export type TermOperationRankByCustomOperationType = z.output<
   typeof bucketTermsRankByCustomOperationSchema
+>;
+export type TermOperationRankByCustomCountOperationType = z.output<
+  typeof bucketTermsRankByCustomCountOperationSchema
 >;
 export type TermOperationRankByCustomPercentileType = z.output<
   typeof bucketTermsRankByPercentileOperationSchema

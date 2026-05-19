@@ -160,7 +160,7 @@ describe('aiSummarizeStepDefinition', () => {
           'test-connector-id',
           mockInference,
           expect.any(Object),
-          { featureId: 'ai.summarize', searchInferenceEndpoints: undefined }
+          { featureId: 'ai_summarize', searchInferenceEndpoints: undefined }
         );
         expect(mockInference.getChatModel).toHaveBeenCalledWith({
           connectorId: 'resolved-connector-id',
@@ -284,7 +284,7 @@ describe('aiSummarizeStepDefinition', () => {
           undefined,
           mockInference,
           expect.any(Object),
-          { featureId: 'ai.summarize', searchInferenceEndpoints: undefined }
+          { featureId: 'ai_summarize', searchInferenceEndpoints: undefined }
         );
       });
     });

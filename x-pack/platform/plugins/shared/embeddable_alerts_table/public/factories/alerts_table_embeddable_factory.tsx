@@ -8,7 +8,7 @@
 import React from 'react';
 import { BehaviorSubject, map, merge } from 'rxjs';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
   initializeTimeRangeManager,
   initializeTitleManager,
@@ -37,7 +37,7 @@ import { queryClient } from '../query_client';
 export const getAlertsTableEmbeddableFactory = (
   coreServices: CoreStart,
   deps: EmbeddableAlertsTablePublicStartDependencies
-): EmbeddableFactory<EmbeddableAlertsTableSerializedState, EmbeddableAlertsTableApi> => ({
+): EmbeddablePublicDefinition<EmbeddableAlertsTableSerializedState, EmbeddableAlertsTableApi> => ({
   type: EMBEDDABLE_ALERTS_TABLE_ID,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const timeRangeManager = initializeTimeRangeManager(initialState);
