@@ -39,10 +39,12 @@ Always run `node scripts/check_changes.ts` to validate your changes
 Follow existing patterns in the target area first; below are common defaults.
 
 ### Type check
-`node scripts/type_check [--project path/to/tsconfig.json]`
+`node scripts/type_check [--project path/to/tsconfig.json] [--skip-emit]`
 - Without `--project` it checks **all** projects (very slow). Always scope to a single project:
   `node scripts/type_check --project src/core/packages/http/server-internal/tsconfig.json`
 - Only one `--project` per run. To check multiple packages, run separate commands.
+- Pass `--skip-emit` to avoid writing `.d.ts` files to `target/types/` (recommended for targeted checks to keep the working tree clean):
+  `node scripts/type_check --project src/core/packages/http/server-internal/tsconfig.json --skip-emit`
 - `.buildkite/` is **not** a valid target for `scripts/type_check`. Buildkite scripts live in a separate workspace; typecheck them with `npm run typecheck` (or `yarn typecheck`) from inside `.buildkite/`.
 
 ### TypeScript & Types

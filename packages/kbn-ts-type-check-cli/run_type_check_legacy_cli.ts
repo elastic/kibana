@@ -32,14 +32,17 @@ export const runLegacyTypeCheckCli = () => {
     async ({ log, flagsReader, procRunner }) => {
       const { TS_PROJECTS } = await import('@kbn/ts-projects');
       const shouldCleanCache = flagsReader.boolean('clean-cache');
+      const noEmit = flagsReader.boolean('skip-emit');
       const withArchive = flagsReader.boolean('with-archive');
-      const shouldRestoreArchive = withArchive || flagsReader.boolean('restore-archive');
-      const shouldUploadArchive = withArchive || flagsReader.boolean('upload-archive');
+      const shouldRestoreArchive = !noEmit && (withArchive || flagsReader.boolean('restore-archive'));
+      const shouldUploadArchive = !noEmit && (withArchive || flagsReader.boolean('upload-archive'));
 
       if (shouldCleanCache) {
         await cleanTypeCheckCaches(log, TS_PROJECTS);
         return;
       }
+
+      const projectFilter = normalizeProjectPath(flagsReader.path('project'), log);
 
       const { updateRootRefsConfig, cleanupRootRefsConfig, ROOT_REFS_CONFIG_PATH } = await import(
         './root_refs_config'
@@ -57,7 +60,6 @@ export const runLegacyTypeCheckCli = () => {
         );
       }
 
-      const projectFilter = normalizeProjectPath(flagsReader.path('project'), log);
       const projects = TS_PROJECTS.filter(
         (project) =>
           !project.isTypeCheckDisabled() && (!projectFilter || project.path === projectFilter)
@@ -81,6 +83,7 @@ export const runLegacyTypeCheckCli = () => {
             '-b',
             buildTarget,
             '--pretty',
+            ...(noEmit ? ['--noEmit'] : []),
             ...(flagsReader.boolean('verbose') ? ['--verbose'] : []),
             ...(flagsReader.boolean('extended-diagnostics') ? ['--extendedDiagnostics'] : []),
           ],
@@ -148,6 +151,7 @@ export const runLegacyTypeCheckCli = () => {
           'clean-cache',
           'cleanup',
           'extended-diagnostics',
+          'skip-emit',
           'with-archive',
           'restore-archive',
           'upload-archive',
@@ -161,6 +165,10 @@ export const runLegacyTypeCheckCli = () => {
                                   identify that none of the imports have changed (it uses creation/update
                                   times) but cleaning them prevents leaving garbage around the repo.
         --extended-diagnostics  Turn on extended diagnostics in the TypeScript compiler
+        --skip-emit             Run tsc in --noEmit mode: type-checks without writing any .d.ts or
+                                  .tsbuildinfo files. Recommended for targeted single-project checks
+                                  (avoids polluting target/types/ across the dependency tree).
+                                  Implies skipping --restore-archive and --upload-archive.
         --restore-archive       Restore cached artifacts from GCS before running tsc
         --upload-archive        Upload resulting artifacts to GCS after a successful tsc run
         --with-archive          Shorthand for \`--restore-archive --upload-archive\`
