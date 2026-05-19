@@ -356,6 +356,16 @@ function findPreviousRunProfile(runId, clusterName, entityType) {
 // Main
 // ---------------------------------------------------------------------------
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function isCircuitBreakerError(err) {
+  return (
+    err.message.includes('circuit_breaking_exception') ||
+    err.message.includes('Data too large') ||
+    err.message.includes('429')
+  );
+}
+
 async function main() {
   const {
     clusters,
@@ -432,6 +442,12 @@ async function main() {
           raw = await runProfileQuery(cluster, query);
         } catch (err) {
           console.error(`[${clusterName}/${entityType}] FAILED: ${err.message}`);
+          if (isCircuitBreakerError(err)) {
+            console.log(
+              `[${clusterName}/${entityType}] OOM detected — waiting 60s before next query…`
+            );
+            await sleep(60_000);
+          }
           continue;
         }
         took = raw.took ?? '?';

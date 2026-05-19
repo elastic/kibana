@@ -33,6 +33,7 @@ import {
   ENTITY_NAME_FIELD,
   ENTITY_TYPE_FIELD,
   TIMESTAMP_FIELD,
+  MAX_AMOUNT_OF_VALUES_IN_COLLECT,
   aggregationStats,
   fieldsToKeep,
   extractPaginationParams,
@@ -233,7 +234,7 @@ function mergedFieldStats(idFieldName: string, fields: EntityField[]): string {
       switch (retention.operation) {
         case 'collect_values':
           return `${dest} = MV_SLICE(MV_UNION(${recentDest}, ${dest}), 0, ${
-            retention.maxLength - 1
+            MAX_AMOUNT_OF_VALUES_IN_COLLECT - 1
           })`;
         case 'prefer_newest_value':
           return `${dest} = COALESCE(${recentDest}, ${dest})`;
