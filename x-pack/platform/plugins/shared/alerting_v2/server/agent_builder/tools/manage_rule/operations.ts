@@ -8,7 +8,6 @@
 import { z } from '@kbn/zod/v4';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
-import { buildRulePayload } from '../../../../common/agent_builder/rule_mappers';
 import {
   createRuleDataSchema,
   metadataSchema,
@@ -21,6 +20,7 @@ import {
   isStateTransitionAllowed,
   isRecoveryPolicyQueryProvided,
 } from '@kbn/alerting-v2-schemas';
+import { buildRulePayload } from '../../../../common/agent_builder/rule_mappers';
 
 // ─── Operation schemas ────────────────────────────────────────────────────────
 // Every field-level schema is derived from the shared alerting-v2-schemas
@@ -265,4 +265,3 @@ export const executeRuleOperations = async (
     ...(lastQueryColumns ? { queryColumns: lastQueryColumns } : {}),
   };
 };
-

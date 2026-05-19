@@ -201,7 +201,17 @@ For an existing rule, pass the \`ruleAttachmentId\` and only include the operati
 
 Always include \`{ operation: "validate" }\` as the **last operation** in the final ${alertingTools.manageRule} call after all fields are set. This validates the accumulated rule against the API request schema and throws if the rule is not ready to save (missing required fields, invalid values, etc.). If validation fails, read the error issues, fix them with corrective operations, and retry with \`validate\` again.
 
-## Rule Persistence
+## Rendering Attachments
+
+After calling ${alertingTools.manageRule}, **always** render the rule attachment inline in your response using the \`<render_attachment>\` tag with the attachment ID and version from the tool result:
+
+\`\`\`
+<render_attachment id="<ruleAttachment.id>" version="<version>" />
+\`\`\`
+
+This displays the interactive rule card with Preview and Create/Update buttons.
+
+## Persistence
 
 The ${alertingTools.manageRule} tool only manages the **in-memory attachment** — it never writes to Elasticsearch.
 Always direct the user to the rendered attachment's action buttons for persistence:

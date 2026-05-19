@@ -27,7 +27,9 @@ import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { useBulkGetUserProfiles } from '../../../hooks/use_bulk_get_user_profiles';
+import { resolveDisplayName } from '../../../utils/resolve_display_name';
 import { ActionPolicyActionsMenu } from '../action_policy_actions_menu';
 import { ActionPolicyStateBadge } from '../action_policy_state_badge';
 import { isSnoozed } from '../is_snoozed';
@@ -67,6 +69,13 @@ export const ActionPolicyDetailsFlyout = ({
   const dateTimeFormat = settings.client.get<string>('dateFormat');
   const formatDate = (value: string) => moment(value).format(dateTimeFormat);
 
+  const metadataUids = useMemo(
+    () => [policy.createdBy, policy.updatedBy].filter((uid): uid is string => Boolean(uid)),
+    [policy.createdBy, policy.updatedBy]
+  );
+
+  const { data: profileByUid } = useBulkGetUserProfiles({ uids: metadataUids });
+
   const snoozedActive = isSnoozed(policy.snoozedUntil);
 
   const handleEdit = () => {
@@ -91,7 +100,7 @@ export const ActionPolicyDetailsFlyout = ({
       title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.metadata.createdBy', {
         defaultMessage: 'Created by',
       }),
-      description: policy.createdByUsername ?? EMPTY_VALUE,
+      description: resolveDisplayName(policy.createdBy, profileByUid, EMPTY_VALUE),
     },
     {
       title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.metadata.createdAt', {
@@ -103,7 +112,7 @@ export const ActionPolicyDetailsFlyout = ({
       title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.metadata.updatedBy', {
         defaultMessage: 'Updated by',
       }),
-      description: policy.updatedByUsername ?? EMPTY_VALUE,
+      description: resolveDisplayName(policy.updatedBy, profileByUid, EMPTY_VALUE),
     },
     {
       title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.metadata.updatedAt', {
