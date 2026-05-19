@@ -16,5 +16,8 @@ export {
   type ReportSkillUpdatedParams,
   type ReportSkillDeletedParams,
   type ReportUiClickParams,
+  type ReportManageEntityListViewParams,
+  type ReportUsedByWarningShownParams,
+  type ReportUsedByWarningProceededParams,
 } from './agent_builder_events';
 export { AGENT_BUILDER_UI_EBT, type AgentBuilderUiEbt } from './agent_builder_ui_ebt';

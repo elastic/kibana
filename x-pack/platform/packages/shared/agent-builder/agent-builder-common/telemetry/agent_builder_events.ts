@@ -28,6 +28,9 @@ export const AGENT_BUILDER_EVENT_TYPES = {
   RoundError: `${TELEMETRY_PREFIX}_round_error`,
   ToolCallSuccess: `${TELEMETRY_PREFIX}_tool_call_success`,
   ToolCallError: `${TELEMETRY_PREFIX}_tool_call_error`,
+  ManageEntityListView: `${TELEMETRY_PREFIX}_manage_entity_list_view`,
+  UsedByWarningShown: `${TELEMETRY_PREFIX}_used_by_warning_shown`,
+  UsedByWarningProceeded: `${TELEMETRY_PREFIX}_used_by_warning_proceeded`,
 } as const;
 
 export type OptInSource =
@@ -241,6 +244,21 @@ export interface ReportToolCallErrorParams {
   duration_ms: number;
 }
 
+export interface ReportManageEntityListViewParams {
+  entity_type: string;
+  entity_count: number;
+}
+
+export interface ReportUsedByWarningShownParams {
+  entity_type: string;
+  agent_count: number;
+}
+
+export interface ReportUsedByWarningProceededParams {
+  entity_type: string;
+  agent_count: number;
+}
+
 export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.OptInAction]: ReportOptInActionParams;
   [AGENT_BUILDER_EVENT_TYPES.OptOut]: ReportOptOutParams;
@@ -263,6 +281,9 @@ export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.RoundError]: ReportRoundErrorParams;
   [AGENT_BUILDER_EVENT_TYPES.ToolCallSuccess]: ReportToolCallSuccessParams;
   [AGENT_BUILDER_EVENT_TYPES.ToolCallError]: ReportToolCallErrorParams;
+  [AGENT_BUILDER_EVENT_TYPES.ManageEntityListView]: ReportManageEntityListViewParams;
+  [AGENT_BUILDER_EVENT_TYPES.UsedByWarningShown]: ReportUsedByWarningShownParams;
+  [AGENT_BUILDER_EVENT_TYPES.UsedByWarningProceeded]: ReportUsedByWarningProceededParams;
 }
 
 export type AgentBuilderTelemetryEvent =
@@ -281,7 +302,10 @@ export type AgentBuilderTelemetryEvent =
   | EventTypeOpts<ReportRoundCompleteParams>
   | EventTypeOpts<ReportRoundErrorParams>
   | EventTypeOpts<ReportToolCallSuccessParams>
-  | EventTypeOpts<ReportToolCallErrorParams>;
+  | EventTypeOpts<ReportToolCallErrorParams>
+  | EventTypeOpts<ReportManageEntityListViewParams>
+  | EventTypeOpts<ReportUsedByWarningShownParams>
+  | EventTypeOpts<ReportUsedByWarningProceededParams>;
 // Type union of all event type strings for use in union types
 export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.OptInAction
@@ -299,7 +323,10 @@ export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.RoundComplete
   | typeof AGENT_BUILDER_EVENT_TYPES.RoundError
   | typeof AGENT_BUILDER_EVENT_TYPES.ToolCallSuccess
-  | typeof AGENT_BUILDER_EVENT_TYPES.ToolCallError;
+  | typeof AGENT_BUILDER_EVENT_TYPES.ToolCallError
+  | typeof AGENT_BUILDER_EVENT_TYPES.ManageEntityListView
+  | typeof AGENT_BUILDER_EVENT_TYPES.UsedByWarningShown
+  | typeof AGENT_BUILDER_EVENT_TYPES.UsedByWarningProceeded;
 
 const OPT_IN_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.OptInAction,
@@ -1044,11 +1071,72 @@ const TOOL_CALL_ERROR_EVENT: AgentBuilderTelemetryEvent = {
   },
 };
 
+const MANAGE_ENTITY_LIST_VIEW_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.ManageEntityListView,
+  schema: {
+    entity_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'Type of entity on the list page (tool|plugin|skill)',
+        optional: false,
+      },
+    },
+    entity_count: {
+      type: 'integer',
+      _meta: { description: 'Number of entities shown in the list', optional: false },
+    },
+  },
+};
+
+const USED_BY_WARNING_SHOWN_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.UsedByWarningShown,
+  schema: {
+    entity_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'Type of entity the warning is about (tool|plugin|skill)',
+        optional: false,
+      },
+    },
+    agent_count: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of agents currently using the entity',
+        optional: false,
+      },
+    },
+  },
+};
+
+const USED_BY_WARNING_PROCEEDED_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.UsedByWarningProceeded,
+  schema: {
+    entity_type: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Type of entity the user proceeded to modify despite the warning (tool|plugin|skill)',
+        optional: false,
+      },
+    },
+    agent_count: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of agents affected at the time the user proceeded',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
   OPT_IN_EVENT,
   OPT_OUT_EVENT,
   UI_CLICK_EVENT,
   ADD_TO_CHAT_CLICKED_EVENT,
+  MANAGE_ENTITY_LIST_VIEW_EVENT,
+  USED_BY_WARNING_SHOWN_EVENT,
+  USED_BY_WARNING_PROCEEDED_EVENT,
 ];
 
 export const agentBuilderServerEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
