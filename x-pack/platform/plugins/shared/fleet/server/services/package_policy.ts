@@ -54,6 +54,7 @@ import {
   hasMultipleEnabledPolicyTemplates,
   getInputEffectiveName,
   getRegistryStreamWithDataStreamForInputType,
+  syncDataStreamTypeFromVar,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -531,6 +532,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     this.keepPolicyIdInSync(packagePolicy);
 
+    syncDataStreamTypeFromVar(packagePolicy);
     await preflightCheckPackagePolicy(soClient, packagePolicy, basePkgInfo);
 
     let enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
@@ -948,6 +950,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       });
 
       this.keepPolicyIdInSync(packagePolicy);
+      syncDataStreamTypeFromVar(packagePolicy);
       await preflightCheckPackagePolicy(soClient, packagePolicy, basePkgInfo);
     });
 
