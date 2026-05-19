@@ -489,7 +489,7 @@
             "type": "text"
           }, 
           "recovery_type": {
-            "type": "text"
+            "type": "keyword"
           }
         }
       },
