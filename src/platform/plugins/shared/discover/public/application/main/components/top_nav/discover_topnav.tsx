@@ -411,6 +411,11 @@ export const DiscoverTopNav = ({
     [dispatch, setEsqlEditorUiState]
   );
 
+  const textBasedLanguageModeErrors = useMemo(
+    () => (esqlModeErrors ? [esqlModeErrors] : undefined),
+    [esqlModeErrors]
+  );
+
   const shouldHideDefaultDataviewPicker =
     !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
 
@@ -456,7 +461,7 @@ export const DiscoverTopNav = ({
           shouldHideDefaultDataviewPicker ? undefined : dataViewPickerProps
         }
         displayStyle="detached"
-        textBasedLanguageModeErrors={esqlModeErrors ? [esqlModeErrors] : undefined}
+        textBasedLanguageModeErrors={textBasedLanguageModeErrors}
         textBasedLanguageModeWarning={esqlModeWarning}
         enableResourceBrowser={isEsqlMode}
         prependFilterBar={

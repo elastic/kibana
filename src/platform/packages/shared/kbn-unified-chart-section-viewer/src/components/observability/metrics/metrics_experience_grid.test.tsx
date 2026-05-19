@@ -142,6 +142,7 @@ describe('MetricsExperienceGrid', () => {
       } as unknown as UnifiedHistogramServices,
       fetch$,
       isComponentVisible: true,
+      isTabSelected: true,
       profileId: 'test-profile-id',
     };
 
@@ -154,6 +155,9 @@ describe('MetricsExperienceGrid', () => {
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
+      flyoutState: undefined,
+      onFlyoutStateChange: jest.fn(),
+      onFlyoutSelectedTabChange: jest.fn(),
       profileId: 'test-profile-id',
     });
 
@@ -268,6 +272,9 @@ describe('MetricsExperienceGrid', () => {
       searchTerm: '',
       onSearchTermChange,
       onToggleFullscreen: jest.fn(),
+      flyoutState: undefined,
+      onFlyoutStateChange: jest.fn(),
+      onFlyoutSelectedTabChange: jest.fn(),
       profileId: 'test-profile-id',
     });
 
@@ -311,6 +318,9 @@ describe('MetricsExperienceGrid', () => {
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen,
+      flyoutState: undefined,
+      onFlyoutStateChange: jest.fn(),
+      onFlyoutSelectedTabChange: jest.fn(),
       profileId: 'test-profile-id',
     });
 
@@ -349,6 +359,9 @@ describe('MetricsExperienceGrid', () => {
         searchTerm: '',
         onSearchTermChange: jest.fn(),
         onToggleFullscreen: jest.fn(),
+        flyoutState: undefined,
+        onFlyoutStateChange: jest.fn(),
+        onFlyoutSelectedTabChange: jest.fn(),
         profileId: 'test-profile-id',
       });
 
@@ -386,6 +399,9 @@ describe('MetricsExperienceGrid', () => {
         searchTerm: '',
         onSearchTermChange: jest.fn(),
         onToggleFullscreen: jest.fn(),
+        flyoutState: undefined,
+        onFlyoutStateChange: jest.fn(),
+        onFlyoutSelectedTabChange: jest.fn(),
         profileId: 'test-profile-id',
       });
 
