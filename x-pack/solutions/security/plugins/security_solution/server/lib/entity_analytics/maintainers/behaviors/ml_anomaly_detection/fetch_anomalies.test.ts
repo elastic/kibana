@@ -145,6 +145,7 @@ describe('streamAnomaliesForEntityBatch', () => {
 
     expect(result).toEqual([
       {
+        _id: 'hit-1',
         entityId: 'user:alice',
         jobId: 'security-job-1',
         detectorIndex: 2,
@@ -375,8 +376,8 @@ describe('fetchAnomaliesForEntityBatch', () => {
   it('groups anomalies by entityId and jobId', async () => {
     mockMlAnomalySearch.mockResolvedValueOnce(
       makeResponse([
-        makeHit({ entityId: 'user:alice', jobId: 'security-job-1', recordScore: 80 }),
-        makeHit({ entityId: 'user:alice', jobId: 'security-job-2', recordScore: 70 }),
+        makeHit({ id: '1', entityId: 'user:alice', jobId: 'security-job-1', recordScore: 80 }),
+        makeHit({ id: '2', entityId: 'user:alice', jobId: 'security-job-2', recordScore: 70 }),
       ])
     );
 
@@ -394,6 +395,7 @@ describe('fetchAnomaliesForEntityBatch', () => {
     expect(Object.keys(aliceAnomalies ?? {})).toEqual(['security-job-1', 'security-job-2']);
     expect(aliceAnomalies?.['security-job-1'].anomalies).toHaveLength(1);
     expect(aliceAnomalies?.['security-job-1'].anomalies[0]).toEqual({
+      _id: '1',
       entityId: 'user:alice',
       jobId: 'security-job-1',
       detectorIndex: 0,
@@ -411,6 +413,7 @@ describe('fetchAnomaliesForEntityBatch', () => {
     });
     expect(aliceAnomalies?.['security-job-2'].anomalies).toHaveLength(1);
     expect(aliceAnomalies?.['security-job-2'].anomalies[0]).toEqual({
+      _id: '2',
       entityId: 'user:alice',
       jobId: 'security-job-2',
       detectorIndex: 0,
@@ -432,12 +435,14 @@ describe('fetchAnomaliesForEntityBatch', () => {
     mockMlAnomalySearch.mockResolvedValueOnce(
       makeResponse([
         makeHit({
+          id: '1',
           entityId: 'user:alice',
           jobId: 'security-job-1',
           timestamp: 1000,
           recordScore: 60,
         }),
         makeHit({
+          id: '2',
           entityId: 'user:alice',
           jobId: 'security-job-1',
           timestamp: 2000,
@@ -458,6 +463,7 @@ describe('fetchAnomaliesForEntityBatch', () => {
     expect(result.get('user:alice')?.['security-job-1'].anomalies).toHaveLength(2);
     expect(result.get('user:alice')?.['security-job-1'].anomalies).toEqual([
       {
+        _id: '1',
         entityId: 'user:alice',
         jobId: 'security-job-1',
         detectorIndex: 0,
@@ -474,6 +480,7 @@ describe('fetchAnomaliesForEntityBatch', () => {
         partitionFieldValue: 'web-01',
       },
       {
+        _id: '2',
         entityId: 'user:alice',
         jobId: 'security-job-1',
         detectorIndex: 0,

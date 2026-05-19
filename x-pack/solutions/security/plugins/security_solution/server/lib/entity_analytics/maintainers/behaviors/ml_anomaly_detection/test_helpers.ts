@@ -40,6 +40,7 @@ export const makeBaselineBucket = (overrides: Partial<BaselineBucket> = {}): Bas
 
 export const makeHit = (
   overrides: {
+    id?: string;
     entityId?: string;
     jobId?: string;
     detectorIndex?: number;
@@ -55,6 +56,7 @@ export const makeHit = (
   } = {}
 ) => {
   const {
+    id,
     entityId = 'user:alice',
     jobId = 'security-job-1',
     detectorIndex = 0,
@@ -70,6 +72,7 @@ export const makeHit = (
   } = overrides;
 
   return {
+    _id: id ?? 'hit-1',
     _source: noSource
       ? undefined
       : {

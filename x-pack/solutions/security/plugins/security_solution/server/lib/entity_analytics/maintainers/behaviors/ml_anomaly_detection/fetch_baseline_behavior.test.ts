@@ -332,16 +332,17 @@ describe('getBaselineConfigs', () => {
         { function: 'high_count', field_name: 'destination.ip' },
       ]);
       const anomalies = [
-        makeAnomaly({ detectorIndex: 0 }),
+        makeAnomaly({ detectorIndex: 0, _id: '1' }),
         makeAnomaly({
           detectorIndex: 0,
           recordScore: 85,
           timestamp: 2000,
           actual: 0.02,
           typical: 0.5,
+          _id: '2',
         }),
-        makeAnomaly({ detectorIndex: 1 }),
-        makeAnomaly({ detectorIndex: 2 }),
+        makeAnomaly({ detectorIndex: 1, _id: '3' }),
+        makeAnomaly({ detectorIndex: 2, _id: '4' }),
       ];
 
       const configs = getBaselineConfigs(job, anomalies, 'user');
@@ -351,6 +352,7 @@ describe('getBaselineConfigs', () => {
         {
           anomalies: [
             {
+              _id: '1',
               actual: 5,
               detectorIndex: 0,
               entityId: 'user:alice',
@@ -360,6 +362,7 @@ describe('getBaselineConfigs', () => {
               typical: 1,
             },
             {
+              _id: '2',
               actual: 0.02,
               detectorIndex: 0,
               entityId: 'user:alice',
@@ -379,6 +382,7 @@ describe('getBaselineConfigs', () => {
         {
           anomalies: [
             {
+              _id: '3',
               actual: 5,
               detectorIndex: 1,
               entityId: 'user:alice',
@@ -398,6 +402,7 @@ describe('getBaselineConfigs', () => {
         {
           anomalies: [
             {
+              _id: '4',
               actual: 5,
               detectorIndex: 2,
               entityId: 'user:alice',
@@ -423,8 +428,8 @@ describe('getBaselineConfigs', () => {
         { function: 'rare', by_field_name: 'process.name' },
       ]);
       const anomalies = [
-        makeAnomaly({ detectorIndex: 0, byFieldValue: 'evil-ip' }),
-        makeAnomaly({ detectorIndex: 1, byFieldValue: 'malware.exe' }),
+        makeAnomaly({ detectorIndex: 0, byFieldValue: 'evil-ip', _id: '1' }),
+        makeAnomaly({ detectorIndex: 1, byFieldValue: 'malware.exe', _id: '2' }),
       ];
 
       const configs = getBaselineConfigs(job, anomalies, 'user');
@@ -433,6 +438,7 @@ describe('getBaselineConfigs', () => {
         {
           anomalies: [
             {
+              _id: '1',
               actual: 5,
               byFieldValue: 'evil-ip',
               detectorIndex: 0,
@@ -453,6 +459,7 @@ describe('getBaselineConfigs', () => {
         {
           anomalies: [
             {
+              _id: '2',
               actual: 5,
               byFieldValue: 'malware.exe',
               detectorIndex: 1,

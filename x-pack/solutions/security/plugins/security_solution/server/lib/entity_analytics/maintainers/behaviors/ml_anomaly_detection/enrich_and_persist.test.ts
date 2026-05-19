@@ -166,6 +166,7 @@ describe('enrichAndPersistAnomalies', () => {
     const indexedDoc = (bulkCall.operations as unknown[])[1] as Record<string, unknown>;
     expect(indexedDoc.entity).toEqual({ id: 'user:alice', type: 'user' });
     expect(indexedDoc.anomaly).toEqual({
+      _id: 'anomaly-hit-1',
       job_id: 'security-job-1',
       detector_index: 2,
       timestamp: 1778241600000,
