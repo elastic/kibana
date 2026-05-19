@@ -25,7 +25,7 @@ interface FtrConfigsManifest {
   enabled: Array<string | FtrConfigWithOptions>;
 }
 
-const FTR_CONFIGS_MANIFEST_SOURCE_REL = '.buildkite/ftr_configs_manifests.json';
+const FTR_CONFIGS_MANIFEST_SOURCE_REL = '.buildkite/ftr-manifests/ftr_configs_manifests.json';
 
 const getAllFtrConfigsManifests = () => {
   const ftrConfigsManifestsSourcePath = Path.resolve(REPO_ROOT, FTR_CONFIGS_MANIFEST_SOURCE_REL);

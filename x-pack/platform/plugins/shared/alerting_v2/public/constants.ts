@@ -40,7 +40,6 @@ export const AGENT_BUILDER_NEW_CONVERSATION_PATH = '/agents/elastic-ai-agent/con
 export const paths = {
   ruleDetails: (id: string) => `${ALERTING_V2_RULES_BASE_PATH}/${encodeURIComponent(id)}`,
   ruleList: ALERTING_V2_RULES_BASE_PATH,
-  ruleCreateOptions: `${ALERTING_V2_RULES_BASE_PATH}/create_options`,
   actionPolicyCreate: `${ALERTING_V2_ACTION_POLICIES_BASE_PATH}/create`,
   actionPolicyEdit: (id: string) =>
     `${ALERTING_V2_ACTION_POLICIES_BASE_PATH}/edit/${encodeURIComponent(id)}`,

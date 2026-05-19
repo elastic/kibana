@@ -20,7 +20,6 @@ import {
   useGeneratedHtmlId,
   type Criteria,
 } from '@elastic/eui';
-import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBoolean, useDebouncedValue } from '@kbn/react-hooks';
@@ -31,7 +30,6 @@ import { useFetchRuleTags } from '../../hooks/use_fetch_rule_tags';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { useNavigateToAgentBuilder } from '../../hooks/use_navigate_to_agent_builder';
-import { paths } from '../../constants';
 
 import { RulesListTableContainer } from './rules_list_table_container';
 import type { RulesListTableSortField } from './rules_list_table';
@@ -40,6 +38,7 @@ import { StatusFilterPopover } from '../../components/rule/popovers/status_filte
 import { TagsFilterPopover } from '../../components/rule/popovers/tag_filter_popover';
 import { buildRulesListFilter } from './utils';
 import { RuleCreateOptionsPanel } from '../../components/rule_create_options/rule_create_options_panel';
+import { RuleCreateOptionsFlyout } from '../../components/rule_create_options/rule_create_options_flyout';
 
 const DEFAULT_PER_PAGE = 20;
 export const SEARCH_DEBOUNCE_MS = 300;
@@ -55,9 +54,12 @@ const TABLE_FIELD_TO_API_SORT_FIELD = Object.fromEntries(
 ) as Partial<Record<string, FindRulesSortField>>;
 
 export const RulesListPage = () => {
-  const http = useService(CoreStart('http'));
   useBreadcrumbs('rules_list');
 
+  const [
+    isCreateOptionsFlyoutOpen,
+    { on: openCreateOptionsFlyout, off: closeCreateOptionsFlyout },
+  ] = useBoolean(false);
   const [isCreateMenuOpen, { off: closeCreateMenu, toggle: toggleCreateMenu }] = useBoolean(false);
   const createMenuId = useGeneratedHtmlId({ prefix: 'createRuleMenu' });
   const { flyout, openCreateFlyout, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
@@ -127,6 +129,14 @@ export const RulesListPage = () => {
   const isInitialLoad = isLoading && rulesData === undefined;
   const hasRules = (rulesData?.total ?? 0) > 0;
   const showEmptyState = !isInitialLoad && !isError && !hasRules && !hasActiveFilters;
+  const onCreateEsqlRuleFromOptionsFlyout = () => {
+    closeCreateOptionsFlyout();
+    openCreateFlyout();
+  };
+  const onCreateWithAgentFromOptionsFlyout = () => {
+    closeCreateOptionsFlyout();
+    navigateToAgentBuilder();
+  };
 
   return (
     <div>
@@ -139,13 +149,14 @@ export const RulesListPage = () => {
             ? [
                 <EuiSplitButton
                   key="create-rule-split"
-                  color="primary"
-                  size="m"
+                  color="text"
+                  fill={false}
                   data-test-subj="createRuleSplitButton"
                 >
                   <EuiSplitButton.ActionPrimary
-                    href={http.basePath.prepend(paths.ruleCreateOptions)}
+                    onClick={openCreateOptionsFlyout}
                     data-test-subj="createRuleButton"
+                    iconType="plusInCircle"
                   >
                     <FormattedMessage
                       id="xpack.alertingV2.rulesList.createRuleButton"
@@ -174,15 +185,15 @@ export const RulesListPage = () => {
                               items: [
                                 {
                                   name: i18n.translate(
-                                    'xpack.alertingV2.rulesList.createRuleFlyoutButton',
-                                    { defaultMessage: 'Create with flyout' }
+                                    'xpack.alertingV2.rulesList.createEsqlRuleButton',
+                                    { defaultMessage: 'Create ES|QL rule' }
                                   ),
-                                  icon: 'popout',
+                                  icon: 'productDiscover',
                                   onClick: () => {
                                     closeCreateMenu();
                                     openCreateFlyout();
                                   },
-                                  'data-test-subj': 'createRuleFlyoutButton',
+                                  'data-test-subj': 'createEsqlRuleButton',
                                 },
                                 {
                                   name: i18n.translate(
@@ -284,6 +295,13 @@ export const RulesListPage = () => {
             onCloneInFlyout={openCloneFlyout}
           />
         </>
+      ) : null}
+      {isCreateOptionsFlyoutOpen ? (
+        <RuleCreateOptionsFlyout
+          onClose={closeCreateOptionsFlyout}
+          onCreateEsqlRule={onCreateEsqlRuleFromOptionsFlyout}
+          onCreateWithAgent={onCreateWithAgentFromOptionsFlyout}
+        />
       ) : null}
       {flyout}
     </div>
