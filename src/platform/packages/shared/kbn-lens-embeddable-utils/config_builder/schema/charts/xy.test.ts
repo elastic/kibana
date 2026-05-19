@@ -8,6 +8,7 @@
  */
 
 import type { z } from '@kbn/zod';
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import type { DataSourceTypeESQL } from '../data_source';
 import type { xyDataLayerSharedShape, XYConfig } from './xy';
 import { statisticsOptionsSize, statisticsSchema, xyConfigSchema } from './xy';
@@ -567,18 +568,18 @@ describe('XY', () => {
 
   describe('invalid xy charts', () => {
     it('should throw for no layers', () => {
-      expect(() =>
-        xyConfigSchema.parse({
+      expectPrettyError(
+        xyConfigSchema.safeParse({
           type: 'xy',
           title: `Faulty Chart`,
           layers: [],
         } satisfies XYConfig)
-      ).toThrow();
+      ).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('should not let mix esql data_source with dsl operations', () => {
-      expect(() =>
-        xyConfigSchema.parse({
+      expectPrettyError(
+        xyConfigSchema.safeParse({
           type: 'xy',
           title: `Faulty Chart`,
           layers: [
@@ -599,16 +600,17 @@ describe('XY', () => {
                 { operation: 'count', empty_as_null: false },
                 { operation: 'average', field: 'price' },
               ],
+
               breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
             },
           ],
         } satisfies XYConfig)
-      ).toThrow();
+      ).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('should not let esql annotations', () => {
-      expect(() =>
-        xyConfigSchema.parse({
+      expectPrettyError(
+        xyConfigSchema.safeParse({
           type: 'xy',
           title: `Faulty Chart`,
           layers: [
@@ -650,12 +652,12 @@ describe('XY', () => {
             },
           ],
         } satisfies XYConfig)
-      ).toThrow();
+      ).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('should reject mixing ES|QL and DSL layers in one chart', () => {
-      expect(() =>
-        xyConfigSchema.parse({
+      expectPrettyError(
+        xyConfigSchema.safeParse({
           type: 'xy',
           title: 'Mixed mode chart',
           layers: [
@@ -684,12 +686,12 @@ describe('XY', () => {
             },
           ],
         } as XYConfig)
-      ).toThrow();
+      ).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('should reject list legend layout for left positions', () => {
-      expect(() =>
-        xyConfigSchema.parse({
+      expectPrettyError(
+        xyConfigSchema.safeParse({
           type: 'xy',
           title: 'Invalid list legend position',
           legend: {
@@ -701,7 +703,7 @@ describe('XY', () => {
           },
           layers: [minimalLayer],
         })
-      ).toThrow();
+      ).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
   });
 

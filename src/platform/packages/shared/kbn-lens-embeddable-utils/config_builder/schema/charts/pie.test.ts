@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type { PieConfigESQL, PieConfigNoESQL } from './pie';
 import { pieConfigSchema } from './pie';
@@ -264,7 +265,10 @@ describe('Pie Schema', () => {
           metrics: [],
         };
 
-        expect(() => pieConfigSchema.parse(input)).toThrow();
+        expectPrettyError(pieConfigSchema.safeParse(input)).toMatchInlineSnapshot(`
+          "✖ Too small: expected array to have >=1 items
+            → at metrics"
+        `);
       });
 
       it('throws on empty group_by array', () => {
@@ -279,7 +283,10 @@ describe('Pie Schema', () => {
           group_by: [],
         };
 
-        expect(() => pieConfigSchema.parse(input)).toThrow();
+        expectPrettyError(pieConfigSchema.safeParse(input)).toMatchInlineSnapshot(`
+          "✖ Too small: expected array to have >=1 items
+            → at group_by"
+        `);
       });
 
       it('throws on invalid donut hole size', () => {
@@ -304,7 +311,9 @@ describe('Pie Schema', () => {
           },
         };
 
-        expect(() => pieConfigSchema.parse(input)).toThrow();
+        expectPrettyError(pieConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+          `"✖ Invalid input"`
+        );
       });
 
       it('throws on invalid label position', () => {
@@ -331,7 +340,9 @@ describe('Pie Schema', () => {
           },
         };
 
-        expect(() => pieConfigSchema.parse(input)).toThrow();
+        expectPrettyError(pieConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+          `"✖ Invalid input"`
+        );
       });
 
       describe('Grouping Validation', () => {
@@ -490,8 +501,8 @@ describe('Pie Schema', () => {
               ],
             };
 
-            expect(() => pieConfigSchema.parse(input)).toThrow(
-              /number of non-collapsed group_by dimensions must not exceed 3/i
+            expectPrettyError(pieConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+              `"✖ The number of non-collapsed group_by dimensions must not exceed 3"`
             );
           });
         });
@@ -651,8 +662,8 @@ describe('Pie Schema', () => {
               ],
             };
 
-            expect(() => pieConfigSchema.parse(input)).toThrow(
-              /the number of non-collapsed group_by dimensions must not exceed 2/i
+            expectPrettyError(pieConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+              `"✖ When multiple metrics are defined, the number of non-collapsed group_by dimensions must not exceed 2"`
             );
           });
 
@@ -699,8 +710,8 @@ describe('Pie Schema', () => {
               ],
             };
 
-            expect(() => pieConfigSchema.parse(input)).toThrow(
-              /the number of non-collapsed group_by dimensions must not exceed 2/i
+            expectPrettyError(pieConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+              `"✖ Invalid input"`
             );
           });
         });

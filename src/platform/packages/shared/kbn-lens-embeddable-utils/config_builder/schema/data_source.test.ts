@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import type { DataSourceTypeESQL, DataSourceTypeNoESQL } from './data_source';
 import { dataSourceSchema } from './data_source';
 import {
@@ -34,7 +35,10 @@ describe('DataSource Schema', () => {
         // @ts-expect-error - ignore required name for test purposes
       } satisfies DataSourceTypeNoESQL;
 
-      expect(() => dataViewSchema.parse(input)).toThrow(/ref_id/);
+      expectPrettyError(dataViewSchema.safeParse(input)).toMatchInlineSnapshot(`
+        "✖ Invalid input: expected string, received undefined
+          → at ref_id"
+      `);
     });
   });
 
@@ -77,7 +81,10 @@ describe('DataSource Schema', () => {
         // @ts-expect-error - ignore required fields for test purposes
       } satisfies DataSourceTypeNoESQL;
 
-      expect(() => dataViewSchema.parse(input)).toThrow(/index_pattern/);
+      expectPrettyError(dataViewSchema.safeParse(input)).toMatchInlineSnapshot(`
+        "✖ Invalid input: expected string, received undefined
+          → at index_pattern"
+      `);
     });
   });
 
@@ -98,7 +105,10 @@ describe('DataSource Schema', () => {
         // @ts-expect-error - ignore query prop for test purposes
       } satisfies DataSourceTypeESQL;
 
-      expect(() => esqlDataSourceSchema.parse(input)).toThrow(/query/);
+      expectPrettyError(esqlDataSourceSchema.safeParse(input)).toMatchInlineSnapshot(`
+        "✖ Invalid input: expected string, received undefined
+          → at query"
+      `);
     });
   });
 
@@ -119,7 +129,10 @@ describe('DataSource Schema', () => {
         id: 'my-data-view',
       };
 
-      expect(() => dataSourceSchema.shape.data_source.parse(input)).toThrow();
+      expectPrettyError(dataSourceSchema.shape.data_source.safeParse(input)).toMatchInlineSnapshot(`
+        "✖ Invalid discriminator value. Expected 'data_view_reference' | 'data_view_spec'
+          → at type"
+      `);
     });
   });
 

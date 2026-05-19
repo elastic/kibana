@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { monitorOptionSchema, monitorFiltersSchema } from './common_schemas';
 
 describe('Common Schemas', () => {
@@ -24,9 +25,10 @@ describe('Common Schemas', () => {
         value: 'prod',
       };
 
-      expect(() => monitorOptionSchema.parse(input)).toThrow(
-        /\[label\]: expected value of type \[string\]/
-      );
+      expectPrettyError(monitorOptionSchema.safeParse(input)).toMatchInlineSnapshot(`
+        "✖ Invalid input: expected string, received undefined
+          → at label"
+      `);
     });
 
     it('throws on missing value', () => {
@@ -34,9 +36,10 @@ describe('Common Schemas', () => {
         label: 'Production',
       };
 
-      expect(() => monitorOptionSchema.parse(input)).toThrow(
-        /\[value\]: expected value of type \[string\]/
-      );
+      expectPrettyError(monitorOptionSchema.safeParse(input)).toMatchInlineSnapshot(`
+        "✖ Invalid input: expected string, received undefined
+          → at value"
+      `);
     });
 
     it('throws on invalid label type', () => {
@@ -45,9 +48,10 @@ describe('Common Schemas', () => {
         value: 'prod',
       };
 
-      expect(() => monitorOptionSchema.parse(input)).toThrow(
-        /\[label\]: expected value of type \[string\]/
-      );
+      expectPrettyError(monitorOptionSchema.safeParse(input)).toMatchInlineSnapshot(`
+        "✖ Invalid input: expected string, received number
+          → at label"
+      `);
     });
 
     it('throws on invalid value type', () => {
@@ -56,9 +60,10 @@ describe('Common Schemas', () => {
         value: 123,
       };
 
-      expect(() => monitorOptionSchema.parse(input)).toThrow(
-        /\[value\]: expected value of type \[string\]/
-      );
+      expectPrettyError(monitorOptionSchema.safeParse(input)).toMatchInlineSnapshot(`
+        "✖ Invalid input: expected string, received number
+          → at value"
+      `);
     });
   });
 
@@ -154,9 +159,10 @@ describe('Common Schemas', () => {
         projects: [{ label: 'Project 1' }], // missing 'value'
       };
 
-      expect(() => monitorFiltersSchema.parse(input)).toThrow(
-        /\[projects.0.value\]: expected value of type \[string\]/
-      );
+      expectPrettyError(monitorFiltersSchema.safeParse(input)).toMatchInlineSnapshot(`
+        "✖ Invalid input: expected string, received undefined
+          → at projects[0].value"
+      `);
     });
 
     it('throws on invalid tags array item', () => {
@@ -164,9 +170,10 @@ describe('Common Schemas', () => {
         tags: [{ value: 'tag-1' }], // missing 'label'
       };
 
-      expect(() => monitorFiltersSchema.parse(input)).toThrow(
-        /\[tags.0.label\]: expected value of type \[string\]/
-      );
+      expectPrettyError(monitorFiltersSchema.safeParse(input)).toMatchInlineSnapshot(`
+        "✖ Invalid input: expected string, received undefined
+          → at tags[0].label"
+      `);
     });
 
     it('throws on invalid monitor_ids array item', () => {
@@ -174,9 +181,10 @@ describe('Common Schemas', () => {
         monitor_ids: [{ label: 123, value: 'monitor-a' }], // invalid label type
       };
 
-      expect(() => monitorFiltersSchema.parse(input)).toThrow(
-        /\[monitor_ids.0.label\]: expected value of type \[string\]/
-      );
+      expectPrettyError(monitorFiltersSchema.safeParse(input)).toMatchInlineSnapshot(`
+        "✖ Invalid input: expected string, received number
+          → at monitor_ids[0].label"
+      `);
     });
 
     it('throws on invalid monitor_types array item', () => {
@@ -184,9 +192,10 @@ describe('Common Schemas', () => {
         monitor_types: [{ label: 'HTTP', value: 123 }], // invalid value type
       };
 
-      expect(() => monitorFiltersSchema.parse(input)).toThrow(
-        /\[monitor_types.0.value\]: expected value of type \[string\]/
-      );
+      expectPrettyError(monitorFiltersSchema.safeParse(input)).toMatchInlineSnapshot(`
+        "✖ Invalid input: expected string, received number
+          → at monitor_types[0].value"
+      `);
     });
 
     it('throws on invalid locations array item', () => {
@@ -194,7 +203,10 @@ describe('Common Schemas', () => {
         locations: ['invalid'], // should be array of objects, not strings
       };
 
-      expect(() => monitorFiltersSchema.parse(input)).toThrow();
+      expectPrettyError(monitorFiltersSchema.safeParse(input)).toMatchInlineSnapshot(`
+        "✖ Invalid input: expected object, received string
+          → at locations[0]"
+      `);
     });
 
     it('throws on non-array projects value', () => {
@@ -202,9 +214,10 @@ describe('Common Schemas', () => {
         projects: { label: 'Project 1', value: 'project-1' }, // should be array
       };
 
-      expect(() => monitorFiltersSchema.parse(input)).toThrow(
-        /\[projects\]: expected value of type \[array\]/
-      );
+      expectPrettyError(monitorFiltersSchema.safeParse(input)).toMatchInlineSnapshot(`
+        "✖ Invalid input: expected array, received object
+          → at projects"
+      `);
     });
 
     it('validates filters with empty arrays', () => {

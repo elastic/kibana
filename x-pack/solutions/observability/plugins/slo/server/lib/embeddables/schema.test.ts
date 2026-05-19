@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { mockGetDrilldownsSchema } from '@kbn/embeddable-plugin/server/mocks';
 import { getOverviewEmbeddableSchema } from './schema';
 
@@ -47,17 +48,19 @@ describe('schema validation', () => {
         overview_mode: 'invalid-mode',
       };
 
-      expect(() => overviewEmbeddableSchema.parse(invalidState)).toThrow(
-        /expected "overview_mode" to be one of \["single", "groups"\]/
-      );
+      expectPrettyError(overviewEmbeddableSchema.safeParse(invalidState)).toMatchInlineSnapshot(`
+        "✖ Invalid discriminator value. Expected 'single' | 'groups'
+          → at overview_mode"
+      `);
     });
 
     it('should report missing overview_mode without cross-variant noise', () => {
       const missingMode = { slo_id: 'test-slo-id' };
 
-      expect(() => overviewEmbeddableSchema.parse(missingMode)).toThrow(
-        /"overview_mode" property is required/
-      );
+      expectPrettyError(overviewEmbeddableSchema.safeParse(missingMode)).toMatchInlineSnapshot(`
+        "✖ Invalid discriminator value. Expected 'single' | 'groups'
+          → at overview_mode"
+      `);
     });
   });
 
@@ -156,7 +159,10 @@ describe('schema validation', () => {
         overview_mode: 'groups' as const,
       };
 
-      expect(() => overviewEmbeddableSchema.parse(invalidState)).toThrow(/group_filters\.group_by/);
+      expectPrettyError(overviewEmbeddableSchema.safeParse(invalidState)).toMatchInlineSnapshot(`
+        "✖ Invalid input
+          → at group_filters.group_by"
+      `);
       expect(() => overviewEmbeddableSchema.parse(invalidState)).not.toThrow(/slo_id/);
     });
 
@@ -203,7 +209,11 @@ describe('schema validation', () => {
         overview_mode: 'groups' as const,
       };
 
-      expect(() => overviewEmbeddableSchema.parse(stateWithTooManyGroups)).toThrow();
+      expectPrettyError(overviewEmbeddableSchema.safeParse(stateWithTooManyGroups))
+        .toMatchInlineSnapshot(`
+        "✖ Too big: expected array to have <=100 items
+          → at group_filters.groups"
+      `);
     });
 
     it('should accept groups array at maxSize (100)', () => {
@@ -234,7 +244,11 @@ describe('schema validation', () => {
         overview_mode: 'groups' as const,
       };
 
-      expect(() => overviewEmbeddableSchema.parse(stateWithTooManyFilters)).toThrow();
+      expectPrettyError(overviewEmbeddableSchema.safeParse(stateWithTooManyFilters))
+        .toMatchInlineSnapshot(`
+        "✖ Too big: expected array to have <=500 items
+          → at group_filters.filters"
+      `);
     });
 
     it('should accept filters array at maxSize (500)', () => {

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import {
   bucketDateHistogramOperationSchema,
   bucketTermsOperationSchema,
@@ -39,11 +40,14 @@ describe('Bucket Operation Schemas', () => {
     });
 
     it('requires operation and field', () => {
-      expect(() =>
-        bucketDateHistogramOperationSchema.parse({
+      expectPrettyError(
+        bucketDateHistogramOperationSchema.safeParse({
           operation: 'date_histogram',
         })
-      ).toThrow();
+      ).toMatchInlineSnapshot(`
+        "✖ Invalid input: expected string, received undefined
+          → at field"
+      `);
     });
   });
 
@@ -201,7 +205,7 @@ describe('Bucket Operation Schemas', () => {
         },
       };
 
-      const validated = bucketTermsOperationSchema.validate(input);
+      const validated = bucketTermsOperationSchema.parse(input);
       expect(validated.rank_by).toEqual(input.rank_by);
     });
 
@@ -217,7 +221,7 @@ describe('Bucket Operation Schemas', () => {
         },
       };
 
-      const validated = bucketTermsOperationSchema.validate(input);
+      const validated = bucketTermsOperationSchema.parse(input);
       expect(validated.rank_by).toEqual(input.rank_by);
     });
 
@@ -240,7 +244,7 @@ describe('Bucket Operation Schemas', () => {
             direction: 'desc',
           },
         };
-        expect(() => bucketTermsOperationSchema.validate(input)).toThrow();
+        expect(() => bucketTermsOperationSchema.parse(input)).toThrow();
       });
     });
   });
@@ -281,21 +285,27 @@ describe('Bucket Operation Schemas', () => {
     });
 
     it('enforces granularity limits', () => {
-      expect(() =>
-        bucketHistogramOperationSchema.parse({
+      expectPrettyError(
+        bucketHistogramOperationSchema.safeParse({
           operation: 'histogram',
           field: 'price',
           granularity: 0,
         })
-      ).toThrow();
+      ).toMatchInlineSnapshot(`
+        "✖ Too small: expected number to be >=1
+          → at granularity"
+      `);
 
-      expect(() =>
-        bucketHistogramOperationSchema.parse({
+      expectPrettyError(
+        bucketHistogramOperationSchema.safeParse({
           operation: 'histogram',
           field: 'price',
           granularity: 8,
         })
-      ).toThrow();
+      ).toMatchInlineSnapshot(`
+        "✖ Too big: expected number to be <=7
+          → at granularity"
+      `);
     });
   });
 
@@ -360,12 +370,12 @@ describe('Bucket Operation Schemas', () => {
     });
 
     it('rejects invalid operation types', () => {
-      expect(() =>
-        bucketOperationDefinitionSchema.parse({
+      expectPrettyError(
+        bucketOperationDefinitionSchema.safeParse({
           operation: 'invalid_operation',
           field: 'test',
         })
-      ).toThrow();
+      ).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
   });
 });

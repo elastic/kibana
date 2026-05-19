@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { mockGetDrilldownsSchema } from '@kbn/embeddable-plugin/server/mocks';
 import { getBurnRateEmbeddableSchema } from './burn_rate_schema';
 
@@ -68,7 +69,10 @@ describe('burn rate schema validation', () => {
       duration: '1h',
     };
 
-    expect(() => burnRateSchema.parse(invalidState)).toThrow(/slo_id/);
+    expectPrettyError(burnRateSchema.safeParse(invalidState)).toMatchInlineSnapshot(`
+      "✖ Invalid input: expected string, received undefined
+        → at slo_id"
+    `);
   });
 
   it('should reject missing duration', () => {
@@ -77,7 +81,10 @@ describe('burn rate schema validation', () => {
       slo_instance_id: '*',
     };
 
-    expect(() => burnRateSchema.parse(invalidState)).toThrow(/duration/);
+    expectPrettyError(burnRateSchema.safeParse(invalidState)).toMatchInlineSnapshot(`
+      "✖ Invalid input: expected string, received undefined
+        → at duration"
+    `);
   });
 
   it('should default slo_instance_id to * when omitted', () => {

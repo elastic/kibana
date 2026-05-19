@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { mockGetDrilldownsSchema } from '@kbn/embeddable-plugin/server/mocks';
 import { getErrorBudgetEmbeddableSchema } from './error_budget_schema';
 
@@ -77,7 +78,10 @@ describe('error budget schema validation', () => {
       slo_instance_id: 'test-instance-id',
     };
 
-    expect(() => errorBudgetSchema.parse(invalidState)).toThrow(/slo_id/);
+    expectPrettyError(errorBudgetSchema.safeParse(invalidState)).toMatchInlineSnapshot(`
+      "✖ Invalid input: expected string, received undefined
+        → at slo_id"
+    `);
   });
 
   it('should default slo_instance_id to * when omitted', () => {

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type { WaffleConfigNoESQL, WaffleConfigESQL } from './waffle';
 import { waffleConfigSchema } from './waffle';
@@ -224,7 +225,10 @@ describe('Waffle Schema', () => {
         metrics: [],
       };
 
-      expect(() => waffleConfigSchema.parse(input)).toThrow();
+      expectPrettyError(waffleConfigSchema.safeParse(input)).toMatchInlineSnapshot(`
+        "✖ Too small: expected array to have >=1 items
+          → at metrics"
+      `);
     });
 
     it('throws on empty group_by array', () => {
@@ -239,7 +243,10 @@ describe('Waffle Schema', () => {
         group_by: [],
       };
 
-      expect(() => waffleConfigSchema.parse(input)).toThrow();
+      expectPrettyError(waffleConfigSchema.safeParse(input)).toMatchInlineSnapshot(`
+        "✖ Too small: expected array to have >=1 items
+          → at group_by"
+      `);
     });
 
     describe('Grouping Validation', () => {
@@ -320,8 +327,8 @@ describe('Waffle Schema', () => {
           ],
         };
 
-        expect(() => waffleConfigSchema.parse(input)).toThrow(
-          /Only a single non-collapsed dimension is allowed for group_by/i
+        expectPrettyError(waffleConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+          `"✖ Only a single non-collapsed dimension is allowed for group_by"`
         );
       });
 
@@ -367,7 +374,9 @@ describe('Waffle Schema', () => {
           ],
         };
 
-        expect(() => waffleConfigSchema.parse(input)).toThrow();
+        expectPrettyError(waffleConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+          `"✖ When multiple metrics are defined, only collapsed group_by dimensions are allowed."`
+        );
       });
 
       it('allows multiple metrics with multiple collapsed breakdowns', () => {
@@ -441,8 +450,8 @@ describe('Waffle Schema', () => {
           ],
         };
 
-        expect(() => waffleConfigSchema.parse(input)).toThrow(
-          /only collapsed group_by dimensions are allowed/i
+        expectPrettyError(waffleConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+          `"✖ Invalid input"`
         );
       });
     });

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { RUNTIME_FIELD_COMPOSITE_TYPE } from '@kbn/data-views-plugin/common';
 import { savedDataViewSpecSchema } from './schema_saved_data_view';
 
@@ -75,7 +76,10 @@ describe('savedDataViewSpecSchema', () => {
       },
     };
 
-    expect(() => savedDataViewSpecSchema.parse(input)).toThrow(/popularity|Too small|>=0/i);
+    expectPrettyError(savedDataViewSpecSchema.safeParse(input)).toMatchInlineSnapshot(`
+      "✖ Too small: expected number to be >=0
+        → at field_settings.bytes_field.popularity"
+    `);
   });
 
   it('rejects an empty field_settings key', () => {
@@ -86,8 +90,9 @@ describe('savedDataViewSpecSchema', () => {
       },
     };
 
-    expect(() => savedDataViewSpecSchema.parse(input)).toThrow(
-      /invalid_key|field_settings|""|Too small|key/i
-    );
+    expectPrettyError(savedDataViewSpecSchema.safeParse(input)).toMatchInlineSnapshot(`
+      "✖ Invalid key in record
+        → at field_settings."
+    `);
   });
 });

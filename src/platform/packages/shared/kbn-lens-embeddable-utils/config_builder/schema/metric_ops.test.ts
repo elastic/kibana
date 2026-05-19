@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../transforms/columns/utils';
 import {
   LENS_LAST_VALUE_DEFAULT_MULTI_VALUE,
@@ -73,7 +74,10 @@ describe('Metric Operations Schemas', () => {
         operation: 'formula' as const,
       };
 
-      expect(() => formulaOperationDefinitionSchema.parse(input)).toThrow();
+      expectPrettyError(formulaOperationDefinitionSchema.safeParse(input)).toMatchInlineSnapshot(`
+        "✖ Invalid input: expected string, received undefined
+          → at formula"
+      `);
     });
   });
 
@@ -336,7 +340,9 @@ describe('Metric Operations Schemas', () => {
         field: 'value',
       };
 
-      expect(() => metricOperationDefinitionSchema.parse(input)).toThrow();
+      expectPrettyError(metricOperationDefinitionSchema.safeParse(input)).toMatchInlineSnapshot(
+        `"✖ Invalid input"`
+      );
     });
   });
 });

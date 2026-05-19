@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { formatTypeSchema, formatSchema } from './format';
 
 describe('Format Schemas', () => {
@@ -112,7 +113,9 @@ describe('Format Schemas', () => {
         from: 'ms',
       };
 
-      expect(() => formatTypeSchema.parse(input)).toThrow(/Invalid input|expected string/);
+      expectPrettyError(formatTypeSchema.safeParse(input)).toMatchInlineSnapshot(
+        `"✖ Invalid input"`
+      );
     });
   });
 
@@ -132,7 +135,9 @@ describe('Format Schemas', () => {
         type: 'custom' as const,
       };
 
-      expect(() => formatTypeSchema.parse(input)).toThrow(/Invalid input|expected string/);
+      expectPrettyError(formatTypeSchema.safeParse(input)).toMatchInlineSnapshot(
+        `"✖ Invalid input"`
+      );
     });
   });
 
@@ -164,7 +169,10 @@ describe('Format Schemas', () => {
         },
       };
 
-      expect(() => formatSchema.parse(input)).toThrow();
+      expectPrettyError(formatSchema.safeParse(input)).toMatchInlineSnapshot(`
+        "✖ Invalid input
+          → at format"
+      `);
     });
   });
 

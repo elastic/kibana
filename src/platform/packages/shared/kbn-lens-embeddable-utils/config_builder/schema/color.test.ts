@@ -224,7 +224,9 @@ describe('Color Schema', () => {
           palette: 'not-a-color',
         };
 
-        expect(() => allColoringTypeSchema.parse(input)).toThrow();
+        expectPrettyError(allColoringTypeSchema.safeParse(input)).toMatchInlineSnapshot(
+          `"✖ Invalid input"`
+        );
       });
     });
   });
@@ -388,7 +390,9 @@ describe('Color Schema', () => {
           ],
         } satisfies ColorMappingCategoricalType;
 
-        expect(() => allColoringTypeSchema.parse(input)).toThrow();
+        expectPrettyError(allColoringTypeSchema.safeParse(input)).toMatchInlineSnapshot(
+          `"✖ Invalid input"`
+        );
       });
     });
   });

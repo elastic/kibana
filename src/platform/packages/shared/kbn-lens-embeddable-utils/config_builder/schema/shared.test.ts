@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { sharedPanelInfoSchema, layerSettingsSchema, collapseBySchema } from './shared';
 
 describe('Shared Schemas', () => {
@@ -73,7 +74,10 @@ describe('Shared Schemas', () => {
         sampling: -0.1,
       };
 
-      expect(() => layerSettingsSchema.parse(input)).toThrow();
+      expectPrettyError(layerSettingsSchema.safeParse(input)).toMatchInlineSnapshot(`
+        "✖ Too small: expected number to be >=0
+          → at sampling"
+      `);
     });
 
     it('throws on invalid sampling value above maximum', () => {
@@ -81,7 +85,10 @@ describe('Shared Schemas', () => {
         sampling: 1.1,
       };
 
-      expect(() => layerSettingsSchema.parse(input)).toThrow();
+      expectPrettyError(layerSettingsSchema.safeParse(input)).toMatchInlineSnapshot(`
+        "✖ Too big: expected number to be <=1
+          → at sampling"
+      `);
     });
 
     it('validates sampling edge cases', () => {
@@ -107,7 +114,9 @@ describe('Shared Schemas', () => {
     it('throws on invalid collapse by value', () => {
       const input = 'invalid';
 
-      expect(() => collapseBySchema.parse(input)).toThrow();
+      expectPrettyError(collapseBySchema.safeParse(input)).toMatchInlineSnapshot(
+        `"✖ Invalid input"`
+      );
     });
   });
 

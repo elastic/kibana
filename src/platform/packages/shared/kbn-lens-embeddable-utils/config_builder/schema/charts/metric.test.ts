@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
 import type { MetricConfig } from './metric';
@@ -164,8 +165,8 @@ describe('Metric Schema', () => {
           ],
         } satisfies MetricInput;
 
-        expect(() => metricConfigSchema.parse(input)).toThrow(
-          'When using percentage-based dynamic coloring, a breakdown dimension or max must be defined.'
+        expectPrettyError(metricConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+          `"✖ Invalid input"`
         );
       });
 
@@ -362,7 +363,9 @@ describe('Metric Schema', () => {
         ],
       } satisfies MetricInput;
 
-      expect(() => metricConfigSchema.parse(input)).toThrow();
+      expectPrettyError(metricConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+        `"✖ Invalid input"`
+      );
     });
 
     it('throws on invalid styling alignment value', () => {
@@ -386,7 +389,9 @@ describe('Metric Schema', () => {
         },
       } satisfies MetricInput;
 
-      expect(() => metricConfigSchema.parse(input)).toThrow();
+      expectPrettyError(metricConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+        `"✖ Invalid input"`
+      );
     });
 
     it('throws on invalid breakdown collapse_by value', () => {
@@ -408,7 +413,9 @@ describe('Metric Schema', () => {
         },
       } satisfies MetricInput;
 
-      expect(() => metricConfigSchema.parse(input)).toThrow();
+      expectPrettyError(metricConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+        `"✖ Invalid input"`
+      );
     });
 
     it('throws if metric type is missing', () => {
@@ -424,7 +431,9 @@ describe('Metric Schema', () => {
         ],
       } satisfies MetricInput;
 
-      expect(() => metricConfigSchema.parse(input)).toThrow();
+      expectPrettyError(metricConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+        `"✖ Invalid input"`
+      );
     });
 
     it('throws for two primary metrics', () => {
@@ -446,7 +455,9 @@ describe('Metric Schema', () => {
         ],
       } satisfies MetricInput;
 
-      expect(() => metricConfigSchema.parse(input)).toThrow();
+      expectPrettyError(metricConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+        `"✖ Invalid input"`
+      );
     });
 
     it('throws for two secondary metrics', () => {
@@ -466,7 +477,9 @@ describe('Metric Schema', () => {
         ],
       };
 
-      expect(() => metricConfigSchema.parse(input)).toThrow();
+      expectPrettyError(metricConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+        `"✖ Invalid input"`
+      );
     });
 
     it('throws if the only metric is secondary', () => {
@@ -482,7 +495,9 @@ describe('Metric Schema', () => {
         ],
       } satisfies MetricInput;
 
-      expect(() => metricConfigSchema.parse(input)).toThrow();
+      expectPrettyError(metricConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+        `"✖ Invalid input"`
+      );
     });
 
     it('throws if the icon name is invalid', () => {
@@ -506,7 +521,9 @@ describe('Metric Schema', () => {
         ],
       } satisfies MetricInput;
 
-      expect(() => metricConfigSchema.parse(input)).toThrow();
+      expectPrettyError(metricConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+        `"✖ Invalid input"`
+      );
     });
   });
 

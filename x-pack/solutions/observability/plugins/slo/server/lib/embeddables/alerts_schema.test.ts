@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { mockGetDrilldownsSchema } from '@kbn/embeddable-plugin/server/mocks';
 import { getAlertsEmbeddableSchema } from './alerts_schema';
 
@@ -68,6 +69,10 @@ describe('alerts schema validation', () => {
       slos: [{ slo_instance_id: '*' }],
     };
 
-    expect(() => alertsEmbeddableSchema.parse(invalidState)).toThrow(/slo_id/);
+    const result = alertsEmbeddableSchema.safeParse(invalidState);
+    expectPrettyError(result).toMatchInlineSnapshot(`
+      "✖ Invalid input: expected string, received undefined
+        → at slos[0].slo_id"
+    `);
   });
 });

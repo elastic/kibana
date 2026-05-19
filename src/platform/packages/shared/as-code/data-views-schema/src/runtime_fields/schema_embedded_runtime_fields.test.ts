@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { savedRuntimeFieldSchema } from './schema_saved_runtime_fields';
 
 describe('schema_embedded_runtime_fields', () => {
@@ -38,7 +39,10 @@ describe('schema_embedded_runtime_fields', () => {
           popularity: -1,
         };
 
-        expect(() => savedRuntimeFieldSchema.parse(runtimeField)).toThrow(/popularity|Too small/i);
+        expectPrettyError(savedRuntimeFieldSchema.safeParse(runtimeField)).toMatchInlineSnapshot(`
+          "✖ Too small: expected number to be >=0
+            → at popularity"
+        `);
       });
     });
 
@@ -85,9 +89,10 @@ describe('schema_embedded_runtime_fields', () => {
           },
         };
 
-        expect(() => savedRuntimeFieldSchema.parse(runtimeField)).toThrow(
-          /my_subfield|popularity|Too small|fields/i
-        );
+        expectPrettyError(savedRuntimeFieldSchema.safeParse(runtimeField)).toMatchInlineSnapshot(`
+          "✖ Too small: expected number to be >=0
+            → at fields.my_subfield.popularity"
+        `);
       });
     });
   });

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type { TreemapConfigESQL, TreemapConfigNoESQL } from './treemap';
 import { treemapConfigSchema } from './treemap';
@@ -231,7 +232,10 @@ describe('Treemap Schema', () => {
         metrics: [],
       };
 
-      expect(() => treemapConfigSchema.parse(input)).toThrow();
+      expectPrettyError(treemapConfigSchema.safeParse(input)).toMatchInlineSnapshot(`
+        "✖ Too small: expected array to have >=1 items
+          → at metrics"
+      `);
     });
 
     it('throws on empty group_by array', () => {
@@ -246,7 +250,10 @@ describe('Treemap Schema', () => {
         group_by: [],
       };
 
-      expect(() => treemapConfigSchema.parse(input)).toThrow();
+      expectPrettyError(treemapConfigSchema.safeParse(input)).toMatchInlineSnapshot(`
+        "✖ Too small: expected array to have >=1 items
+          → at group_by"
+      `);
     });
 
     describe('Grouping Validation', () => {
@@ -364,8 +371,8 @@ describe('Treemap Schema', () => {
             ],
           };
 
-          expect(() => treemapConfigSchema.parse(input)).toThrow(
-            /The number of non-collapsed group_by dimensions must not exceed 2/i
+          expectPrettyError(treemapConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+            `"✖ The number of non-collapsed group_by dimensions must not exceed 2"`
           );
         });
       });
@@ -484,8 +491,8 @@ describe('Treemap Schema', () => {
             ],
           };
 
-          expect(() => treemapConfigSchema.parse(input)).toThrow(
-            /the number of non-collapsed group_by dimensions must not exceed 1/i
+          expectPrettyError(treemapConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+            `"✖ When multiple metrics are defined, the number of non-collapsed group_by dimensions must not exceed 1"`
           );
         });
 
@@ -527,8 +534,8 @@ describe('Treemap Schema', () => {
             ],
           };
 
-          expect(() => treemapConfigSchema.parse(input)).toThrow(
-            /the number of non-collapsed group_by dimensions must not exceed 1/i
+          expectPrettyError(treemapConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+            `"✖ Invalid input"`
           );
         });
       });

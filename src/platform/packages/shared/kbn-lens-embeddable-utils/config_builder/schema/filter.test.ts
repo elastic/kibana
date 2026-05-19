@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { filterSchema, filterWithLabelSchema } from './filter';
 
 describe('Filter Schemas', () => {
@@ -37,7 +38,10 @@ describe('Filter Schemas', () => {
         expression: 'status:active',
       };
 
-      expect(() => filterSchema.parse(input)).toThrow();
+      expectPrettyError(filterSchema.safeParse(input)).toMatchInlineSnapshot(`
+        "✖ Invalid input
+          → at language"
+      `);
     });
 
     it('throws on missing expression', () => {
@@ -45,7 +49,10 @@ describe('Filter Schemas', () => {
         language: 'kql',
       };
 
-      expect(() => filterSchema.parse(input)).toThrow(/expression/);
+      expectPrettyError(filterSchema.safeParse(input)).toMatchInlineSnapshot(`
+        "✖ Invalid input: expected string, received undefined
+          → at expression"
+      `);
     });
   });
 
@@ -80,7 +87,10 @@ describe('Filter Schemas', () => {
         label: 'Active Status',
       };
 
-      expect(() => filterWithLabelSchema.parse(input)).toThrow();
+      expectPrettyError(filterWithLabelSchema.safeParse(input)).toMatchInlineSnapshot(`
+        "✖ Invalid input: expected object, received undefined
+          → at filter"
+      `);
     });
 
     it('throws on invalid filter', () => {
@@ -92,7 +102,10 @@ describe('Filter Schemas', () => {
         label: 'Active Status',
       };
 
-      expect(() => filterWithLabelSchema.parse(input)).toThrow();
+      expectPrettyError(filterWithLabelSchema.safeParse(input)).toMatchInlineSnapshot(`
+        "✖ Invalid input
+          → at filter.language"
+      `);
     });
 
     it('validates complex KQL queries', () => {

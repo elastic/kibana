@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
 import type { ColorByValueType } from '../color';
@@ -228,7 +229,9 @@ describe('Gauge Schema', () => {
       },
     } satisfies GaugeInput;
 
-    expect(() => gaugeConfigSchema.parse(input)).toThrow();
+    expectPrettyError(gaugeConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+      `"✖ Invalid input"`
+    );
   });
 
   it('throws on invalid operations as metric', () => {
@@ -257,7 +260,9 @@ describe('Gauge Schema', () => {
       },
     } satisfies GaugeInput;
 
-    expect(() => gaugeConfigSchema.parse(input)).toThrow();
+    expectPrettyError(gaugeConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+      `"✖ Invalid input"`
+    );
   });
 
   it('throws on invalid ticks value', () => {
@@ -273,7 +278,9 @@ describe('Gauge Schema', () => {
       },
     } satisfies GaugeInput;
 
-    expect(() => gaugeConfigSchema.parse(input)).toThrow();
+    expectPrettyError(gaugeConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+      `"✖ Invalid input"`
+    );
   });
 
   it('throws on reference-based operations for min, max, and goal', () => {

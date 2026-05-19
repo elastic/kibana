@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type { MosaicConfig, MosaicConfigESQL, MosaicConfigNoESQL } from './mosaic';
 import { mosaicConfigSchema } from './mosaic';
@@ -57,7 +58,9 @@ describe('Mosaic Schema', () => {
         },
       };
 
-      expect(() => mosaicConfigSchema.parse(input)).toThrow();
+      expectPrettyError(mosaicConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+        `"✖ Either a group_by or a group_breakdown_by dimension must be specified"`
+      );
     });
 
     it('validates configuration with both outer and inner grouping', () => {
@@ -182,7 +185,11 @@ describe('Mosaic Schema', () => {
         group_by: [],
       };
 
-      expect(() => mosaicConfigSchema.parse(input)).toThrow();
+      expectPrettyError(mosaicConfigSchema.safeParse(input)).toMatchInlineSnapshot(`
+        "✖ Either a group_by or a group_breakdown_by dimension must be specified
+        ✖ Too small: expected array to have >=1 items
+          → at group_by"
+      `);
     });
 
     it('throws on empty group_breakdown_by array', () => {
@@ -202,7 +209,10 @@ describe('Mosaic Schema', () => {
         group_breakdown_by: [],
       };
 
-      expect(() => mosaicConfigSchema.parse(input)).toThrow();
+      expectPrettyError(mosaicConfigSchema.safeParse(input)).toMatchInlineSnapshot(`
+        "✖ Too small: expected array to have >=1 items
+          → at group_breakdown_by"
+      `);
     });
 
     describe('Grouping Cardinality Validation', () => {
@@ -277,8 +287,8 @@ describe('Mosaic Schema', () => {
           ],
         };
 
-        expect(() => mosaicConfigSchema.parse(input)).toThrow(
-          /only a single non-collapsed dimension is allowed/i
+        expectPrettyError(mosaicConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+          `"✖ Only a single non-collapsed dimension is allowed for group_by"`
         );
       });
 
@@ -309,8 +319,8 @@ describe('Mosaic Schema', () => {
           ],
         };
 
-        expect(() => mosaicConfigSchema.parse(input)).toThrow(
-          /only a single non-collapsed dimension is allowed/i
+        expectPrettyError(mosaicConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+          `"✖ Invalid input"`
         );
       });
 
@@ -414,8 +424,8 @@ describe('Mosaic Schema', () => {
           ],
         };
 
-        expect(() => mosaicConfigSchema.parse(input)).toThrow(
-          /only a single non-collapsed dimension is allowed/i
+        expectPrettyError(mosaicConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+          `"✖ Only a single non-collapsed dimension is allowed for group_breakdown_by"`
         );
       });
 
@@ -456,8 +466,8 @@ describe('Mosaic Schema', () => {
           ],
         };
 
-        expect(() => mosaicConfigSchema.parse(input)).toThrow(
-          /only a single non-collapsed dimension is allowed/i
+        expectPrettyError(mosaicConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+          `"✖ Invalid input"`
         );
       });
 
@@ -470,8 +480,8 @@ describe('Mosaic Schema', () => {
           },
         };
 
-        expect(() => mosaicConfigSchema.parse(input)).toThrow(
-          /Either a group_by or a group_breakdown_by dimension must be specified/i
+        expectPrettyError(mosaicConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+          `"✖ Either a group_by or a group_breakdown_by dimension must be specified"`
         );
       });
 
@@ -587,8 +597,8 @@ describe('Mosaic Schema', () => {
         },
       };
 
-      expect(() => mosaicConfigSchema.parse(input)).toThrow(
-        /Either a group_by or a group_breakdown_by dimension must be specified/i
+      expectPrettyError(mosaicConfigSchema.safeParse(input)).toMatchInlineSnapshot(
+        `"✖ Either a group_by or a group_breakdown_by dimension must be specified"`
       );
     });
 
