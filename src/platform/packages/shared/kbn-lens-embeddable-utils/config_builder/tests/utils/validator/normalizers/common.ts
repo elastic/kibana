@@ -97,7 +97,7 @@ function normalizeESQLAdHocDataViews(
   const textBasedLayers = Object.values(attributes.state.datasourceStates.textBased?.layers ?? {});
   if (textBasedLayers.length === 0) return internalReferences;
 
-  // Remove legacy 'textBasedLanguages-datasource-layer-*' references — they are rebuilt below
+  // Remove 'textBasedLanguages-datasource-layer-*' references — they are rebuilt below
   const refs = internalReferences.filter(
     (r) => !r.name.startsWith('textBasedLanguages-datasource-layer-')
   );
@@ -327,7 +327,7 @@ const normalizeReferences = <T extends LensAttributes>(
           reference.name === 'indexpattern-datasource-current-indexpattern'
         );
       })
-      // legacy textBasedLanguages-* references are replaced by indexpattern-datasource-layer-* in internalReferences
+      // textBasedLanguages-* references are replaced by indexpattern-datasource-layer-* in internalReferences
       .filter((reference) => {
         return !(
           reference.type === 'index-pattern' &&
