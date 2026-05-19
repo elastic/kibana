@@ -10,11 +10,27 @@ import type {
   DatasourceStates,
   FormBasedPersistedState,
   FormBasedPrivateState,
+  GenericIndexPatternColumn,
   IndexPatternMap,
   LensDocument,
   MetricVisualizationState,
 } from '@kbn/lens-common';
 import { LENS_DATASOURCE_ID, LENS_METRIC_ID } from '@kbn/lens-common';
+
+function isFormBasedPrivateState(state: unknown): state is FormBasedPrivateState {
+  return (
+    state != null &&
+    typeof state === 'object' &&
+    'layers' in state &&
+    'currentIndexPatternId' in state
+  );
+}
+
+function isDateHistogramColumn(
+  column: GenericIndexPatternColumn | undefined
+): column is DateHistogramIndexPatternColumn {
+  return column?.operationType === 'date_histogram';
+}
 
 function getMetricTrendlineTimeColumn(
   visualizationState: MetricVisualizationState,
@@ -25,13 +41,14 @@ function getMetricTrendlineTimeColumn(
     return {};
   }
 
-  const formBasedState = datasourceStates[LENS_DATASOURCE_ID.FORM_BASED]?.state as
-    | FormBasedPrivateState
-    | undefined;
-  const trendlineLayer = formBasedState?.layers[trendlineLayerId];
-  const column = trendlineLayer?.columns[trendlineTimeAccessor] as
-    | DateHistogramIndexPatternColumn
-    | undefined;
+  const rawState = datasourceStates[LENS_DATASOURCE_ID.FORM_BASED]?.state;
+  if (!isFormBasedPrivateState(rawState)) {
+    return {};
+  }
+
+  const formBasedState = rawState;
+  const trendlineLayer = formBasedState.layers[trendlineLayerId];
+  const column = trendlineLayer?.columns[trendlineTimeAccessor];
 
   return { formBasedState, column, trendlineLayer, trendlineLayerId, trendlineTimeAccessor };
 }
@@ -50,11 +67,10 @@ export function postProcessMetricLoadedState({
 
   if (
     !formBasedState ||
-    !column ||
     !trendlineLayer ||
     !trendlineLayerId ||
     !trendlineTimeAccessor ||
-    column.operationType !== 'date_histogram' ||
+    !isDateHistogramColumn(column) ||
     column.sourceField
   ) {
     return { visualizationState, datasourceStates };
@@ -97,6 +113,10 @@ export function postProcessMetricLoadedState({
   };
 }
 
+function isFormBasedPersistedState(state: unknown): state is FormBasedPersistedState {
+  return state != null && typeof state === 'object' && 'layers' in state;
+}
+
 export function normalizeMetricDocumentForEquality(doc: LensDocument): LensDocument {
   if (doc.visualizationType !== LENS_METRIC_ID) {
     return doc;
@@ -108,14 +128,13 @@ export function normalizeMetricDocumentForEquality(doc: LensDocument): LensDocum
     return doc;
   }
 
-  const formBasedState = doc.state.datasourceStates[LENS_DATASOURCE_ID.FORM_BASED] as
-    | FormBasedPersistedState
-    | undefined;
-  const column = formBasedState?.layers[trendlineLayerId]?.columns?.[trendlineTimeAccessor] as
-    | DateHistogramIndexPatternColumn
-    | undefined;
+  const rawState = doc.state.datasourceStates[LENS_DATASOURCE_ID.FORM_BASED];
+  if (!isFormBasedPersistedState(rawState)) {
+    return doc;
+  }
 
-  if (column?.operationType !== 'date_histogram') {
+  const column = rawState.layers[trendlineLayerId]?.columns?.[trendlineTimeAccessor];
+  if (!isDateHistogramColumn(column)) {
     return doc;
   }
 
