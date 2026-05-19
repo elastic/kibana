@@ -210,6 +210,72 @@ describe('handle', () => {
     expect(log.error).not.toHaveBeenCalled();
   });
 
+  it('validates custom request validation error responses against the returned documented status', async () => {
+    const response = await handle(createRequest({ query: { foo: 'bar' } }), {
+      router,
+      handler,
+      log,
+      method: 'get',
+      isDevMode: true,
+      route: {
+        path: '/test',
+        validate: { query: schema.object({ foo: schema.number() }) },
+        onRequestValidationError: {
+          response: {
+            400: {
+              description: 'Bad request',
+              body: () => schema.object({ message: schema.string() }),
+            },
+            422: {
+              description: 'Validation failed',
+              body: () => schema.object({ code: schema.literal('validation_failed') }),
+            },
+          },
+          handler: (_error, _request, res) =>
+            res.custom({ statusCode: 422, body: { code: 'validation_failed' } }),
+        },
+      },
+      routeSchemas: RouteValidator.from({ query: schema.object({ foo: schema.number() }) }),
+    });
+
+    expect(response.status).toEqual(422);
+    expect(response.payload).toEqual({ code: 'validation_failed' });
+    expect(log.error).toHaveBeenCalledWith('422 Request Validation Error', {
+      error: { message: '[request query.foo]: expected value of type [number] but got [string]' },
+      http: { request: { method: undefined, path: undefined }, response: { status_code: 422 } },
+    });
+  });
+
+  it('does not validate custom request validation error response bodies outside dev mode', async () => {
+    const body = jest.fn(() => schema.object({ message: schema.string() }));
+
+    const response = await handle(createRequest({ query: { foo: 'bar' } }), {
+      router,
+      handler,
+      log,
+      method: 'get',
+      isDevMode: false,
+      route: {
+        path: '/test',
+        validate: { query: schema.object({ foo: schema.number() }) },
+        onRequestValidationError: {
+          response: {
+            422: {
+              description: 'Validation failed',
+              body,
+            },
+          },
+          handler: (_error, _request, res) => res.custom({ statusCode: 422, body: { message: 1 } }),
+        },
+      },
+      routeSchemas: RouteValidator.from({ query: schema.object({ foo: schema.number() }) }),
+    });
+
+    expect(response.status).toEqual(422);
+    expect(response.payload).toEqual({ message: 1 });
+    expect(body).not.toHaveBeenCalled();
+  });
+
   it('rejects undocumented custom request validation error status codes in dev mode', async () => {
     const response = await handle(createRequest({ query: { foo: 'bar' } }), {
       router,
