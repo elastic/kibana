@@ -116,9 +116,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'geo.src',
           'geo.srcdest',
         ],
-        selectedFieldNames: ['extension', 'bytes', '@message', 'agent'],
-        extensionRowIndex: 0,
-        bytesRowIndex: 1,
+        selectedFieldNames: ['@timestamp', 'extension', 'bytes', '@message', 'agent'],
+        extensionRowIndex: 1,
+        bytesRowIndex: 2,
       });
     });
   });

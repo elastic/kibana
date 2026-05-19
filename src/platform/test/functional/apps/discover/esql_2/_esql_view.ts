@@ -577,7 +577,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
 
         await retry.waitFor('first cell contains an initial value', async () => {
-          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
           const text = await cell.getVisibleText();
           return text === '1,623';
         });
@@ -591,7 +591,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
 
         await retry.waitFor('first cell contains the highest value', async () => {
-          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
           const text = await cell.getVisibleText();
           return text === '17,966';
         });
@@ -605,7 +605,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
 
         await retry.waitFor('first cell contains the same highest value', async () => {
-          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
           const text = await cell.getVisibleText();
           return text === '17,966';
         });
@@ -615,7 +615,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
 
         await retry.waitFor('first cell contains the same highest value after reload', async () => {
-          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
           const text = await cell.getVisibleText();
           return text === '17,966';
         });

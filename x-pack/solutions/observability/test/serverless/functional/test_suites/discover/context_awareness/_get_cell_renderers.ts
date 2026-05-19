@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.discover.waitUntilSearchingHasFinished();
 
-          const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
+          const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
           const logLevelBadge = await firstCell.findByTestSubject('*logLevelBadgeCell-');
           expect(await logLevelBadge.getVisibleText()).to.be('debug');
           expect(await logLevelBadge.getComputedStyle('background-color')).to.be(
@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.discover.waitUntilSearchingHasFinished();
 
           await retry.try(async () => {
-            const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
+            const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
             expect(await firstCell.getVisibleText()).to.be('debug');
             await testSubjects.missingOrFail('*logLevelBadgeCell-');
           });
@@ -107,8 +107,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.discover.waitUntilSearchingHasFinished();
 
-          const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
-          const lastCell = await dataGrid.getCellElementExcludingControlColumns(2, 0);
+          const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
+          const lastCell = await dataGrid.getCellElementExcludingControlColumns(2, 1);
           const firstServiceNameCell = await firstCell.findByTestSubject(
             'dataTableCellActionsPopover_service.name'
           );
@@ -136,7 +136,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.discover.waitUntilSearchingHasFinished();
 
           await retry.try(async () => {
-            const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
+            const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
             expect(await firstCell.getVisibleText()).to.be('product');
             await testSubjects.missingOrFail('dataTableCellActionsPopover_service.name');
           });
