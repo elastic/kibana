@@ -5,170 +5,38 @@
  * 2.0.
  */
 
-import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills/tools';
-import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
-import { createToolHandlerContext, createToolTestMocks } from '../../__mocks__/test_helpers';
-import { alertAnalysisSkill } from './alert_analysis_skill';
-import type { FindRelatedAlertsResult } from '../../../lib/alert_analysis/services/find_related_alerts';
-import { RELATED_ALERTS_INLINE_MAX_RESULTS } from '../../../lib/alert_analysis/services/find_related_alerts';
-
-jest.mock('../../../lib/alert_analysis/services/find_related_alerts');
-
-const { findRelatedAlerts } = jest.requireMock(
-  '../../../lib/alert_analysis/services/find_related_alerts'
-) as { findRelatedAlerts: jest.MockedFunction<() => Promise<FindRelatedAlertsResult>> };
-
-interface ResultData {
-  message?: string;
-  relatedAlerts?: Array<Record<string, unknown>>;
-  sourceEntities?: {
-    hostNames: string[];
-    userNames: string[];
-    sourceIps: string[];
-    destIps: string[];
-  };
-}
-
-const getData = (result: ToolHandlerStandardReturn, idx = 0): ResultData =>
-  result.results[idx].data as unknown as ResultData;
-
-const makeSuccess = (
-  overrides: Partial<FindRelatedAlertsResult> = {}
-): FindRelatedAlertsResult => ({
-  ok: true,
-  message: 'Found 0 related alerts sharing entities with alert test-alert-id.',
-  relatedAlerts: [],
-  sourceEntities: { hostNames: [], userNames: [], sourceIps: [], destIps: [] },
-  totalMatched: 0,
-  returnedCount: 0,
-  isTruncated: false,
-  ...overrides,
-});
+import { alertAnalysisSkill, WORKFLOW_EXECUTE_STEP_TOOL_ID } from './alert_analysis_skill';
+import { ALERT_ANALYSIS_GET_RELATED_ALERTS_API_PATH } from '../../../../common/api/alert_analysis/related_alerts';
+import {
+  SECURITY_ALERTS_TOOL_ID,
+  SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
+  SECURITY_LABS_SEARCH_TOOL_ID,
+} from '../../tools';
 
 describe('alertAnalysisSkill', () => {
-  describe('get-related-alerts inline tool', () => {
-    it('schema exposes alertId, timeWindowHours, and optional entity shortcut params', async () => {
-      const inlineTools = await alertAnalysisSkill.getInlineTools?.();
-      const tool = inlineTools![0] as BuiltinSkillBoundedTool;
-      const shape = (tool.schema as { shape?: Record<string, unknown> }).shape ?? {};
-      expect(Object.keys(shape)).toEqual([
-        'alertId',
-        'timeWindowHours',
-        'hostNames',
-        'userNames',
-        'sourceIps',
-        'destIps',
-      ]);
-    });
+  it('has the correct skill id', () => {
+    expect(alertAnalysisSkill.id).toBe('alert-analysis');
+  });
 
-    describe('handler', () => {
-      const { mockEsClient, mockRequest, mockLogger } = createToolTestMocks();
+  it('registers security.alerts, security_labs_search, entity_risk_score, and workflow_execute_step tools', () => {
+    const tools = alertAnalysisSkill.getRegistryTools();
+    expect(tools).toContain(SECURITY_ALERTS_TOOL_ID);
+    expect(tools).toContain(SECURITY_LABS_SEARCH_TOOL_ID);
+    expect(tools).toContain(SECURITY_ENTITY_RISK_SCORE_TOOL_ID);
+    expect(tools).toContain(WORKFLOW_EXECUTE_STEP_TOOL_ID);
+  });
 
-      let tool: BuiltinSkillBoundedTool;
+  it('does not register any inline tools (correlation goes through workflow_execute_step)', () => {
+    expect(alertAnalysisSkill.getInlineTools).toBeUndefined();
+  });
 
-      beforeEach(async () => {
-        jest.clearAllMocks();
-        const inlineTools = await alertAnalysisSkill.getInlineTools?.();
-        tool = inlineTools![0] as BuiltinSkillBoundedTool;
-      });
+  it('includes the related alerts API path in skill content', () => {
+    expect(alertAnalysisSkill.content).toContain(ALERT_ANALYSIS_GET_RELATED_ALERTS_API_PATH);
+  });
 
-      const callHandler = async (
-        params: {
-          alertId: string;
-          timeWindowHours?: number;
-          hostNames?: string[];
-          userNames?: string[];
-          sourceIps?: string[];
-          destIps?: string[];
-        },
-        spaceId = 'default'
-      ) => {
-        return tool.handler(
-          params,
-          createToolHandlerContext(mockRequest, mockEsClient, mockLogger, { spaceId })
-        ) as Promise<ToolHandlerStandardReturn>;
-      };
-
-      it('calls findRelatedAlerts with alertId, alertsIndex, timeWindowHours, and inline maxResults', async () => {
-        findRelatedAlerts.mockResolvedValueOnce(
-          makeSuccess({
-            message: 'Found 1 related alerts sharing entities with alert alert-123.',
-            relatedAlerts: [{ _id: 'rel-1', _index: '.alerts-security.alerts-default' }],
-            sourceEntities: { hostNames: ['host-1'], userNames: [], sourceIps: [], destIps: [] },
-          })
-        );
-
-        await callHandler({ alertId: 'alert-123', timeWindowHours: 48 });
-
-        expect(findRelatedAlerts).toHaveBeenCalledWith(
-          mockEsClient.asCurrentUser,
-          expect.objectContaining({
-            alertId: 'alert-123',
-            alertsIndex: '.alerts-security.alerts-default',
-            timeWindowHours: 48,
-            maxResults: RELATED_ALERTS_INLINE_MAX_RESULTS,
-          })
-        );
-      });
-
-      it('passes entity shortcut params through to findRelatedAlerts when provided', async () => {
-        findRelatedAlerts.mockResolvedValueOnce(makeSuccess());
-
-        await callHandler({ alertId: 'alert-123', hostNames: ['host-1'], userNames: ['user-1'] });
-
-        expect(findRelatedAlerts).toHaveBeenCalledWith(
-          mockEsClient.asCurrentUser,
-          expect.objectContaining({
-            hostNames: ['host-1'],
-            userNames: ['user-1'],
-          })
-        );
-      });
-
-      it('uses the correct space-scoped alerts index', async () => {
-        findRelatedAlerts.mockResolvedValueOnce(makeSuccess());
-
-        await callHandler({ alertId: 'alert-abc' }, 'prod');
-
-        expect(findRelatedAlerts).toHaveBeenCalledWith(
-          mockEsClient.asCurrentUser,
-          expect.objectContaining({
-            alertsIndex: '.alerts-security.alerts-prod',
-          })
-        );
-      });
-
-      it('returns message, sourceEntities, and relatedAlerts only — no surplus metadata', async () => {
-        findRelatedAlerts.mockResolvedValueOnce(
-          makeSuccess({
-            message: 'Found 2 related alerts sharing entities with alert alert-123.',
-            relatedAlerts: [
-              { _id: 'r1', _index: 'idx' },
-              { _id: 'r2', _index: 'idx' },
-            ],
-            sourceEntities: { hostNames: ['h1'], userNames: [], sourceIps: [], destIps: [] },
-          })
-        );
-
-        const result = await callHandler({ alertId: 'alert-123' });
-
-        expect(result.results[0].type).toBe(ToolResultType.other);
-        expect(getData(result).relatedAlerts).toHaveLength(2);
-        expect(getData(result).sourceEntities?.hostNames).toEqual(['h1']);
-        expect(getData(result)).not.toHaveProperty('totalMatched');
-        expect(getData(result)).not.toHaveProperty('returnedCount');
-        expect(getData(result)).not.toHaveProperty('isTruncated');
-      });
-
-      it('returns error result when findRelatedAlerts returns ok: false', async () => {
-        findRelatedAlerts.mockResolvedValueOnce({ ok: false, message: 'Alert not found' });
-
-        const result = await callHandler({ alertId: 'missing-alert' });
-
-        expect(result.results[0].type).toBe(ToolResultType.error);
-        expect(getData(result).message).toBe('Alert not found');
-      });
-    });
+  it('includes YAML template for workflow_execute_step in skill content', () => {
+    expect(alertAnalysisSkill.content).toContain('workflow_execute_step');
+    expect(alertAnalysisSkill.content).toContain('kibana.request');
+    expect(alertAnalysisSkill.content).toContain('alertId');
   });
 });

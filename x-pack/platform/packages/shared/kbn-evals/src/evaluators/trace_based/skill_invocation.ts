@@ -8,7 +8,7 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator } from '../../types';
-import { createTraceBasedEvaluator } from './factory';
+import { createTraceBasedEvaluator, traceIdInClause } from './factory';
 
 const VALID_SKILL_NAME = /^[a-zA-Z0-9_-]+$/;
 
@@ -32,8 +32,8 @@ export function createSkillInvocationEvaluator({
     log,
     config: {
       name: `Skill Invoked (${skillName})`,
-      buildQuery: (traceId) => `FROM traces-*
-| WHERE trace.id == "${traceId}"
+      buildQuery: (traceIds) => `FROM traces-*
+| WHERE ${traceIdInClause(traceIds)}
 | STATS
   total_spans = COUNT(*),
   total_tool_spans = COUNT(

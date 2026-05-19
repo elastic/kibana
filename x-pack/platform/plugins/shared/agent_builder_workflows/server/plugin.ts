@@ -16,6 +16,7 @@ import type {
   AgentBuilderWorkflowsPluginSetup,
   AgentBuilderWorkflowsPluginStart,
 } from './types';
+import { createSafeKibanaRequestRegistry } from './safe_kibana_request_registry';
 import { WorkflowsAiTelemetryClient } from './telemetry/workflows_ai_telemetry_client';
 import { createWorkflowSmlType } from './sml_types/workflow';
 import { registerWorkflowYamlAttachment } from './attachment_types/workflow_yaml_attachment';
@@ -60,13 +61,32 @@ export class AgentBuilderWorkflowsPlugin
 
     const aiTelemetryClient = new WorkflowsAiTelemetryClient(coreSetup.analytics, this.logger);
 
+    // Registry of `kibana.request` (method, path) pairs that solution plugins
+    // have declared read-only and safe to execute without a HITL confirmation
+    // dialog (Primitive A). Solution plugins register their paths via
+    // `AgentBuilderWorkflowsPluginSetup.registerSafeKibanaRequestPath`.
+    const safeKibanaRequestRegistry = createSafeKibanaRequestRegistry();
+
+    // Lazy accessor shared by every tool that needs the workflows-extensions
+    // registry. The plugin is declared optional, so the resolver must tolerate
+    // it being absent (unit tests, environments without the extension).
+    const getWorkflowsExtensions = async () => {
+      const [, startDeps] = await coreSetup.getStartServices();
+      return startDeps.workflowsExtensions;
+    };
+
     // Workflow tools
     registerValidateWorkflowTool(agentBuilder, api);
-    registerGetStepDefinitionsTool(agentBuilder, api);
+    registerGetStepDefinitionsTool(agentBuilder, api, getWorkflowsExtensions);
     registerGetTriggerDefinitionsTool(agentBuilder);
     registerGetConnectorsTool(agentBuilder, api);
     registerGetExamplesTool(agentBuilder);
-    registerWorkflowExecuteStepTool(agentBuilder, api);
+    registerWorkflowExecuteStepTool(
+      agentBuilder,
+      api,
+      getWorkflowsExtensions,
+      () => safeKibanaRequestRegistry.getPaths()
+    );
     registerWorkflowEditTools(agentBuilder, api, aiTelemetryClient);
 
     // Workflow attachment types
@@ -87,7 +107,11 @@ export class AgentBuilderWorkflowsPlugin
     ];
     platformTools.forEach((tool) => agentBuilder.tools.register(tool));
 
-    return {};
+    return {
+      registerSafeKibanaRequestPath: safeKibanaRequestRegistry.register.bind(
+        safeKibanaRequestRegistry
+      ),
+    };
   }
 
   start(

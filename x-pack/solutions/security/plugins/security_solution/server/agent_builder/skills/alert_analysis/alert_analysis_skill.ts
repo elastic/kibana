@@ -5,178 +5,98 @@
  * 2.0.
  */
 
-import { ToolType } from '@kbn/agent-builder-common/tools';
-import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import { z } from '@kbn/zod/v4';
 import {
   SECURITY_ALERTS_TOOL_ID,
   SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
   SECURITY_LABS_SEARCH_TOOL_ID,
 } from '../../tools';
-import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
-import {
-  findRelatedAlerts,
-  RELATED_ALERTS_INLINE_MAX_RESULTS,
-} from '../../../lib/alert_analysis/services/find_related_alerts';
+import { ALERT_ANALYSIS_GET_RELATED_ALERTS_API_PATH } from '../../../../common/api/alert_analysis/related_alerts';
 
-const getRelatedAlertsSchema = z.object({
-  alertId: z.string().describe('The _id of the alert to find related alerts for'),
-  timeWindowHours: z
-    .number()
-    .min(1)
-    .max(168)
-    .default(24)
-    .describe('Time window in hours to search for related alerts (1-168, default 24)'),
-  hostNames: z
-    .array(z.string())
-    .optional()
-    .describe(
-      'Optional: host.name values from the alert. If provided along with other entity fields, skips refetching the alert.'
-    ),
-  userNames: z
-    .array(z.string())
-    .optional()
-    .describe(
-      'Optional: user.name values from the alert. If provided along with other entity fields, skips refetching the alert.'
-    ),
-  sourceIps: z
-    .array(z.string())
-    .optional()
-    .describe(
-      'Optional: source.ip values from the alert. If provided along with other entity fields, skips refetching the alert.'
-    ),
-  destIps: z
-    .array(z.string())
-    .optional()
-    .describe(
-      'Optional: destination.ip values from the alert. If provided along with other entity fields, skips refetching the alert.'
-    ),
-});
+export const WORKFLOW_EXECUTE_STEP_TOOL_ID = 'platform.workflows.workflow_execute_step';
 
 export const alertAnalysisSkill = defineSkillType({
   id: 'alert-analysis',
   name: 'alert-analysis',
   basePath: 'skills/security/alerts',
   description:
-    'Alert triage and investigation: fetch alerts, correlate related alerts via a focused inline tool, ' +
-    'enrich with Security Labs threat intelligence, and assess entity risk to determine disposition.',
-  content: `# Alert Analysis Guide
+    'API-driven alert triage and investigation: fetch alerts, correlate related alerts through internal APIs, ' +
+    'enrich with Security Labs intelligence, and assess entity risk to determine disposition.',
+  content: `# Alert Analysis Skill
 
-## When to Use This Skill
+## When to use
 
-Use this skill when:
-- Triaging a specific security alert to determine if it is a true or false positive
-- Investigating alerts to understand their context and impact
-- Finding related alerts that share entities (hosts, users, IPs) with a known alert
-- Enriching alert data with threat intelligence from Elastic Security Labs
-- Assessing entity risk scores for hosts or users involved in alerts
+The question is about: triaging a specific alert, correlating related alerts by \`alertId\`,
+Security Labs threat intel, or entity risk signals.
 
-## Alert Analysis Process
+## Tool selection (one rule per question shape)
 
-### 1. Initial Alert Assessment
-- Fetch the alert using 'security.alerts' to retrieve core details
-- Review: severity, timestamp, rule name, description, MITRE ATT&CK technique
-- Identify key entities: users (user.name), hosts (host.name), IPs (source.ip, destination.ip), file hashes
-- Note the alert's workflow status and any existing assignments
+| Question shape | Tool |
+|---|---|
+| Correlation by \`alertId\` | \`platform.workflows.workflow_execute_step\` — see Related Alerts API below |
+| List/prioritize alerts (e.g. "high/critical last 24h") | \`security.alerts\` |
+| Security Labs intel (e.g. "Lazarus techniques") | \`security.security_labs_search\` |
+| Entity risk score (e.g. "risk score for DC01") | \`security.entity_risk_score\` |
 
-### 2. Find Related Alerts
-- Use 'security.alert-analysis.get-related-alerts' to find alerts sharing entities with the investigated alert
-- Specify the alert ID and an appropriate time window (default 24h, extend to 168h for slow attacks)
-- If you already have entity values (host.name, user.name, source.ip, destination.ip) from a previous tool call, pass them as optional parameters to skip refetching the alert
-- Review the related alerts for patterns: same rule triggering, escalating severity, or multi-stage attack chains
+Hard rules:
+- When an \`alertId\` is present, call \`workflow_execute_step\` **directly**.
+  Do NOT first call \`security.alerts\` to "fetch alert context".
+- \`security.alerts\`, \`security.security_labs_search\`, and \`security.entity_risk_score\`
+  are top-level registry tools. NEVER nest them as \`type: security.alerts\`
+  inside a workflow YAML — they are not workflow step types.
+- If \`workflow_execute_step\` returns \`"alert not found"\` or any explicit error,
+  STOP and report the error verbatim. Do NOT verify by listing all alerts.
+- When \`security.alerts\` returns results, do NOT fall back to
+  \`platform.core.search\` or \`platform.core.list_indices\` to "verify" or
+  "enrich" those results. The alert documents already include source-event
+  context. If you need richer context, re-issue a more specific
+  \`security.alerts\` query (e.g. narrow by host, time, or rule). Use
+  \`security.security_labs_search\` only for threat-intel context, not for
+  event correlation.
+- If \`security.security_labs_search\` returns an install-not-completed error
+  pointing at the GenAI Settings page, surface that link to the user as the
+  final answer; do NOT retry the tool, do NOT call other tools to compensate,
+  and do NOT fabricate threat intelligence — the install is a prerequisite
+  the user must complete first.
 
-### 3. Search Security Labs
-- Query Elastic Security Labs using 'security.security_labs_search' for:
-  - Known threat actor TTPs matching the alert's MITRE technique
-  - Malware family information if process hashes or names are available
-  - IOC context for IPs, domains, or file hashes found in the alert
+## Related Alerts API (correlation by alertId)
 
-### 4. Assess Entity Risk
-- Check entity risk scores using 'security.entity_risk_score' for involved hosts and users
-- High risk scores (>80) on involved entities increase alert priority
-- Compare current risk level with historical baseline
-- For deeper entity profiling (asset criticality, behavioral history, entity store lookups), reference the entity-analytics skill
+Use this exact \`workflow_execute_step\` call shape. The (POST, ${ALERT_ANALYSIS_GET_RELATED_ALERTS_API_PATH})
+pair is registered as read-only, so the confirmation dialog is skipped automatically.
 
-### 5. Determine Disposition
-- **True Positive** → Escalate: Create a case, attach the alert, recommend containment actions
-- **Benign True Positive** → Exception: The alert is technically correct but the activity is known-good (e.g., admin tooling)
-- **False Positive** → Tune: The rule needs adjustment to avoid this class of alerts
-- **Needs More Data** → Expand investigation: Widen time window, check additional data sources
+\`\`\`
+tool_id: platform.workflows.workflow_execute_step
+params:
+  stepName: get_related_alerts
+  confirmation_body: |
+    Correlate related alerts for \`<alert-id>\` over the last 24h (read-only API).
+  yaml: |
+    version: "1"
+    name: alert_analysis_related_alerts
+    triggers:
+      - type: manual
+    steps:
+      - name: get_related_alerts
+        type: kibana.request
+        with:
+          method: POST
+          path: ${ALERT_ANALYSIS_GET_RELATED_ALERTS_API_PATH}
+          headers:
+            elastic-api-version: "1"
+          body:
+            alertId: "<alert-id>"
+            timeWindowHours: 24
+\`\`\`
 
-### 6. Synthesize Findings
-- Compile a comprehensive analysis with supporting evidence
-- Provide clear threat assessment: severity, confidence level, affected scope
-- Recommend specific next steps based on disposition
-- Reference the entity-analytics skill for deeper entity profiling or asset criticality review
+Optional body fields: \`timeWindowHours\` (default 24, max 168),
+\`hostNames\` / \`userNames\` / \`sourceIps\` / \`destIps\` (arrays, pass when already known),
+\`maxResults\` (bounded server-side).
 
-## Tool Selection Guardrails
-- For list/prioritization questions (e.g. "high/critical alerts in last 24h"), use only 'security.alerts' unless explicit correlation by alertId is requested.
-- For Security Labs intel questions (e.g. "Lazarus Group techniques"), use only 'security.security_labs_search'.
-- For risk score questions (e.g. "risk score for host DC01"), use only 'security.entity_risk_score'.
-- For correlation requests that include an alertId, call 'security.alert-analysis.get-related-alerts' directly.
-- Do NOT use platform.core.search or workflow tools for related-alert correlation when an alertId is available.
-
-## Best Practices
-- Always start with the alert details before expanding investigation scope
-- Use entity relationships to efficiently find related security data
-- Maintain chronological context when analyzing events and alerts
-- Prioritize high-severity alerts and entities with critical asset criticality
-- Document your analysis reasoning for future reference
-- Cross-reference multiple data points before making disposition decisions`,
+The response is token-budgeted and may include truncation metadata.`,
   getRegistryTools: () => [
     SECURITY_ALERTS_TOOL_ID,
     SECURITY_LABS_SEARCH_TOOL_ID,
     SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
-  ],
-  getInlineTools: () => [
-    {
-      id: 'security.alert-analysis.get-related-alerts',
-      type: ToolType.builtin,
-      description:
-        'Find alerts that share entities (host.name, user.name, source.ip, destination.ip) with a given alert. Returns related alerts within the specified time window. Pass entity values directly if already available to skip refetching the alert.',
-      schema: getRelatedAlertsSchema,
-      handler: async (args, context) => {
-        const { alertId, timeWindowHours, hostNames, userNames, sourceIps, destIps } =
-          getRelatedAlertsSchema.parse(args);
-
-        const alertsIndex = `${DEFAULT_ALERTS_INDEX}-${context.spaceId}`;
-
-        const result = await findRelatedAlerts(context.esClient.asCurrentUser, {
-          alertId,
-          alertsIndex,
-          timeWindowHours,
-          maxResults: RELATED_ALERTS_INLINE_MAX_RESULTS,
-          hostNames,
-          userNames,
-          sourceIps,
-          destIps,
-        });
-
-        if (!result.ok) {
-          return {
-            results: [
-              {
-                type: ToolResultType.error,
-                data: { message: result.message },
-              },
-            ],
-          };
-        }
-
-        return {
-          results: [
-            {
-              type: ToolResultType.other,
-              data: {
-                message: result.message,
-                sourceEntities: result.sourceEntities,
-                relatedAlerts: result.relatedAlerts,
-              },
-            },
-          ],
-        };
-      },
-    },
+    WORKFLOW_EXECUTE_STEP_TOOL_ID,
   ],
 });

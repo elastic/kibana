@@ -8,7 +8,7 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator } from '../../types';
-import { createTraceBasedEvaluator } from './factory';
+import { createTraceBasedEvaluator, traceIdInClause } from './factory';
 
 export function createOutputTokensEvaluator({
   traceEsClient,
@@ -22,8 +22,8 @@ export function createOutputTokensEvaluator({
     log,
     config: {
       name: 'Output Tokens',
-      buildQuery: (traceId) => `FROM traces-*
-        | WHERE trace.id == "${traceId}"
+      buildQuery: (traceIds) => `FROM traces-*
+        | WHERE ${traceIdInClause(traceIds)}
         | STATS 
         output_tokens = SUM(attributes.gen_ai.usage.output_tokens)`,
       extractResult: (response) => {
@@ -49,8 +49,8 @@ export function createInputTokensEvaluator({
     log,
     config: {
       name: 'Input Tokens',
-      buildQuery: (traceId) => `FROM traces-*
-        | WHERE trace.id == "${traceId}"
+      buildQuery: (traceIds) => `FROM traces-*
+        | WHERE ${traceIdInClause(traceIds)}
         | STATS 
         input_tokens = SUM(attributes.gen_ai.usage.input_tokens)`,
       extractResult: (response) => {
@@ -76,8 +76,8 @@ export function createCachedTokensEvaluator({
     log,
     config: {
       name: 'Cached Tokens',
-      buildQuery: (traceId) => `FROM traces-*
-        | WHERE trace.id == "${traceId}"
+      buildQuery: (traceIds) => `FROM traces-*
+        | WHERE ${traceIdInClause(traceIds)}
         | STATS 
         cached_tokens = SUM(attributes.gen_ai.usage.cached_input_tokens)`,
       extractResult: (response) => {
