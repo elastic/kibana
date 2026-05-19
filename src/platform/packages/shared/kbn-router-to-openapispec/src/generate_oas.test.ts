@@ -603,6 +603,70 @@ describe('generateOpenApiDocument', () => {
       );
     });
 
+    it('fails with source context for conflicting duplicate versioned response declarations', async () => {
+      await expect(
+        generateOpenApiDocument(
+          {
+            routers: [],
+            versionedRouters: [
+              createVersionedRouter({
+                routes: [
+                  {
+                    method: 'post',
+                    path: '/versioned-conflicting-request-validation-error',
+                    isVersioned: true,
+                    options: {
+                      summary: 'versioned route',
+                      access: 'public',
+                      security: {
+                        authz: {
+                          requiredPrivileges: ['foo'],
+                        },
+                      },
+                      options: {},
+                    },
+                    handlers: [
+                      {
+                        fn: jest.fn(),
+                        options: {
+                          version: '2023-10-31',
+                          validate: {
+                            request: { body: schema.object({ value: schema.string() }) },
+                            response: {
+                              400: {
+                                description: 'Validation failed',
+                                body: () => schema.object({ routeError: schema.string() }),
+                              },
+                            },
+                          },
+                          onRequestValidationError: {
+                            response: {
+                              400: {
+                                description: 'Validation failed',
+                                body: () => schema.object({ requestError: schema.string() }),
+                              },
+                            },
+                            handler: jest.fn(),
+                          },
+                        } as never,
+                      },
+                    ],
+                  },
+                ],
+              }),
+            ],
+          },
+          {
+            title: 'test',
+            baseUrl: 'https://test.oas',
+            version: '99.99.99',
+          }
+        )
+      ).rejects.toThrow(
+        "Error generating OpenAPI for route '/versioned-conflicting-request-validation-error' using newest version '2023-10-31': Conflicting response declaration for [post /versioned-conflicting-request-validation-error] status [400] content type [application/json] from [route response validation] and [request validation error response]"
+      );
+    });
+
     it('fails with source context for ambiguous duplicate response descriptions', async () => {
       await expect(
         generateOpenApiDocument(
