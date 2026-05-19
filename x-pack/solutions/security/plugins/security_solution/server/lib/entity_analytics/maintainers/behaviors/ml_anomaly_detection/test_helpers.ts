@@ -12,6 +12,7 @@ import type { AnomalyHit, BaselineBucket } from './types';
 // ---------------------------------------------------------------------------
 
 export const makeAnomaly = (overrides: Partial<AnomalyHit> = {}): AnomalyHit => ({
+  _id: 'anomaly-hit-1',
   entityId: 'user:alice',
   jobId: 'security-job-1',
   detectorIndex: 0,

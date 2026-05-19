@@ -13,7 +13,6 @@ import { ML_AD_MAINTAINER_ID } from '@kbn/security-solution-plugin/server/lib/en
 import type { EnrichedAnomalyRecord } from '@kbn/security-solution-plugin/server/lib/entity_analytics/maintainers/behaviors/ml_anomaly_detection/types';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { EntityStoreUtils, entityMaintainerRouteHelpersFactory } from '../../utils';
-import { dataViewRouteHelpersFactory } from '../../utils/data_view';
 import {
   CAROL_EUID,
   DAVID_EUID,
@@ -59,7 +58,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
   const entityStoreUtils = EntityStoreUtils(getService);
   const maintainerRoutes = entityMaintainerRouteHelpersFactory(supertest);
-  const dataViewRoutes = dataViewRouteHelpersFactory(supertest);
   const LATEST_ALIAS = getEntitiesAlias(ENTITY_LATEST, 'default');
 
   const cleanUp = async () => {
@@ -358,7 +356,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should create a details index entry with anomaly information', async () => {
         await es.indices.refresh({ index: ML_AD_DETAILS_INDEX });
-        const response = await es.search({
+        const response = await es.search<EnrichedAnomalyRecord>({
           index: ML_AD_DETAILS_INDEX,
           query: {
             terms: {
