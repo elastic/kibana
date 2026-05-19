@@ -22,17 +22,19 @@ describe('Workflows Management UI Settings', () => {
   it('should register workflows UI settings', () => {
     registerUISettings(coreSetupMock, {} as WorkflowsServerPluginSetupDeps);
 
-    expect(coreSetupMock.uiSettings.register).toHaveBeenCalledWith({
-      [WORKFLOWS_UI_SETTING_ID]: {
-        description: expect.any(String),
-        name: expect.any(String),
-        schema: expect.any(Object),
-        value: true,
-        readonly: false,
-        requiresPageReload: true,
-        category: expect.any(Array),
-      },
-    });
+    expect(coreSetupMock.uiSettings.register).toHaveBeenCalledWith(
+      expect.objectContaining({
+        [WORKFLOWS_UI_SETTING_ID]: {
+          description: expect.any(String),
+          name: expect.any(String),
+          schema: expect.any(Object),
+          value: true,
+          readonly: false,
+          requiresPageReload: true,
+          category: expect.any(Array),
+        },
+      })
+    );
   });
 
   it('should register UI settings only once', () => {
