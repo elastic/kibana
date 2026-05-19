@@ -156,6 +156,9 @@ const ComparisonSettings = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('unifiedDataTable.comparisonSettingsPopover', {
+        defaultMessage: 'Comparison settings',
+      })}
       button={
         <div className="unifiedDataTableToolbarControlButton" css={toolbarStyles.controlButton}>
           <EuiDataGridToolbarControl
