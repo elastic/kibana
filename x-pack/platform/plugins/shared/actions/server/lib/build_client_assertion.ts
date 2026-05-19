@@ -52,12 +52,26 @@ function base64UrlEncode(data: Buffer | string): string {
 }
 
 /**
- * Normalizes a PEM string by ensuring proper line breaks.
+ * Normalizes a PEM string by re-wrapping its base64 body at 64 characters and
+ * validating that BEGIN/END markers match.
  *
- * PEM format requires base64 content wrapped at 64 characters with newlines.
- * When PEM content passes through secret storage (encrypted saved objects)
- * or is pasted from a UI text field, line breaks can be stripped or corrupted,
- * causing OpenSSL to reject the key with "DECODER routines::unsupported".
+ * Why this exists despite the UI using a fileUpload widget (which preserves
+ * newlines via FileReader.readAsText): connectors are also created by
+ * non-UI callers that have to encode the PEM into a JSON string. Common shapes
+ * that arrive in encrypted saved-object storage with newlines mangled:
+ *
+ *   - Kibana connector REST API consumers (curl, Postman) who strip newlines
+ *     to make the JSON body parse, instead of escaping them as `\n`.
+ *   - Terraform / Ansible / Pulumi configurations that pipe the PEM through
+ *     `tr -d '\n'`, `replace(..., "\n", "")`, or a secrets manager that
+ *     flattens multiline values.
+ *   - CI/CD secret stores that don't round-trip newlines cleanly when the
+ *     secret is pasted into their UI.
+ *
+ * Node's OpenSSL PEM parser rejects unwrapped base64 with
+ * "PEM routines:get_name:no start line" / "DECODER routines::unsupported".
+ * Re-wrapping here lets the connector keep working regardless of how the
+ * secret reached storage.
  */
 function normalizePem(input: string): string {
   const match = input.match(/-----BEGIN ([^-]+)-----\s*([\s\S]+?)\s*-----END ([^-]+)-----/);

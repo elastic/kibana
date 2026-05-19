@@ -129,12 +129,14 @@ describe('OAuthEntraClientCertificate', () => {
       expect(pkcs8.success).toBe(true);
     });
 
-    it('exposes textarea widget hints for PEM fields', () => {
+    it('exposes fileUpload widget hints for PEM fields', () => {
       const shape = OAuthEntraClientCertificate.schema.shape;
       const certMeta = shape.certificate.meta() ?? {};
       const keyMeta = shape.privateKey.meta() ?? {};
-      expect(certMeta.widget).toBe('textarea');
-      expect(keyMeta.widget).toBe('textarea');
+      expect(certMeta.widget).toBe('fileUpload');
+      expect(certMeta.widgetOptions).toEqual({ accept: '.pem,.crt' });
+      expect(keyMeta.widget).toBe('fileUpload');
+      expect(keyMeta.widgetOptions).toEqual({ accept: '.pem,.key' });
       expect(keyMeta.sensitive).toBe(true);
     });
 

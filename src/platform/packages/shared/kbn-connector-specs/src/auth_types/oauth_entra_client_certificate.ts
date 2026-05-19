@@ -60,7 +60,11 @@ const authSchema = lazySchema(() =>
         .refine((v) => CERTIFICATE_MARKER.test(v), {
           message: i18n.OAUTH_CERT_CERTIFICATE_INVALID_PEM_MESSAGE,
         })
-        .meta({ label: i18n.OAUTH_CERT_CERTIFICATE_LABEL, widget: 'textarea' }),
+        .meta({
+          label: i18n.OAUTH_CERT_CERTIFICATE_LABEL,
+          widget: 'fileUpload',
+          widgetOptions: { accept: '.pem,.crt' },
+        }),
       privateKey: z
         .string()
         .min(1, { message: i18n.OAUTH_CERT_PRIVATE_KEY_REQUIRED_MESSAGE })
@@ -70,7 +74,8 @@ const authSchema = lazySchema(() =>
         .meta({
           label: i18n.OAUTH_CERT_PRIVATE_KEY_LABEL,
           sensitive: true,
-          widget: 'textarea',
+          widget: 'fileUpload',
+          widgetOptions: { accept: '.pem,.key' },
         }),
       passphrase: z
         .string()
