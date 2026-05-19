@@ -77,6 +77,10 @@ export const validateUpdatedTypes: Task = (ctx, task) => {
                 to: ctx.to?.typeDefinitions[registeredType.name]!,
                 registeredType,
                 log: (msg) => (typeTask.output = msg),
+                // The serverless snapshot may still use the legacy hash format during
+                // the transition window after the schema storage format change.
+                // Allow undiffable schema changes as warnings rather than errors.
+                undiffableIsError: false,
               }),
           }));
 

@@ -32,6 +32,13 @@ interface ValidateChangesExistingTypeParams {
   to: MigrationInfoRecord;
   registeredType: SavedObjectsType;
   log: (message: string) => void;
+  /**
+   * When `true` (default), schema changes that cannot be diffed against a legacy
+   * hash baseline are treated as a fatal error.  Set to `false` when comparing
+   * against the serverless baseline, where the snapshot may still use the old hash
+   * format during the transition window; in that case a warning is emitted instead.
+   */
+  undiffableIsError?: boolean;
 }
 
 export function validateChangesExistingType({
@@ -39,6 +46,7 @@ export function validateChangesExistingType({
   to,
   registeredType,
   log,
+  undiffableIsError = true,
 }: ValidateChangesExistingTypeParams): void {
   const name = to.name;
 
@@ -82,7 +90,7 @@ export function validateChangesExistingType({
   // Validate existing model versions for structural and schema-only mutations.
   // Structural mutations always throw; schema-only mutations are classified
   // with granular diffing (breaking → throw, warnings → log).
-  validateNoStructuralModelVersionChanges(from, to, registeredType, log);
+  validateNoStructuralModelVersionChanges(from, to, registeredType, log, undiffableIsError);
 
   const newModelVersionCount = to.modelVersions.length - from.modelVersions.length;
 
