@@ -425,14 +425,13 @@ interface InternalUnifiedDataTableProps {
    **/
   visibleCellActions?: number;
   /**
-   * Maximum number of `rowAdditionalLeadingControls` rendered as standalone icon
-   * buttons before the rest collapse into the overflow menu. Defaults to 1.
+   * Total number of visible slots in the actions column, including the overflow
+   * menu button when it appears. Defaults to 2 (one inline control + one overflow menu).
    *
-   * Note: when the total number of controls is `visibleRowActions + 1` or fewer,
-   * all of them render inline (the overflow menu trigger would itself consume
-   * one slot, so collapsing a single extra control saves nothing).
+   * When the total number of controls is `visibleRowLeadingControls` or fewer,
+   * all render inline with no overflow menu.
    */
-  visibleRowActions?: number;
+  visibleRowLeadingControls?: number;
   /**
    * Disable cell actions for the table.
    */
@@ -531,7 +530,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       onUpdateHeaderRowHeight,
       controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
       rowAdditionalLeadingControls,
-      visibleRowActions,
+      visibleRowLeadingControls,
       dataView,
       loadingState,
       onFilter,
@@ -1129,7 +1128,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         baseColumns: leadColumnsExtraContent,
         rowAdditionalLeadingControls,
         externalControlColumns,
-        visibleRowActions,
+        visibleRowLeadingControls,
       });
       if (actionsColumn) {
         filteredLeadColumns.push(actionsColumn);
@@ -1143,7 +1142,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       externalControlColumns,
       getRowIndicator,
       rowAdditionalLeadingControls,
-      visibleRowActions,
+      visibleRowLeadingControls,
     ]);
 
     const additionalControls = useMemo(() => {

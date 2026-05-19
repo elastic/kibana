@@ -33,6 +33,40 @@ const getHorizontalPadding = (node: HTMLElement | null): number => {
   return left + right;
 };
 
+interface ActionsHeaderGhostTextProps {
+  actionsText: string;
+  ghostRef: React.MutableRefObject<HTMLSpanElement | null>;
+  resizeRef: (el: HTMLElement | null) => void;
+}
+
+const ActionsHeaderGhostText = ({
+  actionsText,
+  ghostRef,
+  resizeRef,
+}: ActionsHeaderGhostTextProps) => {
+  const setRefs = useCallback(
+    (element: HTMLSpanElement | null) => {
+      ghostRef.current = element;
+      resizeRef(element);
+    },
+    [ghostRef, resizeRef]
+  );
+
+  return (
+    <span
+      ref={setRefs}
+      css={css`
+        position: absolute;
+        visibility: hidden;
+        white-space: nowrap;
+        pointer-events: none;
+      `}
+    >
+      {actionsText}
+    </span>
+  );
+};
+
 export const ActionsHeader = ({ maxWidth }: ActionsHeaderProps) => {
   const [showText, setShowText] = useState(false);
   const ghostRef = useRef<HTMLSpanElement | null>(null);
@@ -70,20 +104,11 @@ export const ActionsHeader = ({ maxWidth }: ActionsHeaderProps) => {
       )}
       <EuiResizeObserver onResize={measure}>
         {(resizeRef) => (
-          <span
-            ref={(el) => {
-              ghostRef.current = el;
-              (resizeRef as (node: HTMLElement | null) => void)(el);
-            }}
-            css={css`
-              position: absolute;
-              visibility: hidden;
-              white-space: nowrap;
-              pointer-events: none;
-            `}
-          >
-            {actionsText}
-          </span>
+          <ActionsHeaderGhostText
+            actionsText={actionsText}
+            ghostRef={ghostRef}
+            resizeRef={resizeRef}
+          />
         )}
       </EuiResizeObserver>
     </ColumnHeaderTruncateContainer>

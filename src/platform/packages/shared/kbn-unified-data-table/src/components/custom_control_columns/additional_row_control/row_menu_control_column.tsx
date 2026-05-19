@@ -25,9 +25,12 @@ import { useControlColumn } from '../../../hooks/use_control_column';
  */
 export const RowMenuControlCell = ({
   rowControlColumns,
+  startIndex = 0,
   ...props
 }: EuiDataGridCellValueElementProps & {
   rowControlColumns: RowControlColumn[];
+  /** When set, filters by `isAvailable` per-row and slices from this index. */
+  startIndex?: number;
 }) => {
   const { record, rowIndex } = useControlColumn(props);
   const [isMoreActionsPopoverOpen, setIsMoreActionsPopoverOpen] = useState<boolean>(false);
@@ -59,18 +62,23 @@ export const RowMenuControlCell = ({
     [record, rowIndex]
   );
 
-  const popoverMenuItems = useMemo(
-    () =>
-      rowControlColumns.map((rowControlColumn) => {
-        const Control = getControlComponent(rowControlColumn.id);
-        return (
-          <Fragment key={rowControlColumn.id}>
-            {record ? rowControlColumn.render(Control, { record, rowIndex }) : null}
-          </Fragment>
-        );
-      }),
-    [rowControlColumns, getControlComponent, record, rowIndex]
-  );
+  const popoverMenuItems = useMemo(() => {
+    const rowProps = record ? { record, rowIndex } : null;
+    const visibleColumns = rowControlColumns
+      .filter((col) => !rowProps || (col.isAvailable?.(rowProps) ?? true))
+      .slice(startIndex);
+
+    return visibleColumns.map((rowControlColumn) => {
+      const Control = getControlComponent(rowControlColumn.id);
+      return (
+        <Fragment key={rowControlColumn.id}>
+          {rowProps ? rowControlColumn.render(Control, rowProps) : null}
+        </Fragment>
+      );
+    });
+  }, [rowControlColumns, startIndex, getControlComponent, record, rowIndex]);
+
+  if (!popoverMenuItems.length) return null;
 
   return (
     <EuiPopover
@@ -101,8 +109,17 @@ export const RowMenuControlCell = ({
   );
 };
 
-export const getRowMenuControlColumn = (rowControlColumns: RowControlColumn[]) => {
+export const getRowMenuControlColumn = (
+  rowControlColumns: RowControlColumn[],
+  startIndex?: number
+) => {
   return (props: EuiDataGridCellValueElementProps) => {
-    return <RowMenuControlCell {...props} rowControlColumns={rowControlColumns} />;
+    return (
+      <RowMenuControlCell
+        {...props}
+        rowControlColumns={rowControlColumns}
+        startIndex={startIndex}
+      />
+    );
   };
 };

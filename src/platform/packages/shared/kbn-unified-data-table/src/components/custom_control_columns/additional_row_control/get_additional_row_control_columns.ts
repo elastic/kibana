@@ -10,41 +10,45 @@
 import type { RowControlColumn } from '@kbn/discover-utils';
 import type { RenderCellValue } from '@elastic/eui';
 import { DEFAULT_CONTROL_COLUMN_WIDTH } from '../../../constants';
-import { getRowControlColumn } from './row_control_column';
+import { getCompatibleSlotRenderers } from './row_control_column';
 import { getRowMenuControlColumn } from './row_menu_control_column';
 
-export const DEFAULT_VISIBLE_ROW_ACTIONS = 1;
+export const DEFAULT_VISIBLE_ROW_LEADING_CONTROLS = 2;
 
 export const getAdditionalRowControlColumns = (
   rowControlColumns: RowControlColumn[],
-  visibleRowActions: number = DEFAULT_VISIBLE_ROW_ACTIONS
+  visibleRowLeadingControls: number = DEFAULT_VISIBLE_ROW_LEADING_CONTROLS
 ): {
   totalWidth: number;
   columns: RenderCellValue[];
 } => {
-  const visible = Math.max(1, visibleRowActions);
+  // Minimum 2: at least one inline control plus the overflow menu slot.
+  const totalVisible = Math.max(2, visibleRowLeadingControls);
   const n = rowControlColumns.length;
 
-  // Render all inline when there's at most one extra control beyond the visible
-  // budget — collapsing would only save a single slot, which the menu trigger
-  // itself would consume.
-  if (n <= visible + 1) {
-    const totalWidth = rowControlColumns.reduce(
-      (acc, column) => acc + (column.width ?? DEFAULT_CONTROL_COLUMN_WIDTH),
-      0
-    );
-    return { columns: rowControlColumns.map(getRowControlColumn), totalWidth };
+  if (n === 0) return { columns: [], totalWidth: 0 };
+
+  // Each inline slot picks the Kth available action per-row (after isAvailable filtering),
+  // so the visible count reflects truly compatible actions rather than positional gaps.
+  const allInline = n <= totalVisible;
+  const numInlineSlots = allInline ? n : totalVisible - 1;
+
+  const inlineColumns = getCompatibleSlotRenderers(rowControlColumns, numInlineSlots);
+
+  // Width is computed from the static action list as a best-effort estimate;
+  // per-row filtering may leave some slots empty but the column width stays fixed.
+  const inlineWidth = rowControlColumns
+    .slice(0, numInlineSlots)
+    .reduce((acc, col) => acc + (col.width ?? DEFAULT_CONTROL_COLUMN_WIDTH), 0);
+
+  if (allInline) {
+    return { columns: inlineColumns, totalWidth: inlineWidth };
   }
 
-  const inlineControls = rowControlColumns.slice(0, visible);
-  const menuControls = rowControlColumns.slice(visible);
-  const inlineWidth = inlineControls.reduce(
-    (acc, column) => acc + (column.width ?? DEFAULT_CONTROL_COLUMN_WIDTH),
-    0
-  );
-
+  // Pass the full list + startIndex so the menu filters by isAvailable per-row
+  // and only shows actions that didn't fit in the inline slots.
   return {
-    columns: [...inlineControls.map(getRowControlColumn), getRowMenuControlColumn(menuControls)],
+    columns: [...inlineColumns, getRowMenuControlColumn(rowControlColumns, numInlineSlots)],
     totalWidth: inlineWidth + DEFAULT_CONTROL_COLUMN_WIDTH,
   };
 };

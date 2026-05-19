@@ -27,7 +27,7 @@ import {
   type CustomGridColumnsConfiguration,
   type UnifiedDataTableSettings,
 } from '@kbn/unified-data-table';
-import type { RowControlColumn } from '@kbn/discover-utils';
+import type { RowControlColumn, RowControlRowProps } from '@kbn/discover-utils';
 import { css } from '@emotion/react';
 import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -207,9 +207,10 @@ export const AlertEpisodesListPage = () => {
     () =>
       episodeActions.map((action) => ({
         id: action.id,
+        isAvailable: ({ record }: RowControlRowProps) =>
+          action.isCompatible({ episodes: [dataTableRecordToEpisode(record)] }),
         render: (Control, { record }) => {
           const episodes = [dataTableRecordToEpisode(record)];
-          if (!action.isCompatible({ episodes })) return <></>;
           return (
             <Control
               iconType={action.iconType}
@@ -343,7 +344,7 @@ export const AlertEpisodesListPage = () => {
                 configRowHeight={rowHeight}
                 customBulkActions={customBulkActions}
                 rowAdditionalLeadingControls={rowAdditionalLeadingControls}
-                visibleRowActions={2}
+                visibleRowLeadingControls={3}
                 enableComparisonMode={false}
                 services={services}
               />

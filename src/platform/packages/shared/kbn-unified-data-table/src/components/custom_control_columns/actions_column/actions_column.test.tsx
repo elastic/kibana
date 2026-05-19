@@ -345,8 +345,8 @@ describe('getActionsColumn', () => {
     }
   );
 
-  describe('visibleRowActions forwarding', () => {
-    it('forwards visibleRowActions so 3 controls render inline when v=2', async () => {
+  describe('visibleRowLeadingControls forwarding', () => {
+    it('forwards visibleRowLeadingControls so 3 controls render inline when totalVisible=3', async () => {
       const rowAdditionalLeadingControls: RowControlColumn[] = [
         {
           id: 'a',
@@ -372,7 +372,7 @@ describe('getActionsColumn', () => {
         baseColumns: [],
         rowAdditionalLeadingControls,
         externalControlColumns: [],
-        visibleRowActions: 2,
+        visibleRowLeadingControls: 3,
       });
 
       render(

@@ -16,8 +16,8 @@ import { dataTableContextComplexMock } from '../../../../__mocks__/table_context
 import { userEvent } from '@testing-library/user-event';
 import type { RowControlColumn, RowControlComponent } from '@kbn/discover-utils';
 
-const setup = (rowControlColumns: RowControlColumn[], visibleRowActions?: number) => {
-  const { columns } = getAdditionalRowControlColumns(rowControlColumns, visibleRowActions);
+const setup = (rowControlColumns: RowControlColumn[], visibleRowLeadingControls?: number) => {
+  const { columns } = getAdditionalRowControlColumns(rowControlColumns, visibleRowLeadingControls);
 
   render(
     <UnifiedDataTableContext.Provider value={dataTableContextComplexMock}>
@@ -115,15 +115,15 @@ describe('getAdditionalRowControlColumns', () => {
     expect(totalWidth).toBe(74); // 50 (first control) + 24 (menu button default width)
   });
 
-  describe('with visibleRowActions = 2', () => {
-    it('renders 3 controls inline (n <= v + 1)', () => {
+  describe('with visibleRowLeadingControls = 3', () => {
+    it('renders 3 controls inline (n <= totalVisible)', () => {
       const mocks = [
         mockRowAdditionalLeadingControls[0],
         mockRowAdditionalLeadingControls[1],
         mockRowAdditionalLeadingControls[2],
       ];
 
-      setup(mocks, 2);
+      setup(mocks, 3);
 
       expect(screen.getByTestId(mocks[0].id)).toBeVisible();
       expect(screen.getByTestId(mocks[1].id)).toBeVisible();
@@ -133,7 +133,7 @@ describe('getAdditionalRowControlColumns', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('renders 2 inline + menu when n > v + 1', async () => {
+    it('renders 2 inline + menu when n > totalVisible', async () => {
       const user = userEvent.setup();
       const fourthMock: RowControlColumn = {
         id: 'exampleRowControl-fourth',
@@ -153,7 +153,7 @@ describe('getAdditionalRowControlColumns', () => {
         fourthMock,
       ];
 
-      setup(mocks, 2);
+      setup(mocks, 3);
 
       expect(screen.getByTestId(mocks[0].id)).toBeVisible();
       expect(screen.getByTestId(mocks[1].id)).toBeVisible();
@@ -165,7 +165,7 @@ describe('getAdditionalRowControlColumns', () => {
       });
     });
 
-    it('calculates totalWidth for the collapsed branch (n > v + 1)', () => {
+    it('calculates totalWidth for the collapsed branch (n > totalVisible)', () => {
       const mocks = [
         { ...mockRowAdditionalLeadingControls[0], width: 50 },
         { ...mockRowAdditionalLeadingControls[1], width: 30 },
@@ -178,14 +178,14 @@ describe('getAdditionalRowControlColumns', () => {
         },
       ];
 
-      const { totalWidth } = getAdditionalRowControlColumns(mocks, 2);
+      const { totalWidth } = getAdditionalRowControlColumns(mocks, 3);
 
       // 50 + 30 (first two visible) + 24 (menu)
       expect(totalWidth).toBe(104);
     });
   });
 
-  it('clamps visibleRowActions <= 0 to 1', () => {
+  it('clamps visibleRowLeadingControls <= 1 to 2', () => {
     const mocks = [
       mockRowAdditionalLeadingControls[0],
       mockRowAdditionalLeadingControls[1],
@@ -194,7 +194,7 @@ describe('getAdditionalRowControlColumns', () => {
 
     const { columns } = getAdditionalRowControlColumns(mocks, 0);
 
-    // With v clamped to 1 and n=3 (n > v+1=2), expect 1 inline + 1 menu = 2 columns
+    // With totalVisible clamped to 2 and n=3 (n > 2), expect 1 inline + 1 menu = 2 columns
     expect(columns).toHaveLength(2);
   });
 });

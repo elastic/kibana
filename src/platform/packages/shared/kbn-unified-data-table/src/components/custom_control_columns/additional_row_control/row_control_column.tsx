@@ -10,7 +10,7 @@
 import React, { useMemo } from 'react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import type { RowControlColumn, RowControlProps } from '@kbn/discover-utils';
+import type { DataTableRecord, RowControlColumn, RowControlProps } from '@kbn/discover-utils';
 import { useControlColumn } from '../../../hooks/use_control_column';
 
 export const RowControlCell = ({
@@ -75,4 +75,36 @@ export const getRowControlColumn = (rowControlColumn: RowControlColumn) => {
   return (props: EuiDataGridCellValueElementProps) => {
     return <RowControlCell {...props} rowControlColumn={rowControlColumn} />;
   };
+};
+
+/**
+ * Creates all inline slot `RenderCellValue`s at once, sharing a per-setup WeakMap cache
+ * so `isAvailable` filtering runs once per row across all slots instead of once per slot.
+ * The WeakMap key is the record object reference, so entries are GC'd when records change.
+ */
+export const getCompatibleSlotRenderers = (
+  rowControlColumns: RowControlColumn[],
+  numSlots: number
+): Array<(props: EuiDataGridCellValueElementProps) => React.ReactElement | null> => {
+  const cache = new WeakMap<DataTableRecord, RowControlColumn[]>();
+
+  return Array.from({ length: numSlots }, (_, slotIndex) => {
+    const CompatibleSlotCell = (props: EuiDataGridCellValueElementProps) => {
+      const { record, rowIndex } = useControlColumn(props);
+      if (!record) return null;
+
+      let availableRowControls = cache.get(record);
+      if (!availableRowControls) {
+        const rowProps = { record, rowIndex };
+        availableRowControls = rowControlColumns.filter(
+          (col) => col.isAvailable?.(rowProps) ?? true
+        );
+        cache.set(record, availableRowControls);
+      }
+
+      const column = availableRowControls[slotIndex];
+      return column ? <RowControlCell {...props} rowControlColumn={column} /> : null;
+    };
+    return CompatibleSlotCell;
+  });
 };
