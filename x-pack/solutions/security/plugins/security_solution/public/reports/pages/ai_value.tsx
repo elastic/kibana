@@ -129,13 +129,17 @@ const BaseComponent = () => {
         <HeaderPage
           title={i18n.AI_VALUE_DASHBOARD}
           rightSideItems={[
-            exportButton,
-            <SuperDatePicker
-              id={InputsModelId.valueReport}
-              showUpdateButton="iconOnly"
-              width="auto"
-              compressed
-            />,
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <SuperDatePicker
+                  id={InputsModelId.valueReport}
+                  showUpdateButton="iconOnly"
+                  width="auto"
+                  compressed
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{exportButton}</EuiFlexItem>
+            </EuiFlexGroup>,
           ]}
         />
       )}

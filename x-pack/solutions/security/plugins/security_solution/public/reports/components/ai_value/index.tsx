@@ -125,7 +125,7 @@ export const AIValueReport: React.FC<Props> = (props) => {
         />
         <EuiSpacer size="l" />
         <EuiPanel hasBorder={true} borderRadius="m" color="transparent" paddingSize="l">
-          <EuiFlexGroup>
+          <EuiFlexGroup responsive={false} alignItems="center" justifyContent="spaceBetween">
             <EuiFlexItem>
               <EuiTitle
                 size="s"
