@@ -426,8 +426,24 @@ describe('SloOverviewFlyout', () => {
     });
   });
 
-  it('renders the expand button with maximize icon by default and switches to minimize when expanded', async () => {
+  it('toggles the expand button between maximize and minimize when clicked', async () => {
     const mockSlos = [createMockSlo({ id: 'slo-1', name: 'Test SLO', instanceId: '*' })];
+    const getSLODetailsFlyoutMock = jest.fn(() => null);
+
+    mockUseKibana.mockReturnValue({
+      services: {
+        uiSettings: { get: jest.fn().mockReturnValue('0.00%') },
+        slo: { getSLODetailsFlyout: getSLODetailsFlyoutMock },
+        share: {
+          url: {
+            locators: {
+              get: jest.fn().mockReturnValue({ getRedirectUrl: mockGetRedirectUrl }),
+            },
+          },
+        },
+        telemetry: mockTelemetryClient,
+      },
+    });
 
     mockUseFetcher.mockReturnValue({
       data: {
@@ -447,6 +463,7 @@ describe('SloOverviewFlyout', () => {
     const expandButton = screen.getByTestId('apmSloExpandButton');
     expect(expandButton).toBeInTheDocument();
     expect(expandButton).toHaveAttribute('aria-label', 'Open SLO details');
+    expect(getSLODetailsFlyoutMock).not.toHaveBeenCalled();
 
     fireEvent.click(expandButton);
 
@@ -454,6 +471,16 @@ describe('SloOverviewFlyout', () => {
       expect(screen.getByTestId('apmSloExpandButton')).toHaveAttribute(
         'aria-label',
         'Close SLO details'
+      );
+    });
+    expect(getSLODetailsFlyoutMock).toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTestId('apmSloExpandButton'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('apmSloExpandButton')).toHaveAttribute(
+        'aria-label',
+        'Open SLO details'
       );
     });
   });
