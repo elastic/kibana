@@ -44,6 +44,7 @@ import { State } from './state_management/state';
 import type { StreamsStorageClient } from './storage/streams_storage_client';
 import { checkAccess, checkAccessBulk } from './stream_crud';
 import { upsertDataStream } from './data_streams/manage_data_streams';
+import { shouldExcludeFromStreamsList } from './data_streams/should_exclude_from_streams_list';
 import type { FeatureClient } from './feature';
 
 interface AcknowledgeResponse<TResult extends Result> {
@@ -945,19 +946,21 @@ export class StreamsClient {
 
     const now = new Date().toISOString();
 
-    return response.data_streams.map((dataStream) => ({
-      type: 'classic' as const,
-      name: dataStream.name,
-      description: '',
-      updated_at: now,
-      ingest: {
-        lifecycle: { inherit: {} },
-        processing: { steps: [], updated_at: now },
-        settings: {},
-        classic: {},
-        failure_store: { inherit: {} },
-      },
-    }));
+    return response.data_streams
+      .filter((dataStream) => !shouldExcludeFromStreamsList(dataStream))
+      .map((dataStream) => ({
+        type: 'classic' as const,
+        name: dataStream.name,
+        description: '',
+        updated_at: now,
+        ingest: {
+          lifecycle: { inherit: {} },
+          processing: { steps: [], updated_at: now },
+          settings: {},
+          classic: {},
+          failure_store: { inherit: {} },
+        },
+      }));
   }
 
   /**
