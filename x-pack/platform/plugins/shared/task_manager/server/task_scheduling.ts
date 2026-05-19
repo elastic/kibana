@@ -148,15 +148,20 @@ export class TaskScheduling {
         ? agent.currentTraceparent
         : '';
     const modifiedTasks = await Promise.all(
-      taskInstances.map(async (taskInstance) => {
+      taskInstances.map(async (taskInstance, i) => {
         const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
           ...omit(options, 'apiKey', 'request'),
           taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
         });
+        const enabled = modifiedTask.enabled ?? true;
+        // Run the first task now. Run all other tasks a random number of ms in the future,
+        // with a maximum of 5 minutes or the task interval, whichever is smaller.
+        const runAt = enabled && i > 0 ? addJitter(modifiedTask.schedule?.interval) ?? {} : {};
         return {
           ...modifiedTask,
           traceparent: traceparent || '',
-          enabled: modifiedTask.enabled ?? true,
+          enabled,
+          ...runAt,
         };
       })
     );
@@ -200,11 +205,9 @@ export class TaskScheduling {
         if (runSoon) {
           // Run the first task now. Run all other tasks a random number of ms in the future,
           // with a maximum of 5 minutes or the task interval, whichever is smaller.
-          const taskToRun =
-            i === 0
-              ? { ...task, runAt: new Date(), scheduledAt: new Date() }
-              : randomlyOffsetRunTimestamp(task);
-          return { ...taskToRun, enabled: true };
+          return i === 0
+            ? { ...task, enabled: true, runAt: new Date(), scheduledAt: new Date() }
+            : { ...task, enabled: true, ...addJitter(task.schedule?.interval ?? '0s') };
         }
         return { ...task, enabled: true };
       },
@@ -375,17 +378,15 @@ export class TaskScheduling {
   }
 }
 
-const randomlyOffsetRunTimestamp: (task: ConcreteTaskInstance) => ConcreteTaskInstance = (task) => {
+const addJitter = (interval?: string): { runAt: Date; scheduledAt: Date } | undefined => {
+  if (!interval) return undefined;
+
   const now = Date.now();
   const maximumOffsetTimestamp = now + 1000 * 60 * 5; // now + 5 minutes
-  const taskIntervalInMs = parseIntervalAsMillisecond(task.schedule?.interval ?? '0s');
+  const taskIntervalInMs = parseIntervalAsMillisecond(interval);
   const maximumRunAt = Math.min(now + taskIntervalInMs, maximumOffsetTimestamp);
 
   // Offset between 1 and maximumRunAt ms
   const runAt = new Date(now + Math.floor(Math.random() * (maximumRunAt - now) + 1));
-  return {
-    ...task,
-    runAt,
-    scheduledAt: runAt,
-  };
+  return { runAt, scheduledAt: runAt };
 };

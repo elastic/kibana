@@ -1379,6 +1379,120 @@ describe('TaskScheduling', () => {
       );
     });
 
+    test('leaves the first task untouched and jitters subsequent recurring tasks within min(interval, 5m)', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const task0 = {
+        taskType: 'foo',
+        params: {},
+        state: {},
+        schedule: { interval: '1m' },
+      };
+      const task1 = {
+        taskType: 'foo',
+        params: {},
+        state: {},
+        schedule: { interval: '1m' },
+      };
+      const task2 = {
+        taskType: 'foo',
+        params: {},
+        state: {},
+        schedule: { interval: '1h' },
+      };
+      await taskScheduling.bulkSchedule([task0, task1, task2]);
+
+      const bulkSchedulePayload = mockTaskStore.bulkSchedule.mock.calls[0][0];
+
+      expect(bulkSchedulePayload.length).toBe(3);
+
+      expect(bulkSchedulePayload[0]).toEqual({
+        ...task0,
+        id: undefined,
+        traceparent: 'parent',
+        enabled: true,
+      });
+
+      expect(omit(bulkSchedulePayload[1], 'runAt', 'scheduledAt')).toEqual({
+        ...task1,
+        id: undefined,
+        traceparent: 'parent',
+        enabled: true,
+      });
+      expect(omit(bulkSchedulePayload[2], 'runAt', 'scheduledAt')).toEqual({
+        ...task2,
+        id: undefined,
+        traceparent: 'parent',
+        enabled: true,
+      });
+
+      const t1RunAt = bulkSchedulePayload[1].runAt!.getTime();
+      expect(bulkSchedulePayload[1].scheduledAt!.getTime()).toBe(t1RunAt);
+      expect(t1RunAt).toBeGreaterThanOrEqual(1);
+      expect(t1RunAt).toBeLessThanOrEqual(60 * 1000);
+
+      const t2RunAt = bulkSchedulePayload[2].runAt!.getTime();
+      expect(bulkSchedulePayload[2].scheduledAt!.getTime()).toBe(t2RunAt);
+      expect(t2RunAt).toBeGreaterThanOrEqual(1);
+      expect(t2RunAt).toBeLessThanOrEqual(5 * 60 * 1000);
+    });
+
+    test('does not jitter ad-hoc tasks at i > 0', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const recurringTask = {
+        taskType: 'foo',
+        params: {},
+        state: {},
+        schedule: { interval: '1m' },
+      };
+      const adHocTask = {
+        taskType: 'foo',
+        params: {},
+        state: {},
+      };
+      await taskScheduling.bulkSchedule([recurringTask, adHocTask]);
+
+      const bulkSchedulePayload = mockTaskStore.bulkSchedule.mock.calls[0][0];
+
+      expect(bulkSchedulePayload).toEqual([
+        {
+          ...recurringTask,
+          id: undefined,
+          traceparent: 'parent',
+          enabled: true,
+        },
+        {
+          ...adHocTask,
+          id: undefined,
+          schedule: undefined,
+          traceparent: 'parent',
+          enabled: true,
+        },
+      ]);
+    });
+
+    test('does not jitter disabled tasks even if they have an interval schedule', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const task = {
+        taskType: 'foo',
+        params: {},
+        state: {},
+        schedule: { interval: '1h' },
+        enabled: false,
+      };
+      await taskScheduling.bulkSchedule([task]);
+
+      const bulkSchedulePayload = mockTaskStore.bulkSchedule.mock.calls[0][0];
+
+      expect(bulkSchedulePayload).toEqual([
+        {
+          ...task,
+          id: undefined,
+          traceparent: 'parent',
+          enabled: false,
+        },
+      ]);
+    });
+
     test('doesnt allow naively rescheduling existing tasks that have already been scheduled', async () => {
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
       mockTaskStore.bulkSchedule.mockRejectedValueOnce({
