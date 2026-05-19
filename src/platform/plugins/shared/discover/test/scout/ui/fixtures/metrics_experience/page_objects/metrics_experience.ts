@@ -145,8 +145,12 @@ export class MetricsExperiencePage {
   }
 
   /**
-   * Opens the inspector flyout by triggering "Inspect" from the chart
-   * actions menu of the given card.
+   * Opens the inspector flyout by clicking "Inspect" on the visible
+   * quick-action row of the given card.
+   *
+   * Do NOT switch this to `openCardContextMenu` — `openInspector` is promoted to
+   * the visible row via `METRICS_QUICK_ACTION_IDS` and will not appear in the
+   * context-menu popover when it is already in the hover row.
    */
   public async openInspectorFlyout(cardIndex: number): Promise<void> {
     await this.clickVisibleQuickAction(cardIndex, this.chartActions.inspect);
