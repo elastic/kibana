@@ -30,7 +30,7 @@ export const Footer = ({ action }: FooterProps) => {
   `;
 
   return (
-    <EuiListGroup gutterSize="none" flush css={footerStyles}>
+    <EuiListGroup css={footerStyles}>
       <EuiListGroupItem
         label={action.label}
         iconType={'plus'}
@@ -38,7 +38,6 @@ export const Footer = ({ action }: FooterProps) => {
         onClick={action.onClick}
         external={action.external}
         isDisabled={action.disabled}
-        size="s"
         color="text"
         data-test-subj={action['data-test-subj']}
       />

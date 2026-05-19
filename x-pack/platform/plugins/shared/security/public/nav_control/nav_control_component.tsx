@@ -16,7 +16,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import type { FunctionComponent, ReactNode } from 'react';
-import React, { useCallback, useState } from 'react';
+import React, { Fragment, useCallback, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 
@@ -28,8 +28,9 @@ import { UserAvatar, type UserProfileAvatarData } from '@kbn/user-profile-compon
 import { getUserDisplayName, isUserAnonymous } from '../../common/model';
 import { useCurrentUser, useUserProfile } from '../components';
 
-type ContextMenuItem = Omit<EuiContextMenuPanelItemDescriptor, 'onClick'> & {
+type ContextMenuItem = Omit<EuiContextMenuPanelItemDescriptor, 'onClick' | 'content'> & {
   onClick?: () => void;
+  content?: ReactNode | ((props: { closePopover: () => void }) => ReactNode);
 };
 
 interface ContextMenuProps {
@@ -40,21 +41,29 @@ interface ContextMenuProps {
 const ContextMenuContent = ({ items, closePopover }: ContextMenuProps) => {
   return (
     <EuiContextMenuPanel>
-      {items.map((item, i) => (
-        <EuiContextMenuItem
-          key={i}
-          icon={item.icon}
-          size="s"
-          href={item.href}
-          onClick={() => {
-            item.onClick?.();
-            if (!item.href) closePopover();
-          }}
-          data-test-subj={item['data-test-subj']}
-        >
-          {item.name}
-        </EuiContextMenuItem>
-      ))}
+      {items.map((item, i) => {
+        if (item.content) {
+          return (
+            <Fragment key={i}>
+              {typeof item.content === 'function' ? item.content({ closePopover }) : item.content}
+            </Fragment>
+          );
+        }
+        return (
+          <EuiContextMenuItem
+            key={i}
+            icon={item.icon}
+            href={item.href}
+            onClick={() => {
+              item.onClick?.();
+              if (!item.href) closePopover();
+            }}
+            data-test-subj={item['data-test-subj']}
+          >
+            {item.name}
+          </EuiContextMenuItem>
+        );
+      })}
     </EuiContextMenuPanel>
   );
 };
