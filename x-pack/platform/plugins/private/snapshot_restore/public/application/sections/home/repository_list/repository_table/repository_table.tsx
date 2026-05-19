@@ -81,7 +81,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
     if (response?.error) {
       toastNotifications.addDanger(
         i18n.translate('xpack.snapshotRestore.repositoryList.table.setDefaultErrorMessage', {
-          defaultMessage: 'Error setting default repository',
+          defaultMessage: 'Error setting the default repository',
         })
       );
       return;
