@@ -208,6 +208,15 @@ For A: write only the Overview, Feature Background, Scope, and a "Test Coverage"
 
 Find `TARGET_VERSION` from (in priority order): the issue's milestone name, project fields (`Target`, `Fix version`, etc.), version-pattern labels (`v9.3`, `release:9.3`), or explicit mentions in the issue body/comments. If not found, stop and ask the user — this affects whether upgrade scenarios are included.
 
+**User-unavailable fallback** (dry-run mode, async runs, batch generation). When `TARGET_VERSION` cannot be inferred from any source AND the user is not present to answer:
+
+| Situation | Action |
+|---|---|
+| Feature touches stored data, mappings, saved objects, or navigation | Mark `TARGET_VERSION` as `⚠️ Not specified — please confirm before publishing` in Assumptions; **omit upgrade scenarios** rather than guess; record the gap in Known Limitations |
+| Feature is a pure parser, pure compute, or otherwise has no upgrade surface | Mark `TARGET_VERSION` as `⚠️ Not specified — please confirm before publishing` in Assumptions; skip the upgrade-section evaluation entirely |
+
+This fallback is the Core rule's `⚠️` escape: never guess the version, never publish an assumption as a fact, never insert speculative upgrade scenarios.
+
 **Checkpoint before Step 3:** Apply the Core rule — if the mental model has gaps or ambiguities, stop and ask the user before proceeding.
 
 ---
@@ -220,7 +229,14 @@ Apply the Core rule before starting: if any ambiguity about scope, acceptance cr
 
 ### Document structure
 
-Follow the template in [`references/document-structure.md`](references/document-structure.md) — it defines the required sections, their order, and the content expected in each. Read [`references/example-test-plan.md`](references/example-test-plan.md) for a complete worked example showing correct structure, scenario format, and automation coverage lines.
+Follow the template in [`references/document-structure.md`](references/document-structure.md) — it defines the required sections, their order, and the content expected in each. Read the worked example that matches the target feature:
+
+| Target feature type | Example |
+|---|---|
+| UI feature (flyouts, panels, forms, navigation) | [`references/example-test-plan.md`](references/example-test-plan.md) |
+| Backend / parser feature (no UI, no PR yet, unknown `TARGET_VERSION`) | [`references/example-test-plan-backend.md`](references/example-test-plan-backend.md) |
+
+Pick the closer match by shape, not by domain. The two examples differ in which optional sections apply, how `N/A` is handled in the Issue Clarity Assessment, and how the Coverage Ratio is computed when no PR exists.
 
 ### Optional sections
 

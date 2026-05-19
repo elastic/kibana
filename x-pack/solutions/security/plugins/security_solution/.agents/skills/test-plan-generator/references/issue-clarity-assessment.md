@@ -89,12 +89,19 @@ Calibration anchors for each grade across the five dimensions. Use these to deci
 
 **Reading the anchors:**
 
-| Anchor pattern | Meaning |
+| AC grade | Score effect |
 |---|---|
-| AC ✅ Present and ≥6 testable ACs | Score typically lands at **3 or higher**, even when other dimensions are ⚠️ — strong ACs implicitly carry scope and edge cases. |
-| AC ⚠️ Partial (bullets present but untestable) | Score capped at **3** — the AC cap (`AC ❌ → max 2`) does **not** apply, but the rubric will not reach 4. |
-| AC ❌ Missing (no AC section, no enumerable list) | AC cap applies: maximum per-issue score is **2**. |
-| Scope ✅ via strong ACs (no explicit `Scope` section) | Still counts as ✅ Present — do not down-grade for the missing section alone. |
+| AC ✅ Present **and** ≥6 testable ACs | **Floor of 3** — strong ACs implicitly carry Scope and Edge cases, so the score lands at 3 or higher even when those dimensions are ⚠️ Partial. |
+| AC ✅ Present **and** <6 testable ACs | No floor, no cap — the rubric is applied as written. |
+| AC ⚠️ Partial (bullets present but untestable) | **Ceiling of 3** — the strict AC cap (`AC ❌ → max 2`) does not apply, but the rubric cannot reach 4 from a ⚠️ AC. |
+| AC ❌ Missing (no AC section, no enumerable list) | **Ceiling of 2** — the strict AC cap applies regardless of other dimensions. |
+
+Independent of the AC grade:
+
+| Other anchor pattern | Effect |
+|---|---|
+| Scope ✅ via strong ACs (no explicit `Scope` section) | Still counts as ✅ Present — do not down-grade for the missing `Scope` heading alone. |
+| 3+ applicable dimensions ❌ Missing, including AC or Scope | Per-issue score lands at **1** (overrides the AC ✅ floor above when both conflict). |
 
 ---
 
@@ -170,6 +177,18 @@ A scenario is **not derivable from issue text** when:
 
 - It exists because of an artifact discovered only in the PR (e.g. a new API endpoint introduced in the diff with no mention in any issue).
 - A concrete fact in the Gherkin (error message wording, exact label text, telemetry field name, feature flag identifier) was sourced from the PR or the code, not from any issue body or comment.
+
+### Boundary case: no PR linked
+
+The classification reads as if a PR always exists. When the target issue has no linked or orphan PR (the feature is still spec-only, or the PR has not been opened yet), apply this rule:
+
+| Source of a Gherkin fact | Classify as |
+|---|---|
+| Issue body, issue comment, sub-issue body, sub-issue comment, image/Figma/Google Docs linked from any of the above | `issue` |
+| Existing source code (e.g. an artifact discovered by reading the codebase to anchor a regression test, an implementation detail like *"regex `lastIndex` is not retained"*) | `pr` (treated identically to PR-only facts) |
+| Agent's pre-trained knowledge, web search, or speculation | Not allowed — every scenario fact must trace to one of the two rows above |
+
+In other words: **PR and code are interchangeable for the Coverage Ratio**. The rubric treats them as the same category because both are "outside the issue corpus the PM/writer authored". This keeps the metric meaningful on plans generated before a PR exists.
 
 ### Why the rule is conservative
 
