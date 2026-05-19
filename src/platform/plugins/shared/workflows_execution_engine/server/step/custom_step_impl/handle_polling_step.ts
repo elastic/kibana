@@ -14,10 +14,8 @@ import type {
   DurablePhaseResult,
   PollCeilings,
   PollHandlerContext,
-  PollOnlyMode,
-  RunPlusPollMode,
+  PollStepDefinition,
 } from '@kbn/workflows-extensions/server';
-import type { z } from '@kbn/zod/v4';
 import { createHandlerContext } from './step_context_handler';
 import { applyBackoffJitter } from '../../utils/backoff_jitter/backoff_jitter';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
@@ -27,6 +25,7 @@ import type { RunStepResult } from '../node_implementation';
 const bookkeepingKey = '__durableStepState';
 
 interface DurableStepState {
+  /** Author state JSON persisted between polls (opaque to the engine). */
   customState?: Record<string, unknown>;
   initialRunState?: {
     isRun: boolean;
@@ -39,13 +38,6 @@ interface DurableStepState {
   /** Epoch ms when the step entered its poll loop (after `run`). */
   startedAt?: string;
 }
-
-type PollStepDefinition<
-  Input extends z.ZodType = z.ZodType,
-  Output extends z.ZodType = z.ZodType,
-  Config extends z.ZodObject = z.ZodObject,
-  State = Record<string, unknown>
-> = PollOnlyMode<Input, Output, Config, State> | RunPlusPollMode<Input, Output, Config>;
 
 export interface StepHandler {
   onCancel(): Promise<void>;
@@ -76,7 +68,7 @@ export class PollPolicyStepHandler implements StepHandler {
   ): Promise<RunStepResult> {
     let res;
 
-    if (this.stepDefinition.run && !this.getDurableStepState().initialRunState?.isRun) {
+    if ('run' in this.stepDefinition && !this.getDurableStepState().initialRunState?.isRun) {
       res = await this.handleRun(input, rawInput, config);
     } else if (this.stepDefinition.poll) {
       res = await this.handlePoll(input, rawInput, config);
@@ -92,7 +84,7 @@ export class PollPolicyStepHandler implements StepHandler {
     rawInput: unknown,
     config: Record<string, unknown>
   ): Promise<DurablePhaseResult> {
-    if (!this.stepDefinition.run) {
+    if (!('run' in this.stepDefinition)) {
       throw new Error(`Step "${this.node.stepType}" has no "run" phase.`);
     }
 
@@ -173,7 +165,7 @@ export class PollPolicyStepHandler implements StepHandler {
       if (pollResult.state === null) {
         customState = undefined;
       } else {
-        customState = pollResult.state;
+        customState = pollResult.state as Record<string, unknown>;
       }
     }
 
@@ -237,17 +229,13 @@ export class PollPolicyStepHandler implements StepHandler {
     });
   }
 
-  private createPollHandlerContext<
-    Input extends z.ZodType,
-    Config extends z.ZodObject,
-    State = unknown
-  >(
+  private createPollHandlerContext(
     input: unknown,
     rawInput: unknown,
     config: Record<string, unknown>,
     attempt: number,
-    state: State | undefined
-  ): PollHandlerContext<Input, Config, State> {
+    state: Record<string, unknown> | undefined
+  ): PollHandlerContext {
     return {
       ...createHandlerContext(
         input,
@@ -257,9 +245,9 @@ export class PollPolicyStepHandler implements StepHandler {
         this.stepExecutionRuntime,
         this.workflowLogger
       ),
-      state,
+      state: state as PollHandlerContext['state'],
       attempt,
-    } as PollHandlerContext<Input, Config, State>;
+    } as PollHandlerContext;
   }
 
   private async calculateNextPollAt(params: { currentAttempt: number }): Promise<string> {

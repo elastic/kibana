@@ -13,22 +13,27 @@ import { StepCategory } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
 
 /**
- * Step type ID for the durable poll demonstration step.
+ * Step type ID for the durable run+poll demonstration step.
  */
 export const DurablePollStepTypeId = 'example.durablePollDemo';
 
 export const InputSchema = z.object({
   /**
-   * How many poll invocations must complete before the step returns output.
-   * Kept small so ad-hoc runs finish quickly.
+   * Index pattern the “report” targets (mirrors a real saved search / data view).
    */
-  pollsBeforeDone: z.coerce.number().int().min(1).max(20).default(2),
+  indexPattern: z.string().min(1).default('logs-*'),
+  /**
+   * How many poll wake-ups are needed before the simulated backend marks the export ready
+   * (including the poll that returns `{ output }`). Kept small so demos finish quickly.
+   */
+  simulatedRenderPolls: z.coerce.number().int().min(1).max(10).default(3),
 });
 
 export const OutputSchema = z.object({
-  message: z.string(),
-  completedAfterPolls: z.number().int(),
-  state: z.unknown(),
+  requestId: z.string(),
+  documentDownloadPath: z.string(),
+  totalHits: z.number().int(),
+  generatedAt: z.string(),
 });
 
 export type DurablePollStepInputSchema = typeof InputSchema;
@@ -41,24 +46,25 @@ export const durablePollStepCommonDefinition: CommonStepDefinition<
   id: DurablePollStepTypeId,
   category: StepCategory.Data,
   label: i18n.translate('workflowsExtensionsExample.durablePollStep.label', {
-    defaultMessage: 'Durable poll (demo)',
+    defaultMessage: 'Async report (run + poll demo)',
   }),
   description: i18n.translate('workflowsExtensionsExample.durablePollStep.description', {
     defaultMessage:
-      'Example of a poll-only step that waits between invocations until a condition is met',
+      'Starts an async export in run(), then polls until a simulated backend finishes rendering the report.',
   }),
   documentation: {
     details: i18n.translate('workflowsExtensionsExample.durablePollStep.documentation.details', {
       defaultMessage:
-        'Demonstrates poll-only mode: no run phase. The workflow enters WAITING between polls according to poll.policy. See workflows_extensions dev_docs/STEPS.md for durable steps.',
+        'Demonstrates the durable **run + poll** pattern: `run` submits work and returns `{ state }`; `poll.handler` wakes on `poll.policy` until `{ output }`. In production, `run` would call an HTTP API or task queue and `poll` would read job status from Elasticsearch or an upstream service. See workflows_extensions `dev_docs/STEPS.md` for authoring guidance.',
     }),
     examples: [
-      `## Poll until done (demo)
+      `## Async export (demo)
 \`\`\`yaml
-- name: demo_durable_poll
+- name: export_slow_errors
   type: ${DurablePollStepTypeId}
   with:
-    pollsBeforeDone: 3
+    indexPattern: "logs-*"
+    simulatedRenderPolls: 4
 \`\`\``,
     ],
   },

@@ -7,49 +7,68 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  createPollServerStepDefinition,
-  type ServerStepDefinition,
-} from '@kbn/workflows-extensions/server';
+import { createPollServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { z } from '@kbn/zod/v4';
 import { durablePollStepCommonDefinition } from '../../common/step_types/durable_poll_step';
+
+const authorStateSchema = z.object({
+  requestId: z.string(),
+  queryWindow: z.string(),
+  submittedAt: z.string(),
+  phase: z.enum(['queued', 'rendering', 'finalizing']),
+});
 
 export const durablePollStepDefinition = createPollServerStepDefinition({
   ...durablePollStepCommonDefinition,
-  run: async (context) => {
-    // await new Promise((resolve) => setTimeout(resolve, 1000));
+  stateSchema: authorStateSchema,
+  run: async ({ input, logger }) => {
+    const requestId = `rpt_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+    logger.info(`Queued async report ${requestId} for ${input.indexPattern}`);
     return {
       state: {
-        lastAttempt: 0,
-        jobId: '123',
+        requestId,
+        queryWindow: input.indexPattern,
+        submittedAt: new Date().toISOString(),
+        phase: 'queued' as const,
       },
     };
   },
   poll: {
     handler: async (context) => {
-      const { pollsBeforeDone } = context.input;
+      const { simulatedRenderPolls } = context.input;
+      const state = context.state;
 
-      if (context.attempt >= pollsBeforeDone) {
+      if (!state) {
+        throw new Error('Poll ran before run() seeded durable state — check engine wiring.');
+      }
+
+      const lastPollIndex = simulatedRenderPolls - 1;
+      if (context.attempt < lastPollIndex) {
+        const phase = context.attempt === 0 ? ('rendering' as const) : ('finalizing' as const);
+        context.logger.debug(
+          `Report ${state.requestId}: ${phase} (poll ${
+            context.attempt + 1
+          }/${simulatedRenderPolls})`
+        );
         return {
-          output: {
-            message: `Finished after ${context.attempt} poll invocation(s).`,
-            completedAfterPolls: context.attempt,
-            state: context.state,
+          state: {
+            ...state,
+            phase,
           },
         };
       }
 
-      context.logger.debug(`Durable poll demo: attempt ${context.attempt}/${pollsBeforeDone}`);
+      context.logger.info(`Report ${state.requestId}: ready after ${context.attempt + 1} poll(s)`);
       return {
-        state: context.state
-          ? {
-              ...context.state,
-              lastAttempt: context.attempt,
-              foo: [...(context.state.foo || []), context.state.jobId],
-            }
-          : undefined,
+        output: {
+          requestId: state.requestId,
+          documentDownloadPath: `/internal/example/reports/${state.requestId}.ndjson`,
+          totalHits: 42,
+          generatedAt: new Date().toISOString(),
+        },
       };
     },
     policy: { strategy: 'fixed', intervalMs: 2000 },
-    ceilings: { maxAttempts: 5, maxWaitMs: 36 * 1000 },
+    ceilings: { maxAttempts: 12, maxWaitMs: 60_000 },
   },
-}) as ServerStepDefinition;
+});

@@ -45,17 +45,13 @@ export {
 
 export type {
   ServerStepDefinition,
-  LegacyHandlerMode,
-  RunOnlyMode,
-  PollOnlyMode,
-  RunPlusPollMode,
   PollOnlyStepDefinition,
   RunPlusPollStepDefinition,
+  PollStepDefinition,
   StepHandler,
   StepHandlerContext,
   StepHandlerResult,
   OnCancelHandler,
-  RunDoneOnlyHandler,
   RunWithHandoffHandler,
   PollHandler,
   PollContext as PollHandlerContext,
@@ -66,7 +62,6 @@ export type {
   PhaseErrorResult,
   DurablePhaseResult,
   PollContinueResult,
-  RunHandoffResult,
 } from './step_registry/types';
 
 export {
