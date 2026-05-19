@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import type { estypes } from '@elastic/elasticsearch';
 import { taskMappings as TaskManagerMapping } from '@kbn/task-manager-plugin/server/saved_objects/mappings';
+import { TaskPriority } from '@kbn/task-manager-plugin/server';
 import { asyncForEach } from '@kbn/std';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { RawDoc } from './test_utils';
@@ -174,6 +175,86 @@ export default function ({ getService }: FtrProviderContext) {
         taskType: 'normalLongRunningPriorityTask',
       });
       expect(normalLongRunningDocs.length).to.eql(0);
+    });
+
+    describe('per-task priority override', () => {
+      it('should use instance priority when set, overriding definition priority', async () => {
+        const task = await scheduleTask(supertest, {
+          taskType: 'lowPriorityTask',
+          schedule: { interval: '1d' },
+          params: {},
+          priority: TaskPriority.Normal,
+        });
+
+        expect(task.priority).to.eql(TaskPriority.Normal);
+
+        await retry.try(async () => {
+          const docs: RawDoc[] = await historyDocs({
+            es,
+            index: testHistoryIndex,
+            taskId: task.id,
+          });
+          expect(docs.length).to.be.greaterThan(0);
+        });
+      });
+
+      it('should use definition priority when instance priority is not set', async () => {
+        const task = await scheduleTask(supertest, {
+          taskType: 'lowPriorityTask',
+          schedule: { interval: '1d' },
+          params: {},
+        });
+
+        expect(task.priority).to.eql(undefined);
+
+        await retry.try(async () => {
+          const docs: RawDoc[] = await historyDocs({
+            es,
+            index: testHistoryIndex,
+            taskId: task.id,
+          });
+          expect(docs.length).to.be.greaterThan(0);
+        });
+      });
+
+      it('should use Normal priority by default when no instance or definition priority is set', async () => {
+        const task = await scheduleTask(supertest, {
+          taskType: 'sampleTask',
+          schedule: { interval: '1d' },
+          params: {},
+        });
+
+        expect(task.priority).to.eql(undefined);
+
+        await retry.try(async () => {
+          const docs: RawDoc[] = await historyDocs({
+            es,
+            index: testHistoryIndex,
+            taskId: task.id,
+          });
+          expect(docs.length).to.be.greaterThan(0);
+        });
+      });
+
+      it('should use instance priority when set when no definition priority is set', async () => {
+        const task = await scheduleTask(supertest, {
+          taskType: 'sampleTask',
+          schedule: { interval: '1d' },
+          params: {},
+          priority: TaskPriority.Low,
+        });
+
+        expect(task.priority).to.eql(TaskPriority.Low);
+
+        await retry.try(async () => {
+          const docs: RawDoc[] = await historyDocs({
+            es,
+            index: testHistoryIndex,
+            taskId: task.id,
+          });
+          expect(docs.length).to.be.greaterThan(0);
+        });
+      });
     });
 
     it('should not claim low priority tasks when there is no capacity due to normal long running tasks', async () => {

@@ -28,6 +28,5 @@
     "@kbn/apm-utils",
     "@kbn/i18n",
     "@kbn/traced-es-client",
-    "@kbn/es-query",
   ]
 }
