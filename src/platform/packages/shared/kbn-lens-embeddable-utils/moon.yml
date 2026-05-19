@@ -46,6 +46,7 @@ tags:
 fileGroups:
   src:
     - '**/*.ts'
+    - config_builder/tests/integrations/download_integrations_panels.js
     - '!target/**/*'
   jest-config:
     - jest.config.js

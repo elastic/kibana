@@ -12,10 +12,7 @@ import type { EntityType } from '@kbn/security-solution-plugin/common/api/entity
 import type { CriticalityLevel } from '@kbn/security-solution-plugin/common/entity_analytics/asset_criticality/types';
 import type { EntityRiskScoreRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics/common';
 import { buildDocument, readRiskScores, normalizeScores } from './risk_engine';
-import {
-  waitForMaintainerRun,
-  type entityMaintainerRouteHelpersFactory,
-} from './entity_maintainers';
+import { type entityMaintainerRouteHelpersFactory } from './entity_maintainers';
 
 type IndexListOfDocuments = (docs: Array<Record<string, unknown>>) => Promise<void>;
 
@@ -44,7 +41,6 @@ interface EntityStoreUtilsLike {
   installEntityStoreV2: (body?: {
     entityTypes: string[];
     dataViewPattern?: string;
-    maintainerAutoStart?: boolean;
   }) => Promise<unknown>;
   forceUpdateEntityViaCrud: (params: {
     entityType: EntityType;
@@ -359,20 +355,52 @@ export const riskScoreMaintainerScenarioFactory = ({
     minRuns?: number;
     timeoutMs?: number;
   } = {}) => {
+    // installEntityStoreV2 stops the maintainer and waits for it to settle
+    // after install so tests start from a clean slate.
     await entityStoreUtils.installEntityStoreV2({
       entityTypes,
       dataViewPattern,
-      maintainerAutoStart: false,
     });
-    await routes.stopMaintainer('risk-score');
 
-    if (runMode === 'sync') {
-      await routes.runMaintainerSync('risk-score');
-      return;
+    // Always use the synchronous maintainer run endpoint for the initial
+    // scoring pass. The maintainer task has a 1-hour interval, so Task
+    // Manager won't auto-run it within the test timeout. Using runSoon
+    // (runMaintainer) risks a version_conflict_engine_exception if it
+    // overlaps with a TM-initiated run from a stale runAt.
+    await routes.runMaintainerSync('risk-score');
+
+    if (runMode === 'async') {
+      // Start the maintainer so it's in "started" state for callers that need
+      // the real TM scheduler path (e.g. stop/start lifecycle tests).
+      await routes.startMaintainer('risk-score');
+      // After re-enabling, TM may auto-run the task if runAt is stale (set
+      // during the original install scheduling). Wait until nextRunAt is in
+      // the future and runs are stable, which guarantees any TM auto-run has
+      // completed. Without this, the test's subsequent stop/start/runSoon
+      // can race with an in-flight TM auto-run.
+      let lastSeenRuns = -1;
+      await retry.waitForWithTimeout(
+        'risk-score maintainer to settle after start in installAndRunMaintainer',
+        60_000,
+        async () => {
+          const response = await routes.getMaintainers(200, ['risk-score']);
+          const maintainer = response.body.maintainers.find(
+            (m: { id: string; runs: number; nextRunAt?: string | null }) => m.id === 'risk-score'
+          );
+          if (!maintainer) return false;
+          const nextRunAt = (maintainer as { nextRunAt?: string | null }).nextRunAt;
+          const isNextRunInFuture = nextRunAt != null && new Date(nextRunAt).getTime() > Date.now();
+          if (!isNextRunInFuture) {
+            lastSeenRuns = -1;
+            return false;
+          }
+          const runs = maintainer.runs;
+          if (runs === lastSeenRuns) return true;
+          lastSeenRuns = runs;
+          return false;
+        }
+      );
     }
-
-    await routes.startMaintainer('risk-score');
-    await waitForMaintainerRun({ retry, routes, minRuns, timeoutMs });
   };
 
   const setEntityWatchlists = async ({

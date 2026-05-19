@@ -15,7 +15,7 @@ const onInspect = jest.fn();
 
 const defaultContext: ActionBuilderContext = {
   itemConfig: {
-    onInspect,
+    actions: { inspect: { onItemAction: onInspect } },
   },
   isReadOnly: false,
   entityName: 'dashboard',
@@ -63,12 +63,13 @@ describe('inspect action builder', () => {
       expect(result).toBeUndefined();
     });
 
-    it('generates a dynamic name including the item title', () => {
+    it('defaults to a terse "View details" label that ignores the item title', () => {
       const result = buildInspectAction({}, defaultContext);
       const item = { id: '1', title: 'My Dashboard' };
 
       const name = typeof result?.name === 'function' ? result.name(item) : result?.name;
-      expect(name).toContain('My Dashboard');
+      expect(name).toBe('View details');
+      expect(result?.description).toBe('View details');
     });
 
     it('calls onInspect when onClick is triggered', () => {
@@ -83,6 +84,91 @@ describe('inspect action builder', () => {
       const result = buildInspectAction({ label: 'Details' }, defaultContext);
 
       expect(result).toMatchObject({ name: 'Details' });
+    });
+  });
+
+  describe('with `itemConfig.actions.inspect.restriction`', () => {
+    const freeItem = { id: '1', title: 'Free', managed: false };
+    const managedItem = { id: '2', title: 'Managed', managed: true };
+
+    const restrictManaged = (item: { managed?: boolean }) =>
+      item.managed ? 'Managed items cannot be inspected.' : undefined;
+
+    const contextWithRestriction = (
+      restriction: (item: { managed?: boolean }) => string | undefined
+    ): ActionBuilderContext => ({
+      ...defaultContext,
+      itemConfig: {
+        actions: { inspect: { onItemAction: onInspect, restriction } },
+      },
+    });
+
+    it('disables the row icon when the item has a restriction reason', () => {
+      const result = buildInspectAction({}, contextWithRestriction(restrictManaged));
+
+      expect((result!.enabled as (item: typeof managedItem) => boolean)(managedItem)).toBe(false);
+      expect((result!.enabled as (item: typeof freeItem) => boolean)(freeItem)).toBe(true);
+    });
+
+    it('surfaces the restriction reason as the per-row tooltip via `description`', () => {
+      const result = buildInspectAction({}, contextWithRestriction(restrictManaged));
+      const description = result!.description as (item: typeof managedItem) => string;
+
+      expect(description(managedItem)).toBe('Managed items cannot be inspected.');
+      expect(description(freeItem)).toBe('View details');
+    });
+
+    it('lets the consumer `enabled` further narrow but never expand the auto verdict', () => {
+      const result = buildInspectAction(
+        { enabled: (item) => item.id !== '1' },
+        contextWithRestriction(restrictManaged)
+      );
+      const enabled = result!.enabled as (item: typeof freeItem) => boolean;
+
+      expect(enabled(freeItem)).toBe(false);
+      expect(enabled(managedItem)).toBe(false);
+    });
+
+    it('keeps the icon enabled when no restriction predicate is configured', () => {
+      const result = buildInspectAction({}, defaultContext);
+      const enabled = result!.enabled as (item: typeof freeItem) => boolean;
+
+      expect(enabled(freeItem)).toBe(true);
+      expect(enabled(managedItem)).toBe(true);
+    });
+
+    it('keeps the static description when no restriction predicate is configured', () => {
+      const result = buildInspectAction({}, defaultContext);
+      expect(typeof result?.description).toBe('string');
+    });
+  });
+
+  describe('with `actions.inspect.getItemActionHref`', () => {
+    const item = { id: '7', title: 'Dashboard 7' };
+
+    const hrefContext: ActionBuilderContext = {
+      ...defaultContext,
+      itemConfig: {
+        actions: { inspect: { getItemActionHref: (i) => `/inspect/${i.id}` } },
+      },
+    };
+
+    it('renders as an `<a href>` link when `getItemActionHref` is configured', () => {
+      const result = buildInspectAction({}, hrefContext);
+
+      expect(result).toHaveProperty('href');
+      expect(result).not.toHaveProperty('onClick');
+      const href = (result?.href as (i: typeof item) => string)(item);
+      expect(href).toBe('/inspect/7');
+    });
+
+    it('falls back to `getItemActionHref` when only `onItemAction` would otherwise be required', () => {
+      // An inspect config with neither handler nor href returns undefined
+      // (consistent with the old behavior). Wiring a href should produce
+      // an action without forcing a placeholder `onItemAction`.
+      const result = buildInspectAction({}, hrefContext);
+      expect(result).toBeDefined();
+      expect(result).toMatchObject({ icon: 'inspect', type: 'icon' });
     });
   });
 });

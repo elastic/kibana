@@ -22,7 +22,7 @@ import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import { asInteger } from '../../../../../common/utils/formatters';
-import { RedMetricsChartActions } from './red_metrics_chart_actions';
+import { RED_METRICS_CHART_ELEMENT, RedMetricsChartActions } from './red_metrics_chart_actions';
 import { useGetChartAlertAnnotations } from './use_get_chart_alert_annotations';
 
 type ErrorDistribution =
@@ -49,6 +49,8 @@ export function ErrorCountChart({
   groupId,
   threshold,
   ruleTypeId,
+  compact,
+  showAlertAnnotations,
 }: {
   alert: TopAlert;
   serviceName: string;
@@ -64,6 +66,10 @@ export function ErrorCountChart({
   groupId?: string;
   threshold?: ReactElement;
   ruleTypeId?: string;
+  /** When true, hide the threshold side panel even if `threshold` is provided. */
+  compact?: boolean;
+  /** When set, overrides the default annotation behavior (which is keyed off `threshold`). */
+  showAlertAnnotations?: boolean;
 }) {
   const {
     services: { uiSettings },
@@ -105,7 +111,8 @@ export function ErrorCountChart({
 
   const alertAnnotations = useGetChartAlertAnnotations({
     alert,
-    showAnnotations: !!threshold,
+    showAnnotations: showAlertAnnotations ?? !!threshold,
+    showThresholdAnnotation: !!threshold,
     dateFormat,
   });
 
@@ -148,18 +155,19 @@ export function ErrorCountChart({
                   }}
                   timeRange={{ from: start, to: end }}
                   ruleTypeId={ruleTypeId}
+                  element={RED_METRICS_CHART_ELEMENT.ERROR_COUNT}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexGroup direction="row" gutterSize="m">
-          {!!threshold && (
+          {!!threshold && !compact && (
             <EuiFlexItem style={{ minWidth: 180 }} grow={1}>
               {threshold}
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={!!threshold ? 5 : undefined}>
+          <EuiFlexItem grow={!!threshold && !compact ? 5 : undefined}>
             <TimeseriesChart
               id="errorCountChart"
               height={200}

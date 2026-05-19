@@ -92,6 +92,7 @@ describe('fillGapById', () => {
       namespace: 'default',
       getUserName: jest.fn(),
       createAPIKey: jest.fn(),
+      cloneAPIKey: jest.fn(),
       logger: loggingSystemMock.create().get(),
       internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
       encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),

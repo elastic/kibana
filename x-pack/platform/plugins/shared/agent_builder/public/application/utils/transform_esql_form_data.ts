@@ -9,12 +9,12 @@ import { getESQLQueryVariables } from '@kbn/esql-utils';
 
 import type { EsqlToolDefinition, EsqlToolParam } from '@kbn/agent-builder-common';
 import { ToolType } from '@kbn/agent-builder-common';
-import { omit } from 'lodash';
 import type { CreateToolPayload, UpdateToolPayload } from '../../../common/http_api/tools';
 import {
   EsqlParamSource,
   type EsqlToolFormData,
 } from '../components/tools/form/types/tool_form_types';
+import { toCreatePayload, toUpdatePayload } from './tool_payload';
 
 /**
  * Transforms an ES|QL tool into its UI form representation.
@@ -52,6 +52,7 @@ export const transformFormDataToEsqlTool = (data: EsqlToolFormData): EsqlToolDef
     id: data.toolId,
     description: data.description,
     readonly: false,
+    experimental: false,
     configuration: {
       query: data.esql,
       params: data.params
@@ -83,7 +84,7 @@ export const transformFormDataToEsqlTool = (data: EsqlToolFormData): EsqlToolDef
  * @returns The payload for the create tools API.
  */
 export const transformEsqlFormDataForCreate = (data: EsqlToolFormData): CreateToolPayload => {
-  return omit(transformFormDataToEsqlTool(data), ['readonly']);
+  return toCreatePayload(transformFormDataToEsqlTool(data));
 };
 
 /**
@@ -92,5 +93,5 @@ export const transformEsqlFormDataForCreate = (data: EsqlToolFormData): CreateTo
  * @returns The payload for the update tool API.
  */
 export const transformEsqlFormDataForUpdate = (data: EsqlToolFormData): UpdateToolPayload => {
-  return omit(transformFormDataToEsqlTool(data), ['id', 'type', 'readonly']);
+  return toUpdatePayload(transformFormDataToEsqlTool(data));
 };

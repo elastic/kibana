@@ -69,7 +69,10 @@ export const StepIcon = React.memo(
     if (executionStatus === ExecutionStatus.RUNNING) {
       return <EuiLoadingSpinner size="m" />;
     }
-    if (executionStatus === ExecutionStatus.WAITING_FOR_INPUT) {
+    if (
+      executionStatus === ExecutionStatus.WAITING_FOR_INPUT ||
+      executionStatus === ExecutionStatus.WAITING_FOR_CHILD
+    ) {
       return (
         <EuiIcon
           type="hourglass"

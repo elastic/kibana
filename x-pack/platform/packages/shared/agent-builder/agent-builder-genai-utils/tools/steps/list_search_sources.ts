@@ -7,7 +7,7 @@
 
 import { take } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { EsResourceType } from '@kbn/agent-builder-common';
+import { EsResourceType, isVisibleSearchSource } from '@kbn/agent-builder-common';
 import { isNotFoundError } from '@kbn/es-errors';
 
 export interface DataStreamSearchSource {
@@ -37,8 +37,6 @@ export interface ListSourcesResponse {
   warnings?: string[];
 }
 
-const kibanaIndicesExclusionPattern = '-.*';
-
 /**
  * List the search sources (indices, aliases and datastreams) matching a given index pattern,
  * using the `_resolve_index` API.
@@ -47,7 +45,6 @@ export const listSearchSources = async ({
   pattern,
   perTypeLimit = 100,
   includeHidden = false,
-  includeKibanaIndices = false,
   excludeIndicesRepresentedAsAlias = true,
   excludeIndicesRepresentedAsDatastream = true,
   esClient,
@@ -55,45 +52,51 @@ export const listSearchSources = async ({
   pattern: string;
   perTypeLimit?: number;
   includeHidden?: boolean;
-  includeKibanaIndices?: boolean;
   excludeIndicesRepresentedAsAlias?: boolean;
   excludeIndicesRepresentedAsDatastream?: boolean;
   esClient: ElasticsearchClient;
 }): Promise<ListSourcesResponse> => {
   try {
     const resolveRes = await esClient.indices.resolveIndex({
-      name: includeKibanaIndices ? [pattern] : [pattern, kibanaIndicesExclusionPattern],
+      name: [pattern],
       allow_no_indices: true,
       expand_wildcards: includeHidden ? ['open', 'hidden'] : ['open'],
     });
 
-    // data streams
-    const dataStreamSources = resolveRes.data_streams.map<DataStreamSearchSource>((dataStream) => {
-      return {
-        type: EsResourceType.dataStream,
-        name: dataStream.name,
-        indices: Array.isArray(dataStream.backing_indices)
-          ? dataStream.backing_indices
-          : [dataStream.backing_indices],
-        timestamp_field: dataStream.timestamp_field,
-      };
-    });
+    // data streams — apply the allow-list visibility filter by name.
+    const dataStreamSources = resolveRes.data_streams
+      .filter((dataStream) => isVisibleSearchSource(dataStream.name))
+      .map<DataStreamSearchSource>((dataStream) => {
+        return {
+          type: EsResourceType.dataStream,
+          name: dataStream.name,
+          indices: Array.isArray(dataStream.backing_indices)
+            ? dataStream.backing_indices
+            : [dataStream.backing_indices],
+          timestamp_field: dataStream.timestamp_field,
+        };
+      });
 
-    // aliases
-    const aliasSources = resolveRes.aliases.map<AliasSearchSource>((alias) => {
-      return {
-        type: EsResourceType.alias,
-        name: alias.name,
-        indices: Array.isArray(alias.indices) ? alias.indices : [alias.indices],
-      };
-    });
+    // aliases — apply the allow-list visibility filter by name.
+    const aliasSources = resolveRes.aliases
+      .filter((alias) => isVisibleSearchSource(alias.name))
+      .map<AliasSearchSource>((alias) => {
+        return {
+          type: EsResourceType.alias,
+          name: alias.name,
+          indices: Array.isArray(alias.indices) ? alias.indices : [alias.indices],
+        };
+      });
 
-    // indices
-    const resolvedDataStreamNames = dataStreamSources.map((ds) => ds.name);
-    const resolvedAliasNames = aliasSources.map((alias) => alias.name);
+    const resolvedDataStreamNames = resolveRes.data_streams.map((ds) => ds.name);
+    const resolvedAliasNames = resolveRes.aliases.map((alias) => alias.name);
 
     const indexSources = resolveRes.indices
       .filter((index) => {
+        if (!isVisibleSearchSource(index.name)) {
+          return false;
+        }
+
         if (
           excludeIndicesRepresentedAsAlias &&
           index.aliases?.length &&

@@ -51,6 +51,17 @@ export type { LiquidValidationError } from './common/liquid/validate_liquid_temp
 export { getYamlDocumentErrors } from './common/yaml/validate_yaml_document';
 export { updateYamlField } from './common/yaml/update_yaml_field';
 export {
+  buildWorkflowLookup,
+  inspectStep,
+  getValueFromValueNode,
+  NESTED_STEP_KEYS,
+  isNestedStepKey,
+  type NestedStepKey,
+  type StepInfo,
+  type StepPropInfo,
+  type WorkflowLookup,
+} from './common/yaml/build_workflow_lookup';
+export {
   stringifyWorkflowDefinition,
   WORKFLOW_DEFINITION_KEYS_ORDER,
 } from './common/yaml/stringify_workflow_definition';
@@ -77,3 +88,14 @@ export type {
   EnrichmentResult,
   ConnectorParamsSchemaResolver,
 } from './common/zod/enrich_error_message';
+
+// Yaml editing utilities
+export {
+  insertStep,
+  modifyStep,
+  modifyStepProperty,
+  modifyWorkflowProperty,
+  deleteStep,
+  getStepNode,
+} from './lib/yaml_edit';
+export type { StepDefinition, EditResult } from './lib/yaml_edit';

@@ -29,7 +29,6 @@
       "evals"
     ],
     "requiredBundles": ["kibanaReact", "kibanaUtils"],
-    "runtimePluginDependencies": ["ml"],
-    "extraPublicDirs": []
+    "runtimePluginDependencies": ["ml"]
   }
 }

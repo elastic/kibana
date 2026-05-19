@@ -10,6 +10,7 @@
 import { monaco } from '../../../monaco_imports';
 import { lexerRules, consoleOutputLexerRules } from '.';
 import { consoleSharedLexerRules, matchTokensWithEOL } from './shared';
+import { ESQL_LANG_ID } from '../../esql/lib/constants';
 
 const CONSOLE_TEST_LANG_ID = 'console_test';
 const CONSOLE_OUTPUT_TEST_LANG_ID = 'console_output_test';
@@ -38,7 +39,7 @@ const getLineTokens = (
 };
 
 describe('Console highlighting', () => {
-  beforeAll(() => {
+  beforeAll(async () => {
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
       value: jest.fn().mockImplementation((query) => ({
@@ -53,12 +54,28 @@ describe('Console highlighting', () => {
       })),
     });
 
+    // Register a minimal ES|QL grammar for triple-quoted embedded highlighting tests.
+    monaco.languages.register({ id: ESQL_LANG_ID });
+    monaco.languages.setMonarchTokensProvider(ESQL_LANG_ID, {
+      ignoreCase: true,
+      tokenizer: {
+        root: [
+          [/\bFROM\b|\bDROP\b|\bWHERE\b|\bLIMIT\b/, 'keyword'],
+          [/[a-zA-Z_][\w]*/, 'identifier'],
+          [/\d+/, 'number'],
+          [/\s+/, ''],
+          [/./, ''],
+        ],
+      },
+    } as monaco.languages.IMonarchLanguage);
+
     monaco.languages.register({ id: CONSOLE_TEST_LANG_ID });
     monaco.languages.setMonarchTokensProvider(CONSOLE_TEST_LANG_ID, lexerRules);
     monaco.languages.register({ id: CONSOLE_OUTPUT_TEST_LANG_ID });
     monaco.languages.setMonarchTokensProvider(CONSOLE_OUTPUT_TEST_LANG_ID, consoleOutputLexerRules);
 
     // Trigger tokenizer creation.
+    monaco.editor.createModel('', ESQL_LANG_ID).dispose();
     monaco.editor.createModel('', CONSOLE_TEST_LANG_ID).dispose();
     monaco.editor.createModel('', CONSOLE_OUTPUT_TEST_LANG_ID).dispose();
   });
@@ -333,5 +350,29 @@ describe('Lexer rule composition', () => {
     );
     expect(bracketToken).toBeDefined();
     expect(bracketToken?.type).toContain('paren'); // brackets should be recognized (either paren or bracket type depending on the lexer)
+  });
+
+  it('highlights ES|QL keywords in triple-quoted "query" fields via the embedded grammar', () => {
+    const text = `POST /_query
+{
+  "query": """FROM logs | DROP message | WHERE age > 30 | LIMIT 10"""
+}`;
+
+    const tokenizedLines = monaco.editor.tokenize(text, CONSOLE_TEST_LANG_ID);
+    const getLine = getLineTokens(tokenizedLines, text);
+
+    const queryLineText = '  "query": """FROM logs | DROP message | WHERE age > 30 | LIMIT 10"""';
+    const queryLine = getLine(queryLineText);
+
+    for (const kw of ['FROM', 'DROP', 'WHERE', 'LIMIT']) {
+      const kwOffset = queryLineText.indexOf(kw);
+      const kwType = getTokenTypeAtOffset(queryLine, kwOffset);
+      expect(kwType).toContain('keyword');
+    }
+
+    // Closing brace must still be recognised after the triple-quoted block.
+    const closingBraceLine = getLine('}');
+    const closingBraceType = getTokenTypeAtOffset(closingBraceLine, 0);
+    expect(closingBraceType).toContain('paren.rparen');
   });
 });

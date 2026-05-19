@@ -12,6 +12,7 @@ import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use
 import { TableId } from '@kbn/securitysolution-data-table';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { EuiSpacer } from '@elastic/eui';
+import { useAssetCriticalityPrivileges } from '../../../entity_analytics/components/asset_criticality/use_asset_criticality';
 import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
@@ -90,7 +91,7 @@ export const HostPanel = memo(function HostPanel({
   const { uiSettings } = useKibana().services;
   const euidApi = useEntityStoreEuidApi();
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   const safeContextID = contextID ?? scopeId ?? 'host-panel';
   const { to, from, setQuery, deleteQuery, isInitializing } = useGlobalTime();
@@ -171,6 +172,7 @@ export const HostPanel = memo(function HostPanel({
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     identityFields: documentEntityIdentifiers,
     entityType: EntityType.host,
+    entityRecord: entityStoreV2Enabled ? entityFromStoreResult.entityRecord : undefined,
     to,
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}HOST_NAME_RIGHT`,
@@ -186,6 +188,8 @@ export const HostPanel = memo(function HostPanel({
     () => (entityStoreV2Enabled ? observedHost.entityRecord?.entity?.id : entityId),
     [entityId, entityStoreV2Enabled, observedHost.entityRecord?.entity?.id]
   );
+
+  const assetCriticalityPrivileges = useAssetCriticalityPrivileges(entityId ?? hostName);
 
   const useEntityStoreInspectForRisk = entityStoreV2Enabled && observedHost.entityRecord != null;
 
@@ -221,7 +225,9 @@ export const HostPanel = memo(function HostPanel({
       : !!hostRiskData?.host?.risk;
 
   const onCriticalitySave =
-    entityFromStoreResult.entityRecord && observedHost.entityRecord
+    !!assetCriticalityPrivileges.data?.has_write_permissions &&
+    entityFromStoreResult.entityRecord &&
+    observedHost.entityRecord
       ? (level: CriticalityLevelWithUnassigned) =>
           updateAssetCriticalityLevel(level, observedHost.entityRecord)
       : undefined;

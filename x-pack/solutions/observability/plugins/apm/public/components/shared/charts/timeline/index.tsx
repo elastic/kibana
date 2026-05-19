@@ -7,11 +7,11 @@
 
 import React, { useState } from 'react';
 import { EuiResizeObserver } from '@elastic/eui';
-import type { AgentMark } from '../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
-import type { ErrorMark } from '../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
 import { getPlotValues } from './plot_utils';
 import { TimelineAxis } from './timeline_axis';
 import { VerticalLines } from './vertical_lines';
+import type { AgentMark } from './marker/agent_marker';
+import type { ErrorMark } from './marker/error_marker';
 
 export type Mark = AgentMark | ErrorMark;
 

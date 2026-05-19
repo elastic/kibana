@@ -48,6 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
   };
 
+  // https://github.com/elastic/kibana/issues/266002: All upgrade assistant tests are skipped in main until we have a way to test them
   describe.skip('Cloud backup status', function () {
     // file system repositories are not supported in cloud
     this.tags(['skipCloud']);

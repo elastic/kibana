@@ -36,8 +36,6 @@ dependsOn:
   - '@kbn/expandable-flyout'
   - '@kbn/react-query'
   - '@kbn/fleet-plugin'
-  - '@kbn/core-http-browser'
-  - '@kbn/fleet-plugin'
 tags:
   - shared-browser
   - package

@@ -420,6 +420,77 @@
     "functions": [
       {
         "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.buildWorkflowLookup",
+        "type": "Function",
+        "tags": [],
+        "label": "buildWorkflowLookup",
+        "description": [],
+        "signature": [
+          "(yamlDocument: ",
+          "Document",
+          "<",
+          "Node",
+          "<unknown>, true>, lineCounter: ",
+          "LineCounter",
+          ") => ",
+          {
+            "pluginId": "@kbn/workflows-yaml",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsYamlPluginApi",
+            "section": "def-common.WorkflowLookup",
+            "text": "WorkflowLookup"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/build_workflow_lookup.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.buildWorkflowLookup.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "yamlDocument",
+            "description": [],
+            "signature": [
+              "Document",
+              "<",
+              "Node",
+              "<unknown>, true>"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/build_workflow_lookup.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.buildWorkflowLookup.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "lineCounter",
+            "description": [],
+            "signature": [
+              "LineCounter"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/build_workflow_lookup.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "LineCounter",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
         "id": "def-common.clearEnrichmentCache",
         "type": "Function",
         "tags": [],
@@ -870,6 +941,50 @@
       },
       {
         "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.getValueFromValueNode",
+        "type": "Function",
+        "tags": [],
+        "label": "getValueFromValueNode",
+        "description": [],
+        "signature": [
+          "(valueNode: ",
+          "Scalar",
+          "<unknown> | ",
+          "YAMLSeq",
+          "<unknown>) => unknown"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/build_workflow_lookup.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.getValueFromValueNode.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "valueNode",
+            "description": [],
+            "signature": [
+              "Scalar",
+              "<unknown> | ",
+              "YAMLSeq",
+              "<unknown>"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/build_workflow_lookup.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
         "id": "def-common.getYamlDocumentErrors",
         "type": "Function",
         "tags": [],
@@ -1045,6 +1160,88 @@
       },
       {
         "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.inspectStep",
+        "type": "Function",
+        "tags": [],
+        "label": "inspectStep",
+        "description": [],
+        "signature": [
+          "(node: any, lineCounter: ",
+          "LineCounter",
+          ", parentStepId: string | undefined) => Record<string, ",
+          {
+            "pluginId": "@kbn/workflows-yaml",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsYamlPluginApi",
+            "section": "def-common.StepInfo",
+            "text": "StepInfo"
+          },
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/build_workflow_lookup.ts",
+        "lineNumber": 92,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.inspectStep.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/build_workflow_lookup.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.inspectStep.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "lineCounter",
+            "description": [],
+            "signature": [
+              "LineCounter"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/build_workflow_lookup.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "LineCounter",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.inspectStep.$3",
+            "type": "string",
+            "tags": [],
+            "label": "parentStepId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/build_workflow_lookup.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
         "id": "def-common.isDynamicValue",
         "type": "Function",
         "tags": [],
@@ -1113,6 +1310,43 @@
             "path": "src/platform/packages/shared/kbn-workflows-yaml/common/regex.ts",
             "lineNumber": 96,
             "columnNumber": 34,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.isNestedStepKey",
+        "type": "Function",
+        "tags": [],
+        "label": "isNestedStepKey",
+        "description": [],
+        "signature": [
+          "(value: unknown) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/build_workflow_lookup.ts",
+        "lineNumber": 88,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.isNestedStepKey.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/build_workflow_lookup.ts",
+            "lineNumber": 88,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2175,6 +2409,253 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.StepInfo",
+        "type": "Interface",
+        "tags": [],
+        "label": "StepInfo",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/build_workflow_lookup.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.StepInfo.stepId",
+            "type": "string",
+            "tags": [],
+            "label": "stepId",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/build_workflow_lookup.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.StepInfo.stepType",
+            "type": "string",
+            "tags": [],
+            "label": "stepType",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/build_workflow_lookup.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.StepInfo.stepYamlNode",
+            "type": "Object",
+            "tags": [],
+            "label": "stepYamlNode",
+            "description": [],
+            "signature": [
+              "YAMLMap",
+              "<unknown, unknown>"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/build_workflow_lookup.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.StepInfo.lineStart",
+            "type": "number",
+            "tags": [],
+            "label": "lineStart",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/build_workflow_lookup.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.StepInfo.lineEnd",
+            "type": "number",
+            "tags": [],
+            "label": "lineEnd",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/build_workflow_lookup.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.StepInfo.propInfos",
+            "type": "Object",
+            "tags": [],
+            "label": "propInfos",
+            "description": [],
+            "signature": [
+              "{ [x: string]: ",
+              {
+                "pluginId": "@kbn/workflows-yaml",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsYamlPluginApi",
+                "section": "def-common.StepPropInfo",
+                "text": "StepPropInfo"
+              },
+              "; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/build_workflow_lookup.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.StepInfo.parentStepId",
+            "type": "string",
+            "tags": [],
+            "label": "parentStepId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/build_workflow_lookup.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.StepPropInfo",
+        "type": "Interface",
+        "tags": [],
+        "label": "StepPropInfo",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/build_workflow_lookup.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.StepPropInfo.path",
+            "type": "Array",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/build_workflow_lookup.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.StepPropInfo.keyNode",
+            "type": "Object",
+            "tags": [],
+            "label": "keyNode",
+            "description": [],
+            "signature": [
+              "Scalar",
+              "<unknown>"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/build_workflow_lookup.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.StepPropInfo.valueNode",
+            "type": "Object",
+            "tags": [],
+            "label": "valueNode",
+            "description": [],
+            "signature": [
+              "Scalar",
+              "<unknown>"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/build_workflow_lookup.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.WorkflowLookup",
+        "type": "Interface",
+        "tags": [],
+        "label": "WorkflowLookup",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/build_workflow_lookup.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.WorkflowLookup.steps",
+            "type": "Object",
+            "tags": [],
+            "label": "steps",
+            "description": [],
+            "signature": [
+              "{ [x: string]: ",
+              {
+                "pluginId": "@kbn/workflows-yaml",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsYamlPluginApi",
+                "section": "def-common.StepInfo",
+                "text": "StepInfo"
+              },
+              "; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/build_workflow_lookup.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-yaml",
+            "id": "def-common.WorkflowLookup.triggersLineStart",
+            "type": "number",
+            "tags": [],
+            "label": "triggersLineStart",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/build_workflow_lookup.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -2214,6 +2695,23 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.NestedStepKey",
+        "type": "Type",
+        "tags": [],
+        "label": "NestedStepKey",
+        "description": [],
+        "signature": [
+          "\"steps\" | \"fallback\" | \"on-failure\" | \"else\" | \"iteration-on-failure\""
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/build_workflow_lookup.ts",
+        "lineNumber": 86,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2442,6 +2940,23 @@
         ],
         "path": "src/platform/packages/shared/kbn-workflows-yaml/common/regex.ts",
         "lineNumber": 88,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-yaml",
+        "id": "def-common.NESTED_STEP_KEYS",
+        "type": "Object",
+        "tags": [],
+        "label": "NESTED_STEP_KEYS",
+        "description": [],
+        "signature": [
+          "readonly [\"steps\", \"else\", \"on-failure\", \"iteration-on-failure\", \"fallback\"]"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-yaml/common/yaml/build_workflow_lookup.ts",
+        "lineNumber": 78,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

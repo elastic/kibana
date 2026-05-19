@@ -118,7 +118,13 @@ export type DefaultParams = z.infer<typeof DefaultParams>;
 
 export const RunScriptOsConfigValues = lazySchema(() =>
   z.object({
+    /**
+     * The ID of the script to run (from the Kibana Script library)
+     */
     scriptId: z.string().optional(),
+    /**
+     * The arguments to pass to the script (if any)
+     */
     scriptInput: z.string().optional(),
     /**
      * Specify the timeout in seconds for the script execution
@@ -129,10 +135,8 @@ export const RunScriptOsConfigValues = lazySchema(() =>
 export type RunScriptOsConfigValues = z.infer<typeof RunScriptOsConfigValues>;
 
 /**
-  * > warn
-> This functionality is currently not available
-
-  */
+ * Run a script on the Elastic Defend host that triggered the alert.
+ */
 export const RunscriptParams = lazySchema(() =>
   z.object({
     command: z.literal('runscript'),

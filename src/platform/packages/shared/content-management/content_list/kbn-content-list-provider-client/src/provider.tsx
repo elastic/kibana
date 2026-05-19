@@ -27,7 +27,10 @@ import {
   NO_CREATOR_USER_LABEL,
   SENTINEL_KEYS,
 } from '@kbn/content-list-provider';
-import { SAVED_OBJECTS_PER_PAGE_ID } from '@kbn/management-settings-ids';
+import {
+  SAVED_OBJECTS_PER_PAGE_ID,
+  SAVED_OBJECTS_LISTING_LIMIT_ID,
+} from '@kbn/management-settings-ids';
 import { useFavorites } from '@kbn/content-management-favorites-public';
 import type { Tag } from '@kbn/content-management-tags';
 import type { TableListViewFindItemsFn, ContentListClientServices } from './types';
@@ -125,10 +128,11 @@ export type ContentListClientProviderProps = ContentListCoreConfig & {
   /**
    * Content editor (metadata editing flyout) configuration.
    *
-   * When provided, creates an `onInspect` callback on the item config that opens
-   * the Kibana content editor flyout. The consumer must wrap their component tree
-   * with `ContentEditorKibanaProvider` (from `@kbn/content-management-content-editor`)
-   * above this provider.
+   * When provided, populates `actions.inspect.onItemAction` on the item
+   * config with a handler that opens the Kibana content editor flyout.
+   * The consumer must wrap their component tree with
+   * `ContentEditorKibanaProvider` (from
+   * `@kbn/content-management-content-editor`) above this provider.
    */
   contentEditor?: ContentEditorConfig;
 };
@@ -207,9 +211,20 @@ export const ContentListClientProvider = ({
     []
   );
 
+  // Read listing limit once at mount. Not reactive — changes during a session
+  // are not expected to take effect until reload (same pattern as page size).
+  const [listingLimit] = useState(() =>
+    services.uiSettings.get<number>(SAVED_OBJECTS_LISTING_LIMIT_ID)
+  );
+
   const { findItems, onInvalidate, onRefresh, getItems } = useMemo(
-    () => createClientStrategy(tableListViewFindItems, starredEnabled ? decorate : undefined),
-    [tableListViewFindItems, starredEnabled, decorate]
+    () =>
+      createClientStrategy(
+        tableListViewFindItems,
+        starredEnabled ? decorate : undefined,
+        listingLimit
+      ),
+    [tableListViewFindItems, starredEnabled, decorate, listingLimit]
   );
 
   const dataSource: DataSourceConfig = useMemo(
@@ -361,22 +376,60 @@ export const ContentListClientProvider = ({
   // Derive queryKeyScope the same way the base provider does.
   const queryKeyScope = rest.queryKeyScope ?? `${rest.id}-listing`;
 
-  // Create the onInspect callback from the content editor config.
+  // Wrap the consumer's `contentEditor.onSave` so the client strategy cache is
+  // cleared before {@link useContentEditorInspect} invalidates the React Query
+  // cache. Without this, the strategy's internal `searchQuery`-keyed cache
+  // returns stale items on the post-save refetch and the row appears
+  // unchanged in the table — see `createClientStrategy.findItemsFn`.
+  const contentEditorWithInvalidation = useMemo<ContentEditorConfig | undefined>(() => {
+    if (!contentEditor?.onSave) {
+      return contentEditor;
+    }
+    const consumerOnSave = contentEditor.onSave;
+    return {
+      ...contentEditor,
+      onSave: async (args) => {
+        await consumerOnSave(args);
+        onInvalidate();
+      },
+    };
+  }, [contentEditor, onInvalidate]);
+
+  // Create the inspect handler from the content editor config.
   const onInspect = useContentEditorInspect({
-    contentEditor,
+    contentEditor: contentEditorWithInvalidation,
     entityName: rest.labels.entity,
     isReadOnly: rest.isReadOnly,
     queryKeyScope,
   });
 
-  // Merge onInspect into the item config.
-  const itemConfig = useMemo(
-    () => ({
+  // Merge the inspect handler into the item config.
+  //
+  // - Preserve consumer-supplied fields on `actions.inspect` (e.g. `restriction`).
+  // - When the consumer set `getItemActionHref`, respect their explicit
+  //   link choice and skip the inject — `onItemAction` and
+  //   `getItemActionHref` are mutually exclusive.
+  // - Otherwise default-inject `onItemAction` (which also overrides any
+  //   consumer-provided placeholder handler).
+  const itemConfig = useMemo(() => {
+    if (!onInspect) {
+      return itemConfigProp;
+    }
+    const consumerInspect = itemConfigProp?.actions?.inspect;
+    if (consumerInspect?.getItemActionHref) {
+      return itemConfigProp;
+    }
+    return {
       ...itemConfigProp,
-      ...(onInspect && { onInspect }),
-    }),
-    [itemConfigProp, onInspect]
-  );
+      actions: {
+        ...itemConfigProp?.actions,
+        inspect: {
+          ...consumerInspect,
+          onItemAction: onInspect,
+        },
+      },
+    };
+  }, [itemConfigProp, onInspect]);
 
   return (
     <ContentListProvider
