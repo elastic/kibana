@@ -7,21 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AxiosError } from 'axios';
-
+/**
+ * Error thrown by `KbnClientRequester` when an HTTP request fails after retries.
+ * Exposes `.status` directly so callers can branch on the HTTP code (e.g. treat
+ * 404 as "not found"), and `.headers` so callers can read response headers like
+ * `Retry-After` for backoff. The underlying error is attached via `Error.cause`.
+ */
 export class KbnClientRequesterError extends Error {
-  axiosError?: AxiosError;
-  constructor(message: string, error: unknown) {
-    super(message);
+  status?: number;
+  headers?: Headers;
+  constructor(message: string, options?: { status?: number; headers?: Headers; cause?: unknown }) {
+    super(message, options?.cause !== undefined ? { cause: options.cause } : undefined);
     this.name = 'KbnClientRequesterError';
-    if (error instanceof AxiosError) this.axiosError = clean(error);
+    this.status = options?.status;
+    this.headers = options?.headers;
   }
-}
-function clean(error: Error): AxiosError {
-  const _ = AxiosError.from(error);
-  delete _.cause;
-  delete _.config;
-  delete _.request;
-  delete _.response;
-  return _;
 }
