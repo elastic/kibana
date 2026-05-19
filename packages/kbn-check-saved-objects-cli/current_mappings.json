@@ -72,6 +72,7 @@
             "type": "keyword"
           },
           "params": {
+            "ignore_above": 4096,
             "type": "flattened"
           }
         },
@@ -336,9 +337,7 @@
       "createdBy": {
         "type": "keyword"
       },
-      "createdByUsername": {
-        "type": "keyword"
-      },
+
       "description": {
         "fields": {
           "keyword": {
@@ -401,9 +400,6 @@
         "type": "date"
       },
       "updatedBy": {
-        "type": "keyword"
-      },
-      "updatedByUsername": {
         "type": "keyword"
       }
     }
