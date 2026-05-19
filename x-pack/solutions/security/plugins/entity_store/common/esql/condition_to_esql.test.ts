@@ -6,7 +6,7 @@
  */
 
 import { conditionToESQL } from '@kbn/streamlang';
-import { fieldNotOneOfCondition } from '../domain/definitions/common_fields';
+import { fieldNotOneOfCondition, isNotEmptyCondition } from '../domain/definitions/common_fields';
 import { LOCAL_NAMESPACE_EXCLUDED_USER_NAMES } from '../domain/definitions/user_entity_constants';
 import { entityStoreConditionToESQL } from './condition_to_esql';
 
@@ -50,6 +50,67 @@ describe('entityStoreConditionToESQL', () => {
       expect(result).toContain('`user.name` IN (');
       expect(result).toContain(' AND ');
       expect(result).not.toContain(' OR ');
+    });
+  });
+
+  describe('isNotEmpty condition optimization', () => {
+    it('rewrites AND(exists:true, neq:"") on same field to IS NOT NULL AND != ""', () => {
+      const result = entityStoreConditionToESQL(isNotEmptyCondition('host.id'));
+      expect(result).toBe('host.id IS NOT NULL AND host.id != ""');
+    });
+
+    it('does not optimize AND(exists:true, neq:"") with different fields', () => {
+      const condition = {
+        and: [
+          { field: 'host.id', exists: true },
+          { field: 'host.name', neq: '' },
+        ],
+      };
+      // Falls through to general AND handling
+      const result = entityStoreConditionToESQL(condition as any);
+      expect(result).not.toBe('host.id IS NOT NULL AND host.id != ""');
+    });
+
+    it('optimizes isNotEmpty inside OR (documentsFilter pattern)', () => {
+      const condition = {
+        or: [
+          isNotEmptyCondition('host.id'),
+          isNotEmptyCondition('host.name'),
+          isNotEmptyCondition('host.hostname'),
+        ],
+      };
+      const result = entityStoreConditionToESQL(condition);
+      expect(result).toBe(
+        'host.id IS NOT NULL AND host.id != "" OR ' +
+          'host.name IS NOT NULL AND host.name != "" OR ' +
+          'host.hostname IS NOT NULL AND host.hostname != ""'
+      );
+    });
+
+    it('optimizes isNotEmpty inside AND + OR (user documentsFilter pattern)', () => {
+      const condition = {
+        and: [
+          {
+            or: [
+              { field: 'event.outcome', exists: false },
+              { field: 'event.outcome', neq: 'failure' },
+            ],
+          },
+          {
+            or: [
+              isNotEmptyCondition('user.email'),
+              isNotEmptyCondition('user.id'),
+              isNotEmptyCondition('user.name'),
+            ],
+          },
+        ],
+      };
+      const result = entityStoreConditionToESQL(condition as any);
+      expect(result).toContain('user.email IS NOT NULL AND user.email != ""');
+      expect(result).toContain('user.id IS NOT NULL AND user.id != ""');
+      expect(result).toContain('user.name IS NOT NULL AND user.name != ""');
+      // event.outcome arms fall through to streamlang (not isNotEmpty pattern)
+      expect(result).not.toContain('NOT(`event.outcome`');
     });
   });
 

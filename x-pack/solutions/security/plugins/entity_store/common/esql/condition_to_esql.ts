@@ -13,7 +13,7 @@ import {
   isOrCondition,
   type Condition,
 } from '@kbn/streamlang';
-import { escapeEsqlStringLiteral } from './strings';
+import { escapeEsqlStringLiteral, esqlIsNotNullOrEmpty } from './strings';
 
 /**
  * Drop-in wrapper around the streamlang `conditionToESQL` that optimizes
@@ -36,6 +36,8 @@ export function entityStoreConditionToESQL(condition: Condition): string {
     return `NOT (${entityStoreConditionToESQL(condition.not)})`;
   }
   if (isAndCondition(condition)) {
+    const notEmptyField = getNotEmptyField(condition);
+    if (notEmptyField !== null) return esqlIsNotNullOrEmpty(notEmptyField);
     return condition.and
       .map((c) => {
         const s = entityStoreConditionToESQL(c);
@@ -46,6 +48,17 @@ export function entityStoreConditionToESQL(condition: Condition): string {
       .join(' AND ');
   }
   return conditionToESQL(condition);
+}
+
+/** Detects { and: [{ field: X, exists: true }, { field: X, neq: '' }] } → returns X, or null. */
+function getNotEmptyField(condition: Condition): string | null {
+  if (!isAndCondition(condition) || condition.and.length !== 2) return null;
+  const [first, second] = condition.and;
+  if (!isFilterCondition(first) || !isFilterCondition(second)) return null;
+  const f = first as Record<string, unknown>;
+  const s = second as Record<string, unknown>;
+  if (f.exists !== true || s.neq !== '' || f.field !== s.field) return null;
+  return f.field as string;
 }
 
 function buildInClauseOrNull(conditions: Condition[]): string | null {
