@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { escapeKuery } from '@kbn/es-query';
-import { SERVICE_ENVIRONMENT } from '../es_fields';
+import { SERVICE_ENVIRONMENT } from './es_fields/apm';
 import type { Environment } from './environment_rt';
 
 export const ENVIRONMENT_ALL_VALUE = 'ENVIRONMENT_ALL' as const;
