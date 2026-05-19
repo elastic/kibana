@@ -38,6 +38,7 @@ import {
 import type { ComposeDiscoverMode, SandboxApplyData } from './types';
 import { useComposeDiscoverState, getSandboxTabConfig } from './use_compose_discover_state';
 import { ComposeDiscoverForm, getSteps } from './compose_discover_form';
+import { HorizontalMinimalStepper, type MinimalStep } from './horizontal_minimal_stepper';
 import { ComposeDiscoverChild } from './compose_discover_child';
 import { useEsqlAutocomplete } from './use_esql_providers';
 import { useSplitQueryCompletion } from './use_split_query_completion';
@@ -84,6 +85,12 @@ export interface ComposeDiscoverFlyoutProps {
 }
 
 const FLYOUT_TITLE_ID = 'composeDiscoverFlyoutTitle';
+
+const getStepStatus = (currentStep: number, stepIndex: number): MinimalStep['status'] => {
+  if (stepIndex < currentStep) return 'complete';
+  if (stepIndex === currentStep) return 'current';
+  return 'incomplete';
+};
 
 /** Bridge YAML parse (FormValues) into compose form shape until yaml_form_utils adopts ComposeFormValues. */
 const formValuesFromYamlToCompose = (parsed: FormValues): ComposeFormValues => ({
@@ -408,7 +415,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
               responsive={false}
               style={{ marginTop: 8 }}
             >
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow>
                 {uiState.yamlMode ? (
                   <EuiBadge color="hollow" data-test-subj="composeDiscoverYamlBadge">
                     {i18n.translate('xpack.alertingV2.composeDiscover.yamlMode.badge', {
@@ -416,7 +423,14 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                     })}
                   </EuiBadge>
                 ) : (
-                  <>{/* Step indicator coming in PR A — HorizontalMinimalStepper */}</>
+                  <HorizontalMinimalStepper
+                    steps={steps.map(
+                      (s, i): MinimalStep => ({
+                        title: s.title,
+                        status: getStepStatus(uiState.step, i),
+                      })
+                    )}
+                  />
                 )}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
