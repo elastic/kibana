@@ -16,10 +16,7 @@ export interface OnboardingParams {
 }
 
 export class CloudOnboardingPageObject {
-  constructor(
-    private readonly page: ScoutPage,
-    private readonly kbnUrl: KibanaUrl
-  ) {}
+  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
 
   async navigateWithParams({ token, securityDetails, resourceData, next, hash }: OnboardingParams) {
     const params = new URLSearchParams();
@@ -32,7 +29,10 @@ export class CloudOnboardingPageObject {
     if (hash) path += hash;
 
     await this.page.goto(this.kbnUrl.get(path));
-    await this.page.testSubj.waitForSelector('userMenuButton', { state: 'visible', timeout: 20000 });
+    await this.page.testSubj.waitForSelector('userMenuButton', {
+      state: 'visible',
+      timeout: 20000,
+    });
   }
 
   getCurrentPathname(): Promise<string> {

@@ -30,9 +30,6 @@ export const servers: ScoutServerConfig = {
 
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
-    serverArgs: [
-      ...defaultConfig.kbnTestServer.serverArgs,
-      ...cloudLinksServerArgs,
-    ],
+    serverArgs: [...defaultConfig.kbnTestServer.serverArgs, ...cloudLinksServerArgs],
   },
 };
