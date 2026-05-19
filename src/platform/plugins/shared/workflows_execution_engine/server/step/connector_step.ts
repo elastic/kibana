@@ -146,8 +146,8 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
         if (maxBytes > 0) {
           renderedInputs = {
             ...renderedInputs,
-            fetcher: {
-              ...(renderedInputs?.fetcher || {}),
+            fetchOptions: {
+              ...(renderedInputs?.fetchOptions || {}),
               max_content_length: maxBytes,
             },
           };

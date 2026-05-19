@@ -390,7 +390,7 @@ describe('ConnectorStepImpl', () => {
         }),
       })
     );
-    expect(connectorExecutor.execute.mock.calls[0][0].input.fetcher).toBeUndefined();
+    expect(connectorExecutor.execute.mock.calls[0][0].input.fetchOptions).toBeUndefined();
   });
 
   it('injects max_content_length for spec connector sub-actions', async () => {
@@ -423,7 +423,7 @@ describe('ConnectorStepImpl', () => {
     expect(callInput).toEqual({
       subAction: 'downloadFile',
       subActionParams: { fileId: 'file-1' },
-      fetcher: {
+      fetchOptions: {
         max_content_length: 20 * 1024 * 1024,
       },
     });
@@ -490,7 +490,7 @@ describe('ConnectorStepImpl', () => {
       expect.objectContaining({
         connectorType: '.http-system',
         input: expect.objectContaining({
-          fetcher: expect.objectContaining({
+          fetchOptions: expect.objectContaining({
             max_content_length: expect.any(Number),
           }),
         }),
@@ -529,7 +529,7 @@ describe('ConnectorStepImpl', () => {
 
     await (impl as any)._run({ url: 'https://example.com' });
     const callInput = connectorExecutor.execute.mock.calls[0][0].input;
-    expect(callInput.fetcher).toBeDefined();
-    expect(callInput.fetcher.max_content_length).toBeGreaterThan(0);
+    expect(callInput.fetchOptions).toBeDefined();
+    expect(callInput.fetchOptions.max_content_length).toBeGreaterThan(0);
   });
 });

@@ -160,7 +160,7 @@ describe('generateExecutorFunction', () => {
       });
     });
 
-    it('passes fetcher max_content_length to getAxiosInstanceWithAuth', async () => {
+    it('passes fetchOptions max_content_length to getAxiosInstanceWithAuth', async () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
@@ -170,7 +170,7 @@ describe('generateExecutorFunction', () => {
         makeExecOptions({
           subAction: 'testAction',
           subActionParams: {},
-          fetcher: { max_content_length: 20 * 1024 * 1024 },
+          fetchOptions: { max_content_length: 20 * 1024 * 1024 },
         })
       );
 

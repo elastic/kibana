@@ -49,49 +49,25 @@ interface GetAxiosInstanceOpts {
 type ValidatedSecrets = Record<string, unknown>;
 
 const MAX_CONTENT_LENGTH_ERROR_MESSAGE = 'maxContentLength';
-const SENSITIVE_HEADER_NAMES = new Set([
-  'authorization',
-  'cookie',
-  'proxy-authorization',
-  'set-cookie',
+
+const SAFE_HEADER_NAMES = new Set([
+  'content-length',
+  'content-type',
+  'transfer-encoding',
+  'content-encoding',
+  'x-decompressed-content-length',
 ]);
 
-const getHeaderValue = ({
-  headers,
-  headerName,
-}: {
-  headers: unknown;
-  headerName: string;
-}): unknown => {
-  if (!headers || typeof headers !== 'object') {
-    return undefined;
-  }
-
-  const normalizedHeaderName = headerName.toLowerCase();
-  const headersRecord = headers as Record<string, unknown>;
-  const matchingHeaderName = Object.keys(headersRecord).find(
-    (key) => key.toLowerCase() === normalizedHeaderName
-  );
-
-  return matchingHeaderName ? headersRecord[matchingHeaderName] : undefined;
-};
-
-const getHeaderKeys = (headers: unknown): string[] => {
-  if (!headers || typeof headers !== 'object') {
-    return [];
-  }
-
-  return Object.keys(headers as Record<string, unknown>);
-};
-
-const getSanitizedHeaders = (headers: unknown): Record<string, unknown> => {
+const pickSafeHeaders = (headers: unknown): Record<string, unknown> => {
   if (!headers || typeof headers !== 'object') {
     return {};
   }
 
   return Object.entries(headers as Record<string, unknown>).reduce<Record<string, unknown>>(
     (acc, [key, value]) => {
-      acc[key] = SENSITIVE_HEADER_NAMES.has(key.toLowerCase()) ? '[REDACTED]' : value;
+      if (SAFE_HEADER_NAMES.has(key.toLowerCase())) {
+        acc[key] = value;
+      }
       return acc;
     },
     {}
@@ -121,29 +97,15 @@ const logMaxContentLengthError = ({
       };
     };
   };
-  const responseHeaders = axiosError.response?.headers;
-  const requestResponseHeaders = axiosError.request?.res?.headers;
 
-  // Debug-level only; header values may contain non-sensitive but verbose data.
-  // Sensitive headers (auth, cookies) are redacted by getSanitizedHeaders.
   logger.debug(
     `Actions Axios request exceeded maxContentLength: ${errorMessage}; metadata: ${JSON.stringify({
       connectorId,
       configuredMaxContentLength: maxContentLength,
       errorCode: axiosError.code,
       responseStatus: axiosError.response?.status,
-      responseContentLength: getHeaderValue({
-        headers: responseHeaders,
-        headerName: 'content-length',
-      }),
-      requestResponseContentLength: getHeaderValue({
-        headers: requestResponseHeaders,
-        headerName: 'content-length',
-      }),
-      responseHeaderKeys: getHeaderKeys(responseHeaders),
-      requestResponseHeaderKeys: getHeaderKeys(requestResponseHeaders),
-      responseHeaders: getSanitizedHeaders(responseHeaders),
-      requestResponseHeaders: getSanitizedHeaders(requestResponseHeaders),
+      responseHeaders: pickSafeHeaders(axiosError.response?.headers),
+      requestResponseHeaders: pickSafeHeaders(axiosError.request?.res?.headers),
     })}`
   );
 };

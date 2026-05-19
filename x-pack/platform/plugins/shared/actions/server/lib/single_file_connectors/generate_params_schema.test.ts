@@ -44,7 +44,7 @@ describe('generateParamsSchema', () => {
                 message: z.string(),
                 foobar: z.number(),
               }),
-              fetcher: z
+              fetchOptions: z
                 .object({
                   max_content_length: z.number().positive().optional(),
                 })
@@ -58,7 +58,7 @@ describe('generateParamsSchema', () => {
               subActionParams: z.object({
                 bool: z.boolean(),
               }),
-              fetcher: z
+              fetchOptions: z
                 .object({
                   max_content_length: z.number().positive().optional(),
                 })
@@ -70,7 +70,7 @@ describe('generateParamsSchema', () => {
             .object({
               subAction: z.literal('action3'),
               subActionParams: z.object({}),
-              fetcher: z
+              fetchOptions: z
                 .object({
                   max_content_length: z.number().positive().optional(),
                 })
@@ -100,17 +100,17 @@ describe('generateParamsSchema', () => {
       });
     });
 
-    it('parses reserved fetcher options', () => {
+    it('parses reserved fetchOptions', () => {
       const result = generateParamsSchema(mockActions);
       const parsed = result.schema.parse({
         subAction: 'action1',
         subActionParams: { message: 'hello', foobar: 42 },
-        fetcher: { max_content_length: 1024 },
+        fetchOptions: { max_content_length: 1024 },
       });
       expect(parsed).toEqual({
         subAction: 'action1',
         subActionParams: { message: 'hello', foobar: 42 },
-        fetcher: { max_content_length: 1024 },
+        fetchOptions: { max_content_length: 1024 },
       });
     });
 
@@ -171,13 +171,13 @@ describe('generateParamsSchema', () => {
       ).toThrow(/extraTopLevel|Unrecognized/);
     });
 
-    it('rejects unknown fetcher options', () => {
+    it('rejects unknown fetchOptions fields', () => {
       const result = generateParamsSchema(mockActions);
       expect(() =>
         result.schema.parse({
           subAction: 'action1',
           subActionParams: { message: 'x', foobar: 1 },
-          fetcher: { unknown: true },
+          fetchOptions: { unknown: true },
         })
       ).toThrow(/unknown|Unrecognized/);
     });

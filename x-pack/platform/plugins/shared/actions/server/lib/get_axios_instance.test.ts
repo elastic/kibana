@@ -123,7 +123,7 @@ describe('getAxiosInstance', () => {
     await expect(rejectionHandler(error)).rejects.toBe(error);
 
     expect(logger.debug).toHaveBeenCalledWith(
-      'Actions Axios request exceeded maxContentLength: maxContentLength size of 20971520 exceeded; metadata: {"connectorId":"1","configuredMaxContentLength":20971520,"errorCode":"ERR_BAD_RESPONSE","responseStatus":200,"responseContentLength":"104857600","requestResponseContentLength":"104857600","responseHeaderKeys":["content-length","content-type","set-cookie"],"requestResponseHeaderKeys":["Content-Length","server","cookie"],"responseHeaders":{"content-length":"104857600","content-type":"application/octet-stream","set-cookie":"[REDACTED]"},"requestResponseHeaders":{"Content-Length":"104857600","server":"test","cookie":"[REDACTED]"}}'
+      'Actions Axios request exceeded maxContentLength: maxContentLength size of 20971520 exceeded; metadata: {"connectorId":"1","configuredMaxContentLength":20971520,"errorCode":"ERR_BAD_RESPONSE","responseStatus":200,"responseHeaders":{"content-length":"104857600","content-type":"application/octet-stream"},"requestResponseHeaders":{"Content-Length":"104857600"}}'
     );
   });
 

@@ -19,7 +19,7 @@ import type {
 import type { GetAxiosInstanceWithAuthFn } from '../get_axios_instance';
 
 type RecordUnknown = Record<string, unknown>;
-interface FetcherOptions {
+interface FetchOptions {
   max_content_length?: number;
 }
 
@@ -84,8 +84,8 @@ export const generateExecutorFunction = ({
       authMode,
       profileUid,
     } = execOptions;
-    const { subAction, subActionParams, fetcher } = params as ExecutorParams & {
-      fetcher?: FetcherOptions;
+    const { subAction, subActionParams, fetchOptions } = params as ExecutorParams & {
+      fetchOptions?: FetchOptions;
     };
 
     const axiosInstance = await getAxiosInstanceWithAuth({
@@ -96,7 +96,9 @@ export const generateExecutorFunction = ({
       signal,
       authMode,
       profileUid,
-      ...(fetcher?.max_content_length ? { maxContentLength: fetcher.max_content_length } : {}),
+      ...(fetchOptions?.max_content_length
+        ? { maxContentLength: fetchOptions.max_content_length }
+        : {}),
     });
 
     if (!actions[subAction]) {
