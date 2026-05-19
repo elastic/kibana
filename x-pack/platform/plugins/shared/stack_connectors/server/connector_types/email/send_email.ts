@@ -212,6 +212,59 @@ async function sendEmailWithNodemailer(
   return result;
 }
 
+// basic CSS to improve rendering of markdown-generated HTML in email clients
+const EMAIL_STYLES = `
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #343741;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 16px 0;
+  }
+  th, td {
+    border: 1px solid #d3dae6;
+    padding: 8px 12px;
+    text-align: left;
+  }
+  th {
+    background-color: #f5f7fa;
+    font-weight: 600;
+  }
+  tr:nth-child(even) {
+    background-color: #fafbfd;
+  }
+  code {
+    background-color: #f5f7fa;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-size: 90%;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  }
+  pre {
+    background-color: #f5f7fa;
+    padding: 12px;
+    border-radius: 4px;
+    overflow-x: auto;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+  }
+  blockquote {
+    border-left: 4px solid #d3dae6;
+    margin: 16px 0;
+    padding: 8px 16px;
+    color: #69707d;
+  }
+  a {
+    color: #006bb4;
+  }
+`;
+
 // try rendering markdown to html, return markdown on any kind of error
 function htmlFromMarkdown(logger: Logger, markdown: string) {
   try {
@@ -219,12 +272,25 @@ function htmlFromMarkdown(logger: Logger, markdown: string) {
       linkify: true,
     });
 
-    return md.render(markdown);
+    const rendered = md.render(markdown);
+
+    return wrapHtmlWithStyles(rendered);
   } catch (err) {
     logger.debug(`error rendering markdown to html: ${err.message}`);
 
     return markdown;
   }
+}
+
+function wrapHtmlWithStyles(html: string): string {
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>${EMAIL_STYLES}</style>
+</head>
+<body>${html}</body>
+</html>`;
 }
 
 function getTransportConfig(
