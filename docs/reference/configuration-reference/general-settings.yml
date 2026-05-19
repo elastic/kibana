@@ -903,11 +903,6 @@ groups:
           - "ech: unavailable"
           - "self: ga"
         deprecation_details: "Deprecated in 8.3.0. Use `unifiedSearch.autocomplete.valueSuggestions.terminateAfter` instead."
-        note: |
-          :::{note}
-          :applies_to: stack: ga 9.4.0!-9.4.1!
-          Using this setting in Kibana 9.4.0 and 9.4.1 causes a startup failure due to a known regression. Upgrade to 9.4.2 or later, or migrate to `unifiedSearch.autocomplete.valueSuggestions.terminateAfter`.
-          :::
 
       - setting: data.autocomplete.valueSuggestions.timeout
         description: |
