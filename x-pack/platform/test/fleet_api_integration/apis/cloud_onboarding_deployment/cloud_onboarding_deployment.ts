@@ -10,18 +10,16 @@ import { skipIfNoDockerRegistry } from '../../helpers';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 const BASE_URL = '/api/fleet/cloud_onboarding_deployments';
+const CONNECTORS_URL = '/api/fleet/cloud_connectors';
 
-const VALID_CREATE_BODY = {
-  provider: 'aws',
-  connectorId: 'test-connector-id-1',
-  mechanisms: ['identity_federation'],
-  services: ['cloudwatch_metrics'],
-  vars: { role_arn: 'arn:aws:iam::123456789012:role/ElasticIntegrationRole' },
-  serviceVars: {
-    cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }],
+const connectorFixture = (name: string) => ({
+  name,
+  cloudProvider: 'aws',
+  vars: {
+    role_arn: { value: 'arn:aws:iam::123456789012:role/test', type: 'text' },
+    external_id: { type: 'password', value: { isSecretRef: true, id: 'test1234567890123456' } },
   },
-  secrets: { external_id: 'ext-abc123' },
-};
+});
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -33,10 +31,30 @@ export default function (providerContext: FtrProviderContext) {
   describe('fleet_cloud_onboarding_deployments', () => {
     skipIfNoDockerRegistry(providerContext);
 
+    // Connector IDs created once and shared across suites that need them.
+    let primaryConnectorId: string;
+    let secondaryConnectorId: string;
+    let listConnectorId: string;
+
+    let connectorSeq = 0;
+    const createConnector = async (urlPrefix = '') => {
+      const name = `test-connector-${++connectorSeq}`;
+      const { body } = await supertest
+        .post(`${urlPrefix}${CONNECTORS_URL}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send(connectorFixture(name))
+        .expect(200);
+      return body.item.id as string;
+    };
+
     before(async () => {
       await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       await kibanaServer.savedObjects.cleanStandardList();
       await fleetAndAgents.setup();
+
+      primaryConnectorId = await createConnector();
+      secondaryConnectorId = await createConnector();
+      listConnectorId = await createConnector();
     });
 
     after(async () => {
@@ -61,12 +79,22 @@ export default function (providerContext: FtrProviderContext) {
         const { body } = await supertest
           .post(BASE_URL)
           .set('kbn-xsrf', 'xxxx')
-          .send(VALID_CREATE_BODY)
+          .send({
+            provider: 'aws',
+            connectorId: primaryConnectorId,
+            mechanisms: ['identity_federation'],
+            services: ['cloudwatch_metrics'],
+            vars: { role_arn: 'arn:aws:iam::123456789012:role/ElasticIntegrationRole' },
+            serviceVars: {
+              cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }],
+            },
+            secrets: { external_id: 'ext-abc123' },
+          })
           .expect(200);
 
         expect(body.item).to.have.property('id');
         expect(body.item.provider).to.equal('aws');
-        expect(body.item.connectorId).to.equal('test-connector-id-1');
+        expect(body.item.connectorId).to.equal(primaryConnectorId);
         expect(body.item.mechanisms).to.eql(['identity_federation']);
         expect(body.item.services).to.eql(['cloudwatch_metrics']);
         expect(body.item.status).to.equal('pending');
@@ -85,7 +113,7 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .send({
             provider: 'aws',
-            connectorId: 'test-connector-id-2',
+            connectorId: secondaryConnectorId,
             mechanisms: [],
             services: ['s3_logs'],
           })
@@ -98,11 +126,24 @@ export default function (providerContext: FtrProviderContext) {
         createdIds.push(body.item.id);
       });
 
+      it('should return 400 when connectorId does not exist', async () => {
+        await supertest
+          .post(BASE_URL)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            provider: 'aws',
+            connectorId: '00000000-0000-0000-0000-000000000000',
+            mechanisms: [],
+            services: ['cloudtrail'],
+          })
+          .expect(400);
+      });
+
       it('should return 400 when provider is missing', async () => {
         await supertest
           .post(BASE_URL)
           .set('kbn-xsrf', 'xxxx')
-          .send({ connectorId: 'conn-1', mechanisms: [], services: ['cloudtrail'] })
+          .send({ connectorId: primaryConnectorId, mechanisms: [], services: ['cloudtrail'] })
           .expect(400);
       });
 
@@ -126,7 +167,7 @@ export default function (providerContext: FtrProviderContext) {
         await supertest
           .post(BASE_URL)
           .set('kbn-xsrf', 'xxxx')
-          .send({ provider: 'aws', connectorId: 'conn-1', mechanisms: [] })
+          .send({ provider: 'aws', connectorId: primaryConnectorId, mechanisms: [] })
           .expect(400);
       });
 
@@ -134,7 +175,7 @@ export default function (providerContext: FtrProviderContext) {
         await supertest
           .post(BASE_URL)
           .set('kbn-xsrf', 'xxxx')
-          .send({ provider: 'aws', connectorId: 'conn-1', mechanisms: [], services: [] })
+          .send({ provider: 'aws', connectorId: primaryConnectorId, mechanisms: [], services: [] })
           .expect(400);
       });
 
@@ -144,7 +185,7 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .send({
             provider: 'invalid-cloud',
-            connectorId: 'conn-1',
+            connectorId: primaryConnectorId,
             mechanisms: [],
             services: ['cloudtrail'],
           })
@@ -157,7 +198,7 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .send({
             provider: 'aws',
-            connectorId: 'conn-1',
+            connectorId: primaryConnectorId,
             mechanisms: ['invalid_mechanism'],
             services: ['cloudtrail'],
           })
@@ -172,7 +213,17 @@ export default function (providerContext: FtrProviderContext) {
         const { body } = await supertest
           .post(BASE_URL)
           .set('kbn-xsrf', 'xxxx')
-          .send(VALID_CREATE_BODY)
+          .send({
+            provider: 'aws',
+            connectorId: primaryConnectorId,
+            mechanisms: ['identity_federation'],
+            services: ['cloudwatch_metrics'],
+            vars: { role_arn: 'arn:aws:iam::123456789012:role/ElasticIntegrationRole' },
+            serviceVars: {
+              cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }],
+            },
+            secrets: { external_id: 'ext-abc123' },
+          })
           .expect(200);
         deploymentId = body.item.id;
       });
@@ -186,7 +237,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(body.item.id).to.equal(deploymentId);
         expect(body.item.provider).to.equal('aws');
-        expect(body.item.connectorId).to.equal('test-connector-id-1');
+        expect(body.item.connectorId).to.equal(primaryConnectorId);
         expect(body.item.status).to.equal('pending');
         expect(body.item).not.to.have.property('secrets');
       });
@@ -197,7 +248,6 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('GET /api/fleet/cloud_onboarding_deployments/connector/{connectorId}', () => {
-      const connectorId = 'test-connector-list-1';
       const createdIds: string[] = [];
 
       before(async () => {
@@ -208,7 +258,7 @@ export default function (providerContext: FtrProviderContext) {
             .set('kbn-xsrf', 'xxxx')
             .send({
               provider: 'aws',
-              connectorId,
+              connectorId: listConnectorId,
               mechanisms: [mechanism],
               services: ['cloudtrail'],
             })
@@ -228,12 +278,14 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should return all deployments for the connector', async () => {
-        const { body } = await supertest.get(`${BASE_URL}/connector/${connectorId}`).expect(200);
+        const { body } = await supertest
+          .get(`${BASE_URL}/connector/${listConnectorId}`)
+          .expect(200);
 
         expect(body.items).to.be.an('array');
         expect(body.items.length).to.equal(2);
         body.items.forEach((item: Record<string, unknown>) => {
-          expect(item.connectorId).to.equal(connectorId);
+          expect(item.connectorId).to.equal(listConnectorId);
           expect(item).not.to.have.property('secrets');
         });
       });
@@ -254,7 +306,17 @@ export default function (providerContext: FtrProviderContext) {
         const { body } = await supertest
           .post(BASE_URL)
           .set('kbn-xsrf', 'xxxx')
-          .send(VALID_CREATE_BODY)
+          .send({
+            provider: 'aws',
+            connectorId: primaryConnectorId,
+            mechanisms: ['identity_federation'],
+            services: ['cloudwatch_metrics'],
+            vars: { role_arn: 'arn:aws:iam::123456789012:role/ElasticIntegrationRole' },
+            serviceVars: {
+              cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }],
+            },
+            secrets: { external_id: 'ext-abc123' },
+          })
           .expect(200);
         deploymentId = body.item.id;
       });
@@ -353,17 +415,50 @@ export default function (providerContext: FtrProviderContext) {
     describe('Space isolation', () => {
       const TEST_SPACE = 'test-cloud-onboarding-space';
       const spaceUrl = (path: string) => `/s/${TEST_SPACE}${path}`;
-      let defaultSpaceId: string;
-      let testSpaceId: string;
+      let defaultSpaceConnectorId: string;
+      let testSpaceConnectorId: string;
+      let defaultSpaceDeploymentId: string;
+      let testSpaceDeploymentId: string;
+
+      before(async () => {
+        await kibanaServer.spaces.create({ id: TEST_SPACE, name: TEST_SPACE }).catch(() => {});
+
+        defaultSpaceConnectorId = await createConnector();
+        testSpaceConnectorId = await createConnector(`/s/${TEST_SPACE}`);
+
+        const { body: defaultBody } = await supertest
+          .post(BASE_URL)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            provider: 'aws',
+            connectorId: defaultSpaceConnectorId,
+            mechanisms: ['identity_federation'],
+            services: ['cloudtrail'],
+          })
+          .expect(200);
+        defaultSpaceDeploymentId = defaultBody.item.id;
+
+        const { body: spaceBody } = await supertest
+          .post(spaceUrl(BASE_URL))
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            provider: 'aws',
+            connectorId: testSpaceConnectorId,
+            mechanisms: ['identity_federation'],
+            services: ['cloudtrail'],
+          })
+          .expect(200);
+        testSpaceDeploymentId = spaceBody.item.id;
+      });
 
       after(async () => {
         try {
           await supertest
-            .delete(`${BASE_URL}/${defaultSpaceId}`)
+            .delete(`${BASE_URL}/${defaultSpaceDeploymentId}`)
             .set('kbn-xsrf', 'xxxx')
             .catch(() => {});
           await supertest
-            .delete(spaceUrl(`${BASE_URL}/${testSpaceId}`))
+            .delete(spaceUrl(`${BASE_URL}/${testSpaceDeploymentId}`))
             .set('kbn-xsrf', 'xxxx')
             .catch(() => {});
         } finally {
@@ -371,57 +466,42 @@ export default function (providerContext: FtrProviderContext) {
         }
       });
 
-      before(async () => {
-        await kibanaServer.spaces.create({ id: TEST_SPACE, name: TEST_SPACE }).catch(() => {});
-        const { body: defaultBody } = await supertest
-          .post(BASE_URL)
-          .set('kbn-xsrf', 'xxxx')
-          .send({ ...VALID_CREATE_BODY, connectorId: 'space-isolation-default' })
-          .expect(200);
-        defaultSpaceId = defaultBody.item.id;
-
-        const { body: spaceBody } = await supertest
-          .post(spaceUrl(BASE_URL))
-          .set('kbn-xsrf', 'xxxx')
-          .send({ ...VALID_CREATE_BODY, connectorId: 'space-isolation-test' })
-          .expect(200);
-        testSpaceId = spaceBody.item.id;
-      });
-
       it('GET by ID returns a deployment from the same space', async () => {
-        const { body } = await supertest.get(spaceUrl(`${BASE_URL}/${testSpaceId}`)).expect(200);
-        expect(body.item.id).to.equal(testSpaceId);
-        expect(body.item.connectorId).to.equal('space-isolation-test');
+        const { body } = await supertest
+          .get(spaceUrl(`${BASE_URL}/${testSpaceDeploymentId}`))
+          .expect(200);
+        expect(body.item.id).to.equal(testSpaceDeploymentId);
+        expect(body.item.connectorId).to.equal(testSpaceConnectorId);
       });
 
       it('GET by ID returns 404 for a deployment created in a different space', async () => {
         // default-space deployment is invisible from the test space
-        await supertest.get(spaceUrl(`${BASE_URL}/${defaultSpaceId}`)).expect(404);
+        await supertest.get(spaceUrl(`${BASE_URL}/${defaultSpaceDeploymentId}`)).expect(404);
         // test-space deployment is invisible from the default space
-        await supertest.get(`${BASE_URL}/${testSpaceId}`).expect(404);
+        await supertest.get(`${BASE_URL}/${testSpaceDeploymentId}`).expect(404);
       });
 
       it('GET by connector ID only returns deployments from the same space', async () => {
         const { body: testSpaceBody } = await supertest
-          .get(spaceUrl(`${BASE_URL}/connector/space-isolation-test`))
+          .get(spaceUrl(`${BASE_URL}/connector/${testSpaceConnectorId}`))
           .expect(200);
         expect(testSpaceBody.items).to.have.length(1);
-        expect(testSpaceBody.items[0].id).to.equal(testSpaceId);
+        expect(testSpaceBody.items[0].id).to.equal(testSpaceDeploymentId);
 
         const { body: defaultSpaceBody } = await supertest
-          .get(`${BASE_URL}/connector/space-isolation-default`)
+          .get(`${BASE_URL}/connector/${defaultSpaceConnectorId}`)
           .expect(200);
         expect(defaultSpaceBody.items).to.have.length(1);
-        expect(defaultSpaceBody.items[0].id).to.equal(defaultSpaceId);
+        expect(defaultSpaceBody.items[0].id).to.equal(defaultSpaceDeploymentId);
 
         // Cross-space connector queries return nothing
         const { body: crossDefault } = await supertest
-          .get(`${BASE_URL}/connector/space-isolation-test`)
+          .get(`${BASE_URL}/connector/${testSpaceConnectorId}`)
           .expect(200);
         expect(crossDefault.items).to.eql([]);
 
         const { body: crossTest } = await supertest
-          .get(spaceUrl(`${BASE_URL}/connector/space-isolation-default`))
+          .get(spaceUrl(`${BASE_URL}/connector/${defaultSpaceConnectorId}`))
           .expect(200);
         expect(crossTest.items).to.eql([]);
       });
@@ -432,7 +512,17 @@ export default function (providerContext: FtrProviderContext) {
         const { body: created } = await supertest
           .post(BASE_URL)
           .set('kbn-xsrf', 'xxxx')
-          .send(VALID_CREATE_BODY)
+          .send({
+            provider: 'aws',
+            connectorId: primaryConnectorId,
+            mechanisms: ['identity_federation'],
+            services: ['cloudwatch_metrics'],
+            vars: { role_arn: 'arn:aws:iam::123456789012:role/ElasticIntegrationRole' },
+            serviceVars: {
+              cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }],
+            },
+            secrets: { external_id: 'ext-abc123' },
+          })
           .expect(200);
         const id = created.item.id;
 

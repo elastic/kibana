@@ -33,8 +33,22 @@ export const createCloudOnboardingDeploymentHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const { internalSoClient } = fleetContext;
 
-  const deployment = await cloudOnboardingDeploymentService.create(internalSoClient, request.body);
-  return response.ok({ body: { item: toResponseItem(deployment) } });
+  try {
+    const deployment = await cloudOnboardingDeploymentService.create(
+      internalSoClient,
+      request.body
+    );
+    return response.ok({ body: { item: toResponseItem(deployment) } });
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return response.badRequest({
+        body: {
+          message: `Cloud connector ${request.body.connectorId} not found in this space`,
+        },
+      });
+    }
+    throw error;
+  }
 };
 
 export const getCloudOnboardingDeploymentHandler: FleetRequestHandler<

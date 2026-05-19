@@ -15,9 +15,19 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const experimentalFeaturesArg = baseServerArgs.find((arg) =>
     arg.startsWith('--xpack.fleet.experimentalFeatures=')
   );
-  const experimentalFeaturesValue = experimentalFeaturesArg
-    ? JSON.parse(experimentalFeaturesArg.replace('--xpack.fleet.experimentalFeatures=', ''))
-    : {};
+  let experimentalFeaturesValue: Record<string, unknown> = {};
+  if (experimentalFeaturesArg) {
+    try {
+      const parsed = JSON.parse(
+        experimentalFeaturesArg.replace('--xpack.fleet.experimentalFeatures=', '')
+      );
+      if (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        experimentalFeaturesValue = parsed;
+      }
+    } catch {
+      // malformed JSON in base config — start from an empty object
+    }
+  }
 
   return {
     ...baseConfig,

@@ -31,7 +31,7 @@ export const CloudOnboardingDeploymentSchemaV1 = schema.object({
     { defaultValue: 'pending' }
   ),
   statusMessage: schema.maybe(schema.string()),
-  attemptCount: schema.maybe(schema.number({ min: 1 })),
+  attemptCount: schema.maybe(schema.number({ min: 1, defaultValue: 1 })),
   vars: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   serviceVars: schema.maybe(
     schema.recordOf(

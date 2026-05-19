@@ -8,7 +8,10 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { nodeBuilder } from '@kbn/es-query';
 
-import { CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE } from '../../common/constants';
+import {
+  CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+  CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+} from '../../common/constants';
 import type {
   CloudOnboardingDeployment,
   CreateCloudOnboardingDeploymentInput,
@@ -29,6 +32,9 @@ class CloudOnboardingDeploymentService {
     soClient: SavedObjectsClientContract,
     input: CreateCloudOnboardingDeploymentInput
   ): Promise<CloudOnboardingDeployment> {
+    // Validates connectorId exists in the same space; throws SavedObjectsErrorHelpers not-found if not.
+    await soClient.get(CLOUD_CONNECTOR_SAVED_OBJECT_TYPE, input.connectorId);
+
     const attributes: CloudOnboardingDeploymentSOAttributes = {
       ...input,
       mechanisms: input.mechanisms,
@@ -41,7 +47,7 @@ class CloudOnboardingDeploymentService {
       attributes
     );
 
-    return { id: so.id, ...so.attributes };
+    return { id: so.id, ...attributes };
   }
 
   public async getById(
@@ -73,10 +79,13 @@ class CloudOnboardingDeploymentService {
 
     const deployments: Array<Omit<CloudOnboardingDeployment, 'secrets'>> = [];
     try {
-      for await (const result of finder.find()) {
+      outer: for await (const result of finder.find()) {
         for (const so of result.saved_objects) {
           const { secrets: _, ...rest } = so.attributes;
           deployments.push({ id: so.id, ...rest });
+          if (deployments.length >= CLOUD_ONBOARDING_DEPLOYMENT_LIMIT) {
+            break outer;
+          }
         }
       }
     } finally {
