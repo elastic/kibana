@@ -283,8 +283,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
         if (result.values) {
           const compose = formValuesFromYamlToCompose(result.values);
           methods.reset(compose);
-          const parsedQuery =
-            getBreachQuery(compose.query) || result.values.query.breach || '';
+          const parsedQuery = getBreachQuery(compose.query) || result.values.query.breach || '';
           dispatch({ type: 'COMMIT_CHILD_QUERY', fullQuery: parsedQuery });
         }
         preYamlFormSnapshotRef.current = null;

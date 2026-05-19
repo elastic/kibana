@@ -155,33 +155,30 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
     }
   );
 
-  apiTest(
-    'update: should update query to composed format',
-    async ({ apiClient, apiServices }) => {
-      const created = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'rule-to-composed' } })
-      );
+  apiTest('update: should update query to composed format', async ({ apiClient, apiServices }) => {
+    const created = await apiServices.alertingV2.rules.create(
+      buildCreateRuleData({ metadata: { name: 'rule-to-composed' } })
+    );
 
-      const response = await apiClient.patch(getRuleUrl(created.id), {
-        headers: writerHeaders,
-        body: {
-          query: {
-            format: 'composed',
-            base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
-            blocks: { breach: '| WHERE count >= 10' },
-          },
+    const response = await apiClient.patch(getRuleUrl(created.id), {
+      headers: writerHeaders,
+      body: {
+        query: {
+          format: 'composed',
+          base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+          blocks: { breach: '| WHERE count >= 10' },
         },
-      });
+      },
+    });
 
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.query).toStrictEqual({
-        format: 'composed',
-        base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
-        blocks: { breach: '| WHERE count >= 10' },
-      });
-      expect(response.body.schedule).toStrictEqual(created.schedule);
-    }
-  );
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.query).toStrictEqual({
+      format: 'composed',
+      base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+      blocks: { breach: '| WHERE count >= 10' },
+    });
+    expect(response.body.schedule).toStrictEqual(created.schedule);
+  });
 
   apiTest(
     'update: should update query to composed format with a recover block',
