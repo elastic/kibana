@@ -461,6 +461,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                       datastreams={datastreams}
                       isEditPage={isEditPage}
                       isRequiredByVarGroup={requiredByVarGroup}
+                      isUpgrade={isUpgrade}
                     />
                   </EuiFlexItem>
                 );
@@ -591,6 +592,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                               datastreams={datastreams}
                               isEditPage={isEditPage}
                               isRequiredByVarGroup={requiredByVarGroup}
+                              isUpgrade={isUpgrade}
                             />
                           </EuiFlexItem>
                         );

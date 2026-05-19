@@ -11,9 +11,10 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { RulesListPage, SEARCH_DEBOUNCE_MS } from './rules_list_page';
-import { paths } from '../../constants';
+import { CREATE_WITH_AGENT_INITIAL_PROMPT } from '../../constants';
 
 const mockNavigateToUrl = jest.fn();
+const mockNavigateToApp = jest.fn();
 const mockGetUrlForApp = jest.fn((appId: string, options?: { path?: string }) => {
   const path = options?.path ?? '';
   return `/app/${appId}${path}`;
@@ -27,7 +28,11 @@ jest.mock('../../application/breadcrumb_context', () => ({
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     if (token === 'application') {
-      return { navigateToUrl: mockNavigateToUrl, getUrlForApp: mockGetUrlForApp };
+      return {
+        navigateToUrl: mockNavigateToUrl,
+        navigateToApp: mockNavigateToApp,
+        getUrlForApp: mockGetUrlForApp,
+      };
     }
     if (token === 'chrome') {
       return { docTitle: { change: mockDocTitleChange } };
@@ -51,7 +56,11 @@ jest.mock('@kbn/core-di', () => ({
 }));
 
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
-  ComposeDiscoverFlyout: () => <div data-test-subj="composeDiscoverFlyout" />,
+  ComposeDiscoverFlyout: ({ onCreateRule }: { onCreateRule: (payload: unknown) => void }) => (
+    <button data-test-subj="composeDiscoverFlyout" onClick={() => onCreateRule({})}>
+      Compose Discover flyout
+    </button>
+  ),
 }));
 
 const mockUseFetchRules = jest.fn();
@@ -663,7 +672,7 @@ describe('RulesListPage', () => {
     });
   });
 
-  it('navigates to rule selector page when create button is clicked', () => {
+  it('opens create rule options in a flyout when create button is clicked', () => {
     mockUseFetchRules.mockReturnValue({
       data: { items: mockRules, total: 2, page: 1, perPage: 20 },
       isLoading: false,
@@ -673,7 +682,116 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    expect(screen.getByTestId('createRuleButton')).toHaveAttribute('href', paths.ruleCreateOptions);
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
+    expect(screen.getByText('Create ES|QL rule')).toBeInTheDocument();
+    expect(mockNavigateToUrl).not.toHaveBeenCalled();
+  });
+
+  it('closes create rule options flyout without navigating', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+    fireEvent.click(screen.getByTestId('ruleCreateOptionsFlyoutCloseButton'));
+
+    expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
+    expect(screen.getByTestId('rulesListTable')).toBeInTheDocument();
+    expect(mockNavigateToUrl).not.toHaveBeenCalled();
+  });
+
+  it('opens the rule creation flow from the create rule options flyout', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+    fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
+
+    expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
+    expect(mockNavigateToUrl).not.toHaveBeenCalled();
+  });
+
+  it('stays on the rules list after creating a rule from the flyout', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+    mockCreateRuleMutate.mockImplementationOnce((_payload, options) => options?.onSuccess?.());
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+    fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
+    fireEvent.click(screen.getByTestId('composeDiscoverFlyout'));
+
+    expect(mockCreateRuleMutate).toHaveBeenCalledWith(
+      {},
+      expect.objectContaining({ onSuccess: expect.any(Function) })
+    );
+    expect(screen.queryByTestId('composeDiscoverFlyout')).not.toBeInTheDocument();
+    expect(screen.getByTestId('rulesListTable')).toBeInTheDocument();
+    expect(mockNavigateToUrl).not.toHaveBeenCalled();
+  });
+
+  it('opens the rule creation flow from the split button dropdown', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('createRulePopoverButton'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('createEsqlRuleButton')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('createEsqlRuleButton'));
+
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
+  });
+
+  it('opens agent chat when "Create with agent" is clicked in the split button dropdown', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('createRulePopoverButton'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('createWithAgentButton')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('createWithAgentButton'));
+
+    expect(mockNavigateToApp).toHaveBeenCalledWith('agent_builder', {
+      path: '/agents/elastic-ai-agent/conversations/new',
+      state: { initialMessage: CREATE_WITH_AGENT_INITIAL_PROMPT },
+    });
   });
 
   it('shows delete confirmation modal when delete action is clicked', async () => {
