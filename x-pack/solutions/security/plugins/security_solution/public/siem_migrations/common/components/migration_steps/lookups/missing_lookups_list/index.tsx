@@ -50,6 +50,8 @@ export const MissingLookupsList = React.memo<MissingLookupsListProps>(
           <EuiText size="s">
             {migrationSource === MigrationSource.QRADAR ? (
               i18n.REFERENCE_SETS_QRADAR_APP
+            ) : migrationSource === MigrationSource.SENTINEL ? (
+              i18n.WATCHLISTS_SENTINEL_APP
             ) : (
               <FormattedMessage
                 id="xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.copyExportQuery.splunk.description"
@@ -74,9 +76,13 @@ export const MissingLookupsList = React.memo<MissingLookupsListProps>(
                     >
                       <EuiFlexItem grow={false}>
                         {uploadedLookups[lookupName] != null ? (
-                          <EuiIcon type="checkCircleFill" color={euiTheme.colors.success} />
+                          <EuiIcon
+                            type="checkCircleFill"
+                            color={euiTheme.colors.success}
+                            aria-hidden={true}
+                          />
                         ) : (
-                          <EuiIcon type="dot" />
+                          <EuiIcon type="dot" aria-hidden={true} />
                         )}
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
