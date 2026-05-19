@@ -11,12 +11,17 @@ import { z } from '@kbn/zod';
 import { PAGINATION_DEFAULT_PER_PAGE, PAGINATION_MAX_SIZE } from '../../constants';
 
 export const asCodePaginationParamsSchema = z.object({
-  page: z.number().min(1).default(1).meta({
+  page: z.coerce.number().min(1).default(1).meta({
     description: 'The page of results to return.',
   }),
-  per_page: z.number().min(1).max(PAGINATION_MAX_SIZE).default(PAGINATION_DEFAULT_PER_PAGE).meta({
-    description: 'The number of results to return per page.',
-  }),
+  per_page: z.coerce
+    .number()
+    .min(1)
+    .max(PAGINATION_MAX_SIZE)
+    .default(PAGINATION_DEFAULT_PER_PAGE)
+    .meta({
+      description: 'The number of results to return per page.',
+    }),
 });
 
 export const asCodePaginationResponseMetaSchema = z

@@ -39,6 +39,7 @@ export const panelGridSchema = z
       description: 'The height of the panel in grid units. Minimum `1`. Defaults to `15`.',
     }),
   })
+  .strict()
   .meta({
     id: 'kbn-dashboard-panel-grid',
     title: 'Panel grid',

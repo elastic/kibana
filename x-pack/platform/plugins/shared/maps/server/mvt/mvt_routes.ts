@@ -56,7 +56,7 @@ export function initMVTRoutes({
             query: zod.object({
               buffer: zod.coerce.number().optional(),
               geometryFieldName: zod.string(),
-              hasLabels: zod.stringbool(),
+              hasLabels: zod.stringbool({ truthy: ['true'], falsy: ['false'] }),
               requestBody: zod.string(),
               index: zod.string(),
               token: zod.string().optional(),
@@ -142,7 +142,7 @@ export function initMVTRoutes({
             query: zod.object({
               buffer: zod.coerce.number().optional(),
               geometryFieldName: zod.string(),
-              hasLabels: zod.stringbool(),
+              hasLabels: zod.stringbool({ truthy: ['true'], falsy: ['false'] }),
               requestBody: zod.string(),
               index: zod.string(),
               renderAs: zod.string(),

@@ -19,6 +19,7 @@ export const asCodeQuerySchema = z
         'Query language. Use `kql` for Kibana Query Language (KQL) or `lucene` for Lucene query syntax.',
     }),
   })
+  .strict()
   .meta({
     id: 'kbn-as-code-query',
     title: 'Query',
