@@ -195,8 +195,8 @@ export const EditDeletePhaseFlyout = ({
   const disabledApplyTooltip = isSubmitting
     ? editDeletePhaseFlyoutI18n.applySubmittingDisabledTooltip
     : hasFormErrors
-      ? editDeletePhaseFlyoutI18n.applyDisabledTooltip
-      : editDeletePhaseFlyoutI18n.applyUnchangedDisabledTooltip;
+    ? editDeletePhaseFlyoutI18n.applyDisabledTooltip
+    : editDeletePhaseFlyoutI18n.applyUnchangedDisabledTooltip;
   const maximumRetentionHelpText = maximumRetentionPeriod
     ? getMaximumRetentionMessage(maximumRetentionPeriod)
     : undefined;
@@ -271,7 +271,9 @@ export const EditDeletePhaseFlyout = ({
         <FormProvider {...methods}>
           <form
             id={formId}
-            onSubmit={methods.handleSubmit((data) => onSave(serializeFormValuesToDeletePhase(data)))}
+            onSubmit={methods.handleSubmit((data) =>
+              onSave(serializeFormValuesToDeletePhase(data))
+            )}
             noValidate
           >
             <EuiPanel hasShadow={false} hasBorder={false} paddingSize="none" css={sectionStyles}>
