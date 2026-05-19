@@ -59,6 +59,10 @@ export enum ExecutionType {
 export type ExecutionTypeUnion = `${ExecutionType}`;
 export const ExecutionTypeValues = Object.values(ExecutionType);
 
+export const WorkflowExecutionSortFields = ['createdAt', 'finishedAt'] as const;
+export type WorkflowExecutionSortField = (typeof WorkflowExecutionSortFields)[number];
+export type WorkflowExecutionSortOrder = 'asc' | 'desc';
+
 /**
  * An interface representing the state of a step scope during workflow execution.
  */
@@ -227,6 +231,7 @@ export interface WorkflowExecutionDto {
   context?: Record<string, unknown>;
   traceId?: string; // APM trace ID for observability
   entryTransactionId?: string; // APM root transaction ID for trace embeddable
+  concurrencyGroupKey?: string; // Evaluated concurrency group key for grouping executions
 }
 
 export type WorkflowExecutionListItemDto = Omit<
@@ -342,6 +347,14 @@ export const TestWorkflowResponseSchema = z.object({
   workflowExecutionId: z.string(),
 });
 export type TestWorkflowResponseDto = z.infer<typeof TestWorkflowResponseSchema>;
+
+/** Result of scheduling a resume for a workflow execution that was waiting for human input. */
+export const ResumeWorkflowExecutionResponseSchema = z.object({
+  resumedBy: z.string(),
+});
+export type ResumeWorkflowExecutionResponseDto = z.infer<
+  typeof ResumeWorkflowExecutionResponseSchema
+>;
 
 export interface UpdatedWorkflowResponseDto {
   id: string;

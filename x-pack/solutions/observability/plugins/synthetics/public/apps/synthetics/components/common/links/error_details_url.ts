@@ -16,5 +16,9 @@ export const getErrorDetailsUrl = ({
   configId: string;
   locationId?: string;
 }) => {
-  return `${basePath}/app/synthetics/monitor/${configId}/errors/${stateId}?locationId=${locationId}`;
+  const path = `${basePath}/app/synthetics/monitor/${configId}/errors/${stateId}`;
+  if (!locationId) {
+    return path;
+  }
+  return `${path}?locationId=${encodeURIComponent(locationId)}`;
 };

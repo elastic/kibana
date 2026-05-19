@@ -6,9 +6,9 @@
  */
 
 import type { DataStreamDefinition } from '@kbn/data-streams';
-import type { GetFieldsOf, MappingsDefinition, ToPrimitives } from '@kbn/es-mappings';
+import type { Discovery } from '@kbn/streams-schema';
+import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
-import type { Overwrite } from 'utility-types';
 
 export const DISCOVERIES_DATA_STREAM = '.significant_events-discoveries';
 
@@ -38,20 +38,7 @@ export const discoveriesMappings = {
 } satisfies MappingsDefinition;
 
 export type StoredDiscovery = GetFieldsOf<typeof discoveriesMappings>;
-
-export type Discovery = Overwrite<
-  ToPrimitives<{
-    type: 'object';
-    properties: (typeof discoveriesMappings)['properties'];
-  }>,
-  {
-    '@timestamp': string;
-    rule_names: string[];
-    stream_names: string[];
-    grouped_discovery_ids: string[];
-    detections: Array<{ rule_uuid: string }>;
-  }
->;
+export type { Discovery };
 
 export const discoveriesDataStream: DataStreamDefinition<
   typeof discoveriesMappings,

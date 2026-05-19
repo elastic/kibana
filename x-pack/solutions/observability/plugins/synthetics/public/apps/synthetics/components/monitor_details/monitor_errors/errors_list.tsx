@@ -24,25 +24,48 @@ import moment from 'moment';
 import { css } from '@emotion/react';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { ErrorDetailsLink } from '../../common/links/error_details_link';
-import type { PingState } from '../../../../../../common/runtime_types';
+import type { PingState, ErrorGroupItem } from '../../../../../../common/runtime_types';
 import { useErrorFailedStep } from '../hooks/use_error_failed_step';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { ErrorPreviewFlyout } from '../../monitors_page/errors/error_preview_flyout';
-import type { ErrorGroupItem } from '../../../../../../common/runtime_types';
 
-function getNextUpStateForResolvedError(
+export function getNextUpStateForResolvedError(
   errorState: PingState,
   upStates: PingState[],
   scopeByMonitor: boolean
 ) {
   for (const upState of upStates) {
     if (scopeByMonitor && upState.config_id !== errorState.config_id) continue;
+    if (upState.observer?.name !== errorState.observer?.name) continue;
     if (moment(upState.state.started_at).valueOf() > moment(errorState['@timestamp']).valueOf())
       return upState;
   }
+}
+
+export function computeActiveErrorKeys(
+  errorStates: PingState[],
+  upStates: PingState[]
+): Set<string> {
+  const latestErrorByMonitorAndLocation = new Map<string, PingState>();
+  for (const err of errorStates) {
+    const key = `${err.config_id}:${err.observer?.name ?? ''}`;
+    const existing = latestErrorByMonitorAndLocation.get(key);
+    if (!existing || moment(err['@timestamp']).isAfter(existing['@timestamp'])) {
+      latestErrorByMonitorAndLocation.set(key, err);
+    }
+  }
+
+  const ids = new Set<string>();
+  for (const latestErr of latestErrorByMonitorAndLocation.values()) {
+    const resolved = getNextUpStateForResolvedError(latestErr, upStates, true);
+    if (!resolved) {
+      ids.add(`${latestErr.config_id}:${latestErr['@timestamp']}`);
+    }
+  }
+  return ids;
 }
 
 export const ErrorsList = ({
@@ -85,19 +108,8 @@ export const ErrorsList = ({
     const ids = new Set<string>();
 
     if (isGlobalView) {
-      const latestErrorByMonitor = new Map<string, PingState>();
-      for (const err of errorStates) {
-        const existing = latestErrorByMonitor.get(err.config_id);
-        if (!existing || moment(err['@timestamp']).isAfter(existing['@timestamp'])) {
-          latestErrorByMonitor.set(err.config_id, err);
-        }
-      }
-
-      for (const [monitorConfigId, latestErr] of latestErrorByMonitor) {
-        const resolved = getNextUpStateForResolvedError(latestErr, upStates, true);
-        if (!resolved) {
-          ids.add(`${monitorConfigId}:${latestErr['@timestamp']}`);
-        }
+      for (const id of computeActiveErrorKeys(errorStates, upStates)) {
+        ids.add(id);
       }
     } else if (latestPing?.monitor.status === 'down') {
       const sorted = [...errorStates].sort(
@@ -127,8 +139,8 @@ export const ErrorsList = ({
         const link = (
           <ErrorDetailsLink
             configId={item.config_id ?? configId}
-            stateId={item.state?.id!}
-            label={formatter(item.state!.started_at)}
+            stateId={item.state.id}
+            label={formatter(item.state.started_at)}
             locationId={item.observer?.name}
           />
         );
@@ -246,13 +258,11 @@ export const ErrorsList = ({
 
             activeDuration = currentDiff < diff ? currentDiff : diff;
           } else {
-            const resolvedState = getNextUpStateForResolvedError(
-              item,
-              upStates,
-              isGlobalView ?? false
-            );
+            const resolvedState = getNextUpStateForResolvedError(item, upStates, isGlobalView);
 
-            activeDuration = moment(resolvedState?.state.started_at).diff(item['@timestamp']) ?? 0;
+            activeDuration = resolvedState
+              ? moment(resolvedState.state.started_at).diff(item['@timestamp'])
+              : 0;
           }
         }
         return (
@@ -264,7 +274,7 @@ export const ErrorsList = ({
       field: '@timestamp',
       name: RESOLVED_AT_LABEL,
       sortable: (a: PingState) => {
-        const resolvedState = getNextUpStateForResolvedError(a, upStates, isGlobalView ?? false);
+        const resolvedState = getNextUpStateForResolvedError(a, upStates, isGlobalView);
         return resolvedState ? moment(resolvedState.state.started_at).valueOf() : 0;
       },
       render: (_value: string, item: PingState) => {
@@ -275,7 +285,7 @@ export const ErrorsList = ({
             </EuiBadge>
           );
         }
-        const resolvedState = getNextUpStateForResolvedError(item, upStates, isGlobalView ?? false);
+        const resolvedState = getNextUpStateForResolvedError(item, upStates, isGlobalView);
         if (resolvedState) {
           return <EuiText size="s">{formatter(resolvedState.state.started_at)}</EuiText>;
         }
@@ -313,13 +323,14 @@ export const ErrorsList = ({
 
   const getRowProps = (item: PingState) => {
     const { state } = item;
-    if (state?.id) {
+    if (state.id) {
       const itemConfigId = item.config_id ?? configId;
       const locationId = item.observer?.name ?? selectedLocation?.id;
+      const locationQuery = locationId ? `?locationId=${encodeURIComponent(locationId)}` : '';
       return {
         'data-test-subj': `row-${state.id}`,
         onClick: (evt: MouseEvent) => {
-          history.push(`/monitor/${itemConfigId}/errors/${state.id}?locationId=${locationId}`);
+          history.push(`/monitor/${itemConfigId}/errors/${state.id}${locationQuery}`);
         },
       };
     }

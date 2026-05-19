@@ -79,6 +79,8 @@ describe('CcsLogsExtractionClient', () => {
     // Use a very large cap so existing tests remain a single sub-window. The sub-window cap
     // behavior is exercised by the dedicated tests at the end of this describe block.
     maxTimeWindowSize: '999d',
+    maxLogsPerWindow: 0,
+    maxLogsPerWindowCapBehavior: 'defer' as const,
   };
 
   beforeEach(() => {
@@ -448,7 +450,7 @@ describe('CcsLogsExtractionClient', () => {
       windowOverride: { fromDateISO: overrideFrom, toDateISO: overrideTo },
     });
 
-    expect(result).toEqual({ count: 1, pages: 1 });
+    expect(result).toMatchObject({ count: 1, pages: 1 });
 
     // findOrInit must NOT be called for override runs
     expect(mockCcsStateClient.findOrInit).not.toHaveBeenCalled();
