@@ -100,10 +100,12 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/kbn-client'
   - '@kbn/rule-data-utils'
-  - '@kbn/inbox-plugin'
-  - '@kbn/inbox-common'
+  - '@kbn/std'
   - '@kbn/core-saved-objects-common'
   - '@kbn/datemath'
+  - '@kbn/inbox-common'
+  - '@kbn/core-saved-objects-common'
+  - '@kbn/inbox-plugin'
 tags:
   - plugin
   - prod
