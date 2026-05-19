@@ -19,9 +19,8 @@
 - Never share mutable state (policy IDs, package names, secret IDs) between `it` blocks.
 - Use `esArchiver` for read-only fixture data. Unload it in `afterAll`.
 - Do not use `setTimeout` — use the `retry` service for polling:
-  ```typescript
-  await retry.try(async () => { ... });
-  ```
+  - `retry.tryForTime(ms, fn)` — retry for a fixed duration (most common in Fleet tests)
+  - `retry.tryWithRetries(description, fn, retryCount)` — retry a fixed number of times
 - `before all` failures cascade to all tests in the block — always check the hook error first.
 
 **Data cleanup audit before fixing:**
