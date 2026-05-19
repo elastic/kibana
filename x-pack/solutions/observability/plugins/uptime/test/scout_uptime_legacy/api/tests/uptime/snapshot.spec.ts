@@ -19,7 +19,7 @@ apiTest.describe('snapshot count', { tag: '@local-stateful-classic' }, () => {
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.BLANK);
     await esClient.deleteByQuery({
       index: testData.GENERATED_INDEX,
-      body: { query: { match_all: {} } },
+      query: { match_all: {} },
       refresh: true,
       conflicts: 'proceed',
     });

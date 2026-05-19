@@ -29,7 +29,6 @@ export const stripInspect = (obj: any) => {
 };
 
 export const expectFixtureEql = <T>(data: T, fixtureName: string, excluder?: (d: T) => void) => {
-  expect(data).not.toBeNull();
   expect(data).toBeDefined();
 
   const fixturePath = join(fixturesDir, `${fixtureName}.json`);

@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { makeChecks } from '../../api_integration/apis/uptime/rest/helper/make_checks';
+import { makeChecks } from '../../../../plugins/uptime/test/scout_uptime_legacy/api/fixtures/helpers/make_checks';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 const A11Y_TEST_MONITOR_ID = 'a11yTestMonitor';

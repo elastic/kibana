@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import type { DynamicSettings } from '@kbn/uptime-plugin/common/runtime_types';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '@kbn/uptime-plugin/common/constants';
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import { makeChecks } from '../../../api_integration/apis/uptime/rest/helper/make_checks';
+import { makeChecks } from '../../../../../plugins/uptime/test/scout_uptime_legacy/api/fixtures/helpers/make_checks';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const { uptime: uptimePage } = getPageObjects(['uptime']);

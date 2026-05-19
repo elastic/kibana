@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { makeCheck } from '../../../api_integration/apis/uptime/rest/helper/make_checks';
+import { makeCheck } from '../../../../../plugins/uptime/test/scout_uptime_legacy/api/fixtures/helpers/make_checks';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
