@@ -350,6 +350,23 @@ function ZoomMenuItems() {
   );
 }
 
+// Null-rendering child — must only be mounted inside a ReactFlowProvider
+// (i.e. when editorView === 'graph'). Notifies the bar when node selection
+// changes so the bar can stay hidden while a step is selected.
+function SelectionWatcher({
+  onSelectionChange,
+}: {
+  onSelectionChange: (hasSelected: boolean) => void;
+}) {
+  const hasSelected = useStore((s) => s.nodes.some((n) => n.selected));
+  const callbackRef = useRef(onSelectionChange);
+  callbackRef.current = onSelectionChange;
+  useEffect(() => {
+    callbackRef.current(hasSelected);
+  }, [hasSelected]);
+  return null;
+}
+
 export function WorkflowDetailBottomBar({
   editorView,
   onEditorViewChange,
@@ -367,17 +384,37 @@ export function WorkflowDetailBottomBar({
 
   // Auto-hide: any user activity (scroll, click, keydown) hides the bar and
   // resets the idle timer. The bar reappears after AUTOHIDE_TIMEOUT_MS of
-  // inactivity. Events that originate from inside the bar itself are ignored
-  // so clicking bar buttons doesn't collapse it.
+  // inactivity — unless a step is selected, in which case the bar stays
+  // hidden until the step is deselected.
   const [isHidden, setIsHidden] = useState(false);
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Tracks whether any node is currently selected. Updated by SelectionWatcher.
+  const hasSelectedNodeRef = useRef(false);
+
+  const scheduleReappear = useCallback(() => {
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    idleTimerRef.current = setTimeout(() => {
+      if (!hasSelectedNodeRef.current) setIsHidden(false);
+    }, AUTOHIDE_TIMEOUT_MS);
+  }, []);
+
+  const handleSelectionChange = useCallback((hasSelected: boolean) => {
+    hasSelectedNodeRef.current = hasSelected;
+    if (hasSelected) {
+      // Cancel any pending reappear and keep the bar hidden.
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+      setIsHidden(true);
+    } else {
+      // Node deselected — reappear after the usual idle delay.
+      scheduleReappear();
+    }
+  }, [scheduleReappear]);
 
   const triggerActivity = useCallback((e: Event) => {
     if (barRef.current?.contains(e.target as Node)) return;
     setIsHidden(true);
-    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
-    idleTimerRef.current = setTimeout(() => setIsHidden(false), AUTOHIDE_TIMEOUT_MS);
-  }, []);
+    scheduleReappear();
+  }, [scheduleReappear]);
 
   useEffect(() => {
     // capture:true so the wheel event reaches us even when React Flow calls
@@ -394,6 +431,7 @@ export function WorkflowDetailBottomBar({
   }, [triggerActivity]);
 
   const handleBarMouseEnter = useCallback(() => {
+    if (hasSelectedNodeRef.current) return;
     if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
     setIsHidden(false);
   }, []);
@@ -536,6 +574,9 @@ export function WorkflowDetailBottomBar({
             </>
           ) : null}
         </EuiFlexGroup>
+        {editorView === 'graph' && (
+          <SelectionWatcher onSelectionChange={handleSelectionChange} />
+        )}
       </div>
     );
   }
@@ -614,6 +655,9 @@ export function WorkflowDetailBottomBar({
           </>
         )}
       </EuiFlexGroup>
+      {editorView === 'graph' && (
+        <SelectionWatcher onSelectionChange={handleSelectionChange} />
+      )}
     </div>
   );
 }
