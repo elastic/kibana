@@ -14,8 +14,8 @@ import type { IntegrationCardItem } from '..';
 // Flag key from @kbn/ingest-hub-plugin common/constants
 const ONBOARDING_ENABLED_FLAG = 'ingestHub.onboardingEnabled';
 
-const HIDDEN_TILE_NAMES = new Set(['aws', 'awsfirehose']);
-const HIDDEN_TILE_IDS = new Set(['ui_link:esf']);
+const HIDDEN_TILE_NAMES = new Set(['aws']);
+const HIDDEN_TILE_IDS = new Set(['epr:aws']);
 
 export function useOnboardingOverride() {
   const { featureFlags, application } = useStartServices();

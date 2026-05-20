@@ -24,11 +24,7 @@ import {
 import { AWS_ONBOARDING_TITLE, AWS_ONBOARDING_DESCRIPTION } from '../../common/constants';
 import { ONBOARDING_STEPS } from './steps';
 import { useStepState } from './use_step_state';
-import { ConnectStep } from './steps/connect_step';
-import { ServicesStep } from './steps/services_step';
-import { NameAndScopeStep } from './steps/name_and_scope_step';
-import { DeploymentStep } from './steps/deployment_step';
-import { SeeDataStep } from './steps/see_data_step';
+import { ConnectStep, ServicesStep, NameAndScopeStep, DeploymentStep, SeeDataStep } from './steps';
 
 const STEP_COMPONENTS: Record<string, React.ComponentType> = {
   connect: ConnectStep,
@@ -42,31 +38,13 @@ const INTEGRATION_META: Record<string, { title: string; description: string }> =
   aws: { title: AWS_ONBOARDING_TITLE, description: AWS_ONBOARDING_DESCRIPTION },
 };
 
-function formatIntegrationTitle(integrationId: string): string {
-  return integrationId
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-}
-
-function useIntegrationMeta(integrationId: string) {
-  const known = INTEGRATION_META[integrationId];
-  if (known) {
-    return known;
-  }
-  return {
-    title: formatIntegrationTitle(integrationId),
-    description: `Collect logs and metrics from ${formatIntegrationTitle(integrationId)}.`,
-  };
-}
-
 export function OnboardingShell() {
   const { integrationId } = useParams<{ integrationId: string }>();
   const history = useHistory();
   const location = useLocation();
   const { euiTheme } = useEuiTheme();
   const { completedSteps, firstIncompleteStepId } = useStepState(integrationId);
-  const { title, description } = useIntegrationMeta(integrationId);
+  const { title, description } = INTEGRATION_META[integrationId] ?? {};
 
   const currentStepId = location.hash ? location.hash.slice(1) : '';
   const isValidStep = ONBOARDING_STEPS.some((s) => s.id === currentStepId);
