@@ -64,9 +64,9 @@ vault_kv_get() {
   local field=${2:-}
 
   if [[ -z "$field" || "$field" =~ ^-.* ]]; then
-    retry 5 5 vault kv get "$kv_path" "${@:2}"
+    retry 5 5 vault read "$kv_path" "${@:2}"
   else
-    retry 5 5 vault kv get -field="$field" "$kv_path" "${@:3}"
+    retry 5 5 vault read -field="$field" "$kv_path" "${@:3}"
   fi
 }
 
