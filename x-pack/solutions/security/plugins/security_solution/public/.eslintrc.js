@@ -6,4 +6,4 @@
  */
 
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
-module.exports = require('../../../../../packages/kbn-eslint-config-security-tests')(__dirname);
+module.exports = require('../../../../../../packages/kbn-eslint-config-security-tests')(__dirname);
