@@ -31,14 +31,16 @@ export class MetricsExperiencePage {
   public readonly searchButton: Locator;
   public readonly searchInput: Locator;
   public readonly emptyState: Locator;
-  public readonly chartActions: ChartActions;
   public readonly chartInteractions: ChartInteractions;
   public readonly breakdownSelector: BreakdownSelector;
   public readonly share: ShareHelper;
   public readonly fullscreenButton: Locator;
   public readonly chromeHeader: Locator;
 
+  private readonly page: ScoutPage;
+
   constructor(page: ScoutPage) {
+    this.page = page;
     // metricsExperienceRendered is the outer wrapper containing header, grid, and pagination
     this.container = page.testSubj.locator('metricsExperienceRendered');
     this.grid = page.testSubj.locator('unifiedMetricsExperienceGrid');
@@ -46,7 +48,6 @@ export class MetricsExperiencePage {
     this.cards = this.grid.locator('[data-chart-index]');
     this.pagination = createGridPagination(this.container);
     this.flyout = createFlyout(page);
-    this.chartActions = createChartActions(page);
     this.chartInteractions = createChartInteractions(page, (index) => this.getCardByIndex(index));
     this.breakdownSelector = createBreakdownSelector(page);
     this.searchButton = page.testSubj.locator('metricsExperienceToolbarSearch');
@@ -62,6 +63,17 @@ export class MetricsExperiencePage {
   }
 
   /**
+   * Returns action locators scoped to the card at `index`.
+   *
+   * Hover-row actions are scoped to the card element so Playwright strict mode
+   * is satisfied when multiple cards share the same action test-subjs.
+   * `addToCase` remains page-scoped because EUI renders it into a portal.
+   */
+  public chartActionsFor(index: number): ChartActions {
+    return createChartActions(this.getCardByIndex(index), this.page);
+  }
+
+  /**
    * Waits until the first chart card matches the expected id (since pagination/query updates replace cards
    * asynchronously). Call before `expect(cards).toHaveCount(...)` so the count is not asserted
    * against a stale page.
@@ -70,21 +82,6 @@ export class MetricsExperiencePage {
     await this.grid
       .locator(`[data-chart-index="0"][id="${expectedFirstCardId}"]`)
       .waitFor({ state: 'visible' });
-  }
-
-  /**
-   * Returns quick actions scoped to a specific card by index.
-   * Quick actions (like Explore) are rendered in the hover bar inside the card.
-   * Use this instead of global locators to avoid strict mode violations
-   * when multiple cards have visible hover actions.
-   */
-  public getQuickActionsForCard(index: number): { explore: Locator } {
-    const card = this.getCardByIndex(index);
-    return {
-      explore: card.locator(
-        '[data-test-subj="embeddablePanelAction-ACTION_METRICS_EXPERIENCE_EXPLORE_IN_DISCOVER_TAB"]'
-      ),
-    };
   }
 
   public async searchMetric(term: string): Promise<void> {
@@ -127,7 +124,7 @@ export class MetricsExperiencePage {
 
   /**
    * Hovers a card to reveal the visible quick-action row, then clicks the
-   * given action.
+   * given action locator.
    */
   private async clickVisibleQuickAction(cardIndex: number, action: Locator): Promise<void> {
     const card = this.getCardByIndex(cardIndex);
@@ -141,7 +138,7 @@ export class MetricsExperiencePage {
    * quick-action row of the given card.
    */
   public async openInsightsFlyout(cardIndex: number): Promise<void> {
-    await this.clickVisibleQuickAction(cardIndex, this.chartActions.viewDetails);
+    await this.clickVisibleQuickAction(cardIndex, this.chartActionsFor(cardIndex).viewDetails);
   }
 
   /**
@@ -153,6 +150,6 @@ export class MetricsExperiencePage {
    * context-menu popover when it is already in the hover row.
    */
   public async openInspectorFlyout(cardIndex: number): Promise<void> {
-    await this.clickVisibleQuickAction(cardIndex, this.chartActions.inspect);
+    await this.clickVisibleQuickAction(cardIndex, this.chartActionsFor(cardIndex).inspect);
   }
 }

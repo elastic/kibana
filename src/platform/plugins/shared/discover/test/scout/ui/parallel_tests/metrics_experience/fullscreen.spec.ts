@@ -116,7 +116,7 @@ spaceTest.describe(
       await spaceTest.step('open context menu in fullscreen', async () => {
         await metricsExperience.clearSearch();
         await metricsExperience.openCardContextMenu(0);
-        await expect(metricsExperience.chartActions.addToCase).toBeVisible();
+        await expect(metricsExperience.chartActionsFor(0).addToCase).toBeVisible();
       });
 
       await spaceTest.step('exit fullscreen mode', async () => {

@@ -114,9 +114,10 @@ spaceTest.describe(
         'visible quick-action row shows Explore, View details, and Copy to dashboard',
         async () => {
           await metricsExperience.getCardByIndex(cardIndex).hover();
-          await expect(metricsExperience.chartActions.explore).toBeVisible();
-          await expect(metricsExperience.chartActions.viewDetails).toBeVisible();
-          await expect(metricsExperience.chartActions.copyToDashboard).toBeVisible();
+          const actions = metricsExperience.chartActionsFor(cardIndex);
+          await expect(actions.explore).toBeVisible();
+          await expect(actions.viewDetails).toBeVisible();
+          await expect(actions.copyToDashboard).toBeVisible();
         }
       );
     });

@@ -47,18 +47,20 @@ spaceTest.describe(
           await metricsExperience.getCardByIndex(0).hover();
         });
 
+        const actions = metricsExperience.chartActionsFor(0);
+
         await spaceTest.step('Explore is visible without opening the popover', async () => {
-          await expect(metricsExperience.chartActions.explore).toBeVisible();
+          await expect(actions.explore).toBeVisible();
         });
 
         await spaceTest.step('View details is visible without opening the popover', async () => {
-          await expect(metricsExperience.chartActions.viewDetails).toBeVisible();
+          await expect(actions.viewDetails).toBeVisible();
         });
 
         await spaceTest.step(
           'Copy to dashboard is visible without opening the popover',
           async () => {
-            await expect(metricsExperience.chartActions.copyToDashboard).toBeVisible();
+            await expect(actions.copyToDashboard).toBeVisible();
           }
         );
       }
@@ -73,7 +75,7 @@ spaceTest.describe(
         'Add to case is not visible on the hover row before opening the popover',
         async () => {
           await metricsExperience.getCardByIndex(0).hover();
-          await expect(metricsExperience.chartActions.addToCase).toBeHidden();
+          await expect(metricsExperience.chartActionsFor(0).addToCase).toBeHidden();
         }
       );
 
@@ -82,7 +84,7 @@ spaceTest.describe(
       });
 
       await spaceTest.step('Add to case appears inside the popover', async () => {
-        await expect(metricsExperience.chartActions.addToCase).toBeVisible();
+        await expect(metricsExperience.chartActionsFor(0).addToCase).toBeVisible();
       });
     });
   }
