@@ -92,6 +92,32 @@ describe('fetchTagUsageData', () => {
     });
   });
 
+  it('counts distinct tag IDs, not doc_count sums, when the same tag appears on multiple objects of the same type', async () => {
+    mockSearch([
+      {
+        key: 'dashboard',
+        doc_count: 3,
+        nested_ref: {
+          tag_references: {
+            doc_count: 5,
+            tag_id: {
+              buckets: [
+                { key: 'tag-1', doc_count: 3 }, // tag-1 on all 3 dashboards
+                { key: 'tag-2', doc_count: 2 }, // tag-2 on 2 dashboards
+              ],
+            },
+          },
+        },
+      },
+    ]);
+    const result = await fetchTagUsageData({ esClient, kibanaIndices: ['.kibana'] });
+    expect(result).toEqual({
+      usedTags: 2, // 2 distinct tag IDs, not sum(3+2)=5
+      taggedObjects: 3,
+      types: { dashboard: { taggedObjects: 3, usedTags: 2 } },
+    });
+  });
+
   it('deduplicates shared tags across types in the global usedTags count', async () => {
     // tag-1 is used by both types — must be counted once globally, not twice
     mockSearch([
