@@ -95,8 +95,7 @@ const PackagePolicyStreamsSchema = {
   condition: schema.maybe(
     schema.string({
       meta: {
-        description:
-          '**Experimental.** Agent condition expression to evaluate whether to apply this stream.',
+        description: 'Agent condition expression to evaluate whether to apply this stream.',
       },
     })
   ),
@@ -118,8 +117,7 @@ export const PackagePolicyInputsSchema = {
   condition: schema.maybe(
     schema.string({
       meta: {
-        description:
-          '**Experimental.** Agent condition expression to evaluate whether to apply this input.',
+        description: 'Agent condition expression to evaluate whether to apply this input.',
       },
     })
   ),
@@ -291,7 +289,7 @@ export const PackagePolicyBaseSchema = {
     schema.string({
       meta: {
         description:
-          '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.',
+          'Agent condition expression to evaluate whether to apply this integration to its inputs.',
       },
     })
   ),
@@ -457,8 +455,7 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
       condition: schema.maybe(
         schema.string({
           meta: {
-            description:
-              '**Experimental.** Agent condition expression to evaluate whether to apply this input.',
+            description: 'Agent condition expression to evaluate whether to apply this input.',
           },
         })
       ),
@@ -480,7 +477,7 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
               schema.string({
                 meta: {
                   description:
-                    '**Experimental.** Agent condition expression to evaluate whether to apply this stream.',
+                    'Agent condition expression to evaluate whether to apply this stream.',
                 },
               })
             ),
@@ -575,7 +572,7 @@ export const SimplifiedPackagePolicyBaseSchema = schema.object(
       schema.string({
         meta: {
           description:
-            '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.',
+            'Agent condition expression to evaluate whether to apply this integration to its inputs.',
         },
       })
     ),
