@@ -9,7 +9,6 @@
 
 import { existsSync } from 'fs';
 import { resolve } from 'path';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { adjectives, animals, uniqueNamesGenerator } from 'unique-names-generator';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
@@ -683,15 +682,36 @@ export const plugin: PluginInitializer<
             });
             roleLogger.info('Chat model ready, invoking LLM');
 
-            const prompt = new MockIdpRolePromptTemplate();
-            const chain = prompt.pipe(chatModel.withStructuredOutput(roleSchema));
-
             const kibanaFeatures = features.getKibanaFeatures();
-            const llmRole = (await chain.invoke({
+            const featureIds = kibanaFeatures.map((f) => f.id).concat(['base']) as [
+              string,
+              ...string[]
+            ];
+            const dynamicRoleSchema = z.object({
+              kibana: z.array(
+                z.object({
+                  id: z.enum(featureIds),
+                  access: z.enum(['all', 'read']),
+                  space: z.string(),
+                })
+              ),
+              elasticsearch: z.array(
+                z.object({
+                  index: z.string(),
+                  access: z.enum(['all', 'read']),
+                })
+              ),
+              accessToSystemIndices: z.enum(['all', 'read', 'none']),
+            });
+
+            const prompt = new MockIdpRolePromptTemplate();
+            const chain = prompt.pipe(chatModel.withStructuredOutput(dynamicRoleSchema));
+
+            const llmRole = await chain.invoke({
               features: kibanaFeatures,
               userQuery: request.body.description,
               projectType: plugins.cloud?.serverless?.projectType,
-            })) as z.infer<typeof roleSchema>;
+            });
             roleLogger.info(`LLM response: ${JSON.stringify(llmRole)}`);
 
             const roleName = uniqueNamesGenerator({
