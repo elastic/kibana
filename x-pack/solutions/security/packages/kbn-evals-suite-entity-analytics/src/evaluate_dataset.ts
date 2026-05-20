@@ -9,6 +9,8 @@ import {
   createQuantitativeCorrectnessEvaluators,
   createQuantitativeGroundednessEvaluator,
   createSkillInvocationEvaluator,
+  createTrajectoryEvaluator,
+  getToolCallSteps,
   selectEvaluators,
   withEvaluatorSpan,
   type DefaultEvaluators,
@@ -17,6 +19,7 @@ import {
   type EvaluationResult,
   type Evaluator,
   type Example,
+  type TaskOutput,
 } from '@kbn/evals';
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -70,6 +73,18 @@ interface DatasetExample extends Example {
     criteria?: string[];
     toolCalls?: ToolCallAssertion[];
     attachments?: AttachmentAssertion[];
+    /**
+     * Golden tool-call sequence for this example, EXCLUDING `filestore.read`
+     * (already covered by the skill-invocation evaluator). Used by the
+     * trajectory evaluator — examples without an annotation skip trajectory
+     * scoring (report N/A) so partial coverage doesn't penalise unannotated
+     * examples.
+     *
+     * Tool IDs must match registered agent-builder tool IDs, e.g.
+     * `security.get_entity`, `security.search_entities`,
+     * `find.security.ml.jobs`.
+     */
+    tool_sequence?: string[];
   };
   metadata?: { query_intent?: string };
 }
@@ -244,6 +259,48 @@ interface EvaluateDatasetOpts {
 
 const DEFAULT_CONCURRENCY = 3;
 
+const FILESTORE_READ_TOOL_ID = 'filestore.read';
+
+/**
+ * Trajectory evaluator: scores the agent's tool-call sequence against a
+ * per-example `tool_sequence` golden path using LCS (order) + set intersection
+ * (coverage). Examples without a `tool_sequence` annotation report N/A so
+ * partial annotation coverage doesn't dilute suite averages.
+ *
+ * Mirrors the N/A-on-missing-golden pattern established in
+ * `kbn-evals-suite-alerts-rag` (`createAlertsRagTrajectoryEvaluator`).
+ */
+const createEntityAnalyticsTrajectoryEvaluator = (): Evaluator<DatasetExample, TaskOutput> => {
+  const inner = createTrajectoryEvaluator({
+    extractToolCalls: (output) =>
+      getToolCallSteps(output as TaskOutput)
+        .map((step) => step.tool_id)
+        .filter((id): id is string => Boolean(id) && id !== FILESTORE_READ_TOOL_ID),
+    goldenPathExtractor: (expected) => {
+      const exp = expected as DatasetExample['output'] | undefined;
+      return exp?.tool_sequence ?? [];
+    },
+    orderWeight: 0.6,
+    coverageWeight: 0.4,
+  });
+
+  return {
+    ...inner,
+    name: 'Trajectory',
+    evaluate: async (args) => {
+      const exp = args.expected as DatasetExample['output'] | undefined;
+      if (!exp?.tool_sequence || exp.tool_sequence.length === 0) {
+        return {
+          score: null,
+          label: 'N/A',
+          explanation: 'No tool_sequence annotation — skipping trajectory evaluation.',
+        };
+      }
+      return inner.evaluate(args);
+    },
+  } as Evaluator<DatasetExample, TaskOutput>;
+};
+
 interface CreateEvaluateDatasetOpts {
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
@@ -339,6 +396,7 @@ export function createEvaluateDataset({
           log,
           skillName: 'entity-analytics',
         }),
+        createEntityAnalyticsTrajectoryEvaluator(),
       ]
     );
   };
