@@ -39,6 +39,7 @@ export default function (providerContext: FtrProviderContext) {
           attributes: {
             name,
             cloudProvider: 'aws',
+            vars: {},
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           },

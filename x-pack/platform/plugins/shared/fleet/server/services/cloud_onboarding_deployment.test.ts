@@ -200,6 +200,7 @@ describe('cloudOnboardingDeploymentService', () => {
       const deploymentName = 'elastic-aws-onboarding';
       const updatedAttrs = makeAttributes({ deploymentId, deploymentName, status: 'deploying' });
       soClient.update.mockResolvedValue(makeSOResponse('deploy-1', updatedAttrs));
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', updatedAttrs));
 
       const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
         deploymentId,
@@ -235,6 +236,7 @@ describe('cloudOnboardingDeploymentService', () => {
       };
       const updatedAttrs = makeAttributes({ serviceVars });
       soClient.update.mockResolvedValue(makeSOResponse('deploy-1', updatedAttrs));
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', updatedAttrs));
 
       const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
         serviceVars,
@@ -253,12 +255,13 @@ describe('cloudOnboardingDeploymentService', () => {
 
   describe('update (status transitions)', () => {
     describe('status transitions', () => {
-      function mockUpdate(id: string, attrs: CloudOnboardingDeploymentSOAttributes) {
+      function mockUpdateAndGet(id: string, attrs: CloudOnboardingDeploymentSOAttributes) {
         soClient.update.mockResolvedValue(makeSOResponse(id, attrs));
+        soClient.get.mockResolvedValue(makeSOResponse(id, attrs));
       }
 
       it('pending → deploying: sets status without deploymentId', async () => {
-        mockUpdate('deploy-1', makeAttributes({ status: 'deploying' }));
+        mockUpdateAndGet('deploy-1', makeAttributes({ status: 'deploying' }));
 
         const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
           status: 'deploying',
@@ -271,7 +274,10 @@ describe('cloudOnboardingDeploymentService', () => {
       it('deploying → succeeded: status is succeeded and deploymentId is persisted', async () => {
         const stackArn =
           'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-onboarding/aaa-bbb';
-        mockUpdate('deploy-1', makeAttributes({ status: 'succeeded', deploymentId: stackArn }));
+        mockUpdateAndGet(
+          'deploy-1',
+          makeAttributes({ status: 'succeeded', deploymentId: stackArn })
+        );
 
         const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
           status: 'succeeded',
@@ -288,7 +294,7 @@ describe('cloudOnboardingDeploymentService', () => {
       });
 
       it('deploying → failed: status is failed and statusMessage is set', async () => {
-        mockUpdate(
+        mockUpdateAndGet(
           'deploy-1',
           makeAttributes({ status: 'failed', statusMessage: 'ROLLBACK_COMPLETE' })
         );
@@ -307,6 +313,7 @@ describe('cloudOnboardingDeploymentService', () => {
       it('resets status to pending and increments attemptCount', async () => {
         const retriedAttrs = makeAttributes({ status: 'pending', attemptCount: 2 });
         soClient.update.mockResolvedValue(makeSOResponse('deploy-1', retriedAttrs));
+        soClient.get.mockResolvedValue(makeSOResponse('deploy-1', retriedAttrs));
 
         const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
           status: 'pending',
@@ -326,6 +333,7 @@ describe('cloudOnboardingDeploymentService', () => {
         const serviceVars = { cloudtrail: [{ regions: ['us-east-1'] }] };
         const retriedAttrs = makeAttributes({ status: 'pending', attemptCount: 2, serviceVars });
         soClient.update.mockResolvedValue(makeSOResponse('deploy-1', retriedAttrs));
+        soClient.get.mockResolvedValue(makeSOResponse('deploy-1', retriedAttrs));
 
         const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
           status: 'pending',
@@ -465,6 +473,7 @@ describe('cloudOnboardingDeploymentService', () => {
           apiKeyId: 'es-key-abc123',
         });
         soClient.update.mockResolvedValue(makeSOResponse('deploy-uc3', updatedAttrs));
+        soClient.get.mockResolvedValue(makeSOResponse('deploy-uc3', updatedAttrs));
 
         const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-uc3', {
           apiKeyId: 'es-key-abc123',
@@ -518,6 +527,7 @@ describe('cloudOnboardingDeploymentService', () => {
           packagePolicyIds: ['pkg-policy-456'],
         });
         soClient.update.mockResolvedValue(makeSOResponse('deploy-uc6', updatedAttrs));
+        soClient.get.mockResolvedValue(makeSOResponse('deploy-uc6', updatedAttrs));
 
         const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-uc6', {
           agentPolicyId: 'agent-policy-123',

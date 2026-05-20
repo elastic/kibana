@@ -89,15 +89,13 @@ class CloudOnboardingDeploymentService {
     id: string,
     update: UpdateCloudOnboardingDeploymentInput
   ): Promise<CloudOnboardingDeployment> {
-    const so = await soClient.update<CloudOnboardingDeploymentSOAttributes>(
+    await soClient.update<CloudOnboardingDeploymentSOAttributes>(
       CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
       id,
       { ...update }
     );
 
-    // soClient.update() returns the full _source after the write; Partial<T> is a conservative
-    // TypeScript choice on the input side, not a reflection of what ES actually returns.
-    return { id: so.id, ...(so.attributes as CloudOnboardingDeploymentSOAttributes) };
+    return this.getById(soClient, id);
   }
 
   public async delete(soClient: SavedObjectsClientContract, id: string): Promise<void> {
