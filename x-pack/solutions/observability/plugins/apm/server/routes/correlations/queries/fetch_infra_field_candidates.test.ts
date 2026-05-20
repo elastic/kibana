@@ -11,6 +11,7 @@ import {
   CONTAINER_ID,
   KUBERNETES_POD_NAME,
   CLOUD_REGION,
+  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '@kbn/apm-types';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
@@ -98,12 +99,16 @@ describe('fetchInfraFieldCandidates', () => {
     });
 
     const callArgs = mockFieldCaps.mock.calls[0][1];
-    // index_filter should be a bool query (from getCommonCorrelationsQuery), not a plain range query
+    const filter: unknown[] = callArgs.index_filter.bool.filter;
+
     expect(callArgs.index_filter).toHaveProperty('bool');
-    expect(callArgs.index_filter.bool.filter).toEqual(
+    expect(filter).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ range: expect.anything() }),
+        expect.objectContaining({ term: { [SERVICE_ENVIRONMENT]: 'production' } }),
       ])
     );
+    // kuery clause expands filter beyond query + range + environment (≥ 4 clauses)
+    expect(filter.length).toBeGreaterThanOrEqual(4);
   });
 });
