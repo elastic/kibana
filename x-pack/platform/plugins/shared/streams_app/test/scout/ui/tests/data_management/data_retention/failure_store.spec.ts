@@ -11,6 +11,7 @@ import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 import {
   openRetentionModal,
+  saveFailureStoreChanges,
   saveRetentionChanges,
   setCustomRetention,
   setFailureStoreRetention,
