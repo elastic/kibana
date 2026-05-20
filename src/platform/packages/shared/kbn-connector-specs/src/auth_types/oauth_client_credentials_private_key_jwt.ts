@@ -38,11 +38,9 @@ const authSchema = lazySchema(() =>
       scope: z.string().meta({ label: i18n.OAUTH_SCOPE_LABEL }).optional(),
       algorithm: z
         .enum(JWT_ALGORITHMS)
-        .default('PS256')
         .meta({ label: i18n.OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_ALGORITHM_LABEL }),
       certificateBinding: z
         .enum(CERTIFICATE_BINDING_KINDS)
-        .default('x5t#S256')
         .meta({ label: i18n.OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_BINDING_LABEL }),
       certificate: z
         .string()
