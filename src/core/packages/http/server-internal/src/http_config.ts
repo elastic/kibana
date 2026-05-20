@@ -189,6 +189,10 @@ const configSchema = schema.object(
         schema.string({ validate: match(/^\//, 'must start with a slash') }),
         { defaultValue: [], maxSize: 100 }
       ),
+      allowBearerTokens: offeringBasedSchema({
+        serverless: schema.boolean({ defaultValue: true }),
+        traditional: schema.boolean({ defaultValue: false }),
+      }),
     }),
     excludeRoutes: schema.arrayOf(
       schema.string({ validate: match(/^\//, 'must start with a slash') }),
@@ -382,7 +386,7 @@ export class HttpConfig implements IHttpConfig {
   public csp: ICspConfig;
   public prototypeHardening: boolean;
   public externalUrl: IExternalUrlConfig;
-  public xsrf: { disableProtection: boolean; allowlist: string[] };
+  public xsrf: { disableProtection: boolean; allowlist: string[]; allowBearerTokens: boolean };
   public excludeRoutes: string[];
   public requestId: { allowFromAnyIp: boolean; ipAllowlist: string[] };
   public versioned: {

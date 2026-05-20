@@ -14,20 +14,35 @@ import type {
   OnPreResponseInfo,
   KibanaRequest,
 } from '@kbn/core-http-server';
+import type { GetAuthState } from '@kbn/core-http-server';
 import {
   getWarningHeaderMessageFromRouteDeprecation,
   isSafeMethod,
 } from '@kbn/core-http-router-server-internal';
 import type { Logger } from '@kbn/logging';
 import { KIBANA_BUILD_NR_HEADER } from '@kbn/core-http-common';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type { HttpConfig } from './http_config';
 
 const VERSION_HEADER = 'kbn-version';
 const XSRF_HEADER = 'kbn-xsrf';
 const KIBANA_NAME_HEADER = 'kbn-name';
 
-export const createXsrfPostAuthHandler = (config: HttpConfig): OnPostAuthHandler => {
-  const { allowlist, disableProtection } = config.xsrf;
+// Schemes that may bypass the kbn-xsrf check when server.xsrf.allowBearerTokens is enabled.
+// All listed schemes must be stateless, per-request credentials — they cannot carry a browser
+// session. `basic` is intentionally excluded: browsers can cache Basic credentials and replay
+// them cross-origin without user interaction, so the XSRF protection is still meaningful there.
+// If a new scheme is added here it must satisfy the same stateless invariant.
+// NOTE: Core reads http_authentication_scheme from AuthenticatedUser (set by the security
+// plugin's HTTP auth provider). This creates an implicit contract: the security plugin is
+// responsible for populating the field correctly on every HTTP-scheme-authenticated request.
+const CREDENTIAL_SCHEMES_EXEMPT_FROM_XSRF = new Set(['apikey', 'bearer']);
+
+export const createXsrfPostAuthHandler = (
+  config: HttpConfig,
+  getAuthState: GetAuthState
+): OnPostAuthHandler => {
+  const { allowlist, disableProtection, allowBearerTokens } = config.xsrf;
 
   return (request, response, toolkit) => {
     if (
@@ -36,6 +51,14 @@ export const createXsrfPostAuthHandler = (config: HttpConfig): OnPostAuthHandler
       request.route.options.xsrfRequired === false
     ) {
       return toolkit.next();
+    }
+
+    if (allowBearerTokens && !isSafeMethod(request.route.method)) {
+      const authState = getAuthState<AuthenticatedUser>(request);
+      const scheme = authState.state?.http_authentication_scheme;
+      if (scheme != null && CREDENTIAL_SCHEMES_EXEMPT_FROM_XSRF.has(scheme)) {
+        return toolkit.next();
+      }
     }
 
     const hasVersionHeader = VERSION_HEADER in request.headers;
