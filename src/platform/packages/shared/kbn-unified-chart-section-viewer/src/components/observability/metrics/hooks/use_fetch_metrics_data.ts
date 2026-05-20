@@ -9,7 +9,6 @@
 
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useEffect, useMemo } from 'react';
-import { apm } from '@elastic/apm-rum';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { buildMetricsInfoQuery, hasTransformationalCommand } from '@kbn/esql-utils';
 import { getFieldIconType } from '@kbn/field-utils';
@@ -19,11 +18,11 @@ import { useChartSectionInspector } from '../../../../context/chart_section_insp
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { parseMetricsWithTelemetry } from '../utils/parse_metrics_response_with_telemetry';
 import { getEsqlQuery } from '../utils/get_esql_query';
-import { isSuppressedFetchError } from '../utils/is_suppressed_fetch_error';
 import {
   MetricsExecutionContextAction,
   MetricsExecutionContextName,
 } from '../utils/execution_context_enums';
+import { reportChartSectionError } from '../../../chart/utils/report_chart_section_error';
 
 /**
  * Fetches METRICS_INFO when in Metrics Experience (non-transformational ES|QL, chart visible).
@@ -42,6 +41,7 @@ export function useFetchMetricsData({
   services: ChartSectionProps['services'];
   isComponentVisible: boolean;
   selectedDimensionNames?: Dimension[];
+  /** Forwarded as `profile_id` APM label on captured errors. */
   profileId: string;
 }): MetricsInfo {
   const { trackMetricsInfo } = useTelemetry();
@@ -78,72 +78,56 @@ export function useFetchMetricsData({
     async (
       signal: AbortSignal
     ): Promise<(ParsedMetrics & { activeDimensions: Dimension[] }) | null> => {
-      try {
-        const documents = await trackRequest(
-          'Grid of metrics',
-          'This request queries Elasticsearch to fetch metrics info for the grid.',
-          async () => {
-            const {
-              documents: docs,
-              rawResponse,
-              requestParams,
-            } = await executeEsqlQuery<MetricsESQLResponse>({
-              esqlQuery: metricsInfoQuery,
-              search: services.data.search.search,
-              signal,
-              dataView: fetchParams.dataView,
-              timeRange: fetchParams.timeRange,
-              filters: fetchParams.filters ?? [],
-              variables: fetchParams.esqlVariables,
-              uiSettings: services.uiSettings,
-              profileId,
-            });
-
-            return {
-              data: docs,
-              request: requestParams,
-              response: rawResponse,
-            };
-          }
-        );
-
-        const getFieldType = (name: string) => {
-          const field = fetchParams.dataView?.getFieldByName(name);
-          return field ? getFieldIconType(field) : undefined;
-        };
-
-        const parsed = parseMetricsWithTelemetry(documents, getFieldType);
-
-        const sortedMetrics: ParsedMetrics = {
-          metricItems: [...parsed.metricItems].sort((a, b) =>
-            a.metricName.localeCompare(b.metricName)
-          ),
-          allDimensions: [...parsed.allDimensions].sort((a, b) => a.name.localeCompare(b.name)),
-        };
-
-        if (!signal.aborted) {
-          trackMetricsInfo(parsed.telemetry);
-        }
-
-        return {
-          ...sortedMetrics,
-          activeDimensions: appliedDimensions ?? [],
-        };
-      } catch (err) {
-        // Suppress cancellations — aborted locally or via the data plugin.
-        if (!signal.aborted && err instanceof Error && !isSuppressedFetchError(err)) {
-          // RUM error documents don't inherit transaction labels; set
-          // execution-context labels explicitly so error telemetry is
-          // filterable by the same page/profile labels as the request.
-          apm.captureError(err, {
-            labels: {
-              page: `metrics_${MetricsExecutionContextAction.FETCH}_${MetricsExecutionContextName.METRICS_INFO}`,
-              profile_id: profileId,
-            },
+      const documents = await trackRequest(
+        'Grid of metrics',
+        'This request queries Elasticsearch to fetch metrics info for the grid.',
+        async () => {
+          const {
+            documents: docs,
+            rawResponse,
+            requestParams,
+          } = await executeEsqlQuery<MetricsESQLResponse>({
+            esqlQuery: metricsInfoQuery,
+            search: services.data.search.search,
+            signal,
+            dataView: fetchParams.dataView,
+            timeRange: fetchParams.timeRange,
+            filters: fetchParams.filters ?? [],
+            variables: fetchParams.esqlVariables,
+            uiSettings: services.uiSettings,
+            profileId,
           });
+
+          return {
+            data: docs,
+            request: requestParams,
+            response: rawResponse,
+          };
         }
-        throw err;
+      );
+
+      const getFieldType = (name: string) => {
+        const field = fetchParams.dataView?.getFieldByName(name);
+        return field ? getFieldIconType(field) : undefined;
+      };
+
+      const parsed = parseMetricsWithTelemetry(documents, getFieldType);
+
+      const sortedMetrics: ParsedMetrics = {
+        metricItems: [...parsed.metricItems].sort((a, b) =>
+          a.metricName.localeCompare(b.metricName)
+        ),
+        allDimensions: [...parsed.allDimensions].sort((a, b) => a.name.localeCompare(b.name)),
+      };
+
+      if (!signal.aborted) {
+        trackMetricsInfo(parsed.telemetry);
       }
+
+      return {
+        ...sortedMetrics,
+        activeDimensions: appliedDimensions ?? [],
+      };
     },
     [
       metricsInfoQuery,
@@ -178,6 +162,25 @@ export function useFetchMetricsData({
     fetchParams.esqlVariables,
     executeFetch,
   ]);
+
+  // Report every distinct landed fetch error. Repeated failures are a
+  // monitoring signal (something is broken right now), so we deliberately do
+  // not de-dupe at the source - rate-limiting / sampling belongs in APM.
+  // `useAsyncFn` produces a single error reference per failed run, so the
+  // effect only fires once per failure landing.
+  useEffect(() => {
+    if (!error) {
+      return;
+    }
+    reportChartSectionError({
+      error,
+      source: 'useFetchMetricsData',
+      labels: {
+        page: `metrics_${MetricsExecutionContextAction.FETCH}_${MetricsExecutionContextName.METRICS_INFO}`,
+        profile_id: profileId,
+      },
+    });
+  }, [error, profileId]);
 
   return {
     loading,
