@@ -110,18 +110,25 @@ export function LayerPanel(props: LayerPanelProps) {
   const dispatch = useLensDispatch();
 
   // Sync the chart's finished-loading data into Redux so that downstream consumers
-  // (e.g. color mapping term lists) always have access to activeData
+  // (e.g. color mapping term lists) always have access to activeData.
+  // The default layer id mirrors WorkspacePanel#onData$ so the safety-net dispatch agrees
+  // with the canonical one on how single-table adapter output is keyed, and avoids
+  // re-keying the previous layer's table under the currently selected tab's layerId.
   const isDataLoading = useObservable(editorProps.dataLoading$ ?? EMPTY);
   const lensAdaptersRef = useRef(editorProps.lensAdapters);
   lensAdaptersRef.current = editorProps.lensAdapters;
+  const [defaultLayerId] = Object.keys(framePublicAPI.datasourceLayers ?? {});
 
   useEffect(() => {
-    if (isDataLoading !== false) return;
-    const activeData = getActiveDataFromDatatable(layerId, lensAdaptersRef.current?.tables?.tables);
+    if (isDataLoading !== false || !defaultLayerId) return;
+    const activeData = getActiveDataFromDatatable(
+      defaultLayerId,
+      lensAdaptersRef.current?.tables?.tables
+    );
     if (Object.keys(activeData).length > 0) {
       dispatch(onActiveDataChange({ activeData }));
     }
-  }, [isDataLoading, dispatch, layerId]);
+  }, [isDataLoading, dispatch, defaultLayerId]);
 
   useEffect(() => {
     // is undefined when the dimension panel is closed
