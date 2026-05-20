@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 export const CloudOnboardingDeploymentSchemaV1 = schema.object({
   provider: schema.oneOf([schema.literal('aws'), schema.literal('azure'), schema.literal('gcp')]),
-  connectorId: schema.string(),
+  connectorId: schema.string({ minLength: 1 }),
   mechanisms: schema.arrayOf(
     schema.oneOf([
       schema.literal('identity_federation'),
@@ -21,7 +21,7 @@ export const CloudOnboardingDeploymentSchemaV1 = schema.object({
   ),
   deploymentId: schema.maybe(schema.string()),
   deploymentName: schema.maybe(schema.string()),
-  services: schema.arrayOf(schema.string(), { maxSize: 1000 }),
+  services: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1000 }),
   status: schema.oneOf(
     [
       schema.literal('pending'),
@@ -35,10 +35,11 @@ export const CloudOnboardingDeploymentSchemaV1 = schema.object({
   attemptCount: schema.number({ min: 1, defaultValue: 1 }),
   serviceVars: schema.maybe(
     schema.recordOf(
-      schema.string(),
+      schema.string({ minLength: 1 }),
       schema.arrayOf(schema.recordOf(schema.string(), schema.any()), { maxSize: 100 })
     )
   ),
   packagePolicyIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   agentPolicyId: schema.maybe(schema.string()),
+  apiKeyId: schema.maybe(schema.string()),
 });

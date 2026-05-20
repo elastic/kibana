@@ -368,4 +368,6 @@ export interface CloudOnboardingDeploymentSOAttributes {
   packagePolicyIds?: string[];
   /** Agent policy ID for agent_based mechanism — the user-managed agent policy the package policies are attached to. In agentless (identity_federation), agentPolicyId equals packagePolicyId and is not stored separately. */
   agentPolicyId?: string;
+  /** Elasticsearch API key ID for push mechanisms (firehose, cloud_forwarder). Set by the backend after key creation; used to identify the key for rotation/revocation. No package policy exists for push services. */
+  apiKeyId?: string;
 }

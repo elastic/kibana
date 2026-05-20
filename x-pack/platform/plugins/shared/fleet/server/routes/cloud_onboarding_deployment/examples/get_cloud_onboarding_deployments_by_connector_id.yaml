@@ -19,8 +19,6 @@ responses:
                     - 'cloudwatch_metrics'
                   status: 'succeeded'
                   attemptCount: 1
-                  vars:
-                    role_arn: 'arn:aws:iam::123456789012:role/ElasticIntegrationRole'
                   packagePolicyIds:
                     - 'package-policy-id-1'
                 - id: 'onboarding-deployment-id-2'
@@ -33,9 +31,6 @@ responses:
                     - 'cloudfront_logs'
                   status: 'deploying'
                   attemptCount: 1
-                  vars:
-                    role_arn: 'arn:aws:iam::123456789012:role/ElasticIntegrationRole'
-                    api_key_id: 'abc123keyid'
                   serviceVars:
                     cloudfront_logs:
                       - regions:

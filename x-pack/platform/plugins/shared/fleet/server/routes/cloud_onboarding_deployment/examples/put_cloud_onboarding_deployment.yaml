@@ -30,8 +30,6 @@ responses:
                   - 'cloudtrail'
                 status: 'deploying'
                 attemptCount: 1
-                vars:
-                  role_arn: 'arn:aws:iam::123456789012:role/ElasticIntegrationRole'
                 packagePolicyIds:
                   - 'package-policy-id-1'
   400:

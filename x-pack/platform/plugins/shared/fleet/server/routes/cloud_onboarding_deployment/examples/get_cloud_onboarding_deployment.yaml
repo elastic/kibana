@@ -20,8 +20,6 @@ responses:
                   - 'cloudtrail'
                 status: 'succeeded'
                 attemptCount: 1
-                vars:
-                  role_arn: 'arn:aws:iam::123456789012:role/ElasticIntegrationRole'
                 serviceVars:
                   cloudwatch_metrics:
                     - regions:

@@ -463,6 +463,29 @@ describe('cloudOnboardingDeploymentService', () => {
         expect(result.attemptCount).toBe(1);
         expect(result.mechanisms).toEqual(['cloud_forwarder']);
         expect(result.packagePolicyIds).toBeUndefined();
+        expect(result.apiKeyId).toBeUndefined();
+      });
+
+      it('stores apiKeyId after ES API key is created for push service', async () => {
+        const updatedAttrs = makeAttributes({
+          mechanisms: ['cloud_forwarder'],
+          services: ['cloudfront_logs'],
+          apiKeyId: 'es-key-abc123',
+        });
+        soClient.update.mockResolvedValue(makeSOResponse('deploy-uc3', updatedAttrs));
+        soClient.get.mockResolvedValue(makeSOResponse('deploy-uc3', updatedAttrs));
+
+        const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-uc3', {
+          apiKeyId: 'es-key-abc123',
+        });
+
+        expect(soClient.update).toHaveBeenCalledWith(
+          CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+          'deploy-uc3',
+          expect.objectContaining({ apiKeyId: 'es-key-abc123' })
+        );
+        expect(result.apiKeyId).toBe('es-key-abc123');
+        expect(result.packagePolicyIds).toBeUndefined();
       });
     });
 

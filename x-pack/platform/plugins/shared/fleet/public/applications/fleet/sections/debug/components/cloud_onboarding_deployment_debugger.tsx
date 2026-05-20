@@ -24,7 +24,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { API_VERSIONS, CLOUD_CONNECTOR_API_ROUTES } from '../../../../../../common/constants';
+import {
+  API_VERSIONS,
+  CLOUD_CONNECTOR_API_ROUTES,
+  CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES,
+} from '../../../../../../common/constants';
 import { sendRequest } from '../../../hooks';
 
 import { CodeBlock } from './code_block';
@@ -156,7 +160,10 @@ export const CloudOnboardingDeploymentDebugger: React.FunctionComponent = () => 
     setDeploymentsLoading(true);
     const result = await sendRequest({
       method: 'get',
-      path: `/api/fleet/cloud_onboarding_deployments/connector/${connId}`,
+      path: CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES.BY_CONNECTOR_PATTERN.replace(
+        '{connectorId}',
+        connId
+      ),
       version: API_VERSIONS.public.v1,
     });
     setDeploymentsLoading(false);
@@ -186,14 +193,14 @@ export const CloudOnboardingDeploymentDebugger: React.FunctionComponent = () => 
   const availableMechanisms = MECHANISM_OPTIONS;
 
   const buildServiceVars = () => {
-    const result: Record<string, Array<Record<string, string>>> = {};
+    const result: Record<string, Array<Record<string, unknown>>> = {};
     for (const service of activeServices) {
-      const entry: Record<string, string> = {};
+      const entry: Record<string, unknown> = {};
       if (firehoseSelected && serviceVarRegion[service.id]) {
-        entry.region = serviceVarRegion[service.id];
+        entry.regions = [serviceVarRegion[service.id]];
       }
       if (cloudForwarderSelected && serviceVarBucketArn[service.id]) {
-        entry.sourceBucketArn = serviceVarBucketArn[service.id];
+        entry.s3_bucket_arn = serviceVarBucketArn[service.id];
       }
       if (Object.keys(entry).length > 0) {
         result[service.id] = [entry];
@@ -208,7 +215,7 @@ export const CloudOnboardingDeploymentDebugger: React.FunctionComponent = () => 
     const serviceVars = buildServiceVars();
     const result = await sendRequest({
       method: 'post',
-      path: '/api/fleet/cloud_onboarding_deployments',
+      path: CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES.CREATE_PATTERN,
       body: {
         provider: 'aws',
         connectorId,
@@ -231,7 +238,7 @@ export const CloudOnboardingDeploymentDebugger: React.FunctionComponent = () => 
     setGetByIdResult('');
     const result = await sendRequest({
       method: 'get',
-      path: `/api/fleet/cloud_onboarding_deployments/${getByIdValue}`,
+      path: CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES.INFO_PATTERN.replace('{id}', getByIdValue),
       version: API_VERSIONS.public.v1,
     });
     if (result.error) {
@@ -246,7 +253,10 @@ export const CloudOnboardingDeploymentDebugger: React.FunctionComponent = () => 
     setSetDeployingResult('');
     const result = await sendRequest({
       method: 'put',
-      path: `/api/fleet/cloud_onboarding_deployments/${setDeployingIdValue}`,
+      path: CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES.UPDATE_PATTERN.replace(
+        '{id}',
+        setDeployingIdValue
+      ),
       body: {
         status: 'deploying',
         deploymentId: setDeployingDeploymentId || undefined,
@@ -267,7 +277,7 @@ export const CloudOnboardingDeploymentDebugger: React.FunctionComponent = () => 
     setDeleteResult('');
     const result = await sendRequest({
       method: 'delete',
-      path: `/api/fleet/cloud_onboarding_deployments/${deleteIdValue}`,
+      path: CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES.DELETE_PATTERN.replace('{id}', deleteIdValue),
       version: API_VERSIONS.public.v1,
     });
     if (result.error) {

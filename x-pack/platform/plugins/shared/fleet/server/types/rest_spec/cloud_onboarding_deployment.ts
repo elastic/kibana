@@ -92,12 +92,28 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
       },
     })
   ),
+  agentPolicyId: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'Agent policy ID created for agent-based deployments. Present only when agent_based is in mechanisms.',
+      },
+    })
+  ),
   packagePolicyIds: schema.maybe(
     schema.arrayOf(schema.string(), {
       maxSize: 100,
       meta: {
         description:
           'Package policy IDs created for agentless services. Present only when identity_federation is in mechanisms.',
+      },
+    })
+  ),
+  apiKeyId: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'Elasticsearch API key ID for push mechanisms (firehose, cloud_forwarder). Set by the backend; used for key rotation/revocation.',
       },
     })
   ),
@@ -168,7 +184,9 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
     attemptCount: schema.maybe(
       schema.number({ min: 1, meta: { description: 'Incremented by callers performing a retry.' } })
     ),
+    agentPolicyId: schema.maybe(schema.string()),
     packagePolicyIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+    apiKeyId: schema.maybe(schema.string()),
   }),
 };
 
