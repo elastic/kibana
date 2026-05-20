@@ -38,7 +38,7 @@ import type { AlertingV2PublicStart } from './types';
 export type { AlertingV2PublicStart } from './types';
 export type { CreateRuleFormFlyoutProps } from './create_rule_form_flyout';
 
-export const module = new ContainerModule(({ bind }) => {
+const pluginModule = new ContainerModule(({ bind }) => {
   bind(RulesApi).toSelf().inSingletonScope();
   bind(ActionPoliciesApi).toSelf().inSingletonScope();
   bind(ExecutionHistoryApi).toSelf().inSingletonScope();
@@ -204,3 +204,5 @@ export const module = new ContainerModule(({ bind }) => {
     });
   });
 });
+
+export { pluginModule as module };

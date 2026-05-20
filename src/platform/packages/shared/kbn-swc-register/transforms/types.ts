@@ -9,4 +9,4 @@
 
 import type { Cache } from '../cache/types';
 
-export type Transform = (path: string, source: string, cache: Cache) => string;
+export type Transform = (path: string, source: string, cache?: Cache) => string;

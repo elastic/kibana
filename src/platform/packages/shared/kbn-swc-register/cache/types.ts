@@ -22,4 +22,6 @@ export interface Cache {
   update(key: string, entry: { code: string; map?: object | null }): Promise<void>;
 }
 
-export type CacheEntry = [atime: number, code: string, sourceMap: object];
+export type LegacyCacheEntry = [atime: number, code: string, sourceMap: object | undefined];
+export type CodeCacheEntry = [atime: number, code: string];
+export type CacheEntry = LegacyCacheEntry | CodeCacheEntry | object;
