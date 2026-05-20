@@ -242,10 +242,18 @@ export const useTopNavLinks = ({
         order: 2,
         label: isDataViewMode
           ? i18n.translate('discover.localMenu.switchToESQLTitle', {
-              defaultMessage: 'Query with ES|QL',
+              defaultMessage: 'Query in ES|QL',
             })
           : i18n.translate('discover.localMenu.switchToClassicTitle', {
               defaultMessage: 'Switch to Classic',
+            }),
+        tooltipContent: isDataViewMode
+          ? i18n.translate('discover.localMenu.switchToESQLTooltip', {
+              defaultMessage:
+                'Search, transform, join, and aggregate your data with ES|QL or PromQL',
+            })
+          : i18n.translate('discover.localMenu.switchToClassicTooltip', {
+              defaultMessage: 'Search your data with data views and KQL in Classic Discover',
             }),
         iconType: isDataViewMode ? 'code' : 'discoverApp',
         testId: 'discoverSwitchLanguageModeButton',

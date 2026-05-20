@@ -111,6 +111,8 @@ describe('useTopNavLinks', () => {
 
   it('should return results', async () => {
     const appMenuConfig = await setup();
+    const newItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.new);
+    const openItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.open);
 
     expect(appMenuConfig.items).toBeDefined();
     expect(appMenuConfig.items?.length).toBeGreaterThan(0);
@@ -119,6 +121,8 @@ describe('useTopNavLinks', () => {
     const itemIds = appMenuConfig.items?.map((item) => item.id);
     expect(itemIds).toContain('new');
     expect(itemIds).toContain('open');
+    expect(newItem?.label).toBe('New session');
+    expect(openItem?.label).toBe('Open session');
 
     // Check primary action item (Save)
     expect(appMenuConfig.primaryActionItem).toBeDefined();
@@ -137,6 +141,9 @@ describe('useTopNavLinks', () => {
 
       expect(switchLanguageModeItem).toBeDefined();
       expect(switchLanguageModeItem?.label).toBe('Switch to Classic');
+      expect(switchLanguageModeItem?.tooltipContent).toBe(
+        'Search your data with data views and KQL in Classic Discover'
+      );
     });
   });
 
@@ -151,7 +158,10 @@ describe('useTopNavLinks', () => {
       );
 
       expect(switchLanguageModeItem).toBeDefined();
-      expect(switchLanguageModeItem?.label).toBe('Query with ES|QL');
+      expect(switchLanguageModeItem?.label).toBe('Query in ES|QL');
+      expect(switchLanguageModeItem?.tooltipContent).toBe(
+        'Search, transform, join, and aggregate your data with ES|QL or PromQL'
+      );
     });
   });
 
