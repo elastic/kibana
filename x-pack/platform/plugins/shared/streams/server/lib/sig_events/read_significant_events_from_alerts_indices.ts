@@ -63,8 +63,8 @@ export async function readSignificantEventsFromAlertsIndices(
   const esqlUnit = ESQL_UNITS[unit] ?? unit;
   const intervalMs = value * (MS_PER_UNIT[unit] ?? 1000);
 
-  // Composer emits one safe inline literal per value — a single array param
-  // would silently match nothing (see §5.2 #2 in the FE-4 plan).
+  // Inline one literal per value — passing the array as a single composer hole
+  // renders as a non-list ES|QL parameter and silently matches nothing.
   const ruleIdLiterals = ruleIds.map((id) => esql.str(id));
   const ruleUuidCol = esql.col(['kibana', 'alert', 'rule', 'uuid']);
 

@@ -106,8 +106,8 @@ describe('fillBucketGaps', () => {
     expect(result[2].date).toBe('2026-01-01T02:00:00.000Z');
   });
 
-  it('matches DSL date_histogram output on the V9 fixture (rule-A / rule-B parity)', () => {
-    // Reproduces the V9 verification from the plan: 10-minute window, 1-minute buckets.
+  it('produces parity with DSL date_histogram output for multiple rules sharing a window', () => {
+    // 10-minute window, 1-minute buckets, two rules with overlapping but distinct firing patterns.
     // rule-A: docs at minutes 0, 3, 3, 7 → sparse { 0→1, 3→2, 7→1 }
     const base = new Date('2026-01-01T00:00:00.000Z');
     const from = base;

@@ -125,8 +125,8 @@ export class InsightClient {
     });
 
     if (deleteIds.length > 0) {
-      // Composer emits one safe inline literal per value — a single array param
-      // would silently match nothing (see §5.2 #2 in the FE-4 plan).
+      // Inline one literal per value — passing the array as a single composer hole
+      // renders as a non-list ES|QL parameter and silently matches nothing.
       const idLiterals = deleteIds.map((id) => esql.str(id));
 
       const existingResponse = await this.clients.storageClient.esql({

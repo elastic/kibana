@@ -640,8 +640,8 @@ export class QueryClient {
   async bulkGetByIds(name: string, ids: string[]): Promise<QueryLink[]> {
     if (ids.length === 0) return [];
 
-    // Composer emits one safe inline literal per value — a single array param
-    // would silently match nothing (see §5.2 #2 in the FE-4 plan).
+    // Inline one literal per value — passing the array as a single composer hole
+    // renders as a non-list ES|QL parameter and silently matches nothing.
     const uuids = ids.map((id) =>
       getQueryLinkUuid(name, { [ASSET_TYPE]: 'query', [ASSET_ID]: id })
     );
