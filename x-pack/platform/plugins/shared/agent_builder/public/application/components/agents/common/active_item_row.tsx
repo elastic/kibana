@@ -20,6 +20,7 @@ export interface ActiveItemRowProps {
   readOnlyContent?: React.ReactNode;
   canEditAgent: boolean;
   ebtProps?: Record<string, string>;
+  removeEbtProps?: Record<string, string>;
 }
 
 const SHOW_ON_HOVER_CLASS = 'agentBuilder__agentActiveItemRow--showOnHover';
@@ -34,6 +35,7 @@ export const ActiveItemRow: React.FC<ActiveItemRowProps> = ({
   readOnlyContent,
   canEditAgent,
   ebtProps,
+  removeEbtProps,
 }) => {
   const { euiTheme } = useEuiTheme();
   const isReadOnly = Boolean(readOnlyContent);
@@ -109,6 +111,7 @@ export const ActiveItemRow: React.FC<ActiveItemRowProps> = ({
               event.stopPropagation();
               onRemove();
             }}
+            {...removeEbtProps}
           />
         </EuiFlexItem>
       )}

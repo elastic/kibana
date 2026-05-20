@@ -308,6 +308,11 @@ export const AgentPlugins: React.FC = () => {
                         action: AGENT_BUILDER_UI_EBT.action.agentCustomization.ENTITY_DETAIL_VIEW,
                         detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
                       })}
+                      removeEbtProps={getEbtProps({
+                        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                        action: AGENT_BUILDER_UI_EBT.action.agentCustomization.ENTITY_REMOVE,
+                        detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+                      })}
                     />
                   ))
                 )}

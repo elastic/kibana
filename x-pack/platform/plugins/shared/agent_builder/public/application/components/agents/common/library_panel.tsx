@@ -57,6 +57,7 @@ export interface LibraryPanelProps<T extends LibraryItem> {
   disabledItemIdSet?: Set<string>;
   readOnlyItemIdSet?: Set<string>;
   callout?: React.ReactNode;
+  ebtEntityType?: string;
 }
 
 const defaultGetItemName = <T extends LibraryItem>(item: T): string => item.id;
@@ -74,6 +75,7 @@ export const LibraryPanel = <T extends LibraryItem>({
   disabledItemIdSet,
   readOnlyItemIdSet,
   callout,
+  ebtEntityType,
 }: LibraryPanelProps<T>) => {
   const { createAgentBuilderUrl } = useNavigation();
   const manageLibraryUrl = createAgentBuilderUrl(manageLibraryPath);
@@ -175,6 +177,7 @@ export const LibraryPanel = <T extends LibraryItem>({
                   disabledBadgeLabel={libraryLabels.disabledBadgeLabel}
                   disabledTooltipTitle={libraryLabels.disabledTooltipTitle}
                   disabledTooltipBody={libraryLabels.disabledTooltipBody}
+                  ebtEntityType={ebtEntityType}
                 />
                 <EuiHorizontalRule margin="m" />
               </EuiFlexItem>
