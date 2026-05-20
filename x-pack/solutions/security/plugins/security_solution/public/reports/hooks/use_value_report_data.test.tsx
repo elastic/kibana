@@ -72,11 +72,11 @@ const mockMetrics = ({
 };
 
 const mockHistory = ({
-  useHasLatelyUsedAttackDiscovery = false,
+  hasLatelyUsedAttackDiscovery = false,
   isLoading = false,
 }: Partial<ReturnType<typeof useHasLatelyUsedAttackDiscovery>> = {}) => {
   mockUseHasEverUsedAttackDiscovery.mockReturnValue({
-    hasEverUsedAttackDiscovery: useHasLatelyUsedAttackDiscovery,
+    hasLatelyUsedAttackDiscovery,
     isLoading,
   });
 };
@@ -89,7 +89,7 @@ describe('useValueReportData', () => {
   describe('sample vs live mode', () => {
     it('enters sample mode when the feature was never used and the range is empty, passing through settings-derived props', () => {
       mockMetrics({ valueMetrics: EMPTY_LIVE_METRICS });
-      mockHistory({ useHasLatelyUsedAttackDiscovery: false });
+      mockHistory({ hasLatelyUsedAttackDiscovery: false });
 
       const { result } = renderHook(() => useValueReportData(PROPS));
 
@@ -110,7 +110,7 @@ describe('useValueReportData', () => {
 
     it('stays in live mode when the feature was ever used, even if the current range has zero discoveries', () => {
       mockMetrics({ valueMetrics: EMPTY_LIVE_METRICS });
-      mockHistory({ useHasLatelyUsedAttackDiscovery: true });
+      mockHistory({ hasLatelyUsedAttackDiscovery: true });
 
       const { result } = renderHook(() => useValueReportData(PROPS));
 
@@ -130,7 +130,7 @@ describe('useValueReportData', () => {
       'stays in live mode when the current range has discoveries (%s)',
       (_label, hasHistoricalAttackDiscoveries) => {
         mockMetrics({ valueMetrics: LIVE_METRICS });
-        mockHistory({ useHasLatelyUsedAttackDiscovery: hasHistoricalAttackDiscoveries });
+        mockHistory({ hasLatelyUsedAttackDiscovery: hasHistoricalAttackDiscoveries });
 
         const { result } = renderHook(() => useValueReportData(PROPS));
 
@@ -143,7 +143,7 @@ describe('useValueReportData', () => {
 
     it('passes attackAlertIds and both metric objects through unchanged in live mode', () => {
       mockMetrics();
-      mockHistory({ useHasLatelyUsedAttackDiscovery: true });
+      mockHistory({ hasLatelyUsedAttackDiscovery: true });
 
       const { result } = renderHook(() => useValueReportData(PROPS));
 
@@ -157,7 +157,7 @@ describe('useValueReportData', () => {
   describe('loading behavior', () => {
     it('suppresses sample mode while metrics are loading so the report does not flash sample data during fetch', () => {
       mockMetrics({ isLoading: true, valueMetrics: EMPTY_LIVE_METRICS });
-      mockHistory({ isLoading: true, useHasLatelyUsedAttackDiscovery: false });
+      mockHistory({ isLoading: true, hasLatelyUsedAttackDiscovery: false });
 
       const { result } = renderHook(() => useValueReportData(PROPS));
 
@@ -169,7 +169,7 @@ describe('useValueReportData', () => {
 
     it('waits on history loading only when the current range has zero discoveries', () => {
       mockMetrics({ isLoading: false, valueMetrics: EMPTY_LIVE_METRICS });
-      mockHistory({ isLoading: true, useHasLatelyUsedAttackDiscovery: false });
+      mockHistory({ isLoading: true, hasLatelyUsedAttackDiscovery: false });
 
       const { result } = renderHook(() => useValueReportData(PROPS));
 
@@ -180,7 +180,7 @@ describe('useValueReportData', () => {
 
     it('does not wait on history loading when the current range already has discoveries', () => {
       mockMetrics({ valueMetrics: LIVE_METRICS });
-      mockHistory({ isLoading: true, useHasLatelyUsedAttackDiscovery: false });
+      mockHistory({ isLoading: true, hasLatelyUsedAttackDiscovery: false });
 
       const { result } = renderHook(() => useValueReportData(PROPS));
 
