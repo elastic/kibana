@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common/chat/conversation';
 import { MasterToggle } from './master_toggle';
 import { StepItem } from './step_item';
-import { useMasterToggle } from './hooks';
 
 interface RoundEventsProps {
   /**
@@ -52,24 +51,25 @@ export const RoundEvents: React.FC<RoundEventsProps> = ({
   isReloadedRound,
   hideMasterToggle = false,
 }) => {
-  const masterToggle = useMasterToggle({ initialExpanded: !isReloadedRound });
+  const [isExpanded, setIsExpanded] = useState(!isReloadedRound);
+  const toggleExpanded = useCallback(() => setIsExpanded((v) => !v), []);
 
   if (steps.length === 0) return null;
 
-  const stepsVisible = hideMasterToggle || masterToggle.expanded;
+  const stepsVisible = hideMasterToggle || isExpanded;
   // "Show reasoning" (collapsed) renders above the panel — there's no panel yet
   // and the toggle is the only thing to click. "Collapse reasoning" (expanded)
   // renders below the panel so the toggle sits at the boundary between the
   // steps block and whatever follows, keeping it near the end of what the user
   // just scrolled through.
   const showToggle = !hideMasterToggle;
-  const togglePosition: 'above' | 'below' = masterToggle.expanded ? 'below' : 'above';
+  const togglePosition: 'above' | 'below' = isExpanded ? 'below' : 'above';
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       {showToggle && togglePosition === 'above' && (
         <EuiFlexItem grow={false}>
-          <MasterToggle expanded={masterToggle.expanded} onToggle={masterToggle.toggle} />
+          <MasterToggle expanded={isExpanded} onToggle={toggleExpanded} />
         </EuiFlexItem>
       )}
       {stepsVisible && (
@@ -86,7 +86,7 @@ export const RoundEvents: React.FC<RoundEventsProps> = ({
       )}
       {showToggle && togglePosition === 'below' && (
         <EuiFlexItem grow={false}>
-          <MasterToggle expanded={masterToggle.expanded} onToggle={masterToggle.toggle} />
+          <MasterToggle expanded={isExpanded} onToggle={toggleExpanded} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
