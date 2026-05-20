@@ -28,6 +28,7 @@ import {
   EuiText,
   EuiWrappingPopover,
   copyToClipboard,
+  useEuiTheme,
 } from '@elastic/eui';
 import { NumberBadge, type DataCascadeRowProps } from '@kbn/shared-ux-document-data-cascade';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -393,6 +394,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
   togglePopover: ReturnType<typeof useEsqlDataCascadeRowActionHelpers>['togglePopover'],
   columnTypes: Map<string, 'number' | 'array'>
 ) {
+  const { euiTheme } = useEuiTheme();
   const services = useDiscoverServices();
   const aggregateColumnIdentifiers = useMemo(() => {
     return new Set(editorQueryMeta.appliedFunctions.map(({ identifier }) => identifier));
@@ -455,7 +457,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
           if (aggregation && /sparkline/i.test(aggregation) && isArrayType) {
             return (
               <EuiFlexGroup alignItems="stretch" gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false} css={{ width: '100px' }}>
+                <EuiFlexItem grow={false} css={{ width: '100px', minHeight: euiTheme.size.l }}>
                   <SparklineRenderer charts={services.charts} values={aggregatedValue} />
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -501,7 +503,14 @@ export function useEsqlDataCascadeRowHeaderComponents(
           );
         })
         .filter(Boolean),
-    [aggregateColumnIdentifiers, columnTypes, editorQueryMeta, selectedColumns, services]
+    [
+      aggregateColumnIdentifiers,
+      columnTypes,
+      editorQueryMeta,
+      euiTheme.size.l,
+      selectedColumns,
+      services.charts,
+    ]
   );
 
   const rowActions = useCallback<
