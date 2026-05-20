@@ -10,8 +10,8 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 
-import type { PendingActionsSelectorState } from './pending_actions_selector';
-import { PendingActionsSelector } from './pending_actions_selector';
+import type { CancelablePendingActionsSelectorState } from './cancelable_pending_actions_selector';
+import { CancelablePendingActionsSelector } from './cancelable_pending_actions_selector';
 import { useGetEndpointActionList } from '../../../hooks/response_actions/use_get_endpoint_action_list';
 import {
   useGenericErrorToast,
@@ -55,7 +55,7 @@ jest.mock('../../../../common/experimental_features_service');
 
 jest.useFakeTimers();
 
-describe('PendingActionsSelector', () => {
+describe('CancelablePendingActionsSelector', () => {
   const mockUseGetEndpointActionList = useGetEndpointActionList as jest.MockedFunction<
     typeof useGetEndpointActionList
   >;
@@ -134,7 +134,10 @@ describe('PendingActionsSelector', () => {
     },
   };
 
-  const defaultProps: CommandArgumentValueSelectorProps<string, PendingActionsSelectorState> = {
+  const defaultProps: CommandArgumentValueSelectorProps<
+    string,
+    CancelablePendingActionsSelectorState
+  > = {
     value: undefined,
     valueText: '',
     argName: 'actionId',
@@ -255,20 +258,20 @@ describe('PendingActionsSelector', () => {
       error: null,
     } as unknown as ReturnType<typeof useGetEndpointActionList>);
 
-    render(<PendingActionsSelector {...defaultProps} />);
+    render(<CancelablePendingActionsSelector {...defaultProps} />);
 
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
   test('renders initial display label when no action is selected', async () => {
-    await renderAndWaitForComponent(<PendingActionsSelector {...defaultProps} />);
+    await renderAndWaitForComponent(<CancelablePendingActionsSelector {...defaultProps} />);
 
     expect(screen.getByText('Click to select action')).toBeInTheDocument();
   });
 
   test('renders selected action with command-actionId format when action is selected', async () => {
     await renderAndWaitForComponent(
-      <PendingActionsSelector
+      <CancelablePendingActionsSelector
         {...defaultProps}
         value="action-123-abc"
         valueText="isolate - action-123-abc"
@@ -279,7 +282,7 @@ describe('PendingActionsSelector', () => {
   });
 
   test('opens popover when clicked', async () => {
-    await renderAndWaitForComponent(<PendingActionsSelector {...defaultProps} />);
+    await renderAndWaitForComponent(<CancelablePendingActionsSelector {...defaultProps} />);
 
     fireEvent.click(screen.getByText('Click to select action'));
 
@@ -293,7 +296,7 @@ describe('PendingActionsSelector', () => {
 
   test('displays action in dropdown with command format', async () => {
     await renderAndWaitForComponent(
-      <PendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
+      <CancelablePendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
     );
 
     // The action should be displayed with the command name
@@ -308,7 +311,7 @@ describe('PendingActionsSelector', () => {
 
   test('displays action description as tooltip', async () => {
     await renderAndWaitForComponent(
-      <PendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
+      <CancelablePendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
     );
 
     // Check that the description contains expected elements
@@ -373,7 +376,7 @@ describe('PendingActionsSelector', () => {
     ]);
 
     await renderAndWaitForComponent(
-      <PendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
+      <CancelablePendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
     );
 
     // Verify all actions are displayed with correct labels
@@ -413,7 +416,7 @@ describe('PendingActionsSelector', () => {
     };
 
     await renderAndWaitForComponent(
-      <PendingActionsSelector {...defaultProps} command={commandWithEndpointId} />
+      <CancelablePendingActionsSelector {...defaultProps} command={commandWithEndpointId} />
     );
 
     expect(mockUseGetEndpointActionList).toHaveBeenCalledWith(
@@ -433,7 +436,7 @@ describe('PendingActionsSelector', () => {
 
   test('should fetch data when popover is opened', async () => {
     // Test with popover closed (default state)
-    await renderAndWaitForComponent(<PendingActionsSelector {...defaultProps} />);
+    await renderAndWaitForComponent(<CancelablePendingActionsSelector {...defaultProps} />);
 
     expect(mockUseGetEndpointActionList).toHaveBeenCalledWith(
       expect.any(Object),
@@ -447,7 +450,7 @@ describe('PendingActionsSelector', () => {
 
     // Test with popover open
     await renderAndWaitForComponent(
-      <PendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
+      <CancelablePendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
     );
 
     expect(mockUseGetEndpointActionList).toHaveBeenCalledWith(
@@ -460,7 +463,7 @@ describe('PendingActionsSelector', () => {
 
   test('should not fetch data repeatedly when popover is open', async () => {
     // Test with popover closed (default state)
-    await renderAndWaitForComponent(<PendingActionsSelector {...defaultProps} />);
+    await renderAndWaitForComponent(<CancelablePendingActionsSelector {...defaultProps} />);
 
     expect(mockUseGetEndpointActionList).toHaveBeenCalledWith(
       expect.any(Object),
@@ -474,7 +477,7 @@ describe('PendingActionsSelector', () => {
 
     // Test with popover open
     await renderAndWaitForComponent(
-      <PendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
+      <CancelablePendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
     );
 
     expect(mockUseGetEndpointActionList).toHaveBeenCalledWith(
@@ -520,7 +523,7 @@ describe('PendingActionsSelector', () => {
       ]);
 
       await renderAndWaitForComponent(
-        <PendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
+        <CancelablePendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
       );
 
       // The isolate action should be displayed with label and description
@@ -580,7 +583,7 @@ describe('PendingActionsSelector', () => {
       ]);
 
       await renderAndWaitForComponent(
-        <PendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
+        <CancelablePendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
       );
 
       // The action should be displayed with label and description
@@ -595,7 +598,7 @@ describe('PendingActionsSelector', () => {
     test('enables actions when user has all required permissions', async () => {
       // All permissions are enabled by default in beforeEach
       await renderAndWaitForComponent(
-        <PendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
+        <CancelablePendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
       );
 
       // The action should be displayed and selectable with label and description
@@ -625,7 +628,7 @@ describe('PendingActionsSelector', () => {
       ]);
 
       await renderAndWaitForComponent(
-        <PendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
+        <CancelablePendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
       );
 
       // Verify the full description is displayed
@@ -638,7 +641,7 @@ describe('PendingActionsSelector', () => {
 
     test('command names are still truncated when too long', async () => {
       await renderAndWaitForComponent(
-        <PendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
+        <CancelablePendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
       );
 
       // Verify command label has truncation styling by checking the CSS class applied
@@ -652,7 +655,7 @@ describe('PendingActionsSelector', () => {
   });
 
   test('excludes cancel actions from the pending actions query', async () => {
-    await renderAndWaitForComponent(<PendingActionsSelector {...defaultProps} />);
+    await renderAndWaitForComponent(<CancelablePendingActionsSelector {...defaultProps} />);
 
     expect(mockUseGetEndpointActionList).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -683,7 +686,7 @@ describe('PendingActionsSelector', () => {
       ]);
 
       await renderAndWaitForComponent(
-        <PendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
+        <CancelablePendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
       );
 
       // Verify lock icon is displayed for disabled option
@@ -705,7 +708,7 @@ describe('PendingActionsSelector', () => {
       ]);
 
       await renderAndWaitForComponent(
-        <PendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
+        <CancelablePendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
       );
 
       // Verify the disabled option shows the lock icon (which indicates proper disabled state)
@@ -719,7 +722,7 @@ describe('PendingActionsSelector', () => {
 
     test('does not show lock icon for enabled options', async () => {
       await renderAndWaitForComponent(
-        <PendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
+        <CancelablePendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
       );
 
       // Verify no lock icon is displayed for enabled option

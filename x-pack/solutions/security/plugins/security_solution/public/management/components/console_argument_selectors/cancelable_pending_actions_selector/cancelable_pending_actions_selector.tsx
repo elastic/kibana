@@ -41,17 +41,17 @@ import { ERROR_LOADING_PENDING_ACTIONS } from '../../../common/translations';
 /**
  * State for the pending actions selector component
  */
-export interface PendingActionsSelectorState {
+export interface CancelablePendingActionsSelectorState {
   isPopoverOpen: boolean;
 }
 
 /**
  * A Console Argument Selector component that enables the user to select from available pending actions
  */
-export const PendingActionsSelector = memo<
+export const CancelablePendingActionsSelector = memo<
   CommandArgumentValueSelectorProps<
     string,
-    PendingActionsSelectorState,
+    CancelablePendingActionsSelectorState,
     EndpointCommandDefinitionMeta
   >
 >(({ value, valueText, onChange, store, command, requestFocus, argName, argIndex }) => {
@@ -268,4 +268,4 @@ export const PendingActionsSelector = memo<
   );
 });
 
-PendingActionsSelector.displayName = 'PendingActionsSelector';
+CancelablePendingActionsSelector.displayName = 'CancelablePendingActionsSelector';

@@ -15,7 +15,7 @@ import type { SupportedHostOsType } from '../../../../../common/endpoint/constan
 import type { EndpointCommandDefinitionMeta } from '../types';
 import type { CustomScriptSelectorState } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
 import { CustomScriptSelector } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
-import { PendingActionsSelector } from '../../console_argument_selectors/pending_actions_selector/pending_actions_selector';
+import { CancelablePendingActionsSelector } from '../../console_argument_selectors/cancelable_pending_actions_selector/cancelable_pending_actions_selector';
 import type {
   EndpointRunScriptActionParameters,
   SentinelOneRunScriptActionParameters,
@@ -690,7 +690,7 @@ export const getEndpointConsoleCommands = ({
             }
           ),
           mustHaveValue: 'truthy',
-          SelectorComponent: PendingActionsSelector,
+          SelectorComponent: CancelablePendingActionsSelector,
         },
         ...commandCommentArgument(),
       },
