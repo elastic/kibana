@@ -32,6 +32,7 @@ import type {
 
 const ACCESSOR = 'metric_formula_accessor';
 
+// Carry the first series layer subtype into the visualization state so shared XY defaults stay aligned.
 const getPreferredSeriesType = (config: LensXYConfig) =>
   config.layers.find((layer): layer is LensSeriesLayer => layer.type === 'series')?.seriesType ??
   'line';

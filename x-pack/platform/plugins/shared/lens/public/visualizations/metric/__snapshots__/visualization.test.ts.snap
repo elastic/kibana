@@ -79,6 +79,9 @@ Object {
       "filterOperations": [Function],
       "groupId": "breakdownBy",
       "groupLabel": "Break down by",
+      "paramEditorCustomProps": Object {
+        "emptyRowsDefault": false,
+      },
       "supportsMoreColumns": false,
     },
   ],

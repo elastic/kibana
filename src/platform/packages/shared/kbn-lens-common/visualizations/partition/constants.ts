@@ -15,29 +15,6 @@ export const PARTITION_CHART_TYPES = {
   WAFFLE: 'waffle',
 } as const;
 
-/**
- * Partition chart shapes that default `includeEmptyRows` off for `date_histogram`.
- */
-export const PARTITION_CHART_TYPES_WITH_DEFAULT_EMPTY_ROWS_OFF = [
-  PARTITION_CHART_TYPES.PIE,
-  PARTITION_CHART_TYPES.DONUT,
-  PARTITION_CHART_TYPES.TREEMAP,
-  PARTITION_CHART_TYPES.WAFFLE,
-  PARTITION_CHART_TYPES.MOSAIC,
-] as const;
-
-const partitionChartTypesWithDefaultEmptyRowsOffSet = new Set<string>(
-  PARTITION_CHART_TYPES_WITH_DEFAULT_EMPTY_ROWS_OFF
-);
-
-/**
- * Returns true when the partition subtype should default `includeEmptyRows` off.
- */
-export const isPartitionChartTypeWithDefaultEmptyRowsOff = (
-  chartType: string | null | undefined
-): chartType is (typeof PARTITION_CHART_TYPES_WITH_DEFAULT_EMPTY_ROWS_OFF)[number] =>
-  typeof chartType === 'string' && partitionChartTypesWithDefaultEmptyRowsOffSet.has(chartType);
-
 export const PARTITION_EMPTY_SIZE_RADIUS = {
   SMALL: 0.3,
   MEDIUM: 0.54,

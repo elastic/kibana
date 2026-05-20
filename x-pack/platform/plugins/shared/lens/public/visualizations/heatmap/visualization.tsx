@@ -30,7 +30,6 @@ import type {
   UserMessage,
   Visualization,
 } from '@kbn/lens-common';
-import { getDateHistogramEmptyRowsDefaultForVisualizationState } from '@kbn/lens-common';
 import type { HeatmapVisualizationState } from './types';
 import { getSuggestions } from './suggestions';
 import {
@@ -46,6 +45,7 @@ import { HeatmapDimensionEditor } from './dimension_editor';
 import { getSafePaletteParams } from './utils';
 import { isTimeSeriesOperation } from './time_series';
 import type { FormBasedPersistedState } from '../..';
+import { applyVisualizationStateDefaults } from '../utils';
 import { HEATMAP_RENDER_ARRAY_VALUES, HEATMAP_X_MISSING_AXIS } from '../../user_messages_ids';
 import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
 import { HeatmapStyleSettings, HeatmapLegendSettings } from './toolbar_component';
@@ -214,75 +214,69 @@ export const getHeatmapVisualization = ({
       state.valueAccessor,
       state?.palette && state.palette.accessor === state.valueAccessor ? state.palette : undefined
     );
-    const dateHistogramEmptyRowsDefault = getDateHistogramEmptyRowsDefaultForVisualizationState(
-      LENS_HEATMAP_ID,
-      state
-    );
-
     return {
-      groups: [
-        {
-          layerId: state.layerId,
-          groupId: GROUP_ID.X,
-          groupLabel: getAxisName(GROUP_ID.X),
-          paramEditorCustomProps: {
-            dateHistogramEmptyRowsDefault,
+      groups: applyVisualizationStateDefaults({
+        groups: [
+          {
+            layerId: state.layerId,
+            groupId: GROUP_ID.X,
+            groupLabel: getAxisName(GROUP_ID.X),
+            accessors: state.xAccessor ? [{ columnId: state.xAccessor }] : [],
+            filterOperations: filterOperationsAxis,
+            supportsMoreColumns: !state.xAccessor,
+            requiredMinDimensionCount: 1,
+            dataTestSubj: 'lnsHeatmap_xDimensionPanel',
           },
-          accessors: state.xAccessor ? [{ columnId: state.xAccessor }] : [],
-          filterOperations: filterOperationsAxis,
-          supportsMoreColumns: !state.xAccessor,
-          requiredMinDimensionCount: 1,
-          dataTestSubj: 'lnsHeatmap_xDimensionPanel',
-        },
-        {
-          layerId: state.layerId,
-          groupId: GROUP_ID.Y,
-          groupLabel: getAxisName(GROUP_ID.Y),
-          paramEditorCustomProps: {
-            dateHistogramEmptyRowsDefault,
+          {
+            layerId: state.layerId,
+            groupId: GROUP_ID.Y,
+            groupLabel: getAxisName(GROUP_ID.Y),
+            accessors: state.yAccessor ? [{ columnId: state.yAccessor }] : [],
+            filterOperations: filterOperationsAxis,
+            supportsMoreColumns: !state.yAccessor,
+            requiredMinDimensionCount: 0,
+            isBreakdownDimension: true,
+            dataTestSubj: 'lnsHeatmap_yDimensionPanel',
           },
-          accessors: state.yAccessor ? [{ columnId: state.yAccessor }] : [],
-          filterOperations: filterOperationsAxis,
-          supportsMoreColumns: !state.yAccessor,
-          requiredMinDimensionCount: 0,
-          isBreakdownDimension: true,
-          dataTestSubj: 'lnsHeatmap_yDimensionPanel',
-        },
-        {
-          layerId: state.layerId,
-          groupId: GROUP_ID.CELL,
-          groupLabel: i18n.translate('xpack.lens.heatmap.cellValueLabel', {
-            defaultMessage: 'Cell value',
-          }),
-          paramEditorCustomProps: {
-            headingLabel: i18n.translate('xpack.lens.heatmap.headingLabel', {
-              defaultMessage: 'Value',
+          {
+            layerId: state.layerId,
+            groupId: GROUP_ID.CELL,
+            groupLabel: i18n.translate('xpack.lens.heatmap.cellValueLabel', {
+              defaultMessage: 'Cell value',
             }),
+            paramEditorCustomProps: {
+              headingLabel: i18n.translate('xpack.lens.heatmap.headingLabel', {
+                defaultMessage: 'Value',
+              }),
+            },
+            accessors: state.valueAccessor
+              ? [
+                  // When data is not available and the range type is numeric, return a placeholder while refreshing
+                  displayStops.length &&
+                  (frame.activeData || activePalette?.params?.rangeType !== 'number')
+                    ? {
+                        columnId: state.valueAccessor,
+                        triggerIconType: 'colorBy',
+                        palette: displayStops.map(({ color }) => color),
+                      }
+                    : {
+                        columnId: state.valueAccessor,
+                        triggerIconType: 'none',
+                      },
+                ]
+              : [],
+            filterOperations: isCellValueSupported,
+            isMetricDimension: true,
+            supportsMoreColumns: !state.valueAccessor,
+            enableDimensionEditor: true,
+            requiredMinDimensionCount: 1,
+            dataTestSubj: 'lnsHeatmap_cellPanel',
           },
-          accessors: state.valueAccessor
-            ? [
-                // When data is not available and the range type is numeric, return a placeholder while refreshing
-                displayStops.length &&
-                (frame.activeData || activePalette?.params?.rangeType !== 'number')
-                  ? {
-                      columnId: state.valueAccessor,
-                      triggerIconType: 'colorBy',
-                      palette: displayStops.map(({ color }) => color),
-                    }
-                  : {
-                      columnId: state.valueAccessor,
-                      triggerIconType: 'none',
-                    },
-              ]
-            : [],
-          filterOperations: isCellValueSupported,
-          isMetricDimension: true,
-          supportsMoreColumns: !state.valueAccessor,
-          enableDimensionEditor: true,
-          requiredMinDimensionCount: 1,
-          dataTestSubj: 'lnsHeatmap_cellPanel',
-        },
-      ],
+        ],
+        groupIds: [GROUP_ID.X, GROUP_ID.Y],
+        visualizationType: LENS_HEATMAP_ID,
+        visualizationState: state,
+      }),
     };
   },
 

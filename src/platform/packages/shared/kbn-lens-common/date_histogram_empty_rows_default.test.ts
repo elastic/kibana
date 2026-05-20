@@ -14,10 +14,10 @@ import { LENS_METRIC_ID } from './visualizations/metric/constants';
 import { PARTITION_CHART_TYPES } from './visualizations/partition/constants';
 import { SeriesTypes } from './visualizations/xy/constants';
 import {
-  applyDateHistogramEmptyRowsDefaultToDatasourceState,
-  applyDateHistogramEmptyRowsDefaultToDatasourceStates,
-  getDateHistogramEmptyRowsDefault,
-  getDateHistogramEmptyRowsDefaultForVisualizationState,
+  applyEmptyRowsDefaultToDatasourceState,
+  applyEmptyRowsDefaultToDatasourceStates,
+  getEmptyRowsDefault,
+  getEmptyRowsDefaultForVisualizationState,
 } from './date_histogram_empty_rows_default';
 
 const createDateHistogramColumn = (
@@ -51,36 +51,32 @@ const createDatasourceStates = (includeEmptyRows?: boolean) => ({
 
 describe('date histogram empty rows default', () => {
   it('defaults empty rows off for bar subtypes', () => {
-    expect(getDateHistogramEmptyRowsDefault('lnsXY', SeriesTypes.BAR_HORIZONTAL_STACKED)).toBe(
-      false
-    );
+    expect(getEmptyRowsDefault('lnsXY', SeriesTypes.BAR_HORIZONTAL_STACKED)).toBe(false);
   });
 
   it('returns no visualization default for non-bar XY series', () => {
-    expect(getDateHistogramEmptyRowsDefault('lnsXY', SeriesTypes.AREA_PERCENTAGE_STACKED)).toBe(
-      undefined
-    );
-    expect(getDateHistogramEmptyRowsDefault('lnsXY', SeriesTypes.LINE)).toBeUndefined();
+    expect(getEmptyRowsDefault('lnsXY', SeriesTypes.AREA_PERCENTAGE_STACKED)).toBeUndefined();
+    expect(getEmptyRowsDefault('lnsXY', SeriesTypes.LINE)).toBeUndefined();
   });
 
   it('defaults empty rows off for the supported partition chart shapes', () => {
-    expect(getDateHistogramEmptyRowsDefault('lnsPie', PARTITION_CHART_TYPES.DONUT)).toBe(false);
-    expect(getDateHistogramEmptyRowsDefault('lnsPie', PARTITION_CHART_TYPES.TREEMAP)).toBe(false);
-    expect(getDateHistogramEmptyRowsDefault('lnsPie', PARTITION_CHART_TYPES.WAFFLE)).toBe(false);
+    expect(getEmptyRowsDefault('lnsPie', PARTITION_CHART_TYPES.DONUT)).toBe(false);
+    expect(getEmptyRowsDefault('lnsPie', PARTITION_CHART_TYPES.TREEMAP)).toBe(false);
+    expect(getEmptyRowsDefault('lnsPie', PARTITION_CHART_TYPES.WAFFLE)).toBe(false);
   });
 
   it('defaults empty rows off for metric-style visualizations', () => {
-    expect(getDateHistogramEmptyRowsDefault(LENS_METRIC_ID)).toBe(false);
-    expect(getDateHistogramEmptyRowsDefault('lnsTagcloud')).toBe(false);
+    expect(getEmptyRowsDefault(LENS_METRIC_ID)).toBe(false);
+    expect(getEmptyRowsDefault('lnsTagcloud')).toBe(false);
   });
 
   it('keeps empty rows on by default for tables', () => {
-    expect(getDateHistogramEmptyRowsDefault(LENS_DATATABLE_ID)).toBe(true);
+    expect(getEmptyRowsDefault(LENS_DATATABLE_ID)).toBe(true);
   });
 
   it('derives the XY subtype from persisted visualization state', () => {
     expect(
-      getDateHistogramEmptyRowsDefaultForVisualizationState('lnsXY', {
+      getEmptyRowsDefaultForVisualizationState('lnsXY', {
         preferredSeriesType: SeriesTypes.BAR_PERCENTAGE_STACKED,
       })
     ).toBe(false);
@@ -88,14 +84,14 @@ describe('date histogram empty rows default', () => {
 
   it('derives the partition shape from persisted visualization state', () => {
     expect(
-      getDateHistogramEmptyRowsDefaultForVisualizationState('lnsPie', {
+      getEmptyRowsDefaultForVisualizationState('lnsPie', {
         shape: PARTITION_CHART_TYPES.WAFFLE,
       })
     ).toBe(false);
   });
 
   it('returns the heatmap default without needing a subtype', () => {
-    expect(getDateHistogramEmptyRowsDefaultForVisualizationState(LENS_HEATMAP_ID, {})).toBe(false);
+    expect(getEmptyRowsDefaultForVisualizationState(LENS_HEATMAP_ID, {})).toBe(false);
   });
 });
 
@@ -104,7 +100,7 @@ describe('applying date histogram empty rows defaults', () => {
     const datasourceState = createDatasourceState(true);
 
     expect(
-      applyDateHistogramEmptyRowsDefaultToDatasourceState(datasourceState, 'lnsXY', {
+      applyEmptyRowsDefaultToDatasourceState(datasourceState, 'lnsXY', {
         preferredSeriesType: SeriesTypes.BAR,
       })
     ).toBe(datasourceState);
@@ -114,7 +110,7 @@ describe('applying date histogram empty rows defaults', () => {
     const datasourceState = createDatasourceState();
 
     expect(
-      applyDateHistogramEmptyRowsDefaultToDatasourceState(datasourceState, 'lnsXY', {
+      applyEmptyRowsDefaultToDatasourceState(datasourceState, 'lnsXY', {
         preferredSeriesType: SeriesTypes.BAR,
       })
     ).toEqual({
@@ -132,7 +128,7 @@ describe('applying date histogram empty rows defaults', () => {
     const datasourceState = createDatasourceState(true);
 
     expect(
-      applyDateHistogramEmptyRowsDefaultToDatasourceState(
+      applyEmptyRowsDefaultToDatasourceState(
         datasourceState,
         'lnsXY',
         {
@@ -155,7 +151,7 @@ describe('applying date histogram empty rows defaults', () => {
     const datasourceStates = createDatasourceStates(true);
 
     expect(
-      applyDateHistogramEmptyRowsDefaultToDatasourceStates(datasourceStates, 'lnsPie', {
+      applyEmptyRowsDefaultToDatasourceStates(datasourceStates, 'lnsPie', {
         shape: PARTITION_CHART_TYPES.PIE,
       })
     ).toBe(datasourceStates);
@@ -164,9 +160,7 @@ describe('applying date histogram empty rows defaults', () => {
   it('defaults empty rows on for config-builder datasource states when the value is missing', () => {
     const datasourceStates = createDatasourceStates();
 
-    expect(
-      applyDateHistogramEmptyRowsDefaultToDatasourceStates(datasourceStates, 'lnsDatatable', {})
-    ).toEqual({
+    expect(applyEmptyRowsDefaultToDatasourceStates(datasourceStates, 'lnsDatatable', {})).toEqual({
       formBased: {
         layers: {
           layer1: {
@@ -183,7 +177,7 @@ describe('applying date histogram empty rows defaults', () => {
     const datasourceStates = createDatasourceStates(false);
 
     expect(
-      applyDateHistogramEmptyRowsDefaultToDatasourceStates(
+      applyEmptyRowsDefaultToDatasourceStates(
         datasourceStates,
         'lnsDatatable',
         {},
@@ -203,8 +197,8 @@ describe('applying date histogram empty rows defaults', () => {
   });
 
   it('leaves unsupported runtime datasource state unchanged', () => {
-    expect(
-      applyDateHistogramEmptyRowsDefaultToDatasourceState('text based state', 'lnsMetric', {})
-    ).toBe('text based state');
+    expect(applyEmptyRowsDefaultToDatasourceState('text based state', 'lnsMetric', {})).toBe(
+      'text based state'
+    );
   });
 });

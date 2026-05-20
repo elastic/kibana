@@ -12,8 +12,8 @@ import type { GenericIndexPatternColumn } from './datasources/types';
 import { LENS_DATATABLE_ID } from './visualizations/datatable/constants';
 import { LENS_HEATMAP_ID } from './visualizations/heatmap/constants';
 import { LENS_METRIC_ID } from './visualizations/metric/constants';
-import { isPartitionChartTypeWithDefaultEmptyRowsOff } from './visualizations/partition/constants';
-import { isBarSeriesType } from './visualizations/xy/constants';
+import { isPartitionChartTypeWithEmptyRowsDefault } from './visualizations/partition/utils';
+import { isBarSeriesType } from './visualizations/xy/utils';
 
 const XY_VISUALIZATION_ID = 'lnsXY';
 const PARTITION_VISUALIZATION_ID = 'lnsPie';
@@ -46,7 +46,7 @@ interface DatasourceStatesLike {
   formBased?: FormBasedLayerStateLike;
 }
 
-interface ApplyDateHistogramEmptyRowsDefaultOptions {
+interface ApplyEmptyRowsDefaultOptions {
   overwriteExisting?: boolean;
 }
 
@@ -60,7 +60,7 @@ const isDateHistogramColumn = (
   column: GenericIndexPatternColumn
 ): column is DateHistogramIndexPatternColumn => column.operationType === 'date_histogram';
 
-const hasExplicitIncludeEmptyRowsValue = (column: DateHistogramIndexPatternColumn) =>
+const hasExplicitEmptyRowsValue = (column: DateHistogramIndexPatternColumn) =>
   typeof column.params?.includeEmptyRows === 'boolean';
 
 const isFormBasedLayerStateLike = (
@@ -92,22 +92,22 @@ const getPartitionShapeFromState = (visualizationState: unknown) => {
   return typeof shape === 'string' ? shape : undefined;
 };
 
-const shouldKeepDateHistogramColumn = (
+const shouldKeepColumn = (
   column: DateHistogramIndexPatternColumn,
   defaultValue: boolean,
   overwriteExisting: boolean
 ) => {
-  if (!overwriteExisting && hasExplicitIncludeEmptyRowsValue(column)) {
+  if (!overwriteExisting && hasExplicitEmptyRowsValue(column)) {
     return true;
   }
 
   return column.params?.includeEmptyRows === defaultValue;
 };
 
-const applyDateHistogramEmptyRowsDefaultToLayerState = <T extends FormBasedLayerStateLike>(
+const applyEmptyRowsDefaultToLayerState = <T extends FormBasedLayerStateLike>(
   datasourceState: T,
   defaultValue: boolean,
-  { overwriteExisting = false }: ApplyDateHistogramEmptyRowsDefaultOptions = {}
+  { overwriteExisting = false }: ApplyEmptyRowsDefaultOptions = {}
 ): T => {
   let hasChanges = false;
 
@@ -119,7 +119,7 @@ const applyDateHistogramEmptyRowsDefaultToLayerState = <T extends FormBasedLayer
         Object.entries(layer.columns).map(([columnId, column]) => {
           if (
             !isDateHistogramColumn(column) ||
-            shouldKeepDateHistogramColumn(column, defaultValue, overwriteExisting)
+            shouldKeepColumn(column, defaultValue, overwriteExisting)
           ) {
             return [columnId, column];
           }
@@ -153,7 +153,7 @@ const applyDateHistogramEmptyRowsDefaultToLayerState = <T extends FormBasedLayer
  * Returning `undefined` means the visualization does not force a default and callers
  * should leave the current datasource value untouched.
  */
-export const getDateHistogramEmptyRowsDefault = (
+export const getEmptyRowsDefault = (
   visualizationType: string | null | undefined,
   visualizationSubtype?: string | null
 ) => {
@@ -162,7 +162,7 @@ export const getDateHistogramEmptyRowsDefault = (
       return isBarSeriesType(visualizationSubtype) ? DEFAULT_EMPTY_ROWS_OFF : undefined;
 
     case PARTITION_VISUALIZATION_ID:
-      return isPartitionChartTypeWithDefaultEmptyRowsOff(visualizationSubtype)
+      return isPartitionChartTypeWithEmptyRowsDefault(visualizationSubtype)
         ? DEFAULT_EMPTY_ROWS_OFF
         : undefined;
 
@@ -182,41 +182,35 @@ export const getDateHistogramEmptyRowsDefault = (
 /**
  * Returns the default `includeEmptyRows` value using the persisted visualization state.
  */
-export const getDateHistogramEmptyRowsDefaultForVisualizationState = (
+export const getEmptyRowsDefaultForVisualizationState = (
   visualizationType: string | null | undefined,
   visualizationState: unknown
 ) => {
   if (visualizationType === XY_VISUALIZATION_ID) {
-    return getDateHistogramEmptyRowsDefault(
-      visualizationType,
-      getXYSeriesTypeFromState(visualizationState)
-    );
+    return getEmptyRowsDefault(visualizationType, getXYSeriesTypeFromState(visualizationState));
   }
 
   if (visualizationType === PARTITION_VISUALIZATION_ID) {
-    return getDateHistogramEmptyRowsDefault(
-      visualizationType,
-      getPartitionShapeFromState(visualizationState)
-    );
+    return getEmptyRowsDefault(visualizationType, getPartitionShapeFromState(visualizationState));
   }
 
-  return getDateHistogramEmptyRowsDefault(visualizationType);
+  return getEmptyRowsDefault(visualizationType);
 };
 
 /**
- * Applies the visualization-specific default to a form-based datasource state.
+ * Applies the empty-rows default for `date_histogram` columns to a form-based datasource state.
  *
  * By default this only fills missing `includeEmptyRows` values. Pass
  * `{ overwriteExisting: true }` when a chart switch or suggestion should re-sync
  * the datasource state to the destination visualization's default.
  */
-export const applyDateHistogramEmptyRowsDefaultToDatasourceState = <T>(
+export const applyEmptyRowsDefaultToDatasourceState = <T>(
   datasourceState: T,
   visualizationType: string | null | undefined,
   visualizationState: unknown,
-  options?: ApplyDateHistogramEmptyRowsDefaultOptions
+  options?: ApplyEmptyRowsDefaultOptions
 ) => {
-  const defaultValue = getDateHistogramEmptyRowsDefaultForVisualizationState(
+  const defaultValue = getEmptyRowsDefaultForVisualizationState(
     visualizationType,
     visualizationState
   );
@@ -225,29 +219,23 @@ export const applyDateHistogramEmptyRowsDefaultToDatasourceState = <T>(
     return datasourceState;
   }
 
-  return applyDateHistogramEmptyRowsDefaultToLayerState(
-    datasourceState,
-    defaultValue,
-    options
-  ) as T;
+  return applyEmptyRowsDefaultToLayerState(datasourceState, defaultValue, options) as T;
 };
 
 /**
- * Applies the visualization-specific default to `formBased` datasource states.
+ * Applies the empty-rows default for `date_histogram` columns to `formBased` datasource states.
  *
  * By default this only fills missing `includeEmptyRows` values. Pass
  * `{ overwriteExisting: true }` when the caller should re-sync the datasource
  * state to the destination visualization's default.
  */
-export const applyDateHistogramEmptyRowsDefaultToDatasourceStates = <
-  T extends DatasourceStatesLike
->(
+export const applyEmptyRowsDefaultToDatasourceStates = <T extends DatasourceStatesLike>(
   datasourceStates: T,
   visualizationType: string | null | undefined,
   visualizationState: unknown,
-  options?: ApplyDateHistogramEmptyRowsDefaultOptions
+  options?: ApplyEmptyRowsDefaultOptions
 ): T => {
-  const defaultValue = getDateHistogramEmptyRowsDefaultForVisualizationState(
+  const defaultValue = getEmptyRowsDefaultForVisualizationState(
     visualizationType,
     visualizationState
   );
@@ -256,7 +244,7 @@ export const applyDateHistogramEmptyRowsDefaultToDatasourceStates = <
     return datasourceStates;
   }
 
-  const formBased = applyDateHistogramEmptyRowsDefaultToLayerState(
+  const formBased = applyEmptyRowsDefaultToLayerState(
     datasourceStates.formBased,
     defaultValue,
     options

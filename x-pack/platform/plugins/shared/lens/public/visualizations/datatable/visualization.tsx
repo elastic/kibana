@@ -46,7 +46,6 @@ import {
   DEFAULT_HEADER_ROW_HEIGHT,
   DEFAULT_ROW_HEIGHT_LINES,
   DEFAULT_HEADER_ROW_HEIGHT_LINES,
-  getDateHistogramEmptyRowsDefaultForVisualizationState,
   LENS_ROW_HEIGHT_MODE,
   LENS_DATAGRID_DENSITY,
 } from '@kbn/lens-common';
@@ -78,6 +77,7 @@ import {
   getColorDefaults,
   getColorByValuePalette,
 } from './utils';
+import { applyVisualizationStateDefaults } from '../utils';
 
 const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
   defaultMessage: 'Table',
@@ -347,10 +347,6 @@ export const getDatatableVisualization = ({
       return { groups: [] };
     }
     const isTextBasedLanguage = datasource?.isTextBasedLanguage();
-    const dateHistogramEmptyRowsDefault = getDateHistogramEmptyRowsDefaultForVisualizationState(
-      'lnsDatatable',
-      state
-    );
     const currentData =
       frame.activeData?.[state.layerId] ?? frame.activeData?.[DatatableInspectorTables.Default];
 
@@ -382,137 +378,139 @@ export const getDatatableVisualization = ({
     };
 
     return {
-      groups: [
-        // In this group we get columns that are not transposed and are not on the metric dimension
-        {
-          groupId: 'rows',
-          groupLabel: i18n.translate('xpack.lens.datatable.breakdownRows', {
-            defaultMessage: 'Rows',
-          }),
-          dimensionEditorGroupLabel: i18n.translate('xpack.lens.datatable.breakdownRow', {
-            defaultMessage: 'Row',
-          }),
-          groupTooltip: i18n.translate('xpack.lens.datatable.breakdownRows.description', {
-            defaultMessage:
-              'Split table rows by field. This is recommended for high cardinality breakdowns.',
-          }),
-          layerId: state.layerId,
-          accessors: sortedColumns
-            .filter((c) => {
-              const column = state.columns.find((col) => col.columnId === c);
-              if (isTextBasedLanguage) {
-                return (
-                  !datasource!.getOperationForColumnId(c)?.inMetricDimension &&
-                  !column?.isMetric &&
-                  !column?.isTransposed
-                );
-              }
-              return datasource!.getOperationForColumnId(c)?.isBucketed && !column?.isTransposed;
-            })
-            .map((accessor) => {
-              const { colorMode = 'none', hidden, collapseFn } = columnMap[accessor] ?? {};
-              const stops = getResolvedDisplayColors(accessor);
-              const hasColoring = colorMode !== 'none' && stops.length > 0;
+      groups: applyVisualizationStateDefaults({
+        groups: [
+          // In this group we get columns that are not transposed and are not on the metric dimension
+          {
+            groupId: 'rows',
+            groupLabel: i18n.translate('xpack.lens.datatable.breakdownRows', {
+              defaultMessage: 'Rows',
+            }),
+            dimensionEditorGroupLabel: i18n.translate('xpack.lens.datatable.breakdownRow', {
+              defaultMessage: 'Row',
+            }),
+            groupTooltip: i18n.translate('xpack.lens.datatable.breakdownRows.description', {
+              defaultMessage:
+                'Split table rows by field. This is recommended for high cardinality breakdowns.',
+            }),
+            layerId: state.layerId,
+            accessors: sortedColumns
+              .filter((c) => {
+                const column = state.columns.find((col) => col.columnId === c);
+                if (isTextBasedLanguage) {
+                  return (
+                    !datasource!.getOperationForColumnId(c)?.inMetricDimension &&
+                    !column?.isMetric &&
+                    !column?.isTransposed
+                  );
+                }
+                return datasource!.getOperationForColumnId(c)?.isBucketed && !column?.isTransposed;
+              })
+              .map((accessor) => {
+                const { colorMode = 'none', hidden, collapseFn } = columnMap[accessor] ?? {};
+                const stops = getResolvedDisplayColors(accessor);
+                const hasColoring = colorMode !== 'none' && stops.length > 0;
 
-              return {
-                columnId: accessor,
-                triggerIconType: hidden
-                  ? 'invisible'
-                  : hasColoring
-                  ? 'colorBy'
-                  : collapseFn
-                  ? 'aggregate'
-                  : undefined,
-                palette: hasColoring ? stops : undefined,
-              };
-            }),
-          supportsMoreColumns: true,
-          filterOperations: (op) => op.isBucketed,
-          dataTestSubj: 'lnsDatatable_rows',
-          enableDimensionEditor: true,
-          hideGrouping: true,
-          nestingOrder: 1,
-        },
-        // In this group we get columns that are transposed and are not on the metric dimension
-        {
-          groupId: 'columns',
-          groupLabel: i18n.translate('xpack.lens.datatable.breakdownColumns', {
-            defaultMessage: 'Split metrics by',
-          }),
-          paramEditorCustomProps: {
-            dateHistogramEmptyRowsDefault,
+                return {
+                  columnId: accessor,
+                  triggerIconType: hidden
+                    ? 'invisible'
+                    : hasColoring
+                    ? 'colorBy'
+                    : collapseFn
+                    ? 'aggregate'
+                    : undefined,
+                  palette: hasColoring ? stops : undefined,
+                };
+              }),
+            supportsMoreColumns: true,
+            filterOperations: (op) => op.isBucketed,
+            dataTestSubj: 'lnsDatatable_rows',
+            enableDimensionEditor: true,
+            hideGrouping: true,
+            nestingOrder: 1,
           },
-          dimensionEditorGroupLabel: i18n.translate('xpack.lens.datatable.breakdownColumn', {
-            defaultMessage: 'Split metrics by',
-          }),
-          groupTooltip: i18n.translate('xpack.lens.datatable.breakdownColumns.description', {
-            defaultMessage:
-              "Split metric columns by field. It's recommended to keep the number of columns low to avoid horizontal scrolling.",
-          }),
-          layerId: state.layerId,
-          accessors: sortedColumns
-            .filter((c) => {
-              if (isTextBasedLanguage) {
-                return state.columns.find((col) => col.columnId === c)?.isTransposed;
-              }
-              return (
-                datasource!.getOperationForColumnId(c)?.isBucketed &&
-                state.columns.find((col) => col.columnId === c)?.isTransposed
-              );
-            })
-            .map((accessor) => ({ columnId: accessor })),
-          supportsMoreColumns: true,
-          filterOperations: (op) => op.isBucketed,
-          dataTestSubj: 'lnsDatatable_columns',
-          enableDimensionEditor: true,
-          hideGrouping: true,
-          nestingOrder: 0,
-        },
-        // In this group we get columns are on the metric dimension
-        {
-          groupId: 'metrics',
-          groupLabel: i18n.translate('xpack.lens.datatable.metrics', {
-            defaultMessage: 'Metrics',
-          }),
-          dimensionEditorGroupLabel: i18n.translate('xpack.lens.datatable.metric', {
-            defaultMessage: 'Metric',
-          }),
-          paramEditorCustomProps: {
-            headingLabel: i18n.translate('xpack.lens.datatable.headingLabel', {
-              defaultMessage: 'Value',
+          // In this group we get columns that are transposed and are not on the metric dimension
+          {
+            groupId: 'columns',
+            groupLabel: i18n.translate('xpack.lens.datatable.breakdownColumns', {
+              defaultMessage: 'Split metrics by',
             }),
-          },
-          layerId: state.layerId,
-          accessors: sortedColumns
-            .filter((c) => {
-              const operation = datasource!.getOperationForColumnId(c);
-              if (isTextBasedLanguage) {
+            dimensionEditorGroupLabel: i18n.translate('xpack.lens.datatable.breakdownColumn', {
+              defaultMessage: 'Split metrics by',
+            }),
+            groupTooltip: i18n.translate('xpack.lens.datatable.breakdownColumns.description', {
+              defaultMessage:
+                "Split metric columns by field. It's recommended to keep the number of columns low to avoid horizontal scrolling.",
+            }),
+            layerId: state.layerId,
+            accessors: sortedColumns
+              .filter((c) => {
+                if (isTextBasedLanguage) {
+                  return state.columns.find((col) => col.columnId === c)?.isTransposed;
+                }
                 return (
-                  operation?.inMetricDimension ||
-                  state.columns.find((col) => col.columnId === c)?.isMetric
+                  datasource!.getOperationForColumnId(c)?.isBucketed &&
+                  state.columns.find((col) => col.columnId === c)?.isTransposed
                 );
-              }
-              return !operation?.isBucketed;
-            })
-            .map((accessor) => {
-              const { colorMode = 'none', hidden } = columnMap[accessor] ?? {};
-              const stops = getResolvedDisplayColors(accessor);
-              const hasColoring = colorMode !== 'none' && stops.length > 0;
-
-              return {
-                columnId: accessor,
-                triggerIconType: hidden ? 'invisible' : hasColoring ? 'colorBy' : undefined,
-                palette: hasColoring ? stops : undefined,
-              };
+              })
+              .map((accessor) => ({ columnId: accessor })),
+            supportsMoreColumns: true,
+            filterOperations: (op) => op.isBucketed,
+            dataTestSubj: 'lnsDatatable_columns',
+            enableDimensionEditor: true,
+            hideGrouping: true,
+            nestingOrder: 0,
+          },
+          // In this group we get columns are on the metric dimension
+          {
+            groupId: 'metrics',
+            groupLabel: i18n.translate('xpack.lens.datatable.metrics', {
+              defaultMessage: 'Metrics',
             }),
-          supportsMoreColumns: true,
-          filterOperations: (op) => !op.isBucketed,
-          isMetricDimension: true,
-          requiredMinDimensionCount: isTextBasedLanguage ? 0 : 1,
-          dataTestSubj: 'lnsDatatable_metrics',
-          enableDimensionEditor: true,
-        },
-      ],
+            dimensionEditorGroupLabel: i18n.translate('xpack.lens.datatable.metric', {
+              defaultMessage: 'Metric',
+            }),
+            paramEditorCustomProps: {
+              headingLabel: i18n.translate('xpack.lens.datatable.headingLabel', {
+                defaultMessage: 'Value',
+              }),
+            },
+            layerId: state.layerId,
+            accessors: sortedColumns
+              .filter((c) => {
+                const operation = datasource!.getOperationForColumnId(c);
+                if (isTextBasedLanguage) {
+                  return (
+                    operation?.inMetricDimension ||
+                    state.columns.find((col) => col.columnId === c)?.isMetric
+                  );
+                }
+                return !operation?.isBucketed;
+              })
+              .map((accessor) => {
+                const { colorMode = 'none', hidden } = columnMap[accessor] ?? {};
+                const stops = getResolvedDisplayColors(accessor);
+                const hasColoring = colorMode !== 'none' && stops.length > 0;
+
+                return {
+                  columnId: accessor,
+                  triggerIconType: hidden ? 'invisible' : hasColoring ? 'colorBy' : undefined,
+                  palette: hasColoring ? stops : undefined,
+                };
+              }),
+            supportsMoreColumns: true,
+            filterOperations: (op) => !op.isBucketed,
+            isMetricDimension: true,
+            requiredMinDimensionCount: isTextBasedLanguage ? 0 : 1,
+            dataTestSubj: 'lnsDatatable_metrics',
+            enableDimensionEditor: true,
+          },
+        ],
+        groupIds: ['columns'],
+        visualizationType: 'lnsDatatable',
+        visualizationState: state,
+      }),
     };
   },
 

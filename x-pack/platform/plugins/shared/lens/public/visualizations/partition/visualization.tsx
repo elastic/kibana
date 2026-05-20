@@ -31,7 +31,6 @@ import type {
   LensPartitionVisualizationState,
   FormBasedPersistedState,
 } from '@kbn/lens-common';
-import { getDateHistogramEmptyRowsDefaultForVisualizationState } from '@kbn/lens-common';
 import {
   getColumnToLabelMap,
   getSortedAccessorsForGroup,
@@ -59,6 +58,7 @@ import {
 } from '../../user_messages_ids';
 import { convertToRuntimeState } from './runtime_state';
 import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
+import { applyVisualizationStateDefaults } from '../utils';
 import { PartitionStyleSettings, PartitionLegendSettings } from './toolbar';
 
 const metricLabel = i18n.translate('xpack.lens.pie.groupMetricLabelSingular', {
@@ -225,11 +225,6 @@ export const getPieVisualization = ({
       })
       .unsubscribe();
 
-    const dateHistogramEmptyRowsDefault = getDateHistogramEmptyRowsDefaultForVisualizationState(
-      'lnsPie',
-      state
-    );
-
     const getPrimaryGroupConfig = (): VisualizationDimensionGroupConfig => {
       const originalOrder = getSortedAccessorsForGroup(datasource, layer, 'primaryGroups');
       const firstNonCollapsedColumnId = originalOrder.find((id) => !isCollapsed(id, layer));
@@ -252,9 +247,6 @@ export const getPieVisualization = ({
         accessors,
         enableDimensionEditor: true,
         filterOperations: bucketedOperations,
-        paramEditorCustomProps: {
-          dateHistogramEmptyRowsDefault,
-        },
       };
 
       // We count multiple metrics as a bucket dimension.
@@ -355,9 +347,6 @@ export const getPieVisualization = ({
         accessors,
         enableDimensionEditor: true,
         filterOperations: bucketedOperations,
-        paramEditorCustomProps: {
-          dateHistogramEmptyRowsDefault,
-        },
       };
 
       const totalNonCollapsedAccessors = accessors.reduce(
@@ -442,9 +431,14 @@ export const getPieVisualization = ({
     };
 
     return {
-      groups: [getPrimaryGroupConfig(), getSecondaryGroupConfig(), getMetricGroupConfig()].filter(
-        nonNullable
-      ),
+      groups: applyVisualizationStateDefaults({
+        groups: [getPrimaryGroupConfig(), getSecondaryGroupConfig(), getMetricGroupConfig()].filter(
+          nonNullable
+        ),
+        groupIds: ['primaryGroups', 'secondaryGroups'],
+        visualizationType: 'lnsPie',
+        visualizationState: state,
+      }),
     };
   },
 

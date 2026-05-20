@@ -28,7 +28,7 @@ import type {
   VisualizationState,
   DataViewsState,
 } from '@kbn/lens-common';
-import { applyDateHistogramEmptyRowsDefaultToDatasourceState } from '@kbn/lens-common';
+import { applyEmptyRowsDefaultToDatasourceState } from '@kbn/lens-common';
 import { showMemoizedErrorNotification } from '../../lens_ui_errors';
 import type { LensDispatch } from '../../state_management';
 import { switchVisualization, applyChanges } from '../../state_management';
@@ -268,7 +268,7 @@ function getVisualizationSuggestions(
         query,
       })
       .map(({ state, ...visualizationSuggestion }) => {
-        const datasourceState = applyDateHistogramEmptyRowsDefaultToDatasourceState(
+        const datasourceState = applyEmptyRowsDefaultToDatasourceState(
           datasourceSuggestion.state,
           visualizationId,
           state,

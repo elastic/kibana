@@ -8,7 +8,7 @@
  */
 
 import type { LensEmbeddableInput } from '@kbn/lens-common';
-import { applyDateHistogramEmptyRowsDefaultToDatasourceStates } from '@kbn/lens-common';
+import { applyEmptyRowsDefaultToDatasourceStates } from '@kbn/lens-common';
 import { v4 as uuidv4 } from 'uuid';
 import type { LensAttributes, LensConfig, LensConfigOptions, DataViewsCommon } from './types';
 import {
@@ -221,7 +221,7 @@ export class LensConfigBuilder {
       },
     };
     // Normalize visualization-specific datasource defaults after building the chart state.
-    const datasourceStates = applyDateHistogramEmptyRowsDefaultToDatasourceStates(
+    const datasourceStates = applyEmptyRowsDefaultToDatasourceStates(
       chartState.state.datasourceStates,
       chartState.visualizationType,
       chartState.state.visualization
@@ -273,7 +273,7 @@ export class LensConfigBuilder {
       },
     };
     // Normalize visualization-specific datasource defaults after API conversion, too.
-    const datasourceStates = applyDateHistogramEmptyRowsDefaultToDatasourceStates(
+    const datasourceStates = applyEmptyRowsDefaultToDatasourceStates(
       lensState.state.datasourceStates,
       lensState.visualizationType,
       lensState.state.visualization

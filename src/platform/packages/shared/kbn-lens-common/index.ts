@@ -399,9 +399,9 @@ export {
 export { LENS_SHARE_STATE_ACTION } from './locator_types';
 export { defaultSeriesType } from './visualizations/xy/types';
 export {
-  applyDateHistogramEmptyRowsDefaultToDatasourceState,
-  applyDateHistogramEmptyRowsDefaultToDatasourceStates,
-  getDateHistogramEmptyRowsDefaultForVisualizationState,
+  applyEmptyRowsDefaultToDatasourceState,
+  applyEmptyRowsDefaultToDatasourceStates,
+  getEmptyRowsDefaultForVisualizationState,
 } from './date_histogram_empty_rows_default';
 export {
   getLensLayerTypeTabDisplayName,

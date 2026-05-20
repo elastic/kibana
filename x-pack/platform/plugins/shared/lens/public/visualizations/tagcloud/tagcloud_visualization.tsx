@@ -18,12 +18,12 @@ import type { PaletteRegistry } from '@kbn/coloring';
 import { getColorsFromMapping } from '@kbn/coloring';
 import { IconChartTagcloud } from '@kbn/chart-icons';
 import type { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
-import { getDateHistogramEmptyRowsDefaultForVisualizationState } from '@kbn/lens-common';
 import useObservable from 'react-use/lib/useObservable';
 import { getKbnPalettes } from '@kbn/palettes';
 import type { FormatFactory } from '@kbn/visualization-ui-components';
 import type { OperationMetadata, Visualization } from '../..';
 import { getColorMappingDefaults } from '../../utils';
+import { applyVisualizationStateDefaults } from '../utils';
 import type { TagcloudState } from './types';
 import { getSuggestions } from './suggestions';
 import { TagsDimensionEditor } from './tags_dimension_editor';
@@ -142,53 +142,51 @@ export const getTagcloudVisualization = ({
         .get(state.palette?.name || 'default')
         .getCategoricalColors(10, state.palette?.params);
     }
-    const dateHistogramEmptyRowsDefault = getDateHistogramEmptyRowsDefaultForVisualizationState(
-      'lnsTagcloud',
-      state
-    );
     return {
-      groups: [
-        {
-          groupId: TAG_GROUP_ID,
-          groupLabel: i18n.translate('xpack.lens.tagcloud.tagLabel', {
-            defaultMessage: 'Tags',
-          }),
-          paramEditorCustomProps: {
-            dateHistogramEmptyRowsDefault,
+      groups: applyVisualizationStateDefaults({
+        groups: [
+          {
+            groupId: TAG_GROUP_ID,
+            groupLabel: i18n.translate('xpack.lens.tagcloud.tagLabel', {
+              defaultMessage: 'Tags',
+            }),
+            layerId: state.layerId,
+            accessors: state.tagAccessor
+              ? [
+                  {
+                    columnId: state.tagAccessor,
+                    triggerIconType: 'colorBy',
+                    palette: colors,
+                  },
+                ]
+              : [],
+            supportsMoreColumns: !state.tagAccessor,
+            filterOperations: (op: OperationMetadata) => op.isBucketed,
+            enableDimensionEditor: true,
+            required: true,
+            requiredMinDimensionCount: 1,
+            dataTestSubj: 'lnsTagcloud_tagDimensionPanel',
           },
-          layerId: state.layerId,
-          accessors: state.tagAccessor
-            ? [
-                {
-                  columnId: state.tagAccessor,
-                  triggerIconType: 'colorBy',
-                  palette: colors,
-                },
-              ]
-            : [],
-          supportsMoreColumns: !state.tagAccessor,
-          filterOperations: (op: OperationMetadata) => op.isBucketed,
-          enableDimensionEditor: true,
-          required: true,
-          requiredMinDimensionCount: 1,
-          dataTestSubj: 'lnsTagcloud_tagDimensionPanel',
-        },
-        {
-          groupId: METRIC_GROUP_ID,
-          groupLabel: i18n.translate('xpack.lens.tagcloud.metricValueLabel', {
-            defaultMessage: 'Metric',
-          }),
-          isMetricDimension: true,
-          layerId: state.layerId,
-          accessors: state.valueAccessor ? [{ columnId: state.valueAccessor }] : [],
-          supportsMoreColumns: !state.valueAccessor,
-          filterOperations: (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number',
-          enableDimensionEditor: true,
-          required: true,
-          requiredMinDimensionCount: 1,
-          dataTestSubj: 'lnsTagcloud_valueDimensionPanel',
-        },
-      ],
+          {
+            groupId: METRIC_GROUP_ID,
+            groupLabel: i18n.translate('xpack.lens.tagcloud.metricValueLabel', {
+              defaultMessage: 'Metric',
+            }),
+            isMetricDimension: true,
+            layerId: state.layerId,
+            accessors: state.valueAccessor ? [{ columnId: state.valueAccessor }] : [],
+            supportsMoreColumns: !state.valueAccessor,
+            filterOperations: (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number',
+            enableDimensionEditor: true,
+            required: true,
+            requiredMinDimensionCount: 1,
+            dataTestSubj: 'lnsTagcloud_valueDimensionPanel',
+          },
+        ],
+        groupIds: [TAG_GROUP_ID],
+        visualizationType: 'lnsTagcloud',
+        visualizationState: state,
+      }),
     };
   },
 

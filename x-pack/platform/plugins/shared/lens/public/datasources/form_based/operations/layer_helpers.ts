@@ -80,25 +80,25 @@ interface ColumnCopy {
   shouldDeleteSource?: boolean;
 }
 
-interface DateHistogramEmptyRowsParamEditorCustomProps {
-  dateHistogramEmptyRowsDefault?: boolean;
+interface EmptyRowsParamEditorCustomProps {
+  emptyRowsDefault?: boolean;
 }
 
 // Visualization configs pass per-dimension defaults through paramEditorCustomProps.
-const getDateHistogramEmptyRowsDefaultForTargetGroup = (
+const getEmptyRowsDefaultForTargetGroup = (
   visualizationGroups: VisualizationDimensionGroupConfig[],
   targetGroup?: string
 ) => {
   const customProps = targetGroup
     ? visualizationGroups.find((group) => group.groupId === targetGroup)?.paramEditorCustomProps
     : undefined;
-  const defaultValue = (customProps as DateHistogramEmptyRowsParamEditorCustomProps | undefined)
-    ?.dateHistogramEmptyRowsDefault;
+  const defaultValue = (customProps as EmptyRowsParamEditorCustomProps | undefined)
+    ?.emptyRowsDefault;
 
   return typeof defaultValue === 'boolean' ? defaultValue : undefined;
 };
 
-const applyDateHistogramEmptyRowsDefault = (
+const applyEmptyRowsDefault = (
   op: OperationType,
   columnParams: Record<string, unknown> | undefined,
   visualizationGroups: VisualizationDimensionGroupConfig[],
@@ -108,10 +108,7 @@ const applyDateHistogramEmptyRowsDefault = (
     return columnParams;
   }
 
-  const defaultValue = getDateHistogramEmptyRowsDefaultForTargetGroup(
-    visualizationGroups,
-    targetGroup
-  );
+  const defaultValue = getEmptyRowsDefaultForTargetGroup(visualizationGroups, targetGroup);
   if (defaultValue === undefined) {
     return columnParams;
   }
@@ -398,7 +395,7 @@ export function insertNewColumn({
     // @ts-expect-error upgrade typescript v5.9.3
     previousColumn: { ...incompleteParams, ...initialParams, ...layer.columns[columnId] },
   };
-  const nextColumnParams = applyDateHistogramEmptyRowsDefault(
+  const nextColumnParams = applyEmptyRowsDefault(
     op,
     columnParams,
     visualizationGroups,
@@ -665,7 +662,7 @@ export function replaceColumn({
     indexPattern,
     previousColumn,
   };
-  const nextColumnParams = applyDateHistogramEmptyRowsDefault(
+  const nextColumnParams = applyEmptyRowsDefault(
     op,
     initialParams?.params,
     visualizationGroups,
