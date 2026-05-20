@@ -10,8 +10,13 @@
 export { ExecutionError } from './errors/execution_error';
 export { loadWorkflowExampleContent } from './examples';
 export { validateWorkflowForExecution } from './lib/validate_workflow_for_execution';
-export { applyManagedFilter, buildWorkflowSpaceFilter } from './lib/workflow_space_filter';
-export type { ManagedFilter, WorkflowQueryFilter } from './lib/workflow_space_filter';
+export { buildWorkflowFilters } from './lib/workflow_filters';
+export type {
+  BuildWorkflowFiltersParams,
+  DeletedFilter,
+  ManagedFilter,
+  WorkflowQueryFilter,
+} from './lib/workflow_filters';
 export type { WorkflowsApiRequestHandlerContext, WorkflowsClient } from './types';
 
 export {

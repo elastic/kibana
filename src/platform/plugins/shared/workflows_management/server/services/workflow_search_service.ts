@@ -16,7 +16,7 @@ import type {
   WorkflowListDto,
   WorkflowStatsDto,
 } from '@kbn/workflows';
-import { applyManagedFilter, buildWorkflowSpaceFilter } from '@kbn/workflows/server';
+import { buildWorkflowFilters } from '@kbn/workflows/server';
 import type { WorkflowListItemDto } from '@kbn/workflows/types/v1';
 
 import type { WorkflowSearchDeps } from './types';
@@ -57,7 +57,10 @@ export class WorkflowSearchService {
     const keepAlive = '1m';
     const indexPattern = `${workflowIndexName}-*`;
     const sort: estypes.Sort = [{ updated_at: { order: 'desc' } }, '_shard_doc'];
-    const { must, must_not } = buildWorkflowSpaceFilter(spaceId, { includeGlobal: true });
+    const { must, must_not } = buildWorkflowFilters({
+      space: { id: spaceId, includeGlobal: true },
+      deleted: 'not_deleted',
+    });
     must.push({ term: { enabled: true } }, { term: { triggerTypes: triggerId } });
     const query = { bool: { must, must_not } };
     const _source = [
@@ -127,8 +130,11 @@ export class WorkflowSearchService {
     const { size = 100, page = 1, enabled, createdBy, tags, query, managedFilter } = params;
     const from = (page - 1) * size;
 
-    const { must, must_not } = buildWorkflowSpaceFilter(spaceId, { includeGlobal: true });
-    applyManagedFilter(managedFilter ?? 'unmanaged', { must, must_not });
+    const { must, must_not } = buildWorkflowFilters({
+      space: { id: spaceId, includeGlobal: true },
+      deleted: 'not_deleted',
+      managed: managedFilter ?? 'unmanaged',
+    });
 
     must.push(
       ...buildConditionalTermsFilters([
@@ -189,8 +195,11 @@ export class WorkflowSearchService {
     spaceId: string,
     options?: { includeExecutionStats?: boolean }
   ): Promise<WorkflowStatsDto> {
-    const statsFilter = buildWorkflowSpaceFilter(spaceId, { includeGlobal: true });
-    applyManagedFilter('unmanaged', statsFilter);
+    const statsFilter = buildWorkflowFilters({
+      space: { id: spaceId, includeGlobal: true },
+      deleted: 'not_deleted',
+      managed: 'unmanaged',
+    });
     const statsResponse = await this.deps.workflowStorage.getClient().search({
       size: 0,
       track_total_hits: true,
@@ -235,8 +244,11 @@ export class WorkflowSearchService {
     });
 
     try {
-      const aggsFilter = buildWorkflowSpaceFilter(spaceId, { includeGlobal: true });
-      applyManagedFilter('unmanaged', aggsFilter);
+      const aggsFilter = buildWorkflowFilters({
+        space: { id: spaceId, includeGlobal: true },
+        deleted: 'not_deleted',
+        managed: 'unmanaged',
+      });
       const aggsResponse = await this.deps.workflowStorage.getClient().search({
         size: 0,
         track_total_hits: true,
