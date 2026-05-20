@@ -831,6 +831,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     ingest: {
       append: `${ELASTIC_DOCS}reference/enrich-processor/append-processor`,
+      cef: `${ELASTIC_DOCS}reference/enrich-processor/cef-processor`,
       bytes: `${ELASTIC_DOCS}reference/enrich-processor/bytes-processor`,
       circle: `${ELASTIC_DOCS}reference/enrich-processor/ingest-circle-processor`,
       community: `${ELASTIC_DOCS}reference/enrich-processor/community-id-processor`,
