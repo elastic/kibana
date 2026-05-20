@@ -95,7 +95,7 @@ const sectionGridSchema = z
   })
   .strict();
 
-export function getSectionSchema<T extends z.ZodType<unknown>>(panelSchema: T) {
+export function getSectionSchema<T extends ReturnType<typeof getPanelSchema>>(panelSchema: T) {
   return z
     .object({
       title: z.string().meta({ description: 'The title of the section.' }),
