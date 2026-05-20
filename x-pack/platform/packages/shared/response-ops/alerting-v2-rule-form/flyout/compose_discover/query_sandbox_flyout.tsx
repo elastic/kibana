@@ -116,8 +116,38 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
   title = 'Query sandbox',
 }) => {
   const services = useRuleFormServices();
-  const isSplit = !!tabs?.length;
   const isReadOnly = !onQueryChange;
+
+  // Normalize query fields once — format check lives only here and in updateQuery.
+  const queryFields = useMemo(
+    () =>
+      query.format === 'composed'
+        ? { base: query.base, breach: query.blocks.breach, recover: query.blocks.recover ?? '' }
+        : { base: query.no_data ?? '', breach: query.breach, recover: query.recover ?? '' },
+    [query]
+  );
+
+  const updateQuery = useCallback(
+    (patch: { base?: string; breach?: string; recover?: string }) => {
+      if (!onQueryChange) return;
+      const next = { ...queryFields, ...patch };
+      onQueryChange(
+        query.format === 'composed'
+          ? {
+              format: 'composed',
+              base: next.base,
+              blocks: { breach: next.breach, ...(next.recover ? { recover: next.recover } : {}) },
+            }
+          : {
+              format: 'standalone',
+              breach: next.breach,
+              ...(next.base ? { no_data: next.base } : {}),
+              ...(next.recover ? { recover: next.recover } : {}),
+            }
+      );
+    },
+    [query, queryFields, onQueryChange]
+  );
 
   const timeRange = useMemo(
     () => ({ from: dateRange.dateStart, to: dateRange.dateEnd }),
@@ -335,33 +365,17 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
 
         {/* ── 2. Editor — bordered panel ──────────────────────────────── */}
         <EuiPanel hasBorder paddingSize="s" style={{ ...editorPanelStyles }}>
-          {isSplit ? (
+          {tabs?.length ? (
             <ComposeDiscoverTabs
-              baseQuery={query.format === 'composed' ? query.base : ''}
-              alertBlock={query.format === 'composed' ? query.blocks.breach : query.breach}
-              recoveryBlock={
-                query.format === 'composed' ? query.blocks.recover ?? '' : query.recover ?? ''
-              }
-              onBaseQueryChange={(v) => {
-                if (query.format === 'composed') onQueryChange?.({ ...query, base: v });
-              }}
-              onAlertBlockChange={(v) => {
-                onQueryChange?.(
-                  query.format === 'composed'
-                    ? { ...query, blocks: { ...query.blocks, breach: v } }
-                    : { ...query, breach: v }
-                );
-              }}
-              onRecoveryBlockChange={(v) => {
-                onQueryChange?.(
-                  query.format === 'composed'
-                    ? { ...query, blocks: { ...query.blocks, recover: v } }
-                    : { ...query, recover: v }
-                );
-              }}
+              baseQuery={queryFields.base}
+              alertBlock={queryFields.breach}
+              recoveryBlock={queryFields.recover}
+              onBaseQueryChange={(v) => updateQuery({ base: v })}
+              onAlertBlockChange={(v) => updateQuery({ breach: v })}
+              onRecoveryBlockChange={(v) => updateQuery({ recover: v })}
               activeTab={activeTab}
               onTabChange={onTabChange ?? (() => {})}
-              tabs={tabs ?? []}
+              tabs={tabs}
               onAlertEditorMount={onAlertEditorMount}
               onRecoveryEditorMount={onRecoveryEditorMount}
               readOnly={isReadOnly}
@@ -370,10 +384,8 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
           ) : (
             <CodeEditor
               languageId={ESQL_LANG_ID}
-              value={activeQuery}
-              onChange={(v) => {
-                if (query.format === 'standalone') onQueryChange?.({ ...query, breach: v });
-              }}
+              value={queryFields.breach}
+              onChange={(v) => updateQuery({ breach: v })}
               height="100%"
               options={{
                 minimap: { enabled: false },

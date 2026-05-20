@@ -31,13 +31,17 @@ import { splitQuery } from './use_heuristic_split';
  */
 export function transformQueryIn(rule: {
   kind: RuleKind;
-  evaluation: { query: { base: string } };
+  evaluation: { query: { base: string; no_data?: string } };
   recovery_policy?: { type: string; query?: { base?: string } } | null;
 }): RuleQuery {
   const fullQuery = rule.evaluation.query.base;
 
   if (rule.kind === 'signal') {
-    return { format: 'standalone', breach: fullQuery };
+    return {
+      format: 'standalone',
+      breach: fullQuery,
+      ...(rule.evaluation.query.no_data ? { no_data: rule.evaluation.query.no_data } : {}),
+    };
   }
 
   const { base, alertBlock: block } = splitQuery(fullQuery);
@@ -73,7 +77,12 @@ export interface TransformQueryOutResult {
  */
 export function transformQueryOut(query: RuleQuery, kind?: RuleKind): TransformQueryOutResult {
   if (query.format === 'standalone') {
-    const evaluation = { query: { base: query.breach } };
+    const evaluation = {
+      query: {
+        base: query.breach,
+        ...(query.no_data ? { no_data: query.no_data } : {}),
+      },
+    };
     const recoverStr = query.recover?.trim();
     if (recoverStr) {
       return {

@@ -26,6 +26,8 @@ export interface ComposedQuery {
 
 export interface StandaloneQuery {
   format: 'standalone';
+  /** Corollary of `base` in `ComposedQuery` — the "no data" base query. Maps to `evaluation.query.no_data` in the API schema. */
+  no_data?: string;
   breach: string;
   recover?: string;
 }
