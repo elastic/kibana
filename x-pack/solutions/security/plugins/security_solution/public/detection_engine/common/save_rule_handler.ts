@@ -142,15 +142,6 @@ export const createSaveRuleHandler = ({
     const ruleAttachment = event.data.attachments?.find(
       (a) => a.type === SecurityAgentBuilderAttachments.rule
     );
-    // eslint-disable-next-line no-console
-    console.log(
-      '[SaveRuleHandler] roundComplete — lastSavedRuleId:',
-      lastSavedId,
-      '| ruleAttachment found:',
-      !!ruleAttachment,
-      '| attachment types:',
-      event.data.attachments?.map((a) => a.type)
-    );
     if (lastSavedId !== null && ruleAttachment) {
       aiRuleCreation.markDirty();
     }
@@ -162,8 +153,6 @@ export const createSaveRuleHandler = ({
   const conversationSub = agentBuilder?.events.ui.activeConversation$
     .pipe(pairwise())
     .subscribe(([prev, curr]) => {
-      // eslint-disable-next-line no-console
-      console.log('[SaveRuleHandler] conversation changed — prev:', prev?.id, '→ curr:', curr?.id);
       // Use loose != to guard against both null and undefined — the BehaviorSubject
       // initial value may be undefined rather than null on first emission.
       if (prev != null && curr != null && prev?.id !== curr?.id) {

@@ -430,7 +430,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     const aiSession = aiRuleCreation.getSession();
     const isAiEdited = isAiRuleUpdateRef.current;
     telemetry.reportEvent(RuleCreationEventTypes.RuleEdited, {
-      creationSource: isAiEdited ? 'ai' : 'manual',
+      creationSource: isAiEdited ? 'ai_edit' : 'manual',
       sessionId: aiSession?.sessionId ?? '',
       ruleType: updatedRule.type,
       enabled: updatedRule.enabled,

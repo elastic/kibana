@@ -11,6 +11,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type {
   EmbeddableConversationInternalProps,
   EmbeddableConversationProps,
@@ -77,9 +78,17 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
 
   const setConversationId = useCallback(
     (id?: string) => {
-      if (currentProps.newConversation && id) {
-        // reset new conversation flag when there is a valid id
-        setCurrentProps({ ...currentProps, newConversation: undefined });
+      if (id) {
+        // A valid id: clear the newConversation flag so we load the specified conversation.
+        if (currentProps.newConversation) {
+          setCurrentProps({ ...currentProps, newConversation: undefined });
+        }
+      } else {
+        // Resetting to a new conversation: always set the flag so derived state (e.g.
+        // the header title) updates even when persistedConversationId is already undefined.
+        if (!currentProps.newConversation) {
+          setCurrentProps({ ...currentProps, newConversation: true });
+        }
       }
       if (id !== persistedConversationId) {
         updatePersistedConversationId(id);
@@ -93,11 +102,19 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       try {
         const conversation = await services.conversationsService.get({ conversationId: id });
         setConversationId(conversation.id ?? undefined);
-      } catch {
+      } catch (error) {
+        const httpError = error as IHttpFetchError;
+        if (httpError?.response?.status !== 404) {
+          // Only surface unexpected errors; a 404 simply means the conversation no longer exists.
+          coreStart.notifications.toasts.addError(
+            error instanceof Error ? error : new Error(String(error)),
+            { title: 'Failed to restore conversation' }
+          );
+        }
         setConversationId(undefined);
       }
     },
-    [services.conversationsService, setConversationId]
+    [coreStart.notifications.toasts, services.conversationsService, setConversationId]
   );
 
   // One-time initialization per provider instance:

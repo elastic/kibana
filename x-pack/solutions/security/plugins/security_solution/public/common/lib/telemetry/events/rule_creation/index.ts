@@ -11,7 +11,8 @@ import { RuleCreationEventTypes } from './types';
 const creationSourceSchema = {
   type: 'keyword' as const,
   _meta: {
-    description: 'How the rule was created: "ai", "ai_edit", or "manual"',
+    description:
+      'How the rule was created or edited: "ai" (AI created a new rule), "ai_edit" (AI edited an existing rule), or "manual"',
     optional: false as const,
   },
 };
@@ -96,6 +97,14 @@ const creationInitializedEvent: RuleCreationTelemetryEvent = {
 const aiAppliedToFormEvent: RuleCreationTelemetryEvent = {
   eventType: RuleCreationEventTypes.AiAppliedToForm,
   schema: {
+    creationSource: {
+      type: 'keyword' as const,
+      _meta: {
+        description:
+          'Whether AI was used to create a new rule ("ai") or edit an existing one ("ai_edit")',
+        optional: false as const,
+      },
+    },
     ruleType: ruleTypeSchema,
     sessionId: sessionIdSchema,
     durationSinceSessionStartMs: durationSchema,

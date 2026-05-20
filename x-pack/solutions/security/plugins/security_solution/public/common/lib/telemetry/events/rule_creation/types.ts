@@ -25,6 +25,7 @@ export interface ReportCreationInitializedParams {
 }
 
 export interface ReportAiAppliedToFormParams {
+  creationSource: 'ai' | 'ai_edit';
   ruleType: string;
   sessionId: string;
   durationSinceSessionStartMs: number;

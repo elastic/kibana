@@ -22,6 +22,19 @@ export class AiRuleCreationService {
   private readonly savingSubject = new BehaviorSubject<boolean>(false);
   private readonly aiRuleSubject = new BehaviorSubject<RuleResponse | null>(null);
   private readonly formSyncSubject = new BehaviorSubject<boolean>(false);
+  /**
+   * Monotonically increasing sequence assigned to each rule attachment card on mount.
+   * The card whose sequence matches the current value is the "active" card; older cards
+   * (lower sequences) are historical. Robust to JSON serialization differences that broke
+   * the earlier text-based identity scheme.
+   */
+  private readonly currentAttachmentSeqSubject = new BehaviorSubject<number>(0);
+  private seqCounter = 0;
+  /**
+   * True while a chat round is in flight (agent is reasoning / streaming / tool-calling).
+   * Cards hide action buttons while busy to avoid flicker as transient events arrive.
+   */
+  private readonly agentBusySubject = new BehaviorSubject<boolean>(false);
   private session: AiRuleCreationSession | null = null;
 
   public readonly saveRuleRequest$ = this.saveRuleSubject.asObservable();
@@ -30,6 +43,10 @@ export class AiRuleCreationService {
   public readonly saving$ = this.savingSubject.pipe(distinctUntilChanged());
   public readonly aiCreatedRule$ = this.aiRuleSubject.asObservable();
   public readonly formSyncActive$ = this.formSyncSubject.pipe(distinctUntilChanged());
+  public readonly currentAttachmentSeq$ = this.currentAttachmentSeqSubject.pipe(
+    distinctUntilChanged()
+  );
+  public readonly agentBusy$ = this.agentBusySubject.pipe(distinctUntilChanged());
 
   public startSession = (): AiRuleCreationSession => {
     this.session = {
@@ -51,21 +68,15 @@ export class AiRuleCreationService {
   };
 
   public requestSaveRule = (rule: RuleResponse): void => {
-    // eslint-disable-next-line no-console
-    console.log('[AiRuleCreation] requestSaveRule — rule.id:', rule.id);
     this.savingSubject.next(true);
     this.saveRuleSubject.next(rule);
   };
 
   public clearSaving = (): void => {
-    // eslint-disable-next-line no-console
-    console.log('[AiRuleCreation] clearSaving');
     this.savingSubject.next(false);
   };
 
   public setLastSavedRuleId = (id: string | null): void => {
-    // eslint-disable-next-line no-console
-    console.log('[AiRuleCreation] setLastSavedRuleId →', id);
     this.lastSavedRuleIdSubject.next(id);
   };
 
@@ -74,14 +85,10 @@ export class AiRuleCreationService {
   };
 
   public markDirty = (): void => {
-    // eslint-disable-next-line no-console
-    console.log('[AiRuleCreation] markDirty');
     this.dirtySubject.next(true);
   };
 
   public clearDirty = (): void => {
-    // eslint-disable-next-line no-console
-    console.log('[AiRuleCreation] clearDirty');
     this.dirtySubject.next(false);
   };
 
@@ -97,6 +104,24 @@ export class AiRuleCreationService {
     this.formSyncSubject.next(true);
   };
 
+  /**
+   * Allocates a new sequence number and publishes it as the current attachment.
+   * Called by RuleInlineContent on mount. The most recently mounted card "wins".
+   */
+  public claimAsCurrentAttachment = (): number => {
+    this.seqCounter += 1;
+    this.currentAttachmentSeqSubject.next(this.seqCounter);
+    return this.seqCounter;
+  };
+
+  public getCurrentAttachmentSeq = (): number => {
+    return this.currentAttachmentSeqSubject.getValue();
+  };
+
+  public setAgentBusy = (busy: boolean): void => {
+    this.agentBusySubject.next(busy);
+  };
+
   public clearSession = (): void => {
     this.session = null;
   };
@@ -106,6 +131,9 @@ export class AiRuleCreationService {
     this.dirtySubject.next(false);
     this.savingSubject.next(false);
     this.aiRuleSubject.next(null);
+    this.currentAttachmentSeqSubject.next(0);
+    this.seqCounter = 0;
+    this.agentBusySubject.next(false);
     this.session = null;
   };
 }

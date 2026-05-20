@@ -9,6 +9,8 @@ import type { MutableRefObject } from 'react';
 import { useEffect, useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import { ChatEventType, isRoundCompleteEvent } from '@kbn/agent-builder-common/chat/events';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
@@ -45,6 +47,21 @@ const ruleDefaultMetadataFields = {
 };
 
 const SYNC_DEBOUNCE_MS = 500;
+
+// Event types that signal the agent is actively processing a round. Used to drive the
+// "agentBusy" flag so attachment action buttons can be suppressed during reasoning/streaming.
+const AGENT_ACTIVITY_EVENT_TYPES = new Set<string>([
+  ChatEventType.reasoning,
+  ChatEventType.messageChunk,
+  ChatEventType.messageComplete,
+  ChatEventType.toolCall,
+  ChatEventType.browserToolCall,
+  ChatEventType.toolProgress,
+  ChatEventType.toolResult,
+  ChatEventType.toolUi,
+  ChatEventType.thinkingComplete,
+  ChatEventType.promptRequest,
+]);
 
 interface UseAgentBuilderRuleCreationParams {
   defineStepForm: FormHook<DefineStepRule, DefineStepRule>;
@@ -102,6 +119,23 @@ export const useAgentBuilderRuleCreation = ({
     return () => subscription.unsubscribe();
   }, [aiRuleCreation]);
 
+  // Track whether the agent is mid-round so attachment cards can hide their action buttons
+  // during reasoning/streaming. Any agent-activity event marks busy; roundComplete clears it.
+  useEffect(() => {
+    if (!agentBuilder?.events?.chat$) return;
+    const subscription = agentBuilder.events.chat$.subscribe((event) => {
+      if (isRoundCompleteEvent(event)) {
+        aiRuleCreation.setAgentBusy(false);
+      } else if (AGENT_ACTIVITY_EVENT_TYPES.has(event.type)) {
+        aiRuleCreation.setAgentBusy(true);
+      }
+    });
+    return () => {
+      subscription.unsubscribe();
+      aiRuleCreation.setAgentBusy(false);
+    };
+  }, [agentBuilder, aiRuleCreation]);
+
   const addRuleAttachment = useCallback(
     (ruleData: unknown, label: string) => {
       if (!agentBuilder?.addAttachment) {
@@ -127,6 +161,7 @@ export const useAgentBuilderRuleCreation = ({
       const session = aiRuleCreation.getSession() ?? aiRuleCreation.startSession();
       aiRuleCreation.incrementApplyCount();
       telemetry.reportEvent(RuleCreationEventTypes.AiAppliedToForm, {
+        creationSource: existingRuleId ? 'ai_edit' : 'ai',
         ruleType: rule.type,
         sessionId: session.sessionId,
         durationSinceSessionStartMs: Date.now() - session.startTimestamp,
@@ -164,6 +199,7 @@ export const useAgentBuilderRuleCreation = ({
       actionsStepForm,
       addSuccess,
       aiRuleCreation,
+      existingRuleId,
       telemetry,
       onAiCreatedRuleAppliedRef,
     ]
@@ -184,6 +220,39 @@ export const useAgentBuilderRuleCreation = ({
     });
     return () => subscription.unsubscribe();
   }, [aiRuleCreation]);
+
+  // Auto-sync: when the agent updates the rule attachment in chat (via attachment_update or
+  // create_detection_rule), automatically apply those changes to the rule form so the user
+  // doesn't need to click "Open in form" manually after each AI edit.
+  useEffect(() => {
+    if (!agentBuilder?.events?.chat$) return;
+    const subscription = agentBuilder.events.chat$.subscribe((event) => {
+      if (!isRoundCompleteEvent(event)) return;
+      const ruleAttachment = event.data.attachments?.find(
+        (a) => a.type === SecurityAgentBuilderAttachments.rule
+      );
+      if (!ruleAttachment) return;
+      // roundComplete attachments are VersionedAttachment — data lives inside versions[].data,
+      // not at the top level. Use getLatestVersion to reach the current version's data.
+      const latestVersion = getLatestVersion(ruleAttachment);
+      if (!latestVersion) return;
+      let parsed: RuleResponse | undefined;
+      try {
+        const text = (latestVersion.data as { text?: string })?.text;
+        if (!text) return;
+        const result = JSON.parse(text);
+        if (!result || typeof result !== 'object' || Array.isArray(result)) return;
+        parsed = result as RuleResponse;
+      } catch {
+        // Malformed attachment text — ignore silently
+        return;
+      }
+      // Do NOT call addRuleAttachment here — the agent already owns the attachment;
+      // the debounced form→agent sync (below) will push any subsequent user edits back.
+      updateFormFromChatRef.current(parsed);
+    });
+    return () => subscription.unsubscribe();
+  }, [agentBuilder]);
 
   useEffect(() => {
     if (
