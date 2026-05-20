@@ -486,8 +486,7 @@ function defaultGoldenSequence(expected: Partial<ReferenceRule> | null | undefin
  */
 function createRuleTrajectoryEvaluator(): Evaluator<RuleExample, RuleGenerationTaskOutput> {
   const inner = createTrajectoryEvaluator({
-    extractToolCalls: (output: unknown) =>
-      (output as RuleGenerationTaskOutput)?.toolCalls ?? [],
+    extractToolCalls: (output: unknown) => (output as RuleGenerationTaskOutput)?.toolCalls ?? [],
     goldenPathExtractor: (expected: unknown) =>
       defaultGoldenSequence(expected as Partial<ReferenceRule>),
     orderWeight: 0.4,
