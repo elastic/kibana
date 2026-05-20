@@ -18,6 +18,16 @@ function tryParseDate(date: string | string[] | null | undefined): Moment | unde
   return typeof date === 'string' ? datemath.parse(date) : undefined;
 }
 
+function isValidDateRange(
+  from: string | string[] | null | undefined,
+  to: string | string[] | null | undefined
+): boolean {
+  const start = tryParseDate(from);
+  const end = tryParseDate(to);
+
+  return Boolean(start?.isValid() && end?.isValid() && start.isBefore(end));
+}
+
 export function useDateRangeRedirect() {
   const history = useHistory();
   const location = useLocation();
@@ -32,24 +42,21 @@ export function useDateRangeRedirect() {
   const timePickerSharedState = plugins.data.query.timefilter.timefilter.getTime();
 
   const isDateRangeSet = useMemo(() => {
-    const start = tryParseDate(query.rangeFrom);
-    const end = tryParseDate(query.rangeTo);
-
-    return Boolean(start?.isValid() && end?.isValid());
+    return isValidDateRange(query.rangeFrom, query.rangeTo);
   }, [query.rangeFrom, query.rangeTo]);
 
   const redirect = () => {
-    const start = tryParseDate(query.rangeFrom);
-    const end = tryParseDate(query.rangeTo);
-
+    const resolvedFrom = tryParseDate(query.rangeFrom)?.isValid()
+      ? query.rangeFrom
+      : timePickerSharedState.from;
+    const resolvedTo = tryParseDate(query.rangeTo)?.isValid()
+      ? query.rangeTo
+      : timePickerSharedState.to;
+    const isResolvedRangeValid = isValidDateRange(resolvedFrom, resolvedTo);
     const nextQuery = {
       ...query,
-      rangeFrom: start?.isValid()
-        ? query.rangeFrom
-        : timePickerSharedState.from ?? timePickerTimeDefaults.from,
-      rangeTo: end?.isValid()
-        ? query.rangeTo
-        : timePickerSharedState.to ?? timePickerTimeDefaults.to,
+      rangeFrom: isResolvedRangeValid ? resolvedFrom : timePickerTimeDefaults.from,
+      rangeTo: isResolvedRangeValid ? resolvedTo : timePickerTimeDefaults.to,
     };
 
     try {
