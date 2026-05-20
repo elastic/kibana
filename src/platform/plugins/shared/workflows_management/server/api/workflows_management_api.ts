@@ -170,18 +170,24 @@ export interface ExecuteWorkflowBaseParams {
 }
 
 export interface ExecuteSavedWorkflowParams extends ExecuteWorkflowBaseParams {
+  /** Saved workflow ID. The workflow is fetched, validated, and checked for enabled state. */
   workflowId: string;
-  definition?: never;
   yaml?: never;
   name?: never;
   isTestRun?: never;
 }
 
 export interface ExecuteInlineWorkflowParams extends ExecuteWorkflowBaseParams {
+  /**
+   * Optional synthetic workflow ID used on the execution document, telemetry, and result
+   * correlation. It does not trigger a saved-workflow lookup; inline executions are
+   * always marked ephemeral by the management API.
+   */
   workflowId?: string;
-  definition: WorkflowYaml;
+  /** Workflow YAML to validate, parse, execute, and persist on the execution document. */
   yaml: string;
   name?: string;
+  /** Authoring/test-run semantics are independent from whether the workflow is ephemeral. */
   isTestRun?: boolean;
 }
 
@@ -195,7 +201,7 @@ export interface ExecuteWorkflowResult {
 
 const isExecuteInlineWorkflowParams = (
   params: ExecuteWorkflowParams
-): params is ExecuteInlineWorkflowParams => params.definition !== undefined;
+): params is ExecuteInlineWorkflowParams => params.yaml !== undefined;
 
 export class WorkflowsManagementApi {
   private smlIndexAttachment: SmlIndexAttachmentFn | null = null;
@@ -410,7 +416,7 @@ export class WorkflowsManagementApi {
     } = params;
 
     const workflow = isExecuteInlineWorkflowParams(params)
-      ? this.createEphemeralWorkflowExecutionModel(params)
+      ? await this.createEphemeralWorkflowExecutionModel(params)
       : await this.getSavedWorkflowExecutionModel(params.workflowId, spaceId);
 
     const workflowExecutionId = await this.runWorkflow(
@@ -436,14 +442,28 @@ export class WorkflowsManagementApi {
     };
   }
 
-  private createEphemeralWorkflowExecutionModel(
+  private async createEphemeralWorkflowExecutionModel(
     params: ExecuteInlineWorkflowParams
-  ): WorkflowExecutionEngineModel {
+  ): Promise<WorkflowExecutionEngineModel> {
+    const validation = await this.workflowsService.validateWorkflow(
+      params.yaml,
+      params.spaceId,
+      params.request
+    );
+    if (!validation.valid || !validation.parsedWorkflow) {
+      const errorMessages = validation.diagnostics
+        .filter((d) => d.severity === 'error')
+        .map((d) => d.message);
+      throw new WorkflowValidationError('Workflow validation failed', errorMessages);
+    }
+
+    const workflowJson = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
+
     return {
       id: params.workflowId ?? 'ephemeral-workflow',
-      name: params.name ?? params.definition.name,
-      enabled: params.definition.enabled,
-      definition: params.definition,
+      name: params.name ?? workflowJson.name,
+      enabled: workflowJson.enabled,
+      definition: workflowJson.definition,
       yaml: params.yaml,
       isTestRun: params.isTestRun,
       isEphemeral: true,

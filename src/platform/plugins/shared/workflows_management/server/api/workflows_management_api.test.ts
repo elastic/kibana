@@ -603,6 +603,11 @@ steps:
     beforeEach(() => {
       jest.useFakeTimers();
       mockWorkflowsService.getWorkflowExecution.mockResolvedValue(workflowExecution as any);
+      mockWorkflowsService.validateWorkflow.mockResolvedValue({
+        valid: true,
+        diagnostics: [],
+        parsedWorkflow: workflowDefinition as any,
+      });
     });
 
     afterEach(() => {
@@ -669,7 +674,6 @@ steps:
       const result = await runWithTimers(
         api.executeWorkflow({
           workflowId: 'inline-workflow',
-          definition: workflowDefinition,
           yaml: 'name: Test Workflow',
           inputs: {},
           spaceId: 'default',
@@ -681,9 +685,15 @@ steps:
 
       expect(result.workflowExecutionId).toBe('test-exec-id');
       expect(mockWorkflowsService.getWorkflow).not.toHaveBeenCalled();
+      expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
+        'name: Test Workflow',
+        'default',
+        mockRequest
+      );
       expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'inline-workflow',
+          definition: workflowDefinition,
           isEphemeral: true,
           isTestRun: false,
         }),
@@ -696,7 +706,6 @@ steps:
       await runWithTimers(
         api.executeWorkflow({
           workflowId: 'inline-test-workflow',
-          definition: workflowDefinition,
           yaml: 'name: Test Workflow',
           inputs: {},
           spaceId: 'default',
