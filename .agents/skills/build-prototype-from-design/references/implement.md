@@ -97,6 +97,8 @@ If APIs needed: `"server": true`, `server/index.ts` lazy-loads `./plugin` ([AGEN
 - [ ] `yarn kbn bootstrap` if new example package
 - [ ] Ready for [run-kibana](run-kibana.md) with `--run-examples` (new plugin) or normal start (tweak only)
 
+> **Do not run `node scripts/type_check` for example prototypes.** The full compiler walks the entire `kbn_references` chain, takes 5–20 min, and surfaces pre-existing errors from unrelated packages — producing noise with no signal for a not-for-merge prototype. The optimizer's successful bundle build (visible in the Kibana terminal as `[N/N] initial bundle builds complete`) is sufficient proof that the code compiles.
+
 ## Handoff
 
 → [run-kibana](run-kibana.md) · [ingest-data](ingest-data.md) · [build-version-panel](build-version-panel.md) if applicable
