@@ -27,9 +27,10 @@ export interface EpisodeEventDataRow {
  * lets callers detect when the displayed data is stale relative to the latest
  * event (e.g. after recovery).
  */
-export const buildEpisodeEventDataQuery = (episodeId: string) => {
+export const buildEpisodeEventDataQuery = (spaceId: string, episodeId: string) => {
   // prettier-ignore
   return esql.from([ALERT_EVENTS_DATA_STREAM], ['_source'])
+    .where`space_id == ${spaceId}`
     .where`type == "alert"`
     .where`episode.id == ${episodeId}`
     .pipe`EVAL extracted_data = JSON_EXTRACT(_source, "data")`

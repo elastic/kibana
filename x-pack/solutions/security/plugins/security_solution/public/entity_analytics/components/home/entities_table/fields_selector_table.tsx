@@ -242,7 +242,6 @@ export const FieldsSelectorTable = ({
           >
             <EuiContextMenuPanel
               data-test-subj="viewSelectorMenu"
-              size="s"
               items={[
                 <EuiContextMenuItem
                   data-test-subj="viewSelectorOption-all"
