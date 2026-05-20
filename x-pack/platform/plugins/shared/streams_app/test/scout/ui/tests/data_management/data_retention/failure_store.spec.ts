@@ -10,6 +10,7 @@ import { tags } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 import {
+  disableInheritFailureStoreIfEnabled,
   openRetentionModal,
   saveFailureStoreChanges,
   saveRetentionChanges,
@@ -62,18 +63,16 @@ test.describe('Stream data retention - updating failure store', () => {
     {
       label: 'classic streams',
       streamName: 'logs-generic-default' as const,
-      inheritSubtitle: 'Inherit from index template' as const,
       enableBtnTag: [...tags.stateful.classic, ...tags.serverless.observability.complete],
     },
     {
       label: 'wired streams',
       streamName: 'logs.otel.nginx' as const,
-      inheritSubtitle: 'Inherit from parent' as const,
       enableBtnTag: [...tags.stateful.classic, ...tags.serverless.observability.complete],
     },
   ];
 
-  for (const { label, streamName, inheritSubtitle } of STREAM_CONFIGS) {
+  for (const { label, streamName } of STREAM_CONFIGS) {
     test(
       `should edit failure store successfully for ${label}`,
       { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
@@ -82,11 +81,9 @@ test.describe('Stream data retention - updating failure store', () => {
 
         await setFailureStoreRetention(page, '7', 'd');
         await verifyRetentionDisplay(page, '7 days', true);
-        await expect(
-          page
-            .getByTestId('failureStoreRetention-metric-subtitle')
-            .getByText('Custom retention period')
-        ).toBeVisible();
+        await expect(page.getByTestId('failureStoreRetention-metric-subtitle')).toContainText(
+          '2 data phases'
+        );
       }
     );
 
@@ -109,13 +106,13 @@ test.describe('Stream data retention - updating failure store', () => {
       async ({ page, pageObjects }) => {
         await pageObjects.streams.gotoDataRetentionTab(streamName);
 
+        // Ensure a consistent starting point (other tests may leave the failure store enabled).
+        await toggleFailureStore(page, false);
         await toggleFailureStore(page, true);
         await verifyRetentionDisplay(page, '30 days', true);
-        await expect(
-          page
-            .getByTestId('failureStoreRetention-metric-subtitle')
-            .getByText('Default retention period')
-        ).toBeVisible();
+        await expect(page.getByTestId('failureStoreRetention-metric-subtitle')).toContainText(
+          '2 data phases'
+        );
       }
     );
 
@@ -125,22 +122,26 @@ test.describe('Stream data retention - updating failure store', () => {
       async ({ page, pageObjects }) => {
         await pageObjects.streams.gotoDataRetentionTab(streamName);
 
+        // Ensure the failure store is enabled, otherwise lifecycle options are disabled.
+        await toggleFailureStore(page, true);
         await page.getByTestId('streamFailureStoreEditRetention').click();
 
         // The disable lifecycle option should be visible on ESS
         await expect(page.getByTestId('disabledLifecycle')).toBeVisible();
 
+        await disableInheritFailureStoreIfEnabled(page);
+
         // Enable disable lifecycle
-        await page.getByTestId('disabledLifecycle').click();
+        const disabledLifecycleButton = page.getByTestId('disabledLifecycle');
+        await expect(disabledLifecycleButton).toBeEnabled();
+        await disabledLifecycleButton.click();
         await saveFailureStoreChanges(page);
 
         // Verify infinite retention is shown
         await expect(page.getByTestId('failureStoreRetention-metric').getByText('∞')).toBeVisible();
-        await expect(
-          page
-            .getByTestId('failureStoreRetention-metric-subtitle')
-            .getByText('Indefinite retention')
-        ).toBeVisible();
+        await expect(page.getByTestId('failureStoreRetention-metric-subtitle')).toContainText(
+          '1 data phase'
+        );
       }
     );
 
@@ -157,9 +158,9 @@ test.describe('Stream data retention - updating failure store', () => {
         await expect(
           page.getByTestId('failureStoreRetention-metric').getByText('30 days')
         ).toBeVisible();
-        await expect(
-          page.getByTestId('failureStoreRetention-metric-subtitle').getByText(inheritSubtitle)
-        ).toBeVisible();
+        await expect(page.getByTestId('failureStoreRetention-metric-subtitle')).toContainText(
+          '2 data phases'
+        );
       }
     );
   }
