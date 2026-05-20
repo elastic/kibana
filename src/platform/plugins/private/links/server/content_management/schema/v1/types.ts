@@ -31,8 +31,6 @@ export type LinksState = TypeOf<typeof linksSchema>;
 export type StoredLink = StoredDashboardLink | StoredExternalLink;
 export type StoredLinksState = Omit<LinksState, 'links'> & {
   links?: StoredLink[];
-  // links never supported enhancements, but some legacy states serialized an empty enhancements object
-  enhancements?: object;
 };
 export type StoredDashboardLink = Omit<DashboardLink, 'destination'> &
   DeprecatedLinkProperties & {
