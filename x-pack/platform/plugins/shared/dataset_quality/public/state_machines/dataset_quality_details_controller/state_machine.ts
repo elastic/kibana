@@ -789,8 +789,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
           );
         },
         isDataStreamMissing: (_, event) => {
-          const output =
-            'data' in event ? (event.data as DataStreamSettings) : undefined;
+          const output = 'data' in event ? (event.data as DataStreamSettings) : undefined;
           return !output?.lastBackingIndexName;
         },
         shouldOpenFlyout: (context, _event, meta) => {
