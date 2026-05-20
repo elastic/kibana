@@ -65,6 +65,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       spanCompression: `${ELASTIC_DOCS}solutions/observability/apm/spans`,
       transactionSampling: `${ELASTIC_DOCS}solutions/observability/apm/transaction-sampling`,
       indexLifecycleManagement: `${ELASTIC_DOCS}solutions/observability/apm/index-lifecycle-management`,
+      metricsUi: `${ELASTIC_DOCS}solutions/observability/apm/metrics-ui`,
     },
     canvas: {
       guide: `${ELASTIC_DOCS}explore-analyze/visualize/canvas`,
@@ -472,6 +473,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       blocklist: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/blocklist`,
       threatIntelInt: `${ELASTIC_DOCS}solutions/security/get-started/enable-threat-intelligence-integrations`,
       endpointArtifacts: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/optimize-elastic-defend`,
+      endpointArtifactsNoEscaping: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/exception-types-and-syntax#endpoint-no-escaping`,
       eventMerging: `${ELASTIC_DOCS}solutions/security/configure-elastic-defend/configure-data-volume-for-elastic-endpoint`,
       policyResponseTroubleshooting: {
         full_disk_access: `${ELASTIC_DOCS}solutions/security/configure-elastic-defend/enable-access-for-macos-monterey#enable-fda-endpoint`,
@@ -842,6 +844,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     ingest: {
       append: `${ELASTIC_DOCS}reference/enrich-processor/append-processor`,
+      cef: `${ELASTIC_DOCS}reference/enrich-processor/cef-processor`,
       bytes: `${ELASTIC_DOCS}reference/enrich-processor/bytes-processor`,
       circle: `${ELASTIC_DOCS}reference/enrich-processor/ingest-circle-processor`,
       community: `${ELASTIC_DOCS}reference/enrich-processor/community-id-processor`,
@@ -1079,6 +1082,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       agentBuilderPlugins: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/plugins`,
       agentBuilderConnectors: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/connectors`,
       agentBuilderTools: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/tools`,
+      elasticCapabilities: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/agent-builder-agents#elastic-capabilities`,
       programmaticAccess: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/programmatic-access`,
       kibanaApi: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/kibana-api`,
       mcpServer: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/mcp-server`,

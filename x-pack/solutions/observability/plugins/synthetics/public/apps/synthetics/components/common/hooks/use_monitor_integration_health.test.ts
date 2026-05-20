@@ -16,6 +16,10 @@ jest.mock('react-redux', () => ({
   useDispatch: jest.fn(),
 }));
 
+jest.mock('../../../contexts', () => ({
+  useSyntheticsRefreshContext: jest.fn().mockReturnValue({ lastRefresh: 0 }),
+}));
+
 jest.mock('../../../state/monitor_management/api', () => ({
   resetMonitorAPI: jest.fn(),
   resetMonitorBulkAPI: jest.fn(),
@@ -89,6 +93,23 @@ describe('useMonitorIntegrationHealth', () => {
     jest.clearAllMocks();
     dispatchSpy = jest.fn();
     (reactRedux.useDispatch as jest.Mock).mockReturnValue(dispatchSpy);
+  });
+
+  it('does not re-fetch health when configIds is a new array reference with the same ids', () => {
+    setupSelectors({ monitors: [unhealthyMonitor], errors: [] });
+
+    const { rerender } = renderHook(
+      ({ configIds }: { configIds: string[] }) => useMonitorIntegrationHealth({ configIds }),
+      { initialProps: { configIds: ['mon-2'] } }
+    );
+
+    rerender({ configIds: ['mon-2'] });
+    rerender({ configIds: ['mon-2'] });
+
+    const healthDispatches = dispatchSpy.mock.calls.filter(
+      ([action]: [{ type: string }]) => action.type === '[MONITOR HEALTH] GET'
+    );
+    expect(healthDispatches).toHaveLength(1);
   });
 
   describe('status helpers', () => {
