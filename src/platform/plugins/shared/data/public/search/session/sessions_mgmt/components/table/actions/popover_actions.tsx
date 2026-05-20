@@ -112,7 +112,7 @@ export const PopoverActionsMenu = ({
       anchorPosition="downLeft"
       panelPaddingSize={'s'}
       aria-label={i18n.translate('data.mgmt.searchSessions.popoverActions.ariaLabel', {
-        defaultMessage: 'Session actions',
+        defaultMessage: 'Background Search actions',
       })}
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
