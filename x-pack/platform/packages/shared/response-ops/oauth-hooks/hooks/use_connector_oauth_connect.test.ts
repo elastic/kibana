@@ -241,7 +241,6 @@ describe('useConnectorOAuthConnect', () => {
     });
 
     it('does not post to the cancel endpoint when no state has been captured', () => {
-      // Reset so the initial mockHttpPost call from setup doesn't interfere
       mockHttpPost.mockClear();
 
       const { result } = renderHook(() =>

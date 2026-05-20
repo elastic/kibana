@@ -173,9 +173,6 @@ export class OAuthStateClient {
     }
   }
 
-  /**
-   * Delete OAuth state by its state parameter, verifying the requesting user created it.
-   */
   public async deleteByState(
     stateParam: string,
     requestingProfileUid: string

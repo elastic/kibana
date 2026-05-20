@@ -146,9 +146,7 @@ export const useConnectorOAuthConnect = ({
     pendingStateRef.current = undefined;
     setIsAwaitingCallback(false);
     if (state) {
-      // Fire-and-forget: delete the server-side oauth_state so the still-open
-      // provider tab cannot complete the flow. Errors are swallowed — UI cancel
-      // is already done synchronously above.
+      // Fire-and-forget: best-effort server cancel; UI state is already reset above.
       http
         .post(
           `${INTERNAL_BASE_ACTION_API_PATH}/connector/${encodeURIComponent(

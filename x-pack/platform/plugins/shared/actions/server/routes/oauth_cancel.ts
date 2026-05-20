@@ -30,6 +30,7 @@ export const oauthCancelRoute = (
   logger: Logger,
   coreSetup: CoreSetup<ActionsPluginsStart>
 ) => {
+  const routeLogger = logger.get('oauth_cancel');
   router.post(
     {
       path: `${INTERNAL_BASE_ACTION_API_PATH}/connector/{connectorId}/_oauth_cancel`,
@@ -72,7 +73,6 @@ export const oauthCancelRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const { connectorId }: CancelOAuthPathParams = req.params;
         const { state }: CancelOAuthBody = req.body;
-        const routeLogger = logger.get('oauth_cancel');
 
         const { security, savedObjects } = await context.core;
         const currentUser = security.authc.getCurrentUser();
@@ -93,7 +93,6 @@ export const oauthCancelRoute = (
           });
         }
 
-        // Verify the connector exists and the user has access via the actions client
         const actionsClient = (await context.actions).getActionsClient();
         await actionsClient.get({ id: connectorId });
 
