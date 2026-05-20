@@ -65,6 +65,7 @@ export interface GetWorkflowsParams {
   enabled?: boolean[];
   tags?: string[];
   query?: string;
+  managedFilter?: 'all' | 'managed' | 'unmanaged';
   _full?: boolean;
 }
 

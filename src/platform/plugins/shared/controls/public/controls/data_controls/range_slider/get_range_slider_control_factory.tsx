@@ -85,9 +85,12 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
         serializeState,
         anyStateChange$: merge(
           dataControlManager.anyStateChange$,
-          selections.value$,
+          selections.value$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
           editorStateManager.anyStateChange$
-        ).pipe(map(() => undefined)),
+        ),
         getComparators: () => {
           return {
             ...editorComparators,

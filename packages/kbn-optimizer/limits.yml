@@ -44,7 +44,7 @@ pageLoadAssetSize:
   dataViewManagement: 6250
   dataViews: 66000
   dataVisualizer: 32727
-  developerToolbar: 5000
+  developerToolbar: 5758
   devTools: 8107
   discover: 30501
   discoverEnhanced: 5353
@@ -56,7 +56,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 6524
   enterpriseSearch: 37565
   entityStore: 9718
-  esql: 25000
+  esql: 29547
   esqlDataGrid: 10209
   esUiShared: 101220
   evals: 6375
@@ -211,6 +211,6 @@ pageLoadAssetSize:
   visualizationListing: 5148
   visualizations: 52092
   watcher: 10485
-  workflowsExtensions: 38938
+  workflowsExtensions: 43032
   workflowsManagement: 39968
   workplaceAIApp: 6234

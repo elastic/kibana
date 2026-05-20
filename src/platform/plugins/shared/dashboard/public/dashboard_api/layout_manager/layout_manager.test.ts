@@ -8,7 +8,7 @@
  */
 
 import { pick } from 'lodash';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 
 import {
   ControlValuesSource,
@@ -87,6 +87,7 @@ describe('layout manager', () => {
     uuid: PANEL_ONE_ID,
     phase$: {} as unknown as PublishingSubject<PhaseEvent | undefined>,
     ...titleManager.api,
+    anyStateChange$: of(),
     serializeState: () => titleManager.getLatestState(),
     applySerializedState: jest.fn(),
   };
