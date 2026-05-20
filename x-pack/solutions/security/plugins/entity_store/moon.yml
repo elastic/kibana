@@ -47,9 +47,6 @@ dependsOn:
   - '@kbn/esql-language'
   - '@kbn/licensing-plugin'
   - '@kbn/licensing-types'
-  - '@kbn/core-test-helpers-kbn-server'
-  - '@kbn/test'
-  - '@kbn/core-elasticsearch-server'
 tags:
   - plugin
   - prod
