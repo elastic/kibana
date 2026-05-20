@@ -7,4 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { buildInspectAction } from './inspect_action';
+import { setStubKibanaServices } from './public/mocks';
+
+setStubKibanaServices();
