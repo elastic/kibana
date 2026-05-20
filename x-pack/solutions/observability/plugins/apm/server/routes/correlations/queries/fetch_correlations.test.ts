@@ -80,6 +80,7 @@ describe('fetchCorrelations', () => {
       mockFetchDurationFieldCandidates.mockResolvedValue({ fieldCandidates: ['host.name'] });
       mockFetchFieldValuePairs.mockResolvedValue({
         fieldValuePairs: [{ fieldName: 'host.name', fieldValue: 'host-a' }],
+        errors: [],
       });
       mockFetchThroughputCorrelations.mockResolvedValue({
         throughputCorrelations: [infraCorrelation],
@@ -96,7 +97,7 @@ describe('fetchCorrelations', () => {
 
     it('propagates ccsWarning from throughput response', async () => {
       mockFetchDurationFieldCandidates.mockResolvedValue({ fieldCandidates: ['host.name'] });
-      mockFetchFieldValuePairs.mockResolvedValue({ fieldValuePairs: [] });
+      mockFetchFieldValuePairs.mockResolvedValue({ fieldValuePairs: [], errors: [] });
       mockFetchThroughputCorrelations.mockResolvedValue({
         throughputCorrelations: [],
         ccsWarning: true,
@@ -111,7 +112,7 @@ describe('fetchCorrelations', () => {
     it('propagates fallbackResult from throughput response', async () => {
       const fallback = { ...infraCorrelation, isFallbackResult: true as const };
       mockFetchDurationFieldCandidates.mockResolvedValue({ fieldCandidates: ['host.name'] });
-      mockFetchFieldValuePairs.mockResolvedValue({ fieldValuePairs: [] });
+      mockFetchFieldValuePairs.mockResolvedValue({ fieldValuePairs: [], errors: [] });
       mockFetchThroughputCorrelations.mockResolvedValue({
         throughputCorrelations: [],
         ccsWarning: false,
@@ -132,10 +133,11 @@ describe('fetchCorrelations', () => {
 
     it('uses fetchInfraFieldCandidates and passes results through fetchSignificantCorrelations', async () => {
       mockFetchInfraFieldCandidates.mockResolvedValue({ fieldCandidates: ['host.name'] });
-      mockFetchFieldValuePairs.mockResolvedValue({ fieldValuePairs: [infraPair] });
+      mockFetchFieldValuePairs.mockResolvedValue({ fieldValuePairs: [infraPair], errors: [] });
       mockFetchSignificantCorrelations.mockResolvedValue({
         latencyCorrelations: [infraSignificantCorrelation],
         ccsWarning: false,
+        totalDocCount: 500,
       });
 
       const result = await fetchCorrelations({ ...defaultParams, metric: 'infra_metrics' });
@@ -147,10 +149,11 @@ describe('fetchCorrelations', () => {
     });
 
     it('skips fetchInfraFieldCandidates when fieldCandidates are provided', async () => {
-      mockFetchFieldValuePairs.mockResolvedValue({ fieldValuePairs: [infraPair] });
+      mockFetchFieldValuePairs.mockResolvedValue({ fieldValuePairs: [infraPair], errors: [] });
       mockFetchSignificantCorrelations.mockResolvedValue({
         latencyCorrelations: [infraSignificantCorrelation],
         ccsWarning: false,
+        totalDocCount: 500,
       });
 
       const result = await fetchCorrelations({
