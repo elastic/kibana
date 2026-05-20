@@ -10,7 +10,7 @@ import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { expect } from '@kbn/scout-oblt/ui';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
-import { test, testData } from '../fixtures';
+import { test } from '../fixtures';
 
 const BLANK_ARCHIVE = 'x-pack/solutions/observability/test/fixtures/es_archives/uptime/blank';
 const GENERATED_INDEX = 'heartbeat-8-generated-test';
@@ -117,7 +117,7 @@ test.describe('Uptime certificates', { tag: ['@local-stateful-classic'] }, () =>
   });
 
   test('navigates to cert page and displays certificates', async ({ pageObjects }) => {
-    await pageObjects.uptimeApp.navigateToOverview(testData.DEFAULT_NAVIGATION_SEARCH);
+    await pageObjects.uptimeApp.navigateToOverview();
     await pageObjects.uptimeApp.waitForDataLoaded();
 
     await test.step('cert button visible and navigates to cert page', async () => {
@@ -145,7 +145,7 @@ test.describe('Uptime certificates', { tag: ['@local-stateful-classic'] }, () =>
       refresh: 'wait_for',
     });
 
-    await pageObjects.uptimeApp.navigateToOverview(testData.DEFAULT_NAVIGATION_SEARCH);
+    await pageObjects.uptimeApp.navigateToOverview();
     await pageObjects.uptimeApp.navigateToCertificates();
 
     await expect(async () => {
@@ -167,7 +167,7 @@ test.describe('Uptime certificates', { tag: ['@local-stateful-classic'] }, () =>
       refresh: 'wait_for',
     });
 
-    await pageObjects.uptimeApp.navigateToOverview(testData.DEFAULT_NAVIGATION_SEARCH);
+    await pageObjects.uptimeApp.navigateToOverview();
     await pageObjects.uptimeApp.navigateToCertificates();
 
     await expect(async () => {
