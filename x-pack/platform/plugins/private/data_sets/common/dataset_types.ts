@@ -18,12 +18,18 @@ export interface Dataset {
  */
 export type DataSetWithName = Dataset & { name: string };
 
-export interface DatasetSettings {
-  format?: 'parquet' | 'csv' | 'ndjson' | 'orc';
+export type DatasetSettings = DatasetSettingsFile | DatasetSettingsParquet;
+
+export interface DatasetSettingsFile {
+  format?: 'csv' | 'ndjson' | 'orc';
   errorMode?: 'fail_fast' | 'skip_row' | 'null_field';
   maxErrors?: number;
   maxErrorRatio?: number; // between 0 and 1
   partitionDetection?: 'auto' | 'hive' | 'template' | 'none';
   partitionPath?: string;
   hivePartitioning?: boolean;
+}
+
+export interface DatasetSettingsParquet {
+  format: 'parquet';
 }

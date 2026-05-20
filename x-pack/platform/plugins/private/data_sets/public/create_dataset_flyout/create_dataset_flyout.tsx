@@ -27,14 +27,15 @@ import { useController, useForm } from 'react-hook-form';
 
 import type { DataSetWithName, DataSource } from '../../common';
 import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
+import {
+  buildDatasetSettingsFromFormValues,
+  emptyCreateDatasetSettingsFormValues,
+  type CreateDatasetFormValues,
+} from './create_dataset_flyout_form_state';
 import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
+import { CreateDatasetFlyoutSettings } from './create_dataset_flyout_settings';
 
-export interface CreateDatasetFormValues {
-  name: string;
-  description: string;
-  data_source: string;
-  resource: string;
-}
+export type { CreateDatasetFormValues } from './create_dataset_flyout_form_state';
 
 export interface CreateDatasetFlyoutProps {
   onClose: () => void;
@@ -69,6 +70,7 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
       description: '',
       data_source: '',
       resource: '',
+      settings: emptyCreateDatasetSettingsFormValues(),
     },
   });
 
@@ -118,11 +120,13 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
     setIsSaving(true);
     try {
       const desc = values.description.trim();
+      const settings = buildDatasetSettingsFromFormValues(values.settings);
       const payload: DataSetWithName = {
         name: values.name.trim(),
         data_source: values.data_source.trim(),
         resource: values.resource.trim(),
         ...(desc ? { description: desc } : {}),
+        ...(settings ? { settings } : {}),
       };
       const message = await onSave(payload);
       if (message) {
@@ -228,6 +232,7 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
               inputRef={resourceField.ref}
             />
           </EuiFormRow>
+          <CreateDatasetFlyoutSettings control={control} />
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
