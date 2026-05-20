@@ -10,23 +10,37 @@ import { parseLineForCompletion } from '@kbn/workflows-management-plugin/public'
 import type { PayloadVariable } from '../registry';
 import { DISPATCH_PAYLOAD_VARIABLES, ALERT_EPISODE_FIELDS } from '../registry';
 
+// All dispatcher payload variables are nested under `context.inputs` at render time.
+const TOP_LEVEL_PREFIX = 'inputs.';
+
 const buildItem = (
   variable: PayloadVariable,
-  range: monaco.IRange
+  range: monaco.IRange,
+  prefix = ''
 ): monaco.languages.CompletionItem => ({
-  label: variable.path,
+  label: prefix + variable.path,
   kind: monaco.languages.CompletionItemKind.Variable,
   detail: variable.detail,
   documentation: variable.documentation,
-  insertText: variable.path,
+  insertText: prefix + variable.path,
   range,
 });
 
-const isEpisodeContext = (pathSegments: string[] | null): boolean =>
-  pathSegments !== null &&
-  pathSegments.length >= 2 &&
-  pathSegments[0] === 'episodes' &&
-  /^\d+$/.test(pathSegments[1]);
+// Returns the "parent path" — the path segments that represent the already-completed context.
+// When lastPathSegment is non-null the user is mid-word, so strip that partial from the end.
+const getParentPath = (pathSegments: string[] | null, lastPathSegment: string | null): string[] => {
+  if (pathSegments === null) return [];
+  return lastPathSegment === null ? pathSegments : pathSegments.slice(0, -1);
+};
+
+const isEpisodeContext = (parent: string[]): boolean =>
+  parent.length >= 3 &&
+  parent[0] === 'inputs' &&
+  parent[1] === 'episodes' &&
+  /^\d+$/.test(parent[2]);
+
+const isInputsContext = (parent: string[]): boolean =>
+  parent.length === 1 && parent[0] === 'inputs';
 
 export const createPayloadCompletionProvider = (): monaco.languages.CompletionItemProvider => ({
   triggerCharacters: ['{', '.'],
@@ -45,6 +59,7 @@ export const createPayloadCompletionProvider = (): monaco.languages.CompletionIt
     }
 
     const { pathSegments, lastPathSegment } = parseResult;
+    const parent = getParentPath(pathSegments, lastPathSegment);
     const lastSegmentLen = lastPathSegment?.length ?? 0;
     const range: monaco.IRange = {
       startLineNumber: position.lineNumber,
@@ -53,9 +68,18 @@ export const createPayloadCompletionProvider = (): monaco.languages.CompletionIt
       endColumn: position.column,
     };
 
-    const candidates = isEpisodeContext(pathSegments)
-      ? ALERT_EPISODE_FIELDS
-      : DISPATCH_PAYLOAD_VARIABLES;
-    return { suggestions: candidates.map((variable) => buildItem(variable, range)) };
+    let candidates: readonly PayloadVariable[];
+    let prefix = '';
+    if (isEpisodeContext(parent)) {
+      candidates = ALERT_EPISODE_FIELDS;
+    } else if (isInputsContext(parent)) {
+      candidates = DISPATCH_PAYLOAD_VARIABLES;
+    } else if (parent.length === 0) {
+      candidates = DISPATCH_PAYLOAD_VARIABLES;
+      prefix = TOP_LEVEL_PREFIX;
+    } else {
+      return { suggestions: [] };
+    }
+    return { suggestions: candidates.map((variable) => buildItem(variable, range, prefix)) };
   },
 });

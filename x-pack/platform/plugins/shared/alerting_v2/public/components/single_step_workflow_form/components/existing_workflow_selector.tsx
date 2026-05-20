@@ -20,7 +20,7 @@ const CREATE_NEW_OPTION_VALUE = '__create_new_workflow__';
 
 interface ExistingWorkflowSelectorProps {
   value: string | null;
-  onSelect: (workflowId: string) => void;
+  onSelect: (workflowId: string | null) => void;
   onCreateNew: () => void;
   isInvalid?: boolean;
   errorMessage?: string;
@@ -124,8 +124,12 @@ export const ExistingWorkflowSelector = ({
         selectedOptions={selectedOptions}
         onSearchChange={setSearchQuery}
         onChange={(options) => {
+          if (options.length === 0) {
+            setSelectedWorkflow(null);
+            onSelect(null);
+            return;
+          }
           const next = options[0];
-          if (!next) return;
           if (next.value === CREATE_NEW_OPTION_VALUE) {
             onCreateNew();
             return;

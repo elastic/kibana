@@ -36,7 +36,7 @@ export const SingleStepWorkflowForm = ({
   isInvalid,
   errorMessage,
 }: SingleStepWorkflowFormProps) => {
-  const handleSelectExisting = (workflowId: string) => {
+  const handleSelectExisting = (workflowId: string | null) => {
     if (value.mode === 'existing' && value.workflowId === workflowId) return;
     onChange({ mode: 'existing', workflowId });
   };
