@@ -821,7 +821,7 @@ describe('ruleType', () => {
         ],
         values: [],
       };
-      ruleServices.scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce(
+      ruleServices.getAsyncSearchClient().search.mockResolvedValueOnce(
         searchResult
       );
 
@@ -843,7 +843,7 @@ describe('ruleType', () => {
           ['timestamp', 'message'],
         ],
       };
-      ruleServices.scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce(
+      ruleServices.getAsyncSearchClient().search.mockResolvedValueOnce(
         searchResult
       );
 
@@ -870,7 +870,7 @@ describe('ruleType', () => {
 });
 
 function generateResults(
-  docs: Array<{ 'time-field': unknown; [key: string]: unknown }>,
+  docs: Array<{ 'time-field': unknown;[key: string]: unknown }>,
   includeTieBreaker = false,
   skipSortOnFirst = false
 ): ESSearchResponse<unknown, ESSearchRequest> {
@@ -882,10 +882,10 @@ function generateResults(
     ...(skipSortOnFirst && index === 0
       ? {}
       : {
-          sort: (includeTieBreaker
-            ? ['FaslK3QBySSL_rrj9zM5', doc['time-field']]
-            : [doc['time-field']]) as string[],
-        }),
+        sort: (includeTieBreaker
+          ? ['FaslK3QBySSL_rrj9zM5', doc['time-field']]
+          : [doc['time-field']]) as string[],
+      }),
     _source: doc,
   }));
   return {
