@@ -9,6 +9,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { EuiButton, EuiButtonEmpty, EuiButtonIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
+import type { EbtClickAttrs } from '@kbn/ebt-click';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
 import type { ESQLQueryParams } from './get_esql_query';
@@ -30,7 +31,7 @@ interface OpenInDiscoverProps {
   rangeFrom: string;
   rangeTo: string;
   queryParams: ESQLQueryParams;
-  ebt?: { element: string; action?: string; detail?: string };
+  ebt?: Partial<EbtClickAttrs> & Pick<EbtClickAttrs, 'element'>;
 }
 
 export function OpenInDiscover({
