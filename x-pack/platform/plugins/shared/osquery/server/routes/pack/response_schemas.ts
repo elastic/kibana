@@ -35,6 +35,7 @@ const packQuerySchema = schema.object(
     ),
     saved_query_id: schema.maybe(schema.nullable(schema.string())),
     name: schema.maybe(schema.string()),
+    schedule_id: schema.maybe(schema.string()),
   },
   { unknowns: 'allow' }
 );

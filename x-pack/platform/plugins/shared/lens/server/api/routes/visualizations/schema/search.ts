@@ -6,8 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { searchOptionsSchemas } from '@kbn/content-management-utils';
 
+import {
+  asCodePaginationParamsSchema,
+  asCodePaginationResponseMetaSchema,
+  PAGINATION_MAX_SIZE,
+} from '@kbn/as-code-shared-schemas';
 import { lensResponseItemSchema } from './common';
 
 export const lensSearchRequestQuerySchema = schema.object({
@@ -35,38 +39,13 @@ export const lensSearchRequestQuerySchema = schema.object({
       },
     })
   ),
-  page: schema.number({
-    meta: {
-      description: 'Page number.',
-    },
-    min: 1,
-    defaultValue: 1,
-  }),
-  per_page: schema.number({
-    meta: {
-      description: 'Results per page.',
-    },
-    defaultValue: 20,
-    min: 1,
-    max: 1000,
-  }),
+  ...asCodePaginationParamsSchema.getPropSchemas(),
 });
-
-const lensSearchResponseMetaSchema = schema.object(
-  {
-    page: searchOptionsSchemas.page,
-    per_page: searchOptionsSchemas.perPage,
-    total: schema.number({
-      meta: { description: 'Total number of matching visualizations.' },
-    }),
-  },
-  { unknowns: 'forbid' }
-);
 
 export const lensSearchResponseBodySchema = schema.object(
   {
-    data: schema.arrayOf(lensResponseItemSchema, { maxSize: 1000 }),
-    meta: lensSearchResponseMetaSchema,
+    data: schema.arrayOf(lensResponseItemSchema, { maxSize: PAGINATION_MAX_SIZE }),
+    meta: asCodePaginationResponseMetaSchema,
   },
   { unknowns: 'forbid' }
 );
