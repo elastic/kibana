@@ -397,10 +397,12 @@ export class CommonPageObject extends FtrService {
   /**
    * Returns true when navigation to targetUrl can be safely skipped: we last
    * navigated to the same URL, the browser URL has not changed since (meaning no
-   * test navigation occurred), and the page is not showing a fatal error.
+   * test navigation occurred), the page is not showing a fatal error, and no EUI
+   * overlays (popovers, modals, flyouts) are open that would not be cleared without
+   * a real navigation.
    *
-   * Using browser.execute for the fatal-error check avoids any polling overhead —
-   * it's a synchronous DOM query that returns in < 10 ms.
+   * Using browser.execute for all DOM checks avoids polling overhead; each runs as
+   * a synchronous query and returns in < 10 ms.
    */
   private async _tryFastPathNavigation(targetUrl: string, appName: string): Promise<boolean> {
     if (this._lastNavigatedToUrl !== targetUrl || this._lastSettledAtUrl === undefined) {
@@ -411,10 +413,16 @@ export class CommonPageObject extends FtrService {
       if (currentUrl !== this._lastSettledAtUrl) {
         return false;
       }
-      const hasFatalError = await this.browser.execute(
-        () => !!document.querySelector('[data-test-subj="fatalErrorScreen"]')
+      const isDirty = await this.browser.execute(
+        () =>
+          !!(
+            document.querySelector('[data-test-subj="fatalErrorScreen"]') ||
+            document.querySelector('.euiPopover-isOpen') ||
+            document.querySelector('.euiModal') ||
+            document.querySelector('.euiFlyout')
+          )
       );
-      if (hasFatalError) {
+      if (isDirty) {
         return false;
       }
       this.log.debug(`navigateToApp(${appName}): already at settled URL, skipping navigation`);
