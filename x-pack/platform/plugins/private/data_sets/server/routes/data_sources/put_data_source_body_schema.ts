@@ -26,7 +26,7 @@ const gcsSettingsWithSecretsSchema = schema.object({
   credentials: optionalString,
 });
 
-const azureBlobSettingsWithSecretsSchema = schema.object({
+const azureSettingsWithSecretsSchema = schema.object({
   endpoint: optionalString,
   account: optionalString,
   auth: optionalString,
@@ -45,7 +45,7 @@ const icebergSettingsWithSecretsSchema = schema.object({
 const dataSourceTypeSchema = schema.oneOf([
   schema.literal('s3'),
   schema.literal('gcs'),
-  schema.literal('azure_blob'),
+  schema.literal('azure'),
   schema.literal('iceberg'),
   schema.literal('jdbc'),
   schema.literal('flight'),
@@ -87,9 +87,9 @@ export const putDataSourceBodySchema = schema.oneOf([
     settings: gcsSettingsWithSecretsSchema,
   }),
   schema.object({
-    type: schema.literal('azure_blob'),
+    type: schema.literal('azure'),
     description: schema.string(),
-    settings: azureBlobSettingsWithSecretsSchema,
+    settings: azureSettingsWithSecretsSchema,
   }),
   schema.object({
     type: schema.literal('iceberg'),

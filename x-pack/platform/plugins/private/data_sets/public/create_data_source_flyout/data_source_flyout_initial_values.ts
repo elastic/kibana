@@ -69,7 +69,7 @@ export const authenticationModeFromDataSource = (
 ): CreateDataSourceAuthenticationMode => {
   const settings = asSettingsRecord(data.settings);
 
-  if (data.type === 'azure_blob') {
+  if (data.type === 'azure') {
     if (typeof settings.connection_string === 'string' && settings.connection_string.trim()) {
       return 'connection_string';
     }

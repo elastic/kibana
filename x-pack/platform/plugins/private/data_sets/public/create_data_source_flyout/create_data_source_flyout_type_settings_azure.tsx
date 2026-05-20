@@ -12,9 +12,9 @@ import { EuiFieldPassword, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import type { UseFormUnregister } from 'react-hook-form';
 import { type Control, useController } from 'react-hook-form';
 import type { CreateDataSourceFlyoutFormValues } from './create_data_source_flyout_form_state';
-import type { AzureBlobAuthenticationMode } from './create_data_source_flyout_authentication';
+import type { AzureAuthenticationMode } from './create_data_source_flyout_authentication';
 
-export function CreateDataSourceFlyoutTypeSettingsAzureBlob({
+export function CreateDataSourceFlyoutTypeSettingsAzure({
   control,
   unregister,
 }: {
@@ -34,7 +34,7 @@ export function CreateDataSourceFlyoutTypeSettingsAzureBlob({
 
   return (
     <EuiFormRow
-      label={i18n.translate('dataSets.createFlyout.azureBlob.fields.endpoint', {
+      label={i18n.translate('dataSets.createFlyout.azure.fields.endpoint', {
         defaultMessage: 'Endpoint',
       })}
       fullWidth
@@ -52,12 +52,12 @@ export function CreateDataSourceFlyoutTypeSettingsAzureBlob({
   );
 }
 
-export function CreateDataSourceFlyoutTypeSettingsAzureBlobAuthenticationFields({
+export function CreateDataSourceFlyoutTypeSettingsAzureAuthenticationFields({
   authenticationMode,
   control,
   unregister,
 }: {
-  authenticationMode: AzureBlobAuthenticationMode;
+  authenticationMode: AzureAuthenticationMode;
   control: Control<CreateDataSourceFlyoutFormValues, any>;
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
@@ -67,7 +67,7 @@ export function CreateDataSourceFlyoutTypeSettingsAzureBlobAuthenticationFields(
 
   if (authenticationMode === 'credentials') {
     return (
-      <CreateDataSourceFlyoutTypeSettingsAzureBlobCredentialsFields
+      <CreateDataSourceFlyoutTypeSettingsAzureCredentialsFields
         control={control}
         unregister={unregister}
       />
@@ -76,7 +76,7 @@ export function CreateDataSourceFlyoutTypeSettingsAzureBlobAuthenticationFields(
 
   if (authenticationMode === 'connection_string') {
     return (
-      <CreateDataSourceFlyoutTypeSettingsAzureBlobConnectionStringField
+      <CreateDataSourceFlyoutTypeSettingsAzureConnectionStringField
         control={control}
         unregister={unregister}
       />
@@ -84,14 +84,14 @@ export function CreateDataSourceFlyoutTypeSettingsAzureBlobAuthenticationFields(
   }
 
   return (
-    <CreateDataSourceFlyoutTypeSettingsAzureBlobSasTokenField
+    <CreateDataSourceFlyoutTypeSettingsAzureSasTokenField
       control={control}
       unregister={unregister}
     />
   );
 }
 
-function CreateDataSourceFlyoutTypeSettingsAzureBlobCredentialsFields({
+function CreateDataSourceFlyoutTypeSettingsAzureCredentialsFields({
   control,
   unregister,
 }: {
@@ -117,7 +117,7 @@ function CreateDataSourceFlyoutTypeSettingsAzureBlobCredentialsFields({
   return (
     <>
       <EuiFormRow
-        label={i18n.translate('dataSets.createFlyout.azureBlob.fields.account', {
+        label={i18n.translate('dataSets.createFlyout.azure.fields.account', {
           defaultMessage: 'Account',
         })}
         fullWidth
@@ -133,7 +133,7 @@ function CreateDataSourceFlyoutTypeSettingsAzureBlobCredentialsFields({
         />
       </EuiFormRow>
       <EuiFormRow
-        label={i18n.translate('dataSets.createFlyout.azureBlob.fields.key', {
+        label={i18n.translate('dataSets.createFlyout.azure.fields.key', {
           defaultMessage: 'Key',
         })}
         fullWidth
@@ -153,7 +153,7 @@ function CreateDataSourceFlyoutTypeSettingsAzureBlobCredentialsFields({
   );
 }
 
-function CreateDataSourceFlyoutTypeSettingsAzureBlobConnectionStringField({
+function CreateDataSourceFlyoutTypeSettingsAzureConnectionStringField({
   control,
   unregister,
 }: {
@@ -173,7 +173,7 @@ function CreateDataSourceFlyoutTypeSettingsAzureBlobConnectionStringField({
 
   return (
     <EuiFormRow
-      label={i18n.translate('dataSets.createFlyout.azureBlob.fields.connectionString', {
+      label={i18n.translate('dataSets.createFlyout.azure.fields.connectionString', {
         defaultMessage: 'Connection string',
       })}
       fullWidth
@@ -192,7 +192,7 @@ function CreateDataSourceFlyoutTypeSettingsAzureBlobConnectionStringField({
   );
 }
 
-function CreateDataSourceFlyoutTypeSettingsAzureBlobSasTokenField({
+function CreateDataSourceFlyoutTypeSettingsAzureSasTokenField({
   control,
   unregister,
 }: {
@@ -212,7 +212,7 @@ function CreateDataSourceFlyoutTypeSettingsAzureBlobSasTokenField({
 
   return (
     <EuiFormRow
-      label={i18n.translate('dataSets.createFlyout.azureBlob.fields.sasToken', {
+      label={i18n.translate('dataSets.createFlyout.azure.fields.sasToken', {
         defaultMessage: 'SAS token',
       })}
       fullWidth

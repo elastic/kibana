@@ -15,27 +15,25 @@ export type S3GcsAuthenticationMode =
   | 'default_credential_chain'
   | 'anonymous';
 
-/** Azure Blob authentication modes (UI-only; `settings.auth` is never submitted). */
-export type AzureBlobAuthenticationMode =
+/** Azure authentication modes (UI-only; `settings.auth` is never submitted). */
+export type AzureAuthenticationMode =
   | 'credentials'
   | 'connection_string'
   | 'sas_token'
   | 'default_credential_chain';
 
-export type CreateDataSourceAuthenticationMode =
-  | S3GcsAuthenticationMode
-  | AzureBlobAuthenticationMode;
+export type CreateDataSourceAuthenticationMode = S3GcsAuthenticationMode | AzureAuthenticationMode;
 
 export const DATA_SOURCE_TYPES_WITH_AUTHENTICATION: ReadonlySet<DataSourceType> = new Set([
   's3',
   'gcs',
-  'azure_blob',
+  'azure',
 ]);
 
 export const getDefaultAuthenticationMode = (
   dataSourceType: DataSourceType
 ): CreateDataSourceAuthenticationMode => {
-  if (dataSourceType === 'azure_blob') {
+  if (dataSourceType === 'azure') {
     return 'credentials';
   }
   return 'access_and_secret_keys';
@@ -47,7 +45,7 @@ export const getCreateDataSourceAuthenticationOptions = (
   value: CreateDataSourceAuthenticationMode;
   text: string;
 }> => {
-  if (dataSourceType === 'azure_blob') {
+  if (dataSourceType === 'azure') {
     return [
       {
         value: 'credentials',
@@ -102,7 +100,7 @@ export const showsAuthenticationCredentialFields = (
   mode: CreateDataSourceAuthenticationMode,
   dataSourceType: DataSourceType
 ): boolean => {
-  if (dataSourceType === 'azure_blob') {
+  if (dataSourceType === 'azure') {
     return mode === 'credentials' || mode === 'connection_string' || mode === 'sas_token';
   }
   return mode === 'access_and_secret_keys';
@@ -153,7 +151,7 @@ export const applyAuthenticationModeToDataSource = (
         },
       };
     }
-    case 'azure_blob': {
+    case 'azure': {
       const {
         account: _account,
         connection_string: _connectionString,

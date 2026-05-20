@@ -14,10 +14,10 @@ import type { CreateDataSourceFlyoutFormValues } from './create_data_source_flyo
 import {
   DATA_SOURCE_TYPES_WITH_AUTHENTICATION,
   showsAuthenticationCredentialFields,
-  type AzureBlobAuthenticationMode,
+  type AzureAuthenticationMode,
   type CreateDataSourceAuthenticationMode,
 } from './create_data_source_flyout_authentication';
-import { CreateDataSourceFlyoutTypeSettingsAzureBlobAuthenticationFields } from './create_data_source_flyout_type_settings_azure_blob';
+import { CreateDataSourceFlyoutTypeSettingsAzureAuthenticationFields } from './create_data_source_flyout_type_settings_azure';
 import { CreateDataSourceFlyoutTypeSettingsGcsCredentials } from './create_data_source_flyout_type_settings_gcs';
 import { CreateDataSourceFlyoutTypeSettingsS3Credentials } from './create_data_source_flyout_type_settings_s3';
 
@@ -54,9 +54,9 @@ export function CreateDataSourceFlyoutAuthenticationFields({
           unregister={unregister}
         />
       ) : null}
-      {dataSourceType === 'azure_blob' ? (
-        <CreateDataSourceFlyoutTypeSettingsAzureBlobAuthenticationFields
-          authenticationMode={authenticationMode as AzureBlobAuthenticationMode}
+      {dataSourceType === 'azure' ? (
+        <CreateDataSourceFlyoutTypeSettingsAzureAuthenticationFields
+          authenticationMode={authenticationMode as AzureAuthenticationMode}
           control={control}
           unregister={unregister}
         />

@@ -20,7 +20,7 @@ export interface DataSourceCommon<T extends DataSourceType, S extends {}> {
 export type DataSource =
   | S3DataSource
   | GCSDataSource
-  | AzureBlobDataSource
+  | AzureDataSource
   | IcebergDataSource
   | JdbcDataSource
   | FlightDataSource;
@@ -28,18 +28,18 @@ export type DataSource =
 export type DataSourceWithSecrets =
   | S3DataSourceWithSecrets
   | GCSDataSourceWithSecrets
-  | AzureBlobDataSourceWithSecrets
+  | AzureDataSourceWithSecrets
   | IcebergDataSourceWithSecrets
   | JdbcDataSourceWithSecrets
   | FlightDataSource;
 
-export type DataSourceType = 's3' | 'gcs' | 'azure_blob' | 'iceberg' | 'jdbc' | 'flight';
+export type DataSourceType = 's3' | 'gcs' | 'azure' | 'iceberg' | 'jdbc' | 'flight';
 
 /** All supported data source type values, for select components and validation. */
 export const ALL_DATA_SOURCE_TYPES: DataSourceType[] = [
   's3',
   'gcs',
-  'azure_blob',
+  'azure',
   // 'iceberg',
   // 'jdbc',
   // 'flight',
@@ -75,20 +75,20 @@ export interface GCSDataSourceSettingsWithSecrets extends GCSDataSourceSettings 
   credentials?: string;
 }
 
-export type AzureBlobDataSource = DataSourceCommon<'azure_blob', AzureBlobDataSourceSettings>;
+export type AzureDataSource = DataSourceCommon<'azure', AzureDataSourceSettings>;
 
-export type AzureBlobDataSourceWithSecrets = DataSourceCommon<
-  'azure_blob',
-  AzureBlobDataSourceSettingsWithSecrets
+export type AzureDataSourceWithSecrets = DataSourceCommon<
+  'azure',
+  AzureDataSourceSettingsWithSecrets
 >;
 
-export interface AzureBlobDataSourceSettings {
+export interface AzureDataSourceSettings {
   endpoint?: string;
   account?: string;
   auth?: string;
 }
 
-export interface AzureBlobDataSourceSettingsWithSecrets extends AzureBlobDataSourceSettings {
+export interface AzureDataSourceSettingsWithSecrets extends AzureDataSourceSettings {
   connection_string?: string;
   key?: string;
   sas_token?: string;

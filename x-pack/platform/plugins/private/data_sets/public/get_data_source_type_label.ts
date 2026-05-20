@@ -21,7 +21,7 @@ export function getDataSourceTypeLabel(type: DataSourceType): string {
 const messages: Record<DataSourceType, string> = {
   s3: 'Amazon S3',
   gcs: 'Google Cloud Storage',
-  azure_blob: 'Azure Blob Storage',
+  azure: 'Azure',
   iceberg: 'Apache Iceberg',
   jdbc: 'JDBC',
   flight: 'Apache Arrow Flight',

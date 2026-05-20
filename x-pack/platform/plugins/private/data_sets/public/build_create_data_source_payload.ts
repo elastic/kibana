@@ -81,11 +81,11 @@ export function buildOmitIdDataSource(
         },
       };
     }
-    case 'azure_blob': {
-      const { azure_blob: v } = form;
+    case 'azure': {
+      const { azure: v } = form;
       return {
         dataSource: {
-          type: 'azure_blob',
+          type: 'azure',
           description: desc,
           settings: {
             ...pickStrings(v, [

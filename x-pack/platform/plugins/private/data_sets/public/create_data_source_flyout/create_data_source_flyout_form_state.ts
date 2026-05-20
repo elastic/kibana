@@ -30,7 +30,7 @@ export interface CreateDataSourceFlyoutFormSettings {
     auth: string;
     credentialsJson: string;
   };
-  azure_blob: {
+  azure: {
     endpoint: string;
     account: string;
     auth: string;
@@ -61,7 +61,7 @@ export interface CreateDataSourceFlyoutFormSettings {
 export const emptyCreateDataSourceFormSettings = (): CreateDataSourceFlyoutFormSettings => ({
   s3: { region: '', endpoint: '', auth: '', access_key: '', secret_key: '' },
   gcs: { project_id: '', endpoint: '', token_uri: '', auth: '', credentialsJson: '' },
-  azure_blob: {
+  azure: {
     endpoint: '',
     account: '',
     auth: '',

@@ -12,7 +12,7 @@ import { EuiSpacer, EuiText } from '@elastic/eui';
 import type { Control, UseFormUnregister } from 'react-hook-form';
 import type { DataSourceType } from '../../common/datasource_types';
 import type { CreateDataSourceFlyoutFormValues } from './create_data_source_flyout_form_state';
-import { CreateDataSourceFlyoutTypeSettingsAzureBlob } from './create_data_source_flyout_type_settings_azure_blob';
+import { CreateDataSourceFlyoutTypeSettingsAzure } from './create_data_source_flyout_type_settings_azure';
 // import { CreateDataSourceFlyoutTypeSettingsFlight } from './create_data_source_flyout_type_settings_flight';
 import { CreateDataSourceFlyoutTypeSettingsGcs } from './create_data_source_flyout_type_settings_gcs';
 // import { CreateDataSourceFlyoutTypeSettingsIceberg } from './create_data_source_flyout_type_settings_iceberg';
@@ -36,10 +36,8 @@ export function CreateDataSourceFlyoutTypeSettings({
     return <CreateDataSourceFlyoutTypeSettingsGcs control={control} unregister={unregister} />;
   }
 
-  if (dataSourceType === 'azure_blob') {
-    return (
-      <CreateDataSourceFlyoutTypeSettingsAzureBlob control={control} unregister={unregister} />
-    );
+  if (dataSourceType === 'azure') {
+    return <CreateDataSourceFlyoutTypeSettingsAzure control={control} unregister={unregister} />;
   }
 
   /*

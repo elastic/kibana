@@ -49,6 +49,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
   const dataSetsClient = useMemo(() => new HttpDataSetsClient(httpClient), [httpClient]);
   const [items, setItems] = useState<DataSource[]>([]);
   const [selectedItems, setSelectedItems] = useState<DataSource[]>([]);
+  const [selectedDataSets, setSelectedDataSets] = useState<DataSetListRow[]>([]);
   const [dataSetsRaw, setDataSetsRaw] = useState<DataSetWithName[]>([]);
   const [dataSourceFlyout, setDataSourceFlyout] = useState<DataSourceFlyoutState>({
     kind: 'closed',
@@ -275,6 +276,25 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
                     },
                   },
                 },
+                toolsLeft:
+                  selectedDataSets.length > 0 ? (
+                    <EuiButton
+                      color="danger"
+                      data-test-subj="dataSetsSetsDeleteButton"
+                      iconType="trash"
+                      onClick={() => {
+                        void (async () => {
+                          await dataSetsClient.delete(selectedDataSets.map((item) => item.name));
+                          setDataSetsRaw(await dataSetsClient.get());
+                          setSelectedDataSets([]);
+                        })();
+                      }}
+                    >
+                      {i18n.translate('dataSets.deleteButtonLabel', {
+                        defaultMessage: 'Delete',
+                      })}
+                    </EuiButton>
+                  ) : undefined,
                 toolsRight: (
                   <EuiButton
                     color="primary"
@@ -289,6 +309,10 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
                 ),
               }}
               rowHeader="name"
+              selection={{
+                selected: selectedDataSets,
+                onSelectionChange: setSelectedDataSets,
+              }}
               sorting
               pagination={{
                 pageSizeOptions: [5, 10, 20],
@@ -393,7 +417,16 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
         ),
       },
     ],
-    [columns, dataClient, dataSetColumns, dataSetItems, items, selectedItems]
+    [
+      columns,
+      dataClient,
+      dataSetColumns,
+      dataSetItems,
+      dataSetsClient,
+      items,
+      selectedDataSets,
+      selectedItems,
+    ]
   );
 
   return (

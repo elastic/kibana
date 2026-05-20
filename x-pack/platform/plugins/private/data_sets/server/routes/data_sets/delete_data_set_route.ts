@@ -10,6 +10,7 @@ import type { IRouter } from '@kbn/core/server';
 
 import { DATA_SET_BY_ID_ROUTE_PATH } from '../../../common';
 import { DataSetsClient } from '../../data_sets_client';
+import { getRouteErrorMessage } from '../../get_route_error_message';
 
 export function registerDeleteDataSetRoute(router: IRouter): void {
   router.delete(
@@ -35,8 +36,16 @@ export function registerDeleteDataSetRoute(router: IRouter): void {
       const { id } = request.params;
       const { client } = (await context.core).elasticsearch;
       const dataSetsClient = new DataSetsClient(client.asCurrentUser);
-      await dataSetsClient.delete(id);
-      return response.ok();
+      try {
+        await dataSetsClient.delete(id);
+        return response.ok();
+      } catch (error) {
+        return response.badRequest({
+          body: {
+            message: getRouteErrorMessage(error),
+          },
+        });
+      }
     })
   );
 }
