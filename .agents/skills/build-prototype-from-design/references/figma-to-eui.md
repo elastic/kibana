@@ -97,8 +97,8 @@ micro-components**.
 
 For each visual element, match what you see against the table below.
 When two components look similar, use the **Disambiguation** column.
-For more detail on any entry, read the `visualDescription` field in
-`node_modules/@elastic/eui/metadata/components/[name].json`.
+For more detail on any entry, look up the component in
+[eui-component-descriptions.md](eui-component-descriptions.md).
 
 Flag anything that cannot be determined from visual evidence alone — list
 both candidates and the deciding factor rather than guessing silently.
