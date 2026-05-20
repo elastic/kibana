@@ -89,7 +89,6 @@ export default function (providerContext: FtrProviderContext) {
             serviceVars: {
               cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }],
             },
-            secrets: { external_id: 'ext-abc123' },
           })
           .expect(200);
 
@@ -223,7 +222,6 @@ export default function (providerContext: FtrProviderContext) {
             serviceVars: {
               cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }],
             },
-            secrets: { external_id: 'ext-abc123' },
           })
           .expect(200);
         deploymentId = body.item.id;
@@ -316,7 +314,6 @@ export default function (providerContext: FtrProviderContext) {
             serviceVars: {
               cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }],
             },
-            secrets: { external_id: 'ext-abc123' },
           })
           .expect(200);
         deploymentId = body.item.id;
@@ -522,7 +519,6 @@ export default function (providerContext: FtrProviderContext) {
             serviceVars: {
               cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }],
             },
-            secrets: { external_id: 'ext-abc123' },
           })
           .expect(200);
         const id = created.item.id;

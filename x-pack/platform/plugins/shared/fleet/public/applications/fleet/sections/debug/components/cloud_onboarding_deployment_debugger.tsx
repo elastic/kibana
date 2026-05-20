@@ -65,7 +65,6 @@ export const CloudOnboardingDeploymentDebugger: React.FunctionComponent = () => 
 
   const [authType, setAuthType] = useState<string>('identity_federation');
   const [connectorId, setConnectorId] = useState<string>('');
-  const [externalId, setExternalId] = useState<string>('');
   const [selectedServices, setSelectedServices] = useState<Record<string, boolean>>({});
   const [selectedMechanisms, setSelectedMechanisms] = useState<Record<string, boolean>>({});
   const [serviceVarRegion, setServiceVarRegion] = useState<Record<string, string>>({});
@@ -216,7 +215,6 @@ export const CloudOnboardingDeploymentDebugger: React.FunctionComponent = () => 
         mechanisms: activeMechanisms,
         services: activeServices.map((s) => s.id),
         serviceVars: Object.keys(serviceVars).length > 0 ? serviceVars : undefined,
-        secrets: externalId ? { external_id: externalId } : undefined,
       },
       version: API_VERSIONS.public.v1,
     });
@@ -458,19 +456,6 @@ export const CloudOnboardingDeploymentDebugger: React.FunctionComponent = () => 
           onChange={(id) => setSelectedMechanisms((prev) => ({ ...prev, [id]: !prev[id] }))}
         />
       </EuiFormRow>
-
-      {(firehoseSelected || cloudForwarderSelected) && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiFormRow label="External ID" helpText="Stored encrypted in secrets.external_id.">
-            <EuiFieldText
-              value={externalId}
-              onChange={(e) => setExternalId(e.target.value)}
-              placeholder="e.g. my-external-id-value"
-            />
-          </EuiFormRow>
-        </>
-      )}
 
       {activeServices.length > 0 && (firehoseSelected || cloudForwarderSelected) && (
         <>

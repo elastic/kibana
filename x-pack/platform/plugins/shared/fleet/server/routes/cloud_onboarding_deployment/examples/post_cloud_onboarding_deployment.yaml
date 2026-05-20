@@ -24,8 +24,6 @@ requestBody:
                 - regions:
                     - 'us-east-1'
                   s3_bucket_arn: 'arn:aws:s3:::my-cloudtrail-bucket'
-            secrets:
-              external_id: 'ext-abc123'
 responses:
   200:
     description: 'Successful response'

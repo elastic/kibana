@@ -31,7 +31,7 @@ function makeAttributes(
     attemptCount: 1,
     vars: { role_arn: 'arn:aws:iam::123:role/Role' },
     serviceVars: {},
-    secrets: { external_id: 'ext-123' },
+    secrets: {},
     ...overrides,
   };
 }
@@ -78,7 +78,6 @@ describe('cloudOnboardingDeploymentService', () => {
         services: ['cloudtrail'],
         vars: { role_arn: 'arn:aws:iam::123:role/Role' },
         serviceVars: {},
-        secrets: { external_id: 'ext-123' },
       });
 
       expect(soClient.create).toHaveBeenCalledWith(
@@ -94,7 +93,6 @@ describe('cloudOnboardingDeploymentService', () => {
       expect(result.mechanisms).toEqual(['identity_federation']);
       expect(result.status).toBe('pending');
       expect(result.attemptCount).toBe(1);
-      expect(result.secrets).toEqual({ external_id: 'ext-123' });
     });
 
     it('propagates errors thrown by soClient.create', async () => {
@@ -129,7 +127,6 @@ describe('cloudOnboardingDeploymentService', () => {
       );
       expect(result.id).toBe('deploy-1');
       expect(result.status).toBe('succeeded');
-      expect(result.secrets).toEqual({ external_id: 'ext-123' });
     });
 
     it('uses undefined namespace for the default space', async () => {
@@ -360,7 +357,7 @@ describe('cloudOnboardingDeploymentService', () => {
 
       it('does not modify vars or secrets on retry', async () => {
         const vars = { role_arn: 'arn:aws:iam::123:role/Role' };
-        const secrets = { external_id: 'ext-123' };
+        const secrets = {};
         const retriedAttrs = makeAttributes({ status: 'pending', attemptCount: 2, vars, secrets });
         soClient.update.mockResolvedValue({
           id: 'deploy-1',
@@ -406,13 +403,12 @@ describe('cloudOnboardingDeploymentService', () => {
   // UC5: Identity Federation + CloudFront Logs + EDOT Cloud Forwarder
   describe('use case scenarios', () => {
     describe('UC1: identity_federation + cloudwatch_metrics + agentless', () => {
-      it('stores external_id in secrets, no api_key_id, and sets packagePolicyIds', async () => {
+      it('has no api_key_id in vars and sets identity_federation mechanism', async () => {
         const attrs = makeAttributes({
           mechanisms: ['identity_federation'],
           services: ['cloudwatch_metrics'],
           serviceVars: { cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }] },
           vars: { role_arn: 'arn:aws:iam::123456789012:role/ElasticIFRole' },
-          secrets: { external_id: 'ext-uc1' },
           packagePolicyIds: ['pkg-aws-001'],
         });
         soClient.create.mockResolvedValue(makeSOResponse('deploy-uc1', attrs));
@@ -425,7 +421,6 @@ describe('cloudOnboardingDeploymentService', () => {
           services: ['cloudwatch_metrics'],
           serviceVars: { cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }] },
           vars: { role_arn: 'arn:aws:iam::123456789012:role/ElasticIFRole' },
-          secrets: { external_id: 'ext-uc1' },
         });
 
         expect(soClient.create).toHaveBeenCalledWith(
@@ -435,13 +430,12 @@ describe('cloudOnboardingDeploymentService', () => {
         expect(result.status).toBe('pending');
         expect(result.attemptCount).toBe(1);
         expect(result.mechanisms).toEqual(['identity_federation']);
-        expect(result.secrets).toEqual({ external_id: 'ext-uc1' });
         expect(result.vars).not.toHaveProperty('api_key_id');
       });
     });
 
     describe('UC2: static_keys + cloudwatch_metrics + agentless', () => {
-      it('stores no external_id or api_key_id, uses empty mechanisms, and sets packagePolicyIds', async () => {
+      it('uses empty mechanisms, no api_key_id in vars, and sets packagePolicyIds', async () => {
         const attrs = makeAttributes({
           mechanisms: [],
           services: ['cloudwatch_metrics'],
@@ -477,7 +471,7 @@ describe('cloudOnboardingDeploymentService', () => {
     });
 
     describe('UC3: static_keys + cloudfront_logs + cloud_forwarder', () => {
-      it('stores api_key_id in vars, no external_id in secrets, and no packagePolicyIds', async () => {
+      it('stores api_key_id in vars and no packagePolicyIds', async () => {
         const attrs = makeAttributes({
           mechanisms: ['cloud_forwarder'],
           services: ['cloudfront_logs'],
@@ -522,19 +516,14 @@ describe('cloudOnboardingDeploymentService', () => {
 
     describe('UC4/UC5: identity_federation + cloudfront_logs + push mechanism', () => {
       it.each([
-        [
-          'firehose',
-          ['identity_federation', 'firehose'] as CloudOnboardingDeploymentMechanism[],
-          'ext-uc4',
-        ],
+        ['firehose', ['identity_federation', 'firehose'] as CloudOnboardingDeploymentMechanism[]],
         [
           'cloud_forwarder',
           ['identity_federation', 'cloud_forwarder'] as CloudOnboardingDeploymentMechanism[],
-          'ext-uc5',
         ],
       ])(
-        '%s: stores external_id in secrets and api_key_id in vars, with no packagePolicyIds',
-        async (_pushMechanism, mechanisms, extId) => {
+        '%s: stores api_key_id in vars with no packagePolicyIds',
+        async (_pushMechanism, mechanisms) => {
           const attrs = makeAttributes({
             mechanisms,
             services: ['cloudfront_logs'],
@@ -547,7 +536,6 @@ describe('cloudOnboardingDeploymentService', () => {
               role_arn: 'arn:aws:iam::123456789012:role/ElasticIFRole',
               api_key_id: 'abc123keyid',
             },
-            secrets: { external_id: extId },
             packagePolicyIds: undefined,
           });
           soClient.create.mockResolvedValue(makeSOResponse(`deploy-${_pushMechanism}`, attrs));
@@ -567,7 +555,6 @@ describe('cloudOnboardingDeploymentService', () => {
               role_arn: 'arn:aws:iam::123456789012:role/ElasticIFRole',
               api_key_id: 'abc123keyid',
             },
-            secrets: { external_id: extId },
           });
 
           expect(soClient.create).toHaveBeenCalledWith(
@@ -581,7 +568,6 @@ describe('cloudOnboardingDeploymentService', () => {
             role_arn: 'arn:aws:iam::123456789012:role/ElasticIFRole',
             api_key_id: 'abc123keyid',
           });
-          expect(result.secrets).toEqual({ external_id: extId });
           expect(result.packagePolicyIds).toBeUndefined();
         }
       );
