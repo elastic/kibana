@@ -307,6 +307,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       logger: this.logger,
     });
 
+    this.logger.info(`Change to retrigger kibana build`);
+
     initUiSettings(core.uiSettings, experimentalFeatures, config.enableUiSettingsValidations);
     productFeaturesService.setup(core, plugins);
 
