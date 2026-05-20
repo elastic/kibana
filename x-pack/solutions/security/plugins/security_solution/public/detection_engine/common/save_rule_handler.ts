@@ -137,11 +137,21 @@ export const createSaveRuleHandler = ({
   // only the attachments that changed during the round, covering both attachment_update and
   // create_detection_rule (which also replaces the attachment's content).
   const dirtySub = agentBuilder?.events.chat$.subscribe((event) => {
-    if (
-      isRoundCompleteEvent(event) &&
-      aiRuleCreation.getLastSavedRuleId() !== null &&
-      event.data.attachments?.some((a) => a.client_id === SECURITY_RULE_ATTACHMENT_ID)
-    ) {
+    if (!isRoundCompleteEvent(event)) return;
+    const lastSavedId = aiRuleCreation.getLastSavedRuleId();
+    const ruleAttachment = event.data.attachments?.find(
+      (a) => a.type === SecurityAgentBuilderAttachments.rule
+    );
+    // eslint-disable-next-line no-console
+    console.log(
+      '[SaveRuleHandler] roundComplete — lastSavedRuleId:',
+      lastSavedId,
+      '| ruleAttachment found:',
+      !!ruleAttachment,
+      '| attachment types:',
+      event.data.attachments?.map((a) => a.type)
+    );
+    if (lastSavedId !== null && ruleAttachment) {
       aiRuleCreation.markDirty();
     }
   });
@@ -152,7 +162,11 @@ export const createSaveRuleHandler = ({
   const conversationSub = agentBuilder?.events.ui.activeConversation$
     .pipe(pairwise())
     .subscribe(([prev, curr]) => {
-      if (prev !== null && curr !== null && prev?.id !== curr?.id) {
+      // eslint-disable-next-line no-console
+      console.log('[SaveRuleHandler] conversation changed — prev:', prev?.id, '→ curr:', curr?.id);
+      // Use loose != to guard against both null and undefined — the BehaviorSubject
+      // initial value may be undefined rather than null on first emission.
+      if (prev != null && curr != null && prev?.id !== curr?.id) {
         aiRuleCreation.setLastSavedRuleId(null);
         aiRuleCreation.clearDirty();
       }

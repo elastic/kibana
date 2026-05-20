@@ -181,7 +181,7 @@ describe('createRuleAttachmentDefinition', () => {
       const buttons = definition.getActionButtons!(
         makeActionButtonsParams(JSON.stringify({ type: 'query' })) as never
       );
-      expect(buttons).toHaveLength(2);
+      expect(buttons).toHaveLength(1);
     });
 
     it('returns empty array when user lacks edit capabilities', () => {
@@ -220,7 +220,7 @@ describe('createRuleAttachmentDefinition', () => {
       const buttons = definition.getActionButtons!(
         makeActionButtonsParams(JSON.stringify(validEsqlRule)) as never
       );
-      expect(buttons).toHaveLength(2);
+      expect(buttons).toHaveLength(1);
     });
 
     it('returns buttons for non-esql rule even when enableESQL setting is disabled', () => {
@@ -233,10 +233,10 @@ describe('createRuleAttachmentDefinition', () => {
       const buttons = definition.getActionButtons!(
         makeActionButtonsParams(JSON.stringify(validRule)) as never
       );
-      expect(buttons).toHaveLength(2);
+      expect(buttons).toHaveLength(1);
     });
 
-    it('returns "Save rule" as primary button for rule without id', () => {
+    it('returns "Open in form" as the first button', () => {
       const application = makeApplication(true);
       const definition = createRuleAttachmentDefinition({
         application,
@@ -246,38 +246,8 @@ describe('createRuleAttachmentDefinition', () => {
       const buttons = definition.getActionButtons!(
         makeActionButtonsParams(JSON.stringify(validRule)) as never
       );
-      expect(buttons[0].label).toBe('Save rule');
-      expect(buttons[0].type).toBe(ActionButtonType.PRIMARY);
-    });
-
-    it('returns "Save changes" as primary button for rule with id', () => {
-      (window as { location: unknown }).location = { pathname: '/app/security/overview' };
-      const ruleWithId = { ...validRule, id: 'rule-123' };
-      const application = makeApplication(true);
-      const definition = createRuleAttachmentDefinition({
-        application,
-        aiRuleCreation,
-        uiSettings: makeUiSettings(),
-      });
-      const buttons = definition.getActionButtons!(
-        makeActionButtonsParams(JSON.stringify(ruleWithId)) as never
-      );
-      expect(buttons[0].label).toBe('Save changes');
-      expect(buttons[0].type).toBe(ActionButtonType.PRIMARY);
-    });
-
-    it('returns "Open in form" as secondary button', () => {
-      const application = makeApplication(true);
-      const definition = createRuleAttachmentDefinition({
-        application,
-        aiRuleCreation,
-        uiSettings: makeUiSettings(),
-      });
-      const buttons = definition.getActionButtons!(
-        makeActionButtonsParams(JSON.stringify(validRule)) as never
-      );
-      expect(buttons[1].label).toBe('Open in form');
-      expect(buttons[1].type).toBe(ActionButtonType.SECONDARY);
+      expect(buttons[0].label).toBe('Open in form');
+      expect(buttons[0].type).toBe(ActionButtonType.SECONDARY);
     });
 
     it('includes "View rule" button for rule with id when not on rule form page', () => {
@@ -292,38 +262,8 @@ describe('createRuleAttachmentDefinition', () => {
       const buttons = definition.getActionButtons!(
         makeActionButtonsParams(JSON.stringify(ruleWithId)) as never
       );
-      expect(buttons).toHaveLength(3);
-      expect(buttons[2].label).toBe('View rule');
-    });
-
-    it('primary button handler calls requestSaveRule with the parsed rule', () => {
-      const application = makeApplication(true);
-      const definition = createRuleAttachmentDefinition({
-        application,
-        aiRuleCreation,
-        uiSettings: makeUiSettings(),
-      });
-      const buttons = definition.getActionButtons!(
-        makeActionButtonsParams(JSON.stringify(validRule)) as never
-      );
-
-      buttons[0].handler();
-
-      expect(aiRuleCreation.requestSaveRule).toHaveBeenCalledWith(validRule);
-    });
-
-    it('returns "Save changes" when rule has no id but lastSavedRuleId is set', () => {
-      aiRuleCreation.setLastSavedRuleId('saved-rule-id');
-      const application = makeApplication(true);
-      const definition = createRuleAttachmentDefinition({
-        application,
-        aiRuleCreation,
-        uiSettings: makeUiSettings(),
-      });
-      const buttons = definition.getActionButtons!(
-        makeActionButtonsParams(JSON.stringify(validRule)) as never
-      );
-      expect(buttons[0].label).toBe('Save changes');
+      expect(buttons).toHaveLength(2);
+      expect(buttons[1].label).toBe('View rule');
     });
 
     it('includes "View rule" button when rule has no id but lastSavedRuleId is set', () => {
@@ -338,8 +278,8 @@ describe('createRuleAttachmentDefinition', () => {
       const buttons = definition.getActionButtons!(
         makeActionButtonsParams(JSON.stringify(validRule)) as never
       );
-      expect(buttons).toHaveLength(3);
-      expect(buttons[2].label).toBe('View rule');
+      expect(buttons).toHaveLength(2);
+      expect(buttons[1].label).toBe('View rule');
     });
 
     it('"Open in form" handler navigates to rule creation for rule without id', () => {
@@ -353,7 +293,7 @@ describe('createRuleAttachmentDefinition', () => {
         makeActionButtonsParams(JSON.stringify(validRule)) as never
       );
 
-      buttons[1].handler();
+      buttons[0].handler();
 
       expect(application.navigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
         path: '/rules/create',
@@ -372,7 +312,7 @@ describe('createRuleAttachmentDefinition', () => {
         makeActionButtonsParams(JSON.stringify(ruleWithId)) as never
       );
 
-      buttons[1].handler();
+      buttons[0].handler();
 
       expect(application.navigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
         path: '/rules/id/rule-123/edit',

@@ -111,7 +111,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     if (contextProps.newConversation) {
       setConversationId(undefined);
     } else if (persistedConversationId) {
-      validateAndSetConversationId(persistedConversationId);
+      validateAndSetConversationId(persistedConversationId).catch(() => {});
     } else {
       setConversationId(undefined);
     }

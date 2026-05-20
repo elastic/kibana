@@ -236,6 +236,17 @@ export const useSendMessageMutation = ({
           setAgentReasoning: (reasoning) => updateActiveReasoning(vars.conversationId, reasoning),
         });
 
+        if (controller.signal.aborted) {
+          // User stopped the stream. subscribeToChatEvents resolves (not rejects) on abort,
+          // so we land here rather than in catch. Clear the pending-message display but do
+          // NOT set succeeded — finally must skip invalidateConversation() because the
+          // conversation may never have been persisted, and a GET would 404.
+          if (!isRegenerate) {
+            clearPendingMessage(vars.conversationId);
+          }
+          return;
+        }
+
         if (!isRegenerate) {
           clearPendingMessage(vars.conversationId);
           vars.resetAttachments?.();

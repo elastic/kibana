@@ -26,8 +26,8 @@ export class AiRuleCreationService {
 
   public readonly saveRuleRequest$ = this.saveRuleSubject.asObservable();
   public readonly lastSavedRuleId$ = this.lastSavedRuleIdSubject.asObservable();
-  public readonly dirty$ = this.dirtySubject.asObservable();
-  public readonly saving$ = this.savingSubject.asObservable();
+  public readonly dirty$ = this.dirtySubject.pipe(distinctUntilChanged());
+  public readonly saving$ = this.savingSubject.pipe(distinctUntilChanged());
   public readonly aiCreatedRule$ = this.aiRuleSubject.asObservable();
   public readonly formSyncActive$ = this.formSyncSubject.pipe(distinctUntilChanged());
 
@@ -51,15 +51,21 @@ export class AiRuleCreationService {
   };
 
   public requestSaveRule = (rule: RuleResponse): void => {
+    // eslint-disable-next-line no-console
+    console.log('[AiRuleCreation] requestSaveRule — rule.id:', rule.id);
     this.savingSubject.next(true);
     this.saveRuleSubject.next(rule);
   };
 
   public clearSaving = (): void => {
+    // eslint-disable-next-line no-console
+    console.log('[AiRuleCreation] clearSaving');
     this.savingSubject.next(false);
   };
 
   public setLastSavedRuleId = (id: string | null): void => {
+    // eslint-disable-next-line no-console
+    console.log('[AiRuleCreation] setLastSavedRuleId →', id);
     this.lastSavedRuleIdSubject.next(id);
   };
 
@@ -68,10 +74,14 @@ export class AiRuleCreationService {
   };
 
   public markDirty = (): void => {
+    // eslint-disable-next-line no-console
+    console.log('[AiRuleCreation] markDirty');
     this.dirtySubject.next(true);
   };
 
   public clearDirty = (): void => {
+    // eslint-disable-next-line no-console
+    console.log('[AiRuleCreation] clearDirty');
     this.dirtySubject.next(false);
   };
 
@@ -94,6 +104,7 @@ export class AiRuleCreationService {
   public reset = (): void => {
     this.lastSavedRuleIdSubject.next(null);
     this.dirtySubject.next(false);
+    this.savingSubject.next(false);
     this.aiRuleSubject.next(null);
     this.session = null;
   };

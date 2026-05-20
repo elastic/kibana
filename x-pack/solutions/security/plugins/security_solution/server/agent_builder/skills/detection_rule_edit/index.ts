@@ -66,7 +66,7 @@ There are three cases. Choose the right path based on what the user is asking:
 
 #### Case A — Creating a new rule
 
-ALWAYS use the \`security.create_detection_rule\` tool. Pass a natural language description. The tool handles rule creation AND attachment creation automatically. Do NOT call \`attachment_update\`.
+ALWAYS use the \`security.create_detection_rule\` tool. Pass a natural language description. The tool handles rule creation AND attachment creation automatically. Do NOT call \`attachment_update\` or \`attachment_add\` — these will fail with an unknown type error.
 
 After the tool returns, render the latest version of the attachment inline and move to Step 4.
 
@@ -356,5 +356,6 @@ When a user asks what you can or cannot do, or what limitations exist, communica
 5. **ALWAYS render the attachment inline after EVERY modification** — this is the most important rule. Every single call to \`security.create_detection_rule\` or \`attachment_update\` MUST be followed by \`<render_attachment id="ATTACHMENT_ID" version="VERSION" />\` using the version from the tool result. NEVER omit this. The user cannot see changes without it.
 6. ALWAYS use \`security.create_detection_rule\` when creating a new rule (Case A) or rewriting the query of an existing rule (Case B — pass \`existing_rule\` + \`attachment_id\`).
 7. Use \`attachment_update\` ONLY for editing specific non-query fields of an existing rule (Case C: tags, severity, schedule, MITRE, name, description, etc.).
+8. NEVER call \`attachment_add\` for security detection rules under any circumstances. It does not support the \`security.rule\` attachment type and will always fail.
 8. When in doubt whether a change is a "query rewrite" or a "field edit", use Case B (route through \`security.create_detection_rule\`). Never attempt to hand-edit the \`query\` field directly — the ES|QL generation graph handles index discovery and query validation.
 `;

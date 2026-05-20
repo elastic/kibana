@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
@@ -264,32 +265,43 @@ const RuleInlineContent: React.FC<
     callbacks?: InlineRenderCallbacks;
   }
 > = ({ attachment, aiRuleCreation, application, uiSettings, callbacks }) => {
-  const [isDirty, setIsDirty] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const isDirty = useObservable(aiRuleCreation.dirty$, false);
+  const isSaving = useObservable(aiRuleCreation.saving$, false);
+  const lastSavedRuleId = useObservable(aiRuleCreation.lastSavedRuleId$, null);
 
-  const rule = parseRuleFromAttachment(attachment);
+  const rule = useMemo(() => parseRuleFromAttachment(attachment), [attachment]);
 
+  // Destructure to get a stable reference — callbacks object literal is recreated every render.
+  const registerActionButtons = callbacks?.registerActionButtons;
   useEffect(() => {
-    const sub = aiRuleCreation.dirty$.subscribe(setIsDirty);
-    return () => sub.unsubscribe();
-  }, [aiRuleCreation]);
-
-  useEffect(() => {
-    const sub = aiRuleCreation.saving$.subscribe(setIsSaving);
-    return () => sub.unsubscribe();
-  }, [aiRuleCreation]);
-
-  useEffect(() => {
-    if (!callbacks?.registerActionButtons) return;
+    if (!registerActionButtons) return;
     const canEditRules = hasCapabilities(application.capabilities, RULES_UI_EDIT_PRIVILEGE);
     if (!rule || !canEditRules || (rule.type === 'esql' && !uiSettings.get(ENABLE_ESQL))) {
-      callbacks.registerActionButtons([]);
+      registerActionButtons([]);
       return;
     }
-    const savedRuleId = rule.id ?? aiRuleCreation.getLastSavedRuleId() ?? undefined;
-    callbacks.registerActionButtons([
+    const savedRuleId = rule.id ?? lastSavedRuleId ?? undefined;
+    // Disabled while saving, or after a successful save until the agent makes a change.
+    // savedRuleId === undefined means the rule has never been saved — always enabled.
+    const isClean = savedRuleId !== undefined && !isDirty;
+    // eslint-disable-next-line no-console
+    console.log(
+      '[RuleAttachment] registerActionButtons — rule.id:',
+      rule.id,
+      '| lastSavedRuleId:',
+      lastSavedRuleId,
+      '| savedRuleId:',
+      savedRuleId,
+      '| isDirty:',
+      isDirty,
+      '| isSaving:',
+      isSaving,
+      '| isClean:',
+      isClean
+    );
+    registerActionButtons([
       {
-        label: savedRuleId
+        label: rule.id
           ? i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.saveChanges', {
               defaultMessage: 'Save changes',
             })
@@ -298,13 +310,22 @@ const RuleInlineContent: React.FC<
             }),
         icon: 'save' as const,
         type: ActionButtonType.PRIMARY,
-        disabled: isSaving,
+        disabled: isSaving || isClean,
         handler: () => {
           aiRuleCreation.requestSaveRule(rule);
         },
       },
     ]);
-  }, [attachment, isSaving, aiRuleCreation, application, uiSettings, callbacks, rule]);
+  }, [
+    rule,
+    isSaving,
+    isDirty,
+    lastSavedRuleId,
+    aiRuleCreation,
+    application,
+    uiSettings,
+    registerActionButtons,
+  ]);
 
   if (!rule) {
     return <EmptyRuleContent />;
