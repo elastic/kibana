@@ -354,3 +354,144 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
     );
   });
 });
+
+describe('StorageIndexAdapter - esql method', () => {
+  let esClient: jest.Mocked<ElasticsearchClient>;
+  let loggerMock: jest.Mocked<Logger>;
+
+  const mockEsqlResponse = {
+    columns: [{ name: 'foo', type: 'keyword' }],
+    values: [['bar']],
+  };
+
+  beforeEach(() => {
+    esClient = createMockEsClient();
+    // Add esql mock
+    (esClient as any).esql = {
+      query: jest.fn().mockResolvedValue(mockEsqlResponse),
+    };
+    loggerMock = createLoggerMock();
+  });
+
+  it('forwards query and returns ES|QL response', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    const result = await client.esql({ query: 'FROM test_index | LIMIT 1' });
+
+    expect((esClient as any).esql.query).toHaveBeenCalledWith(
+      expect.objectContaining({ query: 'FROM test_index | LIMIT 1', format: 'json' })
+    );
+    expect(result).toEqual(mockEsqlResponse);
+  });
+
+  it('forwards params to esClient.esql.query', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    const params = [{ p: '*foo*' }];
+    await client.esql({ query: 'FROM test_index | WHERE foo LIKE ?p | LIMIT 5', params });
+
+    expect((esClient as any).esql.query).toHaveBeenCalledWith(expect.objectContaining({ params }));
+  });
+
+  it('returns empty response when index does not exist (404 path)', async () => {
+    const notFoundError = new errors.ResponseError({
+      statusCode: 404,
+      headers: {},
+      warnings: [],
+      meta: {} as any,
+      body: { error: { type: 'index_not_found_exception', reason: 'no such index' } },
+    } as TransportResult);
+    (esClient as any).esql.query.mockRejectedValueOnce(notFoundError);
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    const result = await client.esql({ query: 'FROM missing_index | LIMIT 1' });
+
+    expect(result).toEqual({ columns: [], values: [] });
+  });
+
+  it('returns empty response for ES|QL verification_exception with Unknown index', async () => {
+    const unknownIndexError = new errors.ResponseError({
+      statusCode: 400,
+      headers: {},
+      warnings: [],
+      meta: {} as any,
+      body: {
+        error: {
+          type: 'verification_exception',
+          reason: 'Unknown index [missing_index]',
+        },
+      },
+    } as TransportResult);
+    (esClient as any).esql.query.mockRejectedValueOnce(unknownIndexError);
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    const result = await client.esql({ query: 'FROM missing_index | LIMIT 1' });
+
+    expect(result).toEqual({ columns: [], values: [] });
+  });
+
+  it('rethrows errors that are not index-not-found errors', async () => {
+    const unexpectedError = new Error('Unexpected query error');
+    (esClient as any).esql.query.mockRejectedValueOnce(unexpectedError);
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await expect(client.esql({ query: 'FROM test_index | LIMIT 1' })).rejects.toThrow(
+      'Unexpected query error'
+    );
+  });
+
+  it('applies migrateSource to _source column when migrateSource option is configured', async () => {
+    const rawSource = { foo: 'bar', version: 0 };
+    const migratedSource = { foo: 'bar', version: 1 };
+    const esqlWithSourceResponse = {
+      columns: [
+        { name: '_source', type: 'unsupported' },
+        { name: 'foo', type: 'keyword' },
+      ],
+      values: [[rawSource, 'bar']],
+    };
+    (esClient as any).esql.query.mockResolvedValueOnce(esqlWithSourceResponse);
+
+    const migrateSource = jest.fn().mockReturnValue(migratedSource);
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
+      migrateSource,
+    });
+    const client = adapter.getClient();
+
+    const result = await client.esql({ query: 'FROM test_index METADATA _source | LIMIT 1' });
+
+    expect(migrateSource).toHaveBeenCalledWith(rawSource);
+    expect(result.values[0][0]).toEqual(migratedSource);
+  });
+
+  it('skips migrateSource when migrateSource: false is passed', async () => {
+    const rawSource = { foo: 'bar', version: 0 };
+    const esqlWithSourceResponse = {
+      columns: [{ name: '_source', type: 'unsupported' }],
+      values: [[rawSource]],
+    };
+    (esClient as any).esql.query.mockResolvedValueOnce(esqlWithSourceResponse);
+
+    const migrateSource = jest.fn().mockReturnValue({ foo: 'bar', version: 1 });
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
+      migrateSource,
+    });
+    const client = adapter.getClient();
+
+    const result = await client.esql({
+      query: 'FROM test_index METADATA _source | LIMIT 1',
+      migrateSource: false,
+    });
+
+    expect(migrateSource).not.toHaveBeenCalled();
+    expect(result.values[0][0]).toEqual(rawSource);
+  });
+});

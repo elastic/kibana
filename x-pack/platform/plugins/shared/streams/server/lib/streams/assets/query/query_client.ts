@@ -6,7 +6,12 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { esql, type ComposerQuery, type ComposerQueryTagHole } from '@elastic/esql';
+import type { ESQLAstExpression } from '@elastic/esql/types';
+import { isBoom } from '@hapi/boom';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import type {
   IStorageClient,
   StorageClientSearchRequest,
@@ -50,7 +55,7 @@ import {
   RULE_ID,
   STREAM_NAME,
 } from '../fields';
-import type { QueryStorageSettings } from '../storage_settings';
+import { queryStorageSettings, type QueryStorageSettings } from '../storage_settings';
 import { bulkWithInferenceFallback } from '../../errors/bulk_with_inference_fallback';
 import { searchWithKeywordFallback } from '../../errors/search_with_keyword_fallback';
 import { computeRuleId } from './helpers/query';
@@ -74,6 +79,8 @@ const LEGACY_RUNTIME_MAPPINGS = {
   [QUERY_FEATURE_NAME]: { type: 'keyword' as const },
   [QUERY_FEATURE_FILTER]: { type: 'keyword' as const },
 };
+
+const QUERIES_INDEX = queryStorageSettings.name;
 
 export interface QueryLinkFilters {
   ruleUnbacked?: RuleUnbackedFilter;
@@ -117,6 +124,31 @@ function ruleUnbackedFilter(value: RuleUnbackedFilter = 'exclude'): QueryDslQuer
         },
       ];
   }
+}
+
+type WhereCondition = ESQLAstExpression & ComposerQueryTagHole;
+
+// Composer helper: dotted field names need string-array shorthand so each segment
+// is treated as a separate identifier (`foo.bar` not `foo\.bar`).
+const col = (field: string) => esql.col(field.includes('.') ? field.split('.') : field);
+
+// ES|QL counterpart of `ruleUnbackedFilter`. The DSL helper is still used by
+// the semantic/hybrid paths which remain on the search API.
+function ruleUnbackedWhere(value: RuleUnbackedFilter = 'exclude'): WhereCondition | null {
+  const ruleBackedCol = col(RULE_BACKED);
+  switch (value) {
+    case 'include':
+      return null;
+    case 'only':
+      return esql.exp`${ruleBackedCol} == false`;
+    case 'exclude':
+      // Also includes legacy docs that predate the rule_backed field.
+      return esql.exp`${ruleBackedCol} == true OR ${ruleBackedCol} IS NULL`;
+  }
+}
+
+function andWhere(current: WhereCondition | undefined, next: WhereCondition): WhereCondition {
+  return current ? esql.exp`${current} AND ${next}` : next;
 }
 
 function termsQuery<T extends string>(
@@ -182,6 +214,49 @@ function buildKeywordQuery(
   };
 }
 
+// Appends the keyword-search pipeline (WHERE + EVAL CASE chain + SORT + LIMIT) to a
+// composer query. The `EVAL CASE` boosts mirror the DSL `wildcard(boost: N)` ranking:
+// title ×3, description ×2, kql / feature_name / feature_filter ×1 each.
+// Caller is responsible for adding `SET unmapped_fields="LOAD"` so legacy
+// `experimental.query.system.*` fields (mapped as `dynamic:false`) become queryable
+// from `_source`.
+function appendQueryKeywordEsqlPipeline(
+  query: ComposerQuery,
+  searchTerm: string,
+  size: number,
+  extraWhere?: WhereCondition
+): ComposerQuery {
+  const lowerWildcard = esql.str(`*${escapeWildcard(searchTerm.toLowerCase())}*`);
+  const titleCol = col(QUERY_TITLE);
+  const descCol = col(QUERY_DESCRIPTION);
+  const kqlCol = col(QUERY_KQL_BODY);
+  const featureNameCol = col(QUERY_FEATURE_NAME);
+  const featureFilterCol = col(QUERY_FEATURE_FILTER);
+
+  const keywordWhere: WhereCondition = esql.exp`TO_LOWER(${titleCol}) LIKE ${lowerWildcard}
+   OR TO_LOWER(${descCol}) LIKE ${lowerWildcard}
+   OR TO_LOWER(${kqlCol}) LIKE ${lowerWildcard}
+   OR TO_LOWER(${featureNameCol}) LIKE ${lowerWildcard}
+   OR TO_LOWER(${featureFilterCol}) LIKE ${lowerWildcard}`;
+
+  const finalWhere = extraWhere ? esql.exp`${extraWhere} AND (${keywordWhere})` : keywordWhere;
+
+  return query.where`${finalWhere}`
+    .pipe`EVAL _kw_title_hit = CASE(TO_LOWER(${titleCol}) LIKE ${lowerWildcard}, 3.0, 0.0)`
+    .pipe`EVAL _kw_desc_hit = CASE(TO_LOWER(${descCol}) LIKE ${lowerWildcard}, 2.0, 0.0)`
+    .pipe`EVAL _kw_kql_hit = CASE(TO_LOWER(${kqlCol}) LIKE ${lowerWildcard}, 1.0, 0.0)`
+    .pipe`EVAL _kw_fn_hit = CASE(TO_LOWER(${featureNameCol}) LIKE ${lowerWildcard}, 1.0, 0.0)`
+    .pipe`EVAL _kw_ff_hit = CASE(TO_LOWER(${featureFilterCol}) LIKE ${lowerWildcard}, 1.0, 0.0)`
+    .pipe`EVAL _kw_score = _kw_title_hit + _kw_desc_hit + _kw_kql_hit + _kw_fn_hit + _kw_ff_hit`
+    .pipe`SORT _kw_score DESC, _id ASC`.limit(size);
+}
+
+function mapEsqlSourceRows(response: ESQLSearchResponse): QueryLink[] {
+  const sourceIdx = response.columns.findIndex((c) => c.name === '_source');
+  if (sourceIdx === -1) return [];
+  return response.values.map((row) => fromStorage(row[sourceIdx] as StoredQueryLink));
+}
+
 export function getQueryLinkUuid(name: string, asset: Pick<QueryLink, 'asset.id' | 'asset.type'>) {
   return objectHash({
     [STREAM_NAME]: name,
@@ -224,12 +299,12 @@ interface QueryStorageBulkDeleteOperation {
 type QueryStorageBulkOperation = QueryStorageBulkIndexOperation | QueryStorageBulkDeleteOperation;
 
 function fromStorage(link: StoredQueryLink): QueryLink {
-  const esql = link[QUERY_ESQL_QUERY];
+  const esqlQuery = link[QUERY_ESQL_QUERY];
   const storedType = link[QUERY_TYPE] as QueryType | undefined;
 
   // Trust the persisted type when present (set by toStorage and migration).
   // Only derive from ES|QL for pre-migration docs that lack the field.
-  const type: QueryType = storedType ?? deriveQueryType(esql);
+  const type: QueryType = storedType ?? deriveQueryType(esqlQuery);
 
   const ruleBacked = type === QUERY_TYPE_STATS ? false : link[RULE_BACKED];
 
@@ -246,7 +321,7 @@ function fromStorage(link: StoredQueryLink): QueryLink {
       title: link[QUERY_TITLE],
       description: link[QUERY_DESCRIPTION],
       esql: {
-        query: esql,
+        query: esqlQuery,
       },
       severity_score: link[QUERY_SEVERITY_SCORE],
       features: link[QUERY_FEATURES],
@@ -365,17 +440,13 @@ export class QueryClient {
     links: QueryLinkRequest[]
   ): Promise<{ deleted: QueryLink[]; indexed: QueryLink[] }> {
     const name = definition.name;
-    const assetsResponse = await this.dependencies.storageClient.search({
-      size: SEARCH_SIZE_LIMIT,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter: [...termQuery(STREAM_NAME, name), ...termQuery(ASSET_TYPE, 'query')],
-        },
+    const response = await this.dependencies.storageClient.esql({
+      query: esql.from([QUERIES_INDEX], ['_id', '_source']).limit(SEARCH_SIZE_LIMIT).print('basic'),
+      filter: {
+        bool: { filter: [...termQuery(STREAM_NAME, name), ...termQuery(ASSET_TYPE, 'query')] },
       },
     });
-
-    const existingQueryLinks = mapSearchHits(assetsResponse);
+    const existingQueryLinks = mapEsqlSourceRows(response);
 
     const nextQueryLinks = links.map((link) => {
       const ql = { ...toQueryLink(definition, link), rule_backed: link.rule_backed };
@@ -417,16 +488,11 @@ export class QueryClient {
   }
 
   async getStreamToQueryLinksMap(names: string[]): Promise<Record<string, QueryLink[]>> {
-    const filters = [...termsQuery(STREAM_NAME, names), ...termQuery(ASSET_TYPE, 'query')];
+    const filterClauses = [...termsQuery(STREAM_NAME, names), ...termQuery(ASSET_TYPE, 'query')];
 
-    const assetsResponse = await this.dependencies.storageClient.search({
-      size: SEARCH_SIZE_LIMIT,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter: filters,
-        },
-      },
+    const response = await this.dependencies.storageClient.esql({
+      query: esql.from([QUERIES_INDEX], ['_id', '_source']).limit(SEARCH_SIZE_LIMIT).print('basic'),
+      filter: { bool: { filter: filterClauses } },
     });
 
     const queriesPerName = names.reduce((acc, name) => {
@@ -434,19 +500,22 @@ export class QueryClient {
       return acc;
     }, {} as Record<string, QueryLink[]>);
 
-    assetsResponse.hits.hits.forEach((hit) => {
-      const name = hit._source[STREAM_NAME];
+    const sourceIdx = response.columns.findIndex((c) => c.name === '_source');
+    if (sourceIdx === -1) return queriesPerName;
+
+    for (const row of response.values) {
+      const source = row[sourceIdx] as StoredQueryLink;
+      const name = source[STREAM_NAME];
       if (!queriesPerName[name]) {
         this.dependencies.logger.warn(
           `Skipping query asset with unexpected stream_name "${name}" (requested: ${names.join(
             ', '
           )})`
         );
-        return;
+        continue;
       }
-      const asset = fromStorage(hit._source);
-      queriesPerName[name].push(asset);
-    });
+      queriesPerName[name].push(fromStorage(source));
+    }
 
     return queriesPerName;
   }
@@ -456,7 +525,7 @@ export class QueryClient {
    * all query links if no stream names are provided.
    */
   async getQueryLinks(streamNames: string[], filters?: QueryLinkFilters): Promise<QueryLink[]> {
-    const filter = [
+    const filterClauses = [
       ...termsQuery(STREAM_NAME, streamNames),
       ...termQuery(ASSET_TYPE, 'query'),
       ...termsQuery(ASSET_ID, filters?.queryIds),
@@ -464,17 +533,12 @@ export class QueryClient {
       ...rangeGteQuery(QUERY_SEVERITY_SCORE, filters?.minSeverityScore),
     ];
 
-    const queriesResponse = await this.dependencies.storageClient.search({
-      size: SEARCH_SIZE_LIMIT,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter,
-        },
-      },
+    const response = await this.dependencies.storageClient.esql({
+      query: esql.from([QUERIES_INDEX], ['_id', '_source']).limit(SEARCH_SIZE_LIMIT).print('basic'),
+      filter: { bool: { filter: filterClauses } },
     });
 
-    return mapSearchHits(queriesResponse);
+    return mapEsqlSourceRows(response);
   }
 
   /**
@@ -508,13 +572,12 @@ export class QueryClient {
   async getPromotableUnbackedQueries(filters?: {
     minSeverityScore?: number;
   }): Promise<QueryLink[]> {
-    const assetsResponse = await this.dependencies.storageClient.search({
-      size: SEARCH_SIZE_LIMIT,
-      track_total_hits: false,
-      query: { bool: this.promotableUnbackedBoolQuery(filters) },
+    const response = await this.dependencies.storageClient.esql({
+      query: esql.from([QUERIES_INDEX], ['_id', '_source']).limit(SEARCH_SIZE_LIMIT).print('basic'),
+      filter: { bool: this.promotableUnbackedBoolQuery(filters) },
     });
 
-    return mapSearchHits(assetsResponse);
+    return mapEsqlSourceRows(response);
   }
 
   /**
@@ -574,25 +637,26 @@ export class QueryClient {
     return { promoted, skipped_stats: skippedStats };
   }
 
-  async bulkGetByIds(name: string, ids: string[]) {
-    const assetsResponse = await this.dependencies.storageClient.search({
-      size: SEARCH_SIZE_LIMIT,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(STREAM_NAME, name),
-            ...termQuery(ASSET_TYPE, 'query'),
-            ...termsQuery(
-              '_id',
-              ids.map((id) => getQueryLinkUuid(name, { [ASSET_TYPE]: 'query', [ASSET_ID]: id }))
-            ),
-          ],
-        },
-      },
-    });
+  async bulkGetByIds(name: string, ids: string[]): Promise<QueryLink[]> {
+    if (ids.length === 0) return [];
 
-    return mapSearchHits(assetsResponse);
+    // Composer emits one safe inline literal per value — a single array param
+    // would silently match nothing (see §5.2 #2 in the FE-4 plan).
+    const uuids = ids.map((id) =>
+      getQueryLinkUuid(name, { [ASSET_TYPE]: 'query', [ASSET_ID]: id })
+    );
+    const idLiterals = uuids.map((uuid) => esql.str(uuid));
+
+    const query = esql.from([QUERIES_INDEX], ['_id', '_source'])
+      .where`_id IN (${idLiterals}) AND ${col(STREAM_NAME)} == ${esql.str(name)} AND ${col(
+      ASSET_TYPE
+    )} == ${esql.str('query')}`
+      .limit(uuids.length)
+      .print('basic');
+
+    const response = await this.dependencies.storageClient.esql({ query });
+
+    return mapEsqlSourceRows(response);
   }
 
   async findQueries(
@@ -614,35 +678,49 @@ export class QueryClient {
     query: string,
     filters?: QueryLinkFilters
   ): Promise<QueryLink[]> {
-    const filter = [
-      ...termsQuery(STREAM_NAME, streamNames),
-      ...termQuery(ASSET_TYPE, 'query'),
-      ...ruleUnbackedFilter(filters?.ruleUnbacked),
-    ];
-
-    if (mode === 'keyword') {
-      return this.findQueriesByKeyword(filter, query);
+    // Semantic and hybrid paths stay on DSL: ES|QL has no equivalent of the
+    // linear / RRF retrievers with semantic min_score.
+    if (mode === 'hybrid' || mode === 'semantic') {
+      const dslFilter = [
+        ...termsQuery(STREAM_NAME, streamNames),
+        ...termQuery(ASSET_TYPE, 'query'),
+        ...ruleUnbackedFilter(filters?.ruleUnbacked),
+      ];
+      return mode === 'hybrid'
+        ? this.findQueriesByHybrid(dslFilter, query)
+        : this.findQueriesBySemantic(dslFilter, query);
     }
 
-    if (mode === 'semantic') {
-      return this.findQueriesBySemantic(filter, query);
+    // Build the base WHERE (stream filter + asset.type + optional rule-backed).
+    let baseWhere: WhereCondition | undefined;
+    // Omit the IN fragment when no streams are requested — bare `IN ()` is an ES|QL parse error.
+    if (streamNames.length > 0) {
+      const streamLiterals = streamNames.map((sn) => esql.str(sn));
+      baseWhere = andWhere(baseWhere, esql.exp`${col(STREAM_NAME)} IN (${streamLiterals})`);
     }
+    baseWhere = andWhere(baseWhere, esql.exp`${col(ASSET_TYPE)} == ${esql.str('query')}`);
+    const rb = ruleUnbackedWhere(filters?.ruleUnbacked);
+    if (rb !== null) baseWhere = andWhere(baseWhere, rb);
 
-    return this.findQueriesByHybrid(filter, query);
+    return this.findQueriesByKeyword(baseWhere, query);
   }
 
   private async findQueriesByKeyword(
-    filter: QueryDslQueryContainer[],
-    query: string
+    baseWhere: WhereCondition | undefined,
+    query: string,
+    size: number = SEARCH_SIZE_LIMIT
   ): Promise<QueryLink[]> {
-    const assetsResponse = await this.dependencies.storageClient.search({
-      size: SEARCH_SIZE_LIMIT,
-      track_total_hits: false,
-      runtime_mappings: LEGACY_RUNTIME_MAPPINGS,
-      query: buildKeywordQuery(query, filter),
-    });
+    // `SET unmapped_fields="LOAD"` lets legacy `experimental.query.system.*` fields
+    // (mapped `dynamic:false`) be queried from `_source`.
+    const baseQuery = esql.from([QUERIES_INDEX], ['_id', '_source']);
+    baseQuery.addSetCommand('unmapped_fields', 'LOAD');
+    const esqlQuery = appendQueryKeywordEsqlPipeline(baseQuery, query, size, baseWhere).print(
+      'basic'
+    );
 
-    return mapSearchHits(assetsResponse);
+    const response = await this.dependencies.storageClient.esql({ query: esqlQuery });
+
+    return mapEsqlSourceRows(response);
   }
 
   private async findQueriesBySemantic(

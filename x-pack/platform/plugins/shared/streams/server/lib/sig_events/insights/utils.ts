@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { esql } from '@elastic/esql';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import { omit } from 'lodash';
 import type { InsightCore } from '@kbn/streams-schema';
 import type { Query } from '../../../../common/queries';
@@ -63,53 +65,59 @@ export async function collectQueryData({
 }): Promise<QueryData | undefined> {
   const { rule_id: ruleId } = query;
 
-  const currentResponse = await esClient
-    .search<{ original_source: Record<string, unknown> }>({
-      index: '.alerts-streams.alerts-default',
-      size: SAMPLE_EVENTS_COUNT,
-      query: {
-        bool: {
-          filter: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: `now-${CURRENT_WINDOW_MINUTES}m`,
-                  lte: 'now',
-                },
-              },
-            },
-            {
-              term: {
-                'kibana.alert.rule.uuid': ruleId,
-              },
-            },
-          ],
-        },
-      },
-      track_total_hits: true,
-    })
-    .catch((err) => {
-      const { type, message } = parseError(err);
-      if (type === 'security_exception') {
-        throw new SecurityError(
-          `Cannot read Significant events, insufficient privileges: ${message}`,
-          { cause: err }
-        );
-      }
-      throw err;
-    });
+  const now = new Date();
+  const nowMinus15m = new Date(now.getTime() - CURRENT_WINDOW_MINUTES * 60 * 1000);
+  const timestampCol = esql.col('@timestamp');
+  const ruleUuidCol = esql.col(['kibana', 'alert', 'rule', 'uuid']);
+  const fromLit = esql.str(nowMinus15m.toISOString());
+  const toLit = esql.str(now.toISOString());
+  const ruleIdLit = esql.str(ruleId);
+  const whereCondition = esql.exp`${timestampCol} >= ${fromLit} AND ${timestampCol} <= ${toLit} AND ${ruleUuidCol} == ${ruleIdLit}`;
+  const alertsIndex = '.alerts-streams.alerts-default';
 
-  const currentCount =
-    typeof currentResponse.hits.total === 'number'
-      ? currentResponse.hits.total
-      : currentResponse.hits.total?.value ?? 0;
+  let q1Response: ESQLSearchResponse;
+  let q2Response: ESQLSearchResponse;
+  try {
+    [q1Response, q2Response] = await Promise.all([
+      esClient.esql.query({
+        query: esql.from([alertsIndex], ['_source']).where`${whereCondition}`
+          .limit(SAMPLE_EVENTS_COUNT)
+          .print('basic'),
+        drop_null_columns: true,
+        format: 'json',
+      }) as unknown as ESQLSearchResponse,
+      esClient.esql.query({
+        query: esql.from([alertsIndex]).where`${whereCondition}`
+          .pipe`STATS currentCount = COUNT(*)`.print('basic'),
+        format: 'json',
+      }) as unknown as ESQLSearchResponse,
+    ]);
+  } catch (err) {
+    const { type, message } = parseError(err);
+    if (type === 'security_exception') {
+      throw new SecurityError(
+        `Cannot read Significant events, insufficient privileges: ${message}`,
+        { cause: err instanceof Error ? err : new Error(String(err)) }
+      );
+    }
+    if (type === 'verification_exception') {
+      return undefined;
+    }
+    throw err;
+  }
+
+  const countIdx = q2Response.columns.findIndex((col) => col.name === 'currentCount');
+  const currentCount = countIdx >= 0 ? (q2Response.values[0]?.[countIdx] as number) ?? 0 : 0;
 
   if (currentCount === 0) {
     return undefined;
   }
 
-  const sampleEvents = currentResponse.hits.hits.map((hit) => {
-    const stringified = JSON.stringify(omit(hit._source?.original_source ?? {}, '_id'));
+  const sourceIdx = q1Response.columns.findIndex((col) => col.name === '_source');
+  const sampleEvents = q1Response.values.map((row) => {
+    const source = sourceIdx >= 0 ? (row[sourceIdx] as Record<string, unknown>) ?? {} : {};
+    const originalSource = (source.original_source as Record<string, unknown>) ?? {};
+    const stringified = JSON.stringify(omit(originalSource, '_id'));
     return stringified.length > SAMPLE_EVENT_MAX_CHARS
       ? `${stringified.slice(0, SAMPLE_EVENT_MAX_CHARS)}…(truncated)`
       : stringified;

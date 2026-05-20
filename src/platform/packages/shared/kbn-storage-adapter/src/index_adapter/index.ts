@@ -23,6 +23,7 @@ import { last, mapValues, padStart } from 'lodash';
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import type { TransportRequestOptions } from '@elastic/transport';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import type {
   IndexStorageSettings,
   StorageClientBulkResponse,
@@ -38,6 +39,7 @@ import type {
   StorageClientSearchResponse,
   StorageClientClean,
   StorageClientCleanResponse,
+  StorageClientEsql,
   InternalIStorageClient,
   StorageTransportOptions,
 } from '../..';
@@ -82,6 +84,22 @@ function catchConflictError(error: Error) {
 
 function isNotFoundError(error: Error): error is errors.ResponseError & { statusCode: 404 } {
   return isResponseError(error) && error.statusCode === 404;
+}
+
+// ES|QL signals a missing index as a 400 `verification_exception` with reason
+// `"Unknown index [<name>]"` — not a 404. Detect it explicitly so the adapter
+// can return an empty response, matching the 404-graceful-empty behaviour of
+// `search` / `get`.
+function isEsqlUnknownIndexError(error: unknown): boolean {
+  if (!isResponseError(error as Error)) return false;
+  const responseError = error as errors.ResponseError;
+  if (responseError.statusCode !== 400) return false;
+  const body = responseError.body as { error?: { type?: string; reason?: string } } | undefined;
+  return (
+    body?.error?.type === 'verification_exception' &&
+    typeof body?.error?.reason === 'string' &&
+    body.error.reason.includes('Unknown index')
+  );
 }
 
 function isServerlessSettingsError(error: unknown): boolean {
@@ -715,6 +733,55 @@ export class StorageIndexAdapter<
     });
   };
 
+  /**
+   * Executes an ES|QL query. Mirrors the read-side semantics of `search` / `get`:
+   * ensures mappings are up to date, returns an empty response when the index
+   * doesn't exist (both 404 and ES|QL's distinct 400 `Unknown index` shape),
+   * and applies `maybeMigrateSource` to any `_source` column unless disabled.
+   */
+  private esql: StorageClientEsql = ({
+    query,
+    params,
+    filter,
+    drop_null_columns = true,
+    migrateSource = true,
+  }) =>
+    this.ensureMappingsBeforeReading(async () => {
+      const emptyResponse: ESQLSearchResponse = {
+        columns: [],
+        values: [],
+      };
+      try {
+        const response = (await this.esClient.esql.query({
+          query,
+          ...(params !== undefined ? { params } : {}),
+          ...(filter !== undefined ? { filter } : {}),
+          drop_null_columns,
+          format: 'json',
+        })) as unknown as ESQLSearchResponse;
+
+        if (migrateSource && this.options.migrateSource) {
+          const sourceIdx = response.columns.findIndex((c) => c.name === '_source');
+          if (sourceIdx >= 0) {
+            response.values = response.values.map((row) => {
+              const copy = [...row];
+              copy[sourceIdx] = this.options.migrateSource!(
+                copy[sourceIdx] as Record<string, unknown>
+              );
+              return copy;
+            });
+          }
+        }
+
+        return response;
+      } catch (error) {
+        if (isNotFoundError(error) || isEsqlUnknownIndexError(error)) {
+          return emptyResponse;
+        }
+        throw error;
+      }
+    });
+
   getClient(): InternalIStorageClient<TApplicationType> {
     return {
       bulk: this.bulk,
@@ -724,6 +791,7 @@ export class StorageIndexAdapter<
       search: this.search,
       get: this.get,
       existsIndex: this.existsIndex,
+      esql: this.esql,
     };
   }
 }
