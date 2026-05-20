@@ -13,8 +13,7 @@ import { test } from '../fixtures';
 // Modals, flyouts, and context menus render in EUI portals outside .kbnAppWrapper.
 const A11Y_SELECTORS = ['.kbnAppWrapper', '[data-euiportal="true"]'];
 
-// Failing: See https://github.com/elastic/kibana/issues/267280
-test.describe.skip('Tags management — accessibility', { tag: tags.stateful.classic }, () => {
+test.describe('Tags management — accessibility', { tag: tags.stateful.classic }, () => {
   test.afterAll(async ({ kbnClient }) => {
     await kbnClient.savedObjects.cleanStandardList();
   });
@@ -45,16 +44,9 @@ test.describe.skip('Tags management — accessibility', { tag: tags.stateful.cla
       expect(violations).toStrictEqual([]);
     });
 
-    await test.step('tag actions panel', async () => {
-      await tagsTable.openCollapsedRowMenu('a11yTag');
-      const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
-      expect(violations).toStrictEqual([]);
-      await page.keyboard.press('Escape');
-    });
-
     await test.step('tag assignment flyout and listing', async () => {
-      await tagsTable.openCollapsedRowMenu('a11yTag');
-      await tagsTable.clickRowAction('assign');
+      await tagsTable.clickCollapsedRowAction('a11yTag', 'assign');
+      await assignFlyout.waitForResultsLoaded();
       const { violations: flyoutViolations } = await page.checkA11y({ include: A11Y_SELECTORS });
       expect(flyoutViolations).toStrictEqual([]);
       await assignFlyout.closeButton.click();
@@ -64,8 +56,7 @@ test.describe.skip('Tags management — accessibility', { tag: tags.stateful.cla
     });
 
     await test.step('edit tag panel', async () => {
-      await tagsTable.openCollapsedRowMenu('a11yTag');
-      await tagsTable.clickRowAction('edit');
+      await tagsTable.clickRowAction('a11yTag', 'edit', 'inline');
       await tagModal.form.waitFor({ state: 'visible' });
       const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
       expect(violations).toStrictEqual([]);

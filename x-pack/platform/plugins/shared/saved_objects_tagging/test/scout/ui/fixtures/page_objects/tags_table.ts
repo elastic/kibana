@@ -100,21 +100,28 @@ export class TagsTable {
     return this.bulkActionsButton.isVisible();
   }
 
-  async openCollapsedRowMenu(tagName: string) {
+  // assign/delete live in the EUI portal after the `...` menu is opened; edit
+  // (isPrimary) is always inline on the row.
+  async clickRowAction(tagName: string, action: string, location: 'portal' | 'inline') {
+    const testSubj = `tagsTableAction-${action}`;
+    const actionLocator =
+      location === 'portal'
+        ? this.page.locator('[data-euiportal="true"]').locator(`[data-test-subj="${testSubj}"]`)
+        : this.rowByName(tagName).locator(`[data-test-subj="${testSubj}"]`);
+
+    await actionLocator.waitFor({ state: 'visible' });
+    await actionLocator.click();
+  }
+
+  // The `...` button appears slightly after the table-is-ready signal fires
+  // (the edit/assign/delete actions are non-primary and collapse when >2 exist),
+  // so waitFor is used instead of an instant isVisible check.
+  async clickCollapsedRowAction(tagName: string, action: string) {
     const row = this.rowByName(tagName);
     const collapseBtn = row.locator('[data-test-subj="euiCollapsedItemActionsButton"]');
     await collapseBtn.waitFor({ state: 'visible' });
     await collapseBtn.click();
-  }
-
-  // The action is scoped to the EUI portal where the collapsed-menu items render, to avoid
-  // matching the always-present inline row buttons that share the same
-  // data-test-subj.
-  async clickRowAction(action: string) {
-    await this.page
-      .locator('[data-euiportal="true"]')
-      .locator(`[data-test-subj="tagsTableAction-${action}"]`)
-      .click();
+    await this.clickRowAction(tagName, action, 'portal');
   }
 
   rowByName(tagName: string): Locator {
