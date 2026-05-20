@@ -6,23 +6,50 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import {
+  dependencyEdgeSchema,
+  infraComponentSchema,
+  causeKiSchema,
+  evidenceSchema,
+} from '../common_schemas';
+
+const discoveryDetectionSchema = z.object({
+  detection_id: z.string().optional(),
+  rule_name: z.string().optional(),
+  rule_uuid: z.string().optional(),
+  stream_name: z.string().optional(),
+  change_point_type: z.string().optional(),
+  event_count: z.number().optional(),
+  detected_at: z.string().optional(),
+});
 
 export const discoverySchema = z.object({
   '@timestamp': z.iso.datetime(),
-  status: z.string().optional(),
+  kind: z.string(),
   discovery_id: z.string(),
   discovery_slug: z.string(),
   rule_names: z.array(z.string()),
   stream_names: z.array(z.string()),
-  grouped_discovery_ids: z.array(z.string()),
-  title: z.string().optional(),
-  summary: z.string().optional(),
-  root_cause: z.string().optional(),
-  detections: z.array(
-    z.object({
-      rule_uuid: z.string(),
-    })
-  ),
+  title: z.string(),
+  summary: z.string(),
+  root_cause: z.string(),
+  criticality: z.number(),
+  confidence: z.number(),
+  impact: z.string(),
+  detections: z.array(discoveryDetectionSchema),
+  dependency_edges: z.array(dependencyEdgeSchema).optional(),
+  infra_components: z.array(infraComponentSchema).optional(),
+  cause_kis: z.array(causeKiSchema).optional(),
+  evidences: z.array(evidenceSchema).optional(),
+  closes: z.string().optional(),
+  grouped_into: z.string().optional(),
+  grouped_discovery_ids: z.array(z.string()).optional(),
+  grouping_rationale: z.string().optional(),
+  previous_discovery_id: z.string().optional(),
+  change_point_occurrence: z.string().optional(),
+  workflow_execution_id: z.string().optional(),
+  conversation_id: z.string().optional(),
+  closed_by_execution_id: z.string().optional(),
 });
 
 export type Discovery = z.infer<typeof discoverySchema>;

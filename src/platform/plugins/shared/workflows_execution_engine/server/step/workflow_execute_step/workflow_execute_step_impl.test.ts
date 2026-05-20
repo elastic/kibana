@@ -167,6 +167,42 @@ describe('WorkflowExecuteStepImpl', () => {
       });
     });
 
+    it.each([
+      { name: 'empty string', renderedWorkflowId: '' },
+      { name: 'undefined', renderedWorkflowId: undefined },
+    ])(
+      'should fail before lookup when rendered workflow-id is $name',
+      async ({ renderedWorkflowId }) => {
+        const init = createMockInit();
+        const ctx = (init.stepExecutionRuntime as any).contextManager;
+        ctx.renderValueAccordingToContext.mockReturnValue({
+          'workflow-id': renderedWorkflowId,
+          inputs: { rendered: true },
+        });
+
+        const step = new WorkflowExecuteStepImpl(init);
+        await step.run();
+
+        const repo = init.workflowRepository as jest.Mocked<WorkflowRepository>;
+        const stepRuntime = init.stepExecutionRuntime as jest.Mocked<StepExecutionRuntime>;
+        expect(stepRuntime.setInput).toHaveBeenCalledWith({
+          'workflow-id': '',
+          inputs: { rendered: true },
+        });
+        expect(repo.getWorkflow).not.toHaveBeenCalled();
+        expect(stepRuntime.failStep).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message:
+              'workflow.execute step "execute-step-1" in workflow "parent-workflow-id" rendered an empty workflow-id.',
+          })
+        );
+        expect(
+          (init.workflowExecutionRuntime as jest.Mocked<WorkflowExecutionRuntimeManager>)
+            .navigateToNextNode
+        ).toHaveBeenCalled();
+      }
+    );
+
     it('should fail when depth limit is exceeded', async () => {
       const init = createMockInit();
       (init.stepExecutionRuntime as any).workflowExecution.context = {
