@@ -17,14 +17,20 @@ import {
   EuiHorizontalRule,
   EuiLink,
   EuiHealth,
+  EuiIcon,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { SerializedStyles } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import { getSeverityColor } from '../../../../common/anomaly_detection';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+
+const legendButtonLabel = i18n.translate('xpack.apm.serviceMap.legendControl', {
+  defaultMessage: 'Legend',
+});
 
 const ANOMALY_SCORE_LEVELS = [
   {
@@ -36,37 +42,42 @@ const ANOMALY_SCORE_LEVELS = [
   {
     score: ML_ANOMALY_THRESHOLD.LOW,
     label: i18n.translate('xpack.apm.serviceMap.legend.anomalyScore.low', {
-      defaultMessage: '0-3: Low',
+      defaultMessage: '{min}-{max}: Low',
+      values: { min: ML_ANOMALY_THRESHOLD.LOW, max: ML_ANOMALY_THRESHOLD.WARNING },
     }),
   },
   {
     score: ML_ANOMALY_THRESHOLD.WARNING,
     label: i18n.translate('xpack.apm.serviceMap.legend.anomalyScore.warning', {
-      defaultMessage: '3-25: Warning',
+      defaultMessage: '{min}-{max}: Warning',
+      values: { min: ML_ANOMALY_THRESHOLD.WARNING, max: ML_ANOMALY_THRESHOLD.MINOR },
     }),
   },
   {
     score: ML_ANOMALY_THRESHOLD.MINOR,
     label: i18n.translate('xpack.apm.serviceMap.legend.anomalyScore.minor', {
-      defaultMessage: '25-50: Minor',
+      defaultMessage: '{min}-{max}: Minor',
+      values: { min: ML_ANOMALY_THRESHOLD.MINOR, max: ML_ANOMALY_THRESHOLD.MAJOR },
     }),
   },
   {
     score: ML_ANOMALY_THRESHOLD.MAJOR,
     label: i18n.translate('xpack.apm.serviceMap.legend.anomalyScore.major', {
-      defaultMessage: '50-75: Major',
+      defaultMessage: '{min}-{max}: Major',
+      values: { min: ML_ANOMALY_THRESHOLD.MAJOR, max: ML_ANOMALY_THRESHOLD.CRITICAL },
     }),
   },
   {
     score: ML_ANOMALY_THRESHOLD.CRITICAL,
     label: i18n.translate('xpack.apm.serviceMap.legend.anomalyScore.critical', {
-      defaultMessage: '75-100: Critical',
+      defaultMessage: '{min}-100: Critical',
+      values: { min: ML_ANOMALY_THRESHOLD.CRITICAL },
     }),
   },
 ] as const;
 
 interface ServiceMapLegendProps {
-  controlIconCss: ReturnType<typeof css>;
+  controlIconCss: SerializedStyles;
 }
 
 export function ServiceMapLegend({ controlIconCss }: ServiceMapLegendProps) {
@@ -78,69 +89,71 @@ export function ServiceMapLegend({ controlIconCss }: ServiceMapLegendProps) {
   const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
   const close = useCallback(() => setIsOpen(false), []);
 
-  const legendButtonLabel = i18n.translate('xpack.apm.serviceMap.legendControl', {
-    defaultMessage: 'Legend',
-  });
-
   const styles = useMemo(
     () => ({
       container: css`
         width: 200px;
       `,
       circle: css`
-        width: 16px;
-        height: 16px;
+        width: ${euiTheme.size.base};
+        height: ${euiTheme.size.base};
         border-radius: 50%;
-        border: 2px solid ${euiTheme.colors.textSubdued};
+        border: ${euiTheme.size.xxs} solid ${euiTheme.colors.textSubdued};
         background: ${euiTheme.colors.backgroundBasePlain};
         flex-shrink: 0;
       `,
       diamond: css`
-        width: 12px;
-        height: 12px;
+        width: ${euiTheme.size.m};
+        height: ${euiTheme.size.m};
         transform: rotate(45deg);
-        border: 2px solid ${euiTheme.colors.textSubdued};
+        border: ${euiTheme.size.xxs} solid ${euiTheme.colors.textSubdued};
         background: ${euiTheme.colors.backgroundBasePlain};
         flex-shrink: 0;
-        margin: 2px;
+        margin: ${euiTheme.size.xxs};
       `,
       groupedContainer: css`
         position: relative;
-        width: 16px;
-        height: 16px;
+        width: ${euiTheme.size.base};
+        height: ${euiTheme.size.base};
         flex-shrink: 0;
       `,
       groupedDiamond: css`
-        width: 12px;
-        height: 12px;
+        width: ${euiTheme.size.m};
+        height: ${euiTheme.size.m};
         transform: rotate(45deg);
-        border: 2px solid ${euiTheme.colors.textSubdued};
+        border: ${euiTheme.size.xxs} solid ${euiTheme.colors.textSubdued};
         background: ${euiTheme.colors.backgroundBasePlain};
         position: absolute;
-        top: 2px;
-        left: 2px;
+        top: ${euiTheme.size.xxs};
+        left: ${euiTheme.size.xxs};
       `,
       groupedBadge: css`
         position: absolute;
-        top: -3px;
-        right: -3px;
-        width: 11px;
-        height: 11px;
+        top: calc(-1 * ${euiTheme.size.xxs} - ${euiTheme.border.width.thin});
+        right: calc(-1 * ${euiTheme.size.xxs} - ${euiTheme.border.width.thin});
+        width: calc(${euiTheme.size.m} - ${euiTheme.border.width.thin});
+        height: calc(${euiTheme.size.m} - ${euiTheme.border.width.thin});
         border-radius: 50%;
         background: ${euiTheme.colors.backgroundBasePlain};
-        border: 1px solid ${euiTheme.colors.textSubdued};
+        border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.textSubdued};
         font-size: 7px;
-        line-height: 9px;
+        line-height: calc(
+          ${euiTheme.size.m} - ${euiTheme.size.xxs} - ${euiTheme.border.width.thin}
+        );
         text-align: center;
         font-weight: bold;
         color: ${euiTheme.colors.textParagraph};
       `,
-      connectionLine: css`
-        width: 32px;
-        height: 16px;
+      connectionIcon: css`
         flex-shrink: 0;
         display: flex;
         align-items: center;
+      `,
+      bidirectionalIcons: css`
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        gap: 0;
       `,
       docsLink: css`
         font-size: ${euiTheme.size.m};
@@ -148,8 +161,6 @@ export function ServiceMapLegend({ controlIconCss }: ServiceMapLegendProps) {
     }),
     [euiTheme]
   );
-
-  const edgeColor = euiTheme.colors.textSubdued;
 
   return (
     <EuiPopover
@@ -244,11 +255,8 @@ export function ServiceMapLegend({ controlIconCss }: ServiceMapLegendProps) {
           <EuiFlexItem>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
-                <div css={styles.connectionLine}>
-                  <svg width="32" height="12" viewBox="0 0 32 12" aria-hidden="true">
-                    <line x1="0" y1="6" x2="24" y2="6" stroke={edgeColor} strokeWidth="1.5" />
-                    <polygon points="24,2 32,6 24,10" fill={edgeColor} />
-                  </svg>
+                <div css={styles.connectionIcon}>
+                  <EuiIcon type="sortRight" size="m" color="subdued" aria-hidden={true} />
                 </div>
               </EuiFlexItem>
               <EuiFlexItem>
@@ -263,12 +271,14 @@ export function ServiceMapLegend({ controlIconCss }: ServiceMapLegendProps) {
           <EuiFlexItem>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
-                <div css={styles.connectionLine}>
-                  <svg width="32" height="12" viewBox="0 0 32 12" aria-hidden="true">
-                    <polygon points="0,6 8,2 8,10" fill={edgeColor} />
-                    <line x1="8" y1="6" x2="24" y2="6" stroke={edgeColor} strokeWidth="1.5" />
-                    <polygon points="24,2 32,6 24,10" fill={edgeColor} />
-                  </svg>
+                <div css={styles.bidirectionalIcons}>
+                  <EuiIcon
+                    type="sortable"
+                    size="m"
+                    color="subdued"
+                    style={{ transform: 'rotate(90deg)' }}
+                    aria-hidden={true}
+                  />
                 </div>
               </EuiFlexItem>
               <EuiFlexItem>
