@@ -98,10 +98,9 @@ export function registerFastifyAuthentication(params: {
       if (matchedSecurity?.authc?.enabled === true && authRegistered) {
         // Route lookup can attach static-directory options (auth disabled) while the matched
         // router route still requires auth (e.g. bare-prefix `/app/:id` → `renderCoreApp`).
-        compat.route.settings.auth = mapRouteSecurityToHapiAuthSettings(
-          matchedSecurity,
-          authRegistered
-        );
+        // Hapi allows `auth: false`; `@hapi/hapi` types omit that literal on `AuthSettings`.
+        (compat.route.settings as { auth?: false | { mode: 'required' | 'try' } }).auth =
+          mapRouteSecurityToHapiAuthSettings(matchedSecurity, authRegistered);
       } else {
         return;
       }

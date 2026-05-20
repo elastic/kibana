@@ -20,16 +20,13 @@ const isSafeMethod = (method: string) => method === 'get' || method === 'options
 
 /** Mirrors {@link FastifyHttpServer.configureRoute} when find-my-way store omits `kibanaRouteOptions`. */
 const kibanaRouteOptionsFromRouterRoute = (route: RouterRoute): KibanaRouteOptions =>
-  omitBy(
-    {
-      xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
-      access: route.options.access ?? 'internal',
-      deprecated: route.options.deprecated,
-      security: route.security,
-      excludeFromRateLimiter: route.options.excludeFromRateLimiter,
-    },
-    isNil
-  ) as KibanaRouteOptions;
+  ({
+    xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
+    access: route.options.access ?? 'internal',
+    deprecated: route.options.deprecated,
+    security: route.security,
+    ...omitBy({ excludeFromRateLimiter: route.options.excludeFromRateLimiter }, isNil),
+  } as KibanaRouteOptions);
 
 /** @internal */
 export type FastifyRouteLookupPathResolver = (req: FastifyRequest) => string;
