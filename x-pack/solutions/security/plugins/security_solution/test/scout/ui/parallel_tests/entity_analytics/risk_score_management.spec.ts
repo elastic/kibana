@@ -72,9 +72,10 @@ spaceTest.describe(
       async ({ pageObjects, apiServices }) => {
         const managementPage = pageObjects.entityAnalyticsManagementPage;
 
-        await apiServices.entityAnalytics.initRiskEngine();
         await managementPage.navigate();
         await managementPage.waitForStatusLoaded();
+        await managementPage.toggleEntityAnalytics();
+        await apiServices.entityAnalytics.waitForEntityStoreStatusV2('running', 180000);
 
         await expect(managementPage.riskScoreSaveButton).toBeHidden();
 
@@ -89,9 +90,10 @@ spaceTest.describe(
       async ({ pageObjects, apiServices }) => {
         const managementPage = pageObjects.entityAnalyticsManagementPage;
 
-        await apiServices.entityAnalytics.initRiskEngine();
         await managementPage.navigate();
         await managementPage.waitForStatusLoaded();
+        await managementPage.toggleEntityAnalytics();
+        await apiServices.entityAnalytics.waitForEntityStoreStatusV2('running', 180000);
 
         await expect(managementPage.riskScoreSaveButton).toBeHidden();
 
@@ -106,9 +108,10 @@ spaceTest.describe(
       async ({ pageObjects, apiServices }) => {
         const managementPage = pageObjects.entityAnalyticsManagementPage;
 
-        await apiServices.entityAnalytics.initRiskEngine();
         await managementPage.navigate();
         await managementPage.waitForStatusLoaded();
+        await managementPage.toggleEntityAnalytics();
+        await apiServices.entityAnalytics.waitForEntityStoreStatusV2('running', 180000);
 
         await expect(managementPage.includeClosedAlertsSwitch).not.toBeChecked();
 
@@ -128,9 +131,10 @@ spaceTest.describe(
       async ({ pageObjects, apiServices }) => {
         const managementPage = pageObjects.entityAnalyticsManagementPage;
 
-        await apiServices.entityAnalytics.initRiskEngine();
         await managementPage.navigate();
         await managementPage.waitForStatusLoaded();
+        await managementPage.toggleEntityAnalytics();
+        await apiServices.entityAnalytics.waitForEntityStoreStatusV2('running', 180000);
 
         await expect(managementPage.includeClosedAlertsSwitch).not.toBeChecked();
 
