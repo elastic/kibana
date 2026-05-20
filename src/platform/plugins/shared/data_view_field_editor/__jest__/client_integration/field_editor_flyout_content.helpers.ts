@@ -7,41 +7,50 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act } from 'react-dom/test-utils';
-import type { TestBed } from '@kbn/test-jest-helpers';
-import { registerTestBed } from '@kbn/test-jest-helpers';
-
+import { act, fireEvent, screen } from '@testing-library/react';
+import type { UserEvent } from '@testing-library/user-event';
 import type { Context } from '../../public/components/field_editor_context';
 import type { Props } from '../../public/components/field_editor_flyout_content';
-import { FieldEditorFlyoutContent } from '../../public/components/field_editor_flyout_content';
-import { WithFieldEditorDependencies, getCommonActions } from './helpers';
-
-export { waitForUpdates, waitForDocumentsAndPreviewUpdate } from './helpers';
+import {
+  createRtlHelpers,
+  flushPreviewAndSearchTimers,
+  setupFieldEditorFlyout,
+} from './helpers/rtl_helpers';
 
 const defaultProps: Props = {
-  onSave: () => {},
-  onCancel: () => {},
+  onCancel: jest.fn(),
+  onSave: jest.fn(),
 };
 
-const getActions = (testBed: TestBed) => {
+const getActions = (user: UserEvent) => {
+  const { createFieldEditorFields, getByTestSubjectPath, toggleFormRow } = createRtlHelpers(user);
+
+  const closeFlyout = async () => {
+    await user.click(screen.getByText('Cancel'));
+  };
+
+  const saveField = async () => {
+    await act(async () => {
+      fireEvent.click(screen.getByText('Save'));
+      jest.advanceTimersByTime(0);
+    });
+  };
+
   return {
-    ...getCommonActions(testBed),
+    closeFlyout,
+    fields: createFieldEditorFields(),
+    getByTestSubjectPath,
+    saveField,
+    toggleFormRow,
+    waitForUpdates: flushPreviewAndSearchTimers,
   };
 };
 
 export const setup = async (props?: Partial<Props>, deps?: Partial<Context>) => {
-  let testBed: TestBed;
+  const { user } = await setupFieldEditorFlyout(props, deps, defaultProps);
+  const actions = getActions(user);
 
-  // Setup testbed
-  await act(async () => {
-    testBed = registerTestBed(WithFieldEditorDependencies(FieldEditorFlyoutContent, deps), {
-      memoryRouter: {
-        wrapComponent: false,
-      },
-    })({ ...defaultProps, ...props });
-  });
-
-  testBed!.component.update();
-
-  return { ...testBed!, actions: getActions(testBed!) };
+  return {
+    actions,
+  };
 };
