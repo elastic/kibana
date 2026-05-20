@@ -25,7 +25,7 @@ import type {
   ESQLTelemetryCallbacks,
   ESQLSourceResult,
 } from '@kbn/esql-types';
-import type { ESQLDependencies } from '@kbn/monaco/src/languages/esql/language';
+import type { ESQLDependencies } from '@kbn/code-editor';
 
 export interface DataErrorsControl {
   enabled: boolean;
@@ -52,6 +52,7 @@ export interface ESQLEditorProps {
   isLoading?: boolean;
   /** Disables the editor */
   isDisabled?: boolean;
+  /** Test subject selector for targeting the editor in automated tests */
   dataTestSubj?: string;
   /** Hide the Run query button which appears when editor is inlined*/
   hideRunQueryButton?: boolean;
@@ -84,7 +85,6 @@ export interface ESQLEditorProps {
   expandToFitQueryOnMount?: boolean;
   /** Allows controlling the switch to toggle data errors in the UI. If not provided the switch will be hidden and data errors visible */
   dataErrorsControl?: DataErrorsControl;
-  /** Optional form field label to show above the query editor */
   /** Whether to merge external messages into the editor's message list */
   mergeExternalMessages?: boolean;
   /** Enable data source browser suggestion & command integration */
@@ -129,5 +129,6 @@ export enum HistoryTabId {
 export type EsqlLanguageDeps = ESQLCallbacks &
   Partial<{
     telemetry: ESQLTelemetryCallbacks;
+    isSuggestFixEnabled: ESQLDependencies['isSuggestFixEnabled'];
     getEditorMessages: ESQLDependencies['getEditorMessages'];
   }>;

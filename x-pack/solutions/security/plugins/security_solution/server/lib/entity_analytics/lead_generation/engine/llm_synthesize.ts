@@ -10,7 +10,6 @@ import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import type { LeadEntity, Observation } from '../types';
-import { entityToKey } from '../observation_modules/utils';
 
 export interface ScoredEntityInput {
   readonly entity: LeadEntity;
@@ -60,7 +59,7 @@ const formatLeadsPayload = (groups: ScoredEntityInput[][]): string => {
 
       const obsLines = group
         .flatMap((s) => {
-          const key = entityToKey(s.entity);
+          const key = s.entity.id;
           return s.observations
             .filter((o) => o.entityId === key)
             .map((obs) => {
