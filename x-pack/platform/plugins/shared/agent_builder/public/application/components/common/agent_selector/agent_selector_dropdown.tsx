@@ -102,10 +102,13 @@ const AgentListHeader: React.FC = () => {
   );
 };
 
-const AgentListFooter: React.FC = () => {
+const AgentListFooter: React.FC<{ currentAgentId?: string }> = ({ currentAgentId }) => {
   const { euiTheme } = useEuiTheme();
   const { manageAgents } = useUiPrivileges();
   const { createAgentBuilderUrl } = useNavigation();
+  const {
+    services: { analytics },
+  } = useKibana();
   const manageAgentsHref = createAgentBuilderUrl(appPaths.agents.list);
   return (
     <EuiPopoverFooter
@@ -119,6 +122,11 @@ const AgentListFooter: React.FC = () => {
         fullWidth
         size="s"
         data-test-subj="agentBuilderAgentSelectorManageAgentsButton"
+        onClick={() =>
+          analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ManageAllAgentsClick, {
+            current_agent_id: currentAgentId ?? '',
+          })
+        }
         {...getEbtProps({
           element: AGENT_BUILDER_UI_EBT.element.SIDEBAR,
           action: AGENT_BUILDER_UI_EBT.action.navSidebar.MANAGE_ALL_AGENTS_CLICK,
@@ -266,7 +274,7 @@ export const AgentSelectorDropdown: React.FC<AgentSelectorDropdownProps> = ({
             {(list) => (
               <>
                 {list}
-                <AgentListFooter />
+                <AgentListFooter currentAgentId={selectedAgent?.id} />
               </>
             )}
           </EuiSelectable>

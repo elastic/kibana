@@ -34,7 +34,7 @@ export const ManageSidebarView: React.FC<ManageSidebarViewProps> = ({ pathname }
           padding: ${euiTheme.size.base};
         `}
       >
-        <SidebarNavList items={navItems} isActive={isActive} />
+        <SidebarNavList items={navItems} isActive={isActive} layer="manage" />
       </EuiFlexGroup>
     </EuiFlexGroup>
   );

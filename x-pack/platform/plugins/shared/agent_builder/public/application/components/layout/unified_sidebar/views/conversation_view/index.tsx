@@ -187,7 +187,12 @@ export const ConversationSidebarView: React.FC = () => {
                     {customizeLabel}
                   </EuiText>
                   <EuiSpacer size="xs" />
-                  <SidebarNavList items={navItems} isActive={isActive} />
+                  <SidebarNavList
+                    items={navItems}
+                    isActive={isActive}
+                    layer="conversation"
+                    agentId={agentId}
+                  />
                 </EuiFlexItem>
 
                 <EuiFlexItem grow={false}>

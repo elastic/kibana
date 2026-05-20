@@ -5,24 +5,36 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Link } from 'react-router-dom-v5-compat';
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getEbtProps } from '@kbn/ebt-click';
-import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT, AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
 
 import type { SidebarNavItem } from '../../../../route_config';
+import { useKibana } from '../../../../hooks/use_kibana';
 
 interface SidebarNavListProps {
   items: SidebarNavItem[];
   isActive: (path: string) => boolean;
   onItemClick?: () => void;
+  layer: 'conversation' | 'manage';
+  agentId?: string;
 }
 
-export const SidebarNavList: React.FC<SidebarNavListProps> = ({ items, isActive, onItemClick }) => {
+export const SidebarNavList: React.FC<SidebarNavListProps> = ({
+  items,
+  isActive,
+  onItemClick,
+  layer,
+  agentId,
+}) => {
   const { euiTheme } = useEuiTheme();
+  const {
+    services: { analytics },
+  } = useKibana();
 
   const baseLinkStyles = css`
     display: flex;
@@ -47,6 +59,19 @@ export const SidebarNavList: React.FC<SidebarNavListProps> = ({ items, isActive,
     color: ${euiTheme.colors.textPrimary};
   `;
 
+  const handleNavClick = useCallback(
+    (item: SidebarNavItem) => {
+      const navItem = item.path.split('/').filter(Boolean).pop() ?? item.path;
+      analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.SidebarNavigationClick, {
+        layer,
+        item: navItem,
+        ...(agentId ? { agent_id: agentId } : {}),
+      });
+      onItemClick?.();
+    },
+    [analytics, layer, agentId, onItemClick]
+  );
+
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexGroup direction="column" gutterSize="xs">
@@ -55,7 +80,7 @@ export const SidebarNavList: React.FC<SidebarNavListProps> = ({ items, isActive,
             <Link
               to={item.path}
               css={isActive(item.path) ? activeLinkStyles : baseLinkStyles}
-              onClick={onItemClick}
+              onClick={() => handleNavClick(item)}
               {...getEbtProps({
                 element: AGENT_BUILDER_UI_EBT.element.SIDEBAR,
                 action: AGENT_BUILDER_UI_EBT.action.navSidebar.SIDEBAR_NAVIGATION_CLICK,

@@ -36,7 +36,9 @@ export const AGENT_BUILDER_EVENT_TYPES = {
   InappOpenFullscreen: `${TELEMETRY_PREFIX}_inapp_open_fullscreen`,
   FullscreenEntryPoint: `${TELEMETRY_PREFIX}_fullscreen_entry_point`,
   SidebarLayerTransition: `${TELEMETRY_PREFIX}_sidebar_layer_transition`,
+  SidebarNavigationClick: `${TELEMETRY_PREFIX}_sidebar_navigation_click`,
   AgentSwitch: `${TELEMETRY_PREFIX}_agent_switch`,
+  ManageAllAgentsClick: `${TELEMETRY_PREFIX}_manage_all_agents_click`,
   ConversationStart: `${TELEMETRY_PREFIX}_conversation_start`,
   ConversationResume: `${TELEMETRY_PREFIX}_conversation_resume`,
   ConversationSearch: `${TELEMETRY_PREFIX}_conversation_search`,
@@ -303,6 +305,16 @@ export interface ReportSidebarLayerTransitionParams {
   trigger: 'customize_click' | 'manage_click' | 'back_click';
 }
 
+export interface ReportSidebarNavigationClickParams {
+  layer: 'conversation' | 'manage';
+  item: string;
+  agent_id?: string;
+}
+
+export interface ReportManageAllAgentsClickParams {
+  current_agent_id: string;
+}
+
 export interface ReportAgentSwitchParams {
   from_agent_id: string;
   to_agent_id: string;
@@ -372,7 +384,9 @@ export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.InappOpenFullscreen]: ReportInappOpenFullscreenParams;
   [AGENT_BUILDER_EVENT_TYPES.FullscreenEntryPoint]: ReportFullscreenEntryPointParams;
   [AGENT_BUILDER_EVENT_TYPES.SidebarLayerTransition]: ReportSidebarLayerTransitionParams;
+  [AGENT_BUILDER_EVENT_TYPES.SidebarNavigationClick]: ReportSidebarNavigationClickParams;
   [AGENT_BUILDER_EVENT_TYPES.AgentSwitch]: ReportAgentSwitchParams;
+  [AGENT_BUILDER_EVENT_TYPES.ManageAllAgentsClick]: ReportManageAllAgentsClickParams;
   [AGENT_BUILDER_EVENT_TYPES.ConversationStart]: ReportConversationStartParams;
   [AGENT_BUILDER_EVENT_TYPES.ConversationResume]: ReportConversationResumeParams;
   [AGENT_BUILDER_EVENT_TYPES.ConversationSearch]: ReportConversationSearchParams;
@@ -406,7 +420,9 @@ export type AgentBuilderTelemetryEvent =
   | EventTypeOpts<ReportInappOpenFullscreenParams>
   | EventTypeOpts<ReportFullscreenEntryPointParams>
   | EventTypeOpts<ReportSidebarLayerTransitionParams>
+  | EventTypeOpts<ReportSidebarNavigationClickParams>
   | EventTypeOpts<ReportAgentSwitchParams>
+  | EventTypeOpts<ReportManageAllAgentsClickParams>
   | EventTypeOpts<ReportConversationStartParams>
   | EventTypeOpts<ReportConversationResumeParams>
   | EventTypeOpts<ReportConversationSearchParams>
@@ -439,7 +455,9 @@ export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.InappOpenFullscreen
   | typeof AGENT_BUILDER_EVENT_TYPES.FullscreenEntryPoint
   | typeof AGENT_BUILDER_EVENT_TYPES.SidebarLayerTransition
+  | typeof AGENT_BUILDER_EVENT_TYPES.SidebarNavigationClick
   | typeof AGENT_BUILDER_EVENT_TYPES.AgentSwitch
+  | typeof AGENT_BUILDER_EVENT_TYPES.ManageAllAgentsClick
   | typeof AGENT_BUILDER_EVENT_TYPES.ConversationStart
   | typeof AGENT_BUILDER_EVENT_TYPES.ConversationResume
   | typeof AGENT_BUILDER_EVENT_TYPES.ConversationSearch
@@ -1374,6 +1392,47 @@ const SIDEBAR_LAYER_TRANSITION_EVENT: AgentBuilderTelemetryEvent = {
   },
 };
 
+const SIDEBAR_NAVIGATION_CLICK_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.SidebarNavigationClick,
+  schema: {
+    layer: {
+      type: 'keyword',
+      _meta: {
+        description: 'Sidebar layer where the navigation click occurred (conversation|manage)',
+        optional: false,
+      },
+    },
+    item: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Nav item clicked (instructions|skills|plugins|connectors|advanced|agents|tools)',
+        optional: false,
+      },
+    },
+    agent_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'ID of the agent in context when the nav item was clicked',
+        optional: true,
+      },
+    },
+  },
+};
+
+const MANAGE_ALL_AGENTS_CLICK_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.ManageAllAgentsClick,
+  schema: {
+    current_agent_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'ID of the agent that was selected when the user clicked Manage all agents',
+        optional: false,
+      },
+    },
+  },
+};
+
 const AGENT_SWITCH_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.AgentSwitch,
   schema: {
@@ -1555,6 +1614,8 @@ export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unk
   INAPP_OPEN_FULLSCREEN_EVENT,
   FULLSCREEN_ENTRY_POINT_EVENT,
   SIDEBAR_LAYER_TRANSITION_EVENT,
+  SIDEBAR_NAVIGATION_CLICK_EVENT,
+  MANAGE_ALL_AGENTS_CLICK_EVENT,
   AGENT_SWITCH_EVENT,
   CONVERSATION_START_EVENT,
   CONVERSATION_RESUME_EVENT,
