@@ -256,6 +256,7 @@ dependsOn:
   - '@kbn/rrule'
   - '@kbn/agent-builder-genai-utils'
   - '@kbn/agent-builder-server'
+  - '@kbn/agent-builder-workflows-plugin'
   - '@kbn/object-utils'
   - '@kbn/ml-common-types'
   - '@kbn/control-group-renderer'
