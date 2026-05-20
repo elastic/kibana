@@ -25,7 +25,6 @@ export const servers: ScoutServerConfig = {
         MOCK_IDP_UIAM_OAUTH_BASE_URL,
       ])}`,
       `--xpack.security.mcp.oauth2.metadata.resource=http://localhost:5620`,
-      '--uiSettings.overrides.agentBuilder:uiamOAuthClientManagement=true',
     ],
   },
 };
