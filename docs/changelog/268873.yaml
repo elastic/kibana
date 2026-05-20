@@ -6,4 +6,4 @@ type: enhancement
 products:
 - product: cloud-serverless
   target: 2026-05-19
-title: 'Service map: Add service map preview to the alerts page'
+title: 'Add service map preview to the alerts page'

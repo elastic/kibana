@@ -8,4 +8,4 @@ products:
   target: 2026-05-19
 areas:
 - Search and data
-title: Add new actions that allow to remove OTel collector
+title: Add a "Remove collector" action for OpAMP collectors in the Fleet agents list
