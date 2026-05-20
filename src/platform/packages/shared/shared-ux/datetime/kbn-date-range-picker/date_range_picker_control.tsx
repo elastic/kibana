@@ -27,6 +27,9 @@ import { useDateRangePickerContext } from './date_range_picker_context';
 import { useSelectTextPartsWithArrowKeys } from './hooks/use_select_text_parts_with_arrow_keys';
 import { useInputHintText } from './hooks/use_input_hint_text';
 import { inputControlTexts } from './translations';
+import { DateRangeValueDisplay } from './components/date_range_value_display';
+import type { RangePart } from './parse/parse_range_parts';
+import { parseDisplayParts, parseInputParts } from './parse/parse_range_parts';
 
 /**
  * The control portion of the DateRangePicker: displays a button when idle
@@ -67,6 +70,7 @@ export function DateRangePickerControl() {
   const controlRef = useRef<HTMLDivElement>(null);
   const wasEditingRef = useRef(false);
   const wasClearedRef = useRef(false);
+  const clickedDisplayPartRef = useRef<RangePart | null>(null);
 
   /** Focus the button when transitioning from editing to idle. */
   useEffect(() => {
@@ -100,6 +104,27 @@ export function DateRangePickerControl() {
   const onButtonClick = () => {
     setIsEditing(true);
   };
+
+  const handleDisplayPartClick = (part: RangePart) => {
+    clickedDisplayPartRef.current = part;
+  };
+
+  useEffect(() => {
+    if (!isEditing || !inputRef.current) return;
+
+    const clickedPart = clickedDisplayPartRef.current;
+    clickedDisplayPartRef.current = null;
+
+    if (!clickedPart) return;
+
+    const inputParts = parseInputParts(text).filter((part) => part.navigable);
+    const displayParts = parseDisplayParts(displayText);
+    const target = findCorrespondingInputPart(inputParts, clickedPart, displayParts);
+
+    if (target) {
+      inputRef.current.setSelectionRange(target.end, target.end);
+    }
+  }, [displayText, inputRef, isEditing, text]);
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const nextValue = event.target.value;
@@ -239,12 +264,18 @@ export function DateRangePickerControl() {
               data-date-range={`${timeRange.start} to ${timeRange.end}`}
               buttonRef={buttonRef}
               aria-label={collapsed ? displayText : undefined}
-              value={collapsed ? undefined : displayText}
               onClick={onButtonClick}
               isInvalid={isInvalid}
               disabled={disabled}
               compressed={compressed}
             >
+              {!collapsed && (
+                <DateRangeValueDisplay
+                  displayText={displayText}
+                  onPartClick={handleDisplayPartClick}
+                  disabled={disabled}
+                />
+              )}
               {!hideBadge && (
                 <EuiBadge data-test-subj="dateRangePickerDurationBadge">
                   {displayShortDuration ?? '--'}
@@ -256,4 +287,30 @@ export function DateRangePickerControl() {
       </EuiFormControlLayout>
     </div>
   );
+}
+
+const getRangePartMatchIndex = (part: RangePart): 0 | 1 => part.rangeIndex ?? 0;
+
+/**
+ * Finds the edit-input part that corresponds to a clicked idle-display part.
+ */
+function findCorrespondingInputPart(
+  inputParts: RangePart[],
+  displayPart: RangePart,
+  displayParts: RangePart[]
+): RangePart | undefined {
+  const displayRangeIndex = getRangePartMatchIndex(displayPart);
+  const displayOrdinal = displayParts.filter(
+    (part) =>
+      part.navigable &&
+      part.kind === displayPart.kind &&
+      getRangePartMatchIndex(part) === displayRangeIndex &&
+      part.start < displayPart.start
+  ).length;
+
+  const candidates = inputParts.filter(
+    (part) => part.kind === displayPart.kind && getRangePartMatchIndex(part) === displayRangeIndex
+  );
+
+  return candidates[displayOrdinal];
 }
