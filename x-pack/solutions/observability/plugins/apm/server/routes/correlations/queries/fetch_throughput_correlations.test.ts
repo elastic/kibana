@@ -207,17 +207,6 @@ describe('fetchThroughputCorrelations', () => {
       const overallMean = (10 + 50 + 50) / 3;
       expect(result.throughputCorrelations[0].rpmDelta).toBeCloseTo(filteredMean - overallMean, 5);
     });
-
-    it('sums bucket doc_counts into totalDocCount', async () => {
-      // Each bucket has docCount=100 and there are 3 buckets → total = 300
-      mockSearch.mockResolvedValueOnce({
-        aggregations: { timeseries: { buckets: overallBuckets } },
-      });
-
-      const result = await fetchThroughputCorrelations({ ...defaultParams, fieldValuePairs: [] });
-
-      expect(result.totalDocCount).toBe(300);
-    });
   });
 
   // -------------------------------------------------------------------------
@@ -225,7 +214,29 @@ describe('fetchThroughputCorrelations', () => {
   // -------------------------------------------------------------------------
 
   describe('threshold and fallback', () => {
-    it('returns no correlations and sets a fallback when no pair meets the threshold', async () => {
+    // overall [1..10], filtered [3,3,4,3,3,4,3,3,4,3] → r ≈ 0.114 (below threshold, non-zero)
+    const linearOverall10 = Array.from({ length: 10 }, (_, i) => makeBucket(i * 60_000, i + 1));
+    const weakBuckets10 = [3, 3, 4, 3, 3, 4, 3, 3, 4, 3].map((v, i) => makeBucket(i * 60_000, v));
+
+    it('returns no correlations and sets a fallback when correlation is below threshold but non-zero', async () => {
+      mockSearch
+        .mockResolvedValueOnce({ aggregations: { timeseries: { buckets: linearOverall10 } } })
+        .mockResolvedValueOnce({ aggregations: { timeseries: { buckets: weakBuckets10 } } });
+
+      const result = await fetchThroughputCorrelations({
+        ...defaultParams,
+        fieldValuePairs: [{ fieldName: 'host.name', fieldValue: 'host-weak' }],
+      });
+
+      expect(result.throughputCorrelations).toHaveLength(0);
+      expect(result.fallbackResult).toBeDefined();
+      expect(result.fallbackResult?.fieldValue).toBe('host-weak');
+      expect(result.fallbackResult?.isFallbackResult).toBe(true);
+      expect(Math.abs(result.fallbackResult?.correlation ?? 0)).toBeGreaterThan(0);
+      expect(Math.abs(result.fallbackResult?.correlation ?? 0)).toBeLessThan(0.3);
+    });
+
+    it('does not set a fallback when the only candidate has correlation exactly zero', async () => {
       mockSearch
         .mockResolvedValueOnce({ aggregations: { timeseries: { buckets: overallBuckets } } })
         .mockResolvedValueOnce({ aggregations: { timeseries: { buckets: uncorrelatedBuckets } } });
@@ -236,9 +247,7 @@ describe('fetchThroughputCorrelations', () => {
       });
 
       expect(result.throughputCorrelations).toHaveLength(0);
-      expect(result.fallbackResult).toBeDefined();
-      expect(result.fallbackResult?.fieldValue).toBe('host-b');
-      expect(result.fallbackResult?.isFallbackResult).toBe(true);
+      expect(result.fallbackResult).toBeUndefined();
     });
 
     it('does not expose fallbackResult when at least one correlation passes the threshold', async () => {
@@ -257,9 +266,8 @@ describe('fetchThroughputCorrelations', () => {
 
     it('tracks the best-absolute-correlation candidate as fallback across multiple below-threshold pairs', async () => {
       // Use a linear overall [1..10] so we can craft clearly-below-threshold filtered series.
-      // pairA: constant [2,2,...,2] → r = 0 (constant y, zero denominator)
-      // pairB: [3,3,4,3,3,4,3,3,4,3] → r ≈ 0.114 (verified analytically)
-      // Both |r| < 0.3, so both are fallback candidates; pairB wins with higher |r|.
+      // pairA: constant [2,2,...,2] → r = 0; excluded from fallback (threshold: |r| > 0)
+      // pairB: [3,3,4,3,3,4,3,3,4,3] → r ≈ 0.114 (verified analytically); wins fallback
       const linearOverall = Array.from({ length: 10 }, (_, i) =>
         makeBucket(i * 60_000, i + 1)
       );
@@ -367,6 +375,19 @@ describe('fetchThroughputCorrelations', () => {
   // -------------------------------------------------------------------------
 
   describe('error resilience', () => {
+    it('returns empty correlations when the overall ES query fails', async () => {
+      mockSearch.mockRejectedValueOnce(new Error('overall ES failure'));
+
+      const result = await fetchThroughputCorrelations({
+        ...defaultParams,
+        fieldValuePairs: [{ fieldName: 'host.name', fieldValue: 'host-a' }],
+      });
+
+      expect(result.throughputCorrelations).toHaveLength(0);
+      expect(result.ccsWarning).toBe(false);
+      expect(result.fallbackResult).toBeUndefined();
+    });
+
     it('continues processing remaining pairs when one ES request rejects', async () => {
       mockSearch
         .mockResolvedValueOnce({ aggregations: { timeseries: { buckets: overallBuckets } } })
@@ -445,7 +466,6 @@ describe('fetchThroughputCorrelations', () => {
         fieldValuePairs: [{ fieldName: 'host.name', fieldValue: 'host-a' }],
       });
 
-      expect(result.totalDocCount).toBe(0);
       expect(result.throughputCorrelations).toHaveLength(0);
     });
   });

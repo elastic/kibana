@@ -25,7 +25,6 @@ import { getEventTypeFromEntityType } from '../utils';
 export interface ThroughputCorrelationsResponse {
   throughputCorrelations: UnifiedCorrelation[];
   ccsWarning: boolean;
-  totalDocCount: number;
   fallbackResult?: UnifiedCorrelation;
 }
 
@@ -138,31 +137,36 @@ export const fetchThroughputCorrelations = async ({
   const intervalString = computeIntervalString(start, end);
   const eventType = getEventTypeFromEntityType(entityType);
 
-  // Fetch overall RPM timeseries once for all comparisons
-  const overallResp = await apmEventClient.search('get_overall_throughput_timeseries', {
-    apm: { events: [eventType] },
-    track_total_hits: false,
-    size: 0,
-    query: getCommonCorrelationsQuery({ start, end, environment, kuery, query }),
-    aggs: {
-      timeseries: {
-        date_histogram: {
-          field: '@timestamp',
-          fixed_interval: intervalString,
-          min_doc_count: 0,
-          extended_bounds: { min: start, max: end },
-        },
-        aggs: {
-          throughput: { rate: { unit: 'minute' as const } },
+  // Fetch overall RPM timeseries once; bail out gracefully if the query fails
+  const overallResp = await apmEventClient
+    .search('get_overall_throughput_timeseries', {
+      apm: { events: [eventType] },
+      track_total_hits: false,
+      size: 0,
+      query: getCommonCorrelationsQuery({ start, end, environment, kuery, query }),
+      aggs: {
+        timeseries: {
+          date_histogram: {
+            field: '@timestamp',
+            fixed_interval: intervalString,
+            min_doc_count: 0,
+            extended_bounds: { min: start, max: end },
+          },
+          aggs: {
+            throughput: { rate: { unit: 'minute' as const } },
+          },
         },
       },
-    },
-  });
+    })
+    .catch(() => null);
+
+  if (!overallResp) {
+    return { throughputCorrelations: [], ccsWarning: false };
+  }
 
   const overallBuckets = overallResp.aggregations?.timeseries.buckets ?? [];
   const overallBucketKeys = overallBuckets.map((b) => b.key as number);
   const overallRpm = overallBuckets.map((b) => (b.throughput as { value: number }).value ?? 0);
-  const totalDocCount = overallBuckets.reduce((acc, b) => acc + b.doc_count, 0);
   const overallMeanRpm = overallRpm.reduce((a, b) => a + b, 0) / (overallRpm.length || 1);
 
   // Fetch filtered RPM timeseries in chunks to cap simultaneous ES requests
@@ -200,7 +204,7 @@ export const fetchThroughputCorrelations = async ({
 
   const correlations: UnifiedCorrelation[] = [];
   let fallbackResult: UnifiedCorrelation | undefined;
-  let bestFallbackAbs = -Infinity;
+  let bestFallbackAbs = 0;
 
   for (const { fieldName, fieldValue, filteredRpm } of entries) {
     const correlation = computePearsonCorrelation(overallRpm, filteredRpm);
@@ -224,13 +228,12 @@ export const fetchThroughputCorrelations = async ({
 
   correlations.sort((a, b) => Math.abs(b.correlation ?? 0) - Math.abs(a.correlation ?? 0));
 
-  const index = apmEventClient.indices[eventType as keyof typeof apmEventClient.indices];
-  const ccsWarning = rejected.length > 0 && isNonLocalIndexName(index);
+  const index = (apmEventClient.indices as Record<string, string | undefined>)[eventType];
+  const ccsWarning = rejected.length > 0 && !!index && isNonLocalIndexName(index);
 
   return {
     throughputCorrelations: correlations,
     ccsWarning,
-    totalDocCount,
     ...(correlations.length === 0 && fallbackResult ? { fallbackResult } : {}),
   };
 };
