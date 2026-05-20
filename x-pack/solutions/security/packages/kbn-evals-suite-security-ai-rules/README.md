@@ -150,6 +150,16 @@ Uses the built-in `createEsqlEquivalenceEvaluator` from `@kbn/evals` to assess w
 
 Scores whether the model correctly refused to generate a rule for a negative case (a prompt where the available data source cannot support the requested detection). Returns N/A for positive cases. Score: 1 (correctly refused) or 0 (incorrectly generated a rule).
 
+### Rule Name / Rule Description (LLM-as-judge — disabled by default)
+
+These two evaluators use `criteria` to check semantic equivalence for the rule name and description fields. They are intentionally disabled in the default evaluator list because they add significant latency per example. Re-enable them in `src/evaluate_dataset.ts` when running thorough multi-model comparisons:
+
+```typescript
+// In createEvaluateDataset, uncomment:
+createRuleNameEvaluator(evaluators),
+createRuleDescriptionEvaluator(evaluators),
+```
+
 ### Tool Trajectory (CODE — 0 to 1)
 
 Scores tool-call coverage and order against a golden sequence using LCS for order (weight 0.4) and set intersection for coverage (weight 0.6). The default golden sequence is inferred from each example's `category`:
