@@ -25,7 +25,7 @@ export const getDashboardCanvasCreationOptions = (
   dashboardState: DashboardState
 ): DashboardCreationOptions => ({
   getInitialInput: () => ({ ...dashboardState, viewMode: 'view' as const }),
-  lazyFlyoutType: 'overlay',
+  panelFlyoutType: 'overlay',
 });
 
 const dashboardCanvasContentStyles = {
