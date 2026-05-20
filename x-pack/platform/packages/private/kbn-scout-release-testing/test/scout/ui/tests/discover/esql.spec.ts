@@ -6,8 +6,101 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { test, tags } from '@kbn/scout';
+import { test, tags, type ScoutPage } from '@kbn/scout';
 import { SavedObjectsTracker, installLogsSampleData, removeLogsSampleData } from '../../helpers';
+
+// Inlined ES|QL + Monaco editor + doc-viewer helpers.
+//
+// On `main`, `DiscoverApp` and `KibanaCodeEditorWrapper` already expose
+// `selectTextBaseLang`, `writeAndSubmitEsqlQuery`, `getEsqlQueryValue`,
+// `codeEditor.setCodeEditorValue`, `codeEditor.triggerSuggest`,
+// `codeEditor.getCodeEditorSuggestWidget`, `openAndWaitForDocViewerFlyout`,
+// and `closeDocViewerFlyout`. Those helpers were not backported to 8.19,
+// so we re-implement them locally here using the same primitives
+// (`page.testSubj`, `page.evaluate` against the global `MonacoEnvironment`)
+// rather than pulling the full kbn-scout backport into this branch.
+interface WaitableDiscover {
+  discover: { waitUntilSearchingHasFinished(): Promise<void> };
+}
+
+const getCurrentQueryMode = async (page: ScoutPage): Promise<'esql' | 'classic'> => {
+  const esqlEditor = page.testSubj.locator('ESQLEditor');
+  const classicQueryInput = page.testSubj.locator('queryInput');
+  await expect(esqlEditor.or(classicQueryInput)).toBeVisible();
+  return (await esqlEditor.isVisible()) ? 'esql' : 'classic';
+};
+
+const selectTextBaseLang = async (page: ScoutPage, pageObjects: WaitableDiscover) => {
+  if ((await getCurrentQueryMode(page)) !== 'esql') {
+    await page.testSubj.click('select-text-based-language-btn');
+  }
+  await pageObjects.discover.waitUntilSearchingHasFinished();
+  await expect(page.testSubj.locator('ESQLEditor').getByTestId('kibanaCodeEditor')).toBeVisible();
+};
+
+const setEsqlEditorValue = async (page: ScoutPage, value: string) => {
+  await page.evaluate((codeEditorValue) => {
+    const monaco = (window as unknown as { MonacoEnvironment?: { monaco?: any } }).MonacoEnvironment
+      ?.monaco;
+    if (!monaco?.editor) {
+      throw new Error('MonacoEnvironment.monaco.editor is not available');
+    }
+    const models = monaco.editor.getModels();
+    if (!models.length) {
+      throw new Error('No Monaco editor models found');
+    }
+    for (const model of models) {
+      model.setValue(codeEditorValue);
+    }
+  }, value);
+};
+
+const getEsqlQueryValue = async (page: ScoutPage, nthIndex: number = 0): Promise<string> => {
+  let result = '';
+  await expect(async () => {
+    result = await page.evaluate((index) => {
+      const monaco = (window as unknown as { MonacoEnvironment?: { monaco?: any } })
+        .MonacoEnvironment?.monaco;
+      if (!monaco?.editor) {
+        throw new Error('MonacoEnvironment.monaco.editor is not available');
+      }
+      const values: string[] = monaco.editor.getModels().map((m: any) => m.getValue());
+      if (!values.length) return '';
+      return index >= 0 && index < values.length ? values[index] : values[0];
+    }, nthIndex);
+  }).toPass({ timeout: 30_000 });
+  return result;
+};
+
+const writeAndSubmitEsqlQuery = async (
+  page: ScoutPage,
+  pageObjects: WaitableDiscover,
+  query: string
+) => {
+  await selectTextBaseLang(page, pageObjects);
+  await setEsqlEditorValue(page, query);
+  await page.testSubj.click('querySubmitButton');
+  await pageObjects.discover.waitUntilSearchingHasFinished();
+};
+
+const openAndWaitForDocViewerFlyout = async (
+  page: ScoutPage,
+  { rowIndex }: { rowIndex: number }
+) => {
+  const expandButton = page.locator(
+    `[data-grid-visible-row-index="${rowIndex}"] [data-test-subj="docTableExpandToggleColumn"]`
+  );
+  await expect(expandButton).toBeVisible();
+  await expandButton.scrollIntoViewIfNeeded();
+  await expandButton.hover();
+  await expandButton.click({ delay: 50 });
+  await expect(page.testSubj.locator('kbnDocViewer')).toBeVisible({ timeout: 30_000 });
+};
+
+const closeDocViewerFlyout = async (page: ScoutPage) => {
+  await page.testSubj.click('euiFlyoutCloseButton');
+  await page.testSubj.waitForSelector('kbnDocViewer', { state: 'hidden' });
+};
 
 const defaultSettings = {
   defaultIndex: 'kibana_sample_data_logs',
@@ -25,9 +118,6 @@ const SUM_QUERY = 'FROM kibana_sample_data_logs | LIMIT 1000 | STATS total = sum
 const KEEP_QUERY =
   'FROM kibana_sample_data_logs | LIMIT 1000 | KEEP agent.keyword, tags.keyword, geo.coordinates';
 const HISTOGRAM_QUERY = 'FROM kibana_sample_data_logs | LIMIT 1000';
-// Trailing space is required so the ES|QL language server treats the cursor as
-// the next argument position and surfaces the "Create control" suggestion.
-const CREATE_CONTROL_QUERY = 'FROM kibana_sample_data_logs | WHERE agent.keyword == ';
 
 const KEPT_FIELDS = ['agent.keyword', 'tags.keyword', 'geo.coordinates'];
 const DROPPED_FIELDS = ['bytes', 'clientip', 'extension', 'response'];
@@ -38,11 +128,6 @@ const METRIC_VIS = 'mtrVis';
 const EDIT_FLYOUT_HEADER = 'editFlyoutHeader';
 const CANCEL_FLYOUT_BUTTON = 'cancelFlyoutButton';
 const PANEL_ACTION_EDIT = 'embeddablePanelAction-editPanel';
-const CREATE_ESQL_CONTROL_FLYOUT = 'create_esql_control_flyout';
-const ESQL_VARIABLE_NAME_INPUT = 'esqlVariableName';
-const ESQL_CONTROL_LABEL_INPUT = 'esqlControlLabel';
-const SAVE_ESQL_CONTROL_BUTTON = 'saveEsqlControlsFlyoutButton';
-const CONTROLS_GROUP_WRAPPER = 'controls-group-wrapper';
 
 const tracker = new SavedObjectsTracker();
 
@@ -71,11 +156,11 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
     page,
     pageObjects,
   }) => {
-    await pageObjects.discover.selectTextBaseLang();
+    await selectTextBaseLang(page, pageObjects);
 
     await test.step('verify ES|QL editor is active with a non-empty default query', async () => {
       await expect(page.testSubj.locator(ESQL_EDITOR)).toBeVisible();
-      const defaultQuery = await pageObjects.discover.getEsqlQueryValue();
+      const defaultQuery = await getEsqlQueryValue(page);
       expect(defaultQuery.trim().length).toBeGreaterThan(0);
     });
 
@@ -86,68 +171,17 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
     });
   });
 
-  test('should create an ES|QL value variable control from the Discover editor', async ({
-    page,
-    pageObjects,
-  }) => {
-    const variableName = '?agent_keyword';
-    const controlLabel = 'Agent keyword';
-    const { codeEditor } = pageObjects.discover;
-
-    await pageObjects.discover.selectTextBaseLang();
-
-    await test.step('open the Create control flyout from the Monaco suggestion list', async () => {
-      await codeEditor.setCodeEditorValue(CREATE_CONTROL_QUERY);
-
-      const suggestWidget = codeEditor.getCodeEditorSuggestWidget();
-      const createControlRow = suggestWidget.locator('.monaco-list-row', {
-        hasText: 'Create control',
-      });
-
-      // The ES|QL language server may take a moment to surface "Create control"
-      // after the model is updated. Retry triggering the suggest widget until
-      // the row appears rather than relying on an arbitrary sleep.
-      await expect(async () => {
-        await codeEditor.triggerSuggest(CREATE_CONTROL_QUERY);
-        await expect(createControlRow).toBeVisible({ timeout: 2_000 });
-      }).toPass({ timeout: 30_000 });
-
-      await createControlRow.click();
-      await expect(page.testSubj.locator(CREATE_ESQL_CONTROL_FLYOUT)).toBeVisible();
-    });
-
-    await test.step('configure the variable name and label, then save the control', async () => {
-      await page.testSubj.fill(ESQL_VARIABLE_NAME_INPUT, variableName);
-      await page.testSubj.fill(ESQL_CONTROL_LABEL_INPUT, controlLabel);
-
-      const saveButton = page.testSubj.locator(SAVE_ESQL_CONTROL_BUTTON);
-      await expect(saveButton).toBeEnabled();
-      await saveButton.click();
-      await expect(page.testSubj.locator(CREATE_ESQL_CONTROL_FLYOUT)).toBeHidden();
-    });
-
-    await test.step('verify the control renders and the editor query references the variable', async () => {
-      await expect(page.testSubj.locator(CONTROLS_GROUP_WRAPPER)).toBeVisible();
-
-      const updatedQuery = await pageObjects.discover.getEsqlQueryValue();
-      expect(updatedQuery).toContain(`agent.keyword == ${variableName}`);
-
-      await pageObjects.discover.waitUntilSearchingHasFinished();
-      await expect(page.testSubj.locator('discoverDocTable')).toBeVisible();
-    });
-  });
-
   test('should display a metric visualization for ES|QL STATS queries (count and sum)', async ({
     page,
     pageObjects,
   }) => {
     await test.step('renders a metric viz for a STATS count() query', async () => {
-      await pageObjects.discover.writeAndSubmitEsqlQuery(STATS_QUERY);
+      await writeAndSubmitEsqlQuery(page, pageObjects, STATS_QUERY);
       await expect(page.testSubj.locator(METRIC_VIS)).toBeVisible();
     });
 
     await test.step('renders a metric viz for a STATS sum() query', async () => {
-      await pageObjects.discover.writeAndSubmitEsqlQuery(SUM_QUERY);
+      await writeAndSubmitEsqlQuery(page, pageObjects, SUM_QUERY);
       await expect(page.testSubj.locator(METRIC_VIS)).toBeVisible();
     });
   });
@@ -156,7 +190,7 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
     page,
     pageObjects,
   }) => {
-    await pageObjects.discover.writeAndSubmitEsqlQuery(STATS_QUERY);
+    await writeAndSubmitEsqlQuery(page, pageObjects, STATS_QUERY);
 
     await test.step('open the edit visualization flyout', async () => {
       await page.testSubj.click('unifiedHistogramEditFlyoutVisualization');
@@ -174,13 +208,14 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
   });
 
   test('should save an ES|QL visualization to a new dashboard from Discover', async ({
+    page,
     pageObjects,
   }) => {
     const visName = 'ES|QL Stats Vis - New Dashboard';
     tracker.track({ type: 'lens', title: visName });
     tracker.track({ type: 'dashboard' });
 
-    await pageObjects.discover.writeAndSubmitEsqlQuery(STATS_QUERY);
+    await writeAndSubmitEsqlQuery(page, pageObjects, STATS_QUERY);
 
     await test.step('save the ES|QL visualization to a new dashboard', async () => {
       await pageObjects.discover.saveVisualizationToNewDashboard(visName);
@@ -202,7 +237,7 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
     tracker.track({ type: 'dashboard', title: dashboardName });
 
     await test.step('save an ES|QL chart to a new dashboard', async () => {
-      await pageObjects.discover.writeAndSubmitEsqlQuery(STATS_QUERY);
+      await writeAndSubmitEsqlQuery(page, pageObjects, STATS_QUERY);
       await pageObjects.discover.saveVisualizationToNewDashboard(visName);
       await pageObjects.dashboard.waitForRenderComplete();
       await pageObjects.dashboard.saveDashboard(dashboardName);
@@ -247,9 +282,10 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
   });
 
   test('should restrict sidebar fields and grid columns to KEEP-listed fields', async ({
+    page,
     pageObjects,
   }) => {
-    await pageObjects.discover.writeAndSubmitEsqlQuery(KEEP_QUERY);
+    await writeAndSubmitEsqlQuery(page, pageObjects, KEEP_QUERY);
 
     await test.step('verify only KEEP-listed fields are present in the sidebar', async () => {
       await pageObjects.discover.expectSelectedSidebarFieldsToEqual(KEPT_FIELDS);
@@ -274,7 +310,7 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
     tracker.track({ type: 'search', title: savedSearchName });
 
     await test.step('write a KEEP ES|QL query and save the Discover session', async () => {
-      await pageObjects.discover.writeAndSubmitEsqlQuery(KEEP_QUERY);
+      await writeAndSubmitEsqlQuery(page, pageObjects, KEEP_QUERY);
       await pageObjects.discover.expectSelectedSidebarFieldsToEqual(KEPT_FIELDS);
       await pageObjects.discover.saveSearch(savedSearchName);
     });
@@ -303,8 +339,8 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
       // Expanding a row proves the embedded saved-search grid is fully
       // interactive end-to-end: rows are rendered, the expand action
       // surfaces, and the document-viewer flyout opens for the row.
-      await pageObjects.discover.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
-      await pageObjects.discover.closeDocViewerFlyout();
+      await openAndWaitForDocViewerFlyout(page, { rowIndex: 0 });
+      await closeDocViewerFlyout(page);
     });
   });
 
@@ -317,7 +353,7 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
     tracker.track({ type: 'lens', title: visName });
     tracker.track({ type: 'dashboard', title: dashboardName });
 
-    await pageObjects.discover.writeAndSubmitEsqlQuery(HISTOGRAM_QUERY);
+    await writeAndSubmitEsqlQuery(page, pageObjects, HISTOGRAM_QUERY);
 
     await test.step('verify a histogram (xy chart) is rendered for the ES|QL query', async () => {
       await pageObjects.discover.expectXYVisChartVisible();

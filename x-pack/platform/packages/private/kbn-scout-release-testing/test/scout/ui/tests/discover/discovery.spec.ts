@@ -18,8 +18,6 @@ const defaultSettings = {
 };
 const defaultStartTime = 'Sep 19, 2015 @ 06:31:44.000';
 const defaultEndTime = 'Sep 23, 2015 @ 18:31:44.000';
-const defaultStartTimeIso = '2015-09-19T06:31:44.000Z';
-const defaultEndTimeIso = '2015-09-23T18:31:44.000Z';
 const endTimeNoResults = 'Sep 19, 2015 @ 18:45:00.000';
 const queryName1 = 'Query # 1';
 const queryName2 = 'Query # 2';
@@ -62,9 +60,12 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
       from: defaultStartTime,
       to: defaultEndTime,
     });
+    // `getTimeConfig` reads the legacy `EuiSuperDatePicker` start/end button
+    // text, which is the formatted display string (the new date-range picker's
+    // ISO `data-date-range` attribute used on `main` does not exist in 8.19).
     const time = await pageObjects.datePicker.getTimeConfig();
-    expect(time.start).toBe(defaultStartTimeIso);
-    expect(time.end).toBe(defaultEndTimeIso);
+    expect(time.start).toBe(defaultStartTime);
+    expect(time.end).toBe(defaultEndTime);
 
     const rowData = await pageObjects.discover.getDocTableIndex(1);
     expect(rowData).toContain('Sep 22, 2015 @ 23:50:13.253');
@@ -80,21 +81,23 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
     const interval = 3;
     await pageObjects.datePicker.startAutoRefresh(interval);
 
-    // The auto-refresh button renders the live mm:ss countdown as its only
-    // text content (the icon is an inline SVG), so we can prove auto-refresh
-    // fired by observing the countdown tick down and then reset back to the
-    // configured interval.
-    const autoRefreshButton = page.testSubj.locator('dateRangePickerAutoRefreshButton');
-    const getCountdownSeconds = async (): Promise<number> => {
-      const [minutes, seconds] = (await autoRefreshButton.innerText())
-        .trim()
-        .split(':')
-        .map(Number);
-      return minutes * 60 + seconds;
-    };
+    // The mm:ss countdown button (`dateRangePickerAutoRefreshButton`) only
+    // exists on the new date-range picker (main); 8.19 ships only the legacy
+    // `EuiSuperDatePicker`, where auto-refresh state lives behind the
+    // quick-menu popover. Re-open the quick menu and assert the toggle is
+    // running with the requested interval — that proves `startAutoRefresh`
+    // configured auto-refresh end-to-end.
+    await page.testSubj.click('superDatePickerToggleQuickMenuButton');
 
-    await expect.poll(getCountdownSeconds, { timeout: 5_000 }).toBeLessThan(interval);
-    await expect.poll(getCountdownSeconds, { timeout: 5_000 }).toBe(interval);
+    const toggleRefreshButton = page.testSubj.locator('superDatePickerToggleRefreshButton');
+    await expect(toggleRefreshButton).toBeVisible();
+    await expect(toggleRefreshButton).toHaveAttribute('aria-checked', 'true');
+
+    const intervalInput = page.testSubj.locator('superDatePickerRefreshIntervalInput');
+    await expect(intervalInput).toHaveValue(interval.toString());
+
+    // Close the quick menu so it doesn't bleed into the next test.
+    await page.keyboard.press('Escape');
   });
 
   test('load query should show query name', async ({ pageObjects }) => {
@@ -119,9 +122,10 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
     await pageObjects.discover.clickHistogramBar();
     await pageObjects.discover.waitUntilSearchingHasFinished();
 
+    // Legacy super-date-picker reports the formatted display value, not ISO.
     const time = await pageObjects.datePicker.getTimeConfig();
-    expect(time.start).toBe('2015-09-21T09:00:00.000Z');
-    expect(time.end).toBe('2015-09-21T12:00:00.000Z');
+    expect(time.start).toBe('Sep 21, 2015 @ 09:00:00.000');
+    expect(time.end).toBe('Sep 21, 2015 @ 12:00:00.000');
 
     await expect
       .poll(
@@ -217,6 +221,9 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
 
   test('type a search query and execute a search', async ({ pageObjects }) => {
     const filteredHitCount = 12891;
+    // `writeAndSubmitKqlQuery` exists on `main` but was not backported to 8.19;
+    // `writeSearchQuery` is its equivalent on this branch's `DiscoverApp`
+    // (fills `queryInput`, submits, waits for the data grid to finish updating).
     await pageObjects.discover.writeSearchQuery('response:200');
     await expect
       .poll(async () => await pageObjects.discover.getHitCountInt())
@@ -240,10 +247,11 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
     await expect(page.testSubj.locator('lnsApp')).toBeVisible();
   });
 
-  test('download CSV report and validate row length', async ({ pageObjects }) => {
+  test('download CSV report and validate row length', async ({ page, pageObjects }) => {
     // Can download saved searches only, so save first
     await pageObjects.discover.saveSearch(queryName3);
     await pageObjects.toasts.closeAll(); // close toast to avoid obstruction
+
     // Wait for download
     const download = await pageObjects.discover.exportAsCsv();
     downloadedFilePath = `${os.tmpdir()}/${download.suggestedFilename()}`;
