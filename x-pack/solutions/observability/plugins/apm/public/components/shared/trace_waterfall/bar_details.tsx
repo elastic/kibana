@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { asDuration } from '../../../../common/utils/formatters';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
+import { SpanMissingDestinationTooltip } from './span_missing_destination_tooltip';
 import { useTraceWaterfallContext } from './trace_waterfall_context';
 import { isFailureOrError } from './utils/is_failure_or_error';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
@@ -84,6 +85,11 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
           }
         `}
       >
+        {item.missingDestination ? (
+          <EuiFlexItem grow={false}>
+            <SpanMissingDestinationTooltip />
+          </EuiFlexItem>
+        ) : null}
         {item.icon && (
           <EuiFlexItem grow={false}>
             <EuiIcon type={item.icon} data-test-subj="apmBarDetailsIcon" aria-hidden={true} />

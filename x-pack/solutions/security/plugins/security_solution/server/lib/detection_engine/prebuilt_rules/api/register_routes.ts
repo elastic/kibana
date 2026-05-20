@@ -14,7 +14,6 @@ import { reviewRuleInstallationRoute } from './review_rule_installation/review_r
 import { reviewRuleUpgradeRoute } from './review_rule_upgrade/review_rule_upgrade_route';
 import { performRuleInstallationRoute } from './perform_rule_installation/perform_rule_installation_route';
 import { performRuleUpgradeRoute } from './perform_rule_upgrade/perform_rule_upgrade_route';
-import { bootstrapPrebuiltRulesRoute } from './bootstrap_prebuilt_rules/bootstrap_prebuilt_rules';
 import { bootstrapEaseRulesRoute } from './bootstrap_ease_rules/bootstrap_ease_rules';
 import { getPrebuiltRuleBaseVersion } from './get_prebuilt_rule_base_version/get_prebuilt_rule_base_version_route';
 import { revertPrebuiltRule } from './revert_prebuilt_rule/revert_prebuilt_rule_route';
@@ -34,7 +33,6 @@ export const registerPrebuiltRulesRoutes = (
   performRuleUpgradeRoute(router, logger);
   reviewRuleInstallationRoute(router, logger);
   reviewRuleUpgradeRoute(router);
-  bootstrapPrebuiltRulesRoute(router, logger);
   bootstrapEaseRulesRoute(router, logger);
   getPrebuiltRuleBaseVersion(router);
   revertPrebuiltRule(router);

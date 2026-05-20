@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+import { apm } from '@elastic/apm-rum';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { lastValueFrom } from 'rxjs';
 import type { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
+
+export const FETCH_LOG_BY_ID_OPERATION_ID = 'fetch-log-by-id';
+const OPERATION_ID_META_KEY = 'operation_id';
 
 export const fetchLogDocumentById = async (
   {
@@ -37,29 +41,45 @@ export const fetchLogDocumentById = async (
         logSources.map((source: { indexPattern: string }) => source.indexPattern).join(',')
       ));
 
-  const result = await lastValueFrom(
-    data.search.search(
-      {
-        params: {
-          index: queryIndex,
-          size: 1,
-          body: {
-            timeout: '20s',
-            fields: [
-              {
-                field: '*',
-                include_unmapped: true,
-              },
-            ],
-            query: { term: { _id: id } },
+  let result;
+  try {
+    result = await lastValueFrom(
+      data.search.search(
+        {
+          params: {
+            index: queryIndex,
+            size: 1,
+            body: {
+              timeout: '20s',
+              fields: [
+                {
+                  field: '*',
+                  include_unmapped: true,
+                },
+              ],
+              query: { term: { _id: id } },
+            },
           },
         },
-      },
-      { abortSignal: signal }
-    )
-  );
+        {
+          abortSignal: signal,
+          executionContext: {
+            meta: { [OPERATION_ID_META_KEY]: FETCH_LOG_BY_ID_OPERATION_ID },
+          },
+        }
+      )
+    );
+  } catch (e) {
+    apm.captureError(
+      e as Error,
+      {
+        labels: { [`kibana_meta_${OPERATION_ID_META_KEY}`]: FETCH_LOG_BY_ID_OPERATION_ID },
+      } as any
+    );
+    throw e;
+  }
 
-  const hit = result.rawResponse.hits.hits[0];
+  const hit = result?.rawResponse.hits.hits[0];
 
   if (!hit) {
     return undefined;

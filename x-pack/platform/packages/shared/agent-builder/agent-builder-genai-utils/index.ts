@@ -49,3 +49,9 @@ export {
   getChartTypeSelectionPromptContent,
   type VisualizationConfig,
 } from './tools/visualization';
+export {
+  resolveResourceForEsqlWithSamplingStats,
+  type ResolvedResourceWithSampling,
+  formatResourceWithSampledValues,
+} from './tools/utils/resources';
+export { type MappingFieldWithStats } from './tools/utils/sampling';
