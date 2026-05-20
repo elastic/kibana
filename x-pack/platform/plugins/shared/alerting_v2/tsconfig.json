@@ -112,7 +112,8 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-elasticsearch-server",
     "@kbn/code-editor",
-    "@kbn/workflows-yaml"
+    "@kbn/workflows-yaml",
+    "@kbn/workflows-ui"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }
