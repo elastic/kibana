@@ -12,7 +12,7 @@ import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
 import { TestProviders } from '../../../common/mock';
 import { RulePanel } from '.';
 import { getStepsData } from '../../../detection_engine/common/helpers';
-import { useRuleDetails } from '../../../flyout_v2/rule/hooks/use_rule_details';
+import { useRuleDetails } from '../../../flyout_v2/rule/main/hooks/use_rule_details';
 import {
   mockAboutStepRule,
   mockDefineStepRule,
@@ -40,7 +40,7 @@ jest.mock('../preview/footer', () => ({
 }));
 
 const mockUseRuleDetails = useRuleDetails as jest.Mock;
-jest.mock('../../../flyout_v2/rule/hooks/use_rule_details');
+jest.mock('../../../flyout_v2/rule/main/hooks/use_rule_details');
 
 const mockGetStepsData = getStepsData as jest.Mock;
 jest.mock('../../../detection_engine/common/helpers');

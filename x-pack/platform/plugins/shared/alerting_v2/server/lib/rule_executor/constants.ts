@@ -14,3 +14,12 @@ export const RULE_EXECUTOR_EVENT_ACTIONS = {
 
 export type RuleExecutorEventAction =
   (typeof RULE_EXECUTOR_EVENT_ACTIONS)[keyof typeof RULE_EXECUTOR_EVENT_ACTIONS];
+/**
+ * Task manager task type used to schedule rule executor ticks.
+ *
+ * Kept in a pure-constants module so consumers that only need the identifier
+ * (e.g. test helpers polling the task manager / event log) can import it
+ * without pulling in `task_runner.ts`, which uses inversify decorators that
+ * not every transpiler in the repo supports.
+ */
+export const ALERTING_RULE_EXECUTOR_TASK_TYPE = 'alerting_v2:rule_executor' as const;

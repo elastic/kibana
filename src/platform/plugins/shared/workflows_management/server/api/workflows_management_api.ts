@@ -22,6 +22,7 @@ import type {
   EsWorkflow,
   EsWorkflowStepExecution,
   GetAvailableConnectorsResponse,
+  ResumeWorkflowExecutionResponseDto,
   UpdatedWorkflowResponseDto,
   ValidateWorkflowResponseDto,
   WorkflowDetailDto,
@@ -578,10 +579,11 @@ export class WorkflowsManagementApi {
 
   public async cancelWorkflowExecution(
     workflowExecutionId: string,
-    spaceId: string
+    spaceId: string,
+    request?: KibanaRequest
   ): Promise<void> {
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
-    return workflowsExecutionEngine.cancelWorkflowExecution(workflowExecutionId, spaceId);
+    return workflowsExecutionEngine.cancelWorkflowExecution(workflowExecutionId, spaceId, request);
   }
 
   public async cancelAllActiveWorkflowExecutions(
@@ -601,9 +603,20 @@ export class WorkflowsManagementApi {
     spaceId: string,
     input: Record<string, unknown>,
     request: KibanaRequest
-  ): Promise<void> {
+  ): Promise<ResumeWorkflowExecutionResponseDto> {
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     return workflowsExecutionEngine.resumeWorkflowExecution(executionId, spaceId, input, request);
+  }
+
+  /**
+   * Cross-workflow listing of step executions currently blocked on
+   * `waitForInput`. Consumed by the Inbox plugin's workflows provider.
+   */
+  public async listWaitingForInputSteps(
+    spaceId: string,
+    params: { page?: number; perPage?: number } = {}
+  ): Promise<{ results: EsWorkflowStepExecution[]; total: number }> {
+    return this.workflowsService.listWaitingForInputSteps(spaceId, params);
   }
 
   public async getWorkflowStats(spaceId: string, options?: { includeExecutionStats?: boolean }) {

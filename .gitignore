@@ -197,3 +197,6 @@ src/platform/plugins/shared/console/packaging/react/translations
 .collect_commits_marker
 
 .superset/*
+# Agent skill working output (team-auto-tests-stats markdown only — never commit)
+.cursor/tmp/
+.agents/tmp/
