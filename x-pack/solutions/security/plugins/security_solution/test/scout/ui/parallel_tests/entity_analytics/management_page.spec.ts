@@ -44,15 +44,7 @@ spaceTest.describe(
         name: `${RISK_SCORE_RULE.name}_${scoutSpace.id}_${Date.now()}`,
       });
 
-      // v1 exercises the platform_engineer permission path; v2 still has
-      // outstanding privilege gaps (e.g. risk-score maintainer init) that are
-      // out of scope for this PR, so v2 tests log in as admin and exercise
-      // the v2 UI flow functionally without asserting on the role story.
-      if (isV2(title)) {
-        await browserAuth.loginAsAdmin();
-      } else {
-        await browserAuth.loginAsPlatformEngineer();
-      }
+      await browserAuth.loginAsPlatformEngineer();
     });
 
     spaceTest.afterEach(async ({ apiServices }, { title }) => {
