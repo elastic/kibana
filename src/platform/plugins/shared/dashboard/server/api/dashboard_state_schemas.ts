@@ -26,7 +26,7 @@ import {
   DEFAULT_DASHBOARD_OPTIONS,
 } from '../../common/constants';
 
-const MAX_PANELS = 100;
+const MAX_PANELS = 1_000;
 
 export const panelGridSchema = schema.object(
   {
