@@ -83,8 +83,8 @@ export function withPhoenixExecutor<T extends { extend: (...args: any[]) => any 
         },
         use: (client: EvalsExecutorClient) => Promise<void>
       ) => {
-        const runId = process.env.TEST_RUN_ID;
-        if (!runId) {
+        const experimentId = process.env.TEST_RUN_ID;
+        if (!experimentId) {
           throw new Error('TEST_RUN_ID environment variable is required for the Phoenix executor');
         }
 
@@ -100,7 +100,7 @@ export function withPhoenixExecutor<T extends { extend: (...args: any[]) => any 
           config: getPhoenixConfig(),
           log,
           model,
-          runId,
+          experimentId,
           repetitions,
         });
 
@@ -109,7 +109,7 @@ export function withPhoenixExecutor<T extends { extend: (...args: any[]) => any 
         const experiments = await phoenixClient.getRanExperiments();
         const ingestRequests = buildIngestRequest({
           source: { kind: 'experiments', experiments },
-          runId,
+          experimentId,
           taskModel: model,
           evaluatorModel,
           repetitions,
@@ -125,11 +125,15 @@ export function withPhoenixExecutor<T extends { extend: (...args: any[]) => any 
             ingestRequests.map((ingestRequest) => evalsKbnClient.ingestScores(ingestRequest))
           );
         } catch (error) {
-          log.error(`Failed to ingest evaluation results for run ID: ${runId}. ${String(error)}`);
+          log.error(
+            `Failed to ingest evaluation results for experiment ID: ${experimentId}. ${String(
+              error
+            )}`
+          );
           throw error;
         }
 
-        await reportModelScore(evalsKbnClient, runId, log, {
+        await reportModelScore(evalsKbnClient, experimentId, log, {
           taskModelId: model.id,
           suiteId,
         });

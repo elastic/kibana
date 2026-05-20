@@ -41,7 +41,7 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
       config: PhoenixConfig;
       log: SomeDevLog;
       model: Model;
-      runId: string;
+      experimentId: string;
       repetitions?: number;
     }
   ) {
@@ -194,13 +194,13 @@ export class KibanaPhoenixClient implements EvalsExecutorClient {
       const ran = await experiments.runExperiment({
         client: this.phoenixClient,
         dataset: { datasetId },
-        experimentName: `Run ID: ${this.options.runId} - Dataset: ${dataset.name}`,
+        experimentName: `Experiment: ${this.options.experimentId} - Dataset: ${dataset.name}`,
         // Phoenix expects its own task/evaluator types. Keep the adapter boundary here.
         task: task as any,
         experimentMetadata: {
           ...experimentMetadata,
           model: this.options.model,
-          runId: this.options.runId,
+          experimentId: this.options.experimentId,
         },
         setGlobalTracerProvider: false,
         evaluators: evaluators.map((evaluator) => {

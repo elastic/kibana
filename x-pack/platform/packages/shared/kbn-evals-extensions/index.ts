@@ -54,7 +54,7 @@
 // This allows users to import from one place, but doesn't create reverse dependency
 export type { Evaluator, Example, EvaluationDataset, TaskOutput } from '@kbn/evals';
 
-export type { EvaluationScoreDocument } from '@kbn/evals';
+export type { EvaluationScoreDocument } from '@kbn/evals-common';
 
 /**
  * Extension-specific types (to be populated in future PRs)

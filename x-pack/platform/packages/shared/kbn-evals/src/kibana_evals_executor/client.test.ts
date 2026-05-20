@@ -22,6 +22,13 @@ import type { EvaluationDataset, Evaluator, RanExperiment } from '../types';
 import { getCurrentTraceId, withEvaluatorSpan, withTaskSpan } from '../utils/tracing';
 import { KibanaEvalsClient } from './client';
 
+const asSingle = (result: RanExperiment | RanExperiment[]): RanExperiment => {
+  if (Array.isArray(result)) {
+    throw new Error('Expected single RanExperiment, got array');
+  }
+  return result;
+};
+
 describe('KibanaEvalsClient', () => {
   const mockLog: jest.Mocked<SomeDevLog> = {
     debug: jest.fn(),
@@ -68,13 +75,11 @@ describe('KibanaEvalsClient', () => {
       examples: [{ input: { q: 99 }, output: { a: 99 } }],
     };
 
-    const expA = await client.runExperiment(
-      { dataset: datasetA, task: async () => ({ ok: true }) },
-      []
+    const expA = asSingle(
+      await client.runExperiment({ dataset: datasetA, task: async () => ({ ok: true }) }, [])
     );
-    const expB = await client.runExperiment(
-      { dataset: datasetB, task: async () => ({ ok: true }) },
-      []
+    const expB = asSingle(
+      await client.runExperiment({ dataset: datasetB, task: async () => ({ ok: true }) }, [])
     );
 
     expect(expA.datasetId).toBe(expB.datasetId);
@@ -95,13 +100,11 @@ describe('KibanaEvalsClient', () => {
       examples: [{ input: { q: 1 }, output: { a: 1 } }],
     };
 
-    const expA = await client.runExperiment(
-      { dataset: datasetA, task: async () => ({ ok: true }) },
-      []
+    const expA = asSingle(
+      await client.runExperiment({ dataset: datasetA, task: async () => ({ ok: true }) }, [])
     );
-    const expB = await client.runExperiment(
-      { dataset: datasetB, task: async () => ({ ok: true }) },
-      []
+    const expB = asSingle(
+      await client.runExperiment({ dataset: datasetB, task: async () => ({ ok: true }) }, [])
     );
 
     expect(expA.datasetId).not.toBe(expB.datasetId);
@@ -138,7 +141,9 @@ describe('KibanaEvalsClient', () => {
       },
     ];
 
-    const exp = await client.runExperiment({ dataset, task, metadata: { foo: 'bar' } }, evaluators);
+    const exp = asSingle(
+      await client.runExperiment({ dataset, task, metadata: { foo: 'bar' } }, evaluators)
+    );
 
     expect(taskCalls).toBe(4); // 2 examples * 2 repetitions
     expect(exp.datasetName).toBe('ds');
@@ -204,7 +209,7 @@ describe('KibanaEvalsClient', () => {
       .mockReturnValueOnce(mockTaskTraceId)
       .mockReturnValueOnce(mockEvalTraceId);
 
-    const exp = await client.runExperiment({ dataset, task }, evaluators);
+    const exp = asSingle(await client.runExperiment({ dataset, task }, evaluators));
     const [firstRun] = Object.values(exp.runs);
     expect(firstRun).toBeDefined();
     expect(firstRun.traceId).toBe(mockTaskTraceId);
@@ -235,7 +240,7 @@ describe('KibanaEvalsClient', () => {
 
     (getCurrentTraceId as jest.Mock).mockReturnValue(null);
 
-    const exp = await client.runExperiment({ dataset, task }, evaluators);
+    const exp = asSingle(await client.runExperiment({ dataset, task }, evaluators));
     const runKeys = Object.keys(exp.runs);
     const firstRun = exp.runs[runKeys[0]];
     expect(firstRun.traceId).toBeNull();
@@ -272,10 +277,7 @@ describe('KibanaEvalsClient', () => {
       return { ok: true };
     };
 
-    const promise: Promise<RanExperiment> = client.runExperiment(
-      { dataset, task, concurrency: 2 },
-      []
-    );
+    const promise = client.runExperiment({ dataset, task, concurrency: 2 }, []);
 
     // Wait until the limiter allows 2 tasks to start (and then blocks).
     for (let i = 0; i < 200; i++) {
@@ -309,17 +311,19 @@ describe('KibanaEvalsClient', () => {
       evaluate: async () => ({ score: 1 }),
     };
 
-    const ranExperiment = await client.runExperiment(
-      {
-        dataset: {
-          name: 'external-dataset',
-          description: 'local placeholder',
-          examples: [],
+    const ranExperiment = asSingle(
+      await client.runExperiment(
+        {
+          dataset: {
+            name: 'external-dataset',
+            description: 'local placeholder',
+            examples: [],
+          },
+          task,
+          trustUpstreamDataset: true,
         },
-        task,
-        trustUpstreamDataset: true,
-      },
-      [evaluator]
+        [evaluator]
+      )
     );
 
     expect(getDatasetByName).toHaveBeenCalledWith('external-dataset');
@@ -392,12 +396,14 @@ describe('KibanaEvalsClient', () => {
       const onEvaluationComplete = jest.fn().mockResolvedValue(undefined);
       const client = createClient({ repetitions: 1, onEvaluationComplete });
 
-      const exp = await client.runExperiment(
-        {
-          dataset: { ...dataset, examples: [dataset.examples[0]] },
-          task: async () => ({ value: 1 }),
-        },
-        [evaluators[0]]
+      const exp = asSingle(
+        await client.runExperiment(
+          {
+            dataset: { ...dataset, examples: [dataset.examples[0]] },
+            task: async () => ({ value: 1 }),
+          },
+          [evaluators[0]]
+        )
       );
 
       expect(onEvaluationComplete).toHaveBeenCalledTimes(1);
@@ -444,9 +450,8 @@ describe('KibanaEvalsClient', () => {
       const onEvaluationComplete = jest.fn().mockRejectedValue(new Error('ES write failed'));
       const client = createClient({ repetitions: 1, onEvaluationComplete });
 
-      const exp = await client.runExperiment(
-        { dataset, task: async () => ({ value: 1 }) },
-        evaluators
+      const exp = asSingle(
+        await client.runExperiment({ dataset, task: async () => ({ value: 1 }) }, evaluators)
       );
 
       // 2 examples * 1 rep * 2 evaluators = 4 calls, all throwing
@@ -463,9 +468,8 @@ describe('KibanaEvalsClient', () => {
     it('is not invoked when no callback is provided', async () => {
       const client = createClient({ repetitions: 1 });
 
-      const exp = await client.runExperiment(
-        { dataset, task: async () => ({ value: 1 }) },
-        evaluators
+      const exp = asSingle(
+        await client.runExperiment({ dataset, task: async () => ({ value: 1 }) }, evaluators)
       );
 
       expect(exp.evaluationRuns).toHaveLength(4);
