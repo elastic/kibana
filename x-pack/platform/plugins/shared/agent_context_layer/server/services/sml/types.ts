@@ -14,6 +14,7 @@ import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { SmlSearchFilters, SmlSearchConstraints } from '../../../common/http_api/sml';
+import type { SmlResolver, SmlResolverItem } from './resolvers/types';
 
 /**
  * One entry in {@link SmlChunk.discovery_labels}. `value` is what the autocomplete
@@ -145,6 +146,16 @@ export interface SmlListItem {
  * Registered via `agentContextLayer.registerType()` during plugin setup.
  *
  * Solutions register these to make their content discoverable via the SML.
+ *
+ * **Origin IDs and resolvers** — SML types can opt in to the resolver
+ * registry by yielding origin ids of the form `<resolver_type>://<path>`
+ * (e.g. `kibana://lens/abc-123`). When the resolver scheme matches a
+ * registered resolver, permissions are computed automatically and the
+ * `chunk.permissions` field returned by `getSmlData` is ignored.
+ *
+ * For SML types that need permission shapes outside the built-in resolvers
+ * (e.g. feature-API privileges like `api:workflowsManagement:read`), keep
+ * yielding bare origin ids and provide `chunk.permissions` explicitly.
  */
 export interface SmlTypeDefinition {
   /** Unique identifier for this SML type (e.g., 'dashboard', 'lens', 'esql') */
@@ -613,4 +624,33 @@ export interface SmlService {
 
   /** List all registered type definitions */
   listTypeDefinitions: () => SmlTypeDefinition[];
+
+  /** Get a resolver by `type` (e.g. `kibana`, `es_document`). */
+  getResolver: (type: string) => SmlResolver | undefined;
+
+  /** List all registered resolvers. */
+  listResolvers: () => SmlResolver[];
+
+  /**
+   * Resolve an SML `origin_id` to its underlying item using the registered
+   * resolver. Scoped to the user identified by `request` — the resolver
+   * uses request-scoped Kibana/ES clients so permission checks happen
+   * naturally during the fetch.
+   *
+   * Returns `undefined` when:
+   *   - `originId` has no resolver scheme prefix
+   *   - the scheme has no matching registered resolver
+   *   - the resource is missing or the user is not authorized
+   *
+   * **Internal use only.** Callers outside the plugin should typically use
+   * `resolveSmlAttachItems` or `getDocuments`; this primitive is exposed on
+   * the internal `SmlService` for low-level integrations.
+   */
+  resolveItem: (params: {
+    originId: string;
+    request: KibanaRequest;
+    spaceId: string;
+    esClient: IScopedClusterClient;
+    savedObjectsClient: SavedObjectsClientContract;
+  }) => Promise<SmlResolverItem | undefined>;
 }

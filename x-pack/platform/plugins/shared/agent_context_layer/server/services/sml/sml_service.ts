@@ -8,6 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-server';
@@ -34,6 +35,18 @@ import {
   SmlAuthzEnumerationIncompleteError,
   SmlCorpusTooLargeError,
 } from './sml_errors';
+import {
+  createSmlResolverRegistry,
+  createKibanaResolver,
+  createEsDocumentResolver,
+  createEsIndexResolver,
+} from './resolvers';
+import type { SmlResolver, SmlResolverItem, SmlResolverRegistry } from './resolvers/types';
+import { parseOriginId } from './resolvers/origin_id';
+import {
+  buildCheckPrivilegesPayload,
+  collectAuthorizedRawPermissions,
+} from './resolvers/permissions_dsl';
 
 // ES client usage pattern in this module:
 // - Read operations (search, get, list, checkAccess) use `esClient.asInternalUser` directly with
@@ -47,6 +60,17 @@ export interface SmlServiceSetup {
    * Should be called during plugin setup.
    */
   registerType: (definition: SmlTypeDefinition) => void;
+
+  /**
+   * Register an SML resolver. Resolvers map an `origin_id` URI scheme (e.g.
+   * `kibana://...`) to a permission computation and an item fetch. The
+   * built-in resolvers (`kibana`, `es_document`, `es_index`) are registered
+   * automatically; downstream plugins can register additional resolvers
+   * for their own resource shapes.
+   *
+   * Should be called during plugin setup.
+   */
+  registerResolver: (resolver: SmlResolver) => void;
 }
 
 export interface SmlServiceStartDeps {
@@ -65,19 +89,29 @@ export const createSmlService = (): SmlServiceInstance => {
 
 class SmlServiceImpl implements SmlServiceInstance {
   private registry: SmlTypeRegistry;
+  private resolverRegistry: SmlResolverRegistry;
   private indexer?: SmlIndexer;
   private crawler?: SmlCrawler;
   private securityAuthz?: AuthorizationServiceSetup;
 
   constructor() {
     this.registry = createSmlTypeRegistry();
+    this.resolverRegistry = createSmlResolverRegistry();
   }
 
   setup({ logger }: { logger: Logger }): SmlServiceSetup {
+    // Register built-in resolvers up front so they're available regardless
+    // of plugin start-up order (consumers calling `registerType` during
+    // setup can rely on the built-in schemes being live).
+    this.registerBuiltinResolvers(logger);
     return {
       registerType: (definition: SmlTypeDefinition) => {
         this.registry.register(definition);
         logger.info(`Registered SML type: ${definition.id}`);
+      },
+      registerResolver: (resolver: SmlResolver) => {
+        this.resolverRegistry.register(resolver);
+        logger.info(`Registered SML resolver: ${resolver.type}`);
       },
     };
   }
@@ -89,13 +123,18 @@ class SmlServiceImpl implements SmlServiceInstance {
         'SML service started without security authorization — permission checks are disabled (open access)'
       );
     }
-    this.indexer = createSmlIndexer({ registry: this.registry, logger: logger.get('indexer') });
+    this.indexer = createSmlIndexer({
+      registry: this.registry,
+      resolverRegistry: this.resolverRegistry,
+      logger: logger.get('indexer'),
+    });
     this.crawler = new SmlCrawlerImpl({
       indexer: this.indexer,
       logger: logger.get('crawler'),
     });
 
     const crawler = this.crawler;
+    const resolverRegistry = this.resolverRegistry;
 
     return {
       getCrawler: () => crawler,
@@ -190,6 +229,18 @@ class SmlServiceImpl implements SmlServiceInstance {
       listTypeDefinitions: () => {
         return this.registry.list();
       },
+      getResolver: (type: string) => resolverRegistry.get(type),
+      listResolvers: () => resolverRegistry.list(),
+      resolveItem: async ({ originId, request, spaceId, esClient, savedObjectsClient }) =>
+        resolveItem({
+          originId,
+          request,
+          spaceId,
+          esClient,
+          savedObjectsClient,
+          resolverRegistry,
+          logger,
+        }),
     };
   }
 
@@ -198,6 +249,19 @@ class SmlServiceImpl implements SmlServiceInstance {
       throw new Error('SML indexer not initialized — call start() first');
     }
     return this.indexer;
+  }
+
+  private registerBuiltinResolvers(logger: Logger): void {
+    for (const resolver of [
+      createKibanaResolver(),
+      createEsDocumentResolver(),
+      createEsIndexResolver(),
+    ]) {
+      if (!this.resolverRegistry.has(resolver.type)) {
+        this.resolverRegistry.register(resolver);
+        logger.debug(`SML service: registered built-in resolver '${resolver.type}'`);
+      }
+    }
   }
 }
 
@@ -273,6 +337,12 @@ const getAuthorizedPrivileges = async ({
 }): Promise<{ authorizedPerms: Set<string>; authorizedIndices: Set<string> }> => {
   if (permissions.length === 0 && indices.length === 0) {
     return { authorizedPerms: new Set(), authorizedIndices: new Set() };
+  }
+
+  const { payload, classified } = buildCheckPrivilegesPayload(permissions);
+  if (!payload.kibana && !payload.elasticsearch) {
+    // No recognised privileges at all; nothing to check, nothing authorized.
+    return new Set();
   }
 
   try {
@@ -1312,6 +1382,59 @@ const autocompleteSml = async ({
     }
     logger.warn(`SML autocomplete failed: ${(error as Error).message}`);
     throw error;
+  }
+};
+
+/**
+ * Resolve an SML origin id to its underlying resource via the registered
+ * resolver. Returns `undefined` when the origin id has no resolver scheme,
+ * no resolver is registered for the scheme, or the resource is missing /
+ * access is denied (the resolver decides).
+ */
+const resolveItem = async ({
+  originId,
+  request,
+  spaceId,
+  esClient,
+  savedObjectsClient,
+  resolverRegistry,
+  logger,
+}: {
+  originId: string;
+  request: KibanaRequest;
+  spaceId: string;
+  esClient: IScopedClusterClient;
+  savedObjectsClient: SavedObjectsClientContract;
+  resolverRegistry: SmlResolverRegistry;
+  logger: Logger;
+}): Promise<SmlResolverItem | undefined> => {
+  const { scheme, path } = parseOriginId(originId);
+  if (!scheme) {
+    logger.debug(`SML resolveItem: origin '${originId}' has no resolver scheme — cannot resolve`);
+    return undefined;
+  }
+  const resolver = resolverRegistry.get(scheme);
+  if (!resolver) {
+    logger.debug(
+      `SML resolveItem: no resolver registered for scheme '${scheme}' (origin '${originId}')`
+    );
+    return undefined;
+  }
+  try {
+    return await resolver.getItem(path, {
+      esClient,
+      savedObjectsClient,
+      request,
+      spaceId,
+      logger: logger.get(`resolver:${scheme}`),
+    });
+  } catch (error) {
+    logger.warn(
+      `SML resolveItem: resolver '${scheme}' failed for origin '${originId}': ${
+        (error as Error).message
+      }`
+    );
+    return undefined;
   }
 };
 

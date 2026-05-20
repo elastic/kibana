@@ -40,6 +40,22 @@ export type {
   SmlIndexAttachmentContentMode,
 } from './services/sml/types';
 
+export type {
+  SmlResolver,
+  SmlResolverContext,
+  SmlResolverItem,
+  SmlResolverRegistry,
+  ParsedOriginId,
+} from './services/sml/resolvers';
+
+export {
+  parseOriginId,
+  formatOriginId,
+  KIBANA_RESOLVER_TYPE,
+  ES_DOCUMENT_RESOLVER_TYPE,
+  ES_INDEX_RESOLVER_TYPE,
+} from './services/sml/resolvers';
+
 export type { SmlResolvedItemResult } from './services/sml/execute_sml_attach_items';
 export { smlElasticsearchIndexMappings, smlIndexName } from './services/sml/sml_storage';
 export { SmlSearchFilterType } from '../common/http_api/sml';

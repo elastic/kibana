@@ -21,9 +21,12 @@ import type {
 } from './types';
 import { createSmlStorage, smlIndexName } from './sml_storage';
 import { isNotFoundError } from './sml_service';
+import type { SmlResolverRegistry } from './resolvers/types';
+import { parseOriginId } from './resolvers/origin_id';
 
 export interface SmlIndexerDeps {
   registry: SmlTypeRegistry;
+  resolverRegistry: SmlResolverRegistry;
   logger: Logger;
 }
 
@@ -78,16 +81,22 @@ export interface SmlIndexer {
   }) => Promise<void>;
 }
 
-export const createSmlIndexer = ({ registry, logger }: SmlIndexerDeps): SmlIndexer => {
-  return new SmlIndexerImpl({ registry, logger });
+export const createSmlIndexer = ({
+  registry,
+  resolverRegistry,
+  logger,
+}: SmlIndexerDeps): SmlIndexer => {
+  return new SmlIndexerImpl({ registry, resolverRegistry, logger });
 };
 
 class SmlIndexerImpl implements SmlIndexer {
   private readonly registry: SmlTypeRegistry;
+  private readonly resolverRegistry: SmlResolverRegistry;
   private readonly logger: Logger;
 
-  constructor({ registry, logger }: SmlIndexerDeps) {
+  constructor({ registry, resolverRegistry, logger }: SmlIndexerDeps) {
     this.registry = registry;
+    this.resolverRegistry = resolverRegistry;
     this.logger = logger;
   }
 

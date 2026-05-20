@@ -175,7 +175,7 @@ const createMockSecurityAuthz = (
 
 const createMockSecurityAuthzPartial = (
   authorized: string[],
-  unauthorized: string[]
+  _unauthorized: string[]
 ): AuthorizationServiceSetup => {
   // `unauthorized` is retained as a documentation aid for the test author —
   // the mock simply treats any privilege not in `authorized` as denied.
@@ -252,6 +252,117 @@ describe('createSmlService', () => {
       expect(smlService.getTypeDefinition('dashboard')).toBe(def);
       expect(smlService.listTypeDefinitions()).toContain(def);
     });
+
+    it('setup() automatically registers the built-in resolvers', () => {
+      const service = createSmlService();
+      const logger = createMockLogger();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+      const types = smlService.listResolvers().map((r) => r.type);
+      expect(types).toEqual(expect.arrayContaining(['kibana', 'es_document', 'es_index']));
+    });
+
+    it('setup() allows additional resolvers to be registered', () => {
+      const service = createSmlService();
+      const logger = createMockLogger();
+      const setup = service.setup({ logger });
+      setup.registerResolver({
+        type: 'custom',
+        getPermissions: () => [],
+        getItem: async () => undefined,
+      });
+      const smlService = service.start({ logger });
+      expect(smlService.getResolver('custom')).toBeDefined();
+    });
+  });
+});
+
+describe('SmlService.resolveItem', () => {
+  it('routes to the registered resolver via the origin_id scheme', async () => {
+    const service = createSmlService();
+    const logger = loggerMock.create();
+    logger.get = jest.fn().mockReturnValue(logger);
+    const setup = service.setup({ logger });
+    const getItem = jest.fn().mockResolvedValue({ type: 'custom', path: 'foo', data: 'payload' });
+    setup.registerResolver({
+      type: 'custom',
+      getPermissions: () => [],
+      getItem,
+    });
+    const smlService = service.start({ logger });
+
+    const result = await smlService.resolveItem({
+      originId: 'custom://foo',
+      request: {} as KibanaRequest,
+      spaceId: 'default',
+      esClient: {} as IScopedClusterClient,
+      savedObjectsClient: {} as never,
+    });
+
+    expect(getItem).toHaveBeenCalledWith('foo', expect.objectContaining({ spaceId: 'default' }));
+    expect(result).toEqual({ type: 'custom', path: 'foo', data: 'payload' });
+  });
+
+  it('returns undefined when origin_id has no scheme', async () => {
+    const service = createSmlService();
+    const logger = loggerMock.create();
+    logger.get = jest.fn().mockReturnValue(logger);
+    service.setup({ logger });
+    const smlService = service.start({ logger });
+
+    const result = await smlService.resolveItem({
+      originId: 'bare-id',
+      request: {} as KibanaRequest,
+      spaceId: 'default',
+      esClient: {} as IScopedClusterClient,
+      savedObjectsClient: {} as never,
+    });
+
+    expect(result).toBeUndefined();
+  });
+
+  it('returns undefined when no resolver is registered for the scheme', async () => {
+    const service = createSmlService();
+    const logger = loggerMock.create();
+    logger.get = jest.fn().mockReturnValue(logger);
+    service.setup({ logger });
+    const smlService = service.start({ logger });
+
+    const result = await smlService.resolveItem({
+      originId: 'unknown_scheme://anything',
+      request: {} as KibanaRequest,
+      spaceId: 'default',
+      esClient: {} as IScopedClusterClient,
+      savedObjectsClient: {} as never,
+    });
+
+    expect(result).toBeUndefined();
+  });
+
+  it('returns undefined and logs when the resolver throws', async () => {
+    const service = createSmlService();
+    const logger = loggerMock.create();
+    logger.get = jest.fn().mockReturnValue(logger);
+    const setup = service.setup({ logger });
+    setup.registerResolver({
+      type: 'custom',
+      getPermissions: () => [],
+      getItem: async () => {
+        throw new Error('boom');
+      },
+    });
+    const smlService = service.start({ logger });
+
+    const result = await smlService.resolveItem({
+      originId: 'custom://foo',
+      request: {} as KibanaRequest,
+      spaceId: 'default',
+      esClient: {} as IScopedClusterClient,
+      savedObjectsClient: {} as never,
+    });
+
+    expect(result).toBeUndefined();
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("resolver 'custom' failed"));
   });
 });
 

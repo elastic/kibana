@@ -7,6 +7,11 @@
 
 import type { SmlTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
 import {
+  formatOriginId,
+  KIBANA_RESOLVER_TYPE,
+  parseOriginId,
+} from '@kbn/agent-context-layer-plugin/server';
+import {
   DASHBOARD_ATTACHMENT_TYPE,
   dashboardStateToAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
@@ -18,6 +23,31 @@ import type {
 } from '@kbn/dashboard-plugin/server';
 
 const DASHBOARD_SML_TYPE = 'dashboard';
+const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
+
+/**
+ * Build the origin id used for a dashboard SML entry. The path component
+ * (`<saved_object_type>/<saved_object_id>`) is consumed by the built-in
+ * `kibana` resolver to derive the required `saved_object:dashboard/get`
+ * privilege at index time.
+ */
+const buildDashboardOriginId = (savedObjectId: string): string =>
+  formatOriginId(KIBANA_RESOLVER_TYPE, `${DASHBOARD_SAVED_OBJECT_TYPE}/${savedObjectId}`);
+
+/**
+ * Extract the dashboard saved-object id from a prefixed dashboard origin id.
+ * Tolerates legacy bare ids (no `kibana://` scheme) for any unmigrated
+ * crawler-state entries left over from before the resolver-based scheme
+ * was introduced.
+ */
+const extractDashboardId = (originId: string): string => {
+  const { scheme, path } = parseOriginId(originId);
+  if (!scheme) {
+    return originId;
+  }
+  const sep = path.indexOf('/');
+  return sep > 0 ? path.slice(sep + 1) : path;
+};
 
 interface CreateDashboardSmlTypeOptions {
   getDashboardClient: () => Promise<DashboardPluginStart['client']>;
@@ -70,7 +100,7 @@ export const createDashboardSmlType = ({
 
   async *list(context) {
     const finder = context.savedObjectsClient.createPointInTimeFinder({
-      type: 'dashboard',
+      type: DASHBOARD_SAVED_OBJECT_TYPE,
       perPage: 1000,
       namespaces: ['*'],
       fields: ['title'],
@@ -79,7 +109,7 @@ export const createDashboardSmlType = ({
     try {
       for await (const response of finder.find()) {
         yield response.saved_objects.map((savedObject) => ({
-          id: savedObject.id,
+          id: buildDashboardOriginId(savedObject.id),
           updatedAt: savedObject.updated_at ?? new Date().toISOString(),
           spaces: savedObject.namespaces ?? [],
         }));
@@ -90,20 +120,20 @@ export const createDashboardSmlType = ({
   },
 
   getSmlData: async (originId, context) => {
+    const dashboardId = extractDashboardId(originId);
     try {
       const dashboardClient = await getDashboardClient();
-      const dashboard = await dashboardClient.read(context.savedObjectsClient, originId);
+      const dashboard = await dashboardClient.read(context.savedObjectsClient, dashboardId);
 
+      // No `permissions` field — the `kibana` resolver computes
+      // `saved_object:dashboard/get` from the prefixed origin id at
+      // index time.
       return {
         chunks: [
           {
             type: DASHBOARD_SML_TYPE,
-            title: dashboard.data.title ?? originId,
+            title: dashboard.data.title ?? dashboardId,
             content: toDashboardSearchContent(dashboard.data),
-            permissions: {
-              kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
-              elasticsearch: { indices: [] },
-            },
           },
         ],
       };
@@ -116,12 +146,10 @@ export const createDashboardSmlType = ({
   },
 
   toAttachment: async (item, context) => {
+    const dashboardId = extractDashboardId(item.origin_id);
     try {
       const dashboardClient = await getDashboardClient();
-      const dashboard = await dashboardClient.read(
-        context.savedObjectsClient,
-        item.origin_id ?? ''
-      );
+      const dashboard = await dashboardClient.read(context.savedObjectsClient, dashboardId);
 
       return {
         type: DASHBOARD_ATTACHMENT_TYPE,

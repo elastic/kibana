@@ -65,7 +65,7 @@ describe('visualizationSmlType', () => {
       });
     });
 
-    it('returns items with id, updatedAt from so.updated_at, spaces from so.namespaces', async () => {
+    it('returns items with kibana-prefixed id, updatedAt from so.updated_at, spaces from so.namespaces', async () => {
       const savedObjects = [
         {
           id: 'viz-1',
@@ -88,7 +88,7 @@ describe('visualizationSmlType', () => {
 
       expect(result).toEqual([
         {
-          id: 'viz-1',
+          id: 'kibana://lens/viz-1',
           updatedAt: '2024-01-01T00:00:00Z',
           spaces: ['default', 'space-1'],
         },
@@ -117,7 +117,7 @@ describe('visualizationSmlType', () => {
       const result = await collectPages(visualizationSmlType.list(createContext() as never));
 
       expect(result).toHaveLength(1);
-      expect(result[0].id).toBe('viz-2');
+      expect(result[0].id).toBe('kibana://lens/viz-2');
       expect(result[0].updatedAt).toBeDefined();
       expect(new Date(result[0].updatedAt).getTime()).not.toBeNaN();
     });
@@ -144,7 +144,7 @@ describe('visualizationSmlType', () => {
 
       expect(result).toEqual([
         {
-          id: 'viz-3',
+          id: 'kibana://lens/viz-3',
           updatedAt: '2024-02-01T00:00:00Z',
           spaces: [],
         },
@@ -153,7 +153,7 @@ describe('visualizationSmlType', () => {
   });
 
   describe('getSmlData', () => {
-    it('returns chunk with correct type, title, content, permissions', async () => {
+    it('parses the kibana resolver path and returns a chunk WITHOUT permissions', async () => {
       const savedObject = {
         id: 'viz-1',
         type: 'lens',
@@ -177,7 +177,10 @@ describe('visualizationSmlType', () => {
       };
       mockSavedObjectsClient.get.mockResolvedValue(savedObject);
 
-      const result = await visualizationSmlType.getSmlData!('viz-1', createContext() as never);
+      const result = await visualizationSmlType.getSmlData!(
+        'kibana://lens/viz-1',
+        createContext() as never
+      );
 
       expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('lens', 'viz-1');
       expect(result).toEqual({
@@ -186,10 +189,6 @@ describe('visualizationSmlType', () => {
             type: 'visualization',
             title: 'My Visualization',
             content: 'My Visualization\nA test viz\nlnsXY\nFROM test',
-            permissions: {
-              kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
-              elasticsearch: { indices: [] },
-            },
           },
         ],
       });
@@ -219,7 +218,10 @@ describe('visualizationSmlType', () => {
       };
       mockSavedObjectsClient.get.mockResolvedValue(savedObject);
 
-      const result = await visualizationSmlType.getSmlData!('viz-2', createContext() as never);
+      const result = await visualizationSmlType.getSmlData!(
+        'kibana://lens/viz-2',
+        createContext() as never
+      );
 
       expect(result!.chunks[0].content).toBe(
         'Sales Chart\nMonthly sales\nlnsPie\nFROM sales | STATS sum(amount)'
@@ -230,11 +232,14 @@ describe('visualizationSmlType', () => {
       mockSavedObjectsClient.get.mockRejectedValue(new Error('Not found'));
       const context = createContext();
 
-      const result = await visualizationSmlType.getSmlData!('missing-viz', context as never);
+      const result = await visualizationSmlType.getSmlData!(
+        'kibana://lens/missing-viz',
+        context as never
+      );
 
       expect(result).toBeUndefined();
       expect(context.logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining("failed to get data for 'missing-viz'")
+        expect.stringContaining("failed to get data for 'kibana://lens/missing-viz'")
       );
     });
 
@@ -253,7 +258,7 @@ describe('visualizationSmlType', () => {
       mockSavedObjectsClient.get.mockResolvedValue(savedObject);
 
       const result = await visualizationSmlType.getSmlData!(
-        'viz-minimal',
+        'kibana://lens/viz-minimal',
         createContext() as never
       );
 
@@ -261,16 +266,28 @@ describe('visualizationSmlType', () => {
         type: 'visualization',
         title: 'Minimal Viz',
         content: 'Minimal Viz\nlnsXY',
-        permissions: {
-          kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
-          elasticsearch: { indices: [] },
-        },
       });
+    });
+
+    it('accepts legacy bare origin ids without a kibana scheme prefix', async () => {
+      const savedObject = {
+        id: 'legacy-viz',
+        type: 'lens',
+        attributes: { title: 'Legacy', visualizationType: 'lnsXY' },
+        references: [],
+        updated_at: '2024-01-01T00:00:00Z',
+        namespaces: ['default'],
+      };
+      mockSavedObjectsClient.get.mockResolvedValue(savedObject);
+
+      await visualizationSmlType.getSmlData!('legacy-viz', createContext() as never);
+
+      expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('lens', 'legacy-viz');
     });
   });
 
   describe('toAttachment', () => {
-    it('calls resolve with lens and item.origin_id', async () => {
+    it('extracts the lens id from a kibana resolver path and calls resolve', async () => {
       const savedObject = {
         id: 'viz-1',
         type: 'lens',
@@ -298,7 +315,7 @@ describe('visualizationSmlType', () => {
       });
 
       await visualizationSmlType.toAttachment!(
-        { origin_id: 'viz-1' } as never,
+        { origin_id: 'kibana://lens/viz-1' } as never,
         createContext() as never
       );
 
@@ -333,7 +350,7 @@ describe('visualizationSmlType', () => {
       });
 
       const result = await visualizationSmlType.toAttachment!(
-        { origin_id: 'viz-1' } as never,
+        { origin_id: 'kibana://lens/viz-1' } as never,
         createContext() as never
       );
 
@@ -359,7 +376,7 @@ describe('visualizationSmlType', () => {
       });
 
       const result = await visualizationSmlType.toAttachment!(
-        { origin_id: 'viz-1' } as never,
+        { origin_id: 'kibana://lens/viz-1' } as never,
         createContext() as never
       );
 
@@ -371,7 +388,7 @@ describe('visualizationSmlType', () => {
 
       await expect(
         visualizationSmlType.toAttachment!(
-          { origin_id: 'viz-1' } as never,
+          { origin_id: 'kibana://lens/viz-1' } as never,
           createContext() as never
         )
       ).rejects.toThrow('Connection failed');
@@ -404,7 +421,7 @@ describe('visualizationSmlType', () => {
       });
 
       const result = await visualizationSmlType.toAttachment!(
-        { origin_id: 'viz-1' } as never,
+        { origin_id: 'kibana://lens/viz-1' } as never,
         createContext() as never
       );
 

@@ -145,7 +145,7 @@ describe('dashboardSmlType', () => {
     expect(pages).toEqual([
       [
         {
-          id: 'dashboard-1',
+          id: 'kibana://dashboard/dashboard-1',
           updatedAt: '2025-01-01T00:00:00.000Z',
           spaces: ['default'],
         },
@@ -154,14 +154,14 @@ describe('dashboardSmlType', () => {
     expect(finder.close).toHaveBeenCalledTimes(1);
   });
 
-  it('indexes one chunk per dashboard with deep metadata', async () => {
+  it('indexes one chunk per dashboard with deep metadata (no permissions — resolver computes them)', async () => {
     const dashboardClient = createDashboardClient();
     const savedObjectsClient = createSavedObjectsClient();
     const dashboardSmlType = createDashboardSmlType({
       getDashboardClient: async () => dashboardClient,
     });
 
-    const result = await dashboardSmlType.getSmlData('dashboard-1', {
+    const result = await dashboardSmlType.getSmlData('kibana://dashboard/dashboard-1', {
       esClient: {} as never,
       logger: createLogger(),
       savedObjectsClient,
@@ -172,13 +172,11 @@ describe('dashboardSmlType', () => {
         expect.objectContaining({
           type: 'dashboard',
           title: 'System Overview',
-          permissions: {
-            kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
-            elasticsearch: { indices: [] },
-          },
         }),
       ],
     });
+    expect(result?.chunks[0].permissions).toBeUndefined();
+    expect(dashboardClient.read).toHaveBeenCalledWith(expect.anything(), 'dashboard-1');
     expect(result?.chunks[0].content).toContain('System Overview');
     expect(result?.chunks[0].content).toContain('Main dashboard for key metrics');
     expect(result?.chunks[0].content).toContain('CPU Usage');
@@ -199,7 +197,7 @@ describe('dashboardSmlType', () => {
         id: 'chunk-1',
         type: 'dashboard',
         title: 'System Overview',
-        origin_id: 'dashboard-1',
+        origin_id: 'kibana://dashboard/dashboard-1',
         origin: { uri: 'dashboard://dashboard-1' },
         content: '...',
         created_at: '2025-01-01T00:00:00.000Z',
@@ -228,6 +226,7 @@ describe('dashboardSmlType', () => {
         }),
       })
     );
+    expect(dashboardClient.read).toHaveBeenCalledWith(expect.anything(), 'dashboard-1');
     const attachmentData = result?.data as DashboardAttachmentData | undefined;
 
     expect(attachmentData?.panels).toHaveLength(2);
@@ -261,7 +260,7 @@ describe('dashboardSmlType', () => {
         id: 'chunk-2',
         type: 'dashboard',
         title: 'API Lens Dashboard',
-        origin_id: 'dashboard-2',
+        origin_id: 'kibana://dashboard/dashboard-2',
         origin: { uri: 'dashboard://dashboard-2' },
         content: '...',
         created_at: '2025-01-01T00:00:00.000Z',
@@ -309,7 +308,7 @@ describe('dashboardSmlType', () => {
       getDashboardClient: async () => dashboardClient,
     });
 
-    const result = await dashboardSmlType.getSmlData('dashboard-1', {
+    const result = await dashboardSmlType.getSmlData('kibana://dashboard/dashboard-1', {
       esClient: {} as never,
       logger: createLogger(),
       savedObjectsClient,
