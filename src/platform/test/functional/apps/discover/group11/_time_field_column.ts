@@ -373,8 +373,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             const resolvedUrl = decodeURIComponent(await browser.getCurrentUrl());
             expect(resolvedUrl).to.contain('columns:!(bytes)');
-
-            await browser.closeCurrentWindow();
           });
         });
       });
