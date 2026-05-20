@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { Fragment, useEffect, useMemo, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IndexDataVisualizerSpec } from '@kbn/data-visualizer-plugin/public';
@@ -33,7 +33,10 @@ import { useDataSource } from '../../contexts/ml/data_source_context';
 import { useMlManagementLocator } from '../../contexts/kibana/use_create_url';
 import { PageTitle } from '../../components/page_title';
 
-export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false }) => {
+export const IndexDataVisualizerPage: FC<{ esql: boolean; isManagementContext: boolean }> = ({
+  esql = false,
+  isManagementContext,
+}) => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const { services } = useMlKibana();
   const {
@@ -53,6 +56,20 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
   const mlLocator = useMlLocator()!;
   const mlManagementLocator = useMlManagementLocator();
   const mlFeaturesDisabled = !isFullLicense();
+
+  const dataSourceNavigate = useCallback(
+    async (path: string) => {
+      if (isManagementContext && mlManagementLocator) {
+        await mlManagementLocator.navigate({
+          sectionId: 'ml',
+          appId: `anomaly_detection${path}`,
+        });
+      } else {
+        await navigateToPath(path);
+      }
+    },
+    [isManagementContext, navigateToPath, mlManagementLocator]
+  );
 
   useEffect(() => {
     getMlNodeCount(mlApi);
@@ -203,7 +220,7 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
     <MlDataSourcePicker
       currentDataView={dataView ?? null}
       services={services}
-      navigateToPath={navigateToPath}
+      navigateToPath={dataSourceNavigate}
       DataViewPickerComponent={DataViewPicker}
       SavedObjectFinderComponent={SavedObjectFinder}
       filterEsql
@@ -259,6 +276,7 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
               showFrozenDataTierChoice={showNodeInfo}
               esql={esql}
               headerContent={dataSourcePicker}
+              disableSearchSession={isManagementContext}
             />
           )}
         </>

@@ -14,7 +14,12 @@ import type { NavigateToPath } from '../../../contexts/kibana';
 import type { MlRoute } from '../../router';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
-import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import type { NavigateToApp } from '../../breadcrumbs';
+import {
+  getBreadcrumbWithUrlForApp,
+  getStackManagementBreadcrumb,
+  getMlManagementBreadcrumb,
+} from '../../breadcrumbs';
 import { DataSourceContextProvider } from '../../../contexts/ml';
 
 const Page = dynamic(async () => ({
@@ -31,7 +36,7 @@ export const indexBasedRouteFactory = (
   title: i18n.translate('xpack.ml.dataVisualizer.dataView.docTitle', {
     defaultMessage: 'Index data visualizer',
   }),
-  render: () => <PageWrapper esql={false} />,
+  render: () => <PageWrapper esql={false} isManagementContext={false} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', navigateToPath, basePath),
@@ -52,7 +57,7 @@ export const indexESQLBasedRouteFactory = (
   title: i18n.translate('xpack.ml.dataVisualizer.esql.docTitle', {
     defaultMessage: 'Index data visualizer (ES|QL)',
   }),
-  render: () => <PageWrapper esql={true} />,
+  render: () => <PageWrapper esql={true} isManagementContext={false} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', navigateToPath, basePath),
@@ -64,13 +69,52 @@ export const indexESQLBasedRouteFactory = (
   ],
 });
 
-const PageWrapper: FC<{ esql: boolean }> = ({ esql }) => {
+export const indexBasedManagementRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
+  id: 'indexDataVisualizer',
+  path: createPath(ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER),
+  title: i18n.translate('xpack.ml.dataVisualizer.dataView.docTitle', {
+    defaultMessage: 'Index data visualizer',
+  }),
+  render: () => <PageWrapper esql={false} isManagementContext={true} />,
+  breadcrumbs: [
+    getStackManagementBreadcrumb(navigateToApp),
+    getMlManagementBreadcrumb('ANOMALY_DETECTION_MANAGEMENT_BREADCRUMB', navigateToApp),
+    {
+      text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.dataViewLabel', {
+        defaultMessage: 'Index data visualizer',
+      }),
+    },
+  ],
+});
+
+export const indexESQLBasedManagementRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
+  id: 'esqlDataVisualizer',
+  path: createPath(ML_PAGES.DATA_VISUALIZER_ESQL),
+  title: i18n.translate('xpack.ml.dataVisualizer.esql.docTitle', {
+    defaultMessage: 'Index data visualizer (ES|QL)',
+  }),
+  render: () => <PageWrapper esql={true} isManagementContext={true} />,
+  breadcrumbs: [
+    getStackManagementBreadcrumb(navigateToApp),
+    getMlManagementBreadcrumb('ANOMALY_DETECTION_MANAGEMENT_BREADCRUMB', navigateToApp),
+    {
+      text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.esqlLabel', {
+        defaultMessage: 'Index data visualizer (ES|QL)',
+      }),
+    },
+  ],
+});
+
+const PageWrapper: FC<{ esql: boolean; isManagementContext: boolean }> = ({
+  esql,
+  isManagementContext,
+}) => {
   const { context } = useRouteResolver('basic', []);
 
   return (
     <PageLoader context={context}>
       <DataSourceContextProvider>
-        <Page esql={esql} />
+        <Page esql={esql} isManagementContext={isManagementContext} />
       </DataSourceContextProvider>
     </PageLoader>
   );
