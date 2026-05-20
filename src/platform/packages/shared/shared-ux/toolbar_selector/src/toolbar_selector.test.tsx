@@ -239,7 +239,7 @@ describe('ToolbarSelector', () => {
     await user.hover(button);
 
     await waitFor(() => {
-      expect(screen.getByText('Default Label')).toBeInTheDocument();
+      expect(screen.getByRole('tooltip', { hidden: true })).toHaveTextContent('Default Label');
     });
   });
 });

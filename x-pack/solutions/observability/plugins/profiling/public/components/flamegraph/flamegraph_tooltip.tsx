@@ -220,7 +220,7 @@ function FlameGraphTooltipComponent({
               <EuiFlexItem>
                 <EuiFlexGroup gutterSize="xs">
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="info" />
+                    <EuiIcon type="info" aria-hidden={true} />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiText color="subdued" size="xs">

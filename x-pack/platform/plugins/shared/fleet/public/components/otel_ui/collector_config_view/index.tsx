@@ -14,7 +14,6 @@ import type { OTelCollectorConfig, ComponentHealth } from '../../../../common/ty
 
 import { ALL_PIPELINES } from './utils';
 import { PipelineSelector } from './pipeline_selector';
-import { YamlViewer } from './yaml_viewer';
 
 const GraphView = lazy(() => import('./graph_view').then((m) => ({ default: m.GraphView })));
 
@@ -69,9 +68,6 @@ export const CollectorConfigView: React.FunctionComponent<CollectorConfigViewPro
         <Suspense fallback={<EuiLoadingSpinner />}>
           <GraphView config={config} selectedPipelineId={selectedPipelineId} health={health} />
         </Suspense>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <YamlViewer config={config} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

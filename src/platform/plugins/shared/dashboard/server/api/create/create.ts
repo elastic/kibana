@@ -9,20 +9,20 @@
 
 import type { RequestHandlerContext } from '@kbn/core/server';
 import type { RequestTiming } from '@kbn/core-http-server';
-import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import type { DashboardCreateRequestBody } from './types';
 import { transformDashboardIn } from '../transforms';
 import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import type { DashboardCreateResponseBody } from './types';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
+import type { DashboardState } from '../types';
 
 export async function create(
   requestCtx: RequestHandlerContext,
   dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
-  createBody: DashboardCreateRequestBody,
+  createBody: DashboardState,
   serverTiming?: RequestTiming,
-  isDashboardAppRequest: boolean = false
+  isDashboardAppRequest: boolean = false,
+  id?: string
 ): Promise<DashboardCreateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
   const { access_control: accessControl, ...restOfData } = createBody;
@@ -36,16 +36,16 @@ export async function create(
   const supportsAccessControl = core.savedObjects.typeRegistry.supportsAccessControl(
     DASHBOARD_SAVED_OBJECT_TYPE
   );
-
-  const savedObject = await core.savedObjects.client.create<DashboardSavedObjectAttributes>(
+  const savedObject = await core.savedObjects.client.create(
     DASHBOARD_SAVED_OBJECT_TYPE,
     soAttributes,
     {
+      ...(id !== undefined && { id }),
       references: soReferences,
       ...(accessControl?.access_mode &&
         supportsAccessControl && {
           accessControl: {
-            accessMode: accessControl.access_mode ?? 'default',
+            accessMode: accessControl.access_mode,
           },
         }),
     }

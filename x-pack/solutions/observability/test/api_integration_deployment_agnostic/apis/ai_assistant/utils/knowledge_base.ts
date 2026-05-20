@@ -150,8 +150,7 @@ export async function addSampleDocsToCustomIndex(
   customSearchConnectorIndex: string
 ) {
   const es = getService('es');
-  // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context
-  const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
   const log = getService('log');
 
   // create index with semantic_text mapping for `text` field
@@ -181,7 +180,7 @@ export async function addSampleDocsToCustomIndex(
   );
 
   // update the advanced settings (`observability:aiAssistantSearchConnectorIndexPattern`) to include the custom index
-  await setAdvancedSettings(supertest, {
+  await setAdvancedSettings(kibanaServer, {
     'observability:aiAssistantSearchConnectorIndexPattern': customSearchConnectorIndex,
   });
 }

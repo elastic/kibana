@@ -9,12 +9,12 @@
 
 import React, { createContext, useMemo } from 'react';
 import { isUndefined, omitBy } from 'lodash';
-import { BehaviorSubject, map, merge } from 'rxjs';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiListGroup, EuiPanel } from '@elastic/eui';
 
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { PanelIncompatibleError } from '@kbn/embeddable-plugin/public';
 import type { SerializedTitles } from '@kbn/presentation-publishing';
 import {
@@ -38,17 +38,19 @@ import type { LinksApi, LinksParentApi, ResolvedLink } from '../types';
 import type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } from '../../common';
 import { DISPLAY_NAME, LINKS_EMBEDDABLE_TYPE } from '../../common';
 
-import { checkForDuplicateTitle, linksClient } from '../content_management';
+import { hasLibraryItemWithTitle, linksClient } from '../content_management';
 import { resolveLinks, serializeResolvedLinks } from '../lib/resolve_links';
 import { isParentApiCompatible } from '../actions/add_links_panel_action';
 import { coreServices } from '../services/kibana_services';
 import { loadFromLibrary } from '../content_management/load_from_library';
+import { getPlacementHints } from './get_placement_hints';
 
 export const LinksContext = createContext<LinksApi | null>(null);
 
 export const getLinksEmbeddableFactory = () => {
-  const linksEmbeddableFactory: EmbeddableFactory<LinksEmbeddableState, LinksApi> = {
+  const linksEmbeddableFactory: EmbeddablePublicDefinition<LinksEmbeddableState, LinksApi> = {
     type: LINKS_EMBEDDABLE_TYPE,
+    getPlacementHints,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const refId = (initialState as LinksByReferenceState).ref_id;
       const intialLinksState = refId ? await loadFromLibrary(refId) : (initialState as LinksState);
@@ -93,8 +95,14 @@ export const getLinksEmbeddableFactory = () => {
         serializeState,
         anyStateChange$: merge(
           titleManager.anyStateChange$,
-          layout$.pipe(map(() => undefined)),
-          resolvedLinks$.pipe(map(() => undefined))
+          layout$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          resolvedLinks$.pipe(
+            skip(1),
+            map(() => undefined)
+          )
         ),
         getComparators: () => {
           return {
@@ -154,19 +162,7 @@ export const getLinksEmbeddableFactory = () => {
         getSerializedStateByReference: serializeByReference,
         canLinkToLibrary: async () => !isByReference,
         canUnlinkFromLibrary: async () => isByReference,
-        checkForDuplicateTitle: async (
-          newTitle: string,
-          isTitleDuplicateConfirmed: boolean,
-          onTitleDuplicate: () => void
-        ) => {
-          await checkForDuplicateTitle({
-            title: newTitle,
-            copyOnSave: false,
-            lastSavedTitle: '',
-            isTitleDuplicateConfirmed,
-            onTitleDuplicate,
-          });
-        },
+        hasLibraryItemWithTitle,
         onEdit: async () => {
           openLazyFlyout({
             core: coreServices,

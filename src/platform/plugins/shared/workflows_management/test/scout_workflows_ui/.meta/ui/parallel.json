@@ -1,5 +1,5 @@
 {
-  "sha1": "9bc13e904388c5b1310d722b6b4881ceccdc81d6",
+  "sha1": "9dc53441fe67ec2e748356b780fe0bd2f6935a30",
   "tests": [
     {
       "id": "a8dc0a71dd65d42-65fd9c357892a20",
@@ -613,7 +613,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/test_run.spec.ts",
-        "line": 26,
+        "line": 27,
         "column": 7
       }
     },
@@ -627,7 +627,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/test_run.spec.ts",
-        "line": 51,
+        "line": 52,
         "column": 7
       }
     },
@@ -641,7 +641,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/test_run.spec.ts",
-        "line": 76,
+        "line": 77,
         "column": 7
       }
     },
@@ -655,7 +655,21 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/test_run.spec.ts",
-        "line": 124,
+        "line": 125,
+        "column": 7
+      }
+    },
+    {
+      "id": "83eb75963c3c731-701cccba24f7844",
+      "title": "Workflow execution - Test runs should allow providing \"event\" in manual inputs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/test_run.spec.ts",
+        "line": 157,
         "column": 7
       }
     },
