@@ -17,17 +17,20 @@ const SEARCH_WITH_SELECTED_COLUMNS_AND_TIMESTAMP = 'searchWithSelectedColumnsAnd
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
-  const { common, discover, timePicker, dashboard, unifiedFieldList, header } = getPageObjects([
-    'common',
-    'discover',
-    'timePicker',
-    'dashboard',
-    'unifiedFieldList',
-    'header',
-  ]);
+  const { common, discover, timePicker, dashboard, unifiedFieldList, header, share } =
+    getPageObjects([
+      'common',
+      'discover',
+      'timePicker',
+      'dashboard',
+      'unifiedFieldList',
+      'header',
+      'share',
+    ]);
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
+  const browser = getService('browser');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const monacoEditor = getService('monacoEditor');
@@ -339,6 +342,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await retry.try(async () => {
               expect(await dataGrid.getHeaderFields()).to.eql(['bytes', 'extension']);
             });
+          });
+
+          it('should not include time field column in the Share URL', async () => {
+            await discover.selectTextBaseLang();
+            await discover.waitUntilTabIsLoaded();
+
+            await unifiedFieldList.clickFieldListItemAdd('bytes');
+            await discover.waitUntilTabIsLoaded();
+
+            await retry.try(async () => {
+              expect(await dataGrid.getHeaderFields()).to.eql(
+                hideTimeFieldColumnSetting ? ['bytes'] : ['@timestamp', 'bytes']
+              );
+            });
+
+            await share.clickShareTopNavButton();
+            const sharedUrl = await share.getSharedUrl();
+            await share.closeShareModal();
+
+            await browser.openNewTab();
+            await browser.get(sharedUrl);
+            await discover.waitUntilTabIsLoaded();
+
+            await retry.try(async () => {
+              expect(await dataGrid.getHeaderFields()).to.eql(
+                hideTimeFieldColumnSetting ? ['bytes'] : ['@timestamp', 'bytes']
+              );
+            });
+
+            const resolvedUrl = decodeURIComponent(await browser.getCurrentUrl());
+            expect(resolvedUrl).to.contain('columns:!(bytes)');
+
+            await browser.closeCurrentWindow();
           });
         });
       });

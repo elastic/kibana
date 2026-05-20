@@ -56,6 +56,9 @@ export async function getSharingData(
     | AggregateQuery
     | Query
     | undefined;
+
+  // in ES|QL mode this `columns` array will be used only to generate CSV for Dashboard panels (CSV v2)
+  // in Classic mode this `columns` array will be used to generate CSV for both Discover page and Dashboard panels (CSV v1)
   const columns = getColumnsWithTimeField({
     columns: state.columns || [],
     timeFieldName: index?.timeFieldName,

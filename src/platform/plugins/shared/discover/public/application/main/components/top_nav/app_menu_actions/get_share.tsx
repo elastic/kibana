@@ -118,6 +118,8 @@ export const buildShareOptions = async ({
     allowShortUrl: !!services.capabilities.discover_v2.createShortUrl,
     shareableUrl,
     shareableUrlForSavedObject,
+    // Share URL gets the unmodified `columns` array (without the automatically added time field) 
+    // so it does not trigger the unsaved changes badge when user opens the link
     shareableUrlLocatorParams: { locator, params },
     objectId: persistedDiscoverSession?.id,
     objectType: 'search',
@@ -154,6 +156,8 @@ export const buildShareOptions = async ({
           params: isEsqlMode
             ? {
                 ...params,
+                // in ES|QL mode this `columns` array will be used when generating CSV on Discover page (CSV v2)
+                // this way the time field will be included only for CSV export and not for Share URL
                 columns: getColumnsWithTimeField({
                   columns: (params.columns as string[]) || [],
                   timeFieldName: dataView?.timeFieldName,
