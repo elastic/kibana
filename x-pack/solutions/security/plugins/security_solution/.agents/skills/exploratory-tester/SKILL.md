@@ -281,6 +281,54 @@ In `mode: auto` — skip this confirmation. Proceed immediately.
 
 For each flow in `config.json` flows array (in order), run the Explore Loop below. Do not move to the next flow until the current one is complete.
 
+### Parallel mode
+
+The orchestrator dispatches one sub-agent per flow concurrently.
+
+**Orchestrator steps:**
+1. Read `config.json` — confirm `mode` is `parallel`
+2. Assign each flow an index N (1-based)
+3. Dispatch sub-agents concurrently via the Agent tool. Each sub-agent prompt must include:
+
+```
+You are a sub-agent for the exploratory-tester skill.
+Your task: run the Explore Loop (defined in Phase 2 of the skill) for this single flow.
+
+Flow: <flow object as JSON>
+config.json path: .exploratory-session/config.json
+findings file path: .exploratory-session/findings-flow-<N>.md
+knowledge file path: x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/knowledge/<area_slug>.md
+
+Read config.json for environment details, resolved_role, area, and known_open_bugs.
+Read the knowledge file if it exists — use it to recognise known non-bugs.
+Run the Explore Loop for your assigned flow.
+Write all findings to findings-flow-<N>.md.
+Do NOT write to the knowledge file.
+Exit when the flow is complete or the timebox expires.
+```
+
+4. Wait for all sub-agents to complete
+5. If a sub-agent crashes or does not produce a findings file: create `findings-flow-N.md` with a single entry:
+
+```markdown
+## Finding: Sub-agent failure
+
+**Level:** 3
+**Flow:** <flow name>
+**Role:** <resolved_role>
+**Checklist step:** N/A
+
+### Current behavior
+Sub-agent did not complete. No findings collected for this flow.
+```
+
+6. Proceed to Phase 3 once all findings files exist (one per flow)
+
+**Sub-agent rules:**
+- Sub-agents are stateless — they read `config.json` and the knowledge file, write their findings file, and exit
+- Sub-agents read `knowledge/<area_slug>.md` but **never write to it**
+- A sub-agent crashing does not block other sub-agents
+
 ### The Explore Loop (per flow)
 
 **Termination: mandatory checklist complete OR timebox expired — whichever fires first.**
