@@ -1939,13 +1939,3 @@ actions:
           label: Delete a dashboard - Console
           source: |
             DELETE kbn:/api/dashboards/3c4b8e10-d57a-11ef-9a52-4f3c2a8d0e1b
-
-  # ──────────────────────────────────────────────
-  # Fix required fields incorrectly promoted by schema.maybe()
-  # ──────────────────────────────────────────────
-  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-data']"
-    description: 'Remove x-oas-optional fields from required: query, refresh_interval, time_range'
-    update:
-      required:
-        - options
-        - title

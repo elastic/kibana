@@ -13,10 +13,17 @@
  * Auto-generates overlays/required_field_fixes.overlays.yaml from the merged
  * OAS bundles (output/kibana.yaml and output/kibana.serverless.yaml).
  *
- * Root cause: schema.maybe() in @kbn/config-schema emits x-oas-optional: true
- * on the resolved type schema, but the OAS generator still includes the field
- * in the parent schema's required array. This script detects every such
- * occurrence and emits a remove + update overlay action pair to fix it.
+ * Detects two categories of wrongly-required fields and emits a remove + update
+ * overlay action pair for each affected schema:
+ *
+ *   1. x-oas-optional fields — schema.maybe() in @kbn/config-schema emits
+ *      x-oas-optional: true on the resolved type schema, but the OAS generator
+ *      still includes the field in the parent schema's required array.
+ *
+ *   2. default-value fields — schema.object/array/etc. with a defaultValue option
+ *      emits a `default:` on the resolved schema, making the field optional at
+ *      runtime (callers may omit it and the server applies the default), but the
+ *      OAS generator still lists it in required.
  *
  * The generated file is committed and applied early in the api-docs-overlay
  * pipeline, before any hand-authored overlays run.
@@ -38,33 +45,62 @@ const OUTPUT_FILE = path.join(OAS_DOCS_DIR, 'overlays', 'required_field_fixes.ov
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
+/**
+ * Load an OAS spec from disk. Supports both YAML (.yaml/.yml) and JSON (.json).
+ * Returns null if the file does not exist.
+ */
 function loadSpec(filePath) {
   if (!fs.existsSync(filePath)) return null;
-  return yaml.load(fs.readFileSync(filePath, 'utf8'));
+  const raw = fs.readFileSync(filePath, 'utf8');
+  if (filePath.endsWith('.json')) return JSON.parse(raw);
+  return yaml.load(raw);
 }
 
 /**
- * Returns the schema name if a $ref points to an x-oas-optional component schema.
+ * Returns true if a property schema is optional due to x-oas-optional: true
+ * (emitted by schema.maybe()) on its resolved type.
  *
- * Limitation: this only detects optional fields that are expressed as a $ref to a
- * named component schema that carries x-oas-optional: true. It does NOT detect
- * x-oas-optional: true set inline on a property schema (i.e. no $ref). As of writing,
- * ~30 inline occurrences exist in the bundles (e.g. fleet package policy inputs around
- * line 29633 of kibana.yaml), but none sit inside a parent required array, so there is
- * no active bug to fix. If that changes, extend this function to also check
+ * Note: only detects the $ref case. Inline x-oas-optional (no $ref) does exist
+ * (~30 occurrences in the bundles) but none currently sit inside a parent required
+ * array, so there is no active bug. If that changes, also check
  * propSchema['x-oas-optional'] directly.
  */
-function optionalRefName(propSchema, optionalSchemas) {
-  if (!propSchema?.$ref) return null;
+function isXOasOptional(propSchema, optionalSchemas) {
+  if (!propSchema?.$ref) return false;
   const m = propSchema.$ref.match(/^#\/components\/schemas\/(.+)$/);
-  return m && optionalSchemas.has(m[1]) ? m[1] : null;
+  return m ? optionalSchemas.has(m[1]) : false;
+}
+
+/**
+ * Returns true if a property schema is optional because its resolved type
+ * declares a default value (emitted by the defaultValue option in
+ * @kbn/config-schema). Such fields can be omitted by callers; the server
+ * applies the default. Checks both inline schemas and $ref targets.
+ */
+function hasDefaultValue(propSchema, defaultSchemas) {
+  if (!propSchema) return false;
+  if (propSchema.default !== undefined) return true;
+  if (propSchema.$ref) {
+    const m = propSchema.$ref.match(/^#\/components\/schemas\/(.+)$/);
+    return m ? defaultSchemas.has(m[1]) : false;
+  }
+  return false;
 }
 
 /** Walk a spec object recursively, collecting required-field bugs. */
 function collectBugs(spec) {
+  const componentSchemas = spec.components?.schemas || {};
+
+  // Category 1: schemas marked x-oas-optional (from schema.maybe())
   const optionalSchemas = new Set();
-  for (const [name, schema] of Object.entries(spec.components?.schemas || {})) {
+  for (const [name, schema] of Object.entries(componentSchemas)) {
     if (schema['x-oas-optional'] === true) optionalSchemas.add(name);
+  }
+
+  // Category 2: schemas that declare a default value (from defaultValue option)
+  const defaultSchemas = new Set();
+  for (const [name, schema] of Object.entries(componentSchemas)) {
+    if (schema.default !== undefined) defaultSchemas.add(name);
   }
 
   const bugs = []; // { jsonpath, buggyFields, correctRequired }
@@ -73,12 +109,16 @@ function collectBugs(spec) {
     if (!node || typeof node !== 'object' || Array.isArray(node)) return;
 
     if (node.properties && Array.isArray(node.required) && node.required.length > 0) {
-      const buggy = node.required.filter((f) =>
-        optionalRefName(node.properties[f], optionalSchemas)
+      const buggy = node.required.filter(
+        (f) =>
+          isXOasOptional(node.properties[f], optionalSchemas) ||
+          hasDefaultValue(node.properties[f], defaultSchemas)
       );
       if (buggy.length > 0) {
         const correct = node.required.filter(
-          (f) => !optionalRefName(node.properties[f], optionalSchemas)
+          (f) =>
+            !isXOasOptional(node.properties[f], optionalSchemas) &&
+            !hasDefaultValue(node.properties[f], defaultSchemas)
         );
         bugs.push({ jsonpath, buggyFields: buggy, correctRequired: correct });
       }
@@ -117,11 +157,13 @@ function generateActions(bugs) {
     const target = toTarget(jsonpath);
     lines.push(`  - target: "${target}.required"`);
     lines.push(
-      `    description: "Remove x-oas-optional fields from required: ${buggyFields.join(', ')}"`
+      `    description: "Remove wrongly-required fields (x-oas-optional or has default): ${buggyFields.join(
+        ', '
+      )}"`
     );
     lines.push('    remove: true');
     lines.push(`  - target: "${target}"`);
-    lines.push('    description: "Restore required array without x-oas-optional fields"');
+    lines.push('    description: "Restore required array without optional fields"');
     if (correctRequired.length === 0) {
       lines.push('    update:');
       lines.push('      required: []');
@@ -169,10 +211,14 @@ function buildOverlayFile(statefulBugs, serverlessBugs) {
     '# THIS FILE IS AUTO-GENERATED — DO NOT EDIT BY HAND',
     `# Generated by: node oas_docs/scripts/generate_required_field_fixes.js`,
     '#',
-    '# Root cause: schema.maybe() in @kbn/config-schema emits x-oas-optional: true',
-    '# on the resolved type schema, but the OAS generator still includes the field',
-    '# in the parent required array. Each fix below uses remove + update because',
-    "# the Bump overlay engine appends arrays on 'update' alone rather than replacing them.",
+    '# Fixes two categories of wrongly-required fields in the OAS bundles:',
+    '#   1. x-oas-optional — schema.maybe() emits x-oas-optional: true on the resolved',
+    '#      type schema, but the OAS generator still lists the field in required.',
+    '#   2. default-value — schema.object/etc. with defaultValue emits default: on the',
+    '#      resolved schema (the field is optional at runtime), but the OAS generator',
+    '#      still lists it in required.',
+    '# Each fix uses remove + update because the Bump overlay engine appends arrays',
+    "# on 'update' alone rather than replacing them.",
     '#',
     `# ${allBugs.length} schema(s) affected.`,
     '',
