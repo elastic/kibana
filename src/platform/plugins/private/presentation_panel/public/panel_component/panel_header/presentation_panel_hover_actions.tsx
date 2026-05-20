@@ -459,7 +459,11 @@ export const PresentationPanelHoverActions = ({
             )}
             {quickActionElements.map(
               ({ iconType, 'data-test-subj': dataTestSubj, onClick, name }, i) => (
-                <EuiToolTip key={`main_action_${dataTestSubj}_${api?.uuid}`} content={name}>
+                <EuiToolTip
+                  key={`main_action_${dataTestSubj}_${api?.uuid}`}
+                  content={name}
+                  disableScreenReaderOutput
+                >
                   <EuiButtonIcon
                     iconType={iconType}
                     color="text"
