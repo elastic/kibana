@@ -117,7 +117,6 @@ describe('transformMapOut', () => {
               "value": "bar",
             },
             "disabled": false,
-            "negate": false,
             "type": "condition",
           },
         ],

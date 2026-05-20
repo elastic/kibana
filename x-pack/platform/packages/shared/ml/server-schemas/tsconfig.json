@@ -15,6 +15,7 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/as-code-filters-schema",
     "@kbn/config-schema",
     "@kbn/data-service-server",
     "@kbn/es-query-server",
