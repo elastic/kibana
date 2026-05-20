@@ -358,7 +358,7 @@ export class TaskManagerPlugin
     core: CoreStart,
     { cloud, licensing }: TaskManagerPluginsStart
   ): TaskManagerStartContract {
-    const { http, savedObjects, elasticsearch, executionContext, security } = core;
+    const { savedObjects, elasticsearch, executionContext, security } = core;
     this.licenseSubscriber = new LicenseSubscriber(licensing.license$);
 
     const savedObjectsRepository = savedObjects.createInternalRepository([
