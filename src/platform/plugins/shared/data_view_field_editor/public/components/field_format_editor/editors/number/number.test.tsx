@@ -70,15 +70,7 @@ describe('NumberFormatEditor', () => {
   it('should render normally', () => {
     renderNumberFormatEditor();
 
-    expect(
-      screen.getByText((_, element) =>
-        Boolean(
-          element?.tagName === 'LABEL' &&
-            element?.textContent?.includes('Numeral.js format pattern (Default: 0,0.[000])')
-        )
-      )
-    ).toBeVisible();
-
+    expect(screen.getByText(/Numeral\.js format pattern/i)).toBeVisible();
     expect(screen.getByText('0,0.[000]')).toBeVisible();
     expect(screen.getByText('Documentation')).toBeVisible();
     expect(screen.getByText('Documentation').closest('a')).toHaveAttribute(

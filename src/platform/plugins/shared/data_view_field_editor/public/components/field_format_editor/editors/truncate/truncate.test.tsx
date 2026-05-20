@@ -65,21 +65,15 @@ describe('TruncateFormatEditor', () => {
 
     renderTruncateFormatEditor();
 
-    const input = screen.getByDisplayValue('5');
-
-    Object.defineProperty(input, 'checkValidity', {
-      configurable: true,
-      value: () => false,
-    });
-    Object.defineProperty(input, 'validationMessage', {
-      configurable: true,
-      value: 'Error!',
-    });
+    const input = screen.getByTestId('truncateEditorLength');
 
     await user.clear(input);
-    await user.type(input, '123.3');
+    onChange.mockClear();
+    onError.mockClear();
 
-    expect(onError).toHaveBeenCalledWith('Error!');
+    await user.type(input, '-5');
+
+    expect(onError).toHaveBeenCalledWith('Constraints not satisfied');
     expect(onChange).not.toHaveBeenCalled();
   });
 
@@ -88,15 +82,9 @@ describe('TruncateFormatEditor', () => {
 
     renderTruncateFormatEditor();
 
-    const input = screen.getByDisplayValue('5');
-
-    Object.defineProperty(input, 'checkValidity', {
-      configurable: true,
-      value: () => true,
-    });
+    const input = screen.getByTestId('truncateEditorLength');
 
     await user.clear(input);
-
     onChange.mockClear();
     onError.mockClear();
 

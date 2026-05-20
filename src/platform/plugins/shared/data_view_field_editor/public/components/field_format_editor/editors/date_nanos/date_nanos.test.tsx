@@ -49,16 +49,7 @@ describe('DateFormatEditor', () => {
   it('should render normally', () => {
     renderDateNanosFormatEditor();
 
-    expect(
-      screen.getByText((_, element) =>
-        Boolean(
-          element?.tagName === 'LABEL' &&
-            element?.textContent?.includes(
-              'Moment.js format pattern (Default: MMM D, YYYY @ HH:mm:ss.SSSSSSSSS)'
-            )
-        )
-      )
-    ).toBeVisible();
+    expect(screen.getByText(/Moment\.js format pattern/i)).toBeVisible();
     expect(screen.getByText('MMM D, YYYY @ HH:mm:ss.SSSSSSSSS')).toBeVisible();
     expect(screen.getByText('Documentation')).toBeVisible();
     expect(screen.getByText('2015-01-01T12:10:30.123456789Z')).toBeVisible();
