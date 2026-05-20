@@ -21,8 +21,7 @@ import { EntityEventTypes } from '../../../common/lib/telemetry';
 
 export const AssetCriticalityFileUploader: React.FC = () => {
   const { uiSettings } = useKibana().services;
-  const isEntityStoreV2Enabled =
-    uiSettings?.get<boolean>(FF_ENABLE_ENTITY_STORE_V2, false) ?? false;
+  const isEntityStoreV2Enabled = uiSettings?.get<boolean>(FF_ENABLE_ENTITY_STORE_V2) ?? true;
 
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
   const { uploadAssetCriticalityFile } = useEntityAnalyticsRoutes();
