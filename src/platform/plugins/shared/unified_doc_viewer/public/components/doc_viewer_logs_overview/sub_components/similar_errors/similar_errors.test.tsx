@@ -123,7 +123,7 @@ describe('SimilarErrors', () => {
       renderSimilarErrors(hit);
 
       expect(screen.getByTestId('docViewerSimilarErrorsOpenInDiscoverButton')).toBeInTheDocument();
-      expect(screen.getByText('Open in Discover')).toBeInTheDocument();
+      expect(screen.getByText('Open in a Discover tab')).toBeInTheDocument();
     });
 
     it('does not render Discover link when generateDiscoverLink returns undefined', () => {

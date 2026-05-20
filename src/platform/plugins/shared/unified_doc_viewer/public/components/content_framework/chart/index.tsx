@@ -59,7 +59,7 @@ export function ContentFrameworkChart({
   const openInDiscoverButtonLabel = i18n.translate(
     'unifiedDocViewer.contentFramework.chart.openInDiscover',
     {
-      defaultMessage: 'Open in Discover',
+      defaultMessage: 'Open in a Discover tab',
     }
   );
 

@@ -12,13 +12,13 @@ import { i18n } from '@kbn/i18n';
 export const OPEN_IN_DISCOVER_LABEL = i18n.translate(
   'unifiedDocViewer.observability.traces.openInDiscoverLinkLabel',
   {
-    defaultMessage: 'Open in Discover',
+    defaultMessage: 'Open in a Discover tab',
   }
 );
 
 export const OPEN_IN_DISCOVER_ARIA_LABEL = i18n.translate(
   'unifiedDocViewer.observability.traces.openInDiscoverAriaLabel',
-  { defaultMessage: 'Open in discover link' }
+  { defaultMessage: 'Open in a Discover tab' }
 );
 
 export const NOT_AVAILABLE_LABEL = i18n.translate('unifiedDocViewer.observability.traces.na', {
