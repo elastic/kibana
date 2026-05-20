@@ -16,10 +16,11 @@ export const ESQL_UNITS: Record<string, string> = {
   d: 'days',
 };
 
-// Parses bucket-size strings like `"1m"`, `"5s"`, `"2h"`, `"3d"`. Falls back
-// to a 60s bucket for invalid input (already validated by the API schema upstream).
+// Parses bucket-size strings like `"1m"`, `"5s"`, `"2h"`, `"3d"`.
 export function parseBucketSize(raw: string): { value: number; unit: string } {
   const match = raw.match(/^(\d+)([smhd])$/);
+  // 60s (1 minute) is the smallest granularity that produces readable sparklines
+  // while remaining efficient. Invalid inputs are caught upstream by the API schema.
   if (!match) return { value: 60, unit: 's' };
   const value = parseInt(match[1], 10);
   if (value < 1) return { value: 60, unit: 's' };

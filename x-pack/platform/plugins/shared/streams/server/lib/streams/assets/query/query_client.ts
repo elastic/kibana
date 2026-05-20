@@ -138,11 +138,14 @@ function ruleUnbackedWhere(value: RuleUnbackedFilter = 'exclude'): WhereConditio
     case 'only':
       return esql.exp`${ruleBackedCol} == false`;
     case 'exclude':
-      // Also includes legacy docs that predate the rule_backed field.
-      return esql.exp`${ruleBackedCol} == true OR ${ruleBackedCol} IS NULL`;
+      // COALESCE avoids an `OR` that would break precedence when composed
+      // via `andWhere` (the Composer strips syntactic parens).
+      return esql.exp`COALESCE(${ruleBackedCol}, true) == true`;
   }
 }
 
+// NB: `next` must not contain a top-level `OR` — the Composer strips syntactic
+// parens, so `a AND b OR c` binds as `(a AND b) OR c` under ES|QL precedence.
 function andWhere(current: WhereCondition | undefined, next: WhereCondition): WhereCondition {
   return current ? esql.exp`${current} AND ${next}` : next;
 }
@@ -317,9 +320,9 @@ function fromStorage(link: StoredQueryLink): QueryLink {
       },
       severity_score: link[QUERY_SEVERITY_SCORE],
       features: link[QUERY_FEATURES],
-      // QUERY_EVIDENCE lives under the dynamic-disabled 'experimental' object,
-      // so it can't be added to QueryLinkStorageFields without breaking the
-      // IStorageClient Exact type check.
+      // QUERY_EVIDENCE ('experimental.query.evidence') lives under the dynamic-disabled
+      // 'experimental' object, so it can't be added to QueryLinkStorageFields without
+      // breaking the IStorageClient Exact type check.
       evidence: (link as Record<string, unknown>)[QUERY_EVIDENCE] as string[] | undefined,
     },
   };

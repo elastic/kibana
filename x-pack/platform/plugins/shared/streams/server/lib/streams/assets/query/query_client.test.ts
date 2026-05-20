@@ -550,6 +550,60 @@ describe('QueryClient backward compatibility', () => {
     });
   });
 
+  describe('ES|QL precedence safety in keyword search', () => {
+    it('renders rule_backed exclusion as COALESCE (not OR) when ruleUnbacked defaults to "exclude"', async () => {
+      const storageClient = createMockStorageClient();
+      storageClient.esql.mockResolvedValue(toEsqlSourceResponse([]));
+      const { client } = createQueryClient({ storageClient });
+
+      await client.findQueries(['logs.target'], 'authentication', undefined, 'keyword');
+
+      expect(storageClient.esql).toHaveBeenCalledTimes(1);
+      const rendered = storageClient.esql.mock.calls[0][0].query as string;
+
+      // Must use the AND-only COALESCE form, not the OR form that depends on
+      // composer-stripped syntactic parens.
+      expect(rendered).toEqual(expect.stringContaining('COALESCE(rule_backed, TRUE) == TRUE'));
+      expect(rendered).not.toMatch(/rule_backed\s+IS\s+NULL/i);
+      expect(rendered).not.toMatch(/rule_backed\s*==\s*TRUE\s+OR/i);
+    });
+
+    it('renders the safe form when ruleUnbacked is set explicitly to "exclude"', async () => {
+      const storageClient = createMockStorageClient();
+      storageClient.esql.mockResolvedValue(toEsqlSourceResponse([]));
+      const { client } = createQueryClient({ storageClient });
+
+      await client.findQueries(
+        ['logs.target'],
+        'authentication',
+        { ruleUnbacked: 'exclude' },
+        'keyword'
+      );
+
+      const rendered = storageClient.esql.mock.calls[0][0].query as string;
+      expect(rendered).toEqual(expect.stringContaining('COALESCE(rule_backed, TRUE) == TRUE'));
+      expect(rendered).not.toMatch(/rule_backed\s+IS\s+NULL/i);
+    });
+
+    it('renders rule_backed == false for ruleUnbacked: "only" (no OR, no COALESCE)', async () => {
+      const storageClient = createMockStorageClient();
+      storageClient.esql.mockResolvedValue(toEsqlSourceResponse([]));
+      const { client } = createQueryClient({ storageClient });
+
+      await client.findQueries(
+        ['logs.target'],
+        'authentication',
+        { ruleUnbacked: 'only' },
+        'keyword'
+      );
+
+      const rendered = storageClient.esql.mock.calls[0][0].query as string;
+      expect(rendered).toMatch(/rule_backed\s*==\s*FALSE/i);
+      expect(rendered).not.toEqual(expect.stringContaining('COALESCE'));
+      expect(rendered).not.toMatch(/rule_backed\s+IS\s+NULL/i);
+    });
+  });
+
   describe('severity filtering via minSeverityScore', () => {
     describe('getQueryLinks with minSeverityScore', () => {
       it('includes a range filter when minSeverityScore is provided', async () => {

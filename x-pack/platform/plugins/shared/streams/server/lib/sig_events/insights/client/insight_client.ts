@@ -105,6 +105,7 @@ export class InsightClient {
    * Delete an insight by ID
    */
   async delete(id: string): Promise<{ acknowledged: boolean }> {
+    // First verify the insight exists
     await this.get(id);
 
     await this.clients.storageClient.delete({ id });
@@ -116,6 +117,7 @@ export class InsightClient {
    * Bulk operations for insights (save/delete only)
    */
   async bulk(operations: InsightBulkOperation[]): Promise<{ acknowledged: boolean }> {
+    // Validate that delete operations target existing documents
     const deleteIds = operations.flatMap((op) => {
       if ('delete' in op) return [op.delete.id];
       return [];
@@ -143,6 +145,7 @@ export class InsightClient {
       }
     }
 
+    // Build storage operations (insight must include id, generatedAt, impactLevel)
     const storageOperations = operations.map((operation) => {
       if ('index' in operation) {
         const insight = operation.index;
