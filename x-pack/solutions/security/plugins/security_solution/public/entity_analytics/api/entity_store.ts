@@ -28,7 +28,7 @@ const WATCHLIST_TOAST_LIFETIME_MS = 8000;
 
 export const useEntityStoreRoutes = () => {
   const { http, uiSettings, notifications } = useKibana().services;
-  const isV2Enabled = uiSettings.get<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const isV2Enabled = uiSettings.get<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   return useMemo(() => {
     const installPrebuiltWatchlists = async () =>

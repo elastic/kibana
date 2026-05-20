@@ -20,7 +20,7 @@ export const LOG_EXTRACTION_TIMEOUT_DEFAULT = '59s';
 export const LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT = '15m';
 // Max total raw log documents to process per task run; 0 = no cap
 export const LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT = 500_000;
-export const LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT = 'defer' as const;
+export const LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT = 'drop' as const;
 
 export type LogExtractionConfig = z.infer<typeof LogExtractionConfig>;
 export const LogExtractionConfig = z.object({

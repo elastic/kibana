@@ -36,7 +36,7 @@ export const CreateCaseTemplateFields: React.FC = () => {
   useEffect(() => {
     const subscription = innerForm.watch((values) => {
       const slice = values?.[CASE_EXTENDED_FIELDS] ?? {};
-      parentForm.setFieldValue('extendedFields', slice);
+      parentForm.setFieldValue(CASE_EXTENDED_FIELDS, slice);
     });
     return () => subscription.unsubscribe();
   }, [innerForm, parentForm]);
