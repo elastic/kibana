@@ -18,7 +18,7 @@ import type { HasSerializableState } from '@kbn/presentation-publishing';
 import { setStubKibanaServices } from '@kbn/embeddable-plugin/public/mocks';
 import { act, render, waitFor } from '@testing-library/react';
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import type { ControlGroupRendererApi, ControlPanelsState } from '.';
 import type { ControlGroupRendererProps } from './control_group_renderer';
 import { ControlGroupRenderer } from './control_group_renderer';
@@ -45,6 +45,7 @@ const getTestEmbeddableFactory = () =>
         serializeState: () => ({
           selection: initialState.selection,
         }),
+        anyStateChange$: of(),
         applySerializedState: jest.fn(),
       });
       return {
