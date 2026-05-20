@@ -28,7 +28,7 @@ const updateActionPolicyParamsSchema = z.object({
 
 @injectable()
 export class UpdateActionPolicyRoute extends BaseAlertingRoute {
-  static method = 'put' as const;
+  static method = 'patch' as const;
   static path = `${ALERTING_V2_ACTION_POLICY_API_PATH}/{id}`;
   static security: RouteSecurity = {
     authz: {
@@ -36,8 +36,9 @@ export class UpdateActionPolicyRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
-    summary: 'Update an action policy',
-    description: 'Update an existing action policy by identifier.',
+    summary: 'Partially update an action policy.',
+    description:
+      'Apply a partial update to an existing action policy. Fields not present in the body are left unchanged.',
   } as const;
   static validate = {
     request: {

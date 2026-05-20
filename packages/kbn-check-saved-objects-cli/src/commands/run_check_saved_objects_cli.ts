@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { writeFileSync } from 'fs';
 import { Listr, PRESET_TIMER } from 'listr2';
 import { run } from '@kbn/dev-cli-runner';
 import { getKibanaServer, startElasticsearch, stopElasticsearch } from '../util';
+import { FindingsCollector, type SavedObjectsCheckReport } from '../findings';
+import { getNewTypes, getUpdatedTypes } from '../snapshots';
 import type { MigrationAlgorithm, TaskContext } from './types';
 import { automatedRollbackTests, getSnapshots, validateSOChanges, validateTestFlow } from './tasks';
 
@@ -26,6 +29,7 @@ export function runCheckSavedObjectsCli() {
       const client = flagsReader.boolean('client');
       const test = flagsReader.boolean('test');
       const algorithmFlag = flagsReader.string('algorithm') ?? 'v2';
+      const reportPath = flagsReader.string('reportPath');
 
       let migrationAlgorithms: MigrationAlgorithm[];
       if (algorithmFlag === 'both') {
@@ -48,6 +52,8 @@ export function runCheckSavedObjectsCli() {
         gitRev: gitRev!,
         serverlessGitRev,
         updatedTypes: [],
+        typesWithNewModelVersions: [],
+        wipTypes: [],
         currentRemovedTypes: [],
         newRemovedTypes: [],
         fixtures: {
@@ -119,7 +125,7 @@ export function runCheckSavedObjectsCli() {
               ctx.test = true;
             },
             enabled: !server && !test,
-            skip: (ctx) => ctx.updatedTypes.length > 0,
+            skip: (ctx) => ctx.typesWithNewModelVersions.length > 0,
           },
           /**
            * ==================================================================
@@ -143,7 +149,8 @@ export function runCheckSavedObjectsCli() {
           {
             title: 'Automated rollback tests',
             task: automatedRollbackTests,
-            skip: (ctx) => ctx.updatedTypes.length === 0 || globalTask.errors.length > 0,
+            skip: (ctx) =>
+              ctx.typesWithNewModelVersions.length === 0 || globalTask.errors.length > 0,
             enabled: !server,
           },
         ],
@@ -177,6 +184,33 @@ export function runCheckSavedObjectsCli() {
           ],
           { fallbackRenderer: 'simple', exitOnError: false }
         ).run(context);
+
+        if (reportPath) {
+          try {
+            const collector = new FindingsCollector();
+            collector.ingestErrors(globalTask?.errors ?? []);
+            const report: SavedObjectsCheckReport = {
+              status: exitCode === 0 ? 'pass' : 'fail',
+              baseline: gitRev,
+              serverlessBaseline: serverlessGitRev,
+              newTypes:
+                context.from && context.to
+                  ? getNewTypes({ from: context.from, to: context.to })
+                  : [],
+              updatedTypes:
+                context.from && context.to
+                  ? getUpdatedTypes({ from: context.from, to: context.to })
+                  : context.updatedTypes.map(({ name }) => name),
+              removedTypes: context.newRemovedTypes,
+              findings: collector.getFindings(),
+            };
+            writeFileSync(reportPath, JSON.stringify(report, null, 2));
+          } catch (writeErr) {
+            log.warning(
+              `Failed to write Saved Objects check report to '${reportPath}': ${writeErr}`
+            );
+          }
+        }
       }
       if (exitCode) {
         log.warning(
@@ -195,9 +229,10 @@ export function runCheckSavedObjectsCli() {
         alias: {
           baseline: 'gitRev',
           'serverless-baseline': 'serverlessGitRev',
+          'report-path': 'reportPath',
         },
         boolean: ['fix', 'server', 'client', 'test'],
-        string: ['gitRev', 'serverlessGitRev', 'algorithm'],
+        string: ['gitRev', 'serverlessGitRev', 'algorithm', 'reportPath'],
         default: {
           verify: true,
           mappings: true,
@@ -210,6 +245,7 @@ export function runCheckSavedObjectsCli() {
         --client           Do not start ES server (requires running the command above on a separate term)
         --test             Use a sample type registry with dummy types and hardcoded snapshots (no longer starts Kibana)
         --algorithm <v2|zdt|both>  Migration algorithm to use for rollback tests (default: v2)
+        --report-path <file>       Write a structured JSON report of changes and findings to this file
       `,
       },
     }

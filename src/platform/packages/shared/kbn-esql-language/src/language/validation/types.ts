@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { IndexAutocompleteItem, EsqlView } from '@kbn/esql-types';
+import type { IndexAutocompleteItem, EsqlDataset, EsqlView } from '@kbn/esql-types';
 import type { EditorError } from '@elastic/esql/types';
 import type { ESQLColumnData } from '../../commands/registry/types';
 import type { ESQLPolicy } from '../../commands/registry/types';
@@ -20,6 +20,7 @@ export interface ReferenceMaps {
   joinIndices: IndexAutocompleteItem[];
   timeSeriesSources?: IndexAutocompleteItem[];
   views?: EsqlView[];
+  datasets?: EsqlDataset[];
 }
 
 export interface ValidationResult {

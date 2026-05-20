@@ -359,7 +359,7 @@ export const PresentationPanelHoverActions = ({
 
         if (tooltip) {
           notificationComponent = (
-            <EuiToolTip position="top" delay="regular" content={tooltip} key={notification.id}>
+            <EuiToolTip position="top" content={tooltip} key={notification.id}>
               {notificationComponent}
             </EuiToolTip>
           );
@@ -447,7 +447,6 @@ export const PresentationPanelHoverActions = ({
                 size="m"
                 title={!hideTitle ? title || undefined : undefined}
                 content={description}
-                delay="regular"
                 position="top"
                 data-test-subj="embeddablePanelDescriptionTooltip"
                 type="info"
@@ -460,7 +459,11 @@ export const PresentationPanelHoverActions = ({
             )}
             {quickActionElements.map(
               ({ iconType, 'data-test-subj': dataTestSubj, onClick, name }, i) => (
-                <EuiToolTip key={`main_action_${dataTestSubj}_${api?.uuid}`} content={name}>
+                <EuiToolTip
+                  key={`main_action_${dataTestSubj}_${api?.uuid}`}
+                  content={name}
+                  disableScreenReaderOutput
+                >
                   <EuiButtonIcon
                     iconType={iconType}
                     color="text"
