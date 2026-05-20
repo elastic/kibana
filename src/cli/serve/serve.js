@@ -462,7 +462,6 @@ function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
   // Ensure the plugin is loaded in dynamically to exclude from production build
   const {
     MOCK_IDP_REALM_NAME,
-    MOCK_IDP_UIAM_OAUTH_BASE_URL,
     MOCK_IDP_UIAM_SERVICE_URL,
     MOCK_IDP_UIAM_SHARED_SECRET,
     MOCK_IDP_UIAM_ORGANIZATION_ID,
@@ -547,43 +546,6 @@ function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
         // Decodes to: docker.internal:9200$host:9200$kibana:9200
         // Producing ES URL: https://host.docker.internal:9200
         'local-dev:ZG9ja2VyLmludGVybmFsOjkyMDAkaG9zdDo5MjAwJGtpYmFuYTo5MjAw'
-      );
-    }
-
-    // Set `server.publicBaseUrl` to Kibana's actual public URL. Without this, the cloud
-    // plugin decodes the dev `xpack.cloud.id` set above into a `cloud.kibanaUrl` like
-    // `https://kibana.docker.internal:9200`, and `useKibanaUrl()` (and any other consumer
-    // of `basePath.publicBaseUrl`) ends up surfacing that non-routable URL. The scheme has
-    // to mirror whether Kibana itself is serving TLS — `--ssl` / `--http2` flip on the HTTP
-    // TLS block at the top of `applyConfigOverrides`, and a user can also set
-    // `server.ssl.enabled` directly in `kibana.dev.yml`.
-    if (!_.has(rawConfig, 'server.publicBaseUrl')) {
-      const sslEnabled =
-        !!opts.ssl || !!opts.http2 || _.get(rawConfig, 'server.ssl.enabled', false);
-      const scheme = sslEnabled ? 'https' : 'http';
-      const host = _.get(rawConfig, 'server.host', 'localhost');
-      const port = _.get(rawConfig, 'server.port', 5601);
-      lodashSet(rawConfig, 'server.publicBaseUrl', `${scheme}://${host}:${port}`);
-    }
-
-    // OAuth 2.0 Protected Resource Metadata served at `/.well-known/oauth-protected-resource`
-    // and used by the security plugin's create-OAuth-client route. In production these are
-    // injected by ECP; in local dev we derive them from the Mock IdP / serverless defaults so
-    // the MCP OAuth flow works out of the box.
-    if (!_.has(rawConfig, 'xpack.security.mcp.oauth2.metadata.authorization_servers')) {
-      lodashSet(rawConfig, 'xpack.security.mcp.oauth2.metadata.authorization_servers', [
-        MOCK_IDP_UIAM_OAUTH_BASE_URL,
-      ]);
-    }
-
-    if (!_.has(rawConfig, 'xpack.security.mcp.oauth2.metadata.resource')) {
-      // Inherits scheme/host/port from `server.publicBaseUrl` (just set above when absent),
-      // so the protected resource identifier and the URL the agent_builder UI advertises in
-      // its "Copy MCP Server URL" popover have the same origin.
-      lodashSet(
-        rawConfig,
-        'xpack.security.mcp.oauth2.metadata.resource',
-        _.get(rawConfig, 'server.publicBaseUrl')
       );
     }
   }

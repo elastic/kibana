@@ -184,7 +184,6 @@ export const RedirectUriSection = () => {
                         iconType="trash"
                         aria-label={labels.tools.mcpClients.form.removeUriAriaLabel}
                         onClick={() => remove(index)}
-                        isDisabled={fields.length === 1}
                         data-test-subj={`mcpClientRemoveUri-${field.id}`}
                       />
                     ) : undefined
