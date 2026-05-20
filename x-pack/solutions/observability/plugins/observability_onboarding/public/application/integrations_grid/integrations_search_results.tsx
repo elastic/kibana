@@ -51,7 +51,14 @@ const ResultsGrid = ({ useAvailablePackages, searchInput, customCards }: Results
 
   if (isLoading) return <Loading />;
 
-  return <PackageList list={list} searchTerm={searchInput} showCardLabels={false} />;
+  return (
+    <PackageList
+      list={list}
+      searchTerm={searchInput}
+      showCardLabels={false}
+      backgroundColor="transparent"
+    />
+  );
 };
 
 export const IntegrationsSearchResults = ({ searchInput }: Props) => {
