@@ -62,7 +62,7 @@ interface IngestEntitiesParams {
   fieldsToIgnore?: string[];
   /** Optional transform applied to each document before indexing (e.g. add @timestamp, reshape for entity type). */
   transformDocument?: IngestEntitiesTransformDocument;
-  /** Avoid `true` — it forces a per-batch refresh that creates many small segments under sustained load. */
+  /** Use `false` when downstream consumers tolerate the 1 s natural refresh window (e.g. CCS updates data stream). Use `true` when same-run visibility is required (e.g. LOOKUP JOIN on the latest index). */
   refresh: boolean | 'wait_for';
 }
 
