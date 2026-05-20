@@ -154,14 +154,20 @@ export class TaskScheduling {
           taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
         });
         const enabled = modifiedTask.enabled ?? true;
-        // Run the first task now. Run all other tasks a random number of ms in the future,
-        // with a maximum of 5 minutes or the task interval, whichever is smaller.
-        const runAt = enabled && i > 0 ? addJitter(modifiedTask.schedule?.interval) ?? {} : {};
+        let scheduling: Partial<{ runAt: Date; scheduledAt: Date }> = {};
+        if (enabled) {
+          // Run the first task now. Run all other tasks a random number of ms in the future,
+          // with a maximum of 5 minutes or the task interval, whichever is smaller.
+          scheduling =
+            i === 0
+              ? { runAt: new Date(), scheduledAt: new Date() }
+              : addJitter(modifiedTask.schedule?.interval) ?? {};
+        }
         return {
           ...modifiedTask,
           traceparent: traceparent || '',
           enabled,
-          ...runAt,
+          ...scheduling,
         };
       })
     );
