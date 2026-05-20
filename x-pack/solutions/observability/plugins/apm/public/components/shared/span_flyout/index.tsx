@@ -42,6 +42,7 @@ import { SpanDatabase } from './span_db';
 import { StickySpanProperties } from './sticky_span_properties';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useFetcher, isPending } from '../../../hooks/use_fetcher';
+import { getSpanDurationUs } from '../../../../common/utils/get_duration_us';
 import { getTimestampUs } from '../../../../common/utils/get_timestamp_us';
 import type { SpanLinksCount } from '../span_links';
 
@@ -286,7 +287,7 @@ function SpanFlyoutBody({
           <Timestamp timestamp={getTimestampUs(span) / 1000} renderMode="tooltip" />,
           <>
             <Duration
-              duration={span.span.duration.us}
+              duration={getSpanDurationUs(span)}
               parent={{ duration: totalDuration, type: 'transaction', loading: false }}
               showTooltip
             />

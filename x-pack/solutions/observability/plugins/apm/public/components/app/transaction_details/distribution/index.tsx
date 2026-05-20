@@ -13,6 +13,7 @@ import { useHistory } from 'react-router-dom';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { SavedSearchTableConfig } from '@kbn/saved-search-component';
 import { AT_TIMESTAMP } from '@kbn/apm-types';
+import { getTransactionDurationUs } from '../../../../../common/utils/get_duration_us';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 
 import { useUnifiedWaterfallFetcher } from '../use_unified_waterfall_fetcher';
@@ -67,7 +68,7 @@ export function TransactionDistribution({
   });
 
   const markerCurrentEvent =
-    unifiedWaterfallFetchResult.entryTransaction?.transaction?.duration?.us;
+    getTransactionDurationUs(unifiedWaterfallFetchResult.entryTransaction) || undefined;
 
   const { chartData, hasData, percentileThresholdValue, status, totalDocCount } =
     useTransactionDistributionChartData();

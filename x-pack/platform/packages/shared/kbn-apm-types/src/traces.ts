@@ -75,8 +75,8 @@ export interface TransactionDetailRedirectInfo {
     id: string;
     type: string;
     name: string;
-    duration: {
-      us: number;
+    duration?: {
+      us?: number;
     };
   };
   service: {

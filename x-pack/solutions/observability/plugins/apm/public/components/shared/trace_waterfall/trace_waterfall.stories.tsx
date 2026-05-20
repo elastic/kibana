@@ -11,6 +11,10 @@ import { action } from '@storybook/addon-actions';
 import { TraceWaterfall } from '.';
 import { traceUnprocessedOtelSample } from './mock/trace_unprocessed_otel_sample';
 import { traceSample } from './mock/trace_sample';
+import {
+  getTransactionDurationUs,
+  getSpanDurationUs,
+} from '../../../../common/utils/get_duration_us';
 import { getTimestampUs } from '../../../../common/utils/get_timestamp_us';
 import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
@@ -364,7 +368,7 @@ export const APMExample: StoryFn<{}> = () => {
         id: item.span.id || item.transaction?.id,
         name: item.span.name || item.transaction?.name,
         timestampUs: getTimestampUs(item),
-        duration: item.span.duration?.us || item.transaction?.duration?.us,
+        duration: getSpanDurationUs(item) || getTransactionDurationUs(item),
         traceId: item.trace.id,
         parentId: item.parent?.id,
         serviceName: item.service.name,

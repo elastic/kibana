@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { LazySavedSearchComponent, type SavedSearchTableConfig } from '@kbn/saved-search-component';
+import { getTransactionDurationUs } from '../../../../../common/utils/get_duration_us';
 import { getTimestampUs } from '../../../../../common/utils/get_timestamp_us';
 import { useKibana } from '../../../../context/kibana_context/use_kibana';
 import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
@@ -86,7 +87,7 @@ export function TransactionTabs({
             {transaction && (
               <LogsTabContent
                 timestamp={getTimestampUs(transaction)}
-                duration={transaction.transaction.duration.us}
+                duration={getTransactionDurationUs(transaction)}
                 traceId={transaction.trace.id}
                 logsTableConfig={logsTableConfig}
                 onLogsTableConfigChange={onLogsTableConfigChange}

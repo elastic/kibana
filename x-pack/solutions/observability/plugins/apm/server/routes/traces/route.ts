@@ -43,6 +43,7 @@ import {
   SPAN_ID,
 } from '../../../common/es_fields/apm';
 import { parseOtelDuration } from '../../lib/helpers/parse_otel_duration';
+import { getTransactionDurationUs, getSpanDurationUs } from '../../../common/utils/get_duration_us';
 
 const tracesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces',
@@ -302,7 +303,7 @@ const rootItemByTraceIdRoute = createApmServerRoute({
       return undefined;
     }
 
-    const apmDuration = span.transaction?.duration?.us ?? span.span?.duration?.us;
+    const apmDuration = getTransactionDurationUs(span) || getSpanDurationUs(span) || undefined;
     const otelDuration = span.duration;
 
     const duration = apmDuration ?? parseOtelDuration(otelDuration);

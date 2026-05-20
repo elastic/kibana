@@ -7,6 +7,7 @@
 
 import { format } from 'url';
 import type { TransactionDetailRedirectInfo } from '@kbn/apm-types';
+import { getTransactionDurationUs } from '../../../../common/utils/get_duration_us';
 
 export const getRedirectToTransactionDetailPageUrl = ({
   transaction,
@@ -36,7 +37,7 @@ export const getRedirectToTransactionDetailPageUrl = ({
         rangeTo ||
         roundToNearestMinute({
           timestamp: transaction['@timestamp'],
-          diff: transaction.transaction.duration.us / 1000,
+          diff: getTransactionDurationUs(transaction) / 1000,
           direction: 'up',
         }),
       waterfallItemId,

@@ -33,13 +33,13 @@ const requiredFields = asMutableArray([
   AGENT_NAME,
   PROCESSOR_EVENT,
   AT_TIMESTAMP,
-  TIMESTAMP_US,
   SERVICE_NAME,
   TRANSACTION_ID,
-  TRANSACTION_DURATION,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 ] as const);
+
+const optionalFields = asMutableArray([TIMESTAMP_US, TRANSACTION_DURATION] as const);
 
 export async function getTransaction({
   transactionId,
@@ -76,7 +76,7 @@ export async function getTransaction({
       },
     },
     // Custom links should allow users to use any transaction field as a placeholder.
-    fields: [{ field: '*', include_unmapped: true }],
+    fields: [...requiredFields, ...optionalFields, { field: '*', include_unmapped: true }],
     _source: [SPAN_LINKS, TRANSACTION_MARKS_AGENT],
   });
 

@@ -42,9 +42,10 @@ export async function getRootTransactionByTraceId({
     TRANSACTION_NAME,
     AT_TIMESTAMP,
     TRANSACTION_TYPE,
-    TRANSACTION_DURATION,
     SERVICE_NAME,
   ] as const);
+
+  const optionalFields = asMutableArray([TRANSACTION_DURATION] as const);
 
   const params = {
     apm: {
@@ -69,7 +70,7 @@ export async function getRootTransactionByTraceId({
         filter: [{ term: { [TRACE_ID]: traceId } }, ...rangeQuery(start, end)],
       },
     },
-    fields: requiredFields,
+    fields: [...requiredFields, ...optionalFields],
   };
 
   const resp = await apmEventClient.search('get_root_transaction_by_trace_id', params);

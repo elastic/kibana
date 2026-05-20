@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { Duration, Timestamp } from '@kbn/apm-ui-shared';
+import { getTransactionDurationUs } from '../../../../common/utils/get_duration_us';
 import { getTimestampUs } from '../../../../common/utils/get_timestamp_us';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { Summary } from '.';
@@ -47,7 +48,7 @@ function TransactionSummary({ transaction, totalDuration, errorCount, coldStartB
   const items = [
     <Timestamp timestamp={getTimestampUs(transaction) / 1000} renderMode="tooltip" />,
     <Duration
-      duration={transaction.transaction.duration.us}
+      duration={getTransactionDurationUs(transaction)}
       parent={{
         duration: totalDuration,
         type: 'trace',
