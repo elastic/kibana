@@ -50,6 +50,13 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.pci_scope_discovery`,
   `${internalNamespaces.security}.pci_compliance`,
   `${internalNamespaces.security}.pci_field_mapper`,
+  // Autonomous-architected PCI tool bundle (per cycle-17 architect blueprint).
+  // Registered independently of the hand-written variant so the autonomous skill
+  // can be validated as a true end-to-end skill+tool autonomous stack.
+  `${internalNamespaces.security}.pci_autonomous_scope_discovery`,
+  `${internalNamespaces.security}.pci_autonomous_compliance_check`,
+  `${internalNamespaces.security}.pci_autonomous_scorecard_report`,
+  `${internalNamespaces.security}.pci_autonomous_field_mapper`,
 
   // Streams
   `${internalNamespaces.streams}.inspect_streams`,
@@ -135,6 +142,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'detection-rule-edit',
   'threat-hunting',
   'pci-compliance',
+  'pci-compliance-autonomous',
 
   // O11Y
   'observability.rca',

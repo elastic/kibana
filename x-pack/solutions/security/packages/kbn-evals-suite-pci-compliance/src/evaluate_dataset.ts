@@ -35,6 +35,22 @@ export type EvaluatePciDataset = (options: {
 }) => Promise<void>;
 
 /**
+ * Map `EVAL_PCI_VARIANT` env to the registered skill id the agent router will pick.
+ * `handwritten` (default) → Smriti's hand-written `pci-compliance` skill.
+ * `autonomous`            → cycle-17 architect's `pci-compliance-autonomous` skill.
+ *
+ * Both skills share identical tool sets and BASELINE criteria, so the only thing that
+ * changes per-variant is the skill content itself + the skill-invocation evaluator's
+ * target name. This keeps the eval surface deterministic for side-by-side comparison.
+ */
+function resolvePciSkillNameFromEnv(): string {
+  const variant = (process.env.EVAL_PCI_VARIANT ?? 'handwritten').toLowerCase().trim();
+  if (variant === 'autonomous') return 'pci-compliance-autonomous';
+  if (variant === 'handwritten' || variant === '') return 'pci-compliance';
+  throw new Error(`Invalid EVAL_PCI_VARIANT="${variant}". Expected "handwritten" or "autonomous".`);
+}
+
+/**
  * Criteria baked into every PCI example. The PCI skill guarantees:
  *  - PCI DSS v4.0.1 is cited (or `4.0.1`) in the answer.
  *  - The QSA disclaimer is surfaced so the answer never reads as a compliance
@@ -117,7 +133,7 @@ export function createEvaluatePciDataset({
         createSkillInvocationEvaluator({
           traceEsClient,
           log,
-          skillName: 'pci-compliance',
+          skillName: resolvePciSkillNameFromEnv(),
         }),
       ]
     );

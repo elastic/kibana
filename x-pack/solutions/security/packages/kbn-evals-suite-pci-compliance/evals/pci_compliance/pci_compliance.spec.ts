@@ -15,6 +15,38 @@ import {
 
 const ALL_ECS_INDICES = `${PCI_INDICES.auth},${PCI_INDICES.network},${PCI_INDICES.vuln},${PCI_INDICES.endpoint}`;
 
+/**
+ * Variant-aware tool-name vocabulary for the judge rubric.
+ *
+ * The hand-written PCI skill exposes a 3-tool surface with a `mode` parameter
+ * (`pci_compliance` with `mode: "check" | "report"`). The autonomously-architected variant
+ * exposes a 4-tool surface where `check` and `report` are separate tools
+ * (`pci_autonomous_compliance_check` and `pci_autonomous_scorecard_report`). To keep the
+ * side-by-side comparison fair, the judge must look for the *variant's own* tool names
+ * rather than hard-coding the hand-written vocabulary.
+ *
+ * Selected via the `EVAL_PCI_VARIANT` env var (`handwritten` | `autonomous`).
+ * Defaults to `handwritten` to preserve the prior behaviour for ad-hoc runs.
+ */
+const IS_AUTONOMOUS = (process.env.EVAL_PCI_VARIANT ?? 'handwritten') === 'autonomous';
+
+const TOOL_NAMES = IS_AUTONOMOUS
+  ? {
+      scopeDiscovery: 'pci_autonomous_scope_discovery',
+      fieldMapper: 'pci_autonomous_field_mapper',
+      checkCallFor: (requirement: string) =>
+        `Called the pci_autonomous_compliance_check tool for requirement ${requirement}.`,
+      reportCall:
+        'Called the pci_autonomous_scorecard_report tool (rather than running a single requirement check).',
+    }
+  : {
+      scopeDiscovery: 'pci_scope_discovery',
+      fieldMapper: 'pci_field_mapper',
+      checkCallFor: (requirement: string) =>
+        `Called the pci_compliance tool in check mode for requirement ${requirement}.`,
+      reportCall: 'Called the pci_compliance tool in report mode (not just a single check).',
+    };
+
 evaluate.describe('PCI DSS v4.0.1 Compliance', { tag: tags.stateful.classic }, () => {
   evaluate.beforeAll(async ({ internalEsClient, chatClient, log }) => {
     await seedPciEvalData({ esClient: internalEsClient, log });
@@ -49,7 +81,7 @@ evaluate.describe('PCI DSS v4.0.1 Compliance', { tag: tags.stateful.classic }, (
             },
             output: {
               criteria: [
-                'Called the pci_compliance tool in report mode (not just a single check).',
+                TOOL_NAMES.reportCall,
                 'Produced a scorecard covering requirements 1–12 (by id or by name).',
                 'Assigned RED or violation status to requirement 8 (or 8.3.4) due to the brute-force data for user "jdoe".',
                 'Assigned RED or violation status to requirement 4 (or 4.1) due to weak TLS 1.0, TLS 1.1, and plain HTTP traffic.',
@@ -82,7 +114,7 @@ evaluate.describe('PCI DSS v4.0.1 Compliance', { tag: tags.stateful.classic }, (
             },
             output: {
               criteria: [
-                'Called the pci_compliance tool in check mode for requirement 8.3.4 (or requirement 8).',
+                TOOL_NAMES.checkCallFor('8.3.4 (or requirement 8)'),
                 `Passed the index pattern ${PCI_INDICES.auth} (or an equivalent) to the tool.`,
                 'Surfaced the repeated failed logins for user "jdoe" as a RED / violation finding.',
                 'The evidence shows at least 12 (or more than 10) failed authentication attempts for user "jdoe".',
@@ -113,7 +145,7 @@ evaluate.describe('PCI DSS v4.0.1 Compliance', { tag: tags.stateful.classic }, (
             },
             output: {
               criteria: [
-                'Called the pci_compliance tool in check mode for requirement 4.1 (or requirement 4).',
+                TOOL_NAMES.checkCallFor('4.1 (or requirement 4)'),
                 'Identified TLS 1.0 connections (destination 203.0.113.51) as a violation.',
                 'Identified TLS 1.1 connections (destination 203.0.113.52) as a violation.',
                 'Identified plain HTTP traffic (destination 198.51.100.10, no TLS) as a violation.',
@@ -143,7 +175,7 @@ evaluate.describe('PCI DSS v4.0.1 Compliance', { tag: tags.stateful.classic }, (
             },
             output: {
               criteria: [
-                'Called the pci_compliance tool in check mode for requirement 2.2.4 (or requirement 2).',
+                TOOL_NAMES.checkCallFor('2.2.4 (or requirement 2)'),
                 'Identified successful authentication events for "admin" as a violation — default accounts should not be in active use.',
                 'Identified successful authentication events for "root" as a violation — default accounts should not be in active use.',
               ],
@@ -172,10 +204,10 @@ evaluate.describe('PCI DSS v4.0.1 Compliance', { tag: tags.stateful.classic }, (
             },
             output: {
               criteria: [
-                'Called pci_scope_discovery (rather than running compliance checks directly).',
+                `Called ${TOOL_NAMES.scopeDiscovery} (rather than running compliance checks directly).`,
                 `Reported ${PCI_INDICES.auth} as PCI-relevant, classified under "identity" or auth category.`,
                 `Reported ${PCI_INDICES.network} as PCI-relevant, classified under "network" category.`,
-                `Reported ${PCI_INDICES.vuln} as PCI-relevant. The tool classified it under one or more of: "vulnerability", "endpoint", "identity", "network" (the exact category names from pci_scope_discovery).`,
+                `Reported ${PCI_INDICES.vuln} as PCI-relevant. The tool classified it under one or more of: "vulnerability", "endpoint", "identity", "network" (the exact category names from ${TOOL_NAMES.scopeDiscovery}).`,
                 `Reported ${PCI_INDICES.endpoint} as PCI-relevant, classified under "endpoint" or malware category.`,
               ],
             },
@@ -204,7 +236,7 @@ evaluate.describe('PCI DSS v4.0.1 Compliance', { tag: tags.stateful.classic }, (
             },
             output: {
               criteria: [
-                'Called the pci_field_mapper tool against the supplied custom index.',
+                `Called the ${TOOL_NAMES.fieldMapper} tool against the supplied custom index.`,
                 'Suggested mapping "username" → "user.name".',
                 'Suggested mapping "src_ip" → "source.ip".',
                 'Suggested mapping "hostname" → "host.name".',
@@ -266,7 +298,7 @@ evaluate.describe('PCI DSS v4.0.1 Compliance', { tag: tags.stateful.classic }, (
             },
             output: {
               criteria: [
-                'Called the pci_compliance tool in check mode for requirement 9.',
+                TOOL_NAMES.checkCallFor('9'),
                 'Returned AMBER, NOT_ASSESSABLE, or an equivalent non-GREEN / non-RED status.',
                 'Explained that no physical access or badge events were found in the evaluated indices.',
                 'Did not fabricate violations or evidence — the finding reflects the actual absence of data.',

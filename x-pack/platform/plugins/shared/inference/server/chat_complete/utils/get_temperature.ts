@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { InferenceConnector } from '@kbn/inference-common';
-import { InferenceConnectorType } from '@kbn/inference-common';
+import { InferenceConnectorType, getModelDefinition } from '@kbn/inference-common';
 
 const OPENAI_MODELS_WITHOUT_TEMPERATURE = ['o1', 'o3', 'gpt-5'];
 
@@ -44,6 +44,17 @@ export const getTemperatureIfValid = (
     if (shouldExcludeTemperature) {
       // Some models reject non-default temperature values (or reject the param entirely). Let the
       // provider default apply by omitting the parameter.
+      return {};
+    }
+  }
+
+  // Bedrock (and any provider whose model registry marks the model as
+  // temperature-incompatible) — omit the parameter so the provider's default
+  // applies. e.g. Bedrock returns a 400 with "temperature is deprecated for
+  // this model" for Claude Opus 4.7.
+  if (model) {
+    const definition = getModelDefinition(model);
+    if (definition?.supportsTemperature === false) {
       return {};
     }
   }

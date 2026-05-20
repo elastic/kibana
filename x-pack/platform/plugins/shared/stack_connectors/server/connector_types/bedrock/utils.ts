@@ -9,14 +9,37 @@ import { SmithyMessageDecoderStream } from '@smithy/eventstream-codec';
 import { DEFAULT_TOKEN_LIMIT } from '@kbn/connector-schemas/bedrock';
 import type { BedrockMessage, BedrockToolChoice } from '@kbn/connector-schemas/bedrock';
 
+/**
+ * Substrings of Bedrock model IDs that reject the `temperature` inference
+ * parameter and return HTTP 400 ("`temperature` is deprecated for this
+ * model"). The connector strips `temperature` from outgoing payloads when the
+ * configured model matches one of these fragments. Keep this list small and
+ * append-only.
+ *
+ * The inference plugin maintains the canonical list in
+ * `@kbn/inference-common` (`known_models.ts`, `supportsTemperature: false`).
+ * This local guard avoids a cross-plugin dependency for callers that hit the
+ * connector sub-actions directly (e.g. `invokeAI`).
+ */
+const BEDROCK_MODEL_FRAGMENTS_WITHOUT_TEMPERATURE = ['claude-opus-4-7'];
+
+export const bedrockModelSupportsTemperature = (model?: string): boolean => {
+  if (!model) return true;
+  const normalized = model.toLowerCase();
+  return !BEDROCK_MODEL_FRAGMENTS_WITHOUT_TEMPERATURE.some((fragment) =>
+    normalized.includes(fragment)
+  );
+};
+
 export const formatBedrockBody = ({
   messages,
   stopSequences,
-  temperature = 0,
+  temperature,
   system,
   maxTokens = DEFAULT_TOKEN_LIMIT,
   tools,
   toolChoice,
+  model,
 }: {
   messages: BedrockMessage[];
   stopSequences?: string[];
@@ -26,15 +49,25 @@ export const formatBedrockBody = ({
   system?: string;
   tools?: Array<{ name: string; description: string }>;
   toolChoice?: BedrockToolChoice;
-}) => ({
-  anthropic_version: 'bedrock-2023-05-31',
-  ...ensureMessageFormat(messages, system),
-  max_tokens: maxTokens,
-  stop_sequences: stopSequences,
-  temperature,
-  tools,
-  tool_choice: toolChoice,
-});
+  /**
+   * Bedrock model id (e.g. `us.anthropic.claude-opus-4-7`). When provided the
+   * helper omits parameters the model is known to reject. When omitted the
+   * legacy default of `temperature: 0` is preserved for backward compat.
+   */
+  model?: string;
+}) => {
+  const includeTemperature = bedrockModelSupportsTemperature(model);
+  const effectiveTemperature = includeTemperature ? temperature ?? 0 : undefined;
+  return {
+    anthropic_version: 'bedrock-2023-05-31',
+    ...ensureMessageFormat(messages, system),
+    max_tokens: maxTokens,
+    stop_sequences: stopSequences,
+    ...(effectiveTemperature !== undefined ? { temperature: effectiveTemperature } : {}),
+    tools,
+    tool_choice: toolChoice,
+  };
+};
 
 interface FormattedBedrockMessage {
   role: string;

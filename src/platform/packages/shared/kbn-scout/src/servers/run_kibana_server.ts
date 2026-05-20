@@ -33,7 +33,10 @@ export function getExtraKbnOpts(installDir: string | undefined, isServerless: bo
 
   return [
     '--dev',
-    '--no-dev-config',
+    // Local-only patch: allow config/kibana.dev.yml so preconfigured AI
+    // connectors defined there reach the Scout-managed Kibana process.
+    // The upstream behaviour is `--no-dev-config`; this branch reverts that.
+    ...(process.env.SCOUT_READ_DEV_CONFIG === 'true' ? [] : ['--no-dev-config']),
     '--no-dev-credentials',
     isServerless
       ? '--server.versioned.versionResolution=newest'
