@@ -268,13 +268,9 @@ describe('fetchThroughputCorrelations', () => {
       // Use a linear overall [1..10] so we can craft clearly-below-threshold filtered series.
       // pairA: constant [2,2,...,2] → r = 0; excluded from fallback (threshold: |r| > 0)
       // pairB: [3,3,4,3,3,4,3,3,4,3] → r ≈ 0.114 (verified analytically); wins fallback
-      const linearOverall = Array.from({ length: 10 }, (_, i) =>
-        makeBucket(i * 60_000, i + 1)
-      );
+      const linearOverall = Array.from({ length: 10 }, (_, i) => makeBucket(i * 60_000, i + 1));
       const pairABuckets = Array.from({ length: 10 }, (_, i) => makeBucket(i * 60_000, 2));
-      const pairBBuckets = [3, 3, 4, 3, 3, 4, 3, 3, 4, 3].map((v, i) =>
-        makeBucket(i * 60_000, v)
-      );
+      const pairBBuckets = [3, 3, 4, 3, 3, 4, 3, 3, 4, 3].map((v, i) => makeBucket(i * 60_000, v));
 
       mockSearch
         .mockResolvedValueOnce({ aggregations: { timeseries: { buckets: linearOverall } } })
