@@ -200,6 +200,15 @@ describe('CoreKibanaRequest', () => {
           })
         ).not.toThrow();
       });
+      it('maps an undefined payload to null for nullable body schemas (Hapi parity)', () => {
+        const request = hapiMocks.createRequest({ payload: undefined });
+        const kibanaRequest = CoreKibanaRequest.from(request, {
+          body: schema.nullable(
+            schema.object({ signature: schema.string(), timestamp: schema.number() })
+          ),
+        });
+        expect(kibanaRequest.body).toBeNull();
+      });
     });
 
     describe('route.httpVersion property', () => {

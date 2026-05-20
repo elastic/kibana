@@ -12,7 +12,10 @@ import Boom from '@hapi/boom';
 import type { FastifyReply } from 'fastify';
 import type { IncomingMessage } from 'http';
 import { KibanaResponse } from '@kbn/core-http-router-server-internal';
-import { FastifyResponseAdapter } from './fastify_response_adapter';
+import {
+  FastifyResponseAdapter,
+  syncNodeResponseHeadersToFastifyReply,
+} from './fastify_response_adapter';
 
 describe('FastifyResponseAdapter', () => {
   it('forwards Node IncomingMessage headers (e.g. proxied Elasticsearch gzip) before sending', async () => {
@@ -130,6 +133,9 @@ describe('FastifyResponseAdapter', () => {
       hasHeader(name: string) {
         return recordedHeaders.has(name.toLowerCase());
       },
+      getHeader(name: string) {
+        return recordedHeaders.get(name.toLowerCase());
+      },
       getHeaders() {
         return Object.fromEntries(recordedHeaders);
       },
@@ -175,5 +181,28 @@ describe('FastifyResponseAdapter', () => {
 
     expect(reply.code).toHaveBeenCalledWith(501);
     expect(reply.send).toHaveBeenCalledWith(body);
+  });
+
+  it('syncNodeResponseHeadersToFastifyReply preserves every Set-Cookie from the raw response', () => {
+    const recordedHeaders = new Map<string, string | number | string[]>();
+
+    const reply = {
+      raw: {
+        getHeader: (name: string) =>
+          name.toLowerCase() === 'set-cookie'
+            ? ['sid=session-a; Path=/; HttpOnly', 'other=b; Path=/']
+            : undefined,
+      },
+      header(_name: string, value: string | number | string[]) {
+        recordedHeaders.set('set-cookie', value);
+      },
+    } as unknown as FastifyReply;
+
+    syncNodeResponseHeadersToFastifyReply(reply);
+
+    expect(recordedHeaders.get('set-cookie')).toEqual([
+      'sid=session-a; Path=/; HttpOnly',
+      'other=b; Path=/',
+    ]);
   });
 });

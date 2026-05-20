@@ -43,7 +43,10 @@ import {
   getInternalRouteHandler,
   kibanaResponseFactory,
 } from '@kbn/core-http-router-server-internal';
-import { isResponseError as isElasticsearchUnauthorizedError } from '@kbn/es-errors';
+import {
+  isUnauthorizedError as isElasticsearchUnauthorizedError,
+  type UnauthorizedError as EsUnauthorizedError,
+} from '@kbn/es-errors';
 import type {
   IRouter,
   AuthenticationHandler,
@@ -1242,20 +1245,23 @@ export class FastifyHttpServer {
         }
         const requestForLogging = compatForError as unknown as Request;
 
+        // Match {@link Router.handle}: only ES 401s become HTTP 401. Other ResponseErrors
+        // (e.g. 403 security_exception for insufficient privileges) must not — the browser
+        // treats any 401 as a logout signal ({@link UnauthorizedResponseHttpInterceptor}).
         if (isElasticsearchUnauthorizedError(error)) {
           this.log.error(
             '401 Unauthorized',
             formatErrorMeta(401, { request: requestForLogging, error })
           );
+          const esError = error as EsUnauthorizedError;
+          const wwwAuthenticate =
+            Object.entries(esError.headers ?? {}).find(
+              ([key]) => key.toLowerCase() === 'www-authenticate'
+            )?.[1] ?? 'Basic realm="Authorization Required"';
           return await this.responseAdapter.handle(
             kibanaResponseFactory.unauthorized({
-              body: error.message,
-              headers: {
-                'www-authenticate':
-                  Object.entries(error.headers ?? {}).find(
-                    ([key]) => key.toLowerCase() === 'www-authenticate'
-                  )?.[1] ?? 'Basic realm="Authorization Required"',
-              },
+              body: esError.message,
+              headers: { 'www-authenticate': wwwAuthenticate as string },
             }),
             reply
           );

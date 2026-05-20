@@ -14,17 +14,18 @@ import type {
   AuthResult,
   AuthToolkit,
   OnPreResponseHandler,
+  RouterRoute,
 } from '@kbn/core-http-server';
 import { AuthResultType, isKibanaResponse } from '@kbn/core-http-server';
 import { CoreKibanaRequest, lifecycleResponseFactory } from '@kbn/core-http-router-server-internal';
-import type { RouterRoute, KibanaRouteOptions } from '@kbn/core-http-server';
-
 import type { AuthStateStorage } from '../auth_state_storage';
 import type { AuthHeadersStorage } from '../auth_headers_storage';
 import type { FastifyResponseAdapter } from './fastify_response_adapter';
+import { buildKibanaRequest } from './fastify_lifecycle';
+import { KIBANA_HAPI_COMPAT_REQUEST } from './fastify_request_compat_symbol';
 import {
-  buildHapiCompatRequestFromFastify,
   isHapiRouteAuthDisabled,
+  mapRouteSecurityToHapiAuthSettings,
 } from './fastify_to_hapi_request';
 import { isReplyCommitted } from './fastify_reply_utils';
 
@@ -42,7 +43,7 @@ const authToolkit: AuthToolkit = {
   }),
 };
 
-export const KIBANA_HAPI_COMPAT_REQUEST = Symbol('kibanaHapiCompatRequest');
+export { KIBANA_HAPI_COMPAT_REQUEST } from './fastify_request_compat_symbol';
 
 /**
  * Wires the platform {@link AuthenticationHandler} (session/credentials) the same way
@@ -78,23 +79,32 @@ export function registerFastifyAuthentication(params: {
   // `registerAuth`; using `preValidation` keeps authenticate-before-postAuth ordering intact.
   fastify.addHook('preValidation', async (req: FastifyRequest, reply: FastifyReply) => {
     const app = ((req as any).app = (req as any).app ?? {});
-    const matchedRoute = app.matchedRoute as RouterRoute | undefined;
-    const matchedOpts = app.matchedKibanaRouteOptions as KibanaRouteOptions | undefined;
-    if (!matchedRoute || !matchedOpts) {
-      return;
-    }
-
-    let compat = app[KIBANA_HAPI_COMPAT_REQUEST] as ReturnType<
-      typeof buildHapiCompatRequestFromFastify
-    > | null;
-    if (!compat) {
-      compat = buildHapiCompatRequestFromFastify(req, reply, matchedRoute, matchedOpts, true);
-      app[KIBANA_HAPI_COMPAT_REQUEST] = compat;
-    }
+    // Always run through buildKibanaRequest so `app.fastifyReply` stays current for session
+    // cookie reads in {@link createFastifyCookieSessionStorageFactory}.
+    const compat = buildKibanaRequest(req, reply);
+    app[KIBANA_HAPI_COMPAT_REQUEST] = compat;
 
     // Hapi does not run the `registerAuth` handler when `route.settings.auth === false`.
     if (isHapiRouteAuthDisabled(compat.route.settings.auth)) {
-      return;
+      const matchedRoute = app.matchedRoute as RouterRoute | undefined;
+      const matchedSecurity =
+        matchedRoute && typeof matchedRoute.security === 'object'
+          ? matchedRoute.security
+          : undefined;
+      const authRegistered =
+        typeof (req.server as any).getKibanaAuthRegistered === 'function'
+          ? Boolean((req.server as any).getKibanaAuthRegistered())
+          : false;
+      if (matchedSecurity?.authc?.enabled === true && authRegistered) {
+        // Route lookup can attach static-directory options (auth disabled) while the matched
+        // router route still requires auth (e.g. bare-prefix `/app/:id` → `renderCoreApp`).
+        compat.route.settings.auth = mapRouteSecurityToHapiAuthSettings(
+          matchedSecurity,
+          authRegistered
+        );
+      } else {
+        return;
+      }
     }
 
     const kibanaRequest = CoreKibanaRequest.from(compat, undefined, false);

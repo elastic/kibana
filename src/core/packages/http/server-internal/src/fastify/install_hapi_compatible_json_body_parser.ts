@@ -23,11 +23,13 @@ function routeWantsUnparsedJsonBodyStream(route: RouterRoute | undefined): boole
 
 /**
  * Fastify rejects requests that declare `Content-Type: application/json` but send an
- * empty body (`FST_ERR_CTP_EMPTY_JSON_BODY`). Hapi accepted these; many Kibana callsites
- * use JSON content-type with no payload (e.g. sample data install).
+ * empty body (`FST_ERR_CTP_EMPTY_JSON_BODY`). Hapi accepted these; bodyless JSON POSTs are
+ * treated as `null` (e.g. `schema.nullable(...)` routes). Routes without body validation still
+ * receive `{}` from {@link CoreKibanaRequest.from} when no schema is declared.
  *
  * Install before routes listen; replaces the built-in `application/json` parser with one
- * that treats an empty string body as `{}`, delegating otherwise to Fastify's default
+ * that treats an empty string body as `null` (Hapi parity for bodyless JSON POSTs),
+ * delegating otherwise to Fastify's default
  * JSON parser (same proto / constructor poisoning settings as the instance).
  *
  * Uses `parseAs: 'buffer'` (this Fastify build does not allow `parseAs: 'stream'` on JSON).
@@ -55,7 +57,7 @@ export function installHapiCompatibleJsonBodyParser(fastify: FastifyInstance): v
 
       const text = body.length === 0 ? '' : body.toString('utf8');
       if (text === '') {
-        done(null, {});
+        done(null, null);
         return;
       }
       defaultJsonParser(request, text, done);

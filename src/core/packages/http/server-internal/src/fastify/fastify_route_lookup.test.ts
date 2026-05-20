@@ -80,6 +80,43 @@ describe('populateMatchedRouteFromFindMyWay', () => {
     expect((req as any).app?.matchedKibanaRouteOptions).toBeUndefined();
   });
 
+  it('does not apply static-directory options when a Kibana route matched without options', () => {
+    const staticOptions: KibanaRouteOptions = {
+      xsrfRequired: false,
+      access: 'public',
+      security: {
+        authc: { enabled: false, reason: 'static' },
+        authz: { enabled: false, reason: 'static' },
+      },
+    };
+    const appRoute = {
+      method: 'get',
+      path: '/app/{id}/{any*}',
+      options: { tags: [] },
+      security: {
+        authc: { enabled: true },
+        authz: { enabled: false, reason: 'app' },
+      },
+    } as unknown as RouterRoute;
+
+    const appFmw = FindMyWay({ caseSensitive: true, ignoreTrailingSlash: false });
+    appFmw.on('GET', '/app/:id/*', () => undefined, { kibanaRoute: appRoute });
+    appFmw.on('GET', '/app/:id', () => undefined, { kibanaRoute: appRoute });
+
+    const req = makeReq('/app/kibana_overview');
+    populateMatchedRouteFromFindMyWay(req, makeReply(), {
+      ...lookupOptions,
+      fmw: appFmw,
+      staticDirectoryRouteInfo: new Map([['/assets/*', 'path']]),
+      staticDirectoryRouteOptions: staticOptions,
+      pathnameMatchesWildcardPattern: (pathname, pattern) =>
+        pathname === '/assets/foo' && pattern === '/assets/*',
+    });
+
+    expect((req as any).app?.matchedRoute).toBe(appRoute);
+    expect((req as any).app?.matchedKibanaRouteOptions?.security).toEqual(appRoute.security);
+  });
+
   it('matches after rewrite and exposes security on KibanaRequest', () => {
     const req = makeReq('/api/demo');
     const reply = makeReply();

@@ -10,10 +10,26 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { HTTPVersion as FmwHTTPVersion, Instance as FmwInstance } from 'find-my-way';
 import type { KibanaRouteOptions, RouterRoute } from '@kbn/core-http-server';
+import { omitBy, isNil } from 'lodash';
 
 import { applyHapiCompatRequestTimeouts } from './apply_hapi_compat_request_timeouts';
 import { toPlainRouteParams } from './fastify_to_hapi_request';
 import { attachFastifyPayloadReceiveTimeout } from './register_fastify_payload_timeout_pre_parsing';
+
+const isSafeMethod = (method: string) => method === 'get' || method === 'options';
+
+/** Mirrors {@link FastifyHttpServer.configureRoute} when find-my-way store omits `kibanaRouteOptions`. */
+const kibanaRouteOptionsFromRouterRoute = (route: RouterRoute): KibanaRouteOptions =>
+  omitBy(
+    {
+      xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
+      access: route.options.access ?? 'internal',
+      deprecated: route.options.deprecated,
+      security: route.security,
+      excludeFromRateLimiter: route.options.excludeFromRateLimiter,
+    },
+    isNil
+  ) as KibanaRouteOptions;
 
 /** @internal */
 export type FastifyRouteLookupPathResolver = (req: FastifyRequest) => string;
@@ -78,7 +94,13 @@ export function populateMatchedRouteFromFindMyWay(
     }
     if (store?.kibanaRouteOptions) {
       app.matchedKibanaRouteOptions = store.kibanaRouteOptions;
+    } else if (store?.kibanaRoute) {
+      app.matchedKibanaRouteOptions = kibanaRouteOptionsFromRouterRoute(store.kibanaRoute);
     } else {
+      // Only apply static-directory defaults when find-my-way did not match a Kibana router
+      // route. Bare-prefix app URLs (e.g. `/app/kibana_overview`) reuse the wildcard route's
+      // store; if `kibanaRouteOptions` were missing, falling through here would mark the request
+      // as auth-disabled and skip `registerAuth` while still serving `renderCoreApp`.
       for (const [pattern] of staticDirectoryRouteInfo) {
         if (pathnameMatchesWildcardPattern(lookupPath, pattern)) {
           app.matchedKibanaRouteOptions = staticDirectoryRouteOptions;

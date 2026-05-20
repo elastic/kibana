@@ -124,11 +124,11 @@ export function syncNodeResponseHeadersToFastifyReply(reply: FastifyReply): void
   if (setCookie === undefined) {
     return;
   }
-  const cookies = Array.isArray(setCookie) ? setCookie : [setCookie];
-  for (const cookie of cookies) {
-    if (cookie !== undefined) {
-      reply.header('set-cookie', cookie);
-    }
+  const cookies = (Array.isArray(setCookie) ? setCookie : [setCookie]).filter(
+    (cookie): cookie is string => cookie !== undefined
+  );
+  if (cookies.length > 0) {
+    reply.header('set-cookie', cookies);
   }
 }
 
@@ -152,8 +152,10 @@ function appendUtf8CharsetToTextContentType(contentType: string): string {
 }
 
 function ensureHapiCompatibleTextCharset(reply: FastifyReply): void {
-  const headers = typeof reply.getHeaders === 'function' ? reply.getHeaders() : {};
-  const raw = headers['content-type'] ?? headers['Content-Type'];
+  const raw =
+    typeof reply.getHeader === 'function'
+      ? reply.getHeader('content-type') ?? reply.getHeader('Content-Type')
+      : undefined;
   const typeStr = Array.isArray(raw) ? raw[0] : raw;
   if (typeof typeStr !== 'string') {
     return;

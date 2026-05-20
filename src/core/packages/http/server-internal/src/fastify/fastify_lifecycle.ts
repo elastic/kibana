@@ -37,7 +37,7 @@ import { CoreKibanaRequest, lifecycleResponseFactory } from '@kbn/core-http-rout
 import { deepFreeze } from '@kbn/std';
 import type { Request as HapiRequest } from '@hapi/hapi';
 import { FastifyResponseAdapter } from './fastify_response_adapter';
-import { KIBANA_HAPI_COMPAT_REQUEST } from './fastify_auth';
+import { KIBANA_HAPI_COMPAT_REQUEST } from './fastify_request_compat_symbol';
 import {
   getKibanaCompatRequestUrl,
   mapRouteSecurityToHapiAuthSettings,
@@ -95,7 +95,11 @@ const preResponseToolkit: OnPreResponseToolkit = {
  */
 /** @internal */
 export const buildKibanaRequest = (req: FastifyRequest, reply: FastifyReply): HapiRequest => {
-  const existingCompat = (req as any).app?.[KIBANA_HAPI_COMPAT_REQUEST] as HapiRequest | undefined;
+  const app = ((req as any).app = (req as any).app ?? { requestId: req.id ?? '', requestUuid: '' });
+  // Always refresh: lifecycle hooks and auth may reuse a cached compat request across phases.
+  app.fastifyReply = reply;
+
+  const existingCompat = app[KIBANA_HAPI_COMPAT_REQUEST] as HapiRequest | undefined;
   if (existingCompat) {
     return existingCompat;
   }
@@ -105,10 +109,6 @@ export const buildKibanaRequest = (req: FastifyRequest, reply: FastifyReply): Ha
     (req.headers[':authority'] as string | undefined) ??
     'localhost';
   const url = getKibanaCompatRequestUrl(req);
-  // Reuse the per-request `app` slot if a previous hook (e.g. the route handler's
-  // own builder) populated it; otherwise initialize it once.
-  const app = ((req as any).app = (req as any).app ?? { requestId: req.id ?? '', requestUuid: '' });
-  app.fastifyReply = reply;
   const matched = app.matchedRoute as
     | {
         method: string;
@@ -127,10 +127,11 @@ export const buildKibanaRequest = (req: FastifyRequest, reply: FastifyReply): Ha
         }
       : matched
       ? {
-          xsrfRequired: undefined,
-          access: undefined,
-          deprecated: undefined,
-          security: matched.security,
+          xsrfRequired: matchedRoute?.options?.xsrfRequired,
+          access: matchedRoute?.options?.access,
+          deprecated: matchedRoute?.options?.deprecated,
+          security: matchedRoute?.security,
+          excludeFromRateLimiter: matchedRoute?.options?.excludeFromRateLimiter,
         }
       : {}
   ) as KibanaRouteOptions;

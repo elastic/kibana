@@ -465,8 +465,9 @@ function sanitizeRequest(req: Request): { query: unknown; params: unknown; body:
   const { [ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM]: __, ...query } = req.query ?? {};
 
   // Hapi leaves POST bodies without a parser as `null`; Fastify often leaves them
-  // `undefined`. Object body schemas reject `undefined` with 400 before handlers run.
-  const body = req.payload === undefined ? {} : req.payload;
+  // `undefined`. Map missing payloads to `null` so `schema.nullable(...)` validates.
+  // Empty `application/json` bodies are normalized to `null` by the Fastify JSON parser.
+  const body = req.payload === undefined ? null : req.payload;
 
   return {
     query,
