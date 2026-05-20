@@ -12,6 +12,9 @@ import { writeFile, readFile } from 'fs/promises';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { schema } from '@kbn/config-schema';
 
+const DEFAULT_VAULT_ADDR = 'https://secrets.elastic.co:8200';
+const getVaultAddr = (): string => process.env.VAULT_ADDR || DEFAULT_VAULT_ADDR;
+
 /**
  * Vault-backed config used by @kbn/evals CI.
  *
@@ -137,6 +140,10 @@ export const retrieveFromVault = async (vaultPath: string, filePath: string, fie
   const { stdout } = await execa('vault', ['read', `-field=${field}`, vaultPath], {
     cwd: REPO_ROOT,
     buffer: true,
+    env: {
+      ...process.env,
+      VAULT_ADDR: getVaultAddr(),
+    },
   });
 
   const value = Buffer.from(stdout, 'base64').toString('utf-8').trim();
@@ -160,6 +167,10 @@ export const uploadToVault = async (vaultPath: string, filePath: string, field: 
   await execa('vault', ['write', vaultPath, `${field}=${asB64}`], {
     cwd: REPO_ROOT,
     buffer: true,
+    env: {
+      ...process.env,
+      VAULT_ADDR: getVaultAddr(),
+    },
   });
 };
 

@@ -49,22 +49,76 @@ const LazyYamlRuleForm = React.lazy(() =>
   import('../../form/yaml_rule_form').then((m) => ({ default: m.YamlRuleForm }))
 );
 
+// ── Translated phrases ────────────────────────────────────────────────────────
+
+const FORM_VIEW_LABEL = i18n.translate('xpack.alertingV2.composeDiscover.editMode.form', {
+  defaultMessage: 'Form view',
+});
+
+const YAML_VIEW_LABEL = i18n.translate('xpack.alertingV2.composeDiscover.editMode.yaml', {
+  defaultMessage: 'YAML view',
+});
+
+const YAML_MODE_BADGE_LABEL = i18n.translate('xpack.alertingV2.composeDiscover.yamlMode.badge', {
+  defaultMessage: 'YAML MODE',
+});
+
+const EDIT_MODE_LEGEND = i18n.translate('xpack.alertingV2.composeDiscover.editMode.legend', {
+  defaultMessage: 'Edit mode selection',
+});
+
+const CLONE_TITLE = i18n.translate('xpack.alertingV2.composeDiscover.flyout.cloneTitleLabel', {
+  defaultMessage: 'Clone alert rule',
+});
+
+const CREATE_TITLE = i18n.translate('xpack.alertingV2.composeDiscover.flyout.createTitleLabel', {
+  defaultMessage: 'Create alert rule',
+});
+
+const EDIT_TITLE = i18n.translate('xpack.alertingV2.composeDiscover.flyout.editTitleLabel', {
+  defaultMessage: 'Edit alert rule',
+});
+
+const CREATE_RULE_BUTTON_LABEL = i18n.translate(
+  'xpack.alertingV2.composeDiscover.flyout.createButtonLabel',
+  { defaultMessage: 'Create rule' }
+);
+
+const SAVE_RULE_BUTTON_LABEL = i18n.translate(
+  'xpack.alertingV2.composeDiscover.flyout.saveButtonLabel',
+  { defaultMessage: 'Save rule' }
+);
+
+const CANCEL_BUTTON_LABEL = i18n.translate(
+  'xpack.alertingV2.composeDiscover.flyout.cancelButtonLabel',
+  { defaultMessage: 'Cancel' }
+);
+
+const BACK_BUTTON_LABEL = i18n.translate(
+  'xpack.alertingV2.composeDiscover.flyout.backButtonLabel',
+  { defaultMessage: 'Back' }
+);
+
+const NEXT_BUTTON_LABEL = i18n.translate(
+  'xpack.alertingV2.composeDiscover.flyout.nextButtonLabel',
+  { defaultMessage: 'Next' }
+);
+
+const NEXT_DISABLED_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.composeDiscover.flyout.nextDisabledTooltip',
+  { defaultMessage: 'Define a query in the editor before continuing' }
+);
+
 const EDIT_MODE_OPTIONS = [
-  {
-    id: 'form',
-    label: i18n.translate('xpack.alertingV2.composeDiscover.editMode.form', {
-      defaultMessage: 'Form view',
-    }),
-    iconType: 'tableDensityNormal',
-  },
-  {
-    id: 'yaml',
-    label: i18n.translate('xpack.alertingV2.composeDiscover.editMode.yaml', {
-      defaultMessage: 'YAML view',
-    }),
-    iconType: 'editorCodeBlock',
-  },
+  { id: 'form', label: FORM_VIEW_LABEL, iconType: 'tableDensityNormal' },
+  { id: 'yaml', label: YAML_VIEW_LABEL, iconType: 'editorCodeBlock' },
 ];
+
+const getFlyoutTitle = (mode: ComposeDiscoverMode): string => {
+  if (mode === 'clone') return CLONE_TITLE;
+  if (mode === 'edit') return EDIT_TITLE;
+  return CREATE_TITLE;
+};
 
 // These hooks live in the plugin, not the package — imported via the plugin's hook layer
 // when this flyout is rendered in the rules list page.
@@ -283,8 +337,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   );
 
   const isCreate = mode === 'create' || mode === 'clone';
-  const title =
-    mode === 'clone' ? 'Clone alert rule' : isCreate ? 'Create alert rule' : 'Edit alert rule';
+  const title = getFlyoutTitle(mode);
 
   const steps = getSteps(isAlert);
   const currentStep = steps[uiState.step];
@@ -408,9 +461,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
               <EuiFlexItem grow>
                 {uiState.yamlMode ? (
                   <EuiBadge color="hollow" data-test-subj="composeDiscoverYamlBadge">
-                    {i18n.translate('xpack.alertingV2.composeDiscover.yamlMode.badge', {
-                      defaultMessage: 'YAML MODE',
-                    })}
+                    {YAML_MODE_BADGE_LABEL}
                   </EuiBadge>
                 ) : (
                   <HorizontalMinimalStepper
@@ -425,9 +476,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonGroup
-                  legend={i18n.translate('xpack.alertingV2.composeDiscover.editMode.legend', {
-                    defaultMessage: 'Edit mode selection',
-                  })}
+                  legend={EDIT_MODE_LEGEND}
                   options={EDIT_MODE_OPTIONS}
                   idSelected={uiState.yamlMode ? 'yaml' : 'form'}
                   onChange={(id) => handleToggleYamlMode(id === 'yaml')}
@@ -470,14 +519,14 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                     isLoading={isSaving}
                     data-test-subj="composeDiscoverYamlSubmit"
                   >
-                    {isCreate ? 'Create rule' : 'Save rule'}
+                    {isCreate ? CREATE_RULE_BUTTON_LABEL : SAVE_RULE_BUTTON_LABEL}
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
             ) : (
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={onClose}>Cancel</EuiButtonEmpty>
+                  <EuiButtonEmpty onClick={onClose}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="s" responsive={false}>
@@ -489,7 +538,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                           onClick={() => dispatch({ type: 'GO_BACK' })}
                           data-test-subj="composeDiscoverBack"
                         >
-                          Back
+                          {BACK_BUTTON_LABEL}
                         </EuiButtonEmpty>
                       </EuiFlexItem>
                     )}
@@ -501,13 +550,13 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                           onClick={handleSubmit}
                           data-test-subj="composeDiscoverSubmit"
                         >
-                          {isCreate ? 'Create rule' : 'Save rule'}
+                          {isCreate ? CREATE_RULE_BUTTON_LABEL : SAVE_RULE_BUTTON_LABEL}
                         </EuiButton>
                       ) : (
                         <EuiToolTip
                           content={
                             currentStep?.id === 'alertCondition' && !uiState.queryCommitted
-                              ? 'Define a query in the editor before continuing'
+                              ? NEXT_DISABLED_TOOLTIP
                               : undefined
                           }
                         >
@@ -522,7 +571,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                             onClick={handleNext}
                             data-test-subj="composeDiscoverNext"
                           >
-                            Next
+                            {NEXT_BUTTON_LABEL}
                           </EuiButton>
                         </EuiToolTip>
                       )}
