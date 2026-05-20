@@ -82,6 +82,7 @@ export function InlineFilterPopover({
       isLoading={isLoading}
       listProps={{
         onFocusBadge: false,
+        paddingSize: 's',
       }}
       emptyMessage={emptyMessage}
       aria-label={i18n.INLINE_FILTER_POPOVER_ARIA_LABEL}

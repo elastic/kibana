@@ -61,7 +61,7 @@ describe('RuleGroupEditor', () => {
       return menuItem.text() === anyRule.getDisplayTitle();
     });
 
-    anyRuleOption.simulate('click');
+    anyRuleOption.find('button').first().simulate('click');
 
     expect(props.onChange).toHaveBeenCalledTimes(1);
     const [newRule] = props.onChange.mock.calls[0];
@@ -93,7 +93,7 @@ describe('RuleGroupEditor', () => {
       return menuItem.text() === anyRule.getDisplayTitle();
     });
 
-    anyRuleOption.simulate('click');
+    anyRuleOption.find('button').first().simulate('click');
 
     expect(props.onChange).toHaveBeenCalledTimes(0);
     expect(findTestSubject(wrapper, 'confirmRuleChangeModal')).toHaveLength(1);
@@ -131,7 +131,7 @@ describe('RuleGroupEditor', () => {
       return menuItem.text() === anyRule.getDisplayTitle();
     });
 
-    anyRuleOption.simulate('click');
+    anyRuleOption.find('button').first().simulate('click');
 
     expect(props.onChange).toHaveBeenCalledTimes(0);
     expect(findTestSubject(wrapper, 'confirmRuleChangeModal')).toHaveLength(1);
