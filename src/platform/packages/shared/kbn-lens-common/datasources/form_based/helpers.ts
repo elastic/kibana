@@ -10,7 +10,7 @@
 import type { FormulaIndexPatternColumn } from '../operations';
 import type { FormBasedLayer, FormBasedPersistedState, GenericIndexPatternColumn } from '../types';
 
-function isColumnOfType<C extends GenericIndexPatternColumn>(
+export function isColumnOfType<C extends GenericIndexPatternColumn>(
   type: C['operationType'],
   column: GenericIndexPatternColumn
 ): column is C {

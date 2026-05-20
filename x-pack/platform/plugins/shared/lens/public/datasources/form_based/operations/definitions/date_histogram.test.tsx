@@ -214,6 +214,28 @@ describe('date_histogram', () => {
       );
     });
 
+    it('uses data view time field when column source field differs from the data view time field', () => {
+      const esAggsFn = dateHistogramOperation.toEsAggsFn(
+        {
+          ...(layer.columns.col1 as DateHistogramIndexPatternColumn),
+          sourceField: '@timestamp',
+        },
+        'col1',
+        indexPattern1,
+        layer,
+        uiSettingsMock,
+        []
+      );
+
+      expect(esAggsFn).toEqual(
+        expect.objectContaining({
+          arguments: expect.objectContaining({
+            field: ['timestamp'],
+          }),
+        })
+      );
+    });
+
     it('should use restricted time zone and omit use normalized es interval for rollups', () => {
       const esAggsFn = dateHistogramOperation.toEsAggsFn(
         layer.columns.col1 as DateHistogramIndexPatternColumn,
@@ -269,6 +291,27 @@ describe('date_histogram', () => {
           }),
         })
       );
+    });
+  });
+
+  describe('getErrorMessage', () => {
+    it('does not report missing field when column source field is replaced by data view time field', () => {
+      const messages = dateHistogramOperation.getErrorMessage!(
+        {
+          ...layer,
+          columns: {
+            ...layer.columns,
+            col1: {
+              ...(layer.columns.col1 as DateHistogramIndexPatternColumn),
+              sourceField: '@timestamp',
+            },
+          },
+        },
+        'col1',
+        indexPattern1
+      );
+
+      expect(messages).toEqual([]);
     });
   });
 

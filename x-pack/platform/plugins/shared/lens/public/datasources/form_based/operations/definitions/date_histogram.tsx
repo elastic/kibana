@@ -36,6 +36,7 @@ import type {
   FormBasedLayer,
   IndexPattern,
 } from '@kbn/lens-common';
+import { isColumnOfType } from '@kbn/lens-common';
 import { esql } from '@elastic/esql';
 import { TIME_SYSTEM_PARAMS } from '@kbn/esql-language';
 
@@ -133,7 +134,14 @@ export const dateHistogramOperation: OperationDefinition<
   scale: () => 'interval',
   operationParams: [{ name: 'interval', type: 'string', required: false }],
   getErrorMessage: (layer, columnId, indexPattern) => {
-    const column = layer.columns[columnId] as DateHistogramIndexPatternColumn;
+    const column = layer.columns[columnId];
+    if (!isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column)) {
+      return [
+        ...getInvalidFieldMessage(layer, columnId, indexPattern),
+        ...getMultipleDateHistogramsErrorMessage(layer, columnId),
+      ];
+    }
+
     const sourceField = getDateHistogramSourceField(column, indexPattern);
     const layerWithResolvedSourceField = {
       ...layer,
