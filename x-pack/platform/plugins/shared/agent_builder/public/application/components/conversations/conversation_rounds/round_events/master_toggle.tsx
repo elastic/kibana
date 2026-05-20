@@ -6,7 +6,16 @@
  */
 
 import React from 'react';
-import { EuiLink, EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiIcon,
+  EuiLink,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
 interface MasterToggleProps {
@@ -16,11 +25,10 @@ interface MasterToggleProps {
 
 /**
  * Round-level master toggle for the entire steps block.
- *
- * Renders "Collapse reasoning ⌃" when the block is expanded and
- * "Show reasoning ⌄" when collapsed.
  */
 export const MasterToggle: React.FC<MasterToggleProps> = ({ expanded, onToggle }) => {
+  const { euiTheme } = useEuiTheme();
+
   const label = expanded
     ? i18n.translate('xpack.agentBuilder.roundEvents.masterToggle.collapse', {
         defaultMessage: 'Collapse reasoning',
@@ -29,14 +37,35 @@ export const MasterToggle: React.FC<MasterToggleProps> = ({ expanded, onToggle }
         defaultMessage: 'Show reasoning',
       });
 
+  const textDisabledStyles = css`
+    color: ${euiTheme.colors.textDisabled};
+  `;
+
+  const linkStyles = css`
+    color: ${euiTheme.colors.textDisabled};
+    padding-top: ${euiTheme.size.s};
+    padding-bottom: ${euiTheme.size.s};
+  `;
+
   return (
-    <EuiLink color="subdued" onClick={onToggle} role="button">
-      <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>{label}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type={expanded ? 'arrowUp' : 'arrowDown'} size="s" aria-hidden />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiLink>
+    <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiLink css={linkStyles} onClick={onToggle} role="button">
+          <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" css={textDisabledStyles}>
+                {label}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={expanded ? 'arrowUp' : 'arrowDown'} size="s" aria-hidden />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiLink>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiHorizontalRule margin="none" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

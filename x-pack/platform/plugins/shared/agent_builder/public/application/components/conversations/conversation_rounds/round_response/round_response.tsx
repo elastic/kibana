@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AssistantResponse, ConversationRoundStep } from '@kbn/agent-builder-common';
@@ -87,6 +87,11 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
           />
         ) : null}
       </EuiFlexItem>
+      {isLoading && (
+        <EuiFlexItem grow={false}>
+          <EuiLoadingElastic size="l" aria-label="Streaming response" />
+        </EuiFlexItem>
+      )}
       {!isLoading && !hasError && (
         <EuiFlexItem grow={false}>
           <RoundResponseActions content={response.message} isVisible isLastRound={isLastRound} />

@@ -83,7 +83,13 @@ const ToolCallHeadline: React.FC<ToolCallHeadlineProps> = ({ step, hasResults })
   // the entire row (handled by StepLayout) is the click target that expands
   // the step's sub-fields.
   const toolNode = (
-    <EuiBadge iconType="wrench" color={hasErrorResult ? 'danger' : 'default'}>
+    <EuiBadge
+      iconType="wrench"
+      color={hasErrorResult ? 'danger' : 'default'}
+      css={css`
+        vertical-align: inherit;
+      `}
+    >
       {toolId}
     </EuiBadge>
   );
