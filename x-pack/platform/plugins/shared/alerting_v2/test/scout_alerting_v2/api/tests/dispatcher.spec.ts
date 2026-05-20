@@ -187,6 +187,8 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       destinations: [{ type: 'workflow', id: 'test-workflow' }],
     });
 
+    await apiServices.alertingV2.actionPolicies.disable(ACTION_POLICY_ID);
+
     await apiServices.alertingV2.actionPolicies.upsert(ACTION_POLICY_MATCHER_ID, {
       name: 'Matcher Policy',
       description: 'Only matches critical severity',
