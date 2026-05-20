@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
@@ -13,8 +13,9 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 
 import type { Section } from '../../constants';
-import { BASE_PATH } from '../../constants';
-import { useConfig, useCore } from '../../app_context';
+import { BASE_PATH, UIM_REPOSITORY_SET_DEFAULT_PRIVILEGE_MISSING } from '../../constants';
+import { useCanSetDefaultRepository } from '../../services/authorization';
+import { useConfig, useCore, useServices } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 
 import { RepositoryList } from './repository_list';
@@ -34,6 +35,9 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
 }) => {
   const { slm_ui: slmUi } = useConfig();
   const { docLinks } = useCore();
+  const { uiMetricService } = useServices();
+  const canSetDefaultRepository = useCanSetDefaultRepository();
+  const hasReportedMissingSetDefaultPrivilege = useRef(false);
 
   const tabs: Array<{
     id: Section;
@@ -89,6 +93,14 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
     breadcrumbService.setBreadcrumbs(section || 'home');
     docTitleService.setTitle(section || 'home');
   }, [section]);
+
+  useEffect(() => {
+    if (canSetDefaultRepository || hasReportedMissingSetDefaultPrivilege.current) {
+      return;
+    }
+    uiMetricService.trackUiMetric(UIM_REPOSITORY_SET_DEFAULT_PRIVILEGE_MISSING);
+    hasReportedMissingSetDefaultPrivilege.current = true;
+  }, [canSetDefaultRepository, uiMetricService]);
 
   return (
     <>
