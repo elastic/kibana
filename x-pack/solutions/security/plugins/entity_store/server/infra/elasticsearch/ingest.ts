@@ -62,6 +62,8 @@ interface IngestEntitiesParams {
   fieldsToIgnore?: string[];
   /** Optional transform applied to each document before indexing (e.g. add @timestamp, reshape for entity type). */
   transformDocument?: IngestEntitiesTransformDocument;
+  /** Avoid `true` — it forces a per-batch refresh that creates many small segments under sustained load. */
+  refresh: boolean | 'wait_for';
 }
 
 /**
@@ -86,6 +88,7 @@ export async function ingestEntities({
   abortController,
   fieldsToIgnore,
   transformDocument,
+  refresh,
 }: IngestEntitiesParams) {
   const options: TransportRequestOptions = {};
   if (abortController?.signal) {
@@ -143,7 +146,7 @@ export async function ingestEntities({
     {
       datasource: documentGenerator(),
       index: targetIndex,
-      refresh: true,
+      refresh,
       flushBytes: BATCH_SIZE,
       concurrency: 1,
       retries: 2,
