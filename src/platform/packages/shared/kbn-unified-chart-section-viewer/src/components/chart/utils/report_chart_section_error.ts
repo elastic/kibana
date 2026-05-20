@@ -98,7 +98,12 @@ export const reportChartSectionError = ({
       (span as unknown as SpanWithOutcome).outcome = 'failure';
       span.end();
     }
-  } catch {
-    // Intentionally swallow: telemetry reporting failures must not propagate.
+  } catch (reportingError) {
+    // Best-effort: swallow so telemetry reporting failures never propagate to
+    // the host app. Log so the failure is at least observable in the browser
+    // console. Mirrors the precedent in `kbn-unified-doc-viewer`'s analytics
+    // catch block (`doc_viewer_viewed_event.ts`).
+    // eslint-disable-next-line no-console
+    console.error('Error reporting chart section error to APM:', reportingError);
   }
 };

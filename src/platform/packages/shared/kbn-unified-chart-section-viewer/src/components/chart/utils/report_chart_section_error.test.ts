@@ -212,6 +212,30 @@ describe('reportChartSectionError', () => {
     });
   });
 
+  it('swallows reporting failures and logs them via console.error', () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const reportingFailure = new Error('apm transport down');
+    captureErrorMock.mockImplementationOnce(() => {
+      throw reportingFailure;
+    });
+
+    expect(() =>
+      reportChartSectionError({
+        error: new Error('boom'),
+        source: 'useFetchMetricsData',
+        labels: { profile_id: PROFILE_ID },
+      })
+    ).not.toThrow();
+
+    expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Error reporting chart section error to APM:',
+      reportingFailure
+    );
+
+    consoleErrorSpy.mockRestore();
+  });
+
   describe('caller-supplied labels', () => {
     it('merges caller labels into the APM payload', () => {
       const plainError = new Error('boom');
