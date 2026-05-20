@@ -8,10 +8,9 @@
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import {
   buildLogPageProbeSourceClause,
-  DOCUMENT_ID_FIELD,
   TIMESTAMP_FIELD,
   type LogPageProbeSourceClauseParams,
-  type PaginationParams,
+  type LogSlicePaginationParams,
 } from './query_builder_commons';
 
 /** Column produced by {@link buildLogPaginationCursorProbeEsql} via `INLINE STATS` before `LIMIT` (total matching raw rows in the window from the probe). */
@@ -31,16 +30,16 @@ export function buildLogPaginationCursorProbeEsql(
     // since we can't have INLINE STATS after LIMIT. Yet, this communicates if there are more than 40k logs to be processed.
     `
   | INLINE STATS ${LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD} = count(*)
-  | SORT ${TIMESTAMP_FIELD} ASC, \`${DOCUMENT_ID_FIELD}\` ASC
+  | SORT ${TIMESTAMP_FIELD} ASC
   | LIMIT ${maxLogsPerPage}
-  | SORT ${TIMESTAMP_FIELD} DESC, \`${DOCUMENT_ID_FIELD}\` DESC
+  | SORT ${TIMESTAMP_FIELD} DESC
   | LIMIT 1
-  | KEEP ${TIMESTAMP_FIELD}, \`${DOCUMENT_ID_FIELD}\`, ${LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD}`
+  | KEEP ${TIMESTAMP_FIELD}, ${LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD}`
   );
 }
 
 export interface LogPaginationCursorParsedRow {
-  logsPaginationCursor: PaginationParams;
+  logsPaginationCursor: LogSlicePaginationParams;
   /** Total raw log rows matching the probe `WHERE` before `LIMIT` (remaining in the window from the cursor). */
   missingLogsToProcess: number;
 }
@@ -53,20 +52,18 @@ export function parseLogPaginationCursorRow(
   }
 
   const tsIdx = esqlResponse.columns.findIndex(({ name }) => name === TIMESTAMP_FIELD);
-  const idIdx = esqlResponse.columns.findIndex(({ name }) => name === DOCUMENT_ID_FIELD);
   const totalIdx = esqlResponse.columns.findIndex(
     ({ name }) => name === LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD
   );
-  if (tsIdx === -1 || idIdx === -1 || totalIdx === -1) {
+  if (tsIdx === -1 || totalIdx === -1) {
     throw new Error(
-      `Expected ${TIMESTAMP_FIELD}, ${DOCUMENT_ID_FIELD}, and ${LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD} columns in log pagination cursor probe response`
+      `Expected ${TIMESTAMP_FIELD} and ${LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD} columns in log pagination cursor probe response`
     );
   }
   const row = esqlResponse.values[0];
   return {
     logsPaginationCursor: {
       timestampCursor: String(row[tsIdx]),
-      idCursor: String(row[idIdx]),
     },
     missingLogsToProcess: Number(row[totalIdx]),
   };
@@ -76,7 +73,7 @@ export type LogPaginationCursor =
   | { hasLogsToProcess: false }
   | {
       hasLogsToProcess: true;
-      logsPaginationCursor: PaginationParams;
+      logsPaginationCursor: LogSlicePaginationParams;
       isLastLogsPage: boolean;
       /** Raw log count in this slice: `min(total_logs, maxLogsPerPage)`. Used for volume-cap accounting. */
       sliceLogCount: number;

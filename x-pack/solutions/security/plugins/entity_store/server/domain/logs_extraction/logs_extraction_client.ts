@@ -16,6 +16,7 @@ import type {
 } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import {
+  type LogSlicePaginationParams,
   type PaginationParams,
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
 } from './query_builder_commons';
@@ -231,8 +232,7 @@ export class LogsExtractionClient {
       const { fromDateISO } = resolveMainExtractionWindow({ config, engineState });
       const toDateISO = moment().utc().toISOString();
       const logsPageCursorStart = paginationFromOptionalFields(
-        engineState.logsPageCursorStartTimestamp,
-        engineState.logsPageCursorStartId
+        engineState.logsPageCursorStartTimestamp
       );
       const query = buildRemainingLogsCountQuery({
         indexPatterns,
@@ -547,17 +547,14 @@ export class LogsExtractionClient {
       /** First outer iteration of this `extractLogs` run: run the boundary probe from the time window only, not the persisted log-slice start. */
       let isFirstRunInThisCycle = true;
       do {
-        const entityPagination = paginationFromOptionalFields(
-          state.paginationTimestamp,
-          state.paginationId
-        );
+        const entityPagination: PaginationParams | undefined =
+          state.paginationTimestamp && state.paginationId
+            ? { timestampCursor: state.paginationTimestamp, idCursor: state.paginationId }
+            : undefined;
         // always find a new cursor via probe on first run
         const logsPageCursorStart = isFirstRunInThisCycle
           ? undefined
-          : paginationFromOptionalFields(
-              state.logsPageCursorStartTimestamp,
-              state.logsPageCursorStartId
-            );
+          : paginationFromOptionalFields(state.logsPageCursorStartTimestamp);
 
         const probe = await this.runLogPaginationCursorProbeForNextPage({
           indexPatterns,
@@ -573,42 +570,60 @@ export class LogsExtractionClient {
           break;
         }
 
-        const logsPageCursorEnd = probe.logsPaginationCursor;
+        let logsPageCursorEnd = probe.logsPaginationCursor;
         lastLogsPages = probe.isLastLogsPage;
-        totalLogs += probe.sliceLogCount;
-        state = {
-          ...state,
-          logsPageCursorEndTimestamp: logsPageCursorEnd.timestampCursor,
-          logsPageCursorEndId: logsPageCursorEnd.idCursor,
-        };
 
-        const sliceIngestOutcome = await this.ingestEntityPagesWithinCurrentLogPage({
-          type,
-          opts,
-          indexPatterns,
-          latestIndex,
-          entityDefinition,
-          docsLimit: effectiveDocsLimit,
-          fromDateISO,
-          toDateISO,
-          logsPageCursorStart,
-          logsPageCursorEnd,
-          entityPagination,
-          recoveryId,
-          state,
-        });
+        // Stall detection: if timestamp didn't advance and we filled a full page, the congested
+        // millisecond's docs were already processed in the previous iteration. Bump by 1ms and
+        // skip extraction — re-extracting would double-count those entities.
+        const stalled =
+          !!logsPageCursorStart &&
+          logsPageCursorStart.timestampCursor === logsPageCursorEnd.timestampCursor &&
+          probe.sliceLogCount >= effectiveMaxLogsPerPage;
+        if (stalled) {
+          this.logger.warn(
+            `Log-slice probe stalled at ${logsPageCursorEnd.timestampCursor} with a full page (${probe.sliceLogCount} docs); advancing cursor by 1ms. Docs sharing this timestamp beyond maxLogsPerPage will be dropped.`
+          );
+          logsPageCursorEnd = {
+            timestampCursor: moment(logsPageCursorEnd.timestampCursor).add(1, 'ms').toISOString(),
+          };
+        } else {
+          totalLogs += probe.sliceLogCount;
 
-        totalCount += sliceIngestOutcome.addedToTotalCount;
-        pages += sliceIngestOutcome.addedToPageCount;
-        state = sliceIngestOutcome.state;
+          state = {
+            ...state,
+            logsPageCursorEndTimestamp: logsPageCursorEnd.timestampCursor,
+            logsPageCursorEndId: null,
+          };
 
-        recoveryId = undefined;
+          const sliceIngestOutcome = await this.ingestEntityPagesWithinCurrentLogPage({
+            type,
+            opts,
+            indexPatterns,
+            latestIndex,
+            entityDefinition,
+            docsLimit: effectiveDocsLimit,
+            fromDateISO,
+            toDateISO,
+            logsPageCursorStart,
+            logsPageCursorEnd,
+            entityPagination,
+            recoveryId,
+            state,
+          });
+
+          totalCount += sliceIngestOutcome.addedToTotalCount;
+          pages += sliceIngestOutcome.addedToPageCount;
+          state = sliceIngestOutcome.state;
+
+          recoveryId = undefined;
+        }
 
         state = this.advanceEngineStateAfterLogPageCompletes(state, logsPageCursorEnd);
         await this.persistMainLogExtractionStateIfNotManualWindow(type, opts, state);
         isFirstRunInThisCycle = false;
 
-        if (maxLogsPerWindow > 0 && totalLogs >= maxLogsPerWindow) {
+        if (!stalled && maxLogsPerWindow > 0 && totalLogs >= maxLogsPerWindow) {
           logsCapApplied = true;
           logsCapTimestamp = logsPageCursorEnd.timestampCursor;
           break;
@@ -646,7 +661,7 @@ export class LogsExtractionClient {
     type: EntityType;
     fromDateISO: string;
     toDateISO: string;
-    logsPageCursorStart: PaginationParams | undefined;
+    logsPageCursorStart: LogSlicePaginationParams | undefined;
     maxLogsPerPage: number;
     opts?: LogsExtractionOptions;
   }): Promise<LogPaginationCursor> {
@@ -674,7 +689,7 @@ export class LogsExtractionClient {
 
     if (parsedLogPaginationCursor) {
       this.logger.debug(
-        `Log pagination cursor probe: missing logs to process ${parsedLogPaginationCursor.missingLogsToProcess}, next page starts at ${parsedLogPaginationCursor.logsPaginationCursor.timestampCursor} | ${parsedLogPaginationCursor.logsPaginationCursor.idCursor}`
+        `Log pagination cursor probe: missing logs to process ${parsedLogPaginationCursor.missingLogsToProcess}, next page starts at ${parsedLogPaginationCursor.logsPaginationCursor.timestampCursor}`
       );
     }
 
@@ -716,8 +731,8 @@ export class LogsExtractionClient {
     docsLimit: number;
     fromDateISO: string;
     toDateISO: string;
-    logsPageCursorStart: PaginationParams | undefined;
-    logsPageCursorEnd: PaginationParams;
+    logsPageCursorStart: LogSlicePaginationParams | undefined;
+    logsPageCursorEnd: LogSlicePaginationParams;
     entityPagination: PaginationParams | undefined;
     recoveryId: string | undefined;
     state: EngineLogExtractionState;
@@ -785,9 +800,9 @@ export class LogsExtractionClient {
           paginationTimestamp: pagination.timestampCursor,
           paginationId: pagination.idCursor,
           logsPageCursorEndTimestamp: logsPageCursorEnd.timestampCursor,
-          logsPageCursorEndId: logsPageCursorEnd.idCursor,
+          logsPageCursorEndId: null,
           logsPageCursorStartTimestamp: logsPageCursorStart?.timestampCursor ?? null,
-          logsPageCursorStartId: logsPageCursorStart?.idCursor ?? null,
+          logsPageCursorStartId: null,
         };
         await this.persistMainLogExtractionStateIfNotManualWindow(type, opts, state);
       }
@@ -801,7 +816,7 @@ export class LogsExtractionClient {
    */
   private advanceEngineStateAfterLogPageCompletes(
     state: EngineLogExtractionState,
-    logsPageCursorEnd: PaginationParams
+    logsPageCursorEnd: LogSlicePaginationParams
   ): EngineLogExtractionState {
     return {
       ...state,
@@ -811,7 +826,7 @@ export class LogsExtractionClient {
       logsPageCursorEndTimestamp: null,
       logsPageCursorEndId: null,
       logsPageCursorStartTimestamp: logsPageCursorEnd.timestampCursor,
-      logsPageCursorStartId: logsPageCursorEnd.idCursor,
+      logsPageCursorStartId: null,
     };
   }
 
@@ -926,12 +941,9 @@ export class LogsExtractionClient {
   }
 }
 
-function paginationFromOptionalFields(
-  ts: string | null,
-  id: string | null
-): PaginationParams | undefined {
-  if (id && ts) {
-    return { timestampCursor: ts, idCursor: id };
+function paginationFromOptionalFields(ts: string | null): LogSlicePaginationParams | undefined {
+  if (ts) {
+    return { timestampCursor: ts };
   }
   return undefined;
 }

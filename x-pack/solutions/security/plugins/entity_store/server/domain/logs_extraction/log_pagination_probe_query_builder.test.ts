@@ -34,7 +34,7 @@ describe('interpretLogPaginationCursorRows', () => {
 
   it('returns isLastLogsPage false when more matching logs remain than one page', () => {
     const row = {
-      logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z', idCursor: 'a' },
+      logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z' },
       missingLogsToProcess: 101,
     };
     expect(interpretLogPaginationCursorRows(row, 100)).toEqual({
@@ -47,7 +47,7 @@ describe('interpretLogPaginationCursorRows', () => {
 
   it('returns isLastLogsPage true when exactly maxLogsPerPage logs remain (last full page)', () => {
     const row = {
-      logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z', idCursor: 'a' },
+      logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z' },
       missingLogsToProcess: 100,
     };
     expect(interpretLogPaginationCursorRows(row, 100)).toEqual({
@@ -60,7 +60,7 @@ describe('interpretLogPaginationCursorRows', () => {
 
   it('returns isLastLogsPage true when fewer than maxLogsPerPage logs remain', () => {
     const row = {
-      logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z', idCursor: 'a' },
+      logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z' },
       missingLogsToProcess: 3,
     };
     expect(interpretLogPaginationCursorRows(row, 100)).toEqual({
@@ -77,22 +77,21 @@ describe('parseLogPaginationCursorRow', () => {
     const resp: ESQLSearchResponse = {
       columns: [
         { name: TIMESTAMP_FIELD, type: 'date' },
-        { name: '_id', type: 'keyword' },
         { name: LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD, type: 'long' },
       ],
-      values: [['2024-01-01T00:00:00.000Z', 'doc1', 42]],
+      values: [['2024-01-01T00:00:00.000Z', 42]],
     };
     expect(parseLogPaginationCursorRow(resp)).toEqual({
-      logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z', idCursor: 'doc1' },
+      logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z' },
       missingLogsToProcess: 42,
     });
   });
 
-  it('returns undefined when there are no values without requiring total_logs column', () => {
+  it('returns undefined when there are no values', () => {
     const resp: ESQLSearchResponse = {
       columns: [
         { name: TIMESTAMP_FIELD, type: 'date' },
-        { name: '_id', type: 'keyword' },
+        { name: LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD, type: 'long' },
       ],
       values: [],
     };

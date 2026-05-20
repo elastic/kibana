@@ -4,7 +4,7 @@ Three nested loops process raw log documents into aggregated entity rows.
 
 **Window cap outer loop**: When the gap between `fromDateISO` and the effective window end (`now - delay`) exceeds `maxTimeWindowSize + GRACE_PERIOD` (default `15m + 30s`), the run processes the time range as a sequence of capped `[fromSub, toSub]` sub-windows of width `maxTimeWindowSize`, advancing within a single execution until the effective end is reached. Sub-windows are an in-memory iteration concept — the saved-object schema is unaware of them. Crash recovery uses the per-slice persistence emitted by the inner outer-loop (last `paginationTimestamp` / `checkpointTimestamp` written). Manual `specificWindow` / `windowOverride` runs bypass capping and run as a single pass.
 
-**Outer loop — log slices**: Each iteration runs a **boundary probe** (`buildLogPaginationCursorProbeEsql`) to locate the inclusive end of the next raw-log slice (up to `maxLogsPerPage` documents, sorted by `@timestamp ASC, _id ASC`). The probe returns `total_logs` (count before `LIMIT`) so the client knows when the window is exhausted.
+**Outer loop — log slices**: Each iteration runs a **boundary probe** (`buildLogPaginationCursorProbeEsql`) to locate the inclusive end of the next raw-log slice (up to `maxLogsPerPage` documents, sorted by `@timestamp ASC`). The probe returns `total_logs` (count before `LIMIT`) so the client knows when the window is exhausted.
 
 **Inner loop — entity pages**: Each log slice is processed via `buildLogsExtractionEsqlQuery`. Results are paginated by `(FirstSeenLogInPage, UntypedId)` up to `docsLimit` entities per query.
 
@@ -14,16 +14,18 @@ Three nested loops process raw log documents into aggregated entity rows.
 
 | Cursor | Persisted fields | Semantics |
 |--------|-----------------|-----------|
-| **Log slice start** | `logsPageCursorStartTimestamp/Id` | Exclusive compound lower bound `(@timestamp, _id)` for the next probe. Set to the previous slice end after completing all entity pages. Doubles as the resume point on crash mid-run — no separate sub-window checkpoint is persisted. |
-| **Log slice end** | `logsPageCursorEndTimestamp/Id` | Inclusive upper bound for the current slice. Set by the probe; cleared when the slice is fully processed. |
+| **Log slice start** | `logsPageCursorStartTimestamp` | Inclusive lower bound `@timestamp` for the next probe. Set to the previous slice end after completing all entity pages. Doubles as the resume point on crash mid-run — no separate sub-window checkpoint is persisted. |
+| **Log slice end** | `logsPageCursorEndTimestamp` | Inclusive upper bound for the current slice. Set by the probe; cleared when the slice is fully processed. |
 | **Entity cursor** | `paginationTimestamp/Id` | `(FirstSeenLogInPage, UntypedId)` of the last ingested entity page. Cleared when a slice finishes. |
 
-`logsPageCursorStart` is a **compound** exclusive bound applied as:
+`logsPageCursorStart` is a **timestamp-only** inclusive lower bound applied as:
 ```
-(@timestamp > T) OR (@timestamp = T AND _id > id)
+@timestamp >= TO_DATETIME("T")
 ```
 
-The time-window base filter always uses `@timestamp >= fromDateISO` (inclusive). The compound cursor owns the exclusive lower bound — never the time-window filter.
+The base time-window filter also uses `@timestamp >= fromDateISO` (inclusive). `logsPageCursorStart` adds a tighter bound narrowing to the next unprocessed slice.
+
+The boundary is inclusive, which means the slice-end document is re-processed on the next iteration. This is safe because all aggregations (`TOP`, `LAST`, `MIN`, `MV_UNION`) are idempotent.
 
 ---
 
@@ -35,9 +37,9 @@ All logs fit in one slice; all entities fit in one page.
 sequenceDiagram
     participant C as Client
     participant ES as Elasticsearch
-    C->>ES: probe(from ≤ @ts ≤ to) → end=(T1,id1), total≤maxLogs
+    C->>ES: probe(from ≤ @ts ≤ to) → end=T1, total≤maxLogs
     Note over C: isLastPage=true, no further probe needed
-    C->>ES: extract(from ≤ @ts ≤ (T1,id1)) → N entities
+    C->>ES: extract(from ≤ @ts ≤ T1) → N entities
     C->>ES: ingest(entities)
     Note over C: done — clear all state, set lastExecutionTimestamp=to
 ```
@@ -53,19 +55,19 @@ sequenceDiagram
     participant C as Client
     participant ES as Elasticsearch
 
-    C->>ES: probe(from ≤ @ts ≤ to) → end=(T1,id1), total>maxLogs
-    C->>ES: extract(from ≤ @ts ≤ (T1,id1)) → entities
+    C->>ES: probe(from ≤ @ts ≤ to) → end=T1, total>maxLogs
+    C->>ES: extract(from ≤ @ts ≤ T1) → entities
     C->>ES: ingest
-    Note over C: advance cursorStart=(T1,id1)
+    Note over C: advance cursorStart=T1
 
-    C->>ES: probe(@ts>T1 OR @ts=T1 AND _id>id1) → end=(T2,id2), total≤maxLogs
+    C->>ES: probe(@ts≥T1, @ts≤to) → end=T2, total≤maxLogs
     Note over C: isLastPage=true
-    C->>ES: extract(cursorStart ≤ @ts ≤ (T2,id2)) → entities
+    C->>ES: extract(@ts≥T1, @ts≤T2) → entities
     C->>ES: ingest
     Note over C: done
 ```
 
-After each slice, `logsPageCursorStart` advances to the slice end. The next probe's compound filter starts strictly after that document.
+After each slice, `logsPageCursorStart` advances to the slice end (`@timestamp >= T`). The slice-end doc may be re-processed on the next probe, but aggregations are idempotent so this is safe.
 
 ---
 
@@ -78,16 +80,16 @@ sequenceDiagram
     participant C as Client
     participant ES as Elasticsearch
 
-    C->>ES: probe(from ≤ @ts ≤ to) → end=(T1,id1), total>maxLogs
+    C->>ES: probe(from ≤ @ts ≤ to) → end=T1, total>maxLogs
 
     loop inner — entity pages
-        C->>ES: extract(@ts ≤ (T1,id1), entityCursor) → docsLimit entities
+        C->>ES: extract(@ts ≤ T1, entityCursor) → docsLimit entities
         C->>ES: ingest
-        Note over C: persist: cursorEnd=(T1,id1), paginationTimestamp/Id=(Tp,Ep)
+        Note over C: persist: cursorEnd=T1, paginationTimestamp/Id=(Tp,Ep)
     end
 
-    Note over C: slice done — advance cursorStart=(T1,id1), clear entity cursor
-    C->>ES: probe(cursorStart, @ts≤to) → next slice...
+    Note over C: slice done — advance cursorStart=T1, clear entity cursor
+    C->>ES: probe(@ts≥T1, @ts≤to) → next slice...
 ```
 
 If the process crashes mid inner-loop, `paginationId` is set in the saved state. The next run enters recovery (see below).
@@ -135,8 +137,8 @@ A crash mid-entity-page leaves the following state on disk:
 |-------|-------|---------|
 | `paginationTimestamp` | `T_ent` | `MIN(@timestamp)` of logs in the last processed entity page |
 | `paginationId` | `E_ent` | untyped ID of the last ingested entity |
-| `logsPageCursorEnd` | `(T_end, id_end)` | inclusive end of the interrupted slice |
-| `logsPageCursorStart` | `(T_start, id_start)` | exclusive start of the interrupted slice |
+| `logsPageCursorEndTimestamp` | `T_end` | inclusive upper bound of the interrupted slice |
+| `logsPageCursorStartTimestamp` | `T_start` | inclusive lower bound of the interrupted slice |
 
 On the next run `fromDateISO = T_ent` and `recoveryId = E_ent`.
 
@@ -148,15 +150,15 @@ sequenceDiagram
     Note over C: fromDateISO=T_ent, recoveryId=E_ent
     Note over C: first iteration — cursorStart ignored, probe re-establishes slice from T_ent
 
-    C->>ES: probe(@ts ≥ T_ent, @ts ≤ to) → new end=(T1,id1)
+    C->>ES: probe(@ts ≥ T_ent, @ts ≤ to) → new end=T1
     Note over C: entity pagination starts strictly after (T_ent, E_ent)
 
     loop remaining entity pages
-        C->>ES: extract(@ts ≥ T_ent, @ts ≤ (T1,id1), entityCursor after (T_ent,E_ent))
+        C->>ES: extract(@ts ≥ T_ent, @ts ≤ T1, entityCursor after (T_ent,E_ent))
         C->>ES: ingest
     end
 
-    Note over C: recoveryId cleared — continues as normal from cursorStart=(T1,id1)
+    Note over C: recoveryId cleared — continues as normal from cursorStart=T1
 ```
 
 The entity-level pagination WHERE uses `> T_ent OR (= T_ent AND untypedId > E_ent)` — entities already ingested before the crash are skipped; the slice is re-established from `T_ent` inclusive.
@@ -173,29 +175,27 @@ When a manual window is supplied (admin-triggered API call), the sub-window cap 
 
 ### Timestamp collision at a slice boundary
 
-The compound cursor `(@timestamp = T AND _id > id)` is essential when multiple documents share the same millisecond timestamp. If the base time-window filter used `@timestamp > fromDateISO` (exclusive) and `fromDateISO == T`, all same-timestamp documents would be discarded before the compound filter could apply — permanently losing them.
+The log-slice cursor is timestamp-only (`@timestamp >= T`). Documents sharing the same millisecond are processed in undefined order, and the slice boundary is inclusive so the slice-end document is re-processed on the next iteration. Re-processing is safe because all aggregations (`TOP`, `LAST`, `MIN`, `MV_UNION`) are idempotent.
 
-**Scenario**: recovery where all remaining logs share timestamp `T_ent`.
+**Timestamp stall detection**: If more than `maxLogsPerPage` documents share a single millisecond, successive slices would all end at the same timestamp and the outer loop would make no progress. The client detects this condition (same slice-end timestamp as the previous slice start, full page) and bumps the cursor forward by 1ms, emitting a `warn` log. Documents at the surplus millisecond beyond `maxLogsPerPage` are dropped.
 
 ```mermaid
 sequenceDiagram
     participant C as Client
     participant ES as Elasticsearch
 
-    Note over C: fromDateISO=T, cursorStart=(T, id3) after first recovery slice
-
-    Note over C: ❌ WRONG — @ts > T kills (T,id4) and (T,id5) before compound filter runs
-    Note over C: ✅ CORRECT — @ts >= T lets compound filter decide: keeps only _id > id3
-
-    C->>ES: probe(@ts≥T AND (@ts>T OR @ts=T AND _id>id3))
-    Note over ES: sees (T,id4), (T,id5) only — correct
+    Note over C: sliceStart=T (from previous iteration)
+    C->>ES: probe(@ts≥T) → end=T again (same ms!), total=maxLogsPerPage
+    Note over C: stall detected — bump cursor to T+1ms, log warn
+    C->>ES: extract(@ts≥T, @ts≤T) → entities (re-processes T docs, idempotent)
+    Note over C: sliceStart = T+1ms — advances past the congested millisecond
 ```
-
-This is why the base filter is always `>=` and the compound cursor owns exclusion entirely.
 
 ### Exact full page (`total_logs == maxLogsPerPage`)
 
 When the probe returns `total_logs == maxLogsPerPage` the slice is marked `isLastPage = true` and no further probe is issued. This is correct: `total_logs` is the `INLINE STATS count(*)` computed before the `LIMIT`, so an exactly full count means the window is exhausted by this slice.
+
+The inclusive boundary means the slice-end document is re-processed on the following slice when the loop advances. This is harmless under idempotent aggregations.
 
 ---
 

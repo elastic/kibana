@@ -24,19 +24,17 @@ import { LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD } from './log_pagination_probe_q
 
 const LOG_PAGINATION_CURSOR_PROBE_COLUMNS: ESQLSearchResponse['columns'] = [
   { name: TIMESTAMP_FIELD, type: 'date' },
-  { name: '_id', type: 'keyword' },
   { name: LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD, type: 'long' },
 ];
 
 /** Default total_logs > maxLogsPerPage so interpret marks a non-final slice (matches default config cap). */
 function mockLogPaginationCursorProbeRow(
   timestamp: string,
-  id: string,
   totalLogsInSlice: number = LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT + 1
 ): ESQLSearchResponse {
   return {
     columns: LOG_PAGINATION_CURSOR_PROBE_COLUMNS,
-    values: [[timestamp, id, totalLogsInSlice]],
+    values: [[timestamp, totalLogsInSlice]],
   };
 }
 
@@ -52,8 +50,7 @@ function mockExtractSuccessSequence(mainExtractionResponse: ESQLSearchResponse):
   mockExecuteEsqlQuery
     .mockResolvedValueOnce(
       mockLogPaginationCursorProbeRow(
-        String(mainExtractionResponse.values.at(-1)?.[0] ?? '2024-01-02T12:00:00.000Z'),
-        'log-slice-end-id'
+        String(mainExtractionResponse.values.at(-1)?.[0] ?? '2024-01-02T12:00:00.000Z')
       )
     )
     .mockResolvedValueOnce(mainExtractionResponse)
@@ -505,7 +502,7 @@ describe('LogsExtractionClient', () => {
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
       mockExecuteEsqlQuery
         .mockResolvedValueOnce(
-          mockLogPaginationCursorProbeRow(fromDateISO, 'probe-slice-end-id', 1 /* isLastLogsPage */)
+          mockLogPaginationCursorProbeRow(fromDateISO, 1 /* single doc — last page */)
         )
         .mockResolvedValueOnce({ columns: [], values: [] });
       mockIngestEntities.mockResolvedValue(undefined);
@@ -748,7 +745,7 @@ describe('LogsExtractionClient', () => {
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
       mockExecuteEsqlQuery
-        .mockResolvedValueOnce(mockLogPaginationCursorProbeRow('2024-01-02T10:00:00.000Z', 'e'))
+        .mockResolvedValueOnce(mockLogPaginationCursorProbeRow('2024-01-02T10:00:00.000Z'))
         .mockResolvedValueOnce(mockEsqlResponse);
       const testError = new Error('Ingestion failed');
       mockIngestEntities.mockRejectedValue(testError);
@@ -1139,9 +1136,7 @@ describe('LogsExtractionClient', () => {
         setupVolCapTest({ maxLogsPerWindow: 1, maxLogsPerWindowCapBehavior: 'defer' });
         // Probe response uses the last page timestamp as the cursor end
         mockExecuteEsqlQuery
-          .mockResolvedValueOnce(
-            mockLogPaginationCursorProbeRow(lastPageTimestamp, 'cursor-end-id')
-          )
+          .mockResolvedValueOnce(mockLogPaginationCursorProbeRow(lastPageTimestamp))
           .mockResolvedValueOnce(mainExtractionResponse)
           .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty());
         mockIngestEntities.mockResolvedValue(undefined);
@@ -1192,6 +1187,114 @@ describe('LogsExtractionClient', () => {
         // drop: lastSearchTimestamp is advanced to the window end
         expect(result.lastSearchTimestamp).toBe(toDateISO);
         expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('stall detection', () => {
+      // `isFirstRunInThisCycle=true` on the first outer-loop iteration always passes
+      // `logsPageCursorStart=undefined` to the probe, so stall detection is inactive on iteration 1.
+      // Stall can only fire from iteration 2 onward (once `isFirstRunInThisCycle` is cleared).
+      // Tests therefore use two slice iterations: slice 1 advances `logsPageCursorStartTimestamp`
+      // via `advanceEngineStateAfterLogPageCompletes`, and slice 2 is the stall candidate.
+      // Using total=LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT for the stall probe sets
+      // `isLastLogsPage=true`, ending the loop cleanly without a third terminal probe.
+
+      const setupStallTest = () => {
+        mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+          createMockEngineDescriptor('user') as Awaited<
+            ReturnType<EngineDescriptorClient['findOrThrow']>
+          >
+        );
+        mockDataViewsService.get.mockResolvedValue({
+          getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+        } as any);
+        mockIngestEntities.mockResolvedValue(undefined);
+      };
+
+      it('logs warn and bumps cursor by 1ms when timestamp unchanged and page is full', async () => {
+        const stalledTs = '2024-01-02T10:00:00.000Z';
+        const bumpedTs = moment(stalledTs).add(1, 'ms').toISOString();
+        setupStallTest();
+
+        // Slice 1: ends at stalledTs (not last page → loop continues, state logsPageCursorStartTs = stalledTs).
+        // Slice 2: same stalledTs + full page → stall fires, total=maxLogsPerPage → isLastLogsPage=true → loop ends.
+        mockExecuteEsqlQuery
+          .mockResolvedValueOnce(mockLogPaginationCursorProbeRow(stalledTs)) // slice 1, not last
+          .mockResolvedValueOnce({ columns: [], values: [] }) // entity extraction 1
+          .mockResolvedValueOnce(
+            mockLogPaginationCursorProbeRow(stalledTs, LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT) // slice 2: stall + last page
+          )
+          .mockResolvedValueOnce({ columns: [], values: [] }); // entity extraction 2
+
+        const result = await client.extractLogs('user');
+
+        expect(result.success).toBe(true);
+        expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          expect.stringContaining(`Log-slice probe stalled at ${stalledTs}`)
+        );
+        // After the stall bump, a later update persists logsPageCursorStartTimestamp = bumpedTs.
+        const updateCalls = (mockEngineDescriptorClient.update as jest.Mock).mock.calls;
+        const persistedStartTimestamps = updateCalls
+          .map(([, patch]) => patch?.logExtractionState?.logsPageCursorStartTimestamp)
+          .filter((ts) => ts != null);
+        expect(persistedStartTimestamps).toContain(bumpedTs);
+      });
+
+      it('does not warn when timestamp advances between slices', async () => {
+        const ts1 = '2024-01-02T10:00:00.000Z';
+        const ts2 = '2024-01-02T10:00:01.000Z'; // different timestamp → no stall
+        setupStallTest();
+
+        // Slice 1 ends at ts1; slice 2 ends at ts2 (advances) → no stall.
+        mockExecuteEsqlQuery
+          .mockResolvedValueOnce(mockLogPaginationCursorProbeRow(ts1)) // slice 1, not last
+          .mockResolvedValueOnce({ columns: [], values: [] })
+          .mockResolvedValueOnce(
+            mockLogPaginationCursorProbeRow(ts2, LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT) // last page, different ts
+          )
+          .mockResolvedValueOnce({ columns: [], values: [] });
+
+        const result = await client.extractLogs('user');
+
+        expect(result.success).toBe(true);
+        expect(mockLogger.warn).not.toHaveBeenCalled();
+      });
+
+      it('does not warn when page is partial even if timestamp unchanged', async () => {
+        const stalledTs = '2024-01-02T10:00:00.000Z';
+        setupStallTest();
+
+        // Slice 1 ends at stalledTs. Slice 2: same ts but only 5 docs (partial) → no stall.
+        mockExecuteEsqlQuery
+          .mockResolvedValueOnce(mockLogPaginationCursorProbeRow(stalledTs)) // slice 1, not last
+          .mockResolvedValueOnce({ columns: [], values: [] })
+          .mockResolvedValueOnce(mockLogPaginationCursorProbeRow(stalledTs, 5)) // same ts, partial → no stall
+          .mockResolvedValueOnce({ columns: [], values: [] });
+
+        const result = await client.extractLogs('user');
+
+        expect(result.success).toBe(true);
+        expect(mockLogger.warn).not.toHaveBeenCalled();
+      });
+
+      it('does not warn on first iteration (isFirstRunInThisCycle always starts true)', async () => {
+        // On the first outer-loop iteration logsPageCursorStart is forced to undefined,
+        // so the stall guard is always inactive regardless of page size.
+        setupStallTest();
+
+        const someTs = '2024-01-02T10:00:00.000Z';
+        // Single slice (total=maxLogsPerPage → isLastLogsPage=true): loop ends after one iteration.
+        mockExecuteEsqlQuery
+          .mockResolvedValueOnce(
+            mockLogPaginationCursorProbeRow(someTs, LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT)
+          )
+          .mockResolvedValueOnce({ columns: [], values: [] });
+
+        const result = await client.extractLogs('user');
+
+        expect(result.success).toBe(true);
+        expect(mockLogger.warn).not.toHaveBeenCalled();
       });
     });
 
@@ -1747,7 +1850,7 @@ describe('LogsExtractionClient', () => {
       });
       expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
         esClient: mockEsClient,
-        query: expect.stringContaining(sliceStartId),
+        query: expect.stringContaining(sliceStartTs),
       });
       jest.useRealTimers();
     });
