@@ -6,6 +6,7 @@
  */
 
 import {
+  CHANGE_POINT_CHART_DEFAULT_AGG_FUNCTION,
   CHANGE_POINT_CHART_DEFAULT_SERIES,
   CHANGE_POINT_DETECTION_VIEW_TYPE,
 } from '@kbn/aiops-change-point-detection/constants';
@@ -25,7 +26,7 @@ export type RawChangePointChartState = Partial<ChangePointChartEmbeddableState> 
   LegacyChangePointChartFields;
 
 interface NormalizedChangePointChartFields {
-  aggregation_function: ChangePointChartEmbeddableState['aggregation_function'] | undefined;
+  aggregation_function: ChangePointChartEmbeddableState['aggregation_function'];
   view_type: ChangePointChartEmbeddableState['view_type'];
   data_view_id: string | undefined;
   metric_field: string | undefined;
@@ -37,7 +38,7 @@ interface NormalizedChangePointChartFields {
 export const normalizeChangePointChartLegacyFields = (
   state: RawChangePointChartState
 ): NormalizedChangePointChartFields => ({
-  aggregation_function: state.aggregation_function ?? state.fn,
+  aggregation_function: state.aggregation_function ?? state.fn ?? CHANGE_POINT_CHART_DEFAULT_AGG_FUNCTION,
   view_type: state.view_type ?? state.viewType ?? CHANGE_POINT_DETECTION_VIEW_TYPE.CHARTS,
   data_view_id: state.data_view_id ?? state.dataViewId,
   metric_field: state.metric_field ?? state.metricField,

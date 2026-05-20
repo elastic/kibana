@@ -11,6 +11,7 @@ import {
   serializedTitlesSchema,
 } from '@kbn/presentation-publishing-schemas';
 import {
+  CHANGE_POINT_CHART_DEFAULT_AGG_FUNCTION,
   CHANGE_POINT_CHART_DEFAULT_SERIES,
   CHANGE_POINT_CHART_MAX_SERIES,
   CHANGE_POINT_DETECTION_VIEW_TYPE,
@@ -25,6 +26,7 @@ const validateInteger = (value: number) => {
 const aggregationFunctionSchema = schema.oneOf(
   [schema.literal('avg'), schema.literal('sum'), schema.literal('min'), schema.literal('max')],
   {
+    defaultValue: CHANGE_POINT_CHART_DEFAULT_AGG_FUNCTION,
     meta: { description: 'The aggregation function used to calculate the metric values.' },
   }
 );

@@ -35,9 +35,6 @@ export function transformOut(
   if (!dataViewId) {
     throw new Error('Invalid change point chart embeddable state: missing data_view_id reference');
   }
-  if (!normalized.aggregation_function) {
-    throw new Error('Invalid change point chart embeddable state: missing aggregation_function');
-  }
   if (!normalized.metric_field) {
     throw new Error('Invalid change point chart embeddable state: missing metric_field');
   }
