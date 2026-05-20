@@ -30,7 +30,7 @@ export const scoutPageParallelFixture = base.extend<
     use: (extendedPage: ScoutPage) => Promise<void>,
     testInfo: TestInfo
   ) => {
-    const stopCollecting = collectBrowserConsoleErrors(page);
+    const consoleErrors = collectBrowserConsoleErrors(page);
 
     const extendedPage = extendPlaywrightPage({ page, kbnUrl });
 
@@ -41,6 +41,6 @@ export const scoutPageParallelFixture = base.extend<
     log.serviceLoaded(`scoutPage`);
     await use(extendedPage);
 
-    await attachBrowserConsoleErrors(testInfo, stopCollecting());
+    await attachBrowserConsoleErrors(testInfo, consoleErrors);
   },
 });

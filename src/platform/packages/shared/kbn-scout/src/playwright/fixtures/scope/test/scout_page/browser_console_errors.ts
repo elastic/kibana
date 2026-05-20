@@ -8,7 +8,7 @@
  */
 
 import { BROWSER_CONSOLE_ERRORS_ATTACHMENT } from '@kbn/scout-info';
-import type { ConsoleMessage, Page, TestInfo } from '@playwright/test';
+import type { Page, TestInfo } from '@playwright/test';
 
 // Set SCOUT_REPORT_ALL_CONSOLE_LOGS=true to disable filtering and capture every console error.
 const filteringEnabled = process.env.SCOUT_REPORT_ALL_CONSOLE_LOGS !== 'true';
@@ -23,19 +23,16 @@ const IGNORED_ERROR_PATTERNS = [
 const isIgnored = (message: string) =>
   IGNORED_ERROR_PATTERNS.some((pattern) => message.includes(pattern));
 
-export const collectBrowserConsoleErrors = (page: Page): (() => string[]) => {
+// page fixture has test scope so a new Page instance is created per test — no need to call page.off()
+export const collectBrowserConsoleErrors = (page: Page): string[] => {
   const errors: string[] = [];
-  const onConsole = (msg: ConsoleMessage) => {
+  page.on('console', (msg) => {
     if (msg.type() !== 'error') return;
-    if (filteringEnabled && isIgnored(msg.text())) return;
-    errors.push(msg.text());
-  };
-  page.on('console', onConsole);
-
-  return () => {
-    page.off('console', onConsole);
-    return errors;
-  };
+    const text = msg.text();
+    if (filteringEnabled && isIgnored(text)) return;
+    errors.push(text);
+  });
+  return errors;
 };
 
 export const attachBrowserConsoleErrors = async (
