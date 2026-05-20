@@ -65,6 +65,7 @@ export interface GetWorkflowsParams {
   enabled?: boolean[];
   tags?: string[];
   query?: string;
+  managedFilter?: 'all' | 'managed' | 'unmanaged';
   _full?: boolean;
 }
 
@@ -579,10 +580,11 @@ export class WorkflowsManagementApi {
 
   public async cancelWorkflowExecution(
     workflowExecutionId: string,
-    spaceId: string
+    spaceId: string,
+    request?: KibanaRequest
   ): Promise<void> {
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
-    return workflowsExecutionEngine.cancelWorkflowExecution(workflowExecutionId, spaceId);
+    return workflowsExecutionEngine.cancelWorkflowExecution(workflowExecutionId, spaceId, request);
   }
 
   public async cancelAllActiveWorkflowExecutions(

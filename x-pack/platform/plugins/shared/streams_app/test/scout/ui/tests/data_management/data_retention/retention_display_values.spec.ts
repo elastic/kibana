@@ -15,8 +15,6 @@ import {
   saveRetentionChanges,
   setCustomRetention,
   toggleInheritSwitch,
-  verifyRetentionBadge,
-  BADGE_TEXT,
   RETENTION_TEST_IDS,
 } from '../../../fixtures/retention_helpers';
 
@@ -62,12 +60,12 @@ test.describe(
       await apiServices.streams.clearStreamChildren('logs.otel');
     });
 
-    test('should show custom period badge when custom retention is set', async ({ page }) => {
+    test('should show data phase count subtitle when custom retention is set', async ({ page }) => {
       await openRetentionModal(page);
       await toggleInheritSwitch(page, false);
       await setCustomRetention(page, '7', 'd');
       await saveRetentionChanges(page);
-      await verifyRetentionBadge(page, BADGE_TEXT.customPeriod);
+      await expect(page.getByTestId('retention-metric-subtitle')).toContainText('2 data phases');
     });
 
     test('should display retention metric prominently', async ({ page }) => {
