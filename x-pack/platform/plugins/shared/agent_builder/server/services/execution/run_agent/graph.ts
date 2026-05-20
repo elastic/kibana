@@ -39,7 +39,6 @@ import {
   isToolCallAction,
   isToolPromptAction,
 } from './actions';
-import { createCycleLimitFallbackMessage } from './prompts/utils/fallback_messages';
 import type { ProcessedConversation } from './utils/prepare_conversation';
 
 // number of successive recoverable errors we try to recover from before throwing
@@ -156,7 +155,14 @@ export const createAgentGraph = ({
     } else if (isToolCallAction(lastAction)) {
       const maxCycleReached = state.currentCycle > state.cycleLimit;
       if (maxCycleReached) {
-        return structuredOutput ? steps.prepareToAnswer : steps.prepareFallbackAnswer;
+        if (structuredOutput) {
+          return steps.prepareToAnswer;
+        }
+        throw createAgentExecutionError(
+          `Agent exceeded its cycle budget of ${state.cycleLimit} without producing a final answer.`,
+          ErrCodes.cycleLimitExceeded,
+          {}
+        );
       } else {
         return steps.executeTool;
       }
@@ -220,12 +226,6 @@ export const createAgentGraph = ({
     }
   };
 
-  const prepareFallbackAnswer = async (_state: StateType) => {
-    return {
-      mainActions: [handoverAction(createCycleLimitFallbackMessage(), true)],
-    };
-  };
-
   const answerAgentStructured = createAnswerAgentStructured({
     chatModel,
     promptFactory,
@@ -263,8 +263,8 @@ export const createAgentGraph = ({
       );
     }
 
-    // Non-structured: the research agent's terminal HandoverAction (real or
-    // synthetic from prepareFallbackAnswer) carries the user-facing answer.
+    // Non-structured: the research agent's terminal HandoverAction carries the
+    // user-facing answer.
     const lastMainAction = state.mainActions[state.mainActions.length - 1];
     if (isHandoverAction(lastMainAction)) {
       return { finalAnswer: lastMainAction.message };
@@ -305,15 +305,11 @@ export const createAgentGraph = ({
         [steps.finalize]: steps.finalize,
       });
   } else {
-    graphBuilder
-      .addNode(steps.prepareFallbackAnswer, prepareFallbackAnswer)
-      .addConditionalEdges(steps.researchAgent, researchAgentEdge, {
-        [steps.researchAgent]: steps.researchAgent,
-        [steps.executeTool]: steps.executeTool,
-        [steps.prepareFallbackAnswer]: steps.prepareFallbackAnswer,
-        [steps.finalize]: steps.finalize,
-      })
-      .addEdge(steps.prepareFallbackAnswer, steps.finalize);
+    graphBuilder.addConditionalEdges(steps.researchAgent, researchAgentEdge, {
+      [steps.researchAgent]: steps.researchAgent,
+      [steps.executeTool]: steps.executeTool,
+      [steps.finalize]: steps.finalize,
+    });
   }
 
   return graphBuilder.compile();

@@ -15,7 +15,6 @@ export const steps = {
   executeTool: 'executeTool',
   handleToolInterrupt: 'handleToolInterrupt',
   prepareToAnswer: 'prepareToAnswer',
-  prepareFallbackAnswer: 'prepareFallbackAnswer',
   answerAgent: 'answerAgent',
   finalize: 'finalize',
 };
