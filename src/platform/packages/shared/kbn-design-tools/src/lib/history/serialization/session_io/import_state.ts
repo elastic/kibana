@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import DOMPurify from 'dompurify';
 import type { ReactElement } from 'react';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
-import { EUI_LIBRARY } from '../../../components/edit/library/library_entries';
-import type { ElementRegistry, ElementSession } from '../../../edit_engine/element_registry';
-import { toPath, fromPath, buildRelativeSelector } from './element_path';
-import type { ElementPath } from './element_path';
-import { buildTransform } from '../../../edit_engine/resize_helpers';
+import { EUI_LIBRARY } from '../../../../components/edit/library/library_entries';
+import type { ElementRegistry, ElementSession } from '../../../../edit_engine/element_registry';
+import { fromPath } from '../element_path';
+import type { ElementPath } from '../element_path';
+import { buildTransform } from '../../../../edit_engine/resize_helpers';
 import {
   setImportant,
   unfreezeChildren,
@@ -22,271 +21,24 @@ import {
   reflowManagedStyle,
   reflowManagedText,
   roundRect,
-} from '../../../edit_engine/clone_element';
-import { cloneElement } from '../../../edit_engine/clone_element';
+} from '../../../../edit_engine/clone_element';
+import { cloneElement } from '../../../../edit_engine/clone_element';
 import {
-  DEVTOOL_HIDDEN_ATTR,
   DEVTOOL_LIBRARY_ID_ATTR,
   IMPORT_CLONE_Z_INDEX,
   PSEUDO_CLASS_PREFIX,
   PSEUDO_CLASS_RE,
-} from '../../constants';
-
-import { renderEuiComponentLive } from '../../dom/insert_element';
-import { readStateAttributes } from '../../../components/edit/library/serializable_state';
-import { replaceIconContent, applySourceAttribute } from '../../eui_icon_cache';
-import { getPageColorScheme } from '../../dom/get_page_color_mode';
-import type { PageColorScheme } from '../../dom/get_page_color_mode';
-import { resolveColorTokensDeep } from '../../dom/color_token_lookup';
-import { buildEmotionClassMap, remapEmotionClasses } from '../../dom/remap_emotion_classes';
+} from '../../../constants';
+import { renderEuiComponentLive } from '../../../dom/insert_element';
+import { replaceIconContent, applySourceAttribute } from '../../../eui_icon_cache';
+import { getPageColorScheme } from '../../../dom/get_page_color_mode';
+import { resolveColorTokensDeep } from '../../../dom/color_token_lookup';
+import { buildEmotionClassMap, remapEmotionClasses } from '../../../dom/remap_emotion_classes';
+import { sanitizeHTML, sanitizeInlineStyles } from './sanitize_html';
+import type { ExportedState, ExportedSession, ImportResult } from './types';
 
 /** Attributes allowed to be restored during media edit import. */
 const ALLOWED_SOURCE_ATTRIBUTES: ReadonlySet<string> = new Set(['src', 'href', 'data-icon-type']);
-
-/**
- * Portable version of a single style edit. Element replaced by path.
- */
-interface SerializedStyleEditEntry {
-  readonly targetPath: ElementPath;
-  readonly relativeSelector?: string;
-  readonly property: string;
-  readonly original: string;
-  readonly originalPriority: string;
-  readonly current: string;
-  readonly currentPriority: string;
-}
-
-/**
- * Portable version of a single text edit. Text node replaced by
- * parent path + child index.
- */
-interface SerializedTextEditEntry {
-  readonly parentPath: ElementPath;
-  readonly parentRelativeSelector?: string;
-  readonly childIndex: number;
-  readonly original: string;
-  readonly current: string;
-}
-
-/**
- * Portable version of a single media/attribute edit.
- */
-interface SerializedMediaEditEntry {
-  readonly targetPath: ElementPath;
-  readonly relativeSelector?: string;
-  readonly attribute: string;
-  readonly original: string;
-  readonly current: string;
-}
-
-/**
- * Portable version of an {@link ElementSession}. All DOM references
- * are replaced by {@link ElementPath} locators.
- */
-interface ExportedSession {
-  readonly elPath?: ElementPath;
-  readonly dx: number;
-  readonly dy: number;
-  readonly dw: number;
-  readonly dh: number;
-  readonly originalRect: { x: number; y: number; width: number; height: number };
-  readonly isDuplicate: boolean;
-  readonly referenceElPath?: ElementPath;
-  readonly styleEdits: SerializedStyleEditEntry[];
-  readonly textEdits: SerializedTextEditEntry[];
-  readonly mediaEdits: SerializedMediaEditEntry[];
-  readonly outerHTML?: string;
-  readonly inlineStyles?: string;
-  readonly libraryId?: string;
-  readonly stateAttributes?: Record<string, string>;
-}
-
-/**
- * A soft-deleted page element, hidden via visibility:hidden and
- * DEVTOOL_HIDDEN_ATTR but not removed from the DOM.
- */
-interface ExportedDeletion {
-  readonly elPath: ElementPath;
-  /** Original CSS transform value, stored so resetAll can restore it. */
-  readonly originalTransform: string;
-}
-
-/**
- * Top-level export payload written to JSON.
- */
-export interface ExportedState {
-  readonly version: 1;
-  readonly exportedAt: string;
-  readonly pageUrl: string;
-  readonly viewport: { width: number; height: number };
-  /**
-   * Scroll position of the main Kibana scroll container at export time.
-   * Used to adjust element positions on import so they map back to the
-   * same document coordinates regardless of current scroll.
-   */
-  readonly scroll?: { x: number; y: number };
-  /**
-   * Color scheme active when the export was created. Used to detect
-   * light/dark mode and forced-colors (high contrast) mismatches on import.
-   */
-  readonly colorScheme?: PageColorScheme;
-  readonly sessions: ExportedSession[];
-  readonly deletions?: ExportedDeletion[];
-}
-
-/**
- * Serialize the current registry state into a portable JSON object.
- *
- * For existing page elements (non-duplicates), stores an element path
- * so the element can be found on re-import. For inserted duplicates
- * (cloned or live EUI components), stores the outer HTML so the
- * element can be recreated from scratch.
- *
- * @param registry - The live element registry.
- * @returns A JSON-serializable payload.
- */
-export const exportState = (registry: ElementRegistry): ExportedState => {
-  const sessions: ExportedSession[] = [];
-
-  for (const session of registry.values()) {
-    const referenceElPath = session.referenceEl ? toPath(session.referenceEl) : undefined;
-
-    const styleEdits: SerializedStyleEditEntry[] = session.styleEdits.map((e) => {
-      const current = e.element.style.getPropertyValue(e.property);
-      return {
-        targetPath: toPath(e.element),
-        relativeSelector: buildRelativeSelector(session.el, e.element),
-        property: e.property,
-        original: e.original,
-        originalPriority: e.originalPriority,
-        current,
-        currentPriority: e.element.style.getPropertyPriority(e.property),
-      };
-    });
-
-    const textEdits: SerializedTextEditEntry[] = session.textEdits.map((e) => {
-      const parent = e.node.parentElement;
-      const parentPath = parent ? toPath(parent) : toPath(session.el);
-      const parentRelativeSelector = parent ? buildRelativeSelector(session.el, parent) : undefined;
-      let childIndex = 0;
-      if (parent) {
-        for (let i = 0; i < parent.childNodes.length; i++) {
-          if (parent.childNodes[i] === e.node) {
-            childIndex = i;
-            break;
-          }
-        }
-      }
-      return {
-        parentPath,
-        parentRelativeSelector,
-        childIndex,
-        original: e.original,
-        current: e.node.textContent ?? '',
-      };
-    });
-
-    const mediaEdits: SerializedMediaEditEntry[] = session.mediaEdits.map((e) => ({
-      targetPath: toPath(e.element),
-      relativeSelector: buildRelativeSelector(session.el, e.element),
-      attribute: e.attribute,
-      original: e.original,
-      current: e.element.getAttribute(e.attribute) ?? '',
-    }));
-
-    // componentState (React hook snapshots for live elements)
-    // is intentionally omitted. Hook values may contain
-    // non-serializable data (DOM refs, callbacks). Interactive
-    // components rely on stateAttributes for round-trip fidelity.
-    const base: ExportedSession = {
-      dx: session.dx,
-      dy: session.dy,
-      dw: session.dw,
-      dh: session.dh,
-      originalRect: {
-        x: session.originalRect.x,
-        y: session.originalRect.y,
-        width: session.originalRect.width,
-        height: session.originalRect.height,
-      },
-      isDuplicate: session.isDuplicate,
-      referenceElPath,
-      styleEdits,
-      textEdits,
-      mediaEdits,
-      libraryId: session.el.getAttribute(DEVTOOL_LIBRARY_ID_ATTR) ?? undefined,
-      stateAttributes: (() => {
-        const attrs = readStateAttributes(session.el);
-        return Object.keys(attrs).length > 0 ? attrs : undefined;
-      })(),
-    };
-
-    if (session.isDuplicate) {
-      sessions.push({
-        ...base,
-        outerHTML: session.el.outerHTML,
-        inlineStyles: session.el.style.cssText,
-      });
-    } else {
-      sessions.push({
-        ...base,
-        elPath: toPath(session.el),
-      });
-    }
-  }
-
-  // Collect soft-deleted elements: anything with DEVTOOL_HIDDEN_ATTR that
-  // is not the hidden original of an active session (those are tracked via
-  // the session's referenceEl instead).
-  const activeReferenceEls = new Set<HTMLElement>();
-  for (const session of registry.values()) {
-    if (session.referenceEl) activeReferenceEls.add(session.referenceEl);
-  }
-
-  const deletions: ExportedDeletion[] = [];
-  const hiddenEls = document.querySelectorAll<HTMLElement>(`[${DEVTOOL_HIDDEN_ATTR}]`);
-  for (const el of hiddenEls) {
-    if (activeReferenceEls.has(el)) continue;
-    deletions.push({
-      elPath: toPath(el),
-      originalTransform: el.getAttribute(DEVTOOL_HIDDEN_ATTR) ?? '',
-    });
-  }
-
-  return {
-    version: 1,
-    exportedAt: new Date().toISOString(),
-    pageUrl: window.location.href,
-    viewport: { width: window.innerWidth, height: window.innerHeight },
-    scroll: (() => {
-      const scrollEl = document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID);
-      return scrollEl ? { x: scrollEl.scrollLeft, y: scrollEl.scrollTop } : { x: 0, y: 0 };
-    })(),
-    colorScheme: getPageColorScheme(),
-    sessions,
-    ...(deletions.length > 0 ? { deletions } : {}),
-  };
-};
-
-/**
- * Result of importing a serialized state file.
- */
-export interface ImportResult {
-  /** Number of sessions successfully restored. */
-  restoredCount: number;
-  /** Number of soft-deleted elements re-hidden. */
-  deletedCount: number;
-  /** Warnings from element resolution (fingerprint mismatches, etc.). */
-  warnings: string[];
-  /** Number of sessions that could not be resolved. */
-  failedCount: number;
-  /** True when the export's color scheme differs from the current page. */
-  colorSchemeMismatch: boolean;
-  /** Elements imported as sessions (for undo transaction snapshots). */
-  importedElements: HTMLElement[];
-  /** Elements soft-hidden by the import's deletion list (for undo). */
-  importedDeletions: Array<{ element: HTMLElement; originalTransform: string }>;
-}
 
 /**
  * Resolve a serialized element path to an HTMLElement, pushing
@@ -329,51 +81,6 @@ const findLibraryElement = (libraryId: string) => {
   }
 
   return { element: entry.element };
-};
-
-/**
- * Sanitize HTML to prevent script execution when importing untrusted
- * outerHTML. Returns the sanitized string.
- */
-const purifier = (() => {
-  const instance = DOMPurify();
-  instance.addHook('afterSanitizeAttributes', (node) => {
-    const href = node.getAttribute('xlink:href') ?? node.getAttribute('href');
-    if (href && !href.startsWith('#')) {
-      node.removeAttribute('xlink:href');
-      node.removeAttribute('href');
-    }
-  });
-  return instance;
-})();
-
-const sanitizeHTML = (html: string): string => {
-  return purifier.sanitize(html, {
-    ADD_TAGS: ['use'],
-    ADD_ATTR: ['xlink:href', 'data-icon-type'],
-    FORBID_TAGS: ['script', 'iframe', 'object', 'embed'],
-  });
-};
-
-/**
- * Sanitize inline CSS text to prevent script execution.
- *
- * Applies the styles to a detached element and reads them back via
- * `style.cssText`. The browser's CSS parser rejects any non-standard
- * constructs (e.g. `expression()`, `behavior:`, `javascript:`,
- * `-moz-binding:`) without needing fragile regex patterns.
- */
-const sanitizeInlineStyles = (raw: string): string => {
-  const scratch = document.createElement('div');
-  scratch.style.cssText = raw;
-  const cleaned = scratch.style.cssText;
-  // Preserve internal fragment references (url(#id)) used by SVG
-  // clip-paths/masks, but strip external URLs that could load resources.
-  return cleaned.replace(/url\(([^)]*)\)/gi, (_match, inner) => {
-    const trimmed = inner.trim().replace(/^["']|["']$/g, '');
-    if (trimmed.startsWith('#')) return _match;
-    return 'url("")';
-  });
 };
 
 const recreateFromOuterHTML = (
@@ -826,78 +533,3 @@ export const importState = async (
     importedDeletions,
   };
 };
-
-/**
- * Trigger a JSON file download in the browser.
- *
- * @param data - The object to serialize.
- * @param filename - The download filename.
- */
-export const downloadAsJsonFile = (data: unknown, filename: string): void => {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  // Defer revocation so the browser can finish initiating the download.
-  // Use a generous timeout to account for slow disk I/O and large files.
-  const timer = setTimeout(() => URL.revokeObjectURL(url), 60_000);
-  // If the page unloads before the timer fires, revoke immediately to
-  // prevent the blob from leaking across navigations.
-  const cleanup = () => {
-    clearTimeout(timer);
-    URL.revokeObjectURL(url);
-  };
-  window.addEventListener('unload', cleanup, { once: true });
-};
-
-/**
- * Open a file picker and read a JSON file. Returns `null` if the user
- * cancels or the file can't be parsed.
- */
-export const pickJsonFile = (): Promise<ExportedState | null> =>
-  new Promise((resolve) => {
-    let settled = false;
-    const settle = (value: ExportedState | null) => {
-      if (settled) return;
-      settled = true;
-      input.remove();
-      resolve(value);
-    };
-
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json,application/json';
-    input.addEventListener('cancel', () => settle(null));
-    input.addEventListener('change', () => {
-      const file = input.files?.[0];
-      if (!file) {
-        settle(null);
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = () => {
-        try {
-          const parsed = JSON.parse(reader.result as string) as ExportedState;
-          // The lack of schema validation is intentional - this is a developer tool and we want to be forgiving of missing/extra fields as the format evolves. Just check the basics to avoid runtime errors during import.
-          if (
-            parsed.version !== 1 ||
-            !Array.isArray(parsed.sessions) ||
-            typeof parsed.pageUrl !== 'string'
-          ) {
-            settle(null);
-            return;
-          }
-          settle(parsed);
-        } catch {
-          settle(null);
-        }
-      };
-      reader.onerror = () => settle(null);
-      reader.readAsText(file);
-    });
-    input.click();
-  });
