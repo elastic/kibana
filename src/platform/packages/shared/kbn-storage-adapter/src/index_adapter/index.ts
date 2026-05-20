@@ -23,6 +23,8 @@ import { last, mapValues, padStart } from 'lodash';
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import type { TransportRequestOptions } from '@elastic/transport';
+import { Parser } from '@elastic/esql';
+import type { ESQLCommand, ESQLSource } from '@elastic/esql/types';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type {
   IndexStorageSettings,
@@ -99,6 +101,15 @@ function isEsqlUnknownIndexError(error: unknown): boolean {
     body?.error?.type === 'verification_exception' &&
     typeof body?.error?.reason === 'string' &&
     body.error.reason.includes('Unknown index')
+  );
+}
+
+function isEsqlIndexSource(arg: ESQLCommand['args'][number]): arg is ESQLSource {
+  return (
+    !Array.isArray(arg) &&
+    'type' in arg &&
+    arg.type === 'source' &&
+    (arg as ESQLSource).sourceType === 'index'
   );
 }
 
@@ -733,17 +744,46 @@ export class StorageIndexAdapter<
     });
   };
 
+  private validateEsqlQueryTargetsStorageIndex(query: string): void {
+    const { root, errors: parseErrors } = Parser.parse(query);
+    if (parseErrors.length > 0) {
+      throw new Error(
+        `StorageClientEsql query could not be parsed: ${parseErrors
+          .map((error) => error.message)
+          .join('; ')}`
+      );
+    }
+
+    const fromCommand = root.commands.find((cmd): cmd is ESQLCommand => cmd.name === 'from');
+    if (!fromCommand) {
+      throw new Error('StorageClientEsql query must include a FROM command');
+    }
+
+    const indexSources = fromCommand.args.filter(isEsqlIndexSource);
+    const expectedIndex = this.getSearchIndexPattern();
+    const invalidSources = indexSources.filter((source) => source.name !== expectedIndex);
+
+    if (indexSources.length === 0 || invalidSources.length > 0) {
+      throw new Error(
+        `StorageClientEsql query must target storage index [${expectedIndex}], got [${
+          indexSources.map((source) => source.name).join(', ') || 'none'
+        }]`
+      );
+    }
+  }
+
   /**
    * Executes an ES|QL query. Mirrors the read-side semantics of `search` / `get`:
    * ensures mappings are up to date, returns an empty response when the index
    * doesn't exist (both 404 and ES|QL's distinct 400 `Unknown index` shape),
    * and applies `maybeMigrateSource` to any `_source` column unless disabled.
    */
-  private esql: StorageClientEsql = (
+  private esql: StorageClientEsql = async (
     { query, params, filter, drop_null_columns = true, migrateSource = true },
     transportOptions
-  ) =>
-    this.ensureMappingsBeforeReading(async () => {
+  ) => {
+    this.validateEsqlQueryTargetsStorageIndex(query);
+    return await this.ensureMappingsBeforeReading(async () => {
       const emptyResponse: ESQLSearchResponse = {
         columns: [],
         values: [],
@@ -783,6 +823,7 @@ export class StorageIndexAdapter<
         throw error;
       }
     });
+  };
 
   getClient(): InternalIStorageClient<TApplicationType> {
     return {

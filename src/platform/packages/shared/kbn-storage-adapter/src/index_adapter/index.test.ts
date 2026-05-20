@@ -417,7 +417,7 @@ describe('StorageIndexAdapter - esql method', () => {
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
 
-    const result = await client.esql({ query: 'FROM missing_index | LIMIT 1' });
+    const result = await client.esql({ query: 'FROM test_index | LIMIT 1' });
 
     expect(result).toEqual({ columns: [], values: [] });
   });
@@ -440,9 +440,49 @@ describe('StorageIndexAdapter - esql method', () => {
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
 
-    const result = await client.esql({ query: 'FROM missing_index | LIMIT 1' });
+    const result = await client.esql({ query: 'FROM test_index | LIMIT 1' });
 
     expect(result).toEqual({ columns: [], values: [] });
+  });
+
+  it('rejects ES|QL queries that target a different index', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await expect(client.esql({ query: 'FROM other_index | LIMIT 1' })).rejects.toThrow(
+      'StorageClientEsql query must target storage index [test_index], got [other_index]'
+    );
+    expect(esqlQuery).not.toHaveBeenCalled();
+  });
+
+  it('rejects ES|QL queries that mix the storage index with another source', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await expect(client.esql({ query: 'FROM test_index, other_index | LIMIT 1' })).rejects.toThrow(
+      'StorageClientEsql query must target storage index [test_index], got [test_index, other_index]'
+    );
+    expect(esqlQuery).not.toHaveBeenCalled();
+  });
+
+  it('rejects ES|QL queries without a FROM command', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await expect(client.esql({ query: 'ROW foo = "bar"' })).rejects.toThrow(
+      'StorageClientEsql query must include a FROM command'
+    );
+    expect(esqlQuery).not.toHaveBeenCalled();
+  });
+
+  it('rejects ES|QL queries that cannot be parsed', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await expect(client.esql({ query: 'FROM | LIMIT 1' })).rejects.toThrow(
+      'StorageClientEsql query could not be parsed'
+    );
+    expect(esqlQuery).not.toHaveBeenCalled();
   });
 
   it('rethrows ES|QL verification_exception errors that are not Unknown index', async () => {
