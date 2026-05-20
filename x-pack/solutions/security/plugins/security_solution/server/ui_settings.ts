@@ -43,6 +43,7 @@ import {
   ENABLE_CLOUD_CONNECTOR_SETTING,
   ENABLE_DE_HEALTH_UI_SETTING,
   ENABLE_NEWS_FEED_SETTING,
+  ENABLE_NEW_FLYOUT_SETTING,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE,
   EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
@@ -235,6 +236,23 @@ export const initUiSettings = (
           defaultMessage: `Enable the Asset Inventory experience within the Security Solution. When enabled, you can access the new Inventory feature through the Security Solution navigation. Note: Disabling this setting will not disable the Entity Store or clear persistent Entity metadata. To manage or disable the Entity Store, please visit the Entity Store Management page.`,
         }
       ),
+      type: 'boolean',
+      value: false,
+      category: [APP_ID],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+      solutionViews: ['classic', 'security'],
+      technicalPreview: true,
+    },
+    [ENABLE_NEW_FLYOUT_SETTING]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.enableNewFlyoutLabel', {
+        defaultMessage: 'Enable new document flyout',
+      }),
+      description: i18n.translate('xpack.securitySolution.uiSettings.enableNewFlyoutDescription', {
+        defaultMessage:
+          '<p>Switches Security Solution to the new EUI-based document flyout (Flyout v2). When disabled, the legacy expandable flyout is used. This setting is temporary and is planned to be removed in 9.6.</p>',
+        values: { p: (chunks) => `<p>${chunks}</p>` },
+      }),
       type: 'boolean',
       value: false,
       category: [APP_ID],

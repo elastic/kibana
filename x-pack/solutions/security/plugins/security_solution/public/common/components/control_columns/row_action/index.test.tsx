@@ -22,7 +22,8 @@ import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandabl
 import { createExpandableFlyoutApiMock } from '../../../mock/expandable_flyout';
 import { useUserPrivileges } from '../../user_privileges';
 import { initialUserPrivilegesState } from '../../user_privileges/user_privileges_context';
-import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
+import { useUiSetting } from '../../../lib/kibana';
+import { ENABLE_NEW_FLYOUT_SETTING } from '../../../../../common/constants';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -62,6 +63,7 @@ jest.mock('../../../lib/kibana', () => {
         },
       },
     }),
+    useUiSetting: jest.fn(),
   };
 });
 jest.mock('../../../../flyout_v2/shared/components/flyout_provider', () => ({
@@ -78,7 +80,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 });
 
 jest.mock('../../user_privileges');
-jest.mock('../../../hooks/use_experimental_features');
 
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,
@@ -135,7 +136,9 @@ describe('RowAction', () => {
     });
     jest.mocked(useExpandableFlyoutState).mockReturnValue({} as unknown as ExpandableFlyoutState);
     (useRouteSpy as jest.Mock).mockReturnValue([mockRouteSpy]);
-    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(false);
+    jest
+      .mocked(useUiSetting)
+      .mockImplementation((key: string) => (key === ENABLE_NEW_FLYOUT_SETTING ? false : undefined));
     jest.clearAllMocks();
   });
 
@@ -185,7 +188,9 @@ describe('RowAction', () => {
   });
 
   test('should open system flyout when newFlyoutSystemEnabled is enabled', () => {
-    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
+    jest
+      .mocked(useUiSetting)
+      .mockImplementation((key: string) => (key === ENABLE_NEW_FLYOUT_SETTING ? true : undefined));
     const refetch = jest.fn();
 
     const wrapper = render(

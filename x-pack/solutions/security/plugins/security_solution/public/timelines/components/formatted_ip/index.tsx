@@ -15,8 +15,8 @@ import { useStore } from 'react-redux';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { getOrEmptyTagFromValue } from '../../../common/components/empty_value';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { useKibana } from '../../../common/lib/kibana';
+import { ENABLE_NEW_FLYOUT_SETTING } from '../../../../common/constants';
+import { useKibana, useUiSetting } from '../../../common/lib/kibana';
 import { NetworkDetailsLink } from '../../../common/components/links';
 import { NetworkPanelKey } from '../../../flyout/network_details';
 import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
@@ -66,7 +66,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   const { overlays } = services;
   const store = useStore();
   const history = useHistory();
-  const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
+  const newFlyoutSystemEnabled = useUiSetting<boolean>(ENABLE_NEW_FLYOUT_SETTING, false);
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
   const eventContext = useContext(StatefulEventContext);

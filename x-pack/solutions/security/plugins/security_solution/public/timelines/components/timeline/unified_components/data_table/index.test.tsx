@@ -20,10 +20,10 @@ import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 import * as timelineActions from '../../../../store/actions';
 import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useUiSetting } from '../../../../../common/lib/kibana';
+import { ENABLE_NEW_FLYOUT_SETTING } from '../../../../../../common/constants';
 
 jest.mock('../../../../../sourcerer/containers');
-jest.mock('../../../../../common/hooks/use_experimental_features');
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -67,6 +67,7 @@ jest.mock('../../../../../common/lib/kibana', () => {
         },
       },
     }),
+    useUiSetting: jest.fn(),
   };
 });
 
@@ -150,7 +151,9 @@ describe('unified data table', () => {
       openFlyout: openFlyoutMock,
       closeFlyout: jest.fn(),
     });
-    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(false);
+    jest
+      .mocked(useUiSetting)
+      .mockImplementation((key: string) => (key === ENABLE_NEW_FLYOUT_SETTING ? false : undefined));
   });
   afterEach(() => {
     updateSampleSizeSpy.mockClear();
@@ -192,7 +195,11 @@ describe('unified data table', () => {
   it(
     'opens the system flyout with the existing hit when newFlyoutSystemEnabled is enabled',
     async () => {
-      jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
+      jest
+        .mocked(useUiSetting)
+        .mockImplementation((key: string) =>
+          key === ENABLE_NEW_FLYOUT_SETTING ? true : undefined
+        );
 
       render(<TestComponent />);
       expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
