@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { INDICATOR_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 
-export const IndicatorAttachmentMetadataSchema = z
+const IndicatorAttachmentMetadataSchema = z
   .object({
     indicatorName: z.string(),
     indicatorType: z.string(),
@@ -26,3 +26,4 @@ export const IndicatorAttachmentPayloadSchema = z
   .strict();
 
 export type IndicatorAttachmentPayload = z.infer<typeof IndicatorAttachmentPayloadSchema>;
+export type IndicatorAttachmentMetadata = z.infer<typeof IndicatorAttachmentMetadataSchema>;

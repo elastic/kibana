@@ -7,13 +7,10 @@
 
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { INDICATOR_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
-import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
-import { generateMockFileIndicator } from '../../../../../common/threat_intelligence/types/indicator';
-import type { IndicatorAttachmentMetadata } from './attachments';
-import {
-  generateIndicatorAttachmentsMetadata,
-  generateIndicatorAttachmentsWithoutOwner,
-} from './attachments';
+import type { Indicator } from '../../../../common/threat_intelligence/types/indicator';
+import { generateMockFileIndicator } from '../../../../common/threat_intelligence/types/indicator';
+import type { IndicatorAttachmentMetadata } from '.';
+import { generateIndicatorAttachmentsMetadata, generateIndicatorAttachmentsWithoutOwner } from '.';
 
 describe('generateIndicatorAttachmentsWithoutOwner', () => {
   it('should return empty array if indicator id is empty', () => {

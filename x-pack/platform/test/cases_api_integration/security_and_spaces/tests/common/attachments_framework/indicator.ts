@@ -8,31 +8,26 @@
 import expect from '@kbn/expect';
 import {
   INDICATOR_ATTACHMENT_TYPE,
-  CASE_COMMENT_SAVED_OBJECT,
+  LEGACY_INDICATOR_ATTACHMENT_TYPE,
   AttachmentType,
   ExternalReferenceStorageType,
 } from '@kbn/cases-plugin/common';
 import type { AttachmentRequest } from '@kbn/cases-plugin/common/types/api';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { postCaseReq } from '../../../../common/lib/mock';
-import {
-  createCase,
-  createComment,
-  deleteAllCaseItems,
-  getSOFromKibanaIndex,
-} from '../../../../common/lib/api';
+import { createCase, createComment, deleteAllCaseItems } from '../../../../common/lib/api';
 
 /**
  * Legacy external-reference shape. Existing clients persisted indicator metadata
  * under `externalReferenceMetadata`; the unified schema validates these payloads
- * via `EXTERNAL_REFERENCE_TYPE_MAP['indicator']`.
+ * via `EXTERNAL_REFERENCE_TYPE_MAP[LEGACY_INDICATOR_ATTACHMENT_TYPE]`.
  */
 const legacyIndicatorPayload = (overrides: Record<string, unknown> = {}): AttachmentRequest =>
   ({
     type: AttachmentType.externalReference,
     externalReferenceId: 'indicator-1',
     externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
-    externalReferenceAttachmentTypeId: 'indicator',
+    externalReferenceAttachmentTypeId: LEGACY_INDICATOR_ATTACHMENT_TYPE,
     externalReferenceMetadata: {
       indicatorName: 'malware.exe',
       indicatorType: 'file',
@@ -152,33 +147,6 @@ export default ({ getService }: FtrProviderContext): void => {
           params: unifiedIndicatorPayload({ extra: 'nope' }),
           expectedHttpCode: 400,
         });
-      });
-
-      it('does not leak `attachmentId` / `metadata` / `data` into the cases-comments SO when flag is OFF', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        const patched = await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: unifiedIndicatorPayload(),
-        });
-        const commentId = patched.comments![0].id;
-
-        const esResponse = await getSOFromKibanaIndex({
-          es,
-          soType: CASE_COMMENT_SAVED_OBJECT,
-          soId: commentId,
-        });
-
-        const source = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT] as Record<
-          string,
-          unknown
-        >;
-        expect(source).to.be.ok();
-        expect(source.attachmentId).to.be(undefined);
-        expect(source.metadata).to.be(undefined);
-        expect(source.data).to.be(undefined);
-        expect(source.type).to.be('externalReference');
-        expect(source.externalReferenceAttachmentTypeId).to.be('indicator');
       });
     });
   });

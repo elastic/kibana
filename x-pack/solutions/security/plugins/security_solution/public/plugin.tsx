@@ -75,7 +75,7 @@ import { getEndpointUnifiedAttachment } from './cases/attachments/endpoint';
 import { getEventType } from './cases/attachments/event';
 import { getSecurityAlertType } from './cases/attachments/alert';
 import { isSecuritySolutionAccessible } from './helpers_access';
-import { getIndicatorAttachment } from './cases/attachments/indicator/utils/attachments';
+import { getIndicatorAttachment } from './cases/attachments/indicator';
 import { defaultDeepLinks } from './app/links/default_deep_links';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import {

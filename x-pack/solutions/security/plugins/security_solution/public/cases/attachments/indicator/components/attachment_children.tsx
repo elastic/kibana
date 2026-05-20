@@ -17,7 +17,10 @@ type Props = UnifiedReferenceAttachmentViewProps<IndicatorAttachmentPayload['met
  * Renders the indicator summary in the case attachment view.
  */
 const AttachmentChildren = ({ attachmentId, metadata }: Props) => {
-  if (!metadata || typeof attachmentId !== 'string') {
+  // `IndicatorAttachmentPayloadSchema` validates `attachmentId` as a single string,
+  // but the shared `UnifiedReferenceAttachmentViewProps` types it as `string | string[]`
+  // because alert attachments persist arrays. Treat an array as bad data and bail.
+  if (!metadata || Array.isArray(attachmentId)) {
     return null;
   }
 

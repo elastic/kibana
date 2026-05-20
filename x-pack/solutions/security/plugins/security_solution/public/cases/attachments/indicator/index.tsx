@@ -13,24 +13,17 @@ import React from 'react';
 import { EuiAvatar } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { IndicatorAttachmentPayloadSchema } from '../../../../../common/cases/attachments/indicator';
-import { EMPTY_VALUE } from '../../../../threat_intelligence/constants/common';
-import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
-import { RawIndicatorFieldId } from '../../../../../common/threat_intelligence/types/indicator';
-import { getIndicatorFieldAndValue } from '../../../../threat_intelligence/modules/indicators/utils/field_value';
+import type { IndicatorAttachmentMetadata } from '../../../../common/cases/attachments/indicator';
+import { IndicatorAttachmentPayloadSchema } from '../../../../common/cases/attachments/indicator';
+import { EMPTY_VALUE } from '../../../threat_intelligence/constants/common';
+import type { Indicator } from '../../../../common/threat_intelligence/types/indicator';
+import { RawIndicatorFieldId } from '../../../../common/threat_intelligence/types/indicator';
+import { getIndicatorFieldAndValue } from '../../../threat_intelligence/modules/indicators/utils/field_value';
 
-/**
- * Indicator name, type, feed name and first seen values,
- * rendered in the comment section of a case's attachment or in the flyout
- */
-export interface IndicatorAttachmentMetadata {
-  indicatorName: string;
-  indicatorType: string;
-  indicatorFeedName: string;
-}
+export type { IndicatorAttachmentMetadata };
 
 const IndicatorAttachmentChildrenLazy = React.lazy(
-  () => import('../components/attachment_children')
+  () => import('./components/attachment_children')
 );
 
 const DISPLAY_NAME = i18n.translate('xpack.securitySolution.threatIntelligence.cases.displayName', {
