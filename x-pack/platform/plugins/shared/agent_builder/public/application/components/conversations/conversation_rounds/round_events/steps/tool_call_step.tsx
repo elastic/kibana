@@ -198,8 +198,7 @@ const ToolCallExpansion: React.FC<ToolCallExpansionProps> = ({ step }) => {
 };
 
 /**
- * Shape of `data` on a sub-agent tool result. Defined locally so this module
- * doesn't depend on `round_thinking/`'s now-deleted helpers.
+ * Shape of `data` on a sub-agent tool result.
  */
 interface SubAgentResultData {
   agent_execution_id?: string;

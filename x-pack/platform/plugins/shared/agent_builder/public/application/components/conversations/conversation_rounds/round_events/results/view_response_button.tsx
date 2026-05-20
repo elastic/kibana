@@ -26,9 +26,6 @@ interface ViewResponseButtonProps {
  * Only rendered inside a tool call's expanded sub-fields when the tool's
  * `results[]` contains at least one entry that isn't renderable inline
  * (anything other than `query` / `esqlResults` / `error`).
- *
- * Flyout state is held locally (`useState`) — does not use the
- * `useToolResultsFlyout` hook from `hooks/thinking/`.
  */
 export const ViewResponseButton: React.FC<ViewResponseButtonProps> = ({ results }) => {
   const [isOpen, setIsOpen] = useState(false);

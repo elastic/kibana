@@ -42,9 +42,6 @@ interface RoundEventsProps {
 /**
  * Container for the events block — reasoning, tool calls, compaction, and
  * background-agent completion rendered together above the round response.
- *
- * Replaces `RoundSteps` from `round_thinking/`. No status icons, no per-item
- * loading state, two-layer expansion model.
  */
 export const RoundEvents: React.FC<RoundEventsProps> = ({
   steps,

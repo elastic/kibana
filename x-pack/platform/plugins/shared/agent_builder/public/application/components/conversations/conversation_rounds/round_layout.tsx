@@ -25,7 +25,7 @@ import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { RoundError } from './round_error/round_error';
 import { ConfirmationPrompt } from './round_prompt';
 import { RoundAttachmentReferences } from './round_attachment_references';
-import { TodosStepDisplay } from './round_thinking/steps/todos_step_display';
+import { TodosStepDisplay } from './todos_step_display';
 
 interface RoundLayoutProps {
   isCurrentRound: boolean;
