@@ -30,7 +30,7 @@ import {
   useEuiTheme,
   keys,
 } from '@elastic/eui';
-import { Tab, type TabProps } from '../tab';
+import { Tab, type TabApi, type TabProps } from '../tab';
 import type { TabItem, TabsServices, TabsEBTEvent, RecentlyClosedTabItem } from '../../types';
 import { TabsEventName } from '../../types';
 import { getTabIdAttribute } from '../../utils/get_tab_attributes';
@@ -83,6 +83,7 @@ export type TabsBarProps = Pick<
 
 export interface TabsBarApi {
   moveFocusToNextSelectedItem: (item: TabItem) => void;
+  enterRenamingMode: () => void;
 }
 
 export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
@@ -123,6 +124,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
     tabsContainerRef.current = tabsContainerElement;
     const hasReachedMaxItemsCount = maxItemsCount ? items.length >= maxItemsCount : false;
     const moveFocusToItemIdRef = useRef<string | null>(null);
+    const selectedTabApiRef = useRef<TabApi | null>(null);
 
     const emitOnKeyUsedEvent = useCallback(
       (shortcut: string) => {
@@ -142,12 +144,17 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
       moveFocusToItemIdRef.current = item.id;
     }, []);
 
+    const enterRenamingMode = useCallback(() => {
+      selectedTabApiRef.current?.enterRenamingMode();
+    }, []);
+
     useImperativeHandle(
       componentRef,
       () => ({
         moveFocusToNextSelectedItem,
+        enterRenamingMode,
       }),
-      [moveFocusToNextSelectedItem]
+      [enterRenamingMode, moveFocusToNextSelectedItem]
     );
 
     const addButtonLabel = i18n.translate('unifiedTabs.createTabButton', {
@@ -333,6 +340,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
                         {/* Render prop receives drag-related props when drag is enabled */}
                         {({ dragHandleProps, isDragging }) => (
                           <Tab
+                            ref={selectedItem?.id === item.id ? selectedTabApiRef : undefined}
                             item={item}
                             isSelected={selectedItem?.id === item.id}
                             selectedItemId={selectedItem?.id}

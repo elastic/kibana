@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, {
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { escapeRegExp, omit, debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
@@ -74,6 +81,16 @@ export interface TabbedContentState {
   selectedItem: TabItem | null;
 }
 
+export interface TabbedContentApi {
+  add: () => Promise<void>;
+  closeSelected: () => Promise<void>;
+  restoreLastClosed: () => Promise<void>;
+  selectNext: () => Promise<void>;
+  selectPrevious: () => Promise<void>;
+  duplicateSelected: () => Promise<void>;
+  enterRenamingMode: () => void;
+}
+
 const VerticalRule = () => {
   const { euiTheme } = useEuiTheme();
 
@@ -88,424 +105,509 @@ const VerticalRule = () => {
   );
 };
 
-export const TabbedContent: React.FC<TabbedContentProps> = ({
-  items: managedItems,
-  selectedItemId: managedSelectedItemId,
-  recentlyClosedItems,
-  unsavedItemIds,
-  maxItemsCount = MAX_ITEMS_COUNT,
-  services,
-  hideTabsBar = false,
-  renderContent,
-  createItem,
-  onChanged,
-  tabContentIdOverride,
-  onClearRecentlyClosed,
-  getPreviewData,
-  onEBTEvent,
-  customNewTabButton,
-  disableCloseButton = false,
-  disableInlineLabelEditing = false,
-  disableDragAndDrop = false,
-  disableTabsBarMenu = false,
-  appendRight,
-  getTopTabMenuItems,
-  getAdditionalTabMenuItems,
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const tabsBarApi = useRef<TabsBarApi | null>(null);
-  const [generatedId] = useState(() => tabContentIdOverride ?? htmlIdGenerator()());
-  const tabContentId = tabContentIdOverride ?? generatedId;
-  const state = useMemo(
-    () => prepareStateFromProps(managedItems, managedSelectedItemId),
-    [managedItems, managedSelectedItemId]
-  );
-  const { items, selectedItem } = state;
-  const stateRef = React.useRef<TabbedContentState>();
-  stateRef.current = state;
-
-  const changeState = useCallback(
-    (getNextState: (prevState: TabbedContentState) => TabbedContentState) => {
-      if (!stateRef.current) {
-        return;
-      }
-
-      const nextState = getNextState(stateRef.current);
-      onChanged(nextState);
+export const TabbedContent = forwardRef<TabbedContentApi, TabbedContentProps>(
+  (
+    {
+      items: managedItems,
+      selectedItemId: managedSelectedItemId,
+      recentlyClosedItems,
+      unsavedItemIds,
+      maxItemsCount = MAX_ITEMS_COUNT,
+      services,
+      hideTabsBar = false,
+      renderContent,
+      createItem,
+      onChanged,
+      tabContentIdOverride,
+      onClearRecentlyClosed,
+      getPreviewData,
+      onEBTEvent,
+      customNewTabButton,
+      disableCloseButton = false,
+      disableInlineLabelEditing = false,
+      disableDragAndDrop = false,
+      disableTabsBarMenu = false,
+      appendRight,
+      getTopTabMenuItems,
+      getAdditionalTabMenuItems,
     },
-    [onChanged]
-  );
+    componentRef
+  ) => {
+    const { euiTheme } = useEuiTheme();
+    const tabsBarApi = useRef<TabsBarApi | null>(null);
+    const [generatedId] = useState(() => tabContentIdOverride ?? htmlIdGenerator()());
+    const tabContentId = tabContentIdOverride ?? generatedId;
+    const state = useMemo(
+      () => prepareStateFromProps(managedItems, managedSelectedItemId),
+      [managedItems, managedSelectedItemId]
+    );
+    const { items, selectedItem } = state;
+    const stateRef = React.useRef<TabbedContentState>();
+    stateRef.current = state;
 
-  const onLabelEdited = useCallback(
-    async (item: TabItem, newLabel: string) => {
-      const editedItem = { ...item, label: newLabel };
-      tabsBarApi.current?.moveFocusToNextSelectedItem(editedItem);
-      changeState((prevState) => {
-        const nextState = replaceTabWith(prevState, item, editedItem);
-
-        onEBTEvent({
-          [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabRenamed,
-          [TabsEventDataKeys.TAB_ID]: item.id,
-          [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
-        });
-
-        return nextState;
-      });
-    },
-    [changeState, onEBTEvent]
-  );
-
-  // Debounced tabSwitched EBT event sender
-  const debouncedTabSwitched = useMemo(
-    () => debounce((event: TabsEBTEvent) => onEBTEvent(event), TAB_SWITCH_DEBOUNCE_MS),
-    [onEBTEvent]
-  );
-
-  const onSelect = useCallback(
-    async (item: TabItem) => {
-      tabsBarApi.current?.moveFocusToNextSelectedItem(item);
-      changeState((prevState) => {
-        const prevItems = prevState.items;
-        const nextState = selectTab(prevState, item);
-
-        const eventPayload = {
-          [TabsEventDataKeys.TAB_ID]: item.id,
-          [TabsEventDataKeys.FROM_INDEX]: prevItems.findIndex(
-            (singleItem) => singleItem.id === prevState.selectedItem?.id
-          ),
-          [TabsEventDataKeys.TO_INDEX]: nextState.items.findIndex(
-            (singleItem) => singleItem.id === item.id
-          ),
-          [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevItems.length,
-        };
-
-        debouncedTabSwitched({
-          [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabSwitched,
-          ...eventPayload,
-        });
-
-        return nextState;
-      });
-    },
-    [changeState, debouncedTabSwitched]
-  );
-
-  const onSelectRecentlyClosed = useCallback(
-    async (item: RecentlyClosedTabItem) => {
-      changeState((prevState) => {
-        if (maxItemsCount && prevState.items.length >= maxItemsCount) {
-          return prevState;
+    const changeState = useCallback(
+      (getNextState: (prevState: TabbedContentState) => TabbedContentState) => {
+        if (!stateRef.current) {
+          return;
         }
 
-        const newItem = createItem();
-        const restoredItem = {
-          ...omit(item, 'closedAt'),
-          id: newItem.id,
-          restoredFromId: item.id,
-        };
+        const nextState = getNextState(stateRef.current);
+        onChanged(nextState);
+      },
+      [onChanged]
+    );
 
-        tabsBarApi.current?.moveFocusToNextSelectedItem(restoredItem);
+    const onLabelEdited = useCallback(
+      async (item: TabItem, newLabel: string) => {
+        const editedItem = { ...item, label: newLabel };
+        tabsBarApi.current?.moveFocusToNextSelectedItem(editedItem);
+        changeState((prevState) => {
+          const nextState = replaceTabWith(prevState, item, editedItem);
 
-        onEBTEvent({
-          [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabSelectRecentlyClosed,
-          [TabsEventDataKeys.TAB_ID]: item.id,
-          [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
-        });
-
-        return selectRecentlyClosedTab(prevState, restoredItem);
-      });
-    },
-    [changeState, createItem, maxItemsCount, onEBTEvent]
-  );
-
-  const onRestoreRecentlyClosedGroup = useCallback(
-    async (itemsToRestore: RecentlyClosedTabItem[]) => {
-      if (itemsToRestore.length === 0) {
-        return;
-      }
-
-      changeState((prevState) => {
-        const remainingCapacity = maxItemsCount
-          ? Math.max(0, maxItemsCount - prevState.items.length)
-          : itemsToRestore.length;
-
-        const restoredItems = itemsToRestore.slice(0, remainingCapacity).map((item) => {
-          const newItem = createItem();
-          return { ...omit(item, 'closedAt'), id: newItem.id, restoredFromId: item.id };
-        });
-
-        if (restoredItems.length === 0) {
-          return prevState;
-        }
-
-        const nextSelectedItem = restoredItems.at(0) ?? prevState.selectedItem;
-        if (nextSelectedItem) {
-          tabsBarApi.current?.moveFocusToNextSelectedItem(nextSelectedItem);
-        }
-
-        restoredItems.forEach((restoredItem) => {
           onEBTEvent({
-            [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabSelectRecentlyClosed,
-            [TabsEventDataKeys.TAB_ID]: restoredItem.restoredFromId ?? restoredItem.id,
+            [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabRenamed,
+            [TabsEventDataKeys.TAB_ID]: item.id,
             [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
           });
-        });
 
-        return {
-          items: [...prevState.items, ...restoredItems],
-          selectedItem: nextSelectedItem,
-        };
-      });
-    },
-    [changeState, createItem, maxItemsCount, onEBTEvent]
-  );
-
-  const onClose = useCallback(
-    async (item: TabItem) => {
-      changeState((prevState) => {
-        const nextState = closeTab(prevState, item);
-        if (nextState.selectedItem) {
-          tabsBarApi.current?.moveFocusToNextSelectedItem(nextState.selectedItem);
-        }
-
-        onEBTEvent({
-          [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabClosed,
-          [TabsEventDataKeys.TAB_ID]: item.id,
-          [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
-          [TabsEventDataKeys.REMAINING_TABS_COUNT]: nextState.items.length,
-        });
-
-        return nextState;
-      });
-    },
-    [changeState, onEBTEvent]
-  );
-
-  const onReorder = useCallback(
-    (reorderedItems: TabItem[], movedTabId: string) => {
-      changeState((prevState) => {
-        const prevItems = prevState.items;
-        const nextState = { ...prevState, items: reorderedItems };
-
-        if (!movedTabId) {
           return nextState;
+        });
+      },
+      [changeState, onEBTEvent]
+    );
+
+    // Debounced tabSwitched EBT event sender
+    const debouncedTabSwitched = useMemo(
+      () => debounce((event: TabsEBTEvent) => onEBTEvent(event), TAB_SWITCH_DEBOUNCE_MS),
+      [onEBTEvent]
+    );
+
+    const onSelect = useCallback(
+      async (item: TabItem) => {
+        tabsBarApi.current?.moveFocusToNextSelectedItem(item);
+        changeState((prevState) => {
+          const prevItems = prevState.items;
+          const nextState = selectTab(prevState, item);
+
+          const eventPayload = {
+            [TabsEventDataKeys.TAB_ID]: item.id,
+            [TabsEventDataKeys.FROM_INDEX]: prevItems.findIndex(
+              (singleItem) => singleItem.id === prevState.selectedItem?.id
+            ),
+            [TabsEventDataKeys.TO_INDEX]: nextState.items.findIndex(
+              (singleItem) => singleItem.id === item.id
+            ),
+            [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevItems.length,
+          };
+
+          debouncedTabSwitched({
+            [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabSwitched,
+            ...eventPayload,
+          });
+
+          return nextState;
+        });
+      },
+      [changeState, debouncedTabSwitched]
+    );
+
+    const onSelectRecentlyClosed = useCallback(
+      async (item: RecentlyClosedTabItem) => {
+        changeState((prevState) => {
+          if (maxItemsCount && prevState.items.length >= maxItemsCount) {
+            return prevState;
+          }
+
+          const newItem = createItem();
+          const restoredItem = {
+            ...omit(item, 'closedAt'),
+            id: newItem.id,
+            restoredFromId: item.id,
+          };
+
+          tabsBarApi.current?.moveFocusToNextSelectedItem(restoredItem);
+
+          onEBTEvent({
+            [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabSelectRecentlyClosed,
+            [TabsEventDataKeys.TAB_ID]: item.id,
+            [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
+          });
+
+          return selectRecentlyClosedTab(prevState, restoredItem);
+        });
+      },
+      [changeState, createItem, maxItemsCount, onEBTEvent]
+    );
+
+    const onRestoreRecentlyClosedGroup = useCallback(
+      async (itemsToRestore: RecentlyClosedTabItem[]) => {
+        if (itemsToRestore.length === 0) {
+          return;
         }
 
-        onEBTEvent({
-          [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabReordered,
-          [TabsEventDataKeys.TAB_ID]: movedTabId,
-          [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
-          [TabsEventDataKeys.FROM_INDEX]: prevItems.findIndex((item) => item.id === movedTabId),
-          [TabsEventDataKeys.TO_INDEX]: reorderedItems.findIndex((item) => item.id === movedTabId),
+        changeState((prevState) => {
+          const remainingCapacity = maxItemsCount
+            ? Math.max(0, maxItemsCount - prevState.items.length)
+            : itemsToRestore.length;
+
+          const restoredItems = itemsToRestore.slice(0, remainingCapacity).map((item) => {
+            const newItem = createItem();
+            return { ...omit(item, 'closedAt'), id: newItem.id, restoredFromId: item.id };
+          });
+
+          if (restoredItems.length === 0) {
+            return prevState;
+          }
+
+          const nextSelectedItem = restoredItems.at(0) ?? prevState.selectedItem;
+          if (nextSelectedItem) {
+            tabsBarApi.current?.moveFocusToNextSelectedItem(nextSelectedItem);
+          }
+
+          restoredItems.forEach((restoredItem) => {
+            onEBTEvent({
+              [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabSelectRecentlyClosed,
+              [TabsEventDataKeys.TAB_ID]: restoredItem.restoredFromId ?? restoredItem.id,
+              [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
+            });
+          });
+
+          return {
+            items: [...prevState.items, ...restoredItems],
+            selectedItem: nextSelectedItem,
+          };
         });
+      },
+      [changeState, createItem, maxItemsCount, onEBTEvent]
+    );
 
-        return nextState;
-      });
-    },
-    [changeState, onEBTEvent]
-  );
+    const onClose = useCallback(
+      async (item: TabItem) => {
+        changeState((prevState) => {
+          const nextState = closeTab(prevState, item);
+          if (nextState.selectedItem) {
+            tabsBarApi.current?.moveFocusToNextSelectedItem(nextState.selectedItem);
+          }
 
-  const onAdd = useCallback(async () => {
-    const newItem = createItem();
-    tabsBarApi.current?.moveFocusToNextSelectedItem(newItem);
-    changeState((prevState) => {
-      const nextState = addTab(prevState, newItem, maxItemsCount);
+          onEBTEvent({
+            [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabClosed,
+            [TabsEventDataKeys.TAB_ID]: item.id,
+            [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
+            [TabsEventDataKeys.REMAINING_TABS_COUNT]: nextState.items.length,
+          });
 
-      onEBTEvent({
-        [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabCreated,
-        [TabsEventDataKeys.TAB_ID]: newItem.id,
-        [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
-      });
+          return nextState;
+        });
+      },
+      [changeState, onEBTEvent]
+    );
 
-      return nextState;
-    });
-  }, [changeState, createItem, maxItemsCount, onEBTEvent]);
+    const onReorder = useCallback(
+      (reorderedItems: TabItem[], movedTabId: string) => {
+        changeState((prevState) => {
+          const prevItems = prevState.items;
+          const nextState = { ...prevState, items: reorderedItems };
 
-  const onDuplicate = useCallback(
-    (item: TabItem) => {
+          if (!movedTabId) {
+            return nextState;
+          }
+
+          onEBTEvent({
+            [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabReordered,
+            [TabsEventDataKeys.TAB_ID]: movedTabId,
+            [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
+            [TabsEventDataKeys.FROM_INDEX]: prevItems.findIndex((item) => item.id === movedTabId),
+            [TabsEventDataKeys.TO_INDEX]: reorderedItems.findIndex(
+              (item) => item.id === movedTabId
+            ),
+          });
+
+          return nextState;
+        });
+      },
+      [changeState, onEBTEvent]
+    );
+
+    const onAdd = useCallback(async () => {
       const newItem = createItem();
-      newItem.duplicatedFromId = item.id;
-
-      const copyLabel = i18n.translate('unifiedTabs.copyLabel', { defaultMessage: 'copy' });
-
-      // Remove existing (copy) or (copy N) suffix to get base label
-      const copyPattern = `\\s*\\(${escapeRegExp(copyLabel)}\\)(?:\\s+\\d+)?$`;
-      const baseLabel = item.label.replace(new RegExp(copyPattern), '');
-
-      // Create the copy base pattern: "Original Label (copy)"
-      const copyBaseLabel = `${baseLabel} (${copyLabel})`;
-
-      const nextNumber = getNextTabNumber(state.items, copyBaseLabel);
-      newItem.label = nextNumber ? `${copyBaseLabel} ${nextNumber}` : copyBaseLabel;
-
       tabsBarApi.current?.moveFocusToNextSelectedItem(newItem);
-
       changeState((prevState) => {
-        const nextState = insertTabAfter(prevState, newItem, item, maxItemsCount);
+        const nextState = addTab(prevState, newItem, maxItemsCount);
 
         onEBTEvent({
-          [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabDuplicated,
-          [TabsEventDataKeys.TAB_ID]: item.id,
+          [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabCreated,
+          [TabsEventDataKeys.TAB_ID]: newItem.id,
           [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
         });
 
         return nextState;
       });
-    },
-    [changeState, createItem, maxItemsCount, state.items, onEBTEvent]
-  );
+    }, [changeState, createItem, maxItemsCount, onEBTEvent]);
 
-  const onCloseOtherTabs = useCallback(
-    (item: TabItem) => {
-      changeState((prevState) => {
-        const nextState = closeOtherTabs(prevState, item);
+    const onDuplicate = useCallback(
+      (item: TabItem) => {
+        const newItem = createItem();
+        newItem.duplicatedFromId = item.id;
 
-        onEBTEvent({
-          [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabClosedOthers,
-          [TabsEventDataKeys.TAB_ID]: item.id,
-          [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
-          [TabsEventDataKeys.CLOSED_TABS_COUNT]: prevState.items.length - nextState.items.length,
+        const copyLabel = i18n.translate('unifiedTabs.copyLabel', { defaultMessage: 'copy' });
+
+        // Remove existing (copy) or (copy N) suffix to get base label
+        const copyPattern = `\\s*\\(${escapeRegExp(copyLabel)}\\)(?:\\s+\\d+)?$`;
+        const baseLabel = item.label.replace(new RegExp(copyPattern), '');
+
+        // Create the copy base pattern: "Original Label (copy)"
+        const copyBaseLabel = `${baseLabel} (${copyLabel})`;
+
+        const nextNumber = getNextTabNumber(state.items, copyBaseLabel);
+        newItem.label = nextNumber ? `${copyBaseLabel} ${nextNumber}` : copyBaseLabel;
+
+        tabsBarApi.current?.moveFocusToNextSelectedItem(newItem);
+
+        changeState((prevState) => {
+          const nextState = insertTabAfter(prevState, newItem, item, maxItemsCount);
+
+          onEBTEvent({
+            [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabDuplicated,
+            [TabsEventDataKeys.TAB_ID]: item.id,
+            [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
+          });
+
+          return nextState;
         });
+      },
+      [changeState, createItem, maxItemsCount, state.items, onEBTEvent]
+    );
 
-        return nextState;
-      });
-    },
-    [changeState, onEBTEvent]
-  );
+    const selectRelativeTab = useCallback(
+      async (offset: number) => {
+        const currentState = stateRef.current;
+        const currentSelectedItem = currentState?.selectedItem;
 
-  const onCloseTabsToTheRight = useCallback(
-    (item: TabItem) => {
-      changeState((prevState) => {
-        const nextState = closeTabsToTheRight(prevState, item);
+        if (!currentState || !currentSelectedItem || currentState.items.length < 2) {
+          return;
+        }
 
-        onEBTEvent({
-          [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabClosedToTheRight,
-          [TabsEventDataKeys.TAB_ID]: item.id,
-          [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
-          [TabsEventDataKeys.CLOSED_TABS_COUNT]: prevState.items.length - nextState.items.length,
-          [TabsEventDataKeys.REMAINING_TABS_COUNT]: nextState.items.length,
+        const selectedItemIndex = currentState.items.findIndex(
+          (item) => item.id === currentSelectedItem.id
+        );
+
+        if (selectedItemIndex < 0) {
+          return;
+        }
+
+        const nextIndex =
+          (selectedItemIndex + offset + currentState.items.length) % currentState.items.length;
+        const nextItem = currentState.items[nextIndex];
+
+        if (!nextItem || nextItem.id === currentSelectedItem.id) {
+          return;
+        }
+
+        await onSelect(nextItem);
+      },
+      [onSelect]
+    );
+
+    useImperativeHandle(
+      componentRef,
+      () => ({
+        add: onAdd,
+        closeSelected: async () => {
+          const currentSelectedItem = stateRef.current?.selectedItem;
+
+          if (!currentSelectedItem) {
+            return;
+          }
+
+          await onClose(currentSelectedItem);
+        },
+        restoreLastClosed: async () => {
+          const lastClosedItem = recentlyClosedItems[0];
+
+          if (!lastClosedItem) {
+            return;
+          }
+
+          await onSelectRecentlyClosed(lastClosedItem);
+        },
+        selectNext: async () => selectRelativeTab(1),
+        selectPrevious: async () => selectRelativeTab(-1),
+        duplicateSelected: async () => {
+          const currentSelectedItem = stateRef.current?.selectedItem;
+
+          if (!currentSelectedItem) {
+            return;
+          }
+
+          onDuplicate(currentSelectedItem);
+        },
+        enterRenamingMode: () => {
+          const currentSelectedItem = stateRef.current?.selectedItem;
+
+          if (!currentSelectedItem) {
+            return;
+          }
+
+          tabsBarApi.current?.enterRenamingMode();
+        },
+      }),
+      [onAdd, onClose, onDuplicate, onSelectRecentlyClosed, recentlyClosedItems, selectRelativeTab]
+    );
+
+    const onCloseOtherTabs = useCallback(
+      (item: TabItem) => {
+        changeState((prevState) => {
+          const nextState = closeOtherTabs(prevState, item);
+
+          onEBTEvent({
+            [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabClosedOthers,
+            [TabsEventDataKeys.TAB_ID]: item.id,
+            [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
+            [TabsEventDataKeys.CLOSED_TABS_COUNT]: prevState.items.length - nextState.items.length,
+          });
+
+          return nextState;
         });
+      },
+      [changeState, onEBTEvent]
+    );
 
-        return nextState;
+    const onCloseTabsToTheRight = useCallback(
+      (item: TabItem) => {
+        changeState((prevState) => {
+          const nextState = closeTabsToTheRight(prevState, item);
+
+          onEBTEvent({
+            [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabClosedToTheRight,
+            [TabsEventDataKeys.TAB_ID]: item.id,
+            [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
+            [TabsEventDataKeys.CLOSED_TABS_COUNT]: prevState.items.length - nextState.items.length,
+            [TabsEventDataKeys.REMAINING_TABS_COUNT]: nextState.items.length,
+          });
+
+          return nextState;
+        });
+      },
+      [changeState, onEBTEvent]
+    );
+
+    const getTabMenuItems = useMemo(() => {
+      return getTabMenuItemsFn({
+        tabsState: state,
+        maxItemsCount,
+        onDuplicate,
+        onCloseOtherTabs,
+        onCloseTabsToTheRight,
+        getTopTabMenuItems,
+        getAdditionalTabMenuItems,
       });
-    },
-    [changeState, onEBTEvent]
-  );
-
-  const getTabMenuItems = useMemo(() => {
-    return getTabMenuItemsFn({
-      tabsState: state,
+    }, [
+      state,
       maxItemsCount,
       onDuplicate,
       onCloseOtherTabs,
       onCloseTabsToTheRight,
       getTopTabMenuItems,
       getAdditionalTabMenuItems,
-    });
-  }, [
-    state,
-    maxItemsCount,
-    onDuplicate,
-    onCloseOtherTabs,
-    onCloseTabsToTheRight,
-    getTopTabMenuItems,
-    getAdditionalTabMenuItems,
-  ]);
+    ]);
 
-  const tabsBarContainerCss = css`
-    background-color: ${euiTheme.colors.lightestShade};
-  `;
+    const tabsBarContainerCss = css`
+      background-color: ${euiTheme.colors.lightestShade};
+    `;
 
-  const tabsBarComponentCss = css`
-    min-width: 0; /* Fixes an issue causing TabsBar to push appendRight to overflow as number of tabs grows */
-  `;
+    const tabsBarComponentCss = css`
+      min-width: 0; /* Fixes an issue causing TabsBar to push appendRight to overflow as number of tabs grows */
+    `;
 
-  const appendRightContainerCss = css`
-    margin-right: ${euiTheme.size.s};
-  `;
+    const appendRightContainerCss = css`
+      margin-right: ${euiTheme.size.s};
+    `;
 
-  const tabsBar = (
-    <EuiFlexGroup
-      gutterSize="xs"
-      alignItems="center"
-      wrap={false}
-      responsive={false}
-      css={tabsBarContainerCss}
-    >
-      <EuiFlexItem grow={true} css={tabsBarComponentCss}>
-        <TabsBar
-          ref={tabsBarApi}
-          items={items}
-          selectedItem={selectedItem}
-          recentlyClosedItems={recentlyClosedItems}
-          unsavedItemIds={unsavedItemIds}
-          maxItemsCount={maxItemsCount}
-          tabContentId={tabContentId}
-          getTabMenuItems={getTabMenuItems}
-          services={services}
-          onAdd={onAdd}
-          onLabelEdited={onLabelEdited}
-          onSelect={onSelect}
-          onSelectRecentlyClosed={onSelectRecentlyClosed}
-          onRestoreRecentlyClosedGroup={onRestoreRecentlyClosedGroup}
-          onClearRecentlyClosed={onClearRecentlyClosed}
-          onReorder={onReorder}
-          onClose={onClose}
-          getPreviewData={getPreviewData}
-          onEBTEvent={onEBTEvent}
-          customNewTabButton={customNewTabButton}
-          disableCloseButton={disableCloseButton}
-          disableInlineLabelEditing={disableInlineLabelEditing}
-          disableDragAndDrop={disableDragAndDrop}
-          disableTabsBarMenu={disableTabsBarMenu}
-        />
-      </EuiFlexItem>
-      {appendRight ? (
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup
-            gutterSize="xs"
-            alignItems="center"
-            justifyContent="flexEnd"
-            wrap={false}
-            responsive={false}
+    const tabsBar = (
+      <EuiFlexGroup
+        gutterSize="xs"
+        alignItems="center"
+        wrap={false}
+        responsive={false}
+        css={tabsBarContainerCss}
+      >
+        <EuiFlexItem grow={true} css={tabsBarComponentCss}>
+          <TabsBar
+            ref={tabsBarApi}
+            items={items}
+            selectedItem={selectedItem}
+            recentlyClosedItems={recentlyClosedItems}
+            unsavedItemIds={unsavedItemIds}
+            maxItemsCount={maxItemsCount}
+            tabContentId={tabContentId}
+            getTabMenuItems={getTabMenuItems}
+            services={services}
+            onAdd={onAdd}
+            onLabelEdited={onLabelEdited}
+            onSelect={onSelect}
+            onSelectRecentlyClosed={onSelectRecentlyClosed}
+            onRestoreRecentlyClosedGroup={onRestoreRecentlyClosedGroup}
+            onClearRecentlyClosed={onClearRecentlyClosed}
+            onReorder={onReorder}
+            onClose={onClose}
+            getPreviewData={getPreviewData}
+            onEBTEvent={onEBTEvent}
+            customNewTabButton={customNewTabButton}
+            disableCloseButton={disableCloseButton}
+            disableInlineLabelEditing={disableInlineLabelEditing}
+            disableDragAndDrop={disableDragAndDrop}
+            disableTabsBarMenu={disableTabsBarMenu}
+          />
+        </EuiFlexItem>
+        {appendRight ? (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup
+              gutterSize="xs"
+              alignItems="center"
+              justifyContent="flexEnd"
+              wrap={false}
+              responsive={false}
+            >
+              <EuiFlexItem grow={false}>
+                <VerticalRule />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false} css={appendRightContainerCss}>
+                {appendRight}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+    );
+
+    if (!renderContent) {
+      return tabsBar;
+    }
+
+    return (
+      <EuiFlexGroup
+        responsive={false}
+        direction="column"
+        gutterSize="none"
+        className="eui-fullHeight"
+      >
+        {!hideTabsBar && <EuiFlexItem grow={false}>{tabsBar}</EuiFlexItem>}
+        {selectedItem ? (
+          <EuiFlexItem
+            data-test-subj="unifiedTabs_selectedTabContent"
+            role="tabpanel"
+            id={tabContentId}
+            aria-labelledby={getTabAttributes(selectedItem, tabContentId).id}
           >
-            <EuiFlexItem grow={false}>
-              <VerticalRule />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} css={appendRightContainerCss}>
-              {appendRight}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      ) : null}
-    </EuiFlexGroup>
-  );
-
-  if (!renderContent) {
-    return tabsBar;
+            {renderContent(selectedItem)}
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+    );
   }
+);
 
-  return (
-    <EuiFlexGroup
-      responsive={false}
-      direction="column"
-      gutterSize="none"
-      className="eui-fullHeight"
-    >
-      {!hideTabsBar && <EuiFlexItem grow={false}>{tabsBar}</EuiFlexItem>}
-      {selectedItem ? (
-        <EuiFlexItem
-          data-test-subj="unifiedTabs_selectedTabContent"
-          role="tabpanel"
-          id={tabContentId}
-          aria-labelledby={getTabAttributes(selectedItem, tabContentId).id}
-        >
-          {renderContent(selectedItem)}
-        </EuiFlexItem>
-      ) : null}
-    </EuiFlexGroup>
-  );
-};
+TabbedContent.displayName = 'TabbedContent';
 
 function prepareStateFromProps(items: TabItem[], selectedItemId?: string): TabbedContentState {
   const selectedItem = selectedItemId && items.find((item) => item.id === selectedItemId);

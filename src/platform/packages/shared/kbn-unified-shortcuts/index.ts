@@ -7,4 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Tab, type TabApi, type TabProps } from './tab';
+export { LeaderKeyShortcuts, type LeaderKeyShortcutsProps } from './src/leader_key_shortcuts';
+export type { LeaderKeyShortcut, LeaderKeyShortcutGroup } from './src/types';
+export { ShortcutsProvider, type ShortcutsProviderProps } from './src/shortcuts_provider';

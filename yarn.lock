@@ -9695,6 +9695,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/unified-shortcuts@link:src/platform/packages/shared/kbn-unified-shortcuts":
+  version "0.0.0"
+  uid ""
+
 "@kbn/unified-tabs-examples-plugin@link:examples/unified_tabs_examples":
   version "0.0.0"
   uid ""

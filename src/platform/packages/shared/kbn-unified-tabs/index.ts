@@ -18,6 +18,7 @@ export { TabStatus, TabsEventName } from './src/types';
 export { TabsEventDataKeys } from './src/event_data_keys';
 export {
   TabbedContent as UnifiedTabs,
+  type TabbedContentApi as UnifiedTabsRef,
   type TabbedContentProps as UnifiedTabsProps,
 } from './src/components/tabbed_content';
 export { useNewTabProps } from './src/hooks/use_new_tab_props';

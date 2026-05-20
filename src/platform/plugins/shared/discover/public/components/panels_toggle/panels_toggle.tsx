@@ -7,28 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import useObservable from 'react-use/lib/useObservable';
 import type { BehaviorSubject } from 'rxjs';
 import { useIsWithinBreakpoints } from '@elastic/eui';
 import { IconButtonGroup } from '@kbn/shared-ux-button-toolbar';
-import { setChartHidden, setTableHidden } from '@kbn/discover-utils';
-import { useAppStateSelector } from '../../application/main/state_management/redux';
 import type { SidebarToggleState } from '../../application/types';
-import {
-  internalStateActions,
-  useCurrentTabAction,
-  useInternalStateDispatch,
-} from '../../application/main/state_management/redux';
-import { useDiscoverServices } from '../../hooks/use_discover_services';
-
-const disabledCollapsingTooltip = i18n.translate(
-  'discover.panelsToggle.atLeastOnePanelMustRemain',
-  {
-    defaultMessage: 'You must keep at least one area visible',
-  }
-);
+import { usePanelsToggleActions } from './use_panels_toggle_actions';
 
 export interface PanelsToggleProps {
   sidebarToggleState$: BehaviorSubject<SidebarToggleState>;
@@ -66,11 +51,9 @@ const getSidebarButton = ({
 const getChartButton = ({
   isHidden,
   toggleChart,
-  isDisabled,
 }: {
   isHidden: boolean;
   toggleChart: () => void;
-  isDisabled?: boolean;
 }) => {
   const label = isHidden
     ? i18n.translate('discover.panelsToggle.showChartButton', {
@@ -86,8 +69,7 @@ const getChartButton = ({
     'data-test-subj': isHidden ? 'dscShowHistogramButton' : 'dscHideHistogramButton',
     'aria-expanded': !isHidden,
     'aria-controls': 'unifiedHistogramCollapsablePanel',
-    isDisabled,
-    toolTipContent: isDisabled ? disabledCollapsingTooltip : label,
+    toolTipContent: label,
     onClick: toggleChart,
   };
 };
@@ -95,11 +77,9 @@ const getChartButton = ({
 const getTableButton = ({
   isHidden,
   toggleTable,
-  isDisabled,
 }: {
   isHidden: boolean;
   toggleTable: () => void;
-  isDisabled?: boolean;
 }) => {
   const label = isHidden
     ? i18n.translate('discover.panelsToggle.showTableButton', {
@@ -114,8 +94,7 @@ const getTableButton = ({
     iconType: isHidden ? 'transitionBottomIn' : 'transitionBottomOut',
     'data-test-subj': isHidden ? 'dscShowTableButton' : 'dscHideTableButton',
     'aria-expanded': !isHidden,
-    isDisabled,
-    toolTipContent: isDisabled ? disabledCollapsingTooltip : label,
+    toolTipContent: label,
     onClick: toggleTable,
   };
 };
@@ -133,33 +112,9 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
   omitTableButton = false,
   dataTestSubjSuffix,
 }) => {
-  const { storage } = useDiscoverServices();
-  const dispatch = useInternalStateDispatch();
-  const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
-  const isChartHidden = useAppStateSelector((state) => Boolean(state.hideChart));
-  const isTableHidden = useAppStateSelector((state) => Boolean(state.hideTable));
-  const sidebarToggleState = useObservable(sidebarToggleState$, sidebarToggleState$.getValue());
-  const isSidebarHidden = sidebarToggleState.isCollapsed;
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
-
-  const onToggleChart = useCallback(() => {
-    const hideChart = !isChartHidden;
-    setChartHidden(storage, 'discover', hideChart);
-    dispatch(updateAppState({ appState: { hideChart } }));
-  }, [dispatch, isChartHidden, storage, updateAppState]);
-
-  const onToggleTable = useCallback(() => {
-    const hideTable = !isTableHidden;
-    setTableHidden(storage, 'discover', hideTable);
-    dispatch(updateAppState({ appState: { hideTable } }));
-  }, [dispatch, isTableHidden, storage, updateAppState]);
-
-  const onToggleSidebar = useCallback(() => {
-    sidebarToggleState.toggle?.(!isSidebarHidden);
-  }, [isSidebarHidden, sidebarToggleState]);
-
-  const disableHideChart = isTableHidden && !isChartHidden;
-  const disableHideTable = isChartHidden && !isTableHidden;
+  const { isChartHidden, isSidebarHidden, isTableHidden, toggleChart, toggleSidebar, toggleTable } =
+    usePanelsToggleActions({ sidebarToggleState$ });
 
   const buttons = [];
 
@@ -167,7 +122,7 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
     buttons.push(
       getSidebarButton({
         isHidden: isSidebarHidden,
-        toggleSidebar: onToggleSidebar,
+        toggleSidebar,
       })
     );
   }
@@ -176,8 +131,7 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
     buttons.push(
       getChartButton({
         isHidden: isChartHidden,
-        toggleChart: onToggleChart,
-        isDisabled: disableHideChart,
+        toggleChart,
       })
     );
   }
@@ -186,8 +140,7 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
     buttons.push(
       getTableButton({
         isHidden: isTableHidden,
-        toggleTable: onToggleTable,
-        isDisabled: disableHideTable,
+        toggleTable,
       })
     );
   }

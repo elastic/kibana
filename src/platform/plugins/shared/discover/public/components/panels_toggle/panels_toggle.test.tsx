@@ -170,36 +170,54 @@ describe('Panels toggle component', () => {
     expect(screen.queryByTestId('dscShowTableButton')).not.toBeInTheDocument();
   });
 
-  it('should disable chart collapse when table is collapsed', async () => {
+  it('should auto-show the table when hiding the chart would collapse both panels', async () => {
+    const user = userEvent.setup();
     const sidebarToggleState$ = new BehaviorSubject<SidebarToggleState>({
       isCollapsed: false,
       toggle: jest.fn(),
     });
-    await renderComponent({
+    const toolkit = await renderComponent({
       hideChart: false,
       hideTable: true,
       omitChartButton: false,
       omitTableButton: false,
       sidebarToggleState$,
     });
+    const storageSetSpy = jest.spyOn(toolkit.services.storage, 'set');
 
-    expect(screen.getByTestId('dscHideHistogramButton')).toBeDisabled();
+    await user.click(screen.getByTestId('dscHideHistogramButton'));
+
+    await waitFor(() => {
+      expect(storageSetSpy).toHaveBeenCalledWith('discover:chartHidden', true);
+      expect(storageSetSpy).toHaveBeenCalledWith('discover:tableHidden', false);
+      expect(toolkit.getCurrentTab().appState.hideChart).toBe(true);
+      expect(toolkit.getCurrentTab().appState.hideTable).toBe(false);
+    });
   });
 
-  it('should disable table collapse when chart is collapsed', async () => {
+  it('should auto-show the chart when hiding the table would collapse both panels', async () => {
+    const user = userEvent.setup();
     const sidebarToggleState$ = new BehaviorSubject<SidebarToggleState>({
       isCollapsed: false,
       toggle: jest.fn(),
     });
-    await renderComponent({
+    const toolkit = await renderComponent({
       hideChart: true,
       hideTable: false,
       omitChartButton: false,
       omitTableButton: false,
       sidebarToggleState$,
     });
+    const storageSetSpy = jest.spyOn(toolkit.services.storage, 'set');
 
-    expect(screen.getByTestId('dscHideTableButton')).toBeDisabled();
+    await user.click(screen.getByTestId('dscHideTableButton'));
+
+    await waitFor(() => {
+      expect(storageSetSpy).toHaveBeenCalledWith('discover:chartHidden', false);
+      expect(storageSetSpy).toHaveBeenCalledWith('discover:tableHidden', true);
+      expect(toolkit.getCurrentTab().appState.hideChart).toBe(false);
+      expect(toolkit.getCurrentTab().appState.hideTable).toBe(true);
+    });
   });
 
   it('should persist chart visibility when toggled', async () => {

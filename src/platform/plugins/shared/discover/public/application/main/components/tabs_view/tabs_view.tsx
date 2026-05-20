@@ -8,7 +8,9 @@
  */
 
 import React, { useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiResizeObserver } from '@elastic/eui';
+import { LeaderKeyShortcuts } from '@kbn/unified-shortcuts';
 import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
 import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
@@ -25,8 +27,13 @@ import {
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePreviewData } from './use_preview_data';
 import { useAppMenuData } from './use_app_menu_data';
+import { useTabShortcuts } from './use_tab_shortcuts';
 
 const MAX_TABS_COUNT = 25;
+const SHORTCUTS_LEADER_KEY = 't';
+const SHORTCUTS_LEADER_KEY_DESCRIPTION = i18n.translate('discover.tabsView.shortcut.tabModeLabel', {
+  defaultMessage: 'Tab',
+});
 
 export const TabsView = (props: SingleTabViewProps) => {
   const services = useDiscoverServices();
@@ -47,6 +54,8 @@ export const TabsView = (props: SingleTabViewProps) => {
     getAdditionalTabMenuItems,
     topNavMenuItems,
   } = useAppMenuData({ currentDataView });
+
+  const { unifiedTabsRef, shortcuts } = useTabShortcuts();
 
   const onEvent: UnifiedTabsProps['onEBTEvent'] = useCallback(
     (event) => {
@@ -84,6 +93,7 @@ export const TabsView = (props: SingleTabViewProps) => {
       {(resizeRef) => (
         <div ref={resizeRef} className="eui-fullHeight">
           <UnifiedTabs
+            ref={unifiedTabsRef}
             services={services}
             items={items}
             selectedItemId={currentTabId}
@@ -103,6 +113,13 @@ export const TabsView = (props: SingleTabViewProps) => {
               <AppMenuComponent config={topNavMenuItems} isCollapsed={shouldCollapseAppMenu} />
             }
           />
+          {!hideTabsBar && (
+            <LeaderKeyShortcuts
+              leaderKey={SHORTCUTS_LEADER_KEY}
+              leaderKeyDescription={SHORTCUTS_LEADER_KEY_DESCRIPTION}
+              shortcuts={shortcuts}
+            />
+          )}
         </div>
       )}
     </EuiResizeObserver>

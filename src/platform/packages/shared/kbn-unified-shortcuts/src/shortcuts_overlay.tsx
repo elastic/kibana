@@ -1,0 +1,187 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, {
+  type PropsWithChildren,
+  type ReactNode,
+  forwardRef,
+  isValidElement,
+  useImperativeHandle,
+} from 'react';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiPortal,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { useShortcutsLayer, type UseShortcutsLayerOptions } from './use_shortcuts_layer';
+
+/**
+ * Ref methods for {@link ShortcutsOverlay}.
+ */
+export interface ShortcutsOverlayRef {
+  open: () => boolean;
+}
+
+type LayerOptions = Pick<
+  UseShortcutsLayerOptions,
+  'screenReaderHint' | 'screenReaderAnnouncement' | 'shouldOpen'
+>;
+
+type RequiredLayerOptions = Required<Pick<UseShortcutsLayerOptions, 'runAction'>>;
+
+/**
+ * Props for {@link ShortcutsOverlay}.
+ */
+export interface ShortcutsOverlayProps extends LayerOptions, RequiredLayerOptions {
+  items: ReactNode[];
+}
+
+/**
+ * Props for {@link ShortcutsOverlayItem}.
+ */
+export interface ShortcutsOverlayItemProps {
+  badgeColor?: 'primary' | 'hollow';
+  badgeLabel: string;
+  description: string;
+}
+
+const getOverlayItemKey = (item: ReactNode, index: number) => {
+  return isValidElement(item) && item.key != null ? item.key : index;
+};
+
+const ShortcutsOverlayFlexItem = ({ children }: PropsWithChildren) => {
+  return (
+    <EuiFlexItem
+      grow={false}
+      css={css`
+        align-self: stretch;
+        display: flex;
+        align-items: center;
+      `}
+    >
+      {children}
+    </EuiFlexItem>
+  );
+};
+
+/**
+ * Renders the shared shortcuts overlay container and item layout.
+ */
+export const ShortcutsOverlay = forwardRef<ShortcutsOverlayRef, ShortcutsOverlayProps>(
+  ({ items, screenReaderHint, screenReaderAnnouncement, shouldOpen, runAction }, ref) => {
+    const { euiTheme } = useEuiTheme();
+    const { isVisible, liveAnnouncement, open } = useShortcutsLayer({
+      instanceIdLabel: 'shortcuts-overlay',
+      screenReaderHint,
+      screenReaderAnnouncement,
+      shouldOpen,
+      runAction,
+    });
+
+    useImperativeHandle(ref, () => ({ open }), [open]);
+
+    return (
+      <>
+        {liveAnnouncement}
+        <EuiPortal>
+          <EuiPanel
+            aria-hidden="true"
+            paddingSize="m"
+            css={css`
+              position: fixed;
+              right: ${euiTheme.size.l};
+              bottom: ${euiTheme.size.l};
+              z-index: ${euiTheme.levels.toast};
+              pointer-events: none;
+              max-width: calc(100vw - ${euiTheme.size.l} * 2);
+              opacity: ${isVisible ? 1 : 0};
+              transform: translateY(${isVisible ? '0' : euiTheme.size.s});
+              transition: opacity ${euiTheme.animation.fast} ${euiTheme.animation.resistance},
+                transform ${euiTheme.animation.fast} ${euiTheme.animation.resistance};
+              will-change: opacity, transform;
+            `}
+          >
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
+              {items.map((item, index) => (
+                <ShortcutsOverlayFlexItem key={getOverlayItemKey(item, index)}>
+                  {item}
+                </ShortcutsOverlayFlexItem>
+              ))}
+
+              {items.length > 0 && (
+                <ShortcutsOverlayFlexItem>
+                  <ShortcutsOverlayDivider />
+                </ShortcutsOverlayFlexItem>
+              )}
+
+              <ShortcutsOverlayFlexItem>
+                <EuiBadge>
+                  {i18n.translate('unifiedShortcuts.shortcutsOverlay.escapeLabel', {
+                    defaultMessage: 'esc',
+                  })}
+                </EuiBadge>
+              </ShortcutsOverlayFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </EuiPortal>
+      </>
+    );
+  }
+);
+
+ShortcutsOverlay.displayName = 'ShortcutsOverlay';
+
+/**
+ * Renders a badge-plus-description item within a shortcuts overlay.
+ */
+export const ShortcutsOverlayItem = ({
+  badgeColor = 'hollow',
+  badgeLabel,
+  description,
+}: ShortcutsOverlayItemProps) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
+      <EuiBadge color={badgeColor}>{badgeLabel}</EuiBadge>
+      <EuiText
+        size="xs"
+        css={css`
+          white-space: nowrap;
+          font-weight: ${euiTheme.font.weight.medium};
+        `}
+      >
+        {description}
+      </EuiText>
+    </EuiFlexGroup>
+  );
+};
+
+/**
+ * Renders a divider between items in a shortcuts overlay.
+ */
+export const ShortcutsOverlayDivider = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <div
+      css={css`
+        width: ${euiTheme.border.width.thin};
+        height: 100%;
+        background-color: ${euiTheme.colors.borderBasePlain};
+      `}
+    />
+  );
+};
