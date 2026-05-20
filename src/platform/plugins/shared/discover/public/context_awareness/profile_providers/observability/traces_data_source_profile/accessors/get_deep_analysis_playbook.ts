@@ -58,7 +58,8 @@ export const getDeepAnalysisPlaybook: DataSourceProfileProvider['profile']['getD
           `This dataset is OTel traces. Deep analysis means latency (p50/p95/p99 of ${OTEL_DURATION}), ` +
           `throughput grouped by ${SERVICE_NAME_FIELD} and ${OTEL_SPAN_KIND}, ` +
           `and error rate via ${OTEL_STATUS_CODE}='ERROR'. ` +
-          `Group by ${SERVICE_NAME_FIELD} then by ${OTEL_SPAN_KIND}; never group by trace/span ids.`,
+          `Group by ${SERVICE_NAME_FIELD} then ${SPAN_NAME_FIELD} or ${OTEL_SPAN_KIND}; ` +
+          `never group by trace/span ids.`,
         interestingSignals: [
           'latency outliers per service (p99 vs p50 spread)',
           `spans where ${OTEL_STATUS_CODE}=ERROR`,
