@@ -15,11 +15,13 @@ import type {
   ConnectorStep,
   EsWorkflowExecution,
   EsWorkflowStepExecution,
+  StackFrame,
   WorkflowYaml,
 } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
+import { buildStepExecutionId } from '../../utils';
 import { StepIoService } from '../step_io_service';
 import { WorkflowExecutionState } from '../workflow_execution_state';
 
@@ -1324,6 +1326,112 @@ describe('StepIoService', () => {
         ['exec-b'],
         ['id', 'output', 'workflowRunId']
       );
+    });
+
+    it('rehydrates outputs referenced by the active foreach source expression', async () => {
+      const workflow: WorkflowYaml = {
+        name: 'Foreach source dependency',
+        version: '1',
+        description: 'test',
+        enabled: true,
+        triggers: [],
+        steps: [
+          {
+            name: 'get_active_alerts',
+            type: 'console',
+            with: { message: 'alerts' },
+          } as ConnectorStep,
+          {
+            name: 'foreach_alert',
+            type: 'foreach',
+            foreach: '{{steps.get_active_alerts.output.hits.hits}}',
+            steps: [
+              {
+                name: 'create_new_case',
+                type: 'console',
+                with: { message: 'case' },
+              } as ConnectorStep,
+              {
+                name: 'add_alert_to_case',
+                type: 'console',
+                with: {
+                  message: 'case={{steps.create_new_case.output.id}} alert={{foreach.item._id}}',
+                },
+              } as ConnectorStep,
+            ],
+          },
+        ],
+      };
+      const graph = WorkflowGraph.fromWorkflowDefinition(workflow);
+      const addAlertNode = graph.topologicalOrder
+        .map((nodeId) => graph.getNode(nodeId))
+        .find((n) => n.stepId === 'add_alert_to_case')!;
+
+      const { state, service, stepExecutionRepository } = buildHarness({ evictionMinBytes: 0 });
+      const alertsOutput = { hits: { hits: [{ _id: 'alert-1' }] } };
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'exec-alerts',
+        'get_active_alerts',
+        alertsOutput,
+        1,
+        'connector'
+      );
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'exec-case',
+        'create_new_case',
+        { id: 'case-1' },
+        1,
+        'connector'
+      );
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+
+      const scopeStack: StackFrame[] = [
+        {
+          stepId: 'foreach_alert',
+          nestedScopes: [
+            {
+              nodeId: 'enterForeach_foreach_alert',
+              nodeType: 'enter-foreach',
+              scopeId: '0',
+            },
+          ],
+        },
+      ];
+      const foreachExecutionId = buildStepExecutionId(
+        state.getWorkflowExecutionId(),
+        'foreach_alert',
+        []
+      );
+      state.updateWorkflowExecution({ scopeStack });
+      state.upsertStep({
+        id: foreachExecutionId,
+        stepId: 'foreach_alert',
+        stepType: 'foreach',
+        status: ExecutionStatus.RUNNING,
+        state: { index: 0, total: 1 },
+      } as Partial<EsWorkflowStepExecution>);
+      service.setStepInput(foreachExecutionId, {
+        foreach: '{{steps.get_active_alerts.output.hits.hits}}',
+      });
+
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+        { id: 'exec-alerts', output: alertsOutput } as unknown as EsWorkflowStepExecution,
+        { id: 'exec-case', output: { id: 'case-1' } } as unknown as EsWorkflowStepExecution,
+      ]);
+
+      await service.prepareForRead({
+        node: addAlertNode,
+        predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
+      });
+
+      const rehydratedIds = stepExecutionRepository.getStepExecutionsByIds.mock.calls[0][0];
+      expect(rehydratedIds).toEqual(expect.arrayContaining(['exec-alerts', 'exec-case']));
+      expect(rehydratedIds).toHaveLength(2);
     });
 
     it('falls back to all predecessors when dynamic access is detected', async () => {
