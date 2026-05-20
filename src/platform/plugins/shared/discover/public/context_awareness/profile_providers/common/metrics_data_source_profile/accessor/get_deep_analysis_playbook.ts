@@ -19,10 +19,10 @@ export const getDeepAnalysisPlaybook: MetricsExperienceDataSourceProfileProvider
       'This dataset is TSDB metrics queried via the ES|QL TS command. ALL ' +
       'follow-up queries against this index MUST start with `TS <index>` ' +
       '(never `FROM <index>`). FIRST run `TS <index> | TS_INFO` to discover ' +
-      'metric_name (the numeric series available) and dimension_fields ' +
-      '(valid groupings). Then aggregate with ' +
+      'metric_name, metric_type, and dimension_fields. Then aggregate with ' +
       '`TS <index> | STATS <agg>(<metric>) BY <dimension>, BUCKET(@timestamp, ...)`. ' +
-      'Avoid raw row enumeration.',
+      'Choose <agg> from metric_type — counter: RATE or SUM; gauge: AVG, MAX, ' +
+      'MIN, or PERCENTILE; histogram: PERCENTILE. Avoid raw row enumeration.',
     interestingSignals: [
       'metrics with the largest rate-of-change in the time window',
       'dimensions with diverging trends for the same metric',
