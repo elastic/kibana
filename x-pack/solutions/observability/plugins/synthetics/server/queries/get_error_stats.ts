@@ -66,41 +66,83 @@ export async function getErrorStats({
 }: GetErrorStatsParams): Promise<ErrorStats> {
   const { prevFrom, prevTo } = getPreviousPeriod(from, to);
 
+  // Always-on filters (data shape, not user-driven)
   const baseFilters: QueryDslQueryContainer[] = [
     SUMMARY_FILTER as QueryDslQueryContainer,
     EXCLUDE_RUN_ONCE_FILTER as QueryDslQueryContainer,
   ];
 
-  if (monitorTypes?.length) {
-    baseFilters.push({ terms: { 'monitor.type': monitorTypes } });
-  }
-  if (locations?.length) {
-    baseFilters.push({ terms: { 'observer.geo.name': locations } });
-  }
-  if (tags?.length) {
-    baseFilters.push({ terms: { tags } });
-  }
-  if (projects?.length) {
-    baseFilters.push({ terms: { 'monitor.project.id': projects } });
-  }
+  // User-driven filters that the insights cards write to.
+  // We split these so individual breakdown aggregations can ignore their own
+  // dimension (e.g. the monitor-type breakdown shouldn't be filtered by the
+  // monitorTypes selection, otherwise the user only ever sees the type they
+  // just clicked and has no way to pick another).
+  const monitorTypeFilter: QueryDslQueryContainer | null = monitorTypes?.length
+    ? { terms: { 'monitor.type': monitorTypes } }
+    : null;
+  const tagsFilter: QueryDslQueryContainer | null = tags?.length ? { terms: { tags } } : null;
+  const locationFilter: QueryDslQueryContainer | null = locations?.length
+    ? { terms: { 'observer.geo.name': locations } }
+    : null;
+  const projectFilter: QueryDslQueryContainer | null = projects?.length
+    ? { terms: { 'monitor.project.id': projects } }
+    : null;
+  const queryFilter: QueryDslQueryContainer | null = query
+    ? (getQueryFilters(query) as QueryDslQueryContainer)
+    : null;
 
-  const must: QueryDslQueryContainer[] = [];
-  if (query) {
-    must.push(getQueryFilters(query) as QueryDslQueryContainer);
-  }
+  // Filters that always apply at the top level — used for caching and as the
+  // common denominator for the per-period filter aggregations below.
+  const topLevelFilter: QueryDslQueryContainer[] = [
+    ...baseFilters,
+    { range: { '@timestamp': { gte: prevFrom, lte: to } } },
+  ];
+
+  // Helper: build a bool.must list combining a date-range filter with an
+  // arbitrary subset of the user filters. Returns a single QueryDslQueryContainer
+  // suitable as the body of a `filter` aggregation.
+  const buildPeriodFilter = (
+    range: QueryDslQueryContainer,
+    filters: Array<QueryDslQueryContainer | null>
+  ): QueryDslQueryContainer => {
+    const must = [range, ...filters.filter((f): f is QueryDslQueryContainer => f !== null)];
+    return must.length === 1 ? must[0] : { bool: { must } };
+  };
+
+  const currentRange: QueryDslQueryContainer = {
+    range: { '@timestamp': { gte: from, lte: to } },
+  };
+  const previousRange: QueryDslQueryContainer = {
+    range: { '@timestamp': { gte: prevFrom, lte: prevTo } },
+  };
+
+  // All user filters — used for the main current/previous slices.
+  const allUserFilters = [
+    monitorTypeFilter,
+    tagsFilter,
+    locationFilter,
+    projectFilter,
+    queryFilter,
+  ];
+
+  // User filters excluding the monitor-type dimension — used by the
+  // by_monitor_type breakdown.
+  const userFiltersExcludingMonitorType = [tagsFilter, locationFilter, projectFilter, queryFilter];
+
+  // User filters excluding the tags dimension — used by the by_tag breakdown.
+  const userFiltersExcludingTags = [monitorTypeFilter, locationFilter, projectFilter, queryFilter];
 
   const result = await syntheticsEsClient.search(
     {
       size: 0,
       query: {
         bool: {
-          filter: [...baseFilters, { range: { '@timestamp': { gte: prevFrom, lte: to } } }],
-          ...(must.length ? { must } : {}),
+          filter: topLevelFilter,
         },
       },
       aggs: {
         current: {
-          filter: { range: { '@timestamp': { gte: from, lte: to } } },
+          filter: buildPeriodFilter(currentRange, allUserFilters),
           aggs: {
             down_checks: {
               filter: { term: { 'monitor.status': 'down' } },
@@ -162,14 +204,6 @@ export async function getErrorStats({
                 },
               },
             },
-            by_tag: {
-              terms: { field: 'tags', size: 20 },
-              aggs: {
-                down: {
-                  filter: { term: { 'monitor.status': 'down' } },
-                },
-              },
-            },
             status_codes: {
               filter: { term: { 'monitor.status': 'down' } },
               aggs: {
@@ -178,7 +212,15 @@ export async function getErrorStats({
                 },
               },
             },
-            by_monitor_type: {
+          },
+        },
+        // Breakdown for the "Error rate by monitor type" card. Lives outside
+        // `current` so we can apply every user filter EXCEPT monitorTypes; the
+        // card must keep showing all types so the user can refine further.
+        by_monitor_type: {
+          filter: buildPeriodFilter(currentRange, userFiltersExcludingMonitorType),
+          aggs: {
+            buckets: {
               terms: { field: 'monitor.type', size: 10 },
               aggs: {
                 down: {
@@ -188,8 +230,23 @@ export async function getErrorStats({
             },
           },
         },
+        // Same pattern for tags — apply every user filter EXCEPT tags so the
+        // user can keep clicking other tags after picking one.
+        by_tag: {
+          filter: buildPeriodFilter(currentRange, userFiltersExcludingTags),
+          aggs: {
+            buckets: {
+              terms: { field: 'tags', size: 20 },
+              aggs: {
+                down: {
+                  filter: { term: { 'monitor.status': 'down' } },
+                },
+              },
+            },
+          },
+        },
         previous: {
-          filter: { range: { '@timestamp': { gte: prevFrom, lte: prevTo } } },
+          filter: buildPeriodFilter(previousRange, allUserFilters),
           aggs: {
             down_checks: {
               filter: { term: { 'monitor.status': 'down' } },
@@ -250,7 +307,7 @@ export async function getErrorStats({
     count: b.doc_count as number,
   }));
 
-  const tagBuckets = aggs?.current?.by_tag?.buckets ?? [];
+  const tagBuckets = aggs?.by_tag?.buckets?.buckets ?? [];
   const tagStats: TagErrorStat[] = tagBuckets
     .filter((b: any) => b.down?.doc_count > 0)
     .map((b: any) => {
@@ -271,7 +328,7 @@ export async function getErrorStats({
     count: b.doc_count as number,
   }));
 
-  const monitorTypeBuckets = aggs?.current?.by_monitor_type?.buckets ?? [];
+  const monitorTypeBuckets = aggs?.by_monitor_type?.buckets?.buckets ?? [];
   const monitorTypeStats: MonitorTypeStat[] = monitorTypeBuckets
     .map((b: any) => {
       const total = b.doc_count as number;

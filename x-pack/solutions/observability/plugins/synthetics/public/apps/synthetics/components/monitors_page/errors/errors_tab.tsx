@@ -43,7 +43,11 @@ export const ErrorsTab = () => {
           <SearchField />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <FilterGroup handleFilterChange={handleFilterChange} />
+          {/* Frequency (`schedules`) is omitted: it filters monitor configs
+              by their saved schedule, but the errors data we're showing here
+              is ping-based and doesn't carry that field, so the filter would
+              be a no-op. Re-enable once schedule-based ping filtering exists. */}
+          <FilterGroup handleFilterChange={handleFilterChange} excludeFields={['schedules']} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />

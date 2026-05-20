@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -36,32 +36,27 @@ export const ErrorInsightsPanel = ({
   const urlParams = useGetUrlParams();
   const { refreshApp } = useContext(SyntheticsRefreshContext);
 
-  const filterByTag = useCallback(
-    (tag: string) => {
-      const current = urlParams.tags ?? [];
-      const already = Array.isArray(current) ? current.includes(tag) : current === tag;
-      if (!already) {
-        const newTags = Array.isArray(current) ? [...current, tag] : [tag];
-        updateUrl({ tags: JSON.stringify(newTags) } as any);
-        refreshApp();
-      }
+  const toggleArrayFilter = useCallback(
+    (key: 'tags' | 'monitorTypes', value: string) => {
+      const current = urlParams[key] ?? [];
+      const asArray = Array.isArray(current) ? current : current ? [current] : [];
+      const next = asArray.includes(value)
+        ? asArray.filter((v) => v !== value)
+        : [...asArray, value];
+      updateUrl({ [key]: next.length ? JSON.stringify(next) : '' });
+      refreshApp();
     },
-    [urlParams.tags, updateUrl, refreshApp]
+    [urlParams, updateUrl, refreshApp]
   );
 
-  const filterByMonitorType = useCallback(
-    (monitorType: string) => {
-      const current = urlParams.monitorTypes ?? [];
-      const already = Array.isArray(current)
-        ? current.includes(monitorType)
-        : current === monitorType;
-      if (!already) {
-        const newTypes = Array.isArray(current) ? [...current, monitorType] : [monitorType];
-        updateUrl({ monitorTypes: JSON.stringify(newTypes) } as any);
-        refreshApp();
-      }
-    },
-    [urlParams.monitorTypes, updateUrl, refreshApp]
+  const toggleTag = useCallback(
+    (tag: string) => toggleArrayFilter('tags', tag),
+    [toggleArrayFilter]
+  );
+
+  const toggleMonitorType = useCallback(
+    (monitorType: string) => toggleArrayFilter('monitorTypes', monitorType),
+    [toggleArrayFilter]
   );
 
   const filterByQuery = useCallback(
@@ -70,6 +65,12 @@ export const ErrorInsightsPanel = ({
       refreshApp();
     },
     [updateUrl, refreshApp]
+  );
+
+  const selectedTags = useMemo(() => toStringArray(urlParams.tags), [urlParams.tags]);
+  const selectedMonitorTypes = useMemo(
+    () => toStringArray(urlParams.monitorTypes),
+    [urlParams.monitorTypes]
   );
 
   if (loading && !insights) {
@@ -111,10 +112,14 @@ export const ErrorInsightsPanel = ({
           <FailingDomainsCard domains={insights.failingDomains} onFilter={filterByQuery} />
         </EuiFlexItem>
         <EuiFlexItem grow={1} style={{ minWidth: 180 }}>
-          <MonitorTypeCard types={insights.monitorTypeStats} onFilter={filterByMonitorType} />
+          <MonitorTypeCard
+            types={insights.monitorTypeStats}
+            onFilter={toggleMonitorType}
+            selected={selectedMonitorTypes}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
-          <TagBreakdownCard tags={insights.tagStats} onFilter={filterByTag} />
+          <TagBreakdownCard tags={insights.tagStats} onFilter={toggleTag} selected={selectedTags} />
         </EuiFlexItem>
         {hasStatusCodes && (
           <EuiFlexItem grow={1} style={{ minWidth: 180 }}>
@@ -130,8 +135,13 @@ const TYPE_ICONS: Record<string, string> = {
   http: 'globe',
   browser: 'videoPlayer',
   tcp: 'link',
-  icmp: 'heartbeat',
+  icmp: 'heart',
 };
+
+function toStringArray(value: string | string[] | undefined): string[] {
+  if (!value) return [];
+  return Array.isArray(value) ? value : [value];
+}
 
 const MAX_VISIBLE_TAGS = 6;
 
@@ -148,9 +158,11 @@ const clickableRow = css`
 const MonitorTypeCard = ({
   types,
   onFilter,
+  selected,
 }: {
   types: Array<{ monitorType: string; downChecks: number; totalChecks: number; errorRate: number }>;
   onFilter: (type: string) => void;
+  selected: string[];
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -169,6 +181,7 @@ const MonitorTypeCard = ({
       <EuiSpacer size="xs" />
       {types.map((t) => {
         const pct = (t.errorRate * 100).toFixed(0);
+        const isSelected = selected.includes(t.monitorType);
         const barColor =
           t.errorRate >= 0.5
             ? euiTheme.colors.danger
@@ -176,7 +189,11 @@ const MonitorTypeCard = ({
             ? euiTheme.colors.warning
             : euiTheme.colors.success;
         return (
-          <EuiToolTip key={t.monitorType} content={FILTER_BY_TYPE_HINT}>
+          <EuiToolTip
+            key={t.monitorType}
+            display="block"
+            content={isSelected ? CLICK_TO_REMOVE_FILTER : FILTER_BY_TYPE_HINT}
+          >
             <EuiFlexGroup
               alignItems="center"
               gutterSize="s"
@@ -184,6 +201,9 @@ const MonitorTypeCard = ({
               css={css`
                 ${clickableRow};
                 margin-bottom: 6px;
+                ${isSelected
+                  ? `background: ${euiTheme.colors.lightestShade}; outline: 1px solid ${euiTheme.colors.primary};`
+                  : ''}
               `}
               onClick={() => onFilter(t.monitorType)}
             >
@@ -327,9 +347,11 @@ const FailingDomainsCard = ({
 const TagBreakdownCard = ({
   tags,
   onFilter,
+  selected,
 }: {
   tags: Array<{ tag: string; downChecks: number; totalChecks: number; errorRate: number }>;
   onFilter: (tag: string) => void;
+  selected: string[];
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -366,17 +388,27 @@ const TagBreakdownCard = ({
       <EuiFlexGroup gutterSize="s" wrap responsive={false}>
         {tags.slice(0, MAX_VISIBLE_TAGS).map((t) => {
           const pct = (t.errorRate * 100).toFixed(0);
-          const badgeColor =
-            t.errorRate >= 0.5 ? 'danger' : t.errorRate >= 0.2 ? 'warning' : 'hollow';
+          const isSelected = selected.includes(t.tag);
+          const badgeColor = isSelected
+            ? 'primary'
+            : t.errorRate >= 0.5
+            ? 'danger'
+            : t.errorRate >= 0.2
+            ? 'warning'
+            : 'hollow';
           return (
             <EuiFlexItem key={t.tag} grow={false}>
               <EuiToolTip
-                content={`${t.downChecks} errors / ${t.totalChecks} checks (${pct}%) — ${CLICK_TO_FILTER}`}
+                content={`${t.downChecks} errors / ${t.totalChecks} checks (${pct}%) — ${
+                  isSelected ? CLICK_TO_REMOVE_FILTER : CLICK_TO_FILTER
+                }`}
               >
                 <EuiBadge
                   color={badgeColor}
                   onClick={() => onFilter(t.tag)}
                   onClickAriaLabel={`${FILTER_BY_TAG_HINT}: ${t.tag}`}
+                  iconType={isSelected ? 'check' : undefined}
+                  iconSide="left"
                   css={css`
                     cursor: pointer;
                   `}
@@ -435,7 +467,7 @@ const StatusCodesCard = ({
         const codeColor =
           c.statusCode >= 500 ? 'danger' : c.statusCode >= 400 ? 'warning' : 'hollow';
         return (
-          <EuiToolTip key={c.statusCode} content={FILTER_BY_CODE_HINT}>
+          <EuiToolTip key={c.statusCode} display="block" content={FILTER_BY_CODE_HINT}>
             <EuiFlexGroup
               alignItems="center"
               gutterSize="s"
@@ -553,7 +585,7 @@ const TITLE = i18n.translate('xpack.synthetics.errorInsights.title', {
 });
 
 const MONITOR_TYPE_TITLE = i18n.translate('xpack.synthetics.errorInsights.monitorType', {
-  defaultMessage: 'Errors by monitor type',
+  defaultMessage: 'Error rate by monitor type',
 });
 
 const DOMAINS_TITLE = i18n.translate('xpack.synthetics.errorInsights.failingDomains', {
@@ -579,6 +611,13 @@ const NO_TAGS = i18n.translate('xpack.synthetics.errorInsights.noTags', {
 const CLICK_TO_FILTER = i18n.translate('xpack.synthetics.errorInsights.clickToFilter', {
   defaultMessage: 'Click to filter',
 });
+
+const CLICK_TO_REMOVE_FILTER = i18n.translate(
+  'xpack.synthetics.errorInsights.clickToRemoveFilter',
+  {
+    defaultMessage: 'Click to remove filter',
+  }
+);
 
 const FILTER_BY_TAG_HINT = i18n.translate('xpack.synthetics.errorInsights.filterByTag', {
   defaultMessage: 'Filter by tag',

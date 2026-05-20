@@ -127,6 +127,7 @@ export const getQueryFilters = (query: string) => ({
       'monitor.project.id',
       'error.message',
       'url.domain',
+      'http.response.status_code',
     ],
   },
 });
