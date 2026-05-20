@@ -340,7 +340,8 @@
           "id": "50e3bd70-ef1b-11eb-ad71-7de7959be71c",
           "type": "detection"
         }
-      ]
+      ],
+      "version": 1
     },
     "schedule": {
       "interval": "1m"
@@ -487,7 +488,8 @@
     "alertTypeId": "siem.signals",
     "consumer": "alertsFixture",
     "params": {
-      "type": "threat_match"
+      "type": "threat_match",
+      "version": 1
     },
     "schedule": {
       "interval": "1m"
@@ -529,7 +531,8 @@
     "consumer": "alertsFixture",
     "params": {
       "type": "threat_match",
-      "threatIndicatorPath": "custom.indicator.path"
+      "threatIndicatorPath": "custom.indicator.path",
+      "version": 1
     },
     "schedule": {
       "interval": "1m"
@@ -570,7 +573,8 @@
     "alertTypeId": "siem.signals",
     "consumer": "alertsFixture",
     "params": {
-      "type": "eql"
+      "type": "eql",
+      "version": 1
     },
     "schedule": {
       "interval": "1m"
@@ -814,7 +818,8 @@
     "params": {
       "type": "eql",
       "risk_score": 90,
-      "severity": "critical"
+      "severity": "critical",
+      "version": 1
     },
     "schedule": {
       "interval": "1m"
@@ -1284,7 +1289,7 @@
       "lastExecutionDate": "2022-08-24T19:05:49.817Z",
       "lastDuration": 60000,
       "warning": {
-        "reason": "warning reason",
+        "reason": "ruleExecution",
         "message": "warning message"
       }
     },
