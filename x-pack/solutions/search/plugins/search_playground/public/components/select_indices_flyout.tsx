@@ -157,6 +157,7 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
           showIcons: true,
           bordered: true,
           onFocusBadge: false,
+          paddingSize: 's',
         }}
         isLoading={isIndicesLoading}
       >

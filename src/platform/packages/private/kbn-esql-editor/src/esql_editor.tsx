@@ -40,6 +40,8 @@ import { QuerySource } from '@kbn/esql-types';
 import { isMac } from '@kbn/shared-ux-utility';
 import { useLookupIndexCommand } from './lookup_join';
 import { useCommentToEsql, useGhostLineHint } from './comment_to_esql';
+import { useSuggestFix } from './suggest_fix/use_suggest_fix';
+import { useEditorAiStyle } from './editor_ai.styles';
 import { useFieldsBrowser } from './resource_browser/use_fields_browser';
 import { EditorFooter } from './editor_footer';
 import { QuickSearchVisor } from './editor_visor';
@@ -552,8 +554,9 @@ const ESQLEditorInternal = function ESQLEditor({
   // ghost hint when generation starts; populated below by useGhostLineHint.
   const clearGhostHintRef = useRef<() => void>(() => {});
 
+  const editorAiStyle = useEditorAiStyle();
+
   const {
-    commentToEsqlStyle,
     generateFromComment: onGenerateFromComment,
     isReviewActiveRef,
     isGeneratingRef,
@@ -618,6 +621,14 @@ const ESQLEditorInternal = function ESQLEditor({
       },
     });
 
+  useSuggestFix({
+    editorRef,
+    editorModel,
+    http: core.http,
+    notifications: core.notifications,
+    isEnabled: isNlToEsqlEnabled,
+  });
+
   const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useLookupIndexCommand(
     editorRef,
     editorModel,
@@ -646,6 +657,7 @@ const ESQLEditorInternal = function ESQLEditor({
     editorCommandDisposables,
     esqlCallbacks,
     telemetryCallbacks,
+    isSuggestFixEnabled: isNlToEsqlEnabled,
     isDisabled,
     measuredEditorWidth,
     setMeasuredEditorWidth,
@@ -662,7 +674,7 @@ const ESQLEditorInternal = function ESQLEditor({
           ${lookupIndexBadgeStyle}
           ${sourcesBadgeStyle}
           ${ghostLineHintStyle}
-          ${commentToEsqlStyle}
+          ${editorAiStyle}
         `}
       />
       {Boolean(editorIsInline) && !hideRunQueryButton ? (
@@ -752,6 +764,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     esqlDepsByModelUri.set(editorModelUriRef.current, {
                       ...esqlCallbacks,
                       telemetry: telemetryCallbacks,
+                      isSuggestFixEnabled: isNlToEsqlEnabled,
                       getEditorMessages: () => editorMessagesRef.current,
                     });
                     await addLookupIndicesDecorator();
@@ -1011,8 +1024,8 @@ const ESQLEditorInternal = function ESQLEditor({
             onClose={() => {
               setIsDataSourceBrowserOpen(false);
               suppressSuggestionsRef.current = true;
-              editorRef.current?.focus();
             }}
+            onCloseComplete={() => editorRef.current?.focus()}
           />,
           document.body
         )}
@@ -1026,7 +1039,11 @@ const ESQLEditorInternal = function ESQLEditor({
             activeSolutionId={activeSolutionId ?? undefined}
             position={fieldsBrowserPosition}
             onSelect={handleFieldsBrowserSelect}
-            onClose={() => setIsFieldsBrowserOpen(false)}
+            onClose={() => {
+              setIsFieldsBrowserOpen(false);
+              suppressSuggestionsRef.current = true;
+            }}
+            onCloseComplete={() => editorRef.current?.focus()}
           />,
           document.body
         )}
