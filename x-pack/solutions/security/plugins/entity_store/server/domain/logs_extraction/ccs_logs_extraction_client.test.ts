@@ -80,7 +80,7 @@ describe('CcsLogsExtractionClient', () => {
     // behavior is exercised by the dedicated tests at the end of this describe block.
     maxTimeWindowSize: '999d',
     maxLogsPerWindow: 0,
-    maxLogsPerWindowCapBehavior: 'defer' as const,
+    maxLogsPerWindowCapBehavior: 'drop' as const,
   };
 
   beforeEach(() => {
