@@ -46,7 +46,7 @@ export function registerCspmUsageCollector(
       const awaitPromiseSafe = async <T>(
         taskName: CloudSecurityUsageCollectorType,
         promise: Promise<T>
-      ) => {
+      ): Promise<T | undefined> => {
         try {
           const val = await promise;
           logger.info(`Cloud Security telemetry: ${taskName} payload was sent successfully`);
@@ -54,7 +54,7 @@ export function registerCspmUsageCollector(
         } catch (error) {
           logger.error(`${taskName} task failed: ${error.message}`);
           logger.error(error.stack);
-          return error;
+          return;
         }
       };
 
