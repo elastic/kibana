@@ -97,7 +97,7 @@ describe('initSpacesOnPostAuthRequestInterceptor', () => {
   });
 
   describe('GET / (kibana root)', () => {
-    it('redirects to last selected space when user opted in and space is accessible', async () => {
+    it('redirects to last selected space when user explicitly opts in and space is accessible', async () => {
       getSpaceId.mockReturnValue(DEFAULT_SPACE_ID);
       getAll.mockResolvedValue([space('default'), space('foo')]);
       getCurrent.mockResolvedValue({

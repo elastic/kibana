@@ -59,7 +59,7 @@ const userProfileUpdateSchema = schema.object({
       ),
       locale: schema.maybe(schema.string({ maxLength: MAX_STRING_FIELD_LENGTH })),
       rememberSelectedSpace: schema.maybe(schema.boolean()),
-      lastSelectedSpaceId: schema.maybe(schema.string({ maxLength: MAX_STRING_FIELD_LENGTH })),
+      lastSelectedSpaceId: schema.nullable(schema.string({ maxLength: MAX_STRING_FIELD_LENGTH })),
     })
   ),
 });

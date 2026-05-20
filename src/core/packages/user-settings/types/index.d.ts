@@ -47,6 +47,10 @@ export interface UserSettingsData {
   contrastMode?: ContrastModeValue;
   locale?: LocaleValue;
   solutionNavOptOut?: boolean;
+  /**
+   * Whether the user wants to be redirected to the last accessed space on login.
+   * @default true
+   */
   rememberSelectedSpace?: boolean;
   /**
    * The id of the last space the user navigated into. Persisted server-side on every

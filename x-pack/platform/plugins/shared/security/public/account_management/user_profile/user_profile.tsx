@@ -706,7 +706,7 @@ function UserSpaceConfigEditor({ formik }: { formik: ReturnType<typeof useUserPr
       >
         <FormField
           label={
-            <EuiText id={rememberSelectedSpaceLabelId} size="s">
+            <EuiText size="s">
               <p>
                 <FormattedMessage
                   id="xpack.security.accountManagement.userProfile.rememberSelectedSpaceSwitchDescription"
@@ -716,8 +716,9 @@ function UserSpaceConfigEditor({ formik }: { formik: ReturnType<typeof useUserPr
             </EuiText>
           }
           as={EuiSwitch}
+          id={rememberSelectedSpaceLabelId}
           name="data.userSettings.rememberSelectedSpace"
-          checked={formik.values.data.userSettings.rememberSelectedSpace || false}
+          checked={formik.values.data.userSettings.rememberSelectedSpace ?? true}
           aria-describedby={rememberSelectedSpaceLabelId}
           onChange={async (e) => {
             await formik.setFieldTouched('data.userSettings.rememberSelectedSpace', true);
@@ -967,7 +968,7 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
             locale:
               data.userSettings?.locale ||
               toCanonicalLocaleId(i18n.getLocale(), getAvailableLocales()),
-            rememberSelectedSpace: data.userSettings?.rememberSelectedSpace || false,
+            rememberSelectedSpace: data.userSettings?.rememberSelectedSpace ?? true,
           },
         }
       : undefined,
