@@ -119,30 +119,30 @@ export function QueriesTable() {
 
   const selectedQuery = useMemo(
     () =>
-      routeQuery?.queryFlyout
-        ? queriesData?.queries.find((q) => q.query.id === routeQuery.queryFlyout) ?? null
+      routeQuery?.selectedItem
+        ? queriesData?.queries.find((q) => q.query.id === routeQuery.selectedItem) ?? null
         : null,
-    [queriesData?.queries, routeQuery?.queryFlyout]
+    [queriesData?.queries, routeQuery?.selectedItem]
   );
 
   const buildQueryRouteParams = useCallback(
-    (queryFlyout?: string) => ({
+    (selectedItem?: string) => ({
       ...(routeQuery?.rangeFrom ? { rangeFrom: routeQuery.rangeFrom } : {}),
       ...(routeQuery?.rangeTo ? { rangeTo: routeQuery.rangeTo } : {}),
-      ...(queryFlyout ? { queryFlyout } : {}),
+      ...(selectedItem ? { selectedItem } : {}),
     }),
     [routeQuery?.rangeFrom, routeQuery?.rangeTo]
   );
 
   const handleSelectQuery = useCallback(
     (item: SignificantEventQueryRow) => {
-      const isAlreadyOpen = item.query.id === routeQuery?.queryFlyout;
+      const isAlreadyOpen = item.query.id === routeQuery?.selectedItem;
       router.push('/_discovery/{tab}', {
         path: { tab: 'queries' },
         query: buildQueryRouteParams(isAlreadyOpen ? undefined : item.query.id),
       });
     },
-    [router, routeQuery?.queryFlyout, buildQueryRouteParams]
+    [router, routeQuery?.selectedItem, buildQueryRouteParams]
   );
 
   const closeQueryFlyout = useCallback(() => {

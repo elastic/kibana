@@ -6,12 +6,10 @@
  */
 
 import type { CriteriaWithPagination } from '@elastic/eui';
-import { useDebouncedValue } from '@kbn/react-hooks';
 import { useIsMutating, useMutation } from '@kbn/react-query';
-import { COMPUTED_FEATURE_TYPES, isComputedFeature } from '@kbn/streams-schema';
+import { isComputedFeature } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
-import type React from 'react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useFetchKnowledgeIndicators } from '../../../../../hooks/sig_events/use_fetch_knowledge_indicators';
 import { useDiscoveryFeaturesApi } from '../../../../../hooks/sig_events/use_discovery_features_api';
 import { useKnowledgeIndicatorsBulkDelete } from '../../../../../hooks/sig_events/use_knowledge_indicators_bulk_delete';
@@ -19,14 +17,9 @@ import { useQueriesApi, type PromoteResult } from '../../../../../hooks/sig_even
 import { useInvalidatePromoteRelatedQueries } from '../../../../../hooks/sig_events/use_invalidate_promote_queries';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { getFormattedError } from '../../../../../util/errors';
-import { useStreamsAppParams } from '../../../../../hooks/use_streams_app_params';
-import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
 import { KI_ROW_ACTION_MUTATION_KEY } from '../../../stream_detail_significant_events_view/knowledge_indicator_actions_cell';
 import { getKnowledgeIndicatorItemId } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_item_id';
-import { getKnowledgeIndicatorStreamName } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_stream_name';
-import { getKnowledgeIndicatorSubtype } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_subtype';
 import { matchesKnowledgeIndicatorFilters } from '../../../stream_detail_significant_events_view/utils/matches_knowledge_indicator_filters';
-import { getKnowledgeIndicatorType } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_type';
 import {
   BULK_EXCLUDE_SUCCESS_TOAST_TITLE,
   BULK_EXCLUDE_PARTIAL_TOAST_TITLE,
@@ -37,12 +30,7 @@ import {
   BULK_PROMOTE_SUCCESS_TOAST_TITLE,
   BULK_PROMOTE_ERROR_TITLE,
 } from './translations';
-
-const SEARCH_DEBOUNCE_MS = 300;
-const COMPUTED_FEATURE_TYPES_SET = new Set<string>(COMPUTED_FEATURE_TYPES);
-
-const toArray = (v: string | string[] | undefined): string[] =>
-  v == null ? [] : Array.isArray(v) ? v : [v];
+import { useKnowledgeIndicatorsUrlState } from './use_knowledge_indicators_url_state';
 
 export const getKnowledgeIndicatorTitle = (ki: KnowledgeIndicator): string =>
   ki.kind === 'feature' ? ki.feature.title ?? ki.feature.id : ki.query.title ?? ki.query.id;
@@ -54,42 +42,11 @@ export function useKnowledgeIndicatorsTable() {
     },
   } = useKibana();
 
-  const router = useStreamsAppRouter();
-  const { query } = useStreamsAppParams('/_discovery/{tab}');
-
-  const timeRangeRef = useRef<{ rangeFrom?: string; rangeTo?: string }>({});
-  timeRangeRef.current = { rangeFrom: query?.rangeFrom, rangeTo: query?.rangeTo };
-
-  const flyoutRef = useRef<string | undefined>(undefined);
-  flyoutRef.current = query?.flyout;
-
   const { knowledgeIndicators, occurrencesByQueryId, isLoading, isEmpty, refetch } =
     useFetchKnowledgeIndicators();
   const { excludeFeaturesInBulk, restoreFeaturesInBulk } = useDiscoveryFeaturesApi();
   const { promote } = useQueriesApi();
   const invalidatePromoteRelatedQueries = useInvalidatePromoteRelatedQueries();
-
-  const [tableSearchValue, setTableSearchValue] = useState(() => query?.search ?? '');
-  const debouncedSearchTerm = useDebouncedValue(tableSearchValue, SEARCH_DEBOUNCE_MS)
-    .trim()
-    .toLowerCase();
-  const [statusFilter, setStatusFilter] = useState<'active' | 'excluded'>(() =>
-    query?.status === 'excluded' ? 'excluded' : 'active'
-  );
-  const [selectedTypes, setSelectedTypes] = useState<string[]>(() => toArray(query?.type));
-  const [selectedSubtypes, setSelectedSubtypes] = useState<string[]>(() => toArray(query?.subtype));
-  const [selectedStreams, setSelectedStreams] = useState<string[]>(() => toArray(query?.stream));
-  const [hideComputedTypes, setHideComputedTypes] = useState(() =>
-    query?.showComputed === 'true' ? false : true
-  );
-
-  const selectedKnowledgeIndicator = useMemo(
-    () =>
-      query?.flyout
-        ? knowledgeIndicators.find((ki) => getKnowledgeIndicatorItemId(ki) === query.flyout) ?? null
-        : null,
-    [knowledgeIndicators, query?.flyout]
-  );
 
   const [selectedKnowledgeIndicators, setSelectedKnowledgeIndicators] = useState<
     KnowledgeIndicator[]
@@ -99,22 +56,33 @@ export function useKnowledgeIndicatorsTable() {
   >([]);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 25 });
 
-  const currentParamsRef = useRef({
-    debouncedSearchTerm,
-    statusFilter,
-    selectedTypes,
-    selectedSubtypes,
-    selectedStreams,
-    hideComputedTypes,
+  const resetPagination = useCallback(() => {
+    setPagination((current) => {
+      if (current.pageIndex === 0) return current;
+      return { ...current, pageIndex: 0 };
+    });
+  }, []);
+
+  const clearSelection = useCallback(() => {
+    setSelectedKnowledgeIndicators([]);
+  }, []);
+
+  const urlState = useKnowledgeIndicatorsUrlState({
+    knowledgeIndicators,
+    isLoading,
+    resetPagination,
+    clearSelection,
   });
-  currentParamsRef.current = {
+
+  const {
     debouncedSearchTerm,
     statusFilter,
     selectedTypes,
     selectedSubtypes,
     selectedStreams,
     hideComputedTypes,
-  };
+    closeFlyout,
+  } = urlState;
 
   const { deleteKnowledgeIndicatorsInBulk, isDeleting } = useKnowledgeIndicatorsBulkDelete({
     onSuccess: () => {
@@ -127,10 +95,6 @@ export function useKnowledgeIndicatorsTable() {
   const [isBulkOperationInProgress, setIsBulkOperationInProgress] = useState(false);
   const isRowActionInProgress = useIsMutating({ mutationKey: KI_ROW_ACTION_MUTATION_KEY }) > 0;
 
-  const selectedKnowledgeIndicatorId = selectedKnowledgeIndicator
-    ? getKnowledgeIndicatorItemId(selectedKnowledgeIndicator)
-    : undefined;
-
   // Prune checkbox selections when items disappear from the data (e.g. after
   // deletion or external refetch). The flyout is driven purely from the URL so
   // it does not need explicit pruning here.
@@ -142,94 +106,6 @@ export function useKnowledgeIndicatorsTable() {
       return pruned.length === current.length ? current : pruned;
     });
   }, [knowledgeIndicators]);
-
-  // Guard: skip while data is still loading — an empty KI list would prune all
-  // URL-initialised filter selections before they get a chance to match.
-  useEffect(() => {
-    if (isLoading) return;
-    const availableTypes = new Set<string>();
-    const availableSubtypes = new Set<string>();
-    const availableStreams = new Set<string>();
-
-    for (const ki of knowledgeIndicators) {
-      if (
-        matchesKnowledgeIndicatorFilters(ki, {
-          statusFilter,
-          selectedStreams,
-          hideComputedTypes,
-        })
-      ) {
-        availableTypes.add(getKnowledgeIndicatorType(ki));
-      }
-      if (
-        matchesKnowledgeIndicatorFilters(ki, {
-          statusFilter,
-          selectedTypes,
-          selectedStreams,
-          hideComputedTypes,
-        })
-      ) {
-        const subtype = getKnowledgeIndicatorSubtype(ki);
-        if (subtype) availableSubtypes.add(subtype);
-      }
-      if (
-        matchesKnowledgeIndicatorFilters(ki, {
-          statusFilter,
-          selectedTypes,
-          hideComputedTypes,
-        })
-      ) {
-        availableStreams.add(getKnowledgeIndicatorStreamName(ki));
-      }
-    }
-
-    setSelectedTypes((current) => {
-      const pruned = current.filter((t) => availableTypes.has(t));
-      return pruned.length === current.length ? current : pruned;
-    });
-    setSelectedSubtypes((current) => {
-      const pruned = current.filter((s) => availableSubtypes.has(s));
-      return pruned.length === current.length ? current : pruned;
-    });
-    setSelectedStreams((current) => {
-      const pruned = current.filter((s) => availableStreams.has(s));
-      return pruned.length === current.length ? current : pruned;
-    });
-  }, [
-    isLoading,
-    knowledgeIndicators,
-    statusFilter,
-    selectedTypes,
-    selectedStreams,
-    hideComputedTypes,
-  ]);
-
-  useEffect(() => {
-    const { rangeFrom, rangeTo } = timeRangeRef.current;
-    const flyout = flyoutRef.current;
-    router.replace('/_discovery/{tab}', {
-      path: { tab: 'knowledge_indicators' },
-      query: {
-        ...(rangeFrom ? { rangeFrom } : {}),
-        ...(rangeTo ? { rangeTo } : {}),
-        ...(debouncedSearchTerm ? { search: debouncedSearchTerm } : {}),
-        ...(statusFilter !== 'active' ? { status: statusFilter } : {}),
-        ...(selectedTypes.length ? { type: selectedTypes } : {}),
-        ...(selectedSubtypes.length ? { subtype: selectedSubtypes } : {}),
-        ...(selectedStreams.length ? { stream: selectedStreams } : {}),
-        ...(!hideComputedTypes ? { showComputed: 'true' } : {}),
-        ...(flyout ? { flyout } : {}),
-      },
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    debouncedSearchTerm,
-    statusFilter,
-    selectedTypes,
-    selectedSubtypes,
-    selectedStreams,
-    hideComputedTypes,
-  ]);
 
   const filteredKnowledgeIndicators = useMemo(() => {
     const filtered = knowledgeIndicators.filter((ki) =>
@@ -257,104 +133,6 @@ export function useKnowledgeIndicatorsTable() {
     selectedStreams,
     hideComputedTypes,
   ]);
-
-  const resetPagination = useCallback(() => {
-    setPagination((current) => {
-      if (current.pageIndex === 0) return current;
-      return { ...current, pageIndex: 0 };
-    });
-  }, []);
-
-  const handleStatusFilterChange = useCallback(
-    (filter: 'active' | 'excluded') => {
-      setStatusFilter(filter);
-      setSelectedKnowledgeIndicators([]);
-      resetPagination();
-    },
-    [resetPagination]
-  );
-
-  const handleSelectedTypesChange = useCallback(
-    (types: string[]) => {
-      setSelectedTypes(types);
-      setSelectedSubtypes([]);
-      resetPagination();
-    },
-    [resetPagination]
-  );
-
-  const handleSelectedSubtypesChange = useCallback(
-    (subtypes: string[]) => {
-      setSelectedSubtypes(subtypes);
-      resetPagination();
-    },
-    [resetPagination]
-  );
-
-  const handleSelectedStreamsChange = useCallback(
-    (streams: string[]) => {
-      setSelectedStreams(streams);
-      resetPagination();
-    },
-    [resetPagination]
-  );
-
-  const handleComputedToggleChange = useCallback(
-    (checked: boolean) => {
-      const shouldHide = !checked;
-      setHideComputedTypes(shouldHide);
-      if (shouldHide) {
-        setSelectedTypes((current) =>
-          current.filter((type) => !COMPUTED_FEATURE_TYPES_SET.has(type))
-        );
-      }
-      resetPagination();
-    },
-    [resetPagination]
-  );
-
-  const handleSearchChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setTableSearchValue(event.target.value);
-      resetPagination();
-    },
-    [resetPagination]
-  );
-
-  const buildFlyoutQueryParams = useCallback((flyout?: string) => {
-    const { rangeFrom, rangeTo } = timeRangeRef.current;
-    const p = currentParamsRef.current;
-    return {
-      ...(rangeFrom ? { rangeFrom } : {}),
-      ...(rangeTo ? { rangeTo } : {}),
-      ...(p.debouncedSearchTerm ? { search: p.debouncedSearchTerm } : {}),
-      ...(p.statusFilter !== 'active' ? { status: p.statusFilter } : {}),
-      ...(p.selectedTypes.length ? { type: p.selectedTypes } : {}),
-      ...(p.selectedSubtypes.length ? { subtype: p.selectedSubtypes } : {}),
-      ...(p.selectedStreams.length ? { stream: p.selectedStreams } : {}),
-      ...(!p.hideComputedTypes ? { showComputed: 'true' } : {}),
-      ...(flyout ? { flyout } : {}),
-    };
-  }, []);
-
-  const closeFlyout = useCallback(() => {
-    router.push('/_discovery/{tab}', {
-      path: { tab: 'knowledge_indicators' },
-      query: buildFlyoutQueryParams(),
-    });
-  }, [router, buildFlyoutQueryParams]);
-
-  const toggleSelectedKnowledgeIndicator = useCallback(
-    (ki: KnowledgeIndicator) => {
-      const id = getKnowledgeIndicatorItemId(ki);
-      const isAlreadyOpen = id === flyoutRef.current;
-      router.push('/_discovery/{tab}', {
-        path: { tab: 'knowledge_indicators' },
-        query: buildFlyoutQueryParams(isAlreadyOpen ? undefined : id),
-      });
-    },
-    [router, buildFlyoutQueryParams]
-  );
 
   const handleTableChange = useCallback(({ page }: CriteriaWithPagination<KnowledgeIndicator>) => {
     if (!page) return;
@@ -499,8 +277,6 @@ export function useKnowledgeIndicatorsTable() {
     isEmpty,
     refetch,
     filteredKnowledgeIndicators,
-    selectedKnowledgeIndicator,
-    selectedKnowledgeIndicatorId,
     selectedKnowledgeIndicators,
     setSelectedKnowledgeIndicators,
     knowledgeIndicatorsToDelete,
@@ -514,25 +290,11 @@ export function useKnowledgeIndicatorsTable() {
     hasPromotableSelected,
     isSelectionActionsDisabled,
     hasOnlyHiddenComputedFeatures,
-    tableSearchValue,
-    debouncedSearchTerm,
-    statusFilter,
-    selectedTypes,
-    selectedSubtypes,
-    selectedStreams,
-    hideComputedTypes,
-    handleStatusFilterChange,
-    handleSelectedTypesChange,
-    handleSelectedSubtypesChange,
-    handleSelectedStreamsChange,
-    handleComputedToggleChange,
-    handleSearchChange,
     handleTableChange,
     handleBulkExclude,
     handleBulkRestore,
-    closeFlyout,
-    toggleSelectedKnowledgeIndicator,
     deleteKnowledgeIndicatorsInBulk,
     handleBulkPromote,
+    ...urlState,
   };
 }

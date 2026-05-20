@@ -184,110 +184,6 @@ describe('useKnowledgeIndicatorsTable', () => {
     mockIsMutatingValue = 0;
   });
 
-  describe('initial state from URL query params', () => {
-    it('returns empty defaults when no query params', () => {
-      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
-
-      expect(result.current.tableSearchValue).toBe('');
-      expect(result.current.statusFilter).toBe('active');
-      expect(result.current.selectedTypes).toEqual([]);
-      expect(result.current.selectedSubtypes).toEqual([]);
-      expect(result.current.selectedStreams).toEqual([]);
-      expect(result.current.hideComputedTypes).toBe(true);
-      expect(result.current.pagination).toEqual({ pageIndex: 0, pageSize: 25 });
-    });
-
-    it('initializes search from query.search', () => {
-      mockQuery = { search: 'hello' };
-      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
-      expect(result.current.tableSearchValue).toBe('hello');
-    });
-
-    it('initializes status from query.status', () => {
-      mockQuery = { status: 'excluded' };
-      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
-      expect(result.current.statusFilter).toBe('excluded');
-    });
-
-    it('defaults status to active for unknown values', () => {
-      mockQuery = { status: 'bogus' };
-      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
-      expect(result.current.statusFilter).toBe('active');
-    });
-
-    it('initializes type as array from string', () => {
-      mockKnowledgeIndicators = [makeFeatureKI({ uuid: 'f1', stream_name: 's1', type: 'entity' })];
-      mockQuery = { type: 'entity' };
-      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
-      expect(result.current.selectedTypes).toEqual(['entity']);
-    });
-
-    it('initializes type as array from array', () => {
-      mockKnowledgeIndicators = [
-        makeFeatureKI({ uuid: 'f1', stream_name: 's1', type: 'entity' }),
-        makeFeatureKI({ uuid: 'f2', stream_name: 's1', type: 'infrastructure' }),
-      ];
-      mockQuery = { type: ['entity', 'infrastructure'] };
-      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
-      expect(result.current.selectedTypes).toEqual(['entity', 'infrastructure']);
-    });
-
-    it('initializes subtype from query', () => {
-      mockKnowledgeIndicators = [makeFeatureKI({ uuid: 'f1', stream_name: 's1', subtype: 'sub1' })];
-      mockQuery = { subtype: 'sub1' };
-      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
-      expect(result.current.selectedSubtypes).toEqual(['sub1']);
-    });
-
-    it('initializes stream from query', () => {
-      mockKnowledgeIndicators = [
-        makeFeatureKI({ uuid: 'f1', stream_name: 's1' }),
-        makeFeatureKI({ uuid: 'f2', stream_name: 's2' }),
-      ];
-      mockQuery = { stream: ['s1', 's2'] };
-      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
-      expect(result.current.selectedStreams).toEqual(['s1', 's2']);
-    });
-
-    it('initializes hideComputedTypes=false when showComputed is true', () => {
-      mockQuery = { showComputed: 'true' };
-      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
-      expect(result.current.hideComputedTypes).toBe(false);
-    });
-  });
-
-  describe('selectedKnowledgeIndicator from flyout param', () => {
-    it('returns null when no flyout param', () => {
-      mockKnowledgeIndicators = [makeFeatureKI({ uuid: 'f1', stream_name: 's1' })];
-      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
-      expect(result.current.selectedKnowledgeIndicator).toBeNull();
-    });
-
-    it('finds matching feature by uuid', () => {
-      const ki = makeFeatureKI({ uuid: 'f1', stream_name: 's1' });
-      mockKnowledgeIndicators = [ki];
-      mockQuery = { flyout: 'f1' };
-      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
-      expect(result.current.selectedKnowledgeIndicator).toBe(ki);
-      expect(result.current.selectedKnowledgeIndicatorId).toBe('f1');
-    });
-
-    it('finds matching query by id', () => {
-      const ki = makeQueryKI({ id: 'q1', stream_name: 's1' });
-      mockKnowledgeIndicators = [ki];
-      mockQuery = { flyout: 'q1' };
-      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
-      expect(result.current.selectedKnowledgeIndicator).toBe(ki);
-    });
-
-    it('returns null when flyout does not match any indicator', () => {
-      mockKnowledgeIndicators = [makeFeatureKI({ uuid: 'f1', stream_name: 's1' })];
-      mockQuery = { flyout: 'nonexistent' };
-      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
-      expect(result.current.selectedKnowledgeIndicator).toBeNull();
-    });
-  });
-
   describe('filteredKnowledgeIndicators', () => {
     it('filters by active status (excludes features with excluded_at)', () => {
       mockKnowledgeIndicators = [
@@ -343,98 +239,8 @@ describe('useKnowledgeIndicatorsTable', () => {
     });
   });
 
-  describe('handler callbacks', () => {
-    it('handleStatusFilterChange updates statusFilter and clears selection', () => {
-      mockKnowledgeIndicators = [makeFeatureKI({ uuid: 'f1', stream_name: 's1' })];
-      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
-
-      act(() => {
-        result.current.setSelectedKnowledgeIndicators(mockKnowledgeIndicators);
-      });
-      expect(result.current.selectedKnowledgeIndicators).toHaveLength(1);
-
-      act(() => {
-        result.current.handleStatusFilterChange('excluded');
-      });
-      expect(result.current.statusFilter).toBe('excluded');
-      expect(result.current.selectedKnowledgeIndicators).toEqual([]);
-      expect(result.current.pagination.pageIndex).toBe(0);
-    });
-
-    it('handleSelectedTypesChange updates types and clears subtypes', () => {
-      mockKnowledgeIndicators = [
-        makeFeatureKI({ uuid: 'f1', stream_name: 's1', type: 'entity', subtype: 'sub1' }),
-      ];
-      mockQuery = { subtype: ['sub1'] };
-      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
-      expect(result.current.selectedSubtypes).toEqual(['sub1']);
-
-      act(() => {
-        result.current.handleSelectedTypesChange(['entity']);
-      });
-      expect(result.current.selectedTypes).toEqual(['entity']);
-      expect(result.current.selectedSubtypes).toEqual([]);
-    });
-
-    it('handleSelectedSubtypesChange updates subtypes', () => {
-      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
-      act(() => {
-        result.current.handleSelectedSubtypesChange(['sub1', 'sub2']);
-      });
-      expect(result.current.selectedSubtypes).toEqual(['sub1', 'sub2']);
-    });
-
-    it('handleSelectedStreamsChange updates streams', () => {
-      mockKnowledgeIndicators = [makeFeatureKI({ uuid: 'f1', stream_name: 'logs' })];
-      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
-      act(() => {
-        result.current.handleSelectedStreamsChange(['logs']);
-      });
-      expect(result.current.selectedStreams).toEqual(['logs']);
-    });
-
-    it('handleComputedToggleChange toggles computed types', () => {
-      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
-      expect(result.current.hideComputedTypes).toBe(true);
-
-      act(() => {
-        result.current.handleComputedToggleChange(true);
-      });
-      expect(result.current.hideComputedTypes).toBe(false);
-
-      act(() => {
-        result.current.handleComputedToggleChange(false);
-      });
-      expect(result.current.hideComputedTypes).toBe(true);
-    });
-
-    it('handleComputedToggleChange removes computed types from selectedTypes when hiding', () => {
-      mockKnowledgeIndicators = [
-        makeFeatureKI({ uuid: 'f1', stream_name: 's1', type: 'entity' }),
-        makeFeatureKI({ uuid: 'f2', stream_name: 's1', type: 'dataset_analysis' }),
-      ];
-      mockQuery = { type: ['entity', 'dataset_analysis'], showComputed: 'true' };
-      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
-      expect(result.current.selectedTypes).toEqual(['entity', 'dataset_analysis']);
-
-      act(() => {
-        result.current.handleComputedToggleChange(false);
-      });
-      expect(result.current.hideComputedTypes).toBe(true);
-      expect(result.current.selectedTypes).toEqual(['entity']);
-    });
-
-    it('handleSearchChange updates search value', () => {
-      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
-      act(() => {
-        result.current.handleSearchChange({
-          target: { value: 'test' },
-        } as React.ChangeEvent<HTMLInputElement>);
-      });
-      expect(result.current.tableSearchValue).toBe('test');
-    });
-
-    it('handleTableChange updates pagination', () => {
+  describe('handleTableChange', () => {
+    it('updates pagination', () => {
       const { result } = renderHook(() => useKnowledgeIndicatorsTable());
       act(() => {
         result.current.handleTableChange({
@@ -444,104 +250,12 @@ describe('useKnowledgeIndicatorsTable', () => {
       expect(result.current.pagination).toEqual({ pageIndex: 2, pageSize: 50 });
     });
 
-    it('handleTableChange does nothing when page is undefined', () => {
+    it('does nothing when page is undefined', () => {
       const { result } = renderHook(() => useKnowledgeIndicatorsTable());
       act(() => {
         result.current.handleTableChange({} as CriteriaWithPagination<KnowledgeIndicator>);
       });
       expect(result.current.pagination).toEqual({ pageIndex: 0, pageSize: 25 });
-    });
-  });
-
-  describe('URL sync effect', () => {
-    it('calls router.replace with filter state', () => {
-      mockKnowledgeIndicators = [];
-      renderHook(() => useKnowledgeIndicatorsTable());
-
-      expect(mockReplace).toHaveBeenCalledWith('/_discovery/{tab}', {
-        path: { tab: 'knowledge_indicators' },
-        query: {},
-      });
-    });
-
-    it('includes all active filters in URL', () => {
-      mockQuery = {
-        search: 'test',
-        status: 'excluded',
-        type: ['entity'],
-        subtype: ['sub1'],
-        stream: ['logs'],
-        showComputed: 'true',
-        rangeFrom: 'now-15m',
-        rangeTo: 'now',
-      };
-
-      renderHook(() => useKnowledgeIndicatorsTable());
-
-      expect(mockReplace).toHaveBeenCalledWith('/_discovery/{tab}', {
-        path: { tab: 'knowledge_indicators' },
-        query: expect.objectContaining({
-          search: 'test',
-          status: 'excluded',
-          type: ['entity'],
-          subtype: ['sub1'],
-          stream: ['logs'],
-          showComputed: 'true',
-          rangeFrom: 'now-15m',
-          rangeTo: 'now',
-        }),
-      });
-    });
-
-    it('preserves flyout in URL', () => {
-      mockQuery = { flyout: 'f1' };
-      renderHook(() => useKnowledgeIndicatorsTable());
-      expect(mockReplace).toHaveBeenCalledWith('/_discovery/{tab}', {
-        path: { tab: 'knowledge_indicators' },
-        query: expect.objectContaining({ flyout: 'f1' }),
-      });
-    });
-  });
-
-  describe('flyout navigation', () => {
-    it('closeFlyout pushes without flyout param', () => {
-      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
-      act(() => {
-        result.current.closeFlyout();
-      });
-      expect(mockPush).toHaveBeenCalledWith('/_discovery/{tab}', {
-        path: { tab: 'knowledge_indicators' },
-        query: expect.not.objectContaining({ flyout: expect.anything() }),
-      });
-    });
-
-    it('toggleSelectedKnowledgeIndicator opens flyout for new item', () => {
-      const ki = makeFeatureKI({ uuid: 'f1', stream_name: 's1' });
-      mockKnowledgeIndicators = [ki];
-      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
-
-      act(() => {
-        result.current.toggleSelectedKnowledgeIndicator(ki);
-      });
-      expect(mockPush).toHaveBeenCalledWith('/_discovery/{tab}', {
-        path: { tab: 'knowledge_indicators' },
-        query: expect.objectContaining({ flyout: 'f1' }),
-      });
-    });
-
-    it('toggleSelectedKnowledgeIndicator closes flyout for already-open item', () => {
-      const ki = makeFeatureKI({ uuid: 'f1', stream_name: 's1' });
-      mockKnowledgeIndicators = [ki];
-      mockQuery = { flyout: 'f1' };
-      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
-
-      act(() => {
-        result.current.toggleSelectedKnowledgeIndicator(ki);
-      });
-      expect(mockPush).toHaveBeenCalledWith('/_discovery/{tab}', {
-        path: { tab: 'knowledge_indicators' },
-        query: expect.not.objectContaining({ flyout: expect.anything() }),
-      });
     });
   });
 
@@ -885,33 +599,6 @@ describe('useKnowledgeIndicatorsTable', () => {
       const { result } = renderHook(() => useKnowledgeIndicatorsTable());
       expect(result.current.filteredKnowledgeIndicators).toHaveLength(0);
       expect(result.current.hasOnlyHiddenComputedFeatures).toBe(true);
-    });
-  });
-
-  describe('filter pruning effect', () => {
-    it('does not prune while loading', () => {
-      mockIsLoading = true;
-      mockQuery = { type: ['nonexistent'] };
-      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
-      expect(result.current.selectedTypes).toEqual(['nonexistent']);
-    });
-
-    it('prunes type filters that no longer match any indicator', () => {
-      mockKnowledgeIndicators = [makeFeatureKI({ uuid: 'f1', stream_name: 's1', type: 'entity' })];
-      mockQuery = { type: ['entity', 'nonexistent'] };
-      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
-      waitFor(() => {
-        expect(result.current.selectedTypes).toEqual(['entity']);
-      });
-    });
-
-    it('prunes stream filters that no longer match any indicator', () => {
-      mockKnowledgeIndicators = [makeFeatureKI({ uuid: 'f1', stream_name: 'logs' })];
-      mockQuery = { stream: ['logs', 'metrics'] };
-      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
-      waitFor(() => {
-        expect(result.current.selectedStreams).toEqual(['logs']);
-      });
     });
   });
 
