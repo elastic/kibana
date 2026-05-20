@@ -128,7 +128,7 @@ describe('DatatableComponent', () => {
     const props: DatatableRenderProps = {
       data,
       args,
-      formatFactory: () => ({ convert: (x) => x } as IFieldFormat),
+      formatFactory: () => ({ convert: (x) => x, reactConvert: (x) => x } as IFieldFormat),
       dispatchEvent: onDispatchEvent,
       getType: jest.fn().mockReturnValue({
         type: 'buckets',
@@ -619,7 +619,7 @@ describe('DatatableComponent', () => {
       });
       await userEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
       const sizeToChangeTo = 100;
-      fireEvent.click(screen.getByRole('button', { name: `${sizeToChangeTo} rows` }));
+      fireEvent.click(screen.getByRole('menuitem', { name: `${sizeToChangeTo} rows` }));
 
       expect(onDispatchEvent).toHaveBeenCalledTimes(1);
       expect(onDispatchEvent).toHaveBeenCalledWith({

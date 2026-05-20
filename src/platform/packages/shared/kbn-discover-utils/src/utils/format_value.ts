@@ -13,8 +13,6 @@ import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type {
-  FieldFormatsContentType,
-  HtmlContextTypeOptions,
   ReactContextTypeOptions,
   TextContextTypeOptions,
 } from '@kbn/field-formats-plugin/common/types';
@@ -52,47 +50,7 @@ const getFieldFormatter = (
 };
 
 /**
- * Formats the value of a specific field using the appropriate field formatter if available
- * or the default string field formatter otherwise.
- *
- * @deprecated Use `formatFieldValueReact` instead for React components to avoid dangerouslySetInnerHTML.
- * This function returns HTML strings and should only be used when `contentType: 'text'` is needed,
- * or in legacy code paths that haven't been migrated yet (e.g., UnifiedDocViewer, SummaryColumn).
- *
- * @param value The value to format
- * @param hit The actual search hit (required to get highlight information from)
- * @param fieldFormats Field formatters
- * @param dataView The data view if available
- * @param field The field that value was from if available
- * @param contentType Type of a converter
- * @param options Options for the converter
- * @returns An sanitized HTML string, that is safe to be applied via dangerouslySetInnerHTML
- */
-export function formatFieldValue(
-  value: unknown,
-  hit: EsHitRecord,
-  fieldFormats: FieldFormatsStart,
-  dataView?: DataView,
-  field?: DataViewField,
-  contentType?: FieldFormatsContentType,
-  options?: HtmlContextTypeOptions | TextContextTypeOptions
-): string {
-  const usedContentType = contentType ?? 'html';
-  const converterOptions: HtmlContextTypeOptions | TextContextTypeOptions = {
-    hit,
-    field,
-    ...options,
-  };
-
-  return getFieldFormatter(fieldFormats, dataView, field).convert(
-    value,
-    usedContentType,
-    converterOptions
-  );
-}
-
-/**
- * React equivalent of formatFieldValue. Returns a ReactNode rendered via reactConvert,
+ * React equivalent of formatFieldValueText. Returns a ReactNode rendered via reactConvert,
  * which is safe to render directly without dangerouslySetInnerHTML.
  *
  * @returns A ReactNode that can be rendered directly
@@ -127,4 +85,51 @@ export const formatFieldValueText = ({
   options,
 }: FormatFieldValueTextParams): string => {
   return getFieldFormatter(fieldFormats, dataView, field).convert(value, 'text', options);
+};
+
+export interface FormatFieldStringWithHighlightsParams {
+  value: unknown;
+  hit: EsHitRecord;
+  fieldFormats: FieldFormatsStart;
+  /** Optional data view to look up the field. If provided with fieldName, will attempt to get the DataViewField */
+  dataView?: DataView;
+  /** The field name for highlight lookup. If dataView is provided, will attempt to get DataViewField from it */
+  fieldName?: string;
+  options?: ReactContextTypeOptions;
+}
+
+/**
+ * Formats a value using the default string formatter with React output and search highlighting.
+ *
+ * This is a convenience function for formatting values when you only have a field name (not a DataViewField).
+ * It attempts to look up the field in the data view, falling back to a minimal field object with just the name.
+ * This fallback ensures search highlighting still works even for fields not in the data view (e.g., OTel body.text).
+ *
+ * @param value - The value to format
+ * @param hit - The ES hit record containing highlight information
+ * @param fieldFormats - Field formats service
+ * @param dataView - Optional data view to look up the field
+ * @param fieldName - The field name for highlight lookup
+ * @param options - Additional options for the formatter
+ * @returns A ReactNode that can be rendered directly
+ */
+export const formatFieldStringValueWithHighlights = ({
+  value,
+  hit,
+  fieldFormats,
+  dataView,
+  fieldName,
+  options,
+}: FormatFieldStringWithHighlightsParams): ReactNode => {
+  // Pass field name for highlight lookup in hit.highlight.
+  // The field may not exist in the data view (e.g., OTel body.text) but highlights should still apply.
+  const field = fieldName
+    ? dataView?.fields.getByName(fieldName) ?? { name: fieldName }
+    : undefined;
+
+  return fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING).reactConvert(value, {
+    ...options,
+    hit,
+    field,
+  });
 };

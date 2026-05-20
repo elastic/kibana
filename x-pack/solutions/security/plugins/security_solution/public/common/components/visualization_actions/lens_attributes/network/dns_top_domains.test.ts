@@ -144,6 +144,11 @@ describe('getDnsTopDomainsLensAttributes', () => {
                   _index: 'auditbeat-mytest-*',
                 },
               },
+              {
+                match_phrase: {
+                  _index: '*:auditbeat-mytest-*',
+                },
+              },
             ],
           },
         },

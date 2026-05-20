@@ -200,6 +200,7 @@ export const getEndpointConsoleCommands = ({
     crowdstrikeRunScriptEnabled,
     microsoftDefenderEndpointRunScriptEnabled,
     microsoftDefenderEndpointCancelEnabled,
+    responseActionsEndpointCancel,
     responseActionsEndpointMemoryDump,
     responseActionsEndpointRunScript,
   } = featureFlags;
@@ -503,7 +504,7 @@ export const getEndpointConsoleCommands = ({
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const runscriptCommand = consoleCommands.find((command) => command.name === 'runscript')!;
 
-    runscriptCommand.helpDisabled = false;
+    runscriptCommand.helpDisabled = !doesEndpointSupportCommand('runscript');
     runscriptCommand.mustHaveArgs = true;
     runscriptCommand.exampleUsage = (
       enteredCommand?: Command<
@@ -660,7 +661,7 @@ export const getEndpointConsoleCommands = ({
     }),
   });
 
-  if (microsoftDefenderEndpointCancelEnabled) {
+  if (microsoftDefenderEndpointCancelEnabled || responseActionsEndpointCancel) {
     const isSupported = canCancelForCurrentContext();
     consoleCommands.push({
       name: 'cancel',

@@ -29,7 +29,7 @@ export const EndzoneTooltipHeader: FC<EndzoneTooltipHeaderProps> = ({ value }) =
       gutterSize="xs"
     >
       <EuiFlexItem grow={false}>
-        <EuiIcon type="info" />
+        <EuiIcon type="info" aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem>
         {i18n.translate('expressionXY.partialData.bucketTooltipText', {

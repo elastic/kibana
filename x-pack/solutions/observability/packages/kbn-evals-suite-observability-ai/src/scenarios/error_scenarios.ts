@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import type { ApmErrorScenario, GcsConfig } from './types';
-import { GCS_BUCKET, PAYMENT_SERVICE_GCS } from './constants';
+import type { ApmErrorScenario } from './types';
+import { PAYMENT_SERVICE_GCS, PAYMENT_UNREACHABLE_GCS, PRODUCT_CATALOG_GCS } from './constants';
 
 const PAYMENT_SERVICE_FAILURE_SCENARIO_ID = 'payment-service-failure';
 const PAYMENT_UNREACHABLE_SCENARIO_ID = 'payment-unreachable';
-
-const PAYMENT_UNREACHABLE_GCS: GcsConfig = {
-  bucket: GCS_BUCKET,
-  basePath: 'otel-demo/payment-unreachable',
-};
+const PRODUCT_CATALOG_FAILURE_SCENARIO_ID = 'product-catalog-failure';
 
 const PAYMENT_ERROR_EXPECTED_OUTPUT = `-   Error summary:
     The payment service failed to process a charge request due to an "Invalid token" error, as indicated by the handled exception in the payment service and corroborated by error propagation through checkout and frontend services.
@@ -62,6 +58,26 @@ const PAYMENT_UNREACHABLE_EXPECTED_OUTPUT = `-   Error summary:
     -   Why is the payment service unreachable (deployment, scaling, network partition)?
     -   Are there recent changes to service discovery, configuration, or infrastructure that could have broken connectivity?`;
 
+const PRODUCT_CATALOG_FAILURE_EXPECTED_OUTPUT = `-   Error summary:
+    The frontend fails with "failed to prepare order: failed to get product #OLJCESPC7Z" because the \`product-catalog\` service returns a gRPC Internal error ("Product Catalog Fail Feature Flag Enabled") when retrieving that specific product. The root cause is the \`productCatalogFailure\` feature flag being enabled, which causes a deliberate fault injection in the product catalog service for product \`OLJCESPC7Z\`.
+
+-   Failure pinpoint:
+
+    -   The error is observed in the \`frontend\` service when preparing an order. It propagates from \`checkout\`, which calls \`product-catalog\` to validate cart items. The \`product-catalog\` service's \`GetProduct\` RPC fails for product ID \`OLJCESPC7Z\` with gRPC status Internal and message "Error: Product Catalog Fail Feature Flag Enabled".
+    -   The failure originates in the \`product-catalog\` service, which evaluates the \`productCatalogFailure\` feature flag via the flagd provider. When the flag is enabled, the service intentionally rejects requests for this specific product. The feature flag evaluation itself succeeds (flagd dependency is healthy).
+    -   This is a deliberate fault injection, not a code defect or infrastructure failure.
+-   Impact:
+
+    -   Any request that requires fetching product \`OLJCESPC7Z\` (product detail pages, checkout with this item in cart, recommendations including this product) will fail while the feature flag remains enabled.
+    -   Other products are unaffected; \`ListProducts\` and \`SearchProducts\` do not check this flag.
+    -   Multiple services in the trace report errors: \`product-catalog\`, \`checkout\`, \`frontend\`, and \`frontend-proxy\`, indicating user-facing impact on orders containing this product.
+-   Immediate actions:
+
+    1.  Disable the \`productCatalogFailure\` feature flag in the flagd configuration (\`demo.flagd.json\`) or set its \`defaultVariant\` to \`"off"\` to restore normal behavior.
+    2.  Verify the flag state via the flagd OFREP API or management interface to confirm it is currently enabled.
+    3.  Review recent changes to \`demo.flagd.json\` or flagd targeting rules to determine if the flag was enabled intentionally (e.g., chaos testing) or accidentally.
+    4.  Monitor the \`product-catalog\` service error rate after toggling the flag to confirm the errors stop.`;
+
 export const APM_ERROR_SCENARIOS: Record<string, ApmErrorScenario> = {
   [PAYMENT_SERVICE_FAILURE_SCENARIO_ID]: {
     id: PAYMENT_SERVICE_FAILURE_SCENARIO_ID,
@@ -85,6 +101,18 @@ export const APM_ERROR_SCENARIOS: Record<string, ApmErrorScenario> = {
       serviceName: 'frontend',
     },
     expectedOutput: PAYMENT_UNREACHABLE_EXPECTED_OUTPUT,
+  },
+  [PRODUCT_CATALOG_FAILURE_SCENARIO_ID]: {
+    id: PRODUCT_CATALOG_FAILURE_SCENARIO_ID,
+    description:
+      'Product catalog service fails on product OLJCESPC7Z due to productCatalogFailure feature flag',
+    snapshotName: 'product-catalog',
+    gcs: PRODUCT_CATALOG_GCS,
+    errorQuery: {
+      errorMessage: 'failed to prepare order: failed to get product #"OLJCESPC7Z"',
+      serviceName: 'checkout',
+    },
+    expectedOutput: PRODUCT_CATALOG_FAILURE_EXPECTED_OUTPUT,
   },
 };
 

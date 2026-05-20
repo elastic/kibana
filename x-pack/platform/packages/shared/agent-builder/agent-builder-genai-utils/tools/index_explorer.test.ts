@@ -158,24 +158,7 @@ describe('indexExplorer', () => {
     });
   });
 
-  it('passes includeKibanaIndices as false when indexPattern is "*"', async () => {
-    await indexExplorer({
-      nlQuery: 'test query',
-      indexPattern: '*',
-      esClient,
-      model,
-    });
-
-    expect(listSearchSourcesMock).toHaveBeenCalledWith({
-      pattern: '*',
-      excludeIndicesRepresentedAsDatastream: true,
-      excludeIndicesRepresentedAsAlias: false,
-      esClient,
-      includeKibanaIndices: false,
-    });
-  });
-
-  it('passes includeKibanaIndices as true when indexPattern is not "*"', async () => {
+  it('forwards the index pattern to `listSearchSources` for source resolution', async () => {
     await indexExplorer({
       nlQuery: 'test query',
       indexPattern: 'logs-*',
@@ -188,7 +171,6 @@ describe('indexExplorer', () => {
       excludeIndicesRepresentedAsDatastream: true,
       excludeIndicesRepresentedAsAlias: false,
       esClient,
-      includeKibanaIndices: true,
     });
   });
 });

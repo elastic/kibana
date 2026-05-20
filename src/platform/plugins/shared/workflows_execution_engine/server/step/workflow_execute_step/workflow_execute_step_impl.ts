@@ -18,6 +18,7 @@ import type { WorkflowExecuteAsyncGraphNode, WorkflowExecuteGraphNode } from '@k
 import { WorkflowExecuteAsyncStrategy } from './strategies/workflow_execute_async_strategy';
 import { WorkflowExecuteSyncStrategy } from './strategies/workflow_execute_sync_strategy';
 import type { StrategyResult } from './types';
+import type { WorkflowsExecutionEngineConfig } from '../../config';
 import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../types';
@@ -37,7 +38,7 @@ export interface WorkflowExecuteStepImplInit {
   workflowExecutionRepository: WorkflowExecutionRepository;
   stepExecutionRepository: StepExecutionRepository;
   workflowLogger: IWorkflowEventLogger;
-  maxWorkflowDepth: number;
+  config: WorkflowsExecutionEngineConfig;
 }
 
 export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableNode {
@@ -77,12 +78,23 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
     const { 'workflow-id': workflowId, inputs = {} } = renderedWith;
     const mappedInputs =
       typeof inputs === 'object' && inputs !== null ? (inputs as Record<string, unknown>) : {};
-    return { workflowId: String(workflowId), inputs: mappedInputs };
+    return { workflowId: String(workflowId ?? ''), inputs: mappedInputs };
+  }
+
+  private assertValidWorkflowId(workflowId: string): void {
+    if (workflowId.trim().length > 0) {
+      return;
+    }
+
+    const { node, stepExecutionRuntime } = this.init;
+    throw new Error(
+      `${node.type} step "${node.stepId}" in workflow "${stepExecutionRuntime.workflowExecution.workflowId}" rendered an empty workflow-id.`
+    );
   }
 
   /**
    * Applies strategy result to step and workflow runtime (completed/failed → finish or fail step
-   * and navigate; waiting/cancelled → no navigation). Caller is responsible for flushEventLogs.
+   * and navigate; waiting/cancelled → no navigation).
    */
   private handleResult(result: StrategyResult): void {
     const { stepExecutionRuntime, workflowExecutionRuntime } = this.init;
@@ -108,8 +120,6 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
       } catch (error) {
         stepExecutionRuntime.failStep(error as Error);
         workflowExecutionRuntime.navigateToNextNode();
-      } finally {
-        await stepExecutionRuntime.flushEventLogs();
       }
       return;
     }
@@ -121,22 +131,22 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
 
     // Persist resolved inputs for observability in the execution UI
     stepExecutionRuntime.setInput({ 'workflow-id': workflowId, inputs });
-    await stepExecutionRuntime.flushEventLogs();
 
     // Select executor based on step type
     const executor = node.type === 'workflow.execute' ? this.syncExecutor : this.asyncExecutor;
 
     try {
+      this.assertValidWorkflowId(workflowId);
+
       const rawDepth = stepExecutionRuntime.workflowExecution.context?.parentDepth;
       const currentDepth = (typeof rawDepth === 'number' ? rawDepth : -1) + 1;
-      const maxWorkflowDepth = this.init.maxWorkflowDepth;
+      const maxWorkflowDepth = this.init.config.maxWorkflowDepth;
       if (currentDepth >= maxWorkflowDepth) {
         const error = new Error(
           `Workflow composition depth limit (${maxWorkflowDepth}) exceeded at step "${node.stepId}" in workflow "${stepExecutionRuntime.workflowExecution.workflowId}". Refactor to reduce nesting.`
         );
         stepExecutionRuntime.failStep(error);
         workflowExecutionRuntime.navigateToNextNode();
-        await stepExecutionRuntime.flushEventLogs();
         return;
       }
 
@@ -147,7 +157,6 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
         );
         stepExecutionRuntime.failStep(error);
         workflowExecutionRuntime.navigateToNextNode();
-        await stepExecutionRuntime.flushEventLogs();
         return;
       }
 
@@ -156,7 +165,6 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
       } catch (error) {
         stepExecutionRuntime.failStep(error as Error);
         workflowExecutionRuntime.navigateToNextNode();
-        await stepExecutionRuntime.flushEventLogs();
         return;
       }
 
@@ -172,8 +180,6 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
     } catch (error) {
       stepExecutionRuntime.failStep(error as Error);
       workflowExecutionRuntime.navigateToNextNode();
-    } finally {
-      await stepExecutionRuntime.flushEventLogs();
     }
   }
 
@@ -185,7 +191,8 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
 
     await this.init.workflowsExecutionEngine.cancelWorkflowExecution(
       executionId,
-      this.init.spaceId
+      this.init.spaceId,
+      this.init.request
     );
   }
 

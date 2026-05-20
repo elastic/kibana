@@ -1,0 +1,86 @@
+openapi: 3.0.0
+info:
+  title: Granular rules API shared contract
+  version: '1'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    GranularRulesSearchMode:
+      type: string
+      description: |
+        Search mode for free-text search combined with the KQL `filter`.
+      enum:
+        - legacy
+      default: legacy
+
+    GranularRulesSearch:
+      type: object
+      additionalProperties: false
+      required:
+        - term
+      description: |
+        Free-text search combined with the KQL `filter`. Interpreted according to search mode.
+      properties:
+        term:
+          type: string
+        mode:
+          $ref: '#/components/schemas/GranularRulesSearchMode'
+
+    GranularRulesFacetCategory:
+      type: string
+      enum:
+        - tags
+        - type
+        - enabled
+        - updatedBy
+        - createdBy
+        - lastRunOutcome
+
+    SearchRulesField:
+      type: string
+      description: |
+        A rule attribute that can be requested via the `fields` parameter on `_search`.
+      enum:
+        - id
+        - name
+        - tags
+        - enabled
+        - alertTypeId
+        - params
+        - schedule
+        - actions
+        - createdBy
+        - updatedBy
+        - createdAt
+        - updatedAt
+        - revision
+        - executionStatus
+        - lastRun
+        - monitoring
+        - snoozeSchedule
+        - muteAll
+        - running
+        - nextRun
+
+    SearchRulesAggregations:
+      type: object
+      additionalProperties: false
+      description: |
+        Aggregation options on `_search`.
+      properties:
+        counts:
+          type: array
+          description: Facet categories for which to compute counts over the filtered + searched set.
+          items:
+            $ref: '#/components/schemas/GranularRulesFacetCategory'
+
+    FacetCounts:
+      type: object
+      description: |
+        Per-category facet counts. Each key is a facet category from `aggregations.counts`, each value is an object that maps a filter value to its count.
+      additionalProperties:
+        type: object
+        additionalProperties:
+          type: integer
+          minimum: 0

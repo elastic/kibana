@@ -22,6 +22,7 @@ export interface QueryData {
 
 const SAMPLE_EVENTS_COUNT = 5;
 const CURRENT_WINDOW_MINUTES = 15;
+const SAMPLE_EVENT_MAX_CHARS = 2_000;
 
 /**
  * Safely extracts insights from an LLM response.
@@ -107,9 +108,12 @@ export async function collectQueryData({
     return undefined;
   }
 
-  const sampleEvents = currentResponse.hits.hits.map((hit) =>
-    JSON.stringify(omit(hit._source?.original_source ?? {}, '_id'))
-  );
+  const sampleEvents = currentResponse.hits.hits.map((hit) => {
+    const stringified = JSON.stringify(omit(hit._source?.original_source ?? {}, '_id'));
+    return stringified.length > SAMPLE_EVENT_MAX_CHARS
+      ? `${stringified.slice(0, SAMPLE_EVENT_MAX_CHARS)}…(truncated)`
+      : stringified;
+  });
 
   return {
     title: query.query.title,

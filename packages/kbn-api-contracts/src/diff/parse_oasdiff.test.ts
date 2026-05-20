@@ -173,6 +173,29 @@ describe('parseOasdiff', () => {
     ]);
   });
 
+  it('maps kbn:request-additional-properties-tightened to request_body_tightened', () => {
+    const result = parseOasdiff([
+      entry({
+        id: 'kbn:request-additional-properties-tightened',
+        text: 'Request body schema disallows extra fields (additionalProperties: false). Clients sending unknown keys will now receive 400.',
+        operation: 'POST',
+        path: '/api/data_views/data_view',
+        source: '/components/schemas/Data_views_create_data_view_request_object',
+      }),
+    ]);
+    expect(result).toEqual([
+      {
+        type: 'request_body_tightened',
+        path: '/api/data_views/data_view',
+        method: 'POST',
+        reason:
+          'Request body schema disallows extra fields (additionalProperties: false). Clients sending unknown keys will now receive 400.',
+        oasdiffId: 'kbn:request-additional-properties-tightened',
+        source: '/components/schemas/Data_views_create_data_view_request_object',
+      },
+    ]);
+  });
+
   it('maps response-optional-property-removed to response_property_removed', () => {
     const result = parseOasdiff([
       entry({

@@ -33,27 +33,45 @@ export const PackageIcon: React.FunctionComponent<
 export const TableIcon: React.FunctionComponent<UsePackageIconType & Omit<EuiIconProps, 'type'>> = (
   props
 ) => {
-  const { icons } = props;
+  const { icons, integrationName, packageName, version, tryApi, ...restProps } = props;
   if (icons && icons.length === 1 && icons[0].type === 'eui') {
-    return <EuiIcon type={icons[0].src} {...props} />;
+    return <EuiIcon type={icons[0].src} {...restProps} />;
   } else if (icons && icons.length === 1 && icons[0].type === 'svg') {
     // @ts-expect-error loading="lazy" is not supported by EuiIcon
-    return <EuiIcon type={icons[0].src} {...props} loading="lazy" />;
+    return <EuiIcon type={icons[0].src} {...restProps} loading="lazy" />;
   } else {
-    return <PackageIcon {...props} />;
+    return (
+      <PackageIcon
+        integrationName={integrationName}
+        packageName={packageName}
+        version={version}
+        tryApi={tryApi}
+        icons={icons}
+        {...restProps}
+      />
+    );
   }
 };
 
 export const CardIcon: React.FunctionComponent<UsePackageIconType & Omit<EuiIconProps, 'type'>> = (
   props
 ) => {
-  const { icons } = props;
+  const { icons, integrationName, packageName, version, tryApi, ...restProps } = props;
   if (icons && icons.length === 1 && icons[0].type === 'eui') {
-    return <EuiIcon size={'xl'} type={icons[0].src} {...props} />;
+    return <EuiIcon size={'xl'} type={icons[0].src} {...restProps} />;
   } else if (icons && icons.length === 1 && icons[0].type === 'svg') {
     // @ts-expect-error loading="lazy" is not supported by EuiIcon
-    return <EuiIcon size={'xl'} type={icons[0].src} {...props} loading="lazy" />;
+    return <EuiIcon size={'xl'} type={icons[0].src} {...restProps} loading="lazy" />;
   } else {
-    return <PackageIcon {...props} />;
+    return (
+      <PackageIcon
+        integrationName={integrationName}
+        packageName={packageName}
+        version={version}
+        tryApi={tryApi}
+        icons={icons}
+        {...restProps}
+      />
+    );
   }
 };

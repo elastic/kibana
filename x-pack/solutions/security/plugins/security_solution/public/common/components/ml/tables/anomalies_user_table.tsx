@@ -48,6 +48,7 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
   userName,
   skip,
   type,
+  entityRecord,
   identityFields,
 }) => {
   const dispatch = useDispatch();
@@ -123,6 +124,7 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
         entityType: 'user',
         isScopedToEntity,
         identityFields,
+        entityRecord: isScopedToEntity && entityRecord ? entityRecord : undefined,
         fallbackDisplayName: userName,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -133,7 +135,13 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
     startDate,
     endDate,
     skip: querySkip,
-    criteriaFields: getCriteriaFromUsersType(type, userName, identityFields, euid),
+    criteriaFields: getCriteriaFromUsersType({
+      type,
+      userName,
+      identityFields,
+      entityRecord: isScopedToEntity && entityRecord ? entityRecord : undefined,
+      euid,
+    }),
     filterQuery: anomaliesInfluencersFilterQuery,
     jobIds: selectedJobIds.length > 0 ? selectedJobIds : jobIds,
     aggregationInterval: selectedInterval,

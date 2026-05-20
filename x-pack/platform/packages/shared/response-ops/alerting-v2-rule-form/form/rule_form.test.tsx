@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useFormContext } from 'react-hook-form';
 import { RuleForm } from './rule_form';
 import { RULE_FORM_ID } from './constants';
 import { createFormWrapper, createMockServices } from '../test_utils';
@@ -63,9 +64,20 @@ jest.mock('./gui_rule_form', () => ({
   ),
 }));
 
-// Mock YamlRuleForm to avoid monaco editor setup
+// Mock YamlRuleForm to avoid monaco editor setup. The mock binds the textarea
+// to the lifted yamlText/setYamlText props so toggle-persistence is observable.
 jest.mock('./yaml_rule_form', () => ({
-  YamlRuleForm: ({ onSubmit, isDisabled }: { onSubmit: () => void; isDisabled?: boolean }) => (
+  YamlRuleForm: ({
+    onSubmit,
+    isDisabled,
+    yamlText,
+    setYamlText,
+  }: {
+    onSubmit: () => void;
+    isDisabled?: boolean;
+    yamlText: string;
+    setYamlText: (yaml: string) => void;
+  }) => (
     <form
       id="ruleV2Form"
       data-test-subj="mockYamlRuleForm"
@@ -75,7 +87,12 @@ jest.mock('./yaml_rule_form', () => ({
       }}
     >
       <div>YAML Form</div>
-      <textarea data-test-subj="ruleV2FormYamlEditor" disabled={isDisabled} />
+      <textarea
+        data-test-subj="ruleV2FormYamlEditor"
+        disabled={isDisabled}
+        value={yamlText}
+        onChange={(e) => setYamlText(e.target.value)}
+      />
     </form>
   ),
 }));
@@ -142,16 +159,16 @@ describe('RuleForm', () => {
       expect(screen.getByTestId('ruleV2FormEditModeYamlButton')).toBeInTheDocument();
     });
 
-    it('shows Rule configuration heading when includeYaml is true', () => {
+    it('shows Configure Rule Behavior heading when includeYaml is true', () => {
       render(<RuleForm {...defaultProps} includeYaml />, { wrapper: createFormWrapper() });
 
-      expect(screen.getByText('Rule configuration')).toBeInTheDocument();
+      expect(screen.getByText('Configure Rule Behavior')).toBeInTheDocument();
     });
 
-    it('does not show Rule configuration heading when includeYaml is false', () => {
+    it('does not show Configure Rule Behavior heading when includeYaml is false', () => {
       render(<RuleForm {...defaultProps} includeYaml={false} />, { wrapper: createFormWrapper() });
 
-      expect(screen.queryByText('Rule configuration')).not.toBeInTheDocument();
+      expect(screen.queryByText('Configure Rule Behavior')).not.toBeInTheDocument();
     });
 
     it('starts in form mode by default', () => {
@@ -194,6 +211,222 @@ describe('RuleForm', () => {
 
       expect(screen.getByTestId('ruleV2FormEditModeFormButton')).toBeDisabled();
       expect(screen.getByTestId('ruleV2FormEditModeYamlButton')).toBeDisabled();
+    });
+
+    it('initializes the YAML buffer from current form values', async () => {
+      const user = userEvent.setup();
+
+      render(<RuleForm {...defaultProps} includeYaml />, {
+        wrapper: createFormWrapper({
+          metadata: { name: 'Initial Rule', enabled: true },
+        }),
+      });
+
+      await user.click(screen.getByTestId('ruleV2FormEditModeYamlButton'));
+
+      const editor = screen.getByTestId('ruleV2FormYamlEditor') as HTMLTextAreaElement;
+      expect(editor.value).toContain('Initial Rule');
+    });
+
+    it('regenerates YAML when metadata.name changes (not just query)', async () => {
+      const user = userEvent.setup();
+
+      const NameWriter = () => {
+        const { setValue } = useFormContext();
+        return (
+          <button
+            type="button"
+            data-test-subj="testSetName"
+            onClick={() => setValue('metadata.name', 'renamed-rule', { shouldDirty: true })}
+          >
+            set name
+          </button>
+        );
+      };
+
+      render(
+        <>
+          <RuleForm {...defaultProps} includeYaml />
+          <NameWriter />
+        </>,
+        { wrapper: createFormWrapper({ metadata: { name: 'original-name', enabled: true } }) }
+      );
+
+      await user.click(screen.getByTestId('ruleV2FormEditModeYamlButton'));
+      const initialEditor = screen.getByTestId('ruleV2FormYamlEditor') as HTMLTextAreaElement;
+      expect(initialEditor.value).toContain('original-name');
+      expect(initialEditor.value).not.toContain('renamed-rule');
+
+      await user.click(screen.getByTestId('testSetName'));
+
+      await waitFor(() => {
+        const editor = screen.getByTestId('ruleV2FormYamlEditor') as HTMLTextAreaElement;
+        expect(editor.value).toContain('renamed-rule');
+      });
+    });
+
+    it('regenerates YAML when metadata.tags changes', async () => {
+      const user = userEvent.setup();
+
+      const TagsWriter = () => {
+        const { setValue } = useFormContext();
+        return (
+          <button
+            type="button"
+            data-test-subj="testSetTags"
+            onClick={() => setValue('metadata.tags', ['critical', 'edge'], { shouldDirty: true })}
+          >
+            set tags
+          </button>
+        );
+      };
+
+      render(
+        <>
+          <RuleForm {...defaultProps} includeYaml />
+          <TagsWriter />
+        </>,
+        { wrapper: createFormWrapper() }
+      );
+
+      await user.click(screen.getByTestId('ruleV2FormEditModeYamlButton'));
+      const initialEditor = screen.getByTestId('ruleV2FormYamlEditor') as HTMLTextAreaElement;
+      expect(initialEditor.value).not.toContain('critical');
+
+      await user.click(screen.getByTestId('testSetTags'));
+
+      await waitFor(() => {
+        const editor = screen.getByTestId('ruleV2FormYamlEditor') as HTMLTextAreaElement;
+        expect(editor.value).toContain('critical');
+        expect(editor.value).toContain('edge');
+      });
+    });
+
+    it('regenerates YAML when the ES|QL query field changes', async () => {
+      const user = userEvent.setup();
+
+      // Stand-in for the ES|QL editor: a button that pushes a new query into
+      // form state via setValue, which is what esql_editor_field.tsx does in
+      // production via field.onChange.
+      const QueryWriter = () => {
+        const { setValue } = useFormContext();
+        return (
+          <button
+            type="button"
+            data-test-subj="testSetQuery"
+            onClick={() =>
+              setValue('evaluation.query.base', 'FROM other-index | LIMIT 1', {
+                shouldDirty: true,
+              })
+            }
+          >
+            set query
+          </button>
+        );
+      };
+
+      render(
+        <>
+          <RuleForm {...defaultProps} includeYaml />
+          <QueryWriter />
+        </>,
+        { wrapper: createFormWrapper() }
+      );
+
+      // Open YAML to see initial buffer
+      await user.click(screen.getByTestId('ruleV2FormEditModeYamlButton'));
+      const initialEditor = screen.getByTestId('ruleV2FormYamlEditor') as HTMLTextAreaElement;
+      expect(initialEditor.value).not.toContain('other-index');
+
+      // Simulate an ES|QL editor change pushing into form state
+      await user.click(screen.getByTestId('testSetQuery'));
+
+      await waitFor(() => {
+        const editor = screen.getByTestId('ruleV2FormYamlEditor') as HTMLTextAreaElement;
+        expect(editor.value).toContain('other-index');
+      });
+    });
+
+    it('flushes YAML→Form on toggle to Form (does not depend on editor blur)', async () => {
+      const user = userEvent.setup();
+
+      // Probe that reflects current form state for assertions.
+      const FormStateProbe = () => {
+        const { getValues } = useFormContext();
+        return (
+          <div data-test-subj="formStateProbe">
+            name={String(getValues('metadata.name') ?? '')};tags=
+            {JSON.stringify(getValues('metadata.tags') ?? [])}
+          </div>
+        );
+      };
+
+      render(
+        <>
+          <RuleForm {...defaultProps} includeYaml />
+          <FormStateProbe />
+        </>,
+        { wrapper: createFormWrapper({ metadata: { name: 'before-edit', enabled: true } }) }
+      );
+
+      // Switch to YAML
+      await user.click(screen.getByTestId('ruleV2FormEditModeYamlButton'));
+      const editor = screen.getByTestId('ruleV2FormYamlEditor') as HTMLTextAreaElement;
+
+      // Replace the entire YAML with a valid edited rule (changes name and adds tags)
+      const editedYaml = [
+        'kind: alert',
+        'metadata:',
+        '  name: after-edit',
+        '  tags:',
+        '    - critical',
+        '    - team-rna',
+        'time_field: "@timestamp"',
+        'schedule:',
+        '  every: 5m',
+        '  lookback: 1m',
+        'evaluation:',
+        '  query:',
+        '    base: FROM logs-*',
+        '',
+      ].join('\n');
+      await user.clear(editor);
+      // userEvent.type respects \n; use fireEvent.change for a clean replace
+      const { fireEvent } = await import('@testing-library/react');
+      fireEvent.change(editor, { target: { value: editedYaml } });
+
+      // Click Form toggle — this should flush YAML→Form regardless of blur timing.
+      await user.click(screen.getByTestId('ruleV2FormEditModeFormButton'));
+
+      // GuiRuleForm is now mounted; form state should reflect the YAML edits.
+      await waitFor(() => {
+        expect(screen.getByTestId('formStateProbe')).toHaveTextContent('name=after-edit');
+      });
+      expect(screen.getByTestId('formStateProbe')).toHaveTextContent(
+        'tags=["critical","team-rna"]'
+      );
+    });
+
+    it('preserves YAML edits across Form↔YAML toggle', async () => {
+      const user = userEvent.setup();
+
+      render(<RuleForm {...defaultProps} includeYaml />, { wrapper: createFormWrapper() });
+
+      // Switch to YAML and type something distinctive
+      await user.click(screen.getByTestId('ruleV2FormEditModeYamlButton'));
+
+      const editor = screen.getByTestId('ruleV2FormYamlEditor') as HTMLTextAreaElement;
+      await user.clear(editor);
+      await user.type(editor, 'metadata:\n  name: persisted-edit');
+
+      // Switch back to Form mode (unmounts the YAML form)
+      await user.click(screen.getByTestId('ruleV2FormEditModeFormButton'));
+      expect(screen.getByTestId('mockGuiRuleForm')).toBeInTheDocument();
+
+      // Switch to YAML again — the lifted state should restore the buffer
+      await user.click(screen.getByTestId('ruleV2FormEditModeYamlButton'));
+      const editorAfter = screen.getByTestId('ruleV2FormYamlEditor') as HTMLTextAreaElement;
+      expect(editorAfter.value).toContain('persisted-edit');
     });
   });
 

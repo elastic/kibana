@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -32,6 +32,7 @@ import {
 import { SloAlertsWrapper } from './slo_alerts_wrapper';
 import type { AlertsCustomState, SloAlertsApi, SloAlertsEmbeddableState } from './types';
 import { openSloConfiguration } from './slo_alerts_open_configuration';
+import { ensureLicense } from '../ensure_license';
 const queryClient = new QueryClient();
 
 export const getAlertsPanelTitle = () =>
@@ -50,7 +51,7 @@ export function getAlertsEmbeddableFactory({
   sloClient: SLORepositoryClient;
   kibanaVersion: string;
 }) {
-  const factory: EmbeddableFactory<SloAlertsEmbeddableState, SloAlertsApi> = {
+  const factory: EmbeddablePublicDefinition<SloAlertsEmbeddableState, SloAlertsApi> = {
     type: SLO_ALERTS_EMBEDDABLE_ID,
     buildEmbeddable: async ({
       initializeDrilldownsManager,
@@ -59,8 +60,9 @@ export function getAlertsEmbeddableFactory({
       uuid,
       parentApi,
     }) => {
+      await ensureLicense(pluginsStart.licensing);
       const deps = { ...coreStart, ...pluginsStart };
-      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
+      const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
       async function onEdit() {
         try {
           const result = await openSloConfiguration(

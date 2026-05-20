@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Subject } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, skip, Subject } from 'rxjs';
 import type {
   ChatEvent,
   Conversation,
@@ -17,8 +18,8 @@ import {
   ATTACHMENT_REF_OPERATION,
   type VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { DashboardApi, DashboardSaveEvent } from '@kbn/dashboard-plugin/public';
@@ -42,65 +43,23 @@ const createDashboardSaveState = (): DashboardSaveEvent['dashboardState'] => ({
 });
 
 interface MockDashboardApi {
+  anyStateChange$: Observable<void>;
   savedObjectId$: BehaviorSubject<string | undefined>;
   onSave$: Subject<DashboardSaveEvent>;
-  layout$: BehaviorSubject<unknown>;
-  children$: BehaviorSubject<Record<string, MockChildApi>>;
-  title$: BehaviorSubject<string>;
-  description$: BehaviorSubject<string>;
   filters$: BehaviorSubject<unknown[]>;
   query$: BehaviorSubject<unknown>;
   timeRange$: BehaviorSubject<unknown>;
-  projectRouting$: BehaviorSubject<unknown>;
-  hideTitle$: BehaviorSubject<boolean>;
-  hideBorder$: BehaviorSubject<boolean>;
-  settings?: {
-    autoApplyFilters$?: BehaviorSubject<boolean>;
-    syncColors$?: BehaviorSubject<boolean>;
-    syncCursor$?: BehaviorSubject<boolean>;
-    syncTooltips$?: BehaviorSubject<boolean>;
-    useMargins$?: BehaviorSubject<boolean>;
-  };
   setState: jest.Mock;
   getSerializedState: jest.Mock;
 }
 
-interface MockChildApi {
-  uuid: string;
-  hasUnsavedChanges$: BehaviorSubject<boolean>;
-  resetUnsavedChanges: jest.Mock;
-  serializeState: jest.Mock;
-  applySerializedState: jest.Mock;
-}
-
-const createMockDashboardApi = (): MockDashboardApi => ({
+const createMockDashboardApi = (anyStateChange$: Observable<void>): MockDashboardApi => ({
+  anyStateChange$,
   savedObjectId$: new BehaviorSubject<string | undefined>(undefined),
   onSave$: new Subject<DashboardSaveEvent>(),
-  layout$: new BehaviorSubject<unknown>([]),
-  children$: new BehaviorSubject<Record<string, MockChildApi>>({
-    'panel-1': {
-      uuid: 'panel-1',
-      hasUnsavedChanges$: new BehaviorSubject<boolean>(false),
-      resetUnsavedChanges: jest.fn(),
-      serializeState: jest.fn().mockReturnValue({}),
-      applySerializedState: jest.fn(),
-    },
-  }),
-  title$: new BehaviorSubject<string>('Test Dashboard'),
-  description$: new BehaviorSubject<string>('Test Description'),
   filters$: new BehaviorSubject<unknown[]>([]),
   query$: new BehaviorSubject<unknown>({ query: '', language: 'kuery' }),
   timeRange$: new BehaviorSubject<unknown>({ from: 'now-15m', to: 'now' }),
-  projectRouting$: new BehaviorSubject<unknown>(undefined),
-  hideTitle$: new BehaviorSubject<boolean>(false),
-  hideBorder$: new BehaviorSubject<boolean>(false),
-  settings: {
-    autoApplyFilters$: new BehaviorSubject<boolean>(true),
-    syncColors$: new BehaviorSubject<boolean>(false),
-    syncCursor$: new BehaviorSubject<boolean>(true),
-    syncTooltips$: new BehaviorSubject<boolean>(true),
-    useMargins$: new BehaviorSubject<boolean>(true),
-  },
   setState: jest.fn(),
   getSerializedState: jest.fn().mockReturnValue({
     attributes: {
@@ -188,7 +147,7 @@ const createActiveConversation = ({
 
 describe('registerDashboardAppIntegration', () => {
   let mockApi: MockDashboardApi;
-  let chat$: Subject<ChatEvent>;
+  let chatEventsByConversationId: Map<string, Subject<ChatEvent>>;
   let addAttachment: jest.Mock;
   let updateAttachmentOrigin: jest.Mock;
   let getUpdateOrigin: jest.Mock;
@@ -199,11 +158,16 @@ describe('registerDashboardAppIntegration', () => {
     attachments?: VersionedAttachment[];
   }) => void;
   let cleanup: () => void;
+  let simulateDashboardStateChange: () => void;
 
   beforeEach(() => {
+    const mockAnyStateChange$ = new BehaviorSubject(undefined);
+    simulateDashboardStateChange = () => {
+      mockAnyStateChange$.next(undefined);
+    };
     jest.useFakeTimers();
-    mockApi = createMockDashboardApi();
-    chat$ = new Subject<ChatEvent>();
+    mockApi = createMockDashboardApi(mockAnyStateChange$.pipe(skip(1)));
+    chatEventsByConversationId = new Map();
     addAttachment = jest.fn();
     updateAttachmentOrigin = jest.fn().mockResolvedValue(undefined);
     getUpdateOrigin = jest.fn(
@@ -223,6 +187,10 @@ describe('registerDashboardAppIntegration', () => {
     };
   });
 
+  const emitChatEvent = (conversationId: string, event: ChatEvent) => {
+    chatEventsByConversationId.get(conversationId)?.next(event);
+  };
+
   afterEach(() => {
     cleanup?.();
     jest.useRealTimers();
@@ -234,7 +202,16 @@ describe('registerDashboardAppIntegration', () => {
       addAttachment,
       updateAttachmentOrigin,
       events: {
-        chat$,
+        getChatEvents$: jest.fn((conversationId: string) => {
+          let chatEvents$ = chatEventsByConversationId.get(conversationId);
+
+          if (!chatEvents$) {
+            chatEvents$ = new Subject<ChatEvent>();
+            chatEventsByConversationId.set(conversationId, chatEvents$);
+          }
+
+          return chatEvents$.asObservable();
+        }),
         ui: { activeConversation$: activeConversation$.asObservable() },
       },
     } as unknown as AgentBuilderPluginStart;
@@ -261,7 +238,7 @@ describe('registerDashboardAppIntegration', () => {
       attachments: [createVersionedAttachment(attachment)],
     });
 
-    mockApi.title$.next('Updated Title');
+    simulateDashboardStateChange();
     jest.advanceTimersByTime(200);
 
     expect(addAttachment).toHaveBeenCalledWith(
@@ -294,7 +271,7 @@ describe('registerDashboardAppIntegration', () => {
       ],
     });
 
-    mockApi.title$.next('Updated Title');
+    simulateDashboardStateChange();
     jest.advanceTimersByTime(200);
 
     expect(addAttachment).toHaveBeenCalledWith(
@@ -376,7 +353,7 @@ describe('registerDashboardAppIntegration', () => {
 
     jest.runOnlyPendingTimers();
     addAttachment.mockClear();
-    mockApi.title$.next('Updated Title');
+    simulateDashboardStateChange();
     jest.advanceTimersByTime(200);
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
@@ -433,7 +410,7 @@ describe('registerDashboardAppIntegration', () => {
     emitConversationChange({ id: 'conversation-1', attachments: [] });
 
     addAttachment.mockClear();
-    mockApi.title$.next('Updated Title');
+    simulateDashboardStateChange();
     jest.advanceTimersByTime(200);
 
     expect(addAttachment).not.toHaveBeenCalled();
@@ -459,7 +436,9 @@ describe('registerDashboardAppIntegration', () => {
     );
 
     addAttachment.mockClear();
-    chat$.next(
+    emitConversationChange({ id: 'conversation-1', attachments: [] });
+    emitChatEvent(
+      'conversation-1',
       createMockRoundCompleteEvent(
         [createVersionedAttachment(createDashboardAttachment({ id: firstDraftAttachment.id }))],
         [{ attachment_id: firstDraftAttachment.id, operation: ATTACHMENT_REF_OPERATION.created }]

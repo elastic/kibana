@@ -128,15 +128,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await rule.rulePage.clickBulkActionOption(RULES_BULK_ACTION_OPTION_DISABLE);
         await pageObjects.header.waitUntilLoadingHasFinished();
         await rule.rulePage.clickSelectAllRules();
-        await rule.rulePage.toggleBulkActionButton();
-        expect(
-          (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_ENABLE)) ===
-            'true'
-        ).to.be(false);
-        expect(
-          (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_DISABLE)) ===
-            'true'
-        ).to.be(true);
+        await retryService.try(async () => {
+          await rule.rulePage.toggleBulkActionButton();
+          expect(
+            (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_ENABLE)) ===
+              'true'
+          ).to.be(false);
+          expect(
+            (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_DISABLE)) ===
+              'true'
+          ).to.be(true);
+        });
       });
 
       it('Both option should not be disabled if selected rules contains both enabled and disabled rules', async () => {

@@ -36,7 +36,7 @@ import type { ColumnsMap, GetColumnMapFn } from '../shared/columns_retrieval_hel
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
 import { isTimeseriesSourceCommand } from '../../commands/definitions/utils/timeseries_check';
-import { attachReplacementRanges, attachRootQueryReplacementRanges } from './utils/prefix_range';
+import { attachReplacementRanges, ReplacementRangeStrategyKind } from './utils/prefix_range';
 
 function isSourceCommandSuggestion({ label }: { label: string }) {
   const sourceCommands = esqlCommandRegistry
@@ -47,6 +47,13 @@ function isSourceCommandSuggestion({ label }: { label: string }) {
 }
 function isHeaderCommandSuggestion({ label }: { label: string }) {
   return label === 'SET';
+}
+
+function isFromSourceCommand(commands: ESQLAstAllCommands[]) {
+  const sourceCommandNames = new Set(esqlCommandRegistry.getSourceCommandNames());
+  const sourceCommand = commands.find(({ name }) => sourceCommandNames.has(name));
+
+  return sourceCommand?.name.toLowerCase() === 'from';
 }
 
 const orderingEngine = new SuggestionOrderingEngine();
@@ -80,7 +87,9 @@ export async function suggest(
 
   const activeProduct = resourceRetriever?.getActiveProduct?.();
   const licenseInstance = await resourceRetriever?.getLicense?.();
-  const hasMinimumLicenseRequired = licenseInstance?.hasAtLeast;
+  const hasMinimumLicenseRequired = licenseInstance
+    ? (license: LicenseType) => licenseInstance.hasAtLeast(license)
+    : undefined;
 
   if (astContext.type === 'newCommand') {
     // propose main commands here
@@ -177,11 +186,18 @@ export async function suggest(
       );
 
       const headerCommandsSuggestions = suggestions.filter(isHeaderCommandSuggestion);
-      const rootLevelQuerySuggestions = attachRootQueryReplacementRanges(
-        [...suggestions.filter(isSourceCommandSuggestion), ...recommendedQueriesSuggestions],
+      const rootLevelSuggestions: ISuggestionItem[] = [
+        ...suggestions.filter(isSourceCommandSuggestion),
+        ...recommendedQueriesSuggestions,
+      ].map((suggestion) => ({
+        ...suggestion,
+        replacementRangeStrategy: { kind: ReplacementRangeStrategyKind.ROOT_QUERY },
+      }));
+
+      const rootLevelQuerySuggestions = attachReplacementRanges(innerText, rootLevelSuggestions, {
         fullText,
-        offset
-      );
+        offset,
+      });
 
       return orderingEngine.sort([...headerCommandsSuggestions, ...rootLevelQuerySuggestions], {
         command: '',
@@ -236,7 +252,7 @@ export async function suggest(
     );
 
     return attachReplacementRanges(innerText, commandsSpecificSuggestions, {
-      columns: await getColumnMapOnce(),
+      commandContext: { columns: await getColumnMapOnce() },
     });
   }
   return [];
@@ -299,11 +315,14 @@ async function getSuggestionsWithinCommandExpression(
 
   const isInsideSubquery = astContext.isCursorInSubquery; // We only show resource browser suggestions in the main query
   const canSuggestResourceBrowser = (await callbacks?.canSuggestResourceBrowser?.()) ?? false;
+  const subquerySupport =
+    commandDefinition.metadata.subquerySupport === true && isFromSourceCommand(commands);
 
   const context = {
     ...references,
     ...additionalCommandContext,
     activeProduct: callbacks?.getActiveProduct?.(),
+    subquerySupport,
     isCursorInSubquery: astContext.isCursorInSubquery,
     isFieldsBrowserEnabled: canSuggestResourceBrowser && !isInsideSubquery,
     unmappedFieldsStrategy,
