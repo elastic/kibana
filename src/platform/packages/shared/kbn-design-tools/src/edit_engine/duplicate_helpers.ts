@@ -11,8 +11,8 @@ import { DUPLICATE_OFFSET, DEVTOOL_LIBRARY_ID_ATTR } from '../lib/constants';
 import { cloneClean, setImportant, roundRect } from './clone_element';
 import type { ElementSession, ElementRegistry, MediaEdit } from './element_registry';
 import { buildTransform } from './resize_helpers';
-import { renderEuiComponentLive } from '../lib/dom/insert_element';
-import { applySourceAttribute } from '../lib/eui_icon_cache';
+import { renderEuiComponentLive } from '../components/edit/library/insert_element';
+import { applySourceAttribute } from '../components/edit/library/eui_icon_cache';
 import { readStateAttributes } from '../components/edit/library/serializable_state';
 
 /**

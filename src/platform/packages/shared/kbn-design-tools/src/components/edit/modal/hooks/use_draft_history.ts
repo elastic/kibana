@@ -18,7 +18,7 @@ import type {
 } from '../../../../lib/history/draft_history';
 import { setImportant, restoreDimensions } from '../../../../edit_engine/clone_element';
 import type { DimensionRecord } from '../../../../edit_engine/clone_element';
-import { applySourceAttribute } from '../../../../lib/eui_icon_cache';
+import { applySourceAttribute } from '../../library/eui_icon_cache';
 
 interface DraftEntry extends StackEntry {
   readonly type: 'edit';

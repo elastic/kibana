@@ -9,7 +9,7 @@
 
 import { collectMediaElements } from './collect_media_elements';
 
-jest.mock('../eui_icon_cache', () => ({
+jest.mock('../../components/edit/library/eui_icon_cache', () => ({
   identifyIconType: jest.fn().mockResolvedValue(''),
 }));
 

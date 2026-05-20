@@ -13,7 +13,7 @@ import { createScrollContainer, makeMinimalExport } from '../../tests/helpers';
 import '../../tests/mocks';
 
 // Stub heavy dependencies that aren't relevant for scroll-offset tests.
-jest.mock('../../dom/insert_element', () => ({
+jest.mock('../../../components/edit/library/insert_element', () => ({
   renderEuiComponentLive: jest.fn(),
 }));
 jest.mock('../../../components/edit/library/library_entries', () => ({
@@ -22,7 +22,7 @@ jest.mock('../../../components/edit/library/library_entries', () => ({
 jest.mock('../../../components/edit/library/serializable_state', () => ({
   readStateAttributes: () => ({}),
 }));
-jest.mock('../../eui_icon_cache', () => ({
+jest.mock('../../../components/edit/library/eui_icon_cache', () => ({
   replaceIconContent: jest.fn(),
   applySourceAttribute: jest.fn(),
 }));

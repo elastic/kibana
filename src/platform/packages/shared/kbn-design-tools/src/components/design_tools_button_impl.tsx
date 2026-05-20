@@ -37,9 +37,9 @@ import {
 import { useOverlayZIndex } from '../hooks/use_overlay_z_index';
 import { usePortalZIndex } from '../hooks/use_portal_z_index';
 import { buildAddEuiPanels } from './edit/library/build_add_eui_panels';
-import { renderEuiComponentLive, centerInViewport } from '../lib/dom/insert_element';
+import { renderEuiComponentLive, centerInViewport } from './edit/library/insert_element';
 import { DEVTOOL_LIBRARY_ID_ATTR } from '../lib/constants';
-import { preloadAllEuiIcons } from '../lib/eui_icon_cache';
+import { preloadAllEuiIcons } from './edit/library/eui_icon_cache';
 import { pickJsonFile } from '../lib/history/serialization/session_io';
 import { ContextMenuSkeleton } from './context_menu_skeleton';
 

@@ -15,7 +15,7 @@ import {
   EuiIcon,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import { getIconTypes } from '../../../lib/eui_icon_cache';
+import { getIconTypes } from '../library/eui_icon_cache';
 
 interface Props {
   value: string;

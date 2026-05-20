@@ -13,10 +13,10 @@ import { createRoot } from 'react-dom/client';
 import { EuiProvider } from '@elastic/eui';
 import { EuiThemeBorealis } from '@elastic/eui-theme-borealis';
 import { flushSync } from 'react-dom';
-import { setImportant } from '../../edit_engine/clone_element';
-import { DEVTOOL_MANAGED_ATTR, DEVTOOL_LIVE_ATTR } from '../constants';
-import { getPageColorMode } from './get_page_color_mode';
-import { SerializedStateContext } from '../../components/edit/library/serializable_state';
+import { setImportant } from '../../../edit_engine/clone_element';
+import { DEVTOOL_MANAGED_ATTR, DEVTOOL_LIVE_ATTR } from '../../../lib/constants';
+import { getPageColorMode } from '../../../lib/dom/get_page_color_mode';
+import { SerializedStateContext } from './serializable_state';
 
 /**
  * Render a ReactElement into a fixed-position container and keep the React

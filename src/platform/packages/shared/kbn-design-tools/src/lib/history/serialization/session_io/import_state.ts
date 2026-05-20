@@ -29,8 +29,11 @@ import {
   PSEUDO_CLASS_PREFIX,
   PSEUDO_CLASS_RE,
 } from '../../../constants';
-import { renderEuiComponentLive } from '../../../dom/insert_element';
-import { replaceIconContent, applySourceAttribute } from '../../../eui_icon_cache';
+import { renderEuiComponentLive } from '../../../../components/edit/library/insert_element';
+import {
+  replaceIconContent,
+  applySourceAttribute,
+} from '../../../../components/edit/library/eui_icon_cache';
 import { getPageColorScheme } from '../../../dom/get_page_color_mode';
 import { resolveColorTokensDeep } from '../../../dom/color_token_lookup';
 import { buildEmotionClassMap, remapEmotionClasses } from '../../../dom/remap_emotion_classes';
