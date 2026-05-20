@@ -1,0 +1,1 @@
+export { createObservabilityLogDocumentProfileProvider } from './profile';

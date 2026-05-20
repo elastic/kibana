@@ -1,0 +1,13 @@
+import type { SchemaBasedFormula } from '../../../shared/metrics/types';
+export declare const cpuUsageIowait: SchemaBasedFormula;
+export declare const cpuUsageIrq: SchemaBasedFormula;
+export declare const cpuUsageNice: SchemaBasedFormula;
+export declare const cpuUsageSoftirq: SchemaBasedFormula;
+export declare const cpuUsageSteal: SchemaBasedFormula;
+export declare const cpuUsageSystem: SchemaBasedFormula;
+export declare const cpuUsageUser: SchemaBasedFormula;
+export declare const cpuUsage: SchemaBasedFormula;
+export declare const load1m: SchemaBasedFormula;
+export declare const load5m: SchemaBasedFormula;
+export declare const load15m: SchemaBasedFormula;
+export declare const normalizedLoad1m: SchemaBasedFormula;

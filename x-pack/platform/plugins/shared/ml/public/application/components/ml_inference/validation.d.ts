@@ -1,0 +1,10 @@
+import type { estypes } from '@elastic/elasticsearch';
+import type { IngestInferenceProcessor } from '@elastic/elasticsearch/lib/api/types';
+import type { SupportedPytorchTasksType } from '@kbn/ml-trained-models-utils';
+import type { InferenceModelTypes } from './types';
+import type { AddInferencePipelineFormErrors } from './types';
+export declare const isValidPipelineName: (input: string) => boolean;
+export declare const validateInferencePipelineConfigurationStep: (pipelineName: string, pipelineNames: string[]) => AddInferencePipelineFormErrors;
+export declare const validateInferenceConfig: (inferenceConfig: IngestInferenceProcessor["inference_config"], modelType?: InferenceModelTypes | SupportedPytorchTasksType) => string | undefined;
+export declare const validateFieldMap: (modelInputFields: string[], fieldMap: IngestInferenceProcessor["field_map"]) => string | undefined;
+export declare const validatePipelineProcessors: (pipelineProcessors: estypes.IngestPipeline, taskType?: SupportedPytorchTasksType) => string | undefined;

@@ -1,0 +1,25 @@
+import type { DataFrameAnalyticsListRow } from '../analytics_list/common';
+type DataFrameAnalyticsListRowEssentials = Pick<DataFrameAnalyticsListRow, 'config' | 'stats'>;
+export type DeleteAction = ReturnType<typeof useDeleteAction>;
+export declare const useDeleteAction: (canDeleteDataFrameAnalytics: boolean) => {
+    action: import("@elastic/eui/src/components/common").DisambiguateSet<import("@elastic/eui/src/components/basic_table/action_types").DefaultItemEmptyButtonAction<DataFrameAnalyticsListRow>, import("@elastic/eui/src/components/basic_table/action_types").DefaultItemIconButtonAction<DataFrameAnalyticsListRow>> & import("@elastic/eui/src/components/basic_table/action_types").DefaultItemIconButtonAction<DataFrameAnalyticsListRow>;
+    closeDeleteJobCheckModal: () => void;
+    closeModal: () => void;
+    deleteAndCloseModal: () => void;
+    deleteTargetIndex: boolean;
+    deleteDataView: boolean;
+    deleteItem: boolean;
+    dataViewExists: boolean;
+    isDeleteJobCheckModalVisible: boolean;
+    isModalVisible: boolean;
+    isLoading: boolean;
+    item: DataFrameAnalyticsListRowEssentials | undefined;
+    jobType: "data-frame-analytics";
+    openModal: (newItem: DataFrameAnalyticsListRowEssentials) => void;
+    openDeleteJobCheckModal: (newItem: DataFrameAnalyticsListRowEssentials) => void;
+    toggleDeleteIndex: () => void;
+    toggleDeleteDataView: () => void;
+    userCanDeleteIndex: boolean;
+    userCanDeleteDataView: boolean;
+};
+export {};

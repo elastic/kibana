@@ -1,0 +1,49 @@
+import { z } from '@kbn/zod/v4';
+export declare const sigEventSchema: z.ZodObject<{
+    '@timestamp': z.ZodISODateTime;
+    created_at: z.ZodISODateTime;
+    event_id: z.ZodString;
+    discovery_id: z.ZodString;
+    discovery_slug: z.ZodString;
+    previous_event_id: z.ZodOptional<z.ZodString>;
+    verdict: z.ZodString;
+    verdict_id: z.ZodString;
+    workflow_execution_id: z.ZodString;
+    rule_names: z.ZodArray<z.ZodString>;
+    stream_names: z.ZodArray<z.ZodString>;
+    title: z.ZodString;
+    summary: z.ZodString;
+    root_cause: z.ZodString;
+    criticality: z.ZodNumber;
+    confidence: z.ZodNumber;
+    recommended_action: z.ZodString;
+    impact: z.ZodString;
+    recommendations: z.ZodArray<z.ZodString>;
+    dependency_edges: z.ZodOptional<z.ZodArray<z.ZodObject<{
+        source: z.ZodString;
+        target: z.ZodString;
+        protocol: z.ZodOptional<z.ZodString>;
+        exposure: z.ZodOptional<z.ZodString>;
+    }, z.core.$strip>>>;
+    infra_components: z.ZodOptional<z.ZodArray<z.ZodObject<{
+        title: z.ZodOptional<z.ZodString>;
+        workloads: z.ZodOptional<z.ZodArray<z.ZodString>>;
+        exposure: z.ZodOptional<z.ZodString>;
+    }, z.core.$strip>>>;
+    cause_kis: z.ZodOptional<z.ZodArray<z.ZodObject<{
+        name: z.ZodOptional<z.ZodString>;
+        stream_name: z.ZodOptional<z.ZodString>;
+    }, z.core.$strip>>>;
+    evidences: z.ZodOptional<z.ZodArray<z.ZodObject<{
+        rule_name: z.ZodOptional<z.ZodString>;
+        result: z.ZodOptional<z.ZodString>;
+        description: z.ZodOptional<z.ZodString>;
+        stream_name: z.ZodOptional<z.ZodString>;
+        row_count: z.ZodOptional<z.ZodNumber>;
+        collected_at: z.ZodOptional<z.ZodString>;
+        esql_query: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        confirmed: z.ZodOptional<z.ZodBoolean>;
+    }, z.core.$strip>>>;
+    grouped_into: z.ZodOptional<z.ZodString>;
+}, z.core.$strip>;
+export type SigEvent = z.infer<typeof sigEventSchema>;

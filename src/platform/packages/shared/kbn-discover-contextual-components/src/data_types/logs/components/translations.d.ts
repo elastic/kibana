@@ -1,0 +1,12 @@
+export declare const jsonLabel: string;
+export declare const contentLabel: string;
+export declare const resourceLabel: string;
+export declare const traceLabel: string;
+export declare const actionFilterForText: (text: string) => string;
+export declare const actionFilterOutText: (text: string) => string;
+export declare const filterOutText: string;
+export declare const filterForText: string;
+export declare const copyValueText: string;
+export declare const copyValueAriaText: (fieldName: string) => string;
+export declare const openCellActionPopoverAriaText: string;
+export declare const closeCellActionPopoverText: string;

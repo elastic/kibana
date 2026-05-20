@@ -1,0 +1,13 @@
+import type { TypeOf } from '@kbn/config-schema';
+import type { PluginConfigDescriptor, PluginInitializer } from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type { RecursiveReadonly } from '@kbn/utility-types';
+import { ConfigSchema } from './config';
+import type { PluginSetupDependencies, SecurityPluginSetup } from './plugin';
+export type { CasesSupportedOperations } from './authorization';
+export type { SecurityPluginSetup, SecurityPluginStart };
+export type { AuthenticatedUser } from '../common';
+export { ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW } from './routes/tags';
+export type { AuditEvent, AuditHttp, AuditKibana, AuditRequest, AuditLogger, AuditServiceSetup, NativeAPIKeysType, AuthenticationServiceStart, InvalidateAPIKeyResult, GrantAPIKeyResult, CloneAPIKeyParams, CloneAPIKeyResult, ValidateAPIKeyParams, CreateAPIKeyResult, InvalidateAPIKeysParams, CreateAPIKeyParams, CreateRestAPIKeyParams, CreateRestAPIKeyWithKibanaPrivilegesParams, CreateCrossClusterAPIKeyParams, Actions, AlertingActions, ApiActions, AppActions, CasesActions, SavedObjectActions, SpaceActions, UIActions, AuthorizationServiceSetup, CheckPrivileges, CheckPrivilegesPayload, CheckUserProfilesPrivileges, CheckPrivilegesDynamically, CheckPrivilegesDynamicallyWithRequest, CheckUserProfilesPrivilegesResponse, CheckUserProfilesPrivilegesPayload, CheckPrivilegesOptions, CheckPrivilegesResponse, CheckPrivilegesWithRequest, CheckSavedObjectsPrivileges, CheckSavedObjectsPrivilegesWithRequest, ElasticsearchPrivilegesType, KibanaPrivilegesType, AuthorizationMode, PrivilegeDeprecationsRolesByFeatureIdResponse, PrivilegeDeprecationsService, PrivilegeDeprecationsRolesByFeatureIdRequest, UserProfileBulkGetParams, UserProfileSuggestParams, UserProfileRequiredPrivileges, UserProfileGetCurrentParams, UserProfileServiceStart, } from '@kbn/security-plugin-types-server';
+export declare const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>>;
+export declare const plugin: PluginInitializer<RecursiveReadonly<SecurityPluginSetup>, RecursiveReadonly<SecurityPluginStart>, PluginSetupDependencies>;

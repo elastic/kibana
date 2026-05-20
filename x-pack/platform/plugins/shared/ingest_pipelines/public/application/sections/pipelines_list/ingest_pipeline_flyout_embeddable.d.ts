@@ -1,0 +1,2 @@
+import type { IngestPipelineFlyoutWithContextProps } from './ingest_pipeline_flyout_with_context_types';
+export declare const IngestPipelineFlyout: import("react").ForwardRefExoticComponent<(IngestPipelineFlyoutWithContextProps | Omit<IngestPipelineFlyoutWithContextProps & import("react").RefAttributes<import("react").Component<IngestPipelineFlyoutWithContextProps, any, any>>, "ref">) & import("react").RefAttributes<{}>>;

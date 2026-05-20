@@ -1,0 +1,12 @@
+import type { LocatorGetUrlParams } from '@kbn/share-plugin/common/url_service';
+import type { MlLocatorParams } from '@kbn/ml-common-types/locator';
+import { MlManagementLocatorInternal } from '../../../locator/ml_management_locator';
+import type { NavigateToMlManagementLink } from '../../jobs/new_job/common/job_creator/util/general';
+export declare const useMlManagementLocator: () => import("@kbn/share-plugin/common/url_service").LocatorPublic<import("@kbn/utility-types").SerializableRecord> | undefined;
+export declare const useMlManagementLocatorInternal: () => MlManagementLocatorInternal;
+export declare const useMlLocator: () => import("@kbn/share-plugin/common/url_service").LocatorPublic<import("@kbn/utility-types").SerializableRecord> | undefined;
+export declare const useMlLink: (params: MlLocatorParams, getUrlParams?: LocatorGetUrlParams) => string;
+export declare const useNavigateToManagementMlLink: (appId: string) => NavigateToMlManagementLink;
+export declare const useCreateAndNavigateToMlLink: (page: MlLocatorParams["page"]) => (() => Promise<void>);
+export declare const useCreateAndNavigateToManagementMlLink: (page: MlLocatorParams["page"], appId: string, pageState?: MlLocatorParams["pageState"]) => (() => Promise<void>);
+export declare const useMlManagementLink: (page: MlLocatorParams["page"], appId: string, pageState?: MlLocatorParams["pageState"]) => string;

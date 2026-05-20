@@ -1,0 +1,11 @@
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { ConfigSchema } from './config';
+export { uiCapabilitiesRegex } from './feature_schema';
+export type { KibanaFeatureConfig, FeatureKibanaPrivileges, ElasticsearchFeatureConfig, FeatureElasticsearchPrivileges, } from '../common';
+export type { SubFeaturePrivilegeIterator } from './feature_privilege_iterator';
+export { KibanaFeature, ElasticsearchFeature } from '../common';
+export type { GetKibanaFeaturesParams } from './feature_registry';
+export type { FeaturesPluginSetup, FeaturesPluginStart } from './plugin';
+export declare const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>>;
+export declare const plugin: (initializerContext: PluginInitializerContext) => Promise<import("./plugin").FeaturesPlugin>;

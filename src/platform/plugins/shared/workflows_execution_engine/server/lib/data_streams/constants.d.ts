@@ -1,0 +1,1 @@
+export declare const MANAGED_INDEX_MAPPINGS_VERSION_META_FIELD = "managed_index_mappings_version";

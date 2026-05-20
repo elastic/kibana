@@ -1,0 +1,10 @@
+export declare const GROUPS_UNIT: (totalCount: number) => string;
+export declare const TAKE_ACTION: string;
+export declare const GROUP_BY: string;
+export declare const GROUP_BY_CUSTOM_FIELD: string;
+export declare const SELECT_FIELD: (groupingLevelsCount: number) => string;
+export declare const SELECT_SINGLE_FIELD: string;
+export declare const NONE: string;
+export declare const CUSTOM_FIELD: string;
+export declare const DEFAULT_UNIT: (totalCount: number) => string;
+export declare const NULL_GROUP: (selectedGroup: string, unit: string) => string;

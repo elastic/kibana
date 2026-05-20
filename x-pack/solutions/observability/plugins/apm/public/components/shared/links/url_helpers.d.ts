@@ -1,0 +1,55 @@
+import type { History } from 'history';
+export declare function toQuery(search?: string): APMQueryParamsRaw;
+export declare function fromQuery(query: Record<string, any>): string;
+type LocationWithQuery = Partial<History['location'] & {
+    query: Record<string, string>;
+}>;
+export declare function isInactiveHistoryError(error: unknown): boolean;
+export declare function replace(history: History, locationWithQuery: LocationWithQuery): void;
+export declare function push(history: History, locationWithQuery: LocationWithQuery): void;
+export declare function createHref(history: History, locationWithQuery: LocationWithQuery): string;
+export interface APMQueryParams {
+    sampleRangeFrom?: number;
+    sampleRangeTo?: number;
+    transactionId?: string;
+    transactionName?: string;
+    transactionType?: string;
+    traceId?: string;
+    detailTab?: string;
+    flyoutDetailTab?: string;
+    waterfallItemId?: string;
+    spanId?: string;
+    page?: string | number;
+    pageSize?: string | number;
+    sortDirection?: string;
+    sortField?: string;
+    kuery?: string;
+    environment?: string;
+    rangeFrom?: string;
+    rangeTo?: string;
+    refreshPaused?: string | boolean;
+    refreshInterval?: string | number;
+    searchTerm?: string;
+    percentile?: 50 | 75 | 90 | 95 | 99;
+    latencyAggregationType?: string;
+    comparisonEnabled?: boolean;
+    offset?: string;
+    transactionResult?: string;
+    host?: string;
+    containerId?: string;
+    podName?: string;
+    agentName?: string;
+    serviceVersion?: string;
+    serviceGroup?: string;
+    logsColumns?: string;
+    logsSort?: string;
+    logsGrid?: string;
+    logsRowHeight?: number;
+    logsRowsPerPage?: number;
+    logsDensity?: string;
+}
+type StringifyAll<T> = {
+    [K in keyof T]: string;
+};
+type APMQueryParamsRaw = StringifyAll<APMQueryParams>;
+export {};

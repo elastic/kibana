@@ -1,0 +1,37 @@
+import type { LatencyAggregationType } from '../../../common/latency_aggregation_types';
+export interface UrlParams {
+    detailTab?: string;
+    end?: string;
+    flyoutDetailTab?: string;
+    kuery?: string;
+    environment?: string;
+    rangeFrom?: string;
+    rangeTo?: string;
+    refreshInterval?: number;
+    refreshPaused?: boolean;
+    sortDirection?: string;
+    sortField?: string;
+    start?: string;
+    sampleRangeFrom?: number;
+    sampleRangeTo?: number;
+    traceId?: string;
+    transactionId?: string;
+    transactionName?: string;
+    transactionType?: string;
+    waterfallItemId?: string;
+    page?: number;
+    pageSize?: number;
+    searchTerm?: string;
+    percentile?: number;
+    latencyAggregationType?: LatencyAggregationType;
+    comparisonEnabled?: boolean;
+    offset?: string;
+    logsColumns?: string;
+    logsSort?: string;
+    logsGrid?: string;
+    logsRowHeight?: number;
+    logsRowsPerPage?: number;
+    logsDensity?: string;
+}
+export type UxUrlParams = UrlParams;
+export type ApmUrlParams = Omit<UrlParams, 'environment' | 'kuery'>;

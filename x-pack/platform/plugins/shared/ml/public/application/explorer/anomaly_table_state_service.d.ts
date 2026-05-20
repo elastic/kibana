@@ -1,0 +1,37 @@
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { Observable } from 'rxjs';
+import { Subscription } from 'rxjs';
+import type { UrlStateService } from '@kbn/ml-url-state';
+import type { MlJobService } from '../services/job_service';
+import type { MlApi } from '../services/ml_api_service';
+import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
+import type { TableSeverityState } from '../components/controls/select_severity';
+import type { TableInterval } from '../components/controls/select_interval/select_interval';
+import type { AnomalyTimelineStateService } from './anomaly_timeline_state_service';
+import type { AnomaliesTableData } from './explorer_utils';
+import { StateService } from '../services/state_service';
+export declare class AnomalyTableStateService extends StateService {
+    private readonly mlApi;
+    private readonly mlJobService;
+    private readonly uiSettings;
+    private readonly timefilter;
+    private readonly anomalyExplorerCommonStateService;
+    private readonly anomalyTimelineStateService;
+    private readonly tableSeverityUrlStateService;
+    private readonly tableIntervalUrlStateService;
+    private _tableData$;
+    private _tableDataLoading$;
+    private _tableError$;
+    private _timeBounds$;
+    private _refreshSubject$;
+    constructor(mlApi: MlApi, mlJobService: MlJobService, uiSettings: IUiSettingsClient, timefilter: TimefilterContract, anomalyExplorerCommonStateService: AnomalyExplorerCommonStateService, anomalyTimelineStateService: AnomalyTimelineStateService, tableSeverityUrlStateService: UrlStateService<TableSeverityState>, tableIntervalUrlStateService: UrlStateService<TableInterval>);
+    readonly tableData$: Observable<AnomaliesTableData | null>;
+    get tableData(): AnomaliesTableData | null;
+    readonly tableDataLoading$: Observable<boolean>;
+    get tableDataLoading(): boolean;
+    readonly tableError$: Observable<string | null>;
+    get tableError(): string | null;
+    protected _initSubscriptions(): Subscription;
+    private loadAnomaliesTableData;
+}

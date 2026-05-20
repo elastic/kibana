@@ -1,0 +1,17 @@
+export declare const NO_DATA: string;
+export declare const LCP_LABEL: string;
+export declare const INP_LABEL: string;
+export declare const CLS_LABEL: string;
+export declare const CV_POOR_LABEL: string;
+export declare const CV_GOOD_LABEL: string;
+export declare const CV_AVERAGE_LABEL: string;
+export declare const LEGEND_POOR_LABEL: string;
+export declare const LEGEND_GOOD_LABEL: string;
+export declare const LEGEND_NEEDS_IMPROVEMENT_LABEL: string;
+export declare const MORE_LABEL: string;
+export declare const LESS_LABEL: string;
+export declare const IS_LABEL: string;
+export declare const TAKES_LABEL: string;
+export declare const LCP_HELP_LABEL: string;
+export declare const INP_HELP_LABEL: string;
+export declare const CLS_HELP_LABEL: string;

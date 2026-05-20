@@ -1,0 +1,33 @@
+import { DataView } from '@kbn/data-views-plugin/common';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
+import type { DiscoverServices } from '../../../../build_services';
+import type { DiscoverAppState } from '../redux';
+import type { DefaultEsqlQueryConfig } from '../../../../context_awareness';
+export declare function getInitialAppState({ initialUrlState, hasGlobalState, persistedTab, dataView, services, defaultProfileEsqlQuery, }: {
+    initialUrlState: DiscoverAppState | undefined;
+    hasGlobalState?: boolean;
+    persistedTab: DiscoverSessionTab | undefined;
+    dataView: DataView | Pick<DataView, 'id' | 'timeFieldName'> | undefined;
+    services: DiscoverServices;
+    defaultProfileEsqlQuery?: DefaultEsqlQueryConfig;
+}): {
+    columns?: string[];
+    filters?: import("@kbn/es-query").Filter[];
+    grid?: import("@kbn/saved-search-plugin/common").DiscoverGridSettings;
+    hideChart?: boolean;
+    hideTable?: boolean;
+    dataSource?: import("../../../../../common/data_sources").DiscoverDataSource;
+    interval?: string;
+    query?: Query | AggregateQuery;
+    sort?: string[][];
+    savedQuery?: string;
+    viewMode?: import("@kbn/saved-search-plugin/common").VIEW_MODE;
+    hideAggregatedPreview?: boolean;
+    rowHeight?: number;
+    headerRowHeight?: number;
+    rowsPerPage?: number;
+    sampleSize?: number;
+    breakdownField?: string;
+    density?: import("@kbn/discover-utils").DataGridDensity;
+};

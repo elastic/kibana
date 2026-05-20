@@ -1,0 +1,3 @@
+import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
+export type ElasticsearchProcessorType = keyof NonNullable<IngestProcessorContainer>;
+export declare const elasticsearchProcessorTypes: readonly ["append", "attachment", "bytes", "cef", "circle", "community_id", "convert", "csv", "date", "date_index_name", "dissect", "dot_expander", "drop", "enrich", "fail", "fingerprint", "foreach", "ip_location", "geo_grid", "geoip", "grok", "gsub", "html_strip", "inference", "join", "json", "kv", "lowercase", "network_direction", "pipeline", "redact", "registered_domain", "remove", "rename", "reroute", "script", "set", "set_security_user", "sort", "split", "terminate", "trim", "uppercase", "urldecode", "uri_parts", "user_agent"];

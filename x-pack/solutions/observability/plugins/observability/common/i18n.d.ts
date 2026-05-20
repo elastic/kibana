@@ -1,0 +1,9 @@
+export declare const NOT_AVAILABLE_LABEL: string;
+export declare const BELOW_TEXT: string;
+export declare const BELOW_OR_EQ_TEXT: string;
+export declare const ABOVE_TEXT: string;
+export declare const ABOVE_OR_EQ_TEXT: string;
+export declare const BETWEEN_TEXT: string;
+export declare const NOT_BETWEEN_TEXT: string;
+export declare const BETWEEN_INCLUSIVE_TEXT: string;
+export declare const NOT_BETWEEN_INCLUSIVE_TEXT: string;

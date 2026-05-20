@@ -1,0 +1,14 @@
+import React from 'react';
+import type { CoreStart } from '@kbn/core/public';
+import type { ObservabilityLogsAiInsightFeatureRenderDeps } from '@kbn/discover-shared-plugin/public';
+import type { ObservabilityAgentBuilderPluginStartDependencies } from '../../types';
+import type { AlertAiInsightProps } from './alert_ai_insight';
+import type { ErrorSampleAiInsightProps } from './error_sample_ai_insight';
+import type { LogAiInsightProps } from './log_ai_insight';
+export type { AlertAiInsightProps } from './alert_ai_insight';
+export type { ErrorSampleAiInsightProps } from './error_sample_ai_insight';
+export type { LogAiInsightProps, LogAiInsightDocument } from './log_ai_insight';
+export declare function createAlertAIInsight(core: CoreStart, plugins: ObservabilityAgentBuilderPluginStartDependencies): (props: AlertAiInsightProps) => React.JSX.Element;
+export declare function createErrorSampleAIInsight(core: CoreStart, plugins: ObservabilityAgentBuilderPluginStartDependencies): (props: ErrorSampleAiInsightProps) => React.JSX.Element;
+export declare function createLogAIInsight(core: CoreStart, plugins: ObservabilityAgentBuilderPluginStartDependencies): (props: LogAiInsightProps) => React.JSX.Element;
+export declare const createLogsAIInsightRenderer: (LogAIInsightRender: ReturnType<typeof createLogAIInsight>) => ({ doc }: ObservabilityLogsAiInsightFeatureRenderDeps) => React.JSX.Element;

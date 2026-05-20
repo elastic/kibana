@@ -1,0 +1,1 @@
+export type { FieldValuePair, HistogramItem, ResponseHitSource, ResponseHit, CommonCorrelationsQueryParams, EntityType, MetricCorrelation as Metric, UnifiedCorrelation, CorrelationsResponse, } from '@kbn/apm-types';

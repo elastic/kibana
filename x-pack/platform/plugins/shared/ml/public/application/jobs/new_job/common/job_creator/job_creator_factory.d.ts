@@ -1,0 +1,13 @@
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { MlApi } from '../../../../services/ml_api_service';
+import type { NewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
+import { SingleMetricJobCreator } from './single_metric_job_creator';
+import { MultiMetricJobCreator } from './multi_metric_job_creator';
+import { PopulationJobCreator } from './population_job_creator';
+import { AdvancedJobCreator } from './advanced_job_creator';
+import { CategorizationJobCreator } from './categorization_job_creator';
+import { RareJobCreator } from './rare_job_creator';
+import { GeoJobCreator } from './geo_job_creator';
+import { JOB_TYPE } from '../../../../../../common/constants/new_job';
+export declare const jobCreatorFactory: (jobType: JOB_TYPE) => (mlApi: MlApi, newJobCapsService: NewJobCapsService, indexPattern: DataView, savedSearch: SavedSearch | null, query: object) => SingleMetricJobCreator | MultiMetricJobCreator | PopulationJobCreator | AdvancedJobCreator | CategorizationJobCreator | RareJobCreator | GeoJobCreator;

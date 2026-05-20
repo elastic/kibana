@@ -1,0 +1,51 @@
+import type { $Values } from 'utility-types';
+import type { KbnPalette } from '../constants';
+export type KbnPaletteType = 'categorical' | 'gradient';
+export type KbnPaletteId = $Values<typeof KbnPalette>;
+/**
+ * Common palette definition used throughout kibana
+ */
+export interface IKbnPalette {
+    /**
+     * Unique identifier for the palette
+     */
+    id: KbnPaletteId;
+    /**
+     * Display name of this palette.
+     */
+    name: string;
+    /**
+     * A tag for the palette displayed opposite of the `name`.
+     */
+    tag?: string;
+    /**
+     * Type of pallette
+     */
+    type: KbnPaletteType;
+    /**
+     * Number of colors to display
+     */
+    colorCount: number;
+    /**
+     * Palette belongs to an outdated theme set
+     */
+    legacy: boolean;
+    /**
+     * Alternate aliases/ids this palette matches
+     */
+    aliases: string[];
+    /**
+     * Excluded from `getAll` but can still query for palette with `get`/`query`
+     *
+     * An example would be `KbnPalette.Neutral` palette. I want to exclude it from the list of all available palettes, but I still want to `get`/`query` the palette.
+     */
+    standalone?: boolean;
+    /**
+     * Returns array of colors, optionally provide desired number of colors (`n`)
+     */
+    colors: (n?: number) => string[];
+    /**
+     * Returns color provided index and optional total number of colors
+     */
+    getColor: (colorIndex: number, numberOfColors?: number) => string;
+}

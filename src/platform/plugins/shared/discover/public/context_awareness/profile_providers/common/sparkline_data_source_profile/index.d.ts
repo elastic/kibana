@@ -1,0 +1,1 @@
+export { createSparklineDataSourceProfileProvider } from './profile';

@@ -1,0 +1,15 @@
+import type { PluginInitializerContext } from '@kbn/core/public';
+import { CasesUiPlugin } from './plugin';
+export declare function plugin(initializerContext: PluginInitializerContext): CasesUiPlugin;
+export { DRAFT_COMMENT_STORAGE_ID } from './components/markdown_editor/plugins/lens/constants';
+export type { CasesPublicStart, CasesPublicSetup } from './types';
+export type { GetCreateCaseFlyoutProps } from './client/ui/get_create_case_flyout';
+export type { GetAllCasesSelectorModalProps } from './client/ui/get_all_cases_selector_modal';
+export type { GetRecentCasesProps } from './client/ui/get_recent_cases';
+export type { CaseAttachments, CaseAttachmentsWithoutOwner } from './types';
+export type { ICasesDeepLinkId } from './common/navigation';
+export { getCasesDeepLinks, CasesDeepLinkId, generateCaseViewPath, useCaseViewNavigation, useCaseViewParams, } from './common/navigation';
+export type { UnifiedReferenceAttachmentType, CommonAttachmentTabViewProps, UnifiedReferenceAttachmentViewProps, } from './client/attachment_framework/types';
+export { AttachmentActionType } from './client/attachment_framework/types';
+export { useCasesContext } from './components/cases_context/use_cases_context';
+export { ShowTableButton } from './components/attachments/common/show_table_button';

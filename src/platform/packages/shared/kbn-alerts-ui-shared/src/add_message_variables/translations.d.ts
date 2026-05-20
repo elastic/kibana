@@ -1,0 +1,9 @@
+export declare const LOADING_VARIABLES: string;
+export declare const NO_VARIABLES_FOUND: string;
+export declare const NO_VARIABLES_AVAILABLE: string;
+export declare const DEPRECATED_VARIABLES_ARE_SHOWN: string;
+export declare const DEPRECATED_VARIABLES_ARE_HIDDEN: string;
+export declare const HIDE: string;
+export declare const SHOW_ALL: string;
+export declare const ADD_VARIABLE_POPOVER_BUTTON: string;
+export declare const ADD_VARIABLE_TITLE: string;

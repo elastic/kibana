@@ -1,0 +1,25 @@
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { ReactNode } from 'react';
+import type { TypeOf } from '@kbn/typed-react-router-config';
+import type { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { ApmRoutes } from '../../../routing/apm_route_config';
+type ServiceInstanceMainStatistics = APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
+type MainStatsServiceInstanceItem = ServiceInstanceMainStatistics['currentPeriod'][0];
+type ServiceInstanceDetailedStatistics = APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
+export declare function getColumns({ serviceName, kuery, latencyAggregationType, detailedStatsLoading, detailedStatsData, comparisonEnabled, toggleRowDetails, itemIdToExpandedRowMap, toggleRowActionMenu, itemIdToOpenActionMenuRowMap, offset, shouldShowSparkPlots, query, }: {
+    serviceName: string;
+    kuery: string;
+    latencyAggregationType?: LatencyAggregationType;
+    detailedStatsLoading: boolean;
+    detailedStatsData?: ServiceInstanceDetailedStatistics;
+    comparisonEnabled?: boolean;
+    offset?: string;
+    toggleRowDetails: (selectedServiceNodeName: string) => void;
+    itemIdToExpandedRowMap: Record<string, ReactNode>;
+    toggleRowActionMenu: (selectedServiceNodeName: string) => void;
+    itemIdToOpenActionMenuRowMap: Record<string, boolean>;
+    shouldShowSparkPlots?: boolean;
+    query: Omit<TypeOf<ApmRoutes, '/services/{serviceName}/metrics'>['query'], 'kuery'>;
+}): Array<EuiBasicTableColumn<MainStatsServiceInstanceItem>>;
+export {};

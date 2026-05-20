@@ -1,0 +1,31 @@
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { PluginsSetup, PluginsStart } from './types';
+import { type ConfigSchema } from '../common/constants/app';
+import type { SharedServices } from './shared_services';
+export type MlPluginSetup = SharedServices;
+export type MlPluginStart = void;
+export declare class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, PluginsSetup, PluginsStart> {
+    private log;
+    private mlLicense;
+    private capabilities;
+    private clusterClient;
+    private fieldsFormat;
+    private uiSettings;
+    private savedObjectsStart;
+    private spacesPlugin;
+    private security;
+    private home;
+    private cases;
+    private dataViews;
+    private auditService;
+    private isMlReady;
+    private setMlReady;
+    private savedObjectsSyncService;
+    private enabledFeatures;
+    private compatibleModuleType;
+    private serverless;
+    constructor(ctx: PluginInitializerContext<ConfigSchema>);
+    setup(coreSetup: CoreSetup<PluginsStart>, plugins: PluginsSetup): MlPluginSetup;
+    start(coreStart: CoreStart, plugins: PluginsStart): MlPluginStart;
+    stop(): void;
+}

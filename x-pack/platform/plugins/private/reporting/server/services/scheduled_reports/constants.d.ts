@@ -1,0 +1,2 @@
+export declare const MAX_SCHEDULED_REPORT_LIST_SIZE = 100;
+export declare const DEFAULT_SCHEDULED_REPORT_LIST_SIZE = 10;

@@ -1,0 +1,15 @@
+import type { CoreStart } from '@kbn/core/public';
+import type { LicenseType } from '@kbn/licensing-types';
+import type { EmbeddableStart, EmbeddableStartDependencies } from './types';
+export declare let core: CoreStart;
+export declare let embeddableStart: EmbeddableStart;
+export declare let uiActions: EmbeddableStartDependencies['uiActions'];
+export declare let inspector: EmbeddableStartDependencies['inspector'];
+export declare let usageCollection: EmbeddableStartDependencies['usageCollection'];
+export declare let savedObjectsManagement: EmbeddableStartDependencies['savedObjectsManagement'];
+export declare let savedObjectsTaggingOss: EmbeddableStartDependencies['savedObjectsTaggingOss'];
+export declare let contentManagement: EmbeddableStartDependencies['contentManagement'];
+export declare let licensing: EmbeddableStartDependencies['licensing'];
+export declare const untilPluginStartServicesReady: () => Promise<void>;
+export declare const setKibanaServices: (kibanaCore: CoreStart, selfStart: EmbeddableStart, deps: EmbeddableStartDependencies) => void;
+export declare function isCompatibleLicense(minimalLicense?: LicenseType): Promise<boolean>;

@@ -1,0 +1,23 @@
+import { FrameType } from '@kbn/profiling-utils';
+export declare const FRAME_TYPE_COLOR_MAP: {
+    0: number[];
+    1: number[];
+    2: number[];
+    3: number[];
+    4: number[];
+    5: number[];
+    6: number[];
+    7: number[];
+    8: number[];
+    9: number[];
+    10: number[];
+    11: number[];
+    128: number[];
+    255: number[];
+    256: number[];
+    257: number[];
+    258: number[];
+    259: number[];
+};
+export declare function frameTypeToRGB(frameType: FrameType, x: number): number;
+export declare function rgbToRGBA(rgb: number): number[];

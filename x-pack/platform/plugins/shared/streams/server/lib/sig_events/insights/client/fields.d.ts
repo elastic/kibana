@@ -1,0 +1,9 @@
+export declare const INSIGHT_ID = "id";
+export declare const INSIGHT_TITLE = "title";
+export declare const INSIGHT_DESCRIPTION = "description";
+export declare const INSIGHT_IMPACT = "impact";
+export declare const INSIGHT_IMPACT_LEVEL = "impact_level";
+export declare const INSIGHT_EVIDENCE = "evidence";
+export declare const INSIGHT_RECOMMENDATIONS = "recommendations";
+export declare const INSIGHT_GENERATED_AT = "generated_at";
+export declare const INSIGHT_USER_EVALUATION = "user_evaluation";

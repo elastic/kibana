@@ -1,0 +1,1 @@
+export { IntegrationsHeader } from './header';

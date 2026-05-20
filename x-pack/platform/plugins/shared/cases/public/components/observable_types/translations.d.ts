@@ -1,0 +1,11 @@
+export * from '../../common/translations';
+export declare const TITLE: string;
+export declare const DESCRIPTION: string;
+export declare const NO_OBSERVABLE_TYPES: string;
+export declare const ADD_OBSERVABLE_TYPE: string;
+export declare const OBSERVABLE_TYPE_LABEL: string;
+export declare const REQUIRED_FIELD: (fieldName: string) => string;
+export declare const DELETE_OBSERVABLE_TYPE_TITLE: (fieldName: string) => string;
+export declare const DELETE_OBSERVABLE_TYPE_DESCRIPTION: string;
+export declare const DELETE: string;
+export declare const MAX_OBSERVABLE_TYPES_LIMIT: (maxObservableTypesLimit: number) => string;

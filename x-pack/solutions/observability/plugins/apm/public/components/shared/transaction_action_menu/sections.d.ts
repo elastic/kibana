@@ -1,0 +1,33 @@
+import type { Location } from 'history';
+import type { IBasePath } from '@kbn/core/public';
+import { type LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
+import type { ProfilingLocators } from '@kbn/observability-shared-plugin/public';
+import type { AssetDetailsLocator } from '@kbn/observability-shared-plugin/common';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { Environment } from '../../../../common/environment_rt';
+import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import type { Action } from './sections_helper';
+import type { ApmRouter } from '../../routing/apm_route_config';
+export declare const getSections: ({ transaction, basePath, location, apmRouter, infraLinksAvailable, uptimeLocator, profilingLocators, rangeFrom, rangeTo, environment, logsLocator, dataViewId, assetDetailsLocator, discoverLocator, metricsIndices, }: {
+    transaction?: Transaction;
+    basePath: IBasePath;
+    location: Location;
+    apmRouter: ApmRouter;
+    infraLinksAvailable: boolean;
+    uptimeLocator?: LocatorPublic<SerializableRecord>;
+    profilingLocators?: ProfilingLocators;
+    rangeFrom: string;
+    rangeTo: string;
+    environment: Environment;
+    logsLocator: LocatorPublic<LogsLocatorParams>;
+    dataViewId?: string;
+    assetDetailsLocator?: AssetDetailsLocator;
+    discoverLocator?: LocatorPublic<SerializableRecord>;
+    metricsIndices?: string;
+}) => {
+    actions: Action[];
+    key: string;
+    title?: string;
+    subtitle?: string;
+}[][];

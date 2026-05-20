@@ -1,0 +1,42 @@
+import type { JobCreator } from '../job_creator';
+import { DATAFEED_STATE } from '../../../../../../common/constants/states';
+type Progress = number;
+export type ProgressSubscriber = (progress: number) => void;
+export type JobAssignmentSubscriber = (assigned: boolean) => void;
+export declare class JobRunner {
+    private _mlApi;
+    private _jobId;
+    private _datafeedId;
+    private _start;
+    private _end;
+    private _datafeedState;
+    private _refreshInterval;
+    private _progress$;
+    private _percentageComplete;
+    private _stopRefreshPoll;
+    private _subscribers;
+    private _datafeedStartTime;
+    private _performRefreshRateAdjustment;
+    private _jobAssignedToNode;
+    private _jobAssignedToNode$;
+    constructor(jobCreator: JobCreator);
+    get datafeedState(): DATAFEED_STATE;
+    set refreshInterval(v: number);
+    resetInterval(): void;
+    private openJob;
+    private _startDatafeed;
+    private _adjustRefreshInterval;
+    private _isJobAssigned;
+    startDatafeed(): Promise<boolean>;
+    startDatafeedInRealTime(continueJob: boolean): Promise<boolean>;
+    getProgress(): Promise<{
+        progress: Progress;
+        isRunning: boolean;
+        isJobClosed: boolean;
+    }>;
+    subscribeToProgress(func: ProgressSubscriber): void;
+    isRunning(): Promise<boolean>;
+    isJobAssignedToNode(): boolean;
+    subscribeToJobAssignment(func: JobAssignmentSubscriber): import("rxjs").Subscription;
+}
+export {};

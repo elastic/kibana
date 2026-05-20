@@ -1,0 +1,1 @@
+export { AssetsPage } from './assets';

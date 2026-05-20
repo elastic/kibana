@@ -1,0 +1,10 @@
+import type { RequestHandler } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import type { DeleteOutputRequestSchema, GetLatestOutputHealthRequestSchema, GetOneOutputRequestSchema, PostOutputRequestSchema, PutOutputRequestSchema } from '../../types';
+export declare const getOutputsHandler: RequestHandler;
+export declare const getOneOutputHandler: RequestHandler<TypeOf<typeof GetOneOutputRequestSchema.params>>;
+export declare const putOutputHandler: RequestHandler<TypeOf<typeof PutOutputRequestSchema.params>, undefined, TypeOf<typeof PutOutputRequestSchema.body>>;
+export declare const postOutputHandler: RequestHandler<undefined, undefined, TypeOf<typeof PostOutputRequestSchema.body>>;
+export declare const deleteOutputHandler: RequestHandler<TypeOf<typeof DeleteOutputRequestSchema.params>>;
+export declare const postLogstashApiKeyHandler: RequestHandler;
+export declare const getLatestOutputHealth: RequestHandler<TypeOf<typeof GetLatestOutputHealthRequestSchema.params>>;

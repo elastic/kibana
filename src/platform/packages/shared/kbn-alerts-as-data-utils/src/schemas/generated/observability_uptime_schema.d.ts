@@ -1,0 +1,177 @@
+import * as rt from 'io-ts';
+export declare const IsoDateString: rt.Type<string, string, unknown>;
+export type IsoDateStringC = typeof IsoDateString;
+export declare const schemaUnknown: rt.UnknownC;
+export declare const schemaUnknownArray: rt.ArrayC<rt.UnknownC>;
+export declare const schemaString: rt.StringC;
+export declare const schemaStringArray: rt.ArrayC<rt.StringC>;
+export declare const schemaNumber: rt.NumberC;
+export declare const schemaNumberArray: rt.ArrayC<rt.NumberC>;
+export declare const schemaDate: rt.UnionC<[rt.Type<string, string, unknown>, rt.NumberC]>;
+export declare const schemaDateArray: rt.ArrayC<rt.UnionC<[rt.Type<string, string, unknown>, rt.NumberC]>>;
+export declare const schemaDateRange: rt.PartialC<{
+    gte: rt.UnionC<[rt.Type<string, string, unknown>, rt.NumberC]>;
+    lte: rt.UnionC<[rt.Type<string, string, unknown>, rt.NumberC]>;
+}>;
+export declare const schemaDateRangeArray: rt.ArrayC<rt.PartialC<{
+    gte: rt.UnionC<[rt.Type<string, string, unknown>, rt.NumberC]>;
+    lte: rt.UnionC<[rt.Type<string, string, unknown>, rt.NumberC]>;
+}>>;
+export declare const schemaStringOrNumber: rt.UnionC<[rt.StringC, rt.NumberC]>;
+export declare const schemaStringOrNumberArray: rt.ArrayC<rt.UnionC<[rt.StringC, rt.NumberC]>>;
+export declare const schemaBoolean: rt.BooleanC;
+export declare const schemaBooleanArray: rt.ArrayC<rt.BooleanC>;
+export declare const schemaGeoPoint: rt.UnionC<[rt.TypeC<{
+    type: rt.StringC;
+    coordinates: rt.ArrayC<rt.NumberC>;
+}>, rt.StringC, rt.TypeC<{
+    lat: rt.NumberC;
+    lon: rt.NumberC;
+}>, rt.TypeC<{
+    location: rt.ArrayC<rt.NumberC>;
+}>, rt.TypeC<{
+    location: rt.StringC;
+}>]>;
+export declare const schemaGeoPointArray: rt.ArrayC<rt.UnionC<[rt.TypeC<{
+    type: rt.StringC;
+    coordinates: rt.ArrayC<rt.NumberC>;
+}>, rt.StringC, rt.TypeC<{
+    lat: rt.NumberC;
+    lon: rt.NumberC;
+}>, rt.TypeC<{
+    location: rt.ArrayC<rt.NumberC>;
+}>, rt.TypeC<{
+    location: rt.StringC;
+}>]>>;
+export declare const ObservabilityUptimeAlertSchema: rt.IntersectionC<[rt.TypeC<{}>, rt.PartialC<{
+    'agent.name': rt.StringC;
+    'anomaly.bucket_span.minutes': rt.StringC;
+    'anomaly.start': rt.UnionC<[rt.Type<string, string, unknown>, rt.NumberC]>;
+    configId: rt.StringC;
+    'error.message': rt.StringC;
+    'error.stack_trace': rt.StringC;
+    'host.name': rt.StringC;
+    'kibana.alert.context': rt.UnknownC;
+    'kibana.alert.evaluation.threshold': rt.UnionC<[rt.StringC, rt.NumberC]>;
+    'kibana.alert.evaluation.time_range': rt.PartialC<{
+        gte: rt.UnionC<[rt.Type<string, string, unknown>, rt.NumberC]>;
+        lte: rt.UnionC<[rt.Type<string, string, unknown>, rt.NumberC]>;
+    }>;
+    'kibana.alert.evaluation.value': rt.UnionC<[rt.StringC, rt.NumberC]>;
+    'kibana.alert.evaluation.values': rt.ArrayC<rt.UnionC<[rt.StringC, rt.NumberC]>>;
+    'kibana.alert.group': rt.ArrayC<rt.PartialC<{
+        field: rt.ArrayC<rt.StringC>;
+        value: rt.ArrayC<rt.StringC>;
+    }>>;
+    'kibana.alert.grouping': rt.UnknownC;
+    labels: rt.UnknownC;
+    'location.id': rt.ArrayC<rt.StringC>;
+    'location.name': rt.ArrayC<rt.StringC>;
+    'monitor.failed_step_info': rt.StringC;
+    'monitor.id': rt.StringC;
+    'monitor.name': rt.StringC;
+    'monitor.state.id': rt.StringC;
+    'monitor.tags': rt.ArrayC<rt.StringC>;
+    'monitor.type': rt.StringC;
+    'observer.geo.name': rt.ArrayC<rt.StringC>;
+    'observer.name': rt.ArrayC<rt.StringC>;
+    'service.name': rt.StringC;
+    'tls.server.hash.sha256': rt.StringC;
+    'tls.server.x509.issuer.common_name': rt.StringC;
+    'tls.server.x509.not_after': rt.UnionC<[rt.Type<string, string, unknown>, rt.NumberC]>;
+    'tls.server.x509.not_before': rt.UnionC<[rt.Type<string, string, unknown>, rt.NumberC]>;
+    'tls.server.x509.subject.common_name': rt.StringC;
+    'url.full': rt.StringC;
+}>, rt.IntersectionC<[rt.TypeC<{
+    '@timestamp': rt.UnionC<[rt.Type<string, string, unknown>, rt.NumberC]>;
+    'kibana.alert.instance.id': rt.StringC;
+    'kibana.alert.rule.category': rt.StringC;
+    'kibana.alert.rule.consumer': rt.StringC;
+    'kibana.alert.rule.name': rt.StringC;
+    'kibana.alert.rule.producer': rt.StringC;
+    'kibana.alert.rule.revision': rt.UnionC<[rt.StringC, rt.NumberC]>;
+    'kibana.alert.rule.rule_type_id': rt.StringC;
+    'kibana.alert.rule.uuid': rt.StringC;
+    'kibana.alert.status': rt.StringC;
+    'kibana.alert.uuid': rt.StringC;
+    'kibana.space_ids': rt.ArrayC<rt.StringC>;
+}>, rt.PartialC<{
+    'data_stream.dataset': rt.StringC;
+    'data_stream.namespace': rt.StringC;
+    'data_stream.type': rt.StringC;
+    'event.action': rt.StringC;
+    'event.kind': rt.StringC;
+    'event.original': rt.StringC;
+    'kibana.alert.action_group': rt.StringC;
+    'kibana.alert.case_ids': rt.ArrayC<rt.StringC>;
+    'kibana.alert.consecutive_matches': rt.UnionC<[rt.StringC, rt.NumberC]>;
+    'kibana.alert.duration.us': rt.UnionC<[rt.StringC, rt.NumberC]>;
+    'kibana.alert.end': rt.UnionC<[rt.Type<string, string, unknown>, rt.NumberC]>;
+    'kibana.alert.flapping': rt.BooleanC;
+    'kibana.alert.flapping_history': rt.ArrayC<rt.BooleanC>;
+    'kibana.alert.index_pattern': rt.StringC;
+    'kibana.alert.intended_timestamp': rt.UnionC<[rt.Type<string, string, unknown>, rt.NumberC]>;
+    'kibana.alert.last_detected': rt.UnionC<[rt.Type<string, string, unknown>, rt.NumberC]>;
+    'kibana.alert.maintenance_window_ids': rt.ArrayC<rt.StringC>;
+    'kibana.alert.maintenance_window_names': rt.ArrayC<rt.StringC>;
+    'kibana.alert.muted': rt.BooleanC;
+    'kibana.alert.pending_recovered_count': rt.UnionC<[rt.StringC, rt.NumberC]>;
+    'kibana.alert.previous_action_group': rt.StringC;
+    'kibana.alert.reason': rt.StringC;
+    'kibana.alert.rule.execution.timestamp': rt.UnionC<[rt.Type<string, string, unknown>, rt.NumberC]>;
+    'kibana.alert.rule.execution.type': rt.StringC;
+    'kibana.alert.rule.execution.uuid': rt.StringC;
+    'kibana.alert.rule.parameters': rt.UnknownC;
+    'kibana.alert.rule.tags': rt.ArrayC<rt.StringC>;
+    'kibana.alert.scheduled_action.date': rt.StringC;
+    'kibana.alert.scheduled_action.group': rt.StringC;
+    'kibana.alert.severity': rt.StringC;
+    'kibana.alert.severity_improving': rt.BooleanC;
+    'kibana.alert.start': rt.UnionC<[rt.Type<string, string, unknown>, rt.NumberC]>;
+    'kibana.alert.time_range': rt.PartialC<{
+        gte: rt.UnionC<[rt.Type<string, string, unknown>, rt.NumberC]>;
+        lte: rt.UnionC<[rt.Type<string, string, unknown>, rt.NumberC]>;
+    }>;
+    'kibana.alert.updated_at': rt.UnionC<[rt.Type<string, string, unknown>, rt.NumberC]>;
+    'kibana.alert.updated_by.user.id': rt.StringC;
+    'kibana.alert.updated_by.user.name': rt.StringC;
+    'kibana.alert.url': rt.StringC;
+    'kibana.alert.workflow_assignee_ids': rt.ArrayC<rt.StringC>;
+    'kibana.alert.workflow_status': rt.StringC;
+    'kibana.alert.workflow_tags': rt.ArrayC<rt.StringC>;
+    'kibana.cps_scope.expression': rt.StringC;
+    'kibana.cps_scope.linked_projects': rt.ArrayC<rt.UnknownC>;
+    'kibana.version': rt.StringC;
+    tags: rt.ArrayC<rt.StringC>;
+}>]>, rt.IntersectionC<[rt.TypeC<{}>, rt.PartialC<{
+    'ecs.version': rt.StringC;
+    'kibana.alert.risk_score': rt.NumberC;
+    'kibana.alert.rule.author': rt.StringC;
+    'kibana.alert.rule.created_at': rt.UnionC<[rt.Type<string, string, unknown>, rt.NumberC]>;
+    'kibana.alert.rule.created_by': rt.StringC;
+    'kibana.alert.rule.description': rt.StringC;
+    'kibana.alert.rule.enabled': rt.StringC;
+    'kibana.alert.rule.from': rt.StringC;
+    'kibana.alert.rule.interval': rt.StringC;
+    'kibana.alert.rule.license': rt.StringC;
+    'kibana.alert.rule.note': rt.StringC;
+    'kibana.alert.rule.references': rt.ArrayC<rt.StringC>;
+    'kibana.alert.rule.rule_id': rt.StringC;
+    'kibana.alert.rule.rule_name_override': rt.StringC;
+    'kibana.alert.rule.to': rt.StringC;
+    'kibana.alert.rule.type': rt.StringC;
+    'kibana.alert.rule.updated_at': rt.UnionC<[rt.Type<string, string, unknown>, rt.NumberC]>;
+    'kibana.alert.rule.updated_by': rt.StringC;
+    'kibana.alert.rule.version': rt.StringC;
+    'kibana.alert.severity': rt.StringC;
+    'kibana.alert.suppression.docs_count': rt.UnionC<[rt.StringC, rt.NumberC]>;
+    'kibana.alert.suppression.end': rt.UnionC<[rt.Type<string, string, unknown>, rt.NumberC]>;
+    'kibana.alert.suppression.start': rt.UnionC<[rt.Type<string, string, unknown>, rt.NumberC]>;
+    'kibana.alert.suppression.terms.field': rt.ArrayC<rt.StringC>;
+    'kibana.alert.suppression.terms.value': rt.ArrayC<rt.StringC>;
+    'kibana.alert.system_status': rt.StringC;
+    'kibana.alert.workflow_reason': rt.StringC;
+    'kibana.alert.workflow_status_updated_at': rt.UnionC<[rt.Type<string, string, unknown>, rt.NumberC]>;
+    'kibana.alert.workflow_user': rt.StringC;
+}>]>]>;
+export type ObservabilityUptimeAlert = rt.TypeOf<typeof ObservabilityUptimeAlertSchema>;

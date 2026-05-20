@@ -1,0 +1,41 @@
+export declare const AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ = "aws-cloud-connector-super-select";
+export declare const AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ = "azure-cloud-connector-super-select";
+export declare const GCP_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ = "gcp-cloud-connector-super-select";
+export declare const CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ = "cloudConnectorNameInput";
+export declare const CLOUD_CONNECTOR_EDIT_ICON_TEST_SUBJ = "cloudConnectorEditIcon";
+export declare const getCloudConnectorEditIconTestSubj: (connectorId: string) => string;
+export declare const AZURE_CLOUD_CONNECTOR_SETUP_INSTRUCTIONS_TEST_SUBJ = "launchCloudConnectorArmAccordianInstructions";
+export declare const AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ = "azureLaunchCloudConnectorArmTemplate";
+export declare const AZURE_INPUT_FIELDS_TEST_SUBJECTS: {
+    TENANT_ID: string;
+    CLIENT_ID: string;
+    CLIENT_SECRET: string;
+    CLIENT_CERTIFICATE_PATH: string;
+    CLIENT_CERTIFICATE_PASSWORD: string;
+    CLOUD_CONNECTOR_ID: string;
+};
+export declare const GCP_CLOUD_CONNECTOR_SETUP_INSTRUCTIONS_TEST_SUBJ = "launchCloudConnectorGcpAccordianInstructions";
+export declare const GCP_LAUNCH_CLOUD_CONNECTOR_CLOUD_SHELL_TEST_SUBJ = "gcpLaunchCloudConnectorCloudShell";
+export declare const GCP_INPUT_FIELDS_TEST_SUBJECTS: {
+    SERVICE_ACCOUNT: string;
+    AUDIENCE: string;
+    CLOUD_CONNECTOR_ID: string;
+};
+export declare const CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS: {
+    FLYOUT: string;
+    CLOSE_BUTTON: string;
+    TITLE: string;
+    IDENTIFIER_TEXT: string;
+    COPY_IDENTIFIER_BUTTON: string;
+    NAME_INPUT: string;
+    SAVE_NAME_BUTTON: string;
+    USAGE_COUNT_TEXT: string;
+    POLICIES_TABLE: string;
+    POLICY_LINK: string;
+    EMPTY_STATE: string;
+    ERROR_STATE: string;
+    DELETE_CONNECTOR_BUTTON: string;
+    FOOTER_SAVE_BUTTON: string;
+    DELETE_CONFIRM_MODAL: string;
+    DELETE_MODAL_CALLOUT: string;
+};

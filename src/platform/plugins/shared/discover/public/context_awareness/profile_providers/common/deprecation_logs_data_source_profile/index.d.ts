@@ -1,0 +1,1 @@
+export { createDeprecationLogsDataSourceProfileProvider } from './profile';

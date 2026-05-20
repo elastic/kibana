@@ -1,0 +1,10 @@
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { Owner } from '../../../common/constants/types';
+export declare function getCasesDestinationIndexName(spaceId: string, owner: Owner): string;
+export declare function getCasesDestinationIndexAlias(spaceId: string, owner: Owner): string;
+export declare const CAI_CASES_INDEX_VERSION = 1;
+export declare const CAI_CASES_SYNC_TYPE = "cai_cases_sync";
+export declare const getCasesSourceQuery: (spaceId: string, owner: Owner) => QueryDslQueryContainer;
+export declare const CAI_CASES_SOURCE_INDEX = ".kibana_alerting_cases";
+export declare const getCAICasesBackfillTaskId: (spaceId: string, owner: Owner) => string;
+export declare const getCasesSynchronizationSourceQuery: (lastSyncAt: Date, spaceId: string, owner: Owner) => QueryDslQueryContainer;

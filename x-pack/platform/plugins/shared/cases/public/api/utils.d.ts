@@ -1,0 +1,15 @@
+import type { AttachmentRequestV2, CaseResolveResponse, CasesFindResponse, CasesSimilarResponse } from '../../common/types/api';
+import type { AttachmentV2, Case, Cases, SimilarCase, SimilarCases, UserActions } from '../../common/types/domain';
+import type { CasesFindResponseUI, CasesUI, CaseUI, AttachmentUIV2, ResolvedCase, CasesSimilarResponseUI, SimilarCasesUI, SimilarCaseUI } from '../containers/types';
+export declare const convertArrayToCamelCase: (arrayOfSnakes: unknown[]) => unknown[];
+export declare const convertToCamelCase: <T, U extends {}>(obj: T) => U;
+export declare const convertCaseToCamelCase: (theCase: Case) => CaseUI;
+export declare const convertCasesToCamelCase: (cases: Cases) => CasesUI;
+export declare const convertSimilarCaseToCamelCase: (theCase: SimilarCase) => SimilarCaseUI;
+export declare const convertSimilarCasesToCamelCase: (cases: SimilarCases) => SimilarCasesUI;
+export declare const convertCaseResolveToCamelCase: (res: CaseResolveResponse) => ResolvedCase;
+export declare const convertAttachmentsToCamelCase: (attachments: AttachmentV2[]) => AttachmentUIV2[];
+export declare const convertAttachmentToCamelCase: (attachment: AttachmentRequestV2) => AttachmentUIV2;
+export declare const convertUserActionsToCamelCase: (userActions: UserActions) => {}[];
+export declare const convertAllCasesToCamel: (snakeCases: CasesFindResponse) => CasesFindResponseUI;
+export declare const convertSimilarCasesToCamel: (snakeCases: CasesSimilarResponse) => CasesSimilarResponseUI;

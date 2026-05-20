@@ -1,0 +1,11 @@
+export declare const DEFAULT_EMS_FILE_API_URL = "https://vector.maps.elastic.co";
+export declare const DEFAULT_EMS_TILE_API_URL = "https://tiles.maps.elastic.co";
+export declare const DEFAULT_EMS_LANDING_PAGE_URL = "https://maps.elastic.co";
+export declare const DEFAULT_EMS_FONT_LIBRARY_URL = "https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf";
+export declare const EMS_ROADMAP_BOREALIS_DESATURATED_ID = "road_map_desaturated_v9";
+export declare const EMS_DARKMAP_BOREALIS_ID = "dark_map_v9";
+export declare const DEFAULT_EMS_ROADMAP_ID = "road_map";
+export declare const DEFAULT_EMS_ROADMAP_DESATURATED_ID = "road_map_desaturated_v9";
+export declare const DEFAULT_EMS_DARKMAP_ID = "dark_map_v9";
+export declare const EMS_APP_NAME = "kibana";
+export declare const DEFAULT_EMS_REST_VERSION = "2023-10-31";

@@ -1,0 +1,1 @@
+export { registerCollector } from './collector';

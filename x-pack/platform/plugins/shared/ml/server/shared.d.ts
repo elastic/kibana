@@ -1,0 +1,10 @@
+export * from './lib/capabilities/errors';
+export type { ModuleSetupPayload } from './shared_services/providers/modules';
+import type { SharedServices } from './shared_services';
+export type AlertingService = ReturnType<SharedServices['alertingServiceProvider']>;
+export type AnomalyDetectors = ReturnType<SharedServices['anomalyDetectorsProvider']>;
+export type JobService = ReturnType<SharedServices['jobServiceProvider']>;
+export type MlSystem = ReturnType<SharedServices['mlSystemProvider']>;
+export type Modules = ReturnType<SharedServices['modulesProvider']>;
+export type ResultsService = ReturnType<SharedServices['resultsServiceProvider']>;
+export type TrainedModels = ReturnType<SharedServices['trainedModelsProvider']>;

@@ -1,0 +1,34 @@
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { type Field, type SplitField, type Aggregation } from '@kbn/ml-anomaly-utils';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { MlApi } from '../../../../services/ml_api_service';
+import type { NewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
+import { JobCreator } from './job_creator';
+import { JOB_TYPE } from '../../../../../../common/constants/new_job';
+export declare class RareJobCreator extends JobCreator {
+    private _rareField;
+    private _populationField;
+    private _splitField;
+    protected _type: JOB_TYPE;
+    private _rareInPopulation;
+    private _frequentlyRare;
+    private _rareAgg;
+    private _freqRareAgg;
+    constructor(mlApi: MlApi, newJobCapsService: NewJobCapsService, indexPattern: DataView, savedSearch: SavedSearch | null, query: object);
+    setDefaultDetectorProperties(rare: Aggregation | null, freqRare: Aggregation | null): void;
+    setRareField(field: Field | null): void;
+    get rareField(): Field | null;
+    get rareInPopulation(): boolean;
+    set rareInPopulation(bool: boolean);
+    get frequentlyRare(): boolean;
+    set frequentlyRare(bool: boolean);
+    setPopulationField(field: SplitField): void;
+    removePopulationField(): void;
+    get populationField(): SplitField;
+    setSplitField(field: SplitField): void;
+    removeSplitField(): void;
+    get splitField(): SplitField;
+    cloneFromExistingJob(job: Job, datafeed: Datafeed): void;
+}

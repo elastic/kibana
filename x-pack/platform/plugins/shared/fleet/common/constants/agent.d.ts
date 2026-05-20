@@ -1,0 +1,28 @@
+export declare const AGENTS_PREFIX = "fleet-agents";
+export declare const AGENT_TYPE_PERMANENT = "PERMANENT";
+export declare const AGENT_TYPE_EPHEMERAL = "EPHEMERAL";
+export declare const AGENT_TYPE_TEMPORARY = "TEMPORARY";
+export declare const AGENT_TYPE_OPAMP = "OPAMP";
+export declare const AGENT_POLLING_REQUEST_TIMEOUT_MS = 300000;
+export declare const AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS = 20000;
+export declare const AGENT_POLLING_THRESHOLD_MS = 30000;
+export declare const AGENT_POLLING_INTERVAL = 1000;
+export declare const AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS = 30000;
+export declare const AGENT_UPDATE_ACTIONS_INTERVAL_MS = 5000;
+export declare const AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS = 1000;
+export declare const AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL = 5;
+export declare const AGENTS_INDEX = ".fleet-agents";
+export declare const AGENT_ACTIONS_INDEX = ".fleet-actions";
+export declare const AGENT_ACTIONS_RESULTS_INDEX = ".fleet-actions-results";
+export declare const FleetServerAgentComponentStatuses: readonly ["STARTING", "CONFIGURING", "HEALTHY", "DEGRADED", "FAILED", "STOPPING", "STOPPED"];
+export declare const AgentStatuses: readonly ["offline", "error", "online", "inactive", "enrolling", "unenrolling", "unenrolled", "updating", "degraded", "uninstalled", "orphaned"];
+export declare const ActiveAgentStatuses: string[];
+export declare const UNPRIVILEGED_AGENT_KUERY = "fleet-agents.local_metadata.elastic.agent.unprivileged: true";
+export declare const PRIVILEGED_AGENT_KUERY = "not fleet-agents.local_metadata.elastic.agent.unprivileged: true";
+export declare const FIPS_AGENT_KUERY = "fleet-agents.local_metadata.elastic.agent.fips: true";
+export declare const AGENT_STATUS_CHANGE_DATA_STREAM: {
+    type: string;
+    dataset: string;
+    namespace: string;
+};
+export declare const AGENT_STATUS_CHANGE_DATA_STREAM_NAME: string;

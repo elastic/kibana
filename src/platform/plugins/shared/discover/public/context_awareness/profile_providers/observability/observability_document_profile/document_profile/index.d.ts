@@ -1,0 +1,1 @@
+export { createObservabilityGenericDocumentProfileProvider } from './profile';

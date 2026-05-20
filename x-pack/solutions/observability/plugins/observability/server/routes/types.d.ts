@@ -1,0 +1,19 @@
+import type { EndpointOf, ReturnOf, ServerRouteRepository } from '@kbn/server-route-repository';
+import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
+import type { ObservabilityServerRouteRepository, APIEndpoint } from './get_global_observability_server_route_repository';
+import type { ObservabilityRequestHandlerContext } from '../types';
+import type { RegisterRoutesDependencies } from './register_routes';
+export type { ObservabilityServerRouteRepository, APIEndpoint };
+export interface ObservabilityRouteHandlerResources {
+    context: ObservabilityRequestHandlerContext;
+    dependencies: RegisterRoutesDependencies;
+    logger: Logger;
+    request: KibanaRequest;
+    response: KibanaResponseFactory;
+}
+export interface ObservabilityRouteCreateOptions {
+    tags?: string[];
+    access?: 'public' | 'internal';
+}
+export type AbstractObservabilityServerRouteRepository = ServerRouteRepository;
+export type ObservabilityAPIReturnType<TEndpoint extends EndpointOf<ObservabilityServerRouteRepository>> = ReturnOf<ObservabilityServerRouteRepository, TEndpoint>;

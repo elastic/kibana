@@ -1,0 +1,9 @@
+export declare const PAGE_TITLE_NEW_INTEGRATION: string;
+export declare const PAGE_TITLE_EDIT_INTEGRATION: string;
+export declare const INTEGRATION_NOT_FOUND_TITLE: string;
+export declare const INTEGRATION_NOT_FOUND_DESCRIPTION: string;
+export declare const GO_BACK_BUTTON: string;
+export declare const DELETE_INTEGRATION_MODAL_TITLE: string;
+export declare const DELETE_INTEGRATION_MODAL_BODY: string;
+export declare const DELETE_INTEGRATION_MODAL_CONFIRM: string;
+export declare const DELETE_INTEGRATION_MODAL_CANCEL: string;

@@ -1,0 +1,36 @@
+import type { ReportApiJSON, ReportDocumentHead, ReportFields, ReportSource } from '@kbn/reporting-common/types';
+import type { ReportTaskParams } from '../tasks';
+export declare const MIGRATION_VERSION = "7.14.0";
+export declare class Report implements Partial<ReportSource & ReportDocumentHead> {
+    _index: string;
+    _id: string;
+    _primary_term?: number;
+    _seq_no?: number;
+    readonly jobtype: ReportSource['jobtype'];
+    readonly created_at: ReportSource['created_at'];
+    readonly created_by: ReportSource['created_by'];
+    readonly payload: ReportSource['payload'];
+    readonly space_id: ReportSource['space_id'];
+    readonly meta: ReportSource['meta'];
+    readonly status: ReportSource['status'];
+    readonly attempts: ReportSource['attempts'];
+    readonly scheduled_report_id: ReportSource['scheduled_report_id'];
+    readonly kibana_name: ReportSource['kibana_name'];
+    readonly kibana_id: ReportSource['kibana_id'];
+    readonly output: ReportSource['output'];
+    readonly error: ReportSource['error'];
+    readonly started_at: ReportSource['started_at'];
+    readonly completed_at: ReportSource['completed_at'];
+    readonly timeout: ReportSource['timeout'];
+    readonly max_attempts: ReportSource['max_attempts'];
+    readonly metrics?: ReportSource['metrics'];
+    process_expiration?: ReportSource['process_expiration'];
+    migration_version: string;
+    readonly queue_time_ms: ReportFields['queue_time_ms'];
+    readonly execution_time_ms: ReportFields['execution_time_ms'];
+    constructor(opts: Partial<ReportSource> & Partial<ReportDocumentHead>, fields?: ReportFields);
+    updateWithEsDoc(doc: Partial<Report>): void;
+    toReportSource(): ReportSource;
+    toReportTaskJSON(): ReportTaskParams;
+    toApiJSON(): ReportApiJSON;
+}

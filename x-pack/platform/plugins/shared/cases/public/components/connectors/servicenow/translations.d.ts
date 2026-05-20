@@ -1,0 +1,14 @@
+export declare const URGENCY: string;
+export declare const SEVERITY: string;
+export declare const IMPACT: string;
+export declare const CHOICES_API_ERROR: string;
+export declare const MALWARE_URL: string;
+export declare const MALWARE_HASH: string;
+export declare const CATEGORY: string;
+export declare const SUBCATEGORY: string;
+export declare const SOURCE_IP: string;
+export declare const DEST_IP: string;
+export declare const PRIORITY: string;
+export declare const ALERT_FIELDS_LABEL: string;
+export declare const ALERT_FIELD_ENABLED_TEXT: string;
+export declare const ADDITIONAL_FIELDS_LABEL: string;

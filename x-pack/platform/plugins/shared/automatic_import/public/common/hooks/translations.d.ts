@@ -1,0 +1,15 @@
+export declare const INDEX_MISSING_EVENT_ORIGINAL: string;
+export declare const INDEX_VALIDATION_FAILED: string;
+export declare const SAVE_INTEGRATION_SUCCESS: string;
+export declare const SAVE_PIPELINE_SUCCESS: string;
+export declare const SAVE_PIPELINE_ERROR: string;
+export declare const SAVE_INTEGRATION_SUCCESS_DESCRIPTION: (integrationId: string) => string;
+export declare const SAVE_INTEGRATION_ERROR: string;
+export declare const UPLOAD_SAMPLES_SUCCESS: string;
+export declare const UPLOAD_SAMPLES_ERROR: string;
+export declare const DELETE_DATA_STREAM_SUCCESS: string;
+export declare const DELETE_INTEGRATION_SUCCESS: string;
+export declare const DELETE_INTEGRATION_ERROR: string;
+export declare const DELETE_DATA_STREAM_ERROR: string;
+export declare const REANALYZE_DATA_STREAM_SUCCESS: string;
+export declare const REANALYZE_DATA_STREAM_ERROR: string;

@@ -1,0 +1,32 @@
+import type { ReactNode, FunctionComponent } from 'react';
+import type { IntegrationCardItem } from '../../screens/home';
+import type { ExtendedIntegrationCategory, CategoryFacet } from '../../screens/home/category_facets';
+import type { IntegrationsURLParameters } from '../../screens/home/hooks/use_available_packages';
+export interface PackageListGridProps {
+    isLoading?: boolean;
+    controls?: ReactNode | ReactNode[];
+    emptyStateStyles?: Record<string, string>;
+    list: IntegrationCardItem[];
+    searchTerm: string;
+    setSearchTerm: (search: string) => void;
+    selectedCategory: ExtendedIntegrationCategory;
+    setCategory: (category: ExtendedIntegrationCategory) => void;
+    categories: CategoryFacet[];
+    setUrlandReplaceHistory: (params: IntegrationsURLParameters) => void;
+    setUrlandPushHistory: (params: IntegrationsURLParameters) => void;
+    callout?: JSX.Element | null;
+    calloutTopSpacerSize?: 's' | 'm' | 'xs' | 'l' | 'xl' | 'xxl';
+    showCardLabels?: boolean;
+    title?: string;
+    availableSubCategories?: CategoryFacet[];
+    selectedSubCategory?: string;
+    setSelectedSubCategory?: (c: string | undefined) => void;
+    showMissingIntegrationMessage?: boolean;
+    showControls?: boolean;
+    showSearchTools?: boolean;
+    sortByFeaturedIntegrations?: boolean;
+    spacer?: boolean;
+    scrollElementId?: string;
+    onlyAgentlessFilter?: boolean;
+}
+export declare const PackageListGrid: FunctionComponent<PackageListGridProps>;

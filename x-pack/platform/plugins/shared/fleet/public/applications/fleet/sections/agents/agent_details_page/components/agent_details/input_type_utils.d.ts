@@ -1,0 +1,2 @@
+export declare function displayInputType(inputType: string, id?: string): string;
+export declare function getLogsQueryByInputType(inputType: string): "" | "(datasets:!(elastic_agent.filebeat))" | "(datasets:!(elastic_agent.metricbeat))" | "(datasets:!(elastic_agent.osquerybeat))" | "(datasets:!(elastic_agent.heartbeat))" | "(datasets:!(elastic_agent.apm_server))" | "(datasets:!(elastic_agent.endpoint_security))";

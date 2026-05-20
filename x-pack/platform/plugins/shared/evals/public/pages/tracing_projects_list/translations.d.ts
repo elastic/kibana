@@ -1,0 +1,17 @@
+export declare const PAGE_TITLE: string;
+export declare const SEARCH_PLACEHOLDER: string;
+export declare const COLUMN_NAME: string;
+export declare const COLUMN_LAST_TRACE: string;
+export declare const COLUMN_TRACE_COUNT: string;
+export declare const COLUMN_ERROR_RATE: string;
+export declare const COLUMN_P50_LATENCY: string;
+export declare const COLUMN_P99_LATENCY: string;
+export declare const COLUMN_TOTAL_TOKENS: string;
+export declare const TABLE_CAPTION: string;
+export declare const NO_PROJECTS_TITLE: string;
+export declare const NO_PROJECTS_BODY: string;
+export declare const REFRESH_BUTTON_LABEL: string;
+export declare const AUTO_REFRESH_ARIA_LABEL: string;
+export declare const LOAD_ERROR_TITLE: string;
+export declare const getLoadErrorBody: (errorMessage: string) => string;
+export declare const RETRY_BUTTON: string;

@@ -1,0 +1,25 @@
+export declare const PLUGIN_ID = "profiling";
+export declare const PLUGIN_NAME = "profiling";
+export declare const INDEX_EVENTS = "profiling-events-all";
+export declare const INDEX_TRACES = "profiling-stacktraces";
+export declare const INDEX_FRAMES = "profiling-stackframes";
+export declare const INDEX_EXECUTABLES = "profiling-executables";
+export declare function getRoutePaths(): {
+    TopN: string;
+    TopNContainers: string;
+    TopNDeployments: string;
+    TopNExecutables: string;
+    TopNFunctions: string;
+    TopNHosts: string;
+    TopNThreads: string;
+    TopNTraces: string;
+    APMTransactions: string;
+    Flamechart: string;
+    HasSetupESResources: string;
+    SetupDataCollectionInstructions: string;
+    StorageExplorerSummary: string;
+    StorageExplorerHostStorageDetails: string;
+    StorageExplorerIndicesStorageDetails: string;
+};
+export declare function timeRangeFromRequest(request: any): [number, number];
+export declare const NOT_AVAILABLE_LABEL: string;

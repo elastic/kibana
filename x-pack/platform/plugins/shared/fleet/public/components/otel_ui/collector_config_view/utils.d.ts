@@ -1,0 +1,14 @@
+import type { EuiThemeComputed } from '@elastic/eui-theme-common';
+import type { ComponentHealth } from '../../../../common/types';
+import { type OTelComponentType } from './constants';
+export type ComponentHealthStatus = 'healthy' | 'unhealthy' | 'unknown';
+export declare const ALL_PIPELINES = "__all__";
+export declare const SIGNAL_PREFIX = "__signal__";
+export declare const getSignalType: (pipelineId: string) => string;
+export declare const getComponentHealthStatus: (componentHealth: ComponentHealth | undefined) => ComponentHealthStatus;
+export declare const getHealthStatusLabel: (healthStatus: ComponentHealthStatus) => string;
+export declare const HEALTH_STATUS_COLORS: Record<ComponentHealthStatus, string>;
+export declare const getHealthStatusColor: (status: ComponentHealthStatus, euiTheme: EuiThemeComputed<{}>) => string;
+export declare const nanosToMs: (nanos: number) => number;
+export declare const getComponentAccentColor: (componentType: OTelComponentType, euiTheme: EuiThemeComputed<{}>) => string;
+export declare const findComponentHealth: (health: ComponentHealth | undefined, componentType: OTelComponentType, componentId: string) => ComponentHealth | undefined;

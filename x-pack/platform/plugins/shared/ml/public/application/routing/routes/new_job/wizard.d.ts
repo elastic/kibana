@@ -1,0 +1,11 @@
+import type { MlRoute } from '../../router';
+import { type NavigateToApp } from '../../breadcrumbs';
+export declare const singleMetricRouteFactory: (navigateToApp: NavigateToApp) => MlRoute;
+export declare const multiMetricRouteFactory: (navigateToApp: NavigateToApp) => MlRoute;
+export declare const multiMetricRouteFactoryRedirect: () => MlRoute;
+export declare const populationRouteFactory: (navigateToApp: NavigateToApp) => MlRoute;
+export declare const advancedRouteFactory: (navigateToApp: NavigateToApp) => MlRoute;
+export declare const advancedRouteFactoryRedirect: () => MlRoute;
+export declare const categorizationRouteFactory: (navigateToApp: NavigateToApp) => MlRoute;
+export declare const rareRouteFactory: (navigateToApp: NavigateToApp) => MlRoute;
+export declare const geoRouteFactory: (navigateToApp: NavigateToApp) => MlRoute;

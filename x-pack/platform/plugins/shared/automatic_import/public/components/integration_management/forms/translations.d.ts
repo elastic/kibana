@@ -1,0 +1,16 @@
+export declare const TITLE_REQUIRED: string;
+export declare const DESCRIPTION_REQUIRED: string;
+export declare const CONNECTOR_REQUIRED: string;
+export declare const PACKAGE_NAMES_FETCH_ERROR: string;
+export declare const TITLE_ALREADY_EXISTS: string;
+export declare const DATA_STREAM_TITLE_REQUIRED: string;
+export declare const DATA_STREAM_TITLE_ALREADY_EXISTS: string;
+export declare const DATA_STREAM_DESCRIPTION_REQUIRED: string;
+export declare const DATA_COLLECTION_METHOD_REQUIRED: string;
+export declare const LOG_SAMPLE_REQUIRED: string;
+export declare const SELECTED_INDEX_REQUIRED: string;
+export declare const NAME_INVALID_FORMAT: string;
+export declare const NAME_CANNOT_BE_PURELY_NUMERIC: string;
+export declare const NAME_MUST_START_WITH_LETTER: string;
+export declare const NAME_TOO_SHORT: string;
+export declare const NAME_TOO_LONG: string;

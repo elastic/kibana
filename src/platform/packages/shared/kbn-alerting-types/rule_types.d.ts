@@ -1,0 +1,231 @@
+import type { SavedObjectAttribute, SavedObjectAttributes, SavedObjectsResolveResponse } from '@kbn/core/server';
+import type { Filter } from '@kbn/es-query';
+import type { RuleNotifyWhenType, RRuleParams } from '.';
+export type RuleTypeSolution = 'observability' | 'security' | 'stack';
+export type RuleTypeParams = Record<string, unknown>;
+export type RuleActionParams = SavedObjectAttributes;
+export type RuleActionParam = SavedObjectAttribute;
+export declare enum RuleChangeTrackingAction {
+    ruleCreate = "rule_create",
+    ruleUpdate = "rule_update",
+    ruleUpdateApiKey = "rule_update_api_key",
+    ruleEnable = "rule_enable",
+    ruleDisable = "rule_disable",
+    ruleSnooze = "rule_snooze",
+    ruleUnsnooze = "rule_unsnooze",
+    ruleDelete = "rule_delete"
+}
+export type ChangeTrackingAction = RuleChangeTrackingAction;
+export declare const ISO_WEEKDAYS: readonly [1, 2, 3, 4, 5, 6, 7];
+export type IsoWeekday = (typeof ISO_WEEKDAYS)[number];
+export interface IntervalSchedule extends SavedObjectAttributes {
+    interval: string;
+}
+export interface RuleActionFrequency extends SavedObjectAttributes {
+    summary: boolean;
+    notifyWhen: RuleNotifyWhenType;
+    throttle: string | null;
+}
+export interface AlertsFilterTimeframe extends SavedObjectAttributes {
+    days: IsoWeekday[];
+    timezone: string;
+    hours: {
+        start: string;
+        end: string;
+    };
+}
+export interface AlertsFilter extends SavedObjectAttributes {
+    query?: {
+        kql: string;
+        filters: Filter[];
+        dsl?: string;
+    };
+    timeframe?: AlertsFilterTimeframe;
+}
+export interface RuleAction {
+    uuid?: string;
+    group: string;
+    id: string;
+    actionTypeId: string;
+    params: RuleActionParams;
+    frequency?: RuleActionFrequency;
+    alertsFilter?: AlertsFilter;
+    useAlertDataForTemplate?: boolean;
+}
+export interface RuleSystemAction {
+    uuid?: string;
+    id: string;
+    actionTypeId: string;
+    params: RuleActionParams;
+}
+export interface MappedParamsProperties {
+    risk_score?: number;
+    severity?: string;
+}
+export type MappedParams = SavedObjectAttributes & MappedParamsProperties;
+export declare const RuleExecutionStatusValues: readonly ["ok", "active", "error", "pending", "unknown", "warning"];
+export declare const RuleLastRunOutcomeValues: readonly ["succeeded", "warning", "failed"];
+export declare enum RuleExecutionStatusErrorReasons {
+    Read = "read",
+    Decrypt = "decrypt",
+    Execute = "execute",
+    Unknown = "unknown",
+    License = "license",
+    Timeout = "timeout",
+    Disabled = "disabled",
+    Validate = "validate"
+}
+export declare enum RuleExecutionStatusWarningReasons {
+    MAX_EXECUTABLE_ACTIONS = "maxExecutableActions",
+    MAX_ALERTS = "maxAlerts",
+    MAX_QUEUED_ACTIONS = "maxQueuedActions",
+    EXECUTION = "ruleExecution"
+}
+export type RuleExecutionStatuses = (typeof RuleExecutionStatusValues)[number];
+export type RuleLastRunOutcomes = (typeof RuleLastRunOutcomeValues)[number];
+export interface RuleExecutionStatus {
+    status: RuleExecutionStatuses;
+    lastExecutionDate: Date;
+    lastDuration?: number;
+    error?: {
+        reason: RuleExecutionStatusErrorReasons;
+        message: string;
+    };
+    warning?: {
+        reason: RuleExecutionStatusWarningReasons;
+        message: string;
+    };
+}
+export interface RuleMonitoringHistory extends SavedObjectAttributes {
+    success: boolean;
+    timestamp: number;
+    duration?: number;
+    outcome?: RuleLastRunOutcomes;
+}
+export interface RuleMonitoringCalculatedMetrics extends SavedObjectAttributes {
+    p50?: number;
+    p95?: number;
+    p99?: number;
+    success_ratio: number;
+}
+export interface RuleMonitoringLastRunMetrics extends SavedObjectAttributes {
+    duration?: number;
+    total_search_duration_ms?: number | null;
+    total_indexing_duration_ms?: number | null;
+    total_alerts_detected?: number | null;
+    total_alerts_created?: number | null;
+    gap_duration_s?: number | null;
+    gap_range?: {
+        gte: string;
+        lte: string;
+    } | null;
+}
+export interface RuleMonitoringLastRun extends SavedObjectAttributes {
+    timestamp: string;
+    metrics: RuleMonitoringLastRunMetrics;
+}
+export interface RuleMonitoring {
+    run: {
+        history: RuleMonitoringHistory[];
+        calculated_metrics: RuleMonitoringCalculatedMetrics;
+        last_run: RuleMonitoringLastRun;
+    };
+}
+export interface RuleSnoozeSchedule {
+    duration: number;
+    rRule: RRuleParams;
+    id?: string;
+    skipRecurrences?: string[];
+}
+export type RuleSnooze = Array<{
+    duration: number;
+    rRule: RRuleParams;
+    id?: string;
+    skipRecurrences?: string[];
+}>;
+export interface RuleLastRun {
+    outcome: RuleLastRunOutcomes;
+    outcomeOrder?: number;
+    warning?: RuleExecutionStatusErrorReasons | RuleExecutionStatusWarningReasons | null;
+    outcomeMsg?: string[] | null;
+    alertsCount: {
+        active?: number | null;
+        new?: number | null;
+        recovered?: number | null;
+        ignored?: number | null;
+    };
+}
+export interface AlertDelay extends SavedObjectAttributes {
+    active: number;
+}
+export interface SanitizedAlertsFilter extends AlertsFilter {
+    query?: {
+        kql: string;
+        filters: Filter[];
+    };
+    timeframe?: AlertsFilterTimeframe;
+}
+export type SanitizedRuleAction = Omit<RuleAction, 'alertsFilter'> & {
+    alertsFilter?: SanitizedAlertsFilter;
+};
+export interface Flapping extends SavedObjectAttributes {
+    enabled?: boolean;
+    lookBackWindow: number;
+    statusChangeThreshold: number;
+}
+export interface Dashboard {
+    id: string;
+}
+export interface Artifacts {
+    dashboards?: Dashboard[];
+    investigation_guide?: {
+        blob: string;
+    };
+}
+export interface Rule<Params extends RuleTypeParams = never> {
+    id: string;
+    enabled: boolean;
+    name: string;
+    tags: string[];
+    alertTypeId: string;
+    consumer: string;
+    schedule: IntervalSchedule;
+    actions: RuleAction[];
+    systemActions?: RuleSystemAction[];
+    params: Params;
+    mapped_params?: MappedParams;
+    scheduledTaskId?: string | null;
+    createdBy: string | null;
+    updatedBy: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+    apiKey: string | null;
+    apiKeyOwner: string | null;
+    apiKeyCreatedByUser?: boolean | null;
+    uiamApiKey?: string | null;
+    throttle?: string | null;
+    muteAll: boolean;
+    notifyWhen?: RuleNotifyWhenType | null;
+    mutedInstanceIds: string[];
+    executionStatus: RuleExecutionStatus;
+    monitoring?: RuleMonitoring;
+    snoozeSchedule?: RuleSnooze;
+    activeSnoozes?: string[];
+    isSnoozedUntil?: Date | null;
+    lastRun?: RuleLastRun | null;
+    nextRun?: Date | null;
+    revision: number;
+    running?: boolean | null;
+    viewInAppRelativeUrl?: string;
+    alertDelay?: AlertDelay | null;
+    lastEnabledAt?: Date;
+    flapping?: Flapping | null;
+    artifacts?: Artifacts | null;
+}
+export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<Rule<Params>, 'apiKey' | 'actions'> & {
+    actions: SanitizedRuleAction[];
+};
+export type ResolvedSanitizedRule<Params extends RuleTypeParams = never> = SanitizedRule<Params> & Omit<SavedObjectsResolveResponse, 'saved_object'> & {
+    outcome: string;
+    alias_target_id?: string;
+};

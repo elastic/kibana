@@ -1,0 +1,2 @@
+import { RemoteClusterList as RemoteClusterListView } from './remote_cluster_list';
+export declare const RemoteClusterList: import("react-redux").ConnectedComponent<typeof RemoteClusterListView, import("react-redux").Omit<import("react").ClassAttributes<RemoteClusterListView> & import("./remote_cluster_list").Props, "isLoading" | "clusters" | "openDetailPanel" | "closeDetailPanel" | "loadClusters" | "refreshClusters" | "isDetailPanelOpen" | "isCopyingCluster" | "isRemovingCluster" | "clusterLoadError">>;

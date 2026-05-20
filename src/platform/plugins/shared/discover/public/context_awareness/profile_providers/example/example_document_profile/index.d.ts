@@ -1,0 +1,1 @@
+export { createExampleDocumentProfileProvider } from './profile';

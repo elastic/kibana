@@ -1,0 +1,14 @@
+import type { SnakeToCamelCase } from '../types';
+import type { CategoryUserAction, CommentUserAction, ConnectorUserAction, CreateCaseUserAction, DescriptionUserAction, PushedUserAction, StatusUserAction, TagsUserAction, TitleUserAction, UserActionType } from '../types/domain';
+type SnakeCaseOrCamelCaseUserAction<T extends 'snakeCase' | 'camelCase', S, C> = T extends 'snakeCase' ? S : C;
+export declare const isConnectorUserAction: (userAction: unknown) => userAction is ConnectorUserAction;
+export declare const isPushedUserAction: <T extends "snakeCase" | "camelCase" = "snakeCase">(userAction: unknown) => userAction is SnakeCaseOrCamelCaseUserAction<T, PushedUserAction, SnakeToCamelCase<PushedUserAction>>;
+export declare const isTitleUserAction: (userAction: unknown) => userAction is TitleUserAction;
+export declare const isStatusUserAction: (userAction: unknown) => userAction is StatusUserAction;
+export declare const isTagsUserAction: (userAction: unknown) => userAction is TagsUserAction;
+export declare const isCommentUserAction: (userAction: unknown) => userAction is CommentUserAction;
+export declare const isDescriptionUserAction: (userAction: unknown) => userAction is DescriptionUserAction;
+export declare const isCreateCaseUserAction: (userAction: unknown) => userAction is CreateCaseUserAction;
+export declare const isUserActionType: (field: string) => field is UserActionType;
+export declare const isCategoryUserAction: (userAction: unknown) => userAction is CategoryUserAction;
+export {};

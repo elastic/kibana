@@ -1,0 +1,20 @@
+export declare const AvailableAnnotationIcons: {
+    readonly ASTERISK: "asterisk";
+    readonly ALERT: "alert";
+    readonly BELL: "bell";
+    readonly BOLT: "bolt";
+    readonly BUG: "bug";
+    readonly CIRCLE: "circle";
+    readonly EDITOR_COMMENT: "editorComment";
+    readonly FLAG: "flag";
+    readonly HEART: "heart";
+    readonly MAP_MARKER: "mapMarker";
+    readonly PIN_FILLED: "pinFilled";
+    readonly STAR_EMPTY: "starEmpty";
+    readonly STAR_FILLED: "starFilled";
+    readonly TAG: "tag";
+    readonly TRIANGLE: "triangle";
+};
+export declare const EVENT_ANNOTATION_GROUP_TYPE = "event-annotation-group";
+export { AUTO_ANNOTATION_COLOR, defaultAnnotationColor, defaultAnnotationRangeColor, getDefaultAnnotationColor, getDefaultAnnotationRangeColor, getPersistedAnnotationColor, getResolvedAnnotationColor, defaultAnnotationLabel, defaultRangeAnnotationLabel, getDefaultManualAnnotation, getDefaultQueryAnnotation, createCopiedAnnotation, isAutoAnnotationColor, isRangeAnnotationConfig, isManualPointAnnotationConfig, isQueryAnnotationConfig, } from './util';
+export type { EventAnnotationGroupContent, AvailableAnnotationIcon, PointStyleProps, EventAnnotationConfig, EventAnnotationGroupConfig, RangeStyleProps, ManualAnnotationType, PointInTimeEventAnnotationConfig, RangeEventAnnotationConfig, QueryPointEventAnnotationConfig, } from './types';

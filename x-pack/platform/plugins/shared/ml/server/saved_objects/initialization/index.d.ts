@@ -1,0 +1,1 @@
+export { jobSavedObjectsInitializationFactory } from './initialization';

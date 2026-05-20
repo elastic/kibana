@@ -1,0 +1,14 @@
+export declare const PENDING_CHANGES_REMINDER: string;
+export declare const EDIT_CONTROLS: string;
+export declare const ADD_CONTROLS: string;
+export declare const SAVE_CONTROLS: string;
+export declare const DISCARD_CHANGES: string;
+export declare const FILTER_GROUP_MENU: string;
+export declare const FILTER_GROUP_BANNER_TITLE: string;
+export declare const FILTER_GROUP_BANNER_MESSAGE: string;
+export declare const CONTEXT_MENU_RESET_TOOLTIP: string;
+export declare const CONTEXT_MENU_RESET: string;
+export declare const SAVE_CHANGES: string;
+export declare const REVERT_CHANGES: string;
+export declare const ADD_CONTROLS_MAX_LIMIT: string;
+export declare const URL_PARAM_ARRAY_EXCEPTION_MSG: string;

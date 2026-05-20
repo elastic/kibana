@@ -1,0 +1,45 @@
+import type { TypeOf } from '@kbn/typed-react-router-config';
+import React from 'react';
+import type { AgentName } from '@kbn/elastic-agent-utils';
+import type { ServiceListItem } from '../../../../../common/service_inventory';
+import { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
+import type { Breakpoints } from '../../../../hooks/use_breakpoints';
+import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { ApmRoutes } from '../../../routing/apm_route_config';
+import type { ITableColumn, SortFunction, VisibleItemsStartEnd } from '../../../shared/managed_table';
+type ServicesDetailedStatisticsAPIResponse = APIReturnType<'POST /internal/apm/services/detailed_statistics'>;
+export declare function getServiceColumns({ query, showTransactionTypeColumn, comparisonDataLoading, comparisonData, breakpoints, showAnomaliesColumn, showAlertsColumn, showSlosColumn, link, serviceOverflowCount, onSloBadgeClick, }: {
+    query: TypeOf<ApmRoutes, '/services'>['query'];
+    showTransactionTypeColumn: boolean;
+    showAnomaliesColumn: boolean;
+    showAlertsColumn: boolean;
+    showSlosColumn: boolean;
+    comparisonDataLoading: boolean;
+    breakpoints: Breakpoints;
+    comparisonData?: ServicesDetailedStatisticsAPIResponse;
+    link: any;
+    serviceOverflowCount: number;
+    onSloBadgeClick: (serviceName: string, agentName?: AgentName) => void;
+}): Array<ITableColumn<ServiceListItem>>;
+interface Props {
+    status: FETCH_STATUS;
+    items: ServiceListItem[];
+    comparisonDataLoading: boolean;
+    comparisonData?: ServicesDetailedStatisticsAPIResponse;
+    noItemsMessage?: React.ReactNode;
+    displayAnomalies: boolean;
+    displayAlerts: boolean;
+    displaySlos: boolean;
+    initialSortField: ServiceInventoryFieldName;
+    initialPageSize: number;
+    initialSortDirection: 'asc' | 'desc';
+    sortFn: SortFunction<ServiceListItem>;
+    serviceOverflowCount: number;
+    maxCountExceeded: boolean;
+    onChangeSearchQuery?: (searchQuery: string) => void;
+    onChangeRenderedItems?: (renderedItems: ServiceListItem[]) => void;
+    onChangeItemIndices?: (range: VisibleItemsStartEnd) => void;
+}
+export declare function ApmServicesTable({ status, items, noItemsMessage, comparisonDataLoading, comparisonData, displayAnomalies, displayAlerts, displaySlos, initialSortField, initialSortDirection, initialPageSize, sortFn, serviceOverflowCount, maxCountExceeded, onChangeSearchQuery, onChangeRenderedItems, onChangeItemIndices, }: Props): React.JSX.Element;
+export {};

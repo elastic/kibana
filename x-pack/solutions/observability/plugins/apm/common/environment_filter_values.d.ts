@@ -1,0 +1,1 @@
+export { ENVIRONMENT_ALL_VALUE, ENVIRONMENT_NOT_DEFINED_VALUE, allOptionText, getEnvironmentLabel, ENVIRONMENT_ALL, ENVIRONMENT_NOT_DEFINED, isEnvironmentDefined, getEnvironmentEsField, getEnvironmentKuery, getNextEnvironmentUrlParam, } from '@kbn/apm-types';

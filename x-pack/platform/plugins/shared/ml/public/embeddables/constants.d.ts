@@ -1,0 +1,7 @@
+export declare const ANOMALY_SWIMLANE_EMBEDDABLE_TYPE: "ml_anomaly_swimlane";
+export declare const ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE: "ml_anomaly_charts";
+export declare const ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE: "ml_single_metric_viewer";
+export type AnomalySwimLaneEmbeddableType = typeof ANOMALY_SWIMLANE_EMBEDDABLE_TYPE;
+export type AnomalyExplorerChartsEmbeddableType = typeof ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE;
+export type AnomalySingleMetricViewerEmbeddableType = typeof ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE;
+export type MlEmbeddableTypes = AnomalySwimLaneEmbeddableType | AnomalyExplorerChartsEmbeddableType | AnomalySingleMetricViewerEmbeddableType;

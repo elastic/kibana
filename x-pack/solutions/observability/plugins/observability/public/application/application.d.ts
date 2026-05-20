@@ -1,0 +1,21 @@
+import React from 'react';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
+import type { ObservabilityRuleTypeRegistry } from '../rules/create_observability_rule_type_registry';
+import type { TelemetryServiceStart } from '../services/telemetry/types';
+export declare function App(): React.JSX.Element;
+export declare const renderApp: ({ core, config, plugins, appMountParameters, observabilityRuleTypeRegistry, ObservabilityPageTemplate, telemetryClient, usageCollection, isDev, kibanaVersion, isServerless, }: {
+    core: CoreStart;
+    config: ConfigSchema;
+    plugins: ObservabilityPublicPluginsStart;
+    observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
+    appMountParameters: AppMountParameters;
+    ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
+    telemetryClient: TelemetryServiceStart;
+    usageCollection: UsageCollectionSetup;
+    isDev?: boolean;
+    kibanaVersion: string;
+    isServerless?: boolean;
+}) => () => void;

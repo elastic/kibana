@@ -1,0 +1,13 @@
+import type * as t from 'io-ts';
+import type { dateRangeSchema, groupBySchema, groupingsSchema, groupSummarySchema, metaSchema, objectiveSchema, sloSettingsSchema, statusSchema, storedSloSettingsSchema, summarySchema } from '@kbn/slo-schema';
+type Objective = t.TypeOf<typeof objectiveSchema>;
+type Status = t.TypeOf<typeof statusSchema>;
+type DateRange = t.TypeOf<typeof dateRangeSchema>;
+type Summary = t.TypeOf<typeof summarySchema>;
+type Groupings = t.TypeOf<typeof groupingsSchema>;
+type Meta = t.TypeOf<typeof metaSchema>;
+type GroupSummary = t.TypeOf<typeof groupSummarySchema>;
+type GroupBy = t.TypeOf<typeof groupBySchema>;
+type StoredSLOSettings = t.OutputOf<typeof storedSloSettingsSchema>;
+type SLOSettings = t.TypeOf<typeof sloSettingsSchema>;
+export type { Objective, DateRange, Groupings, Meta, Status, Summary, GroupBy, GroupSummary, StoredSLOSettings, SLOSettings, };

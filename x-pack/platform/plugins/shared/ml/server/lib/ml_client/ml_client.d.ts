@@ -1,0 +1,12 @@
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { MlLicense } from '../../../common/license/ml_license';
+import type { MLSavedObjectService } from '../../saved_objects';
+import type { MlClient, MlGetADParams, MlGetDFAParams, MlGetDatafeedParams, MlGetTrainedModelParams } from './types';
+import type { MlAuditLogger } from './ml_audit_logger';
+import type { ServerlessInfo } from '../../types';
+export declare function getMlClient(client: IScopedClusterClient, mlSavedObjectService: MLSavedObjectService, auditLogger: MlAuditLogger, mlLicense: MlLicense, serverless: ServerlessInfo): MlClient;
+export declare function getDFAJobIdsFromRequest([params]: MlGetDFAParams): string[];
+export declare function getModelIdsFromRequest([params]: MlGetTrainedModelParams): string[];
+export declare function getADJobIdsFromRequest([params]: MlGetADParams): string[];
+export declare function getDatafeedIdsFromRequest([params]: MlGetDatafeedParams): string[];
+export declare function getJobIdFromBody(p: any): string | undefined;

@@ -1,0 +1,16 @@
+export declare const PAGE_TITLE: string;
+export declare const CREATE_DATASET_BUTTON: string;
+export declare const CREATE_DATASET_FLYOUT_TITLE: string;
+export declare const CREATE_DATASET_NAME_LABEL: string;
+export declare const CREATE_DATASET_DESCRIPTION_LABEL: string;
+export declare const CREATE_DATASET_NAME_REQUIRED_ERROR: string;
+export declare const CREATE_DATASET_CANCEL_BUTTON: string;
+export declare const CREATE_DATASET_SUBMIT_BUTTON: string;
+export declare const TABLE_CAPTION: string;
+export declare const COLUMN_NAME: string;
+export declare const COLUMN_DESCRIPTION: string;
+export declare const COLUMN_EXAMPLES: string;
+export declare const COLUMN_LAST_UPDATED: string;
+export declare const LOAD_ERROR_TITLE: string;
+export declare const getLoadErrorBody: (errorMessage: string) => string;
+export declare const RETRY_BUTTON: string;

@@ -1,0 +1,65 @@
+import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
+import type { LogSearchResult, WorkflowLogEvent } from '../repositories/logs_repository';
+/**
+ * Event Logger Service Interfaces
+ */
+export interface BaseLogsParams {
+    spaceId?: string;
+    sortField?: string;
+    sortOrder?: SortOrder;
+    page?: number;
+    size?: number;
+}
+export interface SearchLogsParams extends BaseLogsParams {
+    executionId?: string;
+    stepExecutionId?: string;
+    stepId?: string;
+}
+export interface ExecutionLogsParams extends BaseLogsParams {
+    executionId: string;
+}
+export interface StepLogsParams extends BaseLogsParams {
+    stepExecutionId: string;
+    executionId: string;
+}
+export interface LogsByLevelParams extends BaseLogsParams {
+    executionId?: string;
+    level: string;
+}
+export interface IWorkflowEventLoggerService {
+    createLogger(context: WorkflowEventLoggerContext): IWorkflowEventLogger;
+    createWorkflowLogger(workflowId: string, workflowName?: string): IWorkflowEventLogger;
+    createExecutionLogger(workflowId: string, executionId: string, workflowName?: string): IWorkflowEventLogger;
+    createStepLogger(workflowId: string, executionId: string, stepId: string, stepName?: string, stepType?: string, workflowName?: string): IWorkflowEventLogger;
+    getExecutionLogs(params: ExecutionLogsParams): Promise<LogSearchResult>;
+    getStepLogs(params: StepLogsParams): Promise<LogSearchResult>;
+    getLogsByLevel(params: LogsByLevelParams): Promise<LogSearchResult>;
+    searchLogs(params: SearchLogsParams): Promise<LogSearchResult>;
+    getRecentLogs(limit?: number): Promise<LogSearchResult>;
+}
+/**
+ * Event Logger Interfaces
+ */
+export interface WorkflowEventLoggerContext {
+    workflowId?: string;
+    workflowName?: string;
+    executionId?: string;
+    stepExecutionId?: string;
+    stepId?: string;
+    stepName?: string;
+    stepType?: string;
+    spaceId?: string;
+}
+export interface WorkflowEventLoggerOptions {
+    enableConsoleLogging?: boolean;
+}
+export interface IWorkflowEventLogger {
+    logInfo(message: string, additionalData?: Partial<WorkflowLogEvent>): void;
+    logError(message: string, error?: Error, additionalData?: Partial<WorkflowLogEvent>): void;
+    logWarn(message: string, additionalData?: Partial<WorkflowLogEvent>): void;
+    logDebug(message: string, additionalData?: Partial<WorkflowLogEvent>): void;
+    startTiming(event: WorkflowLogEvent): void;
+    stopTiming(event: WorkflowLogEvent): void;
+    createStepLogger(stepExecutionId: string, stepId: string, stepName?: string, stepType?: string): IWorkflowEventLogger;
+    flushEvents(): Promise<void>;
+}

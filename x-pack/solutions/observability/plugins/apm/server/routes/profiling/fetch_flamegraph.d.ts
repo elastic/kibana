@@ -1,0 +1,40 @@
+import type { ProfilingDataAccessPluginStart } from '@kbn/profiling-data-access-plugin/server';
+import type { CoreRequestHandlerContext, ElasticsearchClient } from '@kbn/core/server';
+interface Params {
+    profilingDataAccessStart: ProfilingDataAccessPluginStart;
+    core: CoreRequestHandlerContext;
+    esClient: ElasticsearchClient;
+    start: number;
+    end: number;
+    kuery: string;
+    serviceName?: string;
+    transactionName?: string;
+    environment?: string;
+    transactionType?: string;
+    indices?: string[];
+    stacktraceIdsField?: string;
+}
+export declare function fetchFlamegraph({ profilingDataAccessStart, core, esClient, start, end, kuery, serviceName, transactionName, environment, transactionType, indices, stacktraceIdsField, }: Params): Promise<{
+    TotalSeconds: number;
+    Size: number;
+    Edges: number[][];
+    FileID: string[];
+    FrameType: number[];
+    Inline: boolean[];
+    ExeFilename: string[];
+    AddressOrLine: number[];
+    FunctionName: string[];
+    FunctionOffset: number[];
+    SourceFilename: string[];
+    SourceLine: number[];
+    CountInclusive: number[];
+    CountExclusive: number[];
+    SamplingRate: number;
+    TotalSamples: number;
+    SelfCPU: number;
+    AnnualCO2TonsExclusive: number[];
+    AnnualCO2TonsInclusive: number[];
+    AnnualCostsUSDInclusive: number[];
+    AnnualCostsUSDExclusive: number[];
+}>;
+export {};

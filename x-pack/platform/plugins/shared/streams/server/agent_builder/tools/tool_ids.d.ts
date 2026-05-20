@@ -1,0 +1,10 @@
+export declare const STREAMS_INSPECT_STREAMS_TOOL_ID: string;
+export declare const STREAMS_DIAGNOSE_STREAM_TOOL_ID: string;
+export declare const STREAMS_QUERY_DOCUMENTS_TOOL_ID: string;
+export declare const STREAMS_DESIGN_PIPELINE_TOOL_ID: string;
+export declare const STREAMS_LIST_ILM_POLICIES_TOOL_ID: string;
+export declare const STREAMS_READ_TOOL_IDS: readonly [string, string, string, string, string];
+export declare const STREAMS_UPDATE_STREAM_TOOL_ID: string;
+export declare const STREAMS_CREATE_PARTITION_TOOL_ID: string;
+export declare const STREAMS_DELETE_STREAM_TOOL_ID: string;
+export declare const STREAMS_WRITE_TOOL_IDS: readonly [string, string, string];

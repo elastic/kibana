@@ -1,0 +1,30 @@
+import type { Observable } from 'rxjs';
+import { Subscription } from 'rxjs';
+import type { UrlStateService } from '@kbn/ml-url-state';
+import { StateService } from '../services/state_service';
+import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
+import type { AnomalyTimelineStateService } from './anomaly_timeline_state_service';
+import type { ExplorerChartsData } from './explorer_charts/explorer_charts_container_service';
+import type { AnomalyExplorerChartsService } from '../services/anomaly_explorer_charts_service';
+import type { TableSeverityState } from '../components/controls/select_severity';
+import type { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_state';
+export declare class AnomalyChartsStateService extends StateService {
+    private _anomalyExplorerCommonStateService;
+    private _anomalyTimelineStateServices;
+    private _anomalyExplorerChartsService;
+    private _anomalyExplorerUrlStateService;
+    private _tableSeverityState;
+    private _isChartsDataLoading$;
+    private _chartsData$;
+    private _showCharts$;
+    constructor(_anomalyExplorerCommonStateService: AnomalyExplorerCommonStateService, _anomalyTimelineStateServices: AnomalyTimelineStateService, _anomalyExplorerChartsService: AnomalyExplorerChartsService, _anomalyExplorerUrlStateService: AnomalyExplorerUrlStateService, _tableSeverityState: UrlStateService<TableSeverityState>);
+    protected _initSubscriptions(): Subscription;
+    private initChartDataSubscription;
+    getChartsData$(): Observable<ExplorerChartsData>;
+    getChartsData(): ExplorerChartsData;
+    getShowCharts$(): Observable<boolean>;
+    getShowCharts(): boolean;
+    setShowCharts(update: boolean): void;
+    isChartsDataLoading$(): Observable<boolean>;
+    isChartsDataLoading(): boolean;
+}

@@ -1,0 +1,13 @@
+import { monaco } from '@kbn/monaco';
+import type { MonacoEditorActionsProvider } from '../monaco_editor_actions_provider';
+import type { AutoCompleteContext, ResultTerm } from '../../../../lib/autocomplete/types';
+import type { EditorRequest } from '../types';
+export declare const getDocumentationLinkFromAutocomplete: (request: EditorRequest, docLinkVersion: string) => string | null;
+export declare const getMethodCompletionItems: (model: monaco.editor.ITextModel, position: monaco.Position) => monaco.languages.CompletionItem[];
+export declare const getUrlPathCompletionItems: (model: monaco.editor.ITextModel, position: monaco.Position) => monaco.languages.CompletionItem[];
+export declare const getUrlParamsCompletionItems: (model: monaco.editor.ITextModel, position: monaco.Position) => monaco.languages.CompletionItem[];
+export declare const getBodyCompletionItems: (model: monaco.editor.ITextModel, position: monaco.Position, requestStartLineNumber: number, editor: MonacoEditorActionsProvider) => Promise<monaco.languages.CompletionItem[]>;
+export declare const getInsertText: ({ name, insertValue, template, value }: ResultTerm, bodyContent: string, context: AutoCompleteContext) => string;
+export declare const shouldTriggerSuggestions: (lineContent: string) => boolean;
+export declare const isEmptyOrDoubleQuote: (lineContent: string) => boolean;
+export declare const hasUnclosedQuote: (lineContent: string) => boolean;

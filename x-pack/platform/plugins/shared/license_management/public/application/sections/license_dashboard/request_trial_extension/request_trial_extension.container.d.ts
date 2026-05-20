@@ -1,0 +1,1 @@
+export declare const RequestTrialExtension: import("react-redux").ConnectedComponent<import("react").FC<import("./request_trial_extension").Props>, import("react-redux").Omit<import("./request_trial_extension").Props, "shouldShowRequestTrialExtension">>;

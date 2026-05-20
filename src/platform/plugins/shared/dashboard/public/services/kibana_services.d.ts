@@ -1,0 +1,48 @@
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public/plugin';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
+import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { DashboardStartDependencies } from '../plugin';
+export declare let coreServices: CoreStart;
+export declare let cpsService: CPSPluginStart | undefined;
+export declare let contentManagementService: ContentManagementPublicStart;
+export declare let dataService: DataPublicPluginStart;
+export declare let dataViewEditorService: DataViewEditorStart;
+export declare let embeddableService: EmbeddableStart;
+export declare let fieldFormatService: FieldFormatsStart;
+export declare let navigationService: NavigationPublicPluginStart;
+export declare let noDataPageService: NoDataPagePluginStart | undefined;
+export declare let observabilityAssistantService: ObservabilityAIAssistantPublicStart | undefined;
+export declare let lensService: LensPublicStart | undefined;
+export declare let presentationUtilService: PresentationUtilPluginStart;
+export declare let savedObjectsTaggingService: SavedObjectTaggingOssPluginStart | undefined;
+export declare let screenshotModeService: ScreenshotModePluginStart;
+export declare let serverlessService: ServerlessPluginStart | undefined;
+export declare let shareService: SharePluginStart | undefined;
+export declare let spacesService: SpacesApi | undefined;
+export declare let uiActionsService: UiActionsPublicStart;
+export declare let unifiedSearchService: UnifiedSearchPublicPluginStart;
+export declare let urlForwardingService: UrlForwardingStart;
+export declare let usageCollectionService: UsageCollectionStart | undefined;
+/**
+ * Allows module-level access to all of the Dashboard plugin's dependencies.
+ */
+export declare const setKibanaServices: (kibanaCore: CoreStart, deps: DashboardStartDependencies) => void;
+export declare const untilPluginStartServicesReady: () => Promise<void>;

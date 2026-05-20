@@ -1,0 +1,10 @@
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { EuiThemeComputed } from '@elastic/eui';
+import type { LayerConfig } from '../configurations/lens_attributes';
+import type { AllSeries } from './use_series_storage';
+import type { ReportViewType, SeriesUrl, UrlFilter } from '../types';
+import type { DataViewState } from './use_app_data_view';
+import type { ReportConfigMap } from '../contexts/exploratory_view_config';
+export declare const getFiltersFromDefs: (reportDefinitions: SeriesUrl["reportDefinitions"] | SeriesUrl["textReportDefinitions"]) => UrlFilter[];
+export declare function getLayerConfigs(allSeries: AllSeries, reportType: ReportViewType, euiTheme: EuiThemeComputed, dataViews: DataViewState, reportConfigMap: ReportConfigMap, spaceId?: string): LayerConfig[];
+export declare const useLensAttributes: () => TypedLensByValueInput["attributes"] | null;

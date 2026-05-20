@@ -1,0 +1,6 @@
+export declare const SECRETS_ENDPOINT_PATH = "/_fleet/secret";
+export declare const SECRETS_MINIMUM_FLEET_SERVER_VERSION = "8.10.0";
+export declare const OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION = "8.12.0";
+export declare const ACTION_SECRETS_MINIMUM_FLEET_SERVER_VERSION = "9.2.0";
+export declare const SSL_SECRETS_MINIMUM_FLEET_SERVER_VERSION = "9.3.0";
+export declare const DOWNLOAD_SOURCE_AUTH_SECRETS_MINIMUM_FLEET_SERVER_VERSION = "9.4.0";

@@ -1,0 +1,2 @@
+declare const routes: ((router: import("../../../../../../../core/server").IRouter, getStartServices: import("@kbn/core/packages/lifecycle/server").StartServicesAccessor<import("@kbn/kql/server/data_views").DataViewsServerPluginStartDependencies, import("@kbn/kql/server/data_views").DataViewsServerPluginStart>, usageCollection?: import("../../../../usage_collection/server").UsageCounter) => void)[];
+export { routes };

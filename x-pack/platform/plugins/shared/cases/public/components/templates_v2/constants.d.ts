@@ -1,0 +1,13 @@
+import type { monaco } from '@kbn/monaco';
+import type { TemplatesFindRequest } from '../../../common/types/api/template/v1';
+export declare const PAGE_SIZE_OPTIONS: number[];
+export declare const TEMPLATES_STATE_URL_KEY = "templates";
+export declare const SORT_ORDER_VALUES: Array<'asc' | 'desc'>;
+export declare const DEFAULT_QUERY_PARAMS: TemplatesFindRequest;
+export declare const LINE_CLAMP = 3;
+export declare const MAX_TEMPLATES_PER_FILE = 100;
+export declare const MAX_TOTAL_IMPORT_TEMPLATES = 100;
+export declare const TEMPLATE_PREVIEW_WIDTH_KEY = "CASES_TEMPLATE_PREVIEW_WIDTH";
+export declare const MIN_PREVIEW_WIDTH = 250;
+export declare const MIN_EDITOR_WIDTH = 400;
+export declare const YAML_EDITOR_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions;

@@ -1,0 +1,42 @@
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type { FindFileStructureResponse, IngestPipeline } from '@kbn/file-upload-common';
+import type { CombinedField } from './types';
+export declare function getDefaultCombinedFields(results: FindFileStructureResponse): CombinedField[];
+export declare function addCombinedFieldsToMappings(mappings: MappingTypeMapping, combinedFields: CombinedField[]): MappingTypeMapping;
+export declare function removeCombinedFieldsFromMappings(mappings: MappingTypeMapping, combinedFields: CombinedField[]): {
+    all_field?: import("@elastic/elasticsearch/lib/api/types").MappingAllField;
+    date_detection?: boolean;
+    dynamic?: import("@elastic/elasticsearch/lib/api/types").MappingDynamicMapping;
+    dynamic_date_formats?: string[];
+    dynamic_templates?: Partial<Record<string, import("@elastic/elasticsearch/lib/api/types").MappingDynamicTemplate>>[];
+    _field_names?: import("@elastic/elasticsearch/lib/api/types").MappingFieldNamesField;
+    index_field?: import("@elastic/elasticsearch/lib/api/types").MappingIndexField;
+    _meta?: import("@elastic/elasticsearch/lib/api/types").Metadata;
+    numeric_detection?: boolean;
+    properties: Record<import("@elastic/elasticsearch/lib/api/types").PropertyName, import("@elastic/elasticsearch/lib/api/types").MappingProperty>;
+    _routing?: import("@elastic/elasticsearch/lib/api/types").MappingRoutingField;
+    _size?: import("@elastic/elasticsearch/lib/api/types").MappingSizeField;
+    _source?: import("@elastic/elasticsearch/lib/api/types").MappingSourceField;
+    runtime?: Record<string, import("@elastic/elasticsearch/lib/api/types").MappingRuntimeField>;
+    enabled?: boolean;
+    subobjects?: import("@elastic/elasticsearch/lib/api/types").MappingSubobjects;
+    _data_stream_timestamp?: import("@elastic/elasticsearch/lib/api/types").MappingDataStreamTimestamp;
+};
+export declare function addCombinedFieldsToPipeline(pipeline: IngestPipeline, combinedFields: CombinedField[]): IngestPipeline;
+export declare function removeCombinedFieldsFromPipeline(pipeline: IngestPipeline, combinedFields: CombinedField[]): {
+    processors: any[];
+    description?: string;
+    isManaged?: boolean;
+    name?: string;
+};
+export declare function isWithinLatRange(fieldName: string, fieldStats: FindFileStructureResponse['field_stats']): boolean;
+export declare function isWithinLonRange(fieldName: string, fieldStats: FindFileStructureResponse['field_stats']): boolean;
+export declare function getLatLonFields(results: FindFileStructureResponse | undefined): {
+    latFields: string[];
+    lonFields: string[];
+};
+export declare function isLatLonCompatible(results: FindFileStructureResponse | undefined): boolean;
+export declare function createGeoPointCombinedField(latField: string, lonField: string, geoPointField: string): CombinedField;
+export declare function createSemanticTextCombinedField(sematicTextField: string, originalField: string): CombinedField;
+export declare function getNameCollisionMsg(name: string): string;
+export declare function getFieldNames(results: FindFileStructureResponse): string[];

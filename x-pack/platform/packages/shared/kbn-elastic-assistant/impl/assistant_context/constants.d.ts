@@ -1,0 +1,32 @@
+import type { KnowledgeBaseConfig } from '../assistant/types';
+export declare const ATTACK_DISCOVERY_STORAGE_KEY = "attackDiscovery";
+export declare const DEFEND_INSIGHTS_STORAGE_KEY = "defendInsights";
+export declare const DEFAULT_ASSISTANT_NAMESPACE = "elasticAssistantDefault";
+export declare const END_LOCAL_STORAGE_KEY = "end";
+export declare const LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY = "lastConversationId";
+export declare const LAST_SELECTED_CONVERSATION_LOCAL_STORAGE_KEY = "lastSelectedConversation";
+export declare const SHARED_CONVERSATION_CALLOUT = "sharedConversationCallout";
+export declare const FILTERS_LOCAL_STORAGE_KEY = "filters";
+export declare const MAX_ALERTS_LOCAL_STORAGE_KEY = "maxAlerts";
+export declare const KNOWLEDGE_BASE_LOCAL_STORAGE_KEY = "knowledgeBase";
+export declare const HISTORY_END_LOCAL_STORAGE_KEY = "historyEnd";
+export declare const HISTORY_START_LOCAL_STORAGE_KEY = "historyStart";
+export declare const HISTORY_QUERY_LOCAL_STORAGE_KEY = "historyQuery";
+export declare const QUERY_LOCAL_STORAGE_KEY = "query";
+export declare const SHOW_SETTINGS_TOUR_LOCAL_STORAGE_KEY = "showSettingsTour";
+export declare const START_LOCAL_STORAGE_KEY = "start";
+export declare const STREAMING_LOCAL_STORAGE_KEY = "streaming";
+export declare const CONTENT_REFERENCES_VISIBLE_LOCAL_STORAGE_KEY = "contentReferencesVisible";
+export declare const SHOW_ANONYMIZED_VALUES_LOCAL_STORAGE_KEY = "showAnonymizedValues";
+export declare const TRACE_OPTIONS_SESSION_STORAGE_KEY = "traceOptions";
+export declare const CONVERSATION_TABLE_SESSION_STORAGE_KEY = "conversationTable";
+export declare const QUICK_PROMPT_TABLE_SESSION_STORAGE_KEY = "quickPromptTable";
+export declare const SYSTEM_PROMPT_TABLE_SESSION_STORAGE_KEY = "systemPromptTable";
+export declare const ANONYMIZATION_TABLE_SESSION_STORAGE_KEY = "anonymizationTable";
+export declare const ANONYMIZATION_PROMPT_CONTEXT_TABLE_SESSION_STORAGE_KEY = "anonymizationPromptContextTable";
+export declare const MOVING_ATTACKS_CALLOUT_LOCAL_STORAGE_KEY = "movingAttacksCallout";
+/** The default `n` latest alerts, ordered by risk score, sent as context to the assistant */
+export declare const DEFAULT_LATEST_ALERTS = 100;
+/** The default maximum number of alerts to be sent as context when generating Attack discoveries */
+export declare const DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS = 100;
+export declare const DEFAULT_KNOWLEDGE_BASE_SETTINGS: KnowledgeBaseConfig;

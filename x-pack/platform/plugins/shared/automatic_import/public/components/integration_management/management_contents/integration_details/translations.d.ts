@@ -1,0 +1,12 @@
+export declare const DESCRIPTION: string;
+export declare const TITLE_LABEL: string;
+export declare const DESCRIPTION_LABEL: string;
+export declare const LOGO_LABEL: string;
+export declare const LOGO_DESCRIPTION_PART_1: string;
+export declare const LOGO_DESCRIPTION_PART_2: string;
+export declare const PREVIEW: string;
+export declare const PREVIEW_TOOLTIP: string;
+export declare const TITLE: string;
+export declare const LOGO_ERROR: string;
+export declare const getLogoTooLargeError: (fileName: string) => string;
+export declare const LOGO_INVALID_FORMAT: string;

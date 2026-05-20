@@ -1,0 +1,28 @@
+export declare const SLOS_BASE_PATH = "/app/slos";
+export declare const SLOS_PATH: "/";
+export declare const SLOS_COMPOSITE_PATH: "/composite";
+export declare const SLOS_WELCOME_PATH: "/welcome";
+export declare const SLO_DETAIL_PATH: "/:sloId/:tabId?";
+export declare const SLO_CREATE_PATH: "/create";
+export declare const SLO_EDIT_PATH: "/edit/:sloId";
+export declare const SLO_SETTINGS_PATH: "/settings";
+export declare const SLOS_MANAGEMENT_PATH: "/management";
+export declare const SLO_COMPOSITE_CREATE_PATH: "/composite/create";
+export declare const SLO_COMPOSITE_EDIT_PATH: "/composite/edit/:compositeSloId";
+export declare const SLOS_MANAGEMENT_TEMPLATES_PATH: "/management/templates";
+export declare const paths: {
+    slos: string;
+    slosComposite: string;
+    slosSettings: string;
+    slosWelcome: string;
+    slosManagement: string;
+    slosManagementTemplates: string;
+    sloCreate: string;
+    sloCompositeCreate: string;
+    sloCompositeEdit: (compositeSloId: string) => string;
+    sloCreateWithEncodedForm: (encodedParams: string) => string;
+    sloCreateFromTemplate: (templateId: string) => string;
+    sloEdit: (sloId: string) => string;
+    sloEditWithEncodedForm: (sloId: string, encodedParams: string) => string;
+    sloDetails: (sloId: string, instanceId: string, remoteName?: string, tabId?: string) => string;
+};

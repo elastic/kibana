@@ -1,0 +1,16 @@
+export declare const VIEW_DETAILS: string;
+export declare const ACK: string;
+export declare const UNACK: string;
+export declare const SNOOZE: string;
+export declare const UNSNOOZE: string;
+export declare const RESOLVE: string;
+export declare const UNRESOLVE: string;
+export declare const EDIT_TAGS: string;
+export declare const EDIT_ASSIGNEE: string;
+export declare const OPEN_IN_DISCOVER: string;
+export declare const TAGS_FLYOUT_TITLE: string;
+export declare const CANCEL: string;
+export declare const RESOLVE_ACTION_REASON: string;
+export declare const BULK_ERROR_TOAST: string;
+export declare const getBulkSuccessToast: (processed: number) => string;
+export declare const getBulkPartialSuccessToast: (processed: number, total: number) => string;

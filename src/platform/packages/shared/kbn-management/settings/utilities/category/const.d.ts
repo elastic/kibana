@@ -1,0 +1,18 @@
+export declare const GENERAL_CATEGORY = "general";
+export declare const PRESENTATION_LAB_CATEGORY = "Presentation Labs";
+export declare const ACCESSIBILITY_CATEGORY = "accessibility";
+export declare const AUTOCOMPLETE_CATEGORY = "autocomplete";
+export declare const BANNER_CATEGORY = "banner";
+export declare const DISCOVER_CATEGORY = "discover";
+export declare const MACHINE_LEARNING_CATEGORY = "machineLearning";
+export declare const NOTIFICATIONS_CATEGORY = "notifications";
+export declare const OBSERVABILITY_CATEGORY = "observability";
+export declare const REPORTING_CATEGORY = "reporting";
+export declare const ROLLUPS_CATEGORY = "rollups";
+export declare const SEARCH_CATEGORY = "search";
+export declare const SECURITY_SOLUTION_CATEGORY = "securitySolution";
+export declare const TIMELION_CATEGORY = "timelion";
+export declare const VISUALIZATION_CATEGORY = "visualization";
+export declare const ENTERPRISE_SEARCH_CATEGORY = "enterpriseSearch";
+export declare const DEV_TOOLS_CATEGORY = "devTools";
+export declare const CATEGORY_ORDER: string[];

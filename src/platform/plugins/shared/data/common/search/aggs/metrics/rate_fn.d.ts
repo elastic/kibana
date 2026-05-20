@@ -1,0 +1,10 @@
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { AggExpressionType, AggExpressionFunctionArgs } from '..';
+import { METRIC_TYPES } from '..';
+export declare const aggRateFnName = "aggRate";
+type Input = any;
+type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.RATE>;
+type Output = AggExpressionType;
+type FunctionDefinition = ExpressionFunctionDefinition<typeof aggRateFnName, Input, AggArgs, Output>;
+export declare const aggRate: () => FunctionDefinition;
+export {};

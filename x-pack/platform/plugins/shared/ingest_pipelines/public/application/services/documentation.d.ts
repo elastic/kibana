@@ -1,0 +1,35 @@
+import type { DocLinksStart } from '@kbn/core/public';
+export declare class DocumentationService {
+    private esDocBasePath;
+    private ingestNodeUrl;
+    private processorsUrl;
+    private handlingFailureUrl;
+    private createPipelineUrl;
+    private createPipelineCSVUrl;
+    private simulatePipelineApiUrl;
+    private enrichDataUrl;
+    private geoMatchUrl;
+    private dissectKeyModifiersUrl;
+    private classificationUrl;
+    private regressionUrl;
+    private documentationUrl;
+    private createIndexParameters;
+    private docLinks;
+    setup(docLinks: DocLinksStart): void;
+    getEsDocsBasePath(): string;
+    getIngestNodeUrl(): string;
+    getProcessorsUrl(): string;
+    getHandlingFailureUrl(): string;
+    getCreatePipelineUrl(): string;
+    getCreatePipelineCSVUrl(): string;
+    getSimulatePipelineApiUrl(): string;
+    getEnrichDataUrl(): string;
+    getGeoMatchUrl(): string;
+    getDissectKeyModifiersUrl(): string;
+    getClassificationUrl(): string;
+    getRegressionUrl(): string;
+    getDocumentationUrl(): string;
+    getIndexParametersUrl(): string;
+    getDocLinks(): undefined | DocLinksStart;
+}
+export declare const documentationService: DocumentationService;

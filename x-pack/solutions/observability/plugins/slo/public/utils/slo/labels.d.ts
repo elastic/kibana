@@ -1,0 +1,13 @@
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+export declare const INDICATOR_CUSTOM_KQL: string;
+export declare const INDICATOR_CUSTOM_METRIC: string;
+export declare const INDICATOR_TIMESLICE_METRIC: string;
+export declare const INDICATOR_HISTOGRAM: string;
+export declare const INDICATOR_APM_LATENCY: string;
+export declare const INDICATOR_APM_AVAILABILITY: string;
+export declare const INDICATOR_SYNTHETICS_AVAILABILITY: string;
+export declare function toIndicatorTypeLabel(indicatorType: SLOWithSummaryResponse['indicator']['type']): string;
+export declare const BUDGETING_METHOD_OCCURRENCES: string;
+export declare const BUDGETING_METHOD_TIMESLICES: string;
+export declare function toDurationLabel(durationStr: string): string;
+export declare function toDurationAdverbLabel(durationStr: string): string;

@@ -1,0 +1,35 @@
+import type { Logger } from '@kbn/logging';
+import type { AxiosError, AxiosResponse } from 'axios';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ConnectorUsageCollector } from '../usage';
+import type { ActionsConfigurationUtilities } from '../actions_config';
+import type { ServiceParams, SubAction, SubActionRequestParams } from './types';
+export declare abstract class SubActionConnector<Config, Secrets> {
+    [k: string]: ((params: unknown) => unknown) | unknown;
+    private axiosInstance;
+    private subActions;
+    protected configurationUtilities: ActionsConfigurationUtilities;
+    protected readonly kibanaRequest?: KibanaRequest;
+    protected logger: Logger;
+    protected esClient: ElasticsearchClient;
+    protected savedObjectsClient: SavedObjectsClientContract;
+    protected connector: ServiceParams<Config, Secrets>['connector'];
+    protected config: Config;
+    protected secrets: Secrets;
+    constructor(params: ServiceParams<Config, Secrets>);
+    private normalizeURL;
+    private normalizeData;
+    private assertURL;
+    private ensureUriAllowed;
+    private getHeaders;
+    private validateResponse;
+    protected registerSubAction(subAction: SubAction): void;
+    protected removeNullOrUndefinedFields(data: unknown | undefined): unknown;
+    getSubActions(): Map<string, SubAction>;
+    protected abstract getResponseErrorMessage(error: AxiosError): string;
+    protected request<R>({ url, data, method, responseSchema, headers, timeout, ...config }: SubActionRequestParams<R>, connectorUsageCollector: ConnectorUsageCollector): Promise<AxiosResponse<R>>;
+    private addMessageToResponseError;
+    private getErrorWithResponse;
+}

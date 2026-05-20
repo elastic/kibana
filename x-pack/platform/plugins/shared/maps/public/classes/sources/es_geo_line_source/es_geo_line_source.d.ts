@@ -1,0 +1,52 @@
+import React from 'react';
+import type { GeoJsonProperties } from 'geojson';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
+import type { DataFilters, ESGeoLineSourceDescriptor, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
+import type { ESAggsSourceSyncMeta } from '../es_agg_source';
+import { AbstractESAggSource } from '../es_agg_source';
+import type { DataRequest } from '../../util/data_request';
+import type { ImmutableSourceProperty, SourceEditorArgs } from '../source';
+import type { GeoJsonWithMeta } from '../vector_source';
+import type { IField } from '../../fields/field';
+import type { ITooltipProperty } from '../../tooltips/tooltip_property';
+import { LICENSED_FEATURES } from '../../../licensed_features';
+type ESGeoLineSourceSyncMeta = ESAggsSourceSyncMeta & Pick<ESGeoLineSourceDescriptor, 'groupByTimeseries' | 'lineSimplificationSize' | 'splitField' | 'sortField'>;
+export declare const geoLineTitle: string;
+export declare const REQUIRES_GOLD_LICENSE_MSG: string;
+type NormalizedGeoLineDescriptor = ESGeoLineSourceDescriptor & Required<Pick<ESGeoLineSourceDescriptor, 'groupByTimeseries' | 'lineSimplificationSize' | 'metrics'>>;
+export declare class ESGeoLineSource extends AbstractESAggSource {
+    static createDescriptor(descriptor: Partial<ESGeoLineSourceDescriptor>): NormalizedGeoLineDescriptor;
+    readonly _descriptor: NormalizedGeoLineDescriptor;
+    constructor(descriptor: Partial<ESGeoLineSourceDescriptor>);
+    getBucketsName(): string;
+    getGeoFieldName(): string;
+    renderSourceSettingsEditor({ onChange }: SourceEditorArgs): React.JSX.Element;
+    getSyncMeta(dataFilters: DataFilters): ESGeoLineSourceSyncMeta;
+    getImmutableProperties(): Promise<ImmutableSourceProperty[]>;
+    _createSplitField(): IField | null;
+    _createTsidField(): IField | null;
+    getFields(): Promise<IField[]>;
+    getFieldByName(name: string): IField | null;
+    isGeoGridPrecisionAware(): boolean;
+    supportsJoins(): boolean;
+    getGeoJsonWithMeta(layerName: string, requestMeta: VectorSourceRequestMeta, registerCancelCallback: (callback: () => void) => void, isRequestStillActive: () => boolean, inspectorAdapters: Adapters): Promise<GeoJsonWithMeta>;
+    getInspectorRequestIds(): string[];
+    private _getTracksRequestId;
+    private _getEntitiesRequestId;
+    _getGeoLineByTimeseries(layerName: string, requestMeta: VectorSourceRequestMeta, registerCancelCallback: (callback: () => void) => void, isRequestStillActive: () => boolean, inspectorAdapters: Adapters): Promise<GeoJsonWithMeta>;
+    _getGeoLineByTerms(layerName: string, requestMeta: VectorSourceRequestMeta, registerCancelCallback: (callback: () => void) => void, isRequestStillActive: () => boolean, inspectorAdapters: Adapters): Promise<GeoJsonWithMeta>;
+    getSourceStatus(sourceDataRequest?: DataRequest): {
+        tooltipContent: null;
+        areResultsTrimmed: boolean;
+    } | {
+        tooltipContent: string;
+        areResultsTrimmed: boolean;
+    };
+    isFilterByMapBounds(): boolean;
+    hasTooltipProperties(): boolean;
+    getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;
+    getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
+    getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
+}
+export {};

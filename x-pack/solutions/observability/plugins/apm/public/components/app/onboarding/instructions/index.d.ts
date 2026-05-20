@@ -1,0 +1,9 @@
+export { createJavaAgentInstructions } from './java_agent';
+export { createNodeAgentInstructions } from './node_agent';
+export { createDjangoAgentInstructions } from './django_agent';
+export { createFlaskAgentInstructions } from './flask_agent';
+export { createRailsAgentInstructions } from './rails_agent';
+export { createRackAgentInstructions } from './rack_agent';
+export { createGoAgentInstructions } from './go_agent';
+export { createDotNetAgentInstructions } from './dotnet_agent';
+export { createPhpAgentInstructions } from './php_agent';

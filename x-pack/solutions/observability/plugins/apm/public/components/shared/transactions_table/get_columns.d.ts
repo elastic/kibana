@@ -1,0 +1,23 @@
+import type { TypeOf } from '@kbn/typed-react-router-config';
+import type { ValuesType } from 'utility-types';
+import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
+import type { ApmRoutes } from '../../routing/apm_route_config';
+import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import type { ITableColumn } from '../managed_table';
+type TransactionGroupMainStatistics = APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
+export type ServiceTransactionGroupItem = ValuesType<TransactionGroupMainStatistics['transactionGroups']>;
+type TransactionGroupDetailedStatistics = APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics'>;
+export declare function getColumns({ serviceName, latencyAggregationType, detailedStatisticsLoading, detailedStatistics, comparisonEnabled, shouldShowSparkPlots, showAlertsColumn, offset, transactionOverflowCount, link, query, }: {
+    serviceName: string;
+    latencyAggregationType?: LatencyAggregationType;
+    detailedStatisticsLoading: boolean;
+    detailedStatistics?: TransactionGroupDetailedStatistics;
+    comparisonEnabled: boolean;
+    shouldShowSparkPlots?: boolean;
+    showAlertsColumn: boolean;
+    offset?: string;
+    transactionOverflowCount: number;
+    link: any;
+    query: TypeOf<ApmRoutes, '/services/{serviceName}/overview'>['query'];
+}): Array<ITableColumn<ServiceTransactionGroupItem>>;
+export {};

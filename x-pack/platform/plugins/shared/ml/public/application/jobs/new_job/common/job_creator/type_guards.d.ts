@@ -1,0 +1,15 @@
+import type { SingleMetricJobCreator } from './single_metric_job_creator';
+import type { MultiMetricJobCreator } from './multi_metric_job_creator';
+import type { PopulationJobCreator } from './population_job_creator';
+import type { AdvancedJobCreator } from './advanced_job_creator';
+import type { CategorizationJobCreator } from './categorization_job_creator';
+import type { RareJobCreator } from './rare_job_creator';
+import type { GeoJobCreator } from './geo_job_creator';
+export type JobCreatorType = SingleMetricJobCreator | MultiMetricJobCreator | PopulationJobCreator | AdvancedJobCreator | CategorizationJobCreator | RareJobCreator | GeoJobCreator;
+export declare function isSingleMetricJobCreator(jobCreator: JobCreatorType): jobCreator is SingleMetricJobCreator;
+export declare function isMultiMetricJobCreator(jobCreator: JobCreatorType): jobCreator is MultiMetricJobCreator;
+export declare function isPopulationJobCreator(jobCreator: JobCreatorType): jobCreator is PopulationJobCreator;
+export declare function isAdvancedJobCreator(jobCreator: JobCreatorType): jobCreator is AdvancedJobCreator;
+export declare function isCategorizationJobCreator(jobCreator: JobCreatorType): jobCreator is CategorizationJobCreator;
+export declare function isRareJobCreator(jobCreator: JobCreatorType): jobCreator is RareJobCreator;
+export declare function isGeoJobCreator(jobCreator: JobCreatorType): jobCreator is GeoJobCreator;

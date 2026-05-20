@@ -1,0 +1,1 @@
+export { CustomViewPage } from './custom';

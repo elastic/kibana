@@ -1,0 +1,2 @@
+export declare const BEGIN_INTERNAL_REASONING_MARKER = "<<<BEGIN_INTERNAL>>>";
+export declare const END_INTERNAL_REASONING_MARKER = "<<<END_INTERNAL>>>";

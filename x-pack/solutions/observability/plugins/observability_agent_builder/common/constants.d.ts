@@ -1,0 +1,11 @@
+export declare const OBSERVABILITY_AI_INSIGHTS_INFERENCE_PARENT_FEATURE_ID = "observability_ai_insights_inference_parent_feature";
+export declare const OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID = "observability_ai_insights_inference_subfeature";
+export declare const OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID = "observability.ai_insight";
+export declare const OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID = "observability.error";
+export declare const OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID = "observability.alert";
+export declare const OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID = "observability.log";
+export declare const OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID = "observability.service";
+export declare const OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID = "observability.slo";
+export declare const OBSERVABILITY_HOST_ATTACHMENT_TYPE_ID = "observability.host";
+export declare const OBSERVABILITY_TRANSACTION_ATTACHMENT_TYPE_ID = "observability.transaction";
+export declare const OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID = "observability.synthetics_monitor";

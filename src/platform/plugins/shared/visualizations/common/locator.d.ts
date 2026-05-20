@@ -1,0 +1,58 @@
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { RefreshInterval } from '@kbn/data-plugin/common';
+import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
+import type { SavedVisState } from './types';
+export type VisualizeLocatorParams = {
+    /**
+     * The ID of the saved visualization to load.
+     */
+    visId?: string;
+    /**
+     * Global- and app-level filters to apply to data loaded by visualize.
+     */
+    filters?: Filter[];
+    /**
+     * Time range to apply to data loaded by visualize.
+     */
+    timeRange?: TimeRange;
+    /**
+     * How frequently to poll for data.
+     */
+    refreshInterval?: RefreshInterval;
+    /**
+     * The query to use in to load data in visualize.
+     */
+    query?: Query;
+    /**
+     * UI state to be passed on to the current visualization. This value is opaque from the perspective of visualize.
+     */
+    uiState?: SerializableRecord;
+    /**
+     * Serialized visualization.
+     *
+     * @note This is required to navigate to "create" page (i.e., when no `visId` has been provided).
+     */
+    vis?: SavedVisState;
+    /**
+     * Whether this visualization is linked a saved search.
+     */
+    linked?: boolean;
+    /**
+     * The saved search used as the source of the visualization.
+     */
+    savedSearchId?: string;
+    /**
+     * The saved search used as the source of the visualization.
+     */
+    indexPattern?: string;
+};
+export type VisualizeAppLocator = LocatorPublic<VisualizeLocatorParams>;
+export declare class VisualizeLocatorDefinition implements LocatorDefinition<VisualizeLocatorParams> {
+    id: string;
+    getLocation(params: VisualizeLocatorParams): Promise<{
+        app: string;
+        path: string;
+        state: {};
+    }>;
+}

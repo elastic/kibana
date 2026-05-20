@@ -1,0 +1,12 @@
+import type { MapStoreState } from '../reducers/store';
+import type { FLYOUT_STATE } from '../reducers/ui';
+import type { DRAW_MODE } from '../../common/constants';
+export declare const getFlyoutDisplay: ({ ui }: MapStoreState) => FLYOUT_STATE;
+export declare const getDrawMode: ({ ui }: MapStoreState) => DRAW_MODE;
+export declare const getIsLayerTOCOpen: ({ ui }: MapStoreState) => boolean;
+export declare const getIsTimesliderOpen: ({ ui }: MapStoreState) => boolean;
+export declare const getOpenTOCDetails: ({ ui }: MapStoreState) => string[];
+export declare const getIsFullScreen: ({ ui }: MapStoreState) => boolean;
+export declare const getIsReadOnly: ({ ui }: MapStoreState) => boolean;
+export declare const getAutoOpenLayerWizardId: ({ ui }: MapStoreState) => string;
+export declare const getDeletedFeatureIds: ({ ui }: MapStoreState) => string[];
