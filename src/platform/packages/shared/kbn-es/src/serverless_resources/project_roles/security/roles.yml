@@ -782,11 +782,10 @@ platform_engineer:
         - all
     - names:
         - .asset-criticality.asset-criticality-*
-        - .entities.v1.latest.security_*
-        - .entities.v1.updates.security_*
-        - '.entities.v1.history.*.security_*'
-        - '.entities.v1.reset*'
-        - '.entities.v2.latest.security_*'
+        - '.entities.v*.latest.security_*'
+        - '.entities.v*.updates.security_*'
+        - '.entities.v*.history.*.security_*'
+        - '.entities.v*.reset*'
         - 'entities-latest-*'
       privileges:
         - all

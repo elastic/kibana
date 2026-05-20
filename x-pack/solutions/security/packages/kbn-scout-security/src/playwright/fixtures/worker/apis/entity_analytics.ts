@@ -15,6 +15,10 @@ import type {
 
 const ENTITY_STORE_ENGINES_URL = '/api/entity_store/engines';
 const ENTITY_STORE_STATUS_URL = '/api/entity_store/status';
+const ENTITY_STORE_V2_UNINSTALL_URL = '/api/security/entity_store/uninstall';
+const ENTITY_STORE_V2_STATUS_URL = '/api/security/entity_store/status';
+const ENTITY_STORE_V2_FF_KEY = 'securitySolution:entityStoreEnableV2';
+const KIBANA_INTERNAL_SETTINGS_URL = '/internal/kibana/settings';
 const SAVED_OBJECTS_FIND_URL = '/api/saved_objects/_find';
 const RISK_ENGINE_CONFIGURATION_TYPE = 'risk-engine-configuration';
 const RISK_ENGINE_STATUS_URL = '/internal/risk_score/engine/status';
@@ -42,6 +46,14 @@ export interface EntityAnalyticsApiService {
   waitForEntityStoreStatusToChange: (timeoutMs?: number) => Promise<GetEntityStoreStatusResponse>;
   waitForEntityStoreCleanup: (timeoutMs?: number) => Promise<GetEntityStoreStatusResponse>;
   waitForRiskEngineCleanup: (timeoutMs?: number) => Promise<RiskEngineStatusResponse>;
+  // v2 entity-store helpers (only relevant when `securitySolution:entityStoreEnableV2` is true)
+  setEntityStoreV2Enabled: (enabled: boolean) => Promise<void>;
+  getEntityStoreStatusV2: () => Promise<GetEntityStoreStatusResponse>;
+  waitForEntityStoreStatusV2: (
+    expectedStatus: StoreStatus,
+    timeoutMs?: number
+  ) => Promise<GetEntityStoreStatusResponse>;
+  uninstallEntityStoreV2: () => Promise<void>;
 }
 
 export const getEntityAnalyticsApiService = ({
@@ -325,6 +337,97 @@ export const getEntityAnalyticsApiService = ({
               lastStatus
             )}`
           );
+        }
+      );
+    },
+
+    setEntityStoreV2Enabled: async (enabled: boolean) => {
+      await kbnClient.request({
+        method: 'POST',
+        path: `${basePath}${KIBANA_INTERNAL_SETTINGS_URL}/${ENTITY_STORE_V2_FF_KEY}`,
+        body: { value: enabled },
+        headers: { 'elastic-api-version': API_VERSIONS.internal.v1 },
+      });
+    },
+
+    getEntityStoreStatusV2: async () => {
+      return measurePerformanceAsync(
+        log,
+        'security.entityAnalytics.getEntityStoreStatusV2',
+        async () => {
+          const response = await kbnClient.request<GetEntityStoreStatusResponse>({
+            method: 'GET',
+            path: `${basePath}${ENTITY_STORE_V2_STATUS_URL}`,
+            headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
+          });
+          return response.data;
+        }
+      );
+    },
+
+    waitForEntityStoreStatusV2: async (expectedStatus: StoreStatus, timeoutMs: number = 60000) => {
+      return measurePerformanceAsync(
+        log,
+        `security.entityAnalytics.waitForEntityStoreStatusV2 [${expectedStatus}]`,
+        async () => {
+          const startTime = Date.now();
+          let lastStatus: GetEntityStoreStatusResponse | undefined;
+
+          while (Date.now() - startTime < timeoutMs) {
+            try {
+              const status = await service.getEntityStoreStatusV2();
+              lastStatus = status;
+
+              if (status.status === expectedStatus) {
+                return status;
+              }
+            } catch (error) {
+              log.debug(`Error checking entity store v2 status: ${error}`);
+            }
+
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          }
+
+          throw new Error(
+            `Timeout waiting for entity store v2 status '${expectedStatus}' after ${timeoutMs}ms. Last status: ${JSON.stringify(
+              lastStatus
+            )}`
+          );
+        }
+      );
+    },
+
+    uninstallEntityStoreV2: async () => {
+      await measurePerformanceAsync(
+        log,
+        'security.entityAnalytics.uninstallEntityStoreV2',
+        async () => {
+          await kbnClient.request({
+            method: 'POST',
+            path: `${basePath}${ENTITY_STORE_V2_UNINSTALL_URL}`,
+            headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
+            body: {},
+            ignoreErrors: [404, 500],
+          });
+
+          // Same belt-and-suspenders pattern as v1: clean any leaked transforms
+          // for this space directly via the admin esClient.
+          try {
+            const { transforms } = await esClient.transform.getTransform({
+              transform_id: `entities-v1-latest-security_*_${spaceId}`,
+              allow_no_match: true,
+            });
+            await Promise.all(
+              transforms.map(({ id }) =>
+                esClient.transform.deleteTransform({
+                  transform_id: id,
+                  force: true,
+                })
+              )
+            );
+          } catch (error) {
+            log.debug(`v2 fallback transform cleanup failed: ${error}`);
+          }
         }
       );
     },
