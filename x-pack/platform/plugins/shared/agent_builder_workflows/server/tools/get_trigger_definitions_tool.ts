@@ -12,11 +12,14 @@ import { z } from '@kbn/zod/v4';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { workflowTools } from '../../common/constants';
 
-type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
+type GetRegisteredTriggersApi = Pick<
+  WorkflowsServerPluginSetup['management'],
+  'getRegisteredTriggers'
+>;
 
 export function registerGetTriggerDefinitionsTool(
   agentBuilder: AgentBuilderPluginSetup,
-  api: WorkflowsManagementApi
+  api: GetRegisteredTriggersApi
 ): void {
   agentBuilder.tools.register({
     id: workflowTools.getTriggerDefinitions,

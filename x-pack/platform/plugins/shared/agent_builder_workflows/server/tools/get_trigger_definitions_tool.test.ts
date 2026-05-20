@@ -11,6 +11,11 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import { z } from '@kbn/zod/v4';
 import { registerGetTriggerDefinitionsTool } from './get_trigger_definitions_tool';
 
+type GetRegisteredTriggersApi = Pick<
+  WorkflowsServerPluginSetup['management'],
+  'getRegisteredTriggers'
+>;
+
 const invokeHandler = async (tool: BuiltinToolDefinition, input: unknown, context: unknown) =>
   (await tool.handler(input as never, context as never)) as ToolHandlerStandardReturn;
 
@@ -24,7 +29,7 @@ const mockCasesTrigger = {
 
 describe('registerGetTriggerDefinitionsTool', () => {
   let registeredTool: BuiltinToolDefinition;
-  let mockApi: jest.Mocked<Pick<WorkflowsServerPluginSetup['management'], 'getRegisteredTriggers'>>;
+  let mockApi: jest.Mocked<GetRegisteredTriggersApi>;
 
   beforeEach(() => {
     mockApi = {
@@ -38,10 +43,7 @@ describe('registerGetTriggerDefinitionsTool', () => {
         }),
       },
     } as any;
-    registerGetTriggerDefinitionsTool(
-      agentBuilder,
-      mockApi as WorkflowsServerPluginSetup['management']
-    );
+    registerGetTriggerDefinitionsTool(agentBuilder, mockApi);
   });
 
   it('registers with correct id', () => {
