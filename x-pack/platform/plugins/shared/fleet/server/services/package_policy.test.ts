@@ -203,6 +203,9 @@ async function mockedGetPackageInfo(params: any) {
       policy_templates: [
         {
           name: 'aws',
+          deployment_modes: {
+            agentless: { enabled: true },
+          },
           inputs: [
             {
               title: 'AWS',
@@ -244,6 +247,15 @@ async function mockedGetPackageInfo(params: any) {
     pkg = {
       name: 'test',
       version: '1.0.2',
+      policy_templates: [
+        {
+          name: 'test',
+          deployment_modes: {
+            agentless: { enabled: true },
+          },
+          inputs: [],
+        },
+      ],
     };
   }
   if (params.pkgName === 'test-conflict') {
