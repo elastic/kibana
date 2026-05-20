@@ -291,6 +291,41 @@ elasticsearch.username: kibana_system
 elasticsearch.password: changeme
 ```
 
+### Recommended prototype config
+
+A useful baseline for prototype work. Drop into `config/kibana.dev.yml`:
+
+```yaml
+# Enable solution views (Observability / Security / Search nav) on the Spaces UI
+xpack.spaces.allowSolutionVisibility: true
+
+# Set the default landing route after login
+uiSettings.overrides:
+  defaultRoute: /app/observability
+
+# Fake cloud context — enables cloud-gated features locally
+xpack.cloud.id: "fake_cloud_id:24h124h11249u31r4"
+xpack.cloud.base_url: "https://cloud.elastic.co"
+
+# Elastic-managed LLM (no API key needed for Elastic employees)
+xpack.actions.preconfigured:
+  elastic-llm:
+    name: Elastic LLM
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: 'elastic'
+      taskType: 'chat_completion'
+      inferenceId: '.rainbow-sprinkles-elastic'
+      providerConfig:
+        model_id: 'rainbow-sprinkles'
+```
+
+**Notes:**
+
+- `config/kibana.dev.yml` is **not committed**. Create the file if it does not exist. **Never overwrite an existing `kibana.dev.yml` without confirming with the user first** — they may have local settings you would clobber.
+- `xpack.spaces.allowSolutionVisibility: true` enables the solution picker in the Spaces UI, but the solution nav must still be set once manually: **Stack Management → Spaces → default → Edit space → Solution**.
+
 Alternate config file:
 
 ```sh

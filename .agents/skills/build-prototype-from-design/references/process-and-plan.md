@@ -14,6 +14,25 @@ Step 1 — read the design, decide what to build, and produce a short plan **bef
 
 ### A. Understand the design
 
+Before analyzing further, use **AskQuestion** to ask the user the three elicitation questions below — all three together in a single message. If any answer is already clear from the design or context, skip that question and record the assumption in the plan output (section D). Do not ask follow-up questions; for anything still ambiguous after this single round, make a reasonable assumption and surface it in the plan.
+
+- **Q1 — What are we building?** State your best guess from the design and ask the user to confirm; do not present a blank list. Options:
+  - A. New plugin / full page
+  - B. New page in existing plugin
+  - C. New component or panel
+  - D. Replacing an existing component
+- **Q2 — Which solution should this live in?** State a best guess if it is inferable from the design. Options:
+  - A. Observability
+  - B. Security
+  - C. Search
+  - D. None / standalone prototype
+- **Q3 — Is Kibana already running locally?** Present as a plain choice (this cannot be inferred from a design). Options:
+  - A. Yes
+  - B. No
+  - C. Not sure
+
+Then continue:
+
 1. **Scope** — screen(s), user flow, states (default, loading, empty, error).
 2. **EUI vs kbn-ui** — classify every element using **[eui-vs-kbnui.md](eui-vs-kbnui.md)** (routing table + flowchart). Default: raw EUI.
 3. **Kibana surface** — chrome vs application workspace ([kbn-ui layout](../../../../src/platform/kbn-ui/README.md)); which solution (Search, Observability, Security).
@@ -48,6 +67,7 @@ Default: **`new_plugin`**.
 
 ### D. Plan output (confirm with user)
 
+- **Assumptions** — any question from section A that was skipped or left ambiguous, with the assumption you are making (e.g. "Assumed solution = Observability based on the design").
 - Host path + plugin id (if new)
 - **EUI vs kbn-ui table** (from [eui-vs-kbnui.md](eui-vs-kbnui.md))
 - Chrome: global shell vs in-app only (do not prototype global chrome unless scoped)

@@ -31,7 +31,13 @@ Register in `public/plugin.tsx`:
 - `core.application.register({ id, title, mount })` — `id` = `plugin.id`
 - `deps.developerExamples.register({ appId, title, description })`
 
-After new files: `yarn kbn bootstrap` from repo root.
+After new files, **do not run `yarn kbn bootstrap` yourself** — Cursor's shell sandbox will cause partial failures and break other packages. Instead, tell the user:
+
+> "All files are written. Please run the following in your terminal, then open Kibana:
+> ```
+> yarn kbn bootstrap
+> yarn start --run-examples
+> ```"
 
 Do **not** use `plugins/` + `node scripts/generate_plugin` for throwaway prototypes (use `examples/` + `--run-examples`).
 
@@ -47,6 +53,15 @@ Follow the plan’s table from [eui-vs-kbnui.md](eui-vs-kbnui.md) — use listed
 | Copy | Sentence case, EUI voice |
 | a11y | Keyboard, labels, contrast per design |
 | Data | In-repo mocks unless plan says live data |
+
+**Avoid introducing third-party dependencies.** Before reaching for an npm package, search the repo for an existing solution:
+
+- Canvas pan/zoom → `x-pack/solutions/security/plugins/security_solution/public/resolver/` (div + CSS transform + SVG edges; no CSP issues)
+- Graph/DAG layout → hardcode positions or copy the Resolver's camera math; do not use `@xyflow/react`, `dagre`, or similar
+- Data grids → `EuiDataGrid` or `EuiBasicTable`
+- Charts → `@elastic/charts` (already in the repo)
+
+If a package is already in `package.json`, it may still conflict with Kibana's strict CSP (`script-src`, `style-src`) or webpack config. Always verify a pattern already works in the repo before using a new dependency.
 
 **Order:** default state → other states in scope. Match Figma/screenshot before done.
 
