@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import { sortBy, take, uniq } from 'lodash';
 import { existsQuery, kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { BoolQuery } from '@kbn/es-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
@@ -26,6 +27,7 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import type { APMConfig } from '../..';
+import { extractEsQueryFilters } from './extract_es_query_filters';
 
 export async function getTraceSampleIds({
   serviceName,
@@ -36,6 +38,7 @@ export async function getTraceSampleIds({
   end,
   serviceGroupKuery,
   kuery,
+  esQuery,
 }: {
   serviceName?: string;
   environment: string;
@@ -45,7 +48,11 @@ export async function getTraceSampleIds({
   end: number;
   serviceGroupKuery?: string;
   kuery?: string;
+  /** Pre-built ES query from the client (includes KQL query + filter bar + Controls API). */
+  esQuery?: { bool: BoolQuery };
 }) {
+  const { filter: esQueryFilters, mustNot: esQueryMustNot } = extractEsQueryFilters(esQuery);
+
   const query = {
     bool: {
       filter: [
@@ -54,11 +61,18 @@ export async function getTraceSampleIds({
         ...kqlQuery(serviceGroupKuery),
         ...kqlQuery(kuery),
         ...termQuery(SERVICE_NAME, serviceName),
+        ...esQueryFilters,
       ],
+      ...(esQueryMustNot.length > 0 ? { must_not: esQueryMustNot } : {}),
     },
   };
 
-  const isUnfilteredGlobalServiceMap = !serviceName && !serviceGroupKuery && !kuery;
+  const isUnfilteredGlobalServiceMap =
+    !serviceName &&
+    !serviceGroupKuery &&
+    !kuery &&
+    esQueryFilters.length === 0 &&
+    esQueryMustNot.length === 0;
 
   const fingerprintBucketSize = isUnfilteredGlobalServiceMap
     ? config.serviceMapFingerprintGlobalBucketSize
