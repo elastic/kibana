@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/266315
+issues:
+- https://github.com/elastic/kibana/issues/266313
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-14
+title: "Fix SLO count display for newly created SLOs in overview"
+description: Fix the SLO Overview status tiles so they count newly created SLOs (and any SLO whose summary transform has not yet produced a real document) consistently with the per-row status badge.
