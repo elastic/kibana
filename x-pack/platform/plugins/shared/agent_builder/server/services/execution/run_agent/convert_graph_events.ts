@@ -75,13 +75,11 @@ export const convertGraphEvents = ({
       });
     }
 
-    // TODO: fix, need a new ID per cycle
-    const messageId = uuidv4();
+    // message identifier for emitted chunks
+    let messageId = uuidv4();
 
     // Tracks the timestamp of the first text chunk of the current research turn.
-    // Used to backdate `thinkingCompleteEvent` to the first chunk of the terminal
-    // turn (the turn ending in a HandoverAction). Reset on each researchAgent
-    // on_chain_start. Only relevant in non-structured mode.
+    // Used to backdate `thinkingCompleteEvent` to the first chunk of the terminal turn
     let currentTurnFirstChunkAt: number | undefined;
 
     return streamEvents$.pipe(
@@ -92,7 +90,10 @@ export const convertGraphEvents = ({
 
         // reset per-turn first-chunk tracker at the start of each research turn
         if (matchEvent(event, 'on_chain_start') && matchName(event, steps.researchAgent)) {
+          // reset per-turn first-chunk tracker at the start of each research turn
           currentTurnFirstChunkAt = undefined;
+          // reset message id between research turns
+          messageId = uuidv4();
           return EMPTY;
         }
 
