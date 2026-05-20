@@ -120,9 +120,9 @@ describe('transformSentinelRuleToOriginalRule', () => {
     });
 
     expect(result.annotations).toEqual({
-      from: 'now-1m',
+      from: 'now-60s',
       to: 'now',
-      interval: '1m',
+      interval: '60s',
     });
   });
 });

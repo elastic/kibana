@@ -34,9 +34,9 @@ describe('convertMigrationCustomRuleToSecurityRulePayload', () => {
         SENTINEL_NRT_TRANSLATION_FIELDS
       )
     ).toMatchObject({
-      from: 'now-1m',
+      from: 'now-60s',
       to: 'now',
-      interval: '1m',
+      interval: '60s',
     });
   });
 });

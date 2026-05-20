@@ -24,9 +24,9 @@ const translatedRule: StoredRuleMigrationRule = {
     query: 'SecurityEvent | where EventID == 1102',
     query_language: 'kql',
     annotations: {
-      from: 'now-1m',
+      from: 'now-60s',
       to: 'now',
-      interval: '1m',
+      interval: '60s',
       timestamp_override: 'event.ingested',
       ignored_annotation: 'do not copy',
     },
@@ -50,9 +50,9 @@ describe('installCustomRules', () => {
 
     expect(createCustomRule).toHaveBeenCalledWith({
       params: expect.objectContaining({
-        from: 'now-1m',
+        from: 'now-60s',
         to: 'now',
-        interval: '1m',
+        interval: '60s',
       }),
     });
     expect(createCustomRule.mock.calls[0][0].params).not.toHaveProperty('timestamp_override');
