@@ -50,6 +50,77 @@ describe('DateRangePickerControl', () => {
       await waitForPopoverClose();
     });
 
+    it('places the input cursor on the clicked display part', async () => {
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} onChange={() => {}} />);
+
+      const displayPart = screen.getByText('20');
+      fireEvent.mouseDown(displayPart);
+      fireEvent.click(displayPart);
+
+      const input = await screen.findByTestId('dateRangePickerInput');
+      await waitFor(() => {
+        expect(input).toHaveFocus();
+        expect((input as HTMLInputElement).selectionStart).toBe(7);
+        expect((input as HTMLInputElement).selectionEnd).toBe(7);
+      });
+
+      fireEvent.keyDown(input, { key: 'Escape' });
+      await waitForPopoverClose();
+    });
+
+    it('keeps the clicked display part visible when the input is scrolled', async () => {
+      const animationFrameCallbacks: FrameRequestCallback[] = [];
+      const requestAnimationFrameSpy = jest
+        .spyOn(window, 'requestAnimationFrame')
+        .mockImplementation((callback) => {
+          animationFrameCallbacks.push(callback);
+          return animationFrameCallbacks.length;
+        });
+      const cancelAnimationFrameSpy = jest
+        .spyOn(window, 'cancelAnimationFrame')
+        .mockImplementation(() => {});
+      const getContextSpy = jest
+        .spyOn(HTMLCanvasElement.prototype, 'getContext')
+        .mockReturnValue(null);
+
+      try {
+        renderWithEuiTheme(
+          <DateRangePicker
+            {...defaultProps}
+            defaultValue="2024-01-01T00:00:00.000Z to 2024-12-31T23:59:59.999Z"
+            onChange={() => {}}
+          />
+        );
+
+        const displayPart = screen.getByText('2024');
+        fireEvent.mouseDown(displayPart);
+        fireEvent.click(displayPart);
+
+        const input = (await screen.findByTestId('dateRangePickerInput')) as HTMLInputElement;
+        await waitFor(() => {
+          expect(input.selectionStart).toBe(11);
+        });
+        Object.defineProperty(input, 'clientWidth', { configurable: true, value: 80 });
+        Object.defineProperty(input, 'scrollWidth', { configurable: true, value: 800 });
+        input.scrollLeft = 720;
+
+        act(() => {
+          for (const callback of animationFrameCallbacks) {
+            callback(performance.now());
+          }
+        });
+
+        expect(input.scrollLeft).toBeLessThan(200);
+
+        fireEvent.keyDown(input, { key: 'Escape' });
+        await waitForPopoverClose();
+      } finally {
+        requestAnimationFrameSpy.mockRestore();
+        cancelAnimationFrameSpy.mockRestore();
+        getContextSpy.mockRestore();
+      }
+    });
+
     it('submits on Enter and returns to idle mode', async () => {
       const onChange = jest.fn();
       renderWithEuiTheme(<DateRangePicker {...defaultProps} onChange={onChange} />);

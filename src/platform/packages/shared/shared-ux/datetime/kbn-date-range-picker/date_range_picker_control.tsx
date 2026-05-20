@@ -122,7 +122,13 @@ export function DateRangePickerControl() {
     const target = findCorrespondingInputPart(inputParts, clickedPart, displayParts);
 
     if (target) {
-      inputRef.current.setSelectionRange(target.end, target.end);
+      const input = inputRef.current;
+      input.setSelectionRange(target.end, target.end);
+      const animationFrame = requestAnimationFrame(() => {
+        input.setSelectionRange(target.end, target.end);
+        scrollInputToPart(input, target);
+      });
+      return () => cancelAnimationFrame(animationFrame);
     }
   }, [displayText, inputRef, isEditing, text]);
 
@@ -313,4 +319,32 @@ function findCorrespondingInputPart(
   );
 
   return candidates[displayOrdinal];
+}
+
+/**
+ * Scrolls the input horizontally so the target part is visible after browser autofocus settles.
+ */
+function scrollInputToPart(input: HTMLInputElement, part: RangePart) {
+  if (input.scrollWidth <= input.clientWidth) return;
+
+  const maxScrollLeft = input.scrollWidth - input.clientWidth;
+  const clampScrollLeft = (value: number) => Math.max(0, Math.min(value, maxScrollLeft));
+  const style = window.getComputedStyle(input);
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+
+  if (!ctx) {
+    const partRatio = part.start / Math.max(input.value.length, 1);
+    input.scrollLeft = clampScrollLeft(input.scrollWidth * partRatio - input.clientWidth / 2);
+    return;
+  }
+
+  ctx.font = style.font;
+  const leftInset = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.borderLeftWidth) || 0);
+  const textBeforePart = input.value.substring(0, part.start);
+  const partText = input.value.substring(part.start, part.end);
+  const partStart = leftInset + ctx.measureText(textBeforePart).width;
+  const partMiddle = partStart + ctx.measureText(partText).width / 2;
+
+  input.scrollLeft = clampScrollLeft(partMiddle - input.clientWidth / 2);
 }
