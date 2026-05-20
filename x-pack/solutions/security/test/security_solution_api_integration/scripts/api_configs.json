@@ -171,13 +171,13 @@
       { "product_line": "endpoint", "product_tier": "essentials" }
     ]
   },
-  "rules_management:essentials:qa:serverless": {
+  "rule_management:essentials:qa:serverless": {
     "productTypes": [
       { "product_line": "security", "product_tier": "essentials" },
       { "product_line": "endpoint", "product_tier": "essentials" }
     ]
   },
-  "rules_management:essentials:qa:serverless:release": {
+  "rule_management:essentials:qa:serverless:release": {
     "productTypes": [
       { "product_line": "security", "product_tier": "essentials" },
       { "product_line": "endpoint", "product_tier": "essentials" }
