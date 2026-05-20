@@ -1,0 +1,7 @@
+prs:
+- https://github.com/elastic/kibana/pull/269000
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-19
+title: Fix crash in Discover flyout Overview tab for alert documents

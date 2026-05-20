@@ -39,20 +39,18 @@ export interface MainExtractionWindow {
 /**
  * Window for the main (non-CCS) extraction path.
  *
- * Resume order: persisted entity-pagination cursor (`paginationTimestamp`) → last completed cycle
- * (`lastExecutionTimestamp`) → lookback fallback. The boundary probe in each new run re-establishes
- * the raw-log slice from the time range; the persisted log-slice start is consulted only after the
- * first slice of this run completes (handled by the caller, not here).
+ * Resume order: `checkpointTimestamp` (last slice end or mid-slice entity cursor) →
+ * `lastExecutionTimestamp` (last completed cycle) → lookback fallback.
  */
 export const resolveMainExtractionWindow = ({
   config,
   engineState,
 }: {
   config: Pick<LogExtractionConfig, 'lookbackPeriod' | 'delay'>;
-  engineState: Pick<EngineLogExtractionState, 'paginationTimestamp' | 'lastExecutionTimestamp'>;
+  engineState: Pick<EngineLogExtractionState, 'checkpointTimestamp' | 'lastExecutionTimestamp'>;
 }): MainExtractionWindow => {
   const fromDateISO =
-    engineState.paginationTimestamp ||
+    engineState.checkpointTimestamp ||
     engineState.lastExecutionTimestamp ||
     computeLookbackStart(config.lookbackPeriod);
   const effectiveWindowEnd = computeEffectiveWindowEnd(config.delay);
