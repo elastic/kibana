@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { EventEmitter } from 'node:events';
+import { EventEmitterAsyncResource } from 'node:events';
 import { inject, injectable } from 'inversify';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
 import type { DomainEvent, EventBus, Subscription } from './types';
+
+const ASYNC_RESOURCE_NAME = 'AlertingDomainEventBus';
 
 type AnyHandler = (event: DomainEvent) => Promise<void> | void;
 
@@ -50,16 +52,21 @@ const RESERVED_EVENT_TYPES: ReadonlySet<string> = new Set([
  *
  * Behaviour:
  *  - `publish` validates the event has a non-reserved string `type` field and
- *    dispatches each listener on the next microtask via `queueMicrotask`. The
- *    publisher's call stack returns synchronously and is never blocked by
- *    handler work.
+ *    dispatches each listener on the next event-loop iteration via
+ *    `setImmediate`. The publisher's call stack returns synchronously and
+ *    is never blocked by handler work. Yielding between events lets I/O
+ *    drain instead of being starved by a long microtask queue.
  *  - Each handler is invoked inside its own try/catch. A thrown handler
  *    (sync throw or rejected promise) is logged but never bubbles up nor
  *    prevents the other handlers from running.
- *  - Backed by Node's built-in {@link EventEmitter} with `captureRejections`
- *    enabled as a defense-in-depth measure, plus a permanent `'error'`
- *    listener so the bus can never crash the process. See
- *    https://nodejs.org/api/events.html#error-events.
+ *  - Backed by Node's {@link EventEmitterAsyncResource} with
+ *    `captureRejections` enabled as a defense-in-depth measure, plus a
+ *    permanent `'error'` listener so the bus can never crash the process.
+ *    `EventEmitterAsyncResource` labels the bus as a discrete async
+ *    resource so async-hooks / APM tooling can attribute handler work
+ *    back to the bus. See
+ *    https://nodejs.org/api/events.html#class-eventseventemitterasyncresource-extends-eventemitter
+ *    and https://nodejs.org/api/events.html#error-events.
  *  - The bus owns no per-event state. Replays/persistence are out of scope.
  *  - The default `EventEmitter` listener-limit warning (10 per event) is
  *    kept intentionally. It is a useful memory-leak signal.
@@ -68,7 +75,10 @@ const RESERVED_EVENT_TYPES: ReadonlySet<string> = new Set([
 export class AlertingDomainEventBus<TEvent extends DomainEvent = DomainEvent>
   implements EventBus<TEvent>
 {
-  readonly #emitter = new EventEmitter({ captureRejections: true });
+  readonly #emitter = new EventEmitterAsyncResource({
+    captureRejections: true,
+    name: ASYNC_RESOURCE_NAME,
+  });
 
   constructor(@inject(LoggerServiceToken) private readonly logger: LoggerServiceContract) {
     // Per Node's docs, emitting `'error'` with no listener crashes the
@@ -108,7 +118,7 @@ export class AlertingDomainEventBus<TEvent extends DomainEvent = DomainEvent>
     handler: (event: E) => Promise<void> | void
   ): Subscription {
     const wrapped: AnyHandler = (event) => {
-      queueMicrotask(async () => {
+      setImmediate(async () => {
         try {
           await handler(event as E);
         } catch (err) {
