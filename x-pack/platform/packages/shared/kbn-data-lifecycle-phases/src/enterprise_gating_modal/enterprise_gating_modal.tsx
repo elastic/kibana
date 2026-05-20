@@ -41,7 +41,7 @@ export interface EnterpriseGatingModalProps {
   trialStatus?: EnterpriseGatingModalTrialStatus;
   hasManageSubscriptionPermission?: boolean;
   subscriptionFeaturesUrl?: string;
-  onCancel?: () => void;
+  onCancel: () => void;
   onPrimaryAction?: (action: EnterpriseGatingModalPrimaryAction) => void;
   'data-test-subj'?: string;
 }
@@ -92,7 +92,6 @@ export const EnterpriseGatingModal = ({
     hasManageSubscriptionPermission,
     trialStatus,
   });
-  const onClose = onCancel ?? noop;
 
   const hasWarnedMissingPrimaryActionHandlerRef = React.useRef(false);
   React.useEffect(() => {
@@ -118,7 +117,7 @@ export const EnterpriseGatingModal = ({
   return (
     <EuiModal
       data-test-subj={dataTestSubj}
-      onClose={onClose}
+      onClose={onCancel}
       aria-labelledby={modalTitleId}
       maxWidth={euiTheme.breakpoint.m}
     >

@@ -21,6 +21,7 @@ describe('EnterpriseGatingModal', () => {
         hasManageSubscriptionPermission={true}
         trialStatus="notStarted"
         onPrimaryAction={onPrimaryAction}
+        onCancel={() => {}}
       />
     );
 
@@ -41,6 +42,7 @@ describe('EnterpriseGatingModal', () => {
         hasManageSubscriptionPermission={true}
         trialStatus="expired"
         onPrimaryAction={onPrimaryAction}
+        onCancel={() => {}}
       />
     );
 
@@ -54,7 +56,11 @@ describe('EnterpriseGatingModal', () => {
 
   it('omits the primary action for cloud users without subscription permissions', () => {
     renderWithI18n(
-      <EnterpriseGatingModal environment="cloud" hasManageSubscriptionPermission={false} />
+      <EnterpriseGatingModal
+        environment="cloud"
+        hasManageSubscriptionPermission={false}
+        onCancel={() => {}}
+      />
     );
 
     expect(
@@ -66,7 +72,11 @@ describe('EnterpriseGatingModal', () => {
     const onPrimaryAction = jest.fn();
 
     renderWithI18n(
-      <EnterpriseGatingModal environment="selfManaged" onPrimaryAction={onPrimaryAction} />
+      <EnterpriseGatingModal
+        environment="selfManaged"
+        onPrimaryAction={onPrimaryAction}
+        onCancel={() => {}}
+      />
     );
 
     expect(screen.getByTestId('enterpriseGatingModalPrimaryActionButton')).toHaveTextContent(
@@ -85,6 +95,7 @@ describe('EnterpriseGatingModal', () => {
         environment="selfManaged"
         hasManageSubscriptionPermission={false}
         onPrimaryAction={onPrimaryAction}
+        onCancel={() => {}}
       />
     );
 
@@ -93,7 +104,7 @@ describe('EnterpriseGatingModal', () => {
   });
 
   it('omits the primary action when onPrimaryAction is not provided', () => {
-    renderWithI18n(<EnterpriseGatingModal environment="selfManaged" />);
+    renderWithI18n(<EnterpriseGatingModal environment="selfManaged" onCancel={() => {}} />);
 
     expect(
       screen.queryByTestId('enterpriseGatingModalPrimaryActionButton')
@@ -106,6 +117,7 @@ describe('EnterpriseGatingModal', () => {
         environment="cloud"
         hasManageSubscriptionPermission={true}
         subscriptionFeaturesUrl="https://www.elastic.co/subscriptions/cloud"
+        onCancel={() => {}}
       />
     );
 
@@ -119,7 +131,11 @@ describe('EnterpriseGatingModal', () => {
 
   it('links to the cloud subscription features page by default on cloud', () => {
     renderWithI18n(
-      <EnterpriseGatingModal environment="cloud" hasManageSubscriptionPermission={true} />
+      <EnterpriseGatingModal
+        environment="cloud"
+        hasManageSubscriptionPermission={true}
+        onCancel={() => {}}
+      />
     );
 
     expect(
@@ -128,7 +144,7 @@ describe('EnterpriseGatingModal', () => {
   });
 
   it('links to the self-managed subscription features page by default on self-managed', () => {
-    renderWithI18n(<EnterpriseGatingModal environment="selfManaged" />);
+    renderWithI18n(<EnterpriseGatingModal environment="selfManaged" onCancel={() => {}} />);
 
     expect(
       screen.getByTestId('enterpriseGatingModalReviewSubscriptionFeaturesButton')
@@ -142,6 +158,7 @@ describe('EnterpriseGatingModal', () => {
         environment="cloud"
         hasManageSubscriptionPermission={true}
         trialStatus="notStarted"
+        onCancel={() => {}}
       />
     );
 
