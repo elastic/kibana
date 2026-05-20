@@ -102,7 +102,7 @@ describe('StreamLinkContent', () => {
         error={undefined}
         locator={buildLocator()}
         remoteSearchType="cps"
-        showRemoteWarning
+        renderRemoteWarning
       />
     );
 
@@ -118,7 +118,7 @@ describe('StreamLinkContent', () => {
         error={undefined}
         locator={buildLocator()}
         remoteSearchType="ccs"
-        showRemoteWarning
+        renderRemoteWarning
       />
     );
 
