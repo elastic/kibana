@@ -97,7 +97,7 @@ const applySharedSchemaRuntimeMetadata = (
     applyPropertyRuntimeMetadata(description, sharedSchemas[id]);
   }
 
-  const { keys, matches, items } = description as Joi.Description & {
+  const { keys, matches, items, rules, whens } = description as Joi.Description & {
     keys?: Record<string, Joi.Description>;
     matches?: Array<{
       schema?: Joi.Description;
@@ -106,6 +106,8 @@ const applySharedSchemaRuntimeMetadata = (
       switch?: Array<{ then?: Joi.Description; otherwise?: Joi.Description }>;
     }>;
     items?: Joi.Description[];
+    rules?: Array<{ args?: { key?: Joi.Description; value?: Joi.Description } }>;
+    whens?: Array<{ then?: Joi.Description; otherwise?: Joi.Description }>;
   };
 
   Object.values(keys ?? {}).forEach((childDescription) => {
@@ -134,6 +136,22 @@ const applySharedSchemaRuntimeMetadata = (
   });
   items?.forEach((itemDescription) => {
     applySharedSchemaRuntimeMetadata(itemDescription, sharedSchemas);
+  });
+  rules?.forEach(({ args }) => {
+    if (args?.key) {
+      applySharedSchemaRuntimeMetadata(args.key, sharedSchemas);
+    }
+    if (args?.value) {
+      applySharedSchemaRuntimeMetadata(args.value, sharedSchemas);
+    }
+  });
+  whens?.forEach((when) => {
+    if (when.then) {
+      applySharedSchemaRuntimeMetadata(when.then, sharedSchemas);
+    }
+    if (when.otherwise) {
+      applySharedSchemaRuntimeMetadata(when.otherwise, sharedSchemas);
+    }
   });
 };
 

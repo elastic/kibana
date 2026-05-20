@@ -543,6 +543,38 @@ describe('convert', () => {
     expect(converted.shared.discriminatedCountOperation.required).toEqual(['format', 'type']);
     expect(converted.shared.discriminatedSumOperation.required).toEqual(['format', 'type']);
   });
+
+  test('does not require maybe referenced fields in conditional id schemas', () => {
+    const timeScaleSchema = schema.maybe(
+      schema.oneOf([schema.literal('s'), schema.literal('m')], {
+        meta: { id: 'conditionalTimeScaleSchema' },
+      })
+    );
+    const thenSchema = schema.object(
+      {
+        time_scale: timeScaleSchema,
+        required: schema.string(),
+      },
+      { meta: { id: 'conditionalThenSchema' } }
+    );
+    const otherwiseSchema = schema.object(
+      {
+        time_scale: timeScaleSchema,
+        required: schema.string(),
+      },
+      { meta: { id: 'conditionalOtherwiseSchema' } }
+    );
+
+    const converted = convert(
+      schema.object({
+        kind: schema.string(),
+        value: schema.conditional(schema.siblingRef('kind'), 'then', thenSchema, otherwiseSchema),
+      })
+    );
+
+    expect(converted.shared.conditionalThenSchema.required).toEqual(['required']);
+    expect(converted.shared.conditionalOtherwiseSchema.required).toEqual(['required']);
+  });
 });
 
 describe('convertPathParameters', () => {
