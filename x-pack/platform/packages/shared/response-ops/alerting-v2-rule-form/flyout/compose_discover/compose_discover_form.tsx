@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useFormContext, useWatch } from 'react-hook-form';
+import { Parser, isColumn } from '@elastic/esql';
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { getEsqlColumns } from '@kbn/esql-utils';
@@ -39,7 +40,6 @@ import type { ComposeFormValues } from './compose_form_types';
 import { QuerySummary } from './query_summary';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { useDataFields } from '../../form/hooks/use_data_fields';
-import { splitQuery } from './use_heuristic_split';
 import { RuleDetailsFieldGroup } from '../../form';
 import { ScheduleField } from '../../form/fields/schedule_field';
 import { LookbackWindowField } from '../../form/fields/lookback_window_field';
@@ -49,6 +49,7 @@ interface ComposeDiscoverFormProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
+  onRecoveryTypeChange: (type: RecoveryType) => void;
 }
 
 // ── Recovery type selector ────────────────────────────────────────────────────
@@ -155,16 +156,19 @@ const RECOVERY_TYPE_OPTIONS: Array<{
 ];
 
 interface RecoveryTypeSelectorProps {
-  state: ComposeDiscoverState;
-  dispatch: React.Dispatch<ComposeDiscoverAction>;
+  recoveryType: RecoveryType;
+  onRecoveryTypeChange: (type: RecoveryType) => void;
 }
 
-const RecoveryTypeSelector: React.FC<RecoveryTypeSelectorProps> = ({ state, dispatch }) => (
+const RecoveryTypeSelector: React.FC<RecoveryTypeSelectorProps> = ({
+  recoveryType,
+  onRecoveryTypeChange,
+}) => (
   <EuiFormRow label="Recovery" fullWidth>
     <EuiSuperSelect
       options={RECOVERY_TYPE_OPTIONS}
-      valueOfSelected={state.recoveryType}
-      onChange={(val) => dispatch({ type: 'SET_RECOVERY_TYPE', recoveryType: val as RecoveryType })}
+      valueOfSelected={recoveryType}
+      onChange={(val) => onRecoveryTypeChange(val as RecoveryType)}
       fullWidth
       data-test-subj="composeDiscoverRecoveryType"
     />
@@ -182,22 +186,23 @@ function AlertConditionStep({
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
 }) {
-  const { clearErrors, control, setValue, watch } = useFormContext<ComposeFormValues>();
+  const { setValue, watch } = useFormContext<ComposeFormValues>();
+  const isAlert = watch('kind') === 'alert';
+  const timeField = watch('timeField') ?? '@timestamp';
   const grouping = watch('grouping');
   const groupFields = grouping?.fields ?? [];
+  const query = watch('query');
 
-  // RHF is the source of truth for the evaluation query. Both field
-  // detection and output-column fetching derive from it, gated on
-  // queryCommitted so we don't fire requests before the user applies.
-  const queryValue = watch('query');
-  const evalQuery = queryValue?.format === 'composed' ? queryValue.base ?? '' : '';
+  const baseQuery = query.format === 'composed' ? query.base : '';
+  const alertBlock = query.format === 'composed' ? query.blocks.breach : '';
+  const fullQuery = query.format === 'standalone' ? query.breach : '';
+
+  // Use the base query for field lookup when tracking is on; fall back to full breach query.
   const committedQuery = useMemo(() => {
-    return /^\s*FROM\s+[a-zA-Z0-9_.*-]/i.test(evalQuery) && state.queryCommitted ? evalQuery : '';
-  }, [evalQuery, state.queryCommitted]);
+    const q = isAlert ? baseQuery : fullQuery;
+    return /^\s*FROM\s+[a-zA-Z0-9_.*-]/i.test(q) && state.queryCommitted ? q : '';
+  }, [isAlert, baseQuery, fullQuery, state.queryCommitted]);
 
-  // useDataFields resolves raw index fields via getESQLAdHocDataview,
-  // so the full pipeline (including STATS) is safe — only the FROM
-  // clause matters for field discovery.
   const { data: fieldMap } = useDataFields({
     query: committedQuery,
     http: services.http,
@@ -208,14 +213,8 @@ function AlertConditionStep({
       .filter((f) => f.type === 'date')
       .map((f) => f.name)
       .sort();
-    if (dateFields.length === 0) {
-      return [{ value: '@timestamp', text: '@timestamp' }];
-    }
-    const opts = dateFields.map((name) => ({ value: name, text: name }));
-    if (dateFields.length > 1) {
-      opts.unshift({ value: '', text: 'Select a time field…' });
-    }
-    return opts;
+    if (!dateFields.includes('@timestamp')) dateFields.unshift('@timestamp');
+    return dateFields.map((name) => ({ value: name, text: name }));
   }, [fieldMap]);
 
   // Output columns of the full pipeline → options for the group fields selector.
@@ -235,18 +234,41 @@ function AlertConditionStep({
     keepPreviousData: true,
   });
 
-  const handleTrackingToggle = useCallback(() => {
-    if (state.tracking) {
-      dispatch({ type: 'DISABLE_TRACKING' });
-    } else {
-      const currentQuery = state.fullQuery;
-      const { base, alertBlock } = splitQuery(currentQuery);
-      dispatch({ type: 'ENABLE_TRACKING', base, alertBlock });
+  // Auto-populate group fields from the STATS BY clause when a query is first committed
+  // and the user hasn't already set any group fields.
+  const autoPopulatedForRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!state.queryCommitted || groupFields.length > 0 || !committedQuery) return;
+    if (autoPopulatedForRef.current === committedQuery) return;
+    autoPopulatedForRef.current = committedQuery;
+    try {
+      const { root } = Parser.parse(committedQuery);
+      const statsCmd = [...root.commands].reverse().find((c) => c.name === 'stats');
+      // ESQLAstItem is a wide union — use a local type alias to access the 'by' option
+      // safely rather than an inline interface (which triggers lint in function scope).
+      interface CmdOption {
+        type: string;
+        name: string;
+        args?: unknown[];
+      }
+      const byOption = (statsCmd?.args as CmdOption[] | undefined)?.find(
+        (a) => a.type === 'option' && a.name === 'by'
+      );
+      const byFields = (byOption?.args ?? []).filter(isColumn).map((a) => a.name);
+      if (byFields.length > 0) setValue('grouping', { fields: byFields });
+    } catch {
+      // Non-parseable query — skip auto-populate
     }
-  }, [state.tracking, state.fullQuery, dispatch]);
+  }, [state.queryCommitted, committedQuery, groupFields.length, setValue]);
 
-  // Callout when the heuristic split couldn't find a clear split point
-  const splitFailed = state.tracking && !state.baseQuery && state.queryCommitted;
+  const handleTrackingToggle = useCallback(() => {
+    setValue('kind', isAlert ? 'signal' : 'alert');
+  }, [isAlert, setValue]);
+
+  // Callout when the heuristic split couldn't find a clear split point.
+  // Only relevant after Apply (when the committed query is in composed format).
+  const splitFailed =
+    isAlert && state.queryCommitted && query.format === 'composed' && !query.base.trim();
 
   return (
     <>
@@ -272,9 +294,9 @@ function AlertConditionStep({
             Open query editor
           </EuiButton>
         </>
-      ) : !state.tracking ? (
+      ) : !isAlert ? (
         <>
-          <QuerySummary query={state.fullQuery} label="query" />
+          <QuerySummary query={fullQuery} label="query" />
           <EuiSpacer size="s" />
           <EuiButton
             size="s"
@@ -304,13 +326,13 @@ function AlertConditionStep({
             <strong>Base query</strong>
           </EuiText>
           <EuiSpacer size="xs" />
-          <QuerySummary query={state.baseQuery} label="base query" />
+          <QuerySummary query={baseQuery} label="base query" />
           <EuiSpacer size="m" />
           <EuiText size="xs" color="subdued">
             <strong>Alert condition</strong>
           </EuiText>
           <EuiSpacer size="xs" />
-          <QuerySummary query={state.alertBlock} label="alert condition" />
+          <QuerySummary query={alertBlock} label="alert condition" />
           <EuiSpacer size="s" />
           <EuiButton
             size="s"
@@ -325,38 +347,16 @@ function AlertConditionStep({
       )}
 
       <EuiSpacer size="m" />
-      <Controller
-        name="timeField"
-        control={control}
-        rules={{
-          validate: (value) => {
-            if (!value) {
-              return i18n.translate(
-                'xpack.responseOps.alertingV2RuleForm.composeDiscover.timeFieldRequiredError',
-                { defaultMessage: 'Time field is required.' }
-              );
-            }
-            return true;
-          },
-        }}
-        render={({ field: { ref, value, onChange }, fieldState: { error } }) => (
-          <EuiFormRow label="Time field" fullWidth isInvalid={!!error} error={error?.message}>
-            <EuiSelect
-              inputRef={ref}
-              fullWidth
-              options={timeFieldOptions}
-              value={value ?? ''}
-              onChange={(e) => {
-                onChange(e.target.value);
-                if (e.target.value) clearErrors('timeField');
-              }}
-              disabled={state.childOpen}
-              isInvalid={!!error}
-              data-test-subj="composeDiscoverTimeField"
-            />
-          </EuiFormRow>
-        )}
-      />
+      <EuiFormRow label="Time field" fullWidth>
+        <EuiSelect
+          fullWidth
+          options={timeFieldOptions}
+          value={timeField}
+          onChange={(e) => setValue('timeField', e.target.value)}
+          disabled={state.childOpen}
+          data-test-subj="composeDiscoverTimeField"
+        />
+      </EuiFormRow>
       <EuiSpacer size="m" />
       <EuiFormRow label="Group fields" fullWidth>
         <EuiComboBox
@@ -375,7 +375,7 @@ function AlertConditionStep({
       <EuiSpacer size="m" />
       <EuiSwitch
         label="Track active and recovered state over time"
-        checked={state.tracking}
+        checked={isAlert}
         onChange={handleTrackingToggle}
         disabled={!state.queryCommitted}
         data-test-subj="composeDiscoverTrackingToggle"
@@ -393,13 +393,22 @@ function AlertConditionStep({
 function RecoveryConditionStep({
   state,
   dispatch,
+  onRecoveryTypeChange,
 }: {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
+  onRecoveryTypeChange: (type: RecoveryType) => void;
 }) {
+  const query = useWatch<ComposeFormValues, 'query'>({ name: 'query' });
+  const baseQuery = query?.format === 'composed' ? query.base : '';
+  const recoveryBlock = query?.format === 'composed' ? query.blocks.recover ?? '' : '';
+
   return (
     <>
-      <RecoveryTypeSelector state={state} dispatch={dispatch} />
+      <RecoveryTypeSelector
+        recoveryType={state.recoveryType}
+        onRecoveryTypeChange={onRecoveryTypeChange}
+      />
 
       {state.recoveryType === 'custom' && (
         <>
@@ -410,13 +419,13 @@ function RecoveryConditionStep({
             <strong>Base query</strong>
           </EuiText>
           <EuiSpacer size="xs" />
-          <QuerySummary query={state.baseQuery} label="base query" />
+          <QuerySummary query={baseQuery} label="base query" />
           <EuiSpacer size="m" />
           <EuiText size="xs" color="subdued">
             <strong>Recovery condition</strong>
           </EuiText>
           <EuiSpacer size="xs" />
-          <QuerySummary query={state.recoveryBlock} label="recovery condition" />
+          <QuerySummary query={recoveryBlock} label="recovery condition" />
           <EuiSpacer size="s" />
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -430,7 +439,7 @@ function RecoveryConditionStep({
                 Edit recovery query
               </EuiButton>
             </EuiFlexItem>
-            {state.recoveryBlock && (
+            {recoveryBlock && (
               <EuiFlexItem grow={false}>
                 <EuiBadge color="success">Custom condition set</EuiBadge>
               </EuiFlexItem>
@@ -500,13 +509,21 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
   alertCondition: {
     id: 'alertCondition',
     title: 'Alert Condition',
-    render: (props) => <AlertConditionStep {...props} />,
-    validate: async (_methods, s) => s.queryCommitted && (await _methods.trigger('timeField')),
+    render: (props) => (
+      <AlertConditionStep state={props.state} dispatch={props.dispatch} services={props.services} />
+    ),
+    validate: (methods, s) => s.queryCommitted && !!methods.getValues('timeField'),
   },
   recoveryCondition: {
     id: 'recoveryCondition',
     title: 'Recovery Condition',
-    render: (props) => <RecoveryConditionStep state={props.state} dispatch={props.dispatch} />,
+    render: (props) => (
+      <RecoveryConditionStep
+        state={props.state}
+        dispatch={props.dispatch}
+        onRecoveryTypeChange={props.onRecoveryTypeChange}
+      />
+    ),
   },
   details: {
     id: 'details',
@@ -530,7 +547,13 @@ export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({
   state,
   dispatch,
   services,
+  onRecoveryTypeChange,
 }) => {
   const steps = getSteps(state.tracking);
-  return steps[state.step].render({ state, dispatch, services });
+  return steps[state.step].render({
+    state,
+    dispatch,
+    services,
+    onRecoveryTypeChange,
+  });
 };
