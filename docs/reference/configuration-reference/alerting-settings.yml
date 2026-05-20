@@ -1357,3 +1357,17 @@ groups:
           stack: ga 7.7
           ech: ga
           self: ga
+
+  - group: Rule Registry settings
+    id: rule-registry-settings
+    settings:
+
+      - setting: xpack.ruleRegistry.write.disabledRegistrationContexts
+        description: |
+          An array of observability rule registration contexts whose alert indices should not be written to. Allowed values are `observability.logs`, `observability.metrics`, `observability.apm`, and `observability.uptime`.
+        datatype: array of strings
+        default: "[]"
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
