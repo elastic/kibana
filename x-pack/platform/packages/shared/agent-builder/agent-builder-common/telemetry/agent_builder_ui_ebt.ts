@@ -12,6 +12,7 @@ const ebtElement = {
   appRoot: 'agentBuilder.app',
   pageContent: 'agentBuilder.pageContent',
   SIDEBAR: 'agentBuilder.sidebar',
+  flyout: 'agentBuilder.flyout',
 } as const;
 
 const ebtAction = {
@@ -42,6 +43,41 @@ const ebtAction = {
     OPEN_FULLSCREEN: 'inapp_open_fullscreen',
     AGENT_SWITCH: 'inapp_agent_switch',
   },
+  agentList: {
+    AGENT_CREATE: 'agent_create',
+    AGENT_EDIT: 'agent_edit',
+    AGENT_DELETE: 'agent_delete',
+    LEARN_MORE_DOCS: 'learn_more_docs',
+  },
+  agentOverview: {
+    COPY_ID: 'copy_agent_id',
+    EDIT_DETAILS: 'edit_agent_details',
+    DOCS_LINK: 'docs_link',
+    DESCRIPTION_TOGGLE: 'description_toggle',
+    ELASTIC_CAPABILITIES_TOGGLE: 'elastic_capabilities_toggle',
+    EDIT_FLYOUT_SAVE: 'form_save',
+    EDIT_FLYOUT_CANCEL: 'form_cancel',
+  },
+  agentEdit: {
+    SAVE: 'form_save',
+    SAVE_AND_CHAT: 'save_and_chat',
+    CHAT: 'agent_chat',
+    CANCEL: 'form_cancel',
+    CLONE: 'agent_clone',
+    DELETE: 'agent_delete',
+    OPEN_MENU: 'open_menu',
+    BACK_TO_LIST: 'back_to_list',
+    LEARN_MORE_DOCS: 'learn_more_docs',
+    MANAGE_ALL: 'manage_all',
+    TOOLS_LINK: 'tools_link',
+    SHOW_ACTIVE_ONLY: 'show_active_only',
+  },
+  access: {
+    CONNECT_LLM: 'connect_llm',
+    LEARN_MORE_DOCS: 'learn_more_docs',
+    SUBSCRIPTION_PLANS: 'subscription_plans',
+    MANAGE_LICENSE: 'manage_license',
+  },
 } as const;
 
 const ebtDetail = {
@@ -55,6 +91,7 @@ const ebtEntity = {
   TOOL: 'tool',
   PLUGIN: 'plugin',
   SKILL: 'skill',
+  AGENT: 'agent',
 } as const;
 const ebtFormat = {} as const;
 

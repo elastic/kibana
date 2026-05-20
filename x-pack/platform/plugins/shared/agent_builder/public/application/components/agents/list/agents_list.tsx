@@ -22,7 +22,12 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { canCurrentUserEditAgent, type AgentDefinition } from '@kbn/agent-builder-common';
+import {
+  canCurrentUserEditAgent,
+  type AgentDefinition,
+  AGENT_BUILDER_UI_EBT,
+} from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { countBy } from 'lodash';
 import React, { useMemo } from 'react';
 import { useDeleteAgent } from '../../../context/delete_agent_context';
@@ -106,6 +111,11 @@ export const AgentsList: React.FC = () => {
           <EuiLink
             data-test-subj="agentBuilderAgentsListName"
             href={createAgentBuilderUrl(appPaths.agents.edit({ agentId: agent.id }))}
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.agentList.AGENT_EDIT,
+              detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+            })}
           >
             <EuiText size="m">{name}</EuiText>
           </EuiLink>
@@ -203,6 +213,11 @@ export const AgentsList: React.FC = () => {
                       deleteAgent({ agent });
                     }}
                     color="danger"
+                    {...getEbtProps({
+                      element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                      action: AGENT_BUILDER_UI_EBT.action.agentList.AGENT_DELETE,
+                      detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                    })}
                   >
                     {actionLabels.delete}
                   </EuiLink>
