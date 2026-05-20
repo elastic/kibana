@@ -17,42 +17,40 @@ interface UseUserPickerValidatorsParams {
   security: SecurityPluginStart;
 }
 
-export const useUserPickerValidators = ({ isRequired, security }: UseUserPickerValidatorsParams) =>
+type ValidateFn = (value: unknown) => true | string | Promise<true | string>;
+
+export const useUserPickerValidators = ({
+  isRequired,
+  security,
+}: UseUserPickerValidatorsParams): { validate: Record<string, ValidateFn> } =>
   useMemo(() => {
-    const validators = [];
+    const validate: Record<string, ValidateFn> = {};
 
     if (isRequired) {
-      validators.push({
-        validator: ({ value }: { value: unknown }) => {
-          if (toSelectedUsers(value).length === 0) {
-            return { message: FIELD_REQUIRED };
-          }
-        },
-      });
+      validate.required = (value) => (toSelectedUsers(value).length === 0 ? FIELD_REQUIRED : true);
     }
 
-    validators.push({
-      validator: async ({ value }: { value: unknown }) => {
-        const users = toSelectedUsers(value);
-        if (users.length === 0) return;
+    validate.profilesValid = async (value) => {
+      const users = toSelectedUsers(value);
+      if (users.length === 0) return true;
 
-        const profiles = await bulkGetUserProfiles({
-          security,
-          uids: users.map((u) => u.uid),
-        });
-        const profileMap = new Map(profiles.map((p) => [p.uid, p]));
+      const profiles = await bulkGetUserProfiles({
+        security,
+        uids: users.map((u) => u.uid),
+      });
+      const profileMap = new Map(profiles.map((p) => [p.uid, p]));
 
-        const invalid = users.filter((u) => {
-          const profile = profileMap.get(u.uid);
-          if (!profile) return true;
-          return getUserDisplayName(profile.user) !== u.name;
-        });
+      const invalid = users.filter((u) => {
+        const profile = profileMap.get(u.uid);
+        if (!profile) return true;
+        return getUserDisplayName(profile.user) !== u.name;
+      });
 
-        if (invalid.length > 0) {
-          return { message: INVALID_USER_PROFILES(invalid.map((u) => u.name)) };
-        }
-      },
-    });
+      if (invalid.length > 0) {
+        return INVALID_USER_PROFILES(invalid.map((u) => u.name));
+      }
+      return true;
+    };
 
-    return validators;
+    return { validate };
   }, [isRequired, security]);

@@ -13,7 +13,7 @@ import type {
   IndicesAutocompleteResult,
   IndexAutocompleteItem,
 } from '@kbn/esql-types';
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import { BROWSER_POPOVER_WIDTH, DataSourceSelectionChange } from '@kbn/esql-resource-browser';
 import {
   computeInsertionText,

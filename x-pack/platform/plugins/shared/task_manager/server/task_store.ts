@@ -266,7 +266,7 @@ export class TaskStore {
 
       // and create new API keys using the new request
       if (docsWithApiKeys.length) {
-        apiKeySOFieldsMap = await this.grantApiKeysFromRequest(docsWithApiKeys, options.request);
+        apiKeySOFieldsMap = await this.grantApiKeysFromRequest(docsWithApiKeys, options);
       }
     }
 
@@ -302,14 +302,20 @@ export class TaskStore {
 
   private async grantApiKeysFromRequest(
     taskInstances: TaskInstance[],
-    request?: KibanaRequest
+    options?: ApiKeyOptions
   ): Promise<Map<string, ApiKeySOFields> | null> {
+    const request = options?.request;
     if (!this.getIsSecurityEnabled() || !request) {
       return null;
     }
 
     try {
-      return await this.apiKeyStrategy.grantApiKeys(taskInstances, request, this.security);
+      return await this.apiKeyStrategy.grantApiKeys(
+        taskInstances,
+        request,
+        this.security,
+        options?.onEsKey === true ? { onEsKey: true } : undefined
+      );
     } catch (e) {
       this.errors$.next(e);
       throw e;
@@ -452,7 +458,7 @@ export class TaskStore {
     this.definitions.ensureHas(taskInstance.taskType);
 
     const apiKeySOFieldsMap =
-      (await this.grantApiKeysFromRequest([taskInstance], options?.request)) || new Map();
+      (await this.grantApiKeysFromRequest([taskInstance], options)) || new Map();
     const apiKeySOFields = apiKeySOFieldsMap.get(taskInstance.id) || {};
 
     const soClient = this.getSoClientForCreate(options || {});
@@ -519,7 +525,7 @@ export class TaskStore {
       throw e;
     }
     const apiKeySOFieldsMap =
-      (await this.grantApiKeysFromRequest(taskInstances, options?.request)) || new Map();
+      (await this.grantApiKeysFromRequest(taskInstances, options)) || new Map();
 
     const soClient = this.getSoClientForCreate(options || {});
 

@@ -34,6 +34,6 @@
     "@kbn/management-settings-ids",
     "@kbn/core-spaces-common",
     "@kbn/agent-context-layer-plugin",
-    "@kbn/actions-plugin"
+    "@kbn/actions-plugin",
   ]
 }

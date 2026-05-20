@@ -67,6 +67,18 @@ describe('Navigation Tree', () => {
     expect(agentsNode).toBeDefined();
   });
 
+  it('hides GenAI Settings in admin settings when unavailable', () => {
+    const { body } = createNavigationTree({ genAiSettingsAvailable: false });
+    const adminSettingsNode = body.find((item) => item.id === 'admin_and_settings');
+    const aiSection = adminSettingsNode?.children?.find(
+      (item) => item.title === 'AI' && 'children' in item
+    );
+
+    expect(aiSection?.children).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ link: 'management:genAiSettings' })])
+    );
+  });
+
   it('uses a single Alerts link to classic Observability alerts', () => {
     const { body } = createNavigationTree({ showAlertingV2: true });
     const alertsPanel = body.find(

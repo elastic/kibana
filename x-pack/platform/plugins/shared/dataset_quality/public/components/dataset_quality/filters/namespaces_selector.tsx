@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiFilterButton, EuiPopover, EuiPopoverTitle, EuiSelectable, EuiText } from '@elastic/eui';
+import {
+  EuiFilterButton,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSelectable,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import React, { useState } from 'react';
 import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
@@ -56,6 +63,7 @@ export function NamespacesSelector({
   onNamespacesChange,
 }: NamespacesSelectorProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId({ prefix: 'namespacesSelectorPopoverTitle' });
 
   const onButtonClick = () => {
     setIsPopoverOpen(!isPopoverOpen);
@@ -88,6 +96,7 @@ export function NamespacesSelector({
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="none"
+      aria-labelledby={popoverTitleId}
     >
       <EuiSelectable
         data-test-subj="datasetQualityNamespacesSelectable"
@@ -96,6 +105,7 @@ export function NamespacesSelector({
           placeholder: namespacesSelectorSearchPlaceholder,
           compressed: true,
         }}
+        listProps={{ paddingSize: 's' }}
         aria-label={namespacesSelectorLabel}
         options={namespaces}
         onChange={onNamespacesChange}
@@ -107,7 +117,9 @@ export function NamespacesSelector({
       >
         {(list, search) => (
           <div style={{ width: 300 }}>
-            <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
+            <EuiPopoverTitle paddingSize="s" id={popoverTitleId}>
+              {search}
+            </EuiPopoverTitle>
             {list}
           </div>
         )}

@@ -68,6 +68,6 @@
     "@kbn/connector-schemas",
     "@kbn/security-solution-features",
     "@kbn/core-spaces-common",
-    "@kbn/entity-store"
+    "@kbn/entity-store",
   ]
 }
