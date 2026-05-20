@@ -76,7 +76,8 @@ export const getDeepAnalysisPlaybook: DataSourceProfileProvider['profile']['getD
         )}), ` +
         `throughput by ${TRANSACTION_NAME_FIELD} or ${SPAN_NAME_FIELD}, ` +
         `and error rate via ${EVENT_OUTCOME_FIELD}='failure'. ` +
-        `Group by ${SERVICE_NAME_FIELD} then ${TRANSACTION_NAME_FIELD}; never group by trace/span ids.`,
+        `Group by ${SERVICE_NAME_FIELD} then ${TRANSACTION_NAME_FIELD} or ${SPAN_NAME_FIELD}; ` +
+        `never group by trace/span ids.`,
       interestingSignals: [
         'latency outliers per service (p99 vs p50 spread)',
         'services with rising failure rate',
