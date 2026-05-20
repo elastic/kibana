@@ -50,6 +50,9 @@ const mockUiSettingsGet = jest.fn().mockReturnValue(false);
 const mockDocumentFlyoutWrapper = jest.fn((_props?: unknown) => (
   <div>{'MockDocumentFlyoutWrapper'}</div>
 ));
+const mockPaginatedTimelineDocumentFlyout = jest.fn((_props?: unknown) => (
+  <div>{'MockPaginatedTimelineDocumentFlyout'}</div>
+));
 
 const updateSampleSizeSpy = jest.spyOn(timelineActions, 'updateSampleSize');
 
@@ -59,6 +62,9 @@ jest.mock('../../../../../flyout_v2/shared/components/flyout_provider', () => ({
 }));
 jest.mock('../../../../../flyout_v2/document/main/document_flyout_wrapper', () => ({
   DocumentFlyoutWrapper: (props: unknown) => mockDocumentFlyoutWrapper(props),
+}));
+jest.mock('../../../../../flyout_v2/document/paginated_timeline_document_flyout', () => ({
+  PaginatedTimelineDocumentFlyout: (props: unknown) => mockPaginatedTimelineDocumentFlyout(props),
 }));
 jest.mock('../../../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../../../common/lib/kibana');
@@ -202,7 +208,7 @@ describe('unified data table', () => {
   );
 
   it(
-    'opens the new document flyout (from index) when enableNewFlyout setting is enabled and row is not an attack',
+    'opens the paginated timeline document flyout when enableNewFlyout setting is enabled and row is not an attack',
     async () => {
       jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
@@ -212,16 +218,16 @@ describe('unified data table', () => {
       fireEvent.click(screen.getAllByTestId('docTableExpandToggleColumn')[0]);
 
       await waitFor(() => {
-        expect(flyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalledWith(
+        expect(mockPaginatedTimelineDocumentFlyout).toHaveBeenCalledWith(
           expect.objectContaining({
-            documentId: mockTimelineData[0]._id,
-            indexName: mockTimelineData[0].ecs._index,
+            paginationInstanceId: expect.any(String),
+            onAlertUpdated: refetchMock,
           })
         );
       });
 
-      // the document (non-attack) new flyout no longer goes through the inline system flyout
-      expect(mockOpenSystemFlyout).not.toHaveBeenCalled();
+      expect(flyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
+      expect(mockDocumentFlyoutWrapper).not.toHaveBeenCalled();
     },
     SPECIAL_TEST_TIMEOUT
   );
