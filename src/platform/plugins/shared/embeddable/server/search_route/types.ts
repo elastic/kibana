@@ -9,7 +9,7 @@
 
 import { schema, type TypeOf } from '@kbn/config-schema';
 
-export const requestTypeSchema = schema.object({
+export const searchEmbeddablesRequestSchema = schema.object({
   type: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
   search: schema.maybe(schema.string()),
   limit: schema.maybe(schema.number()),
@@ -21,11 +21,11 @@ export const requestTypeSchema = schema.object({
   ),
 });
 
-export type RequestType = TypeOf<typeof requestTypeSchema>;
+export type SearchEmbeddablesRequestType = TypeOf<typeof searchEmbeddablesRequestSchema>;
 
-export const responseTypeSchema = schema.object({
+export const searchEmbeddablesResponseSchema = schema.object({
   hits: schema.arrayOf(schema.any()),
   total: schema.number(),
 });
 
-export type ResponseType = TypeOf<typeof responseTypeSchema>;
+export type SearchEmbeddablesResponseType = TypeOf<typeof searchEmbeddablesResponseSchema>;

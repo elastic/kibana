@@ -9,34 +9,55 @@
 
 import type { IRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext, SavedObjectsFindOptionsReference } from '@kbn/core/server';
-import { requestTypeSchema, responseTypeSchema } from './types';
 import { SEARCH_ROUTE_PATH } from '../../common/constants';
+import type { EmbeddableFactoryRegistry } from '../types';
+import { searchEmbeddablesRequestSchema, searchEmbeddablesResponseSchema } from './types';
 
-export function registerSearchRoute(router: IRouter<RequestHandlerContext>) {
+export function registerSearchRoute(
+  router: IRouter<RequestHandlerContext>,
+  getEmbeddableFactories: () => EmbeddableFactoryRegistry
+) {
   router.post(
     {
       path: SEARCH_ROUTE_PATH,
       validate: {
         request: {
-          body: requestTypeSchema,
+          body: searchEmbeddablesRequestSchema,
         },
         response: {
           200: {
-            body: () => responseTypeSchema,
+            body: () => searchEmbeddablesResponseSchema,
             description: 'success',
+          },
+          403: {
+            description: 'forbidden',
           },
         },
       },
       security: {
         authz: {
           enabled: false,
-          reason: 'TODO',
+          reason:
+            'This route delegates authorization because the it is just a wrapper around the Saved Object client',
         },
       },
     },
     async (ctx, req, res) => {
       const { core } = await ctx.resolve(['core']);
       const { type, search, tags, limit } = req.body;
+
+      const embeddableTypes = Object.keys(getEmbeddableFactories());
+      const filteredTypes = (typeof type === 'string' ? [type] : type).filter(
+        (t) => !embeddableTypes.includes(t)
+      );
+      if (!filteredTypes.length) {
+        return res.forbidden({
+          body: {
+            message:
+              'This endpoint should only be used to fetch the saved objects of registered embeddables.',
+          },
+        });
+      }
 
       const tagIdToSavedObjectReference = (tagId: string): SavedObjectsFindOptionsReference => ({
         type: 'tag',

@@ -31,6 +31,7 @@ import {
 } from '../kibana_services';
 import { getAddFromLibraryType, useAddFromLibraryTypes } from './registry';
 import { SEARCH_ROUTE_PATH } from '../../common/constants';
+import type { SearchEmbeddablesResponseType } from '../../server/search_route/types';
 
 const runAddTelemetry = (
   parent: unknown,
@@ -86,15 +87,20 @@ export const AddFromLibraryContent = ({ container }: AddFromLibraryContentProps)
       services={{
         contentClient: {
           ...contentManagement.client,
-          mSearch: (input: MSearchIn): Promise<MSearchResult<any>> => {
-            return core.http.post(SEARCH_ROUTE_PATH, {
-              body: JSON.stringify({
-                type: input.contentTypes.map(({ contentTypeId }) => contentTypeId),
-                ...(input.query.text && { search: `${input.query.text}*` }),
-                limit: input.query.limit,
-                tags: input.query.tags,
-              }),
-            });
+          mSearch: async (input: MSearchIn): Promise<MSearchResult<any>> => {
+            try {
+              const result = (await core.http.post(SEARCH_ROUTE_PATH, {
+                body: JSON.stringify({
+                  type: input.contentTypes.map(({ contentTypeId }) => contentTypeId),
+                  ...(input.query.text && { search: `${input.query.text}*` }),
+                  limit: input.query.limit,
+                  tags: input.query.tags,
+                }),
+              })) as SearchEmbeddablesResponseType;
+              return { hits: result.hits, pagination: { total: result.total } };
+            } catch (e) {
+              return { hits: [], pagination: { total: 0 } };
+            }
           },
         } as ContentClient,
         savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
