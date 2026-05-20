@@ -136,10 +136,10 @@ export class VisualBuilderPageObject extends FtrService {
 
   public async enterMarkdown(markdown: string) {
     await this.clearMarkdown();
-    const prevCount = await this.visChart.getVisualizationRenderingCount();
     const input = await this.find.byCssSelector('.tvbMarkdownEditor__editor textarea');
     await input.type(markdown);
-    await this.visChart.waitForRenderingCount(prevCount + 1);
+    // Monaco typing is debounced and may not increment data-rendering-count; use stabilization
+    await this.visChart.waitForVisualizationRenderingStabilized();
   }
 
   public async clearMarkdown() {
@@ -348,6 +348,7 @@ export class VisualBuilderPageObject extends FtrService {
     const el = await this.testSubjects.find('offsetTimeSeries');
     await el.clearValue();
     await el.type(value);
+    await this.visChart.waitForVisualizationRenderingStabilized();
   }
 
   public async getRhythmChartLegendValue(nth = 0) {
