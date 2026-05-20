@@ -81,6 +81,7 @@ describe('fake elasticsearch', () => {
   let esServer: http.Server;
   let kibanaServer: Root;
   let esStatus$: Observable<ServiceStatus<ElasticsearchStatusMeta>>;
+  let currentStatus: undefined | ServiceStatus<ElasticsearchStatusMeta>;
 
   const waitForUnknownProductStatus = () => {
     const expectedStatusSummary = UNKNOWN_PRODUCT_STATUS_SUMMARY;
@@ -89,6 +90,7 @@ describe('fake elasticsearch', () => {
     return firstValueFrom(
       esStatus$.pipe(
         tap((status) => {
+          currentStatus = status;
           observedStatuses.push(`${status.level.toString()}: ${status.summary}`);
         }),
         filter(
@@ -142,6 +144,8 @@ describe('fake elasticsearch', () => {
 
   test('should return unknown product when it cannot perform the Product check (503 response)', async () => {
     await waitForUnknownProductStatus();
+    expect(currentStatus?.level.toString()).toBe('critical');
+    expect(currentStatus?.summary).toBe(UNKNOWN_PRODUCT_STATUS_SUMMARY);
   });
 
   test('should fail to start Kibana because of the Product Check Error', async () => {
