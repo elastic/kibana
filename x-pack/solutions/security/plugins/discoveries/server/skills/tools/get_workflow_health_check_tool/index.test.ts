@@ -54,6 +54,7 @@ describe('getWorkflowHealthCheckTool', () => {
 
   const mockContext: ToolHandlerContext = {
     attachments: {} as never,
+    callContext: { callSource: 'agent', toolCallId: 'test-tool-call-id', toolId: 'test-tool-id' },
     esClient: mockEsClient,
     events: {} as never,
     filestore: {} as never,
