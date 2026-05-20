@@ -64,52 +64,12 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
     await pageObjects.common.sleep(700);
   };
 
-  /**
-   * Returns true when the browser already has an active session for the given
-   * role so that loginWithRole can skip the full clean-state + cookie-set flow.
-   *
-   * Checks three things in order, each cheap:
-   *   1. A `sid` cookie is present in the browser.
-   *   2. The /internal/security/me API confirms the cookie belongs to the role.
-   *   3. The Kibana chrome (userMenuButton) is visible, so the page is ready.
-   */
-  const isAlreadyLoggedInAs = async (role: string): Promise<boolean> => {
-    try {
-      const cookies = await browser.getCookies();
-      const sidCookie = cookies.find((c) => c.name === 'sid');
-      if (!sidCookie) return false;
-
-      const { body, status } = await supertestWithoutAuth
-        .get('/internal/security/me')
-        .set(svlCommonApi.getInternalRequestHeader())
-        .set({ Cookie: `sid=${sidCookie.value}` });
-
-      if (status !== 200) return false;
-
-      const expectedEmail = await svlUserManager.getEmail(role);
-      if (body.email !== expectedEmail) return false;
-
-      const chromeReady = await testSubjects.exists('userMenuButton', { timeout: 1_000 });
-      if (chromeReady) {
-        log.debug(`loginWithRole: already logged in as '${role}', skipping`);
-      }
-      return chromeReady;
-    } catch {
-      return false;
-    }
-  };
-
   return {
     /**
      * Login to Kibana using SAML authentication with provided project-specfic role
      */
     async loginWithRole(role: string) {
       svlUserManager.checkRoleIsSupported(role);
-
-      if (await isAlreadyLoggedInAs(role)) {
-        return;
-      }
-
       log.debug(`Fetch the cookie for '${role}' role`);
       const sidCookie = await svlUserManager.getInteractiveUserSessionCookieWithRoleScope(role);
       await retry.waitForWithTimeout(
