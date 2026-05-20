@@ -136,7 +136,7 @@ describe('useTopNavLinks', () => {
       });
 
       const switchLanguageModeItem = appMenuConfig.items?.find(
-        (item) => item.testId === 'discoverSwitchLanguageModeButton'
+        (item) => item.testId === 'select-classic-mode-btn'
       );
 
       expect(switchLanguageModeItem).toBeDefined();
@@ -154,7 +154,7 @@ describe('useTopNavLinks', () => {
       });
 
       const switchLanguageModeItem = appMenuConfig.items?.find(
-        (item) => item.testId === 'discoverSwitchLanguageModeButton'
+        (item) => item.testId === 'select-text-based-language-btn'
       );
 
       expect(switchLanguageModeItem).toBeDefined();

@@ -256,7 +256,7 @@ export const useTopNavLinks = ({
               defaultMessage: 'Search your data with data views and KQL in Classic Discover',
             }),
         iconType: isDataViewMode ? 'code' : 'discoverApp',
-        testId: 'discoverSwitchLanguageModeButton',
+        testId: isDataViewMode ? 'select-text-based-language-btn' : 'select-classic-mode-btn',
         run: switchLanguageMode,
       });
     }
