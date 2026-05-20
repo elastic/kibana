@@ -21,7 +21,7 @@ import {
   inactiveSecurityAlertsOlderThan90,
   inactiveStackAlertsNewerThan90,
   inactiveStackAlertsOlderThan90,
-} from '@kbn/test-suites-xpack-platform/alerting_api_integration/security_and_spaces/group2/tests/alerting/alert_deletion/alert_deletion_test_utils';
+} from '../fixtures/alert_deletion_test_utils';
 import { test } from '../fixtures';
 
 const ALERT_INDEX_ALIASES = [

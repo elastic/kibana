@@ -84,11 +84,12 @@ test.describe('Slack connector', { tag: tags.stateful.classic }, () => {
 
   test('shows only the Slack webhook card, not the Slack API card', async ({ page, kbnUrl }) => {
     await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
-    await page.testSubj.click('createConnectorButton');
 
-    // The webhook card is always shown; the Slack-API connector card was
-    // removed in the connector-types matrix update (PR #167150) and should
-    // no longer appear in the picker.
+    const createButton = page.testSubj
+      .locator('createConnectorButton')
+      .or(page.testSubj.locator('createFirstActionButton'));
+    await createButton.click();
+
     await expect(page.testSubj.locator('.slack-card')).toBeVisible();
     await expect(page.testSubj.locator('.slack_api-card')).toBeHidden();
   });
@@ -137,9 +138,6 @@ test.describe('Slack connector', { tag: tags.stateful.classic }, () => {
     page,
     apiServices,
   }) => {
-    // Pre-create the connector via API — the per-test connector creation is
-    // already covered above. This test is about the rule-creation UI flow
-    // attaching the connector as an action.
     const connectorName = `scout-slack-rule-${Date.now()}`;
     const created = await apiServices.alerting.connectors.create({
       name: connectorName,
@@ -159,38 +157,69 @@ test.describe('Slack connector', { tag: tags.stateful.classic }, () => {
 
     await page.testSubj.click('rulePageFooterSaveButton');
 
-    // Some rule-types prompt a confirmation modal on save. Click confirm if
-    // it appears, otherwise carry on.
     const confirmButton = page.testSubj.locator('confirmModalConfirmButton');
-    await confirmButton.click({ timeout: 3000 }).catch(() => {
-      // No confirm modal — index-threshold doesn't always prompt one.
-    });
+    await confirmButton.click({ timeout: 3000 }).catch(() => {});
 
     await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(
       `Created rule "${ruleName}"`
     );
 
-    // Verify the rule appears in the rules list.
     await page.gotoApp('rules');
+    await page.testSubj.click('rulesTab');
     await expect(page.testSubj.locator(RULES_LIST_SUBJ)).toBeVisible();
-    await expect(
-      page.testSubj.locator(RULES_LIST_SUBJ).locator(`[title="${ruleName}"]`)
-    ).toBeVisible();
+    await page.testSubj.locator('ruleSearchField').fill(ruleName);
+    await expect(page.testSubj.locator('rulesTableCell-name')).toHaveCount(1);
+    await expect(page.testSubj.locator('rulesTableCell-name')).toContainText(ruleName);
+    await expect(page.testSubj.locator('rulesTableCell-name')).toContainText('Index threshold');
+    await expect(page.testSubj.locator('rulesTableCell-interval')).toContainText('1 min');
   });
 
-  // TODO: Two Slack Web API tests from the FTR (`it.skip`) are not yet
-  // migrated because the Slack API connector form requires a channel allowlist
-  // (PR #167150). Without at least one allowed channel ID configured, saving
-  // the connector fails with "Failed to retrieve Slack channels list".
-  //
-  // Tests to add once unblocked:
-  //   1. creates a Slack API connector via the UI — click `.slack_apiButton`,
-  //      fill `secrets.token-input`, save, assert toast + list entry.
-  //   2. saves a rule with a Slack API connector as its action — same
-  //      index-threshold rule flow as test 3 above but using the API connector.
-  //
-  // Unblock via either:
-  //   a. Add `xpack.actions.preconfiguredChannels: [{ id: 'fake', ... }]` to
-  //      Scout's stateful/classic Kibana startup args.
-  //   b. Mock the Slack channels endpoint with `page.route()`.
+  test('saves a rule with a Slack API connector as its action', async ({ page, apiServices }) => {
+    const connectorName = `scout-slack-api-rule-${Date.now()}`;
+    const created = await apiServices.alerting.connectors.create({
+      name: connectorName,
+      connectorTypeId: '.slack_api',
+      config: { allowedChannels: [{ name: '#general' }] },
+      secrets: { token: 'fake-token' },
+    });
+    createdConnectorIds.push(created.id);
+
+    const ruleName = `scout-slack-api-rule-${Date.now()}`;
+    createdRuleNames.push(ruleName);
+
+    await page.gotoApp('rules');
+    await defineIndexThresholdRule(page, ruleName);
+    await selectConnectorInRuleAction(page, connectorName);
+
+    // The Slack API action params render a channel combobox (options come from
+    // the connector's allowedChannels config) and a message text area.
+    const channelCombo = page.testSubj.locator('slackChannelsComboBox');
+    await expect(channelCombo).toBeVisible();
+    await channelCombo.click();
+    await page.getByRole('option', { name: '#general' }).click();
+
+    await page.testSubj.locator('webApiTextTextArea').fill('test alert message');
+
+    await page.testSubj.click('rulePageFooterSaveButton');
+    const confirmButton = page.testSubj.locator('confirmModalConfirmButton');
+    await confirmButton.click({ timeout: 3000 }).catch(() => {});
+
+    await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(
+      `Created rule "${ruleName}"`
+    );
+
+    await page.gotoApp('rules');
+    await page.testSubj.click('rulesTab');
+    await expect(page.testSubj.locator(RULES_LIST_SUBJ)).toBeVisible();
+    await page.testSubj.locator('ruleSearchField').fill(ruleName);
+    await expect(page.testSubj.locator('rulesTableCell-name')).toHaveCount(1);
+    await expect(page.testSubj.locator('rulesTableCell-name')).toContainText(ruleName);
+    await expect(page.testSubj.locator('rulesTableCell-name')).toContainText('Index threshold');
+    await expect(page.testSubj.locator('rulesTableCell-interval')).toContainText('1 min');
+  });
+
+  // TODO: Add a test that creates a Slack API connector via the UI:
+  //   - click the Slack API card
+  //   - fill `secrets.token-input`
+  //   - save and assert toast + list entry with type 'Slack API'
 });
