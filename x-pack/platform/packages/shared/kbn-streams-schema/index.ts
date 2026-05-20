@@ -137,6 +137,8 @@ export {
 export {
   type EsqlQuery,
   esqlQuerySchema,
+  type QueryFeature,
+  queryFeatureSchema,
   type StreamQuery,
   type QueryLink,
   type QueryType,
