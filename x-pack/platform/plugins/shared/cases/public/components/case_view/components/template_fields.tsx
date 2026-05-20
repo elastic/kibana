@@ -16,11 +16,7 @@ import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { CaseUI } from '../../../../common';
 import { CASE_EXTENDED_FIELDS } from '../../../../common/constants';
 import type { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/latest';
-import {
-  FieldSchema,
-  isInlineField,
-  isRefField,
-} from '../../../../common/types/domain/template/fields';
+import { FieldSchema, isInlineField } from '../../../../common/types/domain/template/fields';
 import type { InlineField } from '../../../../common/types/domain/template/fields';
 import { useGetTemplate } from '../../templates_v2/hooks/use_get_template';
 import { FieldsRenderer } from '../../templates_v2/field_types/field_renderer';
@@ -160,51 +156,49 @@ interface GlobalCaseFieldsProps {
 }
 
 /**
- * Renders all field definitions that have `renderInAllCases: true` for the
+ * Renders all field definitions that have `applyToAllCases: true` for the
  * case's owner, regardless of which template (if any) the case uses.
  * Values are stored in `extended_fields` alongside template-specific fields.
  */
-export const GlobalCaseFields = React.memo<GlobalCaseFieldsProps>(
-  ({ caseData, onUpdateField }) => {
-    const { data: globalFieldDefsData, isLoading } = useGetFieldDefinitions({
-      owner: caseData.owner,
-      renderInAllCases: true,
-    });
+export const GlobalCaseFields = React.memo<GlobalCaseFieldsProps>(({ caseData, onUpdateField }) => {
+  const { data: globalFieldDefsData, isLoading } = useGetFieldDefinitions({
+    owner: caseData.owner,
+    applyToAllCases: true,
+  });
 
-    const globalInlineFields = useMemo<InlineField[]>(() => {
-      const defs = globalFieldDefsData?.fieldDefinitions ?? [];
-      const fields: InlineField[] = [];
-      for (const fd of defs) {
-        try {
-          const parsed = parseYaml(fd.definition);
-          const result = FieldSchema.safeParse(parsed);
-          if (result.success && isInlineField(result.data) && !isRefField(result.data)) {
-            fields.push(result.data as InlineField);
-          }
-        } catch {
-          // Ignore malformed definitions
+  const globalInlineFields = useMemo<InlineField[]>(() => {
+    const defs = globalFieldDefsData?.fieldDefinitions ?? [];
+    const fields: InlineField[] = [];
+    for (const fd of defs) {
+      try {
+        const parsed = parseYaml(fd.definition);
+        const result = FieldSchema.safeParse(parsed);
+        if (result.success && isInlineField(result.data)) {
+          fields.push(result.data as InlineField);
         }
+      } catch {
+        // Ignore malformed definitions
       }
-      return fields;
-    }, [globalFieldDefsData]);
+    }
+    return fields;
+  }, [globalFieldDefsData]);
 
-    if (isLoading || !globalInlineFields.length) return null;
+  if (isLoading || !globalInlineFields.length) return null;
 
-    return (
-      <>
-        <EuiSpacer size="m" />
-        <EuiTitle size="xs">
-          <h3>{libI18n.GLOBAL_FIELDS_TITLE}</h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <TemplateFieldsFormReady
-          resolvedFields={globalInlineFields}
-          extendedFields={caseData.extendedFields ?? {}}
-          onUpdateField={onUpdateField}
-        />
-      </>
-    );
-  }
-);
+  return (
+    <>
+      <EuiSpacer size="m" />
+      <EuiTitle size="xs">
+        <h3>{libI18n.GLOBAL_FIELDS_TITLE}</h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <TemplateFieldsFormReady
+        resolvedFields={globalInlineFields}
+        extendedFields={caseData.extendedFields ?? {}}
+        onUpdateField={onUpdateField}
+      />
+    </>
+  );
+});
 
 GlobalCaseFields.displayName = 'GlobalCaseFields';

@@ -54,7 +54,7 @@ export const createFieldDefinitionsSubClient = (
         entities: owners.map((owner) => ({ owner, id: owner })),
       });
       return fieldDefinitionsService.getFieldDefinitions(owners, {
-        renderInAllCases: params.renderInAllCases,
+        applyToAllCases: params.applyToAllCases,
       });
     },
 

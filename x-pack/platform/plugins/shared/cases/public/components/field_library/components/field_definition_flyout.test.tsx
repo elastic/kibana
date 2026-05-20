@@ -43,12 +43,12 @@ const defaultProps = {
   onClose: jest.fn(),
 };
 
-describe('FieldDefinitionFlyout — renderInAllCases checkbox', () => {
+describe('FieldDefinitionFlyout — applyToAllCases checkbox', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders the renderInAllCases checkbox unchecked by default', () => {
+  it('renders the applyToAllCases checkbox unchecked by default', () => {
     renderWithTestingProviders(<FieldDefinitionFlyout {...defaultProps} />);
 
     const checkbox = screen.getByTestId('fieldDefinitionRenderInAllCasesCheckbox');
@@ -56,13 +56,13 @@ describe('FieldDefinitionFlyout — renderInAllCases checkbox', () => {
     expect(checkbox).not.toBeChecked();
   });
 
-  it('renders the renderInAllCases checkbox checked when fieldDefinition has renderInAllCases: true', () => {
+  it('renders the applyToAllCases checkbox checked when fieldDefinition has applyToAllCases: true', () => {
     const fieldDefinition = {
       fieldDefinitionId: 'fd-1',
       name: 'my_field',
       owner: 'securitySolution' as const,
       definition: VALID_YAML,
-      renderInAllCases: true,
+      applyToAllCases: true,
     };
 
     renderWithTestingProviders(
@@ -73,7 +73,7 @@ describe('FieldDefinitionFlyout — renderInAllCases checkbox', () => {
     expect(checkbox).toBeChecked();
   });
 
-  it('passes renderInAllCases: false to onSave when checkbox is unchecked', async () => {
+  it('passes applyToAllCases: false to onSave when checkbox is unchecked', async () => {
     renderWithTestingProviders(<FieldDefinitionFlyout {...defaultProps} />);
 
     // Set a valid YAML so validation passes
@@ -83,11 +83,11 @@ describe('FieldDefinitionFlyout — renderInAllCases checkbox', () => {
     fireEvent.click(screen.getByTestId('fieldDefinitionSaveButton'));
 
     expect(defaultProps.onSave).toHaveBeenCalledWith(
-      expect.objectContaining({ renderInAllCases: false })
+      expect.objectContaining({ applyToAllCases: false })
     );
   });
 
-  it('passes renderInAllCases: true to onSave when checkbox is checked', async () => {
+  it('passes applyToAllCases: true to onSave when checkbox is checked', async () => {
     renderWithTestingProviders(<FieldDefinitionFlyout {...defaultProps} />);
 
     const yamlInput = screen.getByTestId('fieldDefinitionYamlInput');
@@ -99,11 +99,11 @@ describe('FieldDefinitionFlyout — renderInAllCases checkbox', () => {
     fireEvent.click(screen.getByTestId('fieldDefinitionSaveButton'));
 
     expect(defaultProps.onSave).toHaveBeenCalledWith(
-      expect.objectContaining({ renderInAllCases: true })
+      expect.objectContaining({ applyToAllCases: true })
     );
   });
 
-  it('toggles renderInAllCases when checkbox is clicked', async () => {
+  it('toggles applyToAllCases when checkbox is clicked', async () => {
     const user = userEvent.setup();
     renderWithTestingProviders(<FieldDefinitionFlyout {...defaultProps} />);
 
@@ -117,7 +117,7 @@ describe('FieldDefinitionFlyout — renderInAllCases checkbox', () => {
     expect(checkbox).not.toBeChecked();
   });
 
-  it('displays the renderInAllCases label text', () => {
+  it('displays the applyToAllCases label text', () => {
     renderWithTestingProviders(<FieldDefinitionFlyout {...defaultProps} />);
 
     expect(screen.getByText('Render in all cases')).toBeInTheDocument();

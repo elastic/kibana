@@ -39,7 +39,7 @@ export const FieldDefinitionSchema = z.object({
    * (if any) the case uses. Values are stored in extended_fields alongside
    * template-specific fields.
    */
-  renderInAllCases: z.boolean().optional(),
+  applyToAllCases: z.boolean().optional(),
 });
 
 export type FieldDefinition = z.infer<typeof FieldDefinitionSchema>;

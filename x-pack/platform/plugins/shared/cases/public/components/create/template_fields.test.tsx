@@ -164,7 +164,7 @@ describe('CreateCaseTemplateFields', () => {
     expect(screen.getByText('Template not selected')).toBeInTheDocument();
   });
 
-  it('renders global fields when no template is selected but renderInAllCases defs exist', () => {
+  it('renders global fields when no template is selected but applyToAllCases defs exist', () => {
     mockUseFormData.mockReturnValue([{ templateId: undefined }]);
     mockUseTemplateFormSync.mockReturnValue({ template: undefined, isLoading: false });
     mockUseGetFieldDefinitions.mockReturnValue({
@@ -180,7 +180,7 @@ describe('CreateCaseTemplateFields', () => {
               label: 'Incident Type',
             }),
             owner: 'securitySolution',
-            renderInAllCases: true,
+            applyToAllCases: true,
           },
         ],
       },

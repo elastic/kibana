@@ -28,7 +28,7 @@ const mappings = {
     description: {
       type: 'text',
     },
-    renderInAllCases: {
+    applyToAllCases: {
       type: 'boolean',
     },
   },

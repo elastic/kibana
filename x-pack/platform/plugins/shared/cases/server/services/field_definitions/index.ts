@@ -29,7 +29,7 @@ export class FieldDefinitionsService {
 
   async getFieldDefinitions(
     owner: string | string[],
-    { renderInAllCases }: { renderInAllCases?: boolean } = {}
+    { applyToAllCases }: { applyToAllCases?: boolean } = {}
   ): Promise<FieldDefinitionsFindResponse> {
     const owners = castArray(owner);
 
@@ -42,8 +42,8 @@ export class FieldDefinitionsService {
       .join(' OR ');
 
     const globalFilter =
-      renderInAllCases === true
-        ? `${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.renderInAllCases: true`
+      applyToAllCases === true
+        ? `${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.applyToAllCases: true`
         : undefined;
 
     const filter = globalFilter ? `(${ownerFilter}) AND ${globalFilter}` : ownerFilter;

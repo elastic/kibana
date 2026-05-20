@@ -183,12 +183,12 @@ export const DELETE_CONFIRM_BODY = (name: string) =>
   });
 
 export const RENDER_IN_ALL_CASES_LABEL = i18n.translate(
-  'xpack.cases.fieldLibrary.renderInAllCasesLabel',
+  'xpack.cases.fieldLibrary.applyToAllCasesLabel',
   { defaultMessage: 'Render in all cases' }
 );
 
 export const RENDER_IN_ALL_CASES_HELP_TEXT = i18n.translate(
-  'xpack.cases.fieldLibrary.renderInAllCasesHelpText',
+  'xpack.cases.fieldLibrary.applyToAllCasesHelpText',
   {
     defaultMessage:
       'When enabled, this field appears in every case regardless of which template is applied.',
@@ -196,7 +196,7 @@ export const RENDER_IN_ALL_CASES_HELP_TEXT = i18n.translate(
 );
 
 export const RENDER_IN_ALL_CASES_COLUMN = i18n.translate(
-  'xpack.cases.fieldLibrary.renderInAllCasesColumn',
+  'xpack.cases.fieldLibrary.applyToAllCasesColumn',
   { defaultMessage: 'Render in all cases' }
 );
 

@@ -738,7 +738,7 @@ describe('validators', () => {
           name,
           definition: yaml.dump({ name, type, control: 'INPUT_TEXT', label: name }),
           owner: 'securitySolution',
-          renderInAllCases: true,
+          applyToAllCases: true,
         })),
         total: defs.length,
       }),
@@ -783,7 +783,7 @@ describe('validators', () => {
           fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
         })
       ).rejects.toThrow(
-        'extended_fields keys [summary_as_keyword] are not global (renderInAllCases) field definitions'
+        'extended_fields keys [summary_as_keyword] are not global (applyToAllCases) field definitions'
       );
     });
 
@@ -895,7 +895,7 @@ describe('validators', () => {
           fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
         })
       ).rejects.toThrow(
-        'extended_fields keys [summary_as_keyword] are not global (renderInAllCases) field definitions'
+        'extended_fields keys [summary_as_keyword] are not global (applyToAllCases) field definitions'
       );
 
       expect(templatesService.getTemplate).not.toHaveBeenCalled();

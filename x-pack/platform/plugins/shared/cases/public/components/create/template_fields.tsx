@@ -21,11 +21,7 @@ import * as libI18n from '../field_library/translations';
 import { FieldsRenderer } from '../templates_v2/field_types/field_renderer';
 import { useResolvedFields } from '../field_library/hooks/use_resolved_fields';
 import { useGetFieldDefinitions } from '../field_library/hooks/use_get_field_definitions';
-import {
-  FieldSchema,
-  isInlineField,
-  isRefField,
-} from '../../../common/types/domain/template/fields';
+import { FieldSchema, isInlineField } from '../../../common/types/domain/template/fields';
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import { getFieldSnakeKey } from '../../../common/utils';
 import { TemplateFieldsValidationContext } from './template_fields_validation_context';
@@ -38,10 +34,10 @@ export const CreateCaseTemplateFields: React.FC = () => {
   const { owner } = useCasesContext();
   const ownerStr = Array.isArray(owner) ? owner[0] : owner;
 
-  // Fetch renderInAllCases field definitions for this owner.
+  // Fetch applyToAllCases field definitions for this owner.
   const { data: globalFieldDefsData, isLoading: isLoadingGlobalDefs } = useGetFieldDefinitions({
     owner: ownerStr,
-    renderInAllCases: true,
+    applyToAllCases: true,
   });
 
   // Resolve global field definitions to inline fields and compute their snake keys.
@@ -53,9 +49,9 @@ export const CreateCaseTemplateFields: React.FC = () => {
       try {
         const parsed = parseYaml(fd.definition);
         const result = FieldSchema.safeParse(parsed);
-        if (result.success && isInlineField(result.data) && !isRefField(result.data)) {
+        if (result.success && isInlineField(result.data)) {
           inlineFields.push(result.data as InlineField);
-          keys.add(getFieldSnakeKey((result.data as InlineField).name, (result.data as InlineField).type));
+          keys.add(getFieldSnakeKey(result.data.name, result.data.type));
         }
       } catch {
         // Ignore malformed definitions

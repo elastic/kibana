@@ -11,7 +11,7 @@ import { FieldDefinitionSchema } from '../../domain/field_definition/v1';
 
 export const FieldDefinitionsFindRequestSchema = z.object({
   owner: z.union([Owner, Owners]).optional(),
-  renderInAllCases: z.boolean().optional(),
+  applyToAllCases: z.boolean().optional(),
 });
 
 export type FieldDefinitionsFindRequest = z.infer<typeof FieldDefinitionsFindRequestSchema>;

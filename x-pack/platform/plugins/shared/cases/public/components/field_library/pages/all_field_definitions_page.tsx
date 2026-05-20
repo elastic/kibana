@@ -74,23 +74,23 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
       name,
       description,
       definition,
-      renderInAllCases,
+      applyToAllCases,
     }: {
       name: string;
       description: string;
       definition: string;
-      renderInAllCases: boolean;
+      applyToAllCases: boolean;
     }) => {
       const ownerValue = (Array.isArray(owner) ? owner[0] : owner) as Owner;
 
       if (editingFieldDef) {
         updateFieldDef({
           id: editingFieldDef.fieldDefinitionId,
-          fieldDefinition: { name, description, definition, owner: ownerValue, renderInAllCases },
+          fieldDefinition: { name, description, definition, owner: ownerValue, applyToAllCases },
         });
       } else {
         createFieldDef({
-          fieldDefinition: { name, description, definition, owner: ownerValue, renderInAllCases },
+          fieldDefinition: { name, description, definition, owner: ownerValue, applyToAllCases },
         });
       }
     },
@@ -131,7 +131,7 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
       truncateText: true,
     },
     {
-      field: 'renderInAllCases',
+      field: 'applyToAllCases',
       name: i18n.RENDER_IN_ALL_CASES_COLUMN,
       render: (value: boolean | undefined) =>
         value ? <EuiBadge color="primary">{i18n.RENDER_IN_ALL_CASES_LABEL}</EuiBadge> : null,

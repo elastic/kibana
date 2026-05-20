@@ -37,7 +37,7 @@ interface UseTemplateFormSyncReturn {
  * - Extended (template-defined) fields are written to the inner react-hook-form
  *   instance owned by `CreateCaseTemplateFields` and mirrored back to the
  *   parent's `extendedFields` field by that component.
- * - `globalFieldKeys` contains the snake_case keys of `renderInAllCases` field
+ * - `globalFieldKeys` contains the snake_case keys of `applyToAllCases` field
  *   definitions; their values are preserved across template changes and resets.
  */
 export const useTemplateFormSync = (

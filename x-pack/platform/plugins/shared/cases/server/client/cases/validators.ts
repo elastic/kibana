@@ -23,10 +23,7 @@ import type { TemplatesService } from '../../services/templates';
 import type { FieldDefinitionsService } from '../../services/field_definitions';
 import { parseTemplate } from '../../routes/api/templates/parse_template';
 import { validateExtendedFields } from '../../../common/types/domain/template/validate_extended_fields';
-import {
-  FieldSchema,
-  isInlineField,
-} from '../../../common/types/domain/template/fields';
+import { FieldSchema, isInlineField } from '../../../common/types/domain/template/fields';
 import { getFieldSnakeKey } from '../../../common/utils';
 
 interface CustomFieldValidationParams {
@@ -164,7 +161,7 @@ export const validateRequiredCustomFields = ({
 };
 
 /**
- * Parses renderInAllCases field definitions for the given owner and returns the
+ * Parses applyToAllCases field definitions for the given owner and returns the
  * set of valid extended-field snake_case keys those definitions produce.
  */
 export const resolveGlobalFieldKeys = async (
@@ -172,7 +169,7 @@ export const resolveGlobalFieldKeys = async (
   fieldDefinitionsService: FieldDefinitionsService
 ): Promise<Set<string>> => {
   const { fieldDefinitions } = await fieldDefinitionsService.getFieldDefinitions(owner, {
-    renderInAllCases: true,
+    applyToAllCases: true,
   });
   const keys = new Set<string>();
   for (const fd of fieldDefinitions) {
@@ -209,14 +206,16 @@ export const validateExtendedFieldsInRequest = async ({
   const templateId =
     updateReq.template === null
       ? null
-      : (updateReq.template?.id ?? originalCase.attributes.template?.id);
+      : updateReq.template?.id ?? originalCase.attributes.template?.id;
 
   if (!templateId) {
     // No template (either never set or being cleared) — only global field keys are permitted.
     const invalidKeys = Object.keys(updateReq.extended_fields).filter((k) => !globalKeys.has(k));
     if (invalidKeys.length) {
       throw Boom.badRequest(
-        `extended_fields keys [${invalidKeys.join(', ')}] are not global (renderInAllCases) field definitions`
+        `extended_fields keys [${invalidKeys.join(
+          ', '
+        )}] are not global (applyToAllCases) field definitions`
       );
     }
     return;

@@ -51,7 +51,7 @@ interface FieldDefinitionFlyoutProps {
     name: string;
     description: string;
     definition: string;
-    renderInAllCases: boolean;
+    applyToAllCases: boolean;
   }) => void;
   onClose: () => void;
   isSaving?: boolean;
@@ -68,8 +68,8 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
 
   const [description, setDescription] = useState(fieldDefinition?.description ?? '');
   const [definition, setDefinition] = useState(fieldDefinition?.definition ?? EXAMPLE_FIELD_YAML);
-  const [renderInAllCases, setRenderInAllCases] = useState(
-    fieldDefinition?.renderInAllCases ?? false
+  const [applyToAllCases, setRenderInAllCases] = useState(
+    fieldDefinition?.applyToAllCases ?? false
   );
   const [definitionError, setDefinitionError] = useState<string | undefined>();
 
@@ -99,8 +99,8 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
   const handleSave = useCallback(() => {
     if (!validate()) return;
     const name = parseName(definition) as string;
-    onSave({ name, description: description.trim(), definition, renderInAllCases });
-  }, [validate, parseName, onSave, description, definition, renderInAllCases]);
+    onSave({ name, description: description.trim(), definition, applyToAllCases });
+  }, [validate, parseName, onSave, description, definition, applyToAllCases]);
 
   const handleDefaultChange = useCallback((fieldName: string, value: string, control: string) => {
     const trimmedValue = value.trim();
@@ -184,7 +184,7 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
             <EuiCheckbox
               id="fieldDefinitionRenderInAllCases"
               label={i18n.RENDER_IN_ALL_CASES_LABEL}
-              checked={renderInAllCases}
+              checked={applyToAllCases}
               onChange={(e) => setRenderInAllCases(e.target.checked)}
               data-test-subj="fieldDefinitionRenderInAllCasesCheckbox"
             />
