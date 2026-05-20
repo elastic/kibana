@@ -13,8 +13,21 @@ export class ComposeDiscoverPage {
   public readonly nextButton: Locator;
   public readonly backButton: Locator;
   public readonly submitButton: Locator;
+  /**
+   * "Open query editor" — visible on the Alert Condition step when no query has
+   * been committed yet (queryCommitted === false).
+   */
   public readonly openEditorButton: Locator;
+  /**
+   * "Edit query" — visible on the Alert Condition step when a query is committed
+   * in signal (non-tracking) mode.
+   */
   public readonly editQueryButton: Locator;
+  /**
+   * "Edit queries" — visible on the Alert Condition step when a query is committed
+   * in tracking (alert kind) mode, where base + breach blocks are shown separately.
+   */
+  public readonly editQueriesButton: Locator;
   public readonly sandboxSearchButton: Locator;
   public readonly sandboxApplyButton: Locator;
   public readonly sandboxTimeFieldSelector: Locator;
@@ -22,6 +35,9 @@ export class ComposeDiscoverPage {
   public readonly createRuleSplitButton: Locator;
   public readonly createRulePopoverButton: Locator;
   public readonly createEsqlRuleButton: Locator;
+  /** "Create ES|QL rule" card in the empty-state panel (shown when no rules exist). */
+  public readonly createEsqlRuleCard: Locator;
+  public readonly cancelButton: Locator;
 
   private readonly codeEditor: KibanaCodeEditorWrapper;
 
@@ -34,6 +50,7 @@ export class ComposeDiscoverPage {
     this.submitButton = this.page.testSubj.locator('composeDiscoverSubmit');
     this.openEditorButton = this.page.testSubj.locator('composeDiscoverOpenEditor');
     this.editQueryButton = this.page.testSubj.locator('composeDiscoverEditQuery');
+    this.editQueriesButton = this.page.testSubj.locator('composeDiscoverEditQueries');
     this.sandboxSearchButton = this.page.testSubj.locator('composeDiscoverRunQuery');
     this.sandboxApplyButton = this.page.testSubj.locator('querySandboxApply');
     this.sandboxTimeFieldSelector = this.page.testSubj.locator('composeDiscoverTimeField');
@@ -41,6 +58,8 @@ export class ComposeDiscoverPage {
     this.createRuleSplitButton = this.page.testSubj.locator('createRuleSplitButton');
     this.createRulePopoverButton = this.page.testSubj.locator('createRulePopoverButton');
     this.createEsqlRuleButton = this.page.testSubj.locator('createEsqlRuleButton');
+    this.createEsqlRuleCard = this.page.testSubj.locator('createEsqlRuleCard');
+    this.cancelButton = this.flyout.locator('button', { hasText: 'Cancel' });
   }
 
   editRuleButton(ruleId: string) {
@@ -53,7 +72,7 @@ export class ComposeDiscoverPage {
       await this.createRulePopoverButton.click();
       await this.createEsqlRuleButton.click();
     } else {
-      await this.page.locator('.euiCard').filter({ hasText: 'Create ES|QL rule' }).click();
+      await this.createEsqlRuleCard.click();
     }
   }
 

@@ -207,6 +207,27 @@ test.describe(
         await expect(pageObjects.composeDiscover.submitButton).toBeHidden();
         await expect(page.testSubj.locator('ruleNameInput')).toBeVisible();
       });
+
+      await test.step('Back returns to Alert Condition step', async () => {
+        await pageObjects.composeDiscover.backButton.click();
+        // Query was committed in signal mode above, so "Edit query" is shown.
+        await expect(pageObjects.composeDiscover.editQueryButton).toBeVisible();
+        await expect(page.testSubj.locator('ruleNameInput')).toBeHidden();
+      });
+    });
+
+    test('cancel: closing flyout via Cancel button dismisses without saving', async ({
+      pageObjects,
+    }) => {
+      await test.step('open create flyout', async () => {
+        await pageObjects.composeDiscover.openCreateFlyout();
+        await expect(pageObjects.composeDiscover.flyout).toBeVisible();
+      });
+
+      await test.step('click Cancel — flyout closes without saving', async () => {
+        await pageObjects.composeDiscover.cancelButton.click();
+        await expect(pageObjects.composeDiscover.flyout).toBeHidden();
+      });
     });
 
     test('sandbox: Apply commits query, closing without Apply discards changes', async ({
