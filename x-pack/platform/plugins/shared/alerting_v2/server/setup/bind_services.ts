@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import { PluginSetup, PluginStart } from '@kbn/core-di';
-import { CoreStart, Request, SavedObjectsClientFactory } from '@kbn/core-di-server';
+import { Logger, PluginSetup, PluginStart } from '@kbn/core-di';
+import {
+  CoreStart,
+  PluginInitializer,
+  Request,
+  SavedObjectsClientFactory,
+} from '@kbn/core-di-server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
@@ -89,7 +95,10 @@ import {
   InsightsClientScopedToken,
   InsightsClientInternalToken,
 } from '../lib/rule_doctor_insights_client/tokens';
+import type { PluginConfig } from '../config';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
+import { RuleChangeHistoryService } from '../lib/rule_change_history';
+import { RuleChangeHistoryServiceToken } from '../lib/rule_change_history/tokens';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
@@ -102,6 +111,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
           taskManager: get(PluginStart<TaskManagerStartContract>('taskManager')),
           userService: get(UserService),
           actionPolicyClient: get(ActionPolicyClient),
+          ruleChangeHistoryService: get(RuleChangeHistoryService),
         },
         options: {
           spaceId: get(RulesClientSpaceIdToken),
@@ -158,6 +168,20 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(WorkflowExtensionsService).toSelf().inRequestScope();
   bind(WorkflowExtensionsServiceToken).toService(WorkflowExtensionsService);
   bind(ResourceManager).toSelf().inSingletonScope();
+
+  bind(RuleChangeHistoryService)
+    .toDynamicValue(({ get }) => {
+      const logger = get(Logger);
+      const env = get(PluginInitializer('env')) as PluginInitializerContext<PluginConfig>['env'];
+      const config = get(PluginInitializer('config')).get<PluginConfig>();
+      return new RuleChangeHistoryService({
+        logger,
+        kibanaVersion: env.packageInfo.version,
+        enabled: config.ruleChangeHistory.enabled,
+      });
+    })
+    .inSingletonScope();
+  bind(RuleChangeHistoryServiceToken).toService(RuleChangeHistoryService);
 
   bind(EsServiceInternalToken)
     .toDynamicValue(({ get }) => {

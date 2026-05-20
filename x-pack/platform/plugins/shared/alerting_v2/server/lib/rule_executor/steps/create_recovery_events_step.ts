@@ -9,6 +9,7 @@ import { inject, injectable } from 'inversify';
 import { stableStringify } from '@kbn/std';
 import { recoveryPolicyType } from '@kbn/alerting-v2-schemas';
 import type { PipelineStateStream, RuleExecutionStep, RulePipelineState } from '../types';
+import { RULE_CONFIG_VERSION_FALLBACK } from '../../rule_change_history';
 import { buildRecoveryAlertEvents, buildQueryRecoveryAlertEvents } from '../build_alert_events';
 import { getQueryPayload } from '../get_query_payload';
 import {
@@ -41,6 +42,7 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
 
     return guardedExpandStep(streamState, ['rule', 'alertEventsBatch'], async function* (state) {
       const { input, rule, alertEventsBatch } = state;
+      const ruleVersion = rule.ruleConfigVersion ?? RULE_CONFIG_VERSION_FALLBACK;
 
       if (rule.kind !== 'alert') {
         step.logger.debug({
@@ -75,10 +77,10 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
 
       const recoveryEvents =
         recoveryType === recoveryPolicyType.query
-          ? await step.buildQueryRecovery({ rule, input, activeGroupHashes })
+          ? await step.buildQueryRecovery({ rule, input, activeGroupHashes, ruleVersion })
           : buildRecoveryAlertEvents({
               ruleId: rule.id,
-              ruleVersion: 1,
+              ruleVersion,
               spaceId: input.spaceId,
               activeGroupHashes,
               breachedGroupHashes: new Set(alertEventsBatch.map((e) => e.group_hash)),
@@ -103,10 +105,12 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
     rule,
     input,
     activeGroupHashes,
+    ruleVersion,
   }: {
     rule: RuleResponse;
     input: RulePipelineState['input'];
     activeGroupHashes: ActiveAlertGroupHash[];
+    ruleVersion: number;
   }): Promise<AlertEvent[]> {
     const effectiveQuery = rule.recovery_policy!.query!.base!.trimEnd();
     const lookbackWindow = rule.schedule.lookback ?? rule.schedule.every;
@@ -135,7 +139,7 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
 
     return buildQueryRecoveryAlertEvents({
       ruleId: rule.id,
-      ruleVersion: 1,
+      ruleVersion,
       spaceId: input.spaceId,
       ruleAttributes: rule,
       activeGroupHashes,

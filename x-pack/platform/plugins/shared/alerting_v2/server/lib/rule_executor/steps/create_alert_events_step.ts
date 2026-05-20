@@ -7,6 +7,7 @@
 
 import { inject, injectable } from 'inversify';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
+import { RULE_CONFIG_VERSION_FALLBACK } from '../../rule_change_history';
 import { createAlertEventsBatchBuilder, type AlertEventsBatchBuilder } from '../build_alert_events';
 import {
   LoggerServiceToken,
@@ -31,7 +32,7 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
           spaceId: state.input.spaceId,
           ruleAttributes: state.rule,
           scheduledTimestamp: state.input.scheduledAt,
-          ruleVersion: 1,
+          ruleVersion: state.rule.ruleConfigVersion ?? RULE_CONFIG_VERSION_FALLBACK,
         });
 
         step.logger.debug({

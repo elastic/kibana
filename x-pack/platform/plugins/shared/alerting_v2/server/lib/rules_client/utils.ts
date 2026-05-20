@@ -207,6 +207,7 @@ export function transformRuleSoAttributesToRuleApiResponse(
     no_data: attrs.no_data,
     artifacts: attrs.artifacts,
     enabled: attrs.enabled,
+    ruleConfigVersion: attrs.change_history_sequence,
     createdBy: attrs.createdBy,
     createdAt: attrs.createdAt,
     updatedBy: attrs.updatedBy,

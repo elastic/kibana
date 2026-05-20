@@ -33,12 +33,13 @@ describe('FetchRuleStep', () => {
   });
 
   it('returns rule when rule exists', async () => {
-    const ruleAttributes = createRuleSoAttributes();
+    const ruleAttributes = createRuleSoAttributes({ change_history_sequence: 2 });
     mockSavedObjectsClient.get.mockResolvedValue({
       id: 'rule-1',
       type: RULE_SAVED_OBJECT_TYPE,
       attributes: ruleAttributes,
       references: [],
+      version: 'WzEsMV0=',
     });
 
     const state = createRulePipelineState();
@@ -48,6 +49,7 @@ describe('FetchRuleStep', () => {
     expect(result.state.rule).toBeDefined();
     expect(result.state.rule?.id).toBe('rule-1');
     expect(result.state.rule?.metadata.name).toBe('test-rule');
+    expect(result.state.rule?.ruleConfigVersion).toBe(2);
   });
 
   it('halts with rule_deleted when rule is not found', async () => {
@@ -82,6 +84,7 @@ describe('FetchRuleStep', () => {
       type: RULE_SAVED_OBJECT_TYPE,
       attributes: ruleAttributes,
       references: [],
+      version: 'WzEsMV0=',
     });
 
     const state = createRulePipelineState({

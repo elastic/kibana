@@ -20,6 +20,11 @@ import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import type { z } from '@kbn/zod/v4';
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { type ActionPolicyClient } from '../action_policy_client';
+import {
+  RuleChangeHistoryAction,
+  type RuleChangeHistoryEntry,
+  type RuleChangeHistoryServiceContract,
+} from '../rule_change_history';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
 import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../rule_executor';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
@@ -81,6 +86,7 @@ interface RulesClientParams {
     taskManager: TaskManagerStartContract;
     userService: UserServiceContract;
     actionPolicyClient: ActionPolicyClient;
+    ruleChangeHistoryService: RuleChangeHistoryServiceContract;
   };
   options: {
     spaceId: string;
@@ -93,6 +99,7 @@ export class RulesClient {
   private readonly taskManager: TaskManagerStartContract;
   private readonly userService: UserServiceContract;
   private readonly actionPolicyClient: ActionPolicyClient;
+  private readonly ruleChangeHistoryService: RuleChangeHistoryServiceContract;
   private readonly spaceId: string;
 
   constructor({ services, options }: RulesClientParams) {
@@ -101,6 +108,7 @@ export class RulesClient {
     this.taskManager = services.taskManager;
     this.userService = services.userService;
     this.actionPolicyClient = services.actionPolicyClient;
+    this.ruleChangeHistoryService = services.ruleChangeHistoryService;
     this.spaceId = options.spaceId;
   }
 
@@ -156,6 +164,40 @@ export class RulesClient {
     });
   }
 
+  private updateRuleSequenceNumber(
+    attrs: RuleSavedObjectAttributes,
+    currentSequence?: number
+  ): RuleSavedObjectAttributes {
+    if (!this.ruleChangeHistoryService.isEnabled()) {
+      return attrs;
+    }
+
+    const base = currentSequence ?? attrs.change_history_sequence ?? 0;
+
+    return { ...attrs, change_history_sequence: base + 1 };
+  }
+
+  private async logRuleChangeHistory({
+    entries,
+    action,
+    metadata,
+    eventType,
+  }: {
+    entries: RuleChangeHistoryEntry[];
+    action: string;
+    metadata?: Record<string, string | number | boolean>;
+    eventType?: 'deletion';
+  }): Promise<void> {
+    await this.ruleChangeHistoryService.logRuleChanges({
+      spaceId: this.spaceId,
+      userService: this.userService,
+      entries,
+      action,
+      metadata,
+      eventType,
+    });
+  }
+
   private async writeRuleAttrs({
     id,
     attrs,
@@ -184,13 +226,15 @@ export class RulesClient {
 
     const nowIso = new Date().toISOString();
 
-    const ruleAttributes = transformCreateRuleBodyToRuleSoAttributes(parsed, {
-      enabled: true,
-      createdBy: userProfileUid,
-      createdAt: nowIso,
-      updatedBy: userProfileUid,
-      updatedAt: nowIso,
-    });
+    const ruleAttributes = this.updateRuleSequenceNumber(
+      transformCreateRuleBodyToRuleSoAttributes(parsed, {
+        enabled: true,
+        createdBy: userProfileUid,
+        createdAt: nowIso,
+        updatedBy: userProfileUid,
+        updatedAt: nowIso,
+      })
+    );
 
     let id: string;
     try {
@@ -216,6 +260,11 @@ export class RulesClient {
       await this.rulesSavedObjectService.delete({ id }).catch(() => {});
       throw e;
     }
+
+    await this.logRuleChangeHistory({
+      entries: [{ id, attributes: ruleAttributes }],
+      action: RuleChangeHistoryAction.ruleCreate,
+    });
 
     return transformRuleSoAttributesToRuleApiResponse(id, ruleAttributes);
   }
@@ -245,10 +294,13 @@ export class RulesClient {
       throw Boom.badRequest('stateTransition is only allowed for rules of kind "alert".');
     }
 
-    const nextAttrs = buildUpdateRuleAttributes(existingAttrs, parsed, {
-      updatedBy: userProfileUid,
-      updatedAt: nowIso,
-    });
+    const nextAttrs = this.updateRuleSequenceNumber(
+      buildUpdateRuleAttributes(existingAttrs, parsed, {
+        updatedBy: userProfileUid,
+        updatedAt: nowIso,
+      }),
+      existingAttrs.change_history_sequence
+    );
 
     await this.scheduleRuleExecutorTask({
       ruleId: id,
@@ -257,6 +309,11 @@ export class RulesClient {
     });
 
     await this.writeRuleAttrs({ id, attrs: nextAttrs, version: existingVersion });
+
+    await this.logRuleChangeHistory({
+      entries: [{ id, attributes: nextAttrs }],
+      action: RuleChangeHistoryAction.ruleUpdate,
+    });
 
     return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs);
   }
@@ -297,9 +354,7 @@ export class RulesClient {
   public async deleteRule({ id }: { id: string }): Promise<void> {
     const { spaceId } = this.getSpaceContext();
 
-    if (!(await this.ruleExists({ id }))) {
-      throw Boom.notFound(`Rule with id "${id}" not found`);
-    }
+    const { attrs } = await this.getExistingRule(id);
 
     const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
     await this.taskManager.removeIfExists(taskId);
@@ -309,6 +364,17 @@ export class RulesClient {
     await this.actionPolicyClient.deleteActionPoliciesByFilter({
       type: 'single_rule',
       ruleId: id,
+    });
+
+    await this.logRuleChangeHistory({
+      entries: [
+        {
+          id,
+          attributes: this.updateRuleSequenceNumber(attrs, attrs.change_history_sequence),
+        },
+      ],
+      action: RuleChangeHistoryAction.ruleDelete,
+      eventType: 'deletion',
     });
   }
 
@@ -321,12 +387,15 @@ export class RulesClient {
 
     const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
 
-    const nextAttrs: RuleSavedObjectAttributes = {
-      ...existingAttrs,
-      enabled: true,
-      updatedBy: userProfileUid,
-      updatedAt: nowIso,
-    };
+    const nextAttrs = this.updateRuleSequenceNumber(
+      {
+        ...existingAttrs,
+        enabled: true,
+        updatedBy: userProfileUid,
+        updatedAt: nowIso,
+      },
+      existingAttrs.change_history_sequence
+    );
 
     await this.scheduleRuleExecutorTask({
       ruleId: id,
@@ -335,6 +404,11 @@ export class RulesClient {
     });
 
     await this.writeRuleAttrs({ id, attrs: nextAttrs, version: existingVersion });
+
+    await this.logRuleChangeHistory({
+      entries: [{ id, attributes: nextAttrs }],
+      action: RuleChangeHistoryAction.ruleEnable,
+    });
 
     return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs);
   }
@@ -348,17 +422,25 @@ export class RulesClient {
 
     const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
 
-    const nextAttrs: RuleSavedObjectAttributes = {
-      ...existingAttrs,
-      enabled: false,
-      updatedBy: userProfileUid,
-      updatedAt: nowIso,
-    };
+    const nextAttrs = this.updateRuleSequenceNumber(
+      {
+        ...existingAttrs,
+        enabled: false,
+        updatedBy: userProfileUid,
+        updatedAt: nowIso,
+      },
+      existingAttrs.change_history_sequence
+    );
 
     const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
     await this.taskManager.removeIfExists(taskId);
 
     await this.writeRuleAttrs({ id, attrs: nextAttrs, version: existingVersion });
+
+    await this.logRuleChangeHistory({
+      entries: [{ id, attributes: nextAttrs }],
+      action: RuleChangeHistoryAction.ruleDisable,
+    });
 
     return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs);
   }
@@ -477,6 +559,14 @@ export class RulesClient {
       return { rules: [], errors: [] };
     }
 
+    const fetchResults = await this.rulesSavedObjectService.bulkGetByIds(ids);
+    const attrsById = new Map<string, RuleSavedObjectAttributes>();
+    for (const doc of fetchResults) {
+      if (!('error' in doc)) {
+        attrsById.set(doc.id, doc.attributes);
+      }
+    }
+
     // Remove associated task manager tasks (best-effort)
     const taskIds = ids.map((id) => getRuleExecutorTaskId({ ruleId: id, spaceId }));
     try {
@@ -486,6 +576,7 @@ export class RulesClient {
     }
 
     const deleteResults = await this.rulesSavedObjectService.bulkDelete(ids);
+    const deletedEntries: RuleChangeHistoryEntry[] = [];
     for (const result of deleteResults) {
       if (!result.success) {
         errors.push({
@@ -495,8 +586,24 @@ export class RulesClient {
             statusCode: result.error.statusCode,
           },
         });
+        continue;
+      }
+
+      const attributes = attrsById.get(result.id);
+      if (attributes) {
+        deletedEntries.push({
+          id: result.id,
+          attributes: this.updateRuleSequenceNumber(attributes, attributes.change_history_sequence),
+        });
       }
     }
+
+    await this.logRuleChangeHistory({
+      entries: deletedEntries,
+      action: RuleChangeHistoryAction.ruleDelete,
+      eventType: 'deletion',
+      metadata: { bulkCount: resolution.usedFilter ? resolution.totalMatched : ids.length },
+    });
 
     return { rules: [], errors, ...this.bulkFilterResponseFields(resolution) };
   }
@@ -539,12 +646,15 @@ export class RulesClient {
         continue;
       }
 
-      const nextAttrs: RuleSavedObjectAttributes = {
-        ...doc.attributes,
-        enabled: true,
-        updatedBy: userProfileUid,
-        updatedAt: nowIso,
-      };
+      const nextAttrs = this.updateRuleSequenceNumber(
+        {
+          ...doc.attributes,
+          enabled: true,
+          updatedBy: userProfileUid,
+          updatedAt: nowIso,
+        },
+        doc.attributes.change_history_sequence
+      );
 
       itemsToUpdate.push({ id: doc.id, attrs: nextAttrs, version: doc.version });
     }
@@ -599,6 +709,14 @@ export class RulesClient {
           // Task scheduling failure is non-fatal for bulk operations
         }
       }
+
+      await this.logRuleChangeHistory({
+        entries: itemsToUpdate
+          .filter((item) => !errors.some((error) => error.id === item.id))
+          .map((item) => ({ id: item.id, attributes: item.attrs })),
+        action: RuleChangeHistoryAction.ruleEnable,
+        metadata: { bulkCount: resolution.usedFilter ? resolution.totalMatched : ids.length },
+      });
     }
 
     return { rules, errors, ...this.bulkFilterResponseFields(resolution) };
@@ -642,12 +760,15 @@ export class RulesClient {
         continue;
       }
 
-      const nextAttrs: RuleSavedObjectAttributes = {
-        ...doc.attributes,
-        enabled: false,
-        updatedBy: userProfileUid,
-        updatedAt: nowIso,
-      };
+      const nextAttrs = this.updateRuleSequenceNumber(
+        {
+          ...doc.attributes,
+          enabled: false,
+          updatedBy: userProfileUid,
+          updatedAt: nowIso,
+        },
+        doc.attributes.change_history_sequence
+      );
 
       itemsToUpdate.push({ id: doc.id, attrs: nextAttrs, version: doc.version });
     }
@@ -687,6 +808,16 @@ export class RulesClient {
       }
     }
 
+    if (itemsToUpdate.length > 0) {
+      await this.logRuleChangeHistory({
+        entries: itemsToUpdate
+          .filter((item) => !errors.some((error) => error.id === item.id))
+          .map((item) => ({ id: item.id, attributes: item.attrs })),
+        action: RuleChangeHistoryAction.ruleDisable,
+        metadata: { bulkCount: resolution.usedFilter ? resolution.totalMatched : ids.length },
+      });
+    }
+
     return { rules, errors, ...this.bulkFilterResponseFields(resolution) };
   }
 
@@ -715,13 +846,16 @@ export class RulesClient {
 
     assertImmutableUnchanged(parsed, existingAttrs);
 
-    const nextAttrs = transformCreateRuleBodyToRuleSoAttributes(parsed, {
-      enabled: existingAttrs.enabled,
-      createdBy: existingAttrs.createdBy,
-      createdAt: existingAttrs.createdAt,
-      updatedBy: userProfileUid,
-      updatedAt: nowIso,
-    });
+    const nextAttrs = this.updateRuleSequenceNumber(
+      transformCreateRuleBodyToRuleSoAttributes(parsed, {
+        enabled: existingAttrs.enabled,
+        createdBy: existingAttrs.createdBy,
+        createdAt: existingAttrs.createdAt,
+        updatedBy: userProfileUid,
+        updatedAt: nowIso,
+      }),
+      existingAttrs.change_history_sequence
+    );
 
     await this.scheduleRuleExecutorTask({
       ruleId: id,
@@ -730,6 +864,11 @@ export class RulesClient {
     });
 
     await this.writeRuleAttrs({ id, attrs: nextAttrs, version: existingVersion });
+
+    await this.logRuleChangeHistory({
+      entries: [{ id, attributes: nextAttrs }],
+      action: RuleChangeHistoryAction.ruleUpdate,
+    });
 
     return {
       rule: transformRuleSoAttributesToRuleApiResponse(id, nextAttrs),

@@ -28,7 +28,11 @@ describe('CreateAlertEventsStep', () => {
     const rule = createRuleResponse();
     const esqlRowBatch = [{ 'host.name': 'host-a' }, { 'host.name': 'host-b' }];
 
-    const state = createRulePipelineState({ input, rule, esqlRowBatch });
+    const state = createRulePipelineState({
+      input,
+      rule: { ...rule, ruleConfigVersion: 1 },
+      esqlRowBatch,
+    });
     const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     expect(result.type).toBe('continue');

@@ -11,6 +11,9 @@ import { validateDuration } from './lib/duration';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
+  ruleChangeHistory: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
   invalidateApiKeysTask: schema.object({
     interval: schema.string({ defaultValue: '5m', validate: validateDuration }),
     removalDelay: schema.string({ defaultValue: '1h', validate: validateDuration }),

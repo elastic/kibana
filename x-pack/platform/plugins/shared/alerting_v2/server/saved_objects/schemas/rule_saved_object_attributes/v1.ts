@@ -88,6 +88,7 @@ export const ruleSavedObjectAttributesSchema = schema.object({
     )
   ),
   // Server-managed fields
+  change_history_sequence: schema.maybe(schema.number()),
   enabled: schema.boolean(),
   createdBy: schema.nullable(schema.string()),
   updatedBy: schema.nullable(schema.string()),
