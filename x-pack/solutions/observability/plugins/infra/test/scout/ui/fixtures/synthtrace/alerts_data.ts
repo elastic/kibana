@@ -16,8 +16,7 @@ const RULE_TAG = 'infra-hosts-scout-test';
 interface AlertDocumentParams {
   hostName: string;
   status: 'active' | 'recovered';
-  timestamp: string;
-  startTime: string;
+  alertStartTime: string;
   endTime?: string;
   ruleUuid: string;
 }
@@ -25,12 +24,11 @@ interface AlertDocumentParams {
 const createAlertDocument = ({
   hostName,
   status,
-  timestamp,
-  startTime,
+  alertStartTime,
   endTime,
   ruleUuid,
 }: AlertDocumentParams) => ({
-  '@timestamp': timestamp,
+  '@timestamp': new Date().toISOString(),
   'event.action': status === 'active' ? 'active' : 'close',
   'event.kind': 'signal',
   'kibana.alert.duration.us': 63291000,
@@ -43,10 +41,10 @@ const createAlertDocument = ({
   'kibana.alert.rule.producer': 'infrastructure',
   'kibana.alert.rule.rule_type_id': 'metrics.alert.inventory.threshold',
   'kibana.alert.rule.uuid': ruleUuid,
-  'kibana.alert.start': startTime,
+  'kibana.alert.start': alertStartTime,
   ...(endTime && { 'kibana.alert.end': endTime }),
   'kibana.alert.status': status,
-  'kibana.alert.time_range': { gte: startTime },
+  'kibana.alert.time_range': { gte: alertStartTime },
   'kibana.alert.uuid': crypto.randomUUID(),
   'kibana.alert.workflow_status': 'open',
   'kibana.space_ids': ['default'],
@@ -155,12 +153,11 @@ export const ingestAlertsData = async ({
 
   const writeTarget = aliasOrIndexExists ? ALERTS_ALIAS : ALERTS_INDEX;
   const operations = alertDocs.flatMap((doc) => [
-    { index: { _index: writeTarget } },
+    { create: { _index: writeTarget } },
     createAlertDocument({
       hostName: doc.hostName,
       status: doc.status,
-      timestamp,
-      startTime: timestamp,
+      alertStartTime: timestamp,
       ruleUuid,
       ...(doc.status === 'recovered' && {
         endTime: new Date(new Date(timestamp).getTime() + 60000).toISOString(),
@@ -168,7 +165,13 @@ export const ingestAlertsData = async ({
     }),
   ]);
 
-  await esClient.bulk({ operations, refresh: 'wait_for' });
+  const bulkResponse = await esClient.bulk({ operations, refresh: 'wait_for' });
+  if (bulkResponse.errors) {
+    const failures = bulkResponse.items
+      .filter((item) => item.create?.error)
+      .map((item) => item.create!.error!.reason);
+    throw new Error(`Failed to ingest alert documents: ${failures.join('; ')}`);
+  }
 };
 
 export const cleanAlertsData = async ({
