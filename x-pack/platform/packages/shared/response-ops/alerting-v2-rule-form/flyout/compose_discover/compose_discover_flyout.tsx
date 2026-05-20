@@ -298,6 +298,15 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
     [runYamlParse]
   );
 
+  const handleBlurSync = useCallback(
+    (values: FormValues) => {
+      cancelYamlParse();
+      methods.reset(formValuesFromYamlToCompose(values));
+      syncForm();
+    },
+    [cancelYamlParse, methods, syncForm]
+  );
+
   const handleToggleYamlMode = useCallback(
     (enabled: boolean) => {
       if (enabled) {
@@ -431,6 +440,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                   services={services}
                   yamlText={yamlText}
                   setYamlText={handleSetYamlText}
+                  onBlurSync={handleBlurSync}
                   isSubmitting={isSaving}
                 />
               </React.Suspense>

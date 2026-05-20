@@ -36,6 +36,13 @@ export interface YamlRuleFormProps {
   yamlText: string;
   /** Setter for the lifted YAML buffer. */
   setYamlText: (yaml: string) => void;
+  /**
+   * Synchronous commit for blur events. In the compose-discover flyout the RHF
+   * form uses `ComposeFormValues`, so a raw `reset(FormValues)` would corrupt it.
+   * The flyout passes a callback that routes through `formValuesFromYamlToCompose`.
+   * When absent (standalone context), blur falls back to `useFormContext().reset()`.
+   */
+  onBlurSync?: (values: FormValues) => void;
 }
 
 /**
@@ -60,6 +67,7 @@ export const YamlRuleForm = ({
   isSubmitting = false,
   yamlText,
   setYamlText,
+  onBlurSync,
 }: YamlRuleFormProps) => {
   const [error, setError] = useState<string | null>(null);
   const { reset } = useFormContext<FormValues>();
@@ -70,40 +78,33 @@ export const YamlRuleForm = ({
     search: services.data.search.search,
   });
 
-  const applyYamlValuesToForm = useCallback(
-    (values: FormValues) => {
-      reset(values);
-    },
-    [reset]
-  );
-
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
       const result = parseYamlToFormValues(yamlText);
-      if (result.error) {
+      if (result.error !== null) {
         setError(result.error);
         return;
       }
-      if (result.values) {
-        setError(null);
-        onSubmit?.(result.values);
-      }
+      setError(null);
+      onSubmit?.(result.values);
     },
     [yamlText, onSubmit]
   );
 
   const handleBlur = useCallback(() => {
     const result = parseYamlToFormValues(yamlText);
-    if (result.error) {
+    if (result.error !== null) {
       setError(result.error);
       return;
     }
-    if (result.values) {
-      setError(null);
-      applyYamlValuesToForm(result.values);
+    setError(null);
+    if (onBlurSync) {
+      onBlurSync(result.values);
+    } else {
+      reset(result.values);
     }
-  }, [yamlText, applyYamlValuesToForm]);
+  }, [yamlText, onBlurSync, reset]);
 
   const handleYamlChange = useCallback(
     (newYaml: string) => {
