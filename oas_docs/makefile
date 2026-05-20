@@ -54,7 +54,7 @@ api-docs-fix-required: ## Auto-generate required_field_fixes.overlays.yaml from 
 	@node scripts/generate_required_field_fixes.js
 
 .PHONY: api-docs-overlay
-api-docs-overlay: ## Apply all overlays (including bump-slim placeholder for Dashboards & Visualizations)
+api-docs-overlay: ## Apply all overlays
 	@./node_modules/.bin/bump overlay "output/kibana.serverless.yaml" "overlays/kibana.overlays.serverless.yaml" > "output/kibana.serverless.tmp1.yaml"
 	@./node_modules/.bin/bump overlay "output/kibana.serverless.tmp1.yaml" "overlays/alerting.overlays.yaml" > "output/kibana.serverless.tmp2.yaml"
 	@./node_modules/.bin/bump overlay "output/kibana.serverless.tmp2.yaml" "overlays/connectors.overlays.yaml" > "output/kibana.serverless.tmp3.yaml"
