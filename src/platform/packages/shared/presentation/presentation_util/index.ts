@@ -8,4 +8,10 @@
  */
 
 export { openLazyFlyout } from './src/open_lazy_flyout';
-export { tracksOverlays, type TracksOverlays } from './src/tracks_overlays';
+export {
+  findTracksOverlaysAncestor,
+  resolveLazyFlyoutTypeFromAncestors,
+  tracksOverlays,
+  type LazyFlyoutType,
+  type TracksOverlays,
+} from './src/tracks_overlays';

@@ -43,7 +43,7 @@ import type {
   PublishesSearchSession,
   PublishesReload,
 } from '@kbn/presentation-publishing';
-import { type TracksOverlays } from '@kbn/presentation-util';
+import { type LazyFlyoutType, type TracksOverlays } from '@kbn/presentation-util';
 import type { TimeSlice } from '@kbn/controls-schemas';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { BehaviorSubject, Observable, Subject } from 'rxjs';
@@ -139,6 +139,12 @@ export interface DashboardCreationOptions {
    * @returns The {@link EmbeddableAppContext} for the dashboard.
    */
   getEmbeddableAppContext?: (dashboardId?: string) => EmbeddableAppContext;
+
+  /**
+   * Flyout type for lazy panel edit flyouts (Settings, Lens config, etc.) opened from this dashboard.
+   * Use `overlay` when the dashboard is embedded in a host that already uses a push flyout (e.g. Agent Builder canvas).
+   */
+  lazyFlyoutType?: LazyFlyoutType;
 }
 
 /**

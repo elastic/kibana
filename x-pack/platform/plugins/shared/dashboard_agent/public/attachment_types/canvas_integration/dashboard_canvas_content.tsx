@@ -19,6 +19,14 @@ import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { SavedObjectStatus } from './use_register_canvas_action_buttons';
 import { useDashboardPreviewUnifiedSearch } from './use_dashboard_preview_unified_search';
 import { useRegisterCanvasActionButtons } from './use_register_canvas_action_buttons';
+import type { DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
+
+export const getDashboardCanvasCreationOptions = (
+  dashboardState: DashboardState
+): DashboardCreationOptions => ({
+  getInitialInput: () => ({ ...dashboardState, viewMode: 'view' as const }),
+  lazyFlyoutType: 'overlay',
+});
 
 const dashboardCanvasContentStyles = {
   actions: ({ euiTheme }: UseEuiTheme) =>
@@ -112,10 +120,7 @@ export const DashboardCanvasContent = ({
   });
 
   const getCreationOptions = useCallback(
-    () =>
-      Promise.resolve({
-        getInitialInput: () => ({ ...dashboardState, viewMode: 'view' as const }),
-      }),
+    () => Promise.resolve(getDashboardCanvasCreationOptions(dashboardState)),
     [dashboardState]
   );
 

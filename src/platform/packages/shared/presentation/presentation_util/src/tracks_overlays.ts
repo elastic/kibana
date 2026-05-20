@@ -9,6 +9,9 @@
 
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 
+/** Flyout layout for lazy panel edit flyouts opened from a {@link TracksOverlays} host. */
+export type LazyFlyoutType = 'push' | 'overlay';
+
 /**
  * Options for tracking overlays.
  *
@@ -30,6 +33,11 @@ export interface TracksOverlaysOptions {
  * @public
  */
 export interface TracksOverlays {
+  /**
+   * Preferred flyout type for lazy panel edit flyouts opened from this host.
+   * Child embeddables inherit this via {@link resolveLazyFlyoutTypeFromAncestors}.
+   */
+  lazyFlyoutType?: LazyFlyoutType;
   /**
    * Registers an overlay.
    *
@@ -56,3 +64,34 @@ export const tracksOverlays = (root: unknown): root is TracksOverlays => {
     root && (root as TracksOverlays).openOverlay && (root as TracksOverlays).clearOverlays
   );
 };
+
+const getParentApi = (api: unknown): unknown | undefined => {
+  if (!api || typeof api !== 'object' || !('parentApi' in api)) {
+    return undefined;
+  }
+
+  return (api as { parentApi?: unknown }).parentApi;
+};
+
+/**
+ * Walks the embeddable parent chain to find the nearest {@link TracksOverlays} ancestor.
+ */
+export const findTracksOverlaysAncestor = (api: unknown | undefined): TracksOverlays | undefined => {
+  let current = api;
+
+  while (current) {
+    if (tracksOverlays(current)) {
+      return current;
+    }
+    current = getParentApi(current);
+  }
+
+  return undefined;
+};
+
+/**
+ * Resolves lazy flyout type from the nearest {@link TracksOverlays} ancestor.
+ */
+export const resolveLazyFlyoutTypeFromAncestors = (
+  api: unknown | undefined
+): LazyFlyoutType | undefined => findTracksOverlaysAncestor(api)?.lazyFlyoutType;

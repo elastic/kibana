@@ -185,6 +185,7 @@ export function getDashboardApi({
     ...unsavedChangesManager.api,
     ...projectRoutingManager?.api,
     ...trackOverlayApi,
+    lazyFlyoutType: creationOptions?.lazyFlyoutType,
     esqlVariables$: esqlVariablesManager.api.publishedEsqlVariables$,
     ...timesliceManager.api,
     ...pauseFetchManager.api,
@@ -321,6 +322,7 @@ export function getDashboardApi({
     } as DashboardApi,
     internalApi,
     cleanup: () => {
+      trackOverlayApi.clearOverlays();
       dataLoadingManager.cleanup();
       dataViewsManager.cleanup();
       searchSessionManager.cleanup();

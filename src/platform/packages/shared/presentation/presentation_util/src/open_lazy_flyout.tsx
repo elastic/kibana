@@ -14,7 +14,7 @@ import useAsync from 'react-use/lib/useAsync';
 import { i18n } from '@kbn/i18n';
 import { focusFirstFocusable } from './focus_helpers';
 import { LoadingFlyout } from './loading_flyout';
-import { tracksOverlays } from './tracks_overlays';
+import { findTracksOverlaysAncestor, resolveLazyFlyoutTypeFromAncestors } from './tracks_overlays';
 
 const htmlId = htmlIdGenerator('modalTitleId');
 
@@ -54,7 +54,12 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
   const { focusedPanelId, triggerId, ...flyoutProps } = allFlyoutProps ?? {};
 
   const ariaLabelledBy = flyoutProps?.['aria-labelledby'] ?? htmlId();
-  const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
+  const overlayTracker = findTracksOverlaysAncestor(parentApi);
+  const lazyFlyoutTypeFromParent = resolveLazyFlyoutTypeFromAncestors(parentApi);
+  const type = flyoutProps?.type ?? lazyFlyoutTypeFromParent ?? 'push';
+  const ownFocus = flyoutProps?.ownFocus ?? (lazyFlyoutTypeFromParent === 'overlay' ? false : true);
+
+  let flyoutRef: ReturnType<CoreStart['overlays']['openFlyout']> | undefined;
 
   const onClose = () => {
     overlayTracker?.clearOverlays();
@@ -64,7 +69,7 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
     }
   };
 
-  const flyoutRef = core.overlays.openFlyout(
+  flyoutRef = core.overlays.openFlyout(
     toMountPoint(
       <LazyFlyout
         closeFlyout={onClose}
@@ -76,16 +81,18 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
     ),
     {
       size: 500,
-      type: 'push',
+      type,
       paddingSize: 'm',
       maxWidth: 800,
-      ownFocus: true,
+      ownFocus,
       isResizable: true,
       outsideClickCloses: true,
       className: 'kbnPresentationLazyFlyout',
       'aria-labelledby': ariaLabelledBy,
       onClose,
       ...flyoutProps,
+      type,
+      ownFocus,
     }
   );
   overlayTracker?.openOverlay(flyoutRef, { focusedPanelId });
