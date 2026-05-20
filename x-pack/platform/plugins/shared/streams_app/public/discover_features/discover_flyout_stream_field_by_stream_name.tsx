@@ -54,6 +54,7 @@ function DiscoverFlyoutStreamFieldByStreamNameContent({
       loading={loading}
       error={error}
       locator={locator}
+      remoteSearchType={cpsHasLinkedProjects ? 'cps' : undefined}
     />
   );
 }
