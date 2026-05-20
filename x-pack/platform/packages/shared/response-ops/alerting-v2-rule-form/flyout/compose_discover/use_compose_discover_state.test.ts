@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createInitialState, reducer, getSandboxTabConfig } from './use_compose_discover_state';
+import { createInitialState, reducer, getSandboxTabs } from './use_compose_discover_state';
 import type { ComposeDiscoverState } from './types';
 
 const createState = (overrides: Partial<ComposeDiscoverState> = {}): ComposeDiscoverState => ({
@@ -81,7 +81,7 @@ describe('reducer', () => {
   });
 
   describe('DISABLE_TRACKING', () => {
-    it('sets tracking false, closes child, resets step and recoveryType', () => {
+    it('sets tracking false, keeps child open, resets step and recoveryType', () => {
       const state = createState({
         tracking: true,
         step: 1,
@@ -91,7 +91,7 @@ describe('reducer', () => {
       const next = reducer(state, { type: 'DISABLE_TRACKING' });
 
       expect(next.tracking).toBe(false);
-      expect(next.childOpen).toBe(false);
+      expect(next.childOpen).toBe(true);
       expect(next.step).toBe(0);
       expect(next.recoveryType).toBe('default');
     });
@@ -146,26 +146,26 @@ describe('reducer', () => {
   });
 });
 
-// ── getSandboxTabConfig ───────────────────────────────────────────────────────
+// ── getSandboxTabs ────────────────────────────────────────────────────────────
 
-describe('getSandboxTabConfig', () => {
-  it('returns single when tracking is off', () => {
+describe('getSandboxTabs', () => {
+  it('returns undefined when tracking is off', () => {
     const state = createState({ tracking: false });
-    expect(getSandboxTabConfig(state)).toEqual({ type: 'single' });
+    expect(getSandboxTabs(state)).toBeUndefined();
   });
 
-  it('returns base-alert on alertCondition step with tracking', () => {
+  it('returns [base, alert] on alertCondition step with tracking', () => {
     const state = createState({ tracking: true, step: 0 });
-    expect(getSandboxTabConfig(state)).toEqual({ type: 'base-alert' });
+    expect(getSandboxTabs(state)).toEqual(['base', 'alert']);
   });
 
-  it('returns base-recovery on recoveryCondition step with custom recovery', () => {
+  it('returns [recovery] on recoveryCondition step with custom recovery', () => {
     const state = createState({ tracking: true, step: 1, recoveryType: 'custom' });
-    expect(getSandboxTabConfig(state)).toEqual({ type: 'base-recovery' });
+    expect(getSandboxTabs(state)).toEqual(['recovery']);
   });
 
-  it('returns single on recoveryCondition step with default recovery', () => {
+  it('returns undefined on recoveryCondition step with default recovery', () => {
     const state = createState({ tracking: true, step: 1, recoveryType: 'default' });
-    expect(getSandboxTabConfig(state)).toEqual({ type: 'single' });
+    expect(getSandboxTabs(state)).toBeUndefined();
   });
 });
