@@ -697,3 +697,11 @@ export const EXTENDS_NOT_FOUND_ERROR = (name: string) =>
     defaultMessage: 'Template "{name}" not found.',
     values: { name },
   });
+
+export const CONFIRM_FIELD_EDIT = i18n.translate('xpack.cases.templates.confirmFieldEdit', {
+  defaultMessage: 'Save field',
+});
+
+export const CANCEL_FIELD_EDIT = i18n.translate('xpack.cases.templates.cancelFieldEdit', {
+  defaultMessage: 'Cancel field edit',
+});

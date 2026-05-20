@@ -9,13 +9,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
-import { PanelPlacementStrategy } from '@kbn/presentation-util-plugin/public';
+import { PlacementStrategy } from '@kbn/embeddable-plugin/public';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/page_bundle_constants';
 import type { PanelPlacementProps, PanelPlacementReturn } from './types';
 import type { DashboardLayoutPanel } from '../dashboard_api/layout_manager';
 
 export const runPanelPlacementStrategy = (
-  strategy: PanelPlacementStrategy,
+  strategy: PlacementStrategy,
   { width, height, currentPanels, sectionId, beside }: PanelPlacementProps
 ): PanelPlacementReturn => {
   let targetPanel: DashboardLayoutPanel | undefined;
@@ -23,7 +23,7 @@ export const runPanelPlacementStrategy = (
     targetPanel = currentPanels[beside];
   }
   switch (strategy) {
-    case PanelPlacementStrategy.placeAtTop:
+    case PlacementStrategy.placeAtTop:
       const otherPanels = { ...currentPanels };
       for (const [id, panel] of Object.entries(currentPanels)) {
         // only consider collisions with panels in the same section
@@ -43,7 +43,7 @@ export const runPanelPlacementStrategy = (
         otherPanels,
       };
 
-    case PanelPlacementStrategy.findTopLeftMostOpenSpace:
+    case PlacementStrategy.findTopLeftMostOpenSpace:
       let maxY = -1;
 
       const currentPanelsArray = Object.values(currentPanels);
