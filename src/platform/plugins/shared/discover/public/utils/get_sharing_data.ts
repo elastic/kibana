@@ -24,7 +24,7 @@ import {
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { DiscoverAppState } from '../application/main/state_management/redux';
 import { isEqualFilters } from '../application/main/state_management/utils/state_comparators';
-import { getColumnsWithTimeField } from './time_field_column';
+import { showTimeFieldColumn } from './show_time_field_column';
 
 /**
  * Preparing data to share the current state as link or CSV/Report
@@ -129,6 +129,28 @@ export async function getSharingData(
     },
     columns,
   };
+}
+
+export function getColumnsWithTimeField({
+  columns,
+  timeFieldName,
+  uiSettings,
+  query,
+}: {
+  columns: string[];
+  timeFieldName: string | undefined;
+  uiSettings: IUiSettingsClient;
+  query?: AggregateQuery | Query;
+}): string[] {
+  if (
+    timeFieldName &&
+    columns.length > 0 &&
+    !columns.includes(timeFieldName) &&
+    showTimeFieldColumn({ uiSettings, query })
+  ) {
+    return [timeFieldName, ...columns];
+  }
+  return columns;
 }
 
 export interface DiscoverCapabilities {

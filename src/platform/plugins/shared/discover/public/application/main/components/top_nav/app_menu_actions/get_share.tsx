@@ -18,8 +18,11 @@ import type { ShareActionIntents, SharingData } from '@kbn/share-plugin/public/t
 import type { IntlShape } from '@kbn/i18n-react';
 import type { ReportingCSVSharingData } from '@kbn/reporting-public/types';
 import type { DataTotalHitsMsg } from '../../../state_management/discover_data_state_container';
-import { getSharingData, showPublicUrlSwitch } from '../../../../../utils/get_sharing_data';
-import { getColumnsWithTimeField } from '../../../../../utils/time_field_column';
+import {
+  getColumnsWithTimeField,
+  getSharingData,
+  showPublicUrlSwitch,
+} from '../../../../../utils/get_sharing_data';
 import { createSearchSource } from '../../../state_management/utils/create_search_source';
 import type { DiscoverAppLocatorParams } from '../../../../../../common/app_locator';
 import type { AppMenuDiscoverParams } from './types';
@@ -118,7 +121,7 @@ export const buildShareOptions = async ({
     allowShortUrl: !!services.capabilities.discover_v2.createShortUrl,
     shareableUrl,
     shareableUrlForSavedObject,
-    // Share URL gets the unmodified `columns` array (without the automatically added time field) 
+    // Share URL gets the unmodified `columns` array (without the automatically added time field)
     // so it does not trigger the unsaved changes badge when user opens the link
     shareableUrlLocatorParams: { locator, params },
     objectId: persistedDiscoverSession?.id,

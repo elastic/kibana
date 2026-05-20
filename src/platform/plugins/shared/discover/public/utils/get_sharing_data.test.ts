@@ -16,7 +16,7 @@ import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_so
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { buildDataViewMock, dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { createDiscoverServicesMock } from '../__mocks__/services';
-import { getSharingData, showPublicUrlSwitch } from './get_sharing_data';
+import { getColumnsWithTimeField, getSharingData, showPublicUrlSwitch } from './get_sharing_data';
 
 describe('getSharingData', () => {
   let services: DiscoverServices;
@@ -438,5 +438,163 @@ describe('showPublicUrlSwitch', () => {
     const result = showPublicUrlSwitch(anonymousUserCapabilities);
 
     expect(result).toBe(true);
+  });
+});
+
+describe('getColumnsWithTimeField', () => {
+  const createUiSettingsMock = ({ hideTimeColumn }: { hideTimeColumn: boolean }) =>
+    ({
+      get: (key: string) => {
+        if (key === DOC_HIDE_TIME_COLUMN_SETTING) {
+          return hideTimeColumn;
+        }
+        return undefined;
+      },
+    } as unknown as IUiSettingsClient);
+
+  const uiSettingsMockWithHideTimeColumn = createUiSettingsMock({ hideTimeColumn: true });
+  const uiSettingsMock = createUiSettingsMock({ hideTimeColumn: false });
+
+  it('should prepend the time field for a non-transformational ES|QL query', () => {
+    expect(
+      getColumnsWithTimeField({
+        columns: ['bytes', 'extension'],
+        timeFieldName: '@timestamp',
+        uiSettings: uiSettingsMock,
+        query: { esql: 'from logstash-*' },
+      })
+    ).toEqual(['@timestamp', 'bytes', 'extension']);
+  });
+
+  it('should not prepend when columns are empty', () => {
+    expect(
+      getColumnsWithTimeField({
+        columns: [],
+        timeFieldName: '@timestamp',
+        uiSettings: uiSettingsMock,
+        query: { esql: 'from logstash-*' },
+      })
+    ).toEqual([]);
+  });
+
+  it('should not prepend for a transformational ES|QL query', () => {
+    expect(
+      getColumnsWithTimeField({
+        columns: ['bytes', 'extension'],
+        timeFieldName: '@timestamp',
+        uiSettings: uiSettingsMock,
+        query: { esql: 'from logstash-* | keep bytes, extension' },
+      })
+    ).toEqual(['bytes', 'extension']);
+  });
+
+  it('should not prepend when timeFieldName is undefined', () => {
+    expect(
+      getColumnsWithTimeField({
+        columns: ['bytes', 'extension'],
+        timeFieldName: undefined,
+        uiSettings: uiSettingsMock,
+        query: { esql: 'from logstash-*' },
+      })
+    ).toEqual(['bytes', 'extension']);
+  });
+
+  it('should not prepend when time field already in columns', () => {
+    expect(
+      getColumnsWithTimeField({
+        columns: ['@timestamp', 'bytes'],
+        timeFieldName: '@timestamp',
+        uiSettings: uiSettingsMock,
+        query: { esql: 'from logstash-*' },
+      })
+    ).toEqual(['@timestamp', 'bytes']);
+  });
+
+  it('should not prepend when hideTimeColumn setting is true', () => {
+    expect(
+      getColumnsWithTimeField({
+        columns: ['bytes', 'extension'],
+        timeFieldName: '@timestamp',
+        uiSettings: uiSettingsMockWithHideTimeColumn,
+        query: { esql: 'from logstash-*' },
+      })
+    ).toEqual(['bytes', 'extension']);
+  });
+
+  it('should prepend the time field for a classic KQL query', () => {
+    expect(
+      getColumnsWithTimeField({
+        columns: ['bytes', 'extension'],
+        timeFieldName: '@timestamp',
+        uiSettings: uiSettingsMock,
+        query: { language: 'kuery', query: '*' },
+      })
+    ).toEqual(['@timestamp', 'bytes', 'extension']);
+  });
+
+  it('should prepend the time field for a classic Lucene query', () => {
+    expect(
+      getColumnsWithTimeField({
+        columns: ['bytes', 'extension'],
+        timeFieldName: '@timestamp',
+        uiSettings: uiSettingsMock,
+        query: { language: 'lucene', query: '*' },
+      })
+    ).toEqual(['@timestamp', 'bytes', 'extension']);
+  });
+
+  it('should not prepend for a classic query when hideTimeColumn setting is true', () => {
+    expect(
+      getColumnsWithTimeField({
+        columns: ['bytes', 'extension'],
+        timeFieldName: '@timestamp',
+        uiSettings: uiSettingsMockWithHideTimeColumn,
+        query: { language: 'kuery', query: '*' },
+      })
+    ).toEqual(['bytes', 'extension']);
+  });
+
+  it('should not prepend for a classic query when time field already in columns', () => {
+    expect(
+      getColumnsWithTimeField({
+        columns: ['@timestamp', 'bytes'],
+        timeFieldName: '@timestamp',
+        uiSettings: uiSettingsMock,
+        query: { language: 'kuery', query: '*' },
+      })
+    ).toEqual(['@timestamp', 'bytes']);
+  });
+
+  it('should not prepend for a classic query when columns are empty', () => {
+    expect(
+      getColumnsWithTimeField({
+        columns: [],
+        timeFieldName: '@timestamp',
+        uiSettings: uiSettingsMock,
+        query: { language: 'kuery', query: '*' },
+      })
+    ).toEqual([]);
+  });
+
+  it('should prepend the time field when query is undefined', () => {
+    expect(
+      getColumnsWithTimeField({
+        columns: ['bytes', 'extension'],
+        timeFieldName: '@timestamp',
+        uiSettings: uiSettingsMock,
+        query: undefined,
+      })
+    ).toEqual(['@timestamp', 'bytes', 'extension']);
+  });
+
+  it('should not prepend when query is undefined and hideTimeColumn setting is true', () => {
+    expect(
+      getColumnsWithTimeField({
+        columns: ['bytes', 'extension'],
+        timeFieldName: '@timestamp',
+        uiSettings: uiSettingsMockWithHideTimeColumn,
+        query: undefined,
+      })
+    ).toEqual(['bytes', 'extension']);
   });
 });

@@ -68,7 +68,7 @@ import {
 } from '../../../../utils/get_allowed_sample_size';
 import { useFetchMoreRecords } from './use_fetch_more_records';
 import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
-import { showTimeFieldColumn } from '../../../../utils/time_field_column';
+import { showTimeFieldColumn } from '../../../../utils/show_time_field_column';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import type {
   CellRenderersExtensionParams,
