@@ -6,7 +6,6 @@
  */
 
 import { detectionSchema, type Detection } from '@kbn/streams-schema';
-import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
@@ -32,15 +31,6 @@ const detectionsSearchRoute = createServerRoute({
         .union([z.string().transform((value) => [value]), z.array(z.string())])
         .optional(),
       rule_name: z.string().optional(),
-      stream_name: z.string().optional(),
-      silent: BooleanFromString.optional(),
-      superseded: BooleanFromString.optional(),
-      superseded_at: z
-        .object({
-          from: z.iso.datetime().optional(),
-          to: z.iso.datetime().optional(),
-        })
-        .optional(),
     }),
   }),
   handler: async ({
