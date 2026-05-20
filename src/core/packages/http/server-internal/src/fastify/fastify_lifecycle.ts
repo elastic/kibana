@@ -21,6 +21,7 @@ import type {
   OnPreResponseHandler,
   OnPreResponseInfo,
   OnPreResponseToolkit,
+  ResponseHeaders,
   OnPreRoutingHandler,
   OnPreRoutingToolkit,
   RouterRoute,
@@ -43,7 +44,20 @@ import {
   toPlainQuery,
   toPlainRouteParams,
 } from './fastify_to_hapi_request';
+import { findHeadersIntersection } from '../lifecycle/on_pre_response';
 import { isReplyCommitted } from './fastify_reply_utils';
+
+/** Set when a `preParsing` lifecycle hook has already sent a response (cannot return `reply` there). */
+export const KIBANA_LIFECYCLE_SHORT_CIRCUITED = Symbol('kibanaLifecycleShortCircuited');
+
+const markLifecycleShortCircuited = (req: FastifyRequest): void => {
+  const app = ((req as { app?: Record<symbol, boolean> }).app =
+    (req as { app?: Record<symbol, boolean> }).app ?? {});
+  app[KIBANA_LIFECYCLE_SHORT_CIRCUITED] = true;
+};
+
+export const isLifecycleShortCircuited = (req: FastifyRequest): boolean =>
+  Boolean((req as { app?: Record<symbol, boolean> }).app?.[KIBANA_LIFECYCLE_SHORT_CIRCUITED]);
 
 const preRoutingToolkit: OnPreRoutingToolkit = {
   next: () => ({ type: OnPreRoutingResultType.next }),
@@ -164,16 +178,21 @@ export const buildKibanaRequest = (req: FastifyRequest, reply: FastifyReply): Ha
 
 const adapter = new FastifyResponseAdapter();
 
-const sendInternalError = (reply: FastifyReply, log: Logger): void => {
+const INTERNAL_ERROR_BODY = {
+  statusCode: 500,
+  error: 'Internal Server Error',
+  message: 'An internal server error occurred. Check Kibana server logs for details.',
+};
+
+const sendInternalError = async (
+  reply: FastifyReply,
+  log: Logger
+): Promise<FastifyReply | void> => {
   if (isReplyCommitted(reply)) {
     log.error(new Error('HTTP lifecycle handler failed after the response was already committed'));
     return;
   }
-  void reply.code(500).send({
-    statusCode: 500,
-    error: 'Internal Server Error',
-    message: 'An internal server error occurred. Check Kibana server logs for details.',
-  });
+  return reply.code(500).type('application/json; charset=utf-8').send(INTERNAL_ERROR_BODY);
 };
 
 /** preParsing/preHandler hooks must not return the Fastify reply object (that is treated as a new payload stream). */
@@ -223,7 +242,9 @@ export function adoptToFastifyOnPreRouting(fn: OnPreRoutingHandler, log: Logger)
       );
     } catch (error) {
       log.error(error);
-      return sendInternalError(reply, log);
+      markLifecycleShortCircuited(req);
+      await sendInternalError(reply, log);
+      return reply;
     }
   };
 }
@@ -243,6 +264,7 @@ export function adoptToFastifyOnPreAuth(fn: OnPreAuthHandler, log: Logger) {
       );
       if (isKibanaResponse(result)) {
         await shortCircuitLifecycle(reply, () => adapter.handle(result, reply));
+        markLifecycleShortCircuited(req);
         return payload === undefined ? Buffer.alloc(0) : payload;
       }
       if (result.type === OnPreAuthResultType.next) {
@@ -253,7 +275,8 @@ export function adoptToFastifyOnPreAuth(fn: OnPreAuthHandler, log: Logger) {
       );
     } catch (error) {
       log.error(error);
-      sendInternalError(reply, log);
+      markLifecycleShortCircuited(req);
+      await sendInternalError(reply, log);
       return payload === undefined ? Buffer.alloc(0) : payload;
     }
   };
@@ -261,7 +284,10 @@ export function adoptToFastifyOnPreAuth(fn: OnPreAuthHandler, log: Logger) {
 
 /** @internal */
 export function adoptToFastifyOnPostAuth(fn: OnPostAuthHandler, log: Logger) {
-  return async function postAuth(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  return async function postAuth(
+    req: FastifyRequest,
+    reply: FastifyReply
+  ): Promise<FastifyReply | void> {
     try {
       const result = await fn(
         CoreKibanaRequest.from(buildKibanaRequest(req, reply)),
@@ -270,7 +296,7 @@ export function adoptToFastifyOnPostAuth(fn: OnPostAuthHandler, log: Logger) {
       );
       if (isKibanaResponse(result)) {
         await shortCircuitLifecycle(reply, () => adapter.handle(result, reply));
-        return;
+        return reply;
       }
       if (result.type === OnPostAuthResultType.next) {
         return;
@@ -290,7 +316,8 @@ export function adoptToFastifyOnPostAuth(fn: OnPostAuthHandler, log: Logger) {
       );
     } catch (error) {
       log.error(error);
-      sendInternalError(reply, log);
+      await sendInternalError(reply, log);
+      return reply;
     }
   };
 }
@@ -314,6 +341,11 @@ export function adoptToFastifyOnPreResponse(fn: OnPreResponseHandler, log: Logge
       );
       if (result.type === OnPreResponseResultType.next) {
         if (result.headers) {
+          findHeadersIntersection(
+            reply.getHeaders() as ResponseHeaders,
+            result.headers,
+            log
+          );
           for (const [name, value] of Object.entries(result.headers)) {
             if (value !== undefined) reply.header(name, value);
           }
@@ -322,6 +354,11 @@ export function adoptToFastifyOnPreResponse(fn: OnPreResponseHandler, log: Logge
       }
       if (result.type === OnPreResponseResultType.render) {
         if (result.headers) {
+          findHeadersIntersection(
+            reply.getHeaders() as ResponseHeaders,
+            result.headers,
+            log
+          );
           for (const [name, value] of Object.entries(result.headers)) {
             if (value !== undefined) reply.header(name, value);
           }
@@ -333,10 +370,9 @@ export function adoptToFastifyOnPreResponse(fn: OnPreResponseHandler, log: Logge
       );
     } catch (error) {
       log.error(error);
-      if (!isReplyCommitted(reply)) {
-        sendInternalError(reply, log);
-      }
-      return payload;
+      reply.code(500);
+      reply.type('application/json; charset=utf-8');
+      return JSON.stringify(INTERNAL_ERROR_BODY);
     }
   };
 }

@@ -911,6 +911,85 @@ describe('FastifyHttpServer', () => {
       expect(JSON.parse(res.body)).toEqual({ filename: 'sample.ndjson' });
     }, 15000);
 
+    it('parses multipart when accepts is unset (timeline _import parity)', async () => {
+      const ctx = createCoreContext();
+      const config = createHttpConfig(PORT);
+      const config$ = new BehaviorSubject(config);
+
+      server = new FastifyHttpServer(ctx, 'Kibana', new BehaviorSubject(config.shutdownTimeout));
+      const setup = await server.setup({ config$ });
+
+      const enhanceHandler = (handler: any) => async (req: any, res: any) =>
+        handler({} as any, req, res);
+
+      const router = new Router('/api/fastify-mvp', ctx.logger.get('router'), enhanceHandler, {
+        env,
+      });
+
+      router.post(
+        {
+          path: '/multipart-default-accepts',
+          security: { authz: { enabled: false, reason: 'test' } },
+          validate: {
+            body: schema.object({
+              file: schema.stream(),
+            }),
+          },
+          options: {
+            body: {
+              output: 'stream',
+              maxBytes: 1024 * 1024,
+            },
+          },
+        },
+        async (_context, req, res) => {
+          const file = (req.body as { file?: { hapi?: { filename: string } } }).file;
+          const filename = file?.hapi?.filename;
+          return res.ok({ body: { filename } });
+        }
+      );
+
+      setup.registerRouter(router);
+      await server.start();
+
+      const address = (setup.server as any).server.address();
+      listenPort = typeof address === 'object' && address ? address.port : 0;
+      expect(listenPort).toBeGreaterThan(0);
+
+      const form = new FormData();
+      form.append('file', Buffer.from('{}'), {
+        filename: 'timelines.ndjson',
+        contentType: 'application/ndjson',
+      });
+
+      const res = await new Promise<{ statusCode: number; body: string }>((resolve, reject) => {
+        const req = http.request(
+          {
+            hostname: '127.0.0.1',
+            port: listenPort,
+            path: '/api/fastify-mvp/multipart-default-accepts',
+            method: 'POST',
+            headers: form.getHeaders(),
+          },
+          (incoming) => {
+            const chunks: Buffer[] = [];
+            incoming.on('data', (c) => chunks.push(Buffer.from(c)));
+            incoming.on('end', () =>
+              resolve({
+                statusCode: incoming.statusCode ?? 0,
+                body: Buffer.concat(chunks).toString('utf8'),
+              })
+            );
+          }
+        );
+        req.on('error', reject);
+        form.pipe(req);
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(JSON.parse(res.body)).toEqual({ filename: 'timelines.ndjson' });
+    }, 15000);
+
     it('passes raw multipart bytes as Buffer when parse: false (lists _import parity)', async () => {
       const ctx = createCoreContext();
       const config = createHttpConfig(PORT);

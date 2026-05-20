@@ -35,6 +35,23 @@ function acceptsMultipartRoute(accepts: string | readonly string[] | undefined):
   return list.some((mime) => mime === 'multipart/form-data');
 }
 
+/**
+ * Hapi allows `multipart/form-data` when `options.body.accepts` is unset (default mime allowlist).
+ * Routes like timeline `_import` only set `output: 'stream'`; supertest `.attach()` still sends multipart.
+ */
+function shouldParseMultipartBody(
+  accepts: string | readonly string[] | undefined,
+  isMultipart: boolean
+): boolean {
+  if (!isMultipart) {
+    return false;
+  }
+  if (acceptsMultipartRoute(accepts)) {
+    return true;
+  }
+  return accepts == null;
+}
+
 function multipartRequestOptions(fileSize: number) {
   return { limits: { fileSize, parts: MULTIPART_MAX_PARTS } };
 }
@@ -93,12 +110,17 @@ export async function registerFastifyMultipartAndKibanaBodyHook(params: {
     const app = (req as FastifyRequest & { app?: Record<string | symbol, unknown> }).app;
     const route = app?.matchedRoute as RouterRoute | undefined;
     const accepts = route?.options?.body?.accepts as string | readonly string[] | undefined;
-    const needsMultipart = acceptsMultipartRoute(accepts);
     const isMultipart = (req as FastifyRequest & { isMultipart?: () => boolean }).isMultipart?.();
+    const requiresMultipartOnly =
+      accepts != null &&
+      (Array.isArray(accepts) ? accepts : [accepts]).every(
+        (mime) => mime === 'multipart/form-data'
+      );
+    const parseMultipart = shouldParseMultipartBody(accepts, Boolean(isMultipart));
 
     // Hapi returns 415 before schema validation when a route declares multipart-only payload
     // but the client did not send multipart/form-data (saved_objects `_import`, etc.).
-    if (needsMultipart && !isMultipart) {
+    if (requiresMultipartOnly && !isMultipart) {
       return reply.code(415).send({
         statusCode: 415,
         error: 'Unsupported Media Type',
@@ -110,7 +132,7 @@ export async function registerFastifyMultipartAndKibanaBodyHook(params: {
       return;
     }
 
-    if (!needsMultipart) {
+    if (!parseMultipart) {
       await drainMultipartBody(req, maxPayloadBytes);
       return;
     }

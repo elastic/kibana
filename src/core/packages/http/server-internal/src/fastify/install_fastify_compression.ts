@@ -70,6 +70,10 @@ export async function installFastifyCompression(
 
   await fastify.register(compress, {
     global: true,
+    // Kibana does not rely on @fastify/compress request decompression; the plugin's
+    // callback-style route `preParsing` hook returns `undefined` under Fastify 4 and breaks
+    // the global `preParsing` chain (e.g. pre-start supertest against an unsealed server).
+    globalDecompression: false,
     threshold: COMPRESSION_THRESHOLD_BYTES,
     encodings,
     brotliOptions: {

@@ -82,6 +82,7 @@ import {
   adoptToFastifyOnPreResponse,
   adoptToFastifyOnPreRouting,
   buildKibanaRequest,
+  isLifecycleShortCircuited,
 } from './fastify/fastify_lifecycle';
 import { getEcsResponseLog } from './logging';
 import { extractHapiWildcardName, translateHapiPathToFastify } from './fastify/translate_path';
@@ -248,6 +249,7 @@ export class FastifyHttpServer {
   private redactedSessionIdGetter?: (request: KibanaRequest) => Promise<string | undefined>;
   private readonly registeredRouters = new Set<IRouter>();
   private authRegistered = false;
+  private sealPromise?: Promise<void>;
 
   /** Patterns from {@link registerStaticDir} — used when find-my-way store has no router metadata. */
   private readonly staticDirectoryRouteInfo = new Map<string, string | undefined>();
@@ -291,10 +293,26 @@ export class FastifyHttpServer {
    * Seals the Fastify instance with `ready()` after {@link HttpService} registers core lifecycle
    * hooks. Must run before `supertest(server.listener)` against a server that has not `start()`ed.
    */
+  /** Ensures `fastify.ready()` ran so hooks and parsers are wired before handling traffic. */
+  private async ensureSealed(): Promise<void> {
+    if (!this.fastify || this.fastifyReady) {
+      return;
+    }
+    if (!this.sealPromise) {
+      this.sealPromise = this.seal();
+    }
+    await this.sealPromise;
+  }
+
   public async seal(): Promise<void> {
     if (!this.fastify || this.fastifyReady) {
       return;
     }
+    // Last in the `preParsing` chain: some plugins still yield `undefined` payloads for
+    // bodyless requests; Fastify's runner then crashes reading `.length` during parsing.
+    this.fastify.addHook('preParsing', async (_req, _reply, payload) => {
+      return payload === undefined ? Buffer.alloc(0) : payload;
+    });
     await this.fastify.ready();
     this.fastifyReady = true;
   }
@@ -338,7 +356,12 @@ export class FastifyHttpServer {
       logger: false,
       bodyLimit: Math.max(config.maxPayload.getValueInBytes(), FASTIFY_BODY_LIMIT_CEILING_BYTES),
       serverFactory: ((handler: (req: any, res: any) => void) => {
-        listener.on('request', handler);
+        listener.on('request', (req, res) => {
+          if ((req as { __kibanaStoppedResponse?: boolean }).__kibanaStoppedResponse) {
+            return;
+          }
+          handler(req, res);
+        });
         return listener;
       }) as any,
       // Trust the proxy info that Kibana already validates upstream; matches Hapi default.
@@ -351,6 +374,14 @@ export class FastifyHttpServer {
       // `server.stop()` blocks until the timeout elapses.
       forceCloseConnections: true,
     }) as unknown as FastifyInstance;
+
+    // Must run before any other `onRequest` hook: `preParsing` reads route-context hooks
+    // populated only after `fastify.ready()` (see Fastify `preReady`).
+    this.fastify.addHook('onRequest', async () => {
+      if (!this.fastifyReady && !this.authRegistered) {
+        await this.ensureSealed();
+      }
+    });
 
     installFastifyGlobalErrorHandler(this.fastify, this.log);
     await installFastifyCompression(this.fastify, config, this.log);
@@ -500,6 +531,12 @@ export class FastifyHttpServer {
           authState: this.authState,
           authRequestHeaders: this.authRequestHeaders,
           authResponseHeaders: this.authResponseHeaders,
+          registerOnPreResponse: (handler) => {
+            if (!this.fastify) {
+              throw new Error('Fastify instance not initialized');
+            }
+            this.fastify.addHook('onSend', adoptToFastifyOnPreResponse(handler, this.log));
+          },
         });
       },
       registerOnPostAuth: (handler: OnPostAuthHandler) => {
@@ -524,6 +561,12 @@ export class FastifyHttpServer {
         // surfaced via the `'https'` value, mirroring how the Hapi backend reports it.
         protocol: config.ssl.enabled ? 'https' : 'http',
       }),
+      prepareForIncomingRequests: async () => {
+        if (this.authRegistered) {
+          return;
+        }
+        await this.ensureSealed();
+      },
     };
   }
 
@@ -980,7 +1023,9 @@ export class FastifyHttpServer {
     const dispatcher = async (req: FastifyRequest, reply: FastifyReply) => {
       if (
         reply.raw.headersSent ||
-        (req.raw as { __kibanaStoppedResponse?: boolean }).__kibanaStoppedResponse
+        (req.raw as { __kibanaStoppedResponse?: boolean }).__kibanaStoppedResponse ||
+        isLifecycleShortCircuited(req) ||
+        reply.sent
       ) {
         return;
       }

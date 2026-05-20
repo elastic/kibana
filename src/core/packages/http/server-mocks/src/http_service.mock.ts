@@ -212,6 +212,7 @@ const createInternalSetupContractMock = () => {
       protocol: 'http',
     }),
     registerRouterAfterListening: jest.fn(),
+    prepareForIncomingRequests: jest.fn().mockResolvedValue(undefined),
     rateLimiter: config.schema.getSchema().extract('rateLimiter').validate({}).value,
   });
 

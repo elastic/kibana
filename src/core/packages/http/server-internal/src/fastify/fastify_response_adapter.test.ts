@@ -27,6 +27,9 @@ describe('FastifyResponseAdapter', () => {
       hasHeader(name: string) {
         return recordedHeaders.has(name.toLowerCase());
       },
+      getHeaders() {
+        return Object.fromEntries(recordedHeaders);
+      },
       send: jest.fn().mockReturnThis(),
     } as unknown as FastifyReply;
 
@@ -68,6 +71,9 @@ describe('FastifyResponseAdapter', () => {
       },
       hasHeader(name: string) {
         return recordedHeaders.has(name.toLowerCase());
+      },
+      getHeaders() {
+        return Object.fromEntries(recordedHeaders);
       },
       send: jest.fn().mockReturnThis(),
     } as unknown as FastifyReply;
@@ -112,6 +118,39 @@ describe('FastifyResponseAdapter', () => {
     );
   });
 
+  it('appends charset=utf-8 to explicit text/csv responses (Hapi reporting parity)', async () => {
+    const recordedHeaders = new Map<string, string | number | string[]>();
+
+    const reply = {
+      request: { app: {} },
+      code: jest.fn().mockReturnThis(),
+      header(this: void, name: string, value: string | number | string[]) {
+        recordedHeaders.set(name.toLowerCase(), value);
+      },
+      hasHeader(name: string) {
+        return recordedHeaders.has(name.toLowerCase());
+      },
+      getHeaders() {
+        return Object.fromEntries(recordedHeaders);
+      },
+      send: jest.fn().mockReturnThis(),
+    } as unknown as FastifyReply;
+
+    const body = Readable.from(['id,title\n1,foo']);
+    const adapter = new FastifyResponseAdapter();
+    await adapter.handle(
+      new KibanaResponse(200, body, {
+        headers: {
+          'content-type': 'text/csv',
+        },
+      }),
+      reply
+    );
+
+    expect(recordedHeaders.get('content-type')).toBe('text/csv; charset=utf-8');
+    expect(reply.send).toHaveBeenCalledWith(body);
+  });
+
   it('passes through duck-typed readable bodies on errors (Fastify stream detection parity)', async () => {
     const recordedHeaders = new Map<string, string | number | string[]>();
     const reply = {
@@ -122,6 +161,9 @@ describe('FastifyResponseAdapter', () => {
       },
       hasHeader(name: string) {
         return recordedHeaders.has(name.toLowerCase());
+      },
+      getHeaders() {
+        return Object.fromEntries(recordedHeaders);
       },
       send: jest.fn().mockReturnThis(),
     } as unknown as FastifyReply;

@@ -9,7 +9,12 @@
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import type { Logger } from '@kbn/logging';
-import type { AuthenticationHandler, AuthResult, AuthToolkit } from '@kbn/core-http-server';
+import type {
+  AuthenticationHandler,
+  AuthResult,
+  AuthToolkit,
+  OnPreResponseHandler,
+} from '@kbn/core-http-server';
 import { AuthResultType, isKibanaResponse } from '@kbn/core-http-server';
 import { CoreKibanaRequest, lifecycleResponseFactory } from '@kbn/core-http-router-server-internal';
 import type { RouterRoute, KibanaRouteOptions } from '@kbn/core-http-server';
@@ -55,9 +60,18 @@ export function registerFastifyAuthentication(params: {
   authState: AuthStateStorage;
   authRequestHeaders: AuthHeadersStorage;
   authResponseHeaders: AuthHeadersStorage;
+  registerOnPreResponse: (handler: OnPreResponseHandler) => void;
 }): void {
-  const { fastify, fn, log, responseAdapter, authState, authRequestHeaders, authResponseHeaders } =
-    params;
+  const {
+    fastify,
+    fn,
+    log,
+    responseAdapter,
+    authState,
+    authRequestHeaders,
+    authResponseHeaders,
+    registerOnPreResponse,
+  } = params;
 
   // Runs after `preParsing` (route lookup + onPreAuth) and before `preHandler` (onPostAuth).
   // Core registers post-auth handlers during `registerCoreHandlers` before plugins call
@@ -95,7 +109,7 @@ export function registerFastifyAuthentication(params: {
           return;
         }
         await responseAdapter.handle(result, reply);
-        return;
+        return reply;
       }
 
       if (result.type === AuthResultType.authenticated) {
@@ -128,7 +142,7 @@ export function registerFastifyAuthentication(params: {
           }),
           reply
         );
-        return;
+        return reply;
       }
 
       if (result.type === AuthResultType.notHandled) {
@@ -138,7 +152,7 @@ export function registerFastifyAuthentication(params: {
           return;
         }
         await responseAdapter.handle(lifecycleResponseFactory.unauthorized(), reply);
-        return;
+        return reply;
       }
 
       throw new Error(`Unexpected authentication result: ${JSON.stringify(result)}`);
@@ -154,29 +168,14 @@ export function registerFastifyAuthentication(params: {
         }),
         reply
       );
+      return reply;
     }
   });
 
-  fastify.addHook('onSend', async (req: FastifyRequest, reply: FastifyReply, payload) => {
-    if (isReplyCommitted(reply)) {
-      return payload;
-    }
-    const app = (req as any).app;
-    const compat = app?.[KIBANA_HAPI_COMPAT_REQUEST] as ReturnType<
-      typeof buildHapiCompatRequestFromFastify
-    > | null;
-    if (!compat) {
-      return payload;
-    }
-    const kibanaRequest = CoreKibanaRequest.from(compat, undefined, false);
-    const hdrs = authResponseHeaders.get(kibanaRequest);
-    if (hdrs) {
-      for (const [name, value] of Object.entries(hdrs)) {
-        if (value !== undefined) {
-          reply.header(name, value as string | string[]);
-        }
-      }
-    }
-    return payload;
+  // Mirror {@link HttpServer.registerAuth}'s `onPreResponse` hook so auth response headers
+  // participate in the same rewrite warnings as other interceptors.
+  registerOnPreResponse((request, _preResponseInfo, toolkit) => {
+    const authHdrs = authResponseHeaders.get(request);
+    return toolkit.next({ headers: authHdrs });
   });
 }

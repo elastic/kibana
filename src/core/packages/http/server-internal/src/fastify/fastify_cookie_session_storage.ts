@@ -52,12 +52,22 @@ const getRawHttpAccess = (kbnRequest: KibanaRequest): RawHttpAccess | null => {
       if (!cookieStrings.length) return;
       if (fastifyReply && !fastifyReply.sent) {
         const existing = fastifyReply.getHeader('set-cookie');
-        const merged: string[] = Array.isArray(existing)
+        let merged: string[] = Array.isArray(existing)
           ? existing.map(String)
           : existing != null
           ? [String(existing)]
           : [];
         for (const cookie of cookieStrings) {
+          const cookieName = cookie.split('=')[0];
+          const isClearing =
+            cookie.includes(`${cookieName}=;`) ||
+            cookie.includes(`${cookieName}=; Path=`) ||
+            /Max-Age=0/.test(cookie);
+          if (isClearing) {
+            merged = merged.filter(
+              (existingCookie) => !existingCookie.startsWith(`${cookieName}=`)
+            );
+          }
           merged.push(cookie);
         }
         fastifyReply.header('set-cookie', merged);
@@ -67,12 +77,22 @@ const getRawHttpAccess = (kbnRequest: KibanaRequest): RawHttpAccess | null => {
         return;
       }
       const existing = res.getHeader('Set-Cookie');
-      const merged: string[] = Array.isArray(existing)
+      let merged: string[] = Array.isArray(existing)
         ? existing.map(String)
         : existing != null
         ? [String(existing)]
         : [];
-      for (const c of cookieStrings) merged.push(c);
+      for (const cookie of cookieStrings) {
+        const cookieName = cookie.split('=')[0];
+        const isClearing =
+          cookie.includes(`${cookieName}=;`) ||
+          cookie.includes(`${cookieName}=; Path=`) ||
+          /Max-Age=0/.test(cookie);
+        if (isClearing) {
+          merged = merged.filter((existingCookie) => !existingCookie.startsWith(`${cookieName}=`));
+        }
+        merged.push(cookie);
+      }
       res.setHeader('Set-Cookie', merged);
     },
   };
@@ -101,12 +121,17 @@ interface SerializeOptions {
 
 const serializeCookie = (name: string, value: string, options: SerializeOptions): string => {
   const parts: string[] = [`${name}=${encodeURIComponent(value)}`];
-  parts.push(`Path=${options.path}`);
+  if (options.expires && options.expires.getTime() <= 0) {
+    parts.push('Max-Age=0');
+    parts.push(`Expires=${options.expires.toUTCString()}`);
+  } else if (options.expires) {
+    parts.push(`Expires=${options.expires.toUTCString()}`);
+  }
   if (options.isHttpOnly) parts.push('HttpOnly');
   if (options.isSecure) parts.push('Secure');
   if (options.sameSite) parts.push(`SameSite=${options.sameSite}`);
   if (options.partitioned) parts.push('Partitioned');
-  if (options.expires) parts.push(`Expires=${options.expires.toUTCString()}`);
+  parts.push(`Path=${options.path}`);
   return parts.join('; ');
 };
 
@@ -185,6 +210,13 @@ class ScopedFastifyCookieSessionStorage<T extends object> implements SessionStor
   private clearWithPath(path: string) {
     const access = getRawHttpAccess(this.request);
     if (!access) return;
+    const raw = ensureRawRequest(this.request) as unknown as {
+      app?: { pendingCookieWrites?: Array<Promise<unknown>> };
+    };
+    const app = raw.app;
+    if (app?.pendingCookieWrites?.length) {
+      app.pendingCookieWrites = [];
+    }
     access.setCookies([
       serializeCookie(this.cookieOptions.name, '', {
         path: path || '/',

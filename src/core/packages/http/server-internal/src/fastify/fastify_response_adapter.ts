@@ -142,6 +142,29 @@ function applyIncomingMessageHeaders(reply: FastifyReply, incoming: IncomingMess
   }
 }
 
+/** Hapi appends `; charset=utf-8` to `text/*` types that omit a charset (e.g. reporting CSV). */
+function appendUtf8CharsetToTextContentType(contentType: string): string {
+  const lower = contentType.toLowerCase();
+  if (lower.startsWith('text/') && !lower.includes('charset=')) {
+    return `${contentType}; charset=utf-8`;
+  }
+  return contentType;
+}
+
+function ensureHapiCompatibleTextCharset(reply: FastifyReply): void {
+  const headers =
+    typeof reply.getHeaders === 'function' ? reply.getHeaders() : {};
+  const raw = headers['content-type'] ?? headers['Content-Type'];
+  const typeStr = Array.isArray(raw) ? raw[0] : raw;
+  if (typeof typeStr !== 'string') {
+    return;
+  }
+  const withCharset = appendUtf8CharsetToTextContentType(typeStr);
+  if (withCharset !== typeStr) {
+    reply.header('content-type', withCharset);
+  }
+}
+
 /**
  * Adapts a {@link KibanaResponse} produced by a route handler to a Fastify reply.
  *
@@ -236,8 +259,7 @@ export class FastifyResponseAdapter {
   private applyHapiCompatiblePayloadHeaders(
     reply: FastifyReply,
     payload: unknown,
-    hasExplicitContentType: boolean,
-    headers?: Record<string, string | string[]>
+    hasExplicitContentType: boolean
   ): void {
     if (Buffer.isBuffer(payload)) {
       if (!hasExplicitContentType && !reply.hasHeader('content-type')) {
@@ -246,45 +268,21 @@ export class FastifyResponseAdapter {
       if (!reply.hasHeader('content-length')) {
         reply.header('content-length', String(payload.length));
       }
-      const explicitType =
-        headers &&
-        (Object.entries(headers).find(([name]) => name.toLowerCase() === 'content-type')?.[1] ??
-          undefined);
-      const typeStr = Array.isArray(explicitType) ? explicitType[0] : explicitType;
-      if (
-        typeof typeStr === 'string' &&
-        typeStr.toLowerCase().startsWith('text/plain') &&
-        !typeStr.toLowerCase().includes('charset=')
-      ) {
-        reply.header('content-type', `${typeStr}; charset=utf-8`);
+    } else {
+      const isStreamBody =
+        !isIncomingMessagePayload(payload) &&
+        (payload instanceof stream.Readable ||
+          stream.isReadable(payload as stream.Readable) === true ||
+          (typeof payload === 'object' &&
+            payload !== null &&
+            typeof (payload as { pipe?: unknown }).pipe === 'function'));
+
+      if (isStreamBody && !hasExplicitContentType && !reply.hasHeader('content-type')) {
+        reply.header('content-type', 'application/octet-stream');
       }
-      return;
     }
 
-    const isStreamBody =
-      !isIncomingMessagePayload(payload) &&
-      (payload instanceof stream.Readable ||
-        stream.isReadable(payload as stream.Readable) === true ||
-        (typeof payload === 'object' &&
-          payload !== null &&
-          typeof (payload as { pipe?: unknown }).pipe === 'function'));
-
-    if (isStreamBody && !hasExplicitContentType && !reply.hasHeader('content-type')) {
-      reply.header('content-type', 'application/octet-stream');
-    }
-
-    const explicitType =
-      headers &&
-      (Object.entries(headers).find(([name]) => name.toLowerCase() === 'content-type')?.[1] ??
-        undefined);
-    const typeStr = Array.isArray(explicitType) ? explicitType[0] : explicitType;
-    if (
-      typeof typeStr === 'string' &&
-      typeStr.toLowerCase().startsWith('text/plain') &&
-      !typeStr.toLowerCase().includes('charset=')
-    ) {
-      reply.header('content-type', `${typeStr}; charset=utf-8`);
-    }
+    ensureHapiCompatibleTextCharset(reply);
   }
 
   private ensureJsonSerializablePayload(payload: unknown): boolean {
@@ -345,12 +343,7 @@ export class FastifyResponseAdapter {
     ) {
       reply.header('content-type', 'text/html; charset=utf-8');
     }
-    this.applyHapiCompatiblePayloadHeaders(
-      reply,
-      payload,
-      hasExplicitContentType,
-      kibanaResponse.options.headers
-    );
+    this.applyHapiCompatiblePayloadHeaders(reply, payload, hasExplicitContentType);
     this.applyDefaultCacheControl(reply, kibanaResponse);
     if (!this.ensureJsonSerializablePayload(payload)) {
       // Hapi fails while serializing the response (e.g. circular JSON) without logging.

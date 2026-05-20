@@ -167,6 +167,11 @@ export interface HttpServerSetup {
   authRequestHeaders: IAuthHeadersStorage;
   auth: HttpAuth;
   getServerInfo: () => HttpServerInfo;
+  /**
+   * Fastify only: runs `fastify.ready()` so route lifecycle hooks exist before `listen()`.
+   * No-op on Hapi. Safe to call after `setup` when `registerAuth` has not run yet.
+   */
+  prepareForIncomingRequests: () => Promise<void>;
 }
 
 /** @internal */
@@ -355,6 +360,7 @@ export class HttpServer {
         port: config.port,
         protocol: this.server!.info.protocol,
       }),
+      prepareForIncomingRequests: async () => {},
       // Return server instance with the connection options so that we can properly
       // bridge core and the "legacy" Kibana internally. Once this bridge isn't
       // needed anymore we shouldn't return the instance from this method.
