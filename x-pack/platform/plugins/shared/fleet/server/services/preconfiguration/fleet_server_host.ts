@@ -145,11 +145,9 @@ export async function createOrUpdatePreconfiguredFleetServerHosts(
           },
           { fromPreconfiguration: true, secretHashes }
         );
-        if (data.is_default) {
-          await agentPolicyService.bumpAllAgentPolicies(esClient);
-        } else {
-          await agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(esClient, id);
-        }
+        await agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(esClient, id, {
+          isDefault: data.is_default,
+        });
       }
     })
   );
