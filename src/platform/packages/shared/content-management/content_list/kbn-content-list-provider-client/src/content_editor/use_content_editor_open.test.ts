@@ -10,7 +10,7 @@
 import { renderHook, act } from '@testing-library/react';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import { contentListQueryClient } from '@kbn/content-list-provider';
-import { useContentEditorInspect } from './use_content_editor_inspect';
+import { useContentEditorOpen } from './use_content_editor_open';
 import type { ContentEditorConfig } from './types';
 
 const mockOpenContentEditor = jest.fn((_params: OpenContentEditorParams): (() => void) =>
@@ -29,12 +29,12 @@ jest.mock('@kbn/content-list-provider', () => {
 });
 
 const defaultConfig: ContentEditorConfig = {
-  openContentEditor: mockOpenContentEditor,
   onSave: mockOnSave,
   isReadonly: false,
 };
 
 const defaultOptions = {
+  openContentEditor: mockOpenContentEditor,
   entityName: 'dashboard',
   isReadOnly: false,
   queryKeyScope: 'test-listing',
@@ -52,14 +52,14 @@ const testItem = {
   managed: false,
 };
 
-describe('useContentEditorInspect', () => {
+describe('useContentEditorOpen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('returns undefined when contentEditor is not provided', () => {
     const { result } = renderHook(() =>
-      useContentEditorInspect({ ...defaultOptions, contentEditor: undefined })
+      useContentEditorOpen({ ...defaultOptions, contentEditor: undefined })
     );
 
     expect(result.current).toBeUndefined();
@@ -67,7 +67,7 @@ describe('useContentEditorInspect', () => {
 
   it('returns a callback when contentEditor is provided', () => {
     const { result } = renderHook(() =>
-      useContentEditorInspect({ ...defaultOptions, contentEditor: defaultConfig })
+      useContentEditorOpen({ ...defaultOptions, contentEditor: defaultConfig })
     );
 
     expect(result.current).toBeInstanceOf(Function);
@@ -75,7 +75,7 @@ describe('useContentEditorInspect', () => {
 
   it('calls openContentEditor with transformed item', () => {
     const { result } = renderHook(() =>
-      useContentEditorInspect({ ...defaultOptions, contentEditor: defaultConfig })
+      useContentEditorOpen({ ...defaultOptions, contentEditor: defaultConfig })
     );
 
     act(() => {
@@ -102,7 +102,7 @@ describe('useContentEditorInspect', () => {
 
   it('forces read-only mode for managed items', () => {
     const { result } = renderHook(() =>
-      useContentEditorInspect({ ...defaultOptions, contentEditor: defaultConfig })
+      useContentEditorOpen({ ...defaultOptions, contentEditor: defaultConfig })
     );
 
     act(() => {
@@ -117,7 +117,7 @@ describe('useContentEditorInspect', () => {
 
   it('wraps onSave with query invalidation', async () => {
     const { result } = renderHook(() =>
-      useContentEditorInspect({ ...defaultOptions, contentEditor: defaultConfig })
+      useContentEditorOpen({ ...defaultOptions, contentEditor: defaultConfig })
     );
 
     act(() => {
@@ -139,7 +139,7 @@ describe('useContentEditorInspect', () => {
 
   it('handles items with no tags', () => {
     const { result } = renderHook(() =>
-      useContentEditorInspect({ ...defaultOptions, contentEditor: defaultConfig })
+      useContentEditorOpen({ ...defaultOptions, contentEditor: defaultConfig })
     );
 
     act(() => {
@@ -152,7 +152,7 @@ describe('useContentEditorInspect', () => {
 
   it('does not suppress onSave for non-managed items when isReadonly is false', () => {
     const { result } = renderHook(() =>
-      useContentEditorInspect({ ...defaultOptions, contentEditor: defaultConfig })
+      useContentEditorOpen({ ...defaultOptions, contentEditor: defaultConfig })
     );
 
     act(() => {
@@ -166,12 +166,11 @@ describe('useContentEditorInspect', () => {
 
   it('defaults to read-only when isReadonly is not explicitly set to false', () => {
     const viewOnlyConfig: ContentEditorConfig = {
-      openContentEditor: mockOpenContentEditor,
       onSave: mockOnSave,
       // isReadonly intentionally omitted — should default to read-only
     };
     const { result } = renderHook(() =>
-      useContentEditorInspect({ ...defaultOptions, contentEditor: viewOnlyConfig })
+      useContentEditorOpen({ ...defaultOptions, contentEditor: viewOnlyConfig })
     );
 
     act(() => {
@@ -185,12 +184,11 @@ describe('useContentEditorInspect', () => {
 
   it('defaults to read-only when onSave is not provided', () => {
     const noSaveConfig: ContentEditorConfig = {
-      openContentEditor: mockOpenContentEditor,
       isReadonly: false,
       // onSave intentionally omitted — should force read-only
     };
     const { result } = renderHook(() =>
-      useContentEditorInspect({ ...defaultOptions, contentEditor: noSaveConfig })
+      useContentEditorOpen({ ...defaultOptions, contentEditor: noSaveConfig })
     );
 
     act(() => {
