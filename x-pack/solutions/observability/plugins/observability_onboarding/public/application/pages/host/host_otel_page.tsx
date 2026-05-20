@@ -279,6 +279,7 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
               isManagedOtlpServiceAvailable={isManagedOtlpServiceAvailable}
               wiredStreamsStatus={wiredStreamsStatus}
               streamsDocLink={docLinks?.links.observability.logsStreams}
+              useInlineCopyOnly
             />
           ),
         };
@@ -291,7 +292,7 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
       title: i18n.translate('xpack.observability_onboarding.otelLogsPanel.steps.start', {
         defaultMessage: 'Start the collector',
       }),
-      children: <OtelLogsStartStep os={os} />,
+      children: <OtelLogsStartStep os={os} useInlineCopyOnly />,
     };
 
     const visualizeStep = {

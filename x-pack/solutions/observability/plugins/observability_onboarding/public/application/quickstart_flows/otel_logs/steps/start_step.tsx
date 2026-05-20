@@ -12,6 +12,10 @@ import type { OtelOs } from './install_step';
 
 interface OtelLogsStartStepProps {
   os: OtelOs;
+  // When true, drops the legacy "Copy to clipboard" button and enables the
+  // code block's built-in top-right copy icon instead. Defaults to false so
+  // V1 panels keep rendering the bottom button as they always have.
+  useInlineCopyOnly?: boolean;
 }
 
 const START_COMMANDS: Readonly<Record<OtelOs, string>> = {
@@ -26,7 +30,10 @@ const CODE_LANGUAGES: Readonly<Record<OtelOs, string>> = {
   windows: 'powershell',
 };
 
-export const OtelLogsStartStep: React.FC<OtelLogsStartStepProps> = ({ os }) => {
+export const OtelLogsStartStep: React.FC<OtelLogsStartStepProps> = ({
+  os,
+  useInlineCopyOnly = false,
+}) => {
   const startCommand = START_COMMANDS[os];
   const codeLanguage = CODE_LANGUAGES[os];
 
@@ -69,21 +76,25 @@ export const OtelLogsStartStep: React.FC<OtelLogsStartStepProps> = ({ os }) => {
         </p>
       </EuiText>
 
-      <EuiCodeBlock language={codeLanguage}>{startCommand}</EuiCodeBlock>
-      <EuiCopy textToCopy={startCommand}>
-        {(copy) => (
-          <EuiButton
-            data-test-subj="observabilityOnboardingCopyableCodeBlockCopyToClipboardButton"
-            iconType="copy"
-            onClick={copy}
-          >
-            {i18n.translate(
-              'xpack.observability_onboarding.installOtelCollector.configStep.copyCommand',
-              { defaultMessage: 'Copy to clipboard' }
-            )}
-          </EuiButton>
-        )}
-      </EuiCopy>
+      <EuiCodeBlock language={codeLanguage} isCopyable={useInlineCopyOnly}>
+        {startCommand}
+      </EuiCodeBlock>
+      {!useInlineCopyOnly && (
+        <EuiCopy textToCopy={startCommand}>
+          {(copy) => (
+            <EuiButton
+              data-test-subj="observabilityOnboardingCopyableCodeBlockCopyToClipboardButton"
+              iconType="copy"
+              onClick={copy}
+            >
+              {i18n.translate(
+                'xpack.observability_onboarding.installOtelCollector.configStep.copyCommand',
+                { defaultMessage: 'Copy to clipboard' }
+              )}
+            </EuiButton>
+          )}
+        </EuiCopy>
+      )}
     </EuiFlexGroup>
   );
 };

@@ -45,6 +45,10 @@ interface OtelLogsInstallStepProps {
     'isEnabled' | 'isLoading' | 'isEnabling' | 'enableWiredStreams'
   >;
   streamsDocLink?: string;
+  // When true, omits the legacy "Copy to clipboard" button below the code
+  // block. The block's built-in top-right copy icon is the sole control.
+  // Defaults to false so V1 panels keep their existing two-control layout.
+  useInlineCopyOnly?: boolean;
 }
 
 const COMMAND_TITLE = i18n.translate(
@@ -64,6 +68,7 @@ export const OtelLogsInstallStep: React.FC<OtelLogsInstallStepProps> = ({
   isManagedOtlpServiceAvailable,
   wiredStreamsStatus,
   streamsDocLink,
+  useInlineCopyOnly = false,
 }) => {
   const { isEnabled, isLoading, isEnabling, enableWiredStreams } = wiredStreamsStatus;
   const useWiredStreams = ingestionMode === 'wired';
@@ -121,22 +126,24 @@ export const OtelLogsInstallStep: React.FC<OtelLogsInstallStepProps> = ({
               </EuiCodeBlock>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiCopy textToCopy={command}>
-              {(copy) => (
-                <EuiButton
-                  data-test-subj="observabilityOnboardingOtelLogsPanelButton"
-                  iconType="copy"
-                  onClick={copy}
-                >
-                  {i18n.translate(
-                    'xpack.observability_onboarding.installOtelCollector.configStep.copyCommand',
-                    { defaultMessage: 'Copy to clipboard' }
-                  )}
-                </EuiButton>
-              )}
-            </EuiCopy>
-          </EuiFlexItem>
+          {!useInlineCopyOnly && (
+            <EuiFlexItem grow={false}>
+              <EuiCopy textToCopy={command}>
+                {(copy) => (
+                  <EuiButton
+                    data-test-subj="observabilityOnboardingOtelLogsPanelButton"
+                    iconType="copy"
+                    onClick={copy}
+                  >
+                    {i18n.translate(
+                      'xpack.observability_onboarding.installOtelCollector.configStep.copyCommand',
+                      { defaultMessage: 'Copy to clipboard' }
+                    )}
+                  </EuiButton>
+                )}
+              </EuiCopy>
+            </EuiFlexItem>
+          )}
         </>
       )}
     </EuiFlexGroup>
