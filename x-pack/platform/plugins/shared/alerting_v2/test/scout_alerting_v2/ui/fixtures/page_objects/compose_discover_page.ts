@@ -28,11 +28,11 @@ export class ComposeDiscoverPage {
    * in tracking (alert kind) mode, where base + breach blocks are shown separately.
    */
   public readonly editQueriesButton: Locator;
+  public readonly sandboxCloseButton: Locator;
   public readonly sandboxSearchButton: Locator;
   public readonly sandboxApplyButton: Locator;
   public readonly sandboxTimeFieldSelector: Locator;
   public readonly ruleNameInput: Locator;
-  public readonly createRuleSplitButton: Locator;
   public readonly createRulePopoverButton: Locator;
   public readonly createEsqlRuleButton: Locator;
   /** "Create ES|QL rule" card in the empty-state panel (shown when no rules exist). */
@@ -51,11 +51,11 @@ export class ComposeDiscoverPage {
     this.openEditorButton = this.page.testSubj.locator('composeDiscoverOpenEditor');
     this.editQueryButton = this.page.testSubj.locator('composeDiscoverEditQuery');
     this.editQueriesButton = this.page.testSubj.locator('composeDiscoverEditQueries');
+    this.sandboxCloseButton = this.page.testSubj.locator('querySandboxClose');
     this.sandboxSearchButton = this.page.testSubj.locator('composeDiscoverRunQuery');
     this.sandboxApplyButton = this.page.testSubj.locator('querySandboxApply');
     this.sandboxTimeFieldSelector = this.page.testSubj.locator('composeDiscoverTimeField');
     this.ruleNameInput = this.flyout.locator('[data-test-subj="ruleNameInput"]');
-    this.createRuleSplitButton = this.page.testSubj.locator('createRuleSplitButton');
     this.createRulePopoverButton = this.page.testSubj.locator('createRulePopoverButton');
     this.createEsqlRuleButton = this.page.testSubj.locator('createEsqlRuleButton');
     this.createEsqlRuleCard = this.page.testSubj.locator('createEsqlRuleCard');
@@ -67,8 +67,10 @@ export class ComposeDiscoverPage {
   }
 
   async openCreateFlyout() {
-    const splitButtonVisible = await this.createRuleSplitButton.isVisible();
-    if (splitButtonVisible) {
+    // Wait until either entry point is rendered — popover button (table state)
+    // or empty-state card — before deciding which path to take.
+    await this.createRulePopoverButton.or(this.createEsqlRuleCard).waitFor({ state: 'visible' });
+    if (await this.createRulePopoverButton.isVisible()) {
       await this.createRulePopoverButton.click();
       await this.createEsqlRuleButton.click();
     } else {

@@ -114,7 +114,11 @@ test.describe(
 
       await test.step('seed a rule via API', async () => {
         const rule = await apiServices.alertingV2.rules.create(
-          buildCreateRuleData({ metadata: { name: EDIT_RULE_NAME } })
+          buildCreateRuleData({
+            kind: 'signal',
+            state_transition: undefined,
+            metadata: { name: EDIT_RULE_NAME },
+          })
         );
         ruleId = rule.id;
       });
@@ -164,10 +168,7 @@ test.describe(
       });
 
       await test.step('close sandbox without applying', async () => {
-        const sandboxCloseButton = page.locator(
-          '[aria-labelledby="composeDiscoverChildTitle"] [aria-label="Close"]'
-        );
-        await sandboxCloseButton.click();
+        await pageObjects.composeDiscover.sandboxCloseButton.click();
         await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeHidden();
       });
 
@@ -231,7 +232,6 @@ test.describe(
     });
 
     test('sandbox: Apply commits query, closing without Apply discards changes', async ({
-      page,
       pageObjects,
     }) => {
       await test.step('open create flyout (sandbox opens automatically)', async () => {
@@ -241,10 +241,7 @@ test.describe(
 
       await test.step('type query and close sandbox without applying', async () => {
         await pageObjects.composeDiscover.setSandboxQuery(TEST_QUERY);
-        const sandboxCloseButton = page.locator(
-          '[aria-labelledby="composeDiscoverChildTitle"] [aria-label="Close"]'
-        );
-        await sandboxCloseButton.click();
+        await pageObjects.composeDiscover.sandboxCloseButton.click();
         await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeHidden();
       });
 
