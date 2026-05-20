@@ -1079,6 +1079,156 @@ describe('isSingleInputAndStreams behavior', () => {
   });
 });
 
+describe('condition field behavior', () => {
+  // A dummy second template forces isSinglePolicyTemplate=false
+  const supportsAgentlessPackageInfo: PackageInfo = {
+    name: 'supports_agentless',
+    title: 'Supports Agentless',
+    version: '1.0.0',
+    release: 'ga',
+    description: 'Package supporting both deployment modes',
+    format_version: '',
+    owner: { github: '' },
+    assets: {} as any,
+    policy_templates: [
+      {
+        name: 'supports_agentless',
+        title: 'Supports agentless template',
+        description: 'Template that supports both default and agentless',
+        deployment_modes: {
+          default: { enabled: true },
+          agentless: { enabled: true },
+        },
+        inputs: [
+          {
+            type: 'httpjson',
+            title: 'Collect via HTTP',
+            description: 'Collect data via HTTP JSON',
+          },
+        ],
+        multiple: true,
+      },
+      {
+        name: 'unused',
+        title: 'Unused template',
+        description: 'Never shown',
+        deployment_modes: { default: { enabled: false }, agentless: { enabled: false } },
+        inputs: [],
+        multiple: false,
+      },
+    ],
+    data_streams: [
+      {
+        type: 'logs',
+        dataset: 'supports_agentless.events',
+        title: 'Supports agentless events',
+        release: 'ga',
+        ingest_pipeline: 'default',
+        streams: [
+          {
+            input: 'httpjson',
+            vars: [],
+            template_path: 'stream.yml.hbs',
+            title: 'Events',
+            description: 'Collect events',
+            enabled: true,
+          },
+        ],
+        package: 'supports_agentless',
+        path: 'events',
+      },
+    ],
+    latestVersion: '1.0.0',
+    keepPoliciesUpToDate: false,
+    status: 'not_installed',
+  };
+
+  const supportsAgentlessPolicy: NewPackagePolicy = {
+    name: 'supports-agentless-1',
+    description: '',
+    namespace: 'default',
+    policy_id: '',
+    policy_ids: [''],
+    enabled: true,
+    supports_agentless: true,
+    inputs: [
+      {
+        type: 'httpjson',
+        policy_template: 'supports_agentless',
+        enabled: true,
+        streams: [
+          {
+            enabled: true,
+            data_stream: { type: 'logs', dataset: 'supports_agentless.events' },
+            vars: {},
+          },
+        ],
+      },
+    ],
+  };
+
+  let testRenderer: TestRenderer;
+  let renderResult: ReturnType<typeof testRenderer.render>;
+  const mockUpdatePackagePolicy = jest.fn();
+
+  beforeEach(() => {
+    testRenderer = createFleetTestRendererMock();
+    mockUpdatePackagePolicy.mockClear();
+  });
+
+  const renderSupportsAgentless = (isAgentlessSelected = false) => {
+    const validationResults = validatePackagePolicy(
+      supportsAgentlessPolicy,
+      supportsAgentlessPackageInfo,
+      parse
+    );
+    renderResult = testRenderer.render(
+      <StepConfigurePackagePolicy
+        packageInfo={supportsAgentlessPackageInfo}
+        packagePolicy={supportsAgentlessPolicy}
+        updatePackagePolicy={mockUpdatePackagePolicy}
+        validationResults={validationResults}
+        submitAttempted={false}
+        isAgentlessSelected={isAgentlessSelected}
+      />
+    );
+  };
+
+  it('shows condition field in Advanced options when not agentless', async () => {
+    renderSupportsAgentless(false);
+
+    // Expand the input panel body via the "Change defaults" button
+    await waitFor(() => {
+      expect(renderResult.getByText('Change defaults')).toBeInTheDocument();
+    });
+    fireEvent.click(renderResult.getByText('Change defaults'));
+
+    await waitFor(() => {
+      expect(renderResult.getByText('Advanced options')).toBeInTheDocument();
+    });
+    fireEvent.click(renderResult.getByText('Advanced options'));
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('packagePolicyInputConditionInput')).toBeInTheDocument();
+    });
+  });
+
+  it('hides condition field when agentless is selected', async () => {
+    renderSupportsAgentless(true);
+
+    await waitFor(() => {
+      expect(renderResult.getByText('Change defaults')).toBeInTheDocument();
+    });
+    fireEvent.click(renderResult.getByText('Change defaults'));
+
+    await waitFor(() => {
+      expect(renderResult.queryByText('Advanced options')).not.toBeInTheDocument();
+    });
+    expect(renderResult.queryByTestId('packagePolicyInputConditionInput')).not.toBeInTheDocument();
+    expect(renderResult.queryByTestId('packagePolicyStreamConditionInput')).not.toBeInTheDocument();
+  });
+});
+
 describe('isInputCompatibleWithVarGroupSelections', () => {
   // Basic Compatibility Tests
   it('should return true when input has no hide_in_var_group_options', () => {

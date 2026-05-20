@@ -438,6 +438,109 @@ describe('PackagePolicyInputStreamConfig', () => {
     });
   });
 
+  describe('condition field', () => {
+    const minimalInputStream: RegistryStreamWithDataStream = {
+      input: 'httpjson',
+      title: 'Collect logs',
+      template_path: 'stream.yml.hbs',
+      vars: [],
+      description: 'Minimal stream for condition tests',
+      data_stream: {
+        title: 'Test Logs',
+        release: 'ga',
+        type: 'logs',
+        package: 'test_package',
+        dataset: 'test_package.test',
+        path: 'test',
+        elasticsearch: {},
+        ingest_pipeline: 'default',
+        streams: [],
+      },
+    };
+
+    const minimalPolicyInputStream: NewPackagePolicyInputStream = {
+      id: 'stream-cond',
+      enabled: true,
+      data_stream: { type: 'logs', dataset: 'test_package.test' },
+      vars: {},
+    };
+
+    const renderCondition = (
+      streamOverrides: Partial<RegistryStreamWithDataStream> = {},
+      policyOverrides: Partial<NewPackagePolicyInputStream> = {},
+      propOverrides: Record<string, unknown> = {}
+    ) => {
+      renderResult = testRenderer.render(
+        <PackagePolicyInputStreamConfig
+          packageInputStream={{ ...minimalInputStream, ...streamOverrides }}
+          packageInfo={mockPackageInfo}
+          packagePolicyInputStream={{ ...minimalPolicyInputStream, ...policyOverrides }}
+          updatePackagePolicyInputStream={mockUpdatePackagePolicyInputStream}
+          inputStreamValidationResults={{ vars: {} }}
+          forceShowErrors={false}
+          hasStreamToggle={true}
+          {...propOverrides}
+        />
+      );
+    };
+
+    it('shows condition field in advanced options for enabled non-agentless non-otelcol stream', async () => {
+      renderCondition();
+      fireEvent.click(renderResult.getByText('Advanced options'));
+      await waitFor(() => {
+        expect(renderResult.getByTestId('packagePolicyStreamConditionInput')).toBeInTheDocument();
+      });
+    });
+
+    it('hides condition field for agentless stream', async () => {
+      renderCondition({}, {}, { isAgentless: true });
+      // No advanced toggle rendered — condition field never in DOM
+      expect(
+        renderResult.queryByTestId('packagePolicyStreamConditionInput')
+      ).not.toBeInTheDocument();
+    });
+
+    it('hides condition field for otelcol stream', async () => {
+      renderCondition({ input: 'otelcol' });
+      expect(
+        renderResult.queryByTestId('packagePolicyStreamConditionInput')
+      ).not.toBeInTheDocument();
+    });
+
+    it('hides condition field when stream is disabled', async () => {
+      renderCondition({}, { enabled: false });
+      expect(
+        renderResult.queryByTestId('packagePolicyStreamConditionInput')
+      ).not.toBeInTheDocument();
+    });
+
+    it('calls updatePackagePolicyInputStream with condition value on change', async () => {
+      renderCondition();
+      fireEvent.click(renderResult.getByText('Advanced options'));
+      await waitFor(() => {
+        expect(renderResult.getByTestId('packagePolicyStreamConditionInput')).toBeInTheDocument();
+      });
+      fireEvent.change(renderResult.getByTestId('packagePolicyStreamConditionInput'), {
+        target: { value: "${host.os.type} == 'linux'" },
+      });
+      expect(mockUpdatePackagePolicyInputStream).toHaveBeenCalledWith({
+        condition: "${host.os.type} == 'linux'",
+      });
+    });
+
+    it('calls updatePackagePolicyInputStream with undefined when field is cleared', async () => {
+      renderCondition({}, { condition: "${host.os.type} == 'linux'" });
+      fireEvent.click(renderResult.getByText('Advanced options'));
+      await waitFor(() => {
+        expect(renderResult.getByTestId('packagePolicyStreamConditionInput')).toBeInTheDocument();
+      });
+      fireEvent.change(renderResult.getByTestId('packagePolicyStreamConditionInput'), {
+        target: { value: '' },
+      });
+      expect(mockUpdatePackagePolicyInputStream).toHaveBeenCalledWith({ condition: undefined });
+    });
+  });
+
   describe('dynamic_signal_types behavior', () => {
     // Data Stream Type UI applies only to `packageInfo.type === 'input'` (see dev_docs/input_packages.md).
     // Input packages are documented with a single policy template; composable multi-template behavior
