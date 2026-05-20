@@ -60,8 +60,7 @@ export interface ComposeDiscoverState {
 
 export type ComposeDiscoverAction =
   | { type: 'SET_RECOVERY_TYPE'; recoveryType: RecoveryType }
-  | { type: 'TRACKING_ENABLED' }
-  | { type: 'TRACKING_DISABLED' }
+  | { type: 'KIND_CHANGE'; kind: 'signal' | 'alert' }
   | { type: 'SET_TAB'; tab: QueryTab }
   | { type: 'SET_STEP'; step: number }
   | { type: 'GO_NEXT'; isAlert: boolean }

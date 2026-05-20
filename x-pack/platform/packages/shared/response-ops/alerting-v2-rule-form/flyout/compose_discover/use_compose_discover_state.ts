@@ -79,10 +79,10 @@ export function reducer(
           ? { childOpen: true, activeTab: 'recovery' as const }
           : {}),
       };
-    case 'TRACKING_ENABLED':
-      return { ...state, step: 0, childOpen: true, activeTab: 'alert' };
-    case 'TRACKING_DISABLED':
-      return { ...state, recoveryType: 'default', step: 0, activeTab: 'alert' };
+    case 'KIND_CHANGE':
+      return action.kind === 'alert'
+        ? { ...state, step: 0, childOpen: true, activeTab: 'alert' }
+        : { ...state, recoveryType: 'default', step: 0, activeTab: 'alert' };
     case 'SET_TAB':
       return { ...state, activeTab: action.tab };
     case 'SET_STEP':

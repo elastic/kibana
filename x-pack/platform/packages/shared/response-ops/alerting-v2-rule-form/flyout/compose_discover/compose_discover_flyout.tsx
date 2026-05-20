@@ -242,16 +242,15 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
         const composed: RuleQuery = { format: 'composed', base, blocks: { breach: alertBlock } };
         setSandboxQuery(composed);
         methods.setValue('query', composed);
-        dispatch({ type: 'TRACKING_ENABLED' });
       } else {
         // Assemble from committed query — discards any unapplied sandbox edits cleanly.
         const assembled = getBreachQuery(methods.getValues('query'));
         const standalone: RuleQuery = { format: 'standalone', breach: assembled };
         setSandboxQuery(standalone);
         methods.setValue('query', standalone);
-        dispatch({ type: 'TRACKING_DISABLED' });
       }
       methods.setValue('kind', kind);
+      dispatch({ type: 'KIND_CHANGE', kind });
     },
     [methods, dispatch]
   );

@@ -65,24 +65,18 @@ describe('createInitialState', () => {
 // ── reducer ───────────────────────────────────────────────────────────────────
 
 describe('reducer', () => {
-  describe('TRACKING_ENABLED', () => {
-    it('opens child, resets to step 0', () => {
+  describe('KIND_CHANGE', () => {
+    it('kind=alert opens child and resets to step 0', () => {
       const state = createState({ step: 2, childOpen: false });
-      const next = reducer(state, { type: 'TRACKING_ENABLED' });
+      const next = reducer(state, { type: 'KIND_CHANGE', kind: 'alert' });
 
       expect(next.childOpen).toBe(true);
       expect(next.step).toBe(0);
     });
-  });
 
-  describe('TRACKING_DISABLED', () => {
-    it('keeps child open, resets step and recoveryType', () => {
-      const state = createState({
-        step: 1,
-        childOpen: true,
-        recoveryType: 'custom',
-      });
-      const next = reducer(state, { type: 'TRACKING_DISABLED' });
+    it('kind=signal keeps child open, resets step and recoveryType', () => {
+      const state = createState({ step: 1, childOpen: true, recoveryType: 'custom' });
+      const next = reducer(state, { type: 'KIND_CHANGE', kind: 'signal' });
 
       expect(next.childOpen).toBe(true);
       expect(next.step).toBe(0);
