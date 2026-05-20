@@ -72,13 +72,16 @@ const throttleSchema = z.object({
     ),
 });
 
-const PER_EPISODE_STRATEGIES = new Set<string>([
+export const PER_EPISODE_STRATEGIES = new Set<string>([
   'on_status_change',
   'per_status_interval',
   'every_time',
 ]);
-const AGGREGATE_STRATEGIES = new Set<string>(['time_interval', 'every_time']);
-const STRATEGIES_REQUIRING_INTERVAL = new Set<string>(['per_status_interval', 'time_interval']);
+export const AGGREGATE_STRATEGIES = new Set<string>(['time_interval', 'every_time']);
+export const STRATEGIES_REQUIRING_INTERVAL = new Set<string>([
+  'per_status_interval',
+  'time_interval',
+]);
 
 export const needsInterval = (strategy: string | undefined): boolean =>
   strategy != null && STRATEGIES_REQUIRING_INTERVAL.has(strategy);
