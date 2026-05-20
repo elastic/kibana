@@ -99,69 +99,24 @@ describe('SecuritySideNav', () => {
     useKibana().services.serverless = undefined;
   });
 
-  describe('with securityClassicNavExternalLinks disabled', () => {
-    it('should render main items without external links', () => {
-      mockUseNavLinks.mockReturnValue([alertsNavLink]);
-      renderNav();
-      expect(mockSolutionSideNav).toHaveBeenCalledWith(
-        expect.objectContaining({
-          selectedId: SecurityPageName.alerts,
-          items: [
-            {
-              id: SecurityPageName.alerts,
-              label: 'alerts',
-              href: '/alerts',
-              position: 'top',
-            },
-          ],
-          categories: getNavCategories(false, false, false),
-          tracker: track,
-        })
-      );
-    });
-  });
-
-  describe('with securityClassicNavExternalLinks enabled', () => {
-    it('should render main items with external links', () => {
-      mockUseIsExperimentalFeatureEnabled.mockImplementation((feature: string) => {
-        if (feature === 'securityClassicNavExternalLinks') {
-          return true;
-        }
-        return false;
-      });
-      mockUseNavLinks.mockReturnValue([alertsNavLink]);
-      renderNav();
-      expect(mockSolutionSideNav).toHaveBeenCalledWith(
-        expect.objectContaining({
-          selectedId: SecurityPageName.alerts,
-          items: [
-            expect.objectContaining({
-              id: SecurityPageName.externalLinkAgentBuilder,
-              label: 'Agents',
-              position: 'top',
-            }),
-            expect.objectContaining({
-              id: SecurityPageName.externalLinkDiscover,
-              label: 'Discover',
-              position: 'top',
-            }),
-            expect.objectContaining({
-              id: SecurityPageName.externalLinkWorkflows,
-              label: 'Workflows',
-              position: 'top',
-            }),
-            {
-              id: SecurityPageName.alerts,
-              label: 'alerts',
-              href: '/alerts',
-              position: 'top',
-            },
-          ],
-          categories: getNavCategories(false, false, true),
-          tracker: track,
-        })
-      );
-    });
+  it('should render main items', () => {
+    mockUseNavLinks.mockReturnValue([alertsNavLink]);
+    renderNav();
+    expect(mockSolutionSideNav).toHaveBeenCalledWith(
+      expect.objectContaining({
+        selectedId: SecurityPageName.alerts,
+        items: [
+          {
+            id: SecurityPageName.alerts,
+            label: 'alerts',
+            href: '/alerts',
+            position: 'top',
+          },
+        ],
+        categories: getNavCategories(false, false, false),
+        tracker: track,
+      })
+    );
   });
 
   it('should render the loader if items are still empty', () => {
@@ -177,17 +132,6 @@ describe('SecuritySideNav', () => {
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
         selectedId: SecurityPageName.administration,
-        items: expect.arrayContaining([
-          expect.objectContaining({
-            id: SecurityPageName.externalLinkAgentBuilder,
-          }),
-          expect.objectContaining({
-            id: SecurityPageName.externalLinkDiscover,
-          }),
-          expect.objectContaining({
-            id: SecurityPageName.externalLinkWorkflows,
-          }),
-        ]),
       })
     );
   });
@@ -198,15 +142,6 @@ describe('SecuritySideNav', () => {
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
         items: expect.arrayContaining([
-          expect.objectContaining({
-            id: SecurityPageName.externalLinkAgentBuilder,
-          }),
-          expect.objectContaining({
-            id: SecurityPageName.externalLinkDiscover,
-          }),
-          expect.objectContaining({
-            id: SecurityPageName.externalLinkWorkflows,
-          }),
           expect.objectContaining({
             id: SecurityPageName.administration,
             label: 'Settings',
@@ -234,15 +169,6 @@ describe('SecuritySideNav', () => {
       expect.objectContaining({
         items: expect.arrayContaining([
           expect.objectContaining({
-            id: SecurityPageName.externalLinkAgentBuilder,
-          }),
-          expect.objectContaining({
-            id: SecurityPageName.externalLinkDiscover,
-          }),
-          expect.objectContaining({
-            id: SecurityPageName.externalLinkWorkflows,
-          }),
-          expect.objectContaining({
             id: SecurityPageName.administration,
           }),
         ]),
@@ -259,17 +185,66 @@ describe('SecuritySideNav', () => {
       expect.objectContaining({
         items: expect.arrayContaining([
           expect.objectContaining({
-            id: SecurityPageName.externalLinkAgentBuilder,
-          }),
-          expect.objectContaining({
-            id: SecurityPageName.externalLinkDiscover,
-          }),
-          expect.objectContaining({
-            id: SecurityPageName.externalLinkWorkflows,
-          }),
-          expect.objectContaining({
             id: SecurityPageName.launchpad,
             label: 'Launchpad',
+            position: 'top',
+          }),
+        ]),
+      })
+    );
+  });
+
+  it('should place administration item in footer', () => {
+    mockUseNavLinks.mockReturnValue([alertsNavLink, settingsNavLink]);
+    renderNav();
+    expect(mockSolutionSideNav).toHaveBeenCalledWith(
+      expect.objectContaining({
+        items: expect.arrayContaining([
+          expect.objectContaining({
+            id: SecurityPageName.administration,
+            position: 'bottom',
+          }),
+        ]),
+      })
+    );
+  });
+
+  it('should not include administration item in body', () => {
+    mockUseNavLinks.mockReturnValue([settingsNavLink, alertsNavLink]);
+    renderNav();
+    const calls = mockSolutionSideNav.mock.calls;
+    const lastCall = calls[calls.length - 1];
+    const items = lastCall[0].items;
+    const administrationItemsInBody = items.filter(
+      (item) => item.id === SecurityPageName.administration && item.position !== 'bottom'
+    );
+    expect(administrationItemsInBody).toHaveLength(0);
+  });
+
+  it('should select launchpad when landing page is selected', () => {
+    mockUseRouteSpy.mockReturnValueOnce([{ pageName: SecurityPageName.landing }]);
+    const landingNavLink: NavigationLink = {
+      id: SecurityPageName.landing,
+      title: 'Get started',
+      description: 'Get started description',
+    };
+    mockUseNavLinks.mockReturnValue([alertsNavLink, landingNavLink, settingsNavLink]);
+    renderNav();
+    expect(mockSolutionSideNav).toHaveBeenCalledWith(
+      expect.objectContaining({
+        selectedId: 'securityGroup:launchpad',
+      })
+    );
+  });
+
+  it('should maintain top position for most items', () => {
+    mockUseNavLinks.mockReturnValue([alertsNavLink]);
+    renderNav();
+    expect(mockSolutionSideNav).toHaveBeenCalledWith(
+      expect.objectContaining({
+        items: expect.arrayContaining([
+          expect.objectContaining({
+            id: SecurityPageName.alerts,
             position: 'top',
           }),
         ]),
@@ -392,61 +367,83 @@ describe('SecuritySideNav', () => {
     });
   });
 
-  it('should place administration item in footer', () => {
-    mockUseNavLinks.mockReturnValue([alertsNavLink, settingsNavLink]);
-    renderNav();
-    expect(mockSolutionSideNav).toHaveBeenCalledWith(
-      expect.objectContaining({
-        items: expect.arrayContaining([
-          expect.objectContaining({
-            id: SecurityPageName.administration,
-            position: 'bottom',
-          }),
-        ]),
-      })
-    );
-  });
+  describe('with securityClassicNavExternalLinks enabled', () => {
+    beforeEach(() => {
+      mockUseIsExperimentalFeatureEnabled.mockImplementation(
+        (feature: string) => feature === 'securityClassicNavExternalLinks'
+      );
+    });
 
-  it('should not include administration item in body', () => {
-    mockUseNavLinks.mockReturnValue([settingsNavLink, alertsNavLink]);
-    renderNav();
-    const calls = mockSolutionSideNav.mock.calls;
-    const lastCall = calls[calls.length - 1];
-    const items = lastCall[0].items;
-    const administrationItemsInBody = items.filter(
-      (item) => item.id === SecurityPageName.administration && item.position !== 'bottom'
-    );
-    expect(administrationItemsInBody).toHaveLength(0);
-  });
+    it('should render main items with external links', () => {
+      mockUseNavLinks.mockReturnValue([alertsNavLink]);
+      renderNav();
+      expect(mockSolutionSideNav).toHaveBeenCalledWith(
+        expect.objectContaining({
+          selectedId: SecurityPageName.alerts,
+          items: [
+            expect.objectContaining({
+              id: SecurityPageName.externalLinkAgentBuilder,
+            }),
+            expect.objectContaining({
+              id: SecurityPageName.externalLinkDiscover,
+            }),
+            expect.objectContaining({
+              id: SecurityPageName.externalLinkWorkflows,
+              label: 'Workflows',
+              position: 'top',
+            }),
+            expect.objectContaining({
+              href: '/alerts',
+              id: SecurityPageName.alerts,
+              label: 'alerts',
+              position: 'top',
+            }),
+          ],
+          categories: getNavCategories(false, false, true),
+          tracker: track,
+        })
+      );
+    });
 
-  it('should select launchpad when landing page is selected', () => {
-    mockUseRouteSpy.mockReturnValue([{ pageName: SecurityPageName.landing }]);
-    const landingNavLink: NavigationLink = {
-      id: SecurityPageName.landing,
-      title: 'Get started',
-      description: 'Get started description',
-    };
-    mockUseNavLinks.mockReturnValue([landingNavLink, alertsNavLink, settingsNavLink]);
-    renderNav();
-    expect(mockSolutionSideNav).toHaveBeenCalledWith(
-      expect.objectContaining({
-        selectedId: 'securityGroup:launchpad',
-      })
-    );
-  });
+    it('should build external links using `getUrlForApp` so basePath and space are applied', () => {
+      (useKibana().services.application.getUrlForApp as jest.Mock).mockImplementation(
+        (appId: string, options?: { path?: string }) =>
+          `/test-basepath/s/my-space/app/${appId}${options?.path ?? ''}`
+      );
+      mockUseNavLinks.mockReturnValue([alertsNavLink]);
+      renderNav();
 
-  it('should maintain top position for most items', () => {
-    mockUseNavLinks.mockReturnValue([alertsNavLink]);
-    renderNav();
-    expect(mockSolutionSideNav).toHaveBeenCalledWith(
-      expect.objectContaining({
-        items: expect.arrayContaining([
-          expect.objectContaining({
-            id: SecurityPageName.alerts,
-            position: 'top',
-          }),
-        ]),
-      })
-    );
+      expect(useKibana().services.application.getUrlForApp as jest.Mock).toHaveBeenCalledWith(
+        'agent_builder',
+        {
+          path: '/agents',
+        }
+      );
+      expect(useKibana().services.application.getUrlForApp as jest.Mock).toHaveBeenCalledWith(
+        'discover'
+      );
+      expect(useKibana().services.application.getUrlForApp as jest.Mock).toHaveBeenCalledWith(
+        'workflows'
+      );
+
+      expect(mockSolutionSideNav).toHaveBeenCalledWith(
+        expect.objectContaining({
+          items: expect.arrayContaining([
+            expect.objectContaining({
+              id: SecurityPageName.externalLinkAgentBuilder,
+              href: '/test-basepath/s/my-space/app/agent_builder/agents',
+            }),
+            expect.objectContaining({
+              id: SecurityPageName.externalLinkDiscover,
+              href: '/test-basepath/s/my-space/app/discover',
+            }),
+            expect.objectContaining({
+              id: SecurityPageName.externalLinkWorkflows,
+              href: '/test-basepath/s/my-space/app/workflows',
+            }),
+          ]),
+        })
+      );
+    });
   });
 });
