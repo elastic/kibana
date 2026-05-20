@@ -7,4 +7,4 @@ products:
 areas:
 - Search and data
 title: Improve Model Management Elastic Inference and Feature Settings pages
-description: Display badges for the deprecation and end-of-life status of the models
+description: Displays badges for the deprecation and end-of-life status of the models.
