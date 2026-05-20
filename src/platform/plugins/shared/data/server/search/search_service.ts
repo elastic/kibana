@@ -86,7 +86,7 @@ import {
   SQL_SEARCH_STRATEGY,
   ESQL_SEARCH_STRATEGY,
   ESQL_ASYNC_SEARCH_STRATEGY,
-  TypedSearchService,
+  SearchMethodsService,
 } from '../../common/search';
 import { getEsaggs, getEsdsl, getEssql, getEql, getEsql } from './expressions';
 import {
@@ -573,9 +573,15 @@ export class SearchService {
         options: ISearchOptions = {}
       ) => this.search<SearchStrategyRequest, SearchStrategyResponse>(deps, searchRequest, options);
 
+      const searchMethodsService = new SearchMethodsService(search as ISearchGeneric);
+
       return {
         search,
-        typed: new TypedSearchService(search as ISearchGeneric),
+        dsl: (params, options) => searchMethodsService.dsl(params, options),
+        dslPaginated: (params, options) => searchMethodsService.dslPaginated(params, options),
+        esql: (params, options) => searchMethodsService.esql(params, options),
+        eql: (params, options) => searchMethodsService.eql(params, options),
+        sql: (params, options) => searchMethodsService.sql(params, options),
         cancel: this.cancel.bind(this, deps),
         extend: this.extend.bind(this, deps),
         saveSession: searchSessionsClient.save,

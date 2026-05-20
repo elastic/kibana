@@ -11,7 +11,7 @@ import type { UiSettingsCommon } from '@kbn/data-views-plugin/common';
 import { getEsqlFn } from './esql';
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 import type {
-  ITypedSearchService,
+  ISearchMethods,
   IESQLSearchParams,
   IESQLSearchOptions,
   IESQLSearchResult,
@@ -19,7 +19,7 @@ import type {
 import type { KibanaContext } from '..';
 
 interface MockTypedSearchService {
-  searchESQL: jest.Mock<Promise<IESQLSearchResult>, [IESQLSearchParams, IESQLSearchOptions?]>;
+  esql: jest.Mock<Promise<IESQLSearchResult>, [IESQLSearchParams, IESQLSearchOptions?]>;
 }
 
 const mockUiSettings = (): UiSettingsCommon =>
@@ -44,7 +44,7 @@ const getMockSearchService = (
   values: unknown[][] = [['v1']]
 ): MockTypedSearchService => {
   const mockTyped = {
-    searchESQL: jest.fn().mockResolvedValue({
+    esql: jest.fn().mockResolvedValue({
       rawResponse: {
         values,
         columns,
@@ -57,7 +57,7 @@ const getMockSearchService = (
 const createEsqlFn = (mockSearchService: MockTypedSearchService) =>
   getEsqlFn({
     getStartDependencies: async () => ({
-      searchService: mockSearchService as unknown as ITypedSearchService,
+      searchService: mockSearchService as unknown as ISearchMethods,
       uiSettings: mockUiSettings(),
     }),
   });
@@ -98,7 +98,7 @@ describe('getEsqlFn', () => {
         createExecutionContext()
       );
 
-      const params = mockSearchService.searchESQL.mock.calls[0][0];
+      const params = mockSearchService.esql.mock.calls[0][0];
       expect(params.query).toBe('FROM index');
       const filterJson = JSON.stringify(params.filter);
       expect(filterJson).toContain('uniqueFromFilterPill');
@@ -114,7 +114,7 @@ describe('getEsqlFn', () => {
         createExecutionContext()
       );
 
-      const params = mockSearchService.searchESQL.mock.calls[0][0];
+      const params = mockSearchService.esql.mock.calls[0][0];
       expect(params.query).toBe('FROM index');
       const filterJson = JSON.stringify(params.filter);
       expect(filterJson).not.toContain('uniqueFromFilterPill');

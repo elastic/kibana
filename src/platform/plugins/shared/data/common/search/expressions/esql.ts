@@ -11,7 +11,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { esFieldTypeToKibanaFieldType, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import type { estypes } from '@elastic/elasticsearch';
-import type { ITypedSearchService } from '@kbn/search-types';
+import type { ISearchMethods } from '@kbn/search-types';
 import type {
   Datatable,
   DatatableColumn,
@@ -73,7 +73,7 @@ interface EsqlFnArguments {
 }
 
 interface EsqlStartDependencies {
-  searchService: ITypedSearchService;
+  searchService: ISearchMethods;
   uiSettings: UiSettingsCommon;
 }
 
@@ -337,7 +337,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
       };
 
       try {
-        const { rawResponse, requestParams } = await searchService.searchESQL(
+        const { rawResponse, requestParams } = await searchService.esql(
           {
             query: fixedQuery,
             params: params.params,

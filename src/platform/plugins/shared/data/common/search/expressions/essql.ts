@@ -15,7 +15,7 @@ import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-p
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 
 import { zipObject } from 'lodash';
-import type { ITypedSearchService } from '@kbn/search-types';
+import type { ISearchMethods } from '@kbn/search-types';
 import type { SqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { NowProviderPublicContract } from '../../../public';
 import { getEsQueryConfig } from '../../es_query';
@@ -47,7 +47,7 @@ interface EssqlFnArguments {
 
 interface EssqlStartDependencies {
   nowProvider?: NowProviderPublicContract;
-  searchService: ITypedSearchService;
+  searchService: ISearchMethods;
   uiSettings: UiSettingsCommon;
 }
 
@@ -193,7 +193,7 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
       };
 
       try {
-        const { rawResponse, took, requestParams } = await searchService.searchSQL(
+        const { rawResponse, took, requestParams } = await searchService.sql(
           {
             query,
             params: parameter,

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { buildEsQuery } from '@kbn/es-query';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 
-import type { ITypedSearchService } from '@kbn/search-types';
+import type { ISearchMethods } from '@kbn/search-types';
 import type { RequestStatistics } from '@kbn/inspector-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { EsRawResponse } from './es_raw_response';
@@ -39,7 +39,7 @@ export type EsdslExpressionFunctionDefinition = ExpressionFunctionDefinition<
 >;
 
 interface EsdslStartDependencies {
-  searchService: ITypedSearchService;
+  searchService: ISearchMethods;
   uiSettingsClient: UiSettingsCommon;
 }
 
@@ -130,7 +130,7 @@ export const getEsdslFn = ({
       });
 
       try {
-        const { rawResponse, requestParams } = await searchService.searchDSL(
+        const { rawResponse, requestParams } = await searchService.dsl(
           {
             index: args.index,
             size: args.size,

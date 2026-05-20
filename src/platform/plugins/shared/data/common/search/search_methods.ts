@@ -9,7 +9,7 @@
 
 import { lastValueFrom, takeWhile } from 'rxjs';
 import type {
-  ITypedSearchService,
+  ISearchMethods,
   IDSLSearchParams,
   IDSLSearchOptions,
   IDSLSearchResult,
@@ -39,23 +39,20 @@ import type {
 } from '.';
 
 /**
- * TypedSearchService provides strategy-specific search methods with type-safe
+ * SearchMethodsService provides strategy-specific search methods with type-safe
  * parameters, invisible polling, and built-in pagination support.
  *
  * This is a common abstraction that works on both client and server by accepting
  * a generic search function that converts Observable-based searches to Promise-based
  * searches and adds pagination helpers for DSL searches using search_after.
  */
-export class TypedSearchService implements ITypedSearchService {
+export class SearchMethodsService implements ISearchMethods {
   constructor(private readonly search: ISearchGeneric) {}
 
   /**
    * Execute an ES|QL search
    */
-  async searchESQL(
-    params: IESQLSearchParams,
-    options?: IESQLSearchOptions
-  ): Promise<IESQLSearchResult> {
+  async esql(params: IESQLSearchParams, options?: IESQLSearchOptions): Promise<IESQLSearchResult> {
     const request = this.buildESQLRequest(params, options);
     const response = await this.executeSearch(
       request,
@@ -67,10 +64,7 @@ export class TypedSearchService implements ITypedSearchService {
   /**
    * Execute a DSL (Elasticsearch Query DSL) search
    */
-  async searchDSL(
-    params: IDSLSearchParams,
-    options?: IDSLSearchOptions
-  ): Promise<IDSLSearchResult> {
+  async dsl(params: IDSLSearchParams, options?: IDSLSearchOptions): Promise<IDSLSearchResult> {
     const request = this.buildDSLRequest(params, options);
     const response = await this.executeSearch(request, this.mapDSLOptions(options, params));
 
@@ -83,7 +77,7 @@ export class TypedSearchService implements ITypedSearchService {
   /**
    * Execute a paginated DSL (Elasticsearch Query DSL) search with pagination helpers
    */
-  async searchDSLPaginated(
+  async dslPaginated(
     params: IDSLSearchParams,
     options?: IDSLSearchOptions
   ): Promise<IDSLPaginatedSearchResult> {
@@ -100,10 +94,7 @@ export class TypedSearchService implements ITypedSearchService {
   /**
    * Execute an EQL (Event Query Language) search
    */
-  async searchEQL(
-    params: IEQLSearchParams,
-    options?: IEQLSearchOptions
-  ): Promise<IEQLSearchResult> {
+  async eql(params: IEQLSearchParams, options?: IEQLSearchOptions): Promise<IEQLSearchResult> {
     const request = this.buildEQLRequest(params, options);
     const response = await this.executeSearch(
       request,
@@ -115,10 +106,7 @@ export class TypedSearchService implements ITypedSearchService {
   /**
    * Execute a SQL search
    */
-  async searchSQL(
-    params: ISQLSearchParams,
-    options?: ISQLSearchOptions
-  ): Promise<ISQLSearchResult> {
+  async sql(params: ISQLSearchParams, options?: ISQLSearchOptions): Promise<ISQLSearchResult> {
     const request = this.buildSQLRequest(params, options);
     const response = await this.executeSearch(
       request,

@@ -8,17 +8,17 @@
  */
 
 import { of } from 'rxjs';
-import { TypedSearchService } from './typed_search_service';
+import { SearchMethodsService } from './search_methods';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { AbstractDataView } from '@kbn/data-views-plugin/common';
 
-describe('TypedSearchService', () => {
+describe('SearchMethodsService', () => {
   let mockSearch: jest.MockedFunction<ISearchGeneric>;
-  let service: TypedSearchService;
+  let service: SearchMethodsService;
 
   beforeEach(() => {
     mockSearch = jest.fn();
-    service = new TypedSearchService(mockSearch);
+    service = new SearchMethodsService(mockSearch);
   });
 
   const createMockResponse = (rawResponse: object, isRunning = false) => {
@@ -28,12 +28,12 @@ describe('TypedSearchService', () => {
     });
   };
 
-  describe('searchESQL', () => {
+  describe('esql', () => {
     it('executes with correct strategy', async () => {
       const mockResponse = { columns: [], values: [] };
       mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
-      await service.searchESQL({ query: 'FROM logs' });
+      await service.esql({ query: 'FROM logs' });
 
       expect(mockSearch).toHaveBeenCalledWith(
         expect.anything(),
@@ -55,7 +55,7 @@ describe('TypedSearchService', () => {
         locale: 'en-US',
       };
 
-      await service.searchESQL(params);
+      await service.esql(params);
 
       expect(mockSearch).toHaveBeenCalledWith(
         {
@@ -85,7 +85,7 @@ describe('TypedSearchService', () => {
         projectRouting: 'test-project',
       };
 
-      await service.searchESQL({ query: 'FROM logs' }, options);
+      await service.esql({ query: 'FROM logs' }, options);
 
       expect(mockSearch).toHaveBeenCalledWith(
         expect.anything(),
@@ -102,18 +102,18 @@ describe('TypedSearchService', () => {
       const mockResponse = { columns: [], values: [] };
       mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
-      const result = await service.searchESQL({ query: 'FROM logs' });
+      const result = await service.esql({ query: 'FROM logs' });
 
       expect(result).toEqual({ rawResponse: mockResponse });
     });
   });
 
-  describe('searchDSL', () => {
+  describe('dsl', () => {
     it('executes with correct strategy', async () => {
       const mockResponse = { hits: { hits: [], total: 0 } };
       mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
-      await service.searchDSL({
+      await service.dsl({
         index: 'logs-*',
         query: { match_all: {} },
       });
@@ -142,7 +142,7 @@ describe('TypedSearchService', () => {
         highlight: { fields: { message: {} } },
       };
 
-      await service.searchDSL(params);
+      await service.dsl(params);
 
       expect(mockSearch).toHaveBeenCalledWith(
         {
@@ -173,7 +173,7 @@ describe('TypedSearchService', () => {
         getIndexPattern: () => 'logs-*',
       } as AbstractDataView;
 
-      await service.searchDSL({
+      await service.dsl({
         index: mockDataView,
         query: { match_all: {} },
       });
@@ -191,7 +191,7 @@ describe('TypedSearchService', () => {
     });
   });
 
-  describe('searchDSLPaginated', () => {
+  describe('dslPaginated', () => {
     it('returns pagination object', async () => {
       const mockResponse = {
         hits: {
@@ -204,7 +204,7 @@ describe('TypedSearchService', () => {
       };
       mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
-      const result = await service.searchDSLPaginated({
+      const result = await service.dslPaginated({
         index: 'logs-*',
         query: { match_all: {} },
         sort: [{ timestamp: 'desc' }],
@@ -228,7 +228,7 @@ describe('TypedSearchService', () => {
       };
       mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
-      const result = await service.searchDSLPaginated({
+      const result = await service.dslPaginated({
         index: 'logs-*',
         query: { match_all: {} },
         sort: [{ timestamp: 'desc' }],
@@ -249,7 +249,7 @@ describe('TypedSearchService', () => {
       };
       mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
-      const result = await service.searchDSLPaginated({
+      const result = await service.dslPaginated({
         index: 'logs-*',
         query: { match_all: {} },
         sort: [{ timestamp: 'desc' }],
@@ -270,7 +270,7 @@ describe('TypedSearchService', () => {
       };
       mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
-      const result = await service.searchDSLPaginated({
+      const result = await service.dslPaginated({
         index: 'logs-*',
         query: { match_all: {} },
       });
@@ -303,7 +303,7 @@ describe('TypedSearchService', () => {
         .mockReturnValueOnce(createMockResponse(firstPageResponse))
         .mockReturnValueOnce(createMockResponse(secondPageResponse));
 
-      const result = await service.searchDSLPaginated({
+      const result = await service.dslPaginated({
         index: 'logs-*',
         query: { match_all: {} },
         sort: [{ timestamp: 'desc' }],
@@ -337,7 +337,7 @@ describe('TypedSearchService', () => {
       };
       mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
-      const result = await service.searchDSLPaginated({
+      const result = await service.dslPaginated({
         index: 'logs-*',
         query: { match_all: {} },
         sort: [{ timestamp: 'desc' }],
@@ -379,7 +379,7 @@ describe('TypedSearchService', () => {
         .mockReturnValueOnce(createMockResponse(page2))
         .mockReturnValueOnce(createMockResponse(page3));
 
-      const result = await service.searchDSLPaginated({
+      const result = await service.dslPaginated({
         index: 'logs-*',
         query: { match_all: {} },
         sort: [{ timestamp: 'desc' }],
@@ -406,7 +406,7 @@ describe('TypedSearchService', () => {
 
       mockSearch.mockReturnValue(createMockResponse(pageResponse));
 
-      const result = await service.searchDSLPaginated({
+      const result = await service.dslPaginated({
         index: 'logs-*',
         query: { match_all: {} },
         sort: [{ timestamp: 'desc' }],
@@ -420,12 +420,12 @@ describe('TypedSearchService', () => {
       expect(pages).toHaveLength(3);
     });
   });
-  describe('searchEQL', () => {
+  describe('eql', () => {
     it('executes with correct strategy', async () => {
       const mockResponse = { hits: { events: [] } };
       mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
-      await service.searchEQL({
+      await service.eql({
         index: 'logs-*',
         query: 'process where process.name == "regsvr32.exe"',
       });
@@ -451,7 +451,7 @@ describe('TypedSearchService', () => {
         runtimeMappings: { runtime_field: { type: 'keyword' as const } },
       };
 
-      await service.searchEQL(params);
+      await service.eql(params);
 
       expect(mockSearch).toHaveBeenCalledWith(
         {
@@ -480,7 +480,7 @@ describe('TypedSearchService', () => {
         sessionId: 'test-session',
       };
 
-      await service.searchEQL(
+      await service.eql(
         {
           index: 'logs-*',
           query: 'process where process.name == "regsvr32.exe"',
@@ -501,7 +501,7 @@ describe('TypedSearchService', () => {
       const mockResponse = { hits: { events: [] } };
       mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
-      const result = await service.searchEQL({
+      const result = await service.eql({
         index: 'logs-*',
         query: 'process where process.name == "regsvr32.exe"',
       });
@@ -510,12 +510,12 @@ describe('TypedSearchService', () => {
     });
   });
 
-  describe('searchSQL', () => {
+  describe('sql', () => {
     it('executes with correct strategy', async () => {
       const mockResponse = { columns: [], rows: [] };
       mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
-      await service.searchSQL({ query: 'SELECT * FROM logs' });
+      await service.sql({ query: 'SELECT * FROM logs' });
 
       expect(mockSearch).toHaveBeenCalledWith(
         expect.anything(),
@@ -536,7 +536,7 @@ describe('TypedSearchService', () => {
         filter: { term: { field: 'value' } },
       };
 
-      await service.searchSQL(params);
+      await service.sql(params);
 
       expect(mockSearch).toHaveBeenCalledWith(
         {
@@ -564,7 +564,7 @@ describe('TypedSearchService', () => {
         executionContext: { type: 'test' as const, name: 'test' },
       };
 
-      await service.searchSQL({ query: 'SELECT * FROM logs' }, options);
+      await service.sql({ query: 'SELECT * FROM logs' }, options);
 
       expect(mockSearch).toHaveBeenCalledWith(
         expect.anything(),
@@ -580,7 +580,7 @@ describe('TypedSearchService', () => {
       const mockResponse = { columns: [], rows: [] };
       mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
-      const result = await service.searchSQL({ query: 'SELECT * FROM logs' });
+      const result = await service.sql({ query: 'SELECT * FROM logs' });
 
       expect(result).toEqual({ rawResponse: mockResponse });
     });

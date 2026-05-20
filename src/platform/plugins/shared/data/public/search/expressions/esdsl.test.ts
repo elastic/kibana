@@ -39,17 +39,15 @@ describe('esdsl', () => {
       {},
       {
         search: {
-          typed: {
-            searchDSL: jest.fn(async (params: any) => ({
-              rawResponse: {
-                params: {
-                  index: params.index,
-                  size: params.size,
-                  ...params,
-                },
+          dsl: jest.fn(async (params: any) => ({
+            rawResponse: {
+              params: {
+                index: params.index,
+                size: params.size,
+                ...params,
               },
-            })),
-          },
+            },
+          })),
         },
       },
     ];

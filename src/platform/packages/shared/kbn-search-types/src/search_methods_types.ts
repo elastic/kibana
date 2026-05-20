@@ -356,31 +356,28 @@ export interface ISQLSearchResult {
 }
 
 // ============================================================================
-// Typed Search Service Interface
+// Search Methods Interface
 // ============================================================================
 
 /**
- * Typed search service providing strategy-specific methods with type-safe
+ * Search methods providing strategy-specific methods with type-safe
  * parameters and built-in pagination support.
  */
-export interface ITypedSearchService {
+export interface ISearchMethods {
   /**
    * Execute an ES|QL search
    */
-  searchESQL: (
-    params: IESQLSearchParams,
-    options?: IESQLSearchOptions
-  ) => Promise<IESQLSearchResult>;
+  esql: (params: IESQLSearchParams, options?: IESQLSearchOptions) => Promise<IESQLSearchResult>;
 
   /**
    * Execute a DSL (Elasticsearch Query DSL) search
    */
-  searchDSL: (params: IDSLSearchParams, options?: IDSLSearchOptions) => Promise<IDSLSearchResult>;
+  dsl: (params: IDSLSearchParams, options?: IDSLSearchOptions) => Promise<IDSLSearchResult>;
 
   /**
    * Execute a paginated DSL (Elasticsearch Query DSL) search with pagination helpers
    */
-  searchDSLPaginated: (
+  dslPaginated: (
     params: IDSLSearchParams,
     options?: IDSLSearchOptions
   ) => Promise<IDSLPaginatedSearchResult>;
@@ -388,10 +385,10 @@ export interface ITypedSearchService {
   /**
    * Execute an EQL (Event Query Language) search
    */
-  searchEQL: (params: IEQLSearchParams, options?: IEQLSearchOptions) => Promise<IEQLSearchResult>;
+  eql: (params: IEQLSearchParams, options?: IEQLSearchOptions) => Promise<IEQLSearchResult>;
 
   /**
    * Execute a SQL search
    */
-  searchSQL: (params: ISQLSearchParams, options?: ISQLSearchOptions) => Promise<ISQLSearchResult>;
+  sql: (params: ISQLSearchParams, options?: ISQLSearchOptions) => Promise<ISQLSearchResult>;
 }

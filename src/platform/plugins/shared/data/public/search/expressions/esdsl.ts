@@ -36,7 +36,7 @@ export function getEsdsl({
       const [core, , { search }] = await getStartServices();
       return {
         uiSettingsClient: core.uiSettings as any as UiSettingsCommon,
-        searchService: search.typed,
+        searchService: search,
       };
     },
   });
