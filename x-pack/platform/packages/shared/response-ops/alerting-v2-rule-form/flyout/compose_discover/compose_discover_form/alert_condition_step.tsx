@@ -39,7 +39,12 @@ interface AlertConditionStepProps {
   onKindChange: (kind: 'signal' | 'alert') => void;
 }
 
-export function AlertConditionStep({ state, dispatch, services, onKindChange }: AlertConditionStepProps) {
+export function AlertConditionStep({
+  state,
+  dispatch,
+  services,
+  onKindChange,
+}: AlertConditionStepProps) {
   const { setValue, watch } = useFormContext<ComposeFormValues>();
   const isAlert = watch('kind') === 'alert';
   const timeField = watch('timeField') ?? '@timestamp';
