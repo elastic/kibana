@@ -39,9 +39,9 @@ export const UserPicker: React.FC<UserPickerProps> = ({
   isRequired,
   onConfirm,
 }) => {
-  const { control, resetField } = useFormContext();
-  const [hasPendingChange, setHasPendingChange] = useState(false);
+  const { control, resetField, getFieldState, formState } = useFormContext();
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
+  const { isDirty } = getFieldState(path, formState);
 
   const { owner: owners } = useCasesContext();
   const availableOwners = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
@@ -78,7 +78,7 @@ export const UserPicker: React.FC<UserPickerProps> = ({
     [onContentChange]
   );
 
-  const showInlineActions = hasPendingChange && onConfirm != null;
+  const showInlineActions = isDirty && onConfirm != null;
 
   return (
     <>
@@ -110,24 +110,13 @@ export const UserPicker: React.FC<UserPickerProps> = ({
               onChange={(next) => {
                 field.onChange(JSON.stringify(next));
                 field.onBlur();
-                setHasPendingChange(true);
               }}
             />
           );
         }}
       />
       {showInlineActions && (
-        <InlineFieldActions
-          name={name}
-          onConfirm={() => {
-            setHasPendingChange(false);
-            onConfirm();
-          }}
-          onCancel={() => {
-            setHasPendingChange(false);
-            resetField(path);
-          }}
-        />
+        <InlineFieldActions name={name} onConfirm={onConfirm} onCancel={() => resetField(path)} />
       )}
     </>
   );
