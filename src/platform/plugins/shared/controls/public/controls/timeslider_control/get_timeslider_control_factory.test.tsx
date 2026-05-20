@@ -324,7 +324,7 @@ describe('TimeSliderControlApi', () => {
       factory
         .buildEmbeddable({
           initializeDrilldownsManager: jest.fn(),
-          initialState: timeSliderControlSchema.validate({
+          initialState: timeSliderControlSchema.parse({
             start_percentage_of_time_range: 0.15,
             end_percentage_of_time_range: 0.25,
           }),

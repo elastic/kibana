@@ -263,7 +263,7 @@ describe('ESQLControlApi', () => {
       factory
         .buildEmbeddable({
           initializeDrilldownsManager: jest.fn(),
-          initialState: optionsListESQLControlSchema.validate({
+          initialState: optionsListESQLControlSchema.parse({
             control_type: 'VALUES_FROM_QUERY',
             selected_options: ['osx'],
             variable_name: 'machineOs',

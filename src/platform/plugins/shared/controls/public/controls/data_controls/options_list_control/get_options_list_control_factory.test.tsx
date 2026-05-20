@@ -323,7 +323,7 @@ describe('Options List Control Api', () => {
       factory
         .buildEmbeddable({
           initializeDrilldownsManager: jest.fn(),
-          initialState: optionsListDSLControlSchema.validate({
+          initialState: optionsListDSLControlSchema.parse({
             data_view_id: 'myDataViewId',
             field_name: 'myFieldName',
           }),

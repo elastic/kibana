@@ -341,7 +341,7 @@ describe('MarkdownEmbeddable', () => {
     let embeddableApi: MarkdownEditorApi;
     beforeEach((done) => {
       renderEmbeddable(
-        markdownEmbeddableSchema.validate({
+        markdownEmbeddableSchema.parse({
           content: 'hello',
         })
       )

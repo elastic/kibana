@@ -304,7 +304,7 @@ describe('RangeSliderControlApi', () => {
       factory
         .buildEmbeddable({
           initializeDrilldownsManager: jest.fn(),
-          initialState: rangeSliderControlSchema.validate({
+          initialState: rangeSliderControlSchema.parse({
             data_view_id: 'oldDataViewId',
             field_name: 'myFieldName',
           }),
