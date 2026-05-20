@@ -30,6 +30,8 @@ import {
   type EuiDataGridColumn,
   type EuiDataGridCellValueElementProps,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor, ESQL_LANG_ID, type monaco } from '@kbn/code-editor';
 import { useRuleFormServices } from '../../form/contexts/rule_form_context';
 import { useDataFields } from '../../form/hooks/use_data_fields';
@@ -122,7 +124,9 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
   onClose,
   onAlertEditorMount,
   onRecoveryEditorMount,
-  title = 'Query sandbox',
+  title = i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.defaultTitle', {
+    defaultMessage: 'Query sandbox',
+  }),
 }) => {
   const services = useRuleFormServices();
   const isSplit = tabConfig.type !== 'single';
@@ -307,10 +311,16 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
             <EuiSelect
               options={timeFieldOptions}
               value={draft.timeField}
-              aria-label="Time field for rule execution"
+              aria-label={i18n.translate(
+                'xpack.alertingV2.composeDiscover.querySandbox.timeFieldAriaLabel',
+                { defaultMessage: 'Time field for rule execution' }
+              )}
               onChange={(e) => onDraftChange?.({ timeField: e.target.value })}
               compressed
-              prepend="Time field"
+              prepend={i18n.translate(
+                'xpack.alertingV2.composeDiscover.querySandbox.timeFieldPrependLabel',
+                { defaultMessage: 'Time field' }
+              )}
               data-test-subj="composeDiscoverTimeField"
             />
           </EuiFlexItem>
@@ -327,14 +337,21 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={`Search (${RUN_SHORTCUT_LABEL})`}>
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.alertingV2.composeDiscover.querySandbox.searchTooltip',
+                { defaultMessage: 'Search ({shortcut})', values: { shortcut: RUN_SHORTCUT_LABEL } }
+              )}
+            >
               <EuiButton
                 size="s"
                 onClick={run}
                 isLoading={isLoading}
                 data-test-subj="composeDiscoverRunQuery"
               >
-                Search
+                {i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.searchButtonLabel', {
+                  defaultMessage: 'Search',
+                })}
               </EuiButton>
             </EuiToolTip>
           </EuiFlexItem>
@@ -381,7 +398,10 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
         {/* ── 3. Footer stats ─────────────────────────────────────────── */}
         {hasRun && !isLoading && !isError && (
           <EuiText size="xs" color="subdued">
-            {totalRowCount.toLocaleString()} {totalRowCount === 1 ? 'result' : 'results'}
+            {i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.resultCountLabel', {
+              defaultMessage: '{count, plural, one {# result} other {# results}}',
+              values: { count: totalRowCount },
+            })}
           </EuiText>
         )}
 
@@ -393,11 +413,24 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
         {!hasRun && (
           <EuiEmptyPrompt
             iconType="playFilled"
-            title={<h4>Run your query to see results</h4>}
+            title={
+              <h4>
+                <FormattedMessage
+                  id="xpack.alertingV2.composeDiscover.querySandbox.runPromptTitle"
+                  defaultMessage="Run your query to see results"
+                />
+              </h4>
+            }
             body={
               <p>
-                Click <strong>Search</strong> or press <strong>{RUN_SHORTCUT_LABEL}</strong> to
-                execute the query.
+                <FormattedMessage
+                  id="xpack.alertingV2.composeDiscover.querySandbox.runPromptDescription"
+                  defaultMessage="Click <strong>Search</strong> or press <strong>{shortcut}</strong> to execute the query."
+                  values={{
+                    shortcut: RUN_SHORTCUT_LABEL,
+                    strong: (chunks) => <strong>{chunks}</strong>,
+                  }}
+                />
               </p>
             }
           />
@@ -412,7 +445,14 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
         )}
 
         {hasRun && isError && (
-          <EuiCallOut announceOnMount color="danger" iconType="error" title="Query error">
+          <EuiCallOut
+            announceOnMount
+            color="danger"
+            iconType="error"
+            title={i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.queryErrorTitle', {
+              defaultMessage: 'Query error',
+            })}
+          >
             <p>{error}</p>
           </EuiCallOut>
         )}
@@ -420,8 +460,22 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
         {hasRun && !isLoading && !isError && rows.length === 0 && activeQuery.trim() && (
           <EuiEmptyPrompt
             iconType="search"
-            title={<h4>No results</h4>}
-            body={<p>The query returned no results for the current time range.</p>}
+            title={
+              <h4>
+                <FormattedMessage
+                  id="xpack.alertingV2.composeDiscover.querySandbox.noResultsTitle"
+                  defaultMessage="No results"
+                />
+              </h4>
+            }
+            body={
+              <p>
+                <FormattedMessage
+                  id="xpack.alertingV2.composeDiscover.querySandbox.noResultsDescription"
+                  defaultMessage="The query returned no results for the current time range."
+                />
+              </p>
+            }
           />
         )}
 
@@ -437,7 +491,10 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
             <EuiSpacer size="m" />
 
             <EuiDataGrid
-              aria-label="Query results"
+              aria-label={i18n.translate(
+                'xpack.alertingV2.composeDiscover.querySandbox.queryResultsAriaLabel',
+                { defaultMessage: 'Query results' }
+              )}
               columns={gridColumns}
               columnVisibility={{ visibleColumns, setVisibleColumns }}
               rowCount={rows.length}
@@ -464,7 +521,9 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButton fill onClick={onApply} data-test-subj="querySandboxApply">
-                Apply changes
+                {i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.applyButtonLabel', {
+                  defaultMessage: 'Apply changes',
+                })}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
