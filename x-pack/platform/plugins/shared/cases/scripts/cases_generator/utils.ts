@@ -148,17 +148,35 @@ export function updateURL({
   return urlObject.href;
 }
 
+interface ClassifiedRequestError {
+  code?: string;
+  cause?: { code?: string };
+  axiosError?: { status?: number; code?: string };
+  response?: { data?: unknown; status?: number };
+}
+
+// Pulls the HTTP status off an HTTP/Axios error, looking at the kbnClient's
+// `axiosError` envelope first and falling back to a raw `response.status`.
+// Returns undefined for non-HTTP errors (network drops, validation, etc.).
+function extractStatus(error: ClassifiedRequestError): number | undefined {
+  return error.axiosError?.status ?? error.response?.status;
+}
+
+// Pulls the Node error code off an HTTP/Axios error (e.g. 'ECONNRESET',
+// 'ETIMEDOUT'), checking the error itself, its `axiosError` envelope, and
+// any wrapped `cause`. Returns undefined for HTTP errors with a status.
+function extractErrorCode(error: ClassifiedRequestError): string | undefined {
+  return error.code ?? error.axiosError?.code ?? error.cause?.code;
+}
+
 // Turns an HTTP/Axios error into a human-readable single-line string with the
 // status and (when present) response body. Used by every catch block that logs
-// failed Kibana/ES requests, and by runWithRetry to decide whether to retry.
+// failed Kibana/ES requests.
 export function formatRequestError(err: unknown): string {
-  const error = err as Error & {
-    axiosError?: { status?: number };
-    response?: { data?: unknown; status?: number };
-  };
+  const error = err as Error & ClassifiedRequestError;
 
   const parts = [error.message];
-  const status = error.axiosError?.status ?? error.response?.status;
+  const status = extractStatus(error);
 
   if (status && !error.message.includes(String(status))) {
     parts.push(`status=${status}`);
@@ -170,14 +188,35 @@ export function formatRequestError(err: unknown): string {
   return parts.join(' | ');
 }
 
-const RETRYABLE_PATTERNS = ['429', '502', '503', '504', 'ECONNRESET', 'ETIMEDOUT'];
+// HTTP statuses worth retrying: rate limits and transient gateway errors.
+const RETRYABLE_HTTP_STATUSES = new Set<number>([429, 502, 503, 504]);
+
+// Node-level connection error codes we should treat as transient.
+const RETRYABLE_ERROR_CODES = new Set<string>([
+  'ECONNRESET',
+  'ECONNABORTED',
+  'ECONNREFUSED',
+  'ETIMEDOUT',
+  'EAI_AGAIN',
+  'EPIPE',
+]);
 
 // True when the error looks transient (rate-limit, gateway error, dropped
-// connection). Used by runWithRetry to decide whether another attempt is worth
-// making.
+// connection). Inspects structured fields (status / code) rather than
+// substring-matching the formatted message — otherwise an unrelated payload
+// containing "429" (UUID prefix, port number, HTTP date) would be classified
+// as transient and retried. Used by runWithRetry.
 function shouldRetry(err: unknown): boolean {
-  const message = formatRequestError(err);
-  return RETRYABLE_PATTERNS.some((pattern) => message.includes(pattern));
+  if (typeof err !== 'object' || err === null) return false;
+  const error = err as ClassifiedRequestError;
+
+  const status = extractStatus(error);
+  if (status !== undefined && RETRYABLE_HTTP_STATUSES.has(status)) return true;
+
+  const code = extractErrorCode(error);
+  if (code !== undefined && RETRYABLE_ERROR_CODES.has(code)) return true;
+
+  return false;
 }
 
 // Runs `operation`, retrying with exponential backoff on transient errors and

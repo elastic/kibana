@@ -7,8 +7,7 @@
 
 import pMap from 'p-map';
 import { logger } from './logger';
-import { bulkCreateAttachmentSOs } from './kibana_ops';
-import type { CreatedAttachment, GenerateCasesParams, KbnContext } from './types';
+import type { GenerateCasesParams, KbnContext } from './types';
 import { casesBasePath, chunk, formatRequestError, rng, runWithRetry } from './utils';
 
 const ATTACHMENT_BULK_LIMIT = 100;
@@ -125,25 +124,24 @@ async function bulkPatchCaseStatuses({
 
 interface PendingAttachment {
   body: Record<string, unknown>;
-  record: CreatedAttachment;
 }
 
 // Posts the pending attachments for one case via the bulk_create attachments
-// endpoint, in batches of ATTACHMENT_BULK_LIMIT, and records the ones that
-// succeeded into `list` for the saved-object follow-up step. Called by
-// generateCases once per case after the case POST returns an id.
+// endpoint, in batches of ATTACHMENT_BULK_LIMIT. The endpoint owns persisting
+// the underlying `cases-comments` saved objects (which are hidden, so the
+// public Saved Objects API can't write them anyway) — this is the only call
+// needed to mirror attachments into the SO store. Called by generateCases
+// once per case after the case POST returns an id.
 async function postBulkAttachments({
   ctx,
   caseId,
   space,
   pending,
-  list,
 }: {
   ctx: KbnContext;
   caseId: string;
   space: string;
   pending: PendingAttachment[];
-  list: CreatedAttachment[];
 }): Promise<void> {
   if (pending.length === 0) return;
   const path = `${casesBasePath(space)}/internal/cases/${caseId}/attachments/_bulk_create`;
@@ -160,9 +158,6 @@ async function postBulkAttachments({
           }),
         { label: `bulk_attachments_case_${caseId}` }
       );
-      for (const item of batch) {
-        list.push(item.record);
-      }
     } catch (err) {
       logger.error(
         `Error bulk-adding ${batch.length} attachment(s) to case ${caseId}: ${formatRequestError(
@@ -173,10 +168,10 @@ async function postBulkAttachments({
   }
 }
 
-// Top-level per-space worker: POSTs every prebuilt case in `cases`,
-// attaches the requested number of comments/alerts/events to each, mirrors
-// those attachments into the saved-objects store, and then patches a random
-// mix of statuses on the result. Called once per target space by run.ts.
+// Top-level per-space worker: POSTs every prebuilt case in `cases`, attaches
+// the requested number of comments/alerts/events to each via the cases bulk
+// attachments endpoint, and then patches a random mix of statuses on the
+// result. Called once per target space by run.ts.
 export async function generateCases(
   {
     cases,
@@ -211,7 +206,6 @@ export async function generateCases(
       : totalAttachments > 0
       ? 10
       : 30;
-  const createdAttachments: CreatedAttachment[] = [];
   const createdCaseRefs: CreatedCaseRef[] = [];
 
   // Precompute per-case offsets so concurrent pMap tasks don't race on shared cursors.
@@ -264,7 +258,6 @@ export async function generateCases(
           const comment = `Auto generated comment ${i + 1}`;
           pending.push({
             body: { type: 'user', comment, owner: newCase.owner },
-            record: { caseId, owner: newCase.owner, type: 'user', comment },
           });
         }
 
@@ -286,14 +279,6 @@ export async function generateCases(
               rule,
               owner: newCase.owner,
             },
-            record: {
-              caseId,
-              owner: newCase.owner,
-              type: 'alert',
-              alertId: alert.alertId,
-              index: alert.index,
-              rule,
-            },
           });
         }
 
@@ -308,18 +293,11 @@ export async function generateCases(
                 index: event.index,
                 owner: newCase.owner,
               },
-              record: {
-                caseId,
-                owner: newCase.owner,
-                type: 'event',
-                eventId: event.eventId,
-                index: event.index,
-              },
             });
           }
         }
 
-        await postBulkAttachments({ ctx, caseId, space, pending, list: createdAttachments });
+        await postBulkAttachments({ ctx, caseId, space, pending });
       } catch (err) {
         logger.error(`Error creating case "${newCase.title}": ${formatRequestError(err)}`);
       } finally {
@@ -331,11 +309,6 @@ export async function generateCases(
     },
     { concurrency }
   );
-
-  if (createdAttachments.length > 0) {
-    logger.info(`Creating ${createdAttachments.length} attachment SOs via saved objects API...`);
-    await bulkCreateAttachmentSOs({ ctx, attachments: createdAttachments, space });
-  }
 
   await bulkPatchCaseStatuses({ ctx, space, refs: createdCaseRefs });
 }

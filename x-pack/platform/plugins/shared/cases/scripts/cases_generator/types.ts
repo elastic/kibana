@@ -26,17 +26,6 @@ export interface EventInfo {
   index: string;
 }
 
-export interface CreatedAttachment {
-  caseId: string;
-  owner: string;
-  type: 'user' | 'alert' | 'event';
-  comment?: string;
-  alertId?: string;
-  eventId?: string;
-  index?: string;
-  rule?: { id: string; name: string };
-}
-
 // User-facing control names. Each maps 1:1 to a real {control, type} pair in
 // the cases template schema (see buildTemplateField in kibana_ops.ts).
 //   text     → control: INPUT_TEXT,      value type: keyword

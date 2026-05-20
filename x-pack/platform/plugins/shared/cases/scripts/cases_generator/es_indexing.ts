@@ -20,6 +20,14 @@ import type { AlertInfo, EventInfo } from './types';
 const ALERT_CHUNK_SIZE = 500;
 const EVENT_CHUNK_SIZE = 500;
 
+// Stays below the ES default `index.max_result_window` (10,000). A search
+// with `from + size` at or above the ceiling 400s with "Result window is
+// too large", which would knock the reuse path out and force the run to
+// re-index everything every time. Capping the fetch size below the default
+// keeps reuse working; the case-attachment loop already cycles through the
+// returned pool to cover any extra cases beyond the cap.
+const MAX_REUSE_FETCH_SIZE = 9999;
+
 // Returns the doc count for `index` (or 0 when the index doesn't exist or the
 // count request errors out). Used by the reuse path so we can decide whether
 // to skip indexing entirely or top up the missing delta.
@@ -38,20 +46,27 @@ interface AlertSource {
   ['kibana.alert.rule.name']?: string;
 }
 
-// Fetches up to `count` existing alert refs from `index`. Used when the alerts
-// index already contains enough docs so the run can skip (or partially skip)
-// generating new alerts. Missing rule metadata is filled with conservative
-// defaults so attachments still succeed.
+// Fetches up to `count` existing alert refs from `index`, capped at
+// MAX_REUSE_FETCH_SIZE. Used when the alerts index already contains enough
+// docs so the run can skip (or partially skip) generating new alerts.
+// Missing rule metadata is filled with conservative defaults so attachments
+// still succeed.
 async function fetchExistingAlerts(
   esClient: Client,
   index: string,
   count: number
 ): Promise<AlertInfo[]> {
   if (count <= 0) return [];
+  const fetchSize = Math.min(count, MAX_REUSE_FETCH_SIZE);
+  if (fetchSize < count) {
+    logger.info(
+      `  [${index}] reuse pool capped at ${MAX_REUSE_FETCH_SIZE} (requested ${count}); attachments cycle through the cap to cover the rest.`
+    );
+  }
   try {
     const res = await esClient.search<AlertSource>({
       index,
-      size: count,
+      size: fetchSize,
       _source: ['kibana.alert.uuid', 'kibana.alert.rule.uuid', 'kibana.alert.rule.name'],
       query: { match_all: {} },
       ignore_unavailable: true,
@@ -72,18 +87,25 @@ async function fetchExistingAlerts(
   }
 }
 
-// Fetches up to `count` existing event ids from `index`. Mirrors
-// fetchExistingAlerts but for the process-events data stream.
+// Fetches up to `count` existing event ids from `index`, capped at
+// MAX_REUSE_FETCH_SIZE. Mirrors fetchExistingAlerts but for the
+// process-events data stream.
 async function fetchExistingEvents(
   esClient: Client,
   index: string,
   count: number
 ): Promise<EventInfo[]> {
   if (count <= 0) return [];
+  const fetchSize = Math.min(count, MAX_REUSE_FETCH_SIZE);
+  if (fetchSize < count) {
+    logger.info(
+      `  [${index}] reuse pool capped at ${MAX_REUSE_FETCH_SIZE} (requested ${count}); attachments cycle through the cap to cover the rest.`
+    );
+  }
   try {
     const res = await esClient.search({
       index,
-      size: count,
+      size: fetchSize,
       _source: false,
       query: { match_all: {} },
       ignore_unavailable: true,

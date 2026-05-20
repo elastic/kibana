@@ -375,14 +375,48 @@ describe('utils', () => {
       expect(op).toHaveBeenCalledTimes(3);
     });
 
-    it('treats ECONNRESET as retryable', async () => {
+    it('treats ECONNRESET (via err.code) as retryable', async () => {
       const op = jest
         .fn()
-        .mockRejectedValueOnce(new Error('ECONNRESET while reading'))
+        .mockRejectedValueOnce(Object.assign(new Error('socket hang up'), { code: 'ECONNRESET' }))
         .mockResolvedValueOnce('ok');
       const result = await runWithRetry(op, { retries: 1, label: 'reset' });
       expect(result).toBe('ok');
       expect(op).toHaveBeenCalledTimes(2);
+    });
+
+    it('treats ETIMEDOUT exposed via err.cause.code as retryable', async () => {
+      const op = jest
+        .fn()
+        .mockRejectedValueOnce(
+          Object.assign(new Error('request failed'), {
+            cause: { code: 'ETIMEDOUT' },
+          })
+        )
+        .mockResolvedValueOnce('ok');
+      const result = await runWithRetry(op, { retries: 1, label: 'timeout' });
+      expect(result).toBe('ok');
+      expect(op).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not retry when a 4xx response body happens to contain a retryable token', async () => {
+      // A 400 carrying "429" anywhere in its body (UUID prefix, port number,
+      // HTTP date, SLA value, etc.) must not be misclassified as transient.
+      const op = jest.fn().mockRejectedValue(
+        Object.assign(new Error('Bad Request'), {
+          axiosError: { status: 400 },
+          response: {
+            status: 400,
+            data: {
+              message: 'Template 429abc-1bf4-4fe7-ba9d-6e124c4a9783 not found',
+            },
+          },
+        })
+      );
+      await expect(runWithRetry(op, { retries: 5, label: 'bad-request' })).rejects.toThrow(
+        'Bad Request'
+      );
+      expect(op).toHaveBeenCalledTimes(1);
     });
   });
 

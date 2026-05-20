@@ -6,7 +6,6 @@
  */
 
 import pMap from 'p-map';
-import { v4 as uuidv4 } from 'uuid';
 import yaml from 'js-yaml';
 import { logger } from './logger';
 import { getKitchenSinkDefinition, KITCHEN_SINK_FIELD_DEFS } from './kitchen_sink_template';
@@ -19,7 +18,6 @@ import {
   type LegacyTemplateConfig,
 } from './configure_customfields';
 import type {
-  CreatedAttachment,
   CreatedTemplateRef,
   KbnContext,
   SpaceConfig,
@@ -125,83 +123,6 @@ function buildTemplateField(
         metadata: { multiple: false, default: [] },
       };
   }
-}
-
-// Builds the saved object document for one case attachment so it can be sent
-// through the saved_objects/_bulk_create API. Used by bulkCreateAttachmentSOs
-// after the attachments themselves have been posted to the cases attachments
-// endpoint, so the saved-object index stays in sync.
-function buildAttachmentSO(attachment: CreatedAttachment) {
-  const now = new Date().toISOString();
-  const id = uuidv4();
-
-  const attributes: Record<string, unknown> = {
-    type: attachment.type,
-    attachmentId: id,
-    created_at: now,
-    created_by: { username: 'elastic' },
-    pushed_at: null,
-    updated_at: null,
-  };
-
-  if (attachment.type === 'user') {
-    attributes.data = { content: attachment.comment };
-  } else if (attachment.type === 'alert') {
-    attributes.data = {
-      alertId: attachment.alertId,
-      index: attachment.index,
-      rule: attachment.rule,
-    };
-    attributes.metadata = { actionType: 'alert' };
-  } else if (attachment.type === 'event') {
-    attributes.data = { eventId: attachment.eventId, index: attachment.index };
-    attributes.metadata = { actionType: 'event' };
-  }
-
-  return {
-    type: 'cases-attachments',
-    id,
-    attributes,
-    references: [{ id: attachment.caseId, name: 'associated-cases', type: 'cases' }],
-  };
-}
-
-// Bulk-creates the cases-attachments saved objects for every attachment that
-// was successfully posted on a case. Called by case_generation.ts after the
-// per-case attachment loop, so the saved-object store mirrors what the cases
-// API recorded.
-export async function bulkCreateAttachmentSOs({
-  ctx,
-  attachments,
-  space,
-}: {
-  ctx: KbnContext;
-  attachments: CreatedAttachment[];
-  space: string;
-}) {
-  if (attachments.length === 0) return;
-
-  const soPath = `${casesBasePath(space)}/api/saved_objects/_bulk_create`;
-  const docs = attachments.map((attachment) => buildAttachmentSO(attachment));
-
-  const chunkSize = 200;
-  for (const batch of chunk(docs, chunkSize)) {
-    try {
-      await runWithRetry(
-        () =>
-          ctx.kbnClient.request({
-            method: 'POST',
-            path: soPath,
-            headers: ctx.headers,
-            body: batch,
-          }),
-        { label: 'bulk_create_attachment_sos' }
-      );
-    } catch (err) {
-      logger.error(`Error bulk-creating attachment SOs: ${formatRequestError(err)}`);
-    }
-  }
-  logger.info(`  [attachments SO] ${docs.length}/${docs.length}`);
 }
 
 interface TemplateBuildResult {
