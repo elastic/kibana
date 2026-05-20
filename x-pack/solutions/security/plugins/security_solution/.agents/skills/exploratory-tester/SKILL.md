@@ -419,3 +419,100 @@ Each entry appended to `.exploratory-session/findings-flow-N.md`:
 ### Evidence
 - Console: `<line>`
 ```
+
+---
+
+## Phase 3: Report
+
+### Step 3a — Merge findings
+
+Read all `.exploratory-session/findings-flow-N.md` files. Write `.exploratory-session/report.md`:
+
+```markdown
+# Exploratory Testing Report
+
+**Area:** <area>
+**Environment:** <environment.type> at <environment.url>
+**Role:** <resolved_role>
+**Date:** <today's date>
+**Mode:** <single | parallel>
+**Flows explored:** <N>
+
+## Summary
+- Level 1 (confirmed bugs): N
+- Level 2 (suspicious — your review needed): N
+- Level 3 (observations): N
+- Skipped (time budget / session lost): N
+- Known / suppressed: N
+
+## Level 1 — Confirmed Bugs
+<all Level 1 findings in full finding format>
+
+## Level 2 — Suspicious
+<all Level 2 findings in full finding format>
+
+## Level 3 — Observations
+<all Level 3 findings in short observation format>
+
+## Skipped
+| Flow | Checklist step | Reason |
+|---|---|---|
+| <flow name> | <step> | time budget exhausted / session lost |
+
+## Known / Suppressed
+| Finding | Reason suppressed |
+|---|---|
+| <title> | Matches knowledge/<area_slug>.md: "<entry>" |
+| <title> | Matches known open bug #<number>: "<title>" |
+```
+
+### Step 3b — Filter known noise
+
+For each Level 2 and Level 3 finding, check in this order:
+1. Does it match an entry in `knowledge/<area_slug>.md`? If yes → move to "Known / Suppressed", cite the matching entry
+2. Does it match a `known_open_bugs` entry in `config.json`? If yes → move to "Known / Suppressed", cite the issue number
+
+**Never silently drop a finding.** Every suppressed finding must appear in "Known / Suppressed" with the reason.
+
+Level 1 findings are never suppressed by the knowledge file — a confirmed bug is always reported.
+
+### Step 3c — Present report
+
+Present `report.md` to the user and ask:
+
+> "Review complete. Are there any Level 2 or Level 3 findings you want to reclassify as false positives before I update the knowledge file?"
+
+Wait for the user's response. Apply any reclassifications to `report.md`.
+
+In `mode: auto`: skip this step. Post the content of `report.md` as a comment on the source GitHub issue or PR:
+```bash
+gh issue comment <NUMBER> --repo elastic/kibana --body "$(cat .exploratory-session/report.md)"
+# or for PRs:
+gh pr comment <NUMBER> --repo elastic/kibana --body "$(cat .exploratory-session/report.md)"
+```
+
+### Step 3d — Update knowledge file
+
+After user review (or immediately in `mode: auto`), update `knowledge/<area_slug>.md`.
+
+If the file does not exist, create it at:
+`x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/knowledge/<area_slug>.md`
+
+With this initial structure:
+```markdown
+# Knowledge: <area name>
+
+## Known non-bugs
+<!-- Behaviours the agent should not re-report as findings -->
+
+## Navigation patterns
+<!-- How to reach features in this area — built up across sessions -->
+```
+
+Append confirmed false positives (findings the user dismissed or reclassified) to `## Known non-bugs`. Append any navigation patterns discovered during this session that weren't already in the file to `## Navigation patterns`.
+
+Commit the knowledge file:
+```bash
+git add x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/knowledge/<area_slug>.md
+git commit -m "knowledge(exploratory-tester): update <area_slug> after session on <date>"
+```
