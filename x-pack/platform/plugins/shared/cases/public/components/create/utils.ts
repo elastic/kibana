@@ -30,7 +30,6 @@ export const trimUserFormData = (
     | 'syncAlerts'
     | 'extractObservables'
     | 'customFields'
-    | 'extendedFields'
     | 'templateId'
     | 'templateVersion'
   >
@@ -68,7 +67,9 @@ export const createFormDeserializer = (data: CasePostRequest): CaseFormFieldsSch
     syncAlerts: settings.syncAlerts,
     extractObservables: settings.extractObservables ?? false,
     customFields: customFieldsFormDeserializer(customFields) ?? {},
-    ...(extendedFieldsFromResponse != null ? { extendedFields: extendedFieldsFromResponse } : {}),
+    ...(extendedFieldsFromResponse != null
+      ? { [CASE_EXTENDED_FIELDS]: extendedFieldsFromResponse }
+      : {}),
   };
 };
 
@@ -92,7 +93,7 @@ export const createFormSerializer = (
     customFields,
     templateId,
     templateVersion,
-    extendedFields,
+    [CASE_EXTENDED_FIELDS]: extendedFields,
     ...restData
   } = data;
 

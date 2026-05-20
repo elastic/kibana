@@ -11,6 +11,7 @@ import yaml from 'js-yaml';
 
 import { CreateCaseTemplateFields } from './template_fields';
 import { renderWithTestingProviders } from '../../common/mock';
+import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
 
 const mockUseFormData = jest.fn();
 const mockUseFormContext = jest.fn();
@@ -192,5 +193,32 @@ describe('CreateCaseTemplateFields', () => {
     expect(screen.getByText('Global fields')).toBeInTheDocument();
     expect(screen.getByTestId('control-incident_type')).toBeInTheDocument();
     expect(screen.queryByText('Template not selected')).not.toBeInTheDocument();
+  });
+
+  it('syncs inner form changes to parent form under the CASE_EXTENDED_FIELDS key', () => {
+    const setFieldValue = jest.fn();
+    mockUseFormContext.mockReturnValue({ setFieldValue });
+    mockUseFormData.mockReturnValue([{ templateId: 'template-1' }]);
+    mockUseTemplateFormSync.mockReturnValue({
+      template: {
+        templateId: 'template-1',
+        definition: { name: 'Test', fields: [] },
+      },
+      isLoading: false,
+    });
+
+    renderWithTestingProviders(<CreateCaseTemplateFields />);
+
+    const allCallsWithWrongKey = setFieldValue.mock.calls.filter(
+      ([key]) => key === 'extendedFields'
+    );
+    expect(allCallsWithWrongKey).toHaveLength(0);
+
+    const extendedFieldCalls = setFieldValue.mock.calls.filter(
+      ([key]) => key === CASE_EXTENDED_FIELDS
+    );
+    extendedFieldCalls.forEach(([key]) => {
+      expect(key).toBe(CASE_EXTENDED_FIELDS);
+    });
   });
 });

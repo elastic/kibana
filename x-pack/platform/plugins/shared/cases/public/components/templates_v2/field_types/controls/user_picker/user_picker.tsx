@@ -10,6 +10,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { z } from '@kbn/zod/v4';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { InlineFieldActions } from '../inline_field_actions';
 import { CASE_EXTENDED_FIELDS } from '../../../../../../common/constants';
 import { getFieldSnakeKey } from '../../../../../../common/utils';
 import type {
@@ -36,9 +37,11 @@ export const UserPicker: React.FC<UserPickerProps> = ({
   type,
   metadata,
   isRequired,
+  onConfirm,
 }) => {
-  const { control } = useFormContext();
+  const { control, resetField, getFieldState, formState } = useFormContext();
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
+  const { isDirty } = getFieldState(path, formState);
 
   const { owner: owners } = useCasesContext();
   const availableOwners = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
@@ -75,40 +78,47 @@ export const UserPicker: React.FC<UserPickerProps> = ({
     [onContentChange]
   );
 
-  return (
-    <Controller
-      key={name}
-      name={path}
-      control={control}
-      rules={rules}
-      defaultValue={defaultValue}
-      render={({ field, fieldState }) => {
-        const selectedUsers = toSelectedUsers(field.value);
-        const missingUids = selectedUsers
-          .filter((u) => !suggestedProfiles.some((p) => p.uid === u.uid))
-          .map((u) => u.uid);
+  const showInlineActions = isDirty && onConfirm != null;
 
-        return (
-          <UserPickerComboboxWithProfiles
-            label={label}
-            name={name}
-            isInvalid={!!fieldState.error}
-            errorMessage={fieldState.error?.message ?? null}
-            isLoading={isLoading}
-            isMultiple={isMultiple}
-            isRequired={isRequired ?? false}
-            selectedUsers={selectedUsers}
-            suggestedProfiles={suggestedProfiles}
-            missingUids={missingUids}
-            onSearchChange={onSearchChange}
-            onChange={(next) => {
-              field.onChange(JSON.stringify(next));
-              field.onBlur();
-            }}
-          />
-        );
-      }}
-    />
+  return (
+    <>
+      <Controller
+        key={name}
+        name={path}
+        control={control}
+        rules={rules}
+        defaultValue={defaultValue}
+        render={({ field, fieldState }) => {
+          const selectedUsers = toSelectedUsers(field.value);
+          const missingUids = selectedUsers
+            .filter((u) => !suggestedProfiles.some((p) => p.uid === u.uid))
+            .map((u) => u.uid);
+
+          return (
+            <UserPickerComboboxWithProfiles
+              label={label}
+              name={name}
+              isInvalid={!!fieldState.error}
+              errorMessage={fieldState.error?.message ?? null}
+              isLoading={isLoading}
+              isMultiple={isMultiple}
+              isRequired={isRequired ?? false}
+              selectedUsers={selectedUsers}
+              suggestedProfiles={suggestedProfiles}
+              missingUids={missingUids}
+              onSearchChange={onSearchChange}
+              onChange={(next) => {
+                field.onChange(JSON.stringify(next));
+                field.onBlur();
+              }}
+            />
+          );
+        }}
+      />
+      {showInlineActions && (
+        <InlineFieldActions name={name} onConfirm={onConfirm} onCancel={() => resetField(path)} />
+      )}
+    </>
   );
 };
 
