@@ -7,7 +7,6 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { rangeQuery } from '@kbn/observability-plugin/server';
 import {
   CLOUD_ACCOUNT_ID,
   CLOUD_AVAILABILITY_ZONE,
@@ -22,7 +21,8 @@ import {
 } from '@kbn/apm-types';
 import type { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import type { DurationFieldCandidatesResponse } from './fetch_duration_field_candidates';
+import { getCommonCorrelationsQuery } from './get_common_correlations_query';
+import type { FieldCandidatesResponse } from './types';
 
 const INFRA_FIELD_CANDIDATES = new Set([
   HOST_NAME,
@@ -42,11 +42,14 @@ export async function fetchInfraFieldCandidates({
   eventType,
   start,
   end,
+  environment,
+  kuery,
+  query,
 }: CommonCorrelationsQueryParams & {
   query: estypes.QueryDslQueryContainer;
   apmEventClient: APMEventClient;
   eventType: ProcessorEvent;
-}): Promise<DurationFieldCandidatesResponse> {
+}): Promise<FieldCandidatesResponse> {
   const respMapping = await apmEventClient.fieldCaps('get_infra_field_caps', {
     apm: {
       events: [eventType],
@@ -54,7 +57,7 @@ export async function fetchInfraFieldCandidates({
     fields: [...INFRA_FIELD_CANDIDATES],
     filters: '-metadata,-parent',
     include_empty_fields: false,
-    index_filter: rangeQuery(start, end)[0],
+    index_filter: getCommonCorrelationsQuery({ start, end, environment, kuery, query }),
   });
 
   return {

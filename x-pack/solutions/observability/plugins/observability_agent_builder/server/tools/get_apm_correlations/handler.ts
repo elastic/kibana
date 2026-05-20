@@ -62,6 +62,8 @@ const INFRA_DEFAULT_FIELD_CANDIDATES = [
   CLOUD_ACCOUNT_ID,
 ] as const;
 
+// These mirror values in apm/common/correlations/constants.ts but cannot be imported
+// directly from there because observability_agent_builder does not depend on the APM plugin.
 const THROUGHPUT_BUCKET_COUNT = 20;
 const THROUGHPUT_CORRELATION_THRESHOLD = 0.3;
 const THROUGHPUT_TOP_VALUES_PER_FIELD = 10;
@@ -301,7 +303,7 @@ export async function getToolHandler({
 
       const fieldValues: unknown[] = [];
 
-      await Promise.all(
+      await Promise.allSettled(
         termBuckets.map(async (bucket) => {
           const fieldValue = bucket.key;
           const filteredFilters = [...overallFilters, { term: { [field]: fieldValue } }];

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { chunk } from 'lodash';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import { termQuery } from '@kbn/observability-plugin/server';
 import type {
@@ -164,31 +165,34 @@ export const fetchThroughputCorrelations = async ({
   const totalDocCount = overallBuckets.reduce((acc, b) => acc + b.doc_count, 0);
   const overallMeanRpm = overallRpm.reduce((a, b) => a + b, 0) / (overallRpm.length || 1);
 
-  // Fetch filtered RPM timeseries for each field-value pair in parallel
-  const settled = await Promise.allSettled(
-    fieldValuePairs.map((pair) =>
-      fetchFilteredRpmTimeseries({
-        apmEventClient,
-        entityType,
-        start,
-        end,
-        environment,
-        kuery,
-        query,
-        intervalString,
-        fieldValuePair: pair,
-        overallBucketKeys,
-      })
-    )
-  );
-
+  // Fetch filtered RPM timeseries in chunks to cap simultaneous ES requests
+  const CHUNK_SIZE = 10;
   const fulfilled: Array<FilteredRpmEntry | undefined> = [];
   const rejected: unknown[] = [];
-  for (const result of settled) {
-    if (result.status === 'fulfilled') {
-      fulfilled.push(result.value);
-    } else {
-      rejected.push(result.reason);
+
+  for (const pairChunk of chunk(fieldValuePairs, CHUNK_SIZE)) {
+    const settled = await Promise.allSettled(
+      pairChunk.map((pair) =>
+        fetchFilteredRpmTimeseries({
+          apmEventClient,
+          entityType,
+          start,
+          end,
+          environment,
+          kuery,
+          query,
+          intervalString,
+          fieldValuePair: pair,
+          overallBucketKeys,
+        })
+      )
+    );
+    for (const result of settled) {
+      if (result.status === 'fulfilled') {
+        fulfilled.push(result.value);
+      } else {
+        rejected.push(result.reason);
+      }
     }
   }
 
