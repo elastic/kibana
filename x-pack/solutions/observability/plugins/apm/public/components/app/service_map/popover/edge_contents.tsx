@@ -22,7 +22,8 @@ import type { APIReturnType } from '../../../../services/rest/create_call_apm_ap
 import { isMessagingExitSpan } from '../../../../../common/service_map/get_service_map_nodes';
 import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
 import { isEdge } from './utils';
-import { SERVICE_MAP_EBT_ACTIONS, SERVICE_MAP_EBT_ELEMENTS } from '../ebt_constants';
+import { APM_EBT_ACTIONS } from '../../ebt_constants';
+import { SERVICE_MAP_EBT_ELEMENTS } from '../ebt_constants';
 
 type EdgeReturn = APIReturnType<'GET /internal/apm/service-map/dependency'>;
 
@@ -146,7 +147,7 @@ export function EdgeContents({
                 sortDirection: 'DESC',
               }}
               ebt={{
-                action: SERVICE_MAP_EBT_ACTIONS.EXPLORE_TRACES,
+                action: APM_EBT_ACTIONS.EXPLORE_TRACES,
                 element: SERVICE_MAP_EBT_ELEMENTS.CONNECTION_POPOVER,
               }}
             />

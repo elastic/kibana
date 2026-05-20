@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export const TRACE_OVERVIEW_EBT_ELEMENTS = {
-  PAGE_HEADER: 'tracesPageHeader',
+export const APM_EBT_ACTIONS = {
+  EXPLORE_TRACES: 'exploreTraces',
 } as const;

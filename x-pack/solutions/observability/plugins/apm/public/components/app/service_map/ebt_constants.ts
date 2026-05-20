@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-export const SERVICE_MAP_EBT_ACTIONS = {
-  EXPLORE_TRACES: 'exploreTraces',
-} as const;
-
 export const SERVICE_MAP_EBT_ELEMENTS = {
   CONNECTION_POPOVER: 'serviceMapConnectionPopover',
 } as const;
