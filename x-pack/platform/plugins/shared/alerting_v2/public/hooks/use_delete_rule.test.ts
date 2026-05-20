@@ -11,31 +11,11 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useDeleteRule } from './use_delete_rule';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { RulesApi } from '../services/rules_api';
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
-
 jest.mock('@kbn/core-di-browser');
 jest.mock('../services/rules_api');
 
 const mockUseService = useService as jest.MockedFunction<typeof useService>;
 const mockCoreStart = CoreStart as jest.MockedFunction<typeof CoreStart>;
-
-const mockRuleResponse: RuleResponse = {
-  id: 'rule-1',
-  kind: 'signal',
-  enabled: true,
-  metadata: {
-    name: 'My CPU Alert',
-    description: '',
-    tags: [],
-  },
-  time_field: '@timestamp',
-  schedule: { every: '1m', lookback: '5m' },
-  evaluation: { query: { base: 'FROM logs-*' } },
-  createdBy: 'test-user',
-  createdAt: '2026-01-01T00:00:00.000Z',
-  updatedBy: 'test-user',
-  updatedAt: '2026-01-01T00:00:00.000Z',
-};
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -70,10 +50,10 @@ describe('useDeleteRule', () => {
   });
 
   it('should delete a rule and show a success toast with the rule name', async () => {
-    mockDeleteRule.mockResolvedValue(mockRuleResponse);
+    mockDeleteRule.mockResolvedValue(undefined);
     const { result } = renderHook(() => useDeleteRule(), { wrapper: createWrapper() });
 
-    result.current.mutate('rule-1');
+    result.current.mutate({ id: 'rule-1', name: 'My CPU Alert' });
 
     await waitFor(() => {
       expect(mockDeleteRule).toHaveBeenCalledWith('rule-1');
@@ -86,7 +66,7 @@ describe('useDeleteRule', () => {
     mockDeleteRule.mockRejectedValue(new Error('delete failed'));
     const { result } = renderHook(() => useDeleteRule(), { wrapper: createWrapper() });
 
-    result.current.mutate('rule-1');
+    result.current.mutate({ id: 'rule-1', name: 'My CPU Alert' });
 
     await waitFor(() => {
       expect(mockAddDanger).toHaveBeenCalledWith(expect.any(String));
@@ -95,11 +75,11 @@ describe('useDeleteRule', () => {
   });
 
   it('should invoke per-call onSuccess callback after deletion', async () => {
-    mockDeleteRule.mockResolvedValue(mockRuleResponse);
+    mockDeleteRule.mockResolvedValue(undefined);
     const onSuccess = jest.fn();
     const { result } = renderHook(() => useDeleteRule(), { wrapper: createWrapper() });
 
-    result.current.mutate('rule-1', { onSuccess });
+    result.current.mutate({ id: 'rule-1', name: 'My CPU Alert' }, { onSuccess });
 
     await waitFor(() => {
       expect(onSuccess).toHaveBeenCalledTimes(1);
@@ -112,7 +92,7 @@ describe('useDeleteRule', () => {
     const onSuccess = jest.fn();
     const { result } = renderHook(() => useDeleteRule(), { wrapper: createWrapper() });
 
-    result.current.mutate('rule-1', { onSuccess });
+    result.current.mutate({ id: 'rule-1', name: 'My CPU Alert' }, { onSuccess });
 
     await waitFor(() => {
       expect(onSuccess).not.toHaveBeenCalled();
