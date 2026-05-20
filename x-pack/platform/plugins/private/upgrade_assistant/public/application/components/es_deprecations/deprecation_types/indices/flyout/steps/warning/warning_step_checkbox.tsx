@@ -80,6 +80,10 @@ const InfoPopover: React.FunctionComponent<{
 
   return (
     <EuiPopover
+      aria-label={i18n.translate(
+        'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.infoPopoverAriaLabel',
+        { defaultMessage: 'More information' }
+      )}
       button={
         <EuiButtonIcon
           display="empty"

@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/256857
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-05-14
+areas:
+- Discover and ES|QL
+title: "Add AI-powered code completion in ES|QL editor"
+description: "Provides intelligent code suggestions and auto-completion for ES|QL queries in Discover, helping users write queries faster and with fewer syntax errors."
