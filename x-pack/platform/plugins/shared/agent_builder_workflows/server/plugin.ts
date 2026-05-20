@@ -81,11 +81,8 @@ export class AgentBuilderWorkflowsPlugin
     registerGetTriggerDefinitionsTool(agentBuilder);
     registerGetConnectorsTool(agentBuilder, api);
     registerGetExamplesTool(agentBuilder);
-    registerWorkflowExecuteStepTool(
-      agentBuilder,
-      api,
-      getWorkflowsExtensions,
-      () => safeKibanaRequestRegistry.getPaths()
+    registerWorkflowExecuteStepTool(agentBuilder, api, getWorkflowsExtensions, () =>
+      safeKibanaRequestRegistry.getPaths()
     );
     registerWorkflowEditTools(agentBuilder, api, aiTelemetryClient);
 
@@ -108,9 +105,8 @@ export class AgentBuilderWorkflowsPlugin
     platformTools.forEach((tool) => agentBuilder.tools.register(tool));
 
     return {
-      registerSafeKibanaRequestPath: safeKibanaRequestRegistry.register.bind(
-        safeKibanaRequestRegistry
-      ),
+      registerSafeKibanaRequestPath:
+        safeKibanaRequestRegistry.register.bind(safeKibanaRequestRegistry),
     };
   }
 

@@ -989,8 +989,7 @@ If the user declines a confirmation, do NOT retry the same step. Acknowledge the
         );
       }
 
-      const isStepUnsafe =
-        !SAFE_STEP_TYPES.has(stepInfo.stepType) && !isAllowlistedKibanaRequest;
+      const isStepUnsafe = !SAFE_STEP_TYPES.has(stepInfo.stepType) && !isAllowlistedKibanaRequest;
       // When the top-level step is an allow-listed `kibana.request` we
       // explicitly skip the descendant walk. `findUnsafeStep` is unaware of
       // the allow-list and would re-flag the step itself via its self-check.

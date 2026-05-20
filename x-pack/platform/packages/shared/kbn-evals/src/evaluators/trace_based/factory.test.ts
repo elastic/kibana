@@ -45,8 +45,7 @@ describe('createTraceBasedEvaluator', () => {
 
     mockConfig = {
       name: 'Test Evaluator',
-      buildQuery: (traceIds: string[]) =>
-        `FROM traces-* | WHERE ${traceIdInClause(traceIds)}`,
+      buildQuery: (traceIds: string[]) => `FROM traces-* | WHERE ${traceIdInClause(traceIds)}`,
       extractResult: (response) => response.values[0][0] as number | null,
     };
   });
@@ -149,11 +148,7 @@ describe('createTraceBasedEvaluator', () => {
       values: [[3]],
     } as any);
 
-    const result = await evaluateWith(evaluator, [
-      VALID_TRACE_ID,
-      'not-a-trace',
-      VALID_TRACE_ID_2,
-    ]);
+    const result = await evaluateWith(evaluator, [VALID_TRACE_ID, 'not-a-trace', VALID_TRACE_ID_2]);
 
     expect(result.score).toBe(3);
     expect(mockEsClient.esql.query as jest.Mock).toHaveBeenCalledWith({
@@ -326,8 +321,6 @@ describe('traceIdInClause', () => {
   });
 
   it('throws if given an empty array (caller bug)', () => {
-    expect(() => traceIdInClause([])).toThrow(
-      'traceIdInClause requires at least one trace ID'
-    );
+    expect(() => traceIdInClause([])).toThrow('traceIdInClause requires at least one trace ID');
   });
 });

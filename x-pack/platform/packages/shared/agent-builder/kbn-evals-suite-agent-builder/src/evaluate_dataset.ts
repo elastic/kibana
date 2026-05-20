@@ -159,7 +159,9 @@ const extractWorkflowExecuteStepRecords = (output: TaskOutput): WorkflowExecuteS
       const results = Array.isArray(s.results) ? s.results : [];
       const firstResult = results.find((r): r is Record<string, unknown> => isRecord(r));
       const data =
-        firstResult && isRecord(firstResult.data) ? (firstResult.data as Record<string, unknown>) : null;
+        firstResult && isRecord(firstResult.data)
+          ? (firstResult.data as Record<string, unknown>)
+          : null;
       return {
         index,
         params: isRecord(s.params) ? (s.params as Record<string, unknown>) : null,
@@ -270,8 +272,7 @@ function configureExperiment({
       getToolCallSteps(output as TaskOutput)
         .map((s) => s.tool_id)
         .filter((id): id is string => Boolean(id) && !TRAJECTORY_INFRA_TOOL_IDS.has(id!)),
-    goldenPathExtractor: (expected) =>
-      (expected as DatasetExample['output'])?.tool_sequence ?? [],
+    goldenPathExtractor: (expected) => (expected as DatasetExample['output'])?.tool_sequence ?? [],
     orderWeight: 0.6,
     coverageWeight: 0.4,
   });
@@ -818,9 +819,8 @@ export function createEvaluateDataset({
     // signal without crashing the box. The env var EVALUATION_CONCURRENCY can
     // override the default if a beefier env wants the original throughput.
     const concurrencyFromEnv = parseInt(process.env.EVALUATION_CONCURRENCY || '', 10);
-    const concurrency = Number.isFinite(concurrencyFromEnv) && concurrencyFromEnv > 0
-      ? concurrencyFromEnv
-      : 2;
+    const concurrency =
+      Number.isFinite(concurrencyFromEnv) && concurrencyFromEnv > 0 ? concurrencyFromEnv : 2;
 
     await executorClient.runExperiment(
       {

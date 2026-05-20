@@ -141,9 +141,9 @@ export function createTraceBasedEvaluator({
               );
             } else {
               log.warning(
-                `${name} query failed on attempt ${error.attemptNumber}; retrying... (traceIds: ${traceIds.join(
-                  ','
-                )})`
+                `${name} query failed on attempt ${
+                  error.attemptNumber
+                }; retrying... (traceIds: ${traceIds.join(',')})`
               );
             }
           },
@@ -157,7 +157,9 @@ export function createTraceBasedEvaluator({
 
         if (lastResult !== undefined) {
           log.warning(
-            `${name} returning potentially incomplete result for traces ${traceIds.join(',')}: ${lastResult}`
+            `${name} returning potentially incomplete result for traces ${traceIds.join(
+              ','
+            )}: ${lastResult}`
           );
           return {
             score: lastResult,

@@ -219,9 +219,7 @@ export class AgentBuilderEvaluationChatClient {
         }
 
         this.log.info(
-          `Auto-confirming ${prompts.length} HITL prompt(s): ${prompts
-            .map((p) => p.id)
-            .join(', ')}`
+          `Auto-confirming ${prompts.length} HITL prompt(s): ${prompts.map((p) => p.id).join(', ')}`
         );
         pendingPromptAnswers = Object.fromEntries(prompts.map((p) => [p.id, { allow: true }]));
         // Resuming a HITL prompt does not require new user text; the empty
