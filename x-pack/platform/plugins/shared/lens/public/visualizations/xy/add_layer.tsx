@@ -240,7 +240,9 @@ export function AddLayerButton({
                         toggleLayersChoice(false);
                       }}
                     >
-                      <span data-test-subj="lnsChartSwitch-option-label">{t.label}</span>
+                      <EuiText size="s" data-test-subj="lnsChartSwitch-option-label">
+                        {t.label}
+                      </EuiText>
                       <EuiText size="xs" color="subdued">
                         {t.description ?? null}
                       </EuiText>
