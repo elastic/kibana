@@ -226,7 +226,7 @@ export function AddLayerButton({
                 return {
                   renderItem: () => (
                     <EuiContextMenuItem
-                      icon={<EuiIcon type={t.icon || 'empty'} aria-hidden={true} />}
+                      icon={<EuiIcon type={t.icon} aria-hidden={true} />}
                       data-test-subj={`lnsXY_seriesType-${t.id}`}
                       onClick={() => {
                         addLayer(
@@ -244,7 +244,7 @@ export function AddLayerButton({
                         {t.label}
                       </EuiText>
                       <EuiText size="xs" color="subdued">
-                        {t.description ?? null}
+                        {t.description}
                       </EuiText>
                     </EuiContextMenuItem>
                   ),
