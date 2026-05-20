@@ -63,6 +63,10 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
   updateRoute.addVersion(
     {
       version: LENS_API_VERSION,
+      options: {
+        oasOperationObject: async () =>
+          (await import('./oas_examples')).getUpdateLensVisualizationOASOperationObject(),
+      },
       validate: {
         request: {
           params: lensUpdateRequestParamsSchema,

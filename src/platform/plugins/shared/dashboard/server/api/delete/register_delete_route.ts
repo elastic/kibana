@@ -32,6 +32,10 @@ export function registerDeleteRoute(
   deleteRoute.addVersion(
     {
       version: routeVersion,
+      options: {
+        oasOperationObject: async () =>
+          (await import('../oas_examples')).getDeleteDashboardOASOperationObject(),
+      },
       validate: {
         request: {
           params: schema.object({
@@ -52,9 +56,6 @@ export function registerDeleteRoute(
           404: {
             description: 'not found',
           },
-          500: {
-            description: 'internal server error',
-          },
         },
       },
     },
@@ -64,22 +65,19 @@ export function registerDeleteRoute(
           await deleteDashboard(ctx, req.params.id);
         } catch (e) {
           if (e.isBoom && e.output.statusCode === 404) {
-            const message = `A dashboard with ID [${req.params.id}] was not found.`;
-            logRequest(logger, req, 'debug', message);
+            logRequest(logger, req, 'debug', e.message);
             return res.notFound({
               body: {
-                message,
+                message: `A dashboard with ID [${req.params.id}] was not found.`,
               },
             });
           }
-
           if (e.isBoom && e.output.statusCode === 403) {
             logRequest(logger, req, 'debug', e.message);
             return res.forbidden({ body: { message: e.message } });
           }
-
-          logRequest(logger, req, 'error', e.message);
-          return res.customError({ statusCode: 500, body: { message: e.message } });
+          logRequest(logger, req, 'warn', e.message);
+          return res.badRequest({ body: { message: e.message } });
         }
 
         return res.noContent();

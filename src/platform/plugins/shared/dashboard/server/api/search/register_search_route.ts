@@ -33,6 +33,10 @@ export function registerSearchRoute(
   searchRoute.addVersion(
     {
       version: routeVersion,
+      options: {
+        oasOperationObject: async () =>
+          (await import('../oas_examples')).getSearchDashboardOASOperationObject(),
+      },
       validate: {
         request: {
           query: searchRequestParamsSchema,
@@ -44,9 +48,6 @@ export function registerSearchRoute(
           },
           403: {
             description: 'forbidden',
-          },
-          500: {
-            description: 'internal server error',
           },
         },
       },
@@ -62,8 +63,8 @@ export function registerSearchRoute(
             return res.forbidden({ body: { message: e.message } });
           }
 
-          logRequest(logger, req, 'error', e.message);
-          return res.customError({ statusCode: 500, body: { message: e.message } });
+          logRequest(logger, req, 'warn', e.message);
+          return res.badRequest({ body: { message: e.message } });
         }
       })
   );
