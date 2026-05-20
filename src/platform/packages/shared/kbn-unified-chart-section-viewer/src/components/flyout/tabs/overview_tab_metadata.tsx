@@ -46,28 +46,28 @@ export interface OverviewTabMetadataProps {
    * When set, prepends a `<Label>: <indexName>` row above the standard metadata.
    * The label is derived from `kind` (Index or Data stream) and the value is the index name or stream link.
    */
-  sourceRow?: SourceLink;
+  indexRow?: SourceLink;
 }
 
-export const OverviewTabMetadata = ({ metricItem, sourceRow }: OverviewTabMetadataProps) => {
+export const OverviewTabMetadata = ({ metricItem, indexRow }: OverviewTabMetadataProps) => {
   const { euiTheme } = useEuiTheme();
 
   const { rows, labelMinWidthPx } = useMemo(() => {
     const labelMinWidthPxInner = euiTheme.base * LABEL_WIDTH_MULTIPLIER;
 
-    const indexNameRow = sourceRow
+    const indexNameRow = indexRow
       ? [
           {
-            title: <StrongTitle text={SOURCE_LABEL[sourceRow.kind]} />,
+            title: <StrongTitle text={SOURCE_LABEL[indexRow.kind]} />,
             description: (
               <div
                 css={css`
                   word-break: break-word;
                   overflow-wrap: anywhere;
                 `}
-                data-test-subj={SOURCE_TEST_SUBJ[sourceRow.kind]}
+                data-test-subj={SOURCE_TEST_SUBJ[indexRow.kind]}
               >
-                {sourceRow.streamLink ?? <EuiText size="xs">{sourceRow.indexName}</EuiText>}
+                {indexRow.streamLink ?? <EuiText size="xs">{indexRow.indexName}</EuiText>}
               </div>
             ),
           },
@@ -135,7 +135,7 @@ export const OverviewTabMetadata = ({ metricItem, sourceRow }: OverviewTabMetada
     ];
 
     return { rows: rowsInner, labelMinWidthPx: labelMinWidthPxInner };
-  }, [euiTheme.base, sourceRow, metricItem.fieldTypes, metricItem.metricTypes, metricItem.units]);
+  }, [euiTheme.base, indexRow, metricItem.fieldTypes, metricItem.metricTypes, metricItem.units]);
 
   return (
     <EuiPanel
