@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { getHoverItem } from '@kbn/esql-language';
 import { FIX_WITH_AI_COMMAND_ID } from '@kbn/esql-types';
 import { monaco } from '../../../../monaco_imports';
-import { createMonacoProvider } from './providers_factory';
+import { createCancellableCallbacks, createMonacoProvider } from './providers_factory';
 import { getDecorationHoveredMessages, monacoPositionToOffset } from '../shared/utils';
 import type { ESQLDependencies } from './types';
 
@@ -19,7 +19,11 @@ export function getHoverProvider(deps?: ESQLDependencies): monaco.languages.Hove
   let lastHoveredWord: string;
 
   return {
-    async provideHover(model: monaco.editor.ITextModel, position: monaco.Position) {
+    async provideHover(
+      model: monaco.editor.ITextModel,
+      position: monaco.Position,
+      token: monaco.CancellationToken
+    ) {
       return createMonacoProvider({
         model,
         run: async (safeModel) => {
@@ -41,7 +45,8 @@ export function getHoverProvider(deps?: ESQLDependencies): monaco.languages.Hove
             }
           }
 
-          const hoverResult = await getHoverItem(fullText, offset, deps);
+          const cancellableCallbacks = createCancellableCallbacks(deps, token);
+          const hoverResult = await getHoverItem(fullText, offset, cancellableCallbacks);
 
           if (!deps?.isSuggestFixEnabled) {
             return hoverResult;

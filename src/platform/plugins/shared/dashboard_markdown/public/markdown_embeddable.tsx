@@ -9,7 +9,7 @@
 
 import { euiMarkdownLinkValidator, getDefaultEuiMarkdownPlugins } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
   apiCanAddNewPanel,
   apiCanFocusPanel,
@@ -21,7 +21,7 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import React from 'react';
-import { BehaviorSubject, map, merge } from 'rxjs';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type {
   MarkdownEmbeddableState,
@@ -43,7 +43,7 @@ const flexCss = css({
   flex: '1 1 100%',
 });
 
-export const markdownEmbeddableFactory: EmbeddableFactory<
+export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
   MarkdownEmbeddableState,
   MarkdownEditorApi
 > = {
@@ -108,9 +108,15 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       serializeState,
       anyStateChange$: merge(
         titleManager.anyStateChange$,
-        content$.pipe(map(() => undefined)),
-        settings$.pipe(map(() => undefined))
-      ).pipe(map(() => undefined)),
+        content$.pipe(
+          skip(1),
+          map(() => undefined)
+        ),
+        settings$.pipe(
+          skip(1),
+          map(() => undefined)
+        )
+      ),
       getComparators: () => {
         return {
           ...titleComparators,
