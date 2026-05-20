@@ -10,6 +10,7 @@ import { transformSentinelMitreMapping, transformSentinelRuleToOriginalRule } fr
 
 const baseSentinelRule: SentinelRule = {
   id: 'rule-id-1',
+  kind: 'Scheduled',
   displayName: 'Suspicious sign-in',
   description: 'Detects suspicious sign-in activity',
   query: 'SigninLogs | where ResultType != 0',
@@ -79,6 +80,11 @@ describe('transformSentinelRuleToOriginalRule', () => {
       description: 'Detects suspicious sign-in activity',
       query: 'SigninLogs | where ResultType != 0',
       query_language: 'kql',
+      annotations: {
+        from: 'now-360s',
+        to: 'now',
+        interval: '5m',
+      },
     });
   });
 
@@ -105,5 +111,18 @@ describe('transformSentinelRuleToOriginalRule', () => {
     expect(result.threat?.[0].tactic.id).toBe('TA0001');
     expect(result.threat?.[0].technique).toHaveLength(1);
     expect(result.threat?.[0].technique?.[0].id).toBe('T1078');
+  });
+
+  it('adds NRT timing overrides to annotations', () => {
+    const result = transformSentinelRuleToOriginalRule({
+      ...baseSentinelRule,
+      kind: 'NRT',
+    });
+
+    expect(result.annotations).toEqual({
+      from: 'now-1m',
+      to: 'now',
+      interval: '1m',
+    });
   });
 });

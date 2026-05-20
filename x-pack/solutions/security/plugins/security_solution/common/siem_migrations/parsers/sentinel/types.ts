@@ -6,12 +6,16 @@
  */
 
 /**
- * Represents a Microsoft Sentinel Scheduled Analytics Rule as parsed from
+ * Represents a Microsoft Sentinel Scheduled or Near-Real-Time Analytics Rule as parsed from
  * an ARM template JSON export.
  */
+export type SentinelRuleKind = 'Scheduled' | 'NRT';
+
 export interface SentinelRule {
   /** The rule's unique identifier (ARM resource name or GUID) */
   id: string;
+  /** The Sentinel analytics rule kind */
+  kind: SentinelRuleKind;
   /** The rule display name */
   displayName: string;
   /** The rule description */

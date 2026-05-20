@@ -6,12 +6,17 @@
  */
 
 import type { SentinelArmResource } from '../../model/vendor/rules/sentinel.gen';
-import type { SentinelRule } from './types';
+import type { SentinelRule, SentinelRuleKind } from './types';
+
+const SUPPORTED_SENTINEL_RULE_KINDS: SentinelRuleKind[] = ['Scheduled', 'NRT'];
+
+const isSupportedSentinelRuleKind = (kind: string | undefined): kind is SentinelRuleKind =>
+  SUPPORTED_SENTINEL_RULE_KINDS.includes(kind as SentinelRuleKind);
 
 /**
  * Processes pre-validated Sentinel ARM template resources into SentinelRule objects.
  *
- * Only "Scheduled" rule kinds are extracted, as these map to detection rules.
+ * Only "Scheduled" and "NRT" rule kinds are extracted, as these map to detection rules.
  * The resources array is expected to be already validated by the API schema.
  */
 export class SentinelRulesParser {
@@ -22,7 +27,7 @@ export class SentinelRulesParser {
   }
 
   /**
-   * Returns all valid Scheduled Analytics Rules from the resources.
+   * Returns all valid Scheduled and NRT Analytics Rules from the resources.
    */
   public getRules(): SentinelRule[] {
     return this.resources
@@ -31,8 +36,8 @@ export class SentinelRulesParser {
   }
 
   private processResource(resource: SentinelArmResource): SentinelRule | undefined {
-    // Only process Scheduled analytics rules
-    if (resource.kind !== 'Scheduled') {
+    // Only process Sentinel analytics rule kinds that share the KQL detection path.
+    if (!isSupportedSentinelRuleKind(resource.kind)) {
       return undefined;
     }
 
@@ -51,6 +56,7 @@ export class SentinelRulesParser {
 
     return {
       id,
+      kind: resource.kind,
       displayName,
       description: description ?? '',
       query,

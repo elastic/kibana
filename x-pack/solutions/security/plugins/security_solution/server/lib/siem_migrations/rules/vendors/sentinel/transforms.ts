@@ -6,6 +6,10 @@
  */
 
 import type { Threat } from '../../../../../../common/api/detection_engine';
+import {
+  DEFAULT_TRANSLATION_FIELDS,
+  SENTINEL_NRT_TRANSLATION_FIELDS,
+} from '../../../../../../common/siem_migrations/constants';
 import type { OriginalRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { SentinelRule } from '../../../../../../common/siem_migrations/parsers/sentinel/types';
 import {
@@ -78,6 +82,9 @@ export function transformSentinelRuleToOriginalRule(rule: SentinelRule): Origina
     query: rule.query,
     query_language: 'kql',
     severity: rule.severity.toLowerCase(),
+    annotations: {
+      ...(rule.kind === 'NRT' ? SENTINEL_NRT_TRANSLATION_FIELDS : DEFAULT_TRANSLATION_FIELDS),
+    },
   };
 
   if (threat.length > 0) {
