@@ -49,7 +49,7 @@ export const useHostDetails = ({
   skip = false,
   startDate,
 }: UseHostDetails): [boolean, HostDetailsArgs, inputsModel.Refetch] => {
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const euidApi = useEntityStoreEuidApi();
 
   const shouldSkip =
