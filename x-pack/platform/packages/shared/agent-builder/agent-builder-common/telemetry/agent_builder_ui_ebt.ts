@@ -111,6 +111,14 @@ const ebtAction = {
     SUBSCRIPTION_PLANS: 'subscription_plans',
     MANAGE_LICENSE: 'manage_license',
   },
+  connectors: {
+    OPEN_CONTEXT_MENU: 'open_context_menu',
+    EDIT_CONNECTOR: 'edit_connector',
+    DISCONNECT_CONNECTOR: 'disconnect_connector',
+    DELETE_CONNECTOR: 'delete_connector',
+    DISCONNECT_CONFIRM: 'disconnect_confirm',
+    DISCONNECT_CANCEL: 'disconnect_cancel',
+  },
   conversation: {
     START_NEW: 'start_new',
     CLOSE: 'close',
@@ -146,6 +154,10 @@ const ebtAction = {
     ATTACHMENT_CLOSE: 'attachment_close',
     CONFIRM_PROMPT_CONFIRM: 'confirm_prompt_confirm',
     CONFIRM_PROMPT_CANCEL: 'confirm_prompt_cancel',
+    DELETE_CONFIRM: 'delete_confirm',
+    DELETE_CANCEL: 'delete_cancel',
+    EXTERNAL_LINK_CONFIRM: 'external_link_confirm',
+    EXTERNAL_LINK_CANCEL: 'external_link_cancel',
   },
   libraryPanel: {
     MANAGE_ALL: 'manage_all',
