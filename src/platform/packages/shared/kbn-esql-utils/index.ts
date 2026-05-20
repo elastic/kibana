@@ -73,6 +73,7 @@ export {
   isComputedColumn,
   getQuerySummary,
   getColumnsToHighlight,
+  buildRenameSourceFieldMap,
   getEsqlControls,
   getAllEsqlControls,
   convertFiltersToESQLExpression,
