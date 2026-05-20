@@ -90,7 +90,10 @@ export const InputNumber = ({
               name={field.name}
               value={(field.value as string | number | undefined) ?? ''}
               onChange={(e) => field.onChange(e.target.value)}
-              onBlur={field.onBlur}
+              onBlur={() => {
+                field.onBlur();
+                setIsFocused(false);
+              }}
               onFocus={() => setIsFocused(true)}
               isInvalid={!!fieldState.error}
               fullWidth

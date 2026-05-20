@@ -280,6 +280,23 @@ describe('TemplateFields', () => {
 
       expect(onUpdateField).not.toHaveBeenCalled();
     });
+
+    it('hides confirm/cancel buttons when the field loses focus (tab away)', async () => {
+      const user = userEvent.setup();
+      render(<TemplateFields {...defaultProps} />);
+
+      await user.click(getSummaryInput());
+      expect(screen.getByTestId('template-field-confirm-summary')).toBeInTheDocument();
+
+      await user.tab();
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('template-field-confirm-summary')).not.toBeInTheDocument();
+      });
+      await waitFor(() => {
+        expect(screen.queryByTestId('template-field-cancel-summary')).not.toBeInTheDocument();
+      });
+    });
   });
 
   describe('textarea field inline-edit confirm/cancel', () => {
@@ -342,6 +359,23 @@ describe('TemplateFields', () => {
         expect(notes.value).toBe('some notes');
       });
     });
+
+    it('hides confirm/cancel buttons when the textarea loses focus', async () => {
+      const user = userEvent.setup();
+      render(<TemplateFields {...defaultProps} />);
+
+      await user.click(getNotesInput());
+      expect(screen.getByTestId('template-field-confirm-notes')).toBeInTheDocument();
+
+      await user.tab();
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('template-field-confirm-notes')).not.toBeInTheDocument();
+      });
+      await waitFor(() => {
+        expect(screen.queryByTestId('template-field-cancel-notes')).not.toBeInTheDocument();
+      });
+    });
   });
 
   describe('number field inline-edit confirm/cancel', () => {
@@ -400,6 +434,23 @@ describe('TemplateFields', () => {
       expect(onUpdateField).not.toHaveBeenCalled();
       await waitFor(() => {
         expect(effort.value).toBe('5');
+      });
+    });
+
+    it('hides confirm/cancel buttons when the number field loses focus', async () => {
+      const user = userEvent.setup();
+      render(<TemplateFields {...defaultProps} />);
+
+      await user.click(getEffortInput());
+      expect(screen.getByTestId('template-field-confirm-effort')).toBeInTheDocument();
+
+      await user.tab();
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('template-field-confirm-effort')).not.toBeInTheDocument();
+      });
+      await waitFor(() => {
+        expect(screen.queryByTestId('template-field-cancel-effort')).not.toBeInTheDocument();
       });
     });
   });
