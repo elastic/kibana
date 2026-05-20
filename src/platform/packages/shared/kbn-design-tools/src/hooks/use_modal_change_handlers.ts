@@ -412,7 +412,7 @@ export const useModalChangeHandlers = ({
   }, [draft, syncUiAfterDraft]);
 
   const handleSave = useCallback(() => {
-    const { styleEdits, textEdits, mediaEdits } = flattenDraftEdits(draft.edits);
+    const { styleEdits, textEdits, mediaEdits } = flattenDraftEdits(draft.edits, draft.activeIds);
 
     const styleChanges: StyleChange[] = styleEdits.map((e) => ({
       element: e.element,
@@ -440,7 +440,7 @@ export const useModalChangeHandlers = ({
     }));
 
     onSave(styleChanges, textChanges, mediaChanges);
-  }, [draft.edits, onSave, textNodeMap]);
+  }, [draft.activeIds, draft.edits, onSave, textNodeMap]);
 
   return {
     handleColorChange,

@@ -177,6 +177,11 @@ export class UndoRedoStack<T extends StackEntry = Transaction> {
     return this.redoEntries.length;
   }
 
+  /** Returns the IDs of all entries on the active (undo) stack. */
+  public get activeIds(): ReadonlySet<number> {
+    return new Set(this.undoEntries.map((e) => e.id));
+  }
+
   /**
    * Returns a cached snapshot of the stack's observable state.
    *

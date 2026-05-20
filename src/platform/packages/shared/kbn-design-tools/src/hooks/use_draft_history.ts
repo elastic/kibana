@@ -116,6 +116,8 @@ export interface DraftHistoryResult {
   state: UndoRedoSnapshot;
   /** Direct access to the edits map - used by `flattenDraftEdits` at save time. */
   edits: Map<number, DraftEdit[]>;
+  /** IDs of transactions on the active (undo) stack, excluding undone entries. */
+  activeIds: ReadonlySet<number>;
 }
 
 /**
@@ -195,7 +197,17 @@ export const useDraftHistory = (): DraftHistoryResult => {
     return batch?.[0] ?? null;
   }, [stack]);
 
-  return { push, pushBatch, undo, redo, state, edits: editsRef.current };
+  return {
+    push,
+    pushBatch,
+    undo,
+    redo,
+    state,
+    edits: editsRef.current,
+    get activeIds() {
+      return stack.activeIds;
+    },
+  };
 };
 
 /**
@@ -212,7 +224,8 @@ export const useDraftHistory = (): DraftHistoryResult => {
  * passed to `onSave`.
  */
 export const flattenDraftEdits = (
-  edits: Map<number, DraftEdit[]>
+  edits: Map<number, DraftEdit[]>,
+  activeIds?: ReadonlySet<number>
 ): {
   styleEdits: DraftStyleEdit[];
   textEdits: DraftTextEdit[];
@@ -235,7 +248,8 @@ export const flattenDraftEdits = (
   // Invariant: Map.values() iterates in insertion order (ES2015+), which
   // matches chronological push order, so the first edit's `before` value
   // is preserved as the original state for each property key.
-  for (const batch of edits.values()) {
+  for (const [id, batch] of edits.entries()) {
+    if (activeIds && !activeIds.has(id)) continue;
     for (const edit of batch) {
       switch (edit.type) {
         case 'style': {

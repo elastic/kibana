@@ -340,6 +340,23 @@ describe('useModalChangeHandlers', () => {
       expect(textChanges).toHaveLength(0);
       expect(mediaChanges).toHaveLength(0);
     });
+
+    it('should not include undone edits when saving', () => {
+      const { result: draftResult } = renderHook(() => useDraftHistory());
+      const args = createArgs();
+
+      const { result } = renderHook(() =>
+        useModalChangeHandlers({ ...args, draft: draftResult.current })
+      );
+
+      act(() => result.current.handleColorChange('#ff0000'));
+      act(() => result.current.handleDraftUndo());
+      act(() => result.current.handleSave());
+
+      expect(args.onSave).toHaveBeenCalledTimes(1);
+      const [styleChanges] = (args.onSave as jest.Mock).mock.calls[0];
+      expect(styleChanges).toHaveLength(0);
+    });
   });
 
   describe('originalDimensionsRef', () => {

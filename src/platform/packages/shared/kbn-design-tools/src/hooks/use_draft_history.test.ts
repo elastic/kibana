@@ -204,6 +204,20 @@ describe('useDraftHistory', () => {
     expect(result.current.edits.size).toBe(1);
   });
 
+  it('should expose activeIds that exclude undone entries', () => {
+    const { result } = renderHook(() => useDraftHistory());
+    const edit1 = makeStyleEdit();
+    const edit2 = makeStyleEdit({ property: 'color', before: 'red', after: 'blue' });
+
+    act(() => result.current.push(edit1));
+    act(() => result.current.push(edit2));
+    expect(result.current.activeIds.size).toBe(2);
+
+    act(() => result.current.undo());
+    expect(result.current.activeIds.size).toBe(1);
+    expect(result.current.edits.size).toBe(2);
+  });
+
   describe('dimension tracking', () => {
     const makeDimensionRecords = (): { el: HTMLElement; records: DimensionRecord[] } => {
       const el = document.createElement('div');
@@ -470,5 +484,47 @@ describe('flattenDraftEdits', () => {
     expect(result.mediaEdits).toHaveLength(1);
     expect(result.mediaEdits[0].before).toBe('a.png');
     expect(result.mediaEdits[0].after).toBe('c.png');
+  });
+
+  it('should exclude undone edits when activeIds is provided', () => {
+    const el = document.createElement('div');
+    const cloneEl = document.createElement('div');
+    const edits = new Map<number, DraftStyleEdit[]>([
+      [
+        1,
+        [
+          {
+            type: 'style',
+            label: 'Color',
+            element: el,
+            cloneElement: cloneEl,
+            property: 'backgroundColor',
+            before: '#ffffff',
+            after: '#ff0000',
+          },
+        ],
+      ],
+      [
+        2,
+        [
+          {
+            type: 'style',
+            label: 'Color',
+            element: el,
+            cloneElement: cloneEl,
+            property: 'backgroundColor',
+            before: '#ff0000',
+            after: '#00ff00',
+          },
+        ],
+      ],
+    ]);
+
+    // Only transaction 1 is active (transaction 2 was undone)
+    const activeIds = new Set([1]);
+    const result = flattenDraftEdits(edits, activeIds);
+
+    expect(result.styleEdits).toHaveLength(1);
+    expect(result.styleEdits[0].after).toBe('#ff0000');
   });
 });
