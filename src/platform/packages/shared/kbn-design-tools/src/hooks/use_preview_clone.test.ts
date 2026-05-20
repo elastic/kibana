@@ -70,14 +70,14 @@ describe('usePreviewClone', () => {
     expect(result.current.cloneRef.current).toBeNull();
   });
 
-  it('should create a clone when previewCallbackRef is called with a node', () => {
+  it('should create a clone when previewCallbackRef is called with a node', async () => {
     const target = createTarget();
     const { result } = renderHook(() => usePreviewClone(target));
 
     const container = document.createElement('div');
     document.body.appendChild(container);
 
-    act(() => {
+    await act(async () => {
       result.current.previewCallbackRef(container);
     });
 
@@ -86,17 +86,17 @@ describe('usePreviewClone', () => {
     expect(container.children.length).toBe(1);
   });
 
-  it('should remove old clone when previewCallbackRef is called again', () => {
+  it('should remove old clone when previewCallbackRef is called again', async () => {
     const target = createTarget();
     const { result } = renderHook(() => usePreviewClone(target));
 
     const container = document.createElement('div');
     document.body.appendChild(container);
 
-    act(() => result.current.previewCallbackRef(container));
+    await act(async () => result.current.previewCallbackRef(container));
     const firstClone = result.current.cloneRef.current;
 
-    act(() => result.current.previewCallbackRef(container));
+    await act(async () => result.current.previewCallbackRef(container));
 
     expect(result.current.cloneRef.current).not.toBe(firstClone);
     expect(container.children.length).toBe(1);
@@ -111,27 +111,27 @@ describe('usePreviewClone', () => {
     expect(result.current.cloneRoot).toBeNull();
   });
 
-  it('should populate textEntries from target text nodes', () => {
+  it('should populate textEntries from target text nodes', async () => {
     const target = createTarget();
     const { result } = renderHook(() => usePreviewClone(target));
 
     const container = document.createElement('div');
     document.body.appendChild(container);
 
-    act(() => result.current.previewCallbackRef(container));
+    await act(async () => result.current.previewCallbackRef(container));
 
     expect(result.current.textEntries.length).toBeGreaterThan(0);
     expect(result.current.textNodeMap.current.length).toBeGreaterThan(0);
   });
 
-  it('should clear cloneRef on unmount', () => {
+  it('should clear cloneRef on unmount', async () => {
     const target = createTarget();
     const { result, unmount } = renderHook(() => usePreviewClone(target));
 
     const container = document.createElement('div');
     document.body.appendChild(container);
 
-    act(() => result.current.previewCallbackRef(container));
+    await act(async () => result.current.previewCallbackRef(container));
     expect(result.current.cloneRef.current).not.toBeNull();
 
     unmount();
