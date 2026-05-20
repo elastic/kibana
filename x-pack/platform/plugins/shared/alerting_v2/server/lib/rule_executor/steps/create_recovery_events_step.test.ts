@@ -40,7 +40,46 @@ describe('CreateRecoveryEventsStep', () => {
     return { step, internalEsClient: internal.mockEsClient, scopedEsClient: scoped.mockEsClient };
   }
 
-  describe('no_breach recovery (default)', () => {
+  describe('no_recovery', () => {
+    it('skips recovery entirely when recovery_policy is not set', async () => {
+      const { step, internalEsClient, scopedEsClient } = createStep();
+
+      const breachedEvents = [createAlertEvent({ group_hash: 'hash-1' })];
+
+      const state = createRulePipelineState({
+        rule: createRuleResponse({ kind: 'alert', recovery_policy: undefined }),
+        alertEventsBatch: breachedEvents,
+      });
+
+      const [result] = await collectStreamResults(
+        step.executeStream(createPipelineStream([state]))
+      );
+
+      expect(internalEsClient.esql.query).not.toHaveBeenCalled();
+      expect(scopedEsClient.esql.query).not.toHaveBeenCalled();
+      expect(result).toEqual({ type: 'continue', state });
+    });
+
+    it('skips recovery for non-alert rules', async () => {
+      const { step, internalEsClient } = createStep();
+
+      const alertEventsBatch = [createAlertEvent({ group_hash: 'hash-1' })];
+
+      const state = createRulePipelineState({
+        rule: createRuleResponse({ kind: 'signal' }),
+        alertEventsBatch,
+      });
+
+      const [result] = await collectStreamResults(
+        step.executeStream(createPipelineStream([state]))
+      );
+
+      expect(internalEsClient.esql.query).not.toHaveBeenCalled();
+      expect(result).toEqual({ type: 'continue', state });
+    });
+  });
+
+  describe('no_breach recovery', () => {
     it('creates recovery events for active groups not in the breached set', async () => {
       const { step, internalEsClient } = createStep();
 
@@ -68,48 +107,6 @@ describe('CreateRecoveryEventsStep', () => {
       expect(alertEvents[1].group_hash).toBe('hash-2');
       expect(alertEvents[2].status).toBe('recovered');
       expect(alertEvents[2].group_hash).toBe('hash-3');
-    });
-
-    it('uses no_breach strategy when recovery_policy is not set', async () => {
-      const { step, internalEsClient, scopedEsClient } = createStep();
-
-      internalEsClient.esql.query.mockResolvedValue(
-        createActiveGroupHashesResponse(['hash-1', 'hash-2'])
-      );
-
-      const state = createRulePipelineState({
-        rule: createRuleResponse({ kind: 'alert', recovery_policy: undefined }),
-        alertEventsBatch: [createAlertEvent({ group_hash: 'hash-1' })],
-      });
-
-      const [result] = await collectStreamResults(
-        step.executeStream(createPipelineStream([state]))
-      );
-
-      expect(scopedEsClient.esql.query).not.toHaveBeenCalled();
-      expect(result.type).toBe('continue');
-      const alertEvents = result.state.alertEventsBatch!;
-      expect(alertEvents).toHaveLength(2);
-      expect(alertEvents[1].status).toBe('recovered');
-      expect(alertEvents[1].group_hash).toBe('hash-2');
-    });
-
-    it('skips recovery for non-alert rules', async () => {
-      const { step, internalEsClient } = createStep();
-
-      const alertEventsBatch = [createAlertEvent({ group_hash: 'hash-1' })];
-
-      const state = createRulePipelineState({
-        rule: createRuleResponse({ kind: 'signal' }),
-        alertEventsBatch,
-      });
-
-      const [result] = await collectStreamResults(
-        step.executeStream(createPipelineStream([state]))
-      );
-
-      expect(internalEsClient.esql.query).not.toHaveBeenCalled();
-      expect(result).toEqual({ type: 'continue', state });
     });
 
     it('returns original events when no active groups exist', async () => {
