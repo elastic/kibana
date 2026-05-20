@@ -16,11 +16,9 @@ export const buildRulePayload = (data: Partial<RuleAttachmentData>): CreateRuleD
   kind: data.kind!,
   metadata: data.metadata!,
   schedule: data.schedule!,
-  evaluation: data.evaluation!,
+  query: data.query!,
   state_transition: data.state_transition ?? null,
   time_field: data.time_field ?? '@timestamp',
-  ...(data.recovery_policy !== undefined ? { recovery_policy: data.recovery_policy } : {}),
   ...(data.grouping !== undefined ? { grouping: data.grouping } : {}),
-  ...(data.no_data !== undefined ? { no_data: data.no_data } : {}),
   ...(data.artifacts !== undefined ? { artifacts: data.artifacts } : {}),
 });
