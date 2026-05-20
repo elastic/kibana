@@ -8,6 +8,6 @@
     "isolatedModules": false
   },
   "kbn_references": [
-    "@kbn/scout-oblt",
+    "@kbn/scout-oblt"
   ]
 }

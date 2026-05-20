@@ -6,8 +6,9 @@
  */
 
 import { expect } from '@kbn/scout-oblt/ui';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 import { test, testData } from '../fixtures';
+
+const { DYNAMIC_SETTINGS_DEFAULTS } = testData;
 
 test.describe('Uptime settings page', { tag: ['@local-stateful-classic'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects, kbnClient }) => {
