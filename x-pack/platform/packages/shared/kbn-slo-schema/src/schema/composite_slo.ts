@@ -7,6 +7,9 @@
 
 import { z } from '@kbn/zod';
 
+const COMPOSITE_SLO_MIN_MEMBERS = 2;
+const COMPOSITE_SLO_MAX_MEMBERS = 25;
+
 const compositeSloIdSchema = z
   .string()
   .min(8)
@@ -67,7 +70,10 @@ const compositeSloBaseDefinitionSchema = z.object({
 });
 
 const compositeSloDefinitionSchema = compositeSloBaseDefinitionSchema.extend({
-  members: z.array(compositeSloMemberSchema).min(2).max(25),
+  members: z
+    .array(compositeSloMemberSchema)
+    .min(COMPOSITE_SLO_MIN_MEMBERS)
+    .max(COMPOSITE_SLO_MAX_MEMBERS),
 });
 
 const storedCompositeSloDefinitionSchema = compositeSloDefinitionSchema;
@@ -103,6 +109,8 @@ type CompositeSLOSummary = z.infer<typeof compositeSloSummarySchema>;
 export type { CompositeSLOMember, CompositeMethod, CompositeSLOMemberSummary, CompositeSLOSummary };
 
 export {
+  COMPOSITE_SLO_MIN_MEMBERS,
+  COMPOSITE_SLO_MAX_MEMBERS,
   compositeSloIdSchema,
   compositeTagsSchema,
   compositeTargetSchema,
