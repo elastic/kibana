@@ -17,6 +17,7 @@ import {
   EuiHorizontalRule,
   EuiSkeletonText,
   EuiSpacer,
+  EuiFlexGroup,
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,
@@ -598,9 +599,11 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
           onSetErrorExists={setConditionsValidationError}
           getExtendedFields={getExtendedFields}
         />
-        {wildcardWarningExists && <WildCardWithWrongOperatorCallout />}
-        {malformedMatchesValueExists && <MalformedMatchesValueCallout />}
-        {partialCodeSignatureWarningExists && <PartialCodeSignatureCallout />}
+        <EuiFlexGroup direction="column" gutterSize="s">
+          {wildcardWarningExists && <WildCardWithWrongOperatorCallout />}
+          {malformedMatchesValueExists && <MalformedMatchesValueCallout />}
+          {partialCodeSignatureWarningExists && <PartialCodeSignatureCallout />}
+        </EuiFlexGroup>
         {listType !== ExceptionListTypeEnum.ENDPOINT && !sharedListToAddTo?.length && (
           <>
             <EuiHorizontalRule />

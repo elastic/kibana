@@ -12,6 +12,7 @@ import {
   EuiHorizontalRule,
   EuiFlyoutBody,
   EuiTitle,
+  EuiFlexGroup,
   EuiFlyout,
   EuiSkeletonText,
   useGeneratedHtmlId,
@@ -456,9 +457,11 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           onSetErrorExists={setConditionsValidationError}
           getExtendedFields={getExtendedFields}
         />
-        {wildcardWarningExists && <WildCardWithWrongOperatorCallout />}
-        {malformedMatchesValueExists && <MalformedMatchesValueCallout />}
-        {partialCodeSignatureWarningExists && <PartialCodeSignatureCallout />}
+        <EuiFlexGroup direction="column" gutterSize="s">
+          {wildcardWarningExists && <WildCardWithWrongOperatorCallout />}
+          {malformedMatchesValueExists && <MalformedMatchesValueCallout />}
+          {partialCodeSignatureWarningExists && <PartialCodeSignatureCallout />}
+        </EuiFlexGroup>
         {!openedFromListDetailPage && listType === ExceptionListTypeEnum.DETECTION && (
           <>
             <EuiHorizontalRule />
