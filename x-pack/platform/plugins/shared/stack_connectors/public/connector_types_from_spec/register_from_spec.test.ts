@@ -98,6 +98,7 @@ describe('registerConnectorTypesFromSpecs', () => {
         connectorTypeRegistry as unknown as TriggersAndActionsUIPublicPluginSetup['actionTypeRegistry'],
       uiSettingsPromise,
       isEarsEnabled: false,
+      isEarsExperimentalEnabled: false,
     });
 
     // Wait for the async import to complete
@@ -140,6 +141,7 @@ describe('registerConnectorTypesFromSpecs', () => {
         connectorTypeRegistry as unknown as TriggersAndActionsUIPublicPluginSetup['actionTypeRegistry'],
       uiSettingsPromise,
       isEarsEnabled: false,
+      isEarsExperimentalEnabled: false,
     });
 
     // Wait for the async import and uiSettings promise to complete
@@ -176,6 +178,7 @@ describe('registerConnectorTypesFromSpecs', () => {
         connectorTypeRegistry as unknown as TriggersAndActionsUIPublicPluginSetup['actionTypeRegistry'],
       uiSettingsPromise,
       isEarsEnabled: false,
+      isEarsExperimentalEnabled: false,
     });
 
     // Wait for the async import and uiSettings promise to complete
@@ -211,6 +214,7 @@ describe('registerConnectorTypesFromSpecs', () => {
         connectorTypeRegistry as unknown as TriggersAndActionsUIPublicPluginSetup['actionTypeRegistry'],
       uiSettingsPromise,
       isEarsEnabled: false,
+      isEarsExperimentalEnabled: false,
     });
 
     // Wait for the async import to complete
@@ -242,6 +246,7 @@ describe('registerConnectorTypesFromSpecs', () => {
         connectorTypeRegistry as unknown as TriggersAndActionsUIPublicPluginSetup['actionTypeRegistry'],
       uiSettingsPromise,
       isEarsEnabled: false,
+      isEarsExperimentalEnabled: false,
     });
 
     // Wait for the async import to complete
@@ -260,6 +265,7 @@ describe('registerConnectorTypesFromSpecs', () => {
         connectorTypeRegistry as unknown as TriggersAndActionsUIPublicPluginSetup['actionTypeRegistry'],
       uiSettingsPromise,
       isEarsEnabled: false,
+      isEarsExperimentalEnabled: false,
     });
 
     // Wait for the async import to complete
@@ -277,6 +283,7 @@ describe('registerConnectorTypesFromSpecs', () => {
           connectorTypeRegistry as unknown as TriggersAndActionsUIPublicPluginSetup['actionTypeRegistry'],
         uiSettingsPromise,
         isEarsEnabled: false,
+        isEarsExperimentalEnabled: false,
       });
 
       await new Promise((resolve) => setTimeout(resolve, 0));

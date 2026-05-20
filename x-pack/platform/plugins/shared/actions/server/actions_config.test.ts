@@ -49,7 +49,7 @@ const defaultActionsConfig: ActionsConfig = {
         callback: { lookbackWindow: '1h', limit: 100 },
       },
     },
-    ears: { enabled: false },
+    ears: { enabled: false, enableExperimental: false },
   },
 };
 
@@ -788,7 +788,7 @@ describe('getEarsUrl()', () => {
       ...defaultActionsConfig,
       auth: {
         ...defaultActionsConfig.auth,
-        ears: { enabled: false, url: 'https://ears.example.com' },
+        ears: { enabled: false, enableExperimental: false, url: 'https://ears.example.com' },
       },
     });
     expect(acu.getEarsUrl()).toBe('https://ears.example.com');
@@ -806,10 +806,28 @@ describe('isEarsEnabled()', () => {
       ...defaultActionsConfig,
       auth: {
         ...defaultActionsConfig.auth,
-        ears: { enabled: true },
+        ears: { enabled: true, enableExperimental: false },
       },
     });
     expect(acu.isEarsEnabled()).toBe(true);
+  });
+});
+
+describe('isEarsExperimentalEnabled()', () => {
+  test('returns false when neither config key is set', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.isEarsExperimentalEnabled()).toBe(false);
+  });
+
+  test('returns true when auth.ears.enableExperimental is true', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      auth: {
+        ...defaultActionsConfig.auth,
+        ears: { enabled: true, enableExperimental: true },
+      },
+    });
+    expect(acu.isEarsExperimentalEnabled()).toBe(true);
   });
 });
 

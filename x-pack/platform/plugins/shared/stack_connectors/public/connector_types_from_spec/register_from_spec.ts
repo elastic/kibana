@@ -22,10 +22,12 @@ export function registerConnectorTypesFromSpecs({
   connectorTypeRegistry,
   uiSettingsPromise,
   isEarsEnabled,
+  isEarsExperimentalEnabled,
 }: {
   connectorTypeRegistry: TriggersAndActionsUIPublicPluginSetup['actionTypeRegistry'];
   uiSettingsPromise: Promise<IUiSettingsClient>;
   isEarsEnabled: boolean;
+  isEarsExperimentalEnabled: boolean;
 }) {
   // TODO: Clean this up when workflows:ui:enabled setting is removed.
   // This is a workaround to avoid making the whole thing async.
@@ -54,7 +56,14 @@ export function registerConnectorTypesFromSpecs({
   ]).then(([{ connectorsSpecs }, { generateFormFields }, { generateSchema }]) => {
     for (const spec of Object.values(connectorsSpecs)) {
       connectorTypeRegistry.register(
-        createConnectorTypeFromSpec(spec, ref, generateFormFields, generateSchema, isEarsEnabled)
+        createConnectorTypeFromSpec(
+          spec,
+          ref,
+          generateFormFields,
+          generateSchema,
+          isEarsEnabled,
+          isEarsExperimentalEnabled
+        )
       );
     }
   });
@@ -64,11 +73,17 @@ const createConnectorFields = (
   spec: ConnectorSpec,
   generateFormFields: typeof import('@kbn/response-ops-form-generator').generateFormFields,
   generateSchema: typeof import('./generate_schema').generateSchema,
-  isEarsEnabled: boolean
+  isEarsEnabled: boolean,
+  isEarsExperimentalEnabled: boolean
 ) => {
   const ConnectorFields = (props: ActionConnectorFieldsProps) => {
     const schema = useMemo(
-      () => generateSchema(spec, { isEarsEnabled, authMode: props.authMode }),
+      () =>
+        generateSchema(spec, {
+          isEarsEnabled,
+          isEarsExperimentalEnabled,
+          authMode: props.authMode,
+        }),
       [props.authMode]
     );
 
@@ -86,9 +101,10 @@ const createConnectorTypeFromSpec = (
   ref: { uiSettings?: IUiSettingsClient },
   generateFormFields: typeof import('@kbn/response-ops-form-generator').generateFormFields,
   generateSchema: typeof import('./generate_schema').generateSchema,
-  isEarsEnabled: boolean
+  isEarsEnabled: boolean,
+  isEarsExperimentalEnabled: boolean
 ): ActionTypeModel => {
-  const schema = generateSchema(spec, { isEarsEnabled });
+  const schema = generateSchema(spec, { isEarsEnabled, isEarsExperimentalEnabled });
 
   return {
     id: spec.metadata.id,
@@ -109,7 +125,13 @@ const createConnectorTypeFromSpec = (
     },
     actionConnectorFields: lazy(() =>
       Promise.resolve({
-        default: createConnectorFields(spec, generateFormFields, generateSchema, isEarsEnabled),
+        default: createConnectorFields(
+          spec,
+          generateFormFields,
+          generateSchema,
+          isEarsEnabled,
+          isEarsExperimentalEnabled
+        ),
       })
     ),
     actionParamsFields: lazy(() => Promise.resolve({ default: () => null })),

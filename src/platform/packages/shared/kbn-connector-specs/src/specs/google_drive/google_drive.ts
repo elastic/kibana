@@ -93,6 +93,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
       },
       {
         type: 'ears',
+        experimental: true,
         overrides: {
           meta: { scope: { disabled: true } },
         },

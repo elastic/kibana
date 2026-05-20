@@ -14,11 +14,22 @@ export const generateSchema = (
   {
     isPfxEnabled,
     isEarsEnabled,
+    isEarsExperimentalEnabled,
     authMode,
-  }: { isPfxEnabled?: boolean; isEarsEnabled?: boolean; authMode?: AuthMode } = {}
+  }: {
+    isPfxEnabled?: boolean;
+    isEarsEnabled?: boolean;
+    isEarsExperimentalEnabled?: boolean;
+    authMode?: AuthMode;
+  } = {}
 ) => {
   return z.object({
     config: spec.schema ?? z.object({}),
-    secrets: generateSecretsSchemaFromSpec(spec.auth, { isPfxEnabled, isEarsEnabled, authMode }),
+    secrets: generateSecretsSchemaFromSpec(spec.auth, {
+      isPfxEnabled,
+      isEarsEnabled,
+      isEarsExperimentalEnabled,
+      authMode,
+    }),
   });
 };

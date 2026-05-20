@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { ConnectorSpec } from '@kbn/connector-specs';
+import { isString } from 'lodash';
+import type { AuthTypeDef, ConnectorSpec } from '@kbn/connector-specs';
+import { EARS_AUTH_ID } from '@kbn/connector-specs';
 import { generateSecretsSchemaFromSpec } from '@kbn/connector-specs/src/lib/generate_secrets_schema_from_spec';
 import { getSchemaForAuthType } from '@kbn/connector-specs/src/lib/get_schema_for_auth_type';
 import type { ActionTypeSecrets, ValidatorType, ValidatorServices } from '../../types';
@@ -32,10 +34,22 @@ export const generateSecretsSchema = (
 ): ValidatorType<ActionTypeSecrets> => {
   const settings = configUtils.getWebhookSettings();
   const isPfxEnabled = settings.ssl.pfx.enabled;
-  // Always include EARS in the static schema regardless of the feature flag.
+  // Always include EARS in the static schema regardless of feature flags.
   // This lets the customValidator (below) return a readable error message when EARS is
   // disabled, instead of a cryptic Zod union discriminator error.
-  const schema = generateSecretsSchemaFromSpec(authSpec, { isPfxEnabled, isEarsEnabled: true });
+  const schema = generateSecretsSchemaFromSpec(authSpec, {
+    isPfxEnabled,
+    isEarsEnabled: true,
+    isEarsExperimentalEnabled: true,
+  });
+
+  const hasExperimentalEars =
+    authSpec?.types.some(
+      (authType) =>
+        !isString(authType) &&
+        (authType as AuthTypeDef).type === EARS_AUTH_ID &&
+        (authType as AuthTypeDef).experimental === true
+    ) ?? false;
 
   const allowedHostsFieldsByAuthType = buildAllowedHostsFieldsByAuthType(authSpec);
 
@@ -52,6 +66,16 @@ export const generateSecretsSchema = (
       if (authType === 'ears' && !configurationUtilities.isEarsEnabled()) {
         throw new Error(
           'EARS OAuth authentication is not enabled. Enable it via xpack.actions.auth.ears.enabled in kibana.yml.'
+        );
+      }
+
+      if (
+        authType === 'ears' &&
+        hasExperimentalEars &&
+        !configurationUtilities.isEarsExperimentalEnabled()
+      ) {
+        throw new Error(
+          'EARS OAuth authentication is not enabled for this provider. Enable it via xpack.actions.auth.ears.enableExperimental in kibana.yml.'
         );
       }
 
