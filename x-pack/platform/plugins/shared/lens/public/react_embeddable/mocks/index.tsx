@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject, NEVER, Subject } from 'rxjs';
+import { BehaviorSubject, NEVER, of, Subject } from 'rxjs';
 import deepMerge from 'deepmerge';
 import React from 'react';
 import { faker } from '@faker-js/faker';
@@ -77,6 +77,7 @@ function getDefaultLensApiMock() {
     canUnlinkFromLibrary: jest.fn(async () => false),
     hasLibraryItemWithTitle: jest.fn().mockResolvedValue(false),
     /** New embeddable api inherited methods */
+    anyStateChange$: of(),
     serializeState: jest.fn(),
     getLegacySerializedState: jest.fn(),
     saveToLibrary: jest.fn(async () => 'saved-id'),

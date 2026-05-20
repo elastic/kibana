@@ -10,7 +10,7 @@
 import type { StateComparators, WithAllKeys } from '@kbn/presentation-publishing';
 import { diffComparators, initializeStateManager } from '@kbn/presentation-publishing';
 import type { BehaviorSubject } from 'rxjs';
-import { combineLatestWith, debounceTime, map } from 'rxjs';
+import { combineLatestWith, debounceTime, map, startWith } from 'rxjs';
 import type { DashboardState, DashboardOptions } from '../../server';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
 
@@ -100,12 +100,16 @@ export function initializeSettingsManager(initialState: DashboardState) {
       },
     },
     internalApi: {
+      anyStateChange$: stateManager.anyStateChange$,
       serializeSettings,
       startComparing: (lastSavedState$: BehaviorSubject<DashboardState>) => {
         return stateManager.anyStateChange$.pipe(
+          // anyStateChange$ does not emit on subscribe
+          // use startWith to compare unsaved changes on subscribe
+          startWith(undefined),
           debounceTime(100),
           map(() => stateManager.getLatestState()),
-          combineLatestWith(lastSavedState$),
+          combineLatestWith(lastSavedState$.pipe(map((lastSaved) => deserializeState(lastSaved)))),
           map(([latestState, lastSavedState]) => {
             const {
               description,
@@ -116,12 +120,7 @@ export function initializeSettingsManager(initialState: DashboardState) {
               project_routing_restore,
               title,
               ...optionDiffs
-            } = diffComparators(
-              comparators,
-              deserializeState(lastSavedState),
-              latestState,
-              DEFAULT_SETTINGS
-            );
+            } = diffComparators(comparators, lastSavedState, latestState, DEFAULT_SETTINGS);
             // options needs to contain all values and not just diffs since is spread into saved state
             const options = Object.keys(optionDiffs).length
               ? { ...serializeSettings().options, ...optionDiffs }
