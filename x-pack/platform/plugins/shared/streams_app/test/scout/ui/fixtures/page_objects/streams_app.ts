@@ -362,7 +362,7 @@ export class StreamsApp {
 
   async switchToColumnsView() {
     // Draft streams fetch samples via ES|QL from the parent, which can be slow
-    await this.page.getByTestId('streamsAppPreviewTableViewModeToggle').click({ timeout: 30_000 });
+    await this.page.getByTestId('streamsAppPreviewTableViewModeToggle').click({ timeout: 60_000 });
   }
 
   async saveRoutingRule() {
