@@ -97,6 +97,7 @@ const useSolutionSideNavItems = (
 ): SolutionSideNavItem<string>[] | undefined => {
   const navLinks = useNavLinks();
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps(); // adds href and onClick props
+  const { application } = useKibana().services;
 
   const classicFooterItems = useMemo((): SolutionSideNavItem[] | null => {
     const flatNavLinks = flattenNavigationLinks(navLinks);
@@ -216,24 +217,37 @@ const useSolutionSideNavItems = (
       return navItems;
     }, []);
 
-    // External app links
+    // External app links — hrefs are built via getUrlForApp so basePath and active
+    // space are automatically prepended (handles e.g. /s/my-space/app/discover).
     const externalLinks: SolutionSideNavItem[] = [
       {
         id: SecurityPageName.externalLinkAgentBuilder,
         label: 'Agents',
-        href: '/app/agent_builder/agents',
+        href: application.getUrlForApp('agent_builder', { path: '/agents' }),
+        onClick: (e: React.MouseEvent) => {
+          e.preventDefault();
+          application.navigateToApp('agent_builder', { path: '/agents' });
+        },
         position: SolutionSideNavItemPosition.top,
       },
       {
         id: SecurityPageName.externalLinkDiscover,
         label: 'Discover',
-        href: '/app/discover',
+        href: application.getUrlForApp('discover'),
+        onClick: (e: React.MouseEvent) => {
+          e.preventDefault();
+          application.navigateToApp('discover');
+        },
         position: SolutionSideNavItemPosition.top,
       },
       {
         id: SecurityPageName.externalLinkWorkflows,
         label: 'Workflows',
-        href: '/app/workflows',
+        href: application.getUrlForApp('workflows'),
+        onClick: (e: React.MouseEvent) => {
+          e.preventDefault();
+          application.navigateToApp('workflows');
+        },
         position: SolutionSideNavItemPosition.top,
       },
     ];
@@ -244,6 +258,7 @@ const useSolutionSideNavItems = (
       ...(classicFooterItems ? classicFooterItems : []),
     ];
   }, [
+    application,
     navLinks,
     getSecuritySolutionLinkProps,
     classicFooterItems,
