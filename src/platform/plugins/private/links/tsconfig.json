@@ -16,7 +16,6 @@
     "@kbn/dashboard-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/presentation-util-plugin",
-    "@kbn/object-versioning",
     "@kbn/config-schema",
     "@kbn/content-management-utils",
     "@kbn/content-management-plugin",
@@ -26,8 +25,6 @@
     "@kbn/saved-objects-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/ui-actions-plugin",
-    "@kbn/logging",
-    "@kbn/core-plugins-server",
     "@kbn/analytics",
     "@kbn/usage-collection-plugin",
     "@kbn/visualizations-plugin",
@@ -40,7 +37,10 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/dashboard-navigation-options-common",
     "@kbn/dashboard-navigation-options-components",
-    "@kbn/dashboard-navigation-options-schema"
+    "@kbn/dashboard-navigation-options-schema",
+    "@kbn/core-http-browser",
+    "@kbn/core-http-server",
+    "@kbn/as-code-shared-schemas"
   ],
   "exclude": ["target/**/*"]
 }

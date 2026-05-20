@@ -35,6 +35,7 @@
     "@kbn/data-plugin",
     "@kbn/unified-search-plugin",
     "@kbn/kibana-react-plugin",
+    "@kbn/core-http-server",
   ],
   "exclude": ["target/**/*"]
 }
