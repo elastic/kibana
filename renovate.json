@@ -1984,7 +1984,6 @@
         "expect",
         "jest",
         "jest-canvas-mock",
-        "jest-cli",
         "jest-config",
         "jest-diff",
         "jest-environment-jsdom",
