@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/266517
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-12
+areas:
+- Search and data
+title: Fix space-aware inference model lists so feature connector pickers match per-space model settings
