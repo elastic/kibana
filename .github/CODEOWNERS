@@ -2791,6 +2791,8 @@ src/platform/packages/shared/kbn-connector-schemas/thehive @elastic/kibana-cases
 /x-pack/solutions/security/test/security_solution_cypress/cypress/support @elastic/security-detection-engine @elastic/security-detection-rule-management @elastic/security-threat-hunting
 /x-pack/solutions/security/test/security_solution_cypress/cypress/urls @elastic/security-threat-hunting @elastic/security-detection-engine
 
+/x-pack/solutions/security/plugins/security_solution/public/agent_builder/attachment_types/rule @elastic/security-threat-hunting @elastic/security-generative-ai @elastic/security-detection-engine
+
 /x-pack/solutions/security/plugins/security_solution/common/test @elastic/security-detection-engine @elastic/security-detection-rule-management @elastic/security-threat-hunting
 
 /x-pack/solutions/security/plugins/security_solution/public/common/components/callouts @elastic/security-detection-rule-management
@@ -3488,6 +3490,9 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 # FTR config manifests have no single owner — touched by all solutions.
 # Leaving this unowned avoids routing every edit through Kibana Operations.
 /.buildkite/ftr-manifests/
+
+
+/.mise.toml @elastic/kibana-operations
 
 ####
 ## These rules are always last so they take ultimate priority over everything else

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+/* eslint-disable no-console */
+
 import axios from 'axios';
+import https from 'https';
 import { Client } from '@elastic/elasticsearch';
 import moment from 'moment';
 import {
@@ -14,36 +17,124 @@ import {
   makeDownSummary,
 } from '@kbn/observability-synthetics-test-data';
 
-const KIBANA_URL = 'http://127.0.0.1:5601/test';
+interface CliArgs {
+  live: boolean;
+}
 
-function getAuth() {
+const parseArgs = (): CliArgs => {
+  const argv = process.argv.slice(2);
+  return {
+    live: argv.includes('--live'),
+  };
+};
+
+const cliArgs = parseArgs();
+
+const getKibanaConnection = () => {
+  let config: Record<string, any> = {};
   try {
-    const config = readKibanaConfig();
-    let username = config.elasticsearch?.username;
-    if (username === 'kibana_system_user') {
-      username = 'elastic';
-    }
-    const password = config.elasticsearch?.password;
-    if (username && password) {
-      return { username, password };
-    }
+    config = readKibanaConfig();
   } catch {
     // fall through to defaults
   }
-  return { username: 'elastic', password: 'changeme' };
-}
+  // YAML supports both `server: { basePath }` and the flat `server.basePath`
+  // form — we honour both. Same goes for host/port. Env overrides win.
+  const flat = (key: string) => config[key];
+  const host = process.env.KIBANA_HOST ?? config.server?.host ?? flat('server.host') ?? '127.0.0.1';
+  const resolvedHost = host === '0.0.0.0' ? '127.0.0.1' : host;
+  const port = process.env.KIBANA_PORT ?? config.server?.port ?? flat('server.port') ?? 5601;
+  // `server.basePath` is empty when not configured; in dev mode `yarn start`
+  // injects a random 3-letter base path at runtime that we then have to
+  // discover from a redirect (see `discoverBasePath`).
+  const configBasePath: string =
+    process.env.KIBANA_BASE_PATH ?? config.server?.basePath ?? flat('server.basePath') ?? '';
+  const sslEnabled =
+    config.server?.ssl?.enabled ?? flat('server.ssl.enabled') ?? flat('server.ssl') === true;
+  const protocol = process.env.KIBANA_PROTOCOL ?? (sslEnabled ? 'https' : 'http');
+  let kbnUsername =
+    process.env.KIBANA_USERNAME ?? config.elasticsearch?.username ?? flat('elasticsearch.username');
+  if (kbnUsername === 'kibana_system_user' || !kbnUsername) {
+    kbnUsername = 'elastic';
+  }
+  const kbnPassword =
+    process.env.KIBANA_PASSWORD ??
+    config.elasticsearch?.password ??
+    flat('elasticsearch.password') ??
+    'changeme';
+  return {
+    username: kbnUsername as string,
+    password: kbnPassword as string,
+    origin: `${protocol}://${resolvedHost}:${port}`,
+    configBasePath,
+    isHttps: protocol === 'https',
+  };
+};
 
-const auth = getAuth();
+const { username, password, origin, configBasePath, isHttps } = getKibanaConnection();
+const auth = { username, password };
 const headers = { 'kbn-xsrf': 'true', 'elastic-api-version': '2023-10-31' };
+const httpsAgent = isHttps ? new https.Agent({ rejectUnauthorized: false }) : undefined;
+
+// When `server.basePath` is not configured, Kibana dev mode generates a random
+// base path on startup (e.g. `/abc`). Discover it by following the redirect
+// from `GET /`, which Kibana points to `/<basePath>/spaces/enter` (or `/login`,
+// etc.). Same trick `kbn-synthtrace`'s `get_service_urls` uses.
+const WELL_KNOWN_TOP_LEVEL =
+  /^\/(api|app|internal|spaces|s|bundles|core|ui|translations|login|logout|security)(\/|$)/;
+
+const discoverBasePath = async (): Promise<string> => {
+  try {
+    const response = await axios.request({
+      method: 'HEAD',
+      url: `${origin}/`,
+      maxRedirects: 0,
+      validateStatus: () => true,
+      httpsAgent,
+    });
+    const location: string | undefined = response.headers?.location;
+    if (!location) return '';
+    const pathname = location.startsWith('http') ? new URL(location).pathname : location;
+    const stripped = pathname
+      .replace(/\/spaces\/enter\/?$/, '')
+      .replace(/\/spaces\/space_selector\/?$/, '')
+      .replace(/\/login\b.*$/, '')
+      .replace(/\/app\/.*$/, '')
+      .replace(/\/$/, '');
+    if (!stripped.startsWith('/') || WELL_KNOWN_TOP_LEVEL.test(stripped + '/')) return '';
+    return stripped;
+  } catch {
+    return '';
+  }
+};
+
+let kibanaUrlPromise: Promise<string> | undefined;
+const getKibanaUrl = () => {
+  if (!kibanaUrlPromise) {
+    kibanaUrlPromise = (async () => {
+      let basePath = configBasePath;
+      if (!basePath) {
+        const discovered = await discoverBasePath();
+        if (discovered) {
+          console.log(`  ✓ Discovered Kibana basePath: ${discovered}`);
+          basePath = discovered;
+        }
+      }
+      return `${origin}${basePath}`;
+    })();
+  }
+  return kibanaUrlPromise;
+};
 
 const request = async (method: string, path: string, data?: any) => {
+  const kibanaUrl = await getKibanaUrl();
   try {
     const response = await axios.request({
       data,
       method,
-      url: `${KIBANA_URL}${path}`,
+      url: `${kibanaUrl}${path}`,
       auth,
       headers,
+      httpsAgent,
     });
     return response.data;
   } catch (error: any) {
@@ -59,12 +150,12 @@ const buildEsClient = () => {
     const node = config.elasticsearch?.hosts;
     if (node) {
       const rawUser = config.elasticsearch?.username;
-      const username = rawUser === 'kibana_system_user' || !rawUser ? 'elastic' : rawUser;
-      const password = config.elasticsearch?.password;
+      const esUsername = rawUser === 'kibana_system_user' || !rawUser ? 'elastic' : rawUser;
+      const esPassword = config.elasticsearch?.password;
       const verificationMode = config.elasticsearch?.ssl?.verificationMode;
       return new Client({
         node: Array.isArray(node) ? node[0] : node,
-        auth: username && password ? { username, password } : undefined,
+        auth: esUsername && esPassword ? { username: esUsername, password: esPassword } : undefined,
         tls: verificationMode === 'none' ? { rejectUnauthorized: false } : undefined,
       });
     }
@@ -83,6 +174,7 @@ interface MonitorInfo {
   configId: string;
   name: string;
   type: string;
+  schedule: { number: string; unit: string };
   locations: Array<{ id: string; label: string }>;
   tags: string[];
   urls: string;
@@ -95,6 +187,10 @@ const fetchAllMonitors = async (): Promise<MonitorInfo[]> => {
     configId: m.config_id,
     name: m.name,
     type: m.type,
+    schedule: {
+      number: String(m.schedule?.number ?? '5'),
+      unit: String(m.schedule?.unit ?? 'm'),
+    },
     locations: (m.locations ?? []).map((l: any) => ({ id: l.id, label: l.label })),
     tags: m.tags ?? [],
     urls: m.urls ?? m.hosts ?? '',
@@ -106,19 +202,83 @@ const indexSummaryDoc = async (index: string, document: Record<string, any>) => 
   await esClient.index({ index, document, refresh: false });
 };
 
+const SCHEDULE_UNIT_MS: Record<string, number> = {
+  s: 1_000,
+  m: 60_000,
+  h: 3_600_000,
+};
+
+const scheduleToMs = ({ number, unit }: { number: string; unit: string }) => {
+  const factor = SCHEDULE_UNIT_MS[unit] ?? 60_000;
+  const num = Number(number);
+  return (Number.isFinite(num) && num > 0 ? num : 5) * factor;
+};
+
+const isMonitorSkipped = (monitor: MonitorInfo) =>
+  monitor.locations.length === 0 || monitor.name.toLowerCase().includes('disabled');
+
+const buildSummaryDoc = (
+  monitor: MonitorInfo,
+  location: { id: string; label: string },
+  ts: moment.Moment
+) => {
+  const isDown = monitor.name.toLowerCase().includes('down');
+  const durationUs = isDown ? randomInt(50000, 200000) : randomInt(80000, 500000);
+  const overrides = {
+    name: monitor.name,
+    timestamp: ts.toISOString(),
+    monitorId: monitor.configId,
+    configId: monitor.configId,
+    location: { id: location.id, label: location.label },
+  };
+  const doc = isDown ? makeDownSummary(overrides) : makeUpSummary(overrides);
+  (doc as any).monitor = {
+    ...(doc as any).monitor,
+    type: monitor.type,
+    id: monitor.configId,
+    name: monitor.name,
+    duration: { us: durationUs },
+    timespan: {
+      lt: ts.clone().add(5, 'minutes').toISOString(),
+      gte: ts.clone().subtract(5, 'minutes').toISOString(),
+    },
+  };
+  const stateId = `${monitor.configId}-${location.id}-summary-${ts.valueOf()}`;
+  const stateDurationMs = isDown ? randomInt(300000, 7200000) : 0;
+  (doc as any).state = {
+    ...(doc as any).state,
+    id: stateId,
+    started_at: ts
+      .clone()
+      .subtract(isDown ? stateDurationMs : 1000, 'milliseconds')
+      .toISOString(),
+    duration_ms: stateDurationMs,
+  };
+  (doc as any).data_stream = {
+    namespace: 'default',
+    type: 'synthetics',
+    dataset: monitor.type === 'browser' ? 'browser' : monitor.type,
+  };
+  (doc as any).tags = monitor.tags;
+  (doc as any).meta = { space_id: 'default' };
+  if (monitor.projectId) {
+    (doc as any).monitor = {
+      ...(doc as any).monitor,
+      project: { id: monitor.projectId },
+    };
+  }
+  const index = `synthetics-${monitor.type === 'browser' ? 'browser' : monitor.type}-default`;
+  return { doc, index, isDown };
+};
+
 const ingestSummaryData = async (monitors: MonitorInfo[]) => {
   const now = moment();
   let upCount = 0;
   let downCount = 0;
 
   for (const monitor of monitors) {
-    if (monitor.locations.length === 0) continue;
-
+    if (isMonitorSkipped(monitor)) continue;
     const isDown = monitor.name.toLowerCase().includes('down');
-    const isDisabled = monitor.name.toLowerCase().includes('disabled');
-    if (isDisabled) continue;
-
-    const index = `synthetics-${monitor.type === 'browser' ? 'browser' : monitor.type}-default`;
 
     for (const location of monitor.locations) {
       const numDocs = isDown ? 5 : randomInt(8, 15);
@@ -126,56 +286,7 @@ const ingestSummaryData = async (monitors: MonitorInfo[]) => {
       for (let i = 0; i < numDocs; i++) {
         const minutesAgo = i * 3 + randomInt(0, 2);
         const ts = now.clone().subtract(minutesAgo, 'minutes');
-        const durationUs = isDown ? randomInt(50000, 200000) : randomInt(80000, 500000);
-
-        const overrides = {
-          name: monitor.name,
-          timestamp: ts.toISOString(),
-          monitorId: monitor.configId,
-          configId: monitor.configId,
-          location: { id: location.id, label: location.label },
-        };
-
-        const doc = isDown ? makeDownSummary(overrides) : makeUpSummary(overrides);
-
-        (doc as any).monitor = {
-          ...(doc as any).monitor,
-          type: monitor.type,
-          id: monitor.configId,
-          name: monitor.name,
-          duration: { us: durationUs },
-          timespan: {
-            lt: ts.clone().add(5, 'minutes').toISOString(),
-            gte: ts.clone().subtract(5, 'minutes').toISOString(),
-          },
-        };
-        const stateId = `${monitor.configId}-${location.id}-summary-${i}`;
-        const stateDurationMs = isDown
-          ? randomInt(300000, 7200000) // 5min–2h for realistic down-state durations
-          : 0;
-        (doc as any).state = {
-          ...(doc as any).state,
-          id: stateId,
-          started_at: ts
-            .clone()
-            .subtract(isDown ? stateDurationMs : 1000, 'milliseconds')
-            .toISOString(),
-          duration_ms: stateDurationMs,
-        };
-        (doc as any).data_stream = {
-          namespace: 'default',
-          type: 'synthetics',
-          dataset: monitor.type === 'browser' ? 'browser' : monitor.type,
-        };
-        (doc as any).tags = monitor.tags;
-        (doc as any).meta = { space_id: 'default' };
-        if (monitor.projectId) {
-          (doc as any).monitor = {
-            ...(doc as any).monitor,
-            project: { id: monitor.projectId },
-          };
-        }
-
+        const { doc, index } = buildSummaryDoc(monitor, location, ts);
         await indexSummaryDoc(index, doc);
         if (isDown) {
           downCount++;
@@ -188,6 +299,69 @@ const ingestSummaryData = async (monitors: MonitorInfo[]) => {
 
   await esClient.indices.refresh({ index: 'synthetics-*' });
   return { upCount, downCount };
+};
+
+const runLiveMode = async (monitors: MonitorInfo[]) => {
+  const active = monitors.filter((m) => !isMonitorSkipped(m));
+  if (active.length === 0) {
+    console.log('  (no eligible monitors to keep live)');
+    return;
+  }
+
+  console.log(`\n=== Live mode: ${active.length} monitor(s), Ctrl-C to stop ===`);
+
+  let total = 0;
+  const timers: NodeJS.Timeout[] = [];
+
+  const tick = async (monitor: MonitorInfo) => {
+    const now = moment();
+    for (const location of monitor.locations) {
+      const { doc, index } = buildSummaryDoc(monitor, location, now);
+      try {
+        await indexSummaryDoc(index, doc);
+        total++;
+      } catch (err: any) {
+        console.error(
+          `  ✗ Failed to index for "${monitor.name}" @ ${location.label}: ${err?.message}`
+        );
+      }
+    }
+  };
+
+  for (const monitor of active) {
+    const intervalMs = scheduleToMs(monitor.schedule);
+    console.log(
+      `  · "${monitor.name}" every ${intervalMs / 1000}s × ${monitor.locations.length} location(s)`
+    );
+    // Stagger first tick slightly so we don't fire everything at once.
+    const initialDelay = randomInt(500, 3_000);
+    timers.push(
+      setTimeout(() => {
+        void tick(monitor);
+        timers.push(setInterval(() => void tick(monitor), intervalMs));
+      }, initialDelay)
+    );
+  }
+
+  // Periodic refresh + status so docs become searchable promptly.
+  const refreshTimer = setInterval(() => {
+    esClient.indices.refresh({ index: 'synthetics-*' }).catch(() => {});
+  }, 5_000);
+  const statusTimer = setInterval(() => {
+    console.log(`  ✓ Live docs ingested so far: ${total}`);
+  }, 30_000);
+  timers.push(refreshTimer, statusTimer);
+
+  await new Promise<void>((resolve) => {
+    const stop = (signal: string) => {
+      console.log(`\n  Received ${signal}, stopping live mode (sent ${total} docs).`);
+      timers.forEach((t) => clearInterval(t as unknown as NodeJS.Timeout));
+      timers.forEach((t) => clearTimeout(t as unknown as NodeJS.Timeout));
+      resolve();
+    };
+    process.once('SIGINT', () => stop('SIGINT'));
+    process.once('SIGTERM', () => stop('SIGTERM'));
+  });
 };
 
 const randomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -607,12 +781,11 @@ const ingestErrorData = async (monitors: MonitorInfo[]) => {
 const createMonitor = async (monitor: Record<string, any>) => {
   try {
     const result = await request('post', '/api/synthetics/monitors', monitor);
-    // eslint-disable-next-line no-console
+
     console.log(`  ✓ Created "${monitor.name}" (${monitor.type})`);
     return result;
   } catch (error: any) {
     if (error.message?.includes('already exists')) {
-      // eslint-disable-next-line no-console
       console.log(`  ↻ Skipped "${monitor.name}" (already exists)`);
       return null;
     }
@@ -628,7 +801,6 @@ const ensureAgentPolicy = async (name: string) => {
     )}"&perPage=1`
   );
   if (existing?.items?.length > 0) {
-    // eslint-disable-next-line no-console
     console.log(`  ↻ Reusing existing agent policy "${name}"`);
     return existing.items[0];
   }
@@ -655,7 +827,6 @@ const ensurePrivateLocation = async (
   const existing = await getPrivateLocations();
   const found = existing.find((loc: any) => loc.label === label);
   if (found) {
-    // eslint-disable-next-line no-console
     console.log(`  ↻ Reusing existing private location "${label}"`);
     return found;
   }
@@ -790,7 +961,6 @@ const browserMonitor = (overrides: Record<string, any>) =>
   });
 
 export const generateMonitors = async () => {
-  // eslint-disable-next-line no-console
   console.log('=== Setting up infrastructure ===');
 
   const policyUS = await ensureAgentPolicy('Test Policy US');
@@ -834,13 +1004,12 @@ export const generateMonitors = async () => {
   const threeLocations = [privateLocUS, privateLocEU, privateLocAP];
   const fourLocations = [privateLocUS, privateLocEU, privateLocAP, privateLocSA];
 
-  // eslint-disable-next-line no-console
   console.log(`  ✓ Private locations: ${allLocations.map((l) => `"${l.label}"`).join(', ')}`);
 
   // ---------------------------------------------------------------------------
   // HTTP monitors — various URLs, tags, schedules, locations
   // ---------------------------------------------------------------------------
-  // eslint-disable-next-line no-console
+
   console.log('\n=== Creating HTTP monitors ===');
 
   await createMonitor(
@@ -979,7 +1148,7 @@ export const generateMonitors = async () => {
   // ---------------------------------------------------------------------------
   // TCP monitors — various hosts, ports, tags
   // ---------------------------------------------------------------------------
-  // eslint-disable-next-line no-console
+
   console.log('\n=== Creating TCP monitors ===');
 
   await createMonitor(
@@ -1056,7 +1225,7 @@ export const generateMonitors = async () => {
   // ---------------------------------------------------------------------------
   // ICMP monitors — various hosts, tags
   // ---------------------------------------------------------------------------
-  // eslint-disable-next-line no-console
+
   console.log('\n=== Creating ICMP monitors ===');
 
   await createMonitor(
@@ -1123,7 +1292,7 @@ export const generateMonitors = async () => {
   // ---------------------------------------------------------------------------
   // Browser monitors — various scripts, tags
   // ---------------------------------------------------------------------------
-  // eslint-disable-next-line no-console
+
   console.log('\n=== Creating Browser monitors ===');
 
   await createMonitor(
@@ -1240,7 +1409,6 @@ step('Fill credentials', async () => {
   // Covers: multiple monitor types, varied tags/domains/status codes,
   // persistent/intermittent/new error patterns, multiple locations
   // ---------------------------------------------------------------------------
-  // eslint-disable-next-line no-console
   console.log('\n=== Creating error-scenario monitors ===');
 
   await createMonitor(
@@ -1356,7 +1524,7 @@ step('Fill credentials', async () => {
   // ---------------------------------------------------------------------------
   // Monitors with project_id — to test "group by project" grouping
   // ---------------------------------------------------------------------------
-  // eslint-disable-next-line no-console
+
   console.log('\n=== Creating monitors with project IDs ===');
 
   await createMonitor(
@@ -1456,7 +1624,7 @@ step('Fill credentials', async () => {
   // ---------------------------------------------------------------------------
   // Additional HTTP monitors with no tags (for testing empty tag grouping)
   // ---------------------------------------------------------------------------
-  // eslint-disable-next-line no-console
+
   console.log('\n=== Creating monitors with edge-case configs ===');
 
   await createMonitor(
@@ -1521,73 +1689,73 @@ step('Fill credentials', async () => {
   // ---------------------------------------------------------------------------
   // Ingest mock summary data into ES for all monitors
   // ---------------------------------------------------------------------------
-  // eslint-disable-next-line no-console
+
   console.log('\n=== Ingesting mock summary data ===');
 
   const allMonitors = await fetchAllMonitors();
-  // eslint-disable-next-line no-console
+
   console.log(`  Found ${allMonitors.length} monitors to seed data for`);
 
   const { upCount, downCount } = await ingestSummaryData(allMonitors);
-  // eslint-disable-next-line no-console
   console.log(`  ✓ Ingested ${upCount} up + ${downCount} down summary docs`);
 
   // ---------------------------------------------------------------------------
   // Ingest rich error data for the Errors Overview page
   // ---------------------------------------------------------------------------
-  // eslint-disable-next-line no-console
   console.log('\n=== Ingesting error data (48h window) ===');
 
   const { errorDocCount } = await ingestErrorData(allMonitors);
-  // eslint-disable-next-line no-console
   console.log(`  ✓ Ingested ${errorDocCount} error docs across current + previous periods`);
 
-  // eslint-disable-next-line no-console
+  if (cliArgs.live) {
+    await runLiveMode(allMonitors);
+  }
+
   console.log('\n=== Done! ===');
-  // eslint-disable-next-line no-console
+
   console.log('Summary of created monitors:');
-  // eslint-disable-next-line no-console
+
   console.log('  HTTP:      22 monitors (12 standard + 6 error-scenario + 4 edge-case)');
-  // eslint-disable-next-line no-console
+
   console.log('  TCP:       9 monitors (7 standard + 1 error-scenario + 1 disabled)');
-  // eslint-disable-next-line no-console
+
   console.log('  ICMP:      7 monitors (5 standard + 1 error-scenario + 1 disabled)');
-  // eslint-disable-next-line no-console
+
   console.log('  Browser:   12 monitors (7 standard + 2 error-scenario + 3 project)');
-  // eslint-disable-next-line no-console
+
   console.log(
     '  w/ Project: 9 monitors (3 projects: ecommerce-app, infra-monitoring, mobile-app-backend)'
   );
-  // eslint-disable-next-line no-console
+
   console.log('  Total:     ~50 monitors across 5 private locations');
-  // eslint-disable-next-line no-console
+
   console.log('\nGroup-by coverage:');
-  // eslint-disable-next-line no-console
+
   console.log('  By Type:     http, tcp, icmp, browser');
-  // eslint-disable-next-line no-console
+
   console.log('  By Location: US East, EU West, Asia Pacific, South America, Australia');
-  // eslint-disable-next-line no-console
+
   console.log('  By Tags:     production, staging, critical, api, infrastructure, dns, ...');
-  // eslint-disable-next-line no-console
+
   console.log('  By Project:  ecommerce-app, infra-monitoring, mobile-app-backend');
-  // eslint-disable-next-line no-console
+
   console.log('  By Monitor:  each monitor is uniquely named');
-  // eslint-disable-next-line no-console
+
   console.log('\nErrors page coverage:');
-  // eslint-disable-next-line no-console
+
   console.log('  15 "down" monitors generating error data');
-  // eslint-disable-next-line no-console
+
   console.log(
     '  Error groups: DNS, timeout, HTTP 5xx, SSL, connection refused, body mismatch, ...'
   );
-  // eslint-disable-next-line no-console
+
   console.log(
     '  Patterns:    persistent (DNS, 503, conn refused), intermittent (429), new (SSL, 401, JS error)'
   );
-  // eslint-disable-next-line no-console
+
   console.log(
     '  Insights:    domains (8+), tags (15+), status codes (200/401/429/502/503), all 4 monitor types'
   );
-  // eslint-disable-next-line no-console
+
   console.log('  Trend:       current + previous period data for delta indicators');
 };
