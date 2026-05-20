@@ -188,6 +188,11 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
       },
     },
 
+    // vertical layout - current dashboard border offset styles
+    '.verticalLayoutWrapper & .euiListItemLayout__text': {
+      paddingInlineStart: euiTheme.size.s,
+    },
+
     // vertical layout - current dashboard link styles
     '.verticalLayoutWrapper &.linkCurrent': {
       paddingLeft: euiTheme.size.s,

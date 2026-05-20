@@ -285,6 +285,7 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     },
     '&.verticalLayoutWrapper': {
       gap: euiTheme.size.xs,
+      paddingBlock: euiTheme.size.xs,
     },
     '&.horizontalLayoutWrapper': {
       height: '100%',
