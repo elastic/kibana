@@ -88,6 +88,55 @@ const applyPropertyRuntimeMetadata = (
   }
 };
 
+const applySharedSchemaRuntimeMetadata = (
+  description: Joi.Description,
+  sharedSchemas: Record<string, OpenAPIV3.SchemaObject>
+): void => {
+  const id = (description.flags as { id?: string } | undefined)?.id;
+  if (id && sharedSchemas[id]) {
+    applyPropertyRuntimeMetadata(description, sharedSchemas[id]);
+  }
+
+  const { keys, matches, items } = description as Joi.Description & {
+    keys?: Record<string, Joi.Description>;
+    matches?: Array<{
+      schema?: Joi.Description;
+      then?: Joi.Description;
+      otherwise?: Joi.Description;
+      switch?: Array<{ then?: Joi.Description; otherwise?: Joi.Description }>;
+    }>;
+    items?: Joi.Description[];
+  };
+
+  Object.values(keys ?? {}).forEach((childDescription) => {
+    applySharedSchemaRuntimeMetadata(childDescription, sharedSchemas);
+  });
+  matches?.forEach(({ schema: matchedDescription }) => {
+    if (matchedDescription) {
+      applySharedSchemaRuntimeMetadata(matchedDescription, sharedSchemas);
+    }
+  });
+  matches?.forEach((match) => {
+    if (match.then) {
+      applySharedSchemaRuntimeMetadata(match.then, sharedSchemas);
+    }
+    if (match.otherwise) {
+      applySharedSchemaRuntimeMetadata(match.otherwise, sharedSchemas);
+    }
+    match.switch?.forEach((switchCase) => {
+      if (switchCase.then) {
+        applySharedSchemaRuntimeMetadata(switchCase.then, sharedSchemas);
+      }
+      if (switchCase.otherwise) {
+        applySharedSchemaRuntimeMetadata(switchCase.otherwise, sharedSchemas);
+      }
+    });
+  });
+  items?.forEach((itemDescription) => {
+    applySharedSchemaRuntimeMetadata(itemDescription, sharedSchemas);
+  });
+};
+
 const removeInternalOptionalMarker = (schema: OpenAPIV3.SchemaObject): void => {
   delete (schema as Record<string, unknown>)[metaFields.META_FIELD_X_OAS_OPTIONAL];
 };
@@ -96,16 +145,20 @@ export const parse = ({ schema, ctx = createCtx() }: ParseArgs) => {
   const parsed: ParseResult = joi2JsonInternal(schema);
   let result: OpenAPIV3.SchemaObject;
   if (isJoiToJsonSpecialSchemas(parsed)) {
+    result = omit(parsed, 'schemas');
+    const schemaDescription = schema.describe();
+    applySharedSchemaRuntimeMetadata(schemaDescription, parsed.schemas);
+    if (!isReferenceObject(result)) {
+      applyPropertyRuntimeMetadata(schemaDescription, result);
+    }
     Object.entries(parsed.schemas).forEach(([id, s]) => {
       postProcessMutations({ schema: s, ctx });
       ctx.addSharedSchema(id, s);
     });
-    result = omit(parsed, 'schemas');
   } else {
     result = parsed;
+    applyPropertyRuntimeMetadata(schema.describe(), result);
   }
-  const schemaDescription = schema.describe();
-  applyPropertyRuntimeMetadata(schemaDescription, result);
   postProcessMutations({ schema: result, ctx });
   Object.values(ctx.getSharedSchemas()).forEach(removeInternalOptionalMarker);
   return { shared: ctx.getSharedSchemas(), result };

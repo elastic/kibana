@@ -181,6 +181,9 @@ describe('convert', () => {
       { a: schema.string() },
       { meta: { id: 'maybeObjectSchema' } }
     );
+    const maybeOneOfSchema = schema.oneOf([schema.literal('s'), schema.literal('m')], {
+      meta: { id: 'maybeOneOfSchema' },
+    });
     const objectWithDefaultSchema = schema.object(
       { b: schema.string() },
       { defaultValue: { b: 'default' }, meta: { id: 'objectWithDefaultSchema' } }
@@ -191,6 +194,7 @@ describe('convert', () => {
     );
     const otherSchema = schema.object({
       maybeObject: schema.maybe(maybeObjectSchema),
+      maybeOneOf: schema.maybe(maybeOneOfSchema),
       objectWithDefault: objectWithDefaultSchema,
       requiredObject: requiredObjectSchema,
     });
@@ -201,6 +205,9 @@ describe('convert', () => {
         properties: {
           maybeObject: {
             $ref: '#/components/schemas/maybeObjectSchema',
+          },
+          maybeOneOf: {
+            $ref: '#/components/schemas/maybeOneOfSchema',
           },
           objectWithDefault: {
             $ref: '#/components/schemas/objectWithDefaultSchema',
@@ -223,6 +230,11 @@ describe('convert', () => {
           },
           required: ['a'],
           type: 'object',
+        },
+        maybeOneOfSchema: {
+          enum: ['s', 'm'],
+          title: 'maybeOneOfSchema',
+          type: 'string',
         },
         objectWithDefaultSchema: {
           title: 'objectWithDefaultSchema',
@@ -369,6 +381,167 @@ describe('convert', () => {
       required: ['nested', 'requiredRef'],
       type: 'object',
     });
+  });
+
+  test('does not require maybe referenced fields added through object extends', () => {
+    const baseSchema = schema.object({
+      format: schema.string(),
+    });
+
+    expect(
+      convert(
+        baseSchema.extends(
+          {
+            field: schema.string(),
+            timeScale: schema.maybe(
+              schema.oneOf([schema.literal('s'), schema.literal('m')], {
+                meta: { id: 'extendedTimeScaleSchema' },
+              })
+            ),
+          },
+          { meta: { id: 'extendedMetricOperation' } }
+        )
+      )
+    ).toEqual({
+      schema: {
+        $ref: '#/components/schemas/extendedMetricOperation',
+      },
+      shared: {
+        extendedMetricOperation: {
+          additionalProperties: false,
+          properties: {
+            field: {
+              type: 'string',
+            },
+            format: {
+              type: 'string',
+            },
+            timeScale: {
+              $ref: '#/components/schemas/extendedTimeScaleSchema',
+            },
+          },
+          required: ['format', 'field'],
+          title: 'extendedMetricOperation',
+          type: 'object',
+        },
+        extendedTimeScaleSchema: {
+          enum: ['s', 'm'],
+          title: 'extendedTimeScaleSchema',
+          type: 'string',
+        },
+      },
+    });
+  });
+
+  test('does not require maybe referenced fields inherited through chained object extends', () => {
+    const genericOptionsSchema = schema.object({
+      format: schema.string(),
+    });
+    const sharedOperationSchema = genericOptionsSchema.extends({
+      timeScale: schema.maybe(
+        schema.oneOf([schema.literal('s'), schema.literal('m')], {
+          meta: { id: 'chainedTimeScaleSchema' },
+        })
+      ),
+    });
+    const fieldBasedOperationSchema = sharedOperationSchema.extends({
+      field: schema.string(),
+    });
+    const concreteOperationSchema = fieldBasedOperationSchema.extends(
+      {
+        operation: schema.literal('count'),
+      },
+      { meta: { id: 'chainedMetricOperation' } }
+    );
+
+    expect(convert(concreteOperationSchema).shared.chainedMetricOperation.required).toEqual([
+      'format',
+      'field',
+      'operation',
+    ]);
+  });
+
+  test('does not require maybe referenced fields in id schemas inside oneOf', () => {
+    const genericOptionsSchema = schema.object({
+      format: schema.string(),
+    });
+    const sharedOperationSchema = genericOptionsSchema.extends({
+      timeScale: schema.maybe(
+        schema.oneOf([schema.literal('s'), schema.literal('m')], {
+          meta: { id: 'oneOfTimeScaleSchema' },
+        })
+      ),
+    });
+    const countOperationSchema = sharedOperationSchema.extends(
+      {
+        operation: schema.literal('count'),
+      },
+      { meta: { id: 'oneOfCountOperation' } }
+    );
+
+    expect(
+      convert(schema.oneOf([countOperationSchema])).shared.oneOfCountOperation.required
+    ).toEqual(['format', 'operation']);
+  });
+
+  test('does not require reused maybe referenced fields across oneOf id schemas', () => {
+    const timeScaleSchema = schema.maybe(
+      schema.oneOf([schema.literal('s'), schema.literal('m')], {
+        meta: { id: 'reusedOneOfTimeScaleSchema' },
+      })
+    );
+    const genericOptionsSchema = schema.object({
+      format: schema.string(),
+      time_scale: timeScaleSchema,
+    });
+    const countOperationSchema = genericOptionsSchema.extends(
+      {
+        operation: schema.literal('count'),
+      },
+      { meta: { id: 'reusedOneOfCountOperation' } }
+    );
+    const sumOperationSchema = genericOptionsSchema.extends(
+      {
+        operation: schema.literal('sum'),
+      },
+      { meta: { id: 'reusedOneOfSumOperation' } }
+    );
+
+    const converted = convert(schema.oneOf([countOperationSchema, sumOperationSchema]));
+
+    expect(converted.shared.reusedOneOfCountOperation.required).toEqual(['format', 'operation']);
+    expect(converted.shared.reusedOneOfSumOperation.required).toEqual(['format', 'operation']);
+  });
+
+  test('does not require reused maybe referenced fields across discriminated union id schemas', () => {
+    const timeScaleSchema = schema.maybe(
+      schema.oneOf([schema.literal('s'), schema.literal('m')], {
+        meta: { id: 'discriminatedTimeScaleSchema' },
+      })
+    );
+    const genericOptionsSchema = schema.object({
+      format: schema.string(),
+      time_scale: timeScaleSchema,
+    });
+    const countOperationSchema = genericOptionsSchema.extends(
+      {
+        type: schema.literal('count'),
+      },
+      { meta: { id: 'discriminatedCountOperation' } }
+    );
+    const sumOperationSchema = genericOptionsSchema.extends(
+      {
+        type: schema.literal('sum'),
+      },
+      { meta: { id: 'discriminatedSumOperation' } }
+    );
+
+    const converted = convert(
+      schema.discriminatedUnion('type', [countOperationSchema, sumOperationSchema])
+    );
+
+    expect(converted.shared.discriminatedCountOperation.required).toEqual(['format', 'type']);
+    expect(converted.shared.discriminatedSumOperation.required).toEqual(['format', 'type']);
   });
 });
 
