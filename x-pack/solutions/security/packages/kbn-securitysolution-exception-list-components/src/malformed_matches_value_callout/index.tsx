@@ -8,8 +8,8 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-
 import { EuiCallOut } from '@elastic/eui';
+import { isOperator, matchesOperator } from '@kbn/securitysolution-list-utils';
 
 export const MalformedMatchesValueCallout = () => {
   return (
@@ -27,20 +27,8 @@ export const MalformedMatchesValueCallout = () => {
           id="exceptionList-components.malformedMatchesValueCallout.body"
           defaultMessage="An entry uses {matches} with a value containing escape sequences (e.g. {escapedStar}, {escapedQuestion}). These will {literalCharacters}, not wildcard patterns (for example {escapedStar} matches a literal asterisk). If you intended an exact match, {changeOperator} to {is}."
           values={{
-            matches: (
-              <strong>
-                {i18n.translate('exceptionList-components.malformedMatchesValueCallout.matches', {
-                  defaultMessage: 'matches',
-                })}
-              </strong>
-            ),
-            is: (
-              <strong>
-                {i18n.translate('exceptionList-components.malformedMatchesValueCallout.is', {
-                  defaultMessage: 'is',
-                })}
-              </strong>
-            ),
+            matches: <strong>{matchesOperator.message}</strong>,
+            is: <strong>{isOperator.message}</strong>,
             escapedStar: <code>{'\\*'}</code>,
             escapedQuestion: <code>{'\\?'}</code>,
             literalCharacters: (

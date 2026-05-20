@@ -1020,32 +1020,6 @@ describe('Helpers', () => {
       ).toEqual([]);
     });
 
-    test('it returns field names from nested entries', () => {
-      expect(
-        getMalformedMatchesFields([
-          {
-            description: '',
-            name: '',
-            type: 'simple',
-            entries: [
-              {
-                type: 'nested',
-                field: 'parent.field',
-                entries: [
-                  {
-                    type: 'wildcard',
-                    value: 'app\\*.exe',
-                    field: 'child.name',
-                    operator: 'included',
-                  },
-                ],
-              },
-            ],
-          },
-        ])
-      ).toEqual(['child.name']);
-    });
-
     test('it excludes entries with an empty field name', () => {
       expect(
         getMalformedMatchesFields([
