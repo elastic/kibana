@@ -49,6 +49,7 @@ import { steps } from './constants';
 import { createPromptFactory } from './prompts';
 import { createSubagentTool } from './tools/run_subagent';
 import { createSleepTool } from './tools/sleep';
+import { createLoadSkillTool } from './tools/load_skill';
 import { BackgroundExecutionService } from './background_execution_service';
 import { builtinToolToExecutable } from './utils/select_tools';
 import type { StateType } from './state';
@@ -108,6 +109,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     toolManager,
     experimentalFeatures,
     todoStateManager,
+    analyticsService,
+    trackingService,
   } = context;
 
   ensureValidInput({ input: nextInput, conversation, action });
@@ -218,6 +221,22 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
         },
         {
           ...builtinToolToExecutable({ tool: sleepTool, runner: context.runner }),
+          origin: ToolOrigin.internal,
+        },
+      ],
+      logger,
+    });
+  }
+
+  // Register load_skill if the skills experimental feature is enabled.
+  // Not gated on executionMode — skills must be loadable in standalone runs.
+  if (experimentalFeatures.skills) {
+    const loadSkillTool = createLoadSkillTool({ analyticsService, trackingService });
+    await toolManager.addTools({
+      type: ToolManagerToolType.executable,
+      tools: [
+        {
+          ...builtinToolToExecutable({ tool: loadSkillTool, runner: context.runner }),
           origin: ToolOrigin.internal,
         },
       ],

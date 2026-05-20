@@ -72,6 +72,7 @@ export const internalTools = {
   subAgentTool: 'run_subagent',
   sleepTool: 'sleep',
   writeTodosTool: 'write_todos',
+  loadSkillTool: 'load_skill',
 };
 
 export const isAttachmentTool = (toolName: string) =>

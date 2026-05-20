@@ -115,9 +115,7 @@ describe('getSkillsInstructions', () => {
 
       const result = await getSkillsInstructions({ filesystem });
 
-      expect(result).toContain(
-        '- test-skill (/skills/platform/core/test-skill/SKILL.md): A test skill description'
-      );
+      expect(result).toContain('- test-skill: A test skill description');
     });
 
     it('sorts skills by path', async () => {
@@ -203,7 +201,7 @@ describe('getSkillsInstructions', () => {
       const result = await getSkillsInstructions({ filesystem });
 
       expect(result).toContain(
-        '- complex-skill (/skills/platform/core/complex-skill/SKILL.md): A complex skill with a longer description that explains what it does'
+        '- complex-skill: A complex skill with a longer description that explains what it does'
       );
     });
 
@@ -241,7 +239,7 @@ describe('getSkillsInstructions', () => {
 
       const result = await getSkillsInstructions({ filesystem });
 
-      expect(result).toContain('- empty-desc (skills/platform/core/empty-desc/SKILL.md): ');
+      expect(result).toContain('- empty-desc: ');
     });
 
     it('handles skills with special characters in description', async () => {

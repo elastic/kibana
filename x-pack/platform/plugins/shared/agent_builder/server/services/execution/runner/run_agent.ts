@@ -52,6 +52,8 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     skillServiceStart,
     pluginsServiceStart,
     toolManager,
+    analyticsService,
+    trackingService,
   } = manager.deps;
 
   const spaceId = getCurrentSpaceId({ request, spaces });
@@ -114,6 +116,8 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     experimentalFeatures,
     executionMode: manager.deps.executionMode,
     subAgentExecutor: manager.deps.subAgentExecutor,
+    analyticsService,
+    trackingService,
   };
 };
 
