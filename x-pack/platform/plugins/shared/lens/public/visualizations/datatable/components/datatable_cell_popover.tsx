@@ -53,7 +53,7 @@ const LensDatatableCellPopover = ({
   const popoverMessage = !filterable
     ? isEsqlTableComputedColumn(table, columnId)
       ? getEsqlComputedColumnFilterDisabledMessage(panelHasConfiguredDrilldowns)
-      : getGenericFilterDisabledMessage()
+      : getGenericFilterDisabledMessage(panelHasConfiguredDrilldowns)
     : undefined;
 
   return (

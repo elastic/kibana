@@ -32,6 +32,9 @@ import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import * as Logger from './logger';
 import type { LensEmbeddableStartServices } from './types';
 import { waitFor } from '@testing-library/dom';
+import type { HasDrilldowns } from '@kbn/embeddable-plugin/public';
+
+type DrilldownActionState = ReturnType<HasDrilldowns['drilldowns$']['getValue']>[number];
 
 jest.mock('@kbn/interpreter', () => ({
   toExpression: jest.fn().mockReturnValue('expression'),
@@ -66,6 +69,7 @@ async function expectRerenderOnDataLoader(
     parentApiOverrides,
     servicesOverrides,
     internalApiOverrides,
+    apiOverrides,
   }: {
     parentApiOverrides?: Partial<
       {
@@ -77,6 +81,7 @@ async function expectRerenderOnDataLoader(
     >;
     internalApiOverrides?: Partial<LensInternalApi>;
     servicesOverrides?: Partial<LensEmbeddableStartServices>;
+    apiOverrides?: Partial<LensApi & HasDrilldowns>;
   } = {}
 ): Promise<void> {
   const parentApi = {
@@ -93,6 +98,7 @@ async function expectRerenderOnDataLoader(
   const api: LensApi = {
     ...getLensApiMock(),
     parentApi,
+    ...apiOverrides,
   };
   const getState = jest.fn(() => runtimeState);
   const internalApi = getLensInternalApiMock({
@@ -230,6 +236,31 @@ describe('Data Loader', () => {
       // should not re-render
       return false;
     });
+  });
+
+  it('should reload when drilldowns change to update panelHasConfiguredDrilldowns', async () => {
+    const drilldowns$ = new BehaviorSubject<DrilldownActionState[]>([]);
+    await expectRerenderOnDataLoader(
+      async ({ api }) => {
+        const drilldownsApi = api as LensApi & HasDrilldowns;
+        (drilldownsApi.drilldowns$ as BehaviorSubject<DrilldownActionState[]>).next([
+          {
+            actionId: 'test_action',
+            label: 'Go to',
+            type: 'test',
+            trigger: 'on_click',
+          },
+        ]);
+        return 'drilldowns';
+      },
+      { attributes: getLensAttributesMock() },
+      {
+        apiOverrides: {
+          drilldowns$: drilldowns$ as PublishingSubject<DrilldownActionState[]>,
+          setDrilldowns: jest.fn(),
+        },
+      }
+    );
   });
 
   it('should pass context to embeddable', async () => {

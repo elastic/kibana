@@ -104,7 +104,7 @@ export const createGridColumns = (
       const disabledFilterActionMessage = !filterable
         ? isEsqlTableComputedColumn(table, field)
           ? getEsqlComputedColumnFilterDisabledMessage(panelHasConfiguredDrilldowns)
-          : getGenericFilterDisabledMessage()
+          : getGenericFilterDisabledMessage(panelHasConfiguredDrilldowns)
         : undefined;
 
       if (showFilterActions) {
