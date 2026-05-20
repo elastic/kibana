@@ -22,7 +22,9 @@ import { z, lazySchema } from '@kbn/zod/v4';
 export const SentinelIso8601Duration = lazySchema(() =>
   z
     .string()
-    .regex(/^P(?=\d|T\d)(?:\d+Y)?(?:\d+M)?(?:\d+D)?(?:T(?=\d)(?:\d+H)?(?:\d+M)?(?:\d+S)?)?$/)
+    .regex(
+      /^P(?&#x3D;\d|T\d)(?:\d+Y)?(?:\d+M)?(?:\d+D)?(?:T(?&#x3D;\d)(?:\d+H)?(?:\d+M)?(?:\d+S)?)?$/
+    )
 );
 export type SentinelIso8601Duration = z.infer<typeof SentinelIso8601Duration>;
 
@@ -46,11 +48,11 @@ export const SentinelRuleProperties = lazySchema(() =>
     /**
      * The frequency in ISO 8601 duration format for this alert rule to run.
      */
-    queryFrequency: SentinelIso8601Duration.optional(),
+    queryFrequency: SentinelIso8601Duration,
     /**
      * The period in ISO 8601 duration format that this alert rule looks at.
      */
-    queryPeriod: SentinelIso8601Duration.optional(),
+    queryPeriod: SentinelIso8601Duration,
     /**
      * The rule severity
      */
@@ -85,7 +87,7 @@ export const SentinelArmResource = lazySchema(() =>
      */
     name: z.string().optional(),
     /**
-     * The rule kind (e.g. Scheduled)
+     * The rule kind (e.g. Scheduled or NRT)
      */
     kind: z.string().optional(),
     /**
