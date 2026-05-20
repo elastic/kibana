@@ -155,6 +155,8 @@ export class CoreKibanaRequest<
   public readonly authzResult?: Record<string, boolean>;
   /** {@inheritDoc KibanaRequest.spaceId} */
   public readonly spaceId: SpaceId;
+  /** {@inheritDoc KibanaRequest.basePath} */
+  public readonly basePath: string;
   /** {@inheritDoc KibanaRequest.timing} */
   public readonly serverTiming: RequestTiming;
 
@@ -186,6 +188,7 @@ export class CoreKibanaRequest<
     // Real Hapi requests carry spaceId on app state (set by Core's onRequest handler).
     // FakeRawRequests carry it as a top-level field.
     this.spaceId = (request as FakeRawRequest).spaceId ?? appState?.spaceId ?? DEFAULT_SPACE_ID;
+    this.basePath = appState?.basePath ?? '';
     this.rewrittenUrl = appState?.rewrittenUrl;
     this.authzResult = appState?.authzResult;
     this.serverTiming = new RequestTimingImpl(appState?.timingState ?? { events: [] });

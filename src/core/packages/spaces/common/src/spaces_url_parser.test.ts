@@ -16,6 +16,7 @@ describe('getSpaceIdFromPath', () => {
       expect(getSpaceIdFromPath('/s/my-space/app/foo')).toEqual({
         spaceId: 'my-space',
         pathname: '/app/foo',
+        hasExplicitSpaceIdentifier: true,
       });
     });
 
@@ -23,6 +24,7 @@ describe('getSpaceIdFromPath', () => {
       expect(getSpaceIdFromPath('/app/foo')).toEqual({
         spaceId: DEFAULT_SPACE_ID,
         pathname: '/app/foo',
+        hasExplicitSpaceIdentifier: false,
       });
     });
 
@@ -30,6 +32,7 @@ describe('getSpaceIdFromPath', () => {
       expect(getSpaceIdFromPath('/this/is/a/crazy/path/s/my-space')).toEqual({
         spaceId: DEFAULT_SPACE_ID,
         pathname: '/this/is/a/crazy/path/s/my-space',
+        hasExplicitSpaceIdentifier: false,
       });
     });
 
@@ -37,6 +40,7 @@ describe('getSpaceIdFromPath', () => {
       expect(getSpaceIdFromPath('/this/is/a/crazy/path/s')).toEqual({
         spaceId: DEFAULT_SPACE_ID,
         pathname: '/this/is/a/crazy/path/s',
+        hasExplicitSpaceIdentifier: false,
       });
     });
 
@@ -44,6 +48,7 @@ describe('getSpaceIdFromPath', () => {
       expect(getSpaceIdFromPath('/s/my-space')).toEqual({
         spaceId: 'my-space',
         pathname: '/',
+        hasExplicitSpaceIdentifier: true,
       });
     });
 
@@ -51,6 +56,7 @@ describe('getSpaceIdFromPath', () => {
       expect(getSpaceIdFromPath(`/s/${DEFAULT_SPACE_ID}`)).toEqual({
         spaceId: DEFAULT_SPACE_ID,
         pathname: '/',
+        hasExplicitSpaceIdentifier: true,
       });
     });
   });
@@ -60,6 +66,7 @@ describe('getSpaceIdFromPath', () => {
       expect(getSpaceIdFromPath('/server/s/my-space/app/foo', '/server')).toEqual({
         spaceId: 'my-space',
         pathname: '/app/foo',
+        hasExplicitSpaceIdentifier: true,
       });
     });
 
@@ -67,6 +74,7 @@ describe('getSpaceIdFromPath', () => {
       expect(getSpaceIdFromPath('/server/app/foo', '/server')).toEqual({
         spaceId: DEFAULT_SPACE_ID,
         pathname: '/app/foo',
+        hasExplicitSpaceIdentifier: false,
       });
     });
 
@@ -74,6 +82,7 @@ describe('getSpaceIdFromPath', () => {
       expect(getSpaceIdFromPath('/this/is/a/crazy/path/s/my-space', '/this/is/a')).toEqual({
         spaceId: DEFAULT_SPACE_ID,
         pathname: '/crazy/path/s/my-space',
+        hasExplicitSpaceIdentifier: false,
       });
     });
 
@@ -81,6 +90,7 @@ describe('getSpaceIdFromPath', () => {
       expect(getSpaceIdFromPath('/this/is/a/crazy/path/s', '/this/is/a/crazy/path/s')).toEqual({
         spaceId: DEFAULT_SPACE_ID,
         pathname: '',
+        hasExplicitSpaceIdentifier: false,
       });
     });
   });

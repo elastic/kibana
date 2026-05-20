@@ -21,18 +21,19 @@ const spaceContextRegex = /^\/s\/([a-z0-9_\-]+)/;
 export function getSpaceIdFromPath(
   requestBasePath: string = '/',
   serverBasePath: string = '/'
-): { spaceId: SpaceId; pathname: string } {
+): { spaceId: SpaceId; pathname: string; hasExplicitSpaceIdentifier: boolean } {
   const pathToCheck = stripServerBasePath(requestBasePath, serverBasePath);
   const match = pathToCheck.match(spaceContextRegex);
 
   if (!match) {
-    return { spaceId: DEFAULT_SPACE_ID, pathname: pathToCheck };
+    return { spaceId: DEFAULT_SPACE_ID, pathname: pathToCheck, hasExplicitSpaceIdentifier: false };
   }
 
   const spaceId = asSpaceId(match[1]);
   return {
     spaceId,
     pathname: pathToCheck.slice(match[0].length) || '/',
+    hasExplicitSpaceIdentifier: true,
   };
 }
 

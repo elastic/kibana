@@ -51,6 +51,8 @@ export interface RequestTimingState {
 export interface KibanaRequestState extends RequestApplicationState {
   requestId: string;
   requestUuid: string;
+  /** The resolved base path for this request, including server base path and any explicit space prefix. */
+  basePath?: string;
   rewrittenUrl?: URL;
   traceId?: string;
   /** The resolved space ID for this request. Defaults to 'default'. */
@@ -221,6 +223,15 @@ export interface KibanaRequest<
    * Always populated; defaults to {@link DEFAULT_SPACE_ID} ('default') when no explicit space is present in the URL.
    */
   readonly spaceId: SpaceId;
+
+  /**
+   * The resolved Kibana base path for this request.
+   *
+   * Includes the configured server base path and, when present, the request's
+   * explicit space URL prefix. Defaults to the configured server base path for
+   * canonical default-space URLs.
+   */
+  readonly basePath: string;
 
   /**
    * The original request URL, captured before any rewrites by Core's onRequest

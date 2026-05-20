@@ -2312,7 +2312,9 @@ describe('space extraction in onRequest', () => {
         },
       },
       (context, req, res) => {
-        return res.ok({ body: { spaceId: req.spaceId, url: req.url.pathname } });
+        return res.ok({
+          body: { basePath: req.basePath, spaceId: req.spaceId, url: req.url.pathname },
+        });
       }
     );
 
@@ -2322,34 +2324,7 @@ describe('space extraction in onRequest', () => {
 
     const response = await supertest(innerServer.listener).get('/s/custom/foo').expect(200);
 
-    expect(response.body).toEqual({ spaceId: 'custom', url: '/foo' });
-  });
-
-  test('basePath.get(request) returns space prefix derived from request.spaceId', async () => {
-    const router = new Router('/', logger, enhanceWithContext, routerOptions);
-
-    router.get(
-      {
-        path: '/api/test',
-        validate: false,
-        security: {
-          authz: {
-            requiredPrivileges: ['foo'],
-          },
-        },
-      },
-      (context, req, res) => {
-        return res.ok({ body: { basePath: basePath.get(req), spaceId: req.spaceId } });
-      }
-    );
-
-    const { registerRouter, server: innerServer, basePath } = await server.setup({ config$ });
-    registerRouter(router);
-    await server.start();
-
-    const response = await supertest(innerServer.listener).get('/s/myspace/api/test').expect(200);
-
-    expect(response.body).toEqual({ basePath: '/s/myspace', spaceId: 'myspace' });
+    expect(response.body).toEqual({ basePath: '/s/custom', spaceId: 'custom', url: '/foo' });
   });
 
   test('extracts spaceId and rewrites URL when rewriteBasePath is true', async () => {
@@ -2374,7 +2349,9 @@ describe('space extraction in onRequest', () => {
         },
       },
       (context, req, res) => {
-        return res.ok({ body: { spaceId: req.spaceId, url: req.url.pathname } });
+        return res.ok({
+          body: { basePath: req.basePath, spaceId: req.spaceId, url: req.url.pathname },
+        });
       }
     );
 
@@ -2386,7 +2363,11 @@ describe('space extraction in onRequest', () => {
 
     const response = await supertest(innerServer.listener).get('/kibana/s/custom/foo').expect(200);
 
-    expect(response.body).toEqual({ spaceId: 'custom', url: '/foo' });
+    expect(response.body).toEqual({
+      basePath: '/kibana/s/custom',
+      spaceId: 'custom',
+      url: '/foo',
+    });
 
     await rewriteServer.stop();
   });
@@ -2405,7 +2386,7 @@ describe('space extraction in onRequest', () => {
         },
       },
       (context, req, res) => {
-        return res.ok({ body: { spaceId: req.spaceId } });
+        return res.ok({ body: { basePath: req.basePath, spaceId: req.spaceId } });
       }
     );
 
@@ -2415,6 +2396,44 @@ describe('space extraction in onRequest', () => {
 
     const response = await supertest(innerServer.listener).get('/foo').expect(200);
 
-    expect(response.body).toEqual({ spaceId: 'default' });
+    expect(response.body).toEqual({ basePath: '', spaceId: 'default' });
   });
+
+  for (const method of ['get', 'put', 'post', 'delete', 'patch'] as const) {
+    test(`${method.toUpperCase()} /s/default/... is served without redirect and keeps /s/default as request basePath`, async () => {
+      // API integrations and old bookmarks may send requests to /s/default/...
+      // They must be served without redirect so clients that do not follow
+      // redirects continue to work. The /s/default/ prefix is stripped from
+      // request.url for routing, but preserved as request.basePath.
+      const router = new Router('/', logger, enhanceWithContext, routerOptions);
+
+      router[method](
+        {
+          path: '/api/test',
+          validate: false,
+          security: { authz: { requiredPrivileges: ['foo'] } },
+        },
+        (context, req, res) => {
+          return res.ok({
+            body: { basePath: req.basePath, spaceId: req.spaceId, url: req.url.pathname },
+          });
+        }
+      );
+
+      const { registerRouter, server: innerServer } = await server.setup({ config$ });
+      registerRouter(router);
+      await server.start();
+
+      const response = await supertest(innerServer.listener)
+        [method]('/s/default/api/test')
+        .redirects(0)
+        .expect(200);
+
+      expect(response.body).toEqual({
+        basePath: '/s/default',
+        spaceId: 'default',
+        url: '/api/test',
+      });
+    });
+  }
 });

@@ -635,9 +635,17 @@ export class HttpServer {
       const requestId = getRequestId(request, config.requestId);
       const parentContext = executionContext?.getParentContextFrom(request.headers);
 
-      const { spaceId, pathname } = getSpaceIdFromPath(request.url.pathname);
-      if (pathname !== request.url.pathname) {
-        request.setUrl(`${pathname}${request.url.search}`);
+      const {
+        spaceId,
+        pathname: pathnameWithoutSpacePrefix,
+        hasExplicitSpaceIdentifier,
+      } = getSpaceIdFromPath(request.url.pathname);
+      // Preserve the `/s/<spaceId>` prefix from the URL as the request basePath so links
+      // rendered in the response point back at the same space the client used. An implicit
+      // default space (no `/s/...` prefix) leaves the basePath without a space segment.
+      const spaceBasePath = hasExplicitSpaceIdentifier ? `/s/${spaceId}` : '';
+      if (hasExplicitSpaceIdentifier) {
+        request.setUrl(`${pathnameWithoutSpacePrefix}${request.url.search}`);
       }
 
       const app: KibanaRequestState = request.app as KibanaRequestState;
@@ -668,13 +676,13 @@ export class HttpServer {
       // This couples our Request representation to a specific HTTP framework (Hapi).
       // A Core-owned per-request state container (e.g. a WeakMap or a symbol-keyed
       // field that doesn't depend on Hapi conventions) would let us swap or layer
-      // alternative HTTP backends without rewriting every reader. Worth doing when
-      // we touch the broader Kibana-state-on-Hapi pattern; out of scope for the
-      // first-class-spaceId work.
+      // alternative HTTP backends without rewriting every reader.
       app.startTime = performance.now();
       app.requestId = requestId;
       app.requestUuid = uuidv4();
       app.spaceId = spaceId;
+      const serverBasePath = config.basePath ?? '';
+      app.basePath = `${serverBasePath}${spaceBasePath}`;
       app.rewrittenUrl = request.url !== originalUrl ? originalUrl : undefined;
       app.measureElu = stop;
       // Kibana stores trace.id until https://github.com/elastic/apm-agent-nodejs/issues/2353 is resolved

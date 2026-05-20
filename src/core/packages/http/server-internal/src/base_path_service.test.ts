@@ -8,7 +8,6 @@
  */
 
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
-import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { BasePath } from './base_path_service';
 
 describe('BasePath', () => {
@@ -37,30 +36,16 @@ describe('BasePath', () => {
   });
 
   describe('#get()', () => {
-    it('returns empty string for default space with no server base path', () => {
-      const request = mockRouter.createKibanaRequest({ spaceId: DEFAULT_SPACE_ID });
+    it('returns the request basePath resolved by Core request normalization', () => {
+      const request = mockRouter.createKibanaRequest({
+        kibanaRequestState: {
+          requestId: 'test',
+          requestUuid: '123e4567-e89b-12d3-a456-426614174000',
+          startTime: 0,
+          basePath: '/foo/bar/s/myspace',
+        },
+      });
       const basePath = new BasePath();
-
-      expect(basePath.get(request)).toBe('');
-    });
-
-    it('returns server base path for default space', () => {
-      const request = mockRouter.createKibanaRequest({ spaceId: DEFAULT_SPACE_ID });
-      const basePath = new BasePath('/foo/bar');
-
-      expect(basePath.get(request)).toBe('/foo/bar');
-    });
-
-    it('returns space prefix for non-default space', () => {
-      const request = mockRouter.createKibanaRequest({ spaceId: asSpaceId('myspace') });
-      const basePath = new BasePath();
-
-      expect(basePath.get(request)).toBe('/s/myspace');
-    });
-
-    it('returns server base path plus space prefix for non-default space', () => {
-      const request = mockRouter.createKibanaRequest({ spaceId: asSpaceId('myspace') });
-      const basePath = new BasePath('/foo/bar');
 
       expect(basePath.get(request)).toBe('/foo/bar/s/myspace');
     });
