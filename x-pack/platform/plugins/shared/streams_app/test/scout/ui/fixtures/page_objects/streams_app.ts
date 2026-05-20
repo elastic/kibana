@@ -118,7 +118,7 @@ export class StreamsApp {
   }
 
   async gotoDataRetentionTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'retention');
+    await this.gotoStreamManagementTab(streamName, 'lifecycle');
   }
 
   async gotoDataQualityTab(streamName: string) {
