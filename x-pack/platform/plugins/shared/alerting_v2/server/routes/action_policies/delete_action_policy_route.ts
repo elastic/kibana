@@ -8,6 +8,7 @@
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { z } from '@kbn/zod/v4';
+import { ID_MAX_LENGTH } from '@kbn/alerting-v2-schemas';
 import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -17,7 +18,7 @@ import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 import { buildRouteValidationWithZod } from '../route_validation';
 
 const deleteActionPolicyParamsSchema = z.object({
-  id: z.string().describe('The action policy identifier.'),
+  id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
 });
 
 @injectable()

@@ -12,6 +12,7 @@ import React from 'react';
 import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { useKibana } from '../../hooks/use_kibana';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+import { InspectorHeaderLink } from '../inspect/inspector_header_link';
 import { FeedbackButton } from '../../pages/slos/components/common/feedback_button';
 
 export function HeaderMenu(): React.ReactElement | null {
@@ -26,6 +27,7 @@ export function HeaderMenu(): React.ReactElement | null {
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem>
           <EuiHeaderLinks gutterSize="xs">
+            <InspectorHeaderLink />
             <FeedbackButton />
             <EuiHeaderLink
               color="primary"

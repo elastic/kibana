@@ -180,7 +180,7 @@ describe('TraceWaterfall', () => {
       const initialState: Partial<TraceWaterfallRestorableState> = {
         restoredTraceId: 'trace-OTHER',
         showFullScreenWaterfall: true,
-        activeFlyoutType: 'spanDetailFlyout',
+        activeFlyoutType: 'span',
         activeDocId: 'span-1',
       };
 
@@ -192,7 +192,7 @@ describe('TraceWaterfall', () => {
     it('preserves legacy restored state when initialState has no restoredTraceId', async () => {
       const initialState: Partial<TraceWaterfallRestorableState> = {
         showFullScreenWaterfall: true,
-        activeFlyoutType: 'spanDetailFlyout',
+        activeFlyoutType: 'span',
         activeDocId: 'transaction-doc-1',
       };
 
@@ -201,7 +201,7 @@ describe('TraceWaterfall', () => {
       expect(await screen.findByTestId('fullScreenWaterfall')).toBeInTheDocument();
       expect(screen.getByTestId('fullScreenWaterfall')).toHaveAttribute(
         'data-active-flyout-type',
-        'spanDetailFlyout'
+        'span'
       );
       expect(screen.getByTestId('fullScreenWaterfall')).toHaveAttribute(
         'data-doc-id',

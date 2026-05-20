@@ -361,7 +361,8 @@ export class StreamsApp {
   }
 
   async switchToColumnsView() {
-    await this.page.getByTestId('streamsAppPreviewTableViewModeToggle').click();
+    // Draft streams fetch samples via ES|QL from the parent, which can be slow
+    await this.page.getByTestId('streamsAppPreviewTableViewModeToggle').click({ timeout: 30_000 });
   }
 
   async saveRoutingRule() {
@@ -1344,7 +1345,20 @@ export class StreamsApp {
   }
 
   async clickDeleteQueryStreamModalDeleteButton() {
+    // Toast notifications rendered in the globalToastList can overlap the confirm
+    // button and intercept pointer events. Wait until the list is empty before clicking.
+    await this.waitForEmptyGlobalToastList();
     await this.page.getByTestId('streamsAppDeleteStreamModalDeleteButton').click();
+  }
+
+  // Toasts rendered in the globalToastList can overlay buttons (Save / Delete) and
+  // intercept pointer events, causing flaky click timeouts. Use before clicking a
+  // primary action that lives near the bottom of the viewport.
+  async waitForEmptyGlobalToastList(timeout: number = 15_000) {
+    await expect(this.page.testSubj.locator('globalToastList').locator(':scope > *')).toHaveCount(
+      0,
+      { timeout }
+    );
   }
 
   async clickQueryStreamEditButton(streamName: string) {
@@ -1361,11 +1375,13 @@ export class StreamsApp {
   }
 
   async saveFlyoutQueryStreamCreate() {
+    await this.waitForEmptyGlobalToastList();
     await this.clickQueryStreamFlyoutSaveButton();
     await this.queryStreamCreatedSuccessToast.waitFor({ state: 'visible' });
   }
 
   async saveFlyoutQueryStreamEdit() {
+    await this.waitForEmptyGlobalToastList();
     await this.clickQueryStreamFlyoutSaveButton();
     await this.queryStreamUpdatedSuccessToast.waitFor({ state: 'visible' });
   }

@@ -15,11 +15,15 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+
 import type { CustomCellRenderer } from '@kbn/unified-data-table';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import type { EpisodeActionState } from '../types/action';
 import type { AlertEpisodeGroupAction } from '../types/action';
+
+import { parseEpisodeDataJson } from '../utils/episode_grouping_data';
+import { AlertingEpisodeGroupingTags } from './grouping/alerting_episode_grouping_tags';
 import { AlertEpisodeStatusBadges } from './status/status_badges';
 import { AlertEpisodeTags } from './actions/tags';
 
@@ -100,16 +104,33 @@ export const EpisodeRuleCell = ({
   if (rowHeight === 1) {
     return ruleName;
   }
+
+  const episodeData = parseEpisodeDataJson(row.flattened.episode_data);
+  const groupingFields = rule.grouping?.fields ?? [];
+
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
-      <EuiFlexItem>{ruleName}</EuiFlexItem>
-      <EuiFlexItem>
+    <EuiFlexGroup direction="column" gutterSize="xs">
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center" wrap responsive={false}>
+          <EuiFlexItem grow={false}>{ruleName}</EuiFlexItem>
+          {groupingFields.length > 0 ? (
+            <EuiFlexItem grow={false}>
+              <AlertingEpisodeGroupingTags
+                fields={groupingFields}
+                data={episodeData}
+                data-test-subj="episodeRuleCellGroupingTags"
+              />
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiCode
           color="subdued"
           css={css`
             background: none;
             color: ${euiTheme.colors.mediumShade};
-            font-size: ${euiTheme.font.scale.xs};
+            font-size: ${euiTheme.font.scale.s};
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;

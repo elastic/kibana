@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/257675
+issues:
+- https://github.com/elastic/search-team/issues/13172
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-05-14
+title: Add HubSpot CRM connector
+description: Adds a HubSpot connector that enables searching and retrieving contacts, companies, deals, tickets, and engagements from HubSpot CRM, with support for bearer token and OAuth 2.0 authentication.

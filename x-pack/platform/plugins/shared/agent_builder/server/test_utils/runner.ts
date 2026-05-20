@@ -35,6 +35,7 @@ import type {
   ToolStateManager,
   WritableSkillsStore,
 } from '@kbn/agent-builder-server/runner';
+import { createTodoStateManager } from '@kbn/agent-builder-server/runner';
 import type { AttachmentsService } from '@kbn/agent-builder-server/runner/attachments_service';
 import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
@@ -297,6 +298,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     resultStore: createToolResultStoreMock(),
     skillsStore: createSkillsStoreMock(),
     attachmentStateManager: createAttachmentStateManagerMock(),
+    todoStateManager: createTodoStateManager(),
     events: {
       emit: jest.fn(),
     },
@@ -312,6 +314,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
       filestore: false,
       skills: false,
       subagents: false,
+      todos: false,
     },
     subAgentExecutor: {
       executeSubAgent: jest.fn(),
@@ -395,6 +398,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     resultStore: createToolResultStoreMock(),
     skillsStore: createSkillsStoreMock(),
     attachmentStateManager: createAttachmentStateManagerMock(),
+    todoStateManager: createTodoStateManager(),
     attachmentsService: createAttachmentsServiceStartMock(),
     promptManager: createPromptManagerMock(),
     stateManager: createStateManagerMock(),

@@ -9,7 +9,7 @@ import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { css } from '@emotion/react';
 import type { StartServicesAccessor } from '@kbn/core/public';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -50,7 +50,7 @@ import { initializeSwimLaneControls, swimLaneComparators } from './initialize_sw
 import { initializeSwimLaneDataFetcher } from './initialize_swim_lane_data_fetcher';
 import type { AnomalySwimLaneEmbeddableApi } from './types';
 import { AnomalySwimlaneUserInput } from './anomaly_swimlane_setup_flyout';
-import { ensureMlAvailable } from '../../../common/license/ml_license';
+import { checkPermissionAsync } from '../../application/capabilities/check_capabilities';
 
 /**
  * Provides the services required by the Anomaly Swimlane Embeddable.
@@ -88,10 +88,13 @@ export const getServices = async (
 export const getAnomalySwimLaneEmbeddableFactory = (
   getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
 ) => {
-  const factory: EmbeddableFactory<AnomalySwimLaneEmbeddableState, AnomalySwimLaneEmbeddableApi> = {
+  const factory: EmbeddablePublicDefinition<
+    AnomalySwimLaneEmbeddableState,
+    AnomalySwimLaneEmbeddableApi
+  > = {
     type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      await ensureMlAvailable(getStartServices);
+      await checkPermissionAsync(getStartServices, 'canGetJobs', true);
       if (!apiHasExecutionContext(parentApi)) {
         throw new Error('Parent API does not have execution context');
       }
