@@ -59,7 +59,6 @@ import {
   DEFAULT_DETECTIONS_CLOSE_REASONS_KEY,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   SERVER_APP_ID,
-  CASE_ATTACHMENT_INDICATOR_TYPE_ID,
 } from '../common/constants';
 import { registerCaseAttachments } from './cases/attachments/register';
 import { securityAlertAttachmentType } from './cases/attachments/alert';
@@ -748,10 +747,6 @@ export class Plugin implements ISecuritySolutionPlugin {
           THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME,
           threatIntelligenceSearchStrategy
         );
-
-        plugins.cases.attachmentFramework.registerExternalReference({
-          id: CASE_ATTACHMENT_INDICATOR_TYPE_ID,
-        });
 
         this.siemMigrationsService.setup({ esClusterClient: coreStart.elasticsearch.client });
       })

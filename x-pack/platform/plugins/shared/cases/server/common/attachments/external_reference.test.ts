@@ -6,7 +6,7 @@
  */
 
 import { AttachmentType, ExternalReferenceStorageType } from '../../../common/types/domain';
-import { LEGACY_FILE_ATTACHMENT_TYPE } from '../../../common/constants';
+import { LEGACY_FILE_ATTACHMENT_TYPE, INDICATOR_ATTACHMENT_TYPE } from '../../../common/constants';
 import { externalReferenceAttachmentTransformer } from './external_reference';
 
 const baseLegacyAttributes = {
@@ -338,6 +338,44 @@ describe('externalReferenceAttachmentTransformer', () => {
           },
         })
       );
+    });
+  });
+
+  describe('indicator', () => {
+    const legacyIndicatorAttributes = {
+      ...baseLegacyAttributes,
+      type: AttachmentType.externalReference as const,
+      externalReferenceId: 'indicator-1',
+      externalReferenceStorage: {
+        type: ExternalReferenceStorageType.elasticSearchDoc as const,
+      },
+      externalReferenceAttachmentTypeId: 'indicator',
+      externalReferenceMetadata: {
+        indicatorName: 'malware.exe',
+        indicatorType: 'file',
+        indicatorFeedName: '[Filebeat] AbuseCH Malware',
+      },
+      owner: 'securitySolution',
+    };
+
+    it('converts a legacy indicator externalReference SO to the unified indicator shape', () => {
+      const result =
+        externalReferenceAttachmentTransformer.toUnifiedSchema(legacyIndicatorAttributes);
+      expect(result).toEqual(
+        expect.objectContaining({
+          type: INDICATOR_ATTACHMENT_TYPE,
+          attachmentId: 'indicator-1',
+          metadata: legacyIndicatorAttributes.externalReferenceMetadata,
+          owner: 'securitySolution',
+        })
+      );
+    });
+
+    it('round-trips legacy indicator -> unified -> legacy', () => {
+      const unified =
+        externalReferenceAttachmentTransformer.toUnifiedSchema(legacyIndicatorAttributes);
+      const round = externalReferenceAttachmentTransformer.toLegacySchema(unified);
+      expect(round).toEqual(legacyIndicatorAttributes);
     });
   });
 });

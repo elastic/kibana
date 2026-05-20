@@ -7,6 +7,7 @@
 
 import {
   FILE_ATTACHMENT_TYPE,
+  INDICATOR_ATTACHMENT_TYPE,
   LEGACY_LENS_ATTACHMENT_TYPE,
   LENS_ATTACHMENT_TYPE,
 } from '../../constants/attachments';
@@ -69,6 +70,20 @@ describe('migration_utils', () => {
   describe('isMigratedAttachmentType - file', () => {
     it('is true for the unified file type', () => {
       expect(isMigratedAttachmentType(FILE_ATTACHMENT_TYPE, owner)).toBe(true);
+    });
+  });
+
+  describe('isMigratedAttachmentType - indicator', () => {
+    it('is true for the unified indicator type', () => {
+      expect(isMigratedAttachmentType(INDICATOR_ATTACHMENT_TYPE, owner)).toBe(true);
+    });
+  });
+
+  describe('toLegacyAttachmentType - indicator', () => {
+    it('maps the unified indicator type back to externalReference (top-level type)', () => {
+      expect(toLegacyAttachmentType(INDICATOR_ATTACHMENT_TYPE)).toBe(
+        AttachmentType.externalReference
+      );
     });
   });
 

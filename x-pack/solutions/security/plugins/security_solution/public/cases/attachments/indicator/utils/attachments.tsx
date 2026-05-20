@@ -6,13 +6,14 @@
  */
 
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
+import { defineAttachment } from '@kbn/cases-plugin/public';
+import { INDICATOR_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { JsonValue } from '@kbn/utility-types';
-import type { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import React from 'react';
 import { EuiAvatar } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CASE_ATTACHMENT_INDICATOR_TYPE_ID } from '../../../../../common/constants';
+import { i18n } from '@kbn/i18n';
+import { IndicatorAttachmentPayloadSchema } from '../../../../../common/cases/attachments/indicator';
 import { EMPTY_VALUE } from '../../../../threat_intelligence/constants/common';
 import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 import { RawIndicatorFieldId } from '../../../../../common/threat_intelligence/types/indicator';
@@ -32,64 +33,56 @@ const IndicatorAttachmentChildrenLazy = React.lazy(
   () => import('../components/attachment_children')
 );
 
-/**
- * Create an {@link ExternalReferenceAttachmentType} object used to register an external reference
- * to the case plugin with our Threat Intelligence plugin initializes.
- *
- * See documentation here https://docs.elastic.dev/reops/attachment-framework-external-reference
- *
- * This object drives for example:
- * - the icon displayed in the case attachment
- * - the component that renders the comment in teh case attachment
- */
-export const generateIndicatorAttachmentType = (): ExternalReferenceAttachmentType => ({
-  id: CASE_ATTACHMENT_INDICATOR_TYPE_ID,
-  displayName: 'indicator',
-  getAttachmentViewObject: () => ({
-    event: (
-      <FormattedMessage
-        id="xpack.securitySolution.threatIntelligence.cases.eventDescription"
-        defaultMessage="added an indicator of compromise"
-      />
-    ),
-    timelineAvatar: <EuiAvatar name="indicator" color="subdued" iconType="crosshair" />,
-    children: IndicatorAttachmentChildrenLazy,
-  }),
-  icon: 'crosshair',
+const DISPLAY_NAME = i18n.translate('xpack.securitySolution.threatIntelligence.cases.displayName', {
+  defaultMessage: 'Indicator',
 });
 
 /**
- * Creates an attachment object, then passed to a case. It contains all the information necessary (id and metadata)
- * to allow the lazy loaded component defined within {@link generateAttachmentType} to render.
+ * Defines the `indicator` cases attachment registered with the cases attachment framework.
+ */
+export const getIndicatorAttachment = () =>
+  defineAttachment({
+    id: INDICATOR_ATTACHMENT_TYPE,
+    icon: 'crosshair',
+    displayName: DISPLAY_NAME,
+    schema: IndicatorAttachmentPayloadSchema,
+    getAttachmentViewObject: () => ({
+      event: (
+        <FormattedMessage
+          id="xpack.securitySolution.threatIntelligence.cases.eventDescription"
+          defaultMessage="added an indicator of compromise"
+        />
+      ),
+      timelineAvatar: <EuiAvatar name="indicator" color="subdued" iconType="crosshair" />,
+      children: IndicatorAttachmentChildrenLazy,
+    }),
+  });
+
+/**
+ * Builds the unified `indicator` attachment payload posted to a case.
  *
- * See documentation here https://docs.elastic.dev/reops/attachment-framework-external-reference
- *
- * @param externalReferenceId the id saved in the case's attachment (in our case the indicator id)
- * @param attachmentMetadata some metadata also saved in the case's attachments for display in the comment
+ * @param indicatorId the indicator id (stored as `attachmentId`)
+ * @param attachmentMetadata indicator fields persisted alongside the attachment for display
  */
 export const generateIndicatorAttachmentsWithoutOwner = (
-  externalReferenceId: string,
+  indicatorId: string,
   attachmentMetadata: IndicatorAttachmentMetadata
 ): CaseAttachmentsWithoutOwner => {
-  if (!externalReferenceId) {
+  if (!indicatorId) {
     return [];
   }
 
   return [
     {
-      type: AttachmentType.externalReference,
-      externalReferenceId,
-      externalReferenceStorage: {
-        type: ExternalReferenceStorageType.elasticSearchDoc,
-      },
-      externalReferenceAttachmentTypeId: CASE_ATTACHMENT_INDICATOR_TYPE_ID,
-      externalReferenceMetadata: attachmentMetadata as unknown as { [p: string]: JsonValue },
+      type: INDICATOR_ATTACHMENT_TYPE,
+      attachmentId: indicatorId,
+      metadata: attachmentMetadata as unknown as { [p: string]: JsonValue },
     },
   ];
 };
 
 /**
- * To facilitate the rendering of the lazy loaded component defined in {@link generateAttachmentType}, we pass
+ * To facilitate the rendering of the lazy loaded component defined in {@link getIndicatorAttachment}, we pass
  * some of the indicator's fields to be saved in the case's attachment.
  *
  * @param indicator the indicator we're attaching to a case

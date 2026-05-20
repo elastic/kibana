@@ -8,6 +8,7 @@
 import {
   SECURITY_ENDPOINT_ATTACHMENT_TYPE,
   SECURITY_EVENT_ATTACHMENT_TYPE,
+  INDICATOR_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common';
 
 import { LEGACY_ENDPOINT_EXTERNAL_REFERENCE_TYPE_ID, registerCaseAttachments } from './register';
@@ -42,6 +43,19 @@ describe('registerCaseAttachments', () => {
     );
   });
 
+  it('registers the unified indicator attachment type with the zod schema', () => {
+    const framework = buildFramework();
+
+    registerCaseAttachments(framework);
+
+    expect(framework.registerUnified).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: INDICATOR_ATTACHMENT_TYPE,
+        schema: expect.anything(),
+      })
+    );
+  });
+
   // Regression: addresses @szwarckonrad review comment on PR #260544.
   // Dropping this registration is a silent breaking change for any API client
   // still POSTing the legacy shape
@@ -69,12 +83,12 @@ describe('registerCaseAttachments', () => {
     expect(framework.registerPersistableState).not.toHaveBeenCalled();
   });
 
-  it('registers exactly the three expected attachment types', () => {
+  it('registers exactly the expected attachment types', () => {
     const framework = buildFramework();
 
     registerCaseAttachments(framework);
 
-    expect(framework.registerUnified).toHaveBeenCalledTimes(2);
+    expect(framework.registerUnified).toHaveBeenCalledTimes(3);
     expect(framework.registerExternalReference).toHaveBeenCalledTimes(1);
   });
 });
