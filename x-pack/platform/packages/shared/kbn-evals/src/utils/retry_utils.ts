@@ -113,6 +113,16 @@ function isRetryable(error: any): { retry: boolean; retryAfterMs?: number } {
     return { retry: true };
   }
 
+  // Socket-level failures (e.g. server closed connection under load)
+  if (/socket.*(closed|hang up|error)|fetch failed|other side closed/i.test(message)) {
+    return { retry: true };
+  }
+
+  // 502/503/504 are typically transient infrastructure errors
+  if (status === 502 || status === 503 || status === 504) {
+    return { retry: true, retryAfterMs };
+  }
+
   return { retry: false };
 }
 

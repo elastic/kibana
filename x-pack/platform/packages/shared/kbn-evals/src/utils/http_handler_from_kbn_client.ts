@@ -52,7 +52,7 @@ export function httpHandlerFromKbnClient({
 
     const finalHeaders = Object.keys(nextHeaders).length ? nextHeaders : undefined;
 
-    const maxRetries = Number(process.env.KBN_EVALS_HTTP_RETRIES ?? '0') || 0;
+    const maxRetries = Number(process.env.KBN_EVALS_HTTP_RETRIES ?? '3') || 3;
     const retryStatuses = new Set([429, 503, 504]);
 
     async function sleep(ms: number) {
@@ -137,8 +137,14 @@ export function httpHandlerFromKbnClient({
         }
 
         const status = (maybeKbn as any)?.status;
+        const errorMessage = toErrorMessage(maybeKbn);
+        const isSocketError =
+          /socket.*(closed|hang up|error)|fetch failed|other side closed|ECONNRESET|ETIMEDOUT/i.test(
+            errorMessage
+          );
         const shouldRetry =
-          attempt < maxRetries && typeof status === 'number' && retryStatuses.has(status);
+          attempt < maxRetries &&
+          (isSocketError || (typeof status === 'number' && retryStatuses.has(status)));
 
         lastError = maybeKbn;
 
