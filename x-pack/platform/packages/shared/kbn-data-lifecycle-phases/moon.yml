@@ -19,7 +19,6 @@ project:
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/storybook'
-  - '@kbn/test-jest-helpers'
   - '@kbn/index-lifecycle-management-common-shared'
   - '@kbn/test-jest-helpers'
 tags:
