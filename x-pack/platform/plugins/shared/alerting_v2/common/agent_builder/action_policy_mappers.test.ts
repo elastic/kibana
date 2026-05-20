@@ -63,18 +63,28 @@ describe('attachmentDataToActionPolicyPayload', () => {
     expect(result.ruleId).toBe('rule-123');
   });
 
-  it('omits ruleId when not present in data', () => {
-    const data: Partial<ActionPolicyAttachmentData> = {
+  it('omits ruleId when not present in data or when type is global', () => {
+    const withoutRuleId: Partial<ActionPolicyAttachmentData> = {
+      name: 'No RuleId Policy',
+      description: '',
+      destinations: [{ type: 'workflow', id: 'wf-1' }],
+    };
+
+    const withoutRuleIdResult = attachmentDataToActionPolicyPayload(withoutRuleId);
+
+    expect(withoutRuleIdResult).not.toHaveProperty('ruleId');
+
+    const globalWithoutRuleId: Partial<ActionPolicyAttachmentData> = {
       name: 'Global Policy',
       description: '',
       type: 'global',
       destinations: [{ type: 'workflow', id: 'wf-1' }],
     };
 
-    const result = attachmentDataToActionPolicyPayload(data);
+    const globalResult = attachmentDataToActionPolicyPayload(globalWithoutRuleId);
 
-    expect(result.type).toBe('global');
-    expect(result).not.toHaveProperty('ruleId');
+    expect(globalResult.type).toBe('global');
+    expect(globalResult).not.toHaveProperty('ruleId');
   });
 
   it('converts null ruleId to undefined', () => {

@@ -9,6 +9,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ToolHandlerContextMock } from '@kbn/agent-builder-plugin/server/mocks';
 import { manageActionPolicyTool, type ManageActionPolicyToolDeps } from './manage_action_policy';
+import { actionPolicyOperationSchema } from './operations';
 
 const createDeps = (): ManageActionPolicyToolDeps => ({
   getWorkflow: jest.fn().mockResolvedValue({ id: 'wf-1', name: 'My Workflow' }),
@@ -220,26 +221,25 @@ describe('manageActionPolicyTool', () => {
       expect(results[0].data?.actionPolicyAttachment?.name).toBe('Single Rule Policy');
     });
 
-    it('returns an error when set_type single_rule is used without ruleId', async () => {
-      const deps = createDeps();
-      const tool = manageActionPolicyTool(deps);
-      const ctx = createContext();
+    it('rejects set_type global with a ruleId at schema level', () => {
+      const result = actionPolicyOperationSchema.safeParse({
+        operation: 'set_type',
+        type: 'global',
+        ruleId: 'rule-abc',
+      });
 
-      const result = await tool.handler(
-        {
-          operations: [
-            { operation: 'set_metadata', name: 'Bad Policy' },
-            { operation: 'set_type', type: 'single_rule' },
-          ],
-        },
-        ctx
-      );
+      expect(result.success).toBe(false);
+      expect(result.error!.issues[0].message).toContain('ruleId is only allowed');
+    });
 
-      const { results } = result as {
-        results: Array<{ type: string; data: { message: string } }>;
-      };
-      expect(results[0].type).toBe(ToolResultType.error);
-      expect(results[0].data.message).toContain('ruleId is required');
+    it('rejects set_type single_rule without ruleId at schema level', () => {
+      const result = actionPolicyOperationSchema.safeParse({
+        operation: 'set_type',
+        type: 'single_rule',
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error!.issues[0].message).toContain('ruleId is required');
     });
   });
 

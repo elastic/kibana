@@ -8,6 +8,7 @@
 import type { ActionPolicyAttachmentData } from '@kbn/alerting-v2-schemas';
 import {
   executeActionPolicyOperations,
+  actionPolicyOperationSchema,
   ActionPolicyOperationValidationError,
   type ActionPolicyOperation,
 } from './operations';
@@ -169,14 +170,25 @@ describe('executeActionPolicyOperations', () => {
       expect(result.ruleId).toBeNull();
     });
 
-    it('throws when single_rule is set without ruleId', () => {
-      const ops: ActionPolicyOperation[] = [
-        { operation: 'set_type', type: 'single_rule' },
-      ];
+    it('rejects single_rule without ruleId at schema level', () => {
+      const result = actionPolicyOperationSchema.safeParse({
+        operation: 'set_type',
+        type: 'single_rule',
+      });
 
-      expect(() => executeActionPolicyOperations({}, ops)).toThrow(
-        'ruleId is required when type is "single_rule"'
-      );
+      expect(result.success).toBe(false);
+      expect(result.error!.issues[0].message).toContain('ruleId is required');
+    });
+
+    it('rejects global with a ruleId at schema level', () => {
+      const result = actionPolicyOperationSchema.safeParse({
+        operation: 'set_type',
+        type: 'global',
+        ruleId: 'rule-123',
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error!.issues[0].message).toContain('ruleId is only allowed');
     });
 
     it('passes validation for a complete single_rule policy', () => {

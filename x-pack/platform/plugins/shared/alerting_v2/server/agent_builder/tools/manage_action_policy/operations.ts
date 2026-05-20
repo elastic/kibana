@@ -9,12 +9,12 @@ import { z } from '@kbn/zod/v4';
 import type { ActionPolicyAttachmentData } from '@kbn/alerting-v2-schemas';
 import {
   actionPolicyDestinationSchema,
-  actionPolicyTypeSchema,
   createActionPolicyDataSchema,
   groupingModeSchema,
   throttleStrategySchema,
   durationSchema,
   tagsSchema,
+  actionPolicyTypeAndRuleIdSchema,
   PER_EPISODE_STRATEGIES,
   AGGREGATE_STRATEGIES,
   STRATEGIES_REQUIRING_INTERVAL,
@@ -67,16 +67,8 @@ export const setThrottleOperationSchema = z.object({
   interval: durationSchema.optional().describe('The throttle interval (e.g. 5m, 1h).'),
 });
 
-export const setTypeOperationSchema = z.object({
+export const setTypeOperationSchema = actionPolicyTypeAndRuleIdSchema.extend({
   operation: z.literal('set_type'),
-  type: actionPolicyTypeSchema.describe(
-    'The action policy type: "single_rule" (scoped to one rule) or "global" (matches any rule in the space).'
-  ),
-  ruleId: z
-    .string()
-    .min(1)
-    .optional()
-    .describe('The rule ID. Required when type is "single_rule".'),
 });
 
 export const validateOperationSchema = z.object({
@@ -186,19 +178,13 @@ export const executeActionPolicyOperations = (
         };
         break;
 
-      case 'set_type': {
-        if (op.type === 'single_rule' && !op.ruleId) {
-          throw new ActionPolicyOperationValidationError(
-            'ruleId is required when type is "single_rule".'
-          );
-        }
+      case 'set_type':
         next = {
           ...next,
           type: op.type,
           ruleId: op.type === 'single_rule' ? op.ruleId : null,
         };
         break;
-      }
 
       case 'validate': {
         const payload = attachmentDataToActionPolicyPayload(next);

@@ -86,7 +86,7 @@ export const STRATEGIES_REQUIRING_INTERVAL = new Set<string>([
 export const needsInterval = (strategy: string | undefined): boolean =>
   strategy != null && STRATEGIES_REQUIRING_INTERVAL.has(strategy);
 
-interface ValidationPayload {
+export interface ValidationPayload {
   value: {
     groupingMode?: string | null;
     throttle?: { strategy?: string; interval?: string | null } | null;
@@ -130,7 +130,7 @@ const validateGroupingModeAndStrategy = (payload: ValidationPayload) => {
   validateStrategyInterval(payload);
 };
 
-const validateTypeAndRuleId = (payload: ValidationPayload) => {
+export const validateTypeAndRuleId = (payload: ValidationPayload) => {
   const { value: data, issues } = payload;
 
   if (data.type === 'single_rule') {
@@ -154,6 +154,19 @@ const validateTypeAndRuleId = (payload: ValidationPayload) => {
     });
   }
 };
+
+export const actionPolicyTypeAndRuleIdSchema = z
+  .object({
+    type: actionPolicyTypeSchema
+      .default('global')
+      .describe('The action policy type. Defaults to "global" when omitted.'),
+    ruleId: z
+      .string()
+      .min(1)
+      .optional()
+      .describe('The rule this policy is attached to. Required when type is "single_rule".'),
+  })
+  .check(validateTypeAndRuleId);
 
 export type ActionPolicyDestination = z.infer<typeof actionPolicyDestinationSchema>;
 
@@ -221,21 +234,13 @@ export const bulkActionActionPoliciesBodySchema = z.object({
 
 export type BulkActionActionPoliciesBody = z.infer<typeof bulkActionActionPoliciesBodySchema>;
 
-export const createActionPolicyDataSchema = z
-  .object({
+export const createActionPolicyDataSchema = actionPolicyTypeAndRuleIdSchema
+  .extend({
     name: z.string().min(1).max(MAX_NAME_LENGTH).describe('The name of the action policy.'),
     description: z
       .string()
       .max(MAX_DESCRIPTION_LENGTH)
       .describe('A description of the action policy.'),
-    type: actionPolicyTypeSchema
-      .default('global')
-      .describe('The action policy type. Defaults to "global" when omitted.'),
-    ruleId: z
-      .string()
-      .min(1)
-      .optional()
-      .describe('The rule this policy is attached to. Required when type is "single_rule".'),
     destinations: z
       .array(actionPolicyDestinationSchema)
       .min(1, 'At least one destination must be provided')
@@ -257,7 +262,7 @@ export const createActionPolicyDataSchema = z
       .describe('The grouping mode for alert notifications.'),
     throttle: throttleSchema.optional().describe('The throttle configuration for notifications.'),
   })
-  .check(validateGroupingModeAndStrategy, validateTypeAndRuleId);
+  .check(validateGroupingModeAndStrategy);
 
 export type CreateActionPolicyData = z.infer<typeof createActionPolicyDataSchema>;
 // Caller-facing shape: `type` is optional because the schema defaults it to 'global'.
