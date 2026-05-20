@@ -186,11 +186,11 @@ function validateEmails(
   addresses: string[],
   options: ValidateEmailAddressesOptions
 ): string | undefined {
-  if (config.email?.domain_allowlist == null) {
-    return;
-  }
-
-  const validated = validateEmailAddresses(config.email.domain_allowlist, addresses, options);
+  const validated = validateEmailAddresses(
+    config.email?.domain_allowlist ?? null,
+    addresses,
+    options
+  );
   return invalidEmailsAsMessage(validated);
 }
 
