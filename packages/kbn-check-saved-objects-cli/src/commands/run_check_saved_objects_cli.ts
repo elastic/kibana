@@ -52,6 +52,7 @@ export function runCheckSavedObjectsCli() {
         gitRev: gitRev!,
         serverlessGitRev,
         updatedTypes: [],
+        typesWithNewModelVersions: [],
         wipTypes: [],
         currentRemovedTypes: [],
         newRemovedTypes: [],
@@ -124,7 +125,7 @@ export function runCheckSavedObjectsCli() {
               ctx.test = true;
             },
             enabled: !server && !test,
-            skip: (ctx) => ctx.updatedTypes.length > 0,
+            skip: (ctx) => ctx.typesWithNewModelVersions.length > 0,
           },
           /**
            * ==================================================================
@@ -148,7 +149,8 @@ export function runCheckSavedObjectsCli() {
           {
             title: 'Automated rollback tests',
             task: automatedRollbackTests,
-            skip: (ctx) => ctx.updatedTypes.length === 0 || globalTask.errors.length > 0,
+            skip: (ctx) =>
+              ctx.typesWithNewModelVersions.length === 0 || globalTask.errors.length > 0,
             enabled: !server,
           },
         ],

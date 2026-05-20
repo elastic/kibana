@@ -127,6 +127,13 @@ export const DownsamplingPhase = ({
       isOpen={isPopoverOpen && !isEditLifecycleFlyoutOpen}
       closePopover={() => setIsPopoverOpen(false)}
       anchorPosition="upCenter"
+      aria-label={i18n.translate(
+        'xpack.streams.streamDetailLifecycle.downsample.popoverAriaLabel',
+        {
+          defaultMessage: 'Downsample step {stepNumber}',
+          values: { stepNumber },
+        }
+      )}
     >
       <EuiPopoverTitle data-test-subj={`downsamplingPopover-step${stepNumber}-title`}>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
