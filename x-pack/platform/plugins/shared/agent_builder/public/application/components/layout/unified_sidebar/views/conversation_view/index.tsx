@@ -138,7 +138,11 @@ export const ConversationSidebarView: React.FC = () => {
   ]);
 
   const handlePressNewConversation = () => {
-    analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ConversationStart, { agent_id: agentId });
+    analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ConversationStart, {
+      agent_id: agentId,
+      is_default_agent: agentId === agentBuilderDefaultAgentId,
+      entry_point: 'sidebar_new',
+    });
     removeAllErrors();
     navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }));
   };
@@ -230,12 +234,7 @@ export const ConversationSidebarView: React.FC = () => {
                             size="s"
                             color="text"
                             aria-label={searchChatsAriaLabel}
-                            onClick={() => {
-                              analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ConversationSearch, {
-                                agent_id: agentId,
-                              });
-                              setIsSearchModalOpen(true);
-                            }}
+                            onClick={() => setIsSearchModalOpen(true)}
                             disabled={!hasConversations}
                             data-test-subj="agentBuilderSidebarSearchChatsButton"
                             {...getEbtProps({

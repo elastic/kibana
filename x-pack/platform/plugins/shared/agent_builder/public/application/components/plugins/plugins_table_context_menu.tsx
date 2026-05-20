@@ -59,7 +59,6 @@ export const PluginContextMenu: React.FC<PluginContextMenuProps> = ({
         onClick: () => {
           analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ManageEntityDelete, {
             entity_type: 'plugin',
-            entity_id: plugin.id,
           });
           onDelete(plugin.id, plugin.name);
           closePopover();

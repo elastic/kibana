@@ -47,6 +47,7 @@ export const ConversationFooter: React.FC = () => {
             analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.SidebarLayerTransition, {
               from_layer: 'conversation',
               to_layer: 'manage',
+              trigger: 'manage_click',
             });
             navigateToAgentBuilderUrl(appPaths.manage.agents);
           }}

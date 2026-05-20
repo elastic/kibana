@@ -149,14 +149,12 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
           response = await saveTool(updatePayload);
           analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ManageEntityEdit, {
             entity_type: 'tool',
-            entity_id: tool?.id ?? currentToolId,
           });
         } else {
           const createPayload = getCreatePayloadFromData(data);
           response = await saveTool(createPayload);
           analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ManageEntityEdit, {
             entity_type: 'tool',
-            entity_id: response?.id ?? currentToolId,
           });
         }
       } finally {
@@ -167,7 +165,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
       }
       return response;
     },
-    [mode, saveTool, deferNavigateToAgentBuilderUrl, analytics, tool?.id, currentToolId]
+    [mode, saveTool, deferNavigateToAgentBuilderUrl, analytics]
   );
 
   const handleTestTool = useCallback(() => {

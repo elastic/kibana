@@ -25,7 +25,11 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
-import { AGENT_BUILDER_UI_EBT, AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
+import {
+  agentBuilderDefaultAgentId,
+  AGENT_BUILDER_UI_EBT,
+  AGENT_BUILDER_EVENT_TYPES,
+} from '@kbn/agent-builder-common';
 
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -239,7 +243,9 @@ export const AgentSelectorDropdown: React.FC<AgentSelectorDropdownProps> = ({
               const { checked, key: agentId } = changedOption;
               if (checked === 'on' && agentId) {
                 analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.AgentSwitch, {
-                  agent_id: agentId,
+                  from_agent_id: selectedAgent?.id ?? '',
+                  to_agent_id: agentId,
+                  is_default_agent: agentId === agentBuilderDefaultAgentId,
                 });
                 onAgentChange(agentId);
                 setIsPopoverOpen(false);

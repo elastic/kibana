@@ -49,7 +49,6 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
   const handleEdit = () => {
     analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.EntityEditFromAgent, {
       entity_type: 'skill',
-      entity_id: skill?.id ?? skillId,
     });
     onEdit();
   };

@@ -19,7 +19,11 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
 import { getEbtProps } from '@kbn/ebt-click';
-import { AGENT_BUILDER_UI_EBT, AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
+import {
+  agentBuilderDefaultAgentId,
+  AGENT_BUILDER_UI_EBT,
+  AGENT_BUILDER_EVENT_TYPES,
+} from '@kbn/agent-builder-common';
 import { getLastAgentId } from '../../../../hooks/use_last_agent_id';
 import { useNavigation } from '../../../../hooks/use_navigation';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -104,6 +108,8 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
               onClick={() => {
                 analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ConversationStart, {
                   agent_id: agentId,
+                  is_default_agent: agentId === agentBuilderDefaultAgentId,
+                  entry_point: 'sidebar_new',
                 });
                 navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }));
               }}
@@ -137,6 +143,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
                 analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.SidebarLayerTransition, {
                   from_layer: 'manage',
                   to_layer: 'conversation',
+                  trigger: 'back_click',
                 });
                 navigate(appPaths.agent.root({ agentId: getLastAgentId() }));
               }}

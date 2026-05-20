@@ -192,7 +192,6 @@ export const SkillForm: React.FC<SkillFormProps> = ({
         });
         analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ManageEntityEdit, {
           entity_type: 'skill',
-          entity_id: data.id,
         });
       } else if (mode === SkillFormMode.Edit) {
         await (onSave as (d: UpdateSkillPayload) => Promise<unknown>)({
@@ -204,13 +203,12 @@ export const SkillForm: React.FC<SkillFormProps> = ({
         });
         analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ManageEntityEdit, {
           entity_type: 'skill',
-          entity_id: skill?.id ?? data.id,
         });
       }
       reset(data, { keepDirty: false });
       deferNavigateToAgentBuilderUrl(appPaths.skills.list);
     },
-    [onSave, mode, reset, deferNavigateToAgentBuilderUrl, analytics, skill?.id]
+    [onSave, mode, reset, deferNavigateToAgentBuilderUrl, analytics]
   );
 
   const pageTitle = useMemo(() => {

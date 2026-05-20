@@ -295,37 +295,46 @@ export interface ReportFullscreenEntryPointParams {
 export interface ReportSidebarLayerTransitionParams {
   from_layer: 'conversation' | 'manage';
   to_layer: 'conversation' | 'manage';
+  trigger: 'customize_click' | 'manage_click' | 'back_click';
 }
 
 export interface ReportAgentSwitchParams {
-  agent_id: string;
+  from_agent_id: string;
+  to_agent_id: string;
+  is_default_agent: boolean;
 }
 
 export interface ReportConversationStartParams {
   agent_id: string;
+  is_default_agent: boolean;
+  entry_point: string;
 }
 
 export interface ReportConversationResumeParams {
-  conversation_id: string;
+  agent_id: string;
+  conversation_age_hours: number;
 }
 
 export interface ReportConversationSearchParams {
-  agent_id: string;
+  has_results: boolean;
+  result_count: number;
 }
 
 export interface ReportEntityEditFromAgentParams {
   entity_type: 'tool' | 'skill';
-  entity_id: string;
+  agent_id?: string;
+  used_by_agent_count?: number;
 }
 
 export interface ReportManageEntityEditParams {
   entity_type: 'tool' | 'skill';
-  entity_id: string;
+  used_by_agent_count?: number;
 }
 
 export interface ReportManageEntityDeleteParams {
   entity_type: 'tool' | 'skill' | 'plugin';
-  entity_id: string;
+  used_by_agent_count?: number;
+  was_blocked?: boolean;
 }
 
 export interface AgentBuilderTelemetryEventsMap {
@@ -1312,16 +1321,38 @@ const SIDEBAR_LAYER_TRANSITION_EVENT: AgentBuilderTelemetryEvent = {
         optional: false,
       },
     },
+    trigger: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'What triggered the layer transition (customize_click|manage_click|back_click)',
+        optional: false,
+      },
+    },
   },
 };
 
 const AGENT_SWITCH_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.AgentSwitch,
   schema: {
-    agent_id: {
+    from_agent_id: {
       type: 'keyword',
       _meta: {
-        description: 'ID of the agent the user switched to in the sidebar',
+        description: 'ID of the agent the user was on before switching',
+        optional: false,
+      },
+    },
+    to_agent_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'ID of the agent the user switched to',
+        optional: false,
+      },
+    },
+    is_default_agent: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the destination agent is the default agent',
         optional: false,
       },
     },
@@ -1338,16 +1369,37 @@ const CONVERSATION_START_EVENT: AgentBuilderTelemetryEvent = {
         optional: false,
       },
     },
+    is_default_agent: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the agent is the default agent',
+        optional: false,
+      },
+    },
+    entry_point: {
+      type: 'keyword',
+      _meta: {
+        description: 'Where the new conversation was initiated from (e.g. sidebar_new)',
+        optional: false,
+      },
+    },
   },
 };
 
 const CONVERSATION_RESUME_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.ConversationResume,
   schema: {
-    conversation_id: {
+    agent_id: {
       type: 'keyword',
       _meta: {
-        description: 'ID of the resumed conversation',
+        description: 'ID of the agent the conversation belongs to',
+        optional: false,
+      },
+    },
+    conversation_age_hours: {
+      type: 'integer',
+      _meta: {
+        description: 'Age of the conversation in hours (based on last updated time)',
         optional: false,
       },
     },
@@ -1357,10 +1409,17 @@ const CONVERSATION_RESUME_EVENT: AgentBuilderTelemetryEvent = {
 const CONVERSATION_SEARCH_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.ConversationSearch,
   schema: {
-    agent_id: {
-      type: 'keyword',
+    has_results: {
+      type: 'boolean',
       _meta: {
-        description: 'ID of the agent when conversation search was opened',
+        description: 'Whether the search returned any results',
+        optional: false,
+      },
+    },
+    result_count: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of conversations matching the search query',
         optional: false,
       },
     },
@@ -1377,11 +1436,18 @@ const ENTITY_EDIT_FROM_AGENT_EVENT: AgentBuilderTelemetryEvent = {
         optional: false,
       },
     },
-    entity_id: {
+    agent_id: {
       type: 'keyword',
       _meta: {
-        description: 'ID of the entity being edited',
-        optional: false,
+        description: 'ID of the agent from whose view the entity is being edited',
+        optional: true,
+      },
+    },
+    used_by_agent_count: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of agents currently using this entity',
+        optional: true,
       },
     },
   },
@@ -1397,11 +1463,11 @@ const MANAGE_ENTITY_EDIT_EVENT: AgentBuilderTelemetryEvent = {
         optional: false,
       },
     },
-    entity_id: {
-      type: 'keyword',
+    used_by_agent_count: {
+      type: 'integer',
       _meta: {
-        description: 'ID of the entity saved',
-        optional: false,
+        description: 'Number of agents currently using this entity',
+        optional: true,
       },
     },
   },
@@ -1417,11 +1483,18 @@ const MANAGE_ENTITY_DELETE_EVENT: AgentBuilderTelemetryEvent = {
         optional: false,
       },
     },
-    entity_id: {
-      type: 'keyword',
+    used_by_agent_count: {
+      type: 'integer',
       _meta: {
-        description: 'ID of the entity deleted',
-        optional: false,
+        description: 'Number of agents currently using this entity',
+        optional: true,
+      },
+    },
+    was_blocked: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the deletion was blocked (e.g. entity still in use)',
+        optional: true,
       },
     },
   },

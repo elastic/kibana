@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiFieldSearch,
   EuiFlexGroup,
@@ -81,6 +81,14 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
     return sortedConversations.filter((c) => c.title.toLowerCase().includes(lower));
   }, [sortedConversations, searchValue]);
 
+  useEffect(() => {
+    if (!searchValue) return;
+    analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ConversationSearch, {
+      has_results: filteredConversations.length > 0,
+      result_count: filteredConversations.length,
+    });
+  }, [filteredConversations, searchValue, analytics]);
+
   const itemStyles = createConversationListItemStyles(euiTheme);
   const activeItemStyles = createActiveConversationListItemStyles(euiTheme);
 
@@ -115,7 +123,10 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
                 css={isActive ? activeItemStyles : itemStyles}
                 onClick={() => {
                   analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ConversationResume, {
-                    conversation_id: conversation.id,
+                    agent_id: agentId,
+                    conversation_age_hours: Math.round(
+                      (Date.now() - new Date(conversation.updated_at).getTime()) / 3_600_000
+                    ),
                   });
                   onSelectConversation(conversation.id);
                   onClose();

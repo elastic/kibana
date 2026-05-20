@@ -66,7 +66,6 @@ export const SkillContextMenu: React.FC<SkillContextMenuProps> = ({
           onClick: () => {
             analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ManageEntityDelete, {
               entity_type: 'skill',
-              entity_id: skill.id,
             });
             onDelete(skill.id);
             closePopover();

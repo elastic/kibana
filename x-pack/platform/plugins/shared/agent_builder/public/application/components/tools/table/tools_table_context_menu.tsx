@@ -58,7 +58,6 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
       onClick={() => {
         analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ManageEntityDelete, {
           entity_type: 'tool',
-          entity_id: tool.id,
         });
         deleteTool(tool.id);
         setIsOpen(false);

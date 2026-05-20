@@ -55,6 +55,7 @@ export interface ConversationListItemRowProps {
   agentId: string;
   conversationId: string;
   title: string;
+  updatedAt: string;
   isActive: boolean;
   routeConversationId: string | undefined;
   onItemClick?: () => void;
@@ -64,6 +65,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
   agentId,
   conversationId,
   title,
+  updatedAt,
   isActive,
   routeConversationId,
   onItemClick,
@@ -204,7 +206,10 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
             data-test-subj={`agentBuilderSidebarConversation-${conversationId}`}
             onClick={() => {
               analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ConversationResume, {
-                conversation_id: conversationId,
+                agent_id: agentId,
+                conversation_age_hours: Math.round(
+                  (Date.now() - new Date(updatedAt).getTime()) / 3_600_000
+                ),
               });
               onItemClick?.();
             }}

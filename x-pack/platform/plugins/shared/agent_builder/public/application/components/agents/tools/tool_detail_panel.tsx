@@ -134,7 +134,6 @@ const ToolHeaderActions = ({
             onClick={() => {
               analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.EntityEditFromAgent, {
                 entity_type: 'tool',
-                entity_id: toolId,
               });
             }}
             {...getEbtProps({
