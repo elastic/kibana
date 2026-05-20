@@ -38,8 +38,16 @@ export function registerPutDataSetRoute(router: IRouter): void {
       const { id } = request.params;
       const { client } = (await context.core).elasticsearch;
       const dataSetsClient = new DataSetsClient(client.asCurrentUser);
-      await dataSetsClient.put(id, request.body);
-      return response.ok();
+      try {
+        const responseBody = await dataSetsClient.put(id, request.body);
+        console.log('responseBody', responseBody);
+        return response.ok();
+      } catch (error) {
+        console.log('error', error);
+        return response.badRequest({
+          body: error,
+        });
+      }
     })
   );
 }

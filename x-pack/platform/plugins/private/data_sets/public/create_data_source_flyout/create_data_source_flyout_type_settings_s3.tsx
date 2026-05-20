@@ -21,12 +21,10 @@ export function CreateDataSourceFlyoutTypeSettingsS3({
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   const { field: regionField } = useController({
-    defaultValue: '',
     name: 'settings.region',
     control,
   });
   const { field: endpointField } = useController({
-    defaultValue: '',
     name: 'settings.endpoint',
     control,
   });
@@ -84,12 +82,10 @@ export function CreateDataSourceFlyoutTypeSettingsS3Credentials({
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   const { field: accessKeyField } = useController({
-    defaultValue: '',
     name: 'settings.access_key',
     control,
   });
   const { field: secretKeyField } = useController({
-    defaultValue: '',
     name: 'settings.secret_key',
     control,
   });

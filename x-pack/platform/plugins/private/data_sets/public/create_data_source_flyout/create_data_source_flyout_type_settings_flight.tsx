@@ -21,12 +21,10 @@ export function CreateDataSourceFlyoutTypeSettingsFlight({
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   const { field: hostField } = useController({
-    defaultValue: '',
     name: 'settings.host',
     control,
   });
   const { field: portField } = useController({
-    defaultValue: undefined,
     name: 'settings.port',
     control,
   });

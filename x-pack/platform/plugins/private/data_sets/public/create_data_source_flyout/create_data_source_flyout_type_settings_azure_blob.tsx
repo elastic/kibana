@@ -22,7 +22,6 @@ export function CreateDataSourceFlyoutTypeSettingsAzureBlob({
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   const { field: endpointField } = useController({
-    defaultValue: '',
     name: 'settings.endpoint',
     control,
   });
@@ -100,12 +99,10 @@ function CreateDataSourceFlyoutTypeSettingsAzureBlobCredentialsFields({
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   const { field: accountField } = useController({
-    defaultValue: '',
     name: 'settings.account',
     control,
   });
   const { field: keyField } = useController({
-    defaultValue: '',
     name: 'settings.key',
     control,
   });
@@ -164,7 +161,6 @@ function CreateDataSourceFlyoutTypeSettingsAzureBlobConnectionStringField({
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   const { field: connectionStringField } = useController({
-    defaultValue: '',
     name: 'settings.connection_string',
     control,
   });
@@ -204,7 +200,6 @@ function CreateDataSourceFlyoutTypeSettingsAzureBlobSasTokenField({
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   const { field: sasTokenField } = useController({
-    defaultValue: '',
     name: 'settings.sas_token',
     control,
   });

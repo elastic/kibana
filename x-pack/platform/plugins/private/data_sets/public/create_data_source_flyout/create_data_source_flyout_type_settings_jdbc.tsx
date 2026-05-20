@@ -21,32 +21,26 @@ export function CreateDataSourceFlyoutTypeSettingsJdbc({
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   const { field: hostField } = useController({
-    defaultValue: '',
     name: 'settings.host',
     control,
   });
   const { field: portField } = useController({
-    defaultValue: '',
     name: 'settings.port',
     control,
   });
   const { field: databaseField } = useController({
-    defaultValue: '',
     name: 'settings.database',
     control,
   });
   const { field: sslField } = useController({
-    defaultValue: false,
     name: 'settings.ssl',
     control,
   });
   const { field: usernameField } = useController({
-    defaultValue: '',
     name: 'settings.username',
     control,
   });
   const { field: passwordField } = useController({
-    defaultValue: '',
     name: 'settings.password',
     control,
   });

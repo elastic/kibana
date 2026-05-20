@@ -21,17 +21,14 @@ export function CreateDataSourceFlyoutTypeSettingsGcs({
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   const { field: projectIdField } = useController({
-    defaultValue: '',
     name: 'settings.project_id',
     control,
   });
   const { field: endpointField } = useController({
-    defaultValue: '',
     name: 'settings.endpoint',
     control,
   });
   const { field: tokenUriField } = useController({
-    defaultValue: '',
     name: 'settings.token_uri',
     control,
   });
@@ -106,7 +103,6 @@ export function CreateDataSourceFlyoutTypeSettingsGcsCredentials({
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   const { field: credentialsField } = useController({
-    defaultValue: '',
     name: 'settings.credentials',
     control,
   });

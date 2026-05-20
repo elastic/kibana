@@ -37,46 +37,64 @@ import {
 import { CreateDataSourceFlyoutAuthenticationFields } from './create_data_source_flyout_authentication_fields';
 import { CreateDataSourceFlyoutAuthenticationSelect } from './create_data_source_flyout_authentication_select';
 import { CreateDataSourceFlyoutTypeSettingsBlock } from './create_data_source_flyout_type_settings';
+import {
+  authenticationModeFromDataSource,
+  dataSourceToFlyoutFormValues,
+  emptyDataSourceFlyoutFormValues,
+} from './data_source_flyout_initial_values';
 import { getDataSourceTypeLabel } from '../get_data_source_type_label';
 import type { CreateDataSourceFlyoutFormValues } from './create_data_source_flyout_form_state';
 
 export interface CreateDataSourceFlyoutProps {
+  /** When set, the flyout opens in edit mode for this data source. */
+  initialDataSource?: DataSourceWithSecrets;
   onClose: () => void;
   /**
-   * Persist a new data source. Resolve `null` on success, or an error message to show in the flyout.
+   * Persist a data source (create or update). Resolve `null` on success, or an error message to show in the flyout.
    */
   onSave: (data: DataSourceWithSecrets) => Promise<string | null>;
 }
 
 export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutProps> = ({
+  initialDataSource,
   onClose,
   onSave,
 }) => {
+  const isEditMode = initialDataSource !== undefined;
+
+  const formDefaultValues = useMemo(
+    (): CreateDataSourceFlyoutFormValues =>
+      initialDataSource
+        ? dataSourceToFlyoutFormValues(initialDataSource)
+        : emptyDataSourceFlyoutFormValues(),
+    [initialDataSource]
+  );
+
   const {
     handleSubmit,
     control,
-    // formState: { errors },
+    reset,
     unregister,
-  } = useForm<CreateDataSourceFlyoutFormValues>();
+  } = useForm<CreateDataSourceFlyoutFormValues>({
+    defaultValues: formDefaultValues,
+  });
 
   const nameError: string | undefined = undefined;
   const saveError: string | undefined = undefined;
   const isSaving = false;
 
-  const [dataSourceType, setDataSourceType] = useState<DataSourceType>('s3');
+  const [dataSourceType, setDataSourceType] = useState<DataSourceType>(
+    initialDataSource?.type ?? 's3'
+  );
 
   const { field: nameField } = useController({
-    defaultValue: '',
     name: 'name',
     control,
     rules: {
-      // todo will need to make sure this is unique
-      // todo make sure this is displayed somewhere
       required: createDataSourceFlyoutStrings.nameRequired(),
     },
   });
   const { field: descriptionField } = useController({
-    defaultValue: '',
     name: 'description',
     control,
   });
@@ -91,45 +109,25 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
   );
 
   const [authenticationMode, setAuthenticationMode] = useState<CreateDataSourceAuthenticationMode>(
-    () => getDefaultAuthenticationMode(dataSourceType)
+    () =>
+      initialDataSource
+        ? authenticationModeFromDataSource(initialDataSource)
+        : getDefaultAuthenticationMode(dataSourceType)
   );
 
   useEffect(() => {
-    setAuthenticationMode(getDefaultAuthenticationMode(dataSourceType));
-  }, [dataSourceType]);
-
-  /*
-  const handleSave = useCallback(async () => {
-    const trimmedName = name.trim();
-    if (!trimmedName) {
-      setNameError(createDataSourceFlyoutStrings.nameRequired());
+    if (!initialDataSource) {
       return;
     }
-    setNameError(undefined);
-    setSaveError(undefined);
-    setIsSaving(true);
-    try {
-      const built = buildOmitIdDataSource(trimmedName, description, dataSourceType, formSettings);
-      if (!('dataSource' in built)) {
-        setSaveError(built.message);
-        return;
-      }
-      const { dataSource } = built;
-      const message = await onSave({ name: trimmedName, dataSource });
-      if (message) {
-        setSaveError(message);
-      } else {
-        setName('');
-        setDescription('');
-        setDataSourceType('s3');
-        setFormSettings(emptyCreateDataSourceFormSettings());
-        onClose();
-      }
-    } finally {
-      setIsSaving(false);
+    reset(dataSourceToFlyoutFormValues(initialDataSource));
+    setAuthenticationMode(authenticationModeFromDataSource(initialDataSource));
+  }, [initialDataSource, dataSourceType, reset]);
+
+  useEffect(() => {
+    if (!isEditMode) {
+      setAuthenticationMode(getDefaultAuthenticationMode(dataSourceType));
     }
-  }, [dataSourceType, description, formSettings, name, onClose, onSave]);
-  */
+  }, [dataSourceType, isEditMode]);
 
   const handleSave = (data: CreateDataSourceFlyoutFormValues) =>
     onSave(
@@ -139,17 +137,21 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
       )
     );
 
+  const flyoutTitle = isEditMode
+    ? createDataSourceFlyoutStrings.editTitle()
+    : createDataSourceFlyoutStrings.createTitle();
+
   return (
     <EuiFlyout
       ownFocus
       onClose={onClose}
       aria-labelledby="createDataSourceFlyoutTitle"
       size="l"
-      data-test-subj="createDataSourceFlyout"
+      data-test-subj={isEditMode ? 'editDataSourceFlyout' : 'createDataSourceFlyout'}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id="createDataSourceFlyoutTitle">{createDataSourceFlyoutStrings.title()}</h2>
+          <h2 id="createDataSourceFlyoutTitle">{flyoutTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
@@ -170,6 +172,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
               aria-label={createDataSourceFlyoutStrings.typeAriaLabel()}
               value={dataSourceType}
               onChange={(e) => setDataSourceType(e.target.value as DataSourceType)}
+              disabled={isEditMode}
             />
           </EuiFormRow>
           <EuiFormRow
@@ -179,15 +182,15 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
             fullWidth
           >
             <EuiFieldText
-              // todo
               isInvalid={Boolean(nameError)}
               data-test-subj="createDataSourceFlyoutName"
-              autoFocus
+              autoFocus={!isEditMode}
               fullWidth
               value={nameField.value}
               onChange={(e) => nameField.onChange(e.target.value)}
               name={nameField.name}
               inputRef={nameField.ref}
+              readOnly={isEditMode}
             />
           </EuiFormRow>
           <EuiFormRow label={createDataSourceFlyoutStrings.descriptionLabel()} fullWidth>

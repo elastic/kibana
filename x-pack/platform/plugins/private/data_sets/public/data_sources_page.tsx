@@ -24,10 +24,16 @@ import { CreateDatasetFlyout } from './create_dataset_flyout';
 import { HttpDataSetsClient } from './http_data_sets_client';
 import { HttpDataSourcesClient } from './http_data_sources_client';
 import { CreateDataSourceFlyout } from './create_data_source_flyout';
+import { dataSourceFromListItem } from './create_data_source_flyout/data_source_flyout_initial_values';
 import { getDataSourceTypeLabel } from './get_data_source_type_label';
 
 /** Data set row in the table; `type` is resolved from the linked data source. */
 type DataSetListRow = DataSetWithName & { type?: DataSource['type'] };
+
+type DataSourceFlyoutState =
+  | { kind: 'closed' }
+  | { kind: 'create' }
+  | { kind: 'edit'; dataSource: DataSourceWithSecrets };
 
 export interface DataSourcesPageProps {
   pageTitle: string;
@@ -43,7 +49,9 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
   const [items, setItems] = useState<DataSource[]>([]);
   const [selectedItems, setSelectedItems] = useState<DataSource[]>([]);
   const [dataSetsRaw, setDataSetsRaw] = useState<DataSetWithName[]>([]);
-  const [isCreateFlyoutOpen, setCreateFlyoutOpen] = useState(false);
+  const [dataSourceFlyout, setDataSourceFlyout] = useState<DataSourceFlyoutState>({
+    kind: 'closed',
+  });
   const [isCreateDatasetFlyoutOpen, setCreateDatasetFlyoutOpen] = useState(false);
 
   useEffect(() => {
@@ -86,12 +94,12 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
     }));
   }, [dataSetsRaw, items]);
 
-  const handleCreateDataSourceSave = useCallback(
+  const handleDataSourceSave = useCallback(
     async (dataSource: DataSourceWithSecrets): Promise<string | null> => {
       try {
         await dataClient.add(dataSource);
         setItems(await dataClient.get());
-        setCreateFlyoutOpen(false);
+        setDataSourceFlyout({ kind: 'closed' });
         return null;
       } catch (e) {
         return e instanceof Error ? e.message : 'Unknown error';
@@ -99,6 +107,13 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
     },
     [dataClient]
   );
+
+  const handleEditDataSource = useCallback((item: DataSource) => {
+    setDataSourceFlyout({
+      kind: 'edit',
+      dataSource: dataSourceFromListItem(item),
+    });
+  }, []);
 
   const handleCreateDatasetSave = useCallback(
     async (dataSet: DataSetWithName): Promise<string | null> => {
@@ -122,7 +137,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
           defaultMessage: 'name',
         }),
         sortable: true,
-        width: '24%',
+        width: '22%',
         'data-test-subj': 'dataSetsColName',
       },
       {
@@ -131,7 +146,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
           defaultMessage: 'Type',
         }),
         sortable: true,
-        width: '20%',
+        width: '18%',
         render: (value: DataSource['type']) => getDataSourceTypeLabel(value),
         'data-test-subj': 'dataSetsColType',
       },
@@ -144,8 +159,30 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
         truncateText: true,
         'data-test-subj': 'dataSetsColDescription',
       },
+      {
+        name: i18n.translate('dataSets.table.columnActions', {
+          defaultMessage: 'Actions',
+        }),
+        width: '8%',
+        actions: [
+          {
+            name: i18n.translate('dataSets.table.editAction', {
+              defaultMessage: 'Edit',
+            }),
+            description: i18n.translate('dataSets.table.editActionDescription', {
+              defaultMessage: 'Edit data source',
+            }),
+            icon: 'pencil',
+            type: 'icon',
+            onClick: (item) => {
+              handleEditDataSource(item);
+            },
+            'data-test-subj': 'dataSetsEditButton',
+          },
+        ],
+      },
     ],
-    []
+    [handleEditDataSource]
   );
 
   const dataSetColumns = useMemo<Array<EuiBasicTableColumn<DataSetListRow>>>(
@@ -322,7 +359,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
                     data-test-subj="dataSetsCreateButton"
                     iconType="plusInCircle"
                     onClick={() => {
-                      setCreateFlyoutOpen(true);
+                      setDataSourceFlyout({ kind: 'create' });
                     }}
                   >
                     {i18n.translate('dataSets.addButtonLabel', {
@@ -372,10 +409,14 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
           data-test-subj="dataSetsTabs"
         />
       </EuiPageSection>
-      {isCreateFlyoutOpen ? (
+      {dataSourceFlyout.kind !== 'closed' ? (
         <CreateDataSourceFlyout
-          onClose={() => setCreateFlyoutOpen(false)}
-          onSave={handleCreateDataSourceSave}
+          key={dataSourceFlyout.kind === 'edit' ? dataSourceFlyout.dataSource.name : 'create'}
+          initialDataSource={
+            dataSourceFlyout.kind === 'edit' ? dataSourceFlyout.dataSource : undefined
+          }
+          onClose={() => setDataSourceFlyout({ kind: 'closed' })}
+          onSave={handleDataSourceSave}
         />
       ) : null}
       {isCreateDatasetFlyoutOpen ? (

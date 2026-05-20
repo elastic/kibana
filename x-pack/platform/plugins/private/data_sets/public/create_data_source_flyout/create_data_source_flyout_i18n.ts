@@ -7,11 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 
-/** Localized strings for the create data source flyout. */
+/** Localized strings for the create / edit data source flyout. */
 export const createDataSourceFlyoutStrings = {
-  title: () =>
+  createTitle: () =>
     i18n.translate('dataSets.createFlyout.title', {
       defaultMessage: 'Add data source',
+    }),
+
+  editTitle: () =>
+    i18n.translate('dataSets.createFlyout.editTitle', {
+      defaultMessage: 'Edit data source',
     }),
 
   nameRequired: () =>
