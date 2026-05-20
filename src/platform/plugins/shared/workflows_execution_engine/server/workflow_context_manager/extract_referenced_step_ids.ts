@@ -29,6 +29,8 @@ const referencedStepIdsCache = new WeakMap<GraphNodeUnion, Set<string> | null>()
  *    `steps[variables.x].output`) — caller should fall back to all predecessors
  *
  * For `enter-if` nodes, KQL condition strings are also analyzed via `extractPropertyPathsFromKql`.
+ * The full node is scanned, not just `configuration`, because some graph nodes render
+ * top-level fields or declare `templateDependencies` for values rendered by their implementation.
  *
  * Result is memoised per-node — see {@link referencedStepIdsCache}.
  */
@@ -57,11 +59,9 @@ function computeReferencedStepIds(node: GraphNodeUnion): Set<string> | null {
       }
     }
 
-    // Scan the entire node's configuration for template variables
-    // This covers `with`, `condition`, `foreach`, `expression`, `match`, etc.
-    if ('configuration' in node) {
-      variables.push(...scanForTemplateVariables(node.configuration));
-    }
+    // Scan the full graph node so template-bearing fields outside `configuration`
+    // (for example exit-while.condition) are included automatically.
+    variables.push(...scanForTemplateVariables(node));
 
     return extractReferencedStepIdsFromVariables(variables);
   } catch {

@@ -1434,6 +1434,169 @@ describe('StepIoService', () => {
       expect(rehydratedIds).toHaveLength(2);
     });
 
+    it('rehydrates outputs referenced by switch case match templates', async () => {
+      const workflow = {
+        name: 'Switch match dependency',
+        version: '1',
+        description: 'test',
+        enabled: true,
+        triggers: [],
+        steps: [
+          {
+            name: 'get_active_alerts',
+            type: 'console',
+            with: { message: 'alerts' },
+          },
+          {
+            name: 'expected_relation',
+            type: 'console',
+            with: { message: 'eq' },
+          },
+          {
+            name: 'choose_branch',
+            type: 'switch',
+            expression: '{{steps.expected_relation.output}}',
+            cases: [
+              {
+                match: '{{steps.get_active_alerts.output.hits.total.relation}}',
+                steps: [
+                  {
+                    name: 'matched_branch',
+                    type: 'console',
+                    with: { message: 'matched' },
+                  },
+                ],
+              },
+            ],
+            default: [
+              {
+                name: 'default_branch',
+                type: 'console',
+                with: { message: 'default' },
+              },
+            ],
+          },
+        ],
+      } as unknown as WorkflowYaml;
+      const graph = WorkflowGraph.fromWorkflowDefinition(workflow);
+      const switchNode = graph.topologicalOrder
+        .map((nodeId) => graph.getNode(nodeId))
+        .find((n) => n.stepId === 'choose_branch' && n.type === 'enter-switch')!;
+
+      const { state, service, stepExecutionRepository } = buildHarness({ evictionMinBytes: 0 });
+      const alertsOutput = { hits: { total: { relation: 'eq' } } };
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'exec-alerts',
+        'get_active_alerts',
+        alertsOutput,
+        1,
+        'connector'
+      );
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'exec-relation',
+        'expected_relation',
+        'eq',
+        1,
+        'connector'
+      );
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+        { id: 'exec-alerts', output: alertsOutput } as unknown as EsWorkflowStepExecution,
+        { id: 'exec-relation', output: 'eq' } as unknown as EsWorkflowStepExecution,
+      ]);
+
+      await service.prepareForRead({
+        node: switchNode,
+        predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
+      });
+
+      const rehydratedIds = stepExecutionRepository.getStepExecutionsByIds.mock.calls[0][0];
+      expect(rehydratedIds).toEqual(expect.arrayContaining(['exec-alerts', 'exec-relation']));
+      expect(rehydratedIds).toHaveLength(2);
+    });
+
+    it('rehydrates outputs referenced by while exit conditions', async () => {
+      const workflow = {
+        name: 'While exit dependency',
+        version: '1',
+        description: 'test',
+        enabled: true,
+        triggers: [],
+        steps: [
+          {
+            name: 'get_active_alerts',
+            type: 'console',
+            with: { message: 'alerts' },
+          },
+          {
+            name: 'create_new_case',
+            type: 'console',
+            with: { message: 'case' },
+          },
+          {
+            name: 'check_while',
+            type: 'while',
+            condition: '{{steps.get_active_alerts.output.hits.total.value}}',
+            'max-iterations': 2,
+            steps: [
+              {
+                name: 'while_log',
+                type: 'console',
+                with: { message: 'case={{steps.create_new_case.output.id}}' },
+              },
+            ],
+          },
+        ],
+      } as unknown as WorkflowYaml;
+      const graph = WorkflowGraph.fromWorkflowDefinition(workflow);
+      const exitWhileNode = graph.topologicalOrder
+        .map((nodeId) => graph.getNode(nodeId))
+        .find((n) => n.stepId === 'check_while' && n.type === 'exit-while')!;
+
+      const { state, service, stepExecutionRepository } = buildHarness({ evictionMinBytes: 0 });
+      const alertsOutput = { hits: { total: { value: 5 } } };
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'exec-alerts',
+        'get_active_alerts',
+        alertsOutput,
+        1,
+        'connector'
+      );
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'exec-case',
+        'create_new_case',
+        { id: 'case-1' },
+        1,
+        'connector'
+      );
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+        { id: 'exec-alerts', output: alertsOutput } as unknown as EsWorkflowStepExecution,
+      ]);
+
+      await service.prepareForRead({
+        node: exitWhileNode,
+        predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
+      });
+
+      expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
+        ['exec-alerts'],
+        ['id', 'output', 'workflowRunId']
+      );
+    });
+
     it('falls back to all predecessors when dynamic access is detected', async () => {
       const dynamicWorkflow: WorkflowYaml = {
         name: 'Dynamic Access',
