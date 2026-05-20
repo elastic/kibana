@@ -20,6 +20,7 @@
     "@kbn/spaces-plugin",
     "@kbn/cloud-plugin",
     "@kbn/deeplinks-observability",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/kibana-react-plugin"
   ]
 }
