@@ -236,7 +236,7 @@ export const toExpression = (
     inspectorTableId: state.layerId,
     secondaryLabelPosition:
       state.secondaryLabelPosition ?? LENS_METRIC_STATE_DEFAULTS.secondaryLabelPosition,
-    applyColorTo: state.applyColorTo,
+    applyColorTo: showingBar(state) ? LENS_METRIC_STATE_DEFAULTS.applyColorTo : state.applyColorTo,
   });
 
   return {
