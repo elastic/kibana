@@ -507,6 +507,22 @@ describe('StorageIndexAdapter - esql method', () => {
     expect((esClient as any).esql.query).toHaveBeenCalledWith(expect.objectContaining({ filter }));
   });
 
+  it('forwards transport options to esClient.esql.query', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    const transportOptions: StorageTransportOptions = {
+      maxResponseSize: 50 * 1024 * 1024,
+      requestTimeout: 30_000,
+    };
+    await client.esql({ query: 'FROM test_index | LIMIT 1' }, transportOptions);
+
+    expect((esClient as any).esql.query).toHaveBeenCalledWith(
+      expect.objectContaining({ query: 'FROM test_index | LIMIT 1' }),
+      transportOptions
+    );
+  });
+
   it('awaits ensureMappingsBeforeReading before issuing the ES|QL query', async () => {
     // Defer the alias lookup that updateMappingsIfNeeded awaits so the
     // ensureMappingsBeforeReading promise stays pending until we release it.

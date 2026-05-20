@@ -43,6 +43,7 @@ import type { StoredFeature } from './stored_feature';
 import { StatusError } from '../errors/status_error';
 import { bulkWithInferenceFallback } from '../errors/bulk_with_inference_fallback';
 import { searchWithKeywordFallback } from '../errors/search_with_keyword_fallback';
+import { col, getSourceColumnIndex, mapSourceRows } from '../helpers/esql';
 import type { SearchMode } from '../../../../common/queries';
 import {
   DEFAULT_SIG_EVENTS_TUNING_CONFIG,
@@ -106,8 +107,6 @@ function buildKeywordQuery(
 
 type WhereCondition = ESQLAstExpression & ComposerQueryTagHole;
 
-const col = (field: string) => esql.col(field.includes('.') ? field.split('.') : field);
-
 // `EVAL CASE` chain mirrors the DSL `wildcard(boost: N)` ranking so result order
 // is identical between the keyword and ES|QL search paths.
 function appendKeywordEsqlPipeline(
@@ -152,21 +151,13 @@ function appendKeywordEsqlPipeline(
     .pipe`EVAL _kw_subtype_hit = CASE(TO_LOWER(${subtypeCol}) LIKE ${lowerWildcard}, 1.0, 0.0)`
     .pipe`EVAL _kw_tag_hit = ${tagHitCase}`
     .pipe`EVAL _kw_score = _kw_title_hit + _kw_desc_hit + _kw_type_hit + _kw_subtype_hit + _kw_tag_hit`
-    .pipe`SORT _kw_score DESC, _id ASC`.limit(size);
-}
-
-function getSourceColumn(response: ESQLSearchResponse): number {
-  return response.columns.findIndex((c) => c.name === '_source');
+    .pipe`SORT _kw_score DESC, _id ASC`
+    .keep('_id', '_source')
+    .limit(size);
 }
 
 function getColumnIndex(response: ESQLSearchResponse, name: string): number {
   return response.columns.findIndex((c) => c.name === name);
-}
-
-function mapEsqlSourceRows(response: ESQLSearchResponse): Feature[] {
-  const sourceIdx = getSourceColumn(response);
-  if (sourceIdx === -1) return [];
-  return response.values.map((row) => fromStorage(row[sourceIdx] as StoredFeature));
 }
 
 function buildBaseFilters({
@@ -344,7 +335,7 @@ export class FeatureClient {
       filter: { bool: { filter: filterClauses } },
     });
 
-    return { hits: mapEsqlSourceRows(response) };
+    return { hits: mapSourceRows<StoredFeature, Feature>(response, fromStorage) };
   }
 
   async getFeature(stream: string, uuid: string) {
@@ -355,7 +346,7 @@ export class FeatureClient {
       .print('basic');
     const response = await this.clients.storageClient.esql({ query });
 
-    const sourceIdx = getSourceColumn(response);
+    const sourceIdx = getSourceColumnIndex(response);
     const row = sourceIdx !== -1 ? response.values[0] : undefined;
     if (!row) {
       throw new StatusError(`Feature ${uuid} not found`, 404);
@@ -384,7 +375,7 @@ export class FeatureClient {
     const response = await this.clients.storageClient.esql({ query });
 
     const idIdx = getColumnIndex(response, '_id');
-    const sourceIdx = getSourceColumn(response);
+    const sourceIdx = getSourceColumnIndex(response);
     if (idIdx === -1 || sourceIdx === -1) return [];
 
     return response.values.map((row) => ({
@@ -420,7 +411,7 @@ export class FeatureClient {
       .print('basic');
     const response = await this.clients.storageClient.esql({ query });
 
-    return { hits: mapEsqlSourceRows(response) };
+    return { hits: mapSourceRows<StoredFeature, Feature>(response, fromStorage) };
   }
 
   async findFeatures(
@@ -487,7 +478,7 @@ export class FeatureClient {
       filter: { bool: { filter } },
     });
 
-    return { hits: mapEsqlSourceRows(response) };
+    return { hits: mapSourceRows<StoredFeature, Feature>(response, fromStorage) };
   }
 
   // Stays on DSL: ES|QL has no equivalent of `linear.min_score` for semantic retrievers.
@@ -611,7 +602,7 @@ export class FeatureClient {
               .print('basic');
             const response = await this.clients.storageClient.esql({ query });
             const idIdx = getColumnIndex(response, '_id');
-            const sourceIdx = getSourceColumn(response);
+            const sourceIdx = getSourceColumnIndex(response);
             if (idIdx === -1 || sourceIdx === -1) return [];
             return response.values.map((row) => ({
               id: row[idIdx] as string,

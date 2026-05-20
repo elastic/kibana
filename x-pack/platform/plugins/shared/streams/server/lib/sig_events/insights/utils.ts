@@ -13,6 +13,7 @@ import type { InsightCore } from '@kbn/streams-schema';
 import type { Query } from '../../../../common/queries';
 import { parseError } from '../../streams/errors/parse_error';
 import { SecurityError } from '../../streams/errors/security_error';
+import { getSourceColumnIndex } from '../../streams/helpers/esql';
 import { SUBMIT_INSIGHTS_TOOL_NAME, parseInsightsWithErrors } from './client/insight_tool';
 
 export interface QueryData {
@@ -113,7 +114,7 @@ export async function collectQueryData({
     return undefined;
   }
 
-  const sourceIdx = q1Response.columns.findIndex((col) => col.name === '_source');
+  const sourceIdx = getSourceColumnIndex(q1Response);
   const sampleEvents = q1Response.values.map((row) => {
     const source = sourceIdx >= 0 ? (row[sourceIdx] as Record<string, unknown>) ?? {} : {};
     const originalSource = (source.original_source as Record<string, unknown>) ?? {};

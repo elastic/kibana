@@ -11,7 +11,6 @@ import type { ESQLAstExpression } from '@elastic/esql/types';
 import { isBoom } from '@hapi/boom';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import type { ESQLSearchResponse } from '@kbn/es-types';
 import type {
   IStorageClient,
   StorageClientSearchRequest,
@@ -58,6 +57,7 @@ import {
 import { queryStorageSettings, type QueryStorageSettings } from '../storage_settings';
 import { bulkWithInferenceFallback } from '../../errors/bulk_with_inference_fallback';
 import { searchWithKeywordFallback } from '../../errors/search_with_keyword_fallback';
+import { col, getSourceColumnIndex, mapSourceRows } from '../../helpers/esql';
 import { computeRuleId } from './helpers/query';
 import {
   STREAMS_RULE_CONSUMER,
@@ -127,10 +127,6 @@ function ruleUnbackedFilter(value: RuleUnbackedFilter = 'exclude'): QueryDslQuer
 }
 
 type WhereCondition = ESQLAstExpression & ComposerQueryTagHole;
-
-// Composer helper: dotted field names need string-array shorthand so each segment
-// is treated as a separate identifier (`foo.bar` not `foo\.bar`).
-const col = (field: string) => esql.col(field.includes('.') ? field.split('.') : field);
 
 // ES|QL counterpart of `ruleUnbackedFilter`. The DSL helper is still used by
 // the semantic/hybrid paths which remain on the search API.
@@ -248,13 +244,9 @@ function appendQueryKeywordEsqlPipeline(
     .pipe`EVAL _kw_fn_hit = CASE(TO_LOWER(${featureNameCol}) LIKE ${lowerWildcard}, 1.0, 0.0)`
     .pipe`EVAL _kw_ff_hit = CASE(TO_LOWER(${featureFilterCol}) LIKE ${lowerWildcard}, 1.0, 0.0)`
     .pipe`EVAL _kw_score = _kw_title_hit + _kw_desc_hit + _kw_kql_hit + _kw_fn_hit + _kw_ff_hit`
-    .pipe`SORT _kw_score DESC, _id ASC`.limit(size);
-}
-
-function mapEsqlSourceRows(response: ESQLSearchResponse): QueryLink[] {
-  const sourceIdx = response.columns.findIndex((c) => c.name === '_source');
-  if (sourceIdx === -1) return [];
-  return response.values.map((row) => fromStorage(row[sourceIdx] as StoredQueryLink));
+    .pipe`SORT _kw_score DESC, _id ASC`
+    .keep('_id', '_source')
+    .limit(size);
 }
 
 export function getQueryLinkUuid(name: string, asset: Pick<QueryLink, 'asset.id' | 'asset.type'>) {
@@ -446,7 +438,7 @@ export class QueryClient {
         bool: { filter: [...termQuery(STREAM_NAME, name), ...termQuery(ASSET_TYPE, 'query')] },
       },
     });
-    const existingQueryLinks = mapEsqlSourceRows(response);
+    const existingQueryLinks = mapSourceRows<StoredQueryLink, QueryLink>(response, fromStorage);
 
     const nextQueryLinks = links.map((link) => {
       const ql = { ...toQueryLink(definition, link), rule_backed: link.rule_backed };
@@ -500,7 +492,7 @@ export class QueryClient {
       return acc;
     }, {} as Record<string, QueryLink[]>);
 
-    const sourceIdx = response.columns.findIndex((c) => c.name === '_source');
+    const sourceIdx = getSourceColumnIndex(response);
     if (sourceIdx === -1) return queriesPerName;
 
     for (const row of response.values) {
@@ -538,7 +530,7 @@ export class QueryClient {
       filter: { bool: { filter: filterClauses } },
     });
 
-    return mapEsqlSourceRows(response);
+    return mapSourceRows<StoredQueryLink, QueryLink>(response, fromStorage);
   }
 
   /**
@@ -577,7 +569,7 @@ export class QueryClient {
       filter: { bool: this.promotableUnbackedBoolQuery(filters) },
     });
 
-    return mapEsqlSourceRows(response);
+    return mapSourceRows<StoredQueryLink, QueryLink>(response, fromStorage);
   }
 
   /**
@@ -656,7 +648,7 @@ export class QueryClient {
 
     const response = await this.dependencies.storageClient.esql({ query });
 
-    return mapEsqlSourceRows(response);
+    return mapSourceRows<StoredQueryLink, QueryLink>(response, fromStorage);
   }
 
   async findQueries(
@@ -720,7 +712,7 @@ export class QueryClient {
 
     const response = await this.dependencies.storageClient.esql({ query: esqlQuery });
 
-    return mapEsqlSourceRows(response);
+    return mapSourceRows<StoredQueryLink, QueryLink>(response, fromStorage);
   }
 
   private async findQueriesBySemantic(

@@ -12,10 +12,7 @@ import type { Insight, InsightImpactLevel } from '@kbn/streams-schema';
 import { INSIGHT_IMPACT, INSIGHT_IMPACT_LEVEL, INSIGHT_GENERATED_AT } from './fields';
 import { insightStorageSettings, type InsightStorageSettings } from './storage_settings';
 import { StatusError } from '../../../streams/errors/status_error';
-
-// Composer helper: dotted field names need string-array shorthand so each segment
-// is treated as a separate identifier (`foo.bar` not `foo\.bar`).
-const col = (field: string) => esql.col(field.includes('.') ? field.split('.') : field);
+import { col, getSourceColumnIndex } from '../../../streams/helpers/esql';
 
 const INSIGHTS_INDEX = insightStorageSettings.name;
 
@@ -61,7 +58,7 @@ export class InsightClient {
         .print('basic'),
     });
 
-    const sourceIdx = response.columns.findIndex((column) => column.name === '_source');
+    const sourceIdx = getSourceColumnIndex(response);
     const source =
       sourceIdx >= 0 ? (response.values[0]?.[sourceIdx] as Insight | undefined) : undefined;
 
@@ -95,7 +92,7 @@ export class InsightClient {
       ...(filterClauses.length > 0 ? { filter: { bool: { filter: filterClauses } } } : {}),
     });
 
-    const sourceIdx = response.columns.findIndex((column) => column.name === '_source');
+    const sourceIdx = getSourceColumnIndex(response);
     const insights = sourceIdx >= 0 ? response.values.map((row) => row[sourceIdx] as Insight) : [];
 
     return {

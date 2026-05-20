@@ -151,17 +151,20 @@ export type StorageClientGet<TDocumentType extends { _id?: string } = never> = (
 
 export type StorageClientExistsIndex = () => Promise<boolean>;
 
-export type StorageClientEsql = (request: {
-  /** Full ES|QL query string, including the `FROM <index>` prefix — the adapter does not prepend it. */
-  query: string;
-  /** Named ES|QL params; required for any user-derived value or `LIKE` pattern. */
-  params?: EsqlQueryRequest['params'];
-  /** DSL query ANDed with the ES|QL pipeline (e.g. time-range gates, stream-name scoping). */
-  filter?: QueryDslQueryContainer;
-  drop_null_columns?: boolean;
-  /** When true (default), `maybeMigrateSource` is applied to each `_source` column. */
-  migrateSource?: boolean;
-}) => Promise<ESQLSearchResponse>;
+export type StorageClientEsql = (
+  request: {
+    /** Full ES|QL query string, including the `FROM <index>` prefix — the adapter does not prepend it. */
+    query: string;
+    /** Named ES|QL params; required for any user-derived value or `LIKE` pattern. */
+    params?: EsqlQueryRequest['params'];
+    /** DSL query ANDed with the ES|QL pipeline (e.g. time-range gates, stream-name scoping). */
+    filter?: QueryDslQueryContainer;
+    drop_null_columns?: boolean;
+    /** When true (default), `maybeMigrateSource` is applied to each `_source` column. */
+    migrateSource?: boolean;
+  },
+  transportOptions?: StorageTransportOptions
+) => Promise<ESQLSearchResponse>;
 
 export interface InternalIStorageClient<TDocumentType extends { _id?: string } = never> {
   search: StorageClientSearch<TDocumentType>;

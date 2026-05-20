@@ -739,26 +739,28 @@ export class StorageIndexAdapter<
    * doesn't exist (both 404 and ES|QL's distinct 400 `Unknown index` shape),
    * and applies `maybeMigrateSource` to any `_source` column unless disabled.
    */
-  private esql: StorageClientEsql = ({
-    query,
-    params,
-    filter,
-    drop_null_columns = true,
-    migrateSource = true,
-  }) =>
+  private esql: StorageClientEsql = (
+    { query, params, filter, drop_null_columns = true, migrateSource = true },
+    transportOptions
+  ) =>
     this.ensureMappingsBeforeReading(async () => {
       const emptyResponse: ESQLSearchResponse = {
         columns: [],
         values: [],
       };
       try {
-        const response = (await this.esClient.esql.query({
-          query,
-          ...(params !== undefined ? { params } : {}),
-          ...(filter !== undefined ? { filter } : {}),
-          drop_null_columns,
-          format: 'json',
-        })) as unknown as ESQLSearchResponse;
+        const response = (await wrapEsCall(
+          this.esClient.esql.query(
+            {
+              query,
+              ...(params !== undefined ? { params } : {}),
+              ...(filter !== undefined ? { filter } : {}),
+              drop_null_columns,
+              format: 'json',
+            },
+            ...optionalTransportArgs(transportOptions)
+          )
+        )) as unknown as ESQLSearchResponse;
 
         if (migrateSource && this.options.migrateSource) {
           const sourceIdx = response.columns.findIndex((c) => c.name === '_source');
