@@ -256,11 +256,12 @@ For each scenario, cross-reference the test coverage catalog from Step 1 and wri
 
 1. Run the Gherkin self-review from `references/output-formats.md`.
 2. Review [`references/common-mistakes.md`](references/common-mistakes.md) and fix any issues found.
-3. **Run Step 3.5 — Issue Clarity Assessment (second half)** to compute the Coverage Ratio and assemble the assessment section. See the dedicated section below.
-4. Append the assembled assessment section as the final block of the test plan, immediately before the footer. The exact placement and template are defined in [`references/document-structure.md`](references/document-structure.md#issue-clarity-assessment-section).
-5. Append the footer (format defined in `references/output-formats.md`).
-6. Save to `x-pack/solutions/security/plugins/security_solution/.agents/tmp/test-plan-#<issue_number>.md` (relative to repo root). The directory is gitignored via the root `.gitignore` (global `.agents/tmp/` pattern).
-7. Output the Sources Summary as defined in `references/output-formats.md`, **followed by the same Issue Clarity Assessment block** rendered in the chat (identical content to the one appended to the draft).
+3. **Run the draft coherence review.** Read [`references/draft-coherence-review.md`](references/draft-coherence-review.md) now and follow every step in that file. This is a holistic end-to-end re-read of the assembled draft against the gathered context corpus — it catches narrative drift, cross-section contradictions, and source-fidelity gaps that the Gherkin self-review (itemised) and `common-mistakes.md` (per-category) do not cover. Resolve every ⚠️ or ❌ finding before continuing; document any non-resolvable conflict as a `⚠️` entry in *Known Limitations*.
+4. **Run Step 3.5 — Issue Clarity Assessment (second half)** to compute the Coverage Ratio and assemble the assessment section. See the dedicated section below.
+5. Append the assembled assessment section as the final block of the test plan, immediately before the footer. The exact placement and template are defined in [`references/document-structure.md`](references/document-structure.md#issue-clarity-assessment-section).
+6. Append the footer (format defined in `references/output-formats.md`).
+7. Save to `x-pack/solutions/security/plugins/security_solution/.agents/tmp/test-plan-#<issue_number>.md` (relative to repo root). The directory is gitignored via the root `.gitignore` (global `.agents/tmp/` pattern).
+8. Output the Sources Summary as defined in `references/output-formats.md`, **followed by the same Issue Clarity Assessment block** rendered in the chat (identical content to the one appended to the draft).
 
 Tell the user:
 > Draft saved to `x-pack/solutions/security/plugins/security_solution/.agents/tmp/test-plan-#<issue_number>.md`. Review and edit it in your editor — ask me to adjust any section before publishing. When ready: `publish test plan for issue #<issue_number>`
@@ -272,7 +273,7 @@ Tell the user:
 
 **Runs in:** draft mode; update fallback; update mode (after re-scoring per-issue + combined on the refreshed corpus). Skip in publish mode.
 
-This step is invoked from **Saving the draft** sub-step 3 above, after the Gherkin self-review and `common-mistakes.md` review have completed. The per-issue scores, combined readability score, combined rationale, and per-issue *critical gaps* notes already exist from Step 1.5 — do not recompute them here.
+This step is invoked from **Saving the draft** sub-step 4 above, after the Gherkin self-review, the `common-mistakes.md` review, and the draft coherence review have completed. The per-issue scores, combined readability score, combined rationale, and per-issue *critical gaps* notes already exist from Step 1.5 — do not recompute them here.
 
 1. **Compute the Issue Coverage Ratio.** Read the *Issue Coverage Ratio* section of [`references/issue-clarity-assessment.md`](references/issue-clarity-assessment.md) and follow it. Walk the finalized scenarios in the draft one by one and classify each scenario's origin as `issue` or `pr` using the classification rules in that file. Apply the conservative tie-breaker (any PR-only fact in the Gherkin → `pr`). Compute `issue_count / total_scenarios` as `X / Y scenarios (Z%)`, with Z rounded to the nearest integer percent. Write the one-sentence breakdown of which fact categories required PR analysis. The **denominator must equal the Total Scenarios cell in the Test Coverage Summary** — if it does not, recount before continuing.
 
@@ -280,7 +281,7 @@ This step is invoked from **Saving the draft** sub-step 3 above, after the Gherk
 
 3. **Assemble the markdown block** using the canonical format defined in [`references/output-formats.md`](references/output-formats.md#issue-clarity-assessment-section). One row per issue read in Step 1, no omissions, no aggregation. Wrap in `<details><summary>📊 Issue Clarity Assessment</summary>…</details>`.
 
-4. **Return the assembled block** to the *Saving the draft* sub-step 4, which appends it to the draft immediately before the footer. Also render the **same block** in the chat after the Sources Summary so the user sees the assessment immediately.
+4. **Return the assembled block** to the *Saving the draft* sub-step 5, which appends it to the draft immediately before the footer. Also render the **same block** in the chat after the Sources Summary so the user sees the assessment immediately.
 
 This step never silently produces an empty assessment. If any input (per-issue scores, combined score, scenario list) is missing, stop and ask the user — do not invent values.
 
