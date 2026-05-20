@@ -12,7 +12,6 @@ import {
   getExternalServiceSimulatorPath,
 } from '@kbn/actions-simulators-plugin/server/plugin';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/generated/schemas';
-import { wrapHtmlWithStyles } from '@kbn/stack-connectors-plugin/server/connector_types/email/send_email';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog } from '../../../../../common/lib';
 import { EmailMaximumBodyLength } from '../../../config';
@@ -133,9 +132,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
               cc: null,
               bcc: null,
               subject: 'email-subject',
-              html: wrapHtmlWithStyles(
-                `<p>email-message</p>\n<hr>\n<p>This message was sent by Elastic. <a href=\"https://localhost:5601\">Go to Elastic</a>.</p>\n`
-              ),
+              html: `<p>email-message</p>\n<hr>\n<p>This message was sent by Elastic. <a href=\"https://localhost:5601\">Go to Elastic</a>.</p>\n`,
               text: 'email-message\n\n---\n\nThis message was sent by Elastic. [Go to Elastic](https://localhost:5601).',
               headers: {},
             },
@@ -156,7 +153,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
           });
 
           const executeEvent = events[1];
-          expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(1484);
+          expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(350);
         });
     });
 
@@ -190,9 +187,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
             'message\n\n---\n\nThis message was sent by Elastic. [Go to Elastic](https://localhost:5601).'
           );
           expect(message.html).to.be(
-            wrapHtmlWithStyles(
-              `<p>message</p>\n<hr>\n<p>This message was sent by Elastic. <a href=\"https://localhost:5601\">Go to Elastic</a>.</p>\n`
-            )
+            `<p>message</p>\n<hr>\n<p>This message was sent by Elastic. <a href=\"https://localhost:5601\">Go to Elastic</a>.</p>\n`
           );
         });
     });
@@ -215,9 +210,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
             '_italic_ **bold** https://elastic.co link\n\n---\n\nThis message was sent by Elastic. [Go to Elastic](https://localhost:5601).'
           );
           expect(html).to.eql(
-            wrapHtmlWithStyles(
-              `<p><em>italic</em> <strong>bold</strong> <a href="https://elastic.co">https://elastic.co</a> link</p>\n<hr>\n<p>This message was sent by Elastic. <a href=\"https://localhost:5601\">Go to Elastic</a>.</p>\n`
-            )
+            `<p><em>italic</em> <strong>bold</strong> <a href="https://elastic.co">https://elastic.co</a> link</p>\n<hr>\n<p>This message was sent by Elastic. <a href=\"https://localhost:5601\">Go to Elastic</a>.</p>\n`
           );
         });
     });
@@ -265,9 +258,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
             'message\n\n---\n\nThis message was sent by Elastic. [View my path in Elastic](https://localhost:5601/my/path).'
           );
           expect(html).to.eql(
-            wrapHtmlWithStyles(
-              `<p>message</p>\n<hr>\n<p>This message was sent by Elastic. <a href=\"https://localhost:5601/my/path\">View my path in Elastic</a>.</p>\n`
-            )
+            `<p>message</p>\n<hr>\n<p>This message was sent by Elastic. <a href=\"https://localhost:5601/my/path\">View my path in Elastic</a>.</p>\n`
           );
         });
     });
@@ -414,9 +405,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
               cc: null,
               bcc: null,
               subject: 'email-subject',
-              html: wrapHtmlWithStyles(
-                `<p>email-message</p>\n<hr>\n<p>This message was sent by Elastic. <a href=\"https://localhost:5601\">Go to Elastic</a>.</p>\n`
-              ),
+              html: `<p>email-message</p>\n<hr>\n<p>This message was sent by Elastic. <a href=\"https://localhost:5601\">Go to Elastic</a>.</p>\n`,
               text: 'email-message\n\n---\n\nThis message was sent by Elastic. [Go to Elastic](https://localhost:5601).',
               headers: {},
             },
@@ -682,7 +671,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
           const startMessageRegExpText =
             /^Your message's length of 20000 exceeded the 10000 bytes limit that is set for the connector/;
           const startMessageRegExpHtml =
-            /Your message's length of 20000 exceeded the 10000 bytes limit that is set for the connector/;
+            /^<p>Your message's length of 20000 exceeded the 10000 bytes limit that is set for the connector/;
           expect(text).match(startMessageRegExpText);
           expect(html).match(startMessageRegExpHtml);
         });
