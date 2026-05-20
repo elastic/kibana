@@ -7,8 +7,8 @@ equivalent **before any code is written**.
 For routing decisions between raw EUI and Kibana-specific wrappers, see
 [eui-vs-kbnui.md](eui-vs-kbnui.md).
 
-For full prop APIs, usage examples, and detailed visual descriptions, read:
-`node_modules/@elastic/eui/metadata/components/[name].json`
+For visual descriptions and import paths for every EUI component, see
+[eui-component-descriptions.md](eui-component-descriptions.md).
 
 ---
 
