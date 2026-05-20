@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export * from './src/phases';
-export * from './src/inspect_ilm_policy_flyout';
-export * from './src/flyout_with_tabs';
-export * from './src/default_snapshot_repository_required_modal';
+export { DefaultSnapshotRepositoryRequiredModal } from './default_snapshot_repository_required_modal';
+export type { DefaultSnapshotRepositoryRequiredModalProps } from './default_snapshot_repository_required_modal';
