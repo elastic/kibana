@@ -12,7 +12,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 /** Subscribes to `services.spaces.getActiveSpace$()` and returns the active space id. */
-export const useEpisodesUiSpaceId = (spaces: SpacesPluginStart): string => {
+export const useSpaceId = (spaces: SpacesPluginStart): string => {
   const spaceId$ = useMemo(() => spaces.getActiveSpace$().pipe(map((space) => space.id)), [spaces]);
 
   return useObservable(spaceId$, DEFAULT_SPACE_ID);

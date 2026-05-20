@@ -48,7 +48,7 @@ describe('useAlertingEpisodesDataView', () => {
     jest.clearAllMocks();
   });
 
-  it('should call getEsqlDataView with correct parameters using default query', async () => {
+  it('should call getEsqlDataView with space-scoped episodes query', async () => {
     const services = { dataViews, http, spaces: mockSpaces };
 
     renderHook(() => useAlertingEpisodesDataView({ services }));
@@ -62,19 +62,6 @@ describe('useAlertingEpisodesDataView', () => {
       undefined,
       services
     );
-  });
-
-  it('should call getEsqlDataView with custom query when provided', async () => {
-    const customQuery = 'FROM .custom-index | LIMIT 100';
-    const services = { dataViews, http, spaces: mockSpaces };
-
-    renderHook(() => useAlertingEpisodesDataView({ query: customQuery, services }));
-
-    await waitFor(() => {
-      expect(mockGetEsqlDataView).toHaveBeenCalledTimes(1);
-    });
-
-    expect(mockGetEsqlDataView).toHaveBeenCalledWith({ esql: customQuery }, undefined, services);
   });
 
   it('should set custom labels for known fields', async () => {

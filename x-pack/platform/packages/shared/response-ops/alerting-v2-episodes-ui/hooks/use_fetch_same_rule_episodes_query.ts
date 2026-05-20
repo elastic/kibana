@@ -9,7 +9,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { useQuery } from '@kbn/react-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { fetchRelatedEpisodes } from '../apis/fetch_related_episodes';
-import { useEpisodesUiSpaceId } from './use_episodes_ui_space_id';
+import { useSpaceId } from './use_space_id';
 import {
   buildRelatedBaseQuery,
   finishRelatedEpisodesQuery,
@@ -67,7 +67,7 @@ export const useFetchSameRuleEpisodesQuery = ({
   toastDanger,
 }: UseFetchSameRuleEpisodesQueryOptions) => {
   const { expressions, spaces } = services;
-  const spaceId = useEpisodesUiSpaceId(spaces);
+  const spaceId = useSpaceId(spaces);
   const otherKey = currentGroupHash ?? 'rule-only';
 
   return useQuery({

@@ -13,7 +13,7 @@ import {
   fetchAlertActionTagSuggestions,
 } from '../apis/fetch_alert_action_tag_suggestions';
 import { queryKeys } from '../query_keys';
-import { useEpisodesUiSpaceId } from './use_episodes_ui_space_id';
+import { useSpaceId } from './use_space_id';
 
 export interface UseFetchAlertEpisodeTagSuggestionsOptions {
   services: { expressions: ExpressionsStart; spaces: SpacesPluginStart };
@@ -24,7 +24,7 @@ export const useFetchAlertEpisodeTagSuggestions = ({
   services,
   enabled = true,
 }: UseFetchAlertEpisodeTagSuggestionsOptions) => {
-  const spaceId = useEpisodesUiSpaceId(services.spaces);
+  const spaceId = useSpaceId(services.spaces);
   return useQuery({
     queryKey: queryKeys.tagSuggestions(spaceId),
     queryFn: ({ signal }) =>

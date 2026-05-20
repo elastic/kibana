@@ -9,7 +9,7 @@ import { useQuery } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { queryKeys } from '../query_keys';
-import { useEpisodesUiSpaceId } from './use_episodes_ui_space_id';
+import { useSpaceId } from './use_space_id';
 import type { UseAlertingEpisodesDataViewOptions } from './use_alerting_episodes_data_view';
 import { useAlertingEpisodesDataView } from './use_alerting_episodes_data_view';
 import { fetchAlertingEpisodes } from '../apis/fetch_alerting_episodes';
@@ -47,7 +47,7 @@ export const useFetchAlertingEpisodesQuery = ({
   sortState = DEFAULT_SORT,
   timeRange,
 }: UseFetchAlertingEpisodesQueryOptions) => {
-  const spaceId = useEpisodesUiSpaceId(services.spaces);
+  const spaceId = useSpaceId(services.spaces);
   const dataView = useAlertingEpisodesDataView({ services });
 
   const queryKey = queryKeys.list(

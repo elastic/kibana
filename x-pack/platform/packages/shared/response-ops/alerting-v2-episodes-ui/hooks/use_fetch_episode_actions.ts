@@ -11,7 +11,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { EpisodeActionState } from '../types/action';
 import { fetchEpisodeActions } from '../apis/fetch_episode_actions';
 import { queryKeys } from '../query_keys';
-import { useEpisodesUiSpaceId } from './use_episodes_ui_space_id';
+import { useSpaceId } from './use_space_id';
 
 export interface UseFetchEpisodeActionsOptions {
   episodeIds: string[];
@@ -20,7 +20,7 @@ export interface UseFetchEpisodeActionsOptions {
 
 export const useFetchEpisodeActions = ({ episodeIds, services }: UseFetchEpisodeActionsOptions) => {
   const { expressions } = services;
-  const spaceId = useEpisodesUiSpaceId(services.spaces);
+  const spaceId = useSpaceId(services.spaces);
   return useQuery({
     queryKey: queryKeys.actions(spaceId, episodeIds),
     queryFn: ({ signal }) =>

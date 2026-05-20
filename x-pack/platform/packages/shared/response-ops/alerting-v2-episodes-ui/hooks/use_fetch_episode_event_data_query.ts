@@ -15,7 +15,7 @@ import {
 import { esqlResponseToObjectRows } from '../utils/esql_response_to_rows';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { queryKeys } from '../query_keys';
-import { useEpisodesUiSpaceId } from './use_episodes_ui_space_id';
+import { useSpaceId } from './use_space_id';
 
 export interface UseFetchEpisodeEventDataQueryOptions {
   episodeId: string | undefined;
@@ -46,7 +46,7 @@ export const useFetchEpisodeEventDataQuery = ({
   services,
 }: UseFetchEpisodeEventDataQueryOptions) => {
   const { data } = services;
-  const spaceId = useEpisodesUiSpaceId(services.spaces);
+  const spaceId = useSpaceId(services.spaces);
 
   return useQuery({
     queryKey: queryKeys.episodeEventData(spaceId, episodeId ?? ''),

@@ -12,7 +12,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { fetchEpisodeTagOptions } from '../apis/fetch_episode_tag_options';
 import type { EpisodeTagOptionRow } from '../queries/episode_tag_options_query';
 import { queryKeys } from '../query_keys';
-import { useEpisodesUiSpaceId } from './use_episodes_ui_space_id';
+import { useSpaceId } from './use_space_id';
 
 export interface UseFetchEpisodeTagOptionsParams {
   services: { expressions: ExpressionsStart; spaces: SpacesPluginStart };
@@ -23,7 +23,7 @@ export const useFetchEpisodeTagOptions = ({
   services,
   timeRange,
 }: UseFetchEpisodeTagOptionsParams) => {
-  const spaceId = useEpisodesUiSpaceId(services.spaces);
+  const spaceId = useSpaceId(services.spaces);
   return useQuery({
     queryKey: queryKeys.tagOptions(spaceId, timeRange ?? undefined),
     queryFn: ({ signal }) =>

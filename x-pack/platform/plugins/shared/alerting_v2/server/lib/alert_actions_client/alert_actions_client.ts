@@ -25,7 +25,7 @@ import type { StorageServiceContract } from '../services/storage_service/storage
 import { StorageServiceScopedToken } from '../services/storage_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
-import { RulesClientSpaceIdToken } from '../rules_client/tokens';
+import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
 
 @injectable()
 export class AlertActionsClient {
@@ -33,7 +33,7 @@ export class AlertActionsClient {
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
     @inject(StorageServiceScopedToken) private readonly storageService: StorageServiceContract,
     @inject(UserService) private readonly userService: UserServiceContract,
-    @inject(RulesClientSpaceIdToken) private readonly spaceId: string
+    @inject(RequestSpaceIdToken) private readonly spaceId: string
   ) {}
 
   public async createAction(params: {

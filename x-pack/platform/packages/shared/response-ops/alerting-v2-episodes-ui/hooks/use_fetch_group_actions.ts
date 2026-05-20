@@ -12,7 +12,7 @@ import type { AlertEpisodeGroupAction } from '../types/action';
 import { fetchGroupActions } from '../apis/fetch_group_actions';
 import { queryKeys } from '../query_keys';
 import { normalizeTags } from '../utils/normalize_tags';
-import { useEpisodesUiSpaceId } from './use_episodes_ui_space_id';
+import { useSpaceId } from './use_space_id';
 
 export interface UseFetchGroupActionsOptions {
   groupHashes: string[];
@@ -21,7 +21,7 @@ export interface UseFetchGroupActionsOptions {
 
 export const useFetchGroupActions = ({ groupHashes, services }: UseFetchGroupActionsOptions) => {
   const { expressions } = services;
-  const spaceId = useEpisodesUiSpaceId(services.spaces);
+  const spaceId = useSpaceId(services.spaces);
   return useQuery({
     queryKey: queryKeys.groupActions(spaceId, groupHashes),
     queryFn: ({ signal }) =>
