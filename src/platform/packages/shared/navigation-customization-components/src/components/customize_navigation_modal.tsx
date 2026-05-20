@@ -73,6 +73,12 @@ export const CustomizeNavigationModal = ({
   } = useItemList(initialItems);
 
   const [isSaving, setIsSaving] = useState(false);
+  const [calloutDismissed, setCalloutDismissed] = useState(isCalloutDismissed);
+
+  const handleDismissCallout = useCallback(() => {
+    setCalloutDismissed(true);
+    onDismissCallout();
+  }, [onDismissCallout]);
 
   useEffect(() => {
     const order = items.map((item) => item.id);
@@ -139,7 +145,7 @@ export const CustomizeNavigationModal = ({
           onDragEnd={createDragEndHandler('hidden')}
           toggleItemVisibility={toggleItemVisibility}
         />
-        {!isCalloutDismissed && <SpaceCallout onDismissCallout={onDismissCallout} />}
+        {!calloutDismissed && <SpaceCallout onDismissCallout={handleDismissCallout} />}
       </EuiModalBody>
       <EuiModalFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
