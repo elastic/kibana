@@ -14,6 +14,11 @@
 version: "1"
 name: ".streams-continuous-ki-extraction"
 description: "This workflow is used by the system and should not be modified."
+tags:
+  - observability
+  - streams
+  - knowledge-indicators
+  - continuous-extraction
 settings:
   # Timeout is 1 minute shorter than the schedule to avoid overlapping runs.
   timeout: "9m"
@@ -52,7 +57,6 @@ steps:
         /internal/streams/_extraction/_eligible?maxScheduledStreams={{ inputs.maxScheduledStreams }}&lookbackHours={{ inputs.lookbackHours }}
         {%- if inputs.extractionIntervalHours %}&extractionIntervalHours={{ inputs.extractionIntervalHours }}{% endif -%}
         {%- if inputs.excludedStreamPatterns %}&excludedStreamPatterns={{ inputs.excludedStreamPatterns }}{% endif -%}
-      use_server_info: true
       headers:
         x-elastic-internal-origin: "kibana"
     on-failure:
@@ -78,7 +82,6 @@ steps:
             with:
               method: POST
               path: "/internal/streams/{{ foreach.item.streamName }}/features/_task"
-              use_server_info: true
               headers:
                 x-elastic-internal-origin: "kibana"
               body:
@@ -99,7 +102,6 @@ steps:
                 with:
                   method: GET
                   path: "/internal/streams/{{ foreach.item.streamName }}/features/_status"
-                  use_server_info: true
                   headers:
                     x-elastic-internal-origin: "kibana"
               - name: if_not_started_delay
@@ -127,7 +129,6 @@ steps:
                 with:
                   method: GET
                   path: "/internal/streams/{{ foreach.item.streamName }}/features/_status"
-                  use_server_info: true
                   headers:
                     x-elastic-internal-origin: "kibana"
                 on-failure:
