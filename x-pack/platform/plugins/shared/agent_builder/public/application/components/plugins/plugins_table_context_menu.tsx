@@ -49,6 +49,11 @@ export const PluginContextMenu: React.FC<PluginContextMenuProps> = ({
           closePopover();
         },
         'data-test-subj': `agentBuilderPluginViewButton-${plugin.id}`,
+        ...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+          action: AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_ENTITY_VIEW,
+          detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+        }),
       },
     ];
 
@@ -83,6 +88,11 @@ export const PluginContextMenu: React.FC<PluginContextMenuProps> = ({
           aria-label={labels.plugins.pluginContextMenuButtonLabel}
           onClick={togglePopover}
           data-test-subj={`agentBuilderPluginContextMenuButton-${plugin.id}`}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.globalManagement.OPEN_CONTEXT_MENU,
+            detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+          })}
         />
       }
       isOpen={isOpen}

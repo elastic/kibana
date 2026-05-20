@@ -94,6 +94,10 @@ const AgentListHeader: React.FC = () => {
           color="text"
           {...(manageAgents ? { href: createAgentHref } : { disabled: true })}
           data-test-subj="agentBuilderAgentSelectorNewAgentButton"
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.SIDEBAR,
+            action: AGENT_BUILDER_UI_EBT.action.navSidebar.NEW_AGENT,
+          })}
         >
           {labels.newAgent}
         </EuiButton>

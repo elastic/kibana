@@ -13,6 +13,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import React, { useState } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { useNavigation } from '../../../../hooks/use_navigation';
@@ -41,6 +43,11 @@ export const ToolEditContextMenu = () => {
           iconType="boxesVertical"
           onClick={() => setIsOpen((openState) => !openState)}
           aria-label={labels.tools.editToolContextMenuButtonLabel}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.globalManagement.OPEN_CONTEXT_MENU,
+            detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+          })}
         />
       }
     >
@@ -53,6 +60,11 @@ export const ToolEditContextMenu = () => {
             onClick={() => {
               cloneTool(toolId);
             }}
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_ENTITY_CLONE,
+              detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+            })}
           >
             {labels.tools.cloneToolButtonLabel}
           </EuiContextMenuItem>,
@@ -69,6 +81,11 @@ export const ToolEditContextMenu = () => {
                 onConfirm: () => navigateToAgentBuilderUrl(appPaths.tools.list),
               });
             }}
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_ENTITY_DELETE,
+              detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+            })}
           >
             {labels.tools.deleteToolButtonLabel}
           </EuiContextMenuItem>,

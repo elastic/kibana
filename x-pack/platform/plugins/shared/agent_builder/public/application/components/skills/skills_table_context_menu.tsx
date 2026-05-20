@@ -47,6 +47,11 @@ export const SkillContextMenu: React.FC<SkillContextMenuProps> = ({
           closePopover();
         },
         'data-test-subj': `agentBuilderSkillViewButton-${skill.id}`,
+        ...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+          action: AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_ENTITY_VIEW,
+          detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+        }),
       });
     } else {
       items.push({
@@ -57,6 +62,11 @@ export const SkillContextMenu: React.FC<SkillContextMenuProps> = ({
           closePopover();
         },
         'data-test-subj': `agentBuilderSkillEditButton-${skill.id}`,
+        ...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+          action: AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_ENTITY_EDIT,
+          detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+        }),
       });
 
       if (canManage) {
@@ -91,6 +101,11 @@ export const SkillContextMenu: React.FC<SkillContextMenuProps> = ({
           aria-label={labels.skills.skillContextMenuButtonLabel}
           onClick={togglePopover}
           data-test-subj={`agentBuilderSkillContextMenuButton-${skill.id}`}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.globalManagement.OPEN_CONTEXT_MENU,
+            detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+          })}
         />
       }
       isOpen={isOpen}

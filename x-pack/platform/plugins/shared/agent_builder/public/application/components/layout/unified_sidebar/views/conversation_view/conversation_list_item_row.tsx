@@ -148,6 +148,10 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
           closePopover();
           setIsRenameModalOpen(true);
         }}
+        {...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.SIDEBAR,
+          action: AGENT_BUILDER_UI_EBT.action.conversationList.RENAME_CONVERSATION,
+        })}
       >
         {labels.rename}
       </EuiContextMenuItem>,
@@ -162,6 +166,10 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
           closePopover();
           setIsDeleteModalOpen(true);
         }}
+        {...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.SIDEBAR,
+          action: AGENT_BUILDER_UI_EBT.action.conversationList.DELETE_CONVERSATION,
+        })}
       >
         {labels.delete}
       </EuiContextMenuItem>,
@@ -182,6 +190,10 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
         togglePopover();
       }}
       data-test-subj={`agentBuilderSidebarConversationMenu-${conversationId}`}
+      {...getEbtProps({
+        element: AGENT_BUILDER_UI_EBT.element.SIDEBAR,
+        action: AGENT_BUILDER_UI_EBT.action.conversationList.OPEN_CONVERSATION_MENU,
+      })}
     />
   );
 

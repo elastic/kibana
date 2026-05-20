@@ -279,6 +279,11 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
           isLoading={submittingButtonId === BUTTON_IDS.SAVE_AND_TEST}
           minWidth="124px"
           data-test-subj={testSubj}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.globalManagement.SAVE_AND_TEST_TOOL,
+            detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+          })}
         >
           {labels.tools.saveAndTestButtonLabel}
         </EuiButton>
@@ -288,6 +293,11 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
           onClick={handleTestTool}
           minWidth="112px"
           data-test-subj={testSubj}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.globalManagement.TEST_TOOL,
+            detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+          })}
         >
           {labels.tools.testButtonLabel}
         </EuiButton>
@@ -355,6 +365,11 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
                             defaultMessage: 'Learn more about creating tools in the documentation',
                           }
                         )}
+                        {...getEbtProps({
+                          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                          action: AGENT_BUILDER_UI_EBT.action.globalManagement.LEARN_MORE_DOCS,
+                          detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+                        })}
                       >
                         {i18n.translate('xpack.agentBuilder.tools.createToolDocumentation', {
                           defaultMessage: 'Learn more',
@@ -416,6 +431,11 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
                     iconType="cross"
                     color="text"
                     onClick={handleCancel}
+                    {...getEbtProps({
+                      element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                      action: AGENT_BUILDER_UI_EBT.action.globalManagement.TOOL_CANCEL,
+                      detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+                    })}
                   >
                     {labels.tools.cancelButtonLabel}
                   </EuiButtonEmpty>
