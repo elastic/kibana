@@ -10,7 +10,12 @@
 import React, { useMemo, type ReactElement } from 'react';
 import { EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { getPopoverPanels, getTooltip } from '../utils';
-import type { AppMenuItemType, AppMenuPopoverItem, AppMenuPrimaryActionItem } from '../types';
+import type {
+  AppMenuItemType,
+  AppMenuPopoverItem,
+  AppMenuPrimaryActionItem,
+  AppMenuSwitch,
+} from '../types';
 
 interface AppMenuContextMenuProps {
   tooltipContent?: string | (() => string | undefined);
@@ -22,6 +27,7 @@ interface AppMenuContextMenuProps {
   isOpen: boolean;
   popoverWidth?: number;
   primaryActionItem?: AppMenuPrimaryActionItem;
+  switchConfig?: AppMenuSwitch;
   popoverTestId?: string;
   onClose: () => void;
   onCloseOverflowButton?: () => void;
@@ -37,6 +43,7 @@ export const AppMenuPopover = ({
   isOpen,
   popoverWidth,
   primaryActionItem,
+  switchConfig,
   popoverTestId = 'app-menu-popover',
   onClose,
   onCloseOverflowButton,
@@ -47,6 +54,7 @@ export const AppMenuPopover = ({
         items,
         staticItems,
         primaryActionItem,
+        switchConfig,
         rootPanelWidth: popoverWidth,
         rootPopoverTestId: popoverTestId,
         onClose,
@@ -57,6 +65,7 @@ export const AppMenuPopover = ({
       items,
       staticItems,
       primaryActionItem,
+      switchConfig,
       popoverWidth,
       popoverTestId,
       onClose,

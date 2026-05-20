@@ -77,7 +77,6 @@ export const COMPOSITE_SUMMARY_MAPPINGS_TEMPLATE: ClusterPutComponentTemplateReq
             weight: { type: 'double' },
             normalisedWeight: { type: 'double' },
             sliValue: { type: 'double' },
-            contribution: { type: 'double' },
             status: { type: 'keyword' },
             instanceId: { type: 'keyword' },
           },
