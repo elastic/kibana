@@ -61,6 +61,7 @@ import {
   ServiceMapOptionsPanelToggle,
   type ServiceMapOrientation,
 } from './service_map_options_panel';
+import { ServiceMapLegend } from './service_map_legend';
 import type { Environment } from '../../../../common/environment_rt';
 import {
   isServiceNode,
@@ -636,6 +637,15 @@ function GraphInner({
                       />
                     )}
                   </EuiFlexGroup>
+                </EuiPanel>
+                <EuiPanel
+                  hasBorder
+                  hasShadow={false}
+                  paddingSize="none"
+                  borderRadius="m"
+                  grow={false}
+                >
+                  <ServiceMapLegend controlIconCss={mapToolbarControlIconCss} />
                 </EuiPanel>
               </div>
               {!isEmbedded && panelExpanded && (
