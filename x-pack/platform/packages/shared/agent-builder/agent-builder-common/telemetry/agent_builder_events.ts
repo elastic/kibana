@@ -43,6 +43,10 @@ export const AGENT_BUILDER_EVENT_TYPES = {
   ConversationResume: `${TELEMETRY_PREFIX}_conversation_resume`,
   ConversationSearch: `${TELEMETRY_PREFIX}_conversation_search`,
   EntityEditFromAgent: `${TELEMETRY_PREFIX}_entity_edit_from_agent`,
+  EntityAddFromLibrary: `${TELEMETRY_PREFIX}_entity_add_from_library`,
+  EntityCreateNew: `${TELEMETRY_PREFIX}_entity_create_new`,
+  EntityRemove: `${TELEMETRY_PREFIX}_entity_remove`,
+  EntityDetailView: `${TELEMETRY_PREFIX}_entity_detail_view`,
   ManageEntityEdit: `${TELEMETRY_PREFIX}_manage_entity_edit`,
   ManageEntityDelete: `${TELEMETRY_PREFIX}_manage_entity_delete`,
 } as const;
@@ -343,6 +347,26 @@ export interface ReportEntityEditFromAgentParams {
   used_by_agent_count?: number;
 }
 
+export interface ReportEntityAddFromLibraryParams {
+  entity_type: string;
+  agent_id: string;
+}
+
+export interface ReportEntityCreateNewParams {
+  entity_type: string;
+  agent_id: string;
+}
+
+export interface ReportEntityRemoveParams {
+  entity_type: string;
+  agent_id: string;
+}
+
+export interface ReportEntityDetailViewParams {
+  entity_type: string;
+  agent_id: string;
+}
+
 export interface ReportManageEntityEditParams {
   entity_type: 'tool' | 'skill';
   used_by_agent_count?: number;
@@ -391,6 +415,10 @@ export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.ConversationResume]: ReportConversationResumeParams;
   [AGENT_BUILDER_EVENT_TYPES.ConversationSearch]: ReportConversationSearchParams;
   [AGENT_BUILDER_EVENT_TYPES.EntityEditFromAgent]: ReportEntityEditFromAgentParams;
+  [AGENT_BUILDER_EVENT_TYPES.EntityAddFromLibrary]: ReportEntityAddFromLibraryParams;
+  [AGENT_BUILDER_EVENT_TYPES.EntityCreateNew]: ReportEntityCreateNewParams;
+  [AGENT_BUILDER_EVENT_TYPES.EntityRemove]: ReportEntityRemoveParams;
+  [AGENT_BUILDER_EVENT_TYPES.EntityDetailView]: ReportEntityDetailViewParams;
   [AGENT_BUILDER_EVENT_TYPES.ManageEntityEdit]: ReportManageEntityEditParams;
   [AGENT_BUILDER_EVENT_TYPES.ManageEntityDelete]: ReportManageEntityDeleteParams;
 }
@@ -427,6 +455,10 @@ export type AgentBuilderTelemetryEvent =
   | EventTypeOpts<ReportConversationResumeParams>
   | EventTypeOpts<ReportConversationSearchParams>
   | EventTypeOpts<ReportEntityEditFromAgentParams>
+  | EventTypeOpts<ReportEntityAddFromLibraryParams>
+  | EventTypeOpts<ReportEntityCreateNewParams>
+  | EventTypeOpts<ReportEntityRemoveParams>
+  | EventTypeOpts<ReportEntityDetailViewParams>
   | EventTypeOpts<ReportManageEntityEditParams>
   | EventTypeOpts<ReportManageEntityDeleteParams>;
 // Type union of all event type strings for use in union types
@@ -462,6 +494,10 @@ export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.ConversationResume
   | typeof AGENT_BUILDER_EVENT_TYPES.ConversationSearch
   | typeof AGENT_BUILDER_EVENT_TYPES.EntityEditFromAgent
+  | typeof AGENT_BUILDER_EVENT_TYPES.EntityAddFromLibrary
+  | typeof AGENT_BUILDER_EVENT_TYPES.EntityCreateNew
+  | typeof AGENT_BUILDER_EVENT_TYPES.EntityRemove
+  | typeof AGENT_BUILDER_EVENT_TYPES.EntityDetailView
   | typeof AGENT_BUILDER_EVENT_TYPES.ManageEntityEdit
   | typeof AGENT_BUILDER_EVENT_TYPES.ManageEntityDelete;
 
@@ -1601,6 +1637,86 @@ const MANAGE_ENTITY_DELETE_EVENT: AgentBuilderTelemetryEvent = {
   },
 };
 
+const ENTITY_ADD_FROM_LIBRARY_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.EntityAddFromLibrary,
+  schema: {
+    entity_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'Type of entity added from the library (tool|skill|plugin)',
+        optional: false,
+      },
+    },
+    agent_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'ID of the agent the entity was added to',
+        optional: false,
+      },
+    },
+  },
+};
+
+const ENTITY_CREATE_NEW_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.EntityCreateNew,
+  schema: {
+    entity_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'Type of entity being created (tool|skill|plugin)',
+        optional: false,
+      },
+    },
+    agent_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'ID of the agent context when creating the entity',
+        optional: false,
+      },
+    },
+  },
+};
+
+const ENTITY_REMOVE_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.EntityRemove,
+  schema: {
+    entity_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'Type of entity removed from the agent (tool|skill|plugin)',
+        optional: false,
+      },
+    },
+    agent_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'ID of the agent the entity was removed from',
+        optional: false,
+      },
+    },
+  },
+};
+
+const ENTITY_DETAIL_VIEW_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.EntityDetailView,
+  schema: {
+    entity_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'Type of entity whose detail panel was opened (tool|skill|plugin)',
+        optional: false,
+      },
+    },
+    agent_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'ID of the agent context when viewing entity details',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
   OPT_IN_EVENT,
   OPT_OUT_EVENT,
@@ -1621,6 +1737,10 @@ export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unk
   CONVERSATION_RESUME_EVENT,
   CONVERSATION_SEARCH_EVENT,
   ENTITY_EDIT_FROM_AGENT_EVENT,
+  ENTITY_ADD_FROM_LIBRARY_EVENT,
+  ENTITY_CREATE_NEW_EVENT,
+  ENTITY_REMOVE_EVENT,
+  ENTITY_DETAIL_VIEW_EVENT,
   MANAGE_ENTITY_EDIT_EVENT,
   MANAGE_ENTITY_DELETE_EVENT,
 ];

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { useParams } from 'react-router-dom';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -100,6 +101,7 @@ const ToolHeaderActions = ({
   isAutoIncluded: boolean;
   toolId: string;
 }) => {
+  const { agentId } = useParams<{ agentId?: string }>();
   const { createAgentBuilderUrl } = useNavigation();
   const {
     services: { analytics },
@@ -134,6 +136,7 @@ const ToolHeaderActions = ({
             onClick={() => {
               analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.EntityEditFromAgent, {
                 entity_type: 'tool',
+                agent_id: agentId,
               });
             }}
             {...getEbtProps({

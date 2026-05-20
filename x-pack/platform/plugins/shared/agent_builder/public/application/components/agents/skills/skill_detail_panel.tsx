@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -40,6 +41,7 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
   isAutoIncluded = false,
   canEditAgent,
 }) => {
+  const { agentId } = useParams<{ agentId?: string }>();
   const { euiTheme } = useEuiTheme();
   const { skill, isLoading } = useSkill({ skillId });
   const {
@@ -49,6 +51,7 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
   const handleEdit = () => {
     analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.EntityEditFromAgent, {
       entity_type: 'skill',
+      agent_id: agentId,
     });
     onEdit();
   };

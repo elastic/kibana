@@ -20,13 +20,14 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { PublicSkillSummary } from '@kbn/agent-builder-common';
-import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT, AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useQueryClient } from '@kbn/react-query';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { useCanEditAgent } from '../../../hooks/agents/use_can_edit_agent';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useSkillsService } from '../../../hooks/skills/use_skills';
 import { useFlyoutState } from '../../../hooks/use_flyout_state';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -50,6 +51,9 @@ export const AgentSkills: React.FC = () => {
   const { agentId } = useParams<{ agentId: string }>();
   const styles = useListDetailPageStyles();
   const { createAgentBuilderUrl } = useNavigation();
+  const {
+    services: { analytics },
+  } = useKibana();
   const queryClient = useQueryClient();
 
   const { agent, isLoading: agentLoading } = useAgentBuilderAgentById(agentId);
@@ -71,11 +75,19 @@ export const AgentSkills: React.FC = () => {
   } = useFlyoutState();
 
   const handleImportFromLibrary = () => {
+    analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.EntityAddFromLibrary, {
+      entity_type: 'skill',
+      agent_id: agentId,
+    });
     setIsAddMenuOpen(false);
     openLibrary();
   };
 
   const handleOpenCreateFlyout = () => {
+    analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.EntityCreateNew, {
+      entity_type: 'skill',
+      agent_id: agentId,
+    });
     setIsAddMenuOpen(false);
     setIsCreateFlyoutOpen(true);
   };
@@ -144,6 +156,22 @@ export const AgentSkills: React.FC = () => {
     );
   }, [activeSkills, searchQuery]);
 
+  const handleSelectSkill = (skillId: string) => {
+    analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.EntityDetailView, {
+      entity_type: 'skill',
+      agent_id: agentId,
+    });
+    setSelectedSkillId(skillId);
+  };
+
+  const handleRemoveSkillWithReport = (skill: PublicSkillSummary) => {
+    analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.EntityRemove, {
+      entity_type: 'skill',
+      agent_id: agentId,
+    });
+    handleRemoveSkill(skill);
+  };
+
   const handleToggleSkill = (skill: PublicSkillSummary, isActive: boolean) => {
     if (enableElasticCapabilities && skill.readonly) return;
     if (isActive) {
@@ -158,7 +186,7 @@ export const AgentSkills: React.FC = () => {
     const skill = activeSkills.find((s) => s.id === selectedSkillId);
     if (skill) {
       if (enableElasticCapabilities && skill.readonly) return;
-      handleRemoveSkill(skill);
+      handleRemoveSkillWithReport(skill);
     }
   };
 
@@ -334,8 +362,8 @@ export const AgentSkills: React.FC = () => {
                       <ActiveSkillRow
                         skill={skill}
                         isSelected={selectedSkillId === skill.id}
-                        onSelect={(s) => setSelectedSkillId(s.id)}
-                        onRemove={handleRemoveSkill}
+                        onSelect={(s) => handleSelectSkill(s.id)}
+                        onRemove={handleRemoveSkillWithReport}
                         isAutoIncluded={enableElasticCapabilities && skill.readonly}
                         canEditAgent={canEditAgent}
                       />

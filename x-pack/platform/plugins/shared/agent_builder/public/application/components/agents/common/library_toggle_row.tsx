@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { useParams } from 'react-router-dom';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -19,8 +20,9 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getEbtProps } from '@kbn/ebt-click';
-import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT, AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
 import { labels } from '../../../utils/i18n';
+import { useKibana } from '../../../hooks/use_kibana';
 
 export interface LibraryToggleRowProps {
   id: string;
@@ -55,6 +57,10 @@ export const LibraryToggleRow: React.FC<LibraryToggleRowProps> = ({
   disabledTooltipBody,
   ebtEntityType,
 }) => {
+  const { agentId } = useParams<{ agentId?: string }>();
+  const {
+    services: { analytics },
+  } = useKibana();
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -113,7 +119,17 @@ export const LibraryToggleRow: React.FC<LibraryToggleRowProps> = ({
             label={name}
             showLabel={false}
             checked={isActive}
-            onChange={(e) => onToggle(e.target.checked)}
+            onChange={(e) => {
+              if (ebtEntityType) {
+                analytics.reportEvent(
+                  e.target.checked
+                    ? AGENT_BUILDER_EVENT_TYPES.EntityAddFromLibrary
+                    : AGENT_BUILDER_EVENT_TYPES.EntityRemove,
+                  { entity_type: ebtEntityType, agent_id: agentId ?? '' }
+                );
+              }
+              onToggle(e.target.checked);
+            }}
             {...(ebtEntityType
               ? getEbtProps({
                   element: AGENT_BUILDER_UI_EBT.element.pageContent,
