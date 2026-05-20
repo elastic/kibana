@@ -15,6 +15,7 @@ export PARENT_DIR
 export WORKSPACE="${WORKSPACE:-$PARENT_DIR}"
 
 export DOCS_REPO_CACHE_DIR="$HOME/.docs-repos"
+export NODE_COMPILE_CACHE="/tmp/kibana-node-compile-cache"
 
 # A few things, such as Chrome, respect this variable
 # For many agent types, the workspace is mounted on a local ssd, so will be faster than the default tmp dir location
