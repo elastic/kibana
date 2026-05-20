@@ -218,8 +218,7 @@ export const calculateIsValidPing = ({
 }) => {
   const bufferMs = minimumTotalBufferMs ?? getDefaultStalenessBufferMs(scheduleInMs);
   const msSincePreviousRunEnd = new Date().getTime() - new Date(previousRunEndTimeISO).getTime();
-  const stalenessThresholdMs =
-    scheduleInMs + Math.max(bufferMs, previousRunDurationUs / 1000);
+  const stalenessThresholdMs = scheduleInMs + Math.max(bufferMs, previousRunDurationUs / 1000);
 
   // Example: a 1m monitor's last valid ping can be at (1+1)m; a 10m monitor's at (10+5)m.
   // If the gap exceeds the threshold the monitor is considered pending.
