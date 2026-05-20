@@ -225,6 +225,12 @@ export function SearchEmbeddableGridComponent({
 
   const defaults = getSearchEmbeddableDefaults(discoverServices.uiSettings);
 
+  // should be aligned with discover documents `showTimeCol` prop
+  const showTimeCol = useMemo(
+    () => getShowTimeFieldColumn(discoverServices.uiSettings, savedSearchQuery),
+    [discoverServices.uiSettings, savedSearchQuery]
+  );
+
   return (
     <DiscoverGridEmbeddableMemoized
       {...onStateEditedProps}
@@ -262,7 +268,7 @@ export function SearchEmbeddableGridComponent({
       savedSearchId={savedSearchId}
       searchTitle={panelTitle || savedSearchTitle}
       services={discoverServices}
-      showTimeCol={getShowTimeFieldColumn(discoverServices.uiSettings, savedSearchQuery)}
+      showTimeCol={showTimeCol}
       dataGridDensityState={savedSearch.density}
       enableDocumentViewer={enableDocumentViewer}
       inlineEditing={inlineEditing}
