@@ -109,6 +109,7 @@ describe('registerSiemDashboardMigrationsInvokeRoute', () => {
 
       expect(mockCreateInvoker).toHaveBeenCalledWith('my-connector', {
         abortController: expect.any(AbortController),
+        vendor: 'splunk',
       });
       expect(mockExecute).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'dashboard-1' }),

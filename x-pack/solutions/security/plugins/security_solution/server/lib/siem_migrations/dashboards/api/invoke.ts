@@ -58,6 +58,7 @@ export const registerSiemDashboardMigrationsInvokeRoute = (
 
           const invoker = await dashboardMigrationsClient.task.createInvoker(connectorId, {
             abortController,
+            vendor: 'splunk',
           });
           const output = await invoker.execute(
             input as unknown as DashboardMigrationTaskInput,

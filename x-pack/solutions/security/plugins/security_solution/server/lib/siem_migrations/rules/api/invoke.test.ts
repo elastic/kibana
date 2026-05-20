@@ -109,6 +109,7 @@ describe('registerSiemRuleMigrationsInvokeRoute', () => {
 
       expect(mockCreateInvoker).toHaveBeenCalledWith('my-connector', {
         abortController: expect.any(AbortController),
+        vendor: 'splunk',
       });
       expect(mockExecute).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'rule-1' }),
