@@ -15,6 +15,13 @@ import {
   getDeprecationsCounters,
 } from '../fixtures/helpers';
 
+// The original FTR suite split this scenario into 7 sequential `it` blocks
+// (with `this.bail(true)`) that shared mutable state — each step depended on
+// the previous step's side effects (deprecation counters, saved objects,
+// mark-as-resolved state). Scout's `apiTest` does not offer an equivalent
+// bail-on-first-failure ordering primitive for cross-test state, so the
+// migration consolidates those steps into a single linear test that walks the
+// same scenario top-to-bottom. The numbered comments below mark each step.
 apiTest.describe.skip(
   'Upgrade Assistant API deprecations',
   { tag: testData.UPGRADE_ASSISTANT_INTEGRATION_TAGS },
@@ -25,11 +32,13 @@ apiTest.describe.skip(
         const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
         const headers = { ...testData.COMMON_HEADERS, ...cookieHeader };
 
+        // Step 1: clean saved objects and assert no deprecations exist at baseline
         await cleanKibanaSavedObjects(esClient);
 
         const initialDeprecations = await getDeprecations(apiClient, cookieHeader);
         expect(initialDeprecations).toHaveLength(0);
 
+        // Step 2: hit the removed route and verify one deprecation is tracked with the correct shape
         const removedRouteResponse = await apiClient.get(testData.ROUTES.removedRoute, {
           headers,
         });
@@ -65,6 +74,7 @@ apiTest.describe.skip(
           title: 'Deprecated API: GET /api/routing_example/d/removed_route',
         });
 
+        // Step 3: hit the internal versioned route and verify two deprecations are tracked in order
         const internalVersionedRouteResponse = await apiClient.get(
           testData.ROUTES.internalVersionedRoute,
           { headers }
@@ -81,6 +91,8 @@ apiTest.describe.skip(
           testData.REMOVED_ROUTE_API_ID,
         ]);
 
+        // Step 4: mark the removed-route deprecation as resolved; hitting the route again with an
+        // internal origin should not re-increment the counter, leaving only 1 deprecation
         const markAsResolvedResponse = await apiClient.post(testData.ROUTES.markAsResolved, {
           headers,
           body: markAsResolvedApi,
@@ -100,6 +112,8 @@ apiTest.describe.skip(
         const deprecationsAfterResolution = await getDeprecations(apiClient, cookieHeader);
         expect(deprecationsAfterResolution[0].apiId).toBe(testData.INTERNAL_VERSIONED_ROUTE_API_ID);
 
+        // Step 5: hit the versioned route, then verify the /deprecations endpoint reports exactly 1
+        // api-type deprecation across the full deprecations payload
         const versionedRouteResponse = await apiClient.get(testData.ROUTES.versionedRoute, {
           headers,
         });
@@ -117,12 +131,14 @@ apiTest.describe.skip(
           )
         ).toHaveLength(1);
 
+        // Step 6: verify the upgrade assistant status reports ready for upgrade
         const statusResponse = await apiClient.get(testData.ROUTES.upgradeAssistantStatus, {
           headers,
         });
         expect(statusResponse).toHaveStatusCode(200);
         expect(statusResponse.body.readyForUpgrade).toBe(true);
 
+        // Step 7: verify the final usage counters accumulated across all steps above
         expect(await getDeprecationsCounters(esClient)).toStrictEqual(expectedSuiteUsageCounters);
       }
     );

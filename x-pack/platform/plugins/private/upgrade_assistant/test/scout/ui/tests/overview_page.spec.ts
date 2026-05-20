@@ -10,6 +10,14 @@ import { test, testData } from '../fixtures';
 
 // All Upgrade Assistant UI tests remain skipped until Kibana has a stable way to test them.
 // See https://github.com/elastic/kibana/issues/266002.
+//
+// NOTE: When these are revisited, the component-render assertions below
+// ("renders the overview page", "renders the overview upgrade steps") belong in
+// an RTL component test rather than a Scout UI spec — Scout UI tests should
+// exercise full user flows. A sibling RTL test already covers this surface at
+// public/application/components/overview/overview.test.tsx and should be the
+// home for pure render coverage. See
+// https://docs.elastic.dev/kibana-dev-docs/tutorials/testing-plugins#pick-the-right-test-type
 test.describe.skip(
   'Upgrade Assistant overview page',
   { tag: testData.UPGRADE_ASSISTANT_TAGS },
