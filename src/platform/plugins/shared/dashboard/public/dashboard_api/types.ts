@@ -61,6 +61,8 @@ export interface DashboardLayoutTweakpaneValues {
   /** Max width (px) of dashboard content; Tweakpane range 800–5000. */
   maxWidthPx: number;
   panelBorderRadiusPx: number;
+  /** Panel title font size in px (Tweakpane range 10–24). */
+  panelTitleFontSizePx: number;
   /** Inset inside each dashboard panel (embeddable chrome), 0–30 px. */
   panelPaddingVerticalPx: number;
   /** Inset inside each dashboard panel (embeddable chrome), 0–30 px. */

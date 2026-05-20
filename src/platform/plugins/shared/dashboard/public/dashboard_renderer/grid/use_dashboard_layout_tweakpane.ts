@@ -11,7 +11,13 @@ import { useEuiTheme } from '@elastic/eui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import type { DashboardLayoutTweakpaneValues } from '../../dashboard_api/types';
-import { DASHBOARD_MARGIN_SIZE, DASHBOARD_MARKDOWN_CORNER_PADDING_MAX_PX } from './constants';
+import {
+  DASHBOARD_DEFAULT_PANEL_TITLE_FONT_SIZE_PX,
+  DASHBOARD_MARGIN_SIZE,
+  DASHBOARD_MARKDOWN_CORNER_PADDING_MAX_PX,
+  DASHBOARD_PANEL_TITLE_FONT_SIZE_MAX_PX,
+  DASHBOARD_PANEL_TITLE_FONT_SIZE_MIN_PX,
+} from './constants';
 import {
   clampDashboardMaxWidthPx,
   DASHBOARD_DEFAULT_MAX_WIDTH_PX,
@@ -98,6 +104,9 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
   const [marginGutterPx, setMarginGutterPx] = useState(DASHBOARD_MARGIN_SIZE);
   const [maxWidthPx, setMaxWidthPx] = useState(DASHBOARD_DEFAULT_MAX_WIDTH_PX);
   const [panelBorderRadiusPx, setPanelBorderRadiusPx] = useState(defaultPanelBorderRadiusPx);
+  const [panelTitleFontSizePx, setPanelTitleFontSizePx] = useState(
+    DASHBOARD_DEFAULT_PANEL_TITLE_FONT_SIZE_PX
+  );
   const [panelPaddingVerticalPx, setPanelPaddingVerticalPx] = useState(0);
   const [panelPaddingHorizontalPx, setPanelPaddingHorizontalPx] = useState(0);
   const [markdownCornerPaddingRightPx, setMarkdownCornerPaddingRightPx] = useState(0);
@@ -139,6 +148,7 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
         marginGutterPx: DASHBOARD_MARGIN_SIZE,
         maxWidthPx: DASHBOARD_DEFAULT_MAX_WIDTH_PX,
         panelBorderRadiusPx: defaultPanelRadiusRef.current,
+        panelTitleFontSizePx: DASHBOARD_DEFAULT_PANEL_TITLE_FONT_SIZE_PX,
         panelPaddingVerticalPx: 0,
         panelPaddingHorizontalPx: 0,
         markdownCornerPaddingRightPx: 0,
@@ -185,6 +195,10 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
         params.marginGutterPx = next.marginGutterPx;
         params.maxWidthPx = clampDashboardMaxWidthPx(next.maxWidthPx);
         params.panelBorderRadiusPx = next.panelBorderRadiusPx;
+        params.panelTitleFontSizePx = Math.min(
+          DASHBOARD_PANEL_TITLE_FONT_SIZE_MAX_PX,
+          Math.max(DASHBOARD_PANEL_TITLE_FONT_SIZE_MIN_PX, next.panelTitleFontSizePx)
+        );
         params.panelPaddingVerticalPx = Math.min(30, Math.max(0, next.panelPaddingVerticalPx));
         params.panelPaddingHorizontalPx = Math.min(30, Math.max(0, next.panelPaddingHorizontalPx));
 
@@ -214,6 +228,7 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
         setMarginGutterPx(params.marginGutterPx);
         setMaxWidthPx(params.maxWidthPx);
         setPanelBorderRadiusPx(params.panelBorderRadiusPx);
+        setPanelTitleFontSizePx(params.panelTitleFontSizePx);
         setPanelPaddingVerticalPx(params.panelPaddingVerticalPx);
         setPanelPaddingHorizontalPx(params.panelPaddingHorizontalPx);
         setMarkdownCornerPaddingRightPx(params.markdownCornerPaddingRightPx);
@@ -289,6 +304,23 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
           const next = readNumber(ev.value) ?? params.panelBorderRadiusPx;
           params.panelBorderRadiusPx = next;
           setPanelBorderRadiusPx(next);
+        });
+
+      pane
+        .addBinding(params, 'panelTitleFontSizePx', {
+          label: 'Panel title font size',
+          min: DASHBOARD_PANEL_TITLE_FONT_SIZE_MIN_PX,
+          max: DASHBOARD_PANEL_TITLE_FONT_SIZE_MAX_PX,
+          step: 1,
+        })
+        .on('change', (ev) => {
+          const next = readNumber(ev.value) ?? params.panelTitleFontSizePx;
+          const clamped = Math.min(
+            DASHBOARD_PANEL_TITLE_FONT_SIZE_MAX_PX,
+            Math.max(DASHBOARD_PANEL_TITLE_FONT_SIZE_MIN_PX, next)
+          );
+          params.panelTitleFontSizePx = clamped;
+          setPanelTitleFontSizePx(clamped);
         });
 
       pane
@@ -446,6 +478,7 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
     marginGutterPx,
     maxWidthPx,
     panelBorderRadiusPx,
+    panelTitleFontSizePx,
     panelPaddingVerticalPx,
     panelPaddingHorizontalPx,
     markdownCornerPaddingRightPx,

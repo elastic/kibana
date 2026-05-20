@@ -22,7 +22,7 @@ import {
   DASHBOARD_DEFAULT_BACKGROUND_TOKEN,
   DASHBOARD_DEFAULT_PANEL_BACKGROUND_TOKEN,
 } from './dashboard_background_tokens';
-import { DASHBOARD_MARGIN_SIZE } from './constants';
+import { DASHBOARD_DEFAULT_PANEL_TITLE_FONT_SIZE_PX, DASHBOARD_MARGIN_SIZE } from './constants';
 import { DASHBOARD_DEFAULT_MAX_WIDTH_PX } from './dashboard_layout_max_width';
 
 /** A named bundle of layout tweak values for the dashboard Tweakpane. */
@@ -50,6 +50,7 @@ export function getDashboardLayoutTweakpanePresets(
         marginGutterPx: DASHBOARD_MARGIN_SIZE,
         maxWidthPx: DASHBOARD_DEFAULT_MAX_WIDTH_PX,
         panelBorderRadiusPx: defaultPanelBorderRadiusPx,
+        panelTitleFontSizePx: DASHBOARD_DEFAULT_PANEL_TITLE_FONT_SIZE_PX,
         panelPaddingVerticalPx: 0,
         panelPaddingHorizontalPx: 0,
         markdownCornerPaddingBottomPx: 0,
@@ -66,6 +67,7 @@ export function getDashboardLayoutTweakpanePresets(
         marginGutterPx: 14,
         maxWidthPx: 1920,
         panelBorderRadiusPx: 8,
+        panelTitleFontSizePx: 16,
         panelPaddingVerticalPx: 10,
         panelPaddingHorizontalPx: 12,
         markdownCornerPaddingBottomPx: 0,

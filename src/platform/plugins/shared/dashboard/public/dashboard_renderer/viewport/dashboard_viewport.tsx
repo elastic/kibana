@@ -81,6 +81,7 @@ export const DashboardViewport = () => {
     marginGutterPx,
     maxWidthPx,
     panelBorderRadiusPx,
+    panelTitleFontSizePx,
     panelPaddingVerticalPx,
     panelPaddingHorizontalPx,
     markdownCornerPaddingRightPx,
@@ -140,6 +141,16 @@ export const DashboardViewport = () => {
           paddingLeft: `${panelPaddingHorizontalPx}px`,
           paddingRight: `${markdownCornerPaddingRightPx}px`,
         },
+        '.embPanel__header .embPanel__title': {
+          height: 'auto !important',
+          minHeight: euiTheme.size.xl,
+          lineHeight: `${panelTitleFontSizePx + 8}px`,
+          fontSize: `${panelTitleFontSizePx}px`,
+        },
+        '.embPanel__title [data-test-subj="embeddablePanelTitle"], .embPanel__title h2': {
+          fontSize: 'inherit',
+          lineHeight: 'inherit',
+        },
         '.embPanel__content, .embPanel__header, .embPanel__hoverActionsAnchor': {
           borderRadius: `${panelBorderRadiusPx}px !important`,
           backgroundColor: 'transparent !important',
@@ -153,6 +164,8 @@ export const DashboardViewport = () => {
       }),
     [
       panelBorderRadiusPx,
+      panelTitleFontSizePx,
+      euiTheme.size.xl,
       panelPaddingVerticalPx,
       panelPaddingHorizontalPx,
       markdownCornerPaddingRightPx,
