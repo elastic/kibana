@@ -7,6 +7,7 @@
 
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { z } from '@kbn/zod/v4';
 import type { ExperimentalFeatures } from '../../../common';
 import { coreMock } from '@kbn/core/server/mocks';
@@ -16,6 +17,7 @@ import {
   createToolTestMocks,
   setupMockCoreStartServices,
 } from '../__mocks__/test_helpers';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import {
   createDetectionRuleTool,
   SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
@@ -37,15 +39,12 @@ const userQuery = 'Create a rule to detect suspicious activity';
 
 describe('createDetectionRuleTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
-  const mockModelProvider = {
-    getDefaultModel: jest.fn().mockResolvedValue({
-      chatModel: {
-        getConnector: jest.fn().mockReturnValue({ connectorId: 'test-connector-id' }),
-      },
-    }),
-    getModel: jest.fn(),
-    getUsageStats: jest.fn(),
-  };
+  const mockModelProvider = agentBuilderMocks.createModelProvider();
+  mockModelProvider.getDefaultModel.mockResolvedValue({
+    chatModel: {
+      getConnector: jest.fn().mockReturnValue({ connectorId: 'test-connector-id' }),
+    },
+  } as never);
   const mockEvents = {
     reportProgress: jest.fn(),
     sendUiEvent: jest.fn(),
@@ -57,9 +56,18 @@ describe('createDetectionRuleTool', () => {
     mockExperimentalFeatures
   ) as BuiltinToolDefinition<z.ZodObject<{ user_query: z.ZodString }>>;
 
+  let mockCoreStart: ReturnType<typeof setupMockCoreStartServices>;
+  let mockUiSettingsClient: ReturnType<
+    ReturnType<typeof setupMockCoreStartServices>['uiSettings']['asScopedToClient']
+  >;
+
   beforeEach(() => {
     jest.clearAllMocks();
-    setupMockCoreStartServices(mockCore, mockEsClient);
+    mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient);
+    mockUiSettingsClient = mockCoreStart.uiSettings.asScopedToClient(
+      mockCoreStart.savedObjects.getScopedClient(mockRequest)
+    );
+    jest.mocked(mockUiSettingsClient.get).mockResolvedValue(true);
     mockGetAgentBuilderResourceAvailability.mockResolvedValue({
       status: 'available',
     });
@@ -122,11 +130,37 @@ describe('createDetectionRuleTool', () => {
       });
     });
 
-    it('returns available status when experimental feature is enabled', async () => {
+    it('returns unavailable when space availability check fails', async () => {
       mockGetAgentBuilderResourceAvailability.mockResolvedValue({
-        status: 'available',
+        status: 'unavailable',
+        reason: 'Space is not available',
       });
 
+      const availability = await tool.availability?.handler(
+        createToolAvailabilityContext(mockRequest, 'default')
+      );
+
+      expect(availability).toEqual({
+        status: 'unavailable',
+        reason: 'Space is not available',
+      });
+    });
+
+    it('returns unavailable when ES|QL is disabled', async () => {
+      jest.mocked(mockUiSettingsClient.get).mockResolvedValue(false);
+
+      const availability = await tool.availability?.handler(
+        createToolAvailabilityContext(mockRequest, 'default')
+      );
+
+      expect(availability).toEqual({
+        status: 'unavailable',
+        reason: 'ES|QL is disabled in this space via the enableESQL advanced setting.',
+      });
+      expect(mockUiSettingsClient.get).toHaveBeenCalledWith(ENABLE_ESQL);
+    });
+
+    it('returns available when all checks pass', async () => {
       const availability = await tool.availability?.handler(
         createToolAvailabilityContext(mockRequest, 'default')
       );
@@ -211,14 +245,12 @@ describe('createDetectionRuleTool', () => {
     });
 
     it('returns error when connector ID is not available', async () => {
-      const mockModelProviderWithoutConnector = {
-        ...mockModelProvider,
-        getDefaultModel: jest.fn().mockResolvedValue({
-          chatModel: {
-            getConnector: jest.fn().mockReturnValue({ connectorId: null }),
-          },
-        }),
-      };
+      const mockModelProviderWithoutConnector = agentBuilderMocks.createModelProvider();
+      mockModelProviderWithoutConnector.getDefaultModel.mockResolvedValue({
+        chatModel: {
+          getConnector: jest.fn().mockReturnValue({ connectorId: null }),
+        },
+      } as never);
 
       const result = await tool.handler(
         { user_query: userQuery },

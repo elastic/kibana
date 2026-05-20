@@ -24,7 +24,7 @@ const createDashboard = async (pageObjects: PageObjects, dashboardName: string) 
 };
 
 const addByValueLensPanel = async (pageObjects: PageObjects) => {
-  await pageObjects.dashboard.openNewLensPanel();
+  await pageObjects.dashboard.addNewPanel('Lens');
   await pageObjects.lens.configureXYDimensions();
   await pageObjects.lens.saveAndReturn();
 };

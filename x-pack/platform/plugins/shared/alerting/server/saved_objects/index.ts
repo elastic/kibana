@@ -294,6 +294,9 @@ export function setupSavedObjects(
         message: {
           type: 'text',
         },
+        errorCode: {
+          type: 'keyword',
+        },
       },
     },
     modelVersions: uiamApiKeysProvisioningStatusModelVersions,

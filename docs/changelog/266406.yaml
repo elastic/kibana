@@ -1,0 +1,11 @@
+﻿prs:
+- https://github.com/elastic/kibana/pull/266406
+issues:
+- https://github.com/elastic/kibana/issues/265591
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-06
+areas:
+- Discover and ES|QL
+title: Do not override panels with Save As on dashboard

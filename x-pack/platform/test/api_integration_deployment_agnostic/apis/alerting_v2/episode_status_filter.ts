@@ -14,7 +14,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 import type { RoleCredentials } from '../../services';
 import { createAlertEvent, indexAlertEvents } from './fixtures';
 
-const BULK_ALERT_ACTION_API_PATH = '/api/alerting/v2/alerts/action/_bulk';
+const BULK_ALERT_ACTION_API_PATH = '/api/alerting/v2/alerts/_bulk_action';
 const ALERTING_EVENTS_INDEX = '.rule-events';
 const ALERTING_ACTIONS_INDEX = '.alert-actions';
 
@@ -116,6 +116,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       filterState: EpisodesFilterState
     ): Promise<Array<Record<string, unknown>>> {
       const esqlQuery = buildEpisodesQuery(
+        'default',
         { sortField: '@timestamp', sortDirection: 'desc' },
         filterState
       );

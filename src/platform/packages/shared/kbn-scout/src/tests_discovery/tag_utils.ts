@@ -48,13 +48,16 @@ export const collectUniqueTags = (
   return Array.from(tagSet);
 };
 
-// Converts tags to server run flags
+// Converts tags to server run flags. The result is deduplicated by (arch, domain) because
+// multiple tag aliases (e.g. `@local-stateful-classic` and `@cloud-stateful-classic`) can
+// resolve to the same target; consumers iterate the flags to fan out test runs and would
+// otherwise execute the same (arch, domain) twice.
 export const getServerRunFlagsFromTags = (testTags: string[]): string[] => {
   const supportedArchDomainCombos: [ScoutTargetArch, ScoutTargetDomain][] = [
     ['stateful', 'classic'],
     ['serverless', 'search'],
     ['serverless', 'observability_complete'],
-    // ['serverless', 'observability_logs_essentials'],
+    ['serverless', 'observability_logs_essentials'],
     ['serverless', 'security_complete'],
     // ['serverless', 'security_essentials'],
     // ['serverless', 'security_ease'],
@@ -62,7 +65,7 @@ export const getServerRunFlagsFromTags = (testTags: string[]): string[] => {
   ];
   // TODO: Uncomment above to run tests for these targets in CI
 
-  return [...new Set(testTags)]
+  const flags = [...new Set(testTags)]
     .map((tag) => ScoutTestTarget.fromPlaywrightTag(tag))
     .filter((target) =>
       supportedArchDomainCombos.some(
@@ -70,4 +73,6 @@ export const getServerRunFlagsFromTags = (testTags: string[]): string[] => {
       )
     )
     .map((target) => `--arch ${target.arch} --domain ${target.domain}`);
+
+  return [...new Set(flags)];
 };

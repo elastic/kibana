@@ -17,9 +17,10 @@ import type {
   SERVICE_ENVIRONMENT,
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
+  ERROR_GROUP_ID,
 } from '../../../../../common/es_fields/apm';
 
-export type ChartId = 'latency' | 'failedTransactionRate' | 'throughput';
+export type ChartId = 'latency' | 'failedTransactionRate' | 'throughput' | 'errorCount';
 
 interface ChartLayout {
   primary: ChartId;
@@ -35,6 +36,10 @@ export const CHART_LAYOUTS: Partial<Record<ApmRuleType | AnomalyDetectorType, Ch
   [ApmRuleType.TransactionDuration]: DEFAULT_LAYOUT,
   [ApmRuleType.TransactionErrorRate]: {
     primary: 'failedTransactionRate',
+    secondary: ['throughput', 'latency'],
+  },
+  [ApmRuleType.ErrorCount]: {
+    primary: 'errorCount',
     secondary: ['throughput', 'latency'],
   },
   [AnomalyDetectorType.txLatency]: DEFAULT_LAYOUT,
@@ -56,11 +61,12 @@ export interface AlertDetailsAppSectionProps extends ObsAlertDetailsAppSectionPr
     windowUnit: TIME_UNITS;
   }>;
   alert: TopAlert<{
+    [ANOMALY_DETECTOR_TYPE]?: string;
+    [ERROR_GROUP_ID]?: string;
     [SERVICE_NAME]: string;
+    [SERVICE_ENVIRONMENT]: string;
     [TRANSACTION_TYPE]: string;
     [TRANSACTION_NAME]?: string;
-    [SERVICE_ENVIRONMENT]: string;
-    [ANOMALY_DETECTOR_TYPE]?: string;
   }>;
   timeZone: string;
 }

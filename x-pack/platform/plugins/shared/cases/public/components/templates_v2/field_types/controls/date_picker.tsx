@@ -8,13 +8,10 @@
 import type { z } from '@kbn/zod/v4';
 import type { Moment } from 'moment';
 import moment from 'moment-timezone';
-import {
-  UseField,
-  getFieldValidityAndErrorMessage,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import React from 'react';
+import React, { useMemo, useState } from 'react';
+import { Controller, useFormContext } from 'react-hook-form';
 import { EuiDatePicker, EuiFormRow } from '@elastic/eui';
+import { InlineFieldActions } from './inline_field_actions';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import { getFieldSnakeKey } from '../../../../../common/utils';
 import {
@@ -22,10 +19,9 @@ import {
   type ConditionRenderProps,
 } from '../../../../../common/types/domain/template/fields';
 import { FIELD_REQUIRED } from '../../translations';
+import { OptionalFieldLabel } from '../../../optional_field_label';
 
 type DatePickerProps = z.infer<typeof DatePickerFieldSchema> & ConditionRenderProps;
-
-const { emptyField } = fieldValidators;
 
 const toMoment = (value: unknown, isLocal: boolean): Moment | null => {
   if (!value) return null;
@@ -34,12 +30,10 @@ const toMoment = (value: unknown, isLocal: boolean): Moment | null => {
   return null;
 };
 
-const makeSerializer =
-  (isLocal: boolean) =>
-  (value: unknown): string => {
-    const m = toMoment(value, isLocal);
-    return m ? m.utc().toISOString() : '';
-  };
+const toIsoString = (value: unknown, isLocal: boolean): string => {
+  const m = toMoment(value, isLocal);
+  return m ? m.utc().toISOString() : '';
+};
 
 export const DatePicker: React.FC<DatePickerProps> = ({
   label,
@@ -47,35 +41,70 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   type,
   metadata,
   isRequired,
+  onConfirm,
 }) => {
+  const { control, resetField } = useFormContext();
+  const [hasPendingChange, setHasPendingChange] = useState(false);
+  const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
   const isLocal = metadata?.timezone === 'local';
-  const serializer = makeSerializer(isLocal);
 
-  const validations = isRequired ? [{ validator: emptyField(FIELD_REQUIRED) }] : [];
+  const rules = useMemo(() => {
+    if (!isRequired) return undefined;
+    return {
+      validate: {
+        required: (value: unknown) =>
+          typeof value === 'string' && value !== '' ? true : FIELD_REQUIRED,
+      },
+    };
+  }, [isRequired]);
+
+  const showInlineActions = hasPendingChange && onConfirm != null;
 
   return (
-    <UseField
-      key={name}
-      path={`${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`}
-      serializer={serializer}
-      config={{ validations }}
-    >
-      {(field) => {
-        const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-        return (
-          <EuiFormRow label={label} error={errorMessage} isInvalid={isInvalid} fullWidth>
+    <>
+      <Controller
+        key={name}
+        name={path}
+        control={control}
+        rules={rules}
+        defaultValue=""
+        render={({ field, fieldState }) => (
+          <EuiFormRow
+            label={label}
+            labelAppend={!isRequired ? OptionalFieldLabel : undefined}
+            error={fieldState.error?.message}
+            isInvalid={!!fieldState.error}
+            fullWidth
+          >
             <EuiDatePicker
               selected={toMoment(field.value, isLocal)}
-              onChange={(date) => field.setValue(date)}
+              onChange={(date) => {
+                field.onChange(toIsoString(date, isLocal));
+                field.onBlur();
+                setHasPendingChange(true);
+              }}
               showTimeSelect={metadata?.show_time ?? false}
               utcOffset={isLocal ? undefined : 0}
-              isInvalid={isInvalid}
+              isInvalid={!!fieldState.error}
               fullWidth
             />
           </EuiFormRow>
-        );
-      }}
-    </UseField>
+        )}
+      />
+      {showInlineActions && (
+        <InlineFieldActions
+          name={name}
+          onConfirm={() => {
+            setHasPendingChange(false);
+            onConfirm();
+          }}
+          onCancel={() => {
+            setHasPendingChange(false);
+            resetField(path);
+          }}
+        />
+      )}
+    </>
   );
 };
 DatePicker.displayName = 'DatePicker';

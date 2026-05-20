@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { Streams, emptyAssets } from '@kbn/streams-schema';
-import { OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS } from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
@@ -22,7 +21,6 @@ import {
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const esClient = getService('es');
-  const kibanaServer = getService('kibanaServer');
   const config = getService('config');
   const isServerless = !!config.get('serverless');
 
@@ -972,9 +970,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const ORPHANED_STREAM_NAME = 'logs-orphaned-default';
 
       before(async () => {
-        await kibanaServer.uiSettings.update({
-          [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: true,
-        });
         const doc = {
           message: '2023-01-01T00:00:10.000Z error test',
         };
@@ -1005,12 +1000,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         // delete the underlying data stream
         await esClient.indices.deleteDataStream({
           name: ORPHANED_STREAM_NAME,
-        });
-      });
-
-      after(async () => {
-        await kibanaServer.uiSettings.update({
-          [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: false,
         });
       });
 

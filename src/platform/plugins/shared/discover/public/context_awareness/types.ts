@@ -231,6 +231,10 @@ export interface DocViewerExtensionParams {
      * Updates the current ES|QL query
      */
     updateESQLQuery?: UpdateESQLQueryFn;
+    /**
+     * Refreshes the current Discover table data.
+     */
+    refreshData?: () => void;
   };
   /**
    * The record being displayed in the doc viewer
@@ -455,6 +459,55 @@ export interface AdditionalCellAction {
 }
 
 /**
+ * Parameters passed to the deep-analysis playbook extension
+ */
+export interface DeepAnalysisPlaybookExtensionParams {
+  /**
+   * The current data view, if any
+   */
+  dataView: DataView | undefined;
+  /**
+   * The current query
+   */
+  query: AggregateQuery | Query | undefined;
+  /**
+   * The columns of the current ES|QL query result, if any
+   */
+  columns?: Array<{ name: string; type?: string }>;
+}
+
+/**
+ * A per-shape contribution to the agent-builder deep-analysis playbook.
+ * Returning `undefined` means "no contribution" — the server playbook
+ * falls back to inferring analysis strategy from column names and types.
+ */
+export interface DeepAnalysisPlaybookExtension {
+  /**
+   * Stable shape identifier, e.g. 'logs' | 'traces' | 'metrics'
+   */
+  shapeId: string;
+  /**
+   * Human-readable shape label, e.g. "Application & infrastructure logs"
+   */
+  shapeLabel: string;
+  /**
+   * Field names that characterize this shape. Intersected against the
+   * actual attachment columns server-side so the agent never sees
+   * fields that don't exist in the result.
+   */
+  characteristicFields: string[];
+  /**
+   * Short guidance (≤600 chars) describing what "deep analysis" means for
+   * this shape — what to group by, what to avoid, what's interesting.
+   */
+  guidance: string;
+  /**
+   * Optional short bullets (≤5 entries) to seed the Drill-Down Queries section.
+   */
+  interestingSignals?: string[];
+}
+
+/**
  * The core profile interface for Discover context awareness.
  * Each of the available methods map to a specific extension point in the Discover application.
  */
@@ -584,6 +637,21 @@ export interface Profile {
    * @returns The doc viewer extension
    */
   getDocViewer: (params: DocViewerExtensionParams) => DocViewerExtension;
+
+  /**
+   * Deep analysis (agent-builder)
+   */
+
+  /**
+   * Contributes per-shape guidance to the Discover deep-analysis agent-builder skill.
+   * The contribution is attached to the ES|QL query results sent to the agent so
+   * the playbook can prioritise shape-relevant fields and aggregations.
+   * @param params The deep-analysis playbook extension parameters
+   * @returns The shape-specific playbook contribution, or `undefined` for the default behaviour
+   */
+  getDeepAnalysisPlaybook: (
+    params: DeepAnalysisPlaybookExtensionParams
+  ) => DeepAnalysisPlaybookExtension | undefined;
 
   /**
    * App Menu (Top Nav actions)

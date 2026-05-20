@@ -43,13 +43,14 @@ export const ENTITY_NAME_FIELD = 'entity.name';
 export const ENTITY_TYPE_FIELD = 'entity.type';
 export const TIMESTAMP_FIELD = '@timestamp';
 
-export const DOCUMENT_ID_FIELD = '_id';
-
-const METADATA_FIELDS = ['_index', '_id'];
-
 export interface PaginationParams {
   timestampCursor: string;
   idCursor: string;
+}
+
+/** Cursor for the log-slice outer loop: timestamp only. `_id` is excluded to avoid the expensive sort. */
+export interface LogSlicePaginationParams {
+  timestampCursor: string;
 }
 
 export interface PaginationFields {
@@ -66,30 +67,21 @@ export interface LogPageProbeSourceClauseParams {
   type: EntityType;
   fromDateISO: string;
   toDateISO: string;
-  recoveryId?: string;
-  /** Exclusive lower bound on (@timestamp, _id) for log-slice pagination within the time window. */
-  logsPageCursorStart?: PaginationParams;
+  /** Inclusive lower bound on @timestamp for log-slice pagination within the time window. */
+  logsPageCursorStart?: LogSlicePaginationParams;
 }
 
-/** Bounded extraction: same as probe plus optional inclusive upper bound on (@timestamp, _id). */
+/** Bounded extraction: same as probe plus optional inclusive upper bound on @timestamp. */
 export type ExtractionSourceClauseParams = LogPageProbeSourceClauseParams & {
-  logsPageCursorEnd?: PaginationParams;
+  logsPageCursorEnd?: LogSlicePaginationParams;
 };
 
 export function buildLogPageProbeSourceClause(params: LogPageProbeSourceClauseParams): string {
-  const { indexPatterns, type, fromDateISO, toDateISO, recoveryId, logsPageCursorStart } = params;
-
-  // If recoveryId is set we use an inclusive lower bound because we are recovering
-  //  from a previous extraction and we don't want to miss any logs from the previous window
-  //
-  // If logsPageCursorStart is not set we use a inclusive lower bound because we are starting a new extraction
-  // and we want to include all logs from the new window
-  const inclusiveLowerBound = recoveryId || !logsPageCursorStart ? true : false;
+  const { indexPatterns, type, fromDateISO, toDateISO, logsPageCursorStart } = params;
 
   const baseWhere = `FROM ${indexPatterns.join(', ')}
-    METADATA ${METADATA_FIELDS.join(', ')}
-  | WHERE 
-      ${TIMESTAMP_FIELD} ${inclusiveLowerBound ? '>=' : '>'} TO_DATETIME("${fromDateISO}")
+  | WHERE
+      ${TIMESTAMP_FIELD} >= TO_DATETIME("${fromDateISO}")
       AND ${TIMESTAMP_FIELD} <= TO_DATETIME("${toDateISO}")
       AND (${getEuidEsqlDocumentsContainsIdFilter(type)})`;
 
@@ -102,7 +94,7 @@ export function buildLogPageProbeSourceClause(params: LogPageProbeSourceClausePa
 }
 
 export function buildExtractionSourceClause(
-  params: LogPageProbeSourceClauseParams & { logsPageCursorEnd?: PaginationParams }
+  params: LogPageProbeSourceClauseParams & { logsPageCursorEnd?: LogSlicePaginationParams }
 ): string {
   if (params.logsPageCursorEnd) {
     const { logsPageCursorEnd, ...probeParams } = params;
@@ -114,26 +106,12 @@ export function buildExtractionSourceClause(
   return buildLogPageProbeSourceClause(params);
 }
 
-function buildLogsPageStartFilter(cursor: PaginationParams): string {
-  const escapedId = escapeEsqlStringLiteral(cursor.idCursor);
-  return `(
-      ${TIMESTAMP_FIELD} > TO_DATETIME("${cursor.timestampCursor}")
-      OR (
-        ${TIMESTAMP_FIELD} == TO_DATETIME("${cursor.timestampCursor}")
-        AND \`${DOCUMENT_ID_FIELD}\` > "${escapedId}"
-      )
-    )`;
+function buildLogsPageStartFilter(cursor: LogSlicePaginationParams): string {
+  return `${TIMESTAMP_FIELD} >= TO_DATETIME("${cursor.timestampCursor}")`;
 }
 
-function buildLogsPageEndFilter(end: PaginationParams): string {
-  const escapedId = escapeEsqlStringLiteral(end.idCursor);
-  return `(
-      ${TIMESTAMP_FIELD} < TO_DATETIME("${end.timestampCursor}")
-      OR (
-        ${TIMESTAMP_FIELD} == TO_DATETIME("${end.timestampCursor}")
-        AND \`${DOCUMENT_ID_FIELD}\` <= "${escapedId}"
-      )
-    )`;
+function buildLogsPageEndFilter(end: LogSlicePaginationParams): string {
+  return `${TIMESTAMP_FIELD} <= TO_DATETIME("${end.timestampCursor}")`;
 }
 
 export function aggregationStats(fields: EntityField[], renameToRecent: boolean = true): string {
@@ -483,9 +461,10 @@ function buildPaginationWhereClause(
   { timestampCursor, idCursor }: PaginationParams,
   { timestampField, idFieldInQuery: idFieldExprForWhere }: PaginationFields
 ): string {
+  const escapedId = escapeEsqlStringLiteral(idCursor);
   return `| WHERE ${timestampField} > TO_DATETIME("${timestampCursor}") 
             OR (${timestampField} == TO_DATETIME("${timestampCursor}") 
-                AND ${idFieldExprForWhere} > "${idCursor}")`;
+                AND ${idFieldExprForWhere} > "${escapedId}")`;
 }
 
 export function hasFieldEvaluations(entityDefinition: EntityDefinition): boolean {

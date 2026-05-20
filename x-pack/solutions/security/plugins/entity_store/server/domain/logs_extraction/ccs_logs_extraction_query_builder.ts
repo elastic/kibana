@@ -14,6 +14,7 @@ import {
   buildFieldEvaluations,
   buildSetFieldsByCondition,
   type PaginationParams,
+  type LogSlicePaginationParams,
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
   MAIN_ENTITY_ID_FIELD,
   TIMESTAMP_FIELD,
@@ -44,6 +45,8 @@ export interface CcsLogsExtractionQueryParams {
   docsLimit: number;
   recoveryId?: string;
   pagination?: PaginationParams;
+  logsPageCursorStart?: LogSlicePaginationParams;
+  logsPageCursorEnd?: LogSlicePaginationParams;
 }
 
 /**
@@ -58,6 +61,8 @@ export function buildCcsLogsExtractionEsqlQuery({
   docsLimit,
   recoveryId,
   pagination,
+  logsPageCursorStart,
+  logsPageCursorEnd,
 }: CcsLogsExtractionQueryParams): string {
   const { fields, type } = entityDefinition;
 
@@ -68,7 +73,14 @@ export function buildCcsLogsExtractionEsqlQuery({
 
   // FROM and WHERE
   parts.push(
-    buildExtractionSourceClause({ indexPatterns, type, fromDateISO, toDateISO, recoveryId })
+    buildExtractionSourceClause({
+      indexPatterns,
+      type,
+      fromDateISO,
+      toDateISO,
+      logsPageCursorStart,
+      logsPageCursorEnd,
+    })
   );
 
   // Special evaluations for entity id

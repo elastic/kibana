@@ -24,7 +24,7 @@ import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_prefe
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { asExactTransactionRate } from '../../../../../common/utils/formatters';
 import { TransactionTypeSelect } from './transaction_type_select';
-import { RedMetricsChartActions } from './red_metrics_chart_actions';
+import { RED_METRICS_CHART_ELEMENT, RedMetricsChartActions } from './red_metrics_chart_actions';
 import { useGetChartAlertAnnotations } from './use_get_chart_alert_annotations';
 
 const INITIAL_STATE = {
@@ -51,9 +51,11 @@ export function ThroughputChart({
   customAlertEvaluationThreshold,
   threshold,
   ruleTypeId,
+  compact,
+  showAlertAnnotations,
 }: {
   alert: TopAlert;
-  transactionType: string;
+  transactionType?: string;
   transactionTypes?: string[];
   setTransactionType?: (transactionType: string) => void;
   transactionName?: string;
@@ -70,6 +72,10 @@ export function ThroughputChart({
   customAlertEvaluationThreshold?: number;
   threshold?: ReactElement;
   ruleTypeId?: ApmRuleType;
+  /** When true, hide the threshold side panel even if `threshold` is provided. */
+  compact?: boolean;
+  /** When set, overrides the default annotation behavior (which is keyed off `threshold`). */
+  showAlertAnnotations?: boolean;
 }) {
   const {
     services: { uiSettings },
@@ -89,7 +95,7 @@ export function ThroughputChart({
 
   const { data: dataThroughput = INITIAL_STATE, status: statusThroughput } = useFetcher(
     (callApmApi) => {
-      if (serviceName && transactionType && start && end && preferred) {
+      if (serviceName && start && end && preferred) {
         return callApmApi('GET /internal/apm/services/{serviceName}/throughput', {
           params: {
             path: {
@@ -129,7 +135,8 @@ export function ThroughputChart({
   const alertAnnotations = useGetChartAlertAnnotations({
     alert,
     dateFormat,
-    showAnnotations: !!threshold,
+    showAnnotations: showAlertAnnotations ?? !!threshold,
+    showThresholdAnnotation: !!threshold,
     customAlertEvaluationThreshold,
     normalizeThreshold: (value) => value / 100,
   });
@@ -155,7 +162,7 @@ export function ThroughputChart({
       : []),
   ];
 
-  const showTransactionTypeSelect = setTransactionType && transactionTypes;
+  const showTransactionTypeSelect = transactionType && transactionTypes && setTransactionType;
 
   return (
     <EuiFlexItem>
@@ -201,18 +208,19 @@ export function ThroughputChart({
                   }}
                   timeRange={{ from: start, to: end }}
                   ruleTypeId={ruleTypeId}
+                  element={RED_METRICS_CHART_ELEMENT.THROUGHPUT}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexGroup direction="row" gutterSize="m">
-          {!!threshold && (
+          {!!threshold && !compact && (
             <EuiFlexItem style={{ minWidth: THRESHOLD_SIDEBAR_MIN_WIDTH }} grow={1}>
               {threshold}
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={!!threshold ? 5 : undefined}>
+          <EuiFlexItem grow={!!threshold && !compact ? 5 : undefined}>
             <TimeseriesChart
               id="throughput"
               height={200}

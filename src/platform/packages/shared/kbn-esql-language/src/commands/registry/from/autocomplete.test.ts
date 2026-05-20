@@ -175,6 +175,39 @@ describe('FROM Autocomplete', () => {
       expect(suggestions).toContain('my_saved_view');
       expect(suggestions).toContain('my-view');
     });
+
+    test('suggests datasets from context.datasets alongside sources and views', async () => {
+      const contextWithDatasets = {
+        ...mockContext,
+        views: [{ name: 'my_saved_view', query: 'FROM logs | LIMIT 10' }],
+        datasets: [
+          {
+            name: 'my_dataset',
+            data_source: 'prod_s3_logs',
+            resource: 's3://logs-bucket/access/**/*.parquet',
+          },
+        ],
+      };
+      const expectedFromSources = visibleIndices;
+
+      await fromExpectSuggestions(
+        'from ',
+        [...expectedFromSources, 'my_saved_view', 'my_dataset', '(FROM $0)'],
+        mockCallbacks,
+        contextWithDatasets
+      );
+
+      const getSuggestions = async (query: string) => {
+        const cursorPosition = query.length;
+        const { command } = findAutocompleteAstPosition(query, cursorPosition);
+        return autocomplete(query, command!, mockCallbacks, contextWithDatasets, cursorPosition);
+      };
+      const suggestions = await getSuggestions('FROM my_d');
+      const datasetSuggestion = suggestions.find((suggestion) => suggestion.text === 'my_dataset');
+
+      expect(datasetSuggestion).toBeDefined();
+      expect(datasetSuggestion?.detail).toBe('Dataset');
+    });
   });
 
   describe('... METADATA <fields>', () => {

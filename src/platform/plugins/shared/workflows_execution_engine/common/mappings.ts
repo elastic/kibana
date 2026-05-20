@@ -26,6 +26,15 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
     workflowId: {
       type: 'keyword',
     },
+    managed: {
+      type: 'boolean',
+    },
+    managedBy: {
+      type: 'keyword',
+    },
+    originManagedWorkflowId: {
+      type: 'keyword',
+    },
     status: {
       type: 'keyword',
     },
@@ -59,6 +68,12 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
       type: 'long',
     },
     triggeredBy: {
+      type: 'keyword',
+    },
+    eventChainDepth: {
+      type: 'long',
+    },
+    eventChainVisitedWorkflowIds: {
       type: 'keyword',
     },
     dispatchEventId: {

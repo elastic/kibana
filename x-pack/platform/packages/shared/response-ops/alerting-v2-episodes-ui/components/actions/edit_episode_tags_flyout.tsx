@@ -10,6 +10,7 @@ import { EuiCallOut, EuiLoadingSpinner, EuiSelectable, EuiSpacer, useEuiTheme } 
 import type { EuiSelectableOption } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { MAX_TAG_LENGTH, MAX_TAGS_PER_EPISODE } from '@kbn/alerting-v2-constants';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { useCreateAlertAction } from '../../hooks/use_create_alert_action';
@@ -25,12 +26,21 @@ function tagValueFromOptionKey(key: string): string {
 }
 
 export interface AlertEpisodeTagsFlyoutProps {
-  isOpen: boolean;
   onClose: () => void;
   groupHash: string;
   currentTags: string[];
   http: HttpStart;
-  services: { expressions: ExpressionsStart };
+  services: { expressions: ExpressionsStart; spaces: SpacesPluginStart };
+  /**
+   * When provided, called with the selected tags on save instead of the
+   * internal single-row mutation. The flyout closes immediately after calling.
+   */
+  onSave?: (tags: string[]) => void;
+  /**
+   * When true, render only the body — `overlays.openFlyout` already provides
+   * the surrounding `EuiFlyout` shell. Default `false` for inline usage.
+   */
+  embedded?: boolean;
 }
 
 export function AlertEpisodeTagsFlyout({
@@ -39,6 +49,8 @@ export function AlertEpisodeTagsFlyout({
   currentTags,
   http,
   services,
+  onSave,
+  embedded = false,
 }: AlertEpisodeTagsFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const [searchValue, setSearchValue] = useState('');
@@ -121,6 +133,11 @@ export function AlertEpisodeTagsFlyout({
     if (saveBlocked) {
       return;
     }
+    if (onSave) {
+      onSave(selectedTags);
+      onClose();
+      return;
+    }
     createAlertAction(
       {
         groupHash,
@@ -129,10 +146,11 @@ export function AlertEpisodeTagsFlyout({
       },
       { onSuccess: onClose }
     );
-  }, [createAlertAction, groupHash, onClose, saveBlocked, selectedTags]);
+  }, [createAlertAction, groupHash, onClose, onSave, saveBlocked, selectedTags]);
 
   return (
     <EpisodeActionFlyout
+      embedded={embedded}
       onClose={onClose}
       dataTestSubj="alertingEpisodeTagsFlyout"
       ariaLabelledBy="alertingEpisodeTagsFlyoutTitle"

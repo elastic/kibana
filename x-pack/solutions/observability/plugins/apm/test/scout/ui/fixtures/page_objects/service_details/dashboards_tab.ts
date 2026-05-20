@@ -30,10 +30,15 @@ export class DashboardsTab extends ServiceDetailsTab {
     await this.page
       .getByTestId('apmUnifiedSearchBar')
       .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await this.page
+      .getByTestId('apmMainTemplateServiceAgentLoader')
+      .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
   }
 
   public async waitForDashboardsToLoad(): Promise<void> {
-    await expect(this.page.getByRole('progressbar')).toBeHidden({ timeout: EXTENDED_TIMEOUT });
+    await this.page
+      .getByTestId('apmMainTemplateServiceAgentLoader')
+      .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
     await this.addServiceDashboardButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 

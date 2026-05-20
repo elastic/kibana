@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
-import { ScaleType, Settings, Tooltip, Chart, AreaSeries } from '@elastic/charts';
+import { ScaleType, Settings, Tooltip, Chart, BarSeries } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import type { Coordinate } from '../../../common/types';
@@ -74,8 +74,8 @@ function SparkPlotItem({
               },
             }}
           />
-          <AreaSeries
-            id="areaseries"
+          <BarSeries
+            id="barseries"
             xScaleType={ScaleType.Linear}
             yScaleType={ScaleType.Linear}
             xAccessor="x"
@@ -91,7 +91,7 @@ function SparkPlotItem({
 
   return (
     <div style={commonStyle}>
-      <EuiIcon type="chartLine" color={euiTheme.colors.mediumShade} />
+      <EuiIcon type="chartLine" color={euiTheme.colors.mediumShade} aria-hidden={true} />
     </div>
   );
 }
