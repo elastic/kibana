@@ -19,6 +19,7 @@ import { useSecondaryFiltersWidthStyle } from './use_secondary_filters_width_sty
 interface Props {
   hidden?: boolean;
   showUnifiedSearchBar?: boolean;
+  showFilterBar?: boolean;
   showTimeComparison?: boolean;
   showEnvironmentFilter?: boolean;
   showQueryInput?: boolean;
@@ -30,6 +31,7 @@ interface Props {
 export function SearchBar({
   hidden = false,
   showUnifiedSearchBar = true,
+  showFilterBar = false,
   showTimeComparison = false,
   showEnvironmentFilter = false,
   showTransactionTypeSelector = false,
@@ -58,6 +60,7 @@ export function SearchBar({
             placeholder={searchBarPlaceholder}
             boolFilter={searchBarBoolFilter}
             showQueryInput={showQueryInput}
+            showFilterBar={showFilterBar}
             showDatePicker
             showSubmitButton
           />
