@@ -13,6 +13,7 @@ import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { QueryClient } from '@kbn/react-query';
 import { createEpisodeActions } from './create_episode_actions';
 
@@ -27,6 +28,7 @@ describe('createEpisodeActions', () => {
       userProfile: userProfileServiceMock.createStart(),
       docLinks: docLinksServiceMock.createStartContract(),
       expressions: expressionsPluginMock.createStartContract(),
+      spaces: spacesPluginMock.createStartContract(),
       queryClient: new QueryClient(),
       getEpisodeDetailsHref: (id) => `/details/${id}`,
       getDiscoverHref: async () => 'https://discover/foo',
