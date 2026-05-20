@@ -39,7 +39,6 @@ export const McpClientActionsMenu = ({
       key="revoke"
       icon="trash"
       color="danger"
-      size="s"
       onClick={handleRevoke}
       data-test-subj={`mcpClientRevokeAction-${clientId}`}
     >
@@ -65,7 +64,7 @@ export const McpClientActionsMenu = ({
       panelPaddingSize="none"
       anchorPosition="downRight"
     >
-      <EuiContextMenuPanel size="s" items={menuItems} />
+      <EuiContextMenuPanel items={menuItems} />
     </EuiPopover>
   );
 };
