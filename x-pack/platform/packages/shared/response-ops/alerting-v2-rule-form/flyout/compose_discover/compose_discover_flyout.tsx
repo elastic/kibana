@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import {
   EuiBadge,
@@ -232,28 +232,29 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
     search: services.data.search.search,
   });
 
-  // `kind` is the source of truth for tracking. Guard on divergence from uiState.tracking
-  // so this effect is a no-op on mount (both sides are seeded from the same initial kind).
   const isAlert = useWatch({ control: methods.control, name: 'kind' }) === 'alert';
-  useEffect(() => {
-    if (isAlert === uiState.tracking) return;
-    if (uiState.yamlMode) return;
-    if (isAlert) {
-      const full = getBreachQuery(methods.getValues('query'));
-      const { base, alertBlock } = splitQuery(full);
-      const composed: RuleQuery = { format: 'composed', base, blocks: { breach: alertBlock } };
-      setSandboxQuery(composed);
-      methods.setValue('query', composed);
-      dispatch({ type: 'ENABLE_TRACKING' });
-    } else {
-      // Assemble from committed RHF query — discards any unapplied sandbox edits cleanly.
-      const assembled = getBreachQuery(methods.getValues('query'));
-      const standalone: RuleQuery = { format: 'standalone', breach: assembled };
-      setSandboxQuery(standalone);
-      methods.setValue('query', standalone);
-      dispatch({ type: 'DISABLE_TRACKING' });
-    }
-  }, [isAlert, uiState.tracking, uiState.yamlMode, methods, dispatch]);
+
+  const handleKindChange = useCallback(
+    (kind: 'signal' | 'alert') => {
+      if (kind === 'alert') {
+        const full = getBreachQuery(methods.getValues('query'));
+        const { base, alertBlock } = splitQuery(full);
+        const composed: RuleQuery = { format: 'composed', base, blocks: { breach: alertBlock } };
+        setSandboxQuery(composed);
+        methods.setValue('query', composed);
+        dispatch({ type: 'TRACKING_ENABLED' });
+      } else {
+        // Assemble from committed query — discards any unapplied sandbox edits cleanly.
+        const assembled = getBreachQuery(methods.getValues('query'));
+        const standalone: RuleQuery = { format: 'standalone', breach: assembled };
+        setSandboxQuery(standalone);
+        methods.setValue('query', standalone);
+        dispatch({ type: 'TRACKING_DISABLED' });
+      }
+      methods.setValue('kind', kind);
+    },
+    [methods, dispatch]
+  );
 
   const handleRecoveryTypeChange = useCallback(
     (type: RecoveryType) => {
@@ -269,30 +270,26 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
             },
           };
         });
+      } else if (type === 'default' && uiState.queryCommitted) {
+        const current = methods.getValues('query');
+        if (current.format === 'composed' && current.blocks.recover) {
+          methods.setValue('query', { ...current, blocks: { breach: current.blocks.breach } });
+        } else if (current.format === 'standalone' && current.recover) {
+          methods.setValue('query', { format: 'standalone', breach: current.breach });
+        }
       }
       dispatch({ type: 'SET_RECOVERY_TYPE', recoveryType: type });
     },
-    [dispatch]
+    [dispatch, methods, uiState.queryCommitted]
   );
 
   const isCreate = mode === 'create' || mode === 'clone';
   const title =
     mode === 'clone' ? 'Clone alert rule' : isCreate ? 'Create alert rule' : 'Edit alert rule';
 
-  const steps = getSteps(uiState.tracking);
+  const steps = getSteps(isAlert);
   const currentStep = steps[uiState.step];
   const isLastStep = uiState.step === steps.length - 1;
-
-  // When recovery type switches to 'default', strip recover from committed RHF query.
-  useEffect(() => {
-    if (!uiState.queryCommitted || uiState.recoveryType !== 'default') return;
-    const current = methods.getValues('query');
-    if (current.format === 'composed' && current.blocks.recover) {
-      methods.setValue('query', { ...current, blocks: { breach: current.blocks.breach } });
-    } else if (current.format === 'standalone' && current.recover) {
-      methods.setValue('query', { format: 'standalone', breach: current.breach });
-    }
-  }, [uiState.recoveryType, uiState.queryCommitted, methods]);
 
   // ── YAML mode state ──────────────────────────────────────────────────────
   const [yamlText, setYamlText] = useState('');
@@ -374,8 +371,8 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
       const valid = await currentStep.validate(methods, uiState);
       if (!valid) return;
     }
-    dispatch({ type: 'GO_NEXT' });
-  }, [currentStep, methods, uiState, dispatch]);
+    dispatch({ type: 'GO_NEXT', isAlert });
+  }, [currentStep, methods, uiState, isAlert, dispatch]);
 
   // TODO: recoveryType drives whether the recovery tab appears in YAML mode.
   // Follow schema decisions in #268984 — if recoveryType is superseded by a
@@ -385,7 +382,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
       ? uiState.recoveryType === 'custom'
         ? ['base', 'alert', 'recovery']
         : ['base', 'alert']
-      : getSandboxTabs(uiState);
+      : getSandboxTabs(isAlert, uiState);
 
   return (
     <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
@@ -459,6 +456,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                 dispatch={dispatch}
                 services={services}
                 onRecoveryTypeChange={handleRecoveryTypeChange}
+                onKindChange={handleKindChange}
               />
             )}
           </EuiFlyoutBody>

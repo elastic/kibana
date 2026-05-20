@@ -29,8 +29,8 @@ jest.mock('@kbn/esql-editor', () => ({
 jest.mock('./compose_discover_form', () => {
   const actual = jest.requireActual('./use_compose_discover_state');
   return {
-    getSteps: (tracking: boolean) =>
-      actual.getStepIds(tracking).map((id: string) => {
+    getSteps: (isAlert: boolean) =>
+      actual.getStepIds(isAlert).map((id: string) => {
         const titles: Record<string, string> = {
           alertCondition: 'Alert Condition',
           recoveryCondition: 'Recovery Condition',

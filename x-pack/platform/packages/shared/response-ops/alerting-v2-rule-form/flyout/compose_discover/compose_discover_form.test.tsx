@@ -89,12 +89,12 @@ const renderRecoveryStep = (
   queryOverride?: RuleQuery
 ) => {
   const state = createState({
-    tracking: true,
     queryCommitted: true,
     ...stateOverrides,
   });
   const dispatch = jest.fn();
   const onRecoveryTypeChange = jest.fn();
+  const onKindChange = jest.fn();
   const services = createMockServices();
   const steps = getSteps(true);
   const recoveryStep = steps.find((s) => s.id === 'recoveryCondition')!;
@@ -105,6 +105,7 @@ const renderRecoveryStep = (
       dispatch,
       services,
       onRecoveryTypeChange,
+      onKindChange,
     }) as React.ReactElement,
     { wrapper: createComposeFormWrapper(queryOverride, services) }
   );
@@ -224,6 +225,6 @@ describe('RecoveryConditionStep', () => {
 
     fireEvent.click(screen.getByTestId('composeDiscoverEditRecovery'));
 
-    expect(dispatch).toHaveBeenCalledWith({ type: 'OPEN_CHILD_FOR_STEP', step: state.step });
+    expect(dispatch).toHaveBeenCalledWith({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert: true });
   });
 });

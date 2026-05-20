@@ -50,6 +50,7 @@ interface ComposeDiscoverFormProps {
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
   onRecoveryTypeChange: (type: RecoveryType) => void;
+  onKindChange: (kind: 'signal' | 'alert') => void;
 }
 
 // ── Recovery type selector ────────────────────────────────────────────────────
@@ -181,12 +182,14 @@ function AlertConditionStep({
   state,
   dispatch,
   services,
+  onKindChange,
 }: {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
+  onKindChange: (kind: 'signal' | 'alert') => void;
 }) {
-  const { setValue, watch } = useFormContext<ComposeFormValues>();
+  const { watch, setValue } = useFormContext<ComposeFormValues>();
   const isAlert = watch('kind') === 'alert';
   const timeField = watch('timeField') ?? '@timestamp';
   const grouping = watch('grouping');
@@ -262,8 +265,8 @@ function AlertConditionStep({
   }, [state.queryCommitted, committedQuery, groupFields.length, setValue]);
 
   const handleTrackingToggle = useCallback(() => {
-    setValue('kind', isAlert ? 'signal' : 'alert');
-  }, [isAlert, setValue]);
+    onKindChange(isAlert ? 'signal' : 'alert');
+  }, [isAlert, onKindChange]);
 
   // Callout when the heuristic split couldn't find a clear split point.
   // Only relevant after Apply (when the committed query is in composed format).
@@ -288,7 +291,7 @@ function AlertConditionStep({
           <EuiButton
             iconType="editorCodeBlock"
             isDisabled={state.childOpen}
-            onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step })}
+            onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert })}
             data-test-subj="composeDiscoverOpenEditor"
           >
             Open query editor
@@ -302,7 +305,7 @@ function AlertConditionStep({
             size="s"
             iconType="editorCodeBlock"
             isDisabled={state.childOpen}
-            onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step })}
+            onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert })}
             data-test-subj="composeDiscoverEditQuery"
           >
             Edit query
@@ -338,7 +341,7 @@ function AlertConditionStep({
             size="s"
             iconType="editorCodeBlock"
             isDisabled={state.childOpen}
-            onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step })}
+            onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert })}
             data-test-subj="composeDiscoverEditQueries"
           >
             Edit queries
@@ -433,7 +436,7 @@ function RecoveryConditionStep({
                 size="s"
                 iconType="editorCodeBlock"
                 isDisabled={state.childOpen}
-                onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step })}
+                onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert: true })}
                 data-test-subj="composeDiscoverEditRecovery"
               >
                 Edit recovery query
@@ -510,7 +513,12 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
     id: 'alertCondition',
     title: 'Alert Condition',
     render: (props) => (
-      <AlertConditionStep state={props.state} dispatch={props.dispatch} services={props.services} />
+      <AlertConditionStep
+        state={props.state}
+        dispatch={props.dispatch}
+        services={props.services}
+        onKindChange={props.onKindChange}
+      />
     ),
     validate: (_methods, s) => s.queryCommitted,
   },
@@ -538,8 +546,8 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
   },
 };
 
-export const getSteps = (tracking: boolean): StepDefinition[] =>
-  getStepIds(tracking).map((id) => STEP_REGISTRY[id]);
+export const getSteps = (isAlert: boolean): StepDefinition[] =>
+  getStepIds(isAlert).map((id) => STEP_REGISTRY[id]);
 
 // ── Main form component ───────────────────────────────────────────────────────
 
@@ -548,12 +556,15 @@ export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({
   dispatch,
   services,
   onRecoveryTypeChange,
+  onKindChange,
 }) => {
-  const steps = getSteps(state.tracking);
+  const isAlert = useWatch<ComposeFormValues, 'kind'>({ name: 'kind' }) === 'alert';
+  const steps = getSteps(isAlert);
   return steps[state.step].render({
     state,
     dispatch,
     services,
     onRecoveryTypeChange,
+    onKindChange,
   });
 };

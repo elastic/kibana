@@ -16,8 +16,8 @@ import type {
   RecoveryType,
 } from './types';
 
-export const getStepIds = (tracking: boolean): StepId[] =>
-  tracking
+export const getStepIds = (isAlert: boolean): StepId[] =>
+  isAlert
     ? ['alertCondition', 'recoveryCondition', 'details', 'notifications']
     : ['alertCondition', 'details', 'notifications'];
 
@@ -34,7 +34,6 @@ export const createInitialState = ({
 }: InitialStateConfig): ComposeDiscoverState => ({
   mode,
   step: 0,
-  tracking: initialKind === 'alert',
   recoveryType: initialKind === 'alert' ? initialRecoveryType : 'default',
   activeTab: 'alert',
   childOpen: mode === 'create',
@@ -43,16 +42,19 @@ export const createInitialState = ({
 });
 
 /**
- * Returns the tabs to show in the Sandbox for the current state.
+ * Returns the tabs to show in the Sandbox for the current step.
  *
- * alertCondition    + tracking  → ['base', 'alert']
- * recoveryCondition + custom    → ['recovery']
- * everything else               → undefined (single editor)
+ * isAlert + alertCondition     → ['base', 'alert']
+ * isAlert + recoveryCondition  + custom → ['recovery']
+ * everything else              → undefined (single editor)
  */
-export function getSandboxTabs(state: ComposeDiscoverState): QueryTab[] | undefined {
-  if (!state.tracking) return undefined;
+export function getSandboxTabs(
+  isAlert: boolean,
+  state: Pick<ComposeDiscoverState, 'step' | 'recoveryType'>
+): QueryTab[] | undefined {
+  if (!isAlert) return undefined;
 
-  const stepId = getStepIds(state.tracking)[state.step];
+  const stepId = getStepIds(isAlert)[state.step];
 
   if (stepId === 'alertCondition') return ['base', 'alert'];
   if (stepId === 'recoveryCondition' && state.recoveryType === 'custom') return ['recovery'];
@@ -77,28 +79,16 @@ export function reducer(
           ? { childOpen: true, activeTab: 'recovery' as const }
           : {}),
       };
-    case 'ENABLE_TRACKING':
-      return {
-        ...state,
-        tracking: true,
-        step: 0,
-        childOpen: true,
-        activeTab: defaultTabForTabs(getSandboxTabs({ ...state, tracking: true, step: 0 })),
-      };
-    case 'DISABLE_TRACKING':
-      return {
-        ...state,
-        tracking: false,
-        recoveryType: 'default',
-        step: 0,
-        activeTab: 'alert',
-      };
+    case 'TRACKING_ENABLED':
+      return { ...state, step: 0, childOpen: true, activeTab: 'alert' };
+    case 'TRACKING_DISABLED':
+      return { ...state, recoveryType: 'default', step: 0, activeTab: 'alert' };
     case 'SET_TAB':
       return { ...state, activeTab: action.tab };
     case 'SET_STEP':
       return { ...state, step: action.step };
     case 'GO_NEXT': {
-      const stepCount = getStepIds(state.tracking).length;
+      const stepCount = getStepIds(action.isAlert).length;
       const nextStep = Math.min(state.step + 1, stepCount - 1);
       return { ...state, step: nextStep, childOpen: false };
     }
@@ -107,14 +97,18 @@ export function reducer(
       return { ...state, step: prevStep, childOpen: false };
     }
     case 'OPEN_CHILD':
-      return { ...state, childOpen: true, activeTab: defaultTabForTabs(getSandboxTabs(state)) };
+      return {
+        ...state,
+        childOpen: true,
+        activeTab: defaultTabForTabs(getSandboxTabs(action.isAlert, state)),
+      };
     case 'OPEN_CHILD_FOR_STEP': {
       const stateAtStep = { ...state, step: action.step };
       return {
         ...state,
         step: action.step,
         childOpen: true,
-        activeTab: defaultTabForTabs(getSandboxTabs(stateAtStep)),
+        activeTab: defaultTabForTabs(getSandboxTabs(action.isAlert, stateAtStep)),
       };
     }
     case 'CLOSE_CHILD':

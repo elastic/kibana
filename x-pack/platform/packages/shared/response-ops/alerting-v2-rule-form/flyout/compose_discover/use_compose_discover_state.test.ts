@@ -16,81 +16,74 @@ const createState = (overrides: Partial<ComposeDiscoverState> = {}): ComposeDisc
 // ── createInitialState ────────────────────────────────────────────────────────
 
 describe('createInitialState', () => {
-  it('creates default state for create mode (signal, tracking off)', () => {
+  it('creates default state for create mode (signal)', () => {
     const state = createInitialState({ mode: 'create' });
 
     expect(state.mode).toBe('create');
-    expect(state.tracking).toBe(false);
     expect(state.childOpen).toBe(true);
     expect(state.queryCommitted).toBe(false);
   });
 
-  it('enables tracking when initialKind is alert', () => {
+  it('sets recoveryType to default when initialKind is alert', () => {
     const state = createInitialState({ mode: 'create', initialKind: 'alert' });
 
-    expect(state.tracking).toBe(true);
     expect(state.recoveryType).toBe('default');
   });
 
-  it('sets tracking false and childOpen false in edit mode with signal kind', () => {
+  it('sets childOpen false and queryCommitted true in edit mode', () => {
     const state = createInitialState({ mode: 'edit', initialKind: 'signal' });
 
-    expect(state.tracking).toBe(false);
     expect(state.childOpen).toBe(false);
     expect(state.queryCommitted).toBe(true);
   });
 
-  it('sets tracking true in edit mode with alert kind', () => {
+  it('sets recoveryType to default in edit mode with alert kind', () => {
     const state = createInitialState({ mode: 'edit', initialKind: 'alert' });
 
-    expect(state.tracking).toBe(true);
     expect(state.childOpen).toBe(false);
     expect(state.queryCommitted).toBe(true);
     expect(state.recoveryType).toBe('default');
   });
 
   it('applies initialRecoveryType only when kind is alert', () => {
-    const withTracking = createInitialState({
+    const withAlert = createInitialState({
       mode: 'edit',
       initialKind: 'alert',
       initialRecoveryType: 'custom',
     });
-    expect(withTracking.recoveryType).toBe('custom');
+    expect(withAlert.recoveryType).toBe('custom');
 
-    const withoutTracking = createInitialState({
+    const withSignal = createInitialState({
       mode: 'edit',
       initialKind: 'signal',
       initialRecoveryType: 'custom',
     });
-    expect(withoutTracking.recoveryType).toBe('default');
+    expect(withSignal.recoveryType).toBe('default');
   });
 });
 
 // ── reducer ───────────────────────────────────────────────────────────────────
 
 describe('reducer', () => {
-  describe('ENABLE_TRACKING', () => {
-    it('sets tracking true, opens child, resets to step 0', () => {
-      const state = createState({ tracking: false, step: 2, childOpen: false });
-      const next = reducer(state, { type: 'ENABLE_TRACKING' });
+  describe('TRACKING_ENABLED', () => {
+    it('opens child, resets to step 0', () => {
+      const state = createState({ step: 2, childOpen: false });
+      const next = reducer(state, { type: 'TRACKING_ENABLED' });
 
-      expect(next.tracking).toBe(true);
       expect(next.childOpen).toBe(true);
       expect(next.step).toBe(0);
     });
   });
 
-  describe('DISABLE_TRACKING', () => {
-    it('sets tracking false, keeps child open, resets step and recoveryType', () => {
+  describe('TRACKING_DISABLED', () => {
+    it('keeps child open, resets step and recoveryType', () => {
       const state = createState({
-        tracking: true,
         step: 1,
         childOpen: true,
         recoveryType: 'custom',
       });
-      const next = reducer(state, { type: 'DISABLE_TRACKING' });
+      const next = reducer(state, { type: 'TRACKING_DISABLED' });
 
-      expect(next.tracking).toBe(false);
       expect(next.childOpen).toBe(true);
       expect(next.step).toBe(0);
       expect(next.recoveryType).toBe('default');
@@ -117,7 +110,7 @@ describe('reducer', () => {
 
   describe('SET_RECOVERY_TYPE', () => {
     it('opens child to recovery tab when switching to custom', () => {
-      const state = createState({ tracking: true, recoveryType: 'default' });
+      const state = createState({ recoveryType: 'default' });
       const next = reducer(state, { type: 'SET_RECOVERY_TYPE', recoveryType: 'custom' });
 
       expect(next.recoveryType).toBe('custom');
@@ -126,7 +119,7 @@ describe('reducer', () => {
     });
 
     it('does not open child when switching to default', () => {
-      const state = createState({ tracking: true, recoveryType: 'custom', childOpen: false });
+      const state = createState({ recoveryType: 'custom', childOpen: false });
       const next = reducer(state, { type: 'SET_RECOVERY_TYPE', recoveryType: 'default' });
 
       expect(next.recoveryType).toBe('default');
@@ -136,11 +129,10 @@ describe('reducer', () => {
 
   describe('CLOSE_CHILD', () => {
     it('sets childOpen false without changing other fields', () => {
-      const state = createState({ tracking: true, childOpen: true, queryCommitted: true });
+      const state = createState({ childOpen: true, queryCommitted: true });
       const next = reducer(state, { type: 'CLOSE_CHILD' });
 
       expect(next.childOpen).toBe(false);
-      expect(next.tracking).toBe(true);
       expect(next.queryCommitted).toBe(true);
     });
   });
@@ -149,23 +141,23 @@ describe('reducer', () => {
 // ── getSandboxTabs ────────────────────────────────────────────────────────────
 
 describe('getSandboxTabs', () => {
-  it('returns undefined when tracking is off', () => {
-    const state = createState({ tracking: false });
-    expect(getSandboxTabs(state)).toBeUndefined();
+  it('returns undefined when isAlert is false', () => {
+    const state = createState();
+    expect(getSandboxTabs(false, state)).toBeUndefined();
   });
 
-  it('returns [base, alert] on alertCondition step with tracking', () => {
-    const state = createState({ tracking: true, step: 0 });
-    expect(getSandboxTabs(state)).toEqual(['base', 'alert']);
+  it('returns [base, alert] on alertCondition step with isAlert true', () => {
+    const state = createState({ step: 0 });
+    expect(getSandboxTabs(true, state)).toEqual(['base', 'alert']);
   });
 
   it('returns [recovery] on recoveryCondition step with custom recovery', () => {
-    const state = createState({ tracking: true, step: 1, recoveryType: 'custom' });
-    expect(getSandboxTabs(state)).toEqual(['recovery']);
+    const state = createState({ step: 1, recoveryType: 'custom' });
+    expect(getSandboxTabs(true, state)).toEqual(['recovery']);
   });
 
   it('returns undefined on recoveryCondition step with default recovery', () => {
-    const state = createState({ tracking: true, step: 1, recoveryType: 'default' });
-    expect(getSandboxTabs(state)).toBeUndefined();
+    const state = createState({ step: 1, recoveryType: 'default' });
+    expect(getSandboxTabs(true, state)).toBeUndefined();
   });
 });
