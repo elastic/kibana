@@ -20,6 +20,8 @@ export interface DataStreamInfo {
 
 const STREAM_TYPES = ['logs', 'metrics', 'traces'] as const;
 
+const STREAMS_DOT_PATTERNS = STREAM_TYPES.map((type) => `${type}.*`);
+
 /** Extracts dataset from classic Fleet ({type}-{dataset}-{namespace}) or Streams dot names (logs.ecs.nginx). */
 export function extractDataset(name: string): string {
   for (const type of STREAM_TYPES) {
@@ -47,13 +49,12 @@ export async function getDataStreamsHandler({
   logger: Logger;
 }): Promise<DataStreamInfo[]> {
   try {
-    const streamsPatterns = STREAM_TYPES.flatMap((type) => [type, `${type}.*`]);
     const pattern = [
       ...dataSources.logIndexPatterns,
       ...dataSources.metricIndexPatterns,
       dataSources.apmIndexPatterns.transaction,
       dataSources.apmIndexPatterns.span,
-      ...streamsPatterns,
+      ...STREAMS_DOT_PATTERNS,
     ].join(',');
 
     const { data_streams: dataStreams } = await listSearchSources({
