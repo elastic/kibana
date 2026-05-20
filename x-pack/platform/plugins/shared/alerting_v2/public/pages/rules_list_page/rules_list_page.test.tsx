@@ -840,7 +840,7 @@ describe('RulesListPage', () => {
     fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
     expect(mockDeleteMutate).toHaveBeenCalledWith(
-      'rule-1',
+      { id: 'rule-1', name: 'Rule One' },
       expect.objectContaining({
         onSettled: expect.any(Function),
       })
