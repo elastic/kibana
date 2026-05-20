@@ -272,7 +272,7 @@ describe('OAuthStateClient', () => {
   });
 
   describe('deleteByState', () => {
-    const makeFutureState = (id = 'state-id-1', createdBy = 'owner-uid') => {
+    const makeFutureState = (id = 'state-id-1', createdBy: string | undefined = 'owner-uid') => {
       const futureDate = new Date(Date.now() + 60000).toISOString();
       mockUnsecuredSavedObjectsClient.find.mockResolvedValue({
         saved_objects: [{ id, attributes: { state: 'test-state', expiresAt: futureDate } }],
@@ -319,6 +319,16 @@ describe('OAuthStateClient', () => {
       makeFutureState('state-id-1', 'other-uid');
 
       const result = await client.deleteByState('test-state', 'requesting-uid');
+
+      expect(result).toBe('forbidden');
+      expect(mockUnsecuredSavedObjectsClient.delete).not.toHaveBeenCalled();
+    });
+
+    it("returns 'forbidden' when the state has no createdBy (unowned state)", async () => {
+      const client = createClient();
+      makeFutureState('state-id-1', undefined);
+
+      const result = await client.deleteByState('test-state', 'any-uid');
 
       expect(result).toBe('forbidden');
       expect(mockUnsecuredSavedObjectsClient.delete).not.toHaveBeenCalled();

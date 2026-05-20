@@ -182,7 +182,7 @@ export class OAuthStateClient {
   ): Promise<'deleted' | 'not_found' | 'forbidden'> {
     const oauthState = await this.get(stateParam);
     if (!oauthState) return 'not_found';
-    if (oauthState.createdBy !== requestingProfileUid) return 'forbidden';
+    if (!oauthState.createdBy || oauthState.createdBy !== requestingProfileUid) return 'forbidden';
     await this.delete(oauthState.id);
     return 'deleted';
   }
