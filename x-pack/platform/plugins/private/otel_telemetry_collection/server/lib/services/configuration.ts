@@ -29,12 +29,11 @@ const CONFIGURATION_ARTIFACT_NAME = 'otel-telemetry-collection-configuration-v1'
 
 export const OtelTelemetryConfigurationSchema = schema.object({
   enabled: schema.boolean(),
-  task_interval: schema.string(),
-  task_timeout: schema.string(),
   query_window: schema.string(),
   query_timeout: schema.string(),
   max_elements_per_event: schema.number(),
   composite_page_size: schema.number(),
+  max_total_buckets: schema.number(),
 });
 
 export class ConfigurationService {

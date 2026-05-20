@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createHash } from 'node:crypto';
 import type { Subscription } from 'rxjs';
 import type {
   ConcreteTaskInstance,
@@ -14,7 +13,13 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { AnalyticsServiceStart, ElasticsearchClient, LogMeta, Logger } from '@kbn/core/server';
-import { TASK_TYPE, TASK_ID, DEFAULT_OTEL_TELEMETRY_CONFIGURATION } from '../constants';
+import {
+  TASK_TYPE,
+  TASK_ID,
+  TASK_INTERVAL,
+  TASK_TIMEOUT,
+  DEFAULT_OTEL_TELEMETRY_CONFIGURATION,
+} from '../constants';
 import type { SignalType, OtelTelemetryConfiguration } from '../constants';
 import type { OtelPerServiceResult } from './types';
 import type { CompositeBucket } from './receiver';
@@ -58,8 +63,6 @@ type TermsAggKey = (typeof TERMS_AGG_KEYS)[number];
 const extractKeys = (agg: { buckets: Array<{ key: string }> }): string[] =>
   agg.buckets.map((b) => b.key);
 
-const hashServiceName = (serviceName: string): string =>
-  createHash('sha256').update(serviceName).digest('hex').slice(0, 16);
 
 export class OtelTelemetryService {
   private readonly logger: Logger;
@@ -118,28 +121,33 @@ export class OtelTelemetryService {
         title: 'OTel Telemetry Collection - Per Service Task',
         description:
           'Periodically collects per-service OTel resource attributes and ships them via EBT.',
-        timeout: service.configuration.task_timeout,
+        timeout: TASK_TIMEOUT,
         maxAttempts: 1,
 
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
-          async run() {
-            const { state } = taskInstance;
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+          const abortController = new AbortController();
 
-            if (service.telemetryConfigProvider.getIsOptedIn()) {
-              await service.publishOtelPerServiceStats();
-            } else {
-              service.logger.debug('Telemetry opted out, skipping OTel per-service task run');
-            }
+          return {
+            async run() {
+              const { state } = taskInstance;
 
-            return { state };
-          },
+              if (service.telemetryConfigProvider.getIsOptedIn()) {
+                await service.publishOtelPerServiceStats(abortController.signal);
+              } else {
+                service.logger.debug('Telemetry opted out, skipping OTel per-service task run');
+              }
 
-          async cancel() {
-            service.logger.warn('OTel per-service task timed out', {
-              task: TASK_ID,
-            } as LogMeta);
-          },
-        }),
+              return { state };
+            },
+
+            async cancel() {
+              service.logger.warn('OTel per-service task timed out, aborting', {
+                task: TASK_ID,
+              } as LogMeta);
+              abortController.abort();
+            },
+          };
+        },
       },
     });
 
@@ -152,7 +160,7 @@ export class OtelTelemetryService {
     const taskInstance = await taskManager.ensureScheduled({
       id: TASK_ID,
       taskType: TASK_TYPE,
-      schedule: { interval: this.configuration.task_interval },
+      schedule: { interval: TASK_INTERVAL },
       params: {},
       state: {},
       scope: ['otelTelemetryCollection'],
@@ -166,7 +174,7 @@ export class OtelTelemetryService {
     return taskInstance;
   }
 
-  private async publishOtelPerServiceStats() {
+  private async publishOtelPerServiceStats(abortSignal?: AbortSignal) {
     const config = this.configuration;
 
     if (!config.enabled) {
@@ -176,21 +184,14 @@ export class OtelTelemetryService {
 
     this.logger.info('Starting OTel per-service stats collection');
 
-    const signalBuckets = await this.receiver.fetchAllSignals(config);
+    const signalBuckets = await this.receiver.fetchAllSignals(config, abortSignal);
 
-    const signals = ['traces', 'metrics', 'logs'] as const;
-    for (let i = 0; i < signals.length; i++) {
-      const signal = signals[i];
+    for (const signal of ['traces', 'metrics', 'logs'] as const) {
       const buckets = signalBuckets[signal];
 
       if (buckets.length === 0) {
         this.logger.debug(`No buckets for ${signal}, skipping`);
         continue;
-      }
-
-      // Ensure distinct timestamps between signals to avoid EBT document ID collisions
-      if (i > 0) {
-        await new Promise((resolve) => setTimeout(resolve, 1));
       }
 
       const results = this.convertBuckets(signal, buckets);
@@ -207,7 +208,7 @@ export class OtelTelemetryService {
     return buckets.map((bucket) => {
       const result: OtelPerServiceResult = {
         signal,
-        service_id: hashServiceName(bucket.key.service_name),
+        service_id: bucket.key.service_name,
         environment: bucket.key.environment ?? '',
         doc_count: bucket.doc_count,
         sdk_names: [],

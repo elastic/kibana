@@ -45,24 +45,26 @@ export interface CdnConfig {
 
 export const TERMS_AGG_SIZE = 5;
 export const SAMPLER_SHARD_SIZE = 200;
-export const SCOPE_NAMES_AGG_SIZE = 50;
+export const SAMPLER_MAX_DOCS_PER_VALUE = 3;
+export const SCOPE_NAMES_AGG_SIZE = 100;
+
+export const TASK_INTERVAL = '24h';
+export const TASK_TIMEOUT = '10m';
 
 export interface OtelTelemetryConfiguration {
   enabled: boolean;
-  task_interval: string;
-  task_timeout: string;
   query_window: string;
   query_timeout: string;
   max_elements_per_event: number;
   composite_page_size: number;
+  max_total_buckets: number;
 }
 
 export const DEFAULT_OTEL_TELEMETRY_CONFIGURATION: OtelTelemetryConfiguration = {
   enabled: true,
-  task_interval: '24h',
-  task_timeout: '10m',
   query_window: '1h',
   query_timeout: '5m',
   max_elements_per_event: 5000,
   composite_page_size: 1000,
+  max_total_buckets: 50_000,
 };

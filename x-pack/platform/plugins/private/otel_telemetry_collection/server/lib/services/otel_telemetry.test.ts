@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createHash } from 'node:crypto';
 import { of } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type {
@@ -19,7 +18,13 @@ import { OtelTelemetryReceiver } from './receiver';
 import { OtelTelemetrySender } from './sender';
 import type { CompositeBucket } from './receiver';
 import { createMockTelemetryConfigProvider } from '../__mocks__';
-import { TASK_TYPE, TASK_ID, DEFAULT_OTEL_TELEMETRY_CONFIGURATION } from '../constants';
+import {
+  TASK_TYPE,
+  TASK_ID,
+  TASK_INTERVAL,
+  TASK_TIMEOUT,
+  DEFAULT_OTEL_TELEMETRY_CONFIGURATION,
+} from '../constants';
 import type { ConfigurationService } from './configuration';
 
 jest.mock('./receiver');
@@ -112,7 +117,7 @@ describe('OtelTelemetryService', () => {
     taskManagerStart = {
       ensureScheduled: jest.fn().mockResolvedValue({
         id: TASK_ID,
-        schedule: { interval: DEFAULT_OTEL_TELEMETRY_CONFIGURATION.task_interval },
+        schedule: { interval: TASK_INTERVAL },
       }),
     } as unknown as jest.Mocked<TaskManagerStartContract>;
 
@@ -144,7 +149,7 @@ describe('OtelTelemetryService', () => {
       expect(taskManager.registerTaskDefinitions).toHaveBeenCalledWith({
         [TASK_TYPE]: expect.objectContaining({
           title: 'OTel Telemetry Collection - Per Service Task',
-          timeout: DEFAULT_OTEL_TELEMETRY_CONFIGURATION.task_timeout,
+          timeout: TASK_TIMEOUT,
           maxAttempts: 1,
           createTaskRunner: expect.any(Function),
         }),
@@ -170,7 +175,7 @@ describe('OtelTelemetryService', () => {
         expect.objectContaining({
           id: TASK_ID,
           taskType: TASK_TYPE,
-          schedule: { interval: DEFAULT_OTEL_TELEMETRY_CONFIGURATION.task_interval },
+          schedule: { interval: TASK_INTERVAL },
           scope: ['otelTelemetryCollection'],
         })
       );
@@ -216,7 +221,10 @@ describe('OtelTelemetryService', () => {
 
       const result = await taskRunner.run();
 
-      expect(receiver.fetchAllSignals).toHaveBeenCalledWith(DEFAULT_OTEL_TELEMETRY_CONFIGURATION);
+      expect(receiver.fetchAllSignals).toHaveBeenCalledWith(
+        DEFAULT_OTEL_TELEMETRY_CONFIGURATION,
+        expect.any(AbortSignal)
+      );
       expect(result).toEqual({ state: {} });
     });
 
@@ -242,12 +250,29 @@ describe('OtelTelemetryService', () => {
       expect(sender.report).not.toHaveBeenCalled();
     });
 
-    it('should handle task cancellation', async () => {
+    it('should handle task cancellation and log warning', async () => {
       await taskRunner.cancel?.();
 
-      expect(logger.warn).toHaveBeenCalledWith('OTel per-service task timed out', {
-        task: TASK_ID,
+      expect(logger.warn).toHaveBeenCalledWith(
+        'OTel per-service task timed out, aborting',
+        expect.objectContaining({ task: TASK_ID })
+      );
+    });
+
+    it('should abort in-flight ES requests when cancelled', async () => {
+      service.start(taskManagerStart, analytics, esClient, telemetryConfigProvider);
+
+      receiver.fetchAllSignals.mockImplementation(async (_config, abortSignal) => {
+        expect(abortSignal).toBeDefined();
+        expect(abortSignal!.aborted).toBe(false);
+
+        await taskRunner.cancel?.();
+
+        expect(abortSignal!.aborted).toBe(true);
+        return { traces: [], metrics: [], logs: [] };
       });
+
+      await taskRunner.run();
     });
   });
 
@@ -369,7 +394,7 @@ describe('OtelTelemetryService', () => {
       expect(sender.report.mock.calls[0][0][0].environment).toBe('');
     });
 
-    it('should hash service names with SHA-256 and slice to 16 characters', async () => {
+    it('should use raw service name as service_id', async () => {
       receiver.fetchAllSignals.mockResolvedValue({
         traces: [makeBucket('my-service', null, { doc_count: 1 })],
         metrics: [],
@@ -379,8 +404,7 @@ describe('OtelTelemetryService', () => {
       // eslint-disable-next-line dot-notation
       await service['publishOtelPerServiceStats']();
 
-      const expected = createHash('sha256').update('my-service').digest('hex').slice(0, 16);
-      expect(sender.report.mock.calls[0][0][0].service_id).toBe(expected);
+      expect(sender.report.mock.calls[0][0][0].service_id).toBe('my-service');
     });
 
     it('should not report when all signals are empty', async () => {

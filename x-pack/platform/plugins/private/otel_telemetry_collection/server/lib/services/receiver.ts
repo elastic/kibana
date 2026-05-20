@@ -11,6 +11,7 @@ import {
   TERMS_AGG_SIZE,
   SCOPE_NAMES_AGG_SIZE,
   SAMPLER_SHARD_SIZE,
+  SAMPLER_MAX_DOCS_PER_VALUE,
 } from '../constants';
 import type { SignalType, OtelTelemetryConfiguration } from '../constants';
 
@@ -83,7 +84,8 @@ export class OtelTelemetryReceiver {
   }
 
   public async fetchAllSignals(
-    config: OtelTelemetryConfiguration
+    config: OtelTelemetryConfiguration,
+    abortSignal?: AbortSignal
   ): Promise<Record<SignalType, CompositeBucket[]>> {
     const result: Record<SignalType, CompositeBucket[]> = {
       traces: [],
@@ -93,7 +95,7 @@ export class OtelTelemetryReceiver {
 
     for (const signal of Object.keys(SIGNAL_INDICES) as SignalType[]) {
       try {
-        result[signal] = await this.fetchSignal(signal, config);
+        result[signal] = await this.fetchSignal(signal, config, abortSignal);
         this.logger.debug('Signal fetch complete', {
           signal,
           bucketCount: result[signal].length,
@@ -111,7 +113,8 @@ export class OtelTelemetryReceiver {
 
   private async fetchSignal(
     signal: SignalType,
-    config: OtelTelemetryConfiguration
+    config: OtelTelemetryConfiguration,
+    abortSignal?: AbortSignal
   ): Promise<CompositeBucket[]> {
     const indexPattern = SIGNAL_INDICES[signal];
     let afterKey: Record<string, unknown> | undefined;
@@ -119,14 +122,26 @@ export class OtelTelemetryReceiver {
 
     do {
       const body = this.buildCompositeQuery(afterKey, config);
-      const response = (await this.esClient.search({
-        index: indexPattern,
-        ...body,
-      })) as CompositeResponse;
+      const response = (await this.esClient.search(
+        {
+          index: indexPattern,
+          ...body,
+        },
+        abortSignal ? { signal: abortSignal } : undefined
+      )) as CompositeResponse;
 
       const buckets = response.aggregations?.combos?.buckets ?? [];
       allBuckets.push(...buckets);
       afterKey = response.aggregations?.combos?.after_key;
+
+      if (allBuckets.length >= config.max_total_buckets) {
+        this.logger.warn(`Reached max_total_buckets cap (${config.max_total_buckets}) for ${signal}, truncating`, {
+          signal,
+          collectedBuckets: allBuckets.length,
+          maxTotalBuckets: config.max_total_buckets,
+        } as LogMeta);
+        break;
+      }
 
       if (buckets.length < config.composite_page_size) {
         break;
@@ -175,7 +190,11 @@ export class OtelTelemetryReceiver {
           composite,
           aggs: {
             sample: {
-              sampler: { shard_size: SAMPLER_SHARD_SIZE },
+              diversified_sampler: {
+                shard_size: SAMPLER_SHARD_SIZE,
+                field: 'scope.name',
+                max_docs_per_value: SAMPLER_MAX_DOCS_PER_VALUE,
+              },
               aggs: {
                 sdk_names: {
                   terms: { field: 'resource.attributes.telemetry.sdk.name', size: TERMS_AGG_SIZE },

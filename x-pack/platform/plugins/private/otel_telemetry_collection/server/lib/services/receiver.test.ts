@@ -150,14 +150,14 @@ describe('OtelTelemetryReceiver', () => {
       expect(comboAggs.has_container.filter).toBeDefined();
     });
 
-    it('should use hardcoded agg sizes (10 for terms, 50 for scope_names)', async () => {
+    it('should use hardcoded agg sizes (5 for terms, 100 for scope_names)', async () => {
       (esClient.search as jest.Mock).mockResolvedValue(makeCompositeResponse([]));
 
       await receiver.fetchAllSignals(defaultConfig);
 
       const sampleAggs = (esClient.search as jest.Mock).mock.calls[0][0].aggs.combos.aggs.sample
         .aggs;
-      expect(sampleAggs.scope_names.terms.size).toBe(50);
+      expect(sampleAggs.scope_names.terms.size).toBe(100);
       expect(sampleAggs.sdk_names.terms.size).toBe(5);
     });
   });
@@ -240,7 +240,7 @@ describe('OtelTelemetryReceiver', () => {
       });
     });
 
-    it('should collect all results without a hard cap', async () => {
+    it('should collect all pages when under max_total_buckets', async () => {
       const pageSize = defaultConfig.composite_page_size;
       const largePage = Array.from({ length: pageSize }, (_, i) => ({
         key: { service_name: `svc-${i}`, environment: null },
@@ -269,6 +269,37 @@ describe('OtelTelemetryReceiver', () => {
       const result = await receiver.fetchAllSignals(defaultConfig);
 
       expect(result.traces).toHaveLength(5 * pageSize + 1);
+    });
+
+    it('should truncate at max_total_buckets and log a warning', async () => {
+      const config = { ...defaultConfig, max_total_buckets: 2500 };
+      const pageSize = config.composite_page_size;
+      const largePage = Array.from({ length: pageSize }, (_, i) => ({
+        key: { service_name: `svc-${i}`, environment: null },
+      }));
+
+      (esClient.search as jest.Mock)
+        .mockResolvedValueOnce(
+          makeCompositeResponse(largePage, { service_name: 'after-1', environment: null })
+        )
+        .mockResolvedValueOnce(
+          makeCompositeResponse(largePage, { service_name: 'after-2', environment: null })
+        )
+        .mockResolvedValueOnce(
+          makeCompositeResponse(largePage, { service_name: 'after-3', environment: null })
+        )
+        .mockResolvedValueOnce(
+          makeCompositeResponse(largePage, { service_name: 'after-4', environment: null })
+        )
+        .mockResolvedValue(makeCompositeResponse([]));
+
+      const result = await receiver.fetchAllSignals(config);
+
+      expect(result.traces).toHaveLength(3 * pageSize);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('max_total_buckets'),
+        expect.any(Object)
+      );
     });
   });
 });

@@ -6,10 +6,10 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/server';
-import { OtelTelemetryCollectionPlugin } from './plugin';
 
 export { config } from './config';
 
-export async function plugin(context: PluginInitializerContext) {
+export const plugin = async (context: PluginInitializerContext) => {
+  const { OtelTelemetryCollectionPlugin } = await import('./plugin');
   return new OtelTelemetryCollectionPlugin(context);
-}
+};
