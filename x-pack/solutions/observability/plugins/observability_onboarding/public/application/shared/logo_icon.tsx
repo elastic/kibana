@@ -59,7 +59,7 @@ export function isSupportedLogo(logo: string): logo is SupportedLogo {
 
 // Logos that EUI ships natively. Anything not listed here falls through to a
 // bundled SVG asset served from the plugin's `public/assets/` folder.
-const EUI_LOGO_BY_BRAND: Partial<Record<SupportedLogo, string>> = {
+export const EUI_LOGO_BY_BRAND: Partial<Record<SupportedLogo, string>> = {
   aws: 'logoAWS',
   azure: 'logoAzure',
   gcp: 'logoGCP',

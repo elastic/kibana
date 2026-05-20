@@ -9,7 +9,12 @@ import React from 'react';
 import { EuiFieldSearch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export const IntegrationsSearch = () => {
+interface Props {
+  searchInput: string;
+  setSearchInput: (value: string) => void;
+}
+
+export const IntegrationsSearch = ({ searchInput, setSearchInput }: Props) => {
   const placeholder = i18n.translate(
     'xpack.observability_onboarding.integrationsGrid.search.placeholder',
     { defaultMessage: 'Search integrations' }
@@ -20,6 +25,8 @@ export const IntegrationsSearch = () => {
       data-test-subj="observabilityOnboardingIntegrationsSearchFieldSearch"
       placeholder={placeholder}
       aria-label={placeholder}
+      value={searchInput}
+      onChange={(event) => setSearchInput(event.target.value)}
       fullWidth
       compressed
     />
