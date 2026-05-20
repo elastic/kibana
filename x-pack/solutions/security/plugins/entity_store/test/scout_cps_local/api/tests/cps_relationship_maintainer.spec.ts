@@ -156,8 +156,12 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ apiClient, esClient, linkedProject }) => {
-      await linkedProject.esClient.indices
-        .delete({ index: LOG_INDEX }, { ignore: [404] })
+      await linkedProject.esClient
+        .deleteByQuery({
+          index: LOG_INDEX,
+          query: { match_all: {} },
+          refresh: true,
+        })
         .catch(() => {});
       await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
         headers: defaultHeaders,
