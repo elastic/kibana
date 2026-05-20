@@ -8,6 +8,7 @@
  */
 
 import type { UserEvent } from '@testing-library/user-event';
+import { screen } from '@testing-library/react';
 import type { Context } from '../../public/components/field_editor_context';
 import type { Props } from '../../public/components/field_editor_flyout_content';
 import type { TestDoc } from './helpers';
@@ -63,7 +64,6 @@ const getTypeValueFromLabel = (label: string) => label.toLowerCase().replaceAll(
 const getActions = (user: UserEvent) => {
   const {
     createFieldEditorFields,
-    existsByTestSubjectPath: exists,
     getTextByTestSubjectPath,
     queryAllByTestSubjectPath,
     queryByTestSubjectPath,
@@ -100,7 +100,7 @@ const getActions = (user: UserEvent) => {
   };
 
   const getRenderedFieldsPreview = () => {
-    if (!exists('fieldPreviewItem')) return [];
+    if (!screen.queryByTestId('fieldPreviewItem')) return [];
 
     const previewFields = queryAllByTestSubjectPath('fieldPreviewItem.listItem');
 
@@ -113,7 +113,7 @@ const getActions = (user: UserEvent) => {
   };
 
   const getRenderedIndexPatternFieldElements = () => {
-    if (!exists('indexPatternFieldList')) return null;
+    if (!screen.queryByTestId('indexPatternFieldList')) return null;
 
     return queryAllByTestSubjectPath('indexPatternFieldList.listItem');
   };
@@ -212,12 +212,7 @@ const getActions = (user: UserEvent) => {
   };
 };
 
-type FieldEditorFlyoutPreviewActions = ReturnType<typeof getActions>;
-
-export const setup = async (
-  props?: Partial<Props>,
-  deps?: Partial<Context>
-): Promise<{ actions: FieldEditorFlyoutPreviewActions }> => {
+export const setup = async (props?: Partial<Props>, deps?: Partial<Context>) => {
   const { user } = await setupFieldEditorFlyout(props, deps, defaultProps);
   const actions = getActions(user);
 

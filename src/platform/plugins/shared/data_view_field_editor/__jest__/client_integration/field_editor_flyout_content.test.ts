@@ -17,8 +17,6 @@ import { setup } from './field_editor_flyout_content.helpers';
 describe('<FieldEditorFlyoutContent />', () => {
   const { httpRequestsMockHelpers } = setupEnvironment();
 
-  const getInputValue = (input: HTMLElement) => (input as HTMLInputElement).value;
-
   beforeAll(() => {
     jest.useFakeTimers({ legacyFakeTimers: true });
   });
@@ -52,9 +50,9 @@ describe('<FieldEditorFlyoutContent />', () => {
     } = await setup({ fieldToEdit: field });
 
     expect(screen.getByText(`Edit field 'foo'`)).toBeVisible();
-    expect(getInputValue(getByTestSubjectPath('nameField.input'))).toBe(field.name);
-    expect(getInputValue(getByTestSubjectPath('typeField'))).toBe(field.type);
-    expect(getInputValue(getByTestSubjectPath('scriptField'))).toBe(field.script.source);
+    expect(getByTestSubjectPath('nameField.input')).toHaveValue(field.name);
+    expect(getByTestSubjectPath('typeField')).toHaveValue(field.type);
+    expect(getByTestSubjectPath('scriptField')).toHaveValue(field.script.source);
   });
 
   it('should allow a new field to be created with initial configuration', async () => {
@@ -72,12 +70,10 @@ describe('<FieldEditorFlyoutContent />', () => {
     } = await setup({ fieldToCreate });
 
     expect(screen.getByText(`Create field`)).toBeVisible();
-    expect(getInputValue(getByTestSubjectPath('nameField.input'))).toBe(fieldToCreate.name);
-    expect(getInputValue(getByTestSubjectPath('typeField'))).toBe(fieldToCreate.type);
-    expect(getInputValue(getByTestSubjectPath('scriptField'))).toBe(fieldToCreate.script.source);
-    expect(getInputValue(getByTestSubjectPath('editorFieldCount'))).toBe(
-      fieldToCreate.popularity.toString()
-    );
+    expect(getByTestSubjectPath('nameField.input')).toHaveValue(fieldToCreate.name);
+    expect(getByTestSubjectPath('typeField')).toHaveValue(fieldToCreate.type);
+    expect(getByTestSubjectPath('scriptField')).toHaveValue(fieldToCreate.script.source);
+    expect(getByTestSubjectPath('editorFieldCount')).toHaveValue(fieldToCreate.popularity);
   });
 
   it('should accept an "onSave" prop', async () => {

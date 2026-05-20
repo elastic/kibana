@@ -53,13 +53,11 @@ const getActions = (user: UserEvent) => {
   };
 };
 
-type FieldEditorActions = ReturnType<typeof getActions>;
-
 export const setup = async (
   props?: Partial<Props>,
   deps?: Partial<Context>,
   getByNameOverride?: () => any
-): Promise<{ actions: FieldEditorActions }> => {
+) => {
   const user = userEvent.setup({
     advanceTimers: jest.advanceTimersByTime,
   });
@@ -67,7 +65,7 @@ export const setup = async (
   const Component = WithFieldEditorDependencies(FieldEditor, deps, getByNameOverride);
 
   await act(async () => {
-    renderWithI18n(React.createElement(Component, { ...defaultProps, ...props }));
+    renderWithI18n(<Component {...defaultProps} {...props} />);
   });
 
   const actions = getActions(user);

@@ -68,15 +68,7 @@ describe('BytesFormatEditor', () => {
   it('should render normally', () => {
     renderBytesFormatEditor();
 
-    expect(
-      screen.getByText((_, element) =>
-        Boolean(
-          element?.tagName === 'LABEL' &&
-            element?.textContent?.includes('Numeral.js format pattern (Default: 0,0.[000]b)')
-        )
-      )
-    ).toBeVisible();
-
+    expect(screen.getByLabelText(/Numeral\.js format pattern/)).toBeVisible();
     expect(screen.getByText('0,0.[000]b')).toBeVisible();
     expect(screen.getByText('Documentation')).toBeVisible();
     expect(screen.getByText('Documentation').closest('a')).toHaveAttribute(

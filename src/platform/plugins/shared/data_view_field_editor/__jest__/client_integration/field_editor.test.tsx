@@ -12,6 +12,7 @@ import type { FieldEditorFormState } from '../../public/components/field_editor/
 import { act, screen } from '@testing-library/react';
 // This import needs to come first as it contains the jest.mocks
 import { setupEnvironment, mockDocuments } from './helpers';
+import { flushDocumentsAndPreviewTimers } from './helpers/rtl_helpers';
 import { setSearchResponse } from './field_editor_flyout_preview.helpers';
 import { setup } from './field_editor.helpers';
 
@@ -39,8 +40,7 @@ describe('<FieldEditor />', () => {
       // If we await here (await state.submit()) we don't have the chance to call jest.advanceTimersByTime()
       // below and the test times out.
       const promise = state.submit();
-      jest.advanceTimersByTime(5000);
-      jest.advanceTimersByTime(1000);
+      await flushDocumentsAndPreviewTimers();
       formState = await promise;
     });
 
@@ -67,13 +67,13 @@ describe('<FieldEditor />', () => {
     httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['mockedScriptValue'] });
   });
 
-  it('initial state should have "set custom label", "set value" and "set format" turned off', async () => {
-    await setup();
-
-    ['Set custom label', 'Set custom description', 'Set value', 'Set format'].forEach((name) => {
+  it.each(['Set custom label', 'Set custom description', 'Set value', 'Set format'])(
+    'initial state should have "%s" turned off',
+    async (name) => {
+      await setup();
       expect(screen.getByRole('switch', { name })).not.toBeChecked();
-    });
-  });
+    }
+  );
 
   it('should accept a defaultValue and onChange prop to forward the form state', async () => {
     const field = {
@@ -156,7 +156,7 @@ describe('<FieldEditor />', () => {
       await submitFormAndGetData(lastState);
 
       expect(getLastStateUpdate().isValid).toBe(true);
-      expect(screen.queryAllByText('A field with this name already exists.')).toHaveLength(0);
+      expect(screen.queryByText('A field with this name already exists.')).not.toBeInTheDocument();
     });
   });
 });

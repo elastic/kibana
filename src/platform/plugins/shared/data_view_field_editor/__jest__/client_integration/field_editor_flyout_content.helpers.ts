@@ -46,12 +46,7 @@ const getActions = (user: UserEvent) => {
   };
 };
 
-type FieldEditorFlyoutContentActions = ReturnType<typeof getActions>;
-
-export const setup = async (
-  props?: Partial<Props>,
-  deps?: Partial<Context>
-): Promise<{ actions: FieldEditorFlyoutContentActions }> => {
+export const setup = async (props?: Partial<Props>, deps?: Partial<Context>) => {
   const { user } = await setupFieldEditorFlyout(props, deps, defaultProps);
   const actions = getActions(user);
 

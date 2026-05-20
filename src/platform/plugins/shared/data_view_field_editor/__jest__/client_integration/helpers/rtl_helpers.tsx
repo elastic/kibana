@@ -22,14 +22,25 @@ interface FieldEditorFieldsOptions {
   getTypeValue?: (value: string) => string;
 }
 
-interface RtlUserSetup {
-  user: UserEvent;
-}
-
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const getTestSubjectMatcher = (part: string) => new RegExp(`(^|\\s)${escapeRegExp(part)}(\\s|$)`);
 
+// Advance fake timers so debounced preview/search requests resolve in tests.
+export const flushPreviewAndSearchTimers = async () => {
+  await act(async () => {
+    jest.advanceTimersByTime(5000);
+  });
+};
+
+// Advance fake timers so form validation state settles after a field change.
+export const flushFormValidation = async () => {
+  await act(async () => {
+    jest.advanceTimersByTime(0);
+  });
+};
+
+// Advance preview/search timers plus the extra delay used by document fetch logic.
 export const flushDocumentsAndPreviewTimers = async () => {
   await flushPreviewAndSearchTimers();
 
@@ -38,18 +49,7 @@ export const flushDocumentsAndPreviewTimers = async () => {
   });
 };
 
-export const flushFormValidation = async () => {
-  await act(async () => {
-    jest.advanceTimersByTime(0);
-  });
-};
-
-export const flushPreviewAndSearchTimers = async () => {
-  await act(async () => {
-    jest.advanceTimersByTime(5000);
-  });
-};
-
+// Resolve nested data-test-subj selectors written as dot paths, e.g. "fieldPreviewItem.listItem".
 const queryAllByTestSubjectPathFromQuery = (
   queryAllByTestId: (matcher: RegExp) => HTMLElement[],
   selector: string
@@ -71,11 +71,12 @@ const queryAllByTestSubjectPathFromQuery = (
 export const queryAllByTestSubjectPath = (root: HTMLElement, selector: string): HTMLElement[] =>
   queryAllByTestSubjectPathFromQuery((matcher) => within(root).queryAllByTestId(matcher), selector);
 
+// Render the field editor flyout with i18n and return a userEvent instance wired to fake timers.
 export const setupFieldEditorFlyout = async (
   props: Partial<Props> | undefined,
   deps: Partial<Context> | undefined,
   defaultProps: Props
-): Promise<RtlUserSetup> => {
+) => {
   const user = userEvent.setup({
     advanceTimers: jest.advanceTimersByTime,
   });
@@ -83,7 +84,7 @@ export const setupFieldEditorFlyout = async (
   const Component = WithFieldEditorDependencies(FieldEditorFlyoutContent, deps);
 
   await act(async () => {
-    renderWithI18n(React.createElement(Component, { ...defaultProps, ...props }));
+    renderWithI18n(<Component {...defaultProps} {...props} />);
   });
 
   return {
@@ -91,10 +92,24 @@ export const setupFieldEditorFlyout = async (
   };
 };
 
+/**
+ * Factory for shared RTL helpers used by the field editor client integration tests.
+ *
+ * Query helpers support Kibana-style dot paths (e.g. "nameField.input") instead of a single
+ * data-test-subj. Action helpers wrap common user interactions and flush debounced validation.
+ */
 export const createRtlHelpers = (user: UserEvent) => {
-  const existsByTestSubjectPath = (selector: string) =>
-    queryAllByTestSubjectPathScoped(selector).length > 0;
+  // Find all elements matching a dot-path selector, optionally scoped to a root element.
+  const queryAllByTestSubjectPathScoped = (selector: string, root?: HTMLElement) =>
+    root
+      ? queryAllByTestSubjectPath(root, selector)
+      : queryAllByTestSubjectPathFromQuery((matcher) => screen.queryAllByTestId(matcher), selector);
 
+  // Return the first match for a dot-path selector, or undefined if none exist.
+  const queryByTestSubjectPath = (selector: string, root?: HTMLElement): HTMLElement | undefined =>
+    queryAllByTestSubjectPathScoped(selector, root)[0];
+
+  // Like queryByTestSubjectPath, but throws when no element is found.
   const getByTestSubjectPath = (selector: string, root?: HTMLElement): HTMLElement => {
     const element = queryByTestSubjectPath(selector, root);
 
@@ -103,19 +118,13 @@ export const createRtlHelpers = (user: UserEvent) => {
     return element;
   };
 
+  // Read and concatenate textContent from all elements matching a dot-path selector.
   const getTextByTestSubjectPath = (selector: string, root?: HTMLElement) =>
     queryAllByTestSubjectPathScoped(selector, root)
       .map((element) => element.textContent ?? '')
       .join('');
 
-  const queryByTestSubjectPath = (selector: string, root?: HTMLElement): HTMLElement | undefined =>
-    queryAllByTestSubjectPathScoped(selector, root)[0];
-
-  const queryAllByTestSubjectPathScoped = (selector: string, root?: HTMLElement) =>
-    root
-      ? queryAllByTestSubjectPath(root, selector)
-      : queryAllByTestSubjectPathFromQuery((matcher) => screen.queryAllByTestId(matcher), selector);
-
+  // Simulate typing into an input identified by a dot-path test subject.
   const setInputValue = async (selector: string, value: string) => {
     const input = getByTestSubjectPath(selector) as HTMLInputElement;
 
@@ -127,6 +136,7 @@ export const createRtlHelpers = (user: UserEvent) => {
     }
   };
 
+  // Toggle optional form rows such as "value" or "popularity", then flush validation.
   const toggleFormRow = async (row: FormRow, value: 'on' | 'off' = 'on') => {
     const testSubj = `${row}Row.toggle`;
     const toggle = getByTestSubjectPath(testSubj);
@@ -139,6 +149,7 @@ export const createRtlHelpers = (user: UserEvent) => {
     await flushFormValidation();
   };
 
+  // Named helpers for the main field editor inputs used across the integration tests.
   const createFieldEditorFields = ({
     getTypeValue = (value: string) => value,
   }: FieldEditorFieldsOptions = {}) => {
@@ -176,7 +187,6 @@ export const createRtlHelpers = (user: UserEvent) => {
 
   return {
     createFieldEditorFields,
-    existsByTestSubjectPath,
     getByTestSubjectPath,
     getTextByTestSubjectPath,
     queryAllByTestSubjectPath: queryAllByTestSubjectPathScoped,
