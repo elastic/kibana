@@ -213,7 +213,8 @@ export const updateTabs: InternalStateThunkActionCreator<
           return tab;
         }
 
-        tab.skipInitialFetch = true;
+        const isAutoRefreshActive = !services.timefilter.getRefreshInterval().pause;
+        tab.skipInitialFetch = !isAutoRefreshActive;
 
         tab.appState = {
           ...(isOfAggregateQueryType(currentQuery)
