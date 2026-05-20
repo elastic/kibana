@@ -21,6 +21,7 @@ import {
 import type { HttpSetup } from '@kbn/core/public';
 import type { DataSetWithName, DataSourceWithSecrets, DataSource } from '../common';
 import { CreateDatasetFlyout } from './create_dataset_flyout';
+import { dataSetFromListItem } from './create_dataset_flyout/dataset_flyout_initial_values';
 import { HttpDataSetsClient } from './http_data_sets_client';
 import { HttpDataSourcesClient } from './http_data_sources_client';
 import { CreateDataSourceFlyout } from './create_data_source_flyout';
@@ -35,6 +36,11 @@ type DataSourceFlyoutState =
   | { kind: 'closed' }
   | { kind: 'create' }
   | { kind: 'edit'; dataSource: DataSourceWithSecrets };
+
+type DataSetFlyoutState =
+  | { kind: 'closed' }
+  | { kind: 'create' }
+  | { kind: 'edit'; dataSet: DataSetWithName };
 
 export interface DataSourcesPageProps {
   pageTitle: string;
@@ -54,7 +60,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
   const [dataSourceFlyout, setDataSourceFlyout] = useState<DataSourceFlyoutState>({
     kind: 'closed',
   });
-  const [isCreateDatasetFlyoutOpen, setCreateDatasetFlyoutOpen] = useState(false);
+  const [dataSetFlyout, setDataSetFlyout] = useState<DataSetFlyoutState>({ kind: 'closed' });
 
   useEffect(() => {
     let cancelled = false;
@@ -117,12 +123,12 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
     });
   }, []);
 
-  const handleCreateDatasetSave = useCallback(
+  const handleDataSetSave = useCallback(
     async (dataSet: DataSetWithName): Promise<string | null> => {
       try {
         await dataSetsClient.add(dataSet);
         setDataSetsRaw(await dataSetsClient.get());
-        setCreateDatasetFlyoutOpen(false);
+        setDataSetFlyout({ kind: 'closed' });
         return null;
       } catch (e) {
         return getFlyoutSaveErrorMessage(e);
@@ -130,6 +136,13 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
     },
     [dataSetsClient]
   );
+
+  const handleEditDataSet = useCallback((item: DataSetListRow) => {
+    setDataSetFlyout({
+      kind: 'edit',
+      dataSet: dataSetFromListItem(item),
+    });
+  }, []);
 
   const columns = useMemo<Array<EuiBasicTableColumn<DataSource>>>(
     () => [
@@ -240,8 +253,30 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
         truncateText: true,
         'data-test-subj': 'dataSetsSetsColDescription',
       },
+      {
+        name: i18n.translate('dataSets.setsTable.columnActions', {
+          defaultMessage: 'Actions',
+        }),
+        width: '8%',
+        actions: [
+          {
+            name: i18n.translate('dataSets.setsTable.editAction', {
+              defaultMessage: 'Edit',
+            }),
+            description: i18n.translate('dataSets.setsTable.editActionDescription', {
+              defaultMessage: 'Edit data set',
+            }),
+            icon: 'pencil',
+            type: 'icon',
+            onClick: (item) => {
+              handleEditDataSet(item);
+            },
+            'data-test-subj': 'dataSetsSetsEditButton',
+          },
+        ],
+      },
     ],
-    []
+    [handleEditDataSet]
   );
 
   const tabs = useMemo<EuiTabbedContentTab[]>(
@@ -300,7 +335,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
                     color="primary"
                     data-test-subj="dataSetsSetsCreateButton"
                     iconType="plusInCircle"
-                    onClick={() => setCreateDatasetFlyoutOpen(true)}
+                    onClick={() => setDataSetFlyout({ kind: 'create' })}
                   >
                     {i18n.translate('dataSets.setsAddButtonLabel', {
                       defaultMessage: 'Add',
@@ -453,11 +488,13 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
           onSave={handleDataSourceSave}
         />
       ) : null}
-      {isCreateDatasetFlyoutOpen ? (
+      {dataSetFlyout.kind !== 'closed' ? (
         <CreateDatasetFlyout
+          key={dataSetFlyout.kind === 'edit' ? dataSetFlyout.dataSet.name : 'create'}
+          initialDataSet={dataSetFlyout.kind === 'edit' ? dataSetFlyout.dataSet : undefined}
           dataSources={items}
-          onClose={() => setCreateDatasetFlyoutOpen(false)}
-          onSave={handleCreateDatasetSave}
+          onClose={() => setDataSetFlyout({ kind: 'closed' })}
+          onSave={handleDataSetSave}
         />
       ) : null}
     </>

@@ -6,7 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -29,18 +29,23 @@ import type { DataSetWithName, DataSource } from '../../common';
 import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
 import {
   buildDatasetSettingsFromFormValues,
-  emptyCreateDatasetSettingsFormValues,
   type CreateDatasetFormValues,
 } from './create_dataset_flyout_form_state';
 import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
 import { CreateDatasetFlyoutSettings } from './create_dataset_flyout_settings';
+import {
+  dataSetToFlyoutFormValues,
+  emptyDatasetFlyoutFormValues,
+} from './dataset_flyout_initial_values';
 
 export type { CreateDatasetFormValues } from './create_dataset_flyout_form_state';
 
 export interface CreateDatasetFlyoutProps {
+  /** When set, the flyout opens in edit mode for this data set. */
+  initialDataSet?: DataSetWithName;
   onClose: () => void;
   /**
-   * Persist a new data set. Resolve `null` on success, or an error message to show in the flyout.
+   * Persist a data set (create or update). Resolve `null` on success, or an error message to show in the flyout.
    */
   onSave: (data: DataSetWithName) => Promise<string | null>;
   /** Data sources used to populate the data source selector (typically `HttpDataSourcesClient.get()`). */
@@ -53,26 +58,36 @@ const trimRequired =
     value.trim() ? true : message;
 
 export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = ({
+  initialDataSet,
   onClose,
   onSave,
   dataSources,
 }) => {
+  const isEditMode = initialDataSet !== undefined;
   const [saveError, setSaveError] = useState<string | undefined>();
   const [isSaving, setIsSaving] = useState(false);
+
+  const formDefaultValues = useMemo(
+    (): CreateDatasetFormValues =>
+      initialDataSet ? dataSetToFlyoutFormValues(initialDataSet) : emptyDatasetFlyoutFormValues(),
+    [initialDataSet]
+  );
 
   const {
     handleSubmit,
     control,
+    reset,
     formState: { errors },
   } = useForm<CreateDatasetFormValues>({
-    defaultValues: {
-      name: '',
-      description: '',
-      data_source: '',
-      resource: '',
-      settings: emptyCreateDatasetSettingsFormValues(),
-    },
+    defaultValues: formDefaultValues,
   });
+
+  useEffect(() => {
+    if (!initialDataSet) {
+      return;
+    }
+    reset(dataSetToFlyoutFormValues(initialDataSet));
+  }, [initialDataSet, reset]);
 
   const { field: nameField } = useController({
     name: 'name',
@@ -139,17 +154,21 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
     }
   };
 
+  const flyoutTitle = isEditMode
+    ? createDatasetFlyoutStrings.editTitle()
+    : createDatasetFlyoutStrings.createTitle();
+
   return (
     <EuiFlyout
       ownFocus
       onClose={onClose}
       aria-labelledby="createDatasetFlyoutTitle"
       size="m"
-      data-test-subj="createDatasetFlyout"
+      data-test-subj={isEditMode ? 'editDatasetFlyout' : 'createDatasetFlyout'}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id="createDatasetFlyoutTitle">{createDatasetFlyoutStrings.title()}</h2>
+          <h2 id="createDatasetFlyoutTitle">{flyoutTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
@@ -170,13 +189,14 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
           >
             <EuiFieldText
               data-test-subj="createDatasetFlyoutName"
-              autoFocus
+              autoFocus={!isEditMode}
               fullWidth
               isInvalid={Boolean(errors.name)}
               value={nameField.value}
               onChange={(e) => nameField.onChange(e.target.value)}
               name={nameField.name}
               inputRef={nameField.ref}
+              readOnly={isEditMode}
             />
           </EuiFormRow>
           <EuiFormRow label={createDatasetFlyoutStrings.descriptionLabel()} fullWidth>
