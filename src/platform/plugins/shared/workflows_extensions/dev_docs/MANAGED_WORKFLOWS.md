@@ -281,8 +281,8 @@ Key distinction: **static** workflows are declarative — the set installed at s
 All managed workflow definitions live in `@kbn/workflows/managed`, organized as **one file per plugin** under the `definitions/` directory. Adding a new definition is a three-step change in that package:
 
 1. **Create or update the plugin's definition file** in `managed/definitions/<your_plugin>.ts`. Declare the id as a `const` and the definition, and export both — the id is the value other code uses to call `install` / `uninstall` / `execute`, and tests reference it.
-2. **Register the definition** by adding it to the `managedWorkflowDefinitions` array in `managed/index.ts`. The platform discovers definitions through this registry (e.g., for orphan cleanup and auto-update reconciliation), so a definition that isn't in this list does not exist as far as the platform is concerned.
-3. **Re-export the id** from `managed/index.ts` so consumers import it from the package entry point (`@kbn/workflows/managed`) rather than from internal paths.
+2. **Register the definition** by adding it to the `managedWorkflowDefinitions` array in `managed/definitions/index.ts`. The platform discovers definitions through this registry (e.g., for orphan cleanup and auto-update reconciliation), so a definition that isn't in this list does not exist as far as the platform is concerned.
+3. **Re-export the id** from `managed/definitions/index.ts`; the package entry point forwards those exports so consumers import ids from `@kbn/workflows/managed` rather than from internal paths.
 
 ```ts
 // packages/kbn-workflows/managed/definitions/my_plugin.ts
@@ -298,8 +298,8 @@ export const MY_WORKFLOW: ManagedWorkflowDefinition = {
 ```
 
 ```ts
-// packages/kbn-workflows/managed/index.ts
-import { MY_WORKFLOW, MY_WORKFLOW_ID } from './definitions/my_plugin';
+// packages/kbn-workflows/managed/definitions/index.ts
+import { MY_WORKFLOW, MY_WORKFLOW_ID } from './my_plugin';
 
 export const managedWorkflowDefinitions = [
   // ...existing definitions
@@ -480,7 +480,7 @@ Because there is a **single persisted document** for a global workflow, any edit
 ## 11) Rollout checklist
 
 1. Add the definition in `@kbn/workflows/managed` with the correct `pluginId`, a `system-` id, and `version: 1`; export the id as a const.
-2. Add the definition to `managedWorkflowDefinitions` in `managed/index.ts`, and re-export the id from the package barrel.
+2. Add the definition to `managedWorkflowDefinitions` in `managed/definitions/index.ts`, and re-export the id from that definitions barrel.
 3. Register the owner plugin id in `setup()`.
 4. Initialize the plugin-scoped client in `start()`.
 5. Install baseline (static) workflows at `start()`. Use on-demand installs (the same `install` API) for dynamic instances.

@@ -11,7 +11,7 @@ import { parse } from 'yaml';
 import { z } from '@kbn/zod/v4';
 import { managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById } from '.';
-import { EXAMPLE_MANAGED_WORKFLOW_ID } from './definitions/workflows_extensions_example';
+import { EXAMPLE_MANAGED_WORKFLOW_ID } from './definitions';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
 
