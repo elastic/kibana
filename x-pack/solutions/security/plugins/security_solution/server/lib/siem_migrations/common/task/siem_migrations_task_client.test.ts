@@ -33,6 +33,7 @@ const migrationId = 'migration1';
 const mockRunnerInstance = {
   setup: jest.fn().mockResolvedValue(undefined),
   run: jest.fn().mockResolvedValue(undefined),
+  executeTask: jest.fn().mockResolvedValue({}),
   abortController: { abort: jest.fn() },
 } as unknown as SiemMigrationTaskRunner;
 
@@ -504,6 +505,45 @@ describe('RuleMigrationsTaskClient', () => {
       expect(data.migrations.setIsStopped).toHaveBeenCalledWith({ id: migrationId });
     });
   });
+  describe('createInvoker', () => {
+    it('should call setup with the provided connectorId', async () => {
+      const abortController = new AbortController();
+      (SiemMigrationTaskRunner as jest.Mock).mockImplementation(() => mockRunnerInstance);
+      const client = new TestTaskClient(
+        migrationsRunning,
+        logger,
+        data,
+        request,
+        currentUser,
+        dependencies
+      );
+      await client.createInvoker('connector-1', { abortController });
+      expect(mockRunnerInstance.setup).toHaveBeenCalledWith('connector-1');
+    });
+
+    it('should return an execute function that calls executeTask with merged config', async () => {
+      const abortController = new AbortController();
+      (SiemMigrationTaskRunner as jest.Mock).mockImplementation(() => mockRunnerInstance);
+      const client = new TestTaskClient(
+        migrationsRunning,
+        logger,
+        data,
+        request,
+        currentUser,
+        dependencies
+      );
+      const invoker = await client.createInvoker('connector-1', { abortController });
+      const input = { foo: 'bar' };
+      const extraConfig = { configurable: { skipPrebuiltRulesMatching: true } };
+      await invoker.execute(input as never, extraConfig);
+      expect(mockRunnerInstance.executeTask).toHaveBeenCalledWith(input, {
+        signal: abortController.signal,
+        metadata: { migrationId: expect.any(String), evalsInvoke: true },
+        ...extraConfig,
+      });
+    });
+  });
+
   describe('task error', () => {
     it('should call saveAsFailed when there has been an error during the migration', async () => {
       data.items.getStats.mockResolvedValue({
