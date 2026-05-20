@@ -28,6 +28,7 @@ import type {
 } from '../../../../../../types';
 import type { PackagePolicyConfigValidationResults } from '../../../services';
 import { isAdvancedVar, validationHasErrors } from '../../../services';
+import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../../../../../../common/constants/epm';
 import { shouldShowVar, getVarsControlledByVarGroups } from '../../../services/var_group_helpers';
 import type { VarGroupSelection } from '../../../services/var_group_helpers';
 import { useAgentless } from '../../../single_page_layout/hooks/setup_technology';
@@ -104,6 +105,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
   inputValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
   isEditPage?: boolean;
+  isAgentless?: boolean;
   varGroups?: RegistryVarGroup[];
   varGroupSelections?: VarGroupSelection;
   onVarGroupSelectionChange?: (groupName: string, optionName: string) => void;
@@ -121,6 +123,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
     inputValidationResults,
     forceShowErrors,
     isEditPage = false,
+    isAgentless = false,
     varGroups,
     varGroupSelections = {},
     onVarGroupSelectionChange,

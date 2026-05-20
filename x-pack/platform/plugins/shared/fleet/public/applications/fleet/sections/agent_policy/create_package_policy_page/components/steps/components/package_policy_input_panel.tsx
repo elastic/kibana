@@ -167,6 +167,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
   isSingleInputAndStreams?: boolean;
   isEditPage?: boolean;
   isUpgrade?: boolean;
+  isAgentless?: boolean;
   varGroupSelections?: Record<string, string>;
 }> = memo(
   ({
@@ -180,6 +181,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     isSingleInputAndStreams = false,
     isEditPage = false,
     isUpgrade = false,
+    isAgentless = false,
     varGroupSelections = {},
   }) => {
     const theme = useEuiTheme();
@@ -554,6 +556,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               inputValidationResults={inputValidationResults}
               forceShowErrors={forceShowErrors}
               isEditPage={isEditPage}
+              isAgentless={isAgentless}
               varGroups={inputVarGroups}
               varGroupSelections={inputVarGroupSelections}
               onVarGroupSelectionChange={handleInputVarGroupSelectionChange}
@@ -626,6 +629,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                     }
                     forceShowErrors={forceShowErrors}
                     isEditPage={isEditPage}
+                    isAgentless={isAgentless}
                     varGroupSelections={varGroupSelections}
                   />
                   {index !== inputStreams.length - 1 ? (
