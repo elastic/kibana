@@ -189,7 +189,21 @@ test.describe(
       await test.step('Next does not advance without a name', async () => {
         await expect(page.testSubj.locator('ruleNameInput')).toBeVisible();
         await pageObjects.composeDiscover.clickNext();
-        // Still on the Details step — submit button is not visible (not last step yet)
+        await expect(pageObjects.composeDiscover.submitButton).toBeHidden();
+        await expect(page.testSubj.locator('ruleNameInput')).toBeVisible();
+      });
+
+      await test.step('clearing a name after typing it blocks advancement', async () => {
+        await pageObjects.composeDiscover.setRuleName('Temporary name');
+        await pageObjects.composeDiscover.ruleNameInput.clear();
+        await pageObjects.composeDiscover.clickNext();
+        await expect(pageObjects.composeDiscover.submitButton).toBeHidden();
+        await expect(page.testSubj.locator('ruleNameInput')).toBeVisible();
+      });
+
+      await test.step('"Untitled rule" placeholder text is rejected as a name', async () => {
+        await pageObjects.composeDiscover.setRuleName('Untitled rule');
+        await pageObjects.composeDiscover.clickNext();
         await expect(pageObjects.composeDiscover.submitButton).toBeHidden();
         await expect(page.testSubj.locator('ruleNameInput')).toBeVisible();
       });
