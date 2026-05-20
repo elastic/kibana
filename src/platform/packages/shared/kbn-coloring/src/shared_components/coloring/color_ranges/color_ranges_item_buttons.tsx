@@ -104,7 +104,7 @@ export function ColorRangeEditButton({
   }
 
   return (
-    <TooltipWrapper tooltipContent={tooltipContent} condition={true} position="top" delay="regular">
+    <TooltipWrapper tooltipContent={tooltipContent} condition={true} position="top">
       <EuiButtonIcon
         iconType="pencil"
         aria-label={tooltipContent}
@@ -136,7 +136,7 @@ export function ColorRangeAutoDetectButton({
   }, [continuity, dataBounds, dispatch, isLast, palettes]);
 
   return (
-    <TooltipWrapper tooltipContent={tooltipContent} condition={true} position="top" delay="regular">
+    <TooltipWrapper tooltipContent={tooltipContent} condition={true} position="top">
       <EuiButtonIcon
         iconType={iconFactory}
         aria-label={tooltipContent}

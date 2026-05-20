@@ -109,16 +109,20 @@ export class AgentBuilderApp {
     await this.typeMessage(userMessage);
     await this.sendMessage();
     await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+    // Wait for the FULL expected response (not just any text) so streaming is
+    // proven complete before we return; the streaming text component animates
+    // tokens (~17ms each) and the test can read the DOM before the last token
+    // has painted on resource-constrained CI runs.
     await this.page.waitForFunction(
-      () => {
+      (expected: string) => {
         const els = document.querySelectorAll('[data-test-subj="agentBuilderRoundResponse"]');
         if (els.length === 0) {
           return false;
         }
         const last = els[els.length - 1];
-        return (last.textContent?.trim().length ?? 0) > 0;
+        return (last.textContent ?? '').includes(expected);
       },
-      undefined,
+      expectedResponse,
       { timeout: 120_000 }
     );
     await this.page.waitForFunction(

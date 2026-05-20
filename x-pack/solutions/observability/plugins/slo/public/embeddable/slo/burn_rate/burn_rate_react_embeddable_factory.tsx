@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
@@ -24,6 +24,7 @@ import { SLO_BURN_RATE_EMBEDDABLE_ID } from '../../../../common/embeddables/burn
 import type { BurnRateApi, BurnRateCustomState, BurnRateEmbeddableState } from './types';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import { PluginContext } from '../../../context/plugin_context';
+import { ensureLicense } from '../ensure_license';
 
 const getTitle = () =>
   i18n.translate('xpack.slo.burnRateEmbeddable.title', {
@@ -39,8 +40,11 @@ export const getBurnRateEmbeddableFactory = ({
   pluginsStart: SLOPublicPluginsStart;
   sloClient: SLORepositoryClient;
 }) => {
-  const factory: EmbeddableFactory<BurnRateEmbeddableState, BurnRateApi> = {
+  const factory: EmbeddablePublicDefinition<BurnRateEmbeddableState, BurnRateApi> = {
     type: SLO_BURN_RATE_EMBEDDABLE_ID,
+    getPlacementHints: () => {
+      return { width: 14, height: 7 };
+    },
     buildEmbeddable: async ({
       initialState,
       finalizeApi,
@@ -48,6 +52,7 @@ export const getBurnRateEmbeddableFactory = ({
       parentApi,
       initializeDrilldownsManager,
     }) => {
+      await ensureLicense(pluginsStart.licensing);
       const deps = { ...coreStart, ...pluginsStart };
       const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getTitle());
