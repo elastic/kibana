@@ -8,7 +8,11 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { AssistantResponse, ConversationRoundStep } from '@kbn/agent-builder-common';
+import type {
+  AssistantResponse,
+  ConversationRound,
+  ConversationRoundStep,
+} from '@kbn/agent-builder-common';
 import type {
   VersionedAttachment,
   AttachmentVersionRef,
@@ -29,6 +33,7 @@ export interface RoundResponseProps {
   conversationAttachments?: VersionedAttachment[];
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
+  rawRound: ConversationRound;
 }
 
 export const RoundResponse: React.FC<RoundResponseProps> = ({
@@ -41,6 +46,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   conversationAttachments,
   attachmentRefs,
   conversationId,
+  rawRound,
 }) => {
   const hasMessage = Boolean(response.message);
 
@@ -100,7 +106,12 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
       )}
       {!isLoading && !hasError && (
         <EuiFlexItem grow={false}>
-          <RoundResponseActions content={response.message} isVisible isLastRound={isLastRound} />
+          <RoundResponseActions
+            content={response.message}
+            isVisible
+            isLastRound={isLastRound}
+            rawRound={rawRound}
+          />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

@@ -11,9 +11,11 @@ import copy from 'copy-to-clipboard';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import type { ConversationRound } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useToasts } from '../../../../hooks/use_toasts';
 import { useConversationStream } from '../../../../hooks/use_conversation_stream';
+import { RoundMetadataPopover } from './round_metadata_popover';
 
 const labels = {
   copy: i18n.translate('xpack.agentBuilder.roundResponseActions.copy', {
@@ -31,12 +33,14 @@ interface RoundResponseActionsProps {
   content: string;
   isVisible: boolean;
   isLastRound?: boolean;
+  rawRound?: ConversationRound;
 }
 
 export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   content,
   isVisible,
   isLastRound,
+  rawRound,
 }) => {
   const { addSuccessToast } = useToasts();
   const { regenerate, isRegenerating, isResponseLoading } = useConversationStream();
@@ -59,6 +63,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
     <EuiFlexGroup
       direction="row"
       gutterSize="xs"
+      alignItems="center"
       responsive={false}
       css={css`
         opacity: ${isVisible ? 1 : 0};
@@ -95,6 +100,11 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
               detail: 'conversation',
             })}
           />
+        </EuiFlexItem>
+      )}
+      {rawRound && (
+        <EuiFlexItem grow={false}>
+          <RoundMetadataPopover rawRound={rawRound} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
