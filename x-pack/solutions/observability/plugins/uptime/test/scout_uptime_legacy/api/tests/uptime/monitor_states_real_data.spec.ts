@@ -7,7 +7,7 @@
 
 import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import type { MonitorSummariesResult } from '@kbn/uptime-plugin/common/runtime_types';
+import type { MonitorSummariesResult } from '../../fixtures/helpers/runtime_types';
 import { apiTest, testData } from '../../fixtures';
 
 interface ExpectedMonitorStatesPage {

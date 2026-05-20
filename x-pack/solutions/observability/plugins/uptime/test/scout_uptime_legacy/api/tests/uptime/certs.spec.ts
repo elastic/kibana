@@ -11,8 +11,8 @@ import { expect } from '@kbn/scout-oblt/api';
 import {
   processCertsResult,
   getCertsRequestBody,
-} from '@kbn/uptime-plugin/common/requests/get_certs_request_body';
-import { CertType } from '@kbn/uptime-plugin/common/runtime_types';
+} from '../../fixtures/helpers/get_certs_request_body';
+import { CertType } from '../../fixtures/helpers/runtime_types';
 import { apiTest, testData } from '../../fixtures';
 import { makeChecksWithStatus } from '../../fixtures/helpers/make_checks';
 
