@@ -24,20 +24,8 @@ export const getSkillsInstructions = async ({
     .filter(isSkillFileEntry)
     .toSorted((a, b) => a.path.localeCompare(b.path));
 
-  const nameCounts = new Map<string, number>();
-  for (const entry of skillsFileEntries) {
-    const name = entry.metadata.skill_name;
-    nameCounts.set(name, (nameCounts.get(name) ?? 0) + 1);
-  }
-
   const skillToLine = (entry: SkillFileEntry) => {
-    const name = entry.metadata.skill_name;
-    const ambiguous = (nameCounts.get(name) ?? 0) > 1;
-    // basePath is the parent of the SKILL.md's containing folder
-    const segments = entry.path.split('/');
-    const basePath = segments.slice(0, -2).join('/');
-    const ref = ambiguous ? `${name} (base_path: ${basePath})` : name;
-    return `- ${ref}: ${entry.metadata.skill_description}`;
+    return `- ${entry.metadata.skill_name} (${entry.path}): ${entry.metadata.skill_description}`;
   };
 
   if (skillsFileEntries.length === 0) {
@@ -59,9 +47,7 @@ ${skillsFileEntries.map(skillToLine).join('\n')}
 
 ### How to load a skill
 
-Call the \`load_skill\` tool with the skill's name. If the listing above shows \`(base_path: ...)\` next to a name (because another skill has the same name), pass that as the \`base_path\` parameter.
-
-The response includes the skill's content, any referenced files it provides (which you can read from the filestore if needed), and the list of specialized tools that were dynamically registered. Use those tools in subsequent turns.
+Call the \`load_skill\` tool with the skill's name or path to load it. Any tools provided by the skill will become available automatically.
 
 **Load skills before calling non-skill tools.** Wait for skills to load, then use their dedicated tools. Multiple skills can be loaded in parallel.
 

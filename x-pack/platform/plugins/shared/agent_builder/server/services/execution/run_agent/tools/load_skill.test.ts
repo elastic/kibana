@@ -18,7 +18,7 @@ import { createLoadSkillTool } from './load_skill';
 
 const callHandler = (
   tool: ReturnType<typeof createLoadSkillTool>,
-  params: { name: string; base_path?: string },
+  params: { skill: string },
   ctx: ToolHandlerContextMock
 ) => tool.handler(params, ctx) as Promise<{ results: any[] }>;
 
@@ -58,13 +58,17 @@ describe('load_skill tool', () => {
     ctx.skills.list.mockResolvedValue([skill]);
 
     const tool = createLoadSkillTool();
-    const result = await callHandler(tool, { name: 'my-skill' }, ctx);
+    const result = await callHandler(tool, { skill: 'my-skill' }, ctx);
 
     expect(result.results).toHaveLength(1);
     expect(result.results[0].type).toBe(ToolResultType.other);
     expect(result.results[0]).toMatchObject({
       data: {
-        skill: { id: 'test-skill', name: 'my-skill', description: 'A test skill' },
+        skill: {
+          id: 'test-skill',
+          name: 'my-skill',
+          path: 'skills/platform/my-skill/SKILL.md',
+        },
         content: 'skill content body',
         referenced_files: [],
         loaded_tools: [],
@@ -72,64 +76,13 @@ describe('load_skill tool', () => {
     });
   });
 
-  it('disambiguates between two skills sharing a name using base_path', async () => {
-    const skillA = createMockSkill({
-      id: 'a',
-      name: 'shared',
-      basePath: 'skills/platform',
-      content: 'platform content',
-    });
-    const skillB = createMockSkill({
-      id: 'b',
-      name: 'shared',
-      basePath: 'skills/security',
-      content: 'security content',
-    });
-    ctx.skills.list.mockResolvedValue([skillA, skillB]);
-
-    const tool = createLoadSkillTool();
-    const result = await callHandler(tool, { name: 'shared', base_path: 'skills/security' }, ctx);
-
-    expect(result.results[0]).toMatchObject({
-      data: {
-        skill: { id: 'b' },
-        content: 'security content',
-      },
-    });
-  });
-
-  it('returns an error result when no skill matches the name', async () => {
+  it('surfaces resolveSkill errors as error tool results', async () => {
     ctx.skills.list.mockResolvedValue([]);
     const tool = createLoadSkillTool();
-    const result = await callHandler(tool, { name: 'nope' }, ctx);
+    const result = await callHandler(tool, { skill: 'nope' }, ctx);
 
     expect(result.results[0].type).toBe(ToolResultType.error);
     expect((result.results[0] as any).data.message).toBe("Skill 'nope' not found.");
-  });
-
-  it('includes base_path in the not-found message when provided', async () => {
-    ctx.skills.list.mockResolvedValue([]);
-    const tool = createLoadSkillTool();
-    const result = await callHandler(tool, { name: 'nope', base_path: 'skills/security' }, ctx);
-
-    expect((result.results[0] as any).data.message).toBe(
-      "Skill 'nope' (basePath 'skills/security') not found."
-    );
-  });
-
-  it('returns an error result listing matches when the name is ambiguous', async () => {
-    const a = createMockSkill({ id: 'a', name: 'shared', basePath: 'skills/platform' });
-    const b = createMockSkill({ id: 'b', name: 'shared', basePath: 'skills/security' });
-    ctx.skills.list.mockResolvedValue([a, b]);
-
-    const tool = createLoadSkillTool();
-    const result = await callHandler(tool, { name: 'shared' }, ctx);
-
-    expect(result.results[0].type).toBe(ToolResultType.error);
-    const message = (result.results[0] as any).data.message as string;
-    expect(message).toContain("Skill name 'shared' is ambiguous");
-    expect(message).toContain("base_path: 'skills/platform'");
-    expect(message).toContain("base_path: 'skills/security'");
   });
 
   it('registers inline + registry tools into the tool manager and returns their ids', async () => {
@@ -147,7 +100,7 @@ describe('load_skill tool', () => {
     ctx.toolProvider.list.mockResolvedValue([registryTool]);
 
     const tool = createLoadSkillTool();
-    const result = await callHandler(tool, { name: 'my-skill' }, ctx);
+    const result = await callHandler(tool, { skill: 'my-skill' }, ctx);
 
     expect(ctx.toolManager.addTools).toHaveBeenCalledWith(
       {
@@ -175,12 +128,11 @@ describe('load_skill tool', () => {
     ctx.skills.list.mockResolvedValue([skill]);
 
     const tool = createLoadSkillTool();
-    const result = await callHandler(tool, { name: 'my-skill' }, ctx);
+    const result = await callHandler(tool, { skill: 'my-skill' }, ctx);
 
     expect((result.results[0] as any).data.referenced_files).toEqual([
       {
         name: 'patterns',
-        relative_path: 'docs',
         path: getSkillReferencedContentEntryPath({
           skill,
           referencedContent,
@@ -197,7 +149,7 @@ describe('load_skill tool', () => {
     ctx.skills.list.mockResolvedValue([skill]);
 
     const tool = createLoadSkillTool();
-    const result = await callHandler(tool, { name: 'my-skill' }, ctx);
+    const result = await callHandler(tool, { skill: 'my-skill' }, ctx);
 
     expect(result.results[0].type).toBe(ToolResultType.error);
     expect((result.results[0] as any).data.message).toMatch(
@@ -217,7 +169,7 @@ describe('load_skill tool', () => {
     const trackingService = { trackSkillInvocation: jest.fn() };
 
     const tool = createLoadSkillTool({ analyticsService, trackingService });
-    await callHandler(tool, { name: 'my-skill' }, ctx);
+    await callHandler(tool, { skill: 'my-skill' }, ctx);
 
     expect(analyticsService.reportSkillInvoked).toHaveBeenCalledWith(
       expect.objectContaining({ skillId: 'sec-skill', agentId: 'a1' })
@@ -230,7 +182,7 @@ describe('load_skill tool', () => {
     ctx.skills.list.mockResolvedValue([skill]);
 
     const tool = createLoadSkillTool();
-    await expect(callHandler(tool, { name: 'my-skill' }, ctx)).resolves.toBeDefined();
+    await expect(callHandler(tool, { skill: 'my-skill' }, ctx)).resolves.toBeDefined();
   });
 
   it('exposes an identity summarizeToolReturn that returns the original results unchanged', () => {
