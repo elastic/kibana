@@ -11,7 +11,7 @@ import {
   getEndpointExceptionListItems,
 } from '../../../../../tasks/api_calls/exceptions';
 import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
-import { createDocument } from '../../../../../tasks/api_calls/elasticsearch';
+import { createDocument, deleteAllDocuments } from '../../../../../tasks/api_calls/elasticsearch';
 import {
   expandFirstAlert,
   goToClosedAlertsOnRuleDetailsPage,
@@ -42,6 +42,7 @@ import {
   ENDPOINT_EXCEPTION_CARD_HEADER_TITLE,
   ENDPOINT_EXCEPTION_ITEM_CONFIRM_BTN,
   ENDPOINT_EXCEPTION_ITEM_NAME_INPUT,
+  FIELD_INPUT,
 } from '../../../../../screens/exceptions';
 import {
   navigateToEndpointExceptions,
@@ -191,6 +192,7 @@ describe(
       deleteAlertsAndRules();
       deleteEndpointExceptionList();
       createEndpointExceptionList();
+      deleteAllDocuments(ENDPOINT_ALERTS_DATA_STREAM);
       createDocument(
         ENDPOINT_ALERTS_DATA_STREAM,
         createWindowsEndpointAlert(WINDOWS_MATCHING_PATH, '2026-01-01T00:00:03.000Z')
@@ -210,6 +212,8 @@ describe(
       waitForAlertsToPopulate();
 
       openAddEndpointExceptionFromFirstAlert();
+      cy.get(FIELD_INPUT).eq(0).type('{selectall}file.path.caseless');
+      cy.get('.euiComboBoxOption[title="file.path.caseless"]').click();
       validateExceptionConditionField('file.path.caseless');
 
       addExceptionEntryOperatorValue('matches', 0);
@@ -221,7 +225,10 @@ describe(
       cy.get(ENDPOINT_EXCEPTION_ITEM_CONFIRM_BTN).should('not.exist');
 
       getEndpointExceptionListItems().then(({ body }) => {
-        expect(body.data[0].entries[0]).to.deep.include({
+        const pathEntry = body.data[0].entries.find(
+          (entry: { field?: string }) => entry.field === 'file.path.caseless'
+        );
+        expect(pathEntry).to.deep.include({
           field: 'file.path.caseless',
           operator: 'included',
           type: 'wildcard',
