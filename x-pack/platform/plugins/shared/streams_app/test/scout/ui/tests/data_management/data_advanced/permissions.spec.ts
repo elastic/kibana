@@ -32,7 +32,6 @@ test.describe(
       browserAuth,
       pageObjects,
       page,
-      pageObjects,
     }) => {
       await pageObjects.streams.gotoDataRetentionTab(CLASSIC_STREAM);
       await browserAuth.loginAsViewer();
@@ -45,7 +44,6 @@ test.describe(
       browserAuth,
       pageObjects,
       page,
-      pageObjects,
     }) => {
       await pageObjects.streams.gotoDataRetentionTab(CLASSIC_STREAM);
       await browserAuth.loginAs('editor');
