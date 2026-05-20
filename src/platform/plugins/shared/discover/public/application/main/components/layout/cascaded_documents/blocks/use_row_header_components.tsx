@@ -388,6 +388,9 @@ const NO_VALUE_PLACEHOLDER = i18n.translate('discover.dataCascade.row.action.noV
   defaultMessage: '(blank)',
 });
 
+const getArrayBadgeDisplayValue = (value: string | number) =>
+  typeof value === 'number' ? value : value || NO_VALUE_PLACEHOLDER;
+
 export function useEsqlDataCascadeRowHeaderComponents(
   editorQueryMeta: ESQLStatsQueryMeta,
   selectedColumns: string[],
@@ -482,9 +485,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
                         <EuiFlexItem grow={false}>
                           <EuiBadge color="hollow" css={textSlotStyles}>
                             {Array.isArray(aggregatedValue)
-                              ? aggregatedValue
-                                  .map((value) => value || NO_VALUE_PLACEHOLDER)
-                                  .join(', ')
+                              ? aggregatedValue.map(getArrayBadgeDisplayValue).join(', ')
                               : '-'}
                           </EuiBadge>
                         </EuiFlexItem>
