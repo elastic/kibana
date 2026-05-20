@@ -8,6 +8,7 @@
  */
 
 import type { JSONSchema7 } from 'json-schema';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { generateSampleFromJsonSchema } from './generate_sample_from_json_schema';
 import { INPUT_STRING_PLACEHOLDER } from '../consts/placeholders';
 
@@ -185,7 +186,7 @@ describe('generateSampleFromJsonSchema', () => {
             required: ['name'],
           },
         },
-      };
+      } as JsonModelSchemaType;
       expect(generateSampleFromJsonSchema({ $ref: '#/definitions/User' }, inputsRoot)).toEqual({
         name: INPUT_STRING_PLACEHOLDER,
       });
@@ -196,7 +197,7 @@ describe('generateSampleFromJsonSchema', () => {
         properties: {
           alert: { $ref: '#/kibana/definitions/alertingRuleV2EventContextV1' },
         },
-      };
+      } as JsonModelSchemaType;
       const sample = generateSampleFromJsonSchema(
         { $ref: '#/kibana/definitions/alertingRuleV2EventContextV1' },
         inputsRoot
