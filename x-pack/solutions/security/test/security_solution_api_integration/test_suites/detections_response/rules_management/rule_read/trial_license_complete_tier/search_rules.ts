@@ -38,7 +38,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body).to.eql({
         data: [],
         page: 1,
-        perPage: 20,
+        per_page: 20,
         total: 0,
       });
     });
