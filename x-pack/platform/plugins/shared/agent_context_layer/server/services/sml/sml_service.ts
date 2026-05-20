@@ -123,9 +123,6 @@ class SmlServiceImpl implements SmlServiceInstance {
       getDocuments: async ({ ids, spaceId, esClient }) => {
         return getDocumentsByIds({ ids, spaceId, esClient, logger });
       },
-      getDocument: async ({ id, spaceId, esClient }) => {
-        return getDocumentById({ id, spaceId, esClient, logger });
-      },
       listDocuments: async ({ spaceId, esClient, page, perPage, type, originId }) => {
         return listDocuments({
           spaceId,

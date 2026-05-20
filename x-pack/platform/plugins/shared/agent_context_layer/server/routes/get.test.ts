@@ -48,11 +48,11 @@ describe('registerGetRoute', () => {
   it('returns 404 when feature flag is disabled', async () => {
     const response = await callHandler({ id: 'chunk-1' }, false);
     expect(response.notFound).toHaveBeenCalled();
-    expect(mockSmlService.getDocument).not.toHaveBeenCalled();
+    expect(mockSmlService.getDocuments).not.toHaveBeenCalled();
   });
 
   it('returns 404 when the document is not found', async () => {
-    mockSmlService.getDocument.mockResolvedValue(undefined);
+    mockSmlService.getDocuments.mockResolvedValue(new Map());
     const response = await callHandler({ id: 'missing' });
     expect(response.notFound).toHaveBeenCalledWith({
       body: { message: "SML document 'missing' not found" },
@@ -60,7 +60,7 @@ describe('registerGetRoute', () => {
   });
 
   it('returns 404 when access check denies the item', async () => {
-    mockSmlService.getDocument.mockResolvedValue(sampleDocument);
+    mockSmlService.getDocuments.mockResolvedValue(new Map([['chunk-1', sampleDocument]]));
     mockSmlService.checkItemsAccess.mockResolvedValue(new Map([['chunk-1', false]]));
     const response = await callHandler({ id: 'chunk-1' });
     expect(response.notFound).toHaveBeenCalledWith({
@@ -69,11 +69,11 @@ describe('registerGetRoute', () => {
   });
 
   it('returns 200 with the document when found and authorized', async () => {
-    mockSmlService.getDocument.mockResolvedValue(sampleDocument);
+    mockSmlService.getDocuments.mockResolvedValue(new Map([['chunk-1', sampleDocument]]));
     mockSmlService.checkItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
     const response = await callHandler({ id: 'chunk-1' });
-    expect(mockSmlService.getDocument).toHaveBeenCalledWith({
-      id: 'chunk-1',
+    expect(mockSmlService.getDocuments).toHaveBeenCalledWith({
+      ids: ['chunk-1'],
       spaceId: 'test-space',
       esClient: expect.any(Object),
     });
@@ -95,16 +95,16 @@ describe('registerGetRoute', () => {
     const request = httpServerMock.createKibanaRequest({ params: { id: 'chunk-1' } });
     const response = httpServerMock.createResponseFactory();
 
-    mockSmlService.getDocument.mockResolvedValue(sampleDocument);
+    mockSmlService.getDocuments.mockResolvedValue(new Map([['chunk-1', sampleDocument]]));
     mockSmlService.checkItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
     await localHandler(buildMockContext(true), request, response);
-    expect(mockSmlService.getDocument).toHaveBeenCalledWith(
+    expect(mockSmlService.getDocuments).toHaveBeenCalledWith(
       expect.objectContaining({ spaceId: 'default' })
     );
   });
 
-  it('propagates errors from sml.getDocument', async () => {
-    mockSmlService.getDocument.mockRejectedValue(new Error('ES connection failed'));
+  it('propagates errors from sml.getDocuments', async () => {
+    mockSmlService.getDocuments.mockRejectedValue(new Error('ES connection failed'));
     await expect(callHandler({ id: 'chunk-1' })).rejects.toThrow('ES connection failed');
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('ES connection failed'));
   });

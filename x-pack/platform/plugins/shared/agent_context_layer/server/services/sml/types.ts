@@ -280,13 +280,6 @@ export interface SmlService {
     esClient: IScopedClusterClient;
   }) => Promise<Map<string, SmlDocument>>;
 
-  /** Fetch a single SML document by id, scoped to a space. Returns undefined if not found. */
-  getDocument: (params: {
-    id: string;
-    spaceId: string;
-    esClient: IScopedClusterClient;
-  }) => Promise<SmlDocument | undefined>;
-
   /** List SML documents in a space with optional filters and pagination. */
   listDocuments: (params: {
     spaceId: string;

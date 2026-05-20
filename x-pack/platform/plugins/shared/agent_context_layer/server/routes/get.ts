@@ -45,7 +45,7 @@ export const registerGetRoute = ({
         const [, startDeps] = await coreSetup.getStartServices();
         const spaceId = startDeps.spaces?.spacesService?.getSpaceId(request) ?? 'default';
 
-        const document = await sml.getDocument({ id, spaceId, esClient });
+        const document = (await sml.getDocuments({ ids: [id], spaceId, esClient })).get(id);
         if (!document) {
           return response.notFound({ body: { message: `SML document '${id}' not found` } });
         }
