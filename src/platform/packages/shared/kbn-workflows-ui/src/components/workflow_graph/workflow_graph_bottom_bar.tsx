@@ -417,15 +417,16 @@ export function WorkflowDetailBottomBar({
   }, [scheduleReappear]);
 
   useEffect(() => {
-    // capture:true so the wheel event reaches us even when React Flow calls
-    // stopPropagation on it during the bubble phase (canvas pan/zoom).
-    window.addEventListener('wheel', triggerActivity, { passive: true, capture: true });
-    document.addEventListener('keydown', triggerActivity, { passive: true });
-    document.addEventListener('pointerdown', triggerActivity, { passive: true });
+    // capture:true on all three so events reach us before React Flow / Monaco
+    // editor can call stopPropagation during the bubble phase.
+    const opts = { passive: true, capture: true } as const;
+    window.addEventListener('wheel', triggerActivity, opts);
+    document.addEventListener('keydown', triggerActivity, opts);
+    document.addEventListener('pointerdown', triggerActivity, opts);
     return () => {
-      window.removeEventListener('wheel', triggerActivity, { capture: true });
-      document.removeEventListener('keydown', triggerActivity);
-      document.removeEventListener('pointerdown', triggerActivity);
+      window.removeEventListener('wheel', triggerActivity, opts);
+      document.removeEventListener('keydown', triggerActivity, opts);
+      document.removeEventListener('pointerdown', triggerActivity, opts);
       if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
     };
   }, [triggerActivity]);
