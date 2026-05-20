@@ -8,6 +8,7 @@
  */
 
 import type Joi from 'joi';
+import { metaFields } from '@kbn/config-schema';
 import joiToJsonParse from 'joi-to-json';
 import { omit } from 'lodash';
 import type { OpenAPIV3 } from 'openapi-types';
@@ -35,6 +36,10 @@ export const joi2JsonInternal = (schema: Joi.Schema) => {
   return joiToJsonParse(schema, 'open-api');
 };
 
+const removeInternalOptionalMarker = (schema: OpenAPIV3.SchemaObject): void => {
+  delete (schema as Record<string, unknown>)[metaFields.META_FIELD_X_OAS_OPTIONAL];
+};
+
 export const parse = ({ schema, ctx = createCtx() }: ParseArgs) => {
   const parsed: ParseResult = joi2JsonInternal(schema);
   let result: OpenAPIV3.SchemaObject;
@@ -48,5 +53,6 @@ export const parse = ({ schema, ctx = createCtx() }: ParseArgs) => {
     result = parsed;
   }
   postProcessMutations({ schema: result, ctx });
+  Object.values(ctx.getSharedSchemas()).forEach(removeInternalOptionalMarker);
   return { shared: ctx.getSharedSchemas(), result };
 };

@@ -9,6 +9,8 @@
 
 import { metaFields } from '@kbn/config-schema';
 import type { OpenAPIV3 } from 'openapi-types';
+import { isReferenceObject } from '../../../common';
+import type { IContext } from '../context';
 import { deleteField, stripBadDefault } from './utils';
 
 const { META_FIELD_X_OAS_OPTIONAL } = metaFields;
@@ -18,28 +20,52 @@ const isNullable = (schema: OpenAPIV3.SchemaObject): boolean => {
 };
 
 const hasDefault = (schema: OpenAPIV3.SchemaObject): boolean => {
-  return schema.default != null;
+  return schema.default !== undefined;
 };
 
-const populateRequiredFields = (schema: OpenAPIV3.SchemaObject): void => {
+const isOptionalAtRuntime = (schema: OpenAPIV3.SchemaObject): boolean => {
+  return (
+    META_FIELD_X_OAS_OPTIONAL in schema ||
+    hasDefault(schema) ||
+    Boolean(schema.anyOf && schema.anyOf.some((v) => isNullable(v as OpenAPIV3.SchemaObject)))
+  );
+};
+
+const isRequiredProperty = (
+  schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject,
+  ctx?: IContext
+): boolean => {
+  if (isReferenceObject(schema)) {
+    const sharedSchema = ctx?.derefSharedSchema(schema.$ref);
+    return sharedSchema ? !isOptionalAtRuntime(sharedSchema) : true;
+  }
+
+  if (META_FIELD_X_OAS_OPTIONAL in schema) {
+    deleteField(schema, META_FIELD_X_OAS_OPTIONAL);
+    return false;
+  }
+
+  return !isOptionalAtRuntime(schema);
+};
+
+const populateRequiredFields = (schema: OpenAPIV3.SchemaObject, ctx?: IContext): void => {
   if (!schema.properties) return;
   const required: string[] = [];
 
-  const entries = Object.entries(schema.properties as Record<string, OpenAPIV3.SchemaObject>);
+  const entries = Object.entries(
+    schema.properties as Record<string, OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject>
+  );
   for (const [key, value] of entries) {
-    if (META_FIELD_X_OAS_OPTIONAL in value) {
-      deleteField(value, META_FIELD_X_OAS_OPTIONAL);
-    } else if (
-      hasDefault(value) ||
-      Boolean(value.anyOf && value.anyOf.some((v) => isNullable(v as OpenAPIV3.SchemaObject)))
-    ) {
-      // Must not be added to the required array
-    } else {
+    if (isRequiredProperty(value, ctx)) {
       required.push(key);
     }
   }
 
-  if (required.length > 0) schema.required = required;
+  if (required.length > 0) {
+    schema.required = required;
+  } else {
+    delete schema.required;
+  }
 };
 
 const removeNeverType = (schema: OpenAPIV3.SchemaObject): void => {
@@ -51,8 +77,8 @@ const removeNeverType = (schema: OpenAPIV3.SchemaObject): void => {
   }
 };
 
-export const processObject = (schema: OpenAPIV3.SchemaObject): void => {
+export const processObject = (schema: OpenAPIV3.SchemaObject, ctx?: IContext): void => {
   stripBadDefault(schema);
   removeNeverType(schema);
-  populateRequiredFields(schema);
+  populateRequiredFields(schema, ctx);
 };

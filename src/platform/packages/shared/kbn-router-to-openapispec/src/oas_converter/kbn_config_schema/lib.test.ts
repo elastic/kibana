@@ -175,6 +175,92 @@ describe('convert', () => {
       },
     });
   });
+
+  test('does not require referenced fields that are optional at runtime', () => {
+    const maybeObjectSchema = schema.object(
+      { a: schema.string() },
+      { meta: { id: 'maybeObjectSchema' } }
+    );
+    const objectWithDefaultSchema = schema.object(
+      { b: schema.string() },
+      { defaultValue: { b: 'default' }, meta: { id: 'objectWithDefaultSchema' } }
+    );
+    const requiredObjectSchema = schema.object(
+      { c: schema.string() },
+      { meta: { id: 'requiredObjectSchema' } }
+    );
+    const otherSchema = schema.object({
+      maybeObject: schema.maybe(maybeObjectSchema),
+      objectWithDefault: objectWithDefaultSchema,
+      requiredObject: requiredObjectSchema,
+    });
+
+    expect(convert(otherSchema)).toEqual({
+      schema: {
+        additionalProperties: false,
+        properties: {
+          maybeObject: {
+            $ref: '#/components/schemas/maybeObjectSchema',
+          },
+          objectWithDefault: {
+            $ref: '#/components/schemas/objectWithDefaultSchema',
+          },
+          requiredObject: {
+            $ref: '#/components/schemas/requiredObjectSchema',
+          },
+        },
+        required: ['requiredObject'],
+        type: 'object',
+      },
+      shared: {
+        maybeObjectSchema: {
+          title: 'maybeObjectSchema',
+          additionalProperties: false,
+          properties: {
+            a: {
+              type: 'string',
+            },
+          },
+          required: ['a'],
+          type: 'object',
+        },
+        objectWithDefaultSchema: {
+          title: 'objectWithDefaultSchema',
+          additionalProperties: false,
+          default: {
+            b: 'default',
+          },
+          properties: {
+            b: {
+              type: 'string',
+            },
+          },
+          required: ['b'],
+          type: 'object',
+        },
+        requiredObjectSchema: {
+          title: 'requiredObjectSchema',
+          additionalProperties: false,
+          properties: {
+            c: {
+              type: 'string',
+            },
+          },
+          required: ['c'],
+          type: 'object',
+        },
+      },
+    });
+
+    expect(
+      convert(
+        schema.object({
+          maybeObject: schema.maybe(maybeObjectSchema),
+          objectWithDefault: objectWithDefaultSchema,
+        })
+      ).schema
+    ).not.toHaveProperty('required');
+  });
 });
 
 describe('convertPathParameters', () => {
