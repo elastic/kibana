@@ -385,8 +385,8 @@ export class TaskScheduling {
 }
 
 const addJitter = (interval?: string): { runAt: Date; scheduledAt: Date } | undefined => {
-  // Adhoc tasks run immediately, no explicit date means they are set to run now inside the store.
-  if (!interval) return undefined;
+  // Adhoc tasks run immediately.
+  if (!interval) return { runAt: new Date(), scheduledAt: new Date() };
 
   const now = Date.now();
   const maximumOffsetTimestamp = now + 1000 * 60 * 5; // now + 5 minutes

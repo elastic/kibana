@@ -1337,6 +1337,8 @@ describe('TaskScheduling', () => {
             schedule: undefined,
             traceparent: 'parent',
             enabled: true,
+            runAt: new Date(),
+            scheduledAt: new Date(),
           },
         ],
         undefined
@@ -1366,6 +1368,8 @@ describe('TaskScheduling', () => {
             schedule: undefined,
             traceparent: 'parent',
             enabled: true,
+            runAt: new Date(),
+            scheduledAt: new Date(),
           },
           {
             ...task2,
@@ -1410,6 +1414,8 @@ describe('TaskScheduling', () => {
         id: undefined,
         traceparent: 'parent',
         enabled: true,
+        runAt: new Date(),
+        scheduledAt: new Date(),
       });
 
       expect(omit(bulkSchedulePayload[1], 'runAt', 'scheduledAt')).toEqual({
@@ -1436,7 +1442,7 @@ describe('TaskScheduling', () => {
       expect(t2RunAt).toBeLessThanOrEqual(5 * 60 * 1000);
     });
 
-    test('does not jitter ad-hoc tasks at i > 0', async () => {
+    test('runs ad-hoc tasks immediately without jitter, even at i > 0', async () => {
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
       const recurringTask = {
         taskType: 'foo',
@@ -1459,6 +1465,8 @@ describe('TaskScheduling', () => {
           id: undefined,
           traceparent: 'parent',
           enabled: true,
+          runAt: new Date(),
+          scheduledAt: new Date(),
         },
         {
           ...adHocTask,
@@ -1466,6 +1474,8 @@ describe('TaskScheduling', () => {
           schedule: undefined,
           traceparent: 'parent',
           enabled: true,
+          runAt: new Date(),
+          scheduledAt: new Date(),
         },
       ]);
     });
