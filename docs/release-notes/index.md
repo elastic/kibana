@@ -573,6 +573,52 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Prevents table sorting when toggling the workflow enable state [#252724]({{kib-pull}}252724).
 * Strips system-managed date fields from ingest pipelines before PUT [#252579]({{kib-pull}}252579).
 
+## 9.3.5 [kibana-9.3.5-release-notes]
+
+### Fixes [kibana-9.3.5-fixes]
+
+**Alerting and cases**:
+* Fixes {{stack}} rule upgrades failing when rule action `params` values exceed Elasticsearch field size limits by adding `ignore_above: 4096` to the `actions.params` mapping [#269467]({{kib-pull}}269467).
+* Fixes alert index template updates failing when auto-increasing `total_fields.limit` because system-managed read-only fields were included in the update request [#262534]({{kib-pull}}262534).
+* Fixes phrase search in the **All Cases** view so quoted queries match exact phrases and unquoted queries match individual terms [#266827]({{kib-pull}}266827).
+
+**Connectivity**:
+* Fixes the email connector to reject malformed email addresses (for example, addresses with leading or trailing hyphens in the local part or domain labels) that mail servers would reject, preventing unnecessary SMTP connection attempts. Existing connectors saved with invalid addresses will fail validation after upgrade and must be updated [#268496]({{kib-pull}}268496).
+
+**Dashboards and Visualizations**:
+* Fixes a regression where the dashboard remained locked in an open-flyout state after closing the {{esql}} control edit flyout when editing an existing query-based control [#267605]({{kib-pull}}267605).
+
+**Data ingestion and Fleet**:
+* Fixes agent policy background tasks failing with a `parse_exception` by sorting agent policies on `updated_at` instead of the non-existent `created_at` field [#267285]({{kib-pull}}267285).
+* Fixes a race condition during async integration knowledge base installation that could clear `installed_es` asset references for input packages and leave the **Assets** tab blank [#266841]({{kib-pull}}266841).
+* Uses password fields instead of cleartext inputs for multi-value secret variables in integration policy forms [#266823]({{kib-pull}}266823).
+
+**Discover**:
+* Fixes {{esql}} Discover so the expanded document flyout stays on the same result after refresh when `METADATA _index, _id` is available, and shows the original document without pagination when that result is no longer in the refreshed set [#268328]({{kib-pull}}268328).
+* Ensures CSV exports from Discover use the absolute time range for the current session so exported data matches what you see on screen [#255005]({{kib-pull}}255005).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.3.5 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.3.5 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Fixes date conversion in the file sharing service [#265131]({{kib-pull}}265131).
+
+**Machine Learning**:
+* Fixes Anomaly Detection chart markers in the Single Metric Viewer so sparse data points with a single value in the chart time range remain visible without hovering [#263632]({{kib-pull}}263632).
+
+**Management**:
+* Fixes the **IP Location** processor in **Ingest pipelines** saving the wrong `database_file` and showing duplicate selections when a local database filename matches a managed database label [#265740]({{kib-pull}}265740).
+* Adds accessible names to modals and popovers across Stack Management pages to improve screen reader support [#269652]({{kib-pull}}269652).
+* Fixes client-side navigation in the content connectors UI to honor `server.basePath` and {{kib}} space prefixes, resolving 404 errors on connector detail tabs and the post-creation **Manage connector** action [#269571]({{kib-pull}}269571).
+* Prevents each keystroke in the **Advanced Settings** search bar from adding a browser history entry, so the back button navigates away from the page in one step [#266278]({{kib-pull}}266278).
+
+**Search**:
+* Fixes query rules API routes to limit the maximum size of arrays accepted in request data [#265495]({{kib-pull}}265495).
+* Fixes the Search Applications document explorer rendering HTML markup from field `.snippet` values [#265319]({{kib-pull}}265319).
+
 ## 9.3.4 [kibana-9.3.4-release-notes]
 
 ### Features and enhancements [kibana-9.3.4-features-enhancements]
