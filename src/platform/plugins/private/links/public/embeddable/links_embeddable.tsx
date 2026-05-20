@@ -293,4 +293,9 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
       alignItems: 'center',
       flexDirection: 'row',
     },
+    // The internal list item wrapper has `width: 100%` which needs to be overridden
+    // for the horizontal layout to look as expected
+    '&.horizontalLayoutWrapper .euiListItemLayout__wrapper': {
+      width: 'auto',
+    },
   });
