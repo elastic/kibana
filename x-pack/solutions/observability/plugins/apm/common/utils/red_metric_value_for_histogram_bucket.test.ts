@@ -8,44 +8,36 @@
 import { nullifyLeadingTrailingEmptyRedMetricPoints } from './red_metric_value_for_histogram_bucket';
 
 describe('nullifyLeadingTrailingEmptyRedMetricPoints', () => {
-  const now = 1000;
-
   it('returns an empty array when input is empty', () => {
-    expect(nullifyLeadingTrailingEmptyRedMetricPoints([], now)).toEqual([]);
+    expect(nullifyLeadingTrailingEmptyRedMetricPoints([])).toEqual([]);
   });
 
-  it('nulls leading empty buckets and keeps middle + past trailing zeros', () => {
-    const result = nullifyLeadingTrailingEmptyRedMetricPoints(
-      [
-        { x: 100, docCount: 0, y: 0 },
-        { x: 200, docCount: 0, y: 0 },
-        { x: 300, docCount: 10, y: 5 },
-        { x: 400, docCount: 0, y: 0 },
-        { x: 500, docCount: 8, y: 2 },
-        { x: 600, docCount: 0, y: 0 },
-      ],
-      now
-    );
+  it('nulls all empty buckets regardless of position', () => {
+    const result = nullifyLeadingTrailingEmptyRedMetricPoints([
+      { x: 100, docCount: 0, y: 0 },
+      { x: 200, docCount: 0, y: 0 },
+      { x: 300, docCount: 10, y: 5 },
+      { x: 400, docCount: 0, y: 0 },
+      { x: 500, docCount: 8, y: 2 },
+      { x: 600, docCount: 0, y: 0 },
+    ]);
 
     expect(result).toEqual([
       { x: 100, y: null },
       { x: 200, y: null },
       { x: 300, y: 5 },
-      { x: 400, y: 0 },
+      { x: 400, y: null },
       { x: 500, y: 2 },
-      { x: 600, y: 0 },
+      { x: 600, y: null },
     ]);
   });
 
-  it('nulls invalid y (null, NaN) for non-edge empty buckets as well', () => {
-    const result = nullifyLeadingTrailingEmptyRedMetricPoints(
-      [
-        { x: 100, docCount: 5, y: null },
-        { x: 200, docCount: 5, y: NaN },
-        { x: 300, docCount: 5, y: 1 },
-      ],
-      now
-    );
+  it('nulls invalid y (null, NaN) for data-bearing buckets', () => {
+    const result = nullifyLeadingTrailingEmptyRedMetricPoints([
+      { x: 100, docCount: 5, y: null },
+      { x: 200, docCount: 5, y: NaN },
+      { x: 300, docCount: 5, y: 1 },
+    ]);
 
     expect(result).toEqual([
       { x: 100, y: null },
@@ -54,14 +46,11 @@ describe('nullifyLeadingTrailingEmptyRedMetricPoints', () => {
     ]);
   });
 
-  it('when every bucket is empty, all y become null', () => {
-    const result = nullifyLeadingTrailingEmptyRedMetricPoints(
-      [
-        { x: 100, docCount: 0, y: 0 },
-        { x: 200, docCount: 0, y: 0 },
-      ],
-      now
-    );
+  it('when every bucket is empty, all become null', () => {
+    const result = nullifyLeadingTrailingEmptyRedMetricPoints([
+      { x: 100, docCount: 0, y: 0 },
+      { x: 200, docCount: 0, y: 0 },
+    ]);
 
     expect(result).toEqual([
       { x: 100, y: null },
@@ -69,62 +58,55 @@ describe('nullifyLeadingTrailingEmptyRedMetricPoints', () => {
     ]);
   });
 
-  it('shows trailing zeros when a service stops sending data (catastrophic failure)', () => {
-    const result = nullifyLeadingTrailingEmptyRedMetricPoints(
-      [
-        { x: 100, docCount: 100, y: 50 },
-        { x: 200, docCount: 60, y: 30 },
-        { x: 300, docCount: 0, y: 0 },
-        { x: 400, docCount: 0, y: 0 },
-      ],
-      now
-    );
+  it('nulls trailing empty buckets after data', () => {
+    const result = nullifyLeadingTrailingEmptyRedMetricPoints([
+      { x: 100, docCount: 100, y: 50 },
+      { x: 200, docCount: 60, y: 30 },
+      { x: 300, docCount: 0, y: 0 },
+      { x: 400, docCount: 0, y: 0 },
+    ]);
 
     expect(result).toEqual([
       { x: 100, y: 50 },
       { x: 200, y: 30 },
-      { x: 300, y: 0 },
-      { x: 400, y: 0 },
+      { x: 300, y: null },
+      { x: 400, y: null },
     ]);
   });
 
-  it('nulls future trailing empty buckets (dotted line for not-yet-observed)', () => {
-    const result = nullifyLeadingTrailingEmptyRedMetricPoints(
-      [
-        { x: 100, docCount: 100, y: 50 },
-        { x: 200, docCount: 60, y: 30 },
-        { x: 300, docCount: 0, y: 0 },
-        { x: 1000, docCount: 0, y: 0 },
-        { x: 1100, docCount: 0, y: 0 },
-      ],
-      now
-    );
+  it('nulls middle empty buckets between data-bearing buckets', () => {
+    const result = nullifyLeadingTrailingEmptyRedMetricPoints([
+      { x: 100, docCount: 10, y: 5 },
+      { x: 200, docCount: 0, y: 0 },
+      { x: 300, docCount: 0, y: 0 },
+      { x: 400, docCount: 8, y: 2 },
+    ]);
 
     expect(result).toEqual([
-      { x: 100, y: 50 },
-      { x: 200, y: 30 },
-      { x: 300, y: 0 },
-      { x: 1000, y: null },
-      { x: 1100, y: null },
+      { x: 100, y: 5 },
+      { x: 200, y: null },
+      { x: 300, y: null },
+      { x: 400, y: 2 },
     ]);
   });
 
-  it('handles mix of past zeros and future empty at the trailing edge', () => {
-    const result = nullifyLeadingTrailingEmptyRedMetricPoints(
-      [
-        { x: 100, docCount: 50, y: 25 },
-        { x: 500, docCount: 0, y: 0 },
-        { x: 800, docCount: 0, y: 0 },
-        { x: 1200, docCount: 0, y: 0 },
-      ],
-      now
-    );
+  it('does not null last bucket when it has data', () => {
+    const result = nullifyLeadingTrailingEmptyRedMetricPoints([
+      { x: 100, docCount: 10, y: 5 },
+      { x: 200, docCount: 0, y: 0 },
+      { x: 300, docCount: 8, y: 3 },
+    ]);
 
     expect(result).toEqual([
-      { x: 100, y: 25 },
-      { x: 500, y: 0 },
-      { x: 800, y: 0 },
-      { x: 1200, y: null },
+      { x: 100, y: 5 },
+      { x: 200, y: null },
+      { x: 300, y: 3 },
     ]);
+  });
+
+  it('single empty bucket becomes null', () => {
+    const result = nullifyLeadingTrailingEmptyRedMetricPoints([{ x: 100, docCount: 0, y: 0 }]);
+
+    expect(result).toEqual([{ x: 100, y: null }]);
   });
 });

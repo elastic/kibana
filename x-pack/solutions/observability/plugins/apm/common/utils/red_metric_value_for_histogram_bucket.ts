@@ -14,47 +14,19 @@ export interface RedMetricHistogramPoint {
 /**
  * For RED series from `date_histogram`:
  *
- * - **Leading** empty buckets (before the first bucket with data) become `null`
- *   so charts show a dotted line instead of dipping to zero at the start.
- * - **Trailing** empty buckets **in the past** (after the last bucket with data
- *   but before `cutoffDate`) are kept as `y: 0` — the service genuinely dropped to
- *   zero (e.g. catastrophic failure) and users must see this.
- * - **Trailing** empty buckets **in the future** (timestamp >= `cutoffDate`) become
- *   `null` — no observation is available yet, shown as a dotted line.
- *
- * Invalid values (`null`, `NaN`) are always dropped to `null`.
- *
- * @param cutoffDate - epoch ms cutoff; buckets at or after this timestamp are
- *   considered "future". Defaults to `Date.now()`.
+ * - Empty buckets (`docCount === 0`) become `null` so charts render a dotted
+ *   line instead of dipping to zero when there is no data.
+ * - Invalid values (`null`, `NaN`) are also dropped to `null`.
  */
 export function nullifyLeadingTrailingEmptyRedMetricPoints(
-  points: ReadonlyArray<RedMetricHistogramPoint>,
-  cutoffDate: number | undefined = Date.now()
+  points: ReadonlyArray<RedMetricHistogramPoint>
 ): Array<{ x: number; y: number | null }> {
-  if (points.length === 0) {
-    return [];
-  }
-
-  let firstNonEmpty = 0;
-  while (firstNonEmpty < points.length && points[firstNonEmpty].docCount === 0) {
-    firstNonEmpty++;
-  }
-
-  let lastNonEmpty = points.length - 1;
-  while (lastNonEmpty >= 0 && points[lastNonEmpty].docCount === 0) {
-    lastNonEmpty--;
-  }
-
-  return points.map((point, index) => {
-    const isLeadingEmpty = point.docCount === 0 && index < firstNonEmpty;
-    const isTrailingEmpty = point.docCount === 0 && index > lastNonEmpty;
-    const isFutureTrailingEmpty = isTrailingEmpty && cutoffDate && point.x >= cutoffDate;
-
-    if (isLeadingEmpty || isFutureTrailingEmpty) {
+  return points.map((point) => {
+    if (point.docCount === 0) {
       return { x: point.x, y: null };
     }
 
-    const y = point.y;
+    const { y } = point;
     if (y == null || Number.isNaN(y)) {
       return { x: point.x, y: null };
     }
