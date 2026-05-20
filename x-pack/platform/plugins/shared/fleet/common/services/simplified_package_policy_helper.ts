@@ -237,15 +237,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
       options.experimental_data_stream_features;
   }
 
-  // Default-mode policies should not auto-enable inputs that the package spec
-  // marks as not allowed in default mode, either via the template-level
-  // `deployment_modes.default.enabled = false` flag or the per-input
-  // `deployment_modes: ['agentless']` annotation. Without this, a package with
-  // a secondary agentless-only template would cause spurious 400s in the
-  // simplified API even when the caller is targeting an unrelated default-mode
-  // template (see https://github.com/elastic/kibana/issues/268930).
-  // The symmetric behavior for agentless mode is intentionally not applied:
-  // the agentless flow already routes through an explicit `policy_template`.
+  // Disable agentless-only inputs for non-agentless policies; the reverse is unnecessary as the agentless API always passes an explicit policy_template.
   if (!supportsAgentless) {
     packagePolicy.inputs.forEach((input) => {
       if (!isInputAllowedForDeploymentMode(input, 'default', packageInfo)) {
