@@ -39,10 +39,10 @@ test.describe(
       });
     });
 
-    test.beforeEach(async ({ browserAuth, pageObjects }) => {
+    test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
       await browserAuth.loginAsAlertingV2Editor();
       await pageObjects.rulesList.goto();
-      await expect(pageObjects.rulesList.rulesListTable).toBeVisible({ timeout: 60_000 });
+      await expect(page.testSubj.locator('rulesListLoading')).toBeHidden({ timeout: 60_000 });
     });
 
     test.afterAll(async ({ esClient, apiServices }) => {

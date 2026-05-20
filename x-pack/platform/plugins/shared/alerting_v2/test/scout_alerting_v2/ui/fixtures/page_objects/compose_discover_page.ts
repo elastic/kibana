@@ -48,8 +48,13 @@ export class ComposeDiscoverPage {
   }
 
   async openCreateFlyout() {
-    await this.createRulePopoverButton.click();
-    await this.createEsqlRuleButton.click();
+    const splitButtonVisible = await this.createRuleSplitButton.isVisible();
+    if (splitButtonVisible) {
+      await this.createRulePopoverButton.click();
+      await this.createEsqlRuleButton.click();
+    } else {
+      await this.page.locator('.euiCard').filter({ hasText: 'Create ES|QL rule' }).click();
+    }
   }
 
   async openEditFlyout(ruleId: string) {
