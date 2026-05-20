@@ -33,6 +33,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getColorsFromMapping } from '@kbn/coloring';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { getKbnPalettes, useKbnPalettes, KbnPalette } from '@kbn/palettes';
+import { getEmptyRowsDefaultForVisualizationState } from '@kbn/lens-common';
 
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type {
@@ -54,7 +55,6 @@ import {
   renewIDs,
   getColorMappingDefaults,
 } from '../../utils';
-import { applyVisualizationStateDefaults } from '../utils';
 import { getSuggestions } from './xy_suggestions';
 import {
   DataDimensionEditor,
@@ -503,60 +503,62 @@ export const getXyVisualization = ({
       );
       colors = palette.getCategoricalColors(10, dataLayer.palette?.params);
     }
+    const emptyRowsDefault = getEmptyRowsDefaultForVisualizationState('lnsXY', state);
     return {
-      groups: applyVisualizationStateDefaults({
-        groups: [
-          {
-            groupId: 'x',
-            groupLabel: getAxisName('x', { isHorizontal }),
-            accessors: dataLayer.xAccessor ? [{ columnId: dataLayer.xAccessor }] : [],
-            filterOperations: isBucketed,
-            supportsMoreColumns: !dataLayer.xAccessor,
-            dataTestSubj: 'lnsXY_xDimensionPanel',
+      groups: [
+        {
+          groupId: 'x',
+          groupLabel: getAxisName('x', { isHorizontal }),
+          paramEditorCustomProps: {
+            emptyRowsDefault,
           },
-          {
-            groupId: 'y',
-            groupLabel: getAxisName('y', { isHorizontal }),
-            accessors: mappedAccessors,
-            filterOperations: isNumericDynamicMetric,
-            isMetricDimension: true,
-            supportsMoreColumns: true,
-            requiredMinDimensionCount: 1,
-            dataTestSubj: 'lnsXY_yDimensionPanel',
-            enableDimensionEditor: true,
+          accessors: dataLayer.xAccessor ? [{ columnId: dataLayer.xAccessor }] : [],
+          filterOperations: isBucketed,
+          supportsMoreColumns: !dataLayer.xAccessor,
+          dataTestSubj: 'lnsXY_xDimensionPanel',
+        },
+        {
+          groupId: 'y',
+          groupLabel: getAxisName('y', { isHorizontal }),
+          accessors: mappedAccessors,
+          filterOperations: isNumericDynamicMetric,
+          isMetricDimension: true,
+          supportsMoreColumns: true,
+          requiredMinDimensionCount: 1,
+          dataTestSubj: 'lnsXY_yDimensionPanel',
+          enableDimensionEditor: true,
+        },
+        {
+          groupId: 'breakdown',
+          groupLabel: i18n.translate('xpack.lens.xyChart.splitSeries', {
+            defaultMessage: 'Breakdown',
+          }),
+          paramEditorCustomProps: {
+            emptyRowsDefault,
           },
-          {
-            groupId: 'breakdown',
-            groupLabel: i18n.translate('xpack.lens.xyChart.splitSeries', {
-              defaultMessage: 'Breakdown',
-            }),
-            accessors: dataLayer.splitAccessors
-              ? dataLayer.splitAccessors.map((splitAccessor, i) => ({
-                  columnId: splitAccessor,
-                  triggerIconType: dataLayer.collapseFn
-                    ? 'aggregate'
-                    : i === 0
-                    ? 'colorBy'
-                    : undefined,
-                  palette: dataLayer.collapseFn ? undefined : i === 0 ? colors : undefined,
-                }))
-              : [],
-            filterOperations: isBucketed,
-            // multiple breakdown are supported only in text based layers
-            supportsMoreColumns: isTextBasedLayer
-              ? true
-              : (dataLayer.splitAccessors ?? []).length === 0,
-            dataTestSubj: 'lnsXY_splitDimensionPanel',
-            requiredMinDimensionCount:
-              dataLayer.seriesType.includes('percentage') && hasOnlyOneAccessor ? 1 : 0,
-            enableDimensionEditor: true,
-            isBreakdownDimension: true,
-          },
-        ],
-        groupIds: ['x', 'breakdown'],
-        visualizationType: 'lnsXY',
-        visualizationState: state,
-      }),
+          accessors: dataLayer.splitAccessors
+            ? dataLayer.splitAccessors.map((splitAccessor, i) => ({
+                columnId: splitAccessor,
+                triggerIconType: dataLayer.collapseFn
+                  ? 'aggregate'
+                  : i === 0
+                  ? 'colorBy'
+                  : undefined,
+                palette: dataLayer.collapseFn ? undefined : i === 0 ? colors : undefined,
+              }))
+            : [],
+          filterOperations: isBucketed,
+          // multiple breakdown are supported only in text based layers
+          supportsMoreColumns: isTextBasedLayer
+            ? true
+            : (dataLayer.splitAccessors ?? []).length === 0,
+          dataTestSubj: 'lnsXY_splitDimensionPanel',
+          requiredMinDimensionCount:
+            dataLayer.seriesType.includes('percentage') && hasOnlyOneAccessor ? 1 : 0,
+          enableDimensionEditor: true,
+          isBreakdownDimension: true,
+        },
+      ],
     };
   },
 

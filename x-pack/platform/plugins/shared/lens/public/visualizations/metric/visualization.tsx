@@ -28,6 +28,7 @@ import type {
   DatasourcePublicAPI,
 } from '@kbn/lens-common';
 import {
+  getEmptyRowsDefaultForVisualizationState,
   LENS_LAYER_TYPES as layerTypes,
   LENS_METRIC_ID,
   LENS_METRIC_GROUP_ID,
@@ -50,7 +51,7 @@ import { getDefaultConfigForMode } from './palette_config';
 import { getAccessorType } from '../../shared_components';
 import { MetricAppearanceSettings } from './toolbar';
 import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
-import { applyVisualizationStateDefaults, getColumnFromActiveData } from '../utils';
+import { getColumnFromActiveData } from '../utils';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 
@@ -166,112 +167,110 @@ const getMetricLayerConfiguration = (
 
   const isBucketed = (op: OperationMetadata) => op.isBucketed;
   const canCollapseBy = isPrimaryMetricNumeric && props.state.collapseFn;
+  const emptyRowsDefault = getEmptyRowsDefaultForVisualizationState(LENS_METRIC_ID, props.state);
   return {
-    groups: applyVisualizationStateDefaults({
-      groups: [
-        {
-          groupId: LENS_METRIC_GROUP_ID.METRIC,
-          dataTestSubj: 'lnsMetric_primaryMetricDimensionPanel',
-          groupLabel: i18n.translate('xpack.lens.primaryMetric.label', {
-            defaultMessage: 'Primary metric',
-          }),
-          paramEditorCustomProps: {
-            headingLabel: i18n.translate('xpack.lens.primaryMetric.headingLabel', {
-              defaultMessage: 'Value',
-            }),
-          },
-          accessors: props.state.metricAccessor
-            ? [
-                {
-                  columnId: props.state.metricAccessor,
-                  ...getPrimaryAccessorDisplayConfig(),
-                },
-              ]
-            : [],
-          supportsMoreColumns: !props.state.metricAccessor,
-          filterOperations: isSupportedDynamicMetric,
-          isMetricDimension: true,
-          enableDimensionEditor: true,
-          enableFormatSelector: true,
-          requiredMinDimensionCount: 1,
-        },
-        {
-          groupId: LENS_METRIC_GROUP_ID.SECONDARY_METRIC,
-          dataTestSubj: 'lnsMetric_secondaryMetricDimensionPanel',
-          groupLabel: i18n.translate('xpack.lens.metric.secondaryMetric', {
-            defaultMessage: 'Secondary metric',
-          }),
-          paramEditorCustomProps: {
-            headingLabel: i18n.translate('xpack.lens.primaryMetric.headingLabel', {
-              defaultMessage: 'Value',
-            }),
-          },
-          accessors: props.state.secondaryMetricAccessor
-            ? [
-                {
-                  columnId: props.state.secondaryMetricAccessor,
-                  ...getSecondaryAccessorDisplayConfig(),
-                },
-              ]
-            : [],
-          supportsMoreColumns: !props.state.secondaryMetricAccessor,
-          filterOperations: isSupportedDynamicMetric,
-          isMetricDimension: true,
-          enableDimensionEditor: true,
-          enableFormatSelector: true,
-        },
-        {
-          groupId: LENS_METRIC_GROUP_ID.MAX,
-          dataTestSubj: 'lnsMetric_maxDimensionPanel',
-          groupLabel: i18n.translate('xpack.lens.metric.max', { defaultMessage: 'Maximum value' }),
-          paramEditorCustomProps: {
-            headingLabel: i18n.translate('xpack.lens.primaryMetric.headingLabel', {
-              defaultMessage: 'Value',
-            }),
-          },
-          accessors: props.state.maxAccessor
-            ? [
-                {
-                  columnId: props.state.maxAccessor,
-                },
-              ]
-            : [],
-          isHidden: !props.state.maxAccessor && !isPrimaryMetricNumeric,
-          supportsMoreColumns: !props.state.maxAccessor,
-          filterOperations: isSupportedMetric,
-          enableDimensionEditor: true,
-          enableFormatSelector: false,
-          supportStaticValue: true,
-          prioritizedOperation: 'max',
-          groupTooltip: i18n.translate('xpack.lens.metric.maxTooltip', {
-            defaultMessage:
-              'If the maximum value is specified, the minimum value is fixed at zero.',
+    groups: [
+      {
+        groupId: LENS_METRIC_GROUP_ID.METRIC,
+        dataTestSubj: 'lnsMetric_primaryMetricDimensionPanel',
+        groupLabel: i18n.translate('xpack.lens.primaryMetric.label', {
+          defaultMessage: 'Primary metric',
+        }),
+        paramEditorCustomProps: {
+          headingLabel: i18n.translate('xpack.lens.primaryMetric.headingLabel', {
+            defaultMessage: 'Value',
           }),
         },
-        {
-          groupId: LENS_METRIC_GROUP_ID.BREAKDOWN_BY,
-          dataTestSubj: 'lnsMetric_breakdownByDimensionPanel',
-          groupLabel: i18n.translate('xpack.lens.metric.breakdownBy', {
-            defaultMessage: 'Break down by',
+        accessors: props.state.metricAccessor
+          ? [
+              {
+                columnId: props.state.metricAccessor,
+                ...getPrimaryAccessorDisplayConfig(),
+              },
+            ]
+          : [],
+        supportsMoreColumns: !props.state.metricAccessor,
+        filterOperations: isSupportedDynamicMetric,
+        isMetricDimension: true,
+        enableDimensionEditor: true,
+        enableFormatSelector: true,
+        requiredMinDimensionCount: 1,
+      },
+      {
+        groupId: LENS_METRIC_GROUP_ID.SECONDARY_METRIC,
+        dataTestSubj: 'lnsMetric_secondaryMetricDimensionPanel',
+        groupLabel: i18n.translate('xpack.lens.metric.secondaryMetric', {
+          defaultMessage: 'Secondary metric',
+        }),
+        paramEditorCustomProps: {
+          headingLabel: i18n.translate('xpack.lens.primaryMetric.headingLabel', {
+            defaultMessage: 'Value',
           }),
-          accessors: props.state.breakdownByAccessor
-            ? [
-                {
-                  columnId: props.state.breakdownByAccessor,
-                  triggerIconType: canCollapseBy ? ('aggregate' as const) : undefined,
-                },
-              ]
-            : [],
-          supportsMoreColumns: !props.state.breakdownByAccessor,
-          filterOperations: isBucketed,
-          enableDimensionEditor: true,
-          enableFormatSelector: true,
         },
-      ],
-      groupIds: [LENS_METRIC_GROUP_ID.BREAKDOWN_BY],
-      visualizationType: LENS_METRIC_ID,
-      visualizationState: props.state,
-    }),
+        accessors: props.state.secondaryMetricAccessor
+          ? [
+              {
+                columnId: props.state.secondaryMetricAccessor,
+                ...getSecondaryAccessorDisplayConfig(),
+              },
+            ]
+          : [],
+        supportsMoreColumns: !props.state.secondaryMetricAccessor,
+        filterOperations: isSupportedDynamicMetric,
+        isMetricDimension: true,
+        enableDimensionEditor: true,
+        enableFormatSelector: true,
+      },
+      {
+        groupId: LENS_METRIC_GROUP_ID.MAX,
+        dataTestSubj: 'lnsMetric_maxDimensionPanel',
+        groupLabel: i18n.translate('xpack.lens.metric.max', { defaultMessage: 'Maximum value' }),
+        paramEditorCustomProps: {
+          headingLabel: i18n.translate('xpack.lens.primaryMetric.headingLabel', {
+            defaultMessage: 'Value',
+          }),
+        },
+        accessors: props.state.maxAccessor
+          ? [
+              {
+                columnId: props.state.maxAccessor,
+              },
+            ]
+          : [],
+        isHidden: !props.state.maxAccessor && !isPrimaryMetricNumeric,
+        supportsMoreColumns: !props.state.maxAccessor,
+        filterOperations: isSupportedMetric,
+        enableDimensionEditor: true,
+        enableFormatSelector: false,
+        supportStaticValue: true,
+        prioritizedOperation: 'max',
+        groupTooltip: i18n.translate('xpack.lens.metric.maxTooltip', {
+          defaultMessage: 'If the maximum value is specified, the minimum value is fixed at zero.',
+        }),
+      },
+      {
+        groupId: LENS_METRIC_GROUP_ID.BREAKDOWN_BY,
+        dataTestSubj: 'lnsMetric_breakdownByDimensionPanel',
+        groupLabel: i18n.translate('xpack.lens.metric.breakdownBy', {
+          defaultMessage: 'Break down by',
+        }),
+        paramEditorCustomProps: {
+          emptyRowsDefault,
+        },
+        accessors: props.state.breakdownByAccessor
+          ? [
+              {
+                columnId: props.state.breakdownByAccessor,
+                triggerIconType: canCollapseBy ? ('aggregate' as const) : undefined,
+              },
+            ]
+          : [],
+        supportsMoreColumns: !props.state.breakdownByAccessor,
+        filterOperations: isBucketed,
+        enableDimensionEditor: true,
+        enableFormatSelector: true,
+      },
+    ],
   };
 };
 
