@@ -176,6 +176,7 @@ export const HostAutoDetectPage: React.FC<HostAutoDetectPageProps> = ({
                   isMetricsOnboardingEnabled={metricsOnboardingEnabled}
                   wiredStreamsStatus={wiredStreamsStatus}
                   streamsDocLink={docLinks?.links.observability.logsStreams}
+                  useInlineCopyOnly
                 />
               ),
             },

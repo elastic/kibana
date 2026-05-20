@@ -28,6 +28,7 @@ interface AutoDetectInstallStepProps {
     'isEnabled' | 'isLoading' | 'isEnabling' | 'enableWiredStreams'
   >;
   streamsDocLink?: string;
+  useInlineCopyOnly?: boolean;
 }
 
 export const AutoDetectInstallStep: React.FC<AutoDetectInstallStepProps> = ({
@@ -39,6 +40,7 @@ export const AutoDetectInstallStep: React.FC<AutoDetectInstallStepProps> = ({
   isMetricsOnboardingEnabled,
   wiredStreamsStatus,
   streamsDocLink,
+  useInlineCopyOnly = false,
 }) => {
   const { isEnabled, isLoading, isEnabling, enableWiredStreams } = wiredStreamsStatus;
 
@@ -52,15 +54,15 @@ export const AutoDetectInstallStep: React.FC<AutoDetectInstallStepProps> = ({
         <p>
           {isMetricsOnboardingEnabled
             ? i18n.translate(
-                'xpack.observability_onboarding.autoDetectPanel.p.wellScanYourHostLabel',
-                {
-                  defaultMessage: "We'll scan your host for logs and metrics, including:",
-                }
-              )
+              'xpack.observability_onboarding.autoDetectPanel.p.wellScanYourHostLabel',
+              {
+                defaultMessage: "We'll scan your host for logs and metrics, including:",
+              }
+            )
             : i18n.translate(
-                'xpack.observability_onboarding.logsEssential.autoDetectPanel.p.wellScanYourHostLabel',
-                { defaultMessage: "We'll scan your host for logs, including:" }
-              )}
+              'xpack.observability_onboarding.logsEssential.autoDetectPanel.p.wellScanYourHostLabel',
+              { defaultMessage: "We'll scan your host for logs, including:" }
+            )}
         </p>
       </EuiText>
       <EuiSpacer size="s" />
@@ -83,16 +85,21 @@ export const AutoDetectInstallStep: React.FC<AutoDetectInstallStepProps> = ({
       <EuiCodeBlock
         paddingSize="m"
         language="bash"
+        isCopyable={useInlineCopyOnly}
         data-test-subj="observabilityOnboardingAutoDetectPanelCodeSnippet"
       >
         {command}
       </EuiCodeBlock>
-      <EuiSpacer />
-      <CopyToClipboardButton
-        textToCopy={command}
-        fill={status === 'notStarted'}
-        data-onboarding-id={onboardingFlowId}
-      />
+      {!useInlineCopyOnly && (
+        <>
+          <EuiSpacer />
+          <CopyToClipboardButton
+            textToCopy={command}
+            fill={status === 'notStarted'}
+            data-onboarding-id={onboardingFlowId}
+          />
+        </>
+      )}
     </>
   );
 };
