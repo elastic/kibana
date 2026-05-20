@@ -7,6 +7,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 import { addTransactionLabels, withSpan } from '@kbn/apm-utils';
+import apm from 'elastic-apm-node';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -26,6 +27,11 @@ jest.mock('@kbn/apm-utils', () => ({
   withSpan: jest.fn((_opts: unknown, cb: () => unknown) => cb()),
 }));
 
+jest.mock('elastic-apm-node', () => ({
+  default: { setCustomContext: jest.fn() },
+  __esModule: true,
+}));
+
 jest.mock('../../summary_client');
 jest.mock('../../burn_rates_client');
 jest.mock('../../composites/compute_composite_summary');
@@ -39,6 +45,9 @@ const mockComputeCompositeSummary = computeCompositeSummary as jest.MockedFuncti
 
 const addTransactionLabelsMock = addTransactionLabels as jest.MockedFunction<
   typeof addTransactionLabels
+>;
+const setCustomContextMock = apm.setCustomContext as jest.MockedFunction<
+  typeof apm.setCustomContext
 >;
 const withSpanMock = withSpan as jest.MockedFunction<typeof withSpan>;
 
@@ -164,6 +173,7 @@ describe('computeAndPersistCompositeSummaries', () => {
     jest.useFakeTimers().setSystemTime(TEST_DATE);
     jest.clearAllMocks();
     addTransactionLabelsMock.mockClear();
+    setCustomContextMock.mockClear();
     withSpanMock.mockClear();
 
     mockComputeSummaries = jest
@@ -632,17 +642,19 @@ describe('computeAndPersistCompositeSummaries', () => {
         abortController,
       });
 
-      expect(addTransactionLabelsMock).toHaveBeenCalledWith(
+      expect(addTransactionLabelsMock).toHaveBeenCalledWith({
+        plugin: 'slo',
+        composite_slo_summary_run_outcome: 'success',
+        composite_slo_summary_hit_max_limit: false,
+      });
+      expect(setCustomContextMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          plugin: 'slo',
-          composite_slo_summary_run_outcome: 'success',
           composite_slo_summary_processed_composites: 1,
           composite_slo_summary_pages_fetched: 1,
           composite_slo_summary_decode_errors: 0,
           composite_slo_summary_space_errors: 0,
           composite_slo_summary_compute_errors: 0,
           composite_slo_summary_bulk_errors: 0,
-          composite_slo_summary_hit_max_limit: false,
           composite_slo_summary_duration_ms: expect.any(Number),
         })
       );
@@ -685,9 +697,13 @@ describe('computeAndPersistCompositeSummaries', () => {
       });
 
       expect(withSpanMock).not.toHaveBeenCalled();
-      expect(addTransactionLabelsMock).toHaveBeenCalledWith(
+      expect(addTransactionLabelsMock).toHaveBeenCalledWith({
+        plugin: 'slo',
+        composite_slo_summary_run_outcome: 'success',
+        composite_slo_summary_hit_max_limit: false,
+      });
+      expect(setCustomContextMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          composite_slo_summary_run_outcome: 'success',
           composite_slo_summary_processed_composites: 0,
           composite_slo_summary_pages_fetched: 1,
         })
@@ -707,11 +723,11 @@ describe('computeAndPersistCompositeSummaries', () => {
         abortController,
       });
 
-      expect(addTransactionLabelsMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          composite_slo_summary_run_outcome: 'aborted',
-        })
-      );
+      expect(addTransactionLabelsMock).toHaveBeenCalledWith({
+        plugin: 'slo',
+        composite_slo_summary_run_outcome: 'aborted',
+        composite_slo_summary_hit_max_limit: false,
+      });
     });
 
     it('sets error outcome when bulk rejects a non-abort error', async () => {
@@ -727,11 +743,11 @@ describe('computeAndPersistCompositeSummaries', () => {
         })
       ).rejects.toThrow('ES unavailable');
 
-      expect(addTransactionLabelsMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          composite_slo_summary_run_outcome: 'error',
-        })
-      );
+      expect(addTransactionLabelsMock).toHaveBeenCalledWith({
+        plugin: 'slo',
+        composite_slo_summary_run_outcome: 'error',
+        composite_slo_summary_hit_max_limit: false,
+      });
     });
 
     it('emits four spans per processed page across multiple pages', async () => {
@@ -748,7 +764,12 @@ describe('computeAndPersistCompositeSummaries', () => {
       });
 
       expect(withSpanMock).toHaveBeenCalledTimes(8);
-      expect(addTransactionLabelsMock).toHaveBeenCalledWith(
+      expect(addTransactionLabelsMock).toHaveBeenCalledWith({
+        plugin: 'slo',
+        composite_slo_summary_run_outcome: 'success',
+        composite_slo_summary_hit_max_limit: false,
+      });
+      expect(setCustomContextMock).toHaveBeenCalledWith(
         expect.objectContaining({
           composite_slo_summary_processed_composites: 2,
           composite_slo_summary_pages_fetched: 2,

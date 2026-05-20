@@ -8,6 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 import pMap from 'p-map';
 import { addTransactionLabels, withSpan } from '@kbn/apm-utils';
+import apm from 'elastic-apm-node';
 import type {
   ElasticsearchClient,
   Logger,
@@ -180,6 +181,9 @@ export async function computeAndPersistCompositeSummaries({
     addTransactionLabels({
       plugin: 'slo',
       composite_slo_summary_run_outcome: runOutcome,
+      composite_slo_summary_hit_max_limit: hitMaxLimit,
+    });
+    apm.setCustomContext({
       composite_slo_summary_processed_composites: totalProcessed,
       composite_slo_summary_pages_fetched: pagesFetched,
       composite_slo_summary_decode_errors: stats.decodeErrors,
@@ -187,7 +191,6 @@ export async function computeAndPersistCompositeSummaries({
       composite_slo_summary_compute_errors: stats.computeErrors,
       composite_slo_summary_bulk_errors: stats.bulkErrors,
       composite_slo_summary_duration_ms: Date.now() - startTime,
-      composite_slo_summary_hit_max_limit: hitMaxLimit,
     });
   }
 
