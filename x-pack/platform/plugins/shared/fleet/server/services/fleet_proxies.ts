@@ -18,7 +18,7 @@ import {
   SO_SEARCH_LIMIT,
   MAX_CONCURRENT_FLEET_PROXIES_OPERATIONS,
 } from '../constants';
-import { FleetError, FleetProxyUnauthorizedError } from '../errors';
+import { FleetProxyUnauthorizedError } from '../errors';
 import { validateFleetSavedObjectId } from '../../common/services';
 import type {
   DownloadSource,
@@ -80,10 +80,7 @@ export async function createFleetProxy(
   const logger = appContextService.getLogger();
   logger.debug(`Creating fleet proxy ${data}`);
 
-  const idError = validateFleetSavedObjectId(options?.id);
-  if (idError) {
-    throw new FleetError(idError);
-  }
+  validateFleetSavedObjectId(options?.id);
 
   const res = await soClient.create<FleetProxySOAttributes>(
     FLEET_PROXY_SAVED_OBJECT_TYPE,

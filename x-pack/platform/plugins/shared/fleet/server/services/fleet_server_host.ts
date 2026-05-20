@@ -35,7 +35,6 @@ import {
   FleetServerHostUnauthorizedError,
   FleetServerHostNotFoundError,
   FleetEncryptedSavedObjectEncryptionKeyRequired,
-  FleetError,
 } from '../errors';
 
 import { appContextService } from './app_context';
@@ -86,10 +85,7 @@ class FleetServerHostService {
     const logger = appContextService.getLogger();
     const data: FleetServerHostSOAttributes = { ...omit(fleetServerHost, ['ssl', 'secrets']) };
 
-    const idError = validateFleetSavedObjectId(options?.id);
-    if (idError) {
-      throw new FleetError(idError);
-    }
+    validateFleetSavedObjectId(options?.id);
 
     if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
       throw new FleetEncryptedSavedObjectEncryptionKeyRequired(

@@ -142,10 +142,7 @@ class DownloadSourceService {
     const logger = appContextService.getLogger();
     logger.debug(`Creating new download source`);
 
-    const idError = validateFleetSavedObjectId(options?.id);
-    if (idError) {
-      throw new FleetError(idError);
-    }
+    validateFleetSavedObjectId(options?.id);
 
     const data: DownloadSourceSOAttributes = {
       ...omit(downloadSource, ['ssl', 'auth', 'secrets']),

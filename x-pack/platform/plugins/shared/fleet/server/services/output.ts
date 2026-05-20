@@ -563,10 +563,7 @@ class OutputService {
     const logger = appContextService.getLogger();
     logger.debug(`Creating new output`);
 
-    const idError = validateFleetSavedObjectId(options?.id);
-    if (idError) {
-      throw new FleetError(idError);
-    }
+    validateFleetSavedObjectId(options?.id);
 
     const data: OutputSOAttributes = { ...omit(output, ['ssl', 'secrets']) };
 

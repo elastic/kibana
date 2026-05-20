@@ -522,10 +522,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   ): Promise<PackagePolicy> {
     const logger = this.getLogger('create');
 
-    const idError = validateFleetSavedObjectId(options?.id);
-    if (idError) {
-      throw new FleetError(idError);
-    }
+    validateFleetSavedObjectId(options?.id);
 
     logger.debug(
       () =>
