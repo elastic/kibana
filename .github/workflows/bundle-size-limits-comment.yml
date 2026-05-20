@@ -92,7 +92,7 @@ jobs:
 
             Large bundle size increases can affect page load performance. Consider whether dependencies can be lazy-loaded or code split to reduce the bundle.
 
-            See the [bundle optimization guide](https://docs.elastic.dev/kibana-dev-docs/key-concepts/performance) for tips.
+            See the [bundle optimization guide](https://www.elastic.co/docs/extend/kibana/ci-metrics#ci-metric-resolving-overages) for tips.
 
             ${MARKER}`;
 
