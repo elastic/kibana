@@ -48,7 +48,6 @@ export const fetchDocuments = async (
   // Build the search request (this is the ES DSL)
   const searchRequest = searchSource.build();
 
-  // Call typed search service with pagination enabled
   const result = await services.data.search.dslPaginated(
     {
       index: dataView,
