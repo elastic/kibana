@@ -61,6 +61,12 @@ const TOGGLE_ACTIVE_SHADOW =
 // starts overlapping the minimap (bottom-left of the canvas).
 const COMPACT_THRESHOLD_PX = 800;
 
+const BAR_HEIGHT = 54;
+// How many px of the bar remain visible as a "tab" while hidden.
+const HANDLE_HEIGHT = 8;
+// How long (ms) after the last activity event before the bar re-appears.
+const AUTOHIDE_TIMEOUT_MS = 1200;
+
 // Treat any zoom within this tolerance of 1.0 as "default" so floating-point
 // drift from React Flow's zoom animations doesn't keep the reset button
 // visible after the user lands back at 100 %.
@@ -305,6 +311,23 @@ function ZoomMenuItems() {
   );
 }
 
+// Null-rendering child — must only be mounted inside a ReactFlowProvider
+// (i.e. when editorView === 'graph'). Notifies the bar when node selection
+// changes so the bar can stay hidden while a step is selected.
+function SelectionWatcher({
+  onSelectionChange,
+}: {
+  onSelectionChange: (hasSelected: boolean) => void;
+}) {
+  const hasSelected = useStore((s) => s.nodes.some((n) => n.selected));
+  const callbackRef = useRef(onSelectionChange);
+  callbackRef.current = onSelectionChange;
+  useEffect(() => {
+    callbackRef.current(hasSelected);
+  }, [hasSelected]);
+  return null;
+}
+
 export function WorkflowDetailBottomBar({
   editorView,
   onEditorViewChange,
@@ -320,6 +343,70 @@ export function WorkflowDetailBottomBar({
   const barRef = useRef<HTMLDivElement>(null);
   const [isCompact, setIsCompact] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  // Auto-hide: any user activity (scroll, click, keydown) hides the bar and
+  // resets the idle timer. The bar reappears after AUTOHIDE_TIMEOUT_MS of
+  // inactivity — unless a step is selected or an editor has focus.
+  const [isHidden, setIsHidden] = useState(false);
+  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasSelectedNodeRef = useRef(false);
+
+  const scheduleReappear = useCallback(() => {
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    idleTimerRef.current = setTimeout(() => {
+      if (hasSelectedNodeRef.current) return;
+      const active = document.activeElement as HTMLElement | null;
+      const isEditorFocused =
+        active != null &&
+        (active.tagName === 'TEXTAREA' ||
+          active.tagName === 'INPUT' ||
+          active.contentEditable === 'true');
+      if (!isEditorFocused) setIsHidden(false);
+    }, AUTOHIDE_TIMEOUT_MS);
+  }, []);
+
+  const handleSelectionChange = useCallback(
+    (hasSelected: boolean) => {
+      hasSelectedNodeRef.current = hasSelected;
+      if (hasSelected) {
+        if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+        setIsHidden(true);
+      } else {
+        scheduleReappear();
+      }
+    },
+    [scheduleReappear]
+  );
+
+  const triggerActivity = useCallback(
+    (e: Event) => {
+      if (barRef.current?.contains(e.target as Node)) return;
+      setIsHidden(true);
+      scheduleReappear();
+    },
+    [scheduleReappear]
+  );
+
+  useEffect(() => {
+    const opts = { passive: true, capture: true } as const;
+    window.addEventListener('wheel', triggerActivity, opts);
+    document.addEventListener('keydown', triggerActivity, opts);
+    document.addEventListener('pointerdown', triggerActivity, opts);
+    return () => {
+      window.removeEventListener('wheel', triggerActivity, opts);
+      document.removeEventListener('keydown', triggerActivity, opts);
+      document.removeEventListener('pointerdown', triggerActivity, opts);
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    };
+  }, [triggerActivity]);
+
+  const handleBarMouseEnter = useCallback(() => {
+    if (hasSelectedNodeRef.current) return;
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    setIsHidden(false);
+  }, []);
+
+  const barBottom = isHidden ? -(BAR_HEIGHT - HANDLE_HEIGHT) : 26 + bottomOffset;
 
   useEffect(() => {
     const parent = barRef.current?.offsetParent as HTMLElement | null;
@@ -368,19 +455,21 @@ export function WorkflowDetailBottomBar({
 
     return (
       <div
+        ref={barRef}
+        onMouseEnter={handleBarMouseEnter}
         css={{
           position: 'absolute',
-          bottom: 26 + bottomOffset,
+          bottom: barBottom,
           left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 5,
-          height: 54,
+          height: BAR_HEIGHT,
           borderRadius: 10,
           background: euiTheme.colors.backgroundBasePlain,
           boxShadow: BAR_SHADOW,
           display: 'flex',
           alignItems: 'center',
-          transition: 'bottom 180ms ease',
+          transition: 'bottom 250ms cubic-bezier(0.4, 0, 0.2, 1)',
           '& .euiButtonIcon, & .euiButtonIcon svg': {
             color: euiTheme.colors.text,
           },
@@ -470,6 +559,9 @@ export function WorkflowDetailBottomBar({
             </>
           ) : null}
         </EuiFlexGroup>
+        {editorView === 'graph' && (
+          <SelectionWatcher onSelectionChange={handleSelectionChange} />
+        )}
       </div>
     );
   }
@@ -490,19 +582,20 @@ export function WorkflowDetailBottomBar({
   return (
     <div
       ref={barRef}
+      onMouseEnter={handleBarMouseEnter}
       css={{
         position: 'absolute',
-        bottom: 26 + bottomOffset,
+        bottom: barBottom,
         left: '50%',
         transform: 'translateX(-50%)',
         zIndex: 5,
-        height: 54,
+        height: BAR_HEIGHT,
         borderRadius: 10,
         background: euiTheme.colors.backgroundBasePlain,
         boxShadow: BAR_SHADOW,
         display: 'flex',
         alignItems: 'center',
-        transition: 'bottom 180ms ease',
+        transition: 'bottom 250ms cubic-bezier(0.4, 0, 0.2, 1)',
         // Force a uniform icon color for every icon-button rendered inside
         // the bar, regardless of the EUI color prop each child uses.
         '& .euiButtonIcon, & .euiButtonIcon svg': {
@@ -550,6 +643,9 @@ export function WorkflowDetailBottomBar({
           </>
         )}
       </EuiFlexGroup>
+      {editorView === 'graph' && (
+        <SelectionWatcher onSelectionChange={handleSelectionChange} />
+      )}
     </div>
   );
 }
