@@ -6,7 +6,10 @@
  */
 
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
+import {
+  createWorkflowsClientMock,
+  workflowsExtensionsMock,
+} from '@kbn/workflows-extensions/server/mocks';
 import {
   CaseCreatedTriggerId,
   CaseUpdatedTriggerId,
@@ -25,12 +28,12 @@ describe('registerCasesWorkflowEventBridge', () => {
   const workflowsExtensions = workflowsExtensionsMock.createStart();
   const logger = loggingSystemMock.createLogger();
   const request = httpServerMock.createKibanaRequest();
-  let mockClient = { emitEvent: jest.fn(), isWorkflowsAvailable: true };
+  let mockClient = createWorkflowsClientMock();
   let eventBus = new CasesEventBus();
 
   beforeEach(() => {
     eventBus = new CasesEventBus();
-    mockClient = { emitEvent: jest.fn(), isWorkflowsAvailable: true };
+    mockClient = createWorkflowsClientMock();
     workflowsExtensions.getClient.mockResolvedValue(mockClient);
     registerCasesWorkflowEventBridge(eventBus, workflowsExtensions, logger);
   });
@@ -149,10 +152,9 @@ describe('registerCasesWorkflowEventBridge', () => {
   });
 
   it('logs warning when forwarding fails', async () => {
-    mockClient = {
+    mockClient = createWorkflowsClientMock({
       emitEvent: jest.fn().mockRejectedValue(new Error('boom')),
-      isWorkflowsAvailable: true,
-    };
+    });
     workflowsExtensions.getClient.mockResolvedValue(mockClient);
     registerCasesWorkflowEventBridge(eventBus, workflowsExtensions, logger);
     eventBus.emitCaseCreated(request, { caseId: 'case-1', owner: 'securitySolution' });

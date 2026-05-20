@@ -19,7 +19,10 @@ import {
   MetricsExecutionContextAction,
   MetricsExecutionContextName,
 } from './execution_context_enums';
-import { EsqlResponseError, extractEsqlEmbeddedError } from './esql_response_error';
+import {
+  EsqlResponseError,
+  extractEsqlEmbeddedError,
+} from '../../../chart/utils/esql_response_error';
 import { esqlResultToPlainObjects } from './esql_result_to_plain_objects';
 import { getMetricsExecutionContext } from './execution_context';
 
