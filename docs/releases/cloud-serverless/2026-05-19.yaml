@@ -172,9 +172,9 @@ entries:
   - https://github.com/elastic/kibana/issues/269029
 - file:
     name: 269047.yaml
-    checksum: 5a6d79e5b630d71c9daa6aaab018e90aa2da3fcd
+    checksum: 13d68e4592f879bd022974fde1cfaf6be209db4d
   type: bug-fix
-  title: Make `with` optional for steps with no required params
+  title: Make `with` optional for workflow steps with no required parameters
   products:
   - product: cloud-serverless
     target: 2026-05-19
@@ -184,13 +184,13 @@ entries:
   - '# PRIVATE: https://github.com/elastic/security-team/issues/17302'
 - file:
     name: 268945.yaml
-    checksum: e72eef432067222ca59a309fe7d7a1aedf36bc0a
+    checksum: d2a5ff9b974f27e9b0de64b2f17d90584d4f89bb
   type: enhancement
-  title: Register workflows ai as inference features on Feature Settings page
+  title: Add `ai.prompt`, `ai.summarize`, and `ai.classify` workflow AI steps to the Feature Settings page
   products:
   - product: cloud-serverless
     target: 2026-05-19
-  description: Adds `ai.prompt`, `ai.summarize`, and `ai.classify` workflow ai steps to the Feature Settings page, allowing administrators to customize the model list of each ai step on a per-space basis.
+  description: These changes allow administrators to customize the model list of each AI step on a per-space basis.
   areas:
   - Search and data
   prs:

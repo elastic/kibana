@@ -6,5 +6,5 @@ products:
   target: 2026-05-19
 areas:
 - Search and data
-title: Register workflows ai as inference features on Feature Settings page
-description: Adds `ai.prompt`, `ai.summarize`, and `ai.classify` workflow ai steps to the Feature Settings page, allowing administrators to customize the model list of each ai step on a per-space basis.
+title: Add `ai.prompt`, `ai.summarize`, and `ai.classify` workflow AI steps to the Feature Settings page
+description: These changes allow administrators to customize the model list of each AI step on a per-space basis.
