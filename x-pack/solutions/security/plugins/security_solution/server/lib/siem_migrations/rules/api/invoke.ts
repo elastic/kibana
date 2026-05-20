@@ -12,6 +12,8 @@ import { SIEM_RULE_MIGRATION_INVOKE_PATH } from '../../../../../common/siem_migr
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { authz } from './util/authz';
 import { withLicense } from '../../common/api/util/with_license';
+import type { MigrateRuleConfig } from '../task/agent/types';
+import type { RuleMigrationTaskInput } from '../task/rule_migrations_task_runner';
 
 const REQUEST_TIMEOUT = 3 * 60 * 1000; // 3 min — rules migration ~60s typical
 
@@ -56,7 +58,10 @@ export const registerSiemRuleMigrationsInvokeRoute = (
           const invoker = await ruleMigrationsClient.task.createInvoker(connectorId, {
             abortController,
           });
-          const output = await invoker.execute(input as never, config as never);
+          const output = await invoker.execute(
+            input as unknown as RuleMigrationTaskInput,
+            config as unknown as MigrateRuleConfig
+          );
 
           return res.ok({ body: { output } });
         } catch (err) {
