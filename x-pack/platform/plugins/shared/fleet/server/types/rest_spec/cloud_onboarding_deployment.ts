@@ -19,9 +19,13 @@ const CloudOnboardingDeploymentMechanismSchema = schema.oneOf(
     schema.literal('identity_federation'),
     schema.literal('firehose'),
     schema.literal('cloud_forwarder'),
+    schema.literal('agent_based'),
   ],
   {
-    meta: { description: 'Delivery mechanism: identity_federation, firehose, or cloud_forwarder.' },
+    meta: {
+      description:
+        'Delivery mechanism: identity_federation, firehose, cloud_forwarder, or agent_based.',
+    },
   }
 );
 
@@ -49,10 +53,6 @@ const RequestServiceVarsSchema = schema.recordOf(
   ServiceVarsEntrySchema,
   { meta: { description: 'Per-service source configs.' } }
 );
-
-const RequestSecretsSchema = schema.recordOf(schema.string({ minLength: 1 }), schema.string(), {
-  meta: { description: 'Deployment-level encrypted secrets (e.g. external_id).' },
-});
 
 const OnboardingDeploymentIdParamSchema = schema.object({
   id: schema.string({
@@ -135,7 +135,6 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
     }),
     vars: schema.maybe(RequestVarsSchema),
     serviceVars: schema.maybe(RequestServiceVarsSchema),
-    secrets: schema.maybe(RequestSecretsSchema),
   }),
 };
 

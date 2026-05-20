@@ -32,6 +32,7 @@ import type {
   DeleteCloudConnectorRequestSchema,
   GetCloudConnectorUsageRequestSchema,
 } from '../../types/rest_spec/cloud_connector';
+import { FleetError } from '../../errors';
 
 export const createCloudConnectorHandler: FleetRequestHandler<
   undefined,
@@ -63,14 +64,22 @@ export const createCloudConnectorHandler: FleetRequestHandler<
       typeof externalIdVar.value === 'string'
     ) {
       logger.debug('external_id is a plain string — creating Fleet secret');
-      const [secret] = await createSecrets({ esClient, values: [externalIdVar.value] });
-      if ('id' in secret) {
-        createdSecretId = secret.id;
-        body.vars = {
-          ...body.vars,
-          external_id: { type: 'password', value: { isSecretRef: true, id: createdSecretId } },
-        };
+      let secret;
+      try {
+        [secret] = await createSecrets({ esClient, values: [externalIdVar.value] });
+      } catch (secretError) {
+        logger.error('Failed to create Fleet secret for external_id', secretError);
+        throw new FleetError('Failed to securely store external_id');
       }
+      if (!secret || !('id' in secret)) {
+        logger.error('createSecrets returned a non-secret result for external_id');
+        throw new FleetError('Failed to securely store external_id');
+      }
+      createdSecretId = secret.id;
+      body.vars = {
+        ...body.vars,
+        external_id: { type: 'password', value: { isSecretRef: true, id: createdSecretId } },
+      };
     }
 
     let cloudConnector;

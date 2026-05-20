@@ -547,10 +547,13 @@ export const CloudOnboardingDeploymentDebugger: React.FunctionComponent = () => 
               value={getByIdValue}
               onChange={(e) => setGetByIdValue(e.target.value)}
               hasNoInitialSelection
-              options={deployments.map((d) => ({
-                value: d.id,
-                text: `${d.id.slice(0, 8)}… [${d.status}] (${d.mechanisms.join(', ')})`,
-              }))}
+              options={[
+                { value: '', text: 'Select a deployment…' },
+                ...deployments.map((d) => ({
+                  value: d.id,
+                  text: `${d.id.slice(0, 8)}… [${d.status}] (${d.mechanisms.join(', ')})`,
+                })),
+              ]}
               disabled={deploymentsLoading}
               isLoading={deploymentsLoading}
             />

@@ -7,7 +7,10 @@
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE } from '../../common/constants';
+import {
+  CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+  CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+} from '../../common/constants';
 import type { CloudOnboardingDeploymentMechanism } from '../../common/types/models/cloud_onboarding_deployment';
 import type { CloudOnboardingDeploymentSOAttributes } from '../types/so_attributes';
 
@@ -38,6 +41,21 @@ function makeSOResponse(id: string, attributes: CloudOnboardingDeploymentSOAttri
   };
 }
 
+// Routes soClient.get by SO type so create() tests get a proper connector stub for the
+// existence check and the correct deployment fixture for the getById retrieval.
+function mockGetByType(
+  soClient: ReturnType<typeof savedObjectsClientMock.create>,
+  deploymentId: string,
+  deploymentAttrs: CloudOnboardingDeploymentSOAttributes
+) {
+  soClient.get.mockImplementation((type: string, id: string) => {
+    if (type === CLOUD_CONNECTOR_SAVED_OBJECT_TYPE) {
+      return Promise.resolve({ id, type, references: [], attributes: {} } as any);
+    }
+    return Promise.resolve(makeSOResponse(deploymentId, deploymentAttrs));
+  });
+}
+
 describe('cloudOnboardingDeploymentService', () => {
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;
 
@@ -49,7 +67,7 @@ describe('cloudOnboardingDeploymentService', () => {
     it('creates a deployment SO with server-set status/attemptCount and returns the mapped deployment', async () => {
       const attrs = makeAttributes();
       soClient.create.mockResolvedValue(makeSOResponse('deploy-1', attrs));
-      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', attrs));
+      mockGetByType(soClient, 'deploy-1', attrs);
 
       const result = await cloudOnboardingDeploymentService.create(soClient, {
         provider: 'aws',
@@ -60,6 +78,7 @@ describe('cloudOnboardingDeploymentService', () => {
         serviceVars: {},
       });
 
+      expect(soClient.get).toHaveBeenCalledWith(CLOUD_CONNECTOR_SAVED_OBJECT_TYPE, 'conn-1');
       expect(soClient.create).toHaveBeenCalledWith(
         CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
         expect.objectContaining({
@@ -75,7 +94,26 @@ describe('cloudOnboardingDeploymentService', () => {
       expect(result.attemptCount).toBe(1);
     });
 
+    it('propagates not-found error from connector check without creating the deployment', async () => {
+      soClient.get.mockRejectedValue(
+        new Error('Saved object [fleet-cloud-connector/missing] not found')
+      );
+
+      await expect(
+        cloudOnboardingDeploymentService.create(soClient, {
+          provider: 'aws',
+          connectorId: 'missing',
+          mechanisms: [],
+          services: ['cloudtrail'],
+        })
+      ).rejects.toThrow('not found');
+
+      expect(soClient.create).not.toHaveBeenCalled();
+    });
+
     it('propagates errors thrown by soClient.create', async () => {
+      const attrs = makeAttributes();
+      mockGetByType(soClient, 'deploy-1', attrs);
       soClient.create.mockRejectedValue(new Error('write failed'));
 
       await expect(
@@ -345,7 +383,7 @@ describe('cloudOnboardingDeploymentService', () => {
           packagePolicyIds: ['pkg-aws-001'],
         });
         soClient.create.mockResolvedValue(makeSOResponse('deploy-uc1', attrs));
-        soClient.get.mockResolvedValue(makeSOResponse('deploy-uc1', attrs));
+        mockGetByType(soClient, 'deploy-uc1', attrs);
 
         const result = await cloudOnboardingDeploymentService.create(soClient, {
           provider: 'aws',
@@ -378,7 +416,7 @@ describe('cloudOnboardingDeploymentService', () => {
           packagePolicyIds: ['pkg-aws-002'],
         });
         soClient.create.mockResolvedValue(makeSOResponse('deploy-uc2', attrs));
-        soClient.get.mockResolvedValue(makeSOResponse('deploy-uc2', attrs));
+        mockGetByType(soClient, 'deploy-uc2', attrs);
 
         const result = await cloudOnboardingDeploymentService.create(soClient, {
           provider: 'aws',
@@ -415,7 +453,7 @@ describe('cloudOnboardingDeploymentService', () => {
           packagePolicyIds: undefined,
         });
         soClient.create.mockResolvedValue(makeSOResponse('deploy-uc3', attrs));
-        soClient.get.mockResolvedValue(makeSOResponse('deploy-uc3', attrs));
+        mockGetByType(soClient, 'deploy-uc3', attrs);
 
         const result = await cloudOnboardingDeploymentService.create(soClient, {
           provider: 'aws',
@@ -453,7 +491,7 @@ describe('cloudOnboardingDeploymentService', () => {
           agentPolicyId: undefined,
         });
         soClient.create.mockResolvedValue(makeSOResponse('deploy-uc6', attrs));
-        soClient.get.mockResolvedValue(makeSOResponse('deploy-uc6', attrs));
+        mockGetByType(soClient, 'deploy-uc6', attrs);
 
         const result = await cloudOnboardingDeploymentService.create(soClient, {
           provider: 'aws',
@@ -524,7 +562,7 @@ describe('cloudOnboardingDeploymentService', () => {
             packagePolicyIds: undefined,
           });
           soClient.create.mockResolvedValue(makeSOResponse(`deploy-${_pushMechanism}`, attrs));
-          soClient.get.mockResolvedValue(makeSOResponse(`deploy-${_pushMechanism}`, attrs));
+          mockGetByType(soClient, `deploy-${_pushMechanism}`, attrs);
 
           const result = await cloudOnboardingDeploymentService.create(soClient, {
             provider: 'aws',
