@@ -22,7 +22,8 @@ import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import { asInteger } from '../../../../../common/utils/formatters';
-import { RED_METRICS_CHART_ELEMENT, RedMetricsChartActions } from './red_metrics_chart_actions';
+import { APM_CHART_EBT_ELEMENTS } from '../../../shared/charts/ebt_constants';
+import { RedMetricsChartActions } from './red_metrics_chart_actions';
 import { useGetChartAlertAnnotations } from './use_get_chart_alert_annotations';
 
 type ErrorDistribution =
@@ -155,7 +156,7 @@ export function ErrorCountChart({
                   }}
                   timeRange={{ from: start, to: end }}
                   ruleTypeId={ruleTypeId}
-                  element={RED_METRICS_CHART_ELEMENT.ERROR_COUNT}
+                  element={APM_CHART_EBT_ELEMENTS.ERROR_COUNT}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
