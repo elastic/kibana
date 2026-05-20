@@ -94,6 +94,9 @@ interface UseModalChangeHandlersResult {
 /**
  * Extracts all change handlers from the edit modal into a single hook.
  * Covers color, dimension, text, media editing, undo/redo, and save.
+ *
+ * @param args - Modal state, refs, and callbacks.
+ * @returns All change handler functions for the edit modal.
  */
 export const useModalChangeHandlers = ({
   selectedElement,

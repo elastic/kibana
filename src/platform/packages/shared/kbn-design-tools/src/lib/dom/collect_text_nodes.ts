@@ -28,6 +28,9 @@ const isHiddenElement = (el: Element): boolean => {
 /**
  * Recursively collect all non-empty Text nodes within the given element tree,
  * skipping hidden elements, aria-hidden subtrees, and screen-reader-only content.
+ *
+ * @param el - The root element to collect text nodes from.
+ * @returns Array of non-empty Text nodes in DOM order.
  */
 export const collectAllTextNodes = (el: Element): Text[] => {
   const nodes: Text[] = [];

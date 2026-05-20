@@ -23,6 +23,9 @@ interface HoverLockBounds {
  * panel lives) and provides a check to determine if the pointer is inside it.
  * Prevents retargeting when the cursor moves toward the controls, while
  * still allowing children inside the element to be targeted normally.
+ *
+ * @param hoverTarget - The currently hovered element, or null.
+ * @returns Lock check function and clear utility.
  */
 export const useHoverLock = (hoverTarget: HTMLElement | null) => {
   const bounds = useRef<HoverLockBounds | null>(null);

@@ -56,6 +56,9 @@ export interface InteractionMachineOptions {
  * (not React state) because pointer-move handlers fire every frame.
  *
  * See `InteractionState` for the full state diagram.
+ *
+ * @param options - Configuration for the interaction machine.
+ * @returns Pointer event handlers and current interaction state.
  */
 export const useInteractionMachine = (options: InteractionMachineOptions) => {
   const interaction = useRef<InteractionState>(IDLE);

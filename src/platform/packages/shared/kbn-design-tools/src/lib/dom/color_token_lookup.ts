@@ -45,13 +45,34 @@ const classifyToken = (name: string): TokenCategory => {
   return 'other';
 };
 
+/**
+ * Returns true if the token is classified as a text color.
+ *
+ * @param name - The EUI color token name.
+ * @returns Whether the token is a text color.
+ */
 export const isTextToken = (name: string): boolean => classifyToken(name) === 'text';
+/**
+ * Returns true if the token is classified as a background color.
+ *
+ * @param name - The EUI color token name.
+ * @returns Whether the token is a background color.
+ */
 export const isBgToken = (name: string): boolean => classifyToken(name) === 'background';
+/**
+ * Returns true if the token is classified as a border color.
+ *
+ * @param name - The EUI color token name.
+ * @returns Whether the token is a border color.
+ */
 export const isBorderToken = (name: string): boolean => classifyToken(name) === 'border';
 
 /**
  * Normalises any CSS color string to a lowercase hex value.
  * Returns `null` for non-color values or fully-transparent values.
+ *
+ * @param value - The CSS color string to normalise.
+ * @returns Lowercase hex string, or `null`.
  */
 export const toHex = (value: string): string | null => {
   if (isTransparentColor(value)) return null;
@@ -132,6 +153,13 @@ const getLookup = (() => {
   };
 })();
 
+/**
+ * Resolves a CSS color value to its matching EUI theme token name.
+ *
+ * @param cssValue - The raw CSS color value (hex, rgb, etc.).
+ * @param cssProp - The CSS property name for context-aware lookup.
+ * @returns The matching token name, or `undefined` if no match.
+ */
 export const colorToToken = (cssValue: string, cssProp: string): string | undefined => {
   const { textReverse, bgReverse, borderReverse, fallbackReverse } = getLookup();
   const hex = toHex(cssValue);
@@ -163,6 +191,9 @@ const tokenToColor = (token: string): string | undefined => getLookup().forward.
  * computed value from `original` matches an EUI token. If so, replace
  * the baked hex with a `var(--dt-tokenName, hex)` reference so the
  * clone auto-adapts when the color mode changes.
+ *
+ * @param original - The original element to read computed styles from.
+ * @param clone - The clone element to write token vars to.
  */
 export const tagColorTokens = (original: HTMLElement, clone: HTMLElement): void => {
   const computed = getComputedStyle(original);
@@ -180,6 +211,8 @@ export const tagColorTokens = (original: HTMLElement, clone: HTMLElement): void 
 /**
  * Walk a DOM tree and update every `var(--dt-*)` inline style so its
  * fallback hex matches the current color mode.
+ *
+ * @param root - The root element to walk.
  */
 export const resolveColorTokensDeep = (root: HTMLElement): void => {
   refreshTokenVars(root);

@@ -20,6 +20,9 @@ import {
  * or the developer toolbar - i.e. it should be ignored by measure/edit interactions.
  *
  * Elements can also be ignored by adding the `data-devtool-ignore` attribute.
+ *
+ * @param el - The element to check.
+ * @returns Whether the element should be ignored.
  */
 export const isIgnoredElement = (el: Element): boolean => {
   if (IGNORED_ELEMENT_IDS.has(el.id)) return true;

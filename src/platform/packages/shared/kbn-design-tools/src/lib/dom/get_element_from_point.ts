@@ -20,6 +20,9 @@ import { MEASURE_OVERLAY_ID } from '../constants';
  * The measure overlay uses `pointer-events: auto` to block hover on
  * underlying elements. We temporarily hide it so `elementsFromPoint`
  * can see through to the page content.
+ *
+ * @param event - The mouse event with coordinates.
+ * @returns The deepest HTMLElement at the coordinates, or `null`.
  */
 export const getElementFromPoint = (event: MouseEvent): HTMLElement | null => {
   const overlay = document.getElementById(MEASURE_OVERLAY_ID);

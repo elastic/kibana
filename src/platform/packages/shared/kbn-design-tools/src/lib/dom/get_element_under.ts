@@ -15,6 +15,10 @@ import { isIgnoredElement } from './is_ignored_element';
  * Managed elements are atomic: returns the root, not children.
  * Ignored UI elements block interaction (returns null).
  * Hidden originals are skipped.
+ *
+ * @param x - Pointer X coordinate.
+ * @param y - Pointer Y coordinate.
+ * @returns The targetable element, or `null`.
  */
 export const getElementUnder = (x: number, y: number): HTMLElement | null => {
   const elements = document.elementsFromPoint(x, y);

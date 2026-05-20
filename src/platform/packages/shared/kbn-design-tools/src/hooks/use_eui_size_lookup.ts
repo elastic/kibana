@@ -10,6 +10,11 @@
 import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 
+/**
+ * Builds a memoized reverse lookup from EUI size pixel values to token keys.
+ *
+ * @returns A map from pixel value to EUI size token key (e.g. `16 → "m"`).
+ */
 export const useEuiSizeLookup = () => {
   const { euiTheme } = useEuiTheme();
 

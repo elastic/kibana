@@ -297,6 +297,9 @@ const EUI_CLASS_RE = /^eui[A-Z]/;
  * Map a CSS class name (e.g. `euiAvatar`) to its EUI component name
  * (e.g. `EuiAvatar`), but only if that component is exported
  * from `@elastic/eui`.
+ *
+ * @param el - The element to inspect.
+ * @returns The EUI component name, or `null`.
  */
 export const resolveEuiTag = (el: Element): string | null => {
   for (const cls of el.classList) {
@@ -311,6 +314,9 @@ export const resolveEuiTag = (el: Element): string | null => {
 /**
  * Resolves a human-readable tag name for an element. Tries EUI class names
  * first, then falls back to the HTML tag.
+ *
+ * @param el - The element to resolve.
+ * @returns A human-readable tag name.
  */
 export const resolveTag = (el: Element): string => {
   return resolveEuiTag(el) ?? el.tagName.toLowerCase();

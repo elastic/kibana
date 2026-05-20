@@ -93,6 +93,9 @@ export const renderEuiComponentLive = async (
 
 /**
  * Position a clone at the center of the viewport.
+ *
+ * @param clone - The cloned element to position.
+ * @param rect - The element's bounding rect.
  */
 export const centerInViewport = (clone: HTMLElement, rect: DOMRect): void => {
   const centerX = Math.round((window.innerWidth - rect.width) / 2);

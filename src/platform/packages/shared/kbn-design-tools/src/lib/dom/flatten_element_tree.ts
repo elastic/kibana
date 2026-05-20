@@ -18,6 +18,13 @@ interface TreeNode {
   isClosing?: boolean;
 }
 
+/**
+ * Recursively flattens a DOM element tree into a flat array of tree nodes.
+ *
+ * @param el - The root element to flatten.
+ * @param depth - The current nesting depth.
+ * @returns Flat array of {@link TreeNode} objects.
+ */
 export const flattenElementTree = (el: Element, depth: number): TreeNode[] => {
   if (depth > MAX_TREE_DEPTH) return [];
 

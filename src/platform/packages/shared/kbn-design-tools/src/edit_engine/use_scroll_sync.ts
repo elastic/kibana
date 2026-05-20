@@ -16,6 +16,8 @@ import { setImportant } from './clone_element';
 /**
  * Keeps managed element positions in sync with the Kibana main scroll
  * container and window resize events.
+ *
+ * @param registry - Ref to the element registry containing tracked sessions.
  */
 export const useScrollSync = (registry: MutableRefObject<ElementRegistry>) => {
   const prevScroll = useRef({ x: 0, y: 0 });

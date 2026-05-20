@@ -23,6 +23,9 @@ import type { StyleChange, TextNodeChange, MediaChange } from '../edit_engine/el
  *
  * Revert is handled per-session by `ElementRegistry.resetAll` /
  * `removeSession`, so there is no separate `revertAll` here.
+ *
+ * @param registryRef - Ref to the element registry.
+ * @returns Edit count and an `applyEdits` function.
  */
 export const useEditChangeTracker = (registryRef: MutableRefObject<ElementRegistry>) => {
   /** Total number of tracked edits across all sessions. */

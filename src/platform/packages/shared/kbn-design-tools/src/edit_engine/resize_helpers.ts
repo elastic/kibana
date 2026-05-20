@@ -17,6 +17,16 @@ import type { ResizeState } from './interaction_state';
  * Calculate position and dimensions given a handle being dragged.
  * Edge handles (`n`, `e`, `s`, `w`) constrain to a single axis.
  * Corner handles (`nw`, `ne`, `sw`, `se`) resize both axes.
+ *
+ * @param handle - The resize handle being dragged.
+ * @param mouseDx - Horizontal pointer delta from start.
+ * @param mouseDy - Vertical pointer delta from start.
+ * @param baseWidth - Original element width.
+ * @param baseHeight - Original element height.
+ * @param baseDx - Position offset at resize start (x).
+ * @param baseDy - Position offset at resize start (y).
+ * @param minSize - Minimum allowed dimension.
+ * @returns Computed position and size deltas.
  */
 export const calcResizeDeltas = (
   handle: ResizeHandle,
@@ -60,6 +70,12 @@ export const calcResizeDeltas = (
 
 /**
  * Start a resize operation from a handle.
+ *
+ * @param session - The element session being resized.
+ * @param handle - The resize handle being dragged.
+ * @param clientX - Pointer X at resize start.
+ * @param clientY - Pointer Y at resize start.
+ * @returns The initial resize state.
  */
 export const startResize = (
   session: ElementSession,
@@ -102,6 +118,9 @@ const HANDLE_ANCHORS: ReadonlyArray<[ResizeHandle, (r: DOMRect) => [number, numb
  * - >= 64px: all 8 handles
  * - 24–64px: corners only (edges too crowded)
  * - < 24px: none (drag only, resize would dominate the target)
+ *
+ * @param rect - The element's bounding dimensions.
+ * @returns The handle display mode.
  */
 export const getHandleMode = (rect: {
   width: number;
@@ -122,6 +141,11 @@ export const getHandleMode = (rect: {
  * tiny elements, and handles are progressively removed as elements shrink.
  *
  * Returns the handle name if hit, or `null`.
+ *
+ * @param pointerX - Pointer X coordinate.
+ * @param pointerY - Pointer Y coordinate.
+ * @param rect - The element's bounding rect.
+ * @returns The handle under the pointer, or `null`.
  */
 export const findNearHandle = (
   pointerX: number,
@@ -153,6 +177,12 @@ export const findNearHandle = (
 /**
  * Builds a CSS transform string combining translate and optional scale.
  * Uses transform-origin: 0 0 so scale grows from top-left.
+ *
+ * @param dx - Horizontal translation.
+ * @param dy - Vertical translation.
+ * @param scaleX - Horizontal scale factor.
+ * @param scaleY - Vertical scale factor.
+ * @returns The CSS transform string.
  */
 export const buildTransform = (dx: number, dy: number, scaleX: number, scaleY: number): string => {
   // Round translate values to whole pixels to keep the element on the pixel
@@ -170,6 +200,10 @@ export const buildTransform = (dx: number, dy: number, scaleX: number, scaleY: n
 /**
  * Applies a resize frame: computes deltas, updates the transform, and
  * writes the new offsets back to the session.
+ *
+ * @param state - The current resize state.
+ * @param clientX - Current pointer X.
+ * @param clientY - Current pointer Y.
  */
 export const applyResizeMove = (state: ResizeState, clientX: number, clientY: number): void => {
   const { session, handle, startX, startY, baseWidth, baseHeight, baseDx, baseDy } = state;
@@ -201,6 +235,11 @@ export const applyResizeMove = (state: ResizeState, clientX: number, clientY: nu
 
 /**
  * Compute the absolute position of each resize handle relative to the outline box.
+ *
+ * @param width - The outline box width.
+ * @param height - The outline box height.
+ * @param handleSize - The handle element size in pixels.
+ * @returns Positions keyed by handle name.
  */
 export const getHandlePositions = (
   width: number,

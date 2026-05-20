@@ -62,6 +62,9 @@ const stripTranslate = (transform: string): string => {
  * If the target is a managed clone (has DEVTOOL_MANAGED_ATTR), it already has
  * all computed styles inlined, so a plain cloneNode(true) is enough.
  * For original DOM elements, copyStylesDeep captures computed styles.
+ *
+ * @param target - The element to clone for the preview.
+ * @returns The clone, element map, and text node map.
  */
 export const createPreviewClone = (target: HTMLElement): PreviewCloneResult => {
   const isManaged = target.hasAttribute(DEVTOOL_MANAGED_ATTR);

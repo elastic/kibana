@@ -23,6 +23,10 @@ const findStyleEl = (): HTMLStyleElement | null =>
  *
  * The fallback hex is included so the value still resolves if the
  * stylesheet hasn't been injected yet (e.g. in detached DOM).
+ *
+ * @param tokenName - The EUI token name.
+ * @param fallbackHex - Optional fallback hex value.
+ * @returns A CSS `var()` reference string.
  */
 export const getTokenVar = (tokenName: string, fallbackHex?: string): string => {
   const fallback = fallbackHex ? `, ${fallbackHex}` : '';
@@ -32,6 +36,9 @@ export const getTokenVar = (tokenName: string, fallbackHex?: string): string => 
 /**
  * Extracts the token name from a CSS `var(--dt-…)` value.
  * Returns `undefined` if the value is not a design-tool CSS var.
+ *
+ * @param value - The CSS value to parse.
+ * @returns The token name, or `undefined`.
  */
 export const parseTokenVar = (value: string): string | undefined => {
   const match = value.match(/^var\(--dt-([^,)]+)/);

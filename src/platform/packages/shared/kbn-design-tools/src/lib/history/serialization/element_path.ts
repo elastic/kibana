@@ -68,6 +68,10 @@ const buildSelector = (el: Element): string => {
  * Build a structural CSS selector path from `descendant` relative to
  * `root`. Returns `undefined` if `descendant` is not inside `root`,
  * or an empty string if they are the same element.
+ *
+ * @param root - The ancestor element to build the path from.
+ * @param descendant - The descendant element to locate.
+ * @returns A CSS selector path, or `undefined` if not inside `root`.
  */
 export const buildRelativeSelector = (root: Element, descendant: Element): string | undefined => {
   if (root === descendant) return '';

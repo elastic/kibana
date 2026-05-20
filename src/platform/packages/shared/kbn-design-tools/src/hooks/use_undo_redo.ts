@@ -34,6 +34,7 @@ import type { TransactionInput } from '../lib/history/transaction';
  *
  * @param registryRef - Ref to the element registry, needed by executors
  *   to look up sessions when applying/reversing transactions.
+ * @returns Undo/redo controls, reactive state, and the underlying stack.
  */
 export const useUndoRedo = (registryRef: MutableRefObject<ElementRegistry>) => {
   const stackRef = useRef(new UndoRedoStack());

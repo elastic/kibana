@@ -27,6 +27,11 @@ export interface PageColorScheme {
   readonly forcedColors: boolean;
 }
 
+/**
+ * Snapshots the current page color scheme (light/dark and forced-colors).
+ *
+ * @returns The current {@link PageColorScheme}.
+ */
 export const getPageColorScheme = (): PageColorScheme => ({
   colorMode: getPageColorMode(),
   forcedColors:

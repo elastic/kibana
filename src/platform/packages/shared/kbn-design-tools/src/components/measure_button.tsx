@@ -20,6 +20,8 @@ const LazyMeasureOverlay = lazy(() =>
 
 /**
  * Toggles measure mode from the developer toolbar.
+ *
+ * @returns A toolbar button that activates the measure overlay.
  */
 export const MeasureButton = () => {
   const [isMeasuring, setIsMeasuring] = useState(false);

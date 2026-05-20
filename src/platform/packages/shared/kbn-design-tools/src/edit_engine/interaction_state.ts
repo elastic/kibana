@@ -77,6 +77,7 @@ export interface ResizeState {
   readonly baseDy: number;
 }
 
+/** Shared singleton representing the idle (no interaction) state. */
 export const IDLE: IdleState = { type: 'idle' };
 
 /**
@@ -112,6 +113,10 @@ export type GestureCompletion =
 
 /**
  * Derive the CSS cursor from the current interaction state and hover target.
+ *
+ * @param state - The current interaction state.
+ * @param target - The hovered element, or null.
+ * @returns The CSS cursor value.
  */
 export const deriveCursor = (state: InteractionState, target: HTMLElement | null): string => {
   switch (state.type) {

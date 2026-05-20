@@ -22,6 +22,8 @@ const LazyDesignToolsButtonImpl = lazy(() =>
  * Thin shell that renders only a button icon until the user clicks it.
  * The full implementation (overlays, context menu, flyout, edit mode)
  * is lazy-loaded on first interaction to keep the initial bundle small.
+ *
+ * @returns A toolbar button that lazy-loads the design tools on first click.
  */
 export const DesignToolsButton = () => {
   const [activated, setActivated] = useState(false);

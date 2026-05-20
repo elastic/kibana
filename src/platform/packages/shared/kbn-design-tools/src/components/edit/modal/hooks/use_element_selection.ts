@@ -23,6 +23,9 @@ interface UseElementSelectionResult {
 /**
  * Manages element selection state in the edit modal: tracks the selected element,
  * highlights its clone in the preview, and reads its background color.
+ *
+ * @param elementMap - Map of original elements to their clone counterparts.
+ * @returns Selection state and handlers.
  */
 export const useElementSelection = (
   elementMap: RefObject<Map<Element, Element>>

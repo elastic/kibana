@@ -75,6 +75,9 @@ export const preloadAllEuiIcons = (() => {
  * icon type. Uses the pre-built icon SVG cache (from buildIconCache) to
  * avoid React renders and flushSync side-effects on live element roots.
  * Falls back to a temporary React render if the cache is not yet built.
+ *
+ * @param container - The DOM element containing the icon SVG.
+ * @param iconType - The EUI icon type name to render.
  */
 export const replaceIconContent = (container: Element, iconType: string): void => {
   const isSvg = (el: Element) => el.tagName.toLowerCase() === 'svg';
@@ -139,6 +142,13 @@ export const replaceIconContent = (container: Element, iconType: string): void =
   }
 };
 
+/**
+ * Sets an attribute on an element, replacing SVG icon content for icon-type attributes.
+ *
+ * @param element - The target DOM element.
+ * @param attribute - The attribute name to set.
+ * @param value - The attribute value.
+ */
 export const applySourceAttribute = (element: Element, attribute: string, value: string): void => {
   if (attribute === 'data-icon-type') {
     replaceIconContent(element, value);
@@ -234,6 +244,9 @@ const buildIconCacheImpl = async (): Promise<Map<string, string>> => {
 /**
  * Identify an EUI icon type from an SVG element by matching its path data
  * against known icons. Returns the icon type name or empty string.
+ *
+ * @param svgElement - The SVG element to identify.
+ * @returns The icon type name, or an empty string if unrecognised.
  */
 export const identifyIconType = async (svgElement: Element): Promise<string> => {
   const firstPath = svgElement.querySelector('path');

@@ -13,6 +13,8 @@ import { isEscapeKey } from '../lib/keyboard_shortcuts';
 /**
  * Registers a capture-phase keydown listener that calls `onEscape`
  * when the Escape key is pressed, preventing further propagation.
+ *
+ * @param onEscape - Callback invoked when Escape is pressed.
  */
 export const useEscapeKey = (onEscape: () => void) => {
   const handler = useCallback(

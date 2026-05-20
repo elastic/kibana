@@ -19,6 +19,9 @@ import { DEVTOOL_LIVE_ATTR } from '../lib/constants';
  * visible child.
  *
  * Static clones and regular DOM elements use themselves as the content root.
+ *
+ * @param target - The element to inspect.
+ * @returns The meaningful content root element.
  */
 export const getContentRoot = (target: HTMLElement): HTMLElement => {
   if (target.hasAttribute(DEVTOOL_LIVE_ATTR)) {
@@ -48,6 +51,9 @@ const isHiddenHelper = (el: HTMLElement): boolean => {
 
 /**
  * Check whether an element is a live React component wrapper.
+ *
+ * @param target - The element to check.
+ * @returns Whether the element has the live component attribute.
  */
 export const isLiveElement = (target: HTMLElement): boolean =>
   target.hasAttribute(DEVTOOL_LIVE_ATTR);

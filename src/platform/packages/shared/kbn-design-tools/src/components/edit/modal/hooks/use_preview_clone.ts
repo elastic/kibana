@@ -39,6 +39,9 @@ interface UsePreviewCloneResult {
  * Manages the preview clone lifecycle: creates the clone, builds
  * element/text/media mappings, collects editor entries, and handles
  * initial element selection.
+ *
+ * @param target - The original element to clone.
+ * @returns Clone state, element/text/media maps, and selection helpers.
  */
 export const usePreviewClone = (target: HTMLElement): UsePreviewCloneResult => {
   const [cloneRoot, setCloneRoot] = useState<HTMLElement | null>(null);

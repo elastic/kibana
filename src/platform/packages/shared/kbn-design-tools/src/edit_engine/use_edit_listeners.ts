@@ -13,6 +13,16 @@ import { type MutableRefObject, useEffect, useRef } from 'react';
  * Registers capture-phase document listeners for the edit overlay when active.
  * Handles blur/visibilitychange to abort in-progress gestures.
  * Cleans up all listeners and pending animation frames on deactivate/unmount.
+ *
+ * @param isActive - Whether the edit overlay is currently active.
+ * @param onPointerMove - Pointer move handler.
+ * @param onPointerDown - Pointer down handler.
+ * @param onPointerUp - Pointer up handler.
+ * @param onClick - Click handler.
+ * @param onKeydown - Keydown handler.
+ * @param onAbort - Handler called when a gesture is aborted.
+ * @param rafId - Optional ref for animation frame tracking.
+ * @returns Ref to the current animation frame ID.
  */
 export const useEditListeners = (
   isActive: boolean,

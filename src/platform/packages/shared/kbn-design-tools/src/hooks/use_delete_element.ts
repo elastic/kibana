@@ -14,6 +14,9 @@ import { setImportant } from '../edit_engine/clone_element';
 /**
  * Manages soft-deletion of elements: fades them out, hides them with
  * visibility:hidden (preserves layout), and tracks them for later restore.
+ *
+ * @param onDelete - Optional callback invoked after each deletion.
+ * @returns Deletion handlers and restore utilities.
  */
 export const useDeleteElement = (onDelete?: () => void) => {
   const deletedElements = useRef(new Set<HTMLElement>());

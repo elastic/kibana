@@ -132,6 +132,8 @@ export interface DraftHistoryResult {
  * Keyboard shortcuts (Cmd+Z / Cmd+Shift+Z) should be wired to `undo`
  * and `redo` with `stopPropagation` to prevent the main overlay from
  * handling them.
+ *
+ * @returns Draft history controls including undo, redo, push, revert, and state.
  */
 export const useDraftHistory = (): DraftHistoryResult => {
   const stackRef = useRef(new UndoRedoStack<DraftEntry>());

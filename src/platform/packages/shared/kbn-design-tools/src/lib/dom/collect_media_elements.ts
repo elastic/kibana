@@ -47,6 +47,9 @@ const matchSourceAttribute = (el: Element): { attr: string; label: string } | un
  *
  * For EUI icon SVGs without `data-icon-type`, the icon type is identified
  * asynchronously by matching path data against known icons.
+ *
+ * @param root - The root element to collect media from.
+ * @returns Array of source entries with attribute and element references.
  */
 export const collectMediaElements = async (root: Element): Promise<SourceEntry[]> => {
   const entries: SourceEntry[] = [];

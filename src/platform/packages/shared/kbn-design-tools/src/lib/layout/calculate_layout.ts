@@ -19,6 +19,13 @@ export interface RowLayout {
   rowHeight: number;
 }
 
+/**
+ * Calculates column widths and left offset for the column layout overlay.
+ *
+ * @param config - The layout configuration.
+ * @param viewportWidth - The current viewport width in pixels.
+ * @returns The computed {@link ColumnLayout}.
+ */
 export const calculateColumnLayout = (
   config: LayoutConfig,
   viewportWidth: number
@@ -50,6 +57,13 @@ export const calculateColumnLayout = (
   return { columnWidth, offsetLeft };
 };
 
+/**
+ * Calculates row heights and top offset for the row layout overlay.
+ *
+ * @param config - The layout configuration.
+ * @param viewportHeight - The current viewport height in pixels.
+ * @returns The computed {@link RowLayout}.
+ */
 export const calculateRowLayout = (config: LayoutConfig, viewportHeight: number): RowLayout => {
   const count = Math.max(1, config.count);
 

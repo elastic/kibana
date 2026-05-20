@@ -14,6 +14,9 @@ import { isUndoShortcut, isRedoShortcut } from '../../../../lib/keyboard_shortcu
  * Intercepts Cmd+Z / Cmd+Shift+Z within the edit modal for draft
  * undo/redo. Stops propagation to prevent the main EditOverlay from
  * handling these shortcuts.
+ *
+ * @param onUndo - Callback for the undo shortcut.
+ * @param onRedo - Callback for the redo shortcut.
  */
 export const useModalKeyboard = (onUndo: () => void, onRedo: () => void): void => {
   const handleKeydown = useCallback(

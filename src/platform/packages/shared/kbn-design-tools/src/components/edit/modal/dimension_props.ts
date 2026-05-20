@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 export type DimensionProperty = 'width' | 'height' | 'padding' | 'margin' | 'border-radius';
 
+/** CSS dimension properties with i18n-translated labels for the dimensions editor. */
 export const DIMENSION_PROPS: ReadonlyArray<{
   property: DimensionProperty;
   label: string;

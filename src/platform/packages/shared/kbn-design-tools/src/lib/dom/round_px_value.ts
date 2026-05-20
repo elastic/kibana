@@ -10,6 +10,9 @@
 /**
  * Round fractional pixel values in a CSS string to whole numbers.
  * e.g. "12.345px" → "12px", "10px 20.7px" → "10px 21px"
+ *
+ * @param value - The CSS string containing pixel values.
+ * @returns The string with rounded pixel values.
  */
 export const roundPxValue = (value: string): string =>
   value.replace(/(\d+\.\d+)px/g, (_m, n) => `${Math.round(parseFloat(n))}px`);
@@ -17,6 +20,9 @@ export const roundPxValue = (value: string): string =>
 /**
  * Parse a CSS pixel value to a rounded integer, returning 0 for
  * non-numeric values (e.g. "auto", "normal", "inherit").
+ *
+ * @param value - The CSS pixel value string.
+ * @returns The rounded integer, or 0 for non-numeric values.
  */
 export const parsePx = (value: string): number => {
   const n = parseFloat(value);

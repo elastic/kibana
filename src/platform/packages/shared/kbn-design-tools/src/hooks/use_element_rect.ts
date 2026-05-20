@@ -15,6 +15,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
  *
  * Scroll and resize handlers are throttled via `requestAnimationFrame`
  * to avoid redundant `getBoundingClientRect` calls and layout thrashing.
+ *
+ * @param target - The element to track.
+ * @returns The current viewport-relative bounding rect.
  */
 export const useElementRect = (target: HTMLElement): DOMRect => {
   const [rect, setRect] = useState(() => target.getBoundingClientRect());

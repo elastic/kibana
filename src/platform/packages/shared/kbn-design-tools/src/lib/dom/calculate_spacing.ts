@@ -22,6 +22,10 @@ export interface SpacingLine {
  * - **Separated elements**: shows the gap between nearest edges (horizontal, vertical, or both).
  * - **Containment** (one inside the other): shows distances from inner edges to outer edges.
  * - **Partial overlap**: no lines shown (ambiguous, not useful).
+ *
+ * @param anchorRect - The reference element's bounding rect.
+ * @param targetRect - The target element's bounding rect.
+ * @returns Array of spacing lines between the two rects.
  */
 export const calculateSpacingLines = (anchorRect: DOMRect, targetRect: DOMRect): SpacingLine[] => {
   const hOverlap = hasHorizontalOverlap(anchorRect, targetRect);

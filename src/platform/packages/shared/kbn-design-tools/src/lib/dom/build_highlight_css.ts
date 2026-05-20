@@ -12,6 +12,11 @@ import { transparentize } from '@elastic/eui';
 
 /**
  * Builds a fixed-position highlight box CSS class for a given rect and color.
+ *
+ * @param rect - The bounding rect to highlight.
+ * @param color - The highlight color.
+ * @param zIndex - The z-index for the highlight.
+ * @returns A CSS class string.
  */
 export const buildHighlightCss = (rect: DOMRect, color: string, zIndex: number): string =>
   css({

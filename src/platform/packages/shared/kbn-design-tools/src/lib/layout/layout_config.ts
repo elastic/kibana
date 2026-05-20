@@ -24,6 +24,12 @@ export interface LayoutConfig {
   color: string;
 }
 
+/**
+ * Returns the default layout configuration using the given base size for spacing.
+ *
+ * @param baseSize - The base pixel size for gutter, margin, and cell dimensions.
+ * @returns The default {@link LayoutConfig}.
+ */
 export const getDefaultLayoutConfig = (baseSize: number): LayoutConfig => ({
   layoutType: 'columns',
   count: 12,

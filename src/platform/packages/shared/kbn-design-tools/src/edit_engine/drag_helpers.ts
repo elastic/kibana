@@ -21,6 +21,8 @@ import { buildTransform } from './resize_helpers';
  * EUI renders popover panels as portals on `document.body`, so they stay
  * anchored to the old position when the element moves or is removed.
  * This detaches any such panels and collapses the controlling toggle.
+ *
+ * @param el - The element whose portaled popovers should be closed.
  */
 export const closePortaledPopovers = (el: HTMLElement): void => {
   const expandedToggles = el.querySelectorAll<HTMLElement>('[aria-expanded="true"]');
@@ -39,6 +41,14 @@ export const closePortaledPopovers = (el: HTMLElement): void => {
   }
 };
 
+/**
+ * Initiates a drag interaction from an existing tracked session.
+ *
+ * @param session - The tracked element session to drag.
+ * @param clientX - Pointer X at drag start.
+ * @param clientY - Pointer Y at drag start.
+ * @returns The initial drag state.
+ */
 export const startDragFromSession = (
   session: ElementSession,
   clientX: number,
@@ -61,6 +71,13 @@ export const startDragFromSession = (
 
 /**
  * Begin dragging a new element for the first time.
+ *
+ * @param target - The original DOM element to drag.
+ * @param registry - The element registry to track the session.
+ * @param cloneZIndex - The z-index for the cloned element.
+ * @param clientX - Pointer X at drag start.
+ * @param clientY - Pointer Y at drag start.
+ * @returns The initial drag state.
  */
 export const startDragFromElement = (
   target: HTMLElement,
@@ -103,6 +120,10 @@ export const startDragFromElement = (
 
 /**
  * Checks if the target is a managed element and finds its tracked session.
+ *
+ * @param target - The element to check.
+ * @param registry - The element registry to search.
+ * @returns The matching session, or `null` if not managed.
  */
 export const findManagedSession = (
   target: HTMLElement,
@@ -117,6 +138,12 @@ export const findManagedSession = (
 /**
  * Applies a drag frame: computes translate with optional snap-to-grid and
  * writes the new offsets back to the session.
+ *
+ * @param state - The current drag state.
+ * @param clientX - Current pointer X.
+ * @param clientY - Current pointer Y.
+ * @param shiftKey - Whether shift is held (disables snap-to-grid).
+ * @param options - Layout visibility and config for snap-to-grid.
  */
 export const applyDragMove = (
   state: DragState,

@@ -13,6 +13,10 @@ import { useEffect } from 'react';
  * Forces the z-index of an EuiPortal parent so the portal renders above
  * overlay layers. Uses requestAnimationFrame because the portal DOM node
  * doesn't exist during synchronous layout effects.
+ *
+ * @param elementId - The DOM ID of the portal element.
+ * @param zIndex - The z-index value to force.
+ * @param isOpen - Whether the portal is currently open.
  */
 export const usePortalZIndex = (elementId: string, zIndex: number, isOpen: boolean) => {
   useEffect(() => {
