@@ -173,7 +173,6 @@ export const MisconfigurationFindingsDetailsTable = memo(
     scopeId,
     entityId,
     entityType,
-    mockData,
     onExpandFinding,
   }: {
     field: CloudPostureEntityIdentifier;
@@ -182,12 +181,6 @@ export const MisconfigurationFindingsDetailsTable = memo(
     /** Canonical entity store id (`host.entity.id` / `user.entity.id`); when set with v2 FF, identity fields are loaded from the store for EUID DSL. */
     entityId?: string;
     entityType?: string;
-    /** Dev override: supply rows and counts directly, bypassing Elasticsearch queries. */
-    mockData?: {
-      rows: MisconfigurationFindingDetailFields[];
-      passedFindings: number;
-      failedFindings: number;
-    };
     /** When provided, called instead of `openPreviewPanel` when the expand icon is clicked. Use this in system-flyout contexts. */
     onExpandFinding?: (resourceId: string, ruleId: string) => void;
   }) => {
@@ -208,13 +201,12 @@ export const MisconfigurationFindingsDetailsTable = memo(
     const sortFieldDirection: { [key: string]: string } = {};
     sortFieldDirection[sortField] = sortDirection;
 
-    const hasMockData = mockData != null;
     const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
     const { entityRecord, isLoading: isEntityRecordLoading } = useEntityFromStore({
       entityId,
       entityType,
-      skip: !entityStoreV2Enabled || !entityId || hasMockData,
+      skip: !entityStoreV2Enabled || !entityId,
     });
 
     const euidApi = useEntityStoreEuidApi();
@@ -226,7 +218,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
     }, [euidApi?.euid, entityType, entityRecord]);
 
     const cspQueriesEnabled =
-      !hasMockData && entityRecord !== null && Boolean(euidEntityFilter) && Boolean(euidApi?.euid);
+      entityRecord !== null && Boolean(euidEntityFilter) && Boolean(euidApi?.euid);
 
     const { data, isLoading } = useMisconfigurationFindings(
       buildMisconfigurationCspOptions({
@@ -280,7 +272,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
     };
 
     const { pageOfItems, totalItemCount } = findingsPagination(
-      mockData?.rows ?? (data?.rows as MisconfigurationFindingDetailFields[]) ?? []
+      (data?.rows as MisconfigurationFindingDetailFields[]) || []
     );
 
     const pagination = {
@@ -323,8 +315,8 @@ export const MisconfigurationFindingsDetailsTable = memo(
 
     const { getFindingsStats } = useGetFindingsStats();
     const misconfigurationStats = getFindingsStats(
-      mockData?.passedFindings ?? passedFindings,
-      mockData?.failedFindings ?? failedFindings,
+      passedFindings,
+      failedFindings,
       setCurrentFilter,
       currentFilter
     );
@@ -446,8 +438,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
             data-test-subj={'securitySolutionFlyoutMisconfigurationFindingsTable'}
             sorting={sorting}
             loading={
-              !hasMockData &&
-              (isLoading || (entityStoreV2Enabled && Boolean(entityId) && isEntityRecordLoading))
+              isLoading || (entityStoreV2Enabled && Boolean(entityId) && isEntityRecordLoading)
             }
             tableCaption={i18n.translate(
               'xpack.securitySolution.flyout.left.insights.misconfigurations.tableCaption',

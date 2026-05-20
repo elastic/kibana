@@ -118,7 +118,6 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
     scopeId,
     entityId,
     entityType,
-    mockData,
     onExpandVulnerability,
   }: {
     identityField: CloudPostureEntityIdentifier;
@@ -126,11 +125,6 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
     scopeId: string;
     entityId?: string;
     entityType?: string;
-    /** Dev override: supply rows and counts directly, bypassing Elasticsearch queries. */
-    mockData?: {
-      rows: VulnerabilitiesFindingDetailFields[];
-      counts: { critical?: number; high?: number; medium?: number; low?: number; none?: number };
-    };
     /** When provided, called instead of `openPreviewPanel` when the expand icon is clicked. Use this in system-flyout contexts. */
     onExpandVulnerability?: (params: {
       vulnerabilityId: string;
@@ -168,13 +162,12 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
       },
     };
 
-    const hasMockData = mockData != null;
     const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
     const { entityRecord, isLoading: isEntityRecordLoading } = useEntityFromStore({
       entityId,
       entityType,
-      skip: !entityStoreV2Enabled || !entityId || hasMockData,
+      skip: !entityStoreV2Enabled || !entityId,
     });
 
     const euidApi = useEntityStoreEuidApi();
@@ -186,7 +179,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
     }, [euidApi?.euid, entityType, entityRecord]);
 
     const cspQueriesEnabled =
-      !hasMockData && entityRecord !== null && Boolean(euidEntityFilter) && Boolean(euidApi?.euid);
+      entityRecord !== null && Boolean(euidEntityFilter) && Boolean(euidApi?.euid);
 
     const { data, isLoading } = useVulnerabilitiesFindings(
       buildVulnerabilityCspOptions({
@@ -210,13 +203,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
       })
     );
 
-    const {
-      critical = 0,
-      high = 0,
-      medium = 0,
-      low = 0,
-      none = 0,
-    } = mockData?.counts ?? counts ?? {};
+    const { critical = 0, high = 0, medium = 0, low = 0, none = 0 } = counts || {};
 
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(10);
@@ -240,7 +227,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
       };
     };
 
-    const { pageOfItems, totalItemCount } = findingsPagination(mockData?.rows ?? data?.rows ?? []);
+    const { pageOfItems, totalItemCount } = findingsPagination(data?.rows || []);
 
     const pagination = {
       pageIndex,
@@ -514,8 +501,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
             data-test-subj={'securitySolutionFlyoutVulnerabilitiesFindingsTable'}
             sorting={sorting}
             loading={
-              !hasMockData &&
-              (isLoading || (entityStoreV2Enabled && Boolean(entityId) && isEntityRecordLoading))
+              isLoading || (entityStoreV2Enabled && Boolean(entityId) && isEntityRecordLoading)
             }
             tableCaption={i18n.translate(
               'xpack.securitySolution.flyout.left.insights.vulnerability.findingsTableCaption',

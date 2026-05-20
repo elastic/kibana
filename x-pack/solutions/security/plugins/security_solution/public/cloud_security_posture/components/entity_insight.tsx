@@ -46,8 +46,6 @@ export const EntityInsight = <T,>({
   hideAlertsHeaderIcon = false,
   hideMisconfigurationsHeaderIcon = false,
   hideVulnerabilitiesHeaderIcon = false,
-  mockMisconfigurationFindings = false,
-  mockVulnerabilitiesFindings = false,
 }: {
   identityFields: IdentityFields;
   isPreviewMode: boolean;
@@ -61,10 +59,6 @@ export const EntityInsight = <T,>({
   hideMisconfigurationsHeaderIcon?: boolean;
   /** When true, hides the icon in the Vulnerabilities preview header. Defaults to false. */
   hideVulnerabilitiesHeaderIcon?: boolean;
-  /** Dev override: force the misconfiguration findings section to render. */
-  mockMisconfigurationFindings?: boolean;
-  /** Dev override: force the vulnerabilities findings section to render. */
-  mockVulnerabilitiesFindings?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
   const euidApi = useEntityStoreEuidApi();
@@ -86,10 +80,9 @@ export const EntityInsight = <T,>({
     })
   );
 
-  const showMisconfigurationsPreview = mockMisconfigurationFindings || hasMisconfigurationFindings;
+  const showMisconfigurationsPreview = hasMisconfigurationFindings;
   const showVulnerabilitiesPreview =
-    (mockVulnerabilitiesFindings || hasVulnerabilitiesFindings) &&
-    Object.keys(identityFields).length > 0;
+    hasVulnerabilitiesFindings && Object.keys(identityFields).length > 0;
 
   const { to, from } = useGlobalTime();
 
