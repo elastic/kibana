@@ -213,12 +213,12 @@ export class VisualizeChartPageObject extends FtrService {
 
   public async waitForVisualizationRenderingStabilized() {
     await this.header.waitUntilLoadingHasFinished();
-    // assuming rendering is done when data-rendering-count is constant within 1000 ms
+    // Rendering is done when data-rendering-count is constant within 500ms
     await this.retry.waitFor('rendering count to stabilize', async () => {
       const firstCount = await this.getVisualizationRenderingCount();
       this.log.debug(`-- firstCount=${firstCount}`);
 
-      await this.common.sleep(2000);
+      await this.common.sleep(500);
 
       const secondCount = await this.getVisualizationRenderingCount();
       this.log.debug(`-- secondCount=${secondCount}`);

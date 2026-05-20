@@ -31,7 +31,6 @@ export class VisualBuilderPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly comboBox = this.ctx.getService('comboBox');
   private readonly elasticChart = this.ctx.getService('elasticChart');
-  private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
   private readonly timePicker = this.ctx.getPageObject('timePicker');
   private readonly visChart = this.ctx.getPageObject('visChart');
@@ -131,7 +130,6 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async getMetricValue() {
-    await this.visChart.waitForVisualizationRenderingStabilized();
     const metricValue = await this.find.byCssSelector('.tvbVisMetric__value--primary');
     return metricValue.getVisibleText();
   }
@@ -140,6 +138,7 @@ export class VisualBuilderPageObject extends FtrService {
     await this.clearMarkdown();
     const input = await this.find.byCssSelector('.tvbMarkdownEditor__editor textarea');
     await input.type(markdown);
+    // Monaco typing is debounced and may not increment data-rendering-count; use stabilization
     await this.visChart.waitForVisualizationRenderingStabilized();
   }
 
@@ -167,7 +166,6 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async getMarkdownText(): Promise<string> {
-    await this.visChart.waitForVisualizationRenderingStabilized();
     const el = await this.find.byCssSelector('.tvbVis');
     const text = await el.getVisibleText();
     return text;
@@ -288,9 +286,10 @@ export class VisualBuilderPageObject extends FtrService {
   public async changeDataFormatter(
     formatter: 'default' | 'bytes' | 'number' | 'percent' | 'duration' | 'custom'
   ) {
+    const prevCount = await this.visChart.getVisualizationRenderingCount();
     await this.testSubjects.click('tsvbDataFormatPicker');
     await this.testSubjects.click(`tsvbDataFormatPicker-${formatter}`);
-    await this.visChart.waitForVisualizationRenderingStabilized();
+    await this.visChart.waitForRenderingCount(prevCount + 1);
   }
 
   public async setDrilldownUrl(value: string) {
@@ -349,10 +348,10 @@ export class VisualBuilderPageObject extends FtrService {
     const el = await this.testSubjects.find('offsetTimeSeries');
     await el.clearValue();
     await el.type(value);
+    await this.visChart.waitForVisualizationRenderingStabilized();
   }
 
   public async getRhythmChartLegendValue(nth = 0) {
-    await this.visChart.waitForVisualizationRenderingStabilized();
     const metricValue = (
       await this.find.allByCssSelector(`.echLegendItem .echLegendItem__legendValue`, 20000)
     )[nth];
@@ -375,7 +374,6 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async getGaugeColor(isInner = false): Promise<string | null> {
-    await this.visChart.waitForVisualizationRenderingStabilized();
     const gaugeColoredCircle = await this.testSubjects.find(`gaugeCircle${isInner ? 'Inner' : ''}`);
     return await gaugeColoredCircle.getAttribute('stroke');
   }
@@ -385,19 +383,16 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async getTopNLabel() {
-    await this.visChart.waitForVisualizationRenderingStabilized();
     const topNLabel = await this.find.byCssSelector('.tvbVisTopN__label');
     return await topNLabel.getVisibleText();
   }
 
   public async getTopNCount() {
-    await this.visChart.waitForVisualizationRenderingStabilized();
     const gaugeCount = await this.find.byCssSelector('.tvbVisTopN__value');
     return await gaugeCount.getVisibleText();
   }
 
   public async getTopNBarStyle(nth: number = 0): Promise<string | null> {
-    await this.visChart.waitForVisualizationRenderingStabilized();
     const topNBars = await this.testSubjects.findAll('topNInnerBar');
     return await topNBars[nth].getAttribute('style');
   }
@@ -410,7 +405,6 @@ export class VisualBuilderPageObject extends FtrService {
     const prevAggs = await this.testSubjects.findAll('aggSelector');
     const elements = await this.testSubjects.findAll('addMetricAddBtn');
     await elements[nth].click();
-    await this.visChart.waitForVisualizationRenderingStabilized();
     await this.retry.waitFor('new agg is added', async () => {
       const currentAggs = await this.testSubjects.findAll('aggSelector');
       return currentAggs.length > prevAggs.length;
@@ -421,7 +415,6 @@ export class VisualBuilderPageObject extends FtrService {
     const prevAggs = await this.testSubjects.findAll('draggable');
     const elements = await this.testSubjects.findAll('AddAddBtn');
     await elements[nth].click();
-    await this.visChart.waitForVisualizationRenderingStabilized();
     await this.retry.waitFor('new agg series is added', async () => {
       const currentAggs = await this.testSubjects.findAll('draggable');
       return currentAggs.length > prevAggs.length;
@@ -431,7 +424,6 @@ export class VisualBuilderPageObject extends FtrService {
   public async createColorRule(nth = 0) {
     const elements = await this.testSubjects.findAll('AddAddBtn');
     await elements[nth].click();
-    await this.visChart.waitForVisualizationRenderingStabilized();
     await this.retry.waitFor('new color rule is added', async () => {
       const currentAddButtons = await this.testSubjects.findAll('AddAddBtn');
       return currentAddButtons.length > elements.length;
@@ -487,7 +479,6 @@ export class VisualBuilderPageObject extends FtrService {
    * @memberof VisualBuilderPage
    */
   public async getViewTable(): Promise<string> {
-    await this.visChart.waitForVisualizationRenderingStabilized();
     const tableView = await this.testSubjects.find('tableView', 20000);
     return await tableView.getVisibleText();
   }
@@ -664,9 +655,7 @@ export class VisualBuilderPageObject extends FtrService {
    * @memberof VisualBuilderPage
    */
   public async setFieldForAggregation(field: string, aggNth: number = 0): Promise<void> {
-    await this.visChart.waitForVisualizationRenderingStabilized();
     const fieldEl = await this.getFieldForAggregation(aggNth);
-
     await this.comboBox.setElement(fieldEl, field);
     await this.header.waitUntilLoadingHasFinished();
   }
@@ -715,6 +704,7 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async setBackgroundColor(colorHex: string): Promise<void> {
+    const prevCount = await this.visChart.getVisualizationRenderingCount();
     await this.clickColorPicker();
     await this.checkColorPickerPopUpIsPresent();
     await this.testSubjects.setValue('euiColorPickerInput_top', colorHex, {
@@ -722,7 +712,7 @@ export class VisualBuilderPageObject extends FtrService {
       typeCharByChar: true,
     });
     await this.clickColorPicker();
-    await this.visChart.waitForVisualizationRenderingStabilized();
+    await this.visChart.waitForRenderingCount(prevCount + 1);
   }
 
   public async checkColorPickerPopUpIsPresent(): Promise<void> {
@@ -731,6 +721,7 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async setColorPickerValue(colorHex: string, nth: number = 0): Promise<void> {
+    const prevCount = await this.visChart.getVisualizationRenderingCount();
     await this.clickColorPicker(nth);
     await this.checkColorPickerPopUpIsPresent();
     await this.testSubjects.setValue('euiColorPickerInput_top', colorHex, {
@@ -738,7 +729,7 @@ export class VisualBuilderPageObject extends FtrService {
       typeCharByChar: true,
     });
     await this.clickColorPicker(nth);
-    await this.visChart.waitForVisualizationRenderingStabilized();
+    await this.visChart.waitForRenderingCount(prevCount + 1);
   }
 
   public async setColorRuleOperator(condition: string): Promise<void> {
@@ -758,19 +749,16 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async getBackgroundStyle(): Promise<string | null> {
-    await this.visChart.waitForVisualizationRenderingStabilized();
     const visualization = await this.find.byClassName('tvbVis');
     return await visualization.getAttribute('style');
   }
 
   public async getMetricValueStyle(): Promise<string | null> {
-    await this.visChart.waitForVisualizationRenderingStabilized();
     const metricValue = await this.testSubjects.find('tsvbMetricValue');
     return await metricValue.getAttribute('style');
   }
 
   public async getGaugeValueStyle(): Promise<string | null> {
-    await this.visChart.waitForVisualizationRenderingStabilized();
     const metricValue = await this.testSubjects.find('gaugeValue');
     return await metricValue.getAttribute('style');
   }
@@ -788,9 +776,10 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async cloneSeries(nth: number = 0): Promise<void> {
+    const prevCount = await this.visChart.getVisualizationRenderingCount();
     const cloneBtnArray = await this.testSubjects.findAll('AddCloneBtn');
     await cloneBtnArray[nth].click();
-    await this.visChart.waitForVisualizationRenderingStabilized();
+    await this.visChart.waitForRenderingCount(prevCount + 1);
   }
 
   /**
@@ -846,7 +835,6 @@ export class VisualBuilderPageObject extends FtrService {
     filtering: { include?: string; exclude?: string } = {}
   ) {
     await this.setMetricsGroupBy('terms');
-    await this.common.sleep(1000);
     await this.retry.try(async () => {
       const byField = await this.testSubjects.find('groupByField');
       await this.comboBox.setElement(byField, field);
@@ -859,13 +847,17 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async setAnotherGroupByTermsField(field: string) {
+    const prevFieldCount = (await this.testSubjects.findAll('fieldSelectItem')).length;
     // Using xpath locator to find the last element
     const fieldSelectAddButtonLast = await this.find.byXPath(
       `(//*[@data-test-subj='fieldSelectItemAddBtn'])[last()]`
     );
     // In case of StaleElementReferenceError 'browser' service will try to find element again
     await fieldSelectAddButtonLast.click();
-    await this.common.sleep(2000);
+    await this.retry.waitFor('new field selector row to appear', async () => {
+      const fieldItems = await this.testSubjects.findAll('fieldSelectItem');
+      return fieldItems.length > prevFieldCount;
+    });
 
     await this.retry.try(async () => {
       const selectedByField = await this.find.byXPath(
