@@ -1881,8 +1881,7 @@
         "@types/lodash",
         "@types/minimist",
         "@types/node-forge",
-        "@types/object-hash",
-        "@types/tough-cookie"
+        "@types/object-hash"
       ],
       "reviewers": ["team:kibana-security"],
       "matchBaseBranches": ["main"],
