@@ -27,7 +27,7 @@ import { ClassicStreamPartitioning } from '../stream_detail_routing/classic_stre
 
 const classicStreamManagementSubTabs = [
   'overview',
-  'dataLifecycle',
+  'lifecycle',
   'partitioning',
   'processing',
   'advanced',
@@ -42,8 +42,7 @@ type ClassicStreamManagementSubTab = (typeof classicStreamManagementSubTabs)[num
 
 const tabRedirects: Record<string, { newTab: ClassicStreamManagementSubTab }> = {
   schemaEditor: { newTab: 'schema' },
-  lifecycle: { newTab: 'dataLifecycle' },
-  retention: { newTab: 'dataLifecycle' },
+  retention: { newTab: 'lifecycle' },
   enrich: { newTab: 'processing' },
 };
 
@@ -107,7 +106,7 @@ export function ClassicStreamDetailManagement({
     }),
   };
 
-  tabs.dataLifecycle = {
+  tabs.lifecycle = {
     content: (
       <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
     ),
@@ -205,7 +204,7 @@ export function ClassicStreamDetailManagement({
 
   if (tab === 'partitioning' && !queryStreams.enabled) {
     return (
-      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'dataLifecycle' } }} />
+      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'lifecycle' } }} />
     );
   }
 
