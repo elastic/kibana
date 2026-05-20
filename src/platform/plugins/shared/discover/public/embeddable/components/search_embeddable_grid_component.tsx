@@ -32,7 +32,7 @@ import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types
 import { DiscoverGridEmbeddable, type InlineEditing } from './saved_search_grid';
 import { getSearchEmbeddableDefaults } from '../get_search_embeddable_defaults';
 import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
-import { getShowTimeFieldColumn } from '../../utils/get_show_time_field_column';
+import { showTimeFieldColumn } from '../../utils/time_field_column';
 import { useAdditionalCellActions } from '../../context_awareness';
 import { getTimeRangeFromFetchContext } from '../utils/update_search_source';
 import { createDataSource } from '../../../common/data_sources';
@@ -227,7 +227,7 @@ export function SearchEmbeddableGridComponent({
 
   // should be aligned with discover documents `showTimeCol` prop
   const showTimeCol = useMemo(
-    () => getShowTimeFieldColumn(discoverServices.uiSettings, savedSearchQuery),
+    () => showTimeFieldColumn({ uiSettings: discoverServices.uiSettings, query: savedSearchQuery }),
     [discoverServices.uiSettings, savedSearchQuery]
   );
 

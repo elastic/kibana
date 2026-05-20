@@ -13,10 +13,13 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
 
-export const getShowTimeFieldColumn = (
-  uiSettings: IUiSettingsClient,
-  query?: AggregateQuery | Query
-): boolean => {
+export const showTimeFieldColumn = ({
+  uiSettings,
+  query,
+}: {
+  uiSettings: IUiSettingsClient;
+  query?: AggregateQuery | Query;
+}): boolean => {
   if (uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false)) {
     return false;
   }
@@ -26,17 +29,22 @@ export const getShowTimeFieldColumn = (
   return true;
 };
 
-export const getColumnsWithTimeField = (
-  columns: string[],
-  timeFieldName: string | undefined,
-  uiSettings: IUiSettingsClient,
-  query?: AggregateQuery | Query
-): string[] => {
+export const getColumnsWithTimeField = ({
+  columns,
+  timeFieldName,
+  uiSettings,
+  query,
+}: {
+  columns: string[];
+  timeFieldName: string | undefined;
+  uiSettings: IUiSettingsClient;
+  query?: AggregateQuery | Query;
+}): string[] => {
   if (
-    columns.length > 0 &&
     timeFieldName &&
-    getShowTimeFieldColumn(uiSettings, query) &&
-    !columns.includes(timeFieldName)
+    columns.length > 0 &&
+    !columns.includes(timeFieldName) &&
+    showTimeFieldColumn({ uiSettings, query })
   ) {
     return [timeFieldName, ...columns];
   }
