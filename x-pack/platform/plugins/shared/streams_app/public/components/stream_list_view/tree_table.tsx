@@ -69,6 +69,10 @@ import {
   CPS_DOCUMENTS_WARNING,
   DOCUMENTS_COLUMN_HEADER,
   FAILURE_STORE_PERMISSIONS_ERROR,
+  STREAM_TYPE_FILTER_LABEL,
+  STREAM_TYPE_CLASSIC_LABEL,
+  STREAM_TYPE_WIRED_LABEL,
+  STREAM_TYPE_QUERY_LABEL,
 } from './translations';
 import {
   DeprecatedLogsBadge,
@@ -204,10 +208,15 @@ export function StreamsTreeTable({
     good: 2,
   };
 
-  // Filter streams by query, including ancestors of matches
+  // Filter streams by free-text query, including ancestors of matches.
+  // Extract only term clauses from the AST so field filters (type, dataQuality) are excluded.
   const filteredStreams = React.useMemo(() => {
-    const dataQualityPattern = /dataQuality:\((.*)\)/;
-    const freeText = searchQuery?.text?.replace(dataQualityPattern, '').trim() ?? '';
+    const freeText =
+      searchQuery?.ast?.clauses
+        .filter((clause) => clause.type === 'term')
+        .map((clause) => ('value' in clause ? clause.value : ''))
+        .join(' ')
+        .trim() ?? '';
     return filterStreamsByQuery(streams, freeText);
   }, [streams, searchQuery]);
 
@@ -222,22 +231,29 @@ export function StreamsTreeTable({
   );
 
   const allRows = React.useMemo(() => {
-    const rows = buildStreamRows(enrichedStreams, sortField, sortDirection, qualityByStream);
-    const qualityFiters =
-      searchQuery?.ast?.clauses.filter(
-        (clause) => clause.type === 'field' && clause.field === 'dataQuality'
-      ) ?? [];
-    return qualityFiters.length > 0
-      ? rows.filter((row) =>
-          qualityFiters.some(
-            (filter) =>
-              'value' in filter &&
-              typeof filter.value === 'string' &&
-              filter.value.includes(row.dataQuality)
-          )
-        )
-      : rows;
-  }, [enrichedStreams, sortField, sortDirection, qualityByStream, searchQuery?.ast?.clauses]);
+    let rows = buildStreamRows(enrichedStreams, sortField, sortDirection, qualityByStream);
+
+    const getFieldFilterValues = (field: string): string[] => {
+      if (!searchQuery?.ast) return [];
+      const clause = searchQuery.ast.getOrFieldClause(field);
+      if (clause && Array.isArray(clause.value)) {
+        return clause.value as string[];
+      }
+      return [];
+    };
+
+    const typeValues = getFieldFilterValues('type');
+    if (typeValues.length > 0) {
+      rows = rows.filter((row) => typeValues.includes(row.type));
+    }
+
+    const qualityValues = getFieldFilterValues('dataQuality');
+    if (qualityValues.length > 0) {
+      rows = rows.filter((row) => qualityValues.includes(row.dataQuality));
+    }
+
+    return rows;
+  }, [enrichedStreams, sortField, sortDirection, qualityByStream, searchQuery?.ast]);
 
   // Only pass filtered rows if tree mode is active
   const items = React.useMemo(
@@ -645,16 +661,16 @@ export function StreamsTreeTable({
             <StreamsAppSearchBar showDatePicker />
           </div>
         ),
-        filters:
-          qualityLoaded && hasFailureStoreAccess
+        filters: [
+          ...(qualityLoaded && hasFailureStoreAccess
             ? [
                 {
-                  type: 'field_value_selection',
+                  type: 'field_value_selection' as const,
                   name: i18n.translate('xpack.streams.streamsTreeTable.dataQualityFilter.label', {
                     defaultMessage: 'Data quality',
                   }),
                   field: 'dataQuality',
-                  multiSelect: 'or',
+                  multiSelect: 'or' as const,
                   options: [
                     {
                       value: 'good',
@@ -680,7 +696,19 @@ export function StreamsTreeTable({
                   ],
                 },
               ]
-            : [],
+            : []),
+          {
+            type: 'field_value_selection' as const,
+            name: STREAM_TYPE_FILTER_LABEL,
+            field: 'type',
+            multiSelect: 'or' as const,
+            options: [
+              { value: 'classic', name: STREAM_TYPE_CLASSIC_LABEL },
+              { value: 'wired', name: STREAM_TYPE_WIRED_LABEL },
+              { value: 'query', name: STREAM_TYPE_QUERY_LABEL },
+            ],
+          },
+        ],
       }}
       tableCaption={STREAMS_TABLE_CAPTION_ARIA_LABEL}
     />

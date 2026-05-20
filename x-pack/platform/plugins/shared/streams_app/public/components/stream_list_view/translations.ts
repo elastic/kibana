@@ -92,3 +92,23 @@ export const NO_RETENTION_LABEL = i18n.translate(
   'xpack.streams.streamsRetentionColumn.noDataAriaLabel',
   { defaultMessage: 'No retention policy configured' }
 );
+
+export const STREAM_TYPE_FILTER_LABEL = i18n.translate(
+  'xpack.streams.streamsTreeTable.streamTypeFilter.label',
+  { defaultMessage: 'Type' }
+);
+
+export const STREAM_TYPE_CLASSIC_LABEL = i18n.translate(
+  'xpack.streams.streamsTreeTable.streamTypeFilter.classicLabel',
+  { defaultMessage: 'Classic' }
+);
+
+export const STREAM_TYPE_WIRED_LABEL = i18n.translate(
+  'xpack.streams.streamsTreeTable.streamTypeFilter.wiredLabel',
+  { defaultMessage: 'Wired' }
+);
+
+export const STREAM_TYPE_QUERY_LABEL = i18n.translate(
+  'xpack.streams.streamsTreeTable.streamTypeFilter.queryLabel',
+  { defaultMessage: 'Query' }
+);

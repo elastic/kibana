@@ -29,9 +29,11 @@ export interface EnrichedStream extends ListStreamDetail {
   nameSortKey: string;
   documentsCount: number;
   retentionMs: number;
-  type: 'wired' | 'root' | 'classic';
+  type: 'wired' | 'root' | 'classic' | 'query';
   children?: EnrichedStream[];
 }
+
+export type FilterableStreamType = Exclude<EnrichedStream['type'], 'root'>;
 
 export type TableRow = EnrichedStream & {
   level: number;
@@ -173,6 +175,19 @@ export function asTrees(streams: ListStreamDetail[]): StreamTree[] {
   return trees;
 }
 
+const getStreamType = (stream: Streams.all.Definition): EnrichedStream['type'] => {
+  if (Streams.ClassicStream.Definition.is(stream)) {
+    return 'classic';
+  }
+  if (Streams.QueryStream.Definition.is(stream)) {
+    return 'query';
+  }
+  if (isRootStreamDefinition(stream)) {
+    return 'root';
+  }
+  return 'wired';
+};
+
 export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStream => {
   let retentionMs = 0;
   const lc = node.effective_lifecycle!;
@@ -197,11 +212,7 @@ export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStrea
     nameSortKey,
     documentsCount: 0,
     retentionMs,
-    type: Streams.ClassicStream.Definition.is(node.stream)
-      ? 'classic'
-      : isRootStreamDefinition(node.stream)
-      ? 'root'
-      : 'wired',
+    type: getStreamType(node.stream),
     ...(children && { children }),
   };
 };
