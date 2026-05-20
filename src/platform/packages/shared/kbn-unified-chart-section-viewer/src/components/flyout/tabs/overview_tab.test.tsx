@@ -218,7 +218,7 @@ describe('Metric Flyout Overview Tab', () => {
           <div data-test-subj="streamFieldSectionRendered">{streamName}</div>
         ));
 
-    it('data_stream + streams feature on -> renders link, no metadata source row', () => {
+    it('data_stream + streams feature on -> renders the link inside the Data stream metadata row', () => {
       mockSourceKind(METRIC_SOURCE_KIND.DATA_STREAM);
       const renderFn = linkRenderer();
       const metricItem = createMockMetric({ dataStream: 'logs-foo-default' });
@@ -226,10 +226,9 @@ describe('Metric Flyout Overview Tab', () => {
       const { getByTestId, queryByTestId } = renderTab(metricItem, renderFn);
 
       expect(renderFn).toHaveBeenCalledWith({ streamName: 'logs-foo-default' });
+      const row = getByTestId('metricsExperienceFlyoutOverviewTabDataStreamLabel');
+      expect(row).toContainElement(getByTestId('streamFieldSectionRendered'));
       expect(getByTestId('streamFieldSectionRendered')).toHaveTextContent('logs-foo-default');
-      expect(
-        queryByTestId('metricsExperienceFlyoutOverviewTabDataStreamLabel')
-      ).not.toBeInTheDocument();
       expect(queryByTestId('metricsExperienceFlyoutOverviewTabIndexLabel')).not.toBeInTheDocument();
     });
 
