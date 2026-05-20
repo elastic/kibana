@@ -17,8 +17,8 @@ import { useStreamingContext, useStreamRecord } from '../context/streaming/strea
  * Per-conversation scoped slice of the streaming state machine.
  *
  * Use INSIDE a conversation tree — it reads `conversationId` and `agentId` from context.
- * Components asking "am I streaming?" / "what's my agent reasoning?" get an answer about
- * their own conversation, not the global app.
+ * Components asking "am I streaming?" get an answer about their own conversation, not
+ * the global app.
  *
  * Outside a conversation tree (e.g. the global sidebar), read `useStreamingContext()`
  * directly. This hook lives in `hooks/` rather than alongside the provider in
@@ -174,7 +174,6 @@ export const useConversationStream = () => {
       pendingMessage: record.pendingMessage,
       error: record.error,
       errorSteps: record.errorSteps,
-      agentReasoning: myStream?.agentReasoning ?? null,
       canCancel: isMyStreamActive,
       // Use this when the question is "is the conversation locked from external action because
       // a mutation is in flight?" — `isResponseLoading` answers a narrower question (round-level loading
@@ -195,7 +194,6 @@ export const useConversationStream = () => {
       record.error,
       record.errorSteps,
       isMyStreamActive,
-      myStream?.agentReasoning,
     ]
   );
 };

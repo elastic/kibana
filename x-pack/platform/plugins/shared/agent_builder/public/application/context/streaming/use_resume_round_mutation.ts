@@ -27,7 +27,6 @@ export interface ResumeRoundVars {
 }
 
 export interface ResumeRoundMutationBindings {
-  updateActiveReasoning: (conversationId: string, reasoning: string) => void;
   setError: (conversationId: string, error: unknown, errorSteps: ConversationRoundStep[]) => void;
   clearActiveStream: (conversationId: string) => void;
 }
@@ -39,7 +38,6 @@ type UseResumeRoundMutationProps = ResumeRoundMutationBindings;
  * `ConfirmationPrompt`. Same single-scope `mutationFn` shape as the send mutation.
  */
 export const useResumeRoundMutation = ({
-  updateActiveReasoning,
   setError,
   clearActiveStream,
 }: UseResumeRoundMutationProps) => {
@@ -89,7 +87,6 @@ export const useResumeRoundMutation = ({
           browserApiTools: vars.browserApiTools,
           browserToolExecutor,
           isAborted: () => controller.signal.aborted,
-          setAgentReasoning: (reasoning) => updateActiveReasoning(vars.conversationId, reasoning),
         });
         succeeded = true;
       } catch (err) {
