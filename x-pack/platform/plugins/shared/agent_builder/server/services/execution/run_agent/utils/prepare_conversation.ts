@@ -249,9 +249,15 @@ export const prepareConversation = async ({
     })
   );
 
+  const allVersionedAttachments = attachmentStateManager.getAll();
+  const maxContentLength = allVersionedAttachments.reduce((max, a) => {
+    const typeMax = attachmentsService.getTypeDefinition(a.type)?.maxContentLength;
+    return typeMax !== undefined ? Math.max(max, typeMax) : max;
+  }, 0);
+
   const versionedAttachmentPresentation = await prepareAttachmentPresentation(
-    attachmentStateManager.getAll(),
-    undefined,
+    allVersionedAttachments,
+    maxContentLength > 0 ? { maxContentLength } : undefined,
     async (attachment, data) => {
       const definition = attachmentsService.getTypeDefinition(attachment.type);
       if (!definition) {

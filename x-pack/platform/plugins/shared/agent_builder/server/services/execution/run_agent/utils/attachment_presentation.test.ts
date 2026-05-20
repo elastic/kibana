@@ -103,10 +103,51 @@ describe('attachment_presentation', () => {
       const largeContent = 'x'.repeat(15000);
       const attachments = [createMockAttachment('1', 'text', largeContent)];
 
-      const result = await prepareAttachmentPresentation(attachments, { maxContentLength: 10000 });
+      const result = await prepareAttachmentPresentation(attachments);
 
       expect(result.content).toContain('[content truncated');
       expect(result.content.length).toBeLessThan(largeContent.length);
+    });
+
+    it('should apply per-attachment max via resolveMaxContentLength', async () => {
+      const largeContent = 'x'.repeat(15000);
+      const attachments = [createMockAttachment('1', 'text', largeContent)];
+
+      const result = await prepareAttachmentPresentation(attachments, {
+        resolveMaxContentLength: () => 500,
+      });
+
+      expect(result.content).toContain('[content truncated');
+      // 500 char limit is tighter than the 10000 default
+      expect(result.content.length).toBeLessThan(10000);
+    });
+
+    it('should fall back to default when resolveMaxContentLength returns undefined', async () => {
+      const largeContent = 'x'.repeat(15000);
+      const attachments = [createMockAttachment('1', 'text', largeContent)];
+
+      const result = await prepareAttachmentPresentation(attachments, {
+        resolveMaxContentLength: () => undefined,
+      });
+
+      // Falls back to DEFAULT_MAX_CONTENT_LENGTH (10000), so content is truncated
+      expect(result.content).toContain('[content truncated');
+      // But longer than the 500-char case above — truncation is at 10000, not 500
+      expect(result.content.length).toBeGreaterThan(500);
+    });
+
+    it('should fall back to default when resolveMaxContentLength throws', async () => {
+      const largeContent = 'x'.repeat(15000);
+      const attachments = [createMockAttachment('1', 'text', largeContent)];
+
+      const result = await prepareAttachmentPresentation(attachments, {
+        resolveMaxContentLength: () => {
+          throw new Error('resolver error');
+        },
+      });
+
+      expect(result.content).toContain('[content truncated');
+      expect(result.content.length).toBeGreaterThan(500);
     });
 
     it('should handle visualization type as JSON', async () => {
