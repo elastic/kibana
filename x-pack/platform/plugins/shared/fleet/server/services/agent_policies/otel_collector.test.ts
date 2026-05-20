@@ -7,7 +7,7 @@
 
 import type { Output, FullAgentPolicyInput, TemplateAgentPolicyInput } from '../../types';
 
-import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../common/constants';
+import { OTEL_COLLECTOR_INPUT_TYPE, outputType } from '../../../common/constants';
 
 import { generateOtelcolConfig } from './otel_collector';
 
@@ -2246,24 +2246,18 @@ describe('generateOtelcolConfig', () => {
       id: 'remote-output',
       name: 'remote-output',
       is_default: false,
-      type: 'remote_elasticsearch' as any,
+      type: outputType.RemoteElasticsearch,
       hosts: ['https://remote-es.example.com:9200'],
     };
 
-    it('should generate an elasticsearch exporter for a remote_elasticsearch output', () => {
-      const result = generateOtelcolConfig({ inputs, dataOutput: remoteOutput });
-
-      expect(result.exporters?.['elasticsearch/remote-output']).toBeDefined();
-      expect(result.exporters?.['elasticsearch/remote-output']).toMatchObject({
-        endpoints: ['https://remote-es.example.com:9200'],
-      });
-    });
-
-    it('should key the exporter using the remote output id', () => {
+    it('should generate an elasticsearch exporter keyed by the remote output id', () => {
       const result = generateOtelcolConfig({ inputs, dataOutput: remoteOutput });
 
       expect(result.exporters).toHaveProperty('elasticsearch/remote-output');
       expect(result.exporters).not.toHaveProperty('elasticsearch/default');
+      expect(result.exporters?.['elasticsearch/remote-output']).toMatchObject({
+        endpoints: ['https://remote-es.example.com:9200'],
+      });
     });
 
     it('should include beatsauth extension with ssl fields when remote output has ssl config', () => {

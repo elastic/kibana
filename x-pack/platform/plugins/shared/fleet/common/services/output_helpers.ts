@@ -121,19 +121,11 @@ export function outputTypeSupportPresets(type: ValueOf<OutputType>) {
   return OUTPUT_TYPES_WITH_PRESET_SUPPORT.includes(type);
 }
 
-/**
- * True for output types that surface the OTel exporter configuration fields
- * (`otel_exporter_config_yaml`, `otel_disable_beatsauth`).
- */
 export function outputTypeSupportsOtelExporter(type: ValueOf<OutputType> | undefined): boolean {
   return type !== undefined && OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT.includes(type);
 }
 
-/**
- * Type predicate that narrows an output (or partial output) to one that carries the OTel
- * exporter fields. Use this instead of casting when reading `otel_exporter_config_yaml` or
- * `otel_disable_beatsauth`.
- */
+/** Narrows outputs that carry OTel exporter fields. */
 export function isOtelExporterOutput<T extends { type?: ValueOf<OutputType> }>(
   output: T
 ): output is T & OtelExporterOutput {

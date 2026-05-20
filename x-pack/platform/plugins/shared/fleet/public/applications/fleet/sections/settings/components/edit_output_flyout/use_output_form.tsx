@@ -24,6 +24,7 @@ import type {
   NewLogstashOutput,
   NewOutput,
   NewRemoteElasticsearchOutput,
+  OtelExporterOutput,
 } from '../../../../../../../common/types/models';
 
 import {
@@ -889,6 +890,11 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
 
       const proxyIdValue = proxyIdInput.value !== '' ? proxyIdInput.value : null;
 
+      const otelExporterParams: OtelExporterOutput = {
+        otel_exporter_config_yaml: otelExporterConfigInput.value || null,
+        otel_disable_beatsauth: otelDisableBeatsauthInput.value ?? null,
+      };
+
       const payload: NewOutput = (() => {
         const parseIntegerIfStringDefined = (value: string | undefined): number | undefined => {
           if (value !== undefined) {
@@ -1075,8 +1081,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
               is_default_monitoring: defaultMonitoringOutputInput.value,
               preset: presetInput.value,
               config_yaml: additionalYamlConfigInput.value,
-              otel_exporter_config_yaml: otelExporterConfigInput.value || null,
-              otel_disable_beatsauth: otelDisableBeatsauthInput.value ?? null,
+              ...otelExporterParams,
               service_token: serviceTokenInput.value || undefined,
               kibana_api_key: kibanaAPIKeyInput.value || undefined,
               ...(secrets ? { secrets } : {}),
@@ -1104,8 +1109,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
               is_default_monitoring: defaultMonitoringOutputInput.value,
               preset: presetInput.value,
               config_yaml: additionalYamlConfigInput.value,
-              otel_exporter_config_yaml: otelExporterConfigInput.value || null,
-              otel_disable_beatsauth: otelDisableBeatsauthInput.value ?? null,
+              ...otelExporterParams,
               ca_trusted_fingerprint: caTrustedFingerprintInput.value,
               proxy_id: proxyIdValue,
               write_to_logs_streams: writeToStreams.value,
