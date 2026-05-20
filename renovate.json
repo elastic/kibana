@@ -1998,7 +1998,6 @@
         "jest-matcher-utils",
         "jest-mock",
         "jest-runtime",
-        "jest-specific-snapshot",
         "jest-snapshot",
         "jest-styled-components",
         "mutation-observer"
