@@ -106,7 +106,7 @@ describe('aggregationStats', () => {
       source: 'tags',
       destination: 'tags',
       mapping: { type: 'keyword' },
-      retention: { operation: 'collect_values', maxLength: 10 },
+      retention: { operation: 'collect_values' },
     };
     expect(aggregationStats([field], false)).toBe('tags = VALUES(TO_STRING(tags))');
   });
@@ -116,7 +116,7 @@ describe('aggregationStats', () => {
       source: 'tags',
       destination: 'tags',
       mapping: { type: 'keyword' },
-      retention: { operation: 'collect_values', maxLength: 10 },
+      retention: { operation: 'collect_values' },
     };
     expect(aggregationStats([field], true)).toBe('recent.tags = VALUES(TO_STRING(tags))');
   });
@@ -126,7 +126,7 @@ describe('aggregationStats', () => {
       source: 'entity.source',
       destination: 'entity.source',
       mapping: { type: 'keyword' },
-      retention: { operation: 'collect_values', maxLength: 50 },
+      retention: { operation: 'collect_values' },
     };
     expect(aggregationStats([field], false)).toBe(
       'entity.source = VALUES(TO_STRING(entity.source))'

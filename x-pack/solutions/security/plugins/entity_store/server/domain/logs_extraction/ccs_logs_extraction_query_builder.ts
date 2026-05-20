@@ -7,7 +7,7 @@
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { EntityDefinition } from '../../../common/domain/definitions/entity_schema';
-import { getEuidEsqlEvaluation } from '../../../common/domain/euid/esql';
+import { getEuidEsqlEvaluationParts } from '../../../common/domain/euid/esql';
 import type { PaginationFields } from './query_builder_commons';
 import {
   buildExtractionSourceClause,
@@ -95,7 +95,7 @@ export function buildCcsLogsExtractionEsqlQuery({
   }
 
   // Builds the id
-  const { prelude: euidPrelude, expression: euidExpression } = getEuidEsqlEvaluation(type);
+  const { prelude: euidPrelude, expression: euidExpression } = getEuidEsqlEvaluationParts(type);
   if (euidPrelude) {
     parts.push(euidPrelude);
   }

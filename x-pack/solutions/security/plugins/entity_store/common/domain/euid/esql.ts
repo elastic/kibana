@@ -387,7 +387,97 @@ function buildRankingCaseEsql(ranking: EuidAttribute[][]): string {
   return armExprs.length === 1 ? armExprs[0] : `COALESCE(${armExprs.join(', ')})`;
 }
 
+/**
+ * Builds a self-contained ranking CASE expression using inline IS NOT NULL / != "" guards.
+ * No prelude columns are referenced — the expression is safe to embed directly in any EVAL.
+ * Used by the public {@link getEuidEsqlEvaluation} to preserve backward-compatible string API.
+ */
+function buildRankingCaseEsqlInline(ranking: EuidAttribute[][]): string {
+  if (ranking.length === 0) {
+    throw new Error('No euid fields found, invalid euid logic definition');
+  }
+  if (ranking.length === 1) {
+    const comp = ranking[0];
+    const firstAttr = comp[0];
+    if (isEuidSeparator(firstAttr)) {
+      throw new Error('Separator found in single field, invalid euid logic definition');
+    }
+    if (comp.length === 1 && isEuidField(firstAttr)) {
+      return (firstAttr as { field: string }).field;
+    }
+  }
+  const euidLogic = ranking.map((composedField) => {
+    if (composedField.length === 1 && isEuidSeparator(composedField[0])) {
+      throw new Error('Separator found in single field, invalid euid logic definition');
+    }
+    if (isEuidSeparator(composedField[0])) {
+      throw new Error('The first field of a composed field cannot be a separator');
+    }
+    const compositionConditions = composedField
+      .filter(isEuidField)
+      .map((f) => esqlIsNotNullOrEmpty(f.field))
+      .join(' AND ');
+    if (composedField.length === 1) {
+      return `(${compositionConditions}), ${(composedField[0] as { field: string }).field}`;
+    }
+    const evaluations = composedField
+      .map((attr) => (isEuidField(attr) ? attr.field : `"${escapeEsqlString(attr.sep)}"`))
+      .join(', ');
+    return `(${compositionConditions}), CONCAT(${evaluations})`;
+  });
+  return `CASE(${euidLogic.join(',\n')}, NULL)`;
+}
+
+/**
+ * Returns a self-contained ES|QL expression string for the entity's EUID.
+ * No prelude pipeline stages are required — the expression can be used directly in
+ * `| EVAL column = <result>` without any prior EVAL setup.
+ *
+ * External consumers (e.g. the CSP graph plugin) should use this function.
+ * For the optimized pipeline-with-prelude variant used internally by entity_store's
+ * logs-extraction builders, use {@link getEuidEsqlEvaluationParts}.
+ */
 export function getEuidEsqlEvaluation(
+  entityType: EntityType,
+  { withTypeId = true }: { withTypeId?: boolean } = {}
+): string {
+  const { identityField } = getEntityDefinitionWithoutId(entityType);
+  const mustPrependTypeId = withTypeId && !identityField.skipTypePrepend;
+  if (isSingleFieldIdentity(identityField)) {
+    return appendTypeIdIfNeeded(entityType, identityField.singleField, mustPrependTypeId);
+  }
+  const { euidRanking } = identityField;
+  const branches = euidRanking.branches;
+  const hasConditionalBranch = branches.some((b) => b.when != null);
+  if (!hasConditionalBranch && branches.length === 1) {
+    const idLogic = buildRankingCaseEsqlInline(branches[0].ranking);
+    return appendTypeIdIfNeeded(entityType, idLogic, mustPrependTypeId);
+  }
+  const branchCaseParts: string[] = [];
+  for (const branch of branches) {
+    const rankingCase = buildRankingCaseEsqlInline(branch.ranking);
+    if (branch.when) {
+      const whenCondition = conditionToESQL(branch.when);
+      branchCaseParts.push(`(${whenCondition}), ${rankingCase}`);
+    } else {
+      branchCaseParts.push(`true, ${rankingCase}`);
+    }
+  }
+  const idLogic =
+    branchCaseParts.length > 0 ? `CASE(${branchCaseParts.join(',\n')}, NULL)` : 'NULL';
+  return appendTypeIdIfNeeded(entityType, idLogic, mustPrependTypeId);
+}
+
+/**
+ * Optimized variant of {@link getEuidEsqlEvaluation} for entity_store's logs-extraction pipeline.
+ * Returns `{ prelude, expression }` where `prelude` contains one or more `| EVAL` pipeline stages
+ * that must be inserted before the stage that uses `expression`.
+ *
+ * The prelude pre-computes field-presence booleans and nullable aliases so that the final
+ * CASE/COALESCE expression only references plain Attribute columns, enabling
+ * CaseEagerEvaluator (vectorized) instead of the per-row CaseLazyEvaluator.
+ */
+export function getEuidEsqlEvaluationParts(
   entityType: EntityType,
   { withTypeId = true }: { withTypeId?: boolean } = {}
 ): { prelude: string | null; expression: string } {

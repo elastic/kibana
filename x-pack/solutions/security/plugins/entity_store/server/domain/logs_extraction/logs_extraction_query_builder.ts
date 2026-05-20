@@ -16,7 +16,7 @@ import {
   type EntityField,
   type EntityType,
 } from '../../../common/domain/definitions/entity_schema';
-import { getEuidEsqlEvaluation } from '../../../common/domain/euid/esql';
+import { getEuidEsqlEvaluationParts } from '../../../common/domain/euid/esql';
 
 import {
   buildExtractionSourceClause,
@@ -127,7 +127,7 @@ export function buildLogsExtractionEsqlQuery({
   }
 
   // Evaluation of the id without type so we can fallback to name
-  const { prelude: euidPrelude, expression: euidExpression } = getEuidEsqlEvaluation(type, {
+  const { prelude: euidPrelude, expression: euidExpression } = getEuidEsqlEvaluationParts(type, {
     withTypeId: false,
   });
   if (euidPrelude) {

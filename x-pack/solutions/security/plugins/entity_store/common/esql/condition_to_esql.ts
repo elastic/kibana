@@ -55,8 +55,8 @@ function getNotEmptyField(condition: Condition): string | null {
   if (!isAndCondition(condition) || condition.and.length !== 2) return null;
   const [first, second] = condition.and;
   if (!isFilterCondition(first) || !isFilterCondition(second)) return null;
-  const f = first as Record<string, unknown>;
-  const s = second as Record<string, unknown>;
+  const f = first as unknown as Record<string, unknown>;
+  const s = second as unknown as Record<string, unknown>;
   if (f.exists !== true || s.neq !== '' || f.field !== s.field) return null;
   return f.field as string;
 }

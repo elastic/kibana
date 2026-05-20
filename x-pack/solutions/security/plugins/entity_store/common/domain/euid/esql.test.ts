@@ -6,7 +6,7 @@
  */
 
 import {
-  getEuidEsqlEvaluation,
+  getEuidEsqlEvaluationParts,
   getEuidEsqlDocumentsContainsIdFilter,
   getEuidEsqlFilterBasedOnDocument,
   getFieldEvaluationsEsql,
@@ -262,16 +262,16 @@ describe('getFieldEvaluationsEsql', () => {
   });
 });
 
-describe('getEuidEsqlEvaluation', () => {
+describe('getEuidEsqlEvaluationParts', () => {
   it('returns raw field for generic with null prelude (skipTypePrepend: no type prefix)', () => {
-    const { prelude, expression } = getEuidEsqlEvaluation('generic');
+    const { prelude, expression } = getEuidEsqlEvaluationParts('generic');
 
     expect(prelude).toBeNull();
     expect(expression).toBe('entity.id');
   });
 
   it('returns _present + _n prelude and COALESCE expression for host', () => {
-    const { prelude, expression } = getEuidEsqlEvaluation('host');
+    const { prelude, expression } = getEuidEsqlEvaluationParts('host');
 
     expect(normalize(prelude!)).toBe(
       normalize(
@@ -291,7 +291,7 @@ describe('getEuidEsqlEvaluation', () => {
   });
 
   it('returns _present + _n prelude and COALESCE(CONCAT) expression for user', () => {
-    const { prelude, expression } = getEuidEsqlEvaluation('user');
+    const { prelude, expression } = getEuidEsqlEvaluationParts('user');
 
     // Prelude now includes: present booleans, branch condition pre-compute, and branch formulas.
     expect(normalize(prelude!)).toBe(
