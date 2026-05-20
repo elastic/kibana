@@ -19,7 +19,7 @@ import type { IntlShape } from '@kbn/i18n-react';
 import type { ReportingCSVSharingData } from '@kbn/reporting-public/types';
 import type { DataTotalHitsMsg } from '../../../state_management/discover_data_state_container';
 import { getSharingData, showPublicUrlSwitch } from '../../../../../utils/get_sharing_data';
-import { getColumnsWithTimeField } from '../../../../../utils/get_show_time_col';
+import { getColumnsWithTimeField } from '../../../../../utils/get_show_time_field_column';
 import { createSearchSource } from '../../../state_management/utils/create_search_source';
 import type { DiscoverAppLocatorParams } from '../../../../../../common/app_locator';
 import type { AppMenuDiscoverParams } from './types';

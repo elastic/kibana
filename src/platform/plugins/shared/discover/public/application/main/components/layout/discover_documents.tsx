@@ -68,7 +68,7 @@ import {
 } from '../../../../utils/get_allowed_sample_size';
 import { useFetchMoreRecords } from './use_fetch_more_records';
 import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
-import { getShowTimeCol } from '../../../../utils/get_show_time_col';
+import { getShowTimeFieldColumn } from '../../../../utils/get_show_time_field_column';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import type {
   CellRenderersExtensionParams,
@@ -323,7 +323,7 @@ function DiscoverDocumentsComponent({
   );
 
   // should be aligned with embeddable `showTimeCol` prop
-  const showTimeCol = useMemo(() => getShowTimeCol(uiSettings, query), [uiSettings, query]);
+  const showTimeCol = useMemo(() => getShowTimeFieldColumn(uiSettings, query), [uiSettings, query]);
 
   const columnsMeta: DataTableColumnsMeta | undefined = useMemo(
     () =>

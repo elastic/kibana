@@ -9,7 +9,7 @@
 
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
-import { getColumnsWithTimeField, getShowTimeCol } from './get_show_time_col';
+import { getColumnsWithTimeField, getShowTimeFieldColumn } from './get_show_time_field_column';
 
 const createUiSettingsMock = (hideTimeColumn: boolean) =>
   ({
@@ -21,26 +21,28 @@ const createUiSettingsMock = (hideTimeColumn: boolean) =>
     },
   } as unknown as IUiSettingsClient);
 
-describe('getShowTimeCol', () => {
+describe('getShowTimeFieldColumn', () => {
   it('should return false when doc_table:hideTimeColumn setting is true', () => {
-    expect(getShowTimeCol(createUiSettingsMock(true), undefined)).toBe(false);
+    expect(getShowTimeFieldColumn(createUiSettingsMock(true), undefined)).toBe(false);
   });
 
   it('should return true for a Classic (non-aggregate) query', () => {
-    expect(getShowTimeCol(createUiSettingsMock(false), { language: 'kuery', query: '*' })).toBe(
-      true
-    );
+    expect(
+      getShowTimeFieldColumn(createUiSettingsMock(false), { language: 'kuery', query: '*' })
+    ).toBe(true);
   });
 
   it('should return true for a non-transformational ES|QL query', () => {
     expect(
-      getShowTimeCol(createUiSettingsMock(false), { esql: 'from logstash-* | where bytes > 0' })
+      getShowTimeFieldColumn(createUiSettingsMock(false), {
+        esql: 'from logstash-* | where bytes > 0',
+      })
     ).toBe(true);
   });
 
   it('should return false for a transformational ES|QL query with KEEP', () => {
     expect(
-      getShowTimeCol(createUiSettingsMock(false), {
+      getShowTimeFieldColumn(createUiSettingsMock(false), {
         esql: 'from logstash-* | keep ip, @timestamp',
       })
     ).toBe(false);
@@ -48,7 +50,9 @@ describe('getShowTimeCol', () => {
 
   it('should return false when setting is true even for non-transformational ES|QL', () => {
     expect(
-      getShowTimeCol(createUiSettingsMock(true), { esql: 'from logstash-* | where bytes > 0' })
+      getShowTimeFieldColumn(createUiSettingsMock(true), {
+        esql: 'from logstash-* | where bytes > 0',
+      })
     ).toBe(false);
   });
 });

@@ -24,7 +24,7 @@ import {
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { DiscoverAppState } from '../application/main/state_management/redux';
 import { isEqualFilters } from '../application/main/state_management/utils/state_comparators';
-import { getColumnsWithTimeField } from './get_show_time_col';
+import { getColumnsWithTimeField } from './get_show_time_field_column';
 
 /**
  * Preparing data to share the current state as link or CSV/Report

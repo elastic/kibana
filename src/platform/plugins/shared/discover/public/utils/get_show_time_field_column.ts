@@ -13,7 +13,7 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
 
-export const getShowTimeCol = (
+export const getShowTimeFieldColumn = (
   uiSettings: IUiSettingsClient,
   query?: AggregateQuery | Query
 ): boolean => {
@@ -35,7 +35,7 @@ export const getColumnsWithTimeField = (
   if (
     columns.length > 0 &&
     timeFieldName &&
-    getShowTimeCol(uiSettings, query) &&
+    getShowTimeFieldColumn(uiSettings, query) &&
     !columns.includes(timeFieldName)
   ) {
     return [timeFieldName, ...columns];

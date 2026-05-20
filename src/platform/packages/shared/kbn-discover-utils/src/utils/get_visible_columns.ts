@@ -22,7 +22,7 @@ export function canPrependTimeFieldColumn(
   }
 
   if (isESQLMode) {
-    return !!columnsMeta && timeFieldName in columnsMeta;
+    return !!columns && !!columnsMeta && timeFieldName in columnsMeta;
   }
 
   return true;
