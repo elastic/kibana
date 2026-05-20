@@ -61,6 +61,7 @@ describe('cloudOnboardingDeploymentService', () => {
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(() => {
+    jest.resetAllMocks();
     soClient = savedObjectsClientMock.create();
   });
 
@@ -68,6 +69,7 @@ describe('cloudOnboardingDeploymentService', () => {
     it('creates a deployment SO with server-set status/attemptCount/timestamps and returns the mapped deployment', async () => {
       const attrs = makeAttributes();
       soClient.create.mockResolvedValue(makeSOResponse('deploy-1', attrs));
+      makeMockedEncryptedSoClient('deploy-1', attrs);
 
       const result = await cloudOnboardingDeploymentService.create(soClient, {
         provider: 'aws',
@@ -414,6 +416,7 @@ describe('cloudOnboardingDeploymentService', () => {
           packagePolicyIds: ['pkg-aws-001'],
         });
         soClient.create.mockResolvedValue(makeSOResponse('deploy-uc1', attrs));
+        makeMockedEncryptedSoClient('deploy-uc1', attrs);
 
         const result = await cloudOnboardingDeploymentService.create(soClient, {
           provider: 'aws',
@@ -448,6 +451,7 @@ describe('cloudOnboardingDeploymentService', () => {
           packagePolicyIds: ['pkg-aws-002'],
         });
         soClient.create.mockResolvedValue(makeSOResponse('deploy-uc2', attrs));
+        makeMockedEncryptedSoClient('deploy-uc2', attrs);
 
         const result = await cloudOnboardingDeploymentService.create(soClient, {
           provider: 'aws',
@@ -487,6 +491,7 @@ describe('cloudOnboardingDeploymentService', () => {
           packagePolicyIds: undefined,
         });
         soClient.create.mockResolvedValue(makeSOResponse('deploy-uc3', attrs));
+        makeMockedEncryptedSoClient('deploy-uc3', attrs);
 
         const result = await cloudOnboardingDeploymentService.create(soClient, {
           provider: 'aws',
@@ -546,6 +551,7 @@ describe('cloudOnboardingDeploymentService', () => {
             packagePolicyIds: undefined,
           });
           soClient.create.mockResolvedValue(makeSOResponse(`deploy-${_pushMechanism}`, attrs));
+          makeMockedEncryptedSoClient(`deploy-${_pushMechanism}`, attrs);
 
           const result = await cloudOnboardingDeploymentService.create(soClient, {
             provider: 'aws',

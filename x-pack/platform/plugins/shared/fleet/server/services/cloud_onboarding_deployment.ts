@@ -46,7 +46,7 @@ class CloudOnboardingDeploymentService {
       attributes
     );
 
-    return { id: so.id, ...attributes };
+    return this.getById(soClient, so.id);
   }
 
   public async getById(
