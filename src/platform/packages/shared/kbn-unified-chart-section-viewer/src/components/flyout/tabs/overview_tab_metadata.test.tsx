@@ -44,7 +44,7 @@ describe('OverviewTabMetadata', () => {
   });
 
   describe('basic rendering', () => {
-    it('renders the description list and hides the source row when no staticIndexName is provided', () => {
+    it('renders the description list and hides the source row when no sourceRow is provided', () => {
       const metricItem = createMockMetric({
         dataStream: 'my-data-stream',
         fieldTypes: [ES_FIELD_TYPES.LONG],
@@ -66,11 +66,15 @@ describe('OverviewTabMetadata', () => {
   });
 
   describe('source row', () => {
-    it('renders the static Index row when staticIndexName is an index', () => {
+    it('renders the Index row when sourceRow is an index', () => {
       const { getByTestId, getByText } = render(
         <OverviewTabMetadata
           metricItem={createMockMetric()}
-          staticIndexName={{ indexName: 'my-source', kind: METRIC_SOURCE_KIND.INDEX }}
+          sourceRow={{
+            indexName: 'my-source',
+            kind: METRIC_SOURCE_KIND.INDEX,
+            streamLink: null,
+          }}
         />
       );
 
@@ -80,11 +84,15 @@ describe('OverviewTabMetadata', () => {
       );
     });
 
-    it('renders the static Data stream row when staticIndexName is a data stream', () => {
+    it('renders the Data stream row when sourceRow is a data stream', () => {
       const { getByTestId, getByText } = render(
         <OverviewTabMetadata
           metricItem={createMockMetric()}
-          staticIndexName={{ indexName: 'logs-foo-default', kind: METRIC_SOURCE_KIND.DATA_STREAM }}
+          sourceRow={{
+            indexName: 'logs-foo-default',
+            kind: METRIC_SOURCE_KIND.DATA_STREAM,
+            streamLink: null,
+          }}
         />
       );
 
@@ -94,7 +102,28 @@ describe('OverviewTabMetadata', () => {
       );
     });
 
-    it('omits the static source row when staticIndexName is not provided', () => {
+    it('renders streamLink inside the source row when provided', () => {
+      const { getByTestId, queryByText } = render(
+        <OverviewTabMetadata
+          metricItem={createMockMetric()}
+          sourceRow={{
+            indexName: 'logs-foo-default',
+            kind: METRIC_SOURCE_KIND.DATA_STREAM,
+            streamLink: (
+              <a data-test-subj="streamLink" href="/streams/logs-foo-default">
+                logs-foo-default
+              </a>
+            ),
+          }}
+        />
+      );
+
+      const row = getByTestId('metricsExperienceFlyoutOverviewTabDataStreamLabel');
+      expect(row).toContainElement(getByTestId('streamLink'));
+      expect(queryByText('logs-foo-default')?.tagName.toLowerCase()).toBe('a');
+    });
+
+    it('omits the source row when sourceRow is not provided', () => {
       const { queryByTestId, queryByText } = render(
         <OverviewTabMetadata metricItem={createMockMetric({ dataStream: 'my-source' })} />
       );
