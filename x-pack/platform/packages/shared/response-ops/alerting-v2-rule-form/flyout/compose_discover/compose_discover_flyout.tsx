@@ -411,8 +411,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
       setYamlText(serializeFormToYaml(composeFormValuesForYamlSerialize(current)));
     }
     dispatch({ type: 'COMMIT_QUERY' });
-    syncSandbox();
-  }, [sandboxQuery, sandboxTimeField, uiState.yamlMode, methods, dispatch, syncSandbox]);
+  }, [sandboxQuery, sandboxTimeField, uiState.yamlMode, methods, dispatch]);
 
   const handleSubmit = methods.handleSubmit((values) => {
     if (isCreate) {
