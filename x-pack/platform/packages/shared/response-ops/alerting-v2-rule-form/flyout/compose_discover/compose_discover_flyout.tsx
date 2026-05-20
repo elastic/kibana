@@ -323,17 +323,34 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
             },
           };
         });
-      } else if (type === 'default' && uiState.queryCommitted) {
-        const current = methods.getValues('query');
-        if (current.format === 'composed' && current.blocks.recover) {
-          methods.setValue('query', { ...current, blocks: { breach: current.blocks.breach } });
-        } else if (current.format === 'standalone' && current.recover) {
-          methods.setValue('query', { format: 'standalone', breach: current.breach });
+      } else {
+        // (a) Clear recover from sandbox regardless of mode — prevents stale recovery
+        // query from surviving a type change even when the sandbox is still open.
+        setSandboxQuery((q) =>
+          q.format === 'composed'
+            ? { ...q, blocks: { breach: q.blocks.breach } }
+            : { ...q, recover: undefined }
+        );
+        // Clear recover from committed RHF state too.
+        if (uiState.queryCommitted) {
+          const current = methods.getValues('query');
+          if (current.format === 'composed' && current.blocks.recover) {
+            methods.setValue('query', { ...current, blocks: { breach: current.blocks.breach } });
+          } else if (current.format === 'standalone' && current.recover) {
+            methods.setValue('query', { format: 'standalone', breach: current.breach });
+          }
+        }
+        // (b) Close sandbox in non-YAML mode — prevents a pending Apply from
+        // overwriting the recovery type change by writing the stale sandboxQuery back.
+        // Skip syncSandbox here: (a) already set the clean state directly, and
+        // calling syncSandbox when !queryCommitted could re-introduce a stale recover.
+        if (uiState.childOpen && !uiState.yamlMode) {
+          dispatch({ type: 'CLOSE_CHILD' });
         }
       }
       dispatch({ type: 'SET_RECOVERY_TYPE', recoveryType: type });
     },
-    [dispatch, methods, uiState.queryCommitted]
+    [dispatch, methods, uiState.queryCommitted, uiState.childOpen, uiState.yamlMode]
   );
 
   const isCreate = mode === 'create' || mode === 'clone';
