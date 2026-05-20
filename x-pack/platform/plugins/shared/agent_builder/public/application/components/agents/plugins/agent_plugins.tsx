@@ -158,6 +158,7 @@ export const AgentPlugins: React.FC = () => {
     (pluginId: string) => {
       analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.EntityDetailView, {
         entity_type: 'plugin',
+        view_format: 'split',
         agent_id: agentId,
       });
       setSelectedPluginId(pluginId);

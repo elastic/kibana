@@ -159,6 +159,7 @@ export const AgentSkills: React.FC = () => {
   const handleSelectSkill = (skillId: string) => {
     analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.EntityDetailView, {
       entity_type: 'skill',
+      view_format: 'split',
       agent_id: agentId,
     });
     setSelectedSkillId(skillId);

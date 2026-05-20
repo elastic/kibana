@@ -214,6 +214,7 @@ export const AgentTools: React.FC = () => {
     (toolId: string) => {
       analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.EntityDetailView, {
         entity_type: 'tool',
+        view_format: 'split',
         agent_id: agentId,
       });
       setSelectedToolId(toolId);

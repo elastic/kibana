@@ -364,6 +364,7 @@ export interface ReportEntityRemoveParams {
 
 export interface ReportEntityDetailViewParams {
   entity_type: string;
+  view_format: 'flyout' | 'split' | 'page';
   agent_id: string;
 }
 
@@ -1704,6 +1705,13 @@ const ENTITY_DETAIL_VIEW_EVENT: AgentBuilderTelemetryEvent = {
       type: 'keyword',
       _meta: {
         description: 'Type of entity whose detail panel was opened (tool|skill|plugin)',
+        optional: false,
+      },
+    },
+    view_format: {
+      type: 'keyword',
+      _meta: {
+        description: 'How the detail is presented (flyout|split|page)',
         optional: false,
       },
     },
