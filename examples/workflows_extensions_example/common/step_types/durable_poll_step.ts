@@ -55,7 +55,7 @@ export const durablePollStepCommonDefinition: CommonStepDefinition<
   documentation: {
     details: i18n.translate('workflowsExtensionsExample.durablePollStep.documentation.details', {
       defaultMessage:
-        'Demonstrates the durable **run + poll** pattern: `run` submits work and returns `{ state }`; `poll.handler` wakes on `poll.policy` until `{ output }`. In production, `run` would call an HTTP API or task queue and `poll` would read job status from Elasticsearch or an upstream service. See workflows_extensions `dev_docs/STEPS.md` for authoring guidance.',
+        'Demonstrates the durable **run + poll** pattern: `run` submits work and returns `{ state }`; `poll.handler` wakes on `poll.policy` until `{ output }`. In production, `run` would call an HTTP API or task queue and `poll` would read job status from Elasticsearch or an upstream service. Authoring guide: `src/platform/plugins/shared/workflows_extensions/dev_docs/STEPS.md` — **Durable run/poll custom steps** (`createPollServerStepDefinition`).',
     }),
     examples: [
       `## Async export (demo)

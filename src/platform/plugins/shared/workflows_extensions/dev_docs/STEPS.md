@@ -17,11 +17,16 @@ This separation ensures:
 - Better code organization
 - Reduced coupling between teams
 
-See [Contributing Custom Step Types](#contributing-custom-step-types) below for the correct way to implement external steps.
+Server-side custom steps use one of two definition helpers:
 
-## Contributing Custom Step Types
+- **[Single-shot custom steps](#single-shot-custom-steps-createserverstepdefinition)** — `createServerStepDefinition` with a `handler` (synchronous or fast work).
+- **[Durable run/poll custom steps](#durable-runpoll-custom-steps-createpollserverstepdefinition)** — `createPollServerStepDefinition` with `poll` and optionally `run` (async work that wakes in `WAITING` until complete).
 
-This section provides a complete guide for contributors who want to add custom step types to the workflows system.
+Both paths share the same registration model (your plugin, common + public definitions). See the single-shot guide below for the default contributor walkthrough.
+
+## Single-shot custom steps (`createServerStepDefinition`)
+
+This section provides a complete guide for contributors who want to add **single-shot** custom step types (one `handler` invocation per step run).
 
 ### Step 1: Define Common Step Definition
 
@@ -89,6 +94,8 @@ export const myStepCommonDefinition: CommonStepDefinition = {
 ```
 
 ### Step 2: Implement Server-Side Handler
+
+For long-running or async work, use `createPollServerStepDefinition` instead — see [Durable run/poll custom steps](#durable-runpoll-custom-steps-createpollserverstepdefinition). Do not add `run` or `poll` to `createServerStepDefinition` definitions.
 
 Create the server-side implementation (e.g., `server/step_types/my_step.ts`):
 
@@ -905,6 +912,8 @@ const myStepDefinition = createServerStepDefinition({
 - Errors thrown in `onCancel` are logged but do **not** disrupt the cancellation flow
 - Steps without `onCancel` are unaffected — no changes required for existing step implementations
 
+For cancellation on **run/poll** steps, see [Cancellation cleanup for run/poll steps](#cancellation-cleanup-oncancel-for-runpoll-steps).
+
 ### Public-Side Definition Requirements
 
 The public definition must include:
@@ -923,6 +932,184 @@ The public definition must include:
   - `input`: Handlers for input properties (inside `with`)
   - `dynamicSchema`: Dynamic schema handlers (e.g., `getOutputSchema`)
 
+## Durable run/poll custom steps (`createPollServerStepDefinition`)
+
+Use this section when a step cannot finish in a single handler invocation: you **start** work, then **check status on a schedule** until the job completes or fails. The execution engine persists author state, moves the step to `WAITING` between polls, and wakes it according to `poll.policy`.
+
+**Good fits:** async exports/reports, ML or Osquery actions, connector jobs, any upstream API that returns a job id and a status endpoint.
+
+**Poor fits:** quick synchronous work — use [`createServerStepDefinition`](#single-shot-custom-steps-createserverstepdefinition) with `handler` instead.
+
+Do **not** mix APIs on one definition: poll-based steps omit `handler` and are built with `createPollServerStepDefinition` only.
+
+| Helper | Server shape | Returns from `run` / `poll.handler` |
+|--------|--------------|-------------------------------------|
+| `createServerStepDefinition` | `handler` | `StepHandlerResult` — `{ output }` or `{ error }` |
+| `createPollServerStepDefinition` | `poll` (required), `run` (optional) | `DurablePhaseResult` — see below |
+
+```mermaid
+sequenceDiagram
+  participant Engine
+  participant RunPhase as run_phase
+  participant PollHandler as poll_handler
+  Note over Engine,PollHandler: run_plus_poll mode
+  Engine->>RunPhase: first execution
+  RunPhase-->>Engine: state handoff
+  loop until output or error
+    Engine->>PollHandler: wake after policy delay
+    PollHandler-->>Engine: continue or output or error
+  end
+```
+
+### Step 1: Common definition
+
+Same as single-shot steps: define `id`, `inputSchema`, `outputSchema`, and optional UI metadata in `common/step_types/`. See [Step 1: Define Common Step Definition](#step-1-define-common-step-definition).
+
+### Step 2: Server definition with `createPollServerStepDefinition`
+
+Import `createPollServerStepDefinition` from `@kbn/workflows-extensions/server`. Spread your common definition and add `poll` (and optionally `run`, `stateSchema`, `onCancel`).
+
+**Execution modes**
+
+| Mode | Fields | Behavior |
+|------|--------|----------|
+| **`run` + `poll`** | `run`, `poll` | `run` may return `{ output }` / `{ error }` immediately, or `{ state }` to hand off. The first `poll.handler` runs on the **next** wake-up (not in the same turn as `run`). |
+| **`poll` only** | `poll` | No `run`. `poll.handler` runs on first execution, then on each scheduled wake-up until done. |
+
+**`DurablePhaseResult`** (return type for both `run` and `poll.handler`):
+
+- **`{ output }`** — success; must match `outputSchema`.
+- **`{ error }`** — failure; step fails with that error.
+- **`{ state?, nextPollDelayMs? }`** — continue in `WAITING`. Omit `state` to keep prior author state; pass `state: null` to clear it. If `nextPollDelayMs` is a positive number, the **next** wake-up uses that delay from now; otherwise spacing follows `poll.policy`.
+
+Optional **`stateSchema`**: a `z.object({ ... })` for compile-time typing of `context.state` in `poll.handler` and of `state` on continuations. The engine persists author state under an internal `__durableStepState` key — use only `{ state }` / `{ state: null }` on `run` / `poll` results; do not read or write that key from workflow YAML.
+
+**`poll.handler` context** (`PollContext`): extends `StepHandlerContext` with:
+
+- **`state`** — author state from the previous `run` / `poll` (typed from `stateSchema` when provided; `undefined` on the first poll of a poll-only step).
+- **`attempt`** — 0-based index of this `poll.handler` invocation (does not count `run`).
+
+**`poll.policy`** (required; fixed at definition time, not overridable from workflow YAML):
+
+- **`fixed`** — `{ strategy: 'fixed', intervalMs: number }` — same delay between every poll.
+- **`exponential`** — `{ strategy: 'exponential', initialMs, maxMs, multiplier?, jitter? }` — delay grows by `multiplier` (default `2`), capped at `maxMs`. With `jitter: true`, delay is randomized in `[computed/2, computed]` ms (same jitter helper as on-failure retry).
+
+**`poll.ceilings`** (optional): `{ maxAttempts?, maxWaitMs? }`. When omitted, defaults are **120** attempts and **3_600_000** ms (1 hour). The step registry logs a **warning** at registration if you rely on defaults — declare explicit ceilings in production. Exceeding a ceiling fails the step with `ExecutionError` type `'PollCeilingExceeded'`.
+
+### Cancellation cleanup (`onCancel`) for run/poll steps
+
+Optional `onCancel` on `createPollServerStepDefinition` uses the same `StepHandlerContext` signature as single-shot steps.
+
+When the **workflow is cancelled**, `onCancel` is invoked **regardless of phase** — while `run` is active (`RUNNING`), while the step is suspended between polls (`WAITING`), or before the next scheduled wake-up. Use it to cancel external jobs (exports, ML tasks, Osquery actions, etc.) started in `run` or tracked in author `state`, without waiting for the next poll.
+
+- Implementations must be **idempotent**.
+- Errors are logged and do **not** block cancellation.
+
+```typescript
+import { createPollServerStepDefinition } from '@kbn/workflows-extensions/server';
+
+export const myAsyncStep = createPollServerStepDefinition({
+  ...myAsyncStepCommonDefinition,
+  run: async ({ input, logger }) => {
+    const jobId = await startExport(input.indexPattern);
+    return { state: { jobId } };
+  },
+  poll: {
+    handler: async (context) => {
+      const status = await getExportStatus(context.state!.jobId);
+      if (status.ready) {
+        return { output: { downloadPath: status.path } };
+      }
+      return { state: { jobId: context.state!.jobId } };
+    },
+    policy: { strategy: 'fixed', intervalMs: 5000 },
+    ceilings: { maxAttempts: 60, maxWaitMs: 300_000 },
+  },
+  onCancel: async (context) => {
+    context.logger.info('Workflow cancelled — aborting export if still running');
+    // await cancelExport(context.input, persistedState...);
+  },
+});
+```
+
+### Reference implementation (`workflows_extensions_example`)
+
+A runnable **simulated async report** step ships in the example plugin:
+
+| Artifact | Path |
+|----------|------|
+| Common (schemas, YAML example) | `examples/workflows_extensions_example/common/step_types/durable_poll_step.ts` |
+| Server (`run` + `poll`) | `examples/workflows_extensions_example/server/step_types/durable_poll_step.ts` |
+| Public (UI metadata) | `examples/workflows_extensions_example/public/step_types/durable_poll_step.ts` |
+| Step type id | `example.durablePollDemo` |
+
+Run Kibana with `yarn start --run-examples`, open **Developer examples** → **Workflows Extensions Example**, and use the **Async report (run + poll demo)** step in the editor.
+
+**Demo vs production**
+
+| Demo behavior | Typical production equivalent |
+|---------------|------------------------------|
+| `run` queues a fake `requestId`, returns `{ state: { phase: 'queued', ... } }` | POST to export/report API or enqueue a background task |
+| `poll` advances `phase` until `simulatedRenderPolls` | GET job status from Elasticsearch or an upstream service |
+| `{ output: { documentDownloadPath, ... } }` | Final artifact URL and metadata |
+| `policy: { strategy: 'fixed', intervalMs: 2000 }` | Tune per integration SLA |
+| `ceilings: { maxAttempts: 12, maxWaitMs: 60_000 }` | Set explicitly for your job duration |
+
+**Workflow YAML**
+
+```yaml
+- name: export_slow_errors
+  type: example.durablePollDemo
+  with:
+    indexPattern: "logs-*"
+    simulatedRenderPolls: 4
+```
+
+**Server excerpt** (abbreviated from the example):
+
+```typescript
+import { createPollServerStepDefinition } from '@kbn/workflows-extensions/server';
+
+export const durablePollStepDefinition = createPollServerStepDefinition({
+  ...durablePollStepCommonDefinition,
+  stateSchema: z.object({ requestId: z.string(), phase: z.enum(['queued', 'rendering', 'finalizing']) }),
+  run: async ({ input, logger }) => {
+    const requestId = `rpt_${Date.now().toString(36)}_…`;
+    return { state: { requestId, queryWindow: input.indexPattern, phase: 'queued', submittedAt: new Date().toISOString() } };
+  },
+  poll: {
+    handler: async (context) => {
+      if (context.attempt < context.input.simulatedRenderPolls - 1) {
+        return { state: { ...context.state!, phase: context.attempt === 0 ? 'rendering' : 'finalizing' } };
+      }
+      return { output: { requestId: context.state!.requestId, documentDownloadPath: '…', totalHits: 42, generatedAt: new Date().toISOString() } };
+    },
+    policy: { strategy: 'fixed', intervalMs: 2000 },
+    ceilings: { maxAttempts: 12, maxWaitMs: 60_000 },
+  },
+});
+```
+
+**Poll-only variant** (sketch): when the job id is already in `input`, omit `run` and use `poll.handler` from the first execution:
+
+```typescript
+createPollServerStepDefinition({
+  ...common,
+  poll: {
+    handler: async (context) => {
+      const job = await getJob(context.input.jobId);
+      if (job.status === 'complete') return { output: { result: job.result } };
+      return {};
+    },
+    policy: { strategy: 'exponential', initialMs: 1000, maxMs: 60_000, jitter: true },
+    ceilings: { maxAttempts: 30, maxWaitMs: 600_000 },
+  },
+});
+```
+
+### Step 3: Public definition and registration
+
+Public registration is identical to single-shot steps: `createPublicStepDefinition` with the same common `id` and schemas. See [Public-Side Definition Requirements](#public-side-definition-requirements) and register via the `workflows_extensions` plugin contract in your plugin `setup` (same as `examples/workflows_extensions_example/README.md`).
 
 ## Step Definition Approval Process
 
@@ -932,10 +1119,10 @@ All custom step definitions must be approved by the workflows-eng team before be
 
 1. **Registration Detection**: When you register a new step or modify an existing step's handler, the test will detect it during CI runs.
 
-2. **Handler Hash**: The test generates a SHA256 hash of each step's handler function implementation. This ensures that:
+2. **Implementation hash**: The test generates a SHA256 fingerprint of each step's callable implementation (`handler`, `run`, `poll.handler`, and `onCancel` when present). Steps that use **only** the legacy `handler` (no `run`, `poll`, or `onCancel`) keep the same hash as before (handler-only). This ensures that:
 
    - New steps are detected
-   - Changes to handler implementations are detected (even if the step ID remains the same)
+   - Changes to handler, run, poll, or onCancel implementations are detected (even if the step ID remains the same)
 
 3. **Approval Required**: The test compares registered steps against the approved list in:
    ```
