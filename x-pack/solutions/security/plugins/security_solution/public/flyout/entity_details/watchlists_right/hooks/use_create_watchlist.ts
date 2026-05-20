@@ -55,6 +55,16 @@ export const useCreateWatchlist = ({
       onSuccess?.();
     },
     onError: (error: Error) => {
+      let errorMessage;
+      if (
+        'body' in error &&
+        error.body &&
+        typeof error.body === 'object' &&
+        'message' in error.body &&
+        typeof error.body.message === 'string'
+      ) {
+        errorMessage = error.body.message;
+      }
       toasts.addError(error, {
         title: i18n.translate(
           'xpack.securitySolution.entityAnalytics.watchlists.flyout.createError',
@@ -62,6 +72,7 @@ export const useCreateWatchlist = ({
             defaultMessage: 'Failed to create watchlist',
           }
         ),
+        toastMessage: errorMessage,
       });
     },
   });

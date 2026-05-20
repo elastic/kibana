@@ -27,6 +27,7 @@ import {
   checkIndexReadPrivilege,
   grantEntitySourceApiKey,
 } from '../../entity_sources/entity_source_api_key';
+import { INSUFFICIENT_INDEX_PRIVILEGES_ERROR } from './translations';
 
 export const createWatchlistRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -100,7 +101,7 @@ export const createWatchlistRoute = (
                       await watchlistClient.delete(watchlist.id);
                       return siemResponse.error({
                         statusCode: 403,
-                        body: `Insufficient privileges to read from index pattern: ${entitySourceInput.indexPattern}`,
+                        body: INSUFFICIENT_INDEX_PRIVILEGES_ERROR,
                       });
                     }
                   }

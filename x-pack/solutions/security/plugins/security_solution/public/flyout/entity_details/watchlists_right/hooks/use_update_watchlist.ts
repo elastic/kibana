@@ -44,9 +44,7 @@ export const useUpdateWatchlist = ({
         throw new Error('Missing watchlist id');
       }
 
-      // Update the watchlist itself (name, description, riskModifier)
-      const updatedWatchlist = await updateWatchlist({ id: watchlistId, body: watchlist });
-
+      // Process entity sources first so that in case of privilege errors, the watchlist is not modified
       const isRuleBasedType = (t: string): t is SourceType => t === 'store' || t === 'index';
       const deletedIds = new Set<string>();
 
@@ -101,6 +99,9 @@ export const useUpdateWatchlist = ({
         }
       }
 
+      // Update the watchlist metadata only after entity sources have succeeded
+      const updatedWatchlist = await updateWatchlist({ id: watchlistId, body: watchlist });
+
       return updatedWatchlist;
     },
     onSuccess: async () => {
@@ -132,6 +133,16 @@ export const useUpdateWatchlist = ({
       onSuccess?.();
     },
     onError: (error: Error) => {
+      let errorMessage;
+      if (
+        'body' in error &&
+        error.body &&
+        typeof error.body === 'object' &&
+        'message' in error.body &&
+        typeof error.body.message === 'string'
+      ) {
+        errorMessage = error.body.message;
+      }
       toasts.addError(error, {
         title: i18n.translate(
           'xpack.securitySolution.entityAnalytics.watchlists.flyout.updateError',
@@ -139,6 +150,7 @@ export const useUpdateWatchlist = ({
             defaultMessage: 'Failed to update watchlist',
           }
         ),
+        toastMessage: errorMessage,
       });
     },
   });

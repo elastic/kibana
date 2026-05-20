@@ -23,6 +23,7 @@ import {
   grantEntitySourceApiKey,
   invalidateEntitySourceApiKey,
 } from '../../../entity_sources/entity_source_api_key';
+import { INSUFFICIENT_INDEX_PRIVILEGES_ERROR } from '../translations';
 
 export const updateEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -78,7 +79,7 @@ export const updateEntitySourceRoute = (
               if (!hasPrivilege) {
                 return siemResponse.error({
                   statusCode: 403,
-                  body: `Insufficient privileges to read from index pattern: ${request.body.indexPattern}`,
+                  body: INSUFFICIENT_INDEX_PRIVILEGES_ERROR,
                 });
               }
             }
