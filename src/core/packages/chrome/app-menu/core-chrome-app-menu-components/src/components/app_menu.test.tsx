@@ -148,4 +148,50 @@ describe('AppMenu', () => {
       expect(screen.queryByText('Single overflow item')).not.toBeInTheDocument();
     });
   });
+
+  describe('switch', () => {
+    const switchConfig: AppMenuConfig['switch'] = {
+      id: 'test-switch',
+      label: 'Test switch',
+      labelProps: {},
+      checked: false,
+      onChange: jest.fn(),
+      'data-test-subj': 'test-switch',
+    };
+
+    it('should render the app menu with only a switch (standalone)', () => {
+      render(<AppMenuComponent config={{ switch: switchConfig }} />);
+
+      expect(screen.getByTestId('app-menu')).toBeInTheDocument();
+      expect(screen.getByTestId('test-switch')).toBeInTheDocument();
+    });
+
+    it('should render the switch alongside menu items at xl breakpoint', () => {
+      render(<AppMenuComponent config={{ ...defaultConfig, switch: switchConfig }} />);
+
+      expect(screen.getByTestId('test-switch')).toBeInTheDocument();
+      expect(screen.getByText('Item 1')).toBeInTheDocument();
+      expect(screen.getByText('Item 2')).toBeInTheDocument();
+    });
+
+    it('should render the switch at m-l breakpoint', () => {
+      mockUseIsWithinBreakpoints.mockImplementation((breakpoints: string[]) => {
+        if (breakpoints.includes('m') && breakpoints.includes('l')) return true;
+        return false;
+      });
+
+      render(<AppMenuComponent config={{ ...defaultConfig, switch: switchConfig }} />);
+
+      expect(screen.getByTestId('test-switch')).toBeInTheDocument();
+    });
+
+    it('should not render standalone switch at collapsed breakpoint (only overflow)', () => {
+      mockUseIsWithinBreakpoints.mockReturnValue(false);
+
+      render(<AppMenuComponent config={{ switch: switchConfig }} />);
+
+      expect(screen.getByTestId('app-menu-overflow-button')).toBeInTheDocument();
+      expect(screen.queryByTestId('test-switch')).not.toBeInTheDocument();
+    });
+  });
 });
