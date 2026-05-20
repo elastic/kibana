@@ -998,7 +998,7 @@ describe('runServerlessCluster()', () => {
     await runServerlessCluster(log, { projectType, basePath: baseEsPath, waitForReady: true });
     expect(waitUntilClusterReadyMock).toHaveBeenCalledTimes(1);
     expect(waitUntilClusterReadyMock.mock.calls[0][0].expectedStatus).toEqual('green');
-    expect(waitUntilClusterReadyMock.mock.calls[0][0].readyTimeout).toEqual(undefined);
+    expect(waitUntilClusterReadyMock.mock.calls[0][0].readyTimeout).toEqual(300_000);
   });
 
   test(`should create SAML role mapping when ssl is passed`, async () => {
@@ -1030,7 +1030,7 @@ describe('runServerlessCluster()', () => {
 
     await runServerlessCluster(log, { projectType, basePath: baseEsPath, waitForReady: true });
     expect(waitForSecurityIndexMock).toHaveBeenCalledTimes(1);
-    expect(waitForSecurityIndexMock.mock.calls[0][0].readyTimeout).toEqual(undefined);
+    expect(waitForSecurityIndexMock.mock.calls[0][0].readyTimeout).toEqual(300_000);
   });
 
   test(`should not wait for the security index when security is disabled`, async () => {
