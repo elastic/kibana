@@ -11,6 +11,7 @@ import type {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
   SavedObjectsModelVersionMap,
+  SavedObjectModelUnsafeTransformFn,
 } from '@kbn/core-saved-objects-server';
 
 /**
@@ -18,6 +19,69 @@ import type {
  * while not required, grouping settings by team, using a consistent naming prefix,
  * is good practice. For example: `ml:<setting-name>`.
  */
+
+interface QuickRange {
+  from: string;
+  to: string;
+  display: string;
+}
+
+/**
+ * Presets appended to `timepicker:quickRanges` in model version 3.
+ * Entries are deduped by `from|to`, so existing customizations (including custom
+ * `display` labels) are preserved.
+ *
+ * Display strings are intentionally plain English: stored UI-setting values are
+ * literal strings, never re-translated at read-time. The defaults registered in
+ * the `data` plugin use `i18n.translate(...)`, which is resolved at server-startup
+ * for the new value path only.
+ */
+export const TIMEPICKER_QUICK_RANGES_V3_PRESETS: ReadonlyArray<QuickRange> = [
+  { from: 'now/M', to: 'now/M', display: 'This month' },
+  { from: 'now-1d/d', to: 'now-1d/d', display: 'Yesterday' },
+  { from: 'now-3h', to: 'now', display: 'Last 3 hours' },
+  { from: 'now/y', to: 'now/y', display: 'This year' },
+  { from: 'now/y', to: 'now', display: 'Year to date' },
+  { from: 'now/M', to: 'now', display: 'Month to date' },
+  { from: 'now/w', to: 'now', display: 'Week to date' },
+  { from: 'now-12h', to: 'now', display: 'Last 12 hours' },
+  { from: 'now-3d', to: 'now', display: 'Last 3 days' },
+];
+
+export const mergeTimepickerQuickRangesV3: SavedObjectModelUnsafeTransformFn<any, any> = (doc) => {
+  const raw = doc.attributes?.['timepicker:quickRanges'];
+  if (typeof raw !== 'string') return { document: doc };
+
+  let existing: QuickRange[];
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return { document: doc };
+    existing = parsed;
+  } catch {
+    return { document: doc };
+  }
+
+  const seen = new Set(
+    existing
+      .filter((r) => r && typeof r.from === 'string' && typeof r.to === 'string')
+      .map(({ from, to }) => `${from}|${to}`)
+  );
+  const additions = TIMEPICKER_QUICK_RANGES_V3_PRESETS.filter(
+    ({ from, to }) => !seen.has(`${from}|${to}`)
+  );
+
+  if (additions.length === 0) return { document: doc };
+
+  return {
+    document: {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        'timepicker:quickRanges': JSON.stringify([...existing, ...additions], null, 2),
+      },
+    },
+  };
+};
 
 export const modelVersions: SavedObjectsModelVersionMap = {
   /**
@@ -34,9 +98,16 @@ export const modelVersions: SavedObjectsModelVersionMap = {
       },
     ],
   },
-  // 3: {
-  //   changes: [ /* Put future migration here */ ],
-  // },
+  3: {
+    changes: [
+      {
+        // owner: Team:DataDiscovery (timepicker:quickRanges)
+        // Existing custom lists are merged with new presets so users do not lose options.
+        type: 'unsafe_transform',
+        transformFn: (guard) => guard(mergeTimepickerQuickRangesV3),
+      },
+    ],
+  },
 };
 
 /**
