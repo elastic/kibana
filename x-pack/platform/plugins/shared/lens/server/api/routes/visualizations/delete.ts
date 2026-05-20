@@ -49,7 +49,7 @@ export const registerLensVisualizationsDeleteAPIRoute: RegisterAPIRouteFn = (
       version: LENS_API_VERSION,
       options: {
         oasOperationObject: async () =>
-          (await import('./oas_examples')).getDeleteLensVisualizationOASOperationObject(),
+          (await import('./oas_examples')).deleteLensVisualizationOASOperationObject,
       },
       validate: {
         request: {

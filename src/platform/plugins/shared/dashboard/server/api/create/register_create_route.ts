@@ -44,7 +44,7 @@ export function registerCreateRoute(
       version: routeVersion,
       options: {
         oasOperationObject: async () =>
-          (await import('../oas_examples')).getCreateDashboardOASOperationObject(),
+          (await import('../oas_examples')).createDashboardOASOperationObject,
       },
       validate: () => ({
         request: {

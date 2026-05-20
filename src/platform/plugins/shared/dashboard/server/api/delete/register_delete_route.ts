@@ -34,7 +34,7 @@ export function registerDeleteRoute(
       version: routeVersion,
       options: {
         oasOperationObject: async () =>
-          (await import('../oas_examples')).getDeleteDashboardOASOperationObject(),
+          (await import('../oas_examples')).deleteDashboardOASOperationObject,
       },
       validate: {
         request: {

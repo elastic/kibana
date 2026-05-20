@@ -35,7 +35,7 @@ export function registerSearchRoute(
       version: routeVersion,
       options: {
         oasOperationObject: async () =>
-          (await import('../oas_examples')).getSearchDashboardOASOperationObject(),
+          (await import('../oas_examples')).searchDashboardOASOperationObject,
       },
       validate: {
         request: {

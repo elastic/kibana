@@ -55,7 +55,7 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
       version: LENS_API_VERSION,
       options: {
         oasOperationObject: async () =>
-          (await import('./oas_examples')).getCreateLensVisualizationOASOperationObject(),
+          (await import('./oas_examples')).createLensVisualizationOASOperationObject,
       },
       validate: {
         request: {

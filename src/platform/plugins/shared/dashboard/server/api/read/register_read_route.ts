@@ -45,7 +45,7 @@ export function registerReadRoute(
       version: routeVersion,
       options: {
         oasOperationObject: async () =>
-          (await import('../oas_examples')).getReadDashboardOASOperationObject(),
+          (await import('../oas_examples')).readDashboardOASOperationObject,
       },
       validate: () => ({
         request: {
