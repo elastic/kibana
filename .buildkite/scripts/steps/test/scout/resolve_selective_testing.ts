@@ -16,9 +16,12 @@
  * --code-changes`, which owns all Scout selective-testing decisions
  * (critical-files check, tests-only fast path, dependency-tree fallback).
  *
- * Inputs (env):
- *   AFFECTED_MERGE_BASE  — git ref to diff against (required)
- *   CODE_CHANGES_FILE    — output JSON path (required)
+ * Usage:
+ *   ts-node resolve_selective_testing.ts <mergeBase> <outPath>
+ *
+ * Args:
+ *   mergeBase  — git ref to diff against (required)
+ *   outPath    — output JSON path (required)
  *
  * Output (file):
  *   {
@@ -36,16 +39,10 @@ import { getAffectedPackages, listChangedFiles } from '#pipeline-utils';
 
 const log = new ToolingLog({ level: 'info', writeTo: process.stderr });
 
-const mergeBase = process.env.AFFECTED_MERGE_BASE;
-const outPath = process.env.CODE_CHANGES_FILE;
+const [mergeBase, outPath] = process.argv.slice(2);
 
-if (!mergeBase) {
-  console.error('AFFECTED_MERGE_BASE environment variable is required');
-  process.exit(1);
-}
-
-if (!outPath) {
-  console.error('CODE_CHANGES_FILE environment variable is required');
+if (!mergeBase || !outPath) {
+  console.error('Usage: resolve_selective_testing.ts <mergeBase> <outPath>');
   process.exit(1);
 }
 

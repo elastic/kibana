@@ -29,17 +29,19 @@ if [[ -n "${GITHUB_PR_MERGE_BASE:-}" ]]; then
 else
   echo "GITHUB_PR_MERGE_BASE not set — using HEAD~1 as merge base (on-merge build)"
 fi
-export AFFECTED_MERGE_BASE="${GITHUB_PR_MERGE_BASE:-HEAD~1}"
+AFFECTED_MERGE_BASE="${GITHUB_PR_MERGE_BASE:-HEAD~1}"
 
 mkdir -p .scout
-export CODE_CHANGES_FILE=".scout/code_changes.json"
+CODE_CHANGES_FILE=".scout/code_changes.json"
 export TESTING_SCOPE_FILE=".scout/testing_scope.json"
 
 echo '--- Resolve Scout selective-testing scope'
 
 # Build the generic code-changes file (changed files + affected @kbn/ modules)
 # consumed by `scout resolve-testing-scope` below.
-ts-node "$(dirname "${0}")/resolve_selective_testing.ts"
+ts-node "$(dirname "${0}")/resolve_selective_testing.ts" \
+  "$AFFECTED_MERGE_BASE" \
+  "$CODE_CHANGES_FILE"
 
 # Decide the scope once (full / tests-only / dependency-tree) so every
 # downstream step uses the same decision.
