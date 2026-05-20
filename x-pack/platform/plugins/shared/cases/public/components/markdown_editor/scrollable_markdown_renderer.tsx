@@ -21,7 +21,6 @@ export const getContentWrapperCss = (euiTheme: EuiThemeComputed<{}>) => css`
 
 const ScrollableMarkdownRenderer = ({ content }: { content: string }) => {
   const { euiTheme } = useEuiTheme();
-
   return (
     <div
       className={'eui-xScroll'}
