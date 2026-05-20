@@ -80,7 +80,6 @@ export const SML_HTTP_LIST_PAGE_DEFAULT = 1;
  * Response body for `GET /internal/agent_context_layer/sml`.
  */
 export interface SmlListHttpResponse {
-  total: number;
   page: number;
   per_page: number;
   items: SmlHttpItem[];

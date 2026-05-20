@@ -68,7 +68,7 @@ export const registerListRoute = ({
         const [, startDeps] = await coreSetup.getStartServices();
         const spaceId = startDeps.spaces?.spacesService?.getSpaceId(request) ?? 'default';
 
-        const { results, total: rawTotal } = await sml.listDocuments({
+        const { results } = await sml.listDocuments({
           spaceId,
           esClient,
           page,
@@ -78,7 +78,6 @@ export const registerListRoute = ({
         });
 
         // TODO: Push permission filtering into the ES query for accurate pagination.
-        // Post-filtering means the returned total may be less than the actual count.
         let filteredResults = results;
         if (results.length > 0) {
           const ids = results.map((r) => r.id);
@@ -87,7 +86,6 @@ export const registerListRoute = ({
         }
 
         const body: SmlListHttpResponse = {
-          total: filteredResults.length < results.length ? filteredResults.length : rawTotal,
           page,
           per_page: perPage,
           items: filteredResults.map(toSmlHttpItem),

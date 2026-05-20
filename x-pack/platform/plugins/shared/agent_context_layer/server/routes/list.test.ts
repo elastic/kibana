@@ -52,13 +52,12 @@ describe('registerListRoute', () => {
     expect(mockSmlService.listDocuments).not.toHaveBeenCalled();
   });
 
-  it('returns 200 with paginated results, items, and metadata', async () => {
+  it('returns 200 with paginated results and metadata', async () => {
     mockSmlService.listDocuments.mockResolvedValue({ total: 1, results: [sampleDocument] });
     mockSmlService.checkItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
     const response = await callHandler({ page: 1, per_page: 20 });
     expect(response.ok).toHaveBeenCalledWith({
       body: {
-        total: 1,
         page: 1,
         per_page: 20,
         items: [sampleDocument],
@@ -66,7 +65,7 @@ describe('registerListRoute', () => {
     });
   });
 
-  it('filters out unauthorized items and adjusts total', async () => {
+  it('filters out unauthorized items', async () => {
     const doc2 = { ...sampleDocument, id: 'chunk-2' };
     mockSmlService.listDocuments.mockResolvedValue({
       total: 2,
@@ -81,7 +80,6 @@ describe('registerListRoute', () => {
     const response = await callHandler({ page: 1, per_page: 20 });
     expect(response.ok).toHaveBeenCalledWith({
       body: expect.objectContaining({
-        total: 1,
         items: [sampleDocument],
       }),
     });
