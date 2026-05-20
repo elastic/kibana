@@ -567,7 +567,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                           </EuiFormRow>
                         </EuiFlexItem>
                       )}
-                      {showConditionField && (
+                      {isShowingAdvanced && showConditionField && (
                         <EuiFlexItem>
                           <PackagePolicyConditionField
                             value={packagePolicyInputStream.condition ?? ''}

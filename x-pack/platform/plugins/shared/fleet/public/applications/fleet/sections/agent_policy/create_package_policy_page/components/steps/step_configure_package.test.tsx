@@ -1227,6 +1227,35 @@ describe('condition field behavior', () => {
     expect(renderResult.queryByTestId('packagePolicyInputConditionInput')).not.toBeInTheDocument();
     expect(renderResult.queryByTestId('packagePolicyStreamConditionInput')).not.toBeInTheDocument();
   });
+
+  it('hides condition field on edit page of an agentless policy', async () => {
+    const validationResults = validatePackagePolicy(
+      supportsAgentlessPolicy,
+      supportsAgentlessPackageInfo,
+      parse
+    );
+    renderResult = testRenderer.render(
+      <StepConfigurePackagePolicy
+        packageInfo={supportsAgentlessPackageInfo}
+        packagePolicy={supportsAgentlessPolicy}
+        updatePackagePolicy={mockUpdatePackagePolicy}
+        validationResults={validationResults}
+        submitAttempted={false}
+        isEditPage={true}
+      />
+    );
+
+    await waitFor(() => {
+      expect(renderResult.getByText('Change defaults')).toBeInTheDocument();
+    });
+    fireEvent.click(renderResult.getByText('Change defaults'));
+
+    await waitFor(() => {
+      expect(renderResult.queryByText('Advanced options')).not.toBeInTheDocument();
+    });
+    expect(renderResult.queryByTestId('packagePolicyInputConditionInput')).not.toBeInTheDocument();
+    expect(renderResult.queryByTestId('packagePolicyStreamConditionInput')).not.toBeInTheDocument();
+  });
 });
 
 describe('isInputCompatibleWithVarGroupSelections', () => {

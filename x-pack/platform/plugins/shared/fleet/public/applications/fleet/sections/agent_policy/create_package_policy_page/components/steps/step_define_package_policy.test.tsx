@@ -410,6 +410,16 @@ describe('StepDefinePackagePolicy', () => {
       });
     });
 
+    it('hides condition field on edit page of an agentless policy', async () => {
+      act(() => {
+        renderWithCondition({ supports_agentless: true }, { isEditPage: true });
+      });
+      await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+      await waitFor(() => {
+        expect(renderResult.queryByTestId('packagePolicyConditionInput')).not.toBeInTheDocument();
+      });
+    });
+
     it('hides condition field when all inputs are otelcol', async () => {
       act(() => {
         renderWithCondition({
