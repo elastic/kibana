@@ -157,9 +157,7 @@ describe('executeActionPolicyOperations', () => {
     });
 
     it('sets type to global and clears ruleId', () => {
-      const ops: ActionPolicyOperation[] = [
-        { operation: 'set_type', type: 'global' },
-      ];
+      const ops: ActionPolicyOperation[] = [{ operation: 'set_type', type: 'global' }];
 
       const result = executeActionPolicyOperations(
         { type: 'single_rule', ruleId: 'rule-123' },
