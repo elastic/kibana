@@ -9,9 +9,7 @@
 
 export { openLazyFlyout } from './src/open_lazy_flyout';
 export {
-  findTracksOverlaysAncestor,
-  resolveLazyFlyoutTypeFromAncestors,
   tracksOverlays,
-  type LazyFlyoutType,
+  type PanelFlyoutType,
   type TracksOverlays,
 } from './src/tracks_overlays';

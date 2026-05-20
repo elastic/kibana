@@ -185,7 +185,7 @@ export function getDashboardApi({
     ...unsavedChangesManager.api,
     ...projectRoutingManager?.api,
     ...trackOverlayApi,
-    lazyFlyoutType: creationOptions?.lazyFlyoutType,
+    panelFlyoutType: creationOptions?.panelFlyoutType,
     esqlVariables$: esqlVariablesManager.api.publishedEsqlVariables$,
     ...timesliceManager.api,
     ...pauseFetchManager.api,

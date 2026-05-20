@@ -14,7 +14,7 @@ import useAsync from 'react-use/lib/useAsync';
 import { i18n } from '@kbn/i18n';
 import { focusFirstFocusable } from './focus_helpers';
 import { LoadingFlyout } from './loading_flyout';
-import { findTracksOverlaysAncestor, resolveLazyFlyoutTypeFromAncestors } from './tracks_overlays';
+import { tracksOverlays } from './tracks_overlays';
 
 const htmlId = htmlIdGenerator('modalTitleId');
 
@@ -53,11 +53,13 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
   const { core, parentApi, loadContent, flyoutProps: allFlyoutProps } = params;
   const { focusedPanelId, triggerId, ...flyoutProps } = allFlyoutProps ?? {};
 
+  const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
+  const panelFlyoutTypeFromParent = overlayTracker?.panelFlyoutType;
+
   const ariaLabelledBy = flyoutProps?.['aria-labelledby'] ?? htmlId();
-  const overlayTracker = findTracksOverlaysAncestor(parentApi);
-  const lazyFlyoutTypeFromParent = resolveLazyFlyoutTypeFromAncestors(parentApi);
-  const type = flyoutProps?.type ?? lazyFlyoutTypeFromParent ?? 'push';
-  const ownFocus = flyoutProps?.ownFocus ?? (lazyFlyoutTypeFromParent === 'overlay' ? false : true);
+  const type = flyoutProps?.type ?? panelFlyoutTypeFromParent ?? 'push';
+  const ownFocus =
+    flyoutProps?.ownFocus ?? (panelFlyoutTypeFromParent === 'overlay' ? false : true);
 
   // eslint-disable-next-line prefer-const
   let flyoutRef: ReturnType<CoreStart['overlays']['openFlyout']> | undefined;
