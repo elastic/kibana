@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { BoolQuery } from '@kbn/es-query';
 import type { ServiceMapSpan } from '../../../common/service_map/types';
 import { type ServiceMapResponse } from '../../../common/service_map';
 import type { APMConfig } from '../..';
@@ -29,6 +30,8 @@ export interface IEnvOptions {
   end: number;
   serviceGroupKuery?: string;
   kuery?: string;
+  /** Pre-built ES query from the client (query + filter bar + Controls API). */
+  esQuery?: { bool: BoolQuery };
 }
 
 async function getConnectionData({
@@ -40,6 +43,7 @@ async function getConnectionData({
   end,
   serviceGroupKuery,
   kuery,
+  esQuery,
   logger,
 }: IEnvOptions): Promise<{ tracesCount: number; spans: ServiceMapSpan[] }> {
   return withApmSpan('get_service_map_connections', async () => {
@@ -53,6 +57,7 @@ async function getConnectionData({
       end,
       serviceGroupKuery,
       kuery,
+      esQuery,
     });
 
     logger.debug(`Found ${traceIds.length} traces to inspect`);
