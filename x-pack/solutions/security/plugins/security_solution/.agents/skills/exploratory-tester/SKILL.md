@@ -272,3 +272,102 @@ Present a confirmation before starting exploration:
 Wait for the user's reply before moving to Phase 2.
 
 In `mode: auto` — skip this confirmation. Proceed immediately.
+
+---
+
+## Phase 2: Explore
+
+### Single mode
+
+For each flow in `config.json` flows array (in order), run the Explore Loop below. Do not move to the next flow until the current one is complete.
+
+### The Explore Loop (per flow)
+
+**Termination: mandatory checklist complete OR timebox expired — whichever fires first.**
+
+Default timebox: `timeout_minutes` from the flow in `config.json` (default 4 minutes). Track elapsed time from the first checklist step.
+
+**Mandatory checklist — attempt in this order:**
+
+| Step | What to attempt |
+|---|---|
+| 1 | **Happy path** — execute the flow exactly as intended |
+| 2 | **Missing prerequisites** — remove one required setup item (e.g. delete the connector) and retry |
+| 3 | **Invalid/edge-case input** — empty strings, special characters (`'`, `"`, `<`, `>`), max length, wrong type |
+| 4 | **Cancel / back-navigate mid-flow** — start the flow, then cancel or navigate away before completion |
+| 5 | **Refresh during in-flight operation** — start the flow, trigger a server call, immediately refresh the page |
+
+**At every checklist step, before and after the action:**
+1. `browser_console_messages` — capture any new messages
+2. `browser_network_requests` — capture requests triggered by the action
+3. `browser_take_screenshot` — capture the resulting UI state
+4. Append one entry to `findings-flow-N.md` **immediately** — even if nothing went wrong (record what was attempted and what happened)
+
+**How to navigate to the flow:**
+1. Use `entry` from `config.json` if provided — navigate exactly as described
+2. If no `entry`: call `browser_snapshot`, read the visible UI, navigate to the area from what's on screen
+3. Check `knowledge/<area_slug>.md` for navigation patterns accumulated from prior sessions
+4. If the flow name is still ambiguous after the snapshot: take a screenshot, describe what you see, choose the most reasonable interpretation and proceed — never skip
+
+**If timebox fires before checklist completes:** log remaining steps as:
+```
+skipped: time budget exhausted (N minutes elapsed)
+```
+
+**If checklist completes before timebox:** probe one or two unexpected UI states noticed during the checklist, or follow a single hint from findings so far. Do not start new flows or navigate to unrelated areas.
+
+**If the browser session is lost mid-flow:** log findings collected so far, mark remaining checklist steps as `skipped: session lost`, continue with the next flow.
+
+---
+
+## Finding Format
+
+Each entry appended to `.exploratory-session/findings-flow-N.md`:
+
+```markdown
+## Finding: [short descriptive title]
+
+**Level:** <1 | 2 | 3>
+**Flow:** <flow name from config.json>
+**Role:** <resolved_role from config.json>
+**Checklist step:** <N — step description>
+
+### Steps followed
+1. <exact action — literal, not a summary>
+2. <exact action>
+
+### Current behavior
+<what actually happened — include error messages verbatim, HTTP status codes, console output>
+
+### Expected behavior
+<what should have happened — use config.json expected field, or state the heuristic used>
+
+### Why this might be an issue
+<mandatory for Level 1 and 2: commit to reasoning, explain user impact>
+
+### Evidence
+- Screenshot: `.exploratory-session/screenshots/<filename>.png`
+- Console: `<relevant line — one line, not a dump>`
+- Network: <METHOD> `<path>` → <status> `<relevant response snippet>`
+```
+
+**Level rules:**
+- **Level 1** — JS exception in console, HTTP 5xx on any in-flow request, or current behavior directly contradicts the `expected` field in `config.json` under the same setup → agent decides: confirmed bug
+- **Level 2** — Unexpected 4xx, element that should be present is missing, layout visibly broken, action completes with no user feedback → agent flags: user decides
+- **Level 3** — `console.warn`, transient spinner, unclassifiable observation → listed, not flagged
+
+**For Level 3 findings** — use this shorter format:
+```markdown
+## Observation: [title]
+
+**Level:** 3
+**Flow:** <flow name>
+**Role:** <resolved_role>
+**Checklist step:** <N — description>
+
+### Current behavior
+<what was observed>
+
+### Evidence
+- Console: `<line>`
+```
