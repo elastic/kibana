@@ -6,9 +6,10 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { EuiCheckboxGroup, EuiFormRow } from '@elastic/eui';
+import { InlineFieldActions } from './inline_field_actions';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import { getFieldSnakeKey } from '../../../../../common/utils';
 import type {
@@ -42,8 +43,10 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
   type,
   metadata,
   isRequired,
+  onConfirm,
 }) => {
-  const { control } = useFormContext();
+  const { control, resetField } = useFormContext();
+  const [hasPendingChange, setHasPendingChange] = useState(false);
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
 
   const options = useMemo(
@@ -62,38 +65,58 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
     };
   }, [isRequired]);
 
-  return (
-    <Controller
-      key={name}
-      name={path}
-      control={control}
-      rules={rules}
-      defaultValue={defaultValue}
-      render={({ field, fieldState }) => {
-        const selected = toArray(field.value);
-        const handleChange = (id: string) => {
-          const next = selected.includes(id) ? selected.filter((s) => s !== id) : [...selected, id];
-          field.onChange(JSON.stringify(next));
-          field.onBlur();
-        };
+  const showInlineActions = hasPendingChange && onConfirm != null;
 
-        return (
-          <EuiFormRow
-            label={label}
-            labelAppend={!isRequired ? OptionalFieldLabel : undefined}
-            error={fieldState.error?.message}
-            isInvalid={!!fieldState.error}
-            fullWidth
-          >
-            <EuiCheckboxGroup
-              options={options}
-              idToSelectedMap={Object.fromEntries(selected.map((id) => [id, true]))}
-              onChange={handleChange}
-            />
-          </EuiFormRow>
-        );
-      }}
-    />
+  return (
+    <>
+      <Controller
+        key={name}
+        name={path}
+        control={control}
+        rules={rules}
+        defaultValue={defaultValue}
+        render={({ field, fieldState }) => {
+          const selected = toArray(field.value);
+          const handleChange = (id: string) => {
+            const next = selected.includes(id)
+              ? selected.filter((s) => s !== id)
+              : [...selected, id];
+            field.onChange(JSON.stringify(next));
+            field.onBlur();
+            setHasPendingChange(true);
+          };
+
+          return (
+            <EuiFormRow
+              label={label}
+              labelAppend={!isRequired ? OptionalFieldLabel : undefined}
+              error={fieldState.error?.message}
+              isInvalid={!!fieldState.error}
+              fullWidth
+            >
+              <EuiCheckboxGroup
+                options={options}
+                idToSelectedMap={Object.fromEntries(selected.map((id) => [id, true]))}
+                onChange={handleChange}
+              />
+            </EuiFormRow>
+          );
+        }}
+      />
+      {showInlineActions && (
+        <InlineFieldActions
+          name={name}
+          onConfirm={() => {
+            setHasPendingChange(false);
+            onConfirm();
+          }}
+          onCancel={() => {
+            setHasPendingChange(false);
+            resetField(path);
+          }}
+        />
+      )}
+    </>
   );
 };
 CheckboxGroup.displayName = 'CheckboxGroup';
