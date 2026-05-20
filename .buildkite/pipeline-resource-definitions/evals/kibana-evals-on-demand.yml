@@ -22,7 +22,7 @@ spec:
         KBN_EVALS: '1'
       allow_rebuilds: true
       branch_configuration: ''
-      cancel_intermediate_builds: true
+      cancel_intermediate_builds: false
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/evals/on_demand_evals.yml
