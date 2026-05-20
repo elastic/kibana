@@ -52,17 +52,15 @@ const droppedDashboardProperty = schema.object(
     key: schema.string({
       meta: { description: 'The name of the property that was dropped.' },
     }),
-    value: schema.object(
-      {},
-      {
-        unknowns: 'allow',
+    value: schema.maybe(
+      schema.any({
         meta: { description: 'The original value of the property that was dropped.' },
-      }
+      })
     ),
   },
   {
     meta: {
-      id: 'kbn-dashboard-dropped-panel-warning',
+      id: 'kbn-dashboard-dropped-property-warning',
       title: 'Dropped panel',
       description:
         'A panel that was excluded from the response because its type is not supported by the API.',
