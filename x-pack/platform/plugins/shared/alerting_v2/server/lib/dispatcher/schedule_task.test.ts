@@ -8,7 +8,7 @@
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { createMockResourceManager } from '../services/resource_service/resource_manager.mock';
 import { INTERVAL, scheduleDispatcherTask } from './schedule_task';
-import { DISPATCHER_TASK_ID, DISPATCHER_TASK_TYPE } from './task_definition';
+import { DISPATCHER_TASK_ID, DISPATCHER_TASK_TYPE } from './constants';
 
 describe('scheduleDispatcherTask', () => {
   let taskManager: jest.Mocked<Pick<TaskManagerStartContract, 'ensureScheduled'>>;

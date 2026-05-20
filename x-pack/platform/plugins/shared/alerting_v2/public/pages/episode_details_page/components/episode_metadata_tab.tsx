@@ -23,7 +23,7 @@ interface EpisodeMetadataTabProps {
 
 export const EpisodeMetadataTab = ({ episodeId, ruleQuery }: EpisodeMetadataTabProps) => {
   const { services } = useKibana<AlertEpisodesKibanaServices>();
-  const { data, uiSettings, unifiedDocViewer } = services;
+  const { uiSettings, unifiedDocViewer } = services;
 
   const {
     data: eventData,
@@ -31,7 +31,7 @@ export const EpisodeMetadataTab = ({ episodeId, ruleQuery }: EpisodeMetadataTabP
     isError,
   } = useFetchEpisodeEventDataQuery({
     episodeId,
-    data,
+    services,
   });
 
   const { value: dataView, loading: isDataViewLoading } = useAlertingEpisodeSourceDataView({
