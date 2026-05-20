@@ -348,8 +348,6 @@ export interface Ecs {
 
 export type CaseActionConnector = ActionConnector;
 
-export type UseFetchAlertData = (alertIds: string[]) => [boolean, Record<string, unknown>];
-
 export interface CasesPermissions {
   all: boolean;
   create: boolean;

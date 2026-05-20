@@ -166,7 +166,7 @@ export const OptionsListPopoverSortingButton = ({
           singleSelection="always"
           onChange={onSortByChange}
           id="optionsList_sortingOptions"
-          listProps={{ bordered: false }}
+          listProps={{ bordered: false, paddingSize: 's' }}
           data-test-subj="optionsListControl__sortingOptions"
           aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
         >

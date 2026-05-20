@@ -257,6 +257,19 @@ describe('ObservabilityActions component', () => {
     expect(refresh).toHaveBeenCalled();
   });
 
+  it('should report telemetry when adding alert to a new case', async () => {
+    await setup('nothing');
+
+    // @ts-expect-error: The object will always be defined
+    mockKibana.services.cases.hooks.useCasesAddToNewCaseFlyout.mock.calls[0][0].onSuccess();
+
+    expect(mockTelemetryClient.reportAlertAddedToCase).toHaveBeenCalledWith(
+      true,
+      'nothing',
+      expect.anything()
+    );
+  });
+
   it('should refresh when adding an alert to an existing case', async () => {
     const wrapper = await setup('nothing');
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
@@ -277,6 +290,19 @@ describe('ObservabilityActions component', () => {
     mockKibana.services.cases.hooks.useCasesAddToExistingCaseModal.mock.calls[0][0].onSuccess();
 
     expect(refresh).toHaveBeenCalled();
+  });
+
+  it('should report telemetry when adding alert to an existing case', async () => {
+    await setup('nothing');
+
+    // @ts-expect-error: The object will always be defined
+    mockKibana.services.cases.hooks.useCasesAddToExistingCaseModal.mock.calls[0][0].onSuccess();
+
+    expect(mockTelemetryClient.reportAlertAddedToCase).toHaveBeenCalledWith(
+      false,
+      'nothing',
+      expect.anything()
+    );
   });
 
   it('should hide the case actions without permissions', async () => {
