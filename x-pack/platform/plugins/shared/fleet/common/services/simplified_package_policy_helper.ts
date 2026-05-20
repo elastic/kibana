@@ -237,6 +237,18 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
       options.experimental_data_stream_features;
   }
 
+  // Disable agentless-only inputs for non-agentless policies; the reverse is unnecessary as the agentless API always passes an explicit policy_template.
+  if (!supportsAgentless) {
+    packagePolicy.inputs.forEach((input) => {
+      if (!isInputAllowedForDeploymentMode(input, 'default', packageInfo)) {
+        input.enabled = false;
+        input.streams.forEach((stream) => {
+          stream.enabled = false;
+        });
+      }
+    });
+  }
+
   // Build a input and streams Map to easily find package policy stream
   const inputMap: InputMap = new Map();
   packagePolicy.inputs.forEach((input) => {

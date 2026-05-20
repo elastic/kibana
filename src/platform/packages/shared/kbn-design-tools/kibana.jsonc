@@ -1,0 +1,8 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/design-tools",
+  "owner": "@elastic/appex-sharedux",
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Developer Toolbar design tools addon."
+}
