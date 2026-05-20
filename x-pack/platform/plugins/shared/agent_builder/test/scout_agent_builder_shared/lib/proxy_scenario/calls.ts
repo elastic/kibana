@@ -164,12 +164,16 @@ export const mockNlToEsql = ({
   });
 
   // generate esql - generate query call
+  // matches both the original prompt ("respond to the user's question by providing a valid ES|QL query")
+  // and the tight prompt ("Generate a valid ES|QL query for the user's request")
   void llmProxy.interceptors.toolMessage({
     name: 'generate_esql:generate_query',
     when: ({ messages }) => {
       const systemMessage = messages.find((message) => message.role === 'system');
-      return (systemMessage?.content as string).includes(
-        `respond to the user's question by providing a valid ES|QL query`
+      const content = systemMessage?.content as string;
+      return (
+        content.includes(`respond to the user's question by providing a valid ES|QL query`) ||
+        content.includes(`Generate a valid ES|QL query for the user's request`)
       );
     },
     response: `Here's the ES|QL query:\`\`\`esql${esqlQuery}\`\`\``,

@@ -36,6 +36,15 @@ export const getTightEsqlInstructions = (params: InstructionsTemplateParams = {}
 - User specifies a number ("top 10", "get 50"): use that number.
 - User asks for all rows ("return all", "no limit"): omit LIMIT.
 
+## TS command for time series
+
+When the resource supports it (\`is-tsds\` is true) use the \`TS\` source command instead of \`FROM\` for time series data streams (TSDS) indices.
+This ensures that time series aggregations are performed correctly and efficiently, and allows using time-series specific functions such as TBUCKET or RATE.
+
+The only reasons to **not** use \`TS\` for time series are:
+- request is about returning raw documents (no aggregations / STATS commands)
+- user explicitly asked to use FROM
+
 ## Query format
 
 Wrap all queries in \`\`\`esql ... \`\`\`. Use a newline after each pipe command.
@@ -48,6 +57,7 @@ ${
 Always use \`?_tstart\` / \`?_tend\` for time range — never hardcode dates or use \`now()\`.
 - WHERE: \`WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend\`
 - BUCKET (preferred): \`BUCKET(@timestamp, 50, ?_tstart, ?_tend)\`
+- TRANGE (for TS): \`TS mytsds | WHERE TRANGE(?_tstart, ?_tend)\`
 
 `
 }`;

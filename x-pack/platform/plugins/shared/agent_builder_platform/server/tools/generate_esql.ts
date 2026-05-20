@@ -73,7 +73,15 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
       },
       { esClient, modelProvider, logger, events, attachments }
     ) => {
-      const model = await modelProvider.getDefaultModel();
+      const esqlConnectorId = process.env.ESQL_MODEL_CONNECTOR_ID;
+      const model = await (esqlConnectorId
+        ? modelProvider.getModelById({ connectorId: esqlConnectorId }).catch(() => {
+            logger.warn(
+              `[generateEsql] Could not get model for connector "${esqlConnectorId}", falling back to default`
+            );
+            return modelProvider.getDefaultModel();
+          })
+        : modelProvider.getDefaultModel());
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
 
       const esqlResponse = await generateEsql({
