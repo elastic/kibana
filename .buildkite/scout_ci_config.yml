@@ -55,12 +55,14 @@ plugins:
     - share
     - slo
     - spaces
+    - stack_connectors
     - streams
     - streams_app
     - synthetics
     - task_manager
     - transform
     - triggers_actions_ui
+    - upgrade_assistant
     - uptime
     - ux
     - workflows_extensions

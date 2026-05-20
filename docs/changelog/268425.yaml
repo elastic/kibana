@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/268425
+issues:
+- https://github.com/elastic/kibana/issues/266269
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-14
+areas:
+- Dashboards and visualizations
+title: Fix the Visualization API to correctly show default datatable colored badges
