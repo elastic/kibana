@@ -135,11 +135,14 @@ export class OtelTelemetryReceiver {
       afterKey = response.aggregations?.combos?.after_key;
 
       if (allBuckets.length >= config.max_total_buckets) {
-        this.logger.warn(`Reached max_total_buckets cap (${config.max_total_buckets}) for ${signal}, truncating`, {
-          signal,
-          collectedBuckets: allBuckets.length,
-          maxTotalBuckets: config.max_total_buckets,
-        } as LogMeta);
+        this.logger.warn(
+          `Reached max_total_buckets cap (${config.max_total_buckets}) for ${signal}, truncating`,
+          {
+            signal,
+            collectedBuckets: allBuckets.length,
+            maxTotalBuckets: config.max_total_buckets,
+          } as LogMeta
+        );
         break;
       }
 

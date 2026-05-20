@@ -63,7 +63,6 @@ type TermsAggKey = (typeof TERMS_AGG_KEYS)[number];
 const extractKeys = (agg: { buckets: Array<{ key: string }> }): string[] =>
   agg.buckets.map((b) => b.key);
 
-
 export class OtelTelemetryService {
   private readonly logger: Logger;
 
