@@ -25,9 +25,13 @@ import { RuleDetails } from '../../rule/main';
  * Currently supports:
  * - IP fields → Network details flyout (value = IP address)
  * - Rule name field → Rule details flyout (value = rule ID)
- * - Host name → Host details flyout
+ * - Host name → Host details flyout (should pass in entityId if available)
  */
-export const buildFlyoutContent = (field: string, value: string): React.ReactElement | null => {
+export const buildFlyoutContent = (
+  field: string,
+  value: string,
+  entityId?: string
+): React.ReactElement | null => {
   const ecsField = getEcsField(field);
 
   if (ecsField?.type === IP_FIELD_TYPE) {
@@ -43,7 +47,7 @@ export const buildFlyoutContent = (field: string, value: string): React.ReactEle
   }
 
   if (field === HOST_NAME_FIELD_NAME) {
-    return <Host hostName={value} />;
+    return <Host hostName={value} entityId={entityId} />;
   }
 
   return null;

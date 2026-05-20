@@ -24,7 +24,6 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../common/lib/kibana';
 import { PreferenceFormattedDate } from '../../common/components/formatted_date';
 import { FlyoutTitle } from '../shared/components/flyout_title';
-import { FlyoutBody } from '../../flyout/shared/components/flyout_body';
 
 export interface MisconfigurationPanelProps {
   resourceId: string;
@@ -127,9 +126,9 @@ export const MisconfigurationPanel = ({
         </EuiFlexGroup>
         <CspFlyout.Header finding={finding} />
       </EuiFlyoutHeader>
-      <FlyoutBody>
+      <EuiFlyoutBody>
         <CspFlyout.Body finding={finding} />
-      </FlyoutBody>
+      </EuiFlyoutBody>
     </>
   );
 };

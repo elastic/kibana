@@ -32,6 +32,10 @@ export interface OpenFlyoutLinkProps {
    */
   value: string;
   /**
+   * Canonical Entity Store v2 id (`entity.id`) when available
+   */
+  entityId?: string;
+  /**
    * When true, opens as a parent flyout starting a new session.
    * When false (default), opens as a child flyout inheriting the parent session.
    */
@@ -56,6 +60,7 @@ export interface OpenFlyoutLinkProps {
 export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
   field,
   value,
+  entityId,
   asParent = false,
   children,
   'data-test-subj': dataTestSubj = OPEN_FLYOUT_LINK_TEST_ID,
@@ -68,7 +73,10 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
-  const flyoutContent = useMemo(() => buildFlyoutContent(field, value), [field, value]);
+  const flyoutContent = useMemo(
+    () => buildFlyoutContent(field, value, entityId),
+    [field, value, entityId]
+  );
 
   const onClick = useCallback(() => {
     if (flyoutContent) {

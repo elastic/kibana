@@ -161,7 +161,7 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
       return (
         <div key={`${i}-${value}`} data-test-subj={`${value}-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`}>
           {RenderFlyoutLink ? (
-            <RenderFlyoutLink field={field} value={value}>
+            <RenderFlyoutLink field={field} value={value} entityId={entityId}>
               {content}
             </RenderFlyoutLink>
           ) : (

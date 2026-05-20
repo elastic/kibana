@@ -28,7 +28,11 @@ jest.mock('../../network/main', () => ({
 }));
 
 jest.mock('../../entity/host/main', () => ({
-  Host: ({ hostName }: { hostName: string }) => <div data-test-subj="mockHost">{hostName}</div>,
+  Host: ({ hostName, entityId }: { hostName: string; entityId?: string }) => (
+    <div data-test-subj="mockHost" data-entity-id={entityId}>
+      {hostName}
+    </div>
+  ),
 }));
 
 jest.mock(
@@ -66,6 +70,15 @@ describe('buildFlyoutContent', () => {
 
     const { getByTestId } = render(result!);
     expect(getByTestId('mockHost')).toHaveTextContent('my-host');
+  });
+
+  it('should pass entityId to Host element when provided', () => {
+    const result = buildFlyoutContent('host.name', 'my-host', 'test-entity-id');
+
+    expect(result).not.toBeNull();
+
+    const { getByTestId } = render(result!);
+    expect(getByTestId('mockHost')).toHaveAttribute('data-entity-id', 'test-entity-id');
   });
 
   it('should return null for an unknown field', () => {
