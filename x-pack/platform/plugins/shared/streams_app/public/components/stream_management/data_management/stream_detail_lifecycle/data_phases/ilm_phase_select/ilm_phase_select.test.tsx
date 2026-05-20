@@ -153,4 +153,68 @@ describe('IlmPhaseSelect', () => {
 
     expect(screen.getByLabelText('Custom trigger label')).toBeInTheDocument();
   });
+
+  it('shows an Enterprise required badge for frozen', () => {
+    const onSelect = jest.fn();
+    render(
+      <IlmPhaseSelect
+        renderButton={(props) => (
+          <EuiButtonEmpty {...props}>Add data phase and downsampling</EuiButtonEmpty>
+        )}
+        selectedPhases={[]}
+        onSelect={onSelect}
+        initialIsOpen={true}
+        showEnterpriseLicenseRequiredBadge={true}
+      />
+    );
+
+    expect(
+      screen.getByTestId('ilmPhaseSelectOption-frozen-enterpriseRequiredBadge')
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('ilmPhaseSelectOption-frozen'));
+    expect(onSelect).toHaveBeenCalledWith('frozen');
+  });
+
+  it('shows a Default repository required badge for frozen', () => {
+    const onSelect = jest.fn();
+    render(
+      <IlmPhaseSelect
+        renderButton={(props) => (
+          <EuiButtonEmpty {...props}>Add data phase and downsampling</EuiButtonEmpty>
+        )}
+        selectedPhases={[]}
+        onSelect={onSelect}
+        initialIsOpen={true}
+        showDefaultRepositoryRequiredBadge={true}
+      />
+    );
+
+    expect(
+      screen.getByTestId('ilmPhaseSelectOption-frozen-defaultRepositoryRequiredBadge')
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('ilmPhaseSelectOption-frozen'));
+    expect(onSelect).toHaveBeenCalledWith('frozen');
+  });
+
+  it('prefers the Enterprise required badge when multiple requirements apply', () => {
+    render(
+      <IlmPhaseSelect
+        renderButton={(props) => (
+          <EuiButtonEmpty {...props}>Add data phase and downsampling</EuiButtonEmpty>
+        )}
+        selectedPhases={[]}
+        onSelect={() => {}}
+        initialIsOpen={true}
+        showEnterpriseLicenseRequiredBadge={true}
+        showDefaultRepositoryRequiredBadge={true}
+      />
+    );
+
+    expect(
+      screen.getByTestId('ilmPhaseSelectOption-frozen-enterpriseRequiredBadge')
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('ilmPhaseSelectOption-frozen-defaultRepositoryRequiredBadge')
+    ).not.toBeInTheDocument();
+  });
 });
