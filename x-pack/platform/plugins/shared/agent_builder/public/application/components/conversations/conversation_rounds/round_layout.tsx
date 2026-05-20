@@ -15,11 +15,10 @@ import type {
   AttachmentVersionRef,
 } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { findTodosStep } from '@kbn/agent-builder-common/chat/conversation';
 import { isConfirmationPrompt } from '@kbn/agent-builder-common/agents';
 import { RoundInput } from './round_input';
-import { RoundEventsHeader } from './round_events_header';
 import { RoundEvents } from './round_events/round_events';
 import { RoundResponse } from './round_response/round_response';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
@@ -92,7 +91,6 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     retry: retrySendMessage,
     resumeRound,
     isResuming,
-    agentReasoning,
   } = useConversationStream();
   // HITL Approve / Cancel is per-conversation: streamActions are closure-bound to
   // vars.conversationId, so other in-flight conversations cannot corrupt this cache.
@@ -114,12 +112,22 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     !isResuming;
 
   const hasMessage = Boolean(response?.message);
-  const showAgentReasoning = isLoadingCurrentRound && !hasMessage && Boolean(agentReasoning);
 
-  const displayedSteps = useMemo(
-    () => (showAgentReasoning && steps.length > 0 ? steps.slice(0, -1) : steps),
-    [steps, showAgentReasoning]
-  );
+  // While the round is streaming, the latest non-todos step is held back from
+  // the events panel and rendered inline in the response body as the live
+  // indicator. TodosStep is filtered out — it has its own dedicated panel and
+  // shouldn't act as the live indicator. Once the round completes (or text
+  // chunks start filling the buffer — StreamingText takes precedence in the
+  // response body), `latestStep` is undefined and all steps show in the panel.
+  const { latestStep, displayedSteps } = useMemo(() => {
+    if (!isLoadingCurrentRound || hasMessage) {
+      return { latestStep: undefined, displayedSteps: steps };
+    }
+    const idx = steps.findLastIndex((s) => s.type !== ConversationRoundStepType.updateTodos);
+    return idx === -1
+      ? { latestStep: undefined, displayedSteps: steps }
+      : { latestStep: steps[idx], displayedSteps: steps.slice(0, idx) };
+  }, [steps, isLoadingCurrentRound, hasMessage]);
 
   const cumulativeAttachmentRefs = useMemo(() => {
     if (!response?.message) return undefined;
@@ -199,7 +207,8 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
         </EuiFlexItem>
       )}
 
-      {/* Steps container — last step hidden when shown as agentReasoning label */}
+      {/* Steps container — `latestStep` is held back from `displayedSteps`
+          and rendered inside `RoundResponse` as the live indicator instead. */}
       {displayedSteps.length > 0 && (
         <EuiFlexItem grow={false}>
           <RoundEvents
@@ -232,33 +241,29 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
           </EuiFlexItem>
         ))}
 
-      {/* Header + Response — bound together; rendered whenever response renders */}
+      {/* Response */}
       {!isAwaitingPrompt && (
-        <>
-          <EuiFlexItem grow={false}>
-            <RoundEventsHeader isStreaming={isLoadingCurrentRound} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexItem>
-              <RoundResponse
-                hasError={isErrorCurrentRound}
-                response={response}
-                steps={steps}
-                isLoading={isLoadingCurrentRound}
-                isLastRound={isCurrentRound}
-                conversationAttachments={conversationAttachments}
-                attachmentRefs={cumulativeAttachmentRefs}
-                conversationId={conversationId}
-              />
-            </EuiFlexItem>
-            <EuiSpacer />
-            <RoundAttachmentReferences
-              attachmentRefs={input.attachment_refs}
+        <EuiFlexItem grow={false}>
+          <EuiFlexItem>
+            <RoundResponse
+              hasError={isErrorCurrentRound}
+              response={response}
+              steps={steps}
+              isLoading={isLoadingCurrentRound}
+              isLastRound={isCurrentRound}
+              latestStep={latestStep}
               conversationAttachments={conversationAttachments}
-              actorFilter={[ATTACHMENT_REF_ACTOR.agent, ATTACHMENT_REF_ACTOR.system]}
+              attachmentRefs={cumulativeAttachmentRefs}
+              conversationId={conversationId}
             />
           </EuiFlexItem>
-        </>
+          <EuiSpacer />
+          <RoundAttachmentReferences
+            attachmentRefs={input.attachment_refs}
+            conversationAttachments={conversationAttachments}
+            actorFilter={[ATTACHMENT_REF_ACTOR.agent, ATTACHMENT_REF_ACTOR.system]}
+          />
+        </EuiFlexItem>
       )}
 
       {/* Add spacing after the final round so that text is not cut off by the scroll mask */}
