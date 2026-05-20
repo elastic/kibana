@@ -42,6 +42,7 @@ const baseArgs = (overrides: Partial<ResolveLocaleArgs> = {}): ResolveLocaleArgs
   translationHashes: { en: 'h1', 'fr-FR': 'h2', 'ja-JP': 'h3' },
   isServerless: false,
   serverBasePath: '',
+  allowLocaleCookie: true,
   ...overrides,
 });
 
@@ -141,6 +142,28 @@ describe('resolveLocale', () => {
         })
       );
       expect(result.locale).toBe('en');
+    });
+
+    it('ignores the KBN_LOCALE cookie when allowLocaleCookie is false', () => {
+      const result = resolveLocale(
+        baseArgs({
+          allowLocaleCookie: false,
+          request: buildRequest({ cookie: `${KBN_LOCALE_COOKIE_NAME}=ja-JP` }),
+          configLocale: 'en',
+        })
+      );
+      expect(result.locale).toBe('en');
+    });
+
+    it('still respects the user profile locale when allowLocaleCookie is false', () => {
+      const result = resolveLocale(
+        baseArgs({
+          allowLocaleCookie: false,
+          userSettingLocale: 'fr-FR',
+          request: buildRequest({ cookie: `${KBN_LOCALE_COOKIE_NAME}=ja-JP` }),
+        })
+      );
+      expect(result.locale).toBe('fr-FR');
     });
 
     it('falls through to configLocale when picker is disabled (i18n.locales is empty)', () => {

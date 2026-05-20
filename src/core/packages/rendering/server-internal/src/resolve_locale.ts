@@ -37,6 +37,11 @@ export interface ResolveLocaleArgs {
   isServerless: boolean;
   /** Server-wide base path for the cookie's Path attribute. */
   serverBasePath: string;
+  /**
+   * When false, the `KBN_LOCALE` cookie is neither read from the request nor
+   * written to the response. Controlled by `i18n.allowLocaleCookie`.
+   */
+  allowLocaleCookie: boolean;
 }
 
 export interface ResolveLocaleResult {
@@ -52,7 +57,7 @@ export interface ResolveLocaleResult {
 /**
  * Resolves the effective locale for a render using the following priority chain:
  *   1. User profile setting (when value is in `translationHashes`)
- *   2. KBN_LOCALE cookie (when value is in `translationHashes`)
+ *   2. KBN_LOCALE cookie (only when `allowLocaleCookie` is `true` and value is in `translationHashes`)
  *   3. Accept-Language header (serverless only; strict match against `configuredLocales`)
  *   4. `configLocale`
  */
@@ -65,15 +70,18 @@ export const resolveLocale = (args: ResolveLocaleArgs): ResolveLocaleResult => {
     translationHashes,
     isServerless,
     serverBasePath,
+    allowLocaleCookie,
   } = args;
 
   if (userSettingLocale && translationHashes[userSettingLocale]) {
     return finalize(userSettingLocale, request, serverBasePath);
   }
 
-  const cookieLocale = readCookie(getHeader(request, 'cookie'), KBN_LOCALE_COOKIE_NAME);
-  if (cookieLocale && translationHashes[cookieLocale]) {
-    return finalize(cookieLocale, request, serverBasePath);
+  if (allowLocaleCookie) {
+    const cookieLocale = readCookie(getHeader(request, 'cookie'), KBN_LOCALE_COOKIE_NAME);
+    if (cookieLocale && translationHashes[cookieLocale]) {
+      return finalize(cookieLocale, request, serverBasePath);
+    }
   }
 
   if (isServerless) {

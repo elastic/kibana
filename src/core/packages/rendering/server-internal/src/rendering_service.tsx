@@ -287,6 +287,7 @@ export class RenderingService {
       translationHashes,
       isServerless,
       serverBasePath,
+      allowLocaleCookie: i18n.allowLocaleCookie,
     });
     let translationsUrl: string;
     if (usingCdn) {
