@@ -13,6 +13,7 @@ import Path from 'path';
 import { pipeline } from 'stream';
 import { promisify } from 'util';
 
+import execa from 'execa';
 import * as tar from 'tar';
 import type { ZipFile, Entry } from 'yauzl';
 import Yauzl from 'yauzl';
@@ -25,6 +26,52 @@ const strComplete = (obs: Rx.Observable<unknown>) =>
   });
 
 const asyncPipeline = promisify(pipeline);
+
+const getNativeTarArgsList = ({
+  archivePath,
+  targetDir,
+  stripComponents,
+}: Pick<Options, 'archivePath' | 'targetDir'> & { stripComponents: number }) => {
+  const commonArgs = [archivePath, '-C', targetDir, `--strip-components=${stripComponents}`];
+
+  if (!archivePath.endsWith('.tar.gz')) {
+    return [['-xf', ...commonArgs]];
+  }
+
+  return [
+    ['--use-compress-program=pigz', '-xf', ...commonArgs],
+    ['-xzf', ...commonArgs],
+  ];
+};
+
+const extractWithNativeTar = async ({
+  archivePath,
+  targetDir,
+  stripComponents,
+}: Pick<Options, 'archivePath' | 'targetDir'> & { stripComponents: number }) => {
+  for (const args of getNativeTarArgsList({ archivePath, targetDir, stripComponents })) {
+    try {
+      await execa('tar', args);
+      return true;
+    } catch {
+      // Try the next native tar strategy, then fall back to node tar.
+    }
+  }
+
+  return false;
+};
+
+const extractWithNodeTar = async ({
+  archivePath,
+  targetDir,
+  stripComponents,
+}: Pick<Options, 'archivePath' | 'targetDir'> & { stripComponents: number }) => {
+  await tar.extract({
+    file: archivePath,
+    cwd: targetDir,
+    stripComponents,
+  });
+};
 
 interface Options {
   /**
@@ -63,11 +110,11 @@ export async function extract({
   await Fs.mkdir(targetDir, { recursive: true });
 
   if (archivePath.endsWith('.tar') || archivePath.endsWith('.tar.gz')) {
-    return await tar.extract({
-      file: archivePath,
-      cwd: targetDir,
-      stripComponents,
-    });
+    if (await extractWithNativeTar({ archivePath, targetDir, stripComponents })) {
+      return;
+    }
+
+    return await extractWithNodeTar({ archivePath, targetDir, stripComponents });
   }
 
   if (!archivePath.endsWith('.zip')) {
