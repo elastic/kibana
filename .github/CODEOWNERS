@@ -483,6 +483,7 @@ src/platform/packages/shared/deeplinks/observability @elastic/observability-ui
 src/platform/packages/shared/deeplinks/search @elastic/search-kibana
 src/platform/packages/shared/deeplinks/security @elastic/security-solution
 src/platform/packages/shared/deeplinks/shared @elastic/appex-sharedux
+src/platform/packages/shared/deeplinks/vectordb @elastic/search-kibana
 src/platform/packages/shared/deeplinks/workflows @elastic/workflows-eng
 src/platform/packages/shared/deeplinks/workplace_ai @elastic/search-kibana
 src/platform/packages/shared/feedback-components @elastic/appex-sharedux
@@ -663,6 +664,7 @@ src/platform/packages/shared/kbn-server-route-repository @elastic/observability-
 src/platform/packages/shared/kbn-server-route-repository-client @elastic/observability-ui
 src/platform/packages/shared/kbn-server-route-repository-utils @elastic/observability-ui
 src/platform/packages/shared/kbn-shared-svg @elastic/obs-presentation-team
+src/platform/packages/shared/kbn-shared-url-state @elastic/appex-sharedux
 src/platform/packages/shared/kbn-shared-ux-utility @elastic/appex-sharedux
 src/platform/packages/shared/kbn-sort-predicates @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-spaces-utils @elastic/kibana-security
@@ -1316,13 +1318,16 @@ x-pack/solutions/security/packages/index-adapter @elastic/security-threat-huntin
 x-pack/solutions/security/packages/kbn-cloud-security-posture/common @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-cloud-security-posture/graph @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-cloud-security-posture/public @elastic/contextual-security-apps
+x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-endpoint @elastic/security-defend-workflows
 x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics @elastic/security-entity-analytics
 x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance @elastic/security-defend-workflows
 x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations @elastic/security-threat-hunting
+x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression @elastic/security-detection-platform
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa @elastic/security-engineering-productivity
+x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-securitysolution-autocomplete @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components @elastic/security-detection-engine
@@ -1362,6 +1367,7 @@ x-pack/solutions/security/test/plugin_functional/plugins/resolver_test @elastic/
 x-pack/solutions/security/test/security_solution_api_integration @elastic/security-detection-engine
 x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response @elastic/security-detection-engine
 x-pack/solutions/security/test/security_solution_endpoint @elastic/security-defend-workflows
+x-pack/solutions/vectordb/packages/kbn-vectordb-onboarding @elastic/search-kibana
 x-pack/solutions/vectordb/plugins/serverless_vectordb @elastic/search-kibana
 x-pack/solutions/workplaceai/plugins/serverless_workplace_ai @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/workplaceai/plugins/workplace_ai_app @elastic/search-kibana @elastic/workchat-eng
@@ -1792,14 +1798,43 @@ x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events @e
 x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts @elastic/obs-sig-events-team
 x-pack/platform/packages/shared/kbn-streams-schema/src/inference_feature_ids.ts @elastic/obs-sig-events-team
 x-pack/platform/packages/shared/kbn-streams-schema/src/queries @elastic/obs-sig-events-team
+x-pack/platform/packages/shared/kbn-streams-schema/src/sig_events @elastic/obs-sig-events-team
+x-pack/platform/packages/shared/kbn-streams-schema/src/insights @elastic/obs-sig-events-team
+x-pack/platform/packages/shared/kbn-streams-schema/src/onboarding @elastic/obs-sig-events-team
+x-pack/platform/packages/shared/kbn-streams-schema/src/feature_accumulator.ts @elastic/obs-sig-events-team
+x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/default_index_patterns.ts @elastic/obs-sig-events-team
+x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/stream_matches_index_patterns.ts @elastic/obs-sig-events-team
+# ai
+x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events @elastic/obs-sig-events-team
+x-pack/platform/packages/shared/kbn-streams-ai/src/features @elastic/obs-sig-events-team
+x-pack/platform/packages/shared/kbn-streams-ai/src/knowledge_indicators @elastic/obs-sig-events-team
 # app
 x-pack/platform/plugins/shared/streams_app/public/components/sig_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams_app/public/hooks/sig_events @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams_app/public/hooks/use_onboarding_api.ts @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams_app/public/hooks/use_index_patterns_config.ts @elastic/obs-sig-events-team
 # server
 x-pack/platform/plugins/shared/streams/server/lib/sig_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/server/lib/streams/assets/query @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/server/lib/streams/feature @elastic/obs-sig-events-team
-x-pack/platform/plugins/shared/streams/server/lib/tasks/task_definitions/features_identification @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/server/lib/tasks @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/server/lib/memory @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/server/lib/workflows @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/server/register_significant_events_inference_features.ts @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/server/routes/internal/memory @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/server/routes/internal/streams/onboarding @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/server/routes/utils/task_helpers.ts @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/server/routes/utils/assert_significant_events_access.ts @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/server/routes/utils/query_status.ts @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/server/routes/utils/search_mode.ts @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/server/routes/utils/resolve_connector_for_feature.ts @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/server/agent_builder/tools/search_knowledge_indicators @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/server/agent_builder/tools/create_feature_knowledge_indicator @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/server/agent_builder/tools/create_query_knowledge_indicator @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/server/agent_builder/tools/ki_identification_start @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/server/agent_builder/tools/ki_identification_cancel @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/server/agent_builder/tools/ki_identification_status @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/server/agent_builder/tools/memory @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/server/routes/sig_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/server/routes/internal/sig_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events @elastic/obs-sig-events-team
@@ -1816,7 +1851,6 @@ x-pack/platform/plugins/shared/streams/common/sig_events_tuning_config.ts @elast
 
 /src/platform/test/api_integration/apis/suggestions  @elastic/actionable-obs-team # Assigned per https://github.com/elastic/kibana/pull/200950#discussion_r1853705079
 /x-pack/solutions/observability/test/api_integration/services/slo.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/functional/apps/slo @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/observability_api_integration @elastic/actionable-obs-team # Assigned per https://github.com/elastic/kibana/pull/182243
 /x-pack/solutions/observability/test/functional/services/observability @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/accessibility/apps/observability.ts @elastic/actionable-obs-team
@@ -2483,6 +2517,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/alienvault_otx/** @el
 src/platform/packages/shared/kbn-connector-specs/src/specs/amazon_s3/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/atlassian/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_lambda/** @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/bigquery/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/azure_blob/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/gcp_cloud_functions/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/brave_search/** @elastic/workchat-eng
@@ -2755,6 +2790,8 @@ src/platform/packages/shared/kbn-connector-schemas/thehive @elastic/kibana-cases
 /x-pack/solutions/security/test/security_solution_cypress/cypress/support @elastic/security-detection-engine @elastic/security-detection-rule-management @elastic/security-threat-hunting
 /x-pack/solutions/security/test/security_solution_cypress/cypress/urls @elastic/security-threat-hunting @elastic/security-detection-engine
 
+/x-pack/solutions/security/plugins/security_solution/public/agent_builder/attachment_types/rule @elastic/security-threat-hunting @elastic/security-generative-ai @elastic/security-detection-engine
+
 /x-pack/solutions/security/plugins/security_solution/common/test @elastic/security-detection-engine @elastic/security-detection-rule-management @elastic/security-threat-hunting
 
 /x-pack/solutions/security/plugins/security_solution/public/common/components/callouts @elastic/security-detection-rule-management
@@ -2794,6 +2831,7 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/cypress-to-scout-migration @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/flaky-test-doctor @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/scout-best-practices-reviewer @elastic/security-engineering-productivity
+/x-pack/solutions/security/plugins/security_solution/.agents/skills/test-plan-generator @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/* @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/cypress/* @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/login.ts @elastic/security-engineering-productivity
@@ -3447,6 +3485,13 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 
 # Inbox FTR test directory (no kibana.jsonc — manual entry)
 /x-pack/platform/test/inbox_api_integration/ @elastic/security-genai-research-and-development
+
+# FTR config manifests have no single owner — touched by all solutions.
+# Leaving this unowned avoids routing every edit through Kibana Operations.
+/.buildkite/ftr-manifests/
+
+
+/.mise.toml @elastic/kibana-operations
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
