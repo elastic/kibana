@@ -13,10 +13,15 @@ export const ANOMALIES_PLACEHOLDER_PANEL = '[data-test-subj="recent-anomalies-pa
 
 export const ENTITIES_TABLE_GRID = '[data-test-subj="entity-analytics-test-subj-grid-wrapper"]';
 export const ENTITIES_TABLE_EMPTY = '[data-test-subj="entity-analytics-empty-state"]';
+export const ENTITY_STORE_DISABLED_EMPTY_PROMPT =
+  '[data-test-subj="entityStoreDisabledEmptyPrompt"]';
 
 export const DATAGRID_HEADER = '[data-test-subj="dataGridHeader"]';
 export const DATAGRID_COLUMN_SELECTOR = '[data-test-subj="dataGridColumnSelectorButton"]';
 export const DATAGRID_SORTING_SELECTOR = '[data-test-subj="dataGridColumnSortingButton"]';
+export const DATA_GRID_ROW_CELL = '[data-test-subj="dataGridRowCell"]';
+export const dataGridRowCellByColumn = (columnId: string) =>
+  `${DATA_GRID_ROW_CELL}[data-gridcell-column-id="${columnId}"]`;
 
 export const EXPAND_ROW_BUTTON = '[data-test-subj="docTableExpandToggleColumn"]';
 
@@ -33,6 +38,10 @@ export const GROUPING_SELECTOR = '[data-test-subj="entity-analytics-grouping"]';
 export const GROUPING_COUNTER = '[data-test-subj="entity-analytics-grouping-counter"]';
 
 export const FLYOUT_RIGHT_PANEL = '[data-test-subj="rightSection"]';
+export const FLYOUT_TITLE_TEXT = '[data-test-subj="flyoutTitleText"]';
+/** Resolution group header — opens the primary (target) entity flyout */
+export const GROUP_HEADER_OPEN_ENTITY_FLYOUT_BUTTON =
+  '[data-test-subj="entity-analytics-resolution-group-open-flyout"]';
 
 export const ALERTS_DISTRIBUTION_BAR =
   '[data-test-subj="entity-analytics-alerts-distribution-bar"]';

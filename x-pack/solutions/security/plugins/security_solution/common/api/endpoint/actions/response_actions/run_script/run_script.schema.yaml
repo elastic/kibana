@@ -17,6 +17,15 @@ paths:
             schema:
               $ref: '#/components/schemas/RunScriptRouteRequestBody'
             examples:
+              Elastic Defend:
+                summary: "Run a script against an Elastic Defend agent"
+                description: "Endpoint runscript to collect logs"
+                value:
+                  endpoint_ids: [ "ed518850-681a-4d60-bb98-e22640cae2a8" ]
+                  agent_type: "endpoint"
+                  parameters:
+                    scriptId: "1111-2222-3333-4444-5555-6666-7777-8888"
+                    scriptInput: "--path= /usr/log/exec.log"
               SentinelOne:
                 summary: "Run a script against a SentinelOne agent"
                 description: "SentinelOne runscript"
@@ -79,13 +88,14 @@ components:
           properties:
             parameters:
               oneOf:
+                - $ref: '#/components/schemas/EndpointRunScriptParameters'
                 - $ref: '#/components/schemas/RawScriptParameters'
                 - $ref: '#/components/schemas/HostPathScriptParameters'
                 - $ref: '#/components/schemas/CloudFileScriptParameters'
                 - $ref: '#/components/schemas/SentinelOneRunScriptParameters'
                 - $ref: '#/components/schemas/MDERunScriptParameters'
               description: >
-                One of the following set of parameters must be provided
+                One of the following set of parameters must be provided for the `agentType` that is specified.
     RawScriptParameters:
       type: object
       required:
@@ -158,6 +168,27 @@ components:
           type: string
           minLength: 1
           description: The input parameter arguments for the script that was selected.
+    EndpointRunScriptParameters:
+      type: object
+      title: Elastic Defend Run Script Parameters
+      description: Parameters for Run Script response action against Elastic Defend agent type.
+      required:
+        - scriptId
+      properties:
+        scriptId:
+          type: string
+          minLength: 1
+          description: The script ID from the scripts library that will be executed.
+        scriptInput:
+          type: string
+          minLength: 1
+          description: The input parameter arguments (if any) for the script that will be executed.
+      example:
+        endpoint_ids: [ "endpoint-id-1" ]
+        agent_type: "endpoint"
+        parameters:
+          scriptId: "1111-2222-3333-4444-5555-6666-7777-8888"
+          scriptInput: "--some-parameter some-value"
     MDERunScriptParameters:
       type: object
       title: Microsoft Defender Endpoint Run Script Parameters

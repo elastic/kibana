@@ -77,6 +77,7 @@ toc:
           - file: connectors-kibana/alienvault-otx-action-type.md
           - file: connectors-kibana/amazon-s3-action-type.md
           - file: connectors-kibana/azure-blob-action-type.md
+          - file: connectors-kibana/bigquery-action-type.md
           - file: connectors-kibana/brave-search-action-type.md
           - file: connectors-kibana/confluence-cloud-action-type.md
           - file: connectors-kibana/gmail-action-type.md
@@ -87,11 +88,13 @@ toc:
           - file: connectors-kibana/google-cloud-storage-action-type.md
           - file: connectors-kibana/google-drive-action-type.md
           - file: connectors-kibana/greynoise-action-type.md
+          - file: connectors-kibana/hubspot-action-type.md
           - file: connectors-kibana/jina-action-type.md
           - file: connectors-kibana/jira-cloud-action-type.md
           - file: connectors-kibana/microsoft-teams-action-type.md
           - file: connectors-kibana/notion-action-type.md
           - file: connectors-kibana/one-password-action-type.md
+          - file: connectors-kibana/outlook-action-type.md
           - file: connectors-kibana/pagerduty-mcp-action-type.md
           - file: connectors-kibana/salesforce-action-type.md
           - file: connectors-kibana/servicenow-search-action-type.md

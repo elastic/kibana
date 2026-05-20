@@ -60,11 +60,38 @@ export const waitForGroupingTable = () => {
 };
 
 /**
+ * Waits for the entity store status intercept and the initial entity store
+ * search to both resolve, then confirms the grouping table is ready.
+ *
+ * Must be called after `interceptEntityStoreStatus` and
+ * `interceptEntityStoreSearch` are registered and after `cy.visit`.
+ *
+ * The search fires only once the sourcerer / data-view has finished loading,
+ * which can take well over 5 s in CI — both timeouts are set to 20 s to
+ * match the patience already applied to `@entityStoreStatus`.
+ */
+export const waitForEntityAnalyticsPageReady = () => {
+  cy.wait('@entityStoreStatus', { timeout: 20000 });
+  cy.wait('@entityStoreSearch', { timeout: 20000 });
+  waitForGroupingTable();
+};
+
+/**
  * Intercepts the entity store search API and registers an alias.
  * Call this before navigation so Cypress captures the request.
  */
 export const interceptEntityStoreSearch = () => {
   cy.intercept('POST', ENTITY_STORE_SEARCH_API).as('entityStoreSearch');
+};
+
+export const interceptEntityStoreStatus = (status: 'running' | 'not_installed') => {
+  cy.intercept(
+    { method: 'GET', pathname: '/api/security/entity_store/status' },
+    {
+      statusCode: 200,
+      body: { status, engines: [] },
+    }
+  ).as('entityStoreStatus');
 };
 
 /**

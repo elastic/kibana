@@ -112,15 +112,36 @@ export const buildResolutionGroupingQuery = ({
         `),
       },
     },
+    bucketRiskScore: {
+      type: 'double' as MappingRuntimeFieldType,
+      script: {
+        source: dedent(`
+          if (doc.containsKey('${ENTITY_FIELDS.RESOLVED_TO}')
+              && !doc['${ENTITY_FIELDS.RESOLVED_TO}'].empty) {
+            return;
+          }
+          if (doc.containsKey('${ENTITY_FIELDS.RESOLUTION_RISK_SCORE}')
+              && !doc['${ENTITY_FIELDS.RESOLUTION_RISK_SCORE}'].empty) {
+            emit(doc['${ENTITY_FIELDS.RESOLUTION_RISK_SCORE}'].value);
+          } else if (doc.containsKey('${ENTITY_FIELDS.ENTITY_RISK}')
+              && !doc['${ENTITY_FIELDS.ENTITY_RISK}'].empty) {
+            emit(doc['${ENTITY_FIELDS.ENTITY_RISK}'].value);
+          }
+        `),
+      },
+    },
   },
   aggs: {
     groupByFields: {
       terms: {
         field: 'groupByField',
         size: MAX_QUERY_SIZE,
-        order: [{ resolutionRiskScore: 'desc' as const }, { _count: 'desc' as const }],
+        order: [{ bucketRiskScore: 'desc' as const }, { _count: 'desc' as const }],
       },
       aggs: {
+        bucketRiskScore: {
+          max: { field: 'bucketRiskScore' },
+        },
         resolutionRiskScore: {
           max: { field: ENTITY_FIELDS.RESOLUTION_RISK_SCORE },
         },

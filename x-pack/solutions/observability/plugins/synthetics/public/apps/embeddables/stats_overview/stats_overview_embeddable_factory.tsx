@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import type {
   DefaultEmbeddableApi,
-  EmbeddableFactory,
+  EmbeddablePublicDefinition,
   HasDrilldowns,
 } from '@kbn/embeddable-plugin/public';
 import type {
@@ -26,7 +26,7 @@ import {
   titleComparators,
 } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
-import { BehaviorSubject, Subject, map, merge } from 'rxjs';
+import { BehaviorSubject, Subject, map, merge, skip } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import type { ClientPluginsStart } from '../../../plugin';
 import { StatsOverviewComponent } from './stats_overview_component';
@@ -60,8 +60,9 @@ export type StatsOverviewApi = DefaultEmbeddableApi<OverviewStatsEmbeddableState
 export const getStatsOverviewEmbeddableFactory = (
   getStartServices: StartServicesAccessor<ClientPluginsStart>
 ) => {
-  const factory: EmbeddableFactory<OverviewStatsEmbeddableState, StatsOverviewApi> = {
+  const factory: EmbeddablePublicDefinition<OverviewStatsEmbeddableState, StatsOverviewApi> = {
     type: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
+    getPlacementHints: () => ({ width: 10, height: 8 }),
     buildEmbeddable: async ({
       initializeDrilldownsManager,
       initialState,
@@ -81,7 +82,7 @@ export const getStatsOverviewEmbeddableFactory = (
         ...(initialState?.filters || {}),
       });
 
-      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
+      const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
 
       function serializeState(): OverviewStatsEmbeddableState {
         return {
@@ -97,9 +98,12 @@ export const getStatsOverviewEmbeddableFactory = (
         serializeState,
         anyStateChange$: merge(
           titleManager.anyStateChange$,
-          filters$,
+          filters$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
           drilldownsManager.anyStateChange$
-        ).pipe(map(() => undefined)),
+        ),
         getComparators: () => ({
           ...titleComparators,
           filters: 'referenceEquality',

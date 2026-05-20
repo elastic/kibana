@@ -11,6 +11,7 @@ import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceConnector } from '@kbn/inference-common';
+import type { ApiInferenceConnector } from './lib/merge_connectors';
 
 export type { InferenceTaskType, InferenceConnector };
 
@@ -24,6 +25,11 @@ export interface InferenceFeatureConfig {
   recommendedEndpoints: string[];
   isTechPreview?: boolean;
   isBeta?: boolean;
+  ignoreGlobalDefault?: boolean;
+  visibilityCondition?: {
+    key: string;
+    value: string | number | boolean | null;
+  };
 }
 
 export type RegisterResult = { ok: true } | { ok: false; error: string };
@@ -47,8 +53,17 @@ export interface ResolvedInferenceEndpoints {
   soEntryFound: boolean;
 }
 
+export interface ResolvedInferenceApiEndpoints {
+  endpoints: ApiInferenceConnector[];
+  warnings: string[];
+  soEntryFound: boolean;
+}
+
 export interface InferenceEndpointsContract {
-  getForFeature: (featureId: string, request: KibanaRequest) => Promise<ResolvedInferenceEndpoints>;
+  getForFeature: (
+    featureId: string,
+    request: KibanaRequest
+  ) => Promise<ResolvedInferenceApiEndpoints>;
 }
 
 export interface SearchInferenceEndpointsPluginStart {

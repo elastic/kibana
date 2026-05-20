@@ -27,22 +27,28 @@ import type { ESQLTelemetryCallbacks, ESQLRegistrySolutionId } from '@kbn/esql-t
 import { ESQL_CLASSIC_SOLUTION_ID } from '@kbn/esql-types';
 import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ESQL_LANG_ID, monaco } from '@kbn/monaco';
+import { ESQL_LANG_ID, monaco } from '@kbn/code-editor';
 import { DataSourceBrowser } from '@kbn/esql-resource-browser';
 import { FieldsBrowser } from '@kbn/esql-resource-browser';
+import { useStableCallback } from '@kbn/react-hooks';
 import type { ComponentProps } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { QuerySource } from '@kbn/esql-types';
+import { isMac } from '@kbn/shared-ux-utility';
 import { useLookupIndexCommand } from './lookup_join';
+import { useCommentToEsql, useGhostLineHint } from './comment_to_esql';
+import { useSuggestFix } from './suggest_fix/use_suggest_fix';
+import { useEditorAiStyle } from './editor_ai.styles';
 import { useFieldsBrowser } from './resource_browser/use_fields_browser';
 import { EditorFooter } from './editor_footer';
 import { QuickSearchVisor } from './editor_visor';
 import { ESQLMenu } from './editor_menu';
 import { getTrimmedQuery } from './history_local_storage';
 import { useEsqlEditorActions } from './hooks/use_esql_editor_actions';
+import { useNlToEsqlCheck } from './hooks/use_nl_to_esql_check';
 import {
   EDITOR_INITIAL_HEIGHT,
   EDITOR_INITIAL_HEIGHT_INLINE_EDITING,
@@ -58,6 +64,7 @@ import {
   trackSuggestionPopupState,
   onKeyDownResizeHandler,
   onMouseDownResizeHandler,
+  isCodeActionMenuVisible,
 } from './helpers';
 import {
   useInitLatencyTracking,
@@ -356,7 +363,19 @@ const ESQLEditorInternal = function ESQLEditor({
         suppressSuggestionsRef.current = false;
         return;
       }
-      editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', { auto: true });
+
+      if (!editorRef.current) {
+        return;
+      }
+
+      // When the quick fix menu is displayed, it triggers onDidFocusEditorText,
+      // calling then this method that makes the popup to close right away.
+      // If the quick fix menu is visible, do not trigger suggestions to avoid this issue.
+      if (isCodeActionMenuVisible(editorRef.current)) {
+        return;
+      }
+
+      editorRef.current.trigger(undefined, 'editor.action.triggerSuggest', { auto: true });
     }, 0);
   }, []);
 
@@ -482,6 +501,11 @@ const ESQLEditorInternal = function ESQLEditor({
   });
   useEsqlEditorActionsRegistration(editorActions);
 
+  // Stable proxies for callbacks captured by long-lived Monaco command closures
+  const stableOnQuerySubmit = useStableCallback(onQuerySubmit);
+  const stableOnToggleVisor = useStableCallback(onToggleVisor);
+  const stableOnPrettifyQuery = useStableCallback(onPrettifyQuery);
+
   const esqlCallbacks = useEsqlCallbacks({
     core,
     data,
@@ -524,6 +548,39 @@ const ESQLEditorInternal = function ESQLEditor({
     suppressSuggestionsRef,
   });
 
+  const isNlToEsqlEnabled = useNlToEsqlCheck();
+
+  // Forward-declared so the comment-to-esql hook can hide an already-visible
+  // ghost hint when generation starts; populated below by useGhostLineHint.
+  const clearGhostHintRef = useRef<() => void>(() => {});
+
+  const editorAiStyle = useEditorAiStyle();
+
+  const {
+    generateFromComment: onGenerateFromComment,
+    isReviewActiveRef,
+    isGeneratingRef,
+  } = useCommentToEsql({
+    editorRef,
+    editorModel,
+    http: core.http,
+    notifications: core.notifications,
+    isEnabled: isNlToEsqlEnabled,
+    clearGhostHintRef,
+  });
+
+  const onGenerateFromCommentRef = useRef(onGenerateFromComment);
+  onGenerateFromCommentRef.current = onGenerateFromComment;
+
+  const { ghostLineHintStyle, setupGhostLineHint } = useGhostLineHint({
+    editorRef,
+    editorModel,
+    isReviewActiveRef,
+    isEnabled: isNlToEsqlEnabled,
+    isGeneratingRef,
+    clearGhostHintRef,
+  });
+
   const {
     isFieldsBrowserOpen,
     setIsFieldsBrowserOpen,
@@ -539,8 +596,8 @@ const ESQLEditorInternal = function ESQLEditor({
     telemetryService,
   });
 
-  const { editorMessages, onLookupIndexCreate, onNewFieldsAddedToLookupIndex } = useQueryValidation(
-    {
+  const { editorMessages, editorMessagesRef, onLookupIndexCreate, onNewFieldsAddedToLookupIndex } =
+    useQueryValidation({
       code,
       codeWhenSubmitted,
       editorRef,
@@ -562,8 +619,15 @@ const ESQLEditorInternal = function ESQLEditor({
         trackValidationLatencyEnd,
         resetValidationTracking,
       },
-    }
-  );
+    });
+
+  useSuggestFix({
+    editorRef,
+    editorModel,
+    http: core.http,
+    notifications: core.notifications,
+    isEnabled: isNlToEsqlEnabled,
+  });
 
   const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useLookupIndexCommand(
     editorRef,
@@ -578,6 +642,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const {
     esqlDepsByModelUri,
     suggestionProvider,
+    codeActionsProvider,
     codeEditorHoverProvider,
     signatureProvider,
     inlineCompletionsProvider,
@@ -592,10 +657,12 @@ const ESQLEditorInternal = function ESQLEditor({
     editorCommandDisposables,
     esqlCallbacks,
     telemetryCallbacks,
+    isSuggestFixEnabled: isNlToEsqlEnabled,
     isDisabled,
     measuredEditorWidth,
     setMeasuredEditorWidth,
     resetPendingTracking,
+    editorMessagesRef,
   });
 
   const htmlId = useGeneratedHtmlId({ prefix: 'esql-editor' });
@@ -606,6 +673,8 @@ const ESQLEditorInternal = function ESQLEditor({
         styles={css`
           ${lookupIndexBadgeStyle}
           ${sourcesBadgeStyle}
+          ${ghostLineHintStyle}
+          ${editorAiStyle}
         `}
       />
       {Boolean(editorIsInline) && !hideRunQueryButton ? (
@@ -663,6 +732,17 @@ const ESQLEditorInternal = function ESQLEditor({
                 languageId={ESQL_LANG_ID}
                 classNameCss={getEditorOverwrites(theme)}
                 value={code}
+                placeholder={
+                  isNlToEsqlEnabled
+                    ? i18n.translate('esqlEditor.placeholder', {
+                        defaultMessage:
+                          "Start typing ES|QL, or write a // comment and press {commandKey}+J to describe what you're looking for",
+                        values: { commandKey: isMac ? '⌘' : 'Ctrl' },
+                      })
+                    : i18n.translate('esqlEditor.placeholder.basic', {
+                        defaultMessage: 'Start typing ES|QL',
+                      })
+                }
                 options={codeEditorOptions}
                 width="100%"
                 suggestionProvider={suggestionProvider}
@@ -670,6 +750,7 @@ const ESQLEditorInternal = function ESQLEditor({
                 signatureProvider={signatureProvider}
                 inlineCompletionsProvider={inlineCompletionsProvider}
                 documentHighlightProvider={documentHighlightProvider}
+                codeActions={codeActionsProvider}
                 onChange={onQueryUpdate}
                 editorDidMount={async (editor) => {
                   // Track editor init time once per mount
@@ -683,6 +764,8 @@ const ESQLEditorInternal = function ESQLEditor({
                     esqlDepsByModelUri.set(editorModelUriRef.current, {
                       ...esqlCallbacks,
                       telemetry: telemetryCallbacks,
+                      isSuggestFixEnabled: isNlToEsqlEnabled,
+                      getEditorMessages: () => editorMessagesRef.current,
                     });
                     await addLookupIndicesDecorator();
                     if (enableResourceBrowser) {
@@ -709,13 +792,24 @@ const ESQLEditorInternal = function ESQLEditor({
                   });
 
                   // Add editor key bindings
-                  addEditorKeyBindings(editor, onQuerySubmit, onToggleVisor, onPrettifyQuery);
+                  addEditorKeyBindings(
+                    editor,
+                    stableOnQuerySubmit,
+                    stableOnToggleVisor,
+                    stableOnPrettifyQuery,
+                    () => onGenerateFromCommentRef.current()
+                  );
+
+                  const ghostHintDisposables = setupGhostLineHint(editor);
 
                   // Store disposables for cleanup
                   const currentEditor = editorRef.current;
                   if (currentEditor) {
                     if (!editorCommandDisposables.current.has(currentEditor)) {
-                      editorCommandDisposables.current.set(currentEditor, commandDisposables);
+                      editorCommandDisposables.current.set(currentEditor, [
+                        ...commandDisposables,
+                        ...ghostHintDisposables,
+                      ]);
                     }
                   }
 
@@ -930,8 +1024,8 @@ const ESQLEditorInternal = function ESQLEditor({
             onClose={() => {
               setIsDataSourceBrowserOpen(false);
               suppressSuggestionsRef.current = true;
-              editorRef.current?.focus();
             }}
+            onCloseComplete={() => editorRef.current?.focus()}
           />,
           document.body
         )}
@@ -945,7 +1039,11 @@ const ESQLEditorInternal = function ESQLEditor({
             activeSolutionId={activeSolutionId ?? undefined}
             position={fieldsBrowserPosition}
             onSelect={handleFieldsBrowserSelect}
-            onClose={() => setIsFieldsBrowserOpen(false)}
+            onClose={() => {
+              setIsFieldsBrowserOpen(false);
+              suppressSuggestionsRef.current = true;
+            }}
+            onCloseComplete={() => editorRef.current?.focus()}
           />,
           document.body
         )}

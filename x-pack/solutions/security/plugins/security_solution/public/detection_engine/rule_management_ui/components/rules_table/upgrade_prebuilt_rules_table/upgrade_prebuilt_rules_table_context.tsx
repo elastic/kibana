@@ -72,10 +72,10 @@ export interface UpgradePrebuiltRulesTableState {
    */
   isRefetching: boolean;
   /**
-   * Is true when installing security_detection_rules
-   * package in background
+   * Is true while the `security_detection_engine` Fleet package is being
+   * initialized (installed or upgraded) in the background.
    */
-  isUpgradingSecurityPackages: boolean;
+  isInitializingPrebuiltRulesPackage: boolean;
   /**
    * List of rule IDs that are currently being upgraded
    */
@@ -164,7 +164,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     isLoading,
     isFetching,
     isRefetching,
-    isUpgradingSecurityPackages,
+    isInitializingPrebuiltRulesPackage,
     loadingRules,
     lastUpdated,
     rulePreviewFlyout,
@@ -207,7 +207,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         isLoading,
         isFetching,
         isRefetching,
-        isUpgradingSecurityPackages,
+        isInitializingPrebuiltRulesPackage,
         loadingRules,
         lastUpdated,
         pagination: {
@@ -227,7 +227,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       isLoading,
       isFetching,
       isRefetching,
-      isUpgradingSecurityPackages,
+      isInitializingPrebuiltRulesPackage,
       loadingRules,
       lastUpdated,
       pagination,

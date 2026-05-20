@@ -106,7 +106,6 @@ describe('take action dropdown', () => {
       dataFormattedForFieldBrowser: mockAlertDetailsData as TimelineEventsDetailsItem[],
       dataAsNestedObject: getDetectionAlertMock(),
       handleOnEventClosed: jest.fn(),
-      isHostIsolationPanelOpen: false,
       onAddEventFilterClick: jest.fn(),
       onAddExceptionTypeClick: jest.fn(),
       onAddIsolationStatusClick: jest.fn(),
@@ -249,11 +248,11 @@ describe('take action dropdown', () => {
         );
       });
     });
-    test('should render "Investigate in timeline"', async () => {
+    test('should render "Investigate in Timeline"', async () => {
       await waitFor(() => {
         expect(
           wrapper.find('[data-test-subj="investigate-in-timeline-action-item"]').first().text()
-        ).toEqual('Investigate in timeline');
+        ).toEqual('Investigate in Timeline');
       });
     });
     test('should render "Run Osquery"', async () => {
@@ -287,7 +286,7 @@ describe('take action dropdown', () => {
   });
 
   describe('privileges', () => {
-    test('should not render "Investigate in timeline" when the user does not have timeline privileges', async () => {
+    test('should not render "Investigate in Timeline" when the user does not have timeline privileges', async () => {
       (useUserPrivileges as jest.Mock).mockReturnValue({
         ...getUserPrivilegesMockDefaultValue(),
         timelinePrivileges: { read: false },

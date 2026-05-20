@@ -46,6 +46,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -135,6 +141,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -220,6 +232,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -309,6 +327,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -394,6 +418,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -479,6 +509,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -568,6 +604,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -653,6 +695,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -738,6 +786,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -823,6 +877,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -913,6 +973,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -1004,6 +1070,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -1094,6 +1166,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -1188,6 +1266,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -1273,6 +1357,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -1363,6 +1453,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -1457,6 +1553,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -1547,6 +1649,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -1639,6 +1747,12 @@ Object {
     },
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {
@@ -1731,6 +1845,12 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
+    "availableLocales": Array [
+      Object {
+        "id": "en",
+        "label": "English",
+      },
+    ],
     "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
   },
   "legacyMetadata": Object {

@@ -53,6 +53,7 @@ import {
   checkIntegrationFipsLooseCompatibility,
   hasMultipleEnabledPolicyTemplates,
   getInputEffectiveName,
+  getRegistryStreamWithDataStreamForInputType,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -61,6 +62,7 @@ import {
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   DATA_STREAM_TYPE_VAR_NAME,
+  OTEL_COLLECTOR_INPUT_TYPE,
 } from '../../common/constants';
 import type {
   PostDeletePackagePoliciesResponse,
@@ -236,6 +238,7 @@ import {
   applyInputLevelMigration,
   migrateStreamVars,
   applyStreamLevelMigration,
+  applyVarScopeMigration,
   deepMergeVars,
   getUpdatedGlobalVars,
   removeStaleVars,
@@ -571,6 +574,18 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           ? 'agentless'
           : 'default',
         basePkgInfo
+      );
+    }
+
+    if (
+      packagePolicy.global_data_tags?.length &&
+      !(
+        agentPolicies.every((policy) => policy?.supports_agentless) ||
+        packagePolicy.supports_agentless
+      )
+    ) {
+      throw new PackagePolicyValidationError(
+        '`global_data_tags` can only be set on agentless integration policies'
       );
     }
 
@@ -1648,6 +1663,16 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         );
       }
 
+      // Validate that global_data_tags is only set on agentless package policies
+      if (
+        packagePolicy.global_data_tags?.length &&
+        !(packagePolicy.supports_agentless || agentPolicy?.supports_agentless)
+      ) {
+        throw new PackagePolicyValidationError(
+          '`global_data_tags` can only be set on agentless integration policies'
+        );
+      }
+
       validateDeploymentModesForInputs(
         packagePolicy.inputs,
         agentPolicy?.supports_agentless || packagePolicy.supports_agentless
@@ -2666,6 +2691,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           cloud_connector_id: newPolicy.cloud_connector_id,
           cloud_connector_name: newPolicy.cloud_connector_name,
           additional_datastreams_permissions: newPolicy.additional_datastreams_permissions,
+          condition: newPolicy.condition,
         };
       }
     }
@@ -3521,7 +3547,55 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
   }
 }
 
+function validateConditionPlacement(packagePolicy: NewPackagePolicy) {
+  const { enableIntegrationConditions } = appContextService.getExperimentalFeatures();
+  const isAgentless = packagePolicy.supports_agentless === true;
+  const throwDisabled = () => {
+    throw new PackagePolicyValidationError(
+      i18n.translate('xpack.fleet.packagePolicyConditionFeatureDisabled', {
+        defaultMessage: '`condition` is not supported because the conditions feature is disabled.',
+      })
+    );
+  };
+  const throwAgentless = () => {
+    throw new PackagePolicyValidationError(
+      i18n.translate('xpack.fleet.packagePolicyConditionNotAllowedAgentless', {
+        defaultMessage: '`condition` is not supported on agentless package policies.',
+      })
+    );
+  };
+  const throwOtel = () => {
+    throw new PackagePolicyValidationError(
+      i18n.translate('xpack.fleet.packagePolicyConditionNotAllowedOtel', {
+        defaultMessage: '`condition` is not supported on `{otelcol}` inputs or their streams.',
+        values: { otelcol: OTEL_COLLECTOR_INPUT_TYPE },
+      })
+    );
+  };
+
+  if (packagePolicy.condition) {
+    if (!enableIntegrationConditions) throwDisabled();
+    if (isAgentless) throwAgentless();
+  }
+
+  for (const input of packagePolicy.inputs) {
+    const isOtel = input.type === OTEL_COLLECTOR_INPUT_TYPE;
+    if (input.condition) {
+      if (!enableIntegrationConditions) throwDisabled();
+      if (isAgentless) throwAgentless();
+      if (isOtel) throwOtel();
+    }
+    for (const stream of input.streams) {
+      if (!stream.condition) continue;
+      if (!enableIntegrationConditions) throwDisabled();
+      if (isAgentless) throwAgentless();
+      if (isOtel) throwOtel();
+    }
+  }
+}
+
 function validatePackagePolicyOrThrow(packagePolicy: NewPackagePolicy, pkgInfo: PackageInfo) {
+  validateConditionPlacement(packagePolicy);
   const validationResults = validatePackagePolicy(packagePolicy, pkgInfo, parse);
   if (validationHasErrors(validationResults)) {
     const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))
@@ -4014,6 +4088,24 @@ export function updatePackageInputs(
   for (const update of inputsUpdated) {
     let originalInput: NewPackagePolicyInput | undefined;
 
+    // Pre-compute registry definitions for this input type so var-level migrate_from renaming
+    // can be applied in both Path A and Path B migration calls below.
+    const updateType = (update as NewPackagePolicyInput).type;
+    const registryStreams = updateType
+      ? getRegistryStreamWithDataStreamForInputType(updateType, packageInfo)
+      : undefined;
+    const registryInputVarDefs = updateType
+      ? (update.policy_template
+          ? packageInfo.policy_templates?.filter((pt) => pt.name === update.policy_template)
+          : packageInfo.policy_templates
+        )
+          ?.flatMap((pt) => getNormalizedInputs(pt))
+          .find(
+            (ri) =>
+              getInputEffectiveName(ri) === getInputEffectiveName(update as NewPackagePolicyInput)
+          )?.vars
+      : undefined;
+
     if (update.policy_template) {
       // If the updated value defines a policy template, try to find an original input
       // with the same policy template value. Match by name ?? type on both sides
@@ -4047,9 +4139,15 @@ export function updatePackageInputs(
       const originalInputToMigrate = applyInputLevelMigration(
         update,
         basePackagePolicy.inputs,
-        inputs
+        inputs,
+        registryInputVarDefs
       );
-      applyStreamLevelMigration(update, originalInputToMigrate, basePackagePolicy.inputs);
+      applyStreamLevelMigration(
+        update,
+        originalInputToMigrate,
+        basePackagePolicy.inputs,
+        registryStreams
+      );
 
       // Do not enable new inputs for limited packages
       if (limitedPackage) {
@@ -4088,6 +4186,11 @@ export function updatePackageInputs(
     const storedInputVars = originalInput.vars
       ? Object.fromEntries(Object.entries(originalInput.vars).map(([k, v]) => [k, { ...v }]))
       : undefined;
+
+    // Var-level scope migration runs before any merge so that values can be seeded into the
+    // new scope's source slot; deepMergeVars then carries them through and removeStaleVars
+    // drops the old scope automatically (the var is no longer in the new schema there).
+    applyVarScopeMigration(originalInput, registryInputVarDefs, registryStreams);
 
     if (update.vars || originalInput.vars) {
       const indexOfInput = inputs.indexOf(originalInput);
@@ -4139,8 +4242,16 @@ export function updatePackageInputs(
             );
             const oldStream = oldInputForStream?.streams[counter];
             if (oldStream) {
+              const registryStream = registryStreams?.find(
+                (rs) => rs.data_stream.dataset === stream.data_stream.dataset
+              );
               originalInput.streams.push(
-                migrateStreamVars(stream as InputsOverride, oldStream, oldInputForStream?.vars)
+                migrateStreamVars(
+                  stream as InputsOverride,
+                  oldStream,
+                  oldInputForStream?.vars,
+                  registryStream?.vars
+                )
               );
               streamMigratedFromOldInput = true;
               if (!oldSourceInput) oldSourceInput = oldInputForStream;
@@ -4191,14 +4302,17 @@ export function updatePackageInputs(
           // Start with httpjson vars as the base — the migrate_from declaration signals that
           // httpjson is the authoritative source for these vars.
           const seededVars: typeof storedCelVars = { ...oldSourceVars };
-          // Merge in cel's own stored vars only for keys NOT present in the old source input
-          // (i.e. cel-only vars). For shared keys (url, api_token, etc.), the old source
-          // (httpjson) always wins — that is the purpose of the migrate_from migration.
+          // Merge in the new input's own stored vars:
+          // - For keys NOT in the old source: always keep the stored value (new-input-only var).
+          // - For shared keys: keep the stored value when it was explicitly set by the user
+          //   (non-null, non-empty). This handles the case where both the old and new inputs
+          //   existed in the policy and the user had independently configured the new input
+          //   (e.g. m365_defender CEL vulnerability credentials differ from httpjson alert creds).
+          //   When the stored value is null/empty, the old source wins so its vars seed the new
+          //   input for the common case where the new input was unconfigured before migration.
           for (const [key, celEntry] of Object.entries(storedCelVars)) {
-            if (!(key in oldSourceVars)) {
-              if (celEntry?.value != null && celEntry.value !== '') {
-                seededVars[key] = celEntry;
-              }
+            if (!(key in oldSourceVars) || (celEntry?.value != null && celEntry.value !== '')) {
+              seededVars[key] = celEntry;
             }
           }
           const merged = deepMergeVars(

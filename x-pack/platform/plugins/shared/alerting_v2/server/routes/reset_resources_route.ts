@@ -25,7 +25,7 @@ import {
 import { isResponseError } from '@kbn/es-errors';
 import { inject, injectable } from 'inversify';
 
-import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../lib/rule_executor/task_definition';
+import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../lib/rule_executor/constants';
 import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
 import { EsServiceScopedToken } from '../lib/services/es_service/tokens';
 import { DatastreamInitializer } from '../lib/services/resource_service/datastream_initializer';
@@ -33,7 +33,7 @@ import { getDataStreamResourceDefinitions } from '../resources/datastreams/regis
 import type { ResourceDefinition } from '../resources/datastreams/types';
 import {
   API_KEY_PENDING_INVALIDATION_TYPE,
-  NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+  ACTION_POLICY_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
 } from '../saved_objects';
 import { AlertingRouteContext } from './alerting_route_context';
@@ -44,7 +44,7 @@ const RESET_RESOURCES_API_PATH = '/internal/alerting/v2/_reset_resources';
 // Keep in sync with `registerSavedObjects` in `server/saved_objects/index.ts`.
 const ALERTING_V2_SAVED_OBJECT_TYPES = [
   RULE_SAVED_OBJECT_TYPE,
-  NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+  ACTION_POLICY_SAVED_OBJECT_TYPE,
   API_KEY_PENDING_INVALIDATION_TYPE,
 ];
 
@@ -57,7 +57,7 @@ export class ResetResourcesRoute extends BaseAlertingRoute {
       requiredPrivileges: [
         ALERTING_V2_API_PRIVILEGES.rules.write,
         ALERTING_V2_API_PRIVILEGES.alerts.write,
-        ALERTING_V2_API_PRIVILEGES.notificationPolicies.write,
+        ALERTING_V2_API_PRIVILEGES.actionPolicies.write,
       ],
     },
   };

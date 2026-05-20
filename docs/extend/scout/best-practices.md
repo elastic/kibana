@@ -4,7 +4,99 @@ navigation_title: Best practices
 
 # General Scout best practices [scout-best-practices]
 
-For test-type-specific guidance, see [UI test best practices](./ui-best-practices.md) and [API test best practices](./api-best-practices.md).
+For test-type-specific guidance, see [UI](./ui-best-practices.md) and [API](./api-best-practices.md) test best practices.
+
+## Pick the right test type [pick-the-right-test-type]
+
+Pick the test type **before** writing the test:
+
+| Test type                                                                      | Ideal for                                                                                                                                                                                                                              |
+| ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Scout UI test**                                                              | • user flows that span multiple pages or components<br>• role-based behavior (e.g. viewer can see X, editor can do Y)<br>• confirming the UI renders and reacts to interaction (not exact data values)                                 |
+| **Scout API test**                                                             | • status code, response shape, and key fields of an HTTP endpoint<br>• authorization checks (e.g. role X gets `403` from endpoint Y)<br>• exact data values computed by the backend (counts, aggregations, formulas)                   |
+| **Jest integration test**<br>A unit test with an Elasticsearch instance running | • saved object / data migrations from a previous version<br>• behavior that depends on a specific Elasticsearch data shape on disk<br>• scenarios that modify the system in ways a real user couldn't (e.g. writing to system indices) |
+| **Jest unit test**<br>Often paired with the React Testing Library              | • conditional rendering and component state (loading, error, empty)<br>• field validation, formatters, tooltips<br>• pure business logic (utilities, hooks, reducers)                                                                  |
+
+:::::{dropdown} Examples
+
+✔️ **Do:** use a Scout UI test to verify behavior, not exact data values.
+
+```ts
+await expect(page.testSubj.locator('datasetQualityTable-loaded')).toBeVisible();
+await page.testSubj.click('tableSortByLastActivity');
+await expect(page.testSubj.locator('row-0-col-dataset')).not.toHaveText('');
+```
+
+❌ **Don't:** assert exact computed values from a UI test — those belong in an API or unit test.
+
+```ts
+await expect(page.testSubj.locator('row-0-col-count')).toHaveText('1,024');
+await expect(page.testSubj.locator('row-0-col-avg')).toHaveText('42.7');
+```
+
+✔️ **Do:** use a Scout API test to validate an endpoint's contract.
+
+```ts
+apiTest('returns 200 and the expected fields for a viewer', async ({ apiClient }) => {
+  const response = await apiClient.get('api/my-feature/data', {
+    headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
+  });
+
+  expect(response).toHaveStatusCode(200);
+  expect(response.body).toMatchObject({ items: expect.any(Array) });
+});
+```
+
+✔️ **Do:** use a Scout API test to assert exact values computed by the backend (counts, aggregations, formulas).
+
+```ts
+apiTest('returns the correct count for each included types', async ({ apiClient }) => {
+  const response = await apiClient.post(MANAGEMENT_API.SCROLL_COUNT, {
+    headers: { ...adminCredentials.apiKeyHeader, ...testData.COMMON_HEADERS },
+    body: { typesToInclude: ['visualization'] },
+  });
+
+  expect(response).toHaveStatusCode(200);
+  expect(response.body).toStrictEqual({ visualization: 12000 });
+});
+```
+
+The suite seeds a known dataset in `beforeAll` (12,000 visualizations) so the count is deterministic. See [`scroll_count_large.spec.ts`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/saved_objects_management/test/scout/api/tests/scroll_count_large.spec.ts).
+
+✔️ **Do:** use a Jest integration test for data-migration coverage.
+
+A Scout API test is the wrong layer here: no real user can drive a stack upgrade through an HTTP route, and Scout suites share a single Kibana/Elasticsearch instance — so writing directly to system indices from one test leaks state into the rest of the suite.
+
+```ts
+import { startElasticsearch, getKibanaMigratorTestKit } from '@kbn/migrator-test-kit';
+
+let esServer;
+beforeAll(async () => {
+  esServer = await startElasticsearch({ dataArchive: BASELINE_TEST_ARCHIVE_LARGE });
+});
+afterAll(async () => esServer?.stop());
+
+it('migrates docs from a previous version', async () => {
+  const { runMigrations, client } = await getKibanaMigratorTestKit({ ...getBaseMigratorParams() });
+  const results = await runMigrations();
+
+  const mappings = await client.indices.getMapping({ index: '.kibana' });
+  expect(results[0].status).toBe('migrated');
+  expect(mappings).toMatchObject({
+    /* expected shape after migration */
+  });
+});
+```
+
+How these tests work:
+
+- They start a real Elasticsearch with `startElasticsearch(...)`, then import Kibana's real `KibanaMigrator` and run it in-process via `getKibanaMigratorTestKit(...).runMigrations()`. The HTTP server, plugins, and UI aren't booted — the test exercises the actual migration code path against real ES, just without the Kibana process around it.
+- "Previous version" data comes from a baseline ES data archive zip (e.g. `BASELINE_TEST_ARCHIVE_LARGE`) passed as `dataArchive`; if you don't need a snapshot, skip it and seed via `savedObjectsRepository.bulkCreate`.
+- Assertions run directly against ES (`client.indices.get` / `getMapping`), the SO repository (`savedObjectsRepository.find`), the returned `MigrationResult[]`, or migration logs.
+
+See [`src/core/server/integration_tests/saved_objects/migrations`](https://github.com/elastic/kibana/tree/main/src/core/server/integration_tests/saved_objects/migrations) for the full set of examples, and [`group1/v2_migration.test.ts`](https://github.com/elastic/kibana/blob/main/src/core/server/integration_tests/saved_objects/migrations/group1/v2_migration.test.ts) for a representative archive-based test.
+
+:::::
 
 ## Design tests with a cloud-first mindset [design-tests-with-a-cloud-first-mindset]
 
@@ -121,11 +213,13 @@ test('can see dashboard', async ({ page }) => {
 
 :::::
 
-## Use a global setup hook for one-time setup [move-repeated-one-time-setup-operations-to-a-global-setup-hook]
+## Use the global setup and teardown hooks in parallel test suites [move-repeated-one-time-setup-operations-to-a-global-setup-hook]
 
-If many files share the same “one-time” work (archives, API calls, settings), move it to a [global setup hook](./global-setup-hook.md).
+For parallel suites, move shared “one-time” work (archives, API calls, settings) to a [global setup hook](./global-setup-hook.md), and reset any state that would leak into other Scout configs in a [global teardown hook](./global-setup-hook.md#global-teardown-hook). See [When to use](./global-setup-hook.md#when-to-use) for the full guidance on what belongs here vs. in `beforeAll`/`afterAll`.
 
-:::::{dropdown} Example
+:::::{dropdown} Examples
+
+✔️ **Do:** load shared data once in `global.setup.ts`:
 
 ```ts
 globalSetupHook('Load shared test data (if needed)', async ({ esArchiver, log }) => {
@@ -134,11 +228,19 @@ globalSetupHook('Load shared test data (if needed)', async ({ esArchiver, log })
 });
 ```
 
-:::::
+✔️ **Do:** revert suite-wide state in `global.teardown.ts` so it doesn't leak into other configs:
 
-::::::{note}
-Global setup hooks have **no corresponding teardown**. Keep operations that require cleanup (such as `kbnClient.importExport.load()`) in `beforeAll`/`afterAll` hooks so saved objects are properly removed after tests run. See [Global setup hook: When to use](./global-setup-hook.md#when-to-use) for guidance.
-::::::
+```ts
+globalTeardownHook('Reset shared Kibana state', async ({ kbnClient, apiServices, log }) => {
+  log.debug('[teardown] resetting shared state...');
+  await kbnClient.uiSettings.unset('discover:searchOnPageLoad');
+  await apiServices.core.settings({
+    'feature_flags.overrides': { 'discover.isEsqlDefault': false },
+  });
+});
+```
+
+:::::
 
 ## Only load archives your tests actually use [only-load-archives-your-tests-actually-use]
 

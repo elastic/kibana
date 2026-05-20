@@ -9,6 +9,10 @@
 // TODO: remove eslint exceptions once we have a better way to handle this
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import type {
+  SmlIndexAction,
+  SmlIndexAttachmentParams,
+} from '@kbn/agent-context-layer-plugin/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { getWorkflowJsonSchema, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
@@ -18,6 +22,7 @@ import type {
   EsWorkflow,
   EsWorkflowStepExecution,
   GetAvailableConnectorsResponse,
+  ResumeWorkflowExecutionResponseDto,
   UpdatedWorkflowResponseDto,
   ValidateWorkflowResponseDto,
   WorkflowDetailDto,
@@ -28,6 +33,7 @@ import type {
   WorkflowListDto,
   WorkflowYaml,
 } from '@kbn/workflows';
+import { WORKFLOW_SML_TYPE } from '@kbn/workflows/common/constants';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { ChildWorkflowExecutionItem, WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
@@ -36,27 +42,20 @@ import type {
   ExecutionLogsParams,
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
+import {
+  parseWorkflowYamlToJSON,
+  stringifyWorkflowDefinition,
+  WorkflowValidationError,
+} from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import type {
   SearchWorkflowExecutionsParams,
   WorkflowsService,
 } from './workflows_management_service';
-import { WORKFLOW_SML_TYPE } from '../../common/agent_builder/constants';
-import { WorkflowValidationError } from '../../common/lib/errors';
-import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml';
+import { connectorParamsSchemaResolver } from '../../common/lib/connector_params_schema_resolver';
 
-// Mirrors SmlIndexAction and SmlStart['indexAttachment'] from @kbn/agent-builder-plugin/server.
-// Declared inline to avoid a circular TS project reference: agent_builder already references
-// workflows_management, so a reverse import would create a build cycle.
-export type SmlIndexAction = 'create' | 'update' | 'delete';
-
-export type SmlIndexAttachmentFn = (params: {
-  request: KibanaRequest;
-  originId: string;
-  attachmentType: string;
-  action: SmlIndexAction;
-}) => Promise<void>;
+export type SmlIndexAttachmentFn = (params: SmlIndexAttachmentParams) => Promise<void>;
 
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event' | 'manual';
@@ -152,8 +151,12 @@ export class WorkflowsManagementApi {
 
   constructor(
     private readonly workflowsService: WorkflowsService,
-    private readonly getWorkflowsExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>
+    public readonly isWorkflowsAvailable: boolean
   ) {}
+
+  private async getWorkflowsExecutionEngine(): Promise<WorkflowsExecutionEnginePluginStart> {
+    return this.workflowsService.getWorkflowsExecutionEngine();
+  }
 
   public setSmlIndexAttachment(fn: SmlIndexAttachmentFn, logger: Logger): void {
     this.smlIndexAttachment = fn;
@@ -253,7 +256,9 @@ export class WorkflowsManagementApi {
       spaceId,
       request
     );
-    const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, zodSchema);
+    const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, zodSchema, {
+      connectorParamsSchemaResolver,
+    });
     if (parsedYaml.error) {
       throw parsedYaml.error;
     }
@@ -306,12 +311,12 @@ export class WorkflowsManagementApi {
     return result;
   }
 
-  public async disableAllWorkflows(): Promise<{
+  public async disableAllWorkflows(spaceId?: string): Promise<{
     total: number;
     disabled: number;
     failures: Array<{ id: string; error: string }>;
   }> {
-    return this.workflowsService.disableAllWorkflows();
+    return this.workflowsService.disableAllWorkflows(spaceId);
   }
 
   public async runWorkflow(
@@ -574,10 +579,11 @@ export class WorkflowsManagementApi {
 
   public async cancelWorkflowExecution(
     workflowExecutionId: string,
-    spaceId: string
+    spaceId: string,
+    request?: KibanaRequest
   ): Promise<void> {
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
-    return workflowsExecutionEngine.cancelWorkflowExecution(workflowExecutionId, spaceId);
+    return workflowsExecutionEngine.cancelWorkflowExecution(workflowExecutionId, spaceId, request);
   }
 
   public async cancelAllActiveWorkflowExecutions(
@@ -597,9 +603,20 @@ export class WorkflowsManagementApi {
     spaceId: string,
     input: Record<string, unknown>,
     request: KibanaRequest
-  ): Promise<void> {
+  ): Promise<ResumeWorkflowExecutionResponseDto> {
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     return workflowsExecutionEngine.resumeWorkflowExecution(executionId, spaceId, input, request);
+  }
+
+  /**
+   * Cross-workflow listing of step executions currently blocked on
+   * `waitForInput`. Consumed by the Inbox plugin's workflows provider.
+   */
+  public async listWaitingForInputSteps(
+    spaceId: string,
+    params: { page?: number; perPage?: number } = {}
+  ): Promise<{ results: EsWorkflowStepExecution[]; total: number }> {
+    return this.workflowsService.listWaitingForInputSteps(spaceId, params);
   }
 
   public async getWorkflowStats(spaceId: string, options?: { includeExecutionStats?: boolean }) {

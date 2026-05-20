@@ -1,0 +1,5 @@
+description: An example of a 401 Unauthorized response, returned when the request is missing valid authentication credentials.
+value:
+  statusCode: 401
+  error: Unauthorized
+  message: "[security_exception]: missing authentication credentials for REST request"

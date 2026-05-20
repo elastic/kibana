@@ -703,3 +703,5 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
     </EuiFlyout>
   );
 }
+
+export { useSloOverviewFlyout } from './use_slo_overview_flyout';

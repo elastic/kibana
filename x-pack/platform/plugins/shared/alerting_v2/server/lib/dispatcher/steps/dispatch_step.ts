@@ -20,14 +20,15 @@ import type {
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
-  NotificationGroup,
-  NotificationPolicyId,
-  NotificationPolicy,
-  NotificationPolicyWorkflowPayload,
+  ActionGroup,
+  ActionGroupId,
+  ActionPolicyId,
+  ActionPolicy,
+  ActionPolicyWorkflowPayload,
 } from '../types';
 import { WorkflowsManagementApiToken } from './dispatch_step_tokens';
 
-const NOTIFICATION_POLICY_TRIGGER = 'notification_policy';
+const ACTION_POLICY_TRIGGER = 'action_policy';
 const MAX_CONCURRENT_DISPATCHES = 3;
 
 @injectable()
@@ -45,17 +46,27 @@ export class DispatchStep implements DispatcherStep {
 
     const limiter = pLimit(MAX_CONCURRENT_DISPATCHES);
 
-    await Promise.allSettled(
+    const groupResults = await Promise.allSettled(
       dispatch.map((group) => limiter(() => this.dispatchGroup(group, policies)))
     );
 
-    return { type: 'continue' };
+    const dispatchedExecutions = new Map<ActionGroupId, string[]>();
+    for (const result of groupResults) {
+      if (result.status !== 'fulfilled') continue;
+      const { groupId, executionIds } = result.value;
+      if (executionIds.length > 0) {
+        dispatchedExecutions.set(groupId, executionIds);
+      }
+    }
+
+    return { type: 'continue', data: { dispatchedExecutions } };
   }
 
   private async dispatchGroup(
-    group: NotificationGroup,
-    policies?: Map<NotificationPolicyId, NotificationPolicy>
-  ): Promise<void> {
+    group: ActionGroup,
+    policies?: Map<ActionPolicyId, ActionPolicy>
+  ): Promise<{ groupId: ActionGroupId; executionIds: string[] }> {
+    const executionIds: string[] = [];
     try {
       const policy = policies?.get(group.policyId);
       const apiKey = policy?.apiKey;
@@ -65,7 +76,7 @@ export class DispatchStep implements DispatcherStep {
           message: () =>
             `No API key found for policy ${group.policyId}, skipping dispatch of group ${group.id}`,
         });
-        return;
+        return { groupId: group.id, executionIds };
       }
 
       const fakeRequest = this.craftFakeRequest(apiKey);
@@ -76,7 +87,10 @@ export class DispatchStep implements DispatcherStep {
         }
 
         try {
-          await this.dispatchWorkflow(group, destination.id, fakeRequest);
+          const executionId = await this.dispatchWorkflow(group, destination.id, fakeRequest);
+          if (executionId) {
+            executionIds.push(executionId);
+          }
         } catch (err) {
           this.logger.error({
             error:
@@ -100,6 +114,7 @@ export class DispatchStep implements DispatcherStep {
               ),
       });
     }
+    return { groupId: group.id, executionIds };
   }
 
   private craftFakeRequest(apiKey: string): KibanaRequest {
@@ -116,17 +131,17 @@ export class DispatchStep implements DispatcherStep {
   }
 
   private async dispatchWorkflow(
-    group: NotificationGroup,
+    group: ActionGroup,
     workflowId: string,
     request: KibanaRequest
-  ): Promise<void> {
+  ): Promise<string | undefined> {
     const workflow = await this.workflowsManagement.getWorkflow(workflowId, group.spaceId);
 
     if (!workflow) {
       this.logger.warn({
         message: () => `Workflow ${workflowId} not found, skipping dispatch for group ${group.id}`,
       });
-      return;
+      return undefined;
     }
 
     if (!workflow.enabled) {
@@ -134,7 +149,7 @@ export class DispatchStep implements DispatcherStep {
         message: () =>
           `Workflow ${workflowId} is disabled, enable it to dispatch for group ${group.id}`,
       });
-      return;
+      return undefined;
     }
 
     const model: WorkflowExecutionEngineModel = {
@@ -145,7 +160,7 @@ export class DispatchStep implements DispatcherStep {
       yaml: workflow.yaml,
     };
 
-    const payload: NotificationPolicyWorkflowPayload = {
+    const payload: ActionPolicyWorkflowPayload = {
       id: group.id,
       policyId: group.policyId,
       groupKey: group.groupKey,
@@ -154,7 +169,7 @@ export class DispatchStep implements DispatcherStep {
 
     this.logger.debug({
       message: () =>
-        `Dispatching notification group ${group.id} to workflow ${workflowId} for policy ${group.policyId}`,
+        `Dispatching action group ${group.id} to workflow ${workflowId} for policy ${group.policyId}`,
     });
 
     const executionId = await this.workflowsManagement.scheduleWorkflow(
@@ -162,12 +177,14 @@ export class DispatchStep implements DispatcherStep {
       group.spaceId,
       payload,
       request,
-      NOTIFICATION_POLICY_TRIGGER
+      ACTION_POLICY_TRIGGER
     );
 
     this.logger.debug({
       message: () =>
         `Workflow ${workflowId} execution scheduled with id ${executionId} for group ${group.id}`,
     });
+
+    return executionId;
   }
 }

@@ -31,7 +31,11 @@ import { CreateDataViewForm } from '@kbn/ml-data-view-utils/components/create_da
 import { DestinationIndexForm } from '@kbn/ml-creation-wizard-utils/components/destination_index_form';
 
 import { retentionPolicyMaxAgeInvalidErrorMessage } from '../../../../common/validators/messages';
-import { DEFAULT_TRANSFORM_FREQUENCY } from '../../../../../../common/constants';
+import {
+  DEFAULT_TRANSFORM_FREQUENCY,
+  DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
+  DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE_LATEST,
+} from '../../../../../../common/constants';
 import type { TransformId } from '../../../../../../common/types/transform';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 
@@ -81,7 +85,10 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const toastNotifications = useToastNotifications();
     const { esIndicesCreateIndex } = useDocumentationLinks();
 
-    const defaults = { ...getDefaultStepDetailsState(), ...overrides };
+    const defaults = {
+      ...getDefaultStepDetailsState(stepDefineState.transformFunction),
+      ...overrides,
+    };
 
     const [transformId, setTransformId] = useState<TransformId>(defaults.transformId);
     const [transformDescription, setTransformDescription] = useState<string>(
@@ -807,7 +814,12 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                   'xpack.transform.stepDetailsForm.editFlyoutFormMaxPageSearchSizePlaceholderText',
                   {
                     defaultMessage: 'Default: {defaultValue}',
-                    values: { defaultValue: 500 },
+                    values: {
+                      defaultValue:
+                        stepDefineState.transformFunction === TRANSFORM_FUNCTION.LATEST
+                          ? DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE_LATEST
+                          : DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
+                    },
                   }
                 )}
                 value={
