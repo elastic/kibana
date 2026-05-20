@@ -62,7 +62,6 @@ export const SingleStepTypeSelector = ({ value, onChange }: SingleStepTypeSelect
       valueOfSelected={value}
       options={SINGLE_STEP_TYPE_OPTIONS}
       onChange={onChange}
-      hasDividers
     />
   </EuiFormRow>
 );
