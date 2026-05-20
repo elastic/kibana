@@ -1319,9 +1319,11 @@
     "revision": 0,
     "lastRun": {
       "outcome": "warning",
-      "outcomeMsg": "warning message",
+      "outcomeMsg": [
+        "warning message"
+      ],
       "outcomeOrder": 10,
-      "warning": "warning reason",
+      "warning": "ruleExecution",
       "alertsCount": {}
     },
     "legacyId": null,
