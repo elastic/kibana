@@ -120,7 +120,10 @@ export const ActionPolicyCanvasContent = ({
             : undefined,
           handler: async () => {
             try {
-              await actionPoliciesApi.upsertActionPolicy(data.id, attachmentDataToActionPolicyPayload(data));
+              await actionPoliciesApi.upsertActionPolicy(
+                data.id,
+                attachmentDataToActionPolicyPayload(data)
+              );
               await updateOrigin(data.id);
               notifications.toasts.addSuccess(
                 i18n.translate('xpack.alertingV2.actionPolicyAttachment.createdSuccess', {
@@ -157,7 +160,10 @@ export const ActionPolicyCanvasContent = ({
           : undefined,
         handler: async () => {
           try {
-            await actionPoliciesApi.upsertActionPolicy(data.id, attachmentDataToActionPolicyPayload(data));
+            await actionPoliciesApi.upsertActionPolicy(
+              data.id,
+              attachmentDataToActionPolicyPayload(data)
+            );
             notifications.toasts.addSuccess(
               i18n.translate('xpack.alertingV2.actionPolicyAttachment.updatedSuccess', {
                 defaultMessage: 'Policy "{name}" updated',

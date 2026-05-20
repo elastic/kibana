@@ -156,9 +156,7 @@ describe('executeActionPolicyOperations', () => {
     });
 
     it('sets type to global and clears ruleId', () => {
-      const ops: ActionPolicyOperation[] = [
-        { operation: 'set_type', type: 'global' },
-      ];
+      const ops: ActionPolicyOperation[] = [{ operation: 'set_type', type: 'global' }];
 
       const result = executeActionPolicyOperations(
         { type: 'single_rule', ruleId: 'rule-123' },
@@ -170,9 +168,7 @@ describe('executeActionPolicyOperations', () => {
     });
 
     it('throws when single_rule is set without ruleId', () => {
-      const ops: ActionPolicyOperation[] = [
-        { operation: 'set_type', type: 'single_rule' },
-      ];
+      const ops: ActionPolicyOperation[] = [{ operation: 'set_type', type: 'single_rule' }];
 
       expect(() => executeActionPolicyOperations({}, ops)).toThrow(
         'ruleId is required when type is "single_rule"'
