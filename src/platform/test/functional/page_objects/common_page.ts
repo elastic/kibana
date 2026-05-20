@@ -34,6 +34,12 @@ export class CommonPageObject extends FtrService {
   private readonly defaultTryTimeout = this.config.get('timeouts.try');
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
+  // Fast-path state for navigateToApp. When a test's beforeEach calls navigateToApp
+  // with the same arguments and the browser hasn't left the page, skip the full
+  // browser.get + refresh + sleeps (~7 s) and return immediately.
+  private _lastNavigatedToUrl: string | undefined;
+  private _lastSettledAtUrl: string | undefined;
+
   private getUrlWithoutPort(urlStr: string) {
     const url = new URL(urlStr);
     url.port = '';
@@ -301,6 +307,10 @@ export class CommonPageObject extends FtrService {
 
     this.log.debug('navigating to ' + appName + ' url: ' + appUrl);
 
+    if (!skipUrlValidation && (await this._tryFastPathNavigation(appUrl, appName))) {
+      return;
+    }
+
     await this.retry.tryForTime(this.defaultTryTimeout * 2, async () => {
       let lastUrl = await this.retry.try(async () => {
         // since we're using hash URLs, always reload first to force re-render
@@ -376,6 +386,42 @@ export class CommonPageObject extends FtrService {
         });
       }
     });
+
+    // Record the settled state so the next call with identical args can skip navigation.
+    if (!skipUrlValidation) {
+      this._lastNavigatedToUrl = appUrl;
+      this._lastSettledAtUrl = (await this.browser.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
+    }
+  }
+
+  /**
+   * Returns true when navigation to targetUrl can be safely skipped: we last
+   * navigated to the same URL, the browser URL has not changed since (meaning no
+   * test navigation occurred), and the page is not showing a fatal error.
+   *
+   * Using browser.execute for the fatal-error check avoids any polling overhead —
+   * it's a synchronous DOM query that returns in < 10 ms.
+   */
+  private async _tryFastPathNavigation(targetUrl: string, appName: string): Promise<boolean> {
+    if (this._lastNavigatedToUrl !== targetUrl || this._lastSettledAtUrl === undefined) {
+      return false;
+    }
+    try {
+      const currentUrl = (await this.browser.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
+      if (currentUrl !== this._lastSettledAtUrl) {
+        return false;
+      }
+      const hasFatalError = await this.browser.execute(
+        () => !!document.querySelector('[data-test-subj="fatalErrorScreen"]')
+      );
+      if (hasFatalError) {
+        return false;
+      }
+      this.log.debug(`navigateToApp(${appName}): already at settled URL, skipping navigation`);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async waitUntilUrlIncludes(path: string) {
