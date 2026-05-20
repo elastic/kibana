@@ -118,7 +118,7 @@ export class ProjectNavigationService {
           this.customization$,
         ]).pipe(
           map(([def, deepLinks, links, customization]) => {
-            let { body } = def;
+            let body = [...def.body];
             let overflowItemIds: string[] = [];
 
             // Capture default item IDs from the raw body before any customization is applied.
@@ -241,7 +241,12 @@ export class ProjectNavigationService {
         options?: { customization?: NavigationCustomization }
       ) => {
         if (currentNavSource$.getValue()?.id === id) return;
-        this.customization$.next(options?.customization);
+        // Only override the active customization when the caller explicitly
+        // provides one. Omitting options must not discard a customization that
+        // was already seeded (e.g. from user-storage before initNavigation runs).
+        if (options?.customization !== undefined) {
+          this.customization$.next(options.customization);
+        }
         currentNavSource$.next({
           id,
           navTreeDefinition$: navTreeDefinition$ as Observable<NavigationTreeDefinition>,
