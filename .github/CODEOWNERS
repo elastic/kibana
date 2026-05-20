@@ -3463,6 +3463,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.buildkite/scripts/steps/checks/capture_oas_snapshot.sh @elastic/kibana-core
 /.buildkite/scripts/steps/checks/notify_api_contract_owners.ts @elastic/kibana-core
 /.buildkite/scripts/steps/checks/notify_api_contract_owners.test.ts @elastic/kibana-core
+/.buildkite/scripts/steps/checks/unused_deps.sh @elastic/kibana-security
 /.buildkite/pipelines/performance/streams_weekly.yml @elastic/obs-sig-events-team @elastic/obs-onboarding-team
 /.buildkite/pipeline-resource-definitions/kibana-otel-semconv-sync.yml @elastic/obs-onboarding-team
 /.buildkite/pipeline-resource-definitions/kibana-streams-performance-weekly.yml @elastic/obs-sig-events-team @elastic/obs-onboarding-team
@@ -3492,6 +3493,8 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 
 
 /.mise.toml @elastic/kibana-operations
+
+/knip.jsonc @elastic/kibana-security
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
