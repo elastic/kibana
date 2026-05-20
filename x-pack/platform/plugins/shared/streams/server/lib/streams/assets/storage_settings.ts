@@ -13,6 +13,7 @@ import {
   ASSET_UUID,
   QUERY_DESCRIPTION,
   QUERY_ESQL_QUERY,
+  QUERY_FEATURES,
   QUERY_KQL_BODY,
   QUERY_SEARCH_EMBEDDING,
   QUERY_SEVERITY_SCORE,
@@ -51,6 +52,12 @@ export const queryStorageSettings = {
       [QUERY_DESCRIPTION]: types.text(),
       [QUERY_SEVERITY_SCORE]: types.long(),
       [QUERY_TYPE]: types.keyword(),
+      [QUERY_FEATURES]: types.object({
+        properties: {
+          id: { type: 'keyword' as const },
+          run_id: { type: 'keyword' as const },
+        },
+      }),
       [RULE_BACKED]: types.boolean(),
       [RULE_ID]: types.keyword(),
       [QUERY_SEARCH_EMBEDDING]: types.semantic_text(),
