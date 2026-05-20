@@ -10,6 +10,7 @@ import { useHistory } from 'react-router-dom';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY } from '@kbn/management-settings-ids';
+import { NightshiftApp } from '@kbn/nightshift';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { OVERVIEW_PATH } from '../../../common/locators/paths';
@@ -48,9 +49,7 @@ export function NightshiftPage() {
 
   return (
     <ObservabilityPageTemplate data-test-subj="nightshiftPage">
-      {i18n.translate('xpack.observability.nightshift.body', {
-        defaultMessage: '🚧 Coming soon ✨🌙.',
-      })}
+      <NightshiftApp />
     </ObservabilityPageTemplate>
   );
 }

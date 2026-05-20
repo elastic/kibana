@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout/ui';
-import { tags } from '@kbn/scout';
+import { tags } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import {
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
@@ -15,13 +15,17 @@ import { test } from '../fixtures';
 
 test.describe(
   'Nightshift navigation from Significant Events Discovery',
-  { tag: tags.serverless.observability.complete },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ kbnClient }) => {
       await kbnClient.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY]: true,
       });
+    });
+
+    test.beforeEach(async ({ browserAuth }) => {
+      await browserAuth.loginAsAdmin();
     });
 
     test.afterAll(async ({ kbnClient }) => {
@@ -31,24 +35,16 @@ test.describe(
       });
     });
 
-    test('navigation to the Nightshift page when clicking the Nightshift button', async ({
-      browserAuth,
-      page,
-    }) => {
-      await browserAuth.loginAsAdmin();
-
+    test('navigates to Nightshift page from Streams discovery', async ({ page }) => {
       await page.gotoApp('streams/_discovery/streams');
 
       const nightshiftButton = page.getByRole('link', { name: /nightshift/i });
       await expect(nightshiftButton).toBeVisible({ timeout: 60_000 });
       await nightshiftButton.click();
 
-      await expect(page).toHaveURL(/\/app\/observability\/nightshift/, {
-        timeout: 60_000,
-      });
-      await expect(page.testSubj.locator('nightshiftPage')).toBeVisible({
-        timeout: 60_000,
-      });
+      await expect(page).toHaveURL(/\/app\/observability\/nightshift/, { timeout: 60_000 });
+      await expect(page.testSubj.locator('nightshiftPage')).toBeVisible({ timeout: 60_000 });
+      await expect(page.locator('svg[viewBox="0 0 32 32"]')).toBeVisible();
     });
   }
 );

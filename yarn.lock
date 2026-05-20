@@ -7950,6 +7950,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/nightshift@link:x-pack/solutions/observability/packages/kbn-nightshift":
+  version "0.0.0"
+  uid ""
+
 "@kbn/no-data-page-plugin@link:src/platform/plugins/shared/no_data_page":
   version "0.0.0"
   uid ""
