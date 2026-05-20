@@ -13,7 +13,10 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { useYaml } from '../../../../../../services';
 
-import { getDefaultPresetForEsOutput } from '../../../../../../../common/services/output_helpers';
+import {
+  getDefaultPresetForEsOutput,
+  isOtelExporterOutput,
+} from '../../../../../../../common/services/output_helpers';
 
 import type {
   KafkaOutput,
@@ -249,14 +252,16 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     isDisabled('config_yaml')
   );
 
+  const otelOutput = output && isOtelExporterOutput(output) ? output : undefined;
+
   const otelExporterConfigInput = useInput(
-    (output as NewElasticsearchOutput)?.otel_exporter_config_yaml ?? '',
+    otelOutput?.otel_exporter_config_yaml ?? '',
     validateYamlConfigFn,
     isDisabled('otel_exporter_config_yaml')
   );
 
   const otelDisableBeatsauthInput = useSwitchInput(
-    (output as NewElasticsearchOutput)?.otel_disable_beatsauth ?? false,
+    otelOutput?.otel_disable_beatsauth ?? false,
     isDisabled('otel_disable_beatsauth')
   );
 
