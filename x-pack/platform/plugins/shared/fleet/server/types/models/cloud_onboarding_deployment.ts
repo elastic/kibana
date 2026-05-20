@@ -40,10 +40,6 @@ export const CloudOnboardingDeploymentSchemaV1 = schema.object({
       schema.arrayOf(schema.recordOf(schema.string(), schema.any()), { maxSize: 100 })
     )
   ),
-  // ESO encrypts this field before model-version schema validation runs, so
-  // the persisted value is an opaque encrypted blob rather than the original
-  // Record<string,string> shape. schema.any() is required here.
-  secrets: schema.maybe(schema.any()),
   packagePolicyIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   agentPolicyId: schema.maybe(schema.string()),
 });

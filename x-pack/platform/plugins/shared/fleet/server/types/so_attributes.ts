@@ -366,8 +366,6 @@ export interface CloudOnboardingDeploymentSOAttributes {
   vars?: Record<string, string>;
   /** Per-service config arrays — serviceVars[serviceId] is an array where each entry represents one data source (region + S3 bucket + service-specific fields). Multiple entries support multiple buckets/sources for the same service. */
   serviceVars?: Record<string, Array<Record<string, unknown>>>;
-  /** Sensitive values encrypted at rest via encryptedSavedObjects. Kibana can read these back. NOT stored in .fleet-secrets. */
-  secrets?: Record<string, string>;
   /** Fleet package policy IDs — one per distinct integration package (e.g. one for 'aws', one for 'aws_bedrock'). Present when identity_federation is in mechanisms (agentless). For agent_based, the package policies are attached to the user-managed agent policy tracked in agentPolicyId. */
   packagePolicyIds?: string[];
   /** Agent policy ID for agent_based mechanism — the user-managed agent policy the package policies are attached to. In agentless (identity_federation), agentPolicyId equals packagePolicyId and is not stored separately. */

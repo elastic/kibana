@@ -21,8 +21,7 @@ import type {
 } from '../../types/rest_spec/cloud_onboarding_deployment';
 
 function toResponseItem(deployment: CloudOnboardingDeployment) {
-  const { secrets: _, ...rest } = deployment;
-  return rest;
+  return deployment;
 }
 
 export const createCloudOnboardingDeploymentHandler: FleetRequestHandler<

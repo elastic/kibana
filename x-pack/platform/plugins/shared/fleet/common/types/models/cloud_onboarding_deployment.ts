@@ -32,7 +32,6 @@ export interface CloudOnboardingDeployment {
   attemptCount: number;
   vars?: Record<string, string>;
   serviceVars?: Record<string, CloudOnboardingDeploymentServiceVars>;
-  secrets?: Record<string, string>;
   packagePolicyIds?: string[];
   /** Agent policy ID for agent_based mechanism. Separate from packagePolicyIds (in agentless those are equal; for agent_based the agent policy is user-managed). */
   agentPolicyId?: string;
@@ -51,8 +50,6 @@ export type CreateCloudOnboardingDeploymentInput = Omit<
   | 'agentPolicyId'
 >;
 
-// Secrets are intentionally excluded: partial updates could silently clobber
-// existing keys. Use a dedicated secrets-update path when needed.
 export type UpdateCloudOnboardingDeploymentInput = Partial<
-  Omit<CloudOnboardingDeployment, 'id' | 'provider' | 'connectorId' | 'secrets'>
+  Omit<CloudOnboardingDeployment, 'id' | 'provider' | 'connectorId'>
 >;

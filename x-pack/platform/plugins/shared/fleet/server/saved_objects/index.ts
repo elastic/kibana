@@ -1975,10 +1975,4 @@ export function registerEncryptedSavedObjects(
     // enforceRandomId allows to create an SO with an arbitrary id
     enforceRandomId: false,
   });
-  encryptedSavedObjects.registerType({
-    type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['secrets']),
-    attributesToIncludeInAAD: new Set(['provider', 'connectorId']),
-    enforceRandomId: false,
-  });
 }

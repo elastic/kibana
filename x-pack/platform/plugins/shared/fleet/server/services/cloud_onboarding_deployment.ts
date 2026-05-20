@@ -19,15 +19,9 @@ import type {
 } from '../../common/types/models/cloud_onboarding_deployment';
 import type { CloudOnboardingDeploymentSOAttributes } from '../types/so_attributes';
 
-import { appContextService } from './app_context';
-
 const CLOUD_ONBOARDING_DEPLOYMENT_LIMIT = 100;
 
 class CloudOnboardingDeploymentService {
-  private get encryptedSoClient() {
-    return appContextService.getEncryptedSavedObjects();
-  }
-
   public async create(
     soClient: SavedObjectsClientContract,
     input: CreateCloudOnboardingDeploymentInput
@@ -53,12 +47,10 @@ class CloudOnboardingDeploymentService {
     soClient: SavedObjectsClientContract,
     id: string
   ): Promise<CloudOnboardingDeployment> {
-    const so =
-      await this.encryptedSoClient.getDecryptedAsInternalUser<CloudOnboardingDeploymentSOAttributes>(
-        CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-        id,
-        { namespace: soClient.getCurrentNamespace() }
-      );
+    const so = await soClient.get<CloudOnboardingDeploymentSOAttributes>(
+      CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+      id
+    );
 
     return { id: so.id, ...so.attributes };
   }
@@ -66,7 +58,7 @@ class CloudOnboardingDeploymentService {
   public async getByConnectorId(
     soClient: SavedObjectsClientContract,
     connectorId: string
-  ): Promise<Array<Omit<CloudOnboardingDeployment, 'secrets'>>> {
+  ): Promise<CloudOnboardingDeployment[]> {
     const finder = soClient.createPointInTimeFinder<CloudOnboardingDeploymentSOAttributes>({
       type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
       filter: nodeBuilder.is(
@@ -76,12 +68,11 @@ class CloudOnboardingDeploymentService {
       perPage: CLOUD_ONBOARDING_DEPLOYMENT_LIMIT,
     });
 
-    const deployments: Array<Omit<CloudOnboardingDeployment, 'secrets'>> = [];
+    const deployments: CloudOnboardingDeployment[] = [];
     try {
       outer: for await (const result of finder.find()) {
         for (const so of result.saved_objects) {
-          const { secrets: _, ...rest } = so.attributes;
-          deployments.push({ id: so.id, ...rest });
+          deployments.push({ id: so.id, ...so.attributes });
           if (deployments.length >= CLOUD_ONBOARDING_DEPLOYMENT_LIMIT) {
             break outer;
           }

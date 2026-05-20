@@ -6,18 +6,12 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 
 import { CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE } from '../../common/constants';
 import type { CloudOnboardingDeploymentMechanism } from '../../common/types/models/cloud_onboarding_deployment';
 import type { CloudOnboardingDeploymentSOAttributes } from '../types/so_attributes';
 
 import { cloudOnboardingDeploymentService } from './cloud_onboarding_deployment';
-import { appContextService } from './app_context';
-
-jest.mock('./app_context');
-
-const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 
 function makeAttributes(
   overrides: Partial<CloudOnboardingDeploymentSOAttributes> = {}
@@ -31,7 +25,6 @@ function makeAttributes(
     attemptCount: 1,
     vars: {},
     serviceVars: {},
-    secrets: {},
     ...overrides,
   };
 }
@@ -45,31 +38,18 @@ function makeSOResponse(id: string, attributes: CloudOnboardingDeploymentSOAttri
   };
 }
 
-function makeMockedEncryptedSoClient(
-  id: string,
-  attributes: CloudOnboardingDeploymentSOAttributes
-) {
-  const esoClientMock = {
-    getDecryptedAsInternalUser: jest.fn().mockResolvedValue(makeSOResponse(id, attributes)),
-    createPointInTimeFinderDecryptedAsInternalUser: jest.fn(),
-  } as jest.Mocked<EncryptedSavedObjectsClient>;
-  mockedAppContextService.getEncryptedSavedObjects.mockReturnValue(esoClientMock);
-  return esoClientMock;
-}
-
 describe('cloudOnboardingDeploymentService', () => {
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(() => {
-    jest.resetAllMocks();
     soClient = savedObjectsClientMock.create();
   });
 
   describe('create', () => {
-    it('creates a deployment SO with server-set status/attemptCount/timestamps and returns the mapped deployment', async () => {
+    it('creates a deployment SO with server-set status/attemptCount and returns the mapped deployment', async () => {
       const attrs = makeAttributes();
       soClient.create.mockResolvedValue(makeSOResponse('deploy-1', attrs));
-      makeMockedEncryptedSoClient('deploy-1', attrs);
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', attrs));
 
       const result = await cloudOnboardingDeploymentService.create(soClient, {
         provider: 'aws',
@@ -106,49 +86,28 @@ describe('cloudOnboardingDeploymentService', () => {
           services: [],
           vars: {},
           serviceVars: {},
-          secrets: {},
         })
       ).rejects.toThrow('write failed');
     });
   });
 
   describe('getById', () => {
-    it('returns the decrypted deployment scoped to the request namespace', async () => {
+    it('returns the deployment by ID', async () => {
       const attrs = makeAttributes({ status: 'succeeded' });
-      const esoClientMock = makeMockedEncryptedSoClient('deploy-1', attrs);
-      soClient.getCurrentNamespace.mockReturnValue('space-a');
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', attrs));
 
       const result = await cloudOnboardingDeploymentService.getById(soClient, 'deploy-1');
 
-      expect(esoClientMock.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+      expect(soClient.get).toHaveBeenCalledWith(
         CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-        'deploy-1',
-        { namespace: 'space-a' }
+        'deploy-1'
       );
       expect(result.id).toBe('deploy-1');
       expect(result.status).toBe('succeeded');
     });
 
-    it('uses undefined namespace for the default space', async () => {
-      const attrs = makeAttributes();
-      const esoClientMock = makeMockedEncryptedSoClient('deploy-1', attrs);
-      soClient.getCurrentNamespace.mockReturnValue(undefined);
-
-      await cloudOnboardingDeploymentService.getById(soClient, 'deploy-1');
-
-      expect(esoClientMock.getDecryptedAsInternalUser).toHaveBeenCalledWith(
-        CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-        'deploy-1',
-        { namespace: undefined }
-      );
-    });
-
-    it('propagates errors thrown by getDecryptedAsInternalUser', async () => {
-      const esoClientMock = {
-        getDecryptedAsInternalUser: jest.fn().mockRejectedValue(new Error('not found')),
-        createPointInTimeFinderDecryptedAsInternalUser: jest.fn(),
-      } as jest.Mocked<EncryptedSavedObjectsClient>;
-      mockedAppContextService.getEncryptedSavedObjects.mockReturnValue(esoClientMock);
+    it('propagates errors thrown by soClient.get', async () => {
+      soClient.get.mockRejectedValue(new Error('not found'));
 
       await expect(
         cloudOnboardingDeploymentService.getById(soClient, 'deploy-missing')
@@ -205,13 +164,8 @@ describe('cloudOnboardingDeploymentService', () => {
         'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-onboarding/aaa-bbb';
       const deploymentName = 'elastic-aws-onboarding';
       const updatedAttrs = makeAttributes({ deploymentId, deploymentName, status: 'deploying' });
-      soClient.update.mockResolvedValue({
-        id: 'deploy-1',
-        type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-        references: [],
-        attributes: updatedAttrs,
-      });
-      makeMockedEncryptedSoClient('deploy-1', updatedAttrs);
+      soClient.update.mockResolvedValue(makeSOResponse('deploy-1', updatedAttrs));
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', updatedAttrs));
 
       const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
         deploymentId,
@@ -246,13 +200,8 @@ describe('cloudOnboardingDeploymentService', () => {
         elb_logs: [{ regions: ['us-east-1'], s3_bucket_arn: 'arn:aws:s3:::elb-bucket' }],
       };
       const updatedAttrs = makeAttributes({ serviceVars });
-      soClient.update.mockResolvedValue({
-        id: 'deploy-1',
-        type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-        references: [],
-        attributes: updatedAttrs,
-      });
-      makeMockedEncryptedSoClient('deploy-1', updatedAttrs);
+      soClient.update.mockResolvedValue(makeSOResponse('deploy-1', updatedAttrs));
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', updatedAttrs));
 
       const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
         serviceVars,
@@ -272,13 +221,8 @@ describe('cloudOnboardingDeploymentService', () => {
   describe('update (status transitions)', () => {
     describe('status transitions', () => {
       function mockUpdateAndGet(id: string, attrs: CloudOnboardingDeploymentSOAttributes) {
-        soClient.update.mockResolvedValue({
-          id,
-          type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-          references: [],
-          attributes: attrs,
-        });
-        makeMockedEncryptedSoClient(id, attrs);
+        soClient.update.mockResolvedValue(makeSOResponse(id, attrs));
+        soClient.get.mockResolvedValue(makeSOResponse(id, attrs));
       }
 
       it('pending → deploying: sets status without deploymentId', async () => {
@@ -333,13 +277,8 @@ describe('cloudOnboardingDeploymentService', () => {
     describe('retry semantics', () => {
       it('resets status to pending and increments attemptCount', async () => {
         const retriedAttrs = makeAttributes({ status: 'pending', attemptCount: 2 });
-        soClient.update.mockResolvedValue({
-          id: 'deploy-1',
-          type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-          references: [],
-          attributes: retriedAttrs,
-        });
-        makeMockedEncryptedSoClient('deploy-1', retriedAttrs);
+        soClient.update.mockResolvedValue(makeSOResponse('deploy-1', retriedAttrs));
+        soClient.get.mockResolvedValue(makeSOResponse('deploy-1', retriedAttrs));
 
         const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
           status: 'pending',
@@ -355,17 +294,11 @@ describe('cloudOnboardingDeploymentService', () => {
         );
       });
 
-      it('does not modify vars or secrets on retry', async () => {
+      it('does not modify vars on retry', async () => {
         const vars = { api_key_id: 'abc123keyid' };
-        const secrets = {};
-        const retriedAttrs = makeAttributes({ status: 'pending', attemptCount: 2, vars, secrets });
-        soClient.update.mockResolvedValue({
-          id: 'deploy-1',
-          type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-          references: [],
-          attributes: retriedAttrs,
-        });
-        makeMockedEncryptedSoClient('deploy-1', retriedAttrs);
+        const retriedAttrs = makeAttributes({ status: 'pending', attemptCount: 2, vars });
+        soClient.update.mockResolvedValue(makeSOResponse('deploy-1', retriedAttrs));
+        soClient.get.mockResolvedValue(makeSOResponse('deploy-1', retriedAttrs));
 
         const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
           status: 'pending',
@@ -373,11 +306,10 @@ describe('cloudOnboardingDeploymentService', () => {
         });
 
         expect(result.vars).toEqual(vars);
-        expect(result.secrets).toEqual(secrets);
         expect(soClient.update).not.toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
-          expect.objectContaining({ vars: expect.anything(), secrets: expect.anything() })
+          expect.objectContaining({ vars: expect.anything() })
         );
       });
     });
@@ -401,6 +333,7 @@ describe('cloudOnboardingDeploymentService', () => {
   // UC3: Static Keys + CloudFront Logs + EDOT Cloud Forwarder
   // UC4: Identity Federation + CloudFront Logs + Firehose
   // UC5: Identity Federation + CloudFront Logs + EDOT Cloud Forwarder
+  // UC6: Agent-Based + CloudWatch Metrics
   describe('use case scenarios', () => {
     describe('UC1: identity_federation + cloudwatch_metrics + agentless', () => {
       it('has no vars (role_arn is on the connector) and sets identity_federation mechanism', async () => {
@@ -412,7 +345,7 @@ describe('cloudOnboardingDeploymentService', () => {
           packagePolicyIds: ['pkg-aws-001'],
         });
         soClient.create.mockResolvedValue(makeSOResponse('deploy-uc1', attrs));
-        makeMockedEncryptedSoClient('deploy-uc1', attrs);
+        soClient.get.mockResolvedValue(makeSOResponse('deploy-uc1', attrs));
 
         const result = await cloudOnboardingDeploymentService.create(soClient, {
           provider: 'aws',
@@ -442,11 +375,10 @@ describe('cloudOnboardingDeploymentService', () => {
           services: ['cloudwatch_metrics'],
           serviceVars: { cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }] },
           vars: {},
-          secrets: {},
           packagePolicyIds: ['pkg-aws-002'],
         });
         soClient.create.mockResolvedValue(makeSOResponse('deploy-uc2', attrs));
-        makeMockedEncryptedSoClient('deploy-uc2', attrs);
+        soClient.get.mockResolvedValue(makeSOResponse('deploy-uc2', attrs));
 
         const result = await cloudOnboardingDeploymentService.create(soClient, {
           provider: 'aws',
@@ -455,7 +387,6 @@ describe('cloudOnboardingDeploymentService', () => {
           services: ['cloudwatch_metrics'],
           serviceVars: { cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }] },
           vars: {},
-          secrets: {},
         });
 
         expect(soClient.create).toHaveBeenCalledWith(
@@ -465,7 +396,6 @@ describe('cloudOnboardingDeploymentService', () => {
         expect(result.status).toBe('pending');
         expect(result.attemptCount).toBe(1);
         expect(result.mechanisms).toEqual([]);
-        expect(result.secrets).toEqual({});
         expect(result.vars).not.toHaveProperty('api_key_id');
         expect(result.vars).not.toHaveProperty('role_arn');
       });
@@ -482,11 +412,10 @@ describe('cloudOnboardingDeploymentService', () => {
             ],
           },
           vars: { api_key_id: 'abc123keyid' },
-          secrets: {},
           packagePolicyIds: undefined,
         });
         soClient.create.mockResolvedValue(makeSOResponse('deploy-uc3', attrs));
-        makeMockedEncryptedSoClient('deploy-uc3', attrs);
+        soClient.get.mockResolvedValue(makeSOResponse('deploy-uc3', attrs));
 
         const result = await cloudOnboardingDeploymentService.create(soClient, {
           provider: 'aws',
@@ -499,7 +428,6 @@ describe('cloudOnboardingDeploymentService', () => {
             ],
           },
           vars: { api_key_id: 'abc123keyid' },
-          secrets: {},
         });
 
         expect(soClient.create).toHaveBeenCalledWith(
@@ -510,7 +438,6 @@ describe('cloudOnboardingDeploymentService', () => {
         expect(result.attemptCount).toBe(1);
         expect(result.mechanisms).toEqual(['cloud_forwarder']);
         expect(result.vars).toEqual({ api_key_id: 'abc123keyid' });
-        expect(result.secrets).toEqual({});
         expect(result.packagePolicyIds).toBeUndefined();
       });
     });
@@ -526,7 +453,7 @@ describe('cloudOnboardingDeploymentService', () => {
           agentPolicyId: undefined,
         });
         soClient.create.mockResolvedValue(makeSOResponse('deploy-uc6', attrs));
-        makeMockedEncryptedSoClient('deploy-uc6', attrs);
+        soClient.get.mockResolvedValue(makeSOResponse('deploy-uc6', attrs));
 
         const result = await cloudOnboardingDeploymentService.create(soClient, {
           provider: 'aws',
@@ -554,13 +481,8 @@ describe('cloudOnboardingDeploymentService', () => {
           agentPolicyId: 'agent-policy-123',
           packagePolicyIds: ['pkg-policy-456'],
         });
-        soClient.update.mockResolvedValue({
-          id: 'deploy-uc6',
-          type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-          references: [],
-          attributes: updatedAttrs,
-        });
-        makeMockedEncryptedSoClient('deploy-uc6', updatedAttrs);
+        soClient.update.mockResolvedValue(makeSOResponse('deploy-uc6', updatedAttrs));
+        soClient.get.mockResolvedValue(makeSOResponse('deploy-uc6', updatedAttrs));
 
         const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-uc6', {
           agentPolicyId: 'agent-policy-123',
@@ -602,7 +524,7 @@ describe('cloudOnboardingDeploymentService', () => {
             packagePolicyIds: undefined,
           });
           soClient.create.mockResolvedValue(makeSOResponse(`deploy-${_pushMechanism}`, attrs));
-          makeMockedEncryptedSoClient(`deploy-${_pushMechanism}`, attrs);
+          soClient.get.mockResolvedValue(makeSOResponse(`deploy-${_pushMechanism}`, attrs));
 
           const result = await cloudOnboardingDeploymentService.create(soClient, {
             provider: 'aws',
