@@ -9,6 +9,8 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Parser, isColumn } from '@elastic/esql';
 import { useQuery } from '@kbn/react-query';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getEsqlColumns } from '@kbn/esql-utils';
 import {
   EuiButton,
@@ -124,7 +126,12 @@ export function AlertConditionStep({ state, dispatch, services }: AlertCondition
   return (
     <>
       <EuiTitle size="xs">
-        <h3>ES|QL query</h3>
+        <h3>
+          <FormattedMessage
+            id="xpack.alertingV2.composeDiscover.alertCondition.esqlQueryTitle"
+            defaultMessage="ES|QL query"
+          />
+        </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
 
@@ -132,7 +139,10 @@ export function AlertConditionStep({ state, dispatch, services }: AlertCondition
         <>
           <EuiPanel color="subdued" paddingSize="m">
             <EuiText size="s" color="subdued">
-              No query defined yet
+              <FormattedMessage
+                id="xpack.alertingV2.composeDiscover.alertCondition.noQueryDescription"
+                defaultMessage="No query defined yet"
+              />
             </EuiText>
           </EuiPanel>
           <EuiSpacer size="s" />
@@ -142,7 +152,10 @@ export function AlertConditionStep({ state, dispatch, services }: AlertCondition
             onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step })}
             data-test-subj="composeDiscoverOpenEditor"
           >
-            Open query editor
+            <FormattedMessage
+              id="xpack.alertingV2.composeDiscover.alertCondition.openEditorButtonLabel"
+              defaultMessage="Open query editor"
+            />
           </EuiButton>
         </>
       ) : !isAlert ? (
@@ -156,7 +169,10 @@ export function AlertConditionStep({ state, dispatch, services }: AlertCondition
             onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step })}
             data-test-subj="composeDiscoverEditQuery"
           >
-            Edit query
+            <FormattedMessage
+              id="xpack.alertingV2.composeDiscover.alertCondition.editQueryButtonLabel"
+              defaultMessage="Edit query"
+            />
           </EuiButton>
         </>
       ) : (
@@ -168,19 +184,35 @@ export function AlertConditionStep({ state, dispatch, services }: AlertCondition
                 size="s"
                 color="primary"
                 iconType="iInCircle"
-                title="Couldn't automatically separate base query from alert condition. Adjust the split in the query editor."
+                title={i18n.translate(
+                  'xpack.alertingV2.composeDiscover.alertCondition.splitFailedTitle',
+                  {
+                    defaultMessage:
+                      "Couldn't automatically separate base query from alert condition. Adjust the split in the query editor.",
+                  }
+                )}
               />
               <EuiSpacer size="s" />
             </>
           )}
           <EuiText size="xs" color="subdued">
-            <strong>Base query</strong>
+            <strong>
+              <FormattedMessage
+                id="xpack.alertingV2.composeDiscover.alertCondition.baseQueryLabel"
+                defaultMessage="Base query"
+              />
+            </strong>
           </EuiText>
           <EuiSpacer size="xs" />
           <QuerySummary query={baseQuery} label="base query" />
           <EuiSpacer size="m" />
           <EuiText size="xs" color="subdued">
-            <strong>Alert condition</strong>
+            <strong>
+              <FormattedMessage
+                id="xpack.alertingV2.composeDiscover.alertCondition.alertConditionLabel"
+                defaultMessage="Alert condition"
+              />
+            </strong>
           </EuiText>
           <EuiSpacer size="xs" />
           <QuerySummary query={alertBlock} label="alert condition" />
@@ -192,13 +224,21 @@ export function AlertConditionStep({ state, dispatch, services }: AlertCondition
             onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step })}
             data-test-subj="composeDiscoverEditQueries"
           >
-            Edit queries
+            <FormattedMessage
+              id="xpack.alertingV2.composeDiscover.alertCondition.editQueriesButtonLabel"
+              defaultMessage="Edit queries"
+            />
           </EuiButton>
         </>
       )}
 
       <EuiSpacer size="m" />
-      <EuiFormRow label="Time field" fullWidth>
+      <EuiFormRow
+        label={i18n.translate('xpack.alertingV2.composeDiscover.alertCondition.timeFieldLabel', {
+          defaultMessage: 'Time field',
+        })}
+        fullWidth
+      >
         <EuiSelect
           fullWidth
           options={timeFieldOptions}
@@ -209,7 +249,12 @@ export function AlertConditionStep({ state, dispatch, services }: AlertCondition
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
-      <EuiFormRow label="Group fields" fullWidth>
+      <EuiFormRow
+        label={i18n.translate('xpack.alertingV2.composeDiscover.alertCondition.groupFieldsLabel', {
+          defaultMessage: 'Group fields',
+        })}
+        fullWidth
+      >
         <EuiComboBox
           fullWidth
           options={outputColumns.map((name) => ({ label: name }))}
@@ -218,14 +263,20 @@ export function AlertConditionStep({ state, dispatch, services }: AlertCondition
             setValue('grouping', opts.length ? { fields: opts.map((o) => o.label) } : undefined)
           }
           onCreateOption={(val) => setValue('grouping', { fields: [...groupFields, val] })}
-          placeholder="Add group fields"
+          placeholder={i18n.translate(
+            'xpack.alertingV2.composeDiscover.alertCondition.groupFieldsPlaceholder',
+            { defaultMessage: 'Add group fields' }
+          )}
           data-test-subj="composeDiscoverGroupFields"
         />
       </EuiFormRow>
 
       <EuiSpacer size="m" />
       <EuiSwitch
-        label="Track active and recovered state over time"
+        label={i18n.translate(
+          'xpack.alertingV2.composeDiscover.alertCondition.trackingToggleLabel',
+          { defaultMessage: 'Track active and recovered state over time' }
+        )}
         checked={isAlert}
         onChange={handleTrackingToggle}
         disabled={!state.queryCommitted}

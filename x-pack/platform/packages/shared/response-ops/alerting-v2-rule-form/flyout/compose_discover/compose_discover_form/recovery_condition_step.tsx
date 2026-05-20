@@ -19,58 +19,45 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ComposeDiscoverAction, ComposeDiscoverState, RecoveryType } from '../types';
 import type { ComposeFormValues } from '../compose_form_types';
 import { QuerySummary } from '../query_summary';
 import { RecoveryDelayField } from '../../../form/fields/recovery_delay_field';
 
 const defaultRecoveryLabel = i18n.translate(
-  'xpack.responseOps.alertingV2RuleForm.composeDiscover.recoveryType.defaultRecovery.dropDownOptionLabel',
-  {
-    defaultMessage: 'Default recovery',
-  }
+  'xpack.alertingV2.composeDiscover.recoveryCondition.defaultRecoveryDropDownOptionLabel',
+  { defaultMessage: 'Default recovery' }
 );
 
 const defaultRecoveryDescription = i18n.translate(
-  'xpack.responseOps.alertingV2RuleForm.composeDiscover.recoveryType.defaultRecovery.description',
-  {
-    defaultMessage: 'Recover automatically when the alert condition is no longer met.',
-  }
+  'xpack.alertingV2.composeDiscover.recoveryCondition.defaultRecoveryDescription',
+  { defaultMessage: 'Recover automatically when the alert condition is no longer met.' }
 );
 
 const customRecoveryLabel = i18n.translate(
-  'xpack.responseOps.alertingV2RuleForm.composeDiscover.recoveryType.customRecovery.dropDownOptionLabel',
-  {
-    defaultMessage: 'Custom recovery',
-  }
+  'xpack.alertingV2.composeDiscover.recoveryCondition.customRecoveryDropDownOptionLabel',
+  { defaultMessage: 'Custom recovery' }
 );
 
 const customRecoveryDescription = i18n.translate(
-  'xpack.responseOps.alertingV2RuleForm.composeDiscover.recoveryType.customRecovery.description',
-  {
-    defaultMessage: 'Define a custom recovery condition.',
-  }
+  'xpack.alertingV2.composeDiscover.recoveryCondition.customRecoveryDescription',
+  { defaultMessage: 'Define a custom recovery condition.' }
 );
 
 const noRecoveryLabel = i18n.translate(
-  'xpack.responseOps.alertingV2RuleForm.composeDiscover.recoveryType.noRecovery.dropDownOptionLabel',
-  {
-    defaultMessage: 'No recovery',
-  }
+  'xpack.alertingV2.composeDiscover.recoveryCondition.noRecoveryDropDownOptionLabel',
+  { defaultMessage: 'No recovery' }
 );
 
 const noRecoveryDescription = i18n.translate(
-  'xpack.responseOps.alertingV2RuleForm.composeDiscover.recoveryType.noRecovery.description',
-  {
-    defaultMessage: 'Do not recover alerts automatically.',
-  }
+  'xpack.alertingV2.composeDiscover.recoveryCondition.noRecoveryDescription',
+  { defaultMessage: 'Do not recover alerts automatically.' }
 );
 
 const noRecoveryComingSoonBadgeLabel = i18n.translate(
-  'xpack.responseOps.alertingV2RuleForm.composeDiscover.recoveryType.noRecovery.comingSoonBadgeLabel',
-  {
-    defaultMessage: 'Coming soon',
-  }
+  'xpack.alertingV2.composeDiscover.recoveryCondition.noRecoveryComingSoonBadgeLabel',
+  { defaultMessage: 'Coming soon' }
 );
 
 const RECOVERY_TYPE_OPTIONS: Array<{
@@ -134,7 +121,12 @@ const RecoveryTypeSelector: React.FC<RecoveryTypeSelectorProps> = ({
   recoveryType,
   onRecoveryTypeChange,
 }) => (
-  <EuiFormRow label="Recovery" fullWidth>
+  <EuiFormRow
+    label={i18n.translate('xpack.alertingV2.composeDiscover.recoveryCondition.recoveryTypeLabel', {
+      defaultMessage: 'Recovery',
+    })}
+    fullWidth
+  >
     <EuiSuperSelect
       options={RECOVERY_TYPE_OPTIONS}
       valueOfSelected={recoveryType}
@@ -173,13 +165,23 @@ export function RecoveryConditionStep({
           <EuiHorizontalRule margin="none" />
           <EuiSpacer size="m" />
           <EuiText size="xs" color="subdued">
-            <strong>Base query</strong>
+            <strong>
+              <FormattedMessage
+                id="xpack.alertingV2.composeDiscover.recoveryCondition.baseQueryLabel"
+                defaultMessage="Base query"
+              />
+            </strong>
           </EuiText>
           <EuiSpacer size="xs" />
           <QuerySummary query={baseQuery} label="base query" />
           <EuiSpacer size="m" />
           <EuiText size="xs" color="subdued">
-            <strong>Recovery condition</strong>
+            <strong>
+              <FormattedMessage
+                id="xpack.alertingV2.composeDiscover.recoveryCondition.recoveryConditionLabel"
+                defaultMessage="Recovery condition"
+              />
+            </strong>
           </EuiText>
           <EuiSpacer size="xs" />
           <QuerySummary query={recoveryBlock} label="recovery condition" />
@@ -193,12 +195,20 @@ export function RecoveryConditionStep({
                 onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step })}
                 data-test-subj="composeDiscoverEditRecovery"
               >
-                Edit recovery query
+                <FormattedMessage
+                  id="xpack.alertingV2.composeDiscover.recoveryCondition.editRecoveryButtonLabel"
+                  defaultMessage="Edit recovery query"
+                />
               </EuiButton>
             </EuiFlexItem>
             {recoveryBlock && (
               <EuiFlexItem grow={false}>
-                <EuiBadge color="success">Custom condition set</EuiBadge>
+                <EuiBadge color="success">
+                  <FormattedMessage
+                    id="xpack.alertingV2.composeDiscover.recoveryCondition.customConditionSetBadgeLabel"
+                    defaultMessage="Custom condition set"
+                  />
+                </EuiBadge>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

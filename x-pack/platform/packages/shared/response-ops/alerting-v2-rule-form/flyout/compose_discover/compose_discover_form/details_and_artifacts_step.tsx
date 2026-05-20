@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFieldText,
   EuiFormRow,
@@ -25,21 +27,50 @@ export function DetailsAndArtifactsStep() {
       <EuiHorizontalRule margin="m" />
 
       <EuiTitle size="xs">
-        <h3>Artifacts</h3>
+        <h3>
+          <FormattedMessage
+            id="xpack.alertingV2.composeDiscover.detailsAndArtifacts.artifactsTitle"
+            defaultMessage="Artifacts"
+          />
+        </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
 
       {/* TODO (#268770): wire runbook URL and dashboard link to FormValues.artifacts */}
-      <EuiFormRow label="Runbook URL" fullWidth labelAppend={<EuiText size="xs">Optional</EuiText>}>
+      <EuiFormRow
+        label={i18n.translate(
+          'xpack.alertingV2.composeDiscover.detailsAndArtifacts.runbookUrlLabel',
+          { defaultMessage: 'Runbook URL' }
+        )}
+        fullWidth
+        labelAppend={
+          <EuiText size="xs">
+            <FormattedMessage
+              id="xpack.alertingV2.composeDiscover.detailsAndArtifacts.optionalLabel"
+              defaultMessage="Optional"
+            />
+          </EuiText>
+        }
+      >
         <EuiFieldText fullWidth placeholder="https://..." disabled />
       </EuiFormRow>
 
       <EuiSpacer size="m" />
 
       <EuiFormRow
-        label="Dashboard link"
+        label={i18n.translate(
+          'xpack.alertingV2.composeDiscover.detailsAndArtifacts.dashboardLinkLabel',
+          { defaultMessage: 'Dashboard link' }
+        )}
         fullWidth
-        labelAppend={<EuiText size="xs">Optional</EuiText>}
+        labelAppend={
+          <EuiText size="xs">
+            <FormattedMessage
+              id="xpack.alertingV2.composeDiscover.detailsAndArtifacts.dashboardOptionalLabel"
+              defaultMessage="Optional"
+            />
+          </EuiText>
+        }
       >
         <EuiFieldText fullWidth placeholder="https://..." disabled />
       </EuiFormRow>

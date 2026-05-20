@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut } from '@elastic/eui';
 
 // TODO (#268770): Notifications step -- wire workflow selector and notification policy fields
@@ -13,14 +15,18 @@ import { EuiCallOut } from '@elastic/eui';
 export function NotificationsStep() {
   return (
     <EuiCallOut
-      title="Notifications configuration coming soon"
+      title={i18n.translate('xpack.alertingV2.composeDiscover.notifications.comingSoonTitle', {
+        defaultMessage: 'Notifications configuration coming soon',
+      })}
       iconType="clock"
       color="primary"
       size="s"
     >
       <p>
-        Notification policies will be configurable here. Rules are created without notifications
-        until this step is wired.
+        <FormattedMessage
+          id="xpack.alertingV2.composeDiscover.notifications.comingSoonDescription"
+          defaultMessage="Notification policies will be configurable here. Rules are created without notifications until this step is wired."
+        />
       </p>
     </EuiCallOut>
   );
