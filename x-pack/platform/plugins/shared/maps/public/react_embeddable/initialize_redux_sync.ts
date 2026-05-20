@@ -6,7 +6,7 @@
  */
 
 import type { Subscription } from 'rxjs';
-import { BehaviorSubject, debounceTime, filter, map, merge } from 'rxjs';
+import { BehaviorSubject, debounceTime, filter, map, merge, skip } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
@@ -213,8 +213,23 @@ export function initializeReduxSync({
         store.dispatch(setEventHandlers(eventHandlers));
       },
     },
-    anyStateChange$: merge(hiddenLayers$, isLayerTOCOpen$, mapCenterAndZoom$, openTOCDetails$).pipe(
-      map(() => undefined)
+    anyStateChange$: merge(
+      hiddenLayers$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      isLayerTOCOpen$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      mapCenterAndZoom$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      openTOCDetails$.pipe(
+        skip(1),
+        map(() => undefined)
+      )
     ),
     getLatestState: () => {
       return {
