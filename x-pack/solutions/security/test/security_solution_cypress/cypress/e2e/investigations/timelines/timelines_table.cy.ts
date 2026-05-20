@@ -45,10 +45,6 @@ describe('timeline overview search', { tags: ['@ess', '@serverless'] }, () => {
         openTimelineById(timelineId);
         markAsFavorite();
         closeTimeline();
-
-        // Replace '.euiFlyout' or '[data-test-subj="timeline-flyout"]'
-        // with the actual selector of the main timeline detail container
-        cy.get('[data-test-subj="timeline-detail-panel"]').should('not.exist');
       });
   });
 
