@@ -1,0 +1,411 @@
+{
+  "sha1": "5a896dcdb716dafda3bd3d476ffbe921718e376c",
+  "tests": [
+    {
+      "id": "8d02b55e1bb7e1f-e34eb46e3414168",
+      "title": "User Storage - CRUD GET returns all registered keys with their default values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
+        "line": 29,
+        "column": 10
+      }
+    },
+    {
+      "id": "8d02b55e1bb7e1f-630cdfccee6df06",
+      "title": "User Storage - CRUD PUT sets a valid string value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
+        "line": 35,
+        "column": 10
+      }
+    },
+    {
+      "id": "8d02b55e1bb7e1f-a72932a6b95c7e2",
+      "title": "User Storage - CRUD PUT sets a valid number value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
+        "line": 42,
+        "column": 10
+      }
+    },
+    {
+      "id": "8d02b55e1bb7e1f-469e1fd53224f69",
+      "title": "User Storage - CRUD PUT returns 400 for an unregistered key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
+        "line": 49,
+        "column": 10
+      }
+    },
+    {
+      "id": "8d02b55e1bb7e1f-d076e79bcd86587",
+      "title": "User Storage - CRUD DELETE removes an override and falls back to the default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
+        "line": 55,
+        "column": 10
+      }
+    },
+    {
+      "id": "8d02b55e1bb7e1f-0bb70c1fd753121",
+      "title": "User Storage - CRUD DELETE returns 400 for an unregistered key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
+        "line": 64,
+        "column": 10
+      }
+    },
+    {
+      "id": "8d02b55e1bb7e1f-74e9d53225c0c0f",
+      "title": "User Storage - CRUD PUT/GET nested object round-trips correctly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
+        "line": 70,
+        "column": 10
+      }
+    },
+    {
+      "id": "8d02b55e1bb7e1f-602367c20ff9686",
+      "title": "User Storage - CRUD PUT/GET array round-trips correctly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
+        "line": 82,
+        "column": 10
+      }
+    },
+    {
+      "id": "8d02b55e1bb7e1f-ed4c4cb1373a580",
+      "title": "User Storage - CRUD PUT/GET boolean round-trips correctly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
+        "line": 89,
+        "column": 10
+      }
+    },
+    {
+      "id": "8d02b55e1bb7e1f-f677a77ef49e60f",
+      "title": "User Storage - CRUD Multiple PUTs overwrite — last value wins",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
+        "line": 96,
+        "column": 10
+      }
+    },
+    {
+      "id": "8d02b55e1bb7e1f-07d7efa187b470c",
+      "title": "User Storage - CRUD GET returns overrides mixed with defaults across multiple keys",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
+        "line": 104,
+        "column": 10
+      }
+    },
+    {
+      "id": "544a8c9133175ca-1e3be9febb855e4",
+      "title": "User Storage - Forbidden (no user profile) GET returns 403 with API key auth",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/forbidden.spec.ts",
+        "line": 26,
+        "column": 12
+      }
+    },
+    {
+      "id": "544a8c9133175ca-6575bbf211bf171",
+      "title": "User Storage - Forbidden (no user profile) PUT returns 403 with API key auth",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/forbidden.spec.ts",
+        "line": 31,
+        "column": 12
+      }
+    },
+    {
+      "id": "544a8c9133175ca-e1c067c4770e74a",
+      "title": "User Storage - Forbidden (no user profile) DELETE returns 403 with API key auth",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/forbidden.spec.ts",
+        "line": 36,
+        "column": 12
+      }
+    },
+    {
+      "id": "c8a04a1faa24192-1c80d45ef093aea",
+      "title": "User Storage - Scope Isolation space-scoped key is isolated per space — default space override not visible in second space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/scope_isolation.spec.ts",
+        "line": 44,
+        "column": 10
+      }
+    },
+    {
+      "id": "c8a04a1faa24192-3d3df66f8fff4b7",
+      "title": "User Storage - Scope Isolation global key is shared — override in default space is visible in second space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/scope_isolation.spec.ts",
+        "line": 55,
+        "column": 10
+      }
+    },
+    {
+      "id": "c8a04a1faa24192-c61f9f5a5abd36d",
+      "title": "User Storage - Scope Isolation global key set from another space is visible everywhere",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/scope_isolation.spec.ts",
+        "line": 66,
+        "column": 10
+      }
+    },
+    {
+      "id": "84734ffef8a778c-a646f16b3656ba1",
+      "title": "User Storage - Schema Validation PUT returns 400 when value fails schema validation (string key)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
+        "line": 29,
+        "column": 10
+      }
+    },
+    {
+      "id": "84734ffef8a778c-525145fbffe23f7",
+      "title": "User Storage - Schema Validation PUT rejects invalid enum value in object key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
+        "line": 37,
+        "column": 10
+      }
+    },
+    {
+      "id": "84734ffef8a778c-2e051c9f88f850c",
+      "title": "User Storage - Schema Validation PUT rejects missing required field in object key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
+        "line": 46,
+        "column": 10
+      }
+    },
+    {
+      "id": "84734ffef8a778c-1c48df93cca7403",
+      "title": "User Storage - Schema Validation PUT rejects out-of-range number in object key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
+        "line": 54,
+        "column": 10
+      }
+    },
+    {
+      "id": "84734ffef8a778c-ee94eda805660fb",
+      "title": "User Storage - Schema Validation PUT rejects array exceeding max length in object key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
+        "line": 63,
+        "column": 10
+      }
+    },
+    {
+      "id": "84734ffef8a778c-184e1bc537d39df",
+      "title": "User Storage - Schema Validation PUT rejects array with wrong element type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
+        "line": 72,
+        "column": 10
+      }
+    },
+    {
+      "id": "84734ffef8a778c-31040c84549cd40",
+      "title": "User Storage - Schema Validation PUT rejects boolean key with wrong type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
+        "line": 77,
+        "column": 10
+      }
+    },
+    {
+      "id": "84734ffef8a778c-a186e7ada40dbf5",
+      "title": "User Storage - Schema Validation PUT preserves empty string",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
+        "line": 82,
+        "column": 10
+      }
+    },
+    {
+      "id": "84734ffef8a778c-9f73b3bc220ee2b",
+      "title": "User Storage - Schema Validation PUT preserves zero",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
+        "line": 88,
+        "column": 10
+      }
+    },
+    {
+      "id": "84734ffef8a778c-5191bb3fc1f9369",
+      "title": "User Storage - Schema Validation PUT preserves negative number",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
+        "line": 94,
+        "column": 10
+      }
+    },
+    {
+      "id": "84734ffef8a778c-77c44bb91fdbe06",
+      "title": "User Storage - Schema Validation PUT preserves empty array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
+        "line": 100,
+        "column": 10
+      }
+    },
+    {
+      "id": "84734ffef8a778c-faa7dd01540709b",
+      "title": "User Storage - Schema Validation DELETE on a key that was never set is a no-op",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
+        "line": 106,
+        "column": 10
+      }
+    }
+  ]
+}

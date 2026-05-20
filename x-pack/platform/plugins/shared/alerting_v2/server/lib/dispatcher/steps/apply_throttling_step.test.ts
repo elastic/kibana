@@ -6,12 +6,8 @@
  */
 
 import { applyThrottling } from './apply_throttling_step';
-import {
-  createAlertEpisode,
-  createNotificationGroup,
-  createNotificationPolicy,
-} from '../fixtures/test_utils';
-import type { NotificationGroupId, LastNotifiedInfo } from '../types';
+import { createAlertEpisode, createActionGroup, createActionPolicy } from '../fixtures/test_utils';
+import type { ActionGroupId, LastNotifiedInfo } from '../types';
 
 const NOW = new Date('2026-01-22T10:00:00.000Z');
 
@@ -22,14 +18,14 @@ const info = (lastNotified: string, episodeStatus?: string): LastNotifiedInfo =>
 
 describe('applyThrottling', () => {
   describe('per_episode + on_status_change', () => {
-    const basePolicy = createNotificationPolicy({
+    const basePolicy = createActionPolicy({
       id: 'p1',
       groupingMode: 'per_episode',
       throttle: { strategy: 'on_status_change' },
     });
 
-    it('dispatches when no previous notification exists', () => {
-      const group = createNotificationGroup({ id: 'g1', policyId: 'p1' });
+    it('dispatches when no previous action exists', () => {
+      const group = createActionGroup({ id: 'g1', policyId: 'p1' });
 
       const { dispatch, throttled } = applyThrottling(
         [group],
@@ -43,7 +39,7 @@ describe('applyThrottling', () => {
     });
 
     it('dispatches when status changed', () => {
-      const group = createNotificationGroup({
+      const group = createActionGroup({
         id: 'g1',
         policyId: 'p1',
         episodes: [createAlertEpisode({ episode_status: 'recovering' })],
@@ -52,7 +48,7 @@ describe('applyThrottling', () => {
       const { dispatch, throttled } = applyThrottling(
         [group],
         new Map([['p1', basePolicy]]),
-        new Map<NotificationGroupId, LastNotifiedInfo>([
+        new Map<ActionGroupId, LastNotifiedInfo>([
           ['g1', info('2026-01-22T09:59:00.000Z', 'active')],
         ]),
         NOW
@@ -63,7 +59,7 @@ describe('applyThrottling', () => {
     });
 
     it('throttles when status unchanged', () => {
-      const group = createNotificationGroup({
+      const group = createActionGroup({
         id: 'g1',
         policyId: 'p1',
         episodes: [createAlertEpisode({ episode_status: 'active' })],
@@ -72,7 +68,7 @@ describe('applyThrottling', () => {
       const { dispatch, throttled } = applyThrottling(
         [group],
         new Map([['p1', basePolicy]]),
-        new Map<NotificationGroupId, LastNotifiedInfo>([
+        new Map<ActionGroupId, LastNotifiedInfo>([
           ['g1', info('2026-01-22T09:59:00.000Z', 'active')],
         ]),
         NOW
@@ -84,14 +80,14 @@ describe('applyThrottling', () => {
   });
 
   describe('per_episode + per_status_interval', () => {
-    const basePolicy = createNotificationPolicy({
+    const basePolicy = createActionPolicy({
       id: 'p1',
       groupingMode: 'per_episode',
       throttle: { strategy: 'per_status_interval', interval: '1h' },
     });
 
-    it('dispatches when no previous notification exists', () => {
-      const group = createNotificationGroup({ id: 'g1', policyId: 'p1' });
+    it('dispatches when no previous action exists', () => {
+      const group = createActionGroup({ id: 'g1', policyId: 'p1' });
 
       const { dispatch, throttled } = applyThrottling(
         [group],
@@ -105,7 +101,7 @@ describe('applyThrottling', () => {
     });
 
     it('dispatches when status changed', () => {
-      const group = createNotificationGroup({
+      const group = createActionGroup({
         id: 'g1',
         policyId: 'p1',
         episodes: [createAlertEpisode({ episode_status: 'recovering' })],
@@ -114,7 +110,7 @@ describe('applyThrottling', () => {
       const { dispatch, throttled } = applyThrottling(
         [group],
         new Map([['p1', basePolicy]]),
-        new Map<NotificationGroupId, LastNotifiedInfo>([
+        new Map<ActionGroupId, LastNotifiedInfo>([
           ['g1', info('2026-01-22T09:59:00.000Z', 'active')],
         ]),
         NOW
@@ -125,7 +121,7 @@ describe('applyThrottling', () => {
     });
 
     it('dispatches when status unchanged and interval expired', () => {
-      const group = createNotificationGroup({
+      const group = createActionGroup({
         id: 'g1',
         policyId: 'p1',
         episodes: [createAlertEpisode({ episode_status: 'active' })],
@@ -134,7 +130,7 @@ describe('applyThrottling', () => {
       const { dispatch, throttled } = applyThrottling(
         [group],
         new Map([['p1', basePolicy]]),
-        new Map<NotificationGroupId, LastNotifiedInfo>([
+        new Map<ActionGroupId, LastNotifiedInfo>([
           ['g1', info('2026-01-22T08:00:00.000Z', 'active')],
         ]),
         NOW
@@ -145,7 +141,7 @@ describe('applyThrottling', () => {
     });
 
     it('throttles when status unchanged and within interval', () => {
-      const group = createNotificationGroup({
+      const group = createActionGroup({
         id: 'g1',
         policyId: 'p1',
         episodes: [createAlertEpisode({ episode_status: 'active' })],
@@ -154,7 +150,7 @@ describe('applyThrottling', () => {
       const { dispatch, throttled } = applyThrottling(
         [group],
         new Map([['p1', basePolicy]]),
-        new Map<NotificationGroupId, LastNotifiedInfo>([
+        new Map<ActionGroupId, LastNotifiedInfo>([
           ['g1', info('2026-01-22T09:30:00.000Z', 'active')],
         ]),
         NOW
@@ -166,14 +162,14 @@ describe('applyThrottling', () => {
   });
 
   describe('per_episode + every_time', () => {
-    const basePolicy = createNotificationPolicy({
+    const basePolicy = createActionPolicy({
       id: 'p1',
       groupingMode: 'per_episode',
       throttle: { strategy: 'every_time' },
     });
 
-    it('dispatches when no previous notification exists', () => {
-      const group = createNotificationGroup({ id: 'g1', policyId: 'p1' });
+    it('dispatches when no previous action exists', () => {
+      const group = createActionGroup({ id: 'g1', policyId: 'p1' });
 
       const { dispatch, throttled } = applyThrottling(
         [group],
@@ -186,8 +182,8 @@ describe('applyThrottling', () => {
       expect(throttled).toHaveLength(0);
     });
 
-    it('dispatches even with recent notification', () => {
-      const group = createNotificationGroup({
+    it('dispatches even with recent action', () => {
+      const group = createActionGroup({
         id: 'g1',
         policyId: 'p1',
         episodes: [createAlertEpisode({ episode_status: 'active' })],
@@ -196,7 +192,7 @@ describe('applyThrottling', () => {
       const { dispatch, throttled } = applyThrottling(
         [group],
         new Map([['p1', basePolicy]]),
-        new Map<NotificationGroupId, LastNotifiedInfo>([
+        new Map<ActionGroupId, LastNotifiedInfo>([
           ['g1', info('2026-01-22T09:59:59.000Z', 'active')],
         ]),
         NOW
@@ -208,15 +204,15 @@ describe('applyThrottling', () => {
   });
 
   describe('per_field + time_interval', () => {
-    const basePolicy = createNotificationPolicy({
+    const basePolicy = createActionPolicy({
       id: 'p1',
       groupingMode: 'per_field',
       groupBy: ['host.name'],
       throttle: { strategy: 'time_interval', interval: '5m' },
     });
 
-    it('dispatches when no previous notification exists', () => {
-      const group = createNotificationGroup({ id: 'g1', policyId: 'p1' });
+    it('dispatches when no previous action exists', () => {
+      const group = createActionGroup({ id: 'g1', policyId: 'p1' });
 
       const { dispatch, throttled } = applyThrottling(
         [group],
@@ -230,12 +226,12 @@ describe('applyThrottling', () => {
     });
 
     it('dispatches when interval expired', () => {
-      const group = createNotificationGroup({ id: 'g1', policyId: 'p1' });
+      const group = createActionGroup({ id: 'g1', policyId: 'p1' });
 
       const { dispatch, throttled } = applyThrottling(
         [group],
         new Map([['p1', basePolicy]]),
-        new Map<NotificationGroupId, LastNotifiedInfo>([['g1', info('2026-01-22T09:50:00.000Z')]]),
+        new Map<ActionGroupId, LastNotifiedInfo>([['g1', info('2026-01-22T09:50:00.000Z')]]),
         NOW
       );
 
@@ -244,12 +240,12 @@ describe('applyThrottling', () => {
     });
 
     it('throttles when within interval', () => {
-      const group = createNotificationGroup({ id: 'g1', policyId: 'p1' });
+      const group = createActionGroup({ id: 'g1', policyId: 'p1' });
 
       const { dispatch, throttled } = applyThrottling(
         [group],
         new Map([['p1', basePolicy]]),
-        new Map<NotificationGroupId, LastNotifiedInfo>([['g1', info('2026-01-22T09:58:00.000Z')]]),
+        new Map<ActionGroupId, LastNotifiedInfo>([['g1', info('2026-01-22T09:58:00.000Z')]]),
         NOW
       );
 
@@ -258,18 +254,18 @@ describe('applyThrottling', () => {
     });
 
     it('dispatches when no interval configured', () => {
-      const policy = createNotificationPolicy({
+      const policy = createActionPolicy({
         id: 'p1',
         groupingMode: 'per_field',
         groupBy: ['host.name'],
         throttle: { strategy: 'time_interval' },
       });
-      const group = createNotificationGroup({ id: 'g1', policyId: 'p1' });
+      const group = createActionGroup({ id: 'g1', policyId: 'p1' });
 
       const { dispatch, throttled } = applyThrottling(
         [group],
         new Map([['p1', policy]]),
-        new Map<NotificationGroupId, LastNotifiedInfo>([['g1', info('2026-01-22T09:59:59.000Z')]]),
+        new Map<ActionGroupId, LastNotifiedInfo>([['g1', info('2026-01-22T09:59:59.000Z')]]),
         NOW
       );
 
@@ -279,15 +275,15 @@ describe('applyThrottling', () => {
   });
 
   describe('per_field + every_time', () => {
-    const basePolicy = createNotificationPolicy({
+    const basePolicy = createActionPolicy({
       id: 'p1',
       groupingMode: 'per_field',
       groupBy: ['host.name'],
       throttle: { strategy: 'every_time' },
     });
 
-    it('dispatches when no previous notification exists', () => {
-      const group = createNotificationGroup({ id: 'g1', policyId: 'p1' });
+    it('dispatches when no previous action exists', () => {
+      const group = createActionGroup({ id: 'g1', policyId: 'p1' });
 
       const { dispatch, throttled } = applyThrottling(
         [group],
@@ -300,13 +296,13 @@ describe('applyThrottling', () => {
       expect(throttled).toHaveLength(0);
     });
 
-    it('dispatches even with recent notification', () => {
-      const group = createNotificationGroup({ id: 'g1', policyId: 'p1' });
+    it('dispatches even with recent action', () => {
+      const group = createActionGroup({ id: 'g1', policyId: 'p1' });
 
       const { dispatch, throttled } = applyThrottling(
         [group],
         new Map([['p1', basePolicy]]),
-        new Map<NotificationGroupId, LastNotifiedInfo>([['g1', info('2026-01-22T09:59:59.000Z')]]),
+        new Map<ActionGroupId, LastNotifiedInfo>([['g1', info('2026-01-22T09:59:59.000Z')]]),
         NOW
       );
 
@@ -316,14 +312,14 @@ describe('applyThrottling', () => {
   });
 
   describe('all + time_interval', () => {
-    const basePolicy = createNotificationPolicy({
+    const basePolicy = createActionPolicy({
       id: 'p1',
       groupingMode: 'all',
       throttle: { strategy: 'time_interval', interval: '5m' },
     });
 
-    it('dispatches when no previous notification exists', () => {
-      const group = createNotificationGroup({ id: 'g1', policyId: 'p1' });
+    it('dispatches when no previous action exists', () => {
+      const group = createActionGroup({ id: 'g1', policyId: 'p1' });
 
       const { dispatch, throttled } = applyThrottling(
         [group],
@@ -337,12 +333,12 @@ describe('applyThrottling', () => {
     });
 
     it('dispatches when interval expired', () => {
-      const group = createNotificationGroup({ id: 'g1', policyId: 'p1' });
+      const group = createActionGroup({ id: 'g1', policyId: 'p1' });
 
       const { dispatch, throttled } = applyThrottling(
         [group],
         new Map([['p1', basePolicy]]),
-        new Map<NotificationGroupId, LastNotifiedInfo>([['g1', info('2026-01-22T09:50:00.000Z')]]),
+        new Map<ActionGroupId, LastNotifiedInfo>([['g1', info('2026-01-22T09:50:00.000Z')]]),
         NOW
       );
 
@@ -351,12 +347,12 @@ describe('applyThrottling', () => {
     });
 
     it('throttles when within interval', () => {
-      const group = createNotificationGroup({ id: 'g1', policyId: 'p1' });
+      const group = createActionGroup({ id: 'g1', policyId: 'p1' });
 
       const { dispatch, throttled } = applyThrottling(
         [group],
         new Map([['p1', basePolicy]]),
-        new Map<NotificationGroupId, LastNotifiedInfo>([['g1', info('2026-01-22T09:58:00.000Z')]]),
+        new Map<ActionGroupId, LastNotifiedInfo>([['g1', info('2026-01-22T09:58:00.000Z')]]),
         NOW
       );
 
@@ -365,17 +361,17 @@ describe('applyThrottling', () => {
     });
 
     it('dispatches when no interval configured', () => {
-      const policy = createNotificationPolicy({
+      const policy = createActionPolicy({
         id: 'p1',
         groupingMode: 'all',
         throttle: { strategy: 'time_interval' },
       });
-      const group = createNotificationGroup({ id: 'g1', policyId: 'p1' });
+      const group = createActionGroup({ id: 'g1', policyId: 'p1' });
 
       const { dispatch, throttled } = applyThrottling(
         [group],
         new Map([['p1', policy]]),
-        new Map<NotificationGroupId, LastNotifiedInfo>([['g1', info('2026-01-22T09:59:59.000Z')]]),
+        new Map<ActionGroupId, LastNotifiedInfo>([['g1', info('2026-01-22T09:59:59.000Z')]]),
         NOW
       );
 
@@ -385,14 +381,14 @@ describe('applyThrottling', () => {
   });
 
   describe('all + every_time', () => {
-    const basePolicy = createNotificationPolicy({
+    const basePolicy = createActionPolicy({
       id: 'p1',
       groupingMode: 'all',
       throttle: { strategy: 'every_time' },
     });
 
-    it('dispatches when no previous notification exists', () => {
-      const group = createNotificationGroup({ id: 'g1', policyId: 'p1' });
+    it('dispatches when no previous action exists', () => {
+      const group = createActionGroup({ id: 'g1', policyId: 'p1' });
 
       const { dispatch, throttled } = applyThrottling(
         [group],
@@ -405,13 +401,13 @@ describe('applyThrottling', () => {
       expect(throttled).toHaveLength(0);
     });
 
-    it('dispatches even with recent notification', () => {
-      const group = createNotificationGroup({ id: 'g1', policyId: 'p1' });
+    it('dispatches even with recent action', () => {
+      const group = createActionGroup({ id: 'g1', policyId: 'p1' });
 
       const { dispatch, throttled } = applyThrottling(
         [group],
         new Map([['p1', basePolicy]]),
-        new Map<NotificationGroupId, LastNotifiedInfo>([['g1', info('2026-01-22T09:59:59.000Z')]]),
+        new Map<ActionGroupId, LastNotifiedInfo>([['g1', info('2026-01-22T09:59:59.000Z')]]),
         NOW
       );
 
@@ -422,17 +418,17 @@ describe('applyThrottling', () => {
 
   describe('mixed groups', () => {
     it('handles mixed dispatch and throttle across groups', () => {
-      const g1 = createNotificationGroup({
+      const g1 = createActionGroup({
         id: 'g1',
         policyId: 'p1',
         episodes: [createAlertEpisode({ episode_status: 'active' })],
       });
-      const g2 = createNotificationGroup({
+      const g2 = createActionGroup({
         id: 'g2',
         policyId: 'p1',
         episodes: [createAlertEpisode({ episode_status: 'recovering' })],
       });
-      const policy = createNotificationPolicy({
+      const policy = createActionPolicy({
         id: 'p1',
         throttle: { strategy: 'on_status_change' },
       });
@@ -440,7 +436,7 @@ describe('applyThrottling', () => {
       const { dispatch, throttled } = applyThrottling(
         [g1, g2],
         new Map([['p1', policy]]),
-        new Map<NotificationGroupId, LastNotifiedInfo>([
+        new Map<ActionGroupId, LastNotifiedInfo>([
           ['g1', info('2026-01-22T09:30:00.000Z', 'active')],
           ['g2', info('2026-01-22T09:30:00.000Z', 'active')],
         ]),

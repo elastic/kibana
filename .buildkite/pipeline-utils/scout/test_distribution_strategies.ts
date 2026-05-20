@@ -82,7 +82,7 @@ async function distributeScoutTestsOnLanes() {
         SCOUT_TEST_TARGET_DOMAIN: testTarget.domain,
         SCOUT_TEST_SERVER_CONFIG_SET: server.configSet,
         SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS:
-          process.env.SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS || '180',
+          process.env.SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS || '300',
         ...envVarsIfSet([
           'SERVERLESS_TESTS_ONLY',
           'UIAM_DOCKER_IMAGE',
@@ -111,6 +111,11 @@ async function distributeScoutTestsOnLanes() {
       loadIDsByStepKey[stepKey] = lane.loads;
     });
 
+  if (steps.length === 0) {
+    // Stop early. No test steps to upload. ✨
+    return;
+  }
+
   const bk = new BuildkiteClient();
 
   const lanesGroupStepDependencies: string[] = [];
@@ -127,9 +132,10 @@ async function distributeScoutTestsOnLanes() {
     lanesGroupStepDependencies.push('build_scout_tests');
   }
 
-  for (const { key } of steps) {
-    bk.setMetadata(`cancel_on_gate_failure:${key}`, 'true');
-  }
+  bk.setMetadata(
+    'cancel_on_gate_failure_batch:scout_lanes',
+    JSON.stringify(steps.map(({ key }) => key))
+  );
 
   // Write the test lane load IDs to disk in preparation of uploading as an artifact
   fs.writeFileSync(testLaneLoadsFilePath, JSON.stringify(loadIDsByStepKey));

@@ -48,25 +48,17 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
     getScopedClients,
     server,
     continuousKiExtractionWorkflowService,
+    logger,
   }): Promise<{ success: true }> => {
+    if (!continuousKiExtractionWorkflowService) {
+      throw new Error('Continuous KI extraction workflow service is not available');
+    }
+
     const { licensing, uiSettingsClient, globalUiSettingsClient, taskClient } =
       await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const { continuousKiExtraction } = params.body;
-
-    if (continuousKiExtractionWorkflowService) {
-      const enabled =
-        continuousKiExtraction.enabled ??
-        (await globalUiSettingsClient.get<boolean>(
-          OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED
-        ));
-      await continuousKiExtractionWorkflowService.ensureWorkflow({
-        enabled,
-        request,
-        taskClient,
-      });
-    }
 
     const updates: Record<string, boolean | number | string> = {};
 
@@ -83,8 +75,32 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
         continuousKiExtraction.excludedStreamPatterns;
     }
 
-    if (Object.keys(updates).length > 0) {
+    const previousValues: Record<string, boolean | number | string> = {};
+    const keys = Object.keys(updates);
+    const allSettings = await globalUiSettingsClient.getAll<boolean | number | string>();
+    if (keys.length > 0) {
+      for (const key of keys) {
+        previousValues[key] = allSettings[key];
+      }
       await globalUiSettingsClient.setMany(updates);
+    }
+
+    const enabled =
+      continuousKiExtraction.enabled ??
+      (allSettings[OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED] as boolean);
+    try {
+      await continuousKiExtractionWorkflowService.ensureWorkflow({
+        enabled,
+        request,
+        taskClient,
+      });
+    } catch (err) {
+      if (Object.keys(previousValues).length > 0) {
+        await globalUiSettingsClient.setMany(previousValues).catch((rollbackErr) => {
+          logger.warn(`Failed to rollback settings after workflow sync error: ${rollbackErr}`);
+        });
+      }
+      throw err;
     }
 
     return { success: true };

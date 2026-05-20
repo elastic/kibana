@@ -60,7 +60,7 @@ export const generateLeadsRoute = (
           const executionUuid = uuidv4();
           const riskScoreDataClient = secSol.getRiskScoreDataClient();
 
-          const [, startPlugins] = await getStartServices();
+          const [coreStart, startPlugins] = await getStartServices();
           const crudClient = startPlugins.entityStore.createCRUDClient(esClient, spaceId);
           const { connectorId } = request.body;
 
@@ -73,6 +73,10 @@ export const generateLeadsRoute = (
             `[LeadGeneration] Connector resolved successfully (connectorId=${connectorId}, executionUuid=${executionUuid})`
           );
 
+          // The pipeline runs in the background after the 202 is returned.
+          // ES index-level permission errors (security_exception) thrown by
+          // createLeads are caught here, not propagated to the HTTP response.
+          // They surface via the status endpoint's `lastError` field instead.
           void (async () => {
             try {
               await runLeadGenerationPipeline({
@@ -83,6 +87,7 @@ export const generateLeadsRoute = (
                 riskScoreDataClient,
                 executionId: executionUuid,
                 sourceType: 'adhoc',
+                analytics: coreStart.analytics,
                 chatModel,
               });
               await upsertLeadGenerationConfig(soClient, spaceId, {

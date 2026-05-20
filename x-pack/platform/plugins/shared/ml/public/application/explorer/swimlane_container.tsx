@@ -40,6 +40,8 @@ import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { css } from '@emotion/react';
 import { getThemeResolvedSeverityColor, ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
+import type { SwimlaneType } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
+import { SWIMLANE_TYPE } from '@kbn/ml-common-types/embeddables/swimlane_type';
 import type { TimeBuckets as TimeBucketsClass } from '@kbn/ml-time-buckets';
 import { SwimLanePagination } from './swimlane_pagination';
 import type {
@@ -47,8 +49,6 @@ import type {
   OverallSwimlaneData,
   ViewBySwimLaneData,
 } from './explorer_utils';
-import type { SwimlaneType } from './explorer_constants';
-import { SWIMLANE_TYPE } from './explorer_constants';
 import { mlEscape } from '../util/string_utils';
 import { FormattedTooltip } from '../components/chart_tooltip/chart_tooltip';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';

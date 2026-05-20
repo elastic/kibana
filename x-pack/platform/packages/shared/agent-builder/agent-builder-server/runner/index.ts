@@ -45,6 +45,7 @@ export type {
   ScopedModel,
   ModelProviderStats,
   ModelCallInfo,
+  ModelSelectionPreferences,
 } from './model_provider';
 export type { ToolResultStore, WritableToolResultStore, ToolResultWithMeta } from './result_store';
 export type { AttachmentsService } from './attachments_service';
@@ -55,6 +56,8 @@ export { ToolManagerToolType } from './tool_manager';
 export type { SkillsStore, WritableSkillsStore } from './skills_store';
 export type { PromptManager, ToolPromptManager, ConfirmationInfo } from './prompt_manager';
 export type { ConversationStateManager, ToolStateManager } from './state_manager';
+export type { TodoStateManager } from './todo_state_manager';
+export { createTodoStateManager } from './todo_state_manager';
 export { FileEntryType } from './filestore';
 export type {
   IToolFileStore,

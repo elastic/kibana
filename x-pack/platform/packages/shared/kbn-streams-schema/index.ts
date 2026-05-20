@@ -13,6 +13,7 @@ export {
   WiredStream,
   WiredIngestUpsertRequest,
   isDraftStream,
+  isDraftGetResponse,
   type DraftStreamDefinition,
 } from './src/models/ingest/wired';
 export {
@@ -59,6 +60,7 @@ export {
   keepFields,
   namespacePrefixes,
   otelReservedFields,
+  aliases as otelFieldAliases,
   isNamespacedEcsField,
   isOtelReservedField,
   getRegularEcsField,
@@ -68,6 +70,7 @@ export { getInheritedFieldsFromAncestors } from './src/helpers/get_inherited_fie
 export { getInheritedSettings } from './src/helpers/get_inherited_settings';
 export {
   buildMetadataOption,
+  withUnmappedFieldsDirective,
   deriveQueryType,
   ensureMetadata,
   extractBucketColumnName,
@@ -134,11 +137,14 @@ export {
 export {
   type EsqlQuery,
   esqlQuerySchema,
+  type QueryFeature,
+  queryFeatureSchema,
   type StreamQuery,
   type QueryLink,
   type QueryType,
   QUERY_TYPE_MATCH,
   QUERY_TYPE_STATS,
+  HIGH_SEVERITY_THRESHOLD,
   queryTypeSchema,
   type QueriesGetResponse,
   type QueriesOccurrencesGetResponse,
@@ -206,6 +212,7 @@ export type {
   SignificantEventsQueriesGenerationResult,
   SignificantEventsQueriesGenerationTaskResult,
 } from './src/api/significant_events';
+export { generatedSignificantEventQuerySchema } from './src/api/significant_events';
 
 export { emptyAssets } from './src/helpers/empty_assets';
 export {
@@ -228,6 +235,7 @@ export {
   LOG_PATTERNS_FEATURE_TYPE,
   ERROR_LOGS_FEATURE_TYPE,
   COMPUTED_FEATURE_TYPES,
+  INFERRED_FEATURE_TYPES,
   isFeature,
   isFeatureWithFilter,
   isComputedFeature,
@@ -241,6 +249,8 @@ export {
   ignoredFeatureSchema,
   featureStatusSchema,
 } from './src/feature';
+
+export { FeatureAccumulator } from './src/feature_accumulator';
 
 export {
   type BaseSimulationError,
@@ -260,6 +270,7 @@ export { TaskStatus, type TaskResult } from './src/tasks/types';
 
 export type { GenerateDescriptionResult } from './src/api/description_generation';
 export type { IdentifyFeaturesResult, IterationResult } from './src/api/features';
+export { tokenCountSchema, iterationResultSchema } from './src/api/features';
 
 export {
   type GenerateInsightsResult,
@@ -281,10 +292,23 @@ export {
   INSIGHT_IMPACT_LEVEL_MAP,
   getImpactLevel,
 } from './src/insights';
+export {
+  detectionSchema,
+  type Detection,
+  discoverySchema,
+  type Discovery,
+  verdictSchema,
+  type Verdict,
+  sigEventSchema,
+  type SigEvent,
+} from './src/sig_events';
 export type { OnboardingResult } from './src/onboarding';
 export { OnboardingStep } from './src/onboarding';
 export { streamsOasDefinitions } from './src/oas_definitions';
 export type { StreamsOasDefinitions } from './src/oas_definitions';
+
+export { stripOtelAliases } from './src/helpers/strip_otel_aliases';
+export { mergeSourceIntoDocuments } from './src/helpers/merge_esql_source';
 
 export { streamMatchesIndexPatterns } from './src/helpers/stream_matches_index_patterns';
 export { DEFAULT_INDEX_PATTERNS } from './src/helpers/default_index_patterns';

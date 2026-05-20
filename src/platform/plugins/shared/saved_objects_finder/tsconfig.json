@@ -16,6 +16,7 @@
     "@kbn/content-management-utils",
     "@kbn/core-ui-settings-browser",
     "@kbn/shared-ux-table-persist",
+    "@kbn/shared-ux-utility",
   ],
   "exclude": [
     "target/**/*",

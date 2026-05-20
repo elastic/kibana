@@ -383,20 +383,20 @@ describe('TraceWaterfallContextProvider - scroll strategy', () => {
     expect(result.current.scrollStrategy).toBe('parent');
   });
 
-  it('passes scrollToHighlightedOnMount through to the context when scrollStrategy is "parent"', () => {
+  it('passes scrollToContextOnMount through to the context when scrollStrategy is "parent"', () => {
     const { result } = renderHook(() => useTraceWaterfallContext(), {
-      wrapper: createWrapper({ scrollStrategy: 'parent', scrollToHighlightedOnMount: true }),
+      wrapper: createWrapper({ scrollStrategy: 'parent', scrollToContextOnMount: true }),
     });
 
-    expect(result.current.scrollToHighlightedOnMount).toBe(true);
+    expect(result.current.scrollToContextOnMount).toBe(true);
   });
 
-  it('does not expose scrollToHighlightedOnMount when scrollStrategy is "window"', () => {
+  it('does not expose scrollToContextOnMount when scrollStrategy is "window"', () => {
     const { result } = renderHook(() => useTraceWaterfallContext(), {
       wrapper: createWrapper({ scrollStrategy: 'window' }),
     });
 
-    expect(result.current.scrollToHighlightedOnMount).toBeUndefined();
+    expect(result.current.scrollToContextOnMount).toBeUndefined();
   });
 });
 

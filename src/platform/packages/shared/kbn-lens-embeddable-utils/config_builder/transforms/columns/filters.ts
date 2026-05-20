@@ -48,7 +48,7 @@ export function fromFiltersLensStateToAPI(
   const { label } = getLensAPIBucketSharedProps({ ...column, sourceField: '' });
   return {
     operation: 'filters',
-    label,
+    ...(label !== undefined ? { label } : {}),
     filters: column.params.filters.map((filter) => ({
       filter: fromFilterLensStateToAPI(filter.input) ?? DEFAULT_FILTER,
       ...(filter.label !== 'Filter' ? { label: filter.label } : {}),

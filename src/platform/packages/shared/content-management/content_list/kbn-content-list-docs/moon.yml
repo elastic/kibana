@@ -17,14 +17,13 @@ project:
   owner: '@elastic/appex-sharedux'
   sourceRoot: src/platform/packages/shared/content-management/content_list/kbn-content-list-docs
 dependsOn:
+  - '@kbn/content-list'
   - '@kbn/content-list-provider'
-  - '@kbn/content-list-table'
-  - '@kbn/content-list-toolbar'
-  - '@kbn/content-list-footer'
   - '@kbn/content-list-mock-data'
   - '@kbn/content-management-favorites-public'
   - '@kbn/content-management-table-list-view-common'
   - '@kbn/content-management-tags'
+  - '@kbn/content-list-page'
 tags:
   - shared-browser
   - package

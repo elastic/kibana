@@ -95,6 +95,29 @@ describe('WorkflowTemplatingEngine', () => {
     });
   });
 
+  describe('extractGlobalVariableSegments', () => {
+    it('should collect nested references inside Liquid control-flow tags', () => {
+      const extractedSegments = templatingEngine.extractGlobalVariableSegments(
+        '{% if inputs.enabled %}{{ steps.fetchData.output.case.title }}{% endif %}'
+      );
+
+      expect(extractedSegments).toEqual(
+        expect.arrayContaining([
+          ['inputs', 'enabled'],
+          ['steps', 'fetchData', 'output', 'case', 'title'],
+        ])
+      );
+    });
+
+    it('should return null for dynamic bracket paths', () => {
+      const extractedSegments = templatingEngine.extractGlobalVariableSegments(
+        '{{ steps.load_comment_sync_state.output._source[steps.note_sync_space_comment.output].id }}'
+      );
+
+      expect(extractedSegments).toBeNull();
+    });
+  });
+
   describe('built-in filters', () => {
     it('should use built-in json filter for stringification', () => {
       const template = '{{ data | json }}';
@@ -155,7 +178,7 @@ describe('WorkflowTemplatingEngine', () => {
     });
   });
 
-  describe('base64_encode filter with Buffer support', () => {
+  describe('base64_encode filter', () => {
     it('should base64 encode a plain string', () => {
       const template = '{{ text | base64_encode }}';
       const context = { text: 'Hello World' };

@@ -9,6 +9,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { getOr } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { UserPanelKey, HostPanelKey } from '../../../flyout/entity_details/shared/constants';
 import { AuthStackByField } from '../../../../common/search_strategy/security_solution/users/authentications';
 import type { SiemTables } from '../paginated_table';
 import { PaginatedTable } from '../paginated_table';
@@ -40,6 +42,41 @@ const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps>
   userName,
 }) => {
   const dispatch = useDispatch();
+  const { openFlyout } = useExpandableFlyoutApi();
+
+  const openUserFlyout = useCallback(
+    (name: string) => {
+      openFlyout({
+        right: {
+          id: UserPanelKey,
+          params: {
+            userName: name,
+            contextID: 'authentications',
+            scopeId: 'authentications',
+            isPreviewMode: false,
+          },
+        },
+      });
+    },
+    [openFlyout]
+  );
+
+  const openHostFlyout = useCallback(
+    (hostName: string) => {
+      openFlyout({
+        right: {
+          id: HostPanelKey,
+          params: {
+            hostName,
+            contextID: 'authentications',
+            scopeId: 'authentications',
+            isPreviewMode: false,
+          },
+        },
+      });
+    },
+    [openFlyout]
+  );
   const { toggleStatus } = useQueryToggle(TABLE_QUERY_ID);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
   useEffect(() => {
@@ -64,8 +101,11 @@ const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps>
   });
 
   const columns = useMemo(
-    () => (userName ? getUserDetailsAuthenticationColumns() : getUsersPageAuthenticationColumns()),
-    [userName]
+    () =>
+      userName
+        ? getUserDetailsAuthenticationColumns(openHostFlyout)
+        : getUsersPageAuthenticationColumns(openUserFlyout, openHostFlyout),
+    [userName, openUserFlyout, openHostFlyout]
   );
 
   const updateLimitPagination = useCallback<SiemTables['updateLimitPagination']>(

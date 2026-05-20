@@ -11,7 +11,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiText,
   EuiToolTip,
@@ -40,7 +40,11 @@ import {
   RESOLUTION_EMPTY_STATE,
   RESOLUTION_FETCH_ERROR,
 } from './translations';
-import { RESOLUTION_GROUP_TABLE_TEST_ID, RESOLUTION_EMPTY_STATE_TEST_ID } from './test_ids';
+import {
+  RESOLUTION_GROUP_TABLE_TEST_ID,
+  RESOLUTION_EMPTY_STATE_TEST_ID,
+  RESOLUTION_PRIMARY_ENTITY_ICON_TEST_ID,
+} from './test_ids';
 import { RiskScoreCell } from '../home/entities_table/risk_score_cell';
 
 export interface ResolutionGroupTableProps {
@@ -158,9 +162,12 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
                   {nameContent}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip content={TARGET_ENTITY_TOOLTIP}>
-                    <EuiIcon type="aggregate" size="s" aria-hidden={true} />
-                  </EuiToolTip>
+                  <EuiIconTip
+                    content={TARGET_ENTITY_TOOLTIP}
+                    type="aggregate"
+                    size="s"
+                    anchorProps={{ 'data-test-subj': RESOLUTION_PRIMARY_ENTITY_ICON_TEST_ID }}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             );

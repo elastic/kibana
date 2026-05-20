@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   ExceptionListItemId,
@@ -23,21 +23,28 @@ import {
   ExceptionListItem,
 } from '../model/exception_list_common.gen';
 
+export const ReadExceptionListItemRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Exception list item's identifier. Either `id` or `item_id` must be specified.
+     */
+    id: ExceptionListItemId.optional(),
+    /**
+     * Human readable exception item string identifier, e.g. `trusted-linux-processes`. Either `id` or `item_id` must be specified.
+     */
+    item_id: ExceptionListItemHumanId.optional(),
+    /**
+      * `single` fetches the item in the current space; `agnostic` fetches a global (space-agnostic) item. Must
+match how the list was created.
+
+      */
+    namespace_type: ExceptionNamespaceType.optional().default('single'),
+  })
+);
 export type ReadExceptionListItemRequestQuery = z.infer<typeof ReadExceptionListItemRequestQuery>;
-export const ReadExceptionListItemRequestQuery = z.object({
-  /**
-   * Exception list item's identifier. Either `id` or `item_id` must be specified.
-   */
-  id: ExceptionListItemId.optional(),
-  /**
-   * Human readable exception item string identifier, e.g. `trusted-linux-processes`. Either `id` or `item_id` must be specified.
-   */
-  item_id: ExceptionListItemHumanId.optional(),
-  namespace_type: ExceptionNamespaceType.optional().default('single'),
-});
 export type ReadExceptionListItemRequestQueryInput = z.input<
   typeof ReadExceptionListItemRequestQuery
 >;
 
+export const ReadExceptionListItemResponse = lazySchema(() => ExceptionListItem);
 export type ReadExceptionListItemResponse = z.infer<typeof ReadExceptionListItemResponse>;
-export const ReadExceptionListItemResponse = ExceptionListItem;

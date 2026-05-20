@@ -189,8 +189,44 @@ it('checks shasums for each downloaded node build', async () => {
           "<node version>",
           undefined,
         ],
+        Array [
+          <ToolingLog>,
+          "<node version>",
+          undefined,
+        ],
+        Array [
+          <ToolingLog>,
+          "<node version>",
+          undefined,
+        ],
       ],
       "results": Array [
+        Object {
+          "type": "return",
+          "value": Object {
+            "darwin:default:darwin-arm64:downloadName": "valid shasum",
+            "darwin:default:darwin-x64:downloadName": "valid shasum",
+            "linux:default:linux-arm64:downloadName": "valid shasum",
+            "linux:default:linux-x64:downloadName": "valid shasum",
+            "linux:serverless:linux-arm64:downloadName": "valid shasum",
+            "linux:serverless:linux-x64:downloadName": "valid shasum",
+            "win32:default:win32-arm64:downloadName": "valid shasum",
+            "win32:default:win32-x64:downloadName": "valid shasum",
+          },
+        },
+        Object {
+          "type": "return",
+          "value": Object {
+            "darwin:default:darwin-arm64:downloadName": "valid shasum",
+            "darwin:default:darwin-x64:downloadName": "valid shasum",
+            "linux:default:linux-arm64:downloadName": "valid shasum",
+            "linux:default:linux-x64:downloadName": "valid shasum",
+            "linux:serverless:linux-arm64:downloadName": "valid shasum",
+            "linux:serverless:linux-x64:downloadName": "valid shasum",
+            "win32:default:win32-arm64:downloadName": "valid shasum",
+            "win32:default:win32-x64:downloadName": "valid shasum",
+          },
+        },
         Object {
           "type": "return",
           "value": Object {
@@ -589,6 +625,32 @@ it('checks shasums for each downloaded node build', async () => {
             "variant": "serverless",
           },
         ],
+        Array [
+          <Config>,
+          Platform {
+            "architecture": "x64",
+            "buildName": "linux-x86_64",
+            "name": "linux",
+            "solution": Object {
+              "artifact": "vectordb",
+              "id": "vectordb",
+            },
+            "variant": "serverless",
+          },
+        ],
+        Array [
+          <Config>,
+          Platform {
+            "architecture": "arm64",
+            "buildName": "linux-aarch64",
+            "name": "linux",
+            "solution": Object {
+              "artifact": "vectordb",
+              "id": "vectordb",
+            },
+            "variant": "serverless",
+          },
+        ],
       ],
       "results": Array [
         Object {
@@ -642,6 +704,24 @@ it('checks shasums for each downloaded node build', async () => {
             Object {
               "downloadName": "win32:default:win32-arm64:downloadName",
               "downloadPath": "win32:default:win32-arm64:downloadPath",
+            },
+          ],
+        },
+        Object {
+          "type": "return",
+          "value": Array [
+            Object {
+              "downloadName": "linux:serverless:linux-x64:downloadName",
+              "downloadPath": "linux:serverless:linux-x64:downloadPath",
+            },
+          ],
+        },
+        Object {
+          "type": "return",
+          "value": Array [
+            Object {
+              "downloadName": "linux:serverless:linux-arm64:downloadName",
+              "downloadPath": "linux:serverless:linux-arm64:downloadPath",
             },
           ],
         },
@@ -805,8 +885,24 @@ it('checks shasums for each downloaded node build', async () => {
           "linux:serverless:linux-arm64:downloadPath",
           "sha256",
         ],
+        Array [
+          "linux:serverless:linux-x64:downloadPath",
+          "sha256",
+        ],
+        Array [
+          "linux:serverless:linux-arm64:downloadPath",
+          "sha256",
+        ],
       ],
       "results": Array [
+        Object {
+          "type": "return",
+          "value": "valid shasum",
+        },
+        Object {
+          "type": "return",
+          "value": "valid shasum",
+        },
         Object {
           "type": "return",
           "value": "valid shasum",

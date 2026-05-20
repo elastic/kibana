@@ -230,6 +230,7 @@ describe('Transaction duration anomaly alert', () => {
         },
         id: 'apm.anomaly_foo_development_type-foo',
         payload: {
+          'anomaly.detector_type': 'txLatency',
           'kibana.alert.evaluation.threshold': 25,
           'kibana.alert.evaluation.value': 80,
           'kibana.alert.reason':

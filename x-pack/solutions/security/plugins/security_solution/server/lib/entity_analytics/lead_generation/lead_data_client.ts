@@ -65,6 +65,18 @@ export interface LeadDataClient {
 }
 
 // ---------------------------------------------------------------------------
+// ES error classification helpers
+// ---------------------------------------------------------------------------
+
+const getEsErrorType = (e: unknown): string | undefined =>
+  (e as { meta?: { body?: { error?: { type?: string } } } })?.meta?.body?.error?.type;
+
+const isEsSecurityException = (e: unknown): boolean => getEsErrorType(e) === 'security_exception';
+
+const isEsIndexNotFoundException = (e: unknown): boolean =>
+  getEsErrorType(e) === 'index_not_found_exception';
+
+// ---------------------------------------------------------------------------
 // Staleness computation (timestamp-based, computed at read time)
 // ---------------------------------------------------------------------------
 
@@ -231,6 +243,9 @@ export const createLeadDataClient = ({
         ignore_unavailable: true,
       });
     } catch (e) {
+      if (isEsSecurityException(e)) {
+        throw e;
+      }
       logger.warn(`[LeadGeneration] Failed to persist leads to "${indexName}": ${e}`);
     }
   };
@@ -277,11 +292,11 @@ export const createLeadDataClient = ({
 
       return { leads, total, page, perPage };
     } catch (e) {
-      const isIndexNotFound =
-        (e as { meta?: { body?: { error?: { type?: string } } } })?.meta?.body?.error?.type ===
-        'index_not_found_exception';
+      if (isEsSecurityException(e)) {
+        throw e;
+      }
       const errorMessage = e instanceof Error ? e.message : String(e);
-      if (isIndexNotFound) {
+      if (isEsIndexNotFoundException(e)) {
         logger.debug(`[LeadGeneration] Leads indices not available yet: ${errorMessage}`);
       } else {
         logger.error(`[LeadGeneration] Unable to find leads due to error: ${errorMessage}`);
@@ -387,6 +402,9 @@ export const createLeadDataClient = ({
         lastRun = (latestHit._source as Record<string, unknown>).timestamp as string;
       }
     } catch (e) {
+      if (isEsSecurityException(e)) {
+        throw e;
+      }
       logger.debug(`[LeadGeneration] Status check — indices not available: ${e}`);
     }
 
@@ -408,6 +426,9 @@ export const createLeadDataClient = ({
       });
       logger.info(`[LeadGeneration] Deleted all leads from space "${spaceId}"`);
     } catch (e) {
+      if (isEsSecurityException(e)) {
+        throw e;
+      }
       logger.warn(`[LeadGeneration] Failed to delete all leads: ${e}`);
     }
   };

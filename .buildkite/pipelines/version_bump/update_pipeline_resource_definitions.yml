@@ -1,0 +1,9 @@
+steps:
+  - name: 'Update pipeline resource definitions'
+    key: update-pipeline-resource-definitions
+    command: .buildkite/scripts/steps/version_bump/update_pipeline_resource_definitions.sh
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n4-standard-4

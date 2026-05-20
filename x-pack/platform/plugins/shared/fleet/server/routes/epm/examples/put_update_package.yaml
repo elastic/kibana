@@ -6,6 +6,10 @@ requestBody:
           description: 'Update keep_policies_up_to_date setting for a package'
           value:
             keepPoliciesUpToDate: true
+        putUpdatePackageNamespaceCustomizationExample:
+          description: 'Enable namespace-level customization for the `production` and `staging` namespaces'
+          value:
+            namespace_customization_enabled_for: ['production', 'staging']
 responses:
   200:
     description: 'Successful response'

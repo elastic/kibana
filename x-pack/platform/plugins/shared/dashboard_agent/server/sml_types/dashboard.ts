@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SmlTypeDefinition } from '@kbn/agent-builder-plugin/server';
+import type { SmlTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   dashboardStateToAttachmentData,

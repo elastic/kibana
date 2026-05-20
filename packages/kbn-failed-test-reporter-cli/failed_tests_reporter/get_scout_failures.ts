@@ -68,9 +68,20 @@ interface ScoutFailureTrackingEntry {
   };
 }
 
+// Failure substrings that indicate environmental/infrastructure issues rather than
+// real test failures. Matches mark the failure as "likely irrelevant" so we skip
+// filing GitHub issues for them.
+const LIKELY_IRRELEVANT_FAILURE_SUBSTRINGS: readonly string[] = [
+  // SAML response parsing failures are environmental (cloud IAM service, test account).
+  'Failed to parse SAML response value',
+  // Cloud session creation failures are environmental (cloud login endpoint unavailable, MFA, etc.).
+  'Failed to create the new cloud session',
+  // Network connection refused errors are environmental (target host/service unreachable).
+  'connect ECONNREFUSED',
+];
+
 const isLikelyIrrelevant = (name: string, failure: string) => {
-  // no filters for Scout failures at the moment
-  return false;
+  return LIKELY_IRRELEVANT_FAILURE_SUBSTRINGS.some((substring) => failure.includes(substring));
 };
 
 export async function getScoutFailures(reportPath: string): Promise<ScoutTestFailureExtended[]> {

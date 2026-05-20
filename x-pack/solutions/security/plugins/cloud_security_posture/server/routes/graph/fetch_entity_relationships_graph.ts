@@ -76,20 +76,20 @@ FROM ${indexName}
 ${forkBranches}
 | WHERE _target_id != ""
 // Store source entity fields before lookup (they get overwritten by target entity fields)
+| INLINE STATS _source_host_ip = VALUES(TO_STRING(host.ip)) // Extract host IPs as string type
 | RENAME _source_id = entity.id
 | RENAME _source_name = entity.name
 | RENAME _source_type = entity.type
 | RENAME _source_sub_type = entity.sub_type
-| RENAME _source_host_ip = host.ip
 | RENAME _source_engine_metadata_type = entity.EngineMetadata.Type
 // Lookup target entity metadata
 | EVAL entity.id = _target_id
 | LOOKUP JOIN ${indexName} ON entity.id
 | EVAL _target_source_fields = ${buildSourceFieldsJson(GRAPH_ACTOR_EUID_SOURCE_FIELDS)}
+| INLINE STATS _target_host_ip = VALUES(TO_STRING(host.ip)) // Extract host IPs as string type
 | RENAME _target_name = entity.name
 | RENAME _target_type = entity.type
 | RENAME _target_sub_type = entity.sub_type
-| RENAME _target_host_ip = host.ip
 | RENAME _target_engine_metadata_type = entity.EngineMetadata.Type
 // Restore source entity fields
 | RENAME entity.id = _source_id
@@ -118,7 +118,7 @@ ${forkBranches}
       CASE(
         host.ip IS NOT NULL,
         CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},
-          "\\"ip\\":\\"", TO_STRING(host.ip), "\\"",
+          "\\"ip\\":[\\"", MV_CONCAT(host.ip, "\\",\\""), "\\"]",
           ${JSON_OBJECT_END}),
         ""
       ),
@@ -143,7 +143,7 @@ ${forkBranches}
       CASE(
         _target_host_ip IS NOT NULL,
         CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},
-          "\\"ip\\":\\"", TO_STRING(_target_host_ip), "\\"",
+          "\\"ip\\":[\\"", MV_CONCAT(_target_host_ip, "\\",\\""), "\\"]",
           ${JSON_OBJECT_END}),
         ""
       ),
@@ -317,6 +317,7 @@ export const fetchEntities = async ({
   const esqlQuery = `SET unmapped_fields="nullify";
     FROM ${indexName}
     | WHERE entity.id IN (${entityIds.map((_, idx) => `?entityId${idx}`).join(',')})
+    | INLINE STATS __host_ip = VALUES(TO_STRING(host.ip)) // Extract host IPs as string type
     | EVAL id = entity.id
     | EVAL name = entity.name
     | EVAL type = entity.type
@@ -340,7 +341,7 @@ export const fetchEntities = async ({
         CASE(
           host.ip IS NOT NULL,
           CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},
-            "\\"ip\\":\\"", TO_STRING(host.ip), "\\"",
+            "\\"ip\\":[\\"", MV_CONCAT(__host_ip, "\\",\\""), "\\"]",
             ${JSON_OBJECT_END}),
           ""
         ),

@@ -147,6 +147,79 @@ describe('RRule Scheduling Integration', () => {
         })
       ).toThrow('MONTHLY frequency requires either bymonthday or byweekday values');
     });
+
+    it('should reject invalid byhour values', () => {
+      expect(() =>
+        convertRRuleToTaskSchedule({
+          freq: 'DAILY',
+          interval: 1,
+          tzid: 'UTC',
+          byhour: [25],
+        })
+      ).toThrow('Invalid RRule byhour: "25"');
+    });
+
+    it('should reject invalid byminute values', () => {
+      expect(() =>
+        convertRRuleToTaskSchedule({
+          freq: 'DAILY',
+          interval: 1,
+          tzid: 'UTC',
+          byminute: [60],
+        })
+      ).toThrow('Invalid RRule byminute: "60"');
+    });
+
+    it('should reject invalid bymonthday values', () => {
+      expect(() =>
+        convertRRuleToTaskSchedule({
+          freq: 'MONTHLY',
+          interval: 1,
+          tzid: 'UTC',
+          bymonthday: [32],
+        })
+      ).toThrow('Invalid RRule bymonthday: "32"');
+    });
+
+    it('should reject invalid byweekday values', () => {
+      expect(() =>
+        convertRRuleToTaskSchedule({
+          freq: 'WEEKLY',
+          interval: 1,
+          tzid: 'UTC',
+          byweekday: ['INVALID'],
+        })
+      ).toThrow('Invalid RRule byweekday: "INVALID"');
+    });
+
+    it('should reject invalid dtstart values', () => {
+      expect(() =>
+        convertRRuleToTaskSchedule({
+          freq: 'DAILY',
+          interval: 1,
+          tzid: 'UTC',
+          dtstart: 'invalid-date',
+        })
+      ).toThrow('Invalid RRule dtstart: "invalid-date"');
+    });
+
+    it('should accept valid complex RRule with multiple days, hours, and start date', () => {
+      const result = convertRRuleToTaskSchedule({
+        freq: 'WEEKLY',
+        interval: 2,
+        tzid: 'America/New_York',
+        byweekday: ['MO', 'WE', 'FR'],
+        byhour: [8, 17],
+        byminute: [0],
+        dtstart: '2024-01-15T08:00:00-05:00',
+      });
+
+      expect(result.rrule).toBeDefined();
+      expect(result.rrule.interval).toBe(2);
+      expect(result.rrule.byweekday).toEqual(['MO', 'WE', 'FR']);
+      expect(result.rrule.byhour).toEqual([8, 17]);
+      expect(result.rrule.dtstart).toBe('2024-01-15T08:00:00-05:00');
+    });
   });
 
   describe('convertWorkflowScheduleToTaskSchedule', () => {

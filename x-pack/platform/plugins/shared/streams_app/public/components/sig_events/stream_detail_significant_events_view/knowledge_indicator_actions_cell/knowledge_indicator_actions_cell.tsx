@@ -143,7 +143,7 @@ export function KnowledgeIndicatorActionsCell({
       panelPaddingSize="none"
       anchorPosition="downRight"
     >
-      <EuiContextMenuPanel size="s" items={[...featureActionItems, ...queryActionItems]} />
+      <EuiContextMenuPanel items={[...featureActionItems, ...queryActionItems]} />
     </EuiPopover>
   );
 }

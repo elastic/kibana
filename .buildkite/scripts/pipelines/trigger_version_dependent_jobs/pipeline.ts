@@ -12,7 +12,7 @@ import type { BuildkiteTriggerStep } from '#pipeline-utils';
 import { getVersionsFile } from '#pipeline-utils';
 
 const pipelineSets = {
-  'es-forward-9-dot-2': 'kibana-es-forward-compatibility-testing-9-dot-2',
+  'es-forward-9-dot-3': 'kibana-es-forward-compatibility-testing-9-dot-3',
   'artifacts-snapshot': 'kibana-artifacts-snapshot',
   'artifacts-staging': 'kibana-artifacts-staging',
   'artifacts-trigger': 'kibana-artifacts-trigger',
@@ -37,8 +37,8 @@ async function main() {
   }
 
   switch (pipelineSetName) {
-    case 'es-forward-9-dot-2': {
-      pipelineSteps.push(...getESForward9Dot2PipelineTriggers());
+    case 'es-forward-9-dot-3': {
+      pipelineSteps.push(...getESForward9Dot3PipelineTriggers());
       break;
     }
     case 'artifacts-snapshot': {
@@ -62,25 +62,28 @@ async function main() {
 }
 
 /**
- * This pipeline is testing the forward compatibility of Kibana with different versions of Elasticsearch for 9.2.
+ * This pipeline is testing the forward compatibility of Kibana with different versions of Elasticsearch for 9.3.
  * Should be triggered for combinations of (Kibana@8.19 + ES@9.x {current open branches on the same major})
  */
-export function getESForward9Dot2PipelineTriggers(): BuildkiteTriggerStep[] {
+export function getESForward9Dot3PipelineTriggers(): BuildkiteTriggerStep[] {
   const versions = getVersionsFile();
   const KIBANA_8_19 = versions.versions.find((v) => v.branch === '8.19');
   if (!KIBANA_8_19) {
-    throw new Error('Update ES forward compatibility 9.2 pipeline to 8.19');
+    throw new Error('Update ES forward compatibility 9.3 pipeline to 8.19');
   }
   const targetESVersions = versions.versions.filter(
     (v) =>
-      // 9.2+, 8.19 => 9.0 is not supported
-      (v.branch.startsWith('9.') && v.branch !== '9.0' && v.branch !== '9.1') ||
+      // 9.3+, 8.19 => 9.0 is not supported
+      (v.branch.startsWith('9.') &&
+        v.branch !== '9.0' &&
+        v.branch !== '9.1' &&
+        v.branch !== '9.2') ||
       v.branch.includes('main')
   );
 
   return targetESVersions.map(({ version }) => {
     return {
-      trigger: pipelineSets['es-forward-9-dot-2'],
+      trigger: pipelineSets['es-forward-9-dot-3'],
       async: true,
       label: `Triggering Kibana ${KIBANA_8_19.version} + ES ${version} forward compatibility`,
       build: {

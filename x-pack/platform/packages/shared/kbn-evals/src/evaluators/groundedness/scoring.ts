@@ -7,7 +7,8 @@
 
 import type { GroundednessAnalysis } from './types';
 
-// Scoring weights based on the severity of each error type
+// Scoring weights based on the severity of each error type.
+// Keys must match the `verdict` enum emitted by the LLM judge (see ./prompt.ts and ./types.ts).
 const CLAIM_FACTUAL_SCORE_MAP = {
   FULLY_SUPPORTED: 1.0,
   PARTIALLY_SUPPORTED: {
@@ -18,7 +19,7 @@ const CLAIM_FACTUAL_SCORE_MAP = {
     central: 0.0,
     peripheral: 0.1,
   },
-  NOT_IN_GROUND_TRUTH: {
+  NOT_FOUND: {
     central: 0.1,
     peripheral: 0.5,
   },
@@ -43,7 +44,7 @@ export function calculateGroundednessScore(groundednessAnalysis: GroundednessAna
 
   let productOfScores = 1.0;
   for (const claim of analysis) {
-    const verdict = claim.verdict || 'NOT_IN_GROUND_TRUTH';
+    const verdict = claim.verdict || 'NOT_FOUND';
     const centrality = claim.centrality || 'peripheral';
 
     const scoreMapEntry = CLAIM_FACTUAL_SCORE_MAP[verdict as keyof typeof CLAIM_FACTUAL_SCORE_MAP];

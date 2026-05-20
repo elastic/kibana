@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface */

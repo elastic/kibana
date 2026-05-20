@@ -16,6 +16,10 @@ done
 DIR="$(dirname "${SCRIPT}")/.."
 CONFIG_DIR=${KBN_PATH_CONF:-"$DIR/config"}
 
+{{#rspack}}
+export KBN_USE_RSPACK=true
+{{/rspack}}
+
 test_node() {
   test -x "$NODE"
   if [ ! -x "$NODE" ]; then

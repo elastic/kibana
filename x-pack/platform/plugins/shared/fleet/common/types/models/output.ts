@@ -102,7 +102,7 @@ export interface KafkaOutput extends NewBaseOutput {
   version?: string;
   key?: string;
   compression?: ValueOf<KafkaCompressionType>;
-  compression_level?: number;
+  compression_level?: number | null;
   auth_type?: ValueOf<KafkaAuthType>;
   connection_type?: ValueOf<KafkaConnectionTypeType>;
   username?: string | null;

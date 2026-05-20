@@ -1,0 +1,10 @@
+﻿prs:
+- https://github.com/elastic/kibana/pull/262757
+issues:
+- https://github.com/elastic/search-team/issues/13907
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-06
+title: 'Fix bug with Auth header needing "Authorization: Bearer <token>"'
+description: Fixed a bug where the Figma and Notion connectors were returning 401 when chatting in Agent Builder, despite the connectors being authorized.

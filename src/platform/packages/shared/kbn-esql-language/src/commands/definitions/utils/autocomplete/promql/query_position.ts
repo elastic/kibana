@@ -15,7 +15,7 @@ import type {
   PromQLLabel,
   PromQLSelector,
 } from '@elastic/esql';
-import { TRAILING_COMMA_REGEX } from '../../shared';
+import { endsWithComma } from '../../regex';
 import type { PromQLFunctionParamType } from '../../../types';
 import type { CursorMatch, PromqlDetailedPosition } from './types';
 import {
@@ -132,7 +132,7 @@ export function getQueryPosition(
       node.type === 'identifier' &&
       parent?.type === 'label-map' &&
       innermostFunc &&
-      TRAILING_COMMA_REGEX.test(textBeforeCursor);
+      endsWithComma(textBeforeCursor);
 
     if (!skipLabel) {
       const labelPos = resolveLabelPosition(match, cursor, textBeforeCursor, getSignatureTypes());

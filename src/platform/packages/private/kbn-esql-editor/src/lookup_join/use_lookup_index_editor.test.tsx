@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { renderHook } from '@testing-library/react';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { of } from 'rxjs';
 import {

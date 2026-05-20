@@ -19,7 +19,6 @@ project:
 dependsOn:
   - '@kbn/ml-is-populated-object'
   - '@kbn/field-types'
-  - '@kbn/ml-error-utils'
   - '@kbn/ml-anomaly-utils'
 tags:
   - shared-common

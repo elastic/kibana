@@ -44,6 +44,11 @@ export interface ContentsProps {
   onFocusClick: (event: React.MouseEvent<HTMLAnchorElement>) => void;
   showDiagnoseButton?: boolean;
   onDiagnoseClick?: () => void;
+  isEmbedded?: boolean;
+  /** Override for the Focus map button visibility. Defaults to `!isEmbedded`. */
+  showFocusMap?: boolean;
+  /** Strip `kuery` from popover-built URLs (env still flows through). */
+  clearKueryOnNavigation?: boolean;
 }
 
 export const ServiceContentsWithDiagnose = withDiagnoseButton(ServiceContents);
@@ -90,6 +95,12 @@ interface PopoverContentProps {
   onFocusClick: (event: MouseEvent<HTMLAnchorElement>) => void;
   /** Called when user clicks "Open diagnostic tool" – parent should open the flyout and close the popover. */
   onOpenDiagnostic?: () => void;
+  /** When true, hides navigation actions like "Focus map" that don't apply in dashboard embeds. */
+  isEmbedded?: boolean;
+  /** Optional override for the Focus map button visibility. Defaults to `!isEmbedded`. */
+  showFocusMap?: boolean;
+  /** When true, popover-built URLs (Service Details / Focus map) drop `kuery`. See `ContentsProps`. */
+  clearKueryOnNavigation?: boolean;
 }
 
 /**
@@ -104,6 +115,9 @@ export function PopoverContent({
   end,
   onFocusClick,
   onOpenDiagnostic,
+  isEmbedded,
+  showFocusMap,
+  clearKueryOnNavigation,
 }: PopoverContentProps) {
   const { core } = useApmPluginContext();
   const isDiagnosticModeEnabled = core?.uiSettings?.get(enableDiagnosticMode);
@@ -160,6 +174,9 @@ export function PopoverContent({
         end={end}
         showDiagnoseButton={isDiagnosticModeEnabled}
         onDiagnoseClick={onOpenDiagnostic}
+        isEmbedded={isEmbedded}
+        showFocusMap={showFocusMap}
+        clearKueryOnNavigation={clearKueryOnNavigation}
       />
     </EuiFlexGroup>
   );

@@ -13,19 +13,39 @@ import type { ContentListItem } from '@kbn/content-list-provider';
 import { i18n } from '@kbn/i18n';
 import type { ColumnBuilderContext } from '../types';
 import { column } from '../part';
+import { getColumnLayoutProps, pickAttribute, type ColumnLayoutProps } from '../layout';
 import { CreatedByCell } from './created_by_cell';
 
+/**
+ * Default column header.
+ *
+ * ContentList intentionally standardises on `'Created by'` for both the
+ * column header *and* the filter button, correcting the legacy
+ * `TableListView` mismatch where the column said `'Creator'` but the filter
+ * said `'Created by'`. Translators in `de-DE.json` / `fr-FR.json` /
+ * `ja-JP.json` / `zh-CN.json` get fresh entries for this key — see the
+ * package README's "Naming and translation backfill" notes before changing
+ * the wording.
+ */
 const DEFAULT_COLUMN_TITLE = i18n.translate(
   'contentManagement.contentList.table.column.createdBy',
   { defaultMessage: 'Created by' }
 );
 
 /**
+ * Locked English baseline width for the created-by column.
+ *
+ * `88px` ≈ the `'Created by'` header text (~75px) plus a small breathing
+ * gutter for the centered 24px avatar. Long-text locales (e.g. de "Erstellt
+ * von" ~85px) still fit because `minWidth: 'max-content'` lets the column
+ * expand past `width` when the header demands it.
+ */
+const DEFAULT_CREATED_BY_WIDTH = '88px';
+
+/**
  * Props for the `Column.CreatedBy` preset component.
  */
-export interface CreatedByColumnProps {
-  /** Column width (CSS value). */
-  width?: string;
+export interface CreatedByColumnProps extends ColumnLayoutProps {
   /** Override column header text. Defaults to "Created by". */
   columnTitle?: string;
 }
@@ -44,13 +64,23 @@ export const buildCreatedByColumn = (
     return undefined;
   }
 
-  const { width, columnTitle } = attributes;
+  const { columnTitle } = attributes;
+  const resolvedWidth = pickAttribute(attributes, 'width', DEFAULT_CREATED_BY_WIDTH);
 
   return {
+    ...getColumnLayoutProps({
+      width: resolvedWidth,
+      minWidth: pickAttribute(attributes, 'minWidth', 'max-content'),
+      maxWidth: pickAttribute(attributes, 'maxWidth', resolvedWidth),
+      truncateText: pickAttribute(attributes, 'truncateText', undefined),
+    }),
     field: 'createdBy',
     name: columnTitle ?? DEFAULT_COLUMN_TITLE,
     sortable: false,
-    ...(width && { width }),
+    // The cell renders a small fixed-size `EuiAvatar` (or a `—` placeholder),
+    // never free-form text — center it horizontally in the column so it
+    // doesn't visually float to the left of the header.
+    align: 'center',
     'data-test-subj': 'content-list-table-column-createdBy',
     render: (value: string | undefined, record: ContentListItem) => {
       return <CreatedByCell createdBy={value} managed={!!record.managed} />;
@@ -78,7 +108,14 @@ export const buildCreatedByColumn = (
  * </ContentListTable>
  * ```
  */
+/** EUI user-profile avatar default diameter. */
+const CREATED_BY_AVATAR_SIZE = 24;
+
 export const CreatedByColumn = column.createPreset({
   name: 'createdBy',
   resolve: buildCreatedByColumn,
+  skeleton: () => ({
+    shape: 'circle',
+    size: CREATED_BY_AVATAR_SIZE,
+  }),
 });

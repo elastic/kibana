@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { buildDataTableRecord } from '@kbn/discover-utils';
@@ -34,6 +34,7 @@ describe('initialize fetch', () => {
     stateManager,
     setters,
   } = getMockedSearchApi({ searchSource, savedSearch });
+  const refreshTrigger$ = new BehaviorSubject<void>(undefined);
 
   const waitOneTick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -45,6 +46,7 @@ describe('initialize fetch', () => {
       scopedProfilesManager: discoverServiceMock.profilesManager.createScopedProfilesManager({
         scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
       }),
+      refreshTrigger$,
       ...setters,
     });
     await waitOneTick();
@@ -116,5 +118,28 @@ describe('initialize fetch', () => {
     await waitOneTick();
     expect(abortSignals[1].aborted).toBe(true); // second request should have been aborted
     expect(abortSignals[2].aborted).toBe(false); // third request was not aborted
+  });
+
+  it('should fetch again when refresh trigger emits', async () => {
+    const fetchMock = jest.fn().mockImplementation(() =>
+      of({
+        rawResponse: {
+          hits: {
+            hits: [{ _id: '1', _index: dataViewMock.id }],
+            total: 1,
+          },
+        },
+      })
+    );
+    searchSource.fetch$ = fetchMock;
+
+    mockedApi.savedSearch$.next(savedSearch);
+    await waitOneTick();
+    const callsBeforeRefresh = fetchMock.mock.calls.length;
+
+    refreshTrigger$.next(undefined);
+    await waitOneTick();
+
+    expect(fetchMock.mock.calls.length).toBeGreaterThan(callsBeforeRefresh);
   });
 });

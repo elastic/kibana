@@ -8,19 +8,22 @@
 import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import type { RawAction } from '../../../types';
 import type { Connector } from '../types';
+import { getAuthMode } from './get_auth_mode';
 
 export function connectorFromSavedObject(
   savedObject: SavedObject<RawAction>,
   isDeprecated: boolean,
   isConnectorTypeDeprecated: boolean
 ): Connector {
+  const { authMode: savedAuthMode, ...restAttributes } = savedObject.attributes;
+  const authMode = getAuthMode(savedAuthMode as Connector['authMode'] | undefined);
   return {
     id: savedObject.id,
-    ...savedObject.attributes,
+    ...restAttributes,
     isPreconfigured: false,
     isDeprecated,
     isSystemAction: false,
     isConnectorTypeDeprecated,
-    authMode: (savedObject.attributes.authMode ?? 'shared') as Connector['authMode'],
+    authMode,
   };
 }

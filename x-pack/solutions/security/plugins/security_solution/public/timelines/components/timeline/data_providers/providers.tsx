@@ -69,10 +69,8 @@ const getItemStyle = (
 const DroppableContainer = styled.div`
   min-height: ${ROW_OF_DATA_PROVIDERS_HEIGHT}px;
   height: auto !important;
-  display: none;
 
   .${IS_DRAGGING_CLASS_NAME} &:hover {
-    display: flex;
     background-color: ${({ theme }) => rgba(theme.eui.euiColorSuccess, 0.2)} !important;
   }
 `;

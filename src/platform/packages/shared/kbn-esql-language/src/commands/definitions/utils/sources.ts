@@ -6,8 +6,15 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { IndexAutocompleteItem, ESQLSourceResult, EsqlView } from '@kbn/esql-types';
+import type {
+  ESQLCallbacks,
+  EsqlDataset,
+  IndexAutocompleteItem,
+  ESQLSourceResult,
+  EsqlView,
+} from '@kbn/esql-types';
 import { SOURCES_TYPES } from '@kbn/esql-types';
+import { EsqlQuery } from '@elastic/esql';
 import { i18n } from '@kbn/i18n';
 import type { ESQLAstAllCommands, ESQLAstJoinCommand, ESQLSource } from '@elastic/esql/types';
 import { isAsExpression, Walker, LeafPrinter, Parser } from '@elastic/esql';
@@ -158,6 +165,27 @@ export const buildViewsDefinitions = (
     });
 
 /**
+ * Builds suggestion items for ES|QL datasets (GET _query/dataset).
+ */
+export const buildDatasetsDefinitions = (
+  datasets: EsqlDataset[],
+  alreadyUsed: string[] = []
+): ISuggestionItem[] =>
+  datasets
+    .filter(({ name }) => !alreadyUsed.includes(name))
+    .map(({ name }) => {
+      const text = getSafeInsertSourceText(name);
+      return withAutoSuggest({
+        label: name,
+        text,
+        kind: 'Issue',
+        detail: i18n.translate('kbn-esql-language.esql.autocomplete.datasetDefinition', {
+          defaultMessage: 'Dataset',
+        }),
+      });
+    });
+
+/**
  * Checks if the source exists in the provided sources set.
  * It supports both exact matches and fuzzy searches.
  *
@@ -199,6 +227,37 @@ export function getSourcesFromCommands(
   );
 }
 
+/**
+ * Returns true when a wired stream has been used as a source in the query.
+ */
+export async function hasWiredStreamsInQuery(
+  query: string,
+  callbacks: Pick<ESQLCallbacks, 'getSources'> = {}
+): Promise<boolean> {
+  const { getSources } = callbacks;
+  if (!getSources) {
+    return false;
+  }
+
+  // Parse the query to get the sources used in the query.
+  const esqlQuery = EsqlQuery.fromSrc(query);
+  const sourcesInQuery = getSourcesFromCommands(esqlQuery.ast.commands, 'index');
+  if (sourcesInQuery.length === 0) {
+    return false;
+  }
+
+  // Get the available sources, this operations should not be expensive as it is cached.
+  const availableSources = await getSources();
+  const availableWiredStreams = new Set(
+    availableSources
+      .filter((source) => source.type === SOURCES_TYPES.WIRED_STREAM)
+      .map((source) => source.name)
+  );
+
+  // Check if any of the sources used in the query are streams.
+  return sourcesInQuery.some((source) => sourceExists(source.name, availableWiredStreams));
+}
+
 export function getSourceSuggestions(
   sources: ESQLSourceResult[],
   alreadyUsed: string[],
@@ -231,6 +290,7 @@ export async function additionalSourcesSuggestions(
   ignored: string[],
   recommendedQuerySuggestions: ISuggestionItem[],
   views: EsqlView[] = [],
+  datasets: EsqlDataset[] = [],
   sourceReplacementContext?: {
     textBeforeCursor: string;
     commandStart: number;
@@ -239,6 +299,7 @@ export async function additionalSourcesSuggestions(
   const sourceNames = new Set([
     ...sources.map(({ name }) => name),
     ...views.map(({ name }) => name),
+    ...datasets.map(({ name }) => name),
   ]);
   const prefix = findFinalWord(queryText);
   const isComplete = prefix ? sourceExists(prefix, sourceNames) : false;
@@ -282,8 +343,9 @@ export async function additionalSourcesSuggestions(
 
   const sourceSuggestions = getSourceSuggestions(sources, ignored, sourceReplacementContext);
   const viewSuggestions = buildViewsDefinitions(views, ignored);
+  const datasetSuggestions = buildDatasetsDefinitions(datasets, ignored);
 
-  return [...sourceSuggestions, ...viewSuggestions];
+  return [...sourceSuggestions, ...viewSuggestions, ...datasetSuggestions];
 }
 
 // Treating lookup and time_series mode indices

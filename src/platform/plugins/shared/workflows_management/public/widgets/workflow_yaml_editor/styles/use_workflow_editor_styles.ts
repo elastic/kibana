@@ -103,6 +103,18 @@ const editorStyleMap = {
           borderRadius: '50%',
         },
       },
+
+      // Custom trigger `on.workflowEvents` (ignore / allow-all / avoid-loop)
+      '.workflow-trigger-on-chain-glyph': {
+        '&:before': {
+          content: '""',
+          display: 'block',
+          width: '12px',
+          height: '12px',
+          backgroundColor: euiTheme.colors.warning,
+          borderRadius: '50%',
+        },
+      },
       '.alert-trigger-highlight': {
         backgroundColor: euiTheme.colors.backgroundLightWarning,
       },

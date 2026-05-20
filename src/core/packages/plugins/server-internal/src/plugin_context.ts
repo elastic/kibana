@@ -326,6 +326,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     dataStreams: {
       registerDataStream: (dataStream) => deps.dataStreams.registerDataStream(dataStream),
     },
+    userStorage: {
+      register: deps.userStorage.register,
+    },
   };
 }
 
@@ -428,6 +431,9 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     },
     dataStreams: {
       initializeClient: (dataStream) => deps.dataStreams.initializeClient(dataStream),
+    },
+    userStorage: {
+      asScoped: deps.userStorage.asScoped,
     },
   };
 }

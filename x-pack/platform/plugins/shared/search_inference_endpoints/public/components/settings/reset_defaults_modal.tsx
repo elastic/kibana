@@ -35,6 +35,7 @@ export const ResetDefaultsModal: React.FC<ResetDefaultsModalProps> = ({ onConfir
         { defaultMessage: 'Reset to default' }
       )}
       buttonColor="primary"
+      defaultFocusedButton="confirm"
       data-test-subj="resetDefaultsModal"
     >
       <p>

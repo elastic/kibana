@@ -162,11 +162,6 @@ export const validate = (
   const messages: ESQLMessage[] = [];
 
   // custom check specific to FORK
-  if (command.args.length < MIN_BRANCHES) {
-    messages.push(errors.forkTooFewBranches(command));
-  }
-
-  // custom check specific to FORK
   if (command.args.length > MAX_BRANCHES) {
     messages.push(errors.forkTooManyBranches(command));
   }

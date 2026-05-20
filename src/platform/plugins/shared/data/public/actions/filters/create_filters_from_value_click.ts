@@ -155,14 +155,19 @@ const createFilterFromRawColumnsESQL = async (
     http: getHttp(),
   });
 
-  // `column.name` can be a custom Lens label;
-  // `column.id` matches the ES|QL column / field used for lookup and filters
-  const fieldName = column.id;
+  // Prefer `sourceField` (index field name). Fall back to `column.name` when it is not a string
+  const sourceFieldName = column.meta?.sourceParams?.sourceField;
+  const fieldName = typeof sourceFieldName === 'string' ? sourceFieldName : column.name;
 
   const field = dataView.getFieldByName(fieldName);
 
   // Field should be present in the data view and filterable
   if (!field || !field.filterable) {
+    return [];
+  }
+
+  // Avoid index phrase filter when output column name collides with an index field
+  if (column.isComputedColumn === true && column.name === fieldName) {
     return [];
   }
 

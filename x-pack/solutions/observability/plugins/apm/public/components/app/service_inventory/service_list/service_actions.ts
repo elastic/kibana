@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { sloListLocatorID, type SloListLocatorParams } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import { ApmRuleType } from '@kbn/rule-data-utils';
+import type { ApmRuleType } from '@kbn/rule-data-utils';
 import { useMemo } from 'react';
 import type { ServiceListItem } from '../../../../../common/service_inventory';
 import type { ApmIndicatorType } from '../../../../../common/slo_indicator_types';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getManageSlosUrl } from '../../../../hooks/use_manage_slos_url';
-import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
-import type { TableAction, TableActions } from '../../../shared/managed_table';
+import { useAlertSloActions } from '../../../../hooks/use_alert_slo_actions';
+import type { TableActions } from '../../../shared/managed_table';
 import type { IndexType } from '../../../shared/links/discover_links/get_esql_query';
 
 interface UseServiceActionsParams {
@@ -28,13 +26,7 @@ export function useServiceActions({
   openSloFlyout,
   getDiscoverHref,
 }: UseServiceActionsParams): TableActions<ServiceListItem> {
-  const { core, plugins, share } = useApmPluginContext();
-  const { capabilities } = core.application;
-  const sloListLocator = share?.url?.locators?.get<SloListLocatorParams>(sloListLocatorID);
-
-  const { canSaveAlerts } = getAlertingCapabilities(plugins, capabilities);
-  const canSaveApmAlerts = !!(capabilities.apm.save && canSaveAlerts);
-  const canWriteSlos = !!capabilities.slo?.write;
+  const { getAlertActionGroup, getSloActionGroup, sloListLocator } = useAlertSloActions();
 
   const actions = useMemo(() => {
     const actionsList: TableActions<ServiceListItem> = [];
@@ -59,116 +51,31 @@ export function useServiceActions({
       ],
     });
 
-    if (canSaveApmAlerts) {
-      actionsList.push({
-        id: 'alerts',
-        groupLabel: i18n.translate('xpack.apm.servicesTable.actions.alertsGroupLabel', {
-          defaultMessage: 'Alerts',
-        }),
-        actions: [
-          {
-            id: 'createThresholdRule',
-            name: i18n.translate('xpack.apm.servicesTable.actions.createThresholdRule', {
-              defaultMessage: 'Create threshold rule',
-            }),
-            items: [
-              {
-                id: 'createLatencyRule',
-                name: i18n.translate('xpack.apm.servicesTable.actions.createLatencyRule', {
-                  defaultMessage: 'Latency',
-                }),
-                onClick: (item) => {
-                  openAlertFlyout(ApmRuleType.TransactionDuration, item.serviceName);
-                },
-              },
-              {
-                id: 'createFailedTransactionRateRule',
-                name: i18n.translate(
-                  'xpack.apm.servicesTable.actions.createFailedTransactionRateRule',
-                  {
-                    defaultMessage: 'Failed transaction rate',
-                  }
-                ),
-                onClick: (item) => {
-                  openAlertFlyout(ApmRuleType.TransactionErrorRate, item.serviceName);
-                },
-              },
-            ],
-          },
-          {
-            id: 'createAnomalyRule',
-            name: i18n.translate('xpack.apm.servicesTable.actions.createAnomalyRule', {
-              defaultMessage: 'Create anomaly rule',
-            }),
-            onClick: (item) => {
-              openAlertFlyout(ApmRuleType.Anomaly, item.serviceName);
-            },
-          },
-          {
-            id: 'createErrorCountRule',
-            name: i18n.translate('xpack.apm.servicesTable.actions.createErrorCountRule', {
-              defaultMessage: 'Create error count rule',
-            }),
-            onClick: (item) => {
-              openAlertFlyout(ApmRuleType.ErrorCount, item.serviceName);
-            },
-          },
-        ],
-      });
+    const alertGroup = getAlertActionGroup<ServiceListItem>({
+      onAlertClick: (item, ruleType) => openAlertFlyout(ruleType, item.serviceName),
+    });
+    if (alertGroup) {
+      actionsList.push(alertGroup);
     }
 
-    if (canWriteSlos) {
-      const sloActions: Array<TableAction<ServiceListItem>> = [
-        {
-          id: 'createLatencySlo',
-          name: i18n.translate('xpack.apm.servicesTable.actions.createLatencySlo', {
-            defaultMessage: 'Create APM latency SLO',
-          }),
-          onClick: (item: ServiceListItem) => {
-            openSloFlyout('sli.apm.transactionDuration', item.serviceName);
-          },
-        },
-        {
-          id: 'createAvailabilitySlo',
-          name: i18n.translate('xpack.apm.servicesTable.actions.createAvailabilitySlo', {
-            defaultMessage: 'Create APM availability SLO',
-          }),
-          onClick: (item: ServiceListItem) => {
-            openSloFlyout('sli.apm.transactionErrorRate', item.serviceName);
-          },
-        },
-        ...(sloListLocator
-          ? [
-              {
-                id: 'manageSlos',
-                name: i18n.translate('xpack.apm.servicesTable.actions.manageSlos', {
-                  defaultMessage: 'Manage SLOs',
-                }),
-                icon: 'tableOfContents' as const,
-                href: (item: ServiceListItem) =>
-                  getManageSlosUrl(sloListLocator, { serviceName: item.serviceName }),
-              },
-            ]
-          : []),
-      ];
-
-      actionsList.push({
-        id: 'slos',
-        groupLabel: i18n.translate('xpack.apm.servicesTable.actions.slosGroupLabel', {
-          defaultMessage: 'SLOs',
-        }),
-        actions: sloActions,
-      });
+    const sloGroup = getSloActionGroup<ServiceListItem>({
+      onSloClick: (item, indicatorType) => openSloFlyout(indicatorType, item.serviceName),
+      getManageSlosHref: sloListLocator
+        ? (item) => getManageSlosUrl(sloListLocator, { serviceName: item.serviceName })
+        : undefined,
+    });
+    if (sloGroup) {
+      actionsList.push(sloGroup);
     }
 
     return actionsList;
   }, [
     openAlertFlyout,
     openSloFlyout,
-    canSaveApmAlerts,
-    canWriteSlos,
-    sloListLocator,
     getDiscoverHref,
+    getAlertActionGroup,
+    getSloActionGroup,
+    sloListLocator,
   ]);
 
   return actions;

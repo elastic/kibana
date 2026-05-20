@@ -57,7 +57,7 @@ describe('CommentActions', () => {
     const { container } = render(<CommentActions message={message} />, { wrapper: Wrapper });
 
     fireEvent.click(
-      container.querySelector('[aria-label="Add message content as a timeline note"]')!
+      container.querySelector('[aria-label="Add message content as a Timeline note"]')!
     );
 
     expect(updateAndAssociateNode).toHaveBeenCalledWith(

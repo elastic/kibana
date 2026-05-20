@@ -1,0 +1,56 @@
+openapi: 3.0.0
+info:
+  title: Respond To Inbox Action API endpoint
+  version: '1'
+paths:
+  /internal/inbox/actions/{source_app}/{source_id}/respond:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: RespondToInboxAction
+      description: Submit a response for a pending inbox action. The `input` body is validated against the action's `input_schema` by the provider.
+      summary: Respond to an inbox action
+      tags:
+        - Inbox API
+      parameters:
+        - name: source_app
+          in: path
+          required: true
+          schema:
+            type: string
+          description: App id of the provider that owns this action (e.g. `workflows`)
+        - name: source_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Provider-scoped identifier of the action to respond to
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                input:
+                  type: object
+                  additionalProperties: true
+                  description: Response payload. Shape must conform to the inbox action's `input_schema`.
+              required:
+                - input
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                required:
+                  - ok
+        '404':
+          description: No provider registered for the given `source_app`
+        '400':
+          description: Response body failed schema validation

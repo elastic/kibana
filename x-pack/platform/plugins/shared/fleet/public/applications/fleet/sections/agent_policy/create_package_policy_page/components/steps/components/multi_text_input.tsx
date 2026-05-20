@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiFieldText,
+  EuiFieldPassword,
   EuiButtonIcon,
   EuiSpacer,
 } from '@elastic/eui';
@@ -26,6 +27,7 @@ interface Props {
   errors?: Array<{ message: string; index?: number }>;
   isInvalid?: boolean;
   isDisabled?: boolean;
+  isSecret?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -38,6 +40,7 @@ interface RowProps {
   onBlur?: () => void;
   autoFocus?: boolean;
   isDisabled?: boolean;
+  isSecret?: boolean;
   isMultiRow?: boolean;
 }
 
@@ -50,6 +53,7 @@ const Row: FunctionComponent<RowProps> = ({
   onBlur,
   autoFocus,
   isDisabled,
+  isSecret,
   isMultiRow,
 }) => {
   const onDeleteHandler = useCallback(() => {
@@ -63,28 +67,31 @@ const Row: FunctionComponent<RowProps> = ({
     [onChange, index]
   );
 
+  const ariaLabel = isMultiRow
+    ? i18n.translate('xpack.fleet.multiTextInput.ariaLabel', {
+        defaultMessage: '"{fieldLabel}" input {index}',
+        values: {
+          fieldLabel,
+          index: index + 1,
+        },
+      })
+    : fieldLabel;
+
+  const InputComponent = isSecret ? EuiFieldPassword : EuiFieldText;
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
       <EuiFlexItem>
-        <EuiFieldText
+        <InputComponent
           fullWidth
           value={value}
           onChange={onChangeHandler}
           autoFocus={autoFocus}
           disabled={isDisabled}
           onBlur={onBlur}
-          aria-label={
-            isMultiRow
-              ? i18n.translate('xpack.fleet.multiTextInput.ariaLabel', {
-                  defaultMessage: '"{fieldLabel}" input {index}',
-                  values: {
-                    fieldLabel,
-                    index: index + 1,
-                  },
-                })
-              : fieldLabel
-          }
+          aria-label={ariaLabel}
           data-test-subj={`multiTextInputRow-${index}`}
+          {...(isSecret ? { type: 'dual' as const } : {})}
         />
       </EuiFlexItem>
       {isMultiRow && (
@@ -119,6 +126,7 @@ export const MultiTextInput: FunctionComponent<Props> = ({
   onBlur,
   isInvalid,
   isDisabled,
+  isSecret,
   errors,
   'data-test-subj': dataTestSubj,
 }) => {
@@ -173,6 +181,7 @@ export const MultiTextInput: FunctionComponent<Props> = ({
               value={row}
               autoFocus={autoFocus}
               isDisabled={isDisabled}
+              isSecret={isSecret}
               isMultiRow={rows.length > 1}
             />
           </EuiFlexItem>

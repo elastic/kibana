@@ -123,6 +123,7 @@ export function SloPopoverAndFlyout({ canReadSlos, canWriteSlos }: Props) {
     <>
       <EuiPopover
         id="slos-menu"
+        aria-label={sloLabel}
         button={
           <EuiHeaderLink
             color="primary"
