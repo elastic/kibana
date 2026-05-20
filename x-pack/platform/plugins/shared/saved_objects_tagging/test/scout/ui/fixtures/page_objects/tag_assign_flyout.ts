@@ -26,11 +26,7 @@ export class TagAssignFlyout {
   }
 
   async waitForResultsLoaded() {
-    // React.lazy: 'hidden' resolves immediately for missing elements — must confirm DOM presence first.
     await this.resultList.waitFor({ state: 'visible' });
-    // isLoading starts false; wait for spinner to appear (useEffect fired) then disappear (API done).
-    await this.resultList.locator('.euiLoadingSpinner').waitFor({ state: 'visible' });
-    await this.resultList.locator('.euiLoadingSpinner').waitFor({ state: 'hidden' });
     // EUI icons briefly lack alt text while loading their SVGs.
     await this.resultList.locator('[data-is-loading="true"]').waitFor({ state: 'hidden' });
   }

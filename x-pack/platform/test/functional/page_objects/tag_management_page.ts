@@ -233,9 +233,7 @@ class TagAssignmentFlyout extends FtrService {
    * Wait until the assignable object results are displayed in the flyout.
    */
   async waitUntilResultsAreLoaded() {
-    return this.find.waitForDeletedByCssSelector(
-      '*[data-test-subj="assignFlyoutResultList"] .euiLoadingSpinner'
-    );
+    return this.testSubjects.waitForDeleted('assignFlyoutResultList-loading');
   }
 
   /**
