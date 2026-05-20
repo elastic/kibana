@@ -9,7 +9,6 @@ import {
   getAncestors,
   getSegments,
   isDescendantOf,
-  isRootStreamDefinition,
   LOGS_ECS_STREAM_NAME,
   LOGS_OTEL_STREAM_NAME,
   Streams,
@@ -29,11 +28,9 @@ export interface EnrichedStream extends ListStreamDetail {
   nameSortKey: string;
   documentsCount: number;
   retentionMs: number;
-  type: 'wired' | 'root' | 'classic' | 'query';
+  type: 'wired' | 'classic' | 'query';
   children?: EnrichedStream[];
 }
-
-export type FilterableStreamType = Exclude<EnrichedStream['type'], 'root'>;
 
 export type TableRow = EnrichedStream & {
   level: number;
@@ -181,9 +178,6 @@ const getStreamType = (stream: Streams.all.Definition): EnrichedStream['type'] =
   }
   if (Streams.QueryStream.Definition.is(stream)) {
     return 'query';
-  }
-  if (isRootStreamDefinition(stream)) {
-    return 'root';
   }
   return 'wired';
 };
