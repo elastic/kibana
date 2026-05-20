@@ -14,12 +14,13 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ToolDefinition } from '@kbn/agent-builder-common';
-import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT, AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import React, { useState } from 'react';
 import { labels } from '../../../utils/i18n';
 import { useToolsActions } from '../../../context/tools_provider';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
+import { useKibana } from '../../../hooks/use_kibana';
 
 export interface ToolContextMenuProps {
   tool: ToolDefinition;
@@ -30,6 +31,9 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
   const { editTool, deleteTool, testTool, cloneTool, viewTool } = useToolsActions();
   const [isOpen, setIsOpen] = useState(false);
   const { manageTools } = useUiPrivileges();
+  const {
+    services: { analytics },
+  } = useKibana();
 
   const editMenuItem = (
     <EuiContextMenuItem
@@ -52,6 +56,10 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
         color: ${euiTheme.colors.textDanger};
       `}
       onClick={() => {
+        analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ManageEntityDelete, {
+          entity_type: 'tool',
+          entity_id: tool.id,
+        });
         deleteTool(tool.id);
         setIsOpen(false);
       }}

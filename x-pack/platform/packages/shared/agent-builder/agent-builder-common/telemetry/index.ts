@@ -29,5 +29,8 @@ export {
   type ReportConversationStartParams,
   type ReportConversationResumeParams,
   type ReportConversationSearchParams,
+  type ReportEntityEditFromAgentParams,
+  type ReportManageEntityEditParams,
+  type ReportManageEntityDeleteParams,
 } from './agent_builder_events';
 export { AGENT_BUILDER_UI_EBT, type AgentBuilderUiEbt } from './agent_builder_ui_ebt';

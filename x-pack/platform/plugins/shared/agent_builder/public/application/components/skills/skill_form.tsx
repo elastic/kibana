@@ -28,7 +28,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PublicSkillDefinition } from '@kbn/agent-builder-common';
-import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT, AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
@@ -119,6 +119,7 @@ export const SkillForm: React.FC<SkillFormProps> = ({
   const { euiTheme } = useEuiTheme();
   const {
     services: {
+      analytics,
       http,
       application: { navigateToUrl },
       overlays: { openConfirm },
@@ -189,6 +190,10 @@ export const SkillForm: React.FC<SkillFormProps> = ({
           tool_ids: data.tool_ids,
           referenced_content: data.referenced_content,
         });
+        analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ManageEntityEdit, {
+          entity_type: 'skill',
+          entity_id: data.id,
+        });
       } else if (mode === SkillFormMode.Edit) {
         await (onSave as (d: UpdateSkillPayload) => Promise<unknown>)({
           name: data.name,
@@ -197,11 +202,15 @@ export const SkillForm: React.FC<SkillFormProps> = ({
           tool_ids: data.tool_ids,
           referenced_content: data.referenced_content,
         });
+        analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ManageEntityEdit, {
+          entity_type: 'skill',
+          entity_id: skill?.id ?? data.id,
+        });
       }
       reset(data, { keepDirty: false });
       deferNavigateToAgentBuilderUrl(appPaths.skills.list);
     },
-    [onSave, mode, reset, deferNavigateToAgentBuilderUrl]
+    [onSave, mode, reset, deferNavigateToAgentBuilderUrl, analytics, skill?.id]
   );
 
   const pageTitle = useMemo(() => {

@@ -25,7 +25,7 @@ import { css } from '@emotion/react';
 import type { ToolDefinitionWithSchema, ToolType } from '@kbn/agent-builder-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
-import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT, AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { defer } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -117,6 +117,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   const { testTool } = useToolsActions();
   const { services } = useKibana();
   const {
+    analytics,
     application: { navigateToUrl },
     overlays: { openConfirm },
     http,
@@ -146,9 +147,17 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
         if (mode === ToolFormMode.Edit) {
           const updatePayload = getUpdatePayloadFromData(data);
           response = await saveTool(updatePayload);
+          analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ManageEntityEdit, {
+            entity_type: 'tool',
+            entity_id: tool?.id ?? currentToolId,
+          });
         } else {
           const createPayload = getCreatePayloadFromData(data);
           response = await saveTool(createPayload);
+          analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ManageEntityEdit, {
+            entity_type: 'tool',
+            entity_id: response?.id ?? currentToolId,
+          });
         }
       } finally {
         setSubmittingButtonId(undefined);
@@ -158,7 +167,7 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
       }
       return response;
     },
-    [mode, saveTool, deferNavigateToAgentBuilderUrl]
+    [mode, saveTool, deferNavigateToAgentBuilderUrl, analytics, tool?.id, currentToolId]
   );
 
   const handleTestTool = useCallback(() => {

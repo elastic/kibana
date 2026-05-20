@@ -40,6 +40,9 @@ export const AGENT_BUILDER_EVENT_TYPES = {
   ConversationStart: `${TELEMETRY_PREFIX}_conversation_start`,
   ConversationResume: `${TELEMETRY_PREFIX}_conversation_resume`,
   ConversationSearch: `${TELEMETRY_PREFIX}_conversation_search`,
+  EntityEditFromAgent: `${TELEMETRY_PREFIX}_entity_edit_from_agent`,
+  ManageEntityEdit: `${TELEMETRY_PREFIX}_manage_entity_edit`,
+  ManageEntityDelete: `${TELEMETRY_PREFIX}_manage_entity_delete`,
 } as const;
 
 export type OptInSource =
@@ -310,6 +313,21 @@ export interface ReportConversationSearchParams {
   agent_id: string;
 }
 
+export interface ReportEntityEditFromAgentParams {
+  entity_type: 'tool' | 'skill';
+  entity_id: string;
+}
+
+export interface ReportManageEntityEditParams {
+  entity_type: 'tool' | 'skill';
+  entity_id: string;
+}
+
+export interface ReportManageEntityDeleteParams {
+  entity_type: 'tool' | 'skill' | 'plugin';
+  entity_id: string;
+}
+
 export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.OptInAction]: ReportOptInActionParams;
   [AGENT_BUILDER_EVENT_TYPES.OptOut]: ReportOptOutParams;
@@ -344,6 +362,9 @@ export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.ConversationStart]: ReportConversationStartParams;
   [AGENT_BUILDER_EVENT_TYPES.ConversationResume]: ReportConversationResumeParams;
   [AGENT_BUILDER_EVENT_TYPES.ConversationSearch]: ReportConversationSearchParams;
+  [AGENT_BUILDER_EVENT_TYPES.EntityEditFromAgent]: ReportEntityEditFromAgentParams;
+  [AGENT_BUILDER_EVENT_TYPES.ManageEntityEdit]: ReportManageEntityEditParams;
+  [AGENT_BUILDER_EVENT_TYPES.ManageEntityDelete]: ReportManageEntityDeleteParams;
 }
 
 export type AgentBuilderTelemetryEvent =
@@ -374,7 +395,10 @@ export type AgentBuilderTelemetryEvent =
   | EventTypeOpts<ReportAgentSwitchParams>
   | EventTypeOpts<ReportConversationStartParams>
   | EventTypeOpts<ReportConversationResumeParams>
-  | EventTypeOpts<ReportConversationSearchParams>;
+  | EventTypeOpts<ReportConversationSearchParams>
+  | EventTypeOpts<ReportEntityEditFromAgentParams>
+  | EventTypeOpts<ReportManageEntityEditParams>
+  | EventTypeOpts<ReportManageEntityDeleteParams>;
 // Type union of all event type strings for use in union types
 export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.OptInAction
@@ -404,7 +428,10 @@ export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.AgentSwitch
   | typeof AGENT_BUILDER_EVENT_TYPES.ConversationStart
   | typeof AGENT_BUILDER_EVENT_TYPES.ConversationResume
-  | typeof AGENT_BUILDER_EVENT_TYPES.ConversationSearch;
+  | typeof AGENT_BUILDER_EVENT_TYPES.ConversationSearch
+  | typeof AGENT_BUILDER_EVENT_TYPES.EntityEditFromAgent
+  | typeof AGENT_BUILDER_EVENT_TYPES.ManageEntityEdit
+  | typeof AGENT_BUILDER_EVENT_TYPES.ManageEntityDelete;
 
 const OPT_IN_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.OptInAction,
@@ -1340,6 +1367,66 @@ const CONVERSATION_SEARCH_EVENT: AgentBuilderTelemetryEvent = {
   },
 };
 
+const ENTITY_EDIT_FROM_AGENT_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.EntityEditFromAgent,
+  schema: {
+    entity_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'Type of entity being edited from the agent view (tool|skill)',
+        optional: false,
+      },
+    },
+    entity_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'ID of the entity being edited',
+        optional: false,
+      },
+    },
+  },
+};
+
+const MANAGE_ENTITY_EDIT_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.ManageEntityEdit,
+  schema: {
+    entity_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'Type of entity saved in the manage view (tool|skill)',
+        optional: false,
+      },
+    },
+    entity_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'ID of the entity saved',
+        optional: false,
+      },
+    },
+  },
+};
+
+const MANAGE_ENTITY_DELETE_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.ManageEntityDelete,
+  schema: {
+    entity_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'Type of entity deleted in the manage view (tool|skill|plugin)',
+        optional: false,
+      },
+    },
+    entity_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'ID of the entity deleted',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
   OPT_IN_EVENT,
   OPT_OUT_EVENT,
@@ -1357,6 +1444,9 @@ export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unk
   CONVERSATION_START_EVENT,
   CONVERSATION_RESUME_EVENT,
   CONVERSATION_SEARCH_EVENT,
+  ENTITY_EDIT_FROM_AGENT_EVENT,
+  MANAGE_ENTITY_EDIT_EVENT,
+  MANAGE_ENTITY_DELETE_EVENT,
 ];
 
 export const agentBuilderServerEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [

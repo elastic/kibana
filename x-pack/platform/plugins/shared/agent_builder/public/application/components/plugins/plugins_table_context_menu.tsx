@@ -7,10 +7,11 @@
 
 import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import type { PluginDefinition } from '@kbn/agent-builder-common';
-import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT, AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useNavigation } from '../../hooks/use_navigation';
+import { useKibana } from '../../hooks/use_kibana';
 import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
 
@@ -31,6 +32,9 @@ export const PluginContextMenu: React.FC<PluginContextMenuProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { navigateToAgentBuilderUrl } = useNavigation();
+  const {
+    services: { analytics },
+  } = useKibana();
 
   const closePopover = useCallback(() => setIsOpen(false), []);
   const togglePopover = useCallback(() => setIsOpen((prev) => !prev), []);
@@ -53,6 +57,10 @@ export const PluginContextMenu: React.FC<PluginContextMenuProps> = ({
         name: labels.plugins.deletePluginButtonLabel,
         icon: 'trash',
         onClick: () => {
+          analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ManageEntityDelete, {
+            entity_type: 'plugin',
+            entity_id: plugin.id,
+          });
           onDelete(plugin.id, plugin.name);
           closePopover();
         },
@@ -66,7 +74,7 @@ export const PluginContextMenu: React.FC<PluginContextMenuProps> = ({
     }
 
     return [{ id: 0, items }];
-  }, [plugin, canManage, closePopover, onDelete, navigateToAgentBuilderUrl]);
+  }, [plugin, canManage, closePopover, onDelete, navigateToAgentBuilderUrl, analytics]);
 
   return (
     <EuiPopover
