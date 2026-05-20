@@ -76,6 +76,7 @@ describe('executeEsqlQuery', () => {
       filters: [],
       variables,
       uiSettings: mockUiSettings,
+      profileId: 'metrics-data-source-profile',
     });
 
     expect(mockGetESQLResults).toHaveBeenCalledTimes(1);
@@ -88,7 +89,8 @@ describe('executeEsqlQuery', () => {
         variables,
         ...getMetricsExecutionContext(
           MetricsExecutionContextAction.FETCH,
-          MetricsExecutionContextName.METRICS_INFO
+          MetricsExecutionContextName.METRICS_INFO,
+          { profile_id: 'metrics-data-source-profile' }
         ),
       })
     );
@@ -100,13 +102,15 @@ describe('executeEsqlQuery', () => {
       search: mockSearch,
       dataView: dataViewWithAtTimefieldMock,
       uiSettings: mockUiSettings,
+      profileId: 'metrics-data-source-profile',
     });
 
     expect(mockGetESQLResults).toHaveBeenCalledWith(
       expect.objectContaining({
         executionContext: getMetricsExecutionContext(
           MetricsExecutionContextAction.FETCH,
-          MetricsExecutionContextName.METRICS_INFO
+          MetricsExecutionContextName.METRICS_INFO,
+          { profile_id: 'metrics-data-source-profile' }
         ).executionContext,
       })
     );
@@ -131,25 +135,13 @@ describe('executeEsqlQuery', () => {
     );
   });
 
-  it('omits executionContext.meta when no profileId is provided', async () => {
-    await executeEsqlQuery({
-      esqlQuery: 'TS metrics-* | METRICS_INFO',
-      search: mockSearch,
-      dataView: dataViewWithAtTimefieldMock,
-      uiSettings: mockUiSettings,
-    });
-
-    const lastCall = mockGetESQLResults.mock.calls[mockGetESQLResults.mock.calls.length - 1]?.[0];
-    expect(lastCall?.executionContext).toBeDefined();
-    expect(lastCall?.executionContext).not.toHaveProperty('meta');
-  });
-
   it('returns the response from getESQLResults', async () => {
     const result = await executeEsqlQuery({
       esqlQuery: 'TS metrics-* | METRICS_INFO',
       search: mockSearch,
       dataView: dataViewWithAtTimefieldMock,
       uiSettings: mockUiSettings,
+      profileId: 'metrics-data-source-profile',
     });
 
     expect(result.documents).toStrictEqual([
@@ -182,6 +174,7 @@ describe('executeEsqlQuery', () => {
       timeRange: { from: 'now-1h', to: 'now' },
       filters: [],
       uiSettings: mockUiSettings,
+      profileId: 'metrics-data-source-profile',
     });
 
     expect(mockGetTime).toHaveBeenCalledWith(
@@ -206,6 +199,7 @@ describe('executeEsqlQuery', () => {
       dataView: dataViewWithAtTimefieldMock,
       filters: [],
       uiSettings: mockUiSettings,
+      profileId: 'metrics-data-source-profile',
     });
 
     expect(mockGetESQLResults).toHaveBeenCalledWith(
@@ -232,6 +226,7 @@ describe('executeEsqlQuery', () => {
         search: mockSearch,
         dataView: dataViewWithAtTimefieldMock,
         uiSettings: mockUiSettings,
+        profileId: 'metrics-data-source-profile',
       })
     ).rejects.toThrow(EsqlResponseError);
   });
@@ -254,6 +249,7 @@ describe('executeEsqlQuery', () => {
         search: mockSearch,
         dataView: dataViewWithAtTimefieldMock,
         uiSettings: mockUiSettings,
+        profileId: 'metrics-data-source-profile',
       })
     ).rejects.toMatchObject({ status: 400 });
   });

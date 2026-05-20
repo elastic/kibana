@@ -33,11 +33,11 @@ export interface ExecuteEsqlParams {
   variables?: ESQLControlVariable[];
   uiSettings: IUiSettingsClient;
   /**
-   * When provided, forwarded onto `executionContext.meta` so the server-side
-   * pipeline tags the APM transaction with `kibana_meta_profile_id`, keeping
-   * request and error telemetry filterable by the same profile.
+   * Forwarded onto `executionContext.meta` so the server-side pipeline tags
+   * the APM transaction with `kibana_meta_profile_id`, keeping request and
+   * error telemetry filterable by the same profile.
    */
-  profileId?: string;
+  profileId: string;
 }
 
 export const fetchEsqlResponseOrThrow = async (
@@ -94,7 +94,7 @@ export async function executeEsqlQuery<TDocument extends object = Record<string,
     ...getMetricsExecutionContext(
       MetricsExecutionContextAction.FETCH,
       MetricsExecutionContextName.METRICS_INFO,
-      profileId ? { profile_id: profileId } : undefined
+      { profile_id: profileId }
     ),
   });
 
