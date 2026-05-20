@@ -516,3 +516,21 @@ Commit the knowledge file:
 git add x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/knowledge/<area_slug>.md
 git commit -m "knowledge(exploratory-tester): update <area_slug> after session on <date>"
 ```
+
+---
+
+## Failure Handling
+
+| Failure | When | Response |
+|---|---|---|
+| Scout server not available within 10 minutes | Phase 1 (agent-managed) | **Stop.** Tell user to check Scout server output (`node scripts/scout.js start-server` logs). |
+| Scout already running on port 5620 | Phase 0 (agent-managed) | Reuse. Tell user an existing session is being reused. |
+| User-provided environment unreachable | Phase 0 | **Stop.** Tell user to check the environment URL and credentials. |
+| Login fails after one retry | Phase 1 | **Stop.** Report the exact error visible in the browser. |
+| `gh` CLI not authenticated | Phase 0 (GitHub mode) | **Stop.** Tell user to run `gh auth login`. |
+| No `## Exploratory testing scope` comment found | Phase 0 (GitHub mode) | **Stop.** Show the exact comment format to add (see Phase 0 Step 0b). |
+| Sub-agent crashes in parallel mode | Phase 2 | Continue with other flows. Mark the crashed flow as `failed: sub-agent error` in the report. |
+| Browser session lost mid-exploration | Phase 2 | Log findings collected so far. Mark remaining checklist steps as `skipped: session lost`. Continue with next flow. |
+| `config.json` already exists | Phase 0 | Ask user: reuse existing session or start fresh? Wait for answer. |
+| esArchiver load fails in serverless | Phase 1 | Skip. Add to `skipped_setup` with reason. Continue — never fail hard on setup steps. |
+| Role unrecognised in serverless | Phase 0 | Warn user. Use `viewer`. Add to `skipped_setup`. |
