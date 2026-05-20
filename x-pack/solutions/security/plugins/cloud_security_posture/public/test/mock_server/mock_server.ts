@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SetupServerApi } from 'msw/node';
+import type { SetupServer } from 'msw/node';
 import { setupServer } from 'msw/node';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { CoreStart } from '@kbn/core/public';
@@ -74,7 +74,7 @@ export const setupMockServer = ({ debug = false }: { debug?: boolean } = {}) => 
  * sure we don't forget the handlers. Can easily be shared between tests.
  * @param server - The MSW server instance, created with setupMockServer
  */
-export const startMockServer = (server: SetupServerApi) => {
+export const startMockServer = (server: SetupServer) => {
   beforeAll(() => server.listen({ onUnhandledRequest: 'warn' }));
   afterAll(() => server.close());
   beforeEach(() => {

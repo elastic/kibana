@@ -313,7 +313,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.selectField('extension.raw');
         await visEditor.setSize(2);
         await visEditor.toggleOpenEditor(2, 'false');
-        await visEditor.clickBucket('Split rows');
+        await retry.try(async () => {
+          await visEditor.clickBucket('Split rows');
+        });
         await visEditor.selectAggregation('Terms');
         await visEditor.selectField('geo.dest');
         await visEditor.toggleOpenEditor(3, 'false');

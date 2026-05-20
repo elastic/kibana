@@ -14,13 +14,13 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * Final execution outcome as reported by the Alerting Framework (event.outcome).
  */
+export const UnifiedExecutionStatus = lazySchema(() => z.enum(['success', 'warning', 'failure']));
 export type UnifiedExecutionStatus = z.infer<typeof UnifiedExecutionStatus>;
-export const UnifiedExecutionStatus = z.enum(['success', 'warning', 'failure']);
 export type UnifiedExecutionStatusEnum = typeof UnifiedExecutionStatus.enum;
 export const UnifiedExecutionStatusEnum = UnifiedExecutionStatus.enum;
 
@@ -28,86 +28,90 @@ export const UnifiedExecutionStatusEnum = UnifiedExecutionStatus.enum;
   * A single unified rule execution result read from the Alerting Framework's "execute" event
 in the event log. Contains execution metadata and structured metrics.
   */
-export type UnifiedExecutionResult = z.infer<typeof UnifiedExecutionResult>;
-export const UnifiedExecutionResult = z.object({
-  /**
-   * Unique identifier of this execution.
-   */
-  execution_uuid: z.string().nullable(),
-  /**
-   * Start time of the execution (event.start from the Alerting Framework execute event).
-   */
-  execution_start: z.string().datetime(),
-  /**
-   * Total execution duration in milliseconds (converted from event.duration nanoseconds).
-   */
-  execution_duration_ms: z.number().int().nullable(),
-  /**
-   * Delay between scheduled and actual start time in milliseconds (from kibana.task.schedule_delay).
-   */
-  schedule_delay_ms: z.number().int().nullable(),
-  /**
-   * Source event time range for backfill (manual) executions, computed from start and interval.
-   */
-  backfill: z
-    .object({
-      from: z.string().datetime(),
-      to: z.string().datetime(),
-    })
-    .nullable(),
-  /**
-   * Execution outcome information.
-   */
-  outcome: z.object({
-    status: UnifiedExecutionStatus,
+export const UnifiedExecutionResult = lazySchema(() =>
+  z.object({
     /**
-     * Outcome message from the source event (event.message).
+     * Unique identifier of this execution.
      */
-    message: z.string().nullable(),
-  }),
-  /**
-   * Execution metrics from kibana.alert.rule.execution.metrics in the Alerting Framework execute event.
-   */
-  metrics: z.object({
+    execution_uuid: z.string().nullable(),
     /**
-     * Total search duration in milliseconds.
+     * Start time of the execution (event.start from the Alerting Framework execute event).
      */
-    total_search_duration_ms: z.number().int().nullable(),
+    execution_start: z.string().datetime(),
     /**
-     * Total indexing duration in milliseconds.
+     * Total execution duration in milliseconds (converted from event.duration nanoseconds).
      */
-    total_indexing_duration_ms: z.number().int().nullable(),
+    execution_duration_ms: z.number().int().nullable(),
     /**
-     * Gap duration in seconds.
+     * Delay between scheduled and actual start time in milliseconds (from kibana.task.schedule_delay).
      */
-    execution_gap_duration_s: z.number().int().nullable(),
+    schedule_delay_ms: z.number().int().nullable(),
     /**
-     * Number of candidate alerts evaluated during execution (from kibana.alert.rule.execution.metrics.alerts_candidate_count).
+     * Source event time range for backfill (manual) executions, computed from start and interval.
      */
-    alerts_candidate_count: z.number().int().nullable(),
-    /**
-     * Alert counts for this execution.
-     */
-    alert_counts: z
+    backfill: z
       .object({
-        new: z.number().int().nullable(),
+        from: z.string().datetime(),
+        to: z.string().datetime(),
       })
       .nullable(),
     /**
-     * Number of indices matched during execution (from kibana.alert.rule.execution.metrics.matched_indices_count).
+     * Execution outcome information.
      */
-    matched_indices_count: z.number().int().nullable(),
+    outcome: z.object({
+      status: UnifiedExecutionStatus,
+      /**
+       * Outcome message from the source event (event.message).
+       */
+      message: z.string().nullable(),
+    }),
     /**
-     * Number of frozen indices queried during execution (from kibana.alert.rule.execution.metrics.frozen_indices_queried_count).
+     * Execution metrics from kibana.alert.rule.execution.metrics in the Alerting Framework execute event.
      */
-    frozen_indices_queried_count: z.number().int().nullable(),
-  }),
-});
+    metrics: z.object({
+      /**
+       * Total search duration in milliseconds.
+       */
+      total_search_duration_ms: z.number().int().nullable(),
+      /**
+       * Total indexing duration in milliseconds.
+       */
+      total_indexing_duration_ms: z.number().int().nullable(),
+      /**
+       * Gap duration in seconds.
+       */
+      execution_gap_duration_s: z.number().int().nullable(),
+      /**
+       * Number of candidate alerts evaluated during execution (from kibana.alert.rule.execution.metrics.alerts_candidate_count).
+       */
+      alerts_candidate_count: z.number().int().nullable(),
+      /**
+       * Alert counts for this execution.
+       */
+      alert_counts: z
+        .object({
+          new: z.number().int().nullable(),
+        })
+        .nullable(),
+      /**
+       * Number of indices matched during execution (from kibana.alert.rule.execution.metrics.matched_indices_count).
+       */
+      matched_indices_count: z.number().int().nullable(),
+      /**
+       * Number of frozen indices queried during execution (from kibana.alert.rule.execution.metrics.frozen_indices_queried_count).
+       */
+      frozen_indices_queried_count: z.number().int().nullable(),
+    }),
+  })
+);
+export type UnifiedExecutionResult = z.infer<typeof UnifiedExecutionResult>;
 
 /**
  * Fields available for sorting unified execution results.
  */
+export const UnifiedExecutionResultSortField = lazySchema(() =>
+  z.enum(['execution_start', 'execution_duration_ms'])
+);
 export type UnifiedExecutionResultSortField = z.infer<typeof UnifiedExecutionResultSortField>;
-export const UnifiedExecutionResultSortField = z.enum(['execution_start', 'execution_duration_ms']);
 export type UnifiedExecutionResultSortFieldEnum = typeof UnifiedExecutionResultSortField.enum;
 export const UnifiedExecutionResultSortFieldEnum = UnifiedExecutionResultSortField.enum;

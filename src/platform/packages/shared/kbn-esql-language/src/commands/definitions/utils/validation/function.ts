@@ -14,13 +14,7 @@ import {
   isInlineCast,
   isParamLiteral,
 } from '@elastic/esql';
-import type {
-  ESQLAst,
-  ESQLAstAllCommands,
-  ESQLAstItem,
-  ESQLFunction,
-  ESQLMessage,
-} from '@elastic/esql/types';
+import type { ESQLAst, ESQLAstAllCommands, ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
 import type { PromQLFunction } from '@elastic/esql';
 import { errors, getFunctionDefinition } from '..';
 import { FunctionDefinitionTypes } from '../../../../..';
@@ -29,6 +23,7 @@ import { isTimeseriesSourceCommand } from '../timeseries_check';
 import { Location } from '../../../registry/types';
 import type { ICommandCallbacks, ICommandContext } from '../../../registry/types';
 import type {
+  ESQLMessage,
   FunctionDefinition,
   PromQLFunctionDefinition,
   PromQLFunctionParamType,
@@ -129,6 +124,42 @@ class FunctionValidator {
     this.validateArguments();
   }
 
+  /** Resolves the `hint.kind` at a given positional index across all signatures. */
+  private hintKindAt(position: number): string | undefined {
+    for (const sig of this.definition?.signatures ?? []) {
+      const kind = sig.params[position]?.hint?.kind;
+      if (kind !== undefined) return kind;
+    }
+    return undefined;
+  }
+
+  private expectsAggregationAt(position: number): boolean {
+    return this.hintKindAt(position) === 'aggregation';
+  }
+
+  private validateAggregationArg(arg: ESQLAstItem, rawArg: ESQLAstItem): void {
+    const isAggCall =
+      isFunctionExpression(arg) &&
+      getFunctionDefinition(arg.name)?.type === FunctionDefinitionTypes.AGG;
+
+    if (!isAggCall) {
+      const location = Array.isArray(rawArg) ? this.fn.location : rawArg.location;
+      this.report(errors.expectedAggregationArgument(this.fn, location));
+    }
+
+    if (isFunctionExpression(arg)) {
+      const child = new FunctionValidator(
+        arg,
+        this.parentCommand,
+        this.ast,
+        this.context,
+        this.callbacks
+      );
+      child.validate();
+      this.report(...child.messages);
+    }
+  }
+
   /**
    * Validates the function arguments against the function definition
    */
@@ -187,7 +218,12 @@ class FunctionValidator {
   }
 
   /**
-   * Validates the nested functions within the current function
+   * Validates the nested functions within the current function.
+   *
+   * Positions marked `hint.kind === 'aggregation'` are handled
+   * by `validateAggregationArg` and reported inline.
+   * All other positions use the legacy path where nested-agg / license errors
+   * collect in `nestedErrors` and short-circuit further parent validation.
    */
   private validateNestedFunctions(): ESQLMessage[] {
     const nestedErrors: ESQLMessage[] = [];
@@ -198,8 +234,16 @@ class FunctionValidator {
       ? this.definition?.name
       : undefined;
 
-    for (const _arg of this.fn.args.flat()) {
-      const arg = removeInlineCasts(_arg);
+    const flatArgs = this.fn.args.flat();
+    for (let i = 0; i < flatArgs.length; i++) {
+      const rawArg = flatArgs[i];
+      const arg = removeInlineCasts(rawArg);
+
+      if (this.expectsAggregationAt(i)) {
+        this.validateAggregationArg(arg, rawArg);
+        continue;
+      }
+
       if (isFunctionExpression(arg)) {
         const validator = new FunctionValidator(
           arg,

@@ -17,7 +17,6 @@ export {
 
 export const MAX_ENTITIES_TO_LOAD = 500;
 export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 25;
-export const DEFAULT_TABLE_SECTION_HEIGHT = 512;
 
 export const QUERY_KEY_GRID_DATA = 'entity_analytics_grid_data';
 export const QUERY_KEY_GROUPING_DATA = 'entity-analytics-grouping-data';
@@ -33,6 +32,9 @@ export const TEST_SUBJ_EMPTY_STATE = 'entity-analytics-empty-state';
 export const TEST_SUBJ_GROUPING = 'entity-analytics-grouping';
 export const TEST_SUBJ_GROUPING_LOADING = 'entity-analytics-grouping-loading';
 export const TEST_SUBJ_GROUPING_COUNTER = 'entity-analytics-grouping-counter';
+/** Resolution group header control that opens the primary entity flyout */
+export const TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT =
+  'entity-analytics-resolution-group-open-flyout';
 
 export const ENTITY_FIELDS = {
   ASSET_CRITICALITY: 'asset.criticality',

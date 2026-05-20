@@ -179,6 +179,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
       panelPaddingSize="s"
       anchorPosition="upRight"
       panelStyle={{ minWidth: 350 }}
+      aria-label={i18n.ADD_VARIABLE_POPOVER_BUTTON}
     >
       <EuiSelectable
         searchable
@@ -189,7 +190,6 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
         listProps={{
           rowHeight: 70,
           showIcons: false,
-          paddingSize: 'none',
           textWrap: 'wrap',
         }}
         loadingMessage={i18n.LOADING_VARIABLES}

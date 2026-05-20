@@ -53,10 +53,12 @@ export const getCommandContext = async (
         recommendedFields: [],
       };
       const views = await callbacks?.getViews?.();
+      const datasets = await callbacks?.getDatasets?.();
       context = {
         sources: await getSources(),
         editorExtensions,
         views: views?.views ?? [],
+        datasets: datasets?.datasets ?? [],
       };
       break;
     case 'join':
@@ -155,6 +157,7 @@ export const enhanceWithFunctionsContext = async (
 
   // If the hint needs new data to build the suggestions, we add that data to the context
   for (const hint of uniqueHints) {
+    if (!hint.entityType) continue;
     const parameterHandler = parametersFromHintsResolvers[hint.entityType];
     if (parameterHandler?.contextResolver) {
       const resolvedContext = await parameterHandler.contextResolver(

@@ -70,7 +70,11 @@ export const getTransformOut = (
       throw new Error(`Lens "${chartType}" chart type is not supported`);
     }
 
-    const apiConfig = builder.toAPIFormat({
+    const {
+      title: _, // ignore attributes title
+      description: __, // ignore attributes description
+      ...apiConfig
+    } = builder.toAPIFormat({
       ...migratedAttributes,
       visualizationType: migratedAttributes.visualizationType ?? LENS_UNKNOWN_VIS,
     });
@@ -85,7 +89,9 @@ export const getTransformOut = (
 /**
  * Handles transforming old lens SO in dashboard to v1 Lens SO
  */
-function migrateAttributes(attributes: LensByValueSerializedState['attributes']): LensAttributes {
+export function migrateAttributes(
+  attributes: LensByValueSerializedState['attributes']
+): LensAttributes {
   if (!attributes) {
     throw new Error('Why are attributes undefined?');
   }

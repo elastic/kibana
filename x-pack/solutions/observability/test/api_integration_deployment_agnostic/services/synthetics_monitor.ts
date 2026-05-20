@@ -4,7 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { RoleCredentials, SamlAuthProviderType } from '@kbn/ftr-common-functional-services';
+import type {
+  RetryService,
+  RoleCredentials,
+  SamlAuthProviderType,
+} from '@kbn/ftr-common-functional-services';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { syntheticsMonitorSavedObjectType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import type { EncryptedSyntheticsSavedMonitor } from '@kbn/synthetics-plugin/common/runtime_types';
@@ -17,9 +21,12 @@ import { omit } from 'lodash';
 import type { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
 import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
+const TRANSIENT_DELETE_STATUSES = [502, 503, 504];
+
 export class SyntheticsMonitorTestService {
   private supertest: ReturnType<typeof KibanaSupertestProvider>;
   private getService: DeploymentAgnosticFtrProviderContext['getService'];
+  private readonly retry: RetryService;
   public apiKey: string | undefined = '';
   public samlAuth: SamlAuthProviderType;
 
@@ -27,6 +34,7 @@ export class SyntheticsMonitorTestService {
     this.supertest = getService('supertestWithoutAuth');
     this.samlAuth = getService('samlAuth');
     this.getService = getService;
+    this.retry = getService('retry');
   }
 
   generateProjectAPIKey = async (accessToPublicLocations = true, user: RoleCredentials) => {
@@ -197,13 +205,9 @@ export class SyntheticsMonitorTestService {
         .expect(200);
 
       const { monitors } = response.body;
-      if (monitors[0]?.id) {
-        await this.supertest
-          .delete(`/s/${space}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
-          .set(user.apiKeyHeader)
-          .set(this.samlAuth.getInternalRequestHeader())
-          .send({ ids: monitors.map((monitor: { id: string }) => monitor.id) })
-          .expect(200);
+      const ids = monitors.map((monitor: { id: string }) => monitor.id).filter(Boolean);
+      if (ids.length > 0) {
+        await this.deleteMonitor(user, ids, 200, space);
       }
     } catch (e) {
       // eslint-disable-next-line no-console
@@ -228,13 +232,41 @@ export class SyntheticsMonitorTestService {
     statusCode = 200,
     spaceId?: string
   ) {
+    const ids = Array.isArray(monitorId) ? monitorId : monitorId != null ? [monitorId] : [];
+    if (ids.length === 0) {
+      return undefined;
+    }
+
+    const path = spaceId
+      ? `/s/${spaceId}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`
+      : SYNTHETICS_API_URLS.SYNTHETICS_MONITORS;
+
+    if (statusCode === 200) {
+      return await this.retry.tryForTime(60_000, async () => {
+        const deleteResponse = await this.supertest
+          .delete(path)
+          .send({ ids })
+          .set(user.apiKeyHeader)
+          .set(this.samlAuth.getInternalRequestHeader());
+
+        if (TRANSIENT_DELETE_STATUSES.includes(deleteResponse.status)) {
+          throw new Error(
+            `Transient synthetics monitor delete failure: HTTP ${deleteResponse.status}`
+          );
+        }
+
+        expect(deleteResponse.status).eql(
+          statusCode,
+          `DELETE ${path}: ${JSON.stringify(deleteResponse.body)}`
+        );
+
+        return deleteResponse;
+      });
+    }
+
     const deleteResponse = await this.supertest
-      .delete(
-        spaceId
-          ? `/s/${spaceId}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`
-          : SYNTHETICS_API_URLS.SYNTHETICS_MONITORS
-      )
-      .send({ ids: Array.isArray(monitorId) ? monitorId : [monitorId] })
+      .delete(path)
+      .send({ ids })
       .set(user.apiKeyHeader)
       .set(this.samlAuth.getInternalRequestHeader())
       .expect(statusCode);
@@ -248,12 +280,39 @@ export class SyntheticsMonitorTestService {
     statusCode = 200,
     spaceId?: string
   ) {
+    if (!monitorId) {
+      return undefined;
+    }
+
+    const path = spaceId
+      ? `/s/${spaceId}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitorId}`
+      : SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId;
+
+    if (statusCode === 200) {
+      return await this.retry.tryForTime(60_000, async () => {
+        const deleteResponse = await this.supertest
+          .delete(path)
+          .send()
+          .set(user.apiKeyHeader)
+          .set(this.samlAuth.getInternalRequestHeader());
+
+        if (TRANSIENT_DELETE_STATUSES.includes(deleteResponse.status)) {
+          throw new Error(
+            `Transient synthetics monitor delete failure: HTTP ${deleteResponse.status}`
+          );
+        }
+
+        expect(deleteResponse.status).eql(
+          statusCode,
+          `DELETE ${path}: ${JSON.stringify(deleteResponse.body)}`
+        );
+
+        return deleteResponse;
+      });
+    }
+
     const deleteResponse = await this.supertest
-      .delete(
-        spaceId
-          ? `/s/${spaceId}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitorId}`
-          : SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId
-      )
+      .delete(path)
       .send()
       .set(user.apiKeyHeader)
       .set(this.samlAuth.getInternalRequestHeader())

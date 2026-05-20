@@ -23,17 +23,26 @@ import {
   EuiTabbedContent,
   euiDragDropReorder,
 } from '@elastic/eui';
-import { ContentListProvider } from '@kbn/content-list-provider';
-import type { ContentListItem } from '@kbn/content-list-provider';
-import { ContentListTable } from '@kbn/content-list-table';
-import { ContentListToolbar } from '@kbn/content-list-toolbar';
-import { ContentListFooter } from '@kbn/content-list-footer';
+import {
+  ContentList,
+  ContentListProvider,
+  ContentListEmptyState,
+  ContentListTable,
+  ContentListToolbar,
+  ContentListFooter,
+  type ContentListItem,
+} from '@kbn/content-list';
 
 import {
+  buildMockItems,
   createMockFavoritesClient,
   createStoryFindItems,
+  createMockTagFacetProvider,
+  createMockUserProfileFacetProvider,
   mockTagsService,
+  mockContentListUserProfilesServices,
   toJsx,
+  useContentEditorFlyout,
 } from '../stories_helpers';
 import { BuilderPanel } from './builder_panel';
 import type { PlaygroundState } from './playground_state';
@@ -103,7 +112,10 @@ const { Filters } = ContentListToolbar;
  * - `consumerJsx` — a lightweight element tree (without EUI layout wrappers)
  *   used solely for JSX serialization via {@link toJsx}.
  */
-const usePreview = (state: PlaygroundState) => {
+const usePreview = (
+  state: PlaygroundState,
+  openContentEditor?: (item: ContentListItem) => void
+) => {
   const { provider, features, item: itemConfig, table, toolbar, data } = state;
 
   const labels = useMemo(
@@ -113,22 +125,22 @@ const usePreview = (state: PlaygroundState) => {
 
   const sortFields = useMemo(() => buildSortFields(state.table.columns), [state.table.columns]);
 
-  const hasTagsFilter = toolbar.filters.some((f) => f.type === 'tags');
-  const hasTagsColumn = table.columns.some((c) => c.type === 'name' && c.props.showTags);
-  const hasTags = hasTagsFilter || hasTagsColumn;
-
-  // `features.starred` is the master switch in the playground: the favorites client
-  // and provider feature are only enabled when it is explicitly turned on.
-  // Starred columns and filters render silently empty without it.
+  // Feature toggles are master switches: the service and provider feature
+  // are only enabled when the toggle is on. Columns and filters for a
+  // disabled feature render silently empty.
+  const hasTags = features.tags;
   const hasStarred = features.starred;
+  const hasUserProfiles = features.userProfiles;
 
   // Memoized before `dataSource` so both the provider and findItems share the same
   // in-memory favorites set — starring an item is immediately reflected when the
-  // `starredOnly` filter is toggled.
+  // `starred` filter is toggled.
   const favoritesClient = useMemo(
     () => (hasStarred ? createMockFavoritesClient() : undefined),
     [hasStarred]
   );
+
+  const mockItems = useMemo(() => buildMockItems(data.totalItems), [data.totalItems]);
 
   const dataSource = useMemo(() => {
     const baseOptions = {
@@ -155,38 +167,73 @@ const usePreview = (state: PlaygroundState) => {
         ? { initialPageSize: features.initialPageSize }
         : (false as const),
       search: features.search ? {} : (false as const),
-      tags: hasTags ? true : (false as const),
+      tags: hasTags ? createMockTagFacetProvider(mockItems) : (false as const),
       starred: hasStarred ? true : (false as const),
+      userProfiles: hasUserProfiles
+        ? createMockUserProfileFacetProvider(mockItems)
+        : (false as const),
+      // Mirrors how `ContentListClientProvider` wires `useContentEditorOpen()`.
+      ...(features.contentEditor && openContentEditor
+        ? { contentEditor: { open: openContentEditor } }
+        : {}),
     }),
     [
       features.sorting,
       features.pagination,
       features.initialPageSize,
       features.search,
+      features.contentEditor,
       sortFields,
       hasTags,
       hasStarred,
+      hasUserProfiles,
+      mockItems,
+      openContentEditor,
     ]
+  );
+
+  // Whether the user added a custom `<Action id="export">` to any
+  // `Column.Actions`. The provider should only advertise an `export`
+  // handler when the JSX actually declares the action — otherwise the
+  // playground would always emit a non-empty `actions` map even with
+  // every toggle off.
+  const hasExportAction = useMemo(
+    () =>
+      table.columns.some(
+        (col) => col.type === 'actions' && col.actions.some((act) => act.type === 'export')
+      ),
+    [table.columns]
   );
 
   const providerItemConfig = useMemo(() => {
     const config: Record<string, unknown> = {};
+    const actions: Record<string, unknown> = {};
+
     if (itemConfig.getHref) {
       config.getHref = (i: ContentListItem) => `#/${provider.entity}/${i.id}`;
     }
-    if (itemConfig.getEditUrl) {
-      config.getEditUrl = (i: ContentListItem) => `#/${provider.entity}/${i.id}/edit`;
-    }
     if (itemConfig.onEdit) {
-      config.onEdit = (i: ContentListItem) => alert(`Edit: ${i.title}`);
+      actions.edit = { onItemAction: (i: ContentListItem) => alert(`Edit: ${i.title}`) };
     }
     if (itemConfig.onDelete) {
-      config.onDelete = async () => {
-        await new Promise((resolve) => setTimeout(resolve, 300));
+      actions.delete = {
+        onBulkAction: async () => {
+          await new Promise((resolve) => setTimeout(resolve, 300));
+        },
       };
     }
+    if (hasExportAction) {
+      actions.export = {
+        onItemAction: (item: ContentListItem) => alert(`Export: ${item.title}`),
+      };
+    }
+
+    if (Object.keys(actions).length > 0) {
+      config.actions = actions;
+    }
+
     return Object.keys(config).length > 0 ? config : undefined;
-  }, [itemConfig, provider.entity]);
+  }, [itemConfig, provider.entity, hasExportAction]);
 
   const columns = useMemo(
     () =>
@@ -202,6 +249,8 @@ const usePreview = (state: PlaygroundState) => {
             return <Column.Name key={col.instanceId} {...cleanProps} />;
           case 'updatedAt':
             return <Column.UpdatedAt key={col.instanceId} {...cleanProps} />;
+          case 'createdBy':
+            return <Column.CreatedBy key={col.instanceId} {...cleanProps} />;
           case 'type': {
             const { columnTitle, ...rest } = cleanProps;
             return (
@@ -223,6 +272,8 @@ const usePreview = (state: PlaygroundState) => {
                   switch (act.type) {
                     case 'edit':
                       return <Action.Edit key={act.instanceId} />;
+                    case 'contentEditor':
+                      return <Action.ContentEditor key={act.instanceId} />;
                     case 'delete':
                       return <Action.Delete key={act.instanceId} />;
                     case 'export':
@@ -232,7 +283,6 @@ const usePreview = (state: PlaygroundState) => {
                           id="export"
                           name="Export"
                           icon="exportAction"
-                          onClick={(item) => alert(`Export: ${item.title}`)}
                         />
                       );
                     default:
@@ -256,34 +306,20 @@ const usePreview = (state: PlaygroundState) => {
     const filterParts =
       toolbar.filters.length > 0
         ? toolbar.filters.map((f) => {
-            if (f.type === 'starred') {
-              return (
-                <React.Fragment key={f.instanceId}>
-                  <Filters.Starred />
-                </React.Fragment>
-              );
+            switch (f.type) {
+              case 'starred':
+                return <Filters.Starred key={f.instanceId} />;
+              case 'sort':
+                return <Filters.Sort key={f.instanceId} />;
+              case 'tags':
+                return <Filters.Tags key={f.instanceId} />;
+              case 'createdBy':
+                return <Filters.CreatedBy key={f.instanceId} />;
+              default:
+                return null;
             }
-            if (f.type === 'sort') {
-              return (
-                <React.Fragment key={f.instanceId}>
-                  <Filters.Sort />
-                </React.Fragment>
-              );
-            }
-            if (f.type === 'tags') {
-              return (
-                <React.Fragment key={f.instanceId}>
-                  <Filters.Tags />
-                </React.Fragment>
-              );
-            }
-            return null;
           })
-        : [
-            <React.Fragment key="sort">
-              <Filters.Sort />
-            </React.Fragment>,
-          ];
+        : [<Filters.Sort key="sort" />];
 
     return (
       <ContentListToolbar>
@@ -302,8 +338,22 @@ const usePreview = (state: PlaygroundState) => {
     if (hasStarred && favoritesClient) {
       s.favorites = favoritesClient;
     }
+    if (hasUserProfiles) {
+      s.userProfiles = mockContentListUserProfilesServices;
+    }
     return Object.keys(s).length > 0 ? s : undefined;
-  }, [hasTags, hasStarred, favoritesClient]);
+  }, [hasTags, hasStarred, favoritesClient, hasUserProfiles]);
+
+  // Isolate the React Query cache per data variant. The QueryClient is a
+  // module-level singleton shared across every provider remount in the
+  // playground, so without this the cache from a previous variant (e.g. items
+  // from a non-empty state) is briefly shown when toggling `Empty`, causing a
+  // flash of the old table before the new fetch resolves.
+  const queryKeyScope = useMemo(
+    () =>
+      `playground-${data.hasItems ? '1' : '0'}-${data.totalItems}-${data.isLoading ? '1' : '0'}`,
+    [data.hasItems, data.totalItems, data.isLoading]
+  );
 
   const providerProps = useMemo(
     () => ({
@@ -312,17 +362,28 @@ const usePreview = (state: PlaygroundState) => {
       features: providerFeatures,
       isReadOnly: provider.isReadOnly,
       item: providerItemConfig,
+      queryKeyScope,
       ...(services && { services }),
     }),
-    [labels, dataSource, providerFeatures, provider.isReadOnly, providerItemConfig, services]
+    [
+      labels,
+      dataSource,
+      providerFeatures,
+      provider.isReadOnly,
+      providerItemConfig,
+      queryKeyScope,
+      services,
+    ]
   );
 
   const consumerJsx = useMemo(
     () => (
       <ContentListProvider id="playground" {...providerProps}>
-        {toolbarElement}
-        <ContentListTable title={tableTitle}>{columns}</ContentListTable>
-        <ContentListFooter />
+        <ContentList emptyState={<ContentListEmptyState />}>
+          {toolbarElement}
+          <ContentListTable title={tableTitle}>{columns}</ContentListTable>
+          <ContentListFooter />
+        </ContentList>
       </ContentListProvider>
     ),
     [providerProps, toolbarElement, tableTitle, columns]
@@ -344,7 +405,11 @@ const usePreview = (state: PlaygroundState) => {
  */
 export const PlaygroundBuilder = () => {
   const [state, dispatch] = useReducer(playgroundReducer, INITIAL_STATE);
-  const { providerProps, toolbarElement, columns, tableTitle, consumerJsx } = usePreview(state);
+  const { open: openContentEditor, flyout } = useContentEditorFlyout();
+  const { providerProps, toolbarElement, columns, tableTitle, consumerJsx } = usePreview(
+    state,
+    openContentEditor
+  );
 
   const stateKey = JSON.stringify(state);
   const actionsCol = state.table.columns.find((c) => c.type === 'actions');
@@ -397,16 +462,13 @@ export const PlaygroundBuilder = () => {
           <>
             <EuiSpacer size="m" />
             <ContentListProvider key={stateKey} id="playground" {...providerProps}>
-              <EuiFlexGroup direction="column" gutterSize="m">
-                <EuiFlexItem>{toolbarElement}</EuiFlexItem>
-                <EuiFlexItem>
-                  <ContentListTable title={tableTitle}>{columns}</ContentListTable>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <ContentListFooter />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <ContentList emptyState={<ContentListEmptyState />}>
+                {toolbarElement}
+                <ContentListTable title={tableTitle}>{columns}</ContentListTable>
+                <ContentListFooter />
+              </ContentList>
             </ContentListProvider>
+            {flyout}
             <EuiSpacer size="l" />
             <EuiCodeBlock language="tsx" fontSize="s" paddingSize="s" overflowHeight={300}>
               {jsx}
@@ -415,7 +477,7 @@ export const PlaygroundBuilder = () => {
         ),
       },
     ],
-    [stateKey, providerProps, toolbarElement, tableTitle, columns, jsx]
+    [stateKey, providerProps, toolbarElement, tableTitle, columns, jsx, flyout]
   );
 
   return (

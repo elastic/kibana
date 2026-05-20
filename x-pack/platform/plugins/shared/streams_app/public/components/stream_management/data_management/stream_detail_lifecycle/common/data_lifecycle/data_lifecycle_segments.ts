@@ -7,7 +7,7 @@
 
 import type { EuiFlexItemProps } from '@elastic/eui';
 import type { DownsampleStep } from '@kbn/streams-schema/src/models/ingest/lifecycle';
-import { splitSizeAndUnits, toMillis } from '../../helpers/format_size_units';
+import { splitSizeAndUnits, toMillis } from '../../../../../../util/format_size_units';
 
 interface BaseLifecycleSegment {
   grow: EuiFlexItemProps['grow'];
@@ -276,14 +276,18 @@ export const getPhaseColumnSpans = (phases: SegmentPhase[], segments: TimelineSe
 export const buildDownsamplingSegments = (
   phases: SegmentPhase[],
   dslSegments: ReturnType<typeof buildDslSegments> | null
-): DownsamplingSegment[] | null => {
+): DownsamplingSegment[] => {
   if (dslSegments) {
     return dslSegments.downsamplingSegments;
   }
 
   const hasIlmDownsampling = phases.some((phase) => phase.downsample);
   if (!hasIlmDownsampling) {
-    return null;
+    // Still return segments so the UI can show an "empty" downsampling timeline.
+    return phases.map((phase) => ({
+      grow: phase.grow,
+      isDelete: phase.isDelete,
+    }));
   }
 
   // Track the downsample step index separately from phase index

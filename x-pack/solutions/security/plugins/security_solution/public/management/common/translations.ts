@@ -316,6 +316,12 @@ export const CONSOLE_COMMANDS = {
     about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.memoryDump.about', {
       defaultMessage: 'Generate a memory dump on the host',
     }),
+    argNotSupported: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.argNotSupported',
+      {
+        defaultMessage: '(NOTE: not currently supported for this host type)',
+      }
+    ),
     kernelArgAbout: i18n.translate(
       'xpack.securitySolution.translations.memoryDump.kernelArgAbout',
       {
@@ -476,31 +482,6 @@ export const MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS = {
       }
     ),
   },
-};
-
-export const CONFIRM_WARNING_MODAL_LABELS = (entryType: string) => {
-  return {
-    title: i18n.translate('xpack.securitySolution.artifacts.confirmWarningModal.title', {
-      defaultMessage: `Confirm {type}`,
-      values: { type: entryType },
-    }),
-    body: i18n.translate('xpack.securitySolution.artifacts.confirmWarningModal.body', {
-      defaultMessage:
-        'Using a "*" or a "?" in the value with the "is" operator can make the entry ineffective. Change the operator to "matches" to ensure wildcards run properly. Select “Cancel” to revise your entry, or "Add" to continue with the entry in its current state.',
-    }),
-    confirmButton: i18n.translate(
-      'xpack.securitySolution.artifacts.confirmWarningModal.confirmButtonText',
-      {
-        defaultMessage: 'Add',
-      }
-    ),
-    cancelButton: i18n.translate(
-      'xpack.securitySolution.trustedapps.confirmWarningModal.cancelButtonText',
-      {
-        defaultMessage: 'Cancel',
-      }
-    ),
-  };
 };
 
 export const NO_PRIVILEGE_FOR_MANAGEMENT_OF_GLOBAL_ARTIFACT_MESSAGE = i18n.translate(

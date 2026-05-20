@@ -47,9 +47,14 @@ export function buildMetricsInfoQuery(esql?: string, dimensions?: string[]): str
   const baseCommands = root.commands.filter((cmd) => cmd.name !== 'sort' && cmd.name !== 'limit');
   const baseQuery = BasicPrettyPrinter.print({ ...root, commands: baseCommands }).trim();
 
+  // Wrap dimensions in TO_STRING() to prevent verification_exception when a dimension
+  // field has conflicting type mappings across data streams (e.g., keyword in one index,
+  // long in another). TO_STRING resolves the type ambiguity for the IS NOT NULL check.
+  // See: https://www.elastic.co/docs/reference/query-languages/esql/esql-multi-index
   const filteringDimensions =
-    dimensions?.map((dimension) => `${sanitazeESQLInput(dimension)} IS NOT NULL`).join(' AND ') ??
-    [];
+    dimensions
+      ?.map((dimension) => `TO_STRING(${sanitazeESQLInput(dimension)}) IS NOT NULL`)
+      .join(' AND ') ?? [];
 
   const esqlQuery = appendToESQLQuery(
     baseQuery,

@@ -90,7 +90,11 @@ const createCachedArtifact = ({ contents, etag = 'etag' }) => {
 };
 
 const previousEnvVars = {};
-const ENV_VARS_TO_RESET = ['ES_SNAPSHOT_MANIFEST', 'KBN_ES_SNAPSHOT_USE_UNVERIFIED'];
+const ENV_VARS_TO_RESET = [
+  'ES_SNAPSHOT_MANIFEST',
+  'KBN_ES_SNAPSHOT_USE_UNVERIFIED',
+  'KBN_ES_SNAPSHOT_USE_CACHED',
+];
 
 beforeAll(() => {
   ENV_VARS_TO_RESET.forEach((key) => {

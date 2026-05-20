@@ -48,7 +48,7 @@ export const createAlertActionRouteForType = <
   @injectable()
   class CreateTypedAlertActionRoute extends BaseAlertingRoute {
     static method = 'post' as const;
-    static path = `${ALERTING_V2_ALERT_API_PATH}/{group_hash}/action/${pathSuffix}`;
+    static path = `${ALERTING_V2_ALERT_API_PATH}/{group_hash}/${pathSuffix}`;
     static security: RouteSecurity = {
       authz: {
         requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.alerts.write],

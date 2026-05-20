@@ -18,7 +18,8 @@ import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 import { EsqlControlType } from '@kbn/esql-types';
 
 export const registerESQLControlTransforms = (embeddable: EmbeddableSetup) => {
-  embeddable.registerTransforms(ESQL_CONTROL, {
+  embeddable.registerEmbeddableServerDefinition(ESQL_CONTROL, {
+    title: 'ES|QL variable control',
     getSchema: () => optionsListESQLControlSchema,
     getTransforms: () => ({
       transformOut: <
@@ -38,6 +39,7 @@ export const registerESQLControlTransforms = (embeddable: EmbeddableSetup) => {
           esql_query,
           selected_options,
           single_select,
+          title,
           variable_name,
           variable_type,
         } = convertCamelCasedKeysToSnakeCase<LegacyStoredESQLControlExplicitInput>(
@@ -51,6 +53,7 @@ export const registerESQLControlTransforms = (embeddable: EmbeddableSetup) => {
           single_select: single_select ?? DEFAULT_ESQL_OPTIONS_LIST_STATE.single_select,
           variable_name: variable_name ?? '',
           variable_type: variable_type as OptionsListESQLControlState['variable_type'],
+          ...(title && { title }),
         };
         return control_type === EsqlControlType.STATIC_VALUES
           ? {

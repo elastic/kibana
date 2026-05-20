@@ -9,10 +9,17 @@ import { useQuery } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { queryKeys } from '../query_keys';
+import { useSpaceId } from './use_space_id';
 import type { UseAlertingEpisodesDataViewOptions } from './use_alerting_episodes_data_view';
 import { useAlertingEpisodesDataView } from './use_alerting_episodes_data_view';
 import { fetchAlertingEpisodes } from '../apis/fetch_alerting_episodes';
-import { type EpisodesFilterState, type EpisodesSortState } from '../queries/episodes_query';
+import {
+  type AlertEpisode,
+  type AlertEpisodeEsqlRow,
+  type EpisodesFilterState,
+  type EpisodesSortState,
+} from '../queries/episodes_query';
+import { normalizeTags } from '../utils/normalize_tags';
 
 export interface UseFetchAlertingEpisodesQueryOptions {
   pageSize: number;
@@ -40,15 +47,23 @@ export const useFetchAlertingEpisodesQuery = ({
   sortState = DEFAULT_SORT,
   timeRange,
 }: UseFetchAlertingEpisodesQueryOptions) => {
+  const spaceId = useSpaceId(services.spaces);
   const dataView = useAlertingEpisodesDataView({ services });
 
-  const queryKey = queryKeys.list(pageSize, filterState, sortState, timeRange ?? undefined);
+  const queryKey = queryKeys.list(
+    spaceId,
+    pageSize,
+    filterState,
+    sortState,
+    timeRange ?? undefined
+  );
 
-  const query = useQuery({
+  const query = useQuery<AlertEpisodeEsqlRow[], unknown, AlertEpisode[]>({
     enabled: dataView != null,
     queryKey,
     queryFn: ({ signal: abortSignal }) =>
       fetchAlertingEpisodes({
+        spaceId,
         abortSignal,
         pageSize,
         services,
@@ -57,6 +72,11 @@ export const useFetchAlertingEpisodesQuery = ({
         timeRange,
       }),
     keepPreviousData: true,
+    select: (rows): AlertEpisode[] =>
+      rows.map((ep) => ({
+        ...ep,
+        last_tags: normalizeTags(ep.last_tags),
+      })),
   });
 
   return { ...query, dataView };

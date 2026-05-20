@@ -42,6 +42,7 @@ components:
       enum:
         - splunk
         - qradar
+        - microsoft-sentinel
 
     MigrationComment:
       type: object

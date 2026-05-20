@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
@@ -14,12 +15,16 @@ import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import { getMissingPrivileges } from '../utils/get_missing_privileges';
 import type { AssetManagerClient } from '../../../domain/asset_manager';
+import { initMaintainersBodySchema } from './utils/validator';
 
 export function registerInitMaintainers(router: EntityStorePluginRouter) {
   router.versioned
     .post({
       path: ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT,
       access: 'internal',
+      summary: 'Initialize entity maintainers',
+      description:
+        'Initialize all registered entity maintainer tasks. Requires the Entity Store to be installed and the user to have sufficient privileges.',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -28,7 +33,11 @@ export function registerInitMaintainers(router: EntityStorePluginRouter) {
     .addVersion(
       {
         version: API_VERSIONS.internal.v2,
-        validate: false,
+        validate: {
+          request: {
+            body: buildRouteValidationWithZod(initMaintainersBodySchema),
+          },
+        },
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
@@ -41,7 +50,7 @@ export function registerInitMaintainers(router: EntityStorePluginRouter) {
           return validationError;
         }
 
-        await entityMaintainersClient.init(req);
+        await entityMaintainersClient.init(req, { autoStart: req.body?.autoStart });
 
         return res.ok({ body: { ok: true } });
       })

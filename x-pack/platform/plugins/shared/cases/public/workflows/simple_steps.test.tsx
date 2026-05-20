@@ -21,7 +21,6 @@ import {
   getAllAttachmentsStepDefinition,
   getCasesByAlertIdStepDefinition,
   getCasesStepDefinition,
-  setCategoryStepDefinition,
   setDescriptionStepDefinition,
   setSeverityStepDefinition,
   setStatusStepDefinition,
@@ -29,6 +28,7 @@ import {
   unassignCaseStepDefinition,
   updateObservableStepDefinition,
 } from './simple_steps';
+import { setCategoryStepDefinition } from './set_category';
 
 describe('new cases public step definitions', () => {
   const steps = [

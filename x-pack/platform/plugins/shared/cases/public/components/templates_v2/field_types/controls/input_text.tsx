@@ -6,11 +6,11 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import React from 'react';
-import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import React, { useMemo, useState } from 'react';
+import { Controller, useFormContext } from 'react-hook-form';
+import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
+import { getFieldSnakeKey } from '../../../../../common/utils';
 import type {
   InputTextFieldSchema,
   ConditionRenderProps,
@@ -22,8 +22,8 @@ import {
   FIELD_PATTERN_MISMATCH,
   FIELD_PATTERN_INVALID,
 } from '../../translations';
-
-const { emptyField } = fieldValidators;
+import { OptionalFieldLabel } from '../../../optional_field_label';
+import { InlineFieldActions } from './inline_field_actions';
 
 type InputTextProps = z.infer<typeof InputTextFieldSchema> & ConditionRenderProps;
 
@@ -35,58 +35,92 @@ export const InputText = ({
   patternValidation,
   minLength,
   maxLength,
+  onConfirm,
 }: InputTextProps) => {
-  const validations = [];
+  const { control, resetField } = useFormContext();
+  const [isFocused, setIsFocused] = useState(false);
+  const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
 
-  if (isRequired) {
-    validations.push({ validator: emptyField(FIELD_REQUIRED) });
-  }
+  const rules = useMemo(() => {
+    const validate: Record<string, (value: unknown) => true | string> = {};
 
-  if (patternValidation) {
-    const { regex, message } = patternValidation;
-    validations.push({
-      validator: ({ value }: { value: unknown }) => {
-        if (typeof value !== 'string' || value === '') return;
+    if (isRequired) {
+      validate.required = (value) =>
+        typeof value === 'string' && value.trim() !== '' ? true : FIELD_REQUIRED;
+    }
+
+    if (patternValidation) {
+      const { regex, message } = patternValidation;
+      validate.pattern = (value) => {
+        if (typeof value !== 'string' || value === '') return true;
         try {
-          if (!new RegExp(regex).test(value)) {
-            return { message: message ?? FIELD_PATTERN_MISMATCH(regex) };
-          }
+          return new RegExp(regex).test(value) ? true : message ?? FIELD_PATTERN_MISMATCH(regex);
         } catch {
-          return { message: FIELD_PATTERN_INVALID };
+          return FIELD_PATTERN_INVALID;
         }
-      },
-    });
-  }
+      };
+    }
 
-  if (minLength !== undefined) {
-    validations.push({
-      validator: ({ value }: { value: unknown }) => {
-        if (typeof value === 'string' && value.length < minLength) {
-          return { message: FIELD_MIN_LENGTH(minLength) };
-        }
-      },
-    });
-  }
+    if (minLength !== undefined) {
+      validate.minLength = (value) =>
+        typeof value === 'string' && value.length < minLength ? FIELD_MIN_LENGTH(minLength) : true;
+    }
 
-  if (maxLength !== undefined) {
-    validations.push({
-      validator: ({ value }: { value: unknown }) => {
-        if (typeof value === 'string' && value.length > maxLength) {
-          return { message: FIELD_MAX_LENGTH(maxLength) };
-        }
-      },
-    });
-  }
+    if (maxLength !== undefined) {
+      validate.maxLength = (value) =>
+        typeof value === 'string' && value.length > maxLength ? FIELD_MAX_LENGTH(maxLength) : true;
+    }
+
+    return { validate };
+  }, [isRequired, patternValidation, minLength, maxLength]);
+
+  const showInlineActions = isFocused && onConfirm != null;
 
   return (
-    <UseField
+    <Controller
       key={name}
-      path={`${CASE_EXTENDED_FIELDS}.${name}_as_${type}`}
-      component={TextField}
-      config={{ validations }}
-      componentProps={{
-        label,
-      }}
+      name={path}
+      control={control}
+      rules={rules}
+      defaultValue=""
+      render={({ field, fieldState }) => (
+        <>
+          <EuiFormRow
+            label={label}
+            labelAppend={!isRequired ? OptionalFieldLabel : undefined}
+            isInvalid={!!fieldState.error}
+            error={fieldState.error?.message}
+            fullWidth
+          >
+            <EuiFieldText
+              inputRef={field.ref}
+              name={field.name}
+              value={(field.value as string) ?? ''}
+              onChange={(e) => field.onChange(e.target.value)}
+              onBlur={() => {
+                field.onBlur();
+                setIsFocused(false);
+              }}
+              onFocus={() => setIsFocused(true)}
+              isInvalid={!!fieldState.error}
+              fullWidth
+            />
+          </EuiFormRow>
+          {showInlineActions && (
+            <InlineFieldActions
+              name={name}
+              onConfirm={() => {
+                setIsFocused(false);
+                onConfirm();
+              }}
+              onCancel={() => {
+                setIsFocused(false);
+                resetField(path);
+              }}
+            />
+          )}
+        </>
+      )}
     />
   );
 };

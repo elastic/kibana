@@ -14,6 +14,7 @@ import type { ParsedMetricItem } from '../../../types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { METRIC_TYPE_DESCRIPTIONS } from '../components';
 import { OverviewTabMetadata } from './overview_tab_metadata';
+import { METRIC_SOURCE_KIND } from '../hooks/use_metric_source_kind';
 
 jest.mock('../../../common/utils', () => ({
   getUnitLabel: jest.fn(({ unit }) => {
@@ -43,16 +44,96 @@ describe('OverviewTabMetadata', () => {
   });
 
   describe('basic rendering', () => {
-    it('renders main description list', () => {
+    it('renders the description list and hides the source row when no sourceRow is provided', () => {
       const metricItem = createMockMetric({
         dataStream: 'my-data-stream',
         fieldTypes: [ES_FIELD_TYPES.LONG],
       });
-      const { getByTestId, getByText } = render(<OverviewTabMetadata metricItem={metricItem} />);
+      const { getByTestId, getByText, queryByText, queryByTestId } = render(
+        <OverviewTabMetadata metricItem={metricItem} />
+      );
 
       expect(getByTestId('metricsExperienceFlyoutOverviewTabDescriptionList')).toBeInTheDocument();
-      expect(getByText('my-data-stream')).toBeInTheDocument();
       expect(getByText('long')).toBeInTheDocument();
+      expect(queryByTestId('metricsExperienceFlyoutOverviewTabIndexLabel')).not.toBeInTheDocument();
+      expect(
+        queryByTestId('metricsExperienceFlyoutOverviewTabDataStreamLabel')
+      ).not.toBeInTheDocument();
+      expect(queryByText('my-data-stream')).not.toBeInTheDocument();
+      expect(queryByText('Data stream')).not.toBeInTheDocument();
+      expect(queryByText('Index')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('source row', () => {
+    it('renders the Index row when sourceRow is an index', () => {
+      const { getByTestId, getByText } = render(
+        <OverviewTabMetadata
+          metricItem={createMockMetric()}
+          sourceRow={{
+            indexName: 'my-source',
+            kind: METRIC_SOURCE_KIND.INDEX,
+            streamLink: null,
+          }}
+        />
+      );
+
+      expect(getByText('Index')).toBeInTheDocument();
+      expect(getByTestId('metricsExperienceFlyoutOverviewTabIndexLabel')).toHaveTextContent(
+        'my-source'
+      );
+    });
+
+    it('renders the Data stream row when sourceRow is a data stream', () => {
+      const { getByTestId, getByText } = render(
+        <OverviewTabMetadata
+          metricItem={createMockMetric()}
+          sourceRow={{
+            indexName: 'logs-foo-default',
+            kind: METRIC_SOURCE_KIND.DATA_STREAM,
+            streamLink: null,
+          }}
+        />
+      );
+
+      expect(getByText('Data stream')).toBeInTheDocument();
+      expect(getByTestId('metricsExperienceFlyoutOverviewTabDataStreamLabel')).toHaveTextContent(
+        'logs-foo-default'
+      );
+    });
+
+    it('renders streamLink inside the source row when provided', () => {
+      const { getByTestId, queryByText } = render(
+        <OverviewTabMetadata
+          metricItem={createMockMetric()}
+          sourceRow={{
+            indexName: 'logs-foo-default',
+            kind: METRIC_SOURCE_KIND.DATA_STREAM,
+            streamLink: (
+              <a data-test-subj="streamLink" href="/streams/logs-foo-default">
+                logs-foo-default
+              </a>
+            ),
+          }}
+        />
+      );
+
+      const row = getByTestId('metricsExperienceFlyoutOverviewTabDataStreamLabel');
+      expect(row).toContainElement(getByTestId('streamLink'));
+      expect(queryByText('logs-foo-default')?.tagName.toLowerCase()).toBe('a');
+    });
+
+    it('omits the source row when sourceRow is not provided', () => {
+      const { queryByTestId, queryByText } = render(
+        <OverviewTabMetadata metricItem={createMockMetric({ dataStream: 'my-source' })} />
+      );
+
+      expect(queryByTestId('metricsExperienceFlyoutOverviewTabIndexLabel')).not.toBeInTheDocument();
+      expect(
+        queryByTestId('metricsExperienceFlyoutOverviewTabDataStreamLabel')
+      ).not.toBeInTheDocument();
+      expect(queryByText('Index')).not.toBeInTheDocument();
+      expect(queryByText('Data stream')).not.toBeInTheDocument();
     });
   });
 

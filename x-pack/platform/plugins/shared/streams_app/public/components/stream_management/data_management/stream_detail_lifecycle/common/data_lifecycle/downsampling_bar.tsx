@@ -7,10 +7,16 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { usePhaseColors } from '@kbn/data-lifecycle-phases';
 import { useDownsamplingColors } from '../../hooks/use_downsampling_colors';
 import type { DownsamplingSegment } from './data_lifecycle_segments';
 import { DownsamplingPhase } from './downsampling_phase';
+import { useDownsamplingBarStyles } from './downsampling_bar_styles';
+
+const noDownsamplingLabel = i18n.translate('xpack.streams.dataLifecycleSummary.noDownsampling', {
+  defaultMessage: 'No downsampling',
+});
 
 const getDownsamplingLayout = (segments: DownsamplingSegment[]) => {
   const deleteIndex = segments.findIndex((segment) => segment.isDelete);
@@ -74,7 +80,7 @@ const getDownsamplingLayout = (segments: DownsamplingSegment[]) => {
 };
 
 export interface DownsamplingBarProps {
-  segments?: DownsamplingSegment[] | null;
+  segments: DownsamplingSegment[];
   gridTemplateColumns: string;
   onRemoveStep?: (stepNumber: number) => void;
   onEditStep?: (stepNumber: number, phaseName?: string) => void;
@@ -94,12 +100,25 @@ export const DownsamplingBar = ({
   canManageLifecycle,
   isEditLifecycleFlyoutOpen,
 }: DownsamplingBarProps) => {
-  const { euiTheme } = useEuiTheme();
+  const phaseColors = usePhaseColors();
   const { getDownsamplingColor } = useDownsamplingColors();
 
-  if (!segments) {
-    return null;
-  }
+  const hasDownsamplingSteps = segments.some((segment) => Boolean(segment.step));
+
+  const {
+    containerCss,
+    gridCss,
+    emptyFlexItemCss,
+    emptyPanelCss,
+    emptyLabelCss,
+    segmentFlexItemCss,
+    deletePanelCss,
+    transparentPanelCss,
+  } = useDownsamplingBarStyles({
+    gridTemplateColumns,
+    hasDownsamplingSteps,
+    deletePanelColor: phaseColors.delete,
+  });
 
   return (
     <>
@@ -113,89 +132,75 @@ export const DownsamplingBar = ({
       <EuiPanel
         hasShadow={false}
         hasBorder={false}
-        style={{
-          backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-          borderRadius: '8px',
-          padding: '4px 2px',
-        }}
+        data-test-subj="downsamplingBar-container"
+        css={containerCss}
       >
-        <EuiFlexGrid
-          columns={1}
-          gutterSize="none"
-          responsive={false}
-          css={{
-            gridTemplateColumns,
-            paddingInline: euiTheme.size.xxs,
-            boxSizing: 'border-box',
-          }}
-        >
-          {getDownsamplingLayout(segments).map(({ segment, span, hidden, columnStart }, index) => {
-            if (hidden) {
-              return null;
-            }
-
-            return (
-              <EuiFlexItem
-                key={index}
-                grow={segment.grow}
-                css={{
-                  display: 'flex',
-                  flexBasis: 0,
-                  minWidth: 0,
-                  gridColumn: `${columnStart} / span ${span}`,
-                  paddingBlock: euiTheme.size.xxs,
-                  paddingInline: euiTheme.size.xxs,
-                  boxSizing: 'border-box',
-                  justifyContent: 'center',
-                }}
+        <EuiFlexGrid columns={1} gutterSize="none" responsive={false} css={gridCss}>
+          {!hasDownsamplingSteps ? (
+            <EuiFlexItem grow={false} css={emptyFlexItemCss}>
+              <EuiPanel
+                paddingSize="none"
+                hasBorder={false}
+                hasShadow={false}
+                data-test-subj="downsamplingBar-empty"
+                css={emptyPanelCss}
               >
-                {segment.step ? (
-                  <DownsamplingPhase
-                    downsample={segment.step}
-                    stepNumber={(segment.stepIndex ?? index) + 1}
-                    phaseName={segment.phaseName}
-                    color={getDownsamplingColor(segment.stepIndex ?? index)}
-                    onRemoveStep={onRemoveStep}
-                    onEditStep={onEditStep}
-                    isBeingEdited={Boolean(
-                      (editedPhaseName &&
-                        segment.phaseName &&
-                        segment.phaseName === editedPhaseName) ||
-                        (editedDownsampleStepIndex !== undefined &&
-                          segment.stepIndex === editedDownsampleStepIndex)
-                    )}
-                    canManageLifecycle={canManageLifecycle}
-                    isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
-                  />
-                ) : segment.isDelete ? (
-                  <EuiPanel
-                    paddingSize="s"
-                    hasBorder={false}
-                    hasShadow={false}
-                    css={{
-                      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-                      borderRadius: euiTheme.border.radius.small,
-                      minHeight: '30px',
-                      height: '100%',
-                      width: '100%',
-                    }}
-                  />
-                ) : (
-                  <EuiPanel
-                    paddingSize="none"
-                    hasBorder={false}
-                    hasShadow={false}
-                    css={{
-                      backgroundColor: 'transparent',
-                      minHeight: '30px',
-                      height: '100%',
-                      width: '100%',
-                    }}
-                  />
-                )}
-              </EuiFlexItem>
-            );
-          })}
+                <EuiText size="xs" color="subdued">
+                  <span data-test-subj="downsamplingBar-emptyLabel" css={emptyLabelCss}>
+                    {noDownsamplingLabel}
+                  </span>
+                </EuiText>
+              </EuiPanel>
+            </EuiFlexItem>
+          ) : (
+            getDownsamplingLayout(segments).map(({ segment, span, hidden, columnStart }, index) => {
+              if (hidden) {
+                return null;
+              }
+
+              return (
+                <EuiFlexItem
+                  key={index}
+                  grow={segment.grow}
+                  css={[segmentFlexItemCss, { gridColumn: `${columnStart} / span ${span}` }]}
+                >
+                  {segment.step ? (
+                    <DownsamplingPhase
+                      downsample={segment.step}
+                      stepNumber={(segment.stepIndex ?? index) + 1}
+                      phaseName={segment.phaseName}
+                      color={getDownsamplingColor(segment.stepIndex ?? index)}
+                      onRemoveStep={onRemoveStep}
+                      onEditStep={onEditStep}
+                      isBeingEdited={Boolean(
+                        (editedPhaseName &&
+                          segment.phaseName &&
+                          segment.phaseName === editedPhaseName) ||
+                          (editedDownsampleStepIndex !== undefined &&
+                            segment.stepIndex === editedDownsampleStepIndex)
+                      )}
+                      canManageLifecycle={canManageLifecycle}
+                      isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
+                    />
+                  ) : segment.isDelete ? (
+                    <EuiPanel
+                      paddingSize="s"
+                      hasBorder={false}
+                      hasShadow={false}
+                      css={deletePanelCss}
+                    />
+                  ) : (
+                    <EuiPanel
+                      paddingSize="none"
+                      hasBorder={false}
+                      hasShadow={false}
+                      css={transparentPanelCss}
+                    />
+                  )}
+                </EuiFlexItem>
+              );
+            })
+          )}
         </EuiFlexGrid>
       </EuiPanel>
     </>

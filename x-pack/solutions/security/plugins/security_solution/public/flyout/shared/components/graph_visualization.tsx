@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useRef } from 'react';
 import { css } from '@emotion/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
@@ -23,6 +23,7 @@ import {
 import { type NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import { DOCUMENT_TYPE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { isEntityNodeEnriched } from '@kbn/cloud-security-posture-graph/src/components/utils';
+import { useFlyoutBodyAvailableHeight } from './use_flyout_body_available_height';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useGetScopedSourcererDataView } from '../../../sourcerer/components/use_get_sourcerer_data_view';
@@ -36,7 +37,8 @@ import {
   EVENT_PREVIEW_BANNER,
   GENERIC_ENTITY_PREVIEW_BANNER,
 } from '../../document_details/preview/constants';
-import { useToasts } from '../../../common/lib/kibana';
+import { useKibana, useToasts } from '../../../common/lib/kibana';
+import { extractTimelineCapabilities } from '../../../common/utils/timeline_capabilities';
 import { GenericEntityPanelKey, EntityPanelKeyByType } from '../../entity_details/shared/constants';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy';
 
@@ -72,12 +74,7 @@ interface EntityGraphVisualizationProps {
   entityId: string;
 }
 
-export type GraphVisualizationProps = (
-  | EventGraphVisualizationProps
-  | EntityGraphVisualizationProps
-) & {
-  height?: number | string;
-};
+export type GraphVisualizationProps = EventGraphVisualizationProps | EntityGraphVisualizationProps;
 
 /**
  * Full-screen graph investigation view for use in left-panel flyout tabs.
@@ -87,6 +84,14 @@ export type GraphVisualizationProps = (
  */
 export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props) => {
   const { scopeId } = props;
+
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const height = useFlyoutBodyAvailableHeight(wrapperRef);
+
+  const {
+    application: { capabilities },
+  } = useKibana().services;
+  const { read: hasTimelineAccess } = extractTimelineCapabilities(capabilities);
 
   const toasts = useToasts();
   const oldDataView = useGetScopedSourcererDataView({
@@ -291,10 +296,10 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
 
   return (
     <div
+      ref={wrapperRef}
       data-test-subj={GRAPH_VISUALIZATION_TEST_ID}
       css={css`
-        height: ${props.height ?? 'calc(100vh - 250px)'};
-        min-height: 400px;
+        height: ${height}px;
         width: 100%;
       `}
     >
@@ -321,7 +326,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
                     },
                   }
             }
-            showInvestigateInTimeline={true}
+            showInvestigateInTimeline={hasTimelineAccess}
             showToggleSearch={true}
             onInvestigateInTimeline={openTimelineCallback}
             onOpenEventPreview={onOpenEventPreview}

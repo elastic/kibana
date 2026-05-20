@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/data-views-plugin'
   - '@kbn/index-management-shared-types'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod

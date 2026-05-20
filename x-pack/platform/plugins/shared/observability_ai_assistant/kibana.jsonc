@@ -25,10 +25,10 @@
       "cloud",
       "serverless",
       "usageCollection",
-      "agentBuilder"
+      "agentBuilder",
+      "evals"
     ],
-    "requiredBundles": ["kibanaReact", "kibanaUtils", "aiAssistantManagementSelection"],
-    "runtimePluginDependencies": ["ml"],
-    "extraPublicDirs": []
+    "requiredBundles": ["kibanaReact", "kibanaUtils"],
+    "runtimePluginDependencies": ["ml"]
   }
 }

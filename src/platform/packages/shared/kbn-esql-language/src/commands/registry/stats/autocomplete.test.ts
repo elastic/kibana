@@ -34,8 +34,7 @@ import {
   FunctionDefinitionTypes,
   ESQL_COMMON_NUMERIC_TYPES,
 } from '../../definitions/types';
-import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
-import { Parser } from '@elastic/esql';
+import { findAutocompleteAstPosition } from '../../../language/shared/parse_for_autocomplete_query';
 import { setTestFunctions } from '../../definitions/utils/test_functions';
 import {
   getDateHistogramCompletionItem,
@@ -133,11 +132,8 @@ describe('STATS Autocomplete', () => {
   });
 
   const suggest = async (query: string) => {
-    const correctedQuery = correctQuerySyntax(query);
-    const { root } = Parser.parse(correctedQuery, { withFormatting: true });
     const cursorPosition = query.length;
-    const innerText = query.substring(0, cursorPosition);
-    const { command } = findAstPosition(root, cursorPosition);
+    const { innerText, root, command } = findAutocompleteAstPosition(query, cursorPosition);
     if (!command) {
       throw new Error('Command not found in the parsed query');
     }
@@ -149,7 +145,7 @@ describe('STATS Autocomplete', () => {
       contextWithRoot,
       cursorPosition
     );
-    return attachReplacementRanges(innerText, suggestions, contextWithRoot);
+    return attachReplacementRanges(innerText, suggestions, { commandContext: contextWithRoot });
   };
   describe('STATS ...', () => {
     afterEach(() => setTestFunctions([]));
@@ -424,6 +420,28 @@ describe('STATS Autocomplete', () => {
         await statsExpectSuggestions('from a | stats a=min(b), b=max(', expected, mockCallbacks);
       });
 
+      test('inside a function arg with hint.kind === "aggregation" (e.g. SPARKLINE first arg), only aggregation functions are suggested', async () => {
+        // Mock fields just to verify they get suppressed even when the resolver would return them
+        const allFields = getFieldNamesByType('any');
+        (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+          allFields.map((name) => ({ label: name, text: name }))
+        );
+
+        const expectedAggregations = getFunctionSignaturesByReturnType(
+          Location.STATS,
+          ['integer', 'long', 'double'],
+          { agg: true, timeseriesAgg: true },
+          undefined,
+          ['sparkline']
+        ).map((s) => `${s},`);
+
+        await statsExpectSuggestions(
+          'from a | stats SPARKLINE(',
+          expectedAggregations,
+          mockCallbacks
+        );
+      });
+
       test('inside function argument list', async () => {
         const expectedFieldsAvg = getFieldNamesByType(AVG_TYPES);
         (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
@@ -540,6 +558,17 @@ describe('STATS Autocomplete', () => {
             ],
             mockCallbacks
           );
+        });
+
+        it('suggests opening a list after IN in WHERE', async () => {
+          await statsExpectSuggestions('FROM a | STATS MIN(b) WHERE keywordField IN ', ['($0)']);
+        });
+
+        it('suggests LIKE pattern values after LIKE in WHERE', async () => {
+          await statsExpectSuggestions('FROM a | STATS MIN(b) WHERE keywordField LIKE ', [
+            '"${0:*}"',
+            '"${0:?}"',
+          ]);
         });
 
         describe('completed expression suggestions', () => {

@@ -19,6 +19,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/defend_workflows_serverless_burn.sh
     label: '[Soft fail] Defend Workflows Cypress Tests on Serverless, burning changed specs'
     key: defend-workflows-serverless-burn
+    if: "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'"
     agents:
       enableNestedVirtualization: true
       machineType: n2-standard-4

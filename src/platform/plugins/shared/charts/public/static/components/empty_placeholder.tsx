@@ -45,7 +45,7 @@ export const EmptyPlaceholder = ({
   return (
     <div className={className} css={style}>
       <EuiText data-test-subj={dataTestSubj} textAlign="center" color="subdued" size="xs">
-        <EuiIcon type={icon} color={iconColor} size="l" />
+        <EuiIcon type={icon} color={iconColor} size="l" aria-hidden={true} />
         <EuiSpacer size="s" />
         <p>{message}</p>
       </EuiText>

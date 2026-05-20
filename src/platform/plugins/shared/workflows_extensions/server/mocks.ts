@@ -7,16 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { WorkflowsClient } from '@kbn/workflows/server';
 import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from './types';
 
+const createManagedWorkflowsMock = () => ({
+  install: jest.fn().mockResolvedValue(undefined),
+  uninstall: jest.fn().mockResolvedValue(undefined),
+  execute: jest.fn().mockResolvedValue('mock-execution-id'),
+});
+
+export const createWorkflowsClientMock = (
+  overrides?: Partial<WorkflowsClient>
+): WorkflowsClient => ({
+  isWorkflowsAvailable: true,
+  emitEvent: jest.fn(),
+  managedWorkflows: createManagedWorkflowsMock(),
+  ...overrides,
+});
+
 const createSetupMock: () => jest.Mocked<WorkflowsExtensionsServerPluginSetup> = () => {
   return {
     registerStepDefinition: jest.fn(),
     registerTriggerDefinition: jest.fn(),
-    registerTriggerEventHandler: jest.fn(),
+    registerWorkflowsClientProvider: jest.fn(),
+    registerManagedWorkflowsSystemApiProvider: jest.fn(),
+    registerManagedWorkflowOwner: jest.fn(),
   };
 };
 
@@ -26,7 +44,16 @@ const createStartMock: () => jest.Mocked<WorkflowsExtensionsServerPluginStart> =
     hasStepDefinition: jest.fn(),
     getAllStepDefinitions: jest.fn(),
     getAllTriggerDefinitions: jest.fn(),
-    emitEvent: jest.fn(),
+    getTriggerDefinition: jest.fn(),
+    getClient: jest.fn().mockResolvedValue(createWorkflowsClientMock()),
+    initManagedWorkflowsClient: jest.fn().mockResolvedValue({
+      install: jest.fn().mockResolvedValue(undefined),
+      uninstall: jest.fn().mockResolvedValue(undefined),
+      ready: jest.fn().mockResolvedValue(undefined),
+      execute: jest.fn().mockResolvedValue('mock-execution-id'),
+    }),
+    getManagedWorkflowPluginIds: jest.fn().mockReturnValue([]),
+    isReady: jest.fn(() => Promise.resolve()),
   };
 };
 

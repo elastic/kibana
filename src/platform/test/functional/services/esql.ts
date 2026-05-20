@@ -250,9 +250,11 @@ export class ESQLService extends FtrService {
 
   public async selectEsqlBadgeHoverOption(badgeClassName: string, optionText: string) {
     await this.retry.try(async () => {
+      await this.browser.moveMouseTo({ x: 0, y: 0 });
       const badge = await this.findService.byCssSelector(`.${badgeClassName}`);
       await badge.moveMouseTo();
 
+      await this.findService.byCssSelector(`.monaco-hover`);
       const options = await this.findService.allByCssSelector(`.monaco-hover .hover-row`);
       let optionToSelect;
       for (const option of options) {

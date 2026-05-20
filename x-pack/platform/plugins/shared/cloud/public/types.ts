@@ -46,10 +46,6 @@ export interface CloudBasicUrls {
    */
   performanceUrl?: string;
   /**
-   * The full URL to the users and roles page on Elastic Cloud. Undefined if not running on Cloud.
-   */
-  usersAndRolesUrl?: string;
-  /**
    * The full URL to the serverless projects page on Elastic Cloud. Undefined if not running in Serverless.
    */
   projectsUrl?: string;
@@ -69,6 +65,11 @@ export interface CloudPrivilegedUrls {
    * The full URL to the billing page on Elastic Cloud.
    */
   billingUrl?: string;
+  /**
+   * The full URL to the users and roles page on Elastic Cloud. Undefined if not running on Cloud,
+   * or if the user does not have the `manage_security` cluster privilege.
+   */
+  usersAndRolesUrl?: string;
 }
 
 export type CloudUrls = CloudBasicUrls & CloudPrivilegedUrls;
@@ -102,6 +103,11 @@ export interface CloudStart extends CloudBasicUrls {
    * Method to retrieve if the organization is in trial.
    */
   isInTrial: () => boolean;
+  /**
+   * Method to retrieve the number of days left in the trial.
+   * Returns undefined if trial_end_date is not set, or the number of days remaining (0 if expired).
+   */
+  trialDaysLeft: () => number | undefined;
   /**
    * `true` when running on Serverless Elastic Cloud
    * Note that `isCloudEnabled` will always be true when `isServerlessEnabled` is.
@@ -257,6 +263,11 @@ export interface CloudSetup extends CloudBasicUrls {
    * Method to retrieve if the organization is in trial.
    */
   isInTrial: () => boolean;
+  /**
+   * Method to retrieve the number of days left in the trial.
+   * Returns undefined if trial_end_date is not set, or the number of days remaining (0 if expired).
+   */
+  trialDaysLeft: () => number | undefined;
 }
 
 export interface PublicElasticsearchConfigType {

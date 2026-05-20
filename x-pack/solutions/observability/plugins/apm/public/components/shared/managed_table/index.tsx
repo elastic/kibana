@@ -17,6 +17,7 @@ import {
 import { isEmpty, merge, orderBy } from 'lodash';
 import type { ReactNode } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import { useHistory } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ProgressiveLoadingQuality, apmProgressiveLoading } from '@kbn/observability-plugin/common';
@@ -27,8 +28,8 @@ import {
   getItemsFilteredBySearchQuery,
   TableSearchBar,
 } from '../table_search_bar/table_search_bar';
-import type { ActionGroups } from '../actions_context_menu';
 import { ActionsContextMenu } from '../actions_context_menu';
+import { resolveTableActions, type TableActions } from './table_actions';
 
 type SortDirection = 'asc' | 'desc';
 
@@ -69,51 +70,14 @@ export interface TableSearchBar<T> {
   techPreview?: boolean;
 }
 
-export interface TableActionSubItem<T> {
-  id: string;
-  name: string;
-  onClick?: (item: T) => void;
-  href?: (item: T) => string | undefined;
-  icon?: string;
-}
-
-export interface TableAction<T> {
-  id: string;
-  name: string;
-  onClick?: (item: T) => void;
-  href?: (item: T) => string | undefined;
-  icon?: string;
-  items?: Array<TableActionSubItem<T>>;
-}
-
-export interface TableActionGroup<T> {
-  id: string;
-  groupLabel?: string;
-  actions: Array<TableAction<T>>;
-}
-
-export type TableActions<T> = Array<TableActionGroup<T>>;
-
-function resolveTableActions<T>(actions: TableActions<T>, item: T): ActionGroups {
-  return actions.map((group) => ({
-    id: group.id,
-    groupLabel: group.groupLabel,
-    actions: group.actions.map((action) => ({
-      id: action.id,
-      name: action.name,
-      icon: action.icon,
-      onClick: action.onClick ? () => action.onClick!(item) : undefined,
-      href: action.href ? action.href(item) : undefined,
-      items: action.items?.map((subItem) => ({
-        id: subItem.id,
-        name: subItem.name,
-        icon: subItem.icon,
-        onClick: subItem.onClick ? () => subItem.onClick!(item) : undefined,
-        href: subItem.href ? subItem.href(item) : undefined,
-      })),
-    })),
-  }));
-}
+export type {
+  TableActionItem,
+  TableActionSubItem,
+  TableAction,
+  TableActionGroup,
+  TableActions,
+} from './table_actions';
+export { resolveTableActions } from './table_actions';
 
 function ActionsCell<T extends object>({
   item,
@@ -147,6 +111,11 @@ function ActionsCell<T extends object>({
 }
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
+
+const managedTableTableWrapperCss = css`
+  min-inline-size: 0;
+  inline-size: 100%;
+`;
 
 function defaultSortFn<T>(items: T[], sortField: keyof T, sortDirection: SortDirection) {
   return orderBy(items, sortField, sortDirection) as T[];
@@ -442,34 +411,36 @@ function UnoptimizedManagedTable<T extends object>(props: {
         </EuiFlexItem>
       ) : null}
       <EuiFlexItem>
-        <EuiBasicTable<T>
-          loading={isLoading}
-          tableLayout={tableLayout}
-          error={
-            error
-              ? i18n.translate('xpack.apm.managedTable.errorMessage', {
-                  defaultMessage: 'Failed to fetch',
-                })
-              : ''
-          }
-          noItemsMessage={
-            isLoading
-              ? i18n.translate('xpack.apm.managedTable.loadingDescription', {
-                  defaultMessage: 'Loading…',
-                })
-              : noItemsMessage
-          }
-          items={renderedItems}
-          columns={columnsWithActions as unknown as Array<EuiBasicTableColumn<T>>}
-          rowHeader={rowHeader === false ? undefined : rowHeader ?? columns[0]?.field}
-          sorting={sorting}
-          onChange={onTableChange}
-          tableCaption={props.tableCaption}
-          rowProps={props.rowProps}
-          scrollableInline
-          responsiveBreakpoint={false}
-          {...(paginationProps ? { pagination: paginationProps } : {})}
-        />
+        <div css={managedTableTableWrapperCss}>
+          <EuiBasicTable<T>
+            loading={isLoading}
+            tableLayout={tableLayout}
+            error={
+              error
+                ? i18n.translate('xpack.apm.managedTable.errorMessage', {
+                    defaultMessage: 'Failed to fetch',
+                  })
+                : ''
+            }
+            noItemsMessage={
+              isLoading
+                ? i18n.translate('xpack.apm.managedTable.loadingDescription', {
+                    defaultMessage: 'Loading…',
+                  })
+                : noItemsMessage
+            }
+            items={renderedItems}
+            columns={columnsWithActions as unknown as Array<EuiBasicTableColumn<T>>}
+            rowHeader={rowHeader === false ? undefined : rowHeader ?? columns[0]?.field}
+            sorting={sorting}
+            onChange={onTableChange}
+            tableCaption={props.tableCaption}
+            rowProps={props.rowProps}
+            scrollableInline
+            responsiveBreakpoint={false}
+            {...(paginationProps ? { pagination: paginationProps } : {})}
+          />
+        </div>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

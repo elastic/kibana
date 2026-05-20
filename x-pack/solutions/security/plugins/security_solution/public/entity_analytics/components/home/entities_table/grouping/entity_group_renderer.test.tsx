@@ -11,7 +11,7 @@ import type { RawBucket } from '@kbn/grouping';
 import { createGroupPanelRenderer, createGroupStatsRenderer } from './entity_group_renderer';
 import type { EntitiesGroupingAggregation, TargetMetadataMap } from './use_fetch_grouped_data';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
-import { ENTITY_GROUPING_OPTIONS } from '../constants';
+import { ENTITY_GROUPING_OPTIONS, TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT } from '../constants';
 import { TestProviders } from '../../../../../common/mock';
 
 const mockOpenRightPanel = jest.fn();
@@ -71,7 +71,15 @@ describe('createGroupPanelRenderer', () => {
   describe('RESOLUTION group', () => {
     it('renders target entity name from metadata', () => {
       const metadata: TargetMetadataMap = new Map([
-        ['target-entity-id', { name: 'bernicehuel', type: EntityType.user, riskScore: null }],
+        [
+          'target-entity-id',
+          {
+            name: 'bernicehuel',
+            type: EntityType.user,
+            riskScore: null,
+            individualRiskScore: null,
+          },
+        ],
       ]);
       const bucket = createMockBucket({ key: 'target-entity-id' });
       const renderer = createGroupPanelRenderer(metadata);
@@ -80,6 +88,40 @@ describe('createGroupPanelRenderer', () => {
       const { getByText } = render(<>{element}</>);
 
       expect(getByText('bernicehuel')).toBeInTheDocument();
+    });
+
+    it('renders entity id subtitle when metadata has target name', () => {
+      const metadata: TargetMetadataMap = new Map([
+        [
+          'user:james@example.com',
+          { name: 'james-hue', type: EntityType.user, riskScore: null, individualRiskScore: null },
+        ],
+      ]);
+      const bucket = createMockBucket({
+        key: 'user:james@example.com',
+        key_as_string: 'user:james@example.com',
+      });
+      const renderer = createGroupPanelRenderer(metadata);
+      const element = renderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
+
+      const { getByText } = render(<>{element}</>);
+
+      expect(getByText('james-hue')).toBeInTheDocument();
+      expect(getByText('Entity ID: user:james@example.com')).toBeInTheDocument();
+    });
+
+    it('does not render entity id subtitle when falling back to entity id as name', () => {
+      const bucket = createMockBucket({
+        key: 'fallback-entity-id',
+        key_as_string: 'fallback-entity-id',
+      });
+      const renderer = createGroupPanelRenderer(emptyMetadata);
+      const element = renderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
+
+      const { getByText, queryByText } = render(<>{element}</>);
+
+      expect(getByText('fallback-entity-id')).toBeInTheDocument();
+      expect(queryByText(/Entity ID:/)).not.toBeInTheDocument();
     });
 
     it('falls back to bucket key when metadata is not available', () => {
@@ -97,7 +139,15 @@ describe('createGroupPanelRenderer', () => {
 
     it('renders expand button when metadata has name and type', () => {
       const metadata: TargetMetadataMap = new Map([
-        ['target-id', { name: 'test-entity', type: EntityType.user, riskScore: null }],
+        [
+          'target-id',
+          {
+            name: 'test-entity',
+            type: EntityType.user,
+            riskScore: null,
+            individualRiskScore: null,
+          },
+        ],
       ]);
       const bucket = createMockBucket({ key: 'target-id' });
       const renderer = createGroupPanelRenderer(metadata);
@@ -105,7 +155,7 @@ describe('createGroupPanelRenderer', () => {
 
       render(<>{element}</>);
 
-      expect(screen.getByLabelText('Open entity details')).toBeInTheDocument();
+      expect(screen.getByTestId(TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT)).toBeInTheDocument();
     });
 
     it('hides expand button when metadata is not available', () => {
@@ -117,7 +167,7 @@ describe('createGroupPanelRenderer', () => {
 
       render(<>{element}</>);
 
-      expect(screen.queryByLabelText('Open entity details')).not.toBeInTheDocument();
+      expect(screen.queryByTestId(TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT)).not.toBeInTheDocument();
       expect(screen.getByText('fallback-entity-id')).toBeInTheDocument();
     });
 
@@ -130,17 +180,25 @@ describe('createGroupPanelRenderer', () => {
         <>{rendererBefore(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket)}</>
       );
       expect(screen.getByText('target-id')).toBeInTheDocument();
-      expect(screen.queryByLabelText('Open entity details')).not.toBeInTheDocument();
+      expect(screen.queryByTestId(TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT)).not.toBeInTheDocument();
 
       // Phase 2: metadata arrived — new renderer shows target name + flyout button
       const metadata: TargetMetadataMap = new Map([
-        ['target-id', { name: 'alice-target', type: EntityType.user, riskScore: 85.0 }],
+        [
+          'target-id',
+          {
+            name: 'alice-target',
+            type: EntityType.user,
+            riskScore: 85.0,
+            individualRiskScore: null,
+          },
+        ],
       ]);
       const rendererAfter = createGroupPanelRenderer(metadata);
       rerender(<>{rendererAfter(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket)}</>);
       expect(screen.getByText('alice-target')).toBeInTheDocument();
       expect(screen.queryByText('target-id')).not.toBeInTheDocument();
-      expect(screen.getByLabelText('Open entity details')).toBeInTheDocument();
+      expect(screen.getByTestId(TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT)).toBeInTheDocument();
     });
   });
 
@@ -177,7 +235,10 @@ describe('createGroupStatsRenderer', () => {
   describe('RESOLUTION group', () => {
     it('returns entities count + risk score stats (2 items)', () => {
       const metadata: TargetMetadataMap = new Map([
-        ['target-id', { name: 'test', type: EntityType.user, riskScore: 85.42 }],
+        [
+          'target-id',
+          { name: 'test', type: EntityType.user, riskScore: 85.42, individualRiskScore: null },
+        ],
       ]);
       const bucket = createMockBucket({ key: 'target-id', doc_count: 4 });
       const renderer = createGroupStatsRenderer(metadata);
@@ -190,7 +251,10 @@ describe('createGroupStatsRenderer', () => {
 
     it('risk score badge shows value from metadata', () => {
       const metadata: TargetMetadataMap = new Map([
-        ['target-id', { name: 'test', type: EntityType.user, riskScore: 73.1829 }],
+        [
+          'target-id',
+          { name: 'test', type: EntityType.user, riskScore: 73.1829, individualRiskScore: null },
+        ],
       ]);
       const bucket = createMockBucket({ key: 'target-id', doc_count: 3 });
       const renderer = createGroupStatsRenderer(metadata);
@@ -215,9 +279,12 @@ describe('createGroupStatsRenderer', () => {
       expect(screen.getByText('65.50')).toBeInTheDocument();
     });
 
-    it('risk score badge shows en-dash when both metadata and bucket score are null', () => {
+    it('risk score badge shows N/A when both metadata and bucket score are null', () => {
       const metadata: TargetMetadataMap = new Map([
-        ['target-id', { name: 'test', type: EntityType.user, riskScore: null }],
+        [
+          'target-id',
+          { name: 'test', type: EntityType.user, riskScore: null, individualRiskScore: null },
+        ],
       ]);
       const bucket = createMockBucket({ key: 'target-id', doc_count: 1 });
       const renderer = createGroupStatsRenderer(metadata);
@@ -225,7 +292,7 @@ describe('createGroupStatsRenderer', () => {
 
       render(<TestProviders>{stats[1].component}</TestProviders>);
 
-      expect(screen.getByText('—')).toBeInTheDocument();
+      expect(screen.getByText('N/A')).toBeInTheDocument();
     });
 
     it('risk score stat is present even when no metadata or bucket score exists', () => {
@@ -237,26 +304,95 @@ describe('createGroupStatsRenderer', () => {
 
       render(<TestProviders>{stats[1].component}</TestProviders>);
 
-      expect(screen.getByText('—')).toBeInTheDocument();
+      expect(screen.getByText('N/A')).toBeInTheDocument();
     });
 
-    it('updates risk score from en-dash to actual value when metadata arrives after grouping data', () => {
+    it('updates risk score from N/A to actual value when metadata arrives after grouping data', () => {
       const bucket = createMockBucket({ key: 'target-id', doc_count: 3 });
 
-      // Phase 1: no metadata — shows en-dash
+      // Phase 1: no metadata — shows N/A
       const rendererBefore = createGroupStatsRenderer(emptyMetadata);
       const statsBefore = rendererBefore(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
       const { rerender } = render(<TestProviders>{statsBefore[1].component}</TestProviders>);
-      expect(screen.getByText('—')).toBeInTheDocument();
+      expect(screen.getByText('N/A')).toBeInTheDocument();
 
       // Phase 2: metadata arrived — shows actual risk score
       const metadata: TargetMetadataMap = new Map([
-        ['target-id', { name: 'test', type: EntityType.user, riskScore: 92.5 }],
+        [
+          'target-id',
+          { name: 'test', type: EntityType.user, riskScore: 92.5, individualRiskScore: null },
+        ],
       ]);
       const rendererAfter = createGroupStatsRenderer(metadata);
       const statsAfter = rendererAfter(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
       rerender(<TestProviders>{statsAfter[1].component}</TestProviders>);
       expect(screen.getByText('92.50')).toBeInTheDocument();
+    });
+
+    it('solo entity falls back to individual risk score when group score is null', () => {
+      const metadata: TargetMetadataMap = new Map([
+        [
+          'solo-id',
+          { name: 'solo', type: EntityType.user, riskScore: null, individualRiskScore: 42.5 },
+        ],
+      ]);
+      const bucket = createMockBucket({ key: 'solo-id', doc_count: 1 });
+      const renderer = createGroupStatsRenderer(metadata);
+      const stats = renderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
+
+      render(<TestProviders>{stats[1].component}</TestProviders>);
+
+      expect(screen.getByText('42.50')).toBeInTheDocument();
+    });
+
+    it('solo entity with no group or individual score shows N/A', () => {
+      const metadata: TargetMetadataMap = new Map([
+        [
+          'solo-id',
+          { name: 'solo', type: EntityType.user, riskScore: null, individualRiskScore: null },
+        ],
+      ]);
+      const bucket = createMockBucket({ key: 'solo-id', doc_count: 1 });
+      const renderer = createGroupStatsRenderer(metadata);
+      const stats = renderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
+
+      render(<TestProviders>{stats[1].component}</TestProviders>);
+
+      expect(screen.getByText('N/A')).toBeInTheDocument();
+    });
+
+    it('multi-entity group with no group score does NOT fall back to individual score', () => {
+      const metadata: TargetMetadataMap = new Map([
+        [
+          'target-id',
+          { name: 'target', type: EntityType.user, riskScore: null, individualRiskScore: 42.5 },
+        ],
+      ]);
+      const bucket = createMockBucket({ key: 'target-id', doc_count: 3 });
+      const renderer = createGroupStatsRenderer(metadata);
+      const stats = renderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
+
+      render(<TestProviders>{stats[1].component}</TestProviders>);
+
+      expect(screen.getByText('N/A')).toBeInTheDocument();
+      expect(screen.queryByText('42.50')).not.toBeInTheDocument();
+    });
+
+    it('group score wins when both group and individual scores are present', () => {
+      const metadata: TargetMetadataMap = new Map([
+        [
+          'target-id',
+          { name: 'test', type: EntityType.user, riskScore: 90.0, individualRiskScore: 10.0 },
+        ],
+      ]);
+      const bucket = createMockBucket({ key: 'target-id', doc_count: 3 });
+      const renderer = createGroupStatsRenderer(metadata);
+      const stats = renderer(ENTITY_GROUPING_OPTIONS.RESOLUTION, bucket);
+
+      render(<TestProviders>{stats[1].component}</TestProviders>);
+
+      expect(screen.getByText('90.00')).toBeInTheDocument();
+      expect(screen.queryByText('10.00')).not.toBeInTheDocument();
     });
   });
 

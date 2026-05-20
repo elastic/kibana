@@ -27,6 +27,16 @@ export class ServiceMapPage {
   public serviceMapFocusMapButton: Locator;
   public serviceMapDependencyDetailsButton: Locator;
   public serviceMapEdgeExploreTracesButton: Locator;
+  public serviceMapOptionsPanel: Locator;
+  public serviceMapHideControlsButton: Locator;
+  public serviceMapShowControlsButton: Locator;
+  public serviceMapFindInPageInput: Locator;
+  /**
+   * Native search `<input>` (`SERVICE_MAP_FIND_INPUT_ID`). Prefer this for fill/focus so React
+   * `onFocus` runs and find highlights sync (`service_map_find_in_page` gates on `isFocused`).
+   */
+  public serviceMapFindInPageNativeInput: Locator;
+  public serviceMapFindMatchSummary: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.serviceMap = page.testSubj.locator('serviceMap');
@@ -52,6 +62,12 @@ export class ServiceMapPage {
     this.serviceMapEdgeExploreTracesButton = page.testSubj.locator(
       'apmEdgeContentsOpenInDiscoverButton'
     );
+    this.serviceMapOptionsPanel = page.testSubj.locator('serviceMapOptionsPanel');
+    this.serviceMapHideControlsButton = page.testSubj.locator('serviceMapHideControlsButton');
+    this.serviceMapShowControlsButton = page.testSubj.locator('serviceMapShowControlsButton');
+    this.serviceMapFindInPageInput = page.testSubj.locator('serviceMapControlsSearch');
+    this.serviceMapFindInPageNativeInput = page.locator('#serviceMapFindInPageInput');
+    this.serviceMapFindMatchSummary = page.testSubj.locator('serviceMapFindMatchSummary');
   }
 
   async gotoWithDateSelected(start: string, end: string, options?: { kuery?: string }) {
@@ -93,6 +109,23 @@ export class ServiceMapPage {
 
   async waitForMapToLoad() {
     await this.serviceMapGraph.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Blur focused controls and move focus to `document.body` so the service map Ctrl/Cmd+K handler
+   * treats the shortcut as in scope (see graph.tsx).
+   */
+  async focusBodyForMapShortcuts() {
+    await this.page.evaluate(() => {
+      (document.activeElement as HTMLElement | null)?.blur?.();
+      document.body.focus();
+    });
+  }
+
+  /** Triggers find-in-page focus via the same shortcut as the in-app hint (Control+K / Meta+K). */
+  async openFindInPageWithKeyboardShortcut() {
+    await this.focusBodyForMapShortcuts();
+    await this.page.keyboard.press('Control+KeyK');
   }
 
   async clickZoom(direction: 'in' | 'out') {
@@ -181,6 +214,15 @@ export class ServiceMapPage {
   /** Wrapper for a service node (icon, badges row, label). `data.id` on the map matches the service name in tests. */
   getServiceNodeRoot(serviceName: string) {
     return this.serviceMapGraph.getByTestId(`serviceMapNode-service-${serviceName}`);
+  }
+
+  /**
+   * Highlight frame around the active find-in-page match (`HighlightWrapper` when `isActiveSearchMatch`).
+   */
+  getActiveFindMatchHighlightFrame(serviceName: string) {
+    return this.getServiceNodeRoot(serviceName).locator(
+      'xpath=ancestor::*[@data-test-subj="serviceMapNodeSearchHighlightFrame"][1]'
+    );
   }
 
   /**
@@ -306,6 +348,30 @@ export class ServiceMapPage {
   async dismissPopoverIfOpen() {
     await this.page.keyboard.press('Escape');
     await this.waitForPopoverToBeHidden({ timeout: 2000 }).catch(() => {});
+  }
+
+  /**
+   * Collapse the options panel if it is currently open. Use in tests that don't exercise the
+   * panel itself so the expanded menu can't overlap nodes/edges/badges after fit view.
+   */
+  async closeOptionsPanelIfOpen() {
+    if (await this.serviceMapHideControlsButton.isVisible().catch(() => false)) {
+      await this.serviceMapHideControlsButton.click();
+      await this.serviceMapOptionsPanel.waitFor({ state: 'hidden', timeout: 2000 }).catch(() => {});
+    }
+  }
+
+  /**
+   * Expand the options panel if it is currently collapsed. Use in tests that assert on
+   * panel contents (find-in-page input, filters) after the panel was closed in beforeEach.
+   */
+  async openOptionsPanelIfClosed() {
+    if (await this.serviceMapShowControlsButton.isVisible().catch(() => false)) {
+      await this.serviceMapShowControlsButton.click();
+      await this.serviceMapOptionsPanel
+        .waitFor({ state: 'visible', timeout: 2000 })
+        .catch(() => {});
+    }
   }
 
   async getPopoverTitle() {

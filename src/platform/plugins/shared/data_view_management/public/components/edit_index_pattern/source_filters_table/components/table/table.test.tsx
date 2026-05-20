@@ -57,7 +57,7 @@ describe('Table', () => {
     jest.clearAllMocks();
   });
 
-  test('renders table headers and rows', () => {
+  it('renders table headers and rows', () => {
     renderTable({ isSaving: true });
 
     expect(screen.getByRole('table')).toBeInTheDocument();
@@ -66,7 +66,7 @@ describe('Table', () => {
     expect(screen.getByText('tim*')).toBeInTheDocument();
   });
 
-  test('renders filter matches when found', () => {
+  it('renders filter matches when found', () => {
     renderTable({
       indexPattern: getIndexPatternMock(['time', 'value']),
       fieldWildcardMatcher: () => () => true,
@@ -75,7 +75,7 @@ describe('Table', () => {
     expect(screen.getByText('time, value')).toBeInTheDocument();
   });
 
-  test('renders no matches message when there are no matches', () => {
+  it('renders no matches message when there are no matches', () => {
     renderTable({
       indexPattern: getIndexPatternMock(['value']),
     });
@@ -86,7 +86,7 @@ describe('Table', () => {
   });
 
   describe('editing', () => {
-    test('shows input and save button after entering edit mode', async () => {
+    it('shows input and save button after entering edit mode', async () => {
       const user = userEvent.setup();
       renderTable();
 
@@ -96,7 +96,7 @@ describe('Table', () => {
       expect(screen.getByTestId('save_filter-tim*')).toBeInTheDocument();
     });
 
-    test('updates matches dynamically as input value changes', async () => {
+    it('updates matches dynamically as input value changes', async () => {
       const user = userEvent.setup();
       renderTable({
         indexPattern: getIndexPatternMock(['time', 'value']),
@@ -110,7 +110,7 @@ describe('Table', () => {
       expect(screen.queryByText('time, value')).not.toBeInTheDocument();
     });
 
-    test('saves edited filter when save icon is clicked and exits edit mode', async () => {
+    it('saves edited filter when save icon is clicked and exits edit mode', async () => {
       const user = userEvent.setup();
       const saveFilter = jest.fn();
       renderTable({ saveFilter });
@@ -125,7 +125,7 @@ describe('Table', () => {
     });
   });
 
-  test('allows deletes', async () => {
+  it('allows deletes', async () => {
     const user = userEvent.setup();
     const deleteFilter = jest.fn();
     renderTable({ deleteFilter });
@@ -135,7 +135,7 @@ describe('Table', () => {
     expect(deleteFilter).toHaveBeenCalledWith({ clientId: '1', value: 'tim*' });
   });
 
-  test('saves when in edit mode and Enter key is pressed', async () => {
+  it('saves when in edit mode and Enter key is pressed', async () => {
     const user = userEvent.setup();
     const saveFilter = jest.fn();
     renderTable({ saveFilter });
@@ -150,7 +150,7 @@ describe('Table', () => {
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
   });
 
-  test('cancels when in edit mode and Escape key is pressed', async () => {
+  it('cancels when in edit mode and Escape key is pressed', async () => {
     const user = userEvent.setup();
     const saveFilter = jest.fn();
     renderTable({ saveFilter });

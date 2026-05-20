@@ -10,8 +10,8 @@ import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTextColor } from '@elastic/eui';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import { i18n } from '@kbn/i18n';
 import { getModelId } from '../../utils/get_model_id';
-import { MODELS_LABEL, ENDPOINTS_LABEL } from './endpoint_stats_translations';
 
 interface EndpointStatsProps {
   endpoints: InferenceInferenceEndpointInfo[];
@@ -57,9 +57,17 @@ export const EndpointStats: React.FC<EndpointStatsProps> = ({ endpoints }) => {
   }, [endpoints]);
 
   const statItems: StatItemProps[] = [
-    { label: MODELS_LABEL, count: stats.modelsCount, testSubj: 'endpointStatsModelsCount' },
     {
-      label: ENDPOINTS_LABEL,
+      label: i18n.translate('xpack.searchInferenceEndpoints.endpointStats.modelsLabel', {
+        defaultMessage: 'Models:',
+      }),
+      count: stats.modelsCount,
+      testSubj: 'endpointStatsModelsCount',
+    },
+    {
+      label: i18n.translate('xpack.searchInferenceEndpoints.endpointStats.endpointsLabel', {
+        defaultMessage: 'Endpoints:',
+      }),
       count: stats.endpointsCount,
       testSubj: 'endpointStatsEndpointsCount',
     },
