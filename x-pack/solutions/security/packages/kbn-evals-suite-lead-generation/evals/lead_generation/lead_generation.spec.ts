@@ -17,20 +17,22 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
   /**
    * Full dataset evaluation.
    *
-   * Runs in one of two modes — checked in priority order:
+   * Runs in one of three modes — checked in priority order:
    *
-   * 1. **Local JSONL** (set LEAD_GENERATION_DATASET_JSONL_PATH or place the
-   *    file at data/eval_dataset_lead_generation_all_scenarios.jsonl):
-   *    Loads examples from the local file. No golden cluster needed.
+   * 1. **Explicit JSONL path** (set LEAD_GENERATION_DATASET_JSONL_PATH):
+   *    Loads examples from the given file. Useful for ad-hoc local runs
+   *    or CI jobs with a custom dataset.
    *
    * 2. **Golden cluster** (set LEAD_GENERATION_DATASET_NAME):
    *    Fetches the named dataset from the upstream golden cluster
    *    (EVALUATIONS_KBN_URL must also be configured).
    *    Run `scripts/upload_dataset.js` first to publish the dataset.
    *
-   * If neither is configured the test is skipped. See data/README.md for details.
+   * 3. **Bundled default dataset** (no env vars required):
+   *    Falls back to data/eval_dataset_lead_generation_all_scenarios.jsonl,
+   *    which is checked in. Works out of the box in CI and locally.
    */
-  evaluate('full dataset evaluation', async ({ evaluateDataset }, testInfo) => {
+  evaluate('full dataset evaluation', async ({ evaluateDataset }) => {
     const jsonlPath = process.env.LEAD_GENERATION_DATASET_JSONL_PATH;
     const datasetName = process.env.LEAD_GENERATION_DATASET_NAME;
 
@@ -54,11 +56,10 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
       return;
     }
 
-    testInfo.skip(
-      true,
-      'No dataset configured — set LEAD_GENERATION_DATASET_JSONL_PATH (local file) ' +
-        'or LEAD_GENERATION_DATASET_NAME (golden cluster). See data/README.md.'
-    );
+    // Mode 3: bundled default dataset (checked in at data/).
+    // No env vars needed — works out of the box in CI and locally.
+    const dataset = await loadLeadGenerationJsonlDataset();
+    await evaluateDataset({ dataset });
   });
 
   evaluate.describe('smoke tests', () => {

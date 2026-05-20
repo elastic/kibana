@@ -28,7 +28,6 @@
  *     node scripts/evals start --suite lead-generation
  */
 
-// eslint-disable-next-line @kbn/imports/no_unresolvable_imports
 const Fs = require('fs');
 const Path = require('path');
 const Https = require('https');

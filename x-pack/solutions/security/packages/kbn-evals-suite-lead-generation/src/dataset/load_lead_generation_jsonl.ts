@@ -46,7 +46,7 @@ const parseJsonlLine = (line: string, lineNumber: number): LeadGenerationDataset
  * Load a Lead Generation evaluation dataset from a local JSONL file.
  *
  * Reads from LEAD_GENERATION_DATASET_JSONL_PATH if set, otherwise from
- * data/eval_dataset_lead_generation_all_scenarios.jsonl (not checked in).
+ * the bundled data/eval_dataset_lead_generation_all_scenarios.jsonl.
  *
  * Each line must be a JSON object with:
  *   { "input": { "maxLeads"?: number }, "output": { "leads": [] }, "metadata": { "Title": "..." } }
@@ -72,10 +72,10 @@ export const loadLeadGenerationJsonlDataset = async ({
     text = await Fs.readFile(jsonlPath, 'utf-8');
   } catch (err) {
     throw new Error(
-      `Could not read JSONL dataset at ${jsonlPath}. ` +
-        'The dataset file is not checked in. Either:\n' +
-        '  1. Place a local JSONL file at data/eval_dataset_lead_generation_all_scenarios.jsonl\n' +
-        '  2. Set LEAD_GENERATION_DATASET_JSONL_PATH to point at your file\n' +
+      `Could not read JSONL dataset at ${jsonlPath}.\n` +
+        'Options:\n' +
+        '  1. Use the bundled dataset — ensure data/eval_dataset_lead_generation_all_scenarios.jsonl is present\n' +
+        '  2. Set LEAD_GENERATION_DATASET_JSONL_PATH to point at a custom file\n' +
         '  3. Use the golden cluster (set LEAD_GENERATION_DATASET_NAME instead)\n' +
         'See data/README.md for the expected format.',
       { cause: err }

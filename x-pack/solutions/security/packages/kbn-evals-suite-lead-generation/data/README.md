@@ -1,11 +1,17 @@
 # Lead Generation Eval Dataset
 
-The JSONL dataset file is **not checked in** to the repository. Place it locally
-at this path before running evals with a local file:
+A small reference dataset (`eval_dataset_lead_generation_all_scenarios.jsonl`) is
+**checked in** to this directory. It covers the primary evaluation scenarios and is
+used as the default when no environment variables are configured, so the eval suite
+runs out of the box in CI (via `evals:lead-generation` label) and locally.
+
+To use a larger or custom dataset, place a JSONL file locally at:
 
 ```
 data/eval_dataset_lead_generation_all_scenarios.jsonl
 ```
+
+(replacing the bundled file), or point at any file via `LEAD_GENERATION_DATASET_JSONL_PATH`.
 
 ## JSONL format
 
