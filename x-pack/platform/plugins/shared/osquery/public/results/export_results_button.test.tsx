@@ -135,6 +135,37 @@ describe('ExportResultsButton', () => {
     });
   });
 
+  describe('empty-result gating', () => {
+    it('disables the button when total is 0', () => {
+      renderButton({ total: 0 });
+
+      const button = screen.getByTestId('osqueryExportResultsButton');
+      expect(button).toBeDisabled();
+    });
+
+    it('does not open the modal when the button is clicked with total=0', () => {
+      renderButton({ total: 0 });
+
+      fireEvent.click(screen.getByTestId('osqueryExportResultsButton'));
+
+      expect(screen.queryByTestId('osqueryExportResultsModal')).not.toBeInTheDocument();
+    });
+
+    it('leaves the button enabled when total is undefined (loading or error)', () => {
+      renderButton({ total: undefined });
+
+      const button = screen.getByTestId('osqueryExportResultsButton');
+      expect(button).not.toBeDisabled();
+    });
+
+    it('leaves the button enabled when total is greater than zero', () => {
+      renderButton({ total: 10 });
+
+      const button = screen.getByTestId('osqueryExportResultsButton');
+      expect(button).not.toBeDisabled();
+    });
+  });
+
   describe('hasActiveFilters wiring', () => {
     it('passes hasActiveFilters=true to the modal when kuery is set', () => {
       renderButton({ kuery: 'host.os.type:linux' });

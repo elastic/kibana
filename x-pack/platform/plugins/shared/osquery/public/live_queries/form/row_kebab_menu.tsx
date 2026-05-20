@@ -17,6 +17,7 @@ import { useIsExperimentalFeatureEnabled } from '../../common/experimental_featu
 import { useExportResults } from '../../results/use_export_results';
 import { ExportResultsModal } from '../../results/export_results_modal';
 import { useExportFilters } from '../../results/export_filters_context';
+import { EXPORT_NO_DATA_TOOLTIP } from '../../results/translations';
 import type { ExportFormat } from '../../results/use_export_results';
 import type { AddToTimelineHandler } from '../../types';
 
@@ -44,6 +45,10 @@ const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
       exportFilters?.kuery ||
       (exportFilters?.activeFilters && exportFilters.activeFilters.length > 0)
     );
+    // Strict `=== 0` so unknown counts (initial load, error response, or a
+    // collapsed pack row that cleared its store entry) leave the action
+    // enabled. Only a successfully-fetched zero-row result disables it.
+    const isEmpty = exportFilters?.total === 0;
 
     const esFilters = useMemo(
       () =>
@@ -127,6 +132,8 @@ const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
                 key="export"
                 icon="exportAction"
                 onClick={openExportModal}
+                disabled={isEmpty}
+                toolTipContent={isEmpty ? EXPORT_NO_DATA_TOOLTIP : undefined}
                 data-test-subj="osqueryExportResultsMenuItem"
               >
                 {i18n.translate('xpack.osquery.kebab.exportResults', {
@@ -147,6 +154,7 @@ const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
         executionCount,
         close,
         openExportModal,
+        isEmpty,
       ]
     );
 
