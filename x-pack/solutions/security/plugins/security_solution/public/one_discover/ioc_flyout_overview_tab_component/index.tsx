@@ -8,12 +8,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { Content } from '../../flyout_v2/ioc/content';
+import { Content } from '../../flyout_v2/ioc/main/content';
 import type { CellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
-import { getTabsDisplayed } from '../../flyout_v2/ioc/tabs';
+import { getTabsDisplayed } from '../../flyout_v2/ioc/main/tabs';
 import type { Indicator } from '../../../common/threat_intelligence/types/indicator';
 import { DiscoverCellActions } from '../cell_actions';
 
