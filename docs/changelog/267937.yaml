@@ -7,4 +7,4 @@ products:
 areas:
 - Kibana platform
 title: Enforce `form-action` CSP directive
-description: Added `form-action` CSP directive to enforcing mode.
+description: Adds `form-action` CSP directive to enforcing mode.
