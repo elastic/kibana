@@ -18,10 +18,6 @@ import type { CaseViewProps } from './types';
 
 export const caseViewProps: CaseViewProps = {
   onComponentInitialized: jest.fn(),
-  actionsNavigation: {
-    href: jest.fn(),
-    onClick: jest.fn(),
-  },
 };
 
 export const caseData: CaseUI = {

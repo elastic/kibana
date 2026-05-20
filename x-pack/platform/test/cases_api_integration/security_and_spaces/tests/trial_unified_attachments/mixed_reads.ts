@@ -7,9 +7,13 @@
 
 import expect from '@kbn/expect';
 import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
-import { LENS_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common/constants';
+import {
+  LENS_ATTACHMENT_TYPE,
+  SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+} from '@kbn/cases-plugin/common/constants';
+import type { AttachmentRequest } from '@kbn/cases-plugin/common/types/api';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { postCaseReq, postCommentUserReq } from '../../../common/lib/mock';
+import { postCaseReq, postCommentActionsReq, postCommentUserReq } from '../../../common/lib/mock';
 import {
   createCase,
   createComment,
@@ -141,6 +145,60 @@ export default ({ getService }: FtrProviderContext): void => {
         const ids = bulkResult.attachments.map((a: { id: string }) => a.id);
         expect(ids).to.contain(legacyId);
         expect(ids).to.contain(unifiedId);
+      });
+
+      it('bulk get retrieves a unified `security.endpoint` alongside a legacy `actions` row from both SO indices', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        // Unified `security.endpoint` lands on cases-attachments.
+        const unifiedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            type: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+            attachmentId: 'mixed-endpoint-1',
+            owner: 'securitySolutionFixture',
+            data: { content: 'isolated via unified payload' },
+            metadata: {
+              command: 'isolate',
+              targets: [{ endpointId: 'endpoint-1', hostname: 'host-1', agentType: 'endpoint' }],
+            },
+          } as unknown as AttachmentRequest,
+        });
+        const unifiedId = unifiedCase.comments![0].id;
+
+        // Legacy `actions` is folded to `security.endpoint` on write (also lands on
+        // cases-attachments), exercising the asymmetric retirement path alongside
+        // the direct unified write.
+        const actionsCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentActionsReq,
+        });
+        const actionsId = actionsCase.comments!.find((c) => c.id !== unifiedId)!.id;
+
+        const bulkResult = await bulkGetAttachments({
+          supertest,
+          caseId: postedCase.id,
+          savedObjectIds: [unifiedId, actionsId],
+        });
+
+        expect(bulkResult.attachments.length).to.be(2);
+        const byId = new Map<
+          string,
+          { type: string; externalReferenceAttachmentTypeId?: string; externalReferenceId?: string }
+        >(bulkResult.attachments.map((a: { id: string; type: string }) => [a.id, a]));
+
+        // Both rows surface as the legacy `externalReference + endpoint` projection
+        // for API consumers; the actions-origin row carries the synthetic sentinel id.
+        const unifiedProjected = byId.get(unifiedId)!;
+        expect(unifiedProjected.type).to.be(AttachmentType.externalReference);
+        expect(unifiedProjected.externalReferenceAttachmentTypeId).to.be('endpoint');
+
+        const actionsProjected = byId.get(actionsId)!;
+        expect(actionsProjected.type).to.be(AttachmentType.externalReference);
+        expect(actionsProjected.externalReferenceAttachmentTypeId).to.be('endpoint');
+        expect(actionsProjected.externalReferenceId).to.be('legacy-actions');
       });
 
       it('handles mixed legacy v1 and unified v2 payloads in bulk create', async () => {

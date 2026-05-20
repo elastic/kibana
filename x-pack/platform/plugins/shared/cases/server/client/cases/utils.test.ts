@@ -747,21 +747,11 @@ describe('utils', () => {
           comment: 'Wow, good luck catching that bad meanie!\n\nAdded by elastic.',
           commentId: 'comment-user-1',
         },
-        {
-          comment:
-            'Isolated host windows-host-1 with comment: Isolating this for investigation\n\nAdded by elastic.',
-          commentId: 'mock-action-comment-1',
-        },
-        {
-          comment:
-            'Released host windows-host-1 with comment: Releasing this for investigation\n\nAdded by elastic.',
-          commentId: 'mock-action-comment-2',
-        },
-        {
-          comment:
-            'Isolated host windows-host-1 and 1 more with comment: Isolating this for investigation\n\nAdded by elastic.',
-          commentId: 'mock-action-comment-3',
-        },
+        // Legacy `actions` host-isolation comments are no longer pushed: they
+        // are folded into the unified `security.endpoint` shape on read and
+        // the registry-hook redesign tracked in
+        // https://github.com/elastic/kibana/issues/262574 will own per-type
+        // connector formatting.
         {
           comment: 'Elastic Alerts attached to the case: 3',
           commentId: 'mock-id-1-total-alerts',
@@ -796,27 +786,6 @@ describe('utils', () => {
         {
           comment: 'Wow, good luck catching that bad meanie!\n\nAdded by Damaged Raccoon.',
           commentId: 'comment-user-1',
-        },
-        {
-          comment:
-            'Isolated host windows-host-1 with comment: Isolating this for investigation\n' +
-            '\n' +
-            'Added by Damaged Raccoon.',
-          commentId: 'mock-action-comment-1',
-        },
-        {
-          comment:
-            'Released host windows-host-1 with comment: Releasing this for investigation\n' +
-            '\n' +
-            'Added by Damaged Raccoon.',
-          commentId: 'mock-action-comment-2',
-        },
-        {
-          comment:
-            'Isolated host windows-host-1 and 1 more with comment: Isolating this for investigation\n' +
-            '\n' +
-            'Added by Damaged Raccoon.',
-          commentId: 'mock-action-comment-3',
         },
         {
           comment: 'Elastic Alerts attached to the case: 3',

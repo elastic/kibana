@@ -13,6 +13,7 @@ import {
   LEGACY_FILE_ATTACHMENT_TYPE,
   LENS_ATTACHMENT_TYPE,
   LEGACY_LENS_ATTACHMENT_TYPE,
+  SECURITY_ENDPOINT_ATTACHMENT_TYPE,
 } from '../../../common/constants/attachments';
 import { CommentAttachmentPayloadSchema } from '../../../common/types/domain_zod/attachment/comment/v2';
 import { LensAttachmentPayloadSchema } from '../../../common/types/domain_zod/attachment/lens/v2';
@@ -299,6 +300,113 @@ describe('validateLegacyRegisteredAttachments (migrated subtypes)', () => {
           unifiedAttachmentTypeRegistry,
         })
       ).toThrow(/Invalid attachment payload for type 'file'/);
+    });
+  });
+
+  describe('migrated external reference (endpoint, with data.content lift)', () => {
+    // Mirrors the shape of `EndpointAttachmentPayloadSchema` registered by
+    // security_solution. We redeclare it here (rather than importing across
+    // plugin boundaries) to assert the cases-plugin lift + validator contract
+    // independently of the security_solution registration.
+    const endpointSchema = z
+      .object({
+        type: z.literal(SECURITY_ENDPOINT_ATTACHMENT_TYPE),
+        owner: z.string(),
+        attachmentId: z.string(),
+        data: z.object({ content: z.string() }).strict(),
+        metadata: z
+          .object({
+            command: z.string(),
+            targets: z
+              .array(
+                z
+                  .object({
+                    endpointId: z.string(),
+                    hostname: z.string(),
+                    agentType: z.string(),
+                  })
+                  .strict()
+              )
+              .min(1),
+          })
+          .strict(),
+      })
+      .strict();
+
+    const buildLegacyEndpointPayload = (overrides: Record<string, unknown> = {}) => ({
+      type: AttachmentType.externalReference,
+      externalReferenceAttachmentTypeId: 'endpoint',
+      externalReferenceId: 'action-1',
+      externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
+      externalReferenceMetadata: {
+        command: 'isolate',
+        comment: 'host isolated',
+        targets: [{ endpointId: 'ep-1', hostname: 'host-1', agentType: 'endpoint' }],
+      },
+      owner: 'securitySolution',
+      ...overrides,
+    });
+
+    it('accepts a legacy endpoint payload: lifts metadata.comment to data.content before validating', () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register({
+        id: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+        schema: endpointSchema,
+      });
+
+      expect(() =>
+        validateLegacyRegisteredAttachments({
+          query: buildLegacyEndpointPayload() as never,
+          persistableStateAttachmentTypeRegistry,
+          externalReferenceAttachmentTypeRegistry,
+          unifiedAttachmentTypeRegistry,
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects a legacy endpoint payload whose externalReferenceMetadata has no `comment` (no data.content to lift)', () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register({
+        id: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+        schema: endpointSchema,
+      });
+
+      expect(() =>
+        validateLegacyRegisteredAttachments({
+          query: buildLegacyEndpointPayload({
+            externalReferenceMetadata: {
+              command: 'isolate',
+              targets: [{ endpointId: 'ep-1', hostname: 'host-1', agentType: 'endpoint' }],
+            },
+          }) as never,
+          persistableStateAttachmentTypeRegistry,
+          externalReferenceAttachmentTypeRegistry,
+          unifiedAttachmentTypeRegistry,
+        })
+      ).toThrow(/Invalid attachment payload for type 'security\.endpoint'/);
+    });
+
+    it('rejects a legacy endpoint payload with an empty targets array', () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register({
+        id: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+        schema: endpointSchema,
+      });
+
+      expect(() =>
+        validateLegacyRegisteredAttachments({
+          query: buildLegacyEndpointPayload({
+            externalReferenceMetadata: {
+              command: 'isolate',
+              comment: 'host isolated',
+              targets: [],
+            },
+          }) as never,
+          persistableStateAttachmentTypeRegistry,
+          externalReferenceAttachmentTypeRegistry,
+          unifiedAttachmentTypeRegistry,
+        })
+      ).toThrow(/Invalid attachment payload for type 'security\.endpoint'/);
     });
   });
 

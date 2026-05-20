@@ -27,10 +27,11 @@ const EndpointTargetSchema = z
 const EndpointAttachmentMetadataSchema = z
   .object({
     command: z.string(),
-    comment: z.string(),
     targets: z.array(EndpointTargetSchema).min(1, 'targets must contain at least one entry'),
   })
   .strict();
+
+const EndpointAttachmentDataSchema = z.object({ content: z.string() }).strict();
 
 /**
  * Full unified-payload schema for `security.endpoint`. Registered on the unified
@@ -42,6 +43,7 @@ export const EndpointAttachmentPayloadSchema = z
     type: z.literal(SECURITY_ENDPOINT_ATTACHMENT_TYPE),
     owner: z.string(),
     attachmentId: z.string(),
+    data: EndpointAttachmentDataSchema,
     metadata: EndpointAttachmentMetadataSchema,
   })
   .strict();
@@ -49,3 +51,4 @@ export const EndpointAttachmentPayloadSchema = z
 export type EndpointAttachmentPayload = z.infer<typeof EndpointAttachmentPayloadSchema>;
 export type EndpointAttachmentMetadata = EndpointAttachmentPayload['metadata'];
 export type EndpointAttachmentTarget = EndpointAttachmentMetadata['targets'][number];
+export type EndpointAttachmentData = EndpointAttachmentPayload['data'];
