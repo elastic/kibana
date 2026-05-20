@@ -14,13 +14,11 @@ spaceTest.describe(
   () => {
     spaceTest.beforeEach(async ({ browserAuth, apiServices }) => {
       await apiServices.entityAnalytics.deleteEntityStoreEngines();
-      await apiServices.entityAnalytics.deleteRiskEngineConfiguration();
       await browserAuth.loginAsAdmin();
     });
 
     spaceTest.afterEach(async ({ apiServices }) => {
       await apiServices.entityAnalytics.deleteEntityStoreEngines();
-      await apiServices.entityAnalytics.deleteRiskEngineConfiguration();
     });
 
     spaceTest(

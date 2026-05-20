@@ -26,10 +26,6 @@ export const servers: ScoutServerConfig = {
       '--serverless=security',
       '--coreApp.allowDynamicConfigOverrides=true',
       `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
-      // Disable entity store V2 until Scout tests cover it
-      `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-        'disable:entityAnalyticsEntityStoreV2',
-      ])}`,
     ],
   },
 };
