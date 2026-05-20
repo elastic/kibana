@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { LoggerService } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
-import { AlertingDomainEventBus } from './event_bus';
+import { AsyncDomainEventBus } from './event_bus';
 import type { DomainEvent } from './types';
 
 interface FooEvent extends DomainEvent {
@@ -40,14 +40,14 @@ const flushAsync = async (): Promise<void> => {
   await new Promise((resolve) => setImmediate(resolve));
 };
 
-describe('AlertingDomainEventBus', () => {
+describe('AsyncDomainEventBus', () => {
   let loggerService: LoggerService;
   let mockLogger: jest.Mocked<Logger>;
-  let bus: AlertingDomainEventBus<TestEvent>;
+  let bus: AsyncDomainEventBus<TestEvent>;
 
   beforeEach(() => {
     ({ loggerService, mockLogger } = createLoggerService());
-    bus = new AlertingDomainEventBus<TestEvent>(loggerService);
+    bus = new AsyncDomainEventBus<TestEvent>(loggerService);
   });
 
   describe('publish / subscribe', () => {

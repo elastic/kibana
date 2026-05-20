@@ -56,14 +56,6 @@ export interface EventBusSubscriber<TEvent extends DomainEvent = DomainEvent> {
 }
 
 /**
- * Inversify token for the singleton {@link EventBus} carrying alerting
- * domain events.
- */
-export const EventBusToken = Symbol.for('alerting_v2.EventBus') as ServiceIdentifier<
-  EventBus<DomainEvent>
->;
-
-/**
  * Multi-binding token: every subscriber that wants to attach to the bus
  * registers itself under this token. `bind_on_setup` retrieves the full
  * list and attaches each one.

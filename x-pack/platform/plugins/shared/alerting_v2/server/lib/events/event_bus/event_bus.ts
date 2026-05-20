@@ -13,7 +13,7 @@ import {
 } from '../../services/logger_service/logger_service';
 import type { DomainEvent, EventBus, Subscription } from './types';
 
-const ASYNC_RESOURCE_NAME = 'AlertingDomainEventBus';
+const ASYNC_RESOURCE_NAME = 'AsyncDomainEventBus';
 
 type AnyHandler = (event: DomainEvent) => Promise<void> | void;
 
@@ -72,7 +72,7 @@ const RESERVED_EVENT_TYPES: ReadonlySet<string> = new Set([
  *    kept intentionally. It is a useful memory-leak signal.
  */
 @injectable()
-export class AlertingDomainEventBus<TEvent extends DomainEvent = DomainEvent>
+export class AsyncDomainEventBus<TEvent extends DomainEvent = DomainEvent>
   implements EventBus<TEvent>
 {
   readonly #emitter = new EventEmitterAsyncResource({
