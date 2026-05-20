@@ -13,7 +13,6 @@ import type {
   CreateProjectRequestBody,
   Credentials,
 } from './project_handler';
-import { ProjectInitTimeoutError } from './project_init_timeout_error';
 import { ProjectHandler } from './project_handler';
 
 const DEFAULT_REGION = 'aws-eu-west-1';
@@ -161,12 +160,8 @@ export class CloudHandler extends ProjectHandler {
 
   // Wait until Project is initialized
   waitForProjectInitialized(projectId: string): Promise<void> {
-    let lastPhase: string | undefined;
-    let attempts = 0;
-
-    const fetchProjectStatusAttempt = async () => {
-      attempts += 1;
-      this.log.info(`Retry number ${attempts} to check if project is initialized.`);
+    const fetchProjectStatusAttempt = async (attemptNum: number) => {
+      this.log.info(`Retry number ${attemptNum} to check if project is initialized.`);
       const response = await axios.get(
         `${this.baseEnvUrl}/api/v1/serverless/projects/security/${projectId}/status`,
         {
@@ -175,9 +170,6 @@ export class CloudHandler extends ProjectHandler {
           },
         }
       );
-
-      lastPhase = typeof response.data?.phase === 'string' ? response.data.phase : undefined;
-
       if (response.data.phase !== 'initialized') {
         this.log.info(response.data);
         throw new Error('Project is not initialized. A retry will be triggered soon...');
@@ -197,14 +189,5 @@ export class CloudHandler extends ProjectHandler {
       factor: 2,
       maxTimeout: 20000,
     };
-
-    return pRetry(fetchProjectStatusAttempt, retryOptions).catch((final: unknown) => {
-      throw new ProjectInitTimeoutError({
-        projectId,
-        lastPhase,
-        attempts,
-        cause: final,
-      });
-    });
   }
 }
