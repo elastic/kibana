@@ -21,18 +21,6 @@ export const ENTITY_IDS_MAX_SIZE = 5000;
 // maxSize is set to 100 for esQuery.bool clause arrays from the Kibana query builder
 export const ES_BOOL_CLAUSE_MAX_SIZE = 100;
 
-// maxSize is set to 300 to match GRAPH_NODES_LIMIT used by the graph UI
-export const GRAPH_NODES_MAX_SIZE = 300;
-export const GRAPH_EDGES_MAX_SIZE = 1000;
-export const GRAPH_MESSAGES_MAX_SIZE = 5;
-
-// maxSize is set to 100 to match page.size max on graph events/entities requests
-export const GRAPH_PAGE_ITEMS_MAX_SIZE = 100;
-
-export const NODE_IPS_MAX_SIZE = 256;
-export const NODE_COUNTRY_CODES_MAX_SIZE = 100;
-export const NODE_DOCUMENTS_DATA_MAX_SIZE = 5000;
-
 const indexPatternStringSchema = schema.string({
   minLength: 1,
   validate: (value) => {
@@ -121,7 +109,8 @@ export const entitySchema = schema.object({
   ),
   host: schema.maybe(
     schema.object({
-      ip: schema.maybe(schema.arrayOf(schema.string(), { maxSize: NODE_IPS_MAX_SIZE })),
+      // codeql[js/kibana/unbounded-array-in-schema] ES-derived entity detail in response body
+      ip: schema.maybe(schema.arrayOf(schema.string())),
     })
   ),
   availableInEntityStore: schema.maybe(schema.boolean()),
@@ -153,20 +142,20 @@ export const REACHED_NODES_LIMIT = 'REACHED_NODES_LIMIT';
 
 export const graphResponseSchema = () =>
   schema.object({
+    // codeql[js/kibana/unbounded-array-in-schema] Server-built graph response from Elasticsearch, not user HTTP input
     nodes: schema.arrayOf(
       schema.oneOf([
         entityNodeDataSchema,
         groupNodeDataSchema,
         labelNodeDataSchema,
         relationshipNodeDataSchema,
-      ]),
-      { maxSize: GRAPH_NODES_MAX_SIZE }
+      ])
     ),
-    edges: schema.arrayOf(edgeDataSchema, { maxSize: GRAPH_EDGES_MAX_SIZE }),
+    // codeql[js/kibana/unbounded-array-in-schema] Server-built graph response from Elasticsearch, not user HTTP input
+    edges: schema.arrayOf(edgeDataSchema),
     messages: schema.maybe(
-      schema.arrayOf(schema.oneOf([schema.literal(REACHED_NODES_LIMIT)]), {
-        maxSize: GRAPH_MESSAGES_MAX_SIZE,
-      })
+      // codeql[js/kibana/unbounded-array-in-schema] Server-built graph response from Elasticsearch, not user HTTP input
+      schema.arrayOf(schema.oneOf([schema.literal(REACHED_NODES_LIMIT)]))
     ),
   });
 
@@ -213,13 +202,12 @@ export const entityNodeDataSchema = schema.allOf([
     ]),
     tag: schema.maybe(schema.string()),
     count: schema.maybe(schema.number()),
-    ips: schema.maybe(schema.arrayOf(schema.string(), { maxSize: NODE_IPS_MAX_SIZE })),
-    countryCodes: schema.maybe(
-      schema.arrayOf(schema.string(), { maxSize: NODE_COUNTRY_CODES_MAX_SIZE })
-    ),
-    documentsData: schema.maybe(
-      schema.arrayOf(nodeDocumentDataSchema, { maxSize: NODE_DOCUMENTS_DATA_MAX_SIZE })
-    ),
+    // codeql[js/kibana/unbounded-array-in-schema] ES-derived node fields in response body
+    ips: schema.maybe(schema.arrayOf(schema.string())),
+    // codeql[js/kibana/unbounded-array-in-schema] ES-derived node fields in response body
+    countryCodes: schema.maybe(schema.arrayOf(schema.string())),
+    // codeql[js/kibana/unbounded-array-in-schema] ES-derived node fields in response body
+    documentsData: schema.maybe(schema.arrayOf(nodeDocumentDataSchema)),
   }),
 ]);
 
@@ -236,16 +224,15 @@ export const labelNodeDataSchema = schema.allOf([
     shape: schema.literal('label'),
     parentId: schema.maybe(schema.string()),
     color: nodeColorSchema,
-    ips: schema.maybe(schema.arrayOf(schema.string(), { maxSize: NODE_IPS_MAX_SIZE })),
+    // codeql[js/kibana/unbounded-array-in-schema] ES-derived node fields in response body
+    ips: schema.maybe(schema.arrayOf(schema.string())),
     count: schema.maybe(schema.number()),
     uniqueEventsCount: schema.maybe(schema.number()),
     uniqueAlertsCount: schema.maybe(schema.number()),
-    countryCodes: schema.maybe(
-      schema.arrayOf(schema.string(), { maxSize: NODE_COUNTRY_CODES_MAX_SIZE })
-    ),
-    documentsData: schema.maybe(
-      schema.arrayOf(nodeDocumentDataSchema, { maxSize: NODE_DOCUMENTS_DATA_MAX_SIZE })
-    ),
+    // codeql[js/kibana/unbounded-array-in-schema] ES-derived node fields in response body
+    countryCodes: schema.maybe(schema.arrayOf(schema.string())),
+    // codeql[js/kibana/unbounded-array-in-schema] ES-derived node fields in response body
+    documentsData: schema.maybe(schema.arrayOf(nodeDocumentDataSchema)),
   }),
 ]);
 

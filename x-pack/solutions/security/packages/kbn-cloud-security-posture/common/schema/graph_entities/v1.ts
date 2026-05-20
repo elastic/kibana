@@ -6,13 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
-  GRAPH_PAGE_ITEMS_MAX_SIZE,
-  INDEX_PATTERN_REGEX,
-  INDEX_PATTERNS_MAX_SIZE,
-  NODE_COUNTRY_CODES_MAX_SIZE,
-  NODE_IPS_MAX_SIZE,
-} from '../graph/v1';
+import { INDEX_PATTERN_REGEX, INDEX_PATTERNS_MAX_SIZE } from '../graph/v1';
 
 // ============================================
 // ENTITIES ENDPOINT: /internal/cloud_security_posture/graph/entities
@@ -34,10 +28,10 @@ export const entityItemSchema = schema.object({
       ip: schema.maybe(schema.string()),
     })
   ),
-  ips: schema.maybe(schema.arrayOf(schema.string(), { maxSize: NODE_IPS_MAX_SIZE })),
-  countryCodes: schema.maybe(
-    schema.arrayOf(schema.string(), { maxSize: NODE_COUNTRY_CODES_MAX_SIZE })
-  ),
+  // codeql[js/kibana/unbounded-array-in-schema] ES-derived entity fields in response body
+  ips: schema.maybe(schema.arrayOf(schema.string())),
+  // codeql[js/kibana/unbounded-array-in-schema] ES-derived entity fields in response body
+  countryCodes: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 export const entitiesRequestSchema = schema.object({
@@ -67,6 +61,7 @@ export const entitiesRequestSchema = schema.object({
 
 export const entitiesResponseSchema = () =>
   schema.object({
-    entities: schema.arrayOf(entityItemSchema, { maxSize: GRAPH_PAGE_ITEMS_MAX_SIZE }),
+    // codeql[js/kibana/unbounded-array-in-schema] Server-paginated response; size enforced in handler, not request DoS input
+    entities: schema.arrayOf(entityItemSchema),
     totalRecords: schema.number(),
   });
