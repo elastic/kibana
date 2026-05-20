@@ -266,8 +266,9 @@ export class DiscoverApp {
   }
 
   async exportAsCsv(): Promise<Download> {
-    // 1. Click the export top nav button
+    // 1. Navigate to the export menu
     await this.page.testSubj.click('exportTopNavButton');
+    await this.page.testSubj.click('exportMenuItem-CSV');
 
     // 2. Trigger the report generation
     await this.page.testSubj.click('generateReportButton');
