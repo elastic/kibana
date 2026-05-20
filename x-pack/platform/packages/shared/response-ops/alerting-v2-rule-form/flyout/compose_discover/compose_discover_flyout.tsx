@@ -284,7 +284,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   // The Sandbox watches RHF via props, so it sees YAML edits live.
   const { run: runYamlParse, cancel: cancelYamlParse } = useDebounceFn((yaml: string) => {
     const result = parseYamlToFormValues(yaml);
-    if (result.values) {
+    if (result.error === null) {
       methods.reset(formValuesFromYamlToCompose(result.values));
       syncForm();
     }
@@ -314,7 +314,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
       } else {
         cancelYamlParse();
         const result = parseYamlToFormValues(yamlText);
-        if (result.values) {
+        if (result.error === null) {
           const compose = formValuesFromYamlToCompose(result.values);
           methods.reset(compose);
           syncForm();
@@ -360,7 +360,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   const handleYamlSave = useCallback(() => {
     cancelYamlParse();
     const result = parseYamlToFormValues(yamlText);
-    if (result.values) {
+    if (result.error === null) {
       methods.reset(formValuesFromYamlToCompose(result.values));
       // No syncForm() here: draft is temporarily stale after methods.reset(), but
       // we're about to submit. On success the flyout closes; on failure the user is still
