@@ -159,8 +159,6 @@ export class CoreKibanaRequest<
   public readonly basePath: string;
   /** {@inheritDoc KibanaRequest.timing} */
   public readonly serverTiming: RequestTiming;
-  /** {@inheritDoc KibanaRequest.spaceId} */
-  public readonly spaceId: string;
 
   /** @internal */
   protected readonly [requestSymbol]!: Request;
@@ -193,7 +191,6 @@ export class CoreKibanaRequest<
     this.basePath = appState?.basePath ?? '';
     this.rewrittenUrl = appState?.rewrittenUrl;
     this.authzResult = appState?.authzResult;
-    this.spaceId = appState?.spaceId ?? 'default';
     this.serverTiming = new RequestTimingImpl(appState?.timingState ?? { events: [] });
     this.injectHostInfo(request);
 

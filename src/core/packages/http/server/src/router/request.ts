@@ -68,8 +68,6 @@ export interface KibanaRequestState extends RequestApplicationState {
   startTime: number;
   redactedSessionId?: string;
   timingState?: RequestTimingState;
-  /** The resolved Kibana space ID for this request. Set by Core's onRequest handler; defaults to `'default'` when absent. */
-  spaceId?: string;
 }
 
 /**
@@ -272,15 +270,6 @@ export interface KibanaRequest<
    * Only available during development.
    */
   readonly serverTiming: RequestTiming;
-
-  /**
-   * The resolved Kibana space ID for this request.
-   *
-   * @remarks
-   * Always populated. Defaults to `'default'` for requests that do not target an explicit space
-   * (i.e. requests whose URL does not contain a `/s/{spaceId}` prefix).
-   */
-  readonly spaceId: string;
 }
 
 /**
