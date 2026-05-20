@@ -171,10 +171,10 @@ Resolve failed automatic backports for the pull request identified by the inject
    - Branch workers are the only tasks that may call `create_pull_request`, and only for a branch whose worker result is `created`.
    - The parent workflow must never call `create_pull_request` for a branch, including to retry, repair, or replace a worker output.
 10. Wait for every branch task to finish. Do not stop after the first failure.
-11. Validate every branch task result before writing the final comment:
-   - A `created` result requires that branch worker to call `create_pull_request` exactly once and then call `assign_to_user` for the temporary PR reference returned by that `create_pull_request` call.
-   - A `needs manual backport` or `failed` result must not have a `create_pull_request` call for that branch. If a branch worker reports either status after requesting a PR, treat the branch as `failed` and explain the contract violation in the final comment.
-   - If a branch worker returns `created` without a matching `assign_to_user` call, keep the branch status as `created` and explain the missing assignment in the final comment result.
+11. Treat each branch worker's returned structured result as the source of truth for that branch. Do not reinterpret, rewrite, or replace the worker's `status`, `summary`, `conflicted_files`, or `pr_title` except for the explicit validation notes below.
+   - A `created` result requires that branch worker call `create_pull_request` exactly once with a `temporary_id` and then call `assign_to_user` for that same temporary PR reference.
+   - A `needs manual backport` or `failed` result must not have a `create_pull_request` call for that branch. If a branch worker reports either status after requesting a PR, keep the worker's returned status and append a concise contract-violation note to the final comment result.
+   - If a branch worker returns `created` without a matching `assign_to_user` call, keep the branch status as `created` and append `Assignment request missing.` to the final comment result.
 12. Post exactly one final `add_comment` following the exact template below after all branch tasks finish. Include a compact table with `Branch`, `Status`, and `Result`. Use statuses: `created`, `existing`, `skipped`, `needs manual backport`, or `failed`. The status for each worker branch must match the validated status from step 11. Do not fabricate PR URLs; gh-aw safe outputs will attach related created PRs to the comment after processing.
    - Keep every `Result` cell to one concise sentence that is under 80 characters.
    - For conflicts or manual-backport cases, summarize the blocker category. Do not include long conflict explanations, implementation analysis, or full file lists in the table.
@@ -199,6 +199,7 @@ These backports were prepared by an agent. Please review the generated PRs caref
 
 ## agent: `backport-branch-worker`
 ---
+name: backport-branch-worker
 description: Resolve one failed Kibana backport branch in an isolated worktree and request a backport PR.
 ---
 
@@ -258,13 +259,18 @@ Backport PR creation steps:
    - `git diff origin/<target branch>...HEAD` is limited to the intended cherry-pick resolution.
 2. If any PR creation precondition fails, abort any in-progress cherry-pick, leave the worktree for logs, return `needs manual backport`, and do not call `create_pull_request`.
 3. Stay in the worktree directory and run `git branch --show-current`.
-4. Call `create_pull_request` from the committed worktree with:
+4. Choose a canonical temporary PR reference for this branch using the form `#aw_` followed by 3-12 alphanumeric or underscore characters, such as `#aw_bp94` for branch `9.4` or `#aw_bp819` for branch `8.19`.
+5. Build the `create_pull_request` safeoutputs payload as JSON with:
+   - `temporary_id`: the temporary PR reference chosen in the previous step
    - `base`: the target branch
    - `branch`: exactly the output of `git branch --show-current`; do not invent a branch name
    - `title`: `[<target branch>] <source PR title> (#<source PR number>)`
    - `body`: matching the backport body rules below.
-5. Call `assign_to_user` for the PR created by that `create_pull_request` call with `issue_number` set to the temporary PR reference returned by `create_pull_request` and `assignees`: `["<source PR author login>"]`.
-6. Return `created`.
+   - `draft`: `false`
+6. Submit the `create_pull_request` payload through the safeoutputs interface provided by the workflow environment. If using the safeoutputs CLI, pass the JSON payload with the `.` sentinel.
+7. Build the `assign_to_user` safeoutputs payload as JSON with `issue_number` set to the same temporary PR reference and `assignees`: `["<source PR author login>"]`.
+8. Submit the `assign_to_user` payload through the safeoutputs interface provided by the workflow environment. If using the safeoutputs CLI, pass the JSON payload with the `.` sentinel.
+9. Return `created`.
 
 Backport body must match this template EXACTLY. JSON-escape string values in the `BACKPORT` marker when substituting real PR metadata:
 
@@ -295,7 +301,6 @@ Rules:
 
 - Never run `node scripts/backport`.
 - Never run `git push`; `create_pull_request` handles the staged PR request.
-- Never use the `safeoutputs` CLI. Use the safe-output tools directly.
 - Never call `create_pull_request` without the `base` field or retry with a different base.
 - Never create draft PRs, placeholder PRs, manual-resolution PRs, or PRs that preserve conflict markers.
 - Never use a custom PR body. The body must match the Backport body template above exactly.
