@@ -40,8 +40,14 @@ const STEP_COMPONENTS: Record<string, React.ComponentType> = {
   'see-data': SeeDataStep,
 };
 
-const INTEGRATION_META: Record<string, { title: string; description: string }> = {
-  aws: { title: AWS_ONBOARDING_TITLE, description: AWS_ONBOARDING_DESCRIPTION },
+interface IntegrationMeta {
+  title: string;
+  description: string;
+  icon: string;
+}
+
+const INTEGRATION_META: Record<string, IntegrationMeta> = {
+  aws: { title: AWS_ONBOARDING_TITLE, description: AWS_ONBOARDING_DESCRIPTION, icon: 'logoAWS' },
 };
 
 export function OnboardingShell() {
@@ -49,17 +55,24 @@ export function OnboardingShell() {
   const history = useHistory();
   const location = useLocation();
   const { euiTheme } = useEuiTheme();
+  const meta = INTEGRATION_META[integrationId];
+
+  useEffect(() => {
+    if (!meta) {
+      history.replace('/');
+    }
+  }, [meta, history]);
+
   const { completedSteps, firstIncompleteStepId } = useStepState(integrationId);
-  const { title, description } = INTEGRATION_META[integrationId] ?? {};
 
   const currentStepId = location.hash ? location.hash.slice(1) : '';
   const isValidStep = ONBOARDING_STEPS.some((s) => s.id === currentStepId);
 
   useEffect(() => {
-    if (!isValidStep) {
+    if (meta && !isValidStep) {
       history.replace({ ...location, hash: `#${firstIncompleteStepId}` });
     }
-  }, [isValidStep, firstIncompleteStepId, history, location]);
+  }, [meta, isValidStep, firstIncompleteStepId, history, location]);
 
   const stepsConfig: EuiStepProps[] = useMemo(
     () =>
@@ -91,7 +104,7 @@ export function OnboardingShell() {
     [currentStepId, completedSteps, history, location]
   );
 
-  if (!isValidStep) {
+  if (!meta || !isValidStep) {
     return null;
   }
 
@@ -107,15 +120,15 @@ export function OnboardingShell() {
       >
         <EuiFlexGroup alignItems="center" gutterSize="l">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="logoAWS" size="xxl" aria-hidden={true} />
+            <EuiIcon type={meta.icon} size="xxl" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle size="l">
-              <h1>{title}</h1>
+              <h1>{meta.title}</h1>
             </EuiTitle>
             <EuiSpacer size="xs" />
             <EuiText size="m" color="subdued">
-              <p>{description}</p>
+              <p>{meta.description}</p>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
