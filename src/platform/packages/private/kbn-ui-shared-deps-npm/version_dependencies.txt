@@ -101,7 +101,7 @@ array-union@1.0.2
 array-uniq@1.0.3
 asn1.js@4.10.1
 assert@2.1.0
-attr-accept@2.2.2
+attr-accept@2.2.5
 available-typed-arrays@1.0.7
 babel-plugin-macros@3.1.0
 babel-plugin-styled-components@2.1.4
@@ -112,7 +112,7 @@ baseline-browser-mapping@2.9.14
 bezier-easing@2.1.0
 bn.js@4.11.9
 bn.js@5.2.3
-brace-expansion@1.1.12
+brace-expansion@1.1.13
 brorand@1.1.0
 browser-resolve@2.0.0
 browserify-aes@1.2.0

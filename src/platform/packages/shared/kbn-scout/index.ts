@@ -60,6 +60,7 @@ export type {
   ScoutLogger,
   ScoutServerConfig,
   ScoutTestConfig,
+  ServerlessProductTier,
   KibanaRole,
   ElasticsearchRoleDescriptor,
 } from './src/types';

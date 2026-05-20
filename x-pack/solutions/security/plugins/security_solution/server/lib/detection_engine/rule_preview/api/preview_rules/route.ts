@@ -192,6 +192,14 @@ export const previewRulesRoute = (
             });
           }
 
+          // Create the preview index so the Lens histogram can resolve field
+          // mappings even when no preview alerts have been generated yet.
+          try {
+            await previewRuleDataClient.getWriter({ namespace: spaceId });
+          } catch (err) {
+            logger.warn(`Failed to bootstrap preview index for space "${spaceId}": ${err.message}`);
+          }
+
           const previewRuleTypeWrapper = createSecurityRuleTypeWrapper({
             ...securityRuleTypeOptions,
             ruleDataClient: previewRuleDataClient,

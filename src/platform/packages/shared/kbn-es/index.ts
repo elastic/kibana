@@ -18,6 +18,10 @@ export {
   verifyDockerInstalled,
   maybeCreateDockerNetwork,
   type ServerlessProjectType,
+  serverlessProjectTypes,
+  isServerlessProjectType,
+  type ServerlessProductTier,
+  serverlessProductTiers,
   readRolesFromResource,
   readRolesDescriptorsFromResource,
 } from './src/utils';
