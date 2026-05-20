@@ -7,16 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  setupEnvironment,
-  WithFieldEditorDependencies,
-  spySearchQuery,
-  spySearchQueryResponse,
-  spyIndexPatternGetByName,
-  fieldFormatsOptions,
-  indexPatternNameForTest,
-  setSearchResponseLatency,
-} from './setup_environment';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
-export type { EsDoc, TestDoc } from './mocks';
-export { mockDocuments } from './mocks';
+export const createFieldFormatMock = <TOverrides extends object = {}>(
+  overrides: TOverrides = {} as TOverrides
+): FieldFormat & TOverrides => {
+  const format = fieldFormatsMock.deserialize() as unknown as FieldFormat & TOverrides;
+
+  Object.assign(format, overrides);
+
+  return format;
+};

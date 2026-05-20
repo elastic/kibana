@@ -7,16 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  setupEnvironment,
-  WithFieldEditorDependencies,
-  spySearchQuery,
-  spySearchQueryResponse,
-  spyIndexPatternGetByName,
-  fieldFormatsOptions,
-  indexPatternNameForTest,
-  setSearchResponseLatency,
-} from './setup_environment';
-
-export type { EsDoc, TestDoc } from './mocks';
-export { mockDocuments } from './mocks';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/src/platform/kbn-ui/_tooling'],
+};
