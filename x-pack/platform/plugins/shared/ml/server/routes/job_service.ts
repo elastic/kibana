@@ -1085,10 +1085,12 @@ export function jobServiceRoutes(
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
           const { bulkUpdateProjectRouting } = jobServiceProvider(client, mlClient, serverless);
-          const { projectRouting, jobIds, auto, simulate, restartRunningJobs } = request.body;
+          const { projectRouting, jobIds, jobGroups, auto, simulate, restartRunningJobs } =
+            request.body;
           const body = await bulkUpdateProjectRouting(
             projectRouting,
             jobIds,
+            jobGroups,
             auto,
             simulate,
             restartRunningJobs

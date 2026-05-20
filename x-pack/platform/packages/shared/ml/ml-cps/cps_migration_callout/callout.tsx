@@ -21,6 +21,9 @@ const BULK_UPDATE_PROJECT_ROUTING_PATH = '/internal/ml/jobs/bulk_update_project_
 export interface CpsMigrationCalloutProps {
   http: HttpStart;
   uiActions: UiActionsStart;
+  options?: {
+    filterJobGroups?: string[];
+  };
   /** Called when the migrate flyout is closed (optional context on the trigger). */
   onMigrateFlyoutClose?: () => void;
 }
@@ -40,9 +43,10 @@ export interface BulkUpdateProjectRoutingResult {
 export const CpsMigrationCallout: FC<CpsMigrationCalloutProps> = ({
   http,
   uiActions,
+  options,
   onMigrateFlyoutClose,
 }) => {
-  const [jobCount, setJobCount] = useState(0);
+  const [jobIds, setJobIds] = useState<string[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -53,6 +57,7 @@ export const CpsMigrationCallout: FC<CpsMigrationCalloutProps> = ({
           projectRouting: '_alias:_origin',
           simulate: true,
           auto: true,
+          jobGroups: options?.filterJobGroups,
         }),
         version: '1',
         asSystemRequest: true,
@@ -61,7 +66,7 @@ export const CpsMigrationCallout: FC<CpsMigrationCalloutProps> = ({
         if (cancelled) {
           return;
         }
-        setJobCount(Object.keys(response.results).length);
+        setJobIds(Object.keys(response.results));
       })
       .catch(() => {
         if (cancelled) {
@@ -72,15 +77,17 @@ export const CpsMigrationCallout: FC<CpsMigrationCalloutProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [http]);
+  }, [http, options]);
 
   const onMigrate = useCallback(() => {
     void uiActions.executeTriggerActions(MIGRATE_AD_JOBS_TO_CPS_TRIGGER, {
+      initialJobIds: jobIds,
+      allowScopeSelection: false,
       onClose: onMigrateFlyoutClose,
     });
-  }, [uiActions, onMigrateFlyoutClose]);
+  }, [uiActions, onMigrateFlyoutClose, jobIds]);
 
-  if (jobCount === 0) {
+  if (jobIds.length === 0) {
     return null;
   }
 
@@ -108,7 +115,7 @@ export const CpsMigrationCallout: FC<CpsMigrationCalloutProps> = ({
         >
           {i18n.translate('xpack.ml.cpsMigrationCallout.migrateButton', {
             defaultMessage: 'Migrate {count, plural, one {# job} other {# jobs}}',
-            values: { count: jobCount },
+            values: { count: jobIds.length },
           })}
         </EuiButton>
       </EuiCallOut>

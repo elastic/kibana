@@ -228,8 +228,10 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
   }
 
   /**
-   * Updates `project_routing` on datafeeds selected by job ID and/or the `auto` flag.
-   * - When `jobIds` is non-empty, every datafeed whose `job_id` is in the list is included.
+   * Updates `project_routing` on datafeeds selected by job ID, job group, and/or the `auto` flag.
+   * - When `jobIds` and/or `jobGroups` are provided, datafeeds are selected from jobs matching those
+   *   filters. If both are provided, a job must be in `jobIds` and belong to at least one `jobGroups` entry.
+   * - When only `jobGroups` is defined, jobs are loaded via `getJobs` to resolve group membership.
    * - When `auto` is true, every datafeed with no `project_routing` is also included.
    * - Datafeed IDs are deduplicated in a Set before updates are applied.
    * - When `simulate` is true, no updates are sent; the same selection is returned with `simulated: true` per result.
@@ -240,6 +242,7 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
   async function bulkUpdateProjectRouting(
     projectRouting: string,
     jobIds?: string[],
+    jobGroups?: string[],
     auto?: boolean,
     simulate?: boolean,
     restartRunningJobs: boolean = true
@@ -250,11 +253,38 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
     ]);
     const datafeedIdsToUpdate = new Set<string>();
 
-    if (jobIds !== undefined && jobIds.length > 0) {
-      const jobIdSet = new Set(jobIds);
-      for (const df of datafeeds) {
-        if (jobIdSet.has(df.job_id)) {
-          datafeedIdsToUpdate.add(df.datafeed_id);
+    const hasJobIds = jobIds !== undefined && jobIds.length > 0;
+    const hasJobGroups = jobGroups !== undefined;
+
+    if (auto === false && (hasJobIds || hasJobGroups)) {
+      let jobIdsMatchingSelection: Set<string> | undefined;
+
+      if (hasJobGroups) {
+        const { jobs } = await mlClient.getJobs();
+        const jobGroupSet = new Set(jobGroups);
+        jobIdsMatchingSelection = new Set(
+          jobs
+            .filter(
+              (job) =>
+                Array.isArray(job.groups) && job.groups.some((group) => jobGroupSet.has(group))
+            )
+            .map((job) => job.job_id)
+        );
+      }
+
+      if (hasJobIds) {
+        const jobIdSet = new Set(jobIds);
+        jobIdsMatchingSelection =
+          jobIdsMatchingSelection !== undefined
+            ? new Set([...jobIdsMatchingSelection].filter((id) => jobIdSet.has(id)))
+            : jobIdSet;
+      }
+
+      if (jobIdsMatchingSelection !== undefined) {
+        for (const df of datafeeds) {
+          if (jobIdsMatchingSelection.has(df.job_id)) {
+            datafeedIdsToUpdate.add(df.datafeed_id);
+          }
         }
       }
     }

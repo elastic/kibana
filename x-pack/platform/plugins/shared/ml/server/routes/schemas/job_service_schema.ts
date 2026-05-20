@@ -173,6 +173,12 @@ export const bulkUpdateProjectRoutingSchema = schema.object({
   jobIds: schema.maybe(
     schema.arrayOf(schema.string(), { maxSize: 10000, meta: { description: 'Job IDs to update.' } })
   ),
+  jobGroups: schema.maybe(
+    schema.arrayOf(schema.string(), {
+      maxSize: 10000,
+      meta: { description: 'Filter jobs by groups.' },
+    })
+  ),
   auto: schema.maybe(
     schema.boolean({
       defaultValue: false,
