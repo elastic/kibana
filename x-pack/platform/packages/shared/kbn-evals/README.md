@@ -222,14 +222,14 @@ Run a single suite and model on any branch without opening a PR or waiting for t
 
 Pipeline registration: [`.buildkite/pipeline-resource-definitions/evals/kibana-evals-on-demand.yml`](../../../../../.buildkite/pipeline-resource-definitions/evals/kibana-evals-on-demand.yml).
 
-| Variable                  | Required           | Description                                                                                               |
-| ------------------------- | ------------------ | --------------------------------------------------------------------------------------------------------- |
-| `EVAL_SUITE_ID`           | yes                | Suite id from `evals.suites.json` (same as `evals:<id>` PR labels without the prefix)                     |
-| `EVAL_MODEL_GROUPS`       | yes                | Model group (same as `models:<group>` PR labels without the prefix), e.g. `eis/openai-gpt-5.4`            |
-| `EVAL_INCLUDE_EIS_MODELS` | for `eis/*` models | Set to `1` when `EVAL_MODEL_GROUPS` uses `eis/...`                                                        |
-| `EVALUATION_CONNECTOR_ID` | no                 | LLM-as-judge connector id override (connector id, not `eis/...` model group)                              |
-| `EVAL_SERVER_CONFIG_SET`  | some suites        | From `serverConfigSet` on the suite entry in `evals.suites.json` (e.g. `evals_endpoint` for `endpoint`)   |
-| `KIBANA_BUILD_ID`         | no                 | Reuse a Kibana build from another Buildkite job (skips the build step)                                    |
+| Variable                  | Required           | Description                                                                                             |
+| ------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------- |
+| `EVAL_SUITE_ID`           | yes                | Suite id from `evals.suites.json`, e.g. `agent-builder`                                                 |
+| `EVAL_MODEL_GROUPS`       | yes                | Model group, e.g. `eis/openai-gpt-5.4`                                                                  |
+| `EVAL_INCLUDE_EIS_MODELS` | for `eis/*` models | Set to `1` when `EVAL_MODEL_GROUPS` uses `eis/...`                                                      |
+| `EVALUATION_CONNECTOR_ID` | no                 | LLM-as-judge connector id override (connector id, not `eis/...` model group)                            |
+| `EVAL_SERVER_CONFIG_SET`  | some suites        | From `serverConfigSet` on the suite entry in `evals.suites.json` (e.g. `evals_endpoint` for `endpoint`) |
+| `KIBANA_BUILD_ID`         | no                 | Reuse a Kibana build from another Buildkite job (skips the build step)                                  |
 
 The eval pipeline step sets `FTR_EIS_CCM=1` and `EVAL_FANOUT=1`; `KBN_EVALS=1` is set on the pipeline.
 
@@ -240,8 +240,6 @@ EVAL_SUITE_ID=agent-builder
 EVAL_MODEL_GROUPS=eis/openai-gpt-5.4
 EVAL_INCLUDE_EIS_MODELS=1
 ```
-
-**Results:** Scores and traces are exported to the [golden cluster evals UI](https://kbn-evals-serverless-ed035a.kb.us-central1.gcp.elastic.cloud/app/evals). Filter by git branch on the runs list, or by run id prefix `bk-<buildkite_build_id>`.
 
 ### CI labels
 
