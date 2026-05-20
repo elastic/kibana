@@ -15,12 +15,10 @@ import {
 } from '@kbn/inference-tracing';
 import { fromExternalVariant } from '@kbn/std';
 import type { TracingConfig } from '@kbn/tracing-config';
-import { context, propagation, trace } from '@opentelemetry/api';
-import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
+import { propagation, trace } from '@opentelemetry/api';
 import { castArray } from 'lodash';
 import { cleanupBeforeExit } from '@kbn/cleanup-before-exit';
 import { EvalSpanProcessor } from './eval_span_processor';
-import { InferencePreservingSampler } from './inference_preserving_sampler';
 import { OTLPSpanProcessor } from './otlp_span_processor';
 import { LateBindingSpanProcessor } from '..';
 
@@ -36,10 +34,6 @@ export function initTracing({
   resource: resources.Resource;
   tracingConfig: TracingConfig;
 }) {
-  const contextManager = new AsyncLocalStorageContextManager();
-  context.setGlobalContextManager(contextManager);
-  contextManager.enable();
-
   // this is used for late-binding of span processors
   const lateBindingProcessor = LateBindingSpanProcessor.get();
 
@@ -60,7 +54,7 @@ export function initTracing({
   });
 
   const nodeTracerProvider = new node.NodeTracerProvider({
-    sampler: new InferencePreservingSampler(baseSampler),
+    sampler: baseSampler,
     spanProcessors: allSpanProcessors,
     resource,
   });

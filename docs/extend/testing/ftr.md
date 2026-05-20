@@ -56,6 +56,23 @@ yarn test:ftr --config path/to/config.ts --esFrom serverless
 - Brittle tests due to shared state and timing sensitivity
 - No parallel execution
 
+## FTR config manifests [ftr-config-manifests]
+
+The {{kib}} repo contains many FTR config files which use slightly different configurations for the {{kib}} server or {{es}}, have different test files, and potentially other config differences. FTR config files are organised in manifest files under `.buildkite/ftr-manifests/`, grouped by testing area and type of distribution:
+
+- serverless:
+  - `.buildkite/ftr-manifests/ftr_base_serverless_configs.yml`
+  - `.buildkite/ftr-manifests/ftr_oblt_serverless_configs.yml`
+  - `.buildkite/ftr-manifests/ftr_security_serverless_configs.yml`
+  - `.buildkite/ftr-manifests/ftr_search_serverless_configs.yml`
+- stateful:
+  - `.buildkite/ftr-manifests/ftr_platform_stateful_configs.yml`
+  - `.buildkite/ftr-manifests/ftr_oblt_stateful_configs.yml`
+  - `.buildkite/ftr-manifests/ftr_security_stateful_configs.yml`
+  - `.buildkite/ftr-manifests/ftr_search_stateful_configs.yml`
+
+If you're writing a plugin outside the {{kib}} repo, you will have your own config file. See [Functional Tests for Plugins outside the {{kib}} repo](/extend/tutorials/external-plugin-functional-tests.md) for more info.
+
 ## Adding an FTR test [ftr-add-test]
 
 You can reuse the existing [api_integration](https://github.com/elastic/kibana/blob/main/src/platform/test/api_integration/config.js) setup by registering a test file in the [test loader](https://github.com/elastic/kibana/blob/main/src/platform/test/api_integration/apis/index.ts).
