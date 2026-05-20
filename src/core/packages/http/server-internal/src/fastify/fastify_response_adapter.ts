@@ -152,8 +152,7 @@ function appendUtf8CharsetToTextContentType(contentType: string): string {
 }
 
 function ensureHapiCompatibleTextCharset(reply: FastifyReply): void {
-  const headers =
-    typeof reply.getHeaders === 'function' ? reply.getHeaders() : {};
+  const headers = typeof reply.getHeaders === 'function' ? reply.getHeaders() : {};
   const raw = headers['content-type'] ?? headers['Content-Type'];
   const typeStr = Array.isArray(raw) ? raw[0] : raw;
   if (typeof typeStr !== 'string') {

@@ -341,11 +341,7 @@ export function adoptToFastifyOnPreResponse(fn: OnPreResponseHandler, log: Logge
       );
       if (result.type === OnPreResponseResultType.next) {
         if (result.headers) {
-          findHeadersIntersection(
-            reply.getHeaders() as ResponseHeaders,
-            result.headers,
-            log
-          );
+          findHeadersIntersection(reply.getHeaders() as ResponseHeaders, result.headers, log);
           for (const [name, value] of Object.entries(result.headers)) {
             if (value !== undefined) reply.header(name, value);
           }
@@ -354,11 +350,7 @@ export function adoptToFastifyOnPreResponse(fn: OnPreResponseHandler, log: Logge
       }
       if (result.type === OnPreResponseResultType.render) {
         if (result.headers) {
-          findHeadersIntersection(
-            reply.getHeaders() as ResponseHeaders,
-            result.headers,
-            log
-          );
+          findHeadersIntersection(reply.getHeaders() as ResponseHeaders, result.headers, log);
           for (const [name, value] of Object.entries(result.headers)) {
             if (value !== undefined) reply.header(name, value);
           }
