@@ -45,7 +45,7 @@ function getError(error) {
 }
 
 export function CustomSelectionTable({
-  ariaLabel,
+  'aria-label': ariaLabel,
   checkboxDisabledCheck,
   columns,
   currentPage = 0,
@@ -415,7 +415,7 @@ export function CustomSelectionTable({
 }
 
 CustomSelectionTable.propTypes = {
-  ariaLabel: PropTypes.string,
+  'aria-label': PropTypes.string,
   checkboxDisabledCheck: PropTypes.func,
   columns: PropTypes.array.isRequired,
   currentPage: PropTypes.number,
