@@ -1378,6 +1378,11 @@ x-pack/solutions/workplaceai/test @elastic/workchat-eng
 ##  https://help.github.com/articles/about-codeowners/
 ####
 
+# limits.yml changes frequently as bundle sizes shift; no owner means the ops
+# team isn't auto-requested as reviewer on every bump. A GitHub Actions workflow
+# (bundle-size-limits-comment.yml) flags increases ≥15% instead.
+packages/kbn-optimizer/limits.yml
+
 # The #CC# prefix delineates Code Coverage,
 # used for the 'team' designator within Kibana Stats
 
