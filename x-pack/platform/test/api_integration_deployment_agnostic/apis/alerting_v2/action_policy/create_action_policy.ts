@@ -174,7 +174,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(response.status).to.be(201);
       expect(response.body.groupingMode).to.be('per_episode');
-      expect(response.body.throttle).to.eql({ strategy: 'on_status_change' });
+      expect(response.body.throttle).to.eql({ strategy: 'on_status_change', interval: null });
     });
 
     it('should create a policy with all grouping mode and every_time strategy', async () => {
@@ -192,7 +192,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(response.status).to.be(201);
       expect(response.body.groupingMode).to.be('all');
-      expect(response.body.throttle).to.eql({ strategy: 'every_time' });
+      expect(response.body.throttle).to.eql({ strategy: 'every_time', interval: null });
     });
 
     it('should return 400 for invalid groupingMode/strategy combination', async () => {

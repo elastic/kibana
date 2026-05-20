@@ -6,15 +6,12 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import {
-  AlertEventSchema,
-  BaseEventSchema,
-  builtInStepDefinitions,
-  builtInTriggerDefinitions,
-} from '@kbn/workflows';
+import { builtInStepDefinitions, builtInTriggerDefinitions } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
 import { getAllConnectors } from '@kbn/workflows-management-plugin/common/schema';
+import { AlertEventSchema } from '@kbn/workflows/spec/schema/triggers/alert_trigger_schema';
+import { BaseEventSchema } from '@kbn/workflows/spec/schema/common/base_event';
 import {
   categorizeConnectorType,
   formatBuiltInStep,

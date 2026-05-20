@@ -71,6 +71,7 @@ export {
   AppMenuRegistry,
   dismissAllFlyoutsExceptFor,
   dismissFlyouts,
+  ErrorCallout,
   prepareDataViewForEditing,
   getEsqlDataView,
   setChartHidden,
@@ -97,6 +98,7 @@ export type {
   SortOrder,
   SortInput,
   SortPair,
+  ErrorCalloutProps,
   DiscoverSessionFinderAttributes,
 } from './src';
 

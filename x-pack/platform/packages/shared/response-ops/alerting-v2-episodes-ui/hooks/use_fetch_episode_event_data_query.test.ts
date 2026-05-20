@@ -8,8 +8,9 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { buildEpisodeEventDataQuery } from '../queries/episode_event_data_query';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
-import { createQueryClientWrapper, createTestQueryClient } from './test_utils';
+import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
 import { useFetchEpisodeEventDataQuery } from './use_fetch_episode_event_data_query';
 
 jest.mock('../utils/run_esql_async_search');
@@ -20,6 +21,7 @@ const wrapper = createQueryClientWrapper(queryClient);
 
 describe('useFetchEpisodeEventDataQuery', () => {
   const data = dataPluginMock.createStartContract();
+  const mockSpaces = createMockSpaces();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -31,7 +33,11 @@ describe('useFetchEpisodeEventDataQuery', () => {
 
   it('does not run when episodeId is undefined', () => {
     const { result } = renderHook(
-      () => useFetchEpisodeEventDataQuery({ episodeId: undefined, data }),
+      () =>
+        useFetchEpisodeEventDataQuery({
+          episodeId: undefined,
+          services: { data, spaces: mockSpaces },
+        }),
       { wrapper }
     );
     expect(result.current.fetchStatus).toBe('idle');
@@ -54,7 +60,11 @@ describe('useFetchEpisodeEventDataQuery', () => {
     });
 
     const { result } = renderHook(
-      () => useFetchEpisodeEventDataQuery({ episodeId: 'ep-1', data }),
+      () =>
+        useFetchEpisodeEventDataQuery({
+          episodeId: 'ep-1',
+          services: { data, spaces: mockSpaces },
+        }),
       { wrapper }
     );
 
@@ -64,7 +74,7 @@ describe('useFetchEpisodeEventDataQuery', () => {
       expect.objectContaining({
         data,
         params: expect.objectContaining({
-          query: buildEpisodeEventDataQuery('ep-1').print('basic'),
+          query: buildEpisodeEventDataQuery(DEFAULT_SPACE_ID, 'ep-1').print('basic'),
           time_zone: 'UTC',
         }),
       })
@@ -86,7 +96,11 @@ describe('useFetchEpisodeEventDataQuery', () => {
     });
 
     const { result } = renderHook(
-      () => useFetchEpisodeEventDataQuery({ episodeId: 'ep-1', data }),
+      () =>
+        useFetchEpisodeEventDataQuery({
+          episodeId: 'ep-1',
+          services: { data, spaces: mockSpaces },
+        }),
       { wrapper }
     );
 
@@ -105,7 +119,11 @@ describe('useFetchEpisodeEventDataQuery', () => {
     });
 
     const { result } = renderHook(
-      () => useFetchEpisodeEventDataQuery({ episodeId: 'ep-1', data }),
+      () =>
+        useFetchEpisodeEventDataQuery({
+          episodeId: 'ep-1',
+          services: { data, spaces: mockSpaces },
+        }),
       { wrapper }
     );
 
@@ -120,7 +138,11 @@ describe('useFetchEpisodeEventDataQuery', () => {
     });
 
     const { result } = renderHook(
-      () => useFetchEpisodeEventDataQuery({ episodeId: 'ep-1', data }),
+      () =>
+        useFetchEpisodeEventDataQuery({
+          episodeId: 'ep-1',
+          services: { data, spaces: mockSpaces },
+        }),
       { wrapper }
     );
 

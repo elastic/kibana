@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/securitysolution-autocomplete'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
+  - '@kbn/kibana-react-plugin'
 tags:
   - shared-browser
   - package

@@ -50,16 +50,6 @@ jest.mock('@kbn/yaml-rule-editor', () => ({
   ),
 }));
 
-// Mock ES|QL validation
-jest.mock('@kbn/alerting-v2-schemas', () => ({
-  validateEsqlQuery: (query: string) => {
-    if (!query || query.includes('INVALID')) {
-      return 'Invalid ES|QL query syntax';
-    }
-    return null;
-  },
-}));
-
 // Mock EUI components that cause act() warnings due to internal state management
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');

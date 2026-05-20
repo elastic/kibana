@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
 import { ModelDetailFlyout } from './model_detail_flyout';
@@ -112,5 +112,118 @@ describe('ModelDetailFlyout', () => {
   it('renders documentation link', () => {
     renderFlyout();
     expect(screen.getByText('View documentation')).toBeInTheDocument();
+  });
+
+  describe('model status badge', () => {
+    it('renders the EOL badge when metadata has an end_of_life_date in the past', () => {
+      const endpoint = {
+        ...createEndpoint(),
+        metadata: {
+          heuristics: { status: 'deprecated', end_of_life_date: '2020-01-01' },
+        },
+      } as unknown as InferenceAPIConfigResponse;
+      renderFlyout(MODEL_ID, [endpoint]);
+
+      const badges = screen.getByTestId('flyoutTaskBadges');
+      expect(within(badges).getByTestId(`modelEolBadge-${MODEL_ID}`)).toBeInTheDocument();
+    });
+
+    it('renders the deprecated badge when metadata has status', () => {
+      const endpoint = {
+        ...createEndpoint(),
+        metadata: {
+          heuristics: { status: 'deprecated' },
+        },
+      } as unknown as InferenceAPIConfigResponse;
+      renderFlyout(MODEL_ID, [endpoint]);
+
+      const badges = screen.getByTestId('flyoutTaskBadges');
+      expect(within(badges).getByTestId(`modelDeprecatedBadge-${MODEL_ID}`)).toBeInTheDocument();
+    });
+
+    it('renders the preview badge when metadata status is preview', () => {
+      const endpoint = {
+        ...createEndpoint(),
+        metadata: { heuristics: { status: 'preview' } },
+      } as unknown as InferenceAPIConfigResponse;
+      renderFlyout(MODEL_ID, [endpoint]);
+
+      const badges = screen.getByTestId('flyoutTaskBadges');
+      expect(within(badges).getByTestId(`modelPreviewBadge-${MODEL_ID}`)).toBeInTheDocument();
+    });
+
+    it('renders no status badge when endpoint has no metadata', () => {
+      renderFlyout();
+
+      expect(screen.queryByTestId(`modelPreviewBadge-${MODEL_ID}`)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(`modelDeprecatedBadge-${MODEL_ID}`)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(`modelEolBadge-${MODEL_ID}`)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('release and end-of-life dates', () => {
+    const releaseLabel = 'Release date';
+    const eolLabel = 'End-of-life date';
+
+    const valueForLabel = (label: string) => {
+      const dt = screen.getByText(label);
+      return dt.nextElementSibling;
+    };
+
+    it('renders both formatted dates when metadata has release_date and end_of_life_date', () => {
+      const endpoint = {
+        ...createEndpoint(),
+        metadata: {
+          heuristics: {
+            release_date: '2025-01-10',
+            end_of_life_date: '2026-04-15',
+          },
+        },
+      } as unknown as InferenceAPIConfigResponse;
+      renderFlyout(MODEL_ID, [endpoint]);
+
+      expect(valueForLabel(releaseLabel)).not.toHaveTextContent('--');
+      expect(valueForLabel(eolLabel)).not.toHaveTextContent('--');
+    });
+
+    it('renders -- for both dates when metadata is absent', () => {
+      renderFlyout();
+
+      expect(valueForLabel(releaseLabel)).toHaveTextContent('--');
+      expect(valueForLabel(eolLabel)).toHaveTextContent('--');
+    });
+
+    it('renders -- for both dates when metadata heuristics has neither date', () => {
+      const endpoint = {
+        ...createEndpoint(),
+        metadata: { heuristics: { status: 'ga' } },
+      } as unknown as InferenceAPIConfigResponse;
+      renderFlyout(MODEL_ID, [endpoint]);
+
+      expect(valueForLabel(releaseLabel)).toHaveTextContent('--');
+      expect(valueForLabel(eolLabel)).toHaveTextContent('--');
+    });
+
+    it('renders release_date and -- for EOL when only release_date is present', () => {
+      const endpoint = {
+        ...createEndpoint(),
+        metadata: { heuristics: { release_date: '2025-01-10' } },
+      } as unknown as InferenceAPIConfigResponse;
+      renderFlyout(MODEL_ID, [endpoint]);
+
+      expect(valueForLabel(releaseLabel)).not.toHaveTextContent('--');
+      expect(valueForLabel(eolLabel)).toHaveTextContent('--');
+    });
+
+    it('renders end_of_life_date and -- for release when only end_of_life_date is present', () => {
+      const endpoint = {
+        ...createEndpoint(),
+        metadata: { heuristics: { end_of_life_date: '2026-04-15' } },
+      } as unknown as InferenceAPIConfigResponse;
+      renderFlyout(MODEL_ID, [endpoint]);
+
+      expect(valueForLabel(releaseLabel)).toHaveTextContent('--');
+      expect(valueForLabel(eolLabel)).not.toHaveTextContent('--');
+    });
   });
 });

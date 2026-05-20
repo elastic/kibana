@@ -338,6 +338,14 @@ describe('WorkflowManagementAuditLog', () => {
       expect(log.mock.calls[0][0].event.action).toBe(
         WorkflowManagementAuditActions.RESUME_EXECUTION
       );
+      expect(log.mock.calls[0][0].message).toContain('[executionId=r-1]');
+
+      const { audit: aEnriched, request: rEnriched, log: lEnriched } = await createAuditHarness();
+      aEnriched.logExecutionResumed(rEnriched, {
+        executionId: 'r-2',
+        resumedBy: 'jdoe',
+      });
+      expect(lEnriched.mock.calls[0][0].message).toContain('[responder=jdoe]');
 
       const { audit: a2, request: r2, log: l2 } = await createAuditHarness();
       a2.logExecutionResumed(r2, {
