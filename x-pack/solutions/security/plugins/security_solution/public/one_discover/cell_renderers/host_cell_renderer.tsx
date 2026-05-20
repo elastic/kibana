@@ -18,8 +18,6 @@ import { Host } from '../../flyout_v2/entity/host/main';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
-import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
-import { InputsModelId } from '../../common/store/inputs/constants';
 
 export const HOST_CELL_RENDERER_FIELDS = new Set(['host.name', 'host.hostname']);
 
@@ -60,12 +58,6 @@ export const HostCellRenderer = React.memo<HostCellRendererProps>(
           getFirstValue(flattened['host.entity.id']) ?? getFirstValue(flattened['entity.id']);
 
         if (!hostName && !entityId) return;
-
-        // Sync Kibana's current time range to the Security Solution Redux store so that
-        // alert queries inside the flyout use the same window Discover is showing.
-        const tf = services.data.query.timefilter.timefilter;
-        const { from, to } = tf.getAbsoluteTime();
-        store.dispatch(setAbsoluteRangeDatePicker({ id: InputsModelId.global, from, to }));
 
         overlays.openSystemFlyout(
           flyoutProviders({
