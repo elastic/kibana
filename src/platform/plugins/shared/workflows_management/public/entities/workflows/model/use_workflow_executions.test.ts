@@ -180,6 +180,32 @@ describe('useWorkflowExecutions', () => {
     );
   });
 
+  it('should pass finished-time filters and sort params when provided', async () => {
+    const { result } = renderHook(
+      () =>
+        useWorkflowExecutions({
+          workflowId: 'wf-1',
+          finishedAfter: '2026-05-01T00:00:00.000Z',
+          finishedBefore: '2026-05-14T00:00:00.000Z',
+          sortField: 'finishedAt',
+          sortOrder: 'desc',
+        }),
+      { wrapper: createQueryClientWrapper(queryClient) }
+    );
+
+    await waitFor(() => expect(result.current.isFetched).toBe(true));
+
+    expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
+      'wf-1',
+      expect.objectContaining({
+        finishedAfter: '2026-05-01T00:00:00.000Z',
+        finishedBefore: '2026-05-14T00:00:00.000Z',
+        sortField: 'finishedAt',
+        sortOrder: 'desc',
+      })
+    );
+  });
+
   it('should use custom page size when provided', async () => {
     const { result } = renderHook(() => useWorkflowExecutions({ workflowId: 'wf-1', size: 25 }), {
       wrapper: createQueryClientWrapper(queryClient),
