@@ -15,6 +15,7 @@ export const CloudOnboardingDeploymentSchemaV1 = schema.object({
       schema.literal('identity_federation'),
       schema.literal('firehose'),
       schema.literal('cloud_forwarder'),
+      schema.literal('agent_based'),
     ]),
     { maxSize: 10 }
   ),
@@ -44,4 +45,5 @@ export const CloudOnboardingDeploymentSchemaV1 = schema.object({
   // Record<string,string> shape. schema.any() is required here.
   secrets: schema.maybe(schema.any()),
   packagePolicyIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+  agentPolicyId: schema.maybe(schema.string()),
 });

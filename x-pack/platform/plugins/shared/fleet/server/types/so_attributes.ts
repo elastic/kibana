@@ -348,7 +348,7 @@ export interface CloudOnboardingDeploymentSOAttributes {
   provider: CloudProvider;
   /** FK to fleet-cloud-connector — the AWS account connection this deployment belongs to. */
   connectorId: string;
-  /** Active delivery mechanisms included in this deployment's IaC stack (identity_federation, firehose, cloud_forwarder). */
+  /** Active delivery mechanisms included in this deployment's IaC stack (identity_federation, firehose, cloud_forwarder, agent_based). */
   mechanisms: CloudOnboardingDeploymentMechanism[];
   /** Provider-specific deployment identifier. For AWS: the CloudFormation stack ARN. Set after the user deploys the stack. */
   deploymentId?: string;
@@ -368,6 +368,8 @@ export interface CloudOnboardingDeploymentSOAttributes {
   serviceVars?: Record<string, Array<Record<string, unknown>>>;
   /** Sensitive values encrypted at rest via encryptedSavedObjects. Kibana can read these back. NOT stored in .fleet-secrets. */
   secrets?: Record<string, string>;
-  /** Fleet package policy IDs — one per distinct integration package (e.g. one for 'aws', one for 'aws_bedrock'). Present only when identity_federation is in mechanisms. In agentless, the agent policy ID equals the package policy ID, so these also serve as agent policy IDs. */
+  /** Fleet package policy IDs — one per distinct integration package (e.g. one for 'aws', one for 'aws_bedrock'). Present when identity_federation is in mechanisms (agentless). For agent_based, the package policies are attached to the user-managed agent policy tracked in agentPolicyId. */
   packagePolicyIds?: string[];
+  /** Agent policy ID for agent_based mechanism — the user-managed agent policy the package policies are attached to. In agentless (identity_federation), agentPolicyId equals packagePolicyId and is not stored separately. */
+  agentPolicyId?: string;
 }

@@ -12,7 +12,8 @@ export type { CloudProvider };
 export type CloudOnboardingDeploymentMechanism =
   | 'identity_federation'
   | 'firehose'
-  | 'cloud_forwarder';
+  | 'cloud_forwarder'
+  | 'agent_based';
 
 export type CloudOnboardingDeploymentStatus = 'pending' | 'deploying' | 'succeeded' | 'failed';
 
@@ -33,13 +34,21 @@ export interface CloudOnboardingDeployment {
   serviceVars?: Record<string, CloudOnboardingDeploymentServiceVars>;
   secrets?: Record<string, string>;
   packagePolicyIds?: string[];
+  /** Agent policy ID for agent_based mechanism. Separate from packagePolicyIds (in agentless those are equal; for agent_based the agent policy is user-managed). */
+  agentPolicyId?: string;
 }
 
 export type NewCloudOnboardingDeployment = Omit<CloudOnboardingDeployment, 'id'>;
 
 export type CreateCloudOnboardingDeploymentInput = Omit<
   CloudOnboardingDeployment,
-  'id' | 'status' | 'attemptCount' | 'deploymentId' | 'deploymentName' | 'packagePolicyIds'
+  | 'id'
+  | 'status'
+  | 'attemptCount'
+  | 'deploymentId'
+  | 'deploymentName'
+  | 'packagePolicyIds'
+  | 'agentPolicyId'
 >;
 
 // Secrets are intentionally excluded: partial updates could silently clobber
