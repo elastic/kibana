@@ -122,13 +122,8 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
     }
   }, [onPageReady, setupData]);
 
-  // Three adjacent flow identifiers, all different on purpose:
-  //   - `flow: 'otel_host'`         backend has-data endpoint key (server route)
-  //   - `onboardingFlowType: 'otel_logs'`  EBT analytics dimension shared by V1+V2
-  //   - `flowType: 'otel_logs'`     time-window-detection telemetry, also otel_logs
-  // The has-data probe is namespaced per onboarding flow (otel_host), but the
-  // analytics events are kept on otel_logs so V1 and V2 dashboards stay
-  // continuous. See the spec for the analytics-continuity decision.
+  // has-data probe is namespaced per backend route (otel_host); analytics
+  // stays on otel_logs so V1 and V2 dashboards remain continuous.
   const hasPreExistingDataEarly = usePreExistingDataCheck({ flow: 'otel_host' });
 
   const windowBlurred = useWindowBlurDataMonitoringTrigger({
@@ -136,11 +131,6 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
     onboardingFlowType: 'otel_logs',
     onboardingId: setupData?.onboardingId,
   });
-  // Window-blur is our "user left to install" proxy and pre-existing data
-  // means the cluster already had OTel host data; either one is enough to
-  // start polling the has-data endpoint so the visualize step can light up
-  // when real data arrives. Neither signal is precise enough to mark the
-  // install/start steps complete (see step-status block below).
   const isMonitoringStepActive = windowBlurred || hasPreExistingDataEarly;
 
   const [sessionStartTime, setSessionStartTime] = useState<string | null>(null);
@@ -151,17 +141,14 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
   }, [isMonitoringStepActive, sessionStartTime]);
 
   const onboardingId = setupData?.onboardingId;
-  // OTel semantic-convention `host.os.type` value for each per-OS page. Sent
-  // as a filter to has-data so a Linux session can't be marked complete by
-  // unrelated macOS/Windows ingest happening in the same cluster.
+  // OTel semantic-convention `host.os.type` filter so cross-OS ingest in the
+  // same cluster can't complete an unrelated session.
   const hostOsTypeFilter: Record<HostOs, string> = {
     linux: 'linux',
     mac: 'darwin',
     windows: 'windows',
   };
   const { hasData, hasPreExistingData, isTroubleshootingVisible } = useTimeWindowDataDetection({
-    // Gate polling on a real onboardingId so data-detection telemetry can never
-    // emit flow_id: '' when monitoring activates before setup resolves.
     isMonitoringActive:
       isMonitoringStepActive && sessionStartTime !== null && onboardingId !== undefined,
     sessionStartTime: sessionStartTime ?? '',
@@ -175,8 +162,7 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
 
   const hasPreExistingDataFinal = hasPreExistingData || hasPreExistingDataEarly;
 
-  // Windows ships only the OTel approach in this flow because the Elastic Agent
-  // auto-detect script is bash-only and has no PowerShell counterpart.
+  // Elastic Agent auto-detect script is bash-only; Windows has no counterpart.
   const showApproachSelector = os !== 'windows';
   const otelNavigateTo = `${routePath}${location.search}`;
   const eaNavigateTo = showApproachSelector

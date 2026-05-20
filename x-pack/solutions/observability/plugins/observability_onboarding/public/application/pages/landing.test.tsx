@@ -172,8 +172,6 @@ describe('LandingPage host tiles (V2)', () => {
 describe('LandingPage host tile routes (V2 gated)', () => {
   it('renders the V1 landing page when the flag is off and the path is /host/linux', () => {
     renderFlowAtPath(false, '/host/linux');
-    // The V1 LandingPage composes OnboardingFlowForm, so its presence confirms the
-    // catch-all <Route><LandingPage/></Route> caught the unregistered V2 path.
     expect(screen.getByTestId('onboardingFlowFormStub')).toBeInTheDocument();
     expect(screen.queryByTestId('hostLinuxOtelPageStub')).toBeNull();
     expect(screen.queryByTestId('addDataPageV2')).toBeNull();

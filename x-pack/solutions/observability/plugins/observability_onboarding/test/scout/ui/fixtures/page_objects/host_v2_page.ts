@@ -81,8 +81,7 @@ export class HostV2Page {
       (url) => url.pathname.includes('/internal/observability_onboarding/otel_host/setup'),
       (route) => {
         callCount += 1;
-        // First call fails (initial setup); subsequent calls succeed so the
-        // retry path can be validated against a real success response.
+        // Fail the first call; let retries pass through.
         if (callCount === 1) {
           return route.fulfill({
             status: 500,

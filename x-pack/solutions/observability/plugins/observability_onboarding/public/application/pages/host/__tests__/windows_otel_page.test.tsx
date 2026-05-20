@@ -42,7 +42,6 @@ jest.mock('../../../quickstart_flows/shared/empty_prompt', () => ({
   ),
 }));
 
-// usePerformanceContext throws when PerformanceContext is absent (see @kbn/ebt-tools).
 jest.mock('@kbn/ebt-tools', () => ({
   usePerformanceContext: () => ({
     onPageReady: jest.fn(),
@@ -66,10 +65,6 @@ jest.mock('../../../../hooks/use_fetcher', () => ({
 
 const { useFetcher: useFetcherMock } = jest.requireMock('../../../../hooks/use_fetcher');
 
-// Data-detection hooks are mocked so the test can capture and assert their call args.
-// The args are the cross-page contract for the three data-detection hooks
-// (use_pre_existing_data_check / use_window_blur_data_monitoring_trigger /
-// use_time_window_data_detection); see their source files for shape.
 jest.mock('../../../quickstart_flows/shared/use_pre_existing_data_check', () => ({
   usePreExistingDataCheck: jest.fn().mockReturnValue(false),
 }));

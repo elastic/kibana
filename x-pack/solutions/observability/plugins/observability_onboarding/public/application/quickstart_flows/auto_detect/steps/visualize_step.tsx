@@ -112,10 +112,7 @@ export const AutoDetectVisualizeStep: React.FC<AutoDetectVisualizeStepProps> = (
                                 defaultMessage: 'Explore metrics data',
                               }
                             ),
-                            // entityId is required by AssetDetailsLocatorParams but the locator
-                            // falls back to the hosts inventory page when it's empty (see
-                            // asset_details_locator.ts), so missing hostname still produces a
-                            // sane drill-down rather than a broken asset detail URL.
+                            // Empty entityId falls back to the hosts inventory page.
                             href: assetDetailsLocator.getRedirectUrl({
                               entityType: 'host',
                               entityId: integration.metadata?.hostname ?? '',

@@ -19,12 +19,7 @@ interface EmptyPromptProps {
   error: IHttpFetchError<ResponseErrorBody>;
   telemetryEventContext?: OnboardingFlowEventContext;
   onRetryClick(): void;
-  /**
-   * When the prompt is rendered inline inside a wizard step (rather than as
-   * the full-page entry-failure state), this shrinks the prompt's padding so
-   * it nests visually inside the step body. Cosmetic only — does not change
-   * the prompt's title, body, or retry semantics.
-   */
+  // Shrinks padding so the prompt nests inside a wizard step body.
   inline?: boolean;
 }
 export const EmptyPrompt: FunctionComponent<EmptyPromptProps> = ({

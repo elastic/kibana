@@ -35,8 +35,6 @@ export const ApproachSelector: React.FC<ApproachSelectorProps> = ({
   options,
 }) => {
   const history = useHistory();
-  // Each render gets its own radio-group id so multiple selectors on the same
-  // page (or remounts in tests) do not cross-talk via the shared `name` attr.
   const radioGroupId = useMemo(() => htmlIdGenerator('approachSelector')(), []);
 
   return (
@@ -50,8 +48,6 @@ export const ApproachSelector: React.FC<ApproachSelectorProps> = ({
           return (
             <EuiFlexItem
               key={option.id}
-              // EuiCheckableCard does not forward `data-test-subj`, so the
-              // wrapper carries the selector + selection state for tests.
               data-test-subj={`approachSelectorCard-${option.id}`}
               data-selected={isSelected ? 'true' : 'false'}
             >
@@ -59,9 +55,7 @@ export const ApproachSelector: React.FC<ApproachSelectorProps> = ({
                 id={`${radioGroupId}_${option.id}`}
                 name={radioGroupId}
                 checked={isSelected}
-                // The radio's onChange fires only when the selection actually
-                // changes, which dedupes the double-fire we'd get from the
-                // panel-level onClick (label-click + radio-click bubble).
+                // onChange (not onClick) dedupes the label+radio bubble double-fire.
                 onChange={() => {
                   history.push(option.navigateTo);
                 }}

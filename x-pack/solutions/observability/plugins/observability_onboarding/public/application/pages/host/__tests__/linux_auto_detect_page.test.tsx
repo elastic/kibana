@@ -33,13 +33,10 @@ jest.mock('../../../quickstart_flows/auto_detect/use_onboarding_flow', () => ({
   DASHBOARDS: {},
 }));
 
-// useFlowBreadcrumb delegates to observability-shared useBreadcrumbs, which calls useUiSetting.
-// coreMock does not provide UI settings, so stub the hook.
 jest.mock('../../../shared/use_flow_breadcrumbs', () => ({
   useFlowBreadcrumb: jest.fn(),
 }));
 
-// Avoid async streams wiring and extra Kibana deps in jsdom; install step only forwards props.
 jest.mock('../../../../hooks/use_wired_streams_status', () => ({
   useWiredStreamsStatus: () => ({
     isEnabled: false,
@@ -51,7 +48,6 @@ jest.mock('../../../../hooks/use_wired_streams_status', () => ({
   }),
 }));
 
-// usePerformanceContext throws when PerformanceContext is absent (see @kbn/ebt-tools).
 jest.mock('@kbn/ebt-tools', () => ({
   usePerformanceContext: () => ({
     onPageReady: jest.fn(),

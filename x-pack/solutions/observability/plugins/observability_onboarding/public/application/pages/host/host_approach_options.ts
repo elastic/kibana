@@ -28,8 +28,6 @@ export const buildHostApproachOptions = ({
   elasticAgent,
 }: BuildHostApproachOptionsArgs): ApproachOption[] => [
   {
-    // id matches the URL route segment for the Elastic Agent variant ('auto-detect');
-    // 'otel' is the default approach for /host/<os>.
     id: 'otel',
     label: i18n.translate('xpack.observability_onboarding.hostV2.approach.otel.label', {
       defaultMessage: 'OpenTelemetry',
@@ -50,9 +48,6 @@ export const buildHostApproachOptions = ({
     description: i18n.translate('xpack.observability_onboarding.hostV2.approach.ea.description', {
       defaultMessage: 'Deploy a standalone Elastic Agent that auto-detects services on the host.',
     }),
-    // Native EUI icon for Elastic Agent (hexagonal Fleet/Agent product mark)
-    // is OS-independent, matching the design where both Linux and macOS host
-    // pages show the same icon next to "Elastic Agent".
     euiIconType: 'agentApp',
     navigateTo: elasticAgent.navigateTo,
   },

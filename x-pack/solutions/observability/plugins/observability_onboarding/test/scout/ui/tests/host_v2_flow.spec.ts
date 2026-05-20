@@ -59,9 +59,7 @@ test.describe.serial(
       await expect(page).toHaveURL(/\/host\/linux\/auto-detect/);
 
       await pageObjects.hostV2.approachCard('otel').click();
-      // Tightened from the open-ended lookahead so the assertion only passes on
-      // a real /host/linux landing — `/host/linuxxyz` and `/host/linux/foo` no
-      // longer slip through.
+      // Anchored so /host/linuxxyz and /host/linux/foo don't match.
       await expect(page).toHaveURL(/\/host\/linux(\?|$|#)/);
     });
 
@@ -129,17 +127,12 @@ test.describe.serial(
 
       const codeBlock = pageObjects.hostV2.otelInstallCodeBlock();
       await expect(codeBlock).toBeVisible();
-      // PowerShell install commands include Invoke-WebRequest and a .ps1 entry point.
       await expect(codeBlock).toContainText(/Invoke-WebRequest|otelcol\.ps1/);
     });
 
     test('setup failure keeps the V2 chrome visible with an inline error and a working retry', async ({
       pageObjects,
     }) => {
-      // Spec requires V2 to render the return link + approach selector even when
-      // the initial setup call fails, with an inline EmptyPrompt offering retry.
-      // The page object stubs the first /setup call to fail and lets retries
-      // pass through, so clicking Retry recovers the flow on a real backend.
       await pageObjects.hostV2.stubOtelHostSetupAsFailing();
       await pageObjects.hostV2.gotoPath('/host/linux');
 
@@ -152,8 +145,6 @@ test.describe.serial(
       await expect(retry).toBeVisible();
       await retry.click();
 
-      // After retry the second /setup call passes through and the install step
-      // appears in place of the EmptyPrompt.
       await expect(pageObjects.hostV2.otelInstallCodeBlock()).toBeVisible({ timeout: 30_000 });
       await expect(pageObjects.hostV2.emptyPrompt()).toHaveCount(0);
     });
@@ -161,8 +152,7 @@ test.describe.serial(
     test('pre-existing data activates the visualize step get-started panel', async ({
       pageObjects,
     }) => {
-      // Stub the OTel /has-data endpoint before navigation so usePreExistingDataCheck
-      // sees hasPreExistingData:true on the first render and flips isMonitoringStepActive.
+      // Stub before navigation so usePreExistingDataCheck sees true on first render.
       await pageObjects.hostV2.stubHasDataAsPreExisting();
       await pageObjects.hostV2.gotoPath('/host/linux');
       await expect(pageObjects.hostV2.layout('linux')).toBeVisible();
@@ -183,8 +173,6 @@ test.describe.serial(
       await pageObjects.onboarding.useCaseGridByTestId.waitFor({ state: 'visible' });
       await expect(pageObjects.hostV2.v2LandingWrapper).toHaveCount(0);
       await expect(pageObjects.hostV2.layout('linux')).toHaveCount(0);
-      // Spec requires the original /host/* path to survive when FF is off so
-      // deep links and analytics keep their pathname.
       await expect(page).toHaveURL(/\/host\/linux/);
     });
   }

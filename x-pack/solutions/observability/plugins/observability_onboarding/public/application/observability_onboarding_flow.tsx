@@ -52,11 +52,6 @@ export function ObservabilityOnboardingFlow() {
 
   const isManagedOtlpServiceAvailable = useManagedOtlpServiceAvailability();
 
-  // V2 host onboarding sub-pages. Returned as an array (not a fragment) so the
-  // legacy Switch underlying Routes still iterates each Route as a direct child.
-  // When the FF is off, no /host/* routes are registered and the catch-all
-  // LandingPage at the bottom of the Routes renders on the original path
-  // (e.g. /host/linux stays as /host/linux), per the V2 spec.
   const v2HostRoutes = isAddDataPageV2Enabled
     ? [
         <Route key="host-linux" exact path="/host/linux">

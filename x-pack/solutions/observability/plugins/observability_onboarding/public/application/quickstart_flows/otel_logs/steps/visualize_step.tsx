@@ -32,10 +32,7 @@ export const OtelLogsVisualizeStep: React.FC<OtelLogsVisualizeStepProps> = ({
 }) => {
   if (!isMonitoringStepActive) return null;
 
-  // Hide the "waiting for data" progress UI when the cluster already had data
-  // before this flow started and we have not yet seen fresh, in-flow data.
-  // In that pre-existing-only case we jump straight to the get-started panel
-  // below instead of showing a spinner that would never resolve.
+  // Skip the spinner in the pre-existing-only case (no fresh in-flow data yet).
   const shouldShowWaitingProgress = !(hasPreExistingData && !hasData);
 
   return (

@@ -45,9 +45,6 @@ interface OtelLogsInstallStepProps {
     'isEnabled' | 'isLoading' | 'isEnabling' | 'enableWiredStreams'
   >;
   streamsDocLink?: string;
-  // When true, omits the legacy "Copy to clipboard" button below the code
-  // block. The block's built-in top-right copy icon is the sole control.
-  // Defaults to false so V1 panels keep their existing two-control layout.
   useInlineCopyOnly?: boolean;
 }
 
@@ -86,9 +83,6 @@ export const OtelLogsInstallStep: React.FC<OtelLogsInstallStepProps> = ({
       })
     : '';
 
-  // Use 'bash' (not 'sh') so EuiCodeBlock's Prism picks up the registered
-  // grammar and the Linux/macOS commands get the same syntax coloring the
-  // PowerShell block already has on Windows.
   const codeLanguage = os === 'windows' ? 'powershell' : 'bash';
 
   return (

@@ -31,8 +31,6 @@ const buildOptions = (): ApproachOption[] => [
   },
 ];
 
-// Probe component that reflects the current router location into the DOM so
-// tests can assert what the selector navigated to.
 const LocationProbe = () => {
   const location = useLocation();
   return (
@@ -114,8 +112,6 @@ describe('ApproachSelector', () => {
 
   it('navigates to the option path when selecting an unselected card', () => {
     renderSelector('otel');
-    // The radio's accessible name is composed from its label content, so match
-    // by regex to tolerate the surrounding description text.
     fireEvent.click(screen.getByRole('radio', { name: /Elastic Agent/ }));
     expect(getLocation().pathname).toBe('/host/linux/auto-detect');
   });
@@ -123,8 +119,6 @@ describe('ApproachSelector', () => {
   it('does not navigate when re-selecting the already selected card', () => {
     renderSelector('otel');
     fireEvent.click(screen.getByRole('radio', { name: /OpenTelemetry/ }));
-    // The probe still shows the starting location because the radio's
-    // onChange does not fire when state doesn't change.
     expect(getLocation().pathname).toBe('/host/linux');
   });
 

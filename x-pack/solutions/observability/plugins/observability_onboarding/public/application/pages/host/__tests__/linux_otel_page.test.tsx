@@ -57,7 +57,6 @@ jest.mock('../../../quickstart_flows/shared/empty_prompt', () => ({
   ),
 }));
 
-// usePerformanceContext throws when PerformanceContext is absent (see @kbn/ebt-tools).
 jest.mock('@kbn/ebt-tools', () => ({
   usePerformanceContext: () => ({
     onPageReady: jest.fn(),
@@ -65,7 +64,6 @@ jest.mock('@kbn/ebt-tools', () => ({
   }),
 }));
 
-// Test file lives under pages/host/__tests__, so hooks resolve via ../../../../hooks (public/hooks).
 jest.mock('../../../../hooks/use_fetcher', () => ({
   useFetcher: jest.fn().mockReturnValue({
     data: undefined,
@@ -82,21 +80,14 @@ jest.mock('../../../../hooks/use_fetcher', () => ({
 
 const { useFetcher: useFetcherMock } = jest.requireMock('../../../../hooks/use_fetcher');
 
-// useFlowBreadcrumb delegates to observability-shared useBreadcrumbs, which calls useUiSetting.
-// coreMock does not provide UI settings, so stub the hook.
 jest.mock('../../../shared/use_flow_breadcrumbs', () => ({
   useFlowBreadcrumb: jest.fn(),
 }));
 
-// Managed OTLP hook expects onboarding AppContext on services.context (coreMock lacks it).
 jest.mock('../../../shared/use_managed_otlp_service_availability', () => ({
   useManagedOtlpServiceAvailability: () => false,
 }));
 
-// Data-detection hooks are mocked so the test can capture and assert their call args.
-// The args are the cross-page contract for the three data-detection hooks
-// (use_pre_existing_data_check / use_window_blur_data_monitoring_trigger /
-// use_time_window_data_detection); see their source files for shape.
 jest.mock('../../../quickstart_flows/shared/use_pre_existing_data_check', () => ({
   usePreExistingDataCheck: jest.fn().mockReturnValue(false),
 }));
@@ -233,12 +224,6 @@ describe('HostLinuxOtelPage', () => {
   });
 
   it('activates monitoring on pre-existing data alone, while keeping install/start steps rendered', () => {
-    // Pre-existing data flips the visualize step (monitoring) to active so the
-    // has-data probe can light up the deeplink panel, while install/start
-    // step bodies keep rendering. The OTel flow never auto-marks any step
-    // `complete` (heuristic signals → misleading green checks), so the test
-    // only validates that the monitoring flag flips and the step bodies are
-    // still present for the user to see.
     usePreExistingDataCheckMock.mockReturnValue(true);
     useWindowBlurDataMonitoringTriggerMock.mockReturnValue(false);
     try {

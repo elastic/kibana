@@ -12,9 +12,6 @@ import type { OtelOs } from './install_step';
 
 interface OtelLogsStartStepProps {
   os: OtelOs;
-  // When true, drops the legacy "Copy to clipboard" button and enables the
-  // code block's built-in top-right copy icon instead. Defaults to false so
-  // V1 panels keep rendering the bottom button as they always have.
   useInlineCopyOnly?: boolean;
 }
 
