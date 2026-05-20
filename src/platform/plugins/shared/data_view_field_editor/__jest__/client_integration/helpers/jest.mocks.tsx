@@ -13,11 +13,10 @@ import { of } from 'rxjs';
 const mockUseEffect = useEffect;
 const mockOf = of;
 
-const esqlLanguageModuleId = '@kbn/esql-language';
-
-jest.doMock(esqlLanguageModuleId, () => ({}));
+jest.mock('@kbn/esql-language', () => ({}));
 
 const EDITOR_ID = 'testEditor';
+const MONACO_MODULE = '@kbn/monaco';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -55,8 +54,8 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('@kbn/monaco', () => {
-  const original = jest.requireActual('@kbn/monaco');
+jest.doMock(MONACO_MODULE, () => {
+  const original = jest.requireActual(MONACO_MODULE);
   const originalMonaco = original.monaco;
 
   return {

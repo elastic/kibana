@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RenderResult } from '@testing-library/react';
 import type { UserEvent } from '@testing-library/user-event';
 import type { Context } from '../../public/components/field_editor_context';
 import type { Props } from '../../public/components/field_editor_flyout_content';
@@ -17,7 +16,6 @@ import {
   flushDocumentsAndPreviewTimers,
   flushPreviewAndSearchTimers,
   setupFieldEditorFlyout,
-  type RtlSetup,
 } from './helpers/rtl_helpers';
 import { FIELD_PREVIEW_PATH } from '../../common/constants';
 import { spyIndexPatternGetByName, spySearchQuery, spySearchQueryResponse } from './helpers';
@@ -62,16 +60,16 @@ export const setSearchResponse = (
 
 const getTypeValueFromLabel = (label: string) => label.toLowerCase().replaceAll(' ', '_');
 
-const getActions = (renderResult: RenderResult, user: UserEvent) => {
+const getActions = (user: UserEvent) => {
   const {
     createFieldEditorFields,
     existsByTestSubjectPath: exists,
     getTextByTestSubjectPath,
-    queryAllByTestSubjectPath: queryAllByTestSubjectPathScoped,
+    queryAllByTestSubjectPath,
     queryByTestSubjectPath,
     setInputValue,
     toggleFormRow,
-  } = createRtlHelpers(renderResult, user);
+  } = createRtlHelpers(user);
 
   const clearFieldSearch = async () => {
     const button = queryByTestSubjectPath('emptySearchResult.clearSearchButton');
@@ -104,7 +102,7 @@ const getActions = (renderResult: RenderResult, user: UserEvent) => {
   const getRenderedFieldsPreview = () => {
     if (!exists('fieldPreviewItem')) return [];
 
-    const previewFields = queryAllByTestSubjectPathScoped('fieldPreviewItem.listItem');
+    const previewFields = queryAllByTestSubjectPath('fieldPreviewItem.listItem');
 
     return previewFields.map((field) => {
       const key = getTextByTestSubjectPath('key', field);
@@ -117,7 +115,7 @@ const getActions = (renderResult: RenderResult, user: UserEvent) => {
   const getRenderedIndexPatternFieldElements = () => {
     if (!exists('indexPatternFieldList')) return null;
 
-    return queryAllByTestSubjectPathScoped('indexPatternFieldList.listItem');
+    return queryAllByTestSubjectPath('indexPatternFieldList.listItem');
   };
 
   const getRenderedIndexPatternFields = () => {
@@ -219,8 +217,11 @@ type FieldEditorFlyoutPreviewActions = ReturnType<typeof getActions>;
 export const setup = async (
   props?: Partial<Props>,
   deps?: Partial<Context>
-): Promise<RtlSetup<FieldEditorFlyoutPreviewActions>> => {
-  return setupFieldEditorFlyout(props, deps, defaultProps, getActions);
-};
+): Promise<{ actions: FieldEditorFlyoutPreviewActions }> => {
+  const { user } = await setupFieldEditorFlyout(props, deps, defaultProps);
+  const actions = getActions(user);
 
-export type FieldEditorFlyoutPreviewHarness = RtlSetup<FieldEditorFlyoutPreviewActions>;
+  return {
+    actions,
+  };
+};

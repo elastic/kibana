@@ -9,9 +9,8 @@
 
 import React from 'react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
-import { act, type RenderResult } from '@testing-library/react';
+import { act, screen, within } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { within } from '@testing-library/react';
 import type { Context } from '../../../public/components/field_editor_context';
 import type { Props } from '../../../public/components/field_editor_flyout_content';
 import { FieldEditorFlyoutContent } from '../../../public/components/field_editor_flyout_content';
@@ -23,12 +22,13 @@ interface FieldEditorFieldsOptions {
   getTypeValue?: (value: string) => string;
 }
 
-export type RtlSetup<Actions> = RenderResult & {
-  actions: Actions;
+interface RtlUserSetup {
   user: UserEvent;
-};
+}
 
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const getTestSubjectMatcher = (part: string) => new RegExp(`(^|\\s)${escapeRegExp(part)}(\\s|$)`);
 
 export const flushDocumentsAndPreviewTimers = async () => {
   await flushPreviewAndSearchTimers();
@@ -50,48 +50,48 @@ export const flushPreviewAndSearchTimers = async () => {
   });
 };
 
-export const queryAllByTestSubjectPath = (root: HTMLElement, selector: string): HTMLElement[] => {
+const queryAllByTestSubjectPathFromQuery = (
+  queryAllByTestId: (matcher: RegExp) => HTMLElement[],
+  selector: string
+): HTMLElement[] => {
   const parts = selector.split('.');
-  let currentRoots = [root];
+  const [firstPart, ...remainingParts] = parts;
 
-  parts.forEach((part) => {
+  let currentRoots = queryAllByTestId(getTestSubjectMatcher(firstPart));
+
+  remainingParts.forEach((part) => {
     currentRoots = currentRoots.flatMap((currentRoot) =>
-      within(currentRoot).queryAllByTestId(new RegExp(`(^|\\s)${escapeRegExp(part)}(\\s|$)`))
+      within(currentRoot).queryAllByTestId(getTestSubjectMatcher(part))
     );
   });
 
   return currentRoots;
 };
 
-export const setupFieldEditorFlyout = async <Actions>(
+export const queryAllByTestSubjectPath = (root: HTMLElement, selector: string): HTMLElement[] =>
+  queryAllByTestSubjectPathFromQuery((matcher) => within(root).queryAllByTestId(matcher), selector);
+
+export const setupFieldEditorFlyout = async (
   props: Partial<Props> | undefined,
   deps: Partial<Context> | undefined,
-  defaultProps: Props,
-  getActions: (renderResult: RenderResult, user: UserEvent) => Actions
-): Promise<RtlSetup<Actions>> => {
+  defaultProps: Props
+): Promise<RtlUserSetup> => {
   const user = userEvent.setup({
     advanceTimers: jest.advanceTimersByTime,
   });
 
   const Component = WithFieldEditorDependencies(FieldEditorFlyoutContent, deps);
-  let renderResult: RenderResult;
 
   await act(async () => {
-    renderResult = renderWithI18n(React.createElement(Component, { ...defaultProps, ...props }));
+    renderWithI18n(React.createElement(Component, { ...defaultProps, ...props }));
   });
 
-  const actions = getActions(renderResult!, user);
-
   return {
-    ...renderResult!,
-    actions,
     user,
   };
 };
 
-export const createRtlHelpers = (renderResult: RenderResult, user: UserEvent) => {
-  const { container } = renderResult;
-
+export const createRtlHelpers = (user: UserEvent) => {
   const existsByTestSubjectPath = (selector: string) =>
     queryAllByTestSubjectPathScoped(selector).length > 0;
 
@@ -111,8 +111,10 @@ export const createRtlHelpers = (renderResult: RenderResult, user: UserEvent) =>
   const queryByTestSubjectPath = (selector: string, root?: HTMLElement): HTMLElement | undefined =>
     queryAllByTestSubjectPathScoped(selector, root)[0];
 
-  const queryAllByTestSubjectPathScoped = (selector: string, root: HTMLElement = container) =>
-    queryAllByTestSubjectPath(root, selector);
+  const queryAllByTestSubjectPathScoped = (selector: string, root?: HTMLElement) =>
+    root
+      ? queryAllByTestSubjectPath(root, selector)
+      : queryAllByTestSubjectPathFromQuery((matcher) => screen.queryAllByTestId(matcher), selector);
 
   const setInputValue = async (selector: string, value: string) => {
     const input = getByTestSubjectPath(selector) as HTMLInputElement;

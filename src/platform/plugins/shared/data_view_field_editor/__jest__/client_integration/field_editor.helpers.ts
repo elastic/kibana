@@ -9,9 +9,9 @@
 
 import React from 'react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
-import { act, fireEvent, type RenderResult } from '@testing-library/react';
+import { act } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { createRtlHelpers, type RtlSetup } from './helpers/rtl_helpers';
+import { createRtlHelpers } from './helpers/rtl_helpers';
 import { FieldEditor } from '../../public/components/field_editor/field_editor';
 import { WithFieldEditorDependencies } from './helpers';
 import type { Context } from '../../public/components/field_editor_context';
@@ -21,16 +21,23 @@ export const defaultProps: Props = {
   onChange: jest.fn(),
 };
 
-const getActions = (renderResult: RenderResult, user: UserEvent) => {
-  const { createFieldEditorFields, getByTestSubjectPath, toggleFormRow } = createRtlHelpers(
-    renderResult,
-    user
-  );
+const getActions = (user: UserEvent) => {
+  const { createFieldEditorFields, getByTestSubjectPath, toggleFormRow } = createRtlHelpers(user);
   const userEventFields = createFieldEditorFields();
 
   const setInputValue = async (selector: string, value: string) => {
+    const input = getByTestSubjectPath(selector) as HTMLInputElement;
+
+    await user.clear(input);
+
+    if (value) {
+      await user.click(input);
+      await user.paste(value);
+    }
+
+    await user.tab();
+
     await act(async () => {
-      fireEvent.change(getByTestSubjectPath(selector), { target: { value } });
       jest.advanceTimersByTime(0);
     });
   };
@@ -52,19 +59,18 @@ export const setup = async (
   props?: Partial<Props>,
   deps?: Partial<Context>,
   getByNameOverride?: () => any
-): Promise<RtlSetup<FieldEditorActions>> => {
+): Promise<{ actions: FieldEditorActions }> => {
   const user = userEvent.setup({
     advanceTimers: jest.advanceTimersByTime,
   });
 
   const Component = WithFieldEditorDependencies(FieldEditor, deps, getByNameOverride);
-  let renderResult: RenderResult;
 
   await act(async () => {
-    renderResult = renderWithI18n(React.createElement(Component, { ...defaultProps, ...props }));
+    renderWithI18n(React.createElement(Component, { ...defaultProps, ...props }));
   });
 
-  const actions = getActions(renderResult!, user);
+  const actions = getActions(user);
 
-  return { ...renderResult!, actions, user };
+  return { actions };
 };

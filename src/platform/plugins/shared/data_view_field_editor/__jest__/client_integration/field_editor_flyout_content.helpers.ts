@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, fireEvent, type RenderResult } from '@testing-library/react';
+import { act, fireEvent, screen } from '@testing-library/react';
 import type { UserEvent } from '@testing-library/user-event';
 import type { Context } from '../../public/components/field_editor_context';
 import type { Props } from '../../public/components/field_editor_flyout_content';
@@ -15,7 +15,6 @@ import {
   createRtlHelpers,
   flushPreviewAndSearchTimers,
   setupFieldEditorFlyout,
-  type RtlSetup,
 } from './helpers/rtl_helpers';
 
 const defaultProps: Props = {
@@ -23,19 +22,16 @@ const defaultProps: Props = {
   onSave: jest.fn(),
 };
 
-const getActions = (renderResult: RenderResult, user: UserEvent) => {
-  const { createFieldEditorFields, getByTestSubjectPath, toggleFormRow } = createRtlHelpers(
-    renderResult,
-    user
-  );
+const getActions = (user: UserEvent) => {
+  const { createFieldEditorFields, getByTestSubjectPath, toggleFormRow } = createRtlHelpers(user);
 
   const closeFlyout = async () => {
-    await user.click(renderResult.getByText('Cancel'));
+    await user.click(screen.getByText('Cancel'));
   };
 
   const saveField = async () => {
     await act(async () => {
-      fireEvent.click(renderResult.getByText('Save'));
+      fireEvent.click(screen.getByText('Save'));
       jest.advanceTimersByTime(0);
     });
   };
@@ -55,6 +51,11 @@ type FieldEditorFlyoutContentActions = ReturnType<typeof getActions>;
 export const setup = async (
   props?: Partial<Props>,
   deps?: Partial<Context>
-): Promise<RtlSetup<FieldEditorFlyoutContentActions>> => {
-  return setupFieldEditorFlyout(props, deps, defaultProps, getActions);
+): Promise<{ actions: FieldEditorFlyoutContentActions }> => {
+  const { user } = await setupFieldEditorFlyout(props, deps, defaultProps);
+  const actions = getActions(user);
+
+  return {
+    actions,
+  };
 };

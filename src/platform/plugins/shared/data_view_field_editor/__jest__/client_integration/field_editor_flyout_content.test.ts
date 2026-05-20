@@ -8,11 +8,11 @@
  */
 
 // This import needs to come first as it contains the jest.mocks
+import { createPreviewError, mockDocuments } from './helpers/mocks';
 import { setupEnvironment } from './helpers';
-import { mockDocuments, createPreviewError } from './helpers/mocks';
+import { screen, waitFor } from '@testing-library/react';
 import { setSearchResponse } from './field_editor_flyout_preview.helpers';
 import { setup } from './field_editor_flyout_content.helpers';
-import { waitFor } from '@testing-library/react';
 
 describe('<FieldEditorFlyoutContent />', () => {
   const { httpRequestsMockHelpers } = setupEnvironment();
@@ -33,9 +33,9 @@ describe('<FieldEditorFlyoutContent />', () => {
   });
 
   it('should have the correct title', async () => {
-    const { getByText } = await setup();
+    await setup();
 
-    expect(getByText('Create field')).toBeVisible();
+    expect(screen.getByText('Create field')).toBeVisible();
   });
 
   it('should allow an existing field to be provided', async () => {
@@ -49,10 +49,9 @@ describe('<FieldEditorFlyoutContent />', () => {
 
     const {
       actions: { getByTestSubjectPath },
-      getByText,
     } = await setup({ fieldToEdit: field });
 
-    expect(getByText(`Edit field 'foo'`)).toBeVisible();
+    expect(screen.getByText(`Edit field 'foo'`)).toBeVisible();
     expect(getInputValue(getByTestSubjectPath('nameField.input'))).toBe(field.name);
     expect(getInputValue(getByTestSubjectPath('typeField'))).toBe(field.type);
     expect(getInputValue(getByTestSubjectPath('scriptField'))).toBe(field.script.source);
@@ -70,10 +69,9 @@ describe('<FieldEditorFlyoutContent />', () => {
 
     const {
       actions: { getByTestSubjectPath },
-      getByText,
     } = await setup({ fieldToCreate });
 
-    expect(getByText(`Create field`)).toBeVisible();
+    expect(screen.getByText(`Create field`)).toBeVisible();
     expect(getInputValue(getByTestSubjectPath('nameField.input'))).toBe(fieldToCreate.name);
     expect(getInputValue(getByTestSubjectPath('typeField'))).toBe(fieldToCreate.type);
     expect(getInputValue(getByTestSubjectPath('scriptField'))).toBe(fieldToCreate.script.source);
@@ -90,9 +88,11 @@ describe('<FieldEditorFlyoutContent />', () => {
     };
     const onSave = jest.fn();
 
-    const { actions } = await setup({ onSave, fieldToEdit: field });
+    const {
+      actions: { saveField },
+    } = await setup({ onSave, fieldToEdit: field });
 
-    await actions.saveField();
+    await saveField();
 
     await waitFor(() => expect(onSave).toHaveBeenCalled());
 
@@ -103,9 +103,11 @@ describe('<FieldEditorFlyoutContent />', () => {
 
   it('should accept an onCancel prop', async () => {
     const onCancel = jest.fn();
-    const { actions } = await setup({ onCancel });
+    const {
+      actions: { closeFlyout },
+    } = await setup({ onCancel });
 
-    await actions.closeFlyout();
+    await closeFlyout();
 
     expect(onCancel).toHaveBeenCalled();
   });
@@ -116,21 +118,19 @@ describe('<FieldEditorFlyoutContent />', () => {
 
       const {
         actions: { saveField },
-        getAllByText,
-        getByRole,
       } = await setup({ onSave });
 
-      expect(getByRole('button', { name: 'Save' })).not.toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Save' })).not.toBeDisabled();
 
       await saveField();
 
-      await waitFor(() => expect(getByRole('button', { name: 'Save' })).toBeDisabled());
+      await waitFor(() => expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled());
 
       expect(onSave).toHaveBeenCalledTimes(0);
-      expect(getAllByText('A name is required.')).toHaveLength(2);
+      expect(screen.getAllByText('A name is required.')).toHaveLength(2);
     });
 
-    it('should forward values from the form', async () => {
+    it('should forward default values from the form', async () => {
       const onSave = jest.fn();
 
       const {
@@ -142,52 +142,58 @@ describe('<FieldEditorFlyoutContent />', () => {
       await fields.updateScript('echo("hello")');
 
       await waitForUpdates();
+      await saveField();
+
+      expect(onSave).toHaveBeenCalledTimes(1);
+
+      const fieldReturned = onSave.mock.calls[onSave.mock.calls.length - 1][0];
+
+      expect(fieldReturned).toEqual({
+        name: 'someName',
+        script: { source: 'echo("hello")' },
+        type: 'keyword', // default to keyword
+        format: null,
+      });
+    });
+
+    it('should forward updated type and popularity from the form', async () => {
+      const onSave = jest.fn();
+      const fieldToCreate = {
+        name: 'someName',
+        type: 'keyword' as const,
+        script: { source: 'echo("hello")' },
+      };
+
+      const {
+        actions: { fields, saveField, toggleFormRow },
+      } = await setup({ fieldToCreate, onSave });
+
+      await fields.updateType('date');
 
       await saveField();
 
-      await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+      expect(onSave).toHaveBeenCalledTimes(1);
 
       let fieldReturned = onSave.mock.calls[onSave.mock.calls.length - 1][0];
 
       expect(fieldReturned).toEqual({
-        name: 'someName',
-        type: 'keyword', // default to keyword
-        script: { source: 'echo("hello")' },
-        format: null,
-      });
-
-      // Change the type and make sure it is forwarded
-      await fields.updateType('date');
-      await waitForUpdates();
-
-      await saveField();
-
-      await waitFor(() => expect(onSave).toHaveBeenCalledTimes(2));
-
-      fieldReturned = onSave.mock.calls[onSave.mock.calls.length - 1][0];
-
-      expect(fieldReturned).toEqual({
-        name: 'someName',
+        ...fieldToCreate,
         type: 'date',
-        script: { source: 'echo("hello")' },
         format: null,
       });
 
       await toggleFormRow('popularity');
       await fields.updatePopularity('5');
 
-      await waitForUpdates();
-
       await saveField();
 
-      await waitFor(() => expect(onSave).toHaveBeenCalledTimes(3));
+      expect(onSave).toHaveBeenCalledTimes(2);
 
       fieldReturned = onSave.mock.calls[onSave.mock.calls.length - 1][0];
 
       expect(fieldReturned).toEqual({
-        name: 'someName',
+        ...fieldToCreate,
         type: 'date',
-        script: { source: 'echo("hello")' },
         format: null,
         popularity: 5,
       });

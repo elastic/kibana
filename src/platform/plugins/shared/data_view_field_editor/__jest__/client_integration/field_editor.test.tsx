@@ -9,7 +9,7 @@
 
 import type { Field } from '../../public/types';
 import type { FieldEditorFormState } from '../../public/components/field_editor/field_editor';
-import { act } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 // This import needs to come first as it contains the jest.mocks
 import { setupEnvironment, mockDocuments } from './helpers';
 import { setSearchResponse } from './field_editor_flyout_preview.helpers';
@@ -68,10 +68,10 @@ describe('<FieldEditor />', () => {
   });
 
   it('initial state should have "set custom label", "set value" and "set format" turned off', async () => {
-    const { getByRole } = await setup();
+    await setup();
 
     ['Set custom label', 'Set custom description', 'Set value', 'Set format'].forEach((name) => {
-      expect(getByRole('switch', { name })).not.toBeChecked();
+      expect(screen.getByRole('switch', { name })).not.toBeChecked();
     });
   });
 
@@ -102,7 +102,9 @@ describe('<FieldEditor />', () => {
   describe('validation', () => {
     it('should prevent creating duplicates', async () => {
       const existingFields = ['myRuntimeField'];
-      const { actions, getAllByText } = await setup(
+      const {
+        actions: { toggleFormRow, fields },
+      } = await setup(
         {
           onChange,
         },
@@ -119,9 +121,9 @@ describe('<FieldEditor />', () => {
         }
       );
 
-      await actions.toggleFormRow('value');
-      await actions.fields.updateName(existingFields[0]);
-      await actions.fields.updateScript('echo("hello")');
+      await toggleFormRow('value');
+      await fields.updateName(existingFields[0]);
+      await fields.updateScript('echo("hello")');
 
       await act(async () => {
         jest.advanceTimersByTime(1000); // Make sure our debounced error message is in the DOM
@@ -130,7 +132,7 @@ describe('<FieldEditor />', () => {
       const lastState = getLastStateUpdate();
       await submitFormAndGetData(lastState);
       expect(getLastStateUpdate().isValid).toBe(false);
-      expect(getAllByText('A field with this name already exists.')).toHaveLength(2);
+      expect(screen.getAllByText('A field with this name already exists.')).toHaveLength(2);
     });
 
     it('should not count the default value as a duplicate', async () => {
@@ -140,7 +142,7 @@ describe('<FieldEditor />', () => {
         script: { source: 'emit("hello"' },
       };
 
-      const { queryAllByText } = await setup(
+      await setup(
         {
           field,
           onChange,
@@ -154,7 +156,7 @@ describe('<FieldEditor />', () => {
       await submitFormAndGetData(lastState);
 
       expect(getLastStateUpdate().isValid).toBe(true);
-      expect(queryAllByText('A field with this name already exists.')).toHaveLength(0);
+      expect(screen.queryAllByText('A field with this name already exists.')).toHaveLength(0);
     });
   });
 });
