@@ -24,7 +24,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
     privileges: {
       all: {
         app: [],
-        api: [apiPrivileges.readAgentContextLayer],
+        api: [apiPrivileges.readAgentContextLayer, apiPrivileges.writeAgentContextLayer],
         catalogue: [],
         savedObject: {
           all: [],
