@@ -288,6 +288,8 @@ export class FindService extends FtrService {
     // avoiding redundant WebDriver round-trips to change timeout on every iteration.
     await this._withTimeout(0);
     try {
+      // driver.wait treats timeout=0 as "wait forever"; use 1ms so a single
+      // check fires and the timeout guard (elapsed >= timeout) trips immediately.
       await this.driver.wait(async () => {
         const elements = await this.driver.findElements(By.css(selector));
         for (const el of elements) {
@@ -298,7 +300,7 @@ export class FindService extends FtrService {
           }
         }
         return false;
-      }, timeout);
+      }, timeout || 1);
       return true;
     } catch (err) {
       return false;
