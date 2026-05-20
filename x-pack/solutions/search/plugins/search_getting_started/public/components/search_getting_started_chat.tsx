@@ -6,12 +6,14 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { GETTING_STARTED_SESSIONSTORAGE_KEY } from '@kbn/search-shared-ui';
 
 import { AnalyticsEvents } from '../../common';
 import { useUsageTracker } from '../contexts/usage_tracker_context';
 import { SearchGettingStartedPageTemplate } from '../layout/page_template';
+
+import { ChatHeader } from './chat/chat_header';
+import { GettingStartedChatContent } from './chat/chat_content';
 
 export const SearchGettingStartedChatPage = () => {
   const usageTracker = useUsageTracker();
@@ -22,9 +24,8 @@ export const SearchGettingStartedChatPage = () => {
 
   return (
     <SearchGettingStartedPageTemplate>
-      <EuiPageTemplate.Section data-test-subj="gettingStartedChat">
-        <EuiLoadingSpinner />
-      </EuiPageTemplate.Section>
+      <ChatHeader />
+      <GettingStartedChatContent />
     </SearchGettingStartedPageTemplate>
   );
 };
