@@ -179,6 +179,7 @@ dependsOn:
   - '@kbn/core-pricing-common'
   - '@kbn/lazy-object'
   - '@kbn/migrator-test-kit'
+  - '@kbn/scout'
 tags:
   - core
   - package
@@ -191,6 +192,7 @@ fileGroups:
     - server/**/*
     - types/**/*
     - test_helpers/**/*
+    - test/scout/**/*
     - utils/**/*
     - index.ts
     - '!target/**/*'

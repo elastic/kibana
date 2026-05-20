@@ -2,6 +2,7 @@
 plugins:
   enabled:
     - apm
+    - data
     - data_views
     - console
     - dashboard
@@ -9,6 +10,8 @@ plugins:
     - exploratory_view
     - index_management
     - infra
+    - lens
+    - logstash
     - maps
     - observability
     - observability_onboarding
@@ -29,6 +32,7 @@ plugins:
 
 packages:
   enabled:
+    - core
     - kbn-scout
     - kbn-streamlang-tests
   disabled:

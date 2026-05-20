@@ -12,8 +12,8 @@ export { sloDataFixture } from './src/playwright/fixtures/worker';
 // re-exported test framework from @kbn/scout
 export { lighthouseTest, tags } from '@kbn/scout';
 
-// Custom global setup hook with profiling support
-export { globalSetupHook } from './src/playwright/global_hook';
+// Custom global setup/teardown hooks with profiling support
+export { globalSetupHook, globalTeardownHook } from './src/playwright/global_hook';
 
 // re-exported fixtures & configuration from @kbn/scout
 export {

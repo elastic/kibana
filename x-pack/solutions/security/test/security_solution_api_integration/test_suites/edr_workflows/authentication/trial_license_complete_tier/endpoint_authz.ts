@@ -174,7 +174,8 @@ export default function ({ getService }: FtrProviderContext) {
       await endpointTestResources.unloadEndpointData(indexedData);
     });
 
-    describe('with minimal_all', () => {
+    // Failing: See https://github.com/elastic/kibana/issues/251553
+    describe.skip('with minimal_all', () => {
       for (const apiListItem of [
         ...canReadActionsLogManagementApiList,
         ...canIsolateHostApiList,

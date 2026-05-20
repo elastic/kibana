@@ -6,8 +6,7 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { KbnClient } from '@kbn/test';
-import type { AxiosResponse } from 'axios';
+import type { KbnClient, KbnClientResponse } from '@kbn/test';
 import {
   PACKAGE_POLICY_API_ROUTES,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -20,7 +19,7 @@ import { getEndpointPackageInfo } from '../../../common/endpoint/utils/package';
 
 const fetchEndpointPolicies = (
   kbnClient: KbnClient
-): Promise<AxiosResponse<GetPolicyListResponse>> => {
+): Promise<KbnClientResponse<GetPolicyListResponse>> => {
   return kbnClient
     .request<GetPolicyListResponse>({
       method: 'GET',

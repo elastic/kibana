@@ -98,7 +98,12 @@ export const JsonTab = memo(
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <JsonCodeEditor json={value} height={editorHeight} hasLineNumbers={true} />
+          <JsonCodeEditor
+            json={value}
+            height={editorHeight}
+            hasLineNumbers={true}
+            enableFindAction={true}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );

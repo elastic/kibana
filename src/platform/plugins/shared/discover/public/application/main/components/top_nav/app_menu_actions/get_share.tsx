@@ -12,8 +12,9 @@ import { AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
 import { omit } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { TimeRange } from '@kbn/es-query';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import type { SharingData } from '@kbn/share-plugin/public/types';
+import type { ReportingCSVSharingData } from '@kbn/reporting-public/types';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import type { DataTotalHitsMsg } from '../../../state_management/discover_data_state_container';
 import { getSharingData, showPublicUrlSwitch } from '../../../../../utils/get_sharing_data';
@@ -21,6 +22,11 @@ import type { DiscoverAppLocatorParams } from '../../../../../../common/app_loca
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
 import type { TabState } from '../../../state_management/redux/types';
+
+/**
+ * Specifies an explicit type for the sharing data of the Discover app.
+ */
+type DiscoverSharingData = SharingData<DiscoverAppLocatorParams> & ReportingCSVSharingData;
 
 export const getShareAppMenuItem = ({
   discoverParams,
@@ -64,11 +70,12 @@ export const getShareAppMenuItem = ({
     const { locator, discoverFeatureFlags } = services;
     const { timefilter } = services.data.query.timefilter;
     const timeRange = timefilter.getTime();
+    const absoluteTimeRange = timefilter.getAbsoluteTime();
     const refreshInterval = timefilter.getRefreshInterval();
     const filters = services.filterManager.getFilters();
 
     // Share -> Get links -> Snapshot
-    const params: DiscoverAppLocatorParams & { timeRange: TimeRange | undefined } = {
+    const params: DiscoverSharingData['locatorParams'][number]['params'] = {
       ...omit(currentTab.appState, 'dataSource'),
       ...(persistedDiscoverSession?.id ? { savedSearchId: persistedDiscoverSession.id } : {}),
       ...(dataView?.isPersisted()
@@ -153,6 +160,7 @@ export const getShareAppMenuItem = ({
             defaultMessage: 'Untitled Discover session',
           }),
         totalHits: totalHitsState.result || 0,
+        absoluteTimeRange: isEsqlMode ? absoluteTimeRange : undefined,
       },
       isDirty: !persistedDiscoverSession?.id || hasUnsavedChanges,
       onClose: () => {

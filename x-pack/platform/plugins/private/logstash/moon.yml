@@ -30,6 +30,8 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/react-kibana-context-render'
   - '@kbn/core-plugins-browser'
+  - '@kbn/scout'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod
@@ -41,6 +43,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

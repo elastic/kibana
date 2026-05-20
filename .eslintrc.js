@@ -389,6 +389,80 @@ const RESTRICTED_IMPORTS = [
     name: `fp-ts/lib`,
     message: `Please, use fp-ts to avoid duplicating the package import`,
   },
+  {
+    name: 'axios',
+    message:
+      'Do not introduce new axios usage. Use the native `fetch` API instead (available in Node.js 22 and modern browsers). Existing consumers are being migrated incrementally; the allowlist in AXIOS_LEGACY_CONSUMERS will shrink over time.',
+  },
+];
+
+/**
+ * Files that already import axios. New axios imports must not be added here;
+ * this list is expected to shrink as consumers migrate to the native `fetch` API.
+ * Globs are scoped to existing feature boundaries to keep the leak surface small.
+ */
+const AXIOS_LEGACY_CONSUMERS = [
+  '.buildkite/**/*.{js,mjs,ts,tsx,jsx}',
+  'packages/kbn-ci-stats-performance-metrics/**/*.{js,mjs,ts,tsx}',
+  'packages/kbn-generate/**/*.{js,mjs,ts,tsx}',
+  'src/dev/build/lib/**/*.{js,mjs,ts,tsx}',
+  'src/dev/build/tasks/**/*.{js,mjs,ts,tsx}',
+  'src/dev/prs/**/*.{js,mjs,ts,tsx}',
+  'src/platform/packages/private/kbn-ci-stats-reporter/**/*.{js,mjs,ts,tsx}',
+  'src/platform/packages/shared/kbn-connector-specs/**/*.{js,mjs,ts,tsx}',
+  'src/platform/packages/shared/kbn-cypress-test-helper/**/*.{js,mjs,ts,tsx}',
+  'src/platform/packages/shared/kbn-dev-utils/src/axios/**/*.{js,mjs,ts,tsx}',
+  'src/platform/packages/shared/kbn-mcp-dev-server/**/*.{js,mjs,ts,tsx}',
+  'src/platform/plugins/shared/workflows_execution_engine/server/step/http_step/**/*.{js,mjs,ts,tsx}',
+  'x-pack/examples/alerting_example/server/rule_types/**/*.{js,mjs,ts,tsx}',
+  'x-pack/packages/kbn-synthetics-private-location/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/packages/shared/kbn-data-forge/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/packages/shared/kbn-evals/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/private/canvas/common/lib/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/private/data_usage/server/services/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/private/indices_metadata/server/lib/services/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/actions/server/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/cloud_connect/server/routes/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/cloud_connect/server/services/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/dataset_quality/server/test_helpers/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/fleet/server/services/agents/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/fleet/server/telemetry/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/inference/scripts/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/observability_ai_assistant/server/functions/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/observability_ai_assistant/server/service/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/osquery/cypress/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/screenshotting/server/browsers/chromium/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/screenshotting/server/browsers/download/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/plugins/shared/stack_connectors/server/connector_types/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/sub_action_connector.ts',
+  'x-pack/platform/test/alerting_api_integration/security_and_spaces/group4/tests/alerting/mustache_templates.ts',
+  'x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group4/mustache_templates.ts',
+  'x-pack/platform/test/fleet_api_integration/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/test/fleet_cypress/agent.ts',
+  'x-pack/platform/test/fleet_cypress/artifact_manager.ts',
+  'x-pack/platform/test/fleet_cypress/fleet_server.ts',
+  'x-pack/platform/test/fleet_multi_cluster/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/test/ui_capabilities/common/services/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/packages/alerting-test-data/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/packages/kbn-synthetics-forge/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/plugins/apm/scripts/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/plugins/apm/server/test_helpers/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/plugins/observability_onboarding/server/test_helpers/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/plugins/synthetics/scripts/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/plugins/synthetics/server/telemetry/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/observability/test/api_integration/profiling/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/security/packages/kbn-securitysolution-utils/src/axios/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/security/plugins/security_solution/common/endpoint/data_loaders/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/security/plugins/security_solution/common/endpoint/format_axios_error.ts',
+  'x-pack/solutions/security/plugins/security_solution/common/endpoint/utils/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/security/plugins/security_solution/scripts/endpoint/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/security/plugins/security_solution/server/integration_tests/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/security/test/security_solution_api_integration/config/services/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/security/test/security_solution_cypress/cypress/support/**/*.{js,mjs,ts,tsx}',
 ];
 
 /**
@@ -401,6 +475,11 @@ const DEPRECATED_IMPORTS = [
     name: 'enzyme',
     message:
       'Enzyme is deprecated and no longer maintained. Please use @testing-library/react instead.',
+  },
+  {
+    name: '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib',
+    message:
+      '`hook_form_lib` is deprecated and will no longer be supported. Consider using `react-hook-form` for new and existing forms.',
   },
 ];
 
@@ -933,8 +1012,21 @@ module.exports = {
     {
       files: ['**/*.{js,mjs,ts,tsx}'],
       rules: {
+        '@kbn/eslint/no_unsafe_dynamic_http_path': 'warn',
         'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
-        '@kbn/eslint/no_deprecated_imports': ['warn', ...DEPRECATED_IMPORTS],
+        '@kbn/eslint/no_deprecated_imports': [
+          'warn',
+          {
+            paths: DEPRECATED_IMPORTS,
+            patterns: [
+              {
+                group: ['@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/**'],
+                message:
+                  '`hook_form_lib` is deprecated and will no longer be supported. Consider using `react-hook-form` for new and existing forms.',
+              },
+            ],
+          },
+        ],
         'no-restricted-modules': [
           'error',
           {
@@ -1256,8 +1348,8 @@ module.exports = {
         'x-pack/solutions/security/plugins/security_solution/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/plugins/security_solution_ess/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/plugins/security_solution_serverless/common/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/plugins/shared/timelines/public/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/plugins/shared/timelines/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/timelines/public/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/timelines/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/plugins/shared/cases/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/plugins/shared/cases/common/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
@@ -1298,7 +1390,7 @@ module.exports = {
         'x-pack/solutions/security/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/solutions/security/plugins/security_solution_ess/**/*.{ts,tsx}',
         'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{ts,tsx}',
-        'x-pack/platform/plugins/shared/timelines/**/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/timelines/**/*.{ts,tsx}',
         'x-pack/platform/plugins/shared/cases/**/*.{ts,tsx}',
         'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
       ],
@@ -1313,7 +1405,7 @@ module.exports = {
         'x-pack/solutions/security/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/solutions/security/plugins/security_solution_ess/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{test,mock,test_helper}.{ts,tsx}',
-        'x-pack/platform/plugins/shared/timelines/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/solutions/security/plugins/timelines/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/platform/plugins/shared/cases/**/*.{test,mock,test_helper}.{ts,tsx}',
         'src/platform/packages/shared/kbn-cell-actions/**/*.{test,mock,test_helper}.{ts,tsx}',
       ],
@@ -1334,7 +1426,7 @@ module.exports = {
         'x-pack/solutions/security/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/solutions/security/plugins/security_solution_ess/**/*.{ts,tsx}',
         'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{ts,tsx}',
-        'x-pack/platform/plugins/shared/timelines/**/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/timelines/**/*.{ts,tsx}',
         'x-pack/platform/plugins/shared/cases/**/*.{ts,tsx}',
         'src/platform/packages/shared/kbn-cell-actions/**/*.{ts,tsx}',
       ],
@@ -1368,7 +1460,7 @@ module.exports = {
         'x-pack/solutions/security/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/plugins/shared/timelines/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/plugins/timelines/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/plugins/shared/cases/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/packages/data-stream-adapter/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
@@ -2529,10 +2621,7 @@ module.exports = {
         // TODO @kibana/operations
         'scripts/create_observability_rules.js', // is importing "@kbn/observability-alerting-test-data" (observability/private)
         'src/cli_setup/**', // is importing "@kbn/interactive-setup-plugin" (platform/private)
-        'src/dev/build/tasks/install_chromium.ts', // is importing "@kbn/screenshotting-plugin" (platform/private)
-
-        // FIXME PhilippeOberti @kbn/timelines-plugin depends on security-solution-plugin (security/private) (timelines is going to disappear)
-        'x-pack/platform/plugins/shared/timelines/**',
+        'src/dev/build/tasks/install_chromium.ts', // is importing "@kbn/screenshotting-plugin" (platform/private)*',
 
         // For now, we keep the exception to let tests depend on anything.
         // Ideally, we need to classify the solution specific ones to reduce CI times
@@ -2738,6 +2827,7 @@ module.exports = {
         '@kbn/eslint/scout_expect_import': 'error',
         '@kbn/eslint/scout_no_deprecated_tags': 'error',
         '@kbn/eslint/scout_no_locators': ['error', { restricted: ['globalLoadingIndicator'] }],
+        '@kbn/eslint/scout_no_promise_all_with_playwright_apis': 'error',
         '@kbn/eslint/require_include_in_check_a11y': 'warn',
       },
     },
@@ -2798,6 +2888,23 @@ module.exports = {
             disallowedMessage:
               'Use `@kbn/fs` for file write operations instead of direct `fs` in production code',
           },
+        ],
+      },
+    },
+    {
+      // Allow axios in files that already use it. New axios imports are blocked
+      // globally by RESTRICTED_IMPORTS; this allowlist should only ever shrink
+      // as consumers migrate to the native `fetch` API. Placed last so it wins
+      // over any earlier override that re-applies RESTRICTED_IMPORTS (e.g. the
+      // security_solution and workflows_management blocks). The trade-off: the
+      // 35 allowlisted files that overlap with those blocks lose their
+      // `*legacy*` pattern check; verified that none of them currently import
+      // any path matching `*legacy*`.
+      files: AXIOS_LEGACY_CONSUMERS,
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          ...RESTRICTED_IMPORTS.filter(({ name }) => name !== 'axios'),
         ],
       },
     },

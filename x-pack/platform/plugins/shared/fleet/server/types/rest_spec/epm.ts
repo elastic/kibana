@@ -153,7 +153,7 @@ export const PackageInfoSchema = schema
     version: schema.string(),
     description: schema.maybe(schema.string()),
     title: schema.string(),
-    icons: schema.maybe(schema.arrayOf(PackageIconSchema, { maxSize: 10 })),
+    icons: schema.maybe(schema.arrayOf(PackageIconSchema, { maxSize: 100 })),
     conditions: schema.maybe(
       schema.object({
         kibana: schema.maybe(schema.object({ version: schema.maybe(schema.string()) })),
@@ -183,9 +183,9 @@ export const PackageInfoSchema = schema
       schema.arrayOf(schema.recordOf(schema.string(), schema.any()), { maxSize: 1000 })
     ),
     policy_templates: schema.maybe(
-      schema.arrayOf(schema.recordOf(schema.string(), schema.any()), { maxSize: 100 })
+      schema.arrayOf(schema.recordOf(schema.string(), schema.any()), { maxSize: 1000 })
     ),
-    categories: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
+    categories: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
     owner: schema.maybe(
       schema.object({
         github: schema.maybe(schema.string()),
@@ -213,10 +213,10 @@ export const PackageInfoSchema = schema
     discovery: schema.maybe(
       schema.object({
         fields: schema.maybe(
-          schema.arrayOf(schema.object({ name: schema.string() }), { maxSize: 10 })
+          schema.arrayOf(schema.object({ name: schema.string() }), { maxSize: 100 })
         ),
         datasets: schema.maybe(
-          schema.arrayOf(schema.object({ name: schema.string() }), { maxSize: 10 })
+          schema.arrayOf(schema.object({ name: schema.string() }), { maxSize: 100 })
         ),
       })
     ),
@@ -241,7 +241,7 @@ export const InstalledPackageSchema = schema.object({
   status: schema.string(),
   title: schema.maybe(schema.string()),
   description: schema.maybe(schema.string()),
-  icons: schema.maybe(schema.arrayOf(PackageIconSchema, { maxSize: 10 })),
+  icons: schema.maybe(schema.arrayOf(PackageIconSchema, { maxSize: 100 })),
   dataStreams: schema.arrayOf(
     schema.object({
       name: schema.string(),
@@ -320,7 +320,7 @@ export const GetPackageInfoSchema = PackageInfoSchema.extends({
   licensePath: schema.maybe(schema.string()),
   keepPoliciesUpToDate: schema.maybe(schema.boolean()),
   license: schema.maybe(schema.string()),
-  screenshots: schema.maybe(schema.arrayOf(PackageIconSchema, { maxSize: 10 })),
+  screenshots: schema.maybe(schema.arrayOf(PackageIconSchema, { maxSize: 100 })),
   elasticsearch: schema.maybe(schema.recordOf(schema.string(), schema.any())),
   agent: schema.maybe(
     schema.object({
@@ -335,8 +335,8 @@ export const GetPackageInfoSchema = PackageInfoSchema.extends({
     schema.arrayOf(
       schema.object({
         text: schema.string(),
-        asset_types: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
-        asset_ids: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+        asset_types: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+        asset_ids: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1000 })),
       }),
       { maxSize: 1000 }
     )

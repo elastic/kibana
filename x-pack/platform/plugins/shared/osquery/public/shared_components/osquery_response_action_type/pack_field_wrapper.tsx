@@ -13,6 +13,7 @@ import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_status_table';
 import { usePacks } from '../../packs/use_packs';
 import { PacksComboBoxField } from '../../live_queries/form/packs_combobox_field';
+import type { AddToTimelineHandler } from '../../types';
 
 interface PackFieldWrapperProps {
   liveQueryDetails?: {
@@ -26,12 +27,14 @@ interface PackFieldWrapperProps {
   };
   submitButtonContent?: React.ReactNode;
   showResultsHeader?: boolean;
+  addToTimeline?: AddToTimelineHandler;
 }
 
 export const PackFieldWrapper = ({
   liveQueryDetails,
   submitButtonContent,
   showResultsHeader,
+  addToTimeline,
 }: PackFieldWrapperProps) => {
   const { data: packsData } = usePacks({});
   const { packId } = useWatch<{ packId: string[] }>();
@@ -64,6 +67,7 @@ export const PackFieldWrapper = ({
             // @ts-expect-error update types
             data={liveQueryDetails?.queries ?? selectedPackData?.queries}
             showResultsHeader={showResultsHeader}
+            addToTimeline={addToTimeline}
           />
         </EuiFlexItem>
       ) : null}
