@@ -10,13 +10,13 @@
 import { schema, type TypeOf } from '@kbn/config-schema';
 
 export const searchEmbeddablesRequestSchema = schema.object({
-  type: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
+  type: schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })]),
   search: schema.maybe(schema.string()),
   limit: schema.maybe(schema.number()),
   tags: schema.maybe(
     schema.object({
-      included: schema.maybe(schema.arrayOf(schema.string())),
-      excluded: schema.maybe(schema.arrayOf(schema.string())),
+      included: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+      excluded: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
     })
   ),
 });
@@ -24,7 +24,7 @@ export const searchEmbeddablesRequestSchema = schema.object({
 export type SearchEmbeddablesRequestType = TypeOf<typeof searchEmbeddablesRequestSchema>;
 
 export const searchEmbeddablesResponseSchema = schema.object({
-  hits: schema.arrayOf(schema.any()),
+  hits: schema.arrayOf(schema.any(), { maxSize: 10000 }),
   total: schema.number(),
 });
 
