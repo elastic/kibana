@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/269085
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-05-19
+title: Add opamp_polling_interval to EDOT PHP agent settings
+description: '`release_note:skip` — minor agent configuration addition, no user-facing feature change.'
