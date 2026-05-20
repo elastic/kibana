@@ -19,7 +19,6 @@ import { registerGetStepDefinitionsRoute } from './routes/get_step_definitions';
 import { registerGetTriggerDefinitionsRoute } from './routes/get_trigger_definitions';
 import { ServerStepRegistry } from './step_registry';
 import { registerInternalStepDefinitions } from './steps';
-import { registerInferenceFeatures } from './steps/ai/register_inference_features';
 import { TriggerRegistry } from './trigger_registry';
 import { registerInternalTriggerDefinitions } from './triggers';
 import type {
@@ -72,10 +71,6 @@ export class WorkflowsExtensionsServerPlugin
 
     registerInternalStepDefinitions(this.stepRegistry);
     registerInternalTriggerDefinitions(this.triggerRegistry);
-
-    if (plugins.searchInferenceEndpoints) {
-      registerInferenceFeatures(plugins.searchInferenceEndpoints);
-    }
 
     return {
       registerStepDefinition: (definition) => {

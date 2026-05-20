@@ -7,11 +7,17 @@
 
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type {
+  SearchInferenceEndpointsPluginSetup,
+  SearchInferenceEndpointsPluginStart,
+} from '@kbn/search-inference-endpoints/server';
 
 export interface InferenceWorkflowsSetupDeps {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
 }
 
 export interface InferenceWorkflowsStartDeps {
   inference: InferenceServerStart;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
 }
