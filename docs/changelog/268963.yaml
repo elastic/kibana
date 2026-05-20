@@ -4,4 +4,4 @@ type: enhancement
 products:
 - product: cloud-serverless
   target: 2026-05-19
-title: Add knowledge indicator subtype filter and extract shared filter component
+title: Add subtype filter to Knowledge Indicators table

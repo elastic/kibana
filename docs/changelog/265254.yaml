@@ -4,4 +4,4 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-05-19
-title: Fix toggle refinement popover bug
+title: Fix Streams modify suggestions popover toggle when already open
