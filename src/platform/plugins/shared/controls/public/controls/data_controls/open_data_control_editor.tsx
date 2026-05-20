@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SerializedTitles } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
@@ -55,6 +56,7 @@ export const openDataControlEditor = <State extends DataControlState = DataContr
             defaultMessage: 'Discard changes?',
           }),
           buttonColor: 'danger',
+          defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
         }
       )
       .then((confirmed) => {
