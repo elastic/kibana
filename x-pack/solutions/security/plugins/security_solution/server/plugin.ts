@@ -504,7 +504,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       cloud: plugins.cloud,
       loggerFactory: this.pluginContext.logger,
       telemetry: core.analytics,
-      httpServiceSetup: core.http,
     });
 
     initUsageCollectors({

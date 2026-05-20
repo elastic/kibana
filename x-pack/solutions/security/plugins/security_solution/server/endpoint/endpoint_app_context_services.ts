@@ -8,7 +8,6 @@
 import type {
   AnalyticsServiceSetup,
   ElasticsearchClient,
-  HttpServiceSetup,
   KibanaRequest,
   LoggerFactory,
   SavedObjectsServiceStart,
@@ -82,7 +81,6 @@ export interface EndpointAppContextServiceSetupContract {
   cloud: CloudSetup;
   loggerFactory: LoggerFactory;
   telemetry: AnalyticsServiceSetup;
-  httpServiceSetup: HttpServiceSetup;
 }
 
 export interface EndpointAppContextServiceStartContract {

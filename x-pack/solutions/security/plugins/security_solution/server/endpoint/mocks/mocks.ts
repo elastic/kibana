@@ -17,7 +17,6 @@ import {
   savedObjectsClientMock,
   savedObjectsServiceMock,
   securityServiceMock,
-  coreMock,
 } from '@kbn/core/server/mocks';
 import type {
   IRouter,
@@ -193,7 +192,6 @@ export const createMockEndpointAppContextServiceSetupContract =
       cloud: cloudMock.createSetup(),
       loggerFactory: loggingSystemMock.create(),
       telemetry: analyticsServiceMock.createAnalyticsServiceSetup(),
-      httpServiceSetup: coreMock.createSetup().http,
     };
   };
 
