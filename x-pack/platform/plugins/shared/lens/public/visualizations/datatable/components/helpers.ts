@@ -14,7 +14,7 @@ function buildColumnsMetaLookupInner(table: Datatable) {
   return table.columns.reduce<
     Record<
       string,
-      { name: string; index: number; meta?: DatatableColumnMeta; isComputedColumn?: Boolean }
+      { name: string; index: number; meta?: DatatableColumnMeta; isComputedColumn?: boolean }
     >
   >((memo, { id, name, meta, isComputedColumn }, i) => {
     memo[id] = { name, index: i, meta, isComputedColumn };

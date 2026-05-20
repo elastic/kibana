@@ -19,10 +19,6 @@ import type { ReactNode } from 'react';
 import type { FormatFactory } from '../../../../common/types';
 import { LENS_ROW_HEIGHT_MODE, type LensCellValueAction } from '@kbn/lens-common';
 import { createGridColumns } from './columns';
-import {
-  getEsqlComputedColumnFilterDisabledMessage,
-  getGenericFilterDisabledMessage,
-} from './helpers';
 
 const table: Datatable = {
   type: 'datatable',
@@ -131,14 +127,37 @@ describe('getContentData', () => {
       expect(screen.getByTestId('lensDatatableFilterFor')).toBeDisabled();
       expect(screen.getByTestId('lensDatatableFilterFor')).toHaveAttribute(
         'title',
-        getGenericFilterDisabledMessage()
+        `You can't apply a filter from this value.`
       );
 
       renderCellAction(cellActions, 1);
       expect(screen.getByTestId('lensDatatableFilterOut')).toBeDisabled();
       expect(screen.getByTestId('lensDatatableFilterOut')).toHaveAttribute(
         'title',
-        getGenericFilterDisabledMessage()
+        `You can't apply a filter from this value.`
+      );
+    });
+
+    it('should include disabled filter actions when column is not filterable and panel has drilldowns', () => {
+      const [{ cellActions }] = callCreateGridColumns({
+        handleFilterClick: () => {},
+        columnFilterable: [false],
+        panelHasConfiguredDrilldowns: true,
+      });
+      expect(cellActions).toHaveLength(2);
+
+      renderCellAction(cellActions, 0);
+      expect(screen.getByTestId('lensDatatableFilterFor')).toBeDisabled();
+      expect(screen.getByTestId('lensDatatableFilterFor')).toHaveAttribute(
+        'title',
+        `You can't apply a filter or drill down from this value.`
+      );
+
+      renderCellAction(cellActions, 1);
+      expect(screen.getByTestId('lensDatatableFilterOut')).toBeDisabled();
+      expect(screen.getByTestId('lensDatatableFilterOut')).toHaveAttribute(
+        'title',
+        `You can't apply a filter or drill down from this value.`
       );
     });
 
@@ -157,7 +176,7 @@ describe('getContentData', () => {
       renderCellAction(cellActions, 0);
       expect(screen.getByTestId('lensDatatableFilterFor')).toHaveAttribute(
         'title',
-        getEsqlComputedColumnFilterDisabledMessage()
+        `You can't apply a filter from this value because it relies on a field created at query time.`
       );
     });
 
@@ -177,7 +196,7 @@ describe('getContentData', () => {
       renderCellAction(cellActions, 0);
       expect(screen.getByTestId('lensDatatableFilterFor')).toHaveAttribute(
         'title',
-        getEsqlComputedColumnFilterDisabledMessage(true)
+        `You can't apply a filter or drill down from this value because it relies on a field created at query time.`
       );
     });
 

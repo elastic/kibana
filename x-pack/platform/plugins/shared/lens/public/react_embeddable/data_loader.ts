@@ -333,7 +333,6 @@ export function loadEmbeddableData(
       ? [
           api.drilldowns$.pipe(
             map(() => Boolean(api.drilldowns$.getValue()?.length)),
-            distinctUntilChanged(),
             waitUntilChanged(),
             map(() => 'drilldowns' as ReloadReason)
           ),

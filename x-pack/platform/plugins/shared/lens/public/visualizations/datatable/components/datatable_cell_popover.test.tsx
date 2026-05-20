@@ -13,10 +13,6 @@ import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import { MISSING_TOKEN } from '@kbn/field-formats-common';
 import { render, screen } from '@testing-library/react';
 import { createRenderDatatableCellPopover } from './datatable_cell_popover';
-import {
-  getEsqlComputedColumnFilterDisabledMessage,
-  getGenericFilterDisabledMessage,
-} from './helpers';
 
 const table: Datatable = {
   type: 'datatable',
@@ -89,7 +85,7 @@ describe('createRenderDatatableCellPopover', () => {
     renderCellPopover({ columnFilterable: [false] });
 
     expect(screen.getByTestId('lensDatatableCellPopoverMessage')).toHaveTextContent(
-      getGenericFilterDisabledMessage()
+      `You can't apply a filter from this value.`
     );
     expect(screen.getByTestId('cellActions')).toBeInTheDocument();
   });
@@ -107,7 +103,7 @@ describe('createRenderDatatableCellPopover', () => {
     });
 
     expect(screen.getByTestId('lensDatatableCellPopoverMessage')).toHaveTextContent(
-      getEsqlComputedColumnFilterDisabledMessage()
+      `You can't apply a filter from this value because it relies on a field created at query time.`
     );
   });
 
@@ -125,7 +121,7 @@ describe('createRenderDatatableCellPopover', () => {
     });
 
     expect(screen.getByTestId('lensDatatableCellPopoverMessage')).toHaveTextContent(
-      getEsqlComputedColumnFilterDisabledMessage(true)
+      `You can't apply a filter or drill down from this value because it relies on a field created at query time.`
     );
   });
 
