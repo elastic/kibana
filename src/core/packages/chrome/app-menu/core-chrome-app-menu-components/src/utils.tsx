@@ -16,6 +16,7 @@ import {
   type EuiContextMenuPanelItemDescriptor,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSwitch,
 } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import { AppMenuBadge } from './components/app_menu_badge';
@@ -26,6 +27,7 @@ import type {
   AppMenuItemType,
   AppMenuPopoverItem,
   AppMenuPrimaryActionItem,
+  AppMenuSwitch,
 } from './types';
 import { APP_MENU_ITEM_LIMIT, DEFAULT_POPOVER_WIDTH } from './constants';
 
@@ -278,12 +280,43 @@ export const getPopoverActionItems = ({
 };
 
 /**
+ * Generate switch items for the popover menu. The switch is rendered as the very last item
+ * with a separator above it.
+ */
+export const getPopoverSwitchItems = ({
+  switchConfig,
+}: {
+  switchConfig: AppMenuSwitch;
+}): EuiContextMenuPanelItemDescriptor[] => {
+  const separator = createSeparatorItem('switch-separator');
+
+  return [
+    separator,
+    {
+      key: `switch-${switchConfig.id}`,
+      renderItem: () => (
+        <EuiSwitch
+          id={switchConfig.id}
+          label={switchConfig.label}
+          labelProps={switchConfig.labelProps}
+          checked={switchConfig.checked}
+          onChange={(e) => switchConfig.onChange(e.target.checked)}
+          compressed
+          data-test-subj={switchConfig['data-test-subj'] ?? 'app-menu-switch'}
+        />
+      ),
+    },
+  ];
+};
+
+/**
  * Recursively generate EUI context menu panels from the provided menu items.
  */
 export const getPopoverPanels = ({
   items,
   staticItems,
   primaryActionItem,
+  switchConfig,
   startPanelId = 0,
   rootPanelWidth = DEFAULT_POPOVER_WIDTH,
   rootPopoverTestId,
@@ -294,6 +327,7 @@ export const getPopoverPanels = ({
   items: AppMenuPopoverItem[];
   staticItems?: AppMenuPopoverItem[];
   primaryActionItem?: AppMenuPrimaryActionItem;
+  switchConfig?: AppMenuSwitch;
   startPanelId?: number;
   rootPanelWidth?: number;
   rootPopoverTestId?: string;
@@ -303,6 +337,7 @@ export const getPopoverPanels = ({
 }): EuiContextMenuPanelDescriptor[] => {
   const panels: EuiContextMenuPanelDescriptor[] = [];
   const hasActionItems = Boolean(primaryActionItem);
+  const hasSwitchItem = Boolean(switchConfig);
   let currentPanelId = startPanelId;
 
   const processItems = ({
@@ -410,19 +445,23 @@ export const getPopoverPanels = ({
    * Action items are only added to the main panel and only in lower breakpoints (below "m").
    * They should not be available to be added via config.
    */
+  const mainPanel = panels.find((panel) => panel.id === startPanelId);
+
+  if (!mainPanel) return panels;
+
   if (hasActionItems) {
-    const mainPanel = panels.find((panel) => panel.id === startPanelId);
-
-    if (!mainPanel) return panels;
-
     const actionItems: EuiContextMenuPanelItemDescriptor[] = getPopoverActionItems({
       primaryActionItem,
       onCloseOverflowButton: onClose,
     });
 
     mainPanel.items = [...(mainPanel.items as EuiContextMenuPanelItemDescriptor[]), ...actionItems];
+  }
 
-    return panels;
+  if (hasSwitchItem && switchConfig) {
+    const switchItems = getPopoverSwitchItems({ switchConfig });
+
+    mainPanel.items = [...(mainPanel.items as EuiContextMenuPanelItemDescriptor[]), ...switchItems];
   }
 
   return panels;

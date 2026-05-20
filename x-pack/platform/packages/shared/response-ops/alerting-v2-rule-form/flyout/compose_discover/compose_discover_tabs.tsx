@@ -30,6 +30,8 @@ interface ComposeDiscoverTabsProps {
    * Used when the parent renders tabs in the flyout header instead.
    */
   hideTabBar?: boolean;
+  /** When true, all editable query blocks are read-only. Used by Rule Builder preview mode. */
+  readOnly?: boolean;
 }
 
 const LOCKED_EDITOR_STYLES: React.CSSProperties = {
@@ -73,6 +75,7 @@ interface BlockEditorProps {
   /** Line number offset — makes the block editor's line numbers continue from the base. */
   lineNumberOffset: number;
   onEditorMount?: (editor: IStandaloneCodeEditor) => void;
+  readOnly?: boolean;
 }
 
 const BlockEditor: React.FC<BlockEditorProps> = ({
@@ -80,6 +83,7 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
   onChange,
   lineNumberOffset,
   onEditorMount,
+  readOnly = false,
 }) => {
   const options = useMemo(() => {
     const lineNumbers: LineNumbersType | undefined =
@@ -89,9 +93,11 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
       automaticLayout: true,
       scrollBeyondLastLine: false,
       fontSize: 13,
+      readOnly,
+      domReadOnly: readOnly,
       ...(lineNumbers && { lineNumbers }),
     };
-  }, [lineNumberOffset]);
+  }, [lineNumberOffset, readOnly]);
 
   return (
     <CodeEditor
@@ -136,6 +142,7 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
   onAlertEditorMount,
   onRecoveryEditorMount,
   hideTabBar = false,
+  readOnly = false,
 }) => {
   const tabIds = visibleTabIds(tabConfig);
   const visibleTabs = TAB_DEFINITIONS.filter((t) => tabIds.includes(t.id));
@@ -154,7 +161,14 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
   const renderEditor = () => {
     switch (safeActiveTab) {
       case 'base':
-        return <BlockEditor value={baseQuery} onChange={onBaseQueryChange} lineNumberOffset={0} />;
+        return (
+          <BlockEditor
+            value={baseQuery}
+            onChange={onBaseQueryChange}
+            lineNumberOffset={0}
+            readOnly={readOnly}
+          />
+        );
       case 'alert':
         return (
           <>
@@ -164,6 +178,7 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
               onChange={onAlertBlockChange}
               lineNumberOffset={baseLineCount}
               onEditorMount={onAlertEditorMount}
+              readOnly={readOnly}
             />
           </>
         );
@@ -176,6 +191,7 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
               onChange={onRecoveryBlockChange}
               lineNumberOffset={baseLineCount}
               onEditorMount={onRecoveryEditorMount}
+              readOnly={readOnly}
             />
           </>
         );

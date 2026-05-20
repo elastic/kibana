@@ -5,20 +5,8 @@
  * 2.0.
  */
 
-export enum IndexLifecyclePhaseSelectOption {
-  All = 'all',
-  Hot = 'hot',
-  Warm = 'warm',
-  Cold = 'cold',
-  Frozen = 'frozen',
-}
-
-export const indexLifeCyclePhaseToDataTier = {
-  [IndexLifecyclePhaseSelectOption.Hot]: 'data_hot',
-  [IndexLifecyclePhaseSelectOption.Warm]: 'data_warm',
-  [IndexLifecyclePhaseSelectOption.Cold]: 'data_cold',
-  [IndexLifecyclePhaseSelectOption.Frozen]: 'data_frozen',
-} as const;
-
-export type DataTier =
-  (typeof indexLifeCyclePhaseToDataTier)[keyof typeof indexLifeCyclePhaseToDataTier];
+export {
+  IndexLifecyclePhaseSelectOption,
+  indexLifeCyclePhaseToDataTier,
+  type DataTier,
+} from '@kbn/apm-types';
