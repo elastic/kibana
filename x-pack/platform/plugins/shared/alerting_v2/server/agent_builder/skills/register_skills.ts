@@ -6,8 +6,12 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
-import { ruleManagementSkill } from './rule_management_skill';
+import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
+import { createRuleManagementSkill } from './rule_management_skill';
 
-export const registerSkills = (agentBuilder: AgentBuilderPluginSetup): void => {
-  agentBuilder.skills.register(ruleManagementSkill);
+export const registerSkills = (
+  agentBuilder: AgentBuilderPluginSetup,
+  deps: ManageActionPolicyToolDeps
+): void => {
+  agentBuilder.skills.register(createRuleManagementSkill(deps));
 };
