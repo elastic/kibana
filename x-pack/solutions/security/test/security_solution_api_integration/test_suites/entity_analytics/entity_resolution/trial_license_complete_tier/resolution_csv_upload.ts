@@ -121,7 +121,6 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@ess @serverless @skipInServerlessMKI Entity Resolution CSV Upload', () => {
     before(async () => {
       await entityStoreUtils.enableEntityStoreV2();
-      await entityStoreUtils.waitForEngineStatus('user', 'started');
 
       // Install schedules autoStart=true, so TM may be mid-run — wait for idle before stopping.
       const maintainerRoutes = entityMaintainerRouteHelpersFactory(supertest);
@@ -182,6 +181,8 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.items[0].matchedEntities).toBe(2);
       expect(body.items[0].linkedEntities).toBe(2);
 
+      // CSV upload uses refresh: false for performance; refresh before reading group.
+      await es.indices.refresh({ index: getEntitiesAlias(ENTITY_LATEST, 'default') });
       const group = await getResolutionGroup(`${TEST_PREFIX}golden`);
       expect(group.group_size).toBe(3);
     });
@@ -245,6 +246,7 @@ export default ({ getService }: FtrProviderContext) => {
         `user,shared@test.com,${TEST_PREFIX}golden`,
       ].join('\n');
       await uploadCsv(linkCsv);
+      await es.indices.refresh({ index: getEntitiesAlias(ENTITY_LATEST, 'default') });
 
       // Now try to use alias1 as a target
       const csv = [
@@ -265,6 +267,7 @@ export default ({ getService }: FtrProviderContext) => {
         `user,shared@test.com,${TEST_PREFIX}golden`,
       ].join('\n');
       await uploadCsv(csv1);
+      await es.indices.refresh({ index: getEntitiesAlias(ENTITY_LATEST, 'default') });
 
       // Try to link the same aliases to golden2
       const csv2 = [
