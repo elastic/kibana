@@ -63,7 +63,7 @@ export class AgentBuilderWorkflowsPlugin
     // Workflow tools
     registerValidateWorkflowTool(agentBuilder, api);
     registerGetStepDefinitionsTool(agentBuilder, api);
-    registerGetTriggerDefinitionsTool(agentBuilder);
+    registerGetTriggerDefinitionsTool(agentBuilder, api);
     registerGetConnectorsTool(agentBuilder, api);
     registerGetExamplesTool(agentBuilder);
     registerWorkflowExecuteStepTool(agentBuilder, api);
