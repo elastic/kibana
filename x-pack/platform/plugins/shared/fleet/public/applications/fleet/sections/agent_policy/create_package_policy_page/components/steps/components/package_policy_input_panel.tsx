@@ -575,6 +575,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               showDescriptionColumn={!isSingleInputAndStreams}
               streamAdvancedVars={consolidatedStreamAdvancedVars}
               sections={packageInput.sections}
+              isUpgrade={isUpgrade}
             />
             {hasInputStreams &&
             !shouldConsolidateAdvancedSections &&

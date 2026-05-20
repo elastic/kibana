@@ -109,6 +109,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
   showDescriptionColumn?: boolean;
   streamAdvancedVars?: StreamAdvancedVarsConfig;
   sections?: RegistrySection[];
+  isUpgrade?: boolean;
 }> = memo(
   ({
     hasInputStreams,
@@ -124,6 +125,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
     showDescriptionColumn = true,
     streamAdvancedVars,
     sections,
+    isUpgrade = false,
   }) => {
     // Showing advanced options toggle state
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
@@ -281,6 +283,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                       errors={inputValidationResults.vars?.[varName]}
                       forceShowErrors={forceShowErrors}
                       isEditPage={isEditPage}
+                      isUpgrade={isUpgrade}
                     />
                   </EuiFlexItem>
                 );
@@ -323,6 +326,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                       errors={inputValidationResults.vars?.[varName]}
                       forceShowErrors={forceShowErrors}
                       isEditPage={isEditPage}
+                      isUpgrade={isUpgrade}
                     />
                   </EuiFlexItem>
                 );
@@ -383,6 +387,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                             errors={inputValidationResults.vars?.[varName]}
                             forceShowErrors={forceShowErrors}
                             isEditPage={isEditPage}
+                            isUpgrade={isUpgrade}
                           />
                         </EuiFlexItem>
                       );
@@ -412,6 +417,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                             errors={streamAdvancedVars.validationResults.vars?.[varName]}
                             forceShowErrors={forceShowErrors}
                             isEditPage={isEditPage}
+                            isUpgrade={isUpgrade}
                           />
                         </EuiFlexItem>
                       );
