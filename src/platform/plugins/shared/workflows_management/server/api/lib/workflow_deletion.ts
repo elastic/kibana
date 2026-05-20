@@ -10,10 +10,10 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowExecutionListDto } from '@kbn/workflows';
+import { buildWorkflowFilters } from '@kbn/workflows/server';
 
 import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import { partitionBulkResults } from './bulk_response_helpers';
-import { workflowSpaceFilter } from './workflow_query_filters';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../../common';
 import type { WorkflowProperties, WorkflowStorage } from '../../storage/workflow_storage';
 import { unscheduleWorkflowTasks } from '../../task_defs/unschedule_workflow_tasks';
@@ -292,8 +292,10 @@ export const deleteWorkflows = async (params: {
   const failures: Array<{ id: string; error: string }> = [];
   const client = storage.getClient();
 
-  const { must } = workflowSpaceFilter(spaceId, { includeDeleted: true });
-  must.push({ ids: { values: ids } });
+  const { must } = buildWorkflowFilters({
+    ids,
+    space: { id: spaceId },
+  });
   const searchResponse = await client.search({
     query: { bool: { must } },
     size: ids.length,
