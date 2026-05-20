@@ -110,6 +110,7 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
             'previewTelemetryUrlEnabled',
             'endpointExceptionsMovedUnderManagement',
             'ruleChangesHistoryEnabled',
+            'disable:entityAnalyticsEntityStoreV2',
           ])}`,
           '--xpack.alerting.ruleChangeTracking.enabled=true',
           `--plugin-path=${path.resolve(
