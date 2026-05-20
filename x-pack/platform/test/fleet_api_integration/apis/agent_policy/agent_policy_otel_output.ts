@@ -313,5 +313,93 @@ export default function (providerContext: FtrProviderContext) {
         await deleteOutput(outputId);
       }
     });
+
+    // -----------------------------------------------------------------------
+    // Remote Elasticsearch output coverage — see elastic/kibana#257369.
+    //
+    // Before the fix, generating the full agent policy for a policy with OTel
+    // inputs and a `remote_elasticsearch` data output threw and the agent
+    // policy was left stuck in an outdated state.
+    // -----------------------------------------------------------------------
+
+    async function createRemoteEsOutput(fields: Record<string, unknown> = {}): Promise<string> {
+      const { body } = await supertest
+        .post('/api/fleet/outputs')
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: `otel-remote-output-test-${uuidv4()}`,
+          type: 'remote_elasticsearch',
+          hosts: ['https://remote-es.example.com:9200'],
+          service_token: 'test-service-token',
+          is_default: false,
+          is_default_monitoring: false,
+          ...fields,
+        })
+        .expect(200);
+      return body.item.id;
+    }
+
+    it('generates an elasticsearch exporter for a remote_elasticsearch data output', async () => {
+      const outputId = await createRemoteEsOutput();
+      const agentPolicyId = await createAgentPolicyWithOutput(outputId);
+
+      try {
+        await addOtelPackagePolicy(agentPolicyId);
+        const fullPolicy = await getFullAgentPolicy(agentPolicyId);
+
+        const exporter = getEsExporter(fullPolicy, outputId);
+        expect(exporter).not.to.be(undefined);
+        expect(exporter!.endpoints).to.eql(['https://remote-es.example.com:9200']);
+      } finally {
+        await deleteAgentPolicy(agentPolicyId);
+        await deleteOutput(outputId);
+      }
+    });
+
+    it('includes ssl parameters from config_yaml in the beatsauth extension for remote_elasticsearch outputs', async () => {
+      const outputId = await createRemoteEsOutput({
+        config_yaml:
+          'ssl:\n  certificate_authorities:\n    - /path/to/ca.crt\n  verification_mode: none',
+      });
+      const agentPolicyId = await createAgentPolicyWithOutput(outputId);
+
+      try {
+        await addOtelPackagePolicy(agentPolicyId);
+        const fullPolicy = await getFullAgentPolicy(agentPolicyId);
+
+        const beatsauth = getBeatsauthExtension(fullPolicy, outputId);
+        expect(beatsauth).not.to.be(undefined);
+        expect(beatsauth!.ssl).to.eql({
+          certificate_authorities: ['/path/to/ca.crt'],
+          verification_mode: 'none',
+        });
+      } finally {
+        await deleteAgentPolicy(agentPolicyId);
+        await deleteOutput(outputId);
+      }
+    });
+
+    it('omits beatsauth extension and exporter auth when otel_disable_beatsauth is true on remote_elasticsearch outputs', async () => {
+      const outputId = await createRemoteEsOutput({
+        otel_disable_beatsauth: true,
+        otel_exporter_config_yaml: 'flush_interval: 5s',
+      });
+      const agentPolicyId = await createAgentPolicyWithOutput(outputId);
+
+      try {
+        await addOtelPackagePolicy(agentPolicyId);
+        const fullPolicy = await getFullAgentPolicy(agentPolicyId);
+
+        expect(getBeatsauthExtension(fullPolicy, outputId)).to.be(undefined);
+        const exporter = getEsExporter(fullPolicy, outputId);
+        expect(exporter).not.to.be(undefined);
+        expect(exporter!).not.to.have.property('auth');
+        expect(exporter!.flush_interval).to.be('5s');
+        expect(exporter!.endpoints).to.eql(['https://remote-es.example.com:9200']);
+      } finally {
+        await deleteAgentPolicy(agentPolicyId);
+        await deleteOutput(outputId);
+      }
+    });
   });
 }
