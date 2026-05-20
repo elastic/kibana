@@ -8,8 +8,4 @@
  */
 
 export { openLazyFlyout } from './src/open_lazy_flyout';
-export {
-  tracksOverlays,
-  type PanelFlyoutType,
-  type TracksOverlays,
-} from './src/tracks_overlays';
+export { tracksOverlays, type PanelFlyoutType, type TracksOverlays } from './src/tracks_overlays';
