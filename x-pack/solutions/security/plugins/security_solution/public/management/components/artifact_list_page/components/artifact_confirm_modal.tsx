@@ -23,6 +23,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { DocLinks } from '@kbn/doc-links';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isOperator, matchesOperator } from '@kbn/securitysolution-list-utils';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import type { ArtifactConfirmModalLabelProps } from '../types';
 
@@ -42,7 +43,8 @@ export const CONFIRM_WARNING_MODAL_LABELS = (
             'xpack.securitySolution.artifacts.confirmWarningModal.wildcardWithWrongOperator',
             {
               defaultMessage:
-                'Using a "*" or a "?" in the value with the "is" operator can make the entry ineffective. Change the operator to "matches" to ensure wildcards run properly.',
+                'Using a "*" or a "?" in the value with the "{is}" operator can make the entry ineffective. Change the operator to "{matches}" to ensure wildcards run properly.',
+              values: { matches: matchesOperator.message, is: isOperator.message },
             }
           ),
         ]
@@ -51,8 +53,8 @@ export const CONFIRM_WARNING_MODAL_LABELS = (
     ...(warnings.hasMalformedMatchesValue ?? []).map((field) =>
       i18n.translate('xpack.securitySolution.artifacts.confirmWarningModal.malformedMatchesValue', {
         defaultMessage:
-          'Entry on field "{field}" uses the "matches" operator with an escape sequence (e.g. "\\*", "\\?"). These match literal characters, not wildcard patterns. If you intended an exact match, use "is" instead.',
-        values: { field },
+          'Entry on field "{field}" uses the "{matches}" operator with an escape sequence (e.g. "\\*", "\\?"). These match literal characters, not wildcard patterns. If you intended an exact match, use "{is}" instead.',
+        values: { field, matches: matchesOperator.message, is: isOperator.message },
       })
     ),
 
