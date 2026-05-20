@@ -14,6 +14,7 @@ import type {
   PublishesUnsavedChanges,
   HasLibraryTransforms,
   HasType,
+  PublishesWritableTitle,
 } from '@kbn/presentation-publishing';
 import type {
   MarkdownByReferenceState,
@@ -24,6 +25,7 @@ import type { MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
 
 export type MarkdownEditorApi = HasType<typeof MARKDOWN_EMBEDDABLE_TYPE> &
   DefaultEmbeddableApi<MarkdownEmbeddableState> &
+  PublishesWritableTitle &
   PublishesUnsavedChanges &
   HasEditCapabilities &
   CanOverrideHoverActions &
