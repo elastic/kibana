@@ -12,9 +12,11 @@ import { executeWorkflow } from './execute_workflow';
 
 type WorkflowApi = WorkflowsServerPluginSetup['management'];
 
+const mockSetAttribute = jest.fn();
+
 jest.mock('@kbn/inference-tracing', () => ({
   withActiveInferenceSpan: (_name: string, _opts: unknown, fn: (span?: unknown) => unknown) =>
-    fn(undefined),
+    fn({ setAttribute: mockSetAttribute }),
   ElasticGenAIAttributes: { InferenceSpanKind: 'InferenceSpanKind' },
 }));
 
@@ -80,6 +82,7 @@ describe('executeWorkflow', () => {
       completionTimeoutSec: 120,
       metadata: { agent_id: 'agent-abc' },
     });
+    expect(mockSetAttribute).toHaveBeenCalledWith('elastic.workflow.name', 'Test Workflow');
   });
 
   it('passes undefined metadata to executeWorkflow when not provided', async () => {

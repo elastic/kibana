@@ -61,6 +61,10 @@ export const executeWorkflow = async ({
         span?.setAttribute('elastic.workflow.execution_id', executeResult.workflowExecutionId);
 
         if (executeResult.execution) {
+          span?.setAttribute(
+            'elastic.workflow.name',
+            executeResult.execution.workflowDefinition.name
+          );
           const result: WorkflowExecutionResult = {
             success: true,
             execution: toWorkflowExecutionState(executeResult.execution),
