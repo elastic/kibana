@@ -1,0 +1,46 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { ESSENTIAL_ALERT_FIELDS } from '../../../common/constants';
+
+/**
+ * Fetches alerts by their _id values from Elasticsearch, returning only essential fields.
+ */
+export const getAlertsById = async ({
+  esClient,
+  index,
+  ids,
+}: {
+  esClient: ElasticsearchClient;
+  index: string;
+  ids: string[];
+}): Promise<Record<string, unknown>> => {
+  if (ids.length === 0) {
+    return {};
+  }
+
+  const response = await esClient.search({
+    index,
+    ignore_unavailable: true,
+    allow_no_indices: true,
+    size: ids.length,
+    _source: ESSENTIAL_ALERT_FIELDS,
+    query: {
+      bool: {
+        filter: [{ terms: { _id: ids } }],
+      },
+    },
+  });
+
+  return response.hits.hits.reduce<Record<string, unknown>>((acc, hit) => {
+    if (hit._source && hit._id) {
+      acc[hit._id] = hit._source;
+    }
+    return acc;
+  }, {});
+};
