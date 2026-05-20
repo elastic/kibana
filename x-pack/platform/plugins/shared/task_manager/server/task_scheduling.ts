@@ -385,6 +385,7 @@ export class TaskScheduling {
 }
 
 const addJitter = (interval?: string): { runAt: Date; scheduledAt: Date } | undefined => {
+  // Adhoc tasks run immediately, no explicit date means they are set to run now inside the store.
   if (!interval) return undefined;
 
   const now = Date.now();
