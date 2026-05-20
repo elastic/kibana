@@ -271,6 +271,60 @@ describe('OAuthStateClient', () => {
     });
   });
 
+  describe('deleteByState', () => {
+    const makeFutureState = (id = 'state-id-1', createdBy = 'owner-uid') => {
+      const futureDate = new Date(Date.now() + 60000).toISOString();
+      mockUnsecuredSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [{ id, attributes: { state: 'test-state', expiresAt: futureDate } }],
+      });
+      mockEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        attributes: {
+          state: 'test-state',
+          codeVerifier: 'verifier',
+          connectorId: 'connector-1',
+          spaceId: 'default',
+          createdAt: new Date().toISOString(),
+          expiresAt: futureDate,
+          createdBy,
+        },
+      });
+    };
+
+    it("returns 'deleted' and deletes when state exists and is owned by the requesting user", async () => {
+      const client = createClient();
+      makeFutureState();
+      mockUnsecuredSavedObjectsClient.delete.mockResolvedValue({});
+
+      const result = await client.deleteByState('test-state', 'owner-uid');
+
+      expect(result).toBe('deleted');
+      expect(mockUnsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
+        OAUTH_STATE_SAVED_OBJECT_TYPE,
+        'state-id-1'
+      );
+    });
+
+    it("returns 'not_found' when the state does not exist or is expired", async () => {
+      const client = createClient();
+      mockUnsecuredSavedObjectsClient.find.mockResolvedValue({ saved_objects: [] });
+
+      const result = await client.deleteByState('nonexistent-state', 'any-uid');
+
+      expect(result).toBe('not_found');
+      expect(mockUnsecuredSavedObjectsClient.delete).not.toHaveBeenCalled();
+    });
+
+    it("returns 'forbidden' when the state is owned by a different user", async () => {
+      const client = createClient();
+      makeFutureState('state-id-1', 'other-uid');
+
+      const result = await client.deleteByState('test-state', 'requesting-uid');
+
+      expect(result).toBe('forbidden');
+      expect(mockUnsecuredSavedObjectsClient.delete).not.toHaveBeenCalled();
+    });
+  });
+
   describe('cleanupExpiredStates', () => {
     it('deletes expired states and returns count', async () => {
       const client = createClient();

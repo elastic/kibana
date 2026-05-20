@@ -174,6 +174,20 @@ export class OAuthStateClient {
   }
 
   /**
+   * Delete OAuth state by its state parameter, verifying the requesting user created it.
+   */
+  public async deleteByState(
+    stateParam: string,
+    requestingProfileUid: string
+  ): Promise<'deleted' | 'not_found' | 'forbidden'> {
+    const oauthState = await this.get(stateParam);
+    if (!oauthState) return 'not_found';
+    if (oauthState.createdBy !== requestingProfileUid) return 'forbidden';
+    await this.delete(oauthState.id);
+    return 'deleted';
+  }
+
+  /**
    * Delete OAuth state (should be called after a successful token exchange)
    */
   public async delete(id: string): Promise<void> {
