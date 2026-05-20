@@ -20,13 +20,25 @@ export const rangeValueSchema = schema.arrayOf(schema.string(), {
   },
 });
 
-export const rangeSliderControlSchema = extendDataControlSchema({
-  value: schema.maybe(rangeValueSchema),
-  step: schema.number({
-    defaultValue: DEFAULT_RANGE_SLIDER_STATE.step,
-    min: 0,
-    meta: {
-      description: 'The step size between selectable range values.',
-    },
-  }),
-});
+export const rangeSliderControlSchema = extendDataControlSchema(
+  {
+    value: schema.maybe(rangeValueSchema),
+    step: schema.number({
+      defaultValue: DEFAULT_RANGE_SLIDER_STATE.step,
+      min: 0,
+      meta: {
+        description: 'The step size between selectable range values.',
+      },
+    }),
+  },
+  {
+    fieldVariantId: 'kbn-controls-schemas-range-slider-control-schema-field',
+    esqlVariantId: 'kbn-controls-schemas-range-slider-control-schema-esql',
+    fieldVariantTitle: 'FieldRangeSliderControl',
+    esqlVariantTitle: 'EsqlRangeSliderControl',
+    fieldVariantDescription:
+      'A range slider control whose values come from a numeric data view field.',
+    esqlVariantDescription:
+      "A range slider control whose values come from an ES|QL query's results.",
+  }
+);

@@ -69,10 +69,45 @@ export const dataControlSchema = schema.discriminatedUnion(
   }
 );
 
+export interface ExtendDataControlSchemaOptions {
+  fieldVariantId: string;
+  esqlVariantId: string;
+  fieldVariantTitle?: string;
+  esqlVariantTitle?: string;
+  fieldVariantDescription?: string;
+  esqlVariantDescription?: string;
+}
+
 export const extendDataControlSchema = <Extras extends Record<string, Type<unknown>>>(
-  extras: Extras
+  extras: Extras,
+  {
+    fieldVariantId,
+    esqlVariantId,
+    fieldVariantTitle,
+    esqlVariantTitle,
+    fieldVariantDescription,
+    esqlVariantDescription,
+  }: ExtendDataControlSchemaOptions
 ) =>
   schema.discriminatedUnion('values_source', [
-    schema.object({ ...dataControlFieldVariantProps, ...extras }),
-    schema.object({ ...dataControlEsqlVariantProps, ...extras }),
+    schema.object(
+      { ...dataControlFieldVariantProps, ...extras },
+      {
+        meta: {
+          id: fieldVariantId,
+          ...(fieldVariantTitle && { title: fieldVariantTitle }),
+          ...(fieldVariantDescription && { description: fieldVariantDescription }),
+        },
+      }
+    ),
+    schema.object(
+      { ...dataControlEsqlVariantProps, ...extras },
+      {
+        meta: {
+          id: esqlVariantId,
+          ...(esqlVariantTitle && { title: esqlVariantTitle }),
+          ...(esqlVariantDescription && { description: esqlVariantDescription }),
+        },
+      }
+    ),
   ]);

@@ -146,8 +146,27 @@ const optionsListDSLExtras = {
 };
 
 export const optionsListDSLControlSchema = schema.discriminatedUnion('values_source', [
-  schema.object({ ...dataControlFieldVariantProps, ...optionsListDSLExtras }),
-  schema.object({ ...dataControlEsqlVariantProps, ...optionsListDSLExtras }),
+  schema.object(
+    { ...dataControlFieldVariantProps, ...optionsListDSLExtras },
+    {
+      meta: {
+        id: 'kbn-controls-schemas-options-list-dsl-control-schema-field',
+        title: 'FieldOptionsListControl',
+        description: 'An options list control whose available options come from a data view field.',
+      },
+    }
+  ),
+  schema.object(
+    { ...dataControlEsqlVariantProps, ...optionsListDSLExtras },
+    {
+      meta: {
+        id: 'kbn-controls-schemas-options-list-dsl-control-schema-esql',
+        title: 'EsqlOptionsListControl',
+        description:
+          "An options list control whose available options come from an ES|QL query's results.",
+      },
+    }
+  ),
 ]);
 
 const baseEsqlControl = {
