@@ -9,13 +9,14 @@ import { renderHook, waitFor } from '@testing-library/react';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { fetchGroupActions } from '../apis/fetch_group_actions';
 import type { GroupActionRow } from '../queries/group_actions_query';
-import { createQueryClientWrapper, createTestQueryClient } from './test_utils';
+import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
 import { useFetchGroupActions } from './use_fetch_group_actions';
 
 jest.mock('../apis/fetch_group_actions');
 
 const fetchGroupActionsMock = jest.mocked(fetchGroupActions);
 const mockExpressions = {} as ExpressionsStart;
+const mockSpaces = createMockSpaces();
 
 const queryClient = createTestQueryClient();
 const wrapper = createQueryClientWrapper(queryClient);
@@ -34,7 +35,7 @@ describe('useFetchGroupActions', () => {
       () =>
         useFetchGroupActions({
           groupHashes: [],
-          expressions: mockExpressions,
+          services: { expressions: mockExpressions, spaces: mockSpaces },
         }),
       { wrapper }
     );
@@ -60,7 +61,7 @@ describe('useFetchGroupActions', () => {
       () =>
         useFetchGroupActions({
           groupHashes: ['gh-1'],
-          expressions: mockExpressions,
+          services: { expressions: mockExpressions, spaces: mockSpaces },
         }),
       { wrapper }
     );
@@ -98,7 +99,7 @@ describe('useFetchGroupActions', () => {
       () =>
         useFetchGroupActions({
           groupHashes: ['gh-2'],
-          expressions: mockExpressions,
+          services: { expressions: mockExpressions, spaces: mockSpaces },
         }),
       { wrapper }
     );
@@ -126,7 +127,7 @@ describe('useFetchGroupActions', () => {
       () =>
         useFetchGroupActions({
           groupHashes: ['gh-3'],
-          expressions: mockExpressions,
+          services: { expressions: mockExpressions, spaces: mockSpaces },
         }),
       { wrapper }
     );
@@ -164,7 +165,7 @@ describe('useFetchGroupActions', () => {
       () =>
         useFetchGroupActions({
           groupHashes: ['dup'],
-          expressions: mockExpressions,
+          services: { expressions: mockExpressions, spaces: mockSpaces },
         }),
       { wrapper }
     );

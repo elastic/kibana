@@ -6,6 +6,7 @@
  */
 
 import { useReducer } from 'react';
+import type { RuleKind } from './compose_form_types';
 import type {
   StepId,
   ComposeDiscoverState,
@@ -13,8 +14,8 @@ import type {
   ComposeDiscoverMode,
   QueryTab,
   SandboxTabConfig,
+  RecoveryType,
 } from './types';
-import { guessRecoveryBlock, splitQuery } from './use_heuristic_split';
 
 export const getStepIds = (tracking: boolean): StepId[] =>
   tracking
@@ -23,52 +24,24 @@ export const getStepIds = (tracking: boolean): StepId[] =>
 
 export interface InitialStateConfig {
   mode: ComposeDiscoverMode;
-  initialQuery?: string;
-  /**
-   * If the persisted rule has a recovery query (query.recover for standalone,
-   * or base + blocks.recover for composed), pass it here. createInitialState
-   * will infer that tracking was active and reconstruct the split state
-   * (base / alertBlock / recoveryBlock) so the edit form opens in tracking mode.
-   */
-  initialRecoveryQuery?: string;
+  initialKind?: RuleKind;
+  initialRecoveryType?: RecoveryType;
 }
 
 export const createInitialState = ({
   mode,
-  initialQuery = '',
-  initialRecoveryQuery,
-}: InitialStateConfig): ComposeDiscoverState => {
-  const base: ComposeDiscoverState = {
-    mode,
-    step: 0,
-    tracking: false,
-    fullQuery: initialQuery,
-    baseQuery: '',
-    alertBlock: '',
-    recoveryBlock: '',
-    recoveryType: 'default',
-    activeTab: 'alert',
-    childOpen: mode === 'create',
-    queryCommitted: mode === 'edit',
-    sandboxDateStart: 'now-15m',
-    sandboxDateEnd: 'now',
-    yamlMode: false,
-  };
-
-  if (!initialRecoveryQuery) return base;
-
-  const evalSplit = splitQuery(initialQuery);
-  const recoverySplit = splitQuery(initialRecoveryQuery);
-
-  return {
-    ...base,
-    tracking: true,
-    baseQuery: evalSplit.base,
-    alertBlock: evalSplit.alertBlock,
-    recoveryBlock: recoverySplit.alertBlock,
-    recoveryType: 'custom',
-  };
-};
+  initialKind = 'signal',
+  initialRecoveryType = 'default',
+}: InitialStateConfig): ComposeDiscoverState => ({
+  mode,
+  step: 0,
+  tracking: initialKind === 'alert',
+  recoveryType: initialKind === 'alert' ? initialRecoveryType : 'default',
+  activeTab: 'alert',
+  childOpen: mode === 'create',
+  queryCommitted: mode === 'edit',
+  yamlMode: false,
+});
 
 /**
  * Returns which default tab to activate for the Sandbox based on the tab config.
@@ -103,32 +76,22 @@ export function reducer(
   action: ComposeDiscoverAction
 ): ComposeDiscoverState {
   switch (action.type) {
-    case 'SET_FULL_QUERY':
-      return { ...state, fullQuery: action.query };
-    case 'SET_RECOVERY_TYPE': {
-      const seedBlock =
-        action.recoveryType === 'custom' && !state.recoveryBlock && state.alertBlock
-          ? guessRecoveryBlock(state.alertBlock)
-          : state.recoveryBlock;
+    case 'SET_RECOVERY_TYPE':
       return {
         ...state,
         recoveryType: action.recoveryType,
-        recoveryBlock: seedBlock,
         ...(action.recoveryType === 'custom'
           ? { childOpen: true, activeTab: 'recovery' as const }
           : {}),
       };
-    }
     case 'ENABLE_TRACKING': {
       const stateWithTracking = { ...state, tracking: true };
       const tabConfig = getSandboxTabConfig({ ...stateWithTracking, step: 0 });
       return {
         ...state,
         tracking: true,
-        baseQuery: action.base,
-        alertBlock: action.alertBlock,
         step: 0,
-        childOpen: false,
+        childOpen: true,
         activeTab: defaultTabForConfig(tabConfig),
       };
     }
@@ -136,10 +99,6 @@ export function reducer(
       return {
         ...state,
         tracking: false,
-        fullQuery: [state.baseQuery, state.alertBlock].filter(Boolean).join('\n'),
-        baseQuery: '',
-        alertBlock: '',
-        recoveryBlock: '',
         recoveryType: 'default',
         step: 0,
         childOpen: false,
@@ -158,8 +117,6 @@ export function reducer(
       const prevStep = Math.max(state.step - 1, 0);
       return { ...state, step: prevStep, childOpen: false };
     }
-    case 'SET_SANDBOX_DATE_RANGE':
-      return { ...state, sandboxDateStart: action.start, sandboxDateEnd: action.end };
     case 'OPEN_CHILD': {
       const tabConfig = getSandboxTabConfig(state);
       return { ...state, childOpen: true, activeTab: defaultTabForConfig(tabConfig) };
@@ -176,19 +133,9 @@ export function reducer(
     }
     case 'CLOSE_CHILD':
       return { ...state, childOpen: false };
-    case 'COMMIT_CHILD_QUERY':
+    case 'COMMIT_QUERY':
       return {
         ...state,
-        fullQuery: action.fullQuery,
-        childOpen: state.yamlMode ? state.childOpen : false,
-        queryCommitted: true,
-      };
-    case 'COMMIT_CHILD_SPLIT':
-      return {
-        ...state,
-        baseQuery: action.baseQuery,
-        alertBlock: action.alertBlock,
-        recoveryBlock: action.recoveryBlock,
         childOpen: state.yamlMode ? state.childOpen : false,
         queryCommitted: true,
       };

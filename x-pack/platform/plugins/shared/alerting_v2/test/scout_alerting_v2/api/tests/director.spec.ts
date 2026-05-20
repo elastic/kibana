@@ -611,7 +611,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
         episodeStatus: 'inactive',
       });
 
-      await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+      await apiServices.alertingV2.ruleExecutions.waitForRuns({
         ruleId: rule.id,
         runs: 2,
       });
@@ -657,7 +657,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
         episodeStatus: 'active',
       });
 
-      await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+      await apiServices.alertingV2.ruleExecutions.waitForRuns({
         ruleId: rule.id,
         runs: 2,
       });
