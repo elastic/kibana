@@ -197,13 +197,13 @@ entries:
   - https://github.com/elastic/kibana/pull/268945
 - file:
     name: 267937.yaml
-    checksum: cd1d521b7187d38affa92741d46f5e19ee18f080
+    checksum: 9b8319b3a92427f80b23df7b67ce31d0ce74e16d
   type: enhancement
   title: Enforce `form-action` CSP directive
   products:
   - product: cloud-serverless
     target: 2026-05-19
-  description: Added `form-action` CSP directive to enforcing mode.
+  description: Adds `form-action` CSP directive to enforcing mode.
   areas:
   - Kibana platform
   prs:
@@ -267,9 +267,9 @@ entries:
   - https://github.com/elastic/kibana/pull/268963
 - file:
     name: 269283.yaml
-    checksum: 16caafcc3056d61a60c995d1cdd3dff5b0966cb0
+    checksum: 260908f8a823972caf4c893c5513479aaf78325b
   type: enhancement
-  title: Add 'Explore traces' Discover entry points on Traces page
+  title: Add "Explore traces" Discover entry points on the Traces page
   products:
   - product: cloud-serverless
     target: 2026-05-19
@@ -299,13 +299,13 @@ entries:
   - https://github.com/elastic/kibana/pull/268996
 - file:
     name: 268083.yaml
-    checksum: a7f28dcc85b2fc1f9406d7266d28198272b2c3b2
+    checksum: 69f90e40e0d8f022c4cdca52939dc9528f71f73a
   type: enhancement
   title: Improve Model Management Elastic Inference and Feature Settings pages
   products:
   - product: cloud-serverless
     target: 2026-05-19
-  description: Display badges for the deprecation and end-of-life status of the models
+  description: Displays badges for the deprecation and end-of-life status of the models.
   areas:
   - Search and data
   prs:
@@ -326,9 +326,9 @@ entries:
   - https://github.com/elastic/kibana/issues/268814
 - file:
     name: 268328.yaml
-    checksum: 9d925621788007e910a377ab0ca626731892b6a2
+    checksum: 8e40f91f7ff0e64bbbbf6ec607d166cd06d977ac
   type: bug-fix
-  title: Keep track of expanded doc after refresh
+  title: Keep track of the expanded document after refresh
   products:
   - product: cloud-serverless
     target: 2026-05-19
@@ -364,9 +364,9 @@ entries:
   - https://github.com/elastic/kibana/pull/269164
 - file:
     name: 265254.yaml
-    checksum: 3ae3ae8dc176e30f27529f5a958c9197f48cde71
+    checksum: d80996a8c6966c18ff2e5f3731b157b3a44477b5
   type: bug-fix
-  title: Fix Streams modify suggestions popover toggle when already open
+  title: Fix Streams "Modify suggestions" popover toggle when already open
   products:
   - product: cloud-serverless
     target: 2026-05-19
