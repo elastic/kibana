@@ -29,7 +29,11 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
 import { DataViewType, type DataView, type DataViewField } from '@kbn/data-views-plugin/public';
-import { SHOW_FIELD_STATISTICS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
+import {
+  ErrorCallout,
+  SHOW_FIELD_STATISTICS,
+  SORT_DEFAULT_ORDER_SETTING,
+} from '@kbn/discover-utils';
 import type { UseColumnsProps } from '@kbn/unified-data-table';
 import { popularizeField, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
@@ -53,7 +57,6 @@ import type { SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
-import { ErrorCallout } from '../../../../components/common/error_callout';
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { PanelsToggle } from '../../../../components/panels_toggle';
@@ -84,6 +87,8 @@ const TopNavMemoized = React.memo((props: DiscoverTopNavProps) => (
 
 export function DiscoverLayout() {
   const {
+    core,
+    docLinks,
     trackUiMetric,
     capabilities,
     dataViews,
@@ -520,6 +525,10 @@ export function DiscoverLayout() {
                         )}
                         error={dataState.error}
                         isEsqlMode={isEsqlMode}
+                        showErrorDialog={({ title, error }) =>
+                          core.notifications.showErrorDialog({ title, error })
+                        }
+                        esqlReferenceHref={docLinks.links.query.queryESQL}
                       />
                     ) : (
                       <DiscoverNoResults
