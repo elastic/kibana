@@ -7,7 +7,9 @@
 
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { useQuery } from '@kbn/react-query';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { fetchRelatedEpisodes } from '../apis/fetch_related_episodes';
+import { useSpaceId } from './use_space_id';
 import {
   buildRelatedBaseQuery,
   finishRelatedEpisodesQuery,
@@ -20,19 +22,24 @@ import { RELATED_EPISODES_LOAD_ERROR } from './translations';
  * Use when the current episode has no group hash: same as “other groups” without a group dimension.
  * Temporarily limited to 5 episodes.
  */
-const buildRelatedAlertEpisodesEsqlQuery = (ruleId: string, excludeEpisodeId: string) => {
-  return finishRelatedEpisodesQuery(buildRelatedBaseQuery(ruleId, excludeEpisodeId));
+const buildRelatedAlertEpisodesEsqlQuery = (
+  spaceId: string,
+  ruleId: string,
+  excludeEpisodeId: string
+) => {
+  return finishRelatedEpisodesQuery(buildRelatedBaseQuery(spaceId, ruleId, excludeEpisodeId));
 };
 
 /**
  * Other episodes for the same rule with a different `group_hash` (excluding the current episode id).
  */
 const buildOtherGroupsRelatedAlertEpisodesEsqlQuery = (
+  spaceId: string,
   ruleId: string,
   groupHash: string,
   excludeEpisodeId: string
 ) => {
-  const query = buildRelatedBaseQuery(ruleId, excludeEpisodeId);
+  const query = buildRelatedBaseQuery(spaceId, ruleId, excludeEpisodeId);
   query.where`group_hash != ${groupHash}`;
   return finishRelatedEpisodesQuery(query);
 };
@@ -42,7 +49,7 @@ export interface UseFetchSameRuleEpisodesQueryOptions {
   excludeEpisodeId: string | undefined;
   pageSize: number;
   currentGroupHash: string | undefined;
-  expressions: ExpressionsStart;
+  services: { expressions: ExpressionsStart; spaces: SpacesPluginStart };
   toastDanger?: (message: string) => void;
 }
 
@@ -56,13 +63,16 @@ export const useFetchSameRuleEpisodesQuery = ({
   excludeEpisodeId,
   pageSize,
   currentGroupHash,
-  expressions,
+  services,
   toastDanger,
 }: UseFetchSameRuleEpisodesQueryOptions) => {
+  const { expressions, spaces } = services;
+  const spaceId = useSpaceId(spaces);
   const otherKey = currentGroupHash ?? 'rule-only';
 
   return useQuery({
     queryKey: queryKeys.relatedOtherEpisodes(
+      spaceId,
       ruleId ?? '',
       pageSize,
       otherKey,
@@ -72,8 +82,10 @@ export const useFetchSameRuleEpisodesQuery = ({
       const rId = ruleId as string;
       const exId = excludeEpisodeId as string;
       const query = currentGroupHash
-        ? buildOtherGroupsRelatedAlertEpisodesEsqlQuery(rId, currentGroupHash, exId).print('basic')
-        : buildRelatedAlertEpisodesEsqlQuery(rId, exId).print('basic');
+        ? buildOtherGroupsRelatedAlertEpisodesEsqlQuery(spaceId, rId, currentGroupHash, exId).print(
+            'basic'
+          )
+        : buildRelatedAlertEpisodesEsqlQuery(spaceId, rId, exId).print('basic');
       return fetchRelatedEpisodes({
         abortSignal: signal,
         pageSize,

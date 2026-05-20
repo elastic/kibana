@@ -8,8 +8,9 @@
  */
 
 import type { VersionedRouter } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '@kbn/core/server';
+import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import { once } from 'lodash';
+import { logRequest } from '../log_request';
 import { DASHBOARD_INTERNAL_API_PATH } from '../../../common/constants';
 import { getSanitizeResponseBodySchema } from './schemas';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
@@ -20,7 +21,10 @@ import { sanitize } from './sanitize';
  * This route uses an internal API path because it is not intended for public use.
  * It is currently used by the dashboard app to sanitize a dashboard for the export share integration.
  */
-export function registerSanitizeRoute(router: VersionedRouter<RequestHandlerContext>) {
+export function registerSanitizeRoute(
+  router: VersionedRouter<RequestHandlerContext>,
+  logger: Logger
+) {
   const sanitizeRoute = router.post({
     path: `${DASHBOARD_INTERNAL_API_PATH}/_sanitize`,
     summary: 'Sanitize a dashboard',
@@ -60,6 +64,7 @@ export function registerSanitizeRoute(router: VersionedRouter<RequestHandlerCont
         return res.ok({ body: result });
       } catch (e) {
         const message = e instanceof Error ? e.message : 'Unknown error';
+        logRequest(logger, req, 'warn', e.message);
         return res.badRequest({
           body: { message },
         });
