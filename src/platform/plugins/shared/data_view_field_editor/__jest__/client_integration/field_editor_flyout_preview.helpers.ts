@@ -100,7 +100,7 @@ const getActions = (user: UserEvent) => {
   };
 
   const getRenderedFieldsPreview = () => {
-    if (!screen.queryByTestId('fieldPreviewItem')) return [];
+    if (screen.queryAllByTestId('fieldPreviewItem').length === 0) return [];
 
     const previewFields = queryAllByTestSubjectPath('fieldPreviewItem.listItem');
 
@@ -113,7 +113,7 @@ const getActions = (user: UserEvent) => {
   };
 
   const getRenderedIndexPatternFieldElements = () => {
-    if (!screen.queryByTestId('indexPatternFieldList')) return null;
+    if (screen.queryAllByTestId('indexPatternFieldList').length === 0) return null;
 
     return queryAllByTestSubjectPath('indexPatternFieldList.listItem');
   };
