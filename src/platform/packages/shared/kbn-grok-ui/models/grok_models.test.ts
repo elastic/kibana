@@ -396,6 +396,5 @@ describe('Grok models', () => {
       expression.updateExpression('(?<queueId>[0-9A-F]+)');
       expect(colourFor(expression, 'queueId')).toBe(stableColour);
     });
-
   });
 });
