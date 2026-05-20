@@ -24,7 +24,13 @@ import {
 import { AWS_ONBOARDING_TITLE, AWS_ONBOARDING_DESCRIPTION } from '../../common/constants';
 import { ONBOARDING_STEPS } from './steps';
 import { useStepState } from './use_step_state';
-import { ConnectStep, ServicesStep, NameAndScopeStep, DeploymentStep, SeeDataStep } from './steps';
+import {
+  ConnectStep,
+  ServicesStep,
+  NameAndScopeStep,
+  DeploymentStep,
+  SeeDataStep,
+} from './step_components';
 
 const STEP_COMPONENTS: Record<string, React.ComponentType> = {
   connect: ConnectStep,
