@@ -33,7 +33,8 @@
     "@kbn/scout",
     "@kbn/security-plugin",
     "@kbn/navigation-customization-components",
-    "@kbn/usage-collection-plugin"
+    "@kbn/usage-collection-plugin",
+    "@kbn/zod"
   ],
   "exclude": [
     "target/**/*",

@@ -7,4 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DEFAULT_ROUTES, DEFAULT_ROUTE_UI_SETTING_ID } from './constants';
+export {
+  DEFAULT_ROUTES,
+  DEFAULT_ROUTE_UI_SETTING_ID,
+  NAV_CUSTOMIZATION_STORAGE_KEY,
+  NAV_CALLOUT_DISMISSED_STORAGE_KEY,
+} from './constants';

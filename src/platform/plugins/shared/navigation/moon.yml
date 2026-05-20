@@ -39,6 +39,7 @@ dependsOn:
   - '@kbn/security-plugin'
   - '@kbn/navigation-customization-components'
   - '@kbn/usage-collection-plugin'
+  - '@kbn/zod'
 tags:
   - plugin
   - prod

@@ -9,7 +9,7 @@
 
 import React, { lazy, Suspense } from 'react';
 import type { Observable } from 'rxjs';
-import { of, ReplaySubject, take, map, switchMap } from 'rxjs';
+import { of, ReplaySubject, take, map, switchMap, takeUntil } from 'rxjs';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -34,6 +34,10 @@ import type {
 } from './types';
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
 import type { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
+import {
+  NAV_CUSTOMIZATION_STORAGE_KEY,
+  NAV_CALLOUT_DISMISSED_STORAGE_KEY,
+} from '../common/constants';
 
 const LazyCustomizeNavigationUserMenuLink = lazy(async () => {
   const { CustomizeNavigationUserMenuLink } = await import(
@@ -41,9 +45,6 @@ const LazyCustomizeNavigationUserMenuLink = lazy(async () => {
   );
   return { default: CustomizeNavigationUserMenuLink };
 });
-
-const CUSTOM_NAV_STORAGE_KEY = 'kibana.solutionNavigationCustomization';
-const CALLOUT_DISMISSED_KEY = 'kibana.customizeNavigation.calloutDismissed';
 
 export class NavigationPublicPlugin
   implements
@@ -60,7 +61,6 @@ export class NavigationPublicPlugin
   private readonly solutionNavDefinitions = new Map<SolutionId, AddSolutionNavigationArg>();
   private chrome?: InternalChromeStart;
   private activeSolutionId: SolutionId | null = null;
-  private activeSpaceId = 'default';
   private isSolutionNavEnabled = false;
 
   constructor(private initializerContext: PluginInitializerContext) {}
@@ -109,8 +109,6 @@ export class NavigationPublicPlugin
         activeSpace,
       });
 
-      this.activeSpaceId = activeSpace?.id ?? 'default';
-
       if (!this.isSolutionNavEnabled) return;
 
       if (cloud) {
@@ -157,6 +155,18 @@ export class NavigationPublicPlugin
       chrome.project.registerCustomizeNavigationHandler(openCustomizeNavigationModal);
     }
 
+    // Reactively apply stored customization to the navigation. The initial emission
+    // is synchronous from the server-injected cache, so navigation is seeded before
+    // the first render. Subsequent emissions handle multi-tab sync.
+    if (!this.getIsUnauthenticated(core.http)) {
+      core.userStorage
+        .get$<NavigationCustomization>(NAV_CUSTOMIZATION_STORAGE_KEY)
+        .pipe(takeUntil(this.stop$))
+        .subscribe((customization) => {
+          chrome.project.setNavigationCustomization(customization);
+        });
+    }
+
     if (isServerless && !this.getIsUnauthenticated(core.http)) {
       // In serverless, the serverless plugin initializes project navigation directly,
       // bypassing this plugin's addSolutionNavigation flow. Listen for the navigation
@@ -167,14 +177,9 @@ export class NavigationPublicPlugin
         .subscribe(({ solutionId }) => {
           this.activeSolutionId = solutionId;
 
-          const customization = this.loadCustomization();
-          if (customization) {
-            chrome.project.setNavigationCustomization(customization);
-          }
-
           chrome.project.registerCustomizeNavigationHandler(openCustomizeNavigationModal);
 
-          if (security && this.activeSpaceId) {
+          if (security) {
             security.navControlService.addUserMenuLinks([
               {
                 iconType: 'controls',
@@ -244,10 +249,7 @@ export class NavigationPublicPlugin
     if (!this.activeSolutionId || !this.chrome) return;
     const def = this.solutionNavDefinitions.get(this.activeSolutionId);
     if (!def) return;
-    const customization = this.loadCustomization();
-    this.chrome.project.initNavigation(this.activeSolutionId, def.navigationTree$, {
-      customization,
-    });
+    this.chrome.project.initNavigation(this.activeSolutionId, def.navigationTree$);
   }
 
   private initiateChromeStyleAndSideNav(
@@ -279,14 +281,13 @@ export class NavigationPublicPlugin
 
       const { items, defaultItemIds } = this.getNavigationItems(chrome);
 
-      const savedCustomization = this.loadCustomization();
-
-      let isCalloutDismissed: boolean;
-      try {
-        isCalloutDismissed = localStorage.getItem(CALLOUT_DISMISSED_KEY) === 'true';
-      } catch {
-        isCalloutDismissed = true;
-      }
+      const savedCustomization = core.userStorage.get<NavigationCustomization>(
+        NAV_CUSTOMIZATION_STORAGE_KEY
+      );
+      const isCalloutDismissed = core.userStorage.get<boolean>(
+        NAV_CALLOUT_DISMISSED_STORAGE_KEY,
+        false
+      );
 
       const toCustomization = (order: string[], hiddenIds: string[]): NavigationCustomization => ({
         moves: computeMoves(defaultItemIds, order),
@@ -303,14 +304,15 @@ export class NavigationPublicPlugin
                 chrome.project.setNavigationCustomization(toCustomization(order, hiddenIds));
               }}
               onSave={(order, hiddenIds) => {
-                const customization = toCustomization(order, hiddenIds);
-                this.persistCustomization(customization);
-                chrome.project.setNavigationCustomization(customization);
+                core.userStorage.set(
+                  NAV_CUSTOMIZATION_STORAGE_KEY,
+                  toCustomization(order, hiddenIds)
+                );
                 modal.close();
               }}
               onReset={() => {
-                this.persistCustomization(undefined);
                 chrome.project.setNavigationCustomization(undefined);
+                core.userStorage.remove(NAV_CUSTOMIZATION_STORAGE_KEY);
                 return this.getNavigationItems(chrome).items;
               }}
               onClose={() => {
@@ -318,7 +320,7 @@ export class NavigationPublicPlugin
                 modal.close();
               }}
               onDismissCallout={() => {
-                localStorage.setItem(CALLOUT_DISMISSED_KEY, 'true');
+                core.userStorage.set(NAV_CALLOUT_DISMISSED_STORAGE_KEY, true);
               }}
             />
           ),
@@ -360,60 +362,6 @@ export class NavigationPublicPlugin
       }));
 
     return { items, defaultItemIds };
-  }
-
-  private getStorageKey(): string | null {
-    if (!this.activeSolutionId) return null;
-    return `${this.activeSpaceId}::${this.activeSolutionId}`;
-  }
-
-  // TODO: Replace with userStorage
-  private loadCustomization(): NavigationCustomization | undefined {
-    try {
-      const stored = localStorage.getItem(CUSTOM_NAV_STORAGE_KEY);
-      if (!stored) return undefined;
-      const data = JSON.parse(stored) as Record<string, unknown>;
-      const key = this.getStorageKey();
-      if (!key) return undefined;
-      const entry = data[key];
-      // Validate the shape matches the current format; discard stale entries.
-      if (
-        !entry ||
-        typeof entry !== 'object' ||
-        !Array.isArray((entry as any).moves) ||
-        !Array.isArray((entry as any).hidden)
-      ) {
-        return undefined;
-      }
-      return entry as NavigationCustomization;
-    } catch {
-      return undefined;
-    }
-  }
-
-  // TODO: Replace with userStorage
-  private persistCustomization(customization: NavigationCustomization | undefined) {
-    try {
-      const key = this.getStorageKey();
-      if (!key) return;
-
-      const raw = localStorage.getItem(CUSTOM_NAV_STORAGE_KEY);
-      const data: Record<string, NavigationCustomization> = raw ? JSON.parse(raw) : {};
-
-      if (customization) {
-        data[key] = customization;
-      } else {
-        delete data[key];
-      }
-
-      if (Object.keys(data).length === 0) {
-        localStorage.removeItem(CUSTOM_NAV_STORAGE_KEY);
-      } else {
-        localStorage.setItem(CUSTOM_NAV_STORAGE_KEY, JSON.stringify(data));
-      }
-    } catch {
-      // Silently fail
-    }
   }
 }
 

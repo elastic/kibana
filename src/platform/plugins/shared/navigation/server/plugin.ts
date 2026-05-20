@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { z } from '@kbn/zod/v4';
 import type {
   CoreSetup,
   CoreStart,
@@ -23,6 +24,20 @@ import type {
 } from './types';
 import { getUiSettings } from './ui_settings';
 import { registerNavigationUsageCollector } from './collectors/register';
+import {
+  NAV_CUSTOMIZATION_STORAGE_KEY,
+  NAV_CALLOUT_DISMISSED_STORAGE_KEY,
+} from '../common/constants';
+
+const navCustomizationSchema = z.object({
+  moves: z.array(
+    z.object({
+      id: z.string(),
+      afterId: z.string().nullable(),
+    })
+  ),
+  hidden: z.array(z.string()),
+});
 
 export class NavigationServerPlugin
   implements
@@ -48,6 +63,21 @@ export class NavigationServerPlugin
     if (plugins.usageCollection) {
       registerNavigationUsageCollector(plugins.usageCollection);
     }
+
+    core.userStorage.register({
+      [NAV_CUSTOMIZATION_STORAGE_KEY]: {
+        schema: navCustomizationSchema,
+        defaultValue: { moves: [], hidden: [] },
+        scope: 'space',
+        serverInject: true,
+      },
+      [NAV_CALLOUT_DISMISSED_STORAGE_KEY]: {
+        schema: z.boolean(),
+        defaultValue: false,
+        scope: 'global',
+        serverInject: true,
+      },
+    });
 
     return {};
   }
