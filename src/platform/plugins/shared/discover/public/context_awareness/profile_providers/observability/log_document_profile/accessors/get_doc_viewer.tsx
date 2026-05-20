@@ -13,6 +13,7 @@ import type {
   ObservabilityStreamsFeature,
 } from '@kbn/discover-shared-plugin/public';
 import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
+import { PROJECT_ROUTING } from '@kbn/cps-utils';
 import { i18n } from '@kbn/i18n';
 import {
   UnifiedDocViewerLogsOverview,
@@ -41,7 +42,6 @@ export const createGetDocViewer =
     );
 
     const streamsFeature = services.discoverShared.features.registry.getById('streams');
-    const cpsHasLinkedProjects = (services.cps?.cpsManager?.getTotalProjectCount() ?? 0) > 1;
 
     const indexes = {
       apm: {
@@ -61,6 +61,9 @@ export const createGetDocViewer =
           }),
           order: 0,
           render: (props: DocViewRenderProps) => {
+            const cpsHasLinkedProjects =
+              (services.cps?.cpsManager?.getTotalProjectCount() ?? 0) > 1 &&
+              services.cps?.cpsManager?.getProjectRouting() !== PROJECT_ROUTING.ORIGIN;
             return (
               <LogOverviewTab
                 logOverviewContext$={context.logOverviewContext$}

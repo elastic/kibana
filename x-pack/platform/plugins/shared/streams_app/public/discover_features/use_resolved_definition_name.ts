@@ -20,11 +20,13 @@ export function useResolvedDefinitionName({
   index,
   fallbackStreamName,
   cpsHasLinkedProjects,
+  ccsHasRemoteClusters,
 }: {
   streamsRepositoryClient: StreamsRepositoryClient;
   index?: string;
   fallbackStreamName?: string;
   cpsHasLinkedProjects?: boolean;
+  ccsHasRemoteClusters?: boolean;
 }) {
   return useAbortableAsync(
     async ({ signal }): Promise<ResolvedDefinitionName | undefined> => {
@@ -32,7 +34,7 @@ export function useResolvedDefinitionName({
         if (!fallbackStreamName) {
           return undefined;
         }
-        if (!cpsHasLinkedProjects) {
+        if (!cpsHasLinkedProjects && !ccsHasRemoteClusters) {
           return { name: fallbackStreamName, existsLocally: true };
         }
         try {
@@ -42,7 +44,7 @@ export function useResolvedDefinitionName({
           });
           return { name: fallbackStreamName, existsLocally: true };
         } catch {
-          return { name: fallbackStreamName, existsLocally: false };
+          return { name: fallbackStreamName, existsLocally: false, remoteProject: 'unknown' };
         }
       } else {
         try {
@@ -71,7 +73,7 @@ export function useResolvedDefinitionName({
         }
       }
     },
-    [streamsRepositoryClient, index, fallbackStreamName, cpsHasLinkedProjects]
+    [streamsRepositoryClient, index, fallbackStreamName, cpsHasLinkedProjects, ccsHasRemoteClusters]
   );
 }
 

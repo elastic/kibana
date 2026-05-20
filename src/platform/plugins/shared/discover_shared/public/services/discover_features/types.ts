@@ -47,7 +47,6 @@ export interface ObservabilityStreamsFeatureRenderDeps {
 
 export interface ObservabilityStreamsFeatureRenderByStreamNameDeps {
   streamName: string;
-  cpsHasLinkedProjects?: boolean;
 }
 
 export interface ObservabilityStreamsFeature {
