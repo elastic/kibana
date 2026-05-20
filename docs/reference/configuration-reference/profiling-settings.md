@@ -2,7 +2,8 @@
 navigation_title: "Universal Profiling settings"
 applies_to:
   deployment:
-    ech: all
+    ech: ga
+    self: unavailable
 ---
 
 # Universal Profiling settings in {{kib}} [profiling-settings]

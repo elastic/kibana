@@ -21,4 +21,6 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          ech: ga 8.5
+          stack: ga 8.5
+          ech: ga
+          self: unavailable

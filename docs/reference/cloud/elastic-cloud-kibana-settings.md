@@ -7,7 +7,7 @@ mapped_pages:
 
 ## Supported Kibana settings [ec-kibana-config]
 
-The following Kibana settings can be configured on {{ech}} deployments using the **User Settings** editor in the {{ech}} console. Settings not listed here are not supported on {{ech}}.
+The following Kibana settings can be configured using the **Edit user settings** option when editing your {{ech}} deployment configuration. Settings not listed on this page are not supported on {{ech}}.
 
 ## General [ec-general-settings]
 
