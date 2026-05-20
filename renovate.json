@@ -43,9 +43,7 @@
         "webpack-merge",
         "webpack-sources",
         "@statoscope/webpack-plugin",
-        "@types/webpack",
         "@types/webpack-bundle-analyzer",
-        "@types/webpack-env",
         "@types/webpack-sources"
       ],
       "reviewers": ["team:kibana-operations"],
@@ -231,7 +229,7 @@
     },
     {
       "groupName": "base64-js dependencies",
-      "matchDepNames": ["base64-js", "@types/base64-js"],
+      "matchDepNames": ["base64-js"],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:SharedUX"],
@@ -248,7 +246,7 @@
     },
     {
       "groupName": "classnames dependencies",
-      "matchDepNames": ["classnames", "@types/classnames"],
+      "matchDepNames": ["classnames"],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:SharedUX"],
@@ -266,7 +264,7 @@
     },
     {
       "groupName": "lz-string dependencies",
-      "matchDepNames": ["lz-string", "@types/lz-string"],
+      "matchDepNames": ["lz-string"],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:SharedUX"],
@@ -559,7 +557,6 @@
         "reflect-metadata",
         "type-detect",
         "utility-types",
-        "@types/fetch-mock",
         "@types/getos",
         "@types/mock-fs",
         "@types/node-fetch",
@@ -907,7 +904,7 @@
     },
     {
       "groupName": "micromatch/minimatch",
-      "matchDepNames": ["micromatch", "minimatch", "@types/micromatch", "@types/minimatch"],
+      "matchDepNames": ["micromatch", "minimatch", "@types/micromatch"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -916,7 +913,7 @@
     },
     {
       "groupName": "nock",
-      "matchDepNames": ["nock", "@types/nock"],
+      "matchDepNames": ["nock"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -1532,7 +1529,7 @@
     },
     {
       "groupName": "reporting dependencies",
-      "matchDepNames": ["@types/extract-zip", "@types/pdfmake", "extract-zip", "pdfmake"],
+      "matchDepNames": ["@types/pdfmake", "extract-zip", "pdfmake"],
       "reviewers": ["team:response-ops"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Reporting Services", "Team:ResponseOps"],
@@ -1954,7 +1951,6 @@
       "groupName": "minify",
       "matchDepNames": [
         "gulp-brotli",
-        "terser",
         "terser-webpack-plugin"
       ],
       "reviewers": ["team:kibana-operations"],

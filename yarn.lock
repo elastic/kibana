@@ -14992,13 +14992,6 @@
     "@types/qs" "*"
     "@types/serve-static" "^1"
 
-"@types/extract-zip@2.0.3":
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/@types/extract-zip/-/extract-zip-2.0.3.tgz#5872005fd818767734c3528ba0bf57fc80a8c848"
-  integrity sha512-yrO7h+0qOIGxHCmBeL5fKFzR+PBafh9LG6sOLBFFi2JuN+Hj663TAxfnqJh5vkQn963VimrhBF1GZzea3A+4Ig==
-  dependencies:
-    extract-zip "*"
-
 "@types/file-saver@2.0.7":
   version "2.0.7"
   resolved "https://registry.yarnpkg.com/@types/file-saver/-/file-saver-2.0.7.tgz#8dbb2f24bdc7486c54aa854eb414940bbd056f7d"
@@ -22269,7 +22262,7 @@ extglob@^2.0.4:
     snapdragon "^0.8.1"
     to-regex "^3.0.1"
 
-extract-zip@*, extract-zip@2.0.1, extract-zip@^2.0.1:
+extract-zip@2.0.1, extract-zip@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/extract-zip/-/extract-zip-2.0.1.tgz#663dca56fe46df890d5f131ef4a06d22bb8ba13a"
   integrity sha512-GDhU9ntwuKyGXdZBUgTIe+vXnWj0fppUEtMDL0+idd5Sta8TGpHssn/eusA9mrPr9qNDym6SxAYZjNvCn/9RBg==
