@@ -24,6 +24,7 @@ import type { ObservedEntityData } from '../shared/components/observed_entity/ty
 import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 import { VisualizationsSection } from '../shared/components/right/visualizations_section';
 import { ResolutionSection } from '../../../entity_analytics/components/entity_resolution/resolution_section';
+import { BehavioralBaselineSection } from './components/behavioral_baseline_section';
 
 export type ObservedUserData = Omit<ObservedEntityData<UserItem>, 'anomalies'> & {
   entityRecord?: EntityStoreRecord | null;
@@ -65,6 +66,13 @@ export const UserPanelContent = ({
 }: UserPanelContentProps) => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
 
+  // entity.behaviors.anomaly_job_ids is written by the ML anomaly detection maintainer
+  // but is not part of the public EntityField schema, so we access it via a cast
+  const anomalyJobIds = (
+    entityRecord?.entity?.behaviors as { anomaly_job_ids?: string[] } | undefined
+  )?.anomaly_job_ids;
+  const hasBehavioralData = !!anomalyJobIds?.length;
+
   // Extract userName from identityFields for components that need a string
   // Priority: identityFields['user.name'] > identityFields[first key]
   const userName =
@@ -95,6 +103,12 @@ export const UserPanelContent = ({
             <EuiHorizontalRule />
           </>
         )}
+      {entityStoreEntityId && hasBehavioralData && (
+        <>
+          <BehavioralBaselineSection entityId={entityStoreEntityId} />
+          <EuiHorizontalRule margin="m" />
+        </>
+      )}
       {entityStoreEntityId && (
         <>
           <VisualizationsSection
