@@ -191,10 +191,8 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
                     }
                   >
                     <EuiContextMenuPanel
-                      size="s"
                       items={[
                         <EuiContextMenuItem
-                          size="s"
                           key="newConnectorNative"
                           onClick={() => {
                             const url = application?.getUrlForApp('management', {
@@ -214,7 +212,6 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
                           )}
                         </EuiContextMenuItem>,
                         <EuiContextMenuItem
-                          size="s"
                           key="newConnectorClient"
                           icon="plusCircle"
                           onClick={() => {

@@ -69,7 +69,7 @@ export const TakeAction: FC<TakeActionProps> = ({ hit, onAlertUpdated, onShowNot
     );
   }
 
-  if (!dataAsNestedObject || !nonEcsData) {
+  if (!dataAsNestedObject || !nonEcsData || !dataFormattedForFieldBrowser) {
     return (
       <EuiButton data-test-subj={FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID} fill isDisabled>
         {TAKE_ACTION}
@@ -82,6 +82,7 @@ export const TakeAction: FC<TakeActionProps> = ({ hit, onAlertUpdated, onShowNot
       hit={hit}
       ecsData={dataAsNestedObject}
       nonEcsData={nonEcsData}
+      detailsData={dataFormattedForFieldBrowser}
       refetchFlyoutData={refetchFlyoutData}
       onAlertUpdated={onAlertUpdated}
       onShowNotes={onShowNotes}

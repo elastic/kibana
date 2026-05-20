@@ -41,7 +41,6 @@ export class ResponseStreamPlugin implements Plugin {
           label: 'README',
           href: 'https://github.com/elastic/kibana/blob/main/examples/response_stream/README.md',
           iconType: 'logoGithub',
-          size: 's',
           target: '_blank',
         },
       ],
