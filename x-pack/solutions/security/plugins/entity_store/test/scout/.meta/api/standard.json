@@ -1,5 +1,5 @@
 {
-  "sha1": "83ab60b0e329dceb49049e44acc10a503f9901a9",
+  "sha1": "3edcbade677e6cba08abccc432db89c3d56130dc",
   "tests": [
     {
       "id": "2b226b45edecc17-e395ce97cca539e",
@@ -1762,6 +1762,54 @@
       }
     },
     {
+      "id": "919d4a7203d99a5-4ea0e651fbacc8c",
+      "title": "Entity Store volume cap defer — logsCapApplied true, lastSearchTimestamp before window end",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction_volume_cap.spec.ts",
+        "line": 75,
+        "column": 10
+      }
+    },
+    {
+      "id": "919d4a7203d99a5-327842296215ab8",
+      "title": "Entity Store volume cap drop — logsCapApplied true, lastSearchTimestamp equals window end",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction_volume_cap.spec.ts",
+        "line": 175,
+        "column": 10
+      }
+    },
+    {
+      "id": "919d4a7203d99a5-cce7b64a428c2d9",
+      "title": "Entity Store volume cap maxLogsPerWindow 0 disables the cap and extracts all docs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/logs_extraction_volume_cap.spec.ts",
+        "line": 237,
+        "column": 10
+      }
+    },
+    {
       "id": "eea391c0059ed1b-edf468ca499c251",
       "title": "Entity Store Main logs extraction Should extract properly extract host",
       "expectedStatus": "passed",
@@ -2861,7 +2909,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/status.spec.ts",
-        "line": 41,
+        "line": 45,
         "column": 10
       }
     },
@@ -2877,7 +2925,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/status.spec.ts",
-        "line": 59,
+        "line": 65,
         "column": 10
       }
     },
@@ -2893,7 +2941,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/status.spec.ts",
-        "line": 71,
+        "line": 77,
         "column": 10
       }
     },
@@ -2909,7 +2957,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/status.spec.ts",
-        "line": 90,
+        "line": 96,
         "column": 10
       }
     },
