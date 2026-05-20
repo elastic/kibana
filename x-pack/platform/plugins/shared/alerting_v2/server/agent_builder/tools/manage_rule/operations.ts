@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 import {
+  createRuleDataSchema,
   metadataSchema,
   ruleKindSchema,
   scheduleSchema,
@@ -19,6 +20,7 @@ import {
   isStateTransitionAllowed,
   isRecoveryPolicyQueryProvided,
 } from '@kbn/alerting-v2-schemas';
+import { buildRulePayload } from '../../../../common/agent_builder/rule_mappers';
 
 // ─── Operation schemas ────────────────────────────────────────────────────────
 // Every field-level schema is derived from the shared alerting-v2-schemas
@@ -57,6 +59,10 @@ export const setRecoveryPolicyOperationSchema = recoveryPolicySchema.extend({
   operation: z.literal('set_recovery_policy'),
 });
 
+export const validateOperationSchema = z.object({
+  operation: z.literal('validate'),
+});
+
 // ─── Discriminated union ──────────────────────────────────────────────────────
 
 export const ruleOperationSchema = z.discriminatedUnion('operation', [
@@ -67,6 +73,7 @@ export const ruleOperationSchema = z.discriminatedUnion('operation', [
   setGroupingOperationSchema,
   setStateTransitionOperationSchema,
   setRecoveryPolicyOperationSchema,
+  validateOperationSchema,
 ]);
 
 export type RuleOperation = z.infer<typeof ruleOperationSchema>;
@@ -87,9 +94,14 @@ export class RuleOperationValidationError extends Error {
 
 // ─── ES|QL query validation ───────────────────────────────────────────────────
 
-interface EsqlColumn {
+export interface EsqlColumn {
   name: string;
   type: string;
+}
+
+export interface RuleOperationsResult {
+  data: Partial<RuleAttachmentData>;
+  queryColumns?: EsqlColumn[];
 }
 
 /**
@@ -121,7 +133,7 @@ export const executeRuleOperations = async (
   operations: RuleOperation[],
   esClient?: IScopedClusterClient,
   { isNew = false }: { isNew?: boolean } = {}
-): Promise<Partial<RuleAttachmentData>> => {
+): Promise<RuleOperationsResult> => {
   let next = { ...data };
   let lastQueryColumns: EsqlColumn[] | undefined;
 
@@ -215,6 +227,18 @@ export const executeRuleOperations = async (
           },
         };
         break;
+
+      case 'validate': {
+        const payload = buildRulePayload(next);
+        const result = createRuleDataSchema.safeParse(payload);
+        if (!result.success) {
+          const issues = result.error.issues
+            .map((i) => `${i.path.join('.')}: ${i.message}`)
+            .join('\n');
+          throw new RuleOperationValidationError(`Rule is not ready to save:\n${issues}`);
+        }
+        break;
+      }
     }
   }
 
@@ -236,5 +260,8 @@ export const executeRuleOperations = async (
     );
   }
 
-  return next;
+  return {
+    data: next,
+    ...(lastQueryColumns ? { queryColumns: lastQueryColumns } : {}),
+  };
 };

@@ -121,15 +121,13 @@ export const esProjectTypeFromKbn = new Map<string, string>([
   ['oblt', 'observability'],
   ['security', 'security'],
   ['workplaceai', 'workplaceai'],
-  // replace with 'vectordb' once stateless ES supports it
-  ['vectordb', 'elasticsearch_vector'],
+  ['vectordb', 'vectordb'],
 ]);
 
 // ES operator/settings.json expects 'elasticsearch' for all `elasticsearch_*` project types.
 export const esSettingsProjectTypeFromKbn = new Map<string, string>([
   ...esProjectTypeFromKbn.entries(),
   ['es', 'elasticsearch'],
-  ['vectordb', 'elasticsearch'],
 ]);
 
 export const kbnProjectTypeFromEs = new Map<string, string>([
@@ -139,6 +137,7 @@ export const kbnProjectTypeFromEs = new Map<string, string>([
   ['observability', 'oblt'],
   ['security', 'security'],
   ['workplaceai', 'workplaceai'],
+  ['vectordb', 'vectordb'],
 ]);
 
 export interface DockerOptions extends EsClusterExecOptions, BaseOptions {

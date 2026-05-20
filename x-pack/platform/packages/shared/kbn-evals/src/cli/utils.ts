@@ -8,12 +8,19 @@
 import { execFileSync } from 'child_process';
 
 export const VAULT_SECRET_PATH = 'secret/kibana-issues/dev/inference/kibana-eis-ccm';
+export const DEFAULT_VAULT_ADDR = 'https://secrets.elastic.co:8200';
+
+export const getVaultAddr = (): string => process.env.VAULT_ADDR || DEFAULT_VAULT_ADDR;
 
 export const safeExec = (command: string, args: string[]): string | null => {
   try {
     return execFileSync(command, args, {
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'ignore'],
+      env: {
+        ...process.env,
+        VAULT_ADDR: getVaultAddr(),
+      },
     }).trim();
   } catch {
     return null;
