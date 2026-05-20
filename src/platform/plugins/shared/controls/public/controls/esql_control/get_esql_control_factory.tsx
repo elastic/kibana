@@ -9,11 +9,10 @@
 
 import { pick } from 'lodash';
 import React, { useEffect } from 'react';
-import { BehaviorSubject, combineLatest, map } from 'rxjs';
-
+import { BehaviorSubject, combineLatest, map, merge } from 'rxjs';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
   apiPublishesESQLVariables,
   isStaticESQLControl,
@@ -38,15 +37,18 @@ import {
   type ESQLOptionsListRuntimeState,
 } from './types';
 import { getTooltipTitle } from './utils/get_tooltip_title';
+import { getPlacementHints, LAYOUT_CONSTRAINTS } from '../constants';
 
 export const getESQLControlFactory = <
   State extends OptionsListESQLControlState = OptionsListESQLControlState
->(): EmbeddableFactory<
+>(): EmbeddablePublicDefinition<
   State extends { control_type: 'STATIC_VALUES' } ? StaticESQLControl : QueryESQLControl,
   ESQLControlApi<State>
 > => {
   return {
     type: ESQL_CONTROL,
+    getPlacementHints,
+    layoutConstraints: LAYOUT_CONSTRAINTS,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
 
@@ -83,7 +85,7 @@ export const getESQLControlFactory = <
         uuid,
         parentApi,
         serializeState,
-        anyStateChange$: selections.anyStateChange$,
+        anyStateChange$: merge(labelManager.anyStateChange$, selections.anyStateChange$),
         getComparators: () => {
           return {
             ...getSelectionComparators(state.control_type),

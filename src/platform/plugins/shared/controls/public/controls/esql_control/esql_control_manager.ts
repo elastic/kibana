@@ -321,13 +321,31 @@ export function initializeESQLControlManager(
       query$,
     },
     anyStateChange$: merge(
-      selectedOptions$,
-      availableOptions$,
-      variableName$,
-      singleSelect$,
-      variableType$,
-      esqlQuery$
-    ).pipe(map(() => undefined)),
+      selectedOptions$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      availableOptions$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      variableName$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      singleSelect$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      variableType$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      esqlQuery$.pipe(
+        skip(1),
+        map(() => undefined)
+      )
+    ),
     reinitializeState: (lastSaved?: ESQLOptionsListRuntimeState) => {
       setSelectedOptions(lastSaved?.selected_options ?? []);
       variableName$.next(lastSaved?.variable_name ?? '');

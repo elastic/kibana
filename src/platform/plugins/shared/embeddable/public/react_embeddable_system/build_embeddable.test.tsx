@@ -9,13 +9,14 @@
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import type { EmbeddableFactory } from './types';
+import type { EmbeddablePublicDefinition } from './types';
 import { buildEmbeddable } from './build_embeddable';
 import { PhaseTracker } from './phase_tracker';
+import { of } from 'rxjs';
 
 const phaseTracker = new PhaseTracker(performance.now());
 
-const testEmbeddableFactory: EmbeddableFactory<{ name: string; bork: string }> = {
+const testEmbeddableFactory: EmbeddablePublicDefinition<{ name: string; bork: string }> = {
   type: 'test',
   buildEmbeddable: async ({ initialState, finalizeApi }) => {
     const api = finalizeApi({
@@ -23,6 +24,7 @@ const testEmbeddableFactory: EmbeddableFactory<{ name: string; bork: string }> =
         name: initialState.name,
         bork: initialState.bork,
       }),
+      anyStateChange$: of(),
       applySerializedState: jest.fn(),
     });
     return {
@@ -52,6 +54,9 @@ it('should return Component and componentApi', async () => {
   expect(Component).toMatchInlineSnapshot(`[Function]`);
   expect(componentApi).toMatchInlineSnapshot(`
     Object {
+      "anyStateChange$": Observable {
+        "_subscribe": [Function],
+      },
       "applySerializedState": [MockFunction],
       "hasLockedHoverActions$": BehaviorSubject {
         "_value": false,

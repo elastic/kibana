@@ -8,7 +8,7 @@
  */
 
 import { pick } from 'lodash';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 
 import {
   DEFAULT_DSL_OPTIONS_LIST_STATE,
@@ -85,6 +85,7 @@ describe('layout manager', () => {
     phase$: {} as unknown as PublishingSubject<PhaseEvent | undefined>,
     relatedPanels$: new BehaviorSubject<string[]>([]),
     ...titleManager.api,
+    anyStateChange$: of(),
     serializeState: () => titleManager.getLatestState(),
     applySerializedState: jest.fn(),
   };
