@@ -26,6 +26,11 @@ export type ESQLDependencies = ESQLCallbacks &
      */
     getEditorMessages?: () => { errors: MonacoMessage[]; warnings: MonacoMessage[] };
     /**
+     * When true, a "Fix with AI" code action is added alongside the standard quick fixes.
+     * Requires an Enterprise license and an AI connector configured.
+     */
+    isSuggestFixEnabled: boolean;
+    /**
      * Optional resolver to provide model-specific dependencies.
      *
      * Monaco language providers are global per language, but Kibana can render multiple ES|QL

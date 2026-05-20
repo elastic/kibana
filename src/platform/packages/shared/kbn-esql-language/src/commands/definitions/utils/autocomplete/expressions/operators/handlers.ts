@@ -57,7 +57,7 @@ export async function handleListOperator(ctx: ExpressionContext): Promise<ISugge
   if (isSubQuery(rightOperand)) {
     const cursorAfterSubquery = innerText.length > rightOperand.location.max;
 
-    if (allowSubqueryOperand && cursorAfterSubquery) {
+    if (cursorAfterSubquery) {
       return getLogicalContinuationSuggestions();
     }
 
