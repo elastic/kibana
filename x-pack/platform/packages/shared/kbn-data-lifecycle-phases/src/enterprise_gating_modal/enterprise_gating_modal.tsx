@@ -29,8 +29,6 @@ import { enterpriseGatingModalStrings, getPrimaryActionLabel } from './strings';
 const CLOUD_SUBSCRIPTION_FEATURES_URL = 'https://www.elastic.co/subscriptions/cloud';
 const SELF_MANAGED_SUBSCRIPTION_FEATURES_URL = 'https://www.elastic.co/subscriptions';
 
-const noop = () => {};
-
 export type EnterpriseGatingModalEnvironment = 'cloud' | 'selfManaged';
 export type EnterpriseGatingModalTrialStatus = 'notStarted' | 'expired';
 export type EnterpriseGatingModalPrimaryAction = 'startTrial' | 'upgrade' | 'contactUs';
