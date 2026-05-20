@@ -31,7 +31,6 @@ export class VisualBuilderPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly comboBox = this.ctx.getService('comboBox');
   private readonly elasticChart = this.ctx.getService('elasticChart');
-  private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
   private readonly timePicker = this.ctx.getPageObject('timePicker');
   private readonly visChart = this.ctx.getPageObject('visChart');
