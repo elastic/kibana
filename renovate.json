@@ -168,7 +168,6 @@
         "@playwright/test",
         "playwright",
         "pngjs",
-        "qs",
         "rxjs-marbles",
         "sharp",
         "superagent",
@@ -1008,7 +1007,7 @@
     },
     {
       "groupName": "polyfills",
-      "matchDepNames": ["blob-polyfill", "core-js"],
+      "matchDepNames": ["blob-polyfill", "core-js", "qs"],
       "matchDepPatterns": ["polyfill"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
