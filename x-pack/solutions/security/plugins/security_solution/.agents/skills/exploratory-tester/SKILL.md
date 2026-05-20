@@ -204,3 +204,71 @@ Write `.exploratory-session/config.json`:
 ```
 
 Read `x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/knowledge/<area_slug>.md` if it exists — load its contents as context for Phase 2.
+
+---
+
+## Phase 1: Wait & Login
+
+### Step 1a — Wait for Kibana (agent-managed only)
+
+Skip this step if `environment.managed` is `false` in `config.json`.
+
+```bash
+until curl -s -u elastic:changeme http://localhost:5620/api/status \
+  | python3 -c "import sys,json; s=json.load(sys.stdin); \
+    exit(0 if s.get('status',{}).get('overall',{}).get('level')=='available' else 1)" \
+  2>/dev/null; do echo "Waiting for Kibana..."; sleep 10; done
+```
+
+If not available after **10 minutes** — **stop** and tell the user to check the Scout server output.
+
+### Step 1b — Log in via browser
+
+Navigate to `<environment.url>/login?auth_provider_hint=cloud-basic`.
+
+Fill credentials:
+- Agent-managed environments: username `elastic`, password `changeme`
+- User-provided environments: username and password from `config.json` environment block
+
+If login fails — retry once with a fresh navigation. If still failing — **stop** and report the exact error message visible in the browser.
+
+### Step 1c — Set up test data
+
+Check environment capabilities before each step. Record every skipped step in `config.json` → `skipped_setup` with its reason.
+
+**Connectors (all environment types):**
+```bash
+# Create Bedrock connector (stateful):
+curl -s -u elastic:changeme -X POST http://localhost:5620/api/actions/connector \
+  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' \
+  -d '{"name":"Bedrock","connector_type_id":".bedrock","config":{"apiUrl":"https://bedrock.us-east-1.amazonaws.com"},"secrets":{"accessKey":"test","secret":"test"}}'
+```
+For user-provided environments: replace URL and credentials. For serverless: same endpoint, credentials from config.
+
+**esArchiver fixtures (stateful environments only):**
+
+If the scope `Setup` section lists esArchiver fixtures, load them via the Kibana API. For serverless, attempt the load — if the response is 404 or 400, skip and add to `skipped_setup`:
+```
+{ "step": "esArchiver:<fixture-name>", "reason": "not supported in serverless: <error>" }
+```
+
+**Roles and users (stateful only):**
+
+Create the test role and user via the security API. For serverless, skip role/user creation entirely — the `resolved_role` from `config.json` is the project-level role that was already mapped. Add to `skipped_setup`:
+```
+{ "step": "role-creation:<role>", "reason": "serverless uses project roles — resolved to <resolved_role>" }
+```
+
+### Step 1d — Confirm with user
+
+Present a confirmation before starting exploration:
+
+> "Kibana ready (`<environment.type>` at `<environment.url>`).
+> Exploring **`<area>`** with role **`<resolved_role>`**.
+> Flows: `<flow names, comma-separated>`
+> Skipped setup: `<skipped_setup list, or 'none'>`
+> Proceed?"
+
+Wait for the user's reply before moving to Phase 2.
+
+In `mode: auto` — skip this confirmation. Proceed immediately.
