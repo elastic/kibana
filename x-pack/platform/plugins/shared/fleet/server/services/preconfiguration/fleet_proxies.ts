@@ -114,11 +114,9 @@ async function createOrUpdatePreconfiguredFleetProxies(
       await pMap(
         fleetServerHosts,
         (fleetServerHost) =>
-          agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(
-            esClient,
-            fleetServerHost.id,
-            { isDefault: fleetServerHost.is_default }
-          ),
+          agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(esClient, fleetServerHost.id, {
+            isDefault: fleetServerHost.is_default,
+          }),
         { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20 }
       );
     })
