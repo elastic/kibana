@@ -60,7 +60,6 @@ const TAB_SCOPED_APP_MENU_ITEM_IDS = new Set<string>([
   AppMenuActionId.alerts,
   AppMenuActionId.export,
   AppMenuActionId.inspect,
-  AppMenuActionId.switchLanguageMode,
 ]);
 
 /**
@@ -240,13 +239,13 @@ export const useTopNavLinks = ({
     if (canSwitchLanguageMode) {
       items.push({
         id: AppMenuActionId.switchLanguageMode,
-        order: 10,
+        order: 2,
         label: isDataViewMode
           ? i18n.translate('discover.localMenu.switchToESQLTitle', {
-              defaultMessage: 'Switch tab to ES|QL',
+              defaultMessage: 'Query with ES|QL',
             })
           : i18n.translate('discover.localMenu.switchToClassicTitle', {
-              defaultMessage: 'Switch tab to Classic',
+              defaultMessage: 'Switch to Classic',
             }),
         iconType: isDataViewMode ? 'code' : 'discoverApp',
         testId: 'discoverSwitchLanguageModeButton',
@@ -263,10 +262,12 @@ export const useTopNavLinks = ({
     if (firstTabScopedMenuItem) {
       const firstItemIndex = items.findIndex(({ id }) => id === firstTabScopedMenuItem.id);
 
-      items[firstItemIndex] = {
-        ...items[firstItemIndex],
-        separator: 'above',
-      };
+      if (firstItemIndex >= 0) {
+        items[firstItemIndex] = {
+          ...items[firstItemIndex],
+          separator: 'above',
+        };
+      }
     }
 
     return items;

@@ -136,7 +136,7 @@ describe('useTopNavLinks', () => {
       );
 
       expect(switchLanguageModeItem).toBeDefined();
-      expect(switchLanguageModeItem?.label).toBe('Switch tab to Classic');
+      expect(switchLanguageModeItem?.label).toBe('Switch to Classic');
     });
   });
 
@@ -151,7 +151,7 @@ describe('useTopNavLinks', () => {
       );
 
       expect(switchLanguageModeItem).toBeDefined();
-      expect(switchLanguageModeItem?.label).toBe('Switch tab to ES|QL');
+      expect(switchLanguageModeItem?.label).toBe('Query with ES|QL');
     });
   });
 
@@ -417,7 +417,7 @@ describe('useTopNavLinks', () => {
 
       const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
       expect(alertsItem).toBeDefined();
-      expect(alertsItem?.label).toBe('Create alert');
+      expect(alertsItem?.label).toBe('Create alert rule');
 
       const createRuleTopLevel = appMenuConfig.items?.find(
         (item) => item.id === AppMenuActionId.createRule

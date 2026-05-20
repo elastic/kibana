@@ -214,10 +214,10 @@ export const getAlertsAppMenuItem = ({
   return {
     id: AppMenuActionId.alerts,
     label: i18n.translate('discover.localMenu.localMenu.alertsTitle', {
-      defaultMessage: 'Create alert',
+      defaultMessage: 'Create alert rule',
     }),
     testId: 'discoverAlertsButton',
-    order: 7,
+    order: 11,
     iconType: 'warning',
     popoverWidth: 250,
     items,
