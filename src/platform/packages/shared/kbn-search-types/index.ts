@@ -23,13 +23,13 @@ export type {
   IEsSearchResponse,
   IEsSearchRequest,
 } from './src/es_search_types';
-
 export type {
-  ITypedSearchService,
+  ISearchMethods,
   IBaseSearchOptions,
   IDSLSearchParams,
   IDSLSearchOptions,
   IDSLSearchResult,
+  IDSLPaginatedSearchResult,
   IDSLPagination,
   IESQLSearchParams,
   IESQLSearchOptions,
@@ -40,4 +40,4 @@ export type {
   ISQLSearchParams,
   ISQLSearchOptions,
   ISQLSearchResult,
-} from './src/typed_search_types';
+} from './src/search_methods_types';

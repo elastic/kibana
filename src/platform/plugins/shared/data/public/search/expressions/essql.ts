@@ -32,18 +32,11 @@ export function getEssql({
 }) {
   return getEssqlFn({
     async getStartDependencies() {
-      const [
-        { uiSettings },
-        ,
-        {
-          nowProvider,
-          search: { typed },
-        },
-      ] = await getStartServices();
+      const [{ uiSettings }, , { nowProvider, search }] = await getStartServices();
 
       return {
         nowProvider,
-        searchService: typed,
+        searchService: search,
         uiSettings: uiSettings as unknown as UiSettingsCommon,
       };
     },

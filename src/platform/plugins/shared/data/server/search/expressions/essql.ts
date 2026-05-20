@@ -37,7 +37,7 @@ export function getEssql({
       const scopedClient = search.asScoped(request);
 
       return {
-        searchService: scopedClient.typed,
+        searchService: scopedClient,
         uiSettings: uiSettings.asScopedToClient(savedObjectsClient),
       };
     },

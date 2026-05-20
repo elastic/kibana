@@ -10,13 +10,10 @@ import { i18n } from '@kbn/i18n';
 export type AlertingV2BreadcrumbPage =
   | 'root'
   | 'rules_list'
-  | 'create'
-  | 'edit'
   | 'rule_details'
   | 'action_policies_list'
   | 'action_policy_create'
   | 'action_policy_edit'
-  | 'rule_create_options'
   | 'episodes_list'
   | 'episode_details'
   | 'rule_doctor'
@@ -39,27 +36,9 @@ export const getAlertingV2Breadcrumb = (
           defaultMessage: 'Rules',
         }),
       };
-    case 'create':
-      return {
-        text: i18n.translate('xpack.alertingV2.breadcrumbs.createTitle', {
-          defaultMessage: 'Create',
-        }),
-      };
-    case 'edit':
-      return {
-        text: i18n.translate('xpack.alertingV2.breadcrumbs.editTitle', {
-          defaultMessage: 'Edit',
-        }),
-      };
     case 'rule_details':
       return {
         text: options?.ruleName ?? '',
-      };
-    case 'rule_create_options':
-      return {
-        text: i18n.translate('xpack.alertingV2.breadcrumbs.ruleCreateOptionsTitle', {
-          defaultMessage: 'Create rule',
-        }),
       };
     case 'action_policies_list':
       return {

@@ -23,7 +23,7 @@ interface UseEntitiesListParams extends FetchEntitiesListParams {
 export const useEntitiesListQuery = (params: UseEntitiesListParams) => {
   const { skip, ...fetchParams } = params;
   const { fetchEntitiesList, fetchEntitiesListV2 } = useEntityAnalyticsRoutes();
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   return useQuery<ListEntitiesResponse | null, IHttpFetchError>({
     queryKey: [ENTITY_STORE_ENTITIES_LIST, fetchParams, entityStoreV2Enabled],

@@ -14,7 +14,7 @@ import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/commo
 import type { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { RequestStatistics } from '@kbn/inspector-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { ITypedSearchService } from '@kbn/search-types';
+import type { ISearchMethods } from '@kbn/search-types';
 import type { KibanaContext } from '..';
 import { getEsQueryConfig } from '../../es_query';
 import type { DataViewsContract, UiSettingsCommon } from '../..';
@@ -40,7 +40,7 @@ export type EqlExpressionFunctionDefinition = ExpressionFunctionDefinition<
 >;
 
 interface EqlStartDependencies {
-  searchService: ITypedSearchService;
+  searchService: ISearchMethods;
   uiSettingsClient: UiSettingsCommon;
   dataViews: DataViewsContract;
 }
@@ -143,7 +143,7 @@ export const getEqlFn = ({
       });
 
       try {
-        const { rawResponse, requestParams } = await searchService.searchEQL(
+        const { rawResponse, requestParams } = await searchService.eql(
           {
             index: args.index,
             query: args.query,

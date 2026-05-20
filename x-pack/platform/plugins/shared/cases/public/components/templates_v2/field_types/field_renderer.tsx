@@ -9,13 +9,8 @@ import type { FC } from 'react';
 import React, { useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
 import type { z } from '@kbn/zod/v4';
+import { FormProvider, useForm, useFormContext, useWatch } from 'react-hook-form';
 import { EuiIconTip, useEuiTheme } from '@elastic/eui';
-import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import {
-  FormProvider,
-  useForm,
-  useFormData,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/latest';
 import type { InlineField } from '../../../../common/types/domain/template/fields';
 import { CASE_EXTENDED_FIELDS } from '../../../../common/constants';
@@ -40,11 +35,12 @@ export interface TemplateFieldRendererProps {
 
 export const FieldsRenderer: FC<{
   resolvedFields: InlineField[];
-  form: FormHook<{}>;
   parentFieldNames?: Set<string>;
   parentTemplateName?: string;
-}> = ({ resolvedFields, form, parentFieldNames, parentTemplateName }) => {
+  onFieldConfirm?: () => void;
+}> = ({ resolvedFields, parentFieldNames, parentTemplateName, onFieldConfirm }) => {
   const { euiTheme } = useEuiTheme();
+  const { control } = useFormContext();
 
   const fieldTypeMap = useMemo(
     () => Object.fromEntries(resolvedFields.map((f) => [f.name, f.type])),
@@ -61,15 +57,11 @@ export const FieldsRenderer: FC<{
     [resolvedFields]
   );
 
-  const [formData] = useFormData({ form, watch: allFieldPaths });
+  const watchedValues = useWatch({ control, name: allFieldPaths });
 
   const fieldValues = useMemo(() => {
-    const extendedFields =
-      (formData as Record<string, Record<string, unknown>>)?.[CASE_EXTENDED_FIELDS] ?? {};
-    return Object.fromEntries(
-      resolvedFields.map((f) => [f.name, extendedFields[getFieldSnakeKey(f.name, f.type)]])
-    );
-  }, [formData, resolvedFields]);
+    return Object.fromEntries(resolvedFields.map((f, i) => [f.name, watchedValues?.[i]]));
+  }, [watchedValues, resolvedFields]);
 
   return (
     <>
@@ -108,6 +100,7 @@ export const FieldsRenderer: FC<{
           max: field.validation?.max,
           minLength: field.validation?.min_length,
           maxLength: field.validation?.max_length,
+          onConfirm: onFieldConfirm,
         };
 
         const isInherited = parentFieldNames?.has(field.name) ?? false;
@@ -169,18 +162,16 @@ const TemplateFieldRendererInner: FC<{
     return defaults;
   }, [resolvedFields]);
 
-  const { form } = useForm<{}>({
-    defaultValue: initialDefaultValues,
-    options: { stripEmptyFields: false },
+  const form = useForm({
+    defaultValues: initialDefaultValues,
   });
 
   useYamlFormSync(form, resolvedFields, onFieldDefaultChange);
 
   return (
-    <FormProvider key={parsedTemplate.name} form={form}>
+    <FormProvider key={parsedTemplate.name} {...form}>
       <FieldsRenderer
         resolvedFields={resolvedFields}
-        form={form}
         parentFieldNames={parentFieldNames}
         parentTemplateName={parentTemplateName}
       />
@@ -191,8 +182,9 @@ const TemplateFieldRendererInner: FC<{
 TemplateFieldRendererInner.displayName = 'TemplateFieldRendererInner';
 
 /**
- * WARN: this component uses shared-form renderer for Case form compatiblity.
- * Dont change this until we migrate everything to react hook form.
+ * Renders extended fields inside the template YAML editor preview. Owns its
+ * own RHF form and bidirectionally syncs with the YAML defaults via
+ * useYamlFormSync.
  */
 export const TemplateFieldRenderer: FC<TemplateFieldRendererProps> = ({
   parsedTemplate,

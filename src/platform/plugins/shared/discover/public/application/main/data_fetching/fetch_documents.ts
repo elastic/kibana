@@ -49,7 +49,7 @@ export const fetchDocuments = async (
   const searchRequest = searchSource.build();
 
   // Call typed search service with pagination enabled
-  const result = await services.data.search.typed.searchDSL(
+  const result = await services.data.search.dslPaginated(
     {
       index: dataView,
       ...searchRequest.body,
@@ -58,7 +58,6 @@ export const fetchDocuments = async (
       abortSignal: abortController.signal,
       sessionId: searchSessionId,
       executionContext: { description: 'fetch documents' },
-      paginate: true,
     }
   );
 
