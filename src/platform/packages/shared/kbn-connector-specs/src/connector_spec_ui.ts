@@ -26,7 +26,6 @@ import { z } from '@kbn/zod/v4';
 
 export enum WidgetType {
   Text = 'text',
-  Textarea = 'textarea',
   Password = 'password',
   Select = 'select',
   FormFieldset = 'formFieldset',
