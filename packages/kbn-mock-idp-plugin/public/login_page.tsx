@@ -46,6 +46,7 @@ export const LoginPage = ({ config }: { config: ConfigType }) => {
   const [, switchCurrentUser] = useAuthenticator(true);
   const [connectors, setConnectors] = useState<Array<{ connectorId: string; name: string }>>([]);
   const [selectedConnectorId, setSelectedConnectorId] = useState<string | undefined>(undefined);
+  const [eisAvailable, setEisAvailable] = useState<boolean | null>(null);
   const [description, setDescription] = useState('');
   const [isGeneratingRole, setIsGeneratingRole] = useState(false);
   const [roleMessage, setRoleMessage] = useState<{
@@ -126,6 +127,7 @@ export const LoginPage = ({ config }: { config: ConfigType }) => {
       formikRef.current.setFieldValue('role', rolesResponse.roles[0]);
       setConnectors(connectorsResponse.connectors);
       setSelectedConnectorId(connectorsResponse.defaultConnectorId ?? undefined);
+      setEisAvailable(connectorsResponse.connectors.length > 0);
     };
 
     fetchData();
@@ -278,10 +280,12 @@ export const LoginPage = ({ config }: { config: ConfigType }) => {
                 </EuiButtonEmpty>,
               ]}
             />
-            <EuiSpacer size="m" />
-            <EuiText size="s">
-              <strong>Want a custom role?</strong>
-            </EuiText>
+            {eisAvailable && (
+              <>
+                <EuiSpacer size="m" />
+                <EuiText size="s">
+                  <strong>Want a custom role?</strong>
+                </EuiText>
             <EuiButtonEmpty
               size="xs"
               flush="left"
@@ -358,6 +362,8 @@ export const LoginPage = ({ config }: { config: ConfigType }) => {
                     </EuiCodeBlock>
                   </EuiAccordion>
                 )}
+              </>
+            )}
               </>
             )}
           </Form>
