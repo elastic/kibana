@@ -10,14 +10,11 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { RuleDoctorInsightsClient } from '../../lib/rule_doctor_insights_client/rule_doctor_insights_client';
 import { createRouteDependencies } from '../test_utils';
 import { UpdateInsightStatusRoute } from './update_insight_status_route';
-import type { SpaceContext } from './space_context';
 
 describe('UpdateInsightStatusRoute', () => {
   const insightsClient = {
     updateInsightStatus: jest.fn(),
   } as unknown as jest.Mocked<Pick<RuleDoctorInsightsClient, 'updateInsightStatus'>>;
-
-  const spaceContext: SpaceContext = { spaceId: 'my-space' };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -28,6 +25,7 @@ describe('UpdateInsightStatusRoute', () => {
     const request = httpServerMock.createKibanaRequest({
       params: { insight_id: 'insight-1' },
       body: { status: 'dismissed' },
+      spaceId: 'my-space',
     });
 
     insightsClient.updateInsightStatus.mockResolvedValueOnce(undefined);
@@ -35,8 +33,7 @@ describe('UpdateInsightStatusRoute', () => {
     const route = new UpdateInsightStatusRoute(
       ctx,
       request,
-      insightsClient as unknown as RuleDoctorInsightsClient,
-      spaceContext
+      insightsClient as unknown as RuleDoctorInsightsClient
     );
     await route.handle();
 
@@ -62,8 +59,7 @@ describe('UpdateInsightStatusRoute', () => {
     const route = new UpdateInsightStatusRoute(
       ctx,
       request,
-      insightsClient as unknown as RuleDoctorInsightsClient,
-      spaceContext
+      insightsClient as unknown as RuleDoctorInsightsClient
     );
     await route.handle();
 

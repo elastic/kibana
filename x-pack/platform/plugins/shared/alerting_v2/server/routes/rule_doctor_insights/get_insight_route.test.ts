@@ -11,14 +11,11 @@ import type { RuleDoctorInsightsClient } from '../../lib/rule_doctor_insights_cl
 import type { RuleDoctorInsightDoc } from '../../resources/indices/rule_doctor_insights';
 import { createRouteDependencies } from '../test_utils';
 import { GetInsightRoute } from './get_insight_route';
-import type { SpaceContext } from './space_context';
 
 describe('GetInsightRoute', () => {
   const insightsClient = {
     getInsight: jest.fn(),
   } as unknown as jest.Mocked<Pick<RuleDoctorInsightsClient, 'getInsight'>>;
-
-  const spaceContext: SpaceContext = { spaceId: 'default' };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -39,8 +36,7 @@ describe('GetInsightRoute', () => {
     const route = new GetInsightRoute(
       ctx,
       request,
-      insightsClient as unknown as RuleDoctorInsightsClient,
-      spaceContext
+      insightsClient as unknown as RuleDoctorInsightsClient
     );
     await route.handle();
 
@@ -59,8 +55,7 @@ describe('GetInsightRoute', () => {
     const route = new GetInsightRoute(
       ctx,
       request,
-      insightsClient as unknown as RuleDoctorInsightsClient,
-      spaceContext
+      insightsClient as unknown as RuleDoctorInsightsClient
     );
     await route.handle();
 

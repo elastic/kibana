@@ -21,7 +21,6 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_DOCTOR_INSIGHTS_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
-import { SpaceContext } from './space_context';
 
 @injectable()
 export class UpdateInsightStatusRoute extends BaseAlertingRoute {
@@ -53,8 +52,7 @@ export class UpdateInsightStatusRoute extends BaseAlertingRoute {
       UpdateInsightStatusBody
     >,
     @inject(InsightsClientScopedToken)
-    private readonly insightsClient: RuleDoctorInsightsClient,
-    @inject(SpaceContext) private readonly spaceContext: SpaceContext
+    private readonly insightsClient: RuleDoctorInsightsClient
   ) {
     super(ctx);
   }
@@ -63,7 +61,7 @@ export class UpdateInsightStatusRoute extends BaseAlertingRoute {
     await this.insightsClient.updateInsightStatus(
       this.request.params.insight_id,
       this.request.body.status,
-      this.spaceContext.spaceId
+      this.request.spaceId
     );
     return this.ctx.response.noContent();
   }

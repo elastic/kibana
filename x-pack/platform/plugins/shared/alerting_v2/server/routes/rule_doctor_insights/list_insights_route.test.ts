@@ -10,14 +10,11 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { RuleDoctorInsightsClient } from '../../lib/rule_doctor_insights_client/rule_doctor_insights_client';
 import { createRouteDependencies } from '../test_utils';
 import { ListInsightsRoute } from './list_insights_route';
-import type { SpaceContext } from './space_context';
 
 describe('ListInsightsRoute', () => {
   const insightsClient = {
     listInsights: jest.fn(),
   } as unknown as jest.Mocked<Pick<RuleDoctorInsightsClient, 'listInsights'>>;
-
-  const spaceContext: SpaceContext = { spaceId: 'default' };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -34,8 +31,7 @@ describe('ListInsightsRoute', () => {
     const route = new ListInsightsRoute(
       ctx,
       request,
-      insightsClient as unknown as RuleDoctorInsightsClient,
-      spaceContext
+      insightsClient as unknown as RuleDoctorInsightsClient
     );
     await route.handle();
 
@@ -64,8 +60,7 @@ describe('ListInsightsRoute', () => {
     const route = new ListInsightsRoute(
       ctx,
       request,
-      insightsClient as unknown as RuleDoctorInsightsClient,
-      spaceContext
+      insightsClient as unknown as RuleDoctorInsightsClient
     );
     await route.handle();
 
@@ -87,8 +82,7 @@ describe('ListInsightsRoute', () => {
     const route = new ListInsightsRoute(
       ctx,
       request,
-      insightsClient as unknown as RuleDoctorInsightsClient,
-      spaceContext
+      insightsClient as unknown as RuleDoctorInsightsClient
     );
     await route.handle();
 

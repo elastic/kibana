@@ -84,7 +84,6 @@ import {
 } from '../lib/dispatcher/steps/dispatch_step_tokens';
 import { MatcherSuggestionsService } from '../lib/services/matcher_suggestions_service/matcher_suggestions_service';
 import { RuleDoctorInsightsClient } from '../lib/rule_doctor_insights_client/rule_doctor_insights_client';
-import { SpaceContext } from '../routes/rule_doctor_insights/space_context';
 import {
   InsightsClientScopedToken,
   InsightsClientInternalToken,
@@ -311,8 +310,6 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       };
     })
     .inSingletonScope();
-
-  bind(SpaceContext).toSelf().inRequestScope();
 
   bind(InsightsClientScopedToken)
     .toDynamicValue(({ get }) => {

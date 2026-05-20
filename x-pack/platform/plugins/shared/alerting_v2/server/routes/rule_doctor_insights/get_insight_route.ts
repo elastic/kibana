@@ -16,7 +16,6 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_DOCTOR_INSIGHTS_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
-import { SpaceContext } from './space_context';
 
 @injectable()
 export class GetInsightRoute extends BaseAlertingRoute {
@@ -43,8 +42,7 @@ export class GetInsightRoute extends BaseAlertingRoute {
     @inject(Request)
     private readonly request: KibanaRequest<GetInsightParams, unknown, unknown>,
     @inject(InsightsClientScopedToken)
-    private readonly insightsClient: RuleDoctorInsightsClient,
-    @inject(SpaceContext) private readonly spaceContext: SpaceContext
+    private readonly insightsClient: RuleDoctorInsightsClient
   ) {
     super(ctx);
   }
@@ -52,7 +50,7 @@ export class GetInsightRoute extends BaseAlertingRoute {
   protected async execute() {
     const insight = await this.insightsClient.getInsight(
       this.request.params.insight_id,
-      this.spaceContext.spaceId
+      this.request.spaceId
     );
     return this.ctx.response.ok({ body: insight });
   }
