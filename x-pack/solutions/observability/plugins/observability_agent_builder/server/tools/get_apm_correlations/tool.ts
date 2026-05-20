@@ -107,8 +107,8 @@ When NOT to use this tool:
 - If you need the raw trace details, use observability.get_traces.
 
 Notes:
-- "latency" and "infra_metrics" correlations use a percentileThreshold (default p95) to define the slow subset.
-- "throughput" computes Pearson correlation between overall RPM and per-field-value RPM timeseries; results with |correlation| < 0.3 are excluded.
+- "latency" and "infra_metrics" correlations use a percentileThreshold (default p95) to define the slow subset. Scoring uses significant_terms (KL-divergence); this differs from the Kibana UI which uses a K-S test — scores are not directly comparable.
+- "throughput" computes Pearson correlation between overall RPM and per-field-value RPM timeseries; results with |correlation| < 0.3 are excluded. Requires at least a ~3-minute time range to produce meaningful results.
 - "infra_metrics" automatically uses infrastructure field candidates (host.name, container.id, kubernetes.pod.name, etc.) unless fieldCandidates is specified.
 - Results are best-effort and may be less useful when fieldCandidates include high-cardinality fields or fields without keyword mappings.`,
     schema: getApmCorrelationsSchema,

@@ -125,28 +125,34 @@ describe('fetchCorrelations', () => {
   });
 
   describe('infra_metrics metric', () => {
-    it('uses fetchInfraFieldCandidates instead of fetchDurationFieldCandidates', async () => {
+    const infraPair = { fieldName: 'host.name', fieldValue: 'host-a' };
+    // ksTest required for the deduplication filter in fetchCorrelations
+    const infraSignificantCorrelation = { ...infraCorrelation, ksTest: 0.05 };
+
+    it('uses fetchInfraFieldCandidates and passes results through fetchSignificantCorrelations', async () => {
       mockFetchInfraFieldCandidates.mockResolvedValue({ fieldCandidates: ['host.name'] });
-      mockFetchFieldValuePairs.mockResolvedValue({ fieldValuePairs: [] });
+      mockFetchFieldValuePairs.mockResolvedValue({ fieldValuePairs: [infraPair] });
       mockFetchSignificantCorrelations.mockResolvedValue({
-        latencyCorrelations: [],
+        latencyCorrelations: [infraSignificantCorrelation],
         ccsWarning: false,
       });
 
-      await fetchCorrelations({ ...defaultParams, metric: 'infra_metrics' });
+      const result = await fetchCorrelations({ ...defaultParams, metric: 'infra_metrics' });
 
       expect(mockFetchInfraFieldCandidates).toHaveBeenCalledTimes(1);
       expect(mockFetchDurationFieldCandidates).not.toHaveBeenCalled();
+      expect(mockFetchSignificantCorrelations).toHaveBeenCalledTimes(1);
+      expect(result.correlations).toEqual([infraSignificantCorrelation]);
     });
 
     it('skips fetchInfraFieldCandidates when fieldCandidates are provided', async () => {
-      mockFetchFieldValuePairs.mockResolvedValue({ fieldValuePairs: [] });
+      mockFetchFieldValuePairs.mockResolvedValue({ fieldValuePairs: [infraPair] });
       mockFetchSignificantCorrelations.mockResolvedValue({
-        latencyCorrelations: [],
+        latencyCorrelations: [infraSignificantCorrelation],
         ccsWarning: false,
       });
 
-      await fetchCorrelations({
+      const result = await fetchCorrelations({
         ...defaultParams,
         metric: 'infra_metrics',
         fieldCandidates: ['host.name'],
@@ -154,6 +160,8 @@ describe('fetchCorrelations', () => {
 
       expect(mockFetchInfraFieldCandidates).not.toHaveBeenCalled();
       expect(mockFetchDurationFieldCandidates).not.toHaveBeenCalled();
+      expect(mockFetchSignificantCorrelations).toHaveBeenCalledTimes(1);
+      expect(result.correlations).toEqual([infraSignificantCorrelation]);
     });
   });
 

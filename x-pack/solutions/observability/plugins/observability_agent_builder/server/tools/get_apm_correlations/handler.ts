@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { chunk } from 'lodash';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
@@ -62,11 +63,12 @@ const INFRA_DEFAULT_FIELD_CANDIDATES = [
   CLOUD_ACCOUNT_ID,
 ] as const;
 
-// These mirror values in apm/common/correlations/constants.ts but cannot be imported
-// directly from there because observability_agent_builder does not depend on the APM plugin.
-const THROUGHPUT_BUCKET_COUNT = 20;
-const THROUGHPUT_CORRELATION_THRESHOLD = 0.3;
-const THROUGHPUT_TOP_VALUES_PER_FIELD = 10;
+// Mirror values from apm/common/correlations/constants.ts — cannot import directly because
+// observability_agent_builder does not depend on the APM plugin. Keep in sync manually.
+const THROUGHPUT_BUCKET_COUNT = 20; // sync: THROUGHPUT_BUCKET_COUNT
+const THROUGHPUT_CORRELATION_THRESHOLD = 0.3; // sync: THROUGHPUT_CORRELATION_THRESHOLD
+const THROUGHPUT_TOP_VALUES_PER_FIELD = 10; // sync: THROUGHPUT_TOP_VALUES_PER_FIELD
+const THROUGHPUT_CHUNK_SIZE = 10;
 
 function computeIntervalMs(start: number, end: number): number {
   const rangeMs = end - start;
@@ -281,6 +283,18 @@ export async function getToolHandler({
     );
     const overallMeanRpm = overallRpm.reduce((a, b) => a + b, 0) / (overallRpm.length || 1);
 
+    if (overallBuckets.length < 3) {
+      return {
+        metric,
+        timeRange: { start, end },
+        kqlFilter: kqlFilterValue,
+        totalTransactions: overallTotalHits,
+        correlations: [],
+        warning:
+          'Time range too short for throughput correlation — at least 3 time buckets (~3 minutes) are required.',
+      };
+    }
+
     const throughputCandidates = (
       fieldCandidates?.length ? fieldCandidates : [...DEFAULT_FIELD_CANDIDATES]
     ).slice(0, 25);
@@ -303,52 +317,54 @@ export async function getToolHandler({
 
       const fieldValues: unknown[] = [];
 
-      await Promise.allSettled(
-        termBuckets.map(async (bucket) => {
-          const fieldValue = bucket.key;
-          const filteredFilters = [...overallFilters, { term: { [field]: fieldValue } }];
+      for (const bucketChunk of chunk(termBuckets, THROUGHPUT_CHUNK_SIZE)) {
+        await Promise.allSettled(
+          bucketChunk.map(async (bucket) => {
+            const fieldValue = bucket.key;
+            const filteredFilters = [...overallFilters, { term: { [field]: fieldValue } }];
 
-          const filteredResp = await esClient.asCurrentUser.search({
-            index: indices,
-            size: 0,
-            query: toBoolFilter(filteredFilters),
-            aggs: {
-              timeseries: {
-                date_histogram: {
-                  field: APM_TIME_FIELD,
-                  fixed_interval: intervalString,
-                  min_doc_count: 0,
-                  extended_bounds: { min: startTime, max: endTime },
+            const filteredResp = await esClient.asCurrentUser.search({
+              index: indices,
+              size: 0,
+              query: toBoolFilter(filteredFilters),
+              aggs: {
+                timeseries: {
+                  date_histogram: {
+                    field: APM_TIME_FIELD,
+                    fixed_interval: intervalString,
+                    min_doc_count: 0,
+                    extended_bounds: { min: startTime, max: endTime },
+                  },
+                  aggs: { rpm: { rate: { unit: 'minute' as const } } },
                 },
-                aggs: { rpm: { rate: { unit: 'minute' as const } } },
               },
-            },
-          });
+            });
 
-          const filteredByKey = new Map<number, number>(
-            ((filteredResp.aggregations?.timeseries as any)?.buckets ?? []).map((b: any) => [
-              b.key as number,
-              (b.rpm as { value: number }).value ?? 0,
-            ])
-          );
-          const filteredRpm = overallBucketKeys.map((k) => filteredByKey.get(k) ?? 0);
+            const filteredByKey = new Map<number, number>(
+              ((filteredResp.aggregations?.timeseries as any)?.buckets ?? []).map((b: any) => [
+                b.key as number,
+                (b.rpm as { value: number }).value ?? 0,
+              ])
+            );
+            const filteredRpm = overallBucketKeys.map((k) => filteredByKey.get(k) ?? 0);
 
-          if (filteredRpm.every((v) => v === 0)) return;
+            if (filteredRpm.every((v) => v === 0)) return;
 
-          const correlation = computePearsonCorrelation(overallRpm, filteredRpm);
-          if (Math.abs(correlation) < THROUGHPUT_CORRELATION_THRESHOLD) return;
+            const correlation = computePearsonCorrelation(overallRpm, filteredRpm);
+            if (Math.abs(correlation) < THROUGHPUT_CORRELATION_THRESHOLD) return;
 
-          const filteredMeanRpm =
-            filteredRpm.reduce((a, b) => a + b, 0) / (filteredRpm.length || 1);
+            const filteredMeanRpm =
+              filteredRpm.reduce((a, b) => a + b, 0) / (filteredRpm.length || 1);
 
-          fieldValues.push({
-            value: fieldValue,
-            correlation: roundTo(correlation, 3),
-            rpmDelta: roundTo(filteredMeanRpm - overallMeanRpm, 3),
-            rpmBaseline: roundTo(overallMeanRpm, 3),
-          });
-        })
-      );
+            fieldValues.push({
+              value: fieldValue,
+              correlation: roundTo(correlation, 3),
+              rpmDelta: roundTo(filteredMeanRpm - overallMeanRpm, 3),
+              rpmBaseline: roundTo(overallMeanRpm, 3),
+            });
+          })
+        );
+      }
 
       if (fieldValues.length > 0) {
         (fieldValues as Array<{ correlation: number }>).sort(
@@ -369,6 +385,10 @@ export async function getToolHandler({
   }
 
   // --- Latency, failure_rate, infra_metrics: significant_terms approach ---
+  // Note: infra_metrics here uses significant_terms (KL-divergence scoring), whereas
+  // fetchCorrelations in the APM plugin uses a K-S test via fetchSignificantCorrelations.
+  // The two produce different scores for the same data; this is intentional — this handler
+  // cannot import from the APM plugin (no plugin dependency). Document divergence in tool desc.
   let subsetFilters: QueryDslQueryContainer[] = [];
   let subsetDefinition:
     | {
