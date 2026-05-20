@@ -18,7 +18,13 @@ function tryParseDate(date: string | string[] | null | undefined): Moment | unde
   return typeof date === 'string' ? datemath.parse(date) : undefined;
 }
 
-function isValidDateRange(start: Moment | undefined, end: Moment | undefined): boolean {
+function isValidDateRange(
+  from: string | string[] | null | undefined,
+  to: string | string[] | null | undefined
+): boolean {
+  const start = tryParseDate(from);
+  const end = tryParseDate(to);
+
   return Boolean(start?.isValid() && end?.isValid() && start.isBefore(end));
 }
 
@@ -36,27 +42,26 @@ export function useDateRangeRedirect() {
   const timePickerSharedState = plugins.data.query.timefilter.timefilter.getTime();
 
   const isDateRangeSet = useMemo(() => {
-    const start = tryParseDate(query.rangeFrom);
-    const end = tryParseDate(query.rangeTo);
-
-    return Boolean(start?.isValid() && end?.isValid()) && isValidDateRange(start, end);
+    return isValidDateRange(query.rangeFrom, query.rangeTo);
   }, [query.rangeFrom, query.rangeTo]);
 
   const redirect = () => {
-    const start = tryParseDate(query.rangeFrom);
-    const end = tryParseDate(query.rangeTo);
-    const isRangeInverted = start?.isValid() && end?.isValid() && !isValidDateRange(start, end);
+    const defaultFrom = timePickerSharedState.from ?? timePickerTimeDefaults.from;
+    const defaultTo = timePickerSharedState.to ?? timePickerTimeDefaults.to;
+
+    const resolvedFrom = tryParseDate(query.rangeFrom)?.isValid()
+      ? query.rangeFrom
+      : timePickerTimeDefaults.from;
+    const resolvedTo = tryParseDate(query.rangeTo)?.isValid()
+      ? query.rangeTo
+      : timePickerTimeDefaults.to;
+
+    const isResolvedRangeValid = isValidDateRange(resolvedFrom, resolvedTo);
 
     const nextQuery = {
       ...query,
-      rangeFrom:
-        start?.isValid() && !isRangeInverted
-          ? query.rangeFrom
-          : timePickerSharedState.from ?? timePickerTimeDefaults.from,
-      rangeTo:
-        end?.isValid() && !isRangeInverted
-          ? query.rangeTo
-          : timePickerSharedState.to ?? timePickerTimeDefaults.to,
+      rangeFrom: isResolvedRangeValid ? resolvedFrom : defaultFrom,
+      rangeTo: isResolvedRangeValid ? resolvedTo : defaultTo,
     };
 
     try {
