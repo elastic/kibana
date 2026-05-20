@@ -7,10 +7,33 @@
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { threatHuntingSkill } from './threat_hunting';
 import { alertAnalysisSkill } from './alert_analysis';
+import { getDetectionEmulationSkill } from './detection_emulation';
+import type { DetectionEmulationSkillContext } from './detection_emulation';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
+import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
+import type { ConfigType } from '../../config';
 
-const ALL_SKILLS = [threatHuntingSkill, alertAnalysisSkill];
+const createDetectionEmulationCtx = (): DetectionEmulationSkillContext => ({
+  core: {
+    getStartServices: jest
+      .fn()
+      .mockResolvedValue([{ plugins: { cases: undefined }, security: undefined }, {}]),
+  } as unknown as SecuritySolutionPluginCoreSetupDependencies,
+  endpointService: {} as unknown as EndpointAppContextService,
+  config: {
+    experimentalFeatures: { detectionEmulationRealExecution: false },
+  } as unknown as ConfigType,
+  logger: loggingSystemMock.createLogger(),
+});
+
+const ALL_SKILLS = [
+  threatHuntingSkill,
+  alertAnalysisSkill,
+  getDetectionEmulationSkill(createDetectionEmulationCtx()),
+];
 
 describe('Security Skills', () => {
   describe('threat-hunting skill', () => {
@@ -95,6 +118,49 @@ describe('Security Skills', () => {
 
     it('content references entity-analytics skill for deeper profiling', () => {
       expect(alertAnalysisSkill.content).toContain('entity-analytics');
+    });
+  });
+
+  describe('detection-emulation skill', () => {
+    it('validates successfully via validateSkillDefinition', async () => {
+      const skill = getDetectionEmulationSkill(createDetectionEmulationCtx());
+      await expect(validateSkillDefinition(skill)).resolves.toBeDefined();
+    });
+
+    it('has non-empty content', () => {
+      const skill = getDetectionEmulationSkill(createDetectionEmulationCtx());
+      expect(skill.content.length).toBeGreaterThan(100);
+    });
+
+    it('has description under 1024 characters', () => {
+      const skill = getDetectionEmulationSkill(createDetectionEmulationCtx());
+      expect(skill.description.length).toBeLessThanOrEqual(1024);
+    });
+
+    it('has one inline tool (run-command)', async () => {
+      const skill = getDetectionEmulationSkill(createDetectionEmulationCtx());
+      // getInlineTools may return a Promise<Tool[]> or a Tool[]; await covers both.
+      const tools = await skill.getInlineTools!();
+      expect(tools).toHaveLength(1);
+      expect((tools[0] as { id: string }).id).toBe('security.detection-emulation.run-command');
+    });
+
+    it('content describes the only currently-wired agent type (endpoint) and explicitly notes the other three as not-yet-supported', () => {
+      const skill = getDetectionEmulationSkill(createDetectionEmulationCtx());
+      expect(skill.content).toContain('endpoint');
+      // The doc is honest about scope: it must list the unsupported types in
+      // the "Things this skill does NOT do (yet)" section so the LLM does not
+      // try to dispatch against them.
+      expect(skill.content).toContain('sentinel_one');
+      expect(skill.content).toContain('crowdstrike');
+      expect(skill.content).toContain('microsoft_defender_endpoint');
+      // And the description must say the same so it surfaces in skill catalogs.
+      expect(skill.description).toContain('endpoint');
+    });
+
+    it('description references the experimental feature flag', () => {
+      const skill = getDetectionEmulationSkill(createDetectionEmulationCtx());
+      expect(skill.description).toContain('detectionEmulationRealExecution');
     });
   });
 
