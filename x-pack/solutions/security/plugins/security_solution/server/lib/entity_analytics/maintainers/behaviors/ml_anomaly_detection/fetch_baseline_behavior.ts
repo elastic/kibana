@@ -78,6 +78,78 @@ export interface BaselineConfig {
   groupFieldValues: Record<string, string[]>;
 }
 
+const uniqueNonNullValues = (
+  anomalies: AnomalyHit[],
+  selector: (a: AnomalyHit) => string | undefined
+): string[] => [...new Set(anomalies.map(selector).filter((v): v is string => v != null))];
+
+const buildRareConfig = (
+  func: string,
+  detector: MlDetector,
+  detectorAnomalies: AnomalyHit[],
+  detectorIndex: number
+): BaselineConfig | null => {
+  if (!detector.by_field_name) return null;
+  return {
+    detectorIndex,
+    func,
+    targetField: detector.by_field_name,
+    exclusionValues: uniqueNonNullValues(detectorAnomalies, (a) => a.byFieldValue),
+    groupFields: [],
+    groupFieldValues: {},
+    anomalies: detectorAnomalies,
+  };
+};
+
+// Collect detector field names that are not entity-type identifiers (e.g. user.name, host.name)
+const getNonEntityGroupFields = (detector: MlDetector, entityType: string): string[] =>
+  [
+    detector.field_name,
+    detector.by_field_name,
+    detector.over_field_name,
+    detector.partition_field_name,
+  ].filter((f): f is string => f != null && !f.startsWith(`${entityType}.`));
+
+// For each by/over/partition field that made it into groupFields, collect the unique anomalous values
+const buildGroupFieldValues = (
+  detector: MlDetector,
+  groupFields: string[],
+  detectorAnomalies: AnomalyHit[]
+): Record<string, string[]> => {
+  const dimensionalFields: Array<[string | undefined, (a: AnomalyHit) => string | undefined]> = [
+    [detector.by_field_name, (a) => a.byFieldValue],
+    [detector.over_field_name, (a) => a.overFieldValue],
+    [detector.partition_field_name, (a) => a.partitionFieldValue],
+  ];
+  return Object.fromEntries(
+    dimensionalFields
+      .filter(
+        (entry): entry is [string, (a: AnomalyHit) => string | undefined] =>
+          entry[0] != null && groupFields.includes(entry[0])
+      )
+      .map(([fieldName, selector]) => [fieldName, uniqueNonNullValues(detectorAnomalies, selector)])
+  );
+};
+
+const buildMetricConfig = (
+  func: string,
+  detector: MlDetector,
+  detectorAnomalies: AnomalyHit[],
+  detectorIndex: number,
+  entityType: string
+): BaselineConfig => {
+  const groupFields = getNonEntityGroupFields(detector, entityType);
+  return {
+    detectorIndex,
+    func,
+    targetField: null,
+    exclusionValues: [],
+    groupFields,
+    groupFieldValues: buildGroupFieldValues(detector, groupFields, detectorAnomalies),
+    anomalies: detectorAnomalies,
+  };
+};
+
 /**
  * Gets the config to query for baseline behavior
  *
@@ -94,69 +166,20 @@ export const getBaselineConfigs = (
   entityType: string
 ): BaselineConfig[] => {
   const byDetector = groupBy(anomalies, (a) => a.detectorIndex);
-  const configs: BaselineConfig[] = [];
 
-  for (const [detectorIndexStr, detectorAnomalies] of Object.entries(byDetector)) {
+  return Object.entries(byDetector).flatMap(([detectorIndexStr, detectorAnomalies]) => {
     const detectorIndex = Number(detectorIndexStr);
     const detector = job.detectors?.[detectorIndex];
-    if (detector?.function) {
-      const func = detector.function;
+    const { function: func } = detector ?? {};
+    if (!func) return [];
 
-      if (func === 'rare') {
-        if (detector.by_field_name) {
-          const exclusionValues = [
-            ...new Set(
-              detectorAnomalies.map((a) => a.byFieldValue).filter((v): v is string => v != null)
-            ),
-          ];
-          configs.push({
-            detectorIndex,
-            func,
-            targetField: detector.by_field_name,
-            exclusionValues,
-            groupFields: [],
-            groupFieldValues: {},
-            anomalies: detectorAnomalies,
-          });
-        }
-      } else {
-        const groupFields = [
-          detector.field_name,
-          detector.by_field_name,
-          detector.over_field_name,
-          detector.partition_field_name,
-        ].filter((f): f is string => f != null && !f.startsWith(`${entityType}.`));
+    const config =
+      func === 'rare'
+        ? buildRareConfig(func, detector, detectorAnomalies, detectorIndex)
+        : buildMetricConfig(func, detector, detectorAnomalies, detectorIndex, entityType);
 
-        const uniqueValues = (selector: (a: AnomalyHit) => string | undefined): string[] => [
-          ...new Set(detectorAnomalies.map(selector).filter((v): v is string => v != null)),
-        ];
-        const dimensionalFields: Array<
-          [string | undefined, (a: AnomalyHit) => string | undefined]
-        > = [
-          [detector.by_field_name, (a) => a.byFieldValue],
-          [detector.over_field_name, (a) => a.overFieldValue],
-          [detector.partition_field_name, (a) => a.partitionFieldValue],
-        ];
-        const groupFieldValues: Record<string, string[]> = {};
-        for (const [fieldName, selector] of dimensionalFields) {
-          if (fieldName && groupFields.includes(fieldName)) {
-            groupFieldValues[fieldName] = uniqueValues(selector);
-          }
-        }
-        configs.push({
-          detectorIndex,
-          func,
-          targetField: null,
-          exclusionValues: [],
-          groupFields,
-          groupFieldValues,
-          anomalies: detectorAnomalies,
-        });
-      }
-    }
-  }
-
-  return configs;
+    return config != null ? [config] : [];
+  });
 };
 
 interface GetJobConfigOpts {

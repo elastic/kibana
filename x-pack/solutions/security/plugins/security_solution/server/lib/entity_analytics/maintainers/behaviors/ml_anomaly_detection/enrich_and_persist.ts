@@ -33,10 +33,13 @@ export const enrichAndPersistAnomalies = async ({
   namespace,
   soClient,
 }: EnrichAndPersistAnomaliesOpts) => {
-  const enrichedRecords: EnrichedAnomalyRecord[] = [];
-  for (const [entityId, entityAnomalies] of anomaliesByEntity.entries()) {
-    for (const [jobId, jobData] of Object.entries(entityAnomalies)) {
-      const baselinesBehaviors = await fetchBaselineBehavior({
+  const fetchTasks = [...anomaliesByEntity.entries()].flatMap(([entityId, entityAnomalies]) =>
+    Object.entries(entityAnomalies).map(([jobId, jobData]) => ({ entityId, jobId, jobData }))
+  );
+
+  const fetchResults = await Promise.all(
+    fetchTasks.map(({ entityId, jobId, jobData }) =>
+      fetchBaselineBehavior({
         abortSignal,
         anomalies: jobData.anomalies,
         entityId,
@@ -46,39 +49,47 @@ export const enrichAndPersistAnomalies = async ({
         logger,
         ml,
         soClient,
-      });
+      })
+        .then((baselinesBehaviors) => ({ entityId, jobId, jobData, baselinesBehaviors }))
+        .catch((err) => {
+          logger.warn(
+            `Failed to fetch baseline behavior for entity ${entityId}, job ${jobId}: ${err}`
+          );
+          return { entityId, jobId, jobData, baselinesBehaviors: null };
+        })
+    )
+  );
 
-      for (const anomaly of jobData.anomalies) {
-        enrichedRecords.push({
-          entity: {
-            id: entityId,
-            type: entityType,
-          },
-          anomaly: {
-            _id: anomaly._id,
-            job_id: jobId,
-            detector_index: anomaly.detectorIndex,
-            timestamp: anomaly.timestamp,
-            record_score: anomaly.recordScore,
-            field_name: anomaly.fieldName,
-            actual: anomaly.actual,
-            typical: anomaly.typical,
-            by_field_name: anomaly.byFieldName,
-            by_field_value: anomaly.byFieldValue,
-            over_field_name: anomaly.overFieldName,
-            over_field_value: anomaly.overFieldValue,
-            partition_field_name: anomaly.partitionFieldName,
-            partition_field_value: anomaly.partitionFieldValue,
-          },
-          baseline: (baselinesBehaviors ?? []).map((bb) => ({
-            value: bb.value,
-            doc_count: bb.doc_count,
-            top_hits: bb.topHits,
-          })),
-        });
-      }
-    }
-  }
+  const enrichedRecords: EnrichedAnomalyRecord[] = fetchResults.flatMap(
+    ({ entityId, jobId, jobData, baselinesBehaviors }) =>
+      jobData.anomalies.map((anomaly) => ({
+        entity: {
+          id: entityId,
+          type: entityType,
+        },
+        anomaly: {
+          _id: anomaly._id,
+          job_id: jobId,
+          detector_index: anomaly.detectorIndex,
+          timestamp: anomaly.timestamp,
+          record_score: anomaly.recordScore,
+          field_name: anomaly.fieldName,
+          actual: anomaly.actual,
+          typical: anomaly.typical,
+          by_field_name: anomaly.byFieldName,
+          by_field_value: anomaly.byFieldValue,
+          over_field_name: anomaly.overFieldName,
+          over_field_value: anomaly.overFieldValue,
+          partition_field_name: anomaly.partitionFieldName,
+          partition_field_value: anomaly.partitionFieldValue,
+        },
+        baseline: (baselinesBehaviors ?? []).map((bb) => ({
+          value: bb.value,
+          doc_count: bb.doc_count,
+          top_hits: bb.topHits,
+        })),
+      }))
+  );
 
   if (enrichedRecords.length === 0) return;
 

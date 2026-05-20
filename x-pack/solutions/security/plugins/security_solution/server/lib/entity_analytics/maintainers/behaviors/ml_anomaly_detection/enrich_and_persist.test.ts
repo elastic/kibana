@@ -135,6 +135,29 @@ describe('enrichAndPersistAnomalies', () => {
     });
   });
 
+  it('makes exactly one fetchBaselineBehavior call when an entity has multiple anomalies for the same job', async () => {
+    const anomaly1 = makeAnomaly({ entityId: 'user:alice', jobId: 'security-job-1' });
+    const anomaly2 = makeAnomaly({ entityId: 'user:alice', jobId: 'security-job-1' });
+
+    await enrichAndPersistAnomalies({
+      anomaliesByEntity: new Map([
+        ['user:alice', makeEntityAnomalies('security-job-1', [anomaly1, anomaly2])],
+      ]),
+      abortSignal,
+      entityType: 'user',
+      esClient,
+      logger,
+      ml,
+      namespace: 'default',
+      soClient,
+    });
+
+    expect(mockFetchBaselineBehavior).toHaveBeenCalledTimes(1);
+    expect(mockFetchBaselineBehavior).toHaveBeenCalledWith(
+      expect.objectContaining({ anomalies: [anomaly1, anomaly2] })
+    );
+  });
+
   it('maps the anomaly and entity fields into the indexed document correctly', async () => {
     const anomaly = makeAnomaly({
       entityId: 'user:alice',
@@ -355,6 +378,40 @@ describe('enrichAndPersistAnomalies', () => {
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('Bulk-index of enriched anomaly records returned errors')
     );
+  });
+
+  it('still indexes all anomalies with empty baseline when one fetchBaselineBehavior call fails', async () => {
+    const anomaly1 = makeAnomaly({ entityId: 'user:alice', jobId: 'security-job-1' });
+    const anomaly2 = makeAnomaly({ entityId: 'user:bob', jobId: 'security-job-2' });
+    const baselines = [makeBaselineBucket({ value: 'US' })];
+    const fetchError = new Error('fetch failed');
+
+    mockFetchBaselineBehavior.mockResolvedValueOnce(baselines).mockRejectedValueOnce(fetchError);
+
+    await enrichAndPersistAnomalies({
+      anomaliesByEntity: new Map([
+        ['user:alice', makeEntityAnomalies('security-job-1', [anomaly1])],
+        ['user:bob', makeEntityAnomalies('security-job-2', [anomaly2])],
+      ]),
+      abortSignal,
+      entityType: 'user',
+      esClient,
+      logger,
+      ml,
+      namespace: 'default',
+      soClient,
+    });
+
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('fetch failed'));
+
+    const bulkCall = esClient.bulk.mock.calls[0][0];
+    // both anomalies still indexed
+    expect((bulkCall.operations as unknown[]).length).toBe(4);
+
+    const aliceDoc = (bulkCall.operations as unknown[])[1] as Record<string, unknown>;
+    const bobDoc = (bulkCall.operations as unknown[])[3] as Record<string, unknown>;
+    expect(aliceDoc.baseline).toEqual([{ value: 'US', doc_count: 100, top_hits: [] }]);
+    expect(bobDoc.baseline).toEqual([]);
   });
 
   it('does not log a warning when the bulk response has no errors', async () => {
