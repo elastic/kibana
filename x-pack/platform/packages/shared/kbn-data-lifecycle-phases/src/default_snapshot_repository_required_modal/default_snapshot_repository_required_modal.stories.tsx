@@ -12,7 +12,7 @@ import { DefaultSnapshotRepositoryRequiredModal } from './default_snapshot_repos
 
 const meta: Meta<typeof DefaultSnapshotRepositoryRequiredModal> = {
   component: DefaultSnapshotRepositoryRequiredModal,
-  title: 'streams/DefaultSnapshotRepositoryRequiredModal',
+  title: 'Data Lifecycle Phases / Default Snapshot Repository Required Modal',
   argTypes: {
     onCancel: { control: false },
     onRefresh: { control: false },
