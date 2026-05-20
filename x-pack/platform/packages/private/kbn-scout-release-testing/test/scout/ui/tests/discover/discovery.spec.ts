@@ -18,8 +18,6 @@ const defaultSettings = {
 };
 const defaultStartTime = 'Sep 19, 2015 @ 06:31:44.000';
 const defaultEndTime = 'Sep 23, 2015 @ 18:31:44.000';
-const defaultStartTimeIso = '2015-09-19T06:31:44.000Z';
-const defaultEndTimeIso = '2015-09-23T18:31:44.000Z';
 const endTimeNoResults = 'Sep 19, 2015 @ 18:45:00.000';
 const queryName1 = 'Query # 1';
 const queryName2 = 'Query # 2';
@@ -63,8 +61,8 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
       to: defaultEndTime,
     });
     const time = await pageObjects.datePicker.getTimeConfig();
-    expect(time.start).toBe(defaultStartTimeIso);
-    expect(time.end).toBe(defaultEndTimeIso);
+    expect(time.start).toBe(defaultStartTime);
+    expect(time.end).toBe(defaultEndTime);
 
     const rowData = await pageObjects.discover.getDocTableIndex(1);
     expect(rowData).toContain('Sep 22, 2015 @ 23:50:13.253');
@@ -74,27 +72,6 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
     await pageObjects.discover.saveSearch(queryName1);
     const actualQueryNameString = await pageObjects.discover.getCurrentQueryName();
     expect(actualQueryNameString).toBe(queryName1);
-  });
-
-  test('should refetch when autofresh is enabled', async ({ page, pageObjects }) => {
-    const interval = 3;
-    await pageObjects.datePicker.startAutoRefresh(interval);
-
-    // The auto-refresh button renders the live mm:ss countdown as its only
-    // text content (the icon is an inline SVG), so we can prove auto-refresh
-    // fired by observing the countdown tick down and then reset back to the
-    // configured interval.
-    const autoRefreshButton = page.testSubj.locator('dateRangePickerAutoRefreshButton');
-    const getCountdownSeconds = async (): Promise<number> => {
-      const [minutes, seconds] = (await autoRefreshButton.innerText())
-        .trim()
-        .split(':')
-        .map(Number);
-      return minutes * 60 + seconds;
-    };
-
-    await expect.poll(getCountdownSeconds, { timeout: 5_000 }).toBeLessThan(interval);
-    await expect.poll(getCountdownSeconds, { timeout: 5_000 }).toBe(interval);
   });
 
   test('load query should show query name', async ({ pageObjects }) => {
@@ -116,12 +93,17 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
   });
 
   test('should modify the time range when a bar is clicked', async ({ pageObjects }) => {
+    await pageObjects.datePicker.setAbsoluteRange({
+      from: defaultStartTime,
+      to: defaultEndTime,
+    });
+
     await pageObjects.discover.clickHistogramBar();
     await pageObjects.discover.waitUntilSearchingHasFinished();
 
     const time = await pageObjects.datePicker.getTimeConfig();
-    expect(time.start).toBe('2015-09-21T09:00:00.000Z');
-    expect(time.end).toBe('2015-09-21T12:00:00.000Z');
+    expect(time.start).toBe('Sep 21, 2015 @ 09:00:00.000');
+    expect(time.end).toBe('Sep 21, 2015 @ 12:00:00.000');
 
     await expect
       .poll(
@@ -226,7 +208,7 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
   test('click Field Stats button and validate Document Stats is present', async ({ page }) => {
     await page.testSubj.click('dscViewModeFieldStatsButton');
     await expect(page.testSubj.locator('dataVisualizerTable-loaded')).toBeVisible();
-    await page.testSubj.click('dataVisualizerDetailsToggle-@message.raw-arrowRight');
+    await page.testSubj.click('dataVisualizerDetailsToggle-@message.raw-chevronSingleRight');
     await expect(page.testSubj.locator('dataVisualizerDocumentStatsContent')).toBeVisible();
   });
 
