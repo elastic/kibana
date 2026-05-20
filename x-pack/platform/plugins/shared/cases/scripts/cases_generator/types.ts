@@ -7,6 +7,7 @@
 
 import type { KbnClient } from '@kbn/test';
 import type { CasePostRequest } from '../../common';
+import type { KitchenSinkFieldDef } from './kitchen_sink_template';
 
 export interface KbnContext {
   kbnClient: KbnClient;
@@ -61,7 +62,13 @@ export type TemplateFieldUserType = (typeof TEMPLATE_FIELD_USER_TYPES)[number];
 export interface CreatedTemplateRef {
   id: string;
   version: number;
+  // Synthesized field types from the --templateFieldTypes opt-out path.
+  // Empty when the template was created from the kitchen-sink YAML default.
   fieldTypes: TemplateFieldUserType[];
+  // Populated when the template was created from the kitchen-sink YAML so
+  // data_generation can drive extended_fields off the real field defs
+  // (names, types, validation) instead of the synthesized fieldA/B/… names.
+  kitchenSinkFields?: readonly KitchenSinkFieldDef[];
 }
 
 export interface TemplateInput {
@@ -69,6 +76,10 @@ export interface TemplateInput {
   description?: string;
   tags?: string[];
   fieldTypes: TemplateFieldUserType[];
+  // When true, createTemplates emits the kitchen-sink YAML for this template
+  // and ignores fieldTypes. Set by config/parsing when --templates > 0 and no
+  // --templateFieldTypes were supplied (the default path).
+  useKitchenSink?: boolean;
 }
 
 export interface SpaceConfig {
@@ -91,7 +102,6 @@ export interface GeneratorConfig {
   events: number;
   templates: TemplateInput[];
   templateOwners: string[];
-  templateSpace: string;
   spaces: SpaceConfig | null;
   ownerDistribution: Record<string, number> | null;
   analyticsOwners: string[] | null;
@@ -100,7 +110,27 @@ export interface GeneratorConfig {
   kibanaVersion: string;
   cleanup: boolean;
   cleanupTag: string;
+  // Spaces to scope --cleanup to. null = discover every space via the
+  // spaces API (global cleanup). Non-null = restrict cleanup to these IDs
+  // (normalized; '' represents the default space). Only consulted in
+  // cleanup mode.
+  cleanupSpaces: string[] | null;
   concurrency: number | null;
+  // Percentage (0..100) of generated cases that should be linked to one
+  // of the available templates for their owner. Ignored when no templates
+  // are configured for the owner. Default is 50.
+  templateUsagePercent: number;
+  // When true, register a small set of legacy templates on the
+  // cases-configure SO for every owner so the Cases UI shows them under
+  // "Create from template". The legacy template entries are not auto-applied
+  // to generated cases (the case API has no legacy-template reference field).
+  // Independent of --legacyCustomFields; combine the two flags to have the
+  // legacy templates pre-fill values for the typed customFields.
+  legacyTemplates: boolean;
+  // When true, register typed (text/toggle/number) customFields on the
+  // cases-configure SO for every owner and have every generated case POST
+  // matching {key, type, value} entries. Independent of --legacyTemplates.
+  legacyCustomFields: boolean;
 }
 
 export interface GenerateCasesParams {
@@ -115,4 +145,3 @@ export interface GenerateCasesParams {
 }
 
 export const VALID_OWNERS = ['securitySolution', 'observability', 'cases'] as const;
-export type ValidOwner = (typeof VALID_OWNERS)[number];

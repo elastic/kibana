@@ -11,13 +11,14 @@ import type { GeneratorConfig, TemplateInput } from './types';
 import { TEMPLATE_FIELD_USER_TYPES } from './types';
 import {
   AUTO_GENERATED_TAG,
+  DEFAULT_KIBANA_VERSION,
+  DEFAULT_TEMPLATE_USAGE_PERCENT,
   normalizeSpace,
   parseList,
   parseNonNegativeInteger,
+  parsePercent,
   parseTemplateFieldTypes,
 } from './utils';
-
-const DEFAULT_KIBANA_VERSION = '9.2.0';
 
 // Asks `question` on the readline interface and resolves with the user's
 // trimmed answer (or `defaultVal` if they hit enter). Building block for
@@ -66,6 +67,36 @@ async function promptNonNegativeInteger(
   }
 }
 
+// Asks for a percentage in [0, 100] and re-prompts on bad input. Used by the
+// templates step to gather --templateUsagePercent.
+async function promptPercent(
+  rl: readline.Interface,
+  question: string,
+  fallback: number
+): Promise<number> {
+  while (true) {
+    const value = await prompt(rl, question, String(fallback));
+    const parsed = parsePercent(value, -1);
+    if (parsed >= 0) return parsed;
+    logger.warning('Please enter a number between 0 and 100.');
+  }
+}
+
+// Asks for a multi-space name pattern and re-prompts until the answer
+// contains the literal `{i}` placeholder that validateSpaces expects.
+// Catches the most common wizard mistake (typing "analytics" instead of
+// "analytics-{i}") in-place instead of letting it fail later in
+// validateConfig.
+async function promptSpaceNamePattern(rl: readline.Interface, fallback: string): Promise<string> {
+  while (true) {
+    const value = await prompt(rl, 'Space name pattern ({i} = index)', fallback);
+    if (value.includes('{i}')) return value;
+    logger.warning(
+      `Pattern "${value}" is missing the {i} placeholder — try something like "${value}-{i}".`
+    );
+  }
+}
+
 // Wraps `value` in single quotes when it contains shell-significant characters
 // so the rerun-command preview stays copy-paste safe. Used by
 // buildShorthandCommand.
@@ -91,7 +122,7 @@ function buildShorthandCommand(config: GeneratorConfig, fieldTypesAllOf?: string
   if (config.password !== 'changeme') push('password', config.password);
   if (config.ssl) parts.push('  --ssl');
   if (config.apiKey) push('apiKey', config.apiKey);
-  if (config.kibanaVersion !== '9.2.0') push('kibanaVersion', config.kibanaVersion);
+  if (config.kibanaVersion !== DEFAULT_KIBANA_VERSION) push('kibanaVersion', config.kibanaVersion);
   if (config.space) push('space', config.space);
   if (config.spaces) {
     parts.push(`  --numSpaces ${config.spaces.count}`);
@@ -123,74 +154,111 @@ function buildShorthandCommand(config: GeneratorConfig, fieldTypesAllOf?: string
         `  --templateOwners ${config.templateOwners.map(shellQuote).join(' --templateOwners ')}`
       );
     }
-    if (config.templateSpace) push('templateSpace', config.templateSpace);
     if (fieldTypesAllOf && fieldTypesAllOf.length > 0) {
       push('templateFieldTypes', fieldTypesAllOf.join(','));
     }
+    if (config.templateUsagePercent !== DEFAULT_TEMPLATE_USAGE_PERCENT) {
+      parts.push(`  --templateUsagePercent ${config.templateUsagePercent}`);
+    }
   }
+  if (config.legacyTemplates) parts.push('  --legacyTemplates');
+  if (config.legacyCustomFields) parts.push('  --legacyCustomFields');
   if (config.concurrency) parts.push(`  --concurrency ${config.concurrency}`);
   if (config.seed) push('seed', config.seed);
   if (config.dryRun) parts.push('  --dryRun');
   if (config.cleanup) parts.push('  --cleanup');
   if (config.cleanupTag !== AUTO_GENERATED_TAG) push('cleanupTag', config.cleanupTag);
+  if (config.cleanupSpaces && config.cleanupSpaces.length > 0) {
+    push('cleanupSpaces', config.cleanupSpaces.join(','));
+  }
   return parts.join(' \\\n');
 }
 
+interface TemplateStepResult {
+  templates: TemplateInput[];
+  templateOwners: string[];
+  templateUsagePercent: number;
+  legacyTemplates: boolean;
+  legacyCustomFields: boolean;
+}
+
 // Walks the user through defining up to 10 templates (name, description,
-// tags, field types) plus the template owners and space. Returns empty arrays
-// if the user opts out of templates. Called by interactiveMode in step 5/6.
+// tags, field types) plus the template owners, usage percent, and legacy
+// flags. Returns empty templates if the user opts out, but still asks about
+// --legacyCustomFields because that flag is independent of whether templates
+// are configured. Called by interactiveMode in step 5/6.
 async function collectTemplateInputs(
   rl: readline.Interface,
-  owners: string[],
-  space: string
-): Promise<{ templates: TemplateInput[]; templateOwners: string[]; templateSpace: string }> {
+  owners: string[]
+): Promise<TemplateStepResult> {
   const templates: TemplateInput[] = [];
   let templateOwners: string[] = [];
-  let templateSpace = space;
+  let templateUsagePercent = DEFAULT_TEMPLATE_USAGE_PERCENT;
+  let legacyTemplates = false;
 
   const shouldCreateTemplates = await promptBoolean(rl, 'Create templates?', false);
-  if (!shouldCreateTemplates) {
-    return { templates, templateOwners, templateSpace };
-  }
-
-  const templateOwnersStr = await prompt(
-    rl,
-    'Template owner(s) (comma-separated: securitySolution, observability, cases)',
-    owners.join(',')
-  );
-  templateOwners = parseList(templateOwnersStr);
-
-  templateSpace = normalizeSpace(
-    await prompt(rl, 'Template space (empty or "default" for default space)', space || 'default')
-  );
-
-  while (templates.length < 10) {
-    const templateNum = templates.length + 1;
-    const name = await prompt(rl, `Template ${templateNum} name`, `Template ${templateNum}`);
-    const description = await prompt(rl, 'Description (optional)', '');
-    const tags = parseList(await prompt(rl, 'Tags (comma-separated, optional)', ''));
-
-    const fieldTypesStr = await prompt(
+  if (shouldCreateTemplates) {
+    const templateOwnersStr = await prompt(
       rl,
-      `Field controls in declaration order, comma-separated. Valid: ${TEMPLATE_FIELD_USER_TYPES.join(
-        ', '
-      )} (each maps to a real {control, value type} pair — text→INPUT_TEXT/keyword, number→INPUT_NUMBER/integer, date→DATE_PICKER/date, etc.)`,
-      ''
+      'Template owner(s) (comma-separated: securitySolution, observability, cases)',
+      owners.join(',')
     );
-    const fieldTypes = parseTemplateFieldTypes(fieldTypesStr);
+    templateOwners = parseList(templateOwnersStr);
 
-    templates.push({
-      name,
-      ...(description ? { description } : {}),
-      ...(tags.length > 0 ? { tags } : {}),
-      fieldTypes,
-    });
+    while (templates.length < 10) {
+      const templateNum = templates.length + 1;
+      const name = await prompt(rl, `Template ${templateNum} name`, `Template ${templateNum}`);
+      const description = await prompt(rl, 'Description (optional)', '');
+      const tags = parseList(await prompt(rl, 'Tags (comma-separated, optional)', ''));
 
-    const addAnother = await promptBoolean(rl, 'Add another template?', false);
-    if (!addAnother) break;
+      const fieldTypesStr = await prompt(
+        rl,
+        `Field controls in declaration order, comma-separated. Valid: ${TEMPLATE_FIELD_USER_TYPES.join(
+          ', '
+        )} (blank = rich kitchen-sink template with display rules, validation, and compound conditions)`,
+        ''
+      );
+      const explicit = parseTemplateFieldTypes(fieldTypesStr);
+      const useKitchenSink = explicit.length === 0;
+
+      templates.push({
+        name,
+        ...(description ? { description } : {}),
+        ...(tags.length > 0 ? { tags } : {}),
+        fieldTypes: useKitchenSink ? [] : explicit,
+        useKitchenSink,
+      });
+
+      const addAnother = await promptBoolean(rl, 'Add another template?', false);
+      if (!addAnother) break;
+    }
+
+    templateUsagePercent = await promptPercent(
+      rl,
+      'Percentage of generated cases (0-100) that should use one of the templates',
+      DEFAULT_TEMPLATE_USAGE_PERCENT
+    );
+
+    legacyTemplates = await promptBoolean(
+      rl,
+      'Register legacy templates on the cases-configure SO too (visible in the UI as "Create from template")?',
+      false
+    );
   }
 
-  return { templates, templateOwners, templateSpace };
+  const legacyCustomFields = await promptBoolean(
+    rl,
+    'Register typed (text/toggle/number) customFields on the cases-configure SO and have every case set values for them?',
+    false
+  );
+
+  return {
+    templates,
+    templateOwners,
+    templateUsagePercent,
+    legacyTemplates,
+    legacyCustomFields,
+  };
 }
 
 // Drives the six-step wizard (connection, spaces, ownership, volume,
@@ -235,6 +303,15 @@ export async function interactiveMode(): Promise<GeneratorConfig> {
       'Cleanup tag (matches case+template tags)',
       AUTO_GENERATED_TAG
     );
+    let cleanupSpaces: string[] | null = null;
+    if (cleanup) {
+      const cleanupSpacesStr = await prompt(
+        rl,
+        'Cleanup target spaces (comma-separated; blank = every space)',
+        ''
+      );
+      cleanupSpaces = cleanupSpacesStr.trim() ? parseList(cleanupSpacesStr) : null;
+    }
 
     printSection('2/6 Spaces');
     const singleSpace = normalizeSpace(
@@ -243,7 +320,7 @@ export async function interactiveMode(): Promise<GeneratorConfig> {
     const createMultipleSpaces = await promptBoolean(rl, 'Create multiple spaces?', false);
     let spaces = null;
     if (createMultipleSpaces) {
-      const pattern = await prompt(rl, 'Space name pattern ({i} = index)', 'analytics-{i}');
+      const pattern = await promptSpaceNamePattern(rl, 'analytics-{i}');
       const count = await promptNonNegativeInteger(rl, 'Number of spaces to create', 3);
       spaces = { namePattern: pattern, count };
     }
@@ -281,11 +358,8 @@ export async function interactiveMode(): Promise<GeneratorConfig> {
     const events = await promptNonNegativeInteger(rl, 'Event attachments per case', 0);
 
     printSection('5/6 Templates');
-    const { templates, templateOwners, templateSpace } = await collectTemplateInputs(
-      rl,
-      owners,
-      singleSpace
-    );
+    const { templates, templateOwners, templateUsagePercent, legacyTemplates, legacyCustomFields } =
+      await collectTemplateInputs(rl, owners);
 
     printSection('6/6 Review');
     logger.info(`kibana=${kibana} (version=${kibanaVersion})`);
@@ -300,11 +374,27 @@ export async function interactiveMode(): Promise<GeneratorConfig> {
     logger.info(
       `templates=${templates.length}, templateOwners=${
         templateOwners.join(', ') || 'none'
-      }, templateSpace=${templateSpace || 'default'}`
+      }, templateUsagePercent=${templateUsagePercent}`
     );
     for (const tpl of templates) {
-      const ftLabel = tpl.fieldTypes.length > 0 ? tpl.fieldTypes.join(', ') : 'none';
+      const ftLabel = tpl.useKitchenSink
+        ? 'kitchen-sink YAML'
+        : tpl.fieldTypes.length > 0
+        ? tpl.fieldTypes.join(', ')
+        : 'none';
       logger.info(`  - ${tpl.name}: fields=[${ftLabel}]`);
+    }
+    if (legacyTemplates || legacyCustomFields) {
+      logger.info(
+        `legacy: templates=${legacyTemplates ? 'on' : 'off'}, customFields=${
+          legacyCustomFields ? 'on' : 'off'
+        }`
+      );
+    }
+    if (cleanup) {
+      logger.info(
+        `cleanupSpaces=${cleanupSpaces ? cleanupSpaces.join(', ') || 'none' : 'every space'}`
+      );
     }
     logger.info(`analyticsOwners=${analyticsOwners?.join(', ') ?? 'none'}`);
 
@@ -323,7 +413,6 @@ export async function interactiveMode(): Promise<GeneratorConfig> {
       events,
       templates,
       templateOwners,
-      templateSpace,
       spaces,
       ownerDistribution,
       analyticsOwners,
@@ -332,10 +421,20 @@ export async function interactiveMode(): Promise<GeneratorConfig> {
       kibanaVersion,
       cleanup,
       cleanupTag,
+      cleanupSpaces,
+      templateUsagePercent,
+      legacyTemplates,
+      legacyCustomFields,
       concurrency,
     };
+    // Only emit a non-empty --templateFieldTypes in the rerun command when the
+    // user opted into the synthesized-fields path (i.e. supplied explicit
+    // field types). Kitchen-sink templates carry no synthesized fieldTypes,
+    // so emitting `--templateFieldTypes ""` would falsely opt back into the
+    // synthesized path on rerun.
     const fieldTypesAllOf =
       templates.length > 0 &&
+      templates.every((tpl) => !tpl.useKitchenSink) &&
       templates.every(
         (tpl) =>
           tpl.fieldTypes.length === templates[0].fieldTypes.length &&

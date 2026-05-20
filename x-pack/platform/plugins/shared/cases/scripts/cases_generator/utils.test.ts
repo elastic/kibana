@@ -15,6 +15,7 @@ import {
   parseList,
   parseNonNegativeInteger,
   parseOwnerDistribution,
+  parsePercent,
   pick,
   randomString,
   rng,
@@ -439,6 +440,28 @@ describe('utils', () => {
 
     it('parses leading-numeric strings via parseInt semantics', () => {
       expect(parseNonNegativeInteger('12abc', 0)).toBe(12);
+    });
+  });
+
+  describe('parsePercent', () => {
+    it('parses integers in range', () => {
+      expect(parsePercent('0', 50)).toBe(0);
+      expect(parsePercent('25', 50)).toBe(25);
+      expect(parsePercent('100', 50)).toBe(100);
+    });
+
+    it('accepts decimals in range', () => {
+      expect(parsePercent('33.3', 50)).toBeCloseTo(33.3);
+    });
+
+    it('returns the fallback for out-of-range values', () => {
+      expect(parsePercent('-1', 50)).toBe(50);
+      expect(parsePercent('101', 50)).toBe(50);
+    });
+
+    it('returns the fallback for non-numeric values', () => {
+      expect(parsePercent('abc', 50)).toBe(50);
+      expect(parsePercent('', 50)).toBe(50);
     });
   });
 });

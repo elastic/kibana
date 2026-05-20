@@ -20,6 +20,87 @@ import type { AlertInfo, EventInfo } from './types';
 const ALERT_CHUNK_SIZE = 500;
 const EVENT_CHUNK_SIZE = 500;
 
+// Returns the doc count for `index` (or 0 when the index doesn't exist or the
+// count request errors out). Used by the reuse path so we can decide whether
+// to skip indexing entirely or top up the missing delta.
+async function countExistingDocs(esClient: Client, index: string): Promise<number> {
+  try {
+    const res = await esClient.count({ index, ignore_unavailable: true });
+    return typeof res.count === 'number' ? res.count : 0;
+  } catch {
+    return 0;
+  }
+}
+
+interface AlertSource {
+  ['kibana.alert.uuid']?: string;
+  ['kibana.alert.rule.uuid']?: string;
+  ['kibana.alert.rule.name']?: string;
+}
+
+// Fetches up to `count` existing alert refs from `index`. Used when the alerts
+// index already contains enough docs so the run can skip (or partially skip)
+// generating new alerts. Missing rule metadata is filled with conservative
+// defaults so attachments still succeed.
+async function fetchExistingAlerts(
+  esClient: Client,
+  index: string,
+  count: number
+): Promise<AlertInfo[]> {
+  if (count <= 0) return [];
+  try {
+    const res = await esClient.search<AlertSource>({
+      index,
+      size: count,
+      _source: ['kibana.alert.uuid', 'kibana.alert.rule.uuid', 'kibana.alert.rule.name'],
+      query: { match_all: {} },
+      ignore_unavailable: true,
+    });
+    return res.hits.hits.map((hit) => ({
+      alertId: hit._source?.['kibana.alert.uuid'] ?? (hit._id as string),
+      index,
+      ruleId: hit._source?.['kibana.alert.rule.uuid'] ?? 'existing-rule',
+      ruleName: hit._source?.['kibana.alert.rule.name'] ?? 'Existing Rule',
+    }));
+  } catch (err) {
+    logger.warning(
+      `Failed to fetch existing alerts from ${index} (${
+        (err as Error).message
+      }); will fall back to indexing fresh alerts.`
+    );
+    return [];
+  }
+}
+
+// Fetches up to `count` existing event ids from `index`. Mirrors
+// fetchExistingAlerts but for the process-events data stream.
+async function fetchExistingEvents(
+  esClient: Client,
+  index: string,
+  count: number
+): Promise<EventInfo[]> {
+  if (count <= 0) return [];
+  try {
+    const res = await esClient.search({
+      index,
+      size: count,
+      _source: false,
+      query: { match_all: {} },
+      ignore_unavailable: true,
+    });
+    return res.hits.hits
+      .filter((hit) => typeof hit._id === 'string')
+      .map((hit) => ({ eventId: hit._id as string, index }));
+  } catch (err) {
+    logger.warning(
+      `Failed to fetch existing events from ${index} (${
+        (err as Error).message
+      }); will fall back to indexing fresh events.`
+    );
+    return [];
+  }
+}
+
 // Generates `count` alert documents for `owner` and bulk-indexes them into
 // `alertIndex` in chunks. Returns the alertId/ruleId/ruleName tuples for each
 // successfully indexed doc, which are later used to build alert attachments.
@@ -118,10 +199,12 @@ export async function bulkIndexEvents(
   return allEventInfos;
 }
 
-// Tallies how many alerts each owner needs across `cases`, indexes that many
-// docs into the right index per owner, and returns a map keyed by owner so
-// case_generation.ts can hand out alert attachments without re-indexing.
-// Called once per space by run.ts when --alerts > 0.
+// Tallies how many alerts each owner needs across `cases`, then for each
+// owner either reuses already-indexed docs from the target alerts index, tops
+// up the missing delta with newly indexed docs, or indexes the full batch.
+// Returns a map keyed by owner so case_generation.ts can hand out alert
+// attachments without re-indexing. Called once per space by run.ts when
+// --alerts > 0.
 export async function indexAlertsForOwners(
   esClient: Client,
   cases: CasePostRequest[],
@@ -137,11 +220,78 @@ export async function indexAlertsForOwners(
   }
 
   const alertsByOwner = new Map<string, AlertInfo[]>();
-  for (const [owner, count] of alertsNeededByOwner.entries()) {
-    const alertIndex = getAlertsIndex(owner, ctx.space);
-    logger.info(`Indexing ${count} alerts into ${alertIndex} for owner "${owner}"...`);
-    alertsByOwner.set(owner, await bulkIndexAlerts(esClient, alertIndex, count, owner, ctx));
+  for (const [owner, needed] of alertsNeededByOwner.entries()) {
+    if (needed > 0) {
+      alertsByOwner.set(owner, await resolveAlertsForOwner(esClient, owner, needed, ctx));
+    }
   }
 
   return alertsByOwner;
+}
+
+// Resolves the pool of AlertInfo for a single owner by reusing existing docs
+// in the target alerts index, topping up the missing delta with newly indexed
+// docs, or indexing the full batch when the index is empty. Extracted so the
+// outer loop in indexAlertsForOwners can stay flat and avoid `continue`.
+async function resolveAlertsForOwner(
+  esClient: Client,
+  owner: string,
+  needed: number,
+  ctx: DocGeneratorContext
+): Promise<AlertInfo[]> {
+  const alertIndex = getAlertsIndex(owner, ctx.space);
+  const existingCount = await countExistingDocs(esClient, alertIndex);
+
+  if (existingCount >= needed) {
+    logger.info(
+      `Reusing ${needed} existing alert(s) from ${alertIndex} for owner "${owner}" (${existingCount} present)`
+    );
+    return fetchExistingAlerts(esClient, alertIndex, needed);
+  }
+
+  const toIndex = needed - existingCount;
+  const reused =
+    existingCount > 0 ? await fetchExistingAlerts(esClient, alertIndex, existingCount) : [];
+  if (reused.length > 0) {
+    logger.info(
+      `Reusing ${reused.length} existing alert(s) from ${alertIndex} and topping up ${toIndex} new doc(s) for owner "${owner}"`
+    );
+  } else {
+    logger.info(`Indexing ${toIndex} alert(s) into ${alertIndex} for owner "${owner}"...`);
+  }
+  const fresh = await bulkIndexAlerts(esClient, alertIndex, toIndex, owner, ctx);
+  return [...reused, ...fresh];
+}
+
+// Indexes (or reuses) up to `count` events in the endpoint events data
+// stream, returning the full EventInfo pool. Uses the same reuse/top-up
+// policy as indexAlertsForOwners so a fresh run on top of an existing dataset
+// doesn't re-emit duplicate events. Called by run.ts when --events > 0 and
+// at least one non-observability case is being generated.
+export async function indexOrReuseEvents(
+  esClient: Client,
+  eventIndex: string,
+  count: number,
+  ctx: DocGeneratorContext
+): Promise<EventInfo[]> {
+  if (count <= 0) return [];
+  const existingCount = await countExistingDocs(esClient, eventIndex);
+
+  if (existingCount >= count) {
+    logger.info(`Reusing ${count} existing event(s) from ${eventIndex} (${existingCount} present)`);
+    return fetchExistingEvents(esClient, eventIndex, count);
+  }
+
+  const toIndex = count - existingCount;
+  const reused =
+    existingCount > 0 ? await fetchExistingEvents(esClient, eventIndex, existingCount) : [];
+  if (reused.length > 0) {
+    logger.info(
+      `Reusing ${reused.length} existing event(s) from ${eventIndex} and topping up ${toIndex} new doc(s)`
+    );
+  } else {
+    logger.info(`Indexing ${toIndex} event(s) into ${eventIndex}...`);
+  }
+  const fresh = await bulkIndexEvents(esClient, eventIndex, toIndex, ctx);
+  return [...reused, ...fresh];
 }

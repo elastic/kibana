@@ -24,7 +24,6 @@ const baseConfig: GeneratorConfig = {
   events: 3,
   templates: [],
   templateOwners: [],
-  templateSpace: '',
   spaces: null,
   ownerDistribution: null,
   analyticsOwners: ['securitySolution'],
@@ -33,6 +32,10 @@ const baseConfig: GeneratorConfig = {
   kibanaVersion: '9.2.0',
   cleanup: false,
   cleanupTag: 'auto-generated',
+  cleanupSpaces: null,
+  templateUsagePercent: 50,
+  legacyTemplates: false,
+  legacyCustomFields: false,
   concurrency: null,
 };
 
@@ -174,7 +177,7 @@ describe('buildExecutionPlan', () => {
     }
   });
 
-  it('counts template creates as templates × templateOwners', () => {
+  it('counts template creates as templates × templateOwners × target spaces', () => {
     const restore = installSeededRandom('templates-seed');
     try {
       const plan = buildExecutionPlan(
@@ -189,7 +192,9 @@ describe('buildExecutionPlan', () => {
         },
         ['space-a', 'space-b']
       );
-      expect(plan.totals.templateCreates).toBe(6);
+      // 3 templates × 2 owners × 2 target spaces = 12 (templates are
+      // space-scoped so each space gets its own copy).
+      expect(plan.totals.templateCreates).toBe(12);
     } finally {
       restore();
     }
@@ -246,6 +251,40 @@ describe('buildExecutionPlan', () => {
       expect(plan.reqId.length).toBeGreaterThan(0);
     } finally {
       restore();
+    }
+  });
+
+  it('emits a plan row for the default space when "" is included additively alongside created spaces', () => {
+    const restore = installSeededRandom('additive-default-seed');
+    try {
+      const plan = buildExecutionPlan(baseConfig, ['', 'analytics-1', 'analytics-2']);
+      expect(plan.spacePlans.map((s) => s.space)).toEqual(['', 'analytics-1', 'analytics-2']);
+      expect(plan.totals.cases).toBe(baseConfig.count * 3);
+      const defaultRow = plan.spacePlans.find((s) => s.space === '');
+      expect(defaultRow).toBeDefined();
+      expect(defaultRow?.totalCases).toBe(baseConfig.count);
+    } finally {
+      restore();
+    }
+  });
+
+  it('does not let templateUsagePercent change planning totals', () => {
+    const restore = installSeededRandom('template-usage-seed');
+    try {
+      const planAll = buildExecutionPlan({ ...baseConfig, templateUsagePercent: 100 }, ['space-a']);
+      restore();
+      const restore2 = installSeededRandom('template-usage-seed');
+      try {
+        const planNone = buildExecutionPlan({ ...baseConfig, templateUsagePercent: 0 }, [
+          'space-a',
+        ]);
+        expect(planAll.totals).toEqual(planNone.totals);
+      } finally {
+        restore2();
+      }
+    } catch (err) {
+      restore();
+      throw err;
     }
   });
 });

@@ -11,14 +11,16 @@ import type { GeneratorConfig, TemplateInput } from './types';
 import { TEMPLATE_FIELD_USER_TYPES, VALID_OWNERS } from './types';
 import {
   AUTO_GENERATED_TAG,
+  DEFAULT_KIBANA_VERSION,
+  DEFAULT_TEMPLATE_USAGE_PERCENT,
   dedupe,
   normalizeSpace,
+  parseList,
   parseNonNegativeInteger,
   parseOwnerDistribution,
+  parsePercent,
   parseTemplateFieldTypes,
 } from './utils';
-
-const DEFAULT_KIBANA_VERSION = '9.2.0';
 
 // Throws when the owner list is empty or contains anything outside
 // VALID_OWNERS. Called by validateConfig for both the case owners and the
@@ -63,7 +65,9 @@ function validateSpaces(config: GeneratorConfig) {
     throw new Error('numSpaces must be greater than zero when using multiple spaces');
   }
   if (!config.spaces.namePattern.includes('{i}')) {
-    throw new Error('spaceNamePattern must include "{i}" placeholder');
+    throw new Error(
+      `spaceNamePattern must include the literal "{i}" placeholder (got "${config.spaces.namePattern}"). Try "${config.spaces.namePattern}-{i}".`
+    );
   }
 }
 
@@ -117,6 +121,21 @@ function validateConfig(config: GeneratorConfig): GeneratorConfig {
 
   if (config.seed !== null && config.seed.trim().length === 0) {
     throw new Error('seed cannot be an empty string');
+  }
+
+  if (
+    !Number.isFinite(config.templateUsagePercent) ||
+    config.templateUsagePercent < 0 ||
+    config.templateUsagePercent > 100
+  ) {
+    throw new Error('templateUsagePercent must be a number between 0 and 100');
+  }
+
+  if (config.cleanupSpaces !== null) {
+    if (config.cleanupSpaces.length === 0) {
+      throw new Error('cleanupSpaces, when supplied, must contain at least one space ID');
+    }
+    config.cleanupSpaces = dedupe(config.cleanupSpaces.map(normalizeSpace));
   }
 
   return config;
@@ -214,10 +233,6 @@ function parseCliConfig(): GeneratorConfig {
       describe: 'Owner(s) to create templates for (defaults to --owners)',
       type: 'array',
     },
-    templateSpace: {
-      describe: 'Space to create templates in (defaults to --space)',
-      type: 'string',
-    },
     templateFieldTypes: {
       describe: `Comma-separated field types for each auto-generated template, in order. Valid types: ${TEMPLATE_FIELD_USER_TYPES.join(
         ', '
@@ -263,7 +278,7 @@ function parseCliConfig(): GeneratorConfig {
     },
     cleanup: {
       describe:
-        'Delete previously generated cases and templates (matched by --cleanupTag) in the target space(s) and exit. Skips case/alert/event/template generation entirely.',
+        'Delete previously generated cases and templates (matched by --cleanupTag) in the target space(s) and exit. Skips case/alert/event/template generation entirely. Global by default; pass --cleanupSpaces to scope.',
       type: 'boolean',
       default: false,
     },
@@ -271,6 +286,30 @@ function parseCliConfig(): GeneratorConfig {
       describe: 'Tag used to identify auto-generated cases and templates during cleanup',
       type: 'string',
       default: AUTO_GENERATED_TAG,
+    },
+    cleanupSpaces: {
+      describe:
+        'Comma-separated space IDs to scope --cleanup to (e.g. "default,analytics-1"). Blank = clean every Kibana space (global).',
+      type: 'string',
+      default: '',
+    },
+    templateUsagePercent: {
+      describe:
+        'Percentage of generated cases (0-100) that should be created from one of the available templates for their owner. Has no effect when no templates are configured for an owner.',
+      type: 'number',
+      default: DEFAULT_TEMPLATE_USAGE_PERCENT,
+    },
+    legacyTemplates: {
+      describe:
+        'Register a small set of legacy templates on the cases-configure SO for every --owners value. Visible in the Cases UI under "Create from template"; not auto-applied to generated cases. Combine with --legacyCustomFields so the legacy templates pre-fill typed customField values.',
+      type: 'boolean',
+      default: false,
+    },
+    legacyCustomFields: {
+      describe:
+        'Register typed (text/toggle/number) customFields on the cases-configure SO for every --owners value and have every generated case POST matching customField values. Independent of --legacyTemplates.',
+      type: 'boolean',
+      default: false,
     },
     concurrency: {
       describe:
@@ -281,12 +320,18 @@ function parseCliConfig(): GeneratorConfig {
   }).argv;
 
   const templateCount = Math.min(Number(argv.templates) || 0, 10);
-  const templateFieldTypes = parseTemplateFieldTypes(String(argv.templateFieldTypes ?? ''));
+  // Default to the rich kitchen-sink YAML template (display rules, validation,
+  // compound conditions, etc.) when --templates is requested but no
+  // --templateFieldTypes was supplied. Passing --templateFieldTypes opts back
+  // into the legacy synthesized-fields path (one fieldA/B/… per user type).
+  const explicitFieldTypes = parseTemplateFieldTypes(String(argv.templateFieldTypes ?? ''));
+  const useKitchenSink = templateCount > 0 && explicitFieldTypes.length === 0;
   const autoTemplates: TemplateInput[] = Array.from({ length: templateCount }, (_, i) => ({
     name: `Auto Template ${i + 1}`,
     description: `Auto-generated template ${i + 1}`,
     tags: ['auto-generated'],
-    fieldTypes: templateFieldTypes,
+    fieldTypes: useKitchenSink ? [] : explicitFieldTypes,
+    useKitchenSink,
   }));
 
   const owners = (argv.owners as string[]) ?? [];
@@ -294,6 +339,9 @@ function parseCliConfig(): GeneratorConfig {
   const analyticsOwners = (argv.analyticsOwners as string[] | undefined)?.length
     ? (argv.analyticsOwners as string[])
     : null;
+
+  const cleanupSpacesRaw = String(argv.cleanupSpaces ?? '').trim();
+  const cleanupSpaces = cleanupSpacesRaw ? parseList(cleanupSpacesRaw) : null;
 
   return {
     kibana: argv.kibana,
@@ -312,7 +360,6 @@ function parseCliConfig(): GeneratorConfig {
     templateOwners: ((argv.templateOwners as string[] | undefined) ?? owners).map((owner) =>
       owner.trim()
     ),
-    templateSpace: normalizeSpace(argv.templateSpace ?? argv.space),
     spaces: numSpaces > 0 ? { namePattern: argv.spaceNamePattern, count: numSpaces } : null,
     ownerDistribution: parseOwnerDistribution(argv.ownerDistribution ?? ''),
     analyticsOwners,
@@ -321,6 +368,13 @@ function parseCliConfig(): GeneratorConfig {
     kibanaVersion: String(argv.kibanaVersion ?? DEFAULT_KIBANA_VERSION),
     cleanup: Boolean(argv.cleanup),
     cleanupTag: String(argv.cleanupTag ?? AUTO_GENERATED_TAG),
+    cleanupSpaces,
+    templateUsagePercent: parsePercent(
+      String(argv.templateUsagePercent ?? DEFAULT_TEMPLATE_USAGE_PERCENT),
+      DEFAULT_TEMPLATE_USAGE_PERCENT
+    ),
+    legacyTemplates: Boolean(argv.legacyTemplates),
+    legacyCustomFields: Boolean(argv.legacyCustomFields),
     concurrency: Number(argv.concurrency) > 0 ? Number(argv.concurrency) : null,
   };
 }

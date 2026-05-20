@@ -8,8 +8,6 @@
 import { logger } from './cases_generator/logger';
 import { runGenerator } from './cases_generator/run';
 
-// ─── Logger ────────────────────────────────────────────────────────────────────
-
 async function main() {
   try {
     await runGenerator();

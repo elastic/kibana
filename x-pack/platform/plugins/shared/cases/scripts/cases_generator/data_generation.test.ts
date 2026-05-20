@@ -254,5 +254,28 @@ describe('data_generation', () => {
 
       expect(a).toEqual(b);
     });
+
+    it('passes through legacy customFields when supplied via options', () => {
+      const restore = installSeededRandom('case-request-legacy-cf');
+      try {
+        const req = buildCaseRequest(1, 'cases', 'r1', null, {
+          legacyCustomFieldValues: [
+            { key: 'incident_summary', type: 'text', value: 'manual-summary' },
+            { key: 'requires_postmortem', type: 'toggle', value: true },
+            { key: 'sla_minutes', type: 'number', value: 60 },
+          ],
+        });
+        expect(req.customFields).toHaveLength(3);
+        expect(req.customFields).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ key: 'incident_summary', type: 'text' }),
+            expect.objectContaining({ key: 'requires_postmortem', type: 'toggle', value: true }),
+            expect.objectContaining({ key: 'sla_minutes', type: 'number', value: 60 }),
+          ])
+        );
+      } finally {
+        restore();
+      }
+    });
   });
 });

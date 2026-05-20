@@ -13,6 +13,13 @@ export { rng, installSeededRandom } from './seeded_random';
 
 export const AUTO_GENERATED_TAG = 'auto-generated';
 
+// Shared CLI/wizard defaults. Kept here (rather than duplicated in config.ts
+// and interactive_wizard.ts) so the README, tests, and both entry points
+// stay aligned. Bumping the Kibana version here updates the alert/event
+// document stamps and the "Kibana version" prompt in one place.
+export const DEFAULT_KIBANA_VERSION = '9.2.0';
+export const DEFAULT_TEMPLATE_USAGE_PERCENT = 50;
+
 // Maps the user-facing control name to the Elasticsearch value type that ends up
 // on the template field. Must stay in sync with buildTemplateField in kibana_ops.ts.
 export const USER_TYPE_TO_SCHEMA_TYPE: Record<TemplateFieldUserType, string> = {
@@ -263,6 +270,17 @@ export function parseList(input: string): string[] {
 export function parseNonNegativeInteger(value: string, fallback: number): number {
   const parsed = Number.parseInt(value, 10);
   if (Number.isNaN(parsed) || parsed < 0) {
+    return fallback;
+  }
+  return parsed;
+}
+
+// Parses `value` as a percentage clamped to [0, 100], returning `fallback`
+// for anything invalid. Used to validate --templateUsagePercent both from
+// the CLI and from the interactive wizard.
+export function parsePercent(value: string, fallback: number): number {
+  const parsed = Number.parseFloat(value);
+  if (Number.isNaN(parsed) || parsed < 0 || parsed > 100) {
     return fallback;
   }
   return parsed;

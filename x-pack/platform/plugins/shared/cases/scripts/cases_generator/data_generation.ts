@@ -7,6 +7,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { CaseSeverity, type CasePostRequest } from '../../common';
+import { buildKitchenSinkExtendedFields } from './kitchen_sink_template';
+import type { LegacyCaseCustomFieldValue } from './configure_customfields';
 import type { CreatedTemplateRef, TemplateFieldUserType } from './types';
 import { AUTO_GENERATED_TAG, extendedFieldKey, pick, randomString, rng, sampleN } from './utils';
 
@@ -46,8 +48,14 @@ function randomExtendedFieldValue(userType: TemplateFieldUserType): string {
 
 // Builds the extended_fields object a case POST needs when it's based on a
 // template, with one entry per template field. Called by buildCaseRequest when
-// a template was assigned to the case.
+// a template was assigned to the case. Kitchen-sink templates carry the real
+// field defs (names, types, options, validation) so values can match the
+// definition exactly; the synthesized --templateFieldTypes path falls back to
+// the fieldA/fieldB style keys derived from the user-type list.
 function buildExtendedFields(template: CreatedTemplateRef): Record<string, string> {
+  if (template.kitchenSinkFields && template.kitchenSinkFields.length > 0) {
+    return buildKitchenSinkExtendedFields(template.kitchenSinkFields);
+  }
   const result: Record<string, string> = {};
   template.fieldTypes.forEach((userType, idx) => {
     result[extendedFieldKey(idx, userType)] = randomExtendedFieldValue(userType);
@@ -308,17 +316,31 @@ const CASE_SEVERITIES = [
   CaseSeverity.CRITICAL,
 ];
 
+// Optional knobs for buildCaseRequest. Add new options (e.g. connector
+// overrides) here as the generator grows.
+export interface BuildCaseRequestOptions {
+  // Typed customFields the script registered on the configure SO via
+  // --legacyCustomFields. When supplied, the request body's `customFields`
+  // array is set to these values so the case persists with valid typed
+  // entries that match the configure SO's registration.
+  legacyCustomFieldValues?: LegacyCaseCustomFieldValue[];
+}
+
 // Builds the body of a single POST /api/cases request, with random tags,
 // severity, and category. Called by run.ts (one call per case) when assembling
 // the per-space batch. When `template` is provided the case is linked to that
-// template and gets matching extended_fields.
+// template and gets matching extended_fields. When
+// `options.legacyCustomFieldValues` is provided the case carries typed
+// customFields matching the configure SO's registration.
 export function buildCaseRequest(
   counter: number,
   owner: string,
   reqId: string,
-  template?: CreatedTemplateRef | null
+  template?: CreatedTemplateRef | null,
+  options?: BuildCaseRequestOptions
 ): CasePostRequest {
   const sampledTags = sampleN(CASE_TAG_POOL, Math.floor(rng() * 3));
+  const legacyCustomFieldValues = options?.legacyCustomFieldValues ?? [];
   const request: CasePostRequest = {
     title: `[${owner}] Sample Case ${reqId}-${counter}`,
     tags: [AUTO_GENERATED_TAG, ...sampledTags],
@@ -333,7 +355,7 @@ export function buildCaseRequest(
     } as CasePostRequest['connector'],
     settings: { syncAlerts: false, extractObservables: false },
     owner: owner ?? 'cases',
-    customFields: [],
+    customFields: legacyCustomFieldValues as CasePostRequest['customFields'],
     category: pick(CASE_CATEGORY_POOL),
   };
   if (template) {
@@ -346,7 +368,10 @@ export function buildCaseRequest(
       id: template.id,
       version: template.version,
     };
-    if (template.fieldTypes.length > 0) {
+    const hasFields =
+      template.fieldTypes.length > 0 ||
+      (template.kitchenSinkFields !== undefined && template.kitchenSinkFields.length > 0);
+    if (hasFields) {
       (request as CasePostRequest & { extended_fields?: Record<string, string> }).extended_fields =
         buildExtendedFields(template);
     }
