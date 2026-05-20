@@ -794,14 +794,12 @@ export class DashboardPageControls extends FtrService {
     expectedLowerBound: string,
     expectedUpperBound: string
   ) {
-    await this.retry.try(async () => {
-      expect(await this.rangeSliderGetLowerBoundAttribute(controlId, compare)).to.be(
-        expectedLowerBound
-      );
-      expect(await this.rangeSliderGetUpperBoundAttribute(controlId, compare)).to.be(
-        expectedUpperBound
-      );
-    });
+    expect(await this.rangeSliderGetLowerBoundAttribute(controlId, compare)).to.be(
+      expectedLowerBound
+    );
+    expect(await this.rangeSliderGetUpperBoundAttribute(controlId, compare)).to.be(
+      expectedUpperBound
+    );
   }
 
   // Time slider functions
