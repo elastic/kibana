@@ -512,12 +512,6 @@ export class CcsLogsExtractionClient {
     return { count, pages };
   }
 
-  /**
-   * Returns a document transformer that rewrites `@timestamp` to a synthetic value
-   * just of now, incrementing by 1ms per doc, so the next local extraction
-   * run picks up CCS-written updates in the correct order.
-   * This should be picked up in time because of the delay implemented in the main extraction
-   */
   /** Returns the bumped slice-end cursor when a stall is detected, null otherwise. Logs a warning on stall. */
   private detectLogSliceStall(
     sliceStart: LogSlicePaginationParams | undefined,
@@ -539,6 +533,12 @@ export class CcsLogsExtractionClient {
     return null;
   }
 
+  /**
+   * Returns a document transformer that rewrites `@timestamp` to a synthetic value
+   * just of now, incrementing by 1ms per doc, so the next local extraction
+   * run picks up CCS-written updates in the correct order.
+   * This should be picked up in time because of the delay implemented in the main extraction
+   */
   private buildTransformDocument(type: EntityType) {
     let timestampIncrement = 1;
     return (doc: Record<string, unknown>) => {
