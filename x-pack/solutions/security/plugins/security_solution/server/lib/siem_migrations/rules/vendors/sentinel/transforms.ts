@@ -119,9 +119,6 @@ const transformQueryPeriodToTimeRange = (
   };
 };
 
-const transformQueryFrequencyToInterval = (queryFrequencyIso: string): string | undefined =>
-  convertToNativeEsqlUnits(queryFrequencyIso);
-
 /**
  * Transforms a parsed Sentinel rule into the OriginalRule format
  * used by the SIEM migrations pipeline.
@@ -148,8 +145,7 @@ export function transformSentinelRuleToOriginalRule(rule: SentinelRule): Origina
             to: DEFAULT_TRANSLATION_FIELDS.to,
           }),
       interval: isNonEmptyString(rule.queryFrequency)
-        ? transformQueryFrequencyToInterval(rule.queryFrequency) ??
-          DEFAULT_TRANSLATION_FIELDS.interval
+        ? convertToNativeEsqlUnits(rule.queryFrequency) ?? DEFAULT_TRANSLATION_FIELDS.interval
         : DEFAULT_TRANSLATION_FIELDS.interval,
     },
   };
