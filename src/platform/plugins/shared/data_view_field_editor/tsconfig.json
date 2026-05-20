@@ -30,6 +30,7 @@
     "@kbn/code-editor",
     "@kbn/css-utils",
     "@kbn/field-formats-common",
+    "@kbn/ingest-pipelines-plugin",
   ],
   "exclude": ["target/**/*"]
 }

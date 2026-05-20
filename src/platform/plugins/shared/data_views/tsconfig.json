@@ -42,6 +42,7 @@
     "@kbn/core-deprecations-common",
     "@kbn/cps",
     "@kbn/cps-utils",
+    "@kbn/kql",
   ],
   "exclude": [
     "target/**/*",

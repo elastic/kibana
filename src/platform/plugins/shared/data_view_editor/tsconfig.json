@@ -24,6 +24,7 @@
     "@kbn/css-utils",
     "@kbn/cps-utils",
     "@kbn/cps",
+    "@kbn/ingest-pipelines-plugin",
   ],
   "exclude": [
     "target/**/*",

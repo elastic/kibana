@@ -54,6 +54,9 @@
     "@kbn/config-schema",
     "@kbn/chart-expressions-common",
     "@kbn/scout-oblt",
+    "@kbn/lens-common",
+    "@kbn/lens-formula-docs",
+    "@kbn/content-management-utils",
   ],
   "exclude": ["target/**/*"]
 }

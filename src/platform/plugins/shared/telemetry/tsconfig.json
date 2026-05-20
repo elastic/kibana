@@ -42,6 +42,8 @@
     "@kbn/core-security-server",
     "@kbn/telemetry-config",
     "@kbn/config",
+    "@kbn/metrics-config",
+    "@kbn/tracing-config",
   ],
   "exclude": [
     "target/**/*",

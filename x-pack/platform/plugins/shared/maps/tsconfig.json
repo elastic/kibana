@@ -101,7 +101,9 @@
     "@kbn/crypto-browser",
     "@kbn/cps",
     "@kbn/kql",
-    "@kbn/cps-utils"
+    "@kbn/cps-utils",
+    "@kbn/es-query-constants",
+    "@kbn/saved-objects-tagging-oss-plugin"
   ],
   "exclude": ["target/**/*"]
 }

@@ -142,6 +142,8 @@
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-http-server-mocks",
     "@kbn/reporting-public",
+    "@kbn/lens-common",
+    "@kbn/kql",
   ],
   "exclude": ["target/**/*"]
 }

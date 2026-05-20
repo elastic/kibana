@@ -24,6 +24,8 @@
     "@kbn/css-utils",
     "@kbn/chart-expressions-common",
     "@kbn/core",
-    "@kbn/safer-lodash-set"
+    "@kbn/safer-lodash-set",
+    "@kbn/field-formats-plugin",
+    "@kbn/utility-types"
   ]
 }
