@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
@@ -13,6 +13,7 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -22,6 +23,7 @@ import {
   type AttachmentRenderProps,
   type AttachmentServiceStartContract,
   type ActionButton,
+  type InlineRenderCallbacks,
   ActionButtonType,
 } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
@@ -254,8 +256,55 @@ const SeverityRiskScore: React.FC<{
   </EuiText>
 );
 
-const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({ attachment }) => {
+const RuleInlineContent: React.FC<
+  AttachmentRenderProps<RuleAttachment> & {
+    aiRuleCreation: AiRuleCreationService;
+    application: ApplicationStart;
+    uiSettings: IUiSettingsClient;
+    callbacks?: InlineRenderCallbacks;
+  }
+> = ({ attachment, aiRuleCreation, application, uiSettings, callbacks }) => {
+  const [isDirty, setIsDirty] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
   const rule = parseRuleFromAttachment(attachment);
+
+  useEffect(() => {
+    const sub = aiRuleCreation.dirty$.subscribe(setIsDirty);
+    return () => sub.unsubscribe();
+  }, [aiRuleCreation]);
+
+  useEffect(() => {
+    const sub = aiRuleCreation.saving$.subscribe(setIsSaving);
+    return () => sub.unsubscribe();
+  }, [aiRuleCreation]);
+
+  useEffect(() => {
+    if (!callbacks?.registerActionButtons) return;
+    const canEditRules = hasCapabilities(application.capabilities, RULES_UI_EDIT_PRIVILEGE);
+    if (!rule || !canEditRules || (rule.type === 'esql' && !uiSettings.get(ENABLE_ESQL))) {
+      callbacks.registerActionButtons([]);
+      return;
+    }
+    const savedRuleId = rule.id ?? aiRuleCreation.getLastSavedRuleId() ?? undefined;
+    callbacks.registerActionButtons([
+      {
+        label: savedRuleId
+          ? i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.saveChanges', {
+              defaultMessage: 'Save changes',
+            })
+          : i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.saveRule', {
+              defaultMessage: 'Save rule',
+            }),
+        icon: 'save' as const,
+        type: ActionButtonType.PRIMARY,
+        disabled: isSaving,
+        handler: () => {
+          aiRuleCreation.requestSaveRule(rule);
+        },
+      },
+    ]);
+  }, [attachment, isSaving, aiRuleCreation, application, uiSettings, callbacks, rule]);
 
   if (!rule) {
     return <EmptyRuleContent />;
@@ -269,6 +318,34 @@ const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({ at
 
   return (
     <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false}>
+      {isSaving ? (
+        <>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="s" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.savingText', {
+                  defaultMessage: 'Saving…',
+                })}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+        </>
+      ) : (
+        isDirty && (
+          <>
+            <EuiBadge color="warning">
+              {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.modifiedBadge', {
+                defaultMessage: 'Modified',
+              })}
+            </EuiBadge>
+            <EuiSpacer size="s" />
+          </>
+        )
+      )}
       {rule.type && (
         <EuiText size="s">
           <strong>
@@ -354,7 +431,7 @@ const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({ at
       <EuiCallOut
         size="s"
         color="primary"
-        iconType="iInCircle"
+        iconType="info"
         title={i18n.translate(
           'xpack.securitySolution.agentBuilder.ruleAttachment.limitationsTitle',
           { defaultMessage: 'AI rule creation limitations' }
@@ -403,7 +480,15 @@ export const createRuleAttachmentDefinition = ({
       defaultMessage: 'Security Rule',
     }),
   getIcon: () => 'securityApp',
-  renderInlineContent: (props) => <RuleInlineContent {...props} />,
+  renderInlineContent: (props, callbacks) => (
+    <RuleInlineContent
+      {...props}
+      aiRuleCreation={aiRuleCreation}
+      application={application}
+      uiSettings={uiSettings}
+      callbacks={callbacks}
+    />
+  ),
   getActionButtons: ({ attachment }) => {
     const rule = parseRuleFromAttachment(attachment);
     const canEditRules = hasCapabilities(application.capabilities, RULES_UI_EDIT_PRIVILEGE);
@@ -415,21 +500,9 @@ export const createRuleAttachmentDefinition = ({
       return [];
     }
 
+    const savedRuleId = rule.id ?? aiRuleCreation.getLastSavedRuleId() ?? undefined;
+
     const buttons: ActionButton[] = [
-      {
-        label: rule.id
-          ? i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.saveChanges', {
-              defaultMessage: 'Save changes',
-            })
-          : i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.saveRule', {
-              defaultMessage: 'Save rule',
-            }),
-        icon: 'save' as const,
-        type: ActionButtonType.PRIMARY,
-        handler: () => {
-          aiRuleCreation.requestSaveRule(rule);
-        },
-      },
       {
         label: i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.openInForm', {
           defaultMessage: 'Open in form',
@@ -439,13 +512,13 @@ export const createRuleAttachmentDefinition = ({
         handler: () => {
           aiRuleCreation.setAiCreatedRule(rule);
           application.navigateToApp('securitySolutionUI', {
-            path: rule.id ? `${RULES_PATH}/id/${rule.id}/edit` : RULES_CREATE_PATH,
+            path: savedRuleId ? `${RULES_PATH}/id/${savedRuleId}/edit` : RULES_CREATE_PATH,
           });
         },
       },
     ];
 
-    if (rule.id && !isOnRuleFormPage(window.location.pathname)) {
+    if (savedRuleId && !isOnRuleFormPage(window.location.pathname)) {
       buttons.push({
         label: i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.viewRule', {
           defaultMessage: 'View rule',
@@ -454,7 +527,7 @@ export const createRuleAttachmentDefinition = ({
         type: ActionButtonType.SECONDARY,
         handler: () => {
           application.navigateToApp('securitySolutionUI', {
-            path: `${RULES_PATH}/id/${rule.id}`,
+            path: `${RULES_PATH}/id/${savedRuleId}`,
           });
         },
       });

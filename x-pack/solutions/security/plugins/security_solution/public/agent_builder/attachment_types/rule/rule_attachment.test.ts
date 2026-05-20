@@ -312,6 +312,36 @@ describe('createRuleAttachmentDefinition', () => {
       expect(aiRuleCreation.requestSaveRule).toHaveBeenCalledWith(validRule);
     });
 
+    it('returns "Save changes" when rule has no id but lastSavedRuleId is set', () => {
+      aiRuleCreation.setLastSavedRuleId('saved-rule-id');
+      const application = makeApplication(true);
+      const definition = createRuleAttachmentDefinition({
+        application,
+        aiRuleCreation,
+        uiSettings: makeUiSettings(),
+      });
+      const buttons = definition.getActionButtons!(
+        makeActionButtonsParams(JSON.stringify(validRule)) as never
+      );
+      expect(buttons[0].label).toBe('Save changes');
+    });
+
+    it('includes "View rule" button when rule has no id but lastSavedRuleId is set', () => {
+      (window as { location: unknown }).location = { pathname: '/app/security/overview' };
+      aiRuleCreation.setLastSavedRuleId('saved-rule-id');
+      const application = makeApplication(true);
+      const definition = createRuleAttachmentDefinition({
+        application,
+        aiRuleCreation,
+        uiSettings: makeUiSettings(),
+      });
+      const buttons = definition.getActionButtons!(
+        makeActionButtonsParams(JSON.stringify(validRule)) as never
+      );
+      expect(buttons).toHaveLength(3);
+      expect(buttons[2].label).toBe('View rule');
+    });
+
     it('"Open in form" handler navigates to rule creation for rule without id', () => {
       const application = makeApplication(true);
       const definition = createRuleAttachmentDefinition({

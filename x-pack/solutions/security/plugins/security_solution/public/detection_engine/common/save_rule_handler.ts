@@ -6,6 +6,7 @@
  */
 
 import type { Subscription } from 'rxjs';
+import { pairwise } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
@@ -59,6 +60,7 @@ export const createSaveRuleHandler = ({
       const summary = parseResult.error.issues
         .map((e) => `${e.path.join('.')}: ${e.message}`)
         .join('; ');
+      aiRuleCreation.clearSaving();
       notifications.toasts.addDanger({
         title: i18n.translate('xpack.securitySolution.saveRuleHandler.saveFailedTitle', {
           defaultMessage: 'Failed to save rule',
@@ -97,6 +99,7 @@ export const createSaveRuleHandler = ({
 
       aiRuleCreation.setLastSavedRuleId(saved.id);
       aiRuleCreation.clearDirty();
+      aiRuleCreation.clearSaving();
 
       securitySolutionQueryClient.invalidateQueries(['POST', RULE_MANAGEMENT_RULES_URL_SEARCH], {
         exact: false,
@@ -116,6 +119,7 @@ export const createSaveRuleHandler = ({
         data: { text: JSON.stringify(saved), attachmentLabel: saved.name },
       });
     } catch (err) {
+      aiRuleCreation.clearSaving();
       const message =
         (err as { body?: { message?: string } })?.body?.message ??
         (err as Error)?.message ??
@@ -142,7 +146,20 @@ export const createSaveRuleHandler = ({
     }
   });
 
-  // Return a combined subscription so both are cleaned up on unsubscribe
+  // Reset lastSavedRuleId when the active conversation changes so a new conversation
+  // starts fresh ("Save rule" not "Save changes"). Using pairwise so the initial
+  // BehaviorSubject emission on subscribe does not trigger a spurious reset.
+  const conversationSub = agentBuilder?.events.ui.activeConversation$
+    .pipe(pairwise())
+    .subscribe(([prev, curr]) => {
+      if (prev !== null && curr !== null && prev?.id !== curr?.id) {
+        aiRuleCreation.setLastSavedRuleId(null);
+        aiRuleCreation.clearDirty();
+      }
+    });
+
+  // Return a combined subscription so all are cleaned up on unsubscribe
   saveSub.add(dirtySub);
+  saveSub.add(conversationSub);
   return saveSub;
 };

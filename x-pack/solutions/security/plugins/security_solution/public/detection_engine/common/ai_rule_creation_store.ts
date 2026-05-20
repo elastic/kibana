@@ -19,6 +19,7 @@ export class AiRuleCreationService {
   private readonly saveRuleSubject = new Subject<RuleResponse>();
   private readonly lastSavedRuleIdSubject = new BehaviorSubject<string | null>(null);
   private readonly dirtySubject = new BehaviorSubject<boolean>(false);
+  private readonly savingSubject = new BehaviorSubject<boolean>(false);
   private readonly aiRuleSubject = new BehaviorSubject<RuleResponse | null>(null);
   private readonly formSyncSubject = new BehaviorSubject<boolean>(false);
   private session: AiRuleCreationSession | null = null;
@@ -26,6 +27,7 @@ export class AiRuleCreationService {
   public readonly saveRuleRequest$ = this.saveRuleSubject.asObservable();
   public readonly lastSavedRuleId$ = this.lastSavedRuleIdSubject.asObservable();
   public readonly dirty$ = this.dirtySubject.asObservable();
+  public readonly saving$ = this.savingSubject.asObservable();
   public readonly aiCreatedRule$ = this.aiRuleSubject.asObservable();
   public readonly formSyncActive$ = this.formSyncSubject.pipe(distinctUntilChanged());
 
@@ -49,7 +51,12 @@ export class AiRuleCreationService {
   };
 
   public requestSaveRule = (rule: RuleResponse): void => {
+    this.savingSubject.next(true);
     this.saveRuleSubject.next(rule);
+  };
+
+  public clearSaving = (): void => {
+    this.savingSubject.next(false);
   };
 
   public setLastSavedRuleId = (id: string | null): void => {

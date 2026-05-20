@@ -9,10 +9,6 @@ import { platformCoreTools } from '@kbn/agent-builder-common';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { SECURITY_CREATE_DETECTION_RULE_TOOL_ID, SECURITY_LABS_SEARCH_TOOL_ID } from '../../tools';
 
-// TODO: Update SKILL_CONTENT to instruct the agent to route query-field rewrites through
-// security.create_detection_rule (passing existing_rule + attachment_id) rather than
-// attachment_update. All other field edits (severity, tags, MITRE, schedule, etc.) remain
-// on the attachment_update path.
 export const getDetectionRuleEditSkill = () =>
   defineSkillType({
     id: 'detection-rule-edit',
@@ -64,14 +60,44 @@ This is especially important when:
 
 ### Step 3: Create or Modify the Rule
 
-If you are creating a new rule, use the following:
-- **Creating a new rule**: ALWAYS use the \`security.create_detection_rule\` tool. Pass a natural language description of the detection rule to create. The tool handles rule creation AND attachment update automatically. Do NOT call \`attachment_update\`.
-- after calling the \`security.create_detection_rule\` tool, move to step 4.
-- render the latest version of the attachment inline.
+There are three cases. Choose the right path based on what the user is asking:
 
+---
 
-When asked to edit or update the rule or any field of the rule, use the following:
-**Editing an existing rule** (changing fields like tags, severity, description, schedule, MITRE ATT&CK, index patterns, query, etc.):
+#### Case A — Creating a new rule
+
+ALWAYS use the \`security.create_detection_rule\` tool. Pass a natural language description. The tool handles rule creation AND attachment creation automatically. Do NOT call \`attachment_update\`.
+
+After the tool returns, render the latest version of the attachment inline and move to Step 4.
+
+---
+
+#### Case B — Rewriting or regenerating the query of an existing rule
+
+Use this path when the user asks to rewrite, regenerate, or significantly change the detection query (e.g., "rewrite the query to also detect X", "regenerate the query using Y index").
+
+1. **Read the latest attachment** — call \`attachment_read\`.
+2. **Parse** the \`text\` field (stringified JSON of the rule).
+3. **Call \`security.create_detection_rule\`** passing:
+   - \`user_query\`: a natural language description of the new query intent
+   - \`existing_rule\`: the full current rule object (parsed JSON from the attachment) — this seeds the graph so non-query fields (severity, risk_score, name, tags, etc.) are preserved as the base
+   - \`attachment_id\`: the attachment ID from the attachment read result — this causes the tool to update the attachment in place rather than create a new one
+
+   Example call:
+   \`\`\`
+   security.create_detection_rule({
+     user_query: "detect ...",
+     existing_rule: <full parsed rule object from attachment>,
+     attachment_id: "ATTACHMENT_ID"
+   })
+   \`\`\`
+4. After the tool returns, render the latest version of the attachment inline.
+
+---
+
+#### Case C — Editing specific fields of an existing rule
+
+Use this path for any field change that does NOT require regenerating the query: tags, severity, risk_score, name, description, MITRE ATT&CK mappings, schedule (interval/from), enabled, index patterns, etc.
 
 When the user says "add to the rule", "edit the rule", "change the rule", "update the rule", or any variation — they ALWAYS mean the **rule attachment**. The rule lives inside the attachment's \`text\` field as stringified JSON. There is no other rule object.
 
@@ -328,6 +354,7 @@ When a user asks what you can or cannot do, or what limitations exist, communica
 3. ALWAYS read the attachment before modifying it.
 4. ALWAYS re-stringify the FULL rule object — never send partial updates.
 5. **ALWAYS render the attachment inline after EVERY modification** — this is the most important rule. Every single call to \`security.create_detection_rule\` or \`attachment_update\` MUST be followed by \`<render_attachment id="ATTACHMENT_ID" version="VERSION" />\` using the version from the tool result. NEVER omit this. The user cannot see changes without it.
-6. ALWAYS use \`security.create_detection_rule\` when creating a new rule.
-7. Use \`attachment_update\` for editing existing rules (field-level changes like tags, severity, schedule, etc.).
+6. ALWAYS use \`security.create_detection_rule\` when creating a new rule (Case A) or rewriting the query of an existing rule (Case B — pass \`existing_rule\` + \`attachment_id\`).
+7. Use \`attachment_update\` ONLY for editing specific non-query fields of an existing rule (Case C: tags, severity, schedule, MITRE, name, description, etc.).
+8. When in doubt whether a change is a "query rewrite" or a "field edit", use Case B (route through \`security.create_detection_rule\`). Never attempt to hand-edit the \`query\` field directly — the ES|QL generation graph handles index discovery and query validation.
 `;

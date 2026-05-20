@@ -57,6 +57,12 @@ interface UseAgentBuilderRuleCreationParams {
   actionsStepData?: ActionsStepRule;
   actionTypeRegistry?: ActionTypeRegistryContract;
   /**
+   * Server-assigned id of the rule being edited. When provided, the form → agent sync
+   * injects this id into every attachment push so the chat always sees an existing rule
+   * (showing "Save changes", not "Save rule").
+   */
+  existingRuleId?: string;
+  /**
    * Assign `current` to a no-arg function that focuses the desired step after the form is filled
    * from agent chat (e.g. `() => goToStep(RuleStep.ruleActions)`). Uses a ref so the parent can
    * wire this after `goToStep` is defined.
@@ -78,6 +84,7 @@ export const useAgentBuilderRuleCreation = ({
   scheduleStepData,
   actionsStepData,
   actionTypeRegistry,
+  existingRuleId,
   onAiCreatedRuleAppliedRef,
 }: UseAgentBuilderRuleCreationParams): UseAgentBuilderRuleCreationResult => {
   const { services } = useKibana();
@@ -86,6 +93,9 @@ export const useAgentBuilderRuleCreation = ({
   const isAiRuleUpdateRef = useRef(false);
   const [isSyncActive, setIsSyncActive] = useState(false);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  // Tracks the rule id to preserve in form→agent syncs. Seeded from existingRuleId
+  // (edit page) and updated if the agent provides a rule with an id via Open in form.
+  const syncRuleIdRef = useRef<string | undefined>(existingRuleId);
 
   useEffect(() => {
     const subscription = aiRuleCreation.formSyncActive$.subscribe(setIsSyncActive);
@@ -121,6 +131,11 @@ export const useAgentBuilderRuleCreation = ({
         sessionId: session.sessionId,
         durationSinceSessionStartMs: Date.now() - session.startTimestamp,
       });
+
+      // Keep syncRuleIdRef in sync so subsequent form→agent pushes preserve the id.
+      if (rule.id) {
+        syncRuleIdRef.current = rule.id;
+      }
 
       isAiRuleUpdateRef.current = true;
       aiRuleCreation.activateFormSync();
@@ -196,7 +211,12 @@ export const useAgentBuilderRuleCreation = ({
           actionsStepData,
           actionTypeRegistry
         );
-        addRuleAttachment(formattedRule, formattedRule.name ?? 'Rule');
+        // Preserve the rule id (existing rule being edited) so the chat attachment
+        // never loses track of which rule this is after form edits.
+        const ruleToSync = syncRuleIdRef.current
+          ? { ...formattedRule, id: syncRuleIdRef.current }
+          : formattedRule;
+        addRuleAttachment(ruleToSync, ruleToSync.name ?? 'Rule');
       } catch {
         // Incomplete form data may cause formatting errors — ignore silently
       }

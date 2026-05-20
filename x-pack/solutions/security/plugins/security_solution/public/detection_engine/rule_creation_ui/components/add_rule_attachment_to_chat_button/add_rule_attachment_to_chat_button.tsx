@@ -30,6 +30,9 @@ interface AddRuleAttachmentFromFormProps {
   scheduleStepData: ScheduleStepRule;
   actionsStepData: ActionsStepRule;
   actionTypeRegistry: ActionTypeRegistryContract;
+  /** When editing an existing rule, pass its server-assigned id so the attachment
+   * carries `id` and the chat shows "Save changes" instead of "Save rule". */
+  existingRuleId?: string;
   rule?: never;
 }
 
@@ -40,6 +43,7 @@ interface AddRuleAttachmentFromRuleResponseProps {
   scheduleStepData?: never;
   actionsStepData?: never;
   actionTypeRegistry?: never;
+  existingRuleId?: never;
 }
 
 export type AddRuleAttachmentToChatButtonProps = (
@@ -59,6 +63,7 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
     scheduleStepData,
     actionsStepData,
     actionTypeRegistry,
+    existingRuleId,
     rule,
   } = props;
 
@@ -71,15 +76,21 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
     actionTypeRegistry != null;
 
   const ruleAttachment = useMemo(() => {
-    const formattedRule = isFormBased
-      ? formatRule<RuleCreateProps>(
-          defineStepData,
-          aboutStepData,
-          scheduleStepData,
-          actionsStepData,
-          actionTypeRegistry
-        )
-      : rule;
+    let formattedRule: RuleCreateProps | RuleResponse | null | undefined;
+    if (isFormBased) {
+      const fromForm = formatRule<RuleCreateProps>(
+        defineStepData,
+        aboutStepData,
+        scheduleStepData,
+        actionsStepData,
+        actionTypeRegistry
+      );
+      // Preserve the server-assigned id when editing an existing rule so the chat
+      // attachment knows this is an update, not a new rule.
+      formattedRule = existingRuleId ? { ...fromForm, id: existingRuleId } : fromForm;
+    } else {
+      formattedRule = rule;
+    }
     const attachmentLabel = formattedRule?.name;
     const attachmentData = JSON.stringify(formattedRule);
 
@@ -98,6 +109,7 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
     scheduleStepData,
     actionsStepData,
     actionTypeRegistry,
+    existingRuleId,
     rule,
   ]);
 

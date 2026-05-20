@@ -170,6 +170,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     scheduleStepData,
     actionsStepData,
     actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+    existingRuleId: rule?.id,
   });
 
   const { modal: confirmSavingWithWarningModal, confirmValidationErrors } =
@@ -567,6 +568,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
           scheduleStepData={scheduleStepData}
           actionsStepData={actionsStepData}
           actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
+          existingRuleId={rule?.id}
           pathway="rule_editing"
         />
       ) : null,
@@ -577,6 +579,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       scheduleStepData,
       actionsStepData,
       triggersActionsUi.actionTypeRegistry,
+      rule?.id,
     ]
   );
 
