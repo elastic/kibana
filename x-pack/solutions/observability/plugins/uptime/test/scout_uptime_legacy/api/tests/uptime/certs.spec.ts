@@ -47,7 +47,7 @@ apiTest.describe('certs api', { tag: '@local-stateful-classic' }, () => {
     });
 
     const result = processCertsResult(response.body.rawResponse);
-    expect(JSON.stringify(result)).toBe('{"certs":[],"total":0}');
+    expect(result).toStrictEqual({ certs: [], total: 0 });
   });
 
   apiTest('retrieves expected cert data', async ({ apiClient, esClient }) => {

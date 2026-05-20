@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RoleApiCredentials } from '@kbn/scout-oblt';
+import type { KbnClient, RoleApiCredentials } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, testData } from '../../fixtures';
 
@@ -16,7 +16,7 @@ apiTest.describe('dynamic settings', { tag: '@local-stateful-classic' }, () => {
     adminCredentials = await requestAuth.getApiKey('admin');
   });
 
-  const cleanupSettings = async (kbnClient: any) => {
+  const cleanupSettings = async (kbnClient: KbnClient) => {
     try {
       await kbnClient.savedObjects.delete({
         type: 'uptime-dynamic-settings',

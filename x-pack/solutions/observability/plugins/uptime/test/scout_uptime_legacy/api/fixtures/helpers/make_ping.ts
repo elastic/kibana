@@ -10,8 +10,7 @@ import { merge } from 'lodash';
 import type { EsClient } from '@kbn/scout-oblt';
 import type { TlsProps } from './make_tls';
 import { makeTls } from './make_tls';
-
-const DEFAULT_INDEX_NAME = 'heartbeat-8-generated-test';
+import { GENERATED_INDEX } from '../constants';
 
 export const makePing = async (
   es: EsClient,
@@ -118,7 +117,7 @@ export const makePing = async (
   const document = mogrify(merge(baseDoc, fields));
 
   await es.index({
-    index: customIndex || DEFAULT_INDEX_NAME,
+    index: customIndex || GENERATED_INDEX,
     refresh,
     document,
   });

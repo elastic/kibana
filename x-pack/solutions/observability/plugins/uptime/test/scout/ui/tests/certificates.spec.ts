@@ -10,9 +10,8 @@ import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { expect } from '@kbn/scout-oblt/ui';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
-import { test } from '../fixtures';
+import { test, testData } from '../fixtures';
 
-const BLANK_ARCHIVE = 'x-pack/solutions/observability/test/fixtures/es_archives/uptime/blank';
 const GENERATED_INDEX = 'heartbeat-8-generated-test';
 
 const getSha256 = () => crypto.randomBytes(64).toString('hex').toUpperCase();
@@ -96,7 +95,7 @@ test.describe('Uptime certificates', { tag: ['@local-stateful-classic'] }, () =>
         body: DYNAMIC_SETTINGS_DEFAULTS,
       })
       .catch(() => {});
-    await esArchiver.loadIfNeeded(BLANK_ARCHIVE);
+    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.BLANK);
   });
 
   test.beforeEach(async ({ browserAuth, esClient }) => {
