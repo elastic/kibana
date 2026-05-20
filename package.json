@@ -95,7 +95,7 @@
     "**/fast-xml-parser": "5.5.7",
     "**/flatted": "3.4.2",
     "**/hoist-non-react-statics": "3.3.2",
-    "**/hono": "4.12.14",
+    "**/hono": "4.12.19",
     "**/isomorphic-fetch/node-fetch": "2.7.0",
     "**/langchain": "1.2.30",
     "**/pixelmatch": "5.3.0",
