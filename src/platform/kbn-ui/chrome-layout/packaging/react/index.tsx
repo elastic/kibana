@@ -23,8 +23,8 @@ import type { ChromeStyle } from '../../src/layout.types';
 import {
   GridLayoutGlobalStyles,
   type GridLayoutGlobalStylesProps,
-} from '../../src/layouts/grid_global_app_style';
-import { CommonGlobalAppStyles } from '../../src/layouts/global_app_styles';
+  CommonGlobalAppStyles,
+} from './services/grid_global_styles';
 import { LayoutDebugOverlay } from '../../src/debug/layout_debug_overlay';
 
 // React import is needed for JSX transform.

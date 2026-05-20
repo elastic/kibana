@@ -18,7 +18,7 @@ import {
 import { CommonGlobalAppStyles } from './global_app_styles';
 import type { ChromeStyle } from '../layout.types';
 
-const globalLayoutStyles = (euiThemeContext: UseEuiTheme) => {
+export const globalLayoutStyles = (euiThemeContext: UseEuiTheme) => {
   return css`
     :root {
       // TODO: these variables are legacy and we keep them for backward compatibility
@@ -89,7 +89,7 @@ const globalLayoutStyles = (euiThemeContext: UseEuiTheme) => {
  * Project mode background styles with gradient.
  * Only applied when chromeStyle is 'project' to differentiate from classic mode.
  */
-const projectModeBackgroundStyles = (euiThemeContext: UseEuiTheme) => {
+export const projectModeBackgroundStyles = (euiThemeContext: UseEuiTheme) => {
   const { colorMode } = euiThemeContext;
   const isDarkMode = colorMode === 'DARK';
 
