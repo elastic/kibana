@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
-import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
-import type { ObservabilityOnboardingAppServices } from '../../../..';
 import { HostLinuxOtelPage } from '../linux_otel_page';
-import { buildFetchError } from './test_fixtures';
+import { buildFetchError, renderWithHostPageProviders } from './test_helpers';
 
 jest.mock('../../../quickstart_flows/otel_logs/steps', () => ({
   OtelLogsInstallStep: ({ os, ingestionMode }: { os: string; ingestionMode: string }) => (
@@ -111,50 +103,8 @@ const { useTimeWindowDataDetection: useTimeWindowDataDetectionMock } = jest.requ
   '../../../quickstart_flows/shared/use_time_window_data_detection'
 );
 
-const renderPage = (initialEntries: string[] = ['/host/linux']) => {
-  const coreStart = coreMock.createStart();
-  const services: ObservabilityOnboardingAppServices = {
-    ...coreStart,
-    share: sharePluginMock.createStartContract(),
-    context: {
-      isDev: false,
-      isCloud: false,
-      isServerless: false,
-      stackVersion: '9.0.0',
-    },
-    config: {
-      ui: { enabled: true },
-      serverless: { enabled: false },
-    },
-    observability: {
-      config: {
-        unsafe: {
-          alertDetails: {
-            uptime: { enabled: false },
-          },
-        },
-        managedOtlpServiceUrl: '',
-      },
-      observabilityRuleTypeRegistry: {
-        register: jest.fn(),
-        getFormatter: jest.fn(() => undefined),
-        list: jest.fn(() => []),
-      },
-      useRulesLink: jest.fn(() => ({ href: '/' })),
-    } as ObservabilityPublicStart,
-  };
-  return render(
-    <I18nProvider>
-      <KibanaContextProvider services={services}>
-        <MemoryRouter initialEntries={initialEntries}>
-          <CompatRouter>
-            <HostLinuxOtelPage />
-          </CompatRouter>
-        </MemoryRouter>
-      </KibanaContextProvider>
-    </I18nProvider>
-  );
-};
+const renderPage = (initialEntries: string[] = ['/host/linux']) =>
+  renderWithHostPageProviders(<HostLinuxOtelPage />, { initialEntries });
 
 describe('HostLinuxOtelPage', () => {
   it('renders the Linux layout chrome', () => {
@@ -215,11 +165,14 @@ describe('HostLinuxOtelPage', () => {
     );
   });
 
-  it('passes the linux osType filter to the has-data probe so cross-OS ingest cannot complete the wrong session', () => {
+  it('pins the linux osType filter to the has-data probe so cross-OS ingest cannot complete the wrong session', () => {
     useTimeWindowDataDetectionMock.mockClear();
     renderPage();
     expect(useTimeWindowDataDetectionMock).toHaveBeenCalledWith(
-      expect.objectContaining({ extraQueryParams: { osType: 'linux' } })
+      expect.objectContaining({
+        extraQueryParams: { osType: 'linux' },
+        keepExtraParamsOnFallback: true,
+      })
     );
   });
 

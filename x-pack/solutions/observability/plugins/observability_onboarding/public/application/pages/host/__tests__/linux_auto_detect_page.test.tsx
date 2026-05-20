@@ -5,25 +5,36 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
-import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
-import type { ObservabilityOnboardingAppServices } from '../../../..';
 import { HostLinuxAutoDetectPage } from '../linux_auto_detect_page';
+import { buildFetchError, renderWithHostPageProviders } from './test_helpers';
 
 jest.mock('../../../quickstart_flows/auto_detect/steps', () => ({
-  AutoDetectInstallStep: () => <div data-test-subj="autoDetectInstallStep" />,
+  AutoDetectInstallStep: ({ ingestionMode }: { ingestionMode: string }) => (
+    <div data-test-subj="autoDetectInstallStep" data-ingestion-mode={ingestionMode} />
+  ),
   AutoDetectVisualizeStep: () => <div data-test-subj="autoDetectVisualizeStep" />,
 }));
 
+jest.mock('../../../quickstart_flows/shared/empty_prompt', () => ({
+  EmptyPrompt: ({
+    onboardingFlowType,
+    inline,
+  }: {
+    onboardingFlowType: string;
+    inline?: boolean;
+  }) => (
+    <div
+      data-test-subj="emptyPromptStub"
+      data-onboarding-flow-type={onboardingFlowType}
+      data-inline={inline ? 'true' : 'false'}
+    />
+  ),
+}));
+
 jest.mock('../../../quickstart_flows/auto_detect/use_onboarding_flow', () => ({
-  useOnboardingFlow: () => ({
+  useOnboardingFlow: jest.fn().mockReturnValue({
     status: 'notStarted',
     data: undefined,
     error: undefined,
@@ -32,6 +43,10 @@ jest.mock('../../../quickstart_flows/auto_detect/use_onboarding_flow', () => ({
   }),
   DASHBOARDS: {},
 }));
+
+const { useOnboardingFlow: useOnboardingFlowMock } = jest.requireMock(
+  '../../../quickstart_flows/auto_detect/use_onboarding_flow'
+);
 
 jest.mock('../../../shared/use_flow_breadcrumbs', () => ({
   useFlowBreadcrumb: jest.fn(),
@@ -55,52 +70,22 @@ jest.mock('@kbn/ebt-tools', () => ({
   }),
 }));
 
-const renderPage = () => {
-  const coreStart = coreMock.createStart();
-  const services: ObservabilityOnboardingAppServices = {
-    ...coreStart,
-    share: sharePluginMock.createStartContract(),
-    context: {
-      isDev: false,
-      isCloud: false,
-      isServerless: false,
-      stackVersion: '9.0.0',
-    },
-    config: {
-      ui: { enabled: true },
-      serverless: { enabled: false },
-    },
-    observability: {
-      config: {
-        unsafe: {
-          alertDetails: {
-            uptime: { enabled: false },
-          },
-        },
-        managedOtlpServiceUrl: '',
-      },
-      observabilityRuleTypeRegistry: {
-        register: jest.fn(),
-        getFormatter: jest.fn(() => undefined),
-        list: jest.fn(() => []),
-      },
-      useRulesLink: jest.fn(() => ({ href: '/' })),
-    } as ObservabilityPublicStart,
-  };
-  return render(
-    <I18nProvider>
-      <KibanaContextProvider services={services}>
-        <MemoryRouter initialEntries={['/host/linux/auto-detect']}>
-          <CompatRouter>
-            <HostLinuxAutoDetectPage />
-          </CompatRouter>
-        </MemoryRouter>
-      </KibanaContextProvider>
-    </I18nProvider>
-  );
+const DEFAULT_FLOW_STATE = {
+  status: 'notStarted',
+  data: undefined,
+  error: undefined,
+  refetch: jest.fn(),
+  installedIntegrations: [],
 };
 
+const renderPage = (initialEntries: string[] = ['/host/linux/auto-detect']) =>
+  renderWithHostPageProviders(<HostLinuxAutoDetectPage />, { initialEntries });
+
 describe('HostLinuxAutoDetectPage', () => {
+  beforeEach(() => {
+    useOnboardingFlowMock.mockReturnValue(DEFAULT_FLOW_STATE);
+  });
+
   it('renders the Linux layout chrome', () => {
     renderPage();
     expect(screen.getByTestId('observabilityOnboardingHostV2Layout-linux')).toBeInTheDocument();
@@ -119,5 +104,31 @@ describe('HostLinuxAutoDetectPage', () => {
   it('renders the auto-detect install step', () => {
     renderPage();
     expect(screen.getByTestId('autoDetectInstallStep')).toBeInTheDocument();
+  });
+
+  it('uses wired ingestion mode when the URL says so', () => {
+    renderPage(['/host/linux/auto-detect?ingestion=wired']);
+    expect(screen.getByTestId('autoDetectInstallStep').getAttribute('data-ingestion-mode')).toBe(
+      'wired'
+    );
+  });
+
+  it('coerces an unrecognized ingestion param to classic in the install step', () => {
+    renderPage(['/host/linux/auto-detect?ingestion=foo']);
+    expect(screen.getByTestId('autoDetectInstallStep').getAttribute('data-ingestion-mode')).toBe(
+      'classic'
+    );
+  });
+
+  it('renders an inline EmptyPrompt and drops the visualize step when setup errors', () => {
+    useOnboardingFlowMock.mockReturnValue({
+      ...DEFAULT_FLOW_STATE,
+      error: buildFetchError(),
+    });
+    renderPage();
+    const emptyPrompt = screen.getByTestId('emptyPromptStub');
+    expect(emptyPrompt.getAttribute('data-onboarding-flow-type')).toBe('auto-detect');
+    expect(emptyPrompt.getAttribute('data-inline')).toBe('true');
+    expect(screen.queryByTestId('autoDetectVisualizeStep')).toBeNull();
   });
 });

@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
-import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
-import type { ObservabilityOnboardingAppServices } from '../../../..';
 import { HostWindowsOtelPage } from '../windows_otel_page';
-import { buildFetchError } from './test_fixtures';
+import { buildFetchError, renderWithHostPageProviders } from './test_helpers';
 
 jest.mock('../../../quickstart_flows/otel_logs/steps', () => ({
   OtelLogsInstallStep: ({ os, ingestionMode }: { os: string; ingestionMode: string }) => (
@@ -107,54 +99,8 @@ jest.mock('../../../../hooks/use_wired_streams_status', () => ({
   }),
 }));
 
-const buildServices = (): ObservabilityOnboardingAppServices => {
-  const coreStart = coreMock.createStart();
-  return {
-    ...coreStart,
-    share: sharePluginMock.createStartContract(),
-    context: {
-      isDev: false,
-      isCloud: false,
-      isServerless: false,
-      stackVersion: '9.0.0',
-    },
-    config: {
-      ui: { enabled: true },
-      serverless: { enabled: false },
-    },
-    observability: {
-      config: {
-        unsafe: {
-          alertDetails: {
-            uptime: { enabled: false },
-          },
-        },
-        managedOtlpServiceUrl: '',
-      },
-      observabilityRuleTypeRegistry: {
-        register: jest.fn(),
-        getFormatter: jest.fn(() => undefined),
-        list: jest.fn(() => []),
-      },
-      useRulesLink: jest.fn(() => ({ href: '/' })),
-    } as ObservabilityPublicStart,
-  };
-};
-
-const renderWindowsOtelPage = (initialEntries: string[] = ['/host/windows']) => {
-  const services = buildServices();
-  return render(
-    <I18nProvider>
-      <KibanaContextProvider services={services}>
-        <MemoryRouter initialEntries={initialEntries}>
-          <CompatRouter>
-            <HostWindowsOtelPage />
-          </CompatRouter>
-        </MemoryRouter>
-      </KibanaContextProvider>
-    </I18nProvider>
-  );
-};
+const renderWindowsOtelPage = (initialEntries: string[] = ['/host/windows']) =>
+  renderWithHostPageProviders(<HostWindowsOtelPage />, { initialEntries });
 
 describe('HostWindowsOtelPage', () => {
   it('renders the Windows layout chrome', () => {
@@ -195,11 +141,14 @@ describe('HostWindowsOtelPage', () => {
     );
   });
 
-  it('passes the windows osType filter to the has-data probe so cross-OS ingest cannot complete the wrong session', () => {
+  it('pins the windows osType filter to the has-data probe so cross-OS ingest cannot complete the wrong session', () => {
     useTimeWindowDataDetectionMock.mockClear();
     renderWindowsOtelPage();
     expect(useTimeWindowDataDetectionMock).toHaveBeenCalledWith(
-      expect.objectContaining({ extraQueryParams: { osType: 'windows' } })
+      expect.objectContaining({
+        extraQueryParams: { osType: 'windows' },
+        keepExtraParamsOnFallback: true,
+      })
     );
   });
 

@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
-import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
-import type { ObservabilityOnboardingAppServices } from '../../../..';
+import type { CoreStart } from '@kbn/core/public';
 import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../../../../../common/feature_flags';
 import { ObservabilityOnboardingFlow } from '../../../observability_onboarding_flow';
+import { buildHostPageServices, renderWithHostPageProviders } from './test_helpers';
 
 jest.mock('../../landing', () => ({
   LandingPage: () => <div data-test-subj="landingPageStub" />,
@@ -83,51 +77,17 @@ beforeAll(() => {
 });
 
 const renderFlow = (flagEnabled: boolean, path: string) => {
-  const coreStart = coreMock.createStart();
-  coreStart.featureFlags.getBooleanValue.mockImplementation((id, fallback) =>
+  const services = buildHostPageServices();
+  const featureFlags = services.featureFlags as CoreStart['featureFlags'] & {
+    getBooleanValue: jest.Mock;
+  };
+  featureFlags.getBooleanValue.mockImplementation((id: string, fallback: boolean) =>
     id === IS_ADD_DATA_PAGE_V2_ENABLED ? flagEnabled : fallback
   );
-  const services: ObservabilityOnboardingAppServices = {
-    ...coreStart,
-    share: sharePluginMock.createStartContract(),
-    context: {
-      isDev: false,
-      isCloud: false,
-      isServerless: false,
-      stackVersion: '9.0.0',
-    },
-    config: {
-      ui: { enabled: true },
-      serverless: { enabled: false },
-    },
-    observability: {
-      config: {
-        unsafe: {
-          alertDetails: {
-            uptime: { enabled: false },
-          },
-        },
-        managedOtlpServiceUrl: '',
-      },
-      observabilityRuleTypeRegistry: {
-        register: jest.fn(),
-        getFormatter: jest.fn(() => undefined),
-        list: jest.fn(() => []),
-      },
-      useRulesLink: jest.fn(() => ({ href: '/' })),
-    } as ObservabilityPublicStart,
-  };
-  return render(
-    <I18nProvider>
-      <KibanaContextProvider services={services}>
-        <MemoryRouter initialEntries={[path]}>
-          <CompatRouter>
-            <ObservabilityOnboardingFlow />
-          </CompatRouter>
-        </MemoryRouter>
-      </KibanaContextProvider>
-    </I18nProvider>
-  );
+  return renderWithHostPageProviders(<ObservabilityOnboardingFlow />, {
+    initialEntries: [path],
+    services,
+  });
 };
 
 const HOST_ROUTES: ReadonlyArray<readonly [string, string]> = [

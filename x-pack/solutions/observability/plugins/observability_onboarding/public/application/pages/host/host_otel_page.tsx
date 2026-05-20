@@ -158,6 +158,7 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
     onboardingId: onboardingId ?? '',
     endpoint: '/internal/observability_onboarding/otel_host/has-data',
     extraQueryParams: { osType: hostOsTypeFilter[os] },
+    keepExtraParamsOnFallback: true,
   });
 
   const hasPreExistingDataFinal = hasPreExistingData || hasPreExistingDataEarly;
