@@ -188,6 +188,30 @@ export interface SmlCrawler {
 }
 
 /**
+ * Input fields for upserting an SML document.
+ *
+ * `created_at` / `updated_at` are managed server-side; `id` is the URL path id;
+ * `spaces` is derived from the caller's space (on create) or preserved from the
+ * existing document (on update) — callers cannot specify it directly.
+ */
+export interface SmlDocumentInput {
+  type: string;
+  title: string;
+  origin_id: string;
+  content: string;
+  permissions?: string[];
+}
+
+/**
+ * Result of an upsert operation.
+ */
+export interface SmlUpsertResult {
+  document: SmlDocument;
+  /** Whether the document was newly created (vs. updated in place). */
+  created: boolean;
+}
+
+/**
  * Per-type filter parameters for SML search.
  * Re-exported from the shared HTTP API types so server and client use a single definition.
  */
@@ -255,6 +279,43 @@ export interface SmlService {
     spaceId: string;
     esClient: IScopedClusterClient;
   }) => Promise<Map<string, SmlDocument>>;
+
+  /** List SML documents in a space with optional filters and pagination. */
+  listDocuments: (params: {
+    spaceId: string;
+    esClient: IScopedClusterClient;
+    page?: number;
+    perPage?: number;
+    type?: string;
+    originId?: string;
+  }) => Promise<{ total: number; results: SmlDocument[] }>;
+
+  /**
+   * Upsert an SML document by id, scoped to a space.
+   *
+   * On create the new document's `spaces` is `[spaceId]`. On update the
+   * existing document's `spaces` is preserved.
+   *
+   * Resolves to `null` when a document with this id exists but is not
+   * visible from `spaceId` (caller cannot clobber across spaces).
+   */
+  upsertDocument: (params: {
+    id: string;
+    spaceId: string;
+    document: SmlDocumentInput;
+    esClient: IScopedClusterClient;
+  }) => Promise<SmlUpsertResult | null>;
+
+  /**
+   * Delete an SML document by id, scoped to a space.
+   * Resolves to `true` when a document was deleted, `false` when no
+   * matching document was found.
+   */
+  deleteDocument: (params: {
+    id: string;
+    spaceId: string;
+    esClient: IScopedClusterClient;
+  }) => Promise<boolean>;
 
   /** Get a type definition by ID */
   getTypeDefinition: (typeId: string) => SmlTypeDefinition | undefined;
