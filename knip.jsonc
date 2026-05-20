@@ -4,12 +4,65 @@
 // so this file is the source of truth for what knip should analyze. Add more workspaces here as
 // additional areas of the monorepo are brought under knip-managed lint coverage.
 //
-// To run knip from the repo root: `node scripts/knip [...args]`
-// To scope to a single workspace, e.g. for the @kbn/safer-lodash-set check that previously used
-// `dependency-check --missing`: `node scripts/knip --workspace src/platform/packages/shared/kbn-safer-lodash-set --include unlisted`
+// Usage:
+//   node scripts/knip [...args]
+//
+// Check for unused root dependencies (ignores @kbn/* and @elastic/*):
+//   node scripts/knip --workspace . --include dependencies,devDependencies
+//
+// Scope to a single workspace:
+//   node scripts/knip --workspace src/platform/packages/shared/kbn-safer-lodash-set --include unlisted
 {
   "$schema": "https://unpkg.com/knip@6/schema-jsonc.json",
+  // @kbn/* and @elastic/* are internal linked packages managed outside of knip.
+  // @babel/plugin-* and babel-plugin-* are consumed via require.resolve() in
+  // packages/kbn-babel-preset/ which knip cannot trace (it only detects require/import).
+  "ignoreDependencies": [
+    "^@kbn/",
+    "^@elastic/",
+    "^@babel/plugin-",
+    "^babel-plugin-",
+    "^eslint-plugin-"
+  ],
   "workspaces": {
+    ".": {
+      "entry": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "x-pack/**/*.{ts,tsx,js,jsx}",
+        "packages/**/*.{ts,tsx,js,jsx}",
+        "examples/**/*.{ts,tsx,js,jsx}",
+        "plugins/**/*.{ts,tsx,js,jsx}"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "x-pack/**/*.{ts,tsx,js,jsx}",
+        "packages/**/*.{ts,tsx,js,jsx}",
+        "examples/**/*.{ts,tsx,js,jsx}",
+        "plugins/**/*.{ts,tsx,js,jsx}"
+      ],
+      "ignore": [
+        "**/node_modules/**",
+        "**/target/**",
+        "**/build/**"
+      ],
+      "storybook": {
+        "config": [
+          "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
+          "**/.storybook/main.{js,ts}"
+        ]
+      },
+      "eslint": {
+        "config": [".eslintrc.js", "**/.eslintrc.{js,json}"]
+      },
+      "babel": {
+        "config": [
+          "packages/kbn-babel-preset/common_preset.js",
+          "packages/kbn-babel-preset/webpack_preset.js",
+          "packages/kbn-babel-preset/node_preset.js",
+          "packages/kbn-babel-preset/istanbul_preset.js"
+        ]
+      }
+    },
     "src/platform/packages/shared/kbn-safer-lodash-set": {
       "entry": ["set.js", "setWith.js", "fp/*.js"]
     }
