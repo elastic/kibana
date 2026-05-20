@@ -10,6 +10,7 @@ import { EuiCallOut, EuiLoadingSpinner, EuiSelectable, EuiSpacer, useEuiTheme } 
 import type { EuiSelectableOption } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { MAX_TAG_LENGTH, MAX_TAGS_PER_EPISODE } from '@kbn/alerting-v2-constants';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { useCreateAlertAction } from '../../hooks/use_create_alert_action';
@@ -29,7 +30,7 @@ export interface AlertEpisodeTagsFlyoutProps {
   groupHash: string;
   currentTags: string[];
   http: HttpStart;
-  services: { expressions: ExpressionsStart };
+  services: { expressions: ExpressionsStart; spaces: SpacesPluginStart };
   /**
    * When provided, called with the selected tags on save instead of the
    * internal single-row mutation. The flyout closes immediately after calling.
