@@ -23,6 +23,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
           'disable:entityAnalyticsEntityStoreV2',
         ])}`,
+        '--uiSettings.overrides.securitySolution:entityStoreEnableV2=false',
       ],
     },
 
