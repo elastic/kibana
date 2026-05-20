@@ -8,8 +8,8 @@
  */
 
 import { flattenElementTree } from './flatten_element_tree';
-import { DEVTOOL_HIDDEN_ATTR } from '../constants';
-import '../tests/mocks';
+import { DEVTOOL_HIDDEN_ATTR } from '../lib/constants';
+import '../lib/tests/mocks';
 
 describe('flattenElementTree', () => {
   it('should return a single leaf node for an element with no children', () => {

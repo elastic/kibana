@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEVTOOL_HIDDEN_ATTR, SVG_INTERNALS, MAX_TREE_DEPTH } from '../constants';
+import { DEVTOOL_HIDDEN_ATTR, SVG_INTERNALS, MAX_TREE_DEPTH } from '../lib/constants';
 import { resolveTag } from './resolve_eui_tag';
 
 interface TreeNode {

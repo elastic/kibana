@@ -8,7 +8,7 @@
  */
 
 import { hasSignificantRounding, isInRoundedDeadZone } from './rounded_dead_zone';
-import { EDGE_ZONE } from '../constants';
+import { EDGE_ZONE } from '../lib/constants';
 
 describe('hasSignificantRounding', () => {
   const mockRounding = (radii: {

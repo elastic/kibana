@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { identifyIconType } from '../../components/edit/library/eui_icon_cache';
+import { identifyIconType } from '../components/edit/library/eui_icon_cache';
 
 interface SourceEntry {
   element: Element;

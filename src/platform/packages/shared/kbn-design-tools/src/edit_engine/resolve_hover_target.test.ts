@@ -8,15 +8,15 @@
  */
 
 import { resolveHoverTarget } from './resolve_hover_target';
-import { makeRect } from '../tests/helpers';
+import { makeRect } from '../lib/tests/helpers';
 
 const mockGetElementUnder = jest.fn<HTMLElement | null, [number, number]>();
-jest.mock('./get_element_under', () => ({
+jest.mock('../lib/dom/get_element_under', () => ({
   getElementUnder: (x: number, y: number) => mockGetElementUnder(x, y),
 }));
 
 const mockFindNearHandle = jest.fn();
-jest.mock('../../edit_engine/resize_helpers', () => ({
+jest.mock('./resize_helpers', () => ({
   findNearHandle: (...args: unknown[]) => mockFindNearHandle(...args),
 }));
 

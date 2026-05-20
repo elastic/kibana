@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EDGE_ZONE, ROUNDING_THRESHOLD } from '../constants';
+import { EDGE_ZONE, ROUNDING_THRESHOLD } from '../lib/constants';
 
 /**
  * Check whether an element has any corner with a border-radius above the

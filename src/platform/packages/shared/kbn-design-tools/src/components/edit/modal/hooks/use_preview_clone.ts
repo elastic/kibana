@@ -10,9 +10,9 @@
 import type { Dispatch, MutableRefObject, SetStateAction } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { rgbToHex } from '@elastic/eui';
-import { collectAllTextNodes } from '../../../../lib/dom/collect_text_nodes';
-import { collectMediaElements } from '../../../../lib/dom/collect_media_elements';
-import { createPreviewClone } from '../../../../lib/dom/create_preview_clone';
+import { collectAllTextNodes } from '../../../../edit_engine/collect_text_nodes';
+import { collectMediaElements } from '../../../../edit_engine/collect_media_elements';
+import { createPreviewClone } from '../../../../edit_engine/create_preview_clone';
 import { getContentRoot } from '../../../../edit_engine/managed_element';
 import { useElementSelection } from './use_element_selection';
 import type { TextNodeEntry } from '../text_node_editor';

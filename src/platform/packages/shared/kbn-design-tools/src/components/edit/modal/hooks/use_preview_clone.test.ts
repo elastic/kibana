@@ -10,7 +10,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { usePreviewClone } from './use_preview_clone';
 
-jest.mock('../../../../lib/dom/create_preview_clone', () => ({
+jest.mock('../../../../edit_engine/create_preview_clone', () => ({
   createPreviewClone: (target: HTMLElement) => {
     const clone = target.cloneNode(true) as HTMLElement;
     const elementMap = new Map<Element, Element>([[target, clone]]);
@@ -18,7 +18,7 @@ jest.mock('../../../../lib/dom/create_preview_clone', () => ({
   },
 }));
 
-jest.mock('../../../../lib/dom/collect_text_nodes', () => ({
+jest.mock('../../../../edit_engine/collect_text_nodes', () => ({
   collectAllTextNodes: (root: HTMLElement) => {
     const nodes: Text[] = [];
     const walk = (el: globalThis.Node) => {
@@ -33,7 +33,7 @@ jest.mock('../../../../lib/dom/collect_text_nodes', () => ({
   },
 }));
 
-jest.mock('../../../../lib/dom/collect_media_elements', () => ({
+jest.mock('../../../../edit_engine/collect_media_elements', () => ({
   collectMediaElements: jest.fn().mockResolvedValue([]),
 }));
 

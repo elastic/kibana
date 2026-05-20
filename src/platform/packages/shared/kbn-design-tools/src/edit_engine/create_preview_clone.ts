@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEVTOOL_HIDDEN_ATTR, DEVTOOL_MANAGED_ATTR } from '../constants';
+import { DEVTOOL_HIDDEN_ATTR, DEVTOOL_MANAGED_ATTR } from '../lib/constants';
 import {
   copyCanvasContent,
   copyStylesDeep,
@@ -15,8 +15,8 @@ import {
   setImportant,
   roundRect,
   widenForTruncation,
-} from '../../edit_engine/clone_element';
-import { isLiveElement } from '../../edit_engine/managed_element';
+} from './clone_element';
+import { isLiveElement } from './managed_element';
 
 interface PreviewCloneResult {
   clone: HTMLElement;

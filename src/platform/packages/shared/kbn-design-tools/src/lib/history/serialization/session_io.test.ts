@@ -32,7 +32,7 @@ jest.mock('../../dom/get_page_color_mode', () => ({
 jest.mock('../../dom/color_token_lookup', () => ({
   resolveColorTokensDeep: jest.fn(),
 }));
-jest.mock('../../dom/remap_emotion_classes', () => ({
+jest.mock('../../../edit_engine/remap_emotion_classes', () => ({
   buildEmotionClassMap: () => new Map(),
   remapEmotionClasses: jest.fn(),
 }));

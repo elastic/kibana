@@ -36,7 +36,10 @@ import {
 } from '../../../../components/edit/library/eui_icon_cache';
 import { getPageColorScheme } from '../../../dom/get_page_color_mode';
 import { resolveColorTokensDeep } from '../../../dom/color_token_lookup';
-import { buildEmotionClassMap, remapEmotionClasses } from '../../../dom/remap_emotion_classes';
+import {
+  buildEmotionClassMap,
+  remapEmotionClasses,
+} from '../../../../edit_engine/remap_emotion_classes';
 import { sanitizeHTML, sanitizeInlineStyles } from './sanitize_html';
 import type { ExportedState, ExportedSession, ImportResult } from './types';
 

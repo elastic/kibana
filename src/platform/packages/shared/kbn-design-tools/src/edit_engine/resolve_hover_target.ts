@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ResizeHandle } from '../constants';
-import { findNearHandle } from '../../edit_engine/resize_helpers';
-import { getElementUnder } from './get_element_under';
+import type { ResizeHandle } from '../lib/constants';
+import { findNearHandle } from './resize_helpers';
+import { getElementUnder } from '../lib/dom/get_element_under';
 import { hasSignificantRounding, isInRoundedDeadZone } from './rounded_dead_zone';
 
 interface HoverResolution {

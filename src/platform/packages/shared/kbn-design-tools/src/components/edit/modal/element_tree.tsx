@@ -10,7 +10,7 @@
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { flattenElementTree } from '../../../lib/dom/flatten_element_tree';
+import { flattenElementTree } from '../../../edit_engine/flatten_element_tree';
 import { isEnterKey } from '../../../lib/keyboard_shortcuts';
 
 interface Props {
