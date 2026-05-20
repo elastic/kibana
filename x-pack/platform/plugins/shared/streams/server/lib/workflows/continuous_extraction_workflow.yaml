@@ -26,21 +26,22 @@ triggers:
   - type: scheduled
     with:
       every: "10m"
-inputs:
-  - name: maxScheduledStreams
-    type: number
-    default: 5
-    description: "Max streams to schedule per run; remaining eligible streams are skipped."
-  - name: lookbackHours
-    type: number
-    default: 24
-    description: "Hours of data to sample when identifying KIs."
-  - name: extractionIntervalHours
-    type: number
-    description: "Override for the min hours between extractions per stream. When omitted the Advanced Setting is used."
-  - name: excludedStreamPatterns
-    type: string
-    description: "Override for the comma-separated exclude patterns. When omitted the Advanced Setting is used."
+  - type: manual
+    inputs:
+      - name: maxScheduledStreams
+        type: number
+        default: 5
+        description: "Max streams to schedule per run; remaining eligible streams are skipped."
+      - name: lookbackHours
+        type: number
+        default: 24
+        description: "Hours of data to sample when identifying KIs."
+      - name: extractionIntervalHours
+        type: number
+        description: "Override for the min hours between extractions per stream. When omitted the Advanced Setting is used."
+      - name: excludedStreamPatterns
+        type: string
+        description: "Override for the comma-separated exclude patterns. When omitted the Advanced Setting is used."
 steps:
   # Step 1: Fetch eligible streams from the classification endpoint.
   - name: get_eligible
