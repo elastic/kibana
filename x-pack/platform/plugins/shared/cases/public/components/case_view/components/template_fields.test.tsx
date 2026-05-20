@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import type { CaseUI } from '../../../../common';
@@ -164,28 +164,66 @@ describe('TemplateFields', () => {
     expect(screen.getByText('Effort')).toBeInTheDocument();
   });
 
-  it('renders the Save button', () => {
-    renderWithTestingProviders(<TemplateFields {...defaultProps} />);
+  describe('on-blur save', () => {
+    const getInputForLabel = (label: string): HTMLInputElement =>
+      screen.getByLabelText(label) as HTMLInputElement;
 
-    expect(screen.getByTestId('template-fields-save')).toBeInTheDocument();
-  });
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
 
-  it('calls onUpdateField with all field values when Save is clicked', async () => {
-    renderWithTestingProviders(<TemplateFields {...defaultProps} />);
+    afterEach(() => {
+      act(() => {
+        jest.runOnlyPendingTimers();
+      });
+      jest.useRealTimers();
+    });
 
-    await userEvent.click(screen.getByTestId('template-fields-save'));
+    it('calls onUpdateField with extended fields after a blur when valid', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      renderWithTestingProviders(<TemplateFields {...defaultProps} />);
 
-    await waitFor(() => {
-      expect(onUpdateField).toHaveBeenCalledWith(
-        expect.objectContaining({ key: 'extended_fields' })
+      const summary = getInputForLabel('Summary');
+      await user.clear(summary);
+      await user.type(summary, 'updated summary');
+      // Blur by tabbing away
+      await user.tab();
+
+      // Advance past the debounce
+      act(() => {
+        jest.advanceTimersByTime(250);
+      });
+
+      await waitFor(() => {
+        expect(onUpdateField).toHaveBeenCalled();
+      });
+      const lastCall = onUpdateField.mock.calls[onUpdateField.mock.calls.length - 1][0];
+      expect(lastCall.key).toBe('extended_fields');
+      expect(lastCall.value).toEqual(
+        expect.objectContaining({
+          summary_as_keyword: 'updated summary',
+        })
       );
     });
-  });
 
-  it('shows loading state on Save button when isLoading is true', () => {
-    renderWithTestingProviders(<TemplateFields {...defaultProps} isLoading={true} />);
+    it('debounces multiple rapid blurs into a single save', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      renderWithTestingProviders(<TemplateFields {...defaultProps} />);
 
-    const saveButton = screen.getByTestId('template-fields-save');
-    expect(saveButton).toBeDisabled();
+      const summary = getInputForLabel('Summary');
+      await user.clear(summary);
+      await user.type(summary, 'a');
+      await user.tab();
+      await user.tab();
+      await user.tab();
+
+      act(() => {
+        jest.advanceTimersByTime(250);
+      });
+
+      await waitFor(() => {
+        expect(onUpdateField).toHaveBeenCalledTimes(1);
+      });
+    });
   });
 });
