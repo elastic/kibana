@@ -23,12 +23,15 @@ const GROK_FIELD_PATTERN_REGEX =
 export const Expression = ({
   grokCollection,
   pattern,
+  patternSlotId,
   onChange,
   height = '100px',
   dataTestSubj,
 }: {
   grokCollection: GrokCollection;
   pattern: string;
+  /** Must match the preview draft slot for this row so field colours stay stable while typing. */
+  patternSlotId?: string | number;
   onChange?: (pattern: string) => void;
   height?: CodeEditorProps['height'];
   dataTestSubj?: string;
@@ -40,16 +43,26 @@ export const Expression = ({
   const { euiTheme } = useEuiTheme();
 
   const draftGrokExpression = useMemo(() => {
-    return new DraftGrokExpression(grokCollection, pattern);
+    return new DraftGrokExpression(grokCollection, pattern, { patternSlotId });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [grokCollection]);
+  }, [grokCollection, patternSlotId]);
 
-  // Sync pattern prop with internal DraftGrokExpression
+  const [editorValue, setEditorValue] = useState(pattern);
+  const pendingLocalChangeRef = useRef(false);
+
+  // Sync external pattern changes without clobbering in-progress local edits.
   useEffect(() => {
-    const currentExpression = draftGrokExpression.getExpression();
-    if (currentExpression !== pattern) {
+    if (pendingLocalChangeRef.current) {
+      if (pattern === draftGrokExpression.getExpression()) {
+        pendingLocalChangeRef.current = false;
+        setEditorValue(pattern);
+      }
+      return;
+    }
+    if (draftGrokExpression.getExpression() !== pattern) {
       draftGrokExpression.updateExpression(pattern);
     }
+    setEditorValue(pattern);
   }, [pattern, draftGrokExpression]);
 
   const grokEditorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -69,7 +82,7 @@ export const Expression = ({
     grokEditorRef.current = editor;
     decorationsRef.current = editor.createDecorationsCollection();
     setupResizeChecker(editor);
-    updateDecorations(draftGrokExpression, grokEditorRef, decorationsRef);
+    updateDecorations(draftGrokExpression, grokCollection, grokEditorRef, decorationsRef);
   };
 
   const onGrokEditorWillUnmount: CodeEditorProps['editorWillUnmount'] = () => {
@@ -77,16 +90,18 @@ export const Expression = ({
   };
 
   const onGrokEditorChange: CodeEditorProps['onChange'] = (value) => {
+    pendingLocalChangeRef.current = true;
+    setEditorValue(value);
     draftGrokExpression.updateExpression(value);
     onChange?.(value);
-    updateDecorations(draftGrokExpression, grokEditorRef, decorationsRef);
+    updateDecorations(draftGrokExpression, grokCollection, grokEditorRef, decorationsRef);
   };
 
   // Re-apply decorations when the pattern prop changes externally (e.g. form state rewrites
   // the value, or another consumer drives the editor).
   useEffect(() => {
-    updateDecorations(draftGrokExpression, grokEditorRef, decorationsRef);
-  }, [pattern, draftGrokExpression]);
+    updateDecorations(draftGrokExpression, grokCollection, grokEditorRef, decorationsRef);
+  }, [pattern, draftGrokExpression, grokCollection]);
 
   return (
     <div
@@ -103,7 +118,7 @@ export const Expression = ({
     >
       <CodeEditor
         languageId="grok"
-        value={pattern}
+        value={editorValue}
         height={height}
         fullWidth={true}
         editorDidMount={onGrokEditorMount}
@@ -121,6 +136,7 @@ export const Expression = ({
 // pattern (and by extension the preview-table highlight for the same field).
 const updateDecorations = (
   draftGrokExpression: DraftGrokExpression,
+  grokCollection: GrokCollection,
   editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>,
   decorationsCollectionRef: React.MutableRefObject<monaco.editor.IEditorDecorationsCollection | null>
 ) => {
@@ -148,7 +164,7 @@ const updateDecorations = (
   let match: RegExpExecArray | null;
   while ((match = GROK_FIELD_PATTERN_REGEX.exec(text)) !== null) {
     const fieldName = match[1];
-    const colour = fieldColourMap.get(fieldName);
+    const colour = fieldColourMap.get(fieldName) ?? grokCollection.lookupAssignedColour(fieldName);
     if (!colour) continue;
 
     const startPos = model.getPositionAt(match.index);

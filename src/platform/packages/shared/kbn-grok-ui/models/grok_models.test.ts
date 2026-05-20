@@ -181,6 +181,17 @@ describe('Grok models', () => {
   describe('Field colour assignment', () => {
     let collection: GrokCollection;
 
+    const PALETTE = [
+      'Primary',
+      'Accent',
+      'AccentSecondary',
+      'Neutral',
+      'Success',
+      'Warning',
+      'Risk',
+      'Danger',
+    ] as const;
+
     const colourFor = (expression: DraftGrokExpression, fieldName: string): string | undefined => {
       for (const fieldDef of expression.getFields().values()) {
         if (fieldDef.name === fieldName) return fieldDef.colour;
@@ -205,12 +216,49 @@ describe('Grok models', () => {
     });
 
     it('shares the same colour for the same field name across multiple patterns', () => {
-      // This is the original bug: previously, the first field of every pattern reused the same
-      // palette slot because the colour index reset on each resolve. Now the colour is keyed by
-      // field name, so two patterns referencing the same field share one colour.
+      // Two patterns referencing the same field share one colour — preventing collisions of
+      // identical fields across rows in the grok processor editor.
       const a = new DraftGrokExpression(collection, '%{NUMBER:status} %{WORD:method}');
       const b = new DraftGrokExpression(collection, '%{NUMBER:status} %{GREEDYDATA:message}');
       expect(colourFor(a, 'status')).toBe(colourFor(b, 'status'));
+    });
+
+    it('adopts an existing field colour when typing reaches a name already used on another row', () => {
+      const row1 = new DraftGrokExpression(
+        collection,
+        '%{WORD:custom.timestamp} %{WORD:host.hostname}',
+        {
+          patternSlotId: 0,
+        }
+      );
+      const row2 = new DraftGrokExpression(
+        collection,
+        '%{WORD:custom.timestamp} %{WORD:process.name}',
+        {
+          patternSlotId: 1,
+        }
+      );
+      const sharedColour = colourFor(row1, 'custom.timestamp');
+      expect(sharedColour).toBeDefined();
+      expect(colourFor(row2, 'custom.timestamp')).toBe(sharedColour);
+
+      const row3 = new DraftGrokExpression(
+        collection,
+        '%{GREEDYDATA:message} %{WORD:host.hostname}',
+        {
+          patternSlotId: 2,
+        }
+      );
+      const messageColour = colourFor(row3, 'message');
+      expect(messageColour).toBeDefined();
+
+      // Row 3 renames its first field to match rows 1 & 2, letter by letter (slot anchor was messageColour).
+      row3.updateExpression('%{WORD:custom.timestam} %{WORD:host.hostname}');
+      row3.updateExpression('%{WORD:custom.timestamp} %{WORD:host.hostname}');
+
+      expect(colourFor(row3, 'custom.timestamp')).toBe(sharedColour);
+      expect(colourFor(row3, 'custom.timestamp')).not.toBe(messageColour);
+      expect(colourFor(row1, 'custom.timestamp')).toBe(sharedColour);
     });
 
     it('assigns distinct colours to distinct field names within the palette size', () => {
@@ -219,43 +267,116 @@ describe('Grok models', () => {
       expect(colourFor(a, 'a')).not.toBe(colourFor(b, 'b'));
     });
 
-    it('wraps around the palette after exhausting all 8 colours and still returns palette colours', () => {
-      const fieldNames = ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9', 'f10'];
-      const colours = fieldNames.map((name) => collection.getColour(name));
+    it('keeps the colour stable while typing the same field (regression: per-keystroke churn)', () => {
+      const expression = new DraftGrokExpression(collection, '%{NUMBER:f}');
+      const stableColour = colourFor(expression, 'f');
+      expect(stableColour).toBeDefined();
 
-      const palette = [
-        'Primary',
-        'Accent',
-        'AccentSecondary',
-        'Neutral',
-        'Success',
-        'Warning',
-        'Risk',
-        'Danger',
-      ];
-      colours.forEach((colour) => {
-        expect(palette).toContain(colour);
-      });
+      expression.updateExpression('%{NUMBER:fo}');
+      expect(colourFor(expression, 'fo')).toBe(stableColour);
 
-      // The 9th and 10th unique fields wrap back to the start of the palette.
-      expect(colours[8]).toBe(colours[0]);
-      expect(colours[9]).toBe(colours[1]);
+      expression.updateExpression('%{NUMBER:foo}');
+      expect(colourFor(expression, 'foo')).toBe(stableColour);
+
+      expression.updateExpression('%{NUMBER:fooz}');
+      expect(colourFor(expression, 'fooz')).toBe(stableColour);
     });
 
-    it('resetColourIndex() clears the field colour map', () => {
-      const initialColour = collection.getColour('foo');
-      collection.resetColourIndex();
-      // After reset, the next assignment can reclaim the very first palette slot. We only
-      // assert the map was cleared (a new lookup is independent of the previous one) — the
-      // exact colour returned can match `initialColour` if `foo` happens to land on the same
-      // slot, so we instead verify behaviour via two new fields after reset.
-      const afterResetA = collection.getColour('a');
-      const afterResetB = collection.getColour('b');
-      expect(afterResetA).not.toBe(afterResetB);
-      // The previous colour for `foo` may or may not match the colour now assigned to `a`,
-      // but it must be a valid palette entry.
-      expect(typeof initialColour).toBe('string');
-      expect(typeof afterResetA).toBe('string');
+    it('reuses a freed palette slot when one field is renamed while another is unchanged', () => {
+      const expression = new DraftGrokExpression(collection, '%{NUMBER:status} %{WORD:method}');
+      const statusColour = colourFor(expression, 'status');
+      const methodColour = colourFor(expression, 'method');
+      expect(statusColour).not.toBe(methodColour);
+
+      expression.updateExpression('%{NUMBER:status} %{WORD:m}');
+      expect(colourFor(expression, 'status')).toBe(statusColour);
+      expect(colourFor(expression, 'm')).toBe(methodColour);
+
+      expression.updateExpression('%{NUMBER:status} %{WORD:meth}');
+      expect(colourFor(expression, 'status')).toBe(statusColour);
+      expect(colourFor(expression, 'meth')).toBe(methodColour);
+    });
+
+    it('frees a colour slot when a draft is destroyed and the next fresh field rotates to a new colour', () => {
+      const a = new DraftGrokExpression(collection, '%{NUMBER:foo}');
+      const fooColour = colourFor(a, 'foo');
+      expect(fooColour).toBeDefined();
+      expect(PALETTE).toContain(fooColour as (typeof PALETTE)[number]);
+
+      a.destroy();
+
+      const b = new DraftGrokExpression(collection, '%{NUMBER:bar}');
+      const barColour = colourFor(b, 'bar');
+      expect(barColour).toBeDefined();
+      expect(PALETTE).toContain(barColour as (typeof PALETTE)[number]);
+      expect(barColour).not.toBe(fooColour);
+    });
+
+    it('rotates to a new colour when the field is deleted then retyped under a different name (regression: delete-then-retype)', () => {
+      const editor = new DraftGrokExpression(collection, '%{IP:foo}', { patternSlotId: 0 });
+      const preview = new DraftGrokExpression(collection, '%{IP:foo}', { patternSlotId: 0 });
+      const fooColour = colourFor(editor, 'foo');
+      expect(fooColour).toBeDefined();
+      expect(colourFor(preview, 'foo')).toBe(fooColour);
+
+      // Step 1: clear the field name. `%{IP:}` does not register a semantic field, so the
+      // post-update flush drops `foo` from the colour map once neither draft references it.
+      editor.updateExpression('%{IP:}');
+      preview.updateExpression('%{IP:}');
+
+      // Step 2: type a brand-new name in a follow-up edit. There is no in-flight release
+      // for reconcile to transfer from, so getColour rotates to the next palette slot.
+      editor.updateExpression('%{IP:bar}');
+      preview.updateExpression('%{IP:bar}');
+
+      const barColour = colourFor(editor, 'bar');
+      expect(barColour).toBeDefined();
+      expect(PALETTE).toContain(barColour as (typeof PALETTE)[number]);
+      expect(barColour).not.toBe(fooColour);
+      expect(colourFor(preview, 'bar')).toBe(barColour);
+    });
+
+    it('assigns distinct colours to each field when a row replaces all its fields in one edit (regression: multi-field rename)', () => {
+      const row = new DraftGrokExpression(collection, '%{NUMBER:a} %{WORD:b}', {
+        patternSlotId: 0,
+      });
+      const aColour = colourFor(row, 'a');
+      const bColour = colourFor(row, 'b');
+      expect(aColour).toBeDefined();
+      expect(bColour).toBeDefined();
+      expect(aColour).not.toBe(bColour);
+
+      row.updateExpression('%{NUMBER:c} %{WORD:d}');
+
+      const cColour = colourFor(row, 'c');
+      const dColour = colourFor(row, 'd');
+      expect(cColour).toBeDefined();
+      expect(dColour).toBeDefined();
+      expect(PALETTE).toContain(cColour as (typeof PALETTE)[number]);
+      expect(PALETTE).toContain(dColour as (typeof PALETTE)[number]);
+      // The two new fields must land on different palette slots.
+      expect(cColour).not.toBe(dColour);
+    });
+
+    it('always assigns palette colours and wraps around once the palette is exhausted', () => {
+      const drafts = Array.from(
+        { length: 10 },
+        (_, i) => new DraftGrokExpression(collection, `%{NUMBER:f${i}}`)
+      );
+      const colours = drafts.map((draft, i) => colourFor(draft, `f${i}`));
+
+      colours.forEach((colour) => {
+        expect(colour).toBeDefined();
+        expect(PALETTE).toContain(colour as (typeof PALETTE)[number]);
+      });
+
+      // The first 8 unique fields advance the rotation cursor through 8 consecutive slots, so
+      // they must all be different colours.
+      expect(new Set(colours.slice(0, 8)).size).toBe(8);
+      // The 9th and 10th wrap back through the rotation, so they reuse the same colours as
+      // the 1st and 2nd respectively.
+      expect(colours[8]).toBe(colours[0]);
+      expect(colours[9]).toBe(colours[1]);
     });
 
     it('shares colours for manual (?<field>...) capture groups across patterns', () => {
@@ -263,5 +384,18 @@ describe('Grok models', () => {
       const b = new DraftGrokExpression(collection, '%{WORD:level} (?<queueId>[0-9A-F]{10,11})');
       expect(colourFor(a, 'queueId')).toBe(colourFor(b, 'queueId'));
     });
+
+    it('keeps colours stable while typing a manual (?<field>...) capture group', () => {
+      const expression = new DraftGrokExpression(collection, '(?<q>[0-9A-F]+)');
+      const stableColour = colourFor(expression, 'q');
+      expect(stableColour).toBeDefined();
+
+      expression.updateExpression('(?<qu>[0-9A-F]+)');
+      expect(colourFor(expression, 'qu')).toBe(stableColour);
+
+      expression.updateExpression('(?<queueId>[0-9A-F]+)');
+      expect(colourFor(expression, 'queueId')).toBe(stableColour);
+    });
+
   });
 });
