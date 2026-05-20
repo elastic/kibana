@@ -8,7 +8,7 @@
  */
 
 import type { ResizeHandle } from '../constants';
-import { findNearHandle } from './resize_helpers';
+import { findNearHandle } from '../../edit_engine/resize_helpers';
 import { getElementUnder } from './get_element_under';
 import { hasSignificantRounding, isInRoundedDeadZone } from './rounded_dead_zone';
 

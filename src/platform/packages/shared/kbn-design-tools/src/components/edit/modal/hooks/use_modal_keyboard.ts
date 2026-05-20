@@ -8,7 +8,7 @@
  */
 
 import { useCallback, useEffect } from 'react';
-import { isUndoShortcut, isRedoShortcut } from '../lib/keyboard_shortcuts';
+import { isUndoShortcut, isRedoShortcut } from '../../../../lib/keyboard_shortcuts';
 
 /**
  * Intercepts Cmd+Z / Cmd+Shift+Z within the edit modal for draft

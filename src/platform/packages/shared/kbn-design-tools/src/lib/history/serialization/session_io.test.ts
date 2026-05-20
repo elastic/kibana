@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElementRegistry } from '../../dom/element_registry';
+import { ElementRegistry } from '../../../edit_engine/element_registry';
 import { exportState, importState } from './session_io';
 import { createScrollContainer, makeMinimalExport } from '../../tests/helpers';
 import '../../tests/mocks';

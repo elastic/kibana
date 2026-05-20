@@ -11,11 +11,11 @@ import type { ReactElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import { flushSync } from 'react-dom';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
-import type { ElementSession } from '../dom/element_registry';
-import { ElementRegistry } from '../dom/element_registry';
+import type { ElementSession } from '../../edit_engine/element_registry';
+import { ElementRegistry } from '../../edit_engine/element_registry';
 import type { LayoutConfig } from '../layout/layout_config';
 import type { ElementSessionSnapshot } from '../history/transaction';
-import type { InteractionMachineOptions } from '../../hooks/use_interaction_machine';
+import type { InteractionMachineOptions } from '../../edit_engine/use_interaction_machine';
 import type { ExportedState } from '../history/serialization/session_io';
 import './mocks';
 

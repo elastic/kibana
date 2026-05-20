@@ -23,11 +23,15 @@ import { DEVTOOL_IGNORE_ATTR, EDIT_MODAL_ID } from '../../../lib/constants';
 import { DIMENSION_PROPS } from './dimension_props';
 import { useOverlayZIndex } from '../../../hooks/use_overlay_z_index';
 import { usePortalZIndex } from '../../../hooks/use_portal_z_index';
-import { usePreviewClone } from '../../../hooks/use_preview_clone';
-import { useDraftHistory } from '../../../hooks/use_draft_history';
-import { useModalChangeHandlers } from '../../../hooks/use_modal_change_handlers';
-import { useModalKeyboard } from '../../../hooks/use_modal_keyboard';
-import type { StyleChange, TextNodeChange, MediaChange } from '../../../lib/dom/element_registry';
+import { usePreviewClone } from './hooks/use_preview_clone';
+import { useDraftHistory } from './hooks/use_draft_history';
+import { useModalChangeHandlers } from './hooks/use_modal_change_handlers';
+import { useModalKeyboard } from './hooks/use_modal_keyboard';
+import type {
+  StyleChange,
+  TextNodeChange,
+  MediaChange,
+} from '../../../edit_engine/element_registry';
 import { EditModalPreview } from './edit_modal_preview';
 import { EditModalEditorColumns } from './edit_modal_editor_columns';
 import { EditModalFooterBar } from './edit_modal_footer';

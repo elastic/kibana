@@ -17,9 +17,9 @@ import {
   CSS_VAR_PREFIX,
   MAX_TREE_DEPTH,
   PSEUDO_CLASS_PREFIX,
-} from '../constants';
-import { tagColorTokens, colorToToken, toHex } from './color_token_lookup';
-import { getTokenVar } from './color_token_stylesheet';
+} from '../lib/constants';
+import { tagColorTokens, colorToToken, toHex } from '../lib/dom/color_token_lookup';
+import { getTokenVar } from '../lib/dom/color_token_stylesheet';
 
 /**
  * Set a CSS property with `!important` priority.

@@ -10,7 +10,7 @@
 import type { MutableRefObject } from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { useScrollSync } from './use_scroll_sync';
-import { ElementRegistry } from '../lib/dom/element_registry';
+import { ElementRegistry } from './element_registry';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import { makeSession } from '../lib/tests/helpers';
 

@@ -16,7 +16,7 @@ jest.mock('./get_element_under', () => ({
 }));
 
 const mockFindNearHandle = jest.fn();
-jest.mock('./resize_helpers', () => ({
+jest.mock('../../edit_engine/resize_helpers', () => ({
   findNearHandle: (...args: unknown[]) => mockFindNearHandle(...args),
 }));
 

@@ -11,10 +11,10 @@ import DOMPurify from 'dompurify';
 import type { ReactElement } from 'react';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import { EUI_LIBRARY } from '../../../components/edit/library/library_entries';
-import type { ElementRegistry, ElementSession } from '../../dom/element_registry';
+import type { ElementRegistry, ElementSession } from '../../../edit_engine/element_registry';
 import { toPath, fromPath, buildRelativeSelector } from './element_path';
 import type { ElementPath } from './element_path';
-import { buildTransform } from '../../dom/resize_helpers';
+import { buildTransform } from '../../../edit_engine/resize_helpers';
 import {
   setImportant,
   unfreezeChildren,
@@ -22,8 +22,8 @@ import {
   reflowManagedStyle,
   reflowManagedText,
   roundRect,
-} from '../../dom/clone_element';
-import { cloneElement } from '../../dom/clone_element';
+} from '../../../edit_engine/clone_element';
+import { cloneElement } from '../../../edit_engine/clone_element';
 import {
   DEVTOOL_HIDDEN_ATTR,
   DEVTOOL_LIBRARY_ID_ATTR,

@@ -15,7 +15,7 @@ import type {
   StyleChange,
   TextNodeChange,
   MediaChange,
-} from '../dom/element_registry';
+} from '../../edit_engine/element_registry';
 
 /**
  * Fields shared by every transaction. Assigned automatically by the

@@ -9,9 +9,9 @@
 
 import type { MutableRefObject } from 'react';
 import { useCallback } from 'react';
-import type { ElementRegistry } from '../lib/dom/element_registry';
-import { applyEditChanges } from '../lib/dom/element_registry';
-import type { StyleChange, TextNodeChange, MediaChange } from '../lib/dom/element_registry';
+import type { ElementRegistry } from '../edit_engine/element_registry';
+import { applyEditChanges } from '../edit_engine/element_registry';
+import type { StyleChange, TextNodeChange, MediaChange } from '../edit_engine/element_registry';
 
 /**
  * Tracks style, text, and media edits applied via the edit modal.

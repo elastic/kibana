@@ -14,14 +14,18 @@ import {
   reflowAfterTextChange,
   collectTextReflowDimensions,
   collectStyleReflowDimensions,
-} from '../lib/dom/clone_element';
-import { parsePx, roundPxValue } from '../lib/dom/round_px_value';
+} from '../../../../edit_engine/clone_element';
+import { parsePx, roundPxValue } from '../../../../lib/dom/round_px_value';
 import type { DraftHistoryResult } from './use_draft_history';
 import { flattenDraftEdits } from './use_draft_history';
-import type { DraftEdit } from '../lib/history/draft_history';
-import type { StyleChange, TextNodeChange, MediaChange } from '../lib/dom/element_registry';
-import type { TextNodeEntry } from '../components/edit/modal/text_node_editor';
-import type { MediaEditorEntry } from '../components/edit/modal/media_editor';
+import type { DraftEdit } from '../../../../lib/history/draft_history';
+import type {
+  StyleChange,
+  TextNodeChange,
+  MediaChange,
+} from '../../../../edit_engine/element_registry';
+import type { TextNodeEntry } from '../text_node_editor';
+import type { MediaEditorEntry } from '../media_editor';
 
 const readCloneTextValue = (
   clone: Text,

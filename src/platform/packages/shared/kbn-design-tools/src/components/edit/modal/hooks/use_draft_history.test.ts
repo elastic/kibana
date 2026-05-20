@@ -9,9 +9,13 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { useDraftHistory, flattenDraftEdits } from './use_draft_history';
-import type { DraftStyleEdit, DraftTextEdit, DraftMediaEdit } from '../lib/history/draft_history';
-import type { DimensionRecord } from '../lib/dom/clone_element';
-import { setImportant } from '../lib/dom/clone_element';
+import type {
+  DraftStyleEdit,
+  DraftTextEdit,
+  DraftMediaEdit,
+} from '../../../../lib/history/draft_history';
+import type { DimensionRecord } from '../../../../edit_engine/clone_element';
+import { setImportant } from '../../../../edit_engine/clone_element';
 
 describe('useDraftHistory', () => {
   const makeStyleEdit = (overrides: Partial<DraftStyleEdit> = {}): DraftStyleEdit => {

@@ -10,11 +10,11 @@
 import { renderHook, act } from '@testing-library/react';
 import { useModalChangeHandlers } from './use_modal_change_handlers';
 import { useDraftHistory } from './use_draft_history';
-import type { TextNodeEntry } from '../components/edit/modal/text_node_editor';
-import type { MediaEditorEntry } from '../components/edit/modal/media_editor';
+import type { TextNodeEntry } from '../text_node_editor';
+import type { MediaEditorEntry } from '../media_editor';
 import type { DraftHistoryResult } from './use_draft_history';
 
-jest.mock('../lib/dom/clone_element', () => ({
+jest.mock('../../../../edit_engine/clone_element', () => ({
   reflowAfterStyleChange: jest.fn(),
   reflowAfterTextChange: jest.fn(),
   collectTextReflowDimensions: jest.fn(() => []),

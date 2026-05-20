@@ -18,7 +18,7 @@ import {
 } from '../../../lib/constants';
 import { useOverlayZIndex } from '../../../hooks/use_overlay_z_index';
 import { useElementRect } from '../../../hooks/use_element_rect';
-import { getHandleMode, getHandlePositions } from '../../../lib/dom/resize_helpers';
+import { getHandleMode, getHandlePositions } from '../../../edit_engine/resize_helpers';
 import { OutlineControls } from './controls/outline_controls';
 
 interface Props {

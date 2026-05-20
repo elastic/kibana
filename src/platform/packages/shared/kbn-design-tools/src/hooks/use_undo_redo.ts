@@ -12,7 +12,7 @@ import type { MutableRefObject } from 'react';
 import { UndoRedoStack } from '../lib/history/undo_redo_stack';
 import type { UndoRedoSnapshot } from '../lib/history/undo_redo_stack';
 import { executeTransaction } from '../lib/history/executors';
-import type { ElementRegistry } from '../lib/dom/element_registry';
+import type { ElementRegistry } from '../edit_engine/element_registry';
 import type { TransactionInput } from '../lib/history/transaction';
 
 /**

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElementSession } from '../dom/element_registry';
+import type { ElementSession } from '../../edit_engine/element_registry';
 import type { ElementSessionSnapshot } from './transaction';
 
 /**

@@ -10,8 +10,8 @@
 import type { RefObject } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { rgbToHex, useEuiTheme } from '@elastic/eui';
-import { isTransparentColor } from '../lib/dom/is_transparent_color';
-import { useOverlayZIndex } from './use_overlay_z_index';
+import { isTransparentColor } from '../../../../lib/dom/is_transparent_color';
+import { useOverlayZIndex } from '../../../../hooks/use_overlay_z_index';
 
 interface UseElementSelectionResult {
   selectedElement: Element | null;

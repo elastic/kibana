@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEVTOOL_LIVE_ATTR } from '../constants';
+import { DEVTOOL_LIVE_ATTR } from '../lib/constants';
 
 /**
  * Returns the meaningful content root for a managed element.

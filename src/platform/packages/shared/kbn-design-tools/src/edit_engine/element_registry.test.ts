@@ -9,9 +9,9 @@
 
 import { ElementRegistry, applyEditChanges, revertEdits } from './element_registry';
 import type { StyleEdit, TextEdit, MediaEdit } from './element_registry';
-import { DEVTOOL_HIDDEN_ATTR, DEVTOOL_MANAGED_ATTR } from '../constants';
+import { DEVTOOL_HIDDEN_ATTR, DEVTOOL_MANAGED_ATTR } from '../lib/constants';
 import { softHideElement, setImportant } from './clone_element';
-import { makeSession } from '../tests/helpers';
+import { makeSession } from '../lib/tests/helpers';
 
 describe('ElementRegistry', () => {
   let registry: ElementRegistry;

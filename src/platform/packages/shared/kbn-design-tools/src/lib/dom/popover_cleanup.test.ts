@@ -8,7 +8,7 @@
  */
 
 import { makeSession } from '../tests/helpers';
-import { startDragFromSession } from './drag_helpers';
+import { startDragFromSession } from '../../edit_engine/drag_helpers';
 import '../tests/mocks';
 
 describe('startDragFromSession — popover cleanup', () => {

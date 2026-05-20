@@ -15,13 +15,13 @@ import {
   startDragFromSession,
   startDragFromElement,
   applyDragMove,
-} from '../lib/dom/drag_helpers';
-import { startResize, applyResizeMove } from '../lib/dom/resize_helpers';
-import type { InteractionState, DragState, GestureCompletion } from '../lib/dom/interaction_state';
-import { IDLE, deriveCursor } from '../lib/dom/interaction_state';
+} from './drag_helpers';
+import { startResize, applyResizeMove } from './resize_helpers';
+import type { InteractionState, DragState, GestureCompletion } from './interaction_state';
+import { IDLE, deriveCursor } from './interaction_state';
 import { resolveHoverTarget } from '../lib/dom/resolve_hover_target';
 import { getElementUnder } from '../lib/dom/get_element_under';
-import type { ElementRegistry, ElementSession } from '../lib/dom/element_registry';
+import type { ElementRegistry, ElementSession } from './element_registry';
 import type { LayoutConfig } from '../lib/layout/layout_config';
 
 /**

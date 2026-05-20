@@ -8,8 +8,8 @@
  */
 
 import type { ReactElement } from 'react';
-import { DEVTOOL_HIDDEN_ATTR, DEVTOOL_MANAGED_ATTR } from '../constants';
-import { applySourceAttribute } from '../eui_icon_cache';
+import { DEVTOOL_HIDDEN_ATTR, DEVTOOL_MANAGED_ATTR } from '../lib/constants';
+import { applySourceAttribute } from '../lib/eui_icon_cache';
 import {
   setImportant,
   reflowManagedStyle,

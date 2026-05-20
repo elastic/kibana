@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ResizeHandle } from '../constants';
-import { HANDLE_CURSORS } from '../constants';
+import type { ResizeHandle } from '../lib/constants';
+import { HANDLE_CURSORS } from '../lib/constants';
 import type { ElementSession } from './element_registry';
 
 /**

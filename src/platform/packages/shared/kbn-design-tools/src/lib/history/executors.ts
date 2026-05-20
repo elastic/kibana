@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElementRegistry } from '../dom/element_registry';
-import { revertEdits, applyEditChanges } from '../dom/element_registry';
-import { setImportant, softHideElement, restoreHiddenElement } from '../dom/clone_element';
-import { buildTransform } from '../dom/resize_helpers';
+import type { ElementRegistry } from '../../edit_engine/element_registry';
+import { revertEdits, applyEditChanges } from '../../edit_engine/element_registry';
+import {
+  setImportant,
+  softHideElement,
+  restoreHiddenElement,
+} from '../../edit_engine/clone_element';
+import { buildTransform } from '../../edit_engine/resize_helpers';
 import { DEVTOOL_HIDDEN_ATTR } from '../constants';
 import { restoreSession } from './snapshot';
 import type {

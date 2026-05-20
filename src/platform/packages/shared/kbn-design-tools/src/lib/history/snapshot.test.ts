@@ -8,7 +8,7 @@
  */
 
 import type { ReactElement } from 'react';
-import type { ElementSession } from '../dom/element_registry';
+import type { ElementSession } from '../../edit_engine/element_registry';
 import { snapshotSession, restoreSession, captureOriginalStyles } from './snapshot';
 import '../tests/mocks';
 

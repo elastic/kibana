@@ -10,8 +10,8 @@
 import type { MutableRefObject } from 'react';
 import { useEffect, useRef } from 'react';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
-import type { ElementRegistry } from '../lib/dom/element_registry';
-import { setImportant } from '../lib/dom/clone_element';
+import type { ElementRegistry } from './element_registry';
+import { setImportant } from './clone_element';
 
 /**
  * Keeps managed element positions in sync with the Kibana main scroll

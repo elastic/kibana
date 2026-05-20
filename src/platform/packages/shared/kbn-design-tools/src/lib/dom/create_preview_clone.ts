@@ -15,8 +15,8 @@ import {
   setImportant,
   roundRect,
   widenForTruncation,
-} from './clone_element';
-import { isLiveElement } from './managed_element';
+} from '../../edit_engine/clone_element';
+import { isLiveElement } from '../../edit_engine/managed_element';
 
 interface PreviewCloneResult {
   clone: HTMLElement;

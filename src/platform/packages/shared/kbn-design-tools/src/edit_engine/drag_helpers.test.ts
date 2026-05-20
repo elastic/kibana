@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEVTOOL_MANAGED_ATTR } from '../constants';
+import { DEVTOOL_MANAGED_ATTR } from '../lib/constants';
 import type { DragState } from './interaction_state';
 import type { ElementRegistry } from './element_registry';
 import { startDragFromSession, findManagedSession, applyDragMove } from './drag_helpers';
-import { makeRect, makeSession, makeLayoutConfig } from '../tests/helpers';
+import { makeRect, makeSession, makeLayoutConfig } from '../lib/tests/helpers';
 
 describe('dragHelpers', () => {
   describe('startDragFromSession', () => {

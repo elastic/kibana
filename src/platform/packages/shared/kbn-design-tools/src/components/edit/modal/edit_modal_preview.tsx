@@ -10,7 +10,7 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { getContentRoot } from '../../../lib/dom/managed_element';
+import { getContentRoot } from '../../../edit_engine/managed_element';
 import { ElementTree } from './element_tree';
 
 const treeCss = css({

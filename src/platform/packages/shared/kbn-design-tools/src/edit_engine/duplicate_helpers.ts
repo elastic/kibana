@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DUPLICATE_OFFSET, DEVTOOL_LIBRARY_ID_ATTR } from '../constants';
+import { DUPLICATE_OFFSET, DEVTOOL_LIBRARY_ID_ATTR } from '../lib/constants';
 import { cloneClean, setImportant, roundRect } from './clone_element';
 import type { ElementSession, ElementRegistry, MediaEdit } from './element_registry';
 import { buildTransform } from './resize_helpers';
-import { renderEuiComponentLive } from './insert_element';
-import { applySourceAttribute } from '../eui_icon_cache';
-import { readStateAttributes } from '../../components/edit/library/serializable_state';
+import { renderEuiComponentLive } from '../lib/dom/insert_element';
+import { applySourceAttribute } from '../lib/eui_icon_cache';
+import { readStateAttributes } from '../components/edit/library/serializable_state';
 
 /**
  * Replay media edits (e.g. icon replacements) from a source element tree

@@ -8,17 +8,17 @@
  */
 
 import { useCallback, useRef, useSyncExternalStore } from 'react';
-import { UndoRedoStack } from '../lib/history/undo_redo_stack';
-import type { StackEntry, UndoRedoSnapshot } from '../lib/history/undo_redo_stack';
+import { UndoRedoStack } from '../../../../lib/history/undo_redo_stack';
+import type { StackEntry, UndoRedoSnapshot } from '../../../../lib/history/undo_redo_stack';
 import type {
   DraftEdit,
   DraftStyleEdit,
   DraftTextEdit,
   DraftMediaEdit,
-} from '../lib/history/draft_history';
-import { setImportant, restoreDimensions } from '../lib/dom/clone_element';
-import type { DimensionRecord } from '../lib/dom/clone_element';
-import { applySourceAttribute } from '../lib/eui_icon_cache';
+} from '../../../../lib/history/draft_history';
+import { setImportant, restoreDimensions } from '../../../../edit_engine/clone_element';
+import type { DimensionRecord } from '../../../../edit_engine/clone_element';
+import { applySourceAttribute } from '../../../../lib/eui_icon_cache';
 
 interface DraftEntry extends StackEntry {
   readonly type: 'edit';

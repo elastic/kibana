@@ -10,7 +10,7 @@
 import '../lib/tests/mocks';
 import { renderHook, act } from '@testing-library/react';
 import { useUndoRedo } from './use_undo_redo';
-import { ElementRegistry } from '../lib/dom/element_registry';
+import { ElementRegistry } from '../edit_engine/element_registry';
 import { makeSession } from '../lib/tests/helpers';
 
 const makeRegistry = () => {

@@ -19,12 +19,12 @@ import type { Dispatch, ReactElement, Ref, SetStateAction } from 'react';
 import { EuiPortal } from '@elastic/eui';
 import { useHoverLock } from '../../hooks/use_hover_lock';
 import { useDeleteElement } from '../../hooks/use_delete_element';
-import { useEditListeners } from '../../hooks/use_edit_listeners';
+import { useEditListeners } from '../../edit_engine/use_edit_listeners';
 import { useOverlayZIndex } from '../../hooks/use_overlay_z_index';
-import { useScrollSync } from '../../hooks/use_scroll_sync';
+import { useScrollSync } from '../../edit_engine/use_scroll_sync';
 import { useLockedTarget } from '../../hooks/use_locked_target';
 import { useEditChangeTracker } from '../../hooks/use_edit_change_tracker';
-import { useInteractionMachine } from '../../hooks/use_interaction_machine';
+import { useInteractionMachine } from '../../edit_engine/use_interaction_machine';
 import { DEVTOOL_HIDDEN_ATTR, DEVTOOL_MANAGED_ATTR, MEASURE_OVERLAY_ID } from '../../lib/constants';
 import {
   isEscapeKey,
@@ -37,21 +37,21 @@ import {
 import { getElementUnder } from '../../lib/dom/get_element_under';
 import type { LayoutConfig } from '../../lib/layout/layout_config';
 import { GlobalCursorOverride } from '../global_cursor_override';
-import type { ElementSession } from '../../lib/dom/element_registry';
-import { ElementRegistry, applyEditChanges } from '../../lib/dom/element_registry';
-import type { StyleEdit, TextEdit, MediaEdit } from '../../lib/dom/element_registry';
-import { createDuplicate } from '../../lib/dom/duplicate_helpers';
+import type { ElementSession } from '../../edit_engine/element_registry';
+import { ElementRegistry, applyEditChanges } from '../../edit_engine/element_registry';
+import type { StyleEdit, TextEdit, MediaEdit } from '../../edit_engine/element_registry';
+import { createDuplicate } from '../../edit_engine/duplicate_helpers';
 import {
   cloneClean,
   softHideElement,
   buildElementMap,
   buildTextNodeMap,
-} from '../../lib/dom/clone_element';
+} from '../../edit_engine/clone_element';
 import { useUndoRedo } from '../../hooks/use_undo_redo';
 import { snapshotSession } from '../../lib/history/snapshot';
 import { captureOriginalStyles } from '../../lib/history/snapshot';
 import type { DuplicateTransaction, ImportTransaction } from '../../lib/history/transaction';
-import { closePortaledPopovers } from '../../lib/dom/drag_helpers';
+import { closePortaledPopovers } from '../../edit_engine/drag_helpers';
 import { EditOutline } from './outline/edit_outline';
 import { EditModal } from './modal/edit_modal';
 import type { StyleChange, TextNodeChange, MediaChange } from './modal/edit_modal';
