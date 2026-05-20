@@ -30,6 +30,7 @@ import type {
   FunctionParameterType,
   ParameterHint,
 } from '../../../../types';
+import { FunctionDefinitionTypes } from '../../../../types';
 import { type ISuggestionItem } from '../../../../../registry/types';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../../../constants';
 import {
@@ -110,7 +111,7 @@ function tryExclusiveSuggestions(
   }
 
   // Some parameters suggests special values that are deduced from the hints object provided by ES.
-  const itemsFromHints = buildSuggestionsFromHints(paramDefinitions, ctx);
+  const itemsFromHints = buildSuggestionsFromHints(functionParamContext, ctx);
   if (itemsFromHints.length > 0) {
     return itemsFromHints;
   }
@@ -388,12 +389,32 @@ function buildEnumValueSuggestions(
 }
 
 function buildSuggestionsFromHints(
-  paramDefinitions: FunctionParameter[],
+  functionParamContext: FunctionParamContext,
   ctx: ExpressionContext
 ): ISuggestionItem[] {
-  // Keep the hints that are unique by entityType + constraints
+  const { paramDefinitions } = functionParamContext;
+  const { options } = ctx;
+
+  // Hints carrying `kind: 'aggregation'`
+  const expectsAggregation = paramDefinitions.some(({ hint }) => hint?.kind === 'aggregation');
+  if (expectsAggregation) {
+    const config = getParamSuggestionConfig(
+      functionParamContext,
+      options.isCursorFollowedByComma ?? false
+    );
+    return new SuggestionBuilder(ctx)
+      .addFunctions({
+        types: config.acceptedTypes,
+        addComma: config.shouldAddComma,
+        excludeParentFunctions: true,
+        functionTypes: [FunctionDefinitionTypes.AGG],
+      })
+      .build();
+  }
+
+  // Keep the hints that are unique by entityType + constraints; ignore hints without an entityType.
   const hints: ParameterHint[] = uniqWith(
-    paramDefinitions.flatMap(({ hint }) => hint ?? []),
+    paramDefinitions.flatMap(({ hint }) => (hint?.entityType ? [hint] : [])),
     (a, b) => a.entityType === b.entityType && isEqual(a.constraints, b.constraints)
   );
 

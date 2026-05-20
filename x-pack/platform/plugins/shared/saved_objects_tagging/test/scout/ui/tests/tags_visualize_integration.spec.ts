@@ -92,13 +92,13 @@ test.describe('Visualize integration', { tag: tags.stateful.classic }, () => {
     await pageObjects.visualize.selectNoDashboard();
 
     await pageObjects.tagManagement.openCreateTagFromSelector();
-    await pageObjects.tagManagement.fillForm({
+    await pageObjects.tagManagement.tagModal.fillForm({
       name: 'my-new-tag',
       color: '#FFCC33',
       description: '',
     });
     await page.testSubj.click('createModalConfirmButton');
-    await pageObjects.tagManagement.getTagModalForm().waitFor({ state: 'hidden' });
+    await pageObjects.tagManagement.tagModal.form.waitFor({ state: 'hidden' });
     await pageObjects.visualize.confirmSave();
 
     await pageObjects.visualize.goto();

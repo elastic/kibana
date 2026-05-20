@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type {
   SavedObject,
   SavedObjectsBulkResponse,
@@ -15,8 +16,13 @@ import type {
 } from '@kbn/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
+import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
 import { AttachmentType } from '../../../common/types/domain';
+import {
+  UNIFIED_ALERT_TYPES_ARRAY,
+  isAlertAttachmentType,
+} from '../../../common/utils/attachments';
 import type { AttachmentMode } from '../../../common/types/domain/attachment/v2';
 import {
   AttachmentAttributesRtV2,
@@ -84,16 +90,30 @@ import { getTransformerForPatchAttributes, transformAttributesForMode } from './
 const PERSISTABLE_ATTACHMENT_TYPES_ARRAY = Array.from(PERSISTABLE_ATTACHMENT_TYPES);
 
 /**
- * Ensures alert attachments have rule.name, or else existing tests will fail
+ * Ensures alert attachments include a rule name
  */
 function assertAlertAttachmentHasRuleName(attributes: Record<string, unknown>): void {
   const type = attributes?.type;
-  if (type !== AttachmentType.alert && type !== 'alert') {
+  if (!isAlertAttachmentType(type as string)) {
     return;
   }
-  const rule = attributes.rule as { name?: unknown } | null | undefined;
+
+  if (type === AttachmentType.alert || type === 'alert') {
+    const rule = attributes.rule as { name?: unknown } | null | undefined;
+    if (rule == null || rule.name == null) {
+      throw Boom.badRequest(
+        'Invalid attributes: expected attributes.rule.name for alert attachments'
+      );
+    }
+    return;
+  }
+
+  const metadata = attributes.metadata as { rule?: { name?: unknown } } | null | undefined;
+  const rule = metadata?.rule;
   if (rule == null || rule.name == null) {
-    throw new Error('Invalid attributes: expected attributes.rule.name for alert attachments');
+    throw Boom.badRequest(
+      'Invalid attributes: expected attributes.metadata.rule.name for unified alert attachments'
+    );
   }
 }
 
@@ -138,6 +158,14 @@ export class AttachmentService {
     return this._getter;
   }
 
+  /**
+   * Whether the unified `cases-attachments` saved object type is registered
+   * (gated by the `cases.attachments.enabled` config flag).
+   */
+  public get isUnifiedAttachmentsEnabled(): boolean {
+    return this.context.config.attachments?.enabled === true;
+  }
+
   private async getAttachmentSavedObjectType(
     savedObjectId: string
   ): Promise<typeof CASE_ATTACHMENT_SAVED_OBJECT | typeof CASE_COMMENT_SAVED_OBJECT | null> {
@@ -147,32 +175,118 @@ export class AttachmentService {
     );
   }
 
+  /**
+   * Counts the unique number of alerts (deduplicated by id) attached to a case
+   * across legacy and unified alert attachments. Honors an optional
+   * authorization filter so the metric reflects what the caller can see.
+   *
+   * Used by the case metrics handler to display the alert count to the user.
+   */
   public async countAlertsAttachedToCase(
     params: AlertsAttachedToCaseArgs
   ): Promise<number | undefined> {
+    const { caseId, filter: authorizationFilter } = params;
     try {
-      this.context.log.debug(`Attempting to count alerts for case id ${params.caseId}`);
-      const res = await this.executeCaseAggregations<{ alerts: { value: number } }>({
-        ...params,
-        attachmentType: AttachmentType.alert,
-        aggregations: this.buildAlertsAggs(),
+      this.context.log.debug(`Attempting to count alerts for case id ${caseId}`);
+      return this.aggregateAlertsForCase({
+        caseId,
+        aggType: 'cardinality',
+        extraFilter: authorizationFilter,
       });
-
-      return res?.alerts?.value;
     } catch (error) {
-      this.context.log.error(`Error while counting alerts for case id ${params.caseId}: ${error}`);
+      this.context.log.error(`Error while counting alerts for case id ${caseId}: ${error}`);
       throw error;
     }
   }
 
-  private buildAlertsAggs(): Record<string, estypes.AggregationsAggregationContainer> {
-    return {
-      alerts: {
-        cardinality: {
-          field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
-        },
+  /**
+   * Counts the total number of alert occurrences attached to a case across both
+   * legacy and unified alert attachments. Uses value_count (not cardinality)
+   * so each alert occurrence is counted, mirroring how
+   * AlertLimiter.countOfItemsInRequest sums `ids.length` per request.
+   */
+  public async countAlertsWithinCase(caseId: string): Promise<number> {
+    try {
+      this.context.log.debug(
+        `Attempting to count all alerts (legacy + unified) for case ${caseId}`
+      );
+      return this.aggregateAlertsForCase({ caseId, aggType: 'value_count' });
+    } catch (error) {
+      this.context.log.error(`Error while counting alerts for case ${caseId}: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Shared aggregation across legacy (`cases-comments.attributes.alertId`) and
+   * unified (`cases-attachments.attributes.attachmentId`) alert storage.
+   *
+   * @param aggType `'cardinality'` for unique alert ids, `'value_count'` for occurrences.
+   * @param extraFilter additional KueryNode (e.g. authorization) AND-combined onto the type filter.
+   */
+  private async aggregateAlertsForCase({
+    caseId,
+    aggType,
+    extraFilter,
+  }: {
+    caseId: string;
+    aggType: 'cardinality' | 'value_count';
+    extraFilter?: KueryNode;
+  }): Promise<number> {
+    const isCasesAttachmentsEnabled = this.context.config.attachments?.enabled === true;
+
+    const typeFilters: Array<KueryNode | undefined> = [
+      buildFilter({
+        filters: [AttachmentType.alert],
+        field: 'type',
+        operator: 'or',
+        type: CASE_COMMENT_SAVED_OBJECT,
+      }),
+    ];
+
+    const aggregations: Record<string, estypes.AggregationsAggregationContainer> = {
+      legacyAlerts: {
+        [aggType]: { field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId` },
       },
     };
+
+    if (isCasesAttachmentsEnabled) {
+      typeFilters.push(
+        buildFilter({
+          filters: UNIFIED_ALERT_TYPES_ARRAY,
+          field: 'type',
+          operator: 'or',
+          type: CASE_ATTACHMENT_SAVED_OBJECT,
+        })
+      );
+
+      aggregations.unifiedAlerts = {
+        [aggType]: { field: `${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.attachmentId` },
+      };
+    }
+
+    const combinedTypeFilter = combineFilters(typeFilters, 'or');
+    const combinedFilter = combineFilters([combinedTypeFilter, extraFilter]);
+
+    const response = await this.context.unsecuredSavedObjectsClient.find<
+      unknown,
+      { legacyAlerts: { value: number }; unifiedAlerts?: { value: number } }
+    >({
+      type: isCasesAttachmentsEnabled
+        ? [CASE_COMMENT_SAVED_OBJECT, CASE_ATTACHMENT_SAVED_OBJECT]
+        : CASE_COMMENT_SAVED_OBJECT,
+      hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+      page: 1,
+      perPage: 1,
+      sortField: defaultSortField,
+      aggs: aggregations,
+      filter: combinedFilter,
+    });
+
+    const legacyCount = response.aggregations?.legacyAlerts?.value ?? 0;
+    const unifiedCount = response.aggregations?.unifiedAlerts?.value ?? 0;
+
+    return legacyCount + unifiedCount;
   }
 
   /**

@@ -62,6 +62,7 @@ import {
   CASE_ATTACHMENT_INDICATOR_TYPE_ID,
 } from '../common/constants';
 import { registerCaseAttachments } from './cases/attachments/register';
+import { securityAlertAttachmentType } from './cases/attachments/alert';
 import { DefaultClosingReasonSchema } from '../common/types';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
@@ -523,6 +524,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
     this.usageCollection = plugins.usageCollection;
     registerCaseAttachments(plugins.cases.attachmentFramework);
+    plugins.cases.attachmentFramework.registerUnified(securityAlertAttachmentType);
 
     plugins.cases.registerCloseReasonValidator(APP_ID, async (closeReason, request) => {
       const [coreStart] = await core.getStartServices();
