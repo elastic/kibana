@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KbnClient, ScoutLogger, ScoutParallelWorkerFixtures } from '@kbn/scout';
+import type { EsClient, KbnClient, ScoutLogger, ScoutParallelWorkerFixtures } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 import type {
   RiskEngineStatusResponse,
@@ -45,15 +45,18 @@ export interface EntityAnalyticsApiService {
 }
 
 export const getEntityAnalyticsApiService = ({
+  esClient,
   kbnClient,
   log,
   scoutSpace,
 }: {
+  esClient: EsClient;
   kbnClient: KbnClient;
   log: ScoutLogger;
   scoutSpace?: ScoutParallelWorkerFixtures['scoutSpace'];
 }): EntityAnalyticsApiService => {
   const basePath = scoutSpace?.id ? `/s/${scoutSpace?.id}` : '';
+  const spaceId = scoutSpace?.id ?? 'default';
 
   const service: EntityAnalyticsApiService = {
     deleteEntityStoreEngines: async () => {
@@ -71,6 +74,30 @@ export const getEntityAnalyticsApiService = ({
           });
           // Wait for cleanup to complete - ensure server state is fully cleaned up
           await service.waitForEntityStoreCleanup();
+
+          // Belt-and-suspenders: ensure no entity-store transforms are left in
+          // this space. The production delete path can orphan transforms if the
+          // entity-definition SO lookup races with a partial install failure
+          // (saw the SO=0 / transforms=stopped pattern in 10x repeats). Without
+          // this cleanup, the next init fails with `resource_already_exists`.
+          // Uses the admin esClient — bypasses any role-cache issues affecting
+          // the test user.
+          try {
+            const { transforms } = await esClient.transform.getTransform({
+              transform_id: `entities-v1-latest-security_*_${spaceId}`,
+              allow_no_match: true,
+            });
+            await Promise.all(
+              transforms.map(({ id }) =>
+                esClient.transform.deleteTransform({
+                  transform_id: id,
+                  force: true,
+                })
+              )
+            );
+          } catch (error) {
+            log.debug(`Fallback transform cleanup failed: ${error}`);
+          }
         }
       );
     },
