@@ -262,6 +262,61 @@ describe('EditDeletePhaseFlyout', () => {
     });
   });
 
+  it('disables removing the delete phase while saving', () => {
+    const { onSave } = renderFlyout({ isSaving: true });
+
+    const removeButton = screen.getByTestId(`${DATA_TEST_SUBJ}RemoveDeletePhaseButton`);
+    expect(removeButton).toBeDisabled();
+
+    fireEvent.click(removeButton);
+    expect(onSave).toHaveBeenCalledTimes(0);
+  });
+
+  it('disables removing the delete phase while submitting', async () => {
+    let resolveSave!: () => void;
+    const pendingSave = new Promise<void>((resolve) => {
+      resolveSave = resolve;
+    });
+    const onSave = jest.fn(() => pendingSave);
+
+    render(
+      <I18nProvider>
+        <EditDeletePhaseFlyout
+          initialValue={{
+            deletePhaseEnabled: true,
+            dataRetention: '30d',
+            isDefaultRetention: false,
+          }}
+          onSave={onSave}
+          onClose={jest.fn()}
+          onChange={jest.fn()}
+          onChangeDebounceMs={0}
+        />
+      </I18nProvider>
+    );
+
+    // Make Apply enabled so we can trigger isSubmitting via handleSubmit().
+    const valueInput = screen.getByTestId(`${DATA_TEST_SUBJ}DeleteAfterValue`);
+    fireEvent.change(valueInput, { target: { value: '15' } });
+    fireEvent.blur(valueInput);
+
+    const applyButton = screen.getByTestId(`${DATA_TEST_SUBJ}ApplyButton`);
+    await waitFor(() => expect(applyButton).toBeEnabled());
+
+    fireEvent.click(applyButton);
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+
+    const removeButton = screen.getByTestId(`${DATA_TEST_SUBJ}RemoveDeletePhaseButton`);
+    await waitFor(() => expect(removeButton).toBeDisabled());
+
+    fireEvent.click(removeButton);
+    expect(onSave).toHaveBeenCalledTimes(1);
+
+    // Cleanup: resolve the submit so React Hook Form can settle.
+    act(() => resolveSave());
+    await waitFor(() => expect(applyButton).toBeEnabled());
+  });
+
   it('validates that delete after is a non-negative integer', async () => {
     const { onSave } = renderFlyout();
     const valueInput = screen.getByTestId(`${DATA_TEST_SUBJ}DeleteAfterValue`);

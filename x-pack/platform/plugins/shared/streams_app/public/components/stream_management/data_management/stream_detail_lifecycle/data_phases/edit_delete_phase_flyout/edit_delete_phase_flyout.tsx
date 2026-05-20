@@ -300,6 +300,7 @@ export const EditDeletePhaseFlyout = ({
                     type="button"
                     data-test-subj={`${dataTestSubj}RemoveDeletePhaseButton`}
                     onClick={removeDeletePhase}
+                    disabled={Boolean(isSaving) || isSubmitting}
                   >
                     {editDeletePhaseFlyoutI18n.removeDeletePhaseButtonLabel}
                   </EuiButton>

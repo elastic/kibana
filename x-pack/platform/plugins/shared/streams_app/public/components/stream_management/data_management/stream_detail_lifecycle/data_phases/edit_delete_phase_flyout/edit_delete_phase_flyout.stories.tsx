@@ -150,3 +150,23 @@ export const ServerlessClassicMaximumRetention: Story = {
     />
   ),
 };
+
+export const SavingDisablesActions: Story = {
+  args: {
+    initialValue: {
+      deletePhaseEnabled: true,
+      dataRetention: '30d',
+      isDefaultRetention: false,
+    },
+  },
+  render: (args) => (
+    <EditDeletePhaseFlyout
+      initialValue={args.initialValue}
+      onChangeDebounceMs={args.onChangeDebounceMs}
+      onChange={(next) => action('onChange')(next)}
+      onSave={(next) => action('onSave')(next)}
+      onClose={() => action('onClose')()}
+      isSaving={true}
+    />
+  ),
+};
