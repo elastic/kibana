@@ -18,6 +18,9 @@ jest.mock('../entities/service');
 jest.mock('./sync/index_sync');
 jest.mock('../entities/utils');
 jest.mock('./bulk/soft_delete');
+jest.mock('@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request', () => ({
+  getFakeKibanaRequest: jest.fn().mockReturnValue({ fakeRequest: true }),
+}));
 
 const { mockListEntitySources } = jest.requireMock('./infra/entity_source_client') as {
   mockListEntitySources: jest.Mock;
@@ -35,8 +38,11 @@ const { mockListEntityStoreEntities } = jest.requireMock('../entities/service') 
   mockListEntityStoreEntities: jest.Mock;
 };
 
-const { mockPlainIndexSync } = jest.requireMock('./sync/index_sync') as {
+const { mockPlainIndexSync, mockCreateIndexSyncService } = jest.requireMock(
+  './sync/index_sync'
+) as {
   mockPlainIndexSync: jest.Mock;
+  mockCreateIndexSyncService: jest.Mock;
 };
 
 const { mockGetIndexForWatchlist } = jest.requireMock('../entities/utils') as {
@@ -99,7 +105,7 @@ describe('createEntitySourcesService', () => {
     mockGetIndexForWatchlist.mockReturnValue('.lists-watchlist-vip-users-default');
   });
 
-  it('builds the linked source payload and passes it to plainIndexSync', async () => {
+  it('syncs integration sources and skips index sources that have no stored API key', async () => {
     const service = createEntitySourcesService({
       esClient,
       soClient,
@@ -114,40 +120,22 @@ describe('createEntitySourcesService', () => {
     expect(mockListEntitySources).toHaveBeenCalledWith({});
     expect(mockGetIndexForWatchlist).toHaveBeenCalledWith(namespace);
 
-    expect(mockListEntityStoreEntities).toHaveBeenCalledTimes(2);
-    expect(mockListEntityStoreEntities).toHaveBeenCalledWith({ type: 'index', field: 'user.id' });
+    // source-a (index) is skipped — no API key. source-c (integration) syncs.
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Skipping index source source-a: no API key stored')
+    );
+    expect(mockListEntityStoreEntities).toHaveBeenCalledTimes(1);
     expect(mockListEntityStoreEntities).toHaveBeenCalledWith({
       type: 'integration',
       name: 'entityanalytics_okta',
     });
 
-    // Each source gets one plainIndexSync call per page + one tail call (4 total, order may vary)
-    expect(mockPlainIndexSync).toHaveBeenCalledTimes(4);
-
-    expect(mockPlainIndexSync).toHaveBeenCalledWith([
-      expect.objectContaining({
-        source: expect.objectContaining({ id: 'source-a' }),
-        entityStoreEntityIdsByType: { user: ['user:1'], host: [], service: [], generic: [] },
-        correlationMap: expect.any(Map),
-        watchlistsByEuid: expect.any(Map),
-        pageRange: expect.objectContaining({ lte: expect.any(String) }),
-      }),
-    ]);
-    expect(mockPlainIndexSync).toHaveBeenCalledWith([
-      expect.objectContaining({
-        source: expect.objectContaining({ id: 'source-a' }),
-        entityStoreEntityIdsByType: { user: [], host: [], service: [], generic: [] },
-      }),
-    ]);
+    // source-c gets one page call + one tail call
+    expect(mockPlainIndexSync).toHaveBeenCalledTimes(2);
     expect(mockPlainIndexSync).toHaveBeenCalledWith([
       expect.objectContaining({
         source: expect.objectContaining({ id: 'source-c' }),
-        entityStoreEntityIdsByType: {
-          user: ['user:2'],
-          host: ['host:1'],
-          service: [],
-          generic: [],
-        },
+        entityStoreEntityIdsByType: { user: ['user:1'], host: [], service: [], generic: [] },
         watchlistsByEuid: expect.any(Map),
         pageRange: expect.objectContaining({ lte: expect.any(String) }),
       }),
@@ -161,6 +149,45 @@ describe('createEntitySourcesService', () => {
 
     expect(logger.info).toHaveBeenCalledWith(
       '[WatchlistSync] Completed sync for watchlist watchlist-1 (VIP Users)'
+    );
+  });
+
+  it('uses a scoped ES client for an index source when an API key is stored', async () => {
+    const mockScopedEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    const mockCoreElasticsearchClient = {
+      asScoped: jest.fn().mockReturnValue({ asCurrentUser: mockScopedEsClient }),
+    };
+    const mockEsoClientGet = jest.fn().mockResolvedValue({
+      attributes: { apiKeyId: 'key-id', apiKey: 'key-secret' },
+    });
+    const mockEncryptedSavedObjects = {
+      getClient: () => ({ getDecryptedAsInternalUser: mockEsoClientGet }),
+    };
+
+    const service = createEntitySourcesService({
+      esClient,
+      soClient,
+      logger,
+      namespace,
+      encryptedSavedObjects: mockEncryptedSavedObjects as never,
+      coreElasticsearchClient: mockCoreElasticsearchClient as never,
+    });
+
+    await service.syncWatchlist('watchlist-1');
+
+    // source-a (index) should be synced via the scoped client
+    expect(mockCreateIndexSyncService).toHaveBeenCalledWith(
+      expect.objectContaining({
+        writeEsClient: esClient,
+        indexReadEsClient: mockScopedEsClient,
+      })
+    );
+    // source-c (integration) uses the plain esClient for both
+    expect(mockCreateIndexSyncService).toHaveBeenCalledWith(
+      expect.objectContaining({
+        writeEsClient: esClient,
+        indexReadEsClient: esClient,
+      })
     );
   });
 
@@ -353,9 +380,9 @@ describe('createEntitySourcesService', () => {
       const controller = new AbortController();
 
       // Need one active source so the paginated loop calls plainIndexSync at least once
-      mockGetEntitySourceIds.mockResolvedValue(['source-a']);
+      mockGetEntitySourceIds.mockResolvedValue(['source-c']);
       mockListEntitySources.mockResolvedValue({
-        sources: [{ id: 'source-a', type: 'index', identifierField: 'user.id' }],
+        sources: [{ id: 'source-c', type: 'integration', integrationName: 'entityanalytics_okta' }],
       });
       mockListEntityStoreEntities.mockImplementationOnce(async function* () {
         yield {

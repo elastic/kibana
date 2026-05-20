@@ -129,6 +129,25 @@ describe('WatchlistEntitySourceClient', () => {
       );
     });
 
+    it('strips apiKeyId and apiKey from the update payload', async () => {
+      soClient.find.mockResolvedValue({ saved_objects: [], total: 0 } as never);
+      soClient.update.mockResolvedValue({
+        id: 'source-id',
+        attributes: { name: 'Updated' },
+      } as never);
+
+      await client.update({
+        id: 'source-id',
+        name: 'Updated',
+        apiKeyId: 'should-be-stripped',
+        apiKey: 'should-be-stripped',
+      } as never);
+
+      const [, , calledAttrs] = (soClient.update as jest.Mock).mock.calls[0];
+      expect(calledAttrs).not.toHaveProperty('apiKeyId');
+      expect(calledAttrs).not.toHaveProperty('apiKey');
+    });
+
     it('throws when renaming to a name that already exists', async () => {
       soClient.find.mockResolvedValue({
         saved_objects: [{ id: 'other-id', attributes: { name: 'Taken' } }],
@@ -137,6 +156,34 @@ describe('WatchlistEntitySourceClient', () => {
 
       await expect(client.update({ id: 'source-id', name: 'Taken' })).rejects.toThrow(
         'A watchlist entity source with the name "Taken" already exists.'
+      );
+    });
+  });
+
+  describe('updateApiKeyFields', () => {
+    it('writes apiKeyId and apiKey to soClient.update', async () => {
+      soClient.update.mockResolvedValue({} as never);
+
+      await client.updateApiKeyFields('source-id', { apiKeyId: 'kid-1', apiKey: 'secret-1' });
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        watchlistEntitySourceTypeName,
+        'source-id',
+        { apiKeyId: 'kid-1', apiKey: 'secret-1' },
+        { refresh: 'wait_for' }
+      );
+    });
+
+    it('writes null values to clear a stored API key', async () => {
+      soClient.update.mockResolvedValue({} as never);
+
+      await client.updateApiKeyFields('source-id', { apiKeyId: null, apiKey: null });
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        watchlistEntitySourceTypeName,
+        'source-id',
+        { apiKeyId: null, apiKey: null },
+        { refresh: 'wait_for' }
       );
     });
   });
