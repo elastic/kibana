@@ -17,19 +17,19 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { RowControlColumn, RowControlProps } from '@kbn/discover-utils';
+import type { RowControlColumn, RowControlProps, RowControlRowProps } from '@kbn/discover-utils';
 import { useControlColumn } from '../../../hooks/use_control_column';
 
 /**
  * Menu button under which all other additional row controls would be placed
  */
 export const RowMenuControlCell = ({
-  rowControlColumns,
+  getAvailableControls,
   startIndex = 0,
   ...props
 }: EuiDataGridCellValueElementProps & {
-  rowControlColumns: RowControlColumn[];
-  /** When set, filters by `isAvailable` per-row and slices from this index. */
+  getAvailableControls: (rowProps: RowControlRowProps) => RowControlColumn[];
+  /** Index into the available controls list from which menu items start. */
   startIndex?: number;
 }) => {
   const { record, rowIndex } = useControlColumn(props);
@@ -63,20 +63,16 @@ export const RowMenuControlCell = ({
   );
 
   const popoverMenuItems = useMemo(() => {
-    const rowProps = record ? { record, rowIndex } : null;
-    const visibleColumns = rowControlColumns
-      .filter((col) => !rowProps || (col.isAvailable?.(rowProps) ?? true))
-      .slice(startIndex);
-
+    if (!record) return [];
+    const rowProps = { record, rowIndex };
+    const visibleColumns = getAvailableControls(rowProps).slice(startIndex);
     return visibleColumns.map((rowControlColumn) => {
       const Control = getControlComponent(rowControlColumn.id);
       return (
-        <Fragment key={rowControlColumn.id}>
-          {rowProps ? rowControlColumn.render(Control, rowProps) : null}
-        </Fragment>
+        <Fragment key={rowControlColumn.id}>{rowControlColumn.render(Control, rowProps)}</Fragment>
       );
     });
-  }, [rowControlColumns, startIndex, getControlComponent, record, rowIndex]);
+  }, [getAvailableControls, startIndex, getControlComponent, record, rowIndex]);
 
   if (!popoverMenuItems.length) return null;
 
@@ -110,14 +106,14 @@ export const RowMenuControlCell = ({
 };
 
 export const getRowMenuControlColumn = (
-  rowControlColumns: RowControlColumn[],
+  getAvailableControls: (rowProps: RowControlRowProps) => RowControlColumn[],
   startIndex?: number
 ) => {
   return (props: EuiDataGridCellValueElementProps) => {
     return (
       <RowMenuControlCell
         {...props}
-        rowControlColumns={rowControlColumns}
+        getAvailableControls={getAvailableControls}
         startIndex={startIndex}
       />
     );

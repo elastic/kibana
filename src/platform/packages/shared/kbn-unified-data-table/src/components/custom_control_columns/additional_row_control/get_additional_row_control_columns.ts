@@ -10,7 +10,7 @@
 import type { RowControlColumn } from '@kbn/discover-utils';
 import type { RenderCellValue } from '@elastic/eui';
 import { DEFAULT_CONTROL_COLUMN_WIDTH } from '../../../constants';
-import { getCompatibleSlotRenderers } from './row_control_column';
+import { createAvailableControlsGetter, getCompatibleSlotRenderers } from './row_control_column';
 import { getRowMenuControlColumn } from './row_menu_control_column';
 
 export const DEFAULT_VISIBLE_ROW_LEADING_CONTROLS = 2;
@@ -28,12 +28,15 @@ export const getAdditionalRowControlColumns = (
 
   if (n === 0) return { columns: [], totalWidth: 0 };
 
+  // Shared cache: isAvailable is evaluated at most once per record across inline and menu.
+  const getAvailableControls = createAvailableControlsGetter(rowControlColumns);
+
   // Each inline slot picks the Kth available action per-row (after isAvailable filtering),
   // so the visible count reflects truly compatible actions rather than positional gaps.
   const allInline = n <= totalVisible;
   const numInlineSlots = allInline ? n : totalVisible - 1;
 
-  const inlineColumns = getCompatibleSlotRenderers(rowControlColumns, numInlineSlots);
+  const inlineColumns = getCompatibleSlotRenderers(numInlineSlots, getAvailableControls);
 
   // Width is computed from the static action list as a best-effort estimate;
   // per-row filtering may leave some slots empty but the column width stays fixed.
@@ -45,10 +48,10 @@ export const getAdditionalRowControlColumns = (
     return { columns: inlineColumns, totalWidth: inlineWidth };
   }
 
-  // Pass the full list + startIndex so the menu filters by isAvailable per-row
-  // and only shows actions that didn't fit in the inline slots.
+  // Pass the shared getter + startIndex so the menu only shows actions that didn't
+  // fit in the inline slots and are available for the current row.
   return {
-    columns: [...inlineColumns, getRowMenuControlColumn(rowControlColumns, numInlineSlots)],
+    columns: [...inlineColumns, getRowMenuControlColumn(getAvailableControls, numInlineSlots)],
     totalWidth: inlineWidth + DEFAULT_CONTROL_COLUMN_WIDTH,
   };
 };

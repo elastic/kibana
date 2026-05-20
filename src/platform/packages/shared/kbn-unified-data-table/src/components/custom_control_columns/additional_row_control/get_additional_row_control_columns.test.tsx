@@ -185,6 +185,90 @@ describe('getAdditionalRowControlColumns', () => {
     });
   });
 
+  describe('isAvailable predicate', () => {
+    it('excludes an action with isAvailable: () => false from inline slots', () => {
+      const unavailable: RowControlColumn = {
+        id: 'unavailable',
+        isAvailable: () => false,
+        render: (Control) => (
+          <Control
+            data-test-subj="unavailable"
+            label="Unavailable"
+            iconType="empty"
+            onClick={jest.fn()}
+          />
+        ),
+      };
+      setup([mockRowAdditionalLeadingControls[0], unavailable]);
+
+      expect(screen.getByTestId(mockRowAdditionalLeadingControls[0].id)).toBeVisible();
+      expect(screen.queryByTestId('unavailable')).not.toBeInTheDocument();
+    });
+
+    it('excludes an action with isAvailable: () => false from the overflow menu', async () => {
+      const user = userEvent.setup();
+      const unavailable: RowControlColumn = {
+        id: 'unavailable',
+        isAvailable: () => false,
+        render: (Control) => (
+          <Control
+            data-test-subj="unavailable"
+            label="Unavailable"
+            iconType="empty"
+            onClick={jest.fn()}
+          />
+        ),
+      };
+      // 3 controls with default visibleRowLeadingControls (2): 1 inline + menu
+      setup([
+        mockRowAdditionalLeadingControls[0],
+        mockRowAdditionalLeadingControls[1],
+        unavailable,
+      ]);
+
+      await user.click(screen.getByTestId('unifiedDataTable_additionalRowControl_actionsMenu'));
+      await waitFor(() => {
+        expect(screen.getByTestId(mockRowAdditionalLeadingControls[1].id)).toBeVisible();
+        expect(screen.queryByTestId('unavailable')).not.toBeInTheDocument();
+      });
+    });
+
+    it('hides the overflow menu when all menu items are unavailable', () => {
+      const unavailable1: RowControlColumn = {
+        id: 'unavailable-1',
+        isAvailable: () => false,
+        render: (Control) => (
+          <Control
+            data-test-subj="unavailable-1"
+            label="Unavailable 1"
+            iconType="empty"
+            onClick={jest.fn()}
+          />
+        ),
+      };
+      const unavailable2: RowControlColumn = {
+        id: 'unavailable-2',
+        isAvailable: () => false,
+        render: (Control) => (
+          <Control
+            data-test-subj="unavailable-2"
+            label="Unavailable 2"
+            iconType="empty"
+            onClick={jest.fn()}
+          />
+        ),
+      };
+      // 3 controls with default visibleRowLeadingControls (2): 1 inline + menu
+      // Both menu items are unavailable → menu button should not render
+      setup([mockRowAdditionalLeadingControls[0], unavailable1, unavailable2]);
+
+      expect(screen.getByTestId(mockRowAdditionalLeadingControls[0].id)).toBeVisible();
+      expect(
+        screen.queryByTestId('unifiedDataTable_additionalRowControl_actionsMenu')
+      ).not.toBeInTheDocument();
+    });
+  });
+
   it('clamps visibleRowLeadingControls <= 1 to 2', () => {
     const mocks = [
       mockRowAdditionalLeadingControls[0],
