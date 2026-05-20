@@ -143,11 +143,9 @@ export const putDownloadSourcesHandler: RequestHandler<
   try {
     await downloadSourceService.update(soClient, esClient, request.params.sourceId, data);
     const downloadSource = await downloadSourceService.get(request.params.sourceId);
-    if (downloadSource.is_default) {
-      await agentPolicyService.bumpAllAgentPolicies(esClient);
-    } else {
-      await agentPolicyService.bumpAllAgentPoliciesForDownloadSource(esClient, downloadSource.id);
-    }
+    await agentPolicyService.bumpAllAgentPoliciesForDownloadSource(esClient, downloadSource.id, {
+      isDefault: downloadSource.is_default,
+    });
     const body: PutDownloadSourceResponse = {
       item: downloadSource,
     };
@@ -178,9 +176,9 @@ export const postDownloadSourcesHandler: RequestHandler<
   validateDownloadSource(data);
 
   const downloadSource = await downloadSourceService.create(soClient, esClient, data, { id });
-  if (downloadSource.is_default) {
-    await agentPolicyService.bumpAllAgentPolicies(esClient);
-  }
+  await agentPolicyService.bumpAllAgentPoliciesForDownloadSource(esClient, downloadSource.id, {
+    isDefault: downloadSource.is_default,
+  });
   const body: GetOneDownloadSourceResponse = {
     item: downloadSource,
   };
