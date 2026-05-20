@@ -19,11 +19,15 @@ import {
   ESQL_RESOURCE_BROWSER_ITEM_TOGGLED,
   ESQL_RESOURCE_BROWSER_OPENED,
 } from './events_registration';
+import { reportEsqlError } from '../report_error';
+
+jest.mock('../report_error', () => ({
+  reportEsqlError: jest.fn(),
+}));
 
 describe('ESQLEditorTelemetryService', () => {
   let mockAnalytics: jest.Mocked<AnalyticsServiceStart>;
   let telemetryService: ESQLEditorTelemetryService;
-  let consoleLogSpy: jest.SpyInstance;
 
   beforeEach(() => {
     mockAnalytics = {
@@ -31,14 +35,10 @@ describe('ESQLEditorTelemetryService', () => {
     } as unknown as jest.Mocked<AnalyticsServiceStart>;
 
     telemetryService = new ESQLEditorTelemetryService(mockAnalytics);
-
-    // Mock console.log to avoid test output pollution
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
   });
 
   afterEach(() => {
     jest.clearAllMocks();
-    consoleLogSpy.mockRestore();
   });
 
   describe('trackLookupJoinHoverActionShown', () => {
@@ -156,10 +156,9 @@ describe('ESQLEditorTelemetryService', () => {
         telemetryService.trackLookupJoinHoverActionShown(invalidEncodedMessage);
 
         expect(mockAnalytics.reportEvent).not.toHaveBeenCalled();
-        expect(consoleLogSpy).toHaveBeenCalledWith(
-          'Failed to parse hover message command data',
-          expect.any(Error)
-        );
+        expect(reportEsqlError).toHaveBeenCalledWith(expect.any(Error), {
+          errorType: 'HoverMessageParse',
+        });
       });
     });
   });

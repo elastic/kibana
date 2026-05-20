@@ -129,5 +129,6 @@ export enum HistoryTabId {
 export type EsqlLanguageDeps = ESQLCallbacks &
   Partial<{
     telemetry: ESQLTelemetryCallbacks;
+    isSuggestFixEnabled: ESQLDependencies['isSuggestFixEnabled'];
     getEditorMessages: ESQLDependencies['getEditorMessages'];
   }>;
