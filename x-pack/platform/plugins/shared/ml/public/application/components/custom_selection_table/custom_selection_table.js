@@ -45,6 +45,7 @@ function getError(error) {
 }
 
 export function CustomSelectionTable({
+  ariaLabel,
   checkboxDisabledCheck,
   columns,
   currentPage = 0,
@@ -394,7 +395,7 @@ export function CustomSelectionTable({
           <EuiFlexItem grow={false}>{renderSelectAll(true)}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiTableHeaderMobile>
-      <EuiTable data-test-subj="mlCustomSelectionTable">
+      <EuiTable aria-label={ariaLabel} data-test-subj="mlCustomSelectionTable">
         <EuiTableHeader>{renderHeaderCells()}</EuiTableHeader>
         <EuiTableBody>{renderRows()}</EuiTableBody>
       </EuiTable>
@@ -414,6 +415,7 @@ export function CustomSelectionTable({
 }
 
 CustomSelectionTable.propTypes = {
+  ariaLabel: PropTypes.string,
   checkboxDisabledCheck: PropTypes.func,
   columns: PropTypes.array.isRequired,
   currentPage: PropTypes.number,
