@@ -22,6 +22,13 @@ const ALERTS_INDEX = '.alerts-streams.alerts-default';
 // Kept as an empty stub until the consumer-side schema/usage is removed.
 const EMPTY_CHANGE_POINTS = { type: {} } as const;
 
+// Rules with no firings in the requested window (and the "alerts index missing"
+// early-bail path) emit an empty occurrences array, mirroring the pre-ES|QL DSL
+// `notFoundSignificantEvents` branch. Downstream consumers (sparkline, reducers,
+// `formatLastOccurredAt`, `.some(p => p.y > 0)`) all handle `[]` correctly, so a
+// single shared reference keeps the wire shape consistent across both paths.
+const EMPTY_OCCURRENCES: Array<{ date: string; count: number }> = [];
+
 export async function readSignificantEventsFromAlertsIndices(
   params: {
     streamNames?: string[];
@@ -90,9 +97,12 @@ export async function readSignificantEventsFromAlertsIndices(
         { cause: err instanceof Error ? err : new Error(String(err)) }
       );
     }
-    // Alerts index doesn't exist yet (no rules have fired) — surface zeros.
+    // Alerts index doesn't exist yet (no rules have fired) — surface an empty
+    // response. Mirrors the per-rule "not found" shape so consumers see the same
+    // `occurrences: []` regardless of whether the index is missing or the rule
+    // simply produced no firings.
     if (type === 'verification_exception') {
-      return buildEmptyResponse(queryLinks, from, to, intervalMs);
+      return buildEmptyResponse(queryLinks);
     }
     throw err;
   }
@@ -102,7 +112,7 @@ export async function readSignificantEventsFromAlertsIndices(
   const bucketIdx = response.columns.findIndex((col) => col.name === 'bucket');
 
   if (countIdx === -1 || ruleIdx === -1 || bucketIdx === -1) {
-    return buildEmptyResponse(queryLinks, from, to, intervalMs);
+    return buildEmptyResponse(queryLinks);
   }
 
   const sparseByRule = new Map<string, Array<{ date: string; count: number }>>();
@@ -132,34 +142,34 @@ export async function readSignificantEventsFromAlertsIndices(
     intervalMs
   );
 
-  // Rules that never fired still need a (zero-filled) series so the UI renders an empty sparkline.
-  const significantEvents = queryLinks.map((queryLink) => ({
-    ...toStreamQuery(queryLink),
-    stream_name: queryLink.stream_name,
-    occurrences: fillBucketGaps(sparseByRule.get(queryLink.rule_id) ?? [], from, to, intervalMs),
-    change_points: EMPTY_CHANGE_POINTS,
-    rule_backed: queryLink.rule_backed,
-  }));
+  // Rules absent from the ES|QL result set (never fired in the window) emit `[]`
+  // rather than a zero-filled series — mirrors the pre-ES|QL DSL behaviour
+  // (`notFoundSignificantEvents` branch) and matches what `buildEmptyResponse`
+  // emits when the alerts index is missing entirely. See EMPTY_OCCURRENCES note.
+  const significantEvents = queryLinks.map((queryLink) => {
+    const sparse = sparseByRule.get(queryLink.rule_id);
+    return {
+      ...toStreamQuery(queryLink),
+      stream_name: queryLink.stream_name,
+      occurrences: sparse ? fillBucketGaps(sparse, from, to, intervalMs) : EMPTY_OCCURRENCES,
+      change_points: EMPTY_CHANGE_POINTS,
+      rule_backed: queryLink.rule_backed,
+    };
+  });
 
   return { significant_events: significantEvents, aggregated_occurrences: aggregatedOccurrences };
 }
 
-function buildEmptyResponse(
-  queryLinks: QueryLink[],
-  from: Date,
-  to: Date,
-  intervalMs: number
-): SignificantEventsGetResponse {
-  const emptyOccurrences = fillBucketGaps([], from, to, intervalMs);
+function buildEmptyResponse(queryLinks: QueryLink[]): SignificantEventsGetResponse {
   return {
     significant_events: queryLinks.map((queryLink) => ({
       ...toStreamQuery(queryLink),
       stream_name: queryLink.stream_name,
-      occurrences: emptyOccurrences,
+      occurrences: EMPTY_OCCURRENCES,
       change_points: EMPTY_CHANGE_POINTS,
       rule_backed: queryLink.rule_backed,
     })),
-    aggregated_occurrences: emptyOccurrences,
+    aggregated_occurrences: EMPTY_OCCURRENCES,
   };
 }
 

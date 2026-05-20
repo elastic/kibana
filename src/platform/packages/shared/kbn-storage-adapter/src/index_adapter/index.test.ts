@@ -494,4 +494,47 @@ describe('StorageIndexAdapter - esql method', () => {
     expect(migrateSource).not.toHaveBeenCalled();
     expect(result.values[0][0]).toEqual(rawSource);
   });
+
+  it('forwards filter to esClient.esql.query', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    const filter = {
+      bool: { filter: [{ range: { '@timestamp': { gte: 'now-1h' } } }] },
+    };
+    await client.esql({ query: 'FROM test_index | LIMIT 5', filter });
+
+    expect((esClient as any).esql.query).toHaveBeenCalledWith(expect.objectContaining({ filter }));
+  });
+
+  it('awaits ensureMappingsBeforeReading before issuing the ES|QL query', async () => {
+    // Defer the alias lookup that updateMappingsIfNeeded awaits so the
+    // ensureMappingsBeforeReading promise stays pending until we release it.
+    let releaseGetAlias!: () => void;
+    const getAliasPromise = new Promise<{
+      'test_index-000001': { aliases: { test_index: { is_write_index: true } } };
+    }>((resolve) => {
+      releaseGetAlias = () =>
+        resolve({
+          'test_index-000001': { aliases: { test_index: { is_write_index: true } } },
+        });
+    });
+    (esClient.indices.getAlias as jest.Mock).mockReturnValueOnce(getAliasPromise);
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    const esqlPromise = client.esql({ query: 'FROM test_index | LIMIT 1' });
+
+    // Microtask flush; the adapter should still be waiting on the alias lookup,
+    // so esql.query must not have been issued yet.
+    await Promise.resolve();
+    await Promise.resolve();
+    expect((esClient as any).esql.query).not.toHaveBeenCalled();
+
+    releaseGetAlias();
+    await esqlPromise;
+
+    expect((esClient as any).esql.query).toHaveBeenCalledTimes(1);
+  });
 });
