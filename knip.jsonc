@@ -1,0 +1,17 @@
+// Configuration for `knip` (https://knip.dev).
+//
+// Kibana uses a single root `package.json` and links packages via `link:` rather than yarn workspaces,
+// so this file is the source of truth for what knip should analyze. Add more workspaces here as
+// additional areas of the monorepo are brought under knip-managed lint coverage.
+//
+// To run knip from the repo root: `node scripts/knip [...args]`
+// To scope to a single workspace, e.g. for the @kbn/safer-lodash-set check that previously used
+// `dependency-check --missing`: `node scripts/knip --workspace src/platform/packages/shared/kbn-safer-lodash-set --include unlisted`
+{
+  "$schema": "https://unpkg.com/knip@6/schema-jsonc.json",
+  "workspaces": {
+    "src/platform/packages/shared/kbn-safer-lodash-set": {
+      "entry": ["set.js", "setWith.js", "fp/*.js"]
+    }
+  }
+}

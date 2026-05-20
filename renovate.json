@@ -1863,7 +1863,6 @@
     {
       "groupName": "platform security modules",
       "matchDepNames": [
-        "dependency-check",
         "dependency-cruiser",
         "dompurify",
         "fast-deep-equal",
@@ -1872,6 +1871,7 @@
         "handlebars",
         "js-sha256",
         "js-yaml",
+        "knip",
         "magic-bytes.js",
         "minimist",
         "object-hash",
