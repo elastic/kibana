@@ -13,6 +13,7 @@ import { getFieldValue } from '@kbn/discover-utils';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import { ALERT_WORKFLOW_STATUS, EVENT_KIND } from '@kbn/rule-data-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { EventKind } from '../constants/event_kinds';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import type { Status } from '../../../../../common/api/detection_engine';
@@ -24,6 +25,9 @@ import { useInvestigateInTimeline } from '../../../../detections/components/aler
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { useRunAlertWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { useRunDocumentWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
+import type { HostIsolationAction } from '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
+import { useHostIsolationAction } from '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
+import { HostIsolationFlyout } from '../../../../common/components/endpoint/host_isolation/from_alerts/host_isolation_flyout';
 import { useExploreActions } from '../hooks/use_explore_actions';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
@@ -49,6 +53,11 @@ export interface TakeActionButtonProps {
    */
   nonEcsData: TimelineNonEcsData[];
   /**
+   * Field-browser shaped data for the document, used to drive endpoint response actions
+   * (e.g. host isolation) that still consume the legacy `TimelineEventsDetailsItem[]` shape.
+   */
+  detailsData: TimelineEventsDetailsItem[];
+  /**
    * Callback to refetch flyout data
    */
   refetchFlyoutData: () => Promise<void>;
@@ -71,6 +80,7 @@ export const TakeActionButton = memo(
     hit,
     ecsData,
     nonEcsData,
+    detailsData,
     refetchFlyoutData,
     onAlertUpdated,
     onShowNotes,
@@ -78,10 +88,17 @@ export const TakeActionButton = memo(
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const togglePopoverHandler = useCallback(() => setIsPopoverOpen((open) => !open), []);
     const closePopoverHandler = useCallback(() => setIsPopoverOpen(false), []);
+    const [isolateAction, setIsolateAction] = useState<HostIsolationAction | null>(null);
 
     const isInSecurityApp = useIsInSecurityApp();
 
-    const documentId = hit.raw._id as string;
+    const hostIsolationActionItems = useHostIsolationAction({
+      closePopover: closePopoverHandler,
+      detailsData,
+      onAddIsolationStatusClick: setIsolateAction,
+    });
+
+    const documentId = hit.raw._id ?? '';
     const isRemoteDocument = useMemo(
       () => isNonLocalIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
       [hit]
@@ -175,6 +192,7 @@ export const TakeActionButton = memo(
         ...(!isRemoteDocument && isAlert ? statusActionItems : []),
         ...(!isRemoteDocument && isAlert ? alertTagsItems : []),
         ...(!isRemoteDocument && isAlert ? alertAssigneesItems : []),
+        ...(!isRemoteDocument && isAlert ? hostIsolationActionItems : []),
         ...(!isRemoteDocument ? (isAlert ? runWorkflowMenuItem : documentWorkflowMenuItem) : []),
         ...(!isRemoteDocument && !isAlert ? noteItems : []),
         ...(isInSecurityApp ? investigateInTimelineActionItems : []),
@@ -186,6 +204,7 @@ export const TakeActionButton = memo(
         alertTagsItems,
         documentWorkflowMenuItem,
         exploreActionItems,
+        hostIsolationActionItems,
         investigateInTimelineActionItems,
         isAlert,
         isInSecurityApp,
@@ -230,17 +249,28 @@ export const TakeActionButton = memo(
     );
 
     return (
-      <EuiPopover
-        id="AlertTakeActionPanel"
-        button={takeActionButton}
-        isOpen={isPopoverOpen}
-        closePopover={closePopoverHandler}
-        panelPaddingSize="none"
-        anchorPosition="downLeft"
-        repositionOnScroll
-      >
-        <EuiContextMenu initialPanelId={0} panels={panels} data-test-subj="takeActionPanelMenu" />
-      </EuiPopover>
+      <>
+        {isolateAction !== null && (
+          <HostIsolationFlyout
+            hit={hit}
+            detailsData={detailsData}
+            isolateAction={isolateAction}
+            onClose={() => setIsolateAction(null)}
+          />
+        )}
+        <EuiPopover
+          aria-label={TAKE_ACTION}
+          id="AlertTakeActionPanel"
+          button={takeActionButton}
+          isOpen={isPopoverOpen}
+          closePopover={closePopoverHandler}
+          panelPaddingSize="none"
+          anchorPosition="downLeft"
+          repositionOnScroll
+        >
+          <EuiContextMenu initialPanelId={0} panels={panels} data-test-subj="takeActionPanelMenu" />
+        </EuiPopover>
+      </>
     );
   }
 );
