@@ -6,8 +6,8 @@ Step 1 — read the design, decide what to build, and produce a short plan **bef
 
 | Input | Action |
 |-------|--------|
-| **Figma URL** | Figma MCP: `get_design_context`, `get_screenshot`, `get_variable_defs`. No raw HTTP for figma.com. |
-| **Screenshot / image** | Layout, hierarchy, states, copy; request Figma if pixel fidelity matters. |
+| **Figma URL** | Verify Figma MCP is running, then call `get_design_context`, `get_code_connect_map`, `get_variable_defs`. Full MCP setup + workflow: [figma-to-eui.md](figma-to-eui.md). |
+| **Screenshot / image** | Use visual recognition table in [figma-to-eui.md](figma-to-eui.md) to map elements to EUI components. Request Figma URL if pixel fidelity matters. |
 | **Text / brief** | Screens, flows, constraints, open questions. |
 
 ## Agent flow
