@@ -11,7 +11,7 @@ import { Global, css } from '@emotion/react';
 import { EuiLoadingSpinner, EuiProgress, EuiIcon, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useIsLoading } from './chrome_hooks';
+import { useIsLoading, useIsLoadingImmediate } from './chrome_hooks';
 
 export interface LoadingIndicatorProps {
   showAsBar?: boolean;
@@ -20,8 +20,11 @@ export interface LoadingIndicatorProps {
 
 export const LoadingIndicator = ({ showAsBar = false, customLogo }: LoadingIndicatorProps) => {
   const isLoading = useIsLoading();
+  const isLoadingImmediate = useIsLoadingImmediate();
 
-  const loadingSubj = isLoading ? 'globalLoadingIndicator' : 'globalLoadingIndicator-hidden';
+  const loadingSubj = isLoadingImmediate
+    ? 'globalLoadingIndicator'
+    : 'globalLoadingIndicator-hidden';
   const testSubj = customLogo ? `${loadingSubj} customLogo` : loadingSubj;
 
   const ariaLabel = i18n.translate('core.ui.loadingIndicatorAriaLabel', {

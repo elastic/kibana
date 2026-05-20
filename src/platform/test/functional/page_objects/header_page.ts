@@ -54,7 +54,12 @@ export class HeaderPageObject extends FtrService {
   }
 
   public async waitUntilLoadingHasFinished() {
-    await this.awaitGlobalLoadingIndicatorHidden();
+    const loadingStarted = await this.testSubjects.exists('globalLoadingIndicator', {
+      timeout: 300,
+    });
+    if (loadingStarted) {
+      await this.awaitGlobalLoadingIndicatorHidden();
+    }
   }
 
   public async isGlobalLoadingIndicatorVisible() {
