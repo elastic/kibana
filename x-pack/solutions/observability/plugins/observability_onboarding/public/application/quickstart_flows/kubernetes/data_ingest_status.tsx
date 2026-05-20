@@ -65,7 +65,12 @@ export function DataIngestStatus({
   const hasPreExistingData = respectPreExistingData ? data?.hasPreExistingData ?? false : false;
 
   const needsMetrics = actionLinks.some((actionLink) => actionLink.requires === 'metrics');
-  const isReady = needsMetrics ? hasMetrics : hasData;
+  const needsLogs = actionLinks.some((actionLink) => actionLink.requires === 'logs');
+  // Polling must continue until every data type any action link requires has
+  // arrived — otherwise a metrics-first poll latches the gate while hasLogs is
+  // still false and the `requires: 'logs'` link is filtered out forever.
+  const isReady =
+    (!needsMetrics || hasMetrics) && (!needsLogs || hasLogs) && (hasMetrics || hasLogs);
 
   useEffect(() => {
     const pendingStatusList = [FETCH_STATUS.LOADING, FETCH_STATUS.NOT_INITIATED];
@@ -110,9 +115,6 @@ export function DataIngestStatus({
     onboardingId,
   ]);
 
-  // Notify parent when all required data types have arrived (not just any data).
-  // This drives the step status to 'complete' and must wait for metrics
-  // if any action link requires them.
   useEffect(() => {
     if ((isReady || hasPreExistingData) && !dataReceivedNotified) {
       onDataReceived?.();

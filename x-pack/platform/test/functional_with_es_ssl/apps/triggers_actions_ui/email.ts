@@ -133,6 +133,48 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await closeFlyout();
       });
 
+      it('shows invalid email error for addresses with leading hyphen in local part', async () => {
+        const connectorName = generateUniqueKey();
+        const created = await createEmailConnector(connectorName);
+        objectRemover.add(created.id, 'connector', 'actions');
+        await browser.refresh();
+
+        await openTestTabFor(connectorName);
+        await fillSubjectAndMessage();
+
+        await comboBox.setCustom('toEmailAddressInput', '-user@example.com');
+        await testSubjects.click('edit-connector-flyout-header');
+
+        await retry.try(async () => {
+          const errors = await find.allByCssSelector('.euiFormErrorText');
+          const messages = await Promise.all(errors.map((el) => el.getVisibleText()));
+          expect(messages.join(' ')).to.contain('is not valid');
+        });
+
+        await closeFlyout();
+      });
+
+      it('shows invalid email error for addresses with leading hyphen in domain', async () => {
+        const connectorName = generateUniqueKey();
+        const created = await createEmailConnector(connectorName);
+        objectRemover.add(created.id, 'connector', 'actions');
+        await browser.refresh();
+
+        await openTestTabFor(connectorName);
+        await fillSubjectAndMessage();
+
+        await comboBox.setCustom('toEmailAddressInput', 'user@-example.com');
+        await testSubjects.click('edit-connector-flyout-header');
+
+        await retry.try(async () => {
+          const errors = await find.allByCssSelector('.euiFormErrorText');
+          const messages = await Promise.all(errors.map((el) => el.getVisibleText()));
+          expect(messages.join(' ')).to.contain('is not valid');
+        });
+
+        await closeFlyout();
+      });
+
       it('clears the recipients-required error when only Cc has a valid recipient', async () => {
         const connectorName = generateUniqueKey();
         const created = await createEmailConnector(connectorName);

@@ -2,3 +2,8 @@ steps:
   - name: 'Update release branch config'
     key: update-release-branch
     command: .buildkite/scripts/steps/version_bump/update_release_branch.sh
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4

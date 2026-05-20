@@ -200,6 +200,22 @@
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations/playwright.config.ts",
       "tags": ["security", "migrations"],
       "ciLabels": ["evals:security-automatic-migrations"]
+    },
+    {
+      "id": "security-alerts-rag-regression",
+      "name": "Security Alerts RAG Regression",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag/playwright.config.ts",
+      "tags": ["security", "alerts-rag"],
+      "ciLabels": ["evals:security-alerts-rag-regression"]
+    },
+    {
+      "id": "security-esql-generation-regression",
+      "name": "Security ES|QL Generation Regression",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression/playwright.config.ts",
+      "tags": ["security", "esql-generation"],
+      "ciLabels": ["evals:security-esql-generation-regression"]
     }
   ]
 }

@@ -21,6 +21,7 @@ spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
         KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        SLACK_NOTIFICATIONS_SKIP_FOR_RETRIES: 'true'
         REPORT_FAILED_TESTS_TO_GITHUB: 'false'
         SCOUT_REPORTER_ENABLED: 'true'
         # [rspack-transition] Build the distribution and run all tests against the Rspack optimizer
@@ -41,10 +42,10 @@ spec:
         publish_commit_status: false
         build_tags: false
       schedules:
-        Every 3 hours (main):
-          message: Rspack e2e test (every 3 hours)
+        Every 12 hours (main):
+          message: Rspack e2e test (every 12 hours)
           branch: main
-          cronline: 0 */3 * * * America/New_York
+          cronline: 0 */12 * * * America/New_York
       teams:
         everyone:
           access_level: BUILD_AND_READ

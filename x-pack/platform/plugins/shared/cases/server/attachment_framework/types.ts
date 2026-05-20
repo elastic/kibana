@@ -6,6 +6,7 @@
  */
 
 import type { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
+import type { z } from '@kbn/zod/v4';
 import type { PersistableStateAttachmentPayload } from '../../common/types/domain';
 import type {
   UnifiedAttachmentPayload,
@@ -32,7 +33,8 @@ export interface ExternalReferenceAttachmentType {
   id: string;
   /**
    * A function to validate data stored with the attachment type. This function should throw an error
-   * if the data is not in the form it expects.
+   * if the data is not in the form it expects. For **unified reference** types registered on the
+   * unified registry, the full `UnifiedReferenceAttachmentPayload` is passed (not metadata alone).
    */
   schemaValidator?: (data: unknown) => void;
 }
@@ -49,11 +51,17 @@ export type UnifiedAttachmentState = Pick<UnifiedAttachmentPayload, 'type' | 'me
 
 export interface UnifiedAttachmentType
   extends ExternalReferenceAttachmentType,
-    Omit<PersistableState<UnifiedAttachmentState>, 'migrations'> {}
+    Omit<PersistableState<UnifiedAttachmentState>, 'migrations'> {
+  /** Full-payload zod schema. Preferred over `schemaValidator` for new registrations. */
+  schema?: z.ZodType;
+}
 
 export interface UnifiedAttachmentTypeSetup
   extends ExternalReferenceAttachmentType,
-    Omit<PersistableStateDefinition<UnifiedAttachmentState>, 'migrations'> {}
+    Omit<PersistableStateDefinition<UnifiedAttachmentState>, 'migrations'> {
+  /** Full-payload zod schema. Preferred over `schemaValidator` for new registrations. */
+  schema?: z.ZodType;
+}
 
 export interface AttachmentFramework {
   registerExternalReference: (

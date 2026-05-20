@@ -272,7 +272,6 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
 
       menuPanels.push({
         id: 'addToDashboardPanel',
-        size: 's',
         title: i18n.translate('xpack.ml.explorer.anomalies.addToDashboardLabel', {
           defaultMessage: 'Add to dashboard',
         }),
@@ -294,7 +293,6 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
 
       menuPanels.push({
         id: 'addToCasePanel',
-        size: 's',
         title: i18n.translate('xpack.ml.explorer.attachToCaseLabel', {
           defaultMessage: 'Add to case',
         }),
@@ -342,6 +340,9 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
             closePopover={setIsMenuOpen.bind(null, false)}
             panelPaddingSize="none"
             anchorPosition="downLeft"
+            aria-label={i18n.translate('xpack.ml.explorer.anomalies.actionsPopoverAriaLabel', {
+              defaultMessage: 'Anomaly actions menu',
+            })}
           >
             <EuiContextMenu panels={panels} initialPanelId={'panelActions'} />
           </EuiPopover>
