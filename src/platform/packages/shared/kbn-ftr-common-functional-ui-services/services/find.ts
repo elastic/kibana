@@ -25,7 +25,7 @@ export class FindService extends FtrService {
   private readonly retryOnStale = this.ctx.getService('retryOnStale');
 
   private readonly WAIT_FOR_EXISTS_TIME = this.config.get('timeouts.waitForExists');
-  private readonly POLLING_TIME = 500;
+  private readonly POLLING_TIME = 50;
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
   private readonly fixedHeaderHeight = this.config.get('layout.fixedHeaderHeight');
 
