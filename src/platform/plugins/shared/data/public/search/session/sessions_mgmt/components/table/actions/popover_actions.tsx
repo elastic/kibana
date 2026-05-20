@@ -111,6 +111,9 @@ export const PopoverActionsMenu = ({
       closePopover={closePopover}
       anchorPosition="downLeft"
       panelPaddingSize={'s'}
+      aria-label={i18n.translate('data.mgmt.searchSessions.popoverActions.ariaLabel', {
+        defaultMessage: 'Session actions',
+      })}
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
