@@ -86,6 +86,24 @@ describe('WorkflowEventLogger', () => {
     );
   });
 
+  it('suppresses and drops indexing errors during best-effort flushes', async () => {
+    const logsRepository = createLogsRepositoryMock();
+    const logger = loggerMock.create();
+    logsRepository.createLogs.mockRejectedValueOnce(new Error('shutdown'));
+    const workflowLogger = new WorkflowEventLogger(logsRepository, logger);
+
+    workflowLogger.logInfo('best effort');
+    await workflowLogger.flushEvents({ suppressErrors: true });
+    await workflowLogger.flushEvents();
+
+    expect(logsRepository.createLogs).toHaveBeenCalledTimes(1);
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Failed to index workflow events during best-effort flush',
+      expect.objectContaining({ eventsCount: 1, error: 'shutdown' })
+    );
+  });
+
   it('writes to console logger when enabled', () => {
     const logsRepository = createLogsRepositoryMock();
     const logger = loggerMock.create();

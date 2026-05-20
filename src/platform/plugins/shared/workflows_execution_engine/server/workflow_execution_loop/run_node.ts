@@ -19,6 +19,7 @@ import type { NodeImplementation } from '../step/node_implementation';
 import { isCancellableNode } from '../step/node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
+import { isWorkflowTaskShutdownSignal } from '../workflow_task_shutdown';
 
 /**
  * Invokes the cancellable node's `onCancel` hook when the step's abort signal fired.
@@ -158,7 +159,9 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
           }
         } finally {
           if (stepExecutionRuntime) {
-            await stepExecutionRuntime.flushEventLogs();
+            await stepExecutionRuntime.flushEventLogs({
+              suppressErrors: isWorkflowTaskShutdownSignal(params.taskAbortController.signal),
+            });
           }
         }
       })();

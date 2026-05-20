@@ -12,6 +12,7 @@ import type { Logger } from '@kbn/core/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import type {
   IWorkflowEventLogger,
+  WorkflowEventFlushOptions,
   WorkflowEventLoggerContext,
   WorkflowEventLoggerOptions,
 } from './types';
@@ -243,7 +244,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
     this.eventQueue.push(event);
   }
 
-  public async flushEvents(): Promise<void> {
+  public async flushEvents(options: WorkflowEventFlushOptions = {}): Promise<void> {
     if (this.eventQueue.length === 0) return;
 
     const events = [...this.eventQueue];
@@ -254,6 +255,16 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
 
       this.logger.debug(`Successfully indexed ${events.length} workflow events`);
     } catch (error) {
+      if (options.suppressErrors) {
+        // Best-effort flushes are used during shutdown; do not re-queue events
+        // because there may be no future flush in this process.
+        this.logger.debug(`Failed to index workflow events during best-effort flush`, {
+          eventsCount: events.length,
+          error: error instanceof Error ? error.message : String(error),
+        });
+        return;
+      }
+
       this.logger.error(`Failed to index workflow events: ${error.message}`, {
         eventsCount: events.length,
         error: error.stack,
