@@ -188,6 +188,7 @@ export const AlertEpisodesListPage = () => {
         userProfile: services.userProfile,
         docLinks: services.docLinks,
         expressions: services.expressions,
+        spaces: services.spaces,
         queryClient,
         getEpisodeDetailsHref: (id) =>
           services.http.basePath.prepend(paths.alertEpisodeDetails(id)),

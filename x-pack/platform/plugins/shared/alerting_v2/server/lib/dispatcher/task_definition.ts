@@ -8,9 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { AlertingTaskDefinition } from '../services/task_run_scope_service/create_task_runner';
 import { DispatcherTaskRunner } from './task_runner';
-
-export const DISPATCHER_TASK_TYPE = 'alerting_v2:dispatcher' as const;
-export const DISPATCHER_TASK_ID = 'alerting_v2:dispatcher:1.0.0' as const;
+import { DISPATCHER_TASK_TYPE } from './constants';
 
 /**
  * Task definition for dispatcher.
