@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { savedQuerySchemaV2, packSchemaV2, packSchemaV3 } from './schemas';
 
@@ -89,7 +90,7 @@ export const packSavedObjectModelVersion3: SavedObjectsModelVersion = {
   ],
   schemas: {
     forwardCompatibility: packSchemaV3.extends({}, { unknowns: 'ignore' }),
-    create: packSchemaV3,
+    create: schema.object({}, { unknowns: 'allow' }),
   },
 };
 
