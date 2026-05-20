@@ -87,6 +87,16 @@ const createMockEsClient = () => {
   return client;
 };
 
+interface EsqlQueryMock {
+  esql: {
+    query: jest.Mock;
+  };
+}
+
+const addEsqlQueryMock = (client: jest.Mocked<ElasticsearchClient>, query: jest.Mock): void => {
+  (client as unknown as EsqlQueryMock).esql = { query };
+};
+
 describe('StorageIndexAdapter - transport options forwarding', () => {
   let esClient: jest.Mocked<ElasticsearchClient>;
   let loggerMock: jest.Mocked<Logger>;
@@ -254,7 +264,7 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
       statusCode: 400,
       headers: {},
       warnings: [],
-      meta: {} as any,
+      meta: {} as TransportResult['meta'],
       body: {
         error: {
           type: 'illegal_argument_exception',
@@ -294,7 +304,7 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
       statusCode: 400,
       headers: {},
       warnings: [],
-      meta: {} as any,
+      meta: {} as TransportResult['meta'],
       body: {
         error: {
           type: 'illegal_argument_exception',
@@ -357,6 +367,7 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
 
 describe('StorageIndexAdapter - esql method', () => {
   let esClient: jest.Mocked<ElasticsearchClient>;
+  let esqlQuery: jest.Mock;
   let loggerMock: jest.Mocked<Logger>;
 
   const mockEsqlResponse = {
@@ -366,10 +377,8 @@ describe('StorageIndexAdapter - esql method', () => {
 
   beforeEach(() => {
     esClient = createMockEsClient();
-    // Add esql mock
-    (esClient as any).esql = {
-      query: jest.fn().mockResolvedValue(mockEsqlResponse),
-    };
+    esqlQuery = jest.fn().mockResolvedValue(mockEsqlResponse);
+    addEsqlQueryMock(esClient, esqlQuery);
     loggerMock = createLoggerMock();
   });
 
@@ -379,7 +388,7 @@ describe('StorageIndexAdapter - esql method', () => {
 
     const result = await client.esql({ query: 'FROM test_index | LIMIT 1' });
 
-    expect((esClient as any).esql.query).toHaveBeenCalledWith(
+    expect(esqlQuery).toHaveBeenCalledWith(
       expect.objectContaining({ query: 'FROM test_index | LIMIT 1', format: 'json' })
     );
     expect(result).toEqual(mockEsqlResponse);
@@ -392,7 +401,7 @@ describe('StorageIndexAdapter - esql method', () => {
     const params = [{ p: '*foo*' }];
     await client.esql({ query: 'FROM test_index | WHERE foo LIKE ?p | LIMIT 5', params });
 
-    expect((esClient as any).esql.query).toHaveBeenCalledWith(expect.objectContaining({ params }));
+    expect(esqlQuery).toHaveBeenCalledWith(expect.objectContaining({ params }));
   });
 
   it('returns empty response when index does not exist (404 path)', async () => {
@@ -400,10 +409,10 @@ describe('StorageIndexAdapter - esql method', () => {
       statusCode: 404,
       headers: {},
       warnings: [],
-      meta: {} as any,
+      meta: {} as TransportResult['meta'],
       body: { error: { type: 'index_not_found_exception', reason: 'no such index' } },
     } as TransportResult);
-    (esClient as any).esql.query.mockRejectedValueOnce(notFoundError);
+    esqlQuery.mockRejectedValueOnce(notFoundError);
 
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
@@ -418,7 +427,7 @@ describe('StorageIndexAdapter - esql method', () => {
       statusCode: 400,
       headers: {},
       warnings: [],
-      meta: {} as any,
+      meta: {} as TransportResult['meta'],
       body: {
         error: {
           type: 'verification_exception',
@@ -426,7 +435,7 @@ describe('StorageIndexAdapter - esql method', () => {
         },
       },
     } as TransportResult);
-    (esClient as any).esql.query.mockRejectedValueOnce(unknownIndexError);
+    esqlQuery.mockRejectedValueOnce(unknownIndexError);
 
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
@@ -436,15 +445,26 @@ describe('StorageIndexAdapter - esql method', () => {
     expect(result).toEqual({ columns: [], values: [] });
   });
 
-  it('rethrows errors that are not index-not-found errors', async () => {
-    const unexpectedError = new Error('Unexpected query error');
-    (esClient as any).esql.query.mockRejectedValueOnce(unexpectedError);
+  it('rethrows ES|QL verification_exception errors that are not Unknown index', async () => {
+    const verificationError = new errors.ResponseError({
+      statusCode: 400,
+      headers: {},
+      warnings: [],
+      meta: {} as TransportResult['meta'],
+      body: {
+        error: {
+          type: 'verification_exception',
+          reason: 'Unknown column [foo]',
+        },
+      },
+    } as TransportResult);
+    esqlQuery.mockRejectedValueOnce(verificationError);
 
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
 
     await expect(client.esql({ query: 'FROM test_index | LIMIT 1' })).rejects.toThrow(
-      'Unexpected query error'
+      'verification_exception'
     );
   });
 
@@ -458,7 +478,7 @@ describe('StorageIndexAdapter - esql method', () => {
       ],
       values: [[rawSource, 'bar']],
     };
-    (esClient as any).esql.query.mockResolvedValueOnce(esqlWithSourceResponse);
+    esqlQuery.mockResolvedValueOnce(esqlWithSourceResponse);
 
     const migrateSource = jest.fn().mockReturnValue(migratedSource);
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
@@ -478,7 +498,7 @@ describe('StorageIndexAdapter - esql method', () => {
       columns: [{ name: '_source', type: 'unsupported' }],
       values: [[rawSource]],
     };
-    (esClient as any).esql.query.mockResolvedValueOnce(esqlWithSourceResponse);
+    esqlQuery.mockResolvedValueOnce(esqlWithSourceResponse);
 
     const migrateSource = jest.fn().mockReturnValue({ foo: 'bar', version: 1 });
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
@@ -504,7 +524,7 @@ describe('StorageIndexAdapter - esql method', () => {
     };
     await client.esql({ query: 'FROM test_index | LIMIT 5', filter });
 
-    expect((esClient as any).esql.query).toHaveBeenCalledWith(expect.objectContaining({ filter }));
+    expect(esqlQuery).toHaveBeenCalledWith(expect.objectContaining({ filter }));
   });
 
   it('forwards transport options to esClient.esql.query', async () => {
@@ -517,7 +537,7 @@ describe('StorageIndexAdapter - esql method', () => {
     };
     await client.esql({ query: 'FROM test_index | LIMIT 1' }, transportOptions);
 
-    expect((esClient as any).esql.query).toHaveBeenCalledWith(
+    expect(esqlQuery).toHaveBeenCalledWith(
       expect.objectContaining({ query: 'FROM test_index | LIMIT 1' }),
       transportOptions
     );
@@ -546,11 +566,11 @@ describe('StorageIndexAdapter - esql method', () => {
     // so esql.query must not have been issued yet.
     await Promise.resolve();
     await Promise.resolve();
-    expect((esClient as any).esql.query).not.toHaveBeenCalled();
+    expect(esqlQuery).not.toHaveBeenCalled();
 
     releaseGetAlias();
     await esqlPromise;
 
-    expect((esClient as any).esql.query).toHaveBeenCalledTimes(1);
+    expect(esqlQuery).toHaveBeenCalledTimes(1);
   });
 });
