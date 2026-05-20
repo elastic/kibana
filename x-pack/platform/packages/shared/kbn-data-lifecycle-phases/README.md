@@ -47,6 +47,21 @@ const tabs = [
 | `size` | `number` | no | Flyout width in pixels (default: `400`) |
 | `children` | `(selectedTabId: TId) => ReactNode` | yes | Render prop receiving the active tab ID |
 
+### `DefaultSnapshotRepositoryRequiredModal`
+
+Modal shown when a user tries to add a frozen phase but no snapshot repositories are available. The primary action is a link to create a default repository in Snapshot and Restore (`target="_blank"`). Pass `createDefaultRepositoryUrl` from `application.getUrlForApp('management', { path: '/data/snapshot_restore/add_repository' })` (or equivalent). The split-button secondary action calls `onRefresh` to re-fetch repositories; keep `aria-label` on the icon action via the built-in i18n string.
+
+```typescript
+import { DefaultSnapshotRepositoryRequiredModal } from '@kbn/data-lifecycle-phases';
+
+<DefaultSnapshotRepositoryRequiredModal
+  createDefaultRepositoryUrl={url}
+  onCancel={close}
+  onRefresh={refetchRepositories}
+  isRefreshing={isLoading}
+/>
+```
+
 ### `InspectIlmPolicyFlyout`
 
 A stateless flyout for inspecting an ILM policy. Displays a **Summary** tab (per-phase accordions with action details) and a **JSON** tab (copyable `PUT _ilm/policy/…` request).

@@ -11,3 +11,4 @@ export * from './src/flyout_with_tabs';
 export * from './src/retention_selector';
 export * from './src/edit_data_lifecycle_flyout';
 export * from './src/flyout_footer_with_retention_warning';
+export * from './src/default_snapshot_repository_required_modal';
