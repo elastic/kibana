@@ -6,11 +6,16 @@
  */
 
 import expect from '@kbn/expect';
-import { emptyAssets } from '@kbn/streams-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
-import { disableStreams, enableStreams, fetchDocument, indexDocument } from './helpers/requests';
+import {
+  disableStreams,
+  enableStreams,
+  fetchDocument,
+  indexDocument,
+  putIngest,
+} from './helpers/requests';
 
 // OTEL metrics data streams do NOT have a default_pipeline set on their write indices
 // out-of-the-box (unlike logs). Streams must explicitly call updateDefaultIngestPipeline
@@ -51,78 +56,50 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       for (const stream of [stream1, stream2]) {
         await esClient.indices.deleteDataStream({ name: stream }).catch(() => {});
       }
+      // Remove the Streams-managed ingest pipelines so subsequent runs start clean.
+      // The template-level pipeline persists across disableStreams and would cause
+      // the test to see processors already present, bypassing the update_default_ingest_pipeline
+      // code path that this test exercises.
+      await esClient.ingest
+        .deletePipeline({ id: 'metrics-otel@template-pipeline' })
+        .catch(() => {});
+      await esClient.ingest.deletePipeline({ id: `${stream1}@stream.processing` }).catch(() => {});
+      await esClient.ingest.deletePipeline({ id: `${stream2}@stream.processing` }).catch(() => {});
       await disableStreams(apiClient);
     });
 
     it('applies processing to the second OTEL metrics stream when the template pipeline already exists', async () => {
+      const baseIngest = {
+        lifecycle: { inherit: {} },
+        settings: {},
+        classic: {},
+        failure_store: { inherit: {} },
+      };
+
       // --- Step 1: add processing to the FIRST stream ---
-      // This creates the shared template-level pipeline (e.g. metrics-otel@template-pipeline)
+      // This creates the shared template-level pipeline (metrics-otel@template-pipeline)
       // and sets index.default_pipeline on stream1's write index.
-      await apiClient
-        .fetch('PUT /api/streams/{name} 2023-10-31', {
-          params: {
-            path: { name: stream1 },
-            body: {
-              ...emptyAssets,
-              stream: {
-                type: 'classic',
-                description: '',
-                ingest: {
-                  lifecycle: { inherit: {} },
-                  settings: {},
-                  processing: {
-                    steps: [
-                      {
-                        action: 'set',
-                        where: { always: {} },
-                        to: 'attributes.stream_origin',
-                        value: 'stream1',
-                      },
-                    ],
-                  },
-                  classic: {},
-                  failure_store: { inherit: {} },
-                },
-              },
-            },
+      await putIngest(apiClient, stream1, {
+        ingest: {
+          ...baseIngest,
+          processing: {
+            steps: [{ action: 'set', to: 'attributes.stream_origin', value: 'stream1' }],
           },
-        })
-        .expect(200);
+        },
+      });
 
       // --- Step 2: add processing to the SECOND stream ---
       // The template-level pipeline now already exists (streams-managed). Before the fix,
       // updateExistingStreamsManagedPipeline would NOT emit update_default_ingest_pipeline
       // for stream2's write index, so the set processor was silently skipped.
-      await apiClient
-        .fetch('PUT /api/streams/{name} 2023-10-31', {
-          params: {
-            path: { name: stream2 },
-            body: {
-              ...emptyAssets,
-              stream: {
-                type: 'classic',
-                description: '',
-                ingest: {
-                  lifecycle: { inherit: {} },
-                  settings: {},
-                  processing: {
-                    steps: [
-                      {
-                        action: 'set',
-                        where: { always: {} },
-                        to: 'attributes.stream_origin',
-                        value: 'stream2',
-                      },
-                    ],
-                  },
-                  classic: {},
-                  failure_store: { inherit: {} },
-                },
-              },
-            },
+      await putIngest(apiClient, stream2, {
+        ingest: {
+          ...baseIngest,
+          processing: {
+            steps: [{ action: 'set', to: 'attributes.stream_origin', value: 'stream2' }],
           },
-        })
-        .expect(200);
+        },
+      });
 
       // --- Step 3: index a doc into the SECOND stream and verify the processor ran ---
       const response = await indexDocument(esClient, stream2, {
@@ -131,10 +108,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       const hit = await fetchDocument(esClient, stream2, response._id);
-      const source = hit._source as Record<string, unknown>;
+      const source = hit._source as Record<string, Record<string, unknown>>;
 
-      // If the write index never had default_pipeline set, the field will be absent
-      expect(source['attributes.stream_origin']).to.eql('stream2');
+      // If the write index never had default_pipeline set, the field will be absent.
+      // The `set` processor writes into the `attributes` object (OTEL custom namespace).
+      expect(source.attributes?.stream_origin).to.eql('stream2');
     });
   });
 }
