@@ -980,9 +980,11 @@ Import `createPollServerStepDefinition` from `@kbn/workflows-extensions/server`.
 
 - **`{ output }`** — success; must match `outputSchema`.
 - **`{ error }`** — failure; step fails with that error.
-- **`{ state?, nextPollDelayMs? }`** — continue in `WAITING`. Omit `state` to keep prior author state; pass `state: null` to clear it. If `nextPollDelayMs` is a positive number, the **next** wake-up uses that delay from now; otherwise spacing follows `poll.policy`.
+- **`PollContinueResult`** — continue in `WAITING` (schedule another wake-up). Any of:
+  - **`undefined`** — continue polling; keep the previously persisted author state (same as returning `{}` without `output` / `error`).
+  - **`{ state?, nextPollDelayMs? }`** — continue and optionally update state or override the next delay. Omit `state` to keep prior author state. If `nextPollDelayMs` is a positive number, the **next** wake-up uses that delay from now; otherwise spacing follows `poll.policy`.
 
-Optional **`stateSchema`**: a `z.object({ ... })` for compile-time typing of `context.state` in `poll.handler` and of `state` on continuations. The engine persists author state under an internal `__durableStepState` key — use only `{ state }` / `{ state: null }` on `run` / `poll` results; do not read or write that key from workflow YAML.
+Optional **`stateSchema`**: a `z.object({ ... })` describing author state passed between `run` and `poll` invocations. It types `context.state` in `poll.handler` and the `state` field on `{ state }` continuations from `run` / `poll`.
 
 **`poll.handler` context** (`PollContext`): extends `StepHandlerContext` with:
 

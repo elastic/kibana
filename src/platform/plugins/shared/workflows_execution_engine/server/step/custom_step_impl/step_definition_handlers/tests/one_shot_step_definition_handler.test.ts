@@ -1,0 +1,123 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { createHandlerTestMocks, defaultTestNode, type TestNode } from './test_helpers';
+import type { CustomStepDefinitionHandler } from '../../types';
+import { OneShotStepDefinitionHandler } from '../one_shot_step_definition_handler';
+
+const buildHandler = (
+  stepDefinition: { handler: jest.Mock; onCancel?: jest.Mock },
+  mocks = createHandlerTestMocks(),
+  node: TestNode = defaultTestNode
+) =>
+  new OneShotStepDefinitionHandler(
+    stepDefinition as any,
+    node as any,
+    mocks.stepExecutionRuntime as any,
+    mocks.workflowLogger as any
+  );
+
+describe('OneShotStepDefinitionHandler', () => {
+  describe('run', () => {
+    it('invokes the step handler with a context built from input, rawInput, and config', async () => {
+      const handler = jest.fn().mockResolvedValue({ output: { result: 42 } });
+      const stepHandler = buildHandler({ handler });
+
+      const result = await stepHandler.run(
+        { key: 'value' },
+        { key: 'value' },
+        defaultTestNode.configuration
+      );
+
+      expect(result.output).toEqual({ result: 42 });
+      expect(result.error).toBeUndefined();
+      expect(handler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          input: { key: 'value' },
+          rawInput: { key: 'value' },
+          config: defaultTestNode.configuration,
+          stepId: 'custom-step',
+          stepType: 'my-custom-type',
+        })
+      );
+    });
+
+    it('serializes handler errors into the run result', async () => {
+      const handler = jest
+        .fn()
+        .mockResolvedValue({ output: undefined, error: new Error('handler error') });
+      const stepHandler = buildHandler({ handler });
+
+      const result = await stepHandler.run({}, {}, defaultTestNode.configuration);
+
+      expect(result.error).toBeDefined();
+      expect(result.output).toBeUndefined();
+    });
+
+    it('throws when the step definition has no handler', async () => {
+      const stepHandler = buildHandler({ handler: undefined as unknown as jest.Mock });
+
+      await expect(stepHandler.run({}, {}, defaultTestNode.configuration)).rejects.toThrow(
+        /has no "handler"/
+      );
+    });
+  });
+
+  describe('onCancel', () => {
+    const asHandler = (h: OneShotStepDefinitionHandler): CustomStepDefinitionHandler => h;
+
+    it('does nothing when the step definition has no onCancel', async () => {
+      const handler = jest.fn().mockResolvedValue({ output: {} });
+      const stepHandler = buildHandler({ handler });
+
+      await asHandler(stepHandler).onCancel({}, {}, defaultTestNode.configuration);
+    });
+
+    it('invokes onCancel with context from the last run', async () => {
+      const handler = jest.fn().mockResolvedValue({ output: { ok: true } });
+      const onCancel = jest.fn();
+      const stepHandler = buildHandler({ handler, onCancel });
+
+      await stepHandler.run({ ran: true }, { ran: true }, defaultTestNode.configuration);
+      await asHandler(stepHandler).onCancel({}, {}, defaultTestNode.configuration);
+
+      expect(onCancel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          input: { ran: true },
+          rawInput: { ran: true },
+          config: defaultTestNode.configuration,
+        })
+      );
+    });
+
+    it('falls back to node configuration when onCancel runs before run', async () => {
+      const onCancel = jest.fn();
+      const node: TestNode = {
+        stepId: 'custom-step',
+        stepType: 'my-custom-type',
+        configuration: { with: { fromNode: true }, 'max-step-size': undefined },
+      };
+      const stepHandler = buildHandler(
+        { handler: jest.fn(), onCancel },
+        createHandlerTestMocks(),
+        node
+      );
+
+      await asHandler(stepHandler).onCancel({}, {}, node.configuration);
+
+      expect(onCancel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          input: {},
+          rawInput: { fromNode: true },
+          config: node.configuration,
+        })
+      );
+    });
+  });
+});

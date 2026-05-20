@@ -55,22 +55,23 @@ export interface PhaseDoneResult<Output extends z.ZodType = z.ZodType> {
  * Poll-phase continuation: the step is not done yet. The engine schedules the
  * next wake-up from {@link PollPolicy} unless a positive `nextPollDelayMs` is
  * returned (that value is used from **now** for the next wake-up only).
- * The handler may optionally update the persisted author state.
+ *
+ * Returning `undefined` (or an object without `output` / `error`) continues polling
+ * and keeps the previously persisted author state unless `state` is provided.
  */
-export interface PollContinueResult<State extends z.ZodObject = z.ZodObject> {
-  output?: never;
-  /**
-   * Optional updated author state. Omit to keep the previously persisted state.
-   * Pass `null` to explicitly clear it.
-   */
-  state?: z.infer<State> | null;
-  /**
-   * Optional delay (ms) until the next poll. When omitted or non-positive, the
-   * engine uses {@link PollPolicy} for the next wake-up.
-   */
-  nextPollDelayMs?: number;
-  error?: never;
-}
+export type PollContinueResult<State extends z.ZodObject = z.ZodObject> =
+  | {
+      output?: never;
+      /** Optional updated author state. Omit to keep the previously persisted state. */
+      state?: z.infer<State>;
+      /**
+       * Optional delay (ms) until the next poll. When omitted or non-positive, the
+       * engine uses {@link PollPolicy} for the next wake-up.
+       */
+      nextPollDelayMs?: number;
+      error?: never;
+    }
+  | undefined;
 
 /** Failure outcome — same shape as the existing single-handler result. */
 export interface PhaseErrorResult {
@@ -98,8 +99,8 @@ export type RunWithHandoffHandler<
 
 /**
  * Handler for a `poll` phase. Receives the persisted author `state` alongside
- * the regular step handler context. Returns either the final output or
- * `{ state? }` to continue polling.
+ * the regular step handler context. Returns the final output, a continuation
+ * ({@link PollContinueResult}), or `undefined` to continue with unchanged state.
  */
 export type PollHandler<
   Input extends z.ZodType = z.ZodType,
@@ -195,6 +196,14 @@ export interface PollLifecycle<
   ceilings?: PollCeilings;
 }
 
+export interface CommonServerStepDefinition<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject
+> extends CommonStepDefinition<Input, Output, Config> {
+  onCancel?: OnCancelHandler<Input, Config>;
+}
+
 // -----------------------------------------------------------------------------
 // Step definition union
 // -----------------------------------------------------------------------------
@@ -235,25 +244,19 @@ export interface ServerStepDefinition<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
   Config extends z.ZodObject = z.ZodObject
-> extends CommonStepDefinition<Input, Output, Config> {
+> extends CommonServerStepDefinition<Input, Output, Config> {
   /**
    * The handler function that executes this step's logic.
    * Input and output types are automatically inferred from the schemas.
    */
   handler: StepHandler<Input, Output, Config>;
-
-  /**
-   * Optional cancellation cleanup handler.
-   *
-   * Called after the step's abort signal fires and `run()` completes, giving the
-   * step a guaranteed cleanup entry point (e.g. cancelling spawned child operations).
-   * Only invoked when the workflow is being cancelled — normal completions skip it.
-   *
-   * Implementations must be idempotent. Errors thrown here are logged but do not
-   * disrupt the cancellation flow.
-   */
-  onCancel?: OnCancelHandler<Input, Config>;
 }
+
+export type PollOnCancelHandler<
+  Input extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject,
+  State extends z.ZodObject = z.ZodObject
+> = (context: PollContext<Input, Config, State>) => Promise<void> | void;
 
 /**
  * Full server definition for **`run` + `poll`**. Same fields as the corresponding
@@ -264,10 +267,11 @@ export type RunPlusPollStepDefinition<
   Output extends z.ZodType = z.ZodType,
   Config extends z.ZodObject = z.ZodObject,
   State extends z.ZodObject = z.ZodObject
-> = Omit<CommonStepDefinition<Input, Output, Config>, 'handler'> & {
+> = Omit<CommonServerStepDefinition<Input, Output, Config>, 'handler'> & {
   run: RunWithHandoffHandler<Input, Output, Config, State>;
   poll: PollLifecycle<Input, Output, Config, State>;
   stateSchema?: State;
+  onCancel?: PollOnCancelHandler<Input, Config, State>;
 };
 
 /**
@@ -279,9 +283,10 @@ export type PollOnlyStepDefinition<
   Output extends z.ZodType = z.ZodType,
   Config extends z.ZodObject = z.ZodObject,
   State extends z.ZodObject = z.ZodObject
-> = Omit<CommonStepDefinition<Input, Output, Config>, 'handler'> & {
+> = Omit<CommonServerStepDefinition<Input, Output, Config>, 'handler'> & {
   poll: PollLifecycle<Input, Output, Config, State>;
   stateSchema?: State;
+  onCancel?: PollOnCancelHandler<Input, Config, State>;
 };
 
 export type PollStepDefinition<

@@ -15,12 +15,14 @@ import type {
   PollCeilings,
   PollHandlerContext,
   PollStepDefinition,
+  StepHandlerContext,
 } from '@kbn/workflows-extensions/server';
-import { createHandlerContext } from './step_context_handler';
-import { applyBackoffJitter } from '../../utils/backoff_jitter/backoff_jitter';
-import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
-import type { IWorkflowEventLogger } from '../../workflow_event_logger';
-import type { RunStepResult } from '../node_implementation';
+import { createBaseHandlerContext } from './create_base_handler_context';
+import { applyBackoffJitter } from '../../../utils/backoff_jitter/backoff_jitter';
+import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
+import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
+import type { RunStepResult } from '../../node_implementation';
+import type { CustomStepDefinitionHandler } from '../types';
 
 const bookkeepingKey = '__durableStepState';
 
@@ -39,17 +41,12 @@ interface DurableStepState {
   startedAt?: string;
 }
 
-export interface StepHandler {
-  onCancel(): Promise<void>;
-  run(input: unknown, rawInput: unknown, config: Record<string, unknown>): Promise<RunStepResult>;
-}
-
 type PolicyCalculationResult =
   | { outcome: 'success'; nextPollAt: string }
   | { outcome: 'maxAttemptReached' }
   | { outcome: 'maxWaitMsExceeded' };
 
-export class PollPolicyStepHandler implements StepHandler {
+export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
   constructor(
     private readonly stepDefinition: PollStepDefinition,
     private readonly node: AtomicGraphNode,
@@ -57,8 +54,15 @@ export class PollPolicyStepHandler implements StepHandler {
     private readonly workflowLogger: IWorkflowEventLogger
   ) {}
 
-  public async onCancel(): Promise<void> {
+  public async onCancel(
+    input: unknown,
+    rawInput: unknown,
+    config: Record<string, unknown>
+  ): Promise<void> {
     // TBD: Implement cancellation cleanup for polling steps
+    if ('onCancel' in this.stepDefinition && this.stepDefinition.onCancel) {
+      await this.stepDefinition.onCancel(this.createPollHandlerContext(input, rawInput, config));
+    }
   }
 
   public async run(
@@ -89,14 +93,7 @@ export class PollPolicyStepHandler implements StepHandler {
     }
 
     const result = await this.stepDefinition.run(
-      createHandlerContext(
-        input,
-        rawInput,
-        config,
-        this.node,
-        this.stepExecutionRuntime,
-        this.workflowLogger
-      )
+      this.createBaseHandlerContext(input, rawInput, config)
     );
 
     this.setDurableStepState({
@@ -117,13 +114,7 @@ export class PollPolicyStepHandler implements StepHandler {
   ): Promise<DurablePhaseResult> {
     const stepState = this.getDurableStepState();
     const pollResult = await this.stepDefinition.poll.handler(
-      this.createPollHandlerContext(
-        input,
-        rawInput,
-        config,
-        stepState.pollState?.attempt ?? 0,
-        stepState.customState
-      )
+      this.createPollHandlerContext(input, rawInput, config)
     );
 
     this.setDurableStepState({
@@ -147,7 +138,7 @@ export class PollPolicyStepHandler implements StepHandler {
     let nextPollAtOverride: Date | undefined;
     let customState = stepState.customState;
 
-    if (pollResult.output || pollResult.error) {
+    if (pollResult?.output || pollResult?.error) {
       return {
         input,
         output: pollResult.output,
@@ -157,16 +148,12 @@ export class PollPolicyStepHandler implements StepHandler {
       };
     }
 
-    if ('nextPollDelayMs' in pollResult && pollResult?.nextPollDelayMs) {
+    if (pollResult && 'nextPollDelayMs' in pollResult && pollResult.nextPollDelayMs) {
       nextPollAtOverride = new Date(Date.now() + pollResult.nextPollDelayMs);
     }
 
-    if ('state' in pollResult && pollResult.state !== undefined) {
-      if (pollResult.state === null) {
-        customState = undefined;
-      } else {
-        customState = pollResult.state as Record<string, unknown>;
-      }
+    if (pollResult && 'state' in pollResult && pollResult.state !== undefined) {
+      customState = pollResult.state as Record<string, unknown>;
     }
 
     let nextPollAt: string | undefined;
@@ -229,24 +216,31 @@ export class PollPolicyStepHandler implements StepHandler {
     });
   }
 
+  private createBaseHandlerContext(
+    input: unknown,
+    rawInput: unknown,
+    config: Record<string, unknown>
+  ): StepHandlerContext {
+    return createBaseHandlerContext(
+      input,
+      rawInput,
+      config,
+      this.node,
+      this.stepExecutionRuntime,
+      this.workflowLogger
+    );
+  }
+
   private createPollHandlerContext(
     input: unknown,
     rawInput: unknown,
-    config: Record<string, unknown>,
-    attempt: number,
-    state: Record<string, unknown> | undefined
+    config: Record<string, unknown>
   ): PollHandlerContext {
+    const stepState = this.getDurableStepState();
     return {
-      ...createHandlerContext(
-        input,
-        rawInput,
-        config,
-        this.node,
-        this.stepExecutionRuntime,
-        this.workflowLogger
-      ),
-      state: state as PollHandlerContext['state'],
-      attempt,
+      ...this.createBaseHandlerContext(input, rawInput, config),
+      state: stepState.customState,
+      attempt: stepState.pollState?.attempt ?? 0,
     } as PollHandlerContext;
   }
 

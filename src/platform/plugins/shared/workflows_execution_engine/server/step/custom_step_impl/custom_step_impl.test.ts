@@ -7,12 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CustomStepImpl, POLL_AUTHOR_STATE_KEY, POLL_BOOKKEEPING_KEY } from '.';
+import { CustomStepImpl } from './custom_step_impl';
+import { OneShotStepDefinitionHandler, PollPolicyStepHandler } from './step_definition_handlers';
 
-const createMocks = (initialPersistedState?: Record<string, unknown>) => {
-  const persistedState: { value: Record<string, unknown> | undefined } = {
-    value: initialPersistedState,
-  };
+const mockOneShotRun = jest.fn();
+const mockOneShotOnCancel = jest.fn();
+const mockPollRun = jest.fn();
+const mockPollOnCancel = jest.fn();
+
+jest.mock('./step_definition_handlers', () => ({
+  OneShotStepDefinitionHandler: jest.fn().mockImplementation(() => ({
+    run: mockOneShotRun,
+    onCancel: mockOneShotOnCancel,
+  })),
+  PollPolicyStepHandler: jest.fn().mockImplementation(() => ({
+    run: mockPollRun,
+    onCancel: mockPollOnCancel,
+  })),
+}));
+
+const MockedOneShotStepDefinitionHandler = OneShotStepDefinitionHandler as jest.MockedClass<
+  typeof OneShotStepDefinitionHandler
+>;
+const MockedPollPolicyStepHandler = PollPolicyStepHandler as jest.MockedClass<
+  typeof PollPolicyStepHandler
+>;
+
+const createMocks = () => {
   const stepExecutionRuntime = {
     contextManager: {
       renderValueAccordingToContext: jest.fn((v: unknown) => v),
@@ -29,465 +50,222 @@ const createMocks = (initialPersistedState?: Record<string, unknown>) => {
     setInput: jest.fn(),
     stepExecutionId: 'step-exec-1',
     workflowExecution: { workflowDefinition: {} },
-    getCurrentStepState: jest.fn(() => persistedState.value),
-    enterWaitUntil: jest.fn((resumeDate: Date, additionalState?: Record<string, unknown>) => {
-      const next: Record<string, unknown> = {
-        ...(persistedState.value ?? {}),
-        ...(additionalState ?? {}),
-        resumeAt: resumeDate.toISOString(),
-      };
-      for (const key of Object.keys(next)) {
-        if (next[key] === undefined) {
-          delete next[key];
-        }
-      }
-      persistedState.value = next;
-    }),
-  };
-
-  const connectorExecutor = {};
-
-  const workflowRuntime = {
-    navigateToNextNode: jest.fn(),
-  };
-
-  const workflowLogger = {
-    logInfo: jest.fn(),
-    logError: jest.fn(),
-    logDebug: jest.fn(),
-    logWarn: jest.fn(),
+    getCurrentStepState: jest.fn(),
+    setCurrentStepState: jest.fn(),
+    enterWaitUntil: jest.fn(),
   };
 
   return {
     stepExecutionRuntime,
-    connectorExecutor,
-    workflowRuntime,
-    workflowLogger,
-    persistedState,
+    connectorExecutor: {},
+    workflowRuntime: { navigateToNextNode: jest.fn() },
+    workflowLogger: {
+      logInfo: jest.fn(),
+      logError: jest.fn(),
+      logDebug: jest.fn(),
+      logWarn: jest.fn(),
+    },
   };
 };
 
+interface TestNode {
+  stepId: string;
+  stepType: string;
+  configuration: {
+    with?: Record<string, unknown>;
+    'max-step-size'?: undefined;
+  };
+}
+
+const defaultNode: TestNode = {
+  stepId: 'custom-step',
+  stepType: 'my-custom-type',
+  configuration: { with: { key: 'value' }, 'max-step-size': undefined },
+};
+
+const buildImpl = (
+  stepDefinition: Record<string, unknown>,
+  mocks = createMocks(),
+  node: TestNode = defaultNode
+) =>
+  new CustomStepImpl(
+    node as any,
+    stepDefinition as any,
+    mocks.stepExecutionRuntime as any,
+    mocks.connectorExecutor as any,
+    mocks.workflowRuntime as any,
+    mocks.workflowLogger as any
+  );
+
 describe('CustomStepImpl', () => {
-  it('executes the handler and returns output', async () => {
-    const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
-      createMocks();
-
-    const handler = jest.fn().mockResolvedValue({ output: { result: 42 } });
-    const stepDefinition = { handler };
-
-    const node = {
-      stepId: 'custom-step',
-      stepType: 'my-custom-type',
-      configuration: { with: { key: 'value' }, 'max-step-size': undefined },
-    };
-
-    const impl = new CustomStepImpl(
-      node as any,
-      stepDefinition as any,
-      stepExecutionRuntime as any,
-      connectorExecutor as any,
-      workflowRuntime as any,
-      workflowLogger as any
-    );
-
-    const result = await (impl as any)._run({ key: 'value' });
-    expect(result.output).toEqual({ result: 42 });
-    expect(result.error).toBeUndefined();
-    expect(handler).toHaveBeenCalledWith(
-      expect.objectContaining({
-        input: { key: 'value' },
-        stepId: 'custom-step',
-        stepType: 'my-custom-type',
-      })
-    );
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockOneShotRun.mockReset();
+    mockOneShotOnCancel.mockReset();
+    mockPollRun.mockReset();
+    mockPollOnCancel.mockReset();
   });
 
-  it('returns error when handler returns an error', async () => {
-    const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
-      createMocks();
+  describe('resolveStepHandler', () => {
+    it('constructs OneShotStepDefinitionHandler for handler definitions', () => {
+      const mocks = createMocks();
+      const stepDefinition = { handler: jest.fn() };
 
-    const handler = jest
-      .fn()
-      .mockResolvedValue({ output: undefined, error: new Error('handler error') });
-    const stepDefinition = { handler };
+      buildImpl(stepDefinition, mocks);
 
-    const node = {
-      stepId: 'custom-step',
-      stepType: 'my-custom-type',
-      configuration: { with: {}, 'max-step-size': undefined },
-    };
-
-    const impl = new CustomStepImpl(
-      node as any,
-      stepDefinition as any,
-      stepExecutionRuntime as any,
-      connectorExecutor as any,
-      workflowRuntime as any,
-      workflowLogger as any
-    );
-
-    const result = await (impl as any)._run({});
-    expect(result.error).toBeDefined();
-  });
-
-  it('catches handler exceptions and returns them as errors', async () => {
-    const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
-      createMocks();
-
-    const handler = jest.fn().mockRejectedValue(new Error('handler threw'));
-    const stepDefinition = { handler };
-
-    const node = {
-      stepId: 'custom-step',
-      stepType: 'my-custom-type',
-      configuration: { with: {}, 'max-step-size': undefined },
-    };
-
-    const impl = new CustomStepImpl(
-      node as any,
-      stepDefinition as any,
-      stepExecutionRuntime as any,
-      connectorExecutor as any,
-      workflowRuntime as any,
-      workflowLogger as any
-    );
-
-    const result = await (impl as any)._run({});
-    expect(result.error).toBeDefined();
-    expect(result.output).toBeUndefined();
-  });
-
-  it('registers onCancel when step definition provides it', () => {
-    const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
-      createMocks();
-
-    const onCancel = jest.fn();
-    const handler = jest.fn();
-    const stepDefinition = { handler, onCancel };
-
-    const node = {
-      stepId: 'custom-step',
-      stepType: 'my-custom-type',
-      configuration: { with: {}, 'max-step-size': undefined },
-    };
-
-    const impl = new CustomStepImpl(
-      node as any,
-      stepDefinition as any,
-      stepExecutionRuntime as any,
-      connectorExecutor as any,
-      workflowRuntime as any,
-      workflowLogger as any
-    );
-
-    expect(typeof (impl as any).onCancel).toBe('function');
-  });
-
-  it('getInput renders the with data from node configuration', () => {
-    const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
-      createMocks();
-
-    const handler = jest.fn();
-    const stepDefinition = { handler };
-
-    const node = {
-      stepId: 'custom-step',
-      stepType: 'my-custom-type',
-      configuration: { with: { foo: 'bar' }, 'max-step-size': undefined },
-    };
-
-    const impl = new CustomStepImpl(
-      node as any,
-      stepDefinition as any,
-      stepExecutionRuntime as any,
-      connectorExecutor as any,
-      workflowRuntime as any,
-      workflowLogger as any
-    );
-
-    const input = impl.getInput();
-    expect(input).toEqual({ foo: 'bar' });
-    expect(stepExecutionRuntime.contextManager.renderValueAccordingToContext).toHaveBeenCalledWith({
-      foo: 'bar',
-    });
-  });
-
-  describe('run + poll lifecycle', () => {
-    const node = {
-      stepId: 'poll-step',
-      stepType: 'osquery.runQueryAndWait',
-      configuration: { with: {}, 'max-step-size': undefined },
-    };
-
-    const buildImpl = (
-      stepDefinition: unknown,
-      mocks: ReturnType<typeof createMocks> = createMocks()
-    ) => {
-      const impl = new CustomStepImpl(
-        node as any,
-        stepDefinition as any,
-        mocks.stepExecutionRuntime as any,
-        mocks.connectorExecutor as any,
-        mocks.workflowRuntime as any,
-        mocks.workflowLogger as any
+      expect(MockedOneShotStepDefinitionHandler).toHaveBeenCalledTimes(1);
+      expect(MockedOneShotStepDefinitionHandler).toHaveBeenCalledWith(
+        stepDefinition,
+        defaultNode,
+        mocks.stepExecutionRuntime,
+        mocks.workflowLogger
       );
-      return { impl, mocks };
-    };
-
-    it('handler-only definition finalizes immediately on { output }', async () => {
-      const handler = jest.fn().mockResolvedValue({ output: { ok: true } });
-      const { impl, mocks } = buildImpl({ handler });
-
-      const result = await (impl as any)._run({});
-      expect(result).toEqual({ input: {}, output: { ok: true }, error: undefined });
-      expect(mocks.stepExecutionRuntime.enterWaitUntil).not.toHaveBeenCalled();
+      expect(MockedPollPolicyStepHandler).not.toHaveBeenCalled();
     });
 
-    it('run + poll: { state } from run schedules first poll without invoking poll handler', async () => {
-      const run = jest.fn().mockResolvedValue({ state: { actionId: 'abc' } });
-      const pollHandler = jest.fn();
+    it('constructs PollPolicyStepHandler for poll-only definitions', () => {
+      const mocks = createMocks();
       const stepDefinition = {
-        run,
-        poll: {
-          handler: pollHandler,
-          policy: { strategy: 'fixed' as const, intervalMs: 5_000 },
-          ceilings: { maxAttempts: 10, maxWaitMs: 60_000 },
-        },
+        poll: { handler: jest.fn(), policy: { strategy: 'fixed', intervalMs: 1000 } },
       };
-      const { impl, mocks } = buildImpl(stepDefinition);
 
+      buildImpl(stepDefinition, mocks);
+
+      expect(MockedPollPolicyStepHandler).toHaveBeenCalledTimes(1);
+      expect(MockedPollPolicyStepHandler).toHaveBeenCalledWith(
+        stepDefinition,
+        defaultNode,
+        mocks.stepExecutionRuntime,
+        mocks.workflowLogger
+      );
+      expect(MockedOneShotStepDefinitionHandler).not.toHaveBeenCalled();
+    });
+
+    it('constructs PollPolicyStepHandler for run + poll definitions', () => {
+      const mocks = createMocks();
+      const stepDefinition = {
+        run: jest.fn(),
+        poll: { handler: jest.fn(), policy: { strategy: 'fixed', intervalMs: 1000 } },
+      };
+
+      buildImpl(stepDefinition, mocks);
+
+      expect(MockedPollPolicyStepHandler).toHaveBeenCalledTimes(1);
+      expect(MockedOneShotStepDefinitionHandler).not.toHaveBeenCalled();
+    });
+
+    it('throws when the definition has no handler or poll lifecycle', () => {
+      const mocks = createMocks();
+
+      expect(() => buildImpl({ run: jest.fn() }, mocks)).toThrow(/Unknown step definition type/);
+    });
+  });
+
+  describe('_run', () => {
+    it('delegates to the one-shot handler run with input, raw with, and config', async () => {
+      const runResult = { input: { key: 'value' }, output: { ok: true }, error: undefined };
+      mockOneShotRun.mockResolvedValue(runResult);
+
+      const impl = buildImpl({ handler: jest.fn() });
+      const result = await (impl as any)._run({ key: 'value' });
+
+      expect(mockOneShotRun).toHaveBeenCalledTimes(1);
+      expect(mockOneShotRun).toHaveBeenCalledWith(
+        { key: 'value' },
+        defaultNode.configuration.with,
+        defaultNode.configuration
+      );
+      expect(result).toBe(runResult);
+      expect(mockPollRun).not.toHaveBeenCalled();
+    });
+
+    it('delegates to the poll handler run with input, raw with, and config', async () => {
+      const runResult = { suspended: true, input: {} };
+      mockPollRun.mockResolvedValue(runResult);
+
+      const impl = buildImpl({
+        poll: { handler: jest.fn(), policy: { strategy: 'fixed', intervalMs: 1000 } },
+      });
       const result = await (impl as any)._run({});
-      expect(result.suspended).toBe(true);
+
+      expect(mockPollRun).toHaveBeenCalledTimes(1);
+      expect(mockPollRun).toHaveBeenCalledWith(
+        {},
+        defaultNode.configuration.with,
+        defaultNode.configuration
+      );
+      expect(result).toBe(runResult);
+      expect(mockOneShotRun).not.toHaveBeenCalled();
+    });
+
+    it('returns ExecutionError when the delegated handler run throws', async () => {
+      mockOneShotRun.mockRejectedValue(new Error('handler blew up'));
+
+      const impl = buildImpl({ handler: jest.fn() });
+      const result = await (impl as any)._run({ key: 'value' });
+
+      expect(result.input).toEqual({ key: 'value' });
       expect(result.output).toBeUndefined();
-      expect(pollHandler).not.toHaveBeenCalled();
-      expect(mocks.stepExecutionRuntime.enterWaitUntil).toHaveBeenCalledTimes(1);
-
-      const persisted = mocks.persistedState.value!;
-      expect(persisted[POLL_AUTHOR_STATE_KEY]).toEqual({ actionId: 'abc' });
-      const bookkeeping = persisted[POLL_BOOKKEEPING_KEY] as {
-        attempt: number;
-        startedAt: number;
-      };
-      expect(bookkeeping.attempt).toBe(0);
-      expect(typeof bookkeeping.startedAt).toBe('number');
+      expect(result.error).toBeDefined();
+      expect(result.error.message).toContain('handler blew up');
     });
+  });
 
-    it('poll-only: invokes poll handler immediately on first execution and continues on { state }', async () => {
-      const pollHandler = jest.fn().mockResolvedValue({ state: { progress: 1 } });
-      const stepDefinition = {
-        poll: {
-          handler: pollHandler,
-          policy: { strategy: 'fixed' as const, intervalMs: 1_000 },
-          ceilings: { maxAttempts: 10, maxWaitMs: 60_000 },
-        },
-      };
-      const { impl, mocks } = buildImpl(stepDefinition);
-
-      const result = await (impl as any)._run({});
-      expect(result.suspended).toBe(true);
-      expect(pollHandler).toHaveBeenCalledTimes(1);
-      expect(pollHandler.mock.calls[0][0]).toMatchObject({
-        attempt: 1,
-        state: undefined,
+  describe('onCancel', () => {
+    it('delegates to the one-shot handler onCancel with rendered input, raw with, and config', async () => {
+      mockOneShotOnCancel.mockResolvedValue(undefined);
+      const mocks = createMocks();
+      (
+        mocks.stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
+      ).mockReturnValue({
+        rendered: true,
       });
 
-      const persisted = mocks.persistedState.value!;
-      expect(persisted[POLL_AUTHOR_STATE_KEY]).toEqual({ progress: 1 });
-      expect((persisted[POLL_BOOKKEEPING_KEY] as { attempt: number }).attempt).toBe(1);
-    });
+      const impl = buildImpl({ handler: jest.fn() }, mocks);
+      await impl.onCancel();
 
-    it('resumed invocation: hydrates author state, calls poll, schedules next on { state }', async () => {
-      const pollHandler = jest.fn().mockResolvedValue({ state: { progress: 2 } });
-      const startedAt = Date.now() - 5_000;
-      const initialState = {
-        [POLL_BOOKKEEPING_KEY]: {
-          attempt: 1,
-          startedAt,
-          lastInvocationAt: startedAt,
-        },
-        [POLL_AUTHOR_STATE_KEY]: { progress: 1 },
-      };
-      const mocks = createMocks(initialState);
-      const stepDefinition = {
-        poll: {
-          handler: pollHandler,
-          policy: { strategy: 'fixed' as const, intervalMs: 5_000 },
-          ceilings: { maxAttempts: 100, maxWaitMs: 60 * 60_000 },
-        },
-      };
-      const { impl } = buildImpl(stepDefinition, mocks);
-
-      const result = await (impl as any)._run({});
-      expect(result.suspended).toBe(true);
-      expect(pollHandler).toHaveBeenCalledWith(
-        expect.objectContaining({ attempt: 2, state: { progress: 1 } })
+      expect(mockOneShotOnCancel).toHaveBeenCalledTimes(1);
+      expect(mockOneShotOnCancel).toHaveBeenCalledWith(
+        { rendered: true },
+        defaultNode.configuration.with,
+        defaultNode.configuration
       );
-
-      const persisted = mocks.persistedState.value!;
-      expect(persisted[POLL_AUTHOR_STATE_KEY]).toEqual({ progress: 2 });
-      expect((persisted[POLL_BOOKKEEPING_KEY] as { attempt: number }).attempt).toBe(2);
+      expect(mockPollOnCancel).not.toHaveBeenCalled();
     });
 
-    it('resumed invocation: { output } finalizes the step', async () => {
-      const pollHandler = jest.fn().mockResolvedValue({ output: { rows: [1, 2, 3] } });
-      const t = Date.now() - 10_000;
-      const initialState = {
-        [POLL_BOOKKEEPING_KEY]: {
-          attempt: 3,
-          startedAt: t,
-          lastInvocationAt: t,
-        },
-        [POLL_AUTHOR_STATE_KEY]: { actionId: 'abc' },
-      };
-      const mocks = createMocks(initialState);
-      const stepDefinition = {
-        poll: {
-          handler: pollHandler,
-          policy: { strategy: 'fixed' as const, intervalMs: 5_000 },
-        },
-      };
-      const { impl } = buildImpl(stepDefinition, mocks);
+    it('delegates to the poll handler onCancel with rendered input, raw with, and config', async () => {
+      mockPollOnCancel.mockResolvedValue(undefined);
 
-      const result = await (impl as any)._run({});
-      expect(result).toEqual({
-        input: {},
-        output: { rows: [1, 2, 3] },
-        error: undefined,
+      const impl = buildImpl({
+        poll: { handler: jest.fn(), policy: { strategy: 'fixed', intervalMs: 1000 } },
       });
-      expect(mocks.stepExecutionRuntime.enterWaitUntil).not.toHaveBeenCalled();
+      await impl.onCancel();
+
+      expect(mockPollOnCancel).toHaveBeenCalledTimes(1);
+      expect(mockPollOnCancel).toHaveBeenCalledWith(
+        { key: 'value' },
+        defaultNode.configuration.with,
+        defaultNode.configuration
+      );
+      expect(mockOneShotOnCancel).not.toHaveBeenCalled();
     });
+  });
 
-    it('keeps previous author state when poll returns { state: undefined }', async () => {
-      const pollHandler = jest.fn().mockResolvedValue({});
-      const t = Date.now() - 2_000;
-      const initialState = {
-        [POLL_BOOKKEEPING_KEY]: {
-          attempt: 1,
-          startedAt: t,
-          lastInvocationAt: t,
-        },
-        [POLL_AUTHOR_STATE_KEY]: { kept: true },
+  describe('getInput', () => {
+    it('renders node configuration with data via the execution runtime', () => {
+      const mocks = createMocks();
+      const node = {
+        ...defaultNode,
+        configuration: { with: { foo: 'bar' }, 'max-step-size': undefined },
       };
-      const mocks = createMocks(initialState);
-      const stepDefinition = {
-        poll: {
-          handler: pollHandler,
-          policy: { strategy: 'fixed' as const, intervalMs: 1_000 },
-          ceilings: { maxAttempts: 10, maxWaitMs: 60_000 },
-        },
-      };
-      const { impl } = buildImpl(stepDefinition, mocks);
 
-      await (impl as any)._run({});
+      const impl = buildImpl({ handler: jest.fn() }, mocks, node);
+      const input = impl.getInput();
 
-      expect(mocks.persistedState.value![POLL_AUTHOR_STATE_KEY]).toEqual({ kept: true });
-    });
-
-    it('clears author state when poll returns { state: null }', async () => {
-      const pollHandler = jest.fn().mockResolvedValue({ state: null });
-      const t = Date.now() - 2_000;
-      const initialState = {
-        [POLL_BOOKKEEPING_KEY]: {
-          attempt: 1,
-          startedAt: t,
-          lastInvocationAt: t,
-        },
-        [POLL_AUTHOR_STATE_KEY]: { stale: true },
-      };
-      const mocks = createMocks(initialState);
-      const stepDefinition = {
-        poll: {
-          handler: pollHandler,
-          policy: { strategy: 'fixed' as const, intervalMs: 1_000 },
-          ceilings: { maxAttempts: 10, maxWaitMs: 60_000 },
-        },
-      };
-      const { impl } = buildImpl(stepDefinition, mocks);
-
-      await (impl as any)._run({});
-
-      expect(mocks.persistedState.value![POLL_AUTHOR_STATE_KEY]).toBeUndefined();
-    });
-
-    it('fails the step with PollCeilingExceeded when maxAttempts is reached', async () => {
-      const pollHandler = jest.fn().mockResolvedValue({ state: {} });
-      const initialState = {
-        [POLL_BOOKKEEPING_KEY]: {
-          attempt: 4,
-          startedAt: Date.now() - 1_000,
-          lastInvocationAt: Date.now() - 100,
-        },
-        [POLL_AUTHOR_STATE_KEY]: undefined,
-      };
-      const mocks = createMocks(initialState);
-      const stepDefinition = {
-        poll: {
-          handler: pollHandler,
-          policy: { strategy: 'fixed' as const, intervalMs: 100 },
-          ceilings: { maxAttempts: 5, maxWaitMs: 60_000 },
-        },
-      };
-      const { impl } = buildImpl(stepDefinition, mocks);
-
-      const result = await (impl as any)._run({});
-      expect(result.suspended).toBeUndefined();
-      expect(result.error).toBeDefined();
-      expect(result.error.type).toBe('PollCeilingExceeded');
-      expect(result.error.details.reason).toBe('maxAttempts');
-      expect(mocks.stepExecutionRuntime.enterWaitUntil).not.toHaveBeenCalled();
-    });
-
-    it('fails the step pre-emptively when next sleep would exceed maxWaitMs', async () => {
-      const pollHandler = jest.fn().mockResolvedValue({});
-      const startedAt = Date.now() - 55_000; // 55s ago
-      const initialState = {
-        [POLL_BOOKKEEPING_KEY]: {
-          attempt: 5,
-          startedAt,
-          lastInvocationAt: Date.now() - 1_000,
-        },
-        [POLL_AUTHOR_STATE_KEY]: undefined,
-      };
-      const mocks = createMocks(initialState);
-      const stepDefinition = {
-        poll: {
-          handler: pollHandler,
-          policy: { strategy: 'fixed' as const, intervalMs: 10_000 }, // would push past 60s ceiling
-          ceilings: { maxAttempts: 100, maxWaitMs: 60_000 },
-        },
-      };
-      const { impl } = buildImpl(stepDefinition, mocks);
-
-      const result = await (impl as any)._run({});
-      expect(result.error?.type).toBe('PollCeilingExceeded');
-      expect(result.error?.details.reason).toBe('maxWaitMs');
-    });
-
-    it('catches exceptions thrown by the poll handler and returns them as errors', async () => {
-      const pollHandler = jest.fn().mockRejectedValue(new Error('upstream blew up'));
-      const stepDefinition = {
-        poll: {
-          handler: pollHandler,
-          policy: { strategy: 'fixed' as const, intervalMs: 1_000 },
-          ceilings: { maxAttempts: 5, maxWaitMs: 60_000 },
-        },
-      };
-      const { impl } = buildImpl(stepDefinition);
-
-      const result = await (impl as any)._run({});
-      expect(result.error).toBeDefined();
-      expect(result.error.message).toContain('upstream blew up');
-      expect(result.suspended).toBeUndefined();
-    });
-
-    it('throws when run is declared without poll (defensive)', async () => {
-      const run = jest.fn().mockResolvedValue({ state: {} });
-      const stepDefinition = { run };
-      const { impl } = buildImpl(stepDefinition);
-
-      const result = await (impl as any)._run({});
-      expect(result.error).toBeDefined();
-      expect(result.error.message).toMatch(/defines "run" without "poll"/);
+      expect(input).toEqual({ foo: 'bar' });
+      expect(
+        mocks.stepExecutionRuntime.contextManager.renderValueAccordingToContext
+      ).toHaveBeenCalledWith({ foo: 'bar' });
     });
   });
 });

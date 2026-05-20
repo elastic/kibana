@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/** Reserved key under which engine bookkeeping for the poll loop is persisted. */
-export const POLL_BOOKKEEPING_KEY = '__poll';
-/** Reserved key under which the author's `state` is persisted between poll calls. */
-export const POLL_AUTHOR_STATE_KEY = '__authorState';
+import type { RunStepResult } from '../node_implementation';
+
+export interface CustomStepDefinitionHandler {
+  onCancel(input: unknown, rawInput: unknown, config: Record<string, unknown>): Promise<void>;
+  run(input: unknown, rawInput: unknown, config: Record<string, unknown>): Promise<RunStepResult>;
+}
