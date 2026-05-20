@@ -25,7 +25,7 @@ export const registerStopRoute = ({
       },
       validate: {
         body: schema.object({
-          jobIds: schema.arrayOf(schema.string()),
+          jobIds: schema.arrayOf(schema.string(), { maxSize: 1000 }),
         }),
         query: schema.object({
           waitForCompletion: schema.maybe(schema.string()),
