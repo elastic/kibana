@@ -174,6 +174,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
     entityId,
     entityType,
     mockData,
+    onExpandFinding,
   }: {
     field: CloudPostureEntityIdentifier;
     value: string;
@@ -187,6 +188,8 @@ export const MisconfigurationFindingsDetailsTable = memo(
       passedFindings: number;
       failedFindings: number;
     };
+    /** When provided, called instead of `openPreviewPanel` when the expand icon is clicked. Use this in system-flyout contexts. */
+    onExpandFinding?: (resourceId: string, ruleId: string) => void;
   }) => {
     useEffect(() => {
       uiMetricService.trackUiMetric(
@@ -347,6 +350,11 @@ export const MisconfigurationFindingsDetailsTable = memo(
                 METRIC_TYPE.CLICK,
                 NAV_TO_FINDINGS_BY_RULE_NAME_FROM_ENTITY_FLYOUT
               );
+
+              if (onExpandFinding) {
+                onExpandFinding(finding.resource.id, finding.rule.id);
+                return;
+              }
 
               const previewPanelProps: FindingsMisconfigurationPanelExpandableFlyoutPropsPreview = {
                 id: MisconfigurationFindingsPreviewPanelKey,
