@@ -111,6 +111,13 @@ export function buildKqlWhereClause(dataSource: EnrichmentDataSourceWithUIAttrib
   return clauses.join(' AND ');
 }
 
+interface FetchMoreQueryResult {
+  esqlQuery: string;
+  parentIsDraft: boolean;
+  /** Processing steps from all draft ancestors, ordered root to closest parent. */
+  ancestorProcessing: StreamlangDSL;
+}
+
 async function buildFetchMoreEsqlQuery({
   streamName,
   conditionEsql,
@@ -125,15 +132,16 @@ async function buildFetchMoreEsqlQuery({
   isDraft: boolean;
   dataSource: EnrichmentDataSourceWithUIAttributes;
   streamsRepositoryClient: StreamsRepositoryClient;
-}): Promise<string> {
+}): Promise<FetchMoreQueryResult> {
   let baseQuery: string;
+  let parentIsDraft = false;
+  let ancestorProcessing: StreamlangDSL = { steps: [] };
 
   if (isDraft) {
-    const { baseQuery: draftBaseQuery } = await resolveDraftSampleSource(
-      streamsRepositoryClient,
-      streamName
-    );
-    baseQuery = draftBaseQuery;
+    const draftSource = await resolveDraftSampleSource(streamsRepositoryClient, streamName);
+    baseQuery = draftSource.baseQuery;
+    parentIsDraft = draftSource.parentIsDraft;
+    ancestorProcessing = draftSource.ancestorProcessing;
   } else {
     baseQuery = `FROM ${streamName} METADATA _id, _source`;
   }
@@ -154,14 +162,9 @@ async function buildFetchMoreEsqlQuery({
   baseQuery += `\n| SORT @timestamp DESC`;
   baseQuery += `\n| LIMIT ${FETCH_MORE_LIMIT}`;
 
-  // The KQL() function is incompatible with unmapped_fields="LOAD".
-  // Skip the directive when a KQL WHERE clause is present; _source
-  // metadata + mergeSourceIntoDocuments still surfaces unmapped fields.
-  if (kqlWhereClause) {
-    return baseQuery;
-  }
+  const esqlQuery = kqlWhereClause ? baseQuery : withUnmappedFieldsDirective(baseQuery);
 
-  return withUnmappedFieldsDirective(baseQuery);
+  return { esqlQuery, parentIsDraft, ancestorProcessing };
 }
 
 export function createFetchMoreDocumentsActor({ data, streamsRepositoryClient }: FetchMoreDeps) {
@@ -171,26 +174,42 @@ export function createFetchMoreDocumentsActor({ data, streamsRepositoryClient }:
     const abortController = new AbortController();
 
     return new Observable((observer) => {
-      buildFetchMoreEsqlQuery({
-        streamName,
-        conditionEsql,
-        processingSteps,
-        isDraft: isDraft ?? false,
-        dataSource,
-        streamsRepositoryClient,
-      })
-        .then((esqlQuery) =>
-          getESQLResults({
-            esqlQuery,
-            search: data.search.search,
+      const execute = async () => {
+        const { esqlQuery, parentIsDraft, ancestorProcessing } = await buildFetchMoreEsqlQuery({
+          streamName,
+          conditionEsql,
+          processingSteps,
+          isDraft: isDraft ?? false,
+          dataSource,
+          streamsRepositoryClient,
+        });
+
+        const { response } = await getESQLResults({
+          esqlQuery,
+          search: data.search.search,
+          signal: abortController.signal,
+        });
+
+        let docs = esqlResultToPlainObjects<SampleDocument>(response);
+        docs = extractRawDocumentsFromSource(docs);
+
+        if (parentIsDraft && ancestorProcessing.steps.length > 0) {
+          docs = await applyAncestorProcessing({
+            docs,
+            ancestorProcessing,
+            streamName,
+            streamsRepositoryClient,
             signal: abortController.signal,
-          })
-        )
-        .then(({ response }) => {
-          let docs = esqlResultToPlainObjects<SampleDocument>(response);
-          docs = extractRawDocumentsFromSource(docs);
-          docs = stripOtelAliases(docs);
-          observer.next(deduplicateDocuments(existingDocuments, docs));
+          });
+        }
+
+        docs = stripOtelAliases(docs);
+        return deduplicateDocuments(existingDocuments, docs);
+      };
+
+      execute()
+        .then((docs) => {
+          observer.next(docs);
           observer.complete();
         })
         .catch((err) => {
@@ -204,4 +223,41 @@ export function createFetchMoreDocumentsActor({ data, streamsRepositoryClient }:
       };
     });
   });
+}
+
+/**
+ * When the parent is a draft stream, `_source` contains only the raw
+ * stored document without ancestor draft processing. Uses the simulate
+ * endpoint to apply all draft ancestor processing steps to the raw docs,
+ * producing the correct pre-processing baseline for the child's
+ * simulation diff.
+ */
+async function applyAncestorProcessing({
+  docs,
+  ancestorProcessing,
+  streamName,
+  streamsRepositoryClient,
+  signal,
+}: {
+  docs: SampleDocument[];
+  ancestorProcessing: StreamlangDSL;
+  streamName: string;
+  streamsRepositoryClient: StreamsRepositoryClient;
+  signal: AbortSignal;
+}): Promise<SampleDocument[]> {
+  const result = await streamsRepositoryClient.fetch(
+    'POST /internal/streams/{name}/processing/_simulate',
+    {
+      signal,
+      params: {
+        path: { name: streamName },
+        body: {
+          processing: ancestorProcessing,
+          documents: docs,
+        },
+      },
+    }
+  );
+
+  return result.documents.map((docReport) => docReport.value as SampleDocument);
 }
