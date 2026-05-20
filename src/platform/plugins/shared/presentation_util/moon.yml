@@ -33,7 +33,6 @@ dependsOn:
   - '@kbn/calculate-width-from-char-count'
   - '@kbn/field-utils'
   - '@kbn/core-ui-settings-browser'
-  - '@kbn/utility-types'
 tags:
   - plugin
   - prod
@@ -49,26 +48,6 @@ fileGroups:
     - test_helpers/**/*
     - storybook/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

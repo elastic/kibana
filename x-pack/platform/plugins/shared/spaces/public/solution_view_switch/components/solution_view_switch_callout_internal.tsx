@@ -5,13 +5,23 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import { SolutionViewSwitchModal } from './modal';
-import { SOLUTION_VIEW_CONFIG, SOLUTION_VIEW_SWITCH_STORAGE_KEY_PREFIX } from '../constants';
+import { SOLUTION_VIEW_CONFIG } from '../constants';
 import type {
   SolutionViewSwitchCalloutInternalProps,
   SolutionViewSwitchCalloutProps,
@@ -19,39 +29,24 @@ import type {
 } from '../types';
 
 export const SolutionViewSwitchCalloutInternal = ({
-  spacesManager,
-  getStartServices,
   currentSolution,
+  manageSpacesUrl,
+  updateSpace,
+  showError,
+  onDismiss,
 }: SolutionViewSwitchCalloutProps & SolutionViewSwitchCalloutInternalProps) => {
+  const { euiTheme } = useEuiTheme();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const narrowTopMargin = currentSolution === 'security';
+
   const handleSwitch = async (selectedSolution: SupportedSolutionView) => {
     setIsLoading(true);
-    const [{ notifications }] = await getStartServices();
-
     try {
-      const activeSpace = await spacesManager.getActiveSpace();
-      const spaceId = activeSpace.id;
-
-      await spacesManager.updateSpace({
-        ...activeSpace,
-        solution: selectedSolution,
-      });
-      try {
-        localStorage.setItem(`${SOLUTION_VIEW_SWITCH_STORAGE_KEY_PREFIX}:${spaceId}`, 'true');
-      } catch {
-        // Ignore storage errors
-      }
-      window.location.reload();
+      await updateSpace(selectedSolution);
     } catch (error) {
-      const message = error?.body?.message ?? error.toString();
-      notifications.toasts.addError(error, {
-        title: i18n.translate('xpack.spaces.solutionViewSwitch.errorSwitchingTitle', {
-          defaultMessage: 'Error switching solution view: {message}',
-          values: { message },
-        }),
-      });
+      showError(error);
     } finally {
       setIsLoading(false);
     }
@@ -59,25 +54,60 @@ export const SolutionViewSwitchCalloutInternal = ({
 
   return (
     <>
+      <EuiHorizontalRule
+        margin="m"
+        css={
+          narrowTopMargin
+            ? css`
+                margin-block-start: ${euiTheme.size.xs};
+              `
+            : undefined
+        }
+      />
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <strong>
-              {i18n.translate('xpack.spaces.solutionViewSwitch.callout.title', {
-                defaultMessage: '{solutionViewName} space',
-                values: { solutionViewName: SOLUTION_VIEW_CONFIG[currentSolution].name },
-              })}
-            </strong>
-          </EuiText>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <strong>
+                  {i18n.translate('xpack.spaces.solutionViewSwitch.callout.title', {
+                    defaultMessage: 'New navigation available',
+                  })}
+                </strong>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                data-test-subj="solutionViewSwitchCalloutDismissButton"
+                iconType="cross"
+                size="xs"
+                color="text"
+                aria-label={i18n.translate(
+                  'xpack.spaces.solutionViewSwitch.callout.dismissButton',
+                  {
+                    defaultMessage: 'Dismiss',
+                  }
+                )}
+                onClick={onDismiss}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <EuiSpacer size="s" />
           <EuiText size="s">
             {i18n.translate('xpack.spaces.solutionViewSwitch.callout.description', {
-              defaultMessage: 'Use dedicated space to benefit from all new features.',
+              defaultMessage:
+                'Switch to {solutionName} nav for easier access to analytics and management.',
+              values: { solutionName: SOLUTION_VIEW_CONFIG[currentSolution].name },
             })}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton size="s" fullWidth onClick={() => setIsModalOpen(true)}>
+          <EuiButton
+            data-test-subj="solutionViewSwitchCalloutLearnMoreButton"
+            size="s"
+            fullWidth
+            onClick={() => setIsModalOpen(true)}
+          >
             {i18n.translate('xpack.spaces.solutionViewSwitch.callout.learnMoreButton', {
               defaultMessage: 'Learn more',
             })}
@@ -90,6 +120,7 @@ export const SolutionViewSwitchCalloutInternal = ({
           currentSolution={currentSolution}
           onClose={() => setIsModalOpen(false)}
           onSwitch={handleSwitch}
+          manageSpacesUrl={manageSpacesUrl}
           isLoading={isLoading}
         />
       )}

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { take } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
 import { EsResourceType } from '@kbn/agent-builder-common';
@@ -20,7 +19,6 @@ import type {
 import { listSearchSources } from './steps/list_search_sources';
 import { flattenMapping, getDataStreamMappings } from './utils/mappings';
 import { getIndexFields, partitionByCcs, getBatchedFieldsFromFieldCaps } from './utils/ccs';
-import { generateXmlTree } from './utils/formatting/xml';
 
 export interface RelevantResource {
   type: EsResourceType;
@@ -32,12 +30,24 @@ export interface IndexExplorerResponse {
   resources: RelevantResource[];
 }
 
+export interface ResourceFieldDescriptor {
+  path: string;
+  type: string;
+}
+
 export interface ResourceDescriptor {
   type: EsResourceType;
   name: string;
   description?: string;
-  fields?: string[];
+  fields?: ResourceFieldDescriptor[];
 }
+
+const truncateList = (fields: string[], max: number): string[] => {
+  if (fields.length <= max) {
+    return fields;
+  }
+  return [...fields.slice(0, max), `[and ${fields.length - max} more]`];
+};
 
 /**
  * Builds resource descriptors for a list of indices by delegating
@@ -61,7 +71,7 @@ const createIndexSummaries = async ({
       type: EsResourceType.index,
       name,
       description: entry?.rawMapping?._meta?.description,
-      fields: (entry?.fields ?? []).map((f) => f.path),
+      fields: (entry?.fields ?? []).map((f) => ({ path: f.path, type: f.type })),
     };
   });
 };
@@ -76,7 +86,7 @@ const createAliasSummaries = async ({
     return {
       type: EsResourceType.alias,
       name: aliasName,
-      description: `Point to the following indices: ${indices.join(', ')}`,
+      description: `Point to the following indices: ${truncateList(indices, 20).join(', ')}`,
     };
   });
 };
@@ -106,7 +116,7 @@ const createDatastreamSummaries = async ({
         type: EsResourceType.dataStream,
         name,
         description: mappings?.mappings._meta?.description,
-        fields: flattened.map((field) => field.path),
+        fields: flattened.map((field) => ({ path: field.path, type: field.type })),
       });
     }
   }
@@ -122,12 +132,67 @@ const createDatastreamSummaries = async ({
       descriptors.push({
         type: EsResourceType.dataStream,
         name,
-        fields: (fieldsByDs[name] ?? []).map((f) => f.path),
+        fields: (fieldsByDs[name] ?? []).map((f) => ({ path: f.path, type: f.type })),
       });
     }
   }
 
   return descriptors;
+};
+
+/**
+ * Builds resource descriptors for a pre-fetched set of search sources.
+ * Splits the work per source type and optionally skips aliases / data streams.
+ */
+const buildResourceDescriptors = async ({
+  sources,
+  includeAliases,
+  includeDatastream,
+  esClient,
+}: {
+  sources: Awaited<ReturnType<typeof listSearchSources>>;
+  includeAliases: boolean;
+  includeDatastream: boolean;
+  esClient: ElasticsearchClient;
+}): Promise<ResourceDescriptor[]> => {
+  const resources: ResourceDescriptor[] = [];
+  if (sources.indices.length > 0) {
+    resources.push(...(await createIndexSummaries({ indices: sources.indices, esClient })));
+  }
+  if (sources.data_streams.length > 0 && includeDatastream) {
+    resources.push(
+      ...(await createDatastreamSummaries({ datastreams: sources.data_streams, esClient }))
+    );
+  }
+  if (sources.aliases.length > 0 && includeAliases) {
+    resources.push(...(await createAliasSummaries({ aliases: sources.aliases })));
+  }
+  return resources;
+};
+
+/**
+ * Gathers resource descriptors (with field names and types) for all resources
+ * matching the given pattern.
+ */
+export const gatherResourceDescriptors = async ({
+  indexPattern = '*',
+  includeAliases = true,
+  includeDatastream = true,
+  esClient,
+}: {
+  indexPattern?: string;
+  includeAliases?: boolean;
+  includeDatastream?: boolean;
+  esClient: ElasticsearchClient;
+}): Promise<ResourceDescriptor[]> => {
+  const sources = await listSearchSources({
+    pattern: indexPattern,
+    excludeIndicesRepresentedAsDatastream: true,
+    excludeIndicesRepresentedAsAlias: false,
+    esClient,
+  });
+
+  return buildResourceDescriptors({ sources, includeAliases, includeDatastream, esClient });
 };
 
 export const indexExplorer = async ({
@@ -156,7 +221,6 @@ export const indexExplorer = async ({
     excludeIndicesRepresentedAsDatastream: true,
     excludeIndicesRepresentedAsAlias: false,
     esClient,
-    includeKibanaIndices: indexPattern !== '*',
   });
 
   const indexCount = sources.indices.length;
@@ -183,22 +247,12 @@ export const indexExplorer = async ({
     };
   }
 
-  const resources: ResourceDescriptor[] = [];
-  if (indexCount > 0) {
-    const indexDescriptors = await createIndexSummaries({ indices: sources.indices, esClient });
-    resources.push(...indexDescriptors);
-  }
-  if (dataStreamCount > 0 && includeDatastream) {
-    const dsDescriptors = await createDatastreamSummaries({
-      datastreams: sources.data_streams,
-      esClient,
-    });
-    resources.push(...dsDescriptors);
-  }
-  if (aliasCount > 0 && includeAliases) {
-    const aliasDescriptors = await createAliasSummaries({ aliases: sources.aliases });
-    resources.push(...aliasDescriptors);
-  }
+  const resources = await buildResourceDescriptors({
+    sources,
+    includeAliases,
+    includeDatastream,
+    esClient,
+  });
 
   const selectedResources = await selectResources({
     resources,
@@ -216,27 +270,16 @@ export interface SelectedResource {
   reason: string;
 }
 
-// Helper function to format each resource in an XML-like block
 export const formatResource = (res: ResourceDescriptor): string => {
-  const topFields = take(res.fields ?? [], 10);
-
-  return generateXmlTree({
-    tagName: 'resource',
-    attributes: {
-      type: res.type,
-      name: res.name,
-      description: res.description ?? 'No description provided.',
-    },
-    children: [
-      {
-        tagName: 'sample_fields',
-        children:
-          topFields.length > 0
-            ? topFields.map((field) => ({ tagName: 'field', children: [field] }))
-            : ['(No fields available)'],
-      },
-    ],
-  });
+  const allFields = res.fields ?? [];
+  const topFields = allFields.slice(0, 10);
+  const formatted = topFields.map((f) => `${f.path} [${f.type}]`);
+  if (allFields.length > 10) {
+    formatted.push(`[and ${allFields.length - 10} more]`);
+  }
+  const description = res.description ? `: ${res.description}` : '';
+  const fields = formatted.length > 0 ? `\n  fields: ${formatted.join(', ')}` : '';
+  return `- ${res.name} (${res.type})${description}${fields}`;
 };
 
 export const createIndexSelectorPrompt = ({
@@ -287,7 +330,9 @@ The 'select_resources' tool expects this exact structure:
 
 ## Available Resources
 
+<available_resources>
 ${resources.map(formatResource).join('\n')}
+</available_resources>
 
 Call the 'select_resources' tool now with your selection. Maximum ${limit} target(s). Use an empty targets array if none match.`,
     ],

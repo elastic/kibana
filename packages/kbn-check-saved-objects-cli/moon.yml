@@ -31,7 +31,6 @@ dependsOn:
   - '@kbn/core-saved-objects-server'
   - '@kbn/utils'
   - '@kbn/dev-utils'
-  - '@kbn/core-saved-objects-server-internal'
   - '@kbn/core-root-server-internal'
   - '@kbn/core-test-helpers-so-type-serializer'
   - '@kbn/core-saved-objects-api-server'
@@ -50,26 +49,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

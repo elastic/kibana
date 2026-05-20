@@ -99,7 +99,9 @@ export const getIntegrationsFieldMap: ({
   elserInferenceId,
 }: {
   elserInferenceId?: string;
-}) => FieldMap<SchemaFieldMapKeys<RuleMigrationIntegration>> = ({ elserInferenceId }) => ({
+}) => FieldMap<SchemaFieldMapKeys<Omit<RuleMigrationIntegration, 'knowledge_base'>>> = ({
+  elserInferenceId,
+}) => ({
   id: { type: 'keyword', required: true },
   title: { type: 'text', required: true },
   description: { type: 'text', required: true },

@@ -53,6 +53,14 @@ export interface CanvasRenderCallbacks {
 }
 
 /**
+ * Callbacks available to inline content renderers.
+ */
+export interface InlineRenderCallbacks {
+  /** Register action buttons to display in the inline attachment header */
+  registerActionButtons: (buttons: ActionButton[]) => void;
+}
+
+/**
  * Parameters passed when requesting action buttons for an inline-rendered attachment.
  */
 export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = UnknownAttachment> {
@@ -85,8 +93,24 @@ export interface ActionButton {
   icon?: IconType;
   /** Whether this is the primary action button */
   type: ActionButtonType;
+  /** Whether the action is currently unavailable */
+  disabled?: boolean;
+  /** Optional explanation shown when a disabled action remains visible */
+  disabledReason?: string;
   /** Handler function called when the button is clicked */
   handler: () => void | Promise<void>;
+}
+
+/**
+ * Parameters passed to attachment lifecycle hooks.
+ */
+export interface AttachmentLifecycleParams<
+  TAttachment extends UnknownAttachment = UnknownAttachment
+> {
+  /** Returns the current attachment state */
+  getAttachment: () => TAttachment;
+  /** Update the attachment's origin reference (e.g., after saving to library) */
+  updateOrigin: (origin: string) => Promise<UpdateOriginResponse | undefined>;
 }
 
 /**
@@ -110,8 +134,21 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    * Optional custom content renderer for inline attachment display.
    * When provided, attachments can be rendered inline in the conversation
    * using the <render_attachment> tag.
+   *
+   * The `callbacks` object provides:
+   * - `registerActionButtons`: dynamically register action buttons in the inline header
    */
-  renderInlineContent?: (props: AttachmentRenderProps<TAttachment>) => ReactNode;
+  renderInlineContent?: (
+    props: AttachmentRenderProps<TAttachment>,
+    callbacks?: InlineRenderCallbacks
+  ) => ReactNode;
+  /**
+   * Optional preferred width for the canvas flyout when opened in full-screen context.
+   * Accepts any valid CSS width value (e.g. `'600px'`, `'40vw'`).
+   * Defaults to `'50vw'` when not specified.
+   * Has no effect in sidebar context.
+   */
+  canvasWidth?: string;
   /**
    * Optional custom content renderer for canvas mode (expanded flyout view).
    * When provided, attachments can be opened in an expanded view via action buttons.

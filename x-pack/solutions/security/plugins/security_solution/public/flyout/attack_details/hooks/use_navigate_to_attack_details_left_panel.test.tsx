@@ -9,9 +9,10 @@ import { renderHook } from '@testing-library/react';
 import { useNavigateToAttackDetailsLeftPanel } from './use_navigate_to_attack_details_left_panel';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useAttackDetailsContext } from '../context';
-import { AttackDetailsLeftPanelKey } from '../constants/panel_keys';
+import { AttackDetailsLeftPanelKey, AttackDetailsRightPanelKey } from '../constants/panel_keys';
 
 const mockOpenLeftPanel = jest.fn();
+const mockOpenFlyout = jest.fn();
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),
@@ -29,7 +30,7 @@ describe('useNavigateToAttackDetailsLeftPanel', () => {
     jest.clearAllMocks();
     jest.mocked(useExpandableFlyoutApi).mockReturnValue({
       openLeftPanel: mockOpenLeftPanel,
-      openFlyout: jest.fn(),
+      openFlyout: mockOpenFlyout,
       openRightPanel: jest.fn(),
       openPreviewPanel: jest.fn(),
       closeRightPanel: jest.fn(),
@@ -40,6 +41,7 @@ describe('useNavigateToAttackDetailsLeftPanel', () => {
     jest.mocked(useAttackDetailsContext).mockReturnValue({
       attackId,
       indexName,
+      isPreviewMode: false,
     } as ReturnType<typeof useAttackDetailsContext>);
   });
 
@@ -59,6 +61,7 @@ describe('useNavigateToAttackDetailsLeftPanel', () => {
         subTab: 'entity',
       },
     });
+    expect(mockOpenFlyout).not.toHaveBeenCalled();
   });
 
   it('returns a callback that opens the left panel with custom tab when provided', () => {
@@ -74,6 +77,41 @@ describe('useNavigateToAttackDetailsLeftPanel', () => {
       },
       path: {
         tab: 'notes',
+      },
+    });
+    expect(mockOpenFlyout).not.toHaveBeenCalled();
+  });
+
+  it('returns a callback that opens a full flyout when in preview mode', () => {
+    jest.mocked(useAttackDetailsContext).mockReturnValue({
+      attackId,
+      indexName,
+      isPreviewMode: true,
+    } as ReturnType<typeof useAttackDetailsContext>);
+
+    const { result } = renderHook(() => useNavigateToAttackDetailsLeftPanel());
+
+    result.current();
+
+    expect(mockOpenLeftPanel).not.toHaveBeenCalled();
+    expect(mockOpenFlyout).toHaveBeenCalledWith({
+      right: {
+        id: AttackDetailsRightPanelKey,
+        params: {
+          attackId,
+          indexName,
+        },
+      },
+      left: {
+        id: AttackDetailsLeftPanelKey,
+        params: {
+          attackId,
+          indexName,
+        },
+        path: {
+          tab: 'insights',
+          subTab: 'entity',
+        },
       },
     });
   });

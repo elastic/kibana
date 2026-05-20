@@ -97,7 +97,7 @@ const ObservableTypesComponent: React.FC<ObservableTypesProps> = ({
                 isDisabled={!canModifyObservableTypes}
                 size="s"
                 onClick={onAddObservableType}
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 data-test-subj="add-observable-type"
               >
                 {i18n.ADD_OBSERVABLE_TYPE}

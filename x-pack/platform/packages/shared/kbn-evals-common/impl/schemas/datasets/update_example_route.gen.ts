@@ -14,43 +14,49 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const UpdateExamplePayload = lazySchema(() =>
+  z.object({
+    input: z.object({}).catchall(z.unknown()).optional(),
+    output: z.object({}).catchall(z.unknown()).optional(),
+    metadata: z.object({}).catchall(z.unknown()).optional(),
+  })
+);
 export type UpdateExamplePayload = z.infer<typeof UpdateExamplePayload>;
-export const UpdateExamplePayload = z.object({
-  input: z.object({}).catchall(z.unknown()).optional(),
-  output: z.object({}).catchall(z.unknown()).optional(),
-  metadata: z.object({}).catchall(z.unknown()).optional(),
-});
 
+export const UpdateEvaluationDatasetExampleRequestParams = lazySchema(() =>
+  z.object({
+    datasetId: z.string(),
+    exampleId: z.string(),
+  })
+);
 export type UpdateEvaluationDatasetExampleRequestParams = z.infer<
   typeof UpdateEvaluationDatasetExampleRequestParams
 >;
-export const UpdateEvaluationDatasetExampleRequestParams = z.object({
-  datasetId: z.string(),
-  exampleId: z.string(),
-});
 export type UpdateEvaluationDatasetExampleRequestParamsInput = z.input<
   typeof UpdateEvaluationDatasetExampleRequestParams
 >;
 
+export const UpdateEvaluationDatasetExampleRequestBody = lazySchema(() => UpdateExamplePayload);
 export type UpdateEvaluationDatasetExampleRequestBody = z.infer<
   typeof UpdateEvaluationDatasetExampleRequestBody
 >;
-export const UpdateEvaluationDatasetExampleRequestBody = UpdateExamplePayload;
 export type UpdateEvaluationDatasetExampleRequestBodyInput = z.input<
   typeof UpdateEvaluationDatasetExampleRequestBody
 >;
 
+export const UpdateEvaluationDatasetExampleResponse = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    dataset_id: z.string(),
+    input: z.object({}).catchall(z.unknown()).optional(),
+    output: z.object({}).catchall(z.unknown()).optional(),
+    metadata: z.object({}).catchall(z.unknown()).optional(),
+    created_at: z.string(),
+    updated_at: z.string(),
+  })
+);
 export type UpdateEvaluationDatasetExampleResponse = z.infer<
   typeof UpdateEvaluationDatasetExampleResponse
 >;
-export const UpdateEvaluationDatasetExampleResponse = z.object({
-  id: z.string(),
-  dataset_id: z.string(),
-  input: z.object({}).catchall(z.unknown()).optional(),
-  output: z.object({}).catchall(z.unknown()).optional(),
-  metadata: z.object({}).catchall(z.unknown()).optional(),
-  created_at: z.string(),
-  updated_at: z.string(),
-});

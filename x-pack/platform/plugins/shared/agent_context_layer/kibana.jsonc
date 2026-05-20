@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/agent-context-layer-plugin",
+  "owner": "@elastic/workchat-eng",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "agentContextLayer",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": ["features", "taskManager"],
+    "optionalPlugins": ["security", "spaces"]
+  }
+}

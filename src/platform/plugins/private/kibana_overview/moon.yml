@@ -18,6 +18,7 @@ project:
   sourceRoot: src/platform/plugins/private/kibana_overview
 dependsOn:
   - '@kbn/core'
+  - '@kbn/scout'
   - '@kbn/navigation-plugin'
   - '@kbn/home-plugin'
   - '@kbn/newsfeed-plugin'
@@ -48,27 +49,9 @@ fileGroups:
   src:
     - public/**/*
     - common/**/*
+    - test/scout/**/*
+    - test/scout_shared_ux_no_data/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

@@ -15,6 +15,8 @@ import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { MonitorListHeader } from './monitor_list_header';
 import type { MonitorListSortField } from '../../../../../../../common/runtime_types/monitor_management/sort_field';
 import { DeleteMonitor } from './delete_monitor';
+import { ResetMonitorModal } from './reset_monitor_modal';
+import { useMonitorIntegrationHealth } from '../../../common/hooks/use_monitor_integration_health';
 import type { IHttpSerializedFetchError } from '../../../../state/utils/http_error';
 import type { MonitorListPageState } from '../../../../state';
 import type {
@@ -25,6 +27,8 @@ import { ConfigKey, SourceType } from '../../../../../../../common/runtime_types
 import { useMonitorListColumns } from './columns';
 import * as labels from './labels';
 import type { ClientPluginsStart } from '../../../../../../plugin';
+
+export type MonitorListItem = EncryptedSyntheticsSavedMonitor;
 
 interface Props {
   pageState: MonitorListPageState;
@@ -51,12 +55,24 @@ export const MonitorList = ({
   const isXl = useIsWithinMinBreakpoint('xxl');
 
   const [monitorPendingDeletion, setMonitorPendingDeletion] = useState<string[]>([]);
+  const [monitorPendingReset, setMonitorPendingReset] = useState<{
+    resetIds: string[];
+    skippedMonitors: Array<{ id: string; name: string }>;
+  } | null>(null);
+  const { resetMonitors, isFixableByReset } = useMonitorIntegrationHealth();
+
+  const items: MonitorListItem[] = useMemo(
+    () => syntheticsMonitors as MonitorListItem[],
+    [syntheticsMonitors]
+  );
+
+  const totalItemCount = total;
 
   const handleOnChange = useCallback(
     ({
       page = { index: 0, size: 10 },
       sort = { field: ConfigKey.NAME, direction: 'asc' },
-    }: Criteria<EncryptedSyntheticsSavedMonitor>) => {
+    }: Criteria<MonitorListItem>) => {
       const { index, size } = page;
       const { field, direction } = sort;
 
@@ -73,35 +89,37 @@ export const MonitorList = ({
   const pagination = {
     pageIndex,
     pageSize,
-    totalItemCount: total,
+    totalItemCount,
     pageSizeOptions: [5, 10, 25, 50, 100],
   };
 
-  const sorting: EuiTableSortingType<EncryptedSyntheticsSavedMonitor> = {
+  const sorting: EuiTableSortingType<MonitorListItem> = {
     sort: {
-      field: sortField?.replace('.keyword', '') as keyof EncryptedSyntheticsSavedMonitor,
+      field: sortField?.replace('.keyword', '') as keyof MonitorListItem,
       direction: sortOrder,
     },
   };
 
   const recordRangeLabel = labels.getRecordRangeLabel({
-    rangeStart: total === 0 ? 0 : pageSize * pageIndex + 1,
+    rangeStart: totalItemCount === 0 ? 0 : pageSize * pageIndex + 1,
     rangeEnd: pageSize * pageIndex + pageSize,
-    total,
+    total: totalItemCount,
   });
 
   const columns = useMonitorListColumns({
     loading,
     overviewStatus,
     setMonitorPendingDeletion,
+    setMonitorPendingReset,
+    isFixableByReset,
   });
 
-  const [selectedItems, setSelectedItems] = useState<EncryptedSyntheticsSavedMonitor[]>([]);
-  const onSelectionChange = (selItems: EncryptedSyntheticsSavedMonitor[]) => {
+  const [selectedItems, setSelectedItems] = useState<MonitorListItem[]>([]);
+  const onSelectionChange = (selItems: MonitorListItem[]) => {
     setSelectedItems(selItems);
   };
 
-  const selection: EuiTableSelectionType<EncryptedSyntheticsSavedMonitor> = {
+  const selection: EuiTableSelectionType<MonitorListItem> = {
     onSelectionChange,
     initialSelected: selectedItems,
   };
@@ -123,11 +141,12 @@ export const MonitorList = ({
       >
         <MonitorListHeader
           recordRangeLabel={recordRangeLabel}
-          selectedItems={selectedItems}
+          selectedItems={selectedItems as EncryptedSyntheticsSavedMonitor[]}
           setMonitorPendingDeletion={setMonitorPendingDeletion}
+          setMonitorPendingReset={setMonitorPendingReset}
         />
         <EuiHorizontalRule margin="s" />
-        <EuiBasicTable
+        <EuiBasicTable<MonitorListItem>
           aria-label={i18n.translate('xpack.synthetics.management.monitorList.title', {
             defaultMessage: 'Synthetics monitors list',
           })}
@@ -137,7 +156,7 @@ export const MonitorList = ({
           error={error?.body?.message}
           loading={loading}
           itemId="config_id"
-          items={syntheticsMonitors}
+          items={items}
           columns={columns}
           tableLayout={isXl ? 'auto' : 'fixed'}
           pagination={pagination}
@@ -147,6 +166,14 @@ export const MonitorList = ({
           selection={selection}
         />
       </EuiPanel>
+      {monitorPendingReset !== null && monitorPendingReset.resetIds.length > 0 && (
+        <ResetMonitorModal
+          configIds={monitorPendingReset.resetIds}
+          skippedMonitors={monitorPendingReset.skippedMonitors}
+          onClose={() => setMonitorPendingReset(null)}
+          resetMonitors={resetMonitors}
+        />
+      )}
       {monitorPendingDeletion.length > 0 && (
         <DeleteMonitor
           configIds={monitorPendingDeletion}

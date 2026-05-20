@@ -36,7 +36,7 @@ export const TemplateSelectorComponent: React.FC<Props> = ({ isLoading, isDisabl
   const { setFieldValue } = useFormContext();
 
   const { data: templatesData, isLoading: isLoadingTemplates } = useGetTemplates({
-    queryParams: { page: 1, perPage: 10000, owner },
+    queryParams: { page: 1, perPage: 10000, owner, isEnabled: true },
   });
 
   const [selectedTemplate, setSelectedTemplate] = useState<EuiComboBoxOptionOption<string> | null>(
@@ -47,6 +47,7 @@ export const TemplateSelectorComponent: React.FC<Props> = ({ isLoading, isDisabl
     () => [
       EMPTY_TEMPLATE_OPTION,
       ...(templatesData?.templates ?? []).map((template) => ({
+        key: template.templateId,
         label: template.name,
         value: template.templateId,
       })),

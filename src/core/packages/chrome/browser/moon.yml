@@ -31,11 +31,11 @@ dependsOn:
   - '@kbn/deeplinks-fleet'
   - '@kbn/deeplinks-shared'
   - '@kbn/deeplinks-workplace-ai'
+  - '@kbn/deeplinks-vectordb'
   - '@kbn/projects-solutions-groups'
   - '@kbn/deeplinks-workflows'
   - '@kbn/deeplinks-agent-builder'
-  - '@kbn/deeplinks-data-sources'
-  - '@kbn/core-chrome-navigation'
+  - '@kbn/ui-side-navigation'
   - '@kbn/core-chrome-sidebar'
 tags:
   - shared-browser
@@ -49,26 +49,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

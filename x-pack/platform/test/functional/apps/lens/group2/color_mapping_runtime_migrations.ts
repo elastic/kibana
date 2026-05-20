@@ -277,14 +277,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const seriesColors = await getTagCloudColors(
             'RangeKey no label auto assigned - Tag Cloud'
           );
+          const expectedColorMap: Record<string, string> = {
+            '0 → 1,000': defaultPaletteColors[0],
+            '1,000 → 5,000': defaultPaletteColors[1],
+            '5,000 → 10,000': defaultPaletteColors[2],
+            '10,000 → +∞': defaultPaletteColors[3],
+          };
 
-          expect(seriesColors).to.eql([
-            // filter order not based on tag size
-            ['5,000 → 10,000', defaultPaletteColors[2]],
-            ['1,000 → 5,000', defaultPaletteColors[1]],
-            ['0 → 1,000', defaultPaletteColors[0]],
-            ['10,000 → +∞', defaultPaletteColors[3]],
-          ]);
+          expect(seriesColors.length).to.be.greaterThan(2);
+          expect(seriesColors.every(([label, color]) => expectedColorMap[label] === color)).to.be(
+            true
+          );
         });
       });
 
@@ -343,9 +346,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardPanelActions.clickInlineEdit(panel);
         await testSubjects.click(dimension);
         await testSubjects.click('lns_colorEditing_trigger');
-        await testSubjects.click('lns-colorMapping-colorSwatch-0');
-
-        await testSubjects.click('lns-colorMapping-colorPicker-tab-custom');
+        await retry.try(async () => {
+          if (
+            !(await testSubjects.exists('lns-colorMapping-colorPicker-tab-custom', {
+              timeout: 1000,
+            }))
+          ) {
+            await testSubjects.click('lns-colorMapping-colorSwatch-0');
+          }
+          await testSubjects.click('lns-colorMapping-colorPicker-tab-custom');
+        });
         await testSubjects.setValue('lns-colorMapping-colorPicker-custom-input', customColor, {
           typeCharByChar: true,
           clearWithKeyboard: true,

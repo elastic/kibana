@@ -393,7 +393,7 @@ Object {
 
 exports[`Connector type config checks detect connector type changes for: .cases-webhook 3`] = `
 Object {
-  "anyOf": Array [
+  "oneOf": Array [
     Object {
       "additionalProperties": false,
       "properties": Object {
@@ -944,7 +944,7 @@ Object {
 
 exports[`Connector type config checks detect connector type changes for: .gen-ai 1`] = `
 Object {
-  "anyOf": Array [
+  "oneOf": Array [
     Object {
       "additionalProperties": false,
       "properties": Object {
@@ -1358,6 +1358,23 @@ Object {
       ],
       "default": null,
     },
+    "secretQueryParams": Object {
+      "anyOf": Array [
+        Object {
+          "additionalProperties": Object {
+            "type": "string",
+          },
+          "propertyNames": Object {
+            "type": "string",
+          },
+          "type": "object",
+        },
+        Object {
+          "type": "null",
+        },
+      ],
+      "default": null,
+    },
     "user": Object {
       "anyOf": Array [
         Object {
@@ -1379,7 +1396,22 @@ Object {
   "additionalProperties": false,
   "properties": Object {
     "body": Object {
-      "type": "string",
+      "anyOf": Array [
+        Object {
+          "type": "string",
+        },
+        Object {
+          "items": Object {},
+          "type": "array",
+        },
+        Object {
+          "additionalProperties": Object {},
+          "propertyNames": Object {
+            "type": "string",
+          },
+          "type": "object",
+        },
+      ],
     },
     "fetcher": Object {
       "properties": Object {
@@ -1464,7 +1496,22 @@ Object {
   "additionalProperties": false,
   "properties": Object {
     "body": Object {
-      "type": "string",
+      "anyOf": Array [
+        Object {
+          "type": "string",
+        },
+        Object {
+          "items": Object {},
+          "type": "array",
+        },
+        Object {
+          "additionalProperties": Object {},
+          "propertyNames": Object {
+            "type": "string",
+          },
+          "type": "object",
+        },
+      ],
     },
     "fetcher": Object {
       "properties": Object {
@@ -1725,7 +1772,7 @@ Object {
 
 exports[`Connector type config checks detect connector type changes for: .jira 3`] = `
 Object {
-  "anyOf": Array [
+  "oneOf": Array [
     Object {
       "additionalProperties": false,
       "properties": Object {
@@ -1919,7 +1966,6 @@ Object {
               },
               "required": Array [
                 "summary",
-                "otherFields",
               ],
               "type": "object",
             },
@@ -2806,7 +2852,7 @@ Object {
 
 exports[`Connector type config checks detect connector type changes for: .servicenow 3`] = `
 Object {
-  "anyOf": Array [
+  "oneOf": Array [
     Object {
       "additionalProperties": false,
       "properties": Object {
@@ -3031,7 +3077,6 @@ Object {
               },
               "required": Array [
                 "short_description",
-                "additional_fields",
               ],
               "type": "object",
             },
@@ -3250,7 +3295,7 @@ Object {
 
 exports[`Connector type config checks detect connector type changes for: .servicenow-itom 3`] = `
 Object {
-  "anyOf": Array [
+  "oneOf": Array [
     Object {
       "additionalProperties": false,
       "properties": Object {
@@ -3547,7 +3592,7 @@ Object {
 
 exports[`Connector type config checks detect connector type changes for: .servicenow-sir 3`] = `
 Object {
-  "anyOf": Array [
+  "oneOf": Array [
     Object {
       "additionalProperties": false,
       "properties": Object {
@@ -3870,7 +3915,6 @@ Object {
               },
               "required": Array [
                 "short_description",
-                "additional_fields",
               ],
               "type": "object",
             },
@@ -4409,7 +4453,7 @@ Object {
 
 exports[`Connector type config checks detect connector type changes for: .swimlane 3`] = `
 Object {
-  "anyOf": Array [
+  "oneOf": Array [
     Object {
       "additionalProperties": false,
       "properties": Object {
@@ -4981,7 +5025,6 @@ Object {
       "type": "string",
     },
     "subActionParams": Object {
-      "additionalProperties": false,
       "properties": Object {
         "alertStates": Object {
           "additionalProperties": false,

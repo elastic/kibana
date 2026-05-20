@@ -13,6 +13,8 @@ import type { RecentlyAccessedService } from '@kbn/recently-accessed';
 import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar-context';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import type { SidebarStart } from '@kbn/core-chrome-sidebar';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
+import { isNextChrome } from '@kbn/core-chrome-feature-flags';
 import type { InternalChromeStart } from './types';
 import type { ChromeState } from './state/chrome_state';
 import type { NavControlsService } from './services/nav_controls';
@@ -36,9 +38,15 @@ export interface ChromeApiDeps {
     projectNavigation: ProjectNavigationStart;
   };
   sidebar: SidebarStart;
+  featureFlags: FeatureFlagsStart;
 }
 
-export function createChromeApi({ state, services, sidebar }: ChromeApiDeps): InternalChromeStart {
+export function createChromeApi({
+  state,
+  services,
+  sidebar,
+  featureFlags,
+}: ChromeApiDeps): InternalChromeStart {
   const { projectNavigation } = services;
 
   const validateProjectStyle = () => {
@@ -154,6 +162,9 @@ export function createChromeApi({ state, services, sidebar }: ChromeApiDeps): In
       getIsCollapsed$: () => state.sideNav.collapsed.$,
       getIsCollapsed: () => state.sideNav.collapsed.get(),
       setIsCollapsed: state.sideNav.collapsed.set,
+      getWidth$: () => state.sideNav.width.$,
+      getWidth: () => state.sideNav.width.get(),
+      setWidth: state.sideNav.width.set,
     },
 
     // Project Navigation
@@ -163,6 +174,11 @@ export function createChromeApi({ state, services, sidebar }: ChromeApiDeps): In
       >,
     getActiveSolutionNavId: () => projectNavigation.getActiveSolutionNavId(),
     project,
+    next: {
+      get isEnabled() {
+        return isNextChrome(featureFlags);
+      },
+    },
     sidebar,
   };
 

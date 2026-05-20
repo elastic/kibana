@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type PropsWithChildren, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, {
+  type PropsWithChildren,
+  type ReactElement,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from 'react';
 import { createHtmlPortalNode, type HtmlPortalNode, InPortal } from 'react-reverse-portal';
 import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
 import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogram';
@@ -31,7 +38,6 @@ import {
   internalStateActions,
   useRuntimeStateManager,
 } from '../../state_management/redux';
-import type { DiscoverMainContentProps } from '../layout/discover_main_content';
 import { ScopedServicesProvider } from '../../../../components/scoped_services_provider';
 import { useUnifiedHistogramRuntimeState } from './use_unified_histogram_runtime_state';
 import { useUnifiedHistogramCommon } from './use_unified_histogram_common';
@@ -87,7 +93,7 @@ const updatePortals = (portals: ChartPortalNodes, tabsIds: string[]) =>
 interface UnifiedHistogramGuardProps {
   tabId: string;
   runtimeStateManager: RuntimeStateManager;
-  panelsToggle?: DiscoverMainContentProps['panelsToggle'];
+  panelsToggle?: ReactElement;
 }
 
 const UnifiedHistogramGuard = ({
@@ -207,7 +213,7 @@ const UnifiedHistogramWrapper = ({ panelsToggle }: UnifiedHistogramChartProps) =
     setUnifiedHistogramApi(unifiedHistogram.api);
   }, [setUnifiedHistogramApi, unifiedHistogram.api]);
 
-  const { renderCustomChartToggleActions } = useUnifiedHistogramCommon({
+  const { renderToggleActions } = useUnifiedHistogramCommon({
     currentTabId,
     layoutProps: unifiedHistogram.layoutProps,
     panelsToggle,
@@ -220,7 +226,7 @@ const UnifiedHistogramWrapper = ({ panelsToggle }: UnifiedHistogramChartProps) =
   return (
     <UnifiedHistogramChart
       {...unifiedHistogram.chartProps}
-      renderCustomChartToggleActions={renderCustomChartToggleActions}
+      renderToggleActions={renderToggleActions}
     />
   );
 };
@@ -246,6 +252,9 @@ const CustomChartSectionWrapper = ({
   });
 
   const metricsGridState = useCurrentTabSelector((state) => state.uiState.metricsGrid);
+  const isTabSelected = useInternalStateSelector(
+    (state) => state.tabs.unsafeCurrentId === currentTabId
+  );
   const setMetricsGridState = useCurrentTabAction(internalStateActions.setMetricsGridState);
   const onInitialStateChange = useCallback(
     (newMetricsGridState: Partial<UnifiedMetricsGridRestorableState>) => {
@@ -274,7 +283,7 @@ const CustomChartSectionWrapper = ({
     ]
   );
 
-  const { renderCustomChartToggleActions } = useUnifiedHistogramCommon({
+  const { renderToggleActions } = useUnifiedHistogramCommon({
     currentTabId,
     layoutProps,
     panelsToggle,
@@ -300,11 +309,13 @@ const CustomChartSectionWrapper = ({
       {chartSectionConfig.renderChartSection({
         histogramCss,
         chartToolbarCss,
-        renderToggleActions: renderCustomChartToggleActions,
+        renderToggleActions,
         fetch$,
         fetchParams,
         isComponentVisible,
+        isTabSelected,
         ...unifiedHistogramProps,
+        setLensRequestAdapter: api.setLensRequestAdapter,
         initialState: metricsGridState,
         onInitialStateChange,
       })}

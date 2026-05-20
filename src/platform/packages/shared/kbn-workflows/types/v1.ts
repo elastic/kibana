@@ -7,16 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { JsonValue } from '@kbn/utility-types';
+import {
+  HUMAN_READABLE_ID_MAX_LENGTH,
+  HUMAN_READABLE_ID_MIN_LENGTH,
+  HUMAN_READABLE_ID_PATTERN,
+} from '@kbn/human-readable-id';
+import type { DotKeysOf, DotObject, JsonValue, RecursivePartial } from '@kbn/utility-types';
 import { z } from '@kbn/zod/v4';
+import type { StepDeprecationInfo } from '../spec/deprecated_step_metadata';
 import type { SerializedError, WorkflowYaml } from '../spec/schema';
 import { WorkflowSchema } from '../spec/schema';
+
+export type { WorkflowYaml } from '../spec/schema';
 
 export enum ExecutionStatus {
   // In progress
   PENDING = 'pending',
   WAITING = 'waiting',
   WAITING_FOR_INPUT = 'waiting_for_input',
+  WAITING_FOR_CHILD = 'waiting_for_child',
   RUNNING = 'running',
 
   // Done
@@ -41,6 +50,7 @@ export const NonTerminalExecutionStatuses: readonly ExecutionStatus[] = [
   ExecutionStatus.PENDING,
   ExecutionStatus.WAITING,
   ExecutionStatus.WAITING_FOR_INPUT,
+  ExecutionStatus.WAITING_FOR_CHILD,
   ExecutionStatus.RUNNING,
 ] as const;
 
@@ -50,6 +60,10 @@ export enum ExecutionType {
 }
 export type ExecutionTypeUnion = `${ExecutionType}`;
 export const ExecutionTypeValues = Object.values(ExecutionType);
+
+export const WorkflowExecutionSortFields = ['createdAt', 'finishedAt'] as const;
+export type WorkflowExecutionSortField = (typeof WorkflowExecutionSortFields)[number];
+export type WorkflowExecutionSortOrder = 'asc' | 'desc';
 
 /**
  * An interface representing the state of a step scope during workflow execution.
@@ -117,6 +131,18 @@ export interface EsWorkflowExecution {
   stepExecutionIds?: string[];
   /** Caller-supplied execution metadata, separate from workflow inputs */
   metadata?: Record<string, unknown>;
+  /**
+   * Event-chain hop depth when scheduled by the event-driven trigger handler.
+   * Root copy survives partial `context` updates (same pattern as telemetry extraction).
+   */
+  eventChainDepth?: number;
+  /**
+   * Workflow ids that already ran earlier in this event chain (for cycle detection).
+   * Root copy survives partial `context` updates.
+   */
+  eventChainVisitedWorkflowIds?: string[];
+  /** Trigger dispatch id from event-driven scheduling (`context.metadata.eventId`), when set */
+  dispatchEventId?: string;
 }
 
 export interface ProviderInput {
@@ -207,6 +233,7 @@ export interface WorkflowExecutionDto {
   context?: Record<string, unknown>;
   traceId?: string; // APM trace ID for observability
   entryTransactionId?: string; // APM root transaction ID for trace embeddable
+  concurrencyGroupKey?: string; // Evaluated concurrency group key for grouping executions
 }
 
 export type WorkflowExecutionListItemDto = Omit<
@@ -219,6 +246,13 @@ export interface WorkflowExecutionListDto {
   page: number;
   size: number;
   total: number;
+}
+
+export interface WorkflowStepExecutionListDto {
+  results: EsWorkflowStepExecution[];
+  total: number;
+  page?: number;
+  size?: number;
 }
 
 // TODO: convert to actual elastic document spec
@@ -246,13 +280,22 @@ export type EsWorkflowCreate = Omit<
   'id' | 'createdAt' | 'createdBy' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'yaml' | 'deleted_at'
 >;
 
+export const MAX_WORKFLOW_YAML_LENGTH = 1_048_576;
+const MAX_BULK_CREATE_WORKFLOWS = 500;
+
 export const CreateWorkflowCommandSchema = z.object({
-  yaml: z.string(),
-  id: z.string().optional(),
+  yaml: z.string().max(MAX_WORKFLOW_YAML_LENGTH),
+  id: z
+    .string()
+    .min(HUMAN_READABLE_ID_MIN_LENGTH)
+    .max(HUMAN_READABLE_ID_MAX_LENGTH)
+    .regex(HUMAN_READABLE_ID_PATTERN)
+    .optional(),
 });
+export type CreateWorkflowCommand = z.infer<typeof CreateWorkflowCommandSchema>;
 
 export const BulkCreateWorkflowsCommandSchema = z.object({
-  workflows: z.array(CreateWorkflowCommandSchema),
+  workflows: z.array(CreateWorkflowCommandSchema).max(MAX_BULK_CREATE_WORKFLOWS),
 });
 
 export type BulkCreateWorkflowsCommand = z.infer<typeof BulkCreateWorkflowsCommandSchema>;
@@ -286,6 +329,7 @@ export const RunStepCommandSchema = z.object({
   workflowYaml: z.string(),
   workflowId: z.string().optional(), // Optional to allow for test step runs for unsaved workflows
   stepId: z.string(),
+  executionContext: z.record(z.string(), z.unknown()).optional(),
   contextOverride: z.record(z.string(), z.unknown()).optional(),
 });
 export type RunStepCommand = z.infer<typeof RunStepCommandSchema>;
@@ -306,7 +350,13 @@ export const TestWorkflowResponseSchema = z.object({
 });
 export type TestWorkflowResponseDto = z.infer<typeof TestWorkflowResponseSchema>;
 
-export type CreateWorkflowCommand = z.infer<typeof CreateWorkflowCommandSchema>;
+/** Result of scheduling a resume for a workflow execution that was waiting for human input. */
+export const ResumeWorkflowExecutionResponseSchema = z.object({
+  resumedBy: z.string(),
+});
+export type ResumeWorkflowExecutionResponseDto = z.infer<
+  typeof ResumeWorkflowExecutionResponseSchema
+>;
 
 export interface UpdatedWorkflowResponseDto {
   id: string;
@@ -331,6 +381,11 @@ export interface WorkflowDetailDto {
   valid: boolean;
 }
 
+export interface WorkflowPartialDetailDto extends Partial<WorkflowDetailDto> {
+  id: string;
+}
+export type WorkflowMgetResponseDto = WorkflowPartialDetailDto[];
+
 export interface WorkflowListItemDto {
   id: string;
   name: string;
@@ -338,7 +393,7 @@ export interface WorkflowListItemDto {
   enabled: boolean;
   definition: WorkflowYaml | null;
   createdAt: string;
-  history: WorkflowExecutionHistoryModel[];
+  history?: WorkflowExecutionHistoryModel[];
   tags?: string[];
   valid: boolean;
 }
@@ -378,7 +433,7 @@ export interface WorkflowStatsDto {
     enabled: number;
     disabled: number;
   };
-  executions: WorkflowExecutionsHistoryStats[];
+  executions?: WorkflowExecutionsHistoryStats[];
 }
 
 export interface WorkflowAggsDto {
@@ -434,6 +489,8 @@ export interface BaseConnectorContract {
   documentation?: string | null;
   /** API stability level derived from the OpenAPI `x-state` field */
   stability?: StepStabilityLevel;
+  /** Deprecation metadata for this step type. */
+  deprecation?: StepDeprecationInfo;
   examples?: ConnectorExamples;
   // Rich property handlers for completions, validation and decorations
   editorHandlers?: {
@@ -483,12 +540,74 @@ export interface InternalConnectorContract extends BaseConnectorContract {
   };
 }
 
-export interface StepPropertyHandler<T = unknown> {
+/**
+ * Editor handlers type, only used in the UI and extensions.
+ * Maintains type safety while allowing variance
+ */
+export interface EditorHandlers<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject
+> {
+  config?: EditorHandlersConfig<Config, Input>;
+  input?: EditorHandlersInput<Input, Config>;
+  dynamicSchema?: DynamicSchema<Input, Output, Config>;
+}
+
+export type EditorHandlersConfig<
+  Config extends z.ZodObject = z.ZodObject,
+  Input extends z.ZodType = z.ZodType
+> = {
+  [K in DotKeysOf<z.infer<Config>>]?: StepPropertyHandler<
+    DotObject<z.infer<Config>>[K],
+    z.infer<Config>,
+    Input extends z.ZodObject ? z.infer<Input> : Record<string, unknown>
+  >;
+};
+
+export type EditorHandlersInput<
+  Input extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject
+> = Input extends z.ZodObject
+  ? {
+      [K in DotKeysOf<z.infer<Input>>]?: StepPropertyHandler<
+        DotObject<z.infer<Input>>[K],
+        z.infer<Config>,
+        z.infer<Input>
+      >;
+    }
+  : {};
+
+/**
+ * Dynamic schema handlers for a step
+ */
+export interface DynamicSchema<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject
+> {
+  /**
+   * Dynamic Zod schema for validating step output based on input.
+   * Allows for more flexible output structure based on the specific input provided.
+   * @param input The input data for the step.
+   * @returns A Zod schema defining structure and validation rules for the output of the step.
+   */
+  getOutputSchema?(params: {
+    input: z.infer<Input>;
+    config: z.infer<Config>;
+  }): z.ZodType<z.infer<Output>>;
+}
+
+export interface StepPropertyHandler<
+  T = unknown,
+  TConfig extends Record<string, unknown> = Record<string, unknown>,
+  TInput extends Record<string, unknown> = Record<string, unknown>
+> {
   /**
    * Entity selection configuration for the property.
    * Provides a unified interface for search, resolution, and decoration of entity references.
    */
-  selection?: PropertySelectionHandler<Exclude<T, undefined>>;
+  selection?: PropertySelectionHandler<Exclude<T, undefined>, TConfig, TInput>;
   /**
    * Connector ID selection configuration for the property.
    * Used to resolve connector IDs for custom steps.
@@ -498,19 +617,35 @@ export interface StepPropertyHandler<T = unknown> {
   connectorIdSelection?: ConnectorIdSelectionHandler;
 }
 
-export interface PropertySelectionHandler<T = unknown> {
+type DependsOnValuePath = `config.${string}` | `input.${string}`;
+export interface PropertySelectionHandler<
+  T = unknown,
+  TConfig extends Record<string, unknown> = Record<string, unknown>,
+  TInput extends Record<string, unknown> = Record<string, unknown>
+> {
+  /**
+   * Dot paths (e.g. `config.proxy.ssl`, `input.owner`) whose values are passed in `context.values`
+   * and included in the selection cache key. If omitted or empty, `context.values` is `{ config: {}, input: {} }`.
+   */
+  dependsOnValues?: DependsOnValuePath[];
   /**
    * Search for options matching the input query.
    * Used by autocomplete dropdowns when the user types.
    */
-  search: (input: string, context: SelectionContext) => Promise<SelectionOption<T>[]>;
+  search: (
+    input: string,
+    context: SelectionContext<TConfig, TInput>
+  ) => Promise<SelectionOption<T>[]>;
 
   /**
    * Resolve an entity by its value.
    * Used when loading existing values or when a value is pasted.
    * Returns null if the entity is not found.
    */
-  resolve: (value: T, context: SelectionContext) => Promise<SelectionOption<T> | null>;
+  resolve: (
+    value: T,
+    context: SelectionContext<TConfig, TInput>
+  ) => Promise<SelectionOption<T> | null>;
 
   /**
    * Get detailed information for the current value.
@@ -519,7 +654,7 @@ export interface PropertySelectionHandler<T = unknown> {
    */
   getDetails: (
     input: string,
-    context: SelectionContext,
+    context: SelectionContext<TConfig, TInput>,
     option: SelectionOption<T> | null
   ) => Promise<SelectionDetails>;
 }
@@ -527,8 +662,8 @@ export interface PropertySelectionHandler<T = unknown> {
 export interface SelectionOption<T = unknown> {
   /** The value that will be stored in the YAML */
   value: T;
-  /** The label displayed in the UI */
-  label: string;
+  /** The label displayed in the UI (optional) */
+  label?: string;
   /** Description shown in completion popup or tooltips (optional) */
   description?: string;
   /** Extended documentation shown in side panel (optional) */
@@ -547,13 +682,35 @@ export interface SelectionDetails {
   }>;
 }
 
-export interface SelectionContext {
+/**
+ * Structured values of the current step, split by scope.
+ *
+ * Built from scalar leaf properties in the YAML step definition.
+ * Intermediate map nodes that have no scalar value are **not** represented;
+ * a missing key means "not yet defined in the YAML", not "empty object".
+ */
+export interface StepSelectionValues<
+  TConfig extends Record<string, unknown> = Record<string, unknown>,
+  TInput extends Record<string, unknown> = Record<string, unknown>
+> {
+  /** Root-level step properties (everything outside the `with` block). */
+  config: RecursivePartial<TConfig>;
+  /** Properties nested under the `with` block. */
+  input: RecursivePartial<TInput>;
+}
+
+export interface SelectionContext<
+  TConfig extends Record<string, unknown> = Record<string, unknown>,
+  TInput extends Record<string, unknown> = Record<string, unknown>
+> {
   /** The step type ID (e.g., "onechat.runAgent") */
   stepType: string;
   /** The property path ("config" or "input") */
   scope: 'config' | 'input';
   /** The property key (e.g., "agent_id") */
   propertyKey: string;
+  /** Sibling values of the current step, keyed by scope (only paths listed in `dependsOnValues` are populated). */
+  values: StepSelectionValues<TConfig, TInput>;
 }
 
 export interface ConnectorIdSelectionHandler {
@@ -580,8 +737,8 @@ export type ConnectorContractUnion =
   | InternalConnectorContract;
 
 export interface WorkflowsSearchParams {
-  size: number;
-  page: number;
+  size?: number;
+  page?: number;
   query?: string;
   createdBy?: string[];
   enabled?: boolean[];
@@ -597,3 +754,41 @@ export interface RequestOptions {
   /** Bulk body for elasticsearch.bulk step */
   bulkBody?: Array<Record<string, unknown>>;
 }
+
+export type WorkflowDiagnosticSeverity = 'error' | 'warning' | 'info';
+
+export interface WorkflowDiagnostic {
+  severity: WorkflowDiagnosticSeverity;
+  message: string;
+  source: string;
+  path?: (string | number)[];
+}
+export interface ValidateWorkflowResponseDto {
+  valid: boolean;
+  diagnostics: WorkflowDiagnostic[];
+  parsedWorkflow?: WorkflowYaml;
+}
+
+export interface GetAvailableConnectorsResponse {
+  connectorTypes: Record<string, ConnectorTypeInfo>;
+  totalConnectors: number;
+}
+
+export interface ChildWorkflowExecutionItem {
+  parentStepExecutionId: string;
+  workflowId: string;
+  workflowName: string;
+  executionId: string;
+  status: ExecutionStatus;
+  stepExecutions: WorkflowStepExecutionDto[];
+}
+
+/**
+ * Per-item result of a bulk workflow schedule call. The array is order- and
+ * length-preserving with respect to the input items: `results[i]` corresponds
+ * to `items[i]`.
+ */
+export type BulkScheduleWorkflowResult = Array<
+  | { status: 'scheduled'; workflowExecutionId: string }
+  | { status: 'error'; error: { message: string } }
+>;

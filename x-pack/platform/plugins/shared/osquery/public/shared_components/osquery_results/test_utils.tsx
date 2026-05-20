@@ -21,6 +21,7 @@ export const defaultLiveQueryDetails = {
     action_id: 'a77643d3-0876-4179-b077-24ed9f8c58f5',
     agents: ['e157a15c-6013-423b-a139-4eb41baf5be9'],
     expiration: '2022-09-08T15:03:43.580Z',
+    tags: ['linux', 'monitoring'],
     queries: [
       {
         action_id: DETAILS_ACTION_ID,

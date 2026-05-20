@@ -26,7 +26,7 @@ import { AppWithoutRouter } from '../../public/application/app';
 import { loadIndicesSuccess } from '../../public/application/store/actions';
 import { breadcrumbService } from '../../public/application/services/breadcrumbs';
 import { UiMetricService } from '../../public/application/services/ui_metric';
-import { notificationService } from '../../public/application/services/notification';
+import { NotificationService } from '../../public/application/services/notification';
 import { httpService } from '../../public/application/services/http';
 import { setUiMetricService } from '../../public/application/services/api';
 import { indexManagementStore } from '../../public/application/store';
@@ -155,7 +155,7 @@ export const getRowIndicesByStatus = (statusText: string) => {
 export const openMenuAndGetButtonText = async (rowIndex: number) => {
   const menu = await openMenu(rowIndex);
   return within(menu)
-    .getAllByRole('button')
+    .getAllByRole('menuitem')
     .map((btn) => (btn.textContent || '').trim())
     .filter((t) => t.length > 0);
 };
@@ -179,10 +179,11 @@ export const renderIndexApp = async (options?: {
   httpRequestsMockHelpers.setReloadIndicesResponse(reloadIndicesResponse ?? indices);
 
   // Mock initialization of services
+  const notifications = notificationServiceMock.createStartContract();
   const services: AppDependencies['services'] = {
     extensionsService: new ExtensionsService(),
     uiMetricService: new UiMetricService('index_management'),
-    notificationService,
+    notificationService: new NotificationService(notifications.toasts),
     httpService,
   };
   services.uiMetricService.setup(usageCollectionPluginMock.createSetupContract());
@@ -191,7 +192,6 @@ export const renderIndexApp = async (options?: {
 
   httpService.setup(httpSetup);
   breadcrumbService.setup(() => undefined);
-  notificationService.setup(notificationServiceMock.createStartContract());
 
   const store = indexManagementStore(services);
 

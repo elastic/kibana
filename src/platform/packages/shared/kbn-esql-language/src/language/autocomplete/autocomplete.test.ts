@@ -34,7 +34,7 @@ import {
   TIME_PICKER_SUGGESTION,
 } from './__tests__/helpers';
 import { suggest } from './autocomplete';
-import { editorExtensions, views } from '../../__tests__/language/helpers';
+import { datasets, editorExtensions, views } from '../../__tests__/language/helpers';
 import { mapRecommendedQueriesFromExtensions } from './recommended_queries_helpers';
 
 const getRecommendedQueriesSuggestionsFromTemplates = (
@@ -263,6 +263,16 @@ describe('autocomplete', () => {
         'doubleField'
       );
     });
+
+    it('suggests generated STATS columns after inline WHERE filters', async () => {
+      const { suggest: suggestTest } = await setup();
+      const suggestions = await suggestTest(
+        `FROM index | STATS COUNT() WHERE integerField > 0 | ${command} /`
+      );
+      const suggestionTexts = suggestions.map((value) => value.text);
+
+      expect(suggestionTexts).toContain('`COUNT() WHERE integerField > 0`');
+    });
   });
 
   // @TODO: get updated eval block from main
@@ -365,13 +375,18 @@ describe('autocomplete', () => {
     });
 
     // FROM source
-    testSuggestions('FROM k/', ['index1', 'index2', ...views.map((v) => v.name)], undefined, [
-      ,
+    testSuggestions(
+      'FROM k/',
+      ['index1', 'index2', ...views.map((v) => v.name), ...datasets.map((d) => d.name)],
+      undefined,
       [
-        { name: 'index1', hidden: false },
-        { name: 'index2', hidden: false },
-      ],
-    ]);
+        ,
+        [
+          { name: 'index1', hidden: false },
+          { name: 'index2', hidden: false },
+        ],
+      ]
+    );
 
     // FROM source METADATA
     recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates('', 'dateField');
@@ -654,6 +669,7 @@ describe('autocomplete', () => {
           withAutoSuggest({ text: 'index1' } as ISuggestionItem),
           withAutoSuggest({ text: 'index2' } as ISuggestionItem),
           ...views.map((v) => withAutoSuggest({ text: v.name } as ISuggestionItem)),
+          ...datasets.map((d) => withAutoSuggest({ text: d.name } as ISuggestionItem)),
         ],
         undefined,
         [
@@ -671,6 +687,7 @@ describe('autocomplete', () => {
           withAutoSuggest({ text: 'index1' } as ISuggestionItem),
           withAutoSuggest({ text: 'index2' } as ISuggestionItem),
           ...views.map((v) => withAutoSuggest({ text: v.name } as ISuggestionItem)),
+          ...datasets.map((d) => withAutoSuggest({ text: d.name } as ISuggestionItem)),
         ],
         undefined,
         [
@@ -826,7 +843,7 @@ describe('autocomplete', () => {
         policies
           .map((p) => `${getSafeInsertText(p.name)} `)
           .map(attachTriggerCommand)
-          .map((s) => ({ ...s, rangeToReplace: { start: 17, end: 20 } }))
+          .map((s) => ({ ...s, rangeToReplace: { start: 16, end: 19 } }))
       );
       testSuggestions('FROM a | ENRICH policy /', ['ON ', 'WITH ', '| '].map(attachTriggerCommand));
 
@@ -850,14 +867,14 @@ describe('autocomplete', () => {
           'col0 = ',
           ...getPolicyFields('policy').map((name) => ({
             text: name,
-            rangeToReplace: { start: 43, end: 47 },
+            rangeToReplace: { start: 42, end: 46 },
           })),
         ]);
         testSuggestions(
           'FROM a | ENRICH policy ON @timestamp WITH col0 = othe/',
           getPolicyFields('policy').map((name) => ({
             text: name,
-            rangeToReplace: { start: 50, end: 54 },
+            rangeToReplace: { start: 49, end: 53 },
           }))
         );
       });
@@ -1127,6 +1144,11 @@ describe('autocomplete', () => {
 
   describe('IN operator with lists', () => {
     testSuggestions('FROM a | WHERE integerField IN (doubleField /', [{ text: ',' }]);
+
+    testSuggestions(
+      'FROM kibana_sample_data_logs | WHERE agent NOT IN (FROM kibana_sample_data_logs)/',
+      ['AND $0', 'OR $0', '| ']
+    );
   });
 
   describe('Replacement ranges are attached when needed', () => {

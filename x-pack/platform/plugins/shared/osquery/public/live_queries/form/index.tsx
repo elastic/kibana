@@ -60,7 +60,8 @@ type FormType = 'simple' | 'steps';
 
 interface LiveQueryFormProps {
   defaultValue?: DefaultLiveQueryFormFields;
-  onSuccess?: () => void;
+  onSuccess?: (actionId: string) => void;
+  redirectsOnSuccess?: boolean;
   queryField?: boolean;
   ecsMappingField?: boolean;
   formType?: FormType;
@@ -72,6 +73,7 @@ interface LiveQueryFormProps {
 const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   defaultValue,
   onSuccess,
+  redirectsOnSuccess,
   queryField = true,
   formType = 'steps',
   enabled = true,
@@ -181,7 +183,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     () => (
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="flexEnd">
-          {formType === 'steps' && queryType !== 'pack' && (
+          {!isHistoryEnabled && formType === 'steps' && queryType !== 'pack' && (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 disabled={!permissions.writeSavedQueries || resultsStatus === 'disabled'}
@@ -211,6 +213,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       </EuiFlexItem>
     ),
     [
+      isHistoryEnabled,
       formType,
       queryType,
       permissions.writeSavedQueries,
@@ -334,27 +337,30 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
                 <LiveQueryQueryField handleSubmitForm={handleSubmit(onSubmit)} />
               </EuiFlexItem>
               {submitButtonContent}
-              <EuiFlexItem>
-                {isHistoryEnabled ? (
-                  <PackQueriesStatusTable
-                    actionId={liveQueryActionId}
-                    data={liveQueryDetails?.queries}
-                    startDate={liveQueryDetails?.['@timestamp']}
-                    expirationDate={liveQueryDetails?.expiration}
-                    agentIds={liveQueryDetails?.agents}
-                    showResultsHeader
-                    addToTimeline={addToTimeline}
-                  />
-                ) : (
-                  resultsStepContent
-                )}
-              </EuiFlexItem>
+              {data?.action_id && !redirectsOnSuccess ? (
+                <EuiFlexItem>
+                  {isHistoryEnabled ? (
+                    <PackQueriesStatusTable
+                      actionId={liveQueryActionId}
+                      data={liveQueryDetails?.queries}
+                      startDate={liveQueryDetails?.['@timestamp']}
+                      expirationDate={liveQueryDetails?.expiration}
+                      agentIds={liveQueryDetails?.agents}
+                      showResultsHeader
+                      tags={liveQueryDetails?.tags}
+                      addToTimeline={addToTimeline}
+                    />
+                  ) : (
+                    resultsStepContent
+                  )}
+                </EuiFlexItem>
+              ) : null}
             </>
           )}
         </EuiFlexGroup>
       </FormProvider>
 
-      {showSavedQueryFlyout ? (
+      {!isHistoryEnabled && showSavedQueryFlyout ? (
         <SavedQueryFlyout onClose={handleCloseSaveQueryFlyout} defaultValue={serializedData} />
       ) : null}
     </>

@@ -7,12 +7,15 @@
 
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
 
 export interface InferenceEndpoint {
   inferenceId: string;
   taskType: InferenceTaskType;
   service: string;
   serviceSettings?: Record<string, unknown>;
+  // Fix this typing when ES response is updated to include metadata
+  metadata?: EisInferenceEndpointMetadata;
 }
 
 /**
@@ -33,6 +36,7 @@ export const getInferenceEndpoints = async ({
     taskType: ep.task_type,
     service: ep.service,
     serviceSettings: ep.service_settings as Record<string, unknown> | undefined,
+    metadata: 'metadata' in ep ? (ep.metadata as Record<string, unknown>) : {},
   }));
 
   if (taskType) {

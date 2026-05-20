@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
+import type { AsCodeFilter, AsCodeGroupFilter } from '@kbn/as-code-filters-schema';
 import { FilterStateStore } from '@kbn/es-query-constants';
 import { fromStoredFilter } from './from_stored_filter';
 import {
@@ -529,7 +529,7 @@ describe('fromStoredFilter', () => {
         query: {},
       };
 
-      const result = fromStoredFilter(storedFilter) as AsCodeFilter;
+      const result = fromStoredFilter(storedFilter)!;
 
       expect(isGroupFilter(result)).toBe(true);
       if (isGroupFilter(result)) {
@@ -558,7 +558,7 @@ describe('fromStoredFilter', () => {
               ],
             },
           ],
-        });
+        } satisfies AsCodeGroupFilter['group']);
       }
     });
   });
@@ -598,7 +598,8 @@ describe('fromStoredFilter', () => {
         expect(result.dsl.query).toEqual(spatialFilter.query);
         expect(result.label).toBe('intersects shape');
         expect(result.disabled).toBe(false);
-        expect(result.negate).toBe(false);
+        // negate is omitted when negate is false
+        expect(result.negate).toBeUndefined();
       }
     });
 

@@ -33,25 +33,17 @@ import type { NetworkExpandableFlyoutProps } from './network_details';
 import { NetworkPanel, NetworkPanelKey, NetworkPreviewPanelKey } from './network_details';
 import { Flyouts } from './document_details/shared/constants/flyouts';
 import {
-  DocumentDetailsAlertReasonPanelKey,
   DocumentDetailsAnalyzerPanelKey,
-  DocumentDetailsIsolateHostPanelKey,
   DocumentDetailsLeftPanelKey,
   DocumentDetailsPreviewPanelKey,
   DocumentDetailsRightPanelKey,
   DocumentDetailsSessionViewPanelKey,
 } from './document_details/shared/constants/panel_keys';
-import type { IsolateHostPanelProps } from './document_details/isolate_host';
-import { IsolateHostPanel } from './document_details/isolate_host';
-import { IsolateHostPanelProvider } from './document_details/isolate_host/context';
 import type { DocumentDetailsProps } from './document_details/shared/types';
 import { DocumentDetailsProvider } from './document_details/shared/context';
 import { RightPanel } from './document_details/right';
 import { LeftPanel } from './document_details/left';
 import { PreviewPanel } from './document_details/preview';
-import type { AlertReasonPanelProps } from './document_details/alert_reason';
-import { AlertReasonPanel } from './document_details/alert_reason';
-import { AlertReasonPanelProvider } from './document_details/alert_reason/context';
 import type { RulePanelExpandableFlyoutProps } from './rule_details/right';
 import { RulePanel, RulePanelKey, RulePreviewPanelKey } from './rule_details/right';
 import type { UserPanelExpandableFlyoutProps } from './entity_details/user_right';
@@ -77,10 +69,9 @@ import type { ServiceDetailsExpandableFlyoutProps } from './entity_details/servi
 import { ServiceDetailsPanel, ServiceDetailsPanelKey } from './entity_details/service_details_left';
 import {
   ATTACK_DETAILS_LEFT_PANEL_ARIA_LABEL,
+  ATTACK_DETAILS_PREVIEW_PANEL_ARIA_LABEL,
   ATTACK_DETAILS_RIGHT_PANEL_ARIA_LABEL,
-  DOCUMENT_DETAILS_ALERT_REASON_PANEL_ARIA_LABEL,
   DOCUMENT_DETAILS_ANALYZER_PANEL_ARIA_LABEL,
-  DOCUMENT_DETAILS_ISOLATE_HOST_PANEL_ARIA_LABEL,
   DOCUMENT_DETAILS_LEFT_PANEL_ARIA_LABEL,
   DOCUMENT_DETAILS_PREVIEW_PANEL_ARIA_LABEL,
   DOCUMENT_DETAILS_RIGHT_PANEL_ARIA_LABEL,
@@ -123,11 +114,12 @@ import {
 import { FindingsVulnerabilityPanel } from './csp_details/vulnerabilities_flyout/vulnerabilities_right';
 import {
   AttackDetailsLeftPanelKey,
+  AttackDetailsPreviewPanelKey,
   AttackDetailsRightPanelKey,
 } from './attack_details/constants/panel_keys';
 import type { AttackDetailsProps } from './attack_details/types';
 import { AttackDetailsProvider } from './attack_details/context';
-import { AttackDetailsPanel } from './attack_details';
+import { AttackDetailsPreviewPanel, AttackDetailsRightPanel } from './attack_details';
 import { AttackDetailsLeftPanel } from './attack_details/left';
 import type { IOCDetailsProps } from './ioc_details/types';
 import { IOCDetailsProvider } from './ioc_details/context';
@@ -173,15 +165,6 @@ export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredP
     'aria-label': DOCUMENT_DETAILS_PREVIEW_PANEL_ARIA_LABEL,
   },
   {
-    key: DocumentDetailsAlertReasonPanelKey,
-    component: (props) => (
-      <AlertReasonPanelProvider {...(props as AlertReasonPanelProps).params}>
-        <AlertReasonPanel />
-      </AlertReasonPanelProvider>
-    ),
-    'aria-label': DOCUMENT_DETAILS_ALERT_REASON_PANEL_ARIA_LABEL,
-  },
-  {
     key: GraphGroupedNodePreviewPanelKey,
     component: (props) => {
       // TODO Fix typing issue here
@@ -201,15 +184,6 @@ export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredP
       <RulePanel {...(props as RulePanelExpandableFlyoutProps).params} isPreviewMode />
     ),
     'aria-label': RULE_PREVIEW_PANEL_ARIA_LABEL,
-  },
-  {
-    key: DocumentDetailsIsolateHostPanelKey,
-    component: (props) => (
-      <IsolateHostPanelProvider {...(props as IsolateHostPanelProps).params}>
-        <IsolateHostPanel path={props.path as IsolateHostPanelProps['path']} />
-      </IsolateHostPanelProvider>
-    ),
-    'aria-label': DOCUMENT_DETAILS_ISOLATE_HOST_PANEL_ARIA_LABEL,
   },
   {
     key: DocumentDetailsAnalyzerPanelKey,
@@ -326,10 +300,19 @@ export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredP
     key: AttackDetailsRightPanelKey,
     component: (props) => (
       <AttackDetailsProvider {...(props as AttackDetailsProps).params}>
-        <AttackDetailsPanel path={props.path as AttackDetailsProps['path']} />
+        <AttackDetailsRightPanel path={props.path as AttackDetailsProps['path']} />
       </AttackDetailsProvider>
     ),
     'aria-label': ATTACK_DETAILS_RIGHT_PANEL_ARIA_LABEL,
+  },
+  {
+    key: AttackDetailsPreviewPanelKey,
+    component: (props) => (
+      <AttackDetailsProvider {...(props as AttackDetailsProps).params} isPreviewMode={true}>
+        <AttackDetailsPreviewPanel path={props.path as AttackDetailsProps['path']} />
+      </AttackDetailsProvider>
+    ),
+    'aria-label': ATTACK_DETAILS_PREVIEW_PANEL_ARIA_LABEL,
   },
   {
     key: AttackDetailsLeftPanelKey,

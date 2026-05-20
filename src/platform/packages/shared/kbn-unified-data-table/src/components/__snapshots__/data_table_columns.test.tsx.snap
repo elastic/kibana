@@ -10,26 +10,24 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -67,26 +65,24 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -122,26 +118,24 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -330,26 +324,24 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": false,
@@ -536,26 +528,24 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -729,26 +719,24 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -925,26 +913,24 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -1129,26 +1115,24 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -1338,26 +1322,24 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": false,
@@ -1526,26 +1508,24 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": false,
@@ -1717,26 +1697,24 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": false,
@@ -1923,26 +1901,24 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -2115,26 +2091,24 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -2310,26 +2284,24 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": false,
@@ -2518,26 +2490,24 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {
@@ -2725,26 +2695,24 @@ Array [
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy name"
             id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
         Object {
           "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
           "iconProps": Object {
             "size": "m",
           },
-          "iconType": "copyClipboard",
+          "iconType": "copy",
           "label": <Memo(MemoizedFormattedMessage)
             defaultMessage="Copy column"
             id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
           />,
           "onClick": [Function],
-          "size": "xs",
         },
       ],
       "showHide": Object {

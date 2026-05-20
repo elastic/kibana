@@ -4,11 +4,15 @@
     "outDir": "target/types",
     "types": ["jest", "node"]
   },
-  "include": ["**/*.ts"],
+  "include": [
+    "**/*.ts",
+    "config_builder/tests/integrations/download_integrations_panels.js"
+  ],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/as-code-filters-schema",
+    "@kbn/as-code-data-views-schema",
     "@kbn/as-code-filters-transforms",
     "@kbn/data-views-plugin",
     "@kbn/event-annotation-common",
@@ -22,8 +26,8 @@
     "@kbn/lens-common",
     "@kbn/chart-expressions-common",
     "@kbn/expression-xy-plugin",
-    "@kbn/utility-types",
     "@kbn/transpose-utils",
     "@kbn/palettes",
+    "@kbn/crypto-browser",
   ]
 }

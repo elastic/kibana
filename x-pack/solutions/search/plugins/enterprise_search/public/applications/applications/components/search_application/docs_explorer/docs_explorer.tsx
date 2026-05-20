@@ -144,6 +144,10 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
   return (
     <>
       <EuiPopover
+        aria-label={i18n.translate(
+          'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.configuration.popover.ariaLabel',
+          { defaultMessage: 'Configuration options' }
+        )}
         anchorPosition="downCenter"
         isOpen={showConfiguration}
         panelPaddingSize="none"
@@ -153,7 +157,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             {hasSchemaConflicts && (
               <>
                 <EuiFlexItem>
-                  <EuiIcon type="alert" color="danger" />
+                  <EuiIcon aria-hidden type="warning" color="danger" />
                 </EuiFlexItem>
                 {!isTourClosed && <EuiSpacer size="xs" />}
               </>
@@ -198,7 +202,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             <EuiFlexItem>
               <EuiButtonEmpty
                 color="primary"
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 iconSide="right"
                 onClick={setCloseConfiguration}
               >
@@ -230,7 +234,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
 
           <EuiContextMenuItem
             key="Indices"
-            icon="tableDensityExpanded"
+            icon="tableDensityLow"
             onClick={() =>
               navigateToUrl(
                 generateEncodedPath(SEARCH_APPLICATION_CONTENT_PATH, {
@@ -249,7 +253,13 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
           </EuiContextMenuItem>
           <EuiContextMenuItem
             key="Schema"
-            icon={hasSchemaConflicts ? <EuiIcon type="warning" color="danger" /> : 'kqlField'}
+            icon={
+              hasSchemaConflicts ? (
+                <EuiIcon aria-hidden type="warning" color="danger" />
+              ) : (
+                'queryField'
+              )
+            }
             onClick={() =>
               navigateToUrl(
                 generateEncodedPath(SEARCH_APPLICATION_CONTENT_PATH, {
@@ -323,7 +333,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
           <EuiHorizontalRule margin="none" />
           <EuiContextMenuItem
             key="delete"
-            icon={<EuiIcon type="trash" color="danger" />}
+            icon={<EuiIcon aria-hidden type="trash" color="danger" />}
             onClick={() => {
               if (searchApplicationData) {
                 openDeleteSearchApplicationModal();

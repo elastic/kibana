@@ -25,7 +25,7 @@ describe('Type checking with TypeScript compiler', () => {
 
     // The expected errors inside the tests are in the following lines
     const errorLines = errorsByLine.map((error) => error.lineNumber);
-    expect(errorLines).toStrictEqual([46, 54, 61, 69, 90]);
+    expect(errorLines).toStrictEqual([46, 54, 61, 69, 91]);
 
     expect(errorsByLine).toMatchInlineSnapshot(`
       Array [
@@ -54,7 +54,7 @@ describe('Type checking with TypeScript compiler', () => {
           ],
         },
         Object {
-          "errorMessage": "Type '\\"invalid_type\\"' is not assignable to type '\\"boolean\\" | \\"object\\" | \\"keyword\\" | \\"text\\" | \\"date_nanos\\" | \\"date\\" | \\"byte\\" | \\"double\\" | \\"float\\" | \\"integer\\" | \\"long\\" | \\"short\\"'.",
+          "errorMessage": "Type '\\"invalid_type\\"' is not assignable to type '\\"boolean\\" | \\"object\\" | \\"keyword\\" | \\"text\\" | \\"date_nanos\\" | \\"date\\" | \\"flattened\\" | \\"byte\\" | \\"double\\" | \\"float\\" | \\"integer\\" | \\"long\\" | \\"short\\"'.",
           "lineNumber": 69,
           "tsErrorLine": Array [
             "Type Error Explanation: not_mapped is not defined in the mapping",
@@ -63,10 +63,10 @@ describe('Type checking with TypeScript compiler', () => {
         },
         Object {
           "errorMessage": "Property 'unknown' does not exist on type '{ name: TextMapping; age: IntegerMapping; }'.",
-          "lineNumber": 90,
+          "lineNumber": 91,
           "tsErrorLine": Array [
             "Type Error Explanation: Unknown object nested mapping properties are not allowed",
-            "Error Line [90]: export const unknownMappingErrors = objectMapping.properties.nestedObj.properties.unknown;",
+            "Error Line [91]: export const unknownMappingErrors = objectMapping.properties.nestedObj.properties.unknown;",
           ],
         },
       ]
@@ -184,6 +184,39 @@ describe('Type checking with TypeScript compiler', () => {
           "tsErrorLine": Array [
             "Type Error Explanation: a is a string | string[], not a number[]",
             "Error Line [133]: a?: number[];",
+          ],
+        },
+      ]
+    `);
+  });
+
+  it('should default and restrict dynamic for object mappings', () => {
+    const fixturePath = path.join(__dirname, '__fixture__', 'object_dynamic_example.ts');
+
+    const program = createProgramForFixture(fixturePath);
+    const diagnostics = getDiagnosticsIgnoringTsIgnores(fixturePath, program);
+
+    const errorsByLine = groupDiagnosticsByLine(fixturePath, diagnostics);
+
+    const errorLines = errorsByLine.map((error) => error.lineNumber);
+    expect(errorLines).toStrictEqual([30, 36]);
+
+    expect(errorsByLine).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "errorMessage": "Type 'true' is not assignable to type 'StrictDynamic | undefined'.",
+          "lineNumber": 30,
+          "tsErrorLine": Array [
+            "Type Error Explanation: true is not an allowed object dynamic value",
+            "Error Line [30]: dynamic: true,",
+          ],
+        },
+        Object {
+          "errorMessage": "Type '\\"runtime\\"' is not assignable to type 'StrictDynamic | undefined'.",
+          "lineNumber": 36,
+          "tsErrorLine": Array [
+            "Type Error Explanation: runtime is not an allowed object dynamic value",
+            "Error Line [36]: dynamic: 'runtime',",
           ],
         },
       ]

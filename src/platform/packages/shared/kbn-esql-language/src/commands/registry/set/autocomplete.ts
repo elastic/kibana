@@ -15,12 +15,12 @@ import {
   isUnknownNode,
   within,
 } from '@elastic/esql';
-import { handleFragment } from '../../definitions/utils/autocomplete/helpers';
 import { getSettingsCompletionItems } from '../../definitions/utils/settings';
 import { SuggestionCategory } from '../../../..';
 import { semiColonCompleteItem, assignCompletionItem } from '../complete_items';
 import { type ICommandCallbacks, type ICommandContext, type ISuggestionItem } from '../types';
 import { getCompletionItemsBySettingName } from './utils';
+import { ReplacementRangeStrategyKind } from '../../../language/autocomplete/utils/prefix_range';
 
 // SET <setting> = <value>;
 export async function autocomplete(
@@ -78,28 +78,25 @@ export async function autocomplete(
   // SET <setting> = "/  --- Within the value quotes.
   if (isStringLiteral(settingRightSide)) {
     if (cursorPosition && within(cursorPosition, settingRightSide)) {
-      const isFragmentComplete = () => {
-        return settingRightSide.valueUnquoted.length > 0 && innerText.endsWith('"');
-      };
-      const getSuggestionsForIncomplete = (): ISuggestionItem[] => {
-        return settingsValueCompletions.map((item) => {
-          return {
-            ...item,
-            rangeToReplace: {
-              start: settingRightSide.location.min + 1,
-              end: innerText.length,
-            },
-          };
-        });
-      };
-      const getSuggestionsForComplete = () => [];
+      const isComplete = settingRightSide.valueUnquoted.length > 0 && innerText.endsWith('"');
 
-      return handleFragment(
-        innerText,
-        isFragmentComplete,
-        getSuggestionsForIncomplete,
-        getSuggestionsForComplete
-      );
+      if (isComplete) {
+        return [];
+      }
+
+      const valueStartOffset = settingRightSide.location.min + 1;
+      const closingQuoteOffset = query.indexOf('"', valueStartOffset);
+      const valueEndOffset = closingQuoteOffset === -1 ? query.length : closingQuoteOffset;
+      const typedValue = query.substring(valueStartOffset, valueEndOffset);
+
+      return settingsValueCompletions.map((item) => ({
+        ...item,
+        replacementRangeStrategy: {
+          kind: ReplacementRangeStrategyKind.WHOLE_SCOPE,
+          scopeText: typedValue,
+          startOffset: valueStartOffset,
+        },
+      }));
     }
   }
 

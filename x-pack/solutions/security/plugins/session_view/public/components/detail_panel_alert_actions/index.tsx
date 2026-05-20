@@ -85,7 +85,7 @@ export const DetailPanelAlertActions = ({
         <EuiButtonIcon
           display="empty"
           size="s"
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           aria-label={i18n.translate('xpack.sessionView.detailPanelAlertListItem.moreButton', {
             defaultMessage: 'More',
           })}
@@ -98,7 +98,7 @@ export const DetailPanelAlertActions = ({
       panelPaddingSize="none"
       anchorPosition="leftCenter"
     >
-      <EuiContextMenuPanel size="s" items={menuItems} />
+      <EuiContextMenuPanel items={menuItems} />
     </EuiPopover>
   );
 };

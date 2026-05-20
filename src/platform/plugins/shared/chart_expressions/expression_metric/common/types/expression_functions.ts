@@ -57,7 +57,6 @@ export interface MetricArguments {
   secondaryAlign: MetricStyle['extraTextAlign'];
   iconAlign: MetricStyle['iconAlign'];
   valueFontSize: MetricStyle['valueFontSize'];
-  titleWeight: MetricStyle['titleWeight'];
   primaryPosition: MetricStyle['valuePosition'];
   color?: string;
   icon?: string;
@@ -66,7 +65,7 @@ export interface MetricArguments {
   minTiles?: number;
   inspectorTableId: string;
   secondaryLabelPosition: SecondaryMetricProps['labelPosition'];
-  applyColorTo: 'background' | 'value';
+  applyColorTo?: 'background' | 'value';
 }
 
 export type MetricInput = Datatable;

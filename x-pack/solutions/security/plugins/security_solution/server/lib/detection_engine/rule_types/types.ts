@@ -32,6 +32,8 @@ import type { Filter } from '@kbn/es-query';
 
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { DocLinksServiceSetup } from '@kbn/core/server';
+import type { EntityStoreStartContract, EntityStoreCRUDClient } from '@kbn/entity-store/server';
+import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type { RulePreviewLoggedRequest } from '../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import type { RuleResponseAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
 import type { ConfigType } from '../../../config';
@@ -69,6 +71,7 @@ export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   success: boolean;
   warning: boolean;
   warningMessages: string[];
+  alertsCandidateCount?: number;
   suppressedAlertsCount?: number;
   totalEventsFound?: number;
   loggedRequests?: RulePreviewLoggedRequest[];
@@ -99,6 +102,7 @@ export interface SecuritySharedParams<TParams extends RuleParams = RuleParams> {
   experimentalFeatures: ExperimentalFeatures;
   intendedTimestamp: Date | undefined;
   spaceId: string;
+  entityStoreCrudClient?: EntityStoreCRUDClient;
   ignoreFields: Record<string, boolean>;
   ignoreFieldsRegexes: string[];
   eventsTelemetry: ITelemetryEventsSender | undefined;
@@ -159,6 +163,8 @@ export interface CreateSecurityRuleTypeWrapperProps {
   eventsTelemetry: ITelemetryEventsSender | undefined;
   licensing: LicensingPluginSetup;
   scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
+  endpointAppContextService: EndpointAppContextService;
+  getEntityStore: () => Promise<EntityStoreStartContract>;
 }
 
 export type CreateSecurityRuleTypeWrapper = (
@@ -337,12 +343,16 @@ export interface SearchAfterAndBulkCreateReturnType {
   searchAfterTimes: string[];
   enrichmentTimes: string[];
   bulkCreateTimes: string[];
+  /**
+   * The number of detected alerts. Suppression hasn't been applied yet.
+   */
+  alertsCandidateCount?: number;
+  suppressedAlertsCount?: number;
   createdSignalsCount: number;
   createdSignals: unknown[];
   errors: string[];
   userError?: boolean;
   warningMessages: string[];
-  suppressedAlertsCount?: number;
   totalEventsFound?: number;
   loggedRequests?: RulePreviewLoggedRequest[];
 }

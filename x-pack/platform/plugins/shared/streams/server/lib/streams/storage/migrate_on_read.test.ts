@@ -38,6 +38,7 @@ function createCompleteWiredStreamDefinition(overrides: any = {}) {
   return {
     name: 'test-stream',
     description: 'Test stream',
+    type: 'wired' as const,
     updated_at: new Date().toISOString(),
     query_streams: [],
     ingest: {
@@ -59,6 +60,7 @@ function createCompleteClassicStreamDefinition(overrides: any = {}) {
   return {
     name: 'test-classic-stream',
     description: 'Test classic stream',
+    type: 'classic' as const,
     updated_at: new Date().toISOString(),
     query_streams: [],
     ingest: {
@@ -435,6 +437,60 @@ describe('migrateOnRead', () => {
       };
 
       expect(() => migrateOnRead(groupStreamDefinition)).not.toThrow();
+    });
+  });
+
+  describe('type discriminator migration', () => {
+    it('should add type: wired for definitions with ingest.wired', () => {
+      const { type: _omitted, ...definition } = createCompleteWiredStreamDefinition();
+
+      const result = migrateOnRead(definition);
+      expect(result.type).toBe('wired');
+      expect(mockStreamsAsserts).toHaveBeenCalled();
+    });
+
+    it('should add type: classic for definitions with ingest.classic', () => {
+      const { type: _omitted, ...definition } = createCompleteClassicStreamDefinition();
+
+      const result = migrateOnRead(definition);
+      expect(result.type).toBe('classic');
+      expect(mockStreamsAsserts).toHaveBeenCalled();
+    });
+
+    it('should add type: query for definitions without an ingest key', () => {
+      const definition = {
+        name: 'my-query-stream',
+        description: 'A query stream',
+        updated_at: new Date().toISOString(),
+        query_streams: [],
+        query: { view: 'my-view', esql: 'FROM logs | LIMIT 10' },
+      };
+
+      const result = migrateOnRead(definition);
+      expect(result.type).toBe('query');
+      expect(mockStreamsAsserts).toHaveBeenCalled();
+    });
+
+    it('should throw for documents that have ingest but neither wired nor classic', () => {
+      const definition = {
+        name: 'corrupted-stream',
+        description: 'Corrupted',
+        updated_at: new Date().toISOString(),
+        query_streams: [],
+        ingest: { lifecycle: { dsl: {} } },
+      };
+
+      expect(() => migrateOnRead(definition)).toThrow(
+        "Cannot determine stream type: document has an 'ingest' key but it does not contain 'wired' or 'classic'"
+      );
+    });
+
+    it('should not modify type if already present', () => {
+      const definition = createCompleteWiredStreamDefinition();
+      definition.type = 'wired';
+
+      migrateOnRead(definition);
+      expect(mockStreamsAsserts).not.toHaveBeenCalled();
     });
   });
 });

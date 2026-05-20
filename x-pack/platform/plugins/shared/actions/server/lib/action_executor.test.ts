@@ -31,6 +31,7 @@ import { finished } from 'stream/promises';
 import { PassThrough } from 'stream';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { createTaskRunError, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { ConnectorAuthorizationError } from '@kbn/connector-specs';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import type { ConnectorRateLimiter } from './connector_rate_limiter';
 import { createMockInMemoryConnector } from '../application/connector/mocks';
@@ -1514,6 +1515,51 @@ describe('Action Executor', () => {
       });
     });
 
+    test(`${label} returns structured error result when executor throws ConnectorAuthorizationError`, async () => {
+      const err = new ConnectorAuthorizationError({
+        authMethod: 'oauth_authorization_code',
+        reason: 'refresh_token_expired',
+        message: 'Refresh token expired. User must re-authorize.',
+      });
+      err.stack = 'foo error\n  stack 1\n  stack 2\n  stack 3';
+      (
+        connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+      ).mockRejectedValueOnce(err);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        connectorSavedObject
+      );
+      connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+      let executorResult;
+      if (executeUnsecure) {
+        executorResult = await actionExecutor.executeUnsecured(executeUnsecuredParams);
+      } else {
+        executorResult = await actionExecutor.execute(executeParams);
+      }
+
+      expect(executorResult).toEqual({
+        actionId: CONNECTOR_ID,
+        status: 'error',
+        message: 'an error occurred while running the action',
+        serviceMessage: 'Refresh token expired. User must re-authorize.',
+        errorName: 'ConnectorAuthorizationError',
+        errorMeta: {
+          connectorName: '1',
+          authMethod: 'oauth_authorization_code',
+          reason: 'refresh_token_expired',
+        },
+        retry: false,
+        errorSource: TaskErrorSource.USER,
+      });
+      expect(loggerMock.warn).toBeCalledWith(
+        'action execution failure: test:1: 1: an error occurred while running the action: Refresh token expired. User must re-authorize.'
+      );
+      expect(loggerMock.error).toBeCalledWith(err, {
+        error: { stack_trace: 'foo error\n  stack 1\n  stack 2\n  stack 3' },
+        tags: ['test', '1', 'action-run-failed', 'user-error'],
+      });
+    });
+
     test(`${label} logs warning when executor returns invalid status`, async () => {
       (
         connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
@@ -1631,6 +1677,46 @@ describe('Action Executor', () => {
       });
     });
   }
+
+  describe('schema validation on execute', () => {
+    test('returns error result when params fail Zod validation', async () => {
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        connectorSavedObject
+      );
+      connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+      const result = await actionExecutor.execute({
+        ...executeParams,
+        params: { foo: 'not-a-boolean' },
+      });
+
+      expect(result.status).toBe('error');
+      expect(result.message).toMatch(/error validating action params/);
+      expect(result.errorSource).toBe(TaskErrorSource.USER);
+      expect(connectorType.executor).not.toHaveBeenCalled();
+    });
+
+    test('returns error result when config fails Zod validation against saved object', async () => {
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        connectorSavedObject
+      );
+      const typeWithStringBar: jest.Mocked<ConnectorType> = {
+        ...connectorType,
+        validate: {
+          ...connectorType.validate,
+          config: { schema: z.object({ bar: z.string() }) },
+        },
+      };
+      connectorTypeRegistry.get.mockReturnValueOnce(typeWithStringBar);
+
+      const result = await actionExecutor.execute(executeParams);
+
+      expect(result.status).toBe('error');
+      expect(result.message).toMatch(/error validating connector type config/);
+      expect(result.errorSource).toBe(TaskErrorSource.FRAMEWORK);
+      expect(typeWithStringBar.executor).not.toHaveBeenCalled();
+    });
+  });
 });
 
 describe('System actions', () => {

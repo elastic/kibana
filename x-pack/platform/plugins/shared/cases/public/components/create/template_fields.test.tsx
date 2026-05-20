@@ -12,14 +12,16 @@ import { CreateCaseTemplateFields } from './template_fields';
 import { renderWithTestingProviders } from '../../common/mock';
 
 const mockUseFormData = jest.fn();
+const mockUseFormContext = jest.fn();
 jest.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib', () => ({
   ...jest.requireActual('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib'),
   useFormData: (...args: unknown[]) => mockUseFormData(...args),
+  useFormContext: () => mockUseFormContext(),
 }));
 
 const mockUseTemplateFormSync = jest.fn();
 jest.mock('./use_template_form_sync', () => ({
-  useTemplateFormSync: () => mockUseTemplateFormSync(),
+  useTemplateFormSync: (...args: unknown[]) => mockUseTemplateFormSync(...args),
 }));
 
 jest.mock('../templates_v2/field_types/field_types_registry', () => ({
@@ -33,9 +35,17 @@ jest.mock('../templates_v2/field_types/field_types_registry', () => ({
   },
 }));
 
+jest.mock('../field_library/hooks/use_resolved_fields', () => ({
+  useResolvedFields: (fields: unknown[]) => ({
+    resolvedFields: fields,
+    isLoading: false,
+  }),
+}));
+
 describe('CreateCaseTemplateFields', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseFormContext.mockReturnValue({ setFieldValue: jest.fn() });
   });
 
   it('shows callout when no template is selected', () => {

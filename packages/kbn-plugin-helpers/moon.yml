@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/dev-utils'
   - '@kbn/optimizer'
+  - '@kbn/rspack-optimizer'
   - '@kbn/tooling-log'
   - '@kbn/dev-cli-runner'
   - '@kbn/dev-cli-errors'
@@ -26,6 +27,7 @@ dependsOn:
   - '@kbn/jest-serializers'
   - '@kbn/repo-packages'
   - '@kbn/stdio-dev-helpers'
+  - '@kbn/utils'
 tags:
   - shared-server
   - package

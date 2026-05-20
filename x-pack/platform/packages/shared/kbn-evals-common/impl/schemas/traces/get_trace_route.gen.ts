@@ -14,20 +14,24 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { TraceSpan } from '../common_attributes.gen';
 
+export const GetTraceRequestParams = lazySchema(() =>
+  z.object({
+    traceId: z.string(),
+  })
+);
 export type GetTraceRequestParams = z.infer<typeof GetTraceRequestParams>;
-export const GetTraceRequestParams = z.object({
-  traceId: z.string(),
-});
 export type GetTraceRequestParamsInput = z.input<typeof GetTraceRequestParams>;
 
+export const GetTraceResponse = lazySchema(() =>
+  z.object({
+    trace_id: z.string(),
+    spans: z.array(TraceSpan),
+    total_spans: z.number().int(),
+    duration_ms: z.number().optional(),
+  })
+);
 export type GetTraceResponse = z.infer<typeof GetTraceResponse>;
-export const GetTraceResponse = z.object({
-  trace_id: z.string(),
-  spans: z.array(TraceSpan),
-  total_spans: z.number().int(),
-  duration_ms: z.number().optional(),
-});

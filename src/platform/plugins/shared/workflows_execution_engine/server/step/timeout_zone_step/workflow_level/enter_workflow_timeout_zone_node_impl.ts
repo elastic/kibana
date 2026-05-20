@@ -15,6 +15,7 @@ import type { StepExecutionRuntimeFactory } from '../../../workflow_context_mana
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { MonitorableNode, NodeImplementation } from '../../node_implementation';
 
+/** Workflow-level timeout zone; idle resume is scheduled from handleExecutionDelay, not here. */
 export class EnterWorkflowTimeoutZoneNodeImpl implements NodeImplementation, MonitorableNode {
   constructor(
     private node: EnterTimeoutZoneNode,
@@ -45,8 +46,7 @@ export class EnterWorkflowTimeoutZoneNodeImpl implements NodeImplementation, Mon
       let stack = monitoredStepExecutionRuntime.scopeStack;
 
       while (!stack.isEmpty()) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const currentScope = stack.getCurrentScope()!;
+        const currentScope = stack.getCurrentScope();
         stack = stack.exitScope();
         const scopeStepExecutionRuntime =
           this.stepExecutionRuntimeFactory.createStepExecutionRuntime({
@@ -59,7 +59,7 @@ export class EnterWorkflowTimeoutZoneNodeImpl implements NodeImplementation, Mon
         }
       }
 
-      // Errase error because otherwise execution will be marked "failed"
+      // Clear error so the run is not left in a generic failed state after timeout handling
       this.wfExecutionRuntimeManager.setWorkflowError(undefined);
       this.wfExecutionRuntimeManager.markWorkflowTimeouted();
     }

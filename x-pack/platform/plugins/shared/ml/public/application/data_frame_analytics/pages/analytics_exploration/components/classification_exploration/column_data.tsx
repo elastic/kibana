@@ -94,6 +94,12 @@ export function getTrailingControlColumns(
           <EuiPopover
             isOpen={isPopoverOpen}
             anchorPosition="upCenter"
+            aria-label={i18n.translate(
+              'xpack.ml.dataframe.analytics.classificationExploration.cellDetailsPopoverAriaLabel',
+              {
+                defaultMessage: 'Cell details',
+              }
+            )}
             button={
               <EuiButtonIcon
                 aria-label={i18n.translate(
@@ -102,7 +108,7 @@ export function getTrailingControlColumns(
                     defaultMessage: 'Show actions',
                   }
                 )}
-                iconType="boxesHorizontal"
+                iconType="boxesVertical"
                 color="text"
                 onClick={() => setIsPopoverOpen(!isPopoverOpen)}
               />

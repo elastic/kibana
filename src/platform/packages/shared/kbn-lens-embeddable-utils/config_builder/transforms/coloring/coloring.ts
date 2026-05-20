@@ -11,27 +11,29 @@ import type { ColorMapping, ColorStop, CustomPaletteParams, PaletteOutput } from
 import type { KbnPaletteId } from '@kbn/palettes';
 import type {
   AllColoringTypes,
+  AutoColorType,
   ColorByValueAbsolute,
   ColorByValueStep,
   ColorByValueType,
+  ColorMappingCategoricalType,
   ColorMappingColorDefType,
+  ColorMappingGradientType,
   ColorMappingType,
+  NoColorType,
   StaticColorType,
+  UnassignedColorType,
 } from '../../schema/color';
+export { NO_COLOR, AUTO_COLOR, DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../schema/color';
 import type { SerializableValueType } from '../../schema/serializedValue';
+import { getReversibleMappings } from '../charts/utils';
 
 const LENS_DEFAULT_COLOR_BY_VALUE_RANGE_TYPE = 'percentage';
 const LENS_DEFAULT_COLOR_MAPPING_PALETTE: KbnPaletteId = 'default';
 
-const LEGACY_TO_API_RANGE_NAMES: Record<'percent' | 'number', 'percentage' | 'absolute'> = {
-  number: 'absolute',
-  percent: 'percentage',
-};
-
-const API_TO_LEGACY_RANGE_NAMES: Record<'percentage' | 'absolute', 'percent' | 'number'> = {
-  absolute: 'number',
-  percentage: 'percent',
-};
+const paletteRangeCompat = getReversibleMappings([
+  ['percentage', 'percent'],
+  ['absolute', 'number'],
+]);
 
 export const LEGACY_PALETTE_PREFIX = 'LEGACY_PALETTE_';
 
@@ -39,6 +41,19 @@ export function isLegacyColorPalette(
   color: { colorMapping: ColorMapping.Config } | { palette: PaletteOutput } | undefined
 ): color is { palette: PaletteOutput } {
   return 'palette' in (color ?? {});
+}
+
+export function getContinuity(
+  rangeMin: number | null,
+  rangeMax: number | null
+): 'all' | 'above' | 'below' | 'none' {
+  return rangeMin === null && rangeMax === null
+    ? 'all'
+    : rangeMax === null
+    ? 'above'
+    : rangeMin === null
+    ? 'below'
+    : 'none';
 }
 
 export function fromColorByValueAPIToLensState(
@@ -80,9 +95,7 @@ export function fromColorByValueAPIToLensState(
       rangeMin,
       // @ts-expect-error - This can be null
       rangeMax,
-      rangeType: config.range
-        ? API_TO_LEGACY_RANGE_NAMES[config.range]
-        : API_TO_LEGACY_RANGE_NAMES.absolute,
+      rangeType: paletteRangeCompat.toState(config.range ?? 'absolute'),
       stops: !needsPaletteShift
         ? stops
         : stops.map((stop, i) => ({
@@ -90,23 +103,15 @@ export function fromColorByValueAPIToLensState(
             // value can be null
             stop: i === 0 ? (rangeMin as number) : stops[i - 1].stop,
           })),
-      // ignore colorStops when shifting palettes stops
       colorStops,
-      continuity:
-        rangeMin === null && rangeMax === null
-          ? 'all'
-          : rangeMax === null
-          ? 'above'
-          : rangeMin === null
-          ? 'below'
-          : 'none',
+      continuity: getContinuity(rangeMin, rangeMax),
       steps: stops.length,
       maxSteps: Math.max(5, stops.length), // TODO: point this to a constant or a common default
     },
   };
 }
 
-function getRangeValue(value?: number | null): number | null {
+export function getRangeValue(value?: number | null): number | null {
   if (value === undefined || value === null || !isFinite(value)) return null;
   return value;
 }
@@ -141,9 +146,7 @@ export function fromColorByValueLensStateToAPI(
     }));
   }
 
-  const range = rangeType
-    ? LEGACY_TO_API_RANGE_NAMES[rangeType]
-    : LENS_DEFAULT_COLOR_BY_VALUE_RANGE_TYPE;
+  const range = paletteRangeCompat.toAPI(rangeType) ?? LENS_DEFAULT_COLOR_BY_VALUE_RANGE_TYPE;
   const stops = !reverse
     ? originalStops
     : originalStops
@@ -274,12 +277,11 @@ function isLensStateCategoricalConfigColorMapping(
 
 function fromUnassignedColorLensStateToAPI(
   color: ColorMapping.CategoricalColor | ColorMapping.ColorCode | ColorMapping.LoopColor | undefined
-): { unassignedColor: Extract<ColorMappingColorDefType, { type: 'color_code' }> } | {} {
+): UnassignedColorType | undefined {
   if (!color || color.type === 'loop') {
-    return {};
+    return undefined;
   }
-  const unassignedColor = fromColorLensStateToAPI(color);
-  return { unassignedColor };
+  return fromColorLensStateToAPI(color);
 }
 
 export function fromColorMappingLensStateToAPI(
@@ -291,15 +293,13 @@ export function fromColorMappingLensStateToAPI(
       mode: 'categorical',
       palette: `${LEGACY_PALETTE_PREFIX}${legacyPalette.name}`,
       mapping: [],
-    };
+    } satisfies ColorMappingCategoricalType;
   }
   if (!colorMapping) {
     return;
   }
 
-  const unassignedColor = fromUnassignedColorLensStateToAPI(
-    colorMapping.specialAssignments[0]?.color
-  );
+  const unassigned = fromUnassignedColorLensStateToAPI(colorMapping.specialAssignments[0]?.color);
   if (isLensStateCategoricalConfigColorMapping(colorMapping)) {
     return {
       mode: 'categorical',
@@ -310,8 +310,8 @@ export function fromColorMappingLensStateToAPI(
           color: fromColorLensStateToAPI(color),
         };
       }),
-      ...unassignedColor,
-    };
+      ...(unassigned ? { unassigned } : {}),
+    } satisfies ColorMappingCategoricalType;
   }
 
   // because of early return above, we know it is a gradient at this point so casting is safe
@@ -328,8 +328,8 @@ export function fromColorMappingLensStateToAPI(
     }),
     sort: (colorMapping.colorMode as ColorMapping.GradientColorMode).sort,
     gradient: colorMode.steps.map((color) => fromColorLensStateToAPI(color)),
-    ...unassignedColor,
-  };
+    ...(unassigned ? { unassigned } : {}),
+  } satisfies ColorMappingGradientType;
 }
 
 function fromColorDefAPIToLensState(
@@ -411,8 +411,8 @@ export function fromColorMappingAPIToLensState(
           type: 'other',
         },
       ],
-      color: colorMapping.unassignedColor
-        ? fromColorDefAPIToLensState(colorMapping.unassignedColor)
+      color: colorMapping.unassigned
+        ? fromColorDefAPIToLensState(colorMapping.unassigned)
         : { type: 'loop' },
       touched: false,
     },
@@ -453,4 +453,12 @@ export function isColorByValueAbsolute(color?: AllColoringTypes): color is Color
 export function isColorMappingColor(color?: AllColoringTypes): color is ColorMappingType {
   if (!color || !('mode' in color)) return false;
   return color.mode === 'categorical' || color.mode === 'gradient';
+}
+
+export function isNoColor(color?: AllColoringTypes): color is NoColorType {
+  return !!color && 'type' in color && color.type === 'none';
+}
+
+export function isAutoColor(color?: AllColoringTypes): color is AutoColorType {
+  return !!color && 'type' in color && color.type === 'auto';
 }

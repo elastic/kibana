@@ -21,7 +21,7 @@ import {
   useExpandableFlyoutApi,
 } from '@kbn/expandable-flyout';
 import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
-import { useRuleDetails } from '../../rule_details/hooks/use_rule_details';
+import { useRuleDetails } from '../../../flyout_v2/rule/main/hooks/use_rule_details';
 import { useBasicDataFromDetailsData } from '../../document_details/shared/hooks/use_basic_data_from_details_data';
 import { useEventDetails } from '../../document_details/shared/hooks/use_event_details';
 import { DocumentDetailsRightPanelKey } from '../../document_details/shared/constants/panel_keys';
@@ -40,7 +40,10 @@ import {
 } from './test_ids';
 import { HostPanelKey, UserPanelKey } from '../../entity_details/shared/constants';
 import { IOCRightPanelKey } from '../../ioc_details/constants/panel_keys';
-import { AttackDetailsRightPanelKey } from '../../attack_details/constants/panel_keys';
+import {
+  AttackDetailsPreviewPanelKey,
+  AttackDetailsRightPanelKey,
+} from '../../attack_details/constants/panel_keys';
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),
@@ -54,7 +57,7 @@ jest.mock('../../../attack_discovery/pages/use_find_attack_discoveries', () => (
 }));
 jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 jest.mock('../../document_details/shared/hooks/use_basic_data_from_details_data');
-jest.mock('../../rule_details/hooks/use_rule_details');
+jest.mock('../../../flyout_v2/rule/main/hooks/use_rule_details');
 jest.mock('../../document_details/shared/hooks/use_event_details');
 
 const flyoutContextValue = {
@@ -84,14 +87,24 @@ const rowItems: { [id: string]: FlyoutPanelHistory } = {
     lastOpen: Date.now(),
     panel: {
       id: HostPanelKey,
-      params: { hostName: 'host name' },
+      params: {
+        contextID: 'history-test',
+        scopeId: 'history-test',
+        isPreviewMode: false,
+        hostName: 'host name',
+      },
     },
   },
   user: {
     lastOpen: Date.now(),
     panel: {
       id: UserPanelKey,
-      params: { userName: 'user name' },
+      params: {
+        contextID: 'history-test',
+        scopeId: 'history-test',
+        isPreviewMode: false,
+        userName: 'user name',
+      },
     },
   },
   network: {
@@ -113,6 +126,13 @@ const rowItems: { [id: string]: FlyoutPanelHistory } = {
     panel: {
       id: AttackDetailsRightPanelKey,
       params: { attackId: 'attack-1', indexName: '.alerts-security.alerts-default' },
+    },
+  },
+  attackPreview: {
+    lastOpen: Date.now(),
+    panel: {
+      id: AttackDetailsPreviewPanelKey,
+      params: { attackId: 'attack-2', indexName: '.alerts-security.alerts-default' },
     },
   },
   unsupported: {
@@ -222,6 +242,18 @@ describe('FlyoutHistoryRow', () => {
     );
     expect(getByTestId(`${6}-${ATTACK_DETAILS_HISTORY_ROW_TEST_ID}`)).toBeInTheDocument();
     expect(getByTestId(`${6}-${ATTACK_DETAILS_HISTORY_ROW_TEST_ID}`)).toHaveTextContent(
+      'Attack: Attack title'
+    );
+  });
+
+  it('should render attack details history row when key is attack preview', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <FlyoutHistoryRow item={rowItems.attackPreview} index={7} />
+      </TestProviders>
+    );
+    expect(getByTestId(`${7}-${ATTACK_DETAILS_HISTORY_ROW_TEST_ID}`)).toBeInTheDocument();
+    expect(getByTestId(`${7}-${ATTACK_DETAILS_HISTORY_ROW_TEST_ID}`)).toHaveTextContent(
       'Attack: Attack title'
     );
   });

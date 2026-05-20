@@ -29,6 +29,9 @@ import type {
   SortProcessor,
   ConcatProcessor,
   NetworkDirectionProcessor,
+  JsonExtractProcessor,
+  EnrichProcessor,
+  RegisteredDomainProcessor,
 } from '.';
 import type { Condition } from '../conditions';
 
@@ -162,6 +165,24 @@ export type IngestPipelineNetworkDirectionProcessor = RenameFieldsAndRemoveActio
   { where: 'if' }
 >;
 
+// JsonExtract (uses script processor internally)
+export type IngestPipelineJsonExtractProcessor = RenameFieldsAndRemoveAction<
+  JsonExtractProcessor,
+  { where: 'if' }
+>;
+
+// Enrich
+export type IngestPipelineEnrichProcessor = RenameFieldsAndRemoveAction<
+  EnrichProcessor,
+  { to: 'target_field'; where: 'if' }
+>;
+
+// Registered Domain
+export type IngestPipelineRegisteredDomainProcessor = RenameFieldsAndRemoveAction<
+  RegisteredDomainProcessor,
+  { where: 'if' }
+>;
+
 // Manual Ingest Pipeline (escape hatch)
 export type IngestPipelineManualIngestPipelineProcessor = RenameFieldsAndRemoveAction<
   ManualIngestPipelineProcessor,
@@ -190,4 +211,7 @@ export type IngestPipelineProcessor =
   | IngestPipelineSortProcessor
   | IngestPipelineConcatProcessor
   | IngestPipelineNetworkDirectionProcessor
+  | IngestPipelineJsonExtractProcessor
+  | IngestPipelineEnrichProcessor
+  | IngestPipelineRegisteredDomainProcessor
   | IngestPipelineManualIngestPipelineProcessor;

@@ -148,19 +148,16 @@ function QueryBarMenuComponent({
   };
 
   const button = (
-    <EuiToolTip
-      delay="regular"
-      content={strings.getFilterSetButtonLabel()}
-      disableScreenReaderOutput
-    >
+    <EuiToolTip content={strings.getFilterSetButtonLabel()} disableScreenReaderOutput>
       <EuiButtonIcon
         {...buttonProps}
         size="s"
         display="empty"
+        color="text"
         onClick={onButtonClick}
         isDisabled={isDisabled}
         css={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
-        iconType="filter"
+        iconType="ellipsis"
         aria-label={strings.getFilterSetButtonLabel()}
         data-test-subj="showQueryBarMenu"
       />
@@ -269,6 +266,12 @@ function QueryBarMenuComponent({
       anchorPosition="downLeft"
       repositionOnScroll
       data-test-subj="queryBarMenuPopover"
+      aria-label={i18n.translate('unifiedSearch.queryBarMenu.popoverAriaLabel', {
+        defaultMessage: 'Query bar menu',
+      })}
+      focusTrapProps={
+        renderedComponent === 'addFilter' ? { clickOutsideDisables: false } : undefined
+      }
     >
       {renderComponent()}
     </EuiPopover>

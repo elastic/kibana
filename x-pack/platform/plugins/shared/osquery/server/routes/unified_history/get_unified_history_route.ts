@@ -24,6 +24,7 @@ import type {
 } from '../../../common/api/unified_history/types';
 import { buildLiveActionsQuery } from './query_live_actions_dsl';
 import { buildScheduledResponsesQuery } from './query_scheduled_responses_dsl';
+import { hasConnectedRemoteClusters, prefixIndexPatternsWithCcs } from '../../utils/ccs_utils';
 import { mergeRows } from './merge_rows';
 import { decodeCursor, encodeCursor, computePaginationCursors } from './cursor_utils';
 import { processLiveHistory } from './process_live_history';
@@ -34,6 +35,8 @@ import {
   type ScheduledAggregations,
 } from './process_scheduled_history';
 import type { LiveActionHit } from './map_live_hit_to_row';
+
+import { unifiedHistoryResponseSchema } from './response_schemas';
 
 const VALID_SOURCE_FILTERS = new Set(['live', 'rule', 'scheduled']);
 
@@ -75,7 +78,15 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
               startDate: schema.maybe(schema.string()),
               endDate: schema.maybe(schema.string()),
               tags: schema.maybe(schema.string()),
+              sortDirection: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+                defaultValue: 'desc',
+              }),
             }),
+          },
+          response: {
+            200: {
+              body: () => unifiedHistoryResponseSchema,
+            },
           },
         },
       },
@@ -83,6 +94,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
         try {
           const coreContext = await context.core;
           const esClient = coreContext.elasticsearch.client.asInternalUser;
+          const ccsEnabled = await hasConnectedRemoteClusters(esClient);
 
           const spaceId = osqueryContext?.service?.getActiveSpace
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
@@ -97,6 +109,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             startDate,
             endDate,
             tags: tagsRaw,
+            sortDirection,
           } = request.query;
 
           const decoded = decodeCursor(nextPage);
@@ -152,6 +165,8 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                 spaceId,
                 startDate,
                 endDate,
+                sortDirection,
+                activeFilters,
               })
             : undefined;
 
@@ -167,6 +182,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                 spaceId,
                 startDate,
                 endDate,
+                sortDirection,
               })
             : undefined;
 
@@ -176,7 +192,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             actionsQuery
               ? esClient.search(
                   {
-                    index: `${ACTIONS_INDEX}*`,
+                    index: prefixIndexPatternsWithCcs(`${ACTIONS_INDEX}*`, ccsEnabled),
                     ...actionsQuery,
                   },
                   { ignore: [404] }
@@ -186,7 +202,10 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
               ? esClient
                   .search(
                     {
-                      index: `${ACTION_RESPONSES_DATA_STREAM_INDEX}-*`,
+                      index: prefixIndexPatternsWithCcs(
+                        `${ACTION_RESPONSES_DATA_STREAM_INDEX}-*`,
+                        ccsEnabled
+                      ),
                       ...scheduledQuery,
                     },
                     { ignore: [404] }
@@ -211,7 +230,6 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             liveHits,
             osqueryContext,
             spaceId,
-            activeFilters,
             logger,
           });
 
@@ -229,7 +247,8 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             filteredLiveRows,
             allScheduledRows,
             pageSize,
-            scheduledOffset
+            scheduledOffset,
+            sortDirection
           );
 
           const { nextActionSearchAfter, nextScheduledCursor, nextScheduledOffset } =

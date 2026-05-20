@@ -2021,6 +2021,9 @@ describe('delete()', () => {
   });
 
   it('throws when trying to delete a preconfigured connector', async () => {
+    unsecuredSavedObjectsClient.get.mockReset();
+    unsecuredSavedObjectsClient.get.mockRejectedValue(new Error('Not found'));
+
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
@@ -2058,6 +2061,52 @@ describe('delete()', () => {
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Preconfigured action testPreconfigured is not allowed to delete."`
     );
+  });
+
+  it('allows delete when both preconfigured and saved object exist (deletes saved object only)', async () => {
+    const savedObject = {
+      id: 'shared-id',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'my-connector-type',
+        config: {},
+      },
+      references: [],
+    };
+    unsecuredSavedObjectsClient.get
+      .mockResolvedValueOnce(savedObject)
+      .mockResolvedValueOnce(savedObject);
+    unsecuredSavedObjectsClient.delete.mockResolvedValueOnce({});
+
+    actionsClient = new ActionsClient({
+      logger,
+      actionTypeRegistry,
+      authTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      inMemoryConnectors: [
+        createMockInMemoryConnector({
+          id: 'shared-id',
+          actionTypeId: 'my-connector-type',
+          isPreconfigured: true,
+          name: 'Preconfigured',
+        }),
+      ],
+      actionExecutor,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
+    });
+
+    await actionsClient.delete({ id: 'shared-id' });
+
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith('action', 'shared-id');
   });
 
   it('throws when trying to delete a system connector', async () => {
@@ -2347,6 +2396,7 @@ describe('update()', () => {
       isMissingSecrets: false,
       name: 'my name',
       config: {},
+      authMode: 'shared',
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
@@ -2415,6 +2465,7 @@ describe('update()', () => {
       isMissingSecrets: true,
       name: 'my name',
       config: {},
+      authMode: 'shared',
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
@@ -2566,6 +2617,7 @@ describe('update()', () => {
         b: true,
         c: true,
       },
+      authMode: 'shared',
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
@@ -3033,6 +3085,57 @@ describe('execute()', () => {
       ],
       actionExecutionId,
     });
+  });
+
+  test('preconfigured connector takes precedence over saved object connector with same ID', async () => {
+    const duplicateConnectorId = 'duplicate-connector-id';
+
+    actionsClient = new ActionsClient({
+      inMemoryConnectors: [
+        createMockInMemoryConnector({
+          id: duplicateConnectorId,
+          actionTypeId: 'my-connector-type',
+          name: 'Preconfigured Connector',
+          isPreconfigured: true,
+          config: { url: 'https://preconfigured.example.com' },
+        }),
+      ],
+      logger,
+      actionTypeRegistry,
+      authTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      actionExecutor,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      auditLogger,
+      usageCounter: mockUsageCounter,
+      connectorTokenClient,
+      getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
+    });
+
+    actionExecutor.execute.mockResolvedValue({ status: 'ok', actionId: duplicateConnectorId });
+
+    await actionsClient.execute({
+      actionId: duplicateConnectorId,
+      params: { message: 'test' },
+      source: asHttpRequestExecutionSource(request),
+    });
+
+    // Verify that savedObjectsClient.get was NOT called because preconfigured connector takes precedence
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+
+    // Verify the actionExecutor was called with the correct connector ID
+    expect(actionExecutor.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actionId: duplicateConnectorId,
+      })
+    );
   });
 });
 

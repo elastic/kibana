@@ -146,6 +146,9 @@ test.describe(
           .getByTestId('apmSloCalloutCreateSloButton')
           .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
         await page.getByTestId('superDatePickerToggleQuickMenuButton').click();
+        await expect(page.getByTestId('superDatePickerQuickSelectApplyButton')).toBeVisible();
+        await page.getByTestId('superDatePickerToggleQuickMenuButton').click();
+        await expect(page.getByTestId('superDatePickerQuickSelectApplyButton')).toBeHidden();
 
         // Click on "Absolute" tab for the start date
         await page.getByTestId('superDatePickerstartDatePopoverButton').click();

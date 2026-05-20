@@ -18,6 +18,7 @@ project:
   sourceRoot: src/platform/packages/shared/kbn-object-versioning
 dependsOn:
   - '@kbn/config-schema'
+  - '@kbn/zod'
   - '@kbn/safer-lodash-set'
   - '@kbn/object-versioning-utils'
 tags:
@@ -32,26 +33,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

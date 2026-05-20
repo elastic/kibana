@@ -14,6 +14,7 @@ import { buildIndexNameWithNamespace } from '../../../../utils/build_index_name_
 import { getQueryFilter } from '../../../../utils/build_query';
 import { OSQUERY_INTEGRATION_NAME } from '../../../../../common';
 import type { ResultsRequestOptions } from '../../../../../common/search_strategy';
+import { prefixIndexPatternsWithCcs } from '../../../../utils/ccs_utils';
 
 export const buildResultsQuery = ({
   actionId,
@@ -26,6 +27,7 @@ export const buildResultsQuery = ({
   integrationNamespaces,
   scheduleId,
   executionCount,
+  ccsEnabled,
 }: ResultsRequestOptions): ISearchRequestParams => {
   const baseIndex = `logs-${OSQUERY_INTEGRATION_NAME}.result*`;
 
@@ -62,8 +64,10 @@ export const buildResultsQuery = ({
 
   const parsedEsFilters: Filter[] = esFilters ? (JSON.parse(esFilters) as Filter[]) : [];
 
-  const esFilterClauses =
-    parsedEsFilters.length > 0 ? buildQueryFromFilters(parsedEsFilters, undefined).filter : [];
+  const { filter: esFilterClauses, must_not: esFilterMustNotClauses } =
+    parsedEsFilters.length > 0
+      ? buildQueryFromFilters(parsedEsFilters, undefined)
+      : { filter: [], must_not: [] };
 
   const filterQuery = [...timeRangeFilter, kqlFilterClause, ...esFilterClauses];
 
@@ -76,6 +80,8 @@ export const buildResultsQuery = ({
   } else {
     index = baseIndex;
   }
+
+  index = prefixIndexPatternsWithCcs(index, ccsEnabled ?? false);
 
   return {
     allow_no_indices: true,
@@ -94,7 +100,12 @@ export const buildResultsQuery = ({
         },
       },
     },
-    query: { bool: { filter: filterQuery } },
+    query: {
+      bool: {
+        filter: filterQuery,
+        ...(esFilterMustNotClauses.length > 0 ? { must_not: esFilterMustNotClauses } : {}),
+      },
+    },
     from: activePage * querySize,
     size: querySize,
     track_total_hits: true,

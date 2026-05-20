@@ -9,8 +9,14 @@
 
 import { z } from '@kbn/zod/v4';
 import { convertLegacyFieldsToJsonSchema } from './lib/field_conversion';
+import { BaseEventSchema } from './schema/common/base_event';
 import { JsonModelSchema } from './schema/common/json_model_schema';
-import { timezoneNames } from './schema/triggers/timezone_names';
+import { TriggerSchema } from './schema/triggers';
+import { AlertEventSchema } from './schema/triggers/alert_trigger_schema';
+import {
+  isManualTrigger,
+  LegacyWorkflowInputSchema,
+} from './schema/triggers/manual_trigger_schema';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
 
@@ -106,88 +112,6 @@ export function getWorkflowSettingsSchema(stepSchema: z.ZodType, loose: boolean 
   return schema;
 }
 
-/* --- Triggers --- */
-export const AlertRuleTriggerSchema = z.object({
-  type: z.literal('alert'),
-  with: z
-    .union([z.object({ rule_id: z.string().min(1) }), z.object({ rule_name: z.string().min(1) })])
-    .optional(),
-});
-
-export const ScheduledTriggerSchema = z.object({
-  type: z.literal('scheduled'),
-  with: z.union([
-    // New format: every: "5m", "2h", "1d", "30s"
-    z.object({
-      every: z
-        .string()
-        .regex(/^\d+[smhd]$/, 'Invalid interval format. Use format like "5m", "2h", "1d", "30s"'),
-    }),
-    z.object({
-      rrule: z.object({
-        freq: z.enum(['DAILY', 'WEEKLY', 'MONTHLY']),
-        interval: z.number().int().positive(),
-        tzid: z
-          .enum(timezoneNames as [string, ...string[]])
-          .optional()
-          .default('UTC'),
-        dtstart: z.string().optional(),
-        byhour: z.array(z.number().int().min(0).max(23)).optional(),
-        byminute: z.array(z.number().int().min(0).max(59)).optional(),
-        byweekday: z.array(z.enum(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'])).optional(),
-        bymonthday: z.array(z.number().int().min(1).max(31)).optional(),
-      }),
-    }),
-  ]),
-});
-
-export const ManualTriggerSchema = z.object({
-  type: z.literal('manual'),
-});
-
-export const TriggerSchema = z.discriminatedUnion('type', [
-  AlertRuleTriggerSchema,
-  ScheduledTriggerSchema,
-  ManualTriggerSchema,
-]);
-
-/** Schema for the `on` block of custom triggers (KQL condition to filter when the workflow runs). */
-const CustomTriggerOnSchema = z
-  .object({
-    condition: z.string().optional(),
-  })
-  .optional();
-
-/**
- * Returns a trigger schema that includes built-in types plus optional registered trigger ids.
- * Used by the YAML editor so custom trigger types (e.g. example.custom_trigger) pass validation.
- * Custom triggers allow an `on.condition` clause for KQL filtering.
- */
-export function getTriggerSchema(customTriggerIds: string[] = []): z.ZodType {
-  if (customTriggerIds.length === 0) {
-    return TriggerSchema;
-  }
-  const customSchemas = customTriggerIds.map((id) =>
-    z.object({
-      type: z.literal(id),
-      on: CustomTriggerOnSchema,
-    })
-  );
-  return z.discriminatedUnion('type', [
-    AlertRuleTriggerSchema,
-    ScheduledTriggerSchema,
-    ManualTriggerSchema,
-    ...customSchemas,
-  ]);
-}
-
-export const TriggerTypes = [
-  AlertRuleTriggerSchema.shape.type.value,
-  ScheduledTriggerSchema.shape.type.value,
-  ManualTriggerSchema.shape.type.value,
-];
-export type TriggerType = (typeof TriggerTypes)[number];
-
 /* --- Steps --- */
 export const TimeoutPropSchema = z.object({
   timeout: DurationSchema.optional(),
@@ -274,6 +198,9 @@ export type WaitStep = z.infer<typeof WaitStepSchema>;
 export const WaitForInputStepInputSchema = z
   .object({
     message: z.string().optional().describe('Message displayed to the user when waiting for input'),
+    schema: JsonModelSchema.optional().describe(
+      'JSON Schema describing the expected input payload. Used for validation, autocomplete, and default values in the resume UI'
+    ),
   })
   .optional();
 export const WaitForInputStepSchema = BaseStepSchema.extend({
@@ -492,6 +419,54 @@ export const getWhileStepSchema = (stepSchema: z.ZodType, loose: boolean = false
   return schema;
 };
 
+export const SwitchCaseSchema = z.object({
+  match: z.union([z.string(), z.number(), z.boolean()]),
+  steps: z.array(BaseStepSchema).min(1).describe('Steps to execute when this case matches'),
+});
+export type SwitchCase = z.infer<typeof SwitchCaseSchema>;
+
+export const SwitchStepConfigSchema = z.object({
+  expression: z
+    .string()
+    .describe(
+      'Liquid expression evaluated and compared to each case match, e.g. "{{ steps.check.output.status }}"'
+    ),
+  cases: z
+    .array(SwitchCaseSchema)
+    .min(1)
+    .describe('Ordered list of match-to-steps mappings. First matching case is executed'),
+  default: z.array(BaseStepSchema).optional().describe('Steps to execute when no case matches'),
+});
+
+export const SwitchStepSchema = BaseStepSchema.extend({
+  type: z
+    .literal('switch')
+    .describe(
+      'Multi-way branching. Evaluates expression and runs the steps of the first case whose match equals the expression'
+    ),
+  ...SwitchStepConfigSchema.shape,
+  ...StepWithIfConditionSchema.shape,
+  ...TimeoutPropSchema.shape,
+});
+export type SwitchStep = z.infer<typeof SwitchStepSchema>;
+
+export const getSwitchStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
+  const schema = SwitchStepSchema.extend({
+    cases: z.array(
+      SwitchCaseSchema.extend({
+        steps: z.array(stepSchema).min(1),
+      })
+    ),
+    default: z.array(stepSchema).optional(),
+  });
+
+  if (loose) {
+    return schema.partial().required({ type: true });
+  }
+
+  return schema;
+};
+
 export const IfStepConfigSchema = z.object({
   condition: z
     .string()
@@ -653,56 +628,9 @@ export const WorkflowFailStepSchema = BaseStepSchema.extend({
 }).extend(StepWithIfConditionSchema.shape);
 export type WorkflowFailStep = z.infer<typeof WorkflowFailStepSchema>;
 
-/* --- Inputs --- */
-export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array']);
-
-const WorkflowInputBaseSchema = z.object({
-  name: z.string(),
-  description: z.string().optional(),
-  default: z.any().optional(),
-  required: z.boolean().optional(),
-});
-
-export const WorkflowInputStringSchema = WorkflowInputBaseSchema.extend({
-  type: z.literal('string'),
-  default: z.string().optional(),
-});
-
-export const WorkflowInputNumberSchema = WorkflowInputBaseSchema.extend({
-  type: z.literal('number'),
-  default: z.number().optional(),
-});
-
-export const WorkflowInputBooleanSchema = WorkflowInputBaseSchema.extend({
-  type: z.literal('boolean'),
-  default: z.boolean().optional(),
-});
-
-export const WorkflowInputChoiceSchema = WorkflowInputBaseSchema.extend({
-  type: z.literal('choice'),
-  default: z.string().optional(),
-  options: z.array(z.string()),
-});
-
-export const WorkflowInputArraySchema = WorkflowInputBaseSchema.extend({
-  type: z.literal('array'),
-  minItems: z.number().int().nonnegative().optional(),
-  maxItems: z.number().int().nonnegative().optional(),
-  default: z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]).optional(),
-});
-
-export const WorkflowInputSchema = z.union([
-  WorkflowInputStringSchema,
-  WorkflowInputNumberSchema,
-  WorkflowInputBooleanSchema,
-  WorkflowInputChoiceSchema,
-  WorkflowInputArraySchema,
-]);
-export type LegacyWorkflowInput = z.infer<typeof WorkflowInputSchema>;
-
 /* --- Outputs --- */
 // Outputs use the same format as inputs (name, type, required, etc.); default is ignored at runtime for outputs.
-export const WorkflowOutputSchema = WorkflowInputSchema;
+export const WorkflowOutputSchema = LegacyWorkflowInputSchema;
 export type WorkflowOutput = z.infer<typeof WorkflowOutputSchema>;
 
 /* --- Consts --- */
@@ -723,6 +651,7 @@ const StepSchema = z.lazy(() =>
     ForEachStepSchema,
     WhileStepSchema,
     IfStepSchema,
+    SwitchStepSchema,
     WaitStepSchema,
     WaitForInputStepSchema,
     DataSetStepSchema,
@@ -750,10 +679,12 @@ export type LoopStepType = (typeof LoopStepTypes)[number];
 export const BuiltInStepTypes = [
   ...LoopStepTypes,
   IfStepSchema.shape.type.value,
+  SwitchStepSchema.shape.type.value,
   ParallelStepSchema.shape.type.value,
   MergeStepSchema.shape.type.value,
   DataSetStepSchema.shape.type.value,
   WaitStepSchema.shape.type.value,
+  WaitForInputStepSchema.shape.type.value,
   WorkflowExecuteStepSchema.shape.type.value,
   WorkflowExecuteAsyncStepSchema.shape.type.value,
   WorkflowOutputStepSchema.shape.type.value,
@@ -772,14 +703,6 @@ const WorkflowSchemaBase = z.object({
   settings: WorkflowSettingsSchema.optional(),
   enabled: z.boolean().default(true),
   tags: z.array(z.string()).optional(),
-  inputs: z
-    .union([
-      // New JSON Schema format
-      JsonModelSchema,
-      // Legacy array format (for backward compatibility)
-      z.array(WorkflowInputSchema),
-    ])
-    .optional(),
   outputs: z.union([JsonModelSchema, z.array(WorkflowOutputSchema)]).optional(),
   consts: WorkflowConstsSchema.optional(),
   steps: z.array(StepSchema).min(1),
@@ -800,14 +723,24 @@ function normalizeFieldsToJsonSchema(value: unknown): z.infer<typeof JsonModelSc
 export const WorkflowSchema = WorkflowSchemaBase.extend({
   triggers: z.array(TriggerSchema).min(1),
 }).transform((data) => {
-  const normalizedInputs = normalizeFieldsToJsonSchema(data.inputs);
   const normalizedOutputs = normalizeFieldsToJsonSchema(data.outputs);
 
-  const { inputs: _, outputs: __, ...rest } = data;
+  const mappedTriggers = (data.triggers ?? []).map((trigger) => {
+    if (!isManualTrigger(trigger) || !trigger.inputs) {
+      return trigger;
+    }
+
+    return {
+      ...trigger,
+      inputs: normalizeFieldsToJsonSchema(trigger.inputs),
+    };
+  });
+
+  const { outputs: __, ...rest } = data;
   return {
     ...rest,
-    ...(normalizedInputs !== undefined && { inputs: normalizedInputs }),
     ...(normalizedOutputs !== undefined && { outputs: normalizedOutputs }),
+    triggers: mappedTriggers,
   };
 });
 
@@ -832,22 +765,6 @@ const WorkflowSchemaForAutocompleteBase = z
       .array(z.object({ type: z.string().catch('') }).passthrough())
       .catch([])
       .default([]),
-    inputs: z
-      .union([
-        // New JSON Schema format
-        JsonModelSchema,
-        // Legacy array format (for backward compatibility during parsing)
-        z.array(
-          z
-            .object({
-              name: z.string().catch(''),
-              type: z.string().catch(''),
-            })
-            .passthrough()
-        ),
-      ])
-      .optional()
-      .catch(undefined),
     outputs: z
       .union([
         JsonModelSchema,
@@ -906,56 +823,12 @@ export const WorkflowDataContextSchema = z.object({
 });
 export type WorkflowDataContext = z.infer<typeof WorkflowDataContextSchema>;
 
-// Note: AlertSchema from '@kbn/alerts-as-data-utils' uses io-ts runtime types, not Zod.
-// Once a Zod-compatible version is available, we should import and use it instead.
-export const AlertSchema = z.object({
-  _id: z.string(),
-  _index: z.string(),
-  kibana: z.object({
-    alert: z.any(),
-  }),
-  '@timestamp': z.string(),
-});
-
-export const RuleSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  tags: z.array(z.string()),
-  consumer: z.string(),
-  producer: z.string(),
-  ruleTypeId: z.string(),
-});
-
-/**
- * Alert-specific event properties. Only present when the workflow has an alert trigger.
- */
-export const AlertEventPropsSchema = z.object({
-  alerts: z.array(z.union([AlertSchema, z.any()])),
-  rule: RuleSchema,
-  params: z.any(),
-});
-
-/**
- * Base fields present on every trigger event (injected by the platform).
- * Custom trigger event schemas are merged on top of this for workflow context and autocomplete.
- * Timestamp is only present for event-driven (custom) triggers; see EventTimestampSchema.
- */
-export const BaseEventSchema = z.object({
-  spaceId: z.string().describe('The space where the event was emitted.'),
-});
-
 /**
  * Timestamp injected by the platform for event-driven (custom) trigger events only.
  */
 export const EventTimestampSchema = z.object({
   timestamp: z.string().describe('Time when the event was received (ISO 8601).'),
 });
-
-/**
- * Full event schema (used for runtime validation of alert-triggered workflows).
- * For autocomplete, use getEventSchemaForTriggers() to get a trigger-aware schema.
- */
-export const EventSchema = BaseEventSchema.merge(AlertEventPropsSchema);
 
 // Recursive type for workflow inputs that supports nested objects from JSON Schema
 const WorkflowInputValueSchema: z.ZodType<unknown> = z.lazy(() =>
@@ -971,11 +844,16 @@ const WorkflowInputValueSchema: z.ZodType<unknown> = z.lazy(() =>
 );
 
 export const WorkflowContextSchema = z.object({
-  event: EventSchema.optional(),
+  /**
+   * Alias for the inputs defined on the manual trigger (`triggers[type=manual].inputs`) or
+   * workflow call trigger (`triggers[type=workflow_call].inputs`). Populated from the trigger's
+   * event.input values at execution time.
+   */
+  inputs: z.record(z.string(), z.unknown()).optional(),
+  event: AlertEventSchema.optional(),
   execution: WorkflowExecutionContextSchema,
   workflow: WorkflowDataContextSchema,
   kibanaUrl: z.string(),
-  inputs: z.record(z.string(), WorkflowInputValueSchema).optional(),
   output: z
     .record(
       z.string(),

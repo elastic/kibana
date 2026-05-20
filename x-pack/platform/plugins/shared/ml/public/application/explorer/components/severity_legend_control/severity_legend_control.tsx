@@ -79,6 +79,13 @@ export const SeverityLegendControl: FC<SeverityControlProps> = ({
           <EuiFlexItem key={severity.val} grow={false}>
             <EuiButtonEmpty
               size="xs"
+              aria-label={i18n.translate(
+                'xpack.ml.explorer.severityLegendControl.anomalyScoreButtonLabel',
+                {
+                  defaultMessage: 'Anomaly score {range}',
+                  values: { range: getSeverityRangeDisplay(severity.val) },
+                }
+              )}
               onClick={() => handleSeverityClick(severity)}
               css={styles.severityButton}
               data-test-subj={`${dataTestSubj}-item-${severity.val}`}
@@ -86,7 +93,8 @@ export const SeverityLegendControl: FC<SeverityControlProps> = ({
               <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiIcon
-                    type={isSelected ? 'dot' : 'eyeClosed'}
+                    aria-hidden={true}
+                    type={isSelected ? 'dot' : 'eyeSlash'}
                     color={isSelected ? severity.color : euiTheme.colors.textDisabled}
                     size={isSelected ? 'm' : 's'}
                   />

@@ -52,7 +52,7 @@ export const TableRowActions = memo<TableRowActionProps>(({ endpointInfo }) => {
       button={
         <EuiButtonIcon
           data-test-subj="endpointTableRowActions"
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           onClick={handleToggleMenu}
           aria-label={i18n.translate('xpack.securitySolution.endpoint.list.actionmenu', {
             defaultMessage: 'Open',

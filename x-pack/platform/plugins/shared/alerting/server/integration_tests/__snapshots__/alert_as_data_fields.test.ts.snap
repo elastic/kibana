@@ -154,6 +154,10 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "anomaly.detector_type": Object {
+      "required": false,
+      "type": "keyword",
+    },
     "container.id": Object {
       "required": false,
       "type": "keyword",
@@ -179,6 +183,11 @@ Object {
       "required": false,
       "scaling_factor": 100,
       "type": "scaled_float",
+    },
+    "kibana.alert.evaluation.time_range": Object {
+      "array": false,
+      "required": false,
+      "type": "date_range",
     },
     "kibana.alert.evaluation.value": Object {
       "required": false,
@@ -264,6 +273,10 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "anomaly.detector_type": Object {
+      "required": false,
+      "type": "keyword",
+    },
     "container.id": Object {
       "required": false,
       "type": "keyword",
@@ -289,6 +302,11 @@ Object {
       "required": false,
       "scaling_factor": 100,
       "type": "scaled_float",
+    },
+    "kibana.alert.evaluation.time_range": Object {
+      "array": false,
+      "required": false,
+      "type": "date_range",
     },
     "kibana.alert.evaluation.value": Object {
       "required": false,
@@ -374,6 +392,10 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "anomaly.detector_type": Object {
+      "required": false,
+      "type": "keyword",
+    },
     "container.id": Object {
       "required": false,
       "type": "keyword",
@@ -399,6 +421,11 @@ Object {
       "required": false,
       "scaling_factor": 100,
       "type": "scaled_float",
+    },
+    "kibana.alert.evaluation.time_range": Object {
+      "array": false,
+      "required": false,
+      "type": "date_range",
     },
     "kibana.alert.evaluation.value": Object {
       "required": false,
@@ -484,6 +511,10 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "anomaly.detector_type": Object {
+      "required": false,
+      "type": "keyword",
+    },
     "container.id": Object {
       "required": false,
       "type": "keyword",
@@ -509,6 +540,11 @@ Object {
       "required": false,
       "scaling_factor": 100,
       "type": "scaled_float",
+    },
+    "kibana.alert.evaluation.time_range": Object {
+      "array": false,
+      "required": false,
+      "type": "date_range",
     },
     "kibana.alert.evaluation.value": Object {
       "required": false,
@@ -918,6 +954,11 @@ Object {
       "required": false,
       "type": "unmapped",
     },
+    "kibana.alert.severity": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.severity_improving": Object {
       "array": false,
       "required": false,
@@ -990,6 +1031,16 @@ Object {
       "array": true,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.cps_scope.expression": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.cps_scope.linked_projects": Object {
+      "array": true,
+      "required": false,
+      "type": "flattened",
     },
     "kibana.space_ids": Object {
       "array": true,
@@ -1076,6 +1127,11 @@ Object {
       "scaling_factor": 100,
       "type": "scaled_float",
     },
+    "kibana.alert.evaluation.time_range": Object {
+      "array": false,
+      "required": false,
+      "type": "date_range",
+    },
     "kibana.alert.evaluation.value": Object {
       "required": false,
       "scaling_factor": 100,
@@ -1137,6 +1193,11 @@ Object {
       "scaling_factor": 100,
       "type": "scaled_float",
     },
+    "kibana.alert.evaluation.time_range": Object {
+      "array": false,
+      "required": false,
+      "type": "date_range",
+    },
     "kibana.alert.evaluation.value": Object {
       "required": false,
       "scaling_factor": 100,
@@ -1197,6 +1258,11 @@ Object {
       "required": false,
       "scaling_factor": 100,
       "type": "scaled_float",
+    },
+    "kibana.alert.evaluation.time_range": Object {
+      "array": false,
+      "required": false,
+      "type": "date_range",
     },
     "kibana.alert.evaluation.value": Object {
       "required": false,
@@ -1342,6 +1408,11 @@ Object {
       "required": false,
       "scaling_factor": 100,
       "type": "scaled_float",
+    },
+    "kibana.alert.evaluation.time_range": Object {
+      "array": false,
+      "required": false,
+      "type": "date_range",
     },
     "kibana.alert.evaluation.value": Object {
       "required": false,
@@ -2167,6 +2238,16 @@ Object {
       "array": false,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.cps_scope.expression": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.cps_scope.linked_projects": Object {
+      "array": true,
+      "required": false,
+      "type": "flattened",
     },
     "kibana.space_ids": Object {
       "array": true,
@@ -3458,6 +3539,16 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.cps_scope.expression": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.cps_scope.linked_projects": Object {
+      "array": true,
+      "required": false,
+      "type": "flattened",
+    },
     "kibana.space_ids": Object {
       "array": true,
       "required": true,
@@ -4747,6 +4838,16 @@ Object {
       "array": false,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.cps_scope.expression": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.cps_scope.linked_projects": Object {
+      "array": true,
+      "required": false,
+      "type": "flattened",
     },
     "kibana.space_ids": Object {
       "array": true,
@@ -6038,6 +6139,16 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.cps_scope.expression": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.cps_scope.linked_projects": Object {
+      "array": true,
+      "required": false,
+      "type": "flattened",
+    },
     "kibana.space_ids": Object {
       "array": true,
       "required": true,
@@ -7327,6 +7438,16 @@ Object {
       "array": false,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.cps_scope.expression": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.cps_scope.linked_projects": Object {
+      "array": true,
+      "required": false,
+      "type": "flattened",
     },
     "kibana.space_ids": Object {
       "array": true,
@@ -8624,6 +8745,16 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.cps_scope.expression": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.cps_scope.linked_projects": Object {
+      "array": true,
+      "required": false,
+      "type": "flattened",
+    },
     "kibana.space_ids": Object {
       "array": true,
       "required": true,
@@ -9913,6 +10044,16 @@ Object {
       "array": false,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.cps_scope.expression": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.cps_scope.linked_projects": Object {
+      "array": true,
+      "required": false,
+      "type": "flattened",
     },
     "kibana.space_ids": Object {
       "array": true,
@@ -11204,6 +11345,16 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.cps_scope.expression": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.cps_scope.linked_projects": Object {
+      "array": true,
+      "required": false,
+      "type": "flattened",
+    },
     "kibana.space_ids": Object {
       "array": true,
       "required": true,
@@ -11730,6 +11881,11 @@ Object {
       "scaling_factor": 100,
       "type": "scaled_float",
     },
+    "kibana.alert.evaluation.time_range": Object {
+      "array": false,
+      "required": false,
+      "type": "date_range",
+    },
     "kibana.alert.evaluation.value": Object {
       "required": false,
       "scaling_factor": 100,
@@ -11995,6 +12151,11 @@ Object {
       "required": false,
       "type": "unmapped",
     },
+    "kibana.alert.severity": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.severity_improving": Object {
       "array": false,
       "required": false,
@@ -12062,6 +12223,16 @@ Object {
       "array": true,
       "required": false,
       "type": "keyword",
+    },
+    "kibana.cps_scope.expression": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.cps_scope.linked_projects": Object {
+      "array": true,
+      "required": false,
+      "type": "flattened",
     },
     "kibana.space_ids": Object {
       "array": true,
@@ -12371,6 +12542,11 @@ Object {
       "scaling_factor": 100,
       "type": "scaled_float",
     },
+    "kibana.alert.evaluation.time_range": Object {
+      "array": false,
+      "required": false,
+      "type": "date_range",
+    },
     "kibana.alert.evaluation.value": Object {
       "required": false,
       "scaling_factor": 100,
@@ -12536,6 +12712,11 @@ Object {
       "required": false,
       "scaling_factor": 100,
       "type": "scaled_float",
+    },
+    "kibana.alert.evaluation.time_range": Object {
+      "array": false,
+      "required": false,
+      "type": "date_range",
     },
     "kibana.alert.evaluation.value": Object {
       "required": false,
@@ -12703,6 +12884,11 @@ Object {
       "scaling_factor": 100,
       "type": "scaled_float",
     },
+    "kibana.alert.evaluation.time_range": Object {
+      "array": false,
+      "required": false,
+      "type": "date_range",
+    },
     "kibana.alert.evaluation.value": Object {
       "required": false,
       "scaling_factor": 100,
@@ -12868,6 +13054,11 @@ Object {
       "required": false,
       "scaling_factor": 100,
       "type": "scaled_float",
+    },
+    "kibana.alert.evaluation.time_range": Object {
+      "array": false,
+      "required": false,
+      "type": "date_range",
     },
     "kibana.alert.evaluation.value": Object {
       "required": false,
@@ -13040,6 +13231,11 @@ Object {
       "required": false,
       "scaling_factor": 100,
       "type": "scaled_float",
+    },
+    "kibana.alert.evaluation.time_range": Object {
+      "array": false,
+      "required": false,
+      "type": "date_range",
     },
     "kibana.alert.evaluation.value": Object {
       "required": false,

@@ -9,8 +9,16 @@
 
 export * as connectorsSpecs from './src/all_specs';
 export type * from './src/connector_spec';
-
 export * as authTypeSpecs from './src/all_auth_types';
+export { EARS_AUTH_ID, EARS_PROVIDERS } from './src/auth_types/ears';
+export { OAUTH_AUTHORIZATION_CODE_AUTH_ID } from './src/auth_types/oauth_authorization_code';
 
 export { getConnectorSpec } from './src/get_connector_spec';
-export { getWorkflowTemplatesForConnector } from './src/get_workflow_templates';
+export { isToolAction } from './src/connector_spec';
+export { normalizeAuthorizationHeaderValue } from './src/auth_types/oauth_authz_code_and_ears_helpers';
+
+export { ConnectorAuthorizationError, isConnectorAuthorizationError } from './src/errors';
+export type { ConnectorAuthorizationReason } from './src/errors';
+export { AUTH_MODE_BY_AUTH_TYPE_ID } from './src/auth_mode_by_auth_type_id';
+export { getMeta, setMeta, addMeta } from './src/connector_spec_ui';
+export type { BaseMetadata } from './src/connector_spec_ui';

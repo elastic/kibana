@@ -67,6 +67,7 @@ export const PackQueriesAttachmentWrapper = ({
           startDate={scheduledData?.timestamp}
           scheduleId={scheduleId}
           executionCount={executionCount}
+          packName={scheduledData?.packName}
         />
       </CasesAttachmentWrapperContext.Provider>
     );
@@ -81,6 +82,7 @@ export const PackQueriesAttachmentWrapper = ({
         startDate={liveData?.['@timestamp']}
         expirationDate={liveData?.expiration}
         agentIds={agentIds}
+        tags={liveData?.tags}
       />
     </CasesAttachmentWrapperContext.Provider>
   );

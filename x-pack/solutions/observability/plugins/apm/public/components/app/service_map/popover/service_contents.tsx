@@ -29,7 +29,15 @@ const INITIAL_STATE: ServiceNodeReturn = {
   previousPeriod: undefined,
 };
 
-export function ServiceContents({ onFocusClick, selection, environment, kuery }: ContentsProps) {
+export function ServiceContents({
+  onFocusClick,
+  selection,
+  environment,
+  kuery,
+  isEmbedded,
+  showFocusMap,
+  clearKueryOnNavigation,
+}: ContentsProps) {
   const apmRouter = useApmRouter();
   const { query } = useAnyOfApmParams(
     '/service-map',
@@ -76,13 +84,15 @@ export function ServiceContents({ onFocusClick, selection, environment, kuery }:
     return null;
   }
 
+  const destinationKuery = clearKueryOnNavigation ? '' : kuery;
+
   const detailsUrl = apmRouter.link('/services/{serviceName}', {
     path: { serviceName },
     query: {
       rangeFrom,
       rangeTo,
       environment,
-      kuery,
+      kuery: destinationKuery,
       comparisonEnabled,
       serviceGroup,
     },
@@ -94,7 +104,7 @@ export function ServiceContents({ onFocusClick, selection, environment, kuery }:
       rangeFrom,
       rangeTo,
       environment,
-      kuery,
+      kuery: destinationKuery,
       serviceGroup,
       comparisonEnabled,
     },
@@ -125,18 +135,20 @@ export function ServiceContents({ onFocusClick, selection, environment, kuery }:
           })}
         </EuiButton>
       </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiButton
-          data-test-subj="apmServiceContentsFocusMapButton"
-          color="success"
-          href={focusUrl}
-          onClick={onFocusClick}
-        >
-          {i18n.translate('xpack.apm.serviceMap.focusMapButtonText', {
-            defaultMessage: 'Focus map',
-          })}
-        </EuiButton>
-      </EuiFlexItem>
+      {(showFocusMap ?? !isEmbedded) && (
+        <EuiFlexItem>
+          <EuiButton
+            data-test-subj="apmServiceContentsFocusMapButton"
+            color="success"
+            href={focusUrl}
+            onClick={onFocusClick}
+          >
+            {i18n.translate('xpack.apm.serviceMap.focusMapButtonText', {
+              defaultMessage: 'Focus map',
+            })}
+          </EuiButton>
+        </EuiFlexItem>
+      )}
     </>
   );
 }

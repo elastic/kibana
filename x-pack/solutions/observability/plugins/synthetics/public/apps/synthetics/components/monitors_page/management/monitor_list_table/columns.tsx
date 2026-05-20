@@ -6,7 +6,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
@@ -30,7 +30,6 @@ import * as labels from './labels';
 import { MonitorDetailsLink } from './monitor_details_link';
 
 import type {
-  EncryptedSyntheticsSavedMonitor,
   OverviewStatusState,
   ServiceLocations,
   SyntheticsMonitorSchedule,
@@ -41,16 +40,25 @@ import { MonitorTypeBadge } from '../../../common/components/monitor_type_badge'
 import { getFrequencyLabel } from './labels';
 import { MonitorEnabled } from './monitor_enabled';
 import { MonitorLocations } from './monitor_locations';
+import { UnhealthyTooltip } from './unhealthy_tooltip';
+import type { MonitorListItem } from './monitor_list';
 
 export function useMonitorListColumns({
   loading,
   overviewStatus,
   setMonitorPendingDeletion,
+  setMonitorPendingReset,
+  isFixableByReset,
 }: {
   loading: boolean;
   overviewStatus: OverviewStatusState | null;
   setMonitorPendingDeletion: (configs: string[]) => void;
-}): Array<EuiBasicTableColumn<EncryptedSyntheticsSavedMonitor>> {
+  setMonitorPendingReset: (val: {
+    resetIds: string[];
+    skippedMonitors: Array<{ id: string; name: string }>;
+  }) => void;
+  isFixableByReset: (configId: string) => boolean;
+}): Array<EuiBasicTableColumn<MonitorListItem>> {
   const history = useHistory();
   const { http, spaces } = useKibana<ClientPluginsStart>().services;
   const canEditSynthetics = useCanEditSynthetics();
@@ -60,21 +68,20 @@ export function useMonitorListColumns({
 
   const { alertStatus, updateAlertEnabledState } = useMonitorAlertEnable();
 
-  const isActionLoading = (fields: EncryptedSyntheticsSavedMonitor) => {
+  const isActionLoading = (fields: MonitorListItem) => {
     return alertStatus(fields[ConfigKey.CONFIG_ID]) === FETCH_STATUS.LOADING;
   };
 
   const canUsePublicLocations =
     useKibana().services?.application?.capabilities.uptime.elasticManagedLocationsEnabled ?? true;
 
-  const isPublicLocationsAllowed = (fields: EncryptedSyntheticsSavedMonitor) => {
-    const publicLocations = fields.locations.some((loc) => loc.isServiceManaged);
-
+  const isPublicLocationsAllowed = (fields: MonitorListItem) => {
+    const publicLocations = fields.locations?.some((loc: any) => loc.isServiceManaged);
     return publicLocations ? Boolean(canUsePublicLocations) : true;
   };
   const LazySpaceList = spaces?.ui.components.getSpaceList ?? (() => null);
 
-  const columns: Array<EuiBasicTableColumn<EncryptedSyntheticsSavedMonitor>> = [
+  const columns: Array<EuiBasicTableColumn<MonitorListItem>> = [
     {
       align: 'left' as const,
       field: ConfigKey.NAME as string,
@@ -82,9 +89,19 @@ export function useMonitorListColumns({
         defaultMessage: 'Monitor',
       }),
       sortable: true,
-      render: (_: string, monitor: EncryptedSyntheticsSavedMonitor) => (
-        <MonitorDetailsLink monitor={monitor} />
-      ),
+      render: (_: string, monitor: MonitorListItem) => {
+        const configId = monitor[ConfigKey.CONFIG_ID];
+        return (
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <MonitorDetailsLink monitor={monitor} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <UnhealthyTooltip configId={configId} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      },
     },
     // Only show Project ID column if project monitors are present
     ...(overviewStatus?.projectMonitorsCount ?? 0 > 0
@@ -96,6 +113,7 @@ export function useMonitorListColumns({
               defaultMessage: 'Project ID',
             }),
             sortable: true,
+            render: (val: string) => val,
           },
         ]
       : []),
@@ -106,7 +124,7 @@ export function useMonitorListColumns({
         defaultMessage: 'Type',
       }),
       sortable: true,
-      render: (_: string, monitor: EncryptedSyntheticsSavedMonitor) => (
+      render: (_: string, monitor: MonitorListItem) => (
         <MonitorTypeBadge
           monitorType={monitor[ConfigKey.MONITOR_TYPE]}
           ariaLabel={labels.getFilterForTypeMessage(monitor[ConfigKey.MONITOR_TYPE])}
@@ -137,12 +155,12 @@ export function useMonitorListColumns({
       name: i18n.translate('xpack.synthetics.management.monitorList.locations', {
         defaultMessage: 'Locations',
       }),
-      render: (locations: ServiceLocations, monitor: EncryptedSyntheticsSavedMonitor) =>
+      render: (locations: ServiceLocations | string[], monitor: MonitorListItem) =>
         locations ? (
           <MonitorLocations
-            monitorId={monitor[ConfigKey.CONFIG_ID] ?? monitor.id}
-            locations={locations}
-            overviewStatus={overviewStatus}
+            configId={monitor[ConfigKey.CONFIG_ID] ?? monitor.id}
+            locations={locations as ServiceLocations}
+            spaces={monitor.spaces}
           />
         ) : null,
     },
@@ -154,7 +172,7 @@ export function useMonitorListColumns({
       }),
       render: (tags: string[]) => (
         <TagsList
-          tags={tags}
+          tags={tags ?? []}
           onClick={(tag) => {
             history.push({ search: `tags=${encodeURIComponent(JSON.stringify([tag]))}` });
           }}
@@ -168,7 +186,7 @@ export function useMonitorListColumns({
       name: i18n.translate('xpack.synthetics.management.monitorList.enabled', {
         defaultMessage: 'Enabled',
       }),
-      render: (_enabled: boolean, monitor: EncryptedSyntheticsSavedMonitor) => (
+      render: (_enabled: boolean, monitor: MonitorListItem) => (
         <MonitorEnabled
           configId={monitor[ConfigKey.CONFIG_ID]}
           monitor={monitor}
@@ -299,6 +317,41 @@ export function useMonitorListColumns({
           },
         },
         {
+          'data-test-subj': 'syntheticsMonitorResetAction',
+          isPrimary: false,
+          name: (fields) => (
+            <NoPermissionsTooltip
+              canEditSynthetics={canEditSynthetics}
+              canUsePublicLocations={isPublicLocationsAllowed(fields)}
+            >
+              <span
+                aria-label={i18n.translate('xpack.synthetics.management.monitorList.resetLabel', {
+                  defaultMessage: 'Reset monitor {monitorName}',
+                  values: { monitorName: fields[ConfigKey.NAME] },
+                })}
+              >
+                {labels.RESET_LABEL}
+              </span>
+            </NoPermissionsTooltip>
+          ),
+          description: labels.RESET_LABEL,
+          icon: 'refresh' as const,
+          type: 'icon' as const,
+          color: 'warning' as const,
+          available: (fields) => isFixableByReset(fields[ConfigKey.CONFIG_ID]),
+          enabled: (fields) =>
+            canEditSynthetics &&
+            !isActionLoading(fields) &&
+            isServiceAllowed &&
+            isPublicLocationsAllowed(fields),
+          onClick: (fields) => {
+            setMonitorPendingReset({
+              resetIds: [fields[ConfigKey.CONFIG_ID]],
+              skippedMonitors: [],
+            });
+          },
+        },
+        {
           description: labels.DISABLE_STATUS_ALERT,
           name: (fields) => (
             <span
@@ -353,7 +406,7 @@ export function useMonitorListColumns({
         <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
           <EuiButtonIcon
             data-test-subj="syntheticsUseMonitorListColumnsButton"
-            iconType="boxesHorizontal"
+            iconType="boxesVertical"
             isDisabled={true}
             aria-label={CANNOT_PERFORM_ACTION_SYNTHETICS}
           />

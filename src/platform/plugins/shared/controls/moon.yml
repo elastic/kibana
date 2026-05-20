@@ -33,7 +33,6 @@ dependsOn:
   - '@kbn/presentation-publishing'
   - '@kbn/content-management-utils'
   - '@kbn/field-formats-plugin'
-  - '@kbn/presentation-panel-plugin'
   - '@kbn/std'
   - '@kbn/esql-types'
   - '@kbn/css-utils'
@@ -60,26 +59,6 @@ fileGroups:
     - server/**/*
     - ./jest_setup.ts
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

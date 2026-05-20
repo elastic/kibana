@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiInMemoryTable,
@@ -32,6 +32,12 @@ import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import {
+  DEPRECATED_CONNECTOR_TOOLTIP_CONTENT,
+  DEPRECATED_LABEL,
+  DEPRECATED_LLM_CONNECTOR_INFO,
+} from '@kbn/response-ops-rule-form/src/translations';
+import { isLLMConnectorTypeId } from '@kbn/response-ops-rule-form/src/constants';
 import {
   useConnectorOAuthConnect,
   OAuthRedirectMode,
@@ -82,6 +88,7 @@ const ActionsConnectorsList = ({
   actions,
   loadActions,
   setActions,
+  connectorAuthStatusError,
 }: {
   setAddFlyoutVisibility: (state: boolean) => void;
   editItem: (actionConnector: ActionConnector, tab: EditConnectorTabs, isFix?: boolean) => void;
@@ -89,6 +96,7 @@ const ActionsConnectorsList = ({
   actions: ActionConnector[];
   loadActions: () => Promise<void>;
   setActions: (state: ActionConnector[]) => void;
+  connectorAuthStatusError?: string;
 }) => {
   const {
     http,
@@ -97,6 +105,7 @@ const ActionsConnectorsList = ({
     setBreadcrumbs,
     chrome,
     docLinks,
+    actions: { isEarsEnabled },
   } = useKibana().services;
 
   const { euiTheme } = useEuiTheme();
@@ -105,6 +114,13 @@ const ActionsConnectorsList = ({
   const location = useLocation();
   const canDelete = hasDeleteActionsCapability(capabilities);
   const canSave = hasSaveActionsCapability(capabilities);
+  const isDisabledEarsConnector = useCallback(
+    (item: ActionConnectorTableItem | ActionConnector) =>
+      !isEarsEnabled &&
+      'config' in item &&
+      (item.config as Record<string, unknown>)?.authType === 'ears',
+    [isEarsEnabled]
+  );
 
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
   const [pageIndex, setPageIndex] = useState<number>(0);
@@ -156,19 +172,21 @@ const ActionsConnectorsList = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const actionConnectorTableItems: ActionConnectorTableItem[] = actionTypesIndex
-    ? actions.map((action) => {
-        return {
-          ...action,
-          actionType: actionTypesIndex[action.actionTypeId]
-            ? actionTypesIndex[action.actionTypeId].name
-            : action.actionTypeId,
-          compatibility: actionTypesIndex[action.actionTypeId]
-            ? getConnectorCompatibility(actionTypesIndex[action.actionTypeId].supportedFeatureIds)
-            : [],
-        };
-      })
-    : [];
+  const actionConnectorTableItems: ActionConnectorTableItem[] = useMemo(() => {
+    return actionTypesIndex
+      ? actions.map((action) => {
+          return {
+            ...action,
+            actionType: actionTypesIndex[action.actionTypeId]
+              ? actionTypesIndex[action.actionTypeId].name
+              : action.actionTypeId,
+            compatibility: actionTypesIndex[action.actionTypeId]
+              ? getConnectorCompatibility(actionTypesIndex[action.actionTypeId].supportedFeatureIds)
+              : [],
+          };
+        })
+      : [];
+  }, [actions, actionTypesIndex]);
 
   const actionTypesList: Array<{ value: string; name: string }> = actionTypesIndex
     ? Object.values(actionTypesIndex)
@@ -182,7 +200,7 @@ const ActionsConnectorsList = ({
   useEffect(() => {
     if (connectorId && !isLoadingActions) {
       const connector = actions.find((action) => action.id === connectorId);
-      if (connector) {
+      if (connector && !isDisabledEarsConnector(connector)) {
         editItem(connector, EditConnectorTabs.Configuration);
       }
 
@@ -190,7 +208,15 @@ const ActionsConnectorsList = ({
 
       window.history.replaceState(null, '', linkToConnectors);
     }
-  }, [actions, connectorId, editItem, history, isLoadingActions, location]);
+  }, [
+    actions,
+    connectorId,
+    editItem,
+    history,
+    isDisabledEarsConnector,
+    isLoadingActions,
+    location,
+  ]);
 
   function setDeleteConnectorWarning(connectors: string[]) {
     const show = connectors.some((c) => {
@@ -205,6 +231,9 @@ const ActionsConnectorsList = ({
     setConnectorsToDelete(itemIds);
     setDeleteConnectorWarning(itemIds);
   }
+  const hasDeprecatedConnectors = useMemo(() => {
+    return actionConnectorTableItems.some((item) => item.isConnectorTypeDeprecated);
+  }, [actionConnectorTableItems]);
 
   const actionsTableColumns = [
     {
@@ -218,6 +247,7 @@ const ActionsConnectorsList = ({
       ),
       sortable: false,
       truncateText: true,
+      width: '25%',
       render: (value: string, item: ActionConnectorTableItem) => {
         const checkEnabledResult = checkActionTypeEnabled(
           actionTypesIndex && actionTypesIndex[item.actionTypeId],
@@ -231,38 +261,81 @@ const ActionsConnectorsList = ({
         const name = getConnectorName(value, item);
 
         const link = (
-          <EuiFlexGroup alignItems="center" gutterSize="xs">
+          <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiFlexItem grow={false}>
-              <EuiLink
-                data-test-subj={`edit${item.id}`}
-                title={name}
-                onClick={() => editItem(item, EditConnectorTabs.Configuration)}
-                key={item.id}
-                disabled={actionTypesIndex ? !actionTypesIndex[item.actionTypeId]?.enabled : true}
-              >
-                {name}
-              </EuiLink>
+              <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiLink
+                    data-test-subj={`edit${item.id}`}
+                    title={name}
+                    onClick={() => editItem(item, EditConnectorTabs.Configuration)}
+                    key={item.id}
+                    disabled={
+                      isDisabledEarsConnector(item) ||
+                      (actionTypesIndex ? !actionTypesIndex[item.actionTypeId]?.enabled : true)
+                    }
+                  >
+                    {name}
+                  </EuiLink>
+                </EuiFlexItem>
+                {item.isMissingSecrets ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiIconTip
+                      iconProps={{
+                        'data-test-subj': `missingSecrets_${item.id}`,
+                        style: { verticalAlign: 'text-top' },
+                      }}
+                      type="warning"
+                      color="warning"
+                      content={i18n.translate(
+                        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.missingSecretsDescription',
+                        { defaultMessage: 'Sensitive information was not imported' }
+                      )}
+                      position="right"
+                    />
+                  </EuiFlexItem>
+                ) : null}
+                {showDeprecatedTooltip && (
+                  <EuiFlexItem grow={false}>
+                    <ConnectorIconTipWithSpacing />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
             </EuiFlexItem>
-            {item.isMissingSecrets ? (
+            {item.isPreconfigured && (
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  data-test-subj="preConfiguredTitleMessage"
+                  label={i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionsConnectorsList.preconfiguredTitleMessage',
+                    {
+                      defaultMessage: 'Preconfigured',
+                    }
+                  )}
+                  tooltipContent={i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionsConnectorsList.preconfiguredTooltip',
+                    {
+                      defaultMessage: "This connector can't be deleted.",
+                    }
+                  )}
+                  size="s"
+                />
+              </EuiFlexItem>
+            )}
+            {isDisabledEarsConnector(item) && (
               <EuiFlexItem grow={false}>
                 <EuiIconTip
-                  iconProps={{
-                    'data-test-subj': `missingSecrets_${item.id}`,
-                    style: { verticalAlign: 'text-top' },
-                  }}
                   type="warning"
                   color="warning"
                   content={i18n.translate(
-                    'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.missingSecretsDescription',
-                    { defaultMessage: 'Sensitive information was not imported' }
+                    'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.earsDisabledDescription',
+                    {
+                      defaultMessage:
+                        'EARS authentication is disabled. Enable it via xpack.actions.auth.ears.enabled in kibana.yml.',
+                    }
                   )}
                   position="right"
                 />
-              </EuiFlexItem>
-            ) : null}
-            {showDeprecatedTooltip && (
-              <EuiFlexItem grow={false}>
-                <ConnectorIconTipWithSpacing />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -278,6 +351,38 @@ const ActionsConnectorsList = ({
         );
       },
     },
+    ...(hasDeprecatedConnectors
+      ? [
+          {
+            name: '',
+            render: (item: ActionConnectorTableItem) => {
+              if (!item.isConnectorTypeDeprecated) return null;
+              return (
+                <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiBetaBadge
+                      label={DEPRECATED_LABEL}
+                      tooltipContent={DEPRECATED_CONNECTOR_TOOLTIP_CONTENT}
+                      color="warning"
+                      size="s"
+                    />
+                  </EuiFlexItem>
+                  {isLLMConnectorTypeId(item.actionTypeId) && (
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip
+                        type="info"
+                        color="subdued"
+                        content={DEPRECATED_LLM_CONNECTOR_INFO}
+                        data-test-subj={`deprecatedLLMConnectorInfo-${item.id}`}
+                      />
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              );
+            },
+          },
+        ]
+      : []),
     {
       field: 'actionType',
       'data-test-subj': 'connectorsTableCell-actionType',
@@ -361,6 +466,7 @@ const ActionsConnectorsList = ({
     },
     {
       name: '',
+      width: '300px',
       render: (item: ActionConnectorTableItem) => {
         if (!actionTypesIndex || !actionTypesIndex[item.actionTypeId]) {
           return null;
@@ -371,8 +477,30 @@ const ActionsConnectorsList = ({
         const isStackConnector = actionType.source === ACTION_TYPE_SOURCES.stack;
 
         return (
-          <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-            {usesOAuthAuthorizationCode(item) && <OAuthOperations item={item} />}
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false}>
+            {usesOAuthAuthorizationCode(item) && !isDisabledEarsConnector(item) && (
+              <>
+                {connectorAuthStatusError ? (
+                  <DisabledOAuthConnectOperation errorMessage={connectorAuthStatusError} />
+                ) : (
+                  (item.userAuthStatus === 'connected' ||
+                    item.userAuthStatus === 'not_connected') && (
+                    <OAuthOperations
+                      item={item}
+                      onConnectionStatusChange={(changedConnectorId, status) =>
+                        setActions(
+                          actions.map((connector) =>
+                            connector.id === changedConnectorId
+                              ? { ...connector, userAuthStatus: status }
+                              : connector
+                          )
+                        )
+                      }
+                    />
+                  )
+                )}
+              </>
+            )}
             <DeleteOperation canDelete={canDelete} item={item} onDelete={() => onDelete([item])} />
             {showFixButton && (
               <EuiFlexItem grow={false} style={{ marginLeft: 4 }}>
@@ -400,6 +528,7 @@ const ActionsConnectorsList = ({
             {!showFixButton && (
               <RunOperation
                 canExecute={
+                  !isDisabledEarsConnector(item) &&
                   isStackConnector &&
                   hasExecuteActionsCapability(capabilities, actionType?.subFeature)
                 }
@@ -418,13 +547,21 @@ const ActionsConnectorsList = ({
       loading={isLoadingActions || isLoadingActionTypes}
       items={actionConnectorTableItems}
       sorting={true}
-      itemId="id"
+      tableLayout="fixed"
+      itemId={(item: ActionConnectorTableItem) =>
+        item.isPreconfigured ? `preconfigured_${item.id}` : item.id
+      }
       columns={actionsTableColumns}
       css={disabledActConnectorCss}
+      tableCaption={i18n.translate(
+        'xpack.triggersActionsUI.sections.actionsConnectorsList.tableCaption',
+        { defaultMessage: 'Connectors' }
+      )}
       rowProps={(item: ActionConnectorTableItem) => ({
         className:
-          !item.isPreconfigured &&
-          (!actionTypesIndex || !actionTypesIndex[item.actionTypeId]?.enabled)
+          isDisabledEarsConnector(item) ||
+          (!item.isPreconfigured &&
+            (!actionTypesIndex || !actionTypesIndex[item.actionTypeId]?.enabled))
             ? 'actConnectorsList__tableRowDisabled'
             : '',
         'data-test-subj': 'connectors-row',
@@ -432,7 +569,9 @@ const ActionsConnectorsList = ({
       cellProps={(item: ActionConnectorTableItem) => ({
         'data-test-subj': 'cell',
         className:
-          !actionTypesIndex || !actionTypesIndex[item.actionTypeId]?.enabled
+          isDisabledEarsConnector(item) ||
+          !actionTypesIndex ||
+          !actionTypesIndex[item.actionTypeId]?.enabled
             ? 'actConnectorsList__tableCellDisabled'
             : '',
       })}
@@ -513,7 +652,8 @@ const ActionsConnectorsList = ({
           onDeleted={(deleted: string[]) => {
             if (selectedItems.length === 0 || selectedItems.length === deleted.length) {
               const updatedActions = actions.filter(
-                (action) => action.id && !connectorsToDelete.includes(action.id)
+                (action) =>
+                  action.id && !(connectorsToDelete.includes(action.id) && !action.isPreconfigured)
               );
               setActions(updatedActions);
               setSelectedItems([]);
@@ -587,20 +727,7 @@ const DeleteOperation: React.FunctionComponent<{
   onDelete: () => void;
 }> = ({ item, canDelete, onDelete }) => {
   if (item.isPreconfigured) {
-    return (
-      <EuiFlexItem grow={false}>
-        <EuiBetaBadge
-          data-test-subj="preConfiguredTitleMessage"
-          label={i18n.translate(
-            'xpack.triggersActionsUI.sections.actionsConnectorsList.preconfiguredTitleMessage',
-            {
-              defaultMessage: 'Preconfigured',
-            }
-          )}
-          tooltipContent="This connector can't be deleted."
-        />
-      </EuiFlexItem>
-    );
+    return null;
   }
   return (
     <EuiFlexItem grow={false}>
@@ -626,6 +753,36 @@ const DeleteOperation: React.FunctionComponent<{
           )}
           onClick={onDelete}
           iconType={'trash'}
+        />
+      </EuiToolTip>
+    </EuiFlexItem>
+  );
+};
+
+const DisabledOAuthConnectOperation: React.FunctionComponent<{
+  errorMessage: string;
+}> = ({ errorMessage }) => {
+  return (
+    <EuiFlexItem grow={false}>
+      <EuiToolTip
+        content={i18n.translate(
+          'xpack.triggersActionsUI.sections.actionsConnectorsList.oauthAuthStatusLoadFailedTooltip',
+          {
+            defaultMessage: 'Unable to load connector authentication status. {errorMessage}',
+            values: { errorMessage },
+          }
+        )}
+      >
+        <EuiButtonIcon
+          isDisabled
+          data-test-subj="authorizeConnectorDisabledAuthStatusError"
+          aria-label={i18n.translate(
+            'xpack.triggersActionsUI.sections.actionsConnectorsList.oauthAuthStatusLoadFailedAuthorizeAriaLabel',
+            {
+              defaultMessage: 'Authorize unavailable — authentication status could not be loaded',
+            }
+          )}
+          iconType="link"
         />
       </EuiToolTip>
     </EuiFlexItem>
@@ -669,17 +826,21 @@ const RunOperation: React.FunctionComponent<{
 
 const OAuthOperations: React.FunctionComponent<{
   item: ActionConnectorTableItem;
-}> = ({ item }) => {
+  onConnectionStatusChange: (connectorId: string, status: 'connected' | 'not_connected') => void;
+}> = ({ item, onConnectionStatusChange }) => {
   const {
     notifications: { toasts },
   } = useKibana().services;
 
   const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false);
 
+  const isUserConnectedToConnector = item.userAuthStatus === 'connected';
+
   const { connect, cancelConnect, isConnecting, isAwaitingCallback } = useConnectorOAuthConnect({
     connectorId: item.id,
     redirectMode: OAuthRedirectMode.NewTab,
     onSuccess: () => {
+      onConnectionStatusChange(item.id, 'connected');
       toasts.addSuccess({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.actionsConnectorsList.oauthAuthorizationSuccessTitle',
@@ -705,6 +866,7 @@ const OAuthOperations: React.FunctionComponent<{
   const { disconnect, isDisconnecting } = useConnectorOAuthDisconnect({
     connectorId: item.id,
     onSuccess: () => {
+      onConnectionStatusChange(item.id, 'not_connected');
       toasts.addSuccess({
         title: i18n.translate(
           'xpack.triggersActionsUI.sections.actionsConnectorsList.oauthDisconnectSuccessTitle',
@@ -729,68 +891,88 @@ const OAuthOperations: React.FunctionComponent<{
 
   return (
     <>
-      <EuiFlexItem grow={false}>
-        {isAwaitingCallback ? (
+      {!isUserConnectedToConnector && (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj={isAwaitingCallback ? 'connectingConnector' : 'authorizeConnector'}
+                onClick={connect}
+                color="text"
+                isLoading={isConnecting || isAwaitingCallback}
+                disabled={isDisconnecting || isAwaitingCallback}
+                size="s"
+              >
+                {isConnecting || isAwaitingCallback
+                  ? i18n.translate(
+                      'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.connectingButton',
+                      { defaultMessage: 'Connecting...' }
+                    )
+                  : i18n.translate(
+                      'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.authorizeConnectorButton',
+                      { defaultMessage: 'Connect to your account' }
+                    )}
+              </EuiButton>
+            </EuiFlexItem>
+            {isAwaitingCallback && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.cancelAuthorizationDescription',
+                    { defaultMessage: 'Cancel authorization' }
+                  )}
+                >
+                  <EuiButtonIcon
+                    data-test-subj="cancelAuthorizeConnector"
+                    aria-label={i18n.translate(
+                      'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.cancelAuthorizationName',
+                      { defaultMessage: 'Cancel authorization' }
+                    )}
+                    onClick={cancelConnect}
+                    iconType="cross"
+                    display="base"
+                    color="text"
+                    size="s"
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
+      {isUserConnectedToConnector && (
+        <EuiFlexItem grow={false}>
           <EuiToolTip
-            key="cancel"
             content={i18n.translate(
-              'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.cancelAuthorizationDescription',
-              { defaultMessage: 'Cancel authorization' }
+              'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.disconnectConnectorDescription',
+              { defaultMessage: 'Disconnect connector' }
             )}
           >
-            <EuiButtonIcon
-              data-test-subj="cancelAuthorizeConnector"
+            <EuiButton
+              data-test-subj="disconnectConnector"
               aria-label={i18n.translate(
-                'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.cancelAuthorizationName',
-                { defaultMessage: 'Cancel authorization' }
+                'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.disconnectConnectorName',
+                { defaultMessage: 'Disconnect' }
               )}
-              onClick={cancelConnect}
-              iconType="cross"
-              color="danger"
-            />
+              isLoading={isDisconnecting}
+              disabled={isConnecting || isAwaitingCallback}
+              size="s"
+              color="text"
+              onClick={() => setShowDisconnectConfirm(true)}
+            >
+              {isDisconnecting || isAwaitingCallback
+                ? i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.disconnectingConnectorButton',
+                    { defaultMessage: 'Disconnecting' }
+                  )
+                : i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.disconnectConnectorButton',
+                    { defaultMessage: 'Disconnect' }
+                  )}
+            </EuiButton>
           </EuiToolTip>
-        ) : (
-          <EuiToolTip
-            key="authorize"
-            content={i18n.translate(
-              'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.authorizeConnectorDescription',
-              { defaultMessage: 'Authorize connector' }
-            )}
-          >
-            <EuiButtonIcon
-              data-test-subj="authorizeConnector"
-              aria-label={i18n.translate(
-                'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.authorizeConnectorName',
-                { defaultMessage: 'Authorize' }
-              )}
-              isLoading={isConnecting}
-              disabled={isDisconnecting}
-              onClick={connect}
-              iconType="link"
-            />
-          </EuiToolTip>
-        )}
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={i18n.translate(
-            'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.disconnectConnectorDescription',
-            { defaultMessage: 'Disconnect connector' }
-          )}
-        >
-          <EuiButtonIcon
-            data-test-subj="disconnectConnector"
-            aria-label={i18n.translate(
-              'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.disconnectConnectorName',
-              { defaultMessage: 'Disconnect' }
-            )}
-            isLoading={isDisconnecting}
-            disabled={isConnecting || isAwaitingCallback}
-            onClick={() => setShowDisconnectConfirm(true)}
-            iconType="linkSlash"
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
+        </EuiFlexItem>
+      )}
       {showDisconnectConfirm && (
         <EuiConfirmModal
           aria-label={i18n.translate(

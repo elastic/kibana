@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, map, merge } from 'rxjs';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
   initializeTimeRangeManager,
   initializeTitleManager,
@@ -37,7 +37,7 @@ import { queryClient } from '../query_client';
 export const getAlertsTableEmbeddableFactory = (
   coreServices: CoreStart,
   deps: EmbeddableAlertsTablePublicStartDependencies
-): EmbeddableFactory<EmbeddableAlertsTableSerializedState, EmbeddableAlertsTableApi> => ({
+): EmbeddablePublicDefinition<EmbeddableAlertsTableSerializedState, EmbeddableAlertsTableApi> => ({
   type: EMBEDDABLE_ALERTS_TABLE_ID,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const timeRangeManager = initializeTimeRangeManager(initialState);
@@ -51,20 +51,23 @@ export const getAlertsTableEmbeddableFactory = (
     const initialTableConfig = initialState.tableConfig;
     const tableConfig$ = new BehaviorSubject<EmbeddableAlertsTableConfig>(initialTableConfig);
 
-    const serializeState = () => ({
+    const serializeState = (): EmbeddableAlertsTableSerializedState => ({
       ...titleManager.getLatestState(),
       ...timeRangeManager.getLatestState(),
       tableConfig: tableConfig$.getValue(),
     });
 
-    const unsavedChangesApi = initializeUnsavedChanges({
+    const unsavedChangesApi = initializeUnsavedChanges<EmbeddableAlertsTableSerializedState>({
       uuid,
       parentApi,
       anyStateChange$: merge(
         timeRangeManager.anyStateChange$,
         titleManager.anyStateChange$,
-        tableConfig$
-      ).pipe(map(() => undefined)),
+        tableConfig$.pipe(
+          skip(1),
+          map(() => undefined)
+        )
+      ),
       serializeState,
       getComparators: () => ({
         ...titleComparators,
@@ -74,6 +77,9 @@ export const getAlertsTableEmbeddableFactory = (
       onReset: (lastSaved) => {
         titleManager.reinitializeState(lastSaved);
         timeRangeManager.reinitializeState(lastSaved);
+        if (lastSaved?.tableConfig) {
+          tableConfig$.next(lastSaved.tableConfig);
+        }
       },
     });
 

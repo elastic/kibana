@@ -44,6 +44,7 @@ export interface SingleAgentMenuCallbacks {
   onUnenrollClick: () => void;
   onUninstallClick: () => void;
   onRollbackClick: () => void;
+  onRemoveCollectorClick?: () => void;
 }
 
 export interface UseSingleAgentMenuItemsOptions {
@@ -99,6 +100,24 @@ export function useSingleAgentMenuItems({
 
     if (agent.type === 'OPAMP') {
       items.push(viewAgentJsonMenuItem);
+      if (hasFleetAllPrivileges && callbacks.onRemoveCollectorClick) {
+        items.push({
+          id: 'remove-collector',
+          name: (
+            <FormattedMessage
+              id="xpack.fleet.agentList.removeCollectorOneButton"
+              defaultMessage="Remove collector"
+            />
+          ),
+          icon: 'trash',
+          iconColor: 'danger',
+          disabled: !agent.active,
+          onClick: () => {
+            callbacks.onRemoveCollectorClick?.();
+          },
+          'data-test-subj': 'agentRemoveCollectorBtn',
+        });
+      }
       return items;
     }
 
@@ -350,7 +369,7 @@ export function useSingleAgentMenuItems({
               defaultMessage="Uninstall agent"
             />
           ),
-          icon: 'minusInCircle',
+          icon: 'minusCircle',
           iconColor: 'danger',
           disabled: !agent.active,
           onClick: () => {

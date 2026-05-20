@@ -18,8 +18,9 @@ import { assertDiscoverHasData, assertStreamHasData } from '../lib/validation_he
  * to spin up a local k8s cluster with the required resources.
  */
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async ({ page, onboardingHomePage }) => {
   await page.goto(`${process.env.KIBANA_BASE_URL}/app/observabilityOnboarding`);
+  await onboardingHomePage.maybeClickIntroducingAIAgentModalContinueBtn();
 });
 
 /**
@@ -89,12 +90,24 @@ test('Otel Kubernetes', async ({
   fs.writeFileSync(outputPath, codeSnippet);
 
   /**
-   * There is no explicit data ingest indication
-   * in the flow, so we need to rely on a timeout.
-   * 5 minutes should be enough for the stack to be
-   * created and to start pushing data.
+   * The page waits for the browser window to lose
+   * focus as a signal to start checking for incoming data
    */
-  await page.waitForTimeout(5 * 60000);
+  await page.evaluate('window.dispatchEvent(new Event("blur"))');
+
+  /**
+   * Wait for the data received indicator to appear.
+   * The flow now uses DataIngestStatus which polls for data
+   * after the blur event and shows "We are monitoring your cluster"
+   * once both logs and metrics have arrived.
+   */
+  await otelKubernetesFlowPage.assertDataReceivedIndicator();
+
+  /**
+   * Additional buffer to ensure data has propagated
+   * to dashboards and Discover before navigating.
+   */
+  await page.waitForTimeout(2 * 60000);
 
   /**
    * Wired streams only reroutes logs (to logs.otel); metrics and traces are

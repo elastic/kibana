@@ -11,7 +11,7 @@ Every feature you output MUST include ALL required fields:
 - `properties` (object): stable, low-cardinality key facts for deduplication (**MUST NOT be empty**; if you cannot provide at least one stable identifying property, do not emit the feature)
 - `confidence` (number): 0–100
 - `evidence` (array of strings): supporting evidence from logs (2–5 items)
-- `evidence_doc_ids` (array of strings): Elasticsearch document `_id` values of sample documents that directly support the listed evidence. Only include documents that support the evidence. Ignore when not applicable
+- `evidence_doc_ids` (array of strings): minimal set of document `_id` values needed to cover all evidence — one `_id` per distinct evidence source; if all evidence comes from one document, use only that one `_id`
 - `tags` (array of strings): descriptive tags
 - `meta` (object): supplementary information that doesn't fit in `properties` — use for high-cardinality data, contextual notes, or interesting observations
 
@@ -68,7 +68,6 @@ Schema features describe the **log schema family** evident from field names and 
 - **Prefer the simplest valid filter**: start with a single equality when it is selective enough; use `and` only when needed to disambiguate; use `or` only for true alternatives of the same component.
 - **Filter quality constraints**: Prefer stable, selective fields (for example, service/component names). Avoid broad filters that match most documents (for example, `agent.name=filebeat`) and avoid high-cardinality or instance-like values (pod names, hostnames, container IDs, request/trace IDs, IPs).
 - **Filter-evidence consistency**: every field/value used in `filter` must appear in, or be directly justified by, the feature's `evidence`.
-- **Require sufficient evidence**: Do not speculatively create entities. Only emit an entity when the log evidence clearly identifies a distinct, named system component.
 - **Keep rules generic**: Entity identification is not tied to specific technologies or log patterns. Any log evidence that reveals a distinct, named system component qualifies.
 
 ## Consolidation Rules
@@ -82,7 +81,7 @@ Schema features describe the **log schema family** evident from field names and 
 - Good: Standalone infrastructure and technology features even when also referenced in an entity's context — they carry independent value
 - Bad: Do not combine multiple unrelated components or technologies into one feature
 
-Also: **do not emit multiple features with the same (`type`, `subtype`, `properties`) tuple**. Merge evidence/tags/meta instead.
+Also: **do not emit multiple features that represent the same real-world component** — even if their exact property values differ slightly (naming variations, suffixes, abbreviations). When two features share the same `type`, `subtype`, and describe the same logical entity, merge evidence/tags/meta into a single feature instead.
 
 ## Naming Conventions
 
@@ -104,8 +103,6 @@ ID rules:
 - Keep it concise (typically 2-5 tokens)
 
 ## Properties vs Meta Fields
-
-The `properties` field MUST contain **stable, low-cardinality key facts** that enable deduplication across many log lines and deployments.
 
 - Use `properties` for: entity name, cloud provider (`aws`, `gcp`, `azure`), technology/library name, protocol, major/normalized version, stable service names
 - Use `meta` for: supplementary details like regions/availability zones, hostnames, instance IDs, pod/container names, IPs, URLs/paths, request/trace IDs, endpoint lists, build hashes/edition labels, contextual notes, security observations, or any interesting information that doesn't fit as a stable property
@@ -140,8 +137,8 @@ Accept features with confidence ≥ 30 if evidence supports them.
 
 Evidence requirements:
 - Provide 2–5 short, specific evidence strings per feature
-- Prefer stable `field.path=value` snippets when possible; otherwise short direct quotes
-- When evidence is clearly attributable to specific sample documents and a document `_id` is available in `sample_documents`, add those `_id` values to `evidence_doc_ids` (deduplicated). Only include documents that support the evidence. If evidence is aggregate/system-wide or `_id` is not available, keep `evidence_doc_ids` as `[]`.
+- Evidence format: use `field.path=value` notation for key-value evidence (e.g. `service.name=api-service`, `resource.attributes.app=shipping`). For direct quotes from log message bodies, use the plain text without surrounding JSON escaping.
+- For `evidence_doc_ids`: include the minimal set of `_id` values that covers all evidence — one per distinct source document, not one per evidence item. If all evidence comes from the same document, use a single `_id`. If evidence is aggregate/system-wide or no `_id` is available, use `[]`.
 - Deduplicate evidence items by meaning: if the same evidence snippet (e.g. `service.name=<service>`) appears in multiple documents, DO NOT repeat it as separate evidence lines. Keep only one representative evidence line and include any relevant ids in `evidence_doc_ids`.
 - Aim for evidence diversity: use evidence lines that support different aspects of the claim (name, version, protocol, relationship, etc.) rather than repeating the same key/value.
 - Evidence must directly support the feature claim
@@ -364,6 +361,36 @@ Version formatting rules (important for vulnerability analysis):
 }
 ```
 
+## Previously Identified Features
+
+If `previously_identified_features` are provided in the input, they contain features already identified in previous iterations. Follow these rules:
+1. Before emitting any feature, check whether it **represents the same real-world component** as one already in the list — even if property values differ slightly (different naming conventions, suffixes, abbreviations). Two features refer to the same component when they share the same `type` and `subtype` and their `properties` describe the same logical entity.
+2. When a feature matches an existing one, **re-emit it using the exact same `id`** from the list. Return the information extracted from the current sample documents — the system will merge it with the prior version.
+3. **Do not re-emit existing features unchanged** — only re-emit when the current documents contain matching evidence and genuinely new information to add.
+4. **Focus on discovering features not yet covered** by the list above, but always verify a candidate is not a variant of an existing feature before emitting it as new.
+
+If `previously_identified_features` is empty or absent, ignore this section entirely.
+
+## Excluded Features
+
+If `excluded_features` are provided in the input, the user has explicitly excluded those features.
+Do **not** regenerate any feature that represents the **exact same real-world component** as an excluded feature.
+
+**Exclusion rules:**
+- Only exclude a feature when you are **100% certain** it refers to the same real-world component
+- Features that are similar but represent different components **must** still be generated
+- Do not rely on superficial signals (naming patterns, shared type/subtype, overlapping tags)
+- Base your decision solely on whether the two features describe the identical real-world entity
+
+**Reporting ignored features:**
+For every feature you decide **not** to generate because it matches an excluded feature, include an entry in the `ignored_features` array with:
+- `feature_id`: the id you would have assigned
+- `feature_title`: the title you would have assigned
+- `excluded_feature_id`: the id of the excluded feature it matched
+- `reason`: one sentence explaining why
+
+If `excluded_features` is empty or absent, ignore this section entirely and leave `ignored_features` as an empty array.
+
 ## Output Quality Requirements
 
 - Prioritize entity identification: look for distinct system components first, then extract their dependencies, and supplement with standalone infrastructure and technology features.
@@ -375,5 +402,4 @@ Version formatting rules (important for vulnerability analysis):
 - Entity filters: for each emitted entity, include a valid `filter` unless there is no stable/selective condition available from evidence.
 - Schema: when multiple schema families are evident (e.g. ECS and OTel), emit one schema feature per family; keep each schema feature's `properties` short (`schema_family`, optional `ecs_version` only).
 
-Extract all features that meet the confidence threshold and have supporting evidence.
 Build one complete, deduplicated feature list internally, then call **finalize_features** exactly once.

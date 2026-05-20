@@ -46,7 +46,7 @@ export const PluginContextMenu: React.FC<PluginContextMenuProps> = ({
       },
     ];
 
-    if (canManage) {
+    if (canManage && !plugin.readonly) {
       items.push({
         name: labels.plugins.deletePluginButtonLabel,
         icon: 'trash',
@@ -76,7 +76,7 @@ export const PluginContextMenu: React.FC<PluginContextMenuProps> = ({
       panelPaddingSize="none"
       anchorPosition="downRight"
     >
-      <EuiContextMenu initialPanelId={0} panels={panels} size="s" />
+      <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
   );
 };

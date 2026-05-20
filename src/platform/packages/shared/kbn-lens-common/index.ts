@@ -88,8 +88,6 @@ export type {
   InitializationOptions,
   LensInspector,
   ILensDocumentService,
-  CheckDuplicateTitleOptions,
-  CheckDuplicateTitleProps,
   LensSaveResult,
   DatasourceFixAction,
   LensAttributesService,
@@ -209,11 +207,12 @@ export type {
   SecondaryTrend,
   MetricVisualizationState,
   MetricVisualizationStateOptionals,
-  TitleFontWeight,
   PrimaryMetricFontSize,
   IconPosition,
   Alignment,
   PrimaryMetricPosition,
+  MetricStyleTemplateId,
+  MetricStyleTemplatePresetId,
   MetricLayoutWithDefault,
 } from './visualizations/metric/types';
 export type {
@@ -243,8 +242,22 @@ export type {
   XYLayerConfig,
   ValidXYDataLayerConfig,
   ValidLayer,
-  XYState,
+  XYVisualizationState,
 } from './visualizations/xy/types';
+export type {
+  XYPersistedAnnotationLayerConfig,
+  XYPersistedByReferenceAnnotationLayerConfig,
+  XYPersistedByValueAnnotationLayerConfig,
+  XYPersistedLinkedByValueAnnotationLayerConfig,
+  XYPersistedLayerConfig,
+  XYPersistedState,
+} from './visualizations/xy/persistence';
+export {
+  isPersistedAnnotationsLayer,
+  isPersistedByReferenceAnnotationsLayer,
+  isPersistedByValueAnnotationsLayer,
+  isPersistedLinkedByValueAnnotationsLayer,
+} from './visualizations/xy/persistence';
 export type {
   LensEmbeddableInput,
   TypedLensByValueInput,
@@ -338,7 +351,6 @@ export {
 export {
   LENS_HEATMAP_ID,
   LENS_HEATMAP_CHART_SHAPES,
-  LENS_HEATMAP_CHART_NAMES,
   LENS_HEATMAP_GROUP_ID,
   HEATMAP_NAME,
   HEATMAP_LEGEND_NAME,
@@ -358,14 +370,16 @@ export {
   LENS_METRIC_GROUP_ID,
   LENS_METRIC_STATE_DEFAULTS,
   LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR,
+  LENS_METRIC_DEFAULT_STYLE_TEMPLATE_CONFIG,
   LENS_METRIC_DEFAULT_TRENDLINE_NAME,
-  LENS_METRIC_LAYOUT_BY_POSITION,
+  LENS_METRIC_STYLE_TEMPLATE,
   LENS_METRIC_TRENDLINE_NAME,
   LENS_METRIC_LABEL_POSITION,
   LENS_METRIC_SECONDARY_BASELINE_DEFAULT_VALUE,
   LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
   LENS_METRIC_AVAILABLE_METRIC_ICONS,
 } from './visualizations/metric/constants';
+export { inferStyleTemplate, getEffectiveIconAlign } from './visualizations/metric/utils';
 export {
   PARTITION_CHART_TYPES,
   PARTITION_EMPTY_SIZE_RADIUS,
@@ -381,8 +395,6 @@ export {
 export {
   YAxisModes,
   SeriesTypes,
-  visualizationSubtypes,
-  visualizationTypes,
   AvailableReferenceLineIcons,
 } from './visualizations/xy/constants';
 export { LENS_SHARE_STATE_ACTION } from './locator_types';
@@ -402,3 +414,4 @@ export {
 export { DRAG_DROP_EXTRA_TARGETS_WIDTH, DRAG_DROP_EXTRA_TARGETS_PADDING } from './editor/constants';
 export { LENS_DATASOURCE_ID } from './embeddable/types';
 export type { LensDatasourceId } from './embeddable/types';
+export { LENS_EMBEDDABLE_TYPE } from './embeddable/constants';

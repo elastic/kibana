@@ -32,6 +32,27 @@ describe('custom asymmetric matchers', () => {
     });
   });
 
+  describe('expect.stringContaining()', () => {
+    it('matches strings that contain the expected substring', () => {
+      expect(() =>
+        apiExpect({ message: 'hello world' }).toMatchObject({
+          message: apiExpect.stringContaining('hello'),
+        })
+      ).not.toThrow();
+      expect(() =>
+        apiExpect({ message: 'hello world' }).toMatchObject({
+          message: apiExpect.stringContaining('missing'),
+        })
+      ).toThrow();
+    });
+
+    it('does not match non-string values', () => {
+      expect(() =>
+        apiExpect({ code: 404 }).toMatchObject({ code: apiExpect.stringContaining('4') })
+      ).toThrow();
+    });
+  });
+
   it('supports nesting and combining with Playwright matchers', () => {
     const response = {
       data: {

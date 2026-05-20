@@ -34,6 +34,7 @@ export interface LegacyStoredDataControlState extends SerializedTitles {
   useGlobalFilters?: boolean;
   ignoreValidations?: boolean;
   dataViewRefName?: string;
+  dataViewId?: string;
 }
 
 export type LegacyStoredOptionsListExplicitInput = LegacyStoredDataControlState & {
@@ -68,6 +69,7 @@ export interface LegacyStoredESQLControlExplicitInput {
     hideExists?: boolean;
     hideSort?: boolean;
   };
+  title?: string;
   esqlQuery: string;
   selectedOptions: string[];
   singleSelect?: boolean;

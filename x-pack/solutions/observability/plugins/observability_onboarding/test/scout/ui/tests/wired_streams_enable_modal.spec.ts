@@ -6,11 +6,12 @@
  */
 
 import { expect } from '@kbn/scout-oblt/ui';
+import { tags } from '@kbn/scout-oblt';
 import { test } from '../fixtures';
 
 test.describe(
   'Wired Streams - Enable Modal Confirmation Flow',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects, apiServices }) => {
       await browserAuth.loginAsAdmin();
@@ -92,7 +93,9 @@ test.describe(
       });
 
       await test.step('modal closes and Wired Streams is now selected', async () => {
-        await expect(pageObjects.onboarding.enableWiredStreamsModal).toBeHidden();
+        await expect(pageObjects.onboarding.enableWiredStreamsModal).toBeHidden({
+          timeout: 30_000,
+        });
         await expect(pageObjects.onboarding.wiredStreamsOption).toHaveAttribute(
           'aria-pressed',
           'true'

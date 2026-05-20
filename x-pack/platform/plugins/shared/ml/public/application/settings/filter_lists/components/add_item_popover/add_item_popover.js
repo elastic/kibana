@@ -11,6 +11,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
@@ -81,7 +82,7 @@ export class AddItemPopover extends Component {
       <EuiButton
         size="s"
         color="primary"
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         iconSide="right"
         onClick={this.onButtonClick}
         isDisabled={this.props.canCreateFilter === false}
@@ -104,6 +105,12 @@ export class AddItemPopover extends Component {
           isOpen={this.state.isPopoverOpen}
           closePopover={this.closePopover}
           initialFocus="#filter_list_add_item_input_row"
+          aria-label={i18n.translate(
+            'xpack.ml.settings.filterLists.addItemPopover.popoverAriaLabel',
+            {
+              defaultMessage: 'Add filter item',
+            }
+          )}
         >
           <EuiForm data-test-subj="mlFilterListAddItemPopoverContent">
             <EuiFormRow

@@ -12,7 +12,7 @@ export const metricVis: ElementFactory = () => ({
   displayName: 'Metric Vis',
   type: 'chart',
   help: 'Metric visualization',
-  icon: 'visMetric',
+  icon: 'chartMetric',
   expression: `kibana
   | selectFilter
   | demodata

@@ -10,10 +10,10 @@ export { waitForPluginInitialized, result, loadAlertArchive } from './helpers';
 export {
   cleanupEntityStore,
   waitForEntityDataIndexed,
-  enableAssetInventory,
-  waitForEnrichPolicyCreated,
-  executeEnrichPolicy,
   installCloudAssetInventoryPackage,
   initEntityEnginesWithRetry,
+  installEntityStoreV2,
+  uninstallEntityStoreV2,
+  waitForEntityStoreV2Running,
 } from './entity_store';
 export type { EntityStoreHelpersDeps, EntityType } from './entity_store';

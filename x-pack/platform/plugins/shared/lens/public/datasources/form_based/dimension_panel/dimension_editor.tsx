@@ -539,7 +539,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
         id: operationType as string,
         label,
         isActive,
-        size: 's',
         isDisabled: !!disabledStatus,
         css: operationsButtonStyles(euiThemeContext),
         'data-test-subj': `lns-indexPatternDimension-${operationType}${
@@ -748,7 +747,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
       >
         <EuiListGroup
           css={sideNavItems.length > 3 ? operationsTwoColumnsStyles(euiThemeContext) : undefined}
-          gutterSize="none"
           color="primary"
           listItems={
             // add a padding item containing a non breakable space if the number of operations is not even
@@ -948,6 +946,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     !isFullscreen && operationSupportMatrix.operationWithoutField.has(formulaOperationName);
 
   const hasButtonGroups = !isFullscreen && (hasFormula || supportStaticValue);
+
   const initialMethod = useMemo(() => {
     let methodId = '';
     if (showStaticValueFunction) {
@@ -1065,6 +1064,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
     (selectedOperationDefinition.timeScalingMode ||
       selectedOperationDefinition.filterable ||
       selectedOperationDefinition.shiftable);
+
+  const activeTable = props.activeData?.[layerId];
+  const activeColumnMeta = activeTable?.columns.find((col) => col.id === columnId)?.meta;
+  const resolvedDataType = activeColumnMeta?.type ?? selectedColumn?.dataType;
 
   return (
     <div id={columnId}>
@@ -1214,7 +1217,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             {enableFormatSelector &&
             !isFullscreen &&
             selectedColumn &&
-            (selectedColumn.dataType === 'number' || selectedColumn.operationType === 'range') ? (
+            (resolvedDataType === 'number' || selectedColumn.operationType === 'range') ? (
               <FormatSelector
                 selectedColumn={selectedColumn}
                 onChange={onFormatChange}

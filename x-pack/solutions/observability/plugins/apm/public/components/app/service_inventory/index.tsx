@@ -26,11 +26,9 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import type { SortFunction } from '../../shared/managed_table';
 import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
-import { SearchBar } from '../../shared/search_bar/search_bar';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { ApmServicesTable } from './service_list/apm_services_table';
 import { getAvailableFields, orderServiceItems } from './service_list/order_service_items';
-import { TracesInDiscoverCallout } from './traces_in_discover_callout';
 import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 
 type MainStatisticsApiResponse = APIReturnType<'GET /internal/apm/services'>;
@@ -188,12 +186,12 @@ export function ServiceInventory() {
   const serviceOverflowCount = mainStatisticsData?.serviceOverflowCount ?? 0;
 
   // Determine the default sort field based on available data in service items
-  // Priority: alertsCount -> sloStatus -> healthStatus -> throughput
+  // Priority: alertsCount -> sloStatus -> anomalyScore -> throughput
   const {
     sortField: initialSortField,
     hasAlerts,
     hasSlos,
-    hasHealthStatuses,
+    hasAnomalyScores,
   } = getAvailableFields(mainStatisticsData.items);
 
   const initialSortDirection = 'desc';
@@ -303,16 +301,14 @@ export function ServiceInventory() {
 
   return (
     <>
-      <SearchBar showTimeComparison />
       <EuiFlexGroup direction="column" gutterSize="m">
-        <TracesInDiscoverCallout />
         {displayMlCallout && mlCallout}
-        <EuiFlexItem>
+        <EuiFlexItem style={{ minWidth: 0 }}>
           <ApmServicesTable
             status={mainStatisticsStatus}
             items={mainStatisticsData.items}
             comparisonDataLoading={comparisonFetch.status === FETCH_STATUS.LOADING}
-            displayHealthStatus={hasHealthStatuses}
+            displayAnomalies={hasAnomalyScores}
             displayAlerts={hasAlerts}
             displaySlos={hasSlos}
             initialSortField={initialSortField}

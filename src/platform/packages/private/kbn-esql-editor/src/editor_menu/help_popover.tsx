@@ -34,6 +34,7 @@ import { LanguageDocumentationFlyout } from '@kbn/language-documentation';
 import { getCategorizationField } from '@kbn/aiops-utils';
 import { prettifyQueryTemplate } from '@kbn/esql-language/src/commands/registry/options/recommended_queries/utils';
 import { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
+import { reportEsqlError } from '../report_error';
 import type { ESQLEditorDeps } from '../types';
 import { useEsqlEditorActions } from '../editor_actions_context';
 import { helpLabel } from './menu_i18n';
@@ -157,7 +158,7 @@ export const HelpPopover: React.FC<{
           lastFetchedQueries.current = extensions.recommendedQueries;
         }
       } catch (error) {
-        // Do nothing if the extensions are not available
+        reportEsqlError(error, { errorType: 'HelpExtensionsFetch' });
       }
     };
 
@@ -297,6 +298,7 @@ export const HelpPopover: React.FC<{
   return (
     <>
       <EuiPopover
+        aria-label={helpLabel}
         button={
           <EuiToolTip position="top" content={helpLabel} disableScreenReaderOutput>
             <EuiButtonIcon

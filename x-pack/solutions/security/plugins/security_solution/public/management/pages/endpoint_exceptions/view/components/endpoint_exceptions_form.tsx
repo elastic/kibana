@@ -18,24 +18,33 @@ import {
   EuiText,
   EuiHorizontalRule,
   EuiTextArea,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { ExceptionListItemSchema, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  EntriesArray,
+  ExceptionListItemSchema,
+  OsTypeArray,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   hasWrongOperatorWithWildcard,
   hasPartialCodeSignatureEntry,
+  hasEscaping,
 } from '@kbn/securitysolution-list-utils';
 import {
   WildCardWithWrongOperatorCallout,
   PartialCodeSignatureCallout,
+  UnnecessaryEscapingCallout,
 } from '@kbn/securitysolution-exception-list-components';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
 import type { ValueSuggestionsGetFn } from '@kbn/kql/public/autocomplete/providers/value_suggestion_provider';
+import { CONFIRM_WARNING_MODAL_LABELS } from '../../../../components/artifact_list_page/components/artifact_confirm_modal';
+import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../../hooks/artifacts/use_endpoint_per_policy_opt_in';
 import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import { useCanAssignArtifactPerPolicy } from '../../../../hooks/artifacts';
@@ -60,11 +69,7 @@ import {
   DESCRIPTION_LABEL,
   OS_LABEL,
 } from '../../translations';
-import {
-  OS_TITLES,
-  CONFIRM_WARNING_MODAL_LABELS,
-  OPERATING_SYSTEM_WINDOWS_AND_MAC,
-} from '../../../../common/translations';
+import { OS_TITLES, OPERATING_SYSTEM_WINDOWS_AND_MAC } from '../../../../common/translations';
 import { ENDPOINT_EXCEPTIONS_LIST_DEFINITION } from '../../constants';
 
 import { ExceptionItemComments } from '../../../../../detection_engine/rule_exceptions/components/item_comments';
@@ -101,21 +106,33 @@ const defaultConditionEntry = (): ExceptionListItemSchema['entries'] => [
   },
 ];
 
-const cleanupEntries = (item: ArtifactFormComponentProps['item']) =>
-  item.entries.forEach(
-    (e: ArtifactFormComponentProps['item']['entries'][number] & { id?: string }) => {
-      delete e.id;
-    }
-  );
+const cleanupEntries = (multipleEntriesArrays: EntriesArray[]) =>
+  multipleEntriesArrays.forEach((entries) => {
+    entries.forEach(
+      (e: ArtifactFormComponentProps['item']['entries'][number] & { id?: string }) => {
+        delete e.id;
+      }
+    );
+  });
 
 export type EndpointExceptionsFormProps = ArtifactFormComponentProps & {
   allowSelectOs?: boolean;
 };
 
 export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = memo(
-  ({ allowSelectOs = true, item: exception, onChange, mode, error: submitError }) => {
+  ({
+    allowSelectOs = true,
+    item: exception,
+    additionalEntries,
+    onChange,
+    mode,
+    error: submitError,
+  }) => {
     const getTestId = useTestIdGenerator('endpointExceptions-form');
-    const { http } = useKibana().services;
+    const {
+      http,
+      docLinks: { links },
+    } = useKibana().services;
 
     const getSuggestionsFn = useCallback<ValueSuggestionsGetFn>(
       ({ field, query }) => {
@@ -136,11 +153,21 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
     const [hasWildcardWithWrongOperator, setHasWildcardWithWrongOperator] = useState<boolean>(
       hasWrongOperatorWithWildcard([exception])
     );
+    const [hasUnnecessaryEscaping, setHasUnnecessaryEscaping] = useState<boolean>(
+      hasEscaping([exception], exception.os_types)
+    );
     const [hasPartialCodeSignatureWarning, setHasPartialCodeSignatureWarning] = useState<boolean>(
       hasPartialCodeSignatureEntry([exception])
     );
 
-    const showAssignmentSection = useCanAssignArtifactPerPolicy(exception, mode, hasFormChanged);
+    const { data: isPerPolicyOptIn } = useGetEndpointExceptionsPerPolicyOptIn();
+
+    const canAssignArtifactPerPolicy = useCanAssignArtifactPerPolicy(
+      exception,
+      mode,
+      hasFormChanged
+    );
+    const showAssignmentSection = isPerPolicyOptIn?.status === true && canAssignArtifactPerPolicy;
 
     const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(
       ENDPOINT_ALERTS_INDEX_NAMES,
@@ -166,36 +193,51 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
     }, [hasCommentError, hasNameError, exception.entries]);
 
     const processChanged = useCallback(
-      (updatedItem?: Partial<ArtifactFormComponentProps['item']>) => {
+      (
+        updatedItem?: Partial<ArtifactFormComponentProps['item']>,
+        updatedAdditionalEntries?: EntriesArray[]
+      ) => {
         const item = updatedItem
           ? {
               ...exception,
               ...updatedItem,
             }
           : exception;
-        cleanupEntries(item);
+        const addEntries = updatedAdditionalEntries ? updatedAdditionalEntries : additionalEntries;
+        cleanupEntries([item.entries]);
+        cleanupEntries(addEntries ?? []);
         onChange({
           item,
+          additionalEntries: addEntries,
           isValid: isFormValid && areConditionsValid && hasFormChanged,
-          confirmModalLabels: hasWildcardWithWrongOperator
-            ? CONFIRM_WARNING_MODAL_LABELS(
-                i18n.translate(
-                  'xpack.securitySolution.endpointException.flyoutForm.confirmModal.name',
+          confirmModalLabels:
+            hasWildcardWithWrongOperator || hasUnnecessaryEscaping
+              ? CONFIRM_WARNING_MODAL_LABELS(
+                  i18n.translate(
+                    'xpack.securitySolution.endpointException.flyoutForm.confirmModal.name',
+                    {
+                      defaultMessage: 'endpoint exception',
+                    }
+                  ),
                   {
-                    defaultMessage: 'endpoint exception',
-                  }
+                    hasWildcardWithWrongOperator,
+                    hasUnnecessaryEscaping,
+                  },
+                  links
                 )
-              )
-            : undefined,
+              : undefined,
         });
       },
       [
-        areConditionsValid,
         exception,
-        hasFormChanged,
-        isFormValid,
+        additionalEntries,
         onChange,
+        isFormValid,
+        areConditionsValid,
+        hasFormChanged,
         hasWildcardWithWrongOperator,
+        hasUnnecessaryEscaping,
+        links,
       ]
     );
 
@@ -205,11 +247,18 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
         ? (exception.entries as ExceptionListItemSchema['entries'])
         : defaultConditionEntry();
 
-      cleanupEntries(ef);
+      cleanupEntries([ef.entries]);
 
       setAreConditionsValid(!!exception.entries.length);
       return ef;
     }, [exception]);
+
+    const [initialExceptions] = useState(() => [
+      endpointExceptionItem,
+      ...(additionalEntries
+        ? additionalEntries.map((entries) => ({ ...endpointExceptionItem, entries }))
+        : []),
+    ]);
 
     const handleOnChangeName = useCallback(
       (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -275,13 +324,22 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
     const handleOnOsChange = useCallback(
       (os: OsTypeArray) => {
         if (!exception) return;
+        setHasUnnecessaryEscaping(
+          hasEscaping(
+            [
+              exception,
+              ...(additionalEntries ? additionalEntries.map((e) => ({ entries: e })) : []),
+            ],
+            os
+          )
+        );
         processChanged({
           os_types: os,
           entries: exception.entries,
         });
         if (!hasFormChanged) setHasFormChanged(true);
       },
-      [exception, hasFormChanged, processChanged]
+      [additionalEntries, exception, hasFormChanged, processChanged]
     );
 
     const osInputMemo = useMemo(
@@ -379,19 +437,29 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
       (arg: OnChangeProps) => {
         const isCalledWithoutChanges =
           (!hasFormChanged && arg.exceptionItems[0] === undefined) ||
-          isEqual(arg.exceptionItems[0]?.entries, exception?.entries);
+          (isEqual(arg.exceptionItems[0]?.entries, exception?.entries) &&
+            isEqual(
+              arg.exceptionItems.slice(1).map((i) => i.entries),
+              additionalEntries ?? []
+            ));
 
         if (isCalledWithoutChanges) {
-          const addedFields = arg.exceptionItems[0]?.entries.map((e) => e.field) || [''];
+          const addedFieldGroups: string[][] = arg.exceptionItems.map(
+            (item) => item?.entries.map((e) => e.field) || ['']
+          );
 
-          setHasDuplicateFields(computeHasDuplicateFields(getAddedFieldsCounts(addedFields)));
+          setHasDuplicateFields(
+            addedFieldGroups.some((addedFields) =>
+              computeHasDuplicateFields(getAddedFieldsCounts(addedFields))
+            )
+          );
           return;
         } else {
           setHasDuplicateFields(false);
         }
 
-        // handle wildcard with wrong operator case
         setHasWildcardWithWrongOperator(hasWrongOperatorWithWildcard(arg.exceptionItems));
+        setHasUnnecessaryEscaping(hasEscaping(arg.exceptionItems, exception.os_types));
         setHasPartialCodeSignatureWarning(hasPartialCodeSignatureEntry(arg.exceptionItems));
 
         const updatedItem: Partial<ArtifactFormComponentProps['item']> =
@@ -409,16 +477,21 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
                 ...exception,
                 entries: [{ field: '', operator: 'included', type: 'match', value: '' }],
               };
+
+        const updatedAdditionalEntries: EntriesArray[] = arg.exceptionItems
+          .slice(1)
+          .map((item) => item.entries as EntriesArray);
+
         const hasValidConditions =
           arg.exceptionItems[0] !== undefined
             ? !(arg.errorExists && !arg.exceptionItems[0]?.entries?.length)
             : false;
 
         setAreConditionsValid(hasValidConditions);
-        processChanged(updatedItem);
+        processChanged(updatedItem, updatedAdditionalEntries);
         if (!hasFormChanged) setHasFormChanged(true);
       },
-      [exception, hasFormChanged, processChanged]
+      [additionalEntries, exception, hasFormChanged, processChanged]
     );
 
     const exceptionBuilderComponentMemo = useMemo(
@@ -427,7 +500,7 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
           allowLargeValueLists: false,
           httpService: http,
           autocompleteService: autocompleteSuggestions,
-          exceptionListItems: [endpointExceptionItem as ExceptionListItemSchema],
+          exceptionListItems: initialExceptions as ExceptionListItemSchema[],
           listType: ENDPOINT_EXCEPTIONS_LIST_DEFINITION.type,
           listId: ENDPOINT_EXCEPTIONS_LIST_DEFINITION.list_id,
           listNamespaceType: 'agnostic',
@@ -444,7 +517,7 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
       [
         http,
         autocompleteSuggestions,
-        endpointExceptionItem,
+        initialExceptions,
         indexPatterns,
         handleOnBuilderChange,
         exception.os_types,
@@ -533,9 +606,12 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
         {detailsSection}
         <EuiHorizontalRule />
         {criteriaSection}
-        {hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
-        {hasWildcardWithWrongOperator && hasPartialCodeSignatureWarning && <EuiSpacer size="xs" />}
-        {hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
+        <EuiFlexGroup direction="column" gutterSize="s">
+          {hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
+          {hasUnnecessaryEscaping && <UnnecessaryEscapingCallout />}
+          {hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
+        </EuiFlexGroup>
+
         {hasDuplicateFields && (
           <>
             <EuiSpacer size="xs" />

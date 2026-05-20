@@ -11,7 +11,7 @@ import type { FC } from 'react';
 import React, { useState, useEffect, useRef } from 'react';
 import { EuiSkipLink, EuiLiveAnnouncer, keys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MAIN_CONTENT_SELECTORS } from '@kbn/core-chrome-layout-constants';
+import { FLYOUT_SELECTOR, MAIN_CONTENT_SELECTORS } from '@kbn/core-chrome-layout-constants';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import { useCustomBranding } from './chrome_hooks';
 
@@ -65,9 +65,11 @@ export const HeaderPageAnnouncer: FC<{
         // Only intercept Tab if the user is not already focused within the main content area
         const activeElement = document.activeElement;
         const mainContent = document.querySelector(MAIN_CONTENT_SELECTORS.join(','));
+        const openFlyout = document.querySelector(FLYOUT_SELECTOR);
         const isWithinMainContent = mainContent && mainContent.contains(activeElement);
+        const isWithinFlyout = openFlyout && openFlyout.contains(activeElement);
 
-        if (!isWithinMainContent) {
+        if (!isWithinMainContent && !isWithinFlyout) {
           skipLinkRef.current?.focus();
           e.preventDefault?.();
         }
@@ -101,7 +103,7 @@ export const HeaderPageAnnouncer: FC<{
         buttonRef={skipLinkRef}
         position="fixed"
         destinationId=""
-        fallbackDestination={MAIN_CONTENT_SELECTORS}
+        fallbackDestination={[FLYOUT_SELECTOR, ...MAIN_CONTENT_SELECTORS]}
         overrideLinkBehavior
         data-test-subj="skipToMainButton"
         role="button"

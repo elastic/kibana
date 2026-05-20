@@ -6,6 +6,17 @@
  */
 
 import type { IRouter, CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
+
+/**
+ * Validates a close reason.
+ * Register via {@link CasesServerSetup.registerCloseReasonValidator}.
+ * @param closeReason - the close reason provided in the request
+ * @param request - the originating Kibana request, for scoping services
+ */
+export type CloseReasonValidator = (
+  closeReason: string,
+  request: KibanaRequest
+) => Promise<boolean>;
 import type {
   ActionTypeConfig,
   ActionTypeSecrets,
@@ -31,7 +42,10 @@ import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server'
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type {
+  WorkflowsExtensionsServerPluginSetup,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
 import type { CasesClient } from './client';
 import type { AttachmentFramework } from './attachment_framework/types';
 import type { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
@@ -64,6 +78,7 @@ export interface CasesServerStartDependencies {
   spaces?: SpacesPluginStart;
   notifications: NotificationsPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
 }
 
 export interface CaseRequestContext {
@@ -105,6 +120,11 @@ export interface CasesServerStart {
 export interface CasesServerSetup {
   attachmentFramework: AttachmentFramework;
   config: ConfigType;
+  /**
+   * Registers a validator for close reasons for a specific case owner.
+   * Cases with the given owner will be allowed to use any close reason accepted by the validator.
+   */
+  registerCloseReasonValidator: (owner: string, validator: CloseReasonValidator) => void;
 }
 
 export type PartialField<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;

@@ -16,7 +16,6 @@ import type { SortOrder } from '@kbn/discover-utils';
 import type { DataGridDensity } from '@kbn/unified-data-table';
 import { SAVED_SEARCH_TYPE } from './constants';
 import type { SavedSearchCrudTypes } from '../../common/content_management';
-import { checkForDuplicateTitle } from './check_for_duplicate_title';
 import type { DiscoverSession, SavedSearchAttributes } from '../../common';
 
 export type SaveDiscoverSessionParams = Pick<
@@ -26,8 +25,6 @@ export type SaveDiscoverSessionParams = Pick<
   Partial<Pick<DiscoverSession, 'id'>>;
 
 export interface SaveDiscoverSessionOptions {
-  onTitleDuplicate?: () => void;
-  isTitleDuplicateConfirmed?: boolean;
   copyOnSave?: boolean;
 }
 
@@ -71,19 +68,6 @@ export const saveDiscoverSession = async (
 ): Promise<DiscoverSession | undefined> => {
   const isNew = options.copyOnSave || !discoverSession.id;
 
-  if (isNew) {
-    try {
-      await checkForDuplicateTitle({
-        title: discoverSession.title,
-        isTitleDuplicateConfirmed: options.isTitleDuplicateConfirmed,
-        onTitleDuplicate: options.onTitleDuplicate,
-        contentManagement,
-      });
-    } catch {
-      return;
-    }
-  }
-
   const tabReferences: SavedObjectReference[] = [];
 
   // TODO: SavedSearchAttributes['tabs'] shouldn't be nullable soon
@@ -103,6 +87,7 @@ export const saveDiscoverSession = async (
         columns: tab.columns,
         grid: tab.grid,
         hideChart: tab.hideChart,
+        hideTable: tab.hideTable,
         isTextBasedQuery: tab.isTextBasedQuery,
         usesAdHocDataView: tab.usesAdHocDataView,
         kibanaSavedObjectMeta: {
@@ -134,6 +119,7 @@ export const saveDiscoverSession = async (
     tabs,
     // TODO: Spreading the first tab attributes like this shouldn't be necessary soon
     ...firstTabAttributes,
+    hideTable: firstTabAttributes.hideTable,
     sort: firstTabAttributes.sort as SortOrder[],
     density: firstTabAttributes.density as DataGridDensity,
   };

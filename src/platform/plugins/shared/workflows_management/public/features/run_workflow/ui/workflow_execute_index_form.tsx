@@ -22,23 +22,13 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { take } from 'rxjs';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
-import { formatHit } from '@kbn/discover-utils';
+import { formatHitReact } from '@kbn/discover-utils';
 import { buildEsQuery, type Query, type TimeRange } from '@kbn/es-query';
 import type { SearchHit } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '../../../hooks/use_kibana';
-
-/**
- * Strips HTML tags from a string to safely render text content.
- * This removes the need for dangerouslySetInnerHTML while preserving the text content.
- */
-function stripHtmlTags(html: string): string {
-  // Create a temporary div element to parse HTML
-  const doc = new DOMParser().parseFromString(html, 'text/html');
-  return doc.body.textContent || '';
-}
 
 interface Document {
   '@timestamp': string;
@@ -47,7 +37,7 @@ interface Document {
   [key: string]: unknown;
 }
 
-interface WorkflowExecuteEventFormProps {
+interface WorkflowExecuteIndexFormProps {
   setValue: (data: string) => void;
   errors: string | null;
   setErrors: (errors: string | null) => void;
@@ -74,7 +64,7 @@ export const WorkflowExecuteIndexForm = ({
   setValue,
   errors,
   setErrors,
-}: WorkflowExecuteEventFormProps): React.JSX.Element => {
+}: WorkflowExecuteIndexFormProps): React.JSX.Element => {
   const { euiTheme } = useEuiTheme();
   const { services } = useKibana();
   const { unifiedSearch, notifications } = services;
@@ -318,18 +308,18 @@ export const WorkflowExecuteIndexForm = ({
         render: (source: Document) => {
           const flattened = flattenObject(source as Record<string, unknown>);
 
-          // Create a mock DataTableRecord-like object for formatHit
+          // Create a mock DataTableRecord-like object for formatHitReact
           const mockRecord = {
             raw: { _source: source },
             flattened,
-            id: '', //  formatHit doesn't use ID
+            id: '',
             isAnchor: false,
           };
 
-          // Use formatHit to get properly formatted field pairs
+          // Use formatHitReact to get properly formatted field pairs as ReactNodes
           const formattedPairs =
             selectedDataView && typeof selectedDataView.getFieldByName === 'function'
-              ? formatHit(
+              ? formatHitReact(
                   mockRecord,
                   selectedDataView,
                   () => true, // Show all fields
@@ -350,7 +340,7 @@ export const WorkflowExecuteIndexForm = ({
                     <React.Fragment key={index}>
                       <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
                       <EuiDescriptionListDescription>
-                        {stripHtmlTags(description || '-')}
+                        {description ?? '-'}
                       </EuiDescriptionListDescription>
                     </React.Fragment>
                   ))}

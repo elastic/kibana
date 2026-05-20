@@ -6,17 +6,25 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { screen, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import type { CaseUI } from '../../../../common';
 import type { ParsedTemplate } from '../../../../common/types/domain/template/v1';
-import { FieldType } from '../../templates_v2/field_types/constants';
+import { FieldType } from '../../../../common/types/domain/template/fields';
 import { TemplateFields } from './template_fields';
 import { renderWithTestingProviders } from '../../../common/mock';
 
 const mockUseGetTemplate = jest.fn();
 jest.mock('../../templates_v2/hooks/use_get_template', () => ({
   useGetTemplate: (...args: unknown[]) => mockUseGetTemplate(...args),
+}));
+
+jest.mock('../../field_library/hooks/use_resolved_fields', () => ({
+  useResolvedFields: (fields: unknown[]) => ({
+    resolvedFields: fields,
+    isLoading: false,
+  }),
 }));
 
 const mockTemplate: ParsedTemplate = {
@@ -27,6 +35,7 @@ const mockTemplate: ParsedTemplate = {
   deletedAt: null,
   isLatest: true,
   latestVersion: 1,
+  definitionString: 'name: Test Template\nfields: []',
   definition: {
     name: 'Test Template',
     fields: [
@@ -129,9 +138,9 @@ describe('TemplateFields', () => {
     };
     mockUseGetTemplate.mockReturnValue({ data: templateWithUnknown, isLoading: false });
 
-    const { container } = renderWithTestingProviders(<TemplateFields {...defaultProps} />);
+    renderWithTestingProviders(<TemplateFields {...defaultProps} />);
 
-    expect(container.textContent).toBe('');
+    expect(screen.queryByTestId('template-field-unknownField')).not.toBeInTheDocument();
   });
 
   it('uses data-test-subj based on field name', () => {
@@ -143,7 +152,7 @@ describe('TemplateFields', () => {
     expect(screen.getByTestId('template-field-priority')).toBeInTheDocument();
   });
 
-  it('shows "Field not defined" for empty extended field values', () => {
+  it('renders fields with empty inputs when extended field values are absent', () => {
     const caseWithNoExtended = {
       ...defaultCaseData,
       extendedFields: {},
@@ -151,6 +160,70 @@ describe('TemplateFields', () => {
 
     renderWithTestingProviders(<TemplateFields {...defaultProps} caseData={caseWithNoExtended} />);
 
-    expect(screen.getAllByText('Field not defined').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText('Summary')).toBeInTheDocument();
+    expect(screen.getByText('Effort')).toBeInTheDocument();
+  });
+
+  describe('on-blur save', () => {
+    const getInputForLabel = (label: string): HTMLInputElement =>
+      screen.getByLabelText(label) as HTMLInputElement;
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      act(() => {
+        jest.runOnlyPendingTimers();
+      });
+      jest.useRealTimers();
+    });
+
+    it('calls onUpdateField with extended fields after a blur when valid', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      renderWithTestingProviders(<TemplateFields {...defaultProps} />);
+
+      const summary = getInputForLabel('Summary');
+      await user.clear(summary);
+      await user.type(summary, 'updated summary');
+      // Blur by tabbing away
+      await user.tab();
+
+      // Advance past the debounce
+      act(() => {
+        jest.advanceTimersByTime(250);
+      });
+
+      await waitFor(() => {
+        expect(onUpdateField).toHaveBeenCalled();
+      });
+      const lastCall = onUpdateField.mock.calls[onUpdateField.mock.calls.length - 1][0];
+      expect(lastCall.key).toBe('extended_fields');
+      expect(lastCall.value).toEqual(
+        expect.objectContaining({
+          summary_as_keyword: 'updated summary',
+        })
+      );
+    });
+
+    it('debounces multiple rapid blurs into a single save', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      renderWithTestingProviders(<TemplateFields {...defaultProps} />);
+
+      const summary = getInputForLabel('Summary');
+      await user.clear(summary);
+      await user.type(summary, 'a');
+      await user.tab();
+      await user.tab();
+      await user.tab();
+
+      act(() => {
+        jest.advanceTimersByTime(250);
+      });
+
+      await waitFor(() => {
+        expect(onUpdateField).toHaveBeenCalledTimes(1);
+      });
+    });
   });
 });

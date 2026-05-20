@@ -129,7 +129,7 @@ export function updateColumnLabel({
       {
         ...currentColumn,
         label: value,
-        customLabel: !!value,
+        customLabel: Boolean(value) && value !== currentColumn.fieldName,
       },
       ...layer.columns.slice(currentColumnIndex + 1),
     ],

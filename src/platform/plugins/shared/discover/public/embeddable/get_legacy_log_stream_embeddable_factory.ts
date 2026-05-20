@@ -39,8 +39,8 @@ export const getLegacyLogStreamEmbeddableFactory = (
         title: initialState.title,
         description: initialState.description,
         timeRange: initialState.time_range,
-        sort: initialState.sort ?? [],
-        columns: initialState.columns ?? [],
+        sort: 'sort' in initialState ? initialState.sort : [],
+        columns: 'columns' in initialState ? initialState.columns : [],
         searchSource,
         managed: false,
       };
