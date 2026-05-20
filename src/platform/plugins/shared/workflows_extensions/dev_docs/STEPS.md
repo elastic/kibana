@@ -93,11 +93,7 @@ export const myStepCommonDefinition: CommonStepDefinition = {
 Create the server-side implementation (e.g., `server/step_types/my_step.ts`):
 
 ```typescript
-import {
-  createServerStepDefinition,
-  type ServerStepDefinition,
-  type StepHandler,
-} from '@kbn/workflows-extensions/server';
+import type { ServerStepDefinition, StepHandler } from '@kbn/workflows-extensions/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import { myStepCommonDefinition } from '../../common/step_types/my_step';
 
@@ -711,9 +707,7 @@ The step type ID used in the server registry **must match** the one used in the 
 
 ### Handler Implementation
 
-Your step handler is a `StepHandler` function that receives a `StepHandlerContext` and returns a `StepHandlerResult`. Wrap that shape in **`createServerStepDefinition`** to get a **`ServerStepDefinition`** (required **`handler`**, optional **`onCancel`** for cancellation cleanup on single-shot steps). Durable definitions below omit **`handler`** entirely—do not try to mix **`handler`** with **`run`** / **`poll`** on the same object.
-
-Durable **`run`** / **`poll`** steps use a **separate** definition family: **`PollOnlyStepDefinition`** or **`RunPlusPollStepDefinition`**, built with **`createPollServerStepDefinition`**. Those types **`Omit`** the legacy **`handler`** field from `CommonStepDefinition` and instead declare **`poll`** (and optionally **`run`**). They return **`DurablePhaseResult`** (see [Durable awaitable steps](#durable-awaitable-steps-run--poll)).
+Your step handler is a `StepHandler` function that receives a `StepHandlerContext` and returns a `StepHandlerResult`:
 
 ```typescript
 import type { StepHandler } from '@kbn/workflows-extensions/server';
@@ -736,63 +730,6 @@ const myStepHandler: StepHandler = async (context) => {
     output: { result: 'success' },
   };
 };
-```
-
-### Durable awaitable steps (`run` / `poll`)
-
-Some integrations finish asynchronously: you start work in one request, then must **wake up later** and check status until the work completes or fails. Those server steps are **not** `ServerStepDefinition` rows with a legacy **`handler`** — they are **`PollOnlyStepDefinition`** ( **`poll` only** ) or **`RunPlusPollStepDefinition`** ( **`run` + `poll`** ), constructed with **`createPollServerStepDefinition`** so TypeScript keeps durable steps separate from single-shot **`handler`** steps.
-
-**`stateSchema` (optional but recommended)** — on a poll definition you can set **`stateSchema`** to a **`z.object({ ... })`** describing persisted author state. That schema types **`context.state`** in **`poll.handler`** and the **`{ state }`** / **`{ state: null }`** fields on **`DurablePhaseResult`** continuations (via **`z.infer<typeof stateSchema>`**). The execution engine still stores JSON under **`__durableStepState`**; the schema is for authors and compile-time safety, not a runtime validator unless you add your own checks inside handlers.
-
-**Return type (`DurablePhaseResult`)** — both **`run`** and **`poll.handler`** return the same union:
-
-- **`{ output }`** — success; **`output`** matches **`z.infer<typeof outputSchema>`** (see **`PhaseDoneResult`**).
-- **`{ error }`** — failure; the step fails with that error.
-- **`{ state?, nextPollDelayMs? }`** — continue in **`WAITING`** (**`PollContinueResult`**). **`state`** is optional: omit it to keep the previously persisted author state; pass **`null`** to clear it. **`nextPollDelayMs`** is optional: when it is a **positive** number, the next wake-up is scheduled that many milliseconds from **now**, overriding **`poll.policy`** for that wake-up only. When omitted or non-positive, spacing follows **`poll.policy`**.
-
-**Modes**
-
-| Mode | Type helper | Behavior |
-|------|-------------|----------|
-| **`poll` only** | **`PollOnlyStepDefinition`** | No **`run`**. The engine invokes **`poll.handler`** on the first execution, then on each scheduled wake-up until **`{ output }`** or **`{ error }`**. |
-| **`run` + `poll`** | **`RunPlusPollStepDefinition`** | **`run`** may return **`{ output }`** / **`{ error }`** immediately, or **`{ state }`** to hand off. After a hand-off, the **first** **`poll.handler`** invocation runs on the **next** wake-up (not in the same turn as **`run`**). |
-
-**`PollStepDefinition`** — union of **`PollOnlyStepDefinition`** and **`RunPlusPollStepDefinition`**; this is the type **`createPollServerStepDefinition`** returns and what the poll-aware execution path expects.
-
-**`PollHandlerContext`** (alias: **`PollContext`**; passed to **`poll.handler`**) extends **`StepHandlerContext`** with:
-
-- **`state`** — author state from the previous **`run`** / **`poll`** result, typed from **`stateSchema`** when you provide it (`undefined` on the first poll of a poll-only step).
-- **`attempt`** — **0-based** index of this **`poll.handler`** invocation (first poll is **`0`**; does not count **`run`**).
-
-**`poll.policy`** (required) defines **`WAITING`** spacing when the handler does not return a positive **`nextPollDelayMs`**. Strategies: **`fixed`** and **`exponential`** (optional **`multiplier`**, default **`2`**; optional **`jitter`** using **`applyBackoffJitter`** in the workflows execution engine — uniform delay in **`[computed/2, computed]`** ms when **`jitter`** is true). Cadence is fixed at **definition time**; it is not configurable from workflow YAML.
-
-**`poll.ceilings`** (optional) caps runaway polling. Omitted ceilings default to **`DEFAULT_POLL_CEILINGS`**. If a ceiling is exceeded, the step fails with **`PollCeilingExceeded`**. When you rely on defaults, the **step registry** logs a **warning** at registration time.
-
-**Persistence** — the engine stores durable polling under **`__durableStepState`**. Use only **`{ state }`** / **`{ state: null }`** on **`run`** / **`poll`** results; do not read or write the reserved key from YAML.
-
-**Registration** — when a definition is added through **`ServerStepRegistry`**, the same structural checks and default **`poll.ceilings`** filling you previously associated with **`createServerStepDefinition`** are applied to **all** registered definitions (including durable). **`createServerStepDefinition`** / **`createPollServerStepDefinition`** remain thin helpers for **type inference** at the call site.
-
-```typescript
-import { createPollServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { z } from '@kbn/zod/v4';
-
-const authorState = z.object({ marker: z.string() });
-
-export const demoPollOnly = createPollServerStepDefinition({
-  id: 'my-namespace.awaitJob',
-  inputSchema: z.object({ jobId: z.string() }),
-  outputSchema: z.object({ status: z.literal('complete') }),
-  stateSchema: authorState,
-  poll: {
-    handler: async ({ input, state, attempt, logger }) => {
-      const marker = state?.marker ?? 'seed';
-      logger.debug(`poll ${attempt} job=${input.jobId} marker=${marker}`);
-      return { state: { marker: `${marker}.` } };
-    },
-    policy: { strategy: 'exponential', initialMs: 5_000, maxMs: 60_000, multiplier: 2, jitter: true },
-    ceilings: { maxAttempts: 60, maxWaitMs: 30 * 60_000 },
-  },
-});
 ```
 
 ### Error Handling
@@ -995,10 +932,10 @@ All custom step definitions must be approved by the workflows-eng team before be
 
 1. **Registration Detection**: When you register a new step or modify an existing step's handler, the test will detect it during CI runs.
 
-2. **Handler hash**: The test compares a SHA256 fingerprint of the step’s **callable implementation** (see `hashStepImplementation` in `get_step_definitions.ts`). For definitions where **only** the legacy **`handler`** is present (no **`onCancel`**, **`run`**, or **`poll`**), the hash is still **`handler` alone** (backward compatible). If any of **`onCancel`**, **`run`**, or **`poll`** exist, the fingerprint concatenates every present callable (**`handler`**, **`run`**, **`poll.handler`**, **`onCancel`**) so durable polling or cancellation changes require re-approval—even when the durable definition omits **`handler`** entirely. This ensures:
+2. **Handler Hash**: The test generates a SHA256 hash of each step's handler function implementation. This ensures that:
 
    - New steps are detected
-   - Changes to step implementations are detected (even if the step ID remains the same)
+   - Changes to handler implementations are detected (even if the step ID remains the same)
 
 3. **Approval Required**: The test compares registered steps against the approved list in:
    ```
