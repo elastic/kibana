@@ -64,6 +64,15 @@ describe('Subqueries Validation', () => {
   });
 
   describe('WHERE IN subqueries', () => {
+    it('accepts a valid IN subquery with no errors', async () => {
+      const { expectErrors } = await setup();
+
+      await expectErrors(
+        'FROM index | WHERE keywordField IN (FROM other_index | KEEP keywordField)',
+        []
+      );
+    });
+
     it('validates sources inside IN subqueries', async () => {
       const { expectErrors } = await setup();
 

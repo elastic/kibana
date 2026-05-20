@@ -18,6 +18,8 @@ import type {
 import { inOperators } from '../../commands/definitions/all_operators';
 import { expandEvals } from '../shared/expand_evals';
 
+const COMMANDS_WITH_SUBQUERIES = new Set(['from', 'where']);
+
 /**
  * Returns a list of subqueries to validate
  * @param rootCommands
@@ -40,8 +42,8 @@ export function getSubqueriesToValidate(
     }
 
     const commandName = command.name.toLowerCase();
-    if (commandName === 'from' || commandName === 'where') {
-      const subqueries = getSubqueryQueries(command).flatMap(getCommandPrefixesForQuery);
+    if (COMMANDS_WITH_SUBQUERIES.has(commandName)) {
+      const subqueries = getSubqueries(command).flatMap(getCommandPrefixesForQuery);
       subsequences.push(...subqueries);
     }
 
@@ -94,7 +96,7 @@ function getForkBranchSubqueries(command: ESQLAstForkCommand): ESQLCommand[][] {
 function getCommandPrefixesForQuery(subquery: ESQLAstQueryExpression): ESQLCommand[][] {
   return subquery.commands.flatMap((currentCommand, k) => {
     const results: ESQLCommand[][] = [];
-    const nestedSubqueries = getSubqueryQueries(currentCommand).flatMap(getCommandPrefixesForQuery);
+    const nestedSubqueries = getSubqueries(currentCommand).flatMap(getCommandPrefixesForQuery);
     results.push(...nestedSubqueries);
 
     // Always add the partial query (includes current command and all previous ones)
@@ -104,7 +106,7 @@ function getCommandPrefixesForQuery(subquery: ESQLAstQueryExpression): ESQLComma
   });
 }
 
-function getSubqueryQueries(command: ESQLAstAllCommands): ESQLAstQueryExpression[] {
+function getSubqueries(command: ESQLAstAllCommands): ESQLAstQueryExpression[] {
   return [...getFromSubqueries(command), ...getInSubqueries(command)];
 }
 
