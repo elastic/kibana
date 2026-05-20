@@ -252,6 +252,7 @@ export default function ({ getService }: FtrProviderContext) {
         'slo:bulk-delete-task',
         'slo:composite-slo-summary-task',
         'slo:health-scan-task',
+        'slo:orphan-composite-summary-cleanup-task',
         'slo:stale-instances-cleanup-task',
         'slo:temp-summary-cleanup-task',
         'streams_conversation_scraper',
