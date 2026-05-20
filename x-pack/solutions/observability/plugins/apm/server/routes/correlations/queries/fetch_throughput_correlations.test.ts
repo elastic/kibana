@@ -36,25 +36,13 @@ const defaultParams = {
 };
 
 // Overall RPM: rises sharply from bucket 0 to bucket 1
-const overallBuckets = [
-  makeBucket(0, 10),
-  makeBucket(60_000, 50),
-  makeBucket(120_000, 50),
-];
+const overallBuckets = [makeBucket(0, 10), makeBucket(60_000, 50), makeBucket(120_000, 50)];
 
 // Filtered RPM that closely mirrors the overall (high positive correlation)
-const correlatedBuckets = [
-  makeBucket(0, 5),
-  makeBucket(60_000, 40),
-  makeBucket(120_000, 42),
-];
+const correlatedBuckets = [makeBucket(0, 5), makeBucket(60_000, 40), makeBucket(120_000, 42)];
 
 // Filtered RPM that is flat (near-zero correlation)
-const uncorrelatedBuckets = [
-  makeBucket(0, 20),
-  makeBucket(60_000, 20),
-  makeBucket(120_000, 20),
-];
+const uncorrelatedBuckets = [makeBucket(0, 20), makeBucket(60_000, 20), makeBucket(120_000, 20)];
 
 describe('fetchThroughputCorrelations', () => {
   beforeEach(() => {

@@ -40,8 +40,9 @@ const mockFetchThroughputCorrelations = fetchThroughputCorrelations as jest.Mock
   typeof fetchThroughputCorrelations
 >;
 const mockFetchPValues = fetchPValues as jest.MockedFunction<typeof fetchPValues>;
-const mockFetchSignificantCorrelations =
-  fetchSignificantCorrelations as jest.MockedFunction<typeof fetchSignificantCorrelations>;
+const mockFetchSignificantCorrelations = fetchSignificantCorrelations as jest.MockedFunction<
+  typeof fetchSignificantCorrelations
+>;
 
 const mockApmEventClient = {} as unknown as APMEventClient;
 
