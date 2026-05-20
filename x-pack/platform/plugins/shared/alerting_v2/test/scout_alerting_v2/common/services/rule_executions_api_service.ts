@@ -11,11 +11,9 @@ import { measurePerformanceAsync } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../../../../server/lib/rule_executor/constants';
 import { POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from '../constants';
+import { countTaskRuns } from './task_event_log';
 
-const TASK_MANAGER_EVENT_LOG_INDEX = '.kibana-event-log*';
 const TASK_MANAGER_INDEX = '.kibana_task_manager';
-const TASK_MANAGER_EVENT_PROVIDER = 'taskManager';
-const TASK_RUN_EVENT_ACTION = 'task-run';
 const DEFAULT_SPACE_ID = 'default';
 
 /**
@@ -24,7 +22,7 @@ const DEFAULT_SPACE_ID = 'default';
  */
 const RUNNING_TASK_STATUSES = ['claiming', 'running'];
 
-export interface WaitForExecutorRunsParams {
+interface WaitForRunsParams {
   ruleId: string;
   /** Minimum number of `task-run` events that must be observed since `since`. */
   runs: number;
@@ -36,64 +34,39 @@ export interface WaitForExecutorRunsParams {
   spaceId?: string;
 }
 
-export interface WaitForExecutorTaskDrainedParams {
+interface WaitForTaskDrainedParams {
   ruleId: string;
   spaceId?: string;
 }
 
 /**
- * Test-time accessor for task manager state that the rule executor task
- * produces. Used to wait for deterministic conditions instead of sleeping by
- * wall-clock time:
+ * Test-time accessor for the per-rule alerting_v2 rule executor task. Used to
+ * wait for deterministic conditions instead of sleeping by wall-clock time:
  *
- *   - `waitForExecutorRuns` — polls `.kibana-event-log*` for `task-run`
- *     events the executor task produces.
- *   - `waitForExecutorTaskDrained` — polls `.kibana_task_manager` until the
- *     executor task is no longer in `claiming`/`running` status (or until the
- *     document is gone, e.g. after rule delete).
+ *   - `waitForRuns` — polls `.kibana-event-log*` for `task-run` events the
+ *     executor task produces.
+ *   - `waitForTaskDrained` — polls `.kibana_task_manager` until the executor
+ *     task is no longer in `claiming`/`running` status (or until the document
+ *     is gone, e.g. after rule delete).
+ *
+ * The underlying `kibana.task.id` construction (`taskType:spaceId:ruleId`) is
+ * an implementation detail; tests pass `ruleId` (and optionally `spaceId`).
  */
-export interface TaskExecutionsApiService {
-  waitForExecutorRuns: (params: WaitForExecutorRunsParams) => Promise<void>;
-  waitForExecutorTaskDrained: (params: WaitForExecutorTaskDrainedParams) => Promise<void>;
+export interface RuleExecutionsApiService {
+  waitForRuns: (params: WaitForRunsParams) => Promise<void>;
+  waitForTaskDrained: (params: WaitForTaskDrainedParams) => Promise<void>;
 }
 
 const buildExecutorTaskId = (ruleId: string, spaceId: string): string =>
   `${ALERTING_RULE_EXECUTOR_TASK_TYPE}:${spaceId}:${ruleId}`;
 
-export const getTaskExecutionsApiService = ({
+export const getRuleExecutionsApiService = ({
   log,
   esClient,
 }: {
   log: ScoutLogger;
   esClient: EsClient;
-}): TaskExecutionsApiService => {
-  const countExecutorRuns = async ({
-    taskId,
-    sinceMs,
-  }: {
-    taskId: string;
-    sinceMs: number;
-  }): Promise<number> => {
-    await esClient.indices.refresh({ index: TASK_MANAGER_EVENT_LOG_INDEX }, { ignore: [404] });
-
-    const result = await esClient.count({
-      index: TASK_MANAGER_EVENT_LOG_INDEX,
-      ignore_unavailable: true,
-      query: {
-        bool: {
-          filter: [
-            { term: { 'event.provider': TASK_MANAGER_EVENT_PROVIDER } },
-            { term: { 'event.action': TASK_RUN_EVENT_ACTION } },
-            { term: { 'kibana.task.id': taskId } },
-            { range: { 'event.start': { gte: sinceMs } } },
-          ],
-        },
-      },
-    });
-
-    return result.count;
-  };
-
+}): RuleExecutionsApiService => {
   /**
    * Returns `true` when the executor task is not currently being executed:
    * either the task document is absent (after delete), or its `task.status`
@@ -115,21 +88,21 @@ export const getTaskExecutionsApiService = ({
   };
 
   return {
-    waitForExecutorRuns: ({ ruleId, runs, since, spaceId = DEFAULT_SPACE_ID }) =>
-      measurePerformanceAsync(log, 'taskExecutions.waitForExecutorRuns', async () => {
+    waitForRuns: ({ ruleId, runs, since, spaceId = DEFAULT_SPACE_ID }) =>
+      measurePerformanceAsync(log, 'ruleExecutions.waitForRuns', async () => {
         const taskId = buildExecutorTaskId(ruleId, spaceId);
         const sinceMs = (since ?? new Date()).getTime();
 
         await expect
-          .poll(() => countExecutorRuns({ taskId, sinceMs }), {
+          .poll(() => countTaskRuns({ esClient, taskId, sinceMs }), {
             timeout: POLL_TIMEOUT_MS,
             intervals: [POLL_INTERVAL_MS],
           })
           .toBeGreaterThanOrEqual(runs);
       }),
 
-    waitForExecutorTaskDrained: ({ ruleId, spaceId = DEFAULT_SPACE_ID }) =>
-      measurePerformanceAsync(log, 'taskExecutions.waitForExecutorTaskDrained', async () => {
+    waitForTaskDrained: ({ ruleId, spaceId = DEFAULT_SPACE_ID }) =>
+      measurePerformanceAsync(log, 'ruleExecutions.waitForTaskDrained', async () => {
         const taskId = buildExecutorTaskId(ruleId, spaceId);
 
         await expect
