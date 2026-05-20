@@ -15,9 +15,24 @@
       "created_at": "2024-01-01T00:00:00.000Z",
       "created_by": "elastic",
       "updated_at": "2024-01-01T00:00:00.000Z",
-      "updated_by": "elastic",
-      "created_by_profile_uid": "u_profile_1",
-      "updated_by_profile_uid": "u_profile_1"
+      "updated_by": "elastic"
+    },
+    {
+      "name": "test-pack-rrule",
+      "description": "A test pack using RRULE scheduling",
+      "queries": {
+        "query1": {
+          "id": "query1",
+          "query": "select * from processes;",
+          "interval": 3600,
+          "timeout": 300
+        }
+      },
+      "enabled": true,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "created_by": "elastic",
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "updated_by": "elastic"
     }
   ],
   "10.3.0": [
@@ -37,8 +52,35 @@
       "created_by": "elastic",
       "updated_at": "2024-01-01T00:00:00.000Z",
       "updated_by": "elastic",
-      "created_by_profile_uid": "u_profile_1",
-      "updated_by_profile_uid": "u_profile_1"
+      "schedule_type": "interval",
+      "interval": 3600,
+      "rrule_schedule": null
+    },
+    {
+      "name": "test-pack-rrule",
+      "description": "A test pack using RRULE scheduling",
+      "queries": {
+        "query1": {
+          "id": "query1",
+          "query": "select * from processes;",
+          "interval": 3600,
+          "timeout": 300
+        }
+      },
+      "enabled": true,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "created_by": "elastic",
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "updated_by": "elastic",
+      "schedule_type": "rrule",
+      "interval": null,
+      "rrule_schedule": {
+        "rrule": "FREQ=DAILY;INTERVAL=1",
+        "start_date": "2024-01-01T00:00:00.000Z",
+        "end_date": "2024-12-31T23:59:59.000Z",
+        "splay": "5m",
+        "timeout": 300
+      }
     }
   ]
 }
