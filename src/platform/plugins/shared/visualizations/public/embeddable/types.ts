@@ -21,6 +21,7 @@ import type {
   PublishesRendered,
   PublishesTimeRange,
   PublishesTitle,
+  PublishesWritableTitle,
   SerializedTimeRange,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
@@ -57,6 +58,7 @@ export type VisualizeEditorInput = Omit<VisualizeRuntimeState, 'vis'> & {
 };
 
 export type VisualizeApi = Partial<HasEditCapabilities> &
+  PublishesWritableTitle &
   PublishesDataViews &
   PublishesDataLoading &
   PublishesRendered &

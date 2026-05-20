@@ -6,7 +6,7 @@
  */
 
 import type { StateComparators, TitlesApi } from '@kbn/presentation-publishing';
-import { BehaviorSubject, combineLatest, map, merge } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, merge, skip } from 'rxjs';
 import type {
   AnomalySwimLaneControlsState,
   AnomalySwimLaneEmbeddableState,
@@ -76,7 +76,24 @@ export const initializeSwimLaneControls = (
       updateUserInput,
       updatePagination,
     } as unknown as AnomalySwimLaneComponentApi,
-    anyStateChange$: merge(jobIds, swimlaneType, viewBy, perPage).pipe(map(() => undefined)),
+    anyStateChange$: merge(
+      jobIds.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      swimlaneType.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      viewBy.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      perPage.pipe(
+        skip(1),
+        map(() => undefined)
+      )
+    ),
     getLatestState,
     reinitializeState: (lastSavedState: AnomalySwimLaneControlsState) => {
       jobIds.next(lastSavedState.jobIds);
