@@ -63,7 +63,7 @@ export const createTodoTool = ({
 }: {
   todoStateManager: TodoStateManager;
 }): BuiltinToolDefinition<typeof todoWriteSchema> => ({
-  id: internalTools.writeTodosTool,
+  id: internalTools.writeTodos,
   type: ToolType.builtin,
   description: toolDescription,
   schema: todoWriteSchema,

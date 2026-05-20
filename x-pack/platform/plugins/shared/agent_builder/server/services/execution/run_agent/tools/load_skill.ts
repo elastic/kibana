@@ -41,7 +41,7 @@ export const createLoadSkillTool = ({
   analyticsService?: AgentBuilderAnalytics;
   trackingService?: AgentBuilderTracking;
 } = {}): BuiltinToolDefinition<typeof schema> => ({
-  id: internalTools.loadSkillTool,
+  id: internalTools.loadSkill,
   description:
     'Load a skill by name. Returns the skill content, its referenced files, and the list of tools the skill makes available. Loading a skill also dynamically registers its specialized tools so you can use them in subsequent calls.',
   type: ToolType.builtin,

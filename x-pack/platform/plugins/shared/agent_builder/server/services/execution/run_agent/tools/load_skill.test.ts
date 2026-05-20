@@ -52,7 +52,7 @@ describe('load_skill tool', () => {
 
   it('has the expected tool id and is recognized as internal', () => {
     const tool = createLoadSkillTool();
-    expect(tool.id).toBe(internalTools.loadSkillTool);
+    expect(tool.id).toBe(internalTools.loadSkill);
     expect(tool.id).toBe('load_skill');
     expect(isInternalTool(tool.id)).toBe(true);
     expect(isExcludedFromFilestore(tool.id)).toBe(true);
