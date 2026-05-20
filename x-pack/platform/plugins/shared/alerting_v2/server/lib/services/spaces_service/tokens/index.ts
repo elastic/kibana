@@ -9,8 +9,8 @@ import type { ServiceIdentifier } from 'inversify';
 
 /**
  * Request-scoped space id for the current request (from Spaces).
- * Used by RulesClient, and can be overridden to bind a the RulesClient to an explicit space.
+ * Used by RulesClient, AlertActionsClient, and can be overridden to bind clients to an explicit space.
  */
-export const RulesClientSpaceIdToken = Symbol.for(
-  'alerting_v2.RulesClient.SpaceId'
+export const RequestSpaceIdToken = Symbol.for(
+  'alerting_v2.SpacesService.RequestSpaceId'
 ) as ServiceIdentifier<string>;
