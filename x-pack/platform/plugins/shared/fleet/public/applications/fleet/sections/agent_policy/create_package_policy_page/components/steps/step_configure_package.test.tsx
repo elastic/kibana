@@ -711,7 +711,7 @@ describe('isSingleInputAndStreams behavior', () => {
     mockUpdatePackagePolicy.mockClear();
   });
 
-  it('should render title without toggle switch when feature flag is on, single policy template, single input, and single stream', async () => {
+  it('should render toggle switch when feature flag is on, single policy template, single input, and single stream', async () => {
     ExperimentalFeaturesService.init({
       ...allowedExperimentalValues,
       enableSimplifiedAgentlessUX: true,
@@ -733,10 +733,9 @@ describe('isSingleInputAndStreams behavior', () => {
     );
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('PackagePolicy.InputStreamConfig.title')).toBeInTheDocument();
       expect(
-        renderResult.queryByTestId('PackagePolicy.InputStreamConfig.Switch')
-      ).not.toBeInTheDocument();
+        renderResult.getByTestId('PackagePolicy.InputStreamConfig.Switch')
+      ).toBeInTheDocument();
     });
   });
 
