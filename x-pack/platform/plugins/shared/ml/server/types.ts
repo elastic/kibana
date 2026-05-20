@@ -29,6 +29,7 @@ import type {
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
 import type { CPSServerSetup } from '@kbn/cps/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { RouteGuard } from './lib/route_guard';
 import type { MlLicense } from '../common/license';
 import type { MlFeatures } from '../common/constants/app';
@@ -69,6 +70,7 @@ export interface PluginsSetup {
   taskManager: TaskManagerSetupContract;
   cases?: CasesServerSetup;
   cps?: CPSServerSetup;
+  agentBuilder?: AgentBuilderPluginSetup;
 }
 
 export interface PluginsStart {
