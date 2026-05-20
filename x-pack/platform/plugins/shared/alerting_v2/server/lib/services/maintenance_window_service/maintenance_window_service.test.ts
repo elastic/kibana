@@ -8,10 +8,7 @@
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import type { MaintenanceWindowAttributes } from '@kbn/maintenance-windows-plugin/common';
-import {
-  DEFAULT_MAINTENANCE_WINDOW_CACHE_INTERVAL_MS,
-  MaintenanceWindowService,
-} from './maintenance_window_service';
+import { MaintenanceWindowService } from './maintenance_window_service';
 
 const buildSo = (
   id: string,
@@ -111,15 +108,16 @@ describe('MaintenanceWindowService', () => {
     );
   });
 
-  it('caches results within the cache interval', async () => {
+  it('queries the saved-object store on every invocation (no caching)', async () => {
     const mw = buildSo('mw-1', 'default', {
       events: [{ gte: '2026-04-29T00:00:00.000Z', lte: '2026-04-29T23:00:00.000Z' }],
     });
 
-    client.createPointInTimeFinder.mockReturnValue(
-      mockFinderForSavedObjects([mw]) as ReturnType<
-        SavedObjectsClientContract['createPointInTimeFinder']
-      >
+    client.createPointInTimeFinder.mockImplementation(
+      () =>
+        mockFinderForSavedObjects([mw]) as ReturnType<
+          SavedObjectsClientContract['createPointInTimeFinder']
+        >
     );
 
     const service = new MaintenanceWindowService(client, buildLogger());
@@ -127,26 +125,7 @@ describe('MaintenanceWindowService', () => {
     await service.getEnabledMaintenanceWindows();
     await service.getEnabledMaintenanceWindows();
 
-    expect(client.createPointInTimeFinder).toHaveBeenCalledTimes(1);
-  });
-
-  it('refetches after cache TTL expires', async () => {
-    const mw = buildSo('mw-1', 'default', {
-      events: [{ gte: '2026-04-29T00:00:00.000Z', lte: '2026-04-29T23:00:00.000Z' }],
-    });
-
-    client.createPointInTimeFinder.mockReturnValue(
-      mockFinderForSavedObjects([mw]) as ReturnType<
-        SavedObjectsClientContract['createPointInTimeFinder']
-      >
-    );
-
-    const service = new MaintenanceWindowService(client, buildLogger(), { cacheIntervalMs: 10 });
-    await service.getEnabledMaintenanceWindows();
-    await new Promise((resolve) => setTimeout(resolve, 25));
-    await service.getEnabledMaintenanceWindows();
-
-    expect(client.createPointInTimeFinder).toHaveBeenCalledTimes(2);
+    expect(client.createPointInTimeFinder).toHaveBeenCalledTimes(3);
   });
 
   it('returns empty array on fetch error, logs, and still closes the PIT finder', async () => {
@@ -233,9 +212,5 @@ describe('MaintenanceWindowService', () => {
 
     expect(result).toHaveLength(1);
     expect(result[0].spaceId).toBe('default');
-  });
-
-  it('uses default cache interval', () => {
-    expect(DEFAULT_MAINTENANCE_WINDOW_CACHE_INTERVAL_MS).toBe(60_000);
   });
 });
