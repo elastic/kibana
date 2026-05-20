@@ -24,8 +24,10 @@ import {
   EuiMarkdownEditor,
   EuiHorizontalRule,
   EuiSwitch,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   agentBuilderDefaultAgentId,
   AgentVisibility,
@@ -38,6 +40,7 @@ import { Controller } from 'react-hook-form';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { labels } from '../../../../utils/i18n';
 import { useAgentLabels } from '../../../../hooks/agents/use_agent_labels';
+import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useCurrentUser } from '../../../../hooks/agents/use_current_user';
 import { useUiPrivileges } from '../../../../hooks/use_ui_privileges';
@@ -65,6 +68,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
   agentId,
 }) => {
   const { labels: existingLabels, isLoading: labelsLoading } = useAgentLabels();
+  const { docLinksService } = useAgentBuilderServices();
   const {
     services: { uiSettings },
   } = useKibana();
@@ -279,13 +283,32 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
               </EuiTitle>
             </EuiFlexGroup>
             <EuiText size="s" color="subdued">
-              {i18n.translate(
-                'xpack.agentBuilder.agents.form.settings.elasticCapabilitiesDescription',
-                {
-                  defaultMessage:
-                    'Enable built-in Elastic capabilities that enhance the agent with additional tools and skills provided by Elastic.',
-                }
-              )}
+              <FormattedMessage
+                id="xpack.agentBuilder.agents.form.settings.elasticCapabilitiesDescription"
+                defaultMessage="Automatically assign all current and future Elastic-built tools, skills, and plugins to the agent. Disable to manage assignments manually. {learnMoreLink}"
+                values={{
+                  learnMoreLink: (
+                    <EuiLink
+                      href={docLinksService.elasticCapabilities}
+                      target="_blank"
+                      aria-label={i18n.translate(
+                        'xpack.agentBuilder.agents.form.settings.elasticCapabilitiesDocumentationAriaLabel',
+                        {
+                          defaultMessage:
+                            'Learn more about Elastic capabilities in the documentation',
+                        }
+                      )}
+                    >
+                      {i18n.translate(
+                        'xpack.agentBuilder.agents.form.settings.elasticCapabilitiesLearnMoreLabel',
+                        {
+                          defaultMessage: 'Learn more.',
+                        }
+                      )}
+                    </EuiLink>
+                  ),
+                }}
+              />
             </EuiText>
           </EuiFlexGroup>
         </EuiFlexItem>
