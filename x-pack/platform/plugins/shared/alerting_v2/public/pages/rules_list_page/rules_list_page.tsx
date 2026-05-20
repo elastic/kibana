@@ -62,7 +62,7 @@ export const RulesListPage = () => {
   ] = useBoolean(false);
   const [isCreateMenuOpen, { off: closeCreateMenu, toggle: toggleCreateMenu }] = useBoolean(false);
   const createMenuId = useGeneratedHtmlId({ prefix: 'createRuleMenu' });
-  const { flyout, openCreateFlyout, openEditFlyout } = useComposeDiscoverFlyout();
+  const { flyout, openCreateFlyout, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
   const navigateToAgentBuilder = useNavigateToAgentBuilder();
 
   const [page, setPage] = useState(1);
@@ -292,6 +292,7 @@ export const RulesListPage = () => {
             isLoading={isLoading}
             onTableChange={onTableChange}
             onEditInFlyout={openEditFlyout}
+            onCloneInFlyout={openCloneFlyout}
           />
         </>
       ) : null}
