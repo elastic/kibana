@@ -47,4 +47,12 @@ export interface I18nServiceSetup {
    * Returns a map of locale ID to translation content hash for all configured locales.
    */
   getTranslationHashes(): Record<string, string>;
+
+  /**
+   * When `true`, Kibana writes a `KBN_LOCALE` cookie on every rendered
+   * response so the browser remembers the resolved locale across page loads,
+   * anonymous pages, and post-logout browsing. Controlled by
+   * `i18n.allowLocaleCookie` in `kibana.yml`. Defaults to `true`.
+   */
+  allowLocaleCookie: boolean;
 }

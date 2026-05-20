@@ -1,6 +1,6 @@
 ---
 # This file is used to generate "i18n settings" page in the product docs
-# For the schema and an example refer to the automated settings reference: 
+# For the schema and an example refer to the automated settings reference:
 # https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md
 
 product: Kibana
@@ -34,6 +34,19 @@ groups:
           entirely.
         datatype: list
         default: '["en", "fr-FR", "ja-JP", "zh-CN", "de-DE"]'
+        applies_to:
+          stack: ga 9.5+
+          ech: ga
+          self: ga
+
+      - setting: i18n.allowLocaleCookie
+        description: |
+          When `true` (the default), {{kib}} writes a `KBN_LOCALE` cookie on every
+          rendered response so the browser remembers the resolved locale across
+          page loads, anonymous pages, and post-logout browsing. Set to `false`
+          to disable the cookie.
+        datatype: boolean
+        default: "true"
         applies_to:
           stack: ga 9.5+
           ech: ga

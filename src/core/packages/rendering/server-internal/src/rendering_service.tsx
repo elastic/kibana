@@ -394,9 +394,13 @@ export class RenderingService {
       },
     };
 
+    const cookieHeaders: Record<string, string> = i18n.allowLocaleCookie
+      ? { 'set-cookie': setCookieHeader }
+      : {};
+
     return {
       body: `<!DOCTYPE html>${renderToStaticMarkup(<Template metadata={metadata} />)}`,
-      headers: { 'set-cookie': setCookieHeader },
+      headers: cookieHeaders,
     };
   }
 

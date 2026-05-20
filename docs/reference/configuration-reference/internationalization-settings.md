@@ -59,6 +59,12 @@ the resolved locale id (for example, `KBN_LOCALE=ja-JP`). Attributes:
 Privacy posture: `KBN_LOCALE` is a strictly-necessary preference cookie.
 It does not track the user, store identity, or enable cross-site activity.
 
+To disable the cookie entirely, set `i18n.allowLocaleCookie: false` in
+`kibana.yml`. When disabled, the per-user language selection still works via
+user profiles; however, anonymous pages and pages visited after signing out
+will always fall back to `i18n.defaultLocale` (or `Accept-Language` on
+serverless deployments) rather than remembering the previously resolved locale.
+
 ## Example configurations
 
 ```yaml
@@ -77,4 +83,7 @@ i18n.defaultLocale: "en"
 
 # 4. Legacy form — still works, logs a deprecation warning at startup:
 i18n.locale: "ja-JP"
+
+# 5. Disable the KBN_LOCALE cookie:
+i18n.allowLocaleCookie: false
 ```

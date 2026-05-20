@@ -698,6 +698,44 @@ describe('RenderingService', () => {
       await service.preboot(mockRenderingPrebootDeps);
       return [(await service.setup(mockRenderingSetupDeps)).render, mockRenderingSetupDeps];
     });
+
+    describe('allowLocaleCookie', () => {
+      let uiSettings: {
+        client: ReturnType<typeof uiSettingsServiceMock.createClient>;
+        globalClient: ReturnType<typeof uiSettingsServiceMock.createClient>;
+      };
+
+      beforeEach(() => {
+        uiSettings = {
+          client: uiSettingsServiceMock.createClient(),
+          globalClient: uiSettingsServiceMock.createClient(),
+        };
+      });
+
+      it('includes a set-cookie header when allowLocaleCookie is true', async () => {
+        mockRenderingSetupDeps.i18n.allowLocaleCookie = true;
+        await service.preboot(mockRenderingPrebootDeps);
+        const { render } = await service.setup(mockRenderingSetupDeps);
+
+        const result = await render(createKibanaRequest(), uiSettings);
+
+        expect(result.headers).toHaveProperty('set-cookie');
+      });
+
+      it('omits the set-cookie header when allowLocaleCookie is false', async () => {
+        mockRenderingSetupDeps.i18n.allowLocaleCookie = false;
+        await service.preboot(mockRenderingPrebootDeps);
+        const { render } = await service.setup(mockRenderingSetupDeps);
+
+        const result = await render(createKibanaRequest(), uiSettings);
+
+        expect(result.headers).not.toHaveProperty('set-cookie');
+      });
+
+      afterEach(() => {
+        mockRenderingSetupDeps.i18n.allowLocaleCookie = true;
+      });
+    });
   });
 
   describe('start()', () => {
