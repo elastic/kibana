@@ -15,7 +15,7 @@ import {
 } from './log_pagination_probe_query_builder';
 
 describe('buildLogPaginationCursorProbeEsql', () => {
-  it('adds sort, cap, inline count, and slice-end row after the probe WHERE', () => {
+  it('sorts ASC, limits, then aggregates MAX(timestamp) and COUNT(*)', () => {
     const q = buildLogPaginationCursorProbeEsql({
       indexPatterns: ['logs-*'],
       type: 'user',
@@ -32,10 +32,10 @@ describe('interpretLogPaginationCursorRows', () => {
     expect(interpretLogPaginationCursorRows(undefined, 100)).toEqual({ hasLogsToProcess: false });
   });
 
-  it('returns isLastLogsPage false when more matching logs remain than one page', () => {
+  it('returns isLastLogsPage false when sliceDocCount equals maxLogsPerPage (full page, more may follow)', () => {
     const row = {
       logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z' },
-      missingLogsToProcess: 101,
+      sliceDocCount: 100,
     };
     expect(interpretLogPaginationCursorRows(row, 100)).toEqual({
       hasLogsToProcess: true,
@@ -45,23 +45,23 @@ describe('interpretLogPaginationCursorRows', () => {
     });
   });
 
-  it('returns isLastLogsPage true when exactly maxLogsPerPage logs remain (last full page)', () => {
+  it('returns isLastLogsPage true when sliceDocCount is less than maxLogsPerPage (partial page = last)', () => {
     const row = {
       logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z' },
-      missingLogsToProcess: 100,
+      sliceDocCount: 99,
     };
     expect(interpretLogPaginationCursorRows(row, 100)).toEqual({
       hasLogsToProcess: true,
       logsPaginationCursor: row.logsPaginationCursor,
       isLastLogsPage: true,
-      sliceLogCount: 100,
+      sliceLogCount: 99,
     });
   });
 
   it('returns isLastLogsPage true when fewer than maxLogsPerPage logs remain', () => {
     const row = {
       logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z' },
-      missingLogsToProcess: 3,
+      sliceDocCount: 3,
     };
     expect(interpretLogPaginationCursorRows(row, 100)).toEqual({
       hasLogsToProcess: true,
@@ -83,7 +83,7 @@ describe('parseLogPaginationCursorRow', () => {
     };
     expect(parseLogPaginationCursorRow(resp)).toEqual({
       logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z' },
-      missingLogsToProcess: 42,
+      sliceDocCount: 42,
     });
   });
 

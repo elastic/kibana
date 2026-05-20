@@ -27,10 +27,10 @@ const LOG_PAGINATION_CURSOR_PROBE_COLUMNS: ESQLSearchResponse['columns'] = [
   { name: LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD, type: 'long' },
 ];
 
-/** Default total_logs > maxLogsPerPage so interpret marks a non-final slice (matches default config cap). */
+/** Default total_logs = maxLogsPerPage so interpret marks a non-final slice (full page → more may follow). */
 function mockLogPaginationCursorProbeRow(
   timestamp: string,
-  totalLogsInSlice: number = LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT + 1
+  totalLogsInSlice: number = LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT
 ): ESQLSearchResponse {
   return {
     columns: LOG_PAGINATION_CURSOR_PROBE_COLUMNS,
@@ -46,11 +46,15 @@ function mockLogPaginationCursorProbeEmpty(): ESQLSearchResponse {
 }
 
 /** First slice + extraction + terminal empty log pagination cursor probe (end of window). */
-function mockExtractSuccessSequence(mainExtractionResponse: ESQLSearchResponse): void {
+function mockExtractSuccessSequence(
+  mainExtractionResponse: ESQLSearchResponse,
+  totalLogsInSlice?: number
+): void {
   mockExecuteEsqlQuery
     .mockResolvedValueOnce(
       mockLogPaginationCursorProbeRow(
-        String(mainExtractionResponse.values.at(-1)?.[0] ?? '2024-01-02T12:00:00.000Z')
+        String(mainExtractionResponse.values.at(-1)?.[0] ?? '2024-01-02T12:00:00.000Z'),
+        totalLogsInSlice
       )
     )
     .mockResolvedValueOnce(mainExtractionResponse)
@@ -972,10 +976,10 @@ describe('LogsExtractionClient', () => {
           ],
         };
         // effectiveMaxLogsPerPage = min(40000, maxLogsPerWindow=1) = 1.
-        // Probe total_logs = maxLogsPerPage+1 → sliceLogCount = min(total_logs, 1) = 1.
+        // Probe LIMIT 1 → total_logs = 1 → sliceLogCount = 1.
         // totalLogs = 1 >= maxLogsPerWindow=1 → cap fires.
         setupVolCapTest({ maxLogsPerWindow: 1, maxLogsPerWindowCapBehavior: 'defer' });
-        mockExtractSuccessSequence(mainExtractionResponse);
+        mockExtractSuccessSequence(mainExtractionResponse, 1);
         mockIngestEntities.mockResolvedValue(undefined);
 
         const result = await client.extractLogs('user');
@@ -1011,10 +1015,10 @@ describe('LogsExtractionClient', () => {
           ],
         };
         // effectiveMaxLogsPerPage = min(40000, maxLogsPerWindow=1) = 1.
-        // Probe total_logs = maxLogsPerPage+1 → sliceLogCount = min(total_logs, 1) = 1.
+        // Probe LIMIT 1 → total_logs = 1 → sliceLogCount = 1.
         // totalLogs = 1 >= maxLogsPerWindow=1 → cap fires.
         setupVolCapTest({ maxLogsPerWindow: 1, maxLogsPerWindowCapBehavior: 'drop' });
-        mockExtractSuccessSequence(mainExtractionResponse);
+        mockExtractSuccessSequence(mainExtractionResponse, 1);
         mockIngestEntities.mockResolvedValue(undefined);
 
         const result = await client.extractLogs('user');
@@ -1090,9 +1094,9 @@ describe('LogsExtractionClient', () => {
           ],
         };
         setupVolCapTest({ maxLogsPerWindow: 1, maxLogsPerWindowCapBehavior: 'defer' });
-        // Probe response uses the last page timestamp as the cursor end
+        // effectiveMaxLogsPerPage=1 → LIMIT 1 → total_logs=1 → sliceLogCount=1
         mockExecuteEsqlQuery
-          .mockResolvedValueOnce(mockLogPaginationCursorProbeRow(lastPageTimestamp))
+          .mockResolvedValueOnce(mockLogPaginationCursorProbeRow(lastPageTimestamp, 1))
           .mockResolvedValueOnce(mainExtractionResponse)
           .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty());
         mockIngestEntities.mockResolvedValue(undefined);
@@ -1128,7 +1132,7 @@ describe('LogsExtractionClient', () => {
           ],
         };
         setupVolCapTest({ maxLogsPerWindow: 1, maxLogsPerWindowCapBehavior: 'drop' });
-        mockExtractSuccessSequence(mainExtractionResponse);
+        mockExtractSuccessSequence(mainExtractionResponse, 1);
         mockIngestEntities.mockResolvedValue(undefined);
 
         const result = await client.extractLogs('user', {
@@ -1152,8 +1156,7 @@ describe('LogsExtractionClient', () => {
       // Stall can only fire from iteration 2 onward (once `isFirstRunInThisCycle` is cleared).
       // Tests therefore use two slice iterations: slice 1 advances `checkpointTimestamp`
       // via `advanceEngineStateAfterLogPageCompletes`, and slice 2 is the stall candidate.
-      // Using total=LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT for the stall probe sets
-      // `isLastLogsPage=true`, ending the loop cleanly without a third terminal probe.
+      // After the stall, a terminal empty probe ends the loop (full-page count no longer signals last page).
 
       const setupStallTest = () => {
         mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
@@ -1172,15 +1175,16 @@ describe('LogsExtractionClient', () => {
         const bumpedTs = moment(stalledTs).add(1, 'ms').toISOString();
         setupStallTest();
 
-        // Slice 1: ends at stalledTs (not last page → loop continues, state logsPageCursorStartTs = stalledTs).
-        // Slice 2: same stalledTs + full page → stall fires, total=maxLogsPerPage → isLastLogsPage=true → loop ends.
+        // Slice 1: ends at stalledTs (full page → not last, loop continues).
+        // Slice 2: same stalledTs + full page → stall fires, extraction skipped, cursor bumped.
+        // Probe 3 (with bumpedTs): empty → loop ends.
         mockExecuteEsqlQuery
           .mockResolvedValueOnce(mockLogPaginationCursorProbeRow(stalledTs)) // slice 1, not last
           .mockResolvedValueOnce({ columns: [], values: [] }) // entity extraction 1
           .mockResolvedValueOnce(
-            mockLogPaginationCursorProbeRow(stalledTs, LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT) // slice 2: stall + last page
+            mockLogPaginationCursorProbeRow(stalledTs, LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT) // slice 2: stall fires, extraction skipped
           )
-          .mockResolvedValueOnce({ columns: [], values: [] }); // entity extraction 2
+          .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty()); // probe 3 with bumpedTs → loop ends
 
         const result = await client.extractLogs('user');
 
@@ -1203,13 +1207,15 @@ describe('LogsExtractionClient', () => {
         setupStallTest();
 
         // Slice 1 ends at ts1; slice 2 ends at ts2 (advances) → no stall.
+        // Full page (total=max) → isLastLogsPage=false → loop continues; terminal empty probe ends it.
         mockExecuteEsqlQuery
           .mockResolvedValueOnce(mockLogPaginationCursorProbeRow(ts1)) // slice 1, not last
-          .mockResolvedValueOnce({ columns: [], values: [] })
+          .mockResolvedValueOnce({ columns: [], values: [] }) // entity extraction 1
           .mockResolvedValueOnce(
-            mockLogPaginationCursorProbeRow(ts2, LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT) // last page, different ts
+            mockLogPaginationCursorProbeRow(ts2, LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT) // full page, different ts → not last
           )
-          .mockResolvedValueOnce({ columns: [], values: [] });
+          .mockResolvedValueOnce({ columns: [], values: [] }) // entity extraction 2
+          .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty()); // terminal probe → loop ends
 
         const result = await client.extractLogs('user');
 
@@ -1240,12 +1246,13 @@ describe('LogsExtractionClient', () => {
         setupStallTest();
 
         const someTs = '2024-01-02T10:00:00.000Z';
-        // Single slice (total=maxLogsPerPage → isLastLogsPage=true): loop ends after one iteration.
+        // Full page (total=max → isLastLogsPage=false): loop continues; terminal empty probe ends it.
         mockExecuteEsqlQuery
           .mockResolvedValueOnce(
             mockLogPaginationCursorProbeRow(someTs, LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT)
           )
-          .mockResolvedValueOnce({ columns: [], values: [] });
+          .mockResolvedValueOnce({ columns: [], values: [] }) // entity extraction
+          .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty()); // terminal probe → loop ends
 
         const result = await client.extractLogs('user');
 

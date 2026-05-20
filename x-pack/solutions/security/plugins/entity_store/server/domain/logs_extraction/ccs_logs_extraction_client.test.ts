@@ -121,7 +121,7 @@ describe('CcsLogsExtractionClient', () => {
     const result = await client.extractToUpdates(defaultExtractParams);
 
     expect(result).toEqual({ count: 2, pages: 1 });
-    // probe + entity page; total_logs=2 <= maxLogsPerPage → isLastLogsPage=true, no second probe
+    // probe + entity page; total_logs=2 < maxLogsPerPage=10000 → isLastLogsPage=true, no second probe
     expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
     expect(mockIngestEntities).toHaveBeenCalledTimes(1);
     expect(mockIngestEntities).toHaveBeenCalledWith({
@@ -212,7 +212,7 @@ describe('CcsLogsExtractionClient', () => {
     const result = await client.extractToUpdates({ ...defaultExtractParams, docsLimit });
 
     expect(result).toEqual({ count: 3, pages: 2 });
-    // probe + 2 entity pages; total_logs=3 <= maxLogsPerPage → isLastLogsPage=true, no second probe
+    // probe + 2 entity pages; total_logs=3 < maxLogsPerPage=10000 → isLastLogsPage=true, no second probe
     expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(3);
     expect(mockIngestEntities).toHaveBeenCalledTimes(2);
     expect(mockIngestEntities).toHaveBeenNthCalledWith(
@@ -260,12 +260,12 @@ describe('CcsLogsExtractionClient', () => {
       ],
     };
 
-    // Probe 1: total_logs=4 > maxLogsPerPage=2 → not the last slice
-    // Probe 2: total_logs=2 = maxLogsPerPage=2 → last slice
+    // Probe 1: total_logs=2 = maxLogsPerPage=2 → full page, isLastLogsPage=false → not last
+    // Probe 2: total_logs=1 < maxLogsPerPage=2 → partial page, isLastLogsPage=true → last slice
     mockExecuteEsqlQuery
-      .mockResolvedValueOnce(makeProbeResponse('2024-06-15T10:00:00.000Z', 4))
+      .mockResolvedValueOnce(makeProbeResponse('2024-06-15T10:00:00.000Z', 2))
       .mockResolvedValueOnce(slice1EntityPage)
-      .mockResolvedValueOnce(makeProbeResponse('2024-06-15T11:00:00.000Z', 2))
+      .mockResolvedValueOnce(makeProbeResponse('2024-06-15T11:00:00.000Z', 1))
       .mockResolvedValueOnce(slice2EntityPage);
 
     const result = await client.extractToUpdates({
@@ -579,8 +579,7 @@ describe('CcsLogsExtractionClient', () => {
   describe('stall detection', () => {
     // `sliceStart` starts undefined; it is only set after the first slice completes (line ~332).
     // Stall detection (`!!sliceStart && ...`) therefore requires at least two slice iterations.
-    // Tests use total_logs=maxLogsPerPage for the stall probe so `isLastLogsPage=true` ends the
-    // loop cleanly (no extra terminal probe needed).
+    // After the stall, a terminal empty probe ends the loop (full-page count no longer signals last page).
 
     it('logs warn and bumps checkpointTimestamp by 1ms when timestamp unchanged and page is full', async () => {
       const stalledTs = '2024-06-15T10:00:00.000Z';
@@ -591,14 +590,14 @@ describe('CcsLogsExtractionClient', () => {
         paginationRecoveryId: null,
       });
 
-      // Slice 1: ends at stalledTs (not last page → loop continues, sliceStart = stalledTs).
-      // Slice 2: ends at stalledTs again + full page → stall fires (sliceStart.ts === sliceEnd.ts),
-      //          total=maxLogsPerPage → isLastLogsPage=true → loop ends.
+      // Slice 1: ends at stalledTs (full page → not last, loop continues).
+      // Slice 2: same stalledTs + full page → stall fires, extraction skipped, cursor bumped.
+      // Probe 3 (with bumpedTs): empty → loop ends.
       mockExecuteEsqlQuery
-        .mockResolvedValueOnce(makeProbeResponse(stalledTs, DEFAULT_MAX_LOGS_PER_PAGE + 1)) // slice 1
+        .mockResolvedValueOnce(makeProbeResponse(stalledTs, DEFAULT_MAX_LOGS_PER_PAGE)) // slice 1, not last
         .mockResolvedValueOnce({ columns: [], values: [] }) // entity extraction 1
-        .mockResolvedValueOnce(makeProbeResponse(stalledTs, DEFAULT_MAX_LOGS_PER_PAGE)) // slice 2: stall + last page
-        .mockResolvedValueOnce({ columns: [], values: [] }); // entity extraction 2
+        .mockResolvedValueOnce(makeProbeResponse(stalledTs, DEFAULT_MAX_LOGS_PER_PAGE)) // slice 2: stall fires, extraction skipped
+        .mockResolvedValueOnce(emptyProbeResponse); // probe 3 with bumpedTs → loop ends
 
       const result = await client.extractToUpdates(defaultExtractParams);
 
@@ -624,11 +623,13 @@ describe('CcsLogsExtractionClient', () => {
       });
 
       // Slice 1: sliceStart becomes ts1. Slice 2: advances to ts2 (different) → no stall.
+      // Full page (total=max) → isLastLogsPage=false → loop continues; terminal empty probe ends it.
       mockExecuteEsqlQuery
-        .mockResolvedValueOnce(makeProbeResponse(ts1, DEFAULT_MAX_LOGS_PER_PAGE + 1))
-        .mockResolvedValueOnce({ columns: [], values: [] })
-        .mockResolvedValueOnce(makeProbeResponse(ts2, DEFAULT_MAX_LOGS_PER_PAGE))
-        .mockResolvedValueOnce({ columns: [], values: [] });
+        .mockResolvedValueOnce(makeProbeResponse(ts1, DEFAULT_MAX_LOGS_PER_PAGE)) // slice 1, not last
+        .mockResolvedValueOnce({ columns: [], values: [] }) // entity extraction 1
+        .mockResolvedValueOnce(makeProbeResponse(ts2, DEFAULT_MAX_LOGS_PER_PAGE)) // full page, different ts → not last
+        .mockResolvedValueOnce({ columns: [], values: [] }) // entity extraction 2
+        .mockResolvedValueOnce(emptyProbeResponse); // terminal probe → loop ends
 
       const result = await client.extractToUpdates(defaultExtractParams);
 
@@ -644,12 +645,12 @@ describe('CcsLogsExtractionClient', () => {
         paginationRecoveryId: null,
       });
 
-      // Slice 1: sliceStart becomes ts1. Slice 2: same ts but only 5 docs (partial) → no stall.
+      // Slice 1: sliceStart becomes ts1 (full page, not last). Slice 2: same ts but only 5 docs (partial) → no stall.
       mockExecuteEsqlQuery
-        .mockResolvedValueOnce(makeProbeResponse(ts1, DEFAULT_MAX_LOGS_PER_PAGE + 1))
-        .mockResolvedValueOnce({ columns: [], values: [] })
-        .mockResolvedValueOnce(makeProbeResponse(ts1, 5)) // same ts, partial page → no stall
-        .mockResolvedValueOnce({ columns: [], values: [] });
+        .mockResolvedValueOnce(makeProbeResponse(ts1, DEFAULT_MAX_LOGS_PER_PAGE)) // slice 1, not last
+        .mockResolvedValueOnce({ columns: [], values: [] }) // entity extraction 1
+        .mockResolvedValueOnce(makeProbeResponse(ts1, 5)) // same ts, partial page → no stall, isLastLogsPage=true
+        .mockResolvedValueOnce({ columns: [], values: [] }); // entity extraction 2
 
       const result = await client.extractToUpdates(defaultExtractParams);
 
@@ -665,10 +666,11 @@ describe('CcsLogsExtractionClient', () => {
       });
 
       const someTs = '2024-06-15T10:00:00.000Z';
-      // Single slice: total = maxLogsPerPage → isLastLogsPage=true, loop ends after one iteration.
+      // Full page (total=max → isLastLogsPage=false): loop continues; terminal empty probe ends it.
       mockExecuteEsqlQuery
-        .mockResolvedValueOnce(makeProbeResponse(someTs, DEFAULT_MAX_LOGS_PER_PAGE))
-        .mockResolvedValueOnce({ columns: [], values: [] });
+        .mockResolvedValueOnce(makeProbeResponse(someTs, DEFAULT_MAX_LOGS_PER_PAGE)) // slice 1, not last
+        .mockResolvedValueOnce({ columns: [], values: [] }) // entity extraction
+        .mockResolvedValueOnce(emptyProbeResponse); // terminal probe → loop ends
 
       const result = await client.extractToUpdates(defaultExtractParams);
 

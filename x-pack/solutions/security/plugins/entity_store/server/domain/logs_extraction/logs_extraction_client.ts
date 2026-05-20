@@ -669,7 +669,7 @@ export class LogsExtractionClient {
 
     if (parsedLogPaginationCursor) {
       this.logger.debug(
-        `Log pagination cursor probe: missing logs to process ${parsedLogPaginationCursor.missingLogsToProcess}, next page starts at ${parsedLogPaginationCursor.logsPaginationCursor.timestampCursor}`
+        `Log pagination cursor probe: ${parsedLogPaginationCursor.sliceDocCount} docs in slice, next page ends at ${parsedLogPaginationCursor.logsPaginationCursor.timestampCursor}`
       );
     }
 
