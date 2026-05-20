@@ -185,6 +185,7 @@ export interface FunctionDefinition {
   type: FunctionDefinitionTypes;
   preview?: boolean;
   ignoreAsSuggestion?: boolean;
+  tsdbCompatible?: boolean;
   name: string;
   alias?: string[];
   description: string;
