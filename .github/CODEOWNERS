@@ -84,6 +84,7 @@ packages/kbn-manifest @elastic/kibana-core
 packages/kbn-mock-idp-plugin @elastic/kibana-security
 packages/kbn-moon @elastic/kibana-operations
 packages/kbn-optimizer @elastic/kibana-operations
+packages/kbn-optimizer/limits.yml
 packages/kbn-peggy-loader @elastic/kibana-operations
 packages/kbn-perf-page-load @elastic/kibana-operations
 packages/kbn-performance-testing-dataset-extractor @elastic/kibana-performance-testing
