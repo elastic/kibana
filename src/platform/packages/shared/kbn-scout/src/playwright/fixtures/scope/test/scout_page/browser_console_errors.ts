@@ -18,6 +18,8 @@ const filteringEnabled = process.env.SCOUT_REPORT_ALL_CONSOLE_LOGS !== 'true';
 const IGNORED_ERROR_PATTERNS = [
   // CSP violations from inline scripts are expected in Kibana's dev/test environment
   'Executing inline script violates the following Content Security Policy directive',
+  // Moment Timezone data is not bundled for all timezones in the test environment
+  'Moment Timezone has no data for',
 ];
 
 const isIgnored = (message: string) =>
@@ -30,7 +32,7 @@ export const collectBrowserConsoleErrors = (page: Page): string[] => {
     if (msg.type() !== 'error') return;
     const text = msg.text();
     if (filteringEnabled && isIgnored(text)) return;
-    errors.push(text);
+    errors.push(`[${new Date().toISOString()}] ${text}`);
   });
   return errors;
 };
