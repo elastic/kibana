@@ -31,7 +31,11 @@ import {
 } from '@kbn/data-plugin/common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import type { DateHistogramIndexPatternColumn, FormBasedLayer } from '@kbn/lens-common';
+import type {
+  DateHistogramIndexPatternColumn,
+  FormBasedLayer,
+  IndexPattern,
+} from '@kbn/lens-common';
 import { esql } from '@elastic/esql';
 import { TIME_SYSTEM_PARAMS } from '@kbn/esql-language';
 
@@ -106,6 +110,15 @@ function mapToEsqlInterval(interval: string) {
   return interval;
 }
 
+function getDateHistogramSourceField(
+  column: DateHistogramIndexPatternColumn,
+  indexPattern: IndexPattern
+): string {
+  return indexPattern.timeFieldName && column.sourceField !== indexPattern.timeFieldName
+    ? indexPattern.timeFieldName
+    : column.sourceField;
+}
+
 export const dateHistogramOperation: OperationDefinition<
   DateHistogramIndexPatternColumn,
   'field',
@@ -119,10 +132,25 @@ export const dateHistogramOperation: OperationDefinition<
   priority: 5, // Highest priority level used
   scale: () => 'interval',
   operationParams: [{ name: 'interval', type: 'string', required: false }],
-  getErrorMessage: (layer, columnId, indexPattern) => [
-    ...getInvalidFieldMessage(layer, columnId, indexPattern),
-    ...getMultipleDateHistogramsErrorMessage(layer, columnId),
-  ],
+  getErrorMessage: (layer, columnId, indexPattern) => {
+    const column = layer.columns[columnId] as DateHistogramIndexPatternColumn;
+    const sourceField = getDateHistogramSourceField(column, indexPattern);
+    const layerWithResolvedSourceField = {
+      ...layer,
+      columns: {
+        ...layer.columns,
+        [columnId]: {
+          ...column,
+          sourceField,
+        },
+      },
+    };
+
+    return [
+      ...getInvalidFieldMessage(layerWithResolvedSourceField, columnId, indexPattern),
+      ...getMultipleDateHistogramsErrorMessage(layer, columnId),
+    ];
+  },
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       (type === 'date' || type === 'date_range') &&
@@ -233,7 +261,11 @@ export const dateHistogramOperation: OperationDefinition<
     };
   },
   toEsAggsFn: (column, columnId, indexPattern) => {
-    const { usedField, timeZone, interval } = getTimeZoneAndInterval(column, indexPattern);
+    const sourceField = getDateHistogramSourceField(column, indexPattern);
+    const { usedField, timeZone, interval } = getTimeZoneAndInterval(
+      { ...column, sourceField },
+      indexPattern
+    );
     const dropPartials = Boolean(
       column.params?.dropPartials &&
         // set to false when detached from time picker
@@ -244,7 +276,7 @@ export const dateHistogramOperation: OperationDefinition<
       id: columnId,
       enabled: true,
       schema: 'segment',
-      field: column.sourceField,
+      field: sourceField,
       time_zone: timeZone,
       useNormalizedEsInterval: !usedField?.aggregationRestrictions?.date_histogram,
       interval,
