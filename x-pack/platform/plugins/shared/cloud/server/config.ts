@@ -25,6 +25,10 @@ const apmConfigSchema = schema.object({
   ),
 });
 
+const managedOtlpConfigSchema = schema.object({
+  url: schema.maybe(schema.string()),
+});
+
 /**
  * Builds a nested conditional schema for product tiers based on the project type.
  * Something like
@@ -83,6 +87,7 @@ const configSchema = schema.object({
   projects_url: offeringBasedSchema({ serverless: schema.string({ defaultValue: '/projects/' }) }),
   trial_end_date: schema.maybe(schema.string()),
   is_elastic_staff_owned: schema.maybe(schema.boolean()),
+  managed_otlp: schema.maybe(managedOtlpConfigSchema),
   onboarding: schema.maybe(
     schema.object({
       default_solution: schema.maybe(schema.string()),
@@ -130,6 +135,9 @@ export const config: PluginConfigDescriptor<CloudConfigType> = {
     projects_url: true,
     trial_end_date: true,
     is_elastic_staff_owned: true,
+    managed_otlp: {
+      url: true,
+    },
     serverless: {
       project_id: true,
       project_name: true,
