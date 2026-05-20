@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SENTINEL_NRT_TRANSLATION_FIELDS } from '../constants';
 import { convertMigrationCustomRuleToSecurityRulePayload, type MigrationCustomRule } from './utils';
 
 const customRule: MigrationCustomRule = {
@@ -26,13 +25,13 @@ describe('convertMigrationCustomRuleToSecurityRulePayload', () => {
     });
   });
 
-  it('uses NRT translation fields when provided', () => {
+  it('uses translation fields when provided', () => {
     expect(
-      convertMigrationCustomRuleToSecurityRulePayload(
-        customRule,
-        false,
-        SENTINEL_NRT_TRANSLATION_FIELDS
-      )
+      convertMigrationCustomRuleToSecurityRulePayload(customRule, false, {
+        from: 'now-60s',
+        to: 'now',
+        interval: '60s',
+      })
     ).toMatchObject({
       from: 'now-60s',
       to: 'now',

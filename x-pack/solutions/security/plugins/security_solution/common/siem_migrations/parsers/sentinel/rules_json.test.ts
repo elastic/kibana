@@ -17,6 +17,8 @@ const SCHEDULED_RULE: SentinelArmResource = {
     displayName: 'Suspicious Login Activity',
     description: 'Detects suspicious login attempts',
     query: 'SecurityEvent | where EventID == 4625 | summarize count() by Account',
+    queryFrequency: 'PT5M',
+    queryPeriod: 'PT10M',
     severity: 'Medium',
     tactics: ['InitialAccess'],
     techniques: ['T1078'],
@@ -43,10 +45,11 @@ describe('SentinelRulesParser', () => {
       expect(rules).toHaveLength(1);
       expect(rules[0]).toMatchObject({
         id: 'rule-guid',
-        kind: 'Scheduled',
         displayName: 'Suspicious Login Activity',
         description: 'Detects suspicious login attempts',
         query: 'SecurityEvent | where EventID == 4625 | summarize count() by Account',
+        queryFrequency: 'PT5M',
+        queryPeriod: 'PT10M',
         severity: 'Medium',
         tactics: ['InitialAccess'],
         techniques: ['T1078'],
@@ -71,7 +74,6 @@ describe('SentinelRulesParser', () => {
       expect(rules).toHaveLength(1);
       expect(rules[0]).toMatchObject({
         id: 'nrt-rule',
-        kind: 'NRT',
         displayName: 'NRT Security Event log cleared',
         query: 'SecurityEvent | where EventID == 1102',
         severity: 'High',

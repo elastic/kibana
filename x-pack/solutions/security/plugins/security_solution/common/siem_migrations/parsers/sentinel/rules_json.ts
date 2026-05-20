@@ -6,12 +6,14 @@
  */
 
 import type { SentinelArmResource } from '../../model/vendor/rules/sentinel.gen';
-import type { SentinelRule, SentinelRuleKind } from './types';
+import type { SentinelRule } from './types';
 
-const SUPPORTED_SENTINEL_RULE_KINDS: SentinelRuleKind[] = ['Scheduled', 'NRT'];
+type SupportedSentinelRuleKind = 'Scheduled' | 'NRT';
 
-const isSupportedSentinelRuleKind = (kind: string | undefined): kind is SentinelRuleKind =>
-  SUPPORTED_SENTINEL_RULE_KINDS.includes(kind as SentinelRuleKind);
+const SUPPORTED_SENTINEL_RULE_KINDS: SupportedSentinelRuleKind[] = ['Scheduled', 'NRT'];
+
+const isSupportedSentinelRuleKind = (kind: string | undefined): kind is SupportedSentinelRuleKind =>
+  SUPPORTED_SENTINEL_RULE_KINDS.includes(kind as SupportedSentinelRuleKind);
 
 /**
  * Processes pre-validated Sentinel ARM template resources into SentinelRule objects.
@@ -46,7 +48,7 @@ export class SentinelRulesParser {
       return undefined;
     }
 
-    const { displayName, description, query, severity } = properties;
+    const { displayName, description, query, queryFrequency, queryPeriod, severity } = properties;
 
     if (!displayName || !query) {
       return undefined;
@@ -56,11 +58,12 @@ export class SentinelRulesParser {
 
     return {
       id,
-      kind: resource.kind,
       displayName,
       description: description ?? '',
       query,
       severity: severity ?? 'medium',
+      queryFrequency,
+      queryPeriod,
       tactics: properties.tactics,
       techniques: properties.techniques,
     };

@@ -17,7 +17,17 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
- * Properties of a Microsoft Sentinel Scheduled Analytics Rule
+ * An ISO 8601 duration.
+ */
+export const SentinelIso8601Duration = lazySchema(() =>
+  z
+    .string()
+    .regex(/^P(?=\d|T\d)(?:\d+Y)?(?:\d+M)?(?:\d+D)?(?:T(?=\d)(?:\d+H)?(?:\d+M)?(?:\d+S)?)?$/)
+);
+export type SentinelIso8601Duration = z.infer<typeof SentinelIso8601Duration>;
+
+/**
+ * Properties of a Microsoft Sentinel Scheduled or NRT Analytics Rule
  */
 export const SentinelRuleProperties = lazySchema(() =>
   z.object({
@@ -33,6 +43,14 @@ export const SentinelRuleProperties = lazySchema(() =>
      * The KQL query for the rule
      */
     query: z.string(),
+    /**
+     * The frequency in ISO 8601 duration format for this alert rule to run.
+     */
+    queryFrequency: SentinelIso8601Duration.optional(),
+    /**
+     * The period in ISO 8601 duration format that this alert rule looks at.
+     */
+    queryPeriod: SentinelIso8601Duration.optional(),
     /**
      * The rule severity
      */

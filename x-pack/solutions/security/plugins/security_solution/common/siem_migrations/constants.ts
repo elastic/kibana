@@ -85,10 +85,4 @@ export const DEFAULT_TRANSLATION_FIELDS = {
   interval: '5m',
 } as const;
 
-export const SENTINEL_NRT_TRANSLATION_FIELDS = {
-  from: 'now-60s',
-  to: 'now',
-  interval: '60s',
-} as const;
-
 export const SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER = '[indexPattern]';

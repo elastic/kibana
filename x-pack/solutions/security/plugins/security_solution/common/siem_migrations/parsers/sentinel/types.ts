@@ -9,13 +9,9 @@
  * Represents a Microsoft Sentinel Scheduled or Near-Real-Time Analytics Rule as parsed from
  * an ARM template JSON export.
  */
-export type SentinelRuleKind = 'Scheduled' | 'NRT';
-
 export interface SentinelRule {
   /** The rule's unique identifier (ARM resource name or GUID) */
   id: string;
-  /** The Sentinel analytics rule kind */
-  kind: SentinelRuleKind;
   /** The rule display name */
   displayName: string;
   /** The rule description */
@@ -24,6 +20,10 @@ export interface SentinelRule {
   query: string;
   /** The severity of the rule */
   severity: string;
+  /** The Sentinel query lookback period, e.g. "PT5M" */
+  queryPeriod?: string;
+  /** The Sentinel query run frequency, e.g. "PT5M" */
+  queryFrequency?: string;
   /** MITRE ATT&CK tactic IDs, e.g. ["Persistence", "InitialAccess"] */
   tactics?: string[];
   /** MITRE ATT&CK technique IDs, e.g. ["T1078", "T1566"] */

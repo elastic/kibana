@@ -5,13 +5,12 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import type { Threat } from '../../../../../../common/api/detection_engine';
-import {
-  DEFAULT_TRANSLATION_FIELDS,
-  SENTINEL_NRT_TRANSLATION_FIELDS,
-} from '../../../../../../common/siem_migrations/constants';
+import { DEFAULT_TRANSLATION_FIELDS } from '../../../../../../common/siem_migrations/constants';
 import type { OriginalRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { SentinelRule } from '../../../../../../common/siem_migrations/parsers/sentinel/types';
+import type { MigrationTranslationFields } from '../../../../../../common/siem_migrations/rules/utils';
 import {
   TACTICS_BASE_URL,
   TECHNIQUES_BASE_URL,
@@ -67,6 +66,62 @@ export function transformSentinelMitreMapping(
   });
 }
 
+const ISO_8601_DURATION_PATTERN =
+  /^P(?=\d|T\d)(?:(?<years>\d+)Y)?(?:(?<months>\d+)M)?(?:(?<days>\d+)D)?(?:T(?=\d)(?:(?<hours>\d+)H)?(?:(?<minutes>\d+)M)?(?:(?<seconds>\d+)S)?)?$/;
+
+function convertToNativeEsqlUnits(isoString: string): string | undefined {
+  const match = ISO_8601_DURATION_PATTERN.exec(isoString);
+  if (!match?.groups) {
+    return undefined;
+  }
+
+  const duration = moment.duration(isoString);
+  if (!Number.isFinite(duration.asSeconds()) || duration.asSeconds() === 0) {
+    return undefined;
+  }
+
+  if (match.groups.seconds != null) {
+    return `${duration.asSeconds()}s`;
+  }
+  if (match.groups.minutes != null) {
+    return `${duration.asMinutes()}m`;
+  }
+  if (match.groups.hours != null) {
+    return `${duration.asHours()}h`;
+  }
+  if (match.groups.days != null) {
+    return `${duration.asDays()}d`;
+  }
+  if (match.groups.months != null) {
+    return `${duration.asMonths()}M`;
+  }
+  if (match.groups.years != null) {
+    return `${duration.asYears()}y`;
+  }
+
+  return undefined;
+}
+
+const isNonEmptyString = (value: string | undefined): value is string =>
+  value != null && value !== '';
+
+const transformQueryPeriodToTimeRange = (
+  queryPeriodIso: string
+): Pick<MigrationTranslationFields, 'from' | 'to'> | undefined => {
+  const period = convertToNativeEsqlUnits(queryPeriodIso);
+  if (!period) {
+    return undefined;
+  }
+
+  return {
+    from: `now-${period}`,
+    to: 'now',
+  };
+};
+
+const transformQueryFrequencyToInterval = (queryFrequencyIso: string): string | undefined =>
+  convertToNativeEsqlUnits(queryFrequencyIso);
+
 /**
  * Transforms a parsed Sentinel rule into the OriginalRule format
  * used by the SIEM migrations pipeline.
@@ -83,7 +138,19 @@ export function transformSentinelRuleToOriginalRule(rule: SentinelRule): Origina
     query_language: 'kql',
     severity: rule.severity.toLowerCase(),
     annotations: {
-      ...(rule.kind === 'NRT' ? SENTINEL_NRT_TRANSLATION_FIELDS : DEFAULT_TRANSLATION_FIELDS),
+      ...(isNonEmptyString(rule.queryPeriod)
+        ? transformQueryPeriodToTimeRange(rule.queryPeriod) ?? {
+            from: DEFAULT_TRANSLATION_FIELDS.from,
+            to: DEFAULT_TRANSLATION_FIELDS.to,
+          }
+        : {
+            from: DEFAULT_TRANSLATION_FIELDS.from,
+            to: DEFAULT_TRANSLATION_FIELDS.to,
+          }),
+      interval: isNonEmptyString(rule.queryFrequency)
+        ? transformQueryFrequencyToInterval(rule.queryFrequency) ??
+          DEFAULT_TRANSLATION_FIELDS.interval
+        : DEFAULT_TRANSLATION_FIELDS.interval,
     },
   };
 

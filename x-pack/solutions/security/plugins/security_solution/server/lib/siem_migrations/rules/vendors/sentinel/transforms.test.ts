@@ -10,7 +10,6 @@ import { transformSentinelMitreMapping, transformSentinelRuleToOriginalRule } fr
 
 const baseSentinelRule: SentinelRule = {
   id: 'rule-id-1',
-  kind: 'Scheduled',
   displayName: 'Suspicious sign-in',
   description: 'Detects suspicious sign-in activity',
   query: 'SigninLogs | where ResultType != 0',
@@ -113,16 +112,73 @@ describe('transformSentinelRuleToOriginalRule', () => {
     expect(result.threat?.[0].technique?.[0].id).toBe('T1078');
   });
 
-  it('adds NRT timing overrides to annotations', () => {
+  it('adds converted Sentinel timing overrides to annotations', () => {
     const result = transformSentinelRuleToOriginalRule({
       ...baseSentinelRule,
-      kind: 'NRT',
+      queryFrequency: 'PT5M',
+      queryPeriod: 'PT5M',
     });
 
     expect(result.annotations).toEqual({
-      from: 'now-60s',
+      from: 'now-330s',
       to: 'now',
-      interval: '60s',
+      interval: '5m',
+    });
+  });
+
+  it('converts mixed Sentinel ISO durations to seconds', () => {
+    const result = transformSentinelRuleToOriginalRule({
+      ...baseSentinelRule,
+      queryFrequency: 'PT1M30S',
+      queryPeriod: 'PT2M30S',
+    });
+
+    expect(result.annotations).toEqual({
+      from: 'now-150s',
+      to: 'now',
+      interval: '90s',
+    });
+  });
+
+  it('converts Sentinel ISO durations with years and months', () => {
+    const result = transformSentinelRuleToOriginalRule({
+      ...baseSentinelRule,
+      queryFrequency: 'P1Y',
+      queryPeriod: 'P2M',
+    });
+
+    expect(result.annotations).toEqual({
+      from: 'now-2M',
+      to: 'now',
+      interval: '1y',
+    });
+  });
+
+  it('uses the default time range when queryPeriod is empty', () => {
+    const result = transformSentinelRuleToOriginalRule({
+      ...baseSentinelRule,
+      queryFrequency: 'PT1M',
+      queryPeriod: '',
+    });
+
+    expect(result.annotations).toEqual({
+      from: 'now-360s',
+      to: 'now',
+      interval: '1m',
+    });
+  });
+
+  it('uses the default interval when queryFrequency is empty', () => {
+    const result = transformSentinelRuleToOriginalRule({
+      ...baseSentinelRule,
+      queryFrequency: '',
+      queryPeriod: 'PT1M',
+    });
+
+    expect(result.annotations).toEqual({
+      from: 'now-1m',
+      to: 'now',
+      interval: '5m',
     });
   });
 });
