@@ -25,11 +25,11 @@ apiTest.describe('Create unack alert action API', { tag: '@local-stateful-classi
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActions.cleanUp();
+    await apiServices.alertingV2.alertActions.cleanUpAll();
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActions.cleanUp();
+    await apiServices.alertingV2.alertActions.cleanUpAll();
   });
 
   apiTest('unack: writes an unack action and returns 204', async ({ apiClient, apiServices }) => {

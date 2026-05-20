@@ -26,11 +26,11 @@ apiTest.describe('Create unsnooze alert action API', { tag: '@local-stateful-cla
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActions.cleanUp();
+    await apiServices.alertingV2.alertActions.cleanUpAll();
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActions.cleanUp();
+    await apiServices.alertingV2.alertActions.cleanUpAll();
   });
 
   apiTest(

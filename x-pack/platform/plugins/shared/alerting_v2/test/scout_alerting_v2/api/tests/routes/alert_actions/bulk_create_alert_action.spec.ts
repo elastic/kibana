@@ -26,11 +26,11 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActions.cleanUp();
+    await apiServices.alertingV2.alertActions.cleanUpAll();
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActions.cleanUp();
+    await apiServices.alertingV2.alertActions.cleanUpAll();
   });
 
   apiTest(

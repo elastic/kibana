@@ -32,11 +32,11 @@ apiTest.describe('Create ack alert action API', { tag: '@local-stateful-classic'
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActions.cleanUp();
+    await apiServices.alertingV2.alertActions.cleanUpAll();
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActions.cleanUp();
+    await apiServices.alertingV2.alertActions.cleanUpAll();
   });
 
   apiTest('ack: writes an ack action and returns 204', async ({ apiClient, apiServices }) => {
