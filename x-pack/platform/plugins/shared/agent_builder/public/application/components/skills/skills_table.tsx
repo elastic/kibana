@@ -22,6 +22,7 @@ import {
 import { css } from '@emotion/react';
 import type { PublicSkillSummary } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_EVENT_TYPES, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useDeleteSkill } from '../../hooks/skills/use_delete_skill';
@@ -248,6 +249,10 @@ const useSkillsTableColumns = ({
               <EuiLink
                 onClick={() => handleSkillClick(skill.id)}
                 data-test-subj={`agentBuilderSkillLink-${skill.id}`}
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                  action: AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_ENTITY_VIEW,
+                })}
               >
                 <EuiText size="s">
                   <strong>{skill.id}</strong>

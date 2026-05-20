@@ -112,6 +112,7 @@ const ebtAction = {
     MANAGE_LICENSE: 'manage_license',
   },
   connectors: {
+    CREATE_CONNECTOR: 'create_connector',
     OPEN_CONTEXT_MENU: 'open_context_menu',
     EDIT_CONNECTOR: 'edit_connector',
     DISCONNECT_CONNECTOR: 'disconnect_connector',

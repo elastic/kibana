@@ -19,6 +19,7 @@ import {
 import { css } from '@emotion/react';
 import type { PluginDefinition } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_EVENT_TYPES, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import type { PluginUsedByAgents } from '../../hooks/plugins/use_delete_plugin';
@@ -213,6 +214,10 @@ const usePluginsTableColumns = ({
           <EuiLink
             href={createAgentBuilderUrl(appPaths.plugins.details({ pluginId: plugin.id }))}
             data-test-subj={`agentBuilderPluginNameLink-${plugin.id}`}
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_ENTITY_VIEW,
+            })}
           >
             <strong>{name}</strong>
           </EuiLink>
