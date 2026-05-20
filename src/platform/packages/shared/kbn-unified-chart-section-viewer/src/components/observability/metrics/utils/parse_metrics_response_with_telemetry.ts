@@ -26,7 +26,7 @@ export const createInitialMetricsTelemetry = (): MetricsTelemetry => ({
   total_number_of_dimensions: 0,
   metrics_by_type: {},
   units: {},
-  multi_value_counts: { data_streams: 0, field_types: 0, metric_types: 0 },
+  multi_value_counts: { data_streams: 0, field_types: 0, metric_types: 0, units: 0 },
 });
 
 /**

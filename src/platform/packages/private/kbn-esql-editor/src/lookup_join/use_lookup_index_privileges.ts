@@ -12,6 +12,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 import { memoize } from 'lodash';
 import { LOOKUP_INDEX_PRIVILEGES_ROUTE } from '@kbn/esql-types';
+import { reportEsqlError } from '../report_error';
 import type { ESQLEditorDeps } from '../types';
 
 type IndexPrivileges = SecurityHasPrivilegesResponse['index'];
@@ -54,8 +55,7 @@ export const useLookupIndexPrivileges = () => {
         try {
           return await http!.get<IndexPrivileges>(LOOKUP_INDEX_PRIVILEGES_ROUTE, options);
         } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error('Error fetching user privileges:', error);
+          reportEsqlError(error, { errorType: 'LookupIndexPrivilegesFetch' });
           return {};
         }
       },

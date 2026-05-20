@@ -12,7 +12,8 @@ import {
   buildRelatedBaseQuery,
   finishRelatedEpisodesQuery,
 } from '../queries/related_episodes_query';
-import { createQueryClientWrapper, createTestQueryClient } from './test_utils';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
 import { useFetchSameRuleEpisodesQuery } from './use_fetch_same_rule_episodes_query';
 
 jest.mock('../apis/fetch_related_episodes');
@@ -25,6 +26,7 @@ const wrapper = createQueryClientWrapper(queryClient);
 describe('useFetchSameRuleEpisodesQuery', () => {
   const mockToastDanger = jest.fn();
   const mockExpressions = {} as ExpressionsStart;
+  const mockSpaces = createMockSpaces();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -42,7 +44,7 @@ describe('useFetchSameRuleEpisodesQuery', () => {
           excludeEpisodeId: undefined,
           pageSize: 5,
           currentGroupHash: 'gh-1',
-          expressions: mockExpressions,
+          services: { expressions: mockExpressions, spaces: mockSpaces },
           toastDanger: mockToastDanger,
         }),
       { wrapper }
@@ -59,7 +61,7 @@ describe('useFetchSameRuleEpisodesQuery', () => {
     const excludeEpisodeId = 'ep-current';
     const pageSize = 5;
     const expectedQuery = finishRelatedEpisodesQuery(
-      buildRelatedBaseQuery(ruleId, excludeEpisodeId)
+      buildRelatedBaseQuery(DEFAULT_SPACE_ID, ruleId, excludeEpisodeId)
     ).print('basic');
 
     const { result } = renderHook(
@@ -69,7 +71,7 @@ describe('useFetchSameRuleEpisodesQuery', () => {
           excludeEpisodeId,
           pageSize,
           currentGroupHash: undefined,
-          expressions: mockExpressions,
+          services: { expressions: mockExpressions, spaces: mockSpaces },
           toastDanger: mockToastDanger,
         }),
       { wrapper }
@@ -92,7 +94,7 @@ describe('useFetchSameRuleEpisodesQuery', () => {
     const excludeEpisodeId = 'ep-current';
     const currentGroupHash = 'gh-1';
     const pageSize = 5;
-    const otherGroupsQuery = buildRelatedBaseQuery(ruleId, excludeEpisodeId);
+    const otherGroupsQuery = buildRelatedBaseQuery(DEFAULT_SPACE_ID, ruleId, excludeEpisodeId);
     otherGroupsQuery.where`group_hash != ${currentGroupHash}`;
     const expectedQuery = finishRelatedEpisodesQuery(otherGroupsQuery).print('basic');
 
@@ -103,7 +105,7 @@ describe('useFetchSameRuleEpisodesQuery', () => {
           excludeEpisodeId,
           pageSize,
           currentGroupHash,
-          expressions: mockExpressions,
+          services: { expressions: mockExpressions, spaces: mockSpaces },
           toastDanger: mockToastDanger,
         }),
       { wrapper }

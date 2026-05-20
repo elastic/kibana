@@ -14,10 +14,10 @@ import type { RuleAttachment } from './rule_attachment_definition';
 export const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({
   attachment,
 }) => {
-  const { data, origin } = attachment;
-  const isProposed = !origin;
+  const { data, origin: savedObjectId } = attachment;
+  const isDraft = !savedObjectId;
   const isEnabled = data.enabled ?? true;
-  const { label: status, color: statusColor } = getStatusInfo(isProposed, isEnabled);
+  const { label: status, color: statusColor } = getStatusInfo(isDraft, isEnabled);
 
   return (
     <EuiPanel paddingSize="s" hasShadow={false} hasBorder>
@@ -66,11 +66,11 @@ export const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> 
   );
 };
 
-const getStatusInfo = (isProposed: boolean, isEnabled: boolean) => {
-  if (isProposed)
+const getStatusInfo = (isDraft: boolean, isEnabled: boolean) => {
+  if (isDraft)
     return {
-      label: i18n.translate('xpack.alertingV2.ruleAttachment.statusProposed', {
-        defaultMessage: 'proposed',
+      label: i18n.translate('xpack.alertingV2.ruleAttachment.statusDraft', {
+        defaultMessage: 'draft',
       }),
       color: 'default',
     };
