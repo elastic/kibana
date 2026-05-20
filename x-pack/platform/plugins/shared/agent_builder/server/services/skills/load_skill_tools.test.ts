@@ -108,9 +108,8 @@ describe('loadSkillTools', () => {
     });
 
     expect(ids).toEqual([]);
-    expect(ctx.toolManager.addTools).toHaveBeenCalledWith(
-      expect.objectContaining({ tools: [] }),
-      { dynamic: true }
-    );
+    expect(ctx.toolManager.addTools).toHaveBeenCalledWith(expect.objectContaining({ tools: [] }), {
+      dynamic: true,
+    });
   });
 });

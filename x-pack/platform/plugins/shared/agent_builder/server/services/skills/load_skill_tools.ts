@@ -9,7 +9,11 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { ToolOrigin } from '@kbn/agent-builder-common';
 import { getAgentFromRunContext } from '@kbn/agent-builder-server';
-import type { AgentBuilderAnalytics, AgentBuilderTracking, ToolProvider } from '@kbn/agent-builder-server';
+import type {
+  AgentBuilderAnalytics,
+  AgentBuilderTracking,
+  ToolProvider,
+} from '@kbn/agent-builder-server';
 import type { RunContext, SkillsService, ToolManager } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
@@ -99,8 +103,5 @@ export const loadSkillTools = async ({
     logger.warn(`Failed to report SkillInvoked telemetry: ${e}`);
   }
 
-  return [
-    ...inlineExecutableTools.map((t) => t.id),
-    ...registryExecutableTools.map((t) => t.id),
-  ];
+  return [...inlineExecutableTools.map((t) => t.id), ...registryExecutableTools.map((t) => t.id)];
 };

@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  internalTools,
-  ToolOrigin,
-  ToolResultType,
-  ToolType,
-} from '@kbn/agent-builder-common';
+import { internalTools, ToolOrigin, ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { isExcludedFromFilestore, isInternalTool } from '@kbn/agent-builder-common/tools';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import type { InternalSkillDefinition, SkillBoundedTool } from '@kbn/agent-builder-server/skills';
@@ -93,10 +88,7 @@ describe('load_skill tool', () => {
     ctx.skills.list.mockResolvedValue([skillA, skillB]);
 
     const tool = createLoadSkillTool();
-    const result = await callHandler(tool, 
-      { name: 'shared', base_path: 'skills/security' },
-      ctx
-    );
+    const result = await callHandler(tool, { name: 'shared', base_path: 'skills/security' }, ctx);
 
     expect(result.results[0]).toMatchObject({
       data: {
@@ -118,10 +110,7 @@ describe('load_skill tool', () => {
   it('includes base_path in the not-found message when provided', async () => {
     ctx.skills.list.mockResolvedValue([]);
     const tool = createLoadSkillTool();
-    const result = await callHandler(tool, 
-      { name: 'nope', base_path: 'skills/security' },
-      ctx
-    );
+    const result = await callHandler(tool, { name: 'nope', base_path: 'skills/security' }, ctx);
 
     expect((result.results[0] as any).data.message).toBe(
       "Skill 'nope' (basePath 'skills/security') not found."
@@ -175,7 +164,11 @@ describe('load_skill tool', () => {
   });
 
   it('includes referenced files in the response', async () => {
-    const referencedContent = { name: 'patterns', relativePath: 'docs', content: 'patterns content' };
+    const referencedContent = {
+      name: 'patterns',
+      relativePath: 'docs',
+      content: 'patterns content',
+    };
     const skill = createMockSkill({
       referencedContent: [referencedContent as any],
     });
@@ -217,9 +210,7 @@ describe('load_skill tool', () => {
     ctx.skills.list.mockResolvedValue([skill]);
     ctx.runContext = {
       runId: 'run-1',
-      stack: [
-        { type: 'agent', agentId: 'a1', conversationId: 'c1', executionId: 'e1' },
-      ],
+      stack: [{ type: 'agent', agentId: 'a1', conversationId: 'c1', executionId: 'e1' }],
     } as any;
 
     const analyticsService = { reportSkillInvoked: jest.fn() };
