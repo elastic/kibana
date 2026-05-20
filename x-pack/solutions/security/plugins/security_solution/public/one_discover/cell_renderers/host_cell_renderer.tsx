@@ -21,12 +21,6 @@ import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 
 export const HOST_CELL_RENDERER_FIELDS = new Set(['host.name', 'host.hostname']);
 
-const getFirstValue = (raw: unknown): string | undefined => {
-  if (Array.isArray(raw)) return raw.length > 0 ? String(raw[0]) : undefined;
-  if (raw != null) return String(raw);
-  return undefined;
-};
-
 export interface HostCellRendererProps extends DataGridCellValueElementProps {
   services: StartServices;
   store: SecurityAppStore;
@@ -50,14 +44,8 @@ export const HostCellRenderer = React.memo<HostCellRendererProps>(
     }, [rawValue]);
 
     const handleClick = useCallback(
-      (clickedValue: string) => {
-        const { flattened } = props.row;
-
-        const hostName = clickedValue;
-        const entityId =
-          getFirstValue(flattened['host.entity.id']) ?? getFirstValue(flattened['entity.id']);
-
-        if (!hostName && !entityId) return;
+      (hostName: string) => {
+        if (!hostName) return;
 
         overlays.openSystemFlyout(
           flyoutProviders({
@@ -67,7 +55,7 @@ export const HostCellRenderer = React.memo<HostCellRendererProps>(
             children: (
               <>
                 {!isInSecurityApp && <DataViewManagerBootstrap />}
-                <Host hostName={hostName} entityId={entityId} />
+                <Host hostName={hostName} hit={props.row} />
               </>
             ),
           }),
@@ -79,7 +67,7 @@ export const HostCellRenderer = React.memo<HostCellRendererProps>(
           }
         );
       },
-      [props.row, overlays, services, store, history, isInSecurityApp]
+      [overlays, services, store, history, isInSecurityApp, props.row]
     );
 
     if (values.length === 0) {

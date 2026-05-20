@@ -10,6 +10,7 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { flyoutProviders } from './flyout_provider';
 import {
@@ -32,9 +33,9 @@ export interface OpenFlyoutLinkProps {
    */
   value: string;
   /**
-   * Canonical Entity Store v2 id (`entity.id`) when available
+   * The source document record. When provided, enables entity resolution for host/user flyouts.
    */
-  entityId?: string;
+  hit?: DataTableRecord;
   /**
    * When true, opens as a parent flyout starting a new session.
    * When false (default), opens as a child flyout inheriting the parent session.
@@ -60,7 +61,7 @@ export interface OpenFlyoutLinkProps {
 export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
   field,
   value,
-  entityId,
+  hit,
   asParent = false,
   children,
   'data-test-subj': dataTestSubj = OPEN_FLYOUT_LINK_TEST_ID,
@@ -73,10 +74,7 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
-  const flyoutContent = useMemo(
-    () => buildFlyoutContent(field, value, entityId),
-    [field, value, entityId]
-  );
+  const flyoutContent = useMemo(() => buildFlyoutContent(field, value, hit), [field, value, hit]);
 
   const onClick = useCallback(() => {
     if (flyoutContent) {

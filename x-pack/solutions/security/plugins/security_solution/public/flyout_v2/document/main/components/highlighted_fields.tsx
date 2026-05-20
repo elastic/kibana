@@ -222,6 +222,7 @@ export const HighlightedFields = memo(
                   scopeId={description.scopeId}
                   showPreview={showPreview}
                   ancestorsIndexName={description.ancestorsIndexName}
+                  hit={hit}
                   entityId={entityId}
                   renderFlyoutLink={renderFlyoutLink}
                 />
@@ -229,7 +230,7 @@ export const HighlightedFields = memo(
             }),
         },
       ],
-      [renderCellActions, showPreview, entityId, renderFlyoutLink]
+      [renderCellActions, showPreview, hit, entityId, renderFlyoutLink]
     );
 
     return (

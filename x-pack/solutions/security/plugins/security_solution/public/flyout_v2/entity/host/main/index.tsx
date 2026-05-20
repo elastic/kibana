@@ -11,6 +11,7 @@ import { noop } from 'lodash/fp';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
 import { EuiFlyoutHeader, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
@@ -73,7 +74,13 @@ export interface HostProps {
    */
   hostName: string;
   /**
+   * The source document record. When provided, entityId is computed from the document's
+   * host identity fields using the EUID API. This takes precedence over the `entityId` prop.
+   */
+  hit?: DataTableRecord;
+  /**
    * Canonical Entity Store v2 id (`entity.id`) when already resolved (e.g. from alerts/events table).
+   * Ignored when `hit` is provided (entityId is computed from hit instead).
    */
   entityId?: string;
   /**
@@ -100,7 +107,8 @@ const FIRST_RECORD_PAGINATION = {
  */
 export const Host: FC<HostProps> = memo(function Host({
   hostName,
-  entityId,
+  hit,
+  entityId: entityIdProp,
   scopeId = '',
   contextID,
 }) {
@@ -109,6 +117,12 @@ export const Host: FC<HostProps> = memo(function Host({
   const store = useStore();
   const history = useHistory();
   const euidApi = useEntityStoreEuidApi();
+
+  // Compute entityId from hit when provided, otherwise use the prop
+  const entityId = useMemo(
+    () => (hit ? euidApi?.euid?.getEuidFromObject('host', hit.flattened) : entityIdProp),
+    [hit, euidApi, entityIdProp]
+  );
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
   const isInSecurityApp = useIsInSecurityApp();

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { getEcsField } from '../../../flyout/document_details/right/components/table_field_name_cell';
 import {
   HOST_NAME_FIELD_NAME,
@@ -25,12 +26,12 @@ import { RuleDetails } from '../../rule/main';
  * Currently supports:
  * - IP fields → Network details flyout (value = IP address)
  * - Rule name field → Rule details flyout (value = rule ID)
- * - Host name → Host details flyout (should pass in entityId if available)
+ * - Host name → Host details flyout (pass hit for entity resolution)
  */
 export const buildFlyoutContent = (
   field: string,
   value: string,
-  entityId?: string
+  hit?: DataTableRecord
 ): React.ReactElement | null => {
   const ecsField = getEcsField(field);
 
@@ -47,7 +48,7 @@ export const buildFlyoutContent = (
   }
 
   if (field === HOST_NAME_FIELD_NAME) {
-    return <Host hostName={value} entityId={entityId} />;
+    return <Host hostName={value} hit={hit} />;
   }
 
   return null;
