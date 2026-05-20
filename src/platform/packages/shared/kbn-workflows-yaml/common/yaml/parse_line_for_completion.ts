@@ -14,7 +14,7 @@ import {
   LIQUID_FILTER_REGEX,
   UNFINISHED_VARIABLE_REGEX_GLOBAL,
   VARIABLE_REGEX_GLOBAL,
-} from '@kbn/workflows-yaml';
+} from '../regex';
 
 interface BaseLineParseResult {
   fullKey: string;
@@ -87,7 +87,6 @@ export type LineParseResult =
   | TypeLineParseResult
   | TimezoneLineParseResult;
 
-// eslint-disable-next-line complexity
 export function parseLineForCompletion(lineUpToCursor: string): LineParseResult | null {
   const timezoneFieldMatch = lineUpToCursor.match(
     /^(?<prefix>\s*(?:tzid|timezone)\s*:\s*)(?<value>.*)$/

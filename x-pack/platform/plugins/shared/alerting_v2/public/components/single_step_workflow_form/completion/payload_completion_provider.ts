@@ -6,7 +6,7 @@
  */
 
 import { monaco } from '@kbn/code-editor';
-import { parseLineForCompletion } from '@kbn/workflows-management-plugin/public';
+import { parseLineForCompletion } from '@kbn/workflows-yaml';
 import type { PayloadVariable } from '../registry';
 import { DISPATCH_PAYLOAD_VARIABLES, ALERT_EPISODE_FIELDS } from '../registry';
 
