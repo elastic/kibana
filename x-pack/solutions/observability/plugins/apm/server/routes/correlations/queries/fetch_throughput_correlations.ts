@@ -35,13 +35,13 @@ interface FilteredRpmEntry {
   filteredRpm: number[];
 }
 
-function computeIntervalString(start: number, end: number): string {
+export function computeIntervalString(start: number, end: number): string {
   const rangeMs = end - start;
   const bucketMs = Math.max(60_000, Math.ceil(rangeMs / THROUGHPUT_BUCKET_COUNT / 60_000) * 60_000);
   return `${bucketMs / 1000}s`;
 }
 
-function computePearsonCorrelation(x: number[], y: number[]): number {
+export function computePearsonCorrelation(x: number[], y: number[]): number {
   const n = x.length;
   if (n < 3) return 0;
 
