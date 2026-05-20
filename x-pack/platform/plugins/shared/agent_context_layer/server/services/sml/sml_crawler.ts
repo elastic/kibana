@@ -9,6 +9,7 @@ import pLimit from 'p-limit';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
+import { isResponseError } from '@kbn/es-errors';
 import type {
   SmlTypeDefinition,
   SmlContext,
@@ -21,7 +22,7 @@ import {
   createSmlCrawlerStateStorage,
   type SmlCrawlerStateStorage,
 } from './sml_crawler_state_storage';
-import { smlIndexName } from './sml_storage';
+import { createSmlStorage, smlIndexName } from './sml_storage';
 
 export type { SmlCrawler };
 
@@ -65,13 +66,22 @@ export class SmlCrawlerImpl implements SmlCrawler {
     const crawlStartTime = new Date().toISOString();
     this.logger.info(`SML crawler: starting crawl for type '${definition.id}' across all spaces`);
 
+    // For additive schema changes putMapping succeeds in-place (no downtime).
+    // For incompatible changes ES returns 400: we drop and recreate the index
+    // here so the full re-crawl starts immediately in this task run rather than
+    // waiting for the next scheduled tick.
+    const indexRebuilt = await this.applyMappingsOrRebuild({ esClient });
+
     // Data integrity check: if the SML data index is empty for this type but
     // state docs exist, clear state to force a full re-index.
-    const integrityResetNeeded = await this.checkDataIntegrity({
-      esClient,
-      stateClient,
-      attachmentType: definition.id,
-    });
+    // Also triggered when the index was just rebuilt due to an incompatible change.
+    const integrityResetNeeded =
+      indexRebuilt ||
+      (await this.checkDataIntegrity({
+        esClient,
+        stateClient,
+        attachmentType: definition.id,
+      }));
 
     // Stream source items page by page. For each page, batch-lookup state
     // docs by ID, diff, and write state updates stamped with crawlStartTime.
@@ -137,6 +147,43 @@ export class SmlCrawlerImpl implements SmlCrawler {
       savedObjectsClient,
       stateClient,
     });
+  }
+
+  /**
+   * Attempt to apply pending schema changes in-place via putMapping.
+   *
+   * - Additive changes (new field): putMapping succeeds, returns false.
+   * - Incompatible changes (type change, field rename): ES returns 400.
+   *   The index is dropped here so the re-crawl begins immediately in this
+   *   task run rather than waiting for the next scheduled tick.
+   *
+   * Returns true when the index was dropped and a full re-crawl is needed.
+   */
+  private async applyMappingsOrRebuild({
+    esClient,
+  }: {
+    esClient: ElasticsearchClient;
+  }): Promise<boolean> {
+    const storage = createSmlStorage({ logger: this.logger, esClient });
+    const smlClient = storage.getClient();
+
+    if (!(await smlClient.existsIndex())) {
+      return false;
+    }
+
+    try {
+      await storage.updateMappings();
+      return false;
+    } catch (error) {
+      if (isResponseError(error) && error.statusCode === 400) {
+        this.logger.warn(
+          `SML crawler: incompatible mapping change detected — dropping index '${smlIndexName}' and re-crawling immediately`
+        );
+        await smlClient.clean();
+        return true;
+      }
+      throw error;
+    }
   }
 
   /**

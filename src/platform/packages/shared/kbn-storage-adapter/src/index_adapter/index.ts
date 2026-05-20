@@ -363,21 +363,21 @@ export class StorageIndexAdapter<
     });
 
     if (simulateIndexTemplateResponse.template.mappings) {
-      try {
-        await this.esClient.indices.putMapping({
-          index: name,
-          ...simulateIndexTemplateResponse.template.mappings,
-        });
-      } catch (error) {
-        if (isResponseError(error) && error.statusCode === 400) {
-          this.logger.warn(
-            `Index '${name}' has incompatible mappings — dropping and recreating so new schema takes effect on next write`
-          );
-          await this.clean();
-        }
-        throw error;
-      }
+      await this.esClient.indices.putMapping({
+        index: name,
+        ...simulateIndexTemplateResponse.template.mappings,
+      });
     }
+  }
+
+  /**
+   * Attempt to apply any pending mapping changes to the current write index via
+   * `putMapping`. Additive changes succeed silently. Incompatible changes (type
+   * change, field rename) cause ES to return 400, which is thrown to the caller.
+   * No-op when no write index exists yet.
+   */
+  async updateMappings(): Promise<void> {
+    await this.updateMappingsIfNeeded();
   }
 
   /**
