@@ -29,6 +29,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { RulesApp } from './rules_app';
 import { RuleDoctorApp } from './rule_doctor_app';
 import { ActionPoliciesApp } from './action_policies_app';
@@ -133,6 +134,7 @@ export const mountEpisodesApp = async ({
   const charts = container.get(PluginStart('charts')) as ChartsPluginStart;
   const share = container.get(PluginStart('share')) as SharePluginStart;
   const unifiedDocViewer = container.get(PluginStart('unifiedDocViewer')) as UnifiedDocViewerStart;
+  const spaces = container.get(PluginStart('spaces')) as SpacesPluginStart;
 
   const kibanaReactServices: AlertEpisodesKibanaServices = {
     ...coreStart,
@@ -147,6 +149,7 @@ export const mountEpisodesApp = async ({
     storage: new Storage(localStorage),
     toastNotifications: coreStart.notifications.toasts,
     unifiedDocViewer,
+    spaces,
   };
 
   ReactDOM.render(
