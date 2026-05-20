@@ -27,6 +27,22 @@ the `detection-rule-edit` skill.
 
 ## Core Workflow
 
+### Step 0: Ensure the Rule Attachment Exists
+
+Before reading the attachment, check whether a `security.rule` attachment is
+already present in the conversation.
+
+- **Attachment present** (visible in the conversation sidebar, e.g. the user
+  opened a rule from the Security UI or the `detection-rule-edit` skill created
+  it): proceed to Step 1.
+- **No attachment present** (the user referred to a rule by UUID, or selected
+  one from a `find-rules` results table): call
+  `investigate-rule.resolve_rule_attachment` with the rule UUID. This fetches the
+  rule via Kibana's saved-objects layer and creates a `security.rule` attachment
+  keyed on `rule-investigate-<uuid>`. Render the attachment inline using
+  `<render_attachment id="..." version="..." />` after creation, then continue to
+  Step 1.
+
 ### Step 1: Read the Rule Attachment
 
 Always begin by calling `attachment_read` on the rule attachment. The attachment

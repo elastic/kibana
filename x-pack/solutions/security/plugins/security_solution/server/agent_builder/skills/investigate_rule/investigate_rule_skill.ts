@@ -27,8 +27,8 @@ const SKILL_CONTENT = `# investigate-rule Skill
 
 ## When to Use This Skill
 
-Use this skill when a detection rule is attached to the conversation and the
-user asks an investigative question about it:
+Use this skill when the user asks an investigative question about a detection
+rule, whether or not a rule attachment is already present:
 
 - **Execution health:** "Why did this rule fail to run?" / "It shows execution
   errors." / "There are gaps in the execution history."
@@ -45,6 +45,22 @@ the \`detection-rule-edit\` skill.
 ---
 
 ## Core Workflow
+
+### Step 0: Ensure the Rule Attachment Exists
+
+Before reading the attachment, check whether a \`security.rule\` attachment is
+already present in the conversation.
+
+- **Attachment present** (visible in the conversation sidebar, e.g. the user
+  opened a rule from the Security UI or the \`detection-rule-edit\` skill created
+  it): proceed to Step 1.
+- **No attachment present** (the user referred to a rule by UUID, or selected
+  one from a \`find-rules\` results table): call
+  \`investigate-rule.resolve_rule_attachment\` with the rule UUID. This fetches
+  the rule via Kibana's saved-objects layer and creates a \`security.rule\`
+  attachment keyed on \`rule-investigate-<uuid>\`. Render the attachment inline
+  using \`<render_attachment id="..." version="..." />\` after creation, then
+  continue to Step 1.
 
 ### Step 1: Read the Rule Attachment
 
@@ -270,14 +286,17 @@ export const investigateRuleSkill = defineSkillType({
   basePath: 'skills/security/rules',
   description:
     'Rule investigation: diagnose execution failures, classify error types, surface noisy or underperforming rules, ' +
-    'and identify coverage gaps. Use when a detection rule is attached and the user asks why it is failing, ' +
-    'noisy, slow, or not producing alerts.',
+    'and identify coverage gaps. Use when the user asks why a detection rule is failing, noisy, slow, or not ' +
+    'producing alerts. If no rule attachment is present yet (e.g. the user selected a rule from find-rules output), ' +
+    'the skill resolves the rule by UUID and creates the attachment before proceeding.',
   content: SKILL_CONTENT,
   getRegistryTools: () => [
     SECURITY_ALERTS_TOOL_ID,
     SECURITY_LABS_SEARCH_TOOL_ID,
     SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
     platformCoreTools.generateEsql,
+    // TODO: add SECURITY_FIND_RULES_TOOL_ID here once #269089 lands so cross-rule
+    // referral lookups use the rulesClient layer instead of savedObjectsClient.
   ],
   getInlineTools: () => [
     {
