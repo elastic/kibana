@@ -18,7 +18,6 @@ import {
   type EntityMaintainerTaskMethod,
 } from './types';
 import { CRUDClient, type EntityUpdateClient } from '../../domain/crud';
-import { createCpsAllClient } from './create_cps_all_client';
 import type { TelemetryReporter } from '../../telemetry/events';
 import { ENTITY_MAINTAINER_EVENT } from '../../telemetry/events';
 import { wrapTaskRun } from '../../telemetry/traces';
@@ -130,7 +129,9 @@ export async function executeMaintainerRun({
 
   const maintainerStatus = createMaintainerStatus({ status, namespace, initialState });
   const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
-  const cpsEsClient = isServerless ? createCpsAllClient(esClient) : undefined;
+  const cpsEsClient = isServerless
+    ? coreStart.elasticsearch.client.asScoped(request, { projectRouting: 'space' }).asCurrentUser
+    : undefined;
   logger.debug(`[${id}] read client: ${cpsEsClient ? 'cross-project' : 'origin-only'}`);
   const crudClient = new CRUDClient({
     logger,

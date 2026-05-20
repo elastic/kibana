@@ -32,7 +32,6 @@ import type {
 import { EntityMaintainerTaskStatus } from '../../tasks/entity_maintainers/types';
 import type { TelemetryReporter } from '../../telemetry/events';
 import { CRUDClient } from '../crud';
-import { createCpsAllClient } from '../../tasks/entity_maintainers/create_cps_all_client';
 
 interface TaskSnapshot {
   runs: number;
@@ -301,7 +300,10 @@ export class EntityMaintainersClient {
       initialState,
     });
     const esClient = this.coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
-    const cpsEsClient = this.isServerless ? createCpsAllClient(esClient) : undefined;
+    const cpsEsClient = this.isServerless
+      ? this.coreStart.elasticsearch.client.asScoped(request, { projectRouting: 'space' })
+          .asCurrentUser
+      : undefined;
     const crudClient = new CRUDClient({
       logger: this.logger,
       esClient,
