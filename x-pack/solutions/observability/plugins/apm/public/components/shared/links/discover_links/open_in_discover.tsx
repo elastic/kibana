@@ -31,7 +31,7 @@ interface OpenInDiscoverProps {
   rangeFrom: string;
   rangeTo: string;
   queryParams: ESQLQueryParams;
-  ebt?: Partial<EbtClickAttrs> & Pick<EbtClickAttrs, 'element'>;
+  ebt: Partial<EbtClickAttrs> & Pick<EbtClickAttrs, 'element'>;
 }
 
 export function OpenInDiscover({
