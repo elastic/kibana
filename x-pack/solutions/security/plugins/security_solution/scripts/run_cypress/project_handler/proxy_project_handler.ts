@@ -185,5 +185,6 @@ export class ProxyHandler extends ProjectHandler {
       factor: 2,
       maxTimeout: 20000,
     };
+    return pRetry(fetchProjectStatusAttempt, retryOptions);
   }
 }
