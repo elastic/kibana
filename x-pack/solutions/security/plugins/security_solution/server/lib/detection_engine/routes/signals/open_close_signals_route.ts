@@ -8,6 +8,7 @@
 import { get } from 'lodash';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { estypes } from '@elastic/elasticsearch';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   ALERTS_API_ALL,
@@ -128,7 +129,17 @@ export const setSignalsStatusRoute = (
               getIndexPattern,
             });
           } else {
-            const { conflicts, query } = request.body;
+            const {
+              conflicts,
+              query,
+              runtime_mapping_indices: runtimeMappingIndices,
+            } = request.body;
+
+            const runtimeMappings = await resolveRuntimeMappingsFromIndices(
+              esClient,
+              runtimeMappingIndices,
+              logger
+            );
 
             const body = await updateSignalsStatusByQuery(
               status,
@@ -137,7 +148,8 @@ export const setSignalsStatusRoute = (
               spaceId,
               esClient,
               user,
-              reason
+              reason,
+              runtimeMappings
             );
 
             return response.ok({ body });
@@ -166,7 +178,8 @@ const updateSignalsStatusByQuery = async (
   spaceId: string,
   esClient: ElasticsearchClient,
   user: AuthenticatedUser | null,
-  reason?: string
+  reason?: string,
+  runtimeMappings?: estypes.MappingRuntimeFields
 ) =>
   esClient.updateByQuery({
     index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
@@ -178,5 +191,83 @@ const updateSignalsStatusByQuery = async (
         filter: query,
       },
     },
+    // `runtime_mappings` is a valid top-level field on the ES updateByQuery
+    // wire protocol but isn't typed in the @elastic/elasticsearch client.
+    // Threading it through `body` keeps the call type-safe; the keys forbidden
+    // there (query/script/conflicts/etc.) are already passed at the top level.
+    body:
+      runtimeMappings && Object.keys(runtimeMappings).length > 0
+        ? { runtime_mappings: runtimeMappings }
+        : undefined,
     ignore_unavailable: true,
   });
+
+/**
+ * Read the `runtime` block from each provided index's mapping and merge them
+ * into a single `runtime_mappings` object suitable for an ES query body. This
+ * is how the bulk-close path supports runtime fields defined directly on ES
+ * index mappings (the documented workaround in elastic/security-ml#677): field
+ * caps doesn't return the Painless script source, so we have to hit
+ * `GET <index>/_mapping` server-side and pull the definitions from there.
+ *
+ * Conflict handling: if two indices define the same runtime field name with
+ * different scripts or types, last-write-wins (deterministic by the order ES
+ * returns the indices). A warning is logged so the conflict is visible —
+ * realistically rare, since the motivating workaround applies the same script
+ * everywhere, but possible with multi-index data views.
+ *
+ * Failures are logged and treated as no-op — a missing or unauthorised index
+ * shouldn't fail the close, it just means no runtime fields are attached.
+ */
+const resolveRuntimeMappingsFromIndices = async (
+  esClient: ElasticsearchClient,
+  indices: string[] | undefined,
+  logger: Logger
+): Promise<estypes.MappingRuntimeFields | undefined> => {
+  if (!indices || indices.length === 0) return undefined;
+
+  try {
+    const mappings = await esClient.indices.getMapping({
+      index: indices,
+      ignore_unavailable: true,
+      allow_no_indices: true,
+    });
+
+    const merged: estypes.MappingRuntimeFields = {};
+    const sources: Record<string, string> = {};
+
+    for (const [indexName, indexMapping] of Object.entries(mappings)) {
+      const runtime = indexMapping?.mappings?.runtime;
+      if (runtime) {
+        for (const [name, def] of Object.entries(runtime)) {
+          const existing = merged[name];
+          if (existing !== undefined && !areRuntimeFieldsEqual(existing, def)) {
+            logger.warn(
+              `Conflicting runtime field definitions for "${name}" while resolving bulk-close runtime_mappings: ` +
+                `[${sources[name]}] vs [${indexName}]. Last-write-wins; closing alerts using the definition from [${indexName}].`
+            );
+          }
+          merged[name] = def as estypes.MappingRuntimeField;
+          sources[name] = indexName;
+        }
+      }
+    }
+    return Object.keys(merged).length > 0 ? merged : undefined;
+  } catch (err) {
+    logger.warn(
+      `Failed to resolve runtime mappings from indices [${indices.join(', ')}] for bulk close: ${
+        err?.message ?? err
+      }`
+    );
+    return undefined;
+  }
+};
+
+// `Script` has several shapes (inline source, stored id, params, etc.) so a
+// structural equality check via JSON serialisation is the pragmatic choice
+// for "are these two definitions the same?" — false negatives are acceptable
+// here because the only effect is logging a warning we'd otherwise miss.
+const areRuntimeFieldsEqual = (
+  a: estypes.MappingRuntimeField,
+  b: estypes.MappingRuntimeField
+): boolean => a.type === b.type && JSON.stringify(a.script) === JSON.stringify(b.script);

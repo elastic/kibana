@@ -27,13 +27,19 @@ import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actio
  * @param exceptionItems array of ExceptionListItemSchema to add or update
  * @param alertIdToClose - optional string representing alert to close
  * @param bulkCloseIndex - optional index used to create bulk close query
+ * @param runtimeMappingIndices - optional rule source indices; the server
+ *   fetches `GET <index>/_mapping` for these and attaches the resulting
+ *   `runtime` block as `runtime_mappings` on the bulk-close `updateByQuery`
+ *   so runtime fields referenced by the exception filter can be evaluated
+ *   (e.g. the workaround in elastic/security-ml#677).
  *
  */
 export type AddOrUpdateExceptionItemsFunc = (
   ruleStaticIds: string[],
   exceptionItems: ExceptionListItemSchema[],
   alertIdToClose?: string,
-  bulkCloseIndex?: IndexPatternArray
+  bulkCloseIndex?: IndexPatternArray,
+  runtimeMappingIndices?: string[]
 ) => Promise<void>;
 
 export type ReturnUseCloseAlertsFromExceptions = [boolean, AddOrUpdateExceptionItemsFunc | null];
@@ -55,7 +61,8 @@ export const useCloseAlertsFromExceptions = (): ReturnUseCloseAlertsFromExceptio
       ruleStaticIds,
       exceptionItems,
       alertIdToClose,
-      bulkCloseIndex
+      bulkCloseIndex,
+      runtimeMappingIndices
     ) => {
       try {
         setIsLoading(true);
@@ -91,6 +98,7 @@ export const useCloseAlertsFromExceptions = (): ReturnUseCloseAlertsFromExceptio
             query: filter,
             status: 'closed',
             signal: abortCtrl.signal,
+            runtimeMappingIndices,
           });
         }
 

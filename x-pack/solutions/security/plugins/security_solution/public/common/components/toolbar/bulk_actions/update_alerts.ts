@@ -24,6 +24,7 @@ interface UpdatedAlertsProps {
   signalIds?: string[];
   signal?: AbortSignal;
   reason?: AlertClosingReason;
+  runtimeMappingIndices?: string[];
 }
 
 /**
@@ -46,6 +47,7 @@ export const updateAlertStatus = ({
   signalIds,
   signal,
   reason,
+  runtimeMappingIndices,
 }: UpdatedAlertsProps): Promise<UpdatedAlertsResponse> => {
   if (signalIds && signalIds.length > 0) {
     return updateAlertStatusByIds({ status, signalIds, signal, reason }).then(({ updated }) => ({
@@ -53,12 +55,16 @@ export const updateAlertStatus = ({
       version_conflicts: 0,
     }));
   } else if (query) {
-    return updateAlertStatusByQuery({ status, query, signal, reason }).then(
-      ({ updated, version_conflicts: conflicts }) => ({
-        updated: updated ?? 0,
-        version_conflicts: conflicts,
-      })
-    );
+    return updateAlertStatusByQuery({
+      status,
+      query,
+      signal,
+      reason,
+      runtimeMappingIndices,
+    }).then(({ updated, version_conflicts: conflicts }) => ({
+      updated: updated ?? 0,
+      version_conflicts: conflicts,
+    }));
   }
   throw new Error('Either query or signalIds must be provided');
 };

@@ -34,6 +34,8 @@ import { useUserPrivileges } from '../../../../../common/components/user_privile
 import { prepareToCloseAlerts } from '../../../../../detection_engine/rule_exceptions/components/add_exception_flyout/helpers';
 import { useCloseAlertsFromExceptions } from '../../../../../detection_engine/rule_exceptions/logic/use_close_alerts';
 import { ExceptionItemsFlyoutAlertsActions } from '../../../../../detection_engine/rule_exceptions/components/flyout_components/alerts_actions';
+import { useSignalIndex } from '../../../../../detections/containers/detection_engine/alerts/use_signal_index';
+import { useFetchIndex } from '../../../../../common/containers/source';
 import { ARTIFACT_FLYOUT_LABELS } from '../../../../components/artifact_list_page/components/artifact_flyout';
 import type { AddExceptionFlyoutProps } from '../../../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 import { ArtifactConfirmModal } from '../../../../components/artifact_list_page/components/artifact_confirm_modal';
@@ -79,6 +81,18 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
   );
 
   const [isClosingAlerts, closeAlerts] = useCloseAlertsFromExceptions();
+
+  // Endpoint exceptions are not authored against a detection rule's source
+  // indices, so we drive the bulk-close gate from the alerts data view itself.
+  // This preserves the pre-refactor behavior where the gate was computed
+  // against the signal index pattern.
+  const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
+  const memoSignalIndexName = useMemo(
+    () => (signalIndexName !== null ? [signalIndexName] : []),
+    [signalIndexName]
+  );
+  const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] =
+    useFetchIndex(memoSignalIndexName);
 
   const [exception, setException] = useState<CreateExceptionListItemSchema>();
   const [additionalEntries, setAdditionalEntries] = useState<EntriesArray[]>();
@@ -225,6 +239,8 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
               alertData={alertData}
               isAlertDataLoading={isAlertDataLoading ?? false}
               alertStatus={alertStatus}
+              indexPatterns={signalIndexPatterns}
+              isIndexPatternLoading={isSignalIndexPatternLoading || isSignalIndexLoading}
             />
           </>
         )}

@@ -72,6 +72,10 @@ export const SetAlertsStatusByQueryBase = lazySchema(() =>
     query: z.object({}).catchall(z.unknown()),
     status: AlertStatusExceptClosed,
     conflicts: z.enum(['abort', 'proceed']).optional().default('abort'),
+    /**
+     * Optional list of index patterns the server reads mappings from to resolve runtime field definitions. Resolved runtime fields are attached to the underlying updateByQuery as runtime_mappings so the exception filter can reference them (e.g. the workaround in elastic/security-ml#677 where a runtime field is defined directly on the ML anomaly results index mapping).
+     */
+    runtime_mapping_indices: z.array(z.string()).optional(),
   })
 );
 export type SetAlertsStatusByQueryBase = z.infer<typeof SetAlertsStatusByQueryBase>;
@@ -82,6 +86,10 @@ export const CloseAlertsByQuery = lazySchema(() =>
     status: z.literal('closed'),
     conflicts: z.enum(['abort', 'proceed']).optional().default('abort'),
     reason: Reason.optional(),
+    /**
+     * Optional list of index patterns the server reads mappings from to resolve runtime field definitions. Resolved runtime fields are attached to the underlying updateByQuery as runtime_mappings so the exception filter can reference them (e.g. the workaround in elastic/security-ml#677 where a runtime field is defined directly on the ML anomaly results index mapping).
+     */
+    runtime_mapping_indices: z.array(z.string()).optional(),
   })
 );
 export type CloseAlertsByQuery = z.infer<typeof CloseAlertsByQuery>;

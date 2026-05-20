@@ -30,7 +30,11 @@ export const entryHasListType = (exceptionItems: ExceptionsBuilderReturnExceptio
 };
 
 /**
- * Determines whether or not any entries within the given exceptionItems contain values not in the specified ECS mapping
+ * Determines whether any entries within the given exceptionItems reference a
+ * field that is not present on the supplied index patterns. The index patterns
+ * are sourced from the same data view backing the exception field picker
+ * (`useFetchIndexPatterns`), which surfaces both mapped fields and runtime
+ * fields defined on the rule's source indices.
  */
 export const entryHasNonEcsType = (
   exceptionItems: ExceptionsBuilderReturnExceptionItem[],
@@ -64,14 +68,14 @@ export const entryHasNonEcsType = (
  */
 export const shouldDisableBulkClose = ({
   items,
-  signalIndexPatterns,
+  indexPatterns,
 }: {
   items: ExceptionsBuilderReturnExceptionItem[];
-  signalIndexPatterns: DataViewBase;
+  indexPatterns: DataViewBase;
 }): boolean => {
   return (
     entryHasListType(items) ||
-    entryHasNonEcsType(items, signalIndexPatterns) ||
+    entryHasNonEcsType(items, indexPatterns) ||
     items.every((item) => item.entries.length === 0)
   );
 };

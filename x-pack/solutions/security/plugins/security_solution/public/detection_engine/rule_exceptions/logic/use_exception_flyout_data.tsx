@@ -23,6 +23,17 @@ import { getMachineLearningJobId } from '../../common/helpers';
 export interface ReturnUseFetchExceptionFlyoutData {
   isLoading: boolean;
   indexPatterns: DataViewBase;
+  /**
+   * Index patterns to consult on the server for runtime field definitions.
+   * The bulk-close route fetches `GET <index>/_mapping` for these patterns and
+   * attaches the resulting `runtime` block as `runtime_mappings` on the
+   * underlying `updateByQuery`. This is the path used by the documented
+   * workaround in elastic/security-ml#677 (runtime field defined on the ML
+   * anomaly results index mapping). Resolving server-side is necessary because
+   * field caps — and therefore ad-hoc DataView specs — don't expose the
+   * runtime field's Painless script source.
+   */
+  runtimeMappingIndices: string[];
   getExtendedFields: (fields: string[]) => Promise<FieldSpec[]>;
 }
 
@@ -155,9 +166,19 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
     [memoDataViewId, dataViewIndexPatterns, indexIndexPatterns]
   );
 
+  const runtimeMappingIndices = useMemo<string[]>(() => {
+    const spec = memoDataViewId && dataViewSpec != null ? dataViewSpec : indexDataViewSpec;
+    if (!spec?.title) return [];
+    return spec.title
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }, [memoDataViewId, dataViewSpec, indexDataViewSpec]);
+
   return {
     isLoading: isIndexPatternLoading || mlJobLoading || dataViewLoading,
     indexPatterns: indexPatternsToUse,
+    runtimeMappingIndices,
     getExtendedFields,
   };
 };

@@ -44,6 +44,7 @@ export interface UpdateAlertStatusByQueryProps {
   status: Status;
   signal?: AbortSignal;
   reason?: AlertClosingReason;
+  runtimeMappingIndices?: string[];
 }
 
 export interface UpdateAlertStatusByIdsProps {

@@ -9,16 +9,14 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 
 import { ExceptionItemsFlyoutAlertsActions } from '.';
 import { TestProviders } from '../../../../../common/mock';
 import type { AlertData } from '../../../utils/types';
-import { useFetchIndex } from '../../../../../common/containers/source';
 import { useSignalIndex } from '../../../../../detections/containers/detection_engine/alerts/use_signal_index';
-import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 
 jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../common/containers/source');
 jest.mock('../../../../../detections/containers/detection_engine/alerts/use_signal_index');
 
 const alertDataMock: AlertData = {
@@ -28,7 +26,11 @@ const alertDataMock: AlertData = {
 };
 
 const mockUseSignalIndex = useSignalIndex as jest.Mock<Partial<ReturnType<typeof useSignalIndex>>>;
-const mockUseFetchIndex = useFetchIndex as jest.Mock;
+
+const defaultProps = {
+  indexPatterns: stubIndexPattern,
+  isIndexPatternLoading: false,
+};
 
 describe('ExceptionItemsFlyoutAlertsActions', () => {
   beforeEach(() => {
@@ -36,13 +38,6 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
       loading: false,
       signalIndexName: 'mock-siem-signals-index',
     }));
-
-    mockUseFetchIndex.mockImplementation(() => [
-      false,
-      {
-        indexPatterns: stubIndexPattern,
-      },
-    ]);
   });
 
   afterEach(() => {
@@ -54,6 +49,7 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <ExceptionItemsFlyoutAlertsActions
+            {...defaultProps}
             exceptionListItems={[getExceptionListItemSchemaMock()]}
             exceptionListType={ExceptionListTypeEnum.ENDPOINT}
             shouldCloseSingleAlert={false}
@@ -79,6 +75,7 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <ExceptionItemsFlyoutAlertsActions
+            {...defaultProps}
             exceptionListItems={[getExceptionListItemSchemaMock()]}
             exceptionListType={ExceptionListTypeEnum.DETECTION}
             shouldCloseSingleAlert={false}
@@ -107,6 +104,7 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <ExceptionItemsFlyoutAlertsActions
+            {...defaultProps}
             exceptionListItems={[getExceptionListItemSchemaMock()]}
             exceptionListType={ExceptionListTypeEnum.DETECTION}
             shouldCloseSingleAlert={false}
@@ -137,6 +135,7 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <ExceptionItemsFlyoutAlertsActions
+            {...defaultProps}
             exceptionListItems={[getExceptionListItemSchemaMock()]}
             exceptionListType={ExceptionListTypeEnum.DETECTION}
             shouldCloseSingleAlert={false}
@@ -158,17 +157,12 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
       ).toBeTruthy();
     });
 
-    it('it displays single alert close checkbox disabled if "isSignalIndexPatternLoading" is true', () => {
-      mockUseFetchIndex.mockImplementation(() => [
-        true,
-        {
-          indexPatterns: stubIndexPattern,
-        },
-      ]);
-
+    it('it displays single alert close checkbox disabled if "isIndexPatternLoading" is true', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <ExceptionItemsFlyoutAlertsActions
+            indexPatterns={stubIndexPattern}
+            isIndexPatternLoading
             exceptionListItems={[getExceptionListItemSchemaMock()]}
             exceptionListType={ExceptionListTypeEnum.DETECTION}
             shouldCloseSingleAlert={false}
@@ -194,6 +188,7 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <ExceptionItemsFlyoutAlertsActions
+            {...defaultProps}
             exceptionListItems={[getExceptionListItemSchemaMock()]}
             exceptionListType={ExceptionListTypeEnum.DETECTION}
             shouldCloseSingleAlert={false}
@@ -221,6 +216,7 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <ExceptionItemsFlyoutAlertsActions
+            {...defaultProps}
             exceptionListItems={[getExceptionListItemSchemaMock()]}
             exceptionListType={ExceptionListTypeEnum.DETECTION}
             shouldCloseSingleAlert={false}
@@ -246,6 +242,7 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <ExceptionItemsFlyoutAlertsActions
+            {...defaultProps}
             exceptionListItems={[getExceptionListItemSchemaMock()]}
             exceptionListType={ExceptionListTypeEnum.DETECTION}
             shouldCloseSingleAlert={false}
@@ -271,6 +268,7 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <ExceptionItemsFlyoutAlertsActions
+            {...defaultProps}
             exceptionListItems={[getExceptionListItemSchemaMock()]}
             exceptionListType={ExceptionListTypeEnum.DETECTION}
             shouldCloseSingleAlert={false}
@@ -300,6 +298,7 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <ExceptionItemsFlyoutAlertsActions
+            {...defaultProps}
             exceptionListItems={[getExceptionListItemSchemaMock()]}
             exceptionListType={ExceptionListTypeEnum.DETECTION}
             shouldCloseSingleAlert={false}
@@ -332,6 +331,7 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <ExceptionItemsFlyoutAlertsActions
+            {...defaultProps}
             exceptionListItems={[getExceptionListItemSchemaMock()]}
             exceptionListType={ExceptionListTypeEnum.DETECTION}
             shouldCloseSingleAlert={false}
@@ -354,17 +354,12 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
       ).toBeTruthy();
     });
 
-    it('it displays bulk close checkbox disabled if "isSignalIndexPatternLoading" is "true"', () => {
-      mockUseFetchIndex.mockImplementation(() => [
-        true,
-        {
-          indexPatterns: stubIndexPattern,
-        },
-      ]);
-
+    it('it displays bulk close checkbox disabled if "isIndexPatternLoading" is "true"', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <ExceptionItemsFlyoutAlertsActions
+            indexPatterns={stubIndexPattern}
+            isIndexPatternLoading
             exceptionListItems={[getExceptionListItemSchemaMock()]}
             exceptionListType={ExceptionListTypeEnum.DETECTION}
             shouldCloseSingleAlert={false}

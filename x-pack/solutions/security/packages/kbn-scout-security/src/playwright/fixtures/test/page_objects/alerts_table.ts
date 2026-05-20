@@ -77,4 +77,14 @@ export class AlertsTablePage {
     // Increased timeout to 20 seconds because this page sometimes takes longer to load
     return this.detectionsAlertsWrapper.waitFor({ state: 'visible', timeout: 20_000 });
   }
+
+  /**
+   * Open the alert's row context menu and click "Add rule exception". Used by
+   * tests that exercise the exception flyout end-to-end (e.g. bulk-close
+   * regressions).
+   */
+  async openAddRuleException(ruleName: string) {
+    await this.openAlertContextMenu(ruleName);
+    await this.page.testSubj.locator('add-exception-menu-item').click();
+  }
 }

@@ -96,7 +96,7 @@ describe('alerts_actions#utils', () => {
               ],
             },
           ],
-          signalIndexPatterns: mockEcsIndexPattern,
+          indexPatterns: mockEcsIndexPattern,
         })
       ).toBeTruthy();
     });
@@ -110,7 +110,7 @@ describe('alerts_actions#utils', () => {
               entries: [{ field: 'some.nonEcsField' }] as EntriesArray,
             },
           ],
-          signalIndexPatterns: mockEcsIndexPattern,
+          indexPatterns: mockEcsIndexPattern,
         })
       ).toBeTruthy();
     });
@@ -124,7 +124,7 @@ describe('alerts_actions#utils', () => {
               entries: [] as EntriesArray,
             },
           ],
-          signalIndexPatterns: mockEcsIndexPattern,
+          indexPatterns: mockEcsIndexPattern,
         })
       ).toBeTruthy();
     });
@@ -133,7 +133,7 @@ describe('alerts_actions#utils', () => {
       expect(
         shouldDisableBulkClose({
           items: [],
-          signalIndexPatterns: mockEcsIndexPattern,
+          indexPatterns: mockEcsIndexPattern,
         })
       ).toBeTruthy();
     });
@@ -142,7 +142,32 @@ describe('alerts_actions#utils', () => {
       expect(
         shouldDisableBulkClose({
           items: [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()],
-          signalIndexPatterns: mockEcsIndexPattern,
+          indexPatterns: mockEcsIndexPattern,
+        })
+      ).toBeFalsy();
+    });
+
+    // Regression coverage for elastic/kibana#253666: a runtime field defined on
+    // the rule's source indices (e.g. the workaround in elastic/security-ml#677)
+    // is offered in the picker and must therefore be accepted by the gate.
+    it('returns false if the only entry references a runtime field present on the rule indexPatterns', () => {
+      const indexPatternsWithRuntimeField = {
+        title: 'mlAnomalies',
+        fields: [
+          { name: 'partition_field_value' },
+          { name: 'source.ip_ecs', runtimeField: { type: 'ip' } },
+        ],
+      } as DataViewBase;
+
+      expect(
+        shouldDisableBulkClose({
+          items: [
+            {
+              ...getExceptionListItemSchemaMock(),
+              entries: [{ field: 'source.ip_ecs' }] as EntriesArray,
+            },
+          ],
+          indexPatterns: indexPatternsWithRuntimeField,
         })
       ).toBeFalsy();
     });

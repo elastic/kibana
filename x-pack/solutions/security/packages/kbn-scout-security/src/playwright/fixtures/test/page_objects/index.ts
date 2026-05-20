@@ -7,6 +7,7 @@
 
 import type { PageObjects, ScoutPage, ScoutTestConfig } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
+import { AddExceptionFlyoutPage } from './add_exception_flyout';
 import { AlertsTablePage } from './alerts_table';
 import { AlertDetailsRightPanelPage } from './alert_details_right_panel';
 import { EntityAnalyticsDashboardsPage } from './entity_analytics_dashboards';
@@ -21,6 +22,7 @@ import { ServerlessProjectChromePage } from './serverless_project_chrome_page';
 export type { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
 
 export interface SecurityPageObjects extends PageObjects {
+  addExceptionFlyoutPage: AddExceptionFlyoutPage;
   alertsTablePage: AlertsTablePage;
   alertDetailsRightPanelPage: AlertDetailsRightPanelPage;
   entityAnalyticsDashboardsPage: EntityAnalyticsDashboardsPage;
@@ -41,6 +43,7 @@ export function extendPageObjects(
 ): SecurityPageObjects {
   return {
     ...pageObjects,
+    addExceptionFlyoutPage: createLazyPageObject(AddExceptionFlyoutPage, page),
     alertsTablePage: createLazyPageObject(AlertsTablePage, page),
     alertDetailsRightPanelPage: createLazyPageObject(AlertDetailsRightPanelPage, page),
     entityAnalyticsDashboardsPage: createLazyPageObject(EntityAnalyticsDashboardsPage, page),
