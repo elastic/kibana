@@ -686,6 +686,7 @@ describe('useFetchMetricsData', () => {
       expect(mockApmCaptureError).toHaveBeenCalledTimes(1);
       expect(mockApmCaptureError).toHaveBeenCalledWith(fetchError, {
         labels: {
+          page: 'metrics_fetch_metrics_info',
           profile_id: 'test-profile-id',
         },
       });
@@ -711,6 +712,7 @@ describe('useFetchMetricsData', () => {
       expect(mockApmCaptureError).toHaveBeenCalledTimes(1);
       expect(mockApmCaptureError).toHaveBeenCalledWith(responseError, {
         labels: {
+          page: 'metrics_fetch_metrics_info',
           profile_id: 'test-profile-id',
         },
       });

@@ -20,6 +20,10 @@ import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { parseMetricsWithTelemetry } from '../utils/parse_metrics_response_with_telemetry';
 import { getEsqlQuery } from '../utils/get_esql_query';
 import { isSuppressedFetchError } from '../utils/is_suppressed_fetch_error';
+import {
+  MetricsExecutionContextAction,
+  MetricsExecutionContextName,
+} from '../utils/execution_context_enums';
 
 /**
  * Fetches METRICS_INFO when in Metrics Experience (non-transformational ES|QL, chart visible).
@@ -128,8 +132,15 @@ export function useFetchMetricsData({
       } catch (err) {
         // Suppress cancellations — aborted locally or via the data plugin.
         if (!signal.aborted && err instanceof Error && !isSuppressedFetchError(err)) {
-          // RUM error documents don't inherit transaction labels; set explicitly so errors are filterable by profile_id.
-          apm.captureError(err, { labels: { profile_id: profileId } });
+          // RUM error documents don't inherit transaction labels; set
+          // execution-context labels explicitly so error telemetry is
+          // filterable by the same page/profile labels as the request.
+          apm.captureError(err, {
+            labels: {
+              page: `metrics_${MetricsExecutionContextAction.FETCH}_${MetricsExecutionContextName.METRICS_INFO}`,
+              profile_id: profileId,
+            },
+          });
         }
         throw err;
       }
