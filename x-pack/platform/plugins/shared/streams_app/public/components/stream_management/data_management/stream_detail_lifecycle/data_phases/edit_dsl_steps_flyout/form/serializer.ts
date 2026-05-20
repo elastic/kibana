@@ -7,32 +7,9 @@
 
 import { cloneDeep } from 'lodash';
 import type { IngestStreamLifecycleDSL } from '@kbn/streams-schema';
-import type { DslStepsFlyoutFormInternal, PreservedTimeUnit } from './types';
+import { formatDuration } from '../../shared';
+import type { DslStepsFlyoutFormInternal } from './types';
 import { MAX_DOWNSAMPLE_STEPS } from './constants';
-
-const formatDuration = (
-  value: string | undefined,
-  unit: PreservedTimeUnit | undefined
-): string | undefined => {
-  if (!value || value.trim() === '') return;
-  if (!unit) return;
-  const num = Number(value);
-  if (!Number.isFinite(num) || num < 0) return;
-  if (!Number.isInteger(num)) return;
-  return `${num}${unit}`;
-};
-
-const formatInterval = (
-  value: string | undefined,
-  unit: PreservedTimeUnit | undefined
-): string | undefined => {
-  if (!value || value.trim() === '') return;
-  if (!unit) return;
-  const num = Number(value);
-  if (!Number.isFinite(num) || num <= 0) return;
-  if (!Number.isInteger(num)) return;
-  return `${num}${unit}`;
-};
 
 export const createDslStepsFlyoutSerializer = (initialLifecycle: IngestStreamLifecycleDSL) => {
   return (data: DslStepsFlyoutFormInternal): IngestStreamLifecycleDSL => {
@@ -47,12 +24,18 @@ export const createDslStepsFlyoutSerializer = (initialLifecycle: IngestStreamLif
 
     const downsample = metaSteps.slice(0, MAX_DOWNSAMPLE_STEPS).map((step) => {
       const after =
-        formatDuration(step.afterValue, step.afterUnit) ??
+        formatDuration(step.afterValue, step.afterUnit, {
+          integerOnly: true,
+          minInclusive: 0,
+        }) ??
         // Should not happen when form is valid, but keep output shape stable for live previews.
         '0s';
 
       const fixedInterval =
-        formatInterval(step.fixedIntervalValue, step.fixedIntervalUnit) ??
+        formatDuration(step.fixedIntervalValue, step.fixedIntervalUnit, {
+          integerOnly: true,
+          minExclusive: 0,
+        }) ??
         // Should not happen when form is valid, but keep output shape stable for live previews.
         '1d';
 

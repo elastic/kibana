@@ -1254,7 +1254,10 @@ class OutputService {
           { preset },
           { fromPreconfiguration: true }
         );
-        await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id);
+        await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id, {
+          isDefault: output.is_default,
+          isDefaultMonitoring: output.is_default_monitoring,
+        });
       },
       {
         concurrency: MAX_CONCURRENT_BACKFILL_OUTPUTS_PRESETS,
