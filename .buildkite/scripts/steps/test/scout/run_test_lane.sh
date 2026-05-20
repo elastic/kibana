@@ -76,6 +76,17 @@ read_load_ids() {
   echo "Found ${#LOAD_IDS[@]} test lane load(s) for step key '$BUILDKITE_STEP_KEY'"
 }
 
+# Uploads Scout test server logs as a Buildkite artifact
+upload_test_server_log() {
+  if [[ ! -f "$SCOUT_SERVER_LOG" ]]; then
+    echo "No server log found at $SCOUT_SERVER_LOG, skipping upload"
+    return
+  fi
+
+  echo "--- Uploading test server log"
+  buildkite-agent artifact upload "$SCOUT_SERVER_LOG"
+}
+
 # Start the Scout test server in the background and wait for it to become ready
 start_server() {
   local timeout_seconds="$1"
@@ -103,6 +114,7 @@ start_server() {
       echo "Test server exited unexpectedly. Last 50 lines of log:"
       tail -n 50 "$SCOUT_SERVER_LOG" 2>/dev/null || true
       wait "$SCOUT_SERVER_PID" || true
+      upload_test_server_log
       exit 1
     fi
     sleep 1
@@ -110,18 +122,8 @@ start_server() {
 
   echo "Timed out waiting for test server to be ready. Last 50 lines of log:"
   tail -n 50 "$SCOUT_SERVER_LOG" 2>/dev/null || true
+  upload_test_server_log
   exit 1
-}
-
-# Uploads Scout test server logs as a Buildkite artifact
-upload_test_server_log() {
-  if [[ ! -f "$SCOUT_SERVER_LOG" ]]; then
-    echo "No server log found at $SCOUT_SERVER_LOG, skipping upload"
-    return
-  fi
-
-  echo "--- Uploading test server log"
-  buildkite-agent artifact upload "$SCOUT_SERVER_LOG"
 }
 
 # Stop the test server if it's still running
