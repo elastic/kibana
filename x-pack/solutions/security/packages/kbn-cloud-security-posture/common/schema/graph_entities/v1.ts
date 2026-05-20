@@ -6,7 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { INDEX_PATTERN_REGEX } from '../graph/v1';
+import {
+  GRAPH_PAGE_ITEMS_MAX_SIZE,
+  INDEX_PATTERN_REGEX,
+  INDEX_PATTERNS_MAX_SIZE,
+  NODE_COUNTRY_CODES_MAX_SIZE,
+  NODE_IPS_MAX_SIZE,
+} from '../graph/v1';
 
 // ============================================
 // ENTITIES ENDPOINT: /internal/cloud_security_posture/graph/entities
@@ -28,8 +34,10 @@ export const entityItemSchema = schema.object({
       ip: schema.maybe(schema.string()),
     })
   ),
-  ips: schema.maybe(schema.arrayOf(schema.string())),
-  countryCodes: schema.maybe(schema.arrayOf(schema.string())),
+  ips: schema.maybe(schema.arrayOf(schema.string(), { maxSize: NODE_IPS_MAX_SIZE })),
+  countryCodes: schema.maybe(
+    schema.arrayOf(schema.string(), { maxSize: NODE_COUNTRY_CODES_MAX_SIZE })
+  ),
 });
 
 export const entitiesRequestSchema = schema.object({
@@ -51,7 +59,7 @@ export const entitiesRequestSchema = schema.object({
             }
           },
         }),
-        { minSize: 1 }
+        { minSize: 1, maxSize: INDEX_PATTERNS_MAX_SIZE }
       )
     ),
   }),
@@ -59,6 +67,6 @@ export const entitiesRequestSchema = schema.object({
 
 export const entitiesResponseSchema = () =>
   schema.object({
-    entities: schema.arrayOf(entityItemSchema),
+    entities: schema.arrayOf(entityItemSchema, { maxSize: GRAPH_PAGE_ITEMS_MAX_SIZE }),
     totalRecords: schema.number(),
   });

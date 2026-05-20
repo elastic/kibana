@@ -11,6 +11,37 @@ export const INDEX_PATTERN_REGEX = /^[^A-Z^\\/?"<>|\s#,]+$/;
 
 const PINNED_IDS_MAX_SIZE = 1024;
 
+// maxSize is set to 100 to match Security Solution resolver index pattern limits
+export const INDEX_PATTERNS_MAX_SIZE = 100;
+
+// maxSize is set to 5000 to align with graph events/entities ID batch limits
+export const ORIGIN_EVENT_IDS_MAX_SIZE = 5000;
+export const ENTITY_IDS_MAX_SIZE = 5000;
+
+// maxSize is set to 100 for esQuery.bool clause arrays from the Kibana query builder
+export const ES_BOOL_CLAUSE_MAX_SIZE = 100;
+
+// maxSize is set to 300 to match GRAPH_NODES_LIMIT used by the graph UI
+export const GRAPH_NODES_MAX_SIZE = 300;
+export const GRAPH_EDGES_MAX_SIZE = 1000;
+export const GRAPH_MESSAGES_MAX_SIZE = 5;
+
+// maxSize is set to 100 to match page.size max on graph events/entities requests
+export const GRAPH_PAGE_ITEMS_MAX_SIZE = 100;
+
+export const NODE_IPS_MAX_SIZE = 256;
+export const NODE_COUNTRY_CODES_MAX_SIZE = 100;
+export const NODE_DOCUMENTS_DATA_MAX_SIZE = 5000;
+
+const indexPatternStringSchema = schema.string({
+  minLength: 1,
+  validate: (value) => {
+    if (!INDEX_PATTERN_REGEX.test(value)) {
+      return `Invalid index pattern: ${value}. Contains illegal characters.`;
+    }
+  },
+});
+
 /**
  * Entity ID for relationship queries.
  * isOrigin indicates whether this entity is the center/origin of the graph
@@ -28,36 +59,47 @@ export const graphRequestSchema = schema.object({
     pinnedIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: PINNED_IDS_MAX_SIZE })),
     // Origin event IDs - optional, may be empty when opening from entity flyout
     originEventIds: schema.maybe(
-      schema.arrayOf(schema.object({ id: schema.string(), isAlert: schema.boolean() }))
+      schema.arrayOf(schema.object({ id: schema.string(), isAlert: schema.boolean() }), {
+        maxSize: ORIGIN_EVENT_IDS_MAX_SIZE,
+      })
     ),
     // TODO: use zod for range validation instead of config schema
     start: schema.oneOf([schema.number(), schema.string()]),
     end: schema.oneOf([schema.number(), schema.string()]),
     indexPatterns: schema.maybe(
-      schema.arrayOf(
-        schema.string({
-          minLength: 1,
-          validate: (value) => {
-            if (!INDEX_PATTERN_REGEX.test(value)) {
-              return `Invalid index pattern: ${value}. Contains illegal characters.`;
-            }
-          },
-        }),
-        { minSize: 1 }
-      )
+      schema.arrayOf(indexPatternStringSchema, {
+        minSize: 1,
+        maxSize: INDEX_PATTERNS_MAX_SIZE,
+      })
     ),
     esQuery: schema.maybe(
       schema.object({
         bool: schema.object({
-          filter: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
-          must: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
-          should: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
-          must_not: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+          filter: schema.maybe(
+            schema.arrayOf(schema.object({}, { unknowns: 'allow' }), {
+              maxSize: ES_BOOL_CLAUSE_MAX_SIZE,
+            })
+          ),
+          must: schema.maybe(
+            schema.arrayOf(schema.object({}, { unknowns: 'allow' }), {
+              maxSize: ES_BOOL_CLAUSE_MAX_SIZE,
+            })
+          ),
+          should: schema.maybe(
+            schema.arrayOf(schema.object({}, { unknowns: 'allow' }), {
+              maxSize: ES_BOOL_CLAUSE_MAX_SIZE,
+            })
+          ),
+          must_not: schema.maybe(
+            schema.arrayOf(schema.object({}, { unknowns: 'allow' }), {
+              maxSize: ES_BOOL_CLAUSE_MAX_SIZE,
+            })
+          ),
         }),
       })
     ),
     // Entity IDs for fetching relationships from entity store (optional, may be empty when opening from events flyout)
-    entityIds: schema.maybe(schema.arrayOf(entityIdSchema)),
+    entityIds: schema.maybe(schema.arrayOf(entityIdSchema, { maxSize: ENTITY_IDS_MAX_SIZE })),
   }),
 });
 
@@ -79,7 +121,7 @@ export const entitySchema = schema.object({
   ),
   host: schema.maybe(
     schema.object({
-      ip: schema.maybe(schema.arrayOf(schema.string())),
+      ip: schema.maybe(schema.arrayOf(schema.string(), { maxSize: NODE_IPS_MAX_SIZE })),
     })
   ),
   availableInEntityStore: schema.maybe(schema.boolean()),
@@ -117,10 +159,15 @@ export const graphResponseSchema = () =>
         groupNodeDataSchema,
         labelNodeDataSchema,
         relationshipNodeDataSchema,
-      ])
+      ]),
+      { maxSize: GRAPH_NODES_MAX_SIZE }
     ),
-    edges: schema.arrayOf(edgeDataSchema),
-    messages: schema.maybe(schema.arrayOf(schema.oneOf([schema.literal(REACHED_NODES_LIMIT)]))),
+    edges: schema.arrayOf(edgeDataSchema, { maxSize: GRAPH_EDGES_MAX_SIZE }),
+    messages: schema.maybe(
+      schema.arrayOf(schema.oneOf([schema.literal(REACHED_NODES_LIMIT)]), {
+        maxSize: GRAPH_MESSAGES_MAX_SIZE,
+      })
+    ),
   });
 
 export const nodeColorSchema = schema.oneOf([
@@ -166,9 +213,13 @@ export const entityNodeDataSchema = schema.allOf([
     ]),
     tag: schema.maybe(schema.string()),
     count: schema.maybe(schema.number()),
-    ips: schema.maybe(schema.arrayOf(schema.string())),
-    countryCodes: schema.maybe(schema.arrayOf(schema.string())),
-    documentsData: schema.maybe(schema.arrayOf(nodeDocumentDataSchema)),
+    ips: schema.maybe(schema.arrayOf(schema.string(), { maxSize: NODE_IPS_MAX_SIZE })),
+    countryCodes: schema.maybe(
+      schema.arrayOf(schema.string(), { maxSize: NODE_COUNTRY_CODES_MAX_SIZE })
+    ),
+    documentsData: schema.maybe(
+      schema.arrayOf(nodeDocumentDataSchema, { maxSize: NODE_DOCUMENTS_DATA_MAX_SIZE })
+    ),
   }),
 ]);
 
@@ -185,12 +236,16 @@ export const labelNodeDataSchema = schema.allOf([
     shape: schema.literal('label'),
     parentId: schema.maybe(schema.string()),
     color: nodeColorSchema,
-    ips: schema.maybe(schema.arrayOf(schema.string())),
+    ips: schema.maybe(schema.arrayOf(schema.string(), { maxSize: NODE_IPS_MAX_SIZE })),
     count: schema.maybe(schema.number()),
     uniqueEventsCount: schema.maybe(schema.number()),
     uniqueAlertsCount: schema.maybe(schema.number()),
-    countryCodes: schema.maybe(schema.arrayOf(schema.string())),
-    documentsData: schema.maybe(schema.arrayOf(nodeDocumentDataSchema)),
+    countryCodes: schema.maybe(
+      schema.arrayOf(schema.string(), { maxSize: NODE_COUNTRY_CODES_MAX_SIZE })
+    ),
+    documentsData: schema.maybe(
+      schema.arrayOf(nodeDocumentDataSchema, { maxSize: NODE_DOCUMENTS_DATA_MAX_SIZE })
+    ),
   }),
 ]);
 

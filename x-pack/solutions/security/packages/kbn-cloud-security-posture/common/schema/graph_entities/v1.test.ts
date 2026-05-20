@@ -63,4 +63,36 @@ describe('graph entities schema', () => {
       })
     ).toThrow();
   });
+
+  it('accepts up to 100 index patterns', () => {
+    const indexPatterns = Array.from({ length: 100 }, (_, index) => `logs-${index}`);
+
+    expect(() =>
+      entitiesRequestSchema.validate({
+        page: { index: 0, size: 10 },
+        query: {
+          entityIds: ['entity-1'],
+          start: 'now-1d',
+          end: 'now',
+          indexPatterns,
+        },
+      })
+    ).not.toThrow();
+  });
+
+  it('rejects more than 100 index patterns', () => {
+    const indexPatterns = Array.from({ length: 101 }, (_, index) => `logs-${index}`);
+
+    expect(() =>
+      entitiesRequestSchema.validate({
+        page: { index: 0, size: 10 },
+        query: {
+          entityIds: ['entity-1'],
+          start: 'now-1d',
+          end: 'now',
+          indexPatterns,
+        },
+      })
+    ).toThrow();
+  });
 });
