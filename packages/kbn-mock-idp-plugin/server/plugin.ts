@@ -26,6 +26,7 @@ import {
 } from '@kbn/es';
 import type { ServerlessProductTier } from '@kbn/es/src/utils';
 import type { FeaturesPluginStart, KibanaFeature } from '@kbn/features-plugin/server';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import {
   createSAMLResponse,
@@ -582,12 +583,58 @@ export const plugin: PluginInitializer<
           }
         }
       );
+      router.get(
+        {
+          path: '/mock_idp/ai_connectors',
+          validate: false,
+          security: {
+            authc: {
+              enabled: false,
+              reason:
+                'This route simulates a mock identity provider and does not require authentication.',
+            },
+            authz: { enabled: false, reason: '' },
+          },
+        },
+        async (context, request, response) => {
+          const [, startDeps] = await core.getStartServices();
+          const inference = startDeps.inference;
+          if (!inference) {
+            return response.ok({ body: { connectors: [], defaultConnectorId: null } });
+          }
+          try {
+            const inferenceRequest = kibanaRequestFactory({
+              headers: { authorization: credentials },
+              path: '/',
+            });
+            const [connectors, defaultConnector] = await Promise.all([
+              inference.getConnectorList(inferenceRequest),
+              inference.getDefaultConnector(inferenceRequest),
+            ]);
+            return response.ok({
+              body: {
+                connectors: connectors
+                  .filter((c) =>
+                    Object.values(defaultInferenceEndpoints).includes(c.connectorId as any)
+                  )
+                  .map((c) => ({ connectorId: c.connectorId, name: c.name })),
+                defaultConnectorId: defaultConnector?.connectorId ?? null,
+              },
+            });
+          } catch (err) {
+            roleLogger.error(`Failed to fetch connectors: ${err}`);
+            return response.customError({ statusCode: 500, body: err.message });
+          }
+        }
+      );
+
       router.post(
         {
           path: '/mock_idp/ai_generate_role',
           validate: {
             body: schema.object({
               description: schema.string(),
+              connectorId: schema.maybe(schema.string()),
             }),
           },
           security: {
@@ -619,16 +666,19 @@ export const plugin: PluginInitializer<
               path: '/',
             });
 
-            roleLogger.info('Fetching default inference connector');
-            const defaultConnector = await inference.getDefaultConnector(inferenceRequest);
-            if (!defaultConnector) {
-              return response.badRequest({ body: 'No default inference connector configured.' });
+            let connectorId = request.body.connectorId;
+            if (!connectorId) {
+              const defaultConnector = await inference.getDefaultConnector(inferenceRequest);
+              if (!defaultConnector) {
+                return response.badRequest({ body: 'No default inference connector configured.' });
+              }
+              connectorId = defaultConnector.connectorId;
             }
-            roleLogger.info(`Got connector: ${defaultConnector.connectorId}`);
+            roleLogger.info(`Using connector: ${connectorId}`);
 
             const chatModel = await inference.getChatModel({
               request: inferenceRequest,
-              connectorId: defaultConnector.connectorId,
+              connectorId,
               chatModelOptions: {},
             });
             roleLogger.info('Chat model ready, invoking LLM');

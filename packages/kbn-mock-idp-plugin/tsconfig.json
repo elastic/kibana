@@ -28,6 +28,7 @@
     "@kbn/i18n",
     "@kbn/core",
     "@kbn/inference-langchain",
+    "@kbn/inference-common",
     "@kbn/inference-plugin",
     "@kbn/features-plugin",
     "@kbn/zod",
