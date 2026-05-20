@@ -131,6 +131,7 @@ export async function executeMaintainerRun({
   const maintainerStatus = createMaintainerStatus({ status, namespace, initialState });
   const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
   const cpsEsClient = isServerless ? createCpsAllClient(esClient) : undefined;
+  logger.debug(`[${id}] read client: ${cpsEsClient ? 'cross-project' : 'origin-only'}`);
   const crudClient = new CRUDClient({
     logger,
     esClient,

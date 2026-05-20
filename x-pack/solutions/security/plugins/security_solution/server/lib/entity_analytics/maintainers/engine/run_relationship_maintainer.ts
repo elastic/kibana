@@ -276,10 +276,8 @@ export const runRelationshipMaintainer = async ({
   // is cheaper and stronger than trusting all callers.
   assertValidNamespace(namespace);
 
-  // CPS: use the cross-project client for log reads when available so a single
-  // pass covers both origin and linked-project logs. Writes go through crudClient
-  // which always uses the local origin client (no change needed there).
   const readClient = cpsEsClient ?? esClient;
+  logger.debug(`read client: ${cpsEsClient ? 'cross-project' : 'origin-only'}`);
 
   let totalBuckets = 0;
   let totalRecords = 0;
