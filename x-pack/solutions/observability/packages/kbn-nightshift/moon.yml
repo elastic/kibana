@@ -18,6 +18,8 @@ project:
   sourceRoot: x-pack/solutions/observability/packages/kbn-nightshift
 dependsOn:
   - '@kbn/i18n'
+  - '@kbn/storybook'
+  - '@kbn/kibana-react-plugin'
 tags:
   - shared-browser
   - package
@@ -29,6 +31,7 @@ fileGroups:
   src:
     - '**/*.ts'
     - '**/*.tsx'
+    - .storybook/**/*.ts
     - '!target/**/*'
   jest-config:
     - jest.config.js
