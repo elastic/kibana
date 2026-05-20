@@ -3595,10 +3595,10 @@
   dependencies:
     "@hapi/hoek" "^11.0.2"
 
-"@hapi/wreck@18.1.0", "@hapi/wreck@^18.0.1", "@hapi/wreck@^18.1.0":
-  version "18.1.0"
-  resolved "https://registry.yarnpkg.com/@hapi/wreck/-/wreck-18.1.0.tgz#68e631fc7568ebefc6252d5b86cb804466c8dbe6"
-  integrity sha512-0z6ZRCmFEfV/MQqkQomJ7sl/hyxvcZM7LtuVqN3vdAO4vM9eBbowl0kaqQj9EJJQab+3Uuh1GxbGIBFy4NfJ4w==
+"@hapi/wreck@18.1.1", "@hapi/wreck@^18.0.1", "@hapi/wreck@^18.1.0":
+  version "18.1.1"
+  resolved "https://registry.yarnpkg.com/@hapi/wreck/-/wreck-18.1.1.tgz#06d5be6d706d6aa1ecf35e2bd39350f4632f0fbe"
+  integrity sha512-UwTeGBfAnB/1mkw4gD6IQGI/bgMu7iGmqgT8K+xxye3z4ZHhCZlmS2wuHBJmENhBJSKqvoYzJ71ds3Xfq4gofQ==
   dependencies:
     "@hapi/boom" "^10.0.1"
     "@hapi/bourne" "^3.0.0"
