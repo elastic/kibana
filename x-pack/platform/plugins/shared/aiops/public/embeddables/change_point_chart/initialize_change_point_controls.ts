@@ -6,7 +6,7 @@
  */
 
 import type { StateComparators } from '@kbn/presentation-publishing';
-import { BehaviorSubject, map, merge } from 'rxjs';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
 import type { ChangePointChartEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/change_point_chart';
 import type { ChangePointComponentApi, ChangePointEmbeddableCustomState } from './types';
@@ -64,14 +64,35 @@ export const initializeChangePointControls = (initialState: ChangePointChartEmbe
       updateUserInput,
     } satisfies ChangePointComponentApi,
     anyStateChange$: merge(
-      viewType,
-      dataViewId,
-      fn,
-      metricField,
-      splitField,
-      partitions,
-      maxSeriesToPlot
-    ).pipe(map(() => undefined)),
+      viewType.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      dataViewId.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      fn.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      metricField.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      splitField.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      partitions.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      maxSeriesToPlot.pipe(
+        skip(1),
+        map(() => undefined)
+      )
+    ),
     getLatestState,
     reinitializeState: (lastSavedState: ChangePointEmbeddableCustomState) => {
       viewType.next(lastSavedState.view_type);
