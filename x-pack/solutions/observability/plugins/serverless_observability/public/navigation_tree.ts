@@ -22,12 +22,14 @@ export function filterForFeatureAvailability(
 export const createNavigationTree = ({
   streamsAvailable,
   overviewAvailable = true,
+  genAiSettingsAvailable = true,
   isCasesAvailable = true,
   showAiAssistant = true,
   showAlertingV2 = false,
 }: {
   streamsAvailable?: boolean;
   overviewAvailable?: boolean;
+  genAiSettingsAvailable?: boolean;
   isCasesAvailable?: boolean;
   showAiAssistant?: boolean;
   showAlertingV2?: boolean;
