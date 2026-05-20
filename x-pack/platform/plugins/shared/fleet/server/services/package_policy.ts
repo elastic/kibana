@@ -478,6 +478,10 @@ function validateAgentlessForPackagePolicy(
 ): void {
   const isAgentless = Boolean(agentPolicy?.supports_agentless || packagePolicy.supports_agentless);
 
+  if (pkgInfo) {
+    canDeployCustomPackageAsAgentlessOrThrow(packagePolicy, pkgInfo);
+  }
+
   if (isAgentless && pkgInfo && !isAgentlessIntegration(pkgInfo)) {
     throw new PackagePolicyValidationError(
       `Package "${pkgInfo.name}" does not support agentless deployment mode`
@@ -668,7 +672,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     }
     validatePackagePolicyOrThrow(enrichedPackagePolicy, pkgInfo);
-    canDeployCustomPackageAsAgentlessOrThrow(packagePolicy, pkgInfo);
 
     if (await isSecretStorageEnabled(esClient, soClient)) {
       const secretsRes = await extractAndWriteSecrets({
@@ -1035,7 +1038,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         let inputs = getInputsWithIds(packagePolicy, packagePolicyId, undefined, pkgInfo);
 
         validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
-        canDeployCustomPackageAsAgentlessOrThrow(packagePolicy, pkgInfo);
 
         for (const policyId of agentPolicyIdsOfPackagePolicy) {
           validateAgentlessForPackagePolicy(
@@ -1636,7 +1638,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       packagePolicyUpdate,
     });
     validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
-    canDeployCustomPackageAsAgentlessOrThrow(packagePolicy, pkgInfo);
 
     if (await isSecretStorageEnabled(esClient, soClient)) {
       const secretsRes = await extractAndUpdateSecrets({
@@ -2056,7 +2057,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
 
         validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
-        canDeployCustomPackageAsAgentlessOrThrow(packagePolicy, pkgInfo);
 
         for (const policyId of packagePolicy.policy_ids ?? []) {
           validateAgentlessForPackagePolicy(
