@@ -167,7 +167,9 @@ describe('Fleet proxies service', () => {
       } as any);
 
       await expect(() =>
-        bulkCreateFleetProxies(soClientMock, [{ name: 'proxy-1', url: 'http://proxy.fr' }])
+        bulkCreateFleetProxies(soClientMock, [
+          { name: 'proxy-1', url: 'http://proxy.fr', is_preconfigured: false },
+        ])
       ).rejects.toMatchObject({ statusCode: 409 });
     });
   });
