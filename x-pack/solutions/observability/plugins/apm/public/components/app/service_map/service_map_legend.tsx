@@ -18,6 +18,7 @@ import {
   EuiLink,
   EuiHealth,
   EuiIcon,
+  EuiNotificationBadge,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -94,55 +95,33 @@ export function ServiceMapLegend({ controlIconCss }: ServiceMapLegendProps) {
       container: css`
         width: 200px;
       `,
-      circle: css`
-        width: ${euiTheme.size.base};
-        height: ${euiTheme.size.base};
-        border-radius: 50%;
-        border: ${euiTheme.size.xxs} solid ${euiTheme.colors.textSubdued};
-        background: ${euiTheme.colors.backgroundBasePlain};
+      circleIcon: css`
         flex-shrink: 0;
+        transform: scale(2);
       `,
-      diamond: css`
-        width: ${euiTheme.size.m};
-        height: ${euiTheme.size.m};
-        transform: rotate(45deg);
-        border: ${euiTheme.size.xxs} solid ${euiTheme.colors.textSubdued};
-        background: ${euiTheme.colors.backgroundBasePlain};
+      diamondIcon: css`
         flex-shrink: 0;
-        margin: ${euiTheme.size.xxs};
+        transform: rotate(45deg);
       `,
       groupedContainer: css`
         position: relative;
-        width: ${euiTheme.size.base};
-        height: ${euiTheme.size.base};
         flex-shrink: 0;
-      `,
-      groupedDiamond: css`
-        width: ${euiTheme.size.m};
-        height: ${euiTheme.size.m};
-        transform: rotate(45deg);
-        border: ${euiTheme.size.xxs} solid ${euiTheme.colors.textSubdued};
-        background: ${euiTheme.colors.backgroundBasePlain};
-        position: absolute;
-        top: ${euiTheme.size.xxs};
-        left: ${euiTheme.size.xxs};
       `,
       groupedBadge: css`
         position: absolute;
-        top: calc(-1 * ${euiTheme.size.xxs} - ${euiTheme.border.width.thin});
-        right: calc(-1 * ${euiTheme.size.xxs} - ${euiTheme.border.width.thin});
+        top: calc(-1 * ${euiTheme.size.xxs});
+        right: calc(-1 * ${euiTheme.size.xs});
+        font-size: ${euiTheme.size.s};
+        padding: 0;
+        min-width: 0;
         width: calc(${euiTheme.size.m} - ${euiTheme.border.width.thin});
         height: calc(${euiTheme.size.m} - ${euiTheme.border.width.thin});
-        border-radius: 50%;
-        background: ${euiTheme.colors.backgroundBasePlain};
-        border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.textSubdued};
-        font-size: 7px;
         line-height: calc(
           ${euiTheme.size.m} - ${euiTheme.size.xxs} - ${euiTheme.border.width.thin}
         );
-        text-align: center;
-        font-weight: bold;
+        background: ${euiTheme.colors.backgroundBasePlain};
         color: ${euiTheme.colors.textParagraph};
+        border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.textSubdued};
       `,
       connectionIcon: css`
         flex-shrink: 0;
@@ -197,7 +176,13 @@ export function ServiceMapLegend({ controlIconCss }: ServiceMapLegendProps) {
           <EuiFlexItem>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
-                <div css={styles.circle} />
+                <EuiIcon
+                  type="dot"
+                  size="m"
+                  color="subdued"
+                  css={styles.circleIcon}
+                  aria-hidden={true}
+                />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="xs">
@@ -211,7 +196,13 @@ export function ServiceMapLegend({ controlIconCss }: ServiceMapLegendProps) {
           <EuiFlexItem>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
-                <div css={styles.diamond} />
+                <EuiIcon
+                  type="stopFilled"
+                  size="m"
+                  color="subdued"
+                  css={styles.diamondIcon}
+                  aria-hidden={true}
+                />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="xs">
@@ -226,8 +217,16 @@ export function ServiceMapLegend({ controlIconCss }: ServiceMapLegendProps) {
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
                 <div css={styles.groupedContainer}>
-                  <div css={styles.groupedDiamond} />
-                  <div css={styles.groupedBadge}>n</div>
+                  <EuiIcon
+                    type="stopFilled"
+                    size="m"
+                    color="subdued"
+                    css={styles.diamondIcon}
+                    aria-hidden={true}
+                  />
+                  <EuiNotificationBadge css={styles.groupedBadge} aria-hidden={true}>
+                    n
+                  </EuiNotificationBadge>
                 </div>
               </EuiFlexItem>
               <EuiFlexItem>
