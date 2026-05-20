@@ -206,7 +206,7 @@ interface CertSearchHit {
   _source: {
     monitor?: { name?: string; id?: string; type?: string };
     url?: { full?: string };
-    observer?: { geo?: { name?: string[] } };
+    observer?: { geo?: { name?: string } };
     tls?: {
       server?: {
         x509?: {
@@ -272,7 +272,7 @@ export const processCertsResult = (result: CertSearchResponse): CertResult => {
       monitorName: ping?.monitor?.name,
       monitorUrl: ping?.url?.full,
       monitorType: ping?.monitor?.type,
-      locationName: ping?.observer?.geo?.name?.join(', '),
+      locationName: ping?.observer?.geo?.name,
     };
   });
   const total = result.aggregations?.total?.value ?? 0;
