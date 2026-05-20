@@ -69,6 +69,8 @@ export interface ConditionRenderProps {
   max?: number;
   minLength?: number;
   maxLength?: number;
+  /** When provided, the control renders inline confirm/cancel buttons and only calls this on confirm. */
+  onConfirm?: () => void;
 }
 
 const BaseFieldSchema = z.object({

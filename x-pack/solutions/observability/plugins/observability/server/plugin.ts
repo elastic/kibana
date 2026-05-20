@@ -175,7 +175,10 @@ export class ObservabilityPlugin
       },
       alertDetailsContextualInsightsService,
       alertsLocator,
-      managedOtlpServiceUrl: config.managedOtlpServiceUrl,
+      // The managed OTLP service URL was historically set via `xpack.observability.managedOtlpServiceUrl`.
+      // It is now sourced from `xpack.cloud.managed_otlp.url` (surfaced on the cloud plugin's setup contract);
+      // the observability config value is kept as a fallback for deployments that have not yet migrated.
+      managedOtlpServiceUrl: plugins.cloud?.managedOtlp?.url || config.managedOtlpServiceUrl,
     };
   }
 

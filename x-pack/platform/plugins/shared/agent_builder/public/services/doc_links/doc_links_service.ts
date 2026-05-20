@@ -17,6 +17,7 @@ export class DocLinksService {
   public readonly agentBuilderPlugins: string;
   public readonly agentBuilderConnectors: string;
   public readonly agentBuilderTools: string;
+  public readonly elasticCapabilities: string;
   public readonly programmaticAccess: string;
   public readonly kibanaApi: string;
   public readonly mcpServer: string;
@@ -34,6 +35,7 @@ export class DocLinksService {
     this.agentBuilderPlugins = docLinks.agentBuilder.agentBuilderPlugins;
     this.agentBuilderConnectors = docLinks.agentBuilder.agentBuilderConnectors;
     this.agentBuilderTools = docLinks.agentBuilder.agentBuilderTools;
+    this.elasticCapabilities = docLinks.agentBuilder.elasticCapabilities;
     this.programmaticAccess = docLinks.agentBuilder.programmaticAccess;
     this.kibanaApi = docLinks.agentBuilder.kibanaApi;
     this.mcpServer = docLinks.agentBuilder.mcpServer;

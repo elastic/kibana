@@ -8,7 +8,13 @@
 import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import type { Error } from '@kbn/apm-types';
-import { type ErrorsByTraceId, type UnifiedSpanDocument, type TraceRootSpan } from '@kbn/apm-types';
+import type {
+  ErrorsByTraceId,
+  UnifiedSpanDocument,
+  TraceRootSpan,
+  FocusedTraceItems,
+  TransactionDetailRedirectInfo,
+} from '@kbn/apm-types';
 import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
 import type { Span } from '../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../typings/es_schemas/ui/transaction';
@@ -20,11 +26,7 @@ import { environmentRt, kueryRt, probabilityRt, rangeRt } from '../default_api_t
 import { getSpan } from '../transactions/get_span';
 import { getTransaction } from '../transactions/get_transaction';
 import { getTransactionByName } from '../transactions/get_transaction_by_name';
-import {
-  getRootTransactionByTraceId,
-  type TransactionDetailRedirectInfo,
-} from '../transactions/get_transaction_by_trace';
-import type { FocusedTraceItems } from './build_focused_trace_items';
+import { getRootTransactionByTraceId } from '../transactions/get_transaction_by_trace';
 import { buildFocusedTraceItems, findRootItem } from './build_focused_trace_items';
 import type { TopTracesPrimaryStatsResponse } from './get_top_traces_primary_stats';
 import { getTopTracesPrimaryStats } from './get_top_traces_primary_stats';
