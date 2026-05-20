@@ -103,15 +103,15 @@ export const LastTestRunComponent = ({
           color="danger"
           iconType="warning"
         >
-          {isErrorDetails ? null : (
+          {isErrorDetails || !selectedLocation || !monitor?.[ConfigKey.CONFIG_ID] ? null : (
             <EuiButton
               data-test-subj="monitorTestRunViewErrorDetails"
               color="danger"
               href={getErrorDetailsUrl({
                 basePath,
-                configId: monitor?.[ConfigKey.CONFIG_ID]!,
-                locationId: selectedLocation!.id,
-                stateId: latestPing.state?.id!,
+                configId: monitor[ConfigKey.CONFIG_ID],
+                locationId: selectedLocation.id,
+                stateId: latestPing.state?.id ?? '',
               })}
             >
               {i18n.translate('xpack.synthetics.monitorDetails.summary.viewErrorDetails', {

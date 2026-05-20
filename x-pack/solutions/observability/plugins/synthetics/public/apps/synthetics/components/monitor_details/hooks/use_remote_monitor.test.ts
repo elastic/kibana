@@ -45,13 +45,15 @@ describe('useRemoteMonitor', () => {
       );
     });
 
-    it('filters by config_id, sorts by @timestamp desc, and aggregates locations by observer.geo.id', () => {
+    it('filters by config_id, sorts by @timestamp desc, and aggregates locations by observer.name', () => {
       renderHook(() => useRemoteMonitor({ configId: 'config-xyz', remoteName: 'remote-a' }));
 
       const params = useEsSearchMock.mock.calls[0][0];
       expect(params.query.bool.filter).toEqual([{ term: { config_id: 'config-xyz' } }]);
       expect(params.sort).toEqual([{ '@timestamp': 'desc' }]);
-      expect(params.aggs.locations.terms.field).toBe('observer.geo.id');
+      // observer.name is the location id; observer.geo.name is the wildcard
+      // label resolved via the top_hits sub-aggregation.
+      expect(params.aggs.locations.terms.field).toBe('observer.name');
       expect(params.aggs.locations.aggs.label.top_hits._source.includes).toEqual([
         'observer.geo.name',
       ]);

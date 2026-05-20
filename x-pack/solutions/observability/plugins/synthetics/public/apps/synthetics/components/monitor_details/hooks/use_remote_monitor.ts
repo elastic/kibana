@@ -64,7 +64,8 @@ interface LocationBucketSource {
  *     is then read OFF the latest hit (it's the project script id for project
  *     monitors, configId otherwise).
  *   - size: 1, sort `@timestamp desc` → latest ping supplies name/type/tags/remote.
- *   - terms agg on `observer.geo.id` with sub `top_hits` for `observer.geo.name`
+ *   - terms agg on `observer.name` (the location id field in ping documents)
+ *     with sub `top_hits` for `observer.geo.name` (the human-readable label)
  *     → full set of locations the monitor has run from on the remote cluster.
  *
  * Three terminal states (see contract in `RemoteSyntheticsMonitor` JSDoc):
@@ -105,7 +106,11 @@ export const useRemoteMonitor = ({
       aggs: {
         locations: {
           terms: {
-            field: 'observer.geo.id',
+            // observer.name is the location id field in ping documents
+            // (observer.geo.name is the human-readable label, resolved below
+            // via a top_hits sub-agg because it is a wildcard-typed field
+            // and can't be aggregated on directly).
+            field: 'observer.name',
             size: 100,
           },
           aggs: {
