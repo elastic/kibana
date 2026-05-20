@@ -363,10 +363,20 @@ export class StorageIndexAdapter<
     });
 
     if (simulateIndexTemplateResponse.template.mappings) {
-      await this.esClient.indices.putMapping({
-        index: name,
-        ...simulateIndexTemplateResponse.template.mappings,
-      });
+      try {
+        await this.esClient.indices.putMapping({
+          index: name,
+          ...simulateIndexTemplateResponse.template.mappings,
+        });
+      } catch (error) {
+        if (isResponseError(error) && error.statusCode === 400) {
+          this.logger.warn(
+            `Index '${name}' has incompatible mappings — dropping and recreating so new schema takes effect on next write`
+          );
+          await this.clean();
+        }
+        throw error;
+      }
     }
   }
 
