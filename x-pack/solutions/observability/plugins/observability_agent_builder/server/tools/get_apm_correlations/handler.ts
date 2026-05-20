@@ -318,7 +318,7 @@ export async function getToolHandler({
       const fieldValues: unknown[] = [];
 
       for (const bucketChunk of chunk(termBuckets, THROUGHPUT_CHUNK_SIZE)) {
-        await Promise.allSettled(
+        const settled = await Promise.allSettled(
           bucketChunk.map(async (bucket) => {
             const fieldValue = bucket.key;
             const filteredFilters = [...overallFilters, { term: { [field]: fieldValue } }];
@@ -350,7 +350,10 @@ export async function getToolHandler({
 
             if (filteredRpm.every((v) => v === 0)) return;
 
-            const correlation = computePearsonCorrelation(overallRpm, filteredRpm);
+            // Correlate filtered against the residual (overall minus filtered) to avoid the
+            // inclusion bias that results from correlating a subset against its own superset.
+            const residualRpm = overallRpm.map((v, i) => Math.max(0, v - filteredRpm[i]));
+            const correlation = computePearsonCorrelation(filteredRpm, residualRpm);
             if (Math.abs(correlation) < THROUGHPUT_CORRELATION_THRESHOLD) return;
 
             const filteredMeanRpm =
@@ -364,6 +367,12 @@ export async function getToolHandler({
             });
           })
         );
+        const failedCount = settled.filter((r) => r.status === 'rejected').length;
+        if (failedCount > 0) {
+          logger.warn(
+            `[throughput correlations] ${failedCount} timeseries queries failed for field "${field}"`
+          );
+        }
       }
 
       if (fieldValues.length > 0) {
