@@ -95,7 +95,7 @@ const sectionGridSchema = z
   })
   .strict();
 
-export function getSectionSchema(isDashboardAppRequest: boolean) {
+export function getSectionSchema<T extends z.ZodType<unknown>>(panelSchema: T) {
   return z
     .object({
       title: z.string().meta({ description: 'The title of the section.' }),
@@ -105,7 +105,7 @@ export function getSectionSchema(isDashboardAppRequest: boolean) {
       }),
       grid: sectionGridSchema,
       panels: z
-        .array(getPanelSchema(isDashboardAppRequest))
+        .array(panelSchema)
         .max(MAX_PANELS)
         .default([])
         .meta({ description: 'The panels that belong to the section.' }),
@@ -176,6 +176,7 @@ export const accessControlSchema = z
   });
 
 export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
+  const panelSchema = getPanelSchema(isDashboardAppRequest);
   return z
     .object({
       pinned_panels: getPinnedPanelsSchema(),
@@ -188,9 +189,7 @@ export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
       }),
       options: optionsSchema,
       panels: z
-        .array(
-          z.union([getPanelSchema(isDashboardAppRequest), getSectionSchema(isDashboardAppRequest)])
-        )
+        .array(z.union([panelSchema, getSectionSchema(panelSchema)]))
         .max(MAX_PANELS)
         .default([])
         .meta({
