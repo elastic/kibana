@@ -16,6 +16,14 @@ const createSuggestionsService = (): jest.Mocked<MatcherSuggestionsService> =>
     getSuggestions: jest.fn(),
   } as unknown as jest.Mocked<MatcherSuggestionsService>);
 
+const getResponseSchema = () => {
+  const { validate } = MatcherDataFieldsRoute;
+  if (!validate || typeof validate === 'boolean' || !('response' in validate)) {
+    throw new Error('expected response validation to be configured');
+  }
+  return validate.response![200]!.body!();
+};
+
 describe('MatcherDataFieldsRoute', () => {
   it('calls getDataFieldNames with undefined when no matcher query param is provided', async () => {
     const { ctx } = createRouteDependencies();
@@ -58,5 +66,20 @@ describe('MatcherDataFieldsRoute', () => {
     await route.handle();
 
     expect(ctx.response.customError).toHaveBeenCalledTimes(1);
+  });
+
+  describe('MatcherDataFieldsResponseSchema validation', () => {
+    it('accepts an array of strings', () => {
+      expect(() => getResponseSchema().parse(['data.host.name', 'data.cpu'])).not.toThrow();
+    });
+    it('accepts an empty array', () => {
+      expect(() => getResponseSchema().parse([])).not.toThrow();
+    });
+    it('rejects a non-array body', () => {
+      expect(() => getResponseSchema().parse({ fields: [] })).toThrow();
+    });
+    it('rejects an array containing non-strings', () => {
+      expect(() => getResponseSchema().parse(['data.host.name', 42])).toThrow();
+    });
   });
 });

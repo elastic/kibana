@@ -167,6 +167,15 @@ apiTest.describe('Matcher data fields suggestions API', { tag: '@local-stateful-
     }
   );
 
+  apiTest('validation: rejects unexpected query params with a 400', async ({ apiClient }) => {
+    const response = await apiClient.get(`${DATA_FIELDS_PATH}?bogus=1`, {
+      headers: adminHeaders,
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(400);
+  });
+
   apiTest(
     'authorization: returns 200 for a user with read-only privileges',
     async ({ apiClient, requestAuth }) => {

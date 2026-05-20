@@ -20,6 +20,10 @@ const matcherDataFieldsQuerySchema = z.object({
   matcher: z.string().min(1).max(2048).optional(),
 });
 
+const matcherDataFieldsResponseSchema = z
+  .array(z.string())
+  .description('The list of available matcher data field names.');
+
 @injectable()
 export class MatcherDataFieldsRoute extends BaseAlertingRoute {
   static method = 'get' as const;
@@ -36,6 +40,15 @@ export class MatcherDataFieldsRoute extends BaseAlertingRoute {
   static validate = {
     request: {
       query: buildRouteValidationWithZod(matcherDataFieldsQuerySchema),
+    },
+    response: {
+      200: {
+        body: () => matcherDataFieldsResponseSchema,
+        describe: 'Returns the available matcher data field names.',
+      },
+      400: {
+        description: 'Indicates an invalid schema or parameters.',
+      },
     },
   } as const;
 
