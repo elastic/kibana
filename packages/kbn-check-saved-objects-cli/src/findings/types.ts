@@ -59,6 +59,10 @@ export interface SavedObjectsCheckFinding {
    * A value without a leading `#` or `/` will produce a malformed URL.
    */
   docsAnchor?: string;
+  /** GCS URL of the regular (merge-base) baseline snapshot that triggered this finding. */
+  baselineUrl?: string;
+  /** GCS URL of the serverless baseline snapshot that triggered this finding. */
+  serverlessBaselineUrl?: string;
 }
 
 export interface SavedObjectsCheckReport {
