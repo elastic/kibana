@@ -85,23 +85,15 @@ function createMockEngineDescriptor(
   overrides?: Partial<{
     lookbackPeriod: string;
     delay: string;
-    paginationTimestamp: string;
+    checkpointTimestamp: string;
     paginationId: string;
     lastExecutionTimestamp: string;
-    logsPageCursorStartTimestamp: string;
-    logsPageCursorStartId: string;
-    logsPageCursorEndTimestamp: string;
-    logsPageCursorEndId: string;
   }>
 ) {
   const logExtractionState = {
-    paginationTimestamp: overrides?.paginationTimestamp ?? null,
+    checkpointTimestamp: overrides?.checkpointTimestamp ?? null,
     paginationId: overrides?.paginationId ?? null,
     lastExecutionTimestamp: overrides?.lastExecutionTimestamp ?? null,
-    logsPageCursorStartTimestamp: overrides?.logsPageCursorStartTimestamp ?? null,
-    logsPageCursorStartId: overrides?.logsPageCursorStartId ?? null,
-    logsPageCursorEndTimestamp: overrides?.logsPageCursorEndTimestamp ?? null,
-    logsPageCursorEndId: overrides?.logsPageCursorEndId ?? null,
   };
   return {
     type,
@@ -246,12 +238,8 @@ describe('LogsExtractionClient', () => {
         'user',
         expect.objectContaining({
           logExtractionState: expect.objectContaining({
-            paginationTimestamp: null,
+            checkpointTimestamp: null,
             paginationId: null,
-            logsPageCursorStartTimestamp: null,
-            logsPageCursorStartId: null,
-            logsPageCursorEndTimestamp: null,
-            logsPageCursorEndId: null,
             lastExecutionTimestamp: expect.any(String),
           }),
         })
@@ -315,12 +303,8 @@ describe('LogsExtractionClient', () => {
         'user',
         expect.objectContaining({
           logExtractionState: expect.objectContaining({
-            paginationTimestamp: null,
+            checkpointTimestamp: null,
             paginationId: null,
-            logsPageCursorStartTimestamp: null,
-            logsPageCursorStartId: null,
-            logsPageCursorEndTimestamp: null,
-            logsPageCursorEndId: null,
             lastExecutionTimestamp: expect.any(String),
           }),
         })
@@ -370,11 +354,10 @@ describe('LogsExtractionClient', () => {
       jest.useRealTimers();
     });
 
-    it('on first log slice in a new extractLogs, boundary probe does not use persisted log-slice start (time window from lookback)', async () => {
+    it('uses lookback as extraction window from when no checkpoint set', async () => {
       const fixedNow = new Date('2025-01-15T12:00:00.000Z');
       jest.useFakeTimers({ now: fixedNow.getTime() });
 
-      const logPageCursorStart = '2025-01-15T06:00:00.000Z';
       const mockDataView = {
         getIndexPattern: jest.fn().mockReturnValue('logs-*'),
       };
@@ -389,10 +372,9 @@ describe('LogsExtractionClient', () => {
       mockGlobalStateClient.find.mockResolvedValue(globalStateWithDelay5s);
       mockGlobalStateClient.findOrThrow.mockResolvedValue(globalStateWithDelay5s);
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
-        createMockEngineDescriptor('user', {
-          logsPageCursorStartTimestamp: logPageCursorStart,
-          logsPageCursorStartId: 'cursor-doc',
-        }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
+        createMockEngineDescriptor('user') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
       mockExecuteEsqlQuery.mockResolvedValue(mockLogPaginationCursorProbeEmpty());
@@ -403,16 +385,14 @@ describe('LogsExtractionClient', () => {
       const lookbackFrom = moment.utc(fixedNow).subtract(3, 'hours').toISOString();
       const firstEsql = mockExecuteEsqlQuery.mock.calls[0][0].query;
       expect(firstEsql).toContain(lookbackFrom);
-      expect(firstEsql).not.toContain(logPageCursorStart);
 
       jest.useRealTimers();
     });
 
-    it('uses delayed lastExecution for extraction window from when set (first boundary probe, no persisted log-slice start)', async () => {
+    it('uses lastExecutionTimestamp as extraction window from when no checkpoint set', async () => {
       const fixedNow = new Date('2025-01-15T12:00:00.000Z');
       jest.useFakeTimers({ now: fixedNow.getTime() });
 
-      const logPageCursorStart = '2025-01-15T06:00:00.000Z';
       const lastExecutionTimestamp = '2025-01-15T11:00:00.000Z';
       const delayedLastExecution = moment.utc(fixedNow).subtract(5, 'seconds').toISOString();
 
@@ -430,11 +410,9 @@ describe('LogsExtractionClient', () => {
       mockGlobalStateClient.find.mockResolvedValue(globalStateWithDelay5s);
       mockGlobalStateClient.findOrThrow.mockResolvedValue(globalStateWithDelay5s);
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
-        createMockEngineDescriptor('user', {
-          logsPageCursorStartTimestamp: logPageCursorStart,
-          logsPageCursorStartId: 'cursor-doc',
-          lastExecutionTimestamp,
-        }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
+        createMockEngineDescriptor('user', { lastExecutionTimestamp }) as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
       mockExecuteEsqlQuery.mockResolvedValue(mockLogPaginationCursorProbeEmpty());
@@ -444,16 +422,15 @@ describe('LogsExtractionClient', () => {
 
       const firstEsql = mockExecuteEsqlQuery.mock.calls[0][0].query;
       expect(firstEsql).toContain(delayedLastExecution);
-      expect(firstEsql).not.toContain(logPageCursorStart);
 
       jest.useRealTimers();
     });
 
-    it('should use paginationTimestamp as from and subtract delay for to', async () => {
+    it('should use checkpointTimestamp as from and subtract delay for to', async () => {
       const fixedNow = new Date('2025-01-15T12:00:00.000Z');
       jest.useFakeTimers({ now: fixedNow.getTime() });
 
-      const paginationTimestamp = '2025-01-15T10:30:00.000Z';
+      const checkpointTimestamp = '2025-01-15T10:30:00.000Z';
 
       const mockDataView = {
         getIndexPattern: jest.fn().mockReturnValue('logs-*'),
@@ -463,7 +440,7 @@ describe('LogsExtractionClient', () => {
         createMockEngineDescriptor('user', {
           lookbackPeriod: '3h',
           delay: '1m',
-          paginationTimestamp,
+          checkpointTimestamp,
         }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
@@ -476,7 +453,7 @@ describe('LogsExtractionClient', () => {
 
       expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
         esClient: mockEsClient,
-        query: expect.stringContaining(paginationTimestamp),
+        query: expect.stringContaining(checkpointTimestamp),
       });
       expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
         esClient: mockEsClient,
@@ -520,14 +497,10 @@ describe('LogsExtractionClient', () => {
       expect(boundedQuery).toContain(`@timestamp >= TO_DATETIME("${fromDateISO}")`);
     });
 
-    it('on recovery, first boundary probe uses time window at paginationTimestamp (ignores persisted log-slice for first slice)', async () => {
+    it('on recovery, first boundary probe uses checkpointTimestamp as the window start', async () => {
       const fixedNow = new Date('2025-01-15T12:00:00.000Z');
       jest.useFakeTimers({ now: fixedNow.getTime() });
-      const paginationTimestamp = '2025-01-15T10:00:00.000Z';
-      const sliceStartTs = '2025-01-15T10:20:00.000Z';
-      const sliceStartId = 'log-slice-lower';
-      const sliceEndTs = '2025-01-15T10:45:00.000Z';
-      const sliceEndId = 'log-slice-upper';
+      const checkpointTimestamp = '2025-01-15T10:00:00.000Z';
       const mockDataView = {
         getIndexPattern: jest.fn().mockReturnValue('logs-*'),
       };
@@ -542,13 +515,9 @@ describe('LogsExtractionClient', () => {
         createMockEngineDescriptor('user', {
           lookbackPeriod: '3h',
           delay: '1m',
-          paginationTimestamp,
+          checkpointTimestamp,
           paginationId: 'entity-cursor',
           lastExecutionTimestamp: '2025-01-15T10:00:00.000Z',
-          logsPageCursorStartTimestamp: sliceStartTs,
-          logsPageCursorStartId: sliceStartId,
-          logsPageCursorEndTimestamp: sliceEndTs,
-          logsPageCursorEndId: sliceEndId,
         }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
@@ -560,8 +529,7 @@ describe('LogsExtractionClient', () => {
       expect(result.success).toBe(true);
       expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(3);
       const firstProbeQuery = mockExecuteEsqlQuery.mock.calls[0][0].query;
-      expect(firstProbeQuery).toContain(paginationTimestamp);
-      expect(firstProbeQuery).not.toContain(sliceStartTs);
+      expect(firstProbeQuery).toContain(checkpointTimestamp);
       jest.useRealTimers();
     });
 
@@ -600,12 +568,12 @@ describe('LogsExtractionClient', () => {
       const fixedNow = new Date('2025-01-15T11:00:00.000Z');
       jest.useFakeTimers({ now: fixedNow.getTime() });
 
-      const paginationTimestamp = '2025-01-15T12:00:00.000Z'; // after fixedNow
+      const checkpointTimestamp = '2025-01-15T12:00:00.000Z'; // after fixedNow
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
         createMockEngineDescriptor('user', {
           lookbackPeriod: '3h',
           delay: '1m',
-          paginationTimestamp,
+          checkpointTimestamp,
         }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
       );
       mockDataViewsService.get.mockResolvedValue({
@@ -845,12 +813,8 @@ describe('LogsExtractionClient', () => {
         'user',
         expect.objectContaining({
           logExtractionState: expect.objectContaining({
-            paginationTimestamp: null,
+            checkpointTimestamp: null,
             paginationId: null,
-            logsPageCursorStartTimestamp: null,
-            logsPageCursorStartId: null,
-            logsPageCursorEndTimestamp: null,
-            logsPageCursorEndId: null,
             lastExecutionTimestamp: expect.any(String),
           }),
           error: { message: ccsError.message, action: 'extractLogs' },
@@ -933,12 +897,8 @@ describe('LogsExtractionClient', () => {
         'host',
         expect.objectContaining({
           logExtractionState: expect.objectContaining({
-            paginationTimestamp: null,
+            checkpointTimestamp: null,
             paginationId: null,
-            logsPageCursorStartTimestamp: null,
-            logsPageCursorStartId: null,
-            logsPageCursorEndTimestamp: null,
-            logsPageCursorEndId: null,
             lastExecutionTimestamp: expect.any(String),
           }),
         })
@@ -1069,12 +1029,8 @@ describe('LogsExtractionClient', () => {
         const finalUpdate = mockEngineDescriptorClient.update.mock.calls.at(-1)!;
         expect(finalUpdate[1]).toHaveProperty('logExtractionState');
         expect(finalUpdate[1].logExtractionState).toMatchObject({
-          paginationTimestamp: null,
+          checkpointTimestamp: null,
           paginationId: null,
-          logsPageCursorStartTimestamp: null,
-          logsPageCursorStartId: null,
-          logsPageCursorEndTimestamp: null,
-          logsPageCursorEndId: null,
           lastExecutionTimestamp: effectiveWindowEnd,
         });
 
@@ -1109,7 +1065,7 @@ describe('LogsExtractionClient', () => {
         const finalUpdate = mockEngineDescriptorClient.update.mock.calls.at(-1)!;
         expect(finalUpdate[1]).toHaveProperty('logExtractionState');
         expect(finalUpdate[1].logExtractionState).toMatchObject({
-          paginationTimestamp: null,
+          checkpointTimestamp: null,
           lastExecutionTimestamp: expect.any(String),
         });
 
@@ -1194,7 +1150,7 @@ describe('LogsExtractionClient', () => {
       // `isFirstRunInThisCycle=true` on the first outer-loop iteration always passes
       // `logsPageCursorStart=undefined` to the probe, so stall detection is inactive on iteration 1.
       // Stall can only fire from iteration 2 onward (once `isFirstRunInThisCycle` is cleared).
-      // Tests therefore use two slice iterations: slice 1 advances `logsPageCursorStartTimestamp`
+      // Tests therefore use two slice iterations: slice 1 advances `checkpointTimestamp`
       // via `advanceEngineStateAfterLogPageCompletes`, and slice 2 is the stall candidate.
       // Using total=LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT for the stall probe sets
       // `isLastLogsPage=true`, ending the loop cleanly without a third terminal probe.
@@ -1233,12 +1189,12 @@ describe('LogsExtractionClient', () => {
         expect(mockLogger.warn).toHaveBeenCalledWith(
           expect.stringContaining(`Log-slice probe stalled at ${stalledTs}`)
         );
-        // After the stall bump, a later update persists logsPageCursorStartTimestamp = bumpedTs.
+        // After the stall bump, a later update persists checkpointTimestamp = bumpedTs.
         const updateCalls = (mockEngineDescriptorClient.update as jest.Mock).mock.calls;
-        const persistedStartTimestamps = updateCalls
-          .map(([, patch]) => patch?.logExtractionState?.logsPageCursorStartTimestamp)
+        const persistedCheckpoints = updateCalls
+          .map(([, patch]) => patch?.logExtractionState?.checkpointTimestamp)
           .filter((ts) => ts != null);
-        expect(persistedStartTimestamps).toContain(bumpedTs);
+        expect(persistedCheckpoints).toContain(bumpedTs);
       });
 
       it('does not warn when timestamp advances between slices', async () => {
@@ -1353,12 +1309,8 @@ describe('LogsExtractionClient', () => {
           'user',
           expect.objectContaining({
             logExtractionState: {
-              paginationTimestamp: null,
+              checkpointTimestamp: null,
               paginationId: null,
-              logsPageCursorStartTimestamp: null,
-              logsPageCursorStartId: null,
-              logsPageCursorEndTimestamp: null,
-              logsPageCursorEndId: null,
               lastExecutionTimestamp: effectiveWindowEnd,
             },
           })
@@ -1817,7 +1769,7 @@ describe('LogsExtractionClient', () => {
       });
     });
 
-    it('should pass persisted log-slice start into remaining-count ESQL when present on engine', async () => {
+    it('should use checkpointTimestamp as both window start and log-slice lower bound in remaining-count ESQL', async () => {
       const fixedNow = new Date('2025-01-15T12:00:00.000Z');
       jest.useFakeTimers({ now: fixedNow.getTime() });
       const mockEsqlResponse: ESQLSearchResponse = {
@@ -1827,16 +1779,12 @@ describe('LogsExtractionClient', () => {
       const mockDataView = {
         getIndexPattern: jest.fn().mockReturnValue('logs-*'),
       };
-      const paginationTimestamp = '2025-01-15T10:00:00.000Z';
-      const sliceStartId = 'slice-start';
-      const sliceStartTs = '2025-01-15T10:20:00.000Z';
+      const checkpointTimestamp = '2025-01-15T10:20:00.000Z';
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
         createMockEngineDescriptor('user', {
           lookbackPeriod: '3h',
           delay: '1m',
-          paginationTimestamp,
-          logsPageCursorStartTimestamp: sliceStartTs,
-          logsPageCursorStartId: sliceStartId,
+          checkpointTimestamp,
         }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
@@ -1846,11 +1794,7 @@ describe('LogsExtractionClient', () => {
       expect(result).toBe(3);
       expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
         esClient: mockEsClient,
-        query: expect.stringContaining(paginationTimestamp),
-      });
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
-        esClient: mockEsClient,
-        query: expect.stringContaining(sliceStartTs),
+        query: expect.stringContaining(checkpointTimestamp),
       });
       jest.useRealTimers();
     });

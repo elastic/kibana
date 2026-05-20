@@ -63,12 +63,8 @@ import type { LogExtractionUpdateParams } from '../../routes/constants';
 /** Engine state with all cursor fields cleared. Used between sub-window iterations so a fresh
  * sub-window does not re-trigger recovery from cursors persisted by an earlier sub-window. */
 const FRESH_ENGINE_LOG_EXTRACTION_STATE: EngineLogExtractionState = {
-  paginationTimestamp: null,
+  checkpointTimestamp: null,
   paginationId: null,
-  logsPageCursorStartTimestamp: null,
-  logsPageCursorStartId: null,
-  logsPageCursorEndTimestamp: null,
-  logsPageCursorEndId: null,
   lastExecutionTimestamp: null,
 };
 
@@ -194,12 +190,8 @@ export class LogsExtractionClient {
       } else {
         await this.engineDescriptorClient.update(type, {
           logExtractionState: {
-            paginationTimestamp: null,
+            checkpointTimestamp: null,
             paginationId: null,
-            logsPageCursorStartTimestamp: null,
-            logsPageCursorStartId: null,
-            logsPageCursorEndTimestamp: null,
-            logsPageCursorEndId: null,
             lastExecutionTimestamp: lastSearchTimestamp || moment().utc().toISOString(),
           },
           error: ccsError ? { message: ccsError.message, action: 'extractLogs' } : null,
@@ -231,9 +223,7 @@ export class LogsExtractionClient {
       );
       const { fromDateISO } = resolveMainExtractionWindow({ config, engineState });
       const toDateISO = moment().utc().toISOString();
-      const logsPageCursorStart = paginationFromOptionalFields(
-        engineState.logsPageCursorStartTimestamp
-      );
+      const logsPageCursorStart = paginationFromOptionalFields(engineState.checkpointTimestamp);
       const query = buildRemainingLogsCountQuery({
         indexPatterns,
         type,
@@ -536,8 +526,8 @@ export class LogsExtractionClient {
     let recoveryId = initialEngineState.paginationId ?? undefined;
     if (recoveryId) {
       this.logger.warn(
-        `Resuming with paginationId ${recoveryId} and extraction window from ${fromDateISO} (entity pagination at ${
-          state.paginationTimestamp ?? 'n/a'
+        `Resuming with paginationId ${recoveryId} and extraction window from ${fromDateISO} (checkpoint at ${
+          state.checkpointTimestamp ?? 'n/a'
         }).`
       );
     }
@@ -548,13 +538,13 @@ export class LogsExtractionClient {
       let isFirstRunInThisCycle = true;
       do {
         const entityPagination: PaginationParams | undefined =
-          state.paginationTimestamp && state.paginationId
-            ? { timestampCursor: state.paginationTimestamp, idCursor: state.paginationId }
+          state.checkpointTimestamp && state.paginationId
+            ? { timestampCursor: state.checkpointTimestamp, idCursor: state.paginationId }
             : undefined;
         // always find a new cursor via probe on first run
         const logsPageCursorStart = isFirstRunInThisCycle
           ? undefined
-          : paginationFromOptionalFields(state.logsPageCursorStartTimestamp);
+          : paginationFromOptionalFields(state.checkpointTimestamp);
 
         const probe = await this.runLogPaginationCursorProbeForNextPage({
           indexPatterns,
@@ -583,12 +573,6 @@ export class LogsExtractionClient {
           logsPageCursorEnd = bumpedCursorEnd;
         } else {
           totalLogs += probe.sliceLogCount;
-
-          state = {
-            ...state,
-            logsPageCursorEndTimestamp: logsPageCursorEnd.timestampCursor,
-            logsPageCursorEndId: null,
-          };
 
           const sliceIngestOutcome = await this.ingestEntityPagesWithinCurrentLogPage({
             type,
@@ -793,12 +777,8 @@ export class LogsExtractionClient {
       if (pagination) {
         state = {
           ...state,
-          paginationTimestamp: pagination.timestampCursor,
+          checkpointTimestamp: pagination.timestampCursor,
           paginationId: pagination.idCursor,
-          logsPageCursorEndTimestamp: logsPageCursorEnd.timestampCursor,
-          logsPageCursorEndId: null,
-          logsPageCursorStartTimestamp: logsPageCursorStart?.timestampCursor ?? null,
-          logsPageCursorStartId: null,
         };
         await this.persistMainLogExtractionStateIfNotManualWindow(type, opts, state);
       }
@@ -808,7 +788,7 @@ export class LogsExtractionClient {
   }
 
   /**
-   * After all entity pages for a slice: drop entity + slice-end fields and move the exclusive raw-log cursor to the slice end.
+   * After all entity pages for a slice: drop entity + slice-end fields and advance the log-slice cursor to the slice end.
    */
   private advanceEngineStateAfterLogPageCompletes(
     state: EngineLogExtractionState,
@@ -816,13 +796,8 @@ export class LogsExtractionClient {
   ): EngineLogExtractionState {
     return {
       ...state,
-      // this is the leading state for the next log page if we break in the middle of the processing
-      paginationTimestamp: logsPageCursorEnd.timestampCursor,
+      checkpointTimestamp: logsPageCursorEnd.timestampCursor,
       paginationId: null,
-      logsPageCursorEndTimestamp: null,
-      logsPageCursorEndId: null,
-      logsPageCursorStartTimestamp: logsPageCursorEnd.timestampCursor,
-      logsPageCursorStartId: null,
     };
   }
 
