@@ -78,6 +78,26 @@ const ebtAction = {
     SUBSCRIPTION_PLANS: 'subscription_plans',
     MANAGE_LICENSE: 'manage_license',
   },
+  libraryPanel: {
+    MANAGE_ALL: 'manage_all',
+    VIEW_IN_LIBRARY: 'view_in_library',
+    SORT_FILTER_OPEN: 'library_sort_filter_open',
+    SORT_ASC: 'sort_asc',
+    SORT_DESC: 'sort_desc',
+    FILTER_ALL: 'filter_all',
+    FILTER_ACTIVE: 'filter_active',
+    FILTER_ELASTIC: 'filter_elastic',
+    FILTER_CUSTOM: 'filter_custom',
+    EMPTY_STATE_OPEN_LIBRARY: 'empty_state_open_library',
+    EMPTY_STATE_MANAGE_ALL: 'empty_state_manage_all',
+    CROSS_NAV_LINK: 'cross_nav_link',
+    FLYOUT_SAVE: 'form_save',
+    FLYOUT_CANCEL: 'form_cancel',
+    SKILL_TOOL_CLICK: 'skill_tool_click',
+    INSTALL_PLUGIN_TAB: 'install_plugin_tab',
+    INSTALL_PLUGIN_SUBMIT: 'install_plugin_submit',
+    LEARN_MORE_DOCS: 'learn_more_docs',
+  },
 } as const;
 
 const ebtDetail = {

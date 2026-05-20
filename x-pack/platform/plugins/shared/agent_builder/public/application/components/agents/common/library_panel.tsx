@@ -21,6 +21,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { LibraryToggleRow } from './library_toggle_row';
 import { LibrarySortFilterButton } from './library_sort_filter_button';
@@ -120,6 +122,11 @@ export const LibraryPanel = <T extends LibraryItem>({
                 margin-top: ${euiTheme.size.m};
                 font-size: ${euiTheme.size.m};
               `}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.flyout,
+                action: AGENT_BUILDER_UI_EBT.action.libraryPanel.MANAGE_ALL,
+                detail: ebtEntityType ?? '',
+              })}
             >
               {libraryLabels.manageLibraryLink}
             </EuiLink>
@@ -144,6 +151,7 @@ export const LibraryPanel = <T extends LibraryItem>({
               filterMode={filterMode}
               onFilterChange={setFilterMode}
               filterCounts={filterCounts}
+              ebtEntityType={ebtEntityType}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

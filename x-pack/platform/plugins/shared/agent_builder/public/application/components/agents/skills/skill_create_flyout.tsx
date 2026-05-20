@@ -24,7 +24,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormProvider } from 'react-hook-form';
-import type { PublicSkillDefinition } from '@kbn/agent-builder-common';
+import { type PublicSkillDefinition, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { labels } from '../../../utils/i18n';
 import { useCreateSkill } from '../../../hooks/skills/use_create_skill';
 import { useSkillForm } from '../../../hooks/skills/use_skill_form';
@@ -91,7 +92,15 @@ export const SkillCreateFlyout: React.FC<SkillCreateFlyoutProps> = ({
           <h2 id="skillCreateFlyoutTitle">{labels.agentSkills.createSkillFlyoutTitle}</h2>
         </EuiTitle>
         <EuiSpacer size="xs" />
-        <EuiLink href={skillLibraryUrl} target="_blank">
+        <EuiLink
+          href={skillLibraryUrl}
+          target="_blank"
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.flyout,
+            action: AGENT_BUILDER_UI_EBT.action.libraryPanel.VIEW_IN_LIBRARY,
+            detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+          })}
+        >
           {labels.agentSkills.viewSkillLibraryLink}
         </EuiLink>
       </EuiFlyoutHeader>
@@ -114,7 +123,16 @@ export const SkillCreateFlyout: React.FC<SkillCreateFlyoutProps> = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose}>{labels.skills.cancelButtonLabel}</EuiButtonEmpty>
+            <EuiButtonEmpty
+              onClick={onClose}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.flyout,
+                action: AGENT_BUILDER_UI_EBT.action.libraryPanel.FLYOUT_CANCEL,
+                detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+              })}
+            >
+              {labels.skills.cancelButtonLabel}
+            </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
@@ -122,6 +140,11 @@ export const SkillCreateFlyout: React.FC<SkillCreateFlyoutProps> = ({
               onClick={handleSubmit(onSubmit)}
               isLoading={isSubmitting}
               disabled={hasErrors || isSubmitting}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.flyout,
+                action: AGENT_BUILDER_UI_EBT.action.libraryPanel.FLYOUT_SAVE,
+                detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+              })}
             >
               {labels.skills.saveButtonLabel}
             </EuiButton>
