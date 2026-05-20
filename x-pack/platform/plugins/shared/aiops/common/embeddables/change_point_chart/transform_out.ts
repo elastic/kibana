@@ -27,10 +27,10 @@ export function transformOut(
   const state = transformsFlow(storedState) as StoredChangePointChartEmbeddableState &
     LegacyChangePointChartFields;
 
-  const dataViewId = references?.find(
-    (ref) => ref.name === CHANGE_POINT_CHART_DATA_VIEW_REF_NAME
-  )?.id;
   const normalized = normalizeChangePointChartLegacyFields(state);
+  const dataViewId =
+    references?.find((ref) => ref.name === CHANGE_POINT_CHART_DATA_VIEW_REF_NAME)?.id ??
+    normalized.data_view_id;
 
   if (!dataViewId) {
     throw new Error('Invalid change point chart embeddable state: missing data_view_id reference');
