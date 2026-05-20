@@ -286,10 +286,10 @@ export class VisualBuilderPageObject extends FtrService {
   public async changeDataFormatter(
     formatter: 'default' | 'bytes' | 'number' | 'percent' | 'duration' | 'custom'
   ) {
-    const prevCount = await this.visChart.getVisualizationRenderingCount();
     await this.testSubjects.click('tsvbDataFormatPicker');
     await this.testSubjects.click(`tsvbDataFormatPicker-${formatter}`);
-    await this.visChart.waitForRenderingCount(prevCount + 1);
+    // Two clicks (open + select) can each trigger a render; use stabilization to wait for both
+    await this.visChart.waitForVisualizationRenderingStabilized();
   }
 
   public async setDrilldownUrl(value: string) {
@@ -704,7 +704,6 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async setBackgroundColor(colorHex: string): Promise<void> {
-    const prevCount = await this.visChart.getVisualizationRenderingCount();
     await this.clickColorPicker();
     await this.checkColorPickerPopUpIsPresent();
     await this.testSubjects.setValue('euiColorPickerInput_top', colorHex, {
@@ -712,7 +711,8 @@ export class VisualBuilderPageObject extends FtrService {
       typeCharByChar: true,
     });
     await this.clickColorPicker();
-    await this.visChart.waitForRenderingCount(prevCount + 1);
+    // Open + char-by-char type + close can each trigger renders; use stabilization
+    await this.visChart.waitForVisualizationRenderingStabilized();
   }
 
   public async checkColorPickerPopUpIsPresent(): Promise<void> {
@@ -721,7 +721,6 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async setColorPickerValue(colorHex: string, nth: number = 0): Promise<void> {
-    const prevCount = await this.visChart.getVisualizationRenderingCount();
     await this.clickColorPicker(nth);
     await this.checkColorPickerPopUpIsPresent();
     await this.testSubjects.setValue('euiColorPickerInput_top', colorHex, {
@@ -729,7 +728,8 @@ export class VisualBuilderPageObject extends FtrService {
       typeCharByChar: true,
     });
     await this.clickColorPicker(nth);
-    await this.visChart.waitForRenderingCount(prevCount + 1);
+    // Open + char-by-char type + close can each trigger renders; use stabilization
+    await this.visChart.waitForVisualizationRenderingStabilized();
   }
 
   public async setColorRuleOperator(condition: string): Promise<void> {
