@@ -13,6 +13,7 @@ export type {
   InlineRenderCallbacks,
   GetActionButtonsParams,
   ActionButton,
+  ActionButtonColor,
   AttachmentPreviewState,
   AttachmentLifecycleParams,
 } from './contract';
