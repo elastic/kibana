@@ -11,9 +11,9 @@ import {
   DURATION_FIELDS,
   EVENT_OUTCOME_FIELD,
   OTEL_DURATION,
-  OTEL_EVENT_NAME_FIELD,
   OTEL_SPAN_KIND,
   OTEL_STATUS_CODE,
+  PROCESSOR_EVENT_FIELD,
   SERVICE_NAME_FIELD,
   SPAN_NAME_FIELD,
   TIMESTAMP_FIELD,
@@ -30,13 +30,15 @@ const OTEL_TRACE_FIELDS = [
   OTEL_SPAN_KIND,
   OTEL_DURATION,
   OTEL_STATUS_CODE,
-  OTEL_EVENT_NAME_FIELD,
 ];
 
 const ALL_TRACE_FIELDS = Array.from(new Set([...ECS_TRACE_FIELDS, ...OTEL_TRACE_FIELDS]));
 
-const isOtelTraces = (columns: Array<{ name: string }> | undefined): boolean => {
+const isUnprocessedOtelTraces = (columns: Array<{ name: string }> | undefined): boolean => {
   if (!columns?.length) return false;
+  // processor.event is set by APM Server — its presence means the user opted into the APM/ECS experience.
+  const isApmProcessed = columns.some((col) => col.name === PROCESSOR_EVENT_FIELD);
+  if (isApmProcessed) return false;
   return columns.some(
     (col) =>
       col.name === OTEL_SPAN_KIND ||
@@ -47,17 +49,16 @@ const isOtelTraces = (columns: Array<{ name: string }> | undefined): boolean => 
 
 export const getDeepAnalysisPlaybook: DataSourceProfileProvider['profile']['getDeepAnalysisPlaybook'] =
   () => (params) => {
-    if (isOtelTraces(params.columns)) {
+    if (isUnprocessedOtelTraces(params.columns)) {
       return {
         shapeId: 'traces-otel',
         shapeLabel: 'OTel traces & spans',
         characteristicFields: ALL_TRACE_FIELDS,
         guidance:
           `This dataset is OTel traces. Deep analysis means latency (p50/p95/p99 of ${OTEL_DURATION}), ` +
-          `throughput grouped by ${SERVICE_NAME_FIELD} and ${OTEL_SPAN_KIND} or ${OTEL_EVENT_NAME_FIELD}, ` +
+          `throughput grouped by ${SERVICE_NAME_FIELD} and ${OTEL_SPAN_KIND}, ` +
           `and error rate via ${OTEL_STATUS_CODE}='ERROR'. ` +
-          `Group by ${SERVICE_NAME_FIELD} then by ${OTEL_EVENT_NAME_FIELD} or ${OTEL_SPAN_KIND}; ` +
-          'never group by trace/span ids.',
+          `Group by ${SERVICE_NAME_FIELD} then by ${OTEL_SPAN_KIND}; never group by trace/span ids.`,
         interestingSignals: [
           'latency outliers per service (p99 vs p50 spread)',
           `spans where ${OTEL_STATUS_CODE}=ERROR`,

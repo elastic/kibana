@@ -42,9 +42,22 @@ describe('getDeepAnalysisPlaybook (traces)', () => {
     expect(result?.shapeId).toBe('traces-otel');
     expect(result?.shapeLabel).toMatch(/OTel/);
     expect(result?.guidance).toContain('status.code');
-    expect(result?.guidance).toContain('event_name');
+    expect(result?.guidance).toContain('kind');
     expect(result?.guidance).not.toContain('event.outcome');
     expect(result?.guidance.length).toBeLessThanOrEqual(600);
+  });
+
+  it('returns the ECS contribution when OTel signals coexist with processor.event (APM-processed)', () => {
+    const result = invokeWith([
+      { name: '@timestamp', type: 'date' },
+      { name: 'kind', type: 'keyword' },
+      { name: 'duration', type: 'long' },
+      { name: 'processor.event', type: 'keyword' },
+      { name: 'transaction.name', type: 'keyword' },
+    ]);
+
+    expect(result?.shapeId).toBe('traces');
+    expect(result?.shapeLabel).toMatch(/ECS/);
   });
 
   it('returns the OTel contribution when columns include `attributes.*`', () => {
@@ -71,7 +84,6 @@ describe('getDeepAnalysisPlaybook (traces)', () => {
         'kind',
         'duration',
         'status.code',
-        'event_name',
       ])
     );
   });
