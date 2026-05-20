@@ -44,7 +44,6 @@ Flattened field [alert.actions.params] contains one immense field whose keyed en
 
 If the upgrade has failed with this error, identify rules that use connectors with large content (particularly email, webhook, and Slack connectors) and shorten the action parameter values, such as message bodies or HTML templates. Then retry the upgrade.
 
-To check rule action parameter sizes before upgrading, query the `.kibana_alerting_cases_*` index directly in {{es}} and inspect the `alert.actions.params` fields for any values that approach or exceed 32,766 bytes.
 
 ::::
 
