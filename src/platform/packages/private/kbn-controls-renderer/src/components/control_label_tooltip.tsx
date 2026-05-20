@@ -54,10 +54,10 @@ export const ControlLabelTooltip = ({
         })
       : isIndicatingRelatedPanels
       ? i18n.translate('controls.controlGroup.clickToStopHighlighting', {
-          defaultMessage: 'Click to stop highlighting panels.',
+          defaultMessage: 'Unselect to stop highlighting panels.',
         })
       : i18n.translate('controls.controlGroup.clickToHighlight', {
-          defaultMessage: 'Click to highlight panels.',
+          defaultMessage: 'Select to highlight panels.',
         });
 
   const tooltipProps = canIndicateRelatedPanels
