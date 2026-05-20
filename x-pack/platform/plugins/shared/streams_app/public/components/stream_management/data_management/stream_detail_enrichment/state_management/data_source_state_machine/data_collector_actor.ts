@@ -12,6 +12,7 @@ import {
   ensureMetadata,
   getParentId,
   isDraftStream,
+  isRecord,
   mergeSourceIntoDocuments,
   Streams,
   stripOtelAliases,
@@ -25,7 +26,7 @@ import type { EsQueryConfig, Filter, Query, TimeRange } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { getESQLResults } from '@kbn/esql-utils';
-import { Observable, filter, from, map, of, switchMap, tap } from 'rxjs';
+import { Observable, catchError, filter, from, map, of, switchMap, tap, throwError } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import { pick } from 'lodash';
@@ -370,6 +371,36 @@ function collectEsqlSamples({
   });
 }
 
+const MIN_SAMPLE_SIZE = 1;
+
+/**
+ * Returns true when the Kibana search response carries the ES
+ * "async search response too large" error inside its attributes.
+ * The error arrives as a resolved (non-thrown) response with
+ * attributes.error.reason containing "max_async_search_response_size".
+ */
+function isAsyncSearchResponseTooLargeError(error: unknown): boolean {
+  if (!isRecord(error)) return false;
+  const attributes = (error as { attributes?: unknown }).attributes;
+  if (!isRecord(attributes)) return false;
+  const esError = (attributes as { error?: unknown }).error;
+  if (isRecord(esError)) {
+    const reason: unknown = (esError as { reason?: unknown }).reason;
+    if (typeof reason === 'string' && reason.includes('max_async_search_response_size')) {
+      return true;
+    }
+  }
+  // Also check meta.body path for direct ES client errors
+  const meta = (error as { meta?: unknown }).meta;
+  if (isRecord(meta)) {
+    const bodyError = (meta as { body?: { error?: { reason?: unknown } } }).body?.error?.reason;
+    if (typeof bodyError === 'string' && bodyError.includes('max_async_search_response_size')) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function collectKqlData({
   data,
   telemetryClient,
@@ -380,13 +411,30 @@ function collectKqlData({
 }: CollectKqlDataParams): Observable<SampleDocument[]> {
   const abortController = new AbortController();
   const esQueryConfig = getEsQueryConfig(uiSettings);
-  const params = buildSamplesSearchParams(searchParams, dataSourceType, esQueryConfig);
+
+  const fetchWithSize = (size: number): Observable<SampleDocument[]> => {
+    const params = buildSamplesSearchParams(
+      { ...searchParams, size },
+      dataSourceType,
+      esQueryConfig
+    );
+
+    return data.search.search({ params }, { abortSignal: abortController.signal }).pipe(
+      filter(isValidSearchResult),
+      map(extractDocumentsFromResult),
+      catchError((error: unknown) => {
+        if (isAsyncSearchResponseTooLargeError(error) && size > MIN_SAMPLE_SIZE) {
+          return fetchWithSize(Math.max(MIN_SAMPLE_SIZE, Math.floor(size / 2)));
+        }
+        return throwError(() => error);
+      })
+    );
+  };
 
   return new Observable((observer) => {
     let registerFetchLatency: () => void = () => {};
 
-    const subscription = data.search
-      .search({ params }, { abortSignal: abortController.signal })
+    const subscription = fetchWithSize(searchParams.size ?? 100)
       .pipe(
         tap({
           subscribe: () => {
@@ -399,9 +447,7 @@ function collectKqlData({
           finalize: () => {
             registerFetchLatency();
           },
-        }),
-        filter(isValidSearchResult),
-        map(extractDocumentsFromResult)
+        })
       )
       .subscribe(observer);
 

@@ -9,6 +9,7 @@ import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unif
 import {
   commentAttachmentType,
   lensAttachmentType,
+  stackAlertAttachmentType,
   fileAttachmentType,
 } from '../attachment_framework/attachments';
 
@@ -16,4 +17,5 @@ export const registerInternalAttachments = (unifiedRegistry: UnifiedAttachmentTy
   unifiedRegistry.register(fileAttachmentType);
   unifiedRegistry.register(lensAttachmentType);
   unifiedRegistry.register(commentAttachmentType);
+  unifiedRegistry.register(stackAlertAttachmentType);
 };

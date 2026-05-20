@@ -7,10 +7,16 @@
 
 import { stringify as yamlStringify } from 'yaml';
 import type { z } from '@kbn/zod/v4';
-import { FieldType, type FieldSchema } from '../../../../common/types/domain/template/fields';
+import {
+  FieldType,
+  isRefField,
+  type FieldSchema,
+  type RefField,
+} from '../../../../common/types/domain/template/fields';
 import type { ParsedTemplate } from '../../../../common/types/domain/template/v1';
 
 type Field = z.infer<typeof FieldSchema>;
+type InlineField = Exclude<Field, RefField>;
 
 const yamlString = (value: string | number | undefined | null) => {
   if (value == null) {
@@ -145,7 +151,7 @@ const serializeUserPickerMetadata = (
   }
 };
 
-const serializeFieldMetadata = (out: string[], field: Field) => {
+const serializeFieldMetadata = (out: string[], field: InlineField) => {
   if (field.control === FieldType.SELECT_BASIC) {
     serializeSelectMetadata(out, field);
     return;
@@ -193,12 +199,12 @@ const serializeNestedYaml = (out: string[], key: string, value: object) => {
   }
 };
 
-const serializeDisplay = (out: string[], field: Field) => {
+const serializeDisplay = (out: string[], field: InlineField) => {
   if (!field.display) return;
   serializeNestedYaml(out, 'display', field.display);
 };
 
-const serializeValidation = (out: string[], field: Field) => {
+const serializeValidation = (out: string[], field: InlineField) => {
   if (!field.validation) return;
   const defined = Object.fromEntries(
     Object.entries(field.validation).filter(([, v]) => v !== undefined)
@@ -207,7 +213,39 @@ const serializeValidation = (out: string[], field: Field) => {
   serializeNestedYaml(out, 'validation', defined);
 };
 
+const serializeRefDefault = (
+  out: string[],
+  defaultValue: NonNullable<RefField['metadata']>['default']
+) => {
+  if (defaultValue === undefined) return;
+  out.push(`      metadata:`);
+  if (Array.isArray(defaultValue)) {
+    out.push(`        default:`);
+    for (const item of defaultValue) {
+      if (typeof item === 'string') {
+        out.push(`          - ${yamlString(item)}`);
+      } else {
+        out.push(`          - uid: ${yamlString(item.uid)}`);
+        out.push(`            name: ${yamlString(item.name)}`);
+      }
+    }
+    return;
+  }
+  out.push(`        default: ${yamlString(defaultValue)}`);
+};
+
 const serializeField = (out: string[], field: Field) => {
+  if (isRefField(field)) {
+    if (field.name !== undefined) {
+      out.push(`    - name: ${yamlString(field.name)}`);
+      out.push(`      $ref: ${yamlString(field.$ref)}`);
+    } else {
+      out.push(`    - $ref: ${yamlString(field.$ref)}`);
+    }
+    serializeRefDefault(out, field.metadata?.default);
+    out.push('');
+    return;
+  }
   out.push(`    - name: ${yamlString(field.name)}`);
   if (field.label) {
     out.push(`      label: ${yamlString(field.label)}`);

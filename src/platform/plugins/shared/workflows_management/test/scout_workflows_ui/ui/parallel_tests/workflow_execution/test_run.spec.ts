@@ -13,6 +13,7 @@ import { spaceTest as test } from '../../fixtures';
 import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
 import { EXECUTION_TIMEOUT } from '../../fixtures/constants';
 import { getTestRunWorkflowYaml, getWorkflowWithLoopYaml } from '../../fixtures/workflows';
+import { getWorkflowWithEventInputYaml } from '../../fixtures/workflows/console_workflows';
 
 test.describe('Workflow execution - Test runs', { tag: [...tags.stateful.classic] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
@@ -151,5 +152,48 @@ test.describe('Workflow execution - Test runs', { tag: [...tags.stateful.classic
     const dataViewer = stepDetails.getByTestId('workflowJsonDataViewer');
     await dataViewer.waitFor({ state: 'visible' });
     await expect(dataViewer).toContainText('Test run: false, timestamp: now');
+  });
+
+  test('should allow providing "event" in manual inputs', async ({ pageObjects, page }) => {
+    const workflowName = 'Test Workflow Event Input';
+
+    const testEvent = {
+      eventId: '12345',
+      eventType: 'test_event',
+    };
+    const testInputs = {
+      message: 'hello world',
+    };
+
+    await pageObjects.workflowEditor.gotoNewWorkflow();
+    await pageObjects.workflowEditor.setYamlEditorValue(
+      getWorkflowWithEventInputYaml(workflowName)
+    );
+    await pageObjects.workflowEditor.saveWorkflow();
+
+    // Navigate to the step and click the inline "run step" button.
+    await pageObjects.workflowEditor.runButton.click();
+    await page.testSubj.waitForSelector('workflowExecuteModal', { state: 'visible' });
+    await pageObjects.workflowEditor.setExecuteModalInputs({
+      event: testEvent,
+      ...testInputs,
+    });
+
+    await page.testSubj.click('executeWorkflowButton');
+
+    await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
+
+    await pageObjects.workflowExecution.expandStepsTree();
+    await pageObjects.workflowExecution.getStep('log_event').then((step) => step.click());
+    const logEventStepOutput = await pageObjects.workflowExecution.getStepResultJson<string>(
+      'output'
+    );
+    expect(JSON.parse(logEventStepOutput)).toStrictEqual(testEvent);
+
+    await pageObjects.workflowExecution.getStep('log_inputs').then((step) => step.click());
+    const logInputsStepOutput = await pageObjects.workflowExecution.getStepResultJson<string>(
+      'output'
+    );
+    expect(JSON.parse(logInputsStepOutput)).toStrictEqual(testInputs);
   });
 });

@@ -290,7 +290,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
                   panelPaddingSize="none"
                   anchorPosition="downLeft"
                 >
-                  <EuiContextMenuPanel size="s" items={hiddenSubCategoriesItems} />
+                  <EuiContextMenuPanel items={hiddenSubCategoriesItems} />
                 </EuiPopover>
               </EuiFlexItem>
             ) : null}

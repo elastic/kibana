@@ -22,12 +22,14 @@ export const useCaseAlertActionItems = ({
   alert,
   cases,
   refresh,
+  onAddToCase,
   onActionExecuted,
   owner = ['cases'],
 }: {
   alert: Alert;
   cases?: CasesService;
   refresh: () => void;
+  onAddToCase?: (opts: { isNewCase: boolean }) => void;
   onActionExecuted?: () => void;
   owner?: CasesOwner[];
 }): React.ReactElement[] => {
@@ -36,7 +38,7 @@ export const useCaseAlertActionItems = ({
   const { handleAddToExistingCaseClick, handleAddToNewCaseClick } = useCaseActions({
     alerts: [alert],
     cases,
-    onAddToCase: refresh,
+    onAddToCase: onAddToCase ?? refresh,
   });
 
   return useMemo(() => {
@@ -52,7 +54,6 @@ export const useCaseAlertActionItems = ({
           handleAddToExistingCaseClick();
           onActionExecuted?.();
         }}
-        size="s"
       >
         {ADD_TO_EXISTING_CASE}
       </EuiContextMenuItem>,
@@ -63,7 +64,6 @@ export const useCaseAlertActionItems = ({
           handleAddToNewCaseClick();
           onActionExecuted?.();
         }}
-        size="s"
       >
         {ADD_TO_NEW_CASE}
       </EuiContextMenuItem>,

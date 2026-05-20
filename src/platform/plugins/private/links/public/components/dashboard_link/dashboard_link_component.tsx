@@ -149,7 +149,6 @@ export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLin
 
   return (
     <EuiListGroupItem
-      size="s"
       color="text"
       {...onClickProps}
       id={id}

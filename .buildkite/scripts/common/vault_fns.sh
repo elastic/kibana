@@ -59,6 +59,17 @@ vault_set() {
   retry 5 5 vault write "$fullPath" ${fields[@]}
 }
 
+vault_kv_get() {
+  local kv_path=${1:-}
+  local field=${2:-}
+
+  if [[ -z "$field" || "$field" =~ ^-.* ]]; then
+    retry 5 5 vault kv get "$kv_path" "${@:2}"
+  else
+    retry 5 5 vault kv get -field="$field" "$kv_path" "${@:3}"
+  fi
+}
+
 vault_kv_set() {
   kv_path=$1
   shift
