@@ -567,6 +567,7 @@ const ESQLEditorInternal = function ESQLEditor({
     notifications: core.notifications,
     isEnabled: isNlToEsqlEnabled,
     clearGhostHintRef,
+    telemetryService,
   });
 
   const onGenerateFromCommentRef = useRef(onGenerateFromComment);
@@ -627,6 +628,7 @@ const ESQLEditorInternal = function ESQLEditor({
     http: core.http,
     notifications: core.notifications,
     isEnabled: isNlToEsqlEnabled,
+    telemetryService,
   });
 
   const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useLookupIndexCommand(
@@ -893,6 +895,7 @@ const ESQLEditorInternal = function ESQLEditor({
             onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
           }
           onToggleVisor={onToggleVisor}
+          telemetryService={telemetryService}
         />
       )}
       {(isHistoryOpen || (isLanguageComponentOpen && editorIsInline)) && (
