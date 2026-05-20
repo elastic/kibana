@@ -381,7 +381,8 @@ export function DiscoverLayout() {
     () => new BehaviorSubject<SidebarToggleState>({ isCollapsed: false, toggle: () => {} })
   );
 
-  const isSidebarHidden = useCurrentTabSelector((state) => !!state.skipInitialFetch);
+  const skipInitialFetch = useCurrentTabSelector((state) => !!state.skipInitialFetch);
+  const isSidebarHidden = skipInitialFetch && resultState === 'uninitialized';
 
   const mainDisplay = useMemo(() => {
     if (resultState === 'uninitialized') {
