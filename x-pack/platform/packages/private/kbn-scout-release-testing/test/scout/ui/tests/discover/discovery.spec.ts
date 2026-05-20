@@ -61,8 +61,7 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
       to: defaultEndTime,
     });
     // `getTimeConfig` reads the legacy `EuiSuperDatePicker` start/end button
-    // text, which is the formatted display string (the new date-range picker's
-    // ISO `data-date-range` attribute used on `main` does not exist in 8.19).
+    // text, which is the formatted display string
     const time = await pageObjects.datePicker.getTimeConfig();
     expect(time.start).toBe(defaultStartTime);
     expect(time.end).toBe(defaultEndTime);
