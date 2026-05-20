@@ -85,7 +85,6 @@ export default function (providerContext: FtrProviderContext) {
             connectorId: primaryConnectorId,
             mechanisms: ['identity_federation'],
             services: ['cloudwatch_metrics'],
-            vars: { role_arn: 'arn:aws:iam::123456789012:role/ElasticIntegrationRole' },
             serviceVars: {
               cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }],
             },
@@ -99,7 +98,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.item.services).to.eql(['cloudwatch_metrics']);
         expect(body.item.status).to.equal('pending');
         expect(body.item.attemptCount).to.equal(1);
-        expect(body.item.vars).to.have.property('role_arn');
+        expect(body.item.vars).not.to.have.property('role_arn');
         expect(body.item.serviceVars).to.have.property('cloudwatch_metrics');
         // secrets must be stripped from the response
         expect(body.item).not.to.have.property('secrets');
@@ -218,7 +217,6 @@ export default function (providerContext: FtrProviderContext) {
             connectorId: primaryConnectorId,
             mechanisms: ['identity_federation'],
             services: ['cloudwatch_metrics'],
-            vars: { role_arn: 'arn:aws:iam::123456789012:role/ElasticIntegrationRole' },
             serviceVars: {
               cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }],
             },
@@ -310,7 +308,6 @@ export default function (providerContext: FtrProviderContext) {
             connectorId: primaryConnectorId,
             mechanisms: ['identity_federation'],
             services: ['cloudwatch_metrics'],
-            vars: { role_arn: 'arn:aws:iam::123456789012:role/ElasticIntegrationRole' },
             serviceVars: {
               cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }],
             },
@@ -515,7 +512,6 @@ export default function (providerContext: FtrProviderContext) {
             connectorId: primaryConnectorId,
             mechanisms: ['identity_federation'],
             services: ['cloudwatch_metrics'],
-            vars: { role_arn: 'arn:aws:iam::123456789012:role/ElasticIntegrationRole' },
             serviceVars: {
               cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }],
             },

@@ -29,7 +29,7 @@ function makeAttributes(
     services: ['cloudtrail'],
     status: 'pending',
     attemptCount: 1,
-    vars: { role_arn: 'arn:aws:iam::123:role/Role' },
+    vars: {},
     serviceVars: {},
     secrets: {},
     ...overrides,
@@ -76,7 +76,7 @@ describe('cloudOnboardingDeploymentService', () => {
         connectorId: 'conn-1',
         mechanisms: ['identity_federation'],
         services: ['cloudtrail'],
-        vars: { role_arn: 'arn:aws:iam::123:role/Role' },
+        vars: {},
         serviceVars: {},
       });
 
@@ -356,7 +356,7 @@ describe('cloudOnboardingDeploymentService', () => {
       });
 
       it('does not modify vars or secrets on retry', async () => {
-        const vars = { role_arn: 'arn:aws:iam::123:role/Role' };
+        const vars = { api_key_id: 'abc123keyid' };
         const secrets = {};
         const retriedAttrs = makeAttributes({ status: 'pending', attemptCount: 2, vars, secrets });
         soClient.update.mockResolvedValue({
@@ -403,12 +403,12 @@ describe('cloudOnboardingDeploymentService', () => {
   // UC5: Identity Federation + CloudFront Logs + EDOT Cloud Forwarder
   describe('use case scenarios', () => {
     describe('UC1: identity_federation + cloudwatch_metrics + agentless', () => {
-      it('has no api_key_id in vars and sets identity_federation mechanism', async () => {
+      it('has no vars (role_arn is on the connector) and sets identity_federation mechanism', async () => {
         const attrs = makeAttributes({
           mechanisms: ['identity_federation'],
           services: ['cloudwatch_metrics'],
           serviceVars: { cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }] },
-          vars: { role_arn: 'arn:aws:iam::123456789012:role/ElasticIFRole' },
+          vars: {},
           packagePolicyIds: ['pkg-aws-001'],
         });
         soClient.create.mockResolvedValue(makeSOResponse('deploy-uc1', attrs));
@@ -420,7 +420,7 @@ describe('cloudOnboardingDeploymentService', () => {
           mechanisms: ['identity_federation'],
           services: ['cloudwatch_metrics'],
           serviceVars: { cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }] },
-          vars: { role_arn: 'arn:aws:iam::123456789012:role/ElasticIFRole' },
+          vars: {},
         });
 
         expect(soClient.create).toHaveBeenCalledWith(
@@ -430,6 +430,7 @@ describe('cloudOnboardingDeploymentService', () => {
         expect(result.status).toBe('pending');
         expect(result.attemptCount).toBe(1);
         expect(result.mechanisms).toEqual(['identity_federation']);
+        expect(result.vars).not.toHaveProperty('role_arn');
         expect(result.vars).not.toHaveProperty('api_key_id');
       });
     });
@@ -520,7 +521,7 @@ describe('cloudOnboardingDeploymentService', () => {
           mechanisms: ['agent_based'],
           services: ['cloudwatch_metrics'],
           serviceVars: { cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }] },
-          vars: { role_arn: 'arn:aws:iam::123456789012:role/ElasticAgentRole' },
+          vars: {},
           packagePolicyIds: undefined,
           agentPolicyId: undefined,
         });
@@ -533,7 +534,7 @@ describe('cloudOnboardingDeploymentService', () => {
           mechanisms: ['agent_based'],
           services: ['cloudwatch_metrics'],
           serviceVars: { cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }] },
-          vars: { role_arn: 'arn:aws:iam::123456789012:role/ElasticAgentRole' },
+          vars: {},
         });
 
         expect(soClient.create).toHaveBeenCalledWith(
@@ -597,10 +598,7 @@ describe('cloudOnboardingDeploymentService', () => {
                 { regions: ['us-east-1', 'eu-west-1'], s3_bucket_arn: 'arn:aws:s3:::cf-logs' },
               ],
             },
-            vars: {
-              role_arn: 'arn:aws:iam::123456789012:role/ElasticIFRole',
-              api_key_id: 'abc123keyid',
-            },
+            vars: { api_key_id: 'abc123keyid' },
             packagePolicyIds: undefined,
           });
           soClient.create.mockResolvedValue(makeSOResponse(`deploy-${_pushMechanism}`, attrs));
@@ -616,10 +614,7 @@ describe('cloudOnboardingDeploymentService', () => {
                 { regions: ['us-east-1', 'eu-west-1'], s3_bucket_arn: 'arn:aws:s3:::cf-logs' },
               ],
             },
-            vars: {
-              role_arn: 'arn:aws:iam::123456789012:role/ElasticIFRole',
-              api_key_id: 'abc123keyid',
-            },
+            vars: { api_key_id: 'abc123keyid' },
           });
 
           expect(soClient.create).toHaveBeenCalledWith(
@@ -629,10 +624,8 @@ describe('cloudOnboardingDeploymentService', () => {
           expect(result.status).toBe('pending');
           expect(result.attemptCount).toBe(1);
           expect(result.mechanisms).toEqual(mechanisms);
-          expect(result.vars).toEqual({
-            role_arn: 'arn:aws:iam::123456789012:role/ElasticIFRole',
-            api_key_id: 'abc123keyid',
-          });
+          expect(result.vars).toEqual({ api_key_id: 'abc123keyid' });
+          expect(result.vars).not.toHaveProperty('role_arn');
           expect(result.packagePolicyIds).toBeUndefined();
         }
       );
