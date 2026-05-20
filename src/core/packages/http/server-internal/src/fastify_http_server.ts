@@ -1202,6 +1202,47 @@ export class FastifyHttpServer {
     });
   }
 
+  /**
+   * Copies auth results from a prior Hapi-compat request (e.g. cached during `preValidation`)
+   * onto the handler's compat object. {@link AuthStateStorage} keys off the compat reference,
+   * so this must run whenever the handler rebuilds compat from {@link configureRoute} metadata.
+   */
+  private mergeAuthStateOntoHapiCompat(
+    prevCompat: Request | undefined,
+    compat: ReturnType<typeof buildHapiCompatRequestFromFastify>
+  ): ReturnType<typeof buildHapiCompatRequestFromFastify> {
+    if (!prevCompat) {
+      return compat;
+    }
+
+    const prevAuth = (prevCompat as { auth?: { isAuthenticated: boolean; credentials?: unknown } })
+      .auth;
+    if (prevAuth?.isAuthenticated) {
+      (compat as { auth: typeof prevAuth }).auth = prevAuth;
+    }
+
+    try {
+      const prevKibanaRequest = CoreKibanaRequest.from(prevCompat, undefined, false);
+      const newKibanaRequest = CoreKibanaRequest.from(compat, undefined, false);
+      const { state } = this.authState.get(prevKibanaRequest);
+      if (state !== undefined) {
+        this.authState.set(newKibanaRequest, state);
+      }
+      const requestHeaders = this.authRequestHeaders.get(prevKibanaRequest);
+      if (requestHeaders) {
+        this.authRequestHeaders.set(newKibanaRequest, requestHeaders);
+      }
+      const responseHeaders = this.authResponseHeaders.get(prevKibanaRequest);
+      if (responseHeaders) {
+        this.authResponseHeaders.set(newKibanaRequest, responseHeaders);
+      }
+    } catch {
+      // Previous compat may not be suitable for CoreKibanaRequest (e.g. partial test doubles).
+    }
+
+    return compat;
+  }
+
   private makeRouteHandler(
     route: RouterRoute,
     routeApp: KibanaRouteOptions,
@@ -1211,19 +1252,20 @@ export class FastifyHttpServer {
       const app = ((req as any).app = (req as any).app ?? {});
       let apmSpan: ReturnType<typeof apm.startSpan> | null | undefined;
       try {
-        let compat = app[KIBANA_HAPI_COMPAT_REQUEST] as ReturnType<
-          typeof buildHapiCompatRequestFromFastify
-        > | null;
-        if (!compat) {
-          compat = buildHapiCompatRequestFromFastify(
-            req,
-            reply,
-            route,
-            routeApp,
-            this.authRegistered
-          );
-          app[KIBANA_HAPI_COMPAT_REQUEST] = compat;
-        }
+        const prevCompat = app[KIBANA_HAPI_COMPAT_REQUEST] as
+          | ReturnType<typeof buildHapiCompatRequestFromFastify>
+          | undefined;
+        // Always rebuild from the registered route: auth/lifecycle may have cached compat built
+        // via {@link buildKibanaRequest} before route lookup or with static-directory options.
+        let compat = buildHapiCompatRequestFromFastify(
+          req,
+          reply,
+          route,
+          routeApp,
+          this.authRegistered
+        );
+        compat = this.mergeAuthStateOntoHapiCompat(prevCompat, compat);
+        app[KIBANA_HAPI_COMPAT_REQUEST] = compat;
         apmSpan = apm.startSpan('route handler');
         const kibanaResponse = await internalHandler(compat);
         apmSpan?.end();

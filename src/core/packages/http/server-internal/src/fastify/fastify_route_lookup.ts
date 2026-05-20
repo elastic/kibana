@@ -19,7 +19,7 @@ import { attachFastifyPayloadReceiveTimeout } from './register_fastify_payload_t
 const isSafeMethod = (method: string) => method === 'get' || method === 'options';
 
 /** Mirrors {@link FastifyHttpServer.configureRoute} when find-my-way store omits `kibanaRouteOptions`. */
-const kibanaRouteOptionsFromRouterRoute = (route: RouterRoute): KibanaRouteOptions =>
+export const kibanaRouteOptionsFromRouterRoute = (route: RouterRoute): KibanaRouteOptions =>
   ({
     xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
     access: route.options.access ?? 'internal',

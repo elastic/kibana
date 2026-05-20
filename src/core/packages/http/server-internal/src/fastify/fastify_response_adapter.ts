@@ -167,6 +167,40 @@ function ensureHapiCompatibleTextCharset(reply: FastifyReply): void {
 }
 
 /**
+ * Fastify `Reply#send` treats any Content-Type containing `json` as JSON and appends
+ * `; charset=utf-8` to string bodies (see `fastify/lib/reply.js`). Hapi only adds a charset
+ * for `text/*` types ({@link appendUtf8CharsetToTextContentType}), so types like
+ * `application/ndjson` must be sent as a `Buffer` to preserve the route's header value.
+ *
+ * @internal
+ */
+export function coercePayloadToPreserveExplicitJsonLikeContentType(
+  payload: unknown,
+  reply: FastifyReply,
+  hasExplicitContentType: boolean
+): unknown {
+  if (typeof payload !== 'string' || !hasExplicitContentType) {
+    return payload;
+  }
+  const raw =
+    typeof reply.getHeader === 'function'
+      ? reply.getHeader('content-type') ?? reply.getHeader('Content-Type')
+      : undefined;
+  const contentType = (Array.isArray(raw) ? raw[0] : raw) as string | undefined;
+  if (typeof contentType !== 'string') {
+    return payload;
+  }
+  const lower = contentType.toLowerCase();
+  if (lower.startsWith('text/') || lower.includes('charset=')) {
+    return payload;
+  }
+  if (lower.includes('json')) {
+    return Buffer.from(payload, 'utf8');
+  }
+  return payload;
+}
+
+/**
  * Adapts a {@link KibanaResponse} produced by a route handler to a Fastify reply.
  *
  * Mirrors {@link HapiResponseAdapter} so that error and success bodies preserve the
@@ -344,9 +378,14 @@ export class FastifyResponseAdapter {
     ) {
       reply.header('content-type', 'text/html; charset=utf-8');
     }
-    this.applyHapiCompatiblePayloadHeaders(reply, payload, hasExplicitContentType);
+    const payloadToSend = coercePayloadToPreserveExplicitJsonLikeContentType(
+      payload,
+      reply,
+      hasExplicitContentType
+    );
+    this.applyHapiCompatiblePayloadHeaders(reply, payloadToSend, hasExplicitContentType);
     this.applyDefaultCacheControl(reply, kibanaResponse);
-    if (!this.ensureJsonSerializablePayload(payload)) {
+    if (!this.ensureJsonSerializablePayload(payloadToSend)) {
       // Hapi fails while serializing the response (e.g. circular JSON) without logging.
       reply.code(500);
       return reply.send({
@@ -355,7 +394,7 @@ export class FastifyResponseAdapter {
         message: INTERNAL_ERROR_MESSAGE,
       });
     }
-    return reply.send(payload);
+    return reply.send(payloadToSend);
   }
 
   private async toRedirect(

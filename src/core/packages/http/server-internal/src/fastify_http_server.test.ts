@@ -1121,6 +1121,50 @@ describe('FastifyHttpServer', () => {
       expect(JSON.parse(nested.body)).toEqual({ id: 'home', rest: 'sub/page' });
     }, 15000);
 
+    it('uses registered route metadata in the handler when auth cached static-directory compat', async () => {
+      const ctx = createCoreContext();
+      const config = createHttpConfig(PORT);
+      const config$ = new BehaviorSubject(config);
+
+      server = new FastifyHttpServer(ctx, 'Kibana', new BehaviorSubject(config.shutdownTimeout));
+      const setup = await server.setup({ config$ });
+
+      setup.registerAuth(async () => ({
+        type: AuthResultType.authenticated,
+        state: { username: 'tester' },
+      }));
+
+      const enhanceHandler = (handler: any) => async (req: any, res: any) =>
+        handler({} as any, req, res);
+
+      const router = new Router('/api/fastify-mvp', ctx.logger.get('router'), enhanceHandler, {
+        env,
+      });
+
+      router.get(
+        {
+          path: '/needs-auth',
+          security: {
+            authc: { enabled: true },
+            authz: { enabled: false, reason: 'test' },
+          },
+          validate: false,
+        },
+        async (_context, _req, res) => res.ok({ body: { ok: true } })
+      );
+
+      setup.registerRouter(router);
+      await server.start();
+
+      const address = (setup.server as any).server.address();
+      listenPort = typeof address === 'object' && address ? address.port : 0;
+      expect(listenPort).toBeGreaterThan(0);
+
+      const res = await httpRequest(listenPort, '/api/fastify-mvp/needs-auth');
+      expect(res.statusCode).toBe(200);
+      expect(JSON.parse(res.body)).toEqual({ ok: true });
+    }, 15000);
+
     it('exposes Hapi-style wildcard param names to validation after registerAuth (compat cache)', async () => {
       const ctx = createCoreContext();
       const config = createHttpConfig(PORT);

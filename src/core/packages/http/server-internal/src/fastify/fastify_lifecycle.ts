@@ -38,6 +38,7 @@ import { deepFreeze } from '@kbn/std';
 import type { Request as HapiRequest } from '@hapi/hapi';
 import { FastifyResponseAdapter } from './fastify_response_adapter';
 import { KIBANA_HAPI_COMPAT_REQUEST } from './fastify_request_compat_symbol';
+import { kibanaRouteOptionsFromRouterRoute } from './fastify_route_lookup';
 import {
   getKibanaCompatRequestUrl,
   mapRouteSecurityToHapiAuthSettings,
@@ -93,6 +94,79 @@ const preResponseToolkit: OnPreResponseToolkit = {
  * that to populate `route.settings.app` so consumers like the security plugin can read
  * `KibanaRequest.route.options.security`.
  */
+const getAuthRegistered = (req: FastifyRequest): boolean =>
+  typeof (req.server as any).getKibanaAuthRegistered === 'function'
+    ? Boolean((req.server as any).getKibanaAuthRegistered())
+    : false;
+
+const resolveSettingsAppFromMatchedRoute = (
+  matchedRoute: RouterRoute | undefined,
+  matchedKibanaOptions: KibanaRouteOptions | undefined
+): KibanaRouteOptions => {
+  if (matchedRoute) {
+    return {
+      ...kibanaRouteOptionsFromRouterRoute(matchedRoute),
+      ...(matchedKibanaOptions ?? {}),
+      security: matchedRoute.security,
+    } as KibanaRouteOptions;
+  }
+  return (matchedKibanaOptions ?? {}) as KibanaRouteOptions;
+};
+
+/** Keeps a cached Hapi-compat request in sync with the current URL, body, and matched route. */
+const syncHapiCompatRouteMetadata = (
+  compat: HapiRequest,
+  req: FastifyRequest,
+  reply: FastifyReply,
+  app: Record<string, unknown>,
+  authRegistered: boolean
+): void => {
+  const hostHeader =
+    (req.headers.host as string | undefined) ??
+    (req.headers[':authority'] as string | undefined) ??
+    'localhost';
+  const url = getKibanaCompatRequestUrl(req);
+  const matched = app.matchedRoute as
+    | {
+        method: string;
+        path: string;
+        options: { tags?: readonly string[]; body?: unknown };
+        security?: unknown;
+      }
+    | undefined;
+  const matchedKibanaOptions = app.matchedKibanaRouteOptions as KibanaRouteOptions | undefined;
+  const matchedRoute = matched as RouterRoute | undefined;
+  const settingsApp = resolveSettingsAppFromMatchedRoute(matchedRoute, matchedKibanaOptions);
+  const routeSecurity =
+    typeof settingsApp.security === 'function'
+      ? undefined
+      : (settingsApp.security as RouteSecurity | undefined);
+  const compatRecord = compat as any;
+  compatRecord.url = url;
+  compatRecord.path = url.pathname;
+  compatRecord.headers = req.headers;
+  compatRecord.method = String(req.method ?? '').toLowerCase();
+  compatRecord.params = toPlainRouteParams((req as { params?: unknown }).params);
+  compatRecord.query = toPlainQuery((req as { query?: Record<string, unknown> }).query);
+  compatRecord.payload = (req as { body?: unknown }).body;
+  compatRecord.info.host = hostHeader;
+  compatRecord.route = {
+    method: String(matched?.method ?? req.method ?? '').toLowerCase(),
+    path: matched?.path ?? url.pathname,
+    settings: {
+      app: settingsApp,
+      tags: matched?.options.tags ? Array.from(matched.options.tags) : [],
+      auth: mapRouteSecurityToHapiAuthSettings(routeSecurity, authRegistered),
+      payload: {
+        ...(matchedRoute?.options.body ?? {}),
+        ...(matchedRoute?.options.timeout?.payload !== undefined
+          ? { timeout: matchedRoute.options.timeout.payload }
+          : {}),
+      },
+    },
+  };
+};
+
 /** @internal */
 export const buildKibanaRequest = (req: FastifyRequest, reply: FastifyReply): HapiRequest => {
   const app = ((req as any).app = (req as any).app ?? { requestId: req.id ?? '', requestUuid: '' });
@@ -101,6 +175,7 @@ export const buildKibanaRequest = (req: FastifyRequest, reply: FastifyReply): Ha
 
   const existingCompat = app[KIBANA_HAPI_COMPAT_REQUEST] as HapiRequest | undefined;
   if (existingCompat) {
+    syncHapiCompatRouteMetadata(existingCompat, req, reply, app, getAuthRegistered(req));
     return existingCompat;
   }
 
@@ -119,31 +194,12 @@ export const buildKibanaRequest = (req: FastifyRequest, reply: FastifyReply): Ha
     | undefined;
   const matchedKibanaOptions = app.matchedKibanaRouteOptions as KibanaRouteOptions | undefined;
   const matchedRoute = matched as RouterRoute | undefined;
-  const settingsApp = (
-    matchedKibanaOptions
-      ? {
-          ...matchedKibanaOptions,
-          security: matchedKibanaOptions.security ?? matchedRoute?.security,
-        }
-      : matched
-      ? {
-          xsrfRequired: matchedRoute?.options?.xsrfRequired,
-          access: matchedRoute?.options?.access,
-          deprecated: matchedRoute?.options?.deprecated,
-          security: matchedRoute?.security,
-          excludeFromRateLimiter: matchedRoute?.options?.excludeFromRateLimiter,
-        }
-      : {}
-  ) as KibanaRouteOptions;
-  const authRegistered =
-    typeof (req.server as any).getKibanaAuthRegistered === 'function'
-      ? Boolean((req.server as any).getKibanaAuthRegistered())
-      : false;
-  const mergedSecurity = settingsApp.security;
+  const settingsApp = resolveSettingsAppFromMatchedRoute(matchedRoute, matchedKibanaOptions);
+  const authRegistered = getAuthRegistered(req);
   const routeSecurity =
-    typeof mergedSecurity === 'function'
+    typeof settingsApp.security === 'function'
       ? undefined
-      : (mergedSecurity as RouteSecurity | undefined);
+      : (settingsApp.security as RouteSecurity | undefined);
   const compat: any = {
     app,
     url,

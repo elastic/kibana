@@ -9,11 +9,13 @@
 
 import { Readable } from 'stream';
 import Boom from '@hapi/boom';
+import Fastify from 'fastify';
 import type { FastifyReply } from 'fastify';
 import type { IncomingMessage } from 'http';
 import { KibanaResponse } from '@kbn/core-http-router-server-internal';
 import {
   FastifyResponseAdapter,
+  coercePayloadToPreserveExplicitJsonLikeContentType,
   syncNodeResponseHeadersToFastifyReply,
 } from './fastify_response_adapter';
 
@@ -119,6 +121,37 @@ describe('FastifyResponseAdapter', () => {
         message: 'procedure failed',
       })
     );
+  });
+
+  it('preserves application/ndjson Content-Type without a charset (Fastify send parity)', async () => {
+    const fastify = Fastify();
+    const adapter = new FastifyResponseAdapter();
+
+    fastify.get('/export', async (_req, reply) => {
+      await adapter.handle(
+        new KibanaResponse(200, '{"rule_id":"rule-1"}\n', {
+          headers: { 'Content-Type': 'application/ndjson' },
+        }),
+        reply
+      );
+    });
+
+    const response = await fastify.inject({ method: 'GET', url: '/export' });
+    expect(response.statusCode).toBe(200);
+    expect(response.headers['content-type']).toBe('application/ndjson');
+    expect(response.body).toBe('{"rule_id":"rule-1"}\n');
+
+    await fastify.close();
+  });
+
+  it('coercePayloadToPreserveExplicitJsonLikeContentType converts ndjson strings to Buffer', () => {
+    const reply = {
+      getHeader: jest.fn().mockReturnValue('application/ndjson'),
+    } as unknown as FastifyReply;
+
+    const result = coercePayloadToPreserveExplicitJsonLikeContentType('line\n', reply, true);
+    expect(Buffer.isBuffer(result)).toBe(true);
+    expect((result as Buffer).toString('utf8')).toBe('line\n');
   });
 
   it('appends charset=utf-8 to explicit text/csv responses (Hapi reporting parity)', async () => {
