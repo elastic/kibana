@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './pending_actions_selector';
+export * from './cancelable_pending_actions_selector';
