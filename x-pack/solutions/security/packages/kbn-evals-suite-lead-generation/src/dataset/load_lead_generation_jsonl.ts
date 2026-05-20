@@ -8,7 +8,7 @@
 import type { EvaluationDataset } from '@kbn/evals';
 import Fs from 'fs/promises';
 import Path from 'path';
-import type { LeadGenerationDatasetExample } from '../types';
+import type { LeadGenerationDatasetExample, LeadGenerationTaskExpectedOutput } from '../types';
 
 const DEFAULT_DATASET_NAME = 'lead generation: local jsonl';
 const DEFAULT_DATASET_DESCRIPTION =
@@ -36,7 +36,7 @@ const parseJsonlLine = (line: string, lineNumber: number): LeadGenerationDataset
   return {
     input: (parsed.input ?? {}) as LeadGenerationDatasetExample['input'],
     output: {
-      leads: (parsed.output?.leads ?? []) as LeadGenerationDatasetExample['output']['leads'],
+      leads: (parsed.output?.leads ?? []) as LeadGenerationTaskExpectedOutput['leads'],
     },
     metadata: parsed.metadata ?? { Title: `Line ${lineNumber}` },
   };
