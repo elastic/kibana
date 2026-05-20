@@ -478,14 +478,8 @@ export interface DeepAnalysisPlaybookExtensionParams {
 
 /**
  * A per-shape contribution to the agent-builder deep-analysis playbook.
- * Resolved primarily from the data-source profile; root and document
- * profiles may override via the standard composable accessor chain.
  * Returning `undefined` means "no contribution" — the server playbook
  * falls back to inferring analysis strategy from column names and types.
- *
- * Note: when both root and data-source profiles contribute, the
- * data-source contribution wins (last writer in the left-fold).
- * Contributions are NOT merged.
  */
 export interface DeepAnalysisPlaybookExtension {
   /**
