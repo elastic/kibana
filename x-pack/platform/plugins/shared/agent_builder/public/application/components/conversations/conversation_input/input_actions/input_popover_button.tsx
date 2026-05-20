@@ -28,6 +28,7 @@ export const InputPopoverButton: React.FC<
     onClick: () => void;
     'aria-label'?: string;
     'data-test-subj'?: string;
+    ebtProps?: Record<string, string>;
   }>
 > = ({
   open,
@@ -37,6 +38,7 @@ export const InputPopoverButton: React.FC<
   children,
   'aria-label': ariaLabel,
   'data-test-subj': dataTestSubj,
+  ebtProps,
 }) => {
   const openStyles = css`
     text-decoration: underline;
@@ -57,6 +59,7 @@ export const InputPopoverButton: React.FC<
       aria-haspopup="menu"
       aria-label={ariaLabel}
       data-test-subj={dataTestSubj}
+      {...ebtProps}
     >
       {children}
     </EuiButtonEmpty>

@@ -124,6 +124,11 @@ export const AgentsPopoverView: React.FC<AgentsPopoverViewProps> = ({
               size="s"
               flush="left"
               onClick={onBack}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.conversation.BACK_TO_CONVERSATIONS,
+                detail: 'conversation',
+              })}
             >
               {labels.availableAgents}
             </EuiButtonEmpty>
@@ -138,6 +143,11 @@ export const AgentsPopoverView: React.FC<AgentsPopoverViewProps> = ({
               href={agentDetailsHref}
               target="_blank"
               data-test-subj="agentBuilderEmbeddableAgentDetailsButton"
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.conversation.EMBEDDABLE_AGENT_DETAILS,
+                detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+              })}
             >
               {labels.agentDetails}
             </EuiButton>
