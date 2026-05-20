@@ -145,6 +145,8 @@ class FleetServerHostService {
     return savedObjectToFleetServerHost(retrievedSo);
   }
 
+  // Returns void rather than FleetServerHost[]: preconfiguration callers don't use the return value,
+  // so we skip the post-create decrypt re-fetch that create() requires.
   public async bulkCreateForPreconfiguration(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
