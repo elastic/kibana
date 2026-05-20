@@ -79,7 +79,7 @@ describe('user activity injected context', () => {
     const router = httpSetup.createRouter('');
     router.post(
       {
-        path: '/s/{spaceId}/api/user_activity_injected_context/_track',
+        path: '/api/user_activity_injected_context/_track',
         security: {
           authz: {
             enabled: false,
@@ -103,6 +103,8 @@ describe('user activity injected context', () => {
     httpStart.setRedactedSessionIdGetter(() => Promise.resolve('some-redacted-sid'));
 
     const referrer = 'https://example.com/referrer';
+    // The onPreRouting handler strips the /s/{spaceId} prefix before route matching;
+    // posting to the space-prefixed URL still sets request.spaceId = 'myspace'.
     await supertest(httpSetup.server.listener)
       .post('/s/myspace/api/user_activity_injected_context/_track')
       .set('kbn-xsrf', 'true')

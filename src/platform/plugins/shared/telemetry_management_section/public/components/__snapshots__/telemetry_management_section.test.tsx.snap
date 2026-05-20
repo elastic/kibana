@@ -314,6 +314,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
         "patch": [MockFunction],
         "post": [MockFunction],
         "put": [MockFunction],
+        "spaceId": "default",
         "staticAssets": Object {
           "getPluginAssetHref": [MockFunction],
         },
