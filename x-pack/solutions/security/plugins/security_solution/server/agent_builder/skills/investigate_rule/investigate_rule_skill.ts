@@ -15,7 +15,10 @@ import {
   SECURITY_LABS_SEARCH_TOOL_ID,
   SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
 } from '../../tools';
-import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
+import {
+  DEFAULT_ALERTS_INDEX,
+  SecurityAgentBuilderAttachments,
+} from '../../../../common/constants';
 import { fetchExecutionEvents, fetchExecutionMetrics } from './fetch_execution_events';
 import { classifyExecutionFailure } from './classify_execution_failure';
 
@@ -351,22 +354,40 @@ export const investigateRuleSkill = defineSkillType({
       },
     },
 
-    // ── Task 4: get_rule_details ─────────────────────────────────────────────
+    // ── Task 4: resolve_rule_attachment ─────────────────────────────────────
     {
-      id: 'investigate-rule.get_rule_details',
+      id: 'investigate-rule.resolve_rule_attachment',
       type: ToolType.builtin,
       description:
-        'Fetches the full rule definition for a detection rule by its UUID. ' +
-        'Returns name, description, type, language, query, index patterns, schedule, enabled state, ' +
-        'tags, and MITRE threat mappings. ' +
-        'The rule attachment already contains this data when the rule is loaded in chat. ' +
-        'Use this tool only as a fallback when resolving a related rule by ID (e.g. cross-rule referral).',
+        'Fetches a detection rule by UUID and creates a security.rule attachment for it. ' +
+        'Call when the user selects a rule to investigate but no security.rule attachment exists yet ' +
+        '(e.g., the user picked a rule from find-rules output and said "investigate this one"). ' +
+        'Returns the attachment ID and version; use these with attachment_read and render_attachment. ' +
+        'If an attachment for the same rule UUID already exists, returns the existing ID without re-fetching.',
       schema: z.object({
         rule_id: z
           .string()
-          .describe('The UUID of the detection rule (id field, same as kibana.alert.rule.uuid)'),
+          .describe('UUID of the detection rule (id field / kibana.alert.rule.uuid)'),
       }),
       handler: async ({ rule_id: ruleId }, context) => {
+        const attachmentId = `rule-investigate-${ruleId}`;
+
+        const existing = context.attachments.get(attachmentId);
+        if (existing) {
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  message: `Rule ${ruleId} is already loaded as attachment "${attachmentId}".`,
+                  attachmentId,
+                  version: existing.version,
+                },
+              },
+            ],
+          };
+        }
+
         try {
           const so = await context.savedObjectsClient.get<Record<string, unknown>>(
             'alert',
@@ -375,28 +396,43 @@ export const investigateRuleSkill = defineSkillType({
 
           const attrs = so.attributes;
           const params = (attrs.params ?? {}) as Record<string, unknown>;
+          const ruleName = String(attrs.name ?? ruleId);
+
+          const rule = {
+            id: so.id,
+            ruleId: params.ruleId ?? params.rule_id,
+            name: attrs.name,
+            description: params.description,
+            type: params.type,
+            language: params.language,
+            query: params.query,
+            index: params.index,
+            interval: (attrs.schedule as Record<string, unknown> | undefined)?.interval,
+            from: params.from,
+            enabled: attrs.enabled,
+            tags: attrs.tags,
+            threat: params.threat,
+          };
+
+          const created = await context.attachments.add({
+            id: attachmentId,
+            type: SecurityAgentBuilderAttachments.rule,
+            data: {
+              origin: ruleId,
+              text: JSON.stringify(rule),
+              attachmentLabel: ruleName,
+            },
+            description: `Rule: ${ruleName}`,
+          });
 
           return {
             results: [
               {
                 type: ToolResultType.other,
                 data: {
-                  message: `Fetched rule details for rule ${ruleId}.`,
-                  rule: {
-                    id: so.id,
-                    ruleId: params.ruleId ?? params.rule_id,
-                    name: attrs.name,
-                    description: params.description,
-                    type: params.type,
-                    language: params.language,
-                    query: params.query,
-                    index: params.index,
-                    interval: (attrs.schedule as Record<string, unknown> | undefined)?.interval,
-                    from: params.from,
-                    enabled: attrs.enabled,
-                    tags: attrs.tags,
-                    threat: params.threat,
-                  },
+                  message: `Loaded rule "${ruleName}" as attachment "${created.id}".`,
+                  attachmentId: created.id,
+                  version: created.current_version,
                 },
               },
             ],
@@ -423,7 +459,7 @@ export const investigateRuleSkill = defineSkillType({
               {
                 type: ToolResultType.error,
                 data: {
-                  message: `Failed to fetch rule details for ${ruleId}: ${
+                  message: `Failed to resolve rule ${ruleId}: ${
                     error instanceof Error ? error.message : String(error)
                   }`,
                 },

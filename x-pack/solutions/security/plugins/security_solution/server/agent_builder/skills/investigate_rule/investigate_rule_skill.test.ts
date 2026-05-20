@@ -70,7 +70,7 @@ describe('investigateRuleSkill', () => {
       expect(inlineTools).toBeDefined();
       expect(inlineTools).toHaveLength(5);
       expect(inlineTools![0].id).toBe('investigate-rule.get_rule_execution_logs');
-      expect(inlineTools![1].id).toBe('investigate-rule.get_rule_details');
+      expect(inlineTools![1].id).toBe('investigate-rule.resolve_rule_attachment');
       expect(inlineTools![2].id).toBe('investigate-rule.classify_execution_failure');
       expect(inlineTools![3].id).toBe('investigate-rule.get_rule_alerts');
       expect(inlineTools![4].id).toBe('investigate-rule.get_rule_execution_metrics');
@@ -308,9 +308,9 @@ describe('investigateRuleSkill', () => {
     });
   });
 
-  // ── get_rule_details ────────────────────────────────────────────────────────
+  // ── resolve_rule_attachment ─────────────────────────────────────────────────
 
-  describe('get_rule_details inline tool', () => {
+  describe('resolve_rule_attachment inline tool', () => {
     const { mockEsClient, mockRequest, mockLogger } = createToolTestMocks();
     let tool: BuiltinSkillBoundedTool;
 
@@ -320,19 +320,15 @@ describe('investigateRuleSkill', () => {
       tool = inlineTools![1] as BuiltinSkillBoundedTool;
     });
 
-    interface RuleResultData {
+    interface AttachmentResultData {
       message?: string;
-      rule?: Record<string, unknown>;
+      attachmentId?: string;
+      version?: number;
     }
 
-    const callHandler = (params: { rule_id: string }, spaceId = 'default') =>
-      tool.handler(
-        params,
-        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, { spaceId })
-      ) as Promise<ToolHandlerStandardReturn>;
+    const makeCtx = () => createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
 
-    const mockSavedObject = (attrs: Record<string, unknown>) => {
-      const ctx = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+    const mockSavedObject = (ctx: ReturnType<typeof makeCtx>, attrs: Record<string, unknown>) => {
       (ctx.savedObjectsClient.get as jest.Mock).mockResolvedValueOnce({
         id: 'rule-uuid-1',
         type: 'alert',
@@ -341,30 +337,29 @@ describe('investigateRuleSkill', () => {
       });
     };
 
-    it('returns rule details on happy path', async () => {
-      const ctx = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-      (ctx.savedObjectsClient.get as jest.Mock).mockResolvedValueOnce({
-        id: 'rule-uuid-1',
-        type: 'alert',
-        attributes: {
-          name: 'My Detection Rule',
-          enabled: true,
-          tags: ['MITRE', 'Custom'],
-          schedule: { interval: '5m' },
-          params: {
-            rule_id: 'my-static-rule-id',
-            type: 'query',
-            language: 'kuery',
-            query: 'event.category: process',
-            index: ['logs-endpoint.events.*'],
-            from: 'now-6m',
-            description: 'Detects suspicious processes',
-            severity: 'high',
-            risk_score: 73,
-            threat: [{ tactic: { id: 'TA0002' } }],
-          },
+    it('creates an attachment and returns its ID on happy path', async () => {
+      const ctx = makeCtx();
+      mockSavedObject(ctx, {
+        name: 'My Detection Rule',
+        enabled: true,
+        tags: ['MITRE'],
+        schedule: { interval: '5m' },
+        params: {
+          rule_id: 'my-static-rule-id',
+          type: 'query',
+          language: 'kuery',
+          query: 'event.category: process',
+          index: ['logs-endpoint.events.*'],
+          from: 'now-6m',
         },
-        references: [],
+      });
+      (ctx.attachments.get as jest.Mock).mockReturnValueOnce(undefined);
+      (ctx.attachments.add as jest.Mock).mockResolvedValueOnce({
+        id: 'rule-investigate-rule-uuid-1',
+        current_version: 1,
+        type: 'security.rule',
+        versions: [],
+        active: true,
       });
 
       const result = (await tool.handler(
@@ -373,17 +368,44 @@ describe('investigateRuleSkill', () => {
       )) as ToolHandlerStandardReturn;
 
       expect(result.results[0].type).toBe(ToolResultType.other);
-      const data = result.results[0].data as RuleResultData;
-      expect(data.message).toContain('rule-uuid-1');
-      expect(data.rule?.name).toBe('My Detection Rule');
-      expect(data.rule?.type).toBe('query');
-      expect(data.rule?.enabled).toBe(true);
-      expect(data.rule?.tags).toEqual(['MITRE', 'Custom']);
-      expect(data.rule?.interval).toBe('5m');
+      const data = result.results[0].data as AttachmentResultData;
+      expect(data.attachmentId).toBe('rule-investigate-rule-uuid-1');
+      expect(data.version).toBe(1);
+      expect(data.message).toContain('My Detection Rule');
+      expect(ctx.attachments.add).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'rule-investigate-rule-uuid-1',
+          type: 'security.rule',
+          data: expect.objectContaining({ origin: 'rule-uuid-1' }),
+        })
+      );
+    });
+
+    it('returns existing attachment ID when already resolved', async () => {
+      const ctx = makeCtx();
+      (ctx.attachments.get as jest.Mock).mockReturnValueOnce({
+        id: 'rule-investigate-rule-uuid-1',
+        version: 2,
+        type: 'security.rule',
+        data: {},
+      });
+
+      const result = (await tool.handler(
+        { rule_id: 'rule-uuid-1' },
+        ctx
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results[0].type).toBe(ToolResultType.other);
+      const data = result.results[0].data as AttachmentResultData;
+      expect(data.attachmentId).toBe('rule-investigate-rule-uuid-1');
+      expect(data.version).toBe(2);
+      expect(ctx.attachments.add).not.toHaveBeenCalled();
+      expect(ctx.savedObjectsClient.get).not.toHaveBeenCalled();
     });
 
     it('returns graceful message when rule is not found', async () => {
-      const ctx = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+      const ctx = makeCtx();
+      (ctx.attachments.get as jest.Mock).mockReturnValueOnce(undefined);
       (ctx.savedObjectsClient.get as jest.Mock).mockRejectedValueOnce({
         output: { statusCode: 404 },
       });
@@ -394,11 +416,12 @@ describe('investigateRuleSkill', () => {
       )) as ToolHandlerStandardReturn;
 
       expect(result.results[0].type).toBe(ToolResultType.other);
-      expect((result.results[0].data as RuleResultData).message).toContain('not found');
+      expect((result.results[0].data as AttachmentResultData).message).toContain('not found');
     });
 
     it('returns error result when savedObjectsClient throws unexpectedly', async () => {
-      const ctx = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+      const ctx = makeCtx();
+      (ctx.attachments.get as jest.Mock).mockReturnValueOnce(undefined);
       (ctx.savedObjectsClient.get as jest.Mock).mockRejectedValueOnce(
         new Error('Saved objects service unavailable')
       );
@@ -408,8 +431,6 @@ describe('investigateRuleSkill', () => {
       expect(result.results[0].type).toBe(ToolResultType.error);
       expect((result.results[0].data as { message: string }).message).toContain('unavailable');
     });
-
-    void mockSavedObject; // suppress unused warning
   });
 
   // ── classify_execution_failure ──────────────────────────────────────────────
