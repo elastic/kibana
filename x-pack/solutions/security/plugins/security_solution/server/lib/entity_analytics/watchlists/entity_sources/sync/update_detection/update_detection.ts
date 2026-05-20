@@ -90,20 +90,24 @@ const getAllowedEntityIds = (
 ): string[] => entityStoreEntityIdsByType[entityType] ?? [];
 
 export const createUpdateDetectionService = ({
-  esClient,
+  writeEsClient,
+  indexReadEsClient,
   crudClient,
   logger,
   descriptorClient,
   watchlist,
 }: {
-  esClient: ElasticsearchClient;
+  // Entity Store installer's credentials client, used for writes to internal watchlist indices
+  writeEsClient: ElasticsearchClient;
+  // Client used to read from the source index. Scoped to the configuring user's API key for index sources; Entity Store installer's credentials for all others
+  indexReadEsClient: ElasticsearchClient;
   crudClient: CRUDClient;
   logger: Logger;
   descriptorClient?: WatchlistEntitySourceClient;
   watchlist: { name: string; id: string; index: string };
 }) => {
   const syncMarkersService = descriptorClient
-    ? createWatchlistSyncMarkersService(descriptorClient, esClient)
+    ? createWatchlistSyncMarkersService(descriptorClient, writeEsClient)
     : undefined;
 
   const detectForIntegrationEntityType = async (
@@ -126,7 +130,7 @@ export const createUpdateDetectionService = ({
         source.queryRule,
         source.range
       );
-      const response = await esClient.search<never, EntitiesAggregation>({
+      const response = await indexReadEsClient.search<never, EntitiesAggregation>({
         index: source.indexPattern,
         ...query,
       });
@@ -180,7 +184,7 @@ export const createUpdateDetectionService = ({
         source.queryRule,
         source.range
       );
-      const response = await esClient.search<never, IndexSourceAggregation>({
+      const response = await indexReadEsClient.search<never, IndexSourceAggregation>({
         index: source.indexPattern,
         ...query,
       });
@@ -269,7 +273,7 @@ export const createUpdateDetectionService = ({
     }
 
     await applyBulkUpsert({
-      esClient,
+      esClient: writeEsClient,
       crudClient,
       logger,
       entities: allEntities,

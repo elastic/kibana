@@ -23,11 +23,16 @@ import {
   buildWatchlistApiCallSuccessFields,
   reportWatchlistApiCallError,
 } from './watchlist_ebt_helpers';
+import {
+  checkIndexReadPrivilege,
+  grantEntitySourceApiKey,
+} from '../../entity_sources/entity_source_api_key';
 
 export const createWatchlistRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger,
-  telemetrySender: ITelemetryEventsSender
+  telemetrySender: ITelemetryEventsSender,
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
   router.versioned
     .post({
@@ -83,8 +88,37 @@ export const createWatchlistRoute = (
               const createdSources = [];
               try {
                 for (const entitySourceInput of entitySourceInputs) {
+                  if (entitySourceInput.type === 'index' && entitySourceInput.indexPattern) {
+                    const hasPrivilege = await checkIndexReadPrivilege(
+                      core.elasticsearch.client.asCurrentUser,
+                      entitySourceInput.indexPattern
+                    );
+                    if (!hasPrivilege) {
+                      logger.error(
+                        `Insufficient privileges to read from index pattern: ${entitySourceInput.indexPattern}`
+                      );
+                      await watchlistClient.delete(watchlist.id);
+                      return siemResponse.error({
+                        statusCode: 403,
+                        body: `Insufficient privileges to read from index pattern: ${entitySourceInput.indexPattern}`,
+                      });
+                    }
+                  }
+
                   const entitySource = await sourceClient.create(entitySourceInput);
                   await watchlistClient.addEntitySourceReference(watchlist.id, entitySource.id);
+
+                  if (entitySourceInput.type === 'index' && entitySource.name) {
+                    const [coreStart] = await getStartServices();
+                    const apiKey = await grantEntitySourceApiKey(coreStart.security, request, {
+                      id: entitySource.id,
+                      name: entitySource.name,
+                    });
+                    if (apiKey) {
+                      await sourceClient.updateApiKeyFields(entitySource.id, apiKey);
+                    }
+                  }
+
                   createdSources.push(entitySource);
                 }
                 telemetrySender.reportEBT(

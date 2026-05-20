@@ -28,14 +28,14 @@ export const registerWatchlistRoutes = ({
   telemetrySender,
 }: EntityAnalyticsRoutesDeps) => {
   installPrebuiltWatchlistsRoute(router, logger);
-  createWatchlistRoute(router, logger, telemetrySender);
-  deleteWatchlistRoute(router, logger);
+  createWatchlistRoute(router, logger, telemetrySender, getStartServices);
+  deleteWatchlistRoute(router, logger, getStartServices);
   getWatchlistRoute(router, logger);
   watchlistsPrivilegesRoute(router, logger, getStartServices);
   listWatchlistsRoute(router, logger);
   searchWatchlistIndicesRoute(router, logger);
   updateWatchlistRoute(router, logger, telemetrySender);
-  registerEntitySourceRoutes(router, logger);
+  registerEntitySourceRoutes(router, logger, getStartServices);
   syncWatchlistRoute(router, logger);
   csvUploadRoute({ router, logger, getStartServices });
   registerManualEntityRoutes(router, logger);

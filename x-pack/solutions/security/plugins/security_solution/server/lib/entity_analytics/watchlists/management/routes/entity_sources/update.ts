@@ -18,10 +18,16 @@ import type { EntityAnalyticsRoutesDeps } from '../../../../types';
 import { withMinimumLicense } from '../../../../utils/with_minimum_license';
 import { WatchlistEntitySourceClient } from '../../../entity_sources/infra';
 import { getRequestSavedObjectClient } from '../../../shared/utils';
+import {
+  checkIndexReadPrivilege,
+  grantEntitySourceApiKey,
+  invalidateEntitySourceApiKey,
+} from '../../../entity_sources/entity_source_api_key';
 
 export const updateEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
+  logger: Logger,
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
   router.versioned
     .put({
@@ -58,7 +64,54 @@ export const updateEntitySourceRoute = (
               soClient: getRequestSavedObjectClient(core),
               namespace: secSol.getSpaceId(),
             });
+
+            const currentSource = await client.get(request.params.id);
+            const wasIndex = currentSource.type === 'index';
+            const newType = request.body.type ?? currentSource.type;
+            const isNowIndex = newType === 'index';
+
+            if (request.body.indexPattern && isNowIndex) {
+              const hasPrivilege = await checkIndexReadPrivilege(
+                core.elasticsearch.client.asCurrentUser,
+                request.body.indexPattern
+              );
+              if (!hasPrivilege) {
+                return siemResponse.error({
+                  statusCode: 403,
+                  body: `Insufficient privileges to read from index pattern: ${request.body.indexPattern}`,
+                });
+              }
+            }
+
             const body = await client.update({ ...request.body, id: request.params.id });
+
+            if (wasIndex || isNowIndex) {
+              const [coreStart] = await getStartServices();
+
+              if (wasIndex && currentSource.apiKeyId) {
+                await invalidateEntitySourceApiKey(
+                  coreStart.security,
+                  currentSource.apiKeyId,
+                  logger
+                );
+              }
+
+              if (isNowIndex) {
+                const apiKey = await grantEntitySourceApiKey(coreStart.security, request, {
+                  id: request.params.id,
+                  name: body.name ?? request.params.id,
+                });
+                if (apiKey) {
+                  await client.updateApiKeyFields(request.params.id, apiKey);
+                }
+              } else {
+                // Transitioning away from index: clear stale key reference
+                await client.updateApiKeyFields(request.params.id, {
+                  apiKeyId: null,
+                  apiKey: null,
+                });
+              }
+            }
 
             return response.ok({ body });
           } catch (e) {

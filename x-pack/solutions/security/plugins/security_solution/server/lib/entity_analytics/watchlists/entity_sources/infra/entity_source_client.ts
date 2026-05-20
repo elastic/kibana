@@ -17,6 +17,7 @@ import type {
   ListWatchlistEntitySourcesResponse,
 } from '../../../../../../common/api/entity_analytics/watchlists/data_source/list.gen';
 import { watchlistEntitySourceTypeName } from './entity_source_type';
+import type { EntitySourceApiKeyFields } from './entity_source_type';
 
 export interface WatchlistEntitySourceClientDependencies {
   soClient: SavedObjectsClientContract;
@@ -67,7 +68,8 @@ export class WatchlistEntitySourceClient {
       await this.dependencies.soClient.update<MonitoringEntitySourceAttributes>(
         watchlistEntitySourceTypeName,
         entitySource.id,
-        _.omit(entitySource, 'id'),
+        // API key fields are managed separately via updateApiKeyFields
+        _.omit(entitySource, ['id', 'apiKeyId', 'apiKey']),
         { refresh: 'wait_for' }
       );
 
@@ -156,6 +158,15 @@ export class WatchlistEntitySourceClient {
         );
       }
     }
+  }
+
+  async updateApiKeyFields(
+    id: string,
+    fields: { apiKeyId: string | null; apiKey: string | null }
+  ): Promise<void> {
+    await this.dependencies.soClient.update<
+      MonitoringEntitySourceAttributes & EntitySourceApiKeyFields
+    >(watchlistEntitySourceTypeName, id, fields, { refresh: 'wait_for' });
   }
 
   /**

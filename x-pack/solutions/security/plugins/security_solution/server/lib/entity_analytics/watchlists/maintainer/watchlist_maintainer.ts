@@ -54,6 +54,8 @@ export const createWatchlistMaintainer = ({
       soClient,
       logger,
       namespace,
+      encryptedSavedObjects: pluginsStart.encryptedSavedObjects,
+      coreElasticsearchClient: coreStart.elasticsearch.client,
     });
 
     await entitySourcesService.syncAllWatchlists({ abortSignal: abortController.signal });

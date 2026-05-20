@@ -14,8 +14,10 @@ import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
 import { GetWatchlistRequestParams as WatchlistIdParams } from '../../../../../../common/api/entity_analytics/watchlists/management/get.gen';
 import { WatchlistConfigClient } from '../watchlist_config';
+import { WatchlistEntitySourceClient } from '../../entity_sources/infra';
 import { getRequestSavedObjectClient } from '../../shared/utils';
 import { createEntitySourcesService } from '../../entity_sources/entity_sources_service';
+import { invalidateEntitySourceApiKey } from '../../entity_sources/entity_source_api_key';
 
 interface DeleteWatchlistResponse {
   deleted: true;
@@ -23,7 +25,8 @@ interface DeleteWatchlistResponse {
 
 export const deleteWatchlistRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
+  logger: Logger,
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
   router.versioned
     .delete({
@@ -72,6 +75,22 @@ export const deleteWatchlistRoute = (
               esClient,
               logger,
             });
+
+            // Invalidate API keys for all entity sources before cascade-deleting them
+            const entitySourceIds = await watchlistClient.getEntitySourceIds(request.params.id);
+            if (entitySourceIds.length > 0) {
+              const [coreStart] = await getStartServices();
+              const descriptorClient = new WatchlistEntitySourceClient({ soClient, namespace });
+              const sources = await Promise.all(
+                entitySourceIds.map((id) => descriptorClient.get(id))
+              );
+              await Promise.all(
+                sources
+                  .filter((s): s is typeof s & { apiKeyId: string } => !!s.apiKeyId)
+                  .map((s) => invalidateEntitySourceApiKey(coreStart.security, s.apiKeyId, logger))
+              );
+            }
+
             await watchlistClient.delete(request.params.id);
             return response.ok({ body: { deleted: true } });
           } catch (e) {

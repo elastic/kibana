@@ -14,11 +14,12 @@ import { listEntitySourcesRoute } from './list';
 
 export const registerEntitySourceRoutes = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: EntityAnalyticsRoutesDeps['logger']
+  logger: EntityAnalyticsRoutesDeps['logger'],
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
-  createEntitySourceRoute(router, logger);
+  createEntitySourceRoute(router, logger, getStartServices);
   getEntitySourceRoute(router, logger);
-  updateEntitySourceRoute(router, logger);
-  deleteEntitySourceRoute(router, logger);
+  updateEntitySourceRoute(router, logger, getStartServices);
+  deleteEntitySourceRoute(router, logger, getStartServices);
   listEntitySourcesRoute(router, logger);
 };

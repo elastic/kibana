@@ -26,10 +26,15 @@ import {
   oktaLastFullSyncMarkersIndex,
 } from '../../../entity_sources/infra';
 import type { IntegrationType } from '../../../entity_sources/infra';
+import {
+  grantEntitySourceApiKey,
+  checkIndexReadPrivilege,
+} from '../../../entity_sources/entity_source_api_key';
 
 export const createEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
+  logger: Logger,
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
   router.versioned
     .post({
@@ -68,7 +73,31 @@ export const createEntitySourceRoute = (
               namespace,
             });
 
+            if (monitoringSource.type === 'index' && monitoringSource.indexPattern) {
+              const hasPrivilege = await checkIndexReadPrivilege(
+                core.elasticsearch.client.asCurrentUser,
+                monitoringSource.indexPattern
+              );
+              if (!hasPrivilege) {
+                return siemResponse.error({
+                  statusCode: 403,
+                  body: `Insufficient privileges to read from index pattern: ${monitoringSource.indexPattern}`,
+                });
+              }
+            }
+
             const body = await createSourceForType(client, monitoringSource, namespace);
+
+            if (monitoringSource.type === 'index' && body.name) {
+              const [coreStart] = await getStartServices();
+              const apiKey = await grantEntitySourceApiKey(coreStart.security, request, {
+                id: body.id,
+                name: body.name,
+              });
+              if (apiKey) {
+                await client.updateApiKeyFields(body.id, apiKey);
+              }
+            }
 
             const watchlistClient = new WatchlistConfigClient({
               logger,

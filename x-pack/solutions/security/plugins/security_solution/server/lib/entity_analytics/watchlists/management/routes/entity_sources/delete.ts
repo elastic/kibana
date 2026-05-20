@@ -19,10 +19,12 @@ import { withMinimumLicense } from '../../../../utils/with_minimum_license';
 import { WatchlistConfigClient } from '../../watchlist_config';
 import { getRequestSavedObjectClient } from '../../../shared/utils';
 import { WatchlistEntitySourceClient } from '../../../entity_sources/infra';
+import { invalidateEntitySourceApiKey } from '../../../entity_sources/entity_source_api_key';
 
 export const deleteEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
+  logger: Logger,
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
   router.versioned
     .delete({
@@ -66,6 +68,11 @@ export const deleteEntitySourceRoute = (
           });
           await watchlistClient.removeEntitySourceReference(request.params.watchlist_id, source);
           await client.delete(request.params.id);
+
+          if (source.apiKeyId) {
+            const [coreStart] = await getStartServices();
+            await invalidateEntitySourceApiKey(coreStart.security, source.apiKeyId, logger);
+          }
 
           return response.ok({ body: { acknowledged: true } });
         } catch (e) {
