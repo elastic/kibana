@@ -6,17 +6,17 @@
  */
 
 import React, { useState } from 'react';
-import type { IconType } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiPopover,
   EuiIcon,
   EuiContextMenu,
+  EuiContextMenuItem,
+  EuiHighlight,
+  EuiText,
   EuiFlexItem,
   EuiFlexGroup,
   EuiToolTip,
-  type UseEuiTheme,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
@@ -30,7 +30,6 @@ import { visualizationTypes } from './types';
 import { isHorizontalChart, isHorizontalSeries, isPercentageSeries } from './state_helpers';
 import { getDataLayers } from './visualization_helpers';
 import { ExperimentalBadge } from '../../shared_components';
-import { ChartOption } from '../../editor_frame_service/editor_frame/config_panel/chart_switch/chart_option';
 
 export interface AddLayerButtonProps {
   state: XYVisualizationState;
@@ -226,27 +225,32 @@ export function AddLayerButton({
                   t.subtypes?.includes(firstLayerSubtype) && !isPercentageSeries(firstLayerSubtype);
 
                 return {
-                  renderItem: () => {
-                    return (
-                      <ChartOptionWrapper
-                        type={t.id}
-                        label={t.label}
-                        description={t.description}
-                        icon={t.icon}
-                        onClick={() => {
-                          addLayer(
-                            LayerTypes.DATA,
-                            undefined,
-                            undefined,
-                            canInitializeWithSubtype
-                              ? firstLayerSubtype
-                              : (t.subtypes?.[0] as SeriesType)
-                          );
-                          toggleLayersChoice(false);
-                        }}
-                      />
-                    );
-                  },
+                  renderItem: () => (
+                    <EuiContextMenuItem
+                      icon={<EuiIcon type={t.icon || 'empty'} aria-hidden={true} />}
+                      data-test-subj={`lnsXY_seriesType-${t.id}`}
+                      onClick={() => {
+                        addLayer(
+                          LayerTypes.DATA,
+                          undefined,
+                          undefined,
+                          canInitializeWithSubtype
+                            ? firstLayerSubtype
+                            : (t.subtypes?.[0] as SeriesType)
+                        );
+                        toggleLayersChoice(false);
+                      }}
+                    >
+                      <EuiHighlight search="" data-test-subj="lnsChartSwitch-option-label">
+                        {t.label}
+                      </EuiHighlight>
+                      <EuiText size="xs" color="subdued">
+                        {t.description ? (
+                          <EuiHighlight search="">{t.description}</EuiHighlight>
+                        ) : null}
+                      </EuiText>
+                    </EuiContextMenuItem>
+                  ),
                 };
               }),
             },
@@ -267,46 +271,3 @@ export function AddLayerButton({
     </div>
   );
 }
-
-const ChartOptionWrapper = ({
-  label,
-  description,
-  icon,
-  onClick,
-  type,
-}: {
-  label: string;
-  description: string;
-  icon: IconType;
-  onClick: () => void;
-  type: string;
-}) => {
-  const euiThemeContext = useEuiTheme();
-  return (
-    <button
-      data-test-subj={`lnsXY_seriesType-${type}`}
-      onClick={onClick}
-      className="euiContextMenuItem"
-      css={chartOptionWrapperStyles(euiThemeContext)}
-    >
-      <ChartOption option={{ icon, label, description }} />
-    </button>
-  );
-};
-
-const chartOptionWrapperStyles = ({ euiTheme }: UseEuiTheme) => css`
-  padding: ${euiTheme.size.s};
-  border-bottom: ${euiTheme.border.thin};
-  border-bottom-color: ${euiTheme.colors.backgroundBaseSubdued};
-  width: 100%;
-  &:hover,
-  &:focus {
-    color: ${euiTheme.colors.primary};
-    background-color: ${euiTheme.colors.backgroundBasePrimary};
-    span,
-    .euiText {
-      text-decoration: underline;
-      color: ${euiTheme.colors.primary};
-    }
-  }
-`;
