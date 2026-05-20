@@ -26,6 +26,7 @@ import {
 import { useController, useForm } from 'react-hook-form';
 
 import type { DataSetWithName, DataSource } from '../../common';
+import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
 import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
 
 export interface CreateDatasetFormValues {
@@ -127,6 +128,8 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
       if (message) {
         setSaveError(message);
       }
+    } catch (error) {
+      setSaveError(getFlyoutSaveErrorMessage(error));
     } finally {
       setIsSaving(false);
     }

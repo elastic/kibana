@@ -26,6 +26,7 @@ import { HttpDataSourcesClient } from './http_data_sources_client';
 import { CreateDataSourceFlyout } from './create_data_source_flyout';
 import { dataSourceFromListItem } from './create_data_source_flyout/data_source_flyout_initial_values';
 import { getDataSourceTypeLabel } from './get_data_source_type_label';
+import { getFlyoutSaveErrorMessage } from './get_flyout_save_error_message';
 
 /** Data set row in the table; `type` is resolved from the linked data source. */
 type DataSetListRow = DataSetWithName & { type?: DataSource['type'] };
@@ -102,7 +103,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
         setDataSourceFlyout({ kind: 'closed' });
         return null;
       } catch (e) {
-        return e instanceof Error ? e.message : 'Unknown error';
+        return getFlyoutSaveErrorMessage(e);
       }
     },
     [dataClient]
@@ -123,7 +124,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
         setCreateDatasetFlyoutOpen(false);
         return null;
       } catch (e) {
-        return e instanceof Error ? e.message : 'Unknown error';
+        return getFlyoutSaveErrorMessage(e);
       }
     },
     [dataSetsClient]

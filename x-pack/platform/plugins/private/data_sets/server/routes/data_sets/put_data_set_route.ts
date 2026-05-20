@@ -10,6 +10,7 @@ import type { IRouter } from '@kbn/core/server';
 
 import { DATA_SET_BY_ID_ROUTE_PATH } from '../../../common';
 import { DataSetsClient } from '../../data_sets_client';
+import { getRouteErrorMessage } from '../../get_route_error_message';
 
 import { putDataSetBodySchema } from './put_data_set_body_schema';
 
@@ -39,13 +40,13 @@ export function registerPutDataSetRoute(router: IRouter): void {
       const { client } = (await context.core).elasticsearch;
       const dataSetsClient = new DataSetsClient(client.asCurrentUser);
       try {
-        const responseBody = await dataSetsClient.put(id, request.body);
-        console.log('responseBody', responseBody);
+        await dataSetsClient.put(id, request.body);
         return response.ok();
       } catch (error) {
-        console.log('error', error);
         return response.badRequest({
-          body: error,
+          body: {
+            message: getRouteErrorMessage(error),
+          },
         });
       }
     })

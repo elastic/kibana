@@ -10,6 +10,7 @@ import type { IRouter } from '@kbn/core/server';
 
 import { DATA_SOURCE_BY_ID_ROUTE_PATH } from '../../../common';
 import { DataSourcesClient } from '../../data_sources_client';
+import { getRouteErrorMessage } from '../../get_route_error_message';
 
 import { putDataSourceBodySchema } from './put_data_source_body_schema';
 
@@ -39,13 +40,12 @@ export function registerPutDataSourceRoute(router: IRouter): void {
       const { client } = (await context.core).elasticsearch;
       const dataSourcesClient = new DataSourcesClient(client.asCurrentUser);
       try {
-        const responseBody = await dataSourcesClient.put(id, request.body);
-        console.log('responseBody', responseBody);
+        await dataSourcesClient.put(id, request.body);
         return response.ok();
       } catch (error) {
         return response.badRequest({
           body: {
-            message: error.message,
+            message: getRouteErrorMessage(error),
           },
         });
       }
