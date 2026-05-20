@@ -26,7 +26,6 @@ function makeAttributes(
     services: ['cloudtrail'],
     status: 'pending',
     attemptCount: 1,
-    vars: {},
     serviceVars: {},
     ...overrides,
   };
@@ -74,7 +73,6 @@ describe('cloudOnboardingDeploymentService', () => {
         connectorId: 'conn-1',
         mechanisms: ['identity_federation'],
         services: ['cloudtrail'],
-        vars: {},
         serviceVars: {},
       });
 
@@ -122,7 +120,6 @@ describe('cloudOnboardingDeploymentService', () => {
           connectorId: 'conn-1',
           mechanisms: ['identity_federation'],
           services: [],
-          vars: {},
           serviceVars: {},
         })
       ).rejects.toThrow('write failed');
@@ -332,9 +329,9 @@ describe('cloudOnboardingDeploymentService', () => {
         );
       });
 
-      it('does not modify vars on retry', async () => {
-        const vars = { api_key_id: 'abc123keyid' };
-        const retriedAttrs = makeAttributes({ status: 'pending', attemptCount: 2, vars });
+      it('does not modify serviceVars on retry', async () => {
+        const serviceVars = { cloudtrail: [{ regions: ['us-east-1'] }] };
+        const retriedAttrs = makeAttributes({ status: 'pending', attemptCount: 2, serviceVars });
         soClient.update.mockResolvedValue(makeSOResponse('deploy-1', retriedAttrs));
         soClient.get.mockResolvedValue(makeSOResponse('deploy-1', retriedAttrs));
 
@@ -343,11 +340,11 @@ describe('cloudOnboardingDeploymentService', () => {
           attemptCount: 2,
         });
 
-        expect(result.vars).toEqual(vars);
+        expect(result.serviceVars).toEqual(serviceVars);
         expect(soClient.update).not.toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
-          expect.objectContaining({ vars: expect.anything() })
+          expect.objectContaining({ serviceVars: expect.anything() })
         );
       });
     });
@@ -374,12 +371,11 @@ describe('cloudOnboardingDeploymentService', () => {
   // UC6: Agent-Based + CloudWatch Metrics
   describe('use case scenarios', () => {
     describe('UC1: identity_federation + cloudwatch_metrics + agentless', () => {
-      it('has no vars (role_arn is on the connector) and sets identity_federation mechanism', async () => {
+      it('sets identity_federation mechanism and packagePolicyIds', async () => {
         const attrs = makeAttributes({
           mechanisms: ['identity_federation'],
           services: ['cloudwatch_metrics'],
           serviceVars: { cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }] },
-          vars: {},
           packagePolicyIds: ['pkg-aws-001'],
         });
         soClient.create.mockResolvedValue(makeSOResponse('deploy-uc1', attrs));
@@ -391,7 +387,6 @@ describe('cloudOnboardingDeploymentService', () => {
           mechanisms: ['identity_federation'],
           services: ['cloudwatch_metrics'],
           serviceVars: { cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }] },
-          vars: {},
         });
 
         expect(soClient.create).toHaveBeenCalledWith(
@@ -401,18 +396,15 @@ describe('cloudOnboardingDeploymentService', () => {
         expect(result.status).toBe('pending');
         expect(result.attemptCount).toBe(1);
         expect(result.mechanisms).toEqual(['identity_federation']);
-        expect(result.vars).not.toHaveProperty('role_arn');
-        expect(result.vars).not.toHaveProperty('api_key_id');
       });
     });
 
     describe('UC2: static_keys + cloudwatch_metrics + agentless', () => {
-      it('uses empty mechanisms, no api_key_id in vars, and sets packagePolicyIds', async () => {
+      it('uses empty mechanisms and sets packagePolicyIds', async () => {
         const attrs = makeAttributes({
           mechanisms: [],
           services: ['cloudwatch_metrics'],
           serviceVars: { cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }] },
-          vars: {},
           packagePolicyIds: ['pkg-aws-002'],
         });
         soClient.create.mockResolvedValue(makeSOResponse('deploy-uc2', attrs));
@@ -424,7 +416,6 @@ describe('cloudOnboardingDeploymentService', () => {
           mechanisms: [],
           services: ['cloudwatch_metrics'],
           serviceVars: { cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }] },
-          vars: {},
         });
 
         expect(soClient.create).toHaveBeenCalledWith(
@@ -434,13 +425,11 @@ describe('cloudOnboardingDeploymentService', () => {
         expect(result.status).toBe('pending');
         expect(result.attemptCount).toBe(1);
         expect(result.mechanisms).toEqual([]);
-        expect(result.vars).not.toHaveProperty('api_key_id');
-        expect(result.vars).not.toHaveProperty('role_arn');
       });
     });
 
     describe('UC3: static_keys + cloudfront_logs + cloud_forwarder', () => {
-      it('stores api_key_id in vars and no packagePolicyIds', async () => {
+      it('sets cloud_forwarder mechanism and no packagePolicyIds', async () => {
         const attrs = makeAttributes({
           mechanisms: ['cloud_forwarder'],
           services: ['cloudfront_logs'],
@@ -449,7 +438,6 @@ describe('cloudOnboardingDeploymentService', () => {
               { regions: ['us-east-1'], s3_bucket_arn: 'arn:aws:s3:::cf-logs-bucket' },
             ],
           },
-          vars: { api_key_id: 'abc123keyid' },
           packagePolicyIds: undefined,
         });
         soClient.create.mockResolvedValue(makeSOResponse('deploy-uc3', attrs));
@@ -465,7 +453,6 @@ describe('cloudOnboardingDeploymentService', () => {
               { regions: ['us-east-1'], s3_bucket_arn: 'arn:aws:s3:::cf-logs-bucket' },
             ],
           },
-          vars: { api_key_id: 'abc123keyid' },
         });
 
         expect(soClient.create).toHaveBeenCalledWith(
@@ -475,7 +462,6 @@ describe('cloudOnboardingDeploymentService', () => {
         expect(result.status).toBe('pending');
         expect(result.attemptCount).toBe(1);
         expect(result.mechanisms).toEqual(['cloud_forwarder']);
-        expect(result.vars).toEqual({ api_key_id: 'abc123keyid' });
         expect(result.packagePolicyIds).toBeUndefined();
       });
     });
@@ -486,7 +472,6 @@ describe('cloudOnboardingDeploymentService', () => {
           mechanisms: ['agent_based'],
           services: ['cloudwatch_metrics'],
           serviceVars: { cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }] },
-          vars: {},
           packagePolicyIds: undefined,
           agentPolicyId: undefined,
         });
@@ -499,7 +484,6 @@ describe('cloudOnboardingDeploymentService', () => {
           mechanisms: ['agent_based'],
           services: ['cloudwatch_metrics'],
           serviceVars: { cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }] },
-          vars: {},
         });
 
         expect(soClient.create).toHaveBeenCalledWith(
@@ -547,48 +531,41 @@ describe('cloudOnboardingDeploymentService', () => {
           'cloud_forwarder',
           ['identity_federation', 'cloud_forwarder'] as CloudOnboardingDeploymentMechanism[],
         ],
-      ])(
-        '%s: stores api_key_id in vars with no packagePolicyIds',
-        async (_pushMechanism, mechanisms) => {
-          const attrs = makeAttributes({
-            mechanisms,
-            services: ['cloudfront_logs'],
-            serviceVars: {
-              cloudfront_logs: [
-                { regions: ['us-east-1', 'eu-west-1'], s3_bucket_arn: 'arn:aws:s3:::cf-logs' },
-              ],
-            },
-            vars: { api_key_id: 'abc123keyid' },
-            packagePolicyIds: undefined,
-          });
-          soClient.create.mockResolvedValue(makeSOResponse(`deploy-${_pushMechanism}`, attrs));
-          mockGetByType(soClient, `deploy-${_pushMechanism}`, attrs);
+      ])('%s: sets push mechanism and no packagePolicyIds', async (_pushMechanism, mechanisms) => {
+        const attrs = makeAttributes({
+          mechanisms,
+          services: ['cloudfront_logs'],
+          serviceVars: {
+            cloudfront_logs: [
+              { regions: ['us-east-1', 'eu-west-1'], s3_bucket_arn: 'arn:aws:s3:::cf-logs' },
+            ],
+          },
+          packagePolicyIds: undefined,
+        });
+        soClient.create.mockResolvedValue(makeSOResponse(`deploy-${_pushMechanism}`, attrs));
+        mockGetByType(soClient, `deploy-${_pushMechanism}`, attrs);
 
-          const result = await cloudOnboardingDeploymentService.create(soClient, {
-            provider: 'aws',
-            connectorId: `conn-${_pushMechanism}`,
-            mechanisms,
-            services: ['cloudfront_logs'],
-            serviceVars: {
-              cloudfront_logs: [
-                { regions: ['us-east-1', 'eu-west-1'], s3_bucket_arn: 'arn:aws:s3:::cf-logs' },
-              ],
-            },
-            vars: { api_key_id: 'abc123keyid' },
-          });
+        const result = await cloudOnboardingDeploymentService.create(soClient, {
+          provider: 'aws',
+          connectorId: `conn-${_pushMechanism}`,
+          mechanisms,
+          services: ['cloudfront_logs'],
+          serviceVars: {
+            cloudfront_logs: [
+              { regions: ['us-east-1', 'eu-west-1'], s3_bucket_arn: 'arn:aws:s3:::cf-logs' },
+            ],
+          },
+        });
 
-          expect(soClient.create).toHaveBeenCalledWith(
-            CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-            expect.objectContaining({ status: 'pending', attemptCount: 1 })
-          );
-          expect(result.status).toBe('pending');
-          expect(result.attemptCount).toBe(1);
-          expect(result.mechanisms).toEqual(mechanisms);
-          expect(result.vars).toEqual({ api_key_id: 'abc123keyid' });
-          expect(result.vars).not.toHaveProperty('role_arn');
-          expect(result.packagePolicyIds).toBeUndefined();
-        }
-      );
+        expect(soClient.create).toHaveBeenCalledWith(
+          CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+          expect.objectContaining({ status: 'pending', attemptCount: 1 })
+        );
+        expect(result.status).toBe('pending');
+        expect(result.attemptCount).toBe(1);
+        expect(result.mechanisms).toEqual(mechanisms);
+        expect(result.packagePolicyIds).toBeUndefined();
+      });
     });
   });
 });

@@ -12,8 +12,6 @@ requestBody:
             services:
               - 'cloudwatch_metrics'
               - 'cloudtrail'
-            vars:
-              role_arn: 'arn:aws:iam::123456789012:role/ElasticIntegrationRole'
             serviceVars:
               cloudwatch_metrics:
                 - regions:
@@ -44,8 +42,6 @@ responses:
                   - 'cloudtrail'
                 status: 'pending'
                 attemptCount: 1
-                vars:
-                  role_arn: 'arn:aws:iam::123456789012:role/ElasticIntegrationRole'
                 serviceVars:
                   cloudwatch_metrics:
                     - regions:

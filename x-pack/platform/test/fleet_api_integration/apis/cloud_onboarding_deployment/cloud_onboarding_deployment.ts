@@ -39,7 +39,6 @@ export default function (providerContext: FtrProviderContext) {
           attributes: {
             name,
             cloudProvider: 'aws',
-            vars: {},
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           },
@@ -103,7 +102,7 @@ export default function (providerContext: FtrProviderContext) {
         createdIds.push(body.item.id);
       });
 
-      it('should create a minimal deployment (no vars or serviceVars)', async () => {
+      it('should create a minimal deployment (no serviceVars)', async () => {
         const { body } = await supertest
           .post(BASE_URL)
           .set('kbn-xsrf', 'xxxx')

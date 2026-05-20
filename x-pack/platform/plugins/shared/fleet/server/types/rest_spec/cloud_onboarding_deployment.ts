@@ -39,11 +39,6 @@ const CloudOnboardingDeploymentStatusSchema = schema.oneOf(
   { meta: { description: 'Deployment status.' } }
 );
 
-// Request-body variants enforce minLength: 1 on record keys.
-const RequestVarsSchema = schema.recordOf(schema.string({ minLength: 1 }), schema.string(), {
-  meta: { description: 'Deployment-level plaintext config.' },
-});
-
 const ServiceVarsEntrySchema = schema.arrayOf(schema.recordOf(schema.string(), schema.any()), {
   maxSize: 100,
 });
@@ -89,11 +84,6 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
     min: 1,
     meta: { description: 'Number of deployment attempts, including the current one.' },
   }),
-  vars: schema.maybe(
-    schema.recordOf(schema.string(), schema.string(), {
-      meta: { description: 'Deployment-level plaintext config (e.g. role_arn, api_key_id).' },
-    })
-  ),
   serviceVars: schema.maybe(
     schema.recordOf(schema.string(), ServiceVarsEntrySchema, {
       meta: {
@@ -133,7 +123,6 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
       maxSize: 1000,
       meta: { description: 'Service IDs to be covered by this deployment.' },
     }),
-    vars: schema.maybe(RequestVarsSchema),
     serviceVars: schema.maybe(RequestServiceVarsSchema),
   }),
 };
@@ -175,7 +164,6 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
       })
     ),
     deploymentName: schema.maybe(schema.string()),
-    vars: schema.maybe(RequestVarsSchema),
     serviceVars: schema.maybe(RequestServiceVarsSchema),
     attemptCount: schema.maybe(
       schema.number({ min: 1, meta: { description: 'Incremented by callers performing a retry.' } })
