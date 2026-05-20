@@ -161,17 +161,33 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
     setIsPopoverOpen(false);
     onCloseSidebar?.();
 
+    let kibanaApp: string | undefined;
+    const sub = application.currentAppId$.subscribe((appId) => {
+      kibanaApp = appId;
+    });
+    sub.unsubscribe();
+
     analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.InappOpenFullscreen, {
       agent_id: agentId!,
       conversation_id: conversationId,
+      conversation_length: conversationRounds.length,
+      kibana_app: kibanaApp ?? 'unknown',
     });
 
     const path = conversationId
       ? appPaths.agent.conversations.byId({ agentId: agentId!, conversationId: conversationId! })
       : appPaths.agent.conversations.new({ agentId: agentId! });
 
-    navigateToAgentBuilderUrl(path, undefined, { entryPointSource: 'inapp_chat' });
-  }, [application, agentId, analytics, conversationId, navigateToAgentBuilderUrl, onCloseSidebar]);
+    navigateToAgentBuilderUrl(path, undefined, { entryPointSource: 'inapp_escalation' });
+  }, [
+    application,
+    conversationId,
+    onCloseSidebar,
+    analytics,
+    agentId,
+    conversationRounds.length,
+    navigateToAgentBuilderUrl,
+  ]);
 
   const fullScreenMenuItemLabel = useMemo(() => {
     if (conversationId) {

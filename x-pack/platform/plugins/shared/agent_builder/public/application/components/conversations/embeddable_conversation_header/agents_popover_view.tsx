@@ -85,7 +85,10 @@ export const AgentsPopoverView: React.FC<AgentsPopoverViewProps> = ({
   ) => {
     const { checked, key: newAgentId } = changedOption;
     if (checked === 'on' && newAgentId) {
-      analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.InappAgentSwitch, { agent_id: newAgentId });
+      analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.InappAgentSwitch, {
+        from_agent_id: agentId ?? '',
+        to_agent_id: newAgentId,
+      });
       removeAllErrors();
       setAgentId?.(newAgentId);
       onClose();

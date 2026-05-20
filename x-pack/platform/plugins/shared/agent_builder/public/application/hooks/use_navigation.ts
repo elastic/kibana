@@ -8,13 +8,14 @@
 import { useCallback, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { combineLatest, map } from 'rxjs';
+import type { FullscreenEntryPointSource } from '@kbn/agent-builder-common';
 import { AGENTBUILDER_APP_ID } from '../../../common/features';
 import { useKibana } from './use_kibana';
 
 export interface LocationState {
   shouldStickToBottom?: boolean;
   initialMessage?: string;
-  entryPointSource?: 'inapp_chat' | 'direct';
+  entryPointSource?: FullscreenEntryPointSource;
 }
 
 export const INFERENCE_MANAGEMENT_APP_ID = 'management';

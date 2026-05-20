@@ -273,18 +273,23 @@ export interface ReportUsedByWarningProceededParams {
 
 export interface ReportInappChatOpenParams {
   agent_id: string;
+  kibana_app?: string;
+  agent_count?: number;
 }
 
 export interface ReportInappAgentSwitchParams {
-  agent_id: string;
+  from_agent_id: string;
+  to_agent_id: string;
 }
 
 export interface ReportInappOpenFullscreenParams {
   agent_id: string;
   conversation_id?: string;
+  conversation_length?: number;
+  kibana_app?: string;
 }
 
-export type FullscreenEntryPointSource = 'inapp_chat' | 'direct';
+export type FullscreenEntryPointSource = 'inapp_escalation' | 'direct' | 'bookmark' | 'redirect';
 
 export interface ReportFullscreenEntryPointParams {
   agent_id: string;
@@ -1253,13 +1258,35 @@ const INAPP_CHAT_OPEN_EVENT: AgentBuilderTelemetryEvent = {
         optional: false,
       },
     },
+    kibana_app: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Kibana application where the in-app chat was opened (e.g. dashboard, discover)',
+        optional: true,
+      },
+    },
+    agent_count: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of agents available to the user when the chat opened',
+        optional: true,
+      },
+    },
   },
 };
 
 const INAPP_AGENT_SWITCH_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.InappAgentSwitch,
   schema: {
-    agent_id: {
+    from_agent_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'ID of the agent the user switched away from in the in-app chat',
+        optional: false,
+      },
+    },
+    to_agent_id: {
       type: 'keyword',
       _meta: {
         description: 'ID of the agent the user switched to in the in-app chat',
@@ -1280,6 +1307,20 @@ const INAPP_OPEN_FULLSCREEN_EVENT: AgentBuilderTelemetryEvent = {
       type: 'keyword',
       _meta: { description: 'ID of the conversation carried into full-screen', optional: true },
     },
+    conversation_length: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of rounds in the conversation at the time of escalation',
+        optional: true,
+      },
+    },
+    kibana_app: {
+      type: 'keyword',
+      _meta: {
+        description: 'Kibana application from which full-screen was opened',
+        optional: true,
+      },
+    },
   },
 };
 
@@ -1297,7 +1338,8 @@ const FULLSCREEN_ENTRY_POINT_EVENT: AgentBuilderTelemetryEvent = {
     source: {
       type: 'keyword',
       _meta: {
-        description: 'How the user arrived at full-screen (inapp_chat|direct)',
+        description:
+          'How the user arrived at full-screen (inapp_escalation|direct|bookmark|redirect)',
         optional: false,
       },
     },

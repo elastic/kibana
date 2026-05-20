@@ -77,10 +77,35 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   useEffect(() => {
     if (hasFiredChatOpenRef.current) return;
     hasFiredChatOpenRef.current = true;
-    coreStart.analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.InappChatOpen, {
-      agent_id: currentProps.agentId ?? agentBuilderDefaultAgentId,
+
+    let kibanaApp: string | undefined;
+    const sub = coreStart.application.currentAppId$.subscribe((appId) => {
+      kibanaApp = appId;
     });
-  }, [coreStart.analytics, currentProps.agentId]);
+    sub.unsubscribe();
+
+    const agentId = currentProps.agentId ?? agentBuilderDefaultAgentId;
+    void services.agentService
+      .list()
+      .then((agents) => {
+        coreStart.analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.InappChatOpen, {
+          agent_id: agentId,
+          kibana_app: kibanaApp ?? 'unknown',
+          agent_count: agents.length,
+        });
+      })
+      .catch(() => {
+        coreStart.analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.InappChatOpen, {
+          agent_id: agentId,
+          kibana_app: kibanaApp ?? 'unknown',
+        });
+      });
+  }, [
+    coreStart.analytics,
+    coreStart.application.currentAppId$,
+    currentProps.agentId,
+    services.agentService,
+  ]);
 
   const hasInitializedConversationIdRef = useRef(false);
 
