@@ -4852,6 +4852,17 @@ components:
           type: object
         reason:
           $ref: '#/components/schemas/Reason'
+        runtime_mapping_indices:
+          description: >-
+            Optional list of index patterns the server reads mappings from to
+            resolve runtime field definitions. Resolved runtime fields are
+            attached to the underlying updateByQuery as runtime_mappings so the
+            exception filter can reference them (e.g. the workaround in
+            elastic/security-ml#677 where a runtime field is defined directly on
+            the ML anomaly results index mapping).
+          items:
+            type: string
+          type: array
         status:
           enum:
             - closed
@@ -9353,6 +9364,17 @@ components:
         query:
           additionalProperties: true
           type: object
+        runtime_mapping_indices:
+          description: >-
+            Optional list of index patterns the server reads mappings from to
+            resolve runtime field definitions. Resolved runtime fields are
+            attached to the underlying updateByQuery as runtime_mappings so the
+            exception filter can reference them (e.g. the workaround in
+            elastic/security-ml#677 where a runtime field is defined directly on
+            the ML anomaly results index mapping).
+          items:
+            type: string
+          type: array
         status:
           $ref: '#/components/schemas/AlertStatusExceptClosed'
       required:
