@@ -110,7 +110,8 @@ safe-outputs:
     draft: false
     auto-close-issue: false
     allowed-base-branches:
-      - "[0-9]*.[0-9]*"
+      - "8.19"
+      - "9.*"
     fallback-as-issue: false
     protected-files: allowed
   assign-to-user:
@@ -166,11 +167,21 @@ Resolve failed automatic backports for the pull request identified by the inject
 7. If every remaining failed branch already has an existing open backport PR, call `add_comment` exactly once with the final comment table, use status `existing` for those branches, and do not launch branch workers.
 8. Create the shared parent directory for worker worktrees by running `mkdir -p /tmp/gh-aw-worktrees`.
 9. For each remaining target branch, launch one parallel task with the `backport-branch-worker` sub-agent defined at the end of this workflow. Pass only the source PR number, source PR title, source PR URL, source PR author login, source branch, source merge commit SHA, target branch, repository from `GH_AW_GITHUB_REPOSITORY`, and the workflow run URL built from `GH_AW_GITHUB_REPOSITORY` and `GH_AW_GITHUB_RUN_ID`.
+   - Do not rewrite or expand the worker instructions when launching the task. Do not add branch naming, PR body, safe-output tool, git push, draft PR, fallback, retry, test, or validation instructions beyond the input values listed above.
+   - Branch workers are the only tasks that may call `create_pull_request`, and only for a branch whose worker result is `created`.
+   - The parent workflow must never call `create_pull_request` for a branch, including to retry, repair, or replace a worker output.
 10. Wait for every branch task to finish. Do not stop after the first failure.
-11. For each successful branch task, ensure it called `create_pull_request`. Do not call `create_pull_request` again for the same branch.
-12. Post exactly one final `add_comment` after all branch tasks finish. Include a compact table with `Branch`, `Status`, and `Result`. Use statuses: `created`, `existing`, `skipped`, `needs manual backport`, or `failed`. Do not fabricate PR URLs; gh-aw safe outputs will attach related created PRs to the comment after processing.
+11. Treat each branch worker's returned structured result as the source of truth for that branch. Do not reinterpret, rewrite, or replace the worker's `status`, `summary`, `conflicted_files`, or `pr_title` except for the explicit validation notes below.
+   - A `created` result requires that branch worker call `create_pull_request` exactly once with a `temporary_id` and then call `assign_to_user` for that same temporary PR reference.
+   - A `needs manual backport` or `failed` result must not have a `create_pull_request` call for that branch. If a branch worker reports either status after requesting a PR, keep the worker's returned status and append a concise contract-violation note to the final comment result.
+   - If a branch worker returns `created` without a matching `assign_to_user` call, keep the branch status as `created` and append `Assignment request missing.` to the final comment result.
+12. Post exactly one final `add_comment` following the exact template below after all branch tasks finish. Include a compact table with `Branch`, `Status`, and `Result`. Use statuses: `created`, `existing`, `skipped`, `needs manual backport`, or `failed`. The status for each worker branch must match the validated status from step 11. Do not fabricate PR URLs; gh-aw safe outputs will attach related created PRs to the comment after processing.
+   - Keep every `Result` cell to one concise sentence that is under 80 characters.
+   - For conflicts or manual-backport cases, summarize the blocker category. Do not include long conflict explanations, implementation analysis, or full file lists in the table.
+   - For created PR requests, use a short phrase such as `Created a staged backport PR request.` If assignment was missing, append `Assignment request missing.`
+   - Do not add diagnostic paragraphs after the table; workflow logs and the agent summary contain detailed run information.
 
-## Final Comment Format
+## Final Comment Template
 
 Use this shape for the final source PR comment:
 
@@ -180,6 +191,7 @@ Use this shape for the final source PR comment:
 | Branch | Status | Result |
 | --- | --- | --- |
 | 8.19 | created | Created a staged backport PR request. |
+| 9.4 | needs manual backport | Structural OAS conflicts need manual resolution; see workflow logs. |
 
 These backports were prepared by an agent. Please review the generated PRs carefully before merging.
 
@@ -187,6 +199,7 @@ These backports were prepared by an agent. Please review the generated PRs caref
 
 ## agent: `backport-branch-worker`
 ---
+name: backport-branch-worker
 description: Resolve one failed Kibana backport branch in an isolated worktree and request a backport PR.
 ---
 
@@ -239,16 +252,27 @@ If the cherry-pick has conflicts:
 
 Backport PR creation steps:
 
-1. Stay in the worktree directory and run `git branch --show-current`.
-2. Call `create_pull_request` from the committed worktree with:
+1. Confirm the worktree is ready for PR creation:
+   - `git status --short` shows no unresolved conflicts or in-progress cherry-pick state.
+   - A worktree search for `<<<<<<<`, `=======`, and `>>>>>>>` finds no conflict markers.
+   - `git log -1` is the completed cherry-pick commit with the `-x` attribution.
+   - `git diff origin/<target branch>...HEAD` is limited to the intended cherry-pick resolution.
+2. If any PR creation precondition fails, abort any in-progress cherry-pick, leave the worktree for logs, return `needs manual backport`, and do not call `create_pull_request`.
+3. Stay in the worktree directory and run `git branch --show-current`.
+4. Choose a canonical temporary PR reference for this branch using the form `#aw_` followed by 3-12 alphanumeric or underscore characters, such as `#aw_bp94` for branch `9.4` or `#aw_bp819` for branch `8.19`.
+5. Build the `create_pull_request` safeoutputs payload as JSON with:
+   - `temporary_id`: the temporary PR reference chosen in the previous step
    - `base`: the target branch
    - `branch`: exactly the output of `git branch --show-current`; do not invent a branch name
    - `title`: `[<target branch>] <source PR title> (#<source PR number>)`
    - `body`: matching the backport body rules below.
-3. Call `assign_to_user` for the PR created by that `create_pull_request` call with `issue_number` set to the temporary PR reference returned by `create_pull_request` and `assignees`: `["<source PR author login>"]`.
-4. Return `created`.
+   - `draft`: `false`
+6. Submit the `create_pull_request` payload through the safeoutputs interface provided by the workflow environment. If using the safeoutputs CLI, pass the JSON payload with the `.` sentinel.
+7. Build the `assign_to_user` safeoutputs payload as JSON with `issue_number` set to the same temporary PR reference and `assignees`: `["<source PR author login>"]`.
+8. Submit the `assign_to_user` payload through the safeoutputs interface provided by the workflow environment. If using the safeoutputs CLI, pass the JSON payload with the `.` sentinel.
+9. Return `created`.
 
-Backport body rules. JSON-escape string values in the `BACKPORT` marker when substituting real PR metadata:
+Backport body must match this template EXACTLY. JSON-escape string values in the `BACKPORT` marker when substituting real PR metadata:
 
 ```markdown
 # Backport
@@ -276,6 +300,10 @@ Return a short structured result:
 Rules:
 
 - Never run `node scripts/backport`.
+- Never run `git push`; `create_pull_request` handles the staged PR request.
+- Never call `create_pull_request` without the `base` field or retry with a different base.
+- Never create draft PRs, placeholder PRs, manual-resolution PRs, or PRs that preserve conflict markers.
+- Never use a custom PR body. The body must match the Backport body template above exactly.
 - Never change files that are not part of the cherry-pick resolution.
 - Never run `node scripts/check_changes.ts` in a backport worktree; older target branches may not have that script.
 - Never run extra tests or checks in the backport worktree unless the parent task explicitly instructed you to.
