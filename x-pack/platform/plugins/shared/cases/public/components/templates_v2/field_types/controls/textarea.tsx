@@ -6,9 +6,10 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { EuiFormRow, EuiTextArea } from '@elastic/eui';
+import { InlineFieldActions } from './inline_field_actions';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import { getFieldSnakeKey } from '../../../../../common/utils';
 import type {
@@ -34,8 +35,10 @@ export const Textarea = ({
   patternValidation,
   minLength,
   maxLength,
+  onConfirm,
 }: TextareaProps) => {
-  const { control } = useFormContext();
+  const { control, resetField } = useFormContext();
+  const [isFocused, setIsFocused] = useState(false);
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
 
   const rules = useMemo(() => {
@@ -71,6 +74,8 @@ export const Textarea = ({
     return { validate };
   }, [isRequired, patternValidation, minLength, maxLength]);
 
+  const showInlineActions = isFocused && onConfirm != null;
+
   return (
     <Controller
       key={name}
@@ -79,23 +84,42 @@ export const Textarea = ({
       rules={rules}
       defaultValue=""
       render={({ field, fieldState }) => (
-        <EuiFormRow
-          label={label}
-          labelAppend={!isRequired ? OptionalFieldLabel : undefined}
-          isInvalid={!!fieldState.error}
-          error={fieldState.error?.message}
-          fullWidth
-        >
-          <EuiTextArea
-            inputRef={field.ref}
-            name={field.name}
-            value={(field.value as string) ?? ''}
-            onChange={(e) => field.onChange(e.target.value)}
-            onBlur={field.onBlur}
+        <>
+          <EuiFormRow
+            label={label}
+            labelAppend={!isRequired ? OptionalFieldLabel : undefined}
             isInvalid={!!fieldState.error}
+            error={fieldState.error?.message}
             fullWidth
-          />
-        </EuiFormRow>
+          >
+            <EuiTextArea
+              inputRef={field.ref}
+              name={field.name}
+              value={(field.value as string) ?? ''}
+              onChange={(e) => field.onChange(e.target.value)}
+              onBlur={() => {
+                field.onBlur();
+                setIsFocused(false);
+              }}
+              onFocus={() => setIsFocused(true)}
+              isInvalid={!!fieldState.error}
+              fullWidth
+            />
+          </EuiFormRow>
+          {showInlineActions && (
+            <InlineFieldActions
+              name={name}
+              onConfirm={() => {
+                setIsFocused(false);
+                onConfirm();
+              }}
+              onCancel={() => {
+                setIsFocused(false);
+                resetField(path);
+              }}
+            />
+          )}
+        </>
       )}
     />
   );

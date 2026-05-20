@@ -27,7 +27,7 @@ import { ClassicStreamPartitioning } from '../stream_detail_routing/classic_stre
 
 const classicStreamManagementSubTabs = [
   'overview',
-  'retention',
+  'lifecycle',
   'partitioning',
   'processing',
   'advanced',
@@ -42,7 +42,7 @@ type ClassicStreamManagementSubTab = (typeof classicStreamManagementSubTabs)[num
 
 const tabRedirects: Record<string, { newTab: ClassicStreamManagementSubTab }> = {
   schemaEditor: { newTab: 'schema' },
-  lifecycle: { newTab: 'retention' },
+  retention: { newTab: 'lifecycle' },
   enrich: { newTab: 'processing' },
 };
 
@@ -106,7 +106,7 @@ export function ClassicStreamDetailManagement({
     }),
   };
 
-  tabs.retention = {
+  tabs.lifecycle = {
     content: (
       <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
     ),
@@ -119,7 +119,7 @@ export function ClassicStreamDetailManagement({
       >
         <span data-test-subj="retentionTab" tabIndex={0}>
           {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-            defaultMessage: 'Retention',
+            defaultMessage: 'Data lifecycle',
           })}
         </span>
       </EuiToolTip>
@@ -204,7 +204,7 @@ export function ClassicStreamDetailManagement({
 
   if (tab === 'partitioning' && !queryStreams.enabled) {
     return (
-      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'retention' } }} />
+      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'lifecycle' } }} />
     );
   }
 

@@ -16,6 +16,7 @@ import {
   GetDownloadSourceResponseSchema,
 } from '../../types';
 import { downloadSourceService } from '../../services/download_source';
+import { agentPolicyService } from '../../services';
 
 import {
   getDownloadSourcesHandler,
@@ -30,7 +31,7 @@ jest.mock('../../services', () => ({
     getLogger: jest.fn().mockReturnValue({ error: jest.fn() } as any),
   },
   agentPolicyService: {
-    bumpAllAgentPolicies: jest.fn().mockResolvedValue({}),
+    bumpAllAgentPoliciesForDownloadSource: jest.fn().mockResolvedValue({}),
   },
 }));
 
@@ -173,5 +174,39 @@ describe('schema validation', () => {
     });
     const validationResp = DeleteDownloadSourcesResponseSchema.validate(expectedResponse);
     expect(validationResp).toEqual(expectedResponse);
+  });
+
+  it('put should call bumpAllAgentPoliciesForDownloadSource with isDefault flag', async () => {
+    (downloadSourceService.get as jest.Mock).mockResolvedValue({
+      id: 'source1',
+      is_default: true,
+    });
+
+    await putDownloadSourcesHandler(
+      context,
+      { body: {}, params: { sourceId: 'source1' } } as any,
+      response
+    );
+
+    expect(agentPolicyService.bumpAllAgentPoliciesForDownloadSource).toHaveBeenLastCalledWith(
+      expect.any(Object),
+      'source1',
+      { isDefault: true }
+    );
+  });
+
+  it('post should call bumpAllAgentPoliciesForDownloadSource with isDefault flag', async () => {
+    (downloadSourceService.create as jest.Mock).mockResolvedValue({
+      id: 'source1',
+      is_default: false,
+    });
+
+    await postDownloadSourcesHandler(context, { body: { id: 'source1' } } as any, response);
+
+    expect(agentPolicyService.bumpAllAgentPoliciesForDownloadSource).toHaveBeenLastCalledWith(
+      expect.any(Object),
+      'source1',
+      { isDefault: false }
+    );
   });
 });
