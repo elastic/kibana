@@ -9,6 +9,12 @@ mapped_pages:
 
 The following Kibana settings can be configured on {{ech}} deployments using the **User Settings** editor in the {{ech}} console. Settings not listed here are not supported on {{ech}}.
 
+## General [ec-general-settings]
+
+::::{settings} /reference/configuration-reference/general-settings.yml
+:deployment: ech
+::::
+
 ## Alerting and actions [ec-alerting-settings]
 
 ::::{settings} /reference/configuration-reference/alerting-settings.yml
@@ -40,12 +46,6 @@ The following Kibana settings can be configured on {{ech}} deployments using the
 ::::
 
 ::::{settings} /reference/configuration-reference/automatic-import-settings.yml
-:deployment: ech
-::::
-
-## General [ec-general-settings]
-
-::::{settings} /reference/configuration-reference/general-settings.yml
 :deployment: ech
 ::::
 
