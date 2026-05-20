@@ -6,7 +6,50 @@
  */
 
 import { ESSENTIAL_ALERT_FIELDS } from '../../common';
-import { stringifyEssentialAlertData } from './helpers';
+import { SecurityAgentBuilderAttachments } from '../../common/constants';
+import { alertsToAttachmentInputs, stringifyEssentialAlertData } from './helpers';
+
+const makeItem = (id: string) =>
+  ({ _id: id, data: [], ecs: { _id: id, _index: '' } } as unknown as Parameters<
+    typeof alertsToAttachmentInputs
+  >[0][number]);
+
+describe('alertsToAttachmentInputs', () => {
+  it('returns a single visible attachment for ≤20 alerts', () => {
+    const items = Array.from({ length: 5 }, (_, i) => makeItem(`id-${i}`));
+    const result = alertsToAttachmentInputs(items);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].hidden).toBeFalsy();
+    expect(result[0].data?.attachmentLabel).toBe('5 Alerts');
+    expect(result[0].type).toBe(SecurityAgentBuilderAttachments.alerts);
+  });
+
+  it('returns N batches with only the first visible for >20 alerts', () => {
+    const items = Array.from({ length: 50 }, (_, i) => makeItem(`id-${i}`));
+    const result = alertsToAttachmentInputs(items);
+
+    expect(result).toHaveLength(3);
+    expect(result[0].hidden).toBeFalsy();
+    expect(result[0].data?.attachmentLabel).toBe('50 Alerts');
+    expect(result[1].hidden).toBe(true);
+    expect(result[1].data?.attachmentLabel).toBeUndefined();
+    expect(result[2].hidden).toBe(true);
+  });
+
+  it('uses singular label for 1 alert', () => {
+    const result = alertsToAttachmentInputs([makeItem('x')]);
+    expect(result[0].data?.attachmentLabel).toBe('1 Alert');
+  });
+
+  it('each batch contains the correct alert IDs', () => {
+    const items = Array.from({ length: 25 }, (_, i) => makeItem(`id-${i}`));
+    const result = alertsToAttachmentInputs(items);
+
+    expect(result[0].data?.alertIds).toHaveLength(20);
+    expect(result[1].data?.alertIds).toHaveLength(5);
+  });
+});
 
 describe('stringifyEssentialAlertData', () => {
   it('filters to essential fields only', () => {

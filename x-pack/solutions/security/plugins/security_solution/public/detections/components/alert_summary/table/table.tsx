@@ -15,6 +15,7 @@ import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import type {
   AlertsTableImperativeApi,
   AlertsTableProps,
+  TimelineItem,
 } from '@kbn/response-ops-alerts-table/types';
 import { ALERT_RULE_NAME, ALERT_SEVERITY, AlertConsumers, TIMESTAMP } from '@kbn/rule-data-utils';
 import { ESQL_RULE_TYPE_ID, QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
@@ -37,6 +38,9 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { combineQueries } from '../../../../common/lib/kuery';
 import { useKibana } from '../../../../common/lib/kibana';
 import { CellValue } from './render_cell';
+import { BULK_ALERTS_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
+import { alertsToAttachmentInputs } from '../../../../agent_builder/helpers';
+import { useReportAddToChat } from '../../../../agent_builder/hooks/use_report_add_to_chat';
 import { buildTimeRangeFilter } from '../../alerts_table/helpers';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 
@@ -134,6 +138,7 @@ export const Table = memo(({ dataView, groupingFilters, packages }: TableProps) 
   const {
     services: {
       application,
+      agentBuilder,
       cases,
       data,
       fieldFormats,
@@ -156,8 +161,33 @@ export const Table = memo(({ dataView, groupingFilters, packages }: TableProps) 
       application,
       licensing,
       settings,
+      agentBuilder,
     }),
-    [application, cases, data, fieldFormats, http, licensing, notifications, rendering, settings]
+    [
+      agentBuilder,
+      application,
+      cases,
+      data,
+      fieldFormats,
+      http,
+      licensing,
+      notifications,
+      rendering,
+      settings,
+    ]
+  );
+
+  const reportAddToChat = useReportAddToChat();
+  const convertAlertToAttachment = useCallback(
+    (alertItems: TimelineItem[]) => {
+      reportAddToChat({
+        pathway: 'bulk_alerts_alert_summary',
+        attachments: ['alert'],
+        alert_count: alertItems.length,
+      });
+      return alertsToAttachmentInputs(alertItems);
+    },
+    [reportAddToChat]
   );
 
   const getGlobalFiltersSelector = useMemo(() => inputsSelectors.globalFiltersQuerySelector(), []);
@@ -245,6 +275,10 @@ export const Table = memo(({ dataView, groupingFilters, packages }: TableProps) 
         ruleTypeIds={RULE_TYPE_IDS}
         services={services}
         toolbarVisibility={TOOLBAR_VISIBILITY}
+        bulkAddToChatConfig={{
+          convertAlertToAttachment,
+          initialMessage: BULK_ALERTS_ATTACHMENT_PROMPT,
+        }}
       />
     </EuiDataGridStyleWrapper>
   );

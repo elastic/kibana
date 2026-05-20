@@ -29,11 +29,18 @@ export interface AgentBuilderAddToChatTelemetry {
     | 'attack_discovery_bottom'
     | 'attacks_page_group_summary'
     | 'attacks_page_group_take_action'
-    | 'attacks_page_flyout_take_action';
+    | 'attacks_page_flyout_take_action'
+    | 'bulk_alerts_alerts_page'
+    | 'bulk_alerts_rule_details'
+    | 'bulk_alerts_alert_summary'
+    | 'bulk_alerts_cases'
+    | 'bulk_alerts_attack_discovery';
   /**
    * Attachment type
    */
   attachments?: Array<'alert' | 'entity' | 'rule'>;
+  /** Number of alerts added (for bulk add-to-chat actions) */
+  alert_count?: number;
 }
 
 /**
