@@ -46,22 +46,17 @@ export function useDateRangeRedirect() {
   }, [query.rangeFrom, query.rangeTo]);
 
   const redirect = () => {
-    const defaultFrom = timePickerSharedState.from ?? timePickerTimeDefaults.from;
-    const defaultTo = timePickerSharedState.to ?? timePickerTimeDefaults.to;
-
     const resolvedFrom = tryParseDate(query.rangeFrom)?.isValid()
       ? query.rangeFrom
-      : timePickerTimeDefaults.from;
+      : timePickerSharedState.from;
     const resolvedTo = tryParseDate(query.rangeTo)?.isValid()
       ? query.rangeTo
-      : timePickerTimeDefaults.to;
-
+      : timePickerSharedState.to;
     const isResolvedRangeValid = isValidDateRange(resolvedFrom, resolvedTo);
-
     const nextQuery = {
       ...query,
-      rangeFrom: isResolvedRangeValid ? resolvedFrom : defaultFrom,
-      rangeTo: isResolvedRangeValid ? resolvedTo : defaultTo,
+      rangeFrom: isResolvedRangeValid ? resolvedFrom : timePickerTimeDefaults.from,
+      rangeTo: isResolvedRangeValid ? resolvedTo : timePickerTimeDefaults.to,
     };
 
     try {
