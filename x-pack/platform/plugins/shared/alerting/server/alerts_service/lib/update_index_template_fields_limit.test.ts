@@ -5,13 +5,33 @@
  * 2.0.
  */
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import type { IndicesGetIndexTemplateIndexTemplateItem } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesGetIndexTemplateIndexTemplateItem,
+  IndicesIndexTemplate,
+  IndicesPutIndexTemplateRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import { updateIndexTemplateFieldsLimit } from './update_index_template_fields_limit';
 
 const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
+// On 8.x the ES client types don't yet declare the system-managed fields that
+// ES still returns in GET responses; widen the type so the tests can exercise
+// the stripping logic. Keep in sync with update_index_template_fields_limit.ts.
+type IndexTemplateWithSystemFields = IndicesIndexTemplate & {
+  created_date?: string;
+  created_date_millis?: number;
+  modified_date?: string;
+  modified_date_millis?: number;
+};
+
+// Narrow `putIndexTemplate` mock calls to the top-level-keys variant. The
+// client signature accepts a union with a {body: {...}} variant whose top-level
+// shape is too narrow to expose template/index_patterns/etc.
+const getPutCall = (): IndicesPutIndexTemplateRequest =>
+  esClient.indices.putIndexTemplate.mock.calls[0][0] as IndicesPutIndexTemplateRequest;
+
 const createTemplate = (
-  overrides: Partial<IndicesGetIndexTemplateIndexTemplateItem['index_template']> = {}
+  overrides: Partial<IndexTemplateWithSystemFields> = {}
 ): IndicesGetIndexTemplateIndexTemplateItem => ({
   name: '.alerts-test.alerts-default-index-template',
   index_template: {
@@ -70,7 +90,7 @@ describe('updateIndexTemplateFieldsLimit', () => {
 
     await updateIndexTemplateFieldsLimit({ esClient, template, limit: 3000 });
 
-    const call = esClient.indices.putIndexTemplate.mock.calls[0][0];
+    const call = getPutCall();
     expect(call.template?.settings).toEqual({
       hidden: true,
       'index.mapping.total_fields.limit': 3000,
@@ -84,7 +104,7 @@ describe('updateIndexTemplateFieldsLimit', () => {
 
     await updateIndexTemplateFieldsLimit({ esClient, template, limit: 2600 });
 
-    const call = esClient.indices.putIndexTemplate.mock.calls[0][0];
+    const call = getPutCall();
     expect(call.index_patterns).toEqual(['.internal.alerts-test.alerts-default-*']);
     expect(call.composed_of).toEqual(['mappings1', 'framework-mappings']);
     expect(call.priority).toBe(7);
@@ -97,11 +117,11 @@ describe('updateIndexTemplateFieldsLimit', () => {
       created_date_millis: 1775145600000,
       modified_date: '2026-04-09T00:00:00.000Z',
       modified_date_millis: 1775836800000,
-    } as IndicesGetIndexTemplateIndexTemplateItem['index_template']);
+    });
 
     await updateIndexTemplateFieldsLimit({ esClient, template, limit: 2600 });
 
-    const call = esClient.indices.putIndexTemplate.mock.calls[0][0];
+    const call = getPutCall();
     expect(call).not.toHaveProperty('created_date');
     expect(call).not.toHaveProperty('created_date_millis');
     expect(call).not.toHaveProperty('modified_date');
@@ -115,7 +135,7 @@ describe('updateIndexTemplateFieldsLimit', () => {
 
     await updateIndexTemplateFieldsLimit({ esClient, template, limit: 2600 });
 
-    const call = esClient.indices.putIndexTemplate.mock.calls[0][0];
+    const call = getPutCall();
     expect(call.ignore_missing_component_templates).toEqual(['optional-component']);
   });
 
@@ -126,7 +146,7 @@ describe('updateIndexTemplateFieldsLimit', () => {
 
     await updateIndexTemplateFieldsLimit({ esClient, template, limit: 2600 });
 
-    const call = esClient.indices.putIndexTemplate.mock.calls[0][0];
+    const call = getPutCall();
     expect(call.ignore_missing_component_templates).toEqual(['optional-1', 'optional-2']);
   });
 
@@ -135,7 +155,7 @@ describe('updateIndexTemplateFieldsLimit', () => {
 
     await updateIndexTemplateFieldsLimit({ esClient, template, limit: 2600 });
 
-    const call = esClient.indices.putIndexTemplate.mock.calls[0][0];
+    const call = getPutCall();
     expect(call.ignore_missing_component_templates).toBeUndefined();
   });
 
@@ -144,7 +164,7 @@ describe('updateIndexTemplateFieldsLimit', () => {
 
     await updateIndexTemplateFieldsLimit({ esClient, template, limit: 3000 });
 
-    const call = esClient.indices.putIndexTemplate.mock.calls[0][0];
+    const call = getPutCall();
     expect(call.template?.settings).toEqual({
       'index.mapping.total_fields.limit': 3000,
       'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
@@ -156,7 +176,7 @@ describe('updateIndexTemplateFieldsLimit', () => {
 
     await updateIndexTemplateFieldsLimit({ esClient, template, limit: 3000 });
 
-    const call = esClient.indices.putIndexTemplate.mock.calls[0][0];
+    const call = getPutCall();
     expect(call.template).toEqual({
       settings: {
         'index.mapping.total_fields.limit': 3000,
