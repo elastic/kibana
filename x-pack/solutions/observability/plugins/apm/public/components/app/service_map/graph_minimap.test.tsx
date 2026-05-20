@@ -28,6 +28,10 @@ jest.mock('./use_keyboard_navigation', () => ({
   })),
 }));
 
+jest.mock('./use_service_map_alerts_tab_href', () =>
+  jest.requireActual('./use_service_map_alerts_tab_href.test_mock')
+);
+
 let mockMinimapProps: Record<string, unknown> = {};
 
 jest.mock('@xyflow/react', () => {

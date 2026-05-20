@@ -47,7 +47,7 @@ const renderCopyOptions = ({ createNewCopies, overwrite, includeRelated }: CopyO
   );
 
   return (
-    <EuiListGroup className="spcCopyToSpaceOptionsView" flush>
+    <EuiListGroup className="spcCopyToSpaceOptionsView">
       <EuiListGroupItem iconType="copy" label={createNewCopiesLabel} />
       {!createNewCopies && (
         <EuiListGroupItem

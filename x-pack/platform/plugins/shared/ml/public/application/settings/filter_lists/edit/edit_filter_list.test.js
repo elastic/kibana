@@ -174,7 +174,7 @@ describe('EditFilterList', () => {
 
     // Next we want to click the '500 items' button.
     const mlItemsGridPaginationMenuPanel = getByTestId('mlItemsGridPaginationMenuPanel');
-    const buttons = within(mlItemsGridPaginationMenuPanel).getAllByRole('button');
+    const buttons = within(mlItemsGridPaginationMenuPanel).getAllByRole('menuitem');
     expect(buttons.length).toBe(4);
     await userEvent.click(buttons[2]);
 

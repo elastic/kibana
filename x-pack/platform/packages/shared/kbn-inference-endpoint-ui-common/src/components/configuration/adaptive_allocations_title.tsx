@@ -16,12 +16,14 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 export const AdaptiveAllocationsTitle: FC = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
 
   return (
     <>
@@ -39,6 +41,7 @@ export const AdaptiveAllocationsTitle: FC = () => {
         <EuiFlexItem grow={false}>
           <EuiPopover
             anchorPosition="upCenter"
+            aria-labelledby={popoverTitleId}
             button={
               <EuiButtonIcon
                 color="text"
@@ -56,7 +59,7 @@ export const AdaptiveAllocationsTitle: FC = () => {
             isOpen={isPopoverOpen}
             closePopover={() => setIsPopoverOpen(false)}
           >
-            <EuiPopoverTitle>
+            <EuiPopoverTitle id={popoverTitleId}>
               <FormattedMessage
                 id="xpack.inferenceEndpointUICommon.components.sectionPopoverTitle"
                 defaultMessage="Adaptive resources"

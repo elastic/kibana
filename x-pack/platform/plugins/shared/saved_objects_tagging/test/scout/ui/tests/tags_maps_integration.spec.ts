@@ -84,14 +84,14 @@ test.describe('Maps integration', { tag: tags.stateful.classic }, () => {
     await pageObjects.maps.savedObjectTitleInput.fill('map-with-new-tag');
     await pageObjects.visualize.selectNoDashboard();
     await pageObjects.tagManagement.openCreateTagFromSelector();
-    await expect(pageObjects.tagManagement.getTagModalForm()).toBeVisible();
-    await pageObjects.tagManagement.fillForm({
+    await expect(pageObjects.tagManagement.tagModal.form).toBeVisible();
+    await pageObjects.tagManagement.tagModal.fillForm({
       name: 'my-new-tag',
       color: '#FFCC33',
       description: '',
     });
     await page.testSubj.click('createModalConfirmButton');
-    await pageObjects.tagManagement.getTagModalForm().waitFor({ state: 'hidden' });
+    await pageObjects.tagManagement.tagModal.form.waitFor({ state: 'hidden' });
     await pageObjects.maps.confirmSaveButton.click();
     await pageObjects.maps.confirmSaveButton.waitFor({ state: 'hidden' });
 

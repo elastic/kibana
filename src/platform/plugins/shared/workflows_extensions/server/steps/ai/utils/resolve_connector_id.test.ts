@@ -11,12 +11,14 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { InferenceConnectorType } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 
 import { resolveConnectorId } from './resolve_connector_id';
 
 describe('resolveConnectorId', () => {
   let mockInferencePlugin: jest.Mocked<InferenceServerStart>;
   let mockKibanaRequest: jest.Mocked<KibanaRequest>;
+  let mockSearchInferenceEndpoints: jest.Mocked<SearchInferenceEndpointsPluginStart>;
 
   // Helper function to create mock connectors
   const createMockConnector = (partial: Partial<InferenceConnector>): InferenceConnector => ({
@@ -42,6 +44,13 @@ describe('resolveConnectorId', () => {
       getDefaultConnector: jest.fn(),
       getConnectorList: jest.fn(),
       getConnectorById: jest.fn(),
+    } as any;
+
+    mockSearchInferenceEndpoints = {
+      features: {} as any,
+      endpoints: {
+        getForFeature: jest.fn(),
+      },
     } as any;
   });
 
@@ -79,6 +88,71 @@ describe('resolveConnectorId', () => {
       ).rejects.toThrow('No default AI connector configured');
 
       expect(mockInferencePlugin.getDefaultConnector).toHaveBeenCalledWith(mockKibanaRequest);
+    });
+
+    describe('when searchInferenceEndpoints and featureId are provided', () => {
+      it('should use the first feature endpoint when available', async () => {
+        const featureConnectorId = 'feature-connector-id';
+        (mockSearchInferenceEndpoints.endpoints.getForFeature as jest.Mock).mockResolvedValue({
+          endpoints: [
+            createMockConnector({ connectorId: featureConnectorId }),
+            createMockConnector({ connectorId: 'second-connector-id' }),
+          ],
+          warnings: [],
+          soEntryFound: false,
+        });
+
+        const result = await resolveConnectorId(undefined, mockInferencePlugin, mockKibanaRequest, {
+          featureId: 'ai.prompt',
+          searchInferenceEndpoints: mockSearchInferenceEndpoints,
+        });
+
+        expect(mockSearchInferenceEndpoints.endpoints.getForFeature).toHaveBeenCalledWith(
+          'ai.prompt',
+          mockKibanaRequest
+        );
+        expect(mockInferencePlugin.getDefaultConnector).not.toHaveBeenCalled();
+        expect(result).toBe(featureConnectorId);
+      });
+
+      it('should fall back to getDefaultConnector when feature returns no endpoints', async () => {
+        const defaultConnectorId = 'default-connector-id';
+        (mockSearchInferenceEndpoints.endpoints.getForFeature as jest.Mock).mockResolvedValue({
+          endpoints: [],
+          warnings: [],
+          soEntryFound: false,
+        });
+        mockInferencePlugin.getDefaultConnector.mockResolvedValue(
+          createMockConnector({ connectorId: defaultConnectorId })
+        );
+
+        const result = await resolveConnectorId(undefined, mockInferencePlugin, mockKibanaRequest, {
+          featureId: 'ai.prompt',
+          searchInferenceEndpoints: mockSearchInferenceEndpoints,
+        });
+
+        expect(mockSearchInferenceEndpoints.endpoints.getForFeature).toHaveBeenCalledWith(
+          'ai.prompt',
+          mockKibanaRequest
+        );
+        expect(mockInferencePlugin.getDefaultConnector).toHaveBeenCalledWith(mockKibanaRequest);
+        expect(result).toBe(defaultConnectorId);
+      });
+
+      it('should fall back to getDefaultConnector when options are partially set', async () => {
+        const defaultConnectorId = 'default-connector-id';
+        mockInferencePlugin.getDefaultConnector.mockResolvedValue(
+          createMockConnector({ connectorId: defaultConnectorId })
+        );
+
+        const result = await resolveConnectorId(undefined, mockInferencePlugin, mockKibanaRequest, {
+          featureId: 'ai.prompt',
+        });
+
+        expect(mockSearchInferenceEndpoints.endpoints.getForFeature).not.toHaveBeenCalled();
+        expect(mockInferencePlugin.getDefaultConnector).toHaveBeenCalledWith(mockKibanaRequest);
+        expect(result).toBe(defaultConnectorId);
+      });
     });
   });
 

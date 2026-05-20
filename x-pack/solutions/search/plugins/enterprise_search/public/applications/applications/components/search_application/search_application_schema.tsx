@@ -423,6 +423,10 @@ export const SearchApplicationSchema: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiPopover
+                aria-label={i18n.translate(
+                  'xpack.enterpriseSearch.searchApplications.searchApplication.schema.filters.popover.ariaLabel',
+                  { defaultMessage: 'Filter by field types' }
+                )}
                 button={filterButton}
                 isOpen={isFilterByPopoverOpen}
                 closePopover={() => setIsFilterByPopoverOpen(false)}

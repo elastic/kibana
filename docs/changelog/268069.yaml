@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/268069
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-05-14
+areas:
+- Alerting and reporting
+title: Add Elastic Cloud identifiers to connector user agent
+description: Adds a `User-Agent` header fragment for outbound connector requests to identify Elastic Cloud project/deployment providence. This can help IT teams monitor 3rd-party connections that originate from their Elastic Cloud infrastructure. Resulting `User-Agent` headers should follow a pattern of `axios/x.y.z elastic (deployment:abc)` or `axios/x.y.z elastic (project:abc)`

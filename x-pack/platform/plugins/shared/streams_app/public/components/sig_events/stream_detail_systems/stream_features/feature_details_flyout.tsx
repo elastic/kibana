@@ -109,7 +109,6 @@ export function FeatureDetailsFlyout({
               anchorPosition="downRight"
             >
               <EuiContextMenuPanel
-                size="s"
                 items={[
                   ...(onRestore
                     ? [

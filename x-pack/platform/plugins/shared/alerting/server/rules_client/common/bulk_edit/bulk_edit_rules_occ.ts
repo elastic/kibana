@@ -15,7 +15,7 @@ import type {
 } from '@kbn/core/server';
 import type { ChangeTrackingAction } from '@kbn/alerting-types';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
-import { logBulkRuleChanges } from '../../../application/rule/methods/common_utils/log_bulk_rule_changes';
+import { logRuleChanges } from '../../../application/rule/methods/common_utils/log_rule_changes';
 import type { RuleParams } from '../../../application/rule/types';
 import type { ValidateScheduleLimitResult } from '../../../application/rule/methods/get_schedule_frequency';
 import { validateScheduleLimit } from '../../../application/rule/methods/get_schedule_frequency';
@@ -206,7 +206,7 @@ async function saveBulkUpdatedRules({
       savedObjectsBulkCreateOptions: { overwrite: true },
     });
 
-    await logBulkRuleChanges({
+    await logRuleChanges({
       ruleSOs: result.saved_objects,
       rulesClientContext: context,
       changesContext: {

@@ -144,6 +144,10 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
   return (
     <>
       <EuiPopover
+        aria-label={i18n.translate(
+          'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.configuration.popover.ariaLabel',
+          { defaultMessage: 'Configuration options' }
+        )}
         anchorPosition="downCenter"
         isOpen={showConfiguration}
         panelPaddingSize="none"
