@@ -17,7 +17,7 @@ import {
 export const AiPromptStepDefinition = createPublicStepDefinition({
   ...AiPromptStepCommonDefinition,
   icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/product_agent').then(({ icon }) => ({
+    import('@elastic/eui/src/components/icon/assets/product_agent').then(({ icon }) => ({
       default: icon,
     }))
   ),

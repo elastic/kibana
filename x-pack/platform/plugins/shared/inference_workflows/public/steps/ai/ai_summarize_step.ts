@@ -12,7 +12,7 @@ import { AiSummarizeStepCommonDefinition } from '../../../common/steps/ai';
 export const AiSummarizeStepDefinition = createPublicStepDefinition({
   ...AiSummarizeStepCommonDefinition,
   icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/product_agent').then(({ icon }) => ({
+    import('@elastic/eui/src/components/icon/assets/product_agent').then(({ icon }) => ({
       default: icon,
     }))
   ),

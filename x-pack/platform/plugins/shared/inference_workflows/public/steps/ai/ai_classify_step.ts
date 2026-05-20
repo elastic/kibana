@@ -15,7 +15,7 @@ import {
 export const AiClassifyStepDefinition = createPublicStepDefinition({
   ...AiClassifyStepCommonDefinition,
   icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/product_agent').then(({ icon }) => ({
+    import('@elastic/eui/src/components/icon/assets/product_agent').then(({ icon }) => ({
       default: icon,
     }))
   ),
