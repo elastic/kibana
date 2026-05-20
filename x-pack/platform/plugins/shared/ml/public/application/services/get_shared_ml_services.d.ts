@@ -1,5 +1,5 @@
 import { type HttpStart } from '@kbn/core-http-browser';
-import { ElasticModels } from './elastic_models_service';
+import type { ElasticModels } from './elastic_models_service';
 export type MlSharedServices = ReturnType<typeof getMlSharedServices>;
 /**
  * Provides ML services exposed from the plugin start.

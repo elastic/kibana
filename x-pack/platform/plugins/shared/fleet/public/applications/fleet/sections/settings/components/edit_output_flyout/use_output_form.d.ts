@@ -1,6 +1,6 @@
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { KafkaOutput } from '../../../../../../../common/types/models';
-import { useComboInput, useInput, useSecretInput, useNumberInput, useSelectInput, useSwitchInput, useRadioInput, useKeyValueInput, useComboBoxWithCustomInput } from '../../../../hooks';
+import type { useComboInput, useInput, useSecretInput, useNumberInput, useSelectInput, useSwitchInput, useRadioInput, useKeyValueInput, useComboBoxWithCustomInput } from '../../../../hooks';
 import type { Output } from '../../../../types';
 export interface OutputFormInputsType {
     nameInput: ReturnType<typeof useInput>;

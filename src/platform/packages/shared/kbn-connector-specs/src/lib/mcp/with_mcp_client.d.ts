@@ -1,5 +1,5 @@
 import type { ActionContext } from '../../connector_spec';
-import { createMcpClientFromAxios } from './create_mcp_client_from_axios';
+import type { createMcpClientFromAxios } from './create_mcp_client_from_axios';
 /**
  * Lifecycle helper for MCP-native v2 connectors: creates an McpClient from
  * the connector's Axios instance, connects, runs the callback, and disconnects.

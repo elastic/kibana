@@ -6,7 +6,7 @@ import { type Filter, type ProjectRouting, type Query, type TimeRange } from '@k
 import type { DataView } from '@kbn/data-plugin/common';
 import type { GlobalQueryStateFromUrl, QueryState, QueryStateChange, RefreshInterval, SavedQuery } from '@kbn/data-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { AppStateManager } from '../url_state';
+import type { AppStateManager } from '../url_state';
 import type { SavedMap } from '../saved_map';
 import type { MapAttributes } from '../../../../server';
 export interface Props {

@@ -1,4 +1,4 @@
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 export declare abstract class StateService {
     private subscriptions$;
     protected _init(): void;

@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { OmitUpsertProps } from './core';
 import type { StreamQuery } from '../queries';
 export declare namespace BaseStream {

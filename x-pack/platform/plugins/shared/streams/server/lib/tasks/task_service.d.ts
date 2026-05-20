@@ -1,6 +1,6 @@
 import type { TaskManagerSetupContract, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { CoreStart, Logger } from '@kbn/core/server';
-import { TaskClient } from './task_client';
+import type { TaskClient } from './task_client';
 import type { TaskContext } from './task_definitions';
 export declare class TaskService {
     private readonly taskManagerSetup;

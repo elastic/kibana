@@ -1,4 +1,4 @@
-import { EventOutcome } from '../../../common/event_outcome';
+import type { EventOutcome } from '../../../common/event_outcome';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 interface Options {
     dependencyNames: string[];

@@ -1,6 +1,6 @@
 import type { Dispatch } from 'react';
 import React from 'react';
-import * as editor from '../../stores/editor';
+import type * as editor from '../../stores/editor';
 import type { DevToolsSettings } from '../../../services';
 export interface EditorContextArgs {
     children: JSX.Element;

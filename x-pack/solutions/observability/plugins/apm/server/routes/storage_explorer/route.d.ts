@@ -1,5 +1,5 @@
-import * as t from 'io-ts';
-import { IndexLifecyclePhaseSelectOption } from '../../../common/storage_explorer_types';
+import type * as t from 'io-ts';
+import type { IndexLifecyclePhaseSelectOption } from '../../../common/storage_explorer_types';
 import type { StorageExplorerServiceStatisticsResponse } from './get_service_statistics';
 import type { SizeTimeseriesResponse } from './get_size_timeseries';
 import type { StorageDetailsResponse } from './get_storage_details';

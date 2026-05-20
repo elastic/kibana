@@ -1,5 +1,5 @@
-import { z } from '@kbn/zod/v4';
-import { AuthType, SSLCertType } from '../constants';
+import type { z } from '@kbn/zod/v4';
+import type { AuthType, SSLCertType } from '../constants';
 export declare const authTypeSchema: z.ZodOptional<z.ZodDefault<z.ZodUnion<readonly [z.ZodLiteral<AuthType.Basic>, z.ZodLiteral<AuthType.SSL>, z.ZodLiteral<AuthType.OAuth2ClientCredentials>, z.ZodLiteral<null>]>>>;
 export declare const hasAuthSchema: z.ZodDefault<z.ZodBoolean>;
 export declare const AuthConfiguration: {

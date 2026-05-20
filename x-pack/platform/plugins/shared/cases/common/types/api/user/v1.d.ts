@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 export declare const GetCaseUsersResponseRt: rt.ExactC<rt.TypeC<{
     assignees: rt.ArrayC<rt.IntersectionC<[rt.ExactC<rt.TypeC<{
         user: rt.ExactC<rt.TypeC<{

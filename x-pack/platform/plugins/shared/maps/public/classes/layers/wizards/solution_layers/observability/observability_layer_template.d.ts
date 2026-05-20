@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import type { RenderWizardArguments } from '../../layer_wizard_registry';
 import type { OBSERVABILITY_LAYER_TYPE } from './layer_select';
 import type { OBSERVABILITY_METRIC_TYPE } from './metric_select';
-import { DISPLAY } from './display_select';
+import type { DISPLAY } from './display_select';
 interface State {
     display: DISPLAY;
     layer: OBSERVABILITY_LAYER_TYPE | null;

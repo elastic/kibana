@@ -1,5 +1,5 @@
 import type { QueryFilter } from '../../expressions';
-import { BucketAggType } from './bucket_agg_type';
+import type { BucketAggType } from './bucket_agg_type';
 import type { BaseAggParams } from '../types';
 export interface FiltersBucketAggDependencies {
     getConfig: <T = any>(key: string) => any;

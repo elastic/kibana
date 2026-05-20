@@ -1,5 +1,5 @@
-import { resultsServiceRxProvider } from './result_service_rx';
-import { resultsServiceProvider } from './results_service';
+import type { resultsServiceRxProvider } from './result_service_rx';
+import type { resultsServiceProvider } from './results_service';
 import type { MlApi } from '../ml_api_service';
 export type MlResultsService = ReturnType<typeof resultsServiceProvider> & ReturnType<typeof resultsServiceRxProvider>;
 type Time = string;

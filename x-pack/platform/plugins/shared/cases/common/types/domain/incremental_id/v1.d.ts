@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 export declare const CaseIdIncrementerAttributesRt: rt.ExactC<rt.TypeC<{
     '@timestamp': rt.NumberC;
     updated_at: rt.NumberC;

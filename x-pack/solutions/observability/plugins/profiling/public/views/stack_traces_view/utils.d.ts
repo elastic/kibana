@@ -1,5 +1,5 @@
 import type { TypeOf } from '@kbn/typed-react-router-config';
-import { TopNType } from '@kbn/profiling-utils';
+import type { TopNType } from '@kbn/profiling-utils';
 import type { ProfilingRoutes } from '../../routing';
 export declare function getTracesViewRouteParams({ query, topNType, category, }: {
     query: TypeOf<ProfilingRoutes, '/stacktraces/{topNType}'>['query'];

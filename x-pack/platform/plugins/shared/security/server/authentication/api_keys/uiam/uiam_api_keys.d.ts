@@ -1,5 +1,5 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
+import type { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type { ConvertUiamAPIKeysResponse, GrantAPIKeyResult, GrantUiamAPIKeyParams, InvalidateAPIKeyResult, InvalidateUiamAPIKeyParams, UiamAPIKeysType } from '@kbn/security-plugin-types-server';
 import type { SecurityLicense } from '../../../../common';
 import type { UiamServicePublic } from '../../../uiam';

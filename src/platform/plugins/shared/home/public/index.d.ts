@@ -3,5 +3,5 @@ export type { FeatureCatalogueSetup, EnvironmentSetup, TutorialSetup, HomePublic
 export type { AddDataTab, FeatureCatalogueCategory, FeatureCatalogueEntry, FeatureCatalogueRegistry, FeatureCatalogueSolution, Environment, TutorialVariables, TutorialDirectoryHeaderLinkComponent, TutorialModuleNoticeComponent, WelcomeRenderTelemetryNotice, WelcomeServiceSetup, } from './services';
 export type { CustomComponentProps } from './services/tutorials/tutorial_service';
 export { INSTRUCTION_VARIANT, getDisplayText } from '../common/instruction_variant';
-import { HomePublicPlugin } from './plugin';
+import type { HomePublicPlugin } from './plugin';
 export declare const plugin: (initializerContext: PluginInitializerContext) => HomePublicPlugin;

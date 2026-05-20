@@ -5,7 +5,7 @@ import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
 import type { LogCategorizationAppState } from '../../../application/url_state/log_pattern_analysis';
-import { getLabels } from './labels';
+import type { getLabels } from './labels';
 export interface OpenInDiscover {
     openFunction: (mode: QueryMode, navigateToDiscover: boolean, category?: Category) => void;
     getLabels: (navigateToDiscover: boolean) => ReturnType<typeof getLabels>;

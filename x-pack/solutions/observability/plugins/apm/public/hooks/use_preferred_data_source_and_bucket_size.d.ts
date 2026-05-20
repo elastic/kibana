@@ -1,5 +1,5 @@
 import type { ApmDataSourceWithSummary } from '../../common/data_source';
-import { ApmDocumentType } from '../../common/document_type';
+import type { ApmDocumentType } from '../../common/document_type';
 /**
  * Hook to get the source and interval based on Time Range Metadata API
  *

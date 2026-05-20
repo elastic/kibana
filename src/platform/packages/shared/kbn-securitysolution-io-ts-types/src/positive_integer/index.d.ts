@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 /**
  * Types the positive integer are:
  *   - Natural Number (positive integer and not a float),

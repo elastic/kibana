@@ -1,5 +1,5 @@
 import { type DataView } from '@kbn/data-views-plugin/public';
-import { Builder } from '@elastic/esql';
+import type { Builder } from '@elastic/esql';
 import type { EsqlQuery } from '@elastic/esql';
 import type { ESQLFunction, ESQLCommand } from '@elastic/esql/types';
 import type { FieldSummary } from '@kbn/esql-language/src/commands/registry/types';

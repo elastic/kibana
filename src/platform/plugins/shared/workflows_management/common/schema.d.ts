@@ -1,5 +1,5 @@
 import type { ConnectorContractUnion, ConnectorTypeInfo, StepDeprecationInfo, StepPropertyHandler } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export type WorkflowZodSchemaType = z.infer<ReturnType<typeof getWorkflowZodSchema>>;
 export type WorkflowZodSchemaLooseType = z.infer<ReturnType<typeof getWorkflowZodSchemaLoose>>;
 /**

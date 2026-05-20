@@ -1,7 +1,7 @@
 import type { ExpressionFunctionDefinition } from '../types';
 import type { FontLabel as FontFamily } from '../../fonts';
 import type { Style } from '../../types';
-import { FontWeight, TextAlignment } from '../../types';
+import type { FontWeight, TextAlignment } from '../../types';
 export interface FontArguments {
     align?: TextAlignment;
     color?: string;

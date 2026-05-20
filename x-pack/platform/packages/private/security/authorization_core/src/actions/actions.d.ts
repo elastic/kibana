@@ -1,11 +1,11 @@
 import type { Actions as ActionsType } from '@kbn/security-plugin-types-server';
-import { AlertingActions } from './alerting';
-import { ApiActions } from './api';
-import { AppActions } from './app';
-import { CasesActions } from './cases';
-import { SavedObjectActions } from './saved_object';
-import { SpaceActions } from './space';
-import { UIActions } from './ui';
+import type { AlertingActions } from './alerting';
+import type { ApiActions } from './api';
+import type { AppActions } from './app';
+import type { CasesActions } from './cases';
+import type { SavedObjectActions } from './saved_object';
+import type { SpaceActions } from './space';
+import type { UIActions } from './ui';
 /** Actions are used to create the "actions" that are associated with Elasticsearch's
  * application privileges, and are used to perform the authorization checks implemented
  * by the various `checkPrivilegesWithRequest` derivatives.

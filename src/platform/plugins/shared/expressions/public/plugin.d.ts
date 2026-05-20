@@ -1,6 +1,6 @@
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
-import { ReactExpressionRenderer } from './react_expression_renderer_wrapper';
+import type { ReactExpressionRenderer } from './react_expression_renderer_wrapper';
 import type { IExpressionLoader } from './loader';
 import type { IExpressionRenderer } from './render';
 /**

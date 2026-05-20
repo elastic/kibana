@@ -1,5 +1,5 @@
-import { CaseSeverity, CaseStatuses } from '../../common/types/domain';
-import { CasePersistedSeverity, CasePersistedStatus } from './types/case';
+import type { CaseSeverity, CaseStatuses } from '../../common/types/domain';
+import type { CasePersistedSeverity, CasePersistedStatus } from './types/case';
 /**
  * The name of the saved object reference indicating the action connector ID. This is stored in the Saved Object reference
  * field's name property.

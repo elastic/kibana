@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { DependenciesTimeseriesStatisticsResponse } from './get_dependencies_timeseries_statistics';
 import type { DependencyLatencyDistributionResponse } from './get_dependency_latency_distribution';
 import type { LatencyChartsDependencyResponse } from './get_latency_charts_for_dependency';

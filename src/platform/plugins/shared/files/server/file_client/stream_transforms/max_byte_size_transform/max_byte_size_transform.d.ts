@@ -1,2 +1,2 @@
-import { Transform } from 'stream';
+import type { Transform } from 'stream';
 export declare function enforceMaxByteSizeTransform(maxByteSize: number): Transform;

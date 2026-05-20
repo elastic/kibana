@@ -1,4 +1,4 @@
-import { TutorialsCategory } from '@kbn/home-plugin/server';
+import type { TutorialsCategory } from '@kbn/home-plugin/server';
 export declare function emsBoundariesSpecProvider({ emsLandingPageUrl, prependBasePath, }: {
     emsLandingPageUrl: string;
     prependBasePath: (path: string) => string;

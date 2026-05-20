@@ -1,5 +1,5 @@
 import React from 'react';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 export interface TrackRequestResult<T> {
     data: T;
     request: object;

@@ -1,6 +1,6 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { HistogramField, NumericColumnStats } from './types';
 /**
  * Represents an item in numeric data.

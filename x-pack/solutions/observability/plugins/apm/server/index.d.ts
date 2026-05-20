@@ -1,6 +1,6 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { SearchAggregatedTransactionSetting } from '../common/aggregated_transactions';
+import type { SearchAggregatedTransactionSetting } from '../common/aggregated_transactions';
 declare const configSchema: import("@kbn/config-schema").ObjectType<{
     autoCreateApmDataView: import("@kbn/config-schema").Type<boolean>;
     serviceMapEnabled: import("@kbn/config-schema").Type<boolean>;

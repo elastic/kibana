@@ -1,5 +1,5 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { Semaphore } from '@kbn/std';
+import type { Semaphore } from '@kbn/std';
 import type { Readable, Transform } from 'stream';
 import type { BlobStorageClient } from '../../types';
 /**

@@ -1,4 +1,4 @@
-import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 export declare function getLatencyAggregation(latencyAggregationType: LatencyAggregationType, field: string): {
     latency: {
         avg: {

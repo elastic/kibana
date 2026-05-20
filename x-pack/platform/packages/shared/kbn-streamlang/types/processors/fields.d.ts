@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 /**
  * Smart validation that rejects Mustache templates only if the value is a string.
  * Non-string values (numbers, booleans, etc.) pass through since they can't contain templates.

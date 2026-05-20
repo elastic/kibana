@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import type { CustomLink } from '../../../../common/custom_link/custom_link_types';
 export declare const customLinkRouteRepository: {

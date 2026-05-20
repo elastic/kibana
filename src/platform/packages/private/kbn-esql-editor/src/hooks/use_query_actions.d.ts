@@ -1,5 +1,6 @@
-import { QuerySource, type TelemetryQuerySubmittedProps } from '@kbn/esql-types';
-import { monaco } from '@kbn/code-editor';
+import type { QuerySource} from '@kbn/esql-types';
+import { type TelemetryQuerySubmittedProps } from '@kbn/esql-types';
+import type { monaco } from '@kbn/code-editor';
 import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 import type { ESQLEditorProps } from '../types';
 interface UseQueryActionsParams {

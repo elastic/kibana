@@ -42,4 +42,4 @@ export namespace EditDatafeedTab {
     }
 }
 import React from 'react';
-import PropTypes from 'prop-types';
+import type PropTypes from 'prop-types';

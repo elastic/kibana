@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const DeleteDataStreamRequestParams: z.ZodObject<{
     integration_id: z.ZodString;
     data_stream_id: z.ZodString;

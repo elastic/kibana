@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const ListToolsInputSchema: z.ZodObject<{}, z.core.$strip>;
 export type ListToolsInput = z.infer<typeof ListToolsInputSchema>;
 export declare const GetUserDataInputSchema: z.ZodObject<{}, z.core.$strip>;

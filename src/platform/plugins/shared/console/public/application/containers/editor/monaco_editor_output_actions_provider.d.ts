@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 export declare class MonacoEditorOutputActionsProvider {
     private editor;
     private setEditorActionsCss;

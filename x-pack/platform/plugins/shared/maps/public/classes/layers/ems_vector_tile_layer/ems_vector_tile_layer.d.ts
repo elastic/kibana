@@ -5,7 +5,7 @@ import type { EMSVectorTileLayerDescriptor } from '../../../../common/descriptor
 import type { DataRequest } from '../../util/data_request';
 import type { DataRequestContext } from '../../../actions';
 import type { EMSTMSSource } from '../../sources/ems_tms_source';
-import { EMSVectorTileStyle } from '../../styles/ems/ems_vector_tile_style';
+import type { EMSVectorTileStyle } from '../../styles/ems/ems_vector_tile_style';
 import type { SpriteMeta } from '../../sources/ems_tms_source/ems_tms_source';
 interface SourceRequestMeta {
     tileLayerId: string;

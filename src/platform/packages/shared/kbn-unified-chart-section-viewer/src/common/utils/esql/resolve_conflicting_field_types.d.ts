@@ -1,4 +1,4 @@
-import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { ES_FIELD_TYPES } from '@kbn/field-types';
 /**
  * Resolves conflicting field types to a single compatible type for casting.
  * When multiple field types are present (e.g., from different backing indices),

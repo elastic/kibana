@@ -9,7 +9,7 @@
  * in the setup/start interfaces in `plugin.ts`. The remaining items exported here are
  * either types, or static code.
  */
-import { IndexPatternFieldEditorPlugin } from './plugin';
+import type { IndexPatternFieldEditorPlugin } from './plugin';
 export type { Field, PluginSetup as IndexPatternFieldEditorSetup, PluginStart as IndexPatternFieldEditorStart, } from './types';
 export type { PluginSetup as DataViewFieldEditorSetup, PluginStart as DataViewFieldEditorStart, } from './types';
 export { DefaultFormatEditor } from './components/field_format_editor/editors/default/default';

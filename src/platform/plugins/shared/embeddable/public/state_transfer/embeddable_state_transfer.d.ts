@@ -1,4 +1,4 @@
-import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ApplicationStart, PublicAppInfo } from '@kbn/core/public';
 import type { EmbeddableEditorState, EmbeddablePackageState } from './types';
 export declare const EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY = "EMBEDDABLE_STATE_TRANSFER";

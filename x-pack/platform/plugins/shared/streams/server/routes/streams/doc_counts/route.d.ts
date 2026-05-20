@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { StreamDocsStat } from '../../../../common';
 export declare const docCountsRoutes: {
     "GET /internal/streams/doc_counts/failed": import("@kbn/server-route-repository-utils").ServerRoute<"GET /internal/streams/doc_counts/failed", z.ZodObject<{

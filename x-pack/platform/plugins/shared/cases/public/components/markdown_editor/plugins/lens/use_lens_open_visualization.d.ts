@@ -1,4 +1,4 @@
-import { AttachmentActionType } from '../../../../client/attachment_framework/types';
+import type { AttachmentActionType } from '../../../../client/attachment_framework/types';
 export declare const useLensOpenVisualization: ({ comment }: {
     comment: string;
 }) => {

@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import type { RasterTileSource } from 'maplibre-gl';
-import { SOURCE_TYPES } from '../../../../common/constants';
+import type { SOURCE_TYPES } from '../../../../common/constants';
 import type { XYZTMSSourceDescriptor, DataRequestMeta } from '../../../../common/descriptor_types';
 import type { ImmutableSourceProperty } from '../source';
 import { AbstractSource } from '../source';

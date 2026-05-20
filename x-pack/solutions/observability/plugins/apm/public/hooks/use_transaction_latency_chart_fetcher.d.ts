@@ -1,5 +1,5 @@
 import type { LatencyAggregationType } from '../../common/latency_aggregation_types';
-import { FETCH_STATUS } from './use_fetcher';
+import type { FETCH_STATUS } from './use_fetcher';
 export declare function useTransactionLatencyChartsFetcher({ kuery, environment, transactionName, latencyAggregationType, }: {
     kuery: string;
     environment: string;

@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 /**
  * Creates a schema of an array that works in the following way:
  *   - If input is a CSV string, it will be parsed to an array which will be validated.

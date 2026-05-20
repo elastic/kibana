@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const GetAttackDiscoveryGenerationsRequestQuery: z.ZodObject<{
     end: z.ZodOptional<z.ZodString>;
     size: z.ZodDefault<z.ZodOptional<z.ZodCoercedNumber<unknown>>>;

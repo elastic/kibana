@@ -1,4 +1,4 @@
-import moment from 'moment-timezone';
+import type moment from 'moment-timezone';
 import type { LicenseManagementState } from '../types';
 export declare const WARNING_THRESHOLD_IN_DAYS = 25;
 export declare const licenseManagement: import("redux").Reducer<import("redux").CombinedState<{

@@ -6,7 +6,7 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { type Observable } from 'rxjs';
 import type { SortOrder } from '@kbn/unified-data-table';
 import type { ColumnAddition, DocUpdate, IndexEditorError } from '../types';
-import { IndexEditorErrors } from '../types';
+import type { IndexEditorErrors } from '../types';
 import type { IndexEditorTelemetryService } from '../telemetry/telemetry_service';
 interface PendingDocUpdate {
     type: 'add-doc';

@@ -3,7 +3,7 @@ import type { CoreStart, OverlayStart } from '@kbn/core/public';
 import { type TrainedModelDeploymentStatsResponse } from '@kbn/ml-common-types/trained_models';
 import type { CloudInfo } from '@kbn/ml-common-types/ml_server_info';
 import type { NLPSettings } from '../../../common/constants/app';
-import { DeploymentParamsMapper } from './deployment_params_mapper';
+import type { DeploymentParamsMapper } from './deployment_params_mapper';
 import type { HttpService } from '../services/http_service';
 import type { TrainedModelsService } from './trained_models_service';
 import type { MlCapabilitiesService } from '../capabilities/check_capabilities';

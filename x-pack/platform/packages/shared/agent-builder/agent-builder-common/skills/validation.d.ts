@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export { maxReferencedContentItems } from './referenced_content_shared';
 /** Maximum allowed length for a skill ID. */
 export declare const skillIdMaxLength = 64;

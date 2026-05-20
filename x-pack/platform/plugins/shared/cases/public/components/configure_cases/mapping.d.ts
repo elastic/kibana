@@ -1,5 +1,5 @@
 import React from 'react';
-import { ConnectorTypes } from '../../../common/types/domain';
+import type { ConnectorTypes } from '../../../common/types/domain';
 import type { CaseConnectorMapping } from '../../containers/configure/types';
 export interface MappingProps {
     actionTypeName: string;

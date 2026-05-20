@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 declare const updateCompositeSLOParamsSchema: z.ZodObject<{
     path: z.ZodObject<{
         id: z.ZodString;

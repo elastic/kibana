@@ -1,5 +1,5 @@
 import type { TimeKey } from '@kbn/io-ts-utils';
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 export type LogEntryTime = TimeKey;
 /**
  * message parts

@@ -1,4 +1,4 @@
-import { ObservabilitySharedPlugin } from './plugin';
+import type { ObservabilitySharedPlugin } from './plugin';
 export type { ObservabilitySharedPlugin, ObservabilitySharedPluginSetup, ObservabilitySharedPluginStart, ProfilingLocators, } from './plugin';
 export declare const plugin: () => ObservabilitySharedPlugin;
 export type { ObservabilityPageTemplateProps, LazyObservabilityPageTemplateProps, NavigationSection, NavigationEntry, } from './components/page_template/page_template';

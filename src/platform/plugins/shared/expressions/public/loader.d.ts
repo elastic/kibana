@@ -1,10 +1,10 @@
 import type { Observable } from 'rxjs';
 import type { Adapters } from '@kbn/inspector-plugin/public';
-import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import type { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import type { IExpressionLoaderParams } from './types';
 import type { ExpressionAstExpression } from '../common';
 import type { ExecutionContract } from '../common/execution/execution_contract';
-import { ExpressionRenderHandler } from './render';
+import type { ExpressionRenderHandler } from './render';
 export declare class ExpressionLoader {
     data$: ReturnType<ExecutionContract['getData']>;
     update$: ExpressionRenderHandler['update$'];

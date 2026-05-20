@@ -1,6 +1,6 @@
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { UseQueryOptions } from '@kbn/react-query';
-import { getRuleTypes } from '../apis/get_rule_types';
+import type { getRuleTypes } from '../apis/get_rule_types';
 export interface GetRuleTypesQueryParams {
     http: HttpStart;
 }

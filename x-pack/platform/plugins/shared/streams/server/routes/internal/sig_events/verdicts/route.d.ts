@@ -1,5 +1,5 @@
 import { type Verdict } from '@kbn/streams-schema';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const internalSigEventsVerdictsRoutes: {
     "POST /internal/sig_events/verdicts": import("@kbn/server-route-repository-utils").ServerRoute<"POST /internal/sig_events/verdicts", z.ZodObject<{
         body: z.ZodArray<z.ZodObject<{

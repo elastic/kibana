@@ -1,5 +1,5 @@
-import * as rt from 'io-ts';
-import { CaseObservableTypeRt } from '../observable/v1';
+import type * as rt from 'io-ts';
+import type { CaseObservableTypeRt } from '../observable/v1';
 export declare const ClosureTypeRt: rt.UnionC<[rt.LiteralC<"close-by-user">, rt.LiteralC<"close-by-pushing">]>;
 export declare const CustomFieldConfigurationWithoutTypeRt: rt.ExactC<rt.TypeC<{
     /**

@@ -1,4 +1,4 @@
-import { FieldMetadata } from '../../../../common/fields_metadata/models/field_metadata';
+import type { FieldMetadata } from '../../../../common/fields_metadata/models/field_metadata';
 import type { AnyFieldName } from '../../../../common';
 import type { ExtractedStreamFields, StreamsFieldsSearchParams } from './types';
 type BoundStreamsFieldsExtractor = (params: StreamsFieldsSearchParams) => Promise<ExtractedStreamFields>;

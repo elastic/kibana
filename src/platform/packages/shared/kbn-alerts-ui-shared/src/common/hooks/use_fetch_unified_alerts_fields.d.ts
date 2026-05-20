@@ -1,7 +1,7 @@
 import type { ToastsStart } from '@kbn/core/public';
 import type { QueryOptionsOverrides } from '../types/tanstack_query_utility_types';
 import type { FetchUnifiedAlertsFieldsParams } from '../apis/fetch_unified_alert_fields';
-import { fetchUnifiedAlertsFields } from '../apis/fetch_unified_alert_fields/fetch_unified_alerts_fields';
+import type { fetchUnifiedAlertsFields } from '../apis/fetch_unified_alert_fields/fetch_unified_alerts_fields';
 export type UseFetchUnifiedAlertsFieldsQueryParams = FetchUnifiedAlertsFieldsParams & {
     toasts: ToastsStart;
 };

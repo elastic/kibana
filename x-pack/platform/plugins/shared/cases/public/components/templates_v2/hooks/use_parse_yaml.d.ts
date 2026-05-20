@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { ValidatedFile } from './use_validate_yaml';
 declare const ImportedTemplateSchema: z.ZodObject<{
     templateId: z.ZodOptional<z.ZodString>;

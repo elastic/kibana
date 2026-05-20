@@ -1,4 +1,4 @@
-import { LAYER_STYLE_TYPE } from '../../../../../../common/constants';
+import type { LAYER_STYLE_TYPE } from '../../../../../../common/constants';
 export declare const vectorStylePropertiesSchema: import("@kbn/config-schema").ObjectType<{
     symbolizeAs: import("@kbn/config-schema").Type<Readonly<{} & {
         options: Readonly<{

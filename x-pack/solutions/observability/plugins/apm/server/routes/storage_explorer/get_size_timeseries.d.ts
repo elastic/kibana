@@ -1,4 +1,4 @@
-import { IndexLifecyclePhaseSelectOption } from '../../../common/storage_explorer_types';
+import type { IndexLifecyclePhaseSelectOption } from '../../../common/storage_explorer_types';
 import type { ApmPluginRequestHandlerContext } from '../typings';
 import type { RandomSampler } from '../../lib/helpers/get_random_sampler';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';

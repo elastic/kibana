@@ -1,4 +1,4 @@
-import { KibanaUtilsPublicPlugin } from './plugin';
+import type { KibanaUtilsPublicPlugin } from './plugin';
 export type { Get, Set } from '../common';
 export { AbortError, abortSignalToPromise, calculateObjectHash, defer, Defer, fieldWildcardFilter, fieldWildcardMatcher, of, url, createGetterSetter, } from '../common';
 export type { StartServicesGetter } from './core';

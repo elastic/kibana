@@ -1,5 +1,5 @@
 import type { SortState, UseNodeMetricsTableOptions } from '../shared';
-import { SYSTEM_CPU_CORES, SYSTEM_CPU_TOTAL_NORM_PCT, SYSTEM_MEMORY_TOTAL, SYSTEM_MEMORY_USED_PCT } from '../shared/constants';
+import type { SYSTEM_CPU_CORES, SYSTEM_CPU_TOTAL_NORM_PCT, SYSTEM_MEMORY_TOTAL, SYSTEM_MEMORY_USED_PCT } from '../shared/constants';
 type HostMetricsField = typeof SYSTEM_CPU_CORES | typeof SYSTEM_CPU_TOTAL_NORM_PCT | typeof SYSTEM_MEMORY_TOTAL | typeof SYSTEM_MEMORY_USED_PCT;
 export declare const metricByField: Record<HostMetricsField, string>;
 export interface HostNodeMetricsRow {

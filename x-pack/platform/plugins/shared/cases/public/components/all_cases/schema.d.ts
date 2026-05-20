@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 export declare const AllCasesURLQueryParamsRt: rt.ExactC<rt.PartialC<{
     search: rt.StringC;
     severity: rt.ArrayC<rt.UnionC<[rt.LiteralC<import("../../../common/types/domain").CaseSeverity.LOW>, rt.LiteralC<import("../../../common/types/domain").CaseSeverity.MEDIUM>, rt.LiteralC<import("../../../common/types/domain").CaseSeverity.HIGH>, rt.LiteralC<import("../../../common/types/domain").CaseSeverity.CRITICAL>]>>;

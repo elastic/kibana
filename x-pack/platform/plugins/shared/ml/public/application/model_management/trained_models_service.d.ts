@@ -1,5 +1,5 @@
 import type { Observable } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import { type TrainedModelUIItem, type DeleteModelParams } from '@kbn/ml-common-types/trained_models';
 import { type TrainedModelsApiService } from '../services/ml_api_service/trained_models';

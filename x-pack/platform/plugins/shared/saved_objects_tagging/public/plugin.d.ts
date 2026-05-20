@@ -2,7 +2,7 @@ import type { CoreSetup, CoreStart, PluginInitializerContext, Plugin } from '@kb
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SavedObjectTaggingOssPluginSetup } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedObjectTaggingPluginStart } from './types';
-import { TagsClient, TagsCache } from './services';
+import type { TagsClient, TagsCache } from './services';
 interface SetupDeps {
     management: ManagementSetup;
     savedObjectsTaggingOss: SavedObjectTaggingOssPluginSetup;

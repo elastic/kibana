@@ -5,7 +5,7 @@ import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
-import { WorkflowScopeStack } from './workflow_scope_stack';
+import type { WorkflowScopeStack } from './workflow_scope_stack';
 import type { WorkflowTemplatingEngine } from '../templating_engine';
 export interface ContextManagerInit {
     templateEngine: WorkflowTemplatingEngine;

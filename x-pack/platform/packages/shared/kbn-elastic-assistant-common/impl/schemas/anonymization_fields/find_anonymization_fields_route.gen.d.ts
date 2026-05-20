@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const FindAnonymizationFieldsSortField: z.ZodEnum<{
     field: "field";
     updated_at: "updated_at";

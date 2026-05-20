@@ -1,6 +1,6 @@
 import type { Query } from '@kbn/es-query';
 import type { LayerDescriptor } from '../../../../common/descriptor_types';
-import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
+import type { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 export interface CreateLayerDescriptorParams {
     indexPatternId: string;
     geoFieldName: string;

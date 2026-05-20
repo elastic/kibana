@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { SavedApmCustomDashboard } from '../../../common/custom_dashboards';
 export declare const serviceDashboardsRouteRepository: {
     "GET /internal/apm/services/{serviceName}/dashboards": import("@kbn/server-route-repository-utils").ServerRoute<"GET /internal/apm/services/{serviceName}/dashboards", t.TypeC<{

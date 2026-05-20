@@ -1,5 +1,5 @@
 export * from './kbn_rison';
-import { encode, encodeUnknown, decode, encodeArray, decodeArray } from './kbn_rison';
+import type { encode, encodeUnknown, decode, encodeArray, decodeArray } from './kbn_rison';
 declare const _default: {
     encode: typeof encode;
     encodeUnknown: typeof encodeUnknown;

@@ -1,5 +1,5 @@
-import * as t from 'io-ts';
-import { sloSettingsSchema } from '../../schema/settings';
+import type * as t from 'io-ts';
+import type { sloSettingsSchema } from '../../schema/settings';
 declare const putSLOSettingsParamsSchema: t.TypeC<{
     body: t.TypeC<{
         useAllRemoteClusters: t.BooleanC;

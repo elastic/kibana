@@ -1,6 +1,6 @@
 import type { SignificantEventsGetResponse } from '@kbn/streams-schema';
 import { type SignificantEventsQueriesGenerationTaskResult } from '@kbn/streams-schema';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const internalSignificantEventsRoutes: {
     "GET /internal/streams/_significant_events": import("@kbn/server-route-repository-utils").ServerRoute<"GET /internal/streams/_significant_events", z.ZodObject<{
         query: z.ZodObject<{

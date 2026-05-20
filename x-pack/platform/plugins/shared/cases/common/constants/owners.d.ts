@@ -1,4 +1,4 @@
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import type { AlertConsumers } from '@kbn/rule-data-utils';
 import type { ServerlessProjectType, Owner } from './types';
 /**
  * Owner

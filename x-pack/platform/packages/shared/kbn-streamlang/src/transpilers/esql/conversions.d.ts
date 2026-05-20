@@ -1,4 +1,4 @@
-import { conditionToESQLAst } from './condition_to_esql';
+import type { conditionToESQLAst } from './condition_to_esql';
 import type { ESQLTranspilationOptions } from '.';
 import { type StreamlangProcessorDefinition } from '../../../types/processors';
 import { type StreamlangResolverOptions } from '../../../types/resolvers';

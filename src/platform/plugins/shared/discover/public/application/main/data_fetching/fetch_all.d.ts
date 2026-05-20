@@ -1,6 +1,6 @@
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { ISearchSource } from '@kbn/data-plugin/common';
-import { FetchStatus } from '../../types';
+import type { FetchStatus } from '../../types';
 import type { SavedSearchData } from '../state_management/discover_data_state_container';
 import type { DiscoverServices } from '../../../build_services';
 import type { InternalStateStore, TabState } from '../state_management/redux';

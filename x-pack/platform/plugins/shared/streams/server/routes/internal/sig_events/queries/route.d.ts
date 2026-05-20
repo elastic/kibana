@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { QueriesGetResponse, QueriesOccurrencesGetResponse, SignificantEventsQueriesGenerationResult } from '@kbn/streams-schema';
 import type { PersistQueriesResult } from '../../../../lib/sig_events/persist_queries';
 /**

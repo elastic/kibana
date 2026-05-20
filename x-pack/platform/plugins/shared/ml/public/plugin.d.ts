@@ -35,8 +35,8 @@ import type { MlLocatorParams } from './locator';
 import { type ConfigSchema } from '../common/constants/app';
 import type { ElasticModels } from './application/services/elastic_models_service';
 import type { MlApi } from './application/services/ml_api_service';
-import { AnomalySwimLane } from './shared_components';
-import { MlManagementLocatorInternal } from './locator/ml_management_locator';
+import type { AnomalySwimLane } from './shared_components';
+import type { MlManagementLocatorInternal } from './locator/ml_management_locator';
 import type { ITelemetryClient } from './application/services/telemetry/types';
 export interface MlStartDependencies {
     cases?: CasesPublicStart;

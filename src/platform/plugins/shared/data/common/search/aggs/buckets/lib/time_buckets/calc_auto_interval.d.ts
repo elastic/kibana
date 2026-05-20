@@ -1,4 +1,4 @@
-import moment from 'moment';
+import type moment from 'moment';
 export declare const boundsDescendingRaw: ({
     bound: number;
     interval: moment.Duration;

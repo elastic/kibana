@@ -1,6 +1,6 @@
 import React from 'react';
 import type { FormBasedLayer } from '@kbn/lens-common';
-import { operationDefinitionMap } from '../operations';
+import type { operationDefinitionMap } from '../operations';
 export declare const formulaOperationName = "formula";
 export declare const staticValueOperationName = "static_value";
 export declare const quickFunctionsName = "quickFunctions";

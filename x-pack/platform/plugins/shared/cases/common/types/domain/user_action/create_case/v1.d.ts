@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 export declare const CreateCaseUserActionRt: rt.IntersectionC<[rt.ExactC<rt.TypeC<{
     type: rt.LiteralC<"create_case">;
 }>>, rt.ExactC<rt.TypeC<{

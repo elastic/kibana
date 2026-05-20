@@ -1,5 +1,5 @@
 import type { TypeOf } from '@kbn/config-schema';
-import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import type { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 export declare enum AnomalyDetectorType {
     txLatency = "txLatency",
     txThroughput = "txThroughput",

@@ -1,6 +1,6 @@
 import type { Logger, SavedObjectsClientContract, ElasticsearchClient, UiSettingsServiceStart, KibanaRequest, CoreStart } from '@kbn/core/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
-import { DataViewsService } from '../common';
+import type { DataViewsService } from '../common';
 interface DataViewsServiceFactoryDeps {
     logger: Logger;
     uiSettings: UiSettingsServiceStart;

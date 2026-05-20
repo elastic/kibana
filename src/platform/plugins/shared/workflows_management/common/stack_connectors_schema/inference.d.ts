@@ -2,7 +2,7 @@
  * This was generated based on x-pack/platform/plugins/shared/stack_connectors/common/inference/schema.ts
  * and will be deprecated once connectors will expose their schemas
  */
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const InferenceUnifiedCompletionParamsSchema: z.ZodObject<{
     body: z.ZodObject<{
         messages: z.ZodDefault<z.ZodArray<z.ZodObject<{

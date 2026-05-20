@@ -1,5 +1,5 @@
 import type { IconType } from '@elastic/eui';
-import { EuiBetaBadge } from '@elastic/eui';
+import type { EuiBetaBadge } from '@elastic/eui';
 import React from 'react';
 type Props = {
     icon?: IconType;

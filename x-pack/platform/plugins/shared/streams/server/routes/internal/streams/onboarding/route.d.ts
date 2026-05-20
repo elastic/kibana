@@ -1,6 +1,6 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
-import { OnboardingStep } from '@kbn/streams-schema';
+import type { OnboardingStep } from '@kbn/streams-schema';
 export type OnboardingTaskResult = TaskResult<OnboardingResult>;
 export declare const onboardingTaskRoute: Record<"POST /internal/streams/{streamName}/onboarding/_task", import("@kbn/server-route-repository-utils").ServerRoute<"POST /internal/streams/{streamName}/onboarding/_task", z.ZodObject<{
     path: z.ZodObject<{

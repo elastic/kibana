@@ -1,4 +1,4 @@
-import { BulkGapsFillStep } from './types';
+import type { BulkGapsFillStep } from './types';
 import type { RulesClientContext } from '../../../../rules_client';
 export type BulkGapFillError = ReturnType<typeof toBulkGapFillError>;
 export declare const toBulkGapFillError: (rule: {

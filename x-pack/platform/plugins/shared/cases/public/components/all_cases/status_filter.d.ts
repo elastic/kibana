@@ -1,5 +1,5 @@
 import React from 'react';
-import { CaseStatuses } from '../../../common/types/domain';
+import type { CaseStatuses } from '../../../common/types/domain';
 interface Props {
     countClosedCases: number | null;
     countInProgressCases: number | null;

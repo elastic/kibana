@@ -1,5 +1,5 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { WorkflowsManagementApi } from './api/workflows_management_api';
+import type { WorkflowsManagementApi } from './api/workflows_management_api';
 import type { WorkflowsManagementConfig } from './config';
 import type { WorkflowsServerPluginSetup, WorkflowsServerPluginSetupDeps, WorkflowsServerPluginStart, WorkflowsServerPluginStartDeps } from './types';
 export declare class WorkflowsPlugin implements Plugin<WorkflowsServerPluginSetup, WorkflowsServerPluginStart, WorkflowsServerPluginSetupDeps, WorkflowsServerPluginStartDeps> {

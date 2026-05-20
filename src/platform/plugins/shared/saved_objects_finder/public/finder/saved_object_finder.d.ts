@@ -3,7 +3,7 @@ import React from 'react';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { IconType } from '@elastic/eui';
-import { Query } from '@elastic/eui';
+import type { Query } from '@elastic/eui';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { type EuiTablePersistInjectedProps } from '@kbn/shared-ux-table-persist/src';
 import type { SearchQuery } from '@kbn/content-management-plugin/common';

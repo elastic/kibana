@@ -2,7 +2,7 @@ import type { CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import type { Plugin } from '@kbn/core/public';
 import type { CoreSetup } from '@kbn/core/public';
 import type { ConfigSchema } from '@kbn/file-upload-common';
-import { getMaxBytesFormatted } from './application/common/util/get_max_bytes';
+import type { getMaxBytesFormatted } from './application/common/util/get_max_bytes';
 import type { DataVisualizerSetupDependencies, DataVisualizerStartDependencies } from './application/common/types/data_visualizer_plugin';
 export type DataVisualizerPluginSetup = ReturnType<DataVisualizerPlugin['setup']>;
 export type DataVisualizerPluginStart = ReturnType<DataVisualizerPlugin['start']>;

@@ -1,5 +1,5 @@
 import type { Observable } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { Annotation } from '@kbn/ml-common-types/annotations';
 export type AnnotationState = Annotation | null;
 export declare const annotation$: BehaviorSubject<AnnotationState>;

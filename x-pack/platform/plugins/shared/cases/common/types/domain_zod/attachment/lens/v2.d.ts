@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 /** `state` shape is owned by the lens plugin; kept permissive to round-trip what lens persists. */
 export declare const LensAttachmentDataSchema: z.ZodObject<{
     state: z.ZodRecord<z.ZodString, z.ZodUnknown>;

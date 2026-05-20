@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import moment from 'moment';
+import type moment from 'moment';
 import type { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
 import type { LineChartPoint } from '../../../jobs/new_job/common/chart_loader/chart_loader';
 export interface CalendarEvent {

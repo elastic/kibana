@@ -1,4 +1,4 @@
-import { URL } from 'url';
+import type { URL } from 'url';
 import { type Observable } from 'rxjs';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { TelemetryCollectionManagerPluginSetup, TelemetryCollectionManagerPluginStart } from '@kbn/telemetry-collection-manager-plugin/server';

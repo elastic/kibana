@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 export declare const METRIC_EXPLORER_AGGREGATIONS: readonly ["avg", "max", "min", "cardinality", "rate", "count", "sum", "p95", "p99", "custom"];
 export declare const OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS: string[];
 export declare const metricsExplorerAggregationRT: rt.KeyofC<Record<"min" | "max" | "custom" | "count" | "sum" | "avg" | "cardinality" | "rate" | "p95" | "p99", null>>;

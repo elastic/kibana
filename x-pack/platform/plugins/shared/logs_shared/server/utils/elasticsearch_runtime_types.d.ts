@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 export declare const shardFailureRT: rt.PartialC<{
     index: rt.UnionC<[rt.StringC, rt.NullC]>;
     node: rt.UnionC<[rt.StringC, rt.NullC]>;

@@ -1,4 +1,4 @@
-import moment from 'moment';
+import type moment from 'moment';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { Assign, Ensure } from '@kbn/utility-types';
 import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';

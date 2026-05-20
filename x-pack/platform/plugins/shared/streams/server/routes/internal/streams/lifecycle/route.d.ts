@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import { type IlmPolicyWithUsage } from '@kbn/streams-schema';
 export declare const internalLifecycleRoutes: {
     "GET /internal/streams/lifecycle/_snapshot_repositories": import("@kbn/server-route-repository-utils").ServerRoute<"GET /internal/streams/lifecycle/_snapshot_repositories", z.ZodObject<{}, z.core.$strip>, import("../../../types").StreamsRouteHandlerResources, {

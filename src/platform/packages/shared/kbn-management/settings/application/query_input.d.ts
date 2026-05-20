@@ -1,4 +1,4 @@
-import { Query } from '@elastic/eui';
+import type { Query } from '@elastic/eui';
 import React from 'react';
 export declare const DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR = "settingsSearchBar";
 export declare const CATEGORY_FIELD = "categories";

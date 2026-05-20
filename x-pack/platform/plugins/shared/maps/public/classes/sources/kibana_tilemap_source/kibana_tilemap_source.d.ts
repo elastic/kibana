@@ -1,6 +1,6 @@
 import type { RasterTileSource } from 'maplibre-gl';
 import { AbstractSource } from '../source';
-import { SOURCE_TYPES } from '../../../../common/constants';
+import type { SOURCE_TYPES } from '../../../../common/constants';
 import type { IRasterSource, RasterTileSourceData } from '../raster_source';
 export declare const sourceTitle: string;
 export declare class KibanaTilemapSource extends AbstractSource implements IRasterSource {

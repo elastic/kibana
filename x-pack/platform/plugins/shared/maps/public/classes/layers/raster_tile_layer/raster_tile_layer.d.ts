@@ -2,7 +2,7 @@ import type { Map as MbMap } from '@kbn/mapbox-gl';
 import type { ReactElement } from 'react';
 import { AbstractLayer } from '../layer';
 import type { LayerDescriptor, RasterLayerDescriptor } from '../../../../common/descriptor_types';
-import { TileStyle } from '../../styles/tile/tile_style';
+import type { TileStyle } from '../../styles/tile/tile_style';
 import type { DataRequestContext } from '../../../actions';
 import type { IRasterSource } from '../../sources/raster_source';
 export declare class RasterTileLayer extends AbstractLayer {

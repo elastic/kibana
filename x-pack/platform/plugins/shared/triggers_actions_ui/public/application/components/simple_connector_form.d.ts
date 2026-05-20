@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import type { ValidationConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 type Validations<T = any> = Array<ValidationConfig<FormData, string, T>>;
 export interface CommonFieldSchema<T = any> {
     id: string;

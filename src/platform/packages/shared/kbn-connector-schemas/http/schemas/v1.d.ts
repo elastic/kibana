@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const HTTP_METHODS: readonly ["GET", "POST", "PUT", "PATCH", "DELETE"];
 export declare const HeadersSchema: z.ZodRecord<z.ZodString, z.ZodString>;
 export declare const ConfigSchema: z.ZodObject<{

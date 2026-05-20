@@ -1,7 +1,7 @@
 import type { BehaviorSubject } from 'rxjs';
 import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import type { DiscoverEBTContextProps } from './types';
-import { ScopedDiscoverEBTManager } from './scoped_discover_ebt_manager';
+import type { ScopedDiscoverEBTManager } from './scoped_discover_ebt_manager';
 export declare class DiscoverEBTManager {
     private isCustomContextEnabled;
     private customContext$;

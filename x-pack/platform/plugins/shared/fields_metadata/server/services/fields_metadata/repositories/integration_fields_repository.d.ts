@@ -1,4 +1,4 @@
-import { FieldMetadata } from '../../../../common/fields_metadata/models/field_metadata';
+import type { FieldMetadata } from '../../../../common/fields_metadata/models/field_metadata';
 import type { IntegrationFieldName } from '../../../../common';
 import type { IntegrationFieldsExtractor, IntegrationFieldsSearchParams, IntegrationListExtractor } from './types';
 interface IntegrationFieldsRepositoryDeps {

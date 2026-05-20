@@ -1,5 +1,5 @@
 import type { ServiceListItem } from '../../../../../common/service_inventory';
-import { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
+import type { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
 /**
  * Determines the default sort field based on available data in service items.
  * Priority: alertsCount -> sloStatus -> anomalyScore -> throughput

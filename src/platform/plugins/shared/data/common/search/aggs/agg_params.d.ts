@@ -1,5 +1,5 @@
-import { AggParamType } from './param_types/agg';
-import { BaseParamType } from './param_types/base';
+import type { AggParamType } from './param_types/agg';
+import type { BaseParamType } from './param_types/base';
 import type { AggConfig } from './agg_config';
 import type { IAggConfigs } from './agg_configs';
 export type AggParam = BaseParamType;

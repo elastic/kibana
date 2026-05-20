@@ -1,5 +1,5 @@
 import type { TypeOf } from '@kbn/config-schema';
-import { legendSizeSchema } from './shared';
+import type { legendSizeSchema } from './shared';
 /**
  * Statistical functions that can be displayed in chart legend for data series
  */

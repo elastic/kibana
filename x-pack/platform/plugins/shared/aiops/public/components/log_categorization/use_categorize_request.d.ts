@@ -1,9 +1,9 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { type CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
-import { processCategoryResults } from '@kbn/aiops-log-pattern-analysis/process_category_results';
+import type { processCategoryResults } from '@kbn/aiops-log-pattern-analysis/process_category_results';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { RandomSamplerStorage } from './sampling_menu';
-import { RandomSampler } from './sampling_menu';
+import type { RandomSampler } from './sampling_menu';
 export type EventRate = Array<{
     key: number;
     docCount: number;

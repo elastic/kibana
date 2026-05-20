@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { COMBINED_JOB_STATE } from '../model_snapshots_table';
+import type { COMBINED_JOB_STATE } from '../model_snapshots_table';
 interface Props {
     combinedJobState: COMBINED_JOB_STATE;
     hideCloseJobModalVisible(): void;

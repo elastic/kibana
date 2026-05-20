@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const SearchIssuesWithJqlInputSchema: z.ZodObject<{
     jql: z.ZodString;
     maxResults: z.ZodOptional<z.ZodNumber>;

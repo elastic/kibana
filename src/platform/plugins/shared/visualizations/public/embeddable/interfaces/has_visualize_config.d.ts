@@ -1,5 +1,5 @@
 import type { HasType } from '@kbn/presentation-publishing';
-import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
+import type { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
 import type { VisParams } from '../../types';
 import type Vis from '../../vis';
 export type HasVisualizeConfig = HasType<typeof VISUALIZE_EMBEDDABLE_TYPE> & {

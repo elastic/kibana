@@ -1,4 +1,4 @@
-import { monaco } from '@kbn/code-editor';
+import type { monaco } from '@kbn/code-editor';
 import type { MutableRefObject } from 'react';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { type ESQLEditorTelemetryService } from '../telemetry/telemetry_service';

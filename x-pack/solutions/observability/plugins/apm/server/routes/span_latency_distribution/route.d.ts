@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { OverallLatencyDistributionResponse } from '../latency_distribution/types';
 export declare const spanLatencyDistributionRouteRepository: Record<"POST /internal/apm/latency/overall_distribution/spans", import("@kbn/server-route-repository-utils").ServerRoute<"POST /internal/apm/latency/overall_distribution/spans", t.TypeC<{
     body: t.IntersectionC<[t.PartialC<{

@@ -1,5 +1,5 @@
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import { StorageIndexAdapter } from '@kbn/storage-adapter';
+import type { StorageIndexAdapter } from '@kbn/storage-adapter';
 import type { SmlDocument } from './types';
 export declare const smlIndexName: string;
 export declare const storageSettings: {

@@ -1,5 +1,6 @@
 import React from 'react';
-import { SyncStatus, type Output } from '../../../../../../../common/types';
+import type { SyncStatus} from '../../../../../../../common/types';
+import { type Output } from '../../../../../../../common/types';
 interface Props {
     output: Output;
 }

@@ -1,5 +1,5 @@
-import { SortDirection } from '@kbn/data-plugin/common/search';
-import { SCALING_TYPES, SOURCE_TYPES } from '../../../../../common';
+import type { SortDirection } from '@kbn/data-plugin/common/search';
+import type { SCALING_TYPES, SOURCE_TYPES } from '../../../../../common';
 export declare const BaseESSourceSchema: import("@kbn/config-schema").ObjectType<{
     applyForceRefresh: import("@kbn/config-schema").Type<boolean | undefined>;
     applyGlobalQuery: import("@kbn/config-schema").Type<boolean | undefined>;

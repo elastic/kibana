@@ -1,2 +1,2 @@
-import { InfraWaffleMapDataFormat } from './types';
+import type { InfraWaffleMapDataFormat } from './types';
 export declare const createBytesFormatter: (format: InfraWaffleMapDataFormat) => (bytes: number) => string;

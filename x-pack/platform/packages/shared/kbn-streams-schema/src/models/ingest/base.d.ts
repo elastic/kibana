@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { Validation } from '../validation/validation';
 import type { IngestStreamLifecycle } from './lifecycle';
 import type { BaseStream } from '../base';

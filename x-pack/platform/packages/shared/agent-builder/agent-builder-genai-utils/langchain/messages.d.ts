@@ -1,5 +1,5 @@
 import type { BaseMessage } from '@langchain/core/messages';
-import { ToolMessage, AIMessage, HumanMessage } from '@langchain/core/messages';
+import type { ToolMessage, AIMessage, HumanMessage } from '@langchain/core/messages';
 import type { RunToolReturn } from '@kbn/agent-builder-server';
 /**
  * Extract the text content from a langchain message or chunk.

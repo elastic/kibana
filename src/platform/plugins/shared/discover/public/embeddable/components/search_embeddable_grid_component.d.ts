@@ -1,5 +1,5 @@
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { type FetchContext } from '@kbn/presentation-publishing';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';

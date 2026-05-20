@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import type { EuiRangeProps } from '@elastic/eui';
 import type { AggDescriptor } from '../../../../common/descriptor_types';
-import { GRID_RESOLUTION, RENDER_AS } from '../../../../common/constants';
+import type { GRID_RESOLUTION, RENDER_AS } from '../../../../common/constants';
 interface Props {
     renderAs: RENDER_AS;
     resolution: GRID_RESOLUTION;

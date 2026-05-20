@@ -2,8 +2,8 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import type { ConfigType } from '@kbn/screenshotting-server';
-import { HeadlessChromiumDriverFactory } from './browsers';
-import { Screenshots } from './screenshots';
+import type { HeadlessChromiumDriverFactory } from './browsers';
+import type { Screenshots } from './screenshots';
 interface SetupDeps {
     screenshotMode: ScreenshotModePluginSetup;
     cloud?: CloudSetup;

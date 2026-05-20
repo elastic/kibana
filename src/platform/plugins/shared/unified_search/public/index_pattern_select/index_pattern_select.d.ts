@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import type _ from 'lodash';
 import React, { Component } from 'react';
 import type { Required } from '@kbn/utility-types';
 import type { EuiComboBoxProps } from '@elastic/eui';

@@ -1,4 +1,4 @@
-import { UiamApiKeyProvisioningEntityType, UiamApiKeyProvisioningStatus } from '@kbn/uiam-api-keys-provisioning-status';
+import type { UiamApiKeyProvisioningEntityType, UiamApiKeyProvisioningStatus } from '@kbn/uiam-api-keys-provisioning-status';
 export declare const rawUiamApiKeysProvisioningStatusSchema: import("@kbn/config-schema").ObjectType<{
     '@timestamp': import("@kbn/config-schema").Type<string>;
     entityId: import("@kbn/config-schema").Type<string>;

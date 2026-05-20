@@ -1,6 +1,6 @@
 /** @jsxRuntime classic */
 /** @jsx jsx */
-import { jsx } from '@emotion/react';
+import type { jsx } from '@emotion/react';
 import type { CustomIntegration } from '../../../common';
 export interface Props {
     replacements: Array<Pick<CustomIntegration, 'id' | 'uiInternalPath' | 'title'>>;

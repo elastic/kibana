@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import type { BaseFeature } from '../../feature';
 export declare const tokenCountSchema: z.ZodObject<{

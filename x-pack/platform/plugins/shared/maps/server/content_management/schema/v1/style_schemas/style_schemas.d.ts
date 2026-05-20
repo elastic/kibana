@@ -1,4 +1,4 @@
-import { LAYER_STYLE_TYPE } from '../../../../../common/constants';
+import type { LAYER_STYLE_TYPE } from '../../../../../common/constants';
 export declare const EMSVectorTileStyleSchema: import("@kbn/config-schema").ObjectType<{
     color: import("@kbn/config-schema").Type<string>;
     type: import("@kbn/config-schema").Type<LAYER_STYLE_TYPE.EMS_VECTOR_TILE>;

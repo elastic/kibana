@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 /**
  * Types the DefaultArray<C> as:
  *   - If undefined, then a default array will be set

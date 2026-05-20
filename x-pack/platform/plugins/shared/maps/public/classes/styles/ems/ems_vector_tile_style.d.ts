@@ -1,7 +1,7 @@
 import React from 'react';
 import type { IStyle } from '../style';
 import type { EMSVectorTileStyleDescriptor, StyleDescriptor } from '../../../../common/descriptor_types';
-import { LAYER_STYLE_TYPE } from '../../../../common/constants';
+import type { LAYER_STYLE_TYPE } from '../../../../common/constants';
 export declare class EMSVectorTileStyle implements IStyle {
     readonly _descriptor: EMSVectorTileStyleDescriptor;
     constructor(descriptor?: {

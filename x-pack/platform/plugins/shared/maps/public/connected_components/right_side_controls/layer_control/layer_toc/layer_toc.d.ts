@@ -1,7 +1,7 @@
-import _ from 'lodash';
+import type _ from 'lodash';
 import type { ComponentProps } from 'react';
 import React, { Component } from 'react';
-import { EuiDragDropContext } from '@elastic/eui';
+import type { EuiDragDropContext } from '@elastic/eui';
 import type { ILayer } from '../../../../classes/layers/layer';
 export interface Props {
     isReadOnly: boolean;

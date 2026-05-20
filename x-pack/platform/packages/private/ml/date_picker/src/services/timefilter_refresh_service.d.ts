@@ -1,4 +1,4 @@
-import { Subject } from 'rxjs';
+import type { Subject } from 'rxjs';
 /**
  * State definition of `mlTimefilterRefresh$` observable.
  */

@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import { type StreamlangDSLWithUpdatedAt } from '@kbn/streamlang';
 /** Streamlang on ingest plus the `updated_at` cursor managed by the stack. */
 export type IngestStreamProcessing = StreamlangDSLWithUpdatedAt;

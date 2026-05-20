@@ -1,4 +1,4 @@
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { ContextWithProfileId } from '../profile_service';
 import type { DataSourceContext, DataSourceProfileProviderParams, DataSourceProfileService } from '../profiles/data_source_profile';

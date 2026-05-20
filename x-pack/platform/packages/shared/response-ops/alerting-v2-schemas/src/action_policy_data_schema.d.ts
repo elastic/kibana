@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 /**
  * The set of supported action policy destination types. Single source of truth
  * for the destination discriminator and any filter that targets destination type.

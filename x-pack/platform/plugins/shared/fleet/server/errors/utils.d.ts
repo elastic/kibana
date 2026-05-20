@@ -1,4 +1,4 @@
-import { errors } from '@elastic/elasticsearch';
+import type { errors } from '@elastic/elasticsearch';
 export declare function isESClientError(error: unknown): error is errors.ResponseError;
 export declare function isElasticsearchVersionConflictError(error: Error): boolean;
 interface CatchAndSetErrorStackTrace {

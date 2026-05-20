@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const DefendInsightsPostRequestBody: z.ZodObject<{
     endpointIds: z.ZodArray<z.ZodString>;
     insightType: z.ZodEnum<{

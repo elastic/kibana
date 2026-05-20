@@ -1,6 +1,6 @@
 import type { Error, Transaction } from '@kbn/apm-types';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import type { FETCH_STATUS } from '../../../hooks/use_fetcher';
 export interface UnifiedWaterfallFetcherResult {
     traceItems: TraceItem[];
     errors: Error[];

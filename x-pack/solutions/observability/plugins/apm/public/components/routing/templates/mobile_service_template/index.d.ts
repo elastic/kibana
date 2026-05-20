@@ -1,6 +1,6 @@
 import type { EuiPageHeaderProps } from '@elastic/eui';
 import React from 'react';
-import { MobileSearchBar } from '../../../app/mobile/search_bar';
+import type { MobileSearchBar } from '../../../app/mobile/search_bar';
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     key: 'overview' | 'transactions' | 'dependencies' | 'errors-and-crashes' | 'service-map' | 'logs' | 'alerts' | 'dashboards';
     hidden?: boolean;

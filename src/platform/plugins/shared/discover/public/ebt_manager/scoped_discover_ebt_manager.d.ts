@@ -5,7 +5,7 @@ import type { Request as InspectedRequest } from '@kbn/inspector-plugin/public';
 import { type TabsEBTEvent } from '@kbn/unified-tabs';
 import { type DiscoverInDashboardEBTEvent } from './discover_in_dashboard_event_definition';
 import { type CascadeEBTEvent } from '../application/main/components/layout/cascaded_documents/telemetry/event_definition';
-import { ContextualProfileLevel } from '../context_awareness';
+import type { ContextualProfileLevel } from '../context_awareness';
 import type { ReportEvent, ReportPerformanceEvent, SetAsActiveManager, UpdateProfilesContextWith } from './types';
 export declare const NON_ECS_FIELD = "<non-ecs>";
 export declare const FREE_TEXT = "__FREE_TEXT__";

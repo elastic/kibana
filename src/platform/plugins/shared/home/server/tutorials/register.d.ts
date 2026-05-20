@@ -1,2 +1,2 @@
-import { systemLogsSpecProvider } from './system_logs';
+import type { systemLogsSpecProvider } from './system_logs';
 export declare const builtInTutorials: (typeof systemLogsSpecProvider)[];

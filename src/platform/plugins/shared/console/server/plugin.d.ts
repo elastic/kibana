@@ -1,6 +1,6 @@
 import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import { SpecDefinitionsService, EsLegacyConfigService } from './services';
+import type { SpecDefinitionsService, EsLegacyConfigService } from './services';
 import type { ConsoleConfig } from './config';
 import type { ConsoleSetup, ConsoleStart } from './types';
 interface PluginsSetup {

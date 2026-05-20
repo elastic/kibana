@@ -2,7 +2,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { AbstractDataView } from './abstract_data_views';
-import { DataViewField } from '../fields';
+import type { DataViewField } from '../fields';
 import type { DataViewSpec, RuntimeField, FieldSpec, IDataViewsApiClient } from '../types';
 interface DataViewDeps {
     spec?: DataViewSpec;

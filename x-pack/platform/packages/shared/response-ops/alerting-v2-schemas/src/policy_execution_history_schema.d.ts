@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const POLICY_EXECUTION_HISTORY_MAX_PER_PAGE = 100;
 export declare const policyExecutionOutcomeSchema: z.ZodEnum<{
     throttled: "throttled";

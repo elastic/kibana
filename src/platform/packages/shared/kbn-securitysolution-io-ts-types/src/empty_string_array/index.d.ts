@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 /**
  * Types the EmptyStringArray as:
  *   - A value that can be undefined, or null (which will be turned into an empty array)

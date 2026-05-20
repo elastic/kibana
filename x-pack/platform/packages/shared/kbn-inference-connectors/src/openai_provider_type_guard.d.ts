@@ -1,2 +1,2 @@
-import { OpenAiProviderType } from '@kbn/connector-schemas/openai';
+import type { OpenAiProviderType } from '@kbn/connector-schemas/openai';
 export declare const isOpenAiProviderType: (value: unknown) => value is OpenAiProviderType;

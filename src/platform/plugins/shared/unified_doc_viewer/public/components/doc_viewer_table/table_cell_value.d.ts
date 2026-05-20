@@ -1,5 +1,5 @@
 import React, { type ReactNode } from 'react';
-import { IgnoredReason } from '@kbn/discover-utils';
+import type { IgnoredReason } from '@kbn/discover-utils';
 export declare const DOC_VIEWER_DEFAULT_TRUNCATE_MAX_HEIGHT = 110;
 interface TableFieldValueProps {
     field: string;

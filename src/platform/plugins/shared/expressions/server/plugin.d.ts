@@ -1,6 +1,6 @@
 import type { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
-import { ExpressionsService } from '../common';
+import type { ExpressionsService } from '../common';
 export type ExpressionsServerSetup = ExpressionsServiceSetup;
 export type ExpressionsServerStart = ExpressionsServiceStart;
 export declare class ExpressionsServerPlugin implements Plugin<ExpressionsServerSetup, ExpressionsServerStart> {

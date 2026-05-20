@@ -4,11 +4,11 @@ import type { FileLayer } from '@elastic/ems-client';
 import type { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import type { GeoJsonWithMeta, IVectorSource } from '../vector_source';
 import { AbstractVectorSource } from '../vector_source';
-import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
+import type { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import type { IField } from '../../fields/field';
 import type { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
 import type { ITooltipProperty } from '../../tooltips/tooltip_property';
-import { LICENSED_FEATURES } from '../../../licensed_features';
+import type { LICENSED_FEATURES } from '../../../licensed_features';
 export interface IEmsFileSource extends IVectorSource {
     getEmsFieldLabel(emsFieldName: string): Promise<string>;
 }

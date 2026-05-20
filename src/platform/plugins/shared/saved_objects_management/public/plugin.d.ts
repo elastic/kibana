@@ -7,7 +7,7 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { v1 } from '../common';
 import type { SavedObjectManagementTypeInfo } from './types';
-import { getDefaultTitle, getSavedObjectLabel, getTagFindReferences, parseQuery } from './lib';
+import type { getDefaultTitle, getSavedObjectLabel, getTagFindReferences, parseQuery } from './lib';
 export interface SavedObjectsManagementPluginSetup {
 }
 export interface SavedObjectsManagementPluginStart {

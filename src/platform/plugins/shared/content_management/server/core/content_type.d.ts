@@ -1,4 +1,4 @@
-import { ContentCrud } from './crud';
+import type { ContentCrud } from './crud';
 import type { EventBus } from './event_bus';
 import type { ContentStorage, ContentTypeDefinition } from './types';
 export declare class ContentType {

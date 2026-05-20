@@ -1,6 +1,6 @@
 import type { VisualizationStage } from '@kbn/visualizations-plugin/public';
 import type { MapItem } from '../common/content_management';
-import { getMapClient } from './content_management';
+import type { getMapClient } from './content_management';
 export declare const mapsVisTypeAlias: {
     alias: {
         app: string;

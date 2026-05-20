@@ -1,5 +1,5 @@
 import React from 'react';
-import moment from 'moment';
+import type moment from 'moment';
 import type { TimeUnit } from '../utils/formatters/datetime';
 interface Props {
     /**

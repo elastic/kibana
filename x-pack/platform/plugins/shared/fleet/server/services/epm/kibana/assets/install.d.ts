@@ -1,5 +1,5 @@
 import type { SavedObject, SavedObjectsBulkCreateObject, SavedObjectsClientContract, ISavedObjectsImporter, SavedObjectsImportSuccess, Logger } from '@kbn/core/server';
-import { KibanaAssetType, KibanaSavedObjectType } from '../../../../types';
+import type { KibanaAssetType, KibanaSavedObjectType } from '../../../../types';
 import type { Installation, PackageSpecTags } from '../../../../types';
 import type { KibanaAssetReference, PackageInstallContext } from '../../../../../common/types';
 type SavedObjectsImporterContract = Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;

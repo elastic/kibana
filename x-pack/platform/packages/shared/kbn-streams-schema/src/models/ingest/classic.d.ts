@@ -1,5 +1,5 @@
 import type { IngestBaseStream } from './base';
-import { IngestBase, IngestBaseUpsertRequest } from './base';
+import type { IngestBase, IngestBaseUpsertRequest } from './base';
 import type { ClassicIngestStreamEffectiveLifecycle } from './lifecycle';
 import type { ElasticsearchAssets } from './common';
 import type { Validation } from '../validation/validation';

@@ -2,7 +2,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ShareMenuManagerStart } from './services';
 import type { ShareMenuRegistrySetup } from './services';
-import { ShareRegistry } from './services';
+import type { ShareRegistry } from './services';
 import type { RedirectOptions } from '../common/url_service/locators/redirect';
 import type { AnonymousAccessServiceContract } from '../common';
 import type { BrowserUrlService } from './types';

@@ -1,4 +1,4 @@
-import { EsqlToolFieldType } from '@kbn/agent-builder-common';
+import type { EsqlToolFieldType } from '@kbn/agent-builder-common';
 import type { EsqlToolParamValue } from '@kbn/agent-builder-common';
 import React from 'react';
 export declare const getEmptyValue: (fieldType: EsqlToolFieldType) => EsqlToolParamValue;

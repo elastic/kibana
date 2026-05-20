@@ -1,5 +1,5 @@
 import type { AnalyticsServiceStart } from '@kbn/core/public';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { ObservabilityAIAssistantAPIClient } from '../api';
 import type { ChatRegistrationRenderFunction, ObservabilityAIAssistantChatService } from '../types';

@@ -24,6 +24,6 @@ export class ConditionExpression extends React.Component<any, any, any> {
     render(): React.JSX.Element;
 }
 import React from 'react';
-import PropTypes from 'prop-types';
-import { ML_DETECTOR_RULE_APPLIES_TO } from '@kbn/ml-anomaly-utils';
-import { ML_DETECTOR_RULE_OPERATOR } from '@kbn/ml-anomaly-utils';
+import type PropTypes from 'prop-types';
+import type { ML_DETECTOR_RULE_APPLIES_TO } from '@kbn/ml-anomaly-utils';
+import type { ML_DETECTOR_RULE_OPERATOR } from '@kbn/ml-anomaly-utils';

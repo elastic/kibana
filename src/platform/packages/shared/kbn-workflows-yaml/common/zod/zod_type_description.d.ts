@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export interface TypeDescriptionOptions {
     /** Maximum depth for nested objects */
     maxDepth: number;

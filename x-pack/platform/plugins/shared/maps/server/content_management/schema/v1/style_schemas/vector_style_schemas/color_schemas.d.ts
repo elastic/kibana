@@ -1,4 +1,4 @@
-import { COLOR_MAP_TYPE, DATA_MAPPING_FUNCTION, STYLE_TYPE } from '../../../../../../common/constants';
+import type { COLOR_MAP_TYPE, DATA_MAPPING_FUNCTION, STYLE_TYPE } from '../../../../../../common/constants';
 export declare const categoryColorStop: import("@kbn/config-schema").ObjectType<{
     stop: import("@kbn/config-schema").Type<string | null>;
     color: import("@kbn/config-schema").Type<string>;

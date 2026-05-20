@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { SpanLinkDetails } from '@kbn/apm-types';
 export declare const spanLinksRouteRepository: {
     "GET /internal/apm/traces/{traceId}/span_links/{spanId}": import("@kbn/server-route-repository-utils").ServerRoute<"GET /internal/apm/traces/{traceId}/span_links/{spanId}", t.TypeC<{

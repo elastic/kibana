@@ -1,7 +1,7 @@
 import type { BehaviorSubject } from 'rxjs';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
-import { FetchStatus } from '../../types';
+import type { FetchStatus } from '../../types';
 import type { DataDocuments$, DataMain$, DataMsg, DataTotalHits$, SavedSearchData } from '../state_management/discover_data_state_container';
 /**
  * Sends COMPLETE message to the main$ observable with the information

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import type { KibanaPrivileges } from '@kbn/security-role-management-model';
-import { PrivilegeFormCalculator } from '@kbn/security-ui-components';
+import type { PrivilegeFormCalculator } from '@kbn/security-ui-components';
 import type { Space } from '@kbn/spaces-plugin/public';
 import type { Role } from '../../../../../../../common';
 interface Props {

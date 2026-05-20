@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { GRID_RESOLUTION } from '../../../../common/constants';
-import { AGG_TYPE, LAYER_TYPE, RENDER_AS } from '../../../../common/constants';
+import type { AGG_TYPE, LAYER_TYPE, RENDER_AS } from '../../../../common/constants';
 import type { AggDescriptor } from '../../../../common/descriptor_types';
 import type { OnSourceChangeArgs } from '../source';
 interface Props {

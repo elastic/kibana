@@ -1,6 +1,6 @@
 import type { AggregationsSumAggregation, AggregationsValueCountAggregation, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { AggregationResultOfMap } from '@kbn/es-types';
-import { ApmDocumentType } from '../../../common/document_type';
+import type { ApmDocumentType } from '../../../common/document_type';
 export declare const getOutcomeAggregation: (documentType: ApmDocumentType) => {
     successful_or_failed: {
         value_count: AggregationsValueCountAggregation;

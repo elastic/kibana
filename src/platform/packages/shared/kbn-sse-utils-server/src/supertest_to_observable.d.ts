@@ -1,5 +1,5 @@
 import type supertest from 'supertest';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 /**
  * Convert a supertest response to an SSE observable.
  *

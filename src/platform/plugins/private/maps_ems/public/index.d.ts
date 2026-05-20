@@ -1,6 +1,6 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
 import type { EMSClient } from '@elastic/ems-client';
-import { MapsEmsPlugin } from './plugin';
+import type { MapsEmsPlugin } from './plugin';
 import type { MapConfig } from '../server/config';
 import type { EMSSettings } from '../common';
 export declare function plugin(initializerContext: PluginInitializerContext): MapsEmsPlugin;

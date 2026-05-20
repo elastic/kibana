@@ -2,7 +2,7 @@ import React from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { AggDescriptor } from '../../../common/descriptor_types';
-import { AGG_TYPE } from '../../../common/constants';
+import type { AGG_TYPE } from '../../../common/constants';
 interface Props {
     bucketsName?: string;
     isJoin: boolean;

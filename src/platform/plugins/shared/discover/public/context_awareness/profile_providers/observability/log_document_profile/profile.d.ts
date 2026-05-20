@@ -1,4 +1,4 @@
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { DocumentProfileProvider } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import type { LogOverviewContext } from '../logs_data_source_profile/profile';

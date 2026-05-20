@@ -1,7 +1,7 @@
 import type { FeatureCollection } from 'geojson';
 import type { Query } from '@kbn/es-query';
 import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { AGG_TYPE, FIELD_ORIGIN, SOURCE_TYPES } from '../../../../../common/constants';
+import type { AGG_TYPE, FIELD_ORIGIN, SOURCE_TYPES } from '../../../../../common/constants';
 import { AbstractESAggSource } from '../../es_agg_source';
 import type { DataFilters, ESDistanceSourceDescriptor, VectorSourceRequestMeta } from '../../../../../common/descriptor_types';
 import type { IJoinSource } from '../types';

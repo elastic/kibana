@@ -1,7 +1,7 @@
 import type { CoreSetup, IUiSettingsClient, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { StreamsPluginStartDependencies } from '../../types';
 import type { QueryClient } from './assets/query/query_client';
-import { StreamsClient } from './client';
+import type { StreamsClient } from './client';
 import type { AttachmentClient } from './attachments/attachment_client';
 import type { FeatureClient } from './feature';
 export declare class StreamsService {

@@ -1,6 +1,6 @@
 import type { PropsWithChildren } from 'react';
 import React from 'react';
-import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
+import type { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import type { CaseUI } from '../../../../common';
 export declare const CaseViewAttachments: {
     ({ caseData, activeTab, onSearch, searchTerm, children, }: PropsWithChildren<{

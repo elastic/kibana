@@ -1,6 +1,6 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-import { TopNType } from '@kbn/profiling-utils';
+import type { TopNType } from '@kbn/profiling-utils';
 export interface StacktracesLocatorParams extends SerializableRecord {
     kuery?: string;
     rangeFrom?: string;

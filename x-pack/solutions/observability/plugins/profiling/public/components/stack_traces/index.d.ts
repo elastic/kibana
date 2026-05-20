@@ -1,5 +1,5 @@
 import React from 'react';
-import { StackTracesDisplayOption, TopNType } from '@kbn/profiling-utils';
+import type { StackTracesDisplayOption, TopNType } from '@kbn/profiling-utils';
 import type { StackedBarChartProps } from '../stacked_bar_chart';
 import type { TopNSubchart } from '../../../common/topn';
 import { type AsyncState } from '../../hooks/use_async';

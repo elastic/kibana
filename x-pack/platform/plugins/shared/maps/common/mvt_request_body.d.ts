@@ -1,5 +1,5 @@
 import type { SearchMvtRequest } from '@elastic/elasticsearch/lib/api/types';
-import { RENDER_AS } from './constants';
+import type { RENDER_AS } from './constants';
 export declare function getAggsTileRequest({ buffer, risonRequestBody, geometryFieldName, gridPrecision, hasLabels, index, renderAs, x, y, z, }: {
     buffer: number;
     risonRequestBody: string;

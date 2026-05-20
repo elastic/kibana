@@ -3,9 +3,9 @@ import type { GeoJsonProperties, Geometry, Position } from 'geojson';
 import type { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { AbstractSource } from '../source';
 import type { BoundsRequestMeta, GetFeatureActionsArgs, GeoJsonWithMeta, IMvtVectorSource } from '../vector_source';
-import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
+import type { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import type { MapExtent, TiledSingleLayerVectorSourceDescriptor, TooltipFeatureAction } from '../../../../common/descriptor_types';
-import { MVTField } from '../../fields/mvt_field';
+import type { MVTField } from '../../fields/mvt_field';
 import type { ITooltipProperty } from '../../tooltips/tooltip_property';
 export declare const sourceTitle: string;
 export declare class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVectorSource {

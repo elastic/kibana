@@ -1,6 +1,6 @@
 import type { Observable } from 'rxjs';
 import type { ICPSManager } from '../types';
-import { ProjectRoutingAccess } from '../types';
+import type { ProjectRoutingAccess } from '../types';
 interface ApplicationService {
     currentAppId$: Observable<string | undefined>;
 }

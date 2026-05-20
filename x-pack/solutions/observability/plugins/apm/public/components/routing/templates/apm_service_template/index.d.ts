@@ -1,5 +1,5 @@
 import React from 'react';
-import { SearchBar } from '../../../shared/search_bar/search_bar';
+import type { SearchBar } from '../../../shared/search_bar/search_bar';
 import type { Tab } from './use_tabs';
 interface Props {
     title: string;

@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const suggestDescriptionRoute: Record<"POST /internal/streams/{name}/_suggest_description", import("@kbn/server-route-repository-utils").ServerRoute<"POST /internal/streams/{name}/_suggest_description", z.ZodObject<{
     path: z.ZodObject<{
         name: z.ZodString;

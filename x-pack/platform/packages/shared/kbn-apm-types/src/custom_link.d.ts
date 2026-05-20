@@ -1,4 +1,4 @@
-import { SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_NAME, TRANSACTION_TYPE } from '../es_fields';
+import type { SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_NAME, TRANSACTION_TYPE } from '../es_fields';
 export declare const FILTER_OPTIONS: readonly ["service.name", "service.environment", "transaction.type", "transaction.name"];
 export type FilterKey = (typeof FILTER_OPTIONS)[number];
 export interface CustomLinkES {

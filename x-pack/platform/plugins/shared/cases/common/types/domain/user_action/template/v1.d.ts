@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 export declare const TemplateUserActionPayloadRt: rt.ExactC<rt.TypeC<{
     template: rt.UnionC<[rt.ExactC<rt.TypeC<{
         id: rt.StringC;

@@ -1,6 +1,6 @@
 import React from 'react';
 import type { ESQLSourceResult } from '@kbn/esql-types';
-import { DataSourceSelectionChange } from '../types';
+import type { DataSourceSelectionChange } from '../types';
 interface DataSourceBrowserProps {
     isOpen: boolean;
     isTimeseries: boolean;

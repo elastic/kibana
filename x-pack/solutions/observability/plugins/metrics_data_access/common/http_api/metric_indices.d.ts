@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 export declare const MetricIndicesAPIResponseRT: rt.TypeC<{
     metricIndices: rt.StringC;
     metricIndicesExist: rt.BooleanC;

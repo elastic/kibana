@@ -1,9 +1,9 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { InferenceInferenceEndpointInfo, MlTrainedModelStats } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import type { Instruction, KnowledgeBaseEntry } from '../../../common/types';
-import { KnowledgeBaseEntryRole, InferenceModelState } from '../../../common/types';
+import type { KnowledgeBaseEntryRole, InferenceModelState } from '../../../common/types';
 export declare const knowledgeBaseRoutes: {
     "POST /internal/observability_ai_assistant/kb/warmup_model": import("@kbn/server-route-repository-utils").ServerRoute<"POST /internal/observability_ai_assistant/kb/warmup_model", t.TypeC<{
         query: t.TypeC<{

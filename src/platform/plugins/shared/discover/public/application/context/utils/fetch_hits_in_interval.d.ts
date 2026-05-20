@@ -1,6 +1,6 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ISearchSource, EsQuerySortValue } from '@kbn/data-plugin/public';
-import { SortDirection } from '@kbn/data-plugin/public';
+import type { SortDirection } from '@kbn/data-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { IntervalValue } from './generate_intervals';

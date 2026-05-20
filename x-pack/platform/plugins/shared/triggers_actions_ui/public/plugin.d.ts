@@ -20,7 +20,7 @@ import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { RRuleParams, RuleAction, RuleTypeParams } from '@kbn/alerting-plugin/common';
-import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
+import type { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
 import type { AlertFormatter } from '@kbn/alerts-ui-shared/src/common/types';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';

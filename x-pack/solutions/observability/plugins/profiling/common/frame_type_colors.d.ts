@@ -1,4 +1,4 @@
-import { FrameType } from '@kbn/profiling-utils';
+import type { FrameType } from '@kbn/profiling-utils';
 export declare const FRAME_TYPE_COLOR_MAP: {
     0: number[];
     1: number[];

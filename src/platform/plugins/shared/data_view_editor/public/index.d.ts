@@ -9,6 +9,6 @@
  * in the setup/start interfaces in `plugin.ts`. The remaining items exported here are
  * either types, or static code.
  */
-import { DataViewEditorPlugin } from './plugin';
+import type { DataViewEditorPlugin } from './plugin';
 export type { PluginStart as DataViewEditorStart, DataViewEditorProps, DataViewEditorService, } from './types';
 export declare function plugin(): DataViewEditorPlugin;

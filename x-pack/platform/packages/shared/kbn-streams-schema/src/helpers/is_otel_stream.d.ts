@@ -1,4 +1,4 @@
-import { Streams } from '../models/streams';
+import type { Streams } from '../models/streams';
 /**
  * Determines whether a stream should conform to OpenTelemetry (OTel) naming convention or not.
  *

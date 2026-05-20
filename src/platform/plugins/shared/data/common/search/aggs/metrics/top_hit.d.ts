@@ -1,5 +1,5 @@
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { MetricAggType } from './metric_agg_type';
+import type { MetricAggType } from './metric_agg_type';
 import type { BaseAggParams } from '../types';
 export interface BaseAggParamsTopHit extends BaseAggParams {
     field: string;

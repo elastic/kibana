@@ -1,5 +1,5 @@
 import type { ISessionService } from './session_service';
-import { SearchSessionState } from './search_session_state';
+import type { SearchSessionState } from './search_session_state';
 /**
  * Options for {@link waitUntilNextSessionCompletes$}
  */

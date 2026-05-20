@@ -1,6 +1,6 @@
 import type { Dispatch } from 'react';
 import React from 'react';
-import * as store from '../stores/request';
+import type * as store from '../stores/request';
 export declare function RequestContextProvider({ children }: {
     children: React.ReactNode;
 }): React.JSX.Element;

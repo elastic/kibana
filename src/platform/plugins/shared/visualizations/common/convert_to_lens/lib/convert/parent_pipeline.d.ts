@@ -1,4 +1,4 @@
-import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import type { METRIC_TYPES } from '@kbn/data-plugin/common';
 import type { SchemaConfig } from '../../..';
 import type { AnyMetricColumnAndMeta, MovingAverageParams } from '../../types';
 import type { MovingAverageColumn, DerivativeColumn, CumulativeSumColumn, FormulaColumn, ExtendedColumnConverterArgs, OtherParentPipelineAggs } from './types';

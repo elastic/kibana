@@ -1,6 +1,6 @@
 import React from 'react';
 import type { LegendColorPicker } from '@elastic/charts';
-import { Position } from '@elastic/charts';
+import type { Position } from '@elastic/charts';
 import type { PersistedState } from '@kbn/visualizations-common';
 import type { DatatablesWithFormatInfo, LayersAccessorsTitles, LayersFieldFormats } from '../helpers';
 import type { CommonXYDataLayerConfig } from '../../common/types';

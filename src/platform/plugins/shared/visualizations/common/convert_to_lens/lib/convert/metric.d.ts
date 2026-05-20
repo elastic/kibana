@@ -1,4 +1,4 @@
-import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import type { METRIC_TYPES } from '@kbn/data-plugin/common';
 import type { SupportedMetric } from './supported_metrics';
 import type { CommonColumnConverterArgs, MetricsWithField } from './types';
 import type { SchemaConfig } from '../../../types';

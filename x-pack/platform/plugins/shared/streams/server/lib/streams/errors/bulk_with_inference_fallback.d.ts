@@ -1,5 +1,5 @@
 import type { Logger } from '@kbn/core/server';
-import { BulkOperationError } from '@kbn/storage-adapter';
+import type { BulkOperationError } from '@kbn/storage-adapter';
 /**
  * Returns `true` when **every** errored item in the bulk response has an
  * inference-related error (type/reason contains "inference"), and there is

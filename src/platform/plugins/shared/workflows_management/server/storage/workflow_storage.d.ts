@@ -1,5 +1,5 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { StorageIndexAdapter } from '@kbn/storage-adapter';
+import type { StorageIndexAdapter } from '@kbn/storage-adapter';
 import type { WorkflowYaml } from '@kbn/workflows';
 export declare const workflowIndexName: string;
 declare const storageSettings: {

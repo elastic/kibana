@@ -1,4 +1,4 @@
-import useAsyncFn from 'react-use/lib/useAsyncFn';
+import type useAsyncFn from 'react-use/lib/useAsyncFn';
 import type { FindFieldsMetadataRequestQuery, FindFieldsMetadataResponsePayload } from '../../../common/latest';
 import type { FieldsMetadataServiceStart } from '../../services/fields_metadata';
 interface UseFieldsMetadataFactoryDeps {

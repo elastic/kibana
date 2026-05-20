@@ -1,4 +1,4 @@
-import { FETCH_STATUS } from '../../public/hooks/use_fetcher';
+import type { FETCH_STATUS } from '../../public/hooks/use_fetcher';
 import type { APIReturnType } from '../../public/services/rest/create_call_apm_api';
 export declare enum AnomalyDetectionSetupState {
     Loading = "pending",

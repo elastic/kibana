@@ -1,4 +1,4 @@
-import { AiopsPlugin } from './plugin';
+import type { AiopsPlugin } from './plugin';
 export declare function plugin(): AiopsPlugin;
 export type { AiopsPluginStart, AiopsPluginSetup } from './types';
 export type { AiopsAppContextValue } from './hooks/use_aiops_app_context';

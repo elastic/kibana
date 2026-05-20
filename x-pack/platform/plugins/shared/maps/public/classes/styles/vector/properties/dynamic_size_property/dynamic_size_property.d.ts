@@ -2,7 +2,7 @@ import React from 'react';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { DynamicStyleProperty } from '../dynamic_style_property';
 import type { FieldFormatter } from '../../../../../../common/constants';
-import { VECTOR_STYLES } from '../../../../../../common/constants';
+import type { VECTOR_STYLES } from '../../../../../../common/constants';
 import type { SizeDynamicOptions } from '../../../../../../common/descriptor_types';
 import type { IField } from '../../../../fields/field';
 import type { IVectorLayer } from '../../../../layers/vector_layer';

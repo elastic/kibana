@@ -1,5 +1,5 @@
 import type { LineCounter } from 'yaml';
-import YAML from 'yaml';
+import type YAML from 'yaml';
 export interface StepInfo {
     stepId: string;
     stepType: string;

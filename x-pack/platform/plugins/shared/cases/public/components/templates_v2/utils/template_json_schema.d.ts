@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 /**
  * URI identifier for the template JSON Schema.
  * This is an arbitrary unique identifier used by monaco-yaml to associate

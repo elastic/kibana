@@ -1,7 +1,7 @@
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin, IUiSettingsClient } from '@kbn/core/server';
 import type { FieldFormatsStart, FieldFormatsSetup } from './types';
 import type { FieldFormatInstanceType } from '../common';
-import { FieldFormatsRegistry } from '../common';
+import type { FieldFormatsRegistry } from '../common';
 export declare class FieldFormatsPlugin implements Plugin<FieldFormatsSetup, FieldFormatsStart> {
     private readonly fieldFormats;
     constructor(initializerContext: PluginInitializerContext);

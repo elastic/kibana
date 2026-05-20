@@ -1,6 +1,6 @@
 import React from 'react';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
-import { mapRuleToComposeFormValues, composeFormToCreateRequest, composeFormToUpdateRequest } from './compose_mappers';
+import type { mapRuleToComposeFormValues, composeFormToCreateRequest, composeFormToUpdateRequest } from './compose_mappers';
 import type { ComposeDiscoverMode } from './types';
 export interface ComposeDiscoverFlyoutProps {
     historyKey: symbol;

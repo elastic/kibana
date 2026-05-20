@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import type { ResizableLayoutDirection, ResizableLayoutOrder } from '../types';
-import { ResizableLayoutMode } from '../types';
+import type { ResizableLayoutMode } from '../types';
 export interface ResizableLayoutProps {
     /**
      * Class name for the layout container

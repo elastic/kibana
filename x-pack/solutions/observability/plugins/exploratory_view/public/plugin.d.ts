@@ -16,8 +16,8 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
-import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
-import { registerDataHandler } from './data_handler';
+import type { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
+import type { registerDataHandler } from './data_handler';
 export interface ExploratoryViewPublicPluginsSetup {
     data: DataPublicPluginSetup;
     share: SharePluginSetup;

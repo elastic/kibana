@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import type _ from 'lodash';
 import type { ChangeEvent } from 'react';
 import React, { Component } from 'react';
 export interface Props {

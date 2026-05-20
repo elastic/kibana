@@ -1,6 +1,6 @@
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { AggExpressionType, AggExpressionFunctionArgs } from '..';
-import { METRIC_TYPES } from '..';
+import type { METRIC_TYPES } from '..';
 export declare const aggSumFnName = "aggSum";
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.SUM>;

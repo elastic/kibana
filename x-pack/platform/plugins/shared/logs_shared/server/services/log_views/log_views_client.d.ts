@@ -2,7 +2,7 @@ import type { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import type { LogView, LogViewAttributes, LogViewReference, LogViewsStaticConfig, ResolvedLogView } from '../../../common/log_views';
-import { NotFoundError } from './errors';
+import type { NotFoundError } from './errors';
 import type { ILogViewsClient, LogViewFallbackHandler } from './types';
 type DataViewsService = ReturnType<DataViewsServerPluginStart['dataViewsServiceFactory']>;
 export declare class LogViewsClient implements ILogViewsClient {

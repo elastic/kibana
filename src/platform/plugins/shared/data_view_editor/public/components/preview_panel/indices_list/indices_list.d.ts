@@ -1,6 +1,6 @@
 import React from 'react';
-import { Pager } from '@elastic/eui';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { Pager } from '@elastic/eui';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { MatchedItem } from '@kbn/data-views-plugin/public';
 export interface IndicesListProps {
     indices: MatchedItem[];

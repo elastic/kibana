@@ -1,4 +1,4 @@
-import { LogsSharedPlugin } from './plugin';
+import type { LogsSharedPlugin } from './plugin';
 export type { LogsSharedClientSetupExports, LogsSharedClientStartExports, LogsSharedClientSetupDeps, LogsSharedClientStartDeps, } from './types';
 export declare function plugin(): LogsSharedPlugin;
 export { LogViewProvider, useLogViewContext, useLogView } from './hooks/use_log_view';

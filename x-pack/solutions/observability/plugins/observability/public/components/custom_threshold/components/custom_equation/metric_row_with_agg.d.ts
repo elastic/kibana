@@ -1,7 +1,7 @@
 import type { DataViewBase } from '@kbn/es-query';
 import React from 'react';
 import type { KqlPluginStart } from '@kbn/kql/public';
-import { Aggregators } from '../../../../../common/custom_threshold_rule/types';
+import type { Aggregators } from '../../../../../common/custom_threshold_rule/types';
 import type { MetricRowBaseProps, NormalizedFields } from './types';
 interface MetricRowWithAggProps extends MetricRowBaseProps {
     aggType?: Aggregators;

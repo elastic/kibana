@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import { type ConnectorContractUnion } from '../..';
 export declare function getStepId(stepName: string): string;
 export declare function generateYamlSchemaFromConnectors(connectors: ConnectorContractUnion[], 

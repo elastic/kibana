@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const getFailureStoreStatsRoute: Record<"GET /internal/streams/{name}/failure_store/stats", import("@kbn/server-route-repository-utils").ServerRoute<"GET /internal/streams/{name}/failure_store/stats", z.ZodObject<{
     path: z.ZodObject<{
         name: z.ZodString;

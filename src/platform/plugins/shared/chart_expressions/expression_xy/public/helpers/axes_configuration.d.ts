@@ -1,4 +1,4 @@
-import { Position } from '@elastic/charts';
+import type { Position } from '@elastic/charts';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { FormatFactory } from '../types';
 import type { CommonXYDataLayerConfig, YAxisConfig, YAxisConfigResult, XAxisConfigResult } from '../../common';

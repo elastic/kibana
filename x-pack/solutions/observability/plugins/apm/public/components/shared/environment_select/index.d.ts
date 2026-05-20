@@ -1,6 +1,6 @@
 import React from 'react';
 import type { CSSObject } from '@emotion/react';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import type { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import type { Environment } from '../../../../common/environment_rt';
 export declare function EnvironmentSelect({ environment, availableEnvironments, status, serviceName, rangeFrom, rangeTo, onChange, fullWidth: fullWidthProp, compressed, hideLabel, cssOverride, }: {
     environment: Environment;

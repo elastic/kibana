@@ -1,9 +1,9 @@
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { FavoritesClient } from '@kbn/content-management-favorites-public';
+import type { FavoritesClient } from '@kbn/content-management-favorites-public';
 import { type QueryHistoryItem } from '../history_local_storage';
 /**
  * EsqlStarredQueriesService is a service that manages the starred queries in the ES|QL editor.

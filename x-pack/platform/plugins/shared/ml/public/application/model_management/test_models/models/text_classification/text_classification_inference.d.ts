@@ -1,5 +1,6 @@
 import type { estypes } from '@elastic/elasticsearch';
-import { InferenceBase, INPUT_TYPE } from '../inference_base';
+import type { INPUT_TYPE } from '../inference_base';
+import { InferenceBase } from '../inference_base';
 import type { TextClassificationResponse } from './common';
 import type { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
 import type { ITelemetryClient } from '../../../../services/telemetry/types';

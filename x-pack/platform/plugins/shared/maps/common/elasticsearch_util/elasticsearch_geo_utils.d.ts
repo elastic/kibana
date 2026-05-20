@@ -1,7 +1,7 @@
 import type { TopLeftBottomRightGeoBounds } from '@elastic/elasticsearch/lib/api/types';
 import type { FeatureCollection, Geometry, Polygon, Point, Position } from 'geojson';
 import type { BBox } from '@turf/helpers';
-import { ES_GEO_FIELD_TYPE } from '../constants';
+import type { ES_GEO_FIELD_TYPE } from '../constants';
 import type { MapExtent } from '../descriptor_types';
 type Coordinates = Position | Position[] | Position[][] | Position[][][];
 interface ESGeometry {

@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const ListJoinedTeamsInputSchema: z.ZodOptional<z.ZodObject<{
     userId: z.ZodOptional<z.ZodString>;
 }, z.core.$strip>>;

@@ -4,7 +4,7 @@ import type { BaseLanguageModelInput, StructuredOutputMethodOptions } from '@lan
 import type { BaseMessage, AIMessageChunk } from '@langchain/core/messages';
 import type { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
 import type { ChatResult } from '@langchain/core/outputs';
-import { ChatGenerationChunk } from '@langchain/core/outputs';
+import type { ChatGenerationChunk } from '@langchain/core/outputs';
 import type { Runnable } from '@langchain/core/runnables';
 import type { InferenceConnector, ChatCompleteAPI, ChatCompleteOptions, FunctionCallingMode, ConnectorTelemetryMetadata, ChatCompleteResponse } from '@kbn/inference-common';
 import type { ToolChoice } from './types';

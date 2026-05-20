@@ -1,5 +1,5 @@
-import { z } from '@kbn/zod/v4';
-import { ToolType } from '@kbn/agent-builder-common';
+import type { z } from '@kbn/zod/v4';
+import type { ToolType } from '@kbn/agent-builder-common';
 export declare const mcpToolFormValidationSchema: z.ZodObject<{
     connectorId: z.ZodString;
     mcpToolName: z.ZodString;

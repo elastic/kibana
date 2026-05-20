@@ -5,7 +5,7 @@ import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AuthFilterHelpers, OwnerEntity } from './types';
 import type { OperationDetails } from '.';
-import { AuthorizationAuditLogger } from '.';
+import type { AuthorizationAuditLogger } from '.';
 /**
  * This class handles ensuring that the user making a request has the correct permissions
  * for the API request.

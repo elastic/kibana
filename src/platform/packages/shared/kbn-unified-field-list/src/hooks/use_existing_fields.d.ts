@@ -2,7 +2,8 @@ import type { CoreStart } from '@kbn/core/public';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataView, DataViewsContract, FieldSpec } from '@kbn/data-views-plugin/common';
-import { ExistenceFetchStatus, type ExistingFieldsInfo, type FetchedExistingFieldsInfo } from '../types';
+import type { ExistenceFetchStatus} from '../types';
+import { type ExistingFieldsInfo, type FetchedExistingFieldsInfo } from '../types';
 export interface ExistingFieldsFetcherParams {
     disableAutoFetching?: boolean;
     dataViews: DataView[];

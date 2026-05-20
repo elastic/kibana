@@ -1,4 +1,4 @@
-import moment from 'moment';
+import type moment from 'moment';
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import type { IUsageCounter } from '../usage_counter';
 export declare function rollUsageCountersIndices({ logger, getRegisteredUsageCounters, internalRepository, now, }: {

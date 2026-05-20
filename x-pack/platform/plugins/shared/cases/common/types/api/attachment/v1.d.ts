@@ -1,5 +1,5 @@
-import * as rt from 'io-ts';
-import { AttachmentType } from '../../domain/attachment/v1';
+import type * as rt from 'io-ts';
+import type { AttachmentType } from '../../domain/attachment/v1';
 export declare const BulkDeleteFileAttachmentsRequestRt: rt.ExactC<rt.TypeC<{
     ids: rt.Type<string[], string[], unknown>;
 }>>;

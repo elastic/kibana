@@ -1,7 +1,7 @@
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import type { Agent } from '../../types';
 import { ActionRunner } from './action_runner';
-import { BulkActionTaskType } from './bulk_action_types';
+import type { BulkActionTaskType } from './bulk_action_types';
 export declare class UnenrollActionRunner extends ActionRunner {
     protected processAgents(agents: Agent[]): Promise<{
         actionId: string;

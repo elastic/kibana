@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 export declare const UserRt: rt.IntersectionC<[rt.ExactC<rt.TypeC<{
     email: rt.UnionC<[rt.UndefinedC, rt.NullC, rt.StringC]>;
     full_name: rt.UnionC<[rt.UndefinedC, rt.NullC, rt.StringC]>;

@@ -5,7 +5,7 @@ import type { ReactElement, ReactNode } from 'react';
 import React from 'react';
 import type { FeatureCollection } from 'geojson';
 import type { ProjectRoutingOverrides } from '@kbn/presentation-publishing';
-import { DataRequest } from '../util/data_request';
+import type { DataRequest } from '../util/data_request';
 import type { LAYER_TYPE } from '../../../common/constants';
 import type { Attribution, CustomIcon, LayerDescriptor, MapExtent, StyleDescriptor, TileMetaFeature, Timeslice, StyleMetaDescriptor } from '../../../common/descriptor_types';
 import type { ISource, SourceEditorArgs } from '../sources/source';

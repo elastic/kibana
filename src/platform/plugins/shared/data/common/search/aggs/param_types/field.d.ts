@@ -1,7 +1,7 @@
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { IAggConfig } from '../agg_config';
 import { BaseParamType } from './base';
-import { KBN_FIELD_TYPES } from '../../../kbn_field_types/types';
+import type { KBN_FIELD_TYPES } from '../../../kbn_field_types/types';
 export type FieldTypes = KBN_FIELD_TYPES | KBN_FIELD_TYPES[] | '*';
 export type FilterFieldFn = (field: DataViewField) => boolean;
 export type IFieldParamType = FieldParamType;

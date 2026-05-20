@@ -1,8 +1,8 @@
 import type { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '@kbn/core/server';
-import { CaseSeverity, ConnectorTypes } from '../../../common/types/domain';
+import type { CaseSeverity, ConnectorTypes } from '../../../common/types/domain';
 import type { SanitizedCaseOwner } from '.';
 import type { ConnectorPersistedFields } from '../../common/types/connectors';
-import { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
+import type { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
 import type { CaseAttributes } from '../../../common/types/domain';
 interface UnsanitizedCaseConnector {
     connector_id: string;

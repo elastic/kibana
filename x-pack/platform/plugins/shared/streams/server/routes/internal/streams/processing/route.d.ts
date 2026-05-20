@@ -1,9 +1,9 @@
 import type { FlattenRecord } from '@kbn/streams-schema';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { Observable } from 'rxjs';
-import { handleProcessingGrokSuggestions } from './grok_suggestions_handler';
-import { handleProcessingDissectSuggestions } from './dissect_suggestions_handler';
+import type { handleProcessingGrokSuggestions } from './grok_suggestions_handler';
+import type { handleProcessingDissectSuggestions } from './dissect_suggestions_handler';
 import type { FailureStoreSamplesResponse } from './failure_store_samples_handler';
 export declare const simulateProcessorRoute: Record<"POST /internal/streams/{name}/processing/_simulate", import("@kbn/server-route-repository-utils").ServerRoute<"POST /internal/streams/{name}/processing/_simulate", z.ZodObject<{
     path: z.ZodObject<{

@@ -1,5 +1,5 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
-import { SpacesPlugin } from './plugin';
+import type { SpacesPlugin } from './plugin';
 export { getSpaceColor, getSpaceImageUrl, getSpaceInitials } from './space_avatar';
 export type { SpacesPluginSetup, SpacesPluginStart } from './plugin';
 export type { Space, GetAllSpacesPurpose, GetSpaceResult } from '../common';

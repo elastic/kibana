@@ -1,6 +1,6 @@
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { SearchSourceDependencies } from './search_source';
-import { SearchSource } from './search_source';
+import type { SearchSource } from './search_source';
 import type { SerializedSearchSourceFields } from '../..';
 /**
  * Deserializes a json string and a set of referenced objects to a `SearchSource` instance.

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useStartServices } from '../../../../../hooks';
+import type { useStartServices } from '../../../../../hooks';
 export type DataStreamResultsFlyoutComponent = NonNullable<ReturnType<typeof useStartServices>['automaticImport']>['components']['DataStreamResultsFlyout'];
 export type DataStreamResponse = React.ComponentProps<DataStreamResultsFlyoutComponent>['dataStream'];
 export type TaskStatus = DataStreamResponse['status'];

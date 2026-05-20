@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export interface SlackAssistantSearchContextMessage {
     author_name?: string;
     author_user_id?: string;

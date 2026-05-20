@@ -4,7 +4,7 @@ import type { Filter } from '@kbn/es-query';
 import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import type { Observable } from 'rxjs';
 import type { RawValue } from '../../../common/constants';
-import { FLYOUT_STATE } from '../../reducers/ui';
+import type { FLYOUT_STATE } from '../../reducers/ui';
 import type { MapSettings } from '../../../common/descriptor_types';
 import type { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import type { ILayer } from '../../classes/layers/layer';

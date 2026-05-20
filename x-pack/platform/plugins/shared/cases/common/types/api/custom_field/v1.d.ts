@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 export declare const CaseCustomFieldTextWithValidationValueRt: (fieldName: string) => rt.Type<string, string, unknown>;
 export declare const CaseCustomFieldNumberWithValidationValueRt: ({ fieldName }: {
     fieldName: string;

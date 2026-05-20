@@ -1,5 +1,5 @@
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
-import { CaseSeverity } from '../../../../common/types/domain';
+import type { CaseSeverity } from '../../../../common/types/domain';
 import type { CasesUI } from '../../../../common';
 import type { UseActionProps } from '../types';
 interface UseSeverityActionProps extends UseActionProps {

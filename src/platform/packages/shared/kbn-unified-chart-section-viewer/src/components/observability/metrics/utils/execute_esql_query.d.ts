@@ -3,7 +3,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import { getESQLResults } from '@kbn/esql-utils';
+import type { getESQLResults } from '@kbn/esql-utils';
 export interface ExecuteEsqlParams {
     esqlQuery: string;
     search: ISearchGeneric;

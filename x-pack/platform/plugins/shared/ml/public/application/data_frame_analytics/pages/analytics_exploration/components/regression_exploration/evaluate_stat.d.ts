@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { REGRESSION_STATS } from '../../../../common/analytics';
+import type { REGRESSION_STATS } from '../../../../common/analytics';
 interface Props {
     isLoading: boolean;
     title: number | string;

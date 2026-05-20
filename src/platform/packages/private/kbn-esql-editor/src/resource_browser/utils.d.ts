@@ -1,6 +1,6 @@
 import type { monaco } from '@kbn/code-editor';
 import type { CommandRange, SourceCommandContext, LocatedSourceItem } from './types';
-import { IndicesBrowserOpenMode } from './types';
+import type { IndicesBrowserOpenMode } from './types';
 export declare const getRangeFromOffsets: (model: monaco.editor.ITextModel, startOffset: number, endOffset: number) => monaco.IRange;
 /**
  * Returns the first command in the query that matches one of the `supportedCommands`.

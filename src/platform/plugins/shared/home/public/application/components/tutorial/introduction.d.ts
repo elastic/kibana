@@ -1,7 +1,7 @@
 import React from 'react';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { InjectedIntl } from '@kbn/i18n-react';
-import { TutorialsCategory } from '../../../../common/constants';
+import type { TutorialsCategory } from '../../../../common/constants';
 export interface IntroductionProps {
     description: string;
     title: string;

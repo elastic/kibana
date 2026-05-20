@@ -1,5 +1,6 @@
 import type { UseEuiTheme } from '@elastic/eui';
-import { monaco, type MonacoMessage } from '@kbn/code-editor';
+import type { monaco} from '@kbn/code-editor';
+import { type MonacoMessage } from '@kbn/code-editor';
 import { type MapCache } from 'lodash';
 export declare const useDebounceWithOptions: (fn: Function, { skipFirstRender }?: {
     skipFirstRender: boolean;

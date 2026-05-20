@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 declare const postHealthScanParamsSchema: t.PartialC<{
     body: t.PartialC<{
         force: t.Type<boolean, boolean, unknown>;

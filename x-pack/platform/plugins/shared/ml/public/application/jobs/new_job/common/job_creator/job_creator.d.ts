@@ -1,4 +1,4 @@
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { Query } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { type Aggregation, type Field, type MlUrlConfig } from '@kbn/ml-anomaly-utils';
@@ -9,9 +9,10 @@ import type { Datafeed, DatafeedId } from '@kbn/ml-common-types/anomaly_detectio
 import type { Job, Detector, JobId, BucketSpan } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { MlCalendar } from '@kbn/ml-common-types/calendars';
 import type { MlApi } from '../../../../services/ml_api_service';
-import { JobRunner, type ProgressSubscriber } from '../job_runner';
+import type { JobRunner} from '../job_runner';
+import { type ProgressSubscriber } from '../job_runner';
 import type { CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
-import { JOB_TYPE } from '../../../../../../common/constants/new_job';
+import type { JOB_TYPE } from '../../../../../../common/constants/new_job';
 import type { NewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 export declare class JobCreator {
     protected _type: JOB_TYPE;

@@ -1,5 +1,5 @@
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { TimeBuckets } from './time_buckets';
+import type { TimeBuckets } from './time_buckets';
 /**
  * Custom hook to get `TimeBuckets` configured with settings from the `IUiSettingsClient`.
  *

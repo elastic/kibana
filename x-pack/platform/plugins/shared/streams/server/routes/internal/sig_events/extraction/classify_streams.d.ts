@@ -1,4 +1,4 @@
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import type { PersistedTask } from '../../../../lib/tasks/types';
 import type { FeaturesIdentificationTaskParams } from '../../../../lib/tasks/task_definitions/features_identification';
 export interface StreamCandidate {

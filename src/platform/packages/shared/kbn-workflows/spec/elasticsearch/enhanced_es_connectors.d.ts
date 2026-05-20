@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { InternalConnectorContract } from '../..';
 /**
  * Enhanced connector definition that extends auto-generated connectors

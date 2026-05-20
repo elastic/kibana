@@ -1,4 +1,4 @@
-import { TourQueueStateManager } from './tour_queue_state';
+import type { TourQueueStateManager } from './tour_queue_state';
 /**
  * Get or create the global tour queue instance.
  * This ensures a single state manager is shared across all plugins and bundles.

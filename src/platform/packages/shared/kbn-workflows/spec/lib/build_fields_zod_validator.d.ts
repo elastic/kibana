@@ -1,6 +1,6 @@
 import type { JSONSchema7 } from 'json-schema';
-import { z } from '@kbn/zod/v4';
-import { resolveRef } from './field_conversion';
+import type { z } from '@kbn/zod/v4';
+import type { resolveRef } from './field_conversion';
 /** Root schema type for $ref resolution (same as resolveRef's second parameter). */
 type RootSchemaType = Parameters<typeof resolveRef>[1];
 /**

@@ -6,10 +6,10 @@ import type { ISearchSource } from '@kbn/data-plugin/common/search/search_source
 import type { DataView } from '@kbn/data-plugin/common';
 import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { type ProjectRouting } from '@kbn/es-query';
-import { GRID_RESOLUTION, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
+import type { GRID_RESOLUTION, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import type { ESAggsSourceSyncMeta } from '../es_agg_source';
 import { AbstractESAggSource } from '../es_agg_source';
-import { LICENSED_FEATURES } from '../../../licensed_features';
+import type { LICENSED_FEATURES } from '../../../licensed_features';
 import type { GetFeatureActionsArgs, GeoJsonWithMeta, IMvtVectorSource } from '../vector_source';
 import type { DataFilters, ESGeoGridSourceDescriptor, MapExtent, TooltipFeatureAction, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 import type { ImmutableSourceProperty, SourceEditorArgs } from '../source';

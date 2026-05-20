@@ -3,7 +3,7 @@ import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
-import { updateGlobalNavigation } from './services/update_global_navigation';
+import type { updateGlobalNavigation } from './services/update_global_navigation';
 import { type AssetDetailsFlyoutLocator, type AssetDetailsLocator, type InventoryLocator, type HostsLocator, type FlamegraphLocator, type StacktracesLocator, type TopNFunctionsLocator, type ServiceOverviewLocator, type TransactionDetailsByNameLocator, type MetricsExplorerLocator, type TransactionDetailsByTraceIdLocator } from '../common';
 import type { DependencyOverviewLocator } from '../common/locators/apm/dependency_overview_locator';
 export interface ObservabilitySharedSetup {

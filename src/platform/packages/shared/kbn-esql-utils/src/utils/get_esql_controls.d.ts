@@ -1,7 +1,7 @@
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { type PresentationContainer } from '@kbn/presentation-publishing';
-import { ESQL_CONTROL } from '@kbn/controls-constants';
+import type { ESQL_CONTROL } from '@kbn/controls-constants';
 type EsqlControlState = OptionsListESQLControlState & {
     type: typeof ESQL_CONTROL;
 };

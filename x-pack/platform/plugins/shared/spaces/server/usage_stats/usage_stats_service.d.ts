@@ -1,5 +1,5 @@
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import { UsageStatsClient } from './usage_stats_client';
+import type { UsageStatsClient } from './usage_stats_client';
 export interface UsageStatsServiceSetup {
     getClient(): UsageStatsClient;
 }

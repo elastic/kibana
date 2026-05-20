@@ -1,5 +1,5 @@
 import type { UnifiedHistogramFetch$, UnifiedHistogramHitsContext, UnifiedHistogramServices } from '../../../types';
-import { UnifiedHistogramFetchStatus } from '../../../types';
+import type { UnifiedHistogramFetchStatus } from '../../../types';
 export declare const useTotalHits: ({ services, hits, chartVisible, fetch$, abortController: parentAbortController, onTotalHitsChange, }: {
     services: UnifiedHistogramServices;
     hits: UnifiedHistogramHitsContext | undefined;

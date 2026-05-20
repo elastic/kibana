@@ -1,4 +1,4 @@
-import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
+import type { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import type { JobAction } from '../../../common/constants/job_actions';
 type ACTION_STATE = DATAFEED_STATE | JOB_STATE | JobAction;
 export declare function isRequestTimeout(error: {

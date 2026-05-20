@@ -1,4 +1,4 @@
-import { Query } from '@elastic/eui';
+import type { Query } from '@elastic/eui';
 import type { FieldDefinition } from '@kbn/management-settings-types';
 import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
 /**

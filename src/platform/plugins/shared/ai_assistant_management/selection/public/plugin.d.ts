@@ -6,7 +6,7 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ServerlessPluginSetup } from '@kbn/serverless/public';
 import type { Observable } from 'rxjs';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { AIAssistantType } from '../common/ai_assistant_type';
+import type { AIAssistantType } from '../common/ai_assistant_type';
 import type { AIExperienceSelection } from './types';
 export interface AIAssistantManagementSelectionPluginPublicSetup {
 }

@@ -1,6 +1,6 @@
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
-import { ConfigSchema } from './config';
+import type { ConfigSchema } from './config';
 export { uiCapabilitiesRegex } from './feature_schema';
 export type { KibanaFeatureConfig, FeatureKibanaPrivileges, ElasticsearchFeatureConfig, FeatureElasticsearchPrivileges, } from '../common';
 export type { SubFeaturePrivilegeIterator } from './feature_privilege_iterator';

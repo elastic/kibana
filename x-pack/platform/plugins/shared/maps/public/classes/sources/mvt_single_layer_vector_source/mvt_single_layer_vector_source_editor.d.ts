@@ -1,6 +1,6 @@
 import type { ChangeEvent } from 'react';
 import React, { Component } from 'react';
-import _ from 'lodash';
+import type _ from 'lodash';
 import type { MVTFieldDescriptor, TiledSingleLayerVectorSourceDescriptor } from '../../../../common/descriptor_types';
 export type TiledSingleLayerVectorSourceSettings = Omit<TiledSingleLayerVectorSourceDescriptor, 'tooltipProperties' | 'type'>;
 interface Props {

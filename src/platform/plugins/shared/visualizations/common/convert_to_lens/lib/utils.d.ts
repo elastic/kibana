@@ -1,5 +1,5 @@
 import type { IAggConfig } from '@kbn/data-plugin/common';
-import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import type { METRIC_TYPES } from '@kbn/data-plugin/common';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { AnyMetricColumn, AnyMetricColumnWithSourceField, ColumnWithMeta } from '../types';

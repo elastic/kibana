@@ -1,5 +1,5 @@
 import type { DocLinksStart } from '@kbn/core/public';
-import { VALIDATION_STATUS } from '@kbn/ml-validators';
+import type { VALIDATION_STATUS } from '@kbn/ml-validators';
 export type MessageId = keyof ReturnType<typeof getMessages>;
 export interface JobValidationMessageDef {
     status: VALIDATION_STATUS;

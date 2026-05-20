@@ -1,5 +1,6 @@
 import React, { type ComponentProps, type ReactElement, type ReactNode } from 'react';
-import { EuiModal, type EuiTabProps, type CommonProps } from '@elastic/eui';
+import type { EuiModal} from '@elastic/eui';
+import { type EuiTabProps, type CommonProps } from '@elastic/eui';
 import { type ITabDeclaration, type IDispatchFunction, type IModalContextProviderProps } from './context';
 export type IModalTabContent<S> = (props: {
     state: S;

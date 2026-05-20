@@ -1,10 +1,10 @@
-import _ from 'lodash';
+import type _ from 'lodash';
 import React, { Component } from 'react';
-import MapboxDraw from '@mapbox/mapbox-gl-draw';
+import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import type { Feature } from 'geojson';
 import type { MapMouseEvent } from '@kbn/mapbox-gl';
-import { DRAW_SHAPE } from '../../../../common/constants';
+import type { DRAW_SHAPE } from '../../../../common/constants';
 export interface Props {
     drawShape?: DRAW_SHAPE;
     onDraw: (event: {

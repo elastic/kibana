@@ -1,6 +1,6 @@
 import React from 'react';
-import * as t from 'io-ts';
-import { IndexLifecyclePhaseSelectOption } from '../../../../common/storage_explorer_types';
+import type * as t from 'io-ts';
+import type { IndexLifecyclePhaseSelectOption } from '../../../../common/storage_explorer_types';
 export declare const storageExplorer: {
     '/storage-explorer': {
         element: React.JSX.Element;

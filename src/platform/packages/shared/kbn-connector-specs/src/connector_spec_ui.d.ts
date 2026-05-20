@@ -8,7 +8,7 @@
  * This allows the main spec to focus on connector behavior while
  * UI derivation is handled here.
  */
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare enum WidgetType {
     Text = "text",
     Password = "password",

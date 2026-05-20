@@ -1,6 +1,6 @@
 import type { LayerType as XYLayerType } from '@kbn/expression-xy-plugin/common';
 import type { AxesSettingsConfig, DatasourceLayers, FramePublicAPI, OperationMetadata, UserMessage, VisualizationType } from '@kbn/lens-common';
-import { LENS_LAYER_TYPES as layerTypes } from '@kbn/lens-common';
+import type { LENS_LAYER_TYPES as layerTypes } from '@kbn/lens-common';
 import type { XYVisualizationState, XYAnnotationLayerConfig, XYLayerConfig, XYDataLayerConfig, XYReferenceLineLayerConfig, SeriesType, XYByReferenceAnnotationLayerConfig, XYByValueAnnotationLayerConfig } from './types';
 import type { ExtraAppendLayerArg } from './visualization';
 export declare function getAxisName(axis: 'x' | 'y' | 'yLeft' | 'yRight', { isHorizontal }: {

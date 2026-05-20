@@ -2,7 +2,7 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { type InternalStateStore, type RuntimeStateManager } from '../redux';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
-import { DiscoverSearchSessionManager } from '../discover_search_session';
+import type { DiscoverSearchSessionManager } from '../discover_search_session';
 interface UseStateManagers {
     customizationContext: DiscoverCustomizationContext;
     services: DiscoverServices;

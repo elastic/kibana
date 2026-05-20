@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import _ from 'lodash';
+import type _ from 'lodash';
 import type { MVTFieldDescriptor } from '../../../../common/descriptor_types';
 interface Props {
     fields: MVTFieldDescriptor[];

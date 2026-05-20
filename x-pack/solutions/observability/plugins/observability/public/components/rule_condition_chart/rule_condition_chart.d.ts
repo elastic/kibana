@@ -5,7 +5,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import type { COMPARATORS } from '@kbn/alerting-comparators';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { TimeUnitChar } from '../../../common';
 import type { LEGACY_COMPARATORS } from '../../../common/utils/convert_legacy_outside_comparator';

@@ -1,5 +1,5 @@
 import type { FetchAlertsIndexNamesParams } from '../apis/fetch_alerts_index_names';
-import { fetchAlertsIndexNames } from '../apis/fetch_alerts_index_names';
+import type { fetchAlertsIndexNames } from '../apis/fetch_alerts_index_names';
 import type { QueryOptionsOverrides } from '../types/tanstack_query_utility_types';
 export type UseFetchAlertsIndexNamesQueryParams = FetchAlertsIndexNamesParams;
 export declare const queryKeyPrefix: string[];

@@ -1,9 +1,9 @@
 import type { ChangeEvent } from 'react';
 import React, { Component } from 'react';
-import { SortDirection } from '@kbn/data-plugin/public';
+import type { SortDirection } from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { SCALING_TYPES } from '../../../../common/constants';
-import { ESDocField } from '../../fields/es_doc_field';
+import type { ESDocField } from '../../fields/es_doc_field';
 import type { IESSource } from '../es_source';
 import type { OnSourceChangeArgs } from '../source';
 import type { IField } from '../../fields/field';

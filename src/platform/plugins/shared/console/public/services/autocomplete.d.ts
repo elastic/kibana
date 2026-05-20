@@ -1,6 +1,6 @@
 import type { HttpSetup } from '@kbn/core/public';
 import type { Field } from '../lib/autocomplete_entities/types';
-import { Alias, DataStream, Mapping, LegacyTemplate, IndexTemplate, ComponentTemplate } from '../lib/autocomplete_entities';
+import type { Alias, DataStream, Mapping, LegacyTemplate, IndexTemplate, ComponentTemplate } from '../lib/autocomplete_entities';
 import type { AutocompleteTermDefinition } from '../lib/autocomplete/components/autocomplete_component';
 import type { DevToolsSettings, Settings } from './settings';
 export declare enum ENTITIES {

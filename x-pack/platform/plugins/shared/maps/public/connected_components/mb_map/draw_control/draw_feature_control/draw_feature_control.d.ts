@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import type MapboxDraw from '@mapbox/mapbox-gl-draw';
 import type { Feature, Geometry, Position } from 'geojson';
 import type { Map as MbMap, MapMouseEvent } from '@kbn/mapbox-gl';
-import { DRAW_MODE, DRAW_SHAPE } from '../../../../../common/constants';
+import type { DRAW_MODE, DRAW_SHAPE } from '../../../../../common/constants';
 import type { ILayer } from '../../../../classes/layers/layer';
 export interface ReduxStateProps {
     drawShape?: DRAW_SHAPE;

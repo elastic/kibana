@@ -2,7 +2,7 @@ import type Boom from '@hapi/boom';
 import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract, Logger, KibanaRequest } from '@kbn/core/server';
 import type { KibanaAssetReference, PackageDataStreamTypes, PackageDependencies, PackageInstallContext } from '../../../../common/types';
 import type { BulkInstallPackageInfo, EpmPackageInstallStatus, InstallablePackage, Installation, InstallResult, InstallSource, InstallType, KibanaAssetType, PackageVerificationResult, InstallResultStatus } from '../../../types';
-import { FleetError } from '../../../errors';
+import type { FleetError } from '../../../errors';
 import type { ArchiveAsset } from '../kibana/assets/install';
 import type { PackageUpdateEvent } from '../../upgrade_sender';
 export declare const UPLOAD_RETRY_AFTER_MS = 10000;

@@ -1,7 +1,7 @@
 import type Boom from '@hapi/boom';
 import type { IKibanaResponse, KibanaResponseFactory, RequestHandlerContext } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core/server';
-import { FleetError } from '.';
+import type { FleetError } from '.';
 type IngestErrorHandler = (params: IngestErrorHandlerParams) => IKibanaResponse | Promise<IKibanaResponse>;
 interface IngestErrorHandlerParams {
     error: FleetError | Boom.Boom | Error;

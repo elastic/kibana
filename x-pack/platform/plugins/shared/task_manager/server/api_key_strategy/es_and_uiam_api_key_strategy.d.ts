@@ -1,5 +1,5 @@
 import type { Logger, SecurityServiceStart, IBasePath, KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import { ApiKeyType } from '../config';
+import type { ApiKeyType } from '../config';
 import type { ConcreteTaskInstance, TaskInstance } from '../task';
 import type { ApiKeySOFields, ApiKeyStrategy, GrantApiKeysOpts, InvalidationTarget } from './api_key_strategy';
 export declare class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {

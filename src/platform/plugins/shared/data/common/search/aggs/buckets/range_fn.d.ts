@@ -2,7 +2,7 @@ import type { Assign } from '@kbn/utility-types';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { NumericalRangeOutput } from '../../expressions';
 import type { AggExpressionType, AggExpressionFunctionArgs } from '..';
-import { BUCKET_TYPES } from '..';
+import type { BUCKET_TYPES } from '..';
 export declare const aggRangeFnName = "aggRange";
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.RANGE>;

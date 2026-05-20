@@ -1,4 +1,4 @@
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { StatusError } from '../streams/errors/status_error';
 export declare class EsqlQueryValidationError extends StatusError {
     constructor(message: string, data?: unknown);

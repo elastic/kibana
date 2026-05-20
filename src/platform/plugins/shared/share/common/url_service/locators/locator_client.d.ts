@@ -4,7 +4,7 @@ import type { SavedObjectReference } from '@kbn/core/server';
 import type { DependencyList } from 'react';
 import type { LocatorDependencies } from './locator';
 import type { LocatorDefinition, LocatorPublic, ILocatorClient, LocatorData, LocatorGetUrlParams } from './types';
-import { Locator } from './locator';
+import type { Locator } from './locator';
 import type { LocatorsMigrationMap } from '.';
 export type LocatorClientDependencies = LocatorDependencies;
 export declare class LocatorClient implements ILocatorClient {

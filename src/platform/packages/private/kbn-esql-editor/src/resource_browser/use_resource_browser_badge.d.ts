@@ -1,6 +1,6 @@
-import { monaco } from '@kbn/code-editor';
+import type { monaco } from '@kbn/code-editor';
 import type { MutableRefObject } from 'react';
-import { IndicesBrowserOpenMode } from './types';
+import type { IndicesBrowserOpenMode } from './types';
 interface UseSourcesBadgeParams {
     editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
     editorModel: MutableRefObject<monaco.editor.ITextModel | undefined>;

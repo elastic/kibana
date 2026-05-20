@@ -1,4 +1,4 @@
-import { ML_ANOMALY_SEVERITY } from './anomaly_severity';
+import type { ML_ANOMALY_SEVERITY } from './anomaly_severity';
 /**
  * Returns a severity type (indicating a critical, major, minor, warning or low severity anomaly)
  * for the supplied normalized anomaly score (a value between 0 and 100).

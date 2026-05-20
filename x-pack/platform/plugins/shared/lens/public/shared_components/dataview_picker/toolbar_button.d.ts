@@ -1,6 +1,6 @@
 import React from 'react';
 import type { PropsOf, EuiButtonProps } from '@elastic/eui';
-import { EuiButton } from '@elastic/eui';
+import type { EuiButton } from '@elastic/eui';
 declare const groupPositionToClassMap: {
     none: null;
     left: string;

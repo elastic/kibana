@@ -1,10 +1,11 @@
 import type { FileUploadPluginStartApi } from '@kbn/file-upload-plugin/public/api';
-import { FileUploadTelemetryService, type FindFileStructureResponse, type FormattedOverrides, type ImportFailure, type ImportResults, type IngestPipeline, type InputOverrides } from '@kbn/file-upload-common';
+import type { FileUploadTelemetryService} from '@kbn/file-upload-common';
+import { type FindFileStructureResponse, type FormattedOverrides, type ImportFailure, type ImportResults, type IngestPipeline, type InputOverrides } from '@kbn/file-upload-common';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { type DataTableRecord } from '@kbn/discover-utils';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { STATUS } from './file_manager';
-import { processResults } from '../src/utils';
+import type { STATUS } from './file_manager';
+import type { processResults } from '../src/utils';
 import type { FileClash } from './merge_tools';
 interface FileSizeInfo {
     fileSize: number;

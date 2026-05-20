@@ -2,8 +2,8 @@ import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import type { CaseUserActionDeprecatedResponse } from '../../../common/types/api';
 import type { CaseConnectorActivity, CaseConnectorFields, GetUsersResponse, PushInfo, ServiceContext } from './types';
-import { UserActionPersister } from './operations/create';
-import { UserActionFinder } from './operations/find';
+import type { UserActionPersister } from './operations/create';
+import type { UserActionFinder } from './operations/find';
 import type { UserActionSavedObjectTransformed } from '../../common/types/user_actions';
 export declare class CaseUserActionService {
     private readonly context;

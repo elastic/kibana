@@ -1,4 +1,4 @@
-import { default as React } from 'react';
+import type { default as React } from 'react';
 import type { ControlsLayout, ControlsRendererParentApi } from './types';
 export declare const ControlsRenderer: ({ controls: controlState, onControlsChanged, parentApi, }: {
     controls: ControlsLayout;

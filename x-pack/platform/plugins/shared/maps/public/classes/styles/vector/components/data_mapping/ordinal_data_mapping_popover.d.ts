@@ -1,7 +1,7 @@
 import React from 'react';
 import type { FieldMetaOptions } from '../../../../../../common/descriptor_types';
 import type { VECTOR_STYLES } from '../../../../../../common/constants';
-import { DATA_MAPPING_FUNCTION } from '../../../../../../common/constants';
+import type { DATA_MAPPING_FUNCTION } from '../../../../../../common/constants';
 interface Props<DynamicOptions> {
     fieldMetaOptions: FieldMetaOptions;
     styleName: VECTOR_STYLES;

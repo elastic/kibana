@@ -2,7 +2,7 @@ import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { BehaviorSubject } from 'rxjs';
-import { VIEW_MODE } from '../../../../../common/constants';
+import type { VIEW_MODE } from '../../../../../common/constants';
 import type { SidebarToggleState } from '../../../types';
 export interface DiscoverMainContentProps {
     dataView: DataView;

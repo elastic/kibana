@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import type { AppMountParameters, ScopedHistory } from '@kbn/core/public';
 import type { EmbeddableStateTransfer, EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
-import { SavedMap } from './saved_map';
+import type { SavedMap } from './saved_map';
 import type { MapEmbeddableState } from '../../../common';
 interface Props {
     mapEmbeddableState?: MapEmbeddableState;

@@ -1,4 +1,4 @@
-import { LegendSize } from '@kbn/chart-expressions-common';
+import type { LegendSize } from '@kbn/chart-expressions-common';
 type APILegendSize = 'auto' | 's' | 'm' | 'l' | 'xl';
 export declare const legendSizeCompat: {
     toState: {

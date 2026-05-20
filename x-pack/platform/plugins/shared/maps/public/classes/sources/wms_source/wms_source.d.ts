@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
 import type { RasterTileSource } from 'maplibre-gl';
 import { AbstractSource } from '../source';
-import { SOURCE_TYPES } from '../../../../common/constants';
+import type { SOURCE_TYPES } from '../../../../common/constants';
 import type { IRasterSource, RasterTileSourceData } from '../raster_source';
 import type { WMSSourceDescriptor } from '../../../../common/descriptor_types';
 export declare const sourceTitle: string;

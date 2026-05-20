@@ -1,4 +1,4 @@
-import { FieldFormatEditors } from './field_format_editors';
+import type { FieldFormatEditors } from './field_format_editors';
 import type { FieldFormatEditorFactory } from '../components';
 /**
  * Index patterns management service

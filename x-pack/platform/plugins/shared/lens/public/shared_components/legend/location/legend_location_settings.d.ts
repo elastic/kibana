@@ -1,5 +1,5 @@
 import React from 'react';
-import { VerticalAlignment, HorizontalAlignment, Position } from '@elastic/charts';
+import type { VerticalAlignment, HorizontalAlignment, Position } from '@elastic/charts';
 export interface LegendLocationSettingsProps {
     /**
      * Sets the legend position

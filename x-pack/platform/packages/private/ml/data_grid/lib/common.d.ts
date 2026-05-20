@@ -2,7 +2,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { EuiDataGridCellValueElementProps, EuiDataGridStyle } from '@elastic/eui';
 import type { CoreSetup } from '@kbn/core/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { ES_FIELD_TYPES } from '@kbn/field-types';
 import { type FeatureImportance, type TopClasses } from '@kbn/ml-data-frame-analytics-utils';
 import type { DataGridItem, IndexPagination, RenderCellValue } from './types';
 /**

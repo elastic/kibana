@@ -1,5 +1,5 @@
 import React from 'react';
-import * as i18n from './translations';
+import type * as i18n from './translations';
 export type { AgentBuilderAnnouncementVariant } from './translations';
 export interface AgentBuilderAnnouncementModalProps {
     variant: i18n.AgentBuilderAnnouncementVariant;

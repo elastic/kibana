@@ -1,7 +1,7 @@
 import type { ChangeEvent } from 'react';
 import React, { Component } from 'react';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
-import { SortDirection } from '@kbn/data-plugin/public';
+import type { SortDirection } from '@kbn/data-plugin/public';
 import type { OnSourceChangeArgs } from '../../source';
 interface Props {
     indexPatternId: string;

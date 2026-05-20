@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const RespondToInboxActionRequestParams: z.ZodObject<{
     source_app: z.ZodString;
     source_id: z.ZodString;

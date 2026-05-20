@@ -1,5 +1,5 @@
 import React from 'react';
-import { McpToolHealthStatus } from '../../types/mcp';
+import type { McpToolHealthStatus } from '../../types/mcp';
 export interface McpHealthBannerProps {
     status: McpToolHealthStatus;
     onCreateNewTool?: () => void;

@@ -1,5 +1,5 @@
 import type { ElasticsearchClient, Logger, SavedObject, SavedObjectsClientContract, KibanaRequest } from '@kbn/core/server';
-import { INSTALL_STATES } from '../../../../../common/types';
+import type { INSTALL_STATES } from '../../../../../common/types';
 import type { PackageInstallContext, StateNames, StateContext } from '../../../../../common/types';
 import type { PackageAssetReference } from '../../../../types';
 import type { Installation, InstallType, InstallSource, PackageVerificationResult, EsAssetReference, KibanaAssetReference, IndexTemplateEntry, AssetReference } from '../../../../types';

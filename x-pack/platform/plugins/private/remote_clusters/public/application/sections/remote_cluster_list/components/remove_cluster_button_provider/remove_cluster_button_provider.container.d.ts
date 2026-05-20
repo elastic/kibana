@@ -1,2 +1,2 @@
-import { RemoveClusterButtonProvider as RemoveClusterButtonProviderComponent } from './remove_cluster_button_provider';
+import type { RemoveClusterButtonProvider as RemoveClusterButtonProviderComponent } from './remove_cluster_button_provider';
 export declare const RemoveClusterButtonProvider: import("react-redux").ConnectedComponent<typeof RemoveClusterButtonProviderComponent, import("react-redux").Omit<import("react").ClassAttributes<RemoveClusterButtonProviderComponent> & import("./remove_cluster_button_provider").Props, "removeClusters">>;

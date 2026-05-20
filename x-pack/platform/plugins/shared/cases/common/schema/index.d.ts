@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 export interface LimitedSchemaType {
     fieldName: string;
     min: number;

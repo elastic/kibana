@@ -1,8 +1,9 @@
 import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import type { ProjectRouting } from '@kbn/es-query';
-import { BehaviorSubject } from 'rxjs';
-import { type CPSAppAccessResolver, type ICPSManager, type ProjectsData, ProjectRoutingAccess } from '@kbn/cps-utils';
+import type { BehaviorSubject } from 'rxjs';
+import type { ProjectRoutingAccess } from '@kbn/cps-utils';
+import { type CPSAppAccessResolver, type ICPSManager, type ProjectsData } from '@kbn/cps-utils';
 /**
  * Central service for managing project routing and project data.
  *

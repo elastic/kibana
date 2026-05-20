@@ -1,5 +1,5 @@
-import { useSecretInput, useComboInput, useRadioInput, useKeyValueInput } from '../../../../hooks';
-import { useInput, useSwitchInput } from '../../../../hooks';
+import type { useSecretInput, useComboInput, useRadioInput, useKeyValueInput } from '../../../../hooks';
+import type { useInput, useSwitchInput } from '../../../../hooks';
 import type { DownloadSource } from '../../../../types';
 export type AuthType = 'none' | 'username_password' | 'api_key';
 export interface DownloadSourceFormInputsType {

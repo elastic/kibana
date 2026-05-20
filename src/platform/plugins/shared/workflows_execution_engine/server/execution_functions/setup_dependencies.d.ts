@@ -1,16 +1,16 @@
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
-import { WorkflowGraph } from '@kbn/workflows/graph';
+import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowsExecutionEngineConfig } from '../config';
-import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
-import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
-import { NodesFactory } from '../step/nodes_factory';
+import type { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
+import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import type { NodesFactory } from '../step/nodes_factory';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
-import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
-import { StepIoService } from '../workflow_context_manager/step_io_service';
+import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
+import type { StepIoService } from '../workflow_context_manager/step_io_service';
 import type { ContextDependencies } from '../workflow_context_manager/types';
-import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
-import { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
-import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
+import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
+import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 export declare function setupDependencies(workflowRunId: string, spaceId: string, logger: Logger, config: WorkflowsExecutionEngineConfig, dependencies: ContextDependencies, fakeRequest?: KibanaRequest, workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart): Promise<{
     workflowExecutionGraph: WorkflowGraph;
     workflowRuntime: WorkflowExecutionRuntimeManager;

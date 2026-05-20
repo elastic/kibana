@@ -1,4 +1,4 @@
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 export interface ProcessingChainEntry {
     source: string;
     steps: unknown[];

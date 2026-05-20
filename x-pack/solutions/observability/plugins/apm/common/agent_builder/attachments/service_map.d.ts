@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const SERVICE_MAP_ATTACHMENT_TYPE: "observability.service-map";
 export declare const serviceMapAttachmentDataSchema: z.ZodObject<{
     connections: z.ZodArray<z.ZodObject<{

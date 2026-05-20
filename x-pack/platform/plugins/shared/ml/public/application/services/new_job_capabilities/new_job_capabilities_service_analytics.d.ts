@@ -1,4 +1,4 @@
-import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Field, NewJobCapsResponse } from '@kbn/ml-anomaly-utils';
 import { type DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';

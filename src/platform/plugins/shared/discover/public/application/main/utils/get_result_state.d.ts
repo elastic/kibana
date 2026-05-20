@@ -1,4 +1,4 @@
-import { FetchStatus } from '../../types';
+import type { FetchStatus } from '../../types';
 export declare const resultStatuses: {
     UNINITIALIZED: string;
     LOADING: string;

@@ -1,6 +1,6 @@
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import type { CasesUI } from '../../../../common';
-import { CaseStatuses } from '../../../../common/types/domain';
+import type { CaseStatuses } from '../../../../common/types/domain';
 import type { UseActionProps } from '../types';
 interface UseStatusActionProps extends UseActionProps {
     selectedStatus?: CaseStatuses;

@@ -4,7 +4,7 @@ import type { DataViewSpec, DataViewsPublicPluginStart } from '@kbn/data-views-p
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { FilterGroup } from './filter_group';
+import type { FilterGroup } from './filter_group';
 import type { FilterControlConfig } from './types';
 export type AlertFilterControlsProps = Omit<ComponentProps<typeof FilterGroup>, 'dataViewId' | 'defaultControls' | 'ruleTypeIds' | 'Storage'> & {
     /**

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import type { LayerWizard, LayerWizardWithMeta } from '../../../classes/layers';
-import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
+import type { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 import './layer_wizard_select.scss';
 interface Props {
     onSelect: (layerWizard: LayerWizard) => void;

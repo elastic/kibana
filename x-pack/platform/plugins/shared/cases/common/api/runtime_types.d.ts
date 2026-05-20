@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 import type { JsonArray, JsonObject, JsonValue } from '@kbn/utility-types';
 type ErrorFactory = (message: string) => Error;
 export declare const throwErrors: (createError: ErrorFactory) => (errors: rt.Errors) => never;

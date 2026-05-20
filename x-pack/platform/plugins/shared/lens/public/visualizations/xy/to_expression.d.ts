@@ -1,5 +1,5 @@
 import type { Ast } from '@kbn/interpreter';
-import { ScaleType } from '@elastic/charts';
+import type { ScaleType } from '@elastic/charts';
 import { type PaletteRegistry } from '@kbn/coloring';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import type { OperationMetadata, DatasourcePublicAPI, DatasourceLayers } from '@kbn/lens-common';

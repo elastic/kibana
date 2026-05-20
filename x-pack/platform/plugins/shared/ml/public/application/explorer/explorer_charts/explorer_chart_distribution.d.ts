@@ -41,4 +41,4 @@ export class ExplorerChartDistribution extends React.Component<any, any, any> {
     render(): React.JSX.Element | null;
 }
 import React from 'react';
-import PropTypes from 'prop-types';
+import type PropTypes from 'prop-types';

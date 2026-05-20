@@ -128,6 +128,6 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component<any, any,
     render(): React.JSX.Element;
 }
 import React from 'react';
-import { Subscription } from 'rxjs';
-import { Subject } from 'rxjs';
-import PropTypes from 'prop-types';
+import type { Subscription } from 'rxjs';
+import type { Subject } from 'rxjs';
+import type PropTypes from 'prop-types';

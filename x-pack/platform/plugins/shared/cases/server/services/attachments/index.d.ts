@@ -3,7 +3,7 @@ import type { AttachmentMode } from '../../../common/types/domain/attachment/v2'
 import type { AggregationResponse } from '../../client/metrics/types';
 import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
 import type { AlertsAttachedToCaseArgs, AttachmentsAttachedToCaseArgs, BulkCreateAttachments, BulkUpdateAttachmentArgs, CountActionsAttachedToCaseArgs, CreateAttachmentArgs, DeleteAttachmentArgs, ServiceContext, UpdateAttachmentArgs } from './types';
-import { AttachmentGetter } from './operations/get';
+import type { AttachmentGetter } from './operations/get';
 import type { AttachmentSavedObjectTransformed } from '../../common/types/attachments_v1';
 import type { AttachmentAttributesV2, AttachmentTransformedAttributesV2, UnifiedAttachmentSavedObjectTransformed } from '../../common/types/attachments_v2';
 export declare class AttachmentService {

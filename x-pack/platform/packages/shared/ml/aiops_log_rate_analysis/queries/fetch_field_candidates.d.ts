@@ -1,5 +1,5 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { AiopsLogRateAnalysisSchema } from '../api/schema';
 export declare const TEXT_FIELD_SAFE_LIST: string[];
 export declare const SUPPORTED_ES_FIELD_TYPES: ES_FIELD_TYPES[];

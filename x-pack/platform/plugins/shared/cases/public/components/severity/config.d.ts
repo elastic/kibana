@@ -1,5 +1,5 @@
 import React from 'react';
-import { CaseSeverity } from '../../../common/types/domain';
+import type { CaseSeverity } from '../../../common/types/domain';
 interface Props {
     severity: CaseSeverity;
 }

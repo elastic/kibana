@@ -1,4 +1,5 @@
-import { BehaviorSubject, type Observable } from 'rxjs';
+import type { BehaviorSubject} from 'rxjs';
+import { type Observable } from 'rxjs';
 import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { GridLayoutData } from '@kbn/grid-layout';
 import type { PinnedControlLayoutState as PinnedPanelLayoutState } from '@kbn/controls-schemas';

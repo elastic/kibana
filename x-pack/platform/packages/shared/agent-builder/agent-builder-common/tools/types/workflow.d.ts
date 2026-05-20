@@ -1,4 +1,5 @@
-import { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from '../definition';
+import type { ToolType} from '../definition';
+import { type ToolDefinition, type ToolDefinitionWithSchema } from '../definition';
 export type WorkflowToolConfig = {
     workflow_id: string;
     wait_for_completion?: boolean;

@@ -2,7 +2,7 @@ import type { IconType } from '@elastic/eui';
 import type { FieldConfig, ValidationConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { ConnectorTypeFields } from '../../common/types/domain';
-import { CustomFieldTypes } from '../../common/types/domain';
+import type { CustomFieldTypes } from '../../common/types/domain';
 import type { CasesPublicStartDependencies } from '../types';
 import type { CaseActionConnector } from './types';
 import type { CasesConfigurationUI, CaseUI, CaseUser, CaseUsers } from '../../common/ui/types';

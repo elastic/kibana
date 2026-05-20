@@ -1,6 +1,6 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
 import type { ReportingPublicComponents } from '@kbn/reporting-public/share';
-import { ReportingPublicPlugin } from './plugin';
+import type { ReportingPublicPlugin } from './plugin';
 /**
  * Setup contract for the Reporting plugin.
  */

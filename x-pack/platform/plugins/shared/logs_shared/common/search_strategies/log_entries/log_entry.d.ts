@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 export declare const LOG_ENTRY_SEARCH_STRATEGY = "infra-log-entry";
 export declare const logEntrySearchRequestParamsRT: rt.TypeC<{
     logView: rt.UnionC<[rt.TypeC<{

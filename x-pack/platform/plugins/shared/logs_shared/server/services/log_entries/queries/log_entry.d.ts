@@ -1,5 +1,5 @@
 import type { estypes } from '@elastic/elasticsearch';
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 export declare const createGetLogEntryQuery: (logEntryIndex: string, logEntryId: string, timestampField: string, tiebreakerField: string, runtimeMappings?: estypes.MappingRuntimeFields) => estypes.AsyncSearchSubmitRequest;
 export declare const logEntryHitRT: rt.IntersectionC<[rt.TypeC<{
     _index: rt.StringC;

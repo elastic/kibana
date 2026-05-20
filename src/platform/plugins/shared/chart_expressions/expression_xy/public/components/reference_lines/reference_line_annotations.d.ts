@@ -1,4 +1,4 @@
-import { Position } from '@elastic/charts';
+import type { Position } from '@elastic/charts';
 import type { FC } from 'react';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { AxesMap, AxisConfiguration } from '../../helpers';

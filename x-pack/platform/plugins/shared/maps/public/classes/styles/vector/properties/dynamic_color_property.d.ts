@@ -2,7 +2,7 @@ import type { Map as MbMap } from '@kbn/mapbox-gl';
 import React from 'react';
 import { DynamicStyleProperty } from './dynamic_style_property';
 import type { FieldFormatter, VECTOR_STYLES } from '../../../../../common/constants';
-import { DATA_MAPPING_FUNCTION } from '../../../../../common/constants';
+import type { DATA_MAPPING_FUNCTION } from '../../../../../common/constants';
 import type { Break } from '../components/legend/breaked_legend';
 import type { ColorDynamicOptions } from '../../../../../common/descriptor_types';
 import type { LegendProps } from './style_property';

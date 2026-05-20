@@ -1,5 +1,5 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
-import { UiActionsPlugin } from './plugin';
+import type { UiActionsPlugin } from './plugin';
 export declare function plugin(initializerContext: PluginInitializerContext): UiActionsPlugin;
 export type { UiActionsPublicSetup as UiActionsSetup, UiActionsPublicStart as UiActionsStart, } from './plugin';
 export type { Action, ActionDefinition as UiActionsActionDefinition } from './actions';

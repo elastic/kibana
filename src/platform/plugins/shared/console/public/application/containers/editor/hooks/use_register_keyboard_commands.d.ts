@@ -1,4 +1,4 @@
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 interface RegisterKeyboardCommandsParams {
     /** The current Monaco editor instance. */
     editor: monaco.editor.IStandaloneCodeEditor;

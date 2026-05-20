@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { Condition } from '../conditions';
 import type { ElasticsearchProcessorType } from './manual_ingest_pipeline_processors';
 import type { ConvertType } from '../formats/convert_types';

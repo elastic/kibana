@@ -1,7 +1,7 @@
 import type { CoreSetup, ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { StreamsPluginStartDependencies } from '../../../../types';
-import { QueryClient } from './query_client';
+import type { QueryClient } from './query_client';
 import { type SigEventsTuningConfig } from '../../../../../common/sig_events_tuning_config';
 export declare class QueryService {
     private readonly coreSetup;

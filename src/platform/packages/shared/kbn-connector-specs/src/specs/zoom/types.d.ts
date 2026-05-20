@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const ZOOM_DEFAULT_MAX_RECORDING_CONTENT_CHARS = 100000;
 export declare const ZoomPaginationOutputSchema: z.ZodObject<{
     page_size: z.ZodOptional<z.ZodNumber>;

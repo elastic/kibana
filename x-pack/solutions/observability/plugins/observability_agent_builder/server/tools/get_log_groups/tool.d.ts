@@ -1,9 +1,9 @@
-import { z } from '@kbn/zod/v4';
-import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { z } from '@kbn/zod/v4';
+import type { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import type { ObservabilityAgentBuilderCoreSetup, ObservabilityAgentBuilderPluginSetupDependencies } from '../../types';
-import { getToolHandler } from './handler';
+import type { getToolHandler } from './handler';
 export interface GetLogGroupsToolResult {
     type: ToolResultType.other;
     data: {

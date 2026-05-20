@@ -1,8 +1,8 @@
 import type { Assign } from '@kbn/utility-types';
 import type { IAggConfigs, ISearchSource } from '@kbn/data-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { VisParams } from '@kbn/visualizations-common';
-import { PersistedState } from './persisted_state';
+import type { PersistedState } from './persisted_state';
 import type { BaseVisType } from './vis_types';
 import type { SerializedVis, SerializedVisData } from '../common/types';
 export type { SerializedVis, SerializedVisData };

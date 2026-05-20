@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 declare const findCompositeSLOQuerySchema: z.ZodObject<{
     search: z.ZodOptional<z.ZodString>;
     page: z.ZodOptional<z.ZodString>;

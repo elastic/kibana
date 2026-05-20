@@ -1,5 +1,5 @@
 import type { SortState, UseNodeMetricsTableOptions } from '../shared';
-import { ECS_POD_CPU_USAGE_LIMIT_PCT, MEMORY_LIMIT_UTILIZATION } from '../shared/constants';
+import type { ECS_POD_CPU_USAGE_LIMIT_PCT, MEMORY_LIMIT_UTILIZATION } from '../shared/constants';
 type PodMetricsField = typeof ECS_POD_CPU_USAGE_LIMIT_PCT | typeof MEMORY_LIMIT_UTILIZATION;
 export declare const metricByField: Record<PodMetricsField, string>;
 export interface PodNodeMetricsRow {

@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const getConnectorByIdRoute: Record<"GET /internal/streams/connectors/{connectorId}", import("@kbn/server-route-repository-utils").ServerRoute<"GET /internal/streams/connectors/{connectorId}", z.ZodObject<{
     path: z.ZodObject<{
         connectorId: z.ZodString;

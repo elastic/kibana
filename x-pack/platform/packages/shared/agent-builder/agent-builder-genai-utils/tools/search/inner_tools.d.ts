@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
 import type { ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { TimeRange } from '@kbn/agent-builder-common';

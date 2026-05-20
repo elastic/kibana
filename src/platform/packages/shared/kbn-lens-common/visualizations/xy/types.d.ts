@@ -3,7 +3,7 @@ import type { LegendConfig, AxisExtentConfig, XYCurveType, FittingFunction, EndV
 import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
 import type { EventAnnotationConfig, EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import type { YAxisModes } from './constants';
-import { SeriesTypes } from './constants';
+import type { SeriesTypes } from './constants';
 import type { ValueLabelConfig } from '../../types';
 import type { AxesSettingsConfig, CollapseFunction } from '../types';
 export declare const defaultSeriesType: "bar_stacked";

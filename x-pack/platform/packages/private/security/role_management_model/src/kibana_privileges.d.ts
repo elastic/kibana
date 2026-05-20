@@ -1,8 +1,8 @@
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import type { RawKibanaPrivileges, RoleKibanaPrivilege } from '@kbn/security-plugin-types-common';
-import { KibanaPrivilege } from './kibana_privilege';
-import { PrivilegeCollection } from './privilege_collection';
-import { SecuredFeature } from './secured_feature';
+import type { KibanaPrivilege } from './kibana_privilege';
+import type { PrivilegeCollection } from './privilege_collection';
+import type { SecuredFeature } from './secured_feature';
 /**
  * Determines if the passed privilege spec defines global privileges.
  * @param privilegeSpec

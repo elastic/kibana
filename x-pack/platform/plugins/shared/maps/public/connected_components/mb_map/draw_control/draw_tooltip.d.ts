@@ -1,7 +1,7 @@
-import _ from 'lodash';
+import type _ from 'lodash';
 import React, { Component } from 'react';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
-import { DRAW_SHAPE } from '../../../../common/constants';
+import type { DRAW_SHAPE } from '../../../../common/constants';
 interface Props {
     mbMap: MbMap;
     drawShape: DRAW_SHAPE;

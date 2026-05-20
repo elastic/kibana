@@ -1,5 +1,5 @@
 import { type SavedQuery } from '@kbn/data-plugin/public';
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { Filter } from '@kbn/es-query';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 interface AlertSearchBarContainerState {

@@ -1,4 +1,4 @@
-import { OnboardingStep } from '@kbn/streams-schema';
+import type { OnboardingStep } from '@kbn/streams-schema';
 import type { TaskContext } from '.';
 export interface OnboardingTaskParams {
     streamName: string;

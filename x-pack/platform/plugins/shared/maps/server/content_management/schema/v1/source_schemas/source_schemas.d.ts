@@ -1,5 +1,5 @@
-import { SOURCE_TYPES } from '../../../../../common';
-import { MVT_FIELD_TYPE } from '../../../../../common/constants';
+import type { SOURCE_TYPES } from '../../../../../common';
+import type { MVT_FIELD_TYPE } from '../../../../../common/constants';
 export declare const EMSFileSourceSchema: import("@kbn/config-schema").ObjectType<{
     id: import("@kbn/config-schema").Type<string>;
     type: import("@kbn/config-schema").Type<SOURCE_TYPES.EMS_FILE>;

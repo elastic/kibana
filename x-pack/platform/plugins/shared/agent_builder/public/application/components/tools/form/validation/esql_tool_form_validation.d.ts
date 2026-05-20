@@ -1,6 +1,6 @@
-import { EsqlToolFieldType, ToolType } from '@kbn/agent-builder-common/tools';
-import { z } from '@kbn/zod/v4';
-import { EsqlParamSource } from '../types/tool_form_types';
+import type { EsqlToolFieldType, ToolType } from '@kbn/agent-builder-common/tools';
+import type { z } from '@kbn/zod/v4';
+import type { EsqlParamSource } from '../types/tool_form_types';
 export declare const esqlFormValidationSchema: z.ZodObject<{
     toolId: z.ZodString;
     description: z.ZodString;

@@ -1,4 +1,5 @@
-import { BehaviorSubject, type Observable } from 'rxjs';
+import type { BehaviorSubject} from 'rxjs';
+import { type Observable } from 'rxjs';
 import type { OverallSwimlaneData } from '../../application/explorer/explorer_utils';
 import type { AnomalySwimlaneServices } from '../types';
 import type { AnomalySwimLaneEmbeddableApi } from './types';

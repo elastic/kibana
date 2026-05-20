@@ -1,4 +1,4 @@
-import { ES_FIELD_TYPES } from '../../../../types';
+import type { ES_FIELD_TYPES } from '../../../../types';
 interface IntervalValuesRange {
     min: number;
     max: number;

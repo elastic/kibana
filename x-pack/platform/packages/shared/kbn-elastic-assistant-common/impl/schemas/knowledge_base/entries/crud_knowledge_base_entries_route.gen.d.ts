@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const CreateKnowledgeBaseEntryRequestBody: z.ZodDiscriminatedUnion<[z.ZodObject<{
     name: z.ZodString;
     namespace: z.ZodOptional<z.ZodString>;

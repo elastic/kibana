@@ -1,6 +1,6 @@
 import type { FC } from 'react';
 import type { ModuleJobUI } from '../page';
-import { SAVE_STATE } from '../page';
+import type { SAVE_STATE } from '../page';
 import type { TimeRange } from '../../common/components';
 export interface JobSettingsFormValues {
     jobPrefix: string;

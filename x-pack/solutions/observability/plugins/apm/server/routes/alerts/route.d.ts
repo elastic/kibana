@@ -1,6 +1,6 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { Coordinate } from '../../../typings/timeseries';
-import { AggregationType } from '../../../common/rules/apm_rule_types';
+import type { AggregationType } from '../../../common/rules/apm_rule_types';
 declare const alertParamsRt: t.IntersectionC<[t.PartialC<{
     aggregationType: t.UnionC<[t.LiteralC<AggregationType.Avg>, t.LiteralC<AggregationType.P95>, t.LiteralC<AggregationType.P99>]>;
     serviceName: t.StringC;

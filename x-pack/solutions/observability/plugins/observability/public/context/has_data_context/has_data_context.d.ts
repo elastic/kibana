@@ -1,5 +1,5 @@
 import React from 'react';
-import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
+import type { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import type { ObservabilityFetchDataPlugins } from '../../typings/fetch_overview_data';
 import type { ApmIndicesConfig } from '../../../common/typings';
 export type DataContextApps = ObservabilityFetchDataPlugins | 'alert';

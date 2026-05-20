@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 import { CaseStatuses } from '@kbn/cases-components/src/status/types';
 export { CaseStatuses };
 /**

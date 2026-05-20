@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 export declare const CustomFieldsUserActionPayloadRt: rt.ExactC<rt.TypeC<{
     customFields: rt.ArrayC<rt.UnionC<[rt.ExactC<rt.TypeC<{
         key: rt.StringC;

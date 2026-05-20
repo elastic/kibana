@@ -1,5 +1,5 @@
 import type { HttpSetup } from '@kbn/core/public';
-import { Api } from './api';
+import type { Api } from './api';
 export declare function getUnmatchedEndpointComponents(): import("../autocomplete/components").AutocompleteComponent[];
 export declare function getEndpointDescriptionByEndpoint(endpoint: string): Record<string, unknown> & {
     id: string;

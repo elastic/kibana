@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 import type { DataView } from '@kbn/data-views-plugin/public';
 declare const ControlPanelRT: rt.RecordC<rt.StringC, rt.IntersectionC<[rt.TypeC<{
     order: rt.NumberC;

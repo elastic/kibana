@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const HttpParamsSchema: z.ZodObject<{
     url: z.ZodOptional<z.ZodString>;
     path: z.ZodOptional<z.ZodString>;

@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const PostAttackDiscoveryGenerationsDismissRequestParams: z.ZodObject<{
     execution_uuid: z.ZodString;
 }, z.core.$strip>;

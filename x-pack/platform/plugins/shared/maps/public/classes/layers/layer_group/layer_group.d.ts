@@ -1,7 +1,7 @@
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import type { Query } from '@kbn/es-query';
 import type { ReactElement } from 'react';
-import { LAYER_TYPE } from '../../../../common/constants';
+import type { LAYER_TYPE } from '../../../../common/constants';
 import type { DataRequest } from '../../util/data_request';
 import type { Attribution, CustomIcon, LayerDescriptor, LayerGroupDescriptor, MapExtent, StyleDescriptor, StyleMetaDescriptor } from '../../../../common/descriptor_types';
 import type { ISource, SourceEditorArgs } from '../../sources/source';

@@ -1,4 +1,4 @@
-import { FilterStateStore } from '@kbn/es-query';
+import type { FilterStateStore } from '@kbn/es-query';
 import type { BaseStateContainer } from '@kbn/kibana-utils-plugin/public';
 import type { QuerySetup, QueryStart } from '../query_service';
 import type { QueryState } from '../query_state';

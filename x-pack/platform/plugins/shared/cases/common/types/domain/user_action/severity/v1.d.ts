@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 export declare const SeverityUserActionPayloadRt: rt.ExactC<rt.TypeC<{
     severity: rt.UnionC<[rt.LiteralC<import("../../case/v1").CaseSeverity.LOW>, rt.LiteralC<import("../../case/v1").CaseSeverity.MEDIUM>, rt.LiteralC<import("../../case/v1").CaseSeverity.HIGH>, rt.LiteralC<import("../../case/v1").CaseSeverity.CRITICAL>]>;
 }>>;

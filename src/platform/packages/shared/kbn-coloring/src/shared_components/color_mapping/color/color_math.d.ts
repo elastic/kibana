@@ -1,4 +1,4 @@
-import chroma from 'chroma-js';
+import type chroma from 'chroma-js';
 export declare function getValidColor(color: string): chroma.Color;
 export declare function hasEnoughContrast(color: string, isDark: boolean, threshold?: number): boolean;
 export declare function changeAlpha(color: string, alpha: number): string;

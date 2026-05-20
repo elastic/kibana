@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const internalTasksRoutes: {
     "DELETE /internal/streams/_tasks/{id}": import("@kbn/server-route-repository-utils").ServerRoute<"DELETE /internal/streams/_tasks/{id}", z.ZodObject<{
         path: z.ZodObject<{

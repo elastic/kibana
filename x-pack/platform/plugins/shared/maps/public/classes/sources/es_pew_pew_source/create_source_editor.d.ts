@@ -26,5 +26,5 @@ export class CreateSourceEditor extends React.Component<any, any, any> {
     render(): React.JSX.Element;
 }
 import React from 'react';
-import _ from 'lodash';
-import PropTypes from 'prop-types';
+import type _ from 'lodash';
+import type PropTypes from 'prop-types';

@@ -1,7 +1,8 @@
 import React, { type ComponentProps } from 'react';
 import { type DataCascadeImplProps } from './data_cascade_impl';
 import type { DataCascadeImplRef } from '../lib/core/api';
-import { DataCascadeProvider, type GroupNode, type LeafNode } from '../store_provider';
+import type { DataCascadeProvider} from '../store_provider';
+import { type GroupNode, type LeafNode } from '../store_provider';
 export type { GroupNode, LeafNode, DataCascadeImplProps as DataCascadeProps, DataCascadeImplRef };
 export type { DataCascadeUISnapshot, DataCascadeRestorableState } from '../lib/core/api';
 export { toRestorableState } from '../lib/core/api';

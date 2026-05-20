@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const CasesGroupedAlertsSchema: import("@kbn/config-schema").ObjectType<{
     alerts: import("@kbn/config-schema").Type<Record<string, any>[]>;
     comments: import("@kbn/config-schema").Type<string[] | undefined>;

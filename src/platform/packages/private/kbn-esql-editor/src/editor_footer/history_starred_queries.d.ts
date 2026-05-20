@@ -1,7 +1,7 @@
 import React from 'react';
 import type { EuiBasicTableColumn, CustomItemAction } from '@elastic/eui';
 import type { Interpolation, Theme } from '@emotion/react';
-import { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
+import type { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
 import { type QueryHistoryItem } from '../history_local_storage';
 import type { EsqlStarredQueriesService } from './esql_starred_queries_service';
 export declare function QueryHistoryAction({ toggleHistory, isHistoryOpen, isSpaceReduced, }: {

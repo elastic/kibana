@@ -1,5 +1,5 @@
-import * as rt from 'io-ts';
-import { Color } from '../color_palette';
+import type * as rt from 'io-ts';
+import type { Color } from '../color_palette';
 export declare const inventorySortOptionRT: rt.TypeC<{
     by: rt.KeyofC<{
         name: null;

@@ -1,6 +1,6 @@
 import type { FunctionComponent, MutableRefObject } from 'react';
-import List from 'react-virtualized/dist/commonjs/List';
-import WindowScroller from 'react-virtualized/dist/commonjs/WindowScroller';
+import type List from 'react-virtualized/dist/commonjs/List';
+import type WindowScroller from 'react-virtualized/dist/commonjs/WindowScroller';
 import type { ProcessorInternal, ProcessorSelector } from '../../../types';
 import type { OnActionHandler, ProcessorInfo } from '../processors_tree';
 export interface PrivateProps {

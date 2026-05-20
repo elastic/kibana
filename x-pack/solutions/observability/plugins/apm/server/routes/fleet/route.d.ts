@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { FleetAgentResponse } from './get_agents';
 import type { UnsupportedApmServerSchema } from './get_unsupported_apm_server_schema';

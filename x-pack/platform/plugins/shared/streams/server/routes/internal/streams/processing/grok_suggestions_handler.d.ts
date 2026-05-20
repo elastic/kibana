@@ -1,6 +1,6 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { ReviewFieldsPrompt } from '@kbn/grok-heuristics';
+import type { ReviewFieldsPrompt } from '@kbn/grok-heuristics';
 import type { GrokProcessor } from '@kbn/streamlang';
 import type { InferenceClient, ToolOptionsOfPrompt } from '@kbn/inference-common';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';

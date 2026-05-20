@@ -1,5 +1,5 @@
 import { type Discovery } from '@kbn/streams-schema';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const internalSigEventsDiscoveriesRoutes: {
     "POST /internal/sig_events/discoveries": import("@kbn/server-route-repository-utils").ServerRoute<"POST /internal/sig_events/discoveries", z.ZodObject<{
         body: z.ZodArray<z.ZodObject<{

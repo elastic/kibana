@@ -1,6 +1,6 @@
-import { euiPaletteColorBlind } from '@elastic/eui';
+import type { euiPaletteColorBlind } from '@elastic/eui';
 import type { InferSearchResponseOf } from '@kbn/es-types';
-import { ProfilingESField } from '@kbn/profiling-utils';
+import type { ProfilingESField } from '@kbn/profiling-utils';
 import type { StackFrameMetadata } from '@kbn/profiling-utils';
 export declare const OTHER_BUCKET_LABEL: string;
 export interface CountPerTime {

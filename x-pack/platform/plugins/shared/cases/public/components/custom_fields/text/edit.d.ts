@@ -1,5 +1,5 @@
 import React from 'react';
-import { CustomFieldTypes } from '../../../../common/types/domain';
+import type { CustomFieldTypes } from '../../../../common/types/domain';
 import type { CasesConfigurationUICustomField } from '../../../../common/ui';
 export declare const Edit: React.NamedExoticComponent<{
     customField?: {

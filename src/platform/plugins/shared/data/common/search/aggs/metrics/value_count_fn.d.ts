@@ -1,6 +1,6 @@
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { AggExpressionType, AggExpressionFunctionArgs } from '..';
-import { METRIC_TYPES } from '..';
+import type { METRIC_TYPES } from '..';
 export declare const aggValueCountFnName = "aggValueCount";
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.VALUE_COUNT>;

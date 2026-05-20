@@ -1,4 +1,4 @@
-import moment from 'moment';
+import type moment from 'moment';
 import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { ConfigSchema } from '../config';
 export declare class AutocompleteService implements Plugin<void> {

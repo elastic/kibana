@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 export declare const downstreamDependenciesRouteRt: t.IntersectionC<[t.TypeC<{

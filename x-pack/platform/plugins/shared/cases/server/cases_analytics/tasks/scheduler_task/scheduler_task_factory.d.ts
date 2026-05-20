@@ -2,7 +2,7 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ConfigType } from '../../../config';
-import { SchedulerTaskRunner } from './scheduler_task_runner';
+import type { SchedulerTaskRunner } from './scheduler_task_runner';
 interface AnalyticsIndexSchedulerTaskFactoryParams {
     getUnsecureSavedObjectsClient: () => Promise<SavedObjectsClientContract>;
     logger: Logger;

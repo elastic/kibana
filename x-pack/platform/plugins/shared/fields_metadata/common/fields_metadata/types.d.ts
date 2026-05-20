@@ -1,5 +1,5 @@
 import type { EcsFlat } from '@elastic/ecs';
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 import type { TSemconvFields, SemconvFieldName } from '@kbn/otel-semantic-conventions';
 import type { MetadataFields } from '../metadata_fields';
 export declare const fieldSourceRT: rt.KeyofC<{

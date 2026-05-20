@@ -1,6 +1,6 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { ChangePointType } from '@kbn/es-types/src';
-import { LatencyAggregationType } from './latency_aggregation_types';
+import type { LatencyAggregationType } from './latency_aggregation_types';
 export declare enum ApmTimeseriesType {
     transactionThroughput = "transaction_throughput",
     transactionLatency = "transaction_latency",

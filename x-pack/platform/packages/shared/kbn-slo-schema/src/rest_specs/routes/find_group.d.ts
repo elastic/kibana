@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 declare const findSLOGroupsParamsSchema: t.PartialC<{
     query: t.PartialC<{
         page: t.StringC;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import type { useEuiTheme } from '@elastic/eui';
 export interface FilterPopoverOption {
     value: string;
     label: string;

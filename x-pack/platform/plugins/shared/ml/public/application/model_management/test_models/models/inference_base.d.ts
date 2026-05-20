@@ -1,8 +1,8 @@
 import type { Observable } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
 import type { SupportedPytorchTasksType } from '@kbn/ml-trained-models-utils';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { MLHttpFetchError } from '@kbn/ml-error-utils';
 import type { trainedModelsApiProvider } from '../../../services/ml_api_service/trained_models';
 import type { ITelemetryClient } from '../../../services/telemetry/types';

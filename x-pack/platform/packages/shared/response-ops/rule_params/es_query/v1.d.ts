@@ -1,5 +1,5 @@
 import type { TypeOf } from '@kbn/config-schema';
-import { Comparator } from '../common/constants';
+import type { Comparator } from '../common/constants';
 export type EsQueryRuleParams = TypeOf<typeof EsQueryRuleParamsSchema>;
 export declare function validateParams(anyParams: unknown): string | undefined;
 export declare const EsQueryRuleParamsSchema: import("@kbn/config-schema").ObjectType<{

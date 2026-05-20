@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 declare const createCompositeSLOBodySchema: z.ZodObject<{
     name: z.ZodString;
     description: z.ZodString;

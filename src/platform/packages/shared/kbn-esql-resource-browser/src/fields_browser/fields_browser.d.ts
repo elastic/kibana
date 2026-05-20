@@ -1,6 +1,6 @@
 import React from 'react';
 import type { ESQLRegistrySolutionId } from '@kbn/esql-types';
-import { DataSourceSelectionChange } from '../types';
+import type { DataSourceSelectionChange } from '../types';
 interface FieldsBrowserProps {
     isOpen: boolean;
     onClose: () => void;

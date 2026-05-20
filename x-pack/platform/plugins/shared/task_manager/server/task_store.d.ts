@@ -1,4 +1,4 @@
-import { Subject } from 'rxjs';
+import type { Subject } from 'rxjs';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { estypes } from '@elastic/elasticsearch';
 import type { SavedObjectsBulkDeleteResponse, Logger, SavedObjectsServiceStart, SecurityServiceStart, SavedObject, ISavedObjectsSerializer, ISavedObjectsRepository, ElasticsearchClient } from '@kbn/core/server';
@@ -9,7 +9,7 @@ import type { Result } from './lib/result_type';
 import type { ConcreteTaskInstance, ConcreteTaskInstanceVersion, TaskInstance, TaskLifecycle, SerializedConcreteTaskInstance, PartialConcreteTaskInstance, PartialSerializedConcreteTaskInstance, ApiKeyOptions } from './task';
 import type { TaskTypeDictionary } from './task_type_dictionary';
 import type { AdHocTaskCounter } from './lib/adhoc_task_counter';
-import { TaskValidator } from './task_validator';
+import type { TaskValidator } from './task_validator';
 import type { ErrorOutput } from './lib/bulk_operation_buffer';
 import type { ApiKeyStrategy } from './api_key_strategy';
 export interface StoreOpts {

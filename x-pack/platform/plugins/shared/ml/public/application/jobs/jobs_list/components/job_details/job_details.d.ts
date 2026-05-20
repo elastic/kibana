@@ -20,4 +20,4 @@ export namespace JobDetailsUI {
 }
 export const JobDetails: React.FC<Omit<any, "kibana">>;
 import React from 'react';
-import PropTypes from 'prop-types';
+import type PropTypes from 'prop-types';

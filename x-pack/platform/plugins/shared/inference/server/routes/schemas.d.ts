@@ -1,6 +1,6 @@
 import type { Type } from '@kbn/config-schema';
 import type { ToolCall } from '@kbn/inference-common';
-import { ToolChoiceType } from '@kbn/inference-common';
+import type { ToolChoiceType } from '@kbn/inference-common';
 import type { ChatCompleteRequestBody } from '../../common';
 import type { PromptRequestBody } from '../../common/http_apis';
 export declare const toolCallSchema: Type<ToolCall[]>;

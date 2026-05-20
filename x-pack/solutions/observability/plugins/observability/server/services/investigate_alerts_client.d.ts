@@ -1,6 +1,6 @@
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
-import { AlertData } from './alert_data';
+import type { AlertData } from './alert_data';
 export declare class InvestigateAlertsClient {
     private alertsClient;
     private rulesClient;

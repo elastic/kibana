@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import React from 'react';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { ITelemetryClient } from '../../services/telemetry/types';
 import type { APMServiceContextValue } from '../apm_service/apm_service_context';
 import type { ApmPluginContextValue } from './apm_plugin_context';

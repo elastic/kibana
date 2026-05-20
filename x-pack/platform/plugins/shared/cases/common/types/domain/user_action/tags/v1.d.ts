@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 export declare const TagsUserActionPayloadRt: rt.ExactC<rt.TypeC<{
     tags: rt.ArrayC<rt.StringC>;
 }>>;

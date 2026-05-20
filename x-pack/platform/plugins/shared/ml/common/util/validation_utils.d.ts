@@ -1,4 +1,4 @@
-import { VALIDATION_STATUS } from '@kbn/ml-validators';
+import type { VALIDATION_STATUS } from '@kbn/ml-validators';
 export declare function getMostSevereMessageStatus(messages: Array<{
     status: string;
 }>): VALIDATION_STATUS;

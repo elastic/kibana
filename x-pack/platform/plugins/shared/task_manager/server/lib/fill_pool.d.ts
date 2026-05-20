@@ -1,7 +1,7 @@
 import type { ClaimOwnershipResult } from '../queries/task_claiming';
 import type { ConcreteTaskInstance } from '../task';
 import type { WithTaskTiming } from '../task_events';
-import { TaskPoolRunResult } from '../task_pool';
+import type { TaskPoolRunResult } from '../task_pool';
 import type { TaskManagerRunner } from '../task_running';
 import type { Result } from './result_type';
 export declare enum FillPoolResult {

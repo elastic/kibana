@@ -1,8 +1,9 @@
 import React from 'react';
 import type { EuiSwitchEvent } from '@elastic/eui';
 import type { VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
-import { Position, LegendValue } from '@elastic/charts';
-import { LegendLayout, type LegendSize, type XYLegendValue } from '@kbn/chart-expressions-common';
+import type { Position, LegendValue } from '@elastic/charts';
+import type { LegendLayout} from '@kbn/chart-expressions-common';
+import { type LegendSize, type XYLegendValue } from '@kbn/chart-expressions-common';
 import { type ToolbarPopoverProps } from '../toolbar_popover';
 export interface LegendSettingsProps<LegendStats extends LegendValue = XYLegendValue> {
     /**

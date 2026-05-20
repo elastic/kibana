@@ -6,7 +6,7 @@ import type { GapAutoFillSchedulerLogConfig } from '../../../application/gaps/ty
 import { type GapAutoFillStatus } from '../../../../common/constants';
 import type { GapAutoFillSchedulerEventLogger } from './gap_auto_fill_scheduler_event_log';
 import type { Gap } from '../gap';
-import { GapFillSchedulePerRuleStatus } from '../../../application/gaps/methods/bulk_fill_gaps_by_rule_ids/types';
+import type { GapFillSchedulePerRuleStatus } from '../../../application/gaps/methods/bulk_fill_gaps_by_rule_ids/types';
 export type LogMessageFunction = (message: string) => void;
 export interface AggregatedByRuleEntry {
     ruleId: string;

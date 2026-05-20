@@ -1,4 +1,4 @@
-import { LensPlugin } from './plugin';
+import type { LensPlugin } from './plugin';
 export { isLensApi } from './react_embeddable/type_guards';
 export { type EmbeddableComponent } from './react_embeddable/renderer/lens_custom_renderer_component';
 export type { LensSerializedState, LensRuntimeState, LensByValueInput, LensByReferenceInput, TypedLensByValueInput, LensEmbeddableInput, LensSavedObjectAttributes, LensRendererProps as EmbeddableComponentProps, } from '@kbn/lens-common';

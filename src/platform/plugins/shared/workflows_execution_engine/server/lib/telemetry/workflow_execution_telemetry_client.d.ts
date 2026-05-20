@@ -1,7 +1,8 @@
 import type { AnalyticsServiceSetup, AnalyticsServiceStart, Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
-import { type OutputSizeStats, type WorkflowExecutionTelemetryEventsMap, WorkflowExecutionTelemetryEventTypes } from './events/workflows_execution/types';
+import type { ExecutionStatus } from '@kbn/workflows';
+import type { WorkflowExecutionTelemetryEventTypes } from './events/workflows_execution/types';
+import { type OutputSizeStats, type WorkflowExecutionTelemetryEventsMap } from './events/workflows_execution/types';
 import type { EventTriggersConfig } from '../../config';
 import type { EventChainContext } from '../../trigger_events/event_context/event_chain_context';
 import type { TriggerEventScheduleStats, TriggerResolutionStats } from '../../trigger_events/trigger_event_stats';

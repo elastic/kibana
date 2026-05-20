@@ -1,4 +1,4 @@
-import { DataViewField } from './data_view_field';
+import type { DataViewField } from './data_view_field';
 import type { FieldSpec, DataViewFieldMap } from '../types';
 import type { DataView } from '../data_views';
 interface ToSpecOptions {

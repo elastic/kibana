@@ -1,5 +1,5 @@
-import * as t from 'io-ts';
-import { LatencyDistributionChartType } from '../../../common/latency_distribution_chart_types';
+import type * as t from 'io-ts';
+import type { LatencyDistributionChartType } from '../../../common/latency_distribution_chart_types';
 import type { OverallLatencyDistributionResponse } from './types';
 export declare const latencyDistributionRouteRepository: Record<"POST /internal/apm/latency/overall_distribution/transactions", import("@kbn/server-route-repository-utils").ServerRoute<"POST /internal/apm/latency/overall_distribution/transactions", t.TypeC<{
     body: t.IntersectionC<[t.PartialC<{

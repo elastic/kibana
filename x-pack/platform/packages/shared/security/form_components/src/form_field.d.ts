@@ -1,4 +1,4 @@
-import { EuiFieldText } from '@elastic/eui';
+import type { EuiFieldText } from '@elastic/eui';
 import type { FieldValidator } from 'formik';
 import type { ComponentPropsWithoutRef, ElementType } from 'react';
 import React from 'react';

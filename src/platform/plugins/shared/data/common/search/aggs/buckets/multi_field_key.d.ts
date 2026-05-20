@@ -1,5 +1,5 @@
 import { SerializableField } from '../../../serializable_field';
-import { SerializableType } from '../../../serialize_utils';
+import type { SerializableType } from '../../../serialize_utils';
 /**
  * Serialized form of {@link @kbn/data-plugin/common.MultiFieldKey}
  */

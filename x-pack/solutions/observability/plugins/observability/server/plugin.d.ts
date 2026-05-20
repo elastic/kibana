@@ -12,7 +12,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { PluginSetup as ESQLSetup } from '@kbn/esql/server';
-import { AlertDetailsContextualInsightsService } from './services';
+import type { AlertDetailsContextualInsightsService } from './services';
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 interface PluginSetup {
     alerting: AlertingServerSetup;

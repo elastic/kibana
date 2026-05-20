@@ -3,7 +3,7 @@ import type { DataViewListItem, SerializedSearchSourceFields } from '@kbn/data-p
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { type TabItem } from '@kbn/unified-tabs';
-import { createAsyncThunk } from '@reduxjs/toolkit';
+import type { createAsyncThunk } from '@reduxjs/toolkit';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { InternalStateDependencies, InternalStateDispatch, TabActionPayload } from './internal_state';
 import type { DiscoverInternalState, TabState } from './types';

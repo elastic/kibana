@@ -1,8 +1,8 @@
 import type { SavedObjectMigrationContext, SavedObjectReference, SavedObjectSanitizedDoc, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import type { CaseConnector } from '../../../../common/types/domain';
-import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '../../../common/constants';
+import type { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '../../../common/constants';
 import type { UserActionVersion800 } from './types';
-import { USER_ACTION_OLD_ID_REF_NAME, USER_ACTION_OLD_PUSH_ID_REF_NAME } from './constants';
+import type { USER_ACTION_OLD_ID_REF_NAME, USER_ACTION_OLD_PUSH_ID_REF_NAME } from './constants';
 export declare function isCreateConnector(action?: string, actionFields?: string[]): boolean;
 export declare function isUpdateConnector(action?: string, actionFields?: string[]): boolean;
 export declare function isPush(action?: string, actionFields?: string[]): boolean;

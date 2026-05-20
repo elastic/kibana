@@ -1,5 +1,5 @@
 import type { SavedObject } from '@kbn/core/server';
-import { KibanaSavedObjectType } from '../../../../common/types';
+import type { KibanaSavedObjectType } from '../../../../common/types';
 import type { AssetType, Installable, Installation } from '../../../types';
 export { bulkInstallPackages, isBulkInstallError } from './bulk_install_packages';
 export { getCategories, getFile, getInstallationObject, getInstallation, getInstallations, getPackageInfo, getPackages, getInstalledPackages, getLimitedPackages, getPackageKnowledgeBase, } from './get';

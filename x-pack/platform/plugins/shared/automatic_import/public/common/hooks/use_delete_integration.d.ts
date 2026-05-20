@@ -1,4 +1,4 @@
-import { useMutation } from '@kbn/react-query';
+import type { useMutation } from '@kbn/react-query';
 import { type DeleteIntegrationRequest } from '../lib/api';
 export interface UseDeleteIntegrationResult {
     deleteIntegrationMutation: ReturnType<typeof useMutation<void, Error, DeleteIntegrationRequest>>;

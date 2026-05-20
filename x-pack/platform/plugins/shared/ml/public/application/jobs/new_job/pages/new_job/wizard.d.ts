@@ -1,6 +1,6 @@
 import type { FC } from 'react';
 import type { TimeBuckets } from '@kbn/ml-time-buckets';
-import { WIZARD_STEPS } from '../components/step_types';
+import type { WIZARD_STEPS } from '../components/step_types';
 import type { ExistingJobsAndGroups } from '../../../../services/job_service';
 import type { JobCreatorType } from '../../common/job_creator';
 import type { ChartLoader } from '../../common/chart_loader';

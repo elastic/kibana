@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { Condition } from './conditions';
 import type { StreamlangProcessorDefinition } from './processors';
 import type { StreamlangStepWithUIAttributes } from './ui';

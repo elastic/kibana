@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import React from 'react';
 import type { StartServices } from '../application';
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<(typeof routes)[T]['params']>;

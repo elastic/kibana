@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 declare const batchGetCompositeSLOParamsSchema: z.ZodObject<{
     body: z.ZodObject<{
         ids: z.ZodArray<z.ZodString>;

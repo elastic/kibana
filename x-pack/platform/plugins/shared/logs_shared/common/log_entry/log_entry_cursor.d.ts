@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 export declare const logEntryCursorRT: rt.TypeC<{
     time: rt.StringC;
     tiebreaker: rt.NumberC;

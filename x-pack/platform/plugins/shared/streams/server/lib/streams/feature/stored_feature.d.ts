@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const storedFeatureSchema: z.ZodObject<{
     "feature.type": z.ZodString;
     "feature.id": z.ZodString;

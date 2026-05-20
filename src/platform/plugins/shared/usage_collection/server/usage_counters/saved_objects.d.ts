@@ -1,4 +1,4 @@
-import moment from 'moment';
+import type moment from 'moment';
 import type { SavedObject, SavedObjectsRepository, SavedObjectsServiceSetup } from '@kbn/core/server';
 import type { UsageCounters } from '../../common';
 /**

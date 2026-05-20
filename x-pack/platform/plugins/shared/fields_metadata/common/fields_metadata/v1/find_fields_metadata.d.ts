@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 import type { ANY_DATASET } from '../common';
 import type { FieldAttribute, FieldName, FieldSource } from '../types';
 export declare const findFieldsMetadataRequestQueryRT: rt.Type<{

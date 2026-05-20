@@ -1,4 +1,4 @@
-import { LRUCache } from 'lru-cache';
+import type { LRUCache } from 'lru-cache';
 import type { TemplateDelegate } from '@kbn/handlebars';
 import type { AssetsMap, PackagePolicyAssetsMap } from '../../../../common/types';
 import type { PackageInfo } from '../../../../common';

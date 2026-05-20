@@ -28,4 +28,4 @@ export class WMSCreateSourceEditor extends React.Component<any, any, any> {
     render(): React.JSX.Element;
 }
 import React from 'react';
-import _ from 'lodash';
+import type _ from 'lodash';

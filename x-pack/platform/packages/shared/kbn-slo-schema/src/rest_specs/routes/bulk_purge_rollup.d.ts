@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 declare const bulkPurgePolicy: t.UnionC<[t.TypeC<{
     purgeType: t.LiteralC<"fixed_age">;

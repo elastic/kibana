@@ -1,6 +1,6 @@
 import React from 'react';
 import type { PackageInfo } from '../../common/types';
-import { SetupTechnology } from '../../common/types';
+import type { SetupTechnology } from '../../common/types';
 export declare const SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ = "setup-technology-selector";
 export declare const SETUP_TECHNOLOGY_SELECTOR_BETA_BADGE_TEST_SUBJ = "setup-technology-selector-beta-badge";
 interface SetupTechnologySelectorProps {

@@ -1,4 +1,4 @@
-import { FILTERS } from '@kbn/es-query';
+import type { FILTERS } from '@kbn/es-query';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { FilterMetaParams } from '@kbn/es-query/src/filters/build_filters';
 export declare const strings: {

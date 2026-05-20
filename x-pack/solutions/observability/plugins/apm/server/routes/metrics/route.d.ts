@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { FetchAndTransformMetrics } from './fetch_and_transform_metrics';
 import type { ServiceNodesResponse } from './get_service_nodes';
 export declare const metricsRouteRepository: {

@@ -2,7 +2,7 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { Plugin, PluginInitializerContext } from '@kbn/core-plugins-server';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { MapConfig } from './config';
-import { EMSSettings } from '../common';
+import type { EMSSettings } from '../common';
 export interface MapsEmsPluginServerSetup {
     config: MapConfig;
     createEMSSettings: () => EMSSettings;

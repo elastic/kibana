@@ -1,5 +1,5 @@
 import React from 'react';
-import { Position } from '@elastic/charts';
+import type { Position } from '@elastic/charts';
 import type { EuiIconProps } from '@elastic/eui';
 import type { IconPosition, ReferenceLineDecorationConfig, MergedAnnotation } from '../../common/types';
 import type { AxesMap } from './axes_configuration';

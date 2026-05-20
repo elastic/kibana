@@ -1,5 +1,5 @@
 import type { MB_LOOKUP_FUNCTION, VECTOR_STYLES } from '../../../../common/constants';
-import { ICON_SOURCE } from '../../../../common/constants';
+import type { ICON_SOURCE } from '../../../../common/constants';
 import type { Category } from '../../../../common/descriptor_types';
 import type { StaticTextProperty } from './properties/static_text_property';
 import type { DynamicTextProperty } from './properties/dynamic_text_property';

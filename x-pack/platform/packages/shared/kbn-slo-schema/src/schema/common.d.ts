@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import { ALL_VALUE } from '../constants';
 declare const allOrAnyString: t.UnionC<[t.LiteralC<"*">, t.StringC]>;
 declare const allOrAnyStringOrArray: t.UnionC<[t.LiteralC<"*">, t.StringC, t.ArrayC<t.UnionC<[t.LiteralC<"*">, t.StringC]>>]>;

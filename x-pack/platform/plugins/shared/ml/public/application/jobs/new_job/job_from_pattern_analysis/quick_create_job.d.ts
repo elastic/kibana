@@ -4,7 +4,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
+import type { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { type CreateState, QuickJobCreatorBase } from '../job_from_dashboard/quick_create_job_base';
 import type { MlApi } from '../../../services/ml_api_service';

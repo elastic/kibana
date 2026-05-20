@@ -1,4 +1,4 @@
-import { FileUploadPlugin } from './plugin';
+import type { FileUploadPlugin } from './plugin';
 export declare function plugin(): FileUploadPlugin;
 export type { Props as IndexNameFormProps } from './components/geo_upload_form/index_name_form';
 export type { FileUploadPluginStart } from './plugin';

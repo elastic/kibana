@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 /**
  * Torq connector parameter schema
  * Based on x-pack/platform/plugins/shared/stack_connectors/server/connector_types/torq/index.ts

@@ -1,6 +1,6 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import React from 'react';
-import { TransactionTab } from '../../app/transaction_details/waterfall_with_summary/transaction_tabs';
+import type { TransactionTab } from '../../app/transaction_details/waterfall_with_summary/transaction_tabs';
 export declare const DependenciesInventoryTitle: string;
 export declare const dependencies: {
     '/dependencies': {

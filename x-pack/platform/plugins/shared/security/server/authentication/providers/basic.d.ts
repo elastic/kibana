@@ -1,8 +1,8 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { BaseAuthenticationProvider } from './base';
 import type { SessionValue } from '../../session_management';
-import { AuthenticationResult } from '../authentication_result';
-import { DeauthenticationResult } from '../deauthentication_result';
+import type { AuthenticationResult } from '../authentication_result';
+import type { DeauthenticationResult } from '../deauthentication_result';
 /**
  * Describes the parameters that are required by the provider to process the initial login request.
  */

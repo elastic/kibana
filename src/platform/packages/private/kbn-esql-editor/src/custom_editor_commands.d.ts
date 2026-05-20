@@ -1,9 +1,10 @@
-import { monaco } from '@kbn/code-editor';
-import { QuerySource, type ESQLControlsContext, type ESQLControlVariable, type ESQLSourceResult, type IndexAutocompleteItem } from '@kbn/esql-types';
+import type { monaco } from '@kbn/code-editor';
+import type { QuerySource} from '@kbn/esql-types';
+import { type ESQLControlsContext, type ESQLControlVariable, type ESQLSourceResult, type IndexAutocompleteItem } from '@kbn/esql-types';
 import type { CoreStart } from '@kbn/core/public';
 import type { ESQLEditorDeps } from './types';
 import type { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
-import { IndicesBrowserOpenMode } from './resource_browser/types';
+import type { IndicesBrowserOpenMode } from './resource_browser/types';
 export interface MonacoCommandDependencies {
     application?: CoreStart['application'];
     uiActions: ESQLEditorDeps['uiActions'];

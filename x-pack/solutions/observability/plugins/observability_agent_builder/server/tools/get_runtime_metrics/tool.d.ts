@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
 import type { StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { OtherResult } from '@kbn/agent-builder-common/tools/tool_result';

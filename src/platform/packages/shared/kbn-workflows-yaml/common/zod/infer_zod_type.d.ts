@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 /**
  * Infer a zod schema from an object.
  * @param obj - The object to infer the schema from.

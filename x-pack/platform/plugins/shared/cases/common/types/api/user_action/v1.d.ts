@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 import type { CaseUserActionInjectedIdsRt } from '../../domain/user_action/v1';
 import type { AttachmentsV2 } from '../../domain';
 export type UserActionWithResponse<T> = T & {

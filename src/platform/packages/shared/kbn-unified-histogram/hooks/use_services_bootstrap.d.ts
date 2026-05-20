@@ -1,7 +1,7 @@
-import { ReplaySubject } from 'rxjs';
+import type { ReplaySubject } from 'rxjs';
 import type { UnifiedHistogramApi, UseUnifiedHistogramProps } from './use_unified_histogram';
 import type { UnifiedHistogramFetchParams, UnifiedHistogramFetch$Arguments, LensVisServiceState } from '../types';
-import { LensVisService } from '../services/lens_vis_service';
+import type { LensVisService } from '../services/lens_vis_service';
 export declare const useServicesBootstrap: (props: UseUnifiedHistogramProps, options?: {
     enableLensVisService?: boolean;
 }) => {

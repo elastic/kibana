@@ -1,8 +1,8 @@
 import type { IVectorLayer } from '../vector_layer';
 import { GeoJsonVectorLayer } from '../geojson_vector_layer';
 import type { IVectorStyle } from '../../../styles/vector/vector_style';
-import { VectorStyle } from '../../../styles/vector/vector_style';
-import { ESGeoGridSource } from '../../../sources/es_geo_grid_source/es_geo_grid_source';
+import type { VectorStyle } from '../../../styles/vector/vector_style';
+import type { ESGeoGridSource } from '../../../sources/es_geo_grid_source/es_geo_grid_source';
 import type { ISource } from '../../../sources/source';
 import type { DataRequestContext } from '../../../../actions';
 import type { CustomIcon, VectorLayerDescriptor } from '../../../../../common/descriptor_types';

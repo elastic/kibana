@@ -1,6 +1,6 @@
 import React from 'react';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import { EsqlControlType } from '@kbn/esql-types';
+import type { EsqlControlType } from '@kbn/esql-types';
 import { type EuiSwitchEvent } from '@elastic/eui';
 export declare function ControlType({ isDisabled, initialControlFlyoutType, onFlyoutTypeChange, }: {
     isDisabled: boolean;

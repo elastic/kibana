@@ -2,7 +2,7 @@ import type { EqlSearchRequest, FieldCapsRequest, FieldCapsResponse, TermsEnumRe
 import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { InferSearchResponseOf } from '@kbn/es-types';
-import { ProcessorEvent } from '@kbn/apm-types-shared';
+import type { ProcessorEvent } from '@kbn/apm-types-shared';
 import type { ValuesType } from 'utility-types';
 import type { APMError, Metric, Span, Transaction, Event } from '@kbn/apm-types/es_schemas_ui';
 import { type InspectResponse, type DataTier } from '@kbn/observability-shared-plugin/common';

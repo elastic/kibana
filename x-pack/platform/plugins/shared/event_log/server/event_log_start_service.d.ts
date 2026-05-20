@@ -3,7 +3,7 @@ import type { IClusterClient, KibanaRequest } from '@kbn/core/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { EsContext } from './es';
 import type { IEventLogClientService } from './types';
-import { EventLogClient } from './event_log_client';
+import type { EventLogClient } from './event_log_client';
 import type { SavedObjectProviderRegistry } from './saved_object_provider_registry';
 export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;

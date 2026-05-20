@@ -8,7 +8,7 @@ import type { MapCache } from 'lodash';
 import type { FavoritesClient } from '@kbn/content-management-favorites-public';
 import type { getEsqlColumns, getESQLSources } from '@kbn/esql-utils';
 import type { ESQLSourceResult } from '@kbn/esql-types';
-import { getHistoryItems } from '../history_local_storage';
+import type { getHistoryItems } from '../history_local_storage';
 import type { ESQLEditorDeps } from '../types';
 import type { StarredQueryMetadata } from '../editor_footer/esql_starred_queries_service';
 type MemoizedFn<TArgs extends unknown[], TResult> = (...args: TArgs) => {

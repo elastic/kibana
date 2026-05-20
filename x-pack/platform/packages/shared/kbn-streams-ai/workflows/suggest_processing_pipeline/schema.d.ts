@@ -1,5 +1,5 @@
 import type { OpenAPIV3 } from 'openapi-types';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const pipelineDefinitionSchema: z.ZodObject<{
     steps: z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
         customIdentifier: z.ZodOptional<z.ZodString>;

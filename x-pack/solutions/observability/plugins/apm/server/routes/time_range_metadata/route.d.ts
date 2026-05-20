@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { TimeRangeMetadata } from '../../../common/time_range_metadata';
 export declare const timeRangeMetadataRoute: Record<"GET /internal/apm/time_range_metadata", import("@kbn/server-route-repository-utils").ServerRoute<"GET /internal/apm/time_range_metadata", t.TypeC<{
     query: t.IntersectionC<[t.TypeC<{

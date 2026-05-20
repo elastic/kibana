@@ -1,7 +1,7 @@
 import React from 'react';
 import type { ActionConnector, CaseConnectorMapping } from '../../containers/configure/types';
 import type { ActionTypeConnector } from '../../../common/types/domain';
-import { ConnectorTypes } from '../../../common/types/domain';
+import type { ConnectorTypes } from '../../../common/types/domain';
 export interface Props {
     actionTypes: ActionTypeConnector[];
     connectors: ActionConnector[];

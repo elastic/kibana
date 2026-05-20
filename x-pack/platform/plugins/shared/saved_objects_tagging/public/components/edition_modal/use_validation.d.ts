@@ -1,4 +1,4 @@
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { ITagsClient, TagAttributes } from '../../../common/types';
 import { type TagValidation } from '../../../common';
 export declare const useValidation: ({ tagAttributes, tagClient, validateDuplicateNameOnMount, }: {

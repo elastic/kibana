@@ -1,5 +1,5 @@
 import type { Observable } from 'rxjs';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
 import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';

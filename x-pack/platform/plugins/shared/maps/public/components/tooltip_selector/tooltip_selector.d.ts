@@ -1,6 +1,6 @@
 import type { ComponentProps } from 'react';
 import React, { Component } from 'react';
-import { EuiDragDropContext } from '@elastic/eui';
+import type { EuiDragDropContext } from '@elastic/eui';
 import type { FieldProps } from './add_tooltip_field_popover';
 import type { IField } from '../../classes/fields/field';
 interface Props {

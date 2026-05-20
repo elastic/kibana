@@ -1,4 +1,4 @@
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import { type ClassificationEvaluateResponse, type DataFrameAnalysisConfigType } from '@kbn/ml-data-frame-analytics-utils';
 import type { estypes } from '@elastic/elasticsearch';
 import type { Dictionary } from '@kbn/ml-common-types/common';

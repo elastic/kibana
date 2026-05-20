@@ -1,6 +1,7 @@
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { Moment } from 'moment';
-import { FieldFormat, FIELD_FORMAT_IDS } from '..';
+import type { FIELD_FORMAT_IDS } from '..';
+import { FieldFormat } from '..';
 import type { TextContextTypeConvert } from '../types';
 interface FractPatternObject {
     length: number;

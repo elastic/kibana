@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { ErrorDistributionResponse } from './distribution/get_distribution';
 import type { ErrorGroupMainStatisticsResponse } from './get_error_groups/get_error_group_main_statistics';
 import type { ErrorGroupPeriodsResponse } from './get_error_groups/get_error_group_detailed_statistics';

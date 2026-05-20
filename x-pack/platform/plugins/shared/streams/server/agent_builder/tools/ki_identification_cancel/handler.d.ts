@@ -1,4 +1,4 @@
-import { TaskStatus } from '@kbn/streams-schema';
+import type { TaskStatus } from '@kbn/streams-schema';
 import type { TaskClient } from '../../../lib/tasks/task_client';
 import type { StreamsTaskType } from '../../../lib/tasks/task_definitions';
 interface CancelKiIdentificationHandlerParams {

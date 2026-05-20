@@ -10,7 +10,7 @@ import type { DiscoverSession, SavedSearch, SavedSearchAttributes, SerializableS
 import type { SaveSavedSearchOptions, saveSavedSearch } from './service/save_saved_searches';
 import type { SaveDiscoverSessionOptions, SaveDiscoverSessionParams, saveDiscoverSession } from './service/save_discover_session';
 import type { SavedSearchUnwrapResult } from './service/to_saved_search';
-import { getNewSavedSearch } from '../common/service/get_new_saved_search';
+import type { getNewSavedSearch } from '../common/service/get_new_saved_search';
 /**
  * Saved search plugin public Setup contract
  */

@@ -2,8 +2,8 @@ import type { DataViewFieldBase, TimeRange } from '@kbn/es-query';
 import type { AggTypesDependencies, TimeRangeBounds } from '../../..';
 import type { ExtendedBounds } from '../../expressions';
 import type { IBucketAggConfig } from './bucket_agg_type';
-import { BucketAggType } from './bucket_agg_type';
-import { TimeBuckets } from './lib/time_buckets';
+import type { BucketAggType } from './bucket_agg_type';
+import type { TimeBuckets } from './lib/time_buckets';
 import type { BaseAggParams } from '../types';
 /** @internal */
 export type CalculateBoundsFn = (timeRange: TimeRange) => TimeRangeBounds;

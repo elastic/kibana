@@ -1,4 +1,4 @@
-import { monaco } from '@kbn/code-editor';
+import type { monaco } from '@kbn/code-editor';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 interface UseSplitQueryCompletionParams {
     /**

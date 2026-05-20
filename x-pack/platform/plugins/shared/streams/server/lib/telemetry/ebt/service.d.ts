@@ -1,5 +1,5 @@
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import { EbtTelemetryClient } from './client';
+import type { EbtTelemetryClient } from './client';
 export declare class EbtTelemetryService {
     private analytics?;
     constructor();

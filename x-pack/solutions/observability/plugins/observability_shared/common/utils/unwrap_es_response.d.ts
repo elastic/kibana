@@ -1,4 +1,4 @@
-import { errors } from '@elastic/elasticsearch';
+import type { errors } from '@elastic/elasticsearch';
 export declare class WrappedElasticsearchClientError extends Error {
     originalError: errors.ElasticsearchClientError;
     constructor(originalError: errors.ElasticsearchClientError);

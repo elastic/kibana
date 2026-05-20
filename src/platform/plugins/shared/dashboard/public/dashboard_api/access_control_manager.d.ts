@@ -1,4 +1,4 @@
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { DashboardReadResponseBody } from '../../server';
 export declare function initializeAccessControlManager(savedObjectResult?: DashboardReadResponseBody, savedObjectId$?: BehaviorSubject<string | undefined>): {

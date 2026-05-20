@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import { type Condition } from '@kbn/streamlang';
 export declare const featureStatusSchema: z.ZodEnum<{
     active: "active";

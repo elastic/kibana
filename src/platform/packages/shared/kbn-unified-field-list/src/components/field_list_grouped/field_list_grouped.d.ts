@@ -2,7 +2,7 @@ import React from 'react';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { type FieldsAccordionProps } from './fields_accordion';
 import type { FieldListGroups, FieldListItem } from '../../types';
-import { ExistenceFetchStatus } from '../../types';
+import type { ExistenceFetchStatus } from '../../types';
 export declare const LOCAL_STORAGE_KEY_SECTIONS = "unifiedFieldList.initiallyOpenSections";
 export interface FieldListGroupedProps<T extends FieldListItem> {
     fieldGroups: FieldListGroups<T>;

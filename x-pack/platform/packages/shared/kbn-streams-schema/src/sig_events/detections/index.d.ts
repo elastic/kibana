@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const detectionSchema: z.ZodObject<{
     '@timestamp': z.ZodISODateTime;
     silent: z.ZodBoolean;

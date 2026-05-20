@@ -1,4 +1,5 @@
-import { DataGridDensity, type DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import type { DataGridDensity} from '@kbn/unified-data-table';
+import { type DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import React from 'react';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';

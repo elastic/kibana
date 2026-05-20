@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const sigEventSchema: z.ZodObject<{
     '@timestamp': z.ZodISODateTime;
     created_at: z.ZodISODateTime;

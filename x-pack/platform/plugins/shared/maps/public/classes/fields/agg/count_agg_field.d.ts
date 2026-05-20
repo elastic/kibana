@@ -3,7 +3,7 @@ import type { DataView } from '@kbn/data-plugin/common';
 import type { IESAggSource } from '../../sources/es_agg_source';
 import type { IVectorSource } from '../../sources/vector_source';
 import type { FIELD_ORIGIN } from '../../../../common/constants';
-import { AGG_TYPE } from '../../../../common/constants';
+import type { AGG_TYPE } from '../../../../common/constants';
 import type { AggDescriptor, TileMetaFeature } from '../../../../common/descriptor_types';
 import type { ITooltipProperty } from '../../tooltips/tooltip_property';
 import type { IESAggField, CountAggFieldParams } from './agg_field_types';

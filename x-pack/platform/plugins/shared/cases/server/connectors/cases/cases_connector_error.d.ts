@@ -1,4 +1,4 @@
-import { CaseError } from '../../common/error';
+import type { CaseError } from '../../common/error';
 export declare class CasesConnectorError extends Error {
     readonly statusCode: number;
     constructor(message: string, statusCode: number);

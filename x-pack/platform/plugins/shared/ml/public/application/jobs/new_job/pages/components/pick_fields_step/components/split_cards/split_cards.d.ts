@@ -1,6 +1,6 @@
 import type { FC, PropsWithChildren } from 'react';
 import type { SplitField } from '@kbn/ml-anomaly-utils';
-import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
+import type { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
 interface Props {
     fieldValues: string[];
     splitField: SplitField;

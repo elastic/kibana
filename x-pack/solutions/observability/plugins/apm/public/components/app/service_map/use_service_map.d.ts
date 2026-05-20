@@ -2,7 +2,7 @@ import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import type { BoolQuery } from '@kbn/es-query';
 import type { ReactFlowServiceMapResponse } from '../../../../common/service_map';
 import type { Environment } from '../../../../common/environment_rt';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import type { FETCH_STATUS } from '../../../hooks/use_fetcher';
 export interface UseServiceMapResult {
     data: ReactFlowServiceMapResponse;
     error?: Error | IHttpFetchError<ResponseErrorBody>;

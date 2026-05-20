@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { ConnectorContractUnion } from '../..';
 import type { BaseStepDefinition } from '../step_definition_types';
 /**

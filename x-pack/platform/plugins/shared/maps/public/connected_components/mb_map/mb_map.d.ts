@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import type _ from 'lodash';
 import React, { Component } from 'react';
 import type { Adapters } from '@kbn/inspector-plugin/public';
 import type { Filter } from '@kbn/es-query';

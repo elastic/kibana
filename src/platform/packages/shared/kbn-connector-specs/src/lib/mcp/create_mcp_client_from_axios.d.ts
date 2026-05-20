@@ -1,6 +1,6 @@
 import type { AxiosInstance } from 'axios';
 import type { Logger } from '@kbn/logging';
-import { McpClient } from '@kbn/mcp-client';
+import type { McpClient } from '@kbn/mcp-client';
 export interface CreateMcpClientFromAxiosOpts {
     /** Logger for the MCP client */
     logger: Logger;

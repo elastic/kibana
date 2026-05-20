@@ -1,4 +1,4 @@
-import { SyncStatus } from '../../../common/types';
+import type { SyncStatus } from '../../../common/types';
 export declare const RemoteSyncedIntegrationsStatusSchema: import("@kbn/config-schema").ObjectType<Omit<{
     id: import("@kbn/config-schema").Type<string | undefined>;
     package_name: import("@kbn/config-schema").Type<string | undefined>;

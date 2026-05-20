@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 export declare const CasesStatusResponseRt: rt.ExactC<rt.TypeC<{
     count_open_cases: rt.NumberC;
     count_in_progress_cases: rt.NumberC;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
+import type { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
 import type { SearchConfigurationType } from '../../../../../common/rules/schema';
 import type { AlertMetadata } from '../../utils/helper';
 export interface ErrorCountRuleParams {

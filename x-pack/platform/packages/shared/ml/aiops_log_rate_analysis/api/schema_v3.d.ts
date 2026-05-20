@@ -1,5 +1,5 @@
 import type { TypeOf } from '@kbn/config-schema';
-import { significantItem } from './schema_v2';
+import type { significantItem } from './schema_v2';
 export declare const aiopsLogRateAnalysisSchemaV3: import("@kbn/config-schema").Type<Readonly<{
     projectRouting?: string | undefined;
     overrides?: Readonly<{

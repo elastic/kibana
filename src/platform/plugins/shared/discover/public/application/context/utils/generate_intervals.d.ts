@@ -1,5 +1,5 @@
-import { SortDirection } from '@kbn/data-plugin/public';
-import { SurrDocType } from '../services/context';
+import type { SortDirection } from '@kbn/data-plugin/public';
+import type { SurrDocType } from '../services/context';
 export type IntervalValue = number | null;
 /**
  * Generate a sequence of pairs from the iterable that looks like

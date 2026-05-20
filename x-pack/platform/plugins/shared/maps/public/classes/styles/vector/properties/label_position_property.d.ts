@@ -1,7 +1,7 @@
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { AbstractStyleProperty } from './style_property';
 import type { LabelPositionStylePropertyDescriptor } from '../../../../../common/descriptor_types';
-import { VECTOR_STYLES } from '../../../../../common/constants';
+import type { VECTOR_STYLES } from '../../../../../common/constants';
 import type { DynamicIconProperty } from './dynamic_icon_property';
 import type { StaticIconProperty } from './static_icon_property';
 import type { DynamicSizeProperty } from './dynamic_size_property';

@@ -1,4 +1,4 @@
-import { CaseStatuses, CaseSeverity } from '../../../../../common/types/domain';
+import type { CaseStatuses, CaseSeverity } from '../../../../../common/types/domain';
 import type { CaseSavedObjectTransformed } from '../../../../common/types/case';
 export declare const getStatusColor: (status: CaseStatuses | null | undefined) => string;
 export declare const getSeverityColor: (severity: CaseSeverity | null | undefined) => string;

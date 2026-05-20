@@ -1,4 +1,4 @@
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import type { COMPARATORS } from '@kbn/alerting-comparators';
 export declare const DEFAULT_VALUES: {
     THRESHOLD_COMPARATOR: COMPARATORS;
     QUERY: string;

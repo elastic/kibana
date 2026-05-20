@@ -1,8 +1,9 @@
-import { type Observable, Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
+import { type Observable } from 'rxjs';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
 import type { RuleRegistrySearchRequest } from '@kbn/rule-registry-plugin/common';
-import { ALERT_DURATION, ALERT_END, ALERT_RULE_NAME, ALERT_START, ALERT_STATUS } from '@kbn/rule-data-utils';
-import { ALERT_ANOMALY_DETECTION_JOB_ID, ALERT_ANOMALY_SCORE, ALERT_ANOMALY_TIMESTAMP } from '../../../../common/constants/alerts';
+import type { ALERT_DURATION, ALERT_END, ALERT_RULE_NAME, ALERT_START, ALERT_STATUS } from '@kbn/rule-data-utils';
+import type { ALERT_ANOMALY_DETECTION_JOB_ID, ALERT_ANOMALY_SCORE, ALERT_ANOMALY_TIMESTAMP } from '../../../../common/constants/alerts';
 import { StateService } from '../../services/state_service';
 import type { AnomalyTimelineStateService } from '../anomaly_timeline_state_service';
 export interface AnomalyDetectionAlert {

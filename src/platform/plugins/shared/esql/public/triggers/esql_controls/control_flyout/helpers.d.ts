@@ -1,6 +1,6 @@
 import type { monaco } from '@kbn/code-editor';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import { ESQLVariableType, VariableNamePrefix } from '@kbn/esql-types';
+import type { ESQLVariableType, VariableNamePrefix } from '@kbn/esql-types';
 export declare const updateQueryStringWithVariable: (queryString: string, variable: string, cursorPosition: monaco.Position) => string;
 export declare const getQueryForFields: (queryString: string, cursorPosition?: monaco.Position) => string;
 export declare const areValuesIntervalsValid: (values: string[]) => boolean;

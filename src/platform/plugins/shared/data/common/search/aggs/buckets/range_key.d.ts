@@ -1,5 +1,5 @@
 import { SerializableField } from '../../../serializable_field';
-import { SerializableType } from '../../../serialize_utils';
+import type { SerializableType } from '../../../serialize_utils';
 type Ranges = Array<Partial<{
     from: string | number | null;
     to: string | number | null;

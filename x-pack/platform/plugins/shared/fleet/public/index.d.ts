@@ -1,5 +1,5 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
-import { FleetPlugin } from './plugin';
+import type { FleetPlugin } from './plugin';
 export type { GetPackagesResponse } from './types';
 export { installationStatuses } from '../common/constants';
 export type { FleetSetup, FleetStart, FleetStartServices } from './plugin';

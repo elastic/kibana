@@ -1,5 +1,5 @@
 import React from 'react';
-import { VECTOR_STYLES } from '../../../../../../common/constants';
+import type { VECTOR_STYLES } from '../../../../../../common/constants';
 import type { LabelPositionStylePropertyDescriptor } from '../../../../../../common/descriptor_types';
 import type { LabelPositionProperty } from '../../properties/label_position_property';
 interface Props {

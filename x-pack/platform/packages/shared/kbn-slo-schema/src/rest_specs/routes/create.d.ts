@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 declare const createSLOParamsSchema: t.TypeC<{
     body: t.IntersectionC<[t.TypeC<{
         name: t.StringC;

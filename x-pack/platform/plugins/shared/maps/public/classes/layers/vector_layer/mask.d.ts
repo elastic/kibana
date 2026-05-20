@@ -1,6 +1,6 @@
 import type { MapGeoJSONFeature } from '@kbn/mapbox-gl';
 import type { IESAggField } from '../../fields/agg';
-import { MASK_OPERATOR } from '../../../../common/constants';
+import type { MASK_OPERATOR } from '../../../../common/constants';
 export declare const BELOW: string;
 export declare const ABOVE: string;
 export declare const BUCKETS: string;

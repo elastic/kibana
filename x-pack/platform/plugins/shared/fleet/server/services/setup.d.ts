@@ -1,5 +1,5 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { MessageSigningError } from '../../common/errors';
+import type { MessageSigningError } from '../../common/errors';
 import type { PreconfigurationError } from '../../common/constants';
 import type { DefaultPackagesInstallationError } from '../../common/types';
 import type { UpgradeManagedPackagePoliciesResult } from './setup/managed_package_policies';

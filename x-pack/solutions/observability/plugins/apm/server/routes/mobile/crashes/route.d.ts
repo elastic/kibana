@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { MobileCrashGroupMainStatisticsResponse } from './get_crash_groups/get_crash_group_main_statistics';
 import type { MobileCrashesGroupPeriodsResponse } from './get_mobile_crash_group_detailed_statistics';
 import type { CrashDistributionResponse } from './distribution/get_distribution';

@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { AttachmentType, AttachmentDataOf } from './attachment_types';
 /**
  * Represents a single version of an attachment's content.

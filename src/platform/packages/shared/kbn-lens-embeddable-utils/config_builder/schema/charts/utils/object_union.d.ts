@@ -1,7 +1,7 @@
 import type { ObjectType } from '@kbn/config-schema';
 import { Type } from '@kbn/config-schema';
 import type { ObjectResultType, Props, TypeOptions } from '@kbn/config-schema/src/types';
-import { SchemaTypesError } from '@kbn/config-schema/src/errors';
+import type { SchemaTypesError } from '@kbn/config-schema/src/errors';
 type SomeObjectType = ObjectType<any>;
 /**
  * A custom schema type used in lens for object unions with ability to extend

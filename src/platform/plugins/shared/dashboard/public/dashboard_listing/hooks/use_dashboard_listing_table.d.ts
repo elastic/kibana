@@ -1,4 +1,4 @@
-import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
+import type { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
 import type { TableListViewTableProps } from '@kbn/content-management-table-list-view-table';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { DashboardSavedObjectUserContent } from '../types';

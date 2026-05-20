@@ -2,7 +2,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import type { estypes } from '@elastic/elasticsearch';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
-import { RandomSampler } from '@kbn/ml-random-sampler-utils';
+import type { RandomSampler } from '@kbn/ml-random-sampler-utils';
 export declare const defaultSearchQuery: {
     match_all: {};
 };

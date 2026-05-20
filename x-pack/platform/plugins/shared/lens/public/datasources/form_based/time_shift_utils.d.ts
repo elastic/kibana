@@ -1,4 +1,4 @@
-import moment from 'moment';
+import type moment from 'moment';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import type { FormBasedLayer, FormBasedPrivateState, FramePublicAPI, IndexPattern, UserMessage, DateRange } from '@kbn/lens-common';

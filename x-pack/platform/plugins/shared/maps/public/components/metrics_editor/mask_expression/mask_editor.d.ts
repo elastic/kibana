@@ -1,6 +1,6 @@
 import type { ChangeEvent } from 'react';
 import React, { Component } from 'react';
-import { MASK_OPERATOR } from '../../../../common/constants';
+import type { MASK_OPERATOR } from '../../../../common/constants';
 import type { AggDescriptor } from '../../../../common/descriptor_types';
 interface Props {
     metric: AggDescriptor;

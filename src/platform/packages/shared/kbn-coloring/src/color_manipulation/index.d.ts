@@ -1,4 +1,4 @@
-import chroma from 'chroma-js';
+import type chroma from 'chroma-js';
 export declare const enforceColorContrast: (color: string, backgroundColor: string) => boolean;
 export declare function isValidColor(colorString?: string): boolean;
 export declare const getColorAlpha: (color?: string | null) => number;

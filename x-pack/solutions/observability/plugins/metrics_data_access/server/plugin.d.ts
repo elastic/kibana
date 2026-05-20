@@ -1,6 +1,6 @@
 import type { CoreSetup, PluginInitializerContext, Plugin } from '@kbn/core/server';
 import type { MetricsDataPluginStartDeps } from './types';
-import { MetricsDataClient } from './client';
+import type { MetricsDataClient } from './client';
 export type MetricsDataPluginSetup = ReturnType<MetricsDataPlugin['setup']>;
 export type MetricsDataPluginStart = ReturnType<MetricsDataPlugin['start']>;
 export declare class MetricsDataPlugin implements Plugin<MetricsDataPluginSetup, MetricsDataPluginStart, {}, MetricsDataPluginStartDeps> {

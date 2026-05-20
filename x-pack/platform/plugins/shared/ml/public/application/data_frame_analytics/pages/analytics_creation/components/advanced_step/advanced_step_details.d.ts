@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import React from 'react';
 import type { State } from '../../../analytics_management/hooks/use_create_analytics_form/state';
-import { ANALYTICS_STEPS } from '../../page';
+import type { ANALYTICS_STEPS } from '../../page';
 export interface ListItems {
     title: string;
     description: string | JSX.Element;

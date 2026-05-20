@@ -1,7 +1,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { ElasticRequestState } from '@kbn/unified-doc-viewer';
+import type { ElasticRequestState } from '@kbn/unified-doc-viewer';
 type RequestBody = estypes.SearchRequest;
 export interface EsDocSearchProps {
     /**

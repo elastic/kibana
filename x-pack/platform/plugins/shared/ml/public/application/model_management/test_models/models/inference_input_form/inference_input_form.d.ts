@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { INPUT_TYPE } from '../inference_base';
+import type { INPUT_TYPE } from '../inference_base';
 import type { InferrerType } from '..';
 interface Props {
     inferrer: InferrerType;

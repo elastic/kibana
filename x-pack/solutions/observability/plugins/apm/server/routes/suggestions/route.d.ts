@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 export declare const suggestionsRouteRepository: Record<"GET /internal/apm/suggestions", import("@kbn/server-route-repository-utils").ServerRoute<"GET /internal/apm/suggestions", t.TypeC<{
     query: t.IntersectionC<[t.TypeC<{
         fieldName: t.StringC;

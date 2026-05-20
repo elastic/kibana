@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 import type { Configurations, Configuration } from '../../domain/configure/v1';
 export declare const CustomFieldConfigurationWithoutTypeRt: rt.ExactC<rt.TypeC<{
     /**

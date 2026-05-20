@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 declare const CustomFieldRt: rt.UnionC<[rt.ExactC<rt.TypeC<{
     key: rt.StringC;
     type: rt.LiteralC<import("../../domain").CustomFieldTypes.TEXT>;

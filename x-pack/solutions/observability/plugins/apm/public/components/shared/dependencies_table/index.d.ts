@@ -1,6 +1,6 @@
 import React from 'react';
 import type { ConnectionStatsItemWithComparisonData } from '../../../../common/connections';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import type { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import type { SpanMetricGroup } from './get_span_metric_columns';
 export type DependenciesItem = Omit<ConnectionStatsItemWithComparisonData, 'location'> & {
     name: string;

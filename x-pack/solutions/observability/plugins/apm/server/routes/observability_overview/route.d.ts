@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { ObservabilityOverviewResponse } from './get_observability_overview_data';
 import type { HasDataResponse } from './has_data';
 export declare const observabilityOverviewRouteRepository: {

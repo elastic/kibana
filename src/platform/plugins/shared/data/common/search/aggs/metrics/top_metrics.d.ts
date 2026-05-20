@@ -1,4 +1,4 @@
-import { MetricAggType } from './metric_agg_type';
+import type { MetricAggType } from './metric_agg_type';
 import type { DataViewField } from '../../..';
 import type { BaseAggParams } from '../types';
 export interface BaseAggParamsTopMetrics extends BaseAggParams {

@@ -3,7 +3,8 @@ import type { ChangeTrackingAction } from '@kbn/alerting-types';
 import type { RuleParams } from '../../../application/rule/types';
 import type { RulesClientContext } from '../../types';
 import { type RuleAuditAction } from '../audit_events';
-import { ReadOperations, type WriteOperations } from '../../../authorization';
+import type { ReadOperations} from '../../../authorization';
+import { type WriteOperations } from '../../../authorization';
 import type { BulkEditResult, ParamsModifier, ShouldIncrementRevision, UpdateOperationOpts } from './types';
 export interface BulkEditOptions<Params extends RuleParams> {
     filter?: string | KueryNode;

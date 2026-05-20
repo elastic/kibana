@@ -1,5 +1,5 @@
 import React from 'react';
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 export declare const diagnosticsRoute: {
     '/diagnostics': {
         element: React.JSX.Element;

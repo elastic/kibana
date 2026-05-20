@@ -1,4 +1,4 @@
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 import type { TinymathAST, TinymathFunction, TinymathNamedArgument } from '@kbn/tinymath';
 import type { KqlPluginStart, QuerySuggestion } from '@kbn/kql/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';

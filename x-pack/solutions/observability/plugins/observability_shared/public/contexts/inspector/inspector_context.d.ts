@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import type { Request } from '@kbn/inspector-plugin/common';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { FetcherResult } from '../../hooks/use_fetcher';
 type InspectResponse = Request[];
 export interface InspectorContextValue {

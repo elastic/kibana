@@ -1,5 +1,5 @@
-import type { TrainedModelsModelTestedEbtProps } from './types';
-import { TrainedModelsTelemetryEventTypes, type TrainedModelsDeploymentEbtProps, type TrainedModelsModelDownloadEbtProps } from './types';
+import type { TrainedModelsModelTestedEbtProps , TrainedModelsTelemetryEventTypes} from './types';
+import { type TrainedModelsDeploymentEbtProps, type TrainedModelsModelDownloadEbtProps } from './types';
 export declare const trainedModelsEbtEvents: {
     trainedModelsDeploymentCreatedEventType: {
         eventType: TrainedModelsTelemetryEventTypes.DEPLOYMENT_CREATED;

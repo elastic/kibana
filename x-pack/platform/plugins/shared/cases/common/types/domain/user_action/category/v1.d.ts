@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 export declare const CategoryUserActionPayloadRt: rt.ExactC<rt.TypeC<{
     category: rt.UnionC<[rt.StringC, rt.NullC]>;
 }>>;

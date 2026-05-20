@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import type { CriteriaWithPagination } from '@elastic/eui';
-import { Query } from '@elastic/eui';
+import type { Query } from '@elastic/eui';
 import type { HttpStart, OverlayStart, NotificationsStart, ApplicationStart } from '@kbn/core/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';

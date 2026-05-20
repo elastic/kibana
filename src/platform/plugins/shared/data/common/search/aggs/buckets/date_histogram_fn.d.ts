@@ -2,7 +2,7 @@ import type { Assign } from '@kbn/utility-types';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { ExtendedBoundsOutput, KibanaTimerangeOutput } from '../../expressions';
 import type { AggExpressionType, AggExpressionFunctionArgs } from '..';
-import { BUCKET_TYPES } from '..';
+import type { BUCKET_TYPES } from '..';
 export declare const aggDateHistogramFnName = "aggDateHistogram";
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.DATE_HISTOGRAM>;

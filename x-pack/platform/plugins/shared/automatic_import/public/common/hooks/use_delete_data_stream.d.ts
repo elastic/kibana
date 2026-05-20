@@ -1,4 +1,4 @@
-import { useMutation } from '@kbn/react-query';
+import type { useMutation } from '@kbn/react-query';
 import { type DeleteDataStreamRequest } from '../lib/api';
 export interface UseDeleteDataStreamResult {
     deleteDataStreamMutation: ReturnType<typeof useMutation<void, Error, DeleteDataStreamRequest>>;

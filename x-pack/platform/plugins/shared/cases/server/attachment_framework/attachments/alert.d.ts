@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { UnifiedAttachmentTypeSetup } from '../types';
 export declare const stackAlertAttachmentType: UnifiedAttachmentTypeSetup;
 export declare const StackAlertAttachmentMetadataRt: z.ZodObject<{

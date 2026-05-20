@@ -1,7 +1,7 @@
 import type { AttachmentRequest, AttachmentRequestV2 } from '../../../common/types/api';
 import type { UnifiedAttachmentPayload, UnifiedValueAttachmentPayload, AttachmentAttributesV2 } from '../../../common/types/domain/attachment/v2';
 import type { UserCommentAttachmentPayload } from '../../../common/types/domain';
-import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import type { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import type { AttachmentPersistedAttributes, UnifiedAttachmentAttributes } from '../types/attachments_v2';
 import type { AttachmentTypeTransformer } from './base';
 export declare function isLegacyPayloadCommentAttachment(attachment: AttachmentRequestV2): attachment is UserCommentAttachmentPayload;

@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { DurationFieldCandidatesResponse } from './queries/fetch_duration_field_candidates';
 import type { FieldValuePairsResponse } from './queries/fetch_field_value_pairs';
 import type { SignificantCorrelationsResponse } from './queries/fetch_significant_correlations';

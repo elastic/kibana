@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export type DeanonymizeWithReplacementsRequestBody = z.infer<typeof DeanonymizeWithReplacementsRequestBody>;
 export declare const DeanonymizeWithReplacementsRequestBody: z.ZodObject<{
     text: z.ZodString;

@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { GenerateDescriptionResult, TaskResult } from '@kbn/streams-schema';
 export type DescriptionGenerationTaskResult = TaskResult<GenerateDescriptionResult>;
 export declare const descriptionGenerationStatusRoute: Record<"GET /internal/streams/{name}/_description_generation/_status", import("@kbn/server-route-repository-utils").ServerRoute<"GET /internal/streams/{name}/_description_generation/_status", z.ZodObject<{

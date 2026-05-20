@@ -1,5 +1,5 @@
 import type { DateRange } from '../../../common';
-import { MaintenanceWindowStatus } from '../../../common';
+import type { MaintenanceWindowStatus } from '../../../common';
 export interface DateSearchResult {
     event: DateRange;
     index: number;

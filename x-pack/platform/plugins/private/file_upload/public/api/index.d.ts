@@ -1,8 +1,8 @@
 import type { PreviewTikaResponse, AnalysisResult, ImportFactoryOptions } from '@kbn/file-upload-common';
 import type { IImporter } from '../importer';
 import type { getMaxBytes, getMaxBytesFormatted, getMaxTikaBytes, getMaxTikaBytesFormatted } from '../importer/get_max_bytes';
-import { GeoUploadWizardAsyncWrapper } from './geo_upload_wizard_async_wrapper';
-import { IndexNameFormAsyncWrapper } from './index_name_form_async_wrapper';
+import type { GeoUploadWizardAsyncWrapper } from './geo_upload_wizard_async_wrapper';
+import type { IndexNameFormAsyncWrapper } from './index_name_form_async_wrapper';
 export interface FileUploadPluginStartApi {
     FileUploadComponent: typeof GeoUploadWizardAsyncWrapper;
     IndexNameFormComponent: typeof IndexNameFormAsyncWrapper;

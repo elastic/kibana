@@ -2,7 +2,7 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Query } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
-import { GeoJsonVectorLayer } from '../classes/layers/vector_layer';
+import type { GeoJsonVectorLayer } from '../classes/layers/vector_layer';
 import type { MapStoreState } from '../reducers/store';
 import type { DataRequestDescriptor, CustomIcon, DrawState, EditState, Goto, LayerDescriptor, MapCenter, MapExtent, MapSettings, TooltipState } from '../../common/descriptor_types';
 import type { ILayer } from '../classes/layers/layer';

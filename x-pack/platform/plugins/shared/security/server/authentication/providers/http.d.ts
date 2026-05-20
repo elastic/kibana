@@ -1,8 +1,8 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { AuthenticationProviderOptions } from './base';
 import { BaseAuthenticationProvider } from './base';
-import { AuthenticationResult } from '../authentication_result';
-import { DeauthenticationResult } from '../deauthentication_result';
+import type { AuthenticationResult } from '../authentication_result';
+import type { DeauthenticationResult } from '../deauthentication_result';
 interface HTTPAuthenticationProviderOptions {
     supportedSchemes: Set<string>;
     jwt?: {

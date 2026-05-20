@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const identifyFeaturesRoutes: {
     "GET /internal/streams/{streamName}/features/_should_identify": import("@kbn/server-route-repository-utils").ServerRoute<"GET /internal/streams/{streamName}/features/_should_identify", z.ZodObject<{
         path: z.ZodObject<{

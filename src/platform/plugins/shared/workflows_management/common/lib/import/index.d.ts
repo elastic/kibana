@@ -1,5 +1,5 @@
 import { MAX_WORKFLOW_YAML_LENGTH } from '@kbn/workflows';
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 export { buildSuffixedCandidate, resolveCollisionId, MAX_COLLISION_RETRIES, } from '@kbn/human-readable-id';
 export declare const MAX_IMPORT_WORKFLOWS = 500;
 /** Maximum total decompressed size of all workflow entries in a ZIP archive (50 MB). */

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import type { SloStatus } from '../../../common/service_inventory';
-import { FETCH_STATUS } from '../../hooks/use_fetcher';
+import type { FETCH_STATUS } from '../../hooks/use_fetcher';
 export interface MostCriticalSloStatus {
     status: SloStatus | 'noSLOs';
     count: number;

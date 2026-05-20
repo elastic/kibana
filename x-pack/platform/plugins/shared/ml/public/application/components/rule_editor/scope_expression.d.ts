@@ -22,5 +22,5 @@ export namespace ScopeExpression {
     }
 }
 import React from 'react';
-import PropTypes from 'prop-types';
-import { ML_DETECTOR_RULE_FILTER_TYPE } from '@kbn/ml-anomaly-utils';
+import type PropTypes from 'prop-types';
+import type { ML_DETECTOR_RULE_FILTER_TYPE } from '@kbn/ml-anomaly-utils';

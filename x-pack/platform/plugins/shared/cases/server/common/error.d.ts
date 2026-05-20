@@ -1,4 +1,4 @@
-import { Boom } from '@hapi/boom';
+import type { Boom } from '@hapi/boom';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { DecoratedError } from '@kbn/core-saved-objects-server';
 import type { Logger } from '@kbn/core/server';

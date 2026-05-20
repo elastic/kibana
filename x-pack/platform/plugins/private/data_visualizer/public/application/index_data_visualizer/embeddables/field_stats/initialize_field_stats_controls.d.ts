@@ -1,6 +1,6 @@
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { type WithAllKeys, type StateComparators } from '@kbn/presentation-publishing';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { FieldStatsInitialState } from '../grid_embeddable/types';
 import type { FieldStatsControlsApi } from './types';
 export declare const initializeFieldStatsControls: (initialState: FieldStatsInitialState, uiSettings: IUiSettingsClient) => {

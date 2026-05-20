@@ -1,4 +1,4 @@
-import moment from 'moment';
+import type moment from 'moment';
 import type { TimeRangeBounds } from '../../../../../query';
 import type { EsInterval } from './calc_es_interval';
 export interface TimeBucketsInterval extends moment.Duration {

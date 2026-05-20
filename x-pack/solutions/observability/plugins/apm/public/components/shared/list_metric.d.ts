@@ -1,6 +1,6 @@
 import type { ComponentProps } from 'react';
 import React from 'react';
-import { SparkPlot } from './charts/spark_plot';
+import type { SparkPlot } from './charts/spark_plot';
 interface ListMetricProps extends ComponentProps<typeof SparkPlot> {
     hideSeries?: boolean;
 }

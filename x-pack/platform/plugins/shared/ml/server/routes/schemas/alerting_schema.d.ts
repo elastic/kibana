@@ -1,5 +1,5 @@
 import type { TypeOf } from '@kbn/config-schema';
-import { mlAnomalyDetectionAlertParamsSchema } from '@kbn/response-ops-rule-params/anomaly_detection';
+import type { mlAnomalyDetectionAlertParamsSchema } from '@kbn/response-ops-rule-params/anomaly_detection';
 import type { anomalyDetectionJobsHealthRuleParamsSchema } from '@kbn/response-ops-rule-params/anomaly_detection_jobs_health';
 export declare const mlAnomalyDetectionAlertPreviewRequest: import("@kbn/config-schema").ObjectType<{
     alertParams: import("@kbn/config-schema").ObjectType<{

@@ -1,6 +1,6 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { Environment } from '../../../../common/environment_rt';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import type { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';

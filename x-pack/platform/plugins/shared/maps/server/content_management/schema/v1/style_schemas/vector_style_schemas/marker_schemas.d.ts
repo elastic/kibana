@@ -1,4 +1,4 @@
-import { ICON_SOURCE, STYLE_TYPE, SYMBOLIZE_AS_TYPES } from '../../../../../../common/constants';
+import type { ICON_SOURCE, STYLE_TYPE, SYMBOLIZE_AS_TYPES } from '../../../../../../common/constants';
 export declare const symbolizeAsOptions: import("@kbn/config-schema").ObjectType<{
     value: import("@kbn/config-schema").Type<SYMBOLIZE_AS_TYPES | undefined>;
 }>;

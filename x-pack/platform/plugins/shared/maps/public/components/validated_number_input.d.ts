@@ -1,7 +1,7 @@
 import type { ChangeEvent, ReactNode } from 'react';
 import React, { Component } from 'react';
 import type { EuiFormRowDisplayKeys } from '@elastic/eui/src/components/form/form_row/form_row';
-import _ from 'lodash';
+import type _ from 'lodash';
 interface State {
     value: number | string;
     errorMessage: string;

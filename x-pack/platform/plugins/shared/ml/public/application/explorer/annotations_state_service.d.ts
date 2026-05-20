@@ -1,5 +1,5 @@
 import type { Observable } from 'rxjs';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { AnnotationsTable } from '@kbn/ml-common-types/annotations';
 import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';

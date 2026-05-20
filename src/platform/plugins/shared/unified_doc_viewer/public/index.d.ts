@@ -1,6 +1,6 @@
 import React from 'react';
 import type { JsonCodeEditorProps } from './components';
-import { UnifiedDocViewerPublicPlugin } from './plugin';
+import type { UnifiedDocViewerPublicPlugin } from './plugin';
 export type { UnifiedDocViewerSetup, UnifiedDocViewerStart } from './plugin';
 export declare const JsonCodeEditor: React.ForwardRefExoticComponent<JsonCodeEditorProps & import("@kbn/shared-ux-utility").WithSuspenseExtendedDeps & React.RefAttributes<{}>>;
 export { useEsDocSearch } from './hooks';

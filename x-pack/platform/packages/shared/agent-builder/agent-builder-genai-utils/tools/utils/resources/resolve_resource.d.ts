@@ -1,5 +1,5 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { EsResourceType } from '@kbn/agent-builder-common';
+import type { EsResourceType } from '@kbn/agent-builder-common';
 import type { MappingField } from '../mappings';
 export interface ResolveResourceResponse {
     /** name of the resource */

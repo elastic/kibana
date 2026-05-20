@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { StreamType } from '../../types/streamlang';
 /**
  * JSON Schema produced by Zod v4's native `z.toJSONSchema()`. The output is a

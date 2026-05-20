@@ -1,4 +1,4 @@
-import { BucketAggType } from './bucket_agg_type';
+import type { BucketAggType } from './bucket_agg_type';
 import type { AggConfigSerialized, BaseAggParams, IAggConfig } from '../types';
 interface CommonAggParamsMultiTerms extends BaseAggParams {
     fields: string[];

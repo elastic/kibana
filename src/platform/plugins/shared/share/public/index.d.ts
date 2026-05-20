@@ -6,7 +6,7 @@ export type { SharePublicSetup as SharePluginSetup, SharePublicStart as SharePlu
 export type { ShareContext, ShareMenuItemLegacy, ShowShareMenuOptions, ShareContextMenuPanelItem, BrowserUrlService, ExportShare, ExportShareConfig, ExportShareDerivatives, RegisterShareIntegrationArgs, ShareableLocatorParams, SharingData, ShareActionConfigArgs, } from './types';
 export type { RedirectOptions } from '../common/url_service';
 export { useLocatorUrl } from '../common/url_service/locators/use_locator_url';
-import { SharePlugin } from './plugin';
+import type { SharePlugin } from './plugin';
 export { downloadMultipleAs, downloadFileAs } from './lib/download_as';
 export type { DownloadableContent } from './lib/download_as';
 export { convertRelativeTimeStringToAbsoluteTimeString } from './lib/time_utils';

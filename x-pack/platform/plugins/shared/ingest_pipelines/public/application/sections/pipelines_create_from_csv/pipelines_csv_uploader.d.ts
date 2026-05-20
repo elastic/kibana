@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { FieldCopyAction } from '../../../../common/types';
+import type { FieldCopyAction } from '../../../../common/types';
 interface Props {
     actionOptions: FieldCopyAction[];
     onFilePickerChange(files: FileList | null): void;

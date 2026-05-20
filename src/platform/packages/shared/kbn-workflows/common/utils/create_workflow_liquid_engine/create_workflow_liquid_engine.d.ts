@@ -1,5 +1,5 @@
 import type { LiquidOptions } from 'liquidjs';
-import { Liquid } from 'liquidjs';
+import type { Liquid } from 'liquidjs';
 /**
  * LiquidJS tags supported in workflow templates.
  * Tags not in this set are removed from the engine.

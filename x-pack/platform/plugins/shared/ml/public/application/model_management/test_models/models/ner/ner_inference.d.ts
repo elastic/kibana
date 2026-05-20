@@ -1,7 +1,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
-import { InferenceBase, INPUT_TYPE } from '../inference_base';
-import type { InferResponse } from '../inference_base';
+import { InferenceBase } from '../inference_base';
+import type { InferResponse , INPUT_TYPE } from '../inference_base';
 import type { ITelemetryClient } from '../../../../services/telemetry/types';
 export type FormattedNerResponse = Array<{
     value: string;

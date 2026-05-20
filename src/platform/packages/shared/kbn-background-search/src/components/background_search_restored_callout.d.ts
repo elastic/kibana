@@ -1,6 +1,6 @@
 import React from 'react';
 import { type Observable } from 'rxjs';
-import { SearchSessionState } from '@kbn/data-plugin/public';
+import type { SearchSessionState } from '@kbn/data-plugin/public';
 interface BackgroundSearchRestoredCalloutProps {
     /**
      * Indicates whether the current query is an ES|QL query. Used for styling purposes.

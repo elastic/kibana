@@ -1,7 +1,7 @@
 import type { Assign } from '@kbn/utility-types';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { AggExpressionType, AggExpressionFunctionArgs } from '..';
-import { METRIC_TYPES } from '..';
+import type { METRIC_TYPES } from '..';
 export declare const aggBucketSumFnName = "aggBucketSum";
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.SUM_BUCKET>;

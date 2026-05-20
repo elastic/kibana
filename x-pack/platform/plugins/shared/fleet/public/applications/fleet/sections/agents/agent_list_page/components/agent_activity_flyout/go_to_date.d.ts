@@ -1,5 +1,5 @@
 import React from 'react';
-import moment from 'moment';
+import type moment from 'moment';
 interface Props {
     selectedDate: moment.Moment | null;
     onChangeSelectedDate: (date: moment.Moment | null) => void;

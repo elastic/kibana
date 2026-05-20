@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 /** Impact severity level for an insight (display label). */
 export declare const insightImpactLevelSchema: z.ZodEnum<{

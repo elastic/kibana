@@ -1,5 +1,5 @@
 import type { CoreSetup, Plugin } from '@kbn/core/public';
-import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { CoreStart } from '@kbn/core/public';

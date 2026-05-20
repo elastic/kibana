@@ -1,6 +1,6 @@
 import type { ILicense } from '@kbn/licensing-types';
 import type { KibanaFeatureConfig, ElasticsearchFeatureConfig } from '../common';
-import { KibanaFeature, ElasticsearchFeature } from '../common';
+import type { KibanaFeature, ElasticsearchFeature } from '../common';
 import type { ConfigOverridesType } from './config';
 /**
  * Describes parameters used to retrieve all Kibana features (for internal consumers).

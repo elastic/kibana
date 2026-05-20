@@ -1,5 +1,5 @@
 import React from 'react';
-import { SurrDocType } from '../../services/context';
+import type { SurrDocType } from '../../services/context';
 export interface ActionBarProps {
     /**
      *  the number of documents fetched initially and added when the load button is clicked

@@ -1,5 +1,5 @@
-import { z } from '@kbn/zod/v4';
-import { OpenAiProviderType } from '../constants';
+import type { z } from '@kbn/zod/v4';
+import type { OpenAiProviderType } from '../constants';
 export declare const TelemetryMetadataSchema: z.ZodObject<{
     pluginId: z.ZodOptional<z.ZodString>;
     aggregateBy: z.ZodOptional<z.ZodString>;

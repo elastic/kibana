@@ -1,5 +1,5 @@
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 export declare function initializeTrackOverlay(setFocusedPanelId: (id: string | undefined) => void): {
     clearOverlays: () => void;
     hasOverlays$: BehaviorSubject<boolean>;

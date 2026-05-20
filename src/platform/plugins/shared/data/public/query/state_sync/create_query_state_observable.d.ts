@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { TimefilterSetup } from '../timefilter';
 import type { FilterManager } from '../filter_manager';
 import type { QueryState } from '../query_state';

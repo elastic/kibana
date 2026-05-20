@@ -2,7 +2,7 @@ import type { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { ServiceListItem } from '../../../../../common/service_inventory';
-import { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
+import type { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
 import type { Breakpoints } from '../../../../hooks/use_breakpoints';
 import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';

@@ -2,7 +2,7 @@ import type { ExtendedBounds } from '../../expressions';
 import type { AggTypesDependencies } from '../agg_types';
 import type { BaseAggParams } from '../types';
 import type { IBucketAggConfig } from './bucket_agg_type';
-import { BucketAggType } from './bucket_agg_type';
+import type { BucketAggType } from './bucket_agg_type';
 export interface AutoBounds {
     min: number;
     max: number;

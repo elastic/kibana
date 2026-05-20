@@ -1,6 +1,6 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { GetScopedClients } from '../../../routes/types';
 declare const queryDocumentsSchema: z.ZodObject<{

@@ -1,7 +1,7 @@
 import type { LensPublicStart, ChartInfo } from '@kbn/lens-plugin/public';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import type { LensApi } from '@kbn/lens-plugin/public';
-import { JOB_TYPE } from '../../../../../common/constants/new_job';
+import type { JOB_TYPE } from '../../../../../common/constants/new_job';
 type VisualizationType = Awaited<ReturnType<LensPublicStart['getXyVisTypes']>>[number];
 export interface LayerResult {
     id: string;

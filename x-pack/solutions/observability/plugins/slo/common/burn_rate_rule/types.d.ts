@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 export declare const DependencyRT: t.TypeC<{
     ruleId: t.StringC;
     actionGroupsToSuppressOn: t.ArrayC<t.StringC>;

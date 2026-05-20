@@ -1,5 +1,5 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
-import { CasesUiPlugin } from './plugin';
+import type { CasesUiPlugin } from './plugin';
 export declare function plugin(initializerContext: PluginInitializerContext): CasesUiPlugin;
 export { DRAFT_COMMENT_STORAGE_ID } from './components/markdown_editor/plugins/lens/constants';
 export type { CasesPublicStart, CasesPublicSetup } from './types';

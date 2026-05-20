@@ -1,11 +1,11 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { DetectionService } from './detections';
+import type { DetectionService } from './detections';
 import type { DetectionClient } from './detections';
-import { DiscoveryService } from './discoveries';
+import type { DiscoveryService } from './discoveries';
 import type { DiscoveryClient } from './discoveries';
-import { EventService } from './events';
+import type { EventService } from './events';
 import type { EventClient } from './events';
-import { VerdictService } from './verdicts';
+import type { VerdictService } from './verdicts';
 import type { VerdictClient } from './verdicts';
 export interface SignificantEventsServices {
     detection: DetectionService;

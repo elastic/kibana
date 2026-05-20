@@ -1,4 +1,4 @@
-import { MetricAggType } from './metric_agg_type';
+import type { MetricAggType } from './metric_agg_type';
 import type { AggConfigSerialized, BaseAggParams, IAggConfig } from '../types';
 export interface CommonAggParamsCumulativeSum extends BaseAggParams {
     buckets_path?: string;

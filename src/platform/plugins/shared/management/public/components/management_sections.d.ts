@@ -1,4 +1,4 @@
-import { ManagementSectionId } from '../types';
+import type { ManagementSectionId } from '../types';
 export declare const IngestSection: {
     id: ManagementSectionId;
     title: string;

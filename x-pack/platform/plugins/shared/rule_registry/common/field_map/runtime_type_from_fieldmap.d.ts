@@ -1,5 +1,5 @@
 import type { Optional } from 'utility-types';
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
 declare const esFieldTypeMap: {
     keyword: t.StringC;

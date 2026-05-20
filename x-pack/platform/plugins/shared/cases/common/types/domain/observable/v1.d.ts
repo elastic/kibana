@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 export declare const CaseObservableBaseRt: rt.ExactC<rt.TypeC<{
     typeKey: rt.StringC;
     value: rt.StringC;

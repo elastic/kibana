@@ -1,10 +1,10 @@
 import type { KibanaRequest } from '@kbn/core/server';
-import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
+import type { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type { AuthenticationProviderOptions } from './base';
 import { BaseAuthenticationProvider } from './base';
 import type { SessionValue } from '../../session_management';
-import { AuthenticationResult } from '../authentication_result';
-import { DeauthenticationResult } from '../deauthentication_result';
+import type { AuthenticationResult } from '../authentication_result';
+import type { DeauthenticationResult } from '../deauthentication_result';
 /**
  * Credentials that are based on the username and password.
  */

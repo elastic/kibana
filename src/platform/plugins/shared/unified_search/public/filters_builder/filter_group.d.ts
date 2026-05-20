@@ -1,5 +1,6 @@
 import React from 'react';
-import { BooleanRelation, type Filter } from '@kbn/es-query';
+import type { BooleanRelation} from '@kbn/es-query';
+import { type Filter } from '@kbn/es-query';
 import type { Path } from './types';
 export declare const strings: {
     getDelimiterLabel: (booleanRelation: BooleanRelation) => string;

@@ -1,4 +1,4 @@
-import { monaco } from '@kbn/code-editor';
+import type { monaco } from '@kbn/code-editor';
 export declare const findTargetComment: (model: monaco.editor.ITextModel, cursorLineNumber: number) => {
     lineNumber: number;
     text: string;

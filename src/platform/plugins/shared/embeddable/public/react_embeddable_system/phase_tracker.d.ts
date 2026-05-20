@@ -1,5 +1,5 @@
 import type { HasUniqueId, PhaseEvent, PublishesDataLoading, PublishesRendered } from '@kbn/presentation-publishing';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 export declare class PhaseTracker {
     private firstLoadCompleteTime;
     private readonly embeddableStartTime;

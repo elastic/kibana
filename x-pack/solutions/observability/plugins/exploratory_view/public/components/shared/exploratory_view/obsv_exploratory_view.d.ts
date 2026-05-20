@@ -1,11 +1,11 @@
 import * as React from 'react';
-import { getAlertsKPIConfig } from './configurations/alerts_configs/kpi_over_time_config';
+import type { getAlertsKPIConfig } from './configurations/alerts_configs/kpi_over_time_config';
 import type { AppDataType, ReportViewType } from './types';
 import type { SELECT_REPORT_TYPE } from './series_editor/series_editor';
-import { getKPITrendsLensConfig } from './configurations/rum/kpi_over_time_config';
-import { getSyntheticsKPIConfig } from './configurations/synthetics/kpi_over_time_config';
-import { getMobileKPIConfig } from './configurations/mobile/kpi_over_time_config';
-import { getLogsKPIConfig } from './configurations/infra_logs/kpi_over_time_config';
+import type { getKPITrendsLensConfig } from './configurations/rum/kpi_over_time_config';
+import type { getSyntheticsKPIConfig } from './configurations/synthetics/kpi_over_time_config';
+import type { getMobileKPIConfig } from './configurations/mobile/kpi_over_time_config';
+import type { getLogsKPIConfig } from './configurations/infra_logs/kpi_over_time_config';
 import type { StartServices } from '../../../application';
 export declare const dataTypes: Array<{
     id: AppDataType;

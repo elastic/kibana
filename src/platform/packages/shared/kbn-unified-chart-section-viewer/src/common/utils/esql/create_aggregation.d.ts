@@ -1,5 +1,5 @@
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { ES_FIELD_TYPES } from '@kbn/field-types';
 /**
  * Creates the metric aggregation part of an ES|QL query.
  * It returns:

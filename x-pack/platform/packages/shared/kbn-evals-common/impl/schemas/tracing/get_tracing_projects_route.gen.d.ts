@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const TracingProject: z.ZodObject<{
     name: z.ZodString;
     trace_count: z.ZodNumber;

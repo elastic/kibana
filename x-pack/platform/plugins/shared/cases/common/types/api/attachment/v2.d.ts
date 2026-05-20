@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 import type { BulkGetAttachmentsRequest } from './v1';
 export type { BulkGetAttachmentsRequest as BulkGetAttachmentsRequestV2 };
 export declare const UnifiedAttachmentPatchRequestRt: rt.IntersectionC<[rt.UnionC<[rt.IntersectionC<[rt.ExactC<rt.TypeC<{

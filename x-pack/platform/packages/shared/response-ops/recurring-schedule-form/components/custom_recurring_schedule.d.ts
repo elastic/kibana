@@ -1,5 +1,5 @@
 import React from 'react';
-import { Frequency } from '@kbn/rrule';
+import type { Frequency } from '@kbn/rrule';
 export interface CustomRecurringScheduleProps {
     startDate?: string;
     readOnly?: boolean;

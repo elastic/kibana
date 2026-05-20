@@ -3,7 +3,7 @@ import type { AppCategory } from '@kbn/core/types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { FeatureKibanaPrivileges } from './feature_kibana_privileges';
 import type { SubFeatureConfig } from './sub_feature';
-import { SubFeature as KibanaSubFeature } from './sub_feature';
+import type { SubFeature as KibanaSubFeature } from './sub_feature';
 import type { ReservedKibanaPrivilege } from './reserved_kibana_privilege';
 import type { AlertingKibanaPrivilege } from './alerting_kibana_privilege';
 /**

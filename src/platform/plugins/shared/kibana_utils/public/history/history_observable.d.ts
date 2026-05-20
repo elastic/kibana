@@ -1,5 +1,5 @@
 import type { Action, History, Location } from 'history';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { ParsedQuery } from 'query-string';
 /**
  * Convert history.listen into an observable

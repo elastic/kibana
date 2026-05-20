@@ -1,6 +1,6 @@
 import type { Trigger, ActionRegistry, TriggerToActionsRegistry } from '../types';
 import type { Action, ActionDefinition, FrequentCompatibilityChangeAction } from '../actions';
-import { UiActionsExecutionService } from './ui_actions_execution_service';
+import type { UiActionsExecutionService } from './ui_actions_execution_service';
 export interface UiActionsServiceParams {
     readonly actions?: ActionRegistry;
     /**

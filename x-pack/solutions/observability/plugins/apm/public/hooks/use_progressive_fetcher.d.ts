@@ -3,7 +3,7 @@ import type { ClientRequestParamsOf, EndpointOf, ReturnOf } from '@kbn/server-ro
 import type { APMServerRouteRepository } from '../../server';
 import type { APMClientOptions } from '../services/rest/create_call_apm_api';
 import type { FetcherResult } from './use_fetcher';
-import { useFetcher } from './use_fetcher';
+import type { useFetcher } from './use_fetcher';
 type APMProgressivelyLoadingServerRouteRepository = OmitByValue<{
     [key in keyof APMServerRouteRepository]: ClientRequestParamsOf<APMServerRouteRepository, key> extends {
         params: {

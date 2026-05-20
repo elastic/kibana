@@ -1,4 +1,4 @@
-import { SavedSearchPublicPlugin } from './plugin';
+import type { SavedSearchPublicPlugin } from './plugin';
 export type { SortOrder } from '../common/types';
 export type { SaveDiscoverSessionOptions, SaveDiscoverSessionParams, } from './service/save_discover_session';
 export type { SaveSavedSearchOptions } from './service/save_saved_searches';

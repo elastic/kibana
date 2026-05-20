@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 import type { JsonArray, JsonObject, JsonValue } from '@kbn/utility-types';
 export type { JsonArray, JsonObject, JsonValue };
 export declare const jsonScalarRT: rt.UnionC<[rt.NullC, rt.BooleanC, rt.NumberC, rt.StringC]>;

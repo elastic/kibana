@@ -1,6 +1,6 @@
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { ChartType } from '@kbn/visualization-utils';
+import type { ChartType } from '@kbn/visualization-utils';
 import type { DatasourceMap, VisualizationMap, VisualizeEditorContext, TypedLensByValueInput } from '@kbn/lens-common';
 interface SuggestionsApiProps {
     context: VisualizeFieldContext | VisualizeEditorContext;

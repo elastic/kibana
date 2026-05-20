@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 declare const fetchCompositeHistoricalSummaryParamsSchema: z.ZodObject<{
     body: z.ZodObject<{
         list: z.ZodArray<z.ZodString>;

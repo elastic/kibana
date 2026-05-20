@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { ContentPackSavedObject } from './saved_object';
 import type { ContentPackStream } from './stream';
 export * from './api';

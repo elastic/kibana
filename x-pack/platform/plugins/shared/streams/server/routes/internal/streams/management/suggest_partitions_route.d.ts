@@ -1,6 +1,6 @@
-import { z } from '@kbn/zod/v4';
-import { partitionStream } from '@kbn/streams-ai';
-import { conditionSchema } from '@kbn/streamlang';
+import type { z } from '@kbn/zod/v4';
+import type { partitionStream } from '@kbn/streams-ai';
+import type { conditionSchema } from '@kbn/streamlang';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { Observable } from 'rxjs';
 export interface SuggestPartitionsParams {

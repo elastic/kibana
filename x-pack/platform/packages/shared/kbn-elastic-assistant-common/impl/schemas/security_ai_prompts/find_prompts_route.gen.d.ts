@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const FindSecurityAIPromptsRequestQuery: z.ZodObject<{
     connector_id: z.ZodOptional<z.ZodString>;
     prompt_group_id: z.ZodString;

@@ -1,6 +1,6 @@
 import React from 'react';
 import type { EuiBasicTableColumn, Pagination, Direction } from '@elastic/eui';
-import { Query } from '@elastic/eui';
+import type { Query } from '@elastic/eui';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';

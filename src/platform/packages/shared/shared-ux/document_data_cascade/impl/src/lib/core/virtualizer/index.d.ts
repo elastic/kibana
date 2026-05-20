@@ -1,6 +1,7 @@
 import React, { type CSSProperties } from 'react';
 import { type Row } from '@tanstack/react-table';
-import { useVirtualizer, type VirtualItem } from '@tanstack/react-virtual';
+import type { useVirtualizer} from '@tanstack/react-virtual';
+import { type VirtualItem } from '@tanstack/react-virtual';
 import type { GroupNode } from '../../../store_provider';
 import { type ChildVirtualizerController } from './child_virtualizer_controller';
 type UseVirtualizerOptions = Parameters<typeof useVirtualizer>[0];

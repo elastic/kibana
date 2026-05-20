@@ -2,7 +2,7 @@
  * This was generated based on x-pack/platform/plugins/shared/stack_connectors/common/openai/schema.ts
  * and will be deprecated once connectors will expose their schemas
  */
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const GenAIRunParamsSchema: z.ZodObject<{
     body: z.ZodString;
     timeout: z.ZodOptional<z.ZodNumber>;

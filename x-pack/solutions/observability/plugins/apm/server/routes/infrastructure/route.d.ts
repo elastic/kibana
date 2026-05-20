@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 export declare const infrastructureRouteRepository: {
     "GET /internal/apm/services/{serviceName}/infrastructure_attributes": import("@kbn/server-route-repository-utils").ServerRoute<"GET /internal/apm/services/{serviceName}/infrastructure_attributes", t.TypeC<{
         path: t.TypeC<{

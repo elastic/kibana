@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 export declare enum LatencyAggregationType {
     avg = "avg",
     p99 = "p99",

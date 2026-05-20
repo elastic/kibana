@@ -1,7 +1,7 @@
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
-import * as buckets from './buckets';
+import type * as buckets from './buckets';
 import type { CalculateBoundsFn } from './buckets';
-import * as metrics from './metrics';
+import type * as metrics from './metrics';
 export interface AggTypesDependencies {
     calculateBounds: CalculateBoundsFn;
     getConfig: <T = any>(key: string) => T;

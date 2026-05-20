@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import type { History } from 'history';
-import { FETCH_STATUS } from '../../hooks/use_fetcher';
+import type { FETCH_STATUS } from '../../hooks/use_fetcher';
 import type { ServerlessType } from '../../../common/serverless';
 export interface APMServiceContextValue {
     serviceName: string;

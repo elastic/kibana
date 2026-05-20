@@ -1,5 +1,5 @@
-import { ToolType } from '@kbn/agent-builder-common/tools';
-import { z } from '@kbn/zod/v4';
+import type { ToolType } from '@kbn/agent-builder-common/tools';
+import type { z } from '@kbn/zod/v4';
 import type { ToolsService } from '../../../../../services';
 export declare const createIndexSearchFormValidationSchema: (toolsService: ToolsService) => z.ZodObject<{
     toolId: z.ZodString;

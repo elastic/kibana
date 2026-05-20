@@ -5,7 +5,7 @@ import type { QueryFeature } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema/src/models/streams';
 import { type StreamQuery } from '@kbn/streams-schema/src/queries';
 import { type Query, type QueryLink, type QueryLinkRequest, type QueryUnlinkRequest, type SearchMode } from '../../../../../common/queries';
-import { QUERY_DESCRIPTION, QUERY_ESQL_QUERY, QUERY_FEATURES, QUERY_SEVERITY_SCORE, QUERY_TITLE, QUERY_TYPE, STREAM_NAME } from '../fields';
+import type { QUERY_DESCRIPTION, QUERY_ESQL_QUERY, QUERY_FEATURES, QUERY_SEVERITY_SCORE, QUERY_TITLE, QUERY_TYPE, STREAM_NAME } from '../fields';
 import type { QueryStorageSettings } from '../storage_settings';
 import { type SigEventsTuningConfig } from '../../../../../common/sig_events_tuning_config';
 export type RuleUnbackedFilter = 'exclude' | 'include' | 'only';

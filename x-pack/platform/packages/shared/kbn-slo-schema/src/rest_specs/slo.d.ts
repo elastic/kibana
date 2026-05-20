@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { SLODefinitionResponse } from './routes/find_definition';
 declare const sloWithDataResponseSchema: t.IntersectionC<[t.IntersectionC<[t.IntersectionC<[t.TypeC<{
     id: t.Type<string, string, unknown>;

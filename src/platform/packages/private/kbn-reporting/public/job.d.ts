@@ -1,5 +1,5 @@
 import React from 'react';
-import { JOB_STATUS } from '@kbn/reporting-common';
+import type { JOB_STATUS } from '@kbn/reporting-common';
 import type { BaseParamsV2, JobId, ReportApiJSON, ReportFields, ReportOutput, ReportSource, TaskRunResult } from '@kbn/reporting-common/types';
 type ReportPayload = ReportSource['payload'];
 export declare class Job {

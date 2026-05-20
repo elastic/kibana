@@ -4,11 +4,11 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Filter, ProjectRouting } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';
 import type { Geometry, Position } from 'geojson';
-import { DRAW_SHAPE } from '../../common/constants';
+import type { DRAW_SHAPE } from '../../common/constants';
 import type { MapExtentState } from '../reducers/map/types';
 import type { MapStoreState } from '../reducers/store';
 import type { CustomIcon, DrawState, MapCenterAndZoom, MapExtent, MapSettings, Timeslice } from '../../common/descriptor_types';
-import { INITIAL_LOCATION } from '../../common/constants';
+import type { INITIAL_LOCATION } from '../../common/constants';
 export declare function setPauseSyncData(pauseSyncData: boolean): (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>, getState: () => MapStoreState) => void;
 export declare function setMapInitError(errorMessage: string): {
     type: string;

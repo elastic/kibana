@@ -1,7 +1,7 @@
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { EmbeddableSetup, EmbeddableSetupDependencies, EmbeddableStart, EmbeddableStartDependencies } from './types';
-import { registerLegacyURLTransform } from './bwc/legacy_url_transform';
-import { registerDrilldown } from './drilldowns/registry';
+import type { registerLegacyURLTransform } from './bwc/legacy_url_transform';
+import type { registerDrilldown } from './drilldowns/registry';
 export declare class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
     private stateTransferService;
     private appList?;

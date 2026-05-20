@@ -1,6 +1,6 @@
 import type { UserIdAndName } from '../base/users';
 import type { AgentDefinition } from './definition';
-import { AgentVisibility } from './visibility';
+import type { AgentVisibility } from './visibility';
 export declare const isAgentOwner: ({ owner, currentUser, }: {
     owner?: UserIdAndName;
     currentUser?: UserIdAndName | null;

@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Environment } from '../../../common/environment_rt';
-import { FETCH_STATUS } from '../../hooks/use_fetcher';
+import type { FETCH_STATUS } from '../../hooks/use_fetcher';
 export declare const EnvironmentsContext: React.Context<{
     environment: Environment;
     environments: Environment[];

@@ -1,4 +1,4 @@
-import Boom from '@hapi/boom';
+import type Boom from '@hapi/boom';
 /**
  *  Determines if an error is an elasticsearch error that's
  *  describing a failure caused by missing index/indices

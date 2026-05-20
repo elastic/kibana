@@ -56,4 +56,4 @@ export namespace EditJobFlyoutUI {
 }
 export const EditJobFlyout: React.FC<Omit<any, "kibana">>;
 import React from 'react';
-import PropTypes from 'prop-types';
+import type PropTypes from 'prop-types';

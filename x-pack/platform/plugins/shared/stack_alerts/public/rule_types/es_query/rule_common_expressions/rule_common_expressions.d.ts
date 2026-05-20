@@ -1,6 +1,6 @@
 import React from 'react';
 import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
-import { ForLastExpression, GroupByExpression, OfExpression, ThresholdExpression, ValueExpression, WhenExpression } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ForLastExpression, GroupByExpression, OfExpression, ThresholdExpression, ValueExpression, WhenExpression } from '@kbn/triggers-actions-ui-plugin/public';
 import type { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
 import type { CommonRuleParams } from '../types';
 import type { TestQueryRowProps } from '../test_query_row';

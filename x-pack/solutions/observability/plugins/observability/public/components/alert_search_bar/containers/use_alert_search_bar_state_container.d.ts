@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { AlertSearchBarContainerState } from './state_container';
 export declare const alertSearchBarState: t.PartialC<{

@@ -1,5 +1,5 @@
 import React from 'react';
-import { DRAW_SHAPE } from '../../../../../common/constants';
+import type { DRAW_SHAPE } from '../../../../../common/constants';
 export interface ReduxStateProps {
     drawShape?: string;
 }

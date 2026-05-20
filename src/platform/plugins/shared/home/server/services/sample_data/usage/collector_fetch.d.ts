@@ -1,4 +1,4 @@
-import moment from 'moment';
+import type moment from 'moment';
 import type { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 export interface TelemetryResponse {
     installed: string[];

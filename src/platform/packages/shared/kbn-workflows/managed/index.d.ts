@@ -1,4 +1,4 @@
-import { managedWorkflowDefinitions } from './definitions';
+import type { managedWorkflowDefinitions } from './definitions';
 import type { ManagedWorkflowDefinition, ManagedWorkflowManagement, ManagedWorkflowTemplateValues } from './types';
 export type { ManagedWorkflowDefinition, ManagedWorkflowManagement, ManagedWorkflowTemplateValues };
 export * from './definitions';

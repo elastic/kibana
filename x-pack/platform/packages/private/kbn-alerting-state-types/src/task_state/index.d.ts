@@ -1,5 +1,5 @@
 import { type TypeOf } from '@kbn/config-schema';
-import * as v3 from './v3';
+import type * as v3 from './v3';
 export declare const stateSchemaByVersion: {
     1: {
         up: (state: Record<string, unknown>) => Readonly<{

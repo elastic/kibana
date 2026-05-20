@@ -1,4 +1,4 @@
-import { ApplicationUsageTracker } from '@kbn/analytics';
+import type { ApplicationUsageTracker } from '@kbn/analytics';
 import type { UiCounterMetricType } from '@kbn/analytics';
 import type { FC, PropsWithChildren } from 'react';
 import type { PluginInitializerContext, Plugin, CoreSetup, CoreStart, HttpSetup } from '@kbn/core/public';

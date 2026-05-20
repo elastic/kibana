@@ -4,7 +4,7 @@ import type { Field } from '../../types';
 import type { Context } from '../field_editor_context';
 import type { Props } from './field_editor';
 import type { FieldPreview } from '../preview/types';
-import { ChangeType } from '../preview/types';
+import type { ChangeType } from '../preview/types';
 import type { RuntimePrimitiveTypes } from '../../shared_imports';
 export interface Change {
     changeType: ChangeType;

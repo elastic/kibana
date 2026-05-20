@@ -1,4 +1,4 @@
-import moment from 'moment';
+import type moment from 'moment';
 import type { monaco } from '@kbn/code-editor';
 interface UseTimePickerPopoverParams {
     editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;

@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { Error } from '@kbn/apm-types';
 import type { ErrorsByTraceId, UnifiedSpanDocument, TraceRootSpan, FocusedTraceItems, TransactionDetailRedirectInfo } from '@kbn/apm-types';
 import type { TraceItem } from '../../../common/waterfall/unified_trace_item';

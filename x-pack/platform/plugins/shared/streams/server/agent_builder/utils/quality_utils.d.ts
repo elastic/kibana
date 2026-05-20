@@ -1,4 +1,4 @@
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import type { IngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
 type QualityIndicators = 'good' | 'poor' | 'degraded';
 export declare const computeQualityMetrics: ({ totalCount, degradedCount, failedCount, windowedTotalCount, }: {

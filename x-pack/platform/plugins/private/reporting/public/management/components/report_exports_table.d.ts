@@ -1,4 +1,5 @@
-import { Component, default as React } from 'react';
+import type { default as React } from 'react';
+import { Component } from 'react';
 import type { Job } from '@kbn/reporting-public';
 import type { ListingPropsInternal } from '..';
 interface State {

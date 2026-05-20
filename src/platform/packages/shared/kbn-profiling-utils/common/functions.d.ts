@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { Executable, FileID, FrameGroupID, StackFrame, StackFrameID, StackFrameMetadata, StackTrace, StackTraceID } from '..';
 interface TopNFunctionAndFrameGroup {
     Frame: StackFrameMetadata;

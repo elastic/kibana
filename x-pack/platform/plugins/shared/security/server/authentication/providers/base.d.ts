@@ -3,7 +3,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { AuthenticationInfo } from '../../elasticsearch';
 import type { SessionValue } from '../../session_management';
 import type { UiamServicePublic } from '../../uiam';
-import { AuthenticationResult } from '../authentication_result';
+import type { AuthenticationResult } from '../authentication_result';
 import type { DeauthenticationResult } from '../deauthentication_result';
 import type { Tokens } from '../tokens';
 /**

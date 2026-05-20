@@ -1,5 +1,5 @@
 import type { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
-import { BUCKET_TYPES } from '@kbn/data-plugin/common';
+import type { BUCKET_TYPES } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SchemaConfig } from '../../..';
 import type { CommonBucketConverterArgs } from '../convert';

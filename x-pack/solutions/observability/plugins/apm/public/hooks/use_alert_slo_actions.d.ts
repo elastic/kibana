@@ -1,5 +1,5 @@
 import { type SloListLocatorParams } from '@kbn/deeplinks-observability';
-import { ApmRuleType } from '@kbn/rule-data-utils';
+import type { ApmRuleType } from '@kbn/rule-data-utils';
 import type { ApmIndicatorType } from '../../common/slo_indicator_types';
 import type { TableActionGroup } from '../components/shared/managed_table';
 export type ApmFlyoutState = {

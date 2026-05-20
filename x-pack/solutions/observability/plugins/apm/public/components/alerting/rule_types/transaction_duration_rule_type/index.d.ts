@@ -1,6 +1,6 @@
 import React from 'react';
 import type { SearchConfigurationType } from '@kbn/response-ops-rule-params/common';
-import { AggregationType } from '../../../../../common/rules/apm_rule_types';
+import type { AggregationType } from '../../../../../common/rules/apm_rule_types';
 import type { AlertMetadata } from '../../utils/helper';
 export interface TransactionDurationRuleParams {
     aggregationType: AggregationType;

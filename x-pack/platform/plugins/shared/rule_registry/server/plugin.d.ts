@@ -3,7 +3,8 @@ import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plu
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStart as DataPluginStart, PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
-import { type IRuleDataService, Dataset } from './rule_data_plugin_service';
+import type { Dataset } from './rule_data_plugin_service';
+import { type IRuleDataService } from './rule_data_plugin_service';
 import type { AlertsClient } from './alert_data_client/alerts_client';
 export interface RuleRegistryPluginSetupDependencies {
     security?: SecurityPluginSetup;

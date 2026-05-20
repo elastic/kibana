@@ -1,9 +1,9 @@
 import React from 'react';
-import { type AgentPolicy, type NewPackagePolicy, type NewAgentPolicy, type PackagePolicy, type PackageInfo, SetupTechnology } from '../../../../../types';
+import { type AgentPolicy, type NewPackagePolicy, type NewAgentPolicy, type PackagePolicy, type PackageInfo } from '../../../../../types';
 import type { PackagePolicyValidationResults } from '../../services';
 import type { PackagePolicyFormState } from '../../types';
-import type { RegistryVarGroup } from '../../../../../types';
-import { SelectedPolicyTab } from '../../components';
+import type { RegistryVarGroup , SetupTechnology } from '../../../../../types';
+import type { SelectedPolicyTab } from '../../components';
 export declare function createAgentPolicy({ packagePolicy, newAgentPolicy, withSysMonitoring, }: {
     packagePolicy: NewPackagePolicy;
     newAgentPolicy: NewAgentPolicy;

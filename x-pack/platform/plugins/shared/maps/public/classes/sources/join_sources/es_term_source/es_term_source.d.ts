@@ -1,7 +1,7 @@
 import type { Query } from '@kbn/es-query';
 import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { AGG_TYPE, FIELD_ORIGIN, SOURCE_TYPES } from '../../../../../common/constants';
-import { ESDocField } from '../../../fields/es_doc_field';
+import type { AGG_TYPE, FIELD_ORIGIN, SOURCE_TYPES } from '../../../../../common/constants';
+import type { ESDocField } from '../../../fields/es_doc_field';
 import { AbstractESAggSource } from '../../es_agg_source';
 import type { DataFilters, ESTermSourceDescriptor, VectorSourceRequestMeta } from '../../../../../common/descriptor_types';
 import type { PropertiesMap } from '../../../../../common/elasticsearch_util';

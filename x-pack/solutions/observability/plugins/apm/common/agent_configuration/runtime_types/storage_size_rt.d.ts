@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 export declare function getStorageSizeRt({ min, max }: {
     min?: string;
     max?: string;

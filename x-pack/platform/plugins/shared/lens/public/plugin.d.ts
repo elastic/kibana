@@ -32,7 +32,7 @@ import type { CPSPluginStart } from '@kbn/cps/public';
 import type { SaveModalContainerProps } from './app_plugin/save_modal_container';
 import type { ChartInfoApi } from './chart_info_api';
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
-import { LensRenderer } from './react_embeddable/renderer/lens_custom_renderer_component';
+import type { LensRenderer } from './react_embeddable/renderer/lens_custom_renderer_component';
 import type { Visualization, LensSerializedState, TypedLensByValueInput, Suggestion } from '.';
 export type { SaveProps } from './app_plugin';
 export interface LensPluginSetupDependencies {

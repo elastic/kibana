@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Feature } from 'geojson';
-import { NdjsonReader } from '@kbn/file-upload-common';
+import type { NdjsonReader } from '@kbn/file-upload-common';
 import type { ImportFailure } from '@kbn/file-upload-common';
 import { AbstractGeoFileImporter } from '../abstract_geo_file_importer';
 export declare const SHAPEFILE_TYPES: string[];

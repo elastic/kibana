@@ -1,4 +1,4 @@
-import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
+import type { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import type { ApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 export type ServiceTransactionGroupAlertsResponse = Array<{
     name: string;

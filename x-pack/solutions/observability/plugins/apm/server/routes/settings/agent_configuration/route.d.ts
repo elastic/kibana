@@ -1,5 +1,5 @@
 import type { SearchHit } from '@kbn/es-types';
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 import type { EnvironmentsResponse } from './get_environments';
 declare const searchParamsRt: t.IntersectionC<[t.TypeC<{

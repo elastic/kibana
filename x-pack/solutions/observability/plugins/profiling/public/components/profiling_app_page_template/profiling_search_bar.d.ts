@@ -1,5 +1,5 @@
 import type { Query, TimeRange } from '@kbn/es-query';
-import { SearchBar } from '@kbn/unified-search-plugin/public';
+import type { SearchBar } from '@kbn/unified-search-plugin/public';
 import React from 'react';
 interface Props {
     kuery: string;

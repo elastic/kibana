@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 /** Primitives */
 export declare const esqlQuerySchema: z.ZodString;
 /** Kind */

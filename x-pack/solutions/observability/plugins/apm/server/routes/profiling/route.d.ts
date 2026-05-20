@@ -1,5 +1,5 @@
 import type { BaseFlameGraph, TopNFunctions } from '@kbn/profiling-utils';
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 export declare const profilingRouteRepository: {
     "GET /internal/apm/services/{serviceName}/profiling/functions": import("@kbn/server-route-repository-utils").ServerRoute<"GET /internal/apm/services/{serviceName}/profiling/functions", t.TypeC<{
         path: t.TypeC<{

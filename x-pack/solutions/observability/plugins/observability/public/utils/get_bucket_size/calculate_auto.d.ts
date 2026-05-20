@@ -3,4 +3,4 @@ export namespace calculateAuto {
     function lessThan(buckets: any, duration: any): moment.Duration | undefined;
     function atLeast(buckets: any, duration: any): moment.Duration | undefined;
 }
-import moment from 'moment';
+import type moment from 'moment';

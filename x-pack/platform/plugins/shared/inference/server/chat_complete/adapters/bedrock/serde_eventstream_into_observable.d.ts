@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { Readable } from 'stream';
 import type { ConverseBedrockChunkMember } from './converse_type';
 interface ModelStreamErrorException {

@@ -1,6 +1,6 @@
 import type { CSSProperties, Dispatch } from 'react';
 import type { ConsoleParsedRequestsProvider } from '@kbn/monaco';
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 import type { Actions } from '../../stores/request';
 import { type RequestToRestore } from '../../../types';
 import type { ContextValue } from '../../contexts';

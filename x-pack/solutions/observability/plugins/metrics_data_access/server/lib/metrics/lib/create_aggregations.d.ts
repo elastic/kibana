@@ -1,6 +1,6 @@
 import type { AggregationOptionsByType } from '@kbn/es-types';
 import type { MetricsAPIRequest } from '../../../../common/http_api/metrics_api';
-import { createMetricsAggregations } from './create_metrics_aggregations';
+import type { createMetricsAggregations } from './create_metrics_aggregations';
 type MetricsAggregation = ReturnType<typeof createMetricsAggregations>;
 export declare const createCompositeAggregations: (options: MetricsAPIRequest) => {
     groupings: {

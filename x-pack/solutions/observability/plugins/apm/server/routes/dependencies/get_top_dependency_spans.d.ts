@@ -1,5 +1,5 @@
 import type { Environment } from '../../../common/environment_rt';
-import { EventOutcome } from '../../../common/event_outcome';
+import type { EventOutcome } from '../../../common/event_outcome';
 import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 export interface DependencySpan {

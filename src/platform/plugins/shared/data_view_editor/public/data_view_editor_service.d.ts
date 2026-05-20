@@ -1,7 +1,7 @@
 import type { HttpSetup } from '@kbn/core/public';
 import type { Observable } from 'rxjs';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
-import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
+import type { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import type { ICPSManager } from '@kbn/cps-utils';
 import type { RollupIndicesCapsResponse, RollupIndiciesCapability, MatchedIndicesSet, TimestampOption } from './types';
 export declare const matchedIndiciesDefault: {

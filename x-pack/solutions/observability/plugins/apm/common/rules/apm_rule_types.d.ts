@@ -1,14 +1,14 @@
 import type { ValuesType } from 'utility-types';
 import type { AsDuration, AsPercent } from '@kbn/observability-plugin/common';
 import type { ActionGroup } from '@kbn/alerting-plugin/common';
-import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
-import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
-import { ApmRuleType } from '@kbn/rule-data-utils';
+import type { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import type { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
+import type { ApmRuleType } from '@kbn/rule-data-utils';
 import type { ErrorCountRuleParams } from '@kbn/response-ops-rule-params/error_count';
 import type { TransactionDurationRuleParams } from '@kbn/response-ops-rule-params/transaction_duration';
 import type { AnomalyRuleParams } from '@kbn/response-ops-rule-params/apm_anomaly';
 import type { TransactionErrorRateRuleParams } from '@kbn/response-ops-rule-params/transaction_error_rate';
-import { AnomalyDetectorType } from '../anomaly_detection/apm_ml_detectors';
+import type { AnomalyDetectorType } from '../anomaly_detection/apm_ml_detectors';
 export { AggregationType } from '@kbn/apm-types';
 export declare const APM_SERVER_FEATURE_ID = "apm";
 export interface ApmRuleParamsType {

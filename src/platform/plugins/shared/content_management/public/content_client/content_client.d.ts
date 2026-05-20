@@ -1,4 +1,4 @@
-import { QueryClient } from '@kbn/react-query';
+import type { QueryClient } from '@kbn/react-query';
 import type { CrudClient } from '../crud_client';
 import type { CreateIn, GetIn, UpdateIn, DeleteIn, SearchIn, MSearchIn, MSearchResult } from '../../common';
 import type { ContentTypeRegistry } from '../registry';

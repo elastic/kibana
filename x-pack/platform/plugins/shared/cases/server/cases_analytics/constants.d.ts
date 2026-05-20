@@ -1,9 +1,9 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Owner } from '../../common/constants/types';
-import { CAI_ATTACHMENTS_SYNC_TYPE } from './attachments_index/constants';
-import { CAI_CASES_SYNC_TYPE } from './cases_index/constants';
-import { CAI_COMMENTS_SYNC_TYPE } from './comments_index/constants';
-import { CAI_ACTIVITY_SYNC_TYPE } from './activity_index/constants';
+import type { CAI_ATTACHMENTS_SYNC_TYPE } from './attachments_index/constants';
+import type { CAI_CASES_SYNC_TYPE } from './cases_index/constants';
+import type { CAI_COMMENTS_SYNC_TYPE } from './comments_index/constants';
+import type { CAI_ACTIVITY_SYNC_TYPE } from './activity_index/constants';
 export declare const CAI_NUMBER_OF_SHARDS = 1;
 /** Allocate 1 replica if there are enough data nodes, otherwise continue with 0 */
 export declare const CAI_AUTO_EXPAND_REPLICAS = "0-1";

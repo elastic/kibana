@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 declare const fetchHistoricalSummaryParamsSchema: t.TypeC<{
     body: t.TypeC<{
         list: t.ArrayC<t.IntersectionC<[t.TypeC<{

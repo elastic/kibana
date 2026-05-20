@@ -7,7 +7,7 @@ import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { MLSavedObjectService } from '../saved_objects';
 import type { MlLicense } from '../../common/license';
 import type { MlClient } from './ml_client';
-import { MlAuditLogger } from './ml_client';
+import type { MlAuditLogger } from './ml_client';
 import type { ServerlessInfo } from '../types';
 type MLRequestHandlerContext = CustomRequestHandlerContext<{
     alerting?: AlertingApiRequestHandlerContext;

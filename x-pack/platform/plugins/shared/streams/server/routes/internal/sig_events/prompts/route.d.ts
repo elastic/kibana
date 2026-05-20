@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { PromptsConfigAttributes } from '../../../../lib/sig_events/saved_objects/prompts_config_service';
 export declare const setStreamsPromptRoute: Record<"PUT /internal/streams/_prompts", import("@kbn/server-route-repository-utils").ServerRoute<"PUT /internal/streams/_prompts", z.ZodObject<{
     body: z.ZodObject<{

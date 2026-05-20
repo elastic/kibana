@@ -2,7 +2,7 @@ import type { SavedObjectsUpdateResponse, SavedObject, SavedObjectReference } fr
 import type { AttachmentAttributesV2, AttachmentPatchAttributesV2 } from '../../common/types/domain';
 import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 import type { AttachmentPersistedAttributes, AttachmentRequestAttributes, AttachmentTransformedAttributes, AttachmentSavedObjectTransformed } from '../common/types/attachments_v1';
-import { SOReferenceExtractor } from './so_reference_extractor';
+import type { SOReferenceExtractor } from './so_reference_extractor';
 import type { OptionalAttributes } from './types';
 /**
  * Write-side / legacy read-side extractor: emits ONLY the legacy

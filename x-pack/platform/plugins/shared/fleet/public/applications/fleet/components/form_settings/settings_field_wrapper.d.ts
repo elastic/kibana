@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import React from 'react';
 import type { SettingsConfig } from '../../../../../common/settings/types';
 export declare const ZodSchemaType: {

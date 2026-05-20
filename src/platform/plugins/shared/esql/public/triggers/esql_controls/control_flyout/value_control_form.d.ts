@@ -1,5 +1,6 @@
 import type { TimeRange } from '@kbn/es-query';
-import { ESQLVariableType, EsqlControlType, type ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLVariableType, EsqlControlType} from '@kbn/esql-types';
+import { type ESQLControlVariable } from '@kbn/esql-types';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { ISearchGeneric } from '@kbn/search-types';
 import React from 'react';

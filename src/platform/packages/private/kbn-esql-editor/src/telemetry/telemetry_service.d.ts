@@ -1,5 +1,5 @@
 import type { AnalyticsServiceStart } from '@kbn/core/server';
-import { QuerySource } from '@kbn/esql-types';
+import type { QuerySource } from '@kbn/esql-types';
 import type { TelemetryQuerySubmittedProps, ESQLVariableType, ControlTriggerSource, TelemetryLatencyProps } from '@kbn/esql-types';
 import type { DataSourceSelectionChange } from '@kbn/esql-resource-browser';
 export declare enum AiReviewAction {

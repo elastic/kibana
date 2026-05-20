@@ -1,7 +1,7 @@
 import type { ToolDefinition, ToolDefinitionWithSchema, SerializedAgentBuilderError } from '@kbn/agent-builder-common';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { Tool as McpTool } from '@kbn/mcp-client';
-import { CONNECTOR_ID as MCP_CONNECTOR_ID } from '@kbn/connector-schemas/mcp/constants';
+import type { CONNECTOR_ID as MCP_CONNECTOR_ID } from '@kbn/connector-schemas/mcp/constants';
 import type { ToolTypeInfo } from '../tools';
 export interface ListToolsResponse {
     results: ToolDefinition[];

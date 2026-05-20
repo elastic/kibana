@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import type { EuiSwitchEvent } from '@elastic/eui';
-import { VECTOR_SHAPE_TYPE, VECTOR_STYLES } from '../../../../../common/constants';
+import type { VECTOR_SHAPE_TYPE, VECTOR_STYLES } from '../../../../../common/constants';
 import type { StyleField, StyleFieldsHelper } from '../style_fields_helper';
 import type { CustomIcon, DynamicStylePropertyOptions, StaticStylePropertyOptions, StylePropertyOptions, VectorStylePropertiesDescriptor } from '../../../../../common/descriptor_types';
 import type { IStyleProperty } from '../properties/style_property';

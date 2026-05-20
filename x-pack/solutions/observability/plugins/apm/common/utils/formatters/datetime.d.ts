@@ -1,4 +1,4 @@
-import moment from 'moment-timezone';
+import type moment from 'moment-timezone';
 export type TimeUnit = 'hours' | 'minutes' | 'seconds' | 'milliseconds';
 type DateUnit = 'days' | 'months' | 'years';
 export declare const getDateDifference: ({ start, end, unitOfTime, precise, }: {

@@ -1,5 +1,5 @@
-import * as Rx from 'rxjs';
-import { RenderCompleteDispatcher } from '@kbn/kibana-utils-plugin/public';
+import type * as Rx from 'rxjs';
+import type { RenderCompleteDispatcher } from '@kbn/kibana-utils-plugin/public';
 import type { Adapters } from '@kbn/inspector-plugin/public';
 import type { EmbeddableError, EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 export declare abstract class Embeddable<TEmbeddableInput extends EmbeddableInput = EmbeddableInput, TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput, TNode = any> implements IEmbeddable<TEmbeddableInput, TEmbeddableOutput, TNode> {

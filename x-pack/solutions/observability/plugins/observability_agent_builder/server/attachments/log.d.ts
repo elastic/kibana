@@ -1,8 +1,8 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { ObservabilityAgentBuilderCoreSetup } from '../types';
-import { OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID } from '../../common';
+import type { OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID } from '../../common';
 declare const logDataSchema: z.ZodObject<{
     attachmentLabel: z.ZodOptional<z.ZodString>;
     id: z.ZodString;

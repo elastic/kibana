@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 /**
  * Validates an avatar symbol value.
  * Allows: 1 emoji, 1 letter, or 2 letters.

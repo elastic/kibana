@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 declare const getSLOQuerySchema: t.PartialC<{
     query: t.PartialC<{
         instanceId: t.UnionC<[t.LiteralC<"*">, t.StringC]>;

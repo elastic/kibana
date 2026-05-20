@@ -1,5 +1,5 @@
 import type { Annotation } from '@kbn/observability-plugin/common/annotations';
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { ServiceAnomalyTimeseries } from '../../../common/anomaly_detection/service_anomaly_timeseries';
 import type { ServiceAnnotationResponse } from './annotations';
 import type { ServicesItemsResponse } from './get_services/get_services_items';

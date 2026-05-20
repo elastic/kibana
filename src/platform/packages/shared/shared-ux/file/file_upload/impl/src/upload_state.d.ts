@@ -1,4 +1,4 @@
-import * as Rx from 'rxjs';
+import type * as Rx from 'rxjs';
 import type { ImageMetadataFactory } from '@kbn/shared-ux-file-util';
 import type { FileKindBrowser, FileJSON, BaseFilesClient as FilesClient } from '@kbn/shared-ux-file-types';
 export interface FileState {

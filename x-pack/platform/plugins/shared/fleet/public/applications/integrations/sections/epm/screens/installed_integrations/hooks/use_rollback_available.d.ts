@@ -1,4 +1,4 @@
-import { useLicense } from '../../../../../../../hooks';
+import type { useLicense } from '../../../../../../../hooks';
 import type { InstalledPackageUIPackageListItem } from '../types';
 export declare const hasPreviousVersion: (item: InstalledPackageUIPackageListItem) => boolean;
 export declare const isRollbackTTLExpired: (item: InstalledPackageUIPackageListItem) => boolean;

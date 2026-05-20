@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 export declare const DEFAULT_ANNOTATION_INDEX = "observability-annotations";
 export declare const rectFill: t.UnionC<[t.LiteralC<"inside">, t.LiteralC<"outside">]>;
 export declare const createAnnotationRt: t.IntersectionC<[t.TypeC<{

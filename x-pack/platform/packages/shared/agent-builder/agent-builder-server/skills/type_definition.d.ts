@@ -1,5 +1,5 @@
 import type { MaybePromise } from '@kbn/utility-types';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { SkillBoundedTool } from './tools';
 import type { Directory, FileDirectory, FilePathsFromStructure, StringWithoutSlash, StringWithoutSpace } from './type_utils';
 /**

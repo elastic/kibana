@@ -1,5 +1,5 @@
-import { FieldMetadata } from '../../../../common/fields_metadata/models/field_metadata';
-import { FieldsMetadataDictionary } from '../../../../common/fields_metadata/models/fields_metadata_dictionary';
+import type { FieldMetadata } from '../../../../common/fields_metadata/models/field_metadata';
+import type { FieldsMetadataDictionary } from '../../../../common/fields_metadata/models/fields_metadata_dictionary';
 import type { AnyFieldName, OtelFieldName } from '../../../../common';
 import type { TOtelFields } from '../../../../common/fields_metadata/types';
 export interface OtelFieldsRepositoryDeps {

@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const FieldType: {
     readonly INPUT_TEXT: "INPUT_TEXT";
     readonly INPUT_NUMBER: "INPUT_NUMBER";

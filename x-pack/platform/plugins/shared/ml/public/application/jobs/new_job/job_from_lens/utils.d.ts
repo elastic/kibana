@@ -1,7 +1,7 @@
 import type { LensPublicStart, DataType, ChartInfo, LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
 import type { Query } from '@kbn/es-query';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
+import type { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import type { LensApi } from '@kbn/lens-plugin/public';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 export declare const COMPATIBLE_SERIES_TYPES: string[];

@@ -6,7 +6,7 @@ import type { IndicesIndexSettings, MappingTypeMapping } from '@elastic/elastics
 import type { FileUploadResults, IngestPipeline, InputOverrides } from '@kbn/file-upload-common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FileAnalysis } from './file_wrapper';
-import { FileWrapper } from './file_wrapper';
+import type { FileWrapper } from './file_wrapper';
 import type { FileClash } from './merge_tools';
 export declare enum STATUS {
     NA = 0,

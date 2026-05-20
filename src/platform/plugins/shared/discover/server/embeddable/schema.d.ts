@@ -1,6 +1,6 @@
 import type { ObjectType, TypeOf } from '@kbn/config-schema';
-import { DataGridDensity } from '@kbn/discover-utils';
-import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import type { DataGridDensity } from '@kbn/discover-utils';
+import type { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
 export declare const viewModeSchema: import("@kbn/config-schema").Type<VIEW_MODE>;
 declare const panelOverridesSchema: ObjectType<{

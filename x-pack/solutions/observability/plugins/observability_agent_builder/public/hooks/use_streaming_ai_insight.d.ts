@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { ConnectorInfo } from '../../common';
 export type { ConnectorInfo };
 interface ContextEvent {

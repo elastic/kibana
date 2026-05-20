@@ -1,5 +1,5 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
-import { DiscoverPlugin } from './plugin';
+import type { DiscoverPlugin } from './plugin';
 export type { DiscoverSetup, DiscoverStart } from './types';
 export declare function plugin(initializerContext: PluginInitializerContext): DiscoverPlugin;
 export type { DiscoverAppState } from './application/main/state_management/redux';

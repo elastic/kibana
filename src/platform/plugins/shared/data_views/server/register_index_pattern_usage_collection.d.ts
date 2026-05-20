@@ -1,6 +1,6 @@
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { StartServicesAccessor } from '@kbn/core/server';
-import { SavedObjectsClient } from '@kbn/core/server';
+import type { SavedObjectsClient } from '@kbn/core/server';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from './types';
 export declare const minMaxAvgLoC: (scripts: Array<string | undefined>) => {
     min: number;

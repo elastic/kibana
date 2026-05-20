@@ -14,4 +14,4 @@ export class NewGroupInput extends React.Component<any, any, any> {
     render(): React.JSX.Element;
 }
 import React from 'react';
-import PropTypes from 'prop-types';
+import type PropTypes from 'prop-types';

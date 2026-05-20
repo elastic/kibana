@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const SearchEventsInputSchema: z.ZodObject<{
     query: z.ZodString;
     calendarId: z.ZodDefault<z.ZodPreprocess<z.ZodOptional<z.ZodString>>>;

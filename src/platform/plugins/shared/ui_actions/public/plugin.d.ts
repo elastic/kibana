@@ -1,6 +1,6 @@
 import type { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { UiActionsService } from './service';
+import type { UiActionsService } from './service';
 export type UiActionsPublicSetup = Pick<UiActionsService, 'addTriggerActionAsync' | 'attachAction' | 'detachAction' | 'registerActionAsync' | 'unregisterAction'>;
 export type UiActionsPublicStart = PublicMethodsOf<UiActionsService>;
 export interface UiActionsPublicSetupDependencies {

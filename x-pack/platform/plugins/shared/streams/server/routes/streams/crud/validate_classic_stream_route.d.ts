@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const validateClassicStreamRoute: Record<"POST /internal/streams/_validate_classic_stream", import("@kbn/server-route-repository-utils").ServerRoute<"POST /internal/streams/_validate_classic_stream", z.ZodObject<{
     body: z.ZodObject<{
         name: z.ZodString;

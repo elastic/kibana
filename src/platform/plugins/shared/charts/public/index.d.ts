@@ -1,5 +1,5 @@
 import type { RangeSelectContext, ValueClickContext, MultiValueClickContext } from '@kbn/embeddable-plugin/public';
-import { ChartsPlugin } from './plugin';
+import type { ChartsPlugin } from './plugin';
 export declare const plugin: () => ChartsPlugin;
 export type { ChartsPluginSetup, ChartsPluginStart } from './plugin';
 export { createColorPalette, seedColors, CurrentTime, EmptyPlaceholder, useCommonChartStyles, Endzones, getAdjustedInterval, renderEndzoneTooltip, Warnings, ColorPickerLazy, ColorPicker, LegendToggleLazy, LegendToggle, } from './static';

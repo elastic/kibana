@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare function parsePath(path: string): string[] | null;
 interface GetSchemaAtPathResult {
     schema: z.ZodType | null;

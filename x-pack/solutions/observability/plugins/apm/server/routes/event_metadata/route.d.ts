@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 export declare const eventMetadataRouteRepository: Record<"GET /internal/apm/event_metadata/{processorEvent}/{id}", import("@kbn/server-route-repository-utils").ServerRoute<"GET /internal/apm/event_metadata/{processorEvent}/{id}", t.TypeC<{
     path: t.TypeC<{
         processorEvent: t.UnionC<[t.LiteralC<import("@kbn/apm-types-shared/src/enums/processor_event").ProcessorEvent.transaction>, t.LiteralC<import("@kbn/apm-types-shared/src/enums/processor_event").ProcessorEvent.error>, t.LiteralC<import("@kbn/apm-types-shared/src/enums/processor_event").ProcessorEvent.metric>, t.LiteralC<import("@kbn/apm-types-shared/src/enums/processor_event").ProcessorEvent.span>]>;

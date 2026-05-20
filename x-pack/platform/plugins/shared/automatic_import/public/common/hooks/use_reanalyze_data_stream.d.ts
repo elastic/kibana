@@ -1,4 +1,4 @@
-import { useMutation } from '@kbn/react-query';
+import type { useMutation } from '@kbn/react-query';
 import { type ReanalyzeDataStreamRequest, type ReanalyzeDataStreamResponse } from '../lib/api';
 export interface UseReanalyzeDataStreamResult {
     reanalyzeDataStreamMutation: ReturnType<typeof useMutation<ReanalyzeDataStreamResponse, Error, ReanalyzeDataStreamRequest>>;

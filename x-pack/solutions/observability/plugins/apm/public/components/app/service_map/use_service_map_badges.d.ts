@@ -1,6 +1,6 @@
 import type { ServiceMapNode } from '../../../../common/service_map';
 import type { Environment } from '../../../../common/environment_rt';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import type { FETCH_STATUS } from '../../../hooks/use_fetcher';
 interface ServiceMapBadgesReturn {
     nodes: ServiceMapNode[];
     status: FETCH_STATUS;

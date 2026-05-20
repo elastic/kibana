@@ -6,7 +6,7 @@ export { getRequestAbortedSignal } from './lib';
 /**
  * Exporters (CSV)
  */
-import { datatableToCSV } from '../common';
+import type { datatableToCSV } from '../common';
 export declare const exporters: {
     datatableToCSV: typeof datatableToCSV;
     CSV_MIME_TYPE: string;
@@ -15,7 +15,7 @@ export { ES_FIELD_TYPES, KBN_FIELD_TYPES, UI_SETTINGS, DataViewsService as DataV
 /**
  * Search
  */
-import { CidrMask, dateHistogramInterval, IpAddress, parseInterval, calcAutoIntervalLessThan } from '../common';
+import type { CidrMask, dateHistogramInterval, IpAddress, parseInterval, calcAutoIntervalLessThan } from '../common';
 export type { ParsedInterval } from '../common';
 export { METRIC_TYPES, ES_SEARCH_STRATEGY } from '../common';
 export type { IScopedSearchClient, ISearchStrategy, SearchStrategyDependencies, ISearchSessionService, SearchRequestHandlerContext, DataRequestHandlerContext, } from './search';

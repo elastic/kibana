@@ -3,7 +3,7 @@ import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import type { ConcreteTaskInstance, TaskManagerStartContract, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { ActionParams } from './action_runner';
 import type { RetryParams } from './retry_helper';
-import { BulkActionTaskType } from './bulk_action_types';
+import type { BulkActionTaskType } from './bulk_action_types';
 /**
  * Create and run retry tasks of agent bulk actions
  */

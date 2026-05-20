@@ -1,5 +1,5 @@
 import React from 'react';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { ProcessorEvent } from '@kbn/observability-plugin/common';
 interface Props {
     eventType: ProcessorEvent.transaction | ProcessorEvent.span;
     totalDocCount?: number;

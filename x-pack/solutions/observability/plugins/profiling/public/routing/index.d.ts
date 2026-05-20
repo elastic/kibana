@@ -1,9 +1,9 @@
-import { StackTracesDisplayOption, TopNComparisonFunctionSortField, TopNFunctionSortField, TopNType } from '@kbn/profiling-utils';
-import * as t from 'io-ts';
+import type { StackTracesDisplayOption, TopNComparisonFunctionSortField, TopNFunctionSortField, TopNType } from '@kbn/profiling-utils';
+import type * as t from 'io-ts';
 import React from 'react';
-import { IndexLifecyclePhaseSelectOption } from '../../common/storage_explorer';
-import { ComparisonMode, NormalizationMode } from '../components/normalization_menu';
-import { AddDataTabs } from '../views/add_data_view';
+import type { IndexLifecyclePhaseSelectOption } from '../../common/storage_explorer';
+import type { ComparisonMode, NormalizationMode } from '../components/normalization_menu';
+import type { AddDataTabs } from '../views/add_data_view';
 declare const routes: {
     '/': {
         element: React.JSX.Element;

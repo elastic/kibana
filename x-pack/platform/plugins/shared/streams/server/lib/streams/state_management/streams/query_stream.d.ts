@@ -1,4 +1,4 @@
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import type { ElasticsearchAction } from '../execution_plan/types';
 import type { State } from '../state';
 import type { StreamChangeStatus, StreamChanges, ValidationResult } from '../stream_active_record/stream_active_record';

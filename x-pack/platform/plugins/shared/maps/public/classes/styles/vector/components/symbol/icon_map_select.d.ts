@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import type { CustomIcon, IconDynamicOptions, IconStop } from '../../../../../../common/descriptor_types';
-import { ICON_SOURCE } from '../../../../../../common/constants';
+import type { ICON_SOURCE } from '../../../../../../common/constants';
 import type { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
 export interface StyleOptionChanges {
     customIconStops?: IconStop[];

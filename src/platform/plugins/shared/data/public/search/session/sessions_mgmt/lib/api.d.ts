@@ -1,5 +1,5 @@
 import type { ApplicationStart, FeatureFlagsStart, NotificationsStart } from '@kbn/core/public';
-import moment from 'moment';
+import type moment from 'moment';
 import type { SearchSessionStatusResponse } from '../../../../../common';
 import type { SearchSessionSavedObject } from '../types';
 import type { ISessionsClient } from '../../sessions_client';

@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const ExecuteStatementInputSchema: z.ZodObject<{
     statement: z.ZodString;
     timeout: z.ZodOptional<z.ZodNumber>;

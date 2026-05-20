@@ -1,4 +1,4 @@
-import { Subject } from 'rxjs';
+import type { Subject } from 'rxjs';
 import type { ContextChartSelection } from './context_chart_zoom_pipeline';
 export interface UseSingleMetricViewerChartModelOptions {
     /**

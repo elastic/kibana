@@ -1,5 +1,5 @@
 import React, { type ReactNode } from 'react';
-import { Position } from '@xyflow/react';
+import type { Position } from '@xyflow/react';
 interface DiamondNodeProps {
     id: string;
     label: string;

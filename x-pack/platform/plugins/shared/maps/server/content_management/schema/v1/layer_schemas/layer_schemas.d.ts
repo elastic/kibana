@@ -1,4 +1,4 @@
-import { LAYER_TYPE } from '../../../../../common';
+import type { LAYER_TYPE } from '../../../../../common';
 export declare const attributionSchema: import("@kbn/config-schema").ObjectType<{
     label: import("@kbn/config-schema").Type<string>;
     url: import("@kbn/config-schema").Type<string>;

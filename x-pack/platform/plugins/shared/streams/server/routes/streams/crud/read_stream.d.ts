@@ -1,4 +1,4 @@
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { AttachmentClient } from '../../../lib/streams/attachments/attachment_client';
 import type { QueryClient } from '../../../lib/streams/assets/query/query_client';

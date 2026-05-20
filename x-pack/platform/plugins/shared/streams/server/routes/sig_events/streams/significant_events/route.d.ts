@@ -1,5 +1,5 @@
 import { type SignificantEventsGenerateResponse, type SignificantEventsGetResponse, type SignificantEventsPreviewResponse } from '@kbn/streams-schema';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const significantEventsRoutes: {
     "POST /api/streams/{name}/significant_events/_generate 2023-10-31": import("@kbn/server-route-repository-utils").ServerRoute<"POST /api/streams/{name}/significant_events/_generate 2023-10-31", z.ZodObject<{
         path: z.ZodObject<{

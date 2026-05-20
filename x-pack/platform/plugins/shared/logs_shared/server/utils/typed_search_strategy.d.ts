@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 import type { JsonValue } from '@kbn/utility-types';
 import type { SearchStrategyError } from '../../common/search_strategies/common/errors';
 import type { ShardFailure } from './elasticsearch_runtime_types';

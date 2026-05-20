@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { History } from 'history';
 import type { IStateStorage } from './types';
 import type { IKbnUrlControls } from '../../state_management/url';

@@ -1,4 +1,4 @@
-import { LABEL_BORDER_SIZES, LABEL_POSITIONS, STYLE_TYPE } from '../../../../../../common/constants';
+import type { LABEL_BORDER_SIZES, LABEL_POSITIONS, STYLE_TYPE } from '../../../../../../common/constants';
 export declare const labelBorderSizeOptions: import("@kbn/config-schema").ObjectType<{
     size: import("@kbn/config-schema").Type<LABEL_BORDER_SIZES>;
 }>;

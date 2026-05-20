@@ -43,7 +43,7 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observability-agent-builder-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public/types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { registerDataHandler } from './context/has_data_context/data_handler';
+import type { registerDataHandler } from './context/has_data_context/data_handler';
 export interface ConfigSchema {
     unsafe: {
         alertDetails: {

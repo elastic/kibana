@@ -2,7 +2,7 @@
  * This was generated based on x-pack/platform/plugins/shared/stack_connectors/server/connector_types/pagerduty/schema.ts
  * and will be deprecated once connectors will expose their schemas
  */
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const PagerDutyParamsSchema: z.ZodObject<{
     eventAction: z.ZodEnum<{
         resolve: "resolve";

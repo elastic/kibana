@@ -1,5 +1,5 @@
 import type { Annotations } from '@kbn/ml-common-types/annotations';
-import { ANNOTATION_TYPE } from '../../../common/constants/annotations';
+import type { ANNOTATION_TYPE } from '../../../common/constants/annotations';
 export declare const indexAnnotationSchema: import("@kbn/config-schema").ObjectType<{
     timestamp: import("@kbn/config-schema").Type<number>;
     end_timestamp: import("@kbn/config-schema").Type<number>;

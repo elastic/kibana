@@ -1,7 +1,7 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import React from 'react';
-import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import { InfraTab } from '../../app/infra_overview/infra_tabs/use_tabs';
+import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import type { InfraTab } from '../../app/infra_overview/infra_tabs/use_tabs';
 export declare const serviceDetailRoute: {
     '/services/{serviceName}': {
         element: React.JSX.Element;

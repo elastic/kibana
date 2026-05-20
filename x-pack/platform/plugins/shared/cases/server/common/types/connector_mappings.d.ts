@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 import type { SavedObject } from '@kbn/core/server';
 import type { ConnectorMappingsAttributes } from '../../../common/types/domain';
 export interface ConnectorMappingsPersistedAttributes {

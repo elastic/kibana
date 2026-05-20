@@ -1,4 +1,4 @@
-import { graphlib } from '@dagrejs/dagre';
+import type { graphlib } from '@dagrejs/dagre';
 import type { BaseStep, DataSetStep, ElasticsearchStep, KibanaStep, WaitForInputStep, WaitStep, WorkflowExecuteAsyncStep, WorkflowExecuteStep, WorkflowSettings, WorkflowYaml } from '../../spec/schema';
 import type { GraphNodeUnion, WorkflowGraphType } from '../types';
 /** Context used during the graph construction to keep track of settings and avoid cycles */

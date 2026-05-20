@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 /**
  * Types the positive integer greater than zero is:
  *   - Natural Number (positive integer and not a float),

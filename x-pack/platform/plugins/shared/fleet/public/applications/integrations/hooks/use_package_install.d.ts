@@ -2,7 +2,7 @@ import React from 'react';
 import type { PackageInfo } from '../../../types';
 import type { InstallationInfo } from '../../../../common/types';
 import type { FleetStartServices } from '../../../plugin';
-import { InstallStatus } from '../../../types';
+import type { InstallStatus } from '../../../types';
 import type { InstalledPackageUIPackageListItem } from '../sections/epm/screens/installed_integrations/types';
 type StartServices = Pick<FleetStartServices, 'notifications' | 'analytics' | 'i18n' | 'theme'>;
 interface PackageInstallItem {

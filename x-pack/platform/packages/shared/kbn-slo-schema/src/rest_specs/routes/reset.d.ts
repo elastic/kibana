@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 declare const resetSLOParamsSchema: t.TypeC<{
     path: t.TypeC<{
         id: t.Type<string, string, unknown>;

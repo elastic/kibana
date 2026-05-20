@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 declare const sloTemplateSchema: t.IntersectionC<[t.TypeC<{
     templateId: t.StringC;
 }>, t.PartialC<{

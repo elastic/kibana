@@ -1,6 +1,6 @@
 import type { ChangeEvent } from 'react';
 import React, { Component } from 'react';
-import _ from 'lodash';
+import type _ from 'lodash';
 import type { Value } from '@kbn/kibana-react-plugin/public';
 import type { MVTFieldDescriptor } from '../../../../common/descriptor_types';
 export type MVTSettings = {

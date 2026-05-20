@@ -5,7 +5,7 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { SavedObject } from '@kbn/core/server';
 import type { ActionConnector, Case, CaseAssignees, CaseAttributes, ConnectorMappings, ConnectorMappingSource, ConnectorMappingTarget, CustomFieldsConfiguration, ExternalService, Observable, User } from '../../../common/types/domain';
 import type { Template } from '../../../common/types/domain/template/latest';
-import { CaseStatuses } from '../../../common/types/domain';
+import type { CaseStatuses } from '../../../common/types/domain';
 import type { CasePostRequest, CaseRequestCustomFields, CaseUserActionsDeprecatedResponse, ObservablePost } from '../../../common/types/api';
 import type { CasesClientGetAlertsResponse } from '../alerts/types';
 import type { ExternalServiceComment, ExternalServiceIncident } from './types';

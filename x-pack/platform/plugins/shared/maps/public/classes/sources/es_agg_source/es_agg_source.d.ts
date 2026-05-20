@@ -3,7 +3,7 @@ import type { DataView } from '@kbn/data-plugin/common';
 import type { IESAggSource, ESAggsSourceSyncMeta } from './types';
 import { AbstractESSource } from '../es_source';
 import type { IESAggField } from '../../fields/agg';
-import { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
+import type { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
 import type { AbstractESAggSourceDescriptor, DataFilters } from '../../../../common/descriptor_types';
 import type { IField } from '../../fields/field';
 import type { ITooltipProperty } from '../../tooltips/tooltip_property';

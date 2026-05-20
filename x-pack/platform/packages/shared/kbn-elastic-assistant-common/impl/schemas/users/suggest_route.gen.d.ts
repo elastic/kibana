@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const SuggestUsersRequestBody: z.ZodObject<{
     searchTerm: z.ZodOptional<z.ZodString>;
     size: z.ZodOptional<z.ZodNumber>;

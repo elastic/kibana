@@ -6,14 +6,14 @@ import type { SavedObjectReference } from '@kbn/core/types';
 import type { MigrateFunctionsObject, PersistableStateService, VersionedState } from '@kbn/kibana-utils-plugin/common';
 import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import type { ExecutionContextSearch } from '@kbn/es-query';
-import { Executor } from '../executor';
+import type { Executor } from '../executor';
 import type { AnyExpressionRenderDefinition } from '../expression_renderers';
-import { ExpressionRendererRegistry } from '../expression_renderers';
+import type { ExpressionRendererRegistry } from '../expression_renderers';
 import type { ExpressionAstExpression } from '../ast';
 import type { ExecutionContract, ExecutionResult } from '../execution';
 import type { AnyExpressionTypeDefinition, ExpressionValueError } from '../expression_types';
 import type { AnyExpressionFunctionDefinition } from '../expression_functions';
-import { ExpressionsServiceFork } from './expressions_fork';
+import type { ExpressionsServiceFork } from './expressions_fork';
 /**
  * The public contract that `ExpressionsService` provides to other plugins
  * in Kibana Platform in *setup* life-cycle.

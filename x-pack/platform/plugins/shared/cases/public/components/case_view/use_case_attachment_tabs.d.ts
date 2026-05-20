@@ -1,7 +1,7 @@
 import type { EuiThemeComputed } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React from 'react';
-import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
+import type { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { type CaseUI } from '../../../common';
 export declare const SimilarCasesBadge: {
     ({ activeTab, count, euiTheme, }: {

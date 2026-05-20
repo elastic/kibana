@@ -1,6 +1,6 @@
 import type { VisParams } from '@kbn/visualizations-common';
 import type { VisTypeAlias } from './vis_type_alias_registry';
-import { BaseVisType } from './base_vis_type';
+import type { BaseVisType } from './base_vis_type';
 import type { VisTypeDefinition } from './types';
 import type { VisGroups } from './vis_groups_enum';
 /**

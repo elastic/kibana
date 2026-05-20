@@ -1,4 +1,4 @@
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 import type { MonacoEditorActionsProvider } from '../monaco_editor_actions_provider';
 import type { AutoCompleteContext, ResultTerm } from '../../../../lib/autocomplete/types';
 import type { EditorRequest } from '../types';

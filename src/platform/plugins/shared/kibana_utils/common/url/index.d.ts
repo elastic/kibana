@@ -1,5 +1,5 @@
-import { encodeUriQuery } from './encode_uri_query';
-import { validateUrl } from './validate_url';
+import type { encodeUriQuery } from './encode_uri_query';
+import type { validateUrl } from './validate_url';
 export declare const url: {
     encodeQuery: (query: import("query-string").ParsedQuery, encodeFunction?: (val: string, pctEncodeSpaces?: boolean) => string, pctEncodeSpaces?: boolean) => import("query-string").ParsedQuery;
     encodeUriQuery: typeof encodeUriQuery;

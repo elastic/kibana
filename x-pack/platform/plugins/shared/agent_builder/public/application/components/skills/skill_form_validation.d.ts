@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 /**
  * One additional markdown file attached to a skill (same shape as API `referenced_content` items).
  */

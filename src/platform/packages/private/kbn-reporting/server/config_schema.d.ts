@@ -1,5 +1,5 @@
-import { ByteSizeValue } from '@kbn/config-schema';
-import moment from 'moment';
+import type { ByteSizeValue } from '@kbn/config-schema';
+import type moment from 'moment';
 export declare const ConfigSchema: import("@kbn/config-schema").ObjectType<{
     enabled: import("@kbn/config-schema").Type<boolean>;
     kibanaServer: import("@kbn/config-schema").ObjectType<{

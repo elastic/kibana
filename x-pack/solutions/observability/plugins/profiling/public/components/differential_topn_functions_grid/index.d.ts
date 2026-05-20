@@ -1,5 +1,5 @@
 import type { StackFrameMetadata, TopNFunctions } from '@kbn/profiling-utils';
-import { TopNComparisonFunctionSortField, TopNFunctionSortField } from '@kbn/profiling-utils';
+import type { TopNComparisonFunctionSortField, TopNFunctionSortField } from '@kbn/profiling-utils';
 import React from 'react';
 export declare const isComparisonColumn: (id: string) => boolean;
 type SortDirection = 'asc' | 'desc';

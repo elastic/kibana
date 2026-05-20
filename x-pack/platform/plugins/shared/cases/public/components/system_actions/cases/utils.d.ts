@@ -1,4 +1,4 @@
-import { TIME_UNITS } from './constants';
+import type { TIME_UNITS } from './constants';
 export declare const getTimeUnitOptions: (unitSize: string) => {
     text: string;
     value: TIME_UNITS;

@@ -1,6 +1,6 @@
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { StreamsPluginStartDependencies } from '../../../../types';
-import { InsightClient } from './insight_client';
+import type { InsightClient } from './insight_client';
 export declare class InsightService {
     private readonly coreSetup;
     private readonly logger;

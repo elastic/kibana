@@ -1,4 +1,4 @@
-import { useMutation } from '@kbn/react-query';
+import type { useMutation } from '@kbn/react-query';
 import type { UploadSamplesToDataStreamResponse } from '../../../common/model/api/data_streams/data_stream.gen';
 import { type UploadSamplesRequest } from '../lib/api';
 export interface UseUploadSamplesResult {

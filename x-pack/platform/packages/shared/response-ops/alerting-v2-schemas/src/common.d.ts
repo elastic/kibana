@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 declare const durationSchema: z.ZodString;
 /**
  * Shared schema for tag arrays used across alerting v2 (rule metadata, action policies,

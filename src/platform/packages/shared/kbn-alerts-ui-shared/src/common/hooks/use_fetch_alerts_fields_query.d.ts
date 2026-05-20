@@ -1,6 +1,6 @@
 import type { QueryOptionsOverrides } from '../types/tanstack_query_utility_types';
 import type { FetchAlertsFieldsParams } from '../apis/fetch_alerts_fields';
-import { fetchAlertsFields } from '../apis/fetch_alerts_fields';
+import type { fetchAlertsFields } from '../apis/fetch_alerts_fields';
 export type UseFetchAlertsFieldsQueryParams = FetchAlertsFieldsParams;
 export declare const queryKeyPrefix: string[];
 /**

@@ -1,6 +1,6 @@
 import type { EuiDataGridSorting } from '@elastic/eui';
 import type { TopNFunctions } from '@kbn/profiling-utils';
-import { TopNFunctionSortField } from '@kbn/profiling-utils';
+import type { TopNFunctionSortField } from '@kbn/profiling-utils';
 import React from 'react';
 import type { GridOnScrollProps } from 'react-window';
 interface Props {

@@ -1,7 +1,7 @@
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import type { Writable } from '@kbn/utility-types';
 import { AbstractLayer } from '../layer';
-import { HeatmapStyle } from '../../styles/heatmap/heatmap_style';
+import type { HeatmapStyle } from '../../styles/heatmap/heatmap_style';
 import type { HeatmapLayerDescriptor } from '../../../../common/descriptor_types';
 import type { ESGeoGridSource } from '../../sources/es_geo_grid_source';
 import type { DataRequestContext } from '../../../actions';

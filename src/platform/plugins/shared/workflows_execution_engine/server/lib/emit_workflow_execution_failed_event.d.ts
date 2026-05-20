@@ -1,6 +1,6 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import type { ExecutionStatus } from '@kbn/workflows';
 import type { EmitEvent } from '../trigger_events';
 import type { FailedStepContext } from '../workflow_context_manager/workflow_execution_state';
 export interface WorkflowRuntimeForEmit {

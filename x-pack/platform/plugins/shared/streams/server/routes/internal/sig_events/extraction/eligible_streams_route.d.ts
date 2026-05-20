@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import { type StreamCandidate, type StreamClassificationResult } from './classify_streams';
 export interface EligibleStreamsResponse {
     candidates: StreamCandidate[];

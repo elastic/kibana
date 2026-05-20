@@ -1,4 +1,4 @@
-import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import React from 'react';
 import type { GetStateType, LensInspectorAdapters, LensInternalApi, LensRuntimeState } from '@kbn/lens-common';
 import type { EditConfigPanelProps } from '../../app_plugin/shared/edit_on_the_fly/types';

@@ -1,4 +1,4 @@
-import { Streams } from '../models/streams';
+import type { Streams } from '../models/streams';
 /**
  * Parses a stream upsert request and converts it into the corresponding stream definition.
  * Given that upsert requests don't include name field, the stream name is provided separately.

@@ -6,7 +6,7 @@ import type { Query } from '@kbn/data-plugin/common';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import type { RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import type { Feature, DataDriftField, TimeRange } from './types';
-import { FETCH_STATUS } from './types';
+import type { FETCH_STATUS } from './types';
 export declare const getDataComparisonType: (kibanaType: string) => DataDriftField["type"];
 export declare const useDataSearch: <T>() => (esSearchRequestParams: IKibanaSearchRequest["params"], abortSignal?: AbortSignal) => Promise<estypes.SearchResponse<any, Record<string, estypes.AggregationsAggregate>> | undefined>;
 interface ReturnedError {

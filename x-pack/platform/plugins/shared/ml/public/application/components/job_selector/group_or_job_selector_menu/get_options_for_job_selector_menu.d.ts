@@ -1,6 +1,6 @@
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { type MlPages } from '../../../../locator';
-import { FlyoutType } from '../../../jobs/components/job_details_flyout/job_details_flyout_context';
+import type { FlyoutType } from '../../../jobs/components/job_details_flyout/job_details_flyout_context';
 export declare const getOptionsForJobSelectorMenuItems: ({ jobId, page, onRemoveJobId, removeJobIdDisabled, showRemoveJobId, isSingleMetricViewerDisabled, closePopover, globalState, setActiveFlyout, setActiveJobId, navigateToUrl, share, }: {
     jobId: string;
     page: MlPages;

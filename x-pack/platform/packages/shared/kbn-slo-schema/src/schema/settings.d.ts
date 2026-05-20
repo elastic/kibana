@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 declare const storedSloSettingsSchema: t.IntersectionC<[t.TypeC<{
     useAllRemoteClusters: t.BooleanC;
     selectedRemoteClusters: t.ArrayC<t.StringC>;

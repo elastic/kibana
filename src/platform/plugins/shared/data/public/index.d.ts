@@ -6,7 +6,7 @@ export { convertIntervalToEsInterval } from '../common/search/aggs/buckets/lib/t
 /**
  * Exporters (CSV)
  */
-import { datatableToCSV } from '../common';
+import type { datatableToCSV } from '../common';
 export declare const exporters: {
     datatableToCSV: typeof datatableToCSV;
     CSV_MIME_TYPE: string;
@@ -15,7 +15,7 @@ export declare const exporters: {
 };
 export type { AggregationRestrictions as IndexPatternAggRestrictions, IndexPatternLoadExpressionFunctionDefinition, GetFieldsOptions, AggregationRestrictions, DataViewListItem, } from '../common';
 export { ES_FIELD_TYPES, KBN_FIELD_TYPES, UI_SETTINGS, fieldList, DuplicateDataViewError, } from '../common';
-import { CidrMask, isDateHistogramBucketAggConfig, propFilter, dateHistogramInterval, InvalidEsCalendarIntervalError, InvalidEsIntervalFormatError, IpAddress, isValidEsInterval, isValidInterval, parseEsInterval, parseInterval, toAbsoluteDates, getResponseInspectorStats, calcAutoIntervalLessThan, tabifyAggResponse, tabifyGetColumns } from '../common';
+import type { CidrMask, isDateHistogramBucketAggConfig, propFilter, dateHistogramInterval, InvalidEsCalendarIntervalError, InvalidEsIntervalFormatError, IpAddress, isValidEsInterval, isValidInterval, parseEsInterval, parseInterval, toAbsoluteDates, getResponseInspectorStats, calcAutoIntervalLessThan, tabifyAggResponse, tabifyGetColumns } from '../common';
 export { AggGroupLabels, AggGroupNames, METRIC_TYPES, BUCKET_TYPES } from '../common';
 export type { AggConfigSerialized, AggGroupName, AggFunctionsMapping, AggParam, AggParamOption, AggParamType, AggConfigOptions, EsaggsExpressionFunctionDefinition, IAggConfig, IAggConfigs, IAggType, IFieldParamType, IMetricAggType, OptionedParamType, OptionedValueProp, ParsedInterval, ExpressionFunctionKql, ExpressionFunctionLucene, ExpressionFunctionKibana, ExpressionFunctionKibanaContext, ExpressionValueSearchContext, KibanaContext, } from '../common';
 export type { AggConfigs, AggConfig } from '../common';
@@ -82,7 +82,7 @@ export type { AggsStart } from './search/aggs';
 export { getTime } from '../common';
 export type { SavedObject } from '../common';
 export { isTimeRange, isQuery, flattenHit, calculateBounds, tabifyAggResponse } from '../common';
-import { DataPublicPlugin } from './plugin';
+import type { DataPublicPlugin } from './plugin';
 export declare function plugin(initializerContext: PluginInitializerContext<ConfigSchema>): DataPublicPlugin;
 export type { DataPublicPluginSetup, DataPublicPluginStart, DataPublicPluginStartActions, } from './types';
 export type { DataPublicPlugin as DataPlugin };

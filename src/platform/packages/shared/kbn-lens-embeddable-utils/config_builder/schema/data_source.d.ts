@@ -1,5 +1,5 @@
 import { type TypeOf } from '@kbn/config-schema';
-import { dataViewSchema, esqlDataSourceSchema } from '@kbn/as-code-data-views-schema';
+import type { dataViewSchema, esqlDataSourceSchema } from '@kbn/as-code-data-views-schema';
 declare const anyDataSourceSchema: import("@kbn/config-schema").Type<import("@kbn/config-schema/src/types").ObjectResultUnionType<{
     type: import("@kbn/config-schema").Type<"data_view_reference">;
     ref_id: import("@kbn/config-schema").Type<string>;

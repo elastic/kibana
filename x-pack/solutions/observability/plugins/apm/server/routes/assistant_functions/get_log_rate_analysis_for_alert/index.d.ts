@@ -1,5 +1,5 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { fetchLogRateAnalysisForAlert } from '@kbn/aiops-log-rate-analysis/queries/fetch_log_rate_analysis_for_alert';
+import type { fetchLogRateAnalysisForAlert } from '@kbn/aiops-log-rate-analysis/queries/fetch_log_rate_analysis_for_alert';
 import type { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 /**
  * Runs log rate analysis data on an index given some alert metadata.

@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { MobileErrorGroupPeriodsResponse } from './get_mobile_error_group_detailed_statistics';
 import type { MobileErrorGroupMainStatisticsResponse } from './get_mobile_error_group_main_statistics';
 import type { MobileErrorTermsByFieldResponse } from './get_mobile_errors_terms_by_field';

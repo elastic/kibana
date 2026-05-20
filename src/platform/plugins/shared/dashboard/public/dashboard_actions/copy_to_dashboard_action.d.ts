@@ -1,6 +1,7 @@
 import type { EmbeddableApiContext, HasParentApi, HasType, HasUniqueId, PublishesSavedObjectId } from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { type DashboardApi, DASHBOARD_API_TYPE } from '../dashboard_api/types';
+import type { DASHBOARD_API_TYPE } from '../dashboard_api/types';
+import { type DashboardApi } from '../dashboard_api/types';
 export interface DashboardCopyToCapabilities {
     canCreateNew: boolean;
     canEditExisting: boolean;

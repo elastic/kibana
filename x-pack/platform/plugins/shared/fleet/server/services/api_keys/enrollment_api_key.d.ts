@@ -1,5 +1,5 @@
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
-import { toElasticsearchQuery } from '@kbn/es-query';
+import type { toElasticsearchQuery } from '@kbn/es-query';
 import type { EnrollmentAPIKey } from '../../types';
 export declare function listEnrollmentApiKeys(esClient: ElasticsearchClient, options: {
     page?: number;

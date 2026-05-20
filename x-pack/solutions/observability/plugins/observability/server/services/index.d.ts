@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { IScopedClusterClient, IUiSettingsClient, KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 export declare const alertDetailsContextRt: t.IntersectionC<[t.TypeC<{

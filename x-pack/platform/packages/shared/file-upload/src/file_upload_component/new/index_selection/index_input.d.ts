@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { STATUS } from '../../../../file_upload_manager';
+import type { STATUS } from '../../../../file_upload_manager';
 interface Props {
     setIndexName: (name: string) => void;
     setIndexValidationStatus: (status: STATUS) => void;

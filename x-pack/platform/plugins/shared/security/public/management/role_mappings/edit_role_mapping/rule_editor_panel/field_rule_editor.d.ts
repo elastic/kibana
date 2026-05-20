@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { FieldRule } from '../../model';
+import type { FieldRule } from '../../model';
 interface Props {
     rule: FieldRule;
     onChange: (rule: FieldRule) => void;

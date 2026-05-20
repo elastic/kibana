@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 declare const occurrencesBudgetingMethodSchema: t.LiteralC<"occurrences">;
 declare const timeslicesBudgetingMethodSchema: t.LiteralC<"timeslices">;
 declare const budgetingMethodSchema: t.UnionC<[t.LiteralC<"occurrences">, t.LiteralC<"timeslices">]>;

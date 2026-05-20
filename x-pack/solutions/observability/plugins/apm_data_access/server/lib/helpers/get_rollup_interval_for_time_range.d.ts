@@ -1,4 +1,4 @@
-import { RollupInterval } from '../../../common/rollup';
+import type { RollupInterval } from '../../../common/rollup';
 /**
  * Returns the appropriate rollup interval based on the time range.
  * Longer time ranges can tolerate more data delay in exchange for faster queries.

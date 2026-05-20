@@ -1,5 +1,5 @@
 import type { LineAnnotation, SettingsSpec } from '@elastic/charts';
-import { RectAnnotation } from '@elastic/charts';
+import type { RectAnnotation } from '@elastic/charts';
 import type { ReactElement } from 'react';
 import React from 'react';
 import type { TimeseriesChartWithContextProps } from './timeseries_chart_with_context';

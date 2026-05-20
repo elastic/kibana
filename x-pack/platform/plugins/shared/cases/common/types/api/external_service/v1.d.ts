@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 export declare const ExternalServiceResponseRt: rt.IntersectionC<[rt.ExactC<rt.TypeC<{
     title: rt.StringC;
     id: rt.StringC;

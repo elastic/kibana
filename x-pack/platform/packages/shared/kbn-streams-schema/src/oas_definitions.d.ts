@@ -4,11 +4,11 @@
  * at its definition site, so the OAS generator picks it up automatically via
  * the Zod v4 global registry — no separate registration step required.
  */
-import { WiredStream } from './models/ingest/wired';
-import { ClassicStream, ClassicIngest } from './models/ingest/classic';
-import { WiredIngest } from './models/ingest/wired';
-import { QueryStream } from './models/query';
-import { Streams } from './models/streams';
+import type { WiredStream } from './models/ingest/wired';
+import type { ClassicStream, ClassicIngest } from './models/ingest/classic';
+import type { WiredIngest } from './models/ingest/wired';
+import type { QueryStream } from './models/query';
+import type { Streams } from './models/streams';
 export declare const streamsOasDefinitions: {
     /**
      * Top-level union of all stream definition variants, with an explicit OAS

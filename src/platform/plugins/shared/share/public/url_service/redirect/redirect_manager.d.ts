@@ -1,6 +1,6 @@
 import type { CoreSetup } from '@kbn/core/public';
 import type { Location } from 'history';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { UrlService } from '../../../common/url_service';
 import type { RedirectOptions } from '../../../common/url_service/locators/redirect';
 export interface RedirectManagerDependencies {

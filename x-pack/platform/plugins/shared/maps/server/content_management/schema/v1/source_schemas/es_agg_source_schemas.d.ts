@@ -1,5 +1,5 @@
-import { SOURCE_TYPES } from '../../../../../common';
-import { AGG_TYPE, GRID_RESOLUTION, MASK_OPERATOR, RENDER_AS } from '../../../../../common/constants';
+import type { SOURCE_TYPES } from '../../../../../common';
+import type { AGG_TYPE, GRID_RESOLUTION, MASK_OPERATOR, RENDER_AS } from '../../../../../common/constants';
 export declare const countAggSchema: import("@kbn/config-schema").ObjectType<{
     label: import("@kbn/config-schema").Type<string | undefined>;
     mask: import("@kbn/config-schema").Type<Readonly<{} & {

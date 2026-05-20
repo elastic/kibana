@@ -1,5 +1,5 @@
 import React from 'react';
-import { ComparisonMode } from '../normalization_menu';
+import type { ComparisonMode } from '../normalization_menu';
 interface Props {
     comparisonMode: ComparisonMode;
     onChange: (nextComparisonMode: ComparisonMode) => void;

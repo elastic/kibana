@@ -1,6 +1,6 @@
 import React, { type PropsWithChildren } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
 import type { ConnectedCustomizationService } from '../../../../customizations';
@@ -8,7 +8,7 @@ import type { ScopedProfilesManager } from '../../../../context_awareness';
 import type { TabState } from './types';
 import type { ScopedDiscoverEBTManager } from '../../../../ebt_manager';
 import type { CascadedDocumentsStateManager } from '../../data_fetching/cascaded_documents_fetcher';
-import { CascadedDocumentsFetcher } from '../../data_fetching/cascaded_documents_fetcher';
+import type { CascadedDocumentsFetcher } from '../../data_fetching/cascaded_documents_fetcher';
 import type { DiscoverServices } from '../../../../build_services';
 interface DiscoverRuntimeState {
     adHocDataViews: DataView[];

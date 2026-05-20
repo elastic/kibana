@@ -1,5 +1,5 @@
 import React from 'react';
-import { SearchType } from '../types';
+import type { SearchType } from '../types';
 export interface QueryFormTypeProps {
     searchType: SearchType | null;
     onFormTypeSelect: (formType: SearchType | null) => void;

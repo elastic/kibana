@@ -11,4 +11,4 @@ export namespace ForecastsList {
     }
 }
 import React from 'react';
-import PropTypes from 'prop-types';
+import type PropTypes from 'prop-types';

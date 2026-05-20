@@ -8,7 +8,7 @@ import type { RegistryRuleType } from '../rule_type_registry';
 import type { RuleTypeRegistry } from '../types';
 import type { AlertingAuthorizationFilterOpts } from './alerting_authorization_kuery';
 import type { AlertingAuthorizationEntity } from './types';
-import { ReadOperations, WriteOperations } from './types';
+import type { ReadOperations, WriteOperations } from './types';
 export interface EnsureAuthorizedOpts {
     ruleTypeId: string;
     consumer: string;

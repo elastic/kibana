@@ -10,7 +10,7 @@ import type { CPSPluginStart } from '@kbn/cps/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
-import { EsqlVariablesService } from './variables_service';
+import type { EsqlVariablesService } from './variables_service';
 interface EsqlPluginSetupDependencies {
     uiActions: UiActionsSetup;
 }

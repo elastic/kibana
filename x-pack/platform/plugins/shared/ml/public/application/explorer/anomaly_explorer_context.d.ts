@@ -1,14 +1,14 @@
 import type { PropsWithChildren } from 'react';
 import React, { type FC } from 'react';
-import { AnomalyTimelineStateService } from './anomaly_timeline_state_service';
-import { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
-import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
-import { AnomalyChartsStateService } from './anomaly_charts_state_service';
-import { AnomalyExplorerChartsService } from '../services/anomaly_explorer_charts_service';
-import { AnomalyDetectionAlertsStateService } from './alerts';
-import { AnomalyTableStateService } from './anomaly_table_state_service';
-import { AnnotationsStateService } from './annotations_state_service';
-import { InfluencersStateService } from './influencers_state_service';
+import type { AnomalyTimelineStateService } from './anomaly_timeline_state_service';
+import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
+import type { AnomalyTimelineService } from '../services/anomaly_timeline_service';
+import type { AnomalyChartsStateService } from './anomaly_charts_state_service';
+import type { AnomalyExplorerChartsService } from '../services/anomaly_explorer_charts_service';
+import type { AnomalyDetectionAlertsStateService } from './alerts';
+import type { AnomalyTableStateService } from './anomaly_table_state_service';
+import type { AnnotationsStateService } from './annotations_state_service';
+import type { InfluencersStateService } from './influencers_state_service';
 export interface AnomalyExplorerContextValue {
     anomalyExplorerChartsService: AnomalyExplorerChartsService;
     anomalyExplorerCommonStateService: AnomalyExplorerCommonStateService;

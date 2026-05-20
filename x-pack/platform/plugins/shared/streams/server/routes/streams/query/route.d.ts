@@ -1,5 +1,5 @@
-import { z } from '@kbn/zod/v4';
-import { Streams } from '@kbn/streams-schema';
+import type { z } from '@kbn/zod/v4';
+import type { Streams } from '@kbn/streams-schema';
 export interface QueryStreamObjectGetResponse {
     /** The view reference stored in the definition */
     query: Streams.QueryStream.Definition['query'] & {

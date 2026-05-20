@@ -1,7 +1,7 @@
 import type { PackageInfo, PackagePolicyConfigRecord } from '../../../common';
 import type { AwsCloudConnectorVars, AzureCloudConnectorVars, GcpCloudConnectorVars, CloudConnectorVars } from '../../../common/types';
 import type { AwsCloudConnectorCredentials, AzureCloudConnectorCredentials, GcpCloudConnectorCredentials, CloudConnectorCredentials, GetCloudConnectorRemoteRoleTemplateParams } from './types';
-import { AWS_CLOUD_CONNECTOR_FIELD_NAMES, AZURE_CLOUD_CONNECTOR_FIELD_NAMES, GCP_CLOUD_CONNECTOR_FIELD_NAMES } from './constants';
+import type { AWS_CLOUD_CONNECTOR_FIELD_NAMES, AZURE_CLOUD_CONNECTOR_FIELD_NAMES, GCP_CLOUD_CONNECTOR_FIELD_NAMES } from './constants';
 export type AzureCloudConnectorFieldNames = (typeof AZURE_CLOUD_CONNECTOR_FIELD_NAMES)[keyof typeof AZURE_CLOUD_CONNECTOR_FIELD_NAMES];
 export type AwsCloudConnectorFieldNames = (typeof AWS_CLOUD_CONNECTOR_FIELD_NAMES)[keyof typeof AWS_CLOUD_CONNECTOR_FIELD_NAMES];
 export type GcpCloudConnectorFieldNames = (typeof GCP_CLOUD_CONNECTOR_FIELD_NAMES)[keyof typeof GCP_CLOUD_CONNECTOR_FIELD_NAMES];

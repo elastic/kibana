@@ -1,5 +1,5 @@
 import type { IconType } from '@elastic/eui';
-import { copyToClipboard } from '@elastic/eui';
+import type { copyToClipboard } from '@elastic/eui';
 import type { DocViewRenderProps } from '../types';
 import type { FieldMapping } from '../services/types';
 interface WithFieldParam {

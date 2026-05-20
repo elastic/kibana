@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 export declare const DataRegexReplaceStepTypeId: "data.regexReplace";
 export declare const ConfigSchema: z.ZodObject<{

@@ -1,7 +1,7 @@
 import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import type { BaseParams, JobId, ManagementLinkFn, ScheduledReportApiJSON } from '@kbn/reporting-common/types';
 import type { ReactElement } from 'react';
-import { Job } from '.';
+import type { Job } from '.';
 type AppParams = Omit<BaseParams, 'browserTimezone' | 'version'>;
 export interface DiagnoseResponse {
     help: string[];

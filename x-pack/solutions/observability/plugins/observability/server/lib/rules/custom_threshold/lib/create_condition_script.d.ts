@@ -1,4 +1,4 @@
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import type { COMPARATORS } from '@kbn/alerting-comparators';
 export declare const createConditionScript: (threshold: number[], comparator: COMPARATORS) => {
     source: string;
     params: {

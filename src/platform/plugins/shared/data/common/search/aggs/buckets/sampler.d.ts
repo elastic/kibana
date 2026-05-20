@@ -1,4 +1,4 @@
-import { BucketAggType } from './bucket_agg_type';
+import type { BucketAggType } from './bucket_agg_type';
 import type { BaseAggParams } from '../types';
 export declare const SAMPLER_AGG_NAME = "sampler";
 export interface AggParamsSampler extends BaseAggParams {

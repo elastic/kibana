@@ -1,4 +1,4 @@
-import { loadYaml } from '@kbn/yaml-loader';
+import type { loadYaml } from '@kbn/yaml-loader';
 type YamlModule = Awaited<ReturnType<typeof loadYaml>>;
 /**
  * React hook that loads the yaml package asynchronously.

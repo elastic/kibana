@@ -12,7 +12,7 @@ import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { UnifiedDataTableSettings, DataTableColumnsMeta, CustomCellRenderer, CustomGridColumnsConfiguration, DataGridPaginationMode, CustomBulkActions } from '../types';
-import { DataGridDensity } from '../constants';
+import type { DataGridDensity } from '../constants';
 import type { UnifiedDataTableRenderCustomToolbar } from './custom_toolbar/render_custom_toolbar';
 import { type ColorIndicatorControlColumnParams } from './custom_control_columns';
 export type SortOrder = [string, string];

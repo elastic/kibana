@@ -1,8 +1,8 @@
-import { ProcessorEvent } from '@kbn/apm-types-shared';
+import type { ProcessorEvent } from '@kbn/apm-types-shared';
 import { type DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import type { estypes } from '@elastic/elasticsearch';
-import { ApmDocumentType } from '../../../../common/document_type';
-import { RollupInterval } from '../../../../common/rollup';
+import type { ApmDocumentType } from '../../../../common/document_type';
+import type { RollupInterval } from '../../../../common/rollup';
 declare const documentTypeConfigMap: {
     readonly serviceTransactionMetric: {
         readonly processorEvent: ProcessorEvent.metric;

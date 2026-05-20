@@ -5,7 +5,7 @@
  * in * as Code APIs.
  */
 import { type TypeOf } from '@kbn/config-schema';
-import { ASCODE_GROUPED_CONDITION_TYPE } from '@kbn/as-code-filters-constants';
+import type { ASCODE_GROUPED_CONDITION_TYPE } from '@kbn/as-code-filters-constants';
 /**
  * Discriminated union schema for filter conditions
  */

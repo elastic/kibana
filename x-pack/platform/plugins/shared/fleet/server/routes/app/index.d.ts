@@ -3,7 +3,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { FleetAuthzRouter } from '../../services/security';
 import type { FleetRequestHandler } from '../../types';
-import { CheckPermissionsRequestSchema } from '../../types';
+import type { CheckPermissionsRequestSchema } from '../../types';
 export declare const getCheckPermissionsHandler: FleetRequestHandler<unknown, TypeOf<typeof CheckPermissionsRequestSchema.query>>;
 export declare const postEnableSpaceAwarenessHandler: FleetRequestHandler;
 export declare const generateServiceTokenHandler: RequestHandler<null, null, TypeOf<typeof GenerateServiceTokenRequestSchema.body>>;

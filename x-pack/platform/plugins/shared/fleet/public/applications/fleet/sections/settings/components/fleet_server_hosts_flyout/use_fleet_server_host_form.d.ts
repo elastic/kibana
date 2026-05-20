@@ -1,5 +1,5 @@
-import { useRadioInput } from '../../../../hooks';
-import { useComboInput, useInput, useSwitchInput, useSecretInput } from '../../../../hooks';
+import type { useRadioInput } from '../../../../hooks';
+import type { useComboInput, useInput, useSwitchInput, useSecretInput } from '../../../../hooks';
 import type { FleetServerHost } from '../../../../types';
 export interface FleetServerHostSSLInputsType {
     nameInput: ReturnType<typeof useInput>;

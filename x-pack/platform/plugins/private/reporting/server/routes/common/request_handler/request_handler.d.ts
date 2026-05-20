@@ -1,4 +1,4 @@
-import Boom from '@hapi/boom';
+import type Boom from '@hapi/boom';
 import type { TypeOf } from '@kbn/config-schema';
 import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import type { BaseParams } from '@kbn/reporting-common/types';

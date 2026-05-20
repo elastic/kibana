@@ -1,4 +1,4 @@
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { PinnedControlLayoutState, PinnedControlState } from '@kbn/controls-schemas';
 import type { ControlsLayout } from '@kbn/controls-renderer/src/types';
 import type { PanelPackage } from '@kbn/presentation-publishing';

@@ -1,6 +1,6 @@
 import type { EuiStepsProps, EuiStepsHorizontalProps } from '@elastic/eui';
 import React from 'react';
-import { RuleFormStepId } from '../constants';
+import type { RuleFormStepId } from '../constants';
 interface RuleFormVerticalSteps {
     steps: EuiStepsProps['steps'];
 }

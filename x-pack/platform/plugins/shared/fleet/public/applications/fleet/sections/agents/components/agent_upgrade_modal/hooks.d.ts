@@ -1,4 +1,4 @@
-import moment from 'moment';
+import type moment from 'moment';
 export declare function useScheduleDateTime(now?: string): {
     startDatetime: moment.Moment;
     initialDatetime: moment.Moment;

@@ -1,6 +1,6 @@
 import type { AgentPolicy, NewAgentPolicy, NewPackagePolicy, PackageInfo } from '../../../../../types';
-import { SetupTechnology } from '../../../../../types';
-import { SelectedPolicyTab } from '../../components';
+import type { SetupTechnology } from '../../../../../types';
+import type { SelectedPolicyTab } from '../../components';
 export declare const useAgentless: () => {
     isAgentlessEnabled: boolean;
     isAgentlessDefault: boolean;

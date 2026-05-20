@@ -1,9 +1,9 @@
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { ToastsStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import type { DrilldownFactory, DrilldownTemplate } from '../types';
-import { DrilldownManager } from './drilldown_manager';
+import type { DrilldownManager } from './drilldown_manager';
 import type { HasDrilldowns } from '../../types';
 export type DrilldownsManagerDeps = HasDrilldowns & {
     /**

@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 import type { estypes } from '@elastic/elasticsearch';
 export declare const createLogEntryDatasetsQuery: (indexName: string, timestampField: string, startTime: number, endTime: number, runtimeMappings: estypes.MappingRuntimeFields, size: number, afterKey?: CompositeDatasetKey) => {
     body: {

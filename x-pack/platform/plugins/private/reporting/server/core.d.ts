@@ -1,4 +1,4 @@
-import * as Rx from 'rxjs';
+import type * as Rx from 'rxjs';
 import type { AnalyticsServiceStart, CoreSetup, DocLinksServiceSetup, IBasePath, IClusterClient, KibanaRequest, Logger, PackageInfo, PluginInitializerContext, SavedObjectsServiceStart, SecurityServiceStart, StatusServiceSetup, UiSettingsServiceStart } from '@kbn/core/server';
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
@@ -21,7 +21,7 @@ import type { ReportingSetup } from '.';
 import type { IReport, ReportingStore } from './lib/store';
 import type { ReportTaskParams, ScheduledReportTaskParamsWithoutSpaceId } from './lib/tasks';
 import type { ReportingPluginRouter } from './types';
-import { EventTracker } from './usage';
+import type { EventTracker } from './usage';
 export interface ReportingInternalSetup {
     actions: ActionsPluginSetupContract;
     basePath: Pick<IBasePath, 'set'>;

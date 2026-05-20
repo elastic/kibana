@@ -1,7 +1,7 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import React from 'react';
-import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import { MobileServiceTemplate } from '../templates/mobile_service_template';
+import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import type { MobileServiceTemplate } from '../templates/mobile_service_template';
 import type { MobileSearchBar } from '../../app/mobile/search_bar';
 export declare function page({ title, tabKey, element, searchBarOptions, customSearchBar, bottomHeaderContent, contentWrapper, contextWrapper: ContextWrapper, }: {
     title: string;

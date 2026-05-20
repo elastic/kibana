@@ -1,5 +1,5 @@
 import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export interface FailureStoreStatsResponse {
     size?: number;
     count?: number;

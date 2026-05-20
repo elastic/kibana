@@ -1,5 +1,5 @@
 import type { estypes } from '@elastic/elasticsearch';
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 export declare const sortOrderSchema: t.UnionC<[t.LiteralC<"asc">, t.LiteralC<"desc">, t.LiteralC<"_doc">]>;
 type SortOrderSchema = 'asc' | 'desc' | '_doc';
 export declare const sortSchema: t.UnionC<[t.UnionC<[t.StringC, t.RecordC<t.StringC, t.UnionC<[t.UnionC<[t.LiteralC<"asc">, t.LiteralC<"desc">, t.LiteralC<"_doc">]>, t.ExactC<t.PartialC<{

@@ -1,7 +1,7 @@
 import type { AggregateQuery } from '@kbn/es-query';
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
 import type { EditLookupIndexContentContext } from '@kbn/index-editor';
-import { monaco } from '@kbn/code-editor';
+import type { monaco } from '@kbn/code-editor';
 import type React from 'react';
 import type { LookupIndexPrivileges } from './use_lookup_index_privileges';
 /**

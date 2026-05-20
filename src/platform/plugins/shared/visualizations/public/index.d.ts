@@ -1,7 +1,7 @@
 import type { PublicContract } from '@kbn/utility-types';
 import type { PluginInitializerContext } from '@kbn/core/public';
 import type { VisualizationsSetup, VisualizationsStart } from './plugin';
-import { VisualizationsPlugin } from './plugin';
+import type { VisualizationsPlugin } from './plugin';
 import type { VisualizeEmbeddable } from './legacy/embeddable';
 export declare function plugin(initializerContext: PluginInitializerContext): VisualizationsPlugin;
 /** @public static code */

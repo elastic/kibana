@@ -1,6 +1,6 @@
 import type { DataView } from '@kbn/data-plugin/common';
 import type { AggregationsExtendedStatsAggregation, AggregationsPercentilesAggregation, AggregationsTermsAggregation } from '@elastic/elasticsearch/lib/api/types';
-import { AGG_TYPE } from '../../../../common/constants';
+import type { AGG_TYPE } from '../../../../common/constants';
 import type { TileMetaFeature } from '../../../../common/descriptor_types';
 import { CountAggField } from './count_agg_field';
 import type { CountAggFieldParams } from './agg_field_types';

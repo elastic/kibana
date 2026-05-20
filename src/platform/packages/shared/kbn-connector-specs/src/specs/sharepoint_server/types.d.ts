@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const ODataCollectionOutputSchema: z.ZodObject<{
     value: z.ZodArray<z.ZodAny>;
 }, z.core.$strip>;

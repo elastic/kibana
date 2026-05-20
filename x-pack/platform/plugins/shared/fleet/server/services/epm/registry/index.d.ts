@@ -1,7 +1,7 @@
 import type { Response } from 'node-fetch';
 import type { Logger } from '@kbn/logging';
 import type { ExtractedIntegrationFields } from '@kbn/fields-metadata-plugin/server';
-import { splitPkgKey as split } from '../../../../common/services';
+import type { splitPkgKey as split } from '../../../../common/services';
 import type { AssetsGroupedByServiceByType, CategorySummaryList, RegistryPackage, RegistrySearchResults, GetCategoriesRequest, GetPackagesRequest, PackageVerificationResult, ArchivePackage, BundledPackage, AssetsMap } from '../../../types';
 import type { ArchiveIterator } from '../../../../common/types';
 export declare const splitPkgKey: typeof split;

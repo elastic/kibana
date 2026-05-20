@@ -1,6 +1,6 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 import type { estypes } from '@elastic/elasticsearch';
-import { timeRangeRT } from './metrics_explorer';
+import type { timeRangeRT } from './metrics_explorer';
 import type { MetricsUIAggregation } from '../inventory_models/types';
 export interface MetricsAPIMetric {
     id: string;

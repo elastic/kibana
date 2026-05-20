@@ -1,5 +1,6 @@
 import React from 'react';
-import { type DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { type DataView } from '@kbn/data-views-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { UnifiedHistogramBreakdownContext } from '../../types';
 export interface BreakdownFieldSelectorProps {

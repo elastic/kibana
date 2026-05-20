@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 /**
  * Types the nonEmptyOrNullableStringArray as:
  *   - An array of non empty strings of length 1 or greater

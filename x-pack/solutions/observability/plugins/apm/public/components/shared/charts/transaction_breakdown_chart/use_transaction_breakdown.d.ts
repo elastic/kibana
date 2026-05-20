@@ -1,4 +1,4 @@
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 export declare function useTransactionBreakdown({ kuery, environment, }: {
     kuery: string;
     environment: string;

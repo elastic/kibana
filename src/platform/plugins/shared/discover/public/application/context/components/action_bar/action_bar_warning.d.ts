@@ -1,5 +1,5 @@
 import React from 'react';
-import { SurrDocType } from '../../services/context';
+import type { SurrDocType } from '../../services/context';
 export declare function ActionBarWarning({ docCount, type }: {
     docCount: number;
     type: SurrDocType;

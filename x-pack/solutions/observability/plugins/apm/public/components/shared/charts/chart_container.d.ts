@@ -1,5 +1,5 @@
 import React from 'react';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import type { FETCH_STATUS } from '../../../hooks/use_fetcher';
 export interface ChartContainerProps {
     hasData: boolean;
     status: FETCH_STATUS;

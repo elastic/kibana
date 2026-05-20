@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { RequestResponder } from './request_responder';
+import type { RequestResponder } from './request_responder';
 import type { Request, RequestParams } from './types';
 /**
  * An generic inspector adapter to log requests.

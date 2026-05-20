@@ -1,4 +1,4 @@
-import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { ES_FIELD_TYPES } from '@kbn/field-types';
 export declare const METRICS_GRID_CLASS = "metricsGrid";
 export declare const METRICS_GRID_FULL_SCREEN_CLASS = "metricsGrid--fullScreen";
 export declare const METRICS_GRID_RESTRICT_BODY_CLASS = "metricsGrid--restrictBody";

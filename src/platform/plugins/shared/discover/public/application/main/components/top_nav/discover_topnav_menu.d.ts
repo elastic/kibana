@@ -1,5 +1,5 @@
 import React, { type PropsWithChildren } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { ChromeBreadcrumbsBadge } from '@kbn/core-chrome-browser';
 import type { DiscoverTopNavHookResult } from './use_discover_topnav';

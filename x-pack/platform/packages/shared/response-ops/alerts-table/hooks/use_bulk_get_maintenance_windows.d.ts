@@ -3,7 +3,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { bulkGetMaintenanceWindows } from '../apis/bulk_get_maintenance_windows';
+import type { bulkGetMaintenanceWindows } from '../apis/bulk_get_maintenance_windows';
 interface UseBulkGetMaintenanceWindowsQueryParams {
     ids: string[];
     http: HttpStart;

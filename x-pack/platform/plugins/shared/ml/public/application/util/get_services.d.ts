@@ -1,10 +1,10 @@
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { MlLicense } from '../../../common/license';
-import { MlCapabilitiesService } from '../capabilities/check_capabilities';
-import { HttpService } from '../services/http_service';
-import { TrainedModelsService } from '../model_management/trained_models_service';
+import type { MlLicense } from '../../../common/license';
+import type { MlCapabilitiesService } from '../capabilities/check_capabilities';
+import type { HttpService } from '../services/http_service';
+import type { TrainedModelsService } from '../model_management/trained_models_service';
 /**
  * Provides global services available across the entire ML app.
  */

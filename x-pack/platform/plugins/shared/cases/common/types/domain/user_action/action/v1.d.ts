@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 /**
  * These values are used in a number of places including to define the accepted values in the
  * user_actions/_find api. These values should not be removed only new values can be added.

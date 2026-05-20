@@ -1,4 +1,4 @@
-import { useMutation } from '@kbn/react-query';
+import type { useMutation } from '@kbn/react-query';
 import type { CreateAutoImportIntegrationResponse } from '../../../common';
 import { type CreateUpdateIntegrationRequest } from '../lib/api';
 export interface UseCreateUpdateIntegrationResult {

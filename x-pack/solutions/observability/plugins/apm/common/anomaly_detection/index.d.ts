@@ -1,4 +1,4 @@
-import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import type { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 export type { ServiceAnomalyStats } from '@kbn/apm-types';
 export declare function getSeverity(score: number | undefined): ML_ANOMALY_SEVERITY;
 export declare function getSeverityColor(score: number): string;

@@ -1,5 +1,5 @@
 import type { FunctionComponent } from 'react';
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 import type { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
 import type { FieldConfig, ValidationFunc } from '../../../../../../shared_imports';
 export declare const arrayOfStrings: rt.ArrayC<rt.StringC>;

@@ -1,4 +1,4 @@
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { MapCenterAndZoom } from '../../common/descriptor_types';

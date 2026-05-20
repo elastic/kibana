@@ -1,6 +1,6 @@
 import React from 'react';
 import type { BrushEndListener } from '@elastic/charts';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { HistogramItem } from '../../../../../common/correlations/types';
 import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 export interface DurationDistributionChartData {

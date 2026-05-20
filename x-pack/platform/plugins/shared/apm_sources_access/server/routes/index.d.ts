@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import { type ReturnOf, type EndpointOf, type ClientRequestParamsOf } from '@kbn/server-route-repository';
 import type { SavedObject } from '@kbn/core/server';
 import { type APMSourcesRouteHandlerResources } from './settings';

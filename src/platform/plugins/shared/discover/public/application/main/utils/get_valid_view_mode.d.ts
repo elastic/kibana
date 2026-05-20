@@ -1,4 +1,4 @@
-import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
+import type { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 /**
  * Returns a valid view mode
  * @param viewMode

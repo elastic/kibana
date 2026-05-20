@@ -1,6 +1,6 @@
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { ChatCompletionChunkToolCall } from '@kbn/inference-common';
-import { ChatCompletionEventType } from '@kbn/inference-common';
+import type { ChatCompletionEventType } from '@kbn/inference-common';
 import type { ConverseResponse } from '@aws-sdk/client-bedrock-runtime';
 export declare function processConverseResponse(model?: string): (source: Observable<ConverseResponse>) => Observable<({
     content: string;

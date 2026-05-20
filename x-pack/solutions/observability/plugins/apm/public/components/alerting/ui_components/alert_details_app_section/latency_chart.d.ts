@@ -5,7 +5,7 @@ import React from 'react';
 import type { BoolQuery } from '@kbn/es-query';
 import type { TopAlert } from '@kbn/observability-plugin/public';
 import type { ApmRuleType } from '@kbn/rule-data-utils';
-import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
+import type { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 export declare function LatencyChart({ alert, transactionType, transactionTypes, transactionName, serviceName, environment, start, end, ruleAggregationType, latencyAggregationType: latencyAggregationTypeProp, setLatencyAggregationType, setTransactionType, comparisonChartTheme, comparisonEnabled, offset, timeZone, customAlertEvaluationThreshold, kuery, filters, threshold, ruleTypeId, compact, showAlertAnnotations, }: {
     alert: TopAlert;
     transactionType?: string;

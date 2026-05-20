@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { AgentExplorerAgentsResponse } from './get_agents';
 import type { AgentExplorerAgentInstancesResponse } from './get_agent_instances';
 import type { AgentLatestVersionsResponse } from './fetch_agents_latest_version';

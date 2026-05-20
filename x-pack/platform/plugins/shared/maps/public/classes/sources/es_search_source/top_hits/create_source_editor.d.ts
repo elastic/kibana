@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import type { DataView, DataViewField } from '@kbn/data-plugin/common';
-import { SortDirection } from '@kbn/data-plugin/public';
+import type { SortDirection } from '@kbn/data-plugin/public';
 import type { ESSearchSourceDescriptor } from '../../../../../common/descriptor_types';
 import type { OnSourceChangeArgs } from '../../source';
 interface Props {

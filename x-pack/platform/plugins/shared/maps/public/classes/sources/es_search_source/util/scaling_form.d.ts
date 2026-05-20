@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import React, { Component } from 'react';
 import type { EuiSwitchEvent } from '@elastic/eui';
-import { SCALING_TYPES } from '../../../../../common/constants';
+import type { SCALING_TYPES } from '../../../../../common/constants';
 import type { OnSourceChangeArgs } from '../../source';
 interface Props {
     filterByMapBounds: boolean;

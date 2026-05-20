@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 export declare const StatusUserActionPayloadRt: rt.ExactC<rt.IntersectionC<[rt.TypeC<{
     status: rt.UnionC<[rt.LiteralC<import("@kbn/cases-components/src/status/types").CaseStatuses.open>, rt.LiteralC<typeof import("@kbn/cases-components/src/status/types").CaseStatuses["in-progress"]>, rt.LiteralC<import("@kbn/cases-components/src/status/types").CaseStatuses.closed>]>;
 }>, rt.PartialC<{

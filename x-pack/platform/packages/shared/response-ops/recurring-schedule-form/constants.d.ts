@@ -1,4 +1,4 @@
-import { Frequency } from '@kbn/rrule';
+import type { Frequency } from '@kbn/rrule';
 export declare const ISO_WEEKDAYS: readonly [1, 2, 3, 4, 5, 6, 7];
 export declare const DEFAULT_FREQUENCY_OPTIONS: ({
     text: string;

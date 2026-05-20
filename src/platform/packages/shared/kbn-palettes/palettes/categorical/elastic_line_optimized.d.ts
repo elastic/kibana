@@ -1,4 +1,4 @@
-import { KbnColorFnPalette } from '../../classes/color_fn_palette';
+import type { KbnColorFnPalette } from '../../classes/color_fn_palette';
 /**
  * Swaps color pairs within each group of 10 to increase contrast
  * between adjacent hues (e.g., separating pink and red).

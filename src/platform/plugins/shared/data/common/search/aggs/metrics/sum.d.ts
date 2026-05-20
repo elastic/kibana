@@ -1,4 +1,4 @@
-import { MetricAggType } from './metric_agg_type';
+import type { MetricAggType } from './metric_agg_type';
 import type { BaseAggParams } from '../types';
 export interface AggParamsSum extends BaseAggParams {
     field: string;

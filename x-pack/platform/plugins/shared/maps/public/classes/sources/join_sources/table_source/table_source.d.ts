@@ -1,7 +1,7 @@
 import type { GeoJsonProperties } from 'geojson';
 import type { Query } from '@kbn/data-plugin/common';
 import type { VECTOR_SHAPE_TYPE } from '../../../../../common/constants';
-import { SOURCE_TYPES } from '../../../../../common/constants';
+import type { SOURCE_TYPES } from '../../../../../common/constants';
 import type { MapExtent, VectorSourceRequestMeta } from '../../../../../common/descriptor_types';
 import type { ITermJoinSource } from '../types';
 import type { PropertiesMap } from '../../../../../common/elasticsearch_util';

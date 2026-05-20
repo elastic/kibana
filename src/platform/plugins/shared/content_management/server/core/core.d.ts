@@ -4,8 +4,8 @@ import type { Version } from '@kbn/object-versioning';
 import type { MSearchIn, MSearchOut } from '../../common';
 import type { IContentClient } from '../content_client';
 import type { ContentCrud } from './crud';
-import { EventBus } from './event_bus';
-import { ContentRegistry } from './registry';
+import type { EventBus } from './event_bus';
+import type { ContentRegistry } from './registry';
 export interface GetContentClientForRequestDependencies {
     requestHandlerContext: RequestHandlerContext;
     request: KibanaRequest;

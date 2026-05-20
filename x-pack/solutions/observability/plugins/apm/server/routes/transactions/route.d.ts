@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import type { ColdstartRateResponse } from '../../lib/transaction_groups/get_coldstart_rate';
 import type { ServiceTransactionGroupsResponse } from '../services/get_service_transaction_groups';

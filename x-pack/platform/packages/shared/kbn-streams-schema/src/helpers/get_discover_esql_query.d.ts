@@ -1,5 +1,5 @@
 import type { IngestStreamIndexMode } from '../models/ingest/base';
-import { Streams } from '../models/streams';
+import type { Streams } from '../models/streams';
 export interface GetDiscoverEsqlQueryOptions {
     /**
      * The stream definition to generate the query for

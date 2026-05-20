@@ -1,5 +1,5 @@
 import type { UseEuiTheme } from '@elastic/eui';
-import { VisorMode } from './mode_selector';
+import type { VisorMode } from './mode_selector';
 export declare const visorWidthPercentage = 0.5;
 export declare const dropdownWidthPercentage = 0.35;
 export declare const MODE_SELECT_WIDTH_KQL = 80;

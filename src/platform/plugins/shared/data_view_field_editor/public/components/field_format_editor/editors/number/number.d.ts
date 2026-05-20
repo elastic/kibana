@@ -1,5 +1,5 @@
 import React from 'react';
-import { context as contextType } from '@kbn/kibana-react-plugin/public';
+import type { context as contextType } from '@kbn/kibana-react-plugin/public';
 import { DefaultFormatEditor } from '../default/default';
 export interface NumberFormatEditorParams {
     pattern: string;

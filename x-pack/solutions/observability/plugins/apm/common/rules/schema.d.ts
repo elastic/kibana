@@ -1,8 +1,8 @@
 import type { TypeOf } from '@kbn/config-schema';
-import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import type { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import type { ApmRuleType } from '@kbn/rule-data-utils';
-import { AnomalyDetectorType } from '../anomaly_detection/apm_ml_detectors';
-import { AggregationType } from './apm_rule_types';
+import type { AnomalyDetectorType } from '../anomaly_detection/apm_ml_detectors';
+import type { AggregationType } from './apm_rule_types';
 export declare const searchConfigurationSchema: import("@kbn/config-schema").ObjectType<{
     query: import("@kbn/config-schema").ObjectType<{
         query: import("@kbn/config-schema").Type<string | Record<string, any>>;

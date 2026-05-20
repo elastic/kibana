@@ -1,6 +1,6 @@
 import React from 'react';
-import { AnomalyDetectionSetupState } from '../../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import type { AnomalyDetectionSetupState } from '../../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
+import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import type { AnomalyDetectionApiResponse } from '.';
 interface Props {
     data: AnomalyDetectionApiResponse;

@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { HttpRequestsTimeseries } from './get_mobile_http_requests';
 import type { MobileFiltersResponse } from './get_mobile_filters';
 import type { SessionsTimeseries } from './get_mobile_sessions';

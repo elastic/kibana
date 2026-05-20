@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 import type { DataViewSpec, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { Filter, Query } from '@kbn/es-query';
 import type { COMPARATORS } from '@kbn/alerting-comparators';

@@ -1,5 +1,5 @@
 import type { OperatorFunction, PartialObserver, Subscription } from 'rxjs';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 export declare const useLatest: <Value>(value: Value) => import("react").MutableRefObject<Value>;
 export declare const useObservable: <OutputValue, OutputObservable extends Observable<OutputValue>, InputValues extends Readonly<any[]>>(createObservableOnce: (inputValues: Observable<InputValues>) => OutputObservable, inputValues: InputValues) => OutputObservable;
 export declare const useBehaviorSubject: <InputValue, OutputValue, OutputObservable extends Observable<OutputValue>>(deriveObservableOnce: (input$: Observable<InputValue>) => OutputObservable, createInitialValue: () => InputValue) => readonly [OutputObservable, (value: InputValue) => void];

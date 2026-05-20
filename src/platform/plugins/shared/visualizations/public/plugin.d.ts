@@ -27,8 +27,8 @@ import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisEditorsRegistry } from './vis_editors_registry';
-import { showNewVisModal } from './wizard';
-import { findListItems } from './utils/saved_visualize_utils';
+import type { showNewVisModal } from './wizard';
+import type { findListItems } from './utils/saved_visualize_utils';
 import type { ListingViewRegistry } from './types';
 /**
  * Interface for this plugin's returned setup/start contracts.

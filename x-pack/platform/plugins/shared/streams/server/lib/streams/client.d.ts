@@ -3,7 +3,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { LockManagerService } from '@kbn/lock-manager';
 import type { Condition } from '@kbn/streamlang';
 import type { RoutingStatus } from '@kbn/streams-schema';
-import { Streams, LOGS_OTEL_STREAM_NAME, LOGS_ECS_STREAM_NAME } from '@kbn/streams-schema';
+import type { Streams, LOGS_OTEL_STREAM_NAME, LOGS_ECS_STREAM_NAME } from '@kbn/streams-schema';
 import type { StreamSummary } from '../../../common';
 import type { QueryClient } from './assets/query/query_client';
 import type { AttachmentClient } from './attachments/attachment_client';

@@ -1,5 +1,5 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { ApmDocumentType } from '../../../../common/document_type';
+import type { ApmDocumentType } from '../../../../common/document_type';
 import type { APMEventClient } from '../create_es_client/create_apm_event_client';
 export declare function getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions: boolean): {
     bool: {

@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 declare const purgeInstancesParamsSchema: t.TypeC<{
     body: t.PartialC<{
         list: t.ArrayC<t.Type<string, string, unknown>>;

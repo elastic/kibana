@@ -1,4 +1,4 @@
-import * as openpgp from 'openpgp';
+import type * as openpgp from 'openpgp';
 import type { Logger } from '@kbn/logging';
 import type { PackageVerificationResult } from '../../../types';
 import type { Installation } from '../../../types';

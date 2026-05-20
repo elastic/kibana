@@ -1,4 +1,4 @@
-import { BucketAggType } from './bucket_agg_type';
+import type { BucketAggType } from './bucket_agg_type';
 import type { AggConfigSerialized, BaseAggParams, IAggConfig } from '../types';
 export { termsAggFilter } from './_terms_order_helper';
 export interface CommonAggParamsTerms extends BaseAggParams {

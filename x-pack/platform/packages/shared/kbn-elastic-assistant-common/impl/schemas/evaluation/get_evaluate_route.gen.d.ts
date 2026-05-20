@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const GetEvaluateResponse: z.ZodObject<{
     datasets: z.ZodArray<z.ZodString>;
     graphs: z.ZodArray<z.ZodString>;

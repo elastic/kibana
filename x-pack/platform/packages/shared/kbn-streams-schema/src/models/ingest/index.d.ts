@@ -1,8 +1,8 @@
 import type { BaseStream } from '../base';
-import { IngestBase, IngestBaseUpsertRequest } from './base';
+import type { IngestBase, IngestBaseUpsertRequest } from './base';
 import type { Validation } from '../validation/validation';
-import { ClassicIngest, ClassicIngestUpsertRequest, ClassicStream } from './classic';
-import { WiredIngest, WiredIngestUpsertRequest, WiredStream } from './wired';
+import type { ClassicIngest, ClassicIngestUpsertRequest, ClassicStream } from './classic';
+import type { WiredIngest, WiredIngestUpsertRequest, WiredStream } from './wired';
 export declare namespace IngestStream {
     namespace all {
         type UpsertRequest = WiredStream.UpsertRequest | ClassicStream.UpsertRequest;

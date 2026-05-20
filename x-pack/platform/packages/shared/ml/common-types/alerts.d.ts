@@ -1,6 +1,6 @@
 import type { RuleTypeParams, Rule } from '@kbn/alerting-plugin/common';
 import type { MlAnomalyResultType } from '@kbn/ml-anomaly-utils';
-import { ML_ANOMALY_RESULT_TYPE } from '@kbn/ml-anomaly-utils/constants';
+import type { ML_ANOMALY_RESULT_TYPE } from '@kbn/ml-anomaly-utils/constants';
 export declare const ML_ALERT_TYPES: {
     readonly ANOMALY_DETECTION: "xpack.ml.anomaly_detection_alert";
     readonly AD_JOBS_HEALTH: "xpack.ml.anomaly_detection_jobs_health";

@@ -1,5 +1,5 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { CASE_ATTACHMENT_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
+import type { CASE_ATTACHMENT_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
 import type { ConfigType } from '../../config';
 /**
  * Determines which saved object type should be used for a given attachment type

@@ -1,4 +1,4 @@
-import { RuleNotifyWhen } from '@kbn/alerting-types';
+import type { RuleNotifyWhen } from '@kbn/alerting-types';
 import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import type { RuleFormData } from '../types';
 export * from './routes';

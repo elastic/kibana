@@ -1,6 +1,6 @@
 import type { Moment } from 'moment';
 import type { RecurrenceSchedule } from '../../../../../../types';
-import { RRuleFrequency } from '../../../../../../types';
+import type { RRuleFrequency } from '../../../../../../types';
 export interface CustomFrequencyState {
     freq: RRuleFrequency;
     interval: number;

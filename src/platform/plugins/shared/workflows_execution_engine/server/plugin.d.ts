@@ -1,7 +1,7 @@
 import type { CoreSetup, CoreStart, KibanaRequest, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { BulkScheduleWorkflowResult, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type { CancelAllActiveWorkflowExecutions, CancelWorkflowExecution, ExecuteWorkflow, ExecuteWorkflowStep, ResumeWorkflowExecution, ScheduleWorkflow, TriggerEventsContract, WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginSetupDeps, WorkflowsExecutionEnginePluginStart, WorkflowsExecutionEnginePluginStartDeps } from './types';
-import { WorkflowEventLoggerService } from './workflow_event_logger';
+import type { WorkflowEventLoggerService } from './workflow_event_logger';
 export declare class WorkflowsExecutionEnginePlugin implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart, WorkflowsExecutionEnginePluginSetupDeps, WorkflowsExecutionEnginePluginStartDeps> {
     private readonly logger;
     private readonly config;

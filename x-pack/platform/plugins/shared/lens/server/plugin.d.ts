@@ -9,7 +9,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { TaskManagerSetupContract, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
-import { makeLensEmbeddableFactory } from './embeddable/make_lens_embeddable_factory';
+import type { makeLensEmbeddableFactory } from './embeddable/make_lens_embeddable_factory';
 export interface PluginSetupContract {
     taskManager?: TaskManagerSetupContract;
     embeddable: EmbeddableSetup;

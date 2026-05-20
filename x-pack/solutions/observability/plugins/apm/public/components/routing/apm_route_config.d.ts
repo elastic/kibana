@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import React from 'react';
 /**
  * The array of route definitions to be used when the application

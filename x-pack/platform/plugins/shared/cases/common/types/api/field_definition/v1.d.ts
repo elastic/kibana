@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const FieldDefinitionsFindRequestSchema: z.ZodObject<{
     owner: z.ZodOptional<z.ZodUnion<readonly [z.ZodEnum<{
         observability: "observability";

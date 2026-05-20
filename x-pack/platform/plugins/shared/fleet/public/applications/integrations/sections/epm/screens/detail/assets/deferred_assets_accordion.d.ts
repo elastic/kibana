@@ -1,8 +1,8 @@
 import type { FunctionComponent } from 'react';
 import type { AssetReference } from '../../../../../../../../common';
 import type { PackageInfo } from '../../../../../types';
-import { ElasticsearchAssetType } from '../../../../../types';
-import { KibanaSavedObjectType } from '../../../../../../../../common/types/models';
+import type { ElasticsearchAssetType } from '../../../../../types';
+import type { KibanaSavedObjectType } from '../../../../../../../../common/types/models';
 interface Props {
     packageInfo: PackageInfo;
     type: ElasticsearchAssetType.transform | KibanaSavedObjectType.alert;

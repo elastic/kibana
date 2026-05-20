@@ -1,7 +1,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { SLODefinition } from '../../../../domain/models';
-import { Duration } from '../../../../domain/models';
+import type { Duration } from '../../../../domain/models';
 import type { BurnRateRuleParams } from '../types';
 import type { EvaluationAfterKey } from './build_query';
 export interface EvaluationWindowStats {

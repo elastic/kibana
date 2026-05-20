@@ -1,4 +1,4 @@
-import { SharedComponent } from './components';
+import type { SharedComponent } from './components';
 import type { AutocompleteComponent } from './components/autocomplete_component';
 interface ParametrizedComponentFactories {
     getComponent: (value: string, isValue?: boolean) => ((value: string, parent: SharedComponent | undefined, template?: unknown) => SharedComponent) | undefined;

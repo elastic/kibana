@@ -1,10 +1,10 @@
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { LensSuggestionsApi, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UnifiedHistogramSuggestionContext, UnifiedHistogramVisContext, LensVisServiceState } from '../types';
-import { UnifiedHistogramExternalVisContextStatus } from '../types';
+import type { UnifiedHistogramExternalVisContextStatus } from '../types';
 import { type QueryParams } from '../utils/external_vis_context';
 interface Services {
     data: DataPublicPluginStart;

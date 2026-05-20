@@ -1,7 +1,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { CompositeSLOMemberSummary } from '@kbn/slo-schema';
 import type { CompositeSLODefinition } from '../../domain/models';
-import { computeCompositeSummary } from './compute_composite_summary';
+import type { computeCompositeSummary } from './compute_composite_summary';
 import type { SLODefinitionRepository } from '../slo_definition_repository';
 import type { SummaryClient } from '../summary_client';
 export interface CompositeSummaryDoc {

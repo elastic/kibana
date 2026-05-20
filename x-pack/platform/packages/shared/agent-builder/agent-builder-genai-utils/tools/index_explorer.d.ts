@@ -1,5 +1,5 @@
 import type { Logger } from '@kbn/logging';
-import { EsResourceType } from '@kbn/agent-builder-common';
+import type { EsResourceType } from '@kbn/agent-builder-common';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';

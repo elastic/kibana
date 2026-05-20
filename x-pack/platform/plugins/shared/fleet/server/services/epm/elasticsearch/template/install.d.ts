@@ -1,5 +1,5 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ElasticsearchAssetType } from '../../../../types';
+import type { ElasticsearchAssetType } from '../../../../types';
 import type { RegistryDataStream, IndexTemplateEntry, RegistryElasticsearch, IndexTemplate, IndexTemplateMappings, TemplateMapEntry, TemplateMap, EsAssetReference, ExperimentalDataStreamFeature } from '../../../../types';
 import type { AssetsMap, PackageInstallContext } from '../../../../../common/types';
 export declare const prepareToInstallTemplates: (packageInstallContext: PackageInstallContext, esReferences: EsAssetReference[], experimentalDataStreamFeatures?: ExperimentalDataStreamFeature[], onlyForDataStreams?: RegistryDataStream[]) => Promise<{

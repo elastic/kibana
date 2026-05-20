@@ -51,4 +51,4 @@ export namespace JobsListUI {
 }
 export const JobsList: React.FC<Omit<any, "kibana">>;
 import React from 'react';
-import PropTypes from 'prop-types';
+import type PropTypes from 'prop-types';

@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const EnterSwitchNodeConfigurationSchema: z.ZodObject<{
     type: z.ZodLiteral<"switch">;
     if: z.ZodOptional<z.ZodString>;

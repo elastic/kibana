@@ -4,7 +4,8 @@ import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { UISession } from '@kbn/data-plugin/public/search/session/sessions_mgmt/types';
 import type { OpenInNewTabParams } from '../../../../../context_awareness/types';
 import type { TabState } from '../types';
-import { internalStateSlice, type TabActionPayload, type InternalStateThunkActionCreator } from '../internal_state';
+import type { internalStateSlice} from '../internal_state';
+import { type TabActionPayload, type InternalStateThunkActionCreator } from '../internal_state';
 export declare const setTabs: InternalStateThunkActionCreator<[
     Parameters<typeof internalStateSlice.actions.setTabs>[0]
 ]>;

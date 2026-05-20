@@ -1,5 +1,5 @@
 import type { ToastInputFields } from '@kbn/core/public';
-import { AttachmentType } from '../../common/types/domain';
+import type { AttachmentType } from '../../common/types/domain';
 import type { CasePatchRequest, CaseResolveResponse, CasesPatchResponse, CaseUserActionStatsResponse, FindCasesContainingAllAlertsResponse, SingleCaseMetricsResponse } from '../../common/types/api';
 import type { Case, Cases, Configuration, Configurations, User, UserActions } from '../../common/types/domain';
 import type { CaseUI, ExtendedFieldFilter, FilterOptions, UpdateByKey } from './types';

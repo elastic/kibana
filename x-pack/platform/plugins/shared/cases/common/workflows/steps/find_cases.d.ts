@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 export declare const FindCasesStepTypeId = "cases.findCases";
 export declare const InputSchema: z.ZodObject<{

@@ -5,7 +5,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { ConfigSchema } from './config';
 import type { ISearchSetup, ISearchStart } from './search';
-import { DatatableUtilitiesService } from './datatable_utilities';
+import type { DatatableUtilitiesService } from './datatable_utilities';
 import type { QuerySetup } from './query';
 export interface DataPluginSetup {
     search: ISearchSetup;

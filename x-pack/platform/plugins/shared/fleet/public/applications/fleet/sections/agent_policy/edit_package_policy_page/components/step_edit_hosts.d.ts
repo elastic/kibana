@@ -1,7 +1,7 @@
 import React from 'react';
 import type { AgentPolicy, NewAgentPolicy, PackageInfo } from '../../../../types';
 import type { ValidationResults } from '../../components/agent_policy_validation';
-import { SelectedPolicyTab } from '../../create_package_policy_page/components';
+import type { SelectedPolicyTab } from '../../create_package_policy_page/components';
 interface Props {
     agentPolicies: AgentPolicy[];
     updateAgentPolicies: (u: AgentPolicy[]) => void;

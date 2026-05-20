@@ -1,4 +1,4 @@
-import { FeaturesRegistry } from '../../../common';
+import type { FeaturesRegistry } from '../../../common';
 import type { DiscoverFeature } from './types';
 export declare class DiscoverFeaturesService {
     private registry;

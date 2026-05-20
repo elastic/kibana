@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const indexDescription = "Concrete index or index pattern to analyze. Example: \"logs-*\".";
 export declare const timeRangeSchemaRequired: {
     start: z.ZodString;

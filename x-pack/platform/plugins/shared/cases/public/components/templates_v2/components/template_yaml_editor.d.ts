@@ -1,5 +1,5 @@
 import React from 'react';
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 import type { ValidationError } from './template_yaml_validation_accordion';
 interface TemplateYamlEditorBaseProps {
     value: string;

@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { FunctionDefinition } from '../../../common/functions/types';
 import type { RecalledEntry } from '../../service/knowledge_base_service';
 export declare const functionRoutes: {

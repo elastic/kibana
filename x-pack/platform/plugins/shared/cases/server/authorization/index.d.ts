@@ -1,6 +1,6 @@
 import type { EcsEvent } from '@kbn/core/server';
 import type { OperationDetails } from './types';
-import { ReadOperations, WriteOperations } from './types';
+import type { ReadOperations, WriteOperations } from './types';
 export * from './authorization';
 export * from './audit_logger';
 export * from './types';

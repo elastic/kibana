@@ -1,4 +1,4 @@
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 interface UserDefaultInfo {
     uid: string;

@@ -1,5 +1,5 @@
 import type { CoreSetup, Plugin } from '@kbn/core/public';
-import { FieldFormatsRegistry } from '../common';
+import type { FieldFormatsRegistry } from '../common';
 import type { FormatFactory } from '../common/types';
 export declare class FieldFormatsPlugin implements Plugin<FieldFormatsSetup, FieldFormatsStart> {
     private readonly fieldFormatsRegistry;

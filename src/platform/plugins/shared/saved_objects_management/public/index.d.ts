@@ -1,5 +1,5 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
-import { SavedObjectsManagementPlugin } from './plugin';
+import type { SavedObjectsManagementPlugin } from './plugin';
 export type { SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart, } from './plugin';
 export type { SavedObjectsManagementColumn, SavedObjectsManagementRecord } from './services';
 export { SavedObjectsManagementAction } from './services';

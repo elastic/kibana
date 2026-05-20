@@ -2,7 +2,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import type { ExperimentalIndexingFeature } from '../../../../common/types';
 import type { UpdatePackageRequestSchema } from '../../../types';
-import { getPackageInfo } from './get';
+import type { getPackageInfo } from './get';
 export interface NamespaceCustomizationDiff {
     addedNamespaces: string[];
     removedNamespaces: string[];

@@ -1,7 +1,7 @@
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { SearchSourceDependencies, SerializedSearchSourceFields } from '.';
-import { SearchSource } from '.';
+import type { SearchSource } from '.';
 export declare class SearchSourceService {
     setup(): {
         getAllMigrations: () => MigrateFunctionsObject;

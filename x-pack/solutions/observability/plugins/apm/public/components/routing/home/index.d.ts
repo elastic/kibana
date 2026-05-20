@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import React from 'react';
 export declare const ServiceInventoryTitle: string;
 export declare const ServiceMapTitle: string;

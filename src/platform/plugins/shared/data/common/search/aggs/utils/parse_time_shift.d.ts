@@ -1,4 +1,4 @@
-import moment from 'moment';
+import type moment from 'moment';
 import type { TimeRange } from '../../../types';
 declare const INVALID_DATE = "invalid";
 declare const PREVIOUS_DATE = "previous";

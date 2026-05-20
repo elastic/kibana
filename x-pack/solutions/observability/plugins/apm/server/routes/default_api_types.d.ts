@@ -1,7 +1,7 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { BoolQuery } from '@kbn/es-query';
-import { ApmDocumentType } from '../../common/document_type';
-import { RollupInterval } from '../../common/rollup';
+import type { ApmDocumentType } from '../../common/document_type';
+import type { RollupInterval } from '../../common/rollup';
 export { environmentRt } from '../../common/environment_rt';
 export declare const rangeRt: t.TypeC<{
     start: t.Type<number, string, unknown>;

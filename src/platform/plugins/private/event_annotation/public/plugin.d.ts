@@ -6,7 +6,7 @@ import type { ContentManagementPublicSetup, ContentManagementPublicStart } from 
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public/types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { EventAnnotationService } from './event_annotation_service';
+import type { EventAnnotationService } from './event_annotation_service';
 export interface EventAnnotationStartDependencies {
     data: DataPublicPluginStart;
     savedObjectsTagging: SavedObjectTaggingPluginStart;

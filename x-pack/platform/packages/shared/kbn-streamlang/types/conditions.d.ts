@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const stringOrNumberOrBoolean: z.ZodUnion<readonly [z.ZodString, z.ZodNumber, z.ZodBoolean]>;
 export type StringOrNumberOrBoolean = string | number | boolean;
 export type BinaryOperatorKeys = keyof Omit<ShorthandBinaryFilterCondition, 'field'>;

@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { AuthMode, ConnectorSpec } from '../connector_spec';
 interface GenerateOptions {
     isPfxEnabled?: boolean;

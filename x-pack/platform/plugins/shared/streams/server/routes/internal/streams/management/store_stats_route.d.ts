@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export interface StreamStoreStat {
     store_size_bytes: number;
 }

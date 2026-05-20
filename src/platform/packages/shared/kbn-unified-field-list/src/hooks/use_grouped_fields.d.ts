@@ -2,8 +2,8 @@ import { type CoreStart } from '@kbn/core-lifecycle-browser';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { type DataViewsContract } from '@kbn/data-views-plugin/public';
 import { type UseNewFieldsParams } from './use_new_fields';
-import type { AdditionalFieldGroups } from '../types';
-import { type FieldListGroups, type FieldListItem, type OverrideFieldGroupDetails, ExistenceFetchStatus } from '../types';
+import type { AdditionalFieldGroups , ExistenceFetchStatus } from '../types';
+import { type FieldListGroups, type FieldListItem, type OverrideFieldGroupDetails } from '../types';
 import { type FieldFiltersResult, type FieldFiltersParams } from './use_field_filters';
 export interface GroupedFieldsParams<T extends FieldListItem> {
     dataViewId: string | null;

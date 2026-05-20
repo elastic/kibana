@@ -1,5 +1,5 @@
-import { HttpProxyAgent } from 'http-proxy-agent';
-import { HttpsProxyAgent } from 'https-proxy-agent';
+import type { HttpProxyAgent } from 'http-proxy-agent';
+import type { HttpsProxyAgent } from 'https-proxy-agent';
 import type { HttpsProxyAgentOptions } from 'https-proxy-agent';
 export interface RegistryProxySettings {
     proxyUrl: string;

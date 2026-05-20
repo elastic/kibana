@@ -1,5 +1,5 @@
-import { Readable } from 'stream';
-import { z } from '@kbn/zod/v4';
+import type { Readable } from 'stream';
+import type { z } from '@kbn/zod/v4';
 import type { ContentPack } from '@kbn/content-packs-schema';
 export declare const contentRoutes: {
     "POST /internal/streams/{name}/content/preview": import("@kbn/server-route-repository-utils").ServerRoute<"POST /internal/streams/{name}/content/preview", z.ZodObject<{

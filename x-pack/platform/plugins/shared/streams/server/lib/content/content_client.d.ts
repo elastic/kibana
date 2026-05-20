@@ -1,6 +1,6 @@
 import type { ContentPackSavedObjectLinks, SavedObjectLinkWithReferences } from '@kbn/content-packs-schema';
 import type { IStorageClient } from '@kbn/storage-adapter';
-import { CONTENT_NAME, STREAM_NAME } from './fields';
+import type { CONTENT_NAME, STREAM_NAME } from './fields';
 export declare const contentStorageSettings: {
     name: string;
     schema: {

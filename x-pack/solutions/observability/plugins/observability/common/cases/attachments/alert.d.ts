@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 /**
  * Single source of truth for the Observability alert attachment metadata
  * shape. Used by the registry validator on both server and client.

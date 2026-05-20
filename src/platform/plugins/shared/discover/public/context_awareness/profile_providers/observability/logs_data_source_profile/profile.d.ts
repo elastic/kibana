@@ -1,4 +1,4 @@
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { DataSourceContext, DataSourceProfileProvider } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 export type LogOverViewAccordionExpandedValue = 'stacktrace' | 'quality_issues' | undefined;

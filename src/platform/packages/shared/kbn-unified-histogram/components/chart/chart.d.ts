@@ -3,7 +3,7 @@ import React from 'react';
 import type { EmbeddableComponentProps, LensEmbeddableInput, LensEmbeddableOutput } from '@kbn/lens-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { UnifiedHistogramChartContext, UnifiedHistogramChartLoadEvent, UnifiedHistogramFetch$, UnifiedHistogramFetchParams, UnifiedHistogramHitsContext, UnifiedHistogramServices, LensVisServiceState } from '../../types';
-import { UnifiedHistogramFetchStatus } from '../../types';
+import type { UnifiedHistogramFetchStatus } from '../../types';
 import type { LensVisService } from '../../services/lens_vis_service';
 export interface UnifiedHistogramChartProps {
     isChartAvailable: boolean;

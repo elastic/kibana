@@ -80,9 +80,7 @@ export interface HelperOptions extends Omit<Handlebars.HelperOptions, 'fn' | 'in
  *
  * When registering a helper function, it should be of this type.
  */
-interface HelperDelegateFixed {
-    (...params: any[]): any;
-}
+type HelperDelegateFixed = (...params: any[]) => any;
 export type { HelperDelegateFixed as HelperDelegate };
 /**
  * A template-function type.

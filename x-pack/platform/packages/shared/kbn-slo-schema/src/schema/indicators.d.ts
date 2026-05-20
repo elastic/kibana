@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 declare const kqlQuerySchema: t.StringC;
 declare const filtersSchema: t.ArrayC<t.IntersectionC<[t.TypeC<{
     meta: t.PartialC<{

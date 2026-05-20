@@ -1,5 +1,5 @@
 import React from 'react';
-import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
+import type { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 export declare function SunburstChart({ data, label, chartKey, fetchStatus, chartWidth, }: {
     data?: Array<{
         key: string | number;

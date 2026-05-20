@@ -1,4 +1,4 @@
-import { ReportingError } from '@kbn/reporting-common';
+import type { ReportingError } from '@kbn/reporting-common';
 import type { ExecutionError } from '@kbn/reporting-common/types';
 export declare function isExecutionError(error: ExecutionError | unknown): error is ExecutionError;
 /**

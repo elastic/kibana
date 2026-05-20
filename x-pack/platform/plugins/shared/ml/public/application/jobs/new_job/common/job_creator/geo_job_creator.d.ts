@@ -6,7 +6,7 @@ import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { MlApi } from '../../../../services/ml_api_service';
 import type { NewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { JobCreator } from './job_creator';
-import { JOB_TYPE } from '../../../../../../common/constants/new_job';
+import type { JOB_TYPE } from '../../../../../../common/constants/new_job';
 export declare class GeoJobCreator extends JobCreator {
     private _geoField;
     private _geoAgg;

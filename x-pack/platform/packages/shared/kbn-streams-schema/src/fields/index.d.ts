@@ -1,5 +1,5 @@
 import type { MappingBooleanProperty, MappingByteNumberProperty, MappingDateNanosProperty, MappingDateProperty, MappingDoubleNumberProperty, MappingFloatNumberProperty, MappingGeoPointProperty, MappingHalfFloatNumberProperty, MappingIntegerNumberProperty, MappingIpProperty, MappingKeywordProperty, MappingLongNumberProperty, MappingMatchOnlyTextProperty, MappingProperty, MappingShortNumberProperty, MappingTextProperty, MappingUnsignedLongNumberProperty, MappingVersionProperty, MappingWildcardProperty } from '@elastic/elasticsearch/lib/api/types';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const FIELD_DEFINITION_TYPES: readonly ["keyword", "match_only_text", "long", "double", "date", "boolean", "ip", "geo_point", "integer", "short", "byte", "float", "half_float", "text", "wildcard", "version", "unsigned_long", "date_nanos"];
 export type FieldDefinitionType = (typeof FIELD_DEFINITION_TYPES)[number];
 export declare const ALL_FIELD_DEFINITION_TYPES: readonly ["keyword", "match_only_text", "long", "double", "date", "boolean", "ip", "geo_point", "integer", "short", "byte", "float", "half_float", "text", "wildcard", "version", "unsigned_long", "date_nanos", "system"];

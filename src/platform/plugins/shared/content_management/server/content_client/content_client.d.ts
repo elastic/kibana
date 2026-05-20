@@ -1,5 +1,5 @@
 import type { StorageContext } from '../core';
-import { ContentCrud } from '../core/crud';
+import type { ContentCrud } from '../core/crud';
 import type { IContentClient } from './types';
 interface Context<T = unknown> {
     crudInstance: ContentCrud<T>;

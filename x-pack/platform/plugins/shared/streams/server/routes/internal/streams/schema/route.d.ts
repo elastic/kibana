@@ -1,5 +1,5 @@
 import type { FieldDefinitionType, NamedFieldDefinitionConfig } from '@kbn/streams-schema';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { DocumentWithIgnoredFields } from '@kbn/streams-schema/src/shared/record_types';
 export declare const __test__: {
     getSimulatableFieldDefinitions: (fields: NamedFieldDefinitionConfig[]) => ((import("@elastic/elasticsearch/lib/api/types").MappingBooleanProperty & {

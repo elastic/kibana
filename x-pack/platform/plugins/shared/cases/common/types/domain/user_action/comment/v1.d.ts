@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 export declare const CommentUserActionPayloadRt: rt.ExactC<rt.TypeC<{
     comment: rt.UnionC<[rt.UnionC<[rt.ExactC<rt.TypeC<{
         comment: rt.Type<string, string, unknown>;

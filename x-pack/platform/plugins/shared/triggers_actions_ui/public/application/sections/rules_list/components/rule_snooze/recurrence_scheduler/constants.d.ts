@@ -1,4 +1,4 @@
-import { RRuleFrequency } from '../../../../../../types';
+import type { RRuleFrequency } from '../../../../../../types';
 export { I18N_WEEKDAY_OPTIONS } from '../../../../../../common/constants';
 export { ISO_WEEKDAYS } from '@kbn/alerting-plugin/common';
 export declare const RECURRENCE_END_OPTIONS: {

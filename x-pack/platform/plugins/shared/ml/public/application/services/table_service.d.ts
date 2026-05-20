@@ -2,4 +2,4 @@ export namespace mlTableService {
     let rowMouseenter$: Subject<any>;
     let rowMouseleave$: Subject<any>;
 }
-import { Subject } from 'rxjs';
+import type { Subject } from 'rxjs';

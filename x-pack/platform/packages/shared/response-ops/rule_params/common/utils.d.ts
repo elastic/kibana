@@ -1,4 +1,4 @@
-import { Comparator } from './constants';
+import type { Comparator } from './constants';
 export type ComparatorFn = (value: number, threshold: number[]) => boolean;
 export declare const betweenComparators: Set<string>;
 export declare const jobsSelectionSchema: import("@kbn/config-schema").ObjectType<{

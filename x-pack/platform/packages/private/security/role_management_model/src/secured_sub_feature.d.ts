@@ -1,7 +1,7 @@
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { SubFeature } from '@kbn/features-plugin/common';
-import { SubFeaturePrivilege } from './sub_feature_privilege';
-import { SubFeaturePrivilegeGroup } from './sub_feature_privilege_group';
+import type { SubFeaturePrivilege } from './sub_feature_privilege';
+import type { SubFeaturePrivilegeGroup } from './sub_feature_privilege_group';
 export declare class SecuredSubFeature extends SubFeature {
     private readonly actionMapping;
     readonly privileges: SubFeaturePrivilege[];

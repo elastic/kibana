@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 interface BuildParamsSchemaOptions {
     /** The full request schema containing body, path, query, headers */
     requestSchema: z.ZodType;

@@ -1,4 +1,4 @@
-import { LRUCache } from 'lru-cache';
+import type { LRUCache } from 'lru-cache';
 export interface IHashedCache<KeyType, ValueType> {
     get(key: KeyType): ValueType | undefined;
     set(key: KeyType, value: ValueType): boolean;

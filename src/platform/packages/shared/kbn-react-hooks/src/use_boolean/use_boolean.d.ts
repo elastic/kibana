@@ -1,4 +1,4 @@
-import useToggle from 'react-use/lib/useToggle';
+import type useToggle from 'react-use/lib/useToggle';
 export type VoidHandler = () => void;
 export interface UseBooleanHandlers {
     on: VoidHandler;

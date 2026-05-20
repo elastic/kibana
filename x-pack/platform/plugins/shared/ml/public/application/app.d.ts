@@ -3,7 +3,7 @@ import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { ExperimentalFeatures, MlFeatures, NLPSettings } from '../../common/constants/app';
 import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
-import { getMlGlobalServices } from './util/get_services';
+import type { getMlGlobalServices } from './util/get_services';
 import type { ManagementSectionId } from './management';
 export type MlDependencies = Omit<MlSetupDependencies, 'share' | 'fieldFormats' | 'maps' | 'cases' | 'licensing' | 'uiActions'> & MlStartDependencies;
 interface AppProps {

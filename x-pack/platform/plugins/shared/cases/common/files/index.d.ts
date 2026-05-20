@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 import type { HttpApiPrivilegeOperation, Owner } from '../constants/types';
 /**
  * This type is only used to validate for deletion, it does not check all the fields that should exist in the file

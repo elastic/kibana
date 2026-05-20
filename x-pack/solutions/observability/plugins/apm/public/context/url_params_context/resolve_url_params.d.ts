@@ -1,5 +1,5 @@
 import type { Location } from 'history';
-import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
+import type { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import type { UrlParams } from './types';
 type TimeUrlParams = Pick<UrlParams, 'start' | 'end' | 'rangeFrom' | 'rangeTo'>;
 export declare function resolveUrlParams(location: Location, state: TimeUrlParams): Partial<{

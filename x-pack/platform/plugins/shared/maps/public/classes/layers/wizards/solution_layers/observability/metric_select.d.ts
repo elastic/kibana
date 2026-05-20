@@ -1,6 +1,6 @@
 import React from 'react';
 import type { EuiSelectOption } from '@elastic/eui';
-import { OBSERVABILITY_LAYER_TYPE } from './layer_select';
+import type { OBSERVABILITY_LAYER_TYPE } from './layer_select';
 export declare enum OBSERVABILITY_METRIC_TYPE {
     TRANSACTION_DURATION = "TRANSACTION_DURATION",
     COUNT = "COUNT",

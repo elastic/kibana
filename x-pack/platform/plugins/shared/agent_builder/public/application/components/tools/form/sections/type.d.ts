@@ -1,5 +1,5 @@
 import React from 'react';
-import { ToolFormMode } from '../tool_form';
+import type { ToolFormMode } from '../tool_form';
 export interface TypeProps {
     mode: ToolFormMode;
 }

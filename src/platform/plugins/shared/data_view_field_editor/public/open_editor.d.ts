@@ -1,7 +1,7 @@
 import type { CoreStart } from '@kbn/core/public';
 import type { ApiService } from './lib/api';
 import type { DataPublicPluginStart, DataView, DataViewField, DataViewsPublicPluginStart, FieldFormatsStart, UsageCollectionStart } from './shared_imports';
-import { DataViewLazy } from './shared_imports';
+import type { DataViewLazy } from './shared_imports';
 import type { CloseEditor, Field, PluginStart } from './types';
 /**
  * Options for opening the field editor

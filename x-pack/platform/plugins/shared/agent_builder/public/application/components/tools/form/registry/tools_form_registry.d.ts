@@ -1,4 +1,4 @@
-import { ToolType } from '@kbn/agent-builder-common';
+import type { ToolType } from '@kbn/agent-builder-common';
 import type { CreateToolPayload, UpdateToolPayload } from '../../../../../../common/http_api/tools';
 import type { ToolFormData } from '../types/tool_form_types';
 export declare const TOOLS_FORM_REGISTRY: {

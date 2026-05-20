@@ -1,7 +1,7 @@
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { type MlAnomaliesTableRecord, type MlAnomalyCategorizerStatsDoc, type MlAnomalyRecordDoc, ML_JOB_ID, ML_PARTITION_FIELD_VALUE } from '@kbn/ml-anomaly-utils';
+import { type MlAnomaliesTableRecord, type MlAnomalyCategorizerStatsDoc, type MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
-import type { CriteriaField, Influencer } from '@kbn/ml-anomaly-utils';
+import type { CriteriaField, Influencer , ML_JOB_ID, ML_PARTITION_FIELD_VALUE } from '@kbn/ml-anomaly-utils';
 import type { GetStoppedPartitionResult, GetDatafeedResultsChartDataResult, DatafeedResultsChartDataParams } from '@kbn/ml-common-types/results';
 import type { MlClient } from '../../lib/ml_client';
 /**

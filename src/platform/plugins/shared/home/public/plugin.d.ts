@@ -6,7 +6,7 @@ import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/publi
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { ConfigSchema } from '../server/config';
 import type { EnvironmentServiceSetup, FeatureCatalogueRegistrySetup, TutorialServiceSetup, AddDataServiceSetup, WelcomeServiceSetup } from './services';
-import { FeatureCatalogueRegistry } from './services';
+import type { FeatureCatalogueRegistry } from './services';
 export interface HomePluginStartDependencies {
     dataViews: DataViewsPublicPluginStart;
     urlForwarding: UrlForwardingStart;

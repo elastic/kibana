@@ -1,4 +1,4 @@
-import { ES_AGGREGATION } from '@kbn/ml-anomaly-utils';
+import type { ES_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import type { SeriesConfig } from '@kbn/ml-common-types/results';
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 /**

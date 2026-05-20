@@ -1,6 +1,6 @@
 import type { TypeOf } from '@kbn/config-schema';
-import { DataGridDensity } from '@kbn/discover-utils';
-import { VIEW_MODE } from '../../common';
+import type { DataGridDensity } from '@kbn/discover-utils';
+import type { VIEW_MODE } from '../../common';
 export declare const SCHEMA_SEARCH_V8_8_0: import("@kbn/config-schema").ObjectType<{
     title: import("@kbn/config-schema").Type<string>;
     description: import("@kbn/config-schema").Type<string>;

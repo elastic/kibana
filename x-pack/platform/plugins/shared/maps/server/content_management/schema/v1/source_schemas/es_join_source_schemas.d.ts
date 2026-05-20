@@ -1,4 +1,4 @@
-import { SOURCE_TYPES } from '../../../../../common';
+import type { SOURCE_TYPES } from '../../../../../common';
 export declare const ESJoinSourceSchema: import("@kbn/config-schema").ObjectType<Omit<Omit<{
     applyForceRefresh: import("@kbn/config-schema").Type<boolean | undefined>;
     applyGlobalQuery: import("@kbn/config-schema").Type<boolean | undefined>;

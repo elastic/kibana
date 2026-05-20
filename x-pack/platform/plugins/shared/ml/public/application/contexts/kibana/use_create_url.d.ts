@@ -1,6 +1,6 @@
 import type { LocatorGetUrlParams } from '@kbn/share-plugin/common/url_service';
 import type { MlLocatorParams } from '@kbn/ml-common-types/locator';
-import { MlManagementLocatorInternal } from '../../../locator/ml_management_locator';
+import type { MlManagementLocatorInternal } from '../../../locator/ml_management_locator';
 import type { NavigateToMlManagementLink } from '../../jobs/new_job/common/job_creator/util/general';
 export declare const useMlManagementLocator: () => import("@kbn/share-plugin/common/url_service").LocatorPublic<import("@kbn/utility-types").SerializableRecord> | undefined;
 export declare const useMlManagementLocatorInternal: () => MlManagementLocatorInternal;

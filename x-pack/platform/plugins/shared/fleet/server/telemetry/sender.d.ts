@@ -1,7 +1,7 @@
 import type { CoreStart, Logger } from '@kbn/core/server';
 import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
-import { TelemetryQueue } from './queue';
+import type { TelemetryQueue } from './queue';
 import type { FleetTelemetryChannel, FleetTelemetryChannelEvents } from './types';
 /**
  * Simplified version of https://github.com/elastic/kibana/blob/master/x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/sender.ts

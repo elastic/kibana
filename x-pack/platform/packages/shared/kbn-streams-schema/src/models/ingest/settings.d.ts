@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export interface IngestStreamSettings {
     'index.number_of_replicas'?: {
         value: number;

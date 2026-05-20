@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 export declare const aiAssistantRouteRepository: {
     "GET /internal/observability/assistant/alert_details_contextual_insights": import("@kbn/server-route-repository-utils").ServerRoute<"GET /internal/observability/assistant/alert_details_contextual_insights", t.TypeC<{
         query: t.IntersectionC<[t.TypeC<{

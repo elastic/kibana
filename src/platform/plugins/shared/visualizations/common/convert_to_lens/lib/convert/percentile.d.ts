@@ -1,4 +1,4 @@
-import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import type { METRIC_TYPES } from '@kbn/data-plugin/common';
 import type { PercentileParams } from '../..';
 import type { PercentileColumn, CommonColumnConverterArgs } from './types';
 export declare const convertToPercentileParams: (percentile: number) => PercentileParams;

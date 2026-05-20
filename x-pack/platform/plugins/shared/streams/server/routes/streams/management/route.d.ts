@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { ResyncStreamsResponse } from '../../../lib/streams/client';
 export declare const forkStreamsRoute: Record<"POST /api/streams/{name}/_fork 2023-10-31", import("@kbn/server-route-repository-utils").ServerRoute<"POST /api/streams/{name}/_fork 2023-10-31", z.ZodObject<{
     path: z.ZodObject<{

@@ -1,6 +1,7 @@
 import { type AggregateQuery, type Query } from '@kbn/es-query';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import { DataSourceType, type DataViewDataSource, type DiscoverDataSource, type EsqlDataSource } from './types';
+import type { DataSourceType} from './types';
+import { type DataViewDataSource, type DiscoverDataSource, type EsqlDataSource } from './types';
 export declare const createDataViewDataSource: ({ dataViewId, }: {
     dataViewId: string;
 }) => DataViewDataSource;

@@ -1,10 +1,10 @@
 import type { FeatureCollection } from 'geojson';
 import { type EuiThemeComputed } from '@elastic/eui';
 import type { LayerDescriptor } from '@kbn/maps-plugin/common';
-import { FIELD_ORIGIN, STYLE_TYPE } from '@kbn/maps-plugin/common';
+import type { FIELD_ORIGIN, STYLE_TYPE } from '@kbn/maps-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { VectorSourceRequestMeta } from '@kbn/maps-plugin/common';
-import { LAYER_TYPE } from '@kbn/maps-plugin/common';
+import type { LAYER_TYPE } from '@kbn/maps-plugin/common';
 import type { MlApi } from '../application/services/ml_api_service';
 import { type SourceIndexGeoFields } from '../application/explorer/explorer_utils';
 export declare const ML_ANOMALY_LAYERS: {

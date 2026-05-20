@@ -1,5 +1,5 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { EsResourceType } from '@kbn/agent-builder-common';
+import type { EsResourceType } from '@kbn/agent-builder-common';
 export interface DataStreamSearchSource {
     type: EsResourceType.dataStream;
     name: string;

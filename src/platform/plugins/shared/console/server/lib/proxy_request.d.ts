@@ -1,4 +1,4 @@
-import http from 'http';
+import type http from 'http';
 import type stream from 'stream';
 import type { URL } from 'url';
 interface Args {

@@ -1,5 +1,6 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
-import { EsqlPlugin, type EsqlPluginSetup, type EsqlPluginStart } from './plugin';
+import type { EsqlPlugin} from './plugin';
+import { type EsqlPluginSetup, type EsqlPluginStart } from './plugin';
 export { ESQLLangEditor } from './create_editor';
 export { ESQLMenu, EsqlEditorActionsProvider } from './lazy_esql_menu';
 export { useESQLQueryStats } from './hooks/use_esql_query_stats';

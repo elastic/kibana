@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { AuthTypeDef } from '../connector_spec';
 export declare const AUTH_TYPE_DISCRIMINATOR = "authType";
 export declare const getSchemaForAuthType: (authTypeDef: string | AuthTypeDef) => {

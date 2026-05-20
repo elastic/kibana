@@ -1,5 +1,5 @@
-import type { HookContextByLifecycle } from './types';
-import { HookLifecycle, type BeforeAgentHookContext, type BeforeToolCallHookContext, type AfterToolCallHookContext, type HookHandlerResult } from './types';
+import type { HookContextByLifecycle , HookLifecycle} from './types';
+import { type BeforeAgentHookContext, type BeforeToolCallHookContext, type AfterToolCallHookContext, type HookHandlerResult } from './types';
 export declare function applyBeforeAgentResult(context: BeforeAgentHookContext, result: void | HookHandlerResult<HookLifecycle.beforeAgent>): BeforeAgentHookContext;
 export declare function applyBeforeToolCallResult(context: BeforeToolCallHookContext, result: void | HookHandlerResult<HookLifecycle.beforeToolCall>): BeforeToolCallHookContext;
 export declare function applyAfterToolCallResult(context: AfterToolCallHookContext, result: void | HookHandlerResult<HookLifecycle.afterToolCall>): AfterToolCallHookContext;

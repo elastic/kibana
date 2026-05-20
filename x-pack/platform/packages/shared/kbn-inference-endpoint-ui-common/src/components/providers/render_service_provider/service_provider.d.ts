@@ -1,6 +1,6 @@
 import React from 'react';
 import type { SolutionView } from '@kbn/spaces-plugin/common';
-import { ServiceProviderKeys } from '../../../constants';
+import type { ServiceProviderKeys } from '../../../constants';
 interface ServiceProviderProps {
     providerKey: ServiceProviderKeys;
     searchValue?: string;

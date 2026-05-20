@@ -1,4 +1,5 @@
-import { Observable, type Subscriber } from 'rxjs';
+import type { Observable} from 'rxjs';
+import { type Subscriber } from 'rxjs';
 import type { ChatCompletionChunkEvent, ChatCompletionTokenCountEvent } from '@kbn/inference-common';
 import type { GenerateContentResponseChunk, GenerateContentResponse } from './types';
 type ChunkEvent = ChatCompletionChunkEvent | ChatCompletionTokenCountEvent;

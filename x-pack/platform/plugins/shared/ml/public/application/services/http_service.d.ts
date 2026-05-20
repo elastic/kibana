@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { HttpFetchOptionsWithPath, HttpStart } from '@kbn/core/public';
 /**
  * ML Http Service

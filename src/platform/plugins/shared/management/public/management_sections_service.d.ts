@@ -1,4 +1,4 @@
-import { ManagementSection } from './utils';
+import type { ManagementSection } from './utils';
 import type { SectionsServiceSetup, SectionsServiceStartDeps, DefinedSections, ManagementSectionsStartPrivate } from './types';
 declare const getSectionsServiceStartPrivate: import("@kbn/kibana-utils-plugin/public").Get<ManagementSectionsStartPrivate>;
 export { getSectionsServiceStartPrivate };

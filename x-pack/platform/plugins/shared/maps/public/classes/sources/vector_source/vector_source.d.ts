@@ -8,7 +8,7 @@ import type { TimeRange } from '@kbn/es-query';
 import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import type { IVectorStyle } from '../../styles/vector/vector_style';
-import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
+import type { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import type { TooltipFeatureAction } from '../../../../common/descriptor_types';
 import type { ITooltipProperty } from '../../tooltips/tooltip_property';
 import type { ISource } from '../source';

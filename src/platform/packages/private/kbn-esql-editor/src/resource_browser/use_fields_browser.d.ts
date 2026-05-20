@@ -1,6 +1,6 @@
 import { type MutableRefObject } from 'react';
 import type { monaco } from '@kbn/code-editor';
-import { DataSourceSelectionChange } from '@kbn/esql-resource-browser';
+import type { DataSourceSelectionChange } from '@kbn/esql-resource-browser';
 import type { BrowserPopoverPosition } from './types';
 import { type ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 interface UseFieldsBrowserParams {

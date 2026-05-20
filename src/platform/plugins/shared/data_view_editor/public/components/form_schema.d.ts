@@ -1,4 +1,4 @@
-import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
+import type { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import type { ValidationFunc } from '../shared_imports';
 export declare const singleAstriskValidator: (...args: Parameters<ValidationFunc>) => ReturnType<ValidationFunc>;
 export declare const schema: {

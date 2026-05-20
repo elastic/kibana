@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { TimePickerTimeDefaults } from '../components/shared/date_picker/typings';
 export declare const APMLocatorPayloadValidator: t.UnionC<[t.TypeC<{
     serviceName: t.UndefinedC;

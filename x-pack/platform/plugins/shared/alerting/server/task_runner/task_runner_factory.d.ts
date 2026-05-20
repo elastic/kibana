@@ -1,10 +1,10 @@
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import type { RuleAlertData, RuleTypeParams, RuleTypeState, AlertInstanceState, AlertInstanceContext } from '../types';
-import { TaskRunner } from './task_runner';
+import type { TaskRunner } from './task_runner';
 import type { NormalizedRuleType } from '../rule_type_registry';
 import type { InMemoryMetrics } from '../monitoring';
 import type { TaskRunnerContext } from './types';
-import { AdHocTaskRunner } from './ad_hoc_task_runner';
+import type { AdHocTaskRunner } from './ad_hoc_task_runner';
 export declare class TaskRunnerFactory {
     private isInitialized;
     private taskRunnerContext?;

@@ -1,8 +1,8 @@
 import type { SavedObjectsFindResult, SavedObjectsFindResponse, SavedObject, SavedObjectReference, IBasePath } from '@kbn/core/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import type { ActionsAttachmentPayload, AlertAttachmentPayload, AttachmentV2, AttachmentAttributes, AttachmentAttributesV2, Case, EventAttachmentPayload, User, UserCommentAttachmentPayload } from '../../common/types/domain';
-import { CaseStatuses, ConnectorTypes } from '../../common/types/domain';
-import { OWNER_INFO } from '../../common/constants';
+import type { CaseStatuses, ConnectorTypes } from '../../common/types/domain';
+import type { OWNER_INFO } from '../../common/constants';
 import type { CASE_VIEW_PAGE_TABS } from '../../common/types';
 import type { AlertInfo, FileAttachmentRequest } from './types';
 import type { UpdateAlertStatusRequest } from '../client/alerts/types';

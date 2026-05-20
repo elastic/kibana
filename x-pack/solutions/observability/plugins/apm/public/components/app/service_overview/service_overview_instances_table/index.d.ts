@@ -1,5 +1,5 @@
 import React from 'react';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import type { SortDirection } from '../service_overview_instances_chart_and_table';
 import type { InstancesSortField } from '../../../../../common/instances';

@@ -1,4 +1,4 @@
-import { ContentType } from './content_type';
+import type { ContentType } from './content_type';
 import type { EventBus } from './event_bus';
 import type { ContentStorage, ContentTypeDefinition, MSearchConfig } from './types';
 import type { ContentCrud } from './crud';

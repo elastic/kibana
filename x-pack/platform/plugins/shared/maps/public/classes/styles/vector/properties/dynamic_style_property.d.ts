@@ -5,7 +5,7 @@ import type { DataRequest } from '../../../util/data_request';
 import type { IStyleProperty } from './style_property';
 import { AbstractStyleProperty } from './style_property';
 import type { VECTOR_STYLES, RawValue, FieldFormatter } from '../../../../../common/constants';
-import { FIELD_ORIGIN, MB_LOOKUP_FUNCTION, DATA_MAPPING_FUNCTION, STYLE_TYPE } from '../../../../../common/constants';
+import type { FIELD_ORIGIN, MB_LOOKUP_FUNCTION, DATA_MAPPING_FUNCTION, STYLE_TYPE } from '../../../../../common/constants';
 import type { Category, FieldMetaOptions, PercentilesFieldMeta, RangeFieldMeta, StyleMetaData } from '../../../../../common/descriptor_types';
 import type { IField } from '../../../fields/field';
 import type { IVectorLayer } from '../../../layers/vector_layer';

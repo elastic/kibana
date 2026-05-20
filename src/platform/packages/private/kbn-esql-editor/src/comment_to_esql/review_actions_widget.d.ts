@@ -1,4 +1,4 @@
-import { monaco } from '@kbn/code-editor';
+import type { monaco } from '@kbn/code-editor';
 import type { EuiThemeComputed } from '@elastic/eui';
 interface ReviewActionsCallbacks {
     onAccept: () => void;

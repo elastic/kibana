@@ -1,6 +1,6 @@
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { InspectorViewRegistry } from './view_registry';
+import type { InspectorViewRegistry } from './view_registry';
 import type { InspectorOptions, InspectorSession } from './types';
 import type { Adapters } from '../common';
 export interface InspectorPluginStartDeps {

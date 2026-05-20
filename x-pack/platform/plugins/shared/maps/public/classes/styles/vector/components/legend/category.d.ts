@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import React from 'react';
-import { VECTOR_STYLES } from '../../../../../../common/constants';
+import type { VECTOR_STYLES } from '../../../../../../common/constants';
 interface Props {
     styleName: VECTOR_STYLES;
     label: ReactElement<any> | string | number;

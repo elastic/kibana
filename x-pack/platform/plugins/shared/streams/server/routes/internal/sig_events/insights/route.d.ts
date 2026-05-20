@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { TaskResult } from '@kbn/streams-schema';
 import { type Insight } from '@kbn/streams-schema';
 import type { InsightsDiscoveryTaskResult } from '../../../../lib/sig_events/tasks/insights_discovery';

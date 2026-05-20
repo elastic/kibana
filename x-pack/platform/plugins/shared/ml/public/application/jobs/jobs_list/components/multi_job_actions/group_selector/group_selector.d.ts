@@ -33,4 +33,4 @@ export class GroupSelectorUI extends React.Component<any, any, any> {
 }
 export const GroupSelector: React.FC<Omit<any, "kibana">>;
 import React from 'react';
-import PropTypes from 'prop-types';
+import type PropTypes from 'prop-types';

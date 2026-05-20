@@ -1,6 +1,6 @@
 import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 import type { StreamQuery } from '@kbn/streams-schema';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export interface ListQueriesResponse {
     queries: StreamQuery[];
 }

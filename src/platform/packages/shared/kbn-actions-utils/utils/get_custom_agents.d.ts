@@ -1,5 +1,5 @@
 import type { Agent as HttpAgent } from 'http';
-import { Agent as HttpsAgent } from 'https';
+import type { Agent as HttpsAgent } from 'https';
 import type { Logger } from '@kbn/logging';
 import type { CustomHostSettings, ProxySettings, SSLSettings } from './types';
 /**

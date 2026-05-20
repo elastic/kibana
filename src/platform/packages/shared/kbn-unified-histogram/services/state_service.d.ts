@@ -1,7 +1,7 @@
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
-import { UnifiedHistogramFetchStatus } from '..';
+import type { UnifiedHistogramFetchStatus } from '..';
 import type { UnifiedHistogramServices, UnifiedHistogramChartLoadEvent, UnifiedHistogramTopPanelHeightContext } from '../types';
 /**
  * The current state of the container

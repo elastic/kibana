@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const PostEvaluateBody: z.ZodObject<{
     graphs: z.ZodArray<z.ZodString>;
     datasetName: z.ZodString;

@@ -3,7 +3,7 @@ import type { ServerError } from '@kbn/response-ops-alerts-apis/types';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { Case } from '../apis/bulk_get_cases';
-import { bulkGetCases } from '../apis/bulk_get_cases';
+import type { bulkGetCases } from '../apis/bulk_get_cases';
 export interface UseBulkGetCasesQueryParams {
     caseIds: string[];
     http: HttpStart;

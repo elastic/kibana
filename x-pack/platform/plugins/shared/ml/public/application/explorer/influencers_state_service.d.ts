@@ -1,5 +1,5 @@
 import type { Observable } from 'rxjs';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { MlApi } from '../services/ml_api_service';
 import { StateService } from '../services/state_service';

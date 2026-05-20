@@ -2,7 +2,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { Space } from '@kbn/spaces-plugin/server';
-import { AlertingAuthorization } from './authorization/alerting_authorization';
+import type { AlertingAuthorization } from './authorization/alerting_authorization';
 import type { RuleTypeRegistry } from './types';
 export interface AlertingAuthorizationClientFactoryOpts {
     ruleTypeRegistry: RuleTypeRegistry;

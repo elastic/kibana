@@ -1,5 +1,6 @@
 import type { ESQLCallbacks } from '@kbn/esql-types';
-import { monaco, type MonacoMessage } from '@kbn/code-editor';
+import type { monaco} from '@kbn/code-editor';
+import { type MonacoMessage } from '@kbn/code-editor';
 import type { MapCache } from 'lodash';
 import type { DataErrorsControl } from '../types';
 interface ValidationLatencyTracking {

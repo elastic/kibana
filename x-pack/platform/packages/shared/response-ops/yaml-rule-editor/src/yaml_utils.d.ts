@@ -1,5 +1,6 @@
-import { monaco } from '@kbn/monaco';
-import YAML, { LineCounter } from 'yaml';
+import type { monaco } from '@kbn/monaco';
+import type { LineCounter } from 'yaml';
+import type YAML from 'yaml';
 import type { CompletionContext } from './types';
 /**
  * Get existing keys from YAML text at a given indent level

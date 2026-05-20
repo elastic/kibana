@@ -1,5 +1,5 @@
-import { ProcessorEvent } from '@kbn/apm-types-shared';
-import * as t from 'io-ts';
+import type { ProcessorEvent } from '@kbn/apm-types-shared';
+import type * as t from 'io-ts';
 export declare const processorEventRt: t.UnionC<[t.LiteralC<ProcessorEvent.transaction>, t.LiteralC<ProcessorEvent.error>, t.LiteralC<ProcessorEvent.metric>, t.LiteralC<ProcessorEvent.span>]>;
 /**
  * Processor events that are searchable in the UI via the query bar.

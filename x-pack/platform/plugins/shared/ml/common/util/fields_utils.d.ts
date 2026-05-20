@@ -1,4 +1,4 @@
-import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { ES_FIELD_TYPES } from '@kbn/field-types';
 import { type Field, type Aggregation, type NewJobCaps, type RollupFields } from '@kbn/ml-anomaly-utils';
 export declare const categoryFieldTypes: ES_FIELD_TYPES[];
 export declare function combineFieldsAndAggs(fields: Field[], aggs: Aggregation[], rollupFields: RollupFields): NewJobCaps;

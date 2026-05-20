@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const EnterForeachNodeConfigurationSchema: z.ZodObject<{
     type: z.ZodLiteral<"foreach">;
     if: z.ZodOptional<z.ZodString>;

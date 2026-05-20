@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 export declare const LimitedSizeArray: <C extends t.Mixed>({ codec, minSize, maxSize, name, }: {
     codec: C;
     minSize?: number;

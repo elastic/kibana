@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { LookupServicesResponse } from './lookup_services';
 import type { SavedServiceGroup } from '../../../common/service_groups';
 type ServiceGroupCounts = Record<string, {

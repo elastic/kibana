@@ -6,7 +6,7 @@ import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/dataf
 import type { Job, CustomRule } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { MlApi } from '../../../../services/ml_api_service';
 import { JobCreator } from './job_creator';
-import { JOB_TYPE } from '../../../../../../common/constants/new_job';
+import type { JOB_TYPE } from '../../../../../../common/constants/new_job';
 import type { NewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 export interface RichDetector {
     agg: Aggregation | null;

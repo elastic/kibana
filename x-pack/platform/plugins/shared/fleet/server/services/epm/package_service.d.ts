@@ -8,9 +8,9 @@ import type { GetInstalledPackagesResponse, RollbackPackageResponse } from '../.
 import type { TemplateAgentPolicyInput } from '../../../common/types/models/agent_policy';
 import { type CustomPackageDatasetConfiguration, type EnsurePackageResult } from './packages/install';
 import type { FetchFindLatestPackageOptions } from './registry';
-import { getPackageFieldsMetadata } from './registry';
-import { getPackage } from './registry';
-import { getPackageInfo } from './packages';
+import type { getPackageFieldsMetadata } from './registry';
+import type { getPackage } from './registry';
+import type { getPackageInfo } from './packages';
 import type { PackageAsset } from './archive/storage';
 export type InstalledAssetType = EsAssetReference;
 export interface PackageService {

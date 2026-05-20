@@ -1,7 +1,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
-import { agentPolicyService } from '../agent_policy';
+import type { agentPolicyService } from '../agent_policy';
 export type InactivityTimeouts = Awaited<ReturnType<(typeof agentPolicyService)['getInactivityTimeouts']>>;
 type StatusRuntimeMapping = NonNullable<estypes.MappingRuntimeFields> & {
     status: {

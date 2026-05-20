@@ -1,8 +1,8 @@
 import type { Plugin, CoreSetup } from '@kbn/core/public';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
-import { ThemeService } from './services';
-import { PaletteService } from './services/palettes/service';
-import { ActiveCursor } from './services/active_cursor';
+import type { ThemeService } from './services';
+import type { PaletteService } from './services/palettes/service';
+import type { ActiveCursor } from './services/active_cursor';
 interface SetupDependencies {
     expressions: ExpressionsSetup;
 }

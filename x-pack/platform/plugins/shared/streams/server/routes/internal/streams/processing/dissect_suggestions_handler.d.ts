@@ -1,6 +1,6 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { ReviewDissectFieldsPrompt } from '@kbn/dissect-heuristics';
+import type { ReviewDissectFieldsPrompt } from '@kbn/dissect-heuristics';
 import type { DissectProcessor } from '@kbn/streamlang';
 import type { InferenceClient, ToolOptionsOfPrompt } from '@kbn/inference-common';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';

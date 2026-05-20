@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 declare const ObservablesActionTypeRt: rt.UnionC<[rt.LiteralC<"add">, rt.LiteralC<"delete">, rt.LiteralC<"update">]>;
 export declare const ObservablePayloadRt: rt.ExactC<rt.TypeC<{
     count: rt.NumberC;

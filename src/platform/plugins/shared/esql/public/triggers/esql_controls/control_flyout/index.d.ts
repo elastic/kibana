@@ -1,7 +1,8 @@
 import React from 'react';
 import type { ESQLEditorTelemetryService } from '@kbn/esql-editor';
 import type { TimeRange } from '@kbn/es-query';
-import { ESQLVariableType, type ESQLControlVariable, type ControlTriggerSource } from '@kbn/esql-types';
+import type { ESQLVariableType} from '@kbn/esql-types';
+import { type ESQLControlVariable, type ControlTriggerSource } from '@kbn/esql-types';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { monaco } from '@kbn/code-editor';

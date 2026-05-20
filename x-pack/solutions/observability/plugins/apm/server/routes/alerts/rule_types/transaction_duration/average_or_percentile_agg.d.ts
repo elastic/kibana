@@ -1,5 +1,5 @@
 import type { getDurationFieldForTransactions } from '@kbn/apm-data-access-plugin/server/utils';
-import { AggregationType } from '../../../../../common/rules/apm_rule_types';
+import type { AggregationType } from '../../../../../common/rules/apm_rule_types';
 type TransactionDurationField = ReturnType<typeof getDurationFieldForTransactions>;
 type AvgLatencyAgg = {
     avgLatency: {

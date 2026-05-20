@@ -1,6 +1,6 @@
 import React from 'react';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 export declare const DiagnosticsContext: React.Context<{
     diagnosticsBundle?: DiagnosticsBundle;

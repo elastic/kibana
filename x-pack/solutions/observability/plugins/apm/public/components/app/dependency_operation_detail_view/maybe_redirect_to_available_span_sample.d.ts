@@ -1,5 +1,5 @@
 import type { History } from 'history';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import type { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import type { replace as urlHelpersReplace } from '../../shared/links/url_helpers';
 export declare function maybeRedirectToAvailableSpanSample({ spanFetchStatus, spanId, pageSize, page, replace, samples, history, }: {
     spanFetchStatus: FETCH_STATUS;

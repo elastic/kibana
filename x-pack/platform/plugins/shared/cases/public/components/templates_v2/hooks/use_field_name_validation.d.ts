@@ -1,4 +1,4 @@
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 interface FieldNameInfo {
     name: string;
     startLineNumber: number;

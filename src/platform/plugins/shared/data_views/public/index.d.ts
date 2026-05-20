@@ -9,7 +9,7 @@ export type { DataViewsServicePublic, DataViewsServicePublicDeps, } from './data
 export { DataViewsApiClient, DataViewsService, DataView, DataViewLazy } from './data_views';
 export type { DataViewListItem } from './data_views';
 export { UiSettingsPublicToCommon } from './ui_settings_wrapper';
-import { DataViewsPublicPlugin } from './plugin';
+import type { DataViewsPublicPlugin } from './plugin';
 export declare function plugin(initializerContext: PluginInitializerContext): DataViewsPublicPlugin;
 export type { DataViewsPublicPluginSetup, DataViewsPublicPluginStart, DataViewsContract, HasDataViewsResponse, IndicesViaSearchResponse, } from './types';
 export type { DataViewsPublicPlugin as DataViewsPlugin };

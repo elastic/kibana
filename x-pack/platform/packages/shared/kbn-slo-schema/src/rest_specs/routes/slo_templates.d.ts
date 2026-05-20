@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { sloTemplateSchema } from '../../schema';
 declare const getSLOTemplateParamsSchema: t.TypeC<{
     path: t.TypeC<{

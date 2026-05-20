@@ -1,4 +1,4 @@
-import { RequestDiagnosticsAdditionalMetrics } from '../../../common/types';
+import type { RequestDiagnosticsAdditionalMetrics } from '../../../common/types';
 export declare const GetAgentsRequestSchema: {
     query: import("@kbn/config-schema").ObjectType<{
         page: import("@kbn/config-schema").Type<number | undefined>;

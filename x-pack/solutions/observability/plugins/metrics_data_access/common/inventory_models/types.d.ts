@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 import type { estypes } from '@elastic/elasticsearch';
 import type { LensConfig } from '@kbn/lens-embeddable-utils';
 import type { AggregationConfigMap, ChartsConfigMap, DataSchemaFormat, FormulasConfigMap, InventoryMetricsConfig } from './shared/metrics/types';

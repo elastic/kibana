@@ -7,7 +7,7 @@ import type { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position 
 import type { ProjectRoutingOverrides } from '@kbn/presentation-publishing';
 import { AbstractLayer } from '../layer';
 import type { IVectorStyle } from '../../styles/vector/vector_style';
-import { VectorStyle } from '../../styles/vector/vector_style';
+import type { VectorStyle } from '../../styles/vector/vector_style';
 import type { TimesliceMaskConfig } from '../../util/mb_filter_expressions';
 import type { CustomIcon, DynamicStylePropertyOptions, DataFilters, StyleMetaDescriptor, VectorLayerDescriptor, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 import type { IVectorSource } from '../../sources/vector_source';
@@ -19,7 +19,7 @@ import type { ITooltipProperty } from '../../tooltips/tooltip_property';
 import type { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import type { IJoinSource } from '../../sources/join_sources';
 import type { JoinState } from './types';
-import { Mask } from './mask';
+import type { Mask } from './mask';
 export declare function isVectorLayer(layer: ILayer): layer is IVectorLayer;
 export declare function hasVectorLayerMethod(layer: ILayer, methodName: keyof IVectorLayer): layer is Pick<IVectorLayer, typeof methodName>;
 export interface VectorLayerArguments {

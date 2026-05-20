@@ -1,7 +1,7 @@
 import type { ChangeEvent } from 'react';
 import React, { Component } from 'react';
 import type { EuiSwitchEvent } from '@elastic/eui';
-import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import type { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type { OnFileSelectParameters } from './geo_file_picker';
 interface Props {
     geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE;

@@ -1,4 +1,4 @@
-import { RRuleFrequency } from '../../../../../../types';
+import type { RRuleFrequency } from '../../../../../../types';
 export declare const i18nNthWeekday: (dayOfWeek: string) => string[];
 export declare const i18nNthWeekdayShort: (dayOfWeek: string) => string[];
 export declare const i18nFreqSummary: (interval: number) => {

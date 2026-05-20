@@ -1,4 +1,4 @@
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 export declare const SuggestIngestPipelinePrompt: import("@kbn/inference-common").Prompt<{
     stream: Streams.all.Definition;
     pipeline_schema: string;

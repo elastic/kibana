@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 declare const bulkDeleteParamsSchema: t.TypeC<{
     body: t.TypeC<{
         list: t.ArrayC<t.Type<string, string, unknown>>;

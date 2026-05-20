@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 export declare const DocumentResponseRt: rt.ArrayC<rt.ExactC<rt.TypeC<{
     id: rt.StringC;
     index: rt.StringC;

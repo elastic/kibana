@@ -1,5 +1,5 @@
-import { ServerSentEventError } from '@kbn/sse-utils';
-import { AgentExecutionErrorCode } from '../agents/execution_errors';
+import type { ServerSentEventError } from '@kbn/sse-utils';
+import type { AgentExecutionErrorCode } from '../agents/execution_errors';
 import type { ExecutionErrorMetaOf } from '../agents/execution_errors';
 import type { HookExecutionMode, HookLifecycle } from '../hooks/lifecycle';
 /**

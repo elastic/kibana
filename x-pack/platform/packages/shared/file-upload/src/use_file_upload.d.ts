@@ -3,7 +3,8 @@ import type { ApplicationStart, HttpSetup, NotificationsStart } from '@kbn/core/
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FindFileStructureResponse } from '@kbn/file-upload-common';
 import { type FileUploadResults } from '@kbn/file-upload-common';
-import { STATUS, type FileUploadManager } from '../file_upload_manager';
+import type { STATUS} from '../file_upload_manager';
+import { type FileUploadManager } from '../file_upload_manager';
 export declare enum UPLOAD_TYPE {
     NEW = "new",
     EXISTING = "existing"

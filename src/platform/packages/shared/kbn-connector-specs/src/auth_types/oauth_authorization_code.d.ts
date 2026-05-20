@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { AuthTypeSpec } from '../connector_spec';
 export declare const OAUTH_AUTHORIZATION_CODE_AUTH_ID = "oauth_authorization_code";
 declare const authSchema: z.ZodObject<{

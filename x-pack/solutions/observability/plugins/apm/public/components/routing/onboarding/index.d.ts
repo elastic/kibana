@@ -1,6 +1,6 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import React from 'react';
-import { INSTRUCTION_VARIANT } from '../../app/onboarding/instruction_variants';
+import type { INSTRUCTION_VARIANT } from '../../app/onboarding/instruction_variants';
 export declare const onboarding: {
     '/onboarding': {
         element: React.JSX.Element;

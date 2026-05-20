@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 declare const abortedRequestSearchStrategyErrorRT: rt.TypeC<{
     type: rt.LiteralC<"aborted">;
 }>;

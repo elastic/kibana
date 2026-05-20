@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import React from 'react';
-import { ResizableLayoutOrder, type ResizableLayoutDirection } from '../types';
+import type { ResizableLayoutOrder} from '../types';
+import { type ResizableLayoutDirection } from '../types';
 export declare const PanelsResizable: ({ className, direction, fixedPanelSize, minFixedPanelSize, minFlexPanelSize, fixedPanel, flexPanel, fixedPanelOrder, resizeButtonClassName, ["data-test-subj"]: dataTestSubj, onFixedPanelSizeChange, }: {
     className?: string;
     direction: ResizableLayoutDirection;

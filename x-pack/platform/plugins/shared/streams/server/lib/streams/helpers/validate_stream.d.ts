@@ -1,4 +1,4 @@
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 export declare function validateRootStreamChanges(currentStreamDefinition: Streams.WiredStream.Definition, nextStreamDefinition: Streams.WiredStream.Definition): void;
 /**
  * Validates field definitions and routing rules for bracket characters in field names.

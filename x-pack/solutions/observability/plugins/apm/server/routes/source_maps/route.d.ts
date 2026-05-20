@@ -1,5 +1,5 @@
 import type { Artifact } from '@kbn/fleet-plugin/server';
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { ListSourceMapArtifactsResponse } from '../fleet/source_maps';
 export declare const sourceMapRt: t.IntersectionC<[t.TypeC<{
     version: t.NumberC;

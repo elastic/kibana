@@ -1,6 +1,6 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import { NodeType } from '../../../../common/connections';
+import type { NodeType } from '../../../../common/connections';
 import type { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
 export declare const getConnectionStatsItems: ({ apmEventClient, start, end, filter, numBuckets, offset, withTimeseries, }: {
     apmEventClient: APMEventClient;

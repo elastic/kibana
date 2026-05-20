@@ -1,7 +1,7 @@
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { Observable } from 'rxjs';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import type { UrlStateService } from '@kbn/ml-url-state';
 import type { MlJobService } from '../services/job_service';
 import type { MlApi } from '../services/ml_api_service';

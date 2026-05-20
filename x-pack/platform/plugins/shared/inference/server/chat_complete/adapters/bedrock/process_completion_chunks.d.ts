@@ -1,6 +1,6 @@
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { ChatCompletionChunkToolCall } from '@kbn/inference-common';
-import { ChatCompletionEventType } from '@kbn/inference-common';
+import type { ChatCompletionEventType } from '@kbn/inference-common';
 import type { ContentBlockDeltaEvent, ContentBlockStartEvent, ContentBlockStopEvent, ConverseStreamMetadataEvent, MessageStartEvent, MessageStopEvent } from '@aws-sdk/client-bedrock-runtime';
 import { type CompletionChunk } from './types';
 export declare function processCompletionChunks(model?: string): (source: Observable<CompletionChunk>) => Observable<({

@@ -1,6 +1,6 @@
 import type { ColumnarViewModel } from '@elastic/charts';
 import type { ElasticFlameGraph } from '@kbn/profiling-utils';
-import { ComparisonMode } from '../../components/normalization_menu';
+import type { ComparisonMode } from '../../components/normalization_menu';
 interface ComparisonNode {
     FileID: string;
     FrameType: number;

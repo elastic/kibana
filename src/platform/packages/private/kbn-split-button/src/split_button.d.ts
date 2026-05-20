@@ -1,4 +1,4 @@
-import { EuiButton } from '@elastic/eui';
+import type { EuiButton } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import React from 'react';
 export type SplitButtonProps = React.ComponentProps<typeof EuiButton> & {

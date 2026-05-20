@@ -1,4 +1,4 @@
-import { AGG_TYPE } from './constants';
+import type { AGG_TYPE } from './constants';
 export declare function getJoinAggKey({ aggType, aggFieldName, rightSourceId, }: {
     aggType: AGG_TYPE;
     aggFieldName?: string;

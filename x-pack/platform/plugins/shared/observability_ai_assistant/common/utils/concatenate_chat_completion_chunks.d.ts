@@ -1,6 +1,6 @@
 import { type Observable } from 'rxjs';
 import type { ChatEvent } from '../conversation_complete';
-import { MessageRole } from '../types';
+import type { MessageRole } from '../types';
 export interface ConcatenatedMessage {
     message: {
         content: string;

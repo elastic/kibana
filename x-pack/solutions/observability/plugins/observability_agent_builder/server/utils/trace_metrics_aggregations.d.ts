@@ -1,4 +1,4 @@
-import { ApmDocumentType } from '@kbn/apm-data-access-plugin/common';
+import type { ApmDocumentType } from '@kbn/apm-data-access-plugin/common';
 export type DocumentType = ApmDocumentType.ServiceTransactionMetric | ApmDocumentType.TransactionMetric | ApmDocumentType.TransactionEvent;
 export type LatencyAggregationType = 'avg' | 'p99' | 'p95';
 export declare function getLatencyAggregation({ latencyAggregationType, hasDurationSummaryField, documentType, }: {

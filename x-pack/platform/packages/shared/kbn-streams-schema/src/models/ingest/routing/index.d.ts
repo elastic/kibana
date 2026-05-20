@@ -1,5 +1,5 @@
 import type { Condition } from '@kbn/streamlang';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const routingStatus: z.ZodEnum<{
     disabled: "disabled";
     enabled: "enabled";

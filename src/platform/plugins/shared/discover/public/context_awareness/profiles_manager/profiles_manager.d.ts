@@ -1,7 +1,7 @@
 import type { RootProfileService, DataSourceProfileService, DocumentProfileService, RootProfileProviderParams } from '../profiles';
 import type { ScopedDiscoverEBTManager } from '../../ebt_manager';
 import type { AppliedProfile } from '../composable_profile';
-import { ScopedProfilesManager } from './scoped_profiles_manager';
+import type { ScopedProfilesManager } from './scoped_profiles_manager';
 /**
  * Result of resolving the root profile
  */

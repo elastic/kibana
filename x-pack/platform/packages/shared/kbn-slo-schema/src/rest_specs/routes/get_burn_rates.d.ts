@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 declare const getSLOBurnRatesResponseSchema: t.TypeC<{
     burnRates: t.ArrayC<t.TypeC<{
         name: t.StringC;

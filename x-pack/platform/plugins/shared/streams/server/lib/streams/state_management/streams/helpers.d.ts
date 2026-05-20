@@ -1,4 +1,5 @@
-import { Streams, type IngestStreamSettings } from '@kbn/streams-schema';
+import type { Streams} from '@kbn/streams-schema';
+import { type IngestStreamSettings } from '@kbn/streams-schema';
 import type { BaseStream } from '@kbn/streams-schema/src/models/base';
 import type { State } from '../state';
 import type { ValidationResult } from '../stream_active_record/stream_active_record';

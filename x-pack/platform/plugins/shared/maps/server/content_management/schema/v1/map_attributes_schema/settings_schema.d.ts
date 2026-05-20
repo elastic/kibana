@@ -1,4 +1,4 @@
-import { INITIAL_LOCATION } from '../../../../../common';
+import type { INITIAL_LOCATION } from '../../../../../common';
 export declare const customIconSchema: import("@kbn/config-schema").ObjectType<{
     symbolId: import("@kbn/config-schema").Type<string>;
     svg: import("@kbn/config-schema").Type<string>;

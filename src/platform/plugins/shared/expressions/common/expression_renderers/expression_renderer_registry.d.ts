@@ -1,5 +1,5 @@
 import type { IRegistry } from '../types';
-import { ExpressionRenderer } from './expression_renderer';
+import type { ExpressionRenderer } from './expression_renderer';
 import type { AnyExpressionRenderDefinition } from './types';
 export declare class ExpressionRendererRegistry implements IRegistry<ExpressionRenderer> {
     private readonly renderers;

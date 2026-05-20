@@ -1,5 +1,5 @@
 import type { Reference } from '@kbn/content-management-utils';
-import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
+import type { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';

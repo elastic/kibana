@@ -1,4 +1,4 @@
-import { monaco } from '@kbn/code-editor';
+import type { monaco } from '@kbn/code-editor';
 import type { MutableRefObject } from 'react';
 export declare const CURSOR_PAUSE_MS = 400;
 export type GhostHintKind = 'empty' | 'comment' | null;

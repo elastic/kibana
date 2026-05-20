@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import type { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type { ImportResults } from '@kbn/file-upload-common';
 import type { OnFileSelectParameters } from './geo_upload_form';
 import type { GeoUploadWizardProps } from '../lazy_load_bundle';

@@ -7,7 +7,7 @@ import type { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { UiCounterMetricType } from '@kbn/analytics';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
@@ -41,7 +41,7 @@ import type { DiscoverSingleDocLocator } from './application/doc/locator';
 import type { DiscoverAppLocator } from '../common';
 import type { ProfilesManager } from './context_awareness';
 import type { DiscoverEBTManager } from './ebt_manager';
-import { EmbeddableEditorService } from './plugin_imports/embeddable_editor_service';
+import type { EmbeddableEditorService } from './plugin_imports/embeddable_editor_service';
 /**
  * Location state of internal Discover history instance
  */

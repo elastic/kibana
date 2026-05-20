@@ -1,5 +1,5 @@
 import type { IUiSettingsClient } from '@kbn/core/public';
-import { FilterStateStore } from '@kbn/es-query';
+import type { FilterStateStore } from '@kbn/es-query';
 import type { Filter } from '@kbn/es-query';
 import type { PersistableStateService } from '@kbn/kibana-utils-plugin/common/persistable_state';
 interface PartitionedFilters {

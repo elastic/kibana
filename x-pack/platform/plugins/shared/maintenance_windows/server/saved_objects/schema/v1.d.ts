@@ -1,4 +1,4 @@
-import { FilterStateStore } from '@kbn/es-query';
+import type { FilterStateStore } from '@kbn/es-query';
 export declare const alertsFilterQuerySchema: import("@kbn/config-schema").ObjectType<{
     kql: import("@kbn/config-schema").Type<string>;
     filters: import("@kbn/config-schema").Type<Readonly<{

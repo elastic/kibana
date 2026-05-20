@@ -1,2 +1,2 @@
-import { FieldsMetadataContext } from './fields_metadata_provider';
+import type { FieldsMetadataContext } from './fields_metadata_provider';
 export declare function useFieldsMetadataContext(): FieldsMetadataContext;

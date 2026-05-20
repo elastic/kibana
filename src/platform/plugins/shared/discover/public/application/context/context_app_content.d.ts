@@ -4,7 +4,7 @@ import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { type SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { LoadingStatus } from './services/context_query_state';
+import type { LoadingStatus } from './services/context_query_state';
 import type { AppState } from './services/context_state';
 export interface ContextAppContentProps {
     columns: string[];

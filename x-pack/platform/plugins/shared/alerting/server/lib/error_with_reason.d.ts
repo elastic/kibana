@@ -1,4 +1,4 @@
-import { RuleExecutionStatusErrorReasons } from '../types';
+import type { RuleExecutionStatusErrorReasons } from '../types';
 export declare class ErrorWithReason extends Error {
     readonly reason: RuleExecutionStatusErrorReasons;
     readonly error: Error;

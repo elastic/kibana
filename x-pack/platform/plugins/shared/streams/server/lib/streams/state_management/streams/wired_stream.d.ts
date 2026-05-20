@@ -1,5 +1,5 @@
 import type { IngestStreamLifecycle } from '@kbn/streams-schema';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import type { ElasticsearchAction } from '../execution_plan/types';
 import type { State } from '../state';

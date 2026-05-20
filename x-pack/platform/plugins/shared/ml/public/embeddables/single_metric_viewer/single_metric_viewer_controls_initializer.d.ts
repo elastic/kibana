@@ -1,5 +1,5 @@
 import type { StateComparators, TitlesApi } from '@kbn/presentation-publishing';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { SingleMetricViewerEmbeddableState, SingleMetricViewerEmbeddableUserInput } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
 export type AnomalySwimLaneControlsState = Pick<SingleMetricViewerEmbeddableState, 'jobIds' | 'selectedDetectorIndex' | 'selectedEntities' | 'functionDescription'>;
 export type SingleMetricViewerControlsState = Pick<SingleMetricViewerEmbeddableState, 'jobIds' | 'selectedDetectorIndex' | 'selectedEntities' | 'functionDescription' | 'forecastId'>;

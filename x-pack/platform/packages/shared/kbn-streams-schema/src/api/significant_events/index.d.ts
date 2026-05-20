@@ -1,7 +1,7 @@
 import type { Observable } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import { type StreamQuery } from '../../queries';
 import type { TaskStatus } from '../../tasks/types';
 /**

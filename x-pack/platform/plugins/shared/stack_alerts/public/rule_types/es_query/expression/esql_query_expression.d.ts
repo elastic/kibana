@@ -1,7 +1,7 @@
 import React from 'react';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import type { EsQueryRuleParams, EsQueryRuleMetaData } from '../types';
-import { SearchType } from '../types';
+import type { SearchType } from '../types';
 export declare const getTimeFilter: (timeField: string, window: string) => {
     timeRange: {
         from: string;

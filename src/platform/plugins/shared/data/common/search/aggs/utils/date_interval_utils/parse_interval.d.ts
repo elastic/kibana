@@ -1,4 +1,4 @@
-import moment from 'moment';
+import type moment from 'moment';
 import type { Unit } from '@kbn/datemath';
 export declare const splitStringInterval: (interval: string) => {
     value: number;

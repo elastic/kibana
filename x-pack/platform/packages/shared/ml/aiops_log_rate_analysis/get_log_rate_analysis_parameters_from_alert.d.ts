@@ -1,4 +1,4 @@
-import moment from 'moment';
+import type moment from 'moment';
 export interface GetLogRateAnalysisParametersFromAlertArgs {
     alertStartedAt: string;
     alertEndedAt?: string;

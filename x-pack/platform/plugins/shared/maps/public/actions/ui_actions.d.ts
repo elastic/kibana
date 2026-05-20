@@ -1,8 +1,8 @@
 import type { AnyAction } from 'redux';
 import type { ThunkDispatch } from 'redux-thunk';
 import type { MapStoreState } from '../reducers/store';
-import { FLYOUT_STATE } from '../reducers/ui';
-import { DRAW_MODE } from '../../common/constants';
+import type { FLYOUT_STATE } from '../reducers/ui';
+import type { DRAW_MODE } from '../../common/constants';
 export declare const UPDATE_FLYOUT = "UPDATE_FLYOUT";
 export declare const SET_IS_LAYER_TOC_OPEN = "SET_IS_LAYER_TOC_OPEN";
 export declare const SET_IS_TIME_SLIDER_OPEN = "SET_IS_TIME_SLIDER_OPEN";

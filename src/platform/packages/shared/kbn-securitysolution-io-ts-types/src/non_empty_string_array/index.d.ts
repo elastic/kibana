@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 /**
  * Types the NonEmptyStringArray as:
  *   - A string that is not empty (which will be turned into an array of size 1)

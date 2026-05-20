@@ -1,5 +1,5 @@
 import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import type { StreamsClient } from '../client';
 export declare function getEffectiveLifecycle({ definition, streamsClient, dataStream, }: {
     definition: Streams.ingest.all.Definition;

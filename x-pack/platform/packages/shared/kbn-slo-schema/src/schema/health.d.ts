@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 /**
  * IMPORTANT: Any changes to this file must be carefully checked against both usage
  * from the SLO definitions API and the SLO Health API, as both depend on these shared types.

@@ -1,4 +1,4 @@
-import { where } from '@kbn/esql-composer';
+import type { where } from '@kbn/esql-composer';
 type WhereClause = ReturnType<typeof where>;
 export interface GenerateDiscoverLink {
     (whereClause?: Record<string, any>): string | undefined;

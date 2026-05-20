@@ -1,7 +1,7 @@
 import type { ToolDefinitionWithSchema } from '@kbn/agent-builder-common';
 import React from 'react';
 import type { CreateToolPayload, CreateToolResponse, UpdateToolPayload, UpdateToolResponse } from '../../../../common/http_api/tools';
-import { ToolFormMode } from './form/tool_form';
+import type { ToolFormMode } from './form/tool_form';
 interface ToolBaseProps {
     tool?: ToolDefinitionWithSchema;
     isLoading: boolean;

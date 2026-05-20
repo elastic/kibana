@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { ActiveInstanceOverview } from './get_active_instances_overview';
 import type { ServerlessFunctionsOverviewResponse } from './get_serverless_functions_overview';
 import type { ServerlessSummaryResponse } from './get_serverless_summary';

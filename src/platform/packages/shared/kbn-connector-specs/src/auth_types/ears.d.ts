@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { AuthTypeSpec } from '../connector_spec';
 export declare const EARS_AUTH_ID = "ears";
 export declare const EARS_PROVIDERS: readonly ["google", "microsoft", "slack"];

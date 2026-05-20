@@ -1,7 +1,7 @@
 import type { VisParams } from '../types';
 import type { VisTypeDefinition, VisTypeOptions } from './types';
-import { VisGroups } from './vis_groups_enum';
-import { Schemas } from './schemas';
+import type { VisGroups } from './vis_groups_enum';
+import type { Schemas } from './schemas';
 export declare class BaseVisType<TVisParams extends VisParams = VisParams> {
     readonly name: string;
     readonly title: string;

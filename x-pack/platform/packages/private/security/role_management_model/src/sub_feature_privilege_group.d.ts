@@ -1,5 +1,5 @@
 import type { SubFeaturePrivilegeGroupConfig } from '@kbn/features-plugin/common';
-import { SubFeaturePrivilege } from './sub_feature_privilege';
+import type { SubFeaturePrivilege } from './sub_feature_privilege';
 export declare class SubFeaturePrivilegeGroup {
     private readonly config;
     private readonly actionMapping;

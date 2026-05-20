@@ -1,4 +1,4 @@
-import * as APM_EVENT_FIELDS_MAP from '@kbn/apm-types/es_fields';
+import type * as APM_EVENT_FIELDS_MAP from '@kbn/apm-types/es_fields';
 import type { DedotObject } from '@kbn/utility-types';
 import type { ValuesType } from 'utility-types';
 import type { AgentName } from '@kbn/elastic-agent-utils';

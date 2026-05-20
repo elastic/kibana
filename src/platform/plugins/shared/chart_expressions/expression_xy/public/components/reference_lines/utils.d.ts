@@ -1,5 +1,5 @@
 import React from 'react';
-import { Position } from '@elastic/charts';
+import type { Position } from '@elastic/charts';
 import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
 import type { IconPosition, ReferenceLineConfig, FillStyle, ExtendedReferenceLineDecorationConfig, ReferenceLineDecorationConfig, CommonXYReferenceLineLayerConfig } from '../../../common/types';
 import type { GroupsConfiguration, AxesMap } from '../../helpers';

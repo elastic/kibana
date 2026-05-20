@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { ApmMlJob } from '../../../../common/anomaly_detection/apm_ml_job';
 export declare const anomalyDetectionRouteRepository: {
     "POST /internal/apm/settings/anomaly-detection/update_to_v3": import("@kbn/server-route-repository-utils").ServerRoute<"POST /internal/apm/settings/anomaly-detection/update_to_v3", undefined, import("../../apm_routes/register_apm_server_routes").APMRouteHandlerResources, {

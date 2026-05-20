@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
+import type { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { AbstractESAggSource } from '../es_agg_source';
 import type { SourceEditorArgs } from '../source';
 import type { DataFilters, ESPewPewSourceDescriptor, MapExtent, VectorSourceRequestMeta } from '../../../../common/descriptor_types';

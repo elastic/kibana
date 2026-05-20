@@ -1,4 +1,4 @@
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { DiscoverServices } from '../../../../build_services';

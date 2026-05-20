@@ -1,4 +1,4 @@
-import { QuerySource } from '@kbn/esql-types';
+import type { QuerySource } from '@kbn/esql-types';
 import type { EsqlEditorActions } from '../editor_actions_context';
 import type { EsqlStarredQueriesService } from '../editor_footer/esql_starred_queries_service';
 interface UseEsqlEditorActionsParams {

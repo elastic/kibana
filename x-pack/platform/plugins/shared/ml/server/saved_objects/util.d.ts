@@ -1,5 +1,6 @@
 import type { estypes } from '@elastic/elasticsearch';
-import { type SavedObjectsServiceStart, type KibanaRequest, type IScopedClusterClient, SavedObjectsClient } from '@kbn/core/server';
+import type { SavedObjectsClient } from '@kbn/core/server';
+import { type SavedObjectsServiceStart, type KibanaRequest, type IScopedClusterClient } from '@kbn/core/server';
 import type { TrainedModelJob, MLSavedObjectService } from './service';
 export declare function savedObjectClientsFactory(getSavedObjectsStart: () => SavedObjectsServiceStart | null): {
     getMlSavedObjectsClient: (request: KibanaRequest) => import("@kbn/core/server").SavedObjectsClientContract | null;

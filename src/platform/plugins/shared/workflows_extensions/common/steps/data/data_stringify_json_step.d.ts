@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 export declare const DataStringifyJsonStepTypeId: "data.stringifyJson";
 export declare const ConfigSchema: z.ZodObject<{

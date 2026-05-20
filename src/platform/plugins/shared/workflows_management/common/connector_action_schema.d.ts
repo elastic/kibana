@@ -1,5 +1,5 @@
 import type { BaseConnectorContract } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 /**
  * Connector input schemas
  */

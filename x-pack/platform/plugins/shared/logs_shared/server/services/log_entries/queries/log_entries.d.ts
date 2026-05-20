@@ -1,5 +1,5 @@
 import type { estypes } from '@elastic/elasticsearch';
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 import type { LogEntryAfterCursor, LogEntryBeforeCursor } from '../../../../common/log_entry';
 import type { JsonObject } from '../../../../common/typed_json';
 export declare const createGetLogEntriesQuery: (logEntriesIndex: string, startTimestamp: number, endTimestamp: number, cursor: LogEntryBeforeCursor | LogEntryAfterCursor | null | undefined, size: number, timestampField: string, tiebreakerField: string, fields: string[], runtimeMappings?: estypes.MappingRuntimeFields, query?: JsonObject, highlightTerm?: string) => estypes.AsyncSearchSubmitRequest;

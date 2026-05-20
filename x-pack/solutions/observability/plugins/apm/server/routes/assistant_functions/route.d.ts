@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import { type APMDownstreamDependency } from './get_apm_downstream_dependencies';
 import { type ApmTimeseries } from './get_apm_timeseries';
 export declare const assistantRouteRepository: {

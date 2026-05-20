@@ -1,5 +1,5 @@
 import type { IngestBaseStream } from './base';
-import { IngestBase, IngestBaseUpsertRequest } from './base';
+import type { IngestBase, IngestBaseUpsertRequest } from './base';
 import type { RoutingDefinition } from './routing';
 import type { WiredIngestStreamEffectiveLifecycle } from './lifecycle';
 import type { FieldDefinition, InheritedFieldDefinition } from '../../fields';

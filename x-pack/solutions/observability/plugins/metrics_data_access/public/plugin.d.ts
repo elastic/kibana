@@ -1,7 +1,7 @@
 import type { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import type { MetricsDataPluginClass } from './types';
-import { MetricsDataClient } from './lib/metrics_client';
+import type { MetricsDataClient } from './lib/metrics_client';
 export declare class Plugin implements MetricsDataPluginClass {
     logger: Logger;
     constructor(context: PluginInitializerContext<{}>);

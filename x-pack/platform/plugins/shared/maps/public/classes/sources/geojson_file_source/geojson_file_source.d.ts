@@ -1,7 +1,7 @@
 import type { FeatureCollection } from 'geojson';
 import type { BoundsRequestMeta, GeoJsonWithMeta } from '../vector_source';
 import { AbstractVectorSource } from '../vector_source';
-import { SOURCE_TYPES } from '../../../../common/constants';
+import type { SOURCE_TYPES } from '../../../../common/constants';
 import type { MapExtent } from '../../../../common/descriptor_types';
 import type { IField } from '../../fields/field';
 interface InlineFieldDescriptor {

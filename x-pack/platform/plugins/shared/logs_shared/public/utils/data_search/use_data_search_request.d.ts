@@ -1,5 +1,5 @@
 import type { OperatorFunction } from 'rxjs';
-import { ReplaySubject } from 'rxjs';
+import type { ReplaySubject } from 'rxjs';
 import type { IKibanaSearchResponse, IKibanaSearchRequest, ISearchOptions } from '@kbn/search-types';
 import type { ParsedDataSearchRequestDescriptor, ParsedKibanaSearchResponse } from './types';
 export type DataSearchRequestFactory<Args extends any[], Request extends IKibanaSearchRequest> = (...args: Args) => {

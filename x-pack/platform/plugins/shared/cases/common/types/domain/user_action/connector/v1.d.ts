@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 export declare const ConnectorUserActionPayloadWithoutConnectorIdRt: rt.ExactC<rt.TypeC<{
     connector: rt.UnionC<[rt.IntersectionC<[rt.ExactC<rt.TypeC<{
         type: rt.LiteralC<import("../../connector/v1").ConnectorTypes.casesWebhook>;

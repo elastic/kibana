@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 declare const fetchSLOHealthResponseSchema: t.ArrayC<t.TypeC<{
     id: t.Type<string, string, unknown>;
     instanceId: t.UnionC<[t.LiteralC<"*">, t.StringC]>;

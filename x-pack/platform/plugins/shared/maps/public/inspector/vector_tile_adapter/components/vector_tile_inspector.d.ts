@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import type _ from 'lodash';
 import React, { Component } from 'react';
 import type { InspectorViewProps } from '@kbn/inspector-plugin/public';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';

@@ -1,4 +1,4 @@
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import type { DiscoverSessionTab, SavedSearch } from '@kbn/saved-search-plugin/common/types';

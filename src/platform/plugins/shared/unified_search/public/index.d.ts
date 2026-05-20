@@ -1,6 +1,6 @@
 import type { CoreStart } from '@kbn/core/public';
 import type { FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
-import { UnifiedSearchPublicPlugin } from './plugin';
+import type { UnifiedSearchPublicPlugin } from './plugin';
 export type { IndexPatternSelectProps } from './index_pattern_select';
 export type { StatefulSearchBarProps, SearchBarProps } from './search_bar';
 export type { UnifiedSearchPublicPluginStart, UnifiedSearchPluginSetup, IUnifiedSearchPluginServices, UnifiedSearchDraft, } from './types';

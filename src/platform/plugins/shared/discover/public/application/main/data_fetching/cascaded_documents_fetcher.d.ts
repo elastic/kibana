@@ -1,7 +1,7 @@
 import type { TimeRange } from '@kbn/es-query';
 import type { CascadeQueryArgs } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
 import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
-import { RequestAdapter } from '@kbn/inspector-plugin/public';
+import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import type { DiscoverServices } from '../../../build_services';
 import type { ScopedProfilesManager } from '../../../context_awareness';
 export interface FetchCascadedDocumentsParams extends CascadeQueryArgs {

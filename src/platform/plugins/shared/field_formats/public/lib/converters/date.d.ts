@@ -1,5 +1,6 @@
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { FieldFormat, FIELD_FORMAT_IDS } from '../../../common';
+import type { KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { FIELD_FORMAT_IDS } from '../../../common';
+import { FieldFormat } from '../../../common';
 import type { TextContextTypeConvert } from '../../../common/types';
 export declare class DateFormat extends FieldFormat {
     static id: FIELD_FORMAT_IDS;

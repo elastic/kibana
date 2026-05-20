@@ -2,7 +2,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { Filter, Query } from '@kbn/es-query';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import type { Histogram } from '@kbn/ml-chi2test';
-import { DATA_COMPARISON_TYPE } from './constants';
+import type { DATA_COMPARISON_TYPE } from './constants';
 export interface DataComparisonQueryState {
     searchString?: Query['query'];
     searchQuery?: estypes.QueryDslQueryContainer;

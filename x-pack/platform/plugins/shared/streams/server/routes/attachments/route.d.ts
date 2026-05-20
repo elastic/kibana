@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { Attachment } from '../../lib/streams/attachments/types';
 export interface ListAttachmentsResponse {
     attachments: Attachment[];

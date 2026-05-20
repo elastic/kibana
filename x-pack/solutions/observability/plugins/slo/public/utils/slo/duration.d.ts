@@ -1,4 +1,4 @@
-import moment from 'moment';
+import type moment from 'moment';
 import type { BrushEvent } from '@elastic/charts';
 import type { Duration } from '../../typings';
 import type { TimeBounds } from '../../pages/slo_details/types';

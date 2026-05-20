@@ -1,5 +1,5 @@
 import type { Observable } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { DrilldownState } from '../../../../server/drilldowns/types';
 import type { DrilldownFactory } from '../types';
 export interface DrilldownManagerDeps {

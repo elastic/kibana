@@ -1,4 +1,5 @@
-import { ConstantComponent, SharedComponent } from './components';
+import type { SharedComponent } from './components';
+import { ConstantComponent } from './components';
 import type { AutocompleteComponent } from './components/autocomplete_component';
 import type { ResultTerm } from './types';
 export declare class ParamComponent extends ConstantComponent {

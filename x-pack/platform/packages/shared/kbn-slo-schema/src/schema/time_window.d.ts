@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 declare const rollingTimeWindowTypeSchema: t.LiteralC<"rolling">;
 declare const rollingTimeWindowSchema: t.TypeC<{
     duration: t.Type<import("@kbn/slo-plugin/server/domain/models").Duration, string, unknown>;

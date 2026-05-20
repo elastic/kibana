@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export type Primitive = string | number | boolean | null | undefined;
 export declare const primitive: z.ZodType<Primitive>;
 export interface RecursiveRecord {

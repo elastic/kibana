@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import React from 'react';
-import * as Rx from 'rxjs';
+import type * as Rx from 'rxjs';
 import type { WithEuiThemeProps } from '@elastic/eui';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import type { BaseParams } from '@kbn/reporting-common/types';

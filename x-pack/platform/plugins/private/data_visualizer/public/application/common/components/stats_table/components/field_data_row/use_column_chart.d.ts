@@ -1,8 +1,8 @@
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { EuiDataGridColumn } from '@elastic/eui';
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import type { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { type ChartData, type ChartDataItem } from '@kbn/ml-data-grid';
-import { useColumnChartStyles } from './column_chart_styles';
+import type { useColumnChartStyles } from './column_chart_styles';
 export declare const hoveredRow$: BehaviorSubject<any>;
 export declare const BAR_COLOR: string;
 type XScaleType = 'ordinal' | 'time' | 'linear' | undefined;

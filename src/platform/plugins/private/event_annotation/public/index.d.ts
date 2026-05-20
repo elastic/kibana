@@ -1,4 +1,4 @@
-import { EventAnnotationPlugin } from './plugin';
+import type { EventAnnotationPlugin } from './plugin';
 export declare const plugin: () => EventAnnotationPlugin;
 export type { EventAnnotationPluginSetup, EventAnnotationPluginStart } from './plugin';
 export { EventAnnotationService } from './event_annotation_service';

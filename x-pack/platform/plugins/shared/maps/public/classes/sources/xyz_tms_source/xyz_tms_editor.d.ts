@@ -1,6 +1,6 @@
 import type { ChangeEvent } from 'react';
 import React, { Component } from 'react';
-import _ from 'lodash';
+import type _ from 'lodash';
 export type XYZTMSSourceConfig = {
     urlTemplate: string;
 };

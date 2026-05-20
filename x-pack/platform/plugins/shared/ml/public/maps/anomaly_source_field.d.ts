@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import type { AggregationsExtendedStatsAggregation, AggregationsPercentilesAggregation, AggregationsTermsAggregation } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter } from '@kbn/es-query';
 import type { IField, IVectorSource } from '@kbn/maps-plugin/public';
-import { FIELD_ORIGIN } from '@kbn/maps-plugin/common';
+import type { FIELD_ORIGIN } from '@kbn/maps-plugin/common';
 import type { TileMetaFeature } from '@kbn/maps-plugin/common/descriptor_types';
 import type { ITooltipProperty } from '@kbn/maps-plugin/public';
 import type { AnomalySource } from './anomaly_source';

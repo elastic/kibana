@@ -1,6 +1,6 @@
 import { type ComponentProps } from 'react';
 import type { ColumnPreset } from '@kbn/shared-ux-column-presets';
-import { SeverityHealth } from '../components/severity/config';
+import type { SeverityHealth } from '../components/severity/config';
 /**
  * @internal
  */

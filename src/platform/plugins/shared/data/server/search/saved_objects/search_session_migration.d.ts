@@ -1,6 +1,6 @@
 import type { SavedObjectMigrationMap } from '@kbn/core/server';
 import type { SearchSessionSavedObjectAttributes as SearchSessionSavedObjectAttributesLatest } from '../../../common';
-import { SearchSessionStatus } from '../../../common';
+import type { SearchSessionStatus } from '../../../common';
 /**
  * Search sessions were released in 7.12.0
  * In 7.13.0 a `completed` field was added.

@@ -30,10 +30,9 @@ export interface BaseEvent {
         name: string;
     };
 }
-export declare function reportingEventLoggerFactory(logger: Logger): {
-    new (report: IReport, task?: {
+export declare function reportingEventLoggerFactory(logger: Logger): new (report: IReport, task?: {
         id: string;
-    }): {
+    }) => {
         readonly eventObj: BaseEvent;
         readonly report: IReport;
         readonly task?: {
@@ -49,5 +48,4 @@ export declare function reportingEventLoggerFactory(logger: Logger): {
         logReportSaved(): SavedReport;
         logRetry(): ScheduledRetry;
     };
-};
 export type ReportingEventLogger = ReturnType<typeof reportingEventLoggerFactory>;

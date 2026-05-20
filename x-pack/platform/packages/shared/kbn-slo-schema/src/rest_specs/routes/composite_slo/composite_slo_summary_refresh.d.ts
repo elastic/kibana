@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 declare const postCompositeSloSummaryRefreshParamsSchema: z.ZodObject<{}, z.core.$strip>;
 export type CompositeSloSummaryRefreshSkippedReason = 'task_disabled' | 'cooldown' | 'task_not_scheduled' | 'already_running' | 'run_soon_failed';
 export type PostCompositeSloSummaryRefreshResponse = {

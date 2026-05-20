@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import type { FieldFormatter, TooltipFeatureAction, VectorSourceRequestMeta } from '@kbn/maps-plugin/common';
-import { SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '@kbn/maps-plugin/common';
+import type { SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '@kbn/maps-plugin/common';
 import type { MapExtent } from '@kbn/maps-plugin/common/descriptor_types';
 import type { DataFilters } from '@kbn/maps-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';

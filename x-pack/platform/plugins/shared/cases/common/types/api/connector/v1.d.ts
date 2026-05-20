@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 declare const PushDetailsRt: rt.ExactC<rt.TypeC<{
     latestUserActionPushDate: rt.StringC;
     oldestUserActionPushDate: rt.StringC;

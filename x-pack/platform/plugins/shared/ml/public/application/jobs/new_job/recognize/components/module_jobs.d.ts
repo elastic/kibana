@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import type { JobOverride } from '@kbn/ml-common-types/modules';
 import type { JobOverrides, ModuleJobUI } from '../page';
-import { SAVE_STATE } from '../page';
+import type { SAVE_STATE } from '../page';
 interface ModuleJobsProps {
     jobs: ModuleJobUI[];
     jobPrefix: string;

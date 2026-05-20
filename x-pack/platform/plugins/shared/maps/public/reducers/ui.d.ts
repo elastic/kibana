@@ -1,4 +1,4 @@
-import { DRAW_MODE } from '../../common/constants';
+import type { DRAW_MODE } from '../../common/constants';
 export declare enum FLYOUT_STATE {
     NONE = "NONE",
     LAYER_PANEL = "LAYER_PANEL",

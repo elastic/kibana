@@ -1,5 +1,5 @@
 import type { TypeOf } from '@kbn/config-schema';
-import moment from 'moment';
+import type moment from 'moment';
 export declare const ConfigSchema: import("@kbn/config-schema").ObjectType<{
     enabled: import("@kbn/config-schema").ConditionalType<true, boolean, boolean>;
     networkPolicy: import("@kbn/config-schema").ObjectType<{

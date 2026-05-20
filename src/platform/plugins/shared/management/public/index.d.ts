@@ -1,5 +1,5 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
-import { ManagementPlugin } from './plugin';
+import type { ManagementPlugin } from './plugin';
 export declare function plugin(initializerContext: PluginInitializerContext): ManagementPlugin;
 export type { RegisterManagementAppArgs } from './utils';
 export { ManagementSection, ManagementApp } from './utils';

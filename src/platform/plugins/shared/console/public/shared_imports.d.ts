@@ -1,4 +1,5 @@
-import { sendRequest, XJson } from '@kbn/es-ui-shared-plugin/public';
+import type { XJson } from '@kbn/es-ui-shared-plugin/public';
+import { sendRequest } from '@kbn/es-ui-shared-plugin/public';
 declare const collapseLiteralStrings: typeof XJson.collapseLiteralStrings, expandLiteralStrings: typeof XJson.expandLiteralStrings;
 export { sendRequest, collapseLiteralStrings, expandLiteralStrings };
 export { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';

@@ -1,4 +1,4 @@
-import { ActiveAlerts } from './active_alerts';
+import type { ActiveAlerts } from './active_alerts';
 type SloIdAndInstanceId = [string, string];
 interface Params {
     sloIdsAndInstanceIds: SloIdAndInstanceId[];

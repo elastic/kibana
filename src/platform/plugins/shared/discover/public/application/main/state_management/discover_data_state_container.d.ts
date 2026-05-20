@@ -1,13 +1,13 @@
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, Subject } from 'rxjs';
+import type { BehaviorSubject, Subject } from 'rxjs';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DiscoverServices } from '../../../build_services';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
-import { FetchStatus } from '../../types';
+import type { FetchStatus } from '../../types';
 import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
 export interface SavedSearchData {
     main$: DataMain$;

@@ -1,4 +1,4 @@
-import * as moment from 'moment';
+import type * as moment from 'moment';
 declare enum DurationUnit {
     'Minute' = "m",
     'Hour' = "h",

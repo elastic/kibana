@@ -1,4 +1,4 @@
-import moment from 'moment-timezone';
+import type moment from 'moment-timezone';
 import type { Assign } from '@kbn/utility-types';
 import type { TimeRange, RangeFilter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -6,7 +6,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ISearchOptions, IEsSearchResponse } from '@kbn/search-types';
 import type { ISearchSource } from '../../../public';
 import type { AggConfigSerialized, IAggConfig } from './agg_config';
-import { AggConfig } from './agg_config';
+import type { AggConfig } from './agg_config';
 import type { IAggType } from './agg_type';
 import type { AggTypesRegistryStart } from './agg_types_registry';
 import type { AggTypesDependencies, GetConfigFn } from '../..';

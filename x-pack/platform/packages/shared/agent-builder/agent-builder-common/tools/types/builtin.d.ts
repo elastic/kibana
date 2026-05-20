@@ -1,4 +1,5 @@
-import { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from '../definition';
+import type { ToolType} from '../definition';
+import { type ToolDefinition, type ToolDefinitionWithSchema } from '../definition';
 export type BuiltinToolConfig = {};
 export type BuiltinToolDefinition = ToolDefinition<ToolType.builtin, BuiltinToolConfig>;
 export type BuiltinToolDefinitionWithSchema = ToolDefinitionWithSchema<ToolType.builtin, BuiltinToolConfig>;

@@ -1,6 +1,6 @@
 import type { FunctionComponent, MutableRefObject } from 'react';
 import type { EuiTableSelectionType, EuiBasicTableProps, Pagination } from '@elastic/eui';
-import { EuiBasicTable } from '@elastic/eui';
+import type { EuiBasicTable } from '@elastic/eui';
 import type { CasesFindResponseUI, CaseUI } from '../../../common/ui/types';
 interface CasesTableProps {
     columns: EuiBasicTableProps<CaseUI>['columns'];

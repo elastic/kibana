@@ -1,5 +1,5 @@
 import React from 'react';
-import { Position } from '@elastic/charts';
+import type { Position } from '@elastic/charts';
 import type { EventAnnotationOutput, ManualRangeEventAnnotationRow, PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common';
 import type { FormatFactory } from '@kbn/field-formats-plugin/common';
 import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';

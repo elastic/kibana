@@ -1,4 +1,4 @@
-import { FIELD_ORIGIN, VECTOR_STYLES } from '../../../../common/constants';
+import type { FIELD_ORIGIN, VECTOR_STYLES } from '../../../../common/constants';
 import type { IField } from '../../fields/field';
 import type { IStyleProperty } from './properties/style_property';
 export interface StyleField {

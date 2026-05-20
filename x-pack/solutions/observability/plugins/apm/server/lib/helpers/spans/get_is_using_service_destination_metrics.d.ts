@@ -1,4 +1,4 @@
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getDocumentTypeFilterForServiceDestinationStatistics } from '@kbn/apm-data-access-plugin/server/utils';
 import type { APMEventClient } from '../create_es_client/create_apm_event_client';
 export declare function getProcessorEventForServiceDestinationStatistics(searchServiceDestinationMetrics: boolean): ProcessorEvent.metric | ProcessorEvent.span;

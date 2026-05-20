@@ -1,7 +1,7 @@
 import type { Logger, LogMeta } from '@kbn/core/server';
 import type { ConfigType } from '@kbn/screenshotting-server';
 import type { CaptureResult } from '..';
-import { PLUGIN_ID } from '../../../common';
+import type { PLUGIN_ID } from '../../../common';
 import type { ElementPosition } from '../get_element_position_data';
 export declare enum Actions {
     OPEN_URL = "open-url",

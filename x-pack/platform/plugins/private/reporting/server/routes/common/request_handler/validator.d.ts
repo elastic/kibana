@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { BaseParams } from '@kbn/reporting-common/types';
 export declare function validateTimezone(timezone: string): string | undefined;
 export declare const idSchema: z.ZodEnum<{

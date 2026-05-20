@@ -4,7 +4,7 @@ import type { SourceEditorArgs } from '../source';
 import { AbstractSource } from '../source';
 import type { ITMSSource } from '../tms_source';
 import type { EMSTMSSourceDescriptor } from '../../../../common/descriptor_types';
-import { LICENSED_FEATURES } from '../../../licensed_features';
+import type { LICENSED_FEATURES } from '../../../licensed_features';
 export interface SpriteMeta {
     png: string;
     json: EmsSpriteSheet;

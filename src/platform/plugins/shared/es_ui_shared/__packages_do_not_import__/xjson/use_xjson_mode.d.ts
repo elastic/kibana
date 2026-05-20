@@ -1,5 +1,5 @@
 import type { Dispatch } from 'react';
-import { collapseLiteralStrings } from './json_xjson_translation_tools';
+import type { collapseLiteralStrings } from './json_xjson_translation_tools';
 interface ReturnValue {
     xJson: string;
     setXJson: Dispatch<string>;

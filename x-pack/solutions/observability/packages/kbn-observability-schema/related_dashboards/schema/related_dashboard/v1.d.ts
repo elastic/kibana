@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const linkedDashboardSchema: z.ZodObject<{
     matchedBy: z.ZodObject<{
         fields: z.ZodOptional<z.ZodArray<z.ZodString>>;

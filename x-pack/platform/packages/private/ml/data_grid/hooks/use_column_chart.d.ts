@@ -1,6 +1,6 @@
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import { type EuiDataGridColumn, type EuiThemeComputed } from '@elastic/eui';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { ChartData, ChartDataItem } from '../lib/field_histograms';
 import type { DataGridItem } from '../lib/types';
 export declare const hoveredRow$: BehaviorSubject<DataGridItem | null>;

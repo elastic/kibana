@@ -1,9 +1,9 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { PersistenceAPI } from '../types';
-import { DataViewLazy } from './data_view_lazy';
+import type { DataViewLazy } from './data_view_lazy';
 import type { AbstractDataView } from './abstract_data_views';
-import { DataView } from './data_view';
+import type { DataView } from './data_view';
 import type { OnNotification, OnError, UiSettingsCommon, IDataViewsApiClient, GetFieldsOptions, DataViewSpec, DataViewAttributes, FieldAttrsAsObject, FieldSpec, DataViewFieldMap, TypeMeta } from '../types';
 import type { SavedObject } from '..';
 export type DataViewSavedObjectAttrs = Pick<DataViewAttributes, 'title' | 'type' | 'typeMeta' | 'name' | 'timeFieldName'>;

@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const AttackDiscoveryFindInternalResponse: z.ZodObject<{
     connector_names: z.ZodArray<z.ZodString>;
     data: z.ZodArray<z.ZodObject<{

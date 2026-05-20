@@ -1,6 +1,6 @@
 import type { IShortUrlClientFactory } from '../../../common/url_service';
 import type { BrowserShortUrlClientDependencies } from './short_url_client';
-import { BrowserShortUrlClient } from './short_url_client';
+import type { BrowserShortUrlClient } from './short_url_client';
 export type BrowserShortUrlClientFactoryDependencies = BrowserShortUrlClientDependencies;
 export type BrowserShortUrlClientFactoryCreateParams = null;
 export declare class BrowserShortUrlClientFactory implements IShortUrlClientFactory<BrowserShortUrlClientFactoryCreateParams> {

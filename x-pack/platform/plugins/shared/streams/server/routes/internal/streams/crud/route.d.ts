@@ -1,7 +1,7 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ClassicIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import type { StreamSummary } from '../../../../../common';
 export interface ListStreamDetail {
     stream: Streams.all.Definition;

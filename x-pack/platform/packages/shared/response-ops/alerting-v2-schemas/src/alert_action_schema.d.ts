@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare enum ALERT_EPISODE_STATUS {
     INACTIVE = "inactive",
     PENDING = "pending",

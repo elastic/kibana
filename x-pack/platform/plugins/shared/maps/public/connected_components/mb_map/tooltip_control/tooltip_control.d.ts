@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import type _ from 'lodash';
 import React, { Component } from 'react';
 import type { Map as MbMap, MapGeoJSONFeature, MapMouseEvent, MapSourceDataEvent, Point2D } from '@kbn/mapbox-gl';
 import type { Geometry } from 'geojson';

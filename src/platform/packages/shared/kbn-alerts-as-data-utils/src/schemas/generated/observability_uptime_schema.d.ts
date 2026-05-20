@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 export declare const IsoDateString: rt.Type<string, string, unknown>;
 export type IsoDateStringC = typeof IsoDateString;
 export declare const schemaUnknown: rt.UnknownC;

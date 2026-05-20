@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { IdentifyFeaturesResult, TaskResult } from '@kbn/streams-schema';
 import { type Feature } from '@kbn/streams-schema';
 export type FeaturesIdentificationTaskResult = TaskResult<IdentifyFeaturesResult>;

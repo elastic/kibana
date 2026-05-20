@@ -1,4 +1,4 @@
-import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import type { AbortReason } from '@kbn/kibana-utils-plugin/common';
 export declare class SearchAbortController {
     private inputAbortSignals;
     private abortController;

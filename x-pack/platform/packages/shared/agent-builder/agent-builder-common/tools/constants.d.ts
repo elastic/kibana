@@ -1,4 +1,4 @@
-import { ToolType } from './definition';
+import type { ToolType } from './definition';
 /**
  * Ids of built-in agentBuilder tools
  */

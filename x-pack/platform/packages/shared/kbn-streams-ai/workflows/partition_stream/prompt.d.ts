@@ -1,4 +1,4 @@
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 export declare const SuggestStreamPartitionsPrompt: import("@kbn/inference-common").Prompt<{
     stream: Streams.all.Definition;
     condition_schema: string;

@@ -1,7 +1,7 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { type TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { TaskStatus } from '@kbn/streams-schema';
+import type { TaskStatus } from '@kbn/streams-schema';
 import type { TaskResult } from '@kbn/streams-schema';
 import type { TaskStorageClient } from './storage';
 import type { PersistedTask } from './types';

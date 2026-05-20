@@ -1,5 +1,5 @@
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import type { PublishingSubject } from '../../publishing_subject';
 export interface PublishesTimeslice {
     timeslice$: PublishingSubject<[number, number] | undefined>;

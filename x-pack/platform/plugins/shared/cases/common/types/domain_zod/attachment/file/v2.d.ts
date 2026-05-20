@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const FileAttachmentMetadataSchema: z.ZodObject<{
     files: z.ZodTuple<[z.ZodObject<{
         name: z.ZodString;

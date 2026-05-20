@@ -1,5 +1,5 @@
 import type { JobCreator } from '../job_creator';
-import { DATAFEED_STATE } from '../../../../../../common/constants/states';
+import type { DATAFEED_STATE } from '../../../../../../common/constants/states';
 type Progress = number;
 export type ProgressSubscriber = (progress: number) => void;
 export type JobAssignmentSubscriber = (assigned: boolean) => void;

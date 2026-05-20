@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 declare const COMPOSITE_SLO_MIN_MEMBERS = 2;
 declare const COMPOSITE_SLO_MAX_MEMBERS = 25;
 declare const compositeSloIdSchema: z.ZodString;

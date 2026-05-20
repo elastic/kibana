@@ -1,4 +1,4 @@
-import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import type { METRIC_TYPES } from '@kbn/data-plugin/common';
 import type { MinMax } from '../../types';
 import type { ExtendedColumnConverterArgs } from './types';
 export declare const convertToColumnInPercentageMode: (columnConverterArgs: ExtendedColumnConverterArgs<METRIC_TYPES>, minMax: MinMax | {}) => {

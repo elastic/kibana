@@ -1,6 +1,6 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
 import React from 'react';
-import { EmbeddablePublicPlugin } from './plugin';
+import type { EmbeddablePublicPlugin } from './plugin';
 export type { DrilldownDefinition, DrilldownEditorProps } from './drilldowns/types';
 export { getAddFromLibraryType, useAddFromLibraryTypes } from './add_from_library/registry';
 export { PanelNotFoundError, PanelIncompatibleError } from './react_embeddable_system';

@@ -1,6 +1,6 @@
-import { UrlPatternMatcher } from '../autocomplete/components';
-import { UrlParams } from '../autocomplete/url_params';
-import { compileBodyDescription } from '../autocomplete/body_completer';
+import type { UrlPatternMatcher } from '../autocomplete/components';
+import type { UrlParams } from '../autocomplete/url_params';
+import type { compileBodyDescription } from '../autocomplete/body_completer';
 import type { AutocompleteComponent } from '../autocomplete/components/autocomplete_component';
 type UrlFactories = ConstructorParameters<typeof UrlPatternMatcher>[0];
 type BodyFactories = Parameters<typeof compileBodyDescription>[2];

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import type _ from 'lodash';
 import { Component } from 'react';
 import type { AJAXError, Map as MbMap, MapSourceDataEvent } from '@kbn/mapbox-gl';
 import type { TileError, TileMetaFeature } from '../../../../common/descriptor_types';

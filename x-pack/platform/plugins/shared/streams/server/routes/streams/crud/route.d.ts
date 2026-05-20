@@ -1,5 +1,5 @@
-import { z } from '@kbn/zod/v4';
-import { Streams } from '@kbn/streams-schema';
+import type { z } from '@kbn/zod/v4';
+import type { Streams } from '@kbn/streams-schema';
 import type { UpsertStreamResponse } from '../../../lib/streams/client';
 export declare const readStreamRoute: Record<"GET /api/streams/{name} 2023-10-31", import("@kbn/server-route-repository-utils").ServerRoute<"GET /api/streams/{name} 2023-10-31", z.ZodObject<{
     path: z.ZodObject<{

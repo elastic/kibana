@@ -1,6 +1,6 @@
 import React from 'react';
 import type { PopoverItem } from '.';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import type { FETCH_STATUS } from '../../../hooks/use_fetcher';
 interface IconPopoverProps {
     title: string;
     children: React.ReactChild;

@@ -1,5 +1,5 @@
 import type { FC, ComponentProps } from 'react';
-import { EuiPageHeader } from '@elastic/eui';
+import type { EuiPageHeader } from '@elastic/eui';
 interface LicenseInfo {
     type: string;
     status: string;

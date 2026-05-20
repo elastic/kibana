@@ -2,9 +2,9 @@ import type { Logger } from '@kbn/core/server';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import type { ConfigType } from '@kbn/screenshotting-server';
 import type { Browser, Page, Viewport } from 'puppeteer';
-import * as Rx from 'rxjs';
+import type * as Rx from 'rxjs';
 import type { PerformanceMetrics } from '../../../../common/types';
-import { HeadlessChromiumDriver } from '../driver';
+import type { HeadlessChromiumDriver } from '../driver';
 interface CreatePageOptions {
     browserTimezone?: string;
     defaultViewport: {

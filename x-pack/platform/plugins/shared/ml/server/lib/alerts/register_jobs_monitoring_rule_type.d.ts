@@ -4,7 +4,7 @@ import type { RuleExecutorOptions, IRuleTypeAlerts } from '@kbn/alerting-plugin/
 import type { MlAnomalyDetectionHealthAlert } from '@kbn/alerts-as-data-utils';
 import type { ALERT_REASON } from '@kbn/rule-data-utils';
 import type { JobMessage } from '@kbn/ml-common-types/audit_message';
-import { ALERT_DATAFEED_RESULTS, ALERT_DELAYED_DATA_RESULTS, ALERT_JOB_ERRORS_RESULTS, ALERT_MML_RESULTS } from '../../../common/constants/alerts';
+import type { ALERT_DATAFEED_RESULTS, ALERT_DELAYED_DATA_RESULTS, ALERT_JOB_ERRORS_RESULTS, ALERT_MML_RESULTS } from '../../../common/constants/alerts';
 import type { AnomalyDetectionJobsHealthRuleParams } from '../../routes/schemas/alerting_schema';
 import type { RegisterAlertParams } from './register_ml_alerts';
 type ModelSizeStats = MlJobStats['model_size_stats'];

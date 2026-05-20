@@ -1,5 +1,5 @@
 import type { estypes } from '@elastic/elasticsearch';
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 export declare const LOG_ENTRIES_SEARCH_STRATEGY = "infra-log-entries";
 export declare const logEntriesBeforeSearchRequestParamsRT: rt.IntersectionC<[rt.IntersectionC<[rt.TypeC<{
     logView: rt.UnionC<[rt.TypeC<{

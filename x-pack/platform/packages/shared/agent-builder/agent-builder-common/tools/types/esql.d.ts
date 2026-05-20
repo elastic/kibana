@@ -1,4 +1,5 @@
-import { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from '../definition';
+import type { ToolType} from '../definition';
+import { type ToolDefinition, type ToolDefinitionWithSchema } from '../definition';
 /**
  * Current configuration schema version for persisted ES|QL tools.
  */

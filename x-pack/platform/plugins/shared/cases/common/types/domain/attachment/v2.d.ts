@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 /**
  * Payload for Reference-based Attachments
  * - type: always required

@@ -1,5 +1,5 @@
 import type { AlertStatus } from '@kbn/rule-data-utils';
-import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import type { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import type { SloStatus } from '../../../../common/service_inventory';
 import type { ServiceMapNode, ServiceMapEdge } from '../../../../common/service_map';
 export interface ConnectionCounts {

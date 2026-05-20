@@ -1,5 +1,5 @@
 import type { Observable } from 'rxjs';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import type { UrlStateService } from '@kbn/ml-url-state';
 import { StateService } from '../services/state_service';
 import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';

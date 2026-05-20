@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import React from 'react';
-import { ResizableLayoutDirection } from '../types';
+import type { ResizableLayoutDirection } from '../types';
 export declare const PanelsStatic: ({ className, direction, hideFixedPanel, fixedPanel, flexPanel, }: {
     className?: string;
     direction: ResizableLayoutDirection;

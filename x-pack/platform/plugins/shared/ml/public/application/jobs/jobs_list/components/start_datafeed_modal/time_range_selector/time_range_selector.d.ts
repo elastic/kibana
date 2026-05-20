@@ -42,5 +42,5 @@ export namespace TimeRangeSelector {
     }
 }
 import React from 'react';
-import moment from 'moment';
-import PropTypes from 'prop-types';
+import type moment from 'moment';
+import type PropTypes from 'prop-types';

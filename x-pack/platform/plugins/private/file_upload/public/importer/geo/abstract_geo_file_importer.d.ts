@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { Feature } from 'geojson';
-import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
-import { NdjsonReader } from '@kbn/file-upload-common';
+import type { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import type { NdjsonReader } from '@kbn/file-upload-common';
 import type { CreateDocsResponse, ImportDoc, ImportFailure, ImportResults } from '@kbn/file-upload-common';
 import type { GeoFileImporter, GeoFilePreview } from './types';
 import { Importer } from '../importer';

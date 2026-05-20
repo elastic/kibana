@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { TaskResult } from '@kbn/streams-schema';
 import type { MemoryEntry, MemoryCategoryNode, MemorySearchResult, MemoryVersionRecord } from '../../../lib/memory';
 import { type ConversationScraperTaskResult } from '../../../lib/tasks/task_definitions/conversation_scraper';

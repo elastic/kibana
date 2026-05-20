@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import { AttachmentType, ExternalReferenceStorageType } from '../../domain/attachment/v1';
 export { AttachmentType, ExternalReferenceStorageType };
 /**

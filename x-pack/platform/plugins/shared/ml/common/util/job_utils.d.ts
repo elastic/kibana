@@ -1,8 +1,9 @@
 import type { Duration } from 'moment';
 import type { estypes } from '@elastic/elasticsearch';
 import type { Filter } from '@kbn/es-query';
-import { FilterStateStore } from '@kbn/es-query';
-import { type MlEntityField, ES_AGGREGATION, ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
+import type { FilterStateStore } from '@kbn/es-query';
+import type { ES_AGGREGATION, ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
+import { type MlEntityField } from '@kbn/ml-anomaly-utils';
 import type { Job, JobId, CustomSettings } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { CombinedJob, CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';

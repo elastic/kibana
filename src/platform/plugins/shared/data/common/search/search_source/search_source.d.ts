@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
 import type { DataViewLazy, DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';

@@ -1,6 +1,6 @@
 import type { ActionGroup, AlertInstanceContext, RuleTypeParams, RuleTypeState } from '@kbn/alerting-plugin/common';
 import type { IRuleTypeAlerts, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
-import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
+import type { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import type { MlAnomalyDetectionAlert } from '@kbn/alerts-as-data-utils';
 import type { InfluencerAnomalyAlertDoc, FormattedRecordAnomalyAlertDoc } from '@kbn/ml-common-types/alerts';
 import type { RegisterAlertParams } from './register_ml_alerts';

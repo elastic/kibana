@@ -1,4 +1,4 @@
-import moment from 'moment';
+import type moment from 'moment';
 export interface SavedObjectsTaggingClientConfigRawType {
     cache_refresh_interval: string;
 }

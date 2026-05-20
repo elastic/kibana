@@ -1,6 +1,6 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { SurrDocType } from '../services/context';
+import type { SurrDocType } from '../services/context';
 /**
  * Get the searchAfter query value for elasticsearch
  * When there are already documents available, which means successors or predecessors

@@ -1,4 +1,4 @@
-import { BucketAggType } from './bucket_agg_type';
+import type { BucketAggType } from './bucket_agg_type';
 import type { RangeIpRangeAggKey, CidrMaskIpRangeAggKey } from './lib/ip_range';
 import type { BaseAggParams } from '../types';
 export declare enum IP_RANGE_TYPES {

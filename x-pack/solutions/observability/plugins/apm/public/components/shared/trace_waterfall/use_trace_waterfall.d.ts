@@ -1,5 +1,6 @@
 import type { Error } from '@kbn/apm-types';
-import { WaterfallLegendType, type IWaterfallLegend } from '../../../../common/waterfall/legend';
+import type { WaterfallLegendType} from '../../../../common/waterfall/legend';
+import { type IWaterfallLegend } from '../../../../common/waterfall/legend';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import type { OnErrorClick } from './trace_waterfall_context';
 import type { ErrorMark } from '../charts/timeline/marker/error_marker';

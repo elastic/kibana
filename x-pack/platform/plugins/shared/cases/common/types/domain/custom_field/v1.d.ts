@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 export declare enum CustomFieldTypes {
     TEXT = "text",
     TOGGLE = "toggle",

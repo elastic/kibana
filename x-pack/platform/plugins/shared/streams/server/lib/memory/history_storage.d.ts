@@ -1,5 +1,5 @@
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import { StorageIndexAdapter } from '@kbn/storage-adapter';
+import type { StorageIndexAdapter } from '@kbn/storage-adapter';
 import type { MemoryVersionRecord } from './types';
 export declare const memoryHistoryIndexName: string;
 declare const storageSettings: {

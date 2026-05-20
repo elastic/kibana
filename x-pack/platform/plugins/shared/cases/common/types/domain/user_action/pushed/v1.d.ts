@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 export declare const PushedUserActionPayloadWithoutConnectorIdRt: rt.ExactC<rt.TypeC<{
     externalService: rt.ExactC<rt.TypeC<{
         connector_name: rt.StringC;

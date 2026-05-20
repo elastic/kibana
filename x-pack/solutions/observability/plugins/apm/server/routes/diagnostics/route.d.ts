@@ -1,6 +1,6 @@
 import type { FieldCapsResponse, IndicesDataStream, IndicesGetIndexTemplateIndexTemplateItem, IndicesGetResponse, IngestGetPipelineResponse, SecurityHasPrivilegesPrivileges } from '@elastic/elasticsearch/lib/api/types';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { ApmEvent } from './bundle/get_apm_events';
 import type { ServiceMapDiagnosticResponse } from '../../../common/service_map_diagnostic_types';
 export interface IndiciesItem {

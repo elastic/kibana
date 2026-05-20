@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { DocLinks } from '@kbn/doc-links';
 import type { SettingsConfig } from './types';
 export declare const zodStringWithDurationValidation: z.ZodString;

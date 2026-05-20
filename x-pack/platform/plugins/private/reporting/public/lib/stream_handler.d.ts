@@ -1,4 +1,4 @@
-import * as Rx from 'rxjs';
+import type * as Rx from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import type { JobId } from '@kbn/reporting-common/types';
 import type { ReportingAPIClient } from '@kbn/reporting-public';

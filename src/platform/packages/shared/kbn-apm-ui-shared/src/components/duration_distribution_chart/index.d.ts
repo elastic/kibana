@@ -1,6 +1,7 @@
 import React from 'react';
 import type { BrushEndListener } from '@elastic/charts';
-import { type HistogramItem, ProcessorEvent } from '@kbn/apm-types-shared';
+import type { ProcessorEvent } from '@kbn/apm-types-shared';
+import { type HistogramItem } from '@kbn/apm-types-shared';
 export interface DurationDistributionChartData {
     id: string;
     histogram: HistogramItem[];

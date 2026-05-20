@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const passThroughValidationObject: {
     body: z.ZodAny & import("@kbn/zod-helpers/v4/kbn_zod_types/kbn_zod_type").KbnZodType;
     params: z.ZodAny & import("@kbn/zod-helpers/v4/kbn_zod_types/kbn_zod_type").KbnZodType;

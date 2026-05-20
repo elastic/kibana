@@ -1,4 +1,4 @@
-import { TelemetryEventTypes } from './types';
+import type { TelemetryEventTypes } from './types';
 export declare const apmTelemetryEventBasedTypes: ({
     eventType: TelemetryEventTypes.SEARCH_QUERY_SUBMITTED;
     schema: import("@elastic/ebt").RootSchema<import("./types").SearchQuerySubmittedParams>;

@@ -1,4 +1,5 @@
-import { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from '../definition';
+import type { ToolType} from '../definition';
+import { type ToolDefinition, type ToolDefinitionWithSchema } from '../definition';
 /**
  * Configuration for an MCP (Model Context Protocol) Agent Builder tool.
  *

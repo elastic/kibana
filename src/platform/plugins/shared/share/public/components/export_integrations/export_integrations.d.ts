@@ -1,6 +1,7 @@
 import React, { type FC } from 'react';
 import type { InjectedIntl } from '@kbn/i18n-react';
-import { type IShareContext, useShareTypeContext } from '../context';
+import type { useShareTypeContext } from '../context';
+import { type IShareContext } from '../context';
 import type { ExportShareConfig, ShareContext } from '../../types';
 export declare const ExportMenu: FC<{
     shareContext: IShareContext;

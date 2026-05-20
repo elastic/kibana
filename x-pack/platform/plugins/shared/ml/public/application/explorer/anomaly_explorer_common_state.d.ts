@@ -1,5 +1,5 @@
 import type { Observable } from 'rxjs';
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { GlobalState, UrlStateService } from '@kbn/ml-url-state/src/url_state';
 import type { AnomalyExplorerFilterUrlState } from '@kbn/ml-common-types/locator';

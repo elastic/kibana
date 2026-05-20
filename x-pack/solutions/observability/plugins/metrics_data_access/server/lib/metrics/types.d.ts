@@ -1,4 +1,4 @@
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 import type { InfraDatabaseSearchResponse, CallWithRequestParams } from '../adapters/framework';
 export type ESSearchClient = <Hit = {}, Aggregation = undefined>(options: CallWithRequestParams) => Promise<InfraDatabaseSearchResponse<Hit, Aggregation>>;
 export declare const BasicMetricValueRT: rt.TypeC<{

@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { AgentKeysResponse } from './get_agent_keys';
 import type { AgentKeysPrivilegesResponse } from './get_agent_keys_privileges';
 import type { InvalidateAgentKeyResponse } from './invalidate_agent_key';

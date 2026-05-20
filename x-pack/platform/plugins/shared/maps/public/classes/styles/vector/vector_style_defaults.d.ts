@@ -1,4 +1,4 @@
-import { VECTOR_STYLES } from '../../../../common/constants';
+import type { VECTOR_STYLES } from '../../../../common/constants';
 import type { VectorStylePropertiesDescriptor } from '../../../../common/descriptor_types';
 export declare const MIN_SIZE = 1;
 export declare const MAX_SIZE = 64;

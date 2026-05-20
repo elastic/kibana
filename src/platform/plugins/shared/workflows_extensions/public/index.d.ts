@@ -1,5 +1,5 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
-import { WorkflowsExtensionsPublicPlugin } from './plugin';
+import type { WorkflowsExtensionsPublicPlugin } from './plugin';
 export declare function plugin(initializerContext: PluginInitializerContext): WorkflowsExtensionsPublicPlugin;
 export type { WorkflowsExtensionsPublicPluginSetup, WorkflowsExtensionsPublicPluginStart, } from './types';
 export type { PublicStepDefinition } from './step_registry/types';

@@ -1,7 +1,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { Logger } from '@kbn/logging';
-import { UninstallTokenError } from '../../../../common/errors';
+import type { UninstallTokenError } from '../../../../common/errors';
 import type { GetUninstallTokensMetadataResponse } from '../../../../common/types/rest_spec/uninstall_token';
 import type { UninstallToken } from '../../../../common/types/models/uninstall_token';
 export interface UninstallTokenSOAttributes {

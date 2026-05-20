@@ -1,4 +1,4 @@
-import { ES_AGGREGATION } from '@kbn/ml-anomaly-utils';
+import type { ES_AGGREGATION } from '@kbn/ml-anomaly-utils';
 export declare const estimateBucketSpanSchema: import("@kbn/config-schema").ObjectType<{
     aggTypes: import("@kbn/config-schema").Type<(ES_AGGREGATION | null)[]>;
     duration: import("@kbn/config-schema").ObjectType<{

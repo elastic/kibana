@@ -1,5 +1,5 @@
 import type { PackagePolicy, GetAgentPoliciesResponseItem, GetPackagePoliciesResponse } from '../../../../../types';
-import { useGetPackagePolicies } from '../../../../../hooks';
+import type { useGetPackagePolicies } from '../../../../../hooks';
 export interface PackagePolicyAndAgentPolicy {
     packagePolicy: PackagePolicy;
     agentPolicies: GetAgentPoliciesResponseItem[];

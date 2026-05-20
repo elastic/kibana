@@ -1,9 +1,9 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
-import { JOB_STATUS } from '@kbn/reporting-common';
+import type { JOB_STATUS } from '@kbn/reporting-common';
 import type { ExecutionError, ReportDocument, ReportOutput } from '@kbn/reporting-common/types';
 import type { Report } from '.';
-import { SavedReport } from '.';
+import type { SavedReport } from '.';
 import type { ReportingCore } from '../..';
 import type { ReportTaskParams } from '../tasks';
 type UpdateResponse<T> = estypes.UpdateResponse<T>;

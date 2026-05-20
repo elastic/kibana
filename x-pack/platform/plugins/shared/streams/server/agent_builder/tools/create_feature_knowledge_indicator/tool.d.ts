@@ -1,6 +1,6 @@
 import type { StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
-import { baseFeatureSchema } from '@kbn/streams-schema';
+import type { baseFeatureSchema } from '@kbn/streams-schema';
 import type { StreamsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';

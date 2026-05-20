@@ -1,4 +1,4 @@
-import { SharedComponent } from '.';
+import type { SharedComponent } from '.';
 import type { AutocompleteComponent } from './autocomplete_component';
 /**
  * @param parametrizedComponentFactories a dict of the following structure

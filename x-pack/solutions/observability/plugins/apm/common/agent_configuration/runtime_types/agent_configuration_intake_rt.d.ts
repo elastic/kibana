@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import type { SettingValidation } from '../setting_definitions/types';
 export declare const serviceRt: t.PartialC<{
     name: t.StringC;

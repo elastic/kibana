@@ -1,6 +1,6 @@
 import type { ConfigSchema } from '../../..';
 import type { AgentApiKey } from './instruction_variants';
-import { INSTRUCTION_VARIANT } from './instruction_variants';
+import type { INSTRUCTION_VARIANT } from './instruction_variants';
 export declare function serverlessInstructions({ baseUrl, config, checkAgentStatus, agentStatus, agentStatusLoading, }: {
     baseUrl: string;
     config: ConfigSchema;

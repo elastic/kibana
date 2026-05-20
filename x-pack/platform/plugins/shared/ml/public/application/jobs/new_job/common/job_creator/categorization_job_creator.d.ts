@@ -1,11 +1,13 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { type Field, type Aggregation, ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
+import type { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
+import { type Field, type Aggregation } from '@kbn/ml-anomaly-utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { type CategorizationAnalyzer, type CategoryFieldExample, type FieldExampleCheck, CATEGORY_EXAMPLES_VALIDATION_STATUS } from '@kbn/ml-category-validator';
+import type { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '@kbn/ml-category-validator';
+import { type CategorizationAnalyzer, type CategoryFieldExample, type FieldExampleCheck } from '@kbn/ml-category-validator';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { JobCreator } from './job_creator';
-import { JOB_TYPE } from '../../../../../../common/constants/new_job';
+import type { JOB_TYPE } from '../../../../../../common/constants/new_job';
 import type { MlApi } from '../../../../services/ml_api_service';
 import type { NewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 type DetectorType = ML_JOB_AGGREGATION.COUNT | ML_JOB_AGGREGATION.HIGH_COUNT | ML_JOB_AGGREGATION.RARE;

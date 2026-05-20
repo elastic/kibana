@@ -1,5 +1,5 @@
 import type { Request, RequestStatistics, Response } from './types';
-import { RequestStatus } from './types';
+import type { RequestStatus } from './types';
 /**
  * An API to specify information about a specific request that will be logged.
  * Create a new instance to log a request using {@link RequestAdapter#start}.

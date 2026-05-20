@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 /**
  * Allowed field names to sort Attack Discovery results by. Clients should only pass one of the listed values.
  */

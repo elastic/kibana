@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import type { GeoJsonProperties } from 'geojson';
-import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
+import type { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import type { ESQLSourceDescriptor, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 import type { DataRequest } from '../../util/data_request';
 import type { SourceEditorArgs } from '../source';
