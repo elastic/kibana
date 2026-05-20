@@ -10,6 +10,8 @@
 import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { IKibanaSearchRequest } from '@kbn/search-types';
+import type { ESQLSearchParams } from '@kbn/es-types';
 
 const mockCore = {
   http: {
@@ -130,8 +132,8 @@ const MOCK_COLUMNS_BY_INDEX: Record<string, Array<{ name: string; type: string }
 
 const mockData = {
   search: {
-    search: (request: { params?: { query?: string } }) => {
-      const query: string = (request as any)?.params?.query ?? '';
+    search: (request: IKibanaSearchRequest<ESQLSearchParams>) => {
+      const query: string = request?.params?.query ?? '';
       const matchedIndex = Object.keys(MOCK_COLUMNS_BY_INDEX).find((idx) => query.includes(idx));
       const allColumns = matchedIndex ? MOCK_COLUMNS_BY_INDEX[matchedIndex] : [];
       return of({
@@ -147,7 +149,10 @@ const mockData = {
   query: {
     timefilter: {
       timefilter: {
-        getAbsoluteTime: () => ({ from: 'now-15m', to: 'now' }),
+        getAbsoluteTime: () => ({
+          from: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+          to: new Date().toISOString(),
+        }),
         getTime: () => ({ from: 'now-15m', to: 'now' }),
       },
     },

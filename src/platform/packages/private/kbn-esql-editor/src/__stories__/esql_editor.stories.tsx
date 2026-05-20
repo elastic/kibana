@@ -29,9 +29,7 @@ const ControlledEditor = (props: ESQLEditorProps) => {
           setQuery(q);
           props.onTextLangQueryChange(q);
         }}
-        onTextLangQuerySubmit={async (q?: AggregateQuery, abortController?: AbortController) => {
-          await props.onTextLangQuerySubmit(q, abortController);
-        }}
+        onTextLangQuerySubmit={props.onTextLangQuerySubmit}
       />
     </EditorServicesProvider>
   );
