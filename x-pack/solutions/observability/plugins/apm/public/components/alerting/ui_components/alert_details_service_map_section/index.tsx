@@ -16,7 +16,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALERT_END, ALERT_START } from '@kbn/rule-data-utils';
-import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../../common/es_fields/apm';
+import {
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+} from '../../../../../common/es_fields/apm';
 import { ApmEmbeddableContext } from '../../../../embeddable/embeddable_context';
 import { ServiceMapEmbeddable } from '../../../../embeddable/service_map/service_map_embeddable';
 import { getServiceMapUrl } from '../../../../embeddable/service_map/get_service_map_url';
@@ -61,6 +66,19 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
   const kuery = useMemo(() => buildKueryFromAlert(alert), [alert]);
   const filters = useMemo(() => buildFiltersFromAlert(alert), [alert]);
 
+  const filterPills = useMemo(() => {
+    const pills: Array<{ field: string; value: string }> = [];
+    const transactionType = alert.fields[TRANSACTION_TYPE];
+    const transactionName = alert.fields[TRANSACTION_NAME];
+    if (transactionType != null) {
+      pills.push({ field: 'transaction.type', value: String(transactionType) });
+    }
+    if (transactionName != null) {
+      pills.push({ field: 'transaction.name', value: String(transactionName) });
+    }
+    return pills;
+  }, [alert]);
+
   const [hasNoServices, setHasNoServices] = useState(false);
 
   if (!embeddableDeps || !serviceName || !timeRanges || hasNoServices) {
@@ -74,8 +92,8 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
     rangeFrom,
     rangeTo,
     environment,
-    kuery,
     serviceName,
+    filterPills,
   });
 
   return (
@@ -146,6 +164,7 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
                 serviceName={serviceName}
                 core={embeddableDeps.coreStart}
                 onEmptyStateChange={setHasNoServices}
+                filterPills={filterPills}
               />
             </ApmEmbeddableContext>
           </EuiPanel>
