@@ -677,7 +677,7 @@ describe('EditOutputFlyout', () => {
       expect(utils.queryByLabelText('Advanced YAML Configuration')).toBeNull();
     });
 
-    it('should not show the OTel exporter section for remote ES output', async () => {
+    it('should show the OTel exporter configuration section for remote ES output', async () => {
       jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
       jest
         .spyOn(ExperimentalFeaturesService, 'get')
@@ -691,8 +691,10 @@ describe('EditOutputFlyout', () => {
         is_default_monitoring: false,
       });
 
-      expect(utils.queryByText('OpenTelemetry exporter')).toBeNull();
-      expect(utils.queryByLabelText('Advanced YAML Configuration')).toBeNull();
+      expect(utils.queryByText('OpenTelemetry exporter')).not.toBeNull();
+
+      fireEvent.click(utils.getByText('OpenTelemetry exporter'));
+      expect(utils.queryByLabelText('Advanced YAML configuration')).not.toBeNull();
     });
 
     it('should include otel_exporter_config_yaml in the save payload when creating an ES output', async () => {
@@ -759,6 +761,45 @@ describe('EditOutputFlyout', () => {
           'output123',
           expect.objectContaining({
             otel_exporter_config_yaml: null,
+          })
+        );
+      });
+    });
+
+    it('should include otel_exporter_config_yaml in the save payload when editing a remote ES output', async () => {
+      jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+      jest
+        .spyOn(ExperimentalFeaturesService, 'get')
+        .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+      mockedUseFleetStatus.mockReturnValue({
+        isLoading: false,
+        isReady: true,
+        isSecretsStorageEnabled: true,
+      } as any);
+
+      const { utils } = renderFlyout({
+        type: 'remote_elasticsearch',
+        name: 'remote es output',
+        id: 'outputR',
+        is_default: false,
+        is_default_monitoring: false,
+        hosts: ['https://remote-es:9200'],
+        service_token: 'remote-token',
+        otel_exporter_config_yaml: 'flush_interval: 10s',
+      });
+
+      // Change a field so the Save button becomes enabled
+      fireEvent.change(utils.getByDisplayValue('remote es output'), {
+        target: { value: 'updated remote output name' },
+      });
+
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'outputR',
+          expect.objectContaining({
+            otel_exporter_config_yaml: 'flush_interval: 10s',
           })
         );
       });

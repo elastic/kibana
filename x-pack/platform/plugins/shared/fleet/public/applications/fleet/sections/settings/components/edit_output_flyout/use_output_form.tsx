@@ -1070,6 +1070,8 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
               is_default_monitoring: defaultMonitoringOutputInput.value,
               preset: presetInput.value,
               config_yaml: additionalYamlConfigInput.value,
+              otel_exporter_config_yaml: otelExporterConfigInput.value || null,
+              otel_disable_beatsauth: otelDisableBeatsauthInput.value ?? null,
               service_token: serviceTokenInput.value || undefined,
               kibana_api_key: kibanaAPIKeyInput.value || undefined,
               ...(secrets ? { secrets } : {}),

@@ -587,7 +587,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             </div>
           </EuiFormRow>
           <AdvancedOptionsSection enabled={form.isShipperEnabled} inputs={inputs} />
-          {isESOutput && (
+          {(isESOutput || isRemoteESOutput) && (
             <>
               <EuiSpacer size="l" />
               <EuiAccordion
