@@ -7,7 +7,7 @@
 
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { ConfigKey } from '../../../../../../common/runtime_types';
+import { ConfigKey, isRemoteSyntheticsMonitor } from '../../../../../../common/runtime_types';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 import { getMonitorLastRunAction, selectLastRunMetadata } from '../../../state';
 import { useSelectedLocation } from './use_selected_location';
@@ -31,8 +31,14 @@ export const useMonitorLatestPing = (params?: UseMonitorLatestPingParams) => {
 
   const latestPingId = latestPing?.monitor.id;
 
-  const isIdSame =
-    latestPingId === monitorId || latestPingId === monitor?.[ConfigKey.CUSTOM_HEARTBEAT_ID];
+  // CUSTOM_HEARTBEAT_ID is the project-monitor override on the local SO; remote
+  // monitors don't expose it (their `monitor.id` already equals the ping's
+  // monitor.id), so the equality check above is sufficient for remote.
+  const customHeartbeatId =
+    monitor && !isRemoteSyntheticsMonitor(monitor)
+      ? monitor[ConfigKey.CUSTOM_HEARTBEAT_ID]
+      : undefined;
+  const isIdSame = latestPingId === monitorId || latestPingId === customHeartbeatId;
 
   const isLocationSame = latestPing?.observer?.geo?.name === locationLabel;
 

@@ -28,8 +28,8 @@ import { getTestRunDetailLink } from '../../common/links/test_details_link';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { getErrorDetailsUrl } from '../monitor_errors/errors_list';
 import type {
-  EncryptedSyntheticsSavedMonitor,
   Ping,
+  SelectedSyntheticsMonitor,
   SyntheticsJourneyApiResponse,
 } from '../../../../../../common/runtime_types';
 import { ConfigKey, MonitorTypeEnum } from '../../../../../../common/runtime_types';
@@ -143,7 +143,7 @@ const PanelHeader = ({
   latestPing,
   loading,
 }: {
-  monitor: EncryptedSyntheticsSavedMonitor | null;
+  monitor: SelectedSyntheticsMonitor | null;
   latestPing?: Ping;
   loading: boolean;
 }) => {
