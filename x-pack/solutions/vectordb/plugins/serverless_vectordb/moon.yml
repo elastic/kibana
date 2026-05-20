@@ -30,7 +30,6 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/shared-ux-router'
   - '@kbn/agent-builder-plugin'
-  - '@kbn/vectordb-onboarding'
   - '@kbn/react-query'
   - '@kbn/i18n'
 tags:
