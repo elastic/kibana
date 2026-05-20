@@ -117,6 +117,9 @@ test.describe('Uptime certificates', { tag: ['@local-stateful-classic'] }, () =>
   });
 
   test('navigates to cert page and displays certificates', async ({ pageObjects }) => {
+    // No date range arg on purpose: this spec indexes a live doc at `new Date()` instead of
+    // loading the 2019 FULL_HEARTBEAT archive. Passing DEFAULT_NAVIGATION_SEARCH would pin the
+    // picker to 2019 and the certs query would always exclude the doc.
     await pageObjects.uptimeApp.navigateToOverview();
     await pageObjects.uptimeApp.waitForDataLoaded();
 
