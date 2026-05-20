@@ -73,6 +73,7 @@ export interface QuerySandboxFlyoutProps {
   tabs?: QueryTab[];
   /** Active tab — ignored when tabs is absent/[]. */
   activeTab?: QueryTab;
+  /** Should always be provided when tabs is non-empty — without it tab clicks are no-ops. */
   onTabChange?: (tab: QueryTab) => void;
   timeField: string;
   /** Absent → time field selector is read-only. */

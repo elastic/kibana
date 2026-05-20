@@ -377,9 +377,14 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
     dispatch({ type: 'GO_NEXT' });
   }, [currentStep, methods, uiState, dispatch]);
 
+  // TODO: recoveryType drives whether the recovery tab appears in YAML mode.
+  // Follow schema decisions in #268984 — if recoveryType is superseded by a
+  // field on RuleQuery itself, gate this on query shape instead.
   const sandboxTabs: QueryTab[] | undefined =
     uiState.yamlMode && sandboxQuery.format === 'composed'
-      ? ['base', 'alert', 'recovery']
+      ? uiState.recoveryType === 'custom'
+        ? ['base', 'alert', 'recovery']
+        : ['base', 'alert']
       : getSandboxTabs(uiState);
 
   return (
