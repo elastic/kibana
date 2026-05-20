@@ -40,7 +40,9 @@ import {
 } from './build_prompts';
 import { aiSummarizeStepDefinition } from './step';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { ContextManager, StepHandlerContext } from '@kbn/workflows-extensions/server';
+import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
+
+type ContextManager = StepHandlerContext<any>['contextManager'];
 import type { InferenceWorkflowsStartDeps } from '../../../types';
 import { resolveConnectorId } from '../utils/resolve_connector_id';
 

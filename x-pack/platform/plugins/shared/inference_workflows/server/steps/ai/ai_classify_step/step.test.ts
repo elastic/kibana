@@ -46,7 +46,9 @@ import {
 import { aiClassifyStepDefinition } from './step';
 import { validateModelResponse } from './validate_model_response';
 import { buildStructuredOutputSchema } from '../../../../common/steps/ai';
-import type { ContextManager, StepHandlerContext } from '@kbn/workflows-extensions/server';
+import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
+
+type ContextManager = StepHandlerContext<any>['contextManager'];
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { InferenceWorkflowsStartDeps } from '../../../types';
 import { resolveConnectorId } from '../utils/resolve_connector_id';

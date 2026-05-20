@@ -12,3 +12,8 @@
 declare module '@elastic/eui/lib/services' {
   export const RIGHT_ALIGNMENT: any;
 }
+
+declare module '@elastic/eui/es/components/icon/assets/product_agent' {
+  import type { ComponentType, SVGProps } from 'react';
+  export const icon: ComponentType<SVGProps<SVGSVGElement>>;
+}
