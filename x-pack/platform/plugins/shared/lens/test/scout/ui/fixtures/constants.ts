@@ -18,6 +18,16 @@ export const LOGSTASH_IN_RANGE_DATES = {
   to: 'Sep 23, 2015 @ 18:31:44.000',
 };
 
+export const LOGSTASH_DEFAULT_TIME_RANGE = {
+  from: 'Sep 19, 2015 @ 06:31:44.000',
+  to: 'Sep 23, 2015 @ 18:31:44.000',
+};
+
+export const LOGSTASH_OUT_OF_RANGE = {
+  from: 'Sep 17, 2015 @ 06:31:44.000',
+  to: 'Sep 18, 2015 @ 06:31:44.000',
+};
+
 export const KBN_ARCHIVES = {
   ESQL_CONVERSION_DASHBOARD:
     'x-pack/platform/plugins/shared/lens/test/scout/ui/fixtures/esql_conversion_dashboard.json',
