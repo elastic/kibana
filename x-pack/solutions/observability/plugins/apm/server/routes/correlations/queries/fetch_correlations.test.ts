@@ -85,7 +85,6 @@ describe('fetchCorrelations', () => {
       mockFetchThroughputCorrelations.mockResolvedValue({
         throughputCorrelations: [infraCorrelation],
         ccsWarning: false,
-        totalDocCount: 500,
       });
 
       const result = await fetchCorrelations({ ...defaultParams, metric: 'throughput' });
@@ -101,7 +100,6 @@ describe('fetchCorrelations', () => {
       mockFetchThroughputCorrelations.mockResolvedValue({
         throughputCorrelations: [],
         ccsWarning: true,
-        totalDocCount: 0,
       });
 
       const result = await fetchCorrelations({ ...defaultParams, metric: 'throughput' });
@@ -116,7 +114,6 @@ describe('fetchCorrelations', () => {
       mockFetchThroughputCorrelations.mockResolvedValue({
         throughputCorrelations: [],
         ccsWarning: false,
-        totalDocCount: 0,
         fallbackResult: fallback,
       });
 
