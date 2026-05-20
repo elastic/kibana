@@ -943,7 +943,7 @@ describe('LogsExtractionClient', () => {
             delay: '1m',
             maxTimeWindowSize: '999d',
             maxLogsPerWindow: overrides.maxLogsPerWindow,
-            maxLogsPerWindowCapBehavior: overrides.maxLogsPerWindowCapBehavior ?? 'defer',
+            maxLogsPerWindowCapBehavior: overrides.maxLogsPerWindowCapBehavior ?? 'drop',
           }),
         } as EntityStoreGlobalState;
         mockGlobalStateClient.find.mockResolvedValue(globalState);
