@@ -16,10 +16,10 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
+import type { DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import type { SavedObjectStatus } from './use_register_canvas_action_buttons';
 import { useDashboardPreviewUnifiedSearch } from './use_dashboard_preview_unified_search';
 import { useRegisterCanvasActionButtons } from './use_register_canvas_action_buttons';
-import type { DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 
 export const getDashboardCanvasCreationOptions = (
   dashboardState: DashboardState

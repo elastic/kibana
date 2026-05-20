@@ -76,7 +76,9 @@ const getParentApi = (api: unknown): unknown | undefined => {
 /**
  * Walks the embeddable parent chain to find the nearest {@link TracksOverlays} ancestor.
  */
-export const findTracksOverlaysAncestor = (api: unknown | undefined): TracksOverlays | undefined => {
+export const findTracksOverlaysAncestor = (
+  api: unknown | undefined
+): TracksOverlays | undefined => {
   let current = api;
 
   while (current) {
