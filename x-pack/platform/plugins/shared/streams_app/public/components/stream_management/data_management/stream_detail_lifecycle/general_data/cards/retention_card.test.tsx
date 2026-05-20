@@ -140,6 +140,14 @@ describe('RetentionCard', () => {
   });
 
   describe('ILM lifecycle', () => {
+    it('renders em dash when ILM stats are unavailable', () => {
+      const definition = createMockDefinition({ ilm: { policy: 'my-ilm-policy' } });
+
+      renderWithSync(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
+
+      expect(screen.getByTestId('retention-metric')).toHaveTextContent('—');
+    });
+
     it('refetches ILM _stats after after-save notification', async () => {
       const refresh = jest.fn();
       mockUseStreamsAppFetch.mockReturnValue({

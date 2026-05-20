@@ -54,6 +54,8 @@ export const getRetentionValue = ({
 
   if (isIlm) {
     if (ilmStatsLoading) return '—';
+    // Treat "no stats" as unknown instead of "infinite".
+    if (!ilmStatsValue) return '—';
     const deleteMinAge = ilmStatsValue?.phases?.delete?.min_age;
     const formattedRetention = deleteMinAge ? getTimeSizeAndUnitLabel(deleteMinAge) : undefined;
     return formattedRetention ?? '∞';
