@@ -31,6 +31,7 @@ import {
   OBSERVABLES_TAB,
 } from '../translations';
 import { SEARCH_PLACEHOLDER } from '../../actions/translations';
+import { CaseViewAttachButton } from './case_view_attach_button';
 
 const translateTitle = (activeTab: CASE_VIEW_PAGE_TABS) => {
   switch (activeTab) {
@@ -79,7 +80,7 @@ export const CaseViewAttachments = ({
           label: tab.name,
           'data-test-subj': `case-view-tab-title-${tab.id}`,
           append: tab.badge,
-          isFocused: tab.id === activeTab,
+          checked: tab.id === activeTab ? 'on' : undefined,
           onFocusBadge: false,
           showIcons: false,
           onClick: () => {
@@ -95,12 +96,19 @@ export const CaseViewAttachments = ({
       <EuiFlexItem grow={6}>
         <CaseViewTabs caseData={caseData} activeTab={activeTab} searchTerm={searchTerm} />
         <EuiSpacer size="s" />
-        <EuiFieldSearch
-          placeholder={SEARCH_PLACEHOLDER}
-          onSearch={onSearch}
-          data-test-subj="cases-files-search"
-          fullWidth
-        />
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow>
+            <EuiFieldSearch
+              placeholder={SEARCH_PLACEHOLDER}
+              onSearch={onSearch}
+              data-test-subj="cases-files-search"
+              fullWidth
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <CaseViewAttachButton caseId={caseData.id} fill />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer size="m" />
         <EuiFlexGroup direction="row" responsive={false} data-test-subj="case-view-attachments">
           <EuiFlexItem grow={1} css={{ minWidth: '18rem', maxWidth: '18rem' }}>
