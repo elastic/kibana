@@ -138,6 +138,7 @@ stylis@4.3.6
 supports-color@8.1.1
 tapable@2.3.0
 terser-webpack-plugin@5.3.17
+terser@5.40.0
 throttle-debounce@3.0.1
 toggle-selection@1.0.6
 ts-easing@0.2.0
