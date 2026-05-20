@@ -10,7 +10,6 @@
 import { metaFields } from '@kbn/config-schema';
 import type { OpenAPIV3 } from 'openapi-types';
 import { isReferenceObject } from '../../../common';
-import type { IContext } from '../context';
 import { deleteField, stripBadDefault } from './utils';
 
 const { META_FIELD_X_OAS_OPTIONAL } = metaFields;
@@ -32,23 +31,21 @@ const isOptionalAtRuntime = (schema: OpenAPIV3.SchemaObject): boolean => {
 };
 
 const isRequiredProperty = (
-  schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject,
-  ctx?: IContext
+  schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject
 ): boolean => {
-  if (isReferenceObject(schema)) {
-    const sharedSchema = ctx?.derefSharedSchema(schema.$ref);
-    return sharedSchema ? !isOptionalAtRuntime(sharedSchema) : true;
-  }
-
   if (META_FIELD_X_OAS_OPTIONAL in schema) {
     deleteField(schema, META_FIELD_X_OAS_OPTIONAL);
     return false;
   }
 
+  if (isReferenceObject(schema)) {
+    return true;
+  }
+
   return !isOptionalAtRuntime(schema);
 };
 
-const populateRequiredFields = (schema: OpenAPIV3.SchemaObject, ctx?: IContext): void => {
+const populateRequiredFields = (schema: OpenAPIV3.SchemaObject): void => {
   if (!schema.properties) return;
   const required: string[] = [];
 
@@ -56,7 +53,7 @@ const populateRequiredFields = (schema: OpenAPIV3.SchemaObject, ctx?: IContext):
     schema.properties as Record<string, OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject>
   );
   for (const [key, value] of entries) {
-    if (isRequiredProperty(value, ctx)) {
+    if (isRequiredProperty(value)) {
       required.push(key);
     }
   }
@@ -77,8 +74,8 @@ const removeNeverType = (schema: OpenAPIV3.SchemaObject): void => {
   }
 };
 
-export const processObject = (schema: OpenAPIV3.SchemaObject, ctx?: IContext): void => {
+export const processObject = (schema: OpenAPIV3.SchemaObject): void => {
   stripBadDefault(schema);
   removeNeverType(schema);
-  populateRequiredFields(schema, ctx);
+  populateRequiredFields(schema);
 };

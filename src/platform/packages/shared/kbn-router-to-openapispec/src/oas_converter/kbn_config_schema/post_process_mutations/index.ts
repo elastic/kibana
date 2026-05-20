@@ -47,7 +47,7 @@ const walkSchema = (ctx: IContext, schema: Schema): void => {
         walkSchema(ctx, value as OpenAPIV3.SchemaObject);
       });
     }
-    mutations.processObject(schema, ctx);
+    mutations.processObject(schema);
   } else if (type === 'string') {
     mutations.processString(schema);
   } else if (type === 'record') {

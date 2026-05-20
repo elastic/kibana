@@ -261,6 +261,115 @@ describe('convert', () => {
       ).schema
     ).not.toHaveProperty('required');
   });
+
+  test('does not leak maybe metadata into later uses of the same shared schema', () => {
+    const sharedSchemas = new Map();
+    const sharedSchema = schema.object(
+      { a: schema.string() },
+      { meta: { id: 'reusedSharedSchema' } }
+    );
+
+    // Using the maybe and non-maybe variants in the same object is rejected by Joi because
+    // both schemas have the same id. This models the realistic route-to-route reuse instead.
+    expect(
+      convert(schema.object({ optionalRef: schema.maybe(sharedSchema) }), { sharedSchemas }).schema
+    ).toEqual({
+      additionalProperties: false,
+      properties: {
+        optionalRef: {
+          $ref: '#/components/schemas/reusedSharedSchema',
+        },
+      },
+      type: 'object',
+    });
+
+    expect(convert(schema.object({ requiredRef: sharedSchema }), { sharedSchemas })).toEqual({
+      schema: {
+        additionalProperties: false,
+        properties: {
+          requiredRef: {
+            $ref: '#/components/schemas/reusedSharedSchema',
+          },
+        },
+        required: ['requiredRef'],
+        type: 'object',
+      },
+      shared: {
+        reusedSharedSchema: {
+          title: 'reusedSharedSchema',
+          additionalProperties: false,
+          properties: {
+            a: {
+              type: 'string',
+            },
+          },
+          required: ['a'],
+          type: 'object',
+        },
+      },
+    });
+
+    expect(
+      convert(schema.object({ optionalRef: schema.maybe(sharedSchema) }), { sharedSchemas })
+    ).toEqual({
+      schema: {
+        additionalProperties: false,
+        properties: {
+          optionalRef: {
+            $ref: '#/components/schemas/reusedSharedSchema',
+          },
+        },
+        type: 'object',
+      },
+      shared: {
+        reusedSharedSchema: {
+          title: 'reusedSharedSchema',
+          additionalProperties: false,
+          properties: {
+            a: {
+              type: 'string',
+            },
+          },
+          required: ['a'],
+          type: 'object',
+        },
+      },
+    });
+  });
+
+  test('does not make nested required references optional when the same shared schema is also maybe', () => {
+    const sharedSchema = schema.object(
+      { a: schema.string() },
+      { meta: { id: 'nestedReusedSharedSchema' } }
+    );
+
+    expect(
+      convert(
+        schema.object({
+          nested: schema.object({ optionalRef: schema.maybe(sharedSchema) }),
+          requiredRef: sharedSchema,
+        })
+      ).schema
+    ).toEqual({
+      additionalProperties: false,
+      properties: {
+        nested: {
+          additionalProperties: false,
+          properties: {
+            optionalRef: {
+              $ref: '#/components/schemas/nestedReusedSharedSchema',
+            },
+          },
+          type: 'object',
+        },
+        requiredRef: {
+          $ref: '#/components/schemas/nestedReusedSharedSchema',
+        },
+      },
+      required: ['nested', 'requiredRef'],
+      type: 'object',
+    });
+  });
 });
 
 describe('convertPathParameters', () => {

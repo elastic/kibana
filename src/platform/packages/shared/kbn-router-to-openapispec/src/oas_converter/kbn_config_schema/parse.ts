@@ -12,6 +12,7 @@ import { metaFields } from '@kbn/config-schema';
 import joiToJsonParse from 'joi-to-json';
 import { omit } from 'lodash';
 import type { OpenAPIV3 } from 'openapi-types';
+import { isReferenceObject } from '../common';
 import { createCtx, postProcessMutations } from './post_process_mutations';
 import type { IContext } from './post_process_mutations';
 
@@ -36,6 +37,57 @@ export const joi2JsonInternal = (schema: Joi.Schema) => {
   return joiToJsonParse(schema, 'open-api');
 };
 
+const hasRuntimeOptionalMetadata = (description: Joi.Description): boolean => {
+  const defaultValue = (description.flags as { default?: unknown } | undefined)?.default;
+  const hasDefaultValue =
+    typeof defaultValue === 'function'
+      ? defaultValue() !== undefined
+      : defaultValue !== undefined &&
+        !(
+          typeof defaultValue === 'object' &&
+          defaultValue !== null &&
+          (defaultValue as { special?: unknown }).special === 'deep' &&
+          Object.keys(defaultValue).length === 1
+        );
+
+  return (
+    Boolean(
+      description.metas?.some((meta) => meta[metaFields.META_FIELD_X_OAS_OPTIONAL] === true)
+    ) || hasDefaultValue
+  );
+};
+
+const addInternalOptionalMarker = (
+  schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject
+): void => {
+  (schema as Record<string, unknown>)[metaFields.META_FIELD_X_OAS_OPTIONAL] = true;
+};
+
+const applyPropertyRuntimeMetadata = (
+  description: Joi.Description,
+  openApiSchema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject
+): void => {
+  if (isReferenceObject(openApiSchema)) {
+    if (hasRuntimeOptionalMetadata(description)) {
+      addInternalOptionalMarker(openApiSchema);
+    }
+    return;
+  }
+
+  const { keys } = description as Joi.Description & { keys?: Record<string, Joi.Description> };
+  if (keys && openApiSchema.properties) {
+    for (const [key, childDescription] of Object.entries(keys)) {
+      const childSchema = openApiSchema.properties[key] as
+        | OpenAPIV3.SchemaObject
+        | OpenAPIV3.ReferenceObject
+        | undefined;
+      if (childSchema) {
+        applyPropertyRuntimeMetadata(childDescription, childSchema);
+      }
+    }
+  }
+};
+
 const removeInternalOptionalMarker = (schema: OpenAPIV3.SchemaObject): void => {
   delete (schema as Record<string, unknown>)[metaFields.META_FIELD_X_OAS_OPTIONAL];
 };
@@ -52,6 +104,8 @@ export const parse = ({ schema, ctx = createCtx() }: ParseArgs) => {
   } else {
     result = parsed;
   }
+  const schemaDescription = schema.describe();
+  applyPropertyRuntimeMetadata(schemaDescription, result);
   postProcessMutations({ schema: result, ctx });
   Object.values(ctx.getSharedSchemas()).forEach(removeInternalOptionalMarker);
   return { shared: ctx.getSharedSchemas(), result };
