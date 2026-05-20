@@ -66,6 +66,8 @@ export interface NewRemoteElasticsearchOutput extends NewBaseOutput {
   kibana_url?: string | null;
   kibana_api_key?: string | null;
   sync_uninstalled_integrations?: boolean;
+  otel_exporter_config_yaml?: string | null;
+  otel_disable_beatsauth?: boolean | null;
 }
 
 export interface NewLogstashOutput extends NewBaseOutput {
