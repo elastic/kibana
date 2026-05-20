@@ -94,7 +94,10 @@ export const MlDataSourcePicker: FC<MlDataSourcePickerProps> = ({
     [navigateToPath, location.pathname]
   );
 
-  const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
+  const canEditDataView = useMemo(
+    () => Boolean(dataViewEditor?.userPermissions.editDataView()),
+    [dataViewEditor]
+  );
 
   const onAddField = useMemo(
     () =>
@@ -111,59 +114,70 @@ export const MlDataSourcePicker: FC<MlDataSourcePickerProps> = ({
     [canEditDataView, currentDataView, dataViewFieldEditor, dataViews]
   );
 
-  const triggerLabel =
-    currentDataView?.getName() ??
-    i18n.translate('xpack.aiops.mlDataSourcePicker.selectDataViewLabel', {
-      defaultMessage: 'Select data view',
-    });
+  const triggerLabel = useMemo(
+    () =>
+      currentDataView?.getName() ??
+      i18n.translate('xpack.aiops.mlDataSourcePicker.selectDataViewLabel', {
+        defaultMessage: 'Select data view',
+      }),
+    [currentDataView]
+  );
 
-  return (
-    <>
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <DataViewPickerComponent
-            currentDataViewId={currentDataView?.id}
-            savedDataViews={savedDataViews}
-            trigger={{
-              label: triggerLabel,
-              title: triggerLabel,
-              'data-test-subj': 'mlDataSourceSelectorButton',
-            }}
-            onChangeDataView={onChangeDataView}
-            onDataViewCreated={canEditDataView ? onDataViewCreated : undefined}
-            onAddField={onAddField}
-            compressed={false}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={i18n.translate('xpack.aiops.mlDataSourcePicker.openButton.tooltip', {
+  const onOpenSession = useCallback(() => setOpenSessionPanelVisible(true), []);
+
+  const onCloseSession = useCallback(() => setOpenSessionPanelVisible(false), []);
+
+  const dataViewPickerContent = (
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <DataViewPickerComponent
+          currentDataViewId={currentDataView?.id}
+          savedDataViews={savedDataViews}
+          trigger={{
+            label: triggerLabel,
+            title: triggerLabel,
+            'data-test-subj': 'mlDataSourceSelectorButton',
+          }}
+          onChangeDataView={onChangeDataView}
+          onDataViewCreated={canEditDataView ? onDataViewCreated : undefined}
+          onAddField={onAddField}
+          compressed={false}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          content={i18n.translate('xpack.aiops.mlDataSourcePicker.openButton.tooltip', {
+            defaultMessage: 'Open Discover session',
+          })}
+        >
+          <EuiButtonIcon
+            display="base"
+            size="m"
+            iconType="folderOpen"
+            color="text"
+            onClick={onOpenSession}
+            data-test-subj="mlOpenDiscoverSessionButton"
+            aria-label={i18n.translate('xpack.aiops.mlDataSourcePicker.openButton.ariaLabel', {
               defaultMessage: 'Open Discover session',
             })}
-          >
-            <EuiButtonIcon
-              display="base"
-              size="m"
-              iconType="folderOpen"
-              color="text"
-              onClick={() => setOpenSessionPanelVisible(true)}
-              data-test-subj="mlOpenDiscoverSessionButton"
-              aria-label={i18n.translate('xpack.aiops.mlDataSourcePicker.openButton.ariaLabel', {
-                defaultMessage: 'Open Discover session',
-              })}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {isOpenSessionPanelVisible ? (
-        <MlOpenSessionFlyout
-          services={services}
-          onClose={() => setOpenSessionPanelVisible(false)}
-          onOpenSavedSearch={onOpenSavedSearch}
-          SavedObjectFinderComponent={SavedObjectFinderComponent}
-          filterEsql={filterEsql}
-        />
-      ) : null}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  return isOpenSessionPanelVisible ? (
+    <>
+      {dataViewPickerContent}
+      <MlOpenSessionFlyout
+        services={services}
+        onClose={onCloseSession}
+        onOpenSavedSearch={onOpenSavedSearch}
+        SavedObjectFinderComponent={SavedObjectFinderComponent}
+        filterEsql={filterEsql}
+      />
     </>
+  ) : (
+    dataViewPickerContent
   );
 };
