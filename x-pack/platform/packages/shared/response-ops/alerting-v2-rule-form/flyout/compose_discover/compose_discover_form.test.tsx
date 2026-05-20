@@ -225,6 +225,10 @@ describe('RecoveryConditionStep', () => {
 
     fireEvent.click(screen.getByTestId('composeDiscoverEditRecovery'));
 
-    expect(dispatch).toHaveBeenCalledWith({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert: true });
+    expect(dispatch).toHaveBeenCalledWith({
+      type: 'OPEN_CHILD_FOR_STEP',
+      step: state.step,
+      isAlert: true,
+    });
   });
 });

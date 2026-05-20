@@ -436,7 +436,9 @@ function RecoveryConditionStep({
                 size="s"
                 iconType="editorCodeBlock"
                 isDisabled={state.childOpen}
-                onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert: true })}
+                onClick={() =>
+                  dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert: true })
+                }
                 data-test-subj="composeDiscoverEditRecovery"
               >
                 Edit recovery query

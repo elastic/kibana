@@ -207,8 +207,8 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   const methods = useForm<ComposeFormValues>({ mode: 'onBlur', defaultValues });
 
   const [sandboxQuery, setSandboxQuery] = useState<RuleQuery>(() => methods.getValues('query'));
-  const [sandboxTimeField, setSandboxTimeField] = useState<string>(
-    () => methods.getValues('timeField')
+  const [sandboxTimeField, setSandboxTimeField] = useState<string>(() =>
+    methods.getValues('timeField')
   );
   const [dateRange, setDateRange] = useState({ dateStart: 'now-15m', dateEnd: 'now' });
 
@@ -546,7 +546,10 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
               onTabChange={(tab) => dispatch({ type: 'SET_TAB', tab })}
               onAlertEditorMount={onAlertEditorMount}
               onRecoveryEditorMount={onRecoveryEditorMount}
-              onClose={() => { syncSandbox(); dispatch({ type: 'CLOSE_CHILD' }); }}
+              onClose={() => {
+                syncSandbox();
+                dispatch({ type: 'CLOSE_CHILD' });
+              }}
               onApply={handleSandboxApply}
             />
           )}

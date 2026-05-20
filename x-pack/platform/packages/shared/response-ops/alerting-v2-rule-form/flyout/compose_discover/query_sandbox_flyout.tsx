@@ -340,9 +340,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
               baseQuery={query.format === 'composed' ? query.base : ''}
               alertBlock={query.format === 'composed' ? query.blocks.breach : query.breach}
               recoveryBlock={
-                query.format === 'composed'
-                  ? (query.blocks.recover ?? '')
-                  : (query.recover ?? '')
+                query.format === 'composed' ? query.blocks.recover ?? '' : query.recover ?? ''
               }
               onBaseQueryChange={(v) => {
                 if (query.format === 'composed') onQueryChange?.({ ...query, base: v });
