@@ -41,8 +41,7 @@ import {
 
 const SKILLS_MANAGE_PATH = '/manage/skills';
 
-const PREVIEW_MAX_LINES = 30;
-const PREVIEW_MAX_HEIGHT_PX = 240;
+const INSTRUCTIONS_PREVIEW_MAX_HEIGHT_PX = 240;
 
 const previewButtonLabel = i18n.translate(
   'xpack.agentBuilderPlatform.attachments.skill.previewButtonLabel',
@@ -66,23 +65,6 @@ const lackManageSkillsPermissionDescription = i18n.translate(
     defaultMessage: 'You do not have permission to manage skills in this space.',
   }
 );
-
-/**
- * Trim a multi-line markdown body to a preview suitable for the inline card.
- * The agent's `content` can be hundreds of lines; we show the first chunk
- * inline and let the user open the full skill in the canvas flyout for the
- * rest.
- */
-const previewContent = (content: string): { preview: string; truncated: boolean } => {
-  const lines = content.split('\n');
-  if (lines.length <= PREVIEW_MAX_LINES) {
-    return { preview: content, truncated: false };
-  }
-  return {
-    preview: lines.slice(0, PREVIEW_MAX_LINES).join('\n'),
-    truncated: true,
-  };
-};
 
 const renderBoldChunks = (chunks: React.ReactNode) => <strong>{chunks}</strong>;
 
@@ -166,11 +148,6 @@ const SkillInstructions = ({
   showFullContent: boolean;
   content: string;
 }) => {
-  let shownContent = content;
-  let truncated = false;
-  if (!showFullContent) {
-    ({ preview: shownContent, truncated } = previewContent(content));
-  }
   return (
     <>
       <EuiText size="xs" color="subdued">
@@ -192,24 +169,12 @@ const SkillInstructions = ({
       <EuiCodeBlock
         language="markdown"
         fontSize="s"
-        overflowHeight={showFullContent ? '100%' : PREVIEW_MAX_HEIGHT_PX}
+        overflowHeight={showFullContent ? '100%' : INSTRUCTIONS_PREVIEW_MAX_HEIGHT_PX}
         isCopyable={showFullContent}
         css={showFullContent ? fullContentInstructionsStyles : previewInstructionsStyles}
       >
-        {shownContent}
+        {content}
       </EuiCodeBlock>
-      {!showFullContent && truncated && (
-        <>
-          <EuiSpacer size="xs" />
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.agentBuilderPlatform.attachments.skill.previewTruncated"
-              defaultMessage="Preview truncated to the first {lineCount} lines. The full instructions will be saved when you click Create skill."
-              values={{ lineCount: PREVIEW_MAX_LINES }}
-            />
-          </EuiText>
-        </>
-      )}
     </>
   );
 };
