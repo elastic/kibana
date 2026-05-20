@@ -300,9 +300,9 @@ export abstract class SiemMigrationsTaskClient<
     return {
       execute: (input: P, config?: RunnableConfig<C>) =>
         runner.executeTask(input, {
+          ...config,
           signal: opts.abortController.signal,
           metadata: { migrationId: invokeId, evalsInvoke: true },
-          ...config,
         }),
     };
   }

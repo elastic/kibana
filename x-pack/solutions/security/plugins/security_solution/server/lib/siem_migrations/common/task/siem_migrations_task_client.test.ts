@@ -537,10 +537,35 @@ describe('RuleMigrationsTaskClient', () => {
       const extraConfig = { configurable: { skipPrebuiltRulesMatching: true } };
       await invoker.execute(input as never, extraConfig);
       expect(mockRunnerInstance.executeTask).toHaveBeenCalledWith(input, {
+        ...extraConfig,
         signal: abortController.signal,
         metadata: { migrationId: expect.any(String), evalsInvoke: true },
-        ...extraConfig,
       });
+    });
+
+    it('protects metadata from being overridden by caller config', async () => {
+      const abortController = new AbortController();
+      (SiemMigrationTaskRunner as jest.Mock).mockImplementation(() => mockRunnerInstance);
+      const client = new TestTaskClient(
+        migrationsRunning,
+        logger,
+        data,
+        request,
+        currentUser,
+        dependencies
+      );
+      const invoker = await client.createInvoker('connector-1', { abortController });
+
+      const input = { id: 'r1' };
+      const configWithMetadata = { metadata: { evalsInvoke: false, other: 'data' } };
+      await invoker.execute(input as never, configWithMetadata);
+
+      expect(mockRunnerInstance.executeTask).toHaveBeenCalledWith(
+        input,
+        expect.objectContaining({
+          metadata: expect.objectContaining({ evalsInvoke: true }), // our value wins
+        })
+      );
     });
   });
 
