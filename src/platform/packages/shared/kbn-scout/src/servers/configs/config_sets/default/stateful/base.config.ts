@@ -191,6 +191,9 @@ export const defaultConfig: ScoutServerConfig = {
       '--xpack.ruleRegistry.write.enabled=true',
       '--xpack.ruleRegistry.write.enabled=true',
       '--xpack.ruleRegistry.write.cache.enabled=false',
+      // Enable lead generation experimental feature so Scout API tests can exercise its routes.
+      // This only registers routes and a task type; it does not auto-run anything.
+      `--xpack.securitySolution.enableExperimental=${JSON.stringify(['leadGenerationEnabled'])}`,
       '--monitoring_collection.opentelemetry.metrics.prometheus.enabled=true',
       '--xpack.profiling.enabled=true',
       // Fleet configuration
