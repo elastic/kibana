@@ -8,22 +8,19 @@
 import React from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { render, screen, fireEvent } from '@testing-library/react';
-import type { UseFormReturn } from 'react-hook-form';
 import { QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { createTestQueryClient, createMockServices } from '../../test_utils';
-import { RuleFormProvider, type RuleFormServices } from '../../form/contexts';
-import { createInitialState } from './use_compose_discover_state';
-import { getSteps } from './compose_discover_form';
-import type { ComposeDiscoverState } from './types';
-import type { ComposeFormValues, RuleQuery } from './compose_form_types';
+import { createTestQueryClient, createMockServices } from '../../../test_utils';
+import { RuleFormProvider, type RuleFormServices } from '../../../form/contexts';
+import { createInitialState } from '../use_compose_discover_state';
+import type { ComposeDiscoverState } from '../types';
+import type { ComposeFormValues, RuleQuery } from '../compose_form_types';
+import { RecoveryConditionStep } from './recovery_condition_step';
 
 jest.mock('@kbn/code-editor', () => ({
   ...jest.requireActual('@kbn/code-editor'),
   CodeEditor: ({ value }: { value: string }) => <pre data-test-subj="codeEditorMock">{value}</pre>,
 }));
-
-// ── helpers ───────────────────────────────────────────────────────────────────
 
 const BASE_QUERY = 'FROM logs-*\n| STATS count = COUNT(*) BY host.name';
 const ALERT_BLOCK = '| WHERE count > 100';
@@ -96,84 +93,18 @@ const renderRecoveryStep = (
   const dispatch = jest.fn();
   const onRecoveryTypeChange = jest.fn();
   const services = createMockServices();
-  const steps = getSteps(true);
-  const recoveryStep = steps.find((s) => s.id === 'recoveryCondition')!;
 
   render(
-    recoveryStep.render({
-      state,
-      dispatch,
-      services,
-      onRecoveryTypeChange,
-    }) as React.ReactElement,
+    <RecoveryConditionStep
+      state={state}
+      dispatch={dispatch}
+      onRecoveryTypeChange={onRecoveryTypeChange}
+    />,
     { wrapper: createComposeFormWrapper(queryOverride, services) }
   );
 
   return { dispatch, state, onRecoveryTypeChange };
 };
-
-// ── step validation ───────────────────────────────────────────────────────────
-
-describe('step validation', () => {
-  describe('alertCondition.validate', () => {
-    const alertStep = getSteps(false).find((s) => s.id === 'alertCondition')!;
-
-    it('returns true when queryCommitted is true', async () => {
-      const state = createState({ queryCommitted: true });
-      const methods = {} as UseFormReturn<ComposeFormValues>;
-
-      expect(await alertStep.validate!(methods, state)).toBe(true);
-    });
-
-    it('returns false when queryCommitted is false', async () => {
-      const state = createState({ queryCommitted: false });
-      const methods = {} as UseFormReturn<ComposeFormValues>;
-
-      expect(await alertStep.validate!(methods, state)).toBe(false);
-    });
-  });
-
-  describe('details.validate', () => {
-    const detailsStep = getSteps(false).find((s) => s.id === 'details')!;
-
-    it('delegates to methods.trigger with metadata.name', async () => {
-      const state = createState();
-      const methods = {
-        trigger: jest.fn().mockResolvedValue(true),
-      } as unknown as UseFormReturn<ComposeFormValues>;
-
-      const result = await detailsStep.validate!(methods, state);
-
-      expect(methods.trigger).toHaveBeenCalledWith(['metadata.name']);
-      expect(result).toBe(true);
-    });
-
-    it('returns false when trigger rejects validation', async () => {
-      const state = createState();
-      const methods = {
-        trigger: jest.fn().mockResolvedValue(false),
-      } as unknown as UseFormReturn<ComposeFormValues>;
-
-      const result = await detailsStep.validate!(methods, state);
-
-      expect(result).toBe(false);
-    });
-  });
-
-  describe('steps without validate', () => {
-    it('recoveryCondition has no validate function', () => {
-      const recoveryStep = getSteps(true).find((s) => s.id === 'recoveryCondition')!;
-      expect(recoveryStep.validate).toBeUndefined();
-    });
-
-    it('notifications has no validate function', () => {
-      const notificationsStep = getSteps(false).find((s) => s.id === 'notifications')!;
-      expect(notificationsStep.validate).toBeUndefined();
-    });
-  });
-});
-
-// ── RecoveryConditionStep rendering ───────────────────────────────────────────
 
 describe('RecoveryConditionStep', () => {
   it('renders the recovery type selector in default mode', () => {
