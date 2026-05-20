@@ -41,8 +41,10 @@ interface Props {
   to: string;
 }
 
-export const AIValueReport: React.FC<Props> = (props) => {
-  const { setHasReportData, isSourcererLoading } = props;
+type AIValueReportContentProps = Omit<Props, 'isSourcererLoading'>;
+
+const AIValueReportContent: React.FC<AIValueReportContentProps> = (props) => {
+  const { setHasReportData } = props;
   const { settings } = useKibana().services;
   const exportContext = useAIValueExportContext();
   const setReportInputForExportContext = exportContext?.setReportInput;
@@ -80,7 +82,7 @@ export const AIValueReport: React.FC<Props> = (props) => {
   const data = useValueReportData({ from, to, minutesPerAlert, analystHourlyRate });
 
   useEffect(() => {
-    if (data.isLoading || data.isSample || !setReportInputForExportContext || isSourcererLoading) {
+    if (data.isLoading || data.isSample || !setReportInputForExportContext) {
       return;
     }
     setReportInputForExportContext({
@@ -90,13 +92,13 @@ export const AIValueReport: React.FC<Props> = (props) => {
       analystHourlyRate: data.analystHourlyRate,
       minutesPerAlert: data.minutesPerAlert,
     });
-  }, [data, setReportInputForExportContext, isSourcererLoading]);
+  }, [data, setReportInputForExportContext]);
 
   useEffect(() => {
     setHasReportData(!data.isSample && data.valueMetrics.attackDiscoveryCount > 0);
   }, [data.isSample, data.valueMetrics, setHasReportData]);
 
-  if (data.isLoading || isSourcererLoading) {
+  if (data.isLoading) {
     return <PageLoader />;
   }
 
@@ -176,4 +178,24 @@ export const AIValueReport: React.FC<Props> = (props) => {
   }
 
   return <AIValueReportLayout {...data} />;
+};
+
+export const AIValueReport: React.FC<Props> = ({
+  setHasReportData,
+  isSourcererLoading,
+  from,
+  to,
+}) => {
+  useEffect(() => {
+    if (isSourcererLoading) {
+      // safety check: clear a stale parent flag as soon as loading starts.
+      setHasReportData(false);
+    }
+  }, [isSourcererLoading, setHasReportData]);
+
+  if (isSourcererLoading) {
+    return <PageLoader />;
+  }
+
+  return <AIValueReportContent setHasReportData={setHasReportData} from={from} to={to} />;
 };

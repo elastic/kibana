@@ -14,7 +14,7 @@ import {
 import { AIValueReport } from '.';
 import { useKibana } from '../../../common/lib/kibana';
 import { useValueMetrics } from './hooks/use_value_metrics';
-import { useHasEverUsedAttackDiscovery } from './hooks/use_has_ever_used_attack_discovery';
+import { useHasLatelyUsedAttackDiscovery } from './hooks/use_has_lately_used_attack_discovery';
 import { AIValueReportLayout } from './ai_value_report_layout';
 import {
   SAMPLE_FROM,
@@ -33,8 +33,8 @@ jest.mock('./hooks/use_value_metrics', () => ({
   useValueMetrics: jest.fn(),
 }));
 
-jest.mock('./hooks/use_has_ever_used_attack_discovery', () => ({
-  useHasEverUsedAttackDiscovery: jest.fn(),
+jest.mock('./hooks/use_has_lately_used_attack_discovery', () => ({
+  useHasLatelyUsedAttackDiscovery: jest.fn(),
 }));
 
 jest.mock('./ai_value_report_layout', () => ({
@@ -58,8 +58,8 @@ jest.mock('../../../common/components/links', () => ({
 
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseValueMetrics = useValueMetrics as jest.MockedFunction<typeof useValueMetrics>;
-const mockUseHasEverUsedAttackDiscovery = useHasEverUsedAttackDiscovery as jest.MockedFunction<
-  typeof useHasEverUsedAttackDiscovery
+const mockuseHasLatelyUsedAttackDiscovery = useHasLatelyUsedAttackDiscovery as jest.MockedFunction<
+  typeof useHasLatelyUsedAttackDiscovery
 >;
 const mockAIValueReportLayout = AIValueReportLayout as jest.MockedFunction<
   typeof AIValueReportLayout
@@ -126,8 +126,8 @@ describe('AIValueReport', () => {
       valueMetricsCompare: mockValueMetricsCompare,
     });
 
-    mockUseHasEverUsedAttackDiscovery.mockReturnValue({
-      hasEverUsedAttackDiscovery: true,
+    mockuseHasLatelyUsedAttackDiscovery.mockReturnValue({
+      hasLatelyUsedAttackDiscovery: true,
       isLoading: false,
     });
   });
@@ -173,8 +173,8 @@ describe('AIValueReport', () => {
       },
       valueMetricsCompare: mockValueMetricsCompare,
     });
-    mockUseHasEverUsedAttackDiscovery.mockReturnValue({
-      hasEverUsedAttackDiscovery: false,
+    mockuseHasLatelyUsedAttackDiscovery.mockReturnValue({
+      hasLatelyUsedAttackDiscovery: false,
       isLoading: false,
     });
 
@@ -204,8 +204,8 @@ describe('AIValueReport', () => {
       },
       valueMetricsCompare: mockValueMetricsCompare,
     });
-    mockUseHasEverUsedAttackDiscovery.mockReturnValue({
-      hasEverUsedAttackDiscovery: true,
+    mockuseHasLatelyUsedAttackDiscovery.mockReturnValue({
+      hasLatelyUsedAttackDiscovery: true,
       isLoading: false,
     });
 
@@ -231,11 +231,14 @@ describe('AIValueReport', () => {
     expect(mockAIValueReportLayout).not.toHaveBeenCalled();
   });
 
-  it('renders the page loader when sourcerer is still loading', () => {
+  it('renders the page loader and skips data hooks when sourcerer is still loading', () => {
     render(<AIValueReport {...defaultProps} isSourcererLoading={true} />);
 
     expect(screen.getByTestId('mock-page-loader')).toBeInTheDocument();
     expect(mockAIValueReportLayout).not.toHaveBeenCalled();
+    expect(mockUseValueMetrics).not.toHaveBeenCalled();
+    expect(mockuseHasLatelyUsedAttackDiscovery).not.toHaveBeenCalled();
+    expect(defaultProps.setHasReportData).toHaveBeenCalledWith(false);
   });
 
   it('uses the specified timerange when exporting the report', () => {
@@ -323,8 +326,8 @@ describe('AIValueReport', () => {
       },
       valueMetricsCompare: mockValueMetricsCompare,
     });
-    mockUseHasEverUsedAttackDiscovery.mockReturnValue({
-      hasEverUsedAttackDiscovery: false,
+    mockuseHasLatelyUsedAttackDiscovery.mockReturnValue({
+      hasLatelyUsedAttackDiscovery: false,
       isLoading: false,
     });
 

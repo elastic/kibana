@@ -18,6 +18,7 @@ import { useHasSecurityCapability } from '../../helper_hooks';
 import { TestProviders } from '../../common/mock/test_providers';
 import { AIValueReport } from '../components/ai_value';
 import { useAIValueExportContext } from '../providers/ai_value/export_provider';
+import { useDownloadAIValueReport } from '../hooks/use_download_ai_value_report';
 
 jest.mock('../../common/hooks/search_bar/use_sync_timerange_url_param', () => ({
   useSyncTimerangeUrlParam: jest.fn(),
@@ -53,6 +54,10 @@ jest.mock('../providers/ai_value/export_provider', () => ({
   useAIValueExportContext: jest.fn(),
 }));
 
+jest.mock('../hooks/use_download_ai_value_report', () => ({
+  useDownloadAIValueReport: jest.fn(),
+}));
+
 jest.mock('../components/ai_value', () => ({
   AIValueReport: jest.fn(() => <div data-test-subj="ai-value-report" />),
 }));
@@ -84,6 +89,9 @@ const mockUseHasSecurityCapability = useHasSecurityCapability as jest.MockedFunc
 >;
 const mockAIValueReport = AIValueReport as jest.MockedFunction<typeof AIValueReport>;
 const mockUseAIValueExportContext = useAIValueExportContext as jest.Mock;
+const mockUseDownloadAIValueReport = useDownloadAIValueReport as jest.MockedFunction<
+  typeof useDownloadAIValueReport
+>;
 
 const sourcererDataView = {
   loading: false,
@@ -126,6 +134,10 @@ describe('AIValue', () => {
     mockUseDataView.mockReturnValue({ status: 'ready', dataView: {} as never });
     mockUseHasSecurityCapability.mockReturnValue(true);
     mockUseAIValueExportContext.mockReturnValue({ isExportMode: false });
+    mockUseDownloadAIValueReport.mockReturnValue({
+      toggleContextMenu: jest.fn(),
+      isExportEnabled: false,
+    });
   });
 
   it('renders NoPrivileges when the user lacks the socManagement capability', () => {
@@ -151,6 +163,17 @@ describe('AIValue', () => {
 
     expect(screen.getByTestId('aiValuePage')).toBeInTheDocument();
     expect(screen.queryByTestId('header-page')).not.toBeInTheDocument();
+  });
+
+  it('disables export button when there is no report data even if export integration is available', () => {
+    mockUseDownloadAIValueReport.mockReturnValue({
+      toggleContextMenu: jest.fn(),
+      isExportEnabled: true,
+    });
+
+    renderAIValue();
+
+    expect(screen.getByTestId('aiValueExportButton')).toBeDisabled();
   });
 
   describe('isSourcererLoading derivation', () => {

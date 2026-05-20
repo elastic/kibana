@@ -14,7 +14,7 @@ import {
   SAMPLE_VALUE_METRICS_COMPARE,
 } from '../components/ai_value/sample_data';
 import { useValueMetrics } from '../components/ai_value/hooks/use_value_metrics';
-import { useHasEverUsedAttackDiscovery } from '../components/ai_value/hooks/use_has_ever_used_attack_discovery';
+import { useHasLatelyUsedAttackDiscovery } from '../components/ai_value/hooks/use_has_lately_used_attack_discovery';
 
 interface Props {
   from: string;
@@ -58,13 +58,20 @@ export const useValueReportData = ({
     valueMetricsCompare,
   } = useValueMetrics({ from, to, minutesPerAlert, analystHourlyRate });
 
-  const { hasEverUsedAttackDiscovery, isLoading: isLoadingHistory } =
-    useHasEverUsedAttackDiscovery();
+  const shouldCheckHistory = !isLoadingMetrics && valueMetrics.attackDiscoveryCount === 0;
 
-  const isLoading = isLoadingMetrics || isLoadingHistory;
+  const {
+    hasLatelyUsedAttackDiscovery: hasHistoricalAttackDiscoveries,
+    isLoading: isLoadingHistory,
+  } = useHasLatelyUsedAttackDiscovery({ enabled: shouldCheckHistory });
 
-  const isSample =
-    !isLoading && valueMetrics.attackDiscoveryCount === 0 && !hasEverUsedAttackDiscovery;
+  const isLoading = isLoadingMetrics || (shouldCheckHistory && isLoadingHistory);
+
+  // Discoveries in the selected range imply prior usage; otherwise rely on the history query.
+  const hasEverUsedAttackDiscovery =
+    valueMetrics.attackDiscoveryCount > 0 || hasHistoricalAttackDiscoveries;
+
+  const isSample = !isLoading && shouldCheckHistory && !hasEverUsedAttackDiscovery;
 
   return useMemo<ValueReportData>(() => {
     if (isSample) {

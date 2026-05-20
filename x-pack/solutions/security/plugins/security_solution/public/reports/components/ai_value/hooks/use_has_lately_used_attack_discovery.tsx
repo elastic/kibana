@@ -22,19 +22,26 @@ const EVER_END = 'now';
 
 const ALL_STATUSES = [OPEN, ACKNOWLEDGED, CLOSED].map((s) => s.toLowerCase());
 
-interface UseHasEverUsedAttackDiscovery {
-  hasEverUsedAttackDiscovery: boolean;
+interface UseHasLatelyUsedAttackDiscovery {
+  hasLatelyUsedAttackDiscovery: boolean;
   isLoading: boolean;
 }
 
-export const useHasEverUsedAttackDiscovery = (): UseHasEverUsedAttackDiscovery => {
+interface Options {
+  enabled?: boolean;
+}
+
+export const useHasLatelyUsedAttackDiscovery = ({
+  enabled = true,
+}: Options = {}): UseHasLatelyUsedAttackDiscovery => {
   const { http } = useKibana().services;
   const { assistantAvailability } = useAssistantContext();
+  const shouldQueryHistory = assistantAvailability.isAssistantEnabled && enabled;
 
   const { data, isLoading } = useFindAttackDiscoveries({
     end: EVER_END,
     http,
-    isAssistantEnabled: assistantAvailability.isAssistantEnabled,
+    isAssistantEnabled: shouldQueryHistory,
     perPage: 1,
     start: EVER_START,
     status: ALL_STATUSES,
@@ -42,9 +49,9 @@ export const useHasEverUsedAttackDiscovery = (): UseHasEverUsedAttackDiscovery =
 
   return useMemo(
     () => ({
-      hasEverUsedAttackDiscovery: (data?.total ?? 0) > 0,
-      isLoading,
+      hasLatelyUsedAttackDiscovery: shouldQueryHistory ? (data?.total ?? 0) > 0 : false,
+      isLoading: shouldQueryHistory && isLoading,
     }),
-    [data?.total, isLoading]
+    [data?.total, isLoading, shouldQueryHistory]
   );
 };

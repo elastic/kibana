@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react';
 
 import { useValueReportData } from './use_value_report_data';
 import { useValueMetrics } from '../components/ai_value/hooks/use_value_metrics';
-import { useHasEverUsedAttackDiscovery } from '../components/ai_value/hooks/use_has_ever_used_attack_discovery';
+import { useHasLatelyUsedAttackDiscovery } from '../components/ai_value/hooks/use_has_lately_used_attack_discovery';
 import {
   SAMPLE_FROM,
   SAMPLE_TO,
@@ -19,11 +19,11 @@ import {
 import type { ValueMetrics } from '../components/ai_value/metrics';
 
 jest.mock('../components/ai_value/hooks/use_value_metrics');
-jest.mock('../components/ai_value/hooks/use_has_ever_used_attack_discovery');
+jest.mock('../components/ai_value/hooks/use_has_lately_used_attack_discovery');
 
 const mockUseValueMetrics = useValueMetrics as jest.MockedFunction<typeof useValueMetrics>;
-const mockUseHasEverUsedAttackDiscovery = useHasEverUsedAttackDiscovery as jest.MockedFunction<
-  typeof useHasEverUsedAttackDiscovery
+const mockUseHasEverUsedAttackDiscovery = useHasLatelyUsedAttackDiscovery as jest.MockedFunction<
+  typeof useHasLatelyUsedAttackDiscovery
 >;
 
 const LIVE_METRICS: ValueMetrics = {
@@ -72,11 +72,11 @@ const mockMetrics = ({
 };
 
 const mockHistory = ({
-  hasEverUsedAttackDiscovery = false,
+  useHasLatelyUsedAttackDiscovery = false,
   isLoading = false,
-}: Partial<ReturnType<typeof useHasEverUsedAttackDiscovery>> = {}) => {
+}: Partial<ReturnType<typeof useHasLatelyUsedAttackDiscovery>> = {}) => {
   mockUseHasEverUsedAttackDiscovery.mockReturnValue({
-    hasEverUsedAttackDiscovery,
+    hasEverUsedAttackDiscovery: useHasLatelyUsedAttackDiscovery,
     isLoading,
   });
 };
@@ -89,7 +89,7 @@ describe('useValueReportData', () => {
   describe('sample vs live mode', () => {
     it('enters sample mode when the feature was never used and the range is empty, passing through settings-derived props', () => {
       mockMetrics({ valueMetrics: EMPTY_LIVE_METRICS });
-      mockHistory({ hasEverUsedAttackDiscovery: false });
+      mockHistory({ useHasLatelyUsedAttackDiscovery: false });
 
       const { result } = renderHook(() => useValueReportData(PROPS));
 
@@ -105,11 +105,12 @@ describe('useValueReportData', () => {
         valueMetrics: SAMPLE_VALUE_METRICS,
         valueMetricsCompare: SAMPLE_VALUE_METRICS_COMPARE,
       });
+      expect(mockUseHasEverUsedAttackDiscovery).toHaveBeenCalledWith({ enabled: true });
     });
 
     it('stays in live mode when the feature was ever used, even if the current range has zero discoveries', () => {
       mockMetrics({ valueMetrics: EMPTY_LIVE_METRICS });
-      mockHistory({ hasEverUsedAttackDiscovery: true });
+      mockHistory({ useHasLatelyUsedAttackDiscovery: true });
 
       const { result } = renderHook(() => useValueReportData(PROPS));
 
@@ -119,6 +120,7 @@ describe('useValueReportData', () => {
       expect(result.current.minutesPerAlert).toBe(PROPS.minutesPerAlert);
       expect(result.current.analystHourlyRate).toBe(PROPS.analystHourlyRate);
       expect(result.current.valueMetrics).toBe(EMPTY_LIVE_METRICS);
+      expect(mockUseHasEverUsedAttackDiscovery).toHaveBeenCalledWith({ enabled: true });
     });
 
     it.each([
@@ -126,62 +128,65 @@ describe('useValueReportData', () => {
       ['feature ever used', true],
     ])(
       'stays in live mode when the current range has discoveries (%s)',
-      (_label, hasEverUsedAttackDiscovery) => {
+      (_label, hasHistoricalAttackDiscoveries) => {
         mockMetrics({ valueMetrics: LIVE_METRICS });
-        mockHistory({ hasEverUsedAttackDiscovery });
+        mockHistory({ useHasLatelyUsedAttackDiscovery: hasHistoricalAttackDiscoveries });
 
         const { result } = renderHook(() => useValueReportData(PROPS));
 
         expect(result.current.isSample).toBe(false);
         expect(result.current.valueMetrics).toBe(LIVE_METRICS);
+        expect(result.current.hasEverUsedAttackDiscovery).toBe(true);
+        expect(mockUseHasEverUsedAttackDiscovery).toHaveBeenCalledWith({ enabled: false });
       }
     );
 
     it('passes attackAlertIds and both metric objects through unchanged in live mode', () => {
       mockMetrics();
-      mockHistory({ hasEverUsedAttackDiscovery: true });
+      mockHistory({ useHasLatelyUsedAttackDiscovery: true });
 
       const { result } = renderHook(() => useValueReportData(PROPS));
 
       expect(result.current.attackAlertIds).toBe(LIVE_ALERT_IDS);
       expect(result.current.valueMetrics).toBe(LIVE_METRICS);
       expect(result.current.valueMetricsCompare).toBe(LIVE_METRICS_COMPARE);
+      expect(mockUseHasEverUsedAttackDiscovery).toHaveBeenCalledWith({ enabled: false });
     });
   });
 
   describe('loading behavior', () => {
-    it.each([
-      ['only metrics loading', true, false],
-      ['only history loading', false, true],
-    ])(
-      'suppresses sample mode while loading (%s) so the report does not flash sample data during fetch',
-      (_label, metricsLoading, historyLoading) => {
-        mockMetrics({ isLoading: metricsLoading, valueMetrics: EMPTY_LIVE_METRICS });
-        mockHistory({ isLoading: historyLoading, hasEverUsedAttackDiscovery: false });
+    it('suppresses sample mode while metrics are loading so the report does not flash sample data during fetch', () => {
+      mockMetrics({ isLoading: true, valueMetrics: EMPTY_LIVE_METRICS });
+      mockHistory({ isLoading: true, useHasLatelyUsedAttackDiscovery: false });
 
-        const { result } = renderHook(() => useValueReportData(PROPS));
+      const { result } = renderHook(() => useValueReportData(PROPS));
 
-        expect(result.current.isLoading).toBe(true);
-        expect(result.current.isSample).toBe(false);
-        expect(result.current.from).toBe(PROPS.from);
-      }
-    );
+      expect(result.current.isLoading).toBe(true);
+      expect(result.current.isSample).toBe(false);
+      expect(result.current.from).toBe(PROPS.from);
+      expect(mockUseHasEverUsedAttackDiscovery).toHaveBeenCalledWith({ enabled: false });
+    });
 
-    it.each([
-      [false, false, false],
-      [true, false, true],
-      [false, true, true],
-      [true, true, true],
-    ])(
-      'reports isLoading as the OR of metrics (%s) and history (%s) loading → %s',
-      (metricsLoading, historyLoading, expected) => {
-        mockMetrics({ isLoading: metricsLoading });
-        mockHistory({ isLoading: historyLoading, hasEverUsedAttackDiscovery: true });
+    it('waits on history loading only when the current range has zero discoveries', () => {
+      mockMetrics({ isLoading: false, valueMetrics: EMPTY_LIVE_METRICS });
+      mockHistory({ isLoading: true, useHasLatelyUsedAttackDiscovery: false });
 
-        const { result } = renderHook(() => useValueReportData(PROPS));
+      const { result } = renderHook(() => useValueReportData(PROPS));
 
-        expect(result.current.isLoading).toBe(expected);
-      }
-    );
+      expect(result.current.isLoading).toBe(true);
+      expect(result.current.isSample).toBe(false);
+      expect(mockUseHasEverUsedAttackDiscovery).toHaveBeenCalledWith({ enabled: true });
+    });
+
+    it('does not wait on history loading when the current range already has discoveries', () => {
+      mockMetrics({ valueMetrics: LIVE_METRICS });
+      mockHistory({ isLoading: true, useHasLatelyUsedAttackDiscovery: false });
+
+      const { result } = renderHook(() => useValueReportData(PROPS));
+
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.isSample).toBe(false);
+      expect(mockUseHasEverUsedAttackDiscovery).toHaveBeenCalledWith({ enabled: false });
+    });
   });
 });
