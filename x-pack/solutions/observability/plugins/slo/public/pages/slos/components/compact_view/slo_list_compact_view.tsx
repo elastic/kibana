@@ -41,11 +41,11 @@ import {
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import { SloRemoteBadge } from '../badges/slo_remote_badge';
 import { SloRulesBadge } from '../badges/slo_rules_badge';
-import { SLOGroupings } from '../common/slo_groupings';
 import {
-  CompositeSloBurnRateWindowColumnHeader,
-  type CompositeSloBurnRateWindow,
-} from '../composite_slo_burn_rate_window_column_header';
+  SloBurnRateWindowColumnHeader,
+  type SloBurnRateWindow,
+} from '../common/slo_burn_rate_window_column_header';
+import { SLOGroupings } from '../common/slo_groupings';
 import { SloListEmpty } from '../slo_list_empty';
 import { SloListError } from '../slo_list_error';
 import { SloSparkline } from '../slo_sparkline';
@@ -100,7 +100,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       sloList,
     });
 
-  const [burnRateWindow, setBurnRateWindow] = useState<CompositeSloBurnRateWindow>('5m');
+  const [burnRateWindow, setBurnRateWindow] = useState<SloBurnRateWindow>('5m');
   const [isBurnRatePopoverOpen, setIsBurnRatePopoverOpen] = useState(false);
 
   const isRemote = (slo: SLOWithSummaryResponse) => !!slo.remote;
@@ -446,7 +446,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     },
     {
       name: (
-        <CompositeSloBurnRateWindowColumnHeader
+        <SloBurnRateWindowColumnHeader
           burnRateWindow={burnRateWindow}
           onBurnRateWindowChange={setBurnRateWindow}
           isPopoverOpen={isBurnRatePopoverOpen}
