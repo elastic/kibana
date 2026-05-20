@@ -133,7 +133,6 @@ export const McpClientsTable = memo(() => {
                 body={<p>{labels.tools.mcpClients.noMcpClientsPromptBody}</p>}
                 actions={[
                   <EuiButton
-                    fill
                     onClick={createMcpClient}
                     data-test-subj="mcpClientsEmptyStateAddButton"
                   >

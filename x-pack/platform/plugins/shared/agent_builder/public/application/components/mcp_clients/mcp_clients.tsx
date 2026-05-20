@@ -46,12 +46,7 @@ export const AgentBuilderMcpClients = () => {
         pageTitle={labels.tools.mcpClients.title}
         description={labels.tools.mcpClients.description}
         rightSideItems={[
-          <EuiButton
-            fill
-            iconType="plusInCircle"
-            onClick={createMcpClient}
-            data-test-subj="mcpClientsAddButton"
-          >
+          <EuiButton fill onClick={createMcpClient} data-test-subj="mcpClientsAddButton">
             {labels.tools.mcpClients.addMcpClientButtonLabel}
           </EuiButton>,
         ]}

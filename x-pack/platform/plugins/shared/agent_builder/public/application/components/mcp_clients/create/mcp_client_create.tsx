@@ -38,10 +38,6 @@ const headerStyles = ({ euiTheme }: UseEuiTheme) => css`
   border-block-end: none;
 `;
 
-const bottomBarStyles = ({ euiTheme }: UseEuiTheme) => css`
-  z-index: ${euiTheme.levels.header};
-`;
-
 export const McpClientCreate = () => {
   const { navigateToAgentBuilderUrl } = useNavigation();
   const { createOAuthClient, isCreating } = useCreateOAuthClient();
@@ -110,24 +106,16 @@ export const McpClientCreate = () => {
         />
         <KibanaPageTemplate.Section>
           <McpClientForm onSubmit={handleSubmit(handleCreate)} />
-          <EuiSpacer size="xxl" />
-        </KibanaPageTemplate.Section>
-        <KibanaPageTemplate.BottomBar
-          css={bottomBarStyles}
-          paddingSize="m"
-          restrictWidth={false}
-          position="fixed"
-          usePortal
-        >
+          <EuiSpacer size="xl" />
           <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="s" iconType="cross" color="text" onClick={handleCancel}>
+              <EuiButtonEmpty size="m" color="text" onClick={handleCancel}>
                 {labels.tools.mcpClients.form.cancelButton}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
-                size="s"
+                size="m"
                 fill
                 onClick={handleSubmit(handleCreate)}
                 isLoading={isCreating}
@@ -138,7 +126,7 @@ export const McpClientCreate = () => {
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </KibanaPageTemplate.BottomBar>
+        </KibanaPageTemplate.Section>
       </KibanaPageTemplate>
     </FormProvider>
   );
