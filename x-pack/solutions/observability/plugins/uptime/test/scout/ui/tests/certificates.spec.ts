@@ -85,7 +85,8 @@ const UPTIME_ROLE = {
   ],
 };
 
-test.describe('Uptime certificates', { tag: ['@local-stateful-classic'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/270114
+test.describe.skip('Uptime certificates', { tag: ['@local-stateful-classic'] }, () => {
   test.setTimeout(180_000);
 
   test.beforeAll(async ({ esArchiver, kbnClient }) => {
