@@ -9,5 +9,6 @@
   },
   "kbn_references": [
     "@kbn/scout-oblt",
+    "@kbn/uptime-plugin",
   ]
 }
