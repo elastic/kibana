@@ -43,8 +43,7 @@ export const getGapsSummaryByRuleIdsResponseSchema = schema.object(
         total_in_progress_duration_ms: schema.number(),
         total_filled_duration_ms: schema.number(),
         gap_fill_status: schema.maybe(schema.string()),
-      }),
-      { maxSize: 100 }
+      })
     ),
   },
   { meta: { id: 'get_gaps_summary_by_rule_ids_response' } }

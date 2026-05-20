@@ -9,8 +9,8 @@ import { schema } from '@kbn/config-schema';
 
 export const bulkUntrackBodySchema = schema.object(
   {
-    indices: schema.arrayOf(schema.string(), { maxSize: 1000 }),
-    alert_uuids: schema.arrayOf(schema.string(), { maxSize: 10000 }),
+    indices: schema.arrayOf(schema.string()),
+    alert_uuids: schema.arrayOf(schema.string()),
   },
   { meta: { id: 'bulk_untrack_alerts_request' } }
 );

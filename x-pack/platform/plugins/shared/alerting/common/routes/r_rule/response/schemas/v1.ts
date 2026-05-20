@@ -86,8 +86,7 @@ export const rRuleResponseSchema = schema.object(
               description:
                 'Indicates the days of the week to recur or else nth-day-of-month strings. For example, "+2TU" second Tuesday of month, "-1FR" last Friday of the month, which are internally converted to a `byweekday/bysetpos` combination.',
             },
-          }),
-          { maxSize: 7 }
+          })
         )
       )
     ),
@@ -98,8 +97,7 @@ export const rRuleResponseSchema = schema.object(
             meta: {
               description: 'Indicates months of the year that this rule should recur.',
             },
-          }),
-          { maxSize: 12 }
+          })
         )
       )
     ),
@@ -111,8 +109,7 @@ export const rRuleResponseSchema = schema.object(
               description:
                 'A positive or negative integer affecting the nth day of the month. For example, -2 combined with `byweekday` of FR is 2nd to last Friday of the month. It is recommended to not set this manually and just use `byweekday`.',
             },
-          }),
-          { maxSize: 31 }
+          })
         )
       )
     ),
@@ -123,8 +120,7 @@ export const rRuleResponseSchema = schema.object(
             meta: {
               description: 'Indicates the days of the month to recur.',
             },
-          }),
-          { maxSize: 31 }
+          })
         )
       )
     ),
@@ -135,8 +131,7 @@ export const rRuleResponseSchema = schema.object(
             meta: {
               description: 'Indicates the days of the year that this rule should recur.',
             },
-          }),
-          { maxSize: 366 }
+          })
         )
       )
     ),
@@ -147,8 +142,7 @@ export const rRuleResponseSchema = schema.object(
             meta: {
               description: 'Indicates number of the week hours to recur.',
             },
-          }),
-          { maxSize: 53 }
+          })
         )
       )
     ),
@@ -159,8 +153,7 @@ export const rRuleResponseSchema = schema.object(
             meta: {
               description: 'Indicates hours of the day to recur.',
             },
-          }),
-          { maxSize: 24 }
+          })
         )
       )
     ),
@@ -171,8 +164,7 @@ export const rRuleResponseSchema = schema.object(
             meta: {
               description: 'Indicates minutes of the hour to recur.',
             },
-          }),
-          { maxSize: 60 }
+          })
         )
       )
     ),
@@ -183,8 +175,7 @@ export const rRuleResponseSchema = schema.object(
             meta: {
               description: 'Indicates seconds of the day to recur.',
             },
-          }),
-          { maxSize: 60 }
+          })
         )
       )
     ),

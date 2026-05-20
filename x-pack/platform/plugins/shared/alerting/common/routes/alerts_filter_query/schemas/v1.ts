@@ -52,7 +52,6 @@ export const alertsFilterQuerySchema = schema.object(
         ),
       }),
       {
-        maxSize: 100,
         meta: {
           description:
             'A filter written in Elasticsearch Query Domain Specific Language (DSL) as defined in the `kbn-es-query` package.',

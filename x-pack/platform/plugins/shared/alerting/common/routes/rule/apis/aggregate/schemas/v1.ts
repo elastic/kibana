@@ -13,7 +13,7 @@ export const aggregateRulesRequestBodySchema = schema.object(
     default_search_operator: schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
       defaultValue: 'OR',
     }),
-    search_fields: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+    search_fields: schema.maybe(schema.arrayOf(schema.string())),
     has_reference: schema.maybe(
       // use nullable as maybe is currently broken
       // in config-schema
@@ -25,8 +25,8 @@ export const aggregateRulesRequestBodySchema = schema.object(
       )
     ),
     filter: schema.maybe(schema.string()),
-    rule_type_ids: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
-    consumers: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+    rule_type_ids: schema.maybe(schema.arrayOf(schema.string())),
+    consumers: schema.maybe(schema.arrayOf(schema.string())),
   },
   { meta: { id: 'aggregate_rules_request' } }
 );
@@ -46,7 +46,7 @@ export const aggregateRulesResponseBodySchema = schema.object(
     rule_snoozed_status: schema.object({
       snoozed: schema.number(),
     }),
-    rule_tags: schema.arrayOf(schema.string(), { maxSize: 1000 }),
+    rule_tags: schema.arrayOf(schema.string()),
   },
   { meta: { id: 'aggregate_rules_response' } }
 );

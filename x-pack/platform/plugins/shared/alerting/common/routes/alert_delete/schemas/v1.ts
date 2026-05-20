@@ -70,7 +70,6 @@ export const alertDeleteScheduleQuerySchema = schema.object(
     space_ids: schema.maybe(
       schema.arrayOf(schema.string(), {
         minSize: 1,
-        maxSize: 1000,
         meta: {
           description: 'Kibana space IDs to delete alerts from',
         },

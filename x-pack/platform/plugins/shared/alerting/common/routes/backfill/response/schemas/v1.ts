@@ -26,7 +26,7 @@ export const backfillResponseSchema = schema.object(
     rule: schema.object({
       id: schema.string(),
       name: schema.string(),
-      tags: schema.arrayOf(schema.string(), { maxSize: 1000 }),
+      tags: schema.arrayOf(schema.string()),
       rule_type_id: schema.string(),
       params: ruleParamsSchemaV1,
       api_key_owner: schema.nullable(schema.string()),
@@ -54,8 +54,7 @@ export const backfillResponseSchema = schema.object(
         run_at: schema.string(),
         status: statusSchema,
         interval: schema.string(),
-      }),
-      { maxSize: 10000 }
+      })
     ),
   },
   { meta: { id: 'backfill_response' } }

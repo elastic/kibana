@@ -34,7 +34,6 @@ export const typesRulesSchema = schema.object(
   {
     action_groups: schema.maybe(
       schema.arrayOf(actionGroupSchema, {
-        maxSize: 100,
         meta: {
           description:
             "An explicit list of groups for which the rule type can schedule actions, each with the action group's unique ID and human readable name. Rule actions validation uses this configuration to ensure that groups are valid.",
@@ -44,9 +43,9 @@ export const typesRulesSchema = schema.object(
     action_variables: schema.maybe(
       schema.object(
         {
-          context: schema.maybe(schema.arrayOf(actionVariableSchema, { maxSize: 500 })),
-          state: schema.maybe(schema.arrayOf(actionVariableSchema, { maxSize: 500 })),
-          params: schema.maybe(schema.arrayOf(actionVariableSchema, { maxSize: 500 })),
+          context: schema.maybe(schema.arrayOf(actionVariableSchema)),
+          state: schema.maybe(schema.arrayOf(actionVariableSchema)),
+          params: schema.maybe(schema.arrayOf(actionVariableSchema)),
         },
         {
           meta: {
@@ -140,7 +139,7 @@ export const typesRulesSchema = schema.object(
           'Indicates whether the rule type is enabled or disabled based on the subscription.',
       },
     }),
-    fieldsForAAD: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+    fieldsForAAD: schema.maybe(schema.arrayOf(schema.string())),
     has_alerts_mappings: schema.boolean({
       meta: {
         description: 'Indicates whether the rule type has custom mappings for the alert data.',

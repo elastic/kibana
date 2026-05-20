@@ -19,7 +19,7 @@ export const ruleTagsFormattedResponseSchema = schema.object(
     total: schema.number(),
     page: schema.number(),
     perPage: schema.number(),
-    data: schema.arrayOf(schema.string(), { maxSize: 1000 }),
+    data: schema.arrayOf(schema.string()),
   },
   { meta: { id: 'rule_tags_response' } }
 );
