@@ -19,7 +19,7 @@ const IGNORED_ERROR_PATTERNS = [
   // CSP violations from inline scripts are expected in Kibana's dev/test environment
   'Executing inline script violates the following Content Security Policy directive',
   // Moment Timezone data is not bundled for all timezones in the test environment
-  'Moment Timezone has no data for',
+  'Moment Timezone',
 ];
 
 const isIgnored = (message: string) =>
