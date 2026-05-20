@@ -148,6 +148,7 @@ describe('AlertingDomainEventBus', () => {
       async (reservedType) => {
         const handler = jest.fn();
         bus.subscribe(reservedType, handler);
+        // @ts-expect-error: we're testing the reserved type
         bus.publish({ type: reservedType });
 
         await flushAsync();
