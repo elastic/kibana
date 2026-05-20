@@ -12,6 +12,7 @@ import type {
   StorageClientSearchRequest,
   StorageClientSearchResponse,
 } from '@kbn/storage-adapter';
+import type { QueryFeature } from '@kbn/streams-schema';
 import { deriveQueryType, hasSameEsql } from '@kbn/streams-schema/src/helpers/esql_helpers';
 import type { Streams } from '@kbn/streams-schema/src/models/streams';
 import {
@@ -37,6 +38,7 @@ import {
   QUERY_DESCRIPTION,
   QUERY_ESQL_QUERY,
   QUERY_EVIDENCE,
+  QUERY_FEATURES,
   QUERY_FEATURE_FILTER,
   QUERY_FEATURE_NAME,
   QUERY_KQL_BODY,
@@ -205,6 +207,7 @@ type QueryLinkStorageFields = Omit<QueryLink, 'query' | 'stream_name'> & {
   [QUERY_ESQL_QUERY]: string;
   [QUERY_SEVERITY_SCORE]?: number;
   [QUERY_TYPE]?: string;
+  [QUERY_FEATURES]?: QueryFeature[];
 };
 
 export type StoredQueryLink = QueryLinkStorageFields & {
@@ -246,9 +249,10 @@ function fromStorage(link: StoredQueryLink): QueryLink {
         query: esql,
       },
       severity_score: link[QUERY_SEVERITY_SCORE],
-      // QUERY_EVIDENCE ('experimental.query.evidence') lives under the dynamic-disabled
-      // 'experimental' object, so it can't be added to QueryLinkStorageFields without
-      // breaking the IStorageClient Exact type check.
+      features: link[QUERY_FEATURES],
+      // QUERY_EVIDENCE lives under the dynamic-disabled 'experimental' object,
+      // so it can't be added to QueryLinkStorageFields without breaking the
+      // IStorageClient Exact type check.
       evidence: (link as Record<string, unknown>)[QUERY_EVIDENCE] as string[] | undefined,
     },
   };
@@ -293,6 +297,7 @@ function toStorage(
     [QUERY_SEVERITY_SCORE]: query.severity_score,
     [QUERY_TYPE]: derivedType,
     [QUERY_EVIDENCE]: query.evidence,
+    [QUERY_FEATURES]: query.features,
     [RULE_BACKED]: request.rule_backed,
     [RULE_ID]: link.rule_id,
     ...(includeEmbedding && embeddingText ? { [QUERY_SEARCH_EMBEDDING]: embeddingText } : {}),
