@@ -38,7 +38,8 @@ interface NormalizedChangePointChartFields {
 export const normalizeChangePointChartLegacyFields = (
   state: RawChangePointChartState
 ): NormalizedChangePointChartFields => ({
-  aggregation_function: state.aggregation_function ?? state.fn ?? CHANGE_POINT_CHART_DEFAULT_AGG_FUNCTION,
+  aggregation_function:
+    state.aggregation_function ?? state.fn ?? CHANGE_POINT_CHART_DEFAULT_AGG_FUNCTION,
   view_type: state.view_type ?? state.viewType ?? CHANGE_POINT_DETECTION_VIEW_TYPE.CHARTS,
   data_view_id: state.data_view_id ?? state.dataViewId,
   metric_field: state.metric_field ?? state.metricField,
