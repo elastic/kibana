@@ -13,8 +13,20 @@ import type { SyntheticsMonitorDocument } from '@kbn/synthtrace-client';
 import { generateShortId, syntheticsMonitor } from '@kbn/synthtrace-client';
 import type { Scenario } from '@kbn/synthtrace';
 import { withClient } from '@kbn/synthtrace';
-import { MORE_THAN_1024_CHARS, getIpAddress } from './helpers/logs_mock_data';
 import { getAtIndexOrRandom } from './helpers/get_at_index_or_random';
+
+const MORE_THAN_1024_CHARS =
+  'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?';
+
+const IP_ADDRESSES = [
+  '223.72.43.22',
+  '20.24.184.101',
+  '178.173.228.103',
+  '147.161.184.179',
+  '34.136.92.88',
+];
+
+const getIpAddress = (index?: number) => getAtIndexOrRandom(IP_ADDRESSES, index);
 
 const MONITOR_NAMES = Array(4)
   .fill(null)
