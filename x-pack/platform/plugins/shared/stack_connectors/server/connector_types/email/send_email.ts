@@ -220,6 +220,10 @@ function htmlFromMarkdown(logger: Logger, markdown: string) {
       linkify: true,
     });
 
+    md.renderer.rules.table_open = () => '<table style="border-collapse: collapse;">';
+    md.renderer.rules.th_open = () => '<th style="border: 1px solid; padding: 0 4px;">';
+    md.renderer.rules.td_open = () => '<td style="border: 1px solid; padding: 0 4px;">';
+
     return md.render(markdown);
   } catch (err) {
     logger.debug(`error rendering markdown to html: ${err.message}`);
