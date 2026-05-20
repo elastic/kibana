@@ -17,6 +17,7 @@ import type {
   WorkflowEventLoggerOptions,
 } from './types';
 import type { LogsRepository, WorkflowLogEvent } from '../repositories/logs_repository';
+import { isWorkflowTaskShutdownSignal } from '../workflow_task_shutdown';
 
 export class WorkflowEventLogger implements IWorkflowEventLogger {
   private eventQueue: WorkflowLogEvent[] = [];
@@ -255,12 +256,12 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
 
       this.logger.debug(`Successfully indexed ${events.length} workflow events`);
     } catch (error) {
-      if (options.suppressErrors) {
+      if (options.signal && isWorkflowTaskShutdownSignal(options.signal)) {
         // Best-effort flushes are used during shutdown; do not re-queue events
         // because there may be no future flush in this process.
         this.logger.debug(`Failed to index workflow events during best-effort flush`, {
           eventsCount: events.length,
-          error: error instanceof Error ? error.message : String(error),
+          error: { message: error instanceof Error ? error.message : String(error) },
         });
         return;
       }

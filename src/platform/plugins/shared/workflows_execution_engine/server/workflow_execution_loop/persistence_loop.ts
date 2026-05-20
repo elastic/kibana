@@ -15,7 +15,7 @@ import { abortableTimeout, TimeoutAbortedError } from '../utils';
 export const FLUSH_INTERVAL_MS = 500;
 
 export interface FlushStateOptions {
-  suppressWorkflowLogErrors?: boolean;
+  workflowLogFlushSignal?: AbortSignal;
 }
 
 export async function flushState(
@@ -25,7 +25,7 @@ export async function flushState(
   const flushSpan = apm.startSpan('persistence flush', 'workflow', 'persistence');
   await Promise.all([
     params.stepIoService.flush(),
-    params.workflowLogger.flushEvents({ suppressErrors: options.suppressWorkflowLogErrors }),
+    params.workflowLogger.flushEvents({ signal: options.workflowLogFlushSignal }),
   ]);
   flushSpan?.end();
 }

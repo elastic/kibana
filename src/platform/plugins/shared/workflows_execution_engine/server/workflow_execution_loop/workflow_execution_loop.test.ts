@@ -114,9 +114,13 @@ describe('workflowExecutionLoop', () => {
         cancelledBy: 'system',
       })
     );
-    expect(flushState).toHaveBeenCalledWith(params, { suppressWorkflowLogErrors: true });
+    expect(flushState).toHaveBeenCalledWith(params, {
+      workflowLogFlushSignal: params.taskAbortController.signal,
+    });
     expect(params.workflowRuntime.saveState).toHaveBeenCalled();
     expect(params.stepIoService.flush).toHaveBeenCalled();
-    expect(params.workflowLogger.flushEvents).toHaveBeenCalledWith({ suppressErrors: true });
+    expect(params.workflowLogger.flushEvents).toHaveBeenCalledWith({
+      signal: params.taskAbortController.signal,
+    });
   });
 });

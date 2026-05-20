@@ -172,7 +172,7 @@ describe('runNode', () => {
 
       expect(mockHandleExecutionDelay).toHaveBeenCalled();
       expect(mockStepExecutionRuntime.flushEventLogs).toHaveBeenCalledWith({
-        suppressErrors: true,
+        signal: mockParams.taskAbortController.signal,
       });
       expect(mockParams.workflowRuntime.enterScope).toHaveBeenCalled();
     });

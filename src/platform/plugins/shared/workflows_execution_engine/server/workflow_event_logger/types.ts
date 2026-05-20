@@ -86,7 +86,7 @@ export interface WorkflowEventLoggerOptions {
 }
 
 export interface WorkflowEventFlushOptions {
-  suppressErrors?: boolean;
+  signal?: AbortSignal;
 }
 
 export interface IWorkflowEventLogger {

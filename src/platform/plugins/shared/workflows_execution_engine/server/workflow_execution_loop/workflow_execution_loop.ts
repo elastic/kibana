@@ -86,7 +86,7 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
   } finally {
     const finalFlushSpan = apm.startSpan('final flush state', 'workflow', 'persistence');
     await flushState(params, {
-      suppressWorkflowLogErrors: isWorkflowTaskShutdownSignal(params.taskAbortController.signal),
+      workflowLogFlushSignal: params.taskAbortController.signal,
     });
     finalFlushSpan?.end();
   }
@@ -109,7 +109,7 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
 
   const finalLogFlushSpan = apm.startSpan('final flush logs', 'workflow', 'logging');
   await params.workflowLogger.flushEvents({
-    suppressErrors: isWorkflowTaskShutdownSignal(params.taskAbortController.signal),
+    signal: params.taskAbortController.signal,
   });
   finalLogFlushSpan?.end();
   params.taskAbortController.signal.removeEventListener('abort', onTaskAbort);
