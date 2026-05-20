@@ -43,26 +43,6 @@ function base64UrlEncode(data: Buffer | string): string {
   return buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-/**
- * Normalizes a PEM string by re-wrapping its base64 body at 64 characters and
- * validating that BEGIN/END markers match. Defends against non-UI ingress
- * paths (REST API, Terraform, CI secret stores) that flatten newlines.
- */
-function normalizePem(input: string): string {
-  const match = input.match(/-----BEGIN ([^-]+)-----\s*([\s\S]+?)\s*-----END ([^-]+)-----/);
-  if (!match) {
-    throw new Error('Invalid PEM: missing BEGIN/END markers');
-  }
-
-  const [, beginType, base64Content, endType] = match;
-  if (beginType !== endType) {
-    throw new Error(`Invalid PEM: mismatched markers (BEGIN ${beginType} / END ${endType})`);
-  }
-  const cleanBase64 = base64Content.replace(/\s+/g, '');
-  const lines = cleanBase64.match(/.{1,64}/g) ?? [];
-  return `-----BEGIN ${beginType}-----\n${lines.join('\n')}\n-----END ${beginType}-----\n`;
-}
-
 export function computeCertificateThumbprint(pemCert: string): string {
   const matches = pemCert.match(
     /-----BEGIN CERTIFICATE-----\s*([\s\S]+?)\s*-----END CERTIFICATE-----/
@@ -146,12 +126,11 @@ export function buildClientAssertion({
   const encodedPayload = base64UrlEncode(JSON.stringify(payload));
   const signingInput = `${encodedHeader}.${encodedPayload}`;
 
-  const normalizedKey = normalizePem(privateKey);
   const { digest, signOpts } = signingOptionsFor(algorithm);
   const signer = createSign(digest);
   signer.update(signingInput);
   const signatureBuffer = signer.sign({
-    key: normalizedKey,
+    key: privateKey,
     ...signOpts,
     ...(passphrase ? { passphrase } : {}),
   });
