@@ -175,7 +175,9 @@ describe('CreateCaseTemplateFields', () => {
 
     // Whenever setFieldValue is called (e.g. from the watch subscription or template sync),
     // it must never use the camelCase 'extendedFields' key.
-    const allCallsWithWrongKey = setFieldValue.mock.calls.filter(([key]) => key === 'extendedFields');
+    const allCallsWithWrongKey = setFieldValue.mock.calls.filter(
+      ([key]) => key === 'extendedFields'
+    );
     expect(allCallsWithWrongKey).toHaveLength(0);
 
     // Any calls that update extended fields must use CASE_EXTENDED_FIELDS ('extended_fields').
