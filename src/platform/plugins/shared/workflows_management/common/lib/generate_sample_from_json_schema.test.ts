@@ -195,26 +195,25 @@ describe('generateSampleFromJsonSchema', () => {
     it('resolves built-in #/kibana/definitions when inputs root is provided', () => {
       const inputsRoot = {
         properties: {
-          alert: { $ref: '#/kibana/definitions/alertingRuleV2EventContextV1' },
+          notificationGroup: { $ref: '#/kibana/definitions/alertingV2NotificationGroup' },
         },
       } as JsonModelSchemaType;
       const sample = generateSampleFromJsonSchema(
-        { $ref: '#/kibana/definitions/alertingRuleV2EventContextV1' },
+        { $ref: '#/kibana/definitions/alertingV2NotificationGroup' },
         inputsRoot
       ) as Record<string, unknown>;
-      expect(sample.spaceId).toBe(INPUT_STRING_PLACEHOLDER);
-      expect(sample.rule).toEqual({
-        id: INPUT_STRING_PLACEHOLDER,
-        name: INPUT_STRING_PLACEHOLDER,
-        tags: [INPUT_STRING_PLACEHOLDER],
-        consumer: INPUT_STRING_PLACEHOLDER,
-        producer: INPUT_STRING_PLACEHOLDER,
-        ruleTypeId: INPUT_STRING_PLACEHOLDER,
-      });
-      expect(Array.isArray(sample.alerts)).toBe(true);
-      expect((sample.alerts as unknown[])[0]).toMatchObject({
-        _id: INPUT_STRING_PLACEHOLDER,
-      });
+      expect(sample.id).toBe(INPUT_STRING_PLACEHOLDER);
+      expect(sample.policyId).toBe(INPUT_STRING_PLACEHOLDER);
+      expect(sample.groupKey).toEqual({});
+      expect(sample.episodes).toEqual([
+        {
+          last_event_timestamp: INPUT_STRING_PLACEHOLDER,
+          rule_id: INPUT_STRING_PLACEHOLDER,
+          group_hash: INPUT_STRING_PLACEHOLDER,
+          episode_id: INPUT_STRING_PLACEHOLDER,
+          episode_status: INPUT_STRING_PLACEHOLDER,
+        },
+      ]);
     });
   });
 });

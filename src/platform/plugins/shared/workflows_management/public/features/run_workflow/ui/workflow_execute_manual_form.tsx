@@ -55,6 +55,9 @@ const getDefaultWorkflowInput = (inputs?: JsonModelSchemaType): Record<string, u
         result[propertyName] = sample;
       } else if (resolvedValue !== undefined && (hasDefaults || isRefProp)) {
         result[propertyName] = resolvedValue;
+      } else {
+        // Unknown/invalid $ref: keep the key editable so the run modal is not missing a required field.
+        result[propertyName] = {};
       }
     } else if (resolvedValue !== undefined && (hasDefaults || isRefProp)) {
       // Optional $ref (or defaults in subtree): partial structs from applyInputDefaults without

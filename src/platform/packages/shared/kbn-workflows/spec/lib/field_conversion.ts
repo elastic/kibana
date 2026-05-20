@@ -345,7 +345,7 @@ export function resolveRef(
       return null;
     }
     const builtin = builtinWorkflowInputDefinitions[id];
-    return builtin ?? null;
+    return (builtin ?? null) as JSONSchema7 | null;
   }
 
   const path = ref.slice(2).split('/'); // Remove '#/' and split

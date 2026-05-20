@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { builtinWorkflowInputDefinitionRefValuesForZod } from '../../builtin_workflow_input_definitions';
+import { builtinWorkflowInputDefinitionRefSchema } from '../../builtin_workflow_input_definitions';
 
 /**
  * JSON Schema type values (Draft 7 / 2020-12 standard).
@@ -137,7 +137,7 @@ export const JsonModelShapeSchema: z.ZodType<JsonSchema> = z
       description: z.string().optional(),
       format: z.enum(JSON_SCHEMA_FORMAT_VALUES).optional(),
       default: z.any().optional(),
-      $ref: z.union([z.enum(builtinWorkflowInputDefinitionRefValuesForZod), z.string()]).optional(),
+      $ref: builtinWorkflowInputDefinitionRefSchema.optional(),
 
       // --- Logical Operators ---
       anyOf: z.array(JsonModelShapeSchema).optional(),
@@ -186,7 +186,7 @@ export const JsonModelRootShapeSchema = z
     type: z.literal('object').optional(),
     title: z.string().optional(),
     description: z.string().optional(),
-    $ref: z.union([z.enum(builtinWorkflowInputDefinitionRefValuesForZod), z.string()]).optional(),
+    $ref: builtinWorkflowInputDefinitionRefSchema.optional(),
     properties: z.record(z.string(), JsonModelShapeSchema).optional(),
     additionalProperties: z.boolean().optional(),
     required: z.array(z.string()).optional(),

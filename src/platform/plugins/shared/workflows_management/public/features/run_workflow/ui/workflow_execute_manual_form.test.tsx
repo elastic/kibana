@@ -240,31 +240,47 @@ describe('WorkflowExecuteManualForm', () => {
       expect(
         getInitialJson({
           properties: {
-            alert: { $ref: '#/kibana/definitions/alertingRuleV2EventContextV1' },
+            notificationGroup: { $ref: '#/kibana/definitions/alertingV2NotificationGroup' },
           },
         } as JsonModelSchemaType)
       ).toEqual({
-        alert: {
-          alerts: [],
-          rule: { tags: [] },
+        notificationGroup: {
+          episodes: [],
         },
       });
+    });
+
+    it('prefills required unknown built-in $ref with an empty object so the field is editable', () => {
+      expect(
+        getInitialJson({
+          properties: {
+            payload: { $ref: '#/kibana/definitions/DoesNotExist' },
+          },
+          required: ['payload'],
+        } as JsonModelSchemaType)
+      ).toEqual({ payload: {} });
     });
 
     it('prefills required built-in #/kibana/definitions $ref using generated samples', () => {
       const initial = getInitialJson({
         properties: {
-          alert: { $ref: '#/kibana/definitions/alertingRuleV2EventContextV1' },
+          notificationGroup: { $ref: '#/kibana/definitions/alertingV2NotificationGroup' },
         },
-        required: ['alert'],
+        required: ['notificationGroup'],
       } as JsonModelSchemaType);
-      expect(initial.alert).toMatchObject({
-        spaceId: INPUT_STRING_PLACEHOLDER,
-        rule: {
-          id: INPUT_STRING_PLACEHOLDER,
-          name: INPUT_STRING_PLACEHOLDER,
-        },
-        alerts: expect.any(Array),
+      expect(initial.notificationGroup).toMatchObject({
+        id: INPUT_STRING_PLACEHOLDER,
+        policyId: INPUT_STRING_PLACEHOLDER,
+        groupKey: {},
+        episodes: [
+          {
+            last_event_timestamp: INPUT_STRING_PLACEHOLDER,
+            rule_id: INPUT_STRING_PLACEHOLDER,
+            group_hash: INPUT_STRING_PLACEHOLDER,
+            episode_id: INPUT_STRING_PLACEHOLDER,
+            episode_status: INPUT_STRING_PLACEHOLDER,
+          },
+        ],
       });
     });
   });

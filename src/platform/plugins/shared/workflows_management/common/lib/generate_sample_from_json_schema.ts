@@ -25,18 +25,19 @@ const MAX_REF_RESOLUTION_DEPTH = 32;
 export function generateSampleFromJsonSchema(
   schema: JSONSchema7,
   inputsRoot?: JsonModelSchemaType,
-  depth = 0
+  depth = 0,
+  normalizedRoot?: ReturnType<typeof normalizeFieldsToJsonSchema>
 ): unknown {
-  if (depth > MAX_REF_RESOLUTION_DEPTH) {
+  if (depth >= MAX_REF_RESOLUTION_DEPTH) {
     return undefined;
   }
 
   if (schema.$ref && inputsRoot) {
-    const normalizedRoot = normalizeFieldsToJsonSchema(inputsRoot);
-    if (normalizedRoot) {
-      const resolved = resolveRef(schema.$ref, normalizedRoot);
+    const root = normalizedRoot ?? normalizeFieldsToJsonSchema(inputsRoot);
+    if (root) {
+      const resolved = resolveRef(schema.$ref, root);
       if (resolved) {
-        return generateSampleFromJsonSchema(resolved, inputsRoot, depth + 1);
+        return generateSampleFromJsonSchema(resolved, inputsRoot, depth + 1, root);
       }
     }
   }
@@ -57,7 +58,7 @@ export function generateSampleFromJsonSchema(
     case 'array': {
       const items = schema.items as JSONSchema7 | undefined;
       if (items) {
-        return [generateSampleFromJsonSchema(items, inputsRoot, depth)];
+        return [generateSampleFromJsonSchema(items, inputsRoot, depth, normalizedRoot)];
       }
       return [];
     }
@@ -72,7 +73,7 @@ export function generateSampleFromJsonSchema(
         const prop = propSchema as JSONSchema7;
         const isRequired = schema.required?.includes(key) ?? false;
         if (isRequired || prop.default !== undefined) {
-          sample[key] = generateSampleFromJsonSchema(prop, inputsRoot, depth);
+          sample[key] = generateSampleFromJsonSchema(prop, inputsRoot, depth, normalizedRoot);
         }
       }
       return sample;

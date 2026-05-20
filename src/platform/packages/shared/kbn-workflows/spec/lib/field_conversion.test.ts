@@ -719,9 +719,17 @@ describe('applyInputDefaults', () => {
 
 describe('resolveRef (#/kibana/definitions/...)', () => {
   const testBuiltinId = 'TestBuiltinPayload';
+  let registrySnapshot: typeof builtinWorkflowInputDefinitions;
+
+  beforeEach(() => {
+    registrySnapshot = { ...builtinWorkflowInputDefinitions };
+  });
 
   afterEach(() => {
-    delete builtinWorkflowInputDefinitions[testBuiltinId];
+    for (const key of Object.keys(builtinWorkflowInputDefinitions)) {
+      delete builtinWorkflowInputDefinitions[key];
+    }
+    Object.assign(builtinWorkflowInputDefinitions, registrySnapshot);
   });
 
   it('resolves a registered built-in and applyInputDefaults uses it', () => {

@@ -77,12 +77,13 @@ describe('getWorkflowJsonSchema', () => {
     expect(jsonSchema).toMatchObject({
       kibana: {
         definitions: {
-          alertingRuleV2EventContextV1: expect.objectContaining({
+          alertingV2NotificationGroup: expect.objectContaining({
             type: 'object',
             properties: expect.objectContaining({
-              spaceId: expect.any(Object),
-              rule: expect.any(Object),
-              alerts: expect.any(Object),
+              id: expect.any(Object),
+              policyId: expect.any(Object),
+              groupKey: expect.any(Object),
+              episodes: expect.any(Object),
             }),
           }),
         },
