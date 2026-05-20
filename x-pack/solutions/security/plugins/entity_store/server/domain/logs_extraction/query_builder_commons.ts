@@ -43,10 +43,6 @@ export const ENTITY_NAME_FIELD = 'entity.name';
 export const ENTITY_TYPE_FIELD = 'entity.type';
 export const TIMESTAMP_FIELD = '@timestamp';
 
-export const DOCUMENT_ID_FIELD = '_id';
-
-const METADATA_FIELDS = ['_index', '_id'];
-
 export interface PaginationParams {
   timestampCursor: string;
   idCursor: string;
@@ -84,7 +80,6 @@ export function buildLogPageProbeSourceClause(params: LogPageProbeSourceClausePa
   const { indexPatterns, type, fromDateISO, toDateISO, logsPageCursorStart } = params;
 
   const baseWhere = `FROM ${indexPatterns.join(', ')}
-    METADATA ${METADATA_FIELDS.join(', ')}
   | WHERE
       ${TIMESTAMP_FIELD} >= TO_DATETIME("${fromDateISO}")
       AND ${TIMESTAMP_FIELD} <= TO_DATETIME("${toDateISO}")

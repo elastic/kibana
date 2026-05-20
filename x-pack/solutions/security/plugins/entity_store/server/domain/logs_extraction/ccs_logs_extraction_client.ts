@@ -291,20 +291,14 @@ export class CcsLogsExtractionClient {
       let { logsPaginationCursor: sliceEnd } = logPaginationCursor;
       isLastLogsPage = logPaginationCursor.isLastLogsPage;
 
-      // Stall detection: if timestamp didn't advance and we filled a full page, the congested
-      // millisecond's docs were already processed in the previous iteration. Bump by 1ms and
-      // skip extraction — re-extracting would double-count those entities.
-      const stalled =
-        !!sliceStart &&
-        sliceStart.timestampCursor === sliceEnd.timestampCursor &&
-        logPaginationCursor.sliceLogCount >= effectiveMaxLogsPerPage;
-      if (stalled) {
-        this.logger.warn(
-          `CCS log-slice probe stalled at ${sliceEnd.timestampCursor} with a full page (${logPaginationCursor.sliceLogCount} docs); advancing cursor by 1ms. Docs sharing this timestamp beyond maxLogsPerPage will be dropped.`
-        );
-        sliceEnd = {
-          timestampCursor: moment(sliceEnd.timestampCursor).add(1, 'ms').toISOString(),
-        };
+      const bumpedSliceEnd = this.detectLogSliceStall(
+        sliceStart,
+        sliceEnd,
+        logPaginationCursor.sliceLogCount,
+        effectiveMaxLogsPerPage
+      );
+      if (bumpedSliceEnd) {
+        sliceEnd = bumpedSliceEnd;
       } else {
         totalLogs += logPaginationCursor.sliceLogCount;
 
@@ -340,7 +334,7 @@ export class CcsLogsExtractionClient {
         });
       }
 
-      if (!stalled && maxLogsPerWindow > 0 && totalLogs >= maxLogsPerWindow) {
+      if (!bumpedSliceEnd && maxLogsPerWindow > 0 && totalLogs >= maxLogsPerWindow) {
         this.logger.info(
           `CCS entities extracted: ${totalCount}, logs processed: ${totalLogs}, in ${totalPages} pages`
         );
@@ -524,6 +518,27 @@ export class CcsLogsExtractionClient {
    * run picks up CCS-written updates in the correct order.
    * This should be picked up in time because of the delay implemented in the main extraction
    */
+  /** Returns the bumped slice-end cursor when a stall is detected, null otherwise. Logs a warning on stall. */
+  private detectLogSliceStall(
+    sliceStart: LogSlicePaginationParams | undefined,
+    sliceEnd: LogSlicePaginationParams,
+    sliceLogCount: number,
+    maxLogsPerPage: number
+  ): LogSlicePaginationParams | null {
+    if (
+      sliceStart &&
+      sliceStart.timestampCursor === sliceEnd.timestampCursor &&
+      sliceLogCount >= maxLogsPerPage
+    ) {
+      const bumpedTs = moment(sliceEnd.timestampCursor).add(1, 'ms').toISOString();
+      this.logger.warn(
+        `CCS log-slice probe stalled at ${sliceEnd.timestampCursor} with a full page (${sliceLogCount} docs); advancing cursor by 1ms. Docs sharing this timestamp beyond maxLogsPerPage will be dropped.`
+      );
+      return { timestampCursor: bumpedTs };
+    }
+    return null;
+  }
+
   private buildTransformDocument(type: EntityType) {
     let timestampIncrement = 1;
     return (doc: Record<string, unknown>) => {

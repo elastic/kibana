@@ -573,20 +573,14 @@ export class LogsExtractionClient {
         let logsPageCursorEnd = probe.logsPaginationCursor;
         lastLogsPages = probe.isLastLogsPage;
 
-        // Stall detection: if timestamp didn't advance and we filled a full page, the congested
-        // millisecond's docs were already processed in the previous iteration. Bump by 1ms and
-        // skip extraction — re-extracting would double-count those entities.
-        const stalled =
-          !!logsPageCursorStart &&
-          logsPageCursorStart.timestampCursor === logsPageCursorEnd.timestampCursor &&
-          probe.sliceLogCount >= effectiveMaxLogsPerPage;
-        if (stalled) {
-          this.logger.warn(
-            `Log-slice probe stalled at ${logsPageCursorEnd.timestampCursor} with a full page (${probe.sliceLogCount} docs); advancing cursor by 1ms. Docs sharing this timestamp beyond maxLogsPerPage will be dropped.`
-          );
-          logsPageCursorEnd = {
-            timestampCursor: moment(logsPageCursorEnd.timestampCursor).add(1, 'ms').toISOString(),
-          };
+        const bumpedCursorEnd = this.detectLogSliceStall(
+          logsPageCursorStart,
+          logsPageCursorEnd,
+          probe.sliceLogCount,
+          effectiveMaxLogsPerPage
+        );
+        if (bumpedCursorEnd) {
+          logsPageCursorEnd = bumpedCursorEnd;
         } else {
           totalLogs += probe.sliceLogCount;
 
@@ -623,7 +617,9 @@ export class LogsExtractionClient {
         await this.persistMainLogExtractionStateIfNotManualWindow(type, opts, state);
         isFirstRunInThisCycle = false;
 
-        if (!stalled && maxLogsPerWindow > 0 && totalLogs >= maxLogsPerWindow) {
+        const windowLogCapEnabled = maxLogsPerWindow > 0;
+        const windowOverloaded = totalLogs >= maxLogsPerWindow;
+        if (!bumpedCursorEnd && windowLogCapEnabled && windowOverloaded) {
           logsCapApplied = true;
           logsCapTimestamp = logsPageCursorEnd.timestampCursor;
           break;
@@ -828,6 +824,27 @@ export class LogsExtractionClient {
       logsPageCursorStartTimestamp: logsPageCursorEnd.timestampCursor,
       logsPageCursorStartId: null,
     };
+  }
+
+  /** Returns the bumped slice-end cursor when a stall is detected, null otherwise. Logs a warning on stall. */
+  private detectLogSliceStall(
+    sliceStart: LogSlicePaginationParams | undefined,
+    sliceEnd: LogSlicePaginationParams,
+    sliceLogCount: number,
+    maxLogsPerPage: number
+  ): LogSlicePaginationParams | null {
+    if (
+      sliceStart &&
+      sliceStart.timestampCursor === sliceEnd.timestampCursor &&
+      sliceLogCount >= maxLogsPerPage
+    ) {
+      const bumpedTs = moment(sliceEnd.timestampCursor).add(1, 'ms').toISOString();
+      this.logger.warn(
+        `Log-slice probe stalled at ${sliceEnd.timestampCursor} with a full page (${sliceLogCount} docs); advancing cursor by 1ms. Docs sharing this timestamp beyond maxLogsPerPage will be dropped.`
+      );
+      return { timestampCursor: bumpedTs };
+    }
+    return null;
   }
 
   private async persistMainLogExtractionStateIfNotManualWindow(

@@ -66,7 +66,7 @@ describe('buildExtractionSourceClause', () => {
       logsPageCursorStart: { timestampCursor: '2024-01-01T00:00:00.000Z' },
     });
     expect(withCursor).toContain('FROM logs-*, metrics-*');
-    expect(withCursor).toContain('METADATA _index, _id');
+    expect(withCursor).not.toContain('METADATA');
     expect(withCursor).toContain(`${TIMESTAMP_FIELD} >= TO_DATETIME("2024-01-01T00:00:00.000Z")`);
     expect(withCursor).toContain(`${TIMESTAMP_FIELD} <= TO_DATETIME("2024-01-02T00:00:00.000Z")`);
     expect(withCursor).toContain(getEuidEsqlDocumentsContainsIdFilter('host'));
