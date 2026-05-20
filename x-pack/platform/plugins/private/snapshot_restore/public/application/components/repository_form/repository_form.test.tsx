@@ -69,6 +69,7 @@ const emptyRepository = { name: '', type: null, settings: {} };
 
 const onSaveMock = jest.fn();
 const clearSaveErrorMock = jest.fn();
+const onCancelMock = jest.fn();
 
 const renderForm = (overrides: Record<string, unknown> = {}) => {
   return render(
@@ -79,6 +80,7 @@ const renderForm = (overrides: Record<string, unknown> = {}) => {
         saveError={undefined}
         clearSaveError={clearSaveErrorMock}
         onSave={onSaveMock}
+        onCancel={onCancelMock}
         {...overrides}
       />
     </I18nProvider>
@@ -414,6 +416,81 @@ describe('<RepositoryForm />', () => {
 
       expect(onSaveMock).not.toHaveBeenCalled();
       expect(screen.getAllByText('Location is required.').length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('default vs read-only constraints', () => {
+    const RepositoryFormWithDefaultState = ({
+      repository,
+    }: {
+      repository: { name: string; type: RepositoryType; settings: Record<string, unknown> };
+    }) => {
+      const [isDefaultRepository, setIsDefaultRepository] = React.useState(false);
+
+      return (
+        <RepositoryForm
+          repository={repository as any}
+          isEditing={true}
+          isSaving={false}
+          saveError={undefined}
+          clearSaveError={clearSaveErrorMock}
+          onSave={onSaveMock}
+          onCancel={onCancelMock}
+          isDefaultRepository={isDefaultRepository}
+          onToggleDefault={setIsDefaultRepository}
+        />
+      );
+    };
+
+    it('disables read-only toggle when repository is marked as default', () => {
+      render(
+        <I18nProvider>
+          <RepositoryFormWithDefaultState
+            repository={{ name: 'my-repo', type: 'fs', settings: {} }}
+          />
+        </I18nProvider>
+      );
+
+      expect(screen.getByTestId('readOnlyToggle')).not.toBeDisabled();
+      fireEvent.click(screen.getByTestId('defaultRepositorySwitch'));
+      expect(screen.getByTestId('readOnlyToggle')).toBeDisabled();
+    });
+
+    it('disables default repository switch when repository is read-only', () => {
+      render(
+        <I18nProvider>
+          <RepositoryFormWithDefaultState
+            repository={{ name: 'my-repo', type: 'fs', settings: {} }}
+          />
+        </I18nProvider>
+      );
+
+      expect(screen.getByTestId('defaultRepositorySwitch')).not.toBeDisabled();
+      fireEvent.click(screen.getByTestId('readOnlyToggle'));
+      expect(screen.getByTestId('defaultRepositorySwitch')).toBeDisabled();
+    });
+
+    it('omits default repository switch for URL repositories', () => {
+      render(
+        <I18nProvider>
+          <RepositoryFormWithDefaultState
+            repository={{ name: 'my-repo', type: 'url', settings: { url: '' } }}
+          />
+        </I18nProvider>
+      );
+
+      expect(screen.queryByTestId('defaultRepositorySwitch')).not.toBeInTheDocument();
+    });
+
+    it('disables read-only toggle when editing a repository that is already default', () => {
+      renderForm({
+        repository: { name: 'my-repo', type: 'fs', settings: { location: '/tmp' } },
+        isEditing: true,
+        isDefaultRepository: true,
+        isAlreadyDefaultRepository: true,
+      });
+
+      expect(screen.getByTestId('readOnlyToggle')).toBeDisabled();
     });
   });
 });
