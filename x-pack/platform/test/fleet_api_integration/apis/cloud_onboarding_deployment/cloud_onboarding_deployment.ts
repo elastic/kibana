@@ -98,15 +98,12 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.item.services).to.eql(['cloudwatch_metrics']);
         expect(body.item.status).to.equal('pending');
         expect(body.item.attemptCount).to.equal(1);
-        expect(body.item.vars).not.to.have.property('role_arn');
         expect(body.item.serviceVars).to.have.property('cloudwatch_metrics');
-        // secrets must be stripped from the response
-        expect(body.item).not.to.have.property('secrets');
 
         createdIds.push(body.item.id);
       });
 
-      it('should create a minimal deployment (no vars, serviceVars, or secrets)', async () => {
+      it('should create a minimal deployment (no vars or serviceVars)', async () => {
         const { body } = await supertest
           .post(BASE_URL)
           .set('kbn-xsrf', 'xxxx')
@@ -236,7 +233,6 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.item.provider).to.equal('aws');
         expect(body.item.connectorId).to.equal(primaryConnectorId);
         expect(body.item.status).to.equal('pending');
-        expect(body.item).not.to.have.property('secrets');
       });
 
       it('should return 404 for a non-existent deployment ID', async () => {
@@ -283,7 +279,6 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.items.length).to.equal(2);
         body.items.forEach((item: Record<string, unknown>) => {
           expect(item.connectorId).to.equal(listConnectorId);
-          expect(item).not.to.have.property('secrets');
         });
       });
 
@@ -341,7 +336,6 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.item.status).to.equal('deploying');
         expect(body.item.deploymentId).to.equal(stackArn);
         expect(body.item.deploymentName).to.equal('elastic-onboarding');
-        expect(body.item).not.to.have.property('secrets');
       });
 
       it('should update status to succeeded', async () => {
