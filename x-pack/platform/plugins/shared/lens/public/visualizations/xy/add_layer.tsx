@@ -12,7 +12,6 @@ import {
   EuiIcon,
   EuiContextMenu,
   EuiContextMenuItem,
-  EuiHighlight,
   EuiText,
   EuiFlexItem,
   EuiFlexGroup,
@@ -241,13 +240,9 @@ export function AddLayerButton({
                         toggleLayersChoice(false);
                       }}
                     >
-                      <EuiHighlight search="" data-test-subj="lnsChartSwitch-option-label">
-                        {t.label}
-                      </EuiHighlight>
+                      <span data-test-subj="lnsChartSwitch-option-label">{t.label}</span>
                       <EuiText size="xs" color="subdued">
-                        {t.description ? (
-                          <EuiHighlight search="">{t.description}</EuiHighlight>
-                        ) : null}
+                        {t.description ?? null}
                       </EuiText>
                     </EuiContextMenuItem>
                   ),
