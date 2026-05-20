@@ -6,9 +6,11 @@
  */
 
 import {
+  formatDuration,
   formatMillisecondsInUnit,
   getDoubledDurationFromPrevious,
   parseInterval,
+  parseIntervalWithDefaultUnit,
   toMilliseconds,
 } from './duration_utils';
 
@@ -63,6 +65,37 @@ describe('downsampling/shared/duration_utils', () => {
       expect(parseInterval('1.2.3d')).toBeUndefined();
       expect(parseInterval(' 1d')).toBeUndefined();
       expect(parseInterval('1d ')).toBeUndefined();
+    });
+  });
+
+  describe('parseIntervalWithDefaultUnit()', () => {
+    it('parses valid duration strings', () => {
+      expect(parseIntervalWithDefaultUnit('20d')).toEqual({ value: '20', unit: 'd' });
+      expect(parseIntervalWithDefaultUnit('1500ms')).toEqual({ value: '1500', unit: 'ms' });
+    });
+
+    it('uses an empty value and default unit for missing or invalid durations', () => {
+      expect(parseIntervalWithDefaultUnit(undefined)).toEqual({ value: '', unit: 'd' });
+      expect(parseIntervalWithDefaultUnit('invalid', 'h')).toEqual({ value: '', unit: 'h' });
+    });
+  });
+
+  describe('formatDuration()', () => {
+    it('formats a numeric value and unit', () => {
+      expect(formatDuration('20', 'd')).toBe('20d');
+      expect(formatDuration('1.5', 'h')).toBe('1.5h');
+    });
+
+    it('returns undefined when value or unit is missing', () => {
+      expect(formatDuration('', 'd')).toBeUndefined();
+      expect(formatDuration('20', undefined)).toBeUndefined();
+    });
+
+    it('supports integer and minimum constraints', () => {
+      expect(formatDuration('0', 's', { integerOnly: true, minInclusive: 0 })).toBe('0s');
+      expect(formatDuration('-1', 's', { integerOnly: true, minInclusive: 0 })).toBeUndefined();
+      expect(formatDuration('1.5', 's', { integerOnly: true })).toBeUndefined();
+      expect(formatDuration('0', 's', { integerOnly: true, minExclusive: 0 })).toBeUndefined();
     });
   });
 
