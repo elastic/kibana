@@ -19,7 +19,7 @@ import {
 } from './validators';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import type { TemplatesService } from '../../services/templates';
-import type { FieldDefinitionsService } from '../../services/field_definitions';
+import { getFieldSnakeKey } from '../../../common/utils';
 
 describe('validators', () => {
   describe('validateCustomFieldTypesInRequest', () => {
@@ -722,33 +722,19 @@ describe('validators', () => {
       },
     });
 
+    const makeGlobalKeys = (defs: Array<{ name: string; type: string }> = []): Set<string> =>
+      new Set(defs.map(({ name, type }) => getFieldSnakeKey(name, type)));
+
     const simpleTemplateSO = makeTemplatesSO({
       fields: [{ control: 'INPUT_TEXT', name: 'summary', label: 'Summary', type: 'keyword' }],
     });
 
     let templatesService: jest.Mocked<Pick<TemplatesService, 'getTemplate'>>;
-    let fieldDefinitionsService: jest.Mocked<Pick<FieldDefinitionsService, 'getFieldDefinitions'>>;
-
-    const makeFieldDefinitionsService = (
-      defs: Array<{ name: string; type: string }> = []
-    ): jest.Mocked<Pick<FieldDefinitionsService, 'getFieldDefinitions'>> => ({
-      getFieldDefinitions: jest.fn().mockResolvedValue({
-        fieldDefinitions: defs.map(({ name, type }) => ({
-          fieldDefinitionId: `fd-${name}`,
-          name,
-          definition: yaml.dump({ name, type, control: 'INPUT_TEXT', label: name }),
-          owner: 'securitySolution',
-          applyToAllCases: true,
-        })),
-        total: defs.length,
-      }),
-    });
 
     beforeEach(() => {
       templatesService = {
         getTemplate: jest.fn().mockResolvedValue(simpleTemplateSO),
       };
-      fieldDefinitionsService = makeFieldDefinitionsService();
     });
 
     it('returns without error when extended_fields is undefined', async () => {
@@ -757,19 +743,18 @@ describe('validators', () => {
           updateReq: { id: 'case-1', version: '1' },
           originalCase: makeOriginalCase('tpl-1'),
           templatesService: templatesService as unknown as TemplatesService,
-          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
+          globalKeys: makeGlobalKeys(),
         })
       ).resolves.toBeUndefined();
     });
 
     it('allows global field keys in extended_fields when no template is set', async () => {
-      fieldDefinitionsService = makeFieldDefinitionsService([{ name: 'summary', type: 'keyword' }]);
       await expect(
         validateExtendedFieldsInRequest({
           updateReq: { id: 'case-1', version: '1', extended_fields: { summary_as_keyword: 'hi' } },
           originalCase: makeOriginalCase(), // no template
           templatesService: templatesService as unknown as TemplatesService,
-          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
+          globalKeys: makeGlobalKeys([{ name: 'summary', type: 'keyword' }]),
         })
       ).resolves.toBeUndefined();
     });
@@ -780,7 +765,7 @@ describe('validators', () => {
           updateReq: { id: 'case-1', version: '1', extended_fields: { summary_as_keyword: 'hi' } },
           originalCase: makeOriginalCase(), // no template, no global defs
           templatesService: templatesService as unknown as TemplatesService,
-          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
+          globalKeys: makeGlobalKeys(),
         })
       ).rejects.toThrow(
         'extended_fields keys [summary_as_keyword] are not global (applyToAllCases) field definitions'
@@ -800,7 +785,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase(),
           templatesService: templatesService as unknown as TemplatesService,
-          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
+          globalKeys: makeGlobalKeys(),
         })
       ).rejects.toThrow('Template missing-tpl not found');
     });
@@ -816,7 +801,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase(),
           templatesService: templatesService as unknown as TemplatesService,
-          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
+          globalKeys: makeGlobalKeys(),
         })
       ).resolves.toBeUndefined();
     });
@@ -845,7 +830,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase(),
           templatesService: templatesService as unknown as TemplatesService,
-          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
+          globalKeys: makeGlobalKeys(),
         })
       ).rejects.toThrow('Invalid extended_fields: Field "Summary" is required');
     });
@@ -876,7 +861,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase(),
           templatesService: templatesService as unknown as TemplatesService,
-          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
+          globalKeys: makeGlobalKeys(),
         })
       ).rejects.toThrow('Template tpl-1 has an invalid definition');
     });
@@ -892,7 +877,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase('tpl-from-original'),
           templatesService: templatesService as unknown as TemplatesService,
-          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
+          globalKeys: makeGlobalKeys(),
         })
       ).rejects.toThrow(
         'extended_fields keys [summary_as_keyword] are not global (applyToAllCases) field definitions'
@@ -902,8 +887,6 @@ describe('validators', () => {
     });
 
     it('allows global field keys when template is explicitly null', async () => {
-      fieldDefinitionsService = makeFieldDefinitionsService([{ name: 'summary', type: 'keyword' }]);
-
       await expect(
         validateExtendedFieldsInRequest({
           updateReq: {
@@ -914,7 +897,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase('tpl-from-original'),
           templatesService: templatesService as unknown as TemplatesService,
-          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
+          globalKeys: makeGlobalKeys([{ name: 'summary', type: 'keyword' }]),
         })
       ).resolves.toBeUndefined();
 
@@ -931,7 +914,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase('tpl-from-original'),
           templatesService: templatesService as unknown as TemplatesService,
-          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
+          globalKeys: makeGlobalKeys(),
         })
       ).resolves.toBeUndefined();
 
@@ -939,8 +922,6 @@ describe('validators', () => {
     });
 
     it('allows global field keys alongside template fields when template is set', async () => {
-      fieldDefinitionsService = makeFieldDefinitionsService([{ name: 'global_tag', type: 'keyword' }]);
-
       await expect(
         validateExtendedFieldsInRequest({
           updateReq: {
@@ -954,7 +935,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase(),
           templatesService: templatesService as unknown as TemplatesService,
-          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
+          globalKeys: makeGlobalKeys([{ name: 'global_tag', type: 'keyword' }]),
         })
       ).resolves.toBeUndefined();
     });

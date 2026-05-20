@@ -6,7 +6,6 @@
  */
 
 import React, { useContext, useEffect, useMemo } from 'react';
-import { load as parseYaml } from 'js-yaml';
 import { EuiCallOut, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormProvider, useForm } from 'react-hook-form';
 import {
@@ -21,9 +20,7 @@ import * as libI18n from '../field_library/translations';
 import { FieldsRenderer } from '../templates_v2/field_types/field_renderer';
 import { useResolvedFields } from '../field_library/hooks/use_resolved_fields';
 import { useGetFieldDefinitions } from '../field_library/hooks/use_get_field_definitions';
-import { FieldSchema, isInlineField } from '../../../common/types/domain/template/fields';
-import type { InlineField } from '../../../common/types/domain/template/fields';
-import { getFieldSnakeKey } from '../../../common/utils';
+import { parseFieldDefinitionsToInlineFields, getFieldSnakeKey } from '../../../common/utils';
 import { TemplateFieldsValidationContext } from './template_fields_validation_context';
 
 type FormShape = Record<string, Record<string, unknown>>;
@@ -43,20 +40,8 @@ export const CreateCaseTemplateFields: React.FC = () => {
   // Resolve global field definitions to inline fields and compute their snake keys.
   const { globalInlineFields, globalFieldKeys } = useMemo(() => {
     const defs = globalFieldDefsData?.fieldDefinitions ?? [];
-    const inlineFields: InlineField[] = [];
-    const keys = new Set<string>();
-    for (const fd of defs) {
-      try {
-        const parsed = parseYaml(fd.definition);
-        const result = FieldSchema.safeParse(parsed);
-        if (result.success && isInlineField(result.data)) {
-          inlineFields.push(result.data as InlineField);
-          keys.add(getFieldSnakeKey(result.data.name, result.data.type));
-        }
-      } catch {
-        // Ignore malformed definitions
-      }
-    }
+    const inlineFields = parseFieldDefinitionsToInlineFields(defs);
+    const keys = new Set(inlineFields.map((f) => getFieldSnakeKey(f.name, f.type)));
     return { globalInlineFields: inlineFields, globalFieldKeys: keys };
   }, [globalFieldDefsData]);
 
@@ -107,19 +92,7 @@ export const CreateCaseTemplateFields: React.FC = () => {
   }, [globalInlineFields]);
 
   const templateFieldsFragment = useMemo(() => {
-    if (!templateId || template?.definition?.fields === undefined) {
-      // When global fields are already visible, suppress the callout to avoid
-      // redundant messaging — the user can see there's something to fill in.
-      if (globalInlineFields.length) return null;
-      return (
-        <>
-          <EuiSpacer />
-          <EuiCallOut announceOnMount title={i18n.TEMPLATE_NOT_SELECTED_TITLE} size="s">
-            <p>{i18n.TEMPLATE_NOT_SELECTED_DESCRIPTION}</p>
-          </EuiCallOut>
-        </>
-      );
-    }
+    if (!templateId || template?.definition?.fields === undefined) return null;
     if (!templateFields.length) return null;
     return (
       <>
@@ -131,7 +104,7 @@ export const CreateCaseTemplateFields: React.FC = () => {
         <FieldsRenderer resolvedFields={templateFields} />
       </>
     );
-  }, [templateId, template, templateFields, globalInlineFields.length]);
+  }, [templateId, template, templateFields]);
 
   if (isLoading || isLoadingFields || isLoadingGlobalDefs) {
     return null;

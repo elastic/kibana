@@ -7,7 +7,6 @@
 
 import { differenceWith, intersectionWith, isEmpty } from 'lodash';
 import Boom from '@hapi/boom';
-import { load as parseYaml } from 'js-yaml';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
 import type {
   CasePatchRequest,
@@ -23,8 +22,7 @@ import type { TemplatesService } from '../../services/templates';
 import type { FieldDefinitionsService } from '../../services/field_definitions';
 import { parseTemplate } from '../../routes/api/templates/parse_template';
 import { validateExtendedFields } from '../../../common/types/domain/template/validate_extended_fields';
-import { FieldSchema, isInlineField } from '../../../common/types/domain/template/fields';
-import { getFieldSnakeKey } from '../../../common/utils';
+import { parseFieldDefinitionsToInlineFields, getFieldSnakeKey } from '../../../common/utils';
 
 interface CustomFieldValidationParams {
   requestCustomFields?: CaseRequestCustomFields;
@@ -171,36 +169,22 @@ export const resolveGlobalFieldKeys = async (
   const { fieldDefinitions } = await fieldDefinitionsService.getFieldDefinitions(owner, {
     applyToAllCases: true,
   });
-  const keys = new Set<string>();
-  for (const fd of fieldDefinitions) {
-    try {
-      const parsed = parseYaml(fd.definition);
-      const result = FieldSchema.safeParse(parsed);
-      if (result.success && isInlineField(result.data)) {
-        keys.add(getFieldSnakeKey(result.data.name, result.data.type));
-      }
-    } catch {
-      // Ignore malformed definitions
-    }
-  }
-  return keys;
+  const inlineFields = parseFieldDefinitionsToInlineFields(fieldDefinitions);
+  return new Set(inlineFields.map((f) => getFieldSnakeKey(f.name, f.type)));
 };
 
 export const validateExtendedFieldsInRequest = async ({
   updateReq,
   originalCase,
   templatesService,
-  fieldDefinitionsService,
+  globalKeys,
 }: {
   updateReq: CasePatchRequest;
   originalCase: CaseSavedObjectTransformed;
   templatesService: TemplatesService;
-  fieldDefinitionsService: FieldDefinitionsService;
+  globalKeys: Set<string>;
 }): Promise<void> => {
   if (!updateReq.extended_fields) return;
-
-  const owner = originalCase.attributes.owner;
-  const globalKeys = await resolveGlobalFieldKeys(owner, fieldDefinitionsService);
 
   // null means the template is being cleared; undefined means it is not changing.
   const templateId =

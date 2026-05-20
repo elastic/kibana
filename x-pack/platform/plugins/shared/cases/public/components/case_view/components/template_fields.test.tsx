@@ -12,11 +12,17 @@ import userEvent from '@testing-library/user-event';
 import type { CaseUI } from '../../../../common';
 import type { ParsedTemplate } from '../../../../common/types/domain/template/v1';
 import { FieldType } from '../../../../common/types/domain/template/fields';
-import { TemplateFields } from './template_fields';
+import yaml from 'js-yaml';
+import { TemplateFields, GlobalCaseFields } from './template_fields';
 
 const mockUseGetTemplate = jest.fn();
 jest.mock('../../templates_v2/hooks/use_get_template', () => ({
   useGetTemplate: (...args: unknown[]) => mockUseGetTemplate(...args),
+}));
+
+const mockUseGetFieldDefinitions = jest.fn();
+jest.mock('../../field_library/hooks/use_get_field_definitions', () => ({
+  useGetFieldDefinitions: (...args: unknown[]) => mockUseGetFieldDefinitions(...args),
 }));
 
 jest.mock('../../field_library/hooks/use_resolved_fields', () => ({
@@ -535,5 +541,81 @@ describe('TemplateFields', () => {
         expect(screen.queryByTestId('template-field-cancel-priority')).not.toBeInTheDocument();
       });
     });
+  });
+});
+
+describe('GlobalCaseFields', () => {
+  const caseData = {
+    owner: 'securitySolution',
+    extendedFields: { incidentTypeAsKeyword: 'outage' },
+  } as unknown as CaseUI;
+
+  const makeGlobalDef = (name: string) => ({
+    fieldDefinitionId: `fd-${name}`,
+    name,
+    definition: yaml.dump({ name, type: 'keyword', control: 'INPUT_TEXT', label: name }),
+    owner: 'securitySolution',
+    applyToAllCases: true,
+    description: '',
+  });
+
+  const globalOnUpdateField = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('renders nothing while field definitions are loading', () => {
+    mockUseGetFieldDefinitions.mockReturnValue({ data: undefined, isLoading: true });
+    const { container } = render(
+      <GlobalCaseFields caseData={caseData} onUpdateField={globalOnUpdateField} />
+    );
+    expect(container.textContent).toBe('');
+  });
+
+  it('renders nothing when there are no applyToAllCases definitions', () => {
+    mockUseGetFieldDefinitions.mockReturnValue({
+      data: { fieldDefinitions: [] },
+      isLoading: false,
+    });
+    const { container } = render(
+      <GlobalCaseFields caseData={caseData} onUpdateField={globalOnUpdateField} />
+    );
+    expect(container.textContent).toBe('');
+  });
+
+  it('renders global fields section when applyToAllCases definitions exist', () => {
+    mockUseGetFieldDefinitions.mockReturnValue({
+      data: { fieldDefinitions: [makeGlobalDef('incident_type')] },
+      isLoading: false,
+    });
+    render(<GlobalCaseFields caseData={caseData} onUpdateField={globalOnUpdateField} />);
+    expect(screen.getByText('Global fields')).toBeInTheDocument();
+    expect(screen.getByTestId('template-fields-form')).toBeInTheDocument();
+  });
+
+  it('skips malformed definitions without crashing', () => {
+    mockUseGetFieldDefinitions.mockReturnValue({
+      data: {
+        fieldDefinitions: [
+          { ...makeGlobalDef('bad'), definition: 'not: valid: [broken' },
+          makeGlobalDef('good_field'),
+        ],
+      },
+      isLoading: false,
+    });
+    render(<GlobalCaseFields caseData={caseData} onUpdateField={globalOnUpdateField} />);
+    expect(screen.getByTestId('template-fields-form')).toBeInTheDocument();
+  });
+
+  it('queries field definitions with applyToAllCases: true and the case owner', () => {
+    mockUseGetFieldDefinitions.mockReturnValue({
+      data: { fieldDefinitions: [] },
+      isLoading: false,
+    });
+    render(<GlobalCaseFields caseData={caseData} onUpdateField={globalOnUpdateField} />);
+    expect(mockUseGetFieldDefinitions).toHaveBeenCalledWith(
+      expect.objectContaining({ owner: 'securitySolution', applyToAllCases: true })
+    );
   });
 });

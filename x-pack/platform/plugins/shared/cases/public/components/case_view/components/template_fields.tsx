@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { load as parseYaml } from 'js-yaml';
 import type { z } from '@kbn/zod/v4';
 import type { FieldValues } from 'react-hook-form';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -15,13 +14,16 @@ import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { CaseUI } from '../../../../common';
 import { CASE_EXTENDED_FIELDS } from '../../../../common/constants';
 import type { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/latest';
-import { FieldSchema, isInlineField } from '../../../../common/types/domain/template/fields';
 import type { InlineField } from '../../../../common/types/domain/template/fields';
 import { useGetTemplate } from '../../templates_v2/hooks/use_get_template';
 import { FieldsRenderer } from '../../templates_v2/field_types/field_renderer';
 import { useResolvedFields } from '../../field_library/hooks/use_resolved_fields';
 import { useGetFieldDefinitions } from '../../field_library/hooks/use_get_field_definitions';
-import { getFieldCamelKey, getFieldSnakeKey } from '../../../../common/utils';
+import {
+  getFieldCamelKey,
+  getFieldSnakeKey,
+  parseFieldDefinitionsToInlineFields,
+} from '../../../../common/utils';
 import * as libI18n from '../../field_library/translations';
 import type { OnUpdateFields } from '../types';
 
@@ -159,22 +161,10 @@ export const GlobalCaseFields = React.memo<GlobalCaseFieldsProps>(({ caseData, o
     applyToAllCases: true,
   });
 
-  const globalInlineFields = useMemo<InlineField[]>(() => {
-    const defs = globalFieldDefsData?.fieldDefinitions ?? [];
-    const fields: InlineField[] = [];
-    for (const fd of defs) {
-      try {
-        const parsed = parseYaml(fd.definition);
-        const result = FieldSchema.safeParse(parsed);
-        if (result.success && isInlineField(result.data)) {
-          fields.push(result.data as InlineField);
-        }
-      } catch {
-        // Ignore malformed definitions
-      }
-    }
-    return fields;
-  }, [globalFieldDefsData]);
+  const globalInlineFields = useMemo<InlineField[]>(
+    () => parseFieldDefinitionsToInlineFields(globalFieldDefsData?.fieldDefinitions ?? []),
+    [globalFieldDefsData]
+  );
 
   if (isLoading || !globalInlineFields.length) return null;
 
