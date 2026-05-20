@@ -25,7 +25,7 @@ const { maxLengthField } = fieldValidators;
 
 export type CaseFormFieldsSchemaProps = Omit<
   CasePostRequest,
-  'connector' | 'settings' | 'owner' | 'customFields'
+  'connector' | 'settings' | 'owner' | 'customFields' | 'extended_fields'
 > & {
   connectorId: string;
   fields: ConnectorTypeFields['fields'];
@@ -34,7 +34,7 @@ export type CaseFormFieldsSchemaProps = Omit<
   customFields: Record<string, string | boolean>;
   templateId?: string;
   templateVersion?: number;
-  extendedFields?: Record<string, unknown>;
+  extendedFields?: Record<string, string>;
 };
 
 export const schema: FormSchema<CaseFormFieldsSchemaProps> = {

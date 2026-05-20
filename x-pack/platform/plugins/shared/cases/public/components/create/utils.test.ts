@@ -285,7 +285,7 @@ describe('utils', () => {
       expect(
         createFormSerializer([], casesConfigurationsMock, {
           ...dataToSerialize,
-          extended_fields: extendedFields,
+          extendedFields,
         })
       ).toEqual({ ...serializedFormData, extended_fields: extendedFields });
     });

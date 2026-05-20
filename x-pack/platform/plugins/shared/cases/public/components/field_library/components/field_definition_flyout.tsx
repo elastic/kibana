@@ -68,9 +68,7 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
 
   const [description, setDescription] = useState(fieldDefinition?.description ?? '');
   const [definition, setDefinition] = useState(fieldDefinition?.definition ?? EXAMPLE_FIELD_YAML);
-  const [applyToAllCases, setRenderInAllCases] = useState(
-    fieldDefinition?.applyToAllCases ?? false
-  );
+  const [applyToAllCases, setApplyToAllCases] = useState(fieldDefinition?.applyToAllCases ?? false);
   const [definitionError, setDefinitionError] = useState<string | undefined>();
 
   const definitionRef = useRef(definition);
@@ -180,13 +178,13 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
             />
           </EuiFormRow>
           <EuiSpacer size="m" />
-          <EuiToolTip content={i18n.RENDER_IN_ALL_CASES_HELP_TEXT}>
+          <EuiToolTip content={i18n.APPLY_TO_ALL_CASES_HELP_TEXT}>
             <EuiCheckbox
-              id="fieldDefinitionRenderInAllCases"
-              label={i18n.RENDER_IN_ALL_CASES_LABEL}
+              id="fieldDefinitionApplyToAllCases"
+              label={i18n.APPLY_TO_ALL_CASES_LABEL}
               checked={applyToAllCases}
-              onChange={(e) => setRenderInAllCases(e.target.checked)}
-              data-test-subj="fieldDefinitionRenderInAllCasesCheckbox"
+              onChange={(e) => setApplyToAllCases(e.target.checked)}
+              data-test-subj="fieldDefinitionApplyToAllCasesCheckbox"
             />
           </EuiToolTip>
         </EuiForm>

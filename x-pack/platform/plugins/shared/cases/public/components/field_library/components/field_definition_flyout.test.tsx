@@ -51,7 +51,7 @@ describe('FieldDefinitionFlyout — applyToAllCases checkbox', () => {
   it('renders the applyToAllCases checkbox unchecked by default', () => {
     renderWithTestingProviders(<FieldDefinitionFlyout {...defaultProps} />);
 
-    const checkbox = screen.getByTestId('fieldDefinitionRenderInAllCasesCheckbox');
+    const checkbox = screen.getByTestId('fieldDefinitionApplyToAllCasesCheckbox');
     expect(checkbox).toBeInTheDocument();
     expect(checkbox).not.toBeChecked();
   });
@@ -69,7 +69,7 @@ describe('FieldDefinitionFlyout — applyToAllCases checkbox', () => {
       <FieldDefinitionFlyout {...defaultProps} fieldDefinition={fieldDefinition} />
     );
 
-    const checkbox = screen.getByTestId('fieldDefinitionRenderInAllCasesCheckbox');
+    const checkbox = screen.getByTestId('fieldDefinitionApplyToAllCasesCheckbox');
     expect(checkbox).toBeChecked();
   });
 
@@ -93,7 +93,7 @@ describe('FieldDefinitionFlyout — applyToAllCases checkbox', () => {
     const yamlInput = screen.getByTestId('fieldDefinitionYamlInput');
     fireEvent.change(yamlInput, { target: { value: VALID_YAML } });
 
-    const checkbox = screen.getByTestId('fieldDefinitionRenderInAllCasesCheckbox');
+    const checkbox = screen.getByTestId('fieldDefinitionApplyToAllCasesCheckbox');
     fireEvent.click(checkbox);
 
     fireEvent.click(screen.getByTestId('fieldDefinitionSaveButton'));
@@ -107,7 +107,7 @@ describe('FieldDefinitionFlyout — applyToAllCases checkbox', () => {
     const user = userEvent.setup();
     renderWithTestingProviders(<FieldDefinitionFlyout {...defaultProps} />);
 
-    const checkbox = screen.getByTestId('fieldDefinitionRenderInAllCasesCheckbox');
+    const checkbox = screen.getByTestId('fieldDefinitionApplyToAllCasesCheckbox');
     expect(checkbox).not.toBeChecked();
 
     await user.click(checkbox);
@@ -120,6 +120,6 @@ describe('FieldDefinitionFlyout — applyToAllCases checkbox', () => {
   it('displays the applyToAllCases label text', () => {
     renderWithTestingProviders(<FieldDefinitionFlyout {...defaultProps} />);
 
-    expect(screen.getByText('Render in all cases')).toBeInTheDocument();
+    expect(screen.getByText('Apply to all cases')).toBeInTheDocument();
   });
 });

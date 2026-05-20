@@ -132,10 +132,10 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
     },
     {
       field: 'applyToAllCases',
-      name: i18n.RENDER_IN_ALL_CASES_COLUMN,
+      name: i18n.APPLY_TO_ALL_CASES_COLUMN,
       render: (value: boolean | undefined) =>
-        value ? <EuiBadge color="primary">{i18n.RENDER_IN_ALL_CASES_LABEL}</EuiBadge> : null,
-      'data-test-subj': 'fieldDefinitionRenderInAllCasesCell',
+        value ? <EuiBadge color="primary">{i18n.APPLY_TO_ALL_CASES_LABEL}</EuiBadge> : null,
+      'data-test-subj': 'fieldDefinitionApplyToAllCasesCell',
     },
     {
       name: i18n.ACTIONS_COLUMN,

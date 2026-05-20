@@ -182,12 +182,12 @@ export const DELETE_CONFIRM_BODY = (name: string) =>
     values: { name },
   });
 
-export const RENDER_IN_ALL_CASES_LABEL = i18n.translate(
+export const APPLY_TO_ALL_CASES_LABEL = i18n.translate(
   'xpack.cases.fieldLibrary.applyToAllCasesLabel',
-  { defaultMessage: 'Render in all cases' }
+  { defaultMessage: 'Apply to all cases' }
 );
 
-export const RENDER_IN_ALL_CASES_HELP_TEXT = i18n.translate(
+export const APPLY_TO_ALL_CASES_HELP_TEXT = i18n.translate(
   'xpack.cases.fieldLibrary.applyToAllCasesHelpText',
   {
     defaultMessage:
@@ -195,9 +195,9 @@ export const RENDER_IN_ALL_CASES_HELP_TEXT = i18n.translate(
   }
 );
 
-export const RENDER_IN_ALL_CASES_COLUMN = i18n.translate(
+export const APPLY_TO_ALL_CASES_COLUMN = i18n.translate(
   'xpack.cases.fieldLibrary.applyToAllCasesColumn',
-  { defaultMessage: 'Render in all cases' }
+  { defaultMessage: 'Apply to all cases' }
 );
 
 export const GLOBAL_FIELDS_TITLE = i18n.translate('xpack.cases.fieldLibrary.globalFieldsTitle', {
