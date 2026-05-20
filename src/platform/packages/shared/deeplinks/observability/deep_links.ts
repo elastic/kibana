@@ -70,7 +70,8 @@ export type ObservabilityOverviewLinkId =
   | 'cases'
   | 'cases_configure'
   | 'cases_create'
-  | 'rules';
+  | 'rules'
+  | 'nightshift';
 
 export type MetricsLinkId =
   | 'inventory'

@@ -26,28 +26,25 @@ export function isValidNamespace(
     return { valid, error };
   }
 
-  for (const prefix of allowedNamespacePrefixes || []) {
-    if (!namespace.trim().startsWith(prefix)) {
-      return allowedNamespacePrefixes?.length === 1
-        ? {
-            valid: false,
-            error: i18n.translate('xpack.fleet.namespaceValidation.notAllowedPrefixError', {
-              defaultMessage: 'Namespace should start with {allowedNamespacePrefixes}',
-              values: {
-                allowedNamespacePrefixes: allowedNamespacePrefixes?.[0],
-              },
-            }),
-          }
-        : {
-            valid: false,
-            error: i18n.translate('xpack.fleet.namespaceValidation.notAllowedPrefixesError', {
-              defaultMessage:
-                'Namespace should start with one of these prefixes {allowedNamespacePrefixes}',
-              values: {
-                allowedNamespacePrefixes: allowedNamespacePrefixes?.join(', ') ?? '',
-              },
-            }),
-          };
+  if (allowedNamespacePrefixes && allowedNamespacePrefixes.length > 0) {
+    const matchesAnyPrefix = allowedNamespacePrefixes.some((prefix) =>
+      namespace.trim().startsWith(prefix)
+    );
+    if (!matchesAnyPrefix) {
+      return {
+        valid: false,
+        error: i18n.translate('xpack.fleet.namespaceValidation.notAllowedPrefixError', {
+          defaultMessage:
+            'Namespace should start with {count, plural, one {{allowedNamespacePrefixes}} other {one of these prefixes: {allowedNamespacePrefixes}}}',
+          values: {
+            count: allowedNamespacePrefixes.length,
+            allowedNamespacePrefixes:
+              allowedNamespacePrefixes.length === 1
+                ? allowedNamespacePrefixes[0]
+                : allowedNamespacePrefixes.join(', '),
+          },
+        }),
+      };
     }
   }
   return { valid: true };
