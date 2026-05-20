@@ -45,15 +45,14 @@ import { ComposeDiscoverTabs, TAB_DEFINITIONS } from './compose_discover_tabs';
  *
  * ## Usage modes
  *
- * **Compose Discover flyout (default)** — the parent owns the draft and commits it
- * to RHF on Apply. Pass `draft`, `onDraftChange`, and `onApply`.
+ * **Compose Discover flyout (editable)** — pass `query`, `onQueryChange`, and `onApply`.
+ * The parent holds the editing buffer; Apply commits it to RHF.
  *
- * **Rule Builder preview** — show the committed query read-only so the user can
- * inspect it before closing. Omit `onDraftChange` (makes editors read-only) and
- * omit `onApply` (hides the Apply button; only the close button is shown).
+ * **Preview / read-only** — omit `onQueryChange` (makes all editors read-only) and
+ * omit `onApply` (hides the Apply button). Only the close button is shown.
  *
- * **Rule Builder edit** — let the user edit the query but commit on their own
- * terms. Pass `onDraftChange` but omit `onApply` (close-only, no Apply button).
+ * **Edit without Apply** — pass `onQueryChange` but omit `onApply`. The flyout has
+ * editors but no Apply button; the caller commits on its own terms.
  *
  * ## State ownership
  *
@@ -281,7 +280,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
                 <EuiTab
                   key={tab.id}
                   isSelected={activeTab === tab.id}
-                  onClick={() => onTabChange(tab.id)}
+                  onClick={() => onTabChange?.(tab.id)}
                   data-test-subj={`composeDiscoverTab-${tab.id}`}
                 >
                   {tab.label}

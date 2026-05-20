@@ -212,7 +212,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   );
   const [dateRange, setDateRange] = useState({ dateStart: 'now-15m', dateEnd: 'now' });
 
-  const syncFromRhf = useCallback(() => {
+  const syncSandbox = useCallback(() => {
     setSandboxQuery(methods.getValues('query'));
     setSandboxTimeField(methods.getValues('timeField'));
   }, [methods]);
@@ -303,7 +303,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
     const result = parseYamlToFormValues(yaml);
     if (result.values) {
       methods.reset(formValuesFromYamlToCompose(result.values));
-      syncFromRhf();
+      syncSandbox();
     }
   }, YAML_PARSE_DEBOUNCE_OPTIONS);
 
@@ -325,16 +325,16 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
         if (result.values) {
           const compose = formValuesFromYamlToCompose(result.values);
           methods.reset(compose);
-          syncFromRhf();
+          syncSandbox();
           dispatch({ type: 'COMMIT_QUERY' });
         }
-        // No syncFromRhf() on parse-failure path: the debounced parse always calls
-        // methods.reset() + syncFromRhf() together, so RHF and sandbox state are already in
+        // No syncSandbox() on parse-failure path: the debounced parse always calls
+        // methods.reset() + syncSandbox() together, so RHF and sandbox state are already in
         // sync at the last valid parse state. The current yamlText simply can't be applied.
       }
       dispatch({ type: 'SET_YAML_MODE', enabled });
     },
-    [cancelYamlParse, methods, yamlText, syncFromRhf, dispatch]
+    [cancelYamlParse, methods, yamlText, syncSandbox, dispatch]
   );
 
   const handleSandboxApply = useCallback(() => {
@@ -544,7 +544,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
               onTabChange={(tab) => dispatch({ type: 'SET_TAB', tab })}
               onAlertEditorMount={onAlertEditorMount}
               onRecoveryEditorMount={onRecoveryEditorMount}
-              onClose={() => { syncFromRhf(); dispatch({ type: 'CLOSE_CHILD' }); }}
+              onClose={() => { syncSandbox(); dispatch({ type: 'CLOSE_CHILD' }); }}
               onApply={handleSandboxApply}
             />
           )}
