@@ -19,7 +19,7 @@ import { CiStatsClient, TestGroupRunOrderResponse } from './client';
 import { getTrackedBranch } from '../utils';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
-import { serverless, stateful } from '../../ftr_configs_manifests.json';
+import { serverless, stateful } from '../../ftr-manifests/ftr_configs_manifests.json';
 import {
   getAffectedPackages,
   listChangedFiles,
