@@ -26,8 +26,6 @@ steps:
   - label: 'LLM Evals: On-demand'
     key: kbn-evals-on-demand
     command: bash .buildkite/scripts/steps/evals/run_suite.sh
-    depends_on:
-      - build
     env:
       KBN_EVALS: '1'
       FTR_EIS_CCM: '1'
