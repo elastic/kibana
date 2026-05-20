@@ -433,7 +433,7 @@ export const CloudOnboardingDeploymentDebugger: React.FunctionComponent = () => 
 
       <EuiSpacer size="m" />
 
-      <EuiFormRow label="Connection ID">
+      <EuiFormRow label="Connector ID">
         <EuiSelect
           value={connectorId}
           onChange={(e) => setConnectorId(e.target.value)}

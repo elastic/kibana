@@ -101,7 +101,7 @@ export const createCloudConnectorHandler: FleetRequestHandler<
     logger.info(`Successfully created cloud connector ${cloudConnector.id}`);
     return response.ok({ body: { item: cloudConnector } as CreateCloudConnectorResponse });
   } catch (error) {
-    logger.error(`Failed to create cloud connector`, error.message);
+    logger.error(`Failed to create cloud connector`, error);
     return response.customError({
       statusCode: 400,
       body: {
@@ -136,7 +136,7 @@ export const getCloudConnectorsHandler: FleetRequestHandler<
     };
     return response.ok({ body });
   } catch (error) {
-    logger.error('Failed to get cloud connectors list', error.message);
+    logger.error('Failed to get cloud connectors list', error);
     return response.customError({
       statusCode: 400,
       body: {
@@ -166,7 +166,7 @@ export const getCloudConnectorHandler: FleetRequestHandler<
     };
     return response.ok({ body });
   } catch (error) {
-    logger.error(`Failed to get cloud connector ${cloudConnectorId}`, error.message);
+    logger.error(`Failed to get cloud connector ${cloudConnectorId}`, error);
     return response.customError({
       statusCode: 400,
       body: {
@@ -202,7 +202,7 @@ export const updateCloudConnectorHandler: FleetRequestHandler<
     };
     return response.ok({ body });
   } catch (error) {
-    logger.error(`Failed to update cloud connector ${cloudConnectorId}`, error.message);
+    logger.error(`Failed to update cloud connector ${cloudConnectorId}`, error);
     return response.customError({
       statusCode: 400,
       body: {
@@ -240,7 +240,7 @@ export const deleteCloudConnectorHandler: FleetRequestHandler<
     };
     return response.ok({ body });
   } catch (error) {
-    logger.error(`Failed to delete cloud connector ${cloudConnectorId}`, error.message);
+    logger.error(`Failed to delete cloud connector ${cloudConnectorId}`, error);
 
     return response.customError({
       statusCode: 400,
@@ -317,10 +317,7 @@ export const getCloudConnectorUsageHandler: FleetRequestHandler<
     };
     return response.ok({ body });
   } catch (error) {
-    logger.error(
-      `Failed to get usage for cloud connector ${cloudConnectorId}: ${error.message}`,
-      error
-    );
+    logger.error(`Failed to get usage for cloud connector ${cloudConnectorId}`, error);
     return response.customError({
       statusCode: 400,
       body: {
