@@ -23,6 +23,10 @@
     "^@babel/plugin-",
     "^babel-plugin-",
     "^eslint-plugin-",
+    // @types/d3-color is used by @elastic/kibana-d3-color; knip can't trace this.
+    "@types/d3-color",
+    // used by our FTR; knip can't trace this.
+    "geckodriver",
     // these are used as Cypress reporters via reporter_config.json; knip can't trace the
     // cypress-multi-reporters -> configFile -> reporterEnabled chain.
     "buildkite-test-collector",
