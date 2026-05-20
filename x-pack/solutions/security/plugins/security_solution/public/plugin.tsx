@@ -311,6 +311,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         attachments: plugins.agentBuilder.attachments,
         application: core.application,
         aiRuleCreation: this.services.aiRuleCreation,
+        uiSettings: core.uiSettings,
       });
       registerEntityAnalyticsDashboardAttachment({
         attachments: plugins.agentBuilder.attachments,

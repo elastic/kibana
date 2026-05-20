@@ -1,5 +1,5 @@
 {
-  "sha1": "4174ecbd2d1f86d52b0703f44479cfc30b48fd65",
+  "sha1": "279bb3242b0e4d1bfb808fd2d010f83f822878ae",
   "tests": [
     {
       "id": "42293a2b206815f-21f4f530da45d0c",
@@ -42,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 45,
+        "line": 47,
         "column": 7
       }
     },
@@ -57,7 +57,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 64,
+        "line": 66,
         "column": 7
       }
     },
@@ -72,7 +72,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 83,
+        "line": 85,
+        "column": 7
+      }
+    },
+    {
+      "id": "42293a2b206815f-dad678cd80df6dc",
+      "title": "EIS Models Page renders status badges on deprecated and EOL model cards",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
+        "line": 103,
         "column": 7
       }
     },
@@ -87,7 +102,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
-        "line": 101,
+        "line": 126,
         "column": 7
       }
     },
@@ -299,6 +314,111 @@
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/external_inference_table.spec.ts",
         "line": 111,
         "column": 9
+      }
+    },
+    {
+      "id": "1721454f7fa1c0d-8e82bee9fd25a73",
+      "title": "deprecation surface renders no callouts when only GA models are assigned",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings_deprecations.spec.ts",
+        "line": 27,
+        "column": 7
+      }
+    },
+    {
+      "id": "1721454f7fa1c0d-50126af2d943b61",
+      "title": "deprecation surface global model combobox suffixes deprecated and EOL options",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings_deprecations.spec.ts",
+        "line": 34,
+        "column": 7
+      }
+    },
+    {
+      "id": "1721454f7fa1c0d-93b15d4eb2fffc2",
+      "title": "deprecation surface selecting an EOL model as the global default shows the danger callout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings_deprecations.spec.ts",
+        "line": 53,
+        "column": 7
+      }
+    },
+    {
+      "id": "1721454f7fa1c0d-38dfd3d4385959e",
+      "title": "deprecation surface assigning a deprecated model to a feature shows the warning callout and badge on the row",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings_deprecations.spec.ts",
+        "line": 65,
+        "column": 7
+      }
+    },
+    {
+      "id": "1721454f7fa1c0d-e0df9867ea75307",
+      "title": "deprecation surface add model popover disables the EOL option and renders icon-only status badges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings_deprecations.spec.ts",
+        "line": 89,
+        "column": 7
+      }
+    },
+    {
+      "id": "1721454f7fa1c0d-25155c9b4eaeadf",
+      "title": "deprecation surface global-default locked row renders the deprecation badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings_deprecations.spec.ts",
+        "line": 120,
+        "column": 7
+      }
+    },
+    {
+      "id": "1721454f7fa1c0d-48d4d7355553fe1",
+      "title": "deprecation surface callouts are hidden when Feature specific models is off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings_deprecations.spec.ts",
+        "line": 136,
+        "column": 7
       }
     },
     {
@@ -527,6 +647,132 @@
       }
     },
     {
+      "id": "a408dc2671061e0-466cef2092a43b1",
+      "title": "Inference Navigation - Search Solution Space EIS Models Page: displays correct breadcrumbs in search solution navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation_search_solution.spec.ts",
+        "line": 32,
+        "column": 14
+      }
+    },
+    {
+      "id": "a408dc2671061e0-9de5bdb039340ba",
+      "title": "Inference Navigation - Search Solution Space External Inference Page: displays correct breadcrumbs in search solution navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation_search_solution.spec.ts",
+        "line": 46,
+        "column": 14
+      }
+    },
+    {
+      "id": "a408dc2671061e0-e858606929a1019",
+      "title": "Inference Navigation - Search Solution Space Feature Settings Page: displays correct breadcrumbs in search solution navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation_search_solution.spec.ts",
+        "line": 60,
+        "column": 14
+      }
+    },
+    {
+      "id": "40a7429a3ee22de-2d7108d04faa4e4",
+      "title": "Inference Navigation EIS Models Page: displays correct breadcrumbs in classic navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation.spec.ts",
+        "line": 25,
+        "column": 7
+      }
+    },
+    {
+      "id": "40a7429a3ee22de-a3dcc52118922ad",
+      "title": "Inference Navigation EIS Models Page: displays correct breadcrumbs in serverless search navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation.spec.ts",
+        "line": 40,
+        "column": 7
+      }
+    },
+    {
+      "id": "40a7429a3ee22de-474738238fdaf7f",
+      "title": "Inference Navigation External Inference Page: displays correct breadcrumbs in classic navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation.spec.ts",
+        "line": 55,
+        "column": 7
+      }
+    },
+    {
+      "id": "40a7429a3ee22de-91b64dfbfbcf424",
+      "title": "Inference Navigation External Inference Page: displays correct breadcrumbs in serverless search navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation.spec.ts",
+        "line": 70,
+        "column": 7
+      }
+    },
+    {
+      "id": "40a7429a3ee22de-0f4c5c0fadf830f",
+      "title": "Inference Navigation Feature Settings Page: displays correct breadcrumbs in classic navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation.spec.ts",
+        "line": 85,
+        "column": 7
+      }
+    },
+    {
+      "id": "40a7429a3ee22de-0ee788225722c36",
+      "title": "Inference Navigation Feature Settings Page: displays correct breadcrumbs in serverless search navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/inference_navigation.spec.ts",
+        "line": 100,
+        "column": 7
+      }
+    },
+    {
       "id": "68d451451493487-058290624b65263",
       "title": "Model Detail Flyout opens flyout with model details, task badges, and author",
       "expectedStatus": "passed",
@@ -587,6 +833,36 @@
       }
     },
     {
+      "id": "68d451451493487-cc3dc0edc8db202",
+      "title": "Model Detail Flyout deprecated model flyout shows the deprecated badge and enables Add endpoint",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
+        "line": 123,
+        "column": 7
+      }
+    },
+    {
+      "id": "68d451451493487-febfd8836752f31",
+      "title": "Model Detail Flyout EOL model flyout shows the EOL badge and disables Add endpoint",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
+        "line": 142,
+        "column": 7
+      }
+    },
+    {
       "id": "68d451451493487-a7f4daa29d4e5a6",
       "title": "Model Detail Flyout opens view endpoint modal from flyout",
       "expectedStatus": "passed",
@@ -597,7 +873,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
-        "line": 123,
+        "line": 161,
         "column": 7
       }
     }

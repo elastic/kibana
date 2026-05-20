@@ -45,8 +45,6 @@ jszip
 @rspack/core
 @rspack/plugin-react-refresh
 @swc/helpers
-patch-package
-@opentelemetry/resources
 @opentelemetry/exporter-logs-otlp-grpc
 @opentelemetry/exporter-logs-otlp-proto
 @opentelemetry/otlp-transformer
