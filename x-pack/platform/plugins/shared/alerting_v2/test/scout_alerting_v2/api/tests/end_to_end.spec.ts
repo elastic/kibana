@@ -100,10 +100,9 @@ apiTest.describe(
         const rule = await apiServices.alertingV2.rules.create(
           buildCreateRuleData({
             metadata: { name: 'end-to-end-active' },
-            evaluation: {
-              query: {
-                base: `FROM ${SOURCE_INDEX} | WHERE host.name == "${host}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-              },
+            query: {
+              format: 'standalone',
+              breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "${host}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           })
         );
@@ -146,10 +145,9 @@ apiTest.describe(
         const rule = await apiServices.alertingV2.rules.create(
           buildCreateRuleData({
             metadata: { name: 'end-to-end-recovery' },
-            evaluation: {
-              query: {
-                base: `FROM ${SOURCE_INDEX} | WHERE host.name == "${host}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-              },
+            query: {
+              format: 'standalone',
+              breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "${host}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           })
         );
