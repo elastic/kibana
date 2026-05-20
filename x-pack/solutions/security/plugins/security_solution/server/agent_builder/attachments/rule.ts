@@ -15,6 +15,12 @@ import { SECURITY_CREATE_DETECTION_RULE_TOOL_ID, SECURITY_LABS_SEARCH_TOOL_ID } 
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
 export const ruleAttachmentDataSchema = securityAttachmentDataSchema.extend({
+  /**
+   * UUID of the saved-object rule this attachment was resolved from.
+   * Present when the attachment was created by investigate-rule.resolve_rule_attachment
+   * (i.e. the user selected a rule from find-rules output rather than creating a new one).
+   */
+  origin: z.string().optional(),
   text: z.string(),
 });
 
