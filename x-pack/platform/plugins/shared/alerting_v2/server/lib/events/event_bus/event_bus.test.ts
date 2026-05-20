@@ -51,6 +51,8 @@ describe('AsyncDomainEventBus', () => {
   });
 
   describe('publish / subscribe', () => {
+    const reservedTypes = ['error', 'newListener', 'removeListener'] as const;
+
     it('invokes the subscribed handler when a matching event is published', async () => {
       const handler = jest.fn();
       bus.subscribe<FooEvent>('foo', handler);
@@ -140,6 +142,21 @@ describe('AsyncDomainEventBus', () => {
       expect(barHandler).toHaveBeenCalledTimes(1);
       expect(barHandler).toHaveBeenCalledWith(bar);
     });
+
+    it.each(reservedTypes)(
+      'refuses to publish events typed "%s", logs a single warn, and does not dispatch to handlers',
+      async (reservedType) => {
+        const handler = jest.fn();
+        bus.subscribe(reservedType, handler);
+        // @ts-expect-error: we're testing the reserved type
+        bus.publish({ type: reservedType });
+
+        await flushAsync();
+
+        expect(handler).not.toHaveBeenCalled();
+        expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+      }
+    );
   });
 
   describe('error isolation', () => {
