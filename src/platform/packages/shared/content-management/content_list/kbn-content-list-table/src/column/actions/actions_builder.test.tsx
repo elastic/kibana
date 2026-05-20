@@ -8,11 +8,11 @@
  */
 
 import React from 'react';
-import type { EuiTableActionsColumnType } from '@elastic/eui';
+import type { DefaultItemAction, EuiTableActionsColumnType } from '@elastic/eui';
 import type { ContentListItem } from '@kbn/content-list-provider';
 import type { ColumnBuilderContext } from '../types';
 import { buildActionsColumn, type ActionsColumnProps } from './actions_builder';
-import { EditAction, DeleteAction } from '../../action';
+import { Action, EditAction, DeleteAction } from '../../action';
 
 /** Helper to cast the result to the actions column type for assertions. */
 type ActionsColumn = EuiTableActionsColumnType<ContentListItem> & {
@@ -21,8 +21,10 @@ type ActionsColumn = EuiTableActionsColumnType<ContentListItem> & {
 
 const defaultContext: ColumnBuilderContext = {
   itemConfig: {
-    getEditUrl: (item) => `/edit/${item.id}`,
-    onDelete: jest.fn(async () => {}),
+    actions: {
+      edit: { onItemAction: jest.fn() },
+      delete: { onBulkAction: jest.fn(async () => {}) },
+    },
   },
   isReadOnly: false,
   entityName: 'dashboard',
@@ -53,25 +55,10 @@ describe('actions column builder', () => {
         expect(result['data-test-subj']).toBe('content-list-table-column-actions');
       });
 
-      it('includes edit action when `getEditUrl` is configured', () => {
+      it('includes edit action when `actions.edit.onItemAction` is configured', () => {
         const context: ColumnBuilderContext = {
           ...defaultContext,
-          itemConfig: { getEditUrl: (item) => `/edit/${item.id}` },
-        };
-        const result = buildActionsColumn({}, context) as ActionsColumn;
-
-        expect(result).toBeDefined();
-        expect(result.actions).toHaveLength(1);
-        expect(result.actions[0]).toMatchObject({
-          icon: 'pencil',
-          'data-test-subj': 'content-list-table-action-edit',
-        });
-      });
-
-      it('includes edit action when `onEdit` is configured', () => {
-        const context: ColumnBuilderContext = {
-          ...defaultContext,
-          itemConfig: { onEdit: jest.fn() },
+          itemConfig: { actions: { edit: { onItemAction: jest.fn() } } },
         };
         const result = buildActionsColumn({}, context) as ActionsColumn;
 
@@ -82,10 +69,23 @@ describe('actions column builder', () => {
         });
       });
 
-      it('includes delete action when `onDelete` is configured', () => {
+      it('includes edit action when only `actions.edit.getItemActionHref` is configured', () => {
         const context: ColumnBuilderContext = {
           ...defaultContext,
-          itemConfig: { onDelete: jest.fn(async () => {}) },
+          itemConfig: { actions: { edit: { getItemActionHref: (i) => `/edit/${i.id}` } } },
+        };
+        const result = buildActionsColumn({}, context) as ActionsColumn;
+
+        expect(result).toBeDefined();
+        expect(result.actions).toHaveLength(1);
+        expect(result.actions[0]).toMatchObject({ icon: 'pencil' });
+        expect(result.actions[0]).toHaveProperty('href');
+      });
+
+      it('includes delete action when `actions.delete.onBulkAction` is configured', () => {
+        const context: ColumnBuilderContext = {
+          ...defaultContext,
+          itemConfig: { actions: { delete: { onBulkAction: jest.fn(async () => {}) } } },
         };
         const result = buildActionsColumn({}, context) as ActionsColumn;
 
@@ -108,7 +108,7 @@ describe('actions column builder', () => {
         expect(result).toBeUndefined();
       });
 
-      it('returns `undefined` in read-only mode when onInspect is not configured', () => {
+      it('returns `undefined` in read-only mode when `features.contentEditor.open` is not configured', () => {
         const context: ColumnBuilderContext = {
           ...defaultContext,
           isReadOnly: true,
@@ -118,11 +118,11 @@ describe('actions column builder', () => {
         expect(result).toBeUndefined();
       });
 
-      it('returns only inspect action in read-only mode when onInspect is configured', () => {
+      it('returns only the content editor action in read-only mode when `features.contentEditor.open` is configured', () => {
         const context: ColumnBuilderContext = {
           ...defaultContext,
           isReadOnly: true,
-          itemConfig: { ...defaultContext.itemConfig, onInspect: jest.fn() },
+          features: { contentEditor: { open: jest.fn() } },
         };
         const result = buildActionsColumn({}, context) as ActionsColumn;
 
@@ -134,10 +134,10 @@ describe('actions column builder', () => {
         });
       });
 
-      it('includes inspect action alongside edit and delete when onInspect is configured', () => {
+      it('includes the content editor action alongside edit and delete when `features.contentEditor.open` is configured', () => {
         const context: ColumnBuilderContext = {
           ...defaultContext,
-          itemConfig: { ...defaultContext.itemConfig, onInspect: jest.fn() },
+          features: { contentEditor: { open: jest.fn() } },
         };
         const result = buildActionsColumn({}, context) as ActionsColumn;
 
@@ -187,6 +187,106 @@ describe('actions column builder', () => {
         expect(result).toBeDefined();
         expect(result.actions).toHaveLength(1);
         expect(result.actions[0]).toMatchObject({ icon: 'trash' });
+      });
+
+      it('renders a custom `<Action>` when its config is wired in `itemConfig.actions[id]`', () => {
+        const onArchive = jest.fn();
+        const context: ColumnBuilderContext = {
+          ...defaultContext,
+          itemConfig: {
+            actions: { archive: { onItemAction: onArchive } },
+          },
+        };
+
+        const props: ActionsColumnProps = {
+          children: <Action id="archive" name="Archive" icon="folderClosed" />,
+        };
+        const result = buildActionsColumn(props, context) as ActionsColumn;
+
+        expect(result).toBeDefined();
+        expect(result.actions).toHaveLength(1);
+        const action = result.actions[0] as DefaultItemAction<ContentListItem>;
+        expect(action).toMatchObject({
+          name: 'Archive',
+          icon: 'folderClosed',
+          'data-test-subj': 'content-list-table-action-archive',
+        });
+        expect(action.onClick).toEqual(expect.any(Function));
+      });
+
+      it('composes a custom `<Action>` tooltip and enabled predicate with its restriction', () => {
+        const context: ColumnBuilderContext = {
+          ...defaultContext,
+          itemConfig: {
+            actions: {
+              archive: {
+                onItemAction: jest.fn(),
+                restriction: (item) =>
+                  item.managed ? 'Managed items cannot be archived.' : undefined,
+              },
+            },
+          },
+        };
+
+        const props: ActionsColumnProps = {
+          children: (
+            <Action
+              id="archive"
+              name="Archive"
+              description="Archive this item"
+              icon="folderClosed"
+            />
+          ),
+        };
+        const result = buildActionsColumn(props, context) as ActionsColumn;
+        const action = result.actions[0] as DefaultItemAction<ContentListItem>;
+
+        const freeItem = { id: '1', title: 'Free', managed: false };
+        const managedItem = { id: '2', title: 'Managed', managed: true };
+        expect(action.enabled?.(freeItem)).toBe(true);
+        expect(action.enabled?.(managedItem)).toBe(false);
+
+        const description = action.description as (item: ContentListItem) => string | undefined;
+        expect(description(freeItem)).toBe('Archive this item');
+        expect(description(managedItem)).toBe('Managed items cannot be archived.');
+      });
+
+      it('skips a custom `<Action>` when its `itemConfig.actions[id]` config is missing', () => {
+        // Regression: emitting an action object without `onClick`/`href`
+        // crashes EUI at render. The resolver returns `undefined` so the
+        // missing wiring degrades to a no-op instead of a table crash.
+        const props: ActionsColumnProps = {
+          children: (
+            <>
+              <EditAction />
+              <Action id="archive" name="Archive" icon="folderClosed" />
+            </>
+          ),
+        };
+        const result = buildActionsColumn(props, defaultContext) as ActionsColumn;
+
+        expect(result).toBeDefined();
+        expect(result.actions).toHaveLength(1);
+        expect(result.actions[0]).toMatchObject({ icon: 'pencil' });
+      });
+
+      it('renders a custom `<Action>` as an `<a href>` link when `getItemActionHref` is configured', () => {
+        const context: ColumnBuilderContext = {
+          ...defaultContext,
+          itemConfig: {
+            actions: { archive: { getItemActionHref: (i) => `/archive/${i.id}` } },
+          },
+        };
+        const props: ActionsColumnProps = {
+          children: <Action id="archive" name="Archive" icon="folderClosed" />,
+        };
+        const result = buildActionsColumn(props, context) as ActionsColumn;
+        const action = result.actions[0] as DefaultItemAction<ContentListItem>;
+
+        expect(action).toHaveProperty('href');
+        expect(action).not.toHaveProperty('onClick');
+        const href = (action.href as (i: ContentListItem) => string)({ id: 'a', title: 'A' });
+        expect(href).toBe('/archive/a');
       });
     });
 

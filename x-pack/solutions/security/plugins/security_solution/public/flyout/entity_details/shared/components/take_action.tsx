@@ -92,7 +92,7 @@ export const TakeAction = ({ kqlQuery, isDisabled }: TakeActionProps) => {
       anchorPosition="downLeft"
       data-test-subj="take-action-button"
     >
-      <EuiContextMenuPanel size="s" items={actionsItems} />
+      <EuiContextMenuPanel items={actionsItems} />
     </EuiPopover>
   );
 };

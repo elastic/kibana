@@ -15,6 +15,7 @@ import type { Providers, ProviderFn } from './read_provider_spec';
 import { isProviderConstructor } from './read_provider_spec';
 import { createVerboseInstance } from './verbose_instance';
 import { instrumentProvider } from './instrument_provider';
+import { createTimingProxy, ftrTimingEnabled } from './ftr_timing_registry';
 
 export class ProviderCollection {
   static callProviderFn(providerFn: ProviderFn, ctx: any) {
@@ -113,11 +114,11 @@ export class ProviderCollection {
           instance &&
           typeof instance === 'object'
         ) {
-          instance = createVerboseInstance(
-            this.log,
-            type === 'PageObject' ? `PageObjects.${name}` : name,
-            instance
-          );
+          const displayName = type === 'PageObject' ? `PageObjects.${name}` : name;
+          if (ftrTimingEnabled) {
+            instance = createTimingProxy(displayName, instance);
+          }
+          instance = createVerboseInstance(this.log, displayName, instance);
         }
 
         instances.set(provider, instance);
