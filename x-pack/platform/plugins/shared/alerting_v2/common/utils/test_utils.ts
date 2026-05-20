@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import React, { type PropsWithChildren } from 'react';
-import type { QueryClientConfig } from '@kbn/react-query';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { of } from 'rxjs';
 import { DEFAULT_SPACE_ID, type Space } from '@kbn/spaces-plugin/common';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
@@ -19,22 +16,4 @@ export const createMockSpaces = (): jest.Mocked<SpacesPluginStart> => {
   spaces.getActiveSpace.mockResolvedValue(activeSpace);
   spaces.getActiveSpace$.mockReturnValue(of(activeSpace));
   return spaces;
-};
-
-export const createTestQueryClient = (config: QueryClientConfig = {}) => {
-  const { defaultOptions, ...rest } = config;
-  return new QueryClient({
-    ...rest,
-    defaultOptions: {
-      ...defaultOptions,
-      queries: { retry: false, ...defaultOptions?.queries },
-    },
-  });
-};
-
-export const createQueryClientWrapper = (client: QueryClient) => {
-  const Wrapper = ({ children }: PropsWithChildren) => (
-    <QueryClientProvider client={client}>{children}</QueryClientProvider>
-  );
-  return Wrapper;
 };
