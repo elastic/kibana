@@ -14,7 +14,6 @@ import type {
 } from '@kbn/fleet-plugin/common/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import chalk from 'chalk';
-import { getAgentVersionMatchingCurrentStack } from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_services';
 
 export const DEFAULT_HEADERS = Object.freeze({
   'x-elastic-internal-product': 'security-solution',
@@ -128,11 +127,23 @@ export const addIntegrationToAgentPolicy = async (
   });
 };
 
+// Pinned to 9.4.1 as a workaround for a Fleet Server regression in 9.5.0-SNAPSHOT.
+// Elastic Agent main bumped elastic-agent-libs to v0.43.0 on 2026-05-19, which
+// wires CertReloader into LoadTLSServerConfig and rejects the inline PEM that
+// Fleet Server's managed bootstrap path auto-generates:
+//   "failed to initialize TLS cert reloader: certificate must be a file path,
+//    not an inline PEM"
+// Unpin once Agent vendors elastic-agent-libs v0.43.1+ (PR #421 restored
+// backward compat) and the rolling snapshot rolls forward.
+// Slack: https://elastic.slack.com/archives/C06TGC6D343/p1779259445336199
+const PINNED_AGENT_VERSION = '9.4.1';
+
 export const getLatestAvailableAgentVersion = async (
-  kbnClient: KbnClient,
+  _kbnClient: KbnClient,
   log: ToolingLog
 ): Promise<string> => {
-  return getAgentVersionMatchingCurrentStack(kbnClient, log);
+  log.info(`Using pinned Elastic Agent version ${PINNED_AGENT_VERSION} (see utils.ts comment)`);
+  return PINNED_AGENT_VERSION;
 };
 
 export const generateRandomString = (length: number) => {
