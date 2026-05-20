@@ -119,7 +119,12 @@ export const AccessFlyout: React.FC<AccessFlyoutProps> = ({ agent, onClose }) =>
     }
     if (isError || !data) {
       return (
-        <EuiCallOut color="danger" iconType="error" title={accessFlyoutLoadErrorTitle}>
+        <EuiCallOut
+          announceOnMount
+          color="danger"
+          iconType="error"
+          title={accessFlyoutLoadErrorTitle}
+        >
           <EuiText size="s">{accessFlyoutLoadErrorBody}</EuiText>
         </EuiCallOut>
       );
@@ -129,6 +134,7 @@ export const AccessFlyout: React.FC<AccessFlyoutProps> = ({ agent, onClose }) =>
       // entries — this is its own first-class state, not an error. Be honest about it.
       return (
         <EuiCallOut
+          announceOnMount
           color="primary"
           iconType="lock"
           title={accessFlyoutHiddenTitle}
@@ -142,7 +148,12 @@ export const AccessFlyout: React.FC<AccessFlyoutProps> = ({ agent, onClose }) =>
       <>
         {saveErrorMessage ? (
           <>
-            <EuiCallOut color="danger" iconType="error" title={accessFlyoutSaveErrorTitle}>
+            <EuiCallOut
+              announceOnMount
+              color="danger"
+              iconType="error"
+              title={accessFlyoutSaveErrorTitle}
+            >
               <EuiText size="s">{saveErrorMessage}</EuiText>
             </EuiCallOut>
             <EuiSpacer size="m" />
