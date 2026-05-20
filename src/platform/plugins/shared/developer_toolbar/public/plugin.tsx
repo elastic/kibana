@@ -14,7 +14,6 @@ import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-type
 
 import { BehaviorSubject } from 'rxjs';
 import type { DeveloperToolbarItemProps } from '@kbn/developer-toolbar';
-import { NEXT_CHROME_FEATURE_FLAG_KEY } from '@kbn/core-chrome-feature-flags';
 
 export type UnregisterItemFn = () => void;
 export interface DeveloperToolbarItemRegistry {
@@ -25,8 +24,14 @@ export type DeveloperToolbarSetup = DeveloperToolbarItemRegistry;
 export type DeveloperToolbarStart = DeveloperToolbarItemRegistry;
 
 const LazyMeasureButton = lazy(() =>
-  import('@kbn/measure-component').then(({ MeasureButton }) => ({
+  import('@kbn/design-tools').then(({ MeasureButton }) => ({
     default: MeasureButton,
+  }))
+);
+
+const LazyDesignToolsButton = lazy(() =>
+  import('@kbn/design-tools').then(({ DesignToolsButton }) => ({
+    default: DesignToolsButton,
   }))
 );
 
@@ -60,15 +65,22 @@ export class DeveloperToolbarPlugin
       ),
     });
 
-    if (core.featureFlags.getBooleanValue(NEXT_CHROME_FEATURE_FLAG_KEY, true)) {
-      import('@kbn/core-chrome-feature-flags/chrome_next_toggle').then(({ ChromeNextToggle }) => {
-        this.registerItem({
-          id: 'Chrome Next',
-          children: <ChromeNextToggle featureFlags={core.featureFlags} />,
-          priority: 1,
-        });
+    this.registerItem({
+      id: 'Design Tools',
+      children: (
+        <Suspense fallback={null}>
+          <LazyDesignToolsButton />
+        </Suspense>
+      ),
+    });
+
+    import('@kbn/core-chrome-feature-flags/chrome_next_toggle').then(({ ChromeNextToggle }) => {
+      this.registerItem({
+        id: 'Chrome Next',
+        children: <ChromeNextToggle featureFlags={core.featureFlags} />,
+        priority: 1,
       });
-    }
+    });
 
     return {
       registerItem: this.registerItem.bind(this),

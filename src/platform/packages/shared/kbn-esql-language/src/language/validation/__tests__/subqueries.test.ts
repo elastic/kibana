@@ -62,4 +62,78 @@ describe('Subqueries Validation', () => {
       );
     });
   });
+
+  describe('WHERE IN subqueries', () => {
+    it('accepts a valid IN subquery with no errors', async () => {
+      const { expectErrors } = await setup();
+
+      await expectErrors(
+        'FROM index | WHERE keywordField IN (FROM other_index | KEEP keywordField)',
+        []
+      );
+    });
+
+    it('validates sources inside IN subqueries', async () => {
+      const { expectErrors } = await setup();
+
+      await expectErrors('FROM index | WHERE keywordField IN (FROM missing_index)', [
+        'Unknown index "missing_index"',
+      ]);
+    });
+
+    it.each(['IN', 'NOT IN'])('validates commands inside %s subqueries', async (operator) => {
+      const { expectErrors } = await setup();
+
+      await expectErrors(
+        `FROM index | WHERE keywordField ${operator} (FROM other_index | KEEP missingField)`,
+        ['Unknown column "missingField"']
+      );
+    });
+
+    it('validates nested IN subqueries', async () => {
+      const { expectErrors } = await setup();
+
+      await expectErrors(
+        'FROM index | WHERE keywordField IN (FROM other_index | WHERE keywordField IN (FROM missing_index))',
+        ['Unknown index "missing_index"']
+      );
+    });
+
+    it('does not resolve outer query fields inside IN subqueries', async () => {
+      const { expectErrors } = await setup();
+
+      await expectErrors(
+        'FROM index | EVAL outerField = keywordField | WHERE keywordField IN (FROM other_index | WHERE outerField IS NOT NULL | KEEP keywordField)',
+        ['Unknown column "outerField"']
+      );
+    });
+
+    it('validates multiple IN subqueries in the same WHERE expression', async () => {
+      const { callbacks, expectErrors } = await setup();
+      const query =
+        'FROM kibana_sample_data_ecommerce | WHERE currency IN (FROM kibana_sample_dat_ecommerce | KEEP category) AND category.keyword IN (FROM kibana_sample_ata_logs | KEEP agent)';
+
+      await expectErrors(
+        query,
+        ['Unknown index "kibana_sample_dat_ecommerce"', 'Unknown index "kibana_sample_ata_logs"'],
+        undefined,
+        {
+          ...callbacks,
+          getSources: jest.fn(async () => [
+            {
+              name: 'kibana_sample_data_ecommerce',
+              hidden: false,
+              type: 'Index',
+            },
+          ]),
+          getColumnsFor: jest.fn(async () => [
+            { name: 'currency', type: 'keyword', userDefined: false },
+            { name: 'category.keyword', type: 'keyword', userDefined: false },
+            { name: 'category', type: 'keyword', userDefined: false },
+            { name: 'agent', type: 'keyword', userDefined: false },
+          ]),
+        }
+      );
+    });
+  });
 });

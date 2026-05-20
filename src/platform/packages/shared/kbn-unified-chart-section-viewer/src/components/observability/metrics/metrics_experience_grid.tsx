@@ -21,7 +21,7 @@ import { MetricsExperienceGridContent } from './metrics_experience_grid_content'
 import { MetricsInfoError } from './metrics_info_error';
 import type { Dimension, UnifiedMetricsGridProps } from '../../../types';
 import { useDimensionsWipe, useDiscoverFieldForBreakdown, useMetricFieldsFilter } from './hooks';
-import { isSuppressedFetchError } from './utils/is_suppressed_fetch_error';
+import { isSuppressedFetchError } from '../../chart/utils/is_suppressed_fetch_error';
 
 export const MetricsExperienceGrid = ({
   renderToggleActions,
@@ -37,6 +37,7 @@ export const MetricsExperienceGrid = ({
   isTabSelected,
   breakdownField,
   onBreakdownFieldChange,
+  profileId,
 }: UnifiedMetricsGridProps) => {
   const {
     searchTerm,
@@ -58,6 +59,7 @@ export const MetricsExperienceGrid = ({
     services,
     isComponentVisible,
     selectedDimensionNames: selectedDimensions,
+    profileId,
   });
 
   const { filteredMetricItems } = useMetricFieldsFilter({
