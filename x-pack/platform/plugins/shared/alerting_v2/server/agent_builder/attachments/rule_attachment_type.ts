@@ -25,17 +25,22 @@ interface CreateRuleAttachmentTypeOptions {
 
 const formatRuleAttachmentDescription = (
   attachmentId: string,
-  data: RuleAttachmentData
+  data: RuleAttachmentData,
+  savedObjectId?: string
 ): string => {
-  const status = data.id ? (data.enabled ? 'enabled' : 'disabled') : 'proposed (not yet saved)';
+  const isPersisted = Boolean(savedObjectId);
+  const status = isPersisted ? (data.enabled ? 'enabled' : 'disabled') : 'proposed (not yet saved)';
   const schedule = data.schedule?.every ? `every ${data.schedule.every}` : 'unknown';
 
-  return `Rule "${data.metadata.name}" (ruleAttachment.id: "${attachmentId}")
-Kind: ${data.kind}
-Status: ${status}
-Schedule: ${schedule}
-${data.metadata.description ? `Description: ${data.metadata.description}` : ''}
-${data.metadata.tags?.length ? `Tags: ${data.metadata.tags.join(', ')}` : ''}`.trim();
+  return [
+    `Rule "${data.metadata.name}" (ruleAttachment.id: "${attachmentId}")`,
+    ...(savedObjectId ? [`Rule ID: ${savedObjectId}`] : []),
+    `Kind: ${data.kind}`,
+    `Status: ${status}`,
+    `Schedule: ${schedule}`,
+    ...(data.metadata.description ? [`Description: ${data.metadata.description}`] : []),
+    ...(data.metadata.tags?.length ? [`Tags: ${data.metadata.tags.join(', ')}`] : []),
+  ].join('\n');
 };
 
 export const createRuleAttachmentType = ({
@@ -94,7 +99,7 @@ export const createRuleAttachmentType = ({
   format: (attachment) => ({
     getRepresentation: () => ({
       type: 'text',
-      value: formatRuleAttachmentDescription(attachment.id, attachment.data),
+      value: formatRuleAttachmentDescription(attachment.id, attachment.data, attachment.origin),
     }),
   }),
 
