@@ -61,6 +61,16 @@
           "packages/kbn-babel-preset/node_preset.js",
           "packages/kbn-babel-preset/istanbul_preset.js"
         ]
+      },
+      "webpack": {
+        "config": [
+          "packages/kbn-optimizer/src/worker/webpack.config.ts",
+          "src/platform/plugins/shared/console/packaging/webpack.config.js",
+          "src/platform/packages/private/kbn-ui-shared-deps-npm/webpack.config.js",
+          "src/platform/packages/private/kbn-ui-shared-deps-src/webpack.config.js",
+          "src/platform/packages/shared/kbn-monaco/webpack.config.js",
+          "src/platform/kbn-ui/side-navigation/packaging/webpack.config.js"
+        ]
       }
     },
     "src/platform/packages/shared/kbn-safer-lodash-set": {

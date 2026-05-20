@@ -31,7 +31,6 @@
         "autoprefixer",
         "clean-webpack-plugin",
         "css-loader",
-        "file-loader",
         "mini-css-extract-plugin",
         "sass-loader",
         "style-loader",
