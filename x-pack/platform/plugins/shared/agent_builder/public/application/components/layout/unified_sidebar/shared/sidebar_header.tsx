@@ -19,9 +19,10 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
 import { getEbtProps } from '@kbn/ebt-click';
-import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT, AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
 import { getLastAgentId } from '../../../../hooks/use_last_agent_id';
 import { useNavigation } from '../../../../hooks/use_navigation';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { appPaths } from '../../../../utils/app_paths';
 import { AgentSelector } from './agent_selector';
 
@@ -58,6 +59,9 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
   const { euiTheme } = useEuiTheme();
   const navigate = useNavigate();
   const { navigateToAgentBuilderUrl } = useNavigation();
+  const {
+    services: { analytics },
+  } = useKibana();
 
   const headerStyles = css`
     gap: ${euiTheme.size.s};
@@ -97,9 +101,12 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
               color="text"
               size="s"
               aria-label={labels.newConversation}
-              onClick={() =>
-                navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }))
-              }
+              onClick={() => {
+                analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ConversationStart, {
+                  agent_id: agentId,
+                });
+                navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }));
+              }}
               {...getEbtProps({
                 element: AGENT_BUILDER_UI_EBT.element.SIDEBAR,
                 action: AGENT_BUILDER_UI_EBT.action.conversationList.CONVERSATION_START,
@@ -126,7 +133,13 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
               size="s"
               flush="both"
               color="text"
-              onClick={() => navigate(appPaths.agent.root({ agentId: getLastAgentId() }))}
+              onClick={() => {
+                analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.SidebarLayerTransition, {
+                  from_layer: 'manage',
+                  to_layer: 'conversation',
+                });
+                navigate(appPaths.agent.root({ agentId: getLastAgentId() }));
+              }}
               {...getEbtProps({
                 element: AGENT_BUILDER_UI_EBT.element.SIDEBAR,
                 action: AGENT_BUILDER_UI_EBT.action.navSidebar.SIDEBAR_LAYER_TRANSITION,

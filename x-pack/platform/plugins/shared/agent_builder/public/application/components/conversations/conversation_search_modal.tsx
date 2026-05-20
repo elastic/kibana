@@ -22,8 +22,9 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
-import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT, AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
 import { useConversationList } from '../../hooks/use_conversation_list';
+import { useKibana } from '../../hooks/use_kibana';
 import {
   createActiveConversationListItemStyles,
   createConversationListItemStyles,
@@ -60,6 +61,9 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
 
   const { euiTheme } = useEuiTheme();
   const modalTitleId = useGeneratedHtmlId();
+  const {
+    services: { analytics },
+  } = useKibana();
 
   const { conversations = [], isLoading } = useConversationList({ agentId });
 
@@ -110,6 +114,9 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
               <button
                 css={isActive ? activeItemStyles : itemStyles}
                 onClick={() => {
+                  analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ConversationResume, {
+                    conversation_id: conversation.id,
+                  });
                   onSelectConversation(conversation.id);
                   onClose();
                 }}

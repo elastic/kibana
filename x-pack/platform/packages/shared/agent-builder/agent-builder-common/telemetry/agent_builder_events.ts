@@ -35,6 +35,11 @@ export const AGENT_BUILDER_EVENT_TYPES = {
   InappAgentSwitch: `${TELEMETRY_PREFIX}_inapp_agent_switch`,
   InappOpenFullscreen: `${TELEMETRY_PREFIX}_inapp_open_fullscreen`,
   FullscreenEntryPoint: `${TELEMETRY_PREFIX}_fullscreen_entry_point`,
+  SidebarLayerTransition: `${TELEMETRY_PREFIX}_sidebar_layer_transition`,
+  AgentSwitch: `${TELEMETRY_PREFIX}_agent_switch`,
+  ConversationStart: `${TELEMETRY_PREFIX}_conversation_start`,
+  ConversationResume: `${TELEMETRY_PREFIX}_conversation_resume`,
+  ConversationSearch: `${TELEMETRY_PREFIX}_conversation_search`,
 } as const;
 
 export type OptInSource =
@@ -284,6 +289,27 @@ export interface ReportFullscreenEntryPointParams {
   source: FullscreenEntryPointSource;
 }
 
+export interface ReportSidebarLayerTransitionParams {
+  from_layer: 'conversation' | 'manage';
+  to_layer: 'conversation' | 'manage';
+}
+
+export interface ReportAgentSwitchParams {
+  agent_id: string;
+}
+
+export interface ReportConversationStartParams {
+  agent_id: string;
+}
+
+export interface ReportConversationResumeParams {
+  conversation_id: string;
+}
+
+export interface ReportConversationSearchParams {
+  agent_id: string;
+}
+
 export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.OptInAction]: ReportOptInActionParams;
   [AGENT_BUILDER_EVENT_TYPES.OptOut]: ReportOptOutParams;
@@ -313,6 +339,11 @@ export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.InappAgentSwitch]: ReportInappAgentSwitchParams;
   [AGENT_BUILDER_EVENT_TYPES.InappOpenFullscreen]: ReportInappOpenFullscreenParams;
   [AGENT_BUILDER_EVENT_TYPES.FullscreenEntryPoint]: ReportFullscreenEntryPointParams;
+  [AGENT_BUILDER_EVENT_TYPES.SidebarLayerTransition]: ReportSidebarLayerTransitionParams;
+  [AGENT_BUILDER_EVENT_TYPES.AgentSwitch]: ReportAgentSwitchParams;
+  [AGENT_BUILDER_EVENT_TYPES.ConversationStart]: ReportConversationStartParams;
+  [AGENT_BUILDER_EVENT_TYPES.ConversationResume]: ReportConversationResumeParams;
+  [AGENT_BUILDER_EVENT_TYPES.ConversationSearch]: ReportConversationSearchParams;
 }
 
 export type AgentBuilderTelemetryEvent =
@@ -338,7 +369,12 @@ export type AgentBuilderTelemetryEvent =
   | EventTypeOpts<ReportInappChatOpenParams>
   | EventTypeOpts<ReportInappAgentSwitchParams>
   | EventTypeOpts<ReportInappOpenFullscreenParams>
-  | EventTypeOpts<ReportFullscreenEntryPointParams>;
+  | EventTypeOpts<ReportFullscreenEntryPointParams>
+  | EventTypeOpts<ReportSidebarLayerTransitionParams>
+  | EventTypeOpts<ReportAgentSwitchParams>
+  | EventTypeOpts<ReportConversationStartParams>
+  | EventTypeOpts<ReportConversationResumeParams>
+  | EventTypeOpts<ReportConversationSearchParams>;
 // Type union of all event type strings for use in union types
 export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.OptInAction
@@ -363,7 +399,12 @@ export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.InappChatOpen
   | typeof AGENT_BUILDER_EVENT_TYPES.InappAgentSwitch
   | typeof AGENT_BUILDER_EVENT_TYPES.InappOpenFullscreen
-  | typeof AGENT_BUILDER_EVENT_TYPES.FullscreenEntryPoint;
+  | typeof AGENT_BUILDER_EVENT_TYPES.FullscreenEntryPoint
+  | typeof AGENT_BUILDER_EVENT_TYPES.SidebarLayerTransition
+  | typeof AGENT_BUILDER_EVENT_TYPES.AgentSwitch
+  | typeof AGENT_BUILDER_EVENT_TYPES.ConversationStart
+  | typeof AGENT_BUILDER_EVENT_TYPES.ConversationResume
+  | typeof AGENT_BUILDER_EVENT_TYPES.ConversationSearch;
 
 const OPT_IN_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.OptInAction,
@@ -1227,6 +1268,78 @@ const FULLSCREEN_ENTRY_POINT_EVENT: AgentBuilderTelemetryEvent = {
   },
 };
 
+const SIDEBAR_LAYER_TRANSITION_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.SidebarLayerTransition,
+  schema: {
+    from_layer: {
+      type: 'keyword',
+      _meta: {
+        description: 'The sidebar layer the user is navigating away from (conversation|manage)',
+        optional: false,
+      },
+    },
+    to_layer: {
+      type: 'keyword',
+      _meta: {
+        description: 'The sidebar layer the user is navigating to (conversation|manage)',
+        optional: false,
+      },
+    },
+  },
+};
+
+const AGENT_SWITCH_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.AgentSwitch,
+  schema: {
+    agent_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'ID of the agent the user switched to in the sidebar',
+        optional: false,
+      },
+    },
+  },
+};
+
+const CONVERSATION_START_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.ConversationStart,
+  schema: {
+    agent_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'ID of the agent for the new conversation',
+        optional: false,
+      },
+    },
+  },
+};
+
+const CONVERSATION_RESUME_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.ConversationResume,
+  schema: {
+    conversation_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'ID of the resumed conversation',
+        optional: false,
+      },
+    },
+  },
+};
+
+const CONVERSATION_SEARCH_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.ConversationSearch,
+  schema: {
+    agent_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'ID of the agent when conversation search was opened',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
   OPT_IN_EVENT,
   OPT_OUT_EVENT,
@@ -1239,6 +1352,11 @@ export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unk
   INAPP_AGENT_SWITCH_EVENT,
   INAPP_OPEN_FULLSCREEN_EVENT,
   FULLSCREEN_ENTRY_POINT_EVENT,
+  SIDEBAR_LAYER_TRANSITION_EVENT,
+  AGENT_SWITCH_EVENT,
+  CONVERSATION_START_EVENT,
+  CONVERSATION_RESUME_EVENT,
+  CONVERSATION_SEARCH_EVENT,
 ];
 
 export const agentBuilderServerEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
