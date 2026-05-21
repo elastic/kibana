@@ -18,6 +18,11 @@ export const getErrorDetailsUrl = ({
   locationId?: string;
   spaceId?: string;
 }) => {
-  const spaceIdQuery = spaceId ? `&spaceId=${spaceId}` : '';
-  return `${basePath}/app/synthetics/monitor/${configId}/errors/${stateId}?locationId=${locationId}${spaceIdQuery}`;
+  const params = new URLSearchParams();
+  if (locationId) params.set('locationId', locationId);
+  if (spaceId) params.set('spaceId', spaceId);
+  const search = params.toString();
+  return `${basePath}/app/synthetics/monitor/${configId}/errors/${stateId}${
+    search ? `?${search}` : ''
+  }`;
 };

@@ -30,4 +30,25 @@ describe('getErrorDetailsUrl', () => {
       })
     ).toBe('/s/foo/app/synthetics/monitor/cfg-1/errors/state-1?locationId=loc-1&spaceId=team-a');
   });
+
+  it('omits locationId when it is undefined', () => {
+    expect(
+      getErrorDetailsUrl({
+        basePath: '',
+        configId: 'cfg-1',
+        stateId: 'state-1',
+      })
+    ).toBe('/app/synthetics/monitor/cfg-1/errors/state-1');
+  });
+
+  it('omits locationId but keeps spaceId when locationId is undefined', () => {
+    expect(
+      getErrorDetailsUrl({
+        basePath: '',
+        configId: 'cfg-1',
+        stateId: 'state-1',
+        spaceId: 'team-a',
+      })
+    ).toBe('/app/synthetics/monitor/cfg-1/errors/state-1?spaceId=team-a');
+  });
 });

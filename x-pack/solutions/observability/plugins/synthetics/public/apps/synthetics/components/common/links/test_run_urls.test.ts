@@ -39,6 +39,25 @@ describe('getTestRunDetailRelativeLink', () => {
       })
     ).toBe('/monitor/mon-1/test-run/cg-1?locationId=loc-1');
   });
+
+  it('omits locationId when it is undefined', () => {
+    expect(
+      getTestRunDetailRelativeLink({
+        monitorId: 'mon-1',
+        checkGroup: 'cg-1',
+      })
+    ).toBe('/monitor/mon-1/test-run/cg-1');
+  });
+
+  it('omits locationId but keeps spaceId when locationId is undefined', () => {
+    expect(
+      getTestRunDetailRelativeLink({
+        monitorId: 'mon-1',
+        checkGroup: 'cg-1',
+        spaceId: 'team-a',
+      })
+    ).toBe('/monitor/mon-1/test-run/cg-1?spaceId=team-a');
+  });
 });
 
 describe('getTestRunDetailLink', () => {

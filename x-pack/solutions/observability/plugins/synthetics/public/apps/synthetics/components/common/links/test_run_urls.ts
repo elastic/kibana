@@ -16,8 +16,11 @@ export const getTestRunDetailRelativeLink = ({
   locationId?: string;
   spaceId?: string;
 }) => {
-  const spaceIdQuery = spaceId ? `&spaceId=${spaceId}` : '';
-  return `/monitor/${monitorId}/test-run/${checkGroup}?locationId=${locationId}${spaceIdQuery}`;
+  const params = new URLSearchParams();
+  if (locationId) params.set('locationId', locationId);
+  if (spaceId) params.set('spaceId', spaceId);
+  const search = params.toString();
+  return `/monitor/${monitorId}/test-run/${checkGroup}${search ? `?${search}` : ''}`;
 };
 
 export const getTestRunDetailLink = ({
