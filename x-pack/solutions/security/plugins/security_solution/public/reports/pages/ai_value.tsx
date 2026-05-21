@@ -61,6 +61,7 @@ const BaseComponent = () => {
   const hasSocManagementCapability = useHasSecurityCapability('socManagement');
 
   const [hasReportData, setHasReportData] = useState(false);
+  const [isDatePickerDisabled, setIsDatePickerDisabled] = useState(true);
   const exportPDFRef = useRef<(() => void) | null>(null);
 
   const { serverless } = useKibana().services;
@@ -136,6 +137,7 @@ const BaseComponent = () => {
                   showUpdateButton="iconOnly"
                   width="auto"
                   compressed
+                  disabled={isSourcererLoading || isDatePickerDisabled}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>{exportButton}</EuiFlexItem>
@@ -155,6 +157,7 @@ const BaseComponent = () => {
                   from={from}
                   to={to}
                   setHasReportData={setHasReportData}
+                  setIsDatePickerDisabled={setIsDatePickerDisabled}
                   isSourcererLoading={isSourcererLoading}
                 />
               );

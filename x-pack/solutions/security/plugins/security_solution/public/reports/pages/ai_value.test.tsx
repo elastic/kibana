@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { AIValue } from './ai_value';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
@@ -19,6 +19,7 @@ import { TestProviders } from '../../common/mock/test_providers';
 import { AIValueReport } from '../components/ai_value';
 import { useAIValueExportContext } from '../providers/ai_value/export_provider';
 import { useDownloadAIValueReport } from '../hooks/use_download_ai_value_report';
+import { SuperDatePicker } from '../../common/components/super_date_picker';
 
 jest.mock('../../common/hooks/search_bar/use_sync_timerange_url_param', () => ({
   useSyncTimerangeUrlParam: jest.fn(),
@@ -62,6 +63,10 @@ jest.mock('../components/ai_value', () => ({
   AIValueReport: jest.fn(() => <div data-test-subj="ai-value-report" />),
 }));
 
+jest.mock('../../common/components/super_date_picker', () => ({
+  SuperDatePicker: jest.fn(() => <div data-test-subj="mock-super-date-picker" />),
+}));
+
 jest.mock('../components/ai_value/value_report_exporter', () => ({
   ValueReportExporter: ({ children }: { children: (exportPDF: () => void) => React.ReactNode }) =>
     children(jest.fn()),
@@ -92,6 +97,7 @@ const mockUseAIValueExportContext = useAIValueExportContext as jest.Mock;
 const mockUseDownloadAIValueReport = useDownloadAIValueReport as jest.MockedFunction<
   typeof useDownloadAIValueReport
 >;
+const mockSuperDatePicker = SuperDatePicker as jest.MockedFunction<typeof SuperDatePicker>;
 
 const sourcererDataView = {
   loading: false,
@@ -204,6 +210,38 @@ describe('AIValue', () => {
       renderAIValue();
 
       expect(getLoadingProp()).toBe(false);
+    });
+  });
+
+  describe('date picker disabled state', () => {
+    const getDisabledProp = () => mockSuperDatePicker.mock.calls.at(-1)?.[0].disabled;
+
+    it('disables the date picker while sourcerer is loading', () => {
+      mockUseSourcererDataView.mockReturnValue({ ...sourcererDataView, loading: true });
+
+      renderAIValue();
+
+      expect(getDisabledProp()).toBe(true);
+    });
+
+    it('disables the date picker initially while report data loading state is unknown', () => {
+      renderAIValue();
+
+      // AIValueReport has not called setIsDatePickerDisabled(false) yet — stays at initial true
+      expect(getDisabledProp()).toBe(true);
+    });
+
+    it('enables the date picker once the child reports data has loaded', () => {
+      renderAIValue();
+
+      // Simulate AIValueReport resolving the loading state
+      const setIsDatePickerDisabled =
+        mockAIValueReport.mock.calls.at(-1)?.[0].setIsDatePickerDisabled;
+      act(() => {
+        setIsDatePickerDisabled?.(false);
+      });
+
+      expect(getDisabledProp()).toBe(false);
     });
   });
 });

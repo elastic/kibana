@@ -68,6 +68,7 @@ const useAIValueExportContextMock = useAIValueExportContext as jest.Mock;
 
 const defaultProps = {
   setHasReportData: jest.fn(),
+  setIsDatePickerDisabled: jest.fn(),
   isSourcererLoading: false,
   from: '2023-01-01T00:00:00.000Z',
   to: '2023-01-31T23:59:59.999Z',
@@ -150,6 +151,7 @@ describe('AIValueReport', () => {
       {}
     );
     expect(defaultProps.setHasReportData).toHaveBeenCalledWith(true);
+    expect(defaultProps.setIsDatePickerDisabled).toHaveBeenCalledWith(false);
   });
 
   it('passes the resolved date range and settings to useValueMetrics', () => {
@@ -192,6 +194,7 @@ describe('AIValueReport', () => {
       {}
     );
     expect(defaultProps.setHasReportData).toHaveBeenCalledWith(false);
+    expect(defaultProps.setIsDatePickerDisabled).toHaveBeenCalledWith(true);
   });
 
   it('renders the empty state when the feature was used before but the window has no discoveries', () => {
@@ -215,6 +218,7 @@ describe('AIValueReport', () => {
     expect(screen.queryByTestId('aiValueSampleAttackDiscoveryBanner')).not.toBeInTheDocument();
     expect(screen.getByText('No results for the selected time range')).toBeInTheDocument();
     expect(defaultProps.setHasReportData).toHaveBeenCalledWith(false);
+    expect(defaultProps.setIsDatePickerDisabled).toHaveBeenCalledWith(false);
   });
 
   it('renders the page loader while data or sourcerer is loading', () => {
@@ -229,6 +233,7 @@ describe('AIValueReport', () => {
 
     expect(screen.getByTestId('mock-page-loader')).toBeInTheDocument();
     expect(mockAIValueReportLayout).not.toHaveBeenCalled();
+    expect(defaultProps.setIsDatePickerDisabled).toHaveBeenCalledWith(true);
   });
 
   it('renders the page loader and skips data hooks when sourcerer is still loading', () => {
@@ -239,6 +244,7 @@ describe('AIValueReport', () => {
     expect(mockUseValueMetrics).not.toHaveBeenCalled();
     expect(mockuseHasLatelyUsedAttackDiscovery).not.toHaveBeenCalled();
     expect(defaultProps.setHasReportData).toHaveBeenCalledWith(false);
+    expect(defaultProps.setIsDatePickerDisabled).toHaveBeenCalledWith(true);
   });
 
   it('uses the specified timerange when exporting the report', () => {

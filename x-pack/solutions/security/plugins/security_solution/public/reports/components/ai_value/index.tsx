@@ -36,6 +36,7 @@ import * as i18n from './translations';
 
 interface Props {
   setHasReportData: React.Dispatch<boolean>;
+  setIsDatePickerDisabled: React.Dispatch<boolean>;
   isSourcererLoading: boolean;
   from: string;
   to: string;
@@ -44,7 +45,7 @@ interface Props {
 type AIValueReportContentProps = Omit<Props, 'isSourcererLoading'>;
 
 const AIValueReportContent: React.FC<AIValueReportContentProps> = (props) => {
-  const { setHasReportData } = props;
+  const { setHasReportData, setIsDatePickerDisabled } = props;
   const { settings } = useKibana().services;
   const exportContext = useAIValueExportContext();
   const setReportInputForExportContext = exportContext?.setReportInput;
@@ -97,6 +98,10 @@ const AIValueReportContent: React.FC<AIValueReportContentProps> = (props) => {
   useEffect(() => {
     setHasReportData(!data.isSample && data.valueMetrics.attackDiscoveryCount > 0);
   }, [data.isSample, data.valueMetrics, setHasReportData]);
+
+  useEffect(() => {
+    setIsDatePickerDisabled(data.isLoading || data.isSample);
+  }, [data.isLoading, data.isSample, setIsDatePickerDisabled]);
 
   if (data.isLoading) {
     return <PageLoader />;
@@ -182,20 +187,29 @@ const AIValueReportContent: React.FC<AIValueReportContentProps> = (props) => {
 
 export const AIValueReport: React.FC<Props> = ({
   setHasReportData,
+  setIsDatePickerDisabled,
   isSourcererLoading,
   from,
   to,
 }) => {
   useEffect(() => {
     if (isSourcererLoading) {
-      // safety check: clear a stale parent flag as soon as loading starts.
+      // safety check: clear stale parent flags as soon as loading starts.
       setHasReportData(false);
+      setIsDatePickerDisabled(true);
     }
-  }, [isSourcererLoading, setHasReportData]);
+  }, [isSourcererLoading, setHasReportData, setIsDatePickerDisabled]);
 
   if (isSourcererLoading) {
     return <PageLoader />;
   }
 
-  return <AIValueReportContent setHasReportData={setHasReportData} from={from} to={to} />;
+  return (
+    <AIValueReportContent
+      setHasReportData={setHasReportData}
+      setIsDatePickerDisabled={setIsDatePickerDisabled}
+      from={from}
+      to={to}
+    />
+  );
 };
