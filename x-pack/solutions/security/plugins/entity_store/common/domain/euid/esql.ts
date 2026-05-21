@@ -334,7 +334,9 @@ function collectRankingFields(
 }
 
 function buildPresentPrelude(presentFields: Set<string>): string | null {
-  if (presentFields.size === 0) return null;
+  if (presentFields.size === 0) {
+    return null;
+  }
   const presentAssignments = [...presentFields]
     .map((f) => `${esqlPresentColumnName(f)} = ${esqlIsNotNullOrEmpty(f)}`)
     .join(',\n ');

@@ -29,7 +29,9 @@ import { escapeEsqlStringLiteral, esqlIsNotNullOrEmpty } from './strings';
 export function entityStoreConditionToESQL(condition: Condition): string {
   if (isOrCondition(condition)) {
     const inClause = buildInClauseOrNull(condition.or);
-    if (inClause !== null) return inClause;
+    if (inClause !== null) {
+      return inClause;
+    }
     return condition.or.map(entityStoreConditionToESQL).join(' OR ');
   }
   if (isNotCondition(condition)) {
@@ -37,12 +39,16 @@ export function entityStoreConditionToESQL(condition: Condition): string {
   }
   if (isAndCondition(condition)) {
     const notEmptyField = getNotEmptyField(condition);
-    if (notEmptyField !== null) return esqlIsNotNullOrEmpty(notEmptyField);
+    if (notEmptyField !== null) {
+      return esqlIsNotNullOrEmpty(notEmptyField);
+    }
     return condition.and
       .map((c) => {
         const s = entityStoreConditionToESQL(c);
         // OR (non-IN) inside AND needs parens: AND binds tighter than OR in ES|QL
-        if (isOrCondition(c) && buildInClauseOrNull(c.or) === null) return `(${s})`;
+        if (isOrCondition(c) && buildInClauseOrNull(c.or) === null) {
+          return `(${s})`;
+        }
         return s;
       })
       .join(' AND ');
@@ -52,23 +58,37 @@ export function entityStoreConditionToESQL(condition: Condition): string {
 
 /** Detects { and: [{ field: X, exists: true }, { field: X, neq: '' }] } → returns X, or null. */
 function getNotEmptyField(condition: Condition): string | null {
-  if (!isAndCondition(condition) || condition.and.length !== 2) return null;
+  if (!isAndCondition(condition) || condition.and.length !== 2) {
+    return null;
+  }
   const [first, second] = condition.and;
-  if (!isFilterCondition(first) || !isFilterCondition(second)) return null;
+  if (!isFilterCondition(first) || !isFilterCondition(second)) {
+    return null;
+  }
   const f = first as unknown as Record<string, unknown>;
   const s = second as unknown as Record<string, unknown>;
-  if (f.exists !== true || s.neq !== '' || f.field !== s.field) return null;
+  if (f.exists !== true || s.neq !== '' || f.field !== s.field) {
+    return null;
+  }
   return f.field as string;
 }
 
 function buildInClauseOrNull(conditions: Condition[]): string | null {
-  if (conditions.length < 2) return null;
-  if (!conditions.every((c) => isFilterCondition(c) && 'eq' in c)) return null;
+  if (conditions.length < 2) {
+    return null;
+  }
+  if (!conditions.every((c) => isFilterCondition(c) && 'eq' in c)) {
+    return null;
+  }
   const typed = conditions as Array<{ field: string; eq: unknown }>;
   const fieldSet = new Set(typed.map((c) => c.field));
-  if (fieldSet.size !== 1) return null;
+  if (fieldSet.size !== 1) {
+    return null;
+  }
   const values = typed.map((c) => c.eq);
-  if (!values.every((v) => typeof v === 'string')) return null;
+  if (!values.every((v) => typeof v === 'string')) {
+    return null;
+  }
   const [field] = fieldSet;
   const inList = (values as string[]).map((v) => `"${escapeEsqlStringLiteral(v)}"`).join(', ');
   return `COALESCE(\`${field}\` IN (${inList}), FALSE)`;
