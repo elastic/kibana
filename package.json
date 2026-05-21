@@ -108,7 +108,6 @@
     "**/socks": "2.8.9",
     "**/typescript": "5.9.3",
     "**/util": "0.12.5",
-    "**/ws": "8.20.1",
     "**/yauzl": "3.2.1",
     "**/zod": "4.4.3",
     "@aws-sdk/client-bedrock-agent-runtime": "3.994.0",
