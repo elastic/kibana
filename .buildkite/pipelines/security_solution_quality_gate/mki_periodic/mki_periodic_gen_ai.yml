@@ -12,6 +12,8 @@ steps:
     # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
     timeout_in_minutes: 300
     parallelism: 1
+    soft_fail:
+      - exit_status: 101
 
   - group: "API MKI - AI Assistant"
     key: api_test_ai_assistant
@@ -29,6 +31,9 @@ steps:
           automatic:
             - exit_status: "1"
               limit: 2
+        soft_fail:
+          - exit_status: 101
+
 
       - label: 'API MKI - genai_ad_privileges:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh genai_ad_privileges:essentials:qa:serverless
@@ -43,6 +48,8 @@ steps:
           automatic:
             - exit_status: "1"
               limit: 2
+        soft_fail:
+          - exit_status: 101
 
       - label: 'API MKI - genai_ad_schedules:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh genai_ad_schedules:qa:serverless
@@ -57,6 +64,8 @@ steps:
           automatic:
             - exit_status: "1"
               limit: 2
+        soft_fail:
+          - exit_status: 101
 
       - label: 'API MKI - genai_ad_schedules:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh genai_ad_schedules:essentials:qa:serverless
@@ -71,6 +80,8 @@ steps:
           automatic:
             - exit_status: "1"
               limit: 2
+        soft_fail:
+          - exit_status: 101
 
       - label: 'API MKI - genai_conversations:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh genai_conversations:qa:serverless
@@ -85,6 +96,8 @@ steps:
           automatic:
             - exit_status: "1"
               limit: 2
+        soft_fail:
+          - exit_status: 101
 
       - label: 'API MKI - genai_kb_entries:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh genai_kb_entries:qa:serverless
@@ -99,6 +112,8 @@ steps:
           automatic:
             - exit_status: "1"
               limit: 2
+        soft_fail:
+          - exit_status: 101
 
       - label: 'API MKI - genai_startup:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh genai_startup:qa:serverless
@@ -113,6 +128,8 @@ steps:
           automatic:
             - exit_status: "1"
               limit: 2
+        soft_fail:
+          - exit_status: 101
 
       - label: 'API MKI - nlp_cleanup_task:complete:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh nlp_cleanup_task:complete:qa:serverless
@@ -127,6 +144,8 @@ steps:
           automatic:
             - exit_status: "1"
               limit: 2
+        soft_fail:
+          - exit_status: 101
 
       - label: 'API MKI - nlp_cleanup_task:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh nlp_cleanup_task:essentials:qa:serverless
@@ -141,3 +160,5 @@ steps:
           automatic:
             - exit_status: "1"
               limit: 2
+        soft_fail:
+          - exit_status: 101
