@@ -30,6 +30,7 @@ const selectedTab: Tab = {
 };
 
 describe('useIntegrationCardList', () => {
+  const mockOnCardClick = jest.fn();
   const mockIntegrationsList = [
     {
       id: 'epr:endpoint',
@@ -39,7 +40,7 @@ describe('useIntegrationCardList', () => {
       icons: [{ src: 'icon_url', type: 'image' }],
       integration: 'security',
       maxCardHeight: 127,
-      onCardClick: expect.any(Function),
+      onCardClick: mockOnCardClick,
       showInstallStatus: true,
       titleLineClamp: 1,
       descriptionLineClamp: 3,
@@ -56,7 +57,7 @@ describe('useIntegrationCardList', () => {
       icons: [{ src: 'icon_url', type: 'image' }],
       integration: 'security',
       maxCardHeight: 127,
-      onCardClick: expect.any(Function),
+      onCardClick: mockOnCardClick,
       showInstallStatus: true,
       titleLineClamp: 1,
       descriptionLineClamp: 3,
@@ -77,15 +78,19 @@ describe('useIntegrationCardList', () => {
     },
   ];
 
-  const mockFeaturedCards = [{ ...mockIntegrationsList[0], hasDataStreams: true }];
+  const mockFeaturedCards = [
+    { ...mockIntegrationsList[0], hasDataStreams: true, onCardClick: expect.any(Function) },
+  ];
   const mockIntegrationCards = [
     {
       ...mockIntegrationsList[0],
       hasDataStreams: true,
+      onCardClick: expect.any(Function),
     },
     {
       ...mockIntegrationsList[1],
       hasDataStreams: false,
+      onCardClick: expect.any(Function),
     },
   ];
 
