@@ -100,9 +100,8 @@ export class TagsTable {
     return this.bulkActionsButton.isVisible();
   }
 
-  // assign/delete live in the EUI portal after the `...` menu is opened; edit
-  // (isPrimary) is always inline on the row.
-  async clickRowAction(tagName: string, action: string, location: 'portal' | 'inline') {
+  // portal: action rendered in EUI portal (collapsed menu); inline: rendered on the row.
+  async clickRowAction(tagName: string, action: string, location: 'portal' | 'inline' = 'inline') {
     const testSubj = `tagsTableAction-${action}`;
     const actionLocator =
       location === 'portal'
@@ -113,9 +112,6 @@ export class TagsTable {
     await actionLocator.click();
   }
 
-  // The `...` button appears slightly after the table-is-ready signal fires
-  // (the edit/assign/delete actions are non-primary and collapse when >2 exist),
-  // so waitFor is used instead of an instant isVisible check.
   async clickCollapsedRowAction(tagName: string, action: string) {
     const row = this.rowByName(tagName);
     const collapseBtn = row.locator('[data-test-subj="euiCollapsedItemActionsButton"]');
@@ -164,7 +160,6 @@ export class TagsTable {
     return (await inlineAction.count()) > 0;
   }
 
-  // FTR-equivalent of the connection-count parsing in parseTableRow.
   private async parseConnectionCount(connectionsLocator: Locator) {
     if ((await connectionsLocator.count()) === 0) {
       return undefined;

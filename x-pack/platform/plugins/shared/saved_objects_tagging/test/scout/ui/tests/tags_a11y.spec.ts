@@ -56,7 +56,7 @@ test.describe('Tags management — accessibility', { tag: tags.stateful.classic 
     });
 
     await test.step('edit tag panel', async () => {
-      await tagsTable.clickRowAction('a11yTag', 'edit', 'inline');
+      await tagsTable.clickRowAction('a11yTag', 'edit');
       await tagModal.form.waitFor({ state: 'visible' });
       const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
       expect(violations).toStrictEqual([]);

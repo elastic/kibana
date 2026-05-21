@@ -27,8 +27,6 @@ export class TagAssignFlyout {
 
   async waitForResultsLoaded() {
     await this.resultList.waitFor({ state: 'visible' });
-    // locator.waitFor() has strict mode and throws when multiple elements match — use
-    // waitForFunction instead so all simultaneously-loading icons are handled correctly.
     await this.page.waitForFunction(
       () => document.querySelectorAll('[data-is-loading="true"]').length === 0
     );
