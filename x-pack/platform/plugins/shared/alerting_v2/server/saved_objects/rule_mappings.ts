@@ -59,6 +59,7 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
         timeframe: { type: 'keyword' },
       },
     },
+    builder_type: { type: 'keyword' },
     enabled: { type: 'boolean' },
     createdBy: { type: 'keyword' },
     createdAt: { type: 'date' },

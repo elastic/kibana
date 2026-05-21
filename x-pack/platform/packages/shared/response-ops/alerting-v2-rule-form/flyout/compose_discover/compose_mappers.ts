@@ -172,7 +172,10 @@ const mapStateTransition = (formValues: ComposeFormValues) => {
   return Object.keys(out).length ? out : undefined;
 };
 
-export const composeFormToCreateRequest = (formValues: ComposeFormValues): CreateRuleData => {
+export const composeFormToCreateRequest = (
+  formValues: ComposeFormValues,
+  builderType?: string
+): CreateRuleData => {
   const { evaluation, recovery_policy } = transformQueryOut(formValues.query, formValues.kind);
   const artifacts = mapArtifacts(formValues.artifacts);
 
@@ -193,18 +196,23 @@ export const composeFormToCreateRequest = (formValues: ComposeFormValues): Creat
     recovery_policy,
     state_transition: mapStateTransition(formValues),
     ...(artifacts ? { artifacts } : {}),
+    ...(builderType ? { builder_type: builderType } : {}),
   };
 };
 
-export const composeFormToUpdateRequest = (formValues: ComposeFormValues): UpdateRuleData => {
-  const { kind, ...request } = composeFormToCreateRequest(formValues);
-  const { grouping, recovery_policy, state_transition, artifacts, ...rest } = request;
+export const composeFormToUpdateRequest = (
+  formValues: ComposeFormValues,
+  builderType?: string
+): UpdateRuleData => {
+  const { kind, ...request } = composeFormToCreateRequest(formValues, builderType);
+  const { grouping, recovery_policy, state_transition, artifacts, builder_type, ...rest } = request;
   return {
     ...rest,
     grouping: grouping ?? null,
     recovery_policy: recovery_policy ?? null,
     state_transition: state_transition ?? null,
     artifacts: artifacts ?? null,
+    builder_type: builder_type ?? null,
   };
 };
 

@@ -241,6 +241,13 @@ export const createRuleDataBaseSchema = z
     grouping: groupingSchema.optional(),
     no_data: noDataSchema.optional(),
     artifacts: z.array(artifactSchema).max(100).optional(),
+    builder_type: z
+      .string()
+      .max(64)
+      .optional()
+      .describe(
+        'Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.'
+      ),
   })
   .strip();
 
@@ -314,6 +321,7 @@ export const updateRuleDataSchema = z
     no_data: noDataSchema.optional().nullable(),
     artifacts: z.array(artifactSchema).max(100).optional().nullable(),
     enabled: z.boolean().optional().describe('Whether the rule is enabled.'),
+    builder_type: z.string().max(64).optional().nullable(),
   })
   .strip();
 

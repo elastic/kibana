@@ -49,6 +49,23 @@ describe('utils', () => {
 
       expect(result.metadata.description).toBeUndefined();
     });
+
+    it('passes builder_type through to SO attributes', () => {
+      const data: CreateRuleData = {
+        ...baseCreateData,
+        builder_type: 'threshold',
+      };
+
+      const result = transformCreateRuleBodyToRuleSoAttributes(data, serverFields);
+
+      expect(result.builder_type).toBe('threshold');
+    });
+
+    it('sets builder_type to undefined when not provided', () => {
+      const result = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, serverFields);
+
+      expect(result.builder_type).toBeUndefined();
+    });
   });
 
   describe('buildUpdateRuleAttributes', () => {
@@ -127,6 +144,80 @@ describe('utils', () => {
 
       expect(result.state_transition).toEqual({ pending_count: 5 });
     });
+
+    it('preserves builder_type when query is not changed', () => {
+      const existing = createRuleSoAttributes({ builder_type: 'threshold' });
+      const updateData: UpdateRuleData = {
+        metadata: { name: 'renamed' },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+      });
+
+      expect(result.builder_type).toBe('threshold');
+    });
+
+    it('auto-clears builder_type when query is changed without explicit builder_type', () => {
+      const existing = createRuleSoAttributes({ builder_type: 'threshold' });
+      const updateData: UpdateRuleData = {
+        evaluation: { query: { base: 'FROM new-index | LIMIT 1' } },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+      });
+
+      expect(result.builder_type).toBeUndefined();
+    });
+
+    it('keeps builder_type when query is changed with explicit builder_type', () => {
+      const existing = createRuleSoAttributes({ builder_type: 'threshold' });
+      const updateData: UpdateRuleData = {
+        evaluation: { query: { base: 'FROM new-index | LIMIT 1' } },
+        builder_type: 'threshold',
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+      });
+
+      expect(result.builder_type).toBe('threshold');
+    });
+
+    it('clears builder_type when explicitly set to null', () => {
+      const existing = createRuleSoAttributes({ builder_type: 'threshold' });
+      const updateData: UpdateRuleData = {
+        builder_type: null,
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+      });
+
+      expect(result.builder_type).toBeUndefined();
+    });
+
+    it('does not auto-clear builder_type when same query is sent', () => {
+      const existing = createRuleSoAttributes({
+        builder_type: 'threshold',
+        evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
+      });
+      const updateData: UpdateRuleData = {
+        evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
+      };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: 'user-2',
+        updatedAt: '2025-01-02T00:00:00.000Z',
+      });
+
+      expect(result.builder_type).toBe('threshold');
+    });
   });
 
   describe('transformRuleSoAttributesToRuleApiResponse', () => {
@@ -158,6 +249,22 @@ describe('utils', () => {
       const response = transformRuleSoAttributesToRuleApiResponse('rule-rt-1', soAttrs);
 
       expect(response.metadata.description).toBe('Round-trip desc');
+    });
+
+    it('includes builder_type in API response', () => {
+      const attrs = createRuleSoAttributes({ builder_type: 'threshold' });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.builder_type).toBe('threshold');
+    });
+
+    it('sets builder_type to undefined when absent from SO attributes', () => {
+      const attrs = createRuleSoAttributes({});
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.builder_type).toBeUndefined();
     });
   });
 

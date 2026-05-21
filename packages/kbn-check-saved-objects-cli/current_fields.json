@@ -123,6 +123,7 @@
     "uiamApiKey"
   ],
   "alerting_rule": [
+    "builder_type",
     "createdAt",
     "createdBy",
     "enabled",

@@ -421,6 +421,9 @@
   "alerting_rule": {
     "dynamic": false,
     "properties": {
+      "builder_type": {
+        "type": "keyword"
+      },
       "createdAt": {
         "type": "date"
       },

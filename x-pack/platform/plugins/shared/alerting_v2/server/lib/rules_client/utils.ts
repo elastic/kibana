@@ -120,8 +120,34 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     grouping: data.grouping,
     no_data: data.no_data,
     artifacts: data.artifacts,
+    builder_type: data.builder_type,
     ...serverFields,
   };
+}
+
+/**
+ * Resolves the `builder_type` for an update. Auto-clears the value when the
+ * caller changes `evaluation.query.base` without explicitly providing
+ * `builder_type` in the same request, preventing stale builder metadata from
+ * surviving API-level query edits.
+ */
+function resolveBuilderType(
+  updateData: UpdateRuleData,
+  existingAttrs: RuleSavedObjectAttributes
+): string | undefined {
+  if (updateData.builder_type !== undefined) {
+    return updateData.builder_type ?? undefined;
+  }
+
+  const queryChanged =
+    updateData.evaluation?.query?.base != null &&
+    updateData.evaluation.query.base !== existingAttrs.evaluation.query.base;
+
+  if (queryChanged) {
+    return undefined;
+  }
+
+  return existingAttrs.builder_type;
 }
 
 /**
@@ -165,6 +191,7 @@ export function buildUpdateRuleAttributes(
     no_data: nullToUndefined(updateData.no_data, existingAttrs.no_data),
     artifacts: nullToEmptyArray(updateData.artifacts, existingAttrs.artifacts),
     enabled: updateData.enabled ?? existingAttrs.enabled,
+    builder_type: resolveBuilderType(updateData, existingAttrs),
     // Server-managed fields — preserved as-is except timestamps and user.
     createdBy: existingAttrs.createdBy,
     createdAt: existingAttrs.createdAt,
@@ -206,6 +233,7 @@ export function transformRuleSoAttributesToRuleApiResponse(
     grouping: attrs.grouping,
     no_data: attrs.no_data,
     artifacts: attrs.artifacts,
+    builder_type: attrs.builder_type,
     enabled: attrs.enabled,
     createdBy: attrs.createdBy,
     createdAt: attrs.createdAt,

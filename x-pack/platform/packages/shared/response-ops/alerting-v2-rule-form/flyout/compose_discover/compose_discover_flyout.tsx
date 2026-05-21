@@ -438,9 +438,9 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
 
   const handleSubmit = methods.handleSubmit((values) => {
     if (isCreate) {
-      onCreateRule(composeFormToCreateRequest(values));
+      onCreateRule(composeFormToCreateRequest(values, builderType));
     } else if (ruleId && onUpdateRule) {
-      onUpdateRule(ruleId, composeFormToUpdateRequest(values));
+      onUpdateRule(ruleId, composeFormToUpdateRequest(values, builderType));
     }
   });
 
