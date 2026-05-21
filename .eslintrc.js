@@ -190,6 +190,7 @@ const DEV_PATTERNS = [
   'src/setup_node_env/index.js',
   'src/cli/dev.js',
   'src/platform/packages/shared/kbn-esql-language/scripts/**/*',
+  'src/platform/kbn-ui/_tooling/**/*',
 ];
 
 /** Restricted imports with suggested alternatives */
@@ -2990,6 +2991,7 @@ module.exports = {
         'src/platform/kbn-ui/**/__stories__/**',
         'src/platform/kbn-ui/**/__tests__/**',
         'src/platform/kbn-ui/**/packaging/**',
+        'src/platform/kbn-ui/_tooling/**',
       ],
       rules: {
         'no-restricted-imports': [
