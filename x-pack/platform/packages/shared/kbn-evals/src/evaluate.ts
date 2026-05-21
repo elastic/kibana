@@ -325,21 +325,34 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         upsertDataset,
         getDatasetByName,
         onEvaluationComplete: async (event) => {
-          const ingestRequests = buildIngestRequest({
-            experimentId: currentExperimentId,
-            taskModel: model,
-            evaluatorModel,
-            repetitions,
-            hostName,
-            gitMetadata,
-            suiteId,
-            buildkiteMetadata,
-            source: { kind: 'event', event },
-            log,
-          });
-          await Promise.all(
-            ingestRequests.map((ingestRequest) => evalsClient.ingestScores(ingestRequest))
-          );
+          try {
+            const ingestRequests = buildIngestRequest({
+              experimentId: currentExperimentId,
+              taskModel: model,
+              evaluatorModel,
+              repetitions,
+              hostName,
+              gitMetadata,
+              suiteId,
+              buildkiteMetadata,
+              source: { kind: 'event', event },
+              log,
+            });
+            const results = await Promise.all(
+              ingestRequests.map((ingestRequest) => evalsClient.ingestScores(ingestRequest))
+            );
+            for (const result of results) {
+              if (result.failed.length > 0) {
+                log.warning(
+                  `Score ingest partially failed for example ${event.exampleId}: ${result.failed
+                    .map((f) => f.reason)
+                    .join(', ')}`
+                );
+              }
+            }
+          } catch (error) {
+            log.warning(`Score ingest failed for example ${event.exampleId}: ${error}`);
+          }
         },
       });
 

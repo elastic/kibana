@@ -216,8 +216,15 @@ export class EvalsClient {
         headers: VERSIONED_HEADERS,
         retries: 0,
       });
-    } catch {
-      throw new Error(EVALS_PLUGIN_DISABLED_MESSAGE);
+    } catch (error: unknown) {
+      const statusCode =
+        error instanceof Error && 'statusCode' in error
+          ? (error as { statusCode: unknown }).statusCode
+          : undefined;
+      if (statusCode === 404) {
+        throw new Error(EVALS_PLUGIN_DISABLED_MESSAGE);
+      }
+      throw error;
     }
   }
 }

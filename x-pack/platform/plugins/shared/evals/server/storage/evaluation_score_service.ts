@@ -88,9 +88,10 @@ const toEvaluationScoreDocuments = (
 };
 
 export class EvaluationScoreService {
-  constructor(logger: Logger, private readonly coreDataStreams: DataStreamsStart) {
-    void logger;
-  }
+  constructor(
+    private readonly logger: Logger,
+    private readonly coreDataStreams: DataStreamsStart
+  ) {}
 
   private async getClient(): Promise<AnyIDataStreamClient> {
     return this.coreDataStreams.initializeClient(EvaluationIndices.SCORES);
@@ -142,6 +143,12 @@ export class EvaluationScoreService {
         });
       }
     });
+
+    if (failed.length > 0) {
+      this.logger.warn(
+        `Score ingestion had ${failed.length} failure(s): ${failed.map((f) => f.reason).join('; ')}`
+      );
+    }
 
     return {
       ingested: documents.length - conflicted - failed.length,

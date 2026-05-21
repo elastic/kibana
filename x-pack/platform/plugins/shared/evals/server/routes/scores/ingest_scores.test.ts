@@ -163,7 +163,7 @@ describe('POST /internal/evals/scores', () => {
       conflicted: 0,
       failed: [
         { index: 0, status: 400, reason: 'mapping rejected' },
-        { index: 1, status: 404, reason: 'index missing' },
+        { index: 1, status: 400, reason: 'strict_dynamic_mapping_exception' },
       ],
     });
 
@@ -175,8 +175,27 @@ describe('POST /internal/evals/scores', () => {
       conflicted: 0,
       failed: [
         { index: 0, status: 400, reason: 'mapping rejected' },
-        { index: 1, status: 404, reason: 'index missing' },
+        { index: 1, status: 400, reason: 'strict_dynamic_mapping_exception' },
       ],
+    });
+  });
+
+  it('returns 500 when nothing landed and failures include a 404', async () => {
+    const { handler, context, evaluationScoreService } = setup();
+    const payload = getBasePayload();
+    mockWriteResult(evaluationScoreService, {
+      ingested: 0,
+      conflicted: 0,
+      failed: [{ index: 0, status: 404, reason: 'index missing' }],
+    });
+
+    const response = await handler(context as any, makeRequest(payload), kibanaResponseFactory);
+
+    expect(response.status).toBe(500);
+    expect(response.payload).toEqual({
+      ingested: 0,
+      conflicted: 0,
+      failed: [{ index: 0, status: 404, reason: 'index missing' }],
     });
   });
 

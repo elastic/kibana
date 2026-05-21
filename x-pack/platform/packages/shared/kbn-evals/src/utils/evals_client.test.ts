@@ -292,10 +292,10 @@ describe('EvalsClient', () => {
     );
   });
 
-  it('assertPluginEnabled throws a clear actionable error when plugin is disabled', async () => {
+  it('assertPluginEnabled throws an error when plugin is disabled', async () => {
     const kbnClient = createMockKbnClient();
     const log = createLog();
-    kbnClient.request.mockRejectedValue(new Error('Not Found'));
+    kbnClient.request.mockRejectedValue(Object.assign(new Error('Not Found'), { statusCode: 404 }));
     const client = new EvalsClient(kbnClient, log);
 
     await expect(client.assertPluginEnabled()).rejects.toThrow(

@@ -16,7 +16,6 @@ import { PLUGIN_ID } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
 const SCORE_INGEST_PAYLOAD_CAP_BYTES = 5 * 1024 * 1024;
-const MAPPING_OR_VALIDATION_STATUSES = new Set([400, 404]);
 
 const getResponseStatusCode = ({
   ingested,
@@ -36,7 +35,7 @@ const getResponseStatusCode = ({
     return 207;
   }
 
-  if (failed.every(({ status }) => MAPPING_OR_VALIDATION_STATUSES.has(status))) {
+  if (failed.every(({ status }) => status === 400)) {
     return 400;
   }
 
