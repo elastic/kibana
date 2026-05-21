@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsUtils } from '@kbn/core/server';
+import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { OAuthStateClient } from './oauth_state_client';
 import { OAUTH_STATE_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
@@ -332,6 +332,21 @@ describe('OAuthStateClient', () => {
 
       expect(result).toBe('forbidden');
       expect(mockUnsecuredSavedObjectsClient.delete).not.toHaveBeenCalled();
+    });
+
+    it("returns 'deleted' when the callback concurrently deleted the state (TOCTOU race)", async () => {
+      const client = createClient();
+      makeFutureState();
+      mockUnsecuredSavedObjectsClient.delete.mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          OAUTH_STATE_SAVED_OBJECT_TYPE,
+          'state-id-1'
+        )
+      );
+
+      const result = await client.deleteByState('test-state', 'owner-uid');
+
+      expect(result).toBe('deleted');
     });
   });
 

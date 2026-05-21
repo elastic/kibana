@@ -9,7 +9,7 @@ import crypto from 'crypto';
 import { omitBy, isUndefined } from 'lodash';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { SavedObjectsUtils } from '@kbn/core/server';
+import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { escapeQuotes } from '@kbn/es-query';
 import { OAUTH_STATE_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 
@@ -180,7 +180,15 @@ export class OAuthStateClient {
     const oauthState = await this.get(stateParam);
     if (!oauthState) return 'not_found';
     if (!oauthState.createdBy || oauthState.createdBy !== requestingProfileUid) return 'forbidden';
-    await this.delete(oauthState.id);
+    try {
+      await this.delete(oauthState.id);
+    } catch (err) {
+      // The callback may have completed and deleted the state concurrently — treat as success.
+      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        return 'deleted';
+      }
+      throw err;
+    }
     return 'deleted';
   }
 
