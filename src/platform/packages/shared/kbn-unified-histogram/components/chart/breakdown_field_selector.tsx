@@ -33,6 +33,7 @@ export interface BreakdownFieldSelectorProps {
   breakdown: UnifiedHistogramBreakdownContext;
   esqlColumns?: DatatableColumn[];
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
+  disabled?: boolean;
 }
 
 const mapToDropdownFields = (dataView: DataView, esqlColumns?: DatatableColumn[]) => {
@@ -53,6 +54,7 @@ export const BreakdownFieldSelector = ({
   breakdown,
   esqlColumns,
   onBreakdownFieldChange,
+  disabled,
 }: BreakdownFieldSelectorProps) => {
   const fields = useMemo(() => mapToDropdownFields(dataView, esqlColumns), [dataView, esqlColumns]);
   const fieldOptions: SelectableEntry[] = useMemo(() => {
@@ -106,6 +108,7 @@ export const BreakdownFieldSelector = ({
     <ToolbarSelector
       data-test-subj="unifiedHistogramBreakdownSelector"
       data-selected-value={breakdown?.field?.name}
+      disabled={disabled}
       searchable
       buttonLabel={
         breakdown?.field?.displayName

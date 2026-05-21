@@ -46,6 +46,7 @@ import type {
   ChartSectionConfiguration,
 } from '../../../../context_awareness/types';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import { TimeComparisonSelector } from './time_comparison_selector';
 
 export type ChartPortalNode = HtmlPortalNode;
 export type ChartPortalNodes = Record<string, ChartPortalNode>;
@@ -205,6 +206,7 @@ const ChartsWrapper = ({ panelsToggle }: UnifiedHistogramChartProps) => {
 
 const UnifiedHistogramWrapper = ({ panelsToggle }: UnifiedHistogramChartProps) => {
   const { currentTabId, unifiedHistogramProps } = useUnifiedHistogramRuntimeState();
+  const isEsqlMode = useIsEsqlMode();
 
   const { setUnifiedHistogramApi } = unifiedHistogramProps;
   const unifiedHistogram = useUnifiedHistogram(unifiedHistogramProps);
@@ -227,6 +229,7 @@ const UnifiedHistogramWrapper = ({ panelsToggle }: UnifiedHistogramChartProps) =
     <UnifiedHistogramChart
       {...unifiedHistogram.chartProps}
       renderToggleActions={renderToggleActions}
+      renderTimeComparison={isEsqlMode ? <TimeComparisonSelector /> : undefined}
     />
   );
 };
