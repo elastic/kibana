@@ -1082,6 +1082,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       agentBuilderPlugins: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/plugins`,
       agentBuilderConnectors: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/connectors`,
       agentBuilderTools: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/tools`,
+      elasticCapabilities: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/agent-builder-agents#elastic-capabilities`,
       programmaticAccess: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/programmatic-access`,
       kibanaApi: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/kibana-api`,
       mcpServer: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/mcp-server`,
