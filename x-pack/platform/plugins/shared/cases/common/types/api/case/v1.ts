@@ -418,6 +418,7 @@ export const CasesSearchRequestSearchFieldsRt = rt.keyof({
   'cases-comments.comment': null,
   'cases-comments.alertId': null,
   'cases-comments.eventId': null,
+  'cases.ef_all_values': null,
 });
 
 const ExtendedFieldFilterRt = rt.strict({

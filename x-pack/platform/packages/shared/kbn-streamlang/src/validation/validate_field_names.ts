@@ -114,6 +114,9 @@ export function extractAllFieldNames(processor: StreamlangProcessorDefinition): 
     case 'enrich':
       fields.push(processor.to);
       break;
+    case 'registered_domain':
+      fields.push(processor.expression, processor.prefix);
+      break;
     case 'drop_document':
     case 'manual_ingest_pipeline':
       break;

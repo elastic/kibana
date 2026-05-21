@@ -29,6 +29,7 @@ import type { ConnectorType } from '../application/connector/types';
 import { get } from '../application/connector/methods/get';
 import { getAll, getAllSystemConnectors } from '../application/connector/methods/get_all';
 import { getAuthStatus } from '../application/connector/methods/get_auth_status';
+import { getConnectorSpecAsJsonSchema } from '../application/connector/methods/get_connector_spec';
 import type { GetAuthStatusResult } from '../application/connector/methods/get_auth_status/types';
 import { update } from '../application/connector/methods/update';
 import { listTypes } from '../application/connector/methods/list_types';
@@ -265,6 +266,20 @@ export class ActionsClient {
    */
   public async getAuthStatus(): Promise<GetAuthStatusResult> {
     return getAuthStatus({ context: this.context });
+  }
+
+  public async getConnectorSpec({
+    id,
+    configurationUtilities,
+  }: {
+    id: string;
+    configurationUtilities: ActionsConfigurationUtilities;
+  }) {
+    return getConnectorSpecAsJsonSchema({
+      context: this.context,
+      id,
+      configurationUtilities,
+    });
   }
 
   /**

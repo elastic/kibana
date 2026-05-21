@@ -168,20 +168,24 @@ function renderParameterTemplates(
 }
 
 function combineUrl(basePath: string, path?: string): string {
-  const basePathNormalized = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;
-  const pathNormalized = path?.startsWith('/') ? path : path ? `/${path}` : '';
-  return `${basePathNormalized}${pathNormalized}`;
+  if (!path) return basePath;
+  const url = new URL(basePath);
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  url.pathname = url.pathname.replace(/\/$/, '') + normalizedPath;
+  return url.toString();
 }
 
-function buildQueryString(query?: Record<string, string>): string {
+function appendQueryString(baseUrl: string, query?: Record<string, string>): string {
   if (!query || Object.keys(query).length === 0) {
-    return '';
+    return baseUrl;
   }
-  const params = new URLSearchParams();
+  const url = new URL(baseUrl);
   for (const [key, value] of Object.entries(query)) {
-    params.append(key, value);
+    if (!url.searchParams.has(key)) {
+      url.searchParams.set(key, value);
+    }
   }
-  return `?${params.toString()}`;
+  return url.toString();
 }
 
 function serializeHttpRequestBody(body: unknown): string {
@@ -225,9 +229,6 @@ export async function executor(
     return errorResultInvalid(actionId, 'URL is required');
   }
 
-  // Combine base url and path
-  const url = combineUrl(baseUrl, path) + buildQueryString(query);
-
   const [axiosConfig, axiosConfigError] = await getAxiosConfig({
     connectorId: actionId,
     services,
@@ -249,7 +250,15 @@ export async function executor(
     );
   }
 
-  const { axiosInstance, headers: configHeaders, sslOverrides: baseSslOverrides } = axiosConfig;
+  const {
+    axiosInstance,
+    headers: configHeaders,
+    sslOverrides: baseSslOverrides,
+    secretQueryParams,
+  } = axiosConfig;
+
+  const mergedQuery = { ...(secretQueryParams ?? {}), ...(query ?? {}) };
+  const url = appendQueryString(combineUrl(baseUrl, path), mergedQuery);
 
   // Merge headers: params headers take precedence over config headers
   const finalHeaders = { ...configHeaders, ...(paramsHeaders || {}) };

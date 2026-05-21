@@ -6,21 +6,28 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiCodeBlock, EuiText } from '@elastic/eui';
+import { EuiCodeBlock, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { dump } from 'js-yaml';
 import { i18n } from '@kbn/i18n';
 
+import type { OTelComponentType } from '../graph_view/constants';
 import { DETAIL_PANEL_CONTENT_MAX_HEIGHT } from '../graph_view/constants';
+
+import { getComponentDocUrl } from './component_doc_links';
 
 interface ComponentConfigTabProps {
   componentId: string;
   componentConfig: unknown;
+  componentType: OTelComponentType;
 }
 
 export const ComponentConfigTab: React.FunctionComponent<ComponentConfigTabProps> = ({
   componentId,
   componentConfig,
+  componentType,
 }) => {
+  const docUrl = getComponentDocUrl(componentType);
+
   const yamlContent = useMemo(() => {
     if (componentConfig == null) {
       return null;
@@ -39,14 +46,26 @@ export const ComponentConfigTab: React.FunctionComponent<ComponentConfigTabProps
   }
 
   return (
-    <EuiCodeBlock
-      overflowHeight={`${DETAIL_PANEL_CONTENT_MAX_HEIGHT}px`}
-      language="yaml"
-      isCopyable
-      fontSize="m"
-      paddingSize="s"
-    >
-      {yamlContent}
-    </EuiCodeBlock>
+    <>
+      {docUrl && (
+        <>
+          <EuiLink href={docUrl} target="_blank" external data-test-subj="otelComponentDocLink">
+            {i18n.translate('xpack.fleet.otelUi.componentDetail.viewDocumentation', {
+              defaultMessage: 'View component documentation',
+            })}
+          </EuiLink>
+          <EuiSpacer size="m" />
+        </>
+      )}
+      <EuiCodeBlock
+        overflowHeight={`${DETAIL_PANEL_CONTENT_MAX_HEIGHT}px`}
+        language="yaml"
+        isCopyable
+        fontSize="m"
+        paddingSize="s"
+      >
+        {yamlContent}
+      </EuiCodeBlock>
+    </>
   );
 };

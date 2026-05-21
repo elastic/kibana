@@ -251,6 +251,7 @@ describe('filterByAgent', () => {
           'deactivate_instrumentations',
           'infer_spans',
           'logging_level',
+          'opamp_polling_interval',
           'sampling_rate',
           'send_logs',
           'send_metrics',

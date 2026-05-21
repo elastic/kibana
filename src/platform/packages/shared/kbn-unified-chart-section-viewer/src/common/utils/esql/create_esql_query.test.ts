@@ -548,4 +548,83 @@ TS metrics-*
       );
     });
   });
+
+  describe('originalSource (issue #262360)', () => {
+    // METRICS_INFO returns the parent data stream name even when invoked against
+    // a backing index. Reusing that as the chart query source widens the scope
+    // back to the data stream and reintroduces cross-backing-index conflicts.
+    // Prefer the user's typed source when it is a single concrete index.
+    const mockMetricForBackingIndex: ParsedMetricItem = {
+      metricName: 'request_duration',
+      fieldTypes: [ES_FIELD_TYPES.LONG],
+      dataStream: 'edge-case-gauge-to-counter',
+      units: ['ms'],
+      metricTypes: ['gauge'],
+      dimensionFields: [],
+    };
+
+    it('should use originalSource when it is a single concrete index', () => {
+      const query = createESQLQuery({
+        metricItem: mockMetricForBackingIndex,
+        originalSource: '.ds-edge-case-gauge-to-counter-2026.04.29-000001',
+      });
+      expect(query).toBe(
+        `
+TS .ds-edge-case-gauge-to-counter-2026.04.29-000001
+  | STATS AVG(request_duration) BY TBUCKET(100)
+`.trim()
+      );
+    });
+
+    it('should fall back to dataStream when originalSource contains a glob', () => {
+      const query = createESQLQuery({
+        metricItem: mockMetricForBackingIndex,
+        originalSource: 'edge-case-*',
+      });
+      expect(query).toBe(
+        `
+TS edge-case-gauge-to-counter
+  | STATS AVG(request_duration) BY TBUCKET(100)
+`.trim()
+      );
+    });
+
+    it('should fall back to dataStream when originalSource is a comma list', () => {
+      const query = createESQLQuery({
+        metricItem: mockMetricForBackingIndex,
+        originalSource: 'ds-a,ds-b',
+      });
+      expect(query).toBe(
+        `
+TS edge-case-gauge-to-counter
+  | STATS AVG(request_duration) BY TBUCKET(100)
+`.trim()
+      );
+    });
+
+    it('should fall back to dataStream when originalSource is undefined', () => {
+      const query = createESQLQuery({
+        metricItem: mockMetricForBackingIndex,
+      });
+      expect(query).toBe(
+        `
+TS edge-case-gauge-to-counter
+  | STATS AVG(request_duration) BY TBUCKET(100)
+`.trim()
+      );
+    });
+
+    it('should fall back to dataStream when originalSource is empty', () => {
+      const query = createESQLQuery({
+        metricItem: mockMetricForBackingIndex,
+        originalSource: '',
+      });
+      expect(query).toBe(
+        `
+TS edge-case-gauge-to-counter
+  | STATS AVG(request_duration) BY TBUCKET(100)
+`.trim()
+      );
+    });
+  });
 });

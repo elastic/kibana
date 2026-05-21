@@ -102,6 +102,7 @@ const RuleSourceFilterComponent = ({
           options={options}
           onChange={handleSelectableOnChange}
           renderOption={renderOptionLabel}
+          listProps={{ paddingSize: 's' }}
         >
           {(list) => (
             <div

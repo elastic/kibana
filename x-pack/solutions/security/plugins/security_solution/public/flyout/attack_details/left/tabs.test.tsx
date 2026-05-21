@@ -10,7 +10,7 @@ import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { insightsTab, notesTab } from './tabs';
 import { INSIGHTS_TAB_TEST_ID } from '../constants/test_ids';
-import { NOTES_DETAILS_TEST_ID } from '../../../flyout_v2/notes/test_ids';
+import { NOTES_DETAILS_TEST_ID } from '../../../flyout_v2/shared/tools/notes/test_ids';
 
 jest.mock('./tabs/insights_tab', () => ({
   InsightsTab: () => <div data-test-subj="insights-tab-content">{'Insights tab'}</div>,

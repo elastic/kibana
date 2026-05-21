@@ -374,7 +374,7 @@ export function StreamDetailEnrichmentContentImpl() {
                           <RunSimulationButton />
                         </EuiFlexItem>
                       )}
-                      {evals && (
+                      {evals?.canAddToDataset && (
                         <EuiFlexItem grow={false}>
                           <EuiButtonIcon
                             aria-label={ADD_TO_DATASET_ARIA_LABEL}

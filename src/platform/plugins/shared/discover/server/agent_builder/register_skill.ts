@@ -40,6 +40,14 @@ This skill operates only in ES|QL mode. Before anything else, read the screen_co
 - If it is "esql", proceed normally.
 - If it is "kuery" or "lucene", respond exactly: "I can only analyze data when you're in ES|QL mode. Switch to ES|QL from the query bar toggle to use this feature." Do NOT generate, modify, or run queries. Do NOT call any tools. Stop.
 
+### Shape-Specific Playbook
+If the ES|QL query results attachment contains a "Shape Profile" block, its "Guidance" paragraph is AUTHORITATIVE and OVERRIDES any conflicting examples or defaults elsewhere in this skill:
+- Any source-command rules in the Guidance (e.g. "use TS, never FROM") take precedence over the FROM-style examples in Path A. If the Guidance says to use TS, every aggregation and drill-down query you produce MUST start with TS.
+- Any "first run X to discover schema" instruction in the Guidance (e.g. \`TS_INFO\`) MUST be executed BEFORE the Path A aggregations. Treat that discovery query as the first of your 2-3 query budget, not as an extra step you can skip.
+- Use the "Characteristic fields present" list as priority candidates for STATS BY (still cap at 2 grouping fields).
+- Phrase the Drill-Down Queries section using the "Interesting signals" entries when present.
+If no Shape Profile block is present, infer analysis strategy from the column names and types as before. Never invent fields not listed in the Columns section of the attachment.
+
 ### Critical Rules
 - ALWAYS read the column names from the attached ES|QL query results BEFORE writing any query. NEVER guess column names — use ONLY the exact column names listed in the attachment. For example, if the attachment lists a column named "@timestamp", use "@timestamp". If it lists "timestamp", use "timestamp". If there is no timestamp column, skip time-based queries.
 - ALWAYS format ES|QL queries as esql-tagged code blocks in your response (use triple backticks with "esql" language tag). This ensures the user gets a copy button on each query.
@@ -124,6 +132,16 @@ You MUST include this section after the visualization. Write 3 targeted follow-u
 3. An outlier or edge-case exploration (e.g. filter to extreme values, errors, rare categories, or the tail of a distribution).
 
 Present each query in an esql-tagged code block with a brief explanation of what it investigates and why. Only if the discover_run_query tool is available, tell the user they can ask you to run any of these queries in a new Discover tab. If the tool is not available, do NOT mention this capability.
+
+#### 5. What else I can do
+You MUST include this section as the final part of your response. Do NOT skip it. Briefly tell the user — in 2-3 sentences or a short bullet list — what additional on-demand analyses they can ask for. Phrase it as an invitation, not a list of features. Cover all three:
+- **Correlations** — find relationships between fields (e.g. "do correlations exist between status and response time?").
+- **Time-over-time comparison** — compare the current period against a previous one (e.g. "compare this week to last week").
+- **Field statistics** — top values, distributions, min/max/avg for specific fields (e.g. "show me field stats for status").
+
+Use natural phrasing. Example: "I can also run a few other analyses on this data — just ask. I can look for correlations between fields, compare this time range against a previous one, or break down field statistics (top values, ranges, distributions) for any column you're interested in."
+
+Do NOT execute any of these — only mention them as next-step options.
 
 ### Additional Capabilities
 - If the discover_run_query tool is available and the user asks to run or open a query in Discover, use it. This opens the query in Discover.`,

@@ -41,7 +41,13 @@ export const SyncJobDocumentsPanel: React.FC<SyncJobDocumentsPanelProps> = (sync
             {i18n.translate('searchConnectors.index.syncJobs.documents.added', {
               defaultMessage: 'Upserted',
             })}
-            <EuiIcon size="s" type="question" color="subdued" className="eui-alignTop" />
+            <EuiIcon
+              size="s"
+              type="question"
+              color="subdued"
+              className="eui-alignTop"
+              aria-hidden={true}
+            />
           </>
         </EuiToolTip>
       ),
@@ -62,7 +68,13 @@ export const SyncJobDocumentsPanel: React.FC<SyncJobDocumentsPanelProps> = (sync
             {i18n.translate('searchConnectors.index.syncJobs.documents.removed', {
               defaultMessage: 'Deleted',
             })}
-            <EuiIcon size="s" type="question" color="subdued" className="eui-alignTop" />
+            <EuiIcon
+              size="s"
+              type="question"
+              color="subdued"
+              className="eui-alignTop"
+              aria-hidden={true}
+            />
           </>
         </EuiToolTip>
       ),
@@ -83,7 +95,13 @@ export const SyncJobDocumentsPanel: React.FC<SyncJobDocumentsPanelProps> = (sync
             {i18n.translate('searchConnectors.index.syncJobs.documents.volume', {
               defaultMessage: 'Volume',
             })}
-            <EuiIcon size="s" type="question" color="subdued" className="eui-alignTop" />
+            <EuiIcon
+              size="s"
+              type="question"
+              color="subdued"
+              className="eui-alignTop"
+              aria-hidden={true}
+            />
           </>
         </EuiToolTip>
       ),

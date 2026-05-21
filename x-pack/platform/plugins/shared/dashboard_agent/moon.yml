@@ -34,7 +34,6 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/lens-common'
-  - '@kbn/presentation-publishing'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/es-query'
   - '@kbn/data-plugin'

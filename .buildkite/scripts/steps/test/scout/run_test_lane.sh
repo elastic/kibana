@@ -33,7 +33,7 @@ check_required_env_vars() {
 # Download the test lane loads artifact produced by uploadAllScoutTestLaneSteps()
 download_test_lane_loads() {
   echo "--- Downloading test lane loads file"
-  download_artifact "$SCOUT_TEST_LANE_LOADS_PATH" .
+  download_tmp_artifact "$SCOUT_TEST_LANE_LOADS_PATH" . "$BUILDKITE_BUILD_ID"
 }
 
 # Read the comma-separated list of previously passed load indices from Buildkite metadata

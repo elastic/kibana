@@ -138,11 +138,11 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
           selected: true,
         };
       }),
-    }).onClick();
+    })?.onClick();
   }, [completedRounds, conversation?.id, getAddToDatasetAction]);
 
   const showAddToDatasetItem =
-    isExperimentalEnabled && getAddToDatasetAction != null && completedRounds.length > 0;
+    isExperimentalEnabled && plugins.evals?.canAddToDataset && completedRounds.length > 0;
 
   const closePopover = () => {
     setIsPopoverOpen(false);
@@ -182,7 +182,6 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
         <EuiContextMenuItem
           key="addConversationToDataset"
           icon="beaker"
-          size="s"
           data-test-subj="agentBuilderAddConversationToDataset"
           onClick={onAddConversationToDataset}
         >
@@ -195,7 +194,6 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
     <EuiContextMenuItem
       key="view-current-agent"
       icon="info"
-      size="s"
       disabled={!manageAgents}
       onClick={closePopover}
       href={agentId ? createAgentBuilderUrl(appPaths.agent.overview({ agentId })) : undefined}
@@ -207,7 +205,6 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
           <EuiContextMenuItem
             key="full-screen"
             icon="fullScreen"
-            size="s"
             disabled={!conversationId}
             data-test-subj="agentBuilderFullScreenMenuItem"
             onClick={handleOpenFullScreen}
@@ -236,7 +233,6 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
     <EuiContextMenuItem
       key="view-current-agent"
       icon="info"
-      size="s"
       disabled={!manageAgents}
       onClick={closePopover}
       href={agentId ? createAgentBuilderUrl(appPaths.agent.overview({ agentId })) : undefined}
@@ -280,7 +276,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
         anchorPosition="downCenter"
         aria-label={fullscreenLabels.actionsAriaLabel}
       >
-        <EuiContextMenuPanel size="s" items={menuItems} />
+        <EuiContextMenuPanel items={menuItems} />
         <EuiSpacer size="s" />
       </EuiPopover>
       <DeleteConversationModal
