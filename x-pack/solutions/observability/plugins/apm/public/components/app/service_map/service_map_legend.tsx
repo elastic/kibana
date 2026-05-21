@@ -324,7 +324,7 @@ export function ServiceMapLegend({ controlIconCss }: ServiceMapLegendProps) {
         <EuiSpacer size="m" />
 
         <EuiLink
-          href={docLinks.links.apm.supportedServiceMaps}
+          href={docLinks.links.apm.supportedServiceMapsLegend}
           target="_blank"
           external
           data-test-subj="serviceMapLegendDocsLink"

@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import { ServiceMapLegend } from './service_map_legend';
 import { MOCK_EUI_THEME_FOR_USE_THEME } from './constants';
 
-const MOCK_DOCS_LINK = 'https://www.elastic.co/docs/apm/service-maps';
+const MOCK_DOCS_LINK = 'https://www.elastic.co/docs/apm/service-maps#service-maps-legend';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -28,6 +28,7 @@ jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
         links: {
           apm: {
             supportedServiceMaps: MOCK_DOCS_LINK,
+            supportedServiceMapsLegend: MOCK_DOCS_LINK,
           },
         },
       },

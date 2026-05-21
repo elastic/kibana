@@ -90,6 +90,7 @@ jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
         links: {
           apm: {
             supportedServiceMaps: 'https://example.com/docs',
+            supportedServiceMapsLegend: 'https://example.com/docs#service-maps-legend',
           },
         },
       },

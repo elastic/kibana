@@ -29,6 +29,8 @@ jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
           apm: {
             supportedServiceMaps:
               'https://www.elastic.co/guide/en/kibana/current/service-maps.html',
+            supportedServiceMapsLegend:
+              'https://www.elastic.co/guide/en/kibana/current/service-maps.html#service-maps-legend',
           },
         },
       },
