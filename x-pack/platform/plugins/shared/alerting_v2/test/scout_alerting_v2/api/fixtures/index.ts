@@ -67,7 +67,6 @@ export const buildAlertingApiServices = ({
   sourceIndex: getSourceIndexApiService({ esClient, log }),
   ruleExecutions: getRuleExecutionsApiService({ esClient, log }),
   dispatcher: getDispatcherApiService({ esClient, log }),
-  actionPolicies: getActionPoliciesApiService({ kbnClient, log }),
 });
 
 export const apiTest = baseApiTest.extend<{}, { apiServices: AlertingApiServicesFixture }>({
