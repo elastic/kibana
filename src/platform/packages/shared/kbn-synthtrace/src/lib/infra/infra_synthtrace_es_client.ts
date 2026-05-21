@@ -80,6 +80,29 @@ export class InfraSynthtraceEsClientImpl
         data_stream: {},
         priority: 500,
         template: {
+          // P10 PoC — promote to a TSDS so the Hosts UI Phase A / Phase B
+          // ES|QL `TS` source command can actually run against synthtrace
+          // data. Without `index.mode: time_series` the `TS` source command
+          // refuses every column (verified against the running 1500-host
+          // fixture in May 2026), forcing the route's DSL fallback and
+          // hiding the ES|QL win behind the architectural win. With this
+          // change the steady-state path in production (OTel
+          // `hostmetricsreceiver` data is TSDS-backed by default) is the
+          // same path exercised by synthtrace.
+          //
+          // `routing_path` must reference fields declared with
+          // `time_series_dimension: true`. `host.name` + `metricset.name`
+          // together uniquely partition the fleet's time series; other
+          // dimensions (`state`, `direction`, `device.keyword`, …) further
+          // discriminate within each partition and are declared below but
+          // intentionally omitted from `routing_path` to keep shard
+          // routing predictable.
+          settings: {
+            index: {
+              mode: 'time_series',
+              routing_path: ['host.name', 'metricset.name'],
+            },
+          },
           mappings: {
             dynamic: true,
             dynamic_templates: [
@@ -92,32 +115,128 @@ export class InfraSynthtraceEsClientImpl
             ],
             properties: {
               '@timestamp': { type: 'date' },
+              agent: {
+                properties: {
+                  // Dimension: distinguishes per-collector time series.
+                  id: { type: 'keyword', time_series_dimension: true },
+                },
+              },
               host: {
                 properties: {
-                  name: { type: 'keyword' },
-                  hostname: { type: 'keyword' },
+                  name: { type: 'keyword', time_series_dimension: true },
+                  hostname: { type: 'keyword', time_series_dimension: true },
+                  // `ip` can be a dimension on recent ES versions but the
+                  // synthtrace fixture uses one IP per fleet, so the
+                  // discriminator value is constant — keep as plain `ip`
+                  // to avoid an unnecessary routing-key contribution.
                   ip: { type: 'ip' },
-                  os: { properties: { name: { type: 'keyword' } } },
+                  os: {
+                    properties: {
+                      name: { type: 'keyword', time_series_dimension: true },
+                    },
+                  },
                 },
               },
               cloud: {
                 properties: {
-                  provider: { type: 'keyword' },
-                  region: { type: 'keyword' },
+                  provider: { type: 'keyword', time_series_dimension: true },
+                  region: { type: 'keyword', time_series_dimension: true },
                 },
               },
               data_stream: {
                 properties: {
-                  dataset: { type: 'keyword' },
-                  type: { type: 'keyword' },
-                  namespace: { type: 'keyword' },
+                  dataset: { type: 'keyword', time_series_dimension: true },
+                  type: { type: 'keyword', time_series_dimension: true },
+                  namespace: { type: 'keyword', time_series_dimension: true },
+                },
+              },
+              metricset: {
+                properties: {
+                  name: { type: 'keyword', time_series_dimension: true },
+                },
+              },
+              // Top-level discriminators across metricset variants.
+              state: { type: 'keyword', time_series_dimension: true },
+              direction: { type: 'keyword', time_series_dimension: true },
+              device: {
+                properties: {
+                  keyword: { type: 'keyword', time_series_dimension: true },
+                },
+              },
+              // Metric fields — explicit so the dynamic_templates
+              // `strings_as_keyword` doesn't accidentally promote a metric
+              // to keyword, and so each carries the right
+              // `time_series_metric` semantic. The Hosts UI inventory model
+              // queries `system.memory.utilization` (no `metrics.` prefix)
+              // *and* the `metrics.*` variants depending on the formula;
+              // both shapes are emitted by the synthtrace `SemconvHost`
+              // entity so we map both.
+              metrics: {
+                properties: {
+                  system: {
+                    properties: {
+                      cpu: {
+                        properties: {
+                          utilization: { type: 'double', time_series_metric: 'gauge' },
+                          logical: {
+                            properties: {
+                              count: { type: 'long', time_series_metric: 'gauge' },
+                            },
+                          },
+                          load_average: {
+                            properties: {
+                              '1m': { type: 'double', time_series_metric: 'gauge' },
+                            },
+                          },
+                        },
+                      },
+                      filesystem: {
+                        properties: {
+                          usage: { type: 'double', time_series_metric: 'gauge' },
+                        },
+                      },
+                      network: {
+                        properties: {
+                          // In production OTel hostmetricsreceiver data,
+                          // `system.network.io` is a cumulative counter
+                          // (bytes since boot) and the right aggregation
+                          // is `RATE(...)` in an ES|QL `TS` pipeline. The
+                          // synthtrace `SemconvHost.network()` generator
+                          // emits independent `Math.random() * 1e9`
+                          // values per sample — NOT monotonically
+                          // increasing — so the field behaves like a
+                          // gauge here. Map it as `gauge` so the
+                          // single-query Phase B path (which uses `FROM`
+                          // because `TS` doesn't support filter-in-agg)
+                          // can `AVG(...) WHERE direction == "..."` it.
+                          //
+                          // Production parity follow-up: keep the
+                          // template as gauge for now, gate Phase B
+                          // production rxV2/txV2 on a separate `TS …
+                          // RATE(...)` round-trip when synthtrace is
+                          // upgraded to emit true cumulative counters.
+                          io: { type: 'long', time_series_metric: 'gauge' },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              system: {
+                properties: {
+                  memory: {
+                    properties: {
+                      utilization: { type: 'double', time_series_metric: 'gauge' },
+                      usage: { type: 'double', time_series_metric: 'gauge' },
+                    },
+                  },
                 },
               },
             },
           },
         },
       });
-      this.logger.info(`Created index template "${templateName}"`);
+      this.logger.info(`Created index template "${templateName}" (TSDS)`);
     } catch (error) {
       this.logger.warning(`Failed to create index template "${templateName}": ${error}`);
     }
