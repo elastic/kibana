@@ -83,13 +83,6 @@ export const BREADCRUMB_RELEVANCE = i18n.translate(
   }
 );
 
-export const BREADCRUMB_INFERENCE_ENDPOINTS = i18n.translate(
-  'xpack.searchInferenceEndpoints.breadcrumbs.inferenceEndpoints',
-  {
-    defaultMessage: 'Inference endpoints',
-  }
-);
-
 export const ENDPOINT_COPY_SUCCESS = (inferenceId: string) =>
   i18n.translate('xpack.searchInferenceEndpoints.actions.copyIDSuccess', {
     defaultMessage: 'Inference endpoint ID {inferenceId} copied',
