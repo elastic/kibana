@@ -4,6 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+/**
+ * FTR (L4): privilege-axis test for the status route. ES role + index ACL
+ * evaluation cannot be faithfully mocked, so it stays at L4. This file is
+ * the canonical place to grow per-ACL-combination cases for cspm / kspm /
+ * vuln_mgmt — the cap is one file, but the file may grow horizontally.
+ *
+ * Sibling coverage:
+ * - State machine: server/routes/status/status.test.ts
+ * - Orchestration: server/routes/status/status.handler.test.ts
+ * - Happy-path smoke: status_smoke.ts
+ * - Fleet schema: status_contract.ts
+ *
+ * Rationale: do not add non-privilege cases here.
+ */
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import {
