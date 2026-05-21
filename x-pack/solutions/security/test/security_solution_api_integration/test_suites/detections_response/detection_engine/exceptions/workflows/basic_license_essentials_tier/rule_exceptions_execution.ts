@@ -704,6 +704,10 @@ export default ({ getService }: FtrProviderContext) => {
             });
           });
 
+          // The following types are intentionally skipped: either the auditbeat
+          // fixture lacks a compatible mapped field, or the list type requires
+          // query-path support (range queries) that is not yet implemented in
+          // the small-list exception clause builder.
           it.skip('geo_point', async () => {
             expect(sample.geoLatLon).toBeDefined();
             await runValueListFilterCase({
