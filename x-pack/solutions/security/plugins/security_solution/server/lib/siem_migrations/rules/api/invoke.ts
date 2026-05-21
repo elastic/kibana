@@ -14,7 +14,10 @@ import { authz } from './util/authz';
 import { withLicense } from '../../common/api/util/with_license';
 import type { MigrateRuleConfig } from '../task/agent/types';
 import type { RuleMigrationTaskInput } from '../task/rule_migrations_task_runner';
-import type { SiemMigrationVendor } from '../../../../../common/siem_migrations/types';
+import {
+  OriginalRuleVendorEnum,
+  type OriginalRuleVendor,
+} from '../../../../../common/siem_migrations/model/rule_migration.gen';
 
 const REQUEST_TIMEOUT = 3 * 60 * 1000; // 3 min — rules migration ~60s typical
 
@@ -56,7 +59,11 @@ export const registerSiemRuleMigrationsInvokeRoute = (
           const securitySolutionContext = await context.securitySolution;
           const ruleMigrationsClient = securitySolutionContext.siemMigrations.getRulesClient();
 
-          const vendor = (input.original_rule.vendor ?? 'splunk') as SiemMigrationVendor;
+          const rawVendor = String(input.original_rule.vendor ?? 'splunk');
+          if (!(rawVendor in OriginalRuleVendorEnum)) {
+            return res.badRequest({ body: `Unknown vendor: ${rawVendor}` });
+          }
+          const vendor = rawVendor as OriginalRuleVendor;
           const invoker = await ruleMigrationsClient.task.createInvoker(connectorId, {
             abortController,
             vendor,
