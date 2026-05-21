@@ -11,13 +11,13 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   DEVTOOL_HIDDEN_ATTR,
   DEVTOOL_MANAGED_ATTR,
-  TRUNCATION_CLASSES,
   INHERITED_CSS_PROPS,
   BACKGROUND_CSS_PROPS,
   CSS_VAR_PREFIX,
   MAX_TREE_DEPTH,
   PSEUDO_CLASS_PREFIX,
 } from '../lib/constants';
+import { stripTruncationClasses, isTruncatedDeep } from './truncation_helpers';
 import { tagColorTokens, colorToToken, toHex } from '../lib/dom/color_token_lookup';
 import { getTokenVar } from '../lib/dom/color_token_stylesheet';
 
@@ -582,13 +582,7 @@ export const copyStylesDeep = (
   applyPseudoStyle(original, clone, '::before');
   applyPseudoStyle(original, clone, '::after');
 
-  let hadTruncationClass = false;
-  for (const cls of TRUNCATION_CLASSES) {
-    if (clone.classList.contains(cls)) {
-      clone.classList.remove(cls);
-      hadTruncationClass = true;
-    }
-  }
+  const hadTruncationClass = stripTruncationClasses(clone);
 
   const shouldPinDimensions = !isRoot && !hadTruncationClass;
   if (shouldPinDimensions) {
@@ -615,8 +609,6 @@ export const copyStylesDeep = (
   }
 };
 
-const TRUNCATION_SELECTOR = TRUNCATION_CLASSES.map((c) => `.${c}`).join(',');
-
 /**
  * Check whether the target or any descendant has a truncation class, and if
  * so temporarily append the clone to the body to measure its natural
@@ -633,10 +625,7 @@ export const widenForTruncation = (
   clone: HTMLElement,
   rect: DOMRect
 ): DOMRect => {
-  const hadTruncation =
-    TRUNCATION_CLASSES.some((cls) => target.classList.contains(cls)) ||
-    target.querySelector(TRUNCATION_SELECTOR) !== null;
-  if (!hadTruncation) return rect;
+  if (!isTruncatedDeep(target)) return rect;
 
   clone.style.visibility = 'hidden';
   document.body.appendChild(clone);
