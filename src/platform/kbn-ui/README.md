@@ -18,6 +18,8 @@ Kibana chrome supports two styles: the legacy **classic** chrome (still availabl
 
 ### Anatomy
 
+![Kibana layout terminology](wiki/assets/kibana-layout-terminology.png)
+
 **Chrome parts**
 
 | Part | Purpose |
