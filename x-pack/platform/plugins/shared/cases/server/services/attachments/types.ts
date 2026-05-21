@@ -91,10 +91,6 @@ export interface AttachmentsAttachedToCaseArgs extends AttachedToCaseArgs {
   aggregations: Record<string, estypes.AggregationsAggregationContainer>;
 }
 
-export interface CountActionsAttachedToCaseArgs extends AttachedToCaseArgs {
-  aggregations: Record<string, estypes.AggregationsAggregationContainer>;
-}
-
 export interface DeleteAttachmentArgs extends IndexRefresh {
   savedObjectIds: string[];
 }
