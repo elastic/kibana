@@ -50,10 +50,14 @@ export async function requestEarsRefreshToken(
   });
 
   if (res.status === 200) {
+    const expiresIn: number | undefined = res.data.expiry
+      ? Math.max(0, Math.round((new Date(res.data.expiry).getTime() - Date.now()) / 1000)) ||
+        undefined
+      : undefined;
     return {
       tokenType: res.data.token_type,
       accessToken: res.data.access_token,
-      expiresIn: res.data.expires_in,
+      expiresIn,
       refreshToken: res.data.refresh_token,
       refreshTokenExpiresIn: res.data.refresh_token_expires_in,
     };
