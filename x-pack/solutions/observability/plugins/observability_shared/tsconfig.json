@@ -51,6 +51,10 @@
     "@kbn/agent-builder-browser",
     "@kbn/controls-constants",
     "@kbn/apm-types",
+    "@kbn/react-kibana-mount",
+    "@kbn/core-rendering-browser",
+    "@kbn/core-overlays-browser",
+    "@kbn/core-mount-utils-browser",
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

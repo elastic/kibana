@@ -49,8 +49,10 @@ import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
+import { startDuplicateRequestDetector } from '@kbn/observability-shared-plugin/public';
 
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public/plugin';
+import type { DeveloperToolbarStart } from '@kbn/developer-toolbar-plugin/public';
 import type {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
@@ -128,6 +130,7 @@ export interface ClientPluginsStart {
   dashboard: DashboardStart;
   charts: ChartsPluginStart;
   uiActions: UiActionsStart;
+  developerToolbar?: DeveloperToolbarStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   settings: SettingsStart;
   agentBuilder?: AgentBuilderPluginStart;
@@ -236,6 +239,18 @@ export class SyntheticsPlugin
 
   public start(coreStart: CoreStart, pluginsStart: ClientPluginsStart): void {
     const { triggersActionsUi } = pluginsStart;
+
+    if (this.initContext.env.mode.dev) {
+      startDuplicateRequestDetector({
+        http: coreStart.http,
+        application: coreStart.application,
+        toasts: coreStart.notifications.toasts,
+        overlays: coreStart.overlays,
+        rendering: coreStart.rendering,
+        source: 'synthetics',
+        developerToolbar: pluginsStart.developerToolbar,
+      });
+    }
 
     registerSyntheticsUiActions(coreStart, pluginsStart);
 

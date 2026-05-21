@@ -43,6 +43,7 @@
     "optionalPlugins": [
       "cases",
       "cloud",
+      "developerToolbar",
       "discover",
       "observabilityAIAssistant",
       "security",

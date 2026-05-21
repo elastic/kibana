@@ -105,3 +105,9 @@ export { type ControlPanels, useControlPanels } from './hooks/use_control_panels
 export { useKibanaQuerySettings } from './hooks/use_kibana_query_settings';
 
 export { ExternalResourceLinks } from './components/external_resource_links';
+
+export { startDuplicateRequestDetector } from './dev_tools/duplicate_request_detector';
+export type { DuplicateRequestDetectorOptions } from './dev_tools/duplicate_request_detector';
+export type { DuplicateDetectionEvent } from './dev_tools/duplicate_detections_toast';
+export type { DetectorSettings } from './dev_tools/duplicate_detections_settings';
+export { getDetectorSettingsStore } from './dev_tools/duplicate_detections_settings';
