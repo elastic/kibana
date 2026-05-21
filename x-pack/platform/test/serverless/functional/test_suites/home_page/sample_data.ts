@@ -12,6 +12,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'home', 'svlCommonPage']);
 
   describe('Sample data in serverless', function () {
+    this.tags(['skipSvlVectorDB']);
     before(async () => {
       await pageObjects.svlCommonPage.loginWithPrivilegedRole();
     });

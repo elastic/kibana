@@ -15,6 +15,8 @@ import type {
 import type { ToolingLog } from '@kbn/tooling-log';
 import chalk from 'chalk';
 import { getAgentVersionMatchingCurrentStack } from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_services';
+import { fetchFleetLatestAvailableAgentVersion } from '@kbn/security-solution-plugin/common/endpoint/utils/fetch_fleet_version';
+import { isServerlessKibanaFlavor } from '@kbn/security-solution-plugin/common/endpoint/utils/kibana_status';
 
 export const DEFAULT_HEADERS = Object.freeze({
   'x-elastic-internal-product': 'security-solution',
@@ -132,6 +134,11 @@ export const getLatestAvailableAgentVersion = async (
   kbnClient: KbnClient,
   log: ToolingLog
 ): Promise<string> => {
+  const isServerless = await isServerlessKibanaFlavor(kbnClient);
+  if (isServerless) {
+    return fetchFleetLatestAvailableAgentVersion(kbnClient);
+  }
+
   return getAgentVersionMatchingCurrentStack(kbnClient, log);
 };
 
