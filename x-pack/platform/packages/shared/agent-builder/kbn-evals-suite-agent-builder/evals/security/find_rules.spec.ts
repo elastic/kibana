@@ -53,39 +53,18 @@ evaluate.describe(
             description:
               'Validates multi-rule discovery queries with the array-of-arrays atomic-condition filter (outer OR, inner AND). Backed by 10 seeded rules + 50 synthetic alerts (30 → "Suspicious PowerShell Execution", 20 → "Brute Force Detection").',
             examples: [
-              // ===== Basic metadata =====
               {
                 input: {
                   question: 'List all enabled detection rules tagged with MITRE.',
                 },
                 output: {
-                  criteria: [
-                    'The response identifies exactly 5 detection rules.',
-                    'The response names "Suspicious PowerShell Execution".',
-                    'The response names "PowerShell Encoded Command".',
-                    'The response names "Credential Access via LSASS".',
-                    'The response names "Process Injection T1055".',
-                    'The response names "PowerShell Network Scan".',
-                    'The response does NOT include "Lateral Movement via SMB" (disabled).',
-                    'The response does NOT include "Phishing URL Indicators" (disabled).',
-                    'The model calls `security.discover_rule_tags` to discover available tags, then calls `security.find_rules` to filter the rule list.',
-                  ],
-                  toolCalls: [
-                    {
-                      id: 'security.discover_rule_tags',
-                      criteria: ['Called to enumerate available tag values before filtering.'],
-                    },
-                    {
-                      id: 'security.find_rules',
-                      criteria: [
-                        'The `filter` argument contains an AND-group with both `{ enabled: true }` and `{ tag: "MITRE" }` conditions.',
-                      ],
-                    },
-                  ],
+                  expected:
+                    'The response lists enabled detection rules carrying a MITRE tag. The results include "Suspicious PowerShell Execution" (critical, risk 99), "PowerShell Encoded Command" (high, risk 73), "Credential Access via LSASS" (critical, risk 95), "Process Injection T1055" (critical, risk 95), and "PowerShell Network Scan" (medium, risk 47). Disabled MITRE-tagged rules such as "Lateral Movement via SMB" and "Phishing URL Indicators" are excluded.',
                 },
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-rules',
+                  tool_sequence: ['security.discover_rule_tags', 'security.find_rules'],
                 },
               },
               {
@@ -93,19 +72,13 @@ evaluate.describe(
                   question: 'How many custom (non-prebuilt) detection rules do I have enabled?',
                 },
                 output: {
-                  criteria: ['The response reports a count of 8 enabled custom rules.'],
-                  toolCalls: [
-                    {
-                      id: 'security.find_rules',
-                      criteria: [
-                        'The `filter` argument contains one AND-group with both a `{ enabled: true }` condition and a `{ ruleSource: "custom" }` condition.',
-                      ],
-                    },
-                  ],
+                  expected:
+                    'The response states the total count of enabled custom (non-prebuilt) detection rules, derived from the find-rules tool total field. The count is 8.',
                 },
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-rules',
+                  tool_sequence: ['security.find_rules'],
                 },
               },
               {
@@ -113,24 +86,13 @@ evaluate.describe(
                   question: 'How many detection rules are enabled vs disabled?',
                 },
                 output: {
-                  criteria: [
-                    'The response reports 8 enabled detection rules.',
-                    'The response reports 2 disabled detection rules.',
-                  ],
-                  toolCalls: [
-                    {
-                      id: 'security.find_rules',
-                      criteria: [
-                        'The model calls `security.find_rules` for the enabled total with a `{ enabled: true }` filter.',
-                        'The model calls `security.find_rules` for the disabled total with a `{ enabled: false }` filter.',
-                        'The response is based on the `total` values from the tool results.',
-                      ],
-                    },
-                  ],
+                  expected:
+                    'The response provides separate counts for enabled and disabled detection rules. There are 8 enabled and 2 disabled rules. The find-rules tool was called at least twice with different enabled filters.',
                 },
                 metadata: {
                   query_intent: 'Rule Count Breakdown',
                   expectedSkill: 'find-rules',
+                  tool_sequence: ['security.find_rules'],
                 },
               },
               {
@@ -138,24 +100,13 @@ evaluate.describe(
                   question: 'Show me query-type detection rules whose name contains "PowerShell".',
                 },
                 output: {
-                  criteria: [
-                    'The response identifies exactly 3 detection rules.',
-                    'The response names "Suspicious PowerShell Execution".',
-                    'The response names "PowerShell Encoded Command".',
-                    'The response names "PowerShell Network Scan".',
-                  ],
-                  toolCalls: [
-                    {
-                      id: 'security.find_rules',
-                      criteria: [
-                        'The `filter` argument contains one AND-group with both a `{ ruleType: "query" }` condition and a `{ nameContains: "PowerShell" }` condition.',
-                      ],
-                    },
-                  ],
+                  expected:
+                    'The response lists query-type rules with "PowerShell" in the name. The results include "Suspicious PowerShell Execution" (critical, risk 99), "PowerShell Encoded Command" (high, risk 73), and "PowerShell Network Scan" (medium, risk 47). All three are query-type and enabled.',
                 },
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-rules',
+                  tool_sequence: ['security.find_rules'],
                 },
               },
               {
@@ -163,320 +114,155 @@ evaluate.describe(
                   question: 'Show me my network detection rules.',
                 },
                 output: {
-                  criteria: [
-                    'The response identifies exactly 4 network-related detection rules.',
-                    'The response names "Lateral Movement via SMB".',
-                    'The response names "Brute Force Detection".',
-                    'The response names "Anomalous DNS Activity".',
-                    'The response names "Phishing URL Indicators".',
-                    'The model calls `security.discover_rule_tags` to discover available tags, then calls `security.find_rules` with the discovered tag filter.',
-                  ],
-                  toolCalls: [
-                    {
-                      id: 'security.discover_rule_tags',
-                      criteria: [
-                        'Called to enumerate available tag values and translate the word "network" into exact tag names.',
-                      ],
-                    },
-                    {
-                      id: 'security.find_rules',
-                      criteria: [
-                        'The `filter` argument contains one or more `{ tag: "<exact tag value containing Network>" }` conditions such as `{ tag: "Network" }` or `{ tag: "Domain: Network" }`.',
-                      ],
-                    },
-                  ],
+                  expected:
+                    'The response lists network-related detection rules identified via tag discovery. The results include "Lateral Movement via SMB" (high, disabled), "Brute Force Detection" (medium, enabled), "Anomalous DNS Activity" (medium, enabled), and "Phishing URL Indicators" (low, disabled). Tags containing "Network" were discovered first.',
                 },
                 metadata: {
                   query_intent: 'Semantic Rule Discovery',
                   expectedSkill: 'find-rules',
+                  tool_sequence: ['security.discover_rule_tags', 'security.find_rules'],
                 },
               },
-
-              // ===== Severity =====
               {
                 input: {
                   question: 'Show me my critical severity detection rules.',
                 },
                 output: {
-                  criteria: [
-                    'The response identifies exactly 3 detection rules.',
-                    'The response names "Suspicious PowerShell Execution".',
-                    'The response names "Credential Access via LSASS".',
-                    'The response names "Process Injection T1055".',
-                  ],
-                  toolCalls: [
-                    {
-                      id: 'security.find_rules',
-                      criteria: [
-                        'The `filter` argument contains an AND-group with a `{ severity: "critical" }` condition.',
-                      ],
-                    },
-                  ],
+                  expected:
+                    'The response lists critical severity detection rules. The results include "Suspicious PowerShell Execution" (risk 99), "Credential Access via LSASS" (risk 95), and "Process Injection T1055" (risk 95). All three are enabled.',
                 },
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-rules',
+                  tool_sequence: ['security.find_rules'],
                 },
               },
-
-              // ===== Risk score range =====
               {
                 input: {
                   question: 'List enabled detection rules with a risk score of 70 or higher.',
                 },
                 output: {
-                  criteria: [
-                    'The response identifies exactly 5 detection rules.',
-                    'The response names "Suspicious PowerShell Execution".',
-                    'The response names "PowerShell Encoded Command".',
-                    'The response names "Credential Access via LSASS".',
-                    'The response names "Custom DLL Loading Detection".',
-                    'The response names "Process Injection T1055".',
-                    'The response does NOT include "Lateral Movement via SMB" (disabled).',
-                  ],
-                  toolCalls: [
-                    {
-                      id: 'security.find_rules',
-                      criteria: [
-                        'The `filter` argument contains one AND-group with both a `{ enabled: true }` condition and a `{ riskScoreMin: 70 }` condition.',
-                      ],
-                    },
-                  ],
+                  expected:
+                    'The response lists enabled rules with risk_score >= 70. The results include "Suspicious PowerShell Execution" (critical, risk 99), "Credential Access via LSASS" (critical, risk 95), "Process Injection T1055" (critical, risk 95), "PowerShell Encoded Command" (high, risk 73), and "Custom DLL Loading Detection" (high, risk 70). "Lateral Movement via SMB" (risk 70) is excluded because it is disabled.',
                 },
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-rules',
+                  tool_sequence: ['security.find_rules'],
                 },
               },
-
-              // ===== MITRE structured technique =====
               {
                 input: {
                   question: 'Show me detection rules covering MITRE technique T1059.',
                 },
                 output: {
-                  criteria: [
-                    'The response identifies exactly 2 detection rules.',
-                    'The response names "Suspicious PowerShell Execution".',
-                    'The response names "PowerShell Encoded Command".',
-                  ],
-                  toolCalls: [
-                    {
-                      id: 'security.find_rules',
-                      criteria: [
-                        'The `filter` argument contains an AND-group with a `{ mitreTechnique: "T1059" }` condition.',
-                      ],
-                    },
-                  ],
+                  expected:
+                    'The response lists rules mapped to MITRE technique T1059. The results include "Suspicious PowerShell Execution" (critical, query) and "PowerShell Encoded Command" (high, query). Both are enabled.',
                 },
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-rules',
+                  tool_sequence: ['security.find_rules'],
                 },
               },
-
-              // ===== OR within field (NEW for DNF) =====
               {
                 input: {
                   question: 'Show me enabled critical OR high severity detection rules.',
                 },
                 output: {
-                  criteria: [
-                    'The response identifies exactly 5 detection rules.',
-                    'The response names "Suspicious PowerShell Execution" (critical).',
-                    'The response names "Credential Access via LSASS" (critical).',
-                    'The response names "Process Injection T1055" (critical).',
-                    'The response names "PowerShell Encoded Command" (high).',
-                    'The response names "Custom DLL Loading Detection" (high).',
-                    'The response does NOT include any medium-severity or low-severity rules.',
-                  ],
-                  toolCalls: [
-                    {
-                      id: 'security.find_rules',
-                      criteria: [
-                        'The `filter` argument contains TWO AND-groups (OR semantics across the outer array): one with both `{ enabled: true }` and `{ severity: "critical" }`; the other with both `{ enabled: true }` and `{ severity: "high" }`.',
-                      ],
-                    },
-                  ],
+                  expected:
+                    'The response lists enabled rules with critical or high severity. Critical: "Suspicious PowerShell Execution" (risk 99), "Credential Access via LSASS" (risk 95), "Process Injection T1055" (risk 95). High: "PowerShell Encoded Command" (risk 73), "Custom DLL Loading Detection" (risk 70). Medium and low severity rules are excluded.',
                 },
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-rules',
+                  tool_sequence: ['security.find_rules'],
                 },
               },
-
-              // ===== Cross-field OR groups (NEW for DNF) =====
               {
                 input: {
                   question:
                     'Find detection rules that are either critical severity OR cover MITRE technique T1055.',
                 },
                 output: {
-                  criteria: [
-                    'The response identifies the 3 critical-severity rules: "Suspicious PowerShell Execution", "Credential Access via LSASS", "Process Injection T1055".',
-                    'The response includes any T1055 rule (which is "Process Injection T1055" — already in the critical set).',
-                    'Total distinct rules in the response is 3.',
-                  ],
-                  toolCalls: [
-                    {
-                      id: 'security.find_rules',
-                      criteria: [
-                        'The `filter` argument contains TWO AND-groups (OR semantics across the outer array): one with a `{ severity: "critical" }` condition, the other with a `{ mitreTechnique: "T1055" }` condition.',
-                      ],
-                    },
-                  ],
+                  expected:
+                    'The response lists rules matching critical severity or MITRE T1055. The results include "Suspicious PowerShell Execution" (critical), "Credential Access via LSASS" (critical), and "Process Injection T1055" (critical, also mapped to T1055). All three are enabled.',
                 },
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-rules',
+                  tool_sequence: ['security.find_rules'],
                 },
               },
-
-              // ===== Exclusion =====
               {
                 input: {
                   question: 'Show me MITRE-tagged detection rules that are NOT tagged "Custom".',
                 },
                 output: {
-                  criteria: [
-                    'The response includes "Suspicious PowerShell Execution".',
-                    'The response includes "PowerShell Encoded Command".',
-                    'The response does NOT include "Custom DLL Loading Detection" (excluded by Custom tag).',
-                    'The model calls `security.discover_rule_tags` before filtering (tag values require discovery).',
-                  ],
-                  toolCalls: [
-                    {
-                      id: 'security.discover_rule_tags',
-                      criteria: [
-                        'Called to enumerate available tag values before filtering by tag.',
-                      ],
-                    },
-                    {
-                      id: 'security.find_rules',
-                      criteria: [
-                        'The `filter` argument has a `{ tag: "MITRE" }` condition and `exclude` has a `{ tag: "Custom" }` condition.',
-                      ],
-                    },
-                  ],
+                  expected:
+                    'The response lists MITRE-tagged rules excluding any with a "Custom" tag. The results include "Suspicious PowerShell Execution", "PowerShell Encoded Command", "Credential Access via LSASS", "Process Injection T1055", "PowerShell Network Scan", "Lateral Movement via SMB", and "Phishing URL Indicators". None of the MITRE-tagged rules carry the "Custom" tag.',
                 },
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-rules',
+                  tool_sequence: ['security.discover_rule_tags', 'security.find_rules'],
                 },
               },
-
-              // ===== Sort by severity =====
               {
                 input: {
                   question: 'List my top 3 enabled rules sorted by severity (most severe first).',
                 },
                 output: {
-                  criteria: [
-                    'The response lists exactly 3 rules.',
-                    'The top 3 are critical-severity rules: "Suspicious PowerShell Execution", "Credential Access via LSASS", and "Process Injection T1055" (any order among the three).',
-                  ],
-                  toolCalls: [
-                    {
-                      id: 'security.find_rules',
-                      criteria: [
-                        'The `sortField` argument equals "severity".',
-                        'The `sortOrder` argument equals "desc".',
-                        'The `perPage` argument is 3.',
-                        'The `filter` argument scopes to enabled rules.',
-                      ],
-                    },
-                  ],
+                  expected:
+                    'The response lists the top 3 enabled rules sorted by severity descending. The results include "Suspicious PowerShell Execution" (critical, risk 99), "Credential Access via LSASS" (critical, risk 95), and "Process Injection T1055" (critical, risk 95).',
                 },
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-rules',
+                  tool_sequence: ['security.find_rules'],
                 },
               },
-
-              // ===== Disabled rules =====
               {
                 input: {
                   question: 'Show me my disabled detection rules.',
                 },
                 output: {
-                  criteria: [
-                    'The response identifies exactly 2 detection rules.',
-                    'The response names "Lateral Movement via SMB".',
-                    'The response names "Phishing URL Indicators".',
-                  ],
-                  toolCalls: [
-                    {
-                      id: 'security.find_rules',
-                      criteria: [
-                        'The `filter` argument contains an AND-group with a `{ enabled: false }` condition.',
-                      ],
-                    },
-                  ],
+                  expected:
+                    'The response lists disabled detection rules. The results include "Lateral Movement via SMB" (high, risk 70, eql) and "Phishing URL Indicators" (low, risk 25, threat_match).',
                 },
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-rules',
+                  tool_sequence: ['security.find_rules'],
                 },
               },
-
-              // ===== Empty result (tag doesn't exist in the space) =====
               {
                 input: {
                   question: 'List detection rules tagged with "NonExistentTag".',
                 },
                 output: {
-                  criteria: [
-                    'The response indicates that no rules match (zero results) OR that no tag matching "NonExistentTag" was found in this space.',
-                    'The response does not fabricate rule names.',
-                    'The model calls `security.discover_rule_tags` to discover available tags — the "NonExistentTag" can only be confirmed absent via discovery.',
-                  ],
-                  toolCalls: [
-                    {
-                      id: 'security.discover_rule_tags',
-                      criteria: [
-                        'Called to enumerate available tag values. The model may or may not also call `security.find_rules` filtering by `{ tag: "NonExistentTag" }` — either is acceptable; what is NOT acceptable is skipping discovery entirely.',
-                      ],
-                    },
-                  ],
+                  expected:
+                    'No detection rules match the tag "NonExistentTag". The tag was not found among available tags. The response suggests using tag discovery to explore available values.',
                 },
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-rules',
+                  tool_sequence: ['security.discover_rule_tags'],
                 },
               },
-
-              // ===== Alert volume (UUID translation path) =====
               {
                 input: {
                   question:
                     'Which 10 detection rules generated the most alerts in the last 24 hours?',
                 },
                 output: {
-                  criteria: [
-                    'The response ranks "Suspicious PowerShell Execution" as the top rule by alert count.',
-                    'The response reports 30 alerts for "Suspicious PowerShell Execution".',
-                    'The response ranks "Brute Force Detection" second.',
-                    'The response reports 20 alerts for "Brute Force Detection".',
-                    'The model aggregates alerts by `kibana.alert.rule.uuid` (NOT by rule name) and then translates the top UUIDs back to rule names via `security.find_rules` with `{ ruleUuid: "<uuid>" }` conditions.',
-                  ],
-                  toolCalls: [
-                    {
-                      id: 'security.alerts',
-                      criteria: [
-                        'The query aggregates alerts grouped by `kibana.alert.rule.uuid` (not by name), scoped to the last 24 hours.',
-                      ],
-                    },
-                    {
-                      id: 'security.find_rules',
-                      criteria: [
-                        'The `filter` argument contains one or more AND-groups, each with a single `{ ruleUuid: "<uuid>" }` condition — used to translate the top UUIDs from the alerts aggregation back into rule names and metadata.',
-                      ],
-                    },
-                  ],
+                  expected:
+                    'The response ranks rules by alert volume. "Suspicious PowerShell Execution" has 30 alerts and "Brute Force Detection" has 20 alerts. Alerts were aggregated by kibana.alert.rule.uuid then translated to rule names via the find-rules tool.',
                 },
                 metadata: {
                   query_intent: 'Noisy Rules',
                   expectedSkill: 'find-rules',
+                  tool_sequence: ['security.alerts', 'security.find_rules'],
                 },
               },
               {
@@ -484,30 +270,13 @@ evaluate.describe(
                   question: 'Show me my noisiest detection rules this week.',
                 },
                 output: {
-                  criteria: [
-                    'The response ranks "Suspicious PowerShell Execution" as the noisiest rule.',
-                    'The response reports 30 alerts for "Suspicious PowerShell Execution".',
-                    'The response ranks "Brute Force Detection" second with 20 alerts.',
-                    'The model aggregates alerts by `kibana.alert.rule.uuid` and translates the top UUIDs back to rules via `security.find_rules` with `{ ruleUuid: "<uuid>" }` conditions.',
-                  ],
-                  toolCalls: [
-                    {
-                      id: 'security.alerts',
-                      criteria: [
-                        'The query aggregates alerts by `kibana.alert.rule.uuid` (not by name) over the past 7 days.',
-                      ],
-                    },
-                    {
-                      id: 'security.find_rules',
-                      criteria: [
-                        'The `filter` argument contains AND-groups with `{ ruleUuid: "<uuid>" }` conditions translating the top UUIDs into rule names.',
-                      ],
-                    },
-                  ],
+                  expected:
+                    'The response ranks rules by alert volume. "Suspicious PowerShell Execution" is the noisiest with 30 alerts, followed by "Brute Force Detection" with 20 alerts. Alerts were aggregated by kibana.alert.rule.uuid then translated to rule names via the find-rules tool.',
                 },
                 metadata: {
                   query_intent: 'Noisy Rules',
                   expectedSkill: 'find-rules',
+                  tool_sequence: ['security.alerts', 'security.find_rules'],
                 },
               },
             ],
@@ -537,10 +306,8 @@ evaluate.describe(
                     'Why did alert abc123 fire? Help me triage it and check related activity.',
                 },
                 output: {
-                  criteria: [
-                    'The response addresses triage of a specific alert.',
-                    'The response does not list multiple unrelated detection rules.',
-                  ],
+                  expected:
+                    'I will investigate alert abc123 by looking at the alert details, related events, and timeline activity to help triage it.',
                 },
                 metadata: {
                   query_intent: 'Alert Triage',
@@ -553,10 +320,8 @@ evaluate.describe(
                     'Hunt for lateral movement across our hosts in the last 7 days using suspicious logon types.',
                 },
                 output: {
-                  criteria: [
-                    'The response describes an ES|QL-based hunt for lateral movement.',
-                    'The response does not list multiple detection rules as the primary answer.',
-                  ],
+                  expected:
+                    'I will search for lateral movement indicators using ES|QL queries across endpoint and Windows event logs, looking for suspicious logon types over the last 7 days.',
                 },
                 metadata: {
                   query_intent: 'Threat Hunting',
@@ -568,10 +333,8 @@ evaluate.describe(
                   question: 'What is the risk score for host srv-01 and has it changed recently?',
                 },
                 output: {
-                  criteria: [
-                    'The response addresses the risk score for host srv-01.',
-                    'The response does not list multiple detection rules.',
-                  ],
+                  expected:
+                    'I will look up the risk score for host srv-01 and check its recent changes using the entity analytics data.',
                 },
                 metadata: {
                   query_intent: 'Risk Assessment',
@@ -583,7 +346,7 @@ evaluate.describe(
                   question: 'Which ML jobs have anomalies in the last 24 hours?',
                 },
                 output: {
-                  criteria: ['The response addresses ML jobs and anomalies, not detection rules.'],
+                  expected: 'I will check the ML jobs for anomalies detected in the last 24 hours.',
                 },
                 metadata: {
                   query_intent: 'ML Anomalies',
@@ -595,10 +358,7 @@ evaluate.describe(
                   question: "Disable the rule 'Suspicious PowerShell Execution'.",
                 },
                 output: {
-                  criteria: [
-                    'The response addresses editing or disabling a single rule, not listing rules.',
-                    'The response does not return a list of multiple rules as the primary action.',
-                  ],
+                  expected: 'I will disable the detection rule "Suspicious PowerShell Execution".',
                 },
                 metadata: {
                   query_intent: 'Rule Editing',
@@ -611,9 +371,8 @@ evaluate.describe(
                     'Show me my alerting V2 rules with ES|QL queries that monitor system CPU.',
                 },
                 output: {
-                  criteria: [
-                    'The response addresses alerting V2 rules (not Security detection rules).',
-                  ],
+                  expected:
+                    'I will look up alerting V2 rules (not Security detection rules) that use ES|QL queries to monitor system CPU.',
                 },
                 metadata: {
                   query_intent: 'V2 Rule Discovery',
@@ -646,7 +405,6 @@ evaluate.describe(
     evaluate(
       'second-turn query for a disjoint severity forces a new tool call',
       async ({ chatClient }) => {
-        // Turn 1: ask for critical severity rules.
         const turn1 = await chatClient.converse({
           messages: [
             {
@@ -658,9 +416,6 @@ evaluate.describe(
         expect(turn1.errors).toEqual([]);
         expect(turn1.conversationId).toBeDefined();
 
-        // Turn 2: ask for medium severity rules — a completely disjoint set.
-        // Phrased as a standalone listing request so the agent clearly
-        // activates the find-rules skill again.
         const turn2 = await chatClient.converse({
           messages: [
             {
@@ -673,21 +428,18 @@ evaluate.describe(
 
         expect(turn2.errors).toEqual([]);
 
-        // The model must have called security.find_rules on turn 2.
         const turn2ToolCalls = (turn2.steps ?? []).filter(
           (step: { type?: string; tool_id?: string }) =>
             step.type === 'tool_call' && step.tool_id === 'security.find_rules'
         );
         expect(turn2ToolCalls.length).toBeGreaterThan(0);
 
-        // At least one call must filter by medium severity.
         const turn2CallArgs = turn2ToolCalls.map((step: { params?: unknown }) =>
           JSON.stringify(step.params ?? {})
         );
         const hasMediumFilter = turn2CallArgs.some((args: string) => args.includes('"medium"'));
         expect(hasMediumFilter).toBe(true);
 
-        // The response must mention at least one seeded medium-severity rule.
         const lastMessage = turn2.messages[turn2.messages.length - 1]?.message ?? '';
         const mediumRuleNames = [
           'Brute Force Detection',

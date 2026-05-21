@@ -56,62 +56,37 @@ export const GROUP_BY_TERMS_SIZE = 500;
 
 const conditionSchema = z.union([
   strictObject({
-    enabled: z.boolean().describe('Match rules with this enabled state. Use true or false.'),
+    enabled: z.boolean().describe('Match enabled (true) or disabled (false) rules.'),
   }),
   strictObject({
     ruleSource: z
       .enum(['custom', 'prebuilt'])
-      .describe('"custom" = user-authored. "prebuilt" = Elastic-shipped.'),
+      .describe('"custom" = user-authored, "prebuilt" = Elastic-shipped.'),
   }),
   strictObject({
-    severity: z
-      .enum(['critical', 'high', 'medium', 'low'])
-      .describe('Match rules with this exact severity.'),
+    severity: z.enum(['critical', 'high', 'medium', 'low']).describe('Exact severity level.'),
   }),
   strictObject({
-    ruleType: z.enum(RULE_TYPE_VALUES).describe('Match rules of this exact type.'),
+    ruleType: z.enum(RULE_TYPE_VALUES).describe('Exact rule type (e.g. "query", "eql").'),
   }),
   strictObject({
     tag: nonEmptyString.describe(
-      'Match rules carrying this exact tag string. ' +
-        'Tag values are environment-specific — discover available tags via `security.discover_rule_tags` before filtering by name.'
+      'Exact tag string. Discover values first via `security.discover_rule_tags`.'
     ),
   }),
   strictObject({
     mitreTechnique: nonEmptyString
-      .regex(/^T\d{4}(\.\d{3})?$/i, 'mitreTechnique must look like "T1059" or "T1059.001".')
-      .describe('MITRE ATT&CK technique ID, e.g. "T1059" or "T1059.001".'),
+      .regex(/^T\d{4}(\.\d{3})?$/i)
+      .describe('MITRE technique ID, e.g. "T1059" or "T1059.001".'),
   }),
   strictObject({
-    mitreTactic: nonEmptyString
-      .regex(/^TA\d{4}$/i, 'mitreTactic must look like "TA0002".')
-      .describe('MITRE ATT&CK tactic ID, e.g. "TA0002".'),
+    nameContains: nonEmptyString.describe('Substring search on rule name.'),
   }),
   strictObject({
-    nameContains: nonEmptyString.describe(
-      'Search rule names. Behavior mirrors the Detection Rules UI: a SINGLE-word value matches any name containing it as a substring (case-insensitive wildcard on `name.keyword`); a MULTI-word value matches names containing that exact phrase via the analyzer (no wildcards — punctuation/casing normalized but the words must appear together in order). Prefer a single distinctive token for substring search, or a quoted phrase when the exact wording matters.'
-    ),
+    riskScoreMin: riskScoreSchema.describe('Minimum risk_score (inclusive, 0-100).'),
   }),
   strictObject({
-    riskScoreMin: riskScoreSchema.describe(
-      'Minimum risk_score (inclusive). Pair with riskScoreMax in the same AND-group for a range.'
-    ),
-  }),
-  strictObject({
-    riskScoreMax: riskScoreSchema.describe(
-      'Maximum risk_score (inclusive). Pair with riskScoreMin in the same AND-group for a range.'
-    ),
-  }),
-  strictObject({
-    indexPattern: nonEmptyString.describe(
-      'Match rules whose source index list contains this pattern. ' +
-        'Supports wildcards, e.g. "logs-endpoint.events.*".'
-    ),
-  }),
-  strictObject({
-    ruleUuid: nonEmptyString.describe(
-      'Match a specific rule by its alerting Saved Object UUID. This is the value visible in alerts as `kibana.alert.rule.uuid` and in the event log as `kibana.saved_objects.id`. Note: in the Security detection-engine codebase the bare name "ruleId" elsewhere refers to the static `params.ruleId` — that field is surfaced in this tool\'s output as `ruleId`. Use `ruleUuid` (this atom) for SO-UUID-keyed lookups: translating an alerts aggregation, gap search, failing-rule lookups, etc.'
-    ),
+    ruleUuid: nonEmptyString.describe('Match by saved-object UUID (kibana.alert.rule.uuid).'),
   }),
 ]);
 
@@ -125,10 +100,8 @@ export type AndGroup = z.infer<typeof andGroupSchema>;
 // ---- Shared parameter descriptions ----
 
 export const FILTER_DESCRIPTION =
-  'Outer array = OR. Inner array = AND. Each leaf is one atomic condition (one field per object). ' +
-  'Example "critical AND tagged MITRE": `[[{ "severity": "critical" }, { "tag": "MITRE" }]]`. ' +
-  'Example "critical OR high": `[[{ "severity": "critical" }], [{ "severity": "high" }]]`. ' +
-  'Example "tagged MITRE AND tagged Custom (same rule)": `[[{ "tag": "MITRE" }, { "tag": "Custom" }]]`. ' +
+  'Outer array = OR, inner array = AND. ' +
+  'Example: `[[{ "severity": "critical" }, { "tag": "MITRE" }]]` = critical AND MITRE. ' +
   'Omit to match all rules.';
 
 export const EXCLUDE_DESCRIPTION =
@@ -136,10 +109,6 @@ export const EXCLUDE_DESCRIPTION =
   'Example "MITRE-tagged but not Custom": filter=`[[{ "tag": "MITRE" }]]`, exclude=`[[{ "tag": "Custom" }]]`.';
 
 // ---- KQL building ----
-
-function escapeUnquotedWildcardKql(value: string): string {
-  return fullyEscapeKQLStringParam(value).replace(/\\\*/g, '*');
-}
 
 function isSingleTerm(value: string): boolean {
   return !value.includes(' ');
@@ -159,9 +128,6 @@ function buildConditionKql(c: Condition): string {
       : RULE_PARAMS_FIELDS.TECHNIQUE_ID;
     return `${mitreField}: ${prepareKQLStringParam(c.mitreTechnique)}`;
   }
-  if ('mitreTactic' in c) {
-    return `${RULE_PARAMS_FIELDS.TACTIC_ID}: ${prepareKQLStringParam(c.mitreTactic)}`;
-  }
   if ('nameContains' in c) {
     const escaped = fullyEscapeKQLStringParam(c.nameContains);
     return isSingleTerm(escaped)
@@ -170,15 +136,6 @@ function buildConditionKql(c: Condition): string {
   }
   if ('riskScoreMin' in c) {
     return `${PARAMS_RISK_SCORE_FIELD} >= ${c.riskScoreMin}`;
-  }
-  if ('riskScoreMax' in c) {
-    return `${PARAMS_RISK_SCORE_FIELD} <= ${c.riskScoreMax}`;
-  }
-  if ('indexPattern' in c) {
-    const escaped = escapeUnquotedWildcardKql(c.indexPattern);
-    return isSingleTerm(escaped)
-      ? `${RULE_PARAMS_FIELDS.INDEX}: ${escaped}`
-      : `${RULE_PARAMS_FIELDS.INDEX}: ${prepareKQLStringParam(c.indexPattern)}`;
   }
   return `${RULE_UUID_FIELD}: ${prepareKQLStringParam(`alert:${c.ruleUuid}`)}`;
 }

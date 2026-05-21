@@ -28,16 +28,14 @@ export const createFindRulesSkill = ({
     name: 'find-rules',
     basePath: 'skills/security/rules',
     description:
-      'Discover, list, rank, and count Security detection rules across the rule inventory. ' +
-      'Browse rules by tags (with tag discovery), MITRE technique/tactic, severity, rule type, ' +
-      'risk score range, name substring, source index pattern, or enabled state. ' +
-      'Rank rules by alert volume to identify noisy detections. ' +
-      'Read-only and scoped to multi-rule discovery.',
+      'Discover, list, rank, and count Security detection rules. ' +
+      'Filter by tags, MITRE technique, severity, rule type, risk score, name, or enabled state. ' +
+      'Read-only.',
     content: `# Find Detection Rules
 
 ## Use This Skill
 
-Use this skill to list, count, sort, or rank multiple Security detection rules. It covers rule metadata, tag discovery, MITRE tactic/technique, severity, rule type, risk score, name search, source index pattern, enabled state, and noisy-rules alert volume.
+Use this skill to list, count, sort, or rank multiple Security detection rules.
 
 ## Boundaries
 
@@ -82,7 +80,7 @@ Before filtering by tag:
 
 If no returned tag matches the user's intent, say so and mention the closest available values.
 
-Structured MITRE IDs are exempt: use \`{ mitreTechnique: "T1059" }\` or \`{ mitreTactic: "TA0002" }\` directly in \`security.find_rules\`.
+Structured MITRE IDs are exempt: use \`{ mitreTechnique: "T1059" }\` directly in \`security.find_rules\`.
 
 ## Noisy Rules
 
@@ -107,13 +105,12 @@ Both inline tools share the same structured filter, never raw KQL.
 - \`AndGroup = Condition[]\`: inner array = AND
 - \`Condition\`: one atomic fact, one field per object
 
-Supported conditions: \`enabled\`, \`ruleSource\`, \`severity\`, \`ruleType\`, \`tag\`, \`mitreTechnique\`, \`mitreTactic\`, \`nameContains\`, \`riskScoreMin\`, \`riskScoreMax\`, \`indexPattern\`, \`ruleUuid\`.
+Supported conditions: \`enabled\`, \`ruleSource\`, \`severity\`, \`ruleType\`, \`tag\`, \`mitreTechnique\`, \`nameContains\`, \`riskScoreMin\`, \`ruleUuid\`.
 
 Examples:
 - AND: \`filter: [[{ severity: "critical" }, { tag: "MITRE" }]]\`
 - OR: \`filter: [[{ severity: "critical" }], [{ severity: "high" }]]\`
 - Exclude: \`filter: [[{ tag: "MITRE" }]]\`, \`exclude: [[{ tag: "Custom" }]]\`
-- Range: \`filter: [[{ riskScoreMin: 70 }, { riskScoreMax: 90 }]]\`
 
 ## Rendering
 

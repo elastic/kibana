@@ -235,12 +235,9 @@ describe('buildFullFilter', () => {
       );
     });
 
-    it('builds risk score range clauses against params.* (alerting plugin rewrites to mapped_params under the hood)', () => {
+    it('builds riskScoreMin clause', () => {
       expect(buildFullFilter([[{ riskScoreMin: 70 }]], undefined)).toBe(
         'alert.attributes.params.risk_score >= 70'
-      );
-      expect(buildFullFilter([[{ riskScoreMax: 90 }]], undefined)).toBe(
-        'alert.attributes.params.risk_score <= 90'
       );
     });
 
@@ -253,19 +250,7 @@ describe('buildFullFilter', () => {
       );
     });
 
-    it('builds mitreTactic clause', () => {
-      expect(buildFullFilter([[{ mitreTactic: 'TA0002' }]], undefined)).toBe(
-        'alert.attributes.params.threat.tactic.id: "TA0002"'
-      );
-    });
-
-    it('builds indexPattern unquoted for wildcard match', () => {
-      expect(buildFullFilter([[{ indexPattern: 'logs-endpoint*' }]], undefined)).toBe(
-        'alert.attributes.params.index: logs-endpoint*'
-      );
-    });
-
-    it('builds ruleUuid clause as canonical SO-UUID filter (matches `kibana.alert.rule.uuid` and event-log `kibana.saved_objects.id`)', () => {
+    it('builds ruleUuid clause', () => {
       expect(
         buildFullFilter([[{ ruleUuid: '57fc3dd0-4383-4396-98e7-2bbfe6cde41f' }]], undefined)
       ).toBe('alert.id: "alert:57fc3dd0-4383-4396-98e7-2bbfe6cde41f"');
@@ -297,11 +282,6 @@ describe('buildFullFilter', () => {
       );
     });
 
-    it('expresses a risk-score range via paired min/max conditions', () => {
-      expect(buildFullFilter([[{ riskScoreMin: 70 }, { riskScoreMax: 90 }]], undefined)).toBe(
-        'alert.attributes.params.risk_score >= 70 AND alert.attributes.params.risk_score <= 90'
-      );
-    });
   });
 
   describe('multiple AndGroups (OR between groups)', () => {
@@ -406,8 +386,6 @@ describe('findRules inline tool handler', () => {
       enabled: true,
       alertTypeId: 'siem.queryRule',
       params: { rule_id: 'rl-static-12345', severity: 'critical', risk_score: 99, type: 'query' },
-      schedule: { interval: '5m' },
-      createdAt: '2026-01-01T00:00:00Z',
       updatedAt: '2026-01-01T00:00:00Z',
     };
     findMock.mockResolvedValue({ total: 1, data: [fakeRule] });
@@ -443,8 +421,6 @@ describe('findRules inline tool handler', () => {
       enabled: true,
       alertTypeId: 'siem.queryRule',
       params: { ruleId: 'rl-camel', severity: 'high', riskScore: 75, type: 'query' },
-      schedule: { interval: '5m' },
-      createdAt: '2026-01-01T00:00:00Z',
       updatedAt: '2026-01-01T00:00:00Z',
     };
     findMock.mockResolvedValue({ total: 1, data: [fakeRule] });
@@ -460,48 +436,6 @@ describe('findRules inline tool handler', () => {
     };
     expect(data.rules[0].ruleId).toBe('rl-camel');
     expect(data.rules[0].riskScore).toBe(75);
-  });
-
-  it('plumbs an indexPattern condition through as an unquoted wildcard KQL clause and returns the matched rule', async () => {
-    const { toolDef, findMock, mockEsClient, mockLogger, mockRequest } = await setup();
-    const fakeRule = {
-      id: 'rule-endpoint-1',
-      name: 'Suspicious Endpoint Activity',
-      tags: ['Domain: Endpoint'],
-      enabled: true,
-      alertTypeId: 'siem.queryRule',
-      params: {
-        rule_id: 'rule-endpoint-1-static',
-        severity: 'high',
-        risk_score: 73,
-        type: 'query',
-        index: ['logs-endpoint.events.process-*', 'logs-endpoint.events.network-*'],
-      },
-      schedule: { interval: '5m' },
-      createdAt: '2026-01-01T00:00:00Z',
-      updatedAt: '2026-01-01T00:00:00Z',
-    };
-    findMock.mockResolvedValue({ total: 1, data: [fakeRule] });
-
-    const result = await toolDef.handler(
-      { filter: [[{ indexPattern: 'logs-endpoint.events.*' }]] },
-      createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
-    );
-
-    const args = findMock.mock.calls[0][0];
-    expect(args.options.filter).toContain('alert.attributes.params.index: logs-endpoint.events.*');
-
-    const data = result.results[0].data as {
-      total: number;
-      rules: Array<{ id: string; ruleId: unknown; index: unknown }>;
-    };
-    expect(data.total).toBe(1);
-    expect(data.rules[0].id).toBe('rule-endpoint-1');
-    expect(data.rules[0].ruleId).toBe('rule-endpoint-1-static');
-    expect(data.rules[0].index).toEqual([
-      'logs-endpoint.events.process-*',
-      'logs-endpoint.events.network-*',
-    ]);
   });
 
   it('supports OR-of-AND-groups of ruleUuid conditions (multi-rule translation)', async () => {

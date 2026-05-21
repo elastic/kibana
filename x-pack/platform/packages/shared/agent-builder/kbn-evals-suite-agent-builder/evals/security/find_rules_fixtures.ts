@@ -286,6 +286,37 @@ export async function seedFindRulesFixtures({
   esClient: Client;
   log: ToolingLog;
 }): Promise<SeededFixtures> {
+  // Delete all existing custom rules so leftover fixtures from crashed runs don't pollute results.
+  try {
+    const existing = await kbnClient.request<{ data: Array<{ id: string }> }>({
+      path: `${DETECTION_RULES_URL}/_find?per_page=1000`,
+      method: 'GET',
+    });
+    const existingIds = existing.data.data.map((r) => r.id);
+    if (existingIds.length > 0) {
+      log.info(`[find-rules eval] Removing ${existingIds.length} pre-existing rules...`);
+      await kbnClient.request({
+        path: DETECTION_RULES_BULK_ACTION_URL,
+        method: 'POST',
+        body: { action: 'delete', ids: existingIds },
+      });
+    }
+  } catch (err) {
+    log.warning(`[find-rules eval] Pre-seed cleanup failed: ${err.message}`);
+  }
+
+  // Delete any leftover alerts from previous runs.
+  try {
+    await esClient.deleteByQuery({
+      index: ALERTS_INDEX,
+      query: { match_all: {} },
+      refresh: true,
+      conflicts: 'proceed',
+    });
+  } catch (err) {
+    log.warning(`[find-rules eval] Pre-seed alert cleanup failed: ${err.message}`);
+  }
+
   log.info(`[find-rules eval] Seeding ${SEEDED_RULES.length} detection rules...`);
 
   const ruleIds: string[] = [];

@@ -64,14 +64,9 @@ function summarizeRule(rule: RuleFromFind) {
     name: rule.name,
     tags: rule.tags,
     enabled: rule.enabled,
-    ruleTypeId: rule.alertTypeId,
     severity: params.severity,
     riskScore: params.risk_score ?? params.riskScore,
     type: params.type,
-    index: params.index,
-    threat: params.threat,
-    interval: rule.schedule?.interval,
-    createdAt: rule.createdAt,
     updatedAt: rule.updatedAt,
   };
 }
@@ -96,9 +91,7 @@ export const createFindRulesInlineTool = ({
   type: ToolType.builtin,
   description:
     'Find, list, and sort Security detection rules using structured filters. ' +
-    'Always returns rule names and metadata. ' +
-    'Filter shape: outer array OR, inner array AND, each leaf one atomic condition. ' +
-    'Scoped to Security detection rules (consumer=siem). For alerting V2 rules use platform `rule-management`.',
+    'Returns rule names, metadata, and total count.',
   schema: findRulesSchema,
   handler: async (input, { request }) => {
     try {
