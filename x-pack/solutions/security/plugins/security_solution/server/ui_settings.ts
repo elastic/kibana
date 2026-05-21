@@ -246,11 +246,11 @@ export const initUiSettings = (
     },
     [ENABLE_NEW_FLYOUT_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableNewFlyoutLabel', {
-        defaultMessage: 'Enable new document flyout',
+        defaultMessage: 'Enable new flyout',
       }),
       description: i18n.translate('xpack.securitySolution.uiSettings.enableNewFlyoutDescription', {
         defaultMessage:
-          '<p>Switches Security Solution to the new EUI-based document flyout (Flyout v2). When disabled, the legacy expandable flyout is used. This setting is temporary and is planned to be removed in 9.6.</p>',
+          '<p>Switches Security Solution to the new flyout experience. When disabled, the legacy expandable flyout is used.</p>',
         values: { p: (chunks) => `<p>${chunks}</p>` },
       }),
       type: 'boolean',
