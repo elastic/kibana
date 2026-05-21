@@ -345,34 +345,6 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
 
       await use(executorClient);
 
-      const experiments = await executorClient.getRanExperiments();
-      const ingestRequests = buildIngestRequest({
-        source: { kind: 'experiments', experiments },
-        experimentId: currentExperimentId,
-        taskModel: model,
-        evaluatorModel,
-        repetitions,
-        hostName,
-        gitMetadata,
-        suiteId,
-        buildkiteMetadata,
-        log,
-      });
-
-      try {
-        await Promise.all(
-          ingestRequests.map((ingestRequest) => evalsClient.ingestScores(ingestRequest))
-        );
-      } catch (error) {
-        log.error(
-          new Error(
-            `Failed to ingest evaluation results for experiment ID: ${currentExperimentId}.`,
-            { cause: error }
-          )
-        );
-        throw error;
-      }
-
       await reportModelScore(evalsClient, currentExperimentId, log, {
         taskModelId: model.id,
         suiteId,
