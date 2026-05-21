@@ -760,7 +760,7 @@ describe('PackagePolicyInputPanel', () => {
       });
     });
 
-    it('should render title without toggle switch when isSingleInputAndStreams is true', async () => {
+    it('should render toggle switch when isSingleInputAndStreams is true', async () => {
       const simpleStreams: RegistryStreamWithDataStream[] = [
         {
           input: 'logfile',
@@ -814,11 +814,8 @@ describe('PackagePolicyInputPanel', () => {
       );
       await waitFor(() => {
         expect(
-          renderResult.getByTestId('PackagePolicy.InputStreamConfig.title')
+          renderResult.getByTestId('PackagePolicy.InputStreamConfig.Switch')
         ).toBeInTheDocument();
-        expect(
-          renderResult.queryByTestId('PackagePolicy.InputStreamConfig.Switch')
-        ).not.toBeInTheDocument();
       });
     });
 
@@ -1074,7 +1071,7 @@ describe('PackagePolicyInputPanel', () => {
       streams: [packagePolicyInput.streams[0]],
     } as NewPackagePolicyInput;
 
-    it('should render title without toggle switch when isSingleInputAndStreams is true', async () => {
+    it('should render toggle switch when isSingleInputAndStreams is true', async () => {
       renderResult = testRenderer.render(
         <PackagePolicyInputPanel
           packageInfo={mockPackageInfo}
@@ -1088,11 +1085,8 @@ describe('PackagePolicyInputPanel', () => {
       );
       await waitFor(() => {
         expect(
-          renderResult.getByTestId('PackagePolicy.InputStreamConfig.title')
+          renderResult.getByTestId('PackagePolicy.InputStreamConfig.Switch')
         ).toBeInTheDocument();
-        expect(
-          renderResult.queryByTestId('PackagePolicy.InputStreamConfig.Switch')
-        ).not.toBeInTheDocument();
       });
     });
 
