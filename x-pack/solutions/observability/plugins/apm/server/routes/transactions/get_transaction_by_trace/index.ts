@@ -8,6 +8,7 @@
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { TransactionDetailRedirectInfo } from '@kbn/apm-types';
 import { maybe } from '../../../../common/utils/maybe';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import {
@@ -21,25 +22,6 @@ import {
   SERVICE_NAME,
 } from '../../../../common/es_fields/apm';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-
-export interface TransactionDetailRedirectInfo {
-  [AT_TIMESTAMP]: string;
-  trace: {
-    id: string;
-  };
-  transaction: {
-    id: string;
-    type: string;
-    name: string;
-
-    duration: {
-      us: number;
-    };
-  };
-  service: {
-    name: string;
-  };
-}
 
 export async function getRootTransactionByTraceId({
   traceId,
