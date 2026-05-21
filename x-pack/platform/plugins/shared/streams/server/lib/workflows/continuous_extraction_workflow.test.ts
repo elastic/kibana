@@ -27,21 +27,21 @@ describe('continuous_extraction_workflow.yaml stays in sync with constants', () 
 
   it('uses the correct maxScheduledStreams input', () => {
     assertYamlContains(
-      `name: maxScheduledStreams\n    type: number\n    default: ${MAX_SCHEDULED_STREAMS}`
+      `name: maxScheduledStreams\n        type: number\n        default: ${MAX_SCHEDULED_STREAMS}`
     );
   });
 
   it('uses the correct lookbackHours input', () => {
-    assertYamlContains(`name: lookbackHours\n    type: number\n    default: 24`);
+    assertYamlContains(`name: lookbackHours\n        type: number\n        default: 24`);
   });
 
   it('declares extractionIntervalHours as an optional input without default', () => {
-    assertYamlContains('name: extractionIntervalHours\n    type: number\n    description:');
+    assertYamlContains('name: extractionIntervalHours\n        type: number\n        description:');
     expect(WORKFLOW_YAML).not.toMatch(/name: extractionIntervalHours[\s\S]*?default:/m);
   });
 
   it('declares excludedStreamPatterns as an optional input without default', () => {
-    assertYamlContains('name: excludedStreamPatterns\n    type: string\n    description:');
+    assertYamlContains('name: excludedStreamPatterns\n        type: string\n        description:');
     expect(WORKFLOW_YAML).not.toMatch(/name: excludedStreamPatterns[\s\S]*?default:/m);
   });
 
