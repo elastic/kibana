@@ -51,7 +51,7 @@ evaluate.describe(
           dataset: {
             name: 'agent builder: security-find-rules-skill',
             description:
-              'Validates multi-rule discovery queries with the array-of-arrays atomic-condition filter (outer OR, inner AND). Backed by 10 seeded rules + 50 synthetic alerts (30 → "Suspicious PowerShell Execution", 20 → "Brute Force Detection").',
+              'Validates multi-rule discovery queries with simple flat filters. Backed by 10 seeded rules + 50 synthetic alerts (30 -> "Suspicious PowerShell Execution", 20 -> "Brute Force Detection").',
             examples: [
               {
                 input: {
@@ -64,7 +64,6 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-security-rules',
-                  tool_sequence: ['security.discover_rule_tags', 'security.find_rules'],
                 },
               },
               {
@@ -78,7 +77,6 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-security-rules',
-                  tool_sequence: ['security.find_rules'],
                 },
               },
               {
@@ -92,7 +90,6 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Rule Count Breakdown',
                   expectedSkill: 'find-security-rules',
-                  tool_sequence: ['security.find_rules'],
                 },
               },
               {
@@ -106,7 +103,6 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-security-rules',
-                  tool_sequence: ['security.find_rules'],
                 },
               },
               {
@@ -120,7 +116,6 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Semantic Rule Discovery',
                   expectedSkill: 'find-security-rules',
-                  tool_sequence: ['security.discover_rule_tags', 'security.find_rules'],
                 },
               },
               {
@@ -134,21 +129,19 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-security-rules',
-                  tool_sequence: ['security.find_rules'],
                 },
               },
               {
                 input: {
-                  question: 'List enabled detection rules with a risk score of 70 or higher.',
+                  question: 'List the top 5 enabled detection rules sorted by highest risk score.',
                 },
                 output: {
                   expected:
-                    'Found 5 enabled detection rules with risk score 70 or higher. "Suspicious PowerShell Execution" is a critical severity query rule with risk score 99. "Credential Access via LSASS" is a critical severity query rule with risk score 95. "Process Injection T1055" is a critical severity eql rule with risk score 95. "PowerShell Encoded Command" is a high severity query rule with risk score 73. "Custom DLL Loading Detection" is a high severity query rule with risk score 70. "Lateral Movement via SMB" has risk score 70 but is disabled and therefore excluded.',
+                    'The top 5 enabled detection rules sorted by risk score are "Suspicious PowerShell Execution" with risk score 99, "Credential Access via LSASS" with risk score 95, "Process Injection T1055" with risk score 95, "PowerShell Encoded Command" with risk score 73, and "Custom DLL Loading Detection" with risk score 70.',
                 },
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-security-rules',
-                  tool_sequence: ['security.find_rules'],
                 },
               },
               {
@@ -162,7 +155,6 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-security-rules',
-                  tool_sequence: ['security.find_rules'],
                 },
               },
               {
@@ -176,22 +168,19 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-security-rules',
-                  tool_sequence: ['security.find_rules'],
                 },
               },
               {
                 input: {
-                  question:
-                    'Find detection rules that are either critical severity OR cover MITRE technique T1055.',
+                  question: 'Find detection rules covering MITRE technique T1055.',
                 },
                 output: {
                   expected:
-                    'Found 3 detection rules matching critical severity or MITRE technique T1055 (Process Injection). "Suspicious PowerShell Execution" is a critical severity query rule with risk score 99 and is enabled. "Credential Access via LSASS" is a critical severity query rule with risk score 95 and is enabled. "Process Injection T1055" is a critical severity eql rule with risk score 95, is enabled, and is mapped to MITRE T1055.',
+                    'Found 1 detection rule mapped to MITRE technique T1055 (Process Injection). "Process Injection T1055" is a critical severity eql rule with risk score 95 and is enabled.',
                 },
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-security-rules',
-                  tool_sequence: ['security.find_rules'],
                 },
               },
               {
@@ -205,7 +194,6 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-security-rules',
-                  tool_sequence: ['security.discover_rule_tags', 'security.find_rules'],
                 },
               },
               {
@@ -219,7 +207,6 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-security-rules',
-                  tool_sequence: ['security.find_rules'],
                 },
               },
               {
@@ -233,7 +220,6 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-security-rules',
-                  tool_sequence: ['security.find_rules'],
                 },
               },
               {
@@ -247,7 +233,6 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Rule Discovery',
                   expectedSkill: 'find-security-rules',
-                  tool_sequence: ['security.discover_rule_tags'],
                 },
               },
               {
@@ -262,7 +247,6 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Noisy Rules',
                   expectedSkill: 'find-security-rules',
-                  tool_sequence: ['security.alerts', 'security.find_rules'],
                 },
               },
               {
@@ -276,7 +260,6 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Noisy Rules',
                   expectedSkill: 'find-security-rules',
-                  tool_sequence: ['security.alerts', 'security.find_rules'],
                 },
               },
             ],

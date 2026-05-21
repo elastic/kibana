@@ -6,19 +6,20 @@
  */
 
 import { ToolResultType } from '@kbn/agent-builder-common';
+import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
+import { EXPECTED_MAX_TAGS } from '../../../lib/detection_engine/rule_management/constants';
 import { SECURITY_ALERTS_TOOL_ID } from '../../tools';
 import {
   createToolHandlerContext,
   createToolTestMocks,
   setupMockCoreStartServices,
 } from '../../__mocks__/test_helpers';
-import { createFindRulesSkill } from './find_rules_skill';
-import { FIND_RULES_INLINE_TOOL_ID, findRulesSchema } from './find_rules_tool';
+import { FIND_RULES_INLINE_TOOL_ID, buildToolFilter, findRulesSchema } from './find_rules_tool';
 import {
   DISCOVER_RULE_TAGS_INLINE_TOOL_ID,
   discoverRuleTagsSchema,
 } from './discover_rule_tags_tool';
-import { buildToolFilter } from './find_rules_tool';
+import { createFindRulesSkill } from './find_rules_skill';
 
 const createMockDeps = () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
@@ -57,6 +58,12 @@ describe('findRulesSkill', () => {
     expect(skill.name).toBe('find-security-rules');
     expect(skill.basePath).toBe('skills/security/rules');
     expect(skill.description).toContain('detection rules');
+  });
+
+  it('uses an allow-listed built-in skill id', () => {
+    const { getStartServices, mockLogger } = createMockDeps();
+    const skill = createFindRulesSkill({ getStartServices, logger: mockLogger });
+    expect(isAllowedBuiltinSkill(skill.id)).toBe(true);
   });
 
   it('exposes the alerts tool as a registry tool', () => {
@@ -160,6 +167,7 @@ describe('findRulesSkill', () => {
 
 describe('findRulesSchema', () => {
   it('accepts flat filter parameters', () => {
+    expect(findRulesSchema.safeParse({ searchTerm: 'PowerShell' }).success).toBe(true);
     expect(findRulesSchema.safeParse({ severity: ['critical'] }).success).toBe(true);
     expect(findRulesSchema.safeParse({ enabled: true, ruleSource: 'custom' }).success).toBe(true);
     expect(findRulesSchema.safeParse({ tags: ['MITRE'], excludeTags: ['Custom'] }).success).toBe(
@@ -168,6 +176,7 @@ describe('findRulesSchema', () => {
   });
 
   it('rejects unknown parameters', () => {
+    expect(findRulesSchema.safeParse({ nameContains: 'PowerShell' }).success).toBe(false);
     expect(findRulesSchema.safeParse({ tagDiscovery: true }).success).toBe(false);
     expect(findRulesSchema.safeParse({ countBy: 'enabled' }).success).toBe(false);
     expect(findRulesSchema.safeParse({ groupBy: 'tags' }).success).toBe(false);
@@ -271,8 +280,8 @@ describe('buildToolFilter', () => {
     );
   });
 
-  it('builds nameContains clause via existing search term logic', () => {
-    const result = buildToolFilter({ nameContains: 'PowerShell' });
+  it('builds searchTerm clause via existing search term logic', () => {
+    const result = buildToolFilter({ searchTerm: 'PowerShell' });
     expect(result).toContain('alert.attributes.name.keyword: *PowerShell*');
   });
 
@@ -435,7 +444,7 @@ describe('discoverRuleTags inline tool handler', () => {
     expect(toolDef.id).toBe(DISCOVER_RULE_TAGS_INLINE_TOOL_ID);
   });
 
-  it('uses findRules aggregations for tag discovery, with a 500-bucket size cap', async () => {
+  it('uses findRules aggregations for tag discovery with the rules tag cap', async () => {
     const { toolDef, findMock, aggregateMock, mockEsClient, mockLogger, mockRequest } =
       await setup();
     findMock.mockResolvedValue({
@@ -459,7 +468,7 @@ describe('discoverRuleTags inline tool handler', () => {
     expect(findMock.mock.calls[0][0].options.aggs.by_field.terms.field).toBe(
       'alert.attributes.tags'
     );
-    expect(findMock.mock.calls[0][0].options.aggs.by_field.terms.size).toBe(500);
+    expect(findMock.mock.calls[0][0].options.aggs.by_field.terms.size).toBe(EXPECTED_MAX_TAGS);
     expect(result.results[0].type).toBe(ToolResultType.other);
     expect(result.results[0].data.groups).toEqual([{ value: 'MITRE', count: 3 }]);
     expect(result.results[0].data.truncated).toBe(false);

@@ -291,15 +291,19 @@ export async function seedFindRulesFixtures({
   esClient: Client;
   log: ToolingLog;
 }): Promise<SeededFixtures> {
-  // Delete all existing custom rules so leftover fixtures from crashed runs don't pollute results.
+  const fixtureRuleNames = SEEDED_RULES.map((rule) => rule.name);
+
+  // Delete leftover fixtures from crashed runs without touching unrelated rules.
   try {
-    const existing = await kbnClient.request<{ data: Array<{ id: string }> }>({
+    const existing = await kbnClient.request<{ data: Array<{ id: string; name: string }> }>({
       path: `${DETECTION_RULES_URL}/_find?per_page=1000`,
       method: 'GET',
     });
-    const existingIds = existing.data.data.map((r) => r.id);
+    const existingIds = existing.data.data
+      .filter((rule) => fixtureRuleNames.includes(rule.name))
+      .map((rule) => rule.id);
     if (existingIds.length > 0) {
-      log.info(`[find-rules eval] Removing ${existingIds.length} pre-existing rules...`);
+      log.info(`[find-rules eval] Removing ${existingIds.length} leftover fixture rules...`);
       await kbnClient.request({
         path: DETECTION_RULES_BULK_ACTION_URL,
         method: 'POST',
@@ -310,11 +314,11 @@ export async function seedFindRulesFixtures({
     log.warning(`[find-rules eval] Pre-seed cleanup failed: ${err.message}`);
   }
 
-  // Delete any leftover alerts from previous runs.
+  // Delete leftover fixture alerts from previous runs.
   try {
     await esClient.deleteByQuery({
       index: ALERTS_INDEX,
-      query: { match_all: {} },
+      query: { terms: { 'kibana.alert.rule.name': fixtureRuleNames } },
       refresh: true,
       conflicts: 'proceed',
     });

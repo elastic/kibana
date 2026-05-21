@@ -42,7 +42,11 @@ const SORT_FIELDS = [
 
 export const findRulesSchema = z
   .object({
-    nameContains: z.string().min(1).optional().describe('Search rules by name.'),
+    searchTerm: z
+      .string()
+      .min(1)
+      .optional()
+      .describe('Search text across rule name, index patterns, and MITRE tactic/technique fields.'),
     enabled: z.boolean().optional().describe('Match enabled (true) or disabled (false) rules.'),
     ruleSource: z
       .enum(['custom', 'prebuilt'])
@@ -59,7 +63,9 @@ export const findRulesSchema = z
     tags: z
       .array(z.string().min(1))
       .optional()
-      .describe('Exact tag values (AND). Discover values first via `security.discover_rule_tags`.'),
+      .describe(
+        'Exact tag values to include (OR). Discover values first via `security.discover_rule_tags`.'
+      ),
     excludeTags: z
       .array(z.string().min(1))
       .optional()
@@ -96,12 +102,12 @@ export const findRulesSchema = z
 // ---- Filter building ----
 //
 // Delegates to convertRulesFilterToKQL() for parameters it supports
-// (nameContains, enabled, ruleSource, ruleType), and appends extra KQL
+// (searchTerm, enabled, ruleSource, ruleType), and appends extra KQL
 // for parameters it doesn't (severity, tags, mitreTechnique, ruleId, excludeTags).
 // Tags are handled here (OR) instead of by convertRulesFilterToKQL (AND).
 
 interface FilterInput {
-  nameContains?: string;
+  searchTerm?: string;
   enabled?: boolean;
   ruleSource?: 'custom' | 'prebuilt';
   severity?: string[];
@@ -114,7 +120,7 @@ interface FilterInput {
 
 export function buildToolFilter(params: FilterInput): string | undefined {
   const baseKql = convertRulesFilterToKQL({
-    filter: params.nameContains,
+    filter: params.searchTerm,
     enabled: params.enabled,
     showCustomRules: params.ruleSource === 'custom',
     showElasticRules: params.ruleSource === 'prebuilt',

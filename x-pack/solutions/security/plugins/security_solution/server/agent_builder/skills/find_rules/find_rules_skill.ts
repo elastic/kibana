@@ -96,15 +96,17 @@ Examples:
 
 ## Filtering
 
-All filter parameters are flat and optional. Non-array parameters are ANDed together. Array parameters (\`severity\`, \`ruleType\`, \`tags\`) are ORed within the field.
+All filter parameters are flat and optional. Different parameters are ANDed together. Array parameters (\`severity\`, \`ruleType\`, \`tags\`) are ORed within the same field.
 
-Parameters: \`nameContains\`, \`enabled\`, \`ruleSource\`, \`severity\`, \`ruleType\`, \`tags\`, \`excludeTags\`, \`mitreTechnique\`, \`ruleId\`.
+Parameters: \`searchTerm\`, \`enabled\`, \`ruleSource\`, \`severity\`, \`ruleType\`, \`tags\`, \`excludeTags\`, \`mitreTechnique\`, \`ruleId\`.
 
 Examples:
 - Enabled critical rules: \`{ enabled: true, severity: ["critical"] }\`
 - Critical or high severity: \`{ severity: ["critical", "high"] }\`
 - MITRE-tagged, exclude Custom: \`{ tags: ["MITRE"], excludeTags: ["Custom"] }\`
 - Custom query rules: \`{ ruleSource: "custom", ruleType: ["query"] }\`
+- Text search: \`{ searchTerm: "PowerShell" }\`
+- Highest-risk enabled rules: \`{ enabled: true, sortField: "risk_score", sortOrder: "desc", perPage: 5 }\`
 
 ## Rendering
 
