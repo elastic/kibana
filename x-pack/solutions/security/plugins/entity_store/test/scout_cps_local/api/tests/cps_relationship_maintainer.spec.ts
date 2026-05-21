@@ -97,11 +97,15 @@ async function seedLocalUserEntity(
 }
 
 /**
- * Polls GET /api/security/entity_store/status until the engine reports `running`,
- * or throws on timeout. The INSTALL route returns success while the engine is
- * still bootstrapping its backing indices and aliases (e.g. entities-latest-default),
- * so a test that immediately writes/reads against those aliases races with the
- * async setup and fails with `index_not_found_exception`.
+ * Polls GET /api/security/entity_store/status?include_components=true until the
+ * top-level status is `running` AND every engine's component list shows all
+ * resources `installed: true`, or throws on timeout.
+ *
+ * The plain `running` status flips to true once each engine's task is scheduled,
+ * which is BEFORE the engine actually finishes provisioning its backing indices,
+ * aliases, templates, and pipelines. Tests that immediately read/write
+ * `entities-latest-default` race that setup and intermittently fail with
+ * `index_not_found_exception`, so we wait for component-level readiness instead.
  */
 async function waitForEntityStoreRunning(
   apiClient: {
@@ -115,49 +119,45 @@ async function waitForEntityStoreRunning(
 ): Promise<void> {
   const start = Date.now();
   let lastStatus: string | undefined;
+  let lastMissing: string[] = [];
 
   while (Date.now() - start < timeoutMs) {
-    const response = await apiClient.get(ENTITY_STORE_ROUTES.public.STATUS, {
-      headers,
-      responseType: 'json',
-    });
-    const body = response.body as { status?: string } | undefined;
+    const response = await apiClient.get(
+      `${ENTITY_STORE_ROUTES.public.STATUS}?include_components=true`,
+      { headers, responseType: 'json' }
+    );
+    const body = response.body as
+      | {
+          status?: string;
+          engines?: Array<{
+            type?: string;
+            status?: string;
+            components?: Array<{ id?: string; installed?: boolean }>;
+          }>;
+        }
+      | undefined;
     lastStatus = body?.status;
+
     if (lastStatus === 'running') {
-      return;
-    }
-    await new Promise((resolve) => setTimeout(resolve, 500));
-  }
-
-  throw new Error(
-    `Timed out after ${timeoutMs}ms waiting for entity store status=running (last status: ${lastStatus})`
-  );
-}
-
-/**
- * Polls the LATEST index until the given entity has a non-empty
- * `entity.relationships.accesses_frequently.ids` array, or throws on timeout.
- */
-async function waitForAccessesFrequently(
-  esClient: EsClient,
-  entityId: string,
-  timeoutMs = 60_000
-): Promise<Record<string, unknown>> {
-  const start = Date.now();
-
-  while (Date.now() - start < timeoutMs) {
-    await esClient.indices.refresh({ index: LATEST_ALIAS });
-    const res = await esClient.search({
-      index: LATEST_ALIAS,
-      query: { term: { 'entity.id': entityId } },
-      size: 1,
-    });
-
-    const src = res.hits.hits[0]?._source as Record<string, unknown> | undefined;
-    if (src) {
-      const ids = get(src, 'entity.relationships.accesses_frequently.ids');
-      if (Array.isArray(ids) && ids.length > 0) {
-        return src;
+      const engines = body?.engines ?? [];
+      const missing: string[] = [];
+      let allEnginesHaveComponents = engines.length > 0;
+      for (const engine of engines) {
+        const components = engine.components ?? [];
+        if (components.length === 0) {
+          allEnginesHaveComponents = false;
+          missing.push(`${engine.type}/<no-components-yet>`);
+          continue;
+        }
+        for (const component of components) {
+          if (component.installed !== true) {
+            missing.push(`${engine.type}/${component.id}`);
+          }
+        }
+      }
+      lastMissing = missing;
+      if (allEnginesHaveComponents && missing.length === 0) {
+        return;
       }
     }
 
@@ -165,7 +165,55 @@ async function waitForAccessesFrequently(
   }
 
   throw new Error(
-    `Timed out after ${timeoutMs}ms waiting for accesses_frequently relationship on entity '${entityId}'`
+    `Timed out after ${timeoutMs}ms waiting for entity store status=running with all components installed ` +
+      `(last status: ${lastStatus}, missing components: ${lastMissing.join(', ') || '<none>'})`
+  );
+}
+
+/**
+ * Polls the LATEST index until the given entity has a non-empty
+ * `entity.relationships.accesses_frequently.ids` array, or throws on timeout.
+ *
+ * `indices.refresh` and `search` can hit transient shard-level errors on a
+ * freshly-installed v2 latest index (e.g. `already_closed_exception` while a
+ * replica shard is still settling), so we swallow per-iteration errors and
+ * keep polling rather than failing the test on a recoverable hiccup.
+ */
+async function waitForAccessesFrequently(
+  esClient: EsClient,
+  entityId: string,
+  timeoutMs = 60_000
+): Promise<Record<string, unknown>> {
+  const start = Date.now();
+  let lastError: unknown;
+
+  while (Date.now() - start < timeoutMs) {
+    try {
+      await esClient.indices.refresh({ index: LATEST_ALIAS });
+      const res = await esClient.search({
+        index: LATEST_ALIAS,
+        query: { term: { 'entity.id': entityId } },
+        size: 1,
+      });
+
+      const src = res.hits.hits[0]?._source as Record<string, unknown> | undefined;
+      if (src) {
+        const ids = get(src, 'entity.relationships.accesses_frequently.ids');
+        if (Array.isArray(ids) && ids.length > 0) {
+          return src;
+        }
+      }
+    } catch (e) {
+      lastError = e;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+
+  const lastErrorMsg = lastError instanceof Error ? lastError.message : String(lastError ?? '');
+  throw new Error(
+    `Timed out after ${timeoutMs}ms waiting for accesses_frequently relationship on entity '${entityId}'` +
+      (lastErrorMsg ? ` (last error: ${lastErrorMsg})` : '')
   );
 }
 
@@ -195,7 +243,7 @@ apiTest.describe(
       expect([200, 201]).toContain(installResponse.statusCode);
 
       // INSTALL returns before the engine finishes provisioning the latest alias —
-      // poll until status=running so seedLocalUserEntity has an alias to write into.
+      // poll until every component is installed so seed/refresh have an alias to use.
       await waitForEntityStoreRunning(apiClient, defaultHeaders);
 
       const initResponse = await apiClient.post(
