@@ -12,26 +12,30 @@ import { useForm, FormProvider } from 'react-hook-form';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import { Textarea } from './textarea';
 
-jest.mock('../../../markdown_editor', () => ({
-  MarkdownEditor: ({
-    value,
-    onChange,
-    ariaLabel,
-    'data-test-subj': dataTestSubj,
-  }: {
-    value: string;
-    onChange: (value: string) => void;
-    ariaLabel: string;
-    'data-test-subj': string;
-  }) => (
-    <textarea
-      data-test-subj={dataTestSubj}
-      aria-label={ariaLabel}
-      value={value}
-      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange(e.target.value)}
-    />
-  ),
-}));
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  return {
+    ...actual,
+    EuiMarkdownEditor: ({
+      value,
+      onChange,
+      'aria-label': ariaLabel,
+      'data-test-subj': dataTestSubj,
+    }: {
+      value: string;
+      onChange: (value: string) => void;
+      'aria-label': string;
+      'data-test-subj': string;
+    }) => (
+      <textarea
+        data-test-subj={dataTestSubj}
+        aria-label={ariaLabel}
+        value={value}
+        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange(e.target.value)}
+      />
+    ),
+  };
+});
 
 interface FormWrapperProps {
   isRequired?: boolean;
