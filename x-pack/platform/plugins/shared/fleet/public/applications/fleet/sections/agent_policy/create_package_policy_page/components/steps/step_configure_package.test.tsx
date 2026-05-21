@@ -8,6 +8,7 @@
 import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
 import { parse } from 'yaml';
+import { validateAgentConditionExpression } from '@kbn/elastic-agent-condition-language';
 
 import type { TestRenderer } from '../../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../../mock';
@@ -18,6 +19,8 @@ import { allowedExperimentalValues } from '../../../../../../../../common/experi
 import { validatePackagePolicy, isInputCompatibleWithVarGroupSelections } from '../../services';
 
 import { StepConfigurePackagePolicy } from './step_configure_package';
+
+const deps = { safeLoadYaml: parse, conditionValidator: validateAgentConditionExpression };
 
 describe('StepConfigurePackage', () => {
   let packageInfo: PackageInfo;
@@ -32,7 +35,7 @@ describe('StepConfigurePackage', () => {
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
   const render = (isAgentlessSelected = false) => {
-    const validationResults = validatePackagePolicy(packagePolicy, packageInfo, parse);
+    const validationResults = validatePackagePolicy(packagePolicy, packageInfo, deps);
 
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
@@ -298,7 +301,7 @@ describe('StepConfigurePackage', () => {
     });
 
     const editPackagePolicy = { ...packagePolicy, supports_agentless: false };
-    const validationResults = validatePackagePolicy(editPackagePolicy, packageInfo, parse);
+    const validationResults = validatePackagePolicy(editPackagePolicy, packageInfo, deps);
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
         packageInfo={packageInfo}
@@ -398,7 +401,7 @@ describe('StepConfigurePackage', () => {
     ];
 
     const editPackagePolicy = { ...packagePolicy, supports_agentless: false };
-    const validationResults = validatePackagePolicy(editPackagePolicy, packageInfo, parse);
+    const validationResults = validatePackagePolicy(editPackagePolicy, packageInfo, deps);
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
         packageInfo={packageInfo}
@@ -565,7 +568,7 @@ describe('StepConfigurePackage with multiple inputs of same type but different i
   });
 
   it('should render both input panels with their respective titles', async () => {
-    const validationResults = validatePackagePolicy(otelPackagePolicy, otelPackageInfo, parse);
+    const validationResults = validatePackagePolicy(otelPackagePolicy, otelPackageInfo, deps);
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
         packageInfo={otelPackageInfo}
@@ -587,7 +590,7 @@ describe('StepConfigurePackage with multiple inputs of same type but different i
   });
 
   it('should render two separate input panels with independent stream toggles, not mixed', async () => {
-    const validationResults = validatePackagePolicy(otelPackagePolicy, otelPackageInfo, parse);
+    const validationResults = validatePackagePolicy(otelPackagePolicy, otelPackageInfo, deps);
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
         packageInfo={otelPackageInfo}
@@ -720,7 +723,7 @@ describe('isSingleInputAndStreams behavior', () => {
     const validationResults = validatePackagePolicy(
       singleInputPackagePolicy,
       singleInputPackageInfo,
-      parse
+      deps
     );
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
@@ -748,7 +751,7 @@ describe('isSingleInputAndStreams behavior', () => {
     const validationResults = validatePackagePolicy(
       singleInputPackagePolicy,
       singleInputPackageInfo,
-      parse
+      deps
     );
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
@@ -889,7 +892,7 @@ describe('isSingleInputAndStreams behavior', () => {
       ],
     };
 
-    const validationResults = validatePackagePolicy(multiInputPolicy, multiInputPackageInfo, parse);
+    const validationResults = validatePackagePolicy(multiInputPolicy, multiInputPackageInfo, deps);
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
         packageInfo={multiInputPackageInfo}
@@ -1011,7 +1014,7 @@ describe('isSingleInputAndStreams behavior', () => {
     const validationResults = validatePackagePolicy(
       multiTemplatePolicy,
       multiTemplatePackageInfo,
-      parse
+      deps
     );
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
@@ -1060,7 +1063,7 @@ describe('isSingleInputAndStreams behavior', () => {
     const validationResults = validatePackagePolicy(
       singleInputPackagePolicy,
       deprecatedTemplatePackageInfo,
-      parse
+      deps
     );
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
@@ -1180,7 +1183,7 @@ describe('condition field behavior', () => {
     const validationResults = validatePackagePolicy(
       supportsAgentlessPolicy,
       supportsAgentlessPackageInfo,
-      parse
+      deps
     );
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
@@ -1232,7 +1235,7 @@ describe('condition field behavior', () => {
     const validationResults = validatePackagePolicy(
       supportsAgentlessPolicy,
       supportsAgentlessPackageInfo,
-      parse
+      deps
     );
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy

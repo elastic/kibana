@@ -8,7 +8,6 @@
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 import { keyBy } from 'lodash';
-import { validateAgentConditionExpression } from '@kbn/elastic-agent-condition-language';
 
 import type {
   NewPackagePolicy,
@@ -37,6 +36,11 @@ import { packageHasNoPolicyTemplates } from './policy_template';
 import { isValidDataset, isValidDataStreamType } from './is_valid_namespace';
 
 type Errors = string[] | null;
+
+export interface ValidatePackagePolicyDeps {
+  safeLoadYaml: (yaml: string) => any;
+  conditionValidator?: (expr?: string) => Array<{ line: number; column: number; message: string }>;
+}
 
 interface DurationParseResult {
   isValid: boolean;
@@ -150,8 +154,12 @@ export type PackagePolicyValidationResults = {
   inputs: Record<PackagePolicyInput['type'], PackagePolicyInputValidationResults> | null;
 } & PackagePolicyConfigValidationResults;
 
-const validateCondition = (expr?: string): Errors => {
-  const errors = validateAgentConditionExpression(expr);
+const validateCondition = (
+  expr: string | undefined,
+  conditionValidator: ValidatePackagePolicyDeps['conditionValidator']
+): Errors => {
+  if (!conditionValidator) return null;
+  const errors = conditionValidator(expr);
   if (!errors.length) return null;
   return errors.map(({ line, column, message }) =>
     i18n.translate('xpack.fleet.packagePolicyValidation.conditionSyntaxErrorMessage', {
@@ -292,9 +300,10 @@ const VALIDATE_DATASTREAMS_PERMISSION_REGEX =
 export const validatePackagePolicy = (
   packagePolicy: NewPackagePolicy,
   packageInfo: PackageInfo,
-  safeLoadYaml: (yaml: string) => any,
+  deps: ValidatePackagePolicyDeps,
   spaceSettings?: { allowedNamespacePrefixes?: string[] }
 ): PackagePolicyValidationResults => {
+  const { safeLoadYaml, conditionValidator } = deps;
   const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
   const validationResults: PackagePolicyValidationResults = {
     name: null,
@@ -342,7 +351,7 @@ export const validatePackagePolicy = (
       );
   }
 
-  validationResults.condition = validateCondition(packagePolicy.condition);
+  validationResults.condition = validateCondition(packagePolicy.condition, conditionValidator);
 
   // Validate package-level vars
   const packageVarsByName = keyBy(packageInfo.vars || [], 'name');
@@ -494,7 +503,7 @@ export const validatePackagePolicy = (
       delete inputValidationResults.required_vars;
     }
 
-    const inputConditionErrors = validateCondition(input.condition);
+    const inputConditionErrors = validateCondition(input.condition, conditionValidator);
     if (inputConditionErrors !== null) {
       inputValidationResults.condition = inputConditionErrors;
     }
@@ -552,7 +561,7 @@ export const validatePackagePolicy = (
           }
         }
 
-        const streamConditionErrors = validateCondition(stream.condition);
+        const streamConditionErrors = validateCondition(stream.condition, conditionValidator);
         if (streamConditionErrors !== null) {
           streamValidationResults.condition = streamConditionErrors;
         }
