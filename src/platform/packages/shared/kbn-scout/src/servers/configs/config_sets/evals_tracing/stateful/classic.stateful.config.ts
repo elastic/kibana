@@ -131,9 +131,6 @@ export const servers: ScoutServerConfig = {
     },
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
-      // OTel demo snapshots use trace documents; APM latency rules must not query rollup metrics
-      // (histogram percentiles on OTel rollups are often null and alerts never fire).
-      '--xpack.apm.searchAggregatedTransactions=never',
       ...(preconfiguredEisConnectorsArg ? [preconfiguredEisConnectorsArg] : []),
       ...(shouldEnableTracing
         ? [
