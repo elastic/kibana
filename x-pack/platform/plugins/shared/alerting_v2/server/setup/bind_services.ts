@@ -26,12 +26,13 @@ import { ActionPolicyClient } from '../lib/action_policy_client';
 import { ActionPolicyNamespaceToken } from '../lib/action_policy_client/tokens';
 import { ActionPolicyExecutionHistoryClient } from '../lib/action_policy_execution_history_client';
 import { RulesClient } from '../lib/rules_client';
-import { RulesClientSpaceIdToken } from '../lib/rules_client/tokens';
+import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
 import { ApiKeyService } from '../lib/services/api_key_service/api_key_service';
 import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
 import { EventLogService } from '../lib/services/event_log_service/event_log_service';
 import { EventLogServiceToken } from '../lib/services/event_log_service/tokens';
 import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
+import { AlertingDomainEventBus, EventBusToken } from '../lib/events/event_bus';
 import { MaintenanceWindowService } from '../lib/services/maintenance_window_service/maintenance_window_service';
 import {
   MaintenanceWindowSavedObjectsClientToken,
@@ -104,12 +105,12 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
           actionPolicyClient: get(ActionPolicyClient),
         },
         options: {
-          spaceId: get(RulesClientSpaceIdToken),
+          spaceId: get(RequestSpaceIdToken),
         },
       });
     })
     .inRequestScope();
-  bind(RulesClientSpaceIdToken)
+  bind(RequestSpaceIdToken)
     .toDynamicValue(({ get }) => {
       const request = get(Request);
       const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
@@ -144,6 +145,10 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
 
   bind(LoggerService).toSelf().inSingletonScope();
   bind(LoggerServiceToken).toService(LoggerService);
+
+  bind(AlertingDomainEventBus).toSelf().inSingletonScope();
+  bind(EventBusToken).toService(AlertingDomainEventBus);
+
   bind(EventLogService).toSelf().inSingletonScope();
   bind(EventLogServiceToken).toService(EventLogService);
   bind(WorkflowsClientToken)
