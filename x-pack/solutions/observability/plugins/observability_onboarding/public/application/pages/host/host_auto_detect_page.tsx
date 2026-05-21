@@ -177,6 +177,7 @@ export const HostAutoDetectPage: React.FC<HostAutoDetectPageProps> = ({
                   wiredStreamsStatus={wiredStreamsStatus}
                   streamsDocLink={docLinks?.links.observability.logsStreams}
                   useInlineCopyOnly
+                  useColoredSyntax
                 />
               ),
             },

@@ -46,6 +46,7 @@ interface OtelLogsInstallStepProps {
   >;
   streamsDocLink?: string;
   useInlineCopyOnly?: boolean;
+  useColoredSyntax?: boolean;
 }
 
 const COMMAND_TITLE = i18n.translate(
@@ -66,24 +67,25 @@ export const OtelLogsInstallStep: React.FC<OtelLogsInstallStepProps> = ({
   wiredStreamsStatus,
   streamsDocLink,
   useInlineCopyOnly = false,
+  useColoredSyntax = false,
 }) => {
   const { isEnabled, isLoading, isEnabling, enableWiredStreams } = wiredStreamsStatus;
   const useWiredStreams = ingestionMode === 'wired';
 
   const command = setupData
     ? buildInstallCommand({
-        platform: os,
-        isMetricsOnboardingEnabled,
-        isManagedOtlpServiceAvailable,
-        managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
-        elasticsearchUrl: setupData.elasticsearchUrl,
-        apiKeyEncoded: setupData.apiKeyEncoded,
-        agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
-        useWiredStreams,
-      })
+      platform: os,
+      isMetricsOnboardingEnabled,
+      isManagedOtlpServiceAvailable,
+      managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
+      elasticsearchUrl: setupData.elasticsearchUrl,
+      apiKeyEncoded: setupData.apiKeyEncoded,
+      agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
+      useWiredStreams,
+    })
     : '';
 
-  const codeLanguage = os === 'windows' ? 'powershell' : 'bash';
+  const codeLanguage = os === 'windows' ? 'powershell' : useColoredSyntax ? 'bash' : 'sh';
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">

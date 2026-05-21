@@ -7,10 +7,16 @@
 
 import { screen } from '@testing-library/react';
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import type { CoreStart } from '@kbn/core/public';
 import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../../../../../common/feature_flags';
 import { ObservabilityOnboardingFlow } from '../../../observability_onboarding_flow';
 import { buildHostPageServices, renderWithHostPageProviders } from './test_helpers';
+
+const LocationProbe: React.FC = () => {
+  const { pathname } = useLocation();
+  return <div data-test-subj="locationProbe">{pathname}</div>;
+};
 
 jest.mock('../../landing', () => ({
   LandingPage: () => <div data-test-subj="landingPageStub" />,
@@ -84,10 +90,16 @@ const renderFlow = (flagEnabled: boolean, path: string) => {
   featureFlags.getBooleanValue.mockImplementation((id: string, fallback: boolean) =>
     id === IS_ADD_DATA_PAGE_V2_ENABLED ? flagEnabled : fallback
   );
-  return renderWithHostPageProviders(<ObservabilityOnboardingFlow />, {
-    initialEntries: [path],
-    services,
-  });
+  return renderWithHostPageProviders(
+    <>
+      <ObservabilityOnboardingFlow />
+      <LocationProbe />
+    </>,
+    {
+      initialEntries: [path],
+      services,
+    }
+  );
 };
 
 const HOST_ROUTES: ReadonlyArray<readonly [string, string]> = [
@@ -110,6 +122,11 @@ describe('Feature-flag gate on /host/* routes', () => {
       renderFlow(false, path);
       expect(screen.getByTestId('landingPageStub')).toBeInTheDocument();
       expect(screen.queryByTestId(pageStubTestId)).toBeNull();
+    });
+
+    it('rewrites the URL to / when the flag is off so orphan V2 deep links normalize', () => {
+      renderFlow(false, path);
+      expect(screen.getByTestId('locationProbe').textContent).toBe('/');
     });
   });
 

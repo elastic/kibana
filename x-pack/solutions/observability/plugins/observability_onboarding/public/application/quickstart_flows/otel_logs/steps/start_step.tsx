@@ -13,6 +13,7 @@ import type { OtelOs } from './install_step';
 interface OtelLogsStartStepProps {
   os: OtelOs;
   useInlineCopyOnly?: boolean;
+  useColoredSyntax?: boolean;
 }
 
 const START_COMMANDS: Readonly<Record<OtelOs, string>> = {
@@ -21,18 +22,13 @@ const START_COMMANDS: Readonly<Record<OtelOs, string>> = {
   windows: '.\\otelcol.ps1 --config otel.yml',
 } as const;
 
-const CODE_LANGUAGES: Readonly<Record<OtelOs, string>> = {
-  linux: 'bash',
-  mac: 'bash',
-  windows: 'powershell',
-};
-
 export const OtelLogsStartStep: React.FC<OtelLogsStartStepProps> = ({
   os,
   useInlineCopyOnly = false,
+  useColoredSyntax = false,
 }) => {
   const startCommand = START_COMMANDS[os];
-  const codeLanguage = CODE_LANGUAGES[os];
+  const codeLanguage = os === 'windows' ? 'powershell' : useColoredSyntax ? 'bash' : 'yaml';
 
   return (
     <EuiFlexGroup direction="column">

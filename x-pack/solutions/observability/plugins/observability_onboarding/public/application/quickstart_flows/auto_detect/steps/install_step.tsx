@@ -29,6 +29,7 @@ interface AutoDetectInstallStepProps {
   >;
   streamsDocLink?: string;
   useInlineCopyOnly?: boolean;
+  useColoredSyntax?: boolean;
 }
 
 export const AutoDetectInstallStep: React.FC<AutoDetectInstallStepProps> = ({
@@ -41,6 +42,7 @@ export const AutoDetectInstallStep: React.FC<AutoDetectInstallStepProps> = ({
   wiredStreamsStatus,
   streamsDocLink,
   useInlineCopyOnly = false,
+  useColoredSyntax = false,
 }) => {
   const { isEnabled, isLoading, isEnabling, enableWiredStreams } = wiredStreamsStatus;
 
@@ -84,7 +86,7 @@ export const AutoDetectInstallStep: React.FC<AutoDetectInstallStepProps> = ({
       )}
       <EuiCodeBlock
         paddingSize="m"
-        language="bash"
+        language={useColoredSyntax ? 'bash' : 'text'}
         isCopyable={useInlineCopyOnly}
         data-test-subj="observabilityOnboardingAutoDetectPanelCodeSnippet"
       >

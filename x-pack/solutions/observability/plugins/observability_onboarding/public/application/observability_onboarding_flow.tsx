@@ -8,6 +8,7 @@
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useEffect } from 'react';
 import { Route, Routes } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
 import { useLocation } from 'react-router-dom-v5-compat';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -70,7 +71,11 @@ export function ObservabilityOnboardingFlow() {
           <HostWindowsOtelPage />
         </Route>,
       ]
-    : [];
+    : [
+        <Route key="host-v2-disabled" path="/host">
+          <Redirect to="/" />
+        </Route>,
+      ];
 
   return (
     <QueryClientProvider client={queryClient}>
