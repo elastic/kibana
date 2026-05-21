@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiFlyoutProps } from '@elastic/eui';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 
 /** Flyout layout for panel flyouts opened from a {@link TracksOverlays} host. */
-export type PanelFlyoutType = 'push' | 'overlay';
+export type PanelFlyoutType = EuiFlyoutProps['type'];
 
 /**
  * Options for tracking overlays.
