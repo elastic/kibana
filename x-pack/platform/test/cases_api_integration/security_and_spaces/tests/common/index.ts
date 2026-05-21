@@ -34,7 +34,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./configure/post_configure'));
     loadTestFile(require.resolve('./internal/metrics/get_case_metrics'));
     loadTestFile(require.resolve('./internal/metrics/get_case_metrics_alerts'));
-    loadTestFile(require.resolve('./internal/metrics/get_case_metrics_actions'));
     loadTestFile(require.resolve('./internal/metrics/get_case_metrics_connectors'));
     loadTestFile(require.resolve('./internal/metrics/get_cases_metrics'));
 
