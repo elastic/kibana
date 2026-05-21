@@ -28,12 +28,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 ### Features and enhancements [kibana-9.4.2-features-enhancements]
 
-**Elastic Observability solution**:
-For the Elastic Observability 9.4.2 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
-
-**Elastic Security solution**:
-For the Elastic Security 9.4.2 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
-
 **Search**:
 * Improves the **Add inference endpoint** and **Edit inference endpoint** flyouts with clearer titles, a footer **Save** button, task type descriptions in the selector, always-visible endpoint ID and API reference fields, and inline validation for required fields [#262143]({{kib-pull}}262143).
 
