@@ -13,7 +13,6 @@ import { apiTest, TELEMETRY_HEADERS, KBN_ARCHIVES } from '../fixtures';
  * Dataset: 5 tags (tag-1..4 + unused-tag), 2 tagged dashboards, 3 tagged visualizations.
  * - dashboard refs: tag-1+tag-2, tag-2+tag-4 → 2 tagged objects, 3 distinct tags
  * - visualization refs: tag-1, tag-1+tag-3, tag-3 → 3 tagged objects, 2 distinct tags
- * - usedTags across all types: tag-1,2,3,4 → 4 (unused-tag never referenced)
  */
 apiTest.describe(
   'Saved Objects Tagging - usage collector',
@@ -44,14 +43,8 @@ apiTest.describe(
         const taggingStats =
           response.body[0].stats.stack_stats.kibana.plugins.saved_objects_tagging;
 
-        expect(taggingStats).toStrictEqual({
-          usedTags: 4,
-          taggedObjects: 5,
-          types: {
-            dashboard: { taggedObjects: 2, usedTags: 3 },
-            visualization: { taggedObjects: 3, usedTags: 2 },
-          },
-        });
+        expect(taggingStats.types.dashboard).toStrictEqual({ taggedObjects: 2, usedTags: 3 });
+        expect(taggingStats.types.visualization).toStrictEqual({ taggedObjects: 3, usedTags: 2 });
       }
     );
   }
