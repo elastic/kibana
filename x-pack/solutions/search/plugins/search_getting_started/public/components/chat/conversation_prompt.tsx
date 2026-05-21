@@ -42,6 +42,8 @@ export const ConversationPrompt = () => {
       setLauncherRect(promptLauncherRef.current.getBoundingClientRect());
     }
     setChatPhase(ConversationPhase.Opening);
+    // Two rAF calls: the first lets the browser paint the Opening state (small rect),
+    // and the second triggers the transition to Open so CSS animates between them.
     requestAnimationFrame(() => {
       requestAnimationFrame(() => setChatPhase(ConversationPhase.Open));
     });
@@ -110,13 +112,11 @@ export const ConversationPrompt = () => {
           data-test-subj="searchGettingStartedChatNewConversationOverlay"
         >
           <div css={ConversationStyle(isConversationOverlayOpen)}>
-            {isOverlayVisible && (
-              <EmbeddableConversation
-                sessionTag="search-getting-started"
-                onClose={collapseConversation}
-                ariaLabelledBy="search-getting-started-embeddable-conversation"
-              />
-            )}
+            <EmbeddableConversation
+              sessionTag="search-getting-started"
+              onClose={collapseConversation}
+              ariaLabelledBy="search-getting-started-embeddable-conversation"
+            />
           </div>
         </div>
       ) : null}

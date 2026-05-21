@@ -16,7 +16,11 @@ export const useSpaceId = () => {
 
   useEffect(() => {
     if (spaces) {
-      spaces.getActiveSpace().then((space) => setSpaceId(space.id));
+      spaces
+        .getActiveSpace()
+        .then((space) => setSpaceId(space.id))
+        // ignore exceptions and default to no space
+        .catch(() => {});
     }
   }, [spaces]);
 

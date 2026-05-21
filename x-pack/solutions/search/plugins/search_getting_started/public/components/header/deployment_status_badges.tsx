@@ -20,7 +20,11 @@ export const DeploymentStatusBadges: React.FC = () => {
   const isTrial = cloud?.isInTrial() ?? false;
 
   return (
-    <EuiFlexGroup alignItems="center" justifyContent={isTrial ? 'spaceBetween' : 'flexEnd'}>
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent={isTrial ? 'spaceBetween' : 'flexEnd'}
+      responsive={false}
+    >
       {isTrial && cloud && (
         <EuiFlexItem grow={false}>
           <TrialUsageBadge cloud={cloud} />

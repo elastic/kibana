@@ -32,7 +32,7 @@ export const GettingStartedAgentPrompt = () => {
             <p>
               {i18n.translate('xpack.search.gettingStarted.chat.agentPrompt.description', {
                 defaultMessage:
-                  'Setup our official optimized Elasticsearch skills in your preferred agentic code workflow.',
+                  'Set up our official optimized Elasticsearch skills in your preferred agentic code workflow.',
               })}
             </p>
           </EuiText>

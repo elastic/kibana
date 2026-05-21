@@ -12,7 +12,7 @@ import { layoutVar } from '@kbn/core-chrome-layout-constants';
 export function ChatContentSeparator({ euiTheme }: UseEuiTheme) {
   return css({
     borderRight: euiTheme.border.thin,
-    [`@media (max-width: ${euiTheme.breakpoint.m}px)`]: {
+    [`@media (max-width: ${euiTheme.breakpoint.l}px)`]: {
       borderRight: 'none',
     },
   });
@@ -49,12 +49,18 @@ export const NewConversationContainer = ({ euiTheme }: UseEuiTheme) =>
     paddingRight: euiTheme.size.l,
   });
 
-export const ChatColumnsGrid = css({ gridTemplateColumns: '4fr 2fr' });
+export const ChatColumnsGrid = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    gridTemplateColumns: '4fr 2fr',
+    [`@media (max-width: ${euiTheme.breakpoint.l}px)`]: {
+      gridTemplateColumns: '1fr',
+    },
+  });
 
 export const ChatStretchedFlexItem = ({ euiTheme }: UseEuiTheme) =>
   css({
     alignSelf: 'stretch',
-    [`@media (max-width: ${euiTheme.breakpoint.m}px)`]: {
+    [`@media (max-width: ${euiTheme.breakpoint.l}px)`]: {
       alignSelf: 'flex-start',
     },
   });
@@ -96,14 +102,16 @@ export const ConversationOverlayOpenStyle = ({ euiTheme }: UseEuiTheme) =>
     borderColor: 'transparent',
   });
 
-export const ConversationOverlayOpeningStyle = (promptLaunchRect: DOMRect) =>
-  css({
-    top: `${promptLaunchRect.top}px`,
-    left: `${promptLaunchRect.left}px`,
-    width: `${promptLaunchRect.width}px`,
-    height: `${promptLaunchRect.height}px`,
-    borderRadius: 16,
-  });
+export const ConversationOverlayOpeningStyle =
+  (promptLaunchRect: DOMRect) =>
+  ({ euiTheme }: UseEuiTheme) =>
+    css({
+      top: `${promptLaunchRect.top}px`,
+      left: `${promptLaunchRect.left}px`,
+      width: `${promptLaunchRect.width}px`,
+      height: `${promptLaunchRect.height}px`,
+      borderRadius: euiTheme.size.base,
+    });
 
 export const ConversationStyle =
   (isAnimatingToFull: boolean) =>

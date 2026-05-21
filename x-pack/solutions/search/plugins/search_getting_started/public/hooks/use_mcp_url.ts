@@ -11,6 +11,5 @@ import { useKibanaUrl } from './use_kibana_url';
 
 export const useAgentBuilderMcpUrl = (): string => {
   const { kibanaUrl } = useKibanaUrl();
-  const mcpServerUrl = `${kibanaUrl}${MCP_SERVER_PATH}`;
-  return mcpServerUrl;
+  return `${kibanaUrl}${MCP_SERVER_PATH}`;
 };
