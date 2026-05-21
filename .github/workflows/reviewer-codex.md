@@ -119,6 +119,7 @@ safe-outputs:
     max: 1
     target: ${{ env.PR_NUMBER }}
     allowed-events: [COMMENT]
+    footer: if-body
   add-comment:
     max: 1
     target: ${{ env.PR_NUMBER }}
@@ -126,6 +127,8 @@ safe-outputs:
   reply-to-pull-request-review-comment:
     max: 10
     target: ${{ env.PR_NUMBER }}
+  resolve-pull-request-review-thread:
+    max: 10
 # Codex engine does not expose workflow env vars like PR_NUMBER and REVIEWER_COMMENT_ID to shell tools through -c `include_only [...]`, so render this follow-up context directly in the prompt.
 ---
 

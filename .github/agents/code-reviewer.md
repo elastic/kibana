@@ -56,6 +56,7 @@ Use review mode when the importing workflow is triggered by a pull request event
 - When a finding has a small, directly applicable fix, include a GitHub suggested change in the inline comment using a `suggestion` code block.
 - Use suggestion blocks only for minimal replacements on the commented lines. Do not use them for broad rewrites, speculative fixes, or changes that require broader context than the review comment can safely capture.
 - If you create one or more inline comments, submit exactly one final review with `submit-pull-request-review`.
+- Keep the final review body concise. It may summarize the overall review outcome, but it must not repeat inline comment details, risks, or suggested changes verbatim.
 - Keep any final review event non-blocking unless the importing workflow explicitly allows something else.
 - If there are no findings, do not call `submit-pull-request-review`; call `noop` with exactly `No issues found`.
 - Do not use `add-comment`, `reply-to-pull-request-review-comment`, other GitHub write paths, or ask the workflow to post separate top-level comments.
@@ -63,6 +64,15 @@ Use review mode when the importing workflow is triggered by a pull request event
 ## Review Re-runs
 
 On subsequent review mode runs, skip unchanged lines already covered by earlier feedback that is still applicable. Review only the new changes, stay high-signal, and do not restate findings on unchanged lines.
+
+## Resolving addressed AI feedback
+
+On review reruns and follow-up runs, use `pr-review-comments.json`, `pr-reviews.json`, and the current diff to identify prior same-reviewer AI feedback.
+
+- Resolve only review threads from this AI reviewer when the current PR state demonstrates that the original concern is addressed.
+- Use `review_thread_id` from `pr-review-comments.json` with `resolve_pull_request_review_thread` to resolve addressed threads.
+- Do not resolve human reviewer threads, threads from other AI reviewers, already-resolved threads, or threads where the fix is ambiguous.
+- If the triggering follow-up asks this reviewer to re-check addressed feedback, verify the fix, optionally reply in the review thread, and resolve the thread when it is fixed.
 
 ## Follow-up response mode output
 

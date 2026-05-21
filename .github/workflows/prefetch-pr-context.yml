@@ -115,6 +115,171 @@ jobs:
             mv /tmp/pr-context/pr-metadata-with-cross-refs.json /tmp/pr-context/pr-metadata.json
           }
 
+          fetch_review_comments_with_threads() {
+            local output_file="$1"
+            local owner="${REPO%%/*}"
+            local repo_name="${REPO#*/}"
+            local cursor=""
+            local all_threads_file
+            all_threads_file="$(mktemp)"
+
+            echo '[]' > "$all_threads_file"
+
+            while true; do
+              local page_file
+              local page_threads_file
+              local next_threads_file
+              local has_next_page
+
+              page_file="$(mktemp)"
+              page_threads_file="$(mktemp)"
+              next_threads_file="$(mktemp)"
+
+              gh api graphql \
+                -f owner="$owner" \
+                -f repo="$repo_name" \
+                -F number="$PR_NUMBER" \
+                -f cursor="$cursor" \
+                -f query='
+                  query($owner: String!, $repo: String!, $number: Int!, $cursor: String) {
+                    repository(owner: $owner, name: $repo) {
+                      pullRequest(number: $number) {
+                        reviewThreads(first: 100, after: $cursor) {
+                          nodes {
+                            id
+                            isResolved
+                            isOutdated
+                            path
+                            line
+                            startLine
+                            originalLine
+                            originalStartLine
+                            diffSide
+                            startDiffSide
+                            comments(first: 100) {
+                              nodes {
+                                id
+                                databaseId
+                                body
+                                author {
+                                  __typename
+                                  login
+                                }
+                                authorAssociation
+                                url
+                                createdAt
+                                updatedAt
+                                path
+                                position
+                                originalPosition
+                                diffHunk
+                                outdated
+                                commit {
+                                  oid
+                                }
+                                originalCommit {
+                                  oid
+                                }
+                                pullRequestReview {
+                                  databaseId
+                                  id
+                                  state
+                                  submittedAt
+                                }
+                                replyTo {
+                                  id
+                                  databaseId
+                                }
+                              }
+                            }
+                          }
+                          pageInfo {
+                            hasNextPage
+                            endCursor
+                          }
+                        }
+                      }
+                    }
+                  }
+                ' > "$page_file"
+
+              jq '.data.repository.pullRequest.reviewThreads.nodes' "$page_file" > "$page_threads_file"
+              jq -s '.[0] + .[1]' "$all_threads_file" "$page_threads_file" > "$next_threads_file"
+              mv "$next_threads_file" "$all_threads_file"
+
+              has_next_page="$(jq -r '.data.repository.pullRequest.reviewThreads.pageInfo.hasNextPage' "$page_file")"
+              cursor="$(jq -r '.data.repository.pullRequest.reviewThreads.pageInfo.endCursor // empty' "$page_file")"
+
+              if [[ "$has_next_page" != "true" ]]; then
+                break
+              fi
+            done
+
+            jq \
+              --arg repo "$REPO" \
+              --arg pr_number "$PR_NUMBER" \
+              '
+                [
+                  .[] as $thread |
+                  $thread.comments.nodes[]? |
+                  {
+                    url: "https://api.github.com/repos/\($repo)/pulls/comments/\(.databaseId)",
+                    pull_request_review_id: .pullRequestReview.databaseId,
+                    id: .databaseId,
+                    node_id: .id,
+                    diff_hunk: .diffHunk,
+                    path: (.path // $thread.path),
+                    commit_id: .commit.oid,
+                    original_commit_id: .originalCommit.oid,
+                    user: (
+                      if .author == null then
+                        null
+                      elif .author.__typename == "Bot" then
+                        { login: "\(.author.login)[bot]" }
+                      else
+                        { login: .author.login }
+                      end
+                    ),
+                    body,
+                    created_at: .createdAt,
+                    updated_at: .updatedAt,
+                    html_url: .url,
+                    pull_request_url: "https://api.github.com/repos/\($repo)/pulls/\($pr_number)",
+                    author_association: .authorAssociation,
+                    start_line: (
+                      if $thread.startLine == $thread.line then null else $thread.startLine end
+                    ),
+                    original_start_line: (
+                      if $thread.originalStartLine == $thread.originalLine then null else $thread.originalStartLine end
+                    ),
+                    start_side: $thread.startDiffSide,
+                    line: $thread.line,
+                    original_line: $thread.originalLine,
+                    side: $thread.diffSide,
+                    position: .position,
+                    original_position: .originalPosition,
+                    in_reply_to_id: .replyTo.databaseId,
+                    review_id: .pullRequestReview.databaseId,
+                    review_node_id: .pullRequestReview.id,
+                    review_state: .pullRequestReview.state,
+                    review_submitted_at: .pullRequestReview.submittedAt,
+                    reply_to_node_id: .replyTo.id,
+                    review_comment_is_outdated: .outdated,
+                    review_thread_id: $thread.id,
+                    review_thread_is_resolved: $thread.isResolved,
+                    review_thread_is_outdated: $thread.isOutdated,
+                    review_thread_path: $thread.path,
+                    review_thread_line: $thread.line,
+                    review_thread_start_line: $thread.startLine,
+                    review_thread_original_line: $thread.originalLine,
+                    review_thread_original_start_line: $thread.originalStartLine,
+                    review_thread_diff_side: $thread.diffSide,
+                    review_thread_start_diff_side: $thread.startDiffSide
+                  }
+                ] | sort_by(.id)
+              ' "$all_threads_file" > "$output_file"
+          }
+
           mkdir -p /tmp/pr-context
 
           gh pr view "$PR_NUMBER" --repo "$REPO" \
@@ -131,9 +296,7 @@ jobs:
             "repos/$REPO/issues/$PR_NUMBER/comments?per_page=100" \
             /tmp/pr-context/pr-issue-comments.json
 
-          fetch_paginated_array \
-            "repos/$REPO/pulls/$PR_NUMBER/comments?per_page=100" \
-            /tmp/pr-context/pr-review-comments.json
+          fetch_review_comments_with_threads /tmp/pr-context/pr-review-comments.json
 
           fetch_paginated_array \
             "repos/$REPO/pulls/$PR_NUMBER/reviews?per_page=100" \
