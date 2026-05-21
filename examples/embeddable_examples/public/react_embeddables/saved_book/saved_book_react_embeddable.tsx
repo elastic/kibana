@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { StateComparators, PresentationContainer } from '@kbn/presentation-publishing';
 import {
@@ -48,7 +48,7 @@ const bookStateComparators: StateComparators<BookState> = {
 };
 
 export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
-  const savedBookEmbeddableFactory: EmbeddableFactory<BookEmbeddableState, BookApi> = {
+  const savedBookEmbeddableFactory: EmbeddablePublicDefinition<BookEmbeddableState, BookApi> = {
     type: BOOK_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const titleManager = initializeTitleManager(initialState);

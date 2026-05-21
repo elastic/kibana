@@ -15,7 +15,9 @@ import { useLicenseContext } from '../../../context/license/use_license_context'
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import type { Environment } from '../../../../common/environment_rt';
 import { transformToReactFlow } from '../../../../common/service_map';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { filterServiceMapSpansByEnvironment } from './filter_service_map_spans_by_environment';
 
 const INITIAL_STATE: ReactFlowServiceMapResponse = {
   nodes: [],
@@ -48,6 +50,7 @@ export const useServiceMap = ({
   serviceName,
   serviceGroupId,
   kuery,
+  strictEnvironmentScope,
 }: {
   environment: Environment;
   kuery: string;
@@ -55,6 +58,8 @@ export const useServiceMap = ({
   end: string;
   serviceGroupId?: string;
   serviceName?: string;
+  /** Drop cross-env spans before transforming when `environment` is a specific env. */
+  strictEnvironmentScope?: boolean;
 }): UseServiceMapResult => {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
@@ -109,7 +114,15 @@ export const useServiceMap = ({
     const raw = getRawResponse(data);
     if (raw && typeof raw === 'object' && 'spans' in raw) {
       try {
-        const reactFlowData = transformToReactFlow(raw as ServiceMapResponse);
+        const response = raw as ServiceMapResponse;
+        const scopedResponse =
+          strictEnvironmentScope && environment !== ENVIRONMENT_ALL.value
+            ? {
+                ...response,
+                spans: filterServiceMapSpansByEnvironment(response.spans, environment),
+              }
+            : response;
+        const reactFlowData = transformToReactFlow(scopedResponse);
         return {
           data: reactFlowData,
           status: FETCH_STATUS.SUCCESS,
@@ -124,5 +137,5 @@ export const useServiceMap = ({
     }
 
     return { data: INITIAL_STATE, status: FETCH_STATUS.SUCCESS };
-  }, [data, status, error]);
+  }, [data, status, error, environment, strictEnvironmentScope]);
 };

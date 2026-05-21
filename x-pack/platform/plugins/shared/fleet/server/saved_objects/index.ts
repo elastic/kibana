@@ -38,6 +38,7 @@ import {
   AgentPolicySchemaV3,
   AgentPolicySchemaV4,
   AgentPolicySchemaV5,
+  AgentPolicySchemaV6,
   EpmPackagesSchemaV6,
   EpmPackagesSchemaV7,
   EpmPackagesSchemaV8,
@@ -47,6 +48,7 @@ import {
   SettingsSchemaV7,
   SettingsSchemaV8,
   PackagePolicySchemaV22,
+  PackagePolicySchemaV24,
   CloudConnectorSchemaV4,
 } from '../types';
 
@@ -487,6 +489,18 @@ export const getSavedObjectTypes = (
             create: AgentPolicySchemaV5.extends({}, { unknowns: 'ignore' }),
           },
         },
+        '11': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {},
+            },
+          ],
+          schemas: {
+            forwardCompatibility: AgentPolicySchemaV6.extends({}, { unknowns: 'ignore' }),
+            create: AgentPolicySchemaV6.extends({}, { unknowns: 'ignore' }),
+          },
+        },
       },
     },
     [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
@@ -602,6 +616,18 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: AgentPolicySchemaV5.extends({}, { unknowns: 'ignore' }),
             create: AgentPolicySchemaV5.extends({}, { unknowns: 'ignore' }),
+          },
+        },
+        '6': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {},
+            },
+          ],
+          schemas: {
+            forwardCompatibility: AgentPolicySchemaV6.extends({}, { unknowns: 'ignore' }),
+            create: AgentPolicySchemaV6.extends({}, { unknowns: 'ignore' }),
           },
         },
       },
@@ -1159,6 +1185,13 @@ export const getSavedObjectTypes = (
             create: PackagePolicySchemaV22.extends({}, { unknowns: 'ignore' }),
           },
         },
+        '23': {
+          changes: [],
+          schemas: {
+            forwardCompatibility: PackagePolicySchemaV24.extends({}, { unknowns: 'ignore' }),
+            create: PackagePolicySchemaV24.extends({}, { unknowns: 'ignore' }),
+          },
+        },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
@@ -1310,6 +1343,18 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: PackagePolicySchemaV22.extends({}, { unknowns: 'ignore' }),
             create: PackagePolicySchemaV22.extends({}, { unknowns: 'ignore' }),
+          },
+        },
+        '9': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {},
+            },
+          ],
+          schemas: {
+            forwardCompatibility: PackagePolicySchemaV24.extends({}, { unknowns: 'ignore' }),
+            create: PackagePolicySchemaV24.extends({}, { unknowns: 'ignore' }),
           },
         },
       },

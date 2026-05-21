@@ -5,15 +5,22 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, type ChangeEvent, type SetStateAction } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ChangeEvent,
+  type SetStateAction,
+} from 'react';
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFilterGroup,
   EuiFieldSearch,
   EuiSuperDatePicker,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { EpisodesFilterState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import type { TimeRange } from '@kbn/es-query';
 import { AlertEpisodesStatusFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/status_filter';
@@ -23,6 +30,9 @@ import { AlertEpisodesAssigneeFilter } from '@kbn/alerting-v2-episodes-ui/compon
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
 import useDebounce from 'react-use/lib/useDebounce';
+import deepEqual from 'fast-deep-equal';
+import { DEFAULT_EPISODES_LIST_FILTER } from '../utils/episodes_list_url_state';
+import * as i18n from '../translations';
 
 export interface EpisodesFilterBarProps {
   filterState: EpisodesFilterState;
@@ -48,6 +58,10 @@ export const EpisodesFilterBar = ({
   services,
 }: EpisodesFilterBarProps) => {
   const [queryStringInput, setQueryStringInput] = useState(filterState.queryString ?? '');
+
+  useEffect(() => {
+    setQueryStringInput(filterState.queryString ?? '');
+  }, [filterState.queryString]);
 
   useDebounce(
     () => {
@@ -92,15 +106,23 @@ export const EpisodesFilterBar = ({
     setQueryStringInput(e.target.value);
   }, []);
 
+  const hasActiveFilters = useMemo(
+    () => !deepEqual(filterState, DEFAULT_EPISODES_LIST_FILTER) || queryStringInput.trim() !== '',
+    [filterState, queryStringInput]
+  );
+
+  const onClearFilters = useCallback(() => {
+    setQueryStringInput('');
+    onFilterChange({ ...DEFAULT_EPISODES_LIST_FILTER });
+  }, [onFilterChange]);
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false}>
       <EuiFlexItem grow>
         <EuiFieldSearch
           fullWidth
           compressed
-          placeholder={i18n.translate('xpack.alertingV2.episodes.filterBar.searchPlaceholder', {
-            defaultMessage: 'Search episodes…',
-          })}
+          placeholder={i18n.EPISODES_FILTER_BAR_SEARCH_PLACEHOLDER}
           value={queryStringInput}
           onChange={onKueryChange}
           data-test-subj="episodesFilterBar-search"
@@ -108,38 +130,52 @@ export const EpisodesFilterBar = ({
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiFilterGroup compressed>
-          <AlertEpisodesStatusFilter
-            selectedStatus={filterState.status}
-            onStatusChange={onStatusChange}
-            data-test-subj="episodesFilterBar-status"
-          />
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiFilterGroup compressed>
+              <AlertEpisodesStatusFilter
+                selectedStatus={filterState.status}
+                onStatusChange={onStatusChange}
+                data-test-subj="episodesFilterBar-status"
+              />
 
-          <AlertEpisodesRuleFilter
-            selectedRuleId={filterState.ruleId}
-            onRuleChange={onRuleChange}
-            ruleOptions={ruleOptions}
-            data-test-subj="episodesFilterBar-rule"
-            services={services}
-          />
+              <AlertEpisodesRuleFilter
+                selectedRuleId={filterState.ruleId}
+                onRuleChange={onRuleChange}
+                ruleOptions={ruleOptions}
+                data-test-subj="episodesFilterBar-rule"
+                services={services}
+              />
 
-          <AlertEpisodesTagFilter
-            selectedTags={filterState.tags}
-            onTagsChange={onTagsChange}
-            services={services}
-            timeRange={timeRange}
-            data-test-subj="episodesFilterBar-tags"
-          />
+              <AlertEpisodesTagFilter
+                selectedTags={filterState.tags}
+                onTagsChange={onTagsChange}
+                services={services}
+                timeRange={timeRange}
+                data-test-subj="episodesFilterBar-tags"
+              />
 
-          <AlertEpisodesAssigneeFilter
-            selectedAssigneeUid={filterState.assigneeUid}
-            onAssigneeChange={onAssigneeChange}
-            assigneeUids={assigneeUids}
-            data-test-subj="episodesFilterBar-assignee"
-          />
-        </EuiFilterGroup>
+              <AlertEpisodesAssigneeFilter
+                selectedAssigneeUid={filterState.assigneeUid}
+                onAssigneeChange={onAssigneeChange}
+                assigneeUids={assigneeUids}
+                data-test-subj="episodesFilterBar-assignee"
+              />
+            </EuiFilterGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
-
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          size="xs"
+          iconType="cross"
+          disabled={!hasActiveFilters}
+          onClick={onClearFilters}
+          data-test-subj="episodesFilterBar-resetFilters"
+        >
+          {i18n.EPISODES_FILTER_BAR_RESET_FILTERS}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiSuperDatePicker
           compressed

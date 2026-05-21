@@ -72,6 +72,7 @@ const DurationIcon = () => {
       color="hollow"
       type="clock"
       size="m"
+      aria-hidden={true}
       css={css`
         margin-right: ${euiTheme.size.xs};
       `}

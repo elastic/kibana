@@ -73,6 +73,7 @@ import { PluginContract } from './plugin_contract';
 import { PluginServices } from './plugin_services';
 import { getEndpointUnifiedAttachment } from './cases/attachments/endpoint';
 import { getEventType } from './cases/attachments/event';
+import { getSecurityAlertType } from './cases/attachments/alert';
 import { isSecuritySolutionAccessible } from './helpers_access';
 import { generateIndicatorAttachmentType } from './cases/attachments/indicator/utils/attachments';
 import { defaultDeepLinks } from './app/links/default_deep_links';
@@ -292,6 +293,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     cases.attachmentFramework.registerExternalReference(generateIndicatorAttachmentType());
     cases.attachmentFramework.registerUnified(getEndpointUnifiedAttachment());
     cases.attachmentFramework.registerUnified(getEventType());
+    cases.attachmentFramework.registerUnified(getSecurityAlertType());
 
     this.registerDiscoverSharedFeatures(core, plugins);
 
@@ -309,6 +311,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         attachments: plugins.agentBuilder.attachments,
         application: core.application,
         aiRuleCreation: this.services.aiRuleCreation,
+        uiSettings: core.uiSettings,
       });
       registerEntityAnalyticsDashboardAttachment({
         attachments: plugins.agentBuilder.attachments,

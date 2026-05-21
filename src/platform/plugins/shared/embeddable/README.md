@@ -290,7 +290,7 @@ import type { MyEmbeddableState } from '../../server';
 
 export type MyEditorApi = DefaultEmbeddableApi<MyEmbeddableState>; 
 
-export const myEmbeddableFactory: EmbeddableFactory<
+export const myEmbeddableFactory: EmbeddablePublicDefinition<
   MyEmbeddableState,
   MyEmbeddableApi
 > = {

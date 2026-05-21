@@ -96,11 +96,14 @@ if [[ "${DRY_RUN:-}" == "1" ]]; then
 fi
 
 report_step "Fetching Artifactory credentials"
-# Secret layout at `secret/ci/elastic-kibana/kbn-ui-artifactory`:
+# The secret is stored at `kv/ci-shared/serverless/cloud-ui/kbn-ui-artifactory-registry`,
+# so that engineering orgs and CIs from kibana and cloud-ui can both access it without
+# granting broader vault permissions.
+# Secret layout:
 #   registry   - full npm registry URL
 #   npm_token  - auth token
-NPM_REGISTRY="$(vault_get kbn-ui-artifactory registry)"
-NPM_TOKEN="$(vault_get kbn-ui-artifactory npm_token)"
+NPM_REGISTRY="$(vault_kv_get kv/ci-shared/serverless/cloud-ui/kbn-ui-artifactory-registry registry_url)"
+NPM_TOKEN="$(vault_kv_get kv/ci-shared/serverless/cloud-ui/kbn-ui-artifactory-registry npm_token)"
 if [[ -z "$NPM_REGISTRY" || -z "$NPM_TOKEN" ]]; then
   echo "ERROR: Artifactory credentials missing from vault." >&2
   exit 1

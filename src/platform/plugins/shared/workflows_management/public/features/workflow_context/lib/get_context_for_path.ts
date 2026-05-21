@@ -23,13 +23,7 @@ import { getVariablesSchema } from './get_variables_schema';
 import { getWorkflowContextSchema } from './get_workflow_context_schema';
 
 // Type that accepts both WorkflowYaml (transformed) and raw definition (may have legacy inputs)
-type WorkflowDefinitionForContext =
-  | WorkflowYaml
-  | (Omit<WorkflowYaml, 'inputs'> & {
-      inputs?:
-        | WorkflowYaml['inputs']
-        | Array<{ name: string; type: string; [key: string]: unknown }>;
-    });
+type WorkflowDefinitionForContext = WorkflowYaml;
 
 /**
  * Builds the step-level context schema for a given step name, without

@@ -19,6 +19,7 @@ import {
   openCreateIndexModal,
   clickCreateIndexButton,
   typeIndexName,
+  closeIndexPicker,
 } from '../../../tasks/privileged_user_monitoring';
 import { ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL } from '../../../urls/navigation';
 
@@ -72,6 +73,9 @@ describe(
       openIndexPicker();
       expandIndexPickerOptions();
       selectIndexPickerOption(sourceIndexName);
+      // the commbobox is in multi selection mode, it doesn't close on selection alone
+      // and the update button might be hidden under the popover
+      closeIndexPicker();
       clickFileUploaderUpdateButton();
 
       cy.get(ONBOARDING_CALLOUT).should('contain.text', 'Privileged user monitoring set up');

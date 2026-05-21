@@ -43,7 +43,7 @@ import type { RuleParams, RuleDomain } from '../../types';
 import type { RawRule, SanitizedRule } from '../../../../types';
 import { untrackRuleAlerts } from '../../../../rules_client/lib';
 import { softDeleteGaps } from '../../../../lib/rule_gaps/soft_delete/soft_delete_gaps';
-import { logBulkRuleChanges } from '../common_utils/log_bulk_rule_changes';
+import { logRuleChanges } from '../common_utils/log_rule_changes';
 
 export const bulkDeleteRules = async <Params extends RuleParams>(
   context: RulesClientContext,
@@ -281,7 +281,7 @@ const bulkDeleteWithOCC = async (
   });
   const rules = rulesToDelete.filter((rule) => deletedRuleIds.includes(rule.id));
 
-  await logBulkRuleChanges({
+  await logRuleChanges({
     ruleSOs: rules,
     rulesClientContext: context,
     changesContext: {

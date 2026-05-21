@@ -59,7 +59,7 @@ export type {
 export { tags } from './tags';
 
 // Test entrypoints
-export { test, spaceTest, lighthouseTest, globalSetupHook } from './test/ui';
+export { test, spaceTest, lighthouseTest, globalSetupHook, globalTeardownHook } from './test/ui';
 export { apiTest } from './test/api';
 
 // Test helpers for EUI components
@@ -67,3 +67,11 @@ export * from './eui_components';
 
 // Test helpers for Kibana components
 export * from './ui_components';
+
+// Page-object wrappers and helpers for shared Kibana surfaces.
+export {
+  ContentListWrapper,
+  buildContentListSearch,
+  buildContentListUrlRegex,
+} from './page_objects';
+export type { ContentListUrlState } from './page_objects';

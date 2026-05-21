@@ -1,0 +1,21 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
+    },
+    "optionsJSON": "{\"hidePanelTitles\":false,\"hidePanelBorders\":false,\"useMargins\":true,\"autoApplyFilters\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false}",
+    "panelsJSON": "[{\"type\":\"vis\",\"embeddableConfig\":{\"attributes\":{\"title\":\"\",\"references\":[],\"state\":{\"datasourceStates\":{\"textBased\":{\"layers\":{\"137210ff-4bf0-43d7-b86a-138325b4c883\":{\"index\":\"845c6caef1a32b0a9a91c1d366ee9a644754421e1004a6b7179fdbadec09ca82\",\"query\":{\"esql\":\"ROW foo = 1 | EVAL DELAY(5s)\"},\"columns\":[{\"columnId\":\"foo\",\"fieldName\":\"foo\",\"label\":\"foo\",\"customLabel\":false,\"meta\":{\"type\":\"number\",\"esType\":\"integer\"},\"inMetricDimension\":true}]}},\"indexPatternRefs\":[{\"id\":\"845c6caef1a32b0a9a91c1d366ee9a644754421e1004a6b7179fdbadec09ca82\",\"title\":\"\"}]}},\"filters\":[],\"query\":{\"esql\":\"ROW foo = 1 | EVAL DELAY(5s)\"},\"visualization\":{\"layerId\":\"137210ff-4bf0-43d7-b86a-138325b4c883\",\"layerType\":\"data\",\"metricAccessor\":\"foo\"},\"adHocDataViews\":{\"845c6caef1a32b0a9a91c1d366ee9a644754421e1004a6b7179fdbadec09ca82\":{\"id\":\"845c6caef1a32b0a9a91c1d366ee9a644754421e1004a6b7179fdbadec09ca82\",\"title\":\"\",\"sourceFilters\":[],\"type\":\"esql\",\"fieldFormats\":{},\"runtimeFieldMap\":{},\"allowNoIndex\":false,\"name\":\"\",\"allowHidden\":false,\"managed\":false}},\"needsRefresh\":false},\"visualizationType\":\"lnsMetric\",\"version\":2},\"hide_title\":true,\"drilldowns\":[]},\"panelIndex\":\"5d548114-b699-4a5c-9cd8-f6a21299bcf1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"5d548114-b699-4a5c-9cd8-f6a21299bcf1\"}}]",
+    "timeRestore": false,
+    "title": "Simple slow dash"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2026-04-30T19:15:44.089Z",
+  "id": "80d92ad1-ce0d-4567-81a0-a53987daf0f9",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.3.0",
+  "updated_at": "2026-04-30T19:16:52.230Z",
+  "version": "WzYsMV0="
+}

@@ -96,7 +96,6 @@ Object {
         },
       ],
       "description": "The root condition object. It can be a simple filter or a combination of other conditions.",
-      "id": "Condition",
     },
     "ConditionWithSteps": Object {
       "allOf": Array [
@@ -124,7 +123,6 @@ Object {
           "type": "object",
         },
       ],
-      "id": "ConditionWithSteps",
     },
     "FilterCondition": Object {
       "anyOf": Array [
@@ -283,7 +281,6 @@ Object {
         },
       ],
       "description": "A basic filter condition, either unary or binary.",
-      "id": "FilterCondition",
     },
     "StreamlangConditionBlock": Object {
       "additionalProperties": false,
@@ -360,7 +357,6 @@ Object {
           "label": "Condition block with else",
         },
       ],
-      "id": "StreamlangConditionBlock",
       "properties": Object {
         "condition": Object {
           "additionalProperties": false,
@@ -590,7 +586,6 @@ Object {
               "label": "NOT condition",
             },
           ],
-          "id": "ConditionWithSteps",
           "properties": Object {
             "always": Object {
               "additionalProperties": false,
@@ -2139,6 +2134,58 @@ Object {
             },
             Object {
               "additionalProperties": false,
+              "description": "Extract the domain parts from an FQDN string",
+              "properties": Object {
+                "action": Object {
+                  "const": "registered_domain",
+                  "type": "string",
+                },
+                "customIdentifier": Object {
+                  "description": "Custom identifier to correlate this processor across outputs",
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "description": Object {
+                  "description": "Human-readable notes about this processor step",
+                  "type": "string",
+                },
+                "expression": Object {
+                  "description": "The string expression containing the FQDN to parse",
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "ignore_failure": Object {
+                  "description": "Continue pipeline execution if this processor fails",
+                  "type": "boolean",
+                },
+                "ignore_missing": Object {
+                  "description": "Skip processing when expression field is missing",
+                  "type": "boolean",
+                },
+                "prefix": Object {
+                  "description": "The prefix for the output columns. The extracted parts are available as prefix.part_name",
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "where": Object {
+                  "allOf": Array [
+                    Object {
+                      "$ref": "#/definitions/Condition",
+                    },
+                  ],
+                  "description": "Conditional expression controlling whether this processor runs",
+                },
+              },
+              "required": Array [
+                "action",
+                "expression",
+                "prefix",
+              ],
+              "title": "Registered Domain",
+              "type": "object",
+            },
+            Object {
+              "additionalProperties": false,
               "description": "Execute raw Elasticsearch ingest processors directly",
               "properties": Object {
                 "action": Object {
@@ -2223,6 +2270,7 @@ Object {
                 "network_direction",
                 "json_extract",
                 "enrich",
+                "registered_domain",
                 "manual_ingest_pipeline",
               ],
               "type": "string",
@@ -2238,7 +2286,6 @@ Object {
           "$ref": "#/definitions/StreamlangConditionBlock",
         },
       ],
-      "id": "StreamlangStep",
     },
   },
   "properties": Object {
@@ -3600,6 +3647,58 @@ Object {
               },
               Object {
                 "additionalProperties": false,
+                "description": "Extract the domain parts from an FQDN string",
+                "properties": Object {
+                  "action": Object {
+                    "const": "registered_domain",
+                    "type": "string",
+                  },
+                  "customIdentifier": Object {
+                    "description": "Custom identifier to correlate this processor across outputs",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "description": Object {
+                    "description": "Human-readable notes about this processor step",
+                    "type": "string",
+                  },
+                  "expression": Object {
+                    "description": "The string expression containing the FQDN to parse",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "ignore_failure": Object {
+                    "description": "Continue pipeline execution if this processor fails",
+                    "type": "boolean",
+                  },
+                  "ignore_missing": Object {
+                    "description": "Skip processing when expression field is missing",
+                    "type": "boolean",
+                  },
+                  "prefix": Object {
+                    "description": "The prefix for the output columns. The extracted parts are available as prefix.part_name",
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "where": Object {
+                    "allOf": Array [
+                      Object {
+                        "$ref": "#/definitions/Condition",
+                      },
+                    ],
+                    "description": "Conditional expression controlling whether this processor runs",
+                  },
+                },
+                "required": Array [
+                  "action",
+                  "expression",
+                  "prefix",
+                ],
+                "title": "Registered Domain",
+                "type": "object",
+              },
+              Object {
+                "additionalProperties": false,
                 "description": "Execute raw Elasticsearch ingest processors directly",
                 "properties": Object {
                   "action": Object {
@@ -3684,6 +3783,7 @@ Object {
                   "network_direction",
                   "json_extract",
                   "enrich",
+                  "registered_domain",
                   "manual_ingest_pipeline",
                 ],
                 "type": "string",
@@ -3699,7 +3799,6 @@ Object {
             "$ref": "#/definitions/StreamlangConditionBlock",
           },
         ],
-        "id": "StreamlangStep",
       },
       "type": "array",
     },

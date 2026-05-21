@@ -12,10 +12,13 @@ import { buildFieldsZodValidator } from './build_fields_zod_validator';
 import {
   applyInputDefaults,
   convertLegacyFieldsToJsonSchema,
+  extractNormalizedInputsFromYaml,
+  getInputsFromDefinition,
   normalizeFieldsToJsonSchema,
 } from './field_conversion';
-import type { WorkflowInputSchema } from '../schema';
+import type { WorkflowYaml } from '../schema';
 import type { JsonModelSchemaType } from '../schema/common/json_model_schema';
+import type { LegacyWorkflowInputSchema } from '../schema/triggers/manual_trigger_schema';
 
 describe('convertLegacyFieldsToJsonSchema', () => {
   it('should convert array of legacy inputs to JSON Schema object format', () => {
@@ -35,7 +38,7 @@ describe('convertLegacyFieldsToJsonSchema', () => {
     ];
 
     const result = convertLegacyFieldsToJsonSchema(
-      legacyInputs as Array<z.infer<typeof WorkflowInputSchema>>
+      legacyInputs as Array<z.infer<typeof LegacyWorkflowInputSchema>>
     );
 
     expect(result).toEqual({
@@ -65,7 +68,7 @@ describe('convertLegacyFieldsToJsonSchema', () => {
     ];
 
     const result = convertLegacyFieldsToJsonSchema(
-      legacyInputs as Array<z.infer<typeof WorkflowInputSchema>>
+      legacyInputs as Array<z.infer<typeof LegacyWorkflowInputSchema>>
     );
 
     expect(result.properties?.status).toEqual({
@@ -86,7 +89,7 @@ describe('convertLegacyFieldsToJsonSchema', () => {
     ];
 
     const result = convertLegacyFieldsToJsonSchema(
-      legacyInputs as Array<z.infer<typeof WorkflowInputSchema>>
+      legacyInputs as Array<z.infer<typeof LegacyWorkflowInputSchema>>
     );
 
     expect(result.properties?.tags).toEqual({
@@ -116,7 +119,7 @@ describe('convertLegacyFieldsToJsonSchema', () => {
     ];
 
     const result = convertLegacyFieldsToJsonSchema(
-      legacyInputs as Array<z.infer<typeof WorkflowInputSchema>>
+      legacyInputs as Array<z.infer<typeof LegacyWorkflowInputSchema>>
     );
 
     expect(result.required).toBeUndefined();
@@ -717,7 +720,7 @@ describe('normalizeFieldsToJsonSchema + buildFieldsZodValidator (integration)', 
     const legacyInputs = [
       { name: 'greeting', type: 'string' as const, required: true },
       { name: 'count', type: 'number' as const, required: false },
-    ] as Array<z.infer<typeof WorkflowInputSchema>>;
+    ] as Array<z.infer<typeof LegacyWorkflowInputSchema>>;
 
     const normalizedSchema = normalizeFieldsToJsonSchema(legacyInputs);
     const validator = buildFieldsZodValidator(normalizedSchema);
@@ -740,5 +743,118 @@ describe('normalizeFieldsToJsonSchema + buildFieldsZodValidator (integration)', 
     const validator = buildFieldsZodValidator(normalizedSchema);
     expect(validator.safeParse({ name: 'hello' }).success).toBe(true);
     expect(validator.safeParse({}).success).toBe(false);
+  });
+});
+
+describe('getInputsFromDefinition', () => {
+  const expectedSchema = {
+    properties: {
+      greeting: { type: 'string' },
+      count: { type: 'number' },
+    },
+    required: ['greeting'],
+  };
+
+  it('should return the JSON Schema inputs from a manual trigger (new format)', () => {
+    const definition = {
+      triggers: [
+        {
+          type: 'manual',
+          inputs: {
+            properties: {
+              greeting: { type: 'string' },
+              count: { type: 'number' },
+            },
+            required: ['greeting'],
+          },
+        },
+      ],
+    } as unknown as WorkflowYaml;
+
+    expect(getInputsFromDefinition(definition)).toEqual(expectedSchema);
+  });
+
+  it('should normalize legacy array inputs declared on the manual trigger', () => {
+    const definition = {
+      triggers: [
+        {
+          type: 'manual',
+          inputs: [
+            { name: 'greeting', type: 'string', required: true },
+            { name: 'count', type: 'number' },
+          ],
+        },
+      ],
+    } as unknown as WorkflowYaml;
+
+    expect(getInputsFromDefinition(definition)).toEqual(expectedSchema);
+  });
+
+  it('should fall back to root-level legacy inputs when the manual trigger has none', () => {
+    const definition = {
+      triggers: [{ type: 'manual' }],
+      inputs: [
+        { name: 'greeting', type: 'string', required: true },
+        { name: 'count', type: 'number' },
+      ],
+    } as unknown as WorkflowYaml;
+
+    expect(getInputsFromDefinition(definition)).toEqual(expectedSchema);
+  });
+
+  it('should return undefined when no inputs are defined anywhere', () => {
+    const definition = {
+      triggers: [{ type: 'manual' }],
+    } as unknown as WorkflowYaml;
+
+    expect(getInputsFromDefinition(definition)).toBeUndefined();
+  });
+});
+
+describe('extractNormalizedInputsFromYaml', () => {
+  const expectedSchema = {
+    properties: {
+      greeting: { type: 'string' },
+      count: { type: 'number' },
+    },
+    required: ['greeting'],
+  };
+
+  it('should return inputs from the definition without parsing the YAML', () => {
+    const definition = {
+      triggers: [
+        {
+          type: 'manual',
+          inputs: {
+            properties: {
+              greeting: { type: 'string' },
+              count: { type: 'number' },
+            },
+            required: ['greeting'],
+          },
+        },
+      ],
+    } as unknown as WorkflowYaml;
+
+    expect(extractNormalizedInputsFromYaml(definition, 'invalid: [yaml')).toEqual(expectedSchema);
+  });
+
+  it('should fall back to parsing YAML when the definition has no inputs', () => {
+    const yaml = `
+name: Test Workflow
+triggers:
+  - type: manual
+    inputs:
+      - name: greeting
+        type: string
+        required: true
+      - name: count
+        type: number
+steps:
+  - name: step1
+    type: console
+`;
+
+    expect(extractNormalizedInputsFromYaml(null, yaml)).toEqual(expectedSchema);
   });
 });

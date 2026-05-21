@@ -10,6 +10,10 @@
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type {
+  SearchInferenceEndpointsPluginSetup,
+  SearchInferenceEndpointsPluginStart,
+} from '@kbn/search-inference-endpoints/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   WorkflowsApiRequestHandlerContext,
@@ -85,8 +89,9 @@ export type WorkflowsExtensionsServerPluginStart =
 /**
  * Dependencies for the server plugin setup phase.
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WorkflowsExtensionsServerPluginSetupDeps {}
+export interface WorkflowsExtensionsServerPluginSetupDeps {
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
+}
 
 export type ServerStepDefinitionOrLoader<
   Input extends z.ZodType = z.ZodType,
@@ -102,6 +107,7 @@ export type ServerStepDefinitionOrLoader<
 export interface WorkflowsExtensionsServerPluginStartDeps {
   actions: ActionsPluginStartContract;
   inference: InferenceServerStart;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   spaces?: SpacesPluginStart;
 }
 

@@ -9,13 +9,30 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
+
+export interface ResolveConnectorIdOptions {
+  featureId?: string;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+}
 
 export async function resolveConnectorId(
   nameOrId: string | undefined,
   inferencePlugin: InferenceServerStart,
-  kibanaRequest: KibanaRequest
+  kibanaRequest: KibanaRequest,
+  options?: ResolveConnectorIdOptions
 ): Promise<string> {
   if (!nameOrId) {
+    if (options?.featureId && options?.searchInferenceEndpoints) {
+      const { endpoints } = await options.searchInferenceEndpoints.endpoints.getForFeature(
+        options.featureId,
+        kibanaRequest
+      );
+      if (endpoints.length > 0) {
+        return endpoints[0].connectorId;
+      }
+    }
+
     const defaultConnector = await inferencePlugin.getDefaultConnector(kibanaRequest);
 
     if (!defaultConnector) {
