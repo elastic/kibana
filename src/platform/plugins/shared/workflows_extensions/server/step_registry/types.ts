@@ -13,15 +13,6 @@ import type { StepContext } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../common';
 
-/**
- * Result returned by a legacy single-`handler` step. Kept for backward
- * compatibility with existing step authors using `handler`.
- */
-export interface StepHandlerResult<TOutput extends z.ZodType = z.ZodType> {
-  output?: z.infer<TOutput>;
-  error?: Error;
-}
-
 // -----------------------------------------------------------------------------
 // Poll step types
 // -----------------------------------------------------------------------------
@@ -287,74 +278,24 @@ export const isPollStepDefinition = (
 ): definition is PollStepDefinition =>
   'poll' in definition && typeof definition.poll === 'function';
 
-// -----------------------------------------------------------------------------
-// Registration-time validation
-// -----------------------------------------------------------------------------
-
-const hasCallable = (value: unknown): value is (...args: never[]) => unknown =>
-  typeof value === 'function';
-
-export const validatePollPolicy = (stepId: string, policy: PollPolicy | undefined): void => {
-  if (!policy) {
-    throw new Error(`Step "${stepId}" defines "poll" without a pollPolicy.`);
-  }
-  if (policy.strategy === 'fixed') {
-    if (!Number.isFinite(policy.intervalMs) || policy.intervalMs <= 0) {
-      throw new Error(`Step "${stepId}": "fixed.intervalMs" must be a positive number.`);
-    }
-    return;
-  }
-  if (policy.strategy === 'exponential') {
-    if (!Number.isFinite(policy.initialMs) || policy.initialMs <= 0) {
-      throw new Error(`Step "${stepId}": "exponential.initialMs" must be a positive number.`);
-    }
-    if (!Number.isFinite(policy.maxMs) || policy.maxMs < policy.initialMs) {
-      throw new Error(`Step "${stepId}": "exponential.maxMs" must be >= "initialMs".`);
-    }
-    if (policy.multiplier !== undefined && policy.multiplier <= 1) {
-      throw new Error(`Step "${stepId}": "exponential.multiplier" must be > 1.`);
-    }
-    return;
-  }
-  throw new Error(
-    `Step "${stepId}": unknown strategy "${(policy as { strategy: string }).strategy}".`
-  );
-};
-
-export const validateStepDefinitionShape = (definition: RegisteredStepDefinition): void => {
-  const hasHandler = hasCallable((definition as ServerStepDefinition).handler);
-  const hasStart = hasCallable((definition as StartPlusPollStepDefinition).start);
-  const hasPoll = isPollStepDefinition(definition);
-
-  if (!hasHandler && !hasStart && !hasPoll) {
-    throw new Error(`Step "${definition.id}" must define one of: handler, start, poll.`);
-  }
-  if (hasHandler && (hasStart || hasPoll)) {
-    throw new Error(`Step "${definition.id}" mixes the legacy "handler" field with start/poll.`);
-  }
-  if (hasStart && !hasPoll) {
-    throw new Error(`Step "${definition.id}" defines "start" without "poll".`);
-  }
-  if (hasPoll) {
-    validatePollPolicy(definition.id, definition.pollPolicy);
-  }
-};
-
-export const applyPollDefaults = <T extends PollStepDefinition>(definition: T): T => ({
-  ...definition,
-  pollCeilings: definition.pollCeilings ?? DEFAULT_POLL_CEILINGS,
-});
-
-export const pollCeilingsAreDefault = (definition: PollStepDefinition): boolean =>
-  definition.pollCeilings === undefined;
-
-// -----------------------------------------------------------------------------
-// Helper: createServerStepDefinition (overloaded)
-// -----------------------------------------------------------------------------
-
 /**
- * Helper function to create a {@link ServerStepDefinition} with full type
- * inference for input, output, and config.
+ * Helper function to create a ServerStepDefinition with automatic type inference.
+ * This ensures that the handler's input and output types are correctly inferred
+ * from the inputSchema and outputSchema without needing explicit type annotations.
+ *
+ * @example
+ * ```typescript
+ * const myStepDefinition = createServerStepDefinition({
+ *   id: 'custom.myStep',
+ *   inputSchema: z.object({ message: z.string() }),
+ *   outputSchema: z.object({ result: z.string() }),
+ *   handler: async (context) => {
+ *     // context.input is typed as { message: string }
+ *     // return type should be { output: { result: string } }
+ *     return { output: { result: context.input.message } };
+ *   },
+ * });
+ * ```
  */
 export function createServerStepDefinition<
   Input extends z.ZodType = z.ZodType,
@@ -380,7 +321,6 @@ export function createPollServerStepDefinition<
     | PollOnlyStepDefinition<Input, Output, Config, State>
     | StartPlusPollStepDefinition<Input, Output, Config, State>
 ): PollStepDefinition<Input, Output, Config, State> {
-  validateStepDefinitionShape(definition);
   return definition;
 }
 
@@ -484,4 +424,19 @@ export interface ContextManager {
    * Returns the fake request
    */
   getFakeRequest(): KibanaRequest;
+}
+
+/**
+ * Result returned by a custom step handler
+ */
+export interface StepHandlerResult<TOutput extends z.ZodType = z.ZodType> {
+  /**
+   * Output data from the step execution
+   * This will be available to subsequent steps via template expressions
+   */
+  output?: z.infer<TOutput>;
+  /**
+   * Optional error information if the step failed
+   */
+  error?: Error;
 }
