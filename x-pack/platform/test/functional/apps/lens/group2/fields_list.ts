@@ -187,6 +187,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               .replace(',', ''),
             10
           );
+          // close the popover
+          await testSubjects.click(fieldId);
           // define a filter
           await filterBar.addFilter({ field: 'geo.src', operation: 'is', value: 'CN' });
           await retry.waitFor('Wait for the filter to take effect', async () => {
