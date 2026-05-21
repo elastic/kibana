@@ -311,7 +311,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
                 { defaultMessage: 'Preview results' }
               )}
               isDisabled={!hasValidQuery || state.childOpen}
-              onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step })}
+              onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert })}
               data-test-subj="ruleBuilderOpenPreview"
             />
           </EuiToolTip>
