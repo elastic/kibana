@@ -195,7 +195,7 @@ describe('ToolbarSelector', () => {
     );
     await user.click(screen.getByTestId('toolbarSelectorOptionalPropsButton'));
     expect(screen.getByText('Maximum selection limit reached')).toBeInTheDocument();
-    expect(screen.getAllByLabelText('My Popover Title')).toHaveLength(3);
+    expect(screen.getAllByLabelText('My Popover Title')).toHaveLength(4);
   });
 
   it('uses buttonTooltipContent when provided instead of buttonLabel for tooltip', async () => {
@@ -239,7 +239,7 @@ describe('ToolbarSelector', () => {
     await user.hover(button);
 
     await waitFor(() => {
-      expect(screen.getByText('Default Label')).toBeInTheDocument();
+      expect(screen.getByRole('tooltip', { hidden: true })).toHaveTextContent('Default Label');
     });
   });
 });
