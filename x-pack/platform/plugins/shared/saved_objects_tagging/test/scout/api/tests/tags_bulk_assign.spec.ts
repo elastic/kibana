@@ -57,6 +57,7 @@ apiTest.describe(
       });
 
       expect(bulkResponse).toHaveStatusCode(200);
+      expect(bulkResponse.body.saved_objects).toBeInstanceOf(Array);
 
       const [dashboard, visualization] = bulkResponse.body.saved_objects as Array<{
         references: Array<{ id: string }>;
@@ -97,6 +98,7 @@ apiTest.describe(
         body: [{ type: 'visualization', id: 'ref-to-tag-1' }],
       });
       expect(bulkResponse).toHaveStatusCode(200);
+      expect(bulkResponse.body.saved_objects).toBeInstanceOf(Array);
 
       const [visualization] = bulkResponse.body.saved_objects as Array<{
         references: Array<{ id: string }>;

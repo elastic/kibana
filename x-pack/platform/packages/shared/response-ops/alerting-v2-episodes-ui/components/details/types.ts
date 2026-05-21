@@ -9,10 +9,12 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 export interface AlertEpisodeDetailsServices {
   data: DataPublicPluginStart;
   http: HttpStart;
   expressions: ExpressionsStart;
   userProfile: UserProfileService;
+  spaces: SpacesPluginStart;
 }

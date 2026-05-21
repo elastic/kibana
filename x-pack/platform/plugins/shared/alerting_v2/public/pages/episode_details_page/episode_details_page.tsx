@@ -72,7 +72,7 @@ export function EpisodeDetailsPage() {
 
   const { services } = useKibana<AlertEpisodesKibanaServices>();
   const queryClient = useQueryClient();
-  const { data, http, expressions } = services;
+  const { data, http, expressions, spaces } = services;
   const history = useHistory();
 
   const smallMediaQuery = useEuiMaxBreakpoint('s');
@@ -85,7 +85,7 @@ export function EpisodeDetailsPage() {
     refetch: refetchEpisodeEvents,
   } = useFetchEpisodeEventsQuery({
     episodeId,
-    data,
+    services: { data, spaces },
   });
 
   const ruleId = useMemo(() => getRuleIdFromEpisodeRows(eventRows), [eventRows]);
@@ -95,12 +95,12 @@ export function EpisodeDetailsPage() {
 
   const { data: episodeActionsMap, refetch: refetchEpisodeActions } = useFetchEpisodeActions({
     episodeIds: episodeId ? [episodeId] : [],
-    expressions,
+    services: { expressions, spaces },
   });
 
   const { data: groupActionsMap, refetch: refetchGroupActions } = useFetchGroupActions({
     groupHashes: groupHash ? [groupHash] : [],
-    expressions,
+    services: { expressions, spaces },
   });
 
   // The metadata section fetches its own copy of the episode event data via
@@ -108,7 +108,7 @@ export function EpisodeDetailsPage() {
   // we can invalidate it via `refetchEpisodeEventData` when an action succeeds.
   const { refetch: refetchEpisodeEventData } = useFetchEpisodeEventDataQuery({
     episodeId,
-    data,
+    services: { data, spaces },
   });
 
   const episodeBreadcrumbTitle =
@@ -133,8 +133,9 @@ export function EpisodeDetailsPage() {
       http: services.http,
       expressions: services.expressions,
       userProfile: services.userProfile,
+      spaces: services.spaces,
     }),
-    [services.data, services.http, services.expressions, services.userProfile]
+    [services.data, services.http, services.expressions, services.userProfile, services.spaces]
   );
 
   const metadataServices = useMemo(
@@ -168,6 +169,7 @@ export function EpisodeDetailsPage() {
         userProfile: services.userProfile,
         docLinks: services.docLinks,
         expressions: services.expressions,
+        spaces: services.spaces,
         queryClient,
         getDiscoverHref: ({ episodeIsoTimestamp: ts }) =>
           getDiscoverHrefForRuleAndEpisodeTimestamp({

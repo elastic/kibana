@@ -11,6 +11,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
+import { createMockSpaces } from '../../hooks/test_utils';
 import { AlertEpisodeOverviewSection } from './overview_section';
 import type { AlertEpisodeDetailsServices } from './types';
 
@@ -49,6 +50,7 @@ const mockServices: AlertEpisodeDetailsServices = {
   http: httpServiceMock.createStartContract(),
   expressions: {} as ExpressionsStart,
   userProfile: {} as UserProfileService,
+  spaces: createMockSpaces(),
 };
 
 const getRuleDetailsHref = (ruleId: string) => `/rules/${ruleId}`;

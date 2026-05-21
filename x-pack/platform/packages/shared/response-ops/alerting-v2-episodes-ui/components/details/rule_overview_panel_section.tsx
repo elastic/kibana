@@ -31,7 +31,7 @@ export const AlertEpisodeRuleOverviewPanelSection = ({
     data: eventRows,
     isLoading: isLoadingEvents,
     isError: isEventsError,
-  } = useFetchEpisodeEventsQuery({ episodeId, data: services.data });
+  } = useFetchEpisodeEventsQuery({ episodeId, services });
   const rows = eventRows ?? [];
 
   const ruleId = getRuleIdFromEpisodeRows(rows);

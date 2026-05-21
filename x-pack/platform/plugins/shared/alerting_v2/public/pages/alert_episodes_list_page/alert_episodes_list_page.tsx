@@ -28,7 +28,7 @@ import {
   type UnifiedDataTableSettings,
 } from '@kbn/unified-data-table';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { RowControlColumn } from '@kbn/discover-utils';
+import type { RowControlColumn, RowControlRowProps } from '@kbn/discover-utils';
 import { AlertEpisodeDetailsFlyout } from '@kbn/alerting-v2-episodes-ui/components/details/details_flyout';
 import { css } from '@emotion/react';
 import { useQueryClient } from '@kbn/react-query';
@@ -138,6 +138,7 @@ export const AlertEpisodesListPage = () => {
           http: services.http,
           expressions: services.expressions,
           userProfile: services.userProfile,
+          spaces: services.spaces,
           uiSettings: services.uiSettings,
           unifiedDocViewer: services.unifiedDocViewer,
           dataViews: services.dataViews,
@@ -215,6 +216,7 @@ export const AlertEpisodesListPage = () => {
         userProfile: services.userProfile,
         docLinks: services.docLinks,
         expressions: services.expressions,
+        spaces: services.spaces,
         queryClient,
         getDiscoverHref: ({ episodeIsoTimestamp, ruleId }) =>
           getDiscoverHrefForRuleAndEpisodeTimestamp({
@@ -230,15 +232,12 @@ export const AlertEpisodesListPage = () => {
 
   const rowAdditionalLeadingControls: RowControlColumn[] = useMemo(
     () =>
-      episodeActions.map((action, index) => ({
+      episodeActions.map((action) => ({
         id: action.id,
-        // The UnifiedDataTable actions header maxWidth calculation doesn't take into account larger
-        // paddings, causing the column title to wrap. This forces the column width to be larger and
-        // avoids the problem until https://github.com/elastic/kibana/issues/265569 is fixed
-        width: index === 0 ? 38 : undefined,
+        isAvailable: ({ record }: RowControlRowProps) =>
+          action.isCompatible({ episodes: [dataTableRecordToEpisode(record)] }),
         render: (Control, { record }) => {
           const episodes = [dataTableRecordToEpisode(record)];
-          if (!action.isCompatible({ episodes })) return <></>;
           return (
             <Control
               iconType={action.iconType}
@@ -374,6 +373,7 @@ export const AlertEpisodesListPage = () => {
                 configRowHeight={rowHeight}
                 customBulkActions={customBulkActions}
                 rowAdditionalLeadingControls={rowAdditionalLeadingControls}
+                visibleRowLeadingControls={3}
                 enableComparisonMode={false}
                 services={services}
                 expandedDoc={expandedDoc}

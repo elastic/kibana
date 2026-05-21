@@ -13,6 +13,7 @@ import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { QueryClient } from '@kbn/react-query';
 import type { EpisodeAction } from './types';
 import { createAckAction } from './ack';
@@ -34,6 +35,7 @@ export interface EpisodeActionsDeps {
   userProfile: UserProfileService;
   docLinks: DocLinksStart;
   expressions: ExpressionsStart;
+  spaces: SpacesPluginStart;
   queryClient: QueryClient;
   /** Resolver for "Open in Discover" URL; may be sync or async. Return undefined when not applicable. */
   getDiscoverHref: (args: {

@@ -289,6 +289,7 @@ export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
         }
         listProps={{
           bordered: false, // Doesn't work so we overwrite the border style with filterListStyles
+          paddingSize: 's',
         }}
       >
         {(list) => (

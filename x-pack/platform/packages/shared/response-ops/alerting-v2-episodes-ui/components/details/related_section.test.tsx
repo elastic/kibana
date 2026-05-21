@@ -15,7 +15,11 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { runEsqlAsyncSearch } from '../../utils/run_esql_async_search';
-import { createQueryClientWrapper, createTestQueryClient } from '../../hooks/test_utils';
+import {
+  createMockSpaces,
+  createQueryClientWrapper,
+  createTestQueryClient,
+} from '../../hooks/test_utils';
 import { AlertEpisodesRelatedSection } from './related_section';
 import type { AlertEpisodeDetailsServices } from './types';
 
@@ -35,12 +39,14 @@ const mockData = dataPluginMock.createStartContract();
 const mockHttp = httpServiceMock.createStartContract();
 const mockExpressions = {} as ExpressionsStart;
 const mockUserProfile = {} as UserProfileService;
+const mockSpaces = createMockSpaces();
 
 const mockServices: AlertEpisodeDetailsServices = {
   data: mockData,
   http: mockHttp,
   expressions: mockExpressions,
   userProfile: mockUserProfile,
+  spaces: mockSpaces,
 };
 
 const mockRule = {

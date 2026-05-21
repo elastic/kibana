@@ -28,19 +28,19 @@ export const AlertEpisodeActionsOverviewSection = ({
     data: eventRows,
     isLoading: isLoadingEvents,
     isError: isEventsError,
-  } = useFetchEpisodeEventsQuery({ episodeId, data: services.data });
+  } = useFetchEpisodeEventsQuery({ episodeId, services });
   const rows = eventRows ?? [];
 
   const groupHash = getGroupHashFromEpisodeRows(rows);
 
   const { data: episodeActionsMap, isError: isEpisodeActionsError } = useFetchEpisodeActions({
     episodeIds: [episodeId],
-    expressions: services.expressions,
+    services,
   });
 
   const { data: groupActionsMap, isError: isGroupActionsError } = useFetchGroupActions({
     groupHashes: groupHash ? [groupHash] : [],
-    expressions: services.expressions,
+    services,
   });
 
   if (isEventsError || isEpisodeActionsError || isGroupActionsError) {

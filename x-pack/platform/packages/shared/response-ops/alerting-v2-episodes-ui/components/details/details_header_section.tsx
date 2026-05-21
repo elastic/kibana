@@ -27,7 +27,7 @@ export const AlertEpisodeDetailsHeaderSection = ({
   episodeId,
   services,
 }: AlertEpisodeDetailsHeaderSectionProps) => {
-  const { data: eventRows } = useFetchEpisodeEventsQuery({ episodeId, data: services.data });
+  const { data: eventRows } = useFetchEpisodeEventsQuery({ episodeId, services });
   const rows = eventRows ?? [];
 
   const ruleId = getRuleIdFromEpisodeRows(rows);
@@ -36,11 +36,11 @@ export const AlertEpisodeDetailsHeaderSection = ({
 
   const { data: episodeActionsMap } = useFetchEpisodeActions({
     episodeIds: [episodeId],
-    expressions: services.expressions,
+    services,
   });
   const { data: groupActionsMap } = useFetchGroupActions({
     groupHashes: groupHash ? [groupHash] : [],
-    expressions: services.expressions,
+    services,
   });
   const { data: rule } = useFetchRule({ id: ruleId, http: services.http });
 

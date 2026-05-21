@@ -16,7 +16,11 @@ import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { runEsqlAsyncSearch } from '../../utils/run_esql_async_search';
 import { fetchEpisodeActions } from '../../apis/fetch_episode_actions';
 import { fetchGroupActions } from '../../apis/fetch_group_actions';
-import { createQueryClientWrapper, createTestQueryClient } from '../../hooks/test_utils';
+import {
+  createMockSpaces,
+  createQueryClientWrapper,
+  createTestQueryClient,
+} from '../../hooks/test_utils';
 import { AlertEpisodeActionsOverviewSection } from './actions_overview_section';
 import type { AlertEpisodeDetailsServices } from './types';
 
@@ -32,12 +36,14 @@ const mockData = dataPluginMock.createStartContract();
 const mockHttp = httpServiceMock.createStartContract();
 const mockExpressions = {} as ExpressionsStart;
 const mockUserProfile = {} as UserProfileService;
+const mockSpaces = createMockSpaces();
 
 const mockServices: AlertEpisodeDetailsServices = {
   data: mockData,
   http: mockHttp,
   expressions: mockExpressions,
   userProfile: mockUserProfile,
+  spaces: mockSpaces,
 };
 
 const queryClient = createTestQueryClient();

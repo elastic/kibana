@@ -32,7 +32,7 @@ export const AlertEpisodeMetadataDetailsListSection = ({
     data: eventRows,
     isLoading: isLoadingEvents,
     isError: isEventsError,
-  } = useFetchEpisodeEventsQuery({ episodeId, data: services.data });
+  } = useFetchEpisodeEventsQuery({ episodeId, services });
   const rows = eventRows ?? [];
 
   const ruleId = getRuleIdFromEpisodeRows(rows);
@@ -41,7 +41,7 @@ export const AlertEpisodeMetadataDetailsListSection = ({
 
   const { data: episodeActionsMap } = useFetchEpisodeActions({
     episodeIds: [episodeId],
-    expressions: services.expressions,
+    services,
   });
 
   const {

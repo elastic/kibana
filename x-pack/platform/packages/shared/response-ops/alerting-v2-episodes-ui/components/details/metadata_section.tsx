@@ -11,6 +11,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { useFetchEpisodeEventsQuery } from '../../hooks/use_fetch_episode_events_query';
 import { useFetchEpisodeEventDataQuery } from '../../hooks/use_fetch_episode_event_data_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
@@ -24,6 +25,7 @@ export interface AlertEpisodeMetadataSectionServices extends AlertEpisodeDetails
   dataViews: DataViewsPublicPluginStart;
   uiSettings: IUiSettingsClient;
   unifiedDocViewer: UnifiedDocViewerStart;
+  spaces: SpacesPluginStart;
 }
 
 export interface AlertEpisodeMetadataSectionProps {
@@ -47,7 +49,7 @@ export const AlertEpisodeMetadataSection = ({
 }: AlertEpisodeMetadataSectionProps) => {
   const { data: eventRows, isLoading: isLoadingEvents } = useFetchEpisodeEventsQuery({
     episodeId,
-    data: services.data,
+    services,
   });
   const rows = eventRows ?? [];
   const ruleId = getRuleIdFromEpisodeRows(rows);
@@ -60,7 +62,7 @@ export const AlertEpisodeMetadataSection = ({
     isError,
   } = useFetchEpisodeEventDataQuery({
     episodeId,
-    data: services.data,
+    services,
   });
 
   const { value: dataView, loading: isDataViewLoading } = useAlertingEpisodeSourceDataView({

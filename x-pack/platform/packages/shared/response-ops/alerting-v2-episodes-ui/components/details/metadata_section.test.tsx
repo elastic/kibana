@@ -18,7 +18,11 @@ import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/publi
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { runEsqlAsyncSearch } from '../../utils/run_esql_async_search';
 import { useAlertingEpisodeSourceDataView } from '../../hooks/use_alerting_episode_source_data_view';
-import { createQueryClientWrapper, createTestQueryClient } from '../../hooks/test_utils';
+import {
+  createMockSpaces,
+  createQueryClientWrapper,
+  createTestQueryClient,
+} from '../../hooks/test_utils';
 import { AlertEpisodeMetadataSection } from './metadata_section';
 import type { AlertEpisodeMetadataSectionServices } from './metadata_section';
 
@@ -36,6 +40,7 @@ const mockData = dataPluginMock.createStartContract();
 const mockHttp = httpServiceMock.createStartContract();
 const mockExpressions = {} as ExpressionsStart;
 const mockUserProfile = {} as UserProfileService;
+const mockSpaces = createMockSpaces();
 
 const mockUiSettings = {
   get: jest.fn(() => 'YYYY-MM-DD HH:mm:ss'),
@@ -54,6 +59,7 @@ const mockServices: AlertEpisodeMetadataSectionServices = {
   http: mockHttp,
   expressions: mockExpressions,
   userProfile: mockUserProfile,
+  spaces: mockSpaces,
   dataViews: {} as never,
   uiSettings: mockUiSettings,
   unifiedDocViewer: mockUnifiedDocViewer,

@@ -28,7 +28,7 @@ export const AlertEpisodeLifecycleHeatmapSection = ({
     data: eventRows,
     isLoading,
     isError,
-  } = useFetchEpisodeEventsQuery({ episodeId, data: services.data });
+  } = useFetchEpisodeEventsQuery({ episodeId, services });
 
   if (isLoading) {
     return (

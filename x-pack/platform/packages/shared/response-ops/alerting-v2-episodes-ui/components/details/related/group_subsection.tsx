@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
@@ -31,6 +32,7 @@ import * as i18n from './translations';
 interface RelatedEpisodesGroupSubsectionServices {
   notifications: CoreStart['notifications'];
   expressions: ExpressionsStart;
+  spaces: SpacesPluginStart;
 }
 
 export interface RelatedEpisodesGroupSubsectionProps {
@@ -60,7 +62,7 @@ export function RelatedEpisodesGroupSubsection({
 }: RelatedEpisodesGroupSubsectionProps) {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { notifications, expressions },
+    services: { notifications, expressions, spaces },
   } = useKibana<RelatedEpisodesGroupSubsectionServices>();
   const toastDanger = useCallback(
     (message: string) => {
@@ -75,7 +77,7 @@ export function RelatedEpisodesGroupSubsection({
       excludeEpisodeId: currentEpisodeId,
       pageSize: RELATED_ALERT_EPISODES_PAGE_SIZE,
       groupHash,
-      expressions,
+      services: { expressions, spaces },
       toastDanger,
     });
 
@@ -96,12 +98,12 @@ export function RelatedEpisodesGroupSubsection({
   /** We need the actions to display the correct status badges. */
   const { data: sameGroupEpisodeActionsMap } = useFetchEpisodeActions({
     episodeIds: sameGroupEpisodeIds,
-    expressions,
+    services: { expressions, spaces },
   });
 
   const { data: sameGroupGroupActionsMap } = useFetchGroupActions({
     groupHashes: sameGroupGroupHashes,
-    expressions,
+    services: { expressions, spaces },
   });
 
   return (
