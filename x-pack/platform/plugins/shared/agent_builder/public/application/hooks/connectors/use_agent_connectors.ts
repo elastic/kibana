@@ -5,97 +5,115 @@
  * 2.0.
  */
 
-import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
-import type { UseMutationOptions } from '@kbn/react-query';
 import { useMutation, useQueryClient } from '@kbn/react-query';
+import type { AgentDefinition } from '@kbn/agent-builder-common';
+import { i18n } from '@kbn/i18n';
 import { useCallback, useMemo } from 'react';
+import type { ConnectorItem } from '../../../../common/http_api/tools';
 import { queryKeys } from '../../query_keys';
-import { labels } from '../../utils/i18n';
 import { useAgentBuilderAgentById } from '../agents/use_agent_by_id';
 import { useAgentBuilderServices } from '../use_agent_builder_service';
 import { useListConnectors } from '../tools/use_mcp_connectors';
 import { useToasts } from '../use_toasts';
 
-interface AssignMutationVariables {
-  connectorId: string;
-  currentIds: string[];
-}
-
-type AssignMutationOptions = UseMutationOptions<void, Error, AssignMutationVariables>;
-
-interface UseAgentConnectorsProps {
-  agentId: string;
-  onSuccess?: AssignMutationOptions['onSuccess'];
-  onError?: AssignMutationOptions['onError'];
-}
-
-export const useAgentConnectors = ({ agentId, onSuccess, onError }: UseAgentConnectorsProps) => {
+export const useAgentConnectors = ({ agentId }: { agentId: string }) => {
   const { agent } = useAgentBuilderAgentById(agentId);
-  const { connectors: allConnectors, isLoading, error } = useListConnectors({});
+  const { connectors: allConnectors, isLoading } = useListConnectors({});
   const { agentService } = useAgentBuilderServices();
   const queryClient = useQueryClient();
   const { addSuccessToast, addErrorToast } = useToasts();
 
+  const agentQueryKey = queryKeys.agentProfiles.byId(agentId);
   const assignedIds = agent?.configuration?.connector_ids;
 
-  const assignedConnectors = useMemo(() => {
-    if (assignedIds === undefined) return allConnectors;
-    return allConnectors.filter((c) => assignedIds.includes(c.id));
-  }, [allConnectors, assignedIds]);
-
-  const unassignedConnectors = useMemo(
-    () => allConnectors.filter((c) => !assignedIds?.includes(c.id)),
+  const assignedConnectors = useMemo(
+    () => allConnectors.filter((c) => assignedIds === undefined || assignedIds.includes(c.id)),
     [allConnectors, assignedIds]
   );
 
-  const handleSuccessAssign = useCallback<NonNullable<AssignMutationOptions['onSuccess']>>(
-    (data, variables, context) => {
-      addSuccessToast({ title: labels.connectors.assignConnectorSuccessToast });
-      onSuccess?.(data, variables, context);
-    },
-    [addSuccessToast, onSuccess]
+  const activeConnectorIdSet = useMemo(
+    () => new Set(assignedIds ?? allConnectors.map((c) => c.id)),
+    [allConnectors, assignedIds]
   );
 
-  const handleErrorAssign = useCallback<NonNullable<AssignMutationOptions['onError']>>(
-    (err, variables, context) => {
-      addErrorToast({
-        title: labels.connectors.assignConnectorErrorToast,
-        text: formatAgentBuilderErrorMessage(err),
-      });
-      onError?.(err, variables, context);
-    },
-    [addErrorToast, onError]
-  );
+  const getCurrentConnectorIds = useCallback((): string[] => {
+    const currentAgent = queryClient.getQueryData<AgentDefinition>(agentQueryKey);
+    return currentAgent?.configuration?.connector_ids ?? allConnectors.map((c) => c.id);
+  }, [queryClient, agentQueryKey, allConnectors]);
 
-  const { mutateAsync, isLoading: isAssigning } = useMutation<void, Error, AssignMutationVariables>(
-    {
-      mutationFn: async ({ connectorId, currentIds }) => {
-        await agentService.update(agentId, {
-          configuration: { connector_ids: [...currentIds, connectorId] },
+  const updateConnectorsMutation = useMutation({
+    mutationFn: (newConnectorIds: string[]) =>
+      agentService.update(agentId, {
+        configuration: { connector_ids: newConnectorIds },
+      }),
+    onMutate: async (newConnectorIds: string[]) => {
+      await queryClient.cancelQueries({ queryKey: agentQueryKey });
+      const previousAgent = queryClient.getQueryData<AgentDefinition>(agentQueryKey);
+      if (previousAgent) {
+        queryClient.setQueryData<AgentDefinition>(agentQueryKey, {
+          ...previousAgent,
+          configuration: { ...previousAgent.configuration, connector_ids: newConnectorIds },
         });
-      },
-      onSuccess: handleSuccessAssign,
-      onError: handleErrorAssign,
-      onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.byId(agentId) });
-      },
-    }
-  );
+      }
+      return { previousAgent };
+    },
+    onError: (_err, _newConnectorIds, context) => {
+      if (context?.previousAgent) {
+        queryClient.setQueryData<AgentDefinition>(agentQueryKey, context.previousAgent);
+      }
+      addErrorToast({
+        title: i18n.translate('xpack.agentBuilder.agentConnectors.updateErrorToast', {
+          defaultMessage: 'Failed to update connectors',
+        }),
+      });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: agentQueryKey });
+    },
+  });
 
   const assign = useCallback(
-    (connectorId: string) => {
-      if (!agent) return Promise.resolve();
-      return mutateAsync({ connectorId, currentIds: agent.configuration?.connector_ids ?? [] });
+    (connector: ConnectorItem) => {
+      const currentIds = getCurrentConnectorIds();
+      if (currentIds.includes(connector.id)) return;
+      updateConnectorsMutation.mutate([...currentIds, connector.id], {
+        onSuccess: () =>
+          addSuccessToast({
+            title: i18n.translate('xpack.agentBuilder.agentConnectors.assignSuccessToast', {
+              defaultMessage: '{name} added',
+              values: { name: connector.name },
+            }),
+          }),
+      });
     },
-    [agent, mutateAsync]
+    [getCurrentConnectorIds, updateConnectorsMutation, addSuccessToast]
+  );
+
+  const unassign = useCallback(
+    (connector: ConnectorItem) => {
+      const currentIds = getCurrentConnectorIds();
+      updateConnectorsMutation.mutate(
+        currentIds.filter((id) => id !== connector.id),
+        {
+          onSuccess: () =>
+            addSuccessToast({
+              title: i18n.translate('xpack.agentBuilder.agentConnectors.unassignSuccessToast', {
+                defaultMessage: '{name} removed',
+                values: { name: connector.name },
+              }),
+            }),
+        }
+      );
+    },
+    [getCurrentConnectorIds, updateConnectorsMutation, addSuccessToast]
   );
 
   return {
     assignedConnectors,
-    unassignedConnectors,
+    allConnectors,
+    activeConnectorIdSet,
     isLoading,
-    error,
     assign,
-    isAssigning,
+    unassign,
   };
 };

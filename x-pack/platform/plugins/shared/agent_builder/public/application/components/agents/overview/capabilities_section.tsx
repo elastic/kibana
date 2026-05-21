@@ -91,7 +91,7 @@ export const CapabilitiesSection: React.FC<CapabilitiesSectionProps> = ({
         </EuiFlexItem>
       )}
       {isExperimentalFeaturesEnabled && (
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem grow={1} style={{ minWidth: 240 }}>
           <CapabilityCard
             count={connectorsCount}
             title={overviewLabels.connectorsLabel(connectorsCount)}

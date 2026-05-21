@@ -13,93 +13,201 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiProvider } from '@elastic/eui';
 import { AgentConnectors } from './agent_connectors';
 
-jest.mock('../../connectors/table/connectors_table', () => ({
-  AgentBuilderConnectorsTable: () => <div data-test-subj="agentBuilderConnectorsTable" />,
-}));
-
-jest.mock('../../../hooks/agents/use_agent_by_id', () => ({
-  useAgentBuilderAgentById: () => ({
-    agent: { id: 'agent-1', name: 'Test Agent', configuration: { connector_ids: [] } },
-    isLoading: false,
-    error: null,
+jest.mock('../../../hooks/use_kibana', () => ({
+  useKibana: () => ({
+    services: {
+      plugins: {
+        triggersActionsUi: {
+          actionTypeRegistry: { has: () => false, get: () => ({}) },
+        },
+      },
+    },
   }),
 }));
 
-jest.mock('../../../hooks/connectors/use_agent_connectors', () => ({
-  useAgentConnectors: () => ({
-    assignedConnectors: [],
-    unassignedConnectors: [],
-    isLoading: false,
-    error: null,
-    assign: jest.fn(),
-    isAssigning: false,
+jest.mock('../../../hooks/use_navigation', () => ({
+  useNavigation: () => ({ createAgentBuilderUrl: () => '#' }),
+}));
+
+jest.mock('../../../hooks/use_flyout_state', () => ({
+  useFlyoutState: () => ({ isOpen: false, openFlyout: jest.fn(), closeFlyout: jest.fn() }),
+}));
+
+jest.mock('../../../hooks/use_query_state');
+
+jest.mock('../common/page_wrapper', () => ({
+  PageWrapper: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}));
+
+jest.mock('../common/styles', () => ({
+  useListDetailPageStyles: () => ({
+    loadingSpinner: {},
+    header: {},
+    body: {},
+    searchColumn: {},
+    searchInputWrapper: {},
+    scrollableList: {},
+    detailPanelWrapper: {},
+    noSelectionPlaceholder: {},
   }),
 }));
 
-const mockOpenCreateFlyout = jest.fn();
-
-jest.mock('../../../context/connectors_provider', () => ({
-  useConnectorsActions: () => ({
-    openCreateFlyout: mockOpenCreateFlyout,
-    editConnector: jest.fn(),
-    deleteConnector: jest.fn(),
-    bulkDeleteConnectors: jest.fn(),
-    invalidateConnectors: jest.fn(),
-  }),
+jest.mock('./active_connector_row', () => ({
+  ActiveConnectorRow: () => <div data-test-subj="activeConnectorRow" />,
 }));
 
-jest.mock('../../../hooks/use_has_connectors_all_privileges', () => ({
-  useHasConnectorsAllPrivileges: jest.fn(),
+jest.mock('./connector_detail_panel', () => ({
+  ConnectorDetailPanel: jest.fn(() => <div data-test-subj="connectorDetailPanel" />),
 }));
 
-jest.mock('./assign_connectors_flyout', () => ({
-  AssignConnectorsFlyout: () => <div data-test-subj="assignConnectorsFlyout" />,
+jest.mock('./connector_library_panel', () => ({
+  ConnectorLibraryPanel: () => <div data-test-subj="connectorLibraryPanel" />,
 }));
 
-const renderWithIntl = (ui: React.ReactElement) =>
-  render(
-    <EuiProvider>
-      <IntlProvider locale="en">{ui}</IntlProvider>
-    </EuiProvider>
-  );
+jest.mock('./connectors_customize_empty_state', () => ({
+  ConnectorsCustomizeEmptyState: () => <div data-test-subj="connectorsCustomizeEmptyState" />,
+}));
 
+jest.mock('../../../hooks/agents/use_agent_by_id');
+jest.mock('../../../hooks/agents/use_can_edit_agent');
+jest.mock('../../../hooks/connectors/use_agent_connectors');
+jest.mock('../../../hooks/use_has_connectors_all_privileges');
+jest.mock('../../../context/connectors_provider');
+
+const { useAgentBuilderAgentById } = jest.requireMock('../../../hooks/agents/use_agent_by_id');
+const { useCanEditAgent } = jest.requireMock('../../../hooks/agents/use_can_edit_agent');
+const { useAgentConnectors } = jest.requireMock('../../../hooks/connectors/use_agent_connectors');
 const { useHasConnectorsAllPrivileges } = jest.requireMock(
   '../../../hooks/use_has_connectors_all_privileges'
 );
+const { useConnectorsActions } = jest.requireMock('../../../context/connectors_provider');
+const { useQueryState } = jest.requireMock('../../../hooks/use_query_state');
+const { ConnectorDetailPanel } = jest.requireMock('./connector_detail_panel');
+
+const openCreateFlyout = jest.fn();
+
+const renderComponent = () =>
+  render(
+    <EuiProvider>
+      <IntlProvider locale="en">
+        <AgentConnectors agentId="agent-1" />
+      </IntlProvider>
+    </EuiProvider>
+  );
 
 describe('AgentConnectors', () => {
   beforeEach(() => {
-    useHasConnectorsAllPrivileges.mockReturnValue(false);
-    mockOpenCreateFlyout.mockReset();
+    jest.clearAllMocks();
+
+    useQueryState.mockReturnValue([undefined, jest.fn()]);
+
+    ConnectorDetailPanel.mockImplementation(() => <div data-test-subj="connectorDetailPanel" />);
+
+    useAgentBuilderAgentById.mockReturnValue({
+      agent: {
+        id: 'agent-1',
+        name: 'Test Agent',
+        configuration: { connector_ids: ['c1'] },
+      },
+      isLoading: false,
+      error: null,
+    });
+
+    useCanEditAgent.mockReturnValue(true);
+
+    useAgentConnectors.mockReturnValue({
+      assignedConnectors: [{ id: 'c1', name: 'Connector 1', actionTypeId: '.test' }],
+      allConnectors: [{ id: 'c1', name: 'Connector 1', actionTypeId: '.test' }],
+      activeConnectorIdSet: new Set(['c1']),
+      isLoading: false,
+      assign: jest.fn(),
+      unassign: jest.fn(),
+    });
+
+    useHasConnectorsAllPrivileges.mockReturnValue(true);
+
+    useConnectorsActions.mockReturnValue({ openCreateFlyout });
   });
 
-  it('renders the connectors page', () => {
-    renderWithIntl(<AgentConnectors agentId="agent-1" />);
-
-    expect(screen.getByTestId('agentBuilderConnectorsPage')).toBeInTheDocument();
-  });
-
-  it('opens the assign flyout when "Add existing connector" is clicked', async () => {
+  it('calls openCreateFlyout when "Create new connector" is clicked', async () => {
     const user = userEvent.setup();
-    useHasConnectorsAllPrivileges.mockReturnValue(true);
 
-    renderWithIntl(<AgentConnectors agentId="agent-1" />);
+    renderComponent();
 
-    await user.click(screen.getByText('Add connector'));
-    await user.click(screen.getByText('Add existing connector'));
-
-    expect(screen.getByTestId('assignConnectorsFlyout')).toBeInTheDocument();
-  });
-
-  it('calls mockOpenCreateFlyout when "Create new connector" is clicked', async () => {
-    const user = userEvent.setup({ pointerEventsCheck: 0 });
-    useHasConnectorsAllPrivileges.mockReturnValue(true);
-
-    renderWithIntl(<AgentConnectors agentId="agent-1" />);
-
-    await user.click(screen.getByText('Add connector'));
+    await user.click(screen.getByTestId('agentBuilderAddConnectorButton'));
     await user.click(screen.getByText('Create new connector'));
 
-    expect(mockOpenCreateFlyout).toHaveBeenCalledTimes(1);
+    expect(openCreateFlyout).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows empty state when no connectors are assigned', () => {
+    useAgentBuilderAgentById.mockReturnValue({
+      agent: { id: 'agent-1', name: 'Test Agent', configuration: { connector_ids: [] } },
+      isLoading: false,
+      error: null,
+    });
+    useAgentConnectors.mockReturnValue({
+      assignedConnectors: [],
+      allConnectors: [],
+      activeConnectorIdSet: new Set(),
+      isLoading: false,
+      assign: jest.fn(),
+      unassign: jest.fn(),
+    });
+
+    renderComponent();
+
+    expect(screen.getByTestId('connectorsCustomizeEmptyState')).toBeInTheDocument();
+    expect(screen.queryByTestId('agentBuilderAddConnectorButton')).not.toBeInTheDocument();
+  });
+
+  it('shows detail panel when a connector is selected', () => {
+    useQueryState.mockReturnValue(['c1', jest.fn()]);
+
+    renderComponent();
+
+    expect(screen.getByTestId('connectorDetailPanel')).toBeInTheDocument();
+  });
+
+  it('clears selection when the selected connector is removed', () => {
+    const setSelectedConnectorId = jest.fn();
+    useQueryState.mockReturnValue(['c1', setSelectedConnectorId]);
+    const unassign = jest.fn();
+    useAgentConnectors.mockReturnValue({
+      assignedConnectors: [{ id: 'c1', name: 'Connector 1', actionTypeId: '.test' }],
+      allConnectors: [{ id: 'c1', name: 'Connector 1', actionTypeId: '.test' }],
+      activeConnectorIdSet: new Set(['c1']),
+      isLoading: false,
+      assign: jest.fn(),
+      unassign,
+    });
+
+    renderComponent();
+
+    const { onRemove } = ConnectorDetailPanel.mock.calls[0][0];
+    onRemove({ id: 'c1', name: 'Connector 1', actionTypeId: '.test' });
+
+    expect(unassign).toHaveBeenCalledWith({ id: 'c1', name: 'Connector 1', actionTypeId: '.test' });
+    expect(setSelectedConnectorId).toHaveBeenCalledWith(null);
+  });
+
+  it('disables "From library" but not the main button when connector_ids is undefined', async () => {
+    const user = userEvent.setup();
+
+    useAgentBuilderAgentById.mockReturnValue({
+      agent: { id: 'agent-1', name: 'Test Agent', configuration: {} },
+      isLoading: false,
+      error: null,
+    });
+
+    renderComponent();
+
+    const mainButton = screen.getByTestId('agentBuilderAddConnectorButton');
+    expect(mainButton).not.toBeDisabled();
+
+    await user.click(mainButton);
+
+    expect(screen.getByText('From library').closest('button')).toBeDisabled();
+    expect(screen.getByText('Create new connector').closest('button')).not.toBeDisabled();
   });
 });

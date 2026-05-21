@@ -9,23 +9,34 @@ import {
   EuiButton,
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiFieldSearch,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiLoadingSpinner,
   EuiPopover,
+  EuiSpacer,
   EuiText,
-  useGeneratedHtmlId,
+  EuiTitle,
 } from '@elastic/eui';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { useListDetailPageStyles } from '../common/styles';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
+import { useCanEditAgent } from '../../../hooks/agents/use_can_edit_agent';
 import { useAgentConnectors } from '../../../hooks/connectors/use_agent_connectors';
 import { useConnectorsActions } from '../../../context/connectors_provider';
-import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
-import { labels } from '../../../utils/i18n';
-import { AgentBuilderConnectorsTable } from '../../connectors/table/connectors_table';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors_all_privileges';
-import { AssignConnectorsFlyout } from './assign_connectors_flyout';
+import { useFlyoutState } from '../../../hooks/use_flyout_state';
+import { useQueryState } from '../../../hooks/use_query_state';
+import { searchParamNames } from '../../../search_param_names';
+import { labels } from '../../../utils/i18n';
+import { useNavigation } from '../../../hooks/use_navigation';
+import { appPaths } from '../../../utils/app_paths';
+import { PageWrapper } from '../common/page_wrapper';
+import { useListDetailPageStyles } from '../common/styles';
+import { ActiveConnectorRow } from './active_connector_row';
+import { ConnectorDetailPanel } from './connector_detail_panel';
+import { ConnectorLibraryPanel } from './connector_library_panel';
+import { ConnectorsCustomizeEmptyState } from './connectors_customize_empty_state';
 
 interface AgentConnectorsProps {
   agentId: string;
@@ -33,18 +44,93 @@ interface AgentConnectorsProps {
 
 export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
   const styles = useListDetailPageStyles();
+  const { createAgentBuilderUrl } = useNavigation();
+  const { actionTypeRegistry } = useKibana().services.plugins.triggersActionsUi;
   const agentQuery = useAgentBuilderAgentById(agentId);
   const { openCreateFlyout } = useConnectorsActions();
-  const [activeLayer, setActiveLayer] = useState<'dropdown' | 'assign' | null>(null);
-  const addConnectorPopoverId = useGeneratedHtmlId({ prefix: 'addConnectorPopover' });
   const hasAllPrivileges = useHasConnectorsAllPrivileges();
+  const canEditAgent = useCanEditAgent({ agent: agentQuery.agent ?? null });
+
+  const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedConnectorId, setSelectedConnectorId] = useQueryState<string>(
+    searchParamNames.connectorId
+  );
+
+  const {
+    isOpen: isLibraryOpen,
+    openFlyout: openLibrary,
+    closeFlyout: closeLibrary,
+  } = useFlyoutState();
+
   const {
     assignedConnectors,
+    allConnectors,
+    activeConnectorIdSet,
     isLoading: isConnectorsLoading,
-    error: connectorsError,
+    assign,
+    unassign,
   } = useAgentConnectors({ agentId });
 
-  if (agentQuery.isLoading) {
+  const selectedConnector = useMemo(
+    () => assignedConnectors.find((c) => c.id === selectedConnectorId) ?? null,
+    [assignedConnectors, selectedConnectorId]
+  );
+
+  const filteredConnectors = useMemo(() => {
+    if (!searchQuery.trim()) return assignedConnectors;
+    const lower = searchQuery.toLowerCase();
+    return assignedConnectors.filter((c) => {
+      if (c.name.toLowerCase().includes(lower)) return true;
+      const actionType = actionTypeRegistry.has(c.actionTypeId)
+        ? actionTypeRegistry.get(c.actionTypeId)
+        : null;
+      return (
+        (actionType?.actionTypeTitle ?? '').toLowerCase().includes(lower) ||
+        (actionType?.selectMessage ?? '').toLowerCase().includes(lower)
+      );
+    });
+  }, [assignedConnectors, searchQuery, actionTypeRegistry]);
+
+  const isLoading = agentQuery.isLoading || isConnectorsLoading;
+
+  // Keeps the selected connector in sync: auto-selects first on load, resets on removal, clears when filtered out
+  useEffect(() => {
+    if (agentQuery.isLoading || isConnectorsLoading) return;
+
+    if (selectedConnectorId) {
+      const stillAssigned = assignedConnectors.some((c) => c.id === selectedConnectorId);
+      if (!stillAssigned) {
+        // Connector was removed — reset to first remaining
+        setSelectedConnectorId(assignedConnectors[0]?.id ?? null);
+        return;
+      }
+      const visibleInFilter = filteredConnectors.some((c) => c.id === selectedConnectorId);
+      if (!visibleInFilter) {
+        // Search filtered out the selected connector — clear so list and panel stay in sync
+        setSelectedConnectorId(null);
+      }
+      return;
+    }
+
+    // Nothing selected yet — auto-select first (skip when search is active to avoid jumping)
+    if (!searchQuery.trim() && assignedConnectors.length > 0) {
+      setSelectedConnectorId(assignedConnectors[0].id);
+    }
+  }, [
+    assignedConnectors,
+    filteredConnectors,
+    searchQuery,
+    selectedConnectorId,
+    setSelectedConnectorId,
+    agentQuery.isLoading,
+    isConnectorsLoading,
+  ]);
+
+  const isAddDisabled = agentQuery.agent?.configuration?.connector_ids === undefined;
+  const showCustomizeEmptyState = assignedConnectors.length === 0 && !searchQuery.trim();
+
+  if (isLoading) {
     return (
       <EuiFlexGroup alignItems="center" justifyContent="center" css={styles.loadingSpinner}>
         <EuiLoadingSpinner size="xl" />
@@ -57,82 +143,155 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
   }
 
   return (
-    <KibanaPageTemplate data-test-subj="agentBuilderConnectorsPage">
-      <KibanaPageTemplate.Header
-        pageTitle={labels.connectors.libraryTitle}
-        description={labels.connectors.pageDescription}
-        css={({ euiTheme }) => ({
-          backgroundColor: euiTheme.colors.backgroundBasePlain,
-          borderBlockEnd: 'none',
-        })}
-        rightSideItems={[
-          ...(hasAllPrivileges
-            ? [
-                <EuiPopover
-                  key="add-connector"
-                  button={
-                    <EuiButton
-                      fill
-                      iconType="arrowDown"
-                      iconSide="right"
-                      onClick={() => setActiveLayer('dropdown')}
-                      data-test-subj="agentBuilderAddConnectorButton"
-                    >
-                      <EuiText size="s">
-                        {i18n.translate('xpack.agentBuilder.agentConnectors.addConnectorButton', {
-                          defaultMessage: 'Add connector',
-                        })}
-                      </EuiText>
-                    </EuiButton>
-                  }
-                  aria-labelledby={addConnectorPopoverId}
-                  isOpen={activeLayer === 'dropdown'}
-                  closePopover={() => setActiveLayer(null)}
-                  anchorPosition="downRight"
-                  panelPaddingSize="none"
+    <PageWrapper>
+      {showCustomizeEmptyState ? (
+        <ConnectorsCustomizeEmptyState canEditAgent={canEditAgent} onAddFromLibrary={openLibrary} />
+      ) : (
+        <>
+          <div css={styles.header}>
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="l">
+                  <h1>{labels.connectors.title}</h1>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s">
+                      <a href={createAgentBuilderUrl(appPaths.manage.connectors)}>
+                        {labels.connectors.manageAllLink}
+                      </a>
+                    </EuiText>
+                  </EuiFlexItem>
+                  {hasAllPrivileges && canEditAgent && (
+                    <EuiFlexItem grow={false}>
+                      <EuiPopover
+                        aria-label={labels.connectors.addConnectorPopoverLabel}
+                        button={
+                          <EuiButton
+                            fill
+                            iconType="plusInCircle"
+                            iconSide="left"
+                            onClick={() => setIsAddMenuOpen((prev) => !prev)}
+                            data-test-subj="agentBuilderAddConnectorButton"
+                          >
+                            {labels.connectors.addConnectorButton}
+                          </EuiButton>
+                        }
+                        isOpen={isAddMenuOpen}
+                        closePopover={() => setIsAddMenuOpen(false)}
+                        anchorPosition="downLeft"
+                        panelPaddingSize="none"
+                      >
+                        <EuiContextMenuPanel
+                          items={[
+                            <EuiContextMenuItem
+                              key="from-library"
+                              icon="importAction"
+                              disabled={isAddDisabled}
+                              onClick={() => {
+                                setIsAddMenuOpen(false);
+                                openLibrary();
+                              }}
+                            >
+                              {labels.connectors.fromLibraryMenuItem}
+                            </EuiContextMenuItem>,
+                            <EuiContextMenuItem
+                              key="create-new"
+                              icon="plusInCircle"
+                              onClick={() => {
+                                setIsAddMenuOpen(false);
+                                openCreateFlyout();
+                              }}
+                            >
+                              {labels.connectors.createNewMenuItem}
+                            </EuiContextMenuItem>,
+                          ]}
+                        />
+                      </EuiPopover>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiSpacer size="m" />
+            <EuiText size="m" color="default">
+              {labels.connectors.pageDescription}
+            </EuiText>
+          </div>
+
+          <EuiFlexGroup gutterSize="none" responsive={false} css={styles.body}>
+            <EuiFlexItem grow={false} css={styles.searchColumn}>
+              <div css={styles.searchInputWrapper}>
+                <EuiFieldSearch
+                  placeholder={labels.connectors.searchPlaceholder}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  incremental
+                  fullWidth
+                />
+              </div>
+              <EuiFlexGroup direction="column" gutterSize="xs" css={styles.scrollableList}>
+                {filteredConnectors.length === 0 ? (
+                  <EuiText size="s" color="subdued" textAlign="center">
+                    <p>
+                      {searchQuery.trim()
+                        ? labels.connectors.noMatchMessage
+                        : labels.connectors.noConnectorsMessage}
+                    </p>
+                  </EuiText>
+                ) : (
+                  filteredConnectors.map((connector) => (
+                    <EuiFlexItem key={connector.id} grow={false}>
+                      <ActiveConnectorRow
+                        connector={connector}
+                        isSelected={selectedConnectorId === connector.id}
+                        onSelect={(c) => setSelectedConnectorId(c.id)}
+                        onRemove={unassign}
+                        canEditAgent={canEditAgent}
+                      />
+                    </EuiFlexItem>
+                  ))
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+
+            <EuiFlexItem css={styles.detailPanelWrapper}>
+              {selectedConnector ? (
+                <ConnectorDetailPanel
+                  connector={selectedConnector}
+                  onRemove={(c) => {
+                    unassign(c);
+                    setSelectedConnectorId(null);
+                  }}
+                  canEditAgent={canEditAgent}
+                />
+              ) : (
+                <EuiFlexGroup
+                  justifyContent="center"
+                  alignItems="center"
+                  css={styles.noSelectionPlaceholder}
                 >
-                  <EuiContextMenuPanel
-                    items={[
-                      <EuiContextMenuItem
-                        key="add-existing"
-                        icon="link"
-                        onClick={() => setActiveLayer('assign')}
-                      >
-                        {i18n.translate(
-                          'xpack.agentBuilder.agentConnectors.addExistingConnectorMenuItem',
-                          { defaultMessage: 'Add existing connector' }
-                        )}
-                      </EuiContextMenuItem>,
-                      <EuiContextMenuItem
-                        key="create-new"
-                        icon="plusInCircle"
-                        onClick={() => {
-                          setActiveLayer(null);
-                          openCreateFlyout();
-                        }}
-                      >
-                        {i18n.translate(
-                          'xpack.agentBuilder.agentConnectors.createNewConnectorMenuItem',
-                          { defaultMessage: 'Create new connector' }
-                        )}
-                      </EuiContextMenuItem>,
-                    ]}
-                  />
-                </EuiPopover>,
-              ]
-            : []),
-        ]}
-      />
-      <KibanaPageTemplate.Section>
-        <AgentBuilderConnectorsTable
-          connectors={assignedConnectors}
-          isLoading={isConnectorsLoading}
-          error={connectorsError}
-        />
-      </KibanaPageTemplate.Section>
-      {activeLayer === 'assign' && (
-        <AssignConnectorsFlyout agentId={agentId} onClose={() => setActiveLayer(null)} />
+                  <EuiText size="s" color="subdued">
+                    {labels.connectors.noSelectionMessage}
+                  </EuiText>
+                </EuiFlexGroup>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
       )}
-    </KibanaPageTemplate>
+
+      {isLibraryOpen && (
+        <ConnectorLibraryPanel
+          onClose={closeLibrary}
+          allConnectors={allConnectors}
+          activeConnectorIdSet={activeConnectorIdSet}
+          onToggle={(connector, isActive) => (isActive ? assign(connector) : unassign(connector))}
+        />
+      )}
+    </PageWrapper>
   );
 };

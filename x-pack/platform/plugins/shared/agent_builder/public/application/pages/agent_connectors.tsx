@@ -31,7 +31,7 @@ export const AgentBuilderAgentConnectorsPage: React.FC = () => {
   useBreadcrumb(breadcrumbs);
 
   return (
-    <ConnectorsProvider onConnectorCreated={(connector) => assign(connector.id).catch(() => {})}>
+    <ConnectorsProvider onConnectorCreated={(connector) => assign(connector)}>
       <AgentConnectors agentId={agentId} />
     </ConnectorsProvider>
   );

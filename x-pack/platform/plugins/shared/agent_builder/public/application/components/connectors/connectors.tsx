@@ -10,7 +10,6 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { getEbtProps } from '@kbn/ebt-click';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import React from 'react';
-import { useListConnectors } from '../../hooks/tools/use_mcp_connectors';
 import { useConnectorsActions } from '../../context/connectors_provider';
 import { labels } from '../../utils/i18n';
 import { AgentBuilderConnectorsTable } from './table/connectors_table';
@@ -19,7 +18,6 @@ import { useHasConnectorsAllPrivileges } from '../../hooks/use_has_connectors_al
 export const AgentBuilderConnectors = () => {
   const { openCreateFlyout } = useConnectorsActions();
   const hasAllPrivileges = useHasConnectorsAllPrivileges();
-  const { connectors, isLoading, error } = useListConnectors({});
 
   return (
     <KibanaPageTemplate data-test-subj="agentBuilderConnectorsPage">
@@ -50,7 +48,7 @@ export const AgentBuilderConnectors = () => {
         ]}
       />
       <KibanaPageTemplate.Section>
-        <AgentBuilderConnectorsTable connectors={connectors} isLoading={isLoading} error={error} />
+        <AgentBuilderConnectorsTable />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );

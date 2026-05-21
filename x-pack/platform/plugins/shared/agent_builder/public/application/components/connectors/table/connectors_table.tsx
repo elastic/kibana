@@ -10,6 +10,7 @@ import { EuiInMemoryTable, EuiSkeletonText, EuiText, useEuiTheme } from '@elasti
 import React, { memo, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import type { ConnectorItem } from '../../../../../common/http_api/tools';
+import { useListConnectors } from '../../../hooks/tools/use_mcp_connectors';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { labels } from '../../../utils/i18n';
 import { useConnectorsTableColumns } from './connectors_table_columns';
@@ -17,18 +18,13 @@ import { ConnectorsTableHeader } from './connectors_table_header';
 import { connectorQuickActionsHoverStyles } from './connectors_table_quick_actions';
 import { useConnectorsTableSearch } from './connectors_table_search';
 
-interface ConnectorsTableProps {
-  connectors: readonly ConnectorItem[];
-  isLoading: boolean;
-  error: unknown;
-}
-
-export const AgentBuilderConnectorsTable = memo((props: ConnectorsTableProps) => {
+export const AgentBuilderConnectorsTable = memo(() => {
+  const { connectors, isLoading, error } = useListConnectors({});
   const [tablePageIndex, setTablePageIndex] = useState(0);
   const [tablePageSize, setTablePageSize] = useState(10);
   const [selectedConnectors, setSelectedConnectors] = useState<ConnectorItem[]>([]);
   const columns = useConnectorsTableColumns();
-  const { searchConfig, results: tableConnectors } = useConnectorsTableSearch(props.connectors);
+  const { searchConfig, results: tableConnectors } = useConnectorsTableSearch();
 
   useEffect(() => {
     setTablePageIndex(0);
@@ -44,7 +40,7 @@ export const AgentBuilderConnectorsTable = memo((props: ConnectorsTableProps) =>
 
   return (
     <EuiInMemoryTable
-      tableCaption={labels.connectors.tableCaption(props.connectors.length)}
+      tableCaption={labels.connectors.tableCaption(connectors.length)}
       data-test-subj="agentBuilderConnectorsTable"
       css={[
         ({ euiTheme: theme }) => ({
@@ -57,20 +53,20 @@ export const AgentBuilderConnectorsTable = memo((props: ConnectorsTableProps) =>
       ]}
       childrenBetween={
         <ConnectorsTableHeader
-          isLoading={props.isLoading}
+          isLoading={isLoading}
           pageIndex={tablePageIndex}
           pageSize={tablePageSize}
           connectors={tableConnectors}
-          total={props.connectors.length}
+          total={connectors.length}
           selectedConnectors={selectedConnectors}
           setSelectedConnectors={setSelectedConnectors}
         />
       }
-      loading={props.isLoading}
+      loading={isLoading}
       columns={columns}
       items={tableConnectors}
       itemId="id"
-      error={props.error ? labels.connectors.listConnectorsErrorMessage : undefined}
+      error={error ? labels.connectors.listConnectorsErrorMessage : undefined}
       search={searchConfig}
       onTableChange={({ page }: CriteriaWithPagination<ConnectorItem>) => {
         if (page) {
@@ -99,11 +95,11 @@ export const AgentBuilderConnectorsTable = memo((props: ConnectorsTableProps) =>
         selected: selectedConnectors,
       }}
       noItemsMessage={
-        props.isLoading ? (
+        isLoading ? (
           <EuiSkeletonText lines={1} />
         ) : (
           <EuiText component="p" size="s" textAlign="center" color="subdued">
-            {props.connectors.length > 0 && tableConnectors.length === 0
+            {connectors.length > 0 && tableConnectors.length === 0
               ? labels.connectors.noConnectorsMatchMessage
               : labels.connectors.noConnectorsMessage}
           </EuiText>
