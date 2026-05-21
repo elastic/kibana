@@ -429,6 +429,20 @@ function buildRankingCaseEsqlInline(ranking: EuidAttribute[][]): string {
 }
 
 /**
+ * Builds a multi-arm CASE expression from pre-resolved branch parts.
+ * `condition: null` means an unconditional arm (TRUE).
+ * Preserves "first-matched-branch wins, even if its formula is NULL" semantics.
+ */
+function buildBranchedEuidCaseEsql(
+  parts: Array<{ condition: string | null; formula: string }>
+): string {
+  const caseParts = parts.map(({ condition, formula }) =>
+    condition !== null ? `${condition}, ${formula}` : `TRUE, ${formula}`
+  );
+  return `CASE(${caseParts.join(',\n')}, NULL)`;
+}
+
+/**
  * Returns a self-contained ES|QL expression string for the entity's EUID.
  * No prelude pipeline stages are required — the expression can be used directly in
  * `| EVAL column = <result>` without any prior EVAL setup.
@@ -453,18 +467,12 @@ export function getEuidEsqlEvaluation(
     const idLogic = buildRankingCaseEsqlInline(branches[0].ranking);
     return appendTypeIdIfNeeded(entityType, idLogic, mustPrependTypeId);
   }
-  const branchCaseParts: string[] = [];
-  for (const branch of branches) {
-    const rankingCase = buildRankingCaseEsqlInline(branch.ranking);
-    if (branch.when) {
-      const whenCondition = conditionToESQL(branch.when);
-      branchCaseParts.push(`(${whenCondition}), ${rankingCase}`);
-    } else {
-      branchCaseParts.push(`true, ${rankingCase}`);
-    }
-  }
-  const idLogic =
-    branchCaseParts.length > 0 ? `CASE(${branchCaseParts.join(',\n')}, NULL)` : 'NULL';
+  const idLogic = buildBranchedEuidCaseEsql(
+    branches.map((branch) => ({
+      condition: branch.when ? `(${conditionToESQL(branch.when)})` : null,
+      formula: buildRankingCaseEsqlInline(branch.ranking),
+    }))
+  );
   return appendTypeIdIfNeeded(entityType, idLogic, mustPrependTypeId);
 }
 
@@ -503,25 +511,22 @@ export function getEuidEsqlEvaluationParts(
   }
 
   // Multi-branch: pre-compute each branch's condition AND ranking formula as named columns,
-  // then compose a single multi-arm CASE over plain Attribute references.
+  // then compose a single multi-arm CASE over plain Attribute references via the shared helper.
   // This preserves "first-matched-branch wins, even if its formula is NULL" semantics —
   // matching getEuidEsqlEvaluation, memory.ts, dsl.ts, kql.ts, and getEffectiveEuidRanking.
-  // (A COALESCE of per-branch single-arm CASEs would fall through to the next branch when the
-  // matched branch's formula is NULL, diverging from the intended semantics.)
   const precomputeAssignments: string[] = [];
-  const caseParts: string[] = [];
+  const branchParts: Array<{ condition: string | null; formula: string }> = [];
   for (const [i, branch] of branches.entries()) {
     const rankingFormula = buildRankingCaseEsql(branch.ranking);
     const formulaVar = `_euid_branch_${i}_formula`;
     if (branch.when) {
-      const whenCondition = conditionToESQL(branch.when);
       const condVar = `_euid_branch_${i}_cond`;
-      precomputeAssignments.push(`${condVar} = (${whenCondition})`);
+      precomputeAssignments.push(`${condVar} = (${conditionToESQL(branch.when)})`);
       precomputeAssignments.push(`${formulaVar} = ${rankingFormula}`);
-      caseParts.push(`${condVar}, ${formulaVar}`);
+      branchParts.push({ condition: condVar, formula: formulaVar });
     } else {
       precomputeAssignments.push(`${formulaVar} = ${rankingFormula}`);
-      caseParts.push(`TRUE, ${formulaVar}`);
+      branchParts.push({ condition: null, formula: formulaVar });
     }
   }
 
@@ -536,7 +541,7 @@ export function getEuidEsqlEvaluationParts(
   } else {
     combinedPrelude = prelude;
   }
-  const idLogic = `CASE(${caseParts.join(',\n')}, NULL)`;
+  const idLogic = buildBranchedEuidCaseEsql(branchParts);
   return {
     prelude: combinedPrelude,
     expression: appendTypeIdIfNeeded(entityType, idLogic, mustPrependTypeId),
