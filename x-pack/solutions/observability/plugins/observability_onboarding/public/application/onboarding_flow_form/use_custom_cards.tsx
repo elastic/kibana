@@ -441,14 +441,14 @@ export function useCustomCards(
             name: 'aws',
             categories: ['observability'],
             icons: [{ type: 'eui' as const, src: 'logoAWS' }],
-            url: '',
+            url: getUrlForApp?.('onboarding', { path: '/aws' }) ?? '',
             version: '',
-            integration: '',
+            integration: 'aws',
             isCollectionCard: false,
             onCardClick: () => {
               application?.navigateToApp('onboarding', { path: '/aws' });
             },
-          } as IntegrationCardItem,
+          } satisfies IntegrationCardItem,
         ]
       : [
           {
