@@ -74,15 +74,15 @@ export const OtelLogsInstallStep: React.FC<OtelLogsInstallStepProps> = ({
 
   const command = setupData
     ? buildInstallCommand({
-      platform: os,
-      isMetricsOnboardingEnabled,
-      isManagedOtlpServiceAvailable,
-      managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
-      elasticsearchUrl: setupData.elasticsearchUrl,
-      apiKeyEncoded: setupData.apiKeyEncoded,
-      agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
-      useWiredStreams,
-    })
+        platform: os,
+        isMetricsOnboardingEnabled,
+        isManagedOtlpServiceAvailable,
+        managedOtlpServiceUrl: setupData.managedOtlpServiceUrl,
+        elasticsearchUrl: setupData.elasticsearchUrl,
+        apiKeyEncoded: setupData.apiKeyEncoded,
+        agentVersion: setupData.elasticAgentVersionInfo.agentVersion,
+        useWiredStreams,
+      })
     : '';
 
   const codeLanguage = os === 'windows' ? 'powershell' : useColoredSyntax ? 'bash' : 'sh';

@@ -56,15 +56,15 @@ export const AutoDetectInstallStep: React.FC<AutoDetectInstallStepProps> = ({
         <p>
           {isMetricsOnboardingEnabled
             ? i18n.translate(
-              'xpack.observability_onboarding.autoDetectPanel.p.wellScanYourHostLabel',
-              {
-                defaultMessage: "We'll scan your host for logs and metrics, including:",
-              }
-            )
+                'xpack.observability_onboarding.autoDetectPanel.p.wellScanYourHostLabel',
+                {
+                  defaultMessage: "We'll scan your host for logs and metrics, including:",
+                }
+              )
             : i18n.translate(
-              'xpack.observability_onboarding.logsEssential.autoDetectPanel.p.wellScanYourHostLabel',
-              { defaultMessage: "We'll scan your host for logs, including:" }
-            )}
+                'xpack.observability_onboarding.logsEssential.autoDetectPanel.p.wellScanYourHostLabel',
+                { defaultMessage: "We'll scan your host for logs, including:" }
+              )}
         </p>
       </EuiText>
       <EuiSpacer size="s" />
