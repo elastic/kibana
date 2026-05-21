@@ -7,7 +7,11 @@
 
 import expect from '@kbn/expect';
 import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
-import { LENS_ATTACHMENT_TYPE, OSQUERY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common/constants';
+import {
+  COMMENT_ATTACHMENT_TYPE,
+  LENS_ATTACHMENT_TYPE,
+  OSQUERY_ATTACHMENT_TYPE,
+} from '@kbn/cases-plugin/common/constants';
 import type { AttachmentRequestV2 } from '@kbn/cases-plugin/common/types/api';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { postCaseReq, postCommentUserReq } from '../../../common/lib/mock';
@@ -175,14 +179,20 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(bulkResult.attachments.length).to.be(2);
-        const byId = new Map<string, { type: string; externalReferenceAttachmentTypeId?: string }>(
-          bulkResult.attachments.map((a: { id: string; type: string }) => [a.id, a])
+        // The internal `bulkGetAttachments` route reads with `mode: 'unified'`, so a
+        // legacy `user` SO from `cases-comments` is projected to the unified
+        // `comment` shape and a unified `osquery` SO from `cases-attachments` is
+        // returned in its native unified shape.
+        const byId = new Map<string, { type: string; attachmentId?: string }>(
+          bulkResult.attachments.map((a: { id: string; type: string; attachmentId?: string }) => [
+            a.id,
+            a,
+          ])
         );
-        expect(byId.get(legacyId)!.type).to.be(AttachmentType.user);
-        // Osquery is projected back to the legacy externalReference shape on read.
+        expect(byId.get(legacyId)!.type).to.be(COMMENT_ATTACHMENT_TYPE);
         const osqueryAttachment = byId.get(osqueryId)!;
-        expect(osqueryAttachment.type).to.be(AttachmentType.externalReference);
-        expect(osqueryAttachment.externalReferenceAttachmentTypeId).to.be(OSQUERY_ATTACHMENT_TYPE);
+        expect(osqueryAttachment.type).to.be(OSQUERY_ATTACHMENT_TYPE);
+        expect(osqueryAttachment.attachmentId).to.be('mixed-osquery-1');
       });
 
       it('handles mixed legacy v1 and unified v2 payloads in bulk create', async () => {
