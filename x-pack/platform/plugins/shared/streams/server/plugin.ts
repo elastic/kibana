@@ -27,9 +27,9 @@ import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-s
 import { isNotFoundError } from '@kbn/es-errors';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import {
-  STREAMS_KI_FEATURES_IDENTIFICATION_ID,
-  STREAMS_KI_QUERIES_GENERATION_ID,
-  STREAMS_KI_ONBOARDING_ID,
+  STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
+  STREAMS_KI_QUERIES_GENERATION_WORKFLOW_ID,
+  STREAMS_KI_ONBOARDING_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { StreamsConfig } from '../common/config';
@@ -595,13 +595,13 @@ export class StreamsPlugin
       );
 
       await Promise.all([
-        client.install(STREAMS_KI_FEATURES_IDENTIFICATION_ID, {
+        client.install(STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID, {
           spaceId: GLOBAL_WORKFLOW_SPACE_ID,
         }),
-        client.install(STREAMS_KI_QUERIES_GENERATION_ID, {
+        client.install(STREAMS_KI_QUERIES_GENERATION_WORKFLOW_ID, {
           spaceId: GLOBAL_WORKFLOW_SPACE_ID,
         }),
-        client.install(STREAMS_KI_ONBOARDING_ID, {
+        client.install(STREAMS_KI_ONBOARDING_WORKFLOW_ID, {
           spaceId: GLOBAL_WORKFLOW_SPACE_ID,
         }),
       ]);

@@ -177,7 +177,8 @@ steps:
 
   # -----------------------------------------------------------------------
   # Step 4: Memory generation (best-effort, calls endpoint directly to
-  #          avoid workflow input validation on complex objects)
+  #          avoid workflow input validation on complex objects).
+  #          Triggered when at least one of features or queries was run.
   # -----------------------------------------------------------------------
   - name: trigger_memory
     type: if
