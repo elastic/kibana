@@ -38,7 +38,6 @@ export interface AlertingApiServices {
   sourceIndex: SourceIndexApiService;
   ruleExecutions: RuleExecutionsApiService;
   dispatcher: DispatcherApiService;
-  actionPolicies: ActionPoliciesApiService;
 }
 
 export interface AlertingApiServicesFixture extends ApiServicesFixture {

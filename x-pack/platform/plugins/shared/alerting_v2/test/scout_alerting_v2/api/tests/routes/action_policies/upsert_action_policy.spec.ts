@@ -112,15 +112,15 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     'upsert: 200 replaces and rotates version+updatedAt, preserves createdAt/createdBy',
     async ({ apiClient, apiServices }) => {
       const id = 'upsert-replace-policy';
-      const created = await apiServices.alertingV2.actionPolicies.create(
+      const created = await apiServices.alertingV2.actionPolicies.upsert(
+        id,
         buildCreateActionPolicyData({
           name: 'first-version',
           description: 'before replace',
           matcher: 'env == "production"',
           groupBy: ['service.name'],
           throttle: { interval: '5m' },
-        }),
-        { id }
+        })
       );
 
       const replaced = await apiClient.put(getActionPolicyUrl(id), {
@@ -157,14 +157,14 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     'upsert: replace drops fields not present in the new body',
     async ({ apiClient, apiServices }) => {
       const id = 'upsert-drop-fields-policy';
-      await apiServices.alertingV2.actionPolicies.create(
+      await apiServices.alertingV2.actionPolicies.upsert(
+        id,
         buildCreateActionPolicyData({
           name: 'with-optional-fields',
           matcher: 'env == "production"',
           groupBy: ['service.name'],
           throttle: { interval: '5m' },
-        }),
-        { id }
+        })
       );
 
       const replaced = await apiClient.put(getActionPolicyUrl(id), {
@@ -184,9 +184,9 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('upsert: preserves enabled=false on replace', async ({ apiClient, apiServices }) => {
     const id = 'upsert-preserve-disabled-policy';
-    await apiServices.alertingV2.actionPolicies.create(
-      buildCreateActionPolicyData({ name: 'to-be-disabled' }),
-      { id }
+    await apiServices.alertingV2.actionPolicies.upsert(
+      id,
+      buildCreateActionPolicyData({ name: 'to-be-disabled' })
     );
     await apiServices.alertingV2.actionPolicies.disable(id);
 
@@ -201,9 +201,9 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
 
   apiTest('upsert: preserves snoozedUntil on replace', async ({ apiClient, apiServices }) => {
     const id = 'upsert-preserve-snooze-policy';
-    await apiServices.alertingV2.actionPolicies.create(
-      buildCreateActionPolicyData({ name: 'to-be-snoozed' }),
-      { id }
+    await apiServices.alertingV2.actionPolicies.upsert(
+      id,
+      buildCreateActionPolicyData({ name: 'to-be-snoozed' })
     );
 
     const snoozedUntil = new Date(Date.now() + 60 * 60 * 1000).toISOString();
