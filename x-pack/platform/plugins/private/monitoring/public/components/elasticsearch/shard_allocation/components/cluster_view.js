@@ -11,7 +11,7 @@ import { TableBody } from './table_body';
 
 export const ClusterView = (props) => {
   return (
-    <table cellPadding="0" cellSpacing="0" className="table">
+    <table cellPadding="0" cellSpacing="0">
       <TableHead
         labels={props.labels}
         toggleShowSystemIndices={props.toggleShowSystemIndices}
