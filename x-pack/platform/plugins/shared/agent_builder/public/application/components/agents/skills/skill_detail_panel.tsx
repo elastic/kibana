@@ -6,7 +6,6 @@
  */
 
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -16,10 +15,9 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { AGENT_BUILDER_UI_EBT, AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { labels } from '../../../utils/i18n';
-import { useKibana } from '../../../hooks/use_kibana';
 import { useSkill } from '../../../hooks/skills/use_skills';
 import { DetailPanelLayout } from '../common/detail_panel_layout';
 import { RenderMarkdownReadOnly } from '../common/render_markdown_read_only';
@@ -41,20 +39,8 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
   isAutoIncluded = false,
   canEditAgent,
 }) => {
-  const { agentId } = useParams<{ agentId?: string }>();
   const { euiTheme } = useEuiTheme();
   const { skill, isLoading } = useSkill({ skillId });
-  const {
-    services: { analytics },
-  } = useKibana();
-
-  const handleEdit = () => {
-    analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.EntityEditFromAgent, {
-      entity_type: 'skill',
-      agent_id: agentId,
-    });
-    onEdit();
-  };
   const [selectedToolId, setSelectedToolId] = useState<string | null>(null);
 
   return (
@@ -93,7 +79,7 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
               canEditAgent={canEditAgent}
               isAutoIncluded={isAutoIncluded}
               isReadOnly={skill?.readonly ?? false}
-              onEdit={handleEdit}
+              onEdit={onEdit}
             />
           </EuiFlexGroup>
         )}

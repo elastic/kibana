@@ -21,11 +21,7 @@ import {
 import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
-import {
-  agentBuilderDefaultAgentId,
-  AGENT_BUILDER_UI_EBT,
-  AGENT_BUILDER_EVENT_TYPES,
-} from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { appPaths } from '../../../../../utils/app_paths';
 import {
@@ -40,7 +36,6 @@ import { useAgentBuilderAgents } from '../../../../../hooks/agents/use_agents';
 import { useLastAgentId } from '../../../../../hooks/use_last_agent_id';
 import { useConversationList } from '../../../../../hooks/use_conversation_list';
 import { useStreamingContext } from '../../../../../context/streaming/streaming_context';
-import { useKibana } from '../../../../../hooks/use_kibana';
 import { SidebarNavList } from '../../shared/sidebar_nav_list';
 
 import { ConversationFooter } from './conversation_footer';
@@ -88,9 +83,6 @@ export const ConversationSidebarView: React.FC = () => {
   const { conversations = [] } = useConversationList({ agentId });
   const hasConversations = conversations.length > 0;
   const { removeAllErrors } = useStreamingContext();
-  const {
-    services: { analytics },
-  } = useKibana();
 
   const isNewConversationRoute =
     conversationId === 'new' || pathname === appPaths.agent.root({ agentId });
@@ -138,11 +130,6 @@ export const ConversationSidebarView: React.FC = () => {
   ]);
 
   const handlePressNewConversation = () => {
-    analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ConversationStart, {
-      agent_id: agentId,
-      is_default_agent: agentId === agentBuilderDefaultAgentId,
-      entry_point: 'sidebar_new',
-    });
     removeAllErrors();
     navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }));
   };
@@ -187,12 +174,7 @@ export const ConversationSidebarView: React.FC = () => {
                     {customizeLabel}
                   </EuiText>
                   <EuiSpacer size="xs" />
-                  <SidebarNavList
-                    items={navItems}
-                    isActive={isActive}
-                    layer="conversation"
-                    agentId={agentId}
-                  />
+                  <SidebarNavList items={navItems} isActive={isActive} />
                 </EuiFlexItem>
 
                 <EuiFlexItem grow={false}>

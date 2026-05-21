@@ -19,14 +19,9 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
 import { getEbtProps } from '@kbn/ebt-click';
-import {
-  agentBuilderDefaultAgentId,
-  AGENT_BUILDER_UI_EBT,
-  AGENT_BUILDER_EVENT_TYPES,
-} from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getLastAgentId } from '../../../../hooks/use_last_agent_id';
 import { useNavigation } from '../../../../hooks/use_navigation';
-import { useKibana } from '../../../../hooks/use_kibana';
 import { appPaths } from '../../../../utils/app_paths';
 import { AgentSelector } from './agent_selector';
 
@@ -63,9 +58,6 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
   const { euiTheme } = useEuiTheme();
   const navigate = useNavigate();
   const { navigateToAgentBuilderUrl } = useNavigation();
-  const {
-    services: { analytics },
-  } = useKibana();
 
   const headerStyles = css`
     gap: ${euiTheme.size.s};
@@ -106,11 +98,6 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
               size="s"
               aria-label={labels.newConversation}
               onClick={() => {
-                analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ConversationStart, {
-                  agent_id: agentId,
-                  is_default_agent: agentId === agentBuilderDefaultAgentId,
-                  entry_point: 'sidebar_new',
-                });
                 navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }));
               }}
               {...getEbtProps({
@@ -140,11 +127,6 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
               flush="both"
               color="text"
               onClick={() => {
-                analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.SidebarLayerTransition, {
-                  from_layer: 'manage',
-                  to_layer: 'conversation',
-                  trigger: 'back_click',
-                });
                 navigate(appPaths.agent.root({ agentId: getLastAgentId() }));
               }}
               {...getEbtProps({

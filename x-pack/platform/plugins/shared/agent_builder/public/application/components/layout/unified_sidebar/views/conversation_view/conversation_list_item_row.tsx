@@ -22,8 +22,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
-import { AGENT_BUILDER_UI_EBT, AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
-import { useKibana } from '../../../../../hooks/use_kibana';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 
 import { appPaths } from '../../../../../utils/app_paths';
 import { useConversationListMutations } from '../../../../../hooks/use_conversation_list_mutations';
@@ -55,7 +54,6 @@ export interface ConversationListItemRowProps {
   agentId: string;
   conversationId: string;
   title: string;
-  updatedAt: string;
   isActive: boolean;
   routeConversationId: string | undefined;
   showActionsMenu?: boolean;
@@ -66,16 +64,12 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
   agentId,
   conversationId,
   title,
-  updatedAt,
   isActive,
   routeConversationId,
   showActionsMenu = true,
   onItemClick,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const {
-    services: { analytics },
-  } = useKibana();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -219,12 +213,6 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
             css={linkStyles}
             data-test-subj={`agentBuilderSidebarConversation-${conversationId}`}
             onClick={() => {
-              analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ConversationResume, {
-                agent_id: agentId,
-                conversation_age_hours: Math.round(
-                  (Date.now() - new Date(updatedAt).getTime()) / 3_600_000
-                ),
-              });
               onItemClick?.();
             }}
             {...getEbtProps({

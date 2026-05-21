@@ -20,18 +20,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { ToolDefinition } from '@kbn/agent-builder-common';
-import {
-  defaultAgentToolIds,
-  AGENT_BUILDER_UI_EBT,
-  AGENT_BUILDER_EVENT_TYPES,
-} from '@kbn/agent-builder-common';
+import { defaultAgentToolIds, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useQueryState } from '../../../hooks/use_query_state';
 import { searchParamNames } from '../../../search_param_names';
 import { labels } from '../../../utils/i18n';
 import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
-import { useKibana } from '../../../hooks/use_kibana';
 import { useToolsService } from '../../../hooks/tools/use_tools';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { useFlyoutState } from '../../../hooks/use_flyout_state';
@@ -122,9 +117,6 @@ export const AgentTools: React.FC = () => {
   const { agentId } = useParams<{ agentId: string }>();
   const styles = useListDetailPageStyles();
   const { createAgentBuilderUrl } = useNavigation();
-  const {
-    services: { analytics },
-  } = useKibana();
 
   const { agent, isLoading: agentLoading } = useAgentBuilderAgentById(agentId);
   const { tools: allTools, isLoading: toolsLoading } = useToolsService();
@@ -144,12 +136,8 @@ export const AgentTools: React.FC = () => {
   } = useFlyoutState();
 
   const openLibrary = useCallback(() => {
-    analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.EntityAddFromLibrary, {
-      entity_type: 'tool',
-      agent_id: agentId,
-    });
     openLibraryFlyout();
-  }, [analytics, agentId, openLibraryFlyout]);
+  }, [openLibraryFlyout]);
 
   const agentToolSelections = useMemo(
     () => agent?.configuration?.tools ?? [],
@@ -212,28 +200,19 @@ export const AgentTools: React.FC = () => {
 
   const handleSelectTool = useCallback(
     (toolId: string) => {
-      analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.EntityDetailView, {
-        entity_type: 'tool',
-        view_format: 'split',
-        agent_id: agentId,
-      });
       setSelectedToolId(toolId);
     },
-    [analytics, agentId, setSelectedToolId]
+    [setSelectedToolId]
   );
 
   const handleRemoveToolWithDeselect = useCallback(
     (tool: ToolDefinition) => {
-      analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.EntityRemove, {
-        entity_type: 'tool',
-        agent_id: agentId,
-      });
       handleRemoveTool(tool);
       if (tool.id === selectedToolId) {
         setSelectedToolId(null);
       }
     },
-    [analytics, agentId, handleRemoveTool, selectedToolId, setSelectedToolId]
+    [handleRemoveTool, selectedToolId, setSelectedToolId]
   );
 
   /** Guarded removal: only prevents removing auto-included tools from the agent. */

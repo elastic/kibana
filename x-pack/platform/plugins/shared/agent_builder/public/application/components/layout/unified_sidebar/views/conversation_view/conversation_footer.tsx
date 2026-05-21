@@ -12,17 +12,13 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
 import { getEbtProps } from '@kbn/ebt-click';
-import { AGENT_BUILDER_UI_EBT, AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { appPaths } from '../../../../../utils/app_paths';
 import { useNavigation } from '../../../../../hooks/use_navigation';
-import { useKibana } from '../../../../../hooks/use_kibana';
 import { SidebarLink } from './sidebar_link';
 
 export const ConversationFooter: React.FC = () => {
   const { navigateToAgentBuilderUrl } = useNavigation();
-  const {
-    services: { analytics },
-  } = useKibana();
 
   return (
     <EuiFlexGroup
@@ -44,11 +40,6 @@ export const ConversationFooter: React.FC = () => {
           hideIcon={true}
           onClick={(e) => {
             e.preventDefault();
-            analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.SidebarLayerTransition, {
-              from_layer: 'conversation',
-              to_layer: 'manage',
-              trigger: 'manage_click',
-            });
             navigateToAgentBuilderUrl(appPaths.manage.agents);
           }}
           {...getEbtProps({

@@ -96,7 +96,6 @@ export const ConversationList: React.FC<ConversationListProps> = ({
               agentId={agentId}
               conversationId={conversation.id}
               title={conversation.title || conversation.id}
-              updatedAt={conversation.updated_at}
               isActive={isActive}
               routeConversationId={currentConversationId}
               showActionsMenu={!activeStreams.has(conversation.id)}

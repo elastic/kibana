@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiFieldSearch,
   EuiFlexGroup,
@@ -22,9 +22,8 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
-import { AGENT_BUILDER_UI_EBT, AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { useConversationList } from '../../hooks/use_conversation_list';
-import { useKibana } from '../../hooks/use_kibana';
 import {
   createActiveConversationListItemStyles,
   createConversationListItemStyles,
@@ -61,9 +60,6 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
 
   const { euiTheme } = useEuiTheme();
   const modalTitleId = useGeneratedHtmlId();
-  const {
-    services: { analytics },
-  } = useKibana();
 
   const { conversations = [], isLoading } = useConversationList({ agentId });
 
@@ -80,14 +76,6 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
     const lower = searchValue.toLowerCase();
     return sortedConversations.filter((c) => c.title.toLowerCase().includes(lower));
   }, [sortedConversations, searchValue]);
-
-  useEffect(() => {
-    if (!searchValue) return;
-    analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ConversationSearch, {
-      has_results: filteredConversations.length > 0,
-      result_count: filteredConversations.length,
-    });
-  }, [filteredConversations, searchValue, analytics]);
 
   const itemStyles = createConversationListItemStyles(euiTheme);
   const activeItemStyles = createActiveConversationListItemStyles(euiTheme);
@@ -122,12 +110,6 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
               <button
                 css={isActive ? activeItemStyles : itemStyles}
                 onClick={() => {
-                  analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ConversationResume, {
-                    agent_id: agentId,
-                    conversation_age_hours: Math.round(
-                      (Date.now() - new Date(conversation.updated_at).getTime()) / 3_600_000
-                    ),
-                  });
                   onSelectConversation(conversation.id);
                   onClose();
                 }}

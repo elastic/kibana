@@ -7,11 +7,10 @@
 
 import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import type { PublicSkillSummary } from '@kbn/agent-builder-common';
-import { AGENT_BUILDER_UI_EBT, AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useNavigation } from '../../hooks/use_navigation';
-import { useKibana } from '../../hooks/use_kibana';
 import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
 
@@ -28,9 +27,6 @@ export const SkillContextMenu: React.FC<SkillContextMenuProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { navigateToAgentBuilderUrl } = useNavigation();
-  const {
-    services: { analytics },
-  } = useKibana();
 
   const closePopover = useCallback(() => setIsOpen(false), []);
   const togglePopover = useCallback(() => setIsOpen((prev) => !prev), []);
@@ -74,9 +70,6 @@ export const SkillContextMenu: React.FC<SkillContextMenuProps> = ({
           name: labels.skills.deleteSkillButtonLabel,
           icon: 'trash',
           onClick: () => {
-            analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ManageEntityDelete, {
-              entity_type: 'skill',
-            });
             onDelete(skill.id);
             closePopover();
           },
@@ -91,7 +84,7 @@ export const SkillContextMenu: React.FC<SkillContextMenuProps> = ({
     }
 
     return [{ id: 0, items }];
-  }, [skill, canManage, navigateToAgentBuilderUrl, closePopover, onDelete, analytics]);
+  }, [skill, canManage, navigateToAgentBuilderUrl, closePopover, onDelete]);
 
   return (
     <EuiPopover

@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -17,13 +16,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { AGENT_BUILDER_UI_EBT, AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { labels } from '../../../utils/i18n';
 import { useToolService } from '../../../hooks/tools/use_tools';
 import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
-import { useKibana } from '../../../hooks/use_kibana';
 import { DetailPanelLayout } from '../common/detail_panel_layout';
 import { RenderMarkdownReadOnly } from '../common/render_markdown_read_only';
 
@@ -101,11 +99,7 @@ const ToolHeaderActions = ({
   isAutoIncluded: boolean;
   toolId: string;
 }) => {
-  const { agentId } = useParams<{ agentId?: string }>();
   const { createAgentBuilderUrl } = useNavigation();
-  const {
-    services: { analytics },
-  } = useKibana();
   const editInLibraryUrl = createAgentBuilderUrl(appPaths.manage.toolDetails({ toolId }));
 
   if (isAutoIncluded) {
@@ -133,12 +127,6 @@ const ToolHeaderActions = ({
             href={editInLibraryUrl}
             target="_blank"
             external
-            onClick={() => {
-              analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.EntityEditFromAgent, {
-                entity_type: 'tool',
-                agent_id: agentId,
-              });
-            }}
             {...getEbtProps({
               element: AGENT_BUILDER_UI_EBT.element.pageContent,
               action: AGENT_BUILDER_UI_EBT.action.agentCustomization.ENTITY_EDIT_FROM_AGENT,

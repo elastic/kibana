@@ -21,14 +21,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { PluginDefinition } from '@kbn/agent-builder-common';
-import { AGENT_BUILDER_UI_EBT, AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useQueryState } from '../../../hooks/use_query_state';
 import { searchParamNames } from '../../../search_param_names';
 import { labels } from '../../../utils/i18n';
 import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
-import { useKibana } from '../../../hooks/use_kibana';
 import { usePluginsService } from '../../../hooks/plugins/use_plugins';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { useFlyoutState } from '../../../hooks/use_flyout_state';
@@ -47,9 +46,6 @@ export const AgentPlugins: React.FC = () => {
   const { agentId } = useParams<{ agentId: string }>();
   const styles = useListDetailPageStyles();
   const { createAgentBuilderUrl } = useNavigation();
-  const {
-    services: { analytics },
-  } = useKibana();
 
   const { agent, isLoading: agentLoading } = useAgentBuilderAgentById(agentId);
   const { plugins: allPlugins, isLoading: pluginsLoading } = usePluginsService();
@@ -72,22 +68,14 @@ export const AgentPlugins: React.FC = () => {
   } = useFlyoutState();
 
   const handleOpenLibrary = useCallback(() => {
-    analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.EntityAddFromLibrary, {
-      entity_type: 'plugin',
-      agent_id: agentId,
-    });
     setIsHeaderInstallMenuOpen(false);
     openLibrary();
-  }, [analytics, agentId, openLibrary]);
+  }, [openLibrary]);
 
   const handleOpenInstallFlyout = useCallback(() => {
-    analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.EntityCreateNew, {
-      entity_type: 'plugin',
-      agent_id: agentId,
-    });
     setIsHeaderInstallMenuOpen(false);
     openInstallFlyout();
-  }, [analytics, agentId, openInstallFlyout]);
+  }, [openInstallFlyout]);
 
   const agentPluginIds = useMemo(
     () => agent?.configuration?.plugin_ids,
@@ -156,25 +144,16 @@ export const AgentPlugins: React.FC = () => {
 
   const handleSelectPlugin = useCallback(
     (pluginId: string) => {
-      analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.EntityDetailView, {
-        entity_type: 'plugin',
-        view_format: 'split',
-        agent_id: agentId,
-      });
       setSelectedPluginId(pluginId);
     },
-    [analytics, agentId, setSelectedPluginId]
+    [setSelectedPluginId]
   );
 
   const handleRemovePluginWithReport = useCallback(
     (plugin: PluginDefinition) => {
-      analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.EntityRemove, {
-        entity_type: 'plugin',
-        agent_id: agentId,
-      });
       handleRemovePlugin(plugin);
     },
-    [analytics, agentId, handleRemovePlugin]
+    [handleRemovePlugin]
   );
 
   const handleTogglePlugin = useCallback(

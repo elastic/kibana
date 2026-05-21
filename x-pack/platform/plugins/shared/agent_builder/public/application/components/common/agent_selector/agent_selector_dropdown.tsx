@@ -25,14 +25,9 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
-import {
-  agentBuilderDefaultAgentId,
-  AGENT_BUILDER_UI_EBT,
-  AGENT_BUILDER_EVENT_TYPES,
-} from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
-import { useKibana } from '../../../hooks/use_kibana';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
 import {
@@ -106,13 +101,10 @@ const AgentListHeader: React.FC = () => {
   );
 };
 
-const AgentListFooter: React.FC<{ currentAgentId?: string }> = ({ currentAgentId }) => {
+const AgentListFooter: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const { manageAgents } = useUiPrivileges();
   const { createAgentBuilderUrl } = useNavigation();
-  const {
-    services: { analytics },
-  } = useKibana();
   const manageAgentsHref = createAgentBuilderUrl(appPaths.agents.list);
   return (
     <EuiPopoverFooter
@@ -126,11 +118,6 @@ const AgentListFooter: React.FC<{ currentAgentId?: string }> = ({ currentAgentId
         fullWidth
         size="s"
         data-test-subj="agentBuilderAgentSelectorManageAgentsButton"
-        onClick={() =>
-          analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ManageAllAgentsClick, {
-            current_agent_id: currentAgentId ?? '',
-          })
-        }
         {...getEbtProps({
           element: AGENT_BUILDER_UI_EBT.element.SIDEBAR,
           action: AGENT_BUILDER_UI_EBT.action.navSidebar.MANAGE_ALL_AGENTS_CLICK,
@@ -159,9 +146,6 @@ export const AgentSelectorDropdown: React.FC<AgentSelectorDropdownProps> = ({
   fallbackLabel,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const {
-    services: { analytics },
-  } = useKibana();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const { agentOptions, renderAgentOption } = useAgentOptions({
@@ -254,11 +238,6 @@ export const AgentSelectorDropdown: React.FC<AgentSelectorDropdownProps> = ({
             onChange={(_options, _event, changedOption) => {
               const { checked, key: agentId } = changedOption;
               if (checked === 'on' && agentId) {
-                analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.AgentSwitch, {
-                  from_agent_id: selectedAgent?.id ?? '',
-                  to_agent_id: agentId,
-                  is_default_agent: agentId === agentBuilderDefaultAgentId,
-                });
                 onAgentChange(agentId);
                 setIsPopoverOpen(false);
               }
@@ -278,7 +257,7 @@ export const AgentSelectorDropdown: React.FC<AgentSelectorDropdownProps> = ({
             {(list) => (
               <>
                 {list}
-                <AgentListFooter currentAgentId={selectedAgent?.id} />
+                <AgentListFooter />
               </>
             )}
           </EuiSelectable>
