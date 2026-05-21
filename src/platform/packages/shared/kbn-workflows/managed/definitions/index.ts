@@ -7,8 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  STREAMS_KI_FEATURES_IDENTIFICATION,
+  STREAMS_KI_ONBOARDING,
+  STREAMS_KI_QUERIES_GENERATION,
+} from './streams_ki';
 import { EXAMPLE_MANAGED_WORKFLOW } from './workflows_extensions_example';
 
 export { EXAMPLE_MANAGED_WORKFLOW_ID } from './workflows_extensions_example';
+export {
+  STREAMS_KI_FEATURES_IDENTIFICATION_ID,
+  STREAMS_KI_QUERIES_GENERATION_ID,
+  STREAMS_KI_ONBOARDING_ID,
+} from './streams_ki';
 
-export const managedWorkflowDefinitions = [EXAMPLE_MANAGED_WORKFLOW] as const;
+export const managedWorkflowDefinitions = [
+  EXAMPLE_MANAGED_WORKFLOW,
+  STREAMS_KI_FEATURES_IDENTIFICATION,
+  STREAMS_KI_QUERIES_GENERATION,
+  STREAMS_KI_ONBOARDING,
+] as const;

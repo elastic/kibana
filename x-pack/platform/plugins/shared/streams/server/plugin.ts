@@ -25,6 +25,13 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { RulesClient, RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
+import {
+  STREAMS_KI_FEATURES_IDENTIFICATION_ID,
+  STREAMS_KI_QUERIES_GENERATION_ID,
+  STREAMS_KI_ONBOARDING_ID,
+} from '@kbn/workflows/managed';
+import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { StreamsConfig } from '../common/config';
 import {
   STREAMS_API_PRIVILEGES,
@@ -78,6 +85,8 @@ import {
   createContinuousKiExtractionWorkflowService,
   type ContinuousKiExtractionWorkflowService,
 } from './lib/workflows/continuous_extraction_workflow';
+
+const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -296,6 +305,8 @@ export class StreamsPlugin
         plugins.workflowsManagement.management
       );
     }
+
+    plugins.workflowsExtensions?.registerManagedWorkflowOwner(STREAMS_MANAGED_WORKFLOW_OWNER);
 
     taskService.registerTasks({
       getScopedClients,
@@ -566,9 +577,45 @@ export class StreamsPlugin
       };
     }
 
+    if (plugins.workflowsExtensions) {
+      void this.installManagedWorkflows(plugins.workflowsExtensions);
+    }
+
     this.processorSuggestionsService.setConsoleStart(plugins.console);
 
     return {};
+  }
+
+  private async installManagedWorkflows(
+    workflowsExtensions: WorkflowsExtensionsServerPluginStart
+  ): Promise<void> {
+    try {
+      const client = await workflowsExtensions.initManagedWorkflowsClient(
+        STREAMS_MANAGED_WORKFLOW_OWNER
+      );
+
+      await Promise.all([
+        client.install(STREAMS_KI_FEATURES_IDENTIFICATION_ID, {
+          spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+        }),
+        client.install(STREAMS_KI_QUERIES_GENERATION_ID, {
+          spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+        }),
+        client.install(STREAMS_KI_ONBOARDING_ID, {
+          spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+        }),
+      ]);
+
+      await client.ready();
+
+      this.logger.info('Streams KI managed workflows installed');
+    } catch (error) {
+      this.logger.warn(
+        `Failed to install streams KI managed workflows: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
   }
 
   public async stop() {
