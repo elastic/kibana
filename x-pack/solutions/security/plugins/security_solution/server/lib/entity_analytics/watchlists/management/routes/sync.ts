@@ -18,7 +18,11 @@ import { withMinimumLicense } from '../../../utils/with_minimum_license';
 import { createEntitySourcesService } from '../../entity_sources/entity_sources_service';
 import { getRequestSavedObjectClient } from '../../shared/utils';
 
-export const syncWatchlistRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
+export const syncWatchlistRoute = (
+  router: EntityAnalyticsRoutesDeps['router'],
+  logger: Logger,
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
+) => {
   router.versioned
     .post({
       access: 'public',
@@ -45,11 +49,14 @@ export const syncWatchlistRoute = (router: EntityAnalyticsRoutesDeps['router'], 
           const secSol = await context.securitySolution;
           const core = await context.core;
 
+          const [coreStart, pluginsStart] = await getStartServices();
           const entitySourcesService = createEntitySourcesService({
             esClient: core.elasticsearch.client.asCurrentUser,
             soClient: getRequestSavedObjectClient(core),
             logger,
             namespace: secSol.getSpaceId(),
+            encryptedSavedObjects: pluginsStart.encryptedSavedObjects,
+            coreElasticsearchClient: coreStart.elasticsearch.client,
           });
 
           await entitySourcesService.syncWatchlist(request.params.watchlist_id);

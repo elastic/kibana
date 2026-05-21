@@ -36,7 +36,7 @@ export const registerWatchlistRoutes = ({
   searchWatchlistIndicesRoute(router, logger);
   updateWatchlistRoute(router, logger, telemetrySender);
   registerEntitySourceRoutes(router, logger, getStartServices);
-  syncWatchlistRoute(router, logger);
+  syncWatchlistRoute(router, logger, getStartServices);
   csvUploadRoute({ router, logger, getStartServices });
   registerManualEntityRoutes(router, logger);
 };
