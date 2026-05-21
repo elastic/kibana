@@ -65,7 +65,7 @@ jobs:
                 text:
                   type: mrkdwn
                   text: |
-                    @docs-serverless-release-team
+                    <!subteam^S09CE7YJJU8|docs-serverless-release-team>
                     :memo: Generate Serverless Changelog completed successfully.
                     *Service version:* `${{ inputs.service_version }}`
                     *Target environment:* `${{ inputs.target_env }}`
