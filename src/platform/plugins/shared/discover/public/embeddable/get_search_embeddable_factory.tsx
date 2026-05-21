@@ -277,7 +277,7 @@ export const getSearchEmbeddableFactory = ({
         },
       });
 
-      const unsubscribeFromFetch = initializeFetch({
+      const { unsubscribe: unsubscribeFromFetch, fetchMore } = initializeFetch({
         api: {
           ...api,
           parentApi,
@@ -431,6 +431,7 @@ export const getSearchEmbeddableFactory = ({
                         api={{ ...api, fetchWarnings$, fetchContext$ }}
                         dataView={dataView!}
                         onRefreshData={onRefreshData}
+                        onFetchMoreRecords={fetchMore}
                         onAddFilter={
                           runtimeState.nonPersistedDisplayOptions?.enableFilters === false
                             ? undefined

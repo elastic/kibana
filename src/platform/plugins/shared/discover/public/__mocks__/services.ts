@@ -121,6 +121,23 @@ export function createDiscoverServicesMock(): DiscoverServices {
     return createSearchSourceWithDeps(fields);
   });
 
+  dataPlugin.search.dslPaginated = jest.fn(async (params, options) => {
+    return {
+      rawResponse: {
+        took: 0,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { hits: [], total: 0 },
+      },
+      requestParams: undefined,
+      pagination: {
+        hasNextPage: false,
+        nextPage: jest.fn(async () => null),
+        getAllPages: jest.fn(),
+      },
+    };
+  });
+
   const expressionsPlugin = expressionsPluginMock.createStartContract();
 
   expressionsPlugin.run = jest.fn(() =>

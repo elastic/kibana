@@ -36,6 +36,7 @@ import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import type { BehaviorSubject } from 'rxjs';
 import type { PublishesWritableDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
 import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
+import type { IDSLPagination } from '@kbn/search-types';
 import type {
   NonPersistedDisplayOptions,
   SearchEmbeddablePanelApiState,
@@ -66,6 +67,8 @@ export type SearchEmbeddablePublicState = Pick<
   columnsMeta: DataTableColumnsMeta | undefined;
   totalHitCount: number | undefined;
   inspectorAdapters: Record<string, unknown>;
+  pagination: IDSLPagination | undefined;
+  isLoadingMore: boolean;
 };
 
 export type SearchEmbeddableStateManager = {
@@ -76,7 +79,13 @@ export type SearchEmbeddableStateManager = {
 
 export type SearchEmbeddableSerializedAttributes = Omit<
   SearchEmbeddablePublicState,
-  'rows' | 'columnsMeta' | 'totalHitCount' | 'searchSource' | 'inspectorAdapters'
+  | 'rows'
+  | 'columnsMeta'
+  | 'totalHitCount'
+  | 'searchSource'
+  | 'inspectorAdapters'
+  | 'pagination'
+  | 'isLoadingMore'
 > &
   Pick<SerializableSavedSearch, 'serializedSearchSource'>;
 

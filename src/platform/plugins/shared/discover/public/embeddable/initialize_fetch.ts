@@ -8,9 +8,10 @@
  */
 
 import type { BehaviorSubject } from 'rxjs';
-import { combineLatest, debounceTime, lastValueFrom, switchMap, tap } from 'rxjs';
+import { combineLatest, debounceTime, switchMap, tap } from 'rxjs';
 
 import type { KibanaExecutionContext } from '@kbn/core/types';
+import type { EsHitRecord } from '@kbn/discover-utils';
 import {
   buildDataTableRecordList,
   SEARCH_EMBEDDABLE_TYPE,
@@ -19,7 +20,6 @@ import {
 import { type ESQLControlVariable } from '@kbn/esql-types';
 import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
-import { i18n } from '@kbn/i18n';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type {
   FetchContext,
@@ -159,6 +159,9 @@ export function initializeFetch({
           abortController.abort(AbortReason.REPLACED);
           abortController = undefined;
         }
+        // Reset pagination state when a new fetch starts
+        stateManager.pagination.next(undefined);
+        stateManager.isLoadingMore.next(false);
       }),
       switchMap(async ([fetchContext, savedSearch, dataViews]) => {
         const dataView = dataViews?.length ? dataViews[0] : undefined;
@@ -239,27 +242,22 @@ export function initializeFetch({
           const executionContext = await getExecutionContext(api, discoverServices);
 
           /**
-           * Fetch via saved search
+           * Fetch via dslPaginated for pagination support
            */
-          const { rawResponse: resp } = await lastValueFrom(
-            savedSearch.searchSource.fetch$({
+          const searchRequest = savedSearch.searchSource.build();
+          const result = await discoverServices.data.search.dslPaginated(
+            {
+              ...searchRequest.body,
+              index: dataView,
+            },
+            {
               abortSignal: currentAbortController.signal,
               sessionId: searchSessionId,
-              inspector: {
-                adapter: inspectorAdapters.requests,
-                title: i18n.translate('discover.embeddable.inspectorTableRequestTitle', {
-                  defaultMessage: 'Table',
-                }),
-                description: i18n.translate('discover.embeddable.inspectorRequestDescription', {
-                  defaultMessage:
-                    'This request queries Elasticsearch to fetch the data for the search.',
-                }),
-              },
               executionContext,
-              disableWarningToasts: true,
               projectRouting: fetchContext.projectRouting,
-            })
+            }
           );
+
           const interceptedWarnings: SearchResponseWarning[] = [];
           discoverServices.data.search.showWarnings(inspectorAdapters.requests, (warning) => {
             interceptedWarnings.push(warning);
@@ -269,12 +267,13 @@ export function initializeFetch({
           return {
             warnings: interceptedWarnings,
             rows: buildDataTableRecordList({
-              records: resp.hits.hits,
+              records: result.rawResponse.hits.hits as EsHitRecord[],
               dataView,
               processRecord: (record) => scopedProfilesManager.resolveDocumentProfile({ record }),
             }),
-            hitCount: resp.hits.total as number,
+            hitCount: result.rawResponse.hits.total as number,
             fetchContext,
+            pagination: result.pagination,
           };
         } catch (error) {
           return { error };
@@ -297,9 +296,57 @@ export function initializeFetch({
       if (Object.hasOwn(next, 'columnsMeta')) {
         stateManager.columnsMeta.next(next.columnsMeta);
       }
+      if (Object.hasOwn(next, 'pagination')) {
+        stateManager.pagination.next(next.pagination);
+      }
     });
 
-  return () => {
-    fetchSubscription.unsubscribe();
+  const fetchMore = async () => {
+    const currentPagination = stateManager.pagination.getValue();
+    if (!currentPagination?.hasNextPage) {
+      return;
+    }
+
+    stateManager.isLoadingMore.next(true);
+
+    try {
+      const executionContext = await getExecutionContext(api, discoverServices);
+      const nextPageResult = await currentPagination.nextPage({
+        executionContext,
+      });
+
+      if (!nextPageResult) {
+        stateManager.isLoadingMore.next(false);
+        return;
+      }
+
+      const dataView = api.dataViews$.getValue()?.[0];
+      if (!dataView) {
+        stateManager.isLoadingMore.next(false);
+        return;
+      }
+
+      const moreRecords = buildDataTableRecordList({
+        records: nextPageResult.rawResponse.hits.hits as EsHitRecord[],
+        dataView,
+        processRecord: (record) => scopedProfilesManager.resolveDocumentProfile({ record }),
+      });
+
+      // Merge results
+      const currentRows = stateManager.rows.getValue();
+      stateManager.rows.next([...currentRows, ...moreRecords]);
+      stateManager.pagination.next(nextPageResult.pagination);
+      stateManager.isLoadingMore.next(false);
+    } catch (error) {
+      stateManager.isLoadingMore.next(false);
+      setBlockingError(error);
+    }
+  };
+
+  return {
+    unsubscribe: () => {
+      fetchSubscription.unsubscribe();
+    },
+    fetchMore,
   };
 }

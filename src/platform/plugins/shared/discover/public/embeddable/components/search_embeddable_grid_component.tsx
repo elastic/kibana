@@ -49,6 +49,7 @@ interface SavedSearchEmbeddableComponentProps {
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
   onRefreshData?: () => void;
+  onFetchMoreRecords?: () => void;
   enableDocumentViewer: boolean;
   inlineEditing: InlineEditing;
   stateManager: SearchEmbeddableStateManager;
@@ -61,6 +62,7 @@ export function SearchEmbeddableGridComponent({
   dataView,
   onAddFilter,
   onRefreshData,
+  onFetchMoreRecords,
   enableDocumentViewer,
   inlineEditing,
   stateManager,
@@ -91,6 +93,7 @@ export function SearchEmbeddableGridComponent({
     savedSearchTitle,
     savedSearchDescription,
     esqlVariables,
+    isLoadingMore,
   ] = useBatchedPublishingSubjects(
     api.dataLoading$,
     api.savedSearch$,
@@ -107,7 +110,8 @@ export function SearchEmbeddableGridComponent({
     api.description$,
     api.defaultTitle$,
     api.defaultDescription$,
-    esqlVariables$ ?? emptyEsqlVariables$
+    esqlVariables$ ?? emptyEsqlVariables$,
+    stateManager.isLoadingMore
   );
 
   // `api.query$` and `api.filters$` are the initial values from the saved search SO (as of now)
@@ -226,6 +230,12 @@ export function SearchEmbeddableGridComponent({
     return getAllowedSampleSize(savedSearch.sampleSize, discoverServices.uiSettings);
   }, [savedSearch.sampleSize, discoverServices]);
 
+  const loadingState = useMemo(() => {
+    if (isLoadingMore) return DataLoadingState.loadingMore;
+    if (loading) return DataLoadingState.loading;
+    return DataLoadingState.loaded;
+  }, [loading, isLoadingMore]);
+
   const defaults = getSearchEmbeddableDefaults(discoverServices.uiSettings);
 
   return (
@@ -258,7 +268,7 @@ export function SearchEmbeddableGridComponent({
       headerRowHeightState={savedSearch.headerRowHeight}
       rowHeightState={savedSearch.rowHeight}
       isPlainRecord={isEsql}
-      loadingState={Boolean(loading) ? DataLoadingState.loading : DataLoadingState.loaded}
+      loadingState={loadingState}
       maxAllowedSampleSize={getMaxAllowedSampleSize(discoverServices.uiSettings)}
       query={savedSearchQuery}
       filters={savedSearchFilters}
@@ -269,6 +279,7 @@ export function SearchEmbeddableGridComponent({
       dataGridDensityState={savedSearch.density}
       enableDocumentViewer={enableDocumentViewer}
       inlineEditing={inlineEditing}
+      onFetchMoreRecords={isEsql ? undefined : onFetchMoreRecords}
     />
   );
 }

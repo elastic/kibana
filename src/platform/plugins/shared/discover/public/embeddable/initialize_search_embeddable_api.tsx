@@ -24,6 +24,7 @@ import type {
 import type { DiscoverGridSettings, SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { SortOrder, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import type { DataGridDensity, DataTableColumnsMeta } from '@kbn/unified-data-table';
+import type { IDSLPagination } from '@kbn/search-types';
 
 import {
   isOfAggregateQueryType,
@@ -162,6 +163,8 @@ export const initializeSearchEmbeddableApi = async ({
   const columnsMeta$ = new BehaviorSubject<DataTableColumnsMeta | undefined>(undefined);
   const totalHitCount$ = new BehaviorSubject<number | undefined>(undefined);
   const inspectorAdapters$ = new BehaviorSubject<Adapters>({});
+  const pagination$ = new BehaviorSubject<IDSLPagination | undefined>(undefined);
+  const isLoadingMore$ = new BehaviorSubject<boolean>(false);
 
   /**
    * The state manager is used to modify the state of the saved search - this should never be
@@ -181,6 +184,8 @@ export const initializeSearchEmbeddableApi = async ({
     viewMode: savedSearchViewMode$,
     density: density$,
     inspectorAdapters: inspectorAdapters$,
+    pagination: pagination$,
+    isLoadingMore: isLoadingMore$,
   };
 
   /** The saved search should be the source of truth for all state  */

@@ -23,6 +23,7 @@ import { createDiscoverServicesMock } from '../../__mocks__/services';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types';
 import { SearchEmbeddableGridComponent } from './search_embeddable_grid_component';
+import type { IDSLPagination } from '@kbn/search-types';
 
 const mockDiscoverGridEmbeddableProps = jest.fn();
 
@@ -47,6 +48,8 @@ const createStateManager = (): SearchEmbeddableStateManager => ({
   rows: new BehaviorSubject<DataTableRecord[]>([]),
   totalHitCount: new BehaviorSubject<number | undefined>(undefined),
   inspectorAdapters: new BehaviorSubject<Record<string, unknown>>({}),
+  pagination: new BehaviorSubject<IDSLPagination | undefined>(undefined),
+  isLoadingMore: new BehaviorSubject<boolean>(false),
 });
 
 const createSavedSearch = (isEsql: boolean): SavedSearch => {
