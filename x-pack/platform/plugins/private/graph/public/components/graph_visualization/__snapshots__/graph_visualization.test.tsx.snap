@@ -30,6 +30,7 @@ exports[`graph_visualization should render to svg elements 1`] = `
         />
         <line
           className="gphEdge gphEdge--clickable"
+          data-test-subj="graphClickableEdge"
           onClick={[Function]}
           style={
             Object {
@@ -61,6 +62,7 @@ exports[`graph_visualization should render to svg elements 1`] = `
         />
         <line
           className="gphEdge gphEdge--clickable"
+          data-test-subj="graphClickableEdge"
           onClick={[Function]}
           style={
             Object {
@@ -84,6 +86,7 @@ exports[`graph_visualization should render to svg elements 1`] = `
         css="unknown styles"
         cx={5}
         cy={5}
+        data-test-subj="graphNodeCircle"
         r={10}
       />
       <IconRenderer
@@ -137,6 +140,7 @@ exports[`graph_visualization should render to svg elements 1`] = `
         css="unknown styles"
         cx={7}
         cy={9}
+        data-test-subj="graphNodeCircle"
         r={10}
       />
       <IconRenderer
@@ -172,6 +176,7 @@ exports[`graph_visualization should render to svg elements 1`] = `
         css="unknown styles"
         cx={12}
         cy={2}
+        data-test-subj="graphNodeCircle"
         r={10}
       />
       <IconRenderer
