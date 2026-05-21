@@ -7,9 +7,8 @@
 
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger, SavedObjectsClient } from '@kbn/core/server';
-import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import type { StoredSLODefinition } from '../../../domain/models';
-import { SO_SLO_TYPE } from '../../../saved_objects';
+import pLimit from 'p-limit';
+import { findSloDefinitionMap, getKey, type SLO } from './find_slo_definitions';
 
 interface Dependencies {
   esClient: ElasticsearchClient;
@@ -21,22 +20,28 @@ interface Dependencies {
 interface RunParams {
   from?: number;
   pageSize?: number;
+  maxPages?: number;
+  concurrency?: number;
 }
 
-interface SLO {
-  id: string;
-  revision: number;
+interface AbortedRunResult {
+  aborted: true;
+  completed: false;
+  nextState: {
+    from: number;
+  };
 }
 
-interface SLODefinitionInfo {
-  id: string;
-  revision: number;
-  enabled: boolean;
+interface CompletedRunResult {
+  aborted: false;
+  completed: true;
 }
 
-type SLOKey = `${SLO['id']}:::${SLO['revision']}`;
+type RunResult = AbortedRunResult | CompletedRunResult;
 
 const DEFAULT_PAGE_SIZE = 100;
+const DEFAULT_MAX_PAGES = 10;
+const DEFAULT_CONCURRENCY = 5;
 
 const SLO_SUMMARY_TRANSFORM_PREFIX = 'slo-summary-';
 const SLO_TRANSFORM_PREFIX = 'slo-';
@@ -70,15 +75,20 @@ export function parseSloTransformId(transformId: string): SLO | null {
 export async function cleanupOrphanTransforms(
   params: RunParams,
   dependencies: Dependencies
-): Promise<void> {
-  const { esClient, logger } = dependencies;
+): Promise<RunResult> {
+  const { esClient, logger, abortController } = dependencies;
   const pageSize = params.pageSize ?? DEFAULT_PAGE_SIZE;
+  const maxPages = params.maxPages ?? DEFAULT_MAX_PAGES;
+  const concurrency = params.concurrency ?? DEFAULT_CONCURRENCY;
+  const limiter = pLimit(concurrency);
   let from = params.from ?? 0;
+  let currentPage = 0;
 
   try {
-    let hasMore = true;
+    while (true) {
+      abortController.signal.throwIfAborted();
+      currentPage++;
 
-    while (hasMore) {
       const response = await esClient.transform.getTransformStats(
         {
           transform_id: SLO_TRANSFORM_PATTERN,
@@ -86,7 +96,7 @@ export async function cleanupOrphanTransforms(
           size: pageSize,
           allow_no_match: true,
         },
-        { signal: dependencies.abortController.signal }
+        { signal: abortController.signal }
       );
 
       const transforms = response.transforms ?? [];
@@ -107,24 +117,33 @@ export async function cleanupOrphanTransforms(
       }
 
       if (sloTransforms.length > 0) {
+        abortController.signal.throwIfAborted();
         const uniqueSloIds = [...new Set(sloTransforms.map(({ slo }) => slo.id))];
         const definitionMap = await findSloDefinitionMap(uniqueSloIds, dependencies);
 
         const orphans = sloTransforms.filter(({ slo }) => !definitionMap.has(getKey(slo)));
 
         if (orphans.length > 0) {
+          abortController.signal.throwIfAborted();
           logger.debug(`Deleting ${orphans.length} orphaned SLO transforms`);
 
-          for (const { transformId } of orphans) {
-            try {
-              await esClient.transform.deleteTransform(
-                { transform_id: transformId, force: true },
-                { ignore: [404], signal: dependencies.abortController.signal }
-              );
-            } catch (err) {
-              logger.warn(`Failed to delete orphaned transform [${transformId}]: ${err.message}`);
-            }
-          }
+          await Promise.all(
+            orphans.map(({ transformId }) =>
+              limiter(async () => {
+                try {
+                  await esClient.transform.deleteTransform(
+                    { transform_id: transformId, force: true },
+                    { ignore: [404], signal: abortController.signal }
+                  );
+                } catch (err) {
+                  if (isAbortError(err, abortController)) throw err;
+                  logger.warn(
+                    `Failed to delete orphaned transform [${transformId}]: ${err.message}`
+                  );
+                }
+              })
+            )
+          );
         }
 
         const disabledButRunning = sloTransforms.filter(({ slo, state }) => {
@@ -133,74 +152,66 @@ export async function cleanupOrphanTransforms(
         });
 
         if (disabledButRunning.length > 0) {
+          abortController.signal.throwIfAborted();
           logger.debug(`Stopping ${disabledButRunning.length} transforms for disabled SLOs`);
 
-          for (const { transformId } of disabledButRunning) {
-            try {
-              await esClient.transform.stopTransform(
-                {
-                  transform_id: transformId,
-                  wait_for_completion: true,
-                  force: true,
-                  allow_no_match: true,
-                },
-                { ignore: [404], signal: dependencies.abortController.signal }
-              );
-            } catch (err) {
-              logger.warn(
-                `Failed to stop transform [${transformId}] for disabled SLO: ${err.message}`
-              );
-            }
-          }
+          await Promise.all(
+            disabledButRunning.map(({ transformId }) =>
+              limiter(async () => {
+                try {
+                  await esClient.transform.stopTransform(
+                    {
+                      transform_id: transformId,
+                      wait_for_completion: true,
+                      force: true,
+                      allow_no_match: true,
+                    },
+                    { ignore: [404], signal: abortController.signal }
+                  );
+                } catch (err) {
+                  if (isAbortError(err, abortController)) throw err;
+                  logger.warn(
+                    `Failed to stop transform [${transformId}] for disabled SLO: ${err.message}`
+                  );
+                }
+              })
+            )
+          );
         }
       }
 
       from += transforms.length;
-      hasMore = transforms.length === pageSize;
-    }
+      const reachedLastPage = transforms.length < pageSize;
+      if (reachedLastPage) {
+        break;
+      }
 
-    logger.debug('Orphan transforms cleanup completed');
+      if (currentPage >= maxPages) {
+        logger.debug(
+          `Reached maximum number of pages (${maxPages}) for transforms cleanup, will resume on next run`
+        );
+        return { aborted: true, completed: false, nextState: { from } };
+      }
+    }
   } catch (error) {
-    if (error instanceof errors.RequestAbortedError) {
+    if (isAbortError(error, abortController)) {
       logger.debug('Orphan transforms cleanup aborted');
-      return;
+      return { aborted: true, completed: false, nextState: { from } };
     }
     throw error;
   }
+
+  logger.debug('Orphan transforms cleanup completed');
+  return { aborted: false, completed: true };
 }
 
 function isTransformRunning(state: string): boolean {
   return state === 'started' || state === 'indexing';
 }
 
-async function findSloDefinitionMap(
-  sloIds: string[],
-  { logger, soClient }: Dependencies
-): Promise<Map<SLOKey, SLODefinitionInfo>> {
-  const response = await soClient.find<Pick<StoredSLODefinition, 'id' | 'revision' | 'enabled'>>({
-    type: SO_SLO_TYPE,
-    page: 1,
-    perPage: sloIds.length,
-    filter: `slo.attributes.id:(${sloIds.join(' or ')})`,
-    namespaces: [ALL_SPACES_ID],
-    fields: ['id', 'revision', 'enabled'],
-  });
-
-  logger.debug(
-    `Found ${response.total} matching SLO definitions for ${sloIds.length} transform SLO ids`
-  );
-
-  const map = new Map<SLOKey, SLODefinitionInfo>();
-  for (const { attributes } of response.saved_objects) {
-    map.set(getKey({ id: attributes.id, revision: attributes.revision }), {
-      id: attributes.id,
-      revision: attributes.revision,
-      enabled: attributes.enabled,
-    });
-  }
-  return map;
-}
-
-function getKey(item: SLO): SLOKey {
-  return `${item.id}:::${item.revision}`;
+function isAbortError(error: unknown, abortController: AbortController): boolean {
+  if (error instanceof errors.RequestAbortedError) return true;
+  if (abortController.signal.aborted) return true;
+  if (error instanceof DOMException && error.name === 'AbortError') return true;
+  return false;
 }

@@ -78,11 +78,12 @@ describe('cleanupOrphanTransforms', () => {
       transforms: [],
     } as any);
 
-    await cleanupOrphanTransforms(
+    const result = await cleanupOrphanTransforms(
       {},
       { esClient, soClient: soClient as any, logger, abortController }
     );
 
+    expect(result).toEqual({ aborted: false, completed: true });
     expect(esClient.transform.getTransformStats).toHaveBeenCalledTimes(1);
     expect(soClient.find).not.toHaveBeenCalled();
     expect(esClient.transform.deleteTransform).not.toHaveBeenCalled();
@@ -226,16 +227,81 @@ describe('cleanupOrphanTransforms', () => {
     );
   });
 
-  it('should handle RequestAbortedError gracefully', async () => {
+  it('should handle RequestAbortedError gracefully and preserve the current cursor', async () => {
     esClient.transform.getTransformStats.mockRejectedValueOnce(
       new errors.RequestAbortedError('Aborted')
     );
 
-    await expect(
-      cleanupOrphanTransforms({}, { esClient, soClient: soClient as any, logger, abortController })
-    ).resolves.toBeUndefined();
+    const result = await cleanupOrphanTransforms(
+      { from: 200 },
+      { esClient, soClient: soClient as any, logger, abortController }
+    );
 
+    expect(result).toEqual({ aborted: true, completed: false, nextState: { from: 200 } });
     expect(logger.debug).toHaveBeenCalledWith('Orphan transforms cleanup aborted');
+  });
+
+  it('should bail out when the signal is already aborted', async () => {
+    abortController.abort();
+
+    const result = await cleanupOrphanTransforms(
+      {},
+      { esClient, soClient: soClient as any, logger, abortController }
+    );
+
+    expect(result).toEqual({ aborted: true, completed: false, nextState: { from: 0 } });
+    expect(esClient.transform.getTransformStats).not.toHaveBeenCalled();
+  });
+
+  it('should stop after maxPages and persist the last cursor', async () => {
+    esClient.transform.getTransformStats
+      .mockResolvedValueOnce({
+        count: 2,
+        transforms: [
+          { id: 'slo-slo1-1', state: 'started' },
+          { id: 'slo-summary-slo1-1', state: 'started' },
+        ],
+      } as any)
+      .mockResolvedValueOnce({
+        count: 2,
+        transforms: [
+          { id: 'slo-slo2-1', state: 'started' },
+          { id: 'slo-summary-slo2-1', state: 'started' },
+        ],
+      } as any);
+
+    soClient.find.mockResolvedValue({
+      total: 1,
+      saved_objects: [{ id: 'so-1', attributes: { id: 'slo-1', revision: 1, enabled: true } }],
+      page: 1,
+      per_page: 1,
+    } as any);
+
+    const result = await cleanupOrphanTransforms(
+      { pageSize: 2, maxPages: 2 },
+      { esClient, soClient: soClient as any, logger, abortController }
+    );
+
+    expect(result).toEqual({ aborted: true, completed: false, nextState: { from: 4 } });
+    expect(esClient.transform.getTransformStats).toHaveBeenCalledTimes(2);
+  });
+
+  it('should resume from the provided cursor', async () => {
+    esClient.transform.getTransformStats.mockResolvedValueOnce({
+      count: 0,
+      transforms: [],
+    } as any);
+
+    const result = await cleanupOrphanTransforms(
+      { from: 50, pageSize: 100 },
+      { esClient, soClient: soClient as any, logger, abortController }
+    );
+
+    expect(result).toEqual({ aborted: false, completed: true });
+    expect(esClient.transform.getTransformStats).toHaveBeenCalledWith(
+      { transform_id: 'slo-*', from: 50, size: 100, allow_no_match: true },
+      expect.objectContaining({ signal: abortController.signal })
+    );
   });
 
   it('should rethrow non-abort errors', async () => {
