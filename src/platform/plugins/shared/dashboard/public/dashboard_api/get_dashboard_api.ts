@@ -11,6 +11,7 @@ import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject, merge, Subject } from 'rxjs';
 import { v4 } from 'uuid';
 
+import type { PanelFlyoutType } from '@kbn/presentation-util';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import type { DashboardState } from '../../common/types';
 import { initializeAccessControlManager } from './access_control_manager';
@@ -28,7 +29,6 @@ import { initializeTimesliceManager } from './timeslice_manager';
 import { initializeTrackContentfulRender } from './track_contentful_render';
 import { initializeTrackOverlay } from './track_overlay';
 import { initializeTrackPanel } from './track_panel';
-import type { PanelFlyoutType } from '@kbn/presentation-util';
 import type {
   DashboardApi,
   DashboardCreationOptions,

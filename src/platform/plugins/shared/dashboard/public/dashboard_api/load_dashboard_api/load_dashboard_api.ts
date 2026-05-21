@@ -10,6 +10,7 @@
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
 import { i18n } from '@kbn/i18n';
 import { asyncForEach } from '@kbn/std';
+import type { PanelFlyoutType } from '@kbn/presentation-util';
 import { dashboardClient } from '../../dashboard_client';
 import { getPlacementHints } from '../../panel_placement/get_placement_hints';
 import { getAccessControlClient } from '../../services/access_control_service';
@@ -19,7 +20,6 @@ import { getLastSavedState } from '../default_dashboard_state';
 import { getDashboardApi } from '../get_dashboard_api';
 import { DASHBOARD_DURATION_START_MARK } from '../performance/dashboard_duration_start_mark';
 import { startQueryPerformanceTracking } from '../performance/query_performance_tracking';
-import type { PanelFlyoutType } from '@kbn/presentation-util';
 import type { DashboardCreationOptions } from '../types';
 import { getUserAccessControlData } from './get_user_access_control_data';
 import { transformPanels } from './transform_panels';
