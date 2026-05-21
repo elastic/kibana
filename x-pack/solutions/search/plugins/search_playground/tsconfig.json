@@ -61,7 +61,6 @@
     "@kbn/license-management-plugin",
     "@kbn/connector-schemas",
     "@kbn/react-query",
-    "@kbn/evals-plugin",
     "@kbn/core-chrome-browser"
   ],
   "exclude": [
