@@ -22,6 +22,7 @@ import {
   type IngestScoresRequestBodyInput,
   type Model as EvalsModel,
 } from '@kbn/evals-common';
+import { getStatusCode } from './retry_utils';
 
 export interface EvaluatorStats {
   datasetId: string;
@@ -217,11 +218,7 @@ export class EvalsClient {
         retries: 0,
       });
     } catch (error: unknown) {
-      const statusCode =
-        error instanceof Error && 'statusCode' in error
-          ? (error as { statusCode: unknown }).statusCode
-          : undefined;
-      if (statusCode === 404) {
+      if (getStatusCode(error) === 404) {
         throw new Error(EVALS_PLUGIN_DISABLED_MESSAGE);
       }
       throw error;

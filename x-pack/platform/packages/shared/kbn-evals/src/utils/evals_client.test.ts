@@ -23,10 +23,10 @@ const createMockKbnClient = (): jest.Mocked<KbnClient> =>
     request: jest.fn(),
   } as unknown as jest.Mocked<KbnClient>);
 
-const asKbnResponse = <T>(value: T, status?: number): Awaited<ReturnType<KbnClient['request']>> =>
-  (status === undefined ? value : { data: value, status }) as unknown as Awaited<
+const asKbnResponse = <T>(value: T, status = 200): Awaited<ReturnType<KbnClient['request']>> =>
+  ({ data: value, status, statusText: 'OK', headers: new Headers() } as unknown as Awaited<
     ReturnType<KbnClient['request']>
-  >;
+  >);
 
 const createLog = (): jest.Mocked<SomeDevLog> =>
   ({
@@ -295,7 +295,7 @@ describe('EvalsClient', () => {
   it('assertPluginEnabled throws an error when plugin is disabled', async () => {
     const kbnClient = createMockKbnClient();
     const log = createLog();
-    kbnClient.request.mockRejectedValue(Object.assign(new Error('Not Found'), { statusCode: 404 }));
+    kbnClient.request.mockRejectedValue(Object.assign(new Error('Not Found'), { status: 404 }));
     const client = new EvalsClient(kbnClient, log);
 
     await expect(client.assertPluginEnabled()).rejects.toThrow(

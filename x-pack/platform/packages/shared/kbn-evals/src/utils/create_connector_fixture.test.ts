@@ -6,7 +6,6 @@
  */
 
 import { v5 } from 'uuid';
-import { AxiosError } from 'axios';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
@@ -167,13 +166,7 @@ describe('createConnectorFixture', () => {
   });
 
   it('handles 409 conflict on create when another worker already created the connector', async () => {
-    const conflictError = new AxiosError('Conflict', '409', undefined, undefined, {
-      status: 409,
-      data: {},
-      headers: {},
-      statusText: 'Conflict',
-      config: {} as any,
-    });
+    const conflictError = Object.assign(new Error('Conflict'), { status: 409 });
 
     // First call (preconfigured check) returns not preconfigured, second call (POST) returns 409
     mockFetch
@@ -197,16 +190,15 @@ describe('createConnectorFixture', () => {
   });
 
   it('handles 400 when inference endpoint already exists (parallel workers)', async () => {
-    const existsError = new AxiosError('Bad Request', '400', undefined, undefined, {
+    const existsError = Object.assign(new Error('Bad Request'), {
       status: 400,
-      data: {
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'Inference endpoint [dev-my-test-connector] already exists',
+      response: {
+        data: {
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'Inference endpoint [dev-my-test-connector] already exists',
+        },
       },
-      headers: {},
-      statusText: 'Bad Request',
-      config: {} as any,
     });
 
     mockFetch.mockResolvedValueOnce({ is_preconfigured: false }).mockRejectedValueOnce(existsError);
@@ -227,13 +219,7 @@ describe('createConnectorFixture', () => {
   });
 
   it('throws non-conflict errors on create', async () => {
-    const serverError = new AxiosError('Internal Server Error', '500', undefined, undefined, {
-      status: 500,
-      data: {},
-      headers: {},
-      statusText: 'Internal Server Error',
-      config: {} as any,
-    });
+    const serverError = Object.assign(new Error('Internal Server Error'), { status: 500 });
 
     // First call (preconfigured check) succeeds, second call (POST) fails hard
     mockFetch.mockResolvedValueOnce({ is_preconfigured: false }).mockRejectedValueOnce(serverError);
@@ -252,12 +238,9 @@ describe('createConnectorFixture', () => {
   });
 
   it('throws 400 when message is not an already-exists case', async () => {
-    const badRequest = new AxiosError('Bad Request', '400', undefined, undefined, {
+    const badRequest = Object.assign(new Error('Bad Request'), {
       status: 400,
-      data: { message: 'Invalid API key' },
-      headers: {},
-      statusText: 'Bad Request',
-      config: {} as any,
+      response: { data: { message: 'Invalid API key' } },
     });
 
     mockFetch.mockResolvedValueOnce({ is_preconfigured: false }).mockRejectedValueOnce(badRequest);
