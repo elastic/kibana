@@ -9,7 +9,7 @@ import React from 'react';
 import { render, act } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
-import type { SandboxDraft } from './types';
+import type { RuleQuery } from './compose_form_types';
 import { QuerySandboxFlyout, type QuerySandboxFlyoutProps } from './query_sandbox_flyout';
 
 let mockFieldMap: DataViewFieldMap = {};
@@ -57,22 +57,18 @@ jest.mock('./compose_discover_tabs', () => ({
 const mockField = (name: string, type: string) =>
   ({ name, type, searchable: true, aggregatable: true } as DataViewFieldMap[string]);
 
-const createDraft = (overrides: Partial<SandboxDraft> = {}): SandboxDraft => ({
-  base: '',
-  breach: 'FROM test-index | LIMIT 10',
-  recover: '',
-  timeField: '@timestamp',
-  dateStart: 'now-15m',
-  dateEnd: 'now',
-  ...overrides,
+const standaloneQuery = (breach = 'FROM test-index | LIMIT 10'): RuleQuery => ({
+  format: 'standalone',
+  breach,
 });
 
 const defaultProps: QuerySandboxFlyoutProps = {
-  draft: createDraft(),
-  onDraftChange: jest.fn(),
-  tabConfig: { type: 'single' },
-  activeTab: 'alert',
-  onTabChange: jest.fn(),
+  query: standaloneQuery(),
+  onQueryChange: jest.fn(),
+  timeField: '@timestamp',
+  onTimeFieldChange: jest.fn(),
+  dateRange: { dateStart: 'now-15m', dateEnd: 'now' },
+  onDateRangeChange: jest.fn(),
   onClose: jest.fn(),
 };
 
@@ -90,74 +86,57 @@ describe('QuerySandboxFlyout — timefield auto-select', () => {
   });
 
   it('auto-selects first date field when current timeField is not in the index', () => {
-    const onDraftChange = jest.fn();
+    const onTimeFieldChange = jest.fn();
     mockFieldMap = {
       'event.start': mockField('event.start', 'date'),
       'event.end': mockField('event.end', 'date'),
       'host.name': mockField('host.name', 'keyword'),
     };
 
-    renderSandbox({
-      draft: createDraft({ timeField: '@timestamp' }),
-      onDraftChange,
-    });
+    renderSandbox({ timeField: '@timestamp', onTimeFieldChange });
 
-    expect(onDraftChange).toHaveBeenCalledWith({
-      timeField: expect.stringMatching(/^event\.(end|start)$/),
-    });
+    expect(onTimeFieldChange).toHaveBeenCalledWith(expect.stringMatching(/^event\.(end|start)$/));
   });
 
   it('resets to @timestamp when fieldMap is empty and current timeField differs', () => {
-    const onDraftChange = jest.fn();
+    const onTimeFieldChange = jest.fn();
     mockFieldMap = {};
 
-    renderSandbox({
-      draft: createDraft({ timeField: 'event.start' }),
-      onDraftChange,
-    });
+    renderSandbox({ timeField: 'event.start', onTimeFieldChange });
 
-    expect(onDraftChange).toHaveBeenCalledWith({ timeField: '@timestamp' });
+    expect(onTimeFieldChange).toHaveBeenCalledWith('@timestamp');
   });
 
-  it('does not call onDraftChange when current timeField exists in the index', () => {
-    const onDraftChange = jest.fn();
+  it('does not call onTimeFieldChange when current timeField exists in the index', () => {
+    const onTimeFieldChange = jest.fn();
     mockFieldMap = {
       '@timestamp': mockField('@timestamp', 'date'),
       'event.end': mockField('event.end', 'date'),
     };
 
-    renderSandbox({
-      draft: createDraft({ timeField: '@timestamp' }),
-      onDraftChange,
-    });
+    renderSandbox({ timeField: '@timestamp', onTimeFieldChange });
 
-    expect(onDraftChange).not.toHaveBeenCalled();
+    expect(onTimeFieldChange).not.toHaveBeenCalled();
   });
 
   it('does not reset when fieldMap is empty and timeField is already @timestamp', () => {
-    const onDraftChange = jest.fn();
+    const onTimeFieldChange = jest.fn();
     mockFieldMap = {};
 
-    renderSandbox({
-      draft: createDraft({ timeField: '@timestamp' }),
-      onDraftChange,
-    });
+    renderSandbox({ timeField: '@timestamp', onTimeFieldChange });
 
-    expect(onDraftChange).not.toHaveBeenCalled();
+    expect(onTimeFieldChange).not.toHaveBeenCalled();
   });
 
   it('auto-selects when fieldMap changes and current selection is no longer valid', () => {
-    const onDraftChange = jest.fn();
+    const onTimeFieldChange = jest.fn();
     mockFieldMap = {
       'event.start': mockField('event.start', 'date'),
     };
 
-    const { rerender } = renderSandbox({
-      draft: createDraft({ timeField: 'event.start' }),
-      onDraftChange,
-    });
+    const { rerender } = renderSandbox({ timeField: 'event.start', onTimeFieldChange });
 
-    expect(onDraftChange).not.toHaveBeenCalled();
+    expect(onTimeFieldChange).not.toHaveBeenCalled();
 
     mockFieldMap = {
       created_at: mockField('created_at', 'date'),
@@ -168,13 +147,13 @@ describe('QuerySandboxFlyout — timefield auto-select', () => {
         <IntlProvider locale="en">
           <QuerySandboxFlyout
             {...defaultProps}
-            draft={createDraft({ timeField: 'event.start' })}
-            onDraftChange={onDraftChange}
+            timeField="event.start"
+            onTimeFieldChange={onTimeFieldChange}
           />
         </IntlProvider>
       );
     });
 
-    expect(onDraftChange).toHaveBeenCalledWith({ timeField: 'created_at' });
+    expect(onTimeFieldChange).toHaveBeenCalledWith('created_at');
   });
 });
