@@ -5,96 +5,82 @@
  * 2.0.
  */
 
-import type { EuiSelectableOption } from '@elastic/eui';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSelectable,
-  EuiSpacer,
-  EuiTitle,
-  EuiFieldSearch,
-} from '@elastic/eui';
-import type { PropsWithChildren } from 'react';
+import { EuiFieldSearch, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { useAttachmentsSubTabClickedEBT } from '../../../analytics/use_attachments_tab_ebt';
-import { useCaseViewNavigation } from '../../../common/navigation';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import type { CaseUI } from '../../../../common';
-import { CaseViewTabs } from '../case_view_tabs';
-import { useCaseAttachmentTabs } from '../use_case_attachment_tabs';
-import {
-  ALERTS_TAB,
-  ATTACHMENTS_TAB,
-  EVENTS_TAB,
-  FILES_TAB,
-  OBSERVABLES_TAB,
-} from '../translations';
+import { FILE_ATTACHMENT_TYPE } from '../../../../common/constants';
+import { toUnifiedAttachmentType } from '../../../../common/utils/attachments/migration_utils';
+import { useCasesContext } from '../../cases_context/use_cases_context';
+import { useCasesFeatures } from '../../../common/use_cases_features';
 import { SEARCH_PLACEHOLDER } from '../../actions/translations';
 import { CaseViewAttachButton } from './case_view_attach_button';
+import { CaseViewTabs } from '../case_view_tabs';
+import { OBSERVABLES_TAB } from '../translations';
+import { CaseViewObservables } from './case_view_observables';
+import type { OnUpdateFields } from '../types';
+import { AttachmentAccordion } from './attachment_accordion';
+import { useGetCaseFileStats } from '../../../containers/use_get_case_file_stats';
 
-const translateTitle = (activeTab: CASE_VIEW_PAGE_TABS) => {
-  switch (activeTab) {
-    case CASE_VIEW_PAGE_TABS.ALERTS: {
-      return ALERTS_TAB;
-    }
-
-    case CASE_VIEW_PAGE_TABS.EVENTS: {
-      return EVENTS_TAB;
-    }
-
-    case CASE_VIEW_PAGE_TABS.FILES: {
-      return FILES_TAB;
-    }
-
-    case CASE_VIEW_PAGE_TABS.OBSERVABLES: {
-      return OBSERVABLES_TAB;
-    }
-
-    // NOTE:this should not be called
-    default:
-      return ATTACHMENTS_TAB;
-  }
-};
+interface CaseViewAttachmentsProps {
+  caseData: CaseUI;
+  onSearch: (searchTerm: string) => void;
+  searchTerm?: string;
+  onUpdateField: (args: OnUpdateFields) => void;
+}
 
 export const CaseViewAttachments = ({
   caseData,
-  activeTab,
   onSearch,
   searchTerm,
-  children,
-}: PropsWithChildren<{
-  caseData: CaseUI;
-  activeTab: CASE_VIEW_PAGE_TABS;
-  onSearch: (searchTerm: string) => void;
-  searchTerm?: string;
-}>) => {
-  const { tabs: caseViewTabs } = useCaseAttachmentTabs({ caseData, activeTab, searchTerm });
-  const { navigateToCaseView } = useCaseViewNavigation();
-  const trackSubTabClick = useAttachmentsSubTabClickedEBT();
+  onUpdateField,
+}: CaseViewAttachmentsProps) => {
+  const { unifiedAttachmentTypeRegistry } = useCasesContext();
+  const { observablesAuthorized, isObservablesFeatureEnabled } = useCasesFeatures();
+  const { data: fileStats } = useGetCaseFileStats({ caseId: caseData.id, searchTerm });
+  const fileCount = fileStats?.total ?? 0;
 
-  const tabAsSelectableOptions = useMemo(() => {
-    return caseViewTabs.map(
-      (tab) =>
-        ({
-          label: tab.name,
-          'data-test-subj': `case-view-tab-title-${tab.id}`,
-          append: tab.badge,
-          checked: tab.id === activeTab ? 'on' : undefined,
-          onFocusBadge: false,
-          showIcons: false,
-          onClick: () => {
-            navigateToCaseView({ detailName: caseData.id, tabId: tab.id });
-            trackSubTabClick(tab.id);
-          },
-        } as EuiSelectableOption)
-    );
-  }, [caseViewTabs, activeTab, navigateToCaseView, caseData.id, trackSubTabClick]);
+  const owner = Array.isArray(caseData.owner) ? caseData.owner[0] : caseData.owner;
+
+  const countsByType = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const comment of caseData.comments) {
+      const unifiedType = toUnifiedAttachmentType(comment.type, owner);
+      counts.set(unifiedType, (counts.get(unifiedType) ?? 0) + 1);
+    }
+    return counts;
+  }, [caseData.comments, owner]);
+
+  // Render one accordion per registered type that has a tab view AND a non-zero count
+  const attachmentSections = useMemo(
+    () =>
+      unifiedAttachmentTypeRegistry
+        .list()
+        .flatMap((type) => {
+          const Children = type.getAttachmentTabViewObject?.()?.children;
+          if (!Children) return [];
+          // file count rely on file client as source of truth
+          const count =
+            type.id === FILE_ATTACHMENT_TYPE ? fileCount : countsByType.get(type.id) ?? 0;
+          if (count < 1) return [];
+          return [{ id: type.id, displayName: type.displayName, count, Children }];
+        })
+        .sort((a, b) => a.displayName.localeCompare(b.displayName)),
+    [unifiedAttachmentTypeRegistry, countsByType, fileCount]
+  );
+
+  // Observables stays hardcoded: there's no other entry point to add observables
+  // to a case, so the accordion must be visible even when the count is 0.
+  const showObservables = observablesAuthorized && isObservablesFeatureEnabled;
 
   return (
     <>
-      <EuiFlexItem grow={6}>
-        <CaseViewTabs caseData={caseData} activeTab={activeTab} searchTerm={searchTerm} />
+      <EuiFlexItem grow={6} data-test-subj="case-view-attachments">
+        <CaseViewTabs
+          caseData={caseData}
+          activeTab={CASE_VIEW_PAGE_TABS.ATTACHMENTS}
+          searchTerm={searchTerm}
+        />
         <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow>
@@ -110,19 +96,26 @@ export const CaseViewAttachments = ({
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        <EuiFlexGroup direction="row" responsive={false} data-test-subj="case-view-attachments">
-          <EuiFlexItem grow={1} css={{ minWidth: '18rem', maxWidth: '18rem' }}>
-            <EuiSelectable singleSelection options={tabAsSelectableOptions}>
-              {(list) => list}
-            </EuiSelectable>
-          </EuiFlexItem>
-          <EuiFlexItem grow={1}>
-            <EuiTitle size="xs">
-              <h3>{translateTitle(activeTab)}</h3>
-            </EuiTitle>
-            <EuiHorizontalRule margin="s" />
-            {children}
-          </EuiFlexItem>
+        <EuiFlexGroup direction="column" gutterSize="m">
+          {attachmentSections.map(({ id, displayName, count, Children }) => (
+            <AttachmentAccordion key={id} id={id} title={displayName} count={count}>
+              <Children caseData={caseData} searchTerm={searchTerm} />
+            </AttachmentAccordion>
+          ))}
+          {showObservables && (
+            <AttachmentAccordion
+              id="observables"
+              title={OBSERVABLES_TAB}
+              count={caseData.observables?.length ?? 0}
+            >
+              <CaseViewObservables
+                isLoading={false}
+                caseData={caseData}
+                searchTerm={searchTerm}
+                onUpdateField={onUpdateField}
+              />
+            </AttachmentAccordion>
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
     </>

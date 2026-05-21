@@ -190,18 +190,6 @@ export const ATTACHMENTS_TAB = i18n.translate('xpack.cases.caseView.tabs.attachm
   defaultMessage: 'Attachments',
 });
 
-export const ALERTS_TAB = i18n.translate('xpack.cases.caseView.tabs.alerts', {
-  defaultMessage: 'Alerts',
-});
-
-export const EVENTS_TAB = i18n.translate('xpack.cases.caseView.tabs.events', {
-  defaultMessage: 'Events',
-});
-
-export const FILES_TAB = i18n.translate('xpack.cases.caseView.tabs.files', {
-  defaultMessage: 'Files',
-});
-
 export const OBSERVABLES_TAB = i18n.translate('xpack.cases.caseView.tabs.observables', {
   defaultMessage: 'Observables',
 });
