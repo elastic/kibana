@@ -10,7 +10,7 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createFailError } from '@kbn/dev-cli-errors';
 
-import type { EsVersion, Config } from '../../functional_test_runner';
+import type { EsVersion, Config, RunTestsResult } from '../../functional_test_runner';
 import { FunctionalTestRunner } from '../../functional_test_runner';
 
 export async function runFtr(options: {
@@ -18,10 +18,27 @@ export async function runFtr(options: {
   config: Config;
   esVersion: EsVersion;
   signal?: AbortSignal;
-}) {
+}): Promise<RunTestsResult> {
   const ftr = new FunctionalTestRunner(options.log, options.config, options.esVersion);
+  const raw = await ftr.run(options.signal);
 
-  const failureCount = await ftr.run(options.signal);
+  if (
+    raw &&
+    typeof raw === 'object' &&
+    typeof raw.failureCount === 'number' &&
+    Array.isArray(raw.failedFiles)
+  ) {
+    return raw as RunTestsResult;
+  }
+  // Custom test runners may return arbitrary values (e.g., env vars); treat as success
+  // with no spec-file granularity. Numeric returns are interpreted as a failure count.
+  return {
+    failureCount: typeof raw === 'number' ? raw : 0,
+    failedFiles: [],
+  };
+}
+
+export function failOnFtrFailures({ failureCount }: RunTestsResult) {
   if (failureCount > 0) {
     throw createFailError(
       `${failureCount} functional test ${failureCount === 1 ? 'failure' : 'failures'}`

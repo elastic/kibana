@@ -32,6 +32,7 @@ export const FLAG_OPTIONS: FlagOptions = {
     'include',
     'exclude',
     'writeLogsToPath',
+    'retries-per-file',
   ],
   alias: {
     updateAll: 'u',
@@ -48,6 +49,7 @@ export const FLAG_OPTIONS: FlagOptions = {
     --grep               Pattern to select which tests to run
     --kibana-install-dir Run Kibana from existing install directory instead of from source
     --bail               Stop the test run at the first failure
+    --retries-per-file   When > 0, automatically re-run any spec file that contained a failure, up to N times, reusing the already-running Elasticsearch and Kibana servers. Default: 0
     --logToFile          Write the log output from Kibana/ES to files instead of to stdout
     --writeLogsToPath    Write the log output from Kibana/ES to files in specified path
     --dry-run            Report tests without executing them
@@ -82,6 +84,16 @@ export function parseFlags(flags: FlagsReader) {
     ? Path.resolve(REPO_ROOT, 'data/ftr_servers_logs', uuidV4())
     : undefined;
 
+  const retriesPerFileRaw = flags.string('retries-per-file');
+  let retriesPerFile = 0;
+  if (retriesPerFileRaw !== undefined) {
+    const parsed = Number(retriesPerFileRaw);
+    if (!Number.isInteger(parsed) || parsed < 0) {
+      throw createFlagError('--retries-per-file must be a non-negative integer');
+    }
+    retriesPerFile = parsed;
+  }
+
   return {
     configs,
     esVersion: esVersionString ? new EsVersion(esVersionString) : EsVersion.getDefault(),
@@ -102,5 +114,6 @@ export function parseFlags(flags: FlagsReader) {
       include: flags.arrayOfPaths('include') ?? [],
       exclude: flags.arrayOfPaths('exclude') ?? [],
     },
+    retriesPerFile,
   };
 }

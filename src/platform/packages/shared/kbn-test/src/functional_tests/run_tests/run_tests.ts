@@ -20,7 +20,7 @@ import { runKibanaServer } from '@kbn/test-kibana-server';
 import { applyFipsOverrides, fipsIsEnabled } from '../lib/fips';
 import { Config, readConfigFile } from '../../functional_test_runner';
 
-import { checkForEnabledTestsInFtrConfig, runFtr } from '../lib/run_ftr';
+import { checkForEnabledTestsInFtrConfig, failOnFtrFailures, runFtr } from '../lib/run_ftr';
 import { runElasticsearch } from '../lib/run_elasticsearch';
 import type { RunTestsOptions } from './flags';
 /**
@@ -95,13 +95,14 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
       });
       if (!hasTests) {
         // just run the FTR, no Kibana or ES, which will quickly report a skipped test group to ci-stats and continue
-        await runFtr({
+        const result = await runFtr({
           log,
           config,
           esVersion: options.esVersion,
         }).finally(() => {
           tx.end();
         });
+        failOnFtrFailures(result);
         return;
       }
 
@@ -180,7 +181,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
             return;
           }
 
-          await withSpan('run_tests', () =>
+          let result = await withSpan('run_tests', () =>
             runFtr({
               log,
               config,
@@ -189,7 +190,55 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
             })
           );
 
-          tx.setOutcome('success');
+          for (
+            let attempt = 1;
+            attempt <= options.retriesPerFile &&
+            result.failureCount > 0 &&
+            result.failedFiles.length > 0 &&
+            !abortCtrl.signal.aborted;
+            attempt++
+          ) {
+            log.write(
+              `--- 🔁 Retrying ${result.failedFiles.length} failed spec file(s) ` +
+                `(attempt ${attempt + 1}/${options.retriesPerFile + 1})`
+            );
+            for (const file of result.failedFiles) {
+              log.info(`  retrying: ${Path.relative(REPO_ROOT, file)}`);
+            }
+
+            const retryOverrides = {
+              ...settingOverrides,
+              suiteFiles: {
+                include: result.failedFiles,
+                exclude: settingOverrides.suiteFiles.exclude,
+              },
+            };
+            const retryConfig = fipsIsEnabled()
+              ? await readConfigFile(
+                  log,
+                  options.esVersion,
+                  path,
+                  retryOverrides,
+                  applyFipsOverrides
+                )
+              : await readConfigFile(log, options.esVersion, path, retryOverrides);
+
+            result = await withSpan(`run_tests_retry_${attempt}`, () =>
+              runFtr({
+                log,
+                config: retryConfig,
+                esVersion: options.esVersion,
+                signal: abortCtrl.signal,
+              })
+            );
+          }
+
+          if (result.failureCount === 0) {
+            tx.setOutcome('success');
+          } else {
+            tx.setOutcome('failure');
+            failOnFtrFailures(result);
+          }
         } catch (err) {
           tx.setOutcome('failure');
           throw err;
