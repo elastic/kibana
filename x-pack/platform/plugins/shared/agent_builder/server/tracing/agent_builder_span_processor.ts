@@ -10,9 +10,7 @@ import { resources, tracing } from '@elastic/opentelemetry-node/sdk';
 import { isInferenceSpan } from '@kbn/inference-tracing';
 
 const SHOULD_TRACK_ATTR = '_agent_builder_should_track';
-const AGENT_BUILDER_DATASET_RESOURCE = resources.resourceFromAttributes({
-  'data_stream.dataset': 'agent_builder',
-});
+const DATA_STREAM_NAMESPACE_ATTR = 'data_stream.namespace';
 
 interface AgentBuilderSpanProcessorOpts {
   exporter: tracing.SpanExporter;
@@ -49,11 +47,20 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
       return;
     }
 
-    const { [SHOULD_TRACK_ATTR]: _, ...cleanAttributes } = span.attributes;
+    const {
+      [SHOULD_TRACK_ATTR]: _,
+      [DATA_STREAM_NAMESPACE_ATTR]: namespace,
+      ...cleanAttributes
+    } = span.attributes;
+
+    const datasetResource = resources.resourceFromAttributes({
+      'data_stream.dataset': 'agent_builder',
+      ...(typeof namespace === 'string' ? { [DATA_STREAM_NAMESPACE_ATTR]: namespace } : {}),
+    });
 
     const exportSpan: tracing.ReadableSpan = Object.create(span, {
       resource: {
-        value: span.resource.merge(AGENT_BUILDER_DATASET_RESOURCE),
+        value: span.resource.merge(datasetResource),
         enumerable: true,
       },
       attributes: {
