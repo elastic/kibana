@@ -58,7 +58,7 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
   const panelFlyoutTypeFromParent = overlayTracker?.panelFlyoutType;
   const type = flyoutProps?.type ?? panelFlyoutTypeFromParent ?? 'push';
   const ownFocus =
-    flyoutProps?.ownFocus ?? (panelFlyoutTypeFromParent === 'overlay' ? false : true);
+    flyoutProps?.ownFocus ?? panelFlyoutTypeFromParent !== 'overlay';
 
   const onClose = () => {
     overlayTracker?.clearOverlays();
