@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { ReservedPrivilegesSet } from '@kbn/core-http-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/errors';
 import {
@@ -62,13 +63,22 @@ const DATA_VIEW_SO_TYPE = 'index-pattern';
  * (anyone holding that feature could `/reset` the index). The cluster
  * privilege keeps the model trivial.
  *
+ * Uses the typed `ReservedPrivilegesSet.superuser` constant at the
+ * top level of `requiredPrivileges` — the canonical pattern across
+ * Kibana admin routes (e.g. `security/.../session_management/invalidate.ts`,
+ * `encrypted_saved_objects/.../key_rotation.ts`,
+ * `cloud/.../set_cloud_data_route.ts`). The route security validator
+ * accepts a bare string for the same intent, but the enum form keeps
+ * the privilege checked by the TypeScript compiler instead of by the
+ * runtime schema only.
+ *
  * Not `as const` because `core.http.createRouter`'s `RouteSecurity`
  * shape requires mutable arrays — deep-readonly inference rejects a
  * literal assignment otherwise.
  */
 const SUPERUSER_AUTHZ = {
   authz: {
-    requiredPrivileges: [{ allRequired: ['superuser'] }],
+    requiredPrivileges: [ReservedPrivilegesSet.superuser],
   },
 };
 

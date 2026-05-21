@@ -408,6 +408,46 @@ describe('registerCasesAnalyticsV2Routes — enableAdminRoutes gating', () => {
     expect(registeredPaths).toContain(CASES_ANALYTICS_V2_RESET_URL);
     expect(registeredPaths).toContain(CASES_ANALYTICS_V2_RECONCILE_RUN_SOON_URL);
   });
+
+  /**
+   * Locks the canonical superuser-only authz shape against three
+   * regressions:
+   *   1. Dropping `ReservedPrivilegesSet.superuser` for a bare string
+   *      (validator accepts it, but the enum form catches typos at
+   *      build time).
+   *   2. Wrapping in `{ allRequired: [...] }` — works at runtime but
+   *      diverges from every other Kibana admin route.
+   *   3. Adding a second privilege alongside `superuser`, which the
+   *      route security validator rejects ("Combining superuser with
+   *      other privileges is redundant", see
+   *      `security_route_config_validator.ts`).
+   * If any of the three regress, the assertion fails before the
+   * server-side validator runs at route registration.
+   */
+  it('uses ReservedPrivilegesSet.superuser at the top level of requiredPrivileges for every admin route', () => {
+    const args = buildArgs({ enableAdminRoutes: true });
+    registerCasesAnalyticsV2Routes(args);
+
+    const router = (args.core.http.createRouter as jest.Mock).mock.results[0].value;
+    const adminCalls: Array<[{ path: string; security?: unknown }, unknown]> = [
+      ...(router.get as jest.Mock).mock.calls,
+      ...(router.post as jest.Mock).mock.calls,
+    ].filter(([{ path }]) =>
+      [
+        CASES_ANALYTICS_V2_STATE_URL,
+        CASES_ANALYTICS_V2_RESET_URL,
+        CASES_ANALYTICS_V2_RECONCILE_RUN_SOON_URL,
+      ].includes(path)
+    );
+
+    expect(adminCalls).toHaveLength(3);
+
+    for (const [config] of adminCalls) {
+      expect(config.security).toEqual({
+        authz: { requiredPrivileges: ['superuser'] },
+      });
+    }
+  });
 });
 
 describe('POST /reconcile/run_soon handler', () => {
