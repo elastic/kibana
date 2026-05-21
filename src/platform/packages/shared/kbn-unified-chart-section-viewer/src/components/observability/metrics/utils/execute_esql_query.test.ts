@@ -17,7 +17,7 @@ import {
   MetricsExecutionContextAction,
   MetricsExecutionContextName,
 } from './execution_context_enums';
-import { EsqlResponseError } from './esql_response_error';
+import { EsqlResponseError } from '../../../chart/utils/esql_response_error';
 import { executeEsqlQuery, fetchEsqlResponseOrThrow } from './execute_esql_query';
 import { getMetricsExecutionContext } from './execution_context';
 
