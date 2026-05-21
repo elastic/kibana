@@ -59,7 +59,7 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'The response lists enabled detection rules carrying a MITRE tag. The results include "Suspicious PowerShell Execution" (critical, risk 99), "PowerShell Encoded Command" (high, risk 73), "Credential Access via LSASS" (critical, risk 95), "Process Injection T1055" (critical, risk 95), and "PowerShell Network Scan" (medium, risk 47). Disabled MITRE-tagged rules such as "Lateral Movement via SMB" and "Phishing URL Indicators" are excluded.',
+                    'Found 5 enabled detection rules with the MITRE tag. "Suspicious PowerShell Execution" is a critical severity query rule with risk score 99. "PowerShell Encoded Command" is a high severity query rule with risk score 73. "Credential Access via LSASS" is a critical severity query rule with risk score 95. "Process Injection T1055" is a critical severity eql rule with risk score 95. "PowerShell Network Scan" is a medium severity query rule with risk score 47. The discover_rule_tags tool was used to find tags matching MITRE, then find_rules filtered by that tag with enabled set to true.',
                 },
                 metadata: {
                   query_intent: 'Rule Discovery',
@@ -73,7 +73,7 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'The response states the total count of enabled custom (non-prebuilt) detection rules, derived from the find-rules tool total field. The count is 8.',
+                    'There are 8 enabled custom detection rules. The find_rules tool was called with enabled set to true and ruleSource set to custom. The total field returned 8.',
                 },
                 metadata: {
                   query_intent: 'Rule Discovery',
@@ -87,7 +87,7 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'The response provides separate counts for enabled and disabled detection rules. There are 8 enabled and 2 disabled rules. The find-rules tool was called at least twice with different enabled filters.',
+                    'There are 8 enabled detection rules and 2 disabled detection rules, for a total of 10 rules. The find_rules tool was called twice: once with enabled set to true returning 8, and once with enabled set to false returning 2.',
                 },
                 metadata: {
                   query_intent: 'Rule Count Breakdown',
@@ -101,7 +101,7 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'The response lists query-type rules with "PowerShell" in the name. The results include "Suspicious PowerShell Execution" (critical, risk 99), "PowerShell Encoded Command" (high, risk 73), and "PowerShell Network Scan" (medium, risk 47). All three are query-type and enabled.',
+                    'Found 3 query-type detection rules with "PowerShell" in the name. "Suspicious PowerShell Execution" has critical severity and risk score 99. "PowerShell Encoded Command" has high severity and risk score 73. "PowerShell Network Scan" has medium severity and risk score 47. All three are query-type rules and are enabled.',
                 },
                 metadata: {
                   query_intent: 'Rule Discovery',
@@ -115,7 +115,7 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'The response lists network-related detection rules identified via tag discovery. The results include "Lateral Movement via SMB" (high, disabled), "Brute Force Detection" (medium, enabled), "Anomalous DNS Activity" (medium, enabled), and "Phishing URL Indicators" (low, disabled). Tags containing "Network" were discovered first.',
+                    'Found 4 network-related detection rules by first using discover_rule_tags to find tags containing "Network". "Lateral Movement via SMB" is a high severity eql rule with risk score 70 and is disabled. "Brute Force Detection" is a medium severity threshold rule with risk score 47 and is enabled. "Anomalous DNS Activity" is a medium severity esql rule with risk score 47 and is enabled. "Phishing URL Indicators" is a low severity threat_match rule with risk score 25 and is disabled.',
                 },
                 metadata: {
                   query_intent: 'Semantic Rule Discovery',
@@ -129,7 +129,7 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'The response lists critical severity detection rules. The results include "Suspicious PowerShell Execution" (risk 99), "Credential Access via LSASS" (risk 95), and "Process Injection T1055" (risk 95). All three are enabled.',
+                    'Found 3 critical severity detection rules. "Suspicious PowerShell Execution" is a query rule with risk score 99 and is enabled. "Credential Access via LSASS" is a query rule with risk score 95 and is enabled. "Process Injection T1055" is an eql rule with risk score 95 and is enabled.',
                 },
                 metadata: {
                   query_intent: 'Rule Discovery',
@@ -143,7 +143,7 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'The response lists enabled rules with risk_score >= 70. The results include "Suspicious PowerShell Execution" (critical, risk 99), "Credential Access via LSASS" (critical, risk 95), "Process Injection T1055" (critical, risk 95), "PowerShell Encoded Command" (high, risk 73), and "Custom DLL Loading Detection" (high, risk 70). "Lateral Movement via SMB" (risk 70) is excluded because it is disabled.',
+                    'Found 5 enabled detection rules with risk score 70 or higher. "Suspicious PowerShell Execution" is a critical severity query rule with risk score 99. "Credential Access via LSASS" is a critical severity query rule with risk score 95. "Process Injection T1055" is a critical severity eql rule with risk score 95. "PowerShell Encoded Command" is a high severity query rule with risk score 73. "Custom DLL Loading Detection" is a high severity query rule with risk score 70. "Lateral Movement via SMB" has risk score 70 but is disabled and therefore excluded.',
                 },
                 metadata: {
                   query_intent: 'Rule Discovery',
@@ -157,7 +157,7 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'The response lists rules mapped to MITRE technique T1059. The results include "Suspicious PowerShell Execution" (critical, query) and "PowerShell Encoded Command" (high, query). Both are enabled.',
+                    'Found 2 detection rules mapped to MITRE technique T1059 (Command and Scripting Interpreter). "Suspicious PowerShell Execution" is a critical severity query rule with risk score 99 and is enabled. "PowerShell Encoded Command" is a high severity query rule with risk score 73 and is enabled.',
                 },
                 metadata: {
                   query_intent: 'Rule Discovery',
@@ -171,7 +171,7 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'The response lists enabled rules with critical or high severity. Critical: "Suspicious PowerShell Execution" (risk 99), "Credential Access via LSASS" (risk 95), "Process Injection T1055" (risk 95). High: "PowerShell Encoded Command" (risk 73), "Custom DLL Loading Detection" (risk 70). Medium and low severity rules are excluded.',
+                    'Found 5 enabled detection rules with critical or high severity. Critical: "Suspicious PowerShell Execution" (query, risk score 99), "Credential Access via LSASS" (query, risk score 95), "Process Injection T1055" (eql, risk score 95). High: "PowerShell Encoded Command" (query, risk score 73), "Custom DLL Loading Detection" (query, risk score 70).',
                 },
                 metadata: {
                   query_intent: 'Rule Discovery',
@@ -186,7 +186,7 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'The response lists rules matching critical severity or MITRE T1055. The results include "Suspicious PowerShell Execution" (critical), "Credential Access via LSASS" (critical), and "Process Injection T1055" (critical, also mapped to T1055). All three are enabled.',
+                    'Found 3 detection rules matching critical severity or MITRE technique T1055 (Process Injection). "Suspicious PowerShell Execution" is a critical severity query rule with risk score 99 and is enabled. "Credential Access via LSASS" is a critical severity query rule with risk score 95 and is enabled. "Process Injection T1055" is a critical severity eql rule with risk score 95, is enabled, and is mapped to MITRE T1055.',
                 },
                 metadata: {
                   query_intent: 'Rule Discovery',
@@ -200,7 +200,7 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'The response lists MITRE-tagged rules excluding any with a "Custom" tag. The results include "Suspicious PowerShell Execution", "PowerShell Encoded Command", "Credential Access via LSASS", "Process Injection T1055", "PowerShell Network Scan", "Lateral Movement via SMB", and "Phishing URL Indicators". None of the MITRE-tagged rules carry the "Custom" tag.',
+                    'Found 7 MITRE-tagged detection rules that do not have the "Custom" tag. "Suspicious PowerShell Execution" (critical, query, risk score 99, enabled). "PowerShell Encoded Command" (high, query, risk score 73, enabled). "Credential Access via LSASS" (critical, query, risk score 95, enabled). "Process Injection T1055" (critical, eql, risk score 95, enabled). "PowerShell Network Scan" (medium, query, risk score 47, enabled). "Lateral Movement via SMB" (high, eql, risk score 70, disabled). "Phishing URL Indicators" (low, threat_match, risk score 25, disabled). The discover_rule_tags tool was used to find MITRE and Custom tags.',
                 },
                 metadata: {
                   query_intent: 'Rule Discovery',
@@ -214,7 +214,7 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'The response lists the top 3 enabled rules sorted by severity descending. The results include "Suspicious PowerShell Execution" (critical, risk 99), "Credential Access via LSASS" (critical, risk 95), and "Process Injection T1055" (critical, risk 95).',
+                    'The top 3 enabled detection rules sorted by severity descending are: "Suspicious PowerShell Execution" (critical severity, query type, risk score 99), "Credential Access via LSASS" (critical severity, query type, risk score 95), and "Process Injection T1055" (critical severity, eql type, risk score 95).',
                 },
                 metadata: {
                   query_intent: 'Rule Discovery',
@@ -228,7 +228,7 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'The response lists disabled detection rules. The results include "Lateral Movement via SMB" (high, risk 70, eql) and "Phishing URL Indicators" (low, risk 25, threat_match).',
+                    'Found 2 disabled detection rules. "Lateral Movement via SMB" is a high severity eql rule with risk score 70 and tags including MITRE and Domain: Network. "Phishing URL Indicators" is a low severity threat_match rule with risk score 25 and tags including MITRE and Domain: Network.',
                 },
                 metadata: {
                   query_intent: 'Rule Discovery',
@@ -242,7 +242,7 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'No detection rules match the tag "NonExistentTag". The tag was not found among available tags. The response suggests using tag discovery to explore available values.',
+                    'The tag "NonExistentTag" was not found among the available tags. The discover_rule_tags tool returned available tags but none matched "NonExistentTag". No detection rules match this tag.',
                 },
                 metadata: {
                   query_intent: 'Rule Discovery',
@@ -257,7 +257,7 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'The response ranks rules by alert volume. "Suspicious PowerShell Execution" has 30 alerts and "Brute Force Detection" has 20 alerts. Alerts were aggregated by kibana.alert.rule.uuid then translated to rule names via the find-rules tool.',
+                    'The two rules that generated the most alerts are "Suspicious PowerShell Execution" with 30 alerts and "Brute Force Detection" with 20 alerts, for a total of 50 alerts. "Suspicious PowerShell Execution" is a critical severity query rule with risk score 99. "Brute Force Detection" is a medium severity threshold rule with risk score 47. The alerts tool was used to aggregate alerts by rule, then find_rules was used to look up the rule details.',
                 },
                 metadata: {
                   query_intent: 'Noisy Rules',
@@ -271,7 +271,7 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'The response ranks rules by alert volume. "Suspicious PowerShell Execution" is the noisiest with 30 alerts, followed by "Brute Force Detection" with 20 alerts. Alerts were aggregated by kibana.alert.rule.uuid then translated to rule names via the find-rules tool.',
+                    'The noisiest detection rules are "Suspicious PowerShell Execution" with 30 alerts and "Brute Force Detection" with 20 alerts. "Suspicious PowerShell Execution" is a critical severity query rule with risk score 99. "Brute Force Detection" is a medium severity threshold rule with risk score 47. The alerts tool was used to aggregate alerts by rule, then find_rules was used to look up rule details.',
                 },
                 metadata: {
                   query_intent: 'Noisy Rules',
