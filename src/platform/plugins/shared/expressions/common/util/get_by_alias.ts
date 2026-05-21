@@ -21,11 +21,11 @@ interface Node {
   namespace?: string;
 }
 
-export function getByAlias<T extends Node>(
-  node: T[] | Record<string, T>,
+export async function getByAlias<T extends Node>(
+  node: Record<string, () => Promise<T>>,
   nodeName: string,
   nodeNamespace?: string
-): T | undefined {
+): Promise<T | undefined> {
   const lowerCaseName = nodeName.toLowerCase();
   return Object.values(node).find(({ name, aliases, namespace }) => {
     if (!name) return false;

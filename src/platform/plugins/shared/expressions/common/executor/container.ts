@@ -13,8 +13,8 @@ import type { ExpressionFunction } from '../expression_functions';
 import type { ExpressionType } from '../expression_types';
 
 export interface ExecutorState<Context extends Record<string, unknown> = Record<string, unknown>> {
-  functions: Record<string, ExpressionFunction>;
-  types: Record<string, ExpressionType>;
+  functions: Record<string, () => Promise<ExpressionFunction>>;
+  types: Record<string, () => Promise<ExpressionType>>;
   context: Context;
 }
 
@@ -25,24 +25,24 @@ export const defaultState: ExecutorState = {
 };
 
 export interface ExecutorPureTransitions {
-  addFunction: (state: ExecutorState) => (fn: ExpressionFunction) => ExecutorState;
-  addType: (state: ExecutorState) => (type: ExpressionType) => ExecutorState;
+  addFunction: (state: ExecutorState) => (name: string, getFn: () => Promise<ExpressionFunction>) => ExecutorState;
+  addType: (state: ExecutorState) => (name: string, getType: () => Promise<ExpressionType>) => ExecutorState;
 }
 
 export const pureTransitions: ExecutorPureTransitions = {
-  addFunction: (state) => (fn) => ({ ...state, functions: { ...state.functions, [fn.name]: fn } }),
-  addType: (state) => (type) => ({ ...state, types: { ...state.types, [type.name]: type } }),
+  addFunction: (state) => (name, getFn) => ({ ...state, functions: { ...state.functions, [name]: getFn } }),
+  addType: (state) => (name, getType) => ({ ...state, types: { ...state.types, [name]: getType } }),
 };
 
 export interface ExecutorPureSelectors {
-  getFunction: (state: ExecutorState) => (id: string) => ExpressionFunction | null;
-  getType: (state: ExecutorState) => (id: string) => ExpressionType | null;
+  getFunction: (state: ExecutorState) => (id: string) => Promise<ExpressionFunction | null>;
+  getType: (state: ExecutorState) => (id: string) => Promise<ExpressionType | null>;
   getContext: (state: ExecutorState) => () => ExecutorState['context'];
 }
 
 export const pureSelectors: ExecutorPureSelectors = {
-  getFunction: (state) => (id) => state.functions[id] || null,
-  getType: (state) => (id) => state.types[id] || null,
+  getFunction: (state) => async (id) => state.functions[id]?.() || null,
+  getType: (state) => (id) => state.types[id]?.() || null,
   getContext:
     ({ context }) =>
     () =>

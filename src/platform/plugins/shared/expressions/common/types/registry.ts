@@ -8,9 +8,9 @@
  */
 
 export interface IRegistry<T> {
-  get(id: string): T | null;
+  get(id: string): Promise<T | null>;
 
-  toJS(): Record<string, T>;
+  toJS(): Promise<Record<string, T>>;
 
-  toArray(): T[];
+  toArray(): Promise<T[]>;
 }

@@ -70,7 +70,7 @@ export interface ExpressionsServiceSetup {
    * names of the types and values are `ExpressionType` instances.
    * @deprecated Use start contract instead.
    */
-  getTypes(): ReturnType<Executor['getTypes']>;
+  getTypes(): Promise<ReturnType<Executor['getTypes']>>;
 
   /**
    * Create a new instance of `ExpressionsService`. The new instance inherits
@@ -117,15 +117,18 @@ export interface ExpressionsServiceSetup {
    * passed to all functions that can be used for side-effects.
    */
   registerFunction(
-    functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)
+    name: string,
+    functionDefinition: AnyExpressionFunctionDefinition | (() => Promise<AnyExpressionFunctionDefinition>)
   ): void;
 
   registerType(
-    typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)
+    name: string,
+    typeDefinition: AnyExpressionTypeDefinition | (() => Promise<AnyExpressionTypeDefinition>)
   ): void;
 
   registerRenderer(
-    definition: AnyExpressionRenderDefinition | (() => AnyExpressionRenderDefinition)
+    name: string,
+    definition: AnyExpressionRenderDefinition | (() => Promise<AnyExpressionRenderDefinition>)
   ): void;
 
   getAllMigrations(): MigrateFunctionsObject;
@@ -376,6 +379,7 @@ export class ExpressionsService
   public readonly getTypes: ExpressionsServiceStart['getTypes'] = () => this.executor.getTypes();
 
   public readonly registerFunction: ExpressionsServiceSetup['registerFunction'] = (
+    name,
     functionDefinition
   ) => this.executor.registerFunction(functionDefinition);
 

@@ -31,9 +31,10 @@ import { ExpressionType } from '../expression_types/expression_type';
 import type { AnyExpressionTypeDefinition } from '../expression_types/types';
 import type { ExpressionAstExpression, ExpressionAstFunction } from '../ast';
 import type { ExpressionValueError } from '../expression_types/specs';
-import { typeSpecs } from '../expression_types/specs';
+// import { typeSpecs } from '../expression_types/specs';
 import { ALL_NAMESPACES, getByAlias } from '../util';
 import type { ExpressionExecutionParams } from '../service';
+import { asyncForEach } from '@kbn/std';
 
 export interface ExpressionExecOptions {
   /**
@@ -48,21 +49,22 @@ export class TypesRegistry implements IRegistry<ExpressionType> {
   constructor(private readonly executor: Executor) {}
 
   public register(
-    typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)
+    name: string,
+    typeDefinition: AnyExpressionTypeDefinition | (() => Promise<AnyExpressionTypeDefinition>)
   ) {
-    this.executor.registerType(typeDefinition);
+    this.executor.registerType(name, typeDefinition);
   }
 
-  public get(id: string): ExpressionType | null {
-    return this.executor.getType(id) ?? null;
+  public async get(id: string): Promise<ExpressionType | null> {
+    return (await this.executor.getType(id)) ?? null;
   }
 
-  public toJS(): Record<string, ExpressionType> {
+  public toJS(): Promise<Record<string, ExpressionType>> {
     return this.executor.getTypes();
   }
 
-  public toArray(): ExpressionType[] {
-    return Object.values(this.toJS());
+  public async toArray(): Promise<ExpressionType[]> {
+    return Object.values(await this.toJS());
   }
 }
 
@@ -70,21 +72,22 @@ export class FunctionsRegistry implements IRegistry<ExpressionFunction> {
   constructor(private readonly executor: Executor) {}
 
   public register(
-    functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)
+    name: string,
+    functionDefinition: AnyExpressionFunctionDefinition | (() => Promise<AnyExpressionFunctionDefinition>)
   ) {
-    this.executor.registerFunction(functionDefinition);
+    this.executor.registerFunction(name, functionDefinition);
   }
 
-  public get(id: string): ExpressionFunction | null {
-    return this.executor.getFunction(id) ?? null;
+  public async get(id: string): Promise<ExpressionFunction | null> {
+    return await this.executor.getFunction(id) ?? null;
   }
 
-  public toJS(): Record<string, ExpressionFunction> {
+  public toJS(): Promise<Record<string, ExpressionFunction>> {
     return this.executor.getFunctions();
   }
 
-  public toArray(): ExpressionFunction[] {
-    return Object.values(this.toJS());
+  public async toArray(): Promise<ExpressionFunction[]> {
+    return Object.values(await this.toJS());
   }
 }
 
@@ -96,7 +99,8 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     state?: ExecutorState<Ctx>
   ): Executor<Ctx> {
     const executor = new Executor<Ctx>(logger, state);
-    for (const type of typeSpecs) executor.registerType(type);
+    // TODO where do we get name from
+    // for (const type of typeSpecs) executor.registerType(type);
 
     return executor;
   }
@@ -131,46 +135,56 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
   }
 
   public registerFunction(
-    functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)
+    name: string,
+    functionDefinition: AnyExpressionFunctionDefinition | (() => Promise<AnyExpressionFunctionDefinition>)
   ) {
-    const fn = new ExpressionFunction(
-      typeof functionDefinition === 'object' ? functionDefinition : functionDefinition()
-    );
-    this.container.transitions.addFunction(fn);
+    this.container.transitions.addFunction(name, async () => {
+      return new ExpressionFunction(
+        typeof functionDefinition === 'object' ? functionDefinition : await functionDefinition()
+      )
+    });
   }
 
-  public getFunction(name: string, namespace?: string): ExpressionFunction | undefined {
-    const fn = this.container.get().functions[name];
+  public async getFunction(name: string, namespace?: string): Promise<ExpressionFunction | undefined> {
+    const fn = await this.container.get().functions[name]?.();
 
     if (!fn?.namespace || fn.namespace === namespace) {
       return fn;
     }
   }
 
-  public getFunctions(namespace?: string): Record<string, ExpressionFunction> {
-    const fns = Object.entries(this.container.get().functions);
-    const filtered = fns.filter(
-      ([key, value]) => !value.namespace || value.namespace === namespace
-    );
-    return Object.fromEntries(filtered);
+  public async getFunctions(namespace?: string): Promise<Record<string, ExpressionFunction>> {
+    const fns: Record<string, ExpressionFunction> = {};
+    await asyncForEach(Object.keys(this.container.get().functions), async (key) => {
+      const fn = await this.container.get().functions[key]();
+      if (!fn.namespace || fn.namespace === namespace) {
+        fns[key] = fn;
+      }
+    });
+    return fns;
   }
 
   public registerType(
-    typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)
+    name: string,
+    typeDefinition: AnyExpressionTypeDefinition | (() => Promise<AnyExpressionTypeDefinition>)
   ) {
-    const type = new ExpressionType(
-      typeof typeDefinition === 'object' ? typeDefinition : typeDefinition()
-    );
-
-    this.container.transitions.addType(type);
+    this.container.transitions.addType(name, async () => {
+      return new ExpressionType(
+        typeof typeDefinition === 'object' ? typeDefinition : await typeDefinition()
+      )
+    });
   }
 
-  public getType(name: string): ExpressionType | undefined {
-    return this.container.get().types[name];
+  public async getType(name: string): Promise<ExpressionType | undefined> {
+    return this.container.get().types[name]?.();
   }
 
-  public getTypes(): Record<string, ExpressionType> {
-    return this.container.get().types;
+  public async getTypes(): Promise<Record<string, ExpressionType>> {
+    const types: Record<string, ExpressionType> = {};
+    await asyncForEach(Object.keys(this.container.get().types), async (key) => {
+      types[key] = await this.container.get().types[key]();
+    });
+    return types;
   }
 
   public get context(): Record<string, unknown> {
@@ -215,7 +229,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     return execution;
   }
 
-  private walkAst(
+  private async walkAst(
     ast: ExpressionAstExpression,
     action: (fn: ExpressionFunction, link: ExpressionAstFunction) => void
   ) {
