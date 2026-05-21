@@ -210,6 +210,7 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
   const targetTags = getTestTagsForTarget(target);
   const flatten = flagsReader.boolean('flatten');
   const includeCustomServers = flagsReader.boolean('include-custom-servers');
+  const includeExcluded = flagsReader.boolean('include-excluded');
   const selectiveTesting = flagsReader.boolean('selective-testing');
   const affectedModulesPath = flagsReader.string('affected-modules');
 
@@ -251,9 +252,10 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
     filteredModulesByTags,
     includeCustomServers
   );
-  const filteredModulesWithExcludedConfigs = process.env.CI
-    ? filterModulesByExcludedConfigPaths(filteredModules, getScoutCiExcludedConfigs())
-    : filteredModules;
+  const filteredModulesWithExcludedConfigs =
+    process.env.CI && !includeExcluded
+      ? filterModulesByExcludedConfigPaths(filteredModules, getScoutCiExcludedConfigs())
+      : filteredModules;
   // Handle output based on flatten flag
   if (flatten) {
     handleFlattenedOutput(filteredModulesWithExcludedConfigs, flagsReader, log);
@@ -314,6 +316,9 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
     --selective-testing       Requires --affected-modules.
                               Limits output / Scout CI steps to affected modules; labels unchanged.
     --include-custom-servers  Include configs under 'test/scout_*' paths for custom server setups
+    --include-excluded        Include configs listed under 'excluded_configs' in scout_ci_config.yml.
+                              Required for the Flaky Test Runner to target a config that the regular
+                              PR CI cannot run (e.g. CPS configs that need a linked cluster).
     --validate                Validate that all discovered modules are registered in Scout CI config
     --save                    Validate and save enabled modules to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'
     --flatten                 Output configs in flattened format grouped by mode, group, and scout command
@@ -355,13 +360,21 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
   `,
   flags: {
     string: ['target', 'affected-modules'],
-    boolean: ['save', 'validate', 'flatten', 'include-custom-servers', 'selective-testing'],
+    boolean: [
+      'save',
+      'validate',
+      'flatten',
+      'include-custom-servers',
+      'include-excluded',
+      'selective-testing',
+    ],
     default: {
       target: 'all',
       save: false,
       validate: false,
       flatten: false,
       'include-custom-servers': false,
+      'include-excluded': false,
       'selective-testing': false,
     },
   },
