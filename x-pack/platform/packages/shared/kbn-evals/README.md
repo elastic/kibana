@@ -792,17 +792,11 @@ This grants:
 
 Copy the returned `encoded` value and use it for all four secret fields in your vault config:
 
-| Config field | Env variable | Value |
-| ------------ | ------------ | ----- |
-
-# <<<<<<< HEAD
-
-| `evaluationsEs.apiKey` | `EVALUATIONS_ES_API_KEY` | `<encoded>` |
-
-> > > > > > > origin/main
-> > > > > > > | `tracingEs.apiKey` | `TRACING_ES_API_KEY` | `<encoded>` |
-> > > > > > > | `evaluationsKbn.apiKey` | `EVALUATIONS_KBN_API_KEY` | `<encoded>` |
-> > > > > > > | `tracingExporters[0].http.headers.Authorization` | via `TRACING_EXPORTERS` | `ApiKey <encoded>` |
+| Config field                                     | Env variable              | Value              |
+| ------------------------------------------------ | ------------------------- | ------------------ |
+| `tracingEs.apiKey`                               | `TRACING_ES_API_KEY`      | `<encoded>`        |
+| `evaluationsKbn.apiKey`                          | `EVALUATIONS_KBN_API_KEY` | `<encoded>`        |
+| `tracingExporters[0].http.headers.Authorization` | via `TRACING_EXPORTERS`   | `ApiKey <encoded>` |
 
 ### Using a Separate Kibana for Score Ingestion
 
