@@ -11,7 +11,9 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { createEsTraceFetcher, TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
+import { buildAgentBuilderTracesIndexPattern } from '../../../../../../common/traces';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useSpaceId } from '../../../../hooks/use_space_id';
 
 const traceFlyoutTitle = i18n.translate('xpack.agentBuilder.conversation.traceFlyout.title', {
   defaultMessage: 'Trace',
@@ -25,9 +27,15 @@ interface TraceFlyoutProps {
 export const TraceFlyout: React.FC<TraceFlyoutProps> = ({ traceId, onClose }) => {
   const { services } = useKibana();
   const { data } = services.plugins;
-  const fetchTrace = useMemo(() => createEsTraceFetcher(data.search.search), [data.search.search]);
+  const spaceId = useSpaceId(services.plugins.spaces);
+  const index = spaceId ? buildAgentBuilderTracesIndexPattern(spaceId) : undefined;
+  const fetchTrace = useMemo(
+    () => createEsTraceFetcher(data.search.search, ...(index ? [{ index }] : [])),
+    [data.search.search, index]
+  );
   const traceSpansResult = useTraceSpans(traceId, {
     fetchTrace,
+    enabled: spaceId != null,
   });
 
   return (

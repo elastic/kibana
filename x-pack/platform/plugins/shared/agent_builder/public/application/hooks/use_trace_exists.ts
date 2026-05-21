@@ -29,11 +29,9 @@ export const useTraceExists = (
   const { services } = useKibana();
   const search = services.plugins.data.search.search;
   const spaceId = useSpaceId(services.plugins.spaces);
-  console.log('[useTraceExists] spaceId:', spaceId);
   const indexPattern = spaceId && buildAgentBuilderTracesIndexPattern(spaceId);
 
   const fetchTraceExists = useCallback(async (): Promise<boolean> => {
-    console.log('[useTraceExists] fetching', { traceId, index: indexPattern });
     const response = (await lastValueFrom(
       search({
         params: {
@@ -47,13 +45,8 @@ export const useTraceExists = (
       })
     )) as TraceExistsResponse;
 
-    console.log(
-      '[useTraceExists] raw response',
-      JSON.stringify(response.rawResponse?.hits, null, 2)
-    );
     const total = response.rawResponse?.hits?.total;
     const count = typeof total === 'number' ? total : total?.value ?? 0;
-    console.log('[useTraceExists] total:', total, 'count:', count, 'exists:', count > 0);
     return count > 0;
   }, [search, traceId, indexPattern]);
 
@@ -64,16 +57,6 @@ export const useTraceExists = (
     retryDelay: 5_000,
     staleTime: STALE_TIME_MS,
     queryFn: fetchTraceExists,
-  });
-
-  console.log('[useTraceExists] hook state', {
-    traceId,
-    enabled,
-    queryEnabled: indexPattern && traceId != null && enabled,
-    data: query.data,
-    isLoading: query.isLoading,
-    error: query.error?.message,
-    exists: query.data ?? false,
   });
 
   return {

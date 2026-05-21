@@ -22,12 +22,12 @@ const EMPTY_RESULT: TraceSpansResult = {
 
 export const useTraceSpans = (
   traceId: string | null,
-  { fetchTrace }: { fetchTrace: TraceFetcher }
+  { fetchTrace, enabled = true }: { fetchTrace: TraceFetcher; enabled?: boolean }
 ): { spans: TraceSpan[]; durationMs: number; isLoading: boolean; error: Error | null } => {
   const query = useQuery<TraceSpansResult, Error>({
     // Note: fetcher identity is not part of the key; same traceId across fetchers shares cache.
     queryKey: ['llm-trace-waterfall', 'trace-spans', traceId],
-    enabled: traceId != null,
+    enabled: traceId != null && enabled,
     queryFn: () => fetchTrace(traceId!),
   });
 
