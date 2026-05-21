@@ -11,7 +11,6 @@ import {
   hasWrongOperatorWithWildcard,
   hasEscaping,
   hasPartialCodeSignatureEntry,
-  hasMalformedMatchesValue,
   getMalformedMatchesFields,
   getOperatorOptions,
   hasEntryEscaping,
@@ -645,253 +644,6 @@ describe('Helpers', () => {
     });
   });
 
-  describe('hasMalformedMatchesValue', () => {
-    describe('escaped wildcard characters', () => {
-      test('it returns true for a wildcard entry with escaped asterisk (\\*)', () => {
-        expect(
-          hasMalformedMatchesValue([
-            {
-              description: '',
-              name: '',
-              type: 'simple',
-              entries: [
-                {
-                  type: 'wildcard',
-                  value: 'app\\*.exe',
-                  field: 'process.name',
-                  operator: 'included',
-                },
-              ],
-            },
-          ])
-        ).toBeTruthy();
-      });
-
-      test('it returns true for a wildcard entry with escaped question mark (\\?)', () => {
-        expect(
-          hasMalformedMatchesValue([
-            {
-              description: '',
-              name: '',
-              type: 'simple',
-              entries: [
-                {
-                  type: 'wildcard',
-                  value: 'file\\?.txt',
-                  field: 'file.name',
-                  operator: 'included',
-                },
-              ],
-            },
-          ])
-        ).toBeTruthy();
-      });
-
-      test('it returns false for a wildcard entry with only escaped backslashes (\\\\) and no escaped wildcards', () => {
-        expect(
-          hasMalformedMatchesValue([
-            {
-              description: '',
-              name: '',
-              type: 'simple',
-              entries: [
-                {
-                  type: 'wildcard',
-                  value: 'C:\\\\Windows\\\\explorer.exe',
-                  field: 'process.executable',
-                  operator: 'included',
-                },
-              ],
-            },
-          ])
-        ).toBeFalsy();
-      });
-    });
-
-    describe('valid wildcard entries', () => {
-      test('it returns false for a wildcard entry with a normal pattern', () => {
-        expect(
-          hasMalformedMatchesValue([
-            {
-              description: '',
-              name: '',
-              type: 'simple',
-              entries: [
-                {
-                  type: 'wildcard',
-                  value: 'chrome*.exe',
-                  field: 'process.name',
-                  operator: 'included',
-                },
-              ],
-            },
-          ])
-        ).toBeFalsy();
-      });
-
-      test('it returns false for a wildcard entry with a question mark pattern', () => {
-        expect(
-          hasMalformedMatchesValue([
-            {
-              description: '',
-              name: '',
-              type: 'simple',
-              entries: [
-                {
-                  type: 'wildcard',
-                  value: 'file?.txt',
-                  field: 'file.name',
-                  operator: 'included',
-                },
-              ],
-            },
-          ])
-        ).toBeFalsy();
-      });
-
-      test('it returns false for a documented Windows path with double backslashes and wildcards', () => {
-        expect(
-          hasMalformedMatchesValue([
-            {
-              description: '',
-              name: '',
-              type: 'simple',
-              entries: [
-                {
-                  type: 'wildcard',
-                  value: 'C:\\\\Windows\\\\*.dll',
-                  field: 'process.executable',
-                  operator: 'included',
-                },
-              ],
-            },
-          ])
-        ).toBeFalsy();
-      });
-
-      test('it returns true for a single-backslash path where backslash escapes the wildcard', () => {
-        expect(
-          hasMalformedMatchesValue([
-            {
-              description: '',
-              name: '',
-              type: 'simple',
-              entries: [
-                {
-                  type: 'wildcard',
-                  value: 'C:\\Users\\*\\Downloads\\*.exe',
-                  field: 'process.executable',
-                  operator: 'included',
-                },
-              ],
-            },
-          ])
-        ).toBeTruthy();
-      });
-
-      test('it returns false for a match entry even if it contains escape sequences', () => {
-        expect(
-          hasMalformedMatchesValue([
-            {
-              description: '',
-              name: '',
-              type: 'simple',
-              entries: [
-                {
-                  type: 'match',
-                  value: 'app\\*.exe',
-                  field: 'process.name',
-                  operator: 'included',
-                },
-              ],
-            },
-          ])
-        ).toBeFalsy();
-      });
-
-      test('it returns false for an empty entries list', () => {
-        expect(
-          hasMalformedMatchesValue([
-            {
-              description: '',
-              name: '',
-              type: 'simple',
-              entries: [],
-            },
-          ])
-        ).toBeFalsy();
-      });
-    });
-
-    describe('multiple entries and OR conditions', () => {
-      test('it returns true if at least one entry across OR conditions has escaped wildcards', () => {
-        expect(
-          hasMalformedMatchesValue([
-            {
-              description: '',
-              name: '',
-              type: 'simple',
-              entries: [
-                {
-                  type: 'wildcard',
-                  value: 'normal*',
-                  field: 'process.name',
-                  operator: 'included',
-                },
-              ],
-            },
-            {
-              description: '',
-              name: '',
-              type: 'simple',
-              entries: [
-                {
-                  type: 'wildcard',
-                  value: 'app\\*.exe',
-                  field: 'process.name',
-                  operator: 'included',
-                },
-              ],
-            },
-          ])
-        ).toBeTruthy();
-      });
-
-      test('it returns false if no entries have malformed values', () => {
-        expect(
-          hasMalformedMatchesValue([
-            {
-              description: '',
-              name: '',
-              type: 'simple',
-              entries: [
-                {
-                  type: 'wildcard',
-                  value: 'normal*',
-                  field: 'process.name',
-                  operator: 'included',
-                },
-              ],
-            },
-            {
-              description: '',
-              name: '',
-              type: 'simple',
-              entries: [
-                {
-                  type: 'wildcard',
-                  value: 'also-normal?',
-                  field: 'file.name',
-                  operator: 'included',
-                },
-              ],
-            },
-          ])
-        ).toBeFalsy();
-      });
-    });
-  });
-
   describe('getMalformedMatchesFields', () => {
     test('it returns the field name for a wildcard entry with an escaped asterisk', () => {
       expect(
@@ -1052,6 +804,27 @@ describe('Helpers', () => {
         ])
       ).toEqual([]);
     });
+
+    test('it does not flag a double-backslash before a wildcard (Windows path separator)', () => {
+      expect(
+        getMalformedMatchesFields([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [
+              {
+                type: 'wildcard',
+                value: 'C:\\\\Windows\\\\*.dll',
+                field: 'file.path',
+                operator: 'included',
+              },
+            ],
+          },
+        ])
+      ).toEqual([]);
+    });
+
   });
 
   describe('getOperatorOptions', () => {

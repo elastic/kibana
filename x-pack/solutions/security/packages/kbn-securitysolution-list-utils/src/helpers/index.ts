@@ -1121,9 +1121,6 @@ export const getMalformedMatchesFields = (
   }, []);
 };
 
-export const hasMalformedMatchesValue = (items: ExceptionsBuilderReturnExceptionItem[]): boolean =>
-  getMalformedMatchesFields(items).length > 0;
-
 /**
  * Event filters helper where given an exceptions list,
  * determine if both 'subject_name' and 'trusted' are
