@@ -16,12 +16,14 @@ import {
   type EntityField,
   type EntityType,
 } from '../../../common/domain/definitions/entity_schema';
-import { getEuidEsqlEvaluationParts } from '../../../common/domain/euid/esql';
+import {
+  getEuidEsqlEvaluationParts,
+  getFieldEvaluationsEsqlFromDefinition,
+} from '../../../common/domain/euid/esql';
 
 import {
   buildExtractionSourceClause,
   buildLogPageProbeSourceClause,
-  buildFieldEvaluations,
   buildSetFieldsByCondition,
   type PaginationParams,
   type PaginationFields,
@@ -38,7 +40,6 @@ import {
   fieldsToKeep,
   extractPaginationParams,
   buildPaginationSection,
-  hasFieldEvaluations,
   mapPostAggFilterFieldsToRecentForEsql,
 } from './query_builder_commons';
 
@@ -115,25 +116,26 @@ export function buildLogsExtractionEsqlQuery({
     })
   );
 
-  // Special evaluations for entity id
-  if (hasFieldEvaluations(entityDefinition)) {
-    parts.push(buildFieldEvaluations(entityDefinition));
+  // Merge field evals, pre-agg set-fields (if any), EUID prelude, and UntypedId into one EVAL.
+  // Sequential EVAL assignments allow later entries to reference columns from earlier ones.
+  const preEvalAssignments: string[] = [];
+  const fieldEvaluationsFragment = getFieldEvaluationsEsqlFromDefinition(entityDefinition);
+  if (fieldEvaluationsFragment) {
+    preEvalAssignments.push(fieldEvaluationsFragment);
   }
-
   if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
     for (const entry of entityDefinition.whenConditionTrueSetFieldsPreAgg) {
-      parts.push(buildSetFieldsByCondition(entry));
+      preEvalAssignments.push(buildSetFieldsByCondition(entry).replace(/^\| EVAL /, ''));
     }
   }
-
-  // Evaluation of the id without type so we can fallback to name
   const { prelude: euidPrelude, expression: euidExpression } = getEuidEsqlEvaluationParts(type, {
     withTypeId: false,
   });
   if (euidPrelude) {
-    parts.push(euidPrelude);
+    preEvalAssignments.push(euidPrelude.replace(/^\| EVAL /, ''));
   }
-  parts.push(`| EVAL ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} = ${euidExpression}`);
+  preEvalAssignments.push(`${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} = ${euidExpression}`);
+  parts.push(`| EVAL ${preEvalAssignments.join(',\n ')}`);
 
   // Main stats aggregation from incoming data
   parts.push(`| STATS
@@ -188,14 +190,15 @@ export function buildLogsExtractionEsqlQuery({
   }
 
   if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {
-    for (const entry of entityDefinition.whenConditionTrueSetFieldsAfterStats) {
-      parts.push(
+    const afterStatsAssignments = entityDefinition.whenConditionTrueSetFieldsAfterStats
+      .map((entry) =>
         buildSetFieldsByCondition(entry, {
           entityFields: fields,
           useRecentDataPrefix: true,
-        })
-      );
-    }
+        }).replace(/^\| EVAL /, '')
+      )
+      .join(',\n    ');
+    parts.push(`| EVAL ${afterStatsAssignments}`);
   }
 
   // Perform the final merge of the fields between latest and recent data

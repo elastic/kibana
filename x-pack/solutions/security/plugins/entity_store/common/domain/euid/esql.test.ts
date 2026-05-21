@@ -309,10 +309,10 @@ describe('getEuidEsqlEvaluationParts', () => {
                entity_namespace_present_or_null = CASE(entity_namespace_present, entity.namespace),
                user_email_present_or_null = CASE(user_email_present, user.email),
                user_id_present_or_null = CASE(user_id_present, user.id),
-               user_domain_present_or_null = CASE(user_domain_present, user.domain)
-| EVAL _euid_branch_0_cond = (COALESCE(\`entity.namespace\` == "local", FALSE)),
-       _euid_branch_0_formula = CONCAT(user_name_present_or_null, "@", host_id_present_or_null, "@", entity_namespace_present_or_null),
-       _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, "@", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, "@", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, "@", user_domain_present_or_null, "@", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, "@", entity_namespace_present_or_null))`
+               user_domain_present_or_null = CASE(user_domain_present, user.domain),
+               _euid_branch_0_cond = (COALESCE(\`entity.namespace\` == "local", FALSE)),
+               _euid_branch_0_formula = CONCAT(user_name_present_or_null, "@", host_id_present_or_null, "@", entity_namespace_present_or_null),
+               _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, "@", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, "@", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, "@", user_domain_present_or_null, "@", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, "@", entity_namespace_present_or_null))`
       )
     );
     // Expression uses a single multi-arm CASE to preserve "first-matched-branch wins, even if NULL"

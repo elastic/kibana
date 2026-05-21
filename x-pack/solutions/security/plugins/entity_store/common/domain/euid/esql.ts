@@ -525,9 +525,17 @@ export function getEuidEsqlEvaluationParts(
     }
   }
 
-  const precomputePrelude =
-    precomputeAssignments.length > 0 ? `| EVAL ${precomputeAssignments.join(',\n ')}` : null;
-  const combinedPrelude = [prelude, precomputePrelude].filter(Boolean).join('\n');
+  // Merge precompute assignments into the present-prelude EVAL so both stages become one.
+  // Sequential EVAL assignments allow later entries to reference columns from earlier ones.
+  let combinedPrelude: string | null;
+  if (precomputeAssignments.length > 0) {
+    const precomputeFragment = precomputeAssignments.join(',\n ');
+    combinedPrelude = prelude
+      ? `${prelude},\n ${precomputeFragment}`
+      : `| EVAL ${precomputeFragment}`;
+  } else {
+    combinedPrelude = prelude;
+  }
   const idLogic = `CASE(${caseParts.join(',\n')}, NULL)`;
   return {
     prelude: combinedPrelude,

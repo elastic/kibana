@@ -7,11 +7,13 @@
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { EntityDefinition } from '../../../common/domain/definitions/entity_schema';
-import { getEuidEsqlEvaluationParts } from '../../../common/domain/euid/esql';
+import {
+  getEuidEsqlEvaluationParts,
+  getFieldEvaluationsEsqlFromDefinition,
+} from '../../../common/domain/euid/esql';
 import type { PaginationFields } from './query_builder_commons';
 import {
   buildExtractionSourceClause,
-  buildFieldEvaluations,
   buildSetFieldsByCondition,
   type PaginationParams,
   type LogSlicePaginationParams,
@@ -22,7 +24,6 @@ import {
   fieldsToKeep,
   extractPaginationParams,
   buildPaginationSection,
-  hasFieldEvaluations,
 } from './query_builder_commons';
 
 const CCS_FIELDS_TO_KEEP = [
@@ -83,23 +84,24 @@ export function buildCcsLogsExtractionEsqlQuery({
     })
   );
 
-  // Special evaluations for entity id
-  if (hasFieldEvaluations(entityDefinition)) {
-    parts.push(buildFieldEvaluations(entityDefinition));
+  // Merge field evals, pre-agg set-fields (if any), EUID prelude, and entity id into one EVAL.
+  // Sequential EVAL assignments allow later entries to reference columns from earlier ones.
+  const preEvalAssignments: string[] = [];
+  const fieldEvaluationsFragment = getFieldEvaluationsEsqlFromDefinition(entityDefinition);
+  if (fieldEvaluationsFragment) {
+    preEvalAssignments.push(fieldEvaluationsFragment);
   }
-
   if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
     for (const entry of entityDefinition.whenConditionTrueSetFieldsPreAgg) {
-      parts.push(buildSetFieldsByCondition(entry));
+      preEvalAssignments.push(buildSetFieldsByCondition(entry).replace(/^\| EVAL /, ''));
     }
   }
-
-  // Builds the id
   const { prelude: euidPrelude, expression: euidExpression } = getEuidEsqlEvaluationParts(type);
   if (euidPrelude) {
-    parts.push(euidPrelude);
+    preEvalAssignments.push(euidPrelude.replace(/^\| EVAL /, ''));
   }
-  parts.push(`| EVAL ${MAIN_ENTITY_ID_FIELD} = ${euidExpression}`);
+  preEvalAssignments.push(`${MAIN_ENTITY_ID_FIELD} = ${euidExpression}`);
+  parts.push(`| EVAL ${preEvalAssignments.join(',\n ')}`);
 
   // Main stats aggregation from incoming data
   parts.push(`| STATS
@@ -109,14 +111,15 @@ export function buildCcsLogsExtractionEsqlQuery({
     BY ${MAIN_ENTITY_ID_FIELD}`);
 
   if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {
-    for (const entry of entityDefinition.whenConditionTrueSetFieldsAfterStats) {
-      parts.push(
+    const afterStatsAssignments = entityDefinition.whenConditionTrueSetFieldsAfterStats
+      .map((entry) =>
         buildSetFieldsByCondition(entry, {
           entityFields: fields,
           useRecentDataPrefix: false,
-        })
-      );
-    }
+        }).replace(/^\| EVAL /, '')
+      )
+      .join(',\n    ');
+    parts.push(`| EVAL ${afterStatsAssignments}`);
   }
 
   // Keep fields
