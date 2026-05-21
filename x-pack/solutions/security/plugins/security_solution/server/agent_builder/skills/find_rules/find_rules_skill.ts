@@ -5,145 +5,127 @@
  * 2.0.
  */
 
+import type { StartServicesAccessor } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
+import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import { SECURITY_FIND_RULES_TOOL_ID, SECURITY_ALERTS_TOOL_ID } from '../../tools';
+import { SECURITY_ALERTS_TOOL_ID } from '../../tools';
+import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
+import { createFindRulesInlineTool } from './find_rules_tool';
+import { createDiscoverRuleTagsInlineTool } from './discover_rule_tags_tool';
 
-export const findRulesSkill = defineSkillType({
-  id: 'find-rules',
-  name: 'find-rules',
-  basePath: 'skills/security/rules',
-  description:
-    'Discover, list, rank, group, and count Security detection rules across the rule inventory. ' +
-    'Browse rules by tags (with tag discovery), MITRE technique/tactic, severity, rule type, ' +
-    'risk score range, name substring, source index pattern, or enabled state. ' +
-    'Rank rules by alert volume to identify noisy detections. ' +
-    "Read-only and scoped to MULTI-rule discovery — for individual rule actions or other rule-engine queries see the appropriate sibling skills documented in this skill's content.",
-  content: `# Find Detection Rules
+interface FindRulesSkillDeps {
+  getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>;
+  logger: Logger;
+}
 
-## When to Use This Skill
+export const createFindRulesSkill = ({
+  getStartServices,
+  logger,
+}: FindRulesSkillDeps): SkillDefinition<'find-rules', 'skills/security/rules'> =>
+  defineSkillType({
+    id: 'find-rules',
+    name: 'find-rules',
+    basePath: 'skills/security/rules',
+    description:
+      'Discover, list, rank, and count Security detection rules across the rule inventory. ' +
+      'Browse rules by tags (with tag discovery), MITRE technique/tactic, severity, rule type, ' +
+      'risk score range, name substring, source index pattern, or enabled state. ' +
+      'Rank rules by alert volume to identify noisy detections. ' +
+      'Read-only and scoped to multi-rule discovery.',
+    content: `# Find Detection Rules
 
-Use this skill when the user asks to **list or rank multiple Security detection rules** by:
-- Metadata: tags, enabled state, rule type, severity, name pattern, risk score, MITRE technique/tactic, index pattern
-- Alert volume: which rules are noisy / produced the most alerts
+## Use This Skill
 
-## Do NOT Use When
+Use this skill to list, count, sort, or rank multiple Security detection rules. It covers rule metadata, tag discovery, MITRE tactic/technique, severity, rule type, risk score, name search, source index pattern, enabled state, and noisy-rules alert volume.
 
-- The user is triaging a specific alert (alert id) — that's alert-analysis
-- The user wants to create or edit a **single** rule via the rule attachment in chat — that's detection-rule-edit
-- The user wants a proactive ES|QL hunt for suspicious activity — that's threat-hunting
-- The user is asking about alerting V2 (ES|QL alerts) rules — that's rule-management
+## Boundaries
 
-## ⚠️ Action Limitations — Read-Only Skill
+- Specific alert triage (alert id) -> alert-analysis
+- Create or edit a single rule attachment -> detection-rule-edit
+- ES|QL hunting over events -> threat-hunting
+- Alerting V2 or ES|QL alerting rules -> rule-management
 
-This skill **only reads** detection rules. The following actions are **not supported** by any tool currently available to the agent:
+## Read-Only
 
-- Bulk enable / disable rules
-- Bulk delete rules
-- Bulk duplicate rules
-- Modifying tags, severity, schedule, or any other field on an existing rule that is not loaded into the chat as a rule attachment
-- Running bulk actions against the detection engine API
+This skill cannot enable, disable, delete, duplicate, or bulk-edit detection rules. For mutations, direct the user to the Detection Rules UI. Use detection-rule-edit only when a single rule attachment is present in the conversation.
 
-If the user asks for any of these after seeing a rule list (e.g. "now enable all of them", "disable these", "change the severity on these to high"):
+## Tools
 
-1. **Do NOT** invoke other tools hoping one will work.
-2. **Do NOT** spawn a sub-agent to retry.
-3. **Do NOT** look for a connector to call the Kibana API.
-4. **Do** respond plainly: explain that bulk rule mutation is not available in chat yet, and direct the user to **Security → Rules → Detection Rules** in the UI (Bulk actions → Enable/Disable/Delete) or the \`POST /api/detection_engine/rules/_bulk_action\` endpoint, including the rule IDs from the listing for convenience.
+This skill has two inline tools — pick the one that matches the user's intent:
 
-Single-rule edits via an existing **rule attachment in this chat** are still routed to detection-rule-edit — that path is supported.
+| Tool | When to use | Returns |
+|---|---|---|
+| \`security.find_rules\` | List, filter, sort rules, answer simple total-count questions | Rule names + metadata + total |
+| \`security.discover_rule_tags\` | Discover available tag values | Tag buckets + counts |
 
-## 🚫 Grounding — Never Invent Values
+**Default to \`security.find_rules\`** for rule-list queries and simple total-count questions. Exception: before using any \`{ tag: "..." }\` filter, call \`security.discover_rule_tags\` first and choose exact tag values from the result.
 
-Every tag name, index pattern, rule name, rule ID, alert count, or total in your response must come from a tool result earlier in this conversation. Do not fill in plausible-looking values from prior knowledge, do not round counts ("about 50" when the tool said 47), do not add an "and also" rule that was not in the result set, and do not echo a rule UUID you have not seen in a tool result.
+## Grounding
 
-If a filter returns zero results, say so. Do not list rules from memory or from a previous turn's result set.
+Call \`security.find_rules\` for every new or different rule query. Do not reuse a previous rule list when the user changes the criteria.
 
-## 🏷️ Tag Discovery — ALWAYS Discover Before Filtering by Tag (No Exceptions)
+Every tag name, index pattern, rule name, rule ID, alert count, and total in the response must come from a tool result in this conversation. If a filter returns zero results, say so.
 
-Tag values are environment-specific and you cannot know the canonical strings in this space from prior knowledge — even widely-used names like "MITRE" may be spelled, cased, or absent differently here.
+## Tag Discovery
 
-**Whenever any tag filter is involved — whether the user named the tag string directly ("rules tagged MITRE"), referenced a category ("endpoint rules"), or described semantic intent ("anything about network security") — you MUST:**
+Tag values are environment-specific. Even widely-used names like "MITRE" may be spelled, cased, or absent differently in this space.
 
-1. **First call** \`security.find_rules\` with \`groupBy: "tags"\` to enumerate the actual tag values in this space. This is the same data the Detection Rules UI tag filter loads.
-2. **Read the returned tag list.** Pick the exact strings whose meaning matches the user's intent.
-3. **Then call** \`security.find_rules\` again with one \`{ tag: "<exact value>" }\` condition per tag.
+Call \`security.discover_rule_tags\` before any tag-name or category filter. This includes explicit tag names like "MITRE" and vague category text such as "network rules", "endpoint rules", or "Windows rules".
 
-Do not skip discovery, even when the user's wording looks like a known tag. If \`groupBy: "tags"\` returns no tag matching the user's intent, tell the user plainly and offer the closest available values — do not invent one.
+Do NOT call \`security.discover_rule_tags\` when the user filters only by severity, risk score, enabled state, name, rule type, or MITRE ID. Those filters work directly — just pass them in \`security.find_rules\` and get rule names back.
 
-Exception — **structured MITRE IDs** (\`T####\`, \`T####.###\`, \`TA####\`): use \`{ mitreTechnique: "T1059" }\` / \`{ mitreTactic: "TA0002" }\` directly, no discovery needed. The format is canonical and schema-enforced.
+Before filtering by tag:
+1. Call \`security.discover_rule_tags\` to list available tag values.
+2. Choose exact tag values from the result.
+3. Call \`security.find_rules\` with \`{ tag: "<exact value>" }\` in the filter.
 
-## Process
+If no returned tag matches the user's intent, say so and mention the closest available values.
 
-### 1. Choose the right tool
+Structured MITRE IDs are exempt: use \`{ mitreTechnique: "T1059" }\` or \`{ mitreTactic: "TA0002" }\` directly in \`security.find_rules\`.
 
-- **Rule metadata / counts / sort** → \`security.find_rules\` (structured filters).
-- **Alert volume ranking** ("noisiest rules", "top N by alerts"):
-  1. Call \`security.alerts\` to aggregate alerts grouped by \`kibana.alert.rule.uuid\` (NOT \`kibana.alert.rule.name\` — names are not guaranteed unique).
-  2. Then call \`security.find_rules\` with one \`{ ruleUuid: "<uuid>" }\` condition per top rule (each as its own AndGroup, OR-combined across groups) to translate the UUIDs into rule names + metadata. The same UUID also identifies rules in the event log (\`kibana.saved_objects.id\`) — so this is the one identifier to use across all rule lookups. ⚠️ Note the atom name: \`ruleUuid\` is the Saved Object UUID (\`kibana.alert.rule.uuid\`), NOT the static detection-engine \`rule_id\` — both identifiers are surfaced in the tool's output as \`id\` and \`ruleId\` respectively.
-- **Tag discovery** (before filtering by tag) → \`security.find_rules\` with \`groupBy: "tags"\`. See "Tag Discovery" above.
+## Noisy Rules
 
-### 2. Build a structured filter (no KQL)
+Call \`security.alerts\` to aggregate by \`kibana.alert.rule.uuid\`, then call \`security.find_rules\` with \`{ ruleUuid: "<uuid>" }\` to translate UUIDs into rule names and metadata.
 
-\`security.find_rules\` takes a structured filter — never raw KQL. The shape mirrors the indicator-match rule's \`threat_mapping\`:
+Use \`ruleUuid\` for the alerting saved object UUID (\`kibana.alert.rule.uuid\`), not the static detection-engine \`ruleId\`. Do not aggregate noisy rules by \`kibana.alert.rule.name\`; names are not guaranteed unique.
 
-- \`filter: AndGroup[]\` — **outer array = OR**. Rules matching ANY group are included.
-- \`exclude: AndGroup[]\` — same shape; rules matching ANY group are EXCLUDED.
-- \`AndGroup\` = \`Condition[]\` — **inner array = AND**. All conditions in a group must match.
-- \`Condition\` = **one atomic fact** (one field per object), e.g. \`{ severity: "critical" }\`, \`{ tag: "MITRE" }\`, \`{ mitreTechnique: "T1059" }\`.
+## Count Questions
 
-**One rule to remember:** outer is OR, inner is AND, leaf is one fact. There is no "OR within a field" — to express OR you always split into two groups.
+For simple count questions, call \`security.find_rules\` with the relevant filter and answer from \`total\`. Use a small \`perPage\` such as 1 if the user only wants the count.
 
-### 3. Atomic conditions
+Examples:
+- "How many enabled custom rules?" -> \`filter: [[{ enabled: true }, { ruleSource: "custom" }]]\`
+- "How many enabled vs disabled?" -> call \`security.find_rules\` twice: once with \`{ enabled: true }\`, once with \`{ enabled: false }\`
 
-Use exactly one of these shapes per object:
+## Filter Shape
 
-| User intent | Condition |
-|---|---|
-| Enabled / disabled | \`{ enabled: true }\` or \`{ enabled: false }\` |
-| Custom vs prebuilt | \`{ ruleSource: "custom" }\` or \`{ ruleSource: "prebuilt" }\` |
-| One severity | \`{ severity: "critical" }\` |
-| One rule type | \`{ ruleType: "query" }\` |
-| One tag (discover first — see Tag Discovery) | \`{ tag: "MITRE" }\` |
-| One MITRE technique | \`{ mitreTechnique: "T1059" }\` |
-| One MITRE tactic | \`{ mitreTactic: "TA0002" }\` |
-| Name substring | \`{ nameContains: "PowerShell" }\` |
-| Min risk score | \`{ riskScoreMin: 70 }\` |
-| Max risk score | \`{ riskScoreMax: 90 }\` |
-| Index pattern | \`{ indexPattern: "logs-endpoint*" }\` |
-| Rule lookup by SO UUID (alert → rule translation, event-log lookups) | \`{ ruleUuid: "<kibana.alert.rule.uuid value>" }\` |
+Both inline tools share the same structured filter, never raw KQL.
 
-### 4. Pattern examples
+- \`filter: AndGroup[]\`: outer array = OR
+- \`exclude: AndGroup[]\`: same shape, rules matching any group are excluded
+- \`AndGroup = Condition[]\`: inner array = AND
+- \`Condition\`: one atomic fact, one field per object
 
-- **"Critical severity rules"** → \`filter: [[{ severity: "critical" }]]\`
-- **"Critical OR high severity"** → \`filter: [[{ severity: "critical" }], [{ severity: "high" }]]\`
-- **"Critical AND MITRE-tagged"** → \`filter: [[{ severity: "critical" }, { tag: "MITRE" }]]\`
-- **"Tagged MITRE AND Custom (same rule)"** → \`filter: [[{ tag: "MITRE" }, { tag: "Custom" }]]\`
-- **"Tagged MITRE OR Custom"** → \`filter: [[{ tag: "MITRE" }], [{ tag: "Custom" }]]\`
-- **"(critical AND MITRE) OR (high AND Custom)"** → \`filter: [[{ severity: "critical" }, { tag: "MITRE" }], [{ severity: "high" }, { tag: "Custom" }]]\`
-- **"MITRE-tagged but NOT Custom"** → \`filter: [[{ tag: "MITRE" }]]\`, \`exclude: [[{ tag: "Custom" }]]\`
-- **"Risk score between 70 and 90"** → \`filter: [[{ riskScoreMin: 70 }, { riskScoreMax: 90 }]]\`
-- **"All disabled rules"** → \`filter: [[{ enabled: false }]]\`
+Supported conditions: \`enabled\`, \`ruleSource\`, \`severity\`, \`ruleType\`, \`tag\`, \`mitreTechnique\`, \`mitreTactic\`, \`nameContains\`, \`riskScoreMin\`, \`riskScoreMax\`, \`indexPattern\`, \`ruleUuid\`.
 
-### 5. Sort, page, group
+Examples:
+- AND: \`filter: [[{ severity: "critical" }, { tag: "MITRE" }]]\`
+- OR: \`filter: [[{ severity: "critical" }], [{ severity: "high" }]]\`
+- Exclude: \`filter: [[{ tag: "MITRE" }]]\`, \`exclude: [[{ tag: "Custom" }]]\`
+- Range: \`filter: [[{ riskScoreMin: 70 }, { riskScoreMax: 90 }]]\`
 
+## Rendering
+
+- \`security.find_rules\`: show **Name | Severity | Enabled | Type** by default. Add columns only when the user asks for them, sorted/filtered by them, or they are needed to explain the answer. Show at most 20 rows and say when more matches exist. For simple count questions, answer from \`total\`.
+- \`security.discover_rule_tags\`: show **Value | Count**. If the user asked to list rules, follow tag discovery with a \`security.find_rules\` call using the discovered tag filter.
+- Alert-volume rankings: show **Rule Name | Alert Count**.
 - Sort: \`sortField: "severity"\` (or \`risk_score\`, \`updatedAt\`, etc.) + \`sortOrder: "desc"\`
 - Top-N: \`perPage: N\`
-- Count grouped by attribute: \`groupBy: "ruleType"\` (or \`tags\`, \`enabled\`, \`mitreTechnique\`, \`mitreTactic\`)
-- The tool returns at most 500 groups per aggregation. If \`truncated: true\` is set, additional groups exist beyond the cap (\`otherDocCount\` tells you how many) — surface this to the user instead of stating that a value does not exist.
-
-### 6. Render the result
-
-**Rule lists** — default columns, in this order: **Name | Severity | Enabled | Type**.
-
-Add a column only when one of these applies:
-- The user **filtered by** that field (e.g. a \`{ tag: "MITRE" }\` condition → add Tags column).
-- The user **sorted by** that field (e.g. \`sortField: "updatedAt"\` → add Updated column).
-- The user **explicitly asked** for that field (e.g. "show me the MITRE techniques" → add MITRE column).
-
-Show at most 20 rows. If the result \`total\` exceeds what is shown, append a single line like "Showing 20 of 47 matching rules."
-
-**\`groupBy\` results** — two columns: **Value | Count**, sorted by count descending.
-
-**Alert-volume rankings** — two columns: **Rule Name | Alert Count**, sorted by alert count descending.`,
-  getRegistryTools: () => [SECURITY_FIND_RULES_TOOL_ID, SECURITY_ALERTS_TOOL_ID],
-});
+- If \`truncated: true\`, mention that additional groups exist beyond the returned buckets.`,
+    getRegistryTools: () => [SECURITY_ALERTS_TOOL_ID],
+    getInlineTools: () => [
+      createFindRulesInlineTool({ getStartServices, logger }),
+      createDiscoverRuleTagsInlineTool({ getStartServices, logger }),
+    ],
+  });

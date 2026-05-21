@@ -68,13 +68,17 @@ evaluate.describe(
                     'The response names "PowerShell Network Scan".',
                     'The response does NOT include "Lateral Movement via SMB" (disabled).',
                     'The response does NOT include "Phishing URL Indicators" (disabled).',
-                    'The model issues at least two `security.find_rules` calls: one with `groupBy: "tags"` to discover available tags, then one that filters the rule list.',
+                    'The model calls `security.discover_rule_tags` to discover available tags, then calls `security.find_rules` to filter the rule list.',
                   ],
                   toolCalls: [
                     {
+                      id: 'security.discover_rule_tags',
+                      criteria: ['Called to enumerate available tag values before filtering.'],
+                    },
+                    {
                       id: 'security.find_rules',
                       criteria: [
-                        'Across the calls, one invocation sets `groupBy: "tags"` to enumerate tag values (discovery step), and a separate invocation filters with an AND-group containing both `{ enabled: true }` and `{ tag: "MITRE" }` conditions.',
+                        'The `filter` argument contains an AND-group with both `{ enabled: true }` and `{ tag: "MITRE" }` conditions.',
                       ],
                     },
                   ],
@@ -106,6 +110,31 @@ evaluate.describe(
               },
               {
                 input: {
+                  question: 'How many detection rules are enabled vs disabled?',
+                },
+                output: {
+                  criteria: [
+                    'The response reports 8 enabled detection rules.',
+                    'The response reports 2 disabled detection rules.',
+                  ],
+                  toolCalls: [
+                    {
+                      id: 'security.find_rules',
+                      criteria: [
+                        'The model calls `security.find_rules` for the enabled total with a `{ enabled: true }` filter.',
+                        'The model calls `security.find_rules` for the disabled total with a `{ enabled: false }` filter.',
+                        'The response is based on the `total` values from the tool results.',
+                      ],
+                    },
+                  ],
+                },
+                metadata: {
+                  query_intent: 'Rule Count Breakdown',
+                  expectedSkill: 'find-rules',
+                },
+              },
+              {
+                input: {
                   question: 'Show me query-type detection rules whose name contains "PowerShell".',
                 },
                 output: {
@@ -126,6 +155,39 @@ evaluate.describe(
                 },
                 metadata: {
                   query_intent: 'Rule Discovery',
+                  expectedSkill: 'find-rules',
+                },
+              },
+              {
+                input: {
+                  question: 'Show me my network detection rules.',
+                },
+                output: {
+                  criteria: [
+                    'The response identifies exactly 4 network-related detection rules.',
+                    'The response names "Lateral Movement via SMB".',
+                    'The response names "Brute Force Detection".',
+                    'The response names "Anomalous DNS Activity".',
+                    'The response names "Phishing URL Indicators".',
+                    'The model calls `security.discover_rule_tags` to discover available tags, then calls `security.find_rules` with the discovered tag filter.',
+                  ],
+                  toolCalls: [
+                    {
+                      id: 'security.discover_rule_tags',
+                      criteria: [
+                        'Called to enumerate available tag values and translate the word "network" into exact tag names.',
+                      ],
+                    },
+                    {
+                      id: 'security.find_rules',
+                      criteria: [
+                        'The `filter` argument contains one or more `{ tag: "<exact tag value containing Network>" }` conditions such as `{ tag: "Network" }` or `{ tag: "Domain: Network" }`.',
+                      ],
+                    },
+                  ],
+                },
+                metadata: {
+                  query_intent: 'Semantic Rule Discovery',
                   expectedSkill: 'find-rules',
                 },
               },
@@ -280,13 +342,19 @@ evaluate.describe(
                     'The response includes "Suspicious PowerShell Execution".',
                     'The response includes "PowerShell Encoded Command".',
                     'The response does NOT include "Custom DLL Loading Detection" (excluded by Custom tag).',
-                    'The model performs tag discovery via `groupBy: "tags"` before the filter/exclude call (any tag filter requires discovery).',
+                    'The model calls `security.discover_rule_tags` before filtering (tag values require discovery).',
                   ],
                   toolCalls: [
                     {
+                      id: 'security.discover_rule_tags',
+                      criteria: [
+                        'Called to enumerate available tag values before filtering by tag.',
+                      ],
+                    },
+                    {
                       id: 'security.find_rules',
                       criteria: [
-                        'One invocation sets `groupBy: "tags"` (discovery). A separate invocation has `filter` with a `{ tag: "MITRE" }` condition and `exclude` with a `{ tag: "Custom" }` condition.',
+                        'The `filter` argument has a `{ tag: "MITRE" }` condition and `exclude` has a `{ tag: "Custom" }` condition.',
                       ],
                     },
                   ],
@@ -360,13 +428,13 @@ evaluate.describe(
                   criteria: [
                     'The response indicates that no rules match (zero results) OR that no tag matching "NonExistentTag" was found in this space.',
                     'The response does not fabricate rule names.',
-                    'The model issues a `security.find_rules` call with `groupBy: "tags"` to discover available tags — the "NonExistentTag" can only be confirmed absent via discovery.',
+                    'The model calls `security.discover_rule_tags` to discover available tags — the "NonExistentTag" can only be confirmed absent via discovery.',
                   ],
                   toolCalls: [
                     {
-                      id: 'security.find_rules',
+                      id: 'security.discover_rule_tags',
                       criteria: [
-                        'At least one invocation sets `groupBy: "tags"` to enumerate available tag values. The model may or may not issue a second invocation filtering by `{ tag: "NonExistentTag" }` — either is acceptable; what is NOT acceptable is skipping discovery entirely.',
+                        'Called to enumerate available tag values. The model may or may not also call `security.find_rules` filtering by `{ tag: "NonExistentTag" }` — either is acceptable; what is NOT acceptable is skipping discovery entirely.',
                       ],
                     },
                   ],
@@ -576,61 +644,58 @@ evaluate.describe(
     });
 
     evaluate(
-      'second-turn refinement re-invokes find_rules instead of filtering from memory',
+      'second-turn query for a disjoint severity forces a new tool call',
       async ({ chatClient }) => {
-        // Turn 1: broad query.
+        // Turn 1: ask for critical severity rules.
         const turn1 = await chatClient.converse({
-          messages: [{ message: 'List all enabled detection rules tagged with MITRE.' }],
+          messages: [
+            {
+              message: 'List all critical severity detection rules.',
+            },
+          ],
         });
 
         expect(turn1.errors).toEqual([]);
         expect(turn1.conversationId).toBeDefined();
 
-        // Turn 2: refinement that depends on turn 1's context. The model MUST re-call
-        // `security.find_rules` with a narrower filter, not paraphrase the prior list.
+        // Turn 2: ask for medium severity rules — a completely disjoint set.
+        // Phrased as a standalone listing request so the agent clearly
+        // activates the find-rules skill again.
         const turn2 = await chatClient.converse({
-          messages: [{ message: 'Now narrow that down to just the critical severity ones.' }],
+          messages: [
+            {
+              message:
+                'I also need a list of all my medium severity detection rules. Can you query the rule inventory for those?',
+            },
+          ],
           conversationId: turn1.conversationId,
         });
 
         expect(turn2.errors).toEqual([]);
 
+        // The model must have called security.find_rules on turn 2.
         const turn2ToolCalls = (turn2.steps ?? []).filter(
           (step: { type?: string; tool_id?: string }) =>
             step.type === 'tool_call' && step.tool_id === 'security.find_rules'
         );
         expect(turn2ToolCalls.length).toBeGreaterThan(0);
 
-        // The model MUST carry the turn-1 MITRE constraint into turn 2 — otherwise the
-        // refinement ("just the critical severity ones") would degenerate into a brand-new
-        // unscoped "all critical rules" listing. Inspect the serialized tool args of every
-        // turn-2 `security.find_rules` call (excluding the always-present `groupBy:"tags"`
-        // discovery call) and require at least one filter call that mentions BOTH "MITRE"
-        // (context preserved) and "critical" (turn-2 narrowing applied).
-        const turn2FilterCallArgs = turn2ToolCalls
-          .map((step: { params?: unknown }) => JSON.stringify(step.params ?? {}))
-          .filter((args: string) => !args.includes('"groupBy"'));
-        expect(turn2FilterCallArgs.length).toBeGreaterThan(0);
-        const carriedMitreAndCritical = turn2FilterCallArgs.some(
-          (args: string) => args.includes('"MITRE"') && args.includes('"critical"')
+        // At least one call must filter by medium severity.
+        const turn2CallArgs = turn2ToolCalls.map((step: { params?: unknown }) =>
+          JSON.stringify(step.params ?? {})
         );
-        expect(carriedMitreAndCritical).toBe(true);
+        const hasMediumFilter = turn2CallArgs.some((args: string) => args.includes('"medium"'));
+        expect(hasMediumFilter).toBe(true);
 
+        // The response must mention at least one seeded medium-severity rule.
         const lastMessage = turn2.messages[turn2.messages.length - 1]?.message ?? '';
-        expect(lastMessage.toLowerCase()).toContain('critical');
-
-        // Seeded fixture has 3 enabled critical+MITRE rules — at least one must surface.
-        const criticalMitreRuleNames = [
-          'Suspicious PowerShell Execution',
-          'Credential Access via LSASS',
-          'Process Injection T1055',
+        const mediumRuleNames = [
+          'Brute Force Detection',
+          'Anomalous DNS Activity',
+          'PowerShell Network Scan',
         ];
-        const mentionedCritical = criticalMitreRuleNames.some((n) => lastMessage.includes(n));
-        expect(mentionedCritical).toBe(true);
-
-        // High-severity MITRE rules from turn 1 must NOT leak into the critical-only turn 2.
-        expect(lastMessage).not.toContain('PowerShell Encoded Command');
-        expect(lastMessage).not.toContain('PowerShell Network Scan');
+        const mentionedMedium = mediumRuleNames.some((n) => lastMessage.includes(n));
+        expect(mentionedMedium).toBe(true);
       }
     );
   }

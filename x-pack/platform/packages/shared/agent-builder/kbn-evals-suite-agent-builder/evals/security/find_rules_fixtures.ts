@@ -367,7 +367,7 @@ function buildAlertDoc(rule: { id: string; name: string }, seq: number): Record<
     '@timestamp': timestamp,
     // `kibana.alert.rule.uuid` is the alerting Saved Object UUID. The noisy-rules flow
     // aggregates alerts by this field, then translates UUIDs back into rule names via
-    // `find_rules` with `{ ruleId: "<uuid>" }`. The same UUID identifies the rule in the
+    // `find_rules` with `{ ruleUuid: "<uuid>" }`. The same UUID identifies the rule in the
     // event log (`kibana.saved_objects.id`), so this is the single identifier to use
     // across alerts/rules/event-log lookups.
     'kibana.alert.rule.uuid': rule.id,
