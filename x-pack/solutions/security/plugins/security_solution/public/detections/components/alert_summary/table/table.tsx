@@ -140,6 +140,7 @@ export const Table = memo(({ dataView, groupingFilters, packages }: TableProps) 
       http,
       licensing,
       notifications,
+      rendering,
       uiSettings,
       settings,
     },
@@ -150,12 +151,13 @@ export const Table = memo(({ dataView, groupingFilters, packages }: TableProps) 
       data,
       http,
       notifications,
+      rendering,
       fieldFormats,
       application,
       licensing,
       settings,
     }),
-    [application, cases, data, fieldFormats, http, licensing, notifications, settings]
+    [application, cases, data, fieldFormats, http, licensing, notifications, rendering, settings]
   );
 
   const getGlobalFiltersSelector = useMemo(() => inputsSelectors.globalFiltersQuerySelector(), []);

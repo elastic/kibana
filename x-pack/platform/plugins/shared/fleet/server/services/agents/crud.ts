@@ -37,6 +37,7 @@ import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
 
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
+import { SIGNALS_RUNTIME_FIELD } from './build_signals_runtime_field';
 import { getLatestAvailableAgentVersion } from './versions';
 
 const INACTIVE_AGENT_CONDITION = `status:inactive`;
@@ -277,7 +278,10 @@ export async function getAgentsByKuery(
 
   const kueryNode = _joinFilters(filters);
 
-  const runtimeFields = await buildAgentStatusRuntimeField(soClient);
+  const runtimeFields = {
+    ...(await buildAgentStatusRuntimeField(soClient)),
+    ...SIGNALS_RUNTIME_FIELD,
+  };
 
   const sort = getSortConfig(sortField, sortOrder);
 

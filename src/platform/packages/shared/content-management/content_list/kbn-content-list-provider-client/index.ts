@@ -21,6 +21,7 @@ export type { ContentEditorConfig } from './src/content_editor';
 // Types.
 export type {
   ContentListClientServices,
+  ContentListClientFeatures,
   TableListViewFindItemsFn,
   TableListViewFindItemsOptions,
   TableListViewFindItemsResult,
