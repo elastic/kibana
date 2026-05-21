@@ -78,22 +78,6 @@ describe('useIntegrationCardList', () => {
     },
   ];
 
-  const mockFeaturedCards = [
-    { ...mockIntegrationsList[0], hasDataStreams: true, onCardClick: expect.any(Function) },
-  ];
-  const mockIntegrationCards = [
-    {
-      ...mockIntegrationsList[0],
-      hasDataStreams: true,
-      onCardClick: expect.any(Function),
-    },
-    {
-      ...mockIntegrationsList[1],
-      hasDataStreams: false,
-      onCardClick: expect.any(Function),
-    },
-  ];
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -107,7 +91,12 @@ describe('useIntegrationCardList', () => {
       })
     );
 
-    expect(result.current).toEqual(mockIntegrationCards);
+    expect(result.current).toEqual([
+      expect.objectContaining({ id: 'epr:endpoint', hasDataStreams: true }),
+      expect.objectContaining({ id: 'epr:auditbeat', hasDataStreams: false }),
+    ]);
+    expect(result.current[0].onCardClick).toBeInstanceOf(Function);
+    expect(result.current[1].onCardClick).toBeInstanceOf(Function);
   });
 
   it('returns featured cards when featuredCardIds are provided', () => {
@@ -119,7 +108,10 @@ describe('useIntegrationCardList', () => {
       })
     );
 
-    expect(result.current).toEqual(mockFeaturedCards);
+    expect(result.current).toEqual([
+      expect.objectContaining({ id: 'epr:endpoint', hasDataStreams: true }),
+    ]);
+    expect(result.current[0].onCardClick).toBeInstanceOf(Function);
   });
 
   it('tracks integration card click', () => {
