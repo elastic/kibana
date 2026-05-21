@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { apm } from '@elastic/apm-rum';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import type { PanelFlyoutType } from '@kbn/presentation-util';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 
@@ -49,6 +50,11 @@ export interface DashboardRendererProps {
   savedObjectId?: string;
   /** Whether to show a plain spinner instead of the Elastic loading animation. */
   showPlainSpinner?: boolean;
+  /**
+   * Flyout type for panel flyouts (Settings, Lens config, Inspect, etc.) opened from this dashboard.
+   * Use `overlay` when the dashboard is embedded in a host that already uses a push flyout (e.g. Agent Builder canvas).
+   */
+  panelFlyoutType?: PanelFlyoutType;
   /** Callback for redirecting within the dashboard application. */
   dashboardRedirect?: DashboardRedirect;
   /** Function that returns the creation options for the dashboard. */
@@ -70,6 +76,7 @@ export function DashboardRenderer({
   locator,
   savedObjectId,
   showPlainSpinner,
+  panelFlyoutType,
   dashboardRedirect,
   getCreationOptions,
   onApiAvailable,
@@ -130,7 +137,7 @@ export function DashboardRenderer({
 
     let canceled = false;
     let cleanupDashboardApi: (() => void) | undefined;
-    loadDashboardApi({ getCreationOptions, onApiCleanup, savedObjectId })
+    loadDashboardApi({ getCreationOptions, onApiCleanup, savedObjectId, panelFlyoutType })
       .then((results) => {
         if (!results) return;
         if (canceled) {

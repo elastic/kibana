@@ -28,6 +28,7 @@ import { initializeTimesliceManager } from './timeslice_manager';
 import { initializeTrackContentfulRender } from './track_contentful_render';
 import { initializeTrackOverlay } from './track_overlay';
 import { initializeTrackPanel } from './track_panel';
+import type { PanelFlyoutType } from '@kbn/presentation-util';
 import type {
   DashboardApi,
   DashboardCreationOptions,
@@ -46,6 +47,7 @@ import { initializeRelatedPanelsManager } from './related_panels_manager';
 
 export function getDashboardApi({
   creationOptions,
+  panelFlyoutType,
   incomingEmbeddables,
   initialState,
   readResult,
@@ -54,6 +56,7 @@ export function getDashboardApi({
   isAccessControlEnabled,
 }: {
   creationOptions?: DashboardCreationOptions;
+  panelFlyoutType?: PanelFlyoutType;
   incomingEmbeddables: EmbeddablePackageState[] | undefined;
   initialState: DashboardState;
   readResult?: DashboardReadResponseBody;
@@ -185,7 +188,7 @@ export function getDashboardApi({
     ...unsavedChangesManager.api,
     ...projectRoutingManager?.api,
     ...trackOverlayApi,
-    panelFlyoutType: creationOptions?.panelFlyoutType,
+    panelFlyoutType,
     esqlVariables$: esqlVariablesManager.api.publishedEsqlVariables$,
     ...timesliceManager.api,
     ...pauseFetchManager.api,

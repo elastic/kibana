@@ -19,6 +19,7 @@ import { getLastSavedState } from '../default_dashboard_state';
 import { getDashboardApi } from '../get_dashboard_api';
 import { DASHBOARD_DURATION_START_MARK } from '../performance/dashboard_duration_start_mark';
 import { startQueryPerformanceTracking } from '../performance/query_performance_tracking';
+import type { PanelFlyoutType } from '@kbn/presentation-util';
 import type { DashboardCreationOptions } from '../types';
 import { getUserAccessControlData } from './get_user_access_control_data';
 import { transformPanels } from './transform_panels';
@@ -31,10 +32,12 @@ export async function loadDashboardApi({
   getCreationOptions,
   onApiCleanup,
   savedObjectId,
+  panelFlyoutType,
 }: {
   getCreationOptions?: () => Promise<DashboardCreationOptions>;
   onApiCleanup?: () => void;
   savedObjectId?: string;
+  panelFlyoutType?: PanelFlyoutType;
 }) {
   const creationOptions = await getCreationOptions?.();
 
@@ -97,6 +100,7 @@ export async function loadDashboardApi({
 
   const { api, cleanup, internalApi } = getDashboardApi({
     creationOptions,
+    panelFlyoutType,
     incomingEmbeddables,
     initialState: {
       ...getLastSavedState(readResult),

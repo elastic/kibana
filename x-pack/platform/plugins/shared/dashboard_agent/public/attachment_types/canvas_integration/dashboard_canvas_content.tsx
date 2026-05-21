@@ -25,7 +25,6 @@ export const getDashboardCanvasCreationOptions = (
   dashboardState: DashboardState
 ): DashboardCreationOptions => ({
   getInitialInput: () => ({ ...dashboardState, viewMode: 'view' as const }),
-  panelFlyoutType: 'overlay',
 });
 
 const dashboardCanvasContentStyles = {
@@ -161,6 +160,7 @@ export const DashboardCanvasContent = ({
         {savedObjectStatus.status !== 'resolved' ? null : (
           <DashboardRenderer
             getCreationOptions={getCreationOptions}
+            panelFlyoutType="overlay"
             showPlainSpinner
             locator={dashboardLocator}
             savedObjectId={getExistingDashboardId()}
