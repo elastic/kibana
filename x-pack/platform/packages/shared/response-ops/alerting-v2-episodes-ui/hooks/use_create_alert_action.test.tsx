@@ -64,7 +64,7 @@ describe('useCreateAlertAction', () => {
     });
   });
 
-  it('invalidates episode and group action queries after a successful mutation', async () => {
+  it('invalidates episode UI caches after a successful mutation', async () => {
     mockHttp.post.mockResolvedValue({});
     const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
@@ -77,11 +77,14 @@ describe('useCreateAlertAction', () => {
       actionType: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
     });
 
-    await waitFor(() => expect(invalidateSpy).toHaveBeenCalledTimes(3));
+    await waitFor(() => expect(invalidateSpy).toHaveBeenCalledTimes(6));
 
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.actionsAll() });
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.groupActionsAll() });
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.tagSuggestions() });
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.tagSuggestionsAll() });
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.listAll() });
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.episodeEventsAll() });
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.episodeEventDataAll() });
   });
 
   it('invalidates episode tag filter options after a successful TAG action', async () => {
@@ -98,8 +101,14 @@ describe('useCreateAlertAction', () => {
       body: { tags: ['new-tag'] },
     });
 
-    await waitFor(() => expect(invalidateSpy).toHaveBeenCalledTimes(4));
+    await waitFor(() => expect(invalidateSpy).toHaveBeenCalledTimes(7));
 
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.actionsAll() });
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.groupActionsAll() });
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.tagSuggestionsAll() });
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.listAll() });
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.episodeEventsAll() });
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.episodeEventDataAll() });
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.tagOptionsAll() });
   });
 
