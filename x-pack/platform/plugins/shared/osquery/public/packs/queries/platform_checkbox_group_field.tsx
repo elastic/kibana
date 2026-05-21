@@ -11,29 +11,10 @@ import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { useController } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import type { FormFieldProps } from '../../form/types';
+import type { PlatformId } from './platforms';
+import { OS_OPTIONS, isPlatformId } from './platforms';
 
 type Props = Omit<FormFieldProps<string>, 'name' | 'label'>;
-
-const OS_OPTIONS: Array<EuiComboBoxOptionOption<string>> = [
-  {
-    key: 'linux',
-    label: i18n.translate('xpack.osquery.pack.queryFlyoutForm.osLinuxLabel', {
-      defaultMessage: 'Linux',
-    }),
-  },
-  {
-    key: 'darwin',
-    label: i18n.translate('xpack.osquery.pack.queryFlyoutForm.osMacOSLabel', {
-      defaultMessage: 'macOS',
-    }),
-  },
-  {
-    key: 'windows',
-    label: i18n.translate('xpack.osquery.pack.queryFlyoutForm.osWindowsLabel', {
-      defaultMessage: 'Windows',
-    }),
-  },
-];
 
 const REQUIRED_ERROR_MESSAGE = i18n.translate(
   'xpack.osquery.pack.queryFlyoutForm.osRequiredError',
@@ -69,12 +50,15 @@ export const PlatformCheckBoxGroupField = (props: Props) => {
       .map((s) => s.trim())
       .filter(Boolean);
 
-    return OS_OPTIONS.filter((opt) => ids.includes(opt.key ?? ''));
+    return OS_OPTIONS.filter((opt) => ids.includes(opt.key));
   }, [value]);
 
   const handleChange = useCallback(
     (newOptions: Array<EuiComboBoxOptionOption<string>>) => {
-      onChange(newOptions.map((opt) => opt.key ?? opt.label).join(','));
+      const ids = newOptions
+        .map((opt) => opt.key)
+        .filter((key): key is PlatformId => key !== undefined && isPlatformId(key));
+      onChange(ids.join(','));
     },
     [onChange]
   );

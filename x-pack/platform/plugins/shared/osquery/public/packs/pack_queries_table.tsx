@@ -9,6 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiBasicTable, EuiBadge, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { PackQueryFormData } from './queries/use_pack_query_form';
+import { OS_LABELS, PLATFORM_IDS, isPlatformId } from './queries/platforms';
 
 export interface PackQueriesTableProps {
   data: PackQueryFormData[];
@@ -63,42 +64,24 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
     [onEditClick]
   );
 
-  const OS_LABELS: Record<string, string> = useMemo(
-    () => ({
-      linux: i18n.translate('xpack.osquery.pack.queriesTable.osLinuxLabel', {
-        defaultMessage: 'Linux',
-      }),
-      darwin: i18n.translate('xpack.osquery.pack.queriesTable.osMacOSLabel', {
-        defaultMessage: 'macOS',
-      }),
-      windows: i18n.translate('xpack.osquery.pack.queriesTable.osWindowsLabel', {
-        defaultMessage: 'Windows',
-      }),
-    }),
-    []
-  );
+  const renderPlatformColumn = useCallback((platform: string) => {
+    const ids = platform
+      ? platform
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [...PLATFORM_IDS];
 
-  const renderPlatformColumn = useCallback(
-    (platform: string) => {
-      const ids = platform
-        ? platform
-            .split(',')
-            .map((s) => s.trim())
-            .filter(Boolean)
-        : ['linux', 'darwin', 'windows'];
-
-      return (
-        <EuiFlexGroup gutterSize="xs" wrap>
-          {ids.map((id) => (
-            <EuiFlexItem key={id} grow={false}>
-              <EuiBadge color="hollow">{OS_LABELS[id] ?? id}</EuiBadge>
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      );
-    },
-    [OS_LABELS]
-  );
+    return (
+      <EuiFlexGroup gutterSize="xs" wrap>
+        {ids.map((id) => (
+          <EuiFlexItem key={id} grow={false}>
+            <EuiBadge color="hollow">{isPlatformId(id) ? OS_LABELS[id] : id}</EuiBadge>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    );
+  }, []);
 
   const renderVersionColumn = useCallback(
     (version: string) =>
