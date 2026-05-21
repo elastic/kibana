@@ -301,15 +301,6 @@ export const createEntitySourcesService = ({
 
     const { sources } = await descriptorClient.list({});
 
-    logger.info(
-      `[WatchlistSync] syncing ${
-        sources.filter((s) => sourceIds.includes(s.id)).length
-      } source(s) for watchlist "${watchlistId}": ${sources
-        .filter((s) => sourceIds.includes(s.id))
-        .map((s) => s.indexPattern)
-        .join(', ')}`
-    );
-
     await Promise.all(
       sources
         .filter((s) => sourceIds.includes(s.id))
@@ -318,9 +309,7 @@ export const createEntitySourcesService = ({
           if (source.type === 'index') {
             const scopedClient = await getSourceEsClient(source);
             if (!scopedClient) {
-              logger.warn(
-                `[WatchlistSync] Skipping index source ${source.id}: no API key stored. Update the source to generate a new API key.`
-              );
+              logger.warn(`[WatchlistSync] Skipping index source ${source.id}: no API key stored.`);
               return;
             }
             indexReadEsClient = scopedClient;
