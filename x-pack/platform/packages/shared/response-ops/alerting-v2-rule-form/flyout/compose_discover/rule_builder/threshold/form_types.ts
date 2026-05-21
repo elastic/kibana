@@ -59,26 +59,6 @@ export interface ThresholdFormValues {
   groupByFields: string[];
 }
 
-export const AGGREGATION_LABELS: Record<Aggregation, string> = {
-  [Aggregation.COUNT]: 'Count',
-  [Aggregation.AVG]: 'Average',
-  [Aggregation.SUM]: 'Sum',
-  [Aggregation.MIN]: 'Min',
-  [Aggregation.MAX]: 'Max',
-  [Aggregation.CARDINALITY]: 'Cardinality',
-  [Aggregation.P95]: 'P95',
-  [Aggregation.P99]: 'P99',
-};
-
-export const COMPARATOR_LABELS: Record<Comparator, string> = {
-  [Comparator.GT]: 'is above',
-  [Comparator.GTE]: 'is above or equals',
-  [Comparator.LT]: 'is below',
-  [Comparator.LTE]: 'is below or equals',
-  [Comparator.BETWEEN]: 'is between',
-  [Comparator.NOT_BETWEEN]: 'is not between',
-};
-
 export const AGGREGATIONS_REQUIRING_FIELD: Aggregation[] = [
   Aggregation.AVG,
   Aggregation.SUM,

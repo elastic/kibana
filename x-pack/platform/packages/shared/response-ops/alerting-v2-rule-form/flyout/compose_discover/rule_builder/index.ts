@@ -7,9 +7,9 @@
 
 export type { RuleBuilderDefinition, RuleBuilderStepProps } from './types';
 export { RULE_BUILDER_REGISTRY } from './registry';
-export { RuleBuilderAlertConditionStep } from './rule_builder_alert_condition_step';
-export { buildThresholdEsql } from './build_threshold_esql';
-export { parseThresholdEsql } from './parse_threshold_esql';
+export { RuleBuilderAlertConditionStep } from './threshold/alert_condition_step';
+export { buildThresholdEsql } from './threshold/build_esql';
+export { parseThresholdEsql } from './threshold/parse_esql';
 export type {
   ThresholdFormValues,
   StatDefinition,
@@ -18,5 +18,5 @@ export type {
   Aggregation,
   Comparator,
   ConditionOperator,
-} from './threshold_form_types';
-export { DEFAULT_THRESHOLD_FORM_VALUES, generateId } from './threshold_form_types';
+} from './threshold/form_types';
+export { DEFAULT_THRESHOLD_FORM_VALUES, generateId } from './threshold/form_types';

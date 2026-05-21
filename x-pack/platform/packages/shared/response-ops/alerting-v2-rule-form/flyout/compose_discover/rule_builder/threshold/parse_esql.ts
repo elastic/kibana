@@ -29,7 +29,7 @@ import {
   type EvaluationDefinition,
   type AlertCondition,
   type ConditionOperator,
-} from './threshold_form_types';
+} from './form_types';
 
 const REVERSE_AGG: Record<string, Aggregation> = {
   COUNT: Aggregation.COUNT,

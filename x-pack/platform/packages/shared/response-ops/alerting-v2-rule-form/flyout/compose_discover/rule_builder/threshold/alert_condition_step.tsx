@@ -27,11 +27,11 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import type { ComposeFormValues } from '../compose_form_types';
-import { useDataFields } from '../../../form/hooks/use_data_fields';
-import { ScheduleField } from '../../../form/fields/schedule_field';
-import { LookbackWindowField } from '../../../form/fields/lookback_window_field';
-import type { RuleBuilderStepProps } from './types';
+import type { ComposeFormValues } from '../../compose_form_types';
+import { useDataFields } from '../../../../form/hooks/use_data_fields';
+import { ScheduleField } from '../../../../form/fields/schedule_field';
+import { LookbackWindowField } from '../../../../form/fields/lookback_window_field';
+import type { RuleBuilderStepProps } from '../types';
 import type {
   ThresholdFormValues,
   StatDefinition,
@@ -39,34 +39,22 @@ import type {
   AlertCondition,
   Aggregation,
   Comparator,
-} from './threshold_form_types';
+} from './form_types';
 import {
-  AGGREGATION_LABELS,
   AGGREGATIONS_REQUIRING_FIELD,
-  COMPARATOR_LABELS,
   DEFAULT_STAT,
   DEFAULT_ALERT_CONDITION,
   deriveStatLabel,
   nextEvalLabel,
   generateId,
-} from './threshold_form_types';
-import { buildThresholdEsql } from './build_threshold_esql';
-import { splitQuery } from '../use_heuristic_split';
-
-const AGGREGATION_OPTIONS = Object.entries(AGGREGATION_LABELS).map(([value, text]) => ({
-  value,
-  text,
-}));
-
-const COMPARATOR_OPTIONS = Object.entries(COMPARATOR_LABELS).map(([value, text]) => ({
-  value,
-  text,
-}));
-
-const CONDITION_OPERATOR_OPTIONS = [
-  { id: 'AND', label: 'AND' },
-  { id: 'OR', label: 'OR' },
-];
+} from './form_types';
+import { buildThresholdEsql } from './build_esql';
+import { splitQuery } from '../../use_heuristic_split';
+import {
+  AGGREGATION_OPTIONS,
+  COMPARATOR_OPTIONS,
+  CONDITION_OPERATOR_OPTIONS,
+} from './translations';
 
 export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<ThresholdFormValues>> = ({
   state,
@@ -121,7 +109,12 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
 
   // Rebuild and commit ES|QL whenever form values change
   useEffect(() => {
-    if (!esqlQuery) return;
+    if (!esqlQuery) {
+      if (state.queryCommitted) {
+        dispatch({ type: 'INVALIDATE_QUERY' });
+      }
+      return;
+    }
 
     if (isAlert) {
       const { base, alertBlock } = splitQuery(esqlQuery);
@@ -186,10 +179,15 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
 
   const removeStat = useCallback(
     (index: number) => {
+      const removedLabel = thresholdValues.stats[index].label;
       const next = thresholdValues.stats.filter((_, i) => i !== index);
+      const cleanedConditions = thresholdValues.alertConditions.map((c) =>
+        c.metric === removedLabel ? { ...c, metric: '' } : c
+      );
       onThresholdValuesChange({
         ...thresholdValues,
         stats: next.length ? next : [{ id: generateId(), ...DEFAULT_STAT }],
+        alertConditions: cleanedConditions,
       });
     },
     [thresholdValues, onThresholdValuesChange]
@@ -230,9 +228,14 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
 
   const removeEvaluation = useCallback(
     (index: number) => {
+      const removedLabel = thresholdValues.evaluations[index].label;
+      const cleanedConditions = thresholdValues.alertConditions.map((c) =>
+        c.metric === removedLabel ? { ...c, metric: '' } : c
+      );
       onThresholdValuesChange({
         ...thresholdValues,
         evaluations: thresholdValues.evaluations.filter((_, i) => i !== index),
+        alertConditions: cleanedConditions,
       });
     },
     [thresholdValues, onThresholdValuesChange]

@@ -64,12 +64,16 @@ function defaultTabForConfig(tabConfig: SandboxTabConfig): QueryTab {
  * recoveryCondition + custom    → base-recovery
  * everything else               → single
  */
-export function getSandboxTabConfig(state: ComposeDiscoverState): SandboxTabConfig {
+export function getSandboxTabConfig(
+  state: ComposeDiscoverState,
+  builderType?: string
+): SandboxTabConfig {
   if (!state.tracking) return { type: 'single' };
 
-  const stepId = getStepIds(state.tracking)[state.step];
+  const ids = builderType ? getBuilderStepIds(state.tracking) : getStepIds(state.tracking);
+  const stepId = ids[state.step];
 
-  if (stepId === 'alertCondition') return { type: 'base-alert' };
+  if (stepId === 'alertCondition' || stepId === 'builderCondition') return { type: 'base-alert' };
   if (stepId === 'recoveryCondition' && state.recoveryType === 'custom') {
     return { type: 'base-recovery' };
   }
@@ -144,6 +148,8 @@ export function reducer(
         childOpen: state.yamlMode ? state.childOpen : false,
         queryCommitted: true,
       };
+    case 'INVALIDATE_QUERY':
+      return { ...state, queryCommitted: false };
     case 'SET_YAML_MODE':
       return {
         ...state,

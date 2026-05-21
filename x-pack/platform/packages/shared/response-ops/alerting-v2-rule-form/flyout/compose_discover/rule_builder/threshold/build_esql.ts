@@ -14,7 +14,7 @@ import {
   type StatDefinition,
   type AlertCondition,
   type ThresholdFormValues,
-} from './threshold_form_types';
+} from './form_types';
 
 const AGG_FN_NAME: Record<Aggregation, string> = {
   [Aggregation.COUNT]: 'COUNT',
@@ -27,20 +27,28 @@ const AGG_FN_NAME: Record<Aggregation, string> = {
   [Aggregation.P99]: 'PERCENTILE',
 };
 
-const parseFragment = (src: string): ESQLSingleAstItem => {
-  const { root } = Parser.parse(`ROW x = 1 | WHERE ${src}`);
-  const whereCmd = root.commands.find((c) => c.name === 'where');
-  if (whereCmd && whereCmd.args.length > 0) {
-    return whereCmd.args[0] as ESQLSingleAstItem;
+const parseFragment = (src: string): ESQLSingleAstItem | null => {
+  try {
+    const { root, errors } = Parser.parse(`ROW x = 1 | WHERE ${src}`);
+    if (errors.length > 0) return null;
+    const whereCmd = root.commands.find((c) => c.name === 'where');
+    if (whereCmd && whereCmd.args.length > 0) {
+      return whereCmd.args[0] as ESQLSingleAstItem;
+    }
+  } catch {
+    // malformed expression
   }
-  return Builder.expression.column(src);
+  return null;
 };
+
+const escapeField = (field: string): string =>
+  /^[a-zA-Z_][a-zA-Z0-9_.]*$/.test(field) ? field : `\`${field}\``;
 
 const buildAggFragment = (stat: StatDefinition): string => {
   const fnName = AGG_FN_NAME[stat.aggregation] ?? 'COUNT';
   let arg = '*';
   if (stat.aggregation !== Aggregation.COUNT && stat.field) {
-    arg = /^[a-zA-Z_][a-zA-Z0-9_.]*$/.test(stat.field) ? stat.field : `\`${stat.field}\``;
+    arg = escapeField(stat.field);
   }
 
   let expr: string;
@@ -68,7 +76,8 @@ const parseStatsCommand = (
   groupByFields: string[]
 ): ESQLSingleAstItem[] => {
   const assignments = stats.map((s) => `${s.label} = ${buildAggFragment(s)}`);
-  const groupBy = groupByFields.length > 0 ? ` BY ${groupByFields.join(', ')}` : '';
+  const groupBy =
+    groupByFields.length > 0 ? ` BY ${groupByFields.map(escapeField).join(', ')}` : '';
   const src = `ROW x = 1 | STATS ${assignments.join(', ')}${groupBy}`;
   const { root } = Parser.parse(src);
   const statsCmd = root.commands.find((c) => c.name === 'stats');
@@ -142,12 +151,10 @@ export const buildThresholdEsql = (values: ThresholdFormValues): string => {
 
   // WHERE (global filter)
   if (values.filterQuery?.trim()) {
-    commands.push(
-      Builder.command({
-        name: 'where',
-        args: [parseFragment(values.filterQuery.trim())],
-      })
-    );
+    const filterAst = parseFragment(values.filterQuery.trim());
+    if (filterAst) {
+      commands.push(Builder.command({ name: 'where', args: [filterAst] }));
+    }
   }
 
   const statsArgs = parseStatsCommand(validStats, values.groupByFields);
@@ -157,12 +164,16 @@ export const buildThresholdEsql = (values: ThresholdFormValues): string => {
   const validEvals = values.evaluations.filter((e) => e.label.trim() && e.expression.trim());
   for (const ev of validEvals) {
     const exprAst = parseFragment(ev.expression.trim());
-    commands.push(
-      Builder.command({
-        name: 'eval',
-        args: [Builder.expression.func.binary('=', [Builder.expression.column(ev.label), exprAst])],
-      })
-    );
+    if (exprAst) {
+      commands.push(
+        Builder.command({
+          name: 'eval',
+          args: [
+            Builder.expression.func.binary('=', [Builder.expression.column(ev.label), exprAst]),
+          ],
+        })
+      );
+    }
   }
 
   // WHERE (alert conditions)

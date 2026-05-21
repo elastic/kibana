@@ -67,13 +67,32 @@ export const useComposeDiscoverFlyout = ({
     setFlyoutOpen(true);
   }, []);
 
-  const openCreateBuilderFlyout = useCallback((type: string) => {
-    setTargetRule(null);
-    setFlyoutMode('create');
-    setBuilderType(type);
-    setInitialBuilderState(undefined);
-    setFlyoutOpen(true);
-  }, []);
+  const openCreateBuilderFlyout = useCallback(
+    (type: string) => {
+      if (!RULE_BUILDER_REGISTRY[type]) {
+        notifications.toasts.addWarning({
+          title: i18n.translate('xpack.alertingV2.useComposeDiscoverFlyout.unknownBuilderTitle', {
+            defaultMessage: 'Unknown rule builder type',
+          }),
+          text: i18n.translate('xpack.alertingV2.useComposeDiscoverFlyout.unknownBuilderText', {
+            defaultMessage: 'No builder registered for type "{type}". Opening ES|QL mode instead.',
+            values: { type },
+          }),
+        });
+        setTargetRule(null);
+        setFlyoutMode('create');
+        setBuilderType(null);
+        setFlyoutOpen(true);
+        return;
+      }
+      setTargetRule(null);
+      setFlyoutMode('create');
+      setBuilderType(type);
+      setInitialBuilderState(undefined);
+      setFlyoutOpen(true);
+    },
+    [notifications.toasts]
+  );
 
   const openRuleFlyout = useCallback(
     (rule: RuleApiResponse, mode: ComposeDiscoverMode) => {
@@ -83,9 +102,10 @@ export const useComposeDiscoverFlyout = ({
       if (rule.builder_type) {
         const query = rule.evaluation?.query?.base;
         const state = query ? tryParseBuilderState(rule.builder_type, query) : null;
-        if (state) {
+        if (state && typeof state === 'object') {
+          const stateWithTimeField = { ...state, timeField: rule.time_field ?? '@timestamp' };
           setBuilderType(rule.builder_type);
-          setInitialBuilderState(state);
+          setInitialBuilderState(stateWithTimeField);
           setFlyoutOpen(true);
           return;
         }

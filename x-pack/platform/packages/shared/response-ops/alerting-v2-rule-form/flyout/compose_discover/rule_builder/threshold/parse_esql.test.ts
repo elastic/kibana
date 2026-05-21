@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { parseThresholdEsql } from './parse_threshold_esql';
-import { buildThresholdEsql } from './build_threshold_esql';
-import { Aggregation, Comparator } from './threshold_form_types';
-import type { ThresholdFormValues } from './threshold_form_types';
+import { parseThresholdEsql } from './parse_esql';
+import { buildThresholdEsql } from './build_esql';
+import { Aggregation, Comparator } from './form_types';
+import type { ThresholdFormValues } from './form_types';
 
 const makeValues = (overrides: Partial<ThresholdFormValues> = {}): ThresholdFormValues => ({
   indexPattern: 'logs-*',

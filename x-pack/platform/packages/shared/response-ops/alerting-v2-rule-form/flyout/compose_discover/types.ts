@@ -54,7 +54,8 @@ export interface StepDefinition {
   render: (props: StepRenderProps) => React.ReactNode;
   validate?: (
     methods: UseFormReturn<ComposeFormValues>,
-    state: ComposeDiscoverState
+    state: ComposeDiscoverState,
+    builderState?: unknown
   ) => Promise<boolean> | boolean;
 }
 
@@ -107,4 +108,5 @@ export type ComposeDiscoverAction =
   | { type: 'OPEN_CHILD_FOR_STEP'; step: number }
   | { type: 'CLOSE_CHILD' }
   | { type: 'COMMIT_QUERY' }
+  | { type: 'INVALIDATE_QUERY' }
   | { type: 'SET_YAML_MODE'; enabled: boolean };

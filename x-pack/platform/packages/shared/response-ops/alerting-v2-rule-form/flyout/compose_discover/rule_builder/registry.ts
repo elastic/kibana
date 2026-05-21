@@ -7,18 +7,39 @@
 
 import React from 'react';
 import type { RuleBuilderDefinition } from './types';
-import type { ThresholdFormValues } from './threshold_form_types';
-import { DEFAULT_THRESHOLD_FORM_VALUES, generateId } from './threshold_form_types';
-import { RuleBuilderAlertConditionStep } from './rule_builder_alert_condition_step';
-import { parseThresholdEsql } from './parse_threshold_esql';
+import type { ThresholdFormValues } from './threshold/form_types';
+import {
+  AGGREGATIONS_REQUIRING_FIELD,
+  DEFAULT_THRESHOLD_FORM_VALUES,
+  generateId,
+} from './threshold/form_types';
+import { RuleBuilderAlertConditionStep } from './threshold/alert_condition_step';
+import { parseThresholdEsql } from './threshold/parse_esql';
+import { THRESHOLD_STEP_TITLE } from './threshold/translations';
 
 const defineBuilder = <TState>(def: RuleBuilderDefinition<TState>): RuleBuilderDefinition => {
   return def as RuleBuilderDefinition;
 };
 
+const isThresholdFormValid = (values: ThresholdFormValues): boolean => {
+  if (!values.indexPattern.trim()) return false;
+
+  const hasValidStat = values.stats.some(
+    (s) => s.label.trim() && (!AGGREGATIONS_REQUIRING_FIELD.includes(s.aggregation) || s.field)
+  );
+  if (!hasValidStat) return false;
+
+  const hasValidCondition = values.alertConditions.some(
+    (c) => c.metric.trim() && c.threshold.length > 0
+  );
+  if (!hasValidCondition) return false;
+
+  return true;
+};
+
 const thresholdDefinition = defineBuilder<ThresholdFormValues>({
   type: 'threshold',
-  stepTitle: 'Alert Condition',
+  stepTitle: THRESHOLD_STEP_TITLE,
   createDefaultState: () => ({
     ...DEFAULT_THRESHOLD_FORM_VALUES,
     stats: DEFAULT_THRESHOLD_FORM_VALUES.stats.map((s) => ({ ...s, id: generateId() })),
@@ -37,7 +58,8 @@ const thresholdDefinition = defineBuilder<ThresholdFormValues>({
       builderState: props.builderState,
       onBuilderStateChange: props.onBuilderStateChange,
     }),
-  validate: (state) => state.queryCommitted,
+  validate: (state, builderState) =>
+    state.queryCommitted && (builderState ? isThresholdFormValid(builderState) : true),
   parseState: parseThresholdEsql,
 });
 

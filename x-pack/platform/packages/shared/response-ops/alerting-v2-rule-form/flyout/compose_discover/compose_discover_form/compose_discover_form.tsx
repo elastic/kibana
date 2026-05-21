@@ -90,7 +90,7 @@ export const getSteps = (tracking: boolean, builderType?: string): StepDefinitio
             });
           },
           validate: definition.validate
-            ? (_methods: any, s: ComposeDiscoverState) => definition.validate!(s)
+            ? (_methods, s, bs) => definition.validate!(s, bs)
             : base.validate,
         };
       }

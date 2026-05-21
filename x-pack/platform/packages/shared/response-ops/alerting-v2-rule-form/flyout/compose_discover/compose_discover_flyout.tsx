@@ -460,11 +460,11 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
 
   const handleNext = useCallback(async () => {
     if (currentStep?.validate) {
-      const valid = await currentStep.validate(methods, uiState);
+      const valid = await currentStep.validate(methods, uiState, builderState);
       if (!valid) return;
     }
     dispatch({ type: 'GO_NEXT' });
-  }, [currentStep, methods, uiState, dispatch]);
+  }, [currentStep, methods, uiState, builderState, dispatch]);
 
   return (
     <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
@@ -624,7 +624,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
             <QuerySandboxFlyout
               draft={draft}
               onDraftChange={isBuilderMode ? undefined : handleDraftChange}
-              tabConfig={getSandboxTabConfig(uiState)}
+              tabConfig={getSandboxTabConfig(uiState, builderType)}
               activeTab={uiState.activeTab}
               onTabChange={(tab) => dispatch({ type: 'SET_TAB', tab })}
               onAlertEditorMount={onAlertEditorMount}
