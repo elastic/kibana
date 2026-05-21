@@ -50,7 +50,7 @@ const SERVICE_OPTIONS = [
 ];
 
 const MECHANISM_OPTIONS = [
-  { id: 'identity_federation', label: 'Agentless (Identity Federation)' },
+  { id: 'agentless', label: 'Agentless' },
   { id: 'firehose', label: 'Firehose' },
   { id: 'cloud_forwarder', label: 'Cloud Forwarder' },
 ];
