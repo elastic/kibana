@@ -247,7 +247,7 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
     await expect(page.testSubj.locator('lnsApp')).toBeVisible();
   });
 
-  test('download CSV report and validate row length', async ({ page, pageObjects }) => {
+  test('download CSV report and validate row length', async ({ pageObjects }) => {
     // Can download saved searches only, so save first
     await pageObjects.discover.saveSearch(queryName3);
     await pageObjects.toasts.closeAll(); // close toast to avoid obstruction
