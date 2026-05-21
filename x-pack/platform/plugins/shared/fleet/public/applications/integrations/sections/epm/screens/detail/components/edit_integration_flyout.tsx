@@ -67,7 +67,7 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
 }) => {
   const updateCustomIntegration = useUpdateCustomIntegration;
 
-  const isCustomIntegration =
+  const isUploadedIntegration =
     packageInfo != null &&
     'installationInfo' in packageInfo &&
     packageInfo.installationInfo?.install_source === 'upload';
@@ -192,7 +192,7 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
             />
           }
           helpText={
-            !isCustomIntegration && (
+            !isUploadedIntegration && (
               <FormattedMessage
                 id="xpack.fleet.epm.editIntegrationFlyout.categoriesHelpText"
                 defaultMessage="You can assign up to two categories to your integration."
@@ -209,7 +209,7 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
             options={parentCategories?.map((category) => ({
               label: category.title,
               value: category.id,
-              disabled: !isCustomIntegration && selectedCategories.length >= 2,
+              disabled: !isUploadedIntegration && selectedCategories.length >= 2,
             }))}
             onChange={(selectedOptions) => {
               const selectedValues = selectedOptions as SelectOption[];
