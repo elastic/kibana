@@ -58,3 +58,8 @@ export const executionHistoryKeys = {
     [...executionHistoryKeys.all, 'list', filters] as const,
   countSince: (since: string) => [...executionHistoryKeys.all, 'countSince', since] as const,
 };
+
+export const userProfileKeys = {
+  all: ['userProfile'] as const,
+  bulk: (uids: string[]) => [...userProfileKeys.all, 'bulk', [...uids].sort()] as const,
+};

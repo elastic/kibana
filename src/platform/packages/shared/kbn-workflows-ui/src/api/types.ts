@@ -12,6 +12,8 @@ import type {
   ExecutionStatus,
   ExecutionType,
   WorkflowDetailDto,
+  WorkflowExecutionSortField,
+  WorkflowExecutionSortOrder,
 } from '@kbn/workflows';
 
 export interface BulkCreateWorkflowsParams {
@@ -73,6 +75,10 @@ export interface GetWorkflowExecutionsParams {
   executionTypes?: ExecutionType[];
   executedBy?: string[];
   omitStepRuns?: boolean;
+  finishedAfter?: string;
+  finishedBefore?: string;
+  sortField?: WorkflowExecutionSortField;
+  sortOrder?: WorkflowExecutionSortOrder;
   page?: number;
   size?: number;
 }

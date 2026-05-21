@@ -76,6 +76,7 @@ export const PrivilegesWarningIconWrapper = ({
       }
       isOpen={isPopoverOpen}
       closePopover={togglePopover}
+      aria-label={insufficientPrivilegesText}
     >
       {insufficientPrivilegesText} {/* <LearnMoreLink /> TODO: Add docs link when available */}
     </EuiPopover>

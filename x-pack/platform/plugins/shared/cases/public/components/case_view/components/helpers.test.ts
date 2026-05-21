@@ -6,7 +6,10 @@
  */
 
 import { alertComment, eventComment, basicCase, basicComment } from '../../../containers/mock';
-import { getManualAlertIds, filterCaseAttachmentsBySearchTerm } from './helpers';
+import { SECURITY_ALERT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
+import type { AttachmentUIV2 } from '../../../../common/ui/types';
+import { getManualAlertIds } from '../../../../common/utils/attachments/manual_alert_ids';
+import { filterCaseAttachmentsBySearchTerm } from './helpers';
 
 const comment = {
   ...alertComment,
@@ -24,6 +27,21 @@ const comment3 = {
   alertId: ['nested1', 'nested2', 'nested3'],
 };
 
+const unifiedAlertComment = {
+  id: 'unified-alert-1',
+  type: SECURITY_ALERT_ATTACHMENT_TYPE,
+  attachmentId: 'unified-alert-id-1',
+  metadata: { index: '.alerts-security', rule: { id: 'rule-1', name: 'Test Rule' } },
+  owner: basicCase.owner,
+  createdAt: basicCase.createdAt,
+  createdBy: basicCase.createdBy,
+  pushedAt: null,
+  pushedBy: null,
+  updatedAt: null,
+  updatedBy: null,
+  version: 'WzQ3LDFc',
+};
+
 describe('Case view helpers', () => {
   describe('getManualAlertIds', () => {
     it('returns the alert ids', () => {
@@ -34,6 +52,28 @@ describe('Case view helpers', () => {
     it('returns the alerts id from multiple alerts in a comment', () => {
       const result = getManualAlertIds([comment, comment2, comment3]);
       expect(result).toEqual(['alert-id-1', 'alert-id-2', 'nested1', 'nested2', 'nested3']);
+    });
+
+    it('returns alert ids from unified alert attachments', () => {
+      const result = getManualAlertIds([unifiedAlertComment as unknown as AttachmentUIV2]);
+      expect(result).toEqual(['unified-alert-id-1']);
+    });
+
+    it('returns alert ids from a mix of legacy and unified alert attachments', () => {
+      const result = getManualAlertIds([comment, unifiedAlertComment as unknown as AttachmentUIV2]);
+      expect(result).toEqual(['alert-id-1', 'unified-alert-id-1']);
+    });
+
+    it('returns alert ids from unified alert with array attachmentId', () => {
+      const multiAlert = { ...unifiedAlertComment, attachmentId: ['ua-1', 'ua-2'] };
+      const result = getManualAlertIds([multiAlert as unknown as AttachmentUIV2]);
+      expect(result).toEqual(['ua-1', 'ua-2']);
+    });
+
+    it('deduplicates alert ids across legacy and unified attachments', () => {
+      const unified = { ...unifiedAlertComment, attachmentId: 'alert-id-1' };
+      const result = getManualAlertIds([comment, unified as unknown as AttachmentUIV2]);
+      expect(result).toEqual(['alert-id-1']);
     });
   });
 
@@ -191,6 +231,35 @@ describe('Case view helpers', () => {
           [fieldName]: [`${type}-123`],
         });
       });
+    });
+
+    it('filters unified alert attachments by search term', () => {
+      const caseData = {
+        ...basicCase,
+        comments: [
+          { ...unifiedAlertComment, attachmentId: ['ua-123', 'ua-456', 'ua-789'] },
+          { ...unifiedAlertComment, attachmentId: ['ua-abc', 'ua-def'] },
+        ],
+      };
+      const result = filterCaseAttachmentsBySearchTerm(caseData, '123');
+      expect(result.comments).toHaveLength(1);
+      expect(result.comments[0]).toEqual({
+        ...unifiedAlertComment,
+        attachmentId: ['ua-123'],
+      });
+    });
+
+    it('filters mixed legacy and unified alert comments correctly', () => {
+      const caseData = {
+        ...basicCase,
+        comments: [
+          { ...alertComment, alertId: 'alert-123' },
+          { ...unifiedAlertComment, attachmentId: 'ua-123' },
+          { ...unifiedAlertComment, attachmentId: 'ua-456' },
+        ],
+      };
+      const result = filterCaseAttachmentsBySearchTerm(caseData, '123');
+      expect(result.comments).toHaveLength(2);
     });
 
     it('does not apply event-id filtering to non-event unified reference attachments', () => {
