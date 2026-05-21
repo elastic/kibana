@@ -263,7 +263,7 @@ const GroupingComponent = <T,>({
             )}
           </span>
         ) : (
-          !isLoading && emptyComponent
+          !isLoading && <EmptyGroupingComponent />
         )}
       </div>
     </>
