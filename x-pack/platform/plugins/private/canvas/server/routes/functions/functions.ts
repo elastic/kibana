@@ -95,7 +95,7 @@ export function initializeBatchFunctionsRoute(deps: RouteInitializerDeps) {
     const { functionName, args, context } = fnCall;
     const { deserialize } = serializeProvider(expressions.getTypes());
 
-    const fnDef = expressions.getFunctions('canvas')[functionName];
+    const fnDef = (await expressions.getFunctions('canvas'))[functionName];
     if (!fnDef) throw new Error(`Function "${functionName}" could not be found.`);
 
     const deserialized = deserialize(context);

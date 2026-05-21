@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { omitBy, isNil } from 'lodash';
 import classNames from 'classnames';
 import { css } from '@emotion/react';
@@ -20,10 +20,10 @@ import { InvalidExpression } from './invalid_expression';
 import { InvalidElementType } from './invalid_element_type';
 import type { RendererHandlers } from '../../../types';
 import type { Renderable } from '../../../canvas_plugin_src/functions/common/render';
+import { getCanvasExpressionService } from '../../services/canvas_expressions_service';
 
 export interface Props {
   renderable: Renderable | null;
-  renderFunction: ExpressionRenderer<any> | null;
   height: number;
   width: number;
   handlers: RendererHandlers;
@@ -35,10 +35,29 @@ export interface Props {
 }
 
 export const ElementContent = (props: Props) => {
-  const { renderable, renderFunction, width, height, handlers, backgroundColor, state } = props;
+  const { renderable, width, height, handlers, backgroundColor, state } = props;
   const { onComplete } = handlers;
 
-  if (!state || !renderable) {
+  const [renderFunction, setRenderFunction] = useState<ExpressionRenderer<any> | null>(null);
+  useEffect(() => {
+    let canceled = false;
+    if (!renderable) {
+      if (renderFunction) setRenderFunction(null);
+      return;
+    }
+
+    getCanvasExpressionService().getRenderer(renderable.as).then(fn => {
+      if (!canceled) {
+        setRenderFunction(fn);
+      }
+    });
+
+    return () => {
+      canceled = true;
+    }
+  }, [renderable]);
+
+  if (!state || !renderable || !renderFunction) {
     return <Loading backgroundColor={backgroundColor} />;
   }
 

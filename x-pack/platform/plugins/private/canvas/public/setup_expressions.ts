@@ -10,6 +10,7 @@ import { serializeProvider } from '@kbn/expressions-plugin/common';
 import { API_ROUTE_FUNCTIONS } from '../common/lib/constants';
 
 import type { CanvasSetupDeps } from './plugin';
+import { asyncForEach } from '@kbn/std';
 
 let cached: Promise<void> | null = null;
 
@@ -34,8 +35,9 @@ export const setupExpressions = async ({
         // For every sever-side function, register a client-side
         // function that matches its definition, but which simply
         // calls the server-side function endpoint.
-        Object.keys(serverFunctionList).forEach((functionName) => {
-          if (expressions.getFunction(functionName)) {
+        await asyncForEach(Object.keys(serverFunctionList), async (functionName) => {
+          const expressionFunction = await expressions.getFunction(functionName);
+          if (expressionFunction) {
             return;
           }
 
