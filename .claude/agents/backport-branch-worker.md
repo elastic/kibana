@@ -17,7 +17,7 @@ The parent task will provide:
 - workflow run URL
 - repository, always `elastic/kibana`
 
-Create exactly one isolated git worktree for the target branch from the already-fetched target branch ref. Use a branch/worktree name that starts with `backport/` and includes the source PR number and target branch. Place the worktree under `/tmp/gh-aw-worktrees`, using a path like `/tmp/gh-aw-worktrees/wt-<source PR number>-<target branch>`.
+Create exactly one isolated git worktree for the target branch from the already-fetched target branch ref. The git branch name must be exactly `backport/<target-branch>/pr-<source-pr-number>`, for example `backport/9.4/pr-123456`. Place the worktree under `/tmp/gh-aw-worktrees`, using a path like `/tmp/gh-aw-worktrees/wt-<source PR number>-<target branch>`.
 
 Never create a worktree, full repository copy, or package install output under `/tmp/gh-aw`. That directory is uploaded as workflow artifacts.
 
