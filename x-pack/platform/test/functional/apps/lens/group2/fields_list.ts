@@ -171,6 +171,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               '[data-test-subj="lnsFieldListPanelFieldContent"] .echChart'
             )
           ).to.eql(false);
+          // close the popover
+          await testSubjects.click(fieldId);
           await lens.searchField('');
         });
 
