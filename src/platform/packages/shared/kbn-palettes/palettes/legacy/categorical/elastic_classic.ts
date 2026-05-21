@@ -13,6 +13,7 @@ import { KbnPalette } from '../../../constants';
 
 export const elasticClassicPalette = new KbnCategoricalPalette({
   id: KbnPalette.ElasticClassic,
+  legacy: true,
   name: i18n.translate('palettes.classic.name', {
     defaultMessage: 'Elastic classic',
   }),

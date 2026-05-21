@@ -130,7 +130,7 @@ export const POLICY_ARTIFACT_EVENT_FILTERS_LABELS: Omit<
   ),
   emptyUnexistingImportButtonTitle: i18n.translate(
     'xpack.securitySolution.endpoint.policy.eventFilters.empty.unexisting.importAction',
-    { defaultMessage: 'Import event filter list' }
+    { defaultMessage: 'Import event filters' }
   ),
   listTotalItemCountMessage: (totalItemsCount: number): string =>
     i18n.translate('xpack.securitySolution.endpoint.policy.eventFilters.list.totalItemCount', {

@@ -8,30 +8,32 @@
  */
 
 import type { ColorMapping, ColorStop, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-
+import type { KbnPaletteId } from '@kbn/palettes';
 import type {
   AllColoringTypes,
+  AutoColorType,
   ColorByValueAbsolute,
   ColorByValueStep,
   ColorByValueType,
+  ColorMappingCategoricalType,
   ColorMappingColorDefType,
+  ColorMappingGradientType,
   ColorMappingType,
+  NoColorType,
   StaticColorType,
+  UnassignedColorType,
 } from '../../schema/color';
+export { NO_COLOR, AUTO_COLOR, DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../schema/color';
 import type { SerializableValueType } from '../../schema/serializedValue';
+import { getReversibleMappings } from '../charts/utils';
 
 const LENS_DEFAULT_COLOR_BY_VALUE_RANGE_TYPE = 'percentage';
-const LENS_DEFAULT_COLOR_MAPPING_PALETTE = 'default';
+const LENS_DEFAULT_COLOR_MAPPING_PALETTE: KbnPaletteId = 'default';
 
-const LEGACY_TO_API_RANGE_NAMES: Record<'percent' | 'number', 'percentage' | 'absolute'> = {
-  number: 'absolute',
-  percent: 'percentage',
-};
-
-const API_TO_LEGACY_RANGE_NAMES: Record<'percentage' | 'absolute', 'percent' | 'number'> = {
-  absolute: 'number',
-  percentage: 'percent',
-};
+const paletteRangeCompat = getReversibleMappings([
+  ['percentage', 'percent'],
+  ['absolute', 'number'],
+]);
 
 export const LEGACY_PALETTE_PREFIX = 'LEGACY_PALETTE_';
 
@@ -39,6 +41,19 @@ export function isLegacyColorPalette(
   color: { colorMapping: ColorMapping.Config } | { palette: PaletteOutput } | undefined
 ): color is { palette: PaletteOutput } {
   return 'palette' in (color ?? {});
+}
+
+export function getContinuity(
+  rangeMin: number | null,
+  rangeMax: number | null
+): 'all' | 'above' | 'below' | 'none' {
+  return rangeMin === null && rangeMax === null
+    ? 'all'
+    : rangeMax === null
+    ? 'above'
+    : rangeMin === null
+    ? 'below'
+    : 'none';
 }
 
 export function fromColorByValueAPIToLensState(
@@ -65,7 +80,7 @@ export function fromColorByValueAPIToLensState(
   const rangeMin = colorStops.at(0)?.stop ?? null;
   const rangeMax = stops.at(-1)?.stop ?? null;
 
-  const isLegacy = config.type === 'legacy-dynamic';
+  const isLegacy = config.type === 'legacy_dynamic';
   const name = isLegacy ? config.palette : 'custom';
   const needsPaletteShift = isLegacy && config.shift;
 
@@ -80,9 +95,7 @@ export function fromColorByValueAPIToLensState(
       rangeMin,
       // @ts-expect-error - This can be null
       rangeMax,
-      rangeType: config.range
-        ? API_TO_LEGACY_RANGE_NAMES[config.range]
-        : API_TO_LEGACY_RANGE_NAMES.absolute,
+      rangeType: paletteRangeCompat.toState(config.range ?? 'absolute'),
       stops: !needsPaletteShift
         ? stops
         : stops.map((stop, i) => ({
@@ -90,23 +103,15 @@ export function fromColorByValueAPIToLensState(
             // value can be null
             stop: i === 0 ? (rangeMin as number) : stops[i - 1].stop,
           })),
-      // ignore colorStops when shifting palettes stops
       colorStops,
-      continuity:
-        rangeMin === null && rangeMax === null
-          ? 'all'
-          : rangeMax === null
-          ? 'above'
-          : rangeMin === null
-          ? 'below'
-          : 'none',
+      continuity: getContinuity(rangeMin, rangeMax),
       steps: stops.length,
       maxSteps: Math.max(5, stops.length), // TODO: point this to a constant or a common default
     },
   };
 }
 
-function getRangeValue(value?: number | null): number | null {
+export function getRangeValue(value?: number | null): number | null {
   if (value === undefined || value === null || !isFinite(value)) return null;
   return value;
 }
@@ -141,9 +146,7 @@ export function fromColorByValueLensStateToAPI(
     }));
   }
 
-  const range = rangeType
-    ? LEGACY_TO_API_RANGE_NAMES[rangeType]
-    : LENS_DEFAULT_COLOR_BY_VALUE_RANGE_TYPE;
+  const range = paletteRangeCompat.toAPI(rangeType) ?? LENS_DEFAULT_COLOR_BY_VALUE_RANGE_TYPE;
   const stops = !reverse
     ? originalStops
     : originalStops
@@ -183,7 +186,7 @@ export function fromColorByValueLensStateToAPI(
 
   if (isLegacy) {
     return {
-      type: 'legacy-dynamic',
+      type: 'legacy_dynamic',
       range,
       palette,
       shift: needsPaletteShift,
@@ -223,7 +226,7 @@ function fromColorLensStateToAPI(
 ): ColorMappingColorDefType {
   if (color.type === 'colorCode') {
     return {
-      type: 'colorCode',
+      type: 'color_code',
       value: color.colorCode,
     };
   }
@@ -234,10 +237,36 @@ function fromColorLensStateToAPI(
   };
 }
 
+function mapSerializedValueToAPI(value: unknown): SerializableValueType {
+  if (value !== null && typeof value === 'object' && 'type' in value) {
+    const typed = value as { type: string };
+    if (typed.type === 'multiFieldKey') {
+      return { ...typed, type: 'multi_field_key' } as SerializableValueType;
+    }
+    if (typed.type === 'rangeKey') {
+      return { ...typed, type: 'range_key' } as SerializableValueType;
+    }
+  }
+  return value as SerializableValueType;
+}
+
+function mapSerializedValueFromAPI(value: SerializableValueType): unknown {
+  if (value !== null && typeof value === 'object' && 'type' in value) {
+    const typed = value as { type: string };
+    if (typed.type === 'multi_field_key') {
+      return { ...typed, type: 'multiFieldKey' };
+    }
+    if (typed.type === 'range_key') {
+      return { ...typed, type: 'rangeKey' };
+    }
+  }
+  return value;
+}
+
 function fromRulesLensStateToAPI(rules: ColorMapping.ColorRule[]): SerializableValueType[] {
   return rules
     .filter((rule): rule is Extract<ColorMapping.ColorRule, { type: 'raw' }> => rule.type === 'raw')
-    .map((rule) => rule.value as SerializableValueType);
+    .map((rule) => mapSerializedValueToAPI(rule.value));
 }
 
 function isLensStateCategoricalConfigColorMapping(
@@ -248,15 +277,11 @@ function isLensStateCategoricalConfigColorMapping(
 
 function fromUnassignedColorLensStateToAPI(
   color: ColorMapping.CategoricalColor | ColorMapping.ColorCode | ColorMapping.LoopColor | undefined
-): { unassignedColor: Extract<ColorMappingColorDefType, { type: 'colorCode' }> } | {} {
+): UnassignedColorType | undefined {
   if (!color || color.type === 'loop') {
-    return {};
+    return undefined;
   }
-  const unassignedColor = fromColorLensStateToAPI(color);
-  if (unassignedColor.type === 'from_palette') {
-    return {};
-  }
-  return { unassignedColor };
+  return fromColorLensStateToAPI(color);
 }
 
 export function fromColorMappingLensStateToAPI(
@@ -268,15 +293,13 @@ export function fromColorMappingLensStateToAPI(
       mode: 'categorical',
       palette: `${LEGACY_PALETTE_PREFIX}${legacyPalette.name}`,
       mapping: [],
-    };
+    } satisfies ColorMappingCategoricalType;
   }
   if (!colorMapping) {
     return;
   }
 
-  const unassignedColor = fromUnassignedColorLensStateToAPI(
-    colorMapping.specialAssignments[0]?.color
-  );
+  const unassigned = fromUnassignedColorLensStateToAPI(colorMapping.specialAssignments[0]?.color);
   if (isLensStateCategoricalConfigColorMapping(colorMapping)) {
     return {
       mode: 'categorical',
@@ -287,17 +310,14 @@ export function fromColorMappingLensStateToAPI(
           color: fromColorLensStateToAPI(color),
         };
       }),
-      ...unassignedColor,
-    };
+      ...(unassigned ? { unassigned } : {}),
+    } satisfies ColorMappingCategoricalType;
   }
-  const colorAssignments = colorMapping.assignments.filter(
-    (
-      assignment
-    ): assignment is ColorMapping.AssignmentBase<
-      ColorMapping.ColorRule,
-      ColorMapping.CategoricalColor | ColorMapping.ColorCode
-    > => assignment.color.type !== 'gradient'
-  );
+
+  // because of early return above, we know it is a gradient at this point so casting is safe
+  const colorMode = colorMapping.colorMode as ColorMapping.GradientColorMode;
+  const colorAssignments = colorMapping.assignments;
+
   return {
     mode: 'gradient',
     palette: colorMapping.paletteId,
@@ -306,15 +326,16 @@ export function fromColorMappingLensStateToAPI(
         values: fromRulesLensStateToAPI(rules),
       };
     }),
-    gradient: colorAssignments.map(({ color }) => fromColorLensStateToAPI(color)),
-    ...unassignedColor,
-  };
+    sort: (colorMapping.colorMode as ColorMapping.GradientColorMode).sort,
+    gradient: colorMode.steps.map((color) => fromColorLensStateToAPI(color)),
+    ...(unassigned ? { unassigned } : {}),
+  } satisfies ColorMappingGradientType;
 }
 
 function fromColorDefAPIToLensState(
   color: ColorMappingColorDefType
 ): ColorMapping.CategoricalColor | ColorMapping.ColorCode {
-  if (color.type === 'colorCode') {
+  if (color.type === 'color_code') {
     return {
       type: 'colorCode',
       colorCode: color.value,
@@ -322,7 +343,7 @@ function fromColorDefAPIToLensState(
   }
   return {
     type: 'categorical',
-    paletteId: color.palette ?? LENS_DEFAULT_COLOR_MAPPING_PALETTE,
+    paletteId: (color.palette as KbnPaletteId) ?? LENS_DEFAULT_COLOR_MAPPING_PALETTE,
     colorIndex: color.index,
   };
 }
@@ -331,7 +352,7 @@ function fromRulesAPIToLensState(values: SerializableValueType[]): ColorMapping.
   return values.map((value): ColorMapping.ColorRule => {
     return {
       type: 'raw',
-      value,
+      value: mapSerializedValueFromAPI(value),
     };
   });
 }
@@ -362,11 +383,10 @@ function fromAPIMappingToAssignments(
       };
     });
   }
-  return colorMapping.mapping.map((assignment, index) => {
-    const step = colorMapping.gradient?.[index];
+  return colorMapping.mapping.map((assignment) => {
     return {
       rules: fromRulesAPIToLensState(assignment.values),
-      color: fromColorDefAPIToLensState(step!),
+      color: { type: 'gradient' },
       touched: false,
     };
   });
@@ -383,6 +403,7 @@ export function fromColorMappingAPIToLensState(
       palette: { type: 'palette', name: colorMapping.palette.replace(LEGACY_PALETTE_PREFIX, '') }, // remove the prefix
     };
   }
+
   const specialAssignments: ColorMapping.SpecialAssignment[] = [
     {
       rules: [
@@ -390,11 +411,8 @@ export function fromColorMappingAPIToLensState(
           type: 'other',
         },
       ],
-      color: colorMapping.unassignedColor
-        ? {
-            type: 'colorCode',
-            colorCode: colorMapping.unassignedColor.value,
-          }
+      color: colorMapping.unassigned
+        ? fromColorDefAPIToLensState(colorMapping.unassigned)
         : { type: 'loop' },
       touched: false,
     },
@@ -409,14 +427,13 @@ export function fromColorMappingAPIToLensState(
             ...step,
             touched: false,
           })),
-          // in the conversion we've lost the actual sort order, so default to "asc"
-          sort: 'asc',
+          sort: colorMapping.sort ?? 'asc',
         };
 
   return {
     colorMapping: {
       colorMode,
-      paletteId: colorMapping.palette,
+      paletteId: colorMapping.palette as KbnPaletteId,
       assignments,
       specialAssignments,
     },
@@ -425,7 +442,7 @@ export function fromColorMappingAPIToLensState(
 
 export function isColorByValueColor(color?: AllColoringTypes): color is ColorByValueType {
   if (!color || !('type' in color)) return false;
-  return color.type === 'dynamic' || color.type === 'legacy-dynamic';
+  return color.type === 'dynamic' || color.type === 'legacy_dynamic';
 }
 
 export function isColorByValueAbsolute(color?: AllColoringTypes): color is ColorByValueAbsolute {
@@ -436,4 +453,12 @@ export function isColorByValueAbsolute(color?: AllColoringTypes): color is Color
 export function isColorMappingColor(color?: AllColoringTypes): color is ColorMappingType {
   if (!color || !('mode' in color)) return false;
   return color.mode === 'categorical' || color.mode === 'gradient';
+}
+
+export function isNoColor(color?: AllColoringTypes): color is NoColorType {
+  return !!color && 'type' in color && color.type === 'none';
+}
+
+export function isAutoColor(color?: AllColoringTypes): color is AutoColorType {
+  return !!color && 'type' in color && color.type === 'auto';
 }

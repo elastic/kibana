@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DatatableState, DatatableStateESQL } from '../../schema';
+import type { DatatableConfig, DatatableConfigESQL } from '../../schema';
 
 /**
  * Basic ESQL datatable with single metric column
  */
-export const singleMetricESQLDatatable: DatatableState = {
+export const singleMetricESQLDatatable: DatatableConfig = {
   title: 'Single metric',
-  type: 'datatable',
-  dataset: {
+  type: 'data_table',
+  data_source: {
     type: 'esql',
     query: 'FROM kibana_sample_data_logs | LIMIT 100',
   },
@@ -23,19 +23,18 @@ export const singleMetricESQLDatatable: DatatableState = {
   ignore_global_filters: false,
   metrics: [
     {
-      operation: 'value',
       column: 'bytes',
     },
   ],
-} satisfies DatatableStateESQL;
+} satisfies DatatableConfigESQL;
 
 /**
  * ESQL datatable with multiple metrics, rows, and split_metrics_by columns
  */
-export const multipleMetricRowSplitESQLDatatable: DatatableState = {
+export const multipleMetricRowSplitESQLDatatable: DatatableConfig = {
   title: 'Multiple metrics, rows, split by',
-  type: 'datatable',
-  dataset: {
+  type: 'data_table',
+  data_source: {
     type: 'esql',
     query: 'FROM kibana_sample_data_logs | LIMIT 10',
   },
@@ -43,43 +42,37 @@ export const multipleMetricRowSplitESQLDatatable: DatatableState = {
   ignore_global_filters: false,
   metrics: [
     {
-      operation: 'value',
       column: 'bytes',
     },
     {
-      operation: 'value',
       column: 'bytes_counter',
     },
   ],
   rows: [
     {
-      operation: 'value',
       column: '@timestamp',
     },
     {
-      operation: 'value',
       column: 'agent',
     },
   ],
   split_metrics_by: [
     {
-      operation: 'value',
       column: 'geo.src',
     },
     {
-      operation: 'value',
       column: 'geo.dest',
     },
   ],
-} satisfies DatatableStateESQL;
+} satisfies DatatableConfigESQL;
 
 /**
  * Full config ESQL datatable
  */
-export const fullConfigESQLDatatable: DatatableState = {
+export const fullConfigESQLDatatable: DatatableConfig = {
   title: 'Full config',
-  type: 'datatable',
-  dataset: {
+  type: 'data_table',
+  data_source: {
     type: 'esql',
     query: 'FROM kibana_sample_data_logs | LIMIT 10',
   },
@@ -87,7 +80,6 @@ export const fullConfigESQLDatatable: DatatableState = {
   ignore_global_filters: false,
   metrics: [
     {
-      operation: 'value',
       column: 'bytes',
       alignment: 'center',
       apply_color_to: 'value',
@@ -126,20 +118,17 @@ export const fullConfigESQLDatatable: DatatableState = {
       },
     },
     {
-      operation: 'value',
       column: 'bytes_counter',
       visible: false,
     },
   ],
   rows: [
     {
-      operation: 'value',
       column: '@timestamp',
       visible: false,
       click_filter: true,
     },
     {
-      operation: 'value',
       column: 'agent',
       alignment: 'center',
       apply_color_to: 'value',
@@ -147,36 +136,36 @@ export const fullConfigESQLDatatable: DatatableState = {
   ],
   split_metrics_by: [
     {
-      operation: 'value',
       column: 'geo.src',
     },
     {
-      operation: 'value',
       column: 'geo.dest',
     },
   ],
-  density: {
-    mode: 'compact',
-    height: {
-      value: {
-        type: 'auto',
-      },
-      header: {
-        type: 'custom',
-        max_lines: 4,
+  styling: {
+    density: {
+      mode: 'compact',
+      height: {
+        value: {
+          type: 'auto',
+        },
+        header: {
+          type: 'custom',
+          max_lines: 4,
+        },
       },
     },
+    paging: 10,
   },
-  paging: 10,
-} satisfies DatatableStateESQL;
+} satisfies DatatableConfigESQL;
 
 /**
  * ESQL datatable sorted by a pivoted metric column (split_metrics_by)
  */
-export const sortedByPivotedMetricColumnESQLDatatable: DatatableState = {
+export const sortedByPivotedMetricColumnESQLDatatable: DatatableConfig = {
   title: 'Sorted by pivoted metric column',
-  type: 'datatable',
-  dataset: {
+  type: 'data_table',
+  data_source: {
     type: 'esql',
     query: 'FROM kibana_sample_data_logs | LIMIT 10',
   },
@@ -184,7 +173,6 @@ export const sortedByPivotedMetricColumnESQLDatatable: DatatableState = {
   ignore_global_filters: false,
   metrics: [
     {
-      operation: 'value',
       column: 'bytes',
       alignment: 'center',
       apply_color_to: 'value',
@@ -223,20 +211,17 @@ export const sortedByPivotedMetricColumnESQLDatatable: DatatableState = {
       },
     },
     {
-      operation: 'value',
       column: 'bytes_counter',
       visible: false,
     },
   ],
   rows: [
     {
-      operation: 'value',
       column: '@timestamp',
       visible: false,
       click_filter: true,
     },
     {
-      operation: 'value',
       column: 'agent',
       alignment: 'center',
       apply_color_to: 'value',
@@ -244,42 +229,42 @@ export const sortedByPivotedMetricColumnESQLDatatable: DatatableState = {
   ],
   split_metrics_by: [
     {
-      operation: 'value',
       column: 'geo.src',
     },
     {
-      operation: 'value',
       column: 'geo.dest',
     },
   ],
-  density: {
-    mode: 'compact',
-    height: {
-      value: {
-        type: 'auto',
-      },
-      header: {
-        type: 'custom',
-        max_lines: 4,
+  styling: {
+    density: {
+      mode: 'compact',
+      height: {
+        value: {
+          type: 'auto',
+        },
+        header: {
+          type: 'custom',
+          max_lines: 4,
+        },
       },
     },
+    paging: 10,
+    sort_by: {
+      column_type: 'pivoted_metric',
+      index: 0,
+      values: ['US', 'MM'],
+      direction: 'desc',
+    },
   },
-  paging: 10,
-  sort_by: {
-    column_type: 'pivoted_metric',
-    index: 0,
-    values: ['US', 'MM'],
-    direction: 'desc',
-  },
-} satisfies DatatableStateESQL;
+} satisfies DatatableConfigESQL;
 
 /**
  * ESQL datatable sorted by a row column
  */
-export const sortedByRowColumnESQLDatatable: DatatableState = {
+export const sortedByRowColumnESQLDatatable: DatatableConfig = {
   title: 'Sorted by row column',
-  type: 'datatable',
-  dataset: {
+  type: 'data_table',
+  data_source: {
     type: 'esql',
     query: 'FROM kibana_sample_data_logs | LIMIT 10',
   },
@@ -287,7 +272,6 @@ export const sortedByRowColumnESQLDatatable: DatatableState = {
   ignore_global_filters: false,
   metrics: [
     {
-      operation: 'value',
       column: 'bytes',
       alignment: 'center',
       apply_color_to: 'value',
@@ -326,20 +310,17 @@ export const sortedByRowColumnESQLDatatable: DatatableState = {
       },
     },
     {
-      operation: 'value',
       column: 'bytes_counter',
       visible: false,
     },
   ],
   rows: [
     {
-      operation: 'value',
       column: '@timestamp',
       visible: false,
       click_filter: true,
     },
     {
-      operation: 'value',
       column: 'agent',
       alignment: 'center',
       apply_color_to: 'value',
@@ -347,30 +328,30 @@ export const sortedByRowColumnESQLDatatable: DatatableState = {
   ],
   split_metrics_by: [
     {
-      operation: 'value',
       column: 'geo.src',
     },
     {
-      operation: 'value',
       column: 'geo.dest',
     },
   ],
-  density: {
-    mode: 'compact',
-    height: {
-      value: {
-        type: 'auto',
-      },
-      header: {
-        type: 'custom',
-        max_lines: 4,
+  styling: {
+    density: {
+      mode: 'compact',
+      height: {
+        value: {
+          type: 'auto',
+        },
+        header: {
+          type: 'custom',
+          max_lines: 4,
+        },
       },
     },
+    paging: 10,
+    sort_by: {
+      column_type: 'row',
+      index: 1,
+      direction: 'desc',
+    },
   },
-  paging: 10,
-  sort_by: {
-    column_type: 'row',
-    index: 1,
-    direction: 'desc',
-  },
-} satisfies DatatableStateESQL;
+} satisfies DatatableConfigESQL;

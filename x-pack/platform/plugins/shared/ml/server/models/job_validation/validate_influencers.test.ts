@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 
 import { validateInfluencers } from './validate_influencers';
 

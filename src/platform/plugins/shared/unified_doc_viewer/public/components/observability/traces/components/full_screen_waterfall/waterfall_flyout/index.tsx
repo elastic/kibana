@@ -18,19 +18,24 @@ import {
   EuiTabs,
   EuiTitle,
   useGeneratedHtmlId,
+  type EuiFlyoutProps,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useState } from 'react';
+import { useDocViewerSpanLogViewedEvent } from '@kbn/unified-doc-viewer';
 import DocViewerSource from '../../../../../doc_viewer_source';
 import DocViewerTable from '../../../../../doc_viewer_table';
+import { getUnifiedDocViewerServices } from '../../../../../../plugin';
+import { useOriginDocType } from '../../../../../doc_viewer_flyout/origin_doc_type_context';
+import type { FlyoutContentId } from '../../../common/constants';
 
 const tabIds = {
-  OVERVIEW: 'unifiedDocViewerTracesSpanFlyoutOverview',
-  TABLE: 'unifiedDocViewerTracesSpanFlyoutTable',
-  JSON: 'unifiedDocViewerTracesSpanFlyoutJson',
+  OVERVIEW: 'unifiedDocViewerTracesDocDetailFlyoutOverview',
+  TABLE: 'unifiedDocViewerTracesDocDetailFlyoutTable',
+  JSON: 'unifiedDocViewerTracesDocDetailFlyoutJson',
 };
 
 const tabs = [
@@ -71,12 +76,16 @@ const FlyoutTabs = ({ onClick, selectedTabId }: FlyoutTabsProps) => {
 
 export interface Props {
   title: string;
-  onCloseFlyout: () => void;
+  onCloseFlyout: EuiFlyoutProps['onClose'];
   hit: DataTableRecord | null;
   loading: boolean;
   dataView: DocViewRenderProps['dataView'];
   dataTestSubj?: string;
+  hasAnimation?: boolean;
+  flyoutContentId: FlyoutContentId;
   children: React.ReactNode;
+  skipNextEventReport?: boolean;
+  size?: EuiFlyoutProps['size'];
 }
 
 export function WaterfallFlyout({
@@ -87,19 +96,35 @@ export function WaterfallFlyout({
   children,
   title,
   dataTestSubj,
+  hasAnimation,
+  flyoutContentId,
+  skipNextEventReport,
+  size = 's',
 }: Props) {
+  const { analytics } = getUnifiedDocViewerServices();
   const [selectedTabId, setSelectedTabId] = useState(tabIds.OVERVIEW);
   const flyoutTitleId = useGeneratedHtmlId();
   const flyoutId = useGeneratedHtmlId({ prefix: 'documentDetailFlyout' });
+  const originDocType = useOriginDocType();
+
+  useDocViewerSpanLogViewedEvent({
+    reportEvent: analytics.reportEvent,
+    originDocType,
+    contentId: flyoutContentId,
+    tabId: selectedTabId,
+    hit,
+    skipNextReport: skipNextEventReport,
+  });
 
   return (
     <EuiFlyout
       data-test-subj={dataTestSubj}
-      size="s"
+      size={size}
       includeFixedHeadersInFocusTrap={false}
       onClose={onCloseFlyout}
       aria-labelledby={flyoutTitleId}
       id={flyoutId}
+      hasAnimation={hasAnimation}
     >
       <EuiFlyoutHeader>
         <EuiSkeletonTitle isLoading={loading}>

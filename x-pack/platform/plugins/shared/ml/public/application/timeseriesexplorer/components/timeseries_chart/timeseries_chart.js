@@ -2010,9 +2010,9 @@ class TimeseriesChartIntl extends Component {
     return (
       <>
         <RuleEditorFlyout
-          selectedJob={this.props.selectedJob}
           setShowFunction={this.setShowRuleEditorFlyoutFunction}
           unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
+          telemetrySource={this.props.telemetrySource}
         />
         {this.state.alertFlyoutVisible && this.state.alertFlyoutParams && (
           <MlAnomalyAlertFlyout
@@ -2033,6 +2033,12 @@ class TimeseriesChartIntl extends Component {
               closePopover={() => this.closePopover()}
               panelPaddingSize="none"
               anchorPosition="upLeft"
+              aria-label={i18n.translate(
+                'xpack.ml.timeSeriesExplorer.timeSeriesChart.anomalyActionsPopoverAriaLabel',
+                {
+                  defaultMessage: 'Anomaly actions',
+                }
+              )}
             >
               <LinksMenuUI
                 anomaly={this.state.popoverData}

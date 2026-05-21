@@ -19,7 +19,8 @@ paths:
         > When you delete a list, all of its list items are also deleted.
       operationId: DeleteList
       parameters:
-        - in: query
+        - description: Value list identifier to delete, including all of its list items.
+          in: query
           name: id
           required: true
           schema:
@@ -142,7 +143,8 @@ paths:
       description: Get the details of a value list using the list ID.
       operationId: ReadList
       parameters:
-        - in: query
+        - description: Value list identifier (`id`) returned when the list was created.
+          in: query
           name: id
           required: true
           schema:
@@ -242,6 +244,11 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              patchName:
+                value:
+                  id: ip_list
+                  name: Bad ips list - UPDATED
             schema:
               example:
                 id: ip_list
@@ -562,6 +569,12 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              replaceList:
+                value:
+                  description: Latest list of bad ips
+                  id: ip_list
+                  name: Bad ips - updated
             schema:
               example:
                 description: Latest list of bad ips
@@ -862,6 +875,10 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                acknowledged:
+                  value:
+                    acknowledged: true
               schema:
                 type: object
                 properties:
@@ -873,6 +890,13 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    message: >-
+                      Unable to delete value list data streams: invalid or
+                      missing index metadata
+                    status_code: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -898,12 +922,25 @@ paths:
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: >-
+                      API [DELETE /api/lists/index] is not authorized; lists-all
+                      (or equivalent) is required to delete data streams
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
         '404':
           content:
             application/json:
+              examples:
+                notFound:
+                  value:
+                    message: The value list data stream was not found in this space
+                    status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: List data stream not found response
@@ -928,6 +965,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                bothExist:
+                  value:
+                    list_index: true
+                    list_item_index: true
               schema:
                 type: object
                 properties:
@@ -942,6 +984,13 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    message: >-
+                      Unable to read value list data stream status for this
+                      space
+                    status_code: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -967,12 +1016,25 @@ paths:
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: >-
+                      API [GET /api/lists/index] is not authorized; list read
+                      permissions are required
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
         '404':
           content:
             application/json:
+              examples:
+                notFound:
+                  value:
+                    message: Value list backing indices were not found for this space
+                    status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: List data stream(s) not found response
@@ -991,12 +1053,31 @@ paths:
       tags:
         - Security Lists API
     post:
-      description: Create `.lists` and `.items` data streams in the relevant space.
+      deprecated: true
+      description: >
+        **DEPRECATED.** `deprecated: true` is set on this operation. Value list
+        backing data streams for the space
+
+        are now created as part of supported workflows; calling this explicitly
+        is rarely required.
+
+        **WARNING:** Do not use for new integrations. Prefer the UI or the list
+        and list-item APIs after confirming
+
+        indices exist with `GET /api/lists/index`.
+
+
+        Creates the `.lists` and `.items` data streams in the current Kibana
+        space.
       operationId: CreateListIndex
       responses:
         '200':
           content:
             application/json:
+              examples:
+                acknowledged:
+                  value:
+                    acknowledged: true
               schema:
                 type: object
                 properties:
@@ -1008,6 +1089,14 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    message: >-
+                      Indices exist but the request could not be completed for
+                      the current space. Check that Elasticsearch and Kibana
+                      privileges allow index creation for lists.
+                    status_code: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -1033,6 +1122,14 @@ paths:
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  value:
+                    error: Forbidden
+                    message: >-
+                      API [POST /api/lists/index] is unauthorized for user, this
+                      action is granted by the Kibana privileges [lists-all]
+                    statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
@@ -1338,10 +1435,12 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              changeValue:
+                value:
+                  id: pd1WRJQBs4HAK3VQeHFI
+                  value: 255.255.255.255
             schema:
-              example:
-                id: pd1WRJQBs4HAK3VQeHFI
-                value: 255.255.255.255
               type: object
               properties:
                 _version:
@@ -1658,10 +1757,15 @@ paths:
       requestBody:
         content:
           application/json:
-            example:
-              id: ip_item
-              value: 255.255.255.255
+            examples:
+              fullReplace:
+                value:
+                  id: ip_item
+                  value: 255.255.255.255
             schema:
+              example:
+                id: ip_item
+                value: 255.255.255.255
               type: object
               properties:
                 _version:
@@ -1784,6 +1888,12 @@ paths:
         '200':
           content:
             application/ndjson:
+              examples:
+                ipLines:
+                  value: |
+                    127.0.0.1
+                    127.0.0.2
+                    127.0.0.3
               schema:
                 description: A `.txt` file containing list items from the specified list
                 example: |
@@ -1847,6 +1957,11 @@ paths:
         '404':
           content:
             application/json:
+              examples:
+                notFound:
+                  value:
+                    message: 'list id: "unknown_list" not found'
+                    status_code: 404
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: List not found response
@@ -1869,7 +1984,8 @@ paths:
       description: Get all value list items in the specified list.
       operationId: FindListItems
       parameters:
-        - in: query
+        - description: Parent value list's `id` to page through items for.
+          in: query
           name: list_id
           required: true
           schema:
@@ -1907,7 +2023,10 @@ paths:
               - asc
             example: asc
             type: string
-        - in: query
+        - description: >
+            Opaque cursor returned in a previous response; pass it to continue
+            listing from the next page. Omit on the first request.
+          in: query
           name: cursor
           required: false
           schema:
@@ -2079,6 +2198,10 @@ paths:
       requestBody:
         content:
           multipart/form-data:
+            examples:
+              ipLinesFile:
+                value:
+                  file: list_values.txt
             schema:
               type: object
               properties:
@@ -2170,6 +2293,13 @@ paths:
         '409':
           content:
             application/json:
+              examples:
+                conflict:
+                  value:
+                    message: >-
+                      List with the specified list_id does not exist, create the
+                      list or fix list_id to import to an existing one
+                    status_code: 409
               schema:
                 $ref: '#/components/schemas/SiemErrorResponse'
           description: List with specified list_id does not exist response
@@ -2189,6 +2319,15 @@ paths:
         - Security Lists API
   /api/lists/privileges:
     get:
+      description: >
+        Returns the caller's authentication state and the Elasticsearch
+        `cluster`, `index`, and `application`
+
+        privileges for `.lists` and `.items` data streams in the current Kibana
+        space. Use this to decide which list
+
+        APIs (`read` vs `all` operations) are available before you create or
+        import lists.
       operationId: ReadListPrivileges
       responses:
         '200':
@@ -2279,6 +2418,14 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: >-
+                      Unable to resolve list privileges: invalid or missing
+                      space context for this request
+                    statusCode: 400
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'

@@ -589,9 +589,9 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
   describe('getAssistantTools', () => {
     it('should return structured tools for relevant index entries', async () => {
-      IndexPatternsFetcher.prototype.getIndexPatternsWithMatches = jest
+      IndexPatternsFetcher.prototype.getIndexPatternMatches = jest
         .fn()
-        .mockResolvedValue(['test']);
+        .mockResolvedValue({ matchedIndexPatterns: ['test'] });
       esClientMock.search.mockReturnValue(
         // @ts-expect-error not full response interface
         getKnowledgeBaseEntrySearchEsMock('index')

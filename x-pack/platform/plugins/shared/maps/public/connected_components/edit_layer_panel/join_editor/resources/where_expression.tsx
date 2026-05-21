@@ -77,6 +77,9 @@ export class WhereExpression extends Component<Props, State> {
           />
         }
         repositionOnScroll={true}
+        aria-label={i18n.translate('xpack.maps.layerPanel.whereExpression.popoverAriaLabel', {
+          defaultMessage: 'Where filter',
+        })}
       >
         <div className="mapFilterEditor" data-test-subj="mapJoinWhereFilterEditor">
           <EuiFormHelpText className="mapJoinExpressionHelpText">

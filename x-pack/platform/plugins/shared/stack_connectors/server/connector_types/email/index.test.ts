@@ -514,6 +514,229 @@ describe('params validation', () => {
     `);
   });
 
+  test('params validation fails when no recipients are provided', () => {
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: [],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities }
+      );
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: At least one entry in [to], [cc], or [bcc] is required"`
+    );
+  });
+
+  test('params validation fails when recipients only contain empty/whitespace strings', () => {
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['', ' '],
+          cc: [''],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities }
+      );
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: At least one entry in [to], [cc], or [bcc] is required"`
+    );
+  });
+
+  test('params validation fails when email has invalid format (leading hyphen in local part)', () => {
+    const configUtils = getActionsConfigUtils({});
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['-user@example.com'],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowError(/not valid emails/);
+  });
+
+  test('params validation fails when email has invalid format (leading hyphen in domain)', () => {
+    const configUtils = getActionsConfigUtils({});
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['user@-example.com'],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowError(/not valid emails/);
+  });
+
+  test('params validation fails when email has invalid format (trailing hyphen in domain)', () => {
+    const configUtils = getActionsConfigUtils({});
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['user@example-.com'],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowError(/not valid emails/);
+  });
+
+  test('params validation fails when email starts with @ sign', () => {
+    const configUtils = getActionsConfigUtils({});
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['@something@example.com'],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowError(/not valid emails/);
+  });
+
+  test('params validation fails when email has double @ sign', () => {
+    const configUtils = getActionsConfigUtils({});
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['user@@example.com'],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowError(/not valid emails/);
+  });
+
+  test('params validation fails when email has double dots in domain', () => {
+    const configUtils = getActionsConfigUtils({});
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['user@example..com'],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowError(/not valid emails/);
+  });
+
+  test('params validation fails when email has space in domain', () => {
+    const configUtils = getActionsConfigUtils({});
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['user@exam ple.com'],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowError(/not valid emails/);
+  });
+
+  test('params validation accepts email with single-label domain (on-prem MTA)', () => {
+    const configUtils = getActionsConfigUtils({});
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['user@localhost'],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).not.toThrowError();
+  });
+
+  test('params validation fails when email has path traversal characters', () => {
+    const configUtils = getActionsConfigUtils({});
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['../etc/passwd@example.com'],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowError(/not valid emails/);
+  });
+
+  test('params validation succeeds for valid email with hyphens and subdomains', () => {
+    const configUtils = getActionsConfigUtils({});
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['first-last@my-domain.example.com'],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).not.toThrow();
+  });
+
+  test('params validation succeeds for RFC 5322 quoted local part', () => {
+    const configUtils = getActionsConfigUtils({});
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['"quoted"@example.com'],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).not.toThrow();
+  });
+
   test('params validation for emails calls validateEmailAddresses', async () => {
     const configUtils = actionsConfigMock.create();
     configUtils.validateEmailAddresses.mockImplementation(validateEmailAddressesImpl);
@@ -1324,6 +1547,56 @@ describe('execute()', () => {
         },
       }
     `);
+  });
+
+  test('returns error when all recipient arrays are empty', async () => {
+    sendEmailMock.mockReset();
+
+    const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
+      ...executorOptions,
+      params: {
+        ...params,
+        to: [],
+        cc: [],
+        bcc: [],
+      },
+    };
+
+    const result = await connectorType.executor(customExecutorOptions);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "errorSource": "user",
+        "message": "At least one entry in [to], [cc], or [bcc] is required",
+        "status": "error",
+      }
+    `);
+    expect(sendEmailMock).not.toHaveBeenCalled();
+  });
+
+  test('returns error when all recipients are empty strings', async () => {
+    sendEmailMock.mockReset();
+
+    const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
+      ...executorOptions,
+      params: {
+        ...params,
+        to: ['', ' '],
+        cc: [''],
+        bcc: [],
+      },
+    };
+
+    const result = await connectorType.executor(customExecutorOptions);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "errorSource": "user",
+        "message": "At least one entry in [to], [cc], or [bcc] is required",
+        "status": "error",
+      }
+    `);
+    expect(sendEmailMock).not.toHaveBeenCalled();
   });
 
   test('returns expected result when an error is thrown', async () => {

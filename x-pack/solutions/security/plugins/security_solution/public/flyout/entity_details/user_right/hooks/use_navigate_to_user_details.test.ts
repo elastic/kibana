@@ -33,15 +33,18 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
+const documentEntityIdentifiers = { 'user.name': 'testUser', 'user.email': 'test@test.com' };
+
 const mockProps = {
+  identityFields: documentEntityIdentifiers,
   userName: 'testUser',
+  entityId: 'resolved-entity-id',
   scopeId: 'testScopeId',
   isRiskScoreExist: false,
   hasMisconfigurationFindings: false,
   hasNonClosedAlerts: false,
   contextID: 'testContextID',
   isPreviewMode: false,
-  email: ['test@test.com'],
 };
 
 const tab = EntityDetailsLeftPanelTab.RISK_INPUTS;
@@ -67,10 +70,9 @@ describe('useNavigateToUserDetails', () => {
     expect(mockOpenLeftPanel).toHaveBeenCalledWith({
       id: UserDetailsPanelKey,
       params: {
-        user: {
-          name: mockProps.userName,
-          email: mockProps.email,
-        },
+        userName: mockProps.userName,
+        identityFields: mockProps.identityFields,
+        entityId: mockProps.entityId,
         scopeId: mockProps.scopeId,
         isRiskScoreExist: mockProps.isRiskScoreExist,
         path: { tab, subTab },
@@ -94,15 +96,16 @@ describe('useNavigateToUserDetails', () => {
           contextID: mockProps.contextID,
           scopeId: mockProps.scopeId,
           userName: mockProps.userName,
+          entityId: mockProps.entityId,
+          identityFields: mockProps.identityFields,
         },
       },
       left: {
         id: UserDetailsPanelKey,
         params: {
-          user: {
-            name: mockProps.userName,
-            email: mockProps.email,
-          },
+          userName: mockProps.userName,
+          identityFields: mockProps.identityFields,
+          entityId: mockProps.entityId,
           scopeId: mockProps.scopeId,
           isRiskScoreExist: mockProps.isRiskScoreExist,
           path: { tab, subTab },

@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 
 import { AutoFollowPatternDeleteProvider } from '../auto_follow_pattern_delete_provider';
 
-// @ts-ignore
 import { routing } from '../../services/routing';
 
 const actionsAriaLabel = i18n.translate(
@@ -73,7 +72,7 @@ const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
               defaultMessage: 'Pause {total, plural, one {replication} other {replications}}',
               values: { total: patterns.length },
             }),
-            icon: <EuiIcon type="pause" />,
+            icon: <EuiIcon type="pause" aria-hidden={true} />,
             onClick: () => {
               pauseAutoFollowPattern(patterns.map(({ name }) => name));
               closePopoverViaAction();
@@ -84,7 +83,7 @@ const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
               defaultMessage: 'Resume {total, plural, one {replication} other {replications}}',
               values: { total: patterns.length },
             }),
-            icon: <EuiIcon type="play" />,
+            icon: <EuiIcon type="play" aria-hidden={true} />,
             onClick: () => {
               resumeAutoFollowPattern(patterns.map(({ name }) => name));
               closePopoverViaAction();
@@ -99,7 +98,7 @@ const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
           name: i18n.translate('xpack.crossClusterReplication.editAutoFollowPatternButtonLabel', {
             defaultMessage: 'Edit pattern',
           }),
-          icon: <EuiIcon type="pencil" />,
+          icon: <EuiIcon type="pencil" aria-hidden={true} />,
           onClick: () => {
             routing.navigate(routing.getAutoFollowPatternPath(patterns[0].name));
           },
@@ -115,20 +114,20 @@ const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
           total: patterns.length,
         },
       }),
-      icon: <EuiIcon type="trash" />,
+      icon: <EuiIcon type="trash" aria-hidden={true} />,
       onClick: () => {
         deleteAutoFollowPattern(patterns.map(({ name }) => name));
         closePopoverViaAction();
       },
     },
-  ].filter(Boolean);
+  ].filter((item): item is NonNullable<typeof item> => Boolean(item));
 
   const button = (
     <EuiButton
       data-test-subj="autoFollowPatternActionMenuButton"
       aria-label={actionsAriaLabel}
       onClick={() => setShowPopover(!showPopover)}
-      iconType={arrowDirection === 'up' ? 'arrowUp' : 'arrowDown'}
+      iconType={arrowDirection === 'up' ? 'chevronSingleUp' : 'chevronSingleDown'}
       iconSide="right"
       fill
     >
@@ -141,6 +140,10 @@ const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate(
+        'xpack.crossClusterReplication.autoFollowPatternActionMenu.popoverAriaLabel',
+        { defaultMessage: 'Auto-follow pattern options' }
+      )}
       isOpen={showPopover}
       closePopover={() => setShowPopover(false)}
       button={button}
@@ -159,7 +162,7 @@ const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
                 defaultMessage: 'Pattern options',
               }
             ),
-            items: panelItems as any,
+            items: panelItems,
           },
         ]}
       />
@@ -167,7 +170,7 @@ const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
   );
 };
 
-export const AutoFollowPatternActionMenu = (props: Omit<Props, 'deleteAutoFollowPatterns'>) => (
+export const AutoFollowPatternActionMenu = (props: Omit<Props, 'deleteAutoFollowPattern'>) => (
   <AutoFollowPatternDeleteProvider>
     {(deleteAutoFollowPattern: (ids: string[]) => void) => (
       <AutoFollowPatternActionMenuUI {...props} deleteAutoFollowPattern={deleteAutoFollowPattern} />

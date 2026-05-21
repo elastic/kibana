@@ -97,6 +97,24 @@
       "reason": "Prints version scheme warning - not needed"
     },
     {
+      "path": "@elastic/opentelemetry-node/node_modules/protobufjs",
+      "lifecycle": "postinstall",
+      "required": false,
+      "reason": "Prints version scheme warning - not needed"
+    },
+    {
+      "path": "@opentelemetry/otlp-grpc-exporter-base/node_modules/protobufjs",
+      "lifecycle": "postinstall",
+      "required": false,
+      "reason": "Prints version scheme warning - not needed"
+    },
+    {
+      "path": "@opentelemetry/sdk-node/node_modules/protobufjs",
+      "lifecycle": "postinstall",
+      "required": false,
+      "reason": "Prints version scheme warning - not needed"
+    },
+    {
       "path": "puppeteer",
       "lifecycle": "postinstall",
       "required": false,
@@ -119,6 +137,12 @@
       "lifecycle": "install",
       "required": false,
       "reason": "Builds from source if npm_config_build_from_source=true.  Prebuilds are sufficient."
+    },
+    {
+      "path": "@swc/core",
+      "lifecycle": "postinstall",
+      "required": false,
+      "reason": "Builds native for @swc/core, used by proxy at src/dev/build to optimize assets.  Prebuilds are sufficient."
     }
   ]
 }

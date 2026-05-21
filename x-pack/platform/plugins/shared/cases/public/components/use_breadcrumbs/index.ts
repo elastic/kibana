@@ -142,6 +142,10 @@ export const useCasesTemplatesBreadcrumbs = (templateTitle?: string) => {
         href: getAppUrl({ deepLinkId: CasesDeepLinkId.cases }),
       },
       {
+        text: getCasesBreadcrumbTitle(CasesDeepLinkId.casesConfigure),
+        href: getAppUrl({ deepLinkId: CasesDeepLinkId.casesConfigure }),
+      },
+      {
         text: getCasesBreadcrumbTitle(CasesDeepLinkId.casesTemplates),
         ...(templateTitle
           ? { href: getAppUrl({ deepLinkId: CasesDeepLinkId.casesTemplates }) }

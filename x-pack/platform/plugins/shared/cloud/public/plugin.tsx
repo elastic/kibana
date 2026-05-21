@@ -38,6 +38,7 @@ export interface CloudConfigType {
   users_and_roles_url?: string;
   performance_url?: string;
   trial_end_date?: string;
+  isSaasContainer?: boolean;
   is_elastic_staff_owned?: boolean;
   onboarding?: {
     default_solution?: string;
@@ -93,6 +94,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       trialEndDate: this.config.trial_end_date ? new Date(this.config.trial_end_date) : undefined,
       isElasticStaffOwned,
       isCloudEnabled: this.isCloudEnabled,
+      isEce: this.config.isSaasContainer != null ? !this.config.isSaasContainer : undefined,
       onboarding: {
         defaultSolution: parseOnboardingSolution(this.config.onboarding?.default_solution),
       },
@@ -116,6 +118,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       getPrivilegedUrls: this.cloudUrls.getPrivilegedUrls.bind(this.cloudUrls),
       getUrls: this.cloudUrls.getUrls.bind(this.cloudUrls),
       isInTrial: this.isInTrial.bind(this),
+      trialDaysLeft: this.trialDaysLeft.bind(this),
     };
   }
 
@@ -166,6 +169,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       getPrivilegedUrls: this.cloudUrls.getPrivilegedUrls.bind(this.cloudUrls),
       getUrls: this.cloudUrls.getUrls.bind(this.cloudUrls),
       isInTrial: this.isInTrial.bind(this),
+      trialDaysLeft: this.trialDaysLeft.bind(this),
     };
   }
 
@@ -193,16 +197,22 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     }
   }
 
-  private isInTrial(): boolean {
-    if (this.config.serverless?.in_trial) return true;
+  private trialDaysLeft(): number | undefined {
     if (this.config.trial_end_date) {
       const endDateMs = new Date(this.config.trial_end_date).getTime();
       if (!Number.isNaN(endDateMs)) {
-        return Date.now() <= endDateMs;
+        const diff = endDateMs - Date.now();
+        return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
       } else {
         this.logger.error('cloud.trial_end_date config value could not be parsed.');
       }
     }
-    return false;
+    return undefined;
+  }
+
+  private isInTrial(): boolean {
+    if (this.config.serverless?.in_trial) return true;
+    const daysLeft = this.trialDaysLeft();
+    return daysLeft !== undefined && daysLeft > 0;
   }
 }

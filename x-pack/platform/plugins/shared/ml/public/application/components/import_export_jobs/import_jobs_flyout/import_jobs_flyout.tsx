@@ -34,7 +34,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { type ErrorType, extractErrorProperties } from '@kbn/ml-error-utils';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 
-import type { JobType } from '../../../../../common/types/saved_objects';
+import type { JobType } from '@kbn/ml-common-types/saved_objects';
 import { useMlKibana } from '../../../contexts/kibana';
 import { CannotImportJobsCallout } from './cannot_import_jobs_callout';
 import { CannotReadFileCallout } from './cannot_read_file_callout';
@@ -583,7 +583,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
 const FlyoutButton: FC<{ isDisabled: boolean; onClick(): void }> = ({ isDisabled, onClick }) => {
   return (
     <EuiButtonEmpty
-      iconType="importAction"
+      iconType="download"
       onClick={onClick}
       isDisabled={isDisabled}
       data-test-subj="mlJobsImportButton"

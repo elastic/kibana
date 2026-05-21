@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { euiPaletteColorBlind, useEuiTheme } from '@elastic/eui';
 import {
   AreaSeries,
@@ -24,6 +24,7 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { ChartContainer } from '../../shared/charts/chart_container';
 import { getTimeZone } from '../../shared/charts/helper/timezone';
 import { isTimeseriesEmpty } from '../../shared/charts/helper/helper';
+import { sliceApmTimeseriesToValidYRange } from '../../shared/charts/utils/split_line_series_for_edge_dots';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import type { Coordinate, TimeSeries } from '../../../../typings/timeseries';
 import { asDynamicBytes } from '../../../../common/utils/formatters';
@@ -61,17 +62,22 @@ export function StorageChart() {
     [indexLifecyclePhase, environment, kuery, start, end]
   );
 
-  const storageTimeSeries: Array<TimeSeries<Coordinate>> =
-    data?.storageTimeSeries?.map(({ timeseries, serviceName }, index) => {
-      return {
-        data: timeseries ?? [],
-        type: 'area',
-        color: groupedPalette[Math.floor(index % (10 * euiPaletteColorBlindRotations))],
-        title: serviceName,
-      };
-    }) ?? [];
+  const trimmedStorageTimeSeries = useMemo(() => {
+    const storageTimeSeries: Array<TimeSeries<Coordinate>> =
+      data?.storageTimeSeries?.map(({ timeseries, serviceName }, index) => {
+        return {
+          data: timeseries ?? [],
+          type: 'area',
+          color: groupedPalette[Math.floor(index % (10 * euiPaletteColorBlindRotations))],
+          title: serviceName,
+        };
+      }) ?? [];
+    return storageTimeSeries.length
+      ? sliceApmTimeseriesToValidYRange(storageTimeSeries)
+      : storageTimeSeries;
+  }, [data, euiPaletteColorBlindRotations, groupedPalette]);
 
-  const xValues = storageTimeSeries.flatMap(({ data: timeseriesData }) =>
+  const xValues = trimmedStorageTimeSeries.flatMap(({ data: timeseriesData }) =>
     timeseriesData.map(({ x }) => x)
   );
 
@@ -80,7 +86,7 @@ export function StorageChart() {
   const xFormatter = niceTimeFormatter([min, max]);
 
   const timeZone = getTimeZone(core?.uiSettings);
-  const isEmpty = isTimeseriesEmpty(storageTimeSeries);
+  const isEmpty = isTimeseriesEmpty(trimmedStorageTimeSeries);
 
   return (
     <ChartContainer
@@ -118,7 +124,7 @@ export function StorageChart() {
           gridLine={{ visible: true }}
           tickFormat={asDynamicBytes}
         />
-        {storageTimeSeries.map((serie, index) => (
+        {trimmedStorageTimeSeries.map((serie, index) => (
           <AreaSeries
             timeZone={timeZone}
             key={serie.title}

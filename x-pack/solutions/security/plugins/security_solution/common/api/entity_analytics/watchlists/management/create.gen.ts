@@ -14,30 +14,75 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+import {
+  EntitySourceType,
+  Matcher,
+  Filter,
+  DateRange,
+  MonitoringEntitySource,
+} from '../data_source/common.gen';
 import { WatchlistObject } from './common.gen';
 
+export const CreateWatchlistRequestBody = lazySchema(() =>
+  z.object({
+    /**
+     * Unique name for the watchlist
+     */
+    name: z.string(),
+    /**
+     * Description of the watchlist
+     */
+    description: z.string().optional(),
+    /**
+     * Risk score modifier associated with the watchlist
+     */
+    riskModifier: z.number().min(0).max(2),
+    /**
+     * Indicates if the watchlist is managed by the system
+     */
+    managed: z.boolean().optional(),
+    /**
+     * Optional entity sources to create and link to the watchlist
+     */
+    entitySources: z
+      .array(
+        z
+          .object({
+            type: EntitySourceType,
+            name: z.string(),
+            indexPattern: z.string().optional(),
+            /**
+             * Required when type is entity_analytics_integration. One of entityanalytics_okta, entityanalytics_ad.
+             */
+            integrationName: z.string().optional(),
+            enabled: z.boolean().optional(),
+            /**
+             * Field used to query the entity store for index-type sources
+             */
+            identifierField: z.string().optional(),
+            /**
+             * KQL query used to filter data from the provided index patterns
+             */
+            queryRule: z.string().optional(),
+            matchers: z.array(Matcher).optional(),
+            filter: Filter.optional(),
+            range: DateRange.optional(),
+          })
+          .strict()
+      )
+      .optional(),
+  })
+);
 export type CreateWatchlistRequestBody = z.infer<typeof CreateWatchlistRequestBody>;
-export const CreateWatchlistRequestBody = z.object({
-  /**
-   * Unique name for the watchlist
-   */
-  name: z.string(),
-  /**
-   * Description of the watchlist
-   */
-  description: z.string(),
-  /**
-   * Risk score modifier associated with the watchlist
-   */
-  riskModifier: z.number(),
-  /**
-   * Indicates if the watchlist is managed by the system
-   */
-  managed: z.boolean().optional(),
-});
 export type CreateWatchlistRequestBodyInput = z.input<typeof CreateWatchlistRequestBody>;
 
+export const CreateWatchlistResponse = lazySchema(() =>
+  WatchlistObject.merge(
+    z.object({
+      entitySources: z.array(MonitoringEntitySource).optional(),
+    })
+  )
+);
 export type CreateWatchlistResponse = z.infer<typeof CreateWatchlistResponse>;
-export const CreateWatchlistResponse = WatchlistObject;

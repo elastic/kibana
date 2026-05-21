@@ -90,6 +90,11 @@ const inferenceEndpoints = [
     service_settings: {
       model_id: 'rainbow-sprinkles',
     },
+    metadata: {
+      display: {
+        model_creator: 'Anthropic',
+      },
+    },
   },
   {
     inference_id: '.elser-2-elastic',
@@ -318,109 +323,6 @@ describe('When the tabular page is loaded', () => {
       expect(rows[11]).not.toHaveTextContent(techPreview);
     });
   });
-  describe('group by models', () => {
-    beforeEach(() => {
-      renderTabularPageWithProviders();
-    });
-
-    it('should display accordions with tables for model groups', () => {
-      const groupAccordions = screen.getAllByTestId(/-accordion$/);
-      expect(groupAccordions).toHaveLength(5);
-      const groupTables = screen.getAllByTestId(/-table$/);
-      expect(groupTables).toHaveLength(5);
-    });
-
-    it('should have expected endpoint table columns', () => {
-      const endpointTables = screen.getAllByTestId(/-table$/);
-
-      endpointTables.forEach((table) => {
-        const columnHeaders = within(table).getAllByRole('columnheader');
-        const headerLabels = columnHeaders.map((header) => header.textContent?.trim() ?? '');
-
-        expect(headerLabels).toEqual(['Endpoint', 'Model', 'Service', '']);
-      });
-    });
-
-    it('should show expected group labels and endpoint counts', () => {
-      const expectedGroups = [
-        {
-          groupId: 'elastic',
-          label: 'Elastic',
-          countLabel: '6 endpoints',
-        },
-        {
-          groupId: '.own_model',
-          label: '.own_model',
-          countLabel: '2 endpoints',
-        },
-        {
-          groupId: 'multilingual-e5',
-          label: 'Multilingual E5',
-          countLabel: '1 endpoint',
-        },
-        {
-          groupId: 'multilingual-embed-v1',
-          label: 'multilingual-embed-v1',
-          countLabel: '1 endpoint',
-        },
-        {
-          groupId: 'rerank-v1',
-          label: 'rerank-v1',
-          countLabel: '1 endpoint',
-        },
-      ];
-
-      expectedGroups.forEach(({ groupId, label, countLabel }) => {
-        const accordionHeader = screen.getByTestId(`${groupId}-accordion-header`);
-        expect(within(accordionHeader).getByText(label)).toBeInTheDocument();
-        expect(within(accordionHeader).getByText(countLabel)).toBeInTheDocument();
-      });
-    });
-
-    it('should show empty prompt when search removes all groups', async () => {
-      fireEvent.change(screen.getByTestId('search-field-endpoints'), {
-        target: { value: 'no-matching-endpoint' },
-      });
-
-      expect(await screen.findByText('No items found')).toBeInTheDocument();
-    });
-
-    it('should disable delete action for preconfigured endpoints in grouped tables', () => {
-      const elserTable = screen.getByTestId('elastic-table');
-
-      const preconfiguredRow = within(elserTable).getByText('.elser-2-elastic').closest('tr');
-
-      expect(preconfiguredRow).not.toBeNull();
-
-      act(() => {
-        within(preconfiguredRow as HTMLElement)
-          .getByTestId('euiCollapsedItemActionsButton')
-          .click();
-      });
-
-      const deleteAction = screen.getByTestId(/inferenceUIDeleteAction/);
-
-      expect(deleteAction).toBeDisabled();
-    });
-
-    it('should enable delete action for user-defined endpoints in grouped tables', () => {
-      const elserTable = screen.getByTestId('elastic-table');
-
-      const userDefinedRow = within(elserTable).getByText('custom-inference-id').closest('tr');
-
-      expect(userDefinedRow).not.toBeNull();
-
-      act(() => {
-        within(userDefinedRow as HTMLElement)
-          .getByTestId('euiCollapsedItemActionsButton')
-          .click();
-      });
-
-      const deleteAction = screen.getByTestId(/inferenceUIDeleteAction/);
-
-      expect(deleteAction).toBeEnabled();
-    });
-  });
   describe('group by service', () => {
     beforeAll(() => {
       window.history.pushState({}, '', '?groupBy=service');
@@ -516,14 +418,8 @@ describe('When the tabular page is loaded', () => {
     const stats = screen.getByTestId('endpointStats');
     expect(stats).toBeInTheDocument();
 
-    // 3 unique services: elasticsearch, openai, elastic
-    expect(screen.getByTestId('endpointStatsServicesCount')).toHaveTextContent('3');
-
     // 8 unique models
     expect(screen.getByTestId('endpointStatsModelsCount')).toHaveTextContent('8');
-
-    // 4 unique types: sparse_embedding, text_embedding, rerank, chat_completion
-    expect(screen.getByTestId('endpointStatsTypesCount')).toHaveTextContent('4');
 
     // 11 endpoints total
     expect(screen.getByTestId('endpointStatsEndpointsCount')).toHaveTextContent('11');

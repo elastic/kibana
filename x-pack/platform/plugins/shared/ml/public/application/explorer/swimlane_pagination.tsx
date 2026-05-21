@@ -77,11 +77,14 @@ export const SwimLanePagination: FC<SwimLanePaginationProps> = ({
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiPopover
+          aria-label={i18n.translate('xpack.ml.explorer.swimLane.rowsPerPagePopoverAriaLabel', {
+            defaultMessage: 'Rows per page',
+          })}
           button={
             <EuiButtonEmpty
               size="xs"
               color="text"
-              iconType="arrowDown"
+              iconType="chevronSingleDown"
               iconSide="right"
               onClick={onButtonClick}
               data-test-subj="mlSwimLanePageSizeControl"

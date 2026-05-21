@@ -7,28 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MOCK_IDP_UIAM_SERVICE_URL, MOCK_IDP_UIAM_SHARED_SECRET } from '@kbn/mock-idp-utils';
-import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
-import { servers as defaultConfig } from '../../default/serverless/security_complete.serverless.config';
+import { resolve } from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { servers as defaultConfig } from '../../default/serverless/observability_complete.serverless.config';
 import type { ScoutServerConfig } from '../../../../../types';
 
-// Indicates whether the config is used on CI or locally.
-const isRunOnCI = process.env.CI;
+// We need to test certain APIs that are only exposed by the plugin contract and not through
+// any HTTP endpoint, so this test plugin exposes these APIs through test HTTP endpoints that
+// we can call in our tests.
+const pluginPath = `--plugin-path=${resolve(
+  REPO_ROOT,
+  'x-pack/platform/test/security_functional/plugins/test_endpoints'
+)}`;
 
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
-  esServerlessOptions: { uiam: true },
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
-    serverArgs: [
-      ...defaultConfig.kbnTestServer.serverArgs,
-      ...(isRunOnCI ? [] : ['--mockIdpPlugin.uiam.enabled=true']),
-      `--xpack.security.uiam.enabled=true`,
-      `--xpack.security.uiam.url=${MOCK_IDP_UIAM_SERVICE_URL}`,
-      `--xpack.security.uiam.sharedSecret=${MOCK_IDP_UIAM_SHARED_SECRET}`,
-      `--xpack.security.uiam.ssl.certificate=${KBN_CERT_PATH}`,
-      `--xpack.security.uiam.ssl.key=${KBN_KEY_PATH}`,
-      '--xpack.security.uiam.ssl.verificationMode=none',
-    ],
+    serverArgs: [...defaultConfig.kbnTestServer.serverArgs, pluginPath],
   },
 };

@@ -105,7 +105,9 @@ export const getTableColumns = (
   const columnsArray = [
     {
       field: 'status',
-      name: '',
+      name: i18n.translate('esqlEditor.query.querieshistory.statusColumnHeader', {
+        defaultMessage: 'Status',
+      }),
       sortable: false,
       'data-test-subj': 'status',
       render: (status: QueryHistoryItem['status']) => {
@@ -118,7 +120,7 @@ export const getTableColumns = (
                 content={i18n.translate('esqlEditor.query.querieshistory.success', {
                   defaultMessage: 'Query ran successfully',
                 })}
-                type="checkCircle"
+                type="checkCircleFill"
                 color="text"
                 size="m"
                 iconProps={{
@@ -195,7 +197,9 @@ export const getTableColumns = (
       width: isOnReducedSpaceLayout ? 'auto' : '240px',
     },
     {
-      name: '',
+      name: i18n.translate('esqlEditor.query.querieshistory.actionsColumnHeader', {
+        defaultMessage: 'Actions',
+      }),
       actions,
       'data-test-subj': 'actions',
       width: isOnReducedSpaceLayout ? 'auto' : '60px',
@@ -318,7 +322,7 @@ export function QueryList({
                 >
                   {(copy) => (
                     <EuiButtonIcon
-                      iconType="copyClipboard"
+                      iconType="copy"
                       iconSize="m"
                       onClick={copy}
                       css={css`
@@ -433,7 +437,7 @@ export function QueryColumn({
                   defaultMessage: 'Expand',
                 })
           }
-          iconType={isRowExpanded ? 'arrowDown' : 'arrowRight'}
+          iconType={isRowExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
           size="xs"
           color="text"
           css={css`

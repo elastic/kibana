@@ -4,252 +4,302 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { RootSchema } from '@kbn/core-analytics-browser';
-import { TelemetryEventType, type TelemetryEventTypeData } from './types';
 
-type TelemetryEventsSchemas = {
-  [T in TelemetryEventType]: RootSchema<TelemetryEventTypeData<T>>;
-};
+import type { RootSchema } from '@kbn/core-analytics-browser';
+
+import { AutomaticImportTelemetryEventType } from '../../../common/telemetry/types';
 
 /**
- * telemetryEventsSchemas
- * Defines the schema for each of the event types
- * */
-export const telemetryEventsSchemas: TelemetryEventsSchemas = {
-  [TelemetryEventType.UploadIntegrationZipComplete]: {
-    integrationName: {
-      type: 'keyword',
-      _meta: {
-        description: 'The name of the integration in the zip file that was uploaded',
-        optional: true,
-      },
-    },
-    errorMessage: {
-      type: 'text',
-      _meta: {
-        description: 'The error message if the upload failed',
-        optional: true,
-      },
-    },
-  },
+ * EBT schema definitions for browser-side telemetry events.
+ * These schemas define the structure of event payloads for BigQuery.
 
-  [TelemetryEventType.AutomaticImportOpen]: {
+ */
+export const telemetryEventsSchemas: Partial<
+  Record<AutomaticImportTelemetryEventType, RootSchema<object>>
+> = {
+  [AutomaticImportTelemetryEventType.CreateIntegrationPageLoaded]: {
     sessionId: {
       type: 'keyword',
       _meta: {
-        description: 'The ID to identify all the events the same session',
+        description: 'The ID to identify all the events in the same session',
         optional: false,
       },
     },
   },
 
-  [TelemetryEventType.AutomaticImportStepComplete]: {
+  [AutomaticImportTelemetryEventType.EditIntegrationPageLoaded]: {
     sessionId: {
       type: 'keyword',
       _meta: {
-        description: 'The ID to identify all the events the same session',
+        description: 'The ID to identify all the events in the same session',
         optional: false,
       },
     },
-    step: {
-      type: 'long',
-      _meta: {
-        description: 'The step number',
-        optional: false,
-      },
-    },
-    stepName: {
+    integrationId: {
       type: 'keyword',
-      _meta: {
-        description: 'The name of the step',
-        optional: false,
-      },
-    },
-    durationMs: {
-      type: 'long',
-      _meta: {
-        description: 'Time spent in the current step',
-        optional: false,
-      },
-    },
-    sessionElapsedTime: {
-      type: 'long',
-      _meta: {
-        description: 'Total time spent in the current generation session',
-        optional: false,
-      },
+      _meta: { description: 'Integration ID', optional: true },
     },
   },
 
-  [TelemetryEventType.AutomaticImportGenerationComplete]: {
+  [AutomaticImportTelemetryEventType.DataStreamFlyoutOpened]: {
     sessionId: {
       type: 'keyword',
       _meta: {
-        description: 'The ID to identify all the events the same session',
+        description: 'The ID to identify all the events in the same session',
         optional: false,
       },
     },
-    sampleRows: {
-      type: 'long',
-      _meta: {
-        description: 'The number of log rows provided as sample data',
-        optional: false,
-      },
-    },
-    durationMs: {
-      type: 'long',
-      _meta: {
-        description: 'Time spent in the generation process',
-        optional: false,
-      },
-    },
-    actionTypeId: {
+    integrationId: {
       type: 'keyword',
-      _meta: {
-        description: 'The connector action type ID',
-        optional: false,
-      },
-    },
-    model: {
-      type: 'keyword',
-      _meta: {
-        description: 'The model used to generate the integration',
-        optional: false,
-      },
-    },
-    provider: {
-      type: 'keyword',
-      _meta: {
-        description: 'The provider of the LLM',
-        optional: false,
-      },
-    },
-    errorMessage: {
-      type: 'text',
-      _meta: {
-        description: 'The error message if the generation failed',
-        optional: true,
-      },
+      _meta: { description: 'Integration ID', optional: true },
     },
   },
 
-  [TelemetryEventType.AutomaticImportCelGenerationComplete]: {
+  [AutomaticImportTelemetryEventType.EditDataStreamFlyoutOpened]: {
     sessionId: {
       type: 'keyword',
       _meta: {
-        description: 'The ID to identify all the events the same session',
+        description: 'The ID to identify all the events in the same session',
         optional: false,
       },
     },
-    durationMs: {
-      type: 'long',
-      _meta: {
-        description: 'Time spent in the generation process',
-        optional: false,
-      },
-    },
-    actionTypeId: {
+    integrationId: {
       type: 'keyword',
-      _meta: {
-        description: 'The connector action type ID',
-        optional: false,
-      },
+      _meta: { description: 'Integration ID', optional: true },
     },
-    model: {
+    dataStreamId: {
       type: 'keyword',
-      _meta: {
-        description: 'The model used to generate the integration',
-        optional: false,
-      },
-    },
-    provider: {
-      type: 'keyword',
-      _meta: {
-        description: 'The provider of the LLM',
-        optional: false,
-      },
-    },
-    errorMessage: {
-      type: 'text',
-      _meta: {
-        description: 'The error message if the generation failed',
-        optional: true,
-      },
+      _meta: { description: 'Data stream ID', optional: true },
     },
   },
 
-  [TelemetryEventType.AutomaticImportComplete]: {
+  [AutomaticImportTelemetryEventType.AnalyzeLogsTriggered]: {
     sessionId: {
       type: 'keyword',
       _meta: {
-        description: 'The ID to identify all the events the same session',
+        description: 'The ID to identify all the events in the same session',
         optional: false,
       },
     },
-    durationMs: {
-      type: 'long',
-      _meta: {
-        description: 'Total time spent in the workflow',
-        optional: false,
-      },
-    },
-    integrationName: {
+    integrationId: {
       type: 'keyword',
-      _meta: {
-        description: 'The name of the integration',
-        optional: false,
-      },
+      _meta: { description: 'Integration ID', optional: true },
     },
-    integrationDescription: {
+    dataStreamId: {
       type: 'keyword',
-      _meta: {
-        description: 'The description of the integration',
-        optional: false,
-      },
+      _meta: { description: 'Data stream ID', optional: true },
     },
-    dataStreamName: {
+    logsSource: {
       type: 'keyword',
-      _meta: {
-        description: 'The name of the data stream used for the integration',
-        optional: false,
-      },
+      _meta: { description: 'Source of logs: upload or index', optional: false },
     },
     inputTypes: {
       type: 'array',
       items: {
         type: 'keyword',
-        _meta: {
-          description: 'The input type used for the integration',
-          optional: false,
-        },
+        _meta: { description: 'An input type selected by the user', optional: false },
       },
-    },
-    actionTypeId: {
-      type: 'keyword',
       _meta: {
-        description: 'The connector action type ID',
+        description: 'Input types selected (e.g. filestream, tcp, udp)',
         optional: false,
       },
     },
-    model: {
+  },
+
+  [AutomaticImportTelemetryEventType.EditPipelineTabOpened]: {
+    sessionId: {
       type: 'keyword',
       _meta: {
-        description: 'The model used to generate the integration',
+        description: 'The ID to identify all the events in the same session',
         optional: false,
       },
     },
-    provider: {
+    integrationId: {
+      type: 'keyword',
+      _meta: { description: 'Integration ID', optional: true },
+    },
+    dataStreamId: {
+      type: 'keyword',
+      _meta: { description: 'Data stream ID', optional: true },
+    },
+  },
+
+  // Code editor copy button clicked
+  [AutomaticImportTelemetryEventType.CodeEditorCopyClicked]: {
+    sessionId: {
       type: 'keyword',
       _meta: {
-        description: 'The provider of the LLM',
+        description: 'The ID to identify all the events in the same session',
         optional: false,
       },
     },
-    errorMessage: {
-      type: 'text',
+    integrationId: {
+      type: 'keyword',
+      _meta: { description: 'Integration ID', optional: true },
+    },
+    dataStreamId: {
+      type: 'keyword',
+      _meta: { description: 'Data stream ID', optional: true },
+    },
+  },
+
+  [AutomaticImportTelemetryEventType.ManageIntegrationsTableViewed]: {},
+
+  [AutomaticImportTelemetryEventType.UploadIntegrationClicked]: {},
+
+  [AutomaticImportTelemetryEventType.CancelButtonClicked]: {
+    sessionId: {
+      type: 'keyword',
       _meta: {
-        description: 'The error message if the workflow failed',
-        optional: true,
+        description: 'The ID to identify all the events in the same session',
+        optional: false,
+      },
+    },
+    integrationId: {
+      type: 'keyword',
+      _meta: { description: 'Integration ID', optional: true },
+    },
+  },
+
+  [AutomaticImportTelemetryEventType.DoneButtonClicked]: {
+    sessionId: {
+      type: 'keyword',
+      _meta: {
+        description: 'The ID to identify all the events in the same session',
+        optional: false,
+      },
+    },
+    integrationId: {
+      type: 'keyword',
+      _meta: { description: 'Integration ID', optional: true },
+    },
+  },
+
+  [AutomaticImportTelemetryEventType.ReviewApproveMenuClicked]: {
+    integrationId: {
+      type: 'keyword',
+      _meta: { description: 'Integration ID', optional: true },
+    },
+    version: {
+      type: 'keyword',
+      _meta: { description: 'Integration version at time of review', optional: true },
+    },
+  },
+  [AutomaticImportTelemetryEventType.IntegrationDownloadZipClicked]: {
+    integrationId: {
+      type: 'keyword',
+      _meta: { description: 'Integration ID', optional: true },
+    },
+  },
+  [AutomaticImportTelemetryEventType.ApproveModalCancelClicked]: {
+    integrationId: {
+      type: 'keyword',
+      _meta: { description: 'Integration ID', optional: true },
+    },
+  },
+  [AutomaticImportTelemetryEventType.ApproveModalApproveClicked]: {
+    integrationId: {
+      type: 'keyword',
+      _meta: { description: 'Integration ID', optional: true },
+    },
+    version: {
+      type: 'keyword',
+      _meta: { description: 'Integration version being approved', optional: true },
+    },
+    dataStreamCount: {
+      type: 'long',
+      _meta: {
+        description: 'Total number of data streams in the integration at the time of approval',
+        optional: false,
+      },
+    },
+  },
+  [AutomaticImportTelemetryEventType.ApproveModalApproveWithAutoInstallClicked]: {
+    integrationId: {
+      type: 'keyword',
+      _meta: { description: 'Integration ID', optional: true },
+    },
+    version: {
+      type: 'keyword',
+      _meta: { description: 'Integration version being approved', optional: true },
+    },
+    dataStreamCount: {
+      type: 'long',
+      _meta: {
+        description: 'Total number of data streams in the integration at the time of approval',
+        optional: false,
+      },
+    },
+  },
+  [AutomaticImportTelemetryEventType.DataStreamDeleteConfirmed]: {
+    sessionId: {
+      type: 'keyword',
+      _meta: {
+        description: 'The ID to identify all the events in the same session',
+        optional: false,
+      },
+    },
+    integrationId: {
+      type: 'keyword',
+      _meta: { description: 'Integration ID', optional: true },
+    },
+    dataStreamId: {
+      type: 'keyword',
+      _meta: { description: 'Data stream ID', optional: true },
+    },
+  },
+  [AutomaticImportTelemetryEventType.DataStreamRefreshConfirmed]: {
+    sessionId: {
+      type: 'keyword',
+      _meta: {
+        description: 'The ID to identify all the events in the same session',
+        optional: false,
+      },
+    },
+    integrationId: {
+      type: 'keyword',
+      _meta: { description: 'Integration ID', optional: true },
+    },
+    dataStreamId: {
+      type: 'keyword',
+      _meta: { description: 'Data stream ID', optional: true },
+    },
+  },
+  [AutomaticImportTelemetryEventType.PipelineEdited]: {
+    sessionId: {
+      type: 'keyword',
+      _meta: {
+        description: 'The ID to identify all the events in the same session',
+        optional: false,
+      },
+    },
+    integrationId: {
+      type: 'keyword',
+      _meta: { description: 'Integration ID', optional: true },
+    },
+    dataStreamId: {
+      type: 'keyword',
+      _meta: { description: 'Data stream ID', optional: true },
+    },
+    linesAdded: {
+      type: 'long',
+      _meta: {
+        description: 'Number of lines added to the pipeline',
+        optional: false,
+      },
+    },
+    linesRemoved: {
+      type: 'long',
+      _meta: {
+        description: 'Number of lines removed from the pipeline',
+        optional: false,
+      },
+    },
+    netLineChange: {
+      type: 'long',
+      _meta: {
+        description: 'Net change in line count (added - removed)',
+        optional: false,
       },
     },
   },

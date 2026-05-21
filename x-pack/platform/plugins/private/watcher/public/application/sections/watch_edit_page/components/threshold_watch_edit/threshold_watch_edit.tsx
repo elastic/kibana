@@ -26,6 +26,7 @@ import {
   EuiTitle,
   EuiPageHeader,
   EuiPageSection,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -188,6 +189,12 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isIndiciesLoading, setIsIndiciesLoading] = useState<boolean>(false);
   const [isRequestVisible, setIsRequestVisible] = useState<boolean>(false);
+
+  const aggTypePopoverTitleId = useGeneratedHtmlId({ prefix: 'aggTypePopoverTitle' });
+  const aggFieldPopoverTitleId = useGeneratedHtmlId({ prefix: 'aggFieldPopoverTitle' });
+  const groupByPopoverTitleId = useGeneratedHtmlId({ prefix: 'groupByPopoverTitle' });
+  const watchThresholdPopoverTitleId = useGeneratedHtmlId({ prefix: 'watchThresholdPopoverTitle' });
+  const watchDurationPopoverTitleId = useGeneratedHtmlId({ prefix: 'watchDurationPopoverTitle' });
 
   const { watch, setWatchProperty } = useContext(WatchContext);
 
@@ -491,9 +498,10 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                   }}
                   ownFocus
                   anchorPosition="downLeft"
+                  aria-labelledby={aggTypePopoverTitleId}
                 >
                   <div>
-                    <EuiPopoverTitle>
+                    <EuiPopoverTitle id={aggTypePopoverTitleId}>
                       {i18n.translate(
                         'xpack.watcher.sections.watchEdit.threshold.whenButtonLabel',
                         {
@@ -548,9 +556,10 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                       setAggFieldPopoverOpen(false);
                     }}
                     anchorPosition="downLeft"
+                    aria-labelledby={aggFieldPopoverTitleId}
                   >
                     <div>
-                      <EuiPopoverTitle>
+                      <EuiPopoverTitle id={aggFieldPopoverTitleId}>
                         {i18n.translate(
                           'xpack.watcher.sections.watchEdit.threshold.ofButtonLabel',
                           {
@@ -645,9 +654,10 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                   }}
                   ownFocus
                   anchorPosition="downLeft"
+                  aria-labelledby={groupByPopoverTitleId}
                 >
                   <div>
-                    <EuiPopoverTitle>
+                    <EuiPopoverTitle id={groupByPopoverTitleId}>
                       {i18n.translate(
                         'xpack.watcher.sections.watchEdit.threshold.overButtonLabel',
                         {
@@ -763,9 +773,12 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                   }}
                   ownFocus
                   anchorPosition="downLeft"
+                  aria-labelledby={watchThresholdPopoverTitleId}
                 >
                   <div>
-                    <EuiPopoverTitle>{comparators[watch.thresholdComparator].text}</EuiPopoverTitle>
+                    <EuiPopoverTitle id={watchThresholdPopoverTitleId}>
+                      {comparators[watch.thresholdComparator].text}
+                    </EuiPopoverTitle>
                     <EuiFlexGroup>
                       <EuiFlexItem grow={false}>
                         <EuiSelect
@@ -854,9 +867,10 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                   }}
                   ownFocus
                   anchorPosition="downLeft"
+                  aria-labelledby={watchDurationPopoverTitleId}
                 >
                   <div>
-                    <EuiPopoverTitle>
+                    <EuiPopoverTitle id={watchDurationPopoverTitleId}>
                       <FormattedMessage
                         id="xpack.watcher.sections.watchEdit.threshold.forTheLastButtonLabel"
                         defaultMessage="For the last"

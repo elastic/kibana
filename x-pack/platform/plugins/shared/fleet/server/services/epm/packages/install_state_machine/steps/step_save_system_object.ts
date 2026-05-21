@@ -12,6 +12,7 @@ import {
   SO_SEARCH_LIMIT,
   FLEET_INSTALL_FORMAT_VERSION,
 } from '../../../../../constants';
+import { handleNamespaceTemplateRestoreAfterPackageInstall } from '../..';
 import type { Installation } from '../../../../../types';
 
 import { packagePolicyService } from '../../../../package_policy';
@@ -65,6 +66,23 @@ export async function stepSaveSystemObject(context: InstallContext) {
     pkgName
   );
   logger.debug(`Package install - Install status ${updatedPackage?.attributes?.install_status}`);
+  // Recreate namespace-scoped index templates for every namespace opted in on this
+  // package's Installation SO. On first install this is a no-op (opt-in list is empty).
+  if (packageInfo.type === 'integration') {
+    try {
+      await handleNamespaceTemplateRestoreAfterPackageInstall({
+        soClient: savedObjectsClient,
+        esClient,
+        packageName: pkgName,
+        dataStreams: packageInfo.data_streams ?? [],
+      });
+    } catch (err: any) {
+      logger.warn(
+        `[stepSaveSystemObject] Failed to restore namespace templates for ${pkgName}: ${err.message}`
+      );
+    }
+  }
+
   // If the package is flagged with the `keep_policies_up_to_date` flag, upgrade its
   // associated package policies after installation
   if (updatedPackage.attributes.keep_policies_up_to_date) {

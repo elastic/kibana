@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiPopoverTitle,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { RowControlColumn } from '@kbn/discover-utils';
 
@@ -63,15 +64,17 @@ const SelectionRowCell = ({ rowIndex }: { rowIndex: number }) => {
 
 const TestTrailingColumn = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
   return (
     <EuiPopover
       isOpen={isPopoverOpen}
       anchorPosition="upCenter"
       panelPaddingSize="s"
+      aria-labelledby={popoverTitleId}
       button={
         <EuiButtonIcon
           aria-label="show actions"
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           color="text"
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
         />
@@ -79,7 +82,7 @@ const TestTrailingColumn = () => {
       data-test-subj="test-trailing-column-popover-button"
       closePopover={() => setIsPopoverOpen(false)}
     >
-      <EuiPopoverTitle>{'Actions'}</EuiPopoverTitle>
+      <EuiPopoverTitle id={popoverTitleId}>{'Actions'}</EuiPopoverTitle>
       <div style={{ width: 150 }}>
         <button type="button" onClick={() => {}}>
           <EuiFlexGroup alignItems="center" component="span" gutterSize="s">
@@ -119,7 +122,7 @@ export const testLeadingControlColumn: EuiDataGridControlColumn = {
   width: 100,
 };
 
-export const mockRowAdditionalLeadingControls = ['visBarVerticalStacked', 'heart', 'inspect'].map(
+export const mockRowAdditionalLeadingControls = ['chartBarVerticalStack', 'heart', 'inspect'].map(
   (iconType): RowControlColumn => ({
     id: `exampleRowControl-${iconType}`,
     render: (Control, rowProps) => {

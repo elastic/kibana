@@ -71,7 +71,7 @@ describe('SloPopoverAndFlyout', () => {
     renderSloPopover({ canReadSlos: true, canWriteSlos: true });
 
     const headerLink = screen.getByTestId('apmSlosHeaderLink');
-    expect(headerLink.querySelector('[data-euiicon-type="arrowDown"]')).toBeInTheDocument();
+    expect(headerLink.querySelector('[data-euiicon-type="chevronSingleDown"]')).toBeInTheDocument();
   });
 
   it('opens popover when clicking header link', async () => {

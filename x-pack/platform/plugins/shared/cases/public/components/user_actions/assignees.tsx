@@ -163,7 +163,7 @@ export const createAssigneesUserActionBuilder: UserActionBuilder = ({
       userProfiles,
       handleOutlineComment,
       label,
-      icon: 'userAvatar',
+      icon: 'user',
     });
 
     return commonBuilder.build();

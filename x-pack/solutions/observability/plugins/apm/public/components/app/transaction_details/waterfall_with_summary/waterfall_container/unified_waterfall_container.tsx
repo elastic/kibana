@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { Error } from '@kbn/apm-types';
 import type { History } from 'history';
 import React from 'react';
@@ -13,8 +12,10 @@ import { useHistory } from 'react-router-dom';
 import type { TraceItem } from '../../../../../../common/waterfall/unified_trace_item';
 import { fromQuery, toQuery } from '../../../../shared/links/url_helpers';
 import { TraceWaterfall } from '../../../../shared/trace_waterfall';
+import { TRACE_WATERFALL_EBT_ELEMENTS } from '../../../../shared/trace_waterfall/ebt_constants';
 import { useErrorClickHandler } from '../../../../shared/trace_waterfall/use_error_click_handler';
-import { UnifiedWaterfallFlyout } from './waterfall/unified_waterfall_flyout';
+import { useGetServiceBadgeHrefFromRouter } from '../../../../shared/trace_waterfall/use_get_service_badge_href_from_router';
+import { UnifiedWaterfallFlyout } from './unified_waterfall_flyout';
 
 interface Props {
   traceItems: TraceItem[];
@@ -25,6 +26,9 @@ interface Props {
   showCriticalPath: boolean;
   onShowCriticalPathChange: (value: boolean) => void;
   entryTransactionId?: string;
+  traceDocsTotal?: number;
+  maxTraceItems?: number;
+  discoverHref?: string;
 }
 
 const toggleFlyout = ({
@@ -55,9 +59,13 @@ export function UnifiedWaterfallContainer({
   showCriticalPath,
   onShowCriticalPathChange,
   entryTransactionId,
+  traceDocsTotal,
+  maxTraceItems,
+  discoverHref,
 }: Props) {
   const history = useHistory();
   const handleErrorClick = useErrorClickHandler(traceItems);
+  const getServiceBadgeHref = useGetServiceBadgeHrefFromRouter();
 
   const handleNodeClick = (id: string, options?: { flyoutDetailTab?: string }) => {
     toggleFlyout({
@@ -68,28 +76,35 @@ export function UnifiedWaterfallContainer({
   };
 
   return (
-    <EuiFlexGroup direction="column">
-      <EuiFlexItem>
-        <TraceWaterfall
+    <div data-test-subj="waterfallContainer">
+      <TraceWaterfall
+        traceItems={traceItems}
+        errors={errors}
+        onClick={handleNodeClick}
+        onErrorClick={handleErrorClick}
+        getServiceBadgeHref={getServiceBadgeHref}
+        serviceName={serviceName}
+        showLegend
+        showCriticalPathControl
+        agentMarks={agentMarks}
+        showCriticalPath={showCriticalPath}
+        onShowCriticalPathChange={onShowCriticalPathChange}
+        entryTransactionId={entryTransactionId}
+        traceDocsTotal={traceDocsTotal}
+        maxTraceItems={maxTraceItems}
+        discoverHref={discoverHref}
+        ebt={{
+          row: { element: TRACE_WATERFALL_EBT_ELEMENTS.WATERFALL_ROW },
+          errorBadge: { element: TRACE_WATERFALL_EBT_ELEMENTS.WATERFALL_ERROR_BADGE },
+          serviceBadge: { element: TRACE_WATERFALL_EBT_ELEMENTS.WATERFALL_SERVICE_BADGE },
+        }}
+      >
+        <UnifiedWaterfallFlyout
+          waterfallItemId={waterfallItemId}
           traceItems={traceItems}
-          errors={errors}
-          onClick={handleNodeClick}
-          onErrorClick={handleErrorClick}
-          serviceName={serviceName}
-          showLegend
-          showCriticalPathControl
-          agentMarks={agentMarks}
-          showCriticalPath={showCriticalPath}
-          onShowCriticalPathChange={onShowCriticalPathChange}
-          entryTransactionId={entryTransactionId}
-        >
-          <UnifiedWaterfallFlyout
-            waterfallItemId={waterfallItemId}
-            traceItems={traceItems}
-            toggleFlyout={toggleFlyout}
-          />
-        </TraceWaterfall>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          toggleFlyout={toggleFlyout}
+        />
+      </TraceWaterfall>
+    </div>
   );
 }

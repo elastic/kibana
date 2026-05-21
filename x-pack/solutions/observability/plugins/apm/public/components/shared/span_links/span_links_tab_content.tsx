@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { SpanLinks } from '.';
-import type { SpanLinksCount } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
+import type { SpanLinksCount } from '.';
 import { TechnicalPreviewBadge } from '../technical_preview_badge';
 
 interface Props {
@@ -27,7 +27,7 @@ export function getSpanLinksTabContent({ spanLinksCount, traceId, spanId, proces
   return {
     id: 'span_links',
     'data-test-subj': 'spanLinksTab',
-    prepend: <TechnicalPreviewBadge icon="beaker" />,
+    prepend: <TechnicalPreviewBadge icon="flask" />,
     name: (
       <>
         {i18n.translate('xpack.apm.propertiesTable.tabs.spanLinks', {

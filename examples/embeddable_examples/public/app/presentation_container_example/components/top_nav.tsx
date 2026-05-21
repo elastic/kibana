@@ -14,7 +14,7 @@ import type { PublishesUnsavedChanges } from '@kbn/presentation-publishing';
 
 interface Props {
   onSave: () => Promise<void>;
-  resetUnsavedChanges: PublishesUnsavedChanges['resetUnsavedChanges'];
+  onReset: () => void;
   hasUnsavedChanges$: PublishesUnsavedChanges['hasUnsavedChanges$'];
 }
 
@@ -40,7 +40,7 @@ export function TopNav(props: Props) {
             <EuiBadge color="warning">Unsaved changes</EuiBadge>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty disabled={isSaving} onClick={props.resetUnsavedChanges}>
+            <EuiButtonEmpty disabled={isSaving} onClick={props.onReset}>
               Reset
             </EuiButtonEmpty>
           </EuiFlexItem>

@@ -58,6 +58,8 @@ const create = () => {
     minimumScheduleInterval: { value: '1m', enforce: false },
     isAuthenticationTypeAPIKey: jest.fn(),
     getAuthenticationAPIKey: jest.fn(),
+    cloneAPIKey: jest.fn(),
+    cloneApiKeysOnCreate: false,
     getAlertIndicesAlias: jest.fn(),
     alertsService: null,
     backfillClient,

@@ -9,20 +9,21 @@
 
 import { act, renderHook } from '@testing-library/react';
 import React from 'react';
-import { coreMock } from '@kbn/core/public/mocks';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { RunWorkflowResponseDto } from '@kbn/workflows';
 import { useRunWorkflow } from '../..';
+import { createMockWorkflowApi } from '../api/workflows_api.mock';
 import { testQueryClientConfig } from '../test_utils';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
 }));
 
+const mockWorkflowApi = createMockWorkflowApi();
+jest.mock('../api/use_workflows_api', () => ({
+  useWorkflowsApi: () => mockWorkflowApi,
+}));
 const queryClient = new QueryClient(testQueryClientConfig);
-const mockCore = coreMock.createStart();
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
 const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) =>
   React.createElement(QueryClientProvider, { client: queryClient }, children);
@@ -31,16 +32,11 @@ describe('useRunWorkflow', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
-    mockUseKibana.mockReturnValue({
-      services: {
-        http: mockCore.http,
-      },
-    } as unknown as ReturnType<typeof useKibana>);
   });
 
   it('runs workflow via API', async () => {
     const response = { workflowExecutionId: 'execution-1' } as RunWorkflowResponseDto;
-    mockCore.http.post.mockResolvedValue(response);
+    mockWorkflowApi.runWorkflow.mockResolvedValue(response);
 
     const { result } = renderHook(() => useRunWorkflow(), { wrapper });
 
@@ -51,18 +47,14 @@ describe('useRunWorkflow', () => {
       });
     });
 
-    expect(mockCore.http.post).toHaveBeenCalledWith('/api/workflows/workflow-1/run', {
-      body: JSON.stringify({ inputs: { event: { triggerType: 'manual' } } }),
+    expect(mockWorkflowApi.runWorkflow).toHaveBeenCalledWith('workflow-1', {
+      inputs: { event: { triggerType: 'manual' } },
     });
   });
 
   it('throws when http service is unavailable', async () => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
-    mockUseKibana.mockReturnValue({
-      services: {
-        http: null,
-      },
-    } as unknown as ReturnType<typeof useKibana>);
+    mockWorkflowApi.runWorkflow.mockRejectedValue(new Error('HTTP service unavailable'));
 
     const { result } = renderHook(() => useRunWorkflow(), { wrapper });
 
@@ -78,6 +70,6 @@ describe('useRunWorkflow', () => {
       }
     });
 
-    expect(thrownError?.message).toBe('Http service is not available');
+    expect(thrownError?.message).toMatch(/HTTP service unavailable/);
   });
 });

@@ -27,7 +27,7 @@ exports[`FieldIcon renders known field types _source is rendered 1`] = `
   aria-label="_source"
   className="kbnFieldIcon"
   color="gray"
-  iconType="editorCodeBlock"
+  iconType="code"
   size="s"
   title="_source"
 />

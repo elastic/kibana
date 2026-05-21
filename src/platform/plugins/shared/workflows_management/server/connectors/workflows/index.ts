@@ -15,7 +15,9 @@ import type {
 } from '@kbn/actions-plugin/server/types';
 import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
-import { z } from '@kbn/zod';
+import type { TriggerType, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import { validateWorkflowForExecution } from '@kbn/workflows/server';
+import { z } from '@kbn/zod/v4';
 import { api } from './api';
 import { ExecutorParamsSchema, WorkflowsRuleActionParamsSchema } from './schema';
 import {
@@ -25,12 +27,14 @@ import {
 } from './service';
 import * as i18n from './translations';
 import type {
+  AlertStates,
   ExecutorParams,
   ExecutorSubActionRunParams,
   WorkflowsActionParamsType,
   WorkflowsExecutorResultData,
 } from './types';
 import { buildAlertEvent } from '../../../common/utils/build_alert_event';
+import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
 
 const supportedSubActions: string[] = ['run'];
 export type ActionParamsType = WorkflowsActionParamsType;
@@ -41,6 +45,7 @@ export interface WorkflowsRuleActionParams {
   subActionParams: {
     workflowId: string;
     summaryMode?: boolean;
+    alertStates?: AlertStates;
   };
   [key: string]: unknown;
 }
@@ -53,13 +58,14 @@ export interface GetWorkflowsConnectorTypeArgs {
 
 // connector type definition
 export function getConnectorType(
-  deps?: GetWorkflowsConnectorTypeArgs
+  workflowsManagementApi: WorkflowsManagementApi
 ): ConnectorType<
   Record<string, unknown>,
   Record<string, unknown>,
   ExecutorParams,
   WorkflowsExecutorResultData
 > {
+  const args = getWorkflowsConnectorTypeArgs(workflowsManagementApi);
   return {
     id: ConnectorTypeId,
     minimumLicenseRequired: 'gold',
@@ -75,10 +81,74 @@ export function getConnectorType(
         schema: z.object({}).strict(),
       },
     },
-    executor: (execOptions) => executor(execOptions, deps),
+    executor: (execOptions) => executor(execOptions, args),
     supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
     isSystemActionType: true,
     allowMultipleSystemActions: true,
+  };
+}
+
+function getWorkflowsConnectorTypeArgs(
+  workflowsManagementApi: WorkflowsManagementApi
+): GetWorkflowsConnectorTypeArgs {
+  // Create workflows service function for the connector
+  const getWorkflowsService = async (request: KibanaRequest) => {
+    // Return a function that will be called by the connector
+    return async (workflowId: string, spaceId: string, inputs: Record<string, unknown>) => {
+      // Get the workflow and validate it is in a runnable state
+      const workflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId);
+      validateWorkflowForExecution(workflow, workflowId);
+
+      const workflowToRun: WorkflowExecutionEngineModel = {
+        id: workflow.id,
+        name: workflow.name,
+        enabled: workflow.enabled,
+        definition: workflow.definition,
+        yaml: workflow.yaml,
+      };
+
+      // Run the workflow, @tb: maybe switch to scheduler?
+      return workflowsManagementApi.runWorkflow(workflowToRun, spaceId, inputs, request);
+    };
+  };
+
+  // Create workflows scheduling service function for per-alert execution
+  const getScheduleWorkflowService = async (request: KibanaRequest) => {
+    return async (
+      workflowId: string,
+      spaceId: string,
+      inputs: Record<string, unknown>,
+      triggeredBy: TriggerType
+    ) => {
+      if (!workflowsManagementApi) {
+        throw new Error('Workflows management API not initialized');
+      }
+
+      // Get the workflow and validate it is in a runnable state
+      const workflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId);
+      validateWorkflowForExecution(workflow, workflowId);
+
+      const workflowToSchedule: WorkflowExecutionEngineModel = {
+        id: workflow.id,
+        name: workflow.name,
+        enabled: workflow.enabled,
+        definition: workflow.definition,
+        yaml: workflow.yaml,
+      };
+
+      return workflowsManagementApi.scheduleWorkflow(
+        workflowToSchedule,
+        spaceId,
+        inputs,
+        request,
+        triggeredBy
+      );
+    };
+  };
+
+  return {
+    getWorkflowsService,
+    getScheduleWorkflowService,
   };
 }
 
@@ -155,6 +225,20 @@ export async function executor(
   return { status: 'ok', data, actionId };
 }
 
+const DEFAULT_ALERT_STATES: AlertStates = {
+  new: true,
+  ongoing: false,
+  recovered: false,
+};
+
+export function resolveAlertStates(alertStates?: Partial<AlertStates>): AlertStates {
+  return {
+    new: alertStates?.new ?? DEFAULT_ALERT_STATES.new,
+    ongoing: alertStates?.ongoing ?? DEFAULT_ALERT_STATES.ongoing,
+    recovered: alertStates?.recovered ?? DEFAULT_ALERT_STATES.recovered,
+  };
+}
+
 // Connector adapter for system action
 export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
   WorkflowsRuleActionParams,
@@ -177,9 +261,23 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
           );
         }
 
-        // Build alert event using shared utility function
+        const resolvedStates = resolveAlertStates(subActionParams.alertStates);
+
+        const emptyAlertGroup = {
+          count: 0,
+          data: [],
+          alert_count: { active: 0, recovered: 0, ignored: 0 },
+        };
+
+        const filteredAlerts = {
+          ...alerts,
+          new: resolvedStates.new ? alerts.new : emptyAlertGroup,
+          ongoing: resolvedStates.ongoing ? alerts.ongoing : emptyAlertGroup,
+          recovered: resolvedStates.recovered ? alerts.recovered : emptyAlertGroup,
+        };
+
         const alertEvent = buildAlertEvent({
-          alerts,
+          alerts: filteredAlerts,
           rule,
           ruleUrl,
           spaceId,
@@ -192,6 +290,7 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
             inputs: { event: alertEvent },
             spaceId,
             summaryMode,
+            alertStates: resolvedStates,
           },
         };
       } catch (error) {
@@ -201,6 +300,7 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
             workflowId: params?.subActionParams?.workflowId || 'unknown',
             spaceId,
             summaryMode: params?.subActionParams?.summaryMode ?? true,
+            alertStates: resolveAlertStates(params?.subActionParams?.alertStates),
           },
         };
       }

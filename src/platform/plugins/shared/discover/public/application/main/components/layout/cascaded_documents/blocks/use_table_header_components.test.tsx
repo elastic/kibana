@@ -12,7 +12,7 @@ import { renderHook, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@elastic/eui';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen, waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { useGetGroupBySelectorRenderer } from './use_table_header_components';
 
 describe('useTableHeaderComponents', () => {
@@ -125,11 +125,7 @@ describe('useTableHeaderComponents', () => {
 
     await user.hover(groupSelectionButton);
 
-    await waitForEuiToolTipVisible();
-
-    expect(screen.getByText('Cascade experience (Technical preview)')).toBeInTheDocument();
-    expect(
-      screen.getByText('This functionality is in technical preview and is subject to change.')
-    ).toBeInTheDocument();
+    expect(screen.getByText('Grouped results (technical preview)')).toBeInTheDocument();
+    expect(screen.getByText('Results are grouped when running a Stats BY')).toBeInTheDocument();
   });
 });

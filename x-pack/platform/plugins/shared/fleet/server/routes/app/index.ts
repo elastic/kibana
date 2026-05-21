@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import path from 'path';
+
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
@@ -168,8 +170,7 @@ export const GenerateServiceTokenResponseSchema = schema.object({
 
 export const registerRoutes = (
   router: FleetAuthzRouter,
-  experimentalFeatures: ExperimentalFeatures,
-  isServerless?: boolean
+  experimentalFeatures: ExperimentalFeatures
 ) => {
   router.versioned
     .get({
@@ -219,6 +220,7 @@ export const registerRoutes = (
     .get({
       path: APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
       summary: `Check permissions`,
+      description: `Check whether the current user has the required permissions to use Fleet. Optionally verifies Fleet Server setup privileges.`,
       options: {
         tags: ['oas-tag:Fleet internals'],
       },
@@ -232,6 +234,9 @@ export const registerRoutes = (
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_check_permissions.yaml'),
+        },
         validate: {
           request: CheckPermissionsRequestSchema,
           response: {
@@ -267,40 +272,43 @@ export const registerRoutes = (
       getAgentPoliciesSpacesHandler
     );
 
-  if (!isServerless) {
-    router.versioned
-      .post({
-        path: APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN,
-        security: {
-          authz: {
-            requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
-          },
+  router.versioned
+    .post({
+      path: APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
         },
-        summary: `Create a service token`,
+      },
+      summary: `Create a service token`,
+      description: `Create a Fleet Server service token. The token is used to enroll Fleet Server instances with Kibana.`,
+      options: {
+        tags: ['oas-tag:Fleet service tokens'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
         options: {
-          tags: ['oas-tag:Fleet service tokens'],
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/post_generate_service_token.yaml'),
         },
-      })
-      .addVersion(
-        {
-          version: API_VERSIONS.public.v1,
-          validate: {
-            request: GenerateServiceTokenRequestSchema,
-            response: {
-              200: {
-                description: 'OK: A successful request.',
-                body: () => GenerateServiceTokenResponseSchema,
-              },
-              400: {
-                description: 'A bad request.',
-                body: genericErrorResponse,
-              },
+        validate: {
+          request: GenerateServiceTokenRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => GenerateServiceTokenResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
             },
           },
         },
-        generateServiceTokenHandler
-      );
-  }
+      },
+      generateServiceTokenHandler
+    );
 };
 const getTelemetryUsageHandler: FleetRequestHandler = async (context, request, response) => {
   const fetchUsage = appContextService.getFetchUsage();

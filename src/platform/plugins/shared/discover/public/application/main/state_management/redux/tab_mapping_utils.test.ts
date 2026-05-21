@@ -8,8 +8,10 @@
  */
 
 import { omit } from 'lodash';
+import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
+import { mockControlState } from '../../../../__mocks__/esql_controls';
 import { getTabStateMock, getPersistedTabMock } from './__mocks__/internal_state.mocks';
 import {
   fromSavedObjectTabToSearchSource,
@@ -87,6 +89,7 @@ describe('tab mapping utils', () => {
             "headerRowHeight": undefined,
             "hideAggregatedPreview": undefined,
             "hideChart": false,
+            "hideTable": false,
             "interval": undefined,
             "query": undefined,
             "rowHeight": undefined,
@@ -105,6 +108,7 @@ describe('tab mapping utils', () => {
           "cascadedDocumentsState": Object {
             "availableCascadeGroups": Array [],
             "cascadedDocumentsMap": Object {},
+            "columnsMeta": Object {},
             "selectedCascadeGroups": Array [],
           },
           "dataRequestParams": Object {
@@ -113,9 +117,15 @@ describe('tab mapping utils', () => {
             "timeRangeAbsolute": undefined,
             "timeRangeRelative": undefined,
           },
+          "defaultProfileState": Object {
+            "fieldsToReset": "none",
+            "resetId": "",
+            "snapshotsByProfileId": Object {},
+          },
           "duplicatedFromId": "0",
           "esqlVariables": Array [],
           "expandedDoc": undefined,
+          "expandedDocOwner": undefined,
           "forceFetchOnSelect": false,
           "globalState": Object {
             "refreshInterval": Object {
@@ -144,13 +154,7 @@ describe('tab mapping utils', () => {
               "column1",
             ],
           },
-          "resetDefaultProfileState": Object {
-            "breakdownField": false,
-            "columns": false,
-            "hideChart": false,
-            "resetId": "",
-            "rowHeight": false,
-          },
+          "renderDocumentViewMeta": undefined,
           "uiState": Object {},
         }
       `);
@@ -180,6 +184,7 @@ describe('tab mapping utils', () => {
             "headerRowHeight": undefined,
             "hideAggregatedPreview": undefined,
             "hideChart": false,
+            "hideTable": false,
             "interval": undefined,
             "query": undefined,
             "rowHeight": undefined,
@@ -198,6 +203,7 @@ describe('tab mapping utils', () => {
           "cascadedDocumentsState": Object {
             "availableCascadeGroups": Array [],
             "cascadedDocumentsMap": Object {},
+            "columnsMeta": Object {},
             "selectedCascadeGroups": Array [],
           },
           "dataRequestParams": Object {
@@ -206,9 +212,15 @@ describe('tab mapping utils', () => {
             "timeRangeAbsolute": undefined,
             "timeRangeRelative": undefined,
           },
+          "defaultProfileState": Object {
+            "fieldsToReset": "none",
+            "resetId": "",
+            "snapshotsByProfileId": Object {},
+          },
           "duplicatedFromId": "0",
           "esqlVariables": Array [],
           "expandedDoc": undefined,
+          "expandedDocOwner": undefined,
           "forceFetchOnSelect": false,
           "globalState": Object {
             "refreshInterval": Object {
@@ -237,16 +249,41 @@ describe('tab mapping utils', () => {
               "column1",
             ],
           },
-          "resetDefaultProfileState": Object {
-            "breakdownField": false,
-            "columns": false,
-            "hideChart": false,
-            "resetId": "",
-            "rowHeight": false,
-          },
+          "renderDocumentViewMeta": undefined,
           "uiState": Object {},
         }
       `);
+    });
+
+    it('should normalize legacy controlGroupJson when loading saved object tabs', () => {
+      const legacyControlsTab = getTabStateMock({
+        id: 'legacy-controls-tab',
+        label: 'Legacy controls tab',
+        initialInternalState: {
+          serializedSearchSource: { index: 'test-data-view-legacy' },
+        },
+        attributes: {
+          controlGroupState: mockControlState,
+          visContext: undefined,
+        },
+      });
+
+      const tabState = fromSavedObjectTabToTabState({
+        tab: fromTabStateToSavedObjectTab({
+          tab: legacyControlsTab,
+          services,
+          currentDataView: undefined,
+        }),
+        existingTab: tab1,
+      });
+
+      expect(tabState.attributes.controlGroupState).toEqual({
+        ...mockControlState,
+        panel1: {
+          ...mockControlState.panel1,
+          type: ESQL_CONTROL,
+        },
+      });
     });
   });
 
@@ -332,6 +369,7 @@ describe('tab mapping utils', () => {
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
           "hideChart": false,
+          "hideTable": false,
           "id": "the-saved-search-id-with-timefield",
           "isTextBasedQuery": false,
           "managed": true,
@@ -400,6 +438,7 @@ describe('tab mapping utils', () => {
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
           "hideChart": false,
+          "hideTable": false,
           "id": "1",
           "isTextBasedQuery": false,
           "label": "Tab 1",
@@ -439,6 +478,7 @@ describe('tab mapping utils', () => {
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
           "hideChart": false,
+          "hideTable": false,
           "id": "1",
           "isTextBasedQuery": false,
           "label": "Tab 1",
@@ -552,6 +592,7 @@ describe('tab mapping utils', () => {
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
           "hideChart": false,
+          "hideTable": false,
           "id": "1",
           "isTextBasedQuery": false,
           "label": "Tab 1",
@@ -595,6 +636,7 @@ describe('tab mapping utils', () => {
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
           "hideChart": false,
+          "hideTable": false,
           "id": "2",
           "isTextBasedQuery": false,
           "label": "Tab 2",
@@ -651,6 +693,7 @@ describe('tab mapping utils', () => {
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
           "hideChart": false,
+          "hideTable": false,
           "id": "1",
           "isTextBasedQuery": false,
           "label": "Tab 1",
@@ -698,6 +741,7 @@ describe('tab mapping utils', () => {
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
           "hideChart": false,
+          "hideTable": false,
           "id": "2",
           "isTextBasedQuery": false,
           "label": "Tab 2",

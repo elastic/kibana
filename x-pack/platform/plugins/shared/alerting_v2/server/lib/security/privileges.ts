@@ -1,0 +1,102 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { AppCategory } from '@kbn/core/types';
+import { APP_ID } from '../constants';
+import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+
+const ALERTS_FEATURE_ID = 'alerting_v2_alerts';
+const RULES_FEATURE_ID = 'alerting_v2_rules';
+const CATEGORY_ID = 'alerting';
+
+export const ALERTING_V2_API_PRIVILEGES = {
+  rules: {
+    read: 'read-alerting-v2-rules',
+    write: 'write-alerting-v2-rules',
+  },
+  alerts: {
+    read: 'read-alerting-v2-alerts',
+    write: 'write-alerting-v2-alerts',
+  },
+  actionPolicies: {
+    read: 'read-alerting-v2-action-policies',
+    write: 'write-alerting-v2-action-policies',
+  },
+  ruleDoctor: {
+    read: 'read-alerting-v2-rule-doctor',
+    write: 'write-alerting-v2-rule-doctor',
+  },
+} as const;
+
+const ALERTING_V2_SAVED_OBJECT_TYPES = [
+  RULE_SAVED_OBJECT_TYPE,
+  ACTION_POLICY_SAVED_OBJECT_TYPE,
+] as const;
+
+const getPrivileges = () => ({
+  all: {
+    app: [APP_ID],
+    savedObject: {
+      all: [...ALERTING_V2_SAVED_OBJECT_TYPES],
+      read: [],
+    },
+    ui: [],
+    api: [
+      ALERTING_V2_API_PRIVILEGES.rules.read,
+      ALERTING_V2_API_PRIVILEGES.rules.write,
+      ALERTING_V2_API_PRIVILEGES.alerts.read,
+      ALERTING_V2_API_PRIVILEGES.alerts.write,
+      ALERTING_V2_API_PRIVILEGES.actionPolicies.read,
+      ALERTING_V2_API_PRIVILEGES.actionPolicies.write,
+      ALERTING_V2_API_PRIVILEGES.ruleDoctor.read,
+      ALERTING_V2_API_PRIVILEGES.ruleDoctor.write,
+    ],
+  },
+  read: {
+    app: [APP_ID],
+    savedObject: {
+      all: [],
+      read: [...ALERTING_V2_SAVED_OBJECT_TYPES],
+    },
+    ui: [],
+    api: [
+      ALERTING_V2_API_PRIVILEGES.rules.read,
+      ALERTING_V2_API_PRIVILEGES.alerts.read,
+      ALERTING_V2_API_PRIVILEGES.actionPolicies.read,
+      ALERTING_V2_API_PRIVILEGES.ruleDoctor.read,
+    ],
+  },
+});
+
+const category: AppCategory = {
+  id: CATEGORY_ID,
+  label: 'Alerting',
+  order: 1000,
+  euiIconType: 'watchesApp',
+};
+
+const alertsFeature = {
+  id: ALERTS_FEATURE_ID,
+  name: 'Alerts',
+  category,
+  app: [APP_ID],
+  privileges: getPrivileges(),
+};
+
+const rulesFeature = {
+  id: RULES_FEATURE_ID,
+  name: 'Rules',
+  category,
+  app: [APP_ID],
+  privileges: getPrivileges(),
+};
+
+export const registerFeaturePrivileges = (features: FeaturesPluginSetup) => {
+  features.registerKibanaFeature(alertsFeature);
+  features.registerKibanaFeature(rulesFeature);
+};

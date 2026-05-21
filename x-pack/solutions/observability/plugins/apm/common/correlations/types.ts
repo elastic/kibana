@@ -5,35 +5,14 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { Environment } from '../environment_rt';
-
-export interface FieldValuePair {
-  fieldName: string;
-  // For dynamic fieldValues we only identify fields as `string`,
-  // but for example `http.response.status_code` which is part of
-  // of the list of predefined field candidates is of type long/number.
-  fieldValue: string | number;
-  isFallbackResult?: boolean;
-}
-
-export interface HistogramItem {
-  key: number;
-  doc_count: number;
-}
-
-export interface ResponseHitSource {
-  [s: string]: unknown;
-}
-
-export interface ResponseHit {
-  _source: ResponseHitSource;
-}
-
-export interface CommonCorrelationsQueryParams {
-  start: number;
-  end: number;
-  kuery: string;
-  environment: Environment;
-  query: QueryDslQueryContainer;
-}
+export type {
+  FieldValuePair,
+  HistogramItem,
+  ResponseHitSource,
+  ResponseHit,
+  CommonCorrelationsQueryParams,
+  EntityType,
+  MetricCorrelation as Metric,
+  UnifiedCorrelation,
+  CorrelationsResponse,
+} from '@kbn/apm-types';

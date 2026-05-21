@@ -60,7 +60,7 @@ const IconFromAccessorConfig = ({ accessorConfig }: { accessorConfig: AccessorCo
       )}
       {accessorConfig.triggerIconType === 'invisible' && (
         <EuiIcon
-          type="eyeClosed"
+          type="eyeSlash"
           color="subdued"
           aria-label={i18n.translate(
             'visualizationUiComponents.dimensionButtonIcon.invisibleIndicatorLabel',
@@ -134,7 +134,7 @@ export function DimensionButtonIcon({
         )}
         {severity && (
           <EuiFlexItem grow={false}>
-            <EuiIcon type={severity === 'error' ? 'error' : 'alert'} />
+            <EuiIcon type={severity === 'error' ? 'error' : 'alert'} aria-hidden={true} />
           </EuiFlexItem>
         )}
       </>

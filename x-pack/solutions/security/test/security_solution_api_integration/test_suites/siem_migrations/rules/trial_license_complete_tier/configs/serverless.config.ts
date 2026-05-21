@@ -19,6 +19,7 @@ export default createTestConfig({
     `--xpack.securitySolution.enableExperimental=${JSON.stringify([
       'automaticDashboardsMigration',
       'qradarRulesMigration',
+      'sentinelRulesMigration',
     ])}`,
   ],
   testFiles: [require.resolve('..')],

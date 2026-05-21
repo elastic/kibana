@@ -4,20 +4,20 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/home-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/home-plugin'
+  title: '@kbn/home-plugin'
   description: Moon project for @kbn/home-plugin
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/platform/plugins/shared/home
+  sourceRoot: src/platform/plugins/shared/home
 dependsOn:
+  - '@kbn/scout'
   - '@kbn/core'
   - '@kbn/data-views-plugin'
   - '@kbn/custom-integrations-plugin'
@@ -39,12 +39,12 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/ebt-tools'
   - '@kbn/core-analytics-server'
-  - '@kbn/storybook'
   - '@kbn/shared-ux-router'
   - '@kbn/core-http-common'
   - '@kbn/core-http-browser'
   - '@kbn/react-kibana-context-theme'
   - '@kbn/css-utils'
+  - '@kbn/shared-ux-utility'
 tags:
   - plugin
   - prod
@@ -57,17 +57,8 @@ fileGroups:
     - public/**/*
     - server/**/*
     - .storybook/**/*
+    - test/scout/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

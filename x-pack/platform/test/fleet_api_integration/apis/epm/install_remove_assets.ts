@@ -18,7 +18,7 @@ import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../
 import { cleanFleetIndices } from '../space_awareness/helpers';
 
 function checkErrorWithResponseDataOrThrow(err: any) {
-  if (!err?.response?.data) {
+  if (err?.status === undefined) {
     throw err;
   }
 }
@@ -268,7 +268,7 @@ export default function (providerContext: FtrProviderContext) {
           checkErrorWithResponseDataOrThrow(err);
           resDashboard = err;
         }
-        expect(resDashboard.response.data.statusCode).equal(404);
+        expect(resDashboard.status).equal(404);
         let resDashboard2;
         try {
           resDashboard2 = await kibanaServer.savedObjects.get({
@@ -279,7 +279,7 @@ export default function (providerContext: FtrProviderContext) {
           checkErrorWithResponseDataOrThrow(err);
           resDashboard2 = err;
         }
-        expect(resDashboard2.response.data.statusCode).equal(404);
+        expect(resDashboard2.status).equal(404);
         let resVis;
         try {
           resVis = await kibanaServer.savedObjects.get({
@@ -290,7 +290,7 @@ export default function (providerContext: FtrProviderContext) {
           checkErrorWithResponseDataOrThrow(err);
           resVis = err;
         }
-        expect(resVis.response.data.statusCode).equal(404);
+        expect(resVis.status).equal(404);
         let resSearch;
         try {
           resVis = await kibanaServer.savedObjects.get({
@@ -301,7 +301,7 @@ export default function (providerContext: FtrProviderContext) {
           checkErrorWithResponseDataOrThrow(err);
           resSearch = err;
         }
-        expect(resSearch.response.data.statusCode).equal(404);
+        expect(resSearch.status).equal(404);
         let resIndexPattern;
         try {
           resIndexPattern = await kibanaServer.savedObjects.get({
@@ -312,7 +312,7 @@ export default function (providerContext: FtrProviderContext) {
           checkErrorWithResponseDataOrThrow(err);
           resIndexPattern = err;
         }
-        expect(resIndexPattern.response.data.statusCode).equal(404);
+        expect(resIndexPattern.status).equal(404);
         let resOsqueryPackAsset;
         try {
           resOsqueryPackAsset = await kibanaServer.savedObjects.get({
@@ -323,7 +323,7 @@ export default function (providerContext: FtrProviderContext) {
           checkErrorWithResponseDataOrThrow(err);
           resOsqueryPackAsset = err;
         }
-        expect(resOsqueryPackAsset.response.data.statusCode).equal(404);
+        expect(resOsqueryPackAsset.status).equal(404);
         let resOsquerySavedQuery;
         try {
           resOsquerySavedQuery = await kibanaServer.savedObjects.get({
@@ -334,7 +334,7 @@ export default function (providerContext: FtrProviderContext) {
           checkErrorWithResponseDataOrThrow(err);
           resOsquerySavedQuery = err;
         }
-        expect(resOsquerySavedQuery.response.data.statusCode).equal(404);
+        expect(resOsquerySavedQuery.status).equal(404);
         let securityAiPrompt;
         try {
           securityAiPrompt = await kibanaServer.savedObjects.get({
@@ -345,7 +345,7 @@ export default function (providerContext: FtrProviderContext) {
           checkErrorWithResponseDataOrThrow(err);
           securityAiPrompt = err;
         }
-        expect(securityAiPrompt.response.data.statusCode).equal(404);
+        expect(securityAiPrompt.status).equal(404);
       });
       it('should have removed the saved object', async function () {
         let res;
@@ -358,7 +358,7 @@ export default function (providerContext: FtrProviderContext) {
           checkErrorWithResponseDataOrThrow(err);
           res = err;
         }
-        expect(res.response.data.statusCode).equal(404);
+        expect(res.status).equal(404);
       });
     });
 
@@ -655,7 +655,7 @@ const expectAssetsInstalled = ({
       checkErrorWithResponseDataOrThrow(err);
       resInvalidTypeIndexPattern = err;
     }
-    expect(resInvalidTypeIndexPattern.response.data.statusCode).equal(404);
+    expect(resInvalidTypeIndexPattern.status).equal(404);
   });
   it('should not add fields to the index patterns', async () => {
     const resIndexPatternLogs = await kibanaServer.savedObjects.get({
@@ -1330,10 +1330,13 @@ const expectAssetsInstalled = ({
             )
           ).to.not.be(undefined);
         });
+      const installedAsDependency = sortedRes.installed_as_dependency;
+      delete sortedRes.installed_as_dependency;
       expect({ ...sortedRes, installed_es: [] }).eql({
         ...expectedSavedObject,
         installed_es: [],
       });
+      expect(Boolean(installedAsDependency)).eql(false);
     }
 
     await verifySO();

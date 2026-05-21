@@ -37,7 +37,7 @@ jest.mock('../../components/template_preview', () => ({
 }));
 
 jest.mock('../../../../common/use_cases_local_storage', () => ({
-  useCasesLocalStorage: () => ['', jest.fn()],
+  useCasesLocalStorage: () => ['', jest.fn(), jest.fn()],
 }));
 
 jest.mock('../../../use_breadcrumbs', () => ({
@@ -70,6 +70,7 @@ describe('EditTemplatePage', () => {
         name: 'Test Template',
         owner: 'cases',
         definition: { name: 'Test Template', fields: [] },
+        definitionString: 'name: Test Template\nfields: []',
         templateVersion: 2,
         deletedAt: null,
         isLatest: true,
@@ -85,12 +86,12 @@ describe('EditTemplatePage', () => {
     expect(screen.getByTestId('template-yaml-editor')).toBeInTheDocument();
   });
 
-  it('shows loading state when template is not yet available', () => {
+  it('renders nothing when template is loading and not yet available', () => {
     mockUseTemplateViewParams.mockReturnValue({ templateId: 'template-123' });
     mockUseGetTemplate.mockReturnValue({ data: undefined, isLoading: true });
 
-    render(<EditTemplatePage />);
+    const { container } = render(<EditTemplatePage />);
 
-    expect(screen.getByTestId('layout-loading')).toBeInTheDocument();
+    expect(container).toBeEmptyDOMElement();
   });
 });

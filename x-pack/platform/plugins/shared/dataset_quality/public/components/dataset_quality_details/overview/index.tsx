@@ -14,7 +14,9 @@ import {
   EuiSkeletonTitle,
   EuiSpacer,
   EuiSplitPanel,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { QualityIssueType } from '../../../state_machines/dataset_quality_details_controller';
 import { useDatasetQualityDetailsState } from '../../../hooks';
 import { AggregationNotSupported } from './aggregation_not_supported';
@@ -56,6 +58,7 @@ const QualitySummaryCards = dynamic(() => import('./quality_summary_cards'), {
 const DocumentTrends = dynamic(() => import('./document_trends'));
 
 export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
+  const { euiTheme } = useEuiTheme();
   const {
     dataStream,
     isNonAggregatable,
@@ -103,7 +106,13 @@ export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
         hasShadow={false}
         hasBorder={true}
       >
-        <EuiSplitPanel.Inner color="subdued" grow={false}>
+        <EuiSplitPanel.Inner
+          color="subdued"
+          grow={false}
+          css={css`
+            border-right: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+          `}
+        >
           <QualitySummaryCards
             selectedCard={selectedQualityCard}
             setSelectedCard={setSelectedQualityCard}
@@ -121,7 +130,7 @@ export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="xxl" />
       <QualityIssues />
     </>
   );

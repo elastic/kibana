@@ -9,9 +9,9 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { esqlColumnOperationWithLabelAndFormatSchema, esqlColumnSchema } from '../metric_ops';
-import { colorMappingSchema, staticColorSchema } from '../color';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { esqlColumnWithFormatSchema } from '../metric_ops';
+import { colorMappingSchema, staticColorSchema, autoColorSchema, AUTO_COLOR } from '../color';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import {
   collapseBySchema,
   dslOnlyPanelInfoSchema,
@@ -19,21 +19,16 @@ import {
   sharedPanelInfoSchema,
   legendTruncateAfterLinesSchema,
 } from '../shared';
-import {
-  legendVisibleSchema,
-  validateMultipleMetricsCriteria,
-  valueDisplaySchema,
-} from './partition_shared';
+import { validateMultipleMetricsCriteria, valueDisplaySchema } from './partition_shared';
 import {
   legendSizeSchema,
+  legendVisibilitySchemaWithAuto,
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
+import { objectUnion } from './utils/object_union';
 
-/**
- * Shared visualization options for partition charts including legend and value display
- */
-export const waffleStateSharedSchema = {
+const waffleConfigSharedSchema = {
   legend: schema.maybe(
     schema.object(
       {
@@ -49,7 +44,7 @@ export const waffleStateSharedSchema = {
           )
         ),
         truncate_after_lines: legendTruncateAfterLinesSchema,
-        visible: legendVisibleSchema,
+        visibility: legendVisibilitySchemaWithAuto,
         size: legendSizeSchema,
       },
       {
@@ -61,23 +56,39 @@ export const waffleStateSharedSchema = {
       }
     )
   ),
-  value_display: valueDisplaySchema,
 };
+
+const waffleStylingSchema = schema.object(
+  {
+    values: valueDisplaySchema,
+  },
+  {
+    meta: {
+      id: 'waffleStyling',
+      title: 'Waffle styling',
+      description: 'Visual chart styling options',
+    },
+  }
+);
 
 /**
  * Color configuration for primary metric in waffle chart
  */
-const partitionStatePrimaryMetricOptionsSchema = {
+const partitionConfigPrimaryMetricOptionsSchema = {
   /**
    * Color configuration
    */
-  color: schema.maybe(staticColorSchema),
+  color: schema.maybe(
+    schema.oneOf([staticColorSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
+    })
+  ),
 };
 
 /**
  * Breakdown configuration including color mapping and collapse behavior
  */
-const partitionStateBreakdownByOptionsSchema = {
+const partitionConfigBreakdownByOptionsSchema = {
   color: schema.maybe(colorMappingSchema),
   collapse_by: schema.maybe(collapseBySchema),
 };
@@ -85,18 +96,19 @@ const partitionStateBreakdownByOptionsSchema = {
 /**
  * Waffle chart configuration for standard (non-ES|QL) queries
  */
-export const waffleStateSchemaNoESQL = schema.object(
+export const waffleConfigSchemaNoESQL = schema.object(
   {
     type: schema.literal('waffle'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     ...dslOnlyPanelInfoSchema,
-    ...waffleStateSharedSchema,
-    ...dslOnlyPanelInfoSchema,
+    ...waffleConfigSharedSchema,
+    styling: schema.maybe(waffleStylingSchema),
     metrics: schema.arrayOf(
       mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
-        partitionStatePrimaryMetricOptionsSchema
+        partitionConfigPrimaryMetricOptionsSchema,
+        'waffleMetric'
       ),
       {
         minSize: 1,
@@ -106,7 +118,10 @@ export const waffleStateSchemaNoESQL = schema.object(
     ),
     group_by: schema.maybe(
       schema.arrayOf(
-        mergeAllBucketsWithChartDimensionSchema(partitionStateBreakdownByOptionsSchema),
+        mergeAllBucketsWithChartDimensionSchema(
+          partitionConfigBreakdownByOptionsSchema,
+          'waffleGroupBy'
+        ),
         {
           minSize: 1,
           maxSize: 100,
@@ -128,15 +143,16 @@ export const waffleStateSchemaNoESQL = schema.object(
 /**
  * Waffle chart configuration for ES|QL queries
  */
-export const waffleStateSchemaESQL = schema.object(
+export const waffleConfigSchemaESQL = schema.object(
   {
     type: schema.literal('waffle'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
-    ...waffleStateSharedSchema,
+    ...dataSourceEsqlTableSchema,
+    ...waffleConfigSharedSchema,
+    styling: schema.maybe(waffleStylingSchema),
     metrics: schema.arrayOf(
-      esqlColumnOperationWithLabelAndFormatSchema.extends(partitionStatePrimaryMetricOptionsSchema),
+      esqlColumnWithFormatSchema.extends(partitionConfigPrimaryMetricOptionsSchema),
       {
         minSize: 1,
         maxSize: 100,
@@ -144,7 +160,7 @@ export const waffleStateSchemaESQL = schema.object(
       }
     ),
     group_by: schema.maybe(
-      schema.arrayOf(esqlColumnSchema.extends(partitionStateBreakdownByOptionsSchema), {
+      schema.arrayOf(esqlColumnWithFormatSchema.extends(partitionConfigBreakdownByOptionsSchema), {
         minSize: 1,
         maxSize: 100,
         meta: { description: 'Array of ES|QL breakdown columns (minimum 1)' },
@@ -164,7 +180,7 @@ export const waffleStateSchemaESQL = schema.object(
 /**
  * Complete waffle chart configuration supporting both standard and ES|QL queries
  */
-export const waffleStateSchema = schema.oneOf([waffleStateSchemaNoESQL, waffleStateSchemaESQL], {
+export const waffleConfigSchema = objectUnion([waffleConfigSchemaNoESQL, waffleConfigSchemaESQL], {
   meta: {
     id: 'waffleChart',
     title: 'Waffle Chart',
@@ -172,6 +188,6 @@ export const waffleStateSchema = schema.oneOf([waffleStateSchemaNoESQL, waffleSt
   },
 });
 
-export type WaffleState = TypeOf<typeof waffleStateSchema>;
-export type WaffleStateNoESQL = TypeOf<typeof waffleStateSchemaNoESQL>;
-export type WaffleStateESQL = TypeOf<typeof waffleStateSchemaESQL>;
+export type WaffleConfig = TypeOf<typeof waffleConfigSchema>;
+export type WaffleConfigNoESQL = TypeOf<typeof waffleConfigSchemaNoESQL>;
+export type WaffleConfigESQL = TypeOf<typeof waffleConfigSchemaESQL>;

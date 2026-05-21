@@ -8,7 +8,6 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import type { FC } from 'react';
 import { useForm } from 'react-hook-form';
-import { dump as yamlDump } from 'js-yaml';
 import { useTemplateViewParams, useCasesTemplatesNavigation } from '../../../../common/navigation';
 import type { YamlEditorFormValues } from '../../components/template_form';
 import { useGetTemplate } from '../../hooks/use_get_template';
@@ -29,10 +28,9 @@ export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
 
   useCasesTemplatesBreadcrumbs(template?.name ?? i18n.EDIT_TEMPLATE_TITLE);
 
-  // Server version as initial value - useDebouncedYamlEdit will use WIP from storage if exists
   const serverDefinition = useMemo(() => {
     if (template) {
-      return yamlDump(template.definition, { lineWidth: -1 }).trimEnd();
+      return template.definitionString.trimEnd();
     }
     return '';
   }, [template]);
@@ -48,14 +46,13 @@ export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
       return;
     }
 
-    const definition = yamlDump(template.definition, { lineWidth: -1 }).trimEnd();
     form.reset({
-      definition,
+      definition: template.definitionString.trimEnd(),
     });
   }, [form, template]);
 
   const handleSave = useCallback(
-    async (data: YamlEditorFormValues) => {
+    async (data: YamlEditorFormValues, isEnabled: boolean) => {
       if (!templateId) {
         return;
       }
@@ -63,6 +60,7 @@ export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
         templateId,
         template: {
           definition: data.definition,
+          isEnabled,
         },
       });
       navigateToCasesTemplates();
@@ -70,17 +68,21 @@ export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
     [mutateAsync, navigateToCasesTemplates, templateId]
   );
 
+  if (isLoading && !template) {
+    return null;
+  }
+
   return (
     <TemplateFormLayout
       form={form}
       title={i18n.EDIT_TEMPLATE_TITLE}
-      isLoading={isLoading && !template}
       isSaving={isSaving}
       onCreate={handleSave}
       isEdit
       storageKey={LOCAL_STORAGE_KEYS.templatesYamlEditorEditState}
       initialValue={serverDefinition}
       templateId={templateId}
+      initialIsEnabled={template?.isEnabled}
     />
   );
 };

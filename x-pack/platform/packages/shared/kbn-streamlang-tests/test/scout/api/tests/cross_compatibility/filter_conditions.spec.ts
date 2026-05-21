@@ -9,6 +9,7 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { SetProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
+import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
@@ -30,8 +31,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       // ES|QL needs a mapping doc for the new field
       const mappingDoc = { attributes: { status: 'null', is_active: 'null' } };
@@ -53,8 +54,8 @@ apiTest.describe(
       expect(ingestResult[0]).toStrictEqual(
         expect.objectContaining({ attributes: { status: 'active', is_active: 'yes' } })
       );
-      expect(ingestResult[1].attributes?.is_active).toBeUndefined();
-      expect(ingestResult[2].attributes?.is_active).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[1])?.attributes)?.is_active).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[2])?.attributes)?.is_active).toBeUndefined();
 
       expect(esqlResult.documentsOrdered[1]).toStrictEqual(
         expect.objectContaining({ 'attributes.status': 'active', 'attributes.is_active': 'yes' })
@@ -82,8 +83,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const mappingDoc = { attributes: { status: 'null', not_deleted: 'null' } };
       const docs = [
@@ -101,7 +102,7 @@ apiTest.describe(
       expect(ingestResult[0]).toStrictEqual(
         expect.objectContaining({ attributes: { status: 'active', not_deleted: 'kept' } })
       );
-      expect(ingestResult[1].attributes?.not_deleted).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[1])?.attributes)?.not_deleted).toBeUndefined();
       expect(ingestResult[2]).toStrictEqual(
         expect.objectContaining({ attributes: { status: 'inactive', not_deleted: 'kept' } })
       );
@@ -120,6 +121,59 @@ apiTest.describe(
       );
     });
 
+    apiTest(
+      'neq fires on documents where the condition field is missing (parity with not(eq))',
+      async ({ testBed, esql }) => {
+        // A missing field "is not equal to" any concrete value, so `neq: "deleted"` must
+        // fire the `set` for documents without `attributes.status`. Both transpilers must
+        // agree, mirroring `not(eq)` and Query DSL semantics.
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'set',
+              to: 'attributes.not_deleted',
+              value: 'kept',
+              where: {
+                field: 'attributes.status',
+                neq: 'deleted',
+              },
+            } as SetProcessor,
+          ],
+        };
+
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
+
+        const mappingDoc = { attributes: { status: 'null', not_deleted: 'null' } };
+        const docs = [
+          { attributes: { status: 'deleted' } },
+          // Document with missing condition field — exercises the neq-on-missing case.
+          { attributes: { other: 'value' } },
+        ];
+
+        await testBed.ingest('ingest-neq-missing', docs, processors);
+        const ingestResult = await testBed.getDocsOrdered('ingest-neq-missing');
+
+        await testBed.ingest('esql-neq-missing', [mappingDoc, ...docs]);
+        const esqlResult = await esql.queryOnIndex('esql-neq-missing', query);
+
+        // Deleted doc: set does NOT fire (positive match against "deleted").
+        expect(asDoc(asDoc(ingestResult[0])?.attributes)?.not_deleted).toBeUndefined();
+        expect(esqlResult.documentsOrdered[1]).toStrictEqual(
+          expect.objectContaining({
+            'attributes.status': 'deleted',
+            'attributes.not_deleted': null,
+          })
+        );
+
+        // Missing-status doc: set DOES fire on both transpilers.
+        expect(asDoc(asDoc(ingestResult[1])?.attributes)?.not_deleted).toBe('kept');
+        expect(esqlResult.documentsOrdered[2]).toStrictEqual(
+          expect.objectContaining({ 'attributes.not_deleted': 'kept' })
+        );
+      }
+    );
+
     apiTest('should handle gt (greater than) filter condition', async ({ testBed, esql }) => {
       const streamlangDSL: StreamlangDSL = {
         steps: [
@@ -135,8 +189,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const mappingDoc = { attributes: { priority: 0, high_priority: 'null' } };
       const docs = [
@@ -158,8 +212,8 @@ apiTest.describe(
       expect(ingestResult[1]).toStrictEqual(
         expect.objectContaining({ attributes: { priority: 8, high_priority: 'high' } })
       );
-      expect(ingestResult[2].attributes?.high_priority).toBeUndefined();
-      expect(ingestResult[3].attributes?.high_priority).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[2])?.attributes)?.high_priority).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[3])?.attributes)?.high_priority).toBeUndefined();
 
       expect(esqlResult.documentsOrdered[1]).toStrictEqual(
         expect.objectContaining({ 'attributes.priority': 10, 'attributes.high_priority': 'high' })
@@ -192,8 +246,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const mappingDoc = { attributes: { age: 0, adult: 'null' } };
         const docs = [
@@ -214,7 +268,7 @@ apiTest.describe(
         expect(ingestResult[1]).toStrictEqual(
           expect.objectContaining({ attributes: { age: 18, adult: 'yes' } })
         );
-        expect(ingestResult[2].attributes?.adult).toBeUndefined();
+        expect(asDoc(asDoc(ingestResult[2])?.attributes)?.adult).toBeUndefined();
 
         expect(esqlResult.documentsOrdered[1]).toStrictEqual(
           expect.objectContaining({ 'attributes.age': 25, 'attributes.adult': 'yes' })
@@ -243,8 +297,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const mappingDoc = { attributes: { quantity: 100, low_stock: 'null' } };
       const docs = [
@@ -266,8 +320,8 @@ apiTest.describe(
       expect(ingestResult[1]).toStrictEqual(
         expect.objectContaining({ attributes: { quantity: 8, low_stock: 'low' } })
       );
-      expect(ingestResult[2].attributes?.low_stock).toBeUndefined();
-      expect(ingestResult[3].attributes?.low_stock).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[2])?.attributes)?.low_stock).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[3])?.attributes)?.low_stock).toBeUndefined();
 
       expect(esqlResult.documentsOrdered[1]).toStrictEqual(
         expect.objectContaining({ 'attributes.quantity': 5, 'attributes.low_stock': 'low' })
@@ -300,8 +354,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const mappingDoc = { attributes: { size: 1000, small_file: 'null' } };
         const docs = [
@@ -322,7 +376,7 @@ apiTest.describe(
         expect(ingestResult[1]).toStrictEqual(
           expect.objectContaining({ attributes: { size: 1024, small_file: 'small' } })
         );
-        expect(ingestResult[2].attributes?.small_file).toBeUndefined();
+        expect(asDoc(asDoc(ingestResult[2])?.attributes)?.small_file).toBeUndefined();
 
         expect(esqlResult.documentsOrdered[1]).toStrictEqual(
           expect.objectContaining({ 'attributes.size': 512, 'attributes.small_file': 'small' })
@@ -351,8 +405,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const mappingDoc = {
         attributes: { user_email: 'null', user_name: 'null', has_email: 'null' },
@@ -369,11 +423,11 @@ apiTest.describe(
       await testBed.ingest('esql-exists', [mappingDoc, ...docs]);
       const esqlResult = await esql.queryOnIndex('esql-exists', query);
 
-      expect(ingestResult[0].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[0])?.attributes).toStrictEqual(
         expect.objectContaining({ user_email: 'test@example.com', has_email: 'yes' })
       );
-      expect(ingestResult[1].attributes?.has_email).toBeUndefined();
-      expect(ingestResult[2].attributes).toStrictEqual(
+      expect(asDoc(asDoc(ingestResult[1])?.attributes)?.has_email).toBeUndefined();
+      expect(asDoc(ingestResult[2])?.attributes).toStrictEqual(
         expect.objectContaining({ user_email: 'another@example.com', has_email: 'yes' })
       );
 
@@ -412,8 +466,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const mappingDoc = { attributes: { temperature: 0, in_range: 'null' } };
       const docs = [
@@ -430,15 +484,15 @@ apiTest.describe(
       await testBed.ingest('esql-range', [mappingDoc, ...docs]);
       const esqlResult = await esql.queryOnIndex('esql-range', query);
 
-      expect(ingestResult[0].attributes?.in_range).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[0])?.attributes)?.in_range).toBeUndefined();
       expect(ingestResult[1]).toStrictEqual(
         expect.objectContaining({ attributes: { temperature: 20, in_range: 'optimal' } })
       );
       expect(ingestResult[2]).toStrictEqual(
         expect.objectContaining({ attributes: { temperature: 25, in_range: 'optimal' } })
       );
-      expect(ingestResult[3].attributes?.in_range).toBeUndefined();
-      expect(ingestResult[4].attributes?.in_range).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[3])?.attributes)?.in_range).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[4])?.attributes)?.in_range).toBeUndefined();
 
       expect(esqlResult.documentsOrdered[1]).toStrictEqual(
         expect.objectContaining({ 'attributes.temperature': 15, 'attributes.in_range': null })
@@ -472,8 +526,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const mappingDoc = { attributes: { service_name: 'null', matched: 'null' } };
       const docs = [
@@ -493,28 +547,28 @@ apiTest.describe(
       await testBed.ingest('esql-contains', [mappingDoc, ...docs]);
       const esqlResult = await esql.queryOnIndex('esql-contains', query);
 
-      expect(ingestResult[0].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[0])?.attributes).toStrictEqual(
         expect.objectContaining({ service_name: 'synth-service-2', matched: 'matched' })
       );
-      expect(ingestResult[1].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[1])?.attributes).toStrictEqual(
         expect.objectContaining({
           service_name: 'prefix-synth-service-2-suffix',
           matched: 'matched',
         })
       );
-      expect(ingestResult[2].attributes?.matched).toBeUndefined();
-      expect(ingestResult[3].attributes?.matched).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[2])?.attributes)?.matched).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[3])?.attributes)?.matched).toBeUndefined();
       // Case-insensitive matches
-      expect(ingestResult[4].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[4])?.attributes).toStrictEqual(
         expect.objectContaining({ service_name: 'SYNTH-SERVICE-2', matched: 'matched' })
       );
-      expect(ingestResult[5].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[5])?.attributes).toStrictEqual(
         expect.objectContaining({
           service_name: 'prefix-Synth-Service-2-suffix',
           matched: 'matched',
         })
       );
-      expect(ingestResult[6].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[6])?.attributes).toStrictEqual(
         expect.objectContaining({ service_name: 'SyNtH-sErViCe-2', matched: 'matched' })
       );
 
@@ -578,8 +632,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const mappingDoc = { attributes: { message: 'null', is_error: 'null' } };
       const docs = [
@@ -595,14 +649,14 @@ apiTest.describe(
       await testBed.ingest('esql-startswith', [mappingDoc, ...docs]);
       const esqlResult = await esql.queryOnIndex('esql-startswith', query);
 
-      expect(ingestResult[0].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[0])?.attributes).toStrictEqual(
         expect.objectContaining({ message: 'Error: Connection failed', is_error: 'error' })
       );
-      expect(ingestResult[1].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[1])?.attributes).toStrictEqual(
         expect.objectContaining({ message: 'Error: Timeout occurred', is_error: 'error' })
       );
-      expect(ingestResult[2].attributes?.is_error).toBeUndefined();
-      expect(ingestResult[3].attributes?.is_error).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[2])?.attributes)?.is_error).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[3])?.attributes)?.is_error).toBeUndefined();
 
       expect(esqlResult.documentsOrdered[1]).toStrictEqual(
         expect.objectContaining({
@@ -645,8 +699,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const mappingDoc = { attributes: { filename: 'null', is_log_file: 'null' } };
       const docs = [
@@ -662,14 +716,14 @@ apiTest.describe(
       await testBed.ingest('esql-endswith', [mappingDoc, ...docs]);
       const esqlResult = await esql.queryOnIndex('esql-endswith', query);
 
-      expect(ingestResult[0].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[0])?.attributes).toStrictEqual(
         expect.objectContaining({ filename: 'application.log', is_log_file: 'log' })
       );
-      expect(ingestResult[1].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[1])?.attributes).toStrictEqual(
         expect.objectContaining({ filename: 'error.log', is_log_file: 'log' })
       );
-      expect(ingestResult[2].attributes?.is_log_file).toBeUndefined();
-      expect(ingestResult[3].attributes?.is_log_file).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[2])?.attributes)?.is_log_file).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[3])?.attributes)?.is_log_file).toBeUndefined();
 
       expect(esqlResult.documentsOrdered[1]).toStrictEqual(
         expect.objectContaining({
@@ -715,8 +769,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const mappingDoc = {
         attributes: { service_name: 'null', message: 'null', log_path: 'null', priority: 'null' },
@@ -751,11 +805,11 @@ apiTest.describe(
       await testBed.ingest('esql-multiple-and', [mappingDoc, ...docs]);
       const esqlResult = await esql.queryOnIndex('esql-multiple-and', query);
 
-      expect(ingestResult[0].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[0])?.attributes).toStrictEqual(
         expect.objectContaining({ service_name: 'prod-api', priority: 'high' })
       );
-      expect(ingestResult[1].attributes?.priority).toBeUndefined();
-      expect(ingestResult[2].attributes?.priority).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[1])?.attributes)?.priority).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[2])?.attributes)?.priority).toBeUndefined();
 
       expect(esqlResult.documentsOrdered[1]).toStrictEqual(
         expect.objectContaining({
@@ -794,8 +848,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const mappingDoc = { attributes: { log_level: 'null', not_debug: 'null' } };
       const docs = [
@@ -811,14 +865,14 @@ apiTest.describe(
       await testBed.ingest('esql-not-contains', [mappingDoc, ...docs]);
       const esqlResult = await esql.queryOnIndex('esql-not-contains', query);
 
-      expect(ingestResult[0].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[0])?.attributes).toStrictEqual(
         expect.objectContaining({ log_level: 'INFO', not_debug: 'production' })
       );
-      expect(ingestResult[1].attributes?.not_debug).toBeUndefined();
-      expect(ingestResult[2].attributes).toStrictEqual(
+      expect(asDoc(asDoc(ingestResult[1])?.attributes)?.not_debug).toBeUndefined();
+      expect(asDoc(ingestResult[2])?.attributes).toStrictEqual(
         expect.objectContaining({ log_level: 'ERROR', not_debug: 'production' })
       );
-      expect(ingestResult[3].attributes?.not_debug).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[3])?.attributes)?.not_debug).toBeUndefined();
 
       expect(esqlResult.documentsOrdered[1]).toStrictEqual(
         expect.objectContaining({
@@ -861,8 +915,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const mappingDoc = { attributes: { message: 'null', important: 'null' } };
       const docs = [
@@ -878,16 +932,16 @@ apiTest.describe(
       await testBed.ingest('esql-or-patterns', [mappingDoc, ...docs]);
       const esqlResult = await esql.queryOnIndex('esql-or-patterns', query);
 
-      expect(ingestResult[0].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[0])?.attributes).toStrictEqual(
         expect.objectContaining({ message: 'CRITICAL: System failure', important: 'critical' })
       );
-      expect(ingestResult[1].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[1])?.attributes).toStrictEqual(
         expect.objectContaining({ message: 'A fatal error occurred', important: 'critical' })
       );
-      expect(ingestResult[2].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[2])?.attributes).toStrictEqual(
         expect.objectContaining({ message: 'Kernel panic', important: 'critical' })
       );
-      expect(ingestResult[3].attributes?.important).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[3])?.attributes)?.important).toBeUndefined();
 
       expect(esqlResult.documentsOrdered[1]).toStrictEqual(
         expect.objectContaining({
@@ -932,8 +986,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const mappingDoc = { attributes: { tags: [''], has_error_tag: 'null' } };
         const docs = [
@@ -950,14 +1004,14 @@ apiTest.describe(
         const esqlResult = await esql.queryOnIndex('esql-includes-string', query);
 
         // Ingest pipeline results
-        expect(ingestResult[0].attributes).toStrictEqual(
+        expect(asDoc(ingestResult[0])?.attributes).toStrictEqual(
           expect.objectContaining({ tags: ['error', 'warning', 'info'], has_error_tag: 'yes' })
         );
-        expect(ingestResult[1].attributes?.has_error_tag).toBeUndefined();
-        expect(ingestResult[2].attributes).toStrictEqual(
+        expect(asDoc(asDoc(ingestResult[1])?.attributes)?.has_error_tag).toBeUndefined();
+        expect(asDoc(ingestResult[2])?.attributes).toStrictEqual(
           expect.objectContaining({ tags: ['error'], has_error_tag: 'yes' })
         );
-        expect(ingestResult[3].attributes?.has_error_tag).toBeUndefined();
+        expect(asDoc(asDoc(ingestResult[3])?.attributes)?.has_error_tag).toBeUndefined();
 
         // ESQL results
         expect(esqlResult.documentsOrdered[1]).toStrictEqual(
@@ -992,8 +1046,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const mappingDoc = { attributes: { roles: [''], no_admin: 'null' } };
       const docs = [
@@ -1009,11 +1063,11 @@ apiTest.describe(
       const esqlResult = await esql.queryOnIndex('esql-includes-not', query);
 
       // Ingest pipeline results
-      expect(ingestResult[0].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[0])?.attributes).toStrictEqual(
         expect.objectContaining({ roles: ['user', 'viewer'], no_admin: 'regular_user' })
       );
-      expect(ingestResult[1].attributes?.no_admin).toBeUndefined();
-      expect(ingestResult[2].attributes).toStrictEqual(
+      expect(asDoc(asDoc(ingestResult[1])?.attributes)?.no_admin).toBeUndefined();
+      expect(asDoc(ingestResult[2])?.attributes).toStrictEqual(
         expect.objectContaining({ roles: ['editor'], no_admin: 'regular_user' })
       );
 
@@ -1044,8 +1098,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const mappingDoc = { attributes: { url_path: 'null', is_api_path: 'null' } };
       const docs = [
@@ -1061,14 +1115,14 @@ apiTest.describe(
       await testBed.ingest('esql-special-chars', [mappingDoc, ...docs]);
       const esqlResult = await esql.queryOnIndex('esql-special-chars', query);
 
-      expect(ingestResult[0].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[0])?.attributes).toStrictEqual(
         expect.objectContaining({ url_path: '/api/v1/users', is_api_path: 'api_v1' })
       );
-      expect(ingestResult[1].attributes).toStrictEqual(
+      expect(asDoc(ingestResult[1])?.attributes).toStrictEqual(
         expect.objectContaining({ url_path: '/api/v1/products/123', is_api_path: 'api_v1' })
       );
-      expect(ingestResult[2].attributes?.is_api_path).toBeUndefined();
-      expect(ingestResult[3].attributes?.is_api_path).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[2])?.attributes)?.is_api_path).toBeUndefined();
+      expect(asDoc(asDoc(ingestResult[3])?.attributes)?.is_api_path).toBeUndefined();
 
       expect(esqlResult.documentsOrdered[1]).toStrictEqual(
         expect.objectContaining({
@@ -1113,8 +1167,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const mappingDoc = { attributes: { tag: 'null', matched: 'null' } };
         const docs = [
@@ -1131,14 +1185,14 @@ apiTest.describe(
         const esqlResult = await esql.queryOnIndex('esql-single-array', query);
 
         // Single-element array ['important'] should match like 'important'
-        expect(ingestResult[0].attributes).toStrictEqual(
+        expect(asDoc(ingestResult[0])?.attributes).toStrictEqual(
           expect.objectContaining({ matched: 'yes' })
         );
-        expect(ingestResult[1].attributes).toStrictEqual(
+        expect(asDoc(ingestResult[1])?.attributes).toStrictEqual(
           expect.objectContaining({ matched: 'yes' })
         );
-        expect(ingestResult[2].attributes?.matched).toBeUndefined();
-        expect(ingestResult[3].attributes?.matched).toBeUndefined();
+        expect(asDoc(asDoc(ingestResult[2])?.attributes)?.matched).toBeUndefined();
+        expect(asDoc(asDoc(ingestResult[3])?.attributes)?.matched).toBeUndefined();
 
         // ES|QL should produce the same results
         expect(esqlResult.documentsOrdered[1]).toStrictEqual(

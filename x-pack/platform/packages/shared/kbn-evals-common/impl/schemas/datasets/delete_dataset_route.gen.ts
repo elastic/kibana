@@ -14,19 +14,23 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const DeleteEvaluationDatasetRequestParams = lazySchema(() =>
+  z.object({
+    datasetId: z.string(),
+  })
+);
 export type DeleteEvaluationDatasetRequestParams = z.infer<
   typeof DeleteEvaluationDatasetRequestParams
 >;
-export const DeleteEvaluationDatasetRequestParams = z.object({
-  datasetId: z.string(),
-});
 export type DeleteEvaluationDatasetRequestParamsInput = z.input<
   typeof DeleteEvaluationDatasetRequestParams
 >;
 
+export const DeleteEvaluationDatasetResponse = lazySchema(() =>
+  z.object({
+    success: z.boolean(),
+  })
+);
 export type DeleteEvaluationDatasetResponse = z.infer<typeof DeleteEvaluationDatasetResponse>;
-export const DeleteEvaluationDatasetResponse = z.object({
-  success: z.boolean(),
-});

@@ -10,9 +10,9 @@
 import type React from 'react';
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { controlSchema, dataControlSchema } from './control_schema';
+import type { controlTitleSchema, dataControlSchema } from './control_schema';
 import type {
-  controlsGroupSchema,
+  getControlsGroupSchema,
   controlWidthSchema,
   pinnedControlSchema,
 } from './controls_group_schema';
@@ -27,14 +27,15 @@ import type {
 import type { rangeSliderControlSchema, rangeValueSchema } from './range_slider_schema';
 import type { timeSliderControlSchema } from './time_slider_schema';
 
-export type ControlsGroupState = TypeOf<typeof controlsGroupSchema>;
+export type ControlsGroupState = TypeOf<ReturnType<typeof getControlsGroupSchema>>;
 export type PinnedControlState = ControlsGroupState[number];
 export type PinnedControlLayoutState = TypeOf<typeof pinnedControlSchema> & {
   order: number;
   type: string;
 };
+
 export type ControlWidth = TypeOf<typeof controlWidthSchema>;
-export type ControlState = TypeOf<typeof controlSchema>;
+export type ControlState = TypeOf<typeof controlTitleSchema>;
 
 export type DataControlState = TypeOf<typeof dataControlSchema>;
 

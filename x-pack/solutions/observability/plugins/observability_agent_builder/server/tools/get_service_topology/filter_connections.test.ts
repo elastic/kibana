@@ -6,42 +6,7 @@
  */
 
 import { filterDownstreamConnections, filterUpstreamConnections } from './filter_connections';
-import type { ConnectionWithKey } from './types';
-
-function makeServiceConnection(source: string, target: string): ConnectionWithKey {
-  return {
-    source: { 'service.name': source },
-    target: { 'service.name': target },
-    metrics: undefined,
-    _key: `${source}->${target}`,
-    _sourceName: source,
-    _dependencyName: target,
-  };
-}
-
-function makeExternalConnection(
-  source: string,
-  resource: string,
-  spanType = 'db',
-  spanSubtype = 'postgresql'
-): ConnectionWithKey {
-  return {
-    source: { 'service.name': source },
-    target: {
-      'span.destination.service.resource': resource,
-      'span.type': spanType,
-      'span.subtype': spanSubtype,
-    },
-    metrics: undefined,
-    _key: `${source}->${resource}`,
-    _sourceName: source,
-    _dependencyName: resource,
-  };
-}
-
-function getConnectionKeys(connections: ConnectionWithKey[]) {
-  return connections.map((c) => c._key).sort();
-}
+import { makeServiceConnection, makeExternalConnection, getConnectionKeys } from './test_helpers';
 
 describe('filterDownstreamConnections', () => {
   it('returns only connections reachable from root', () => {
@@ -52,7 +17,7 @@ describe('filterDownstreamConnections', () => {
     ];
 
     const result = filterDownstreamConnections(connections, 'A');
-    expect(getConnectionKeys(result)).toEqual(['A->B', 'B->C']);
+    expect(getConnectionKeys(result)).toEqual(['A::B', 'B::C']);
   });
 
   it('returns empty when root has no outgoing connections', () => {
@@ -68,9 +33,9 @@ describe('filterDownstreamConnections', () => {
     ];
 
     expect(getConnectionKeys(filterDownstreamConnections(connections, 'A'))).toEqual([
-      'A->B',
-      'B->C',
-      'C->A',
+      'A::B',
+      'B::C',
+      'C::A',
     ]);
   });
 
@@ -78,8 +43,8 @@ describe('filterDownstreamConnections', () => {
     const connections = [makeServiceConnection('A', 'B'), makeExternalConnection('B', 'postgres')];
 
     expect(getConnectionKeys(filterDownstreamConnections(connections, 'A'))).toEqual([
-      'A->B',
-      'B->postgres',
+      'A::B',
+      'B::postgres',
     ]);
   });
 
@@ -91,8 +56,8 @@ describe('filterDownstreamConnections', () => {
     ];
 
     expect(getConnectionKeys(filterDownstreamConnections(connections, 'A', 2))).toEqual([
-      'A->B',
-      'B->C',
+      'A::B',
+      'B::C',
     ]);
   });
 
@@ -117,11 +82,11 @@ describe('filterDownstreamConnections', () => {
     ];
 
     expect(getConnectionKeys(filterDownstreamConnections(connections, 'A', 3))).toEqual([
-      'A->B',
-      'A->C',
-      'B->D',
-      'C->B',
-      'D->E',
+      'A::B',
+      'A::C',
+      'B::D',
+      'C::B',
+      'D::E',
     ]);
   });
 });
@@ -135,8 +100,8 @@ describe('filterUpstreamConnections', () => {
     ];
 
     expect(getConnectionKeys(filterUpstreamConnections(connections, 'C'))).toEqual([
-      'A->B',
-      'B->C',
+      'A::B',
+      'B::C',
     ]);
   });
 
@@ -153,9 +118,9 @@ describe('filterUpstreamConnections', () => {
     ];
 
     expect(getConnectionKeys(filterUpstreamConnections(connections, 'A'))).toEqual([
-      'A->B',
-      'B->C',
-      'C->A',
+      'A::B',
+      'B::C',
+      'C::A',
     ]);
   });
 
@@ -163,8 +128,8 @@ describe('filterUpstreamConnections', () => {
     const connections = [makeServiceConnection('A', 'B'), makeExternalConnection('B', 'postgres')];
 
     expect(getConnectionKeys(filterUpstreamConnections(connections, 'postgres'))).toEqual([
-      'A->B',
-      'B->postgres',
+      'A::B',
+      'B::postgres',
     ]);
   });
 
@@ -176,8 +141,8 @@ describe('filterUpstreamConnections', () => {
     ];
 
     expect(getConnectionKeys(filterUpstreamConnections(connections, 'D', 2))).toEqual([
-      'B->C',
-      'C->D',
+      'B::C',
+      'C::D',
     ]);
   });
 
@@ -196,11 +161,11 @@ describe('filterUpstreamConnections', () => {
     ];
 
     expect(getConnectionKeys(filterUpstreamConnections(connections, 'A', 3))).toEqual([
-      'B->A',
-      'C->B',
-      'D->B',
-      'D->C',
-      'E->D',
+      'B::A',
+      'C::B',
+      'D::B',
+      'D::C',
+      'E::D',
     ]);
   });
 });

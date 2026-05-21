@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { getInferenceExecutorMock, getInferenceAdapterMock } from './api.test.mocks';
+import {
+  getInferenceExecutorMock,
+  getInferenceAdapterMock,
+  resolveInferenceEndpointMock,
+  createInferenceEndpointExecutorMock,
+  inferenceEndpointAdapterMock,
+} from './api.test.mocks';
 
 import { of, Subject, isObservable, toArray, firstValueFrom, filter } from 'rxjs';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
@@ -16,6 +22,8 @@ import {
   type ChatCompletionChunkEvent,
   MessageRole,
   isChatCompletionChunkEvent,
+  createInferenceProviderError,
+  InferenceTaskErrorCode,
 } from '@kbn/inference-common';
 import {
   createInferenceConnectorAdapterMock,
@@ -26,6 +34,7 @@ import {
 } from '../test_utils';
 import { createChatCompleteApi } from './api';
 import { createChatCompleteCallbackApi } from './callback_api';
+import { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 
 describe('createChatCompleteApi', () => {
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
@@ -35,6 +44,7 @@ describe('createChatCompleteApi', () => {
   let inferenceConnector: ReturnType<typeof createInferenceConnectorMock>;
   let inferenceExecutor: ReturnType<typeof createInferenceExecutorMock>;
   let regexWorker: ReturnType<typeof createRegexWorkerServiceMock>;
+  let endpointIdCache: InferenceEndpointIdCache;
 
   let chatComplete: ChatCompleteAPI;
   const mockEsClient = {
@@ -57,12 +67,16 @@ describe('createChatCompleteApi', () => {
     ml: {
       inferTrainedModel: jest.fn(),
     },
+    inference: {
+      get: jest.fn().mockResolvedValue({ endpoints: [] }),
+    },
   } as any;
   beforeEach(() => {
     request = httpServerMock.createKibanaRequest();
     logger = loggerMock.create();
     actions = actionsMock.createStart();
     regexWorker = createRegexWorkerServiceMock();
+    endpointIdCache = new InferenceEndpointIdCache({ esClient: mockEsClient });
     const callbackApi = createChatCompleteCallbackApi({
       request,
       namespace: 'default',
@@ -71,6 +85,7 @@ describe('createChatCompleteApi', () => {
       anonymizationRulesPromise: Promise.resolve([]),
       regexWorker,
       esClient: mockEsClient,
+      endpointIdCache,
     });
     chatComplete = createChatCompleteApi({
       callbackApi,
@@ -92,6 +107,9 @@ describe('createChatCompleteApi', () => {
     mockEsClient.get.mockClear();
     mockEsClient.index.mockClear();
     mockEsClient.update.mockClear();
+    resolveInferenceEndpointMock.mockReset();
+    createInferenceEndpointExecutorMock.mockReset();
+    inferenceEndpointAdapterMock.chatComplete.mockReset();
   });
 
   it('calls `getInferenceExecutor` with the right parameters', async () => {
@@ -106,6 +124,8 @@ describe('createChatCompleteApi', () => {
       connectorId: 'connectorId',
       request,
       actions,
+      esClient: mockEsClient,
+      logger,
     });
   });
 
@@ -426,6 +446,202 @@ describe('createChatCompleteApi', () => {
         expect(caughtError).toBeInstanceOf(Error);
         expect(caughtError.message).toContain('Request was aborted');
       });
+    });
+  });
+
+  describe('upstream provider 404 errors', () => {
+    it('does not rewrite upstream provider 404 errors as connector-not-found errors', async () => {
+      const providerError = createInferenceProviderError(
+        'API Error: Not Found - No endpoints found for google/gemini-3-pro-preview',
+        { status: 404 }
+      );
+      inferenceAdapter.chatComplete.mockImplementation(() => {
+        throw providerError;
+      });
+
+      await expect(
+        chatComplete({
+          connectorId: 'connectorId',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          maxRetries: 0,
+        })
+      ).rejects.toMatchObject({
+        code: InferenceTaskErrorCode.providerError,
+        message: expect.stringContaining('No endpoints found for google/gemini-3-pro-preview'),
+      });
+    });
+  });
+
+  describe('stack connector resolving to inference endpoint', () => {
+    const mockEndpointExecutor = { invoke: jest.fn() };
+
+    beforeEach(() => {
+      const endpointConnector = createInferenceConnectorMock({
+        connectorId: '.my-inference-endpoint',
+        isInferenceEndpoint: true,
+      });
+      const executor = createInferenceExecutorMock({ connector: endpointConnector });
+      getInferenceExecutorMock.mockResolvedValue(executor);
+
+      resolveInferenceEndpointMock.mockResolvedValue({
+        inferenceId: '.my-inference-endpoint',
+        provider: 'openai',
+        modelId: 'gpt-4o',
+        taskType: 'chat_completion',
+      });
+      createInferenceEndpointExecutorMock.mockReturnValue(mockEndpointExecutor);
+      inferenceEndpointAdapterMock.chatComplete.mockReturnValue(of(chunkEvent('endpoint-chunk')));
+    });
+
+    it('routes to the inference endpoint adapter when getInferenceExecutor returns an inference endpoint connector', async () => {
+      await chatComplete({
+        connectorId: 'stack-connector-id',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+      });
+
+      expect(getInferenceExecutorMock).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorId: 'stack-connector-id' })
+      );
+      expect(resolveInferenceEndpointMock).toHaveBeenCalledWith({
+        inferenceId: '.my-inference-endpoint',
+        esClient: mockEsClient,
+      });
+      expect(createInferenceEndpointExecutorMock).toHaveBeenCalledWith({
+        inferenceId: '.my-inference-endpoint',
+        esClient: mockEsClient,
+      });
+      expect(inferenceEndpointAdapterMock.chatComplete).toHaveBeenCalledTimes(1);
+      expect(getInferenceAdapterMock).not.toHaveBeenCalled();
+    });
+
+    it('returns the correct response in non-stream mode', async () => {
+      const response = await chatComplete({
+        connectorId: 'stack-connector-id',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+      });
+
+      expect(response).toEqual({
+        content: 'endpoint-chunk',
+        metadata: undefined,
+        toolCalls: [],
+      });
+    });
+  });
+
+  describe('inference endpoint path (via connectorId resolution)', () => {
+    const mockEndpointExecutor = { invoke: jest.fn() };
+
+    beforeEach(() => {
+      mockEsClient.inference.get.mockResolvedValue({
+        endpoints: [
+          { inference_id: 'my-endpoint', task_type: 'chat_completion', service: 'openai' },
+        ],
+      });
+
+      resolveInferenceEndpointMock.mockResolvedValue({
+        inferenceId: 'my-endpoint',
+        provider: 'openai',
+        modelId: 'gpt-4o',
+        taskType: 'chat_completion',
+      });
+      createInferenceEndpointExecutorMock.mockReturnValue(mockEndpointExecutor);
+      inferenceEndpointAdapterMock.chatComplete.mockReturnValue(of(chunkEvent('endpoint-chunk')));
+    });
+
+    it('does NOT call actionsClient or getInferenceExecutor when connectorId resolves to inference endpoint', async () => {
+      await chatComplete({
+        connectorId: 'my-endpoint',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+      });
+
+      expect(getInferenceExecutorMock).not.toHaveBeenCalled();
+      expect(getInferenceAdapterMock).not.toHaveBeenCalled();
+    });
+
+    it('calls resolveInferenceEndpoint with the correct parameters', async () => {
+      await chatComplete({
+        connectorId: 'my-endpoint',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+      });
+
+      expect(resolveInferenceEndpointMock).toHaveBeenCalledWith({
+        inferenceId: 'my-endpoint',
+        esClient: mockEsClient,
+      });
+    });
+
+    it('calls createInferenceEndpointExecutor with the correct parameters', async () => {
+      await chatComplete({
+        connectorId: 'my-endpoint',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+      });
+
+      expect(createInferenceEndpointExecutorMock).toHaveBeenCalledWith({
+        inferenceId: 'my-endpoint',
+        esClient: mockEsClient,
+      });
+    });
+
+    it('calls the inference endpoint adapter with the correct parameters', async () => {
+      await chatComplete({
+        connectorId: 'my-endpoint',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        temperature: 0.5,
+        modelName: 'gpt-4o-mini',
+        maxRetries: 0,
+      });
+
+      expect(inferenceEndpointAdapterMock.chatComplete).toHaveBeenCalledTimes(1);
+      expect(inferenceEndpointAdapterMock.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          executor: mockEndpointExecutor,
+          temperature: 0.5,
+          modelName: 'gpt-4o-mini',
+          logger,
+        })
+      );
+    });
+
+    it('returns a promise with the response in non-stream mode', async () => {
+      const response = await chatComplete({
+        connectorId: 'my-endpoint',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+      });
+
+      expect(response).toEqual({
+        content: 'endpoint-chunk',
+        metadata: undefined,
+        toolCalls: [],
+      });
+    });
+
+    it('returns an observable in stream mode', async () => {
+      inferenceEndpointAdapterMock.chatComplete.mockReturnValue(
+        of(chunkEvent('chunk-1'), chunkEvent('chunk-2'))
+      );
+
+      const events$ = chatComplete({
+        stream: true,
+        connectorId: 'my-endpoint',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+      });
+
+      expect(isObservable(events$)).toBe(true);
+
+      const events = await firstValueFrom(
+        events$.pipe(filter(isChatCompletionChunkEvent), toArray())
+      );
+      expect(events).toHaveLength(2);
+      expect(events[0].content).toBe('chunk-1');
+      expect(events[1].content).toBe('chunk-2');
     });
   });
 });

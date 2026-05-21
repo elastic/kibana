@@ -10,17 +10,16 @@ import { useEuiTheme } from '@elastic/eui';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { SecurityPageName } from '../../../../common/constants';
-import { NetworkRouteType } from '../../../explore/network/pages/navigation/types';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 import type { LensAttributes, UseLensAttributesProps } from './types';
 import {
+  buildIndexFilters,
   fieldNameExistsFilter,
   getDetailsPageFilter,
   getESQLGlobalFilters,
-  getIndexFilters,
   getNetworkDetailsPageFilter,
   sourceOrDestinationIpExistsFilter,
 } from './utils';
@@ -39,6 +38,7 @@ export const useLensAttributes = ({
   title,
   esql,
   signalIndexName,
+  excludedPatterns,
 }: UseLensAttributesProps): LensAttributes | null => {
   const { euiTheme } = useEuiTheme();
   const {
@@ -82,15 +82,21 @@ export const useLensAttributes = ({
   const [{ detailName, pageName, tabName }] = useRouteSpy();
 
   const tabsFilters = useMemo(() => {
-    if (tabName === NetworkRouteType.events) {
+    if (tabName === 'events') {
       if (pageName === SecurityPageName.network) {
         return sourceOrDestinationIpExistsFilter;
+      }
+      if (
+        extraOptions?.entityStoreV2Enabled === true &&
+        (pageName === SecurityPageName.hosts || pageName === SecurityPageName.users)
+      ) {
+        return [];
       }
       return fieldNameExistsFilter(pageName);
     }
 
     return [];
-  }, [pageName, tabName]);
+  }, [extraOptions?.entityStoreV2Enabled, pageName, tabName]);
 
   const pageFilters = useMemo(() => {
     if (
@@ -132,7 +138,12 @@ export const useLensAttributes = ({
       return null;
     }
 
-    const indexFilters = hasAdHocDataViews ? [] : getIndexFilters(selectedPatterns);
+    const indexFilters = buildIndexFilters({
+      hasAdHocDataViews,
+      selectedPatterns,
+      excludedPatterns,
+      signalIndexName,
+    });
     const query = esql ? { esql } : globalQuery;
 
     const queryFilters = (() => {
@@ -170,6 +181,8 @@ export const useLensAttributes = ({
     stackByField,
     hasAdHocDataViews,
     selectedPatterns,
+    excludedPatterns,
+    signalIndexName,
     esql,
     globalQuery,
     globalFilterQuery,

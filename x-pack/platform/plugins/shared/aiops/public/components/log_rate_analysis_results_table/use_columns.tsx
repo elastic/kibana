@@ -462,6 +462,7 @@ export const useColumns = (
           return (
             <>
               <EuiIcon
+                aria-hidden={true}
                 size="s"
                 color="subdued"
                 type={currentAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE ? 'sortUp' : 'sortDown'}

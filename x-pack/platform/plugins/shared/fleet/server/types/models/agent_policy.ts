@@ -115,6 +115,9 @@ export const AgentPolicyBaseSchema = {
           if (Object.keys(val).some((key) => key.match(/^inputs(\.)?/))) {
             return 'inputs overrides is not allowed';
           }
+          if (Object.keys(val).some((key) => key.match(/^output_permissions(\.)?/))) {
+            return 'output_permissions overrides is not allowed';
+          }
         },
         meta: {
           description:
@@ -147,7 +150,7 @@ export const AgentPolicyBaseSchema = {
           description:
             'User defined data tags that are added to all of the inputs. The values can be strings or numbers.',
         },
-        maxSize: 10,
+        maxSize: 100,
       }
     )
   ),
@@ -221,6 +224,15 @@ export const AgentPolicyBaseSchema = {
       ),
     ])
   ),
+  is_verifier: schema.maybe(
+    schema.boolean({
+      defaultValue: false,
+      meta: {
+        description:
+          'Indicates this is a short-lived verifier policy used for OTel permission verification.',
+      },
+    })
+  ),
 };
 
 function validateGlobalDataTagInput(tags: GlobalDataTag[]): string | undefined {
@@ -289,7 +301,53 @@ export const AgentPolicySchemaV3 = schema
     has_agent_version_conditions: schema.maybe(schema.boolean()),
   });
 
-export const NewAgentPolicySchema = AgentPolicySchemaV3.extends({
+export const AgentPolicySchemaV4 = AgentPolicySchemaV3.extends({
+  min_agent_version: schema.maybe(schema.nullable(schema.string())),
+  package_agent_version_conditions: schema.maybe(
+    schema.nullable(
+      schema.arrayOf(
+        schema.object({
+          name: schema.string(),
+          title: schema.string(),
+          version_condition: schema.string(),
+        }),
+        { maxSize: 1000 }
+      )
+    )
+  ),
+});
+
+export const AgentPolicySchemaV5 = AgentPolicySchemaV4.extends({
+  is_verifier: schema.maybe(schema.boolean()),
+});
+
+export const AgentPolicySchemaV6 = AgentPolicySchemaV5.extends({
+  agentless: schema.maybe(
+    schema.object({
+      cloud_connectors: schema.maybe(
+        schema.object({
+          target_csp: schema.maybe(
+            schema.oneOf([schema.literal('aws'), schema.literal('azure'), schema.literal('gcp')])
+          ),
+          enabled: schema.boolean(),
+        })
+      ),
+      resources: schema.maybe(
+        schema.object({
+          requests: schema.maybe(
+            schema.object({
+              memory: schema.maybe(schema.string({ validate: validateMemory })),
+              cpu: schema.maybe(schema.string({ validate: validateCPU })),
+            })
+          ),
+        })
+      ),
+      cluster_id: schema.maybe(schema.string()),
+    })
+  ),
+});
+
+export const NewAgentPolicySchema = AgentPolicySchemaV6.extends({
   supports_agentless: schema.maybe(
     schema.oneOf([
       schema.literal(null),
@@ -306,7 +364,7 @@ export const NewAgentPolicySchema = AgentPolicySchemaV3.extends({
   force: schema.maybe(schema.boolean()),
 });
 
-export const AgentPolicySchema = AgentPolicySchemaV3.extends({
+export const AgentPolicySchema = AgentPolicySchemaV6.extends({
   id: schema.string(),
   is_managed: schema.maybe(schema.boolean()),
   status: schema.oneOf([
@@ -346,6 +404,20 @@ export const AgentPolicyResponseSchema = AgentPolicySchema.extends({
   version: schema.maybe(schema.string()),
   is_preconfigured: schema.maybe(schema.boolean()),
   schema_version: schema.maybe(schema.string()),
+  min_agent_version: schema.maybe(schema.nullable(schema.string())),
+  package_agent_version_conditions: schema.maybe(
+    schema.nullable(
+      schema.arrayOf(
+        schema.object({
+          name: schema.string(),
+          title: schema.string(),
+          version_condition: schema.string(),
+        }),
+        { maxSize: 1000 }
+      )
+    )
+  ),
+  created_at: schema.maybe(schema.string()),
   package_policies: schema.maybe(
     schema.oneOf([
       schema.arrayOf(schema.string(), { maxSize: 10000 }),

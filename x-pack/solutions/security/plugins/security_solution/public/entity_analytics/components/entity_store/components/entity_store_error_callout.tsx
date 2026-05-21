@@ -32,7 +32,7 @@ export const EntityStoreErrorCallout: React.FC<{ engine?: EngineDescriptor; size
   }
 
   return (
-    <EuiCallOut title={title} color="danger" iconType="alert" size={size}>
+    <EuiCallOut title={title} color="danger" iconType="warning" size={size}>
       <p>{engine.error.message}</p>
     </EuiCallOut>
   );

@@ -55,14 +55,17 @@ export async function restoreIndices({
   const hasRename = renamePattern && renameReplacement;
   log.debug(`Restoring ${indices.length} indices${hasRename ? ' to temp location' : ''}`);
 
-  await esClient.snapshot.restore({
-    repository: repoName,
-    snapshot: snapshotName,
-    wait_for_completion: true,
-    indices: indices.join(','),
-    include_global_state: false,
-    ...(hasRename && { rename_pattern: renamePattern, rename_replacement: renameReplacement }),
-  });
+  await esClient.snapshot.restore(
+    {
+      repository: repoName,
+      snapshot: snapshotName,
+      wait_for_completion: true,
+      indices: indices.join(','),
+      include_global_state: false,
+      ...(hasRename && { rename_pattern: renamePattern, rename_replacement: renameReplacement }),
+    },
+    { requestTimeout: 5 * 60 * 1000 }
+  );
 
   const restoredNames = hasRename
     ? indices.map((idx) => idx.replace(new RegExp(renamePattern), renameReplacement))

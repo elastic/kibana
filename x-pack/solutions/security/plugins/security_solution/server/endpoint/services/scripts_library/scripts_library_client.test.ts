@@ -65,6 +65,20 @@ describe('scripts library client', () => {
     });
   });
 
+  it('should initialize file data index prior to creating a file record', async () => {
+    soClientMock.find.mockResolvedValue({
+      page: 0,
+      per_page: 0,
+      total: 0,
+      saved_objects: [],
+    });
+    await scriptsClient.create(ScriptsLibraryMock.generateCreateScriptBody());
+
+    expect(endpointAppServicesMock.createLogger().debug).toHaveBeenCalledWith(
+      'initializing indexes (if needed)'
+    );
+  });
+
   describe('#create()', () => {
     let createBodyMock: CreateScriptRequestBody;
 
@@ -603,6 +617,62 @@ describe('scripts library client', () => {
         expect.anything()
       );
     });
+
+    it('should check for rules referencing the script when platform types are removed', async () => {
+      await scriptsClient.update({ id: '1-2-3', platform: ['macos'] });
+
+      expect(rulesClient.find).toHaveBeenCalledWith({
+        options: {
+          filter:
+            '(alert.attributes.alertTypeId: siem.eqlRule OR alert.attributes.alertTypeId: siem.esqlRule OR ' +
+            'alert.attributes.alertTypeId: siem.mlRule OR alert.attributes.alertTypeId: siem.queryRule OR ' +
+            'alert.attributes.alertTypeId: siem.savedQueryRule OR ' +
+            'alert.attributes.alertTypeId: siem.indicatorRule OR ' +
+            'alert.attributes.alertTypeId: siem.thresholdRule OR ' +
+            'alert.attributes.alertTypeId: siem.newTermsRule) AND ' +
+            '(alert.attributes.params.responseActions.actionTypeId:".endpoint" AND ' +
+            '(alert.attributes.params.responseActions.params.config.linux.scriptId:("1-2-3")))',
+          fields: undefined,
+          hasReference: undefined,
+          page: undefined,
+          perPage: 1000,
+          sortField: undefined,
+          sortOrder: undefined,
+        },
+      });
+    });
+
+    it('should not check for rules referencing the script when platform types are not updated', async () => {
+      await scriptsClient.update({ id: '1-2-3', description: 'new description' });
+
+      expect(rulesClient.find).not.toHaveBeenCalled();
+    });
+
+    it('should not check for rules referencing the script when platform types are not removed', async () => {
+      // Adding `windows` to list of platforms
+      await scriptsClient.update({ id: '1-2-3', platform: ['macos', 'linux', 'windows'] });
+
+      expect(rulesClient.find).not.toHaveBeenCalled();
+    });
+
+    it('should error if script update removes a platform that is being referenced by a SIEM rule', async () => {
+      rulesClient.find.mockResolvedValue({
+        page: 1,
+        perPage: 10,
+        total: 1,
+        data: [{ id: 'rule-id', name: 'rule id 1 here' } as unknown as SanitizedRule<RuleParams>],
+      });
+
+      await expect(scriptsClient.update({ id: '1-2-3', platform: ['macos'] })).rejects.toThrow(
+        "Cannot remove platform(s) [linux] from script. The following detection rules currently have 'runscript' configurations that reference their use:\nrule id 1 here (ID: rule-id)"
+      );
+    });
+
+    it('should update script when platform is removed and it is not being used by a SIEM rule', async () => {
+      await expect(
+        scriptsClient.update({ id: '1-2-3', platform: ['linux'] })
+      ).resolves.toBeTruthy();
+    });
   });
 
   describe('#get()', () => {
@@ -705,16 +775,14 @@ describe('scripts library client', () => {
       });
     });
 
-    it('should error if no rules client was provided when ScriptsLibraryClient was initialized', async () => {
+    it('should complete successfuly even if no rules client was provided when ScriptsLibraryClient was initialized', async () => {
       scriptsClient = new ScriptsLibraryClient({
         spaceId: 'spaceA',
         username: 'elastic',
         endpointService: endpointAppServicesMock,
       });
 
-      await expect(scriptsClient.delete('1-2-3')).rejects.toThrow(
-        'Unable to query for rules - no Rules client available!'
-      );
+      await expect(scriptsClient.delete('1-2-3')).resolves.toBeUndefined();
     });
 
     it('should error if script id is being used by rules', async () => {
@@ -726,8 +794,7 @@ describe('scripts library client', () => {
       });
 
       await expect(scriptsClient.delete('1-2-3')).rejects.toThrow(
-        'Cannot delete script [1-2-3] because it is referenced by the following rules:\n' +
-          'rule id 1 here (ID: rule-id)'
+        "Cannot delete script [1-2-3]. The following detection rules have 'runscript' configurations that reference it:\nrule id 1 here (ID: rule-id)"
       );
     });
 
@@ -737,6 +804,13 @@ describe('scripts library client', () => {
       await expect(scriptsClient.delete('non-existent')).rejects.toThrow(
         'Script with id [non-existent] not found'
       );
+    });
+
+    it('should complete successfully even if rules check fails', async () => {
+      rulesClient.find.mockRejectedValue(
+        new Error('Unauthorized to find rules for any rule types')
+      );
+      await expect(scriptsClient.delete('1-2-3')).resolves.toBeUndefined();
     });
 
     it('should complete successfully even if file deletion fails', async () => {

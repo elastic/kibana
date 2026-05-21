@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import type { ActionsProps } from './actions';
 import { Actions } from './actions';
@@ -69,7 +69,7 @@ describe('Actions component', () => {
     const { getByTestId, getByLabelText } = renderWithProviders();
 
     expect(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).toBeInTheDocument();
-    expect(getByLabelText('Investigate in timeline')).toBeInTheDocument();
+    expect(getByLabelText('Investigate in Timeline')).toBeInTheDocument();
   });
 
   it('calls onSearchToggle when toggle search button is clicked', () => {
@@ -103,7 +103,7 @@ describe('Actions component', () => {
       showInvestigateInTimeline: false,
     });
     expect(queryByTestId(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID)).not.toBeInTheDocument();
-    expect(queryByLabelText('Investigate in timeline')).not.toBeInTheDocument();
+    expect(queryByLabelText('Investigate in Timeline')).not.toBeInTheDocument();
   });
 
   it('does not render search filter counter badge when searchFilterCounter is equal to 0', () => {

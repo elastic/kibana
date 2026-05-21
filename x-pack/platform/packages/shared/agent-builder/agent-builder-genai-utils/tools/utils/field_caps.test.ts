@@ -53,11 +53,13 @@ describe('processFieldCapsResponse', () => {
         path: 'category',
         type: 'keyword',
         meta: {},
+        searchable: true,
       },
       {
         path: 'content',
         type: 'text',
         meta: {},
+        searchable: true,
       },
     ]);
   });
@@ -83,11 +85,13 @@ describe('processFieldCapsResponse', () => {
     expect(processed.fields.sort((a, b) => a.path.localeCompare(b.path))).toEqual([
       {
         meta: {},
+        searchable: true,
         path: '_not_internal',
         type: 'boolean',
       },
       {
         meta: {},
+        searchable: true,
         path: 'content',
         type: 'text',
       },
@@ -113,8 +117,40 @@ describe('processFieldCapsResponse', () => {
     expect(processed.fields.sort((a, b) => a.path.localeCompare(b.path))).toEqual([
       {
         meta: {},
+        searchable: true,
         path: 'content',
         type: 'text',
+      },
+    ]);
+  });
+
+  it('preserves the searchable property from field caps', () => {
+    const response: FieldCapsResponse = {
+      indices: ['index_1'],
+      fields: {
+        content: {
+          text: caps({ type: 'text', searchable: true }),
+        },
+        non_searchable: {
+          text: caps({ type: 'text', searchable: false }),
+        },
+      },
+    };
+
+    const processed = processFieldCapsResponse(response);
+
+    expect(processed.fields.sort((a, b) => a.path.localeCompare(b.path))).toEqual([
+      {
+        path: 'content',
+        type: 'text',
+        meta: {},
+        searchable: true,
+      },
+      {
+        path: 'non_searchable',
+        type: 'text',
+        meta: {},
+        searchable: false,
       },
     ]);
   });
@@ -139,11 +175,13 @@ describe('processFieldCapsResponse', () => {
         path: 'content',
         type: 'text',
         meta: { description: 'content', role: 'retrieval' },
+        searchable: true,
       },
       {
         path: 'description',
         type: 'text',
         meta: { description: 'desc1,desc2' },
+        searchable: true,
       },
     ]);
   });
@@ -163,8 +201,8 @@ describe('processFieldCapsResponsePerIndex', () => {
     const result = processFieldCapsResponsePerIndex(response);
 
     expect(result).toEqual({
-      index_a: [{ path: 'status', type: 'keyword', meta: {} }],
-      index_b: [{ path: 'status', type: 'keyword', meta: {} }],
+      index_a: [{ path: 'status', type: 'keyword', meta: {}, searchable: true }],
+      index_b: [{ path: 'status', type: 'keyword', meta: {}, searchable: true }],
     });
   });
 
@@ -189,12 +227,12 @@ describe('processFieldCapsResponsePerIndex', () => {
     const sortByPath = (a: { path: string }, b: { path: string }) => a.path.localeCompare(b.path);
 
     expect(result.index_a.sort(sortByPath)).toEqual([
-      { path: 'only_a', type: 'text', meta: {} },
-      { path: 'shared', type: 'keyword', meta: {} },
+      { path: 'only_a', type: 'text', meta: {}, searchable: true },
+      { path: 'shared', type: 'keyword', meta: {}, searchable: true },
     ]);
     expect(result.index_b.sort(sortByPath)).toEqual([
-      { path: 'only_b', type: 'long', meta: {} },
-      { path: 'shared', type: 'keyword', meta: {} },
+      { path: 'only_b', type: 'long', meta: {}, searchable: true },
+      { path: 'shared', type: 'keyword', meta: {}, searchable: true },
     ]);
   });
 
@@ -211,8 +249,12 @@ describe('processFieldCapsResponsePerIndex', () => {
 
     const result = processFieldCapsResponsePerIndex(response);
 
-    expect(result.index_a).toEqual([{ path: 'status', type: 'keyword', meta: {} }]);
-    expect(result.index_b).toEqual([{ path: 'status', type: 'integer', meta: {} }]);
+    expect(result.index_a).toEqual([
+      { path: 'status', type: 'keyword', meta: {}, searchable: true },
+    ]);
+    expect(result.index_b).toEqual([
+      { path: 'status', type: 'integer', meta: {}, searchable: true },
+    ]);
   });
 
   it('excludes internal fields (type starting with _)', () => {
@@ -230,7 +272,7 @@ describe('processFieldCapsResponsePerIndex', () => {
 
     const result = processFieldCapsResponsePerIndex(response);
 
-    expect(result.index_a).toEqual([{ path: 'content', type: 'text', meta: {} }]);
+    expect(result.index_a).toEqual([{ path: 'content', type: 'text', meta: {}, searchable: true }]);
   });
 
   it('preserves field meta', () => {
@@ -246,7 +288,7 @@ describe('processFieldCapsResponsePerIndex', () => {
     const result = processFieldCapsResponsePerIndex(response);
 
     expect(result.index_a).toEqual([
-      { path: 'content', type: 'text', meta: { description: 'main content' } },
+      { path: 'content', type: 'text', meta: { description: 'main content' }, searchable: true },
     ]);
   });
 
@@ -262,7 +304,104 @@ describe('processFieldCapsResponsePerIndex', () => {
 
     const result = processFieldCapsResponsePerIndex(response);
 
-    expect(result.index_a).toEqual([{ path: 'only_a', type: 'text', meta: {} }]);
+    expect(result.index_a).toEqual([{ path: 'only_a', type: 'text', meta: {}, searchable: true }]);
     expect(result.index_b).toEqual([]);
+  });
+});
+
+describe('TSDB markers', () => {
+  it('processFieldCapsResponse extracts tsDimension', () => {
+    const response: FieldCapsResponse = {
+      indices: ['index_1'],
+      fields: {
+        'host.name': {
+          keyword: caps({ type: 'keyword', time_series_dimension: true }),
+        },
+      },
+    };
+
+    const processed = processFieldCapsResponse(response);
+
+    expect(processed.fields).toEqual([
+      {
+        path: 'host.name',
+        type: 'keyword',
+        meta: {},
+        searchable: true,
+        tsDimension: true,
+      },
+    ]);
+  });
+
+  it('processFieldCapsResponse extracts tsMetric', () => {
+    const response: FieldCapsResponse = {
+      indices: ['index_1'],
+      fields: {
+        'system.cpu.pct': {
+          float: caps({ type: 'float', time_series_metric: 'gauge' }),
+        },
+      },
+    };
+
+    const processed = processFieldCapsResponse(response);
+
+    expect(processed.fields).toEqual([
+      {
+        path: 'system.cpu.pct',
+        type: 'float',
+        meta: {},
+        searchable: true,
+        tsMetric: 'gauge',
+      },
+    ]);
+  });
+
+  it('processFieldCapsResponse drops tsMetric when it is null/undefined', () => {
+    const response: FieldCapsResponse = {
+      indices: ['index_1', 'index_2'],
+      fields: {
+        'mixed.metric': {
+          long: caps({
+            type: 'long',
+            // simulate a conflict — ES omits time_series_metric when indices disagree
+            metric_conflicts_indices: ['index_2'],
+          } as any),
+        },
+      },
+    };
+
+    const processed = processFieldCapsResponse(response);
+
+    expect(processed.fields[0]).not.toHaveProperty('tsMetric');
+  });
+
+  it('processFieldCapsResponsePerIndex extracts tsDimension and tsMetric per index', () => {
+    const response: FieldCapsResponse = {
+      indices: ['index_1', 'index_2'],
+      fields: {
+        'host.name': {
+          keyword: caps({
+            type: 'keyword',
+            time_series_dimension: true,
+            indices: ['index_1'],
+          }),
+        },
+        'system.cpu.pct': {
+          float: caps({
+            type: 'float',
+            time_series_metric: 'gauge',
+            indices: ['index_1'],
+          }),
+        },
+      },
+    };
+
+    const processed = processFieldCapsResponsePerIndex(response);
+
+    expect(processed.index_1).toEqual([
+      expect.objectContaining({ path: 'host.name', tsDimension: true }),
+      expect.objectContaining({ path: 'system.cpu.pct', tsMetric: 'gauge' }),
+    ]);
+    expect(processed.index_2).toEqual([]);
   });
 });

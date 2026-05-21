@@ -76,6 +76,17 @@ catchAndSetErrorStackTrace.withMessage = (message) => {
  *   rethrowIfInstanceOrWrap(error, CloudConnectorCreateError, 'Failed to create cloud connector');
  * }
  */
+/**
+ * Extracts a string message from an unknown error value.
+ * Returns the error's message if it's an Error instance, otherwise converts to string.
+ *
+ * @param error - The error value to extract a message from
+ * @returns The error message as a string
+ */
+export function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 export function rethrowIfInstanceOrWrap<T extends new (message: string) => Error>(
   error: unknown,
   ErrorClass: T,
@@ -87,7 +98,7 @@ export function rethrowIfInstanceOrWrap<T extends new (message: string) => Error
   }
 
   // Otherwise, wrap it in the target error class
-  const errorMessage = error instanceof Error ? error.message : String(error);
+  const errorMessage = getErrorMessage(error);
   const errorStack = error instanceof Error ? error.stack : undefined;
 
   const wrappedMessage = message

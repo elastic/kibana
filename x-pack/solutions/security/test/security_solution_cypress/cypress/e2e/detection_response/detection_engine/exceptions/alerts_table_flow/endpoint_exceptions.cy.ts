@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { deleteEndpointExceptionList } from '../../../../../tasks/api_calls/exceptions';
+import {
+  createEndpointExceptionList,
+  deleteEndpointExceptionList,
+} from '../../../../../tasks/api_calls/exceptions';
 import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import {
   expandFirstAlert,
@@ -30,12 +33,14 @@ import {
 import { ALERTS_COUNT } from '../../../../../screens/alerts';
 import {
   ADD_NESTED_BTN,
-  EXCEPTION_CARD_ITEM_CONDITIONS,
-  EXCEPTION_CARD_ITEM_NAME,
-  EXCEPTION_ITEM_VIEWER_CONTAINER,
+  ENDPOINT_EXCEPTION_CARD,
+  ENDPOINT_EXCEPTION_CARD_CONDITIONS,
+  ENDPOINT_EXCEPTION_CARD_HEADER_TITLE,
+  ENDPOINT_EXCEPTION_ITEM_CONFIRM_BTN,
+  ENDPOINT_EXCEPTION_ITEM_NAME_INPUT,
 } from '../../../../../screens/exceptions';
 import {
-  goToEndpointExceptionsTab,
+  navigateToEndpointExceptions,
   visitRuleDetailsPage,
   waitForTheRuleToBeExecuted,
 } from '../../../../../tasks/rule_details';
@@ -50,10 +55,10 @@ describe(
     const ADDITIONAL_ENTRY = 'host.hostname';
 
     beforeEach(() => {
-      cy.task('esArchiverUnload', { archiveName: 'endpoint' });
       login();
       deleteAlertsAndRules();
       deleteEndpointExceptionList();
+      createEndpointExceptionList();
 
       cy.task('esArchiverLoad', { archiveName: 'endpoint' });
       createRule(getEndpointRule()).then((rule) =>
@@ -78,8 +83,8 @@ describe(
       validateExceptionConditionField('file.Ext.code_signature');
 
       selectCloseSingleAlerts();
-      addExceptionFlyoutItemName(ITEM_NAME);
-      submitNewExceptionItem();
+      addExceptionFlyoutItemName(ITEM_NAME, ENDPOINT_EXCEPTION_ITEM_NAME_INPUT);
+      submitNewExceptionItem(ENDPOINT_EXCEPTION_ITEM_CONFIRM_BTN);
 
       // Instead of immediately checking if the Opened Alert has moved to the closed tab,
       // use the waitForAlerts method to create a buffer, allowing the alerts some time to
@@ -101,7 +106,7 @@ describe(
       // As the endpoint.alerts-* is used to trigger the alert the
       // file.Ext.code_signature will be auto-populated
       validateExceptionConditionField('file.Ext.code_signature');
-      addExceptionFlyoutItemName(ITEM_NAME);
+      addExceptionFlyoutItemName(ITEM_NAME, ENDPOINT_EXCEPTION_ITEM_NAME_INPUT);
 
       // Add non-nested condition
       cy.get(ADD_NESTED_BTN).click();
@@ -110,21 +115,20 @@ describe(
       addExceptionEntryFieldValueValue('foo', 4);
 
       // Change the name again
-      editExceptionFlyoutItemName(ITEM_NAME_EDIT);
+      editExceptionFlyoutItemName(ITEM_NAME_EDIT, ENDPOINT_EXCEPTION_ITEM_NAME_INPUT);
 
       // validate the condition is still "agent.name" or got rest after the name is changed
       validateExceptionConditionField(ADDITIONAL_ENTRY);
 
       selectCloseSingleAlerts();
-      submitNewExceptionItem();
+      submitNewExceptionItem(ENDPOINT_EXCEPTION_ITEM_CONFIRM_BTN);
 
-      // Endpoint Exception will move to Endpoint List under Exception tab of rule
-      goToEndpointExceptionsTab();
+      navigateToEndpointExceptions();
 
       // new exception item displays
-      cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
-      cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', ITEM_NAME_EDIT);
-      cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).contains('span', ADDITIONAL_ENTRY);
+      cy.get(ENDPOINT_EXCEPTION_CARD).should('have.length', 1);
+      cy.get(ENDPOINT_EXCEPTION_CARD_HEADER_TITLE).should('have.text', ITEM_NAME_EDIT);
+      cy.get(ENDPOINT_EXCEPTION_CARD_CONDITIONS).contains('span', ADDITIONAL_ENTRY);
     });
   }
 );

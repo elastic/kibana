@@ -162,7 +162,7 @@ export function StreamDetailAttachments({ definition }: { definition: Streams.al
         title: i18n.translate('xpack.streams.attachments.addSuccess.title', {
           defaultMessage: 'Attachments added successfully',
         }),
-        iconType: 'cheer',
+        iconType: 'popper',
         text: toMountPoint(
           <FormattedMessage
             id="xpack.streams.attachments.addSuccess.text"
@@ -204,7 +204,7 @@ export function StreamDetailAttachments({ definition }: { definition: Streams.al
         title: i18n.translate('xpack.streams.attachments.removeSuccess.title', {
           defaultMessage: 'Attachments removed',
         }),
-        iconType: 'unlink',
+        iconType: 'linkSlash',
         text: toMountPoint(
           <FormattedMessage
             id="xpack.streams.attachments.removeSuccess.text"
@@ -302,8 +302,11 @@ export function StreamDetailAttachments({ definition }: { definition: Streams.al
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
                             <EuiIcon
-                              type={isSelectionPopoverOpen ? 'arrowUp' : 'arrowDown'}
+                              type={
+                                isSelectionPopoverOpen ? 'chevronSingleUp' : 'chevronSingleDown'
+                              }
                               size="s"
+                              aria-hidden={true}
                             />
                           </EuiFlexItem>
                         </EuiFlexGroup>
@@ -315,11 +318,10 @@ export function StreamDetailAttachments({ definition }: { definition: Streams.al
                     anchorPosition="downLeft"
                   >
                     <EuiContextMenuPanel
-                      size="s"
                       items={[
                         <EuiContextMenuItem
                           key="unlink"
-                          icon="unlink"
+                          icon="linkSlash"
                           disabled={isUnlinkLoading}
                           onClick={() => {
                             setAttachmentsToUnlink(selectedAttachments);

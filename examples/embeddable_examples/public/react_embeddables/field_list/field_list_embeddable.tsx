@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { type DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { PlacementStrategy, type EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   type WithAllKeys,
@@ -83,8 +83,20 @@ export const getFieldListFactory = (
   core: CoreStart,
   { dataViews, data, charts, fieldFormats }: Services
 ) => {
-  const fieldListEmbeddableFactory: EmbeddableFactory<FieldListSerializedState, FieldListApi> = {
+  const fieldListEmbeddableFactory: EmbeddablePublicDefinition<
+    FieldListSerializedState,
+    FieldListApi
+  > = {
     type: FIELD_LIST_ID,
+    getPlacementHints: () => ({
+      width: 12,
+      height: 36,
+      strategy: PlacementStrategy.placeAtTop,
+    }),
+    layoutConstraints: {
+      minWidth: 12,
+      minHeight: 4,
+    },
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const state = await deserializeState(dataViews, initialState);
       const allDataViews = await dataViews.getIdsWithTitle();
@@ -109,7 +121,7 @@ export const getFieldListFactory = (
           })
       );
 
-      function serializeState() {
+      function serializeState(): FieldListSerializedState {
         const { dataViews: selectedDataViews, ...rest } = fieldListStateManager.getLatestState();
         return {
           ...titleManager.getLatestState(),
@@ -117,7 +129,7 @@ export const getFieldListFactory = (
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges({
+      const unsavedChangesApi = initializeUnsavedChanges<FieldListSerializedState>({
         uuid,
         parentApi,
         serializeState,

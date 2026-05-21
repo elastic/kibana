@@ -119,9 +119,33 @@ export default function searchSolutionNavigation({
           'dev_tools',
           'data_management',
           'stack_management',
+          'workflows',
         ],
         { checkOrder: false }
       );
+    });
+
+    it('navigates to data management and query rules with correct breadcrumbs', async () => {
+      await solutionNavigation.sidenav.openPanel('data_management');
+      await solutionNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'management:index_management',
+      });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbTexts([
+        'Data management',
+        'Indices and data streams',
+        'Index Management',
+        'Indices',
+      ]);
+
+      await solutionNavigation.sidenav.clickLink({
+        deepLinkId: 'searchQueryRules',
+      });
+      await testSubjects.existOrFail('queryRulesBasePage');
+      await solutionNavigation.breadcrumbs.expectBreadcrumbTexts([
+        'Data management',
+        'Relevance',
+        'Query rules',
+      ]);
     });
   });
 }

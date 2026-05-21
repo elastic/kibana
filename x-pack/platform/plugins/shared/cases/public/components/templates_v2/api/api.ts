@@ -52,7 +52,7 @@ export const getTemplates = async ({
   signal?: AbortSignal;
   queryParams: TemplatesFindRequest;
 }): Promise<TemplatesFindResponse> => {
-  const { page, perPage, search, sortField, sortOrder, tags, author, owner, isDeleted } =
+  const { page, perPage, search, sortField, sortOrder, tags, author, owner, isDeleted, isEnabled } =
     queryParams;
 
   const response = await KibanaServices.get().http.fetch<TemplatesFindResponse>(
@@ -66,6 +66,7 @@ export const getTemplates = async ({
         sortField,
         sortOrder,
         isDeleted,
+        ...(isEnabled !== undefined ? { isEnabled } : {}),
         ...(tags && tags.length > 0 ? { tags } : {}),
         ...(author && author.length > 0 ? { author } : {}),
         ...(owner && owner.length > 0 ? { owner } : {}),
@@ -80,17 +81,24 @@ export const getTemplates = async ({
 export const getTemplate = async ({
   templateId,
   version,
+  includeDeleted,
   signal,
 }: {
   templateId: string;
   version?: number;
+  includeDeleted?: boolean;
   signal?: AbortSignal;
 }): Promise<ParsedTemplate> => {
+  const query = {
+    ...(version != null ? { version } : {}),
+    ...(includeDeleted ? { includeDeleted: true } : {}),
+  };
+
   const response = await KibanaServices.get().http.fetch<ParsedTemplate>(
     INTERNAL_TEMPLATE_DETAILS_URL.replace('{template_id}', templateId),
     {
       method: 'GET',
-      query: version != null ? { version } : undefined,
+      query: Object.keys(query).length > 0 ? query : undefined,
       signal,
     }
   );

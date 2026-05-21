@@ -53,7 +53,7 @@ async function searchDashboards(search?: string): Promise<Dashboard[]> {
         resolve(dashboards);
       },
       search: {
-        search,
+        query: search,
         per_page: 30,
       },
       trigger: { id: 'searchDashbaords' },
@@ -182,6 +182,7 @@ export function DashboardPicker({ isDisabled, onChange, idsToOmit }: DashboardPi
           onChange({ name: selected.label, id: selected.value });
         }}
         renderOption={(option) => <EuiHighlight search={query}>{option.label}</EuiHighlight>}
+        listProps={{ paddingSize: 's' }}
       >
         {(list) => <div>{list}</div>}
       </EuiSelectable>

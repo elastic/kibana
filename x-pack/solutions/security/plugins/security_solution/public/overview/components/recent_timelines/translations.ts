@@ -18,7 +18,7 @@ export const NO_FAVORITE_TIMELINES = i18n.translate(
   'xpack.securitySolution.recentTimelines.noFavoriteTimelinesMessage',
   {
     defaultMessage:
-      "You haven't favorited any timelines yet. Get out there and start threat hunting!",
+      "You haven't favorited any Timelines yet. Get out there and start threat hunting!",
   }
 );
 
@@ -33,7 +33,7 @@ export const NO_TIMELINES = i18n.translate(
   'xpack.securitySolution.recentTimelines.noTimelinesMessage',
   {
     defaultMessage:
-      "You haven't created any timelines yet. Get out there and start threat hunting!",
+      "You haven't created any Timelines yet. Get out there and start threat hunting!",
   }
 );
 
@@ -44,7 +44,7 @@ export const NOTES = i18n.translate('xpack.securitySolution.recentTimelines.note
 export const OPEN_AS_DUPLICATE = i18n.translate(
   'xpack.securitySolution.recentTimelines.openAsDuplicateTooltip',
   {
-    defaultMessage: 'Open as a timeline duplicate',
+    defaultMessage: 'Open as a Timeline duplicate',
   }
 );
 
@@ -65,14 +65,14 @@ export const PINNED_EVENTS = i18n.translate(
 export const UNTITLED_TIMELINE = i18n.translate(
   'xpack.securitySolution.recentTimelines.untitledTimelineLabel',
   {
-    defaultMessage: 'Untitled timeline',
+    defaultMessage: 'Untitled Timeline',
   }
 );
 
 export const VIEW_ALL_TIMELINES = i18n.translate(
   'xpack.securitySolution.recentTimelines.viewAllTimelinesLink',
   {
-    defaultMessage: 'View all timelines',
+    defaultMessage: 'View all Timelines',
   }
 );
 

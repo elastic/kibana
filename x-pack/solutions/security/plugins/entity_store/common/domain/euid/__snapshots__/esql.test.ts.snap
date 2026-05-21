@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getEuidEsqlDocumentsContainsIdFilter returns documents filter AND postAggFilter for user (IDP or non-IDP only) 1`] = `"(\`event.outcome\` IS NULL OR COALESCE(\`event.outcome\` != \\"failure\\", TRUE)) AND (NOT(\`user.email\` IS NULL) AND COALESCE(\`user.email\` != \\"\\", TRUE) OR NOT(\`user.id\` IS NULL) AND COALESCE(\`user.id\` != \\"\\", TRUE) OR NOT(\`user.name\` IS NULL) AND COALESCE(\`user.name\` != \\"\\", TRUE))"`;

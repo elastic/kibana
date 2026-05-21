@@ -51,20 +51,13 @@ export class PortableDashboardsExamplePlugin implements Plugin<void, void, Setup
       image: img,
     });
 
-    embeddable.registerReactEmbeddableFactory(FILTER_DEBUGGER_EMBEDDABLE_ID, async () => {
+    embeddable.registerEmbeddablePublicDefinition(FILTER_DEBUGGER_EMBEDDABLE_ID, async () => {
       const { factory } = await import('./filter_debugger_embeddable');
       return factory;
     });
   }
 
-  public async start(core: CoreStart, deps: StartDeps) {
-    deps.presentationUtil.registerPanelPlacementSettings(FILTER_DEBUGGER_EMBEDDABLE_ID, () => ({
-      placementSettings: {
-        width: 48,
-        height: 12,
-      },
-    }));
-  }
+  public async start(core: CoreStart, deps: StartDeps) {}
 
   public stop() {}
 }

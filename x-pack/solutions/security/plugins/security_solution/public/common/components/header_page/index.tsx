@@ -93,7 +93,7 @@ export const HeaderLinkBack: React.FC<{ backOptions: BackOptions }> = React.memo
             navigateToUrl(backUrl);
           }}
           href={backUrl}
-          iconType="arrowLeft"
+          iconType="chevronSingleLeft"
         >
           {backOptions.text}
         </LinkIcon>

@@ -6,7 +6,81 @@
  */
 
 import { validateStreamlang } from './validate_streamlang';
+import { validateStreamlangModeCompatibility } from './ui';
 import type { StreamlangDSL } from '../../types/streamlang';
+
+describe('validateStreamlangModeCompatibility', () => {
+  it('should detect deeply nested conditions in else branches', () => {
+    // Build a DSL that nests 4 levels deep via else branches
+    const dsl: StreamlangDSL = {
+      steps: [
+        {
+          condition: {
+            field: 'a',
+            eq: '1',
+            steps: [],
+            else: [
+              {
+                condition: {
+                  field: 'b',
+                  eq: '2',
+                  steps: [],
+                  else: [
+                    {
+                      condition: {
+                        field: 'c',
+                        eq: '3',
+                        steps: [],
+                        else: [
+                          {
+                            condition: {
+                              field: 'd',
+                              eq: '4',
+                              steps: [],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      ],
+    };
+
+    const result = validateStreamlangModeCompatibility(dsl);
+    expect(result.canBeRepresentedInInteractiveMode).toBe(false);
+  });
+
+  it('should allow conditions nested within depth limit in else branches', () => {
+    const dsl: StreamlangDSL = {
+      steps: [
+        {
+          condition: {
+            field: 'a',
+            eq: '1',
+            steps: [],
+            else: [
+              {
+                condition: {
+                  field: 'b',
+                  eq: '2',
+                  steps: [],
+                },
+              },
+            ],
+          },
+        },
+      ],
+    };
+
+    const result = validateStreamlangModeCompatibility(dsl);
+    expect(result.canBeRepresentedInInteractiveMode).toBe(true);
+  });
+});
 
 describe('validateStreamlang', () => {
   describe('non-namespaced field validation for wired streams', () => {
@@ -1484,6 +1558,43 @@ describe('validateStreamlang', () => {
         );
       });
 
+      it('should detect mixed types from json_extract processor with conditional type cast overwriting source field', () => {
+        const dsl: StreamlangDSL = {
+          steps: [
+            {
+              action: 'set',
+              to: 'attributes.message',
+              value: '{"count": 42}',
+            },
+            {
+              action: 'json_extract',
+              field: 'attributes.message',
+              extractions: [
+                { selector: 'count', target_field: 'attributes.message', type: 'integer' },
+              ],
+              where: {
+                field: 'should_extract',
+                eq: 'yes',
+              },
+            },
+          ],
+        };
+
+        const result = validateStreamlang(dsl, {
+          reservedFields: [],
+          streamType: 'wired',
+        });
+
+        expect(result.isValid).toBe(false);
+        const mixedTypeError = result.errors.find(
+          (e) => e.type === 'mixed_type' && e.field === 'attributes.message'
+        );
+        expect(mixedTypeError).toBeDefined();
+        expect(mixedTypeError?.conflictingTypes).toEqual(
+          expect.arrayContaining(['string', 'number'])
+        );
+      });
+
       it('should allow nested conditional processors to create mixed types', () => {
         const dsl: StreamlangDSL = {
           steps: [
@@ -1793,6 +1904,45 @@ describe('validateStreamlang', () => {
             action: 'math',
             expression: 'attributes.value + log(attributes.other)',
             to: 'attributes.result',
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, { reservedFields: [], streamType: 'wired' });
+
+      const valueErrors = result.errors.filter((e) => e.type === 'invalid_value');
+      expect(valueErrors).toHaveLength(0);
+    });
+
+    it('should detect invalid json_extract selectors', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'json_extract',
+            field: 'attributes.message',
+            extractions: [{ selector: 'a..b', target_field: 'attributes.extracted' }],
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, { reservedFields: [], streamType: 'wired' });
+
+      expect(result.isValid).toBe(false);
+      const valueErrors = result.errors.filter((e) => e.type === 'invalid_value');
+      expect(valueErrors).toHaveLength(1);
+      expect(valueErrors[0].message).toContain('consecutive dots');
+    });
+
+    it('should pass validation for valid json_extract selectors', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'json_extract',
+            field: 'attributes.message',
+            extractions: [
+              { selector: 'user.name', target_field: 'attributes.user_name' },
+              { selector: 'items[0].id', target_field: 'attributes.first_id', type: 'integer' },
+            ],
           },
         ],
       };
@@ -2179,6 +2329,147 @@ describe('validateStreamlang', () => {
 
       const placementErrors = result.errors.filter((e) => e.type === 'invalid_processor_placement');
       expect(placementErrors).toHaveLength(0);
+    });
+  });
+
+  describe('else branch validation', () => {
+    it('should validate fields in else branches', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            condition: {
+              field: 'status',
+              eq: 200,
+              steps: [
+                {
+                  action: 'set',
+                  to: 'attributes.ok',
+                  value: 'yes',
+                },
+              ],
+              else: [
+                {
+                  action: 'set',
+                  to: 'invalid_field',
+                  value: 'no',
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, {
+        reservedFields: [],
+        streamType: 'wired',
+      });
+
+      expect(result.isValid).toBe(false);
+      expect(result.errors.some((e) => e.field === 'invalid_field')).toBe(true);
+    });
+
+    it('should reject remove_by_prefix in else branch of a where block', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            condition: {
+              field: 'status',
+              eq: 200,
+              steps: [],
+              else: [
+                {
+                  action: 'remove_by_prefix',
+                  from: 'attributes.',
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, {
+        reservedFields: [],
+        streamType: 'wired',
+      });
+
+      expect(result.isValid).toBe(false);
+      const placementErrors = result.errors.filter((e) => e.type === 'invalid_processor_placement');
+      expect(placementErrors).toHaveLength(1);
+    });
+
+    it('should detect forbidden processors inside else branches for wired streams', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            condition: {
+              field: 'a',
+              eq: '1',
+              steps: [],
+              else: [
+                {
+                  action: 'manual_ingest_pipeline',
+                  processors: [],
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, { reservedFields: [], streamType: 'wired' });
+      expect(result.errors.some((e) => e.type === 'forbidden_processor')).toBe(true);
+    });
+
+    it('should detect remove_by_prefix inside else branches', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            condition: {
+              field: 'a',
+              eq: '1',
+              steps: [],
+              else: [
+                {
+                  action: 'remove_by_prefix',
+                  from: 'test_',
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, { reservedFields: [], streamType: 'classic' });
+      expect(result.errors.some((e) => e.type === 'invalid_processor_placement')).toBe(true);
+    });
+
+    it('should reject forbidden processors in else branches for wired streams', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            condition: {
+              field: 'status',
+              eq: 200,
+              steps: [],
+              else: [
+                {
+                  action: 'manual_ingest_pipeline' as const,
+                  processors: [],
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, {
+        reservedFields: [],
+        streamType: 'wired',
+      });
+
+      expect(result.isValid).toBe(false);
+      const forbiddenErrors = result.errors.filter((e) => e.type === 'forbidden_processor');
+      expect(forbiddenErrors).toHaveLength(1);
     });
   });
 });

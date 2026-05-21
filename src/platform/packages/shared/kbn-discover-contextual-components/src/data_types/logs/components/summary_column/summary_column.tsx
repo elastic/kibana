@@ -17,9 +17,10 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import {
   type ShouldShowFieldInTableHandler,
   TRACE_FIELDS,
+  formatFieldStringValueWithHighlights,
   getMessageFieldWithFallbacks,
+  getAvailableTraceFields,
 } from '@kbn/discover-utils';
-import { getAvailableTraceFields, escapeAndPreserveHighlightTags } from '@kbn/discover-utils';
 import { Resource } from './resource';
 import { Content } from './content';
 import {
@@ -166,11 +167,19 @@ export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
   const { field, value, formattedValue } = getMessageFieldWithFallbacks(row.flattened, {
     includeFormattedValue: true,
   });
+
+  // For formatted JSON values, render as JSON code block
+  // For plain text, use field formatter's reactConvert which handles search highlighting natively
   const messageCodeBlockProps = formattedValue
     ? { language: 'json', children: formattedValue }
     : {
         language: 'txt',
-        dangerouslySetInnerHTML: { __html: escapeAndPreserveHighlightTags(value ?? '') },
+        children: formatFieldStringValueWithHighlights({
+          value: value ?? '',
+          hit: row.raw,
+          fieldFormats,
+          fieldName: field,
+        }),
       };
   const shouldRenderContent = Boolean(field && value);
 

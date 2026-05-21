@@ -199,8 +199,9 @@ export function HeaderControl({ slo }: Props) {
 
   const showRemoteLinkIcon = isRemote ? (
     <EuiIcon
-      type="popout"
+      type="external"
       size="s"
+      aria-hidden={true}
       css={{
         marginLeft: '10px',
       }}
@@ -216,7 +217,7 @@ export function HeaderControl({ slo }: Props) {
             data-test-subj="o11yHeaderControlActionsButton"
             fill
             iconSide="right"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSize="s"
             onClick={handleActionsClick}
           >
@@ -227,9 +228,9 @@ export function HeaderControl({ slo }: Props) {
         }
         isOpen={isPopoverOpen}
         closePopover={closePopover}
+        panelPaddingSize="none"
       >
         <EuiContextMenuPanel
-          size="m"
           items={[
             <EuiContextMenuItem
               key="edit"

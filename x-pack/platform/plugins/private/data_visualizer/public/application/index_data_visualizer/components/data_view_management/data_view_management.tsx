@@ -67,10 +67,13 @@ export function DataVisualizerDataViewManagement(props: DataVisualizerDataViewMa
       }}
       ownFocus
       data-test-subj="dataVisualizerDataViewManagementPopover"
+      aria-label={i18n.translate('xpack.dataVisualizer.index.dataViewManagement.popoverAriaLabel', {
+        defaultMessage: 'Data view management',
+      })}
       button={
         <EuiButtonIcon
           color="text"
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           data-test-subj="dataVisualizerDataViewManagementButton"
           aria-label={i18n.translate(
             'xpack.dataVisualizer.index.dataViewManagement.actionsPopoverLabel',
@@ -86,7 +89,6 @@ export function DataVisualizerDataViewManagement(props: DataVisualizerDataViewMa
     >
       <EuiContextMenuPanel
         data-test-subj="dataVisualizerDataViewManagementMenu"
-        size="s"
         items={[
           <EuiContextMenuItem
             key="add"

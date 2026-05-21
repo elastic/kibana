@@ -43,6 +43,7 @@ const wrappedScopedClusterClient = wrappedScopedClusterClientMock.create();
 const getDataViews = jest.fn().mockResolvedValue(dataViews);
 const getWrappedSearchSourceClient = jest.fn();
 const getAsyncSearchClient = jest.fn();
+const getCpsData = jest.fn().mockResolvedValue({ linkedProjects: [] });
 
 const fakeRequest = {
   headers: {},
@@ -201,6 +202,7 @@ describe('RuleTypeRunner', () => {
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
           getAsyncSearchClient,
+          getCpsData,
         },
         rule: mockedRule,
         ruleType,
@@ -315,6 +317,7 @@ describe('RuleTypeRunner', () => {
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
           getAsyncSearchClient,
+          getCpsData,
         },
         rule: mockedRule,
         ruleType,
@@ -432,6 +435,7 @@ describe('RuleTypeRunner', () => {
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
           getAsyncSearchClient,
+          getCpsData,
         },
         rule: mockedRule,
         ruleType,
@@ -543,6 +547,7 @@ describe('RuleTypeRunner', () => {
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
           getAsyncSearchClient,
+          getCpsData,
         },
         rule: mockedRule,
         ruleType,
@@ -654,6 +659,7 @@ describe('RuleTypeRunner', () => {
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
           getAsyncSearchClient,
+          getCpsData,
         },
         rule: mockedRule,
         ruleType,
@@ -695,6 +701,7 @@ describe('RuleTypeRunner', () => {
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
           getAsyncSearchClient,
+          getCpsData,
         },
         rule: mockedRule,
         ruleType,
@@ -817,6 +824,7 @@ describe('RuleTypeRunner', () => {
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
           getAsyncSearchClient,
+          getCpsData,
         },
         rule: mockedRule,
         ruleType,
@@ -938,6 +946,7 @@ describe('RuleTypeRunner', () => {
             wrappedScopedClusterClient,
             getWrappedSearchSourceClient,
             getAsyncSearchClient,
+            getCpsData,
           },
           rule: mockedRule,
           ruleType,
@@ -1047,6 +1056,7 @@ describe('RuleTypeRunner', () => {
             wrappedScopedClusterClient,
             getWrappedSearchSourceClient,
             getAsyncSearchClient,
+            getCpsData,
           },
           rule: mockedRule,
           ruleType,
@@ -1159,6 +1169,7 @@ describe('RuleTypeRunner', () => {
             wrappedScopedClusterClient,
             getWrappedSearchSourceClient,
             getAsyncSearchClient,
+            getCpsData,
           },
           rule: mockedRule,
           ruleType,
@@ -1269,6 +1280,7 @@ describe('RuleTypeRunner', () => {
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
           getAsyncSearchClient,
+          getCpsData,
         },
         rule: mockedRule,
         ruleType: { ...ruleType, ruleTaskTimeout: mockRuleExecutionTimeout },
@@ -1282,6 +1294,64 @@ describe('RuleTypeRunner', () => {
           ruleExecutionTimeout: mockRuleExecutionTimeout,
         })
       );
+    });
+  });
+
+  describe('lastEnabledAt', () => {
+    const getRunOpts = (rule: RuleData<Record<string, unknown>>) => ({
+      context: {
+        alertingEventLogger,
+        logger,
+        maintenanceWindowsService,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        queryDelaySec: 0,
+        request: fakeRequest,
+        ruleId: RULE_ID,
+        ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
+        ruleRunMetricsStore,
+        spaceId: 'default',
+        isServerless: false,
+      },
+      alertsClient,
+      executionId: 'abc',
+      executorServices: {
+        getDataViews,
+        ruleMonitoringService: publicRuleMonitoringService,
+        ruleResultService: publicRuleResultService,
+        savedObjectsClient,
+        uiSettingsClient,
+        wrappedScopedClusterClient,
+        getWrappedSearchSourceClient,
+        getAsyncSearchClient,
+        getCpsData,
+      },
+      rule,
+      ruleType,
+      startedAt: new Date(DATE_1970),
+      state: mockTaskInstance().state,
+      validatedParams: mockedRuleParams,
+    });
+
+    test('should pass lastEnabledAt to executor when present', async () => {
+      const enabledAt = new Date('2024-01-15T10:00:00.000Z');
+      ruleType.executor.mockResolvedValueOnce({ state: { foo: 'bar' } });
+
+      await ruleTypeRunner.run(getRunOpts({ ...mockedRule, lastEnabledAt: enabledAt }));
+
+      expect(ruleType.executor).toHaveBeenCalledWith(
+        expect.objectContaining({
+          rule: expect.objectContaining({ lastEnabledAt: enabledAt }),
+        })
+      );
+    });
+
+    test('should not include lastEnabledAt when it is undefined', async () => {
+      ruleType.executor.mockResolvedValueOnce({ state: { foo: 'bar' } });
+
+      await ruleTypeRunner.run(getRunOpts(mockedRule));
+
+      const executorCall = ruleType.executor.mock.calls[0][0];
+      expect(executorCall.rule).not.toHaveProperty('lastEnabledAt');
     });
   });
 
@@ -1314,6 +1384,7 @@ describe('RuleTypeRunner', () => {
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
           getAsyncSearchClient,
+          getCpsData,
         },
         rule: mockedRule,
         ruleType,
@@ -1391,6 +1462,7 @@ describe('RuleTypeRunner', () => {
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
           getAsyncSearchClient,
+          getCpsData,
         },
         rule: mockedRule,
         ruleType,
@@ -1450,6 +1522,7 @@ describe('RuleTypeRunner', () => {
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
           getAsyncSearchClient,
+          getCpsData,
         },
         rule: mockedRule,
         ruleType,

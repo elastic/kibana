@@ -9,7 +9,7 @@
 
 import type { DemoConfig, ServiceConfig } from '../../types';
 
-const CONTAINER_REGISTRY = 'gcr.io/google-samples/microservices-demo';
+const CONTAINER_REGISTRY = 'us-central1-docker.pkg.dev/google-samples/microservices-demo';
 
 /**
  * Google Online Boutique (microservices-demo) configuration
@@ -20,15 +20,15 @@ export const onlineBoutiqueConfig: DemoConfig = {
   displayName: 'Google Online Boutique',
   namespace: 'online-boutique',
   description: 'Google Cloud microservices demo - 11 services in Go, C#, Java, Python, Node.js',
-  defaultVersion: 'v0.10.1',
-  availableVersions: ['v0.10.1', 'v0.9.0', 'v0.8.0'],
+  defaultVersion: 'v0.10.5',
+  availableVersions: ['v0.10.5', 'v0.10.4', 'v0.10.3', 'v0.10.2', 'v0.10.1'],
 
   frontendService: {
     name: 'frontend',
     nodePort: 30080,
   },
 
-  getServices: (version = 'v0.10.1'): ServiceConfig[] => [
+  getServices: (version = 'v0.10.5'): ServiceConfig[] => [
     // Supporting services
     {
       name: 'redis-cart',

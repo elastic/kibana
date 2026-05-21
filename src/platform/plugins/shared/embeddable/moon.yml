@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/embeddable-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-presentation'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/embeddable-plugin'
+  title: '@kbn/embeddable-plugin'
   description: Moon project for @kbn/embeddable-plugin
   channel: ''
   owner: '@elastic/kibana-presentation'
-  metadata:
-    sourceRoot: src/platform/plugins/shared/embeddable
+  sourceRoot: src/platform/plugins/shared/embeddable
 dependsOn:
   - '@kbn/core'
   - '@kbn/inspector-plugin'
@@ -31,7 +30,6 @@ dependsOn:
   - '@kbn/saved-objects-finder-plugin'
   - '@kbn/usage-collection-plugin'
   - '@kbn/content-management-plugin'
-  - '@kbn/presentation-panel-plugin'
   - '@kbn/presentation-publishing'
   - '@kbn/analytics'
   - '@kbn/content-management-utils'
@@ -40,6 +38,15 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/licensing-plugin'
   - '@kbn/presentation-util'
+  - '@kbn/panel-loader'
+  - '@kbn/i18n-react'
+  - '@kbn/react-hooks'
+  - '@kbn/search-errors'
+  - '@kbn/shared-ux-markdown'
+  - '@kbn/data-views-plugin'
+  - '@kbn/data-plugin'
+  - '@kbn/unified-search-plugin'
+  - '@kbn/kibana-react-plugin'
 tags:
   - plugin
   - prod
@@ -52,17 +59,8 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - public/react_embeddable_system/embeddable_renderer_context.tsx
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

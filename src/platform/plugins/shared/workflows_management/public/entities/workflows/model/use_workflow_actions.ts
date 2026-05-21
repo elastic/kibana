@@ -7,17 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { v4 as generateUuid } from 'uuid';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { resolveCollisionId } from '@kbn/human-readable-id';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type {
   RunStepCommand,
   RunWorkflowResponseDto,
+  UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowListDto,
 } from '@kbn/workflows';
-import { useRunWorkflow } from '@kbn/workflows-ui';
-import type { WorkflowTriggerTab } from '../../../features/run_workflow/ui/types';
-import { useKibana } from '../../../hooks/use_kibana';
+import type { BulkCreateWorkflowsResponse } from '@kbn/workflows-ui';
+import { useRunWorkflow, useWorkflowsApi } from '@kbn/workflows-ui';
+import { rewriteWorkflowReferences } from '../../../common/lib/export/rewrite_workflow_references';
+import type { WorkflowPreview } from '../../../common/lib/export/workflow_preview';
+import { parseImportFile } from '../../../features/import_workflows/lib/parse_import_file';
+import type {
+  WorkflowStepTriggerTab,
+  WorkflowTriggerTab,
+} from '../../../features/run_workflow/ui/types';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 
 type HttpError = IHttpFetchError<ResponseErrorBody>;
@@ -34,6 +43,27 @@ export interface UpdateWorkflowParams {
   skipRefetch?: boolean;
 }
 
+export interface PreflightImportResult {
+  format: 'zip' | 'yaml';
+  totalWorkflows: number;
+  conflicts: Array<{ id: string; existingName: string }>;
+  parseErrors: string[];
+  workflows: WorkflowPreview[];
+  rawWorkflows: Array<{ id: string; originalId: string; yaml: string }>;
+}
+
+export interface ImportWorkflowsResult {
+  created: WorkflowDetailDto[];
+  failed: Array<{ index: number; id: string; error: string }>;
+}
+
+export interface ImportWorkflowsParams {
+  workflows: Array<{ id: string; originalId: string; yaml: string }>;
+  overwrite?: boolean;
+  generateNewIds?: boolean;
+  conflictIds: Array<{ id: string; existingName: string }>;
+}
+
 // Context type for storing previous query data to enable rollback on mutation errors
 interface OptimisticContext {
   // Map of query keys to their previous data for workflow lists
@@ -44,16 +74,17 @@ interface OptimisticContext {
 
 export function useWorkflowActions() {
   const queryClient = useQueryClient();
-  const { http } = useKibana().services;
+  const api = useWorkflowsApi();
   const telemetry = useTelemetry();
 
-  const updateWorkflow = useMutation<void, HttpError, UpdateWorkflowParams, OptimisticContext>({
+  const updateWorkflow = useMutation<
+    UpdatedWorkflowResponseDto,
+    HttpError,
+    UpdateWorkflowParams,
+    OptimisticContext
+  >({
     mutationKey: ['PUT', 'workflows', 'id'],
-    mutationFn: ({ id, workflow }: UpdateWorkflowParams) => {
-      return http.put<void>(`/api/workflows/${id}`, {
-        body: JSON.stringify(workflow),
-      });
-    },
+    mutationFn: async ({ id, workflow }: UpdateWorkflowParams) => api.updateWorkflow(id, workflow),
     // Optimistic update: immediately update UI before server responds
     onMutate: async ({ id, workflow }) => {
       // Cancel any outgoing refetches to avoid overwriting optimistic update
@@ -156,11 +187,7 @@ export function useWorkflowActions() {
 
   const deleteWorkflows = useMutation<void, HttpError, { ids: string[] }, OptimisticContext>({
     mutationKey: ['DELETE', 'workflows'],
-    mutationFn: ({ ids }: { ids: string[] }) => {
-      return http.delete(`/api/workflows`, {
-        body: JSON.stringify({ ids }),
-      });
-    },
+    mutationFn: ({ ids }: { ids: string[] }) => api.bulkDeleteWorkflows(ids),
     // Optimistic update: immediately remove workflows from UI before server responds
     onMutate: async ({ ids }) => {
       // Cancel any outgoing refetches to avoid overwriting optimistic update
@@ -261,13 +288,20 @@ export function useWorkflowActions() {
     },
   });
 
-  const runIndividualStep = useMutation<RunWorkflowResponseDto, HttpError, RunStepCommand>({
+  const runIndividualStep = useMutation<
+    RunWorkflowResponseDto,
+    HttpError,
+    RunStepCommand & { triggerTab?: WorkflowStepTriggerTab }
+  >({
     mutationKey: ['POST', 'workflows', 'stepId', 'run'],
-    mutationFn: ({ stepId, contextOverride, workflowYaml }) => {
-      return http.post(`/api/workflows/testStep`, {
-        body: JSON.stringify({ stepId, contextOverride, workflowYaml }),
-      });
-    },
+    mutationFn: (params: RunStepCommand & { triggerTab?: WorkflowStepTriggerTab }) =>
+      api.testStep({
+        workflowYaml: params.workflowYaml,
+        stepId: params.stepId,
+        workflowId: params.workflowId,
+        executionContext: params.executionContext,
+        contextOverride: params.contextOverride,
+      }),
     onSuccess: ({ workflowExecutionId }, variables) => {
       // Report telemetry for successful step test run
       telemetry.reportWorkflowStepTestRunInitiated({
@@ -275,6 +309,7 @@ export function useWorkflowActions() {
         stepId: variables.stepId,
         origin: 'workflow_detail',
         error: undefined,
+        triggerTab: variables.triggerTab,
       });
 
       queryClient.invalidateQueries({ queryKey: ['workflows', workflowExecutionId, 'executions'] });
@@ -287,15 +322,14 @@ export function useWorkflowActions() {
         stepId: variables.stepId,
         origin: 'workflow_detail',
         error: errorObj,
+        triggerTab: variables.triggerTab,
       });
     },
   });
 
   const cloneWorkflow = useMutation<WorkflowDetailDto, HttpError, { id: string }>({
     mutationKey: ['POST', 'workflows', 'id', 'clone'],
-    mutationFn: ({ id }: { id: string }) => {
-      return http.post<WorkflowDetailDto>(`/api/workflows/${id}/clone`);
-    },
+    mutationFn: ({ id }: { id: string }) => api.cloneWorkflow(id),
     onSuccess: (clonedWorkflow, variables) => {
       // Report telemetry for successful clone
       telemetry.reportWorkflowCloned({
@@ -318,11 +352,93 @@ export function useWorkflowActions() {
     },
   });
 
+  const preflightImportWorkflows = useMutation<PreflightImportResult, HttpError, { file: File }>({
+    mutationKey: ['POST', 'workflows', '_import', 'preflight'],
+    mutationFn: async ({ file }) => {
+      const clientResult = await parseImportFile(file);
+
+      let conflicts: PreflightImportResult['conflicts'] = [];
+      if (clientResult.workflowIds.length > 0) {
+        const conflictResponse = await api.mgetWorkflows({
+          ids: clientResult.workflowIds,
+          source: ['name'],
+        });
+        conflicts = conflictResponse
+          .map((w) => ({ id: w.id, existingName: w.name }))
+          .filter((w): w is { id: string; existingName: string } => w.existingName !== undefined);
+      }
+
+      return {
+        format: clientResult.format,
+        totalWorkflows: clientResult.totalWorkflows,
+        conflicts,
+        parseErrors: clientResult.parseErrors,
+        workflows: clientResult.workflows,
+        rawWorkflows: clientResult.rawWorkflows,
+      };
+    },
+  });
+
+  const importWorkflows = useMutation<
+    BulkCreateWorkflowsResponse,
+    HttpError,
+    ImportWorkflowsParams
+  >({
+    mutationKey: ['POST', 'workflows', '_bulk_create'],
+    mutationFn: ({ workflows, overwrite, generateNewIds, conflictIds }) => {
+      // Build base mapping from the original (export) persisted ID to the
+      // desired import ID (slug-of-name or UUID fallback). This is always
+      // needed because cross-workflow `workflow-id` references in the YAML
+      // were written using the persisted export ID, not the slug-of-name.
+      const baseIdMapping = new Map<string, string>(workflows.map((w) => [w.originalId, w.id]));
+
+      let processedWorkflows: Array<{ id: string; yaml: string }>;
+
+      if (generateNewIds) {
+        const conflictIdMapping = new Set(conflictIds.map((c) => c.id));
+        const idMapping = new Map<string, string>();
+        for (const w of workflows) {
+          const id = resolveCollisionId(w.id, conflictIdMapping, `workflow-${generateUuid()}`);
+          // register the resolved ID so the next workflow in the batch cannot collide with it
+          conflictIdMapping.add(id);
+          idMapping.set(w.originalId, id);
+        }
+        processedWorkflows = workflows.map((w) => {
+          const newId = idMapping.get(w.originalId);
+          if (!newId) {
+            throw new Error(`Missing ID mapping for workflow ${w.originalId}`);
+          }
+          return {
+            id: newId,
+            yaml: rewriteWorkflowReferences(w.yaml, idMapping),
+          };
+        });
+      } else {
+        // Only rewrite references when IDs actually changed (legacy exports where
+        // the original ID doesn't conform to the current pattern and was regenerated
+        // to a slug). For conforming exports originalId === id, so the mapping is an
+        // identity and rewriting is unnecessary.
+        const needsRewrite = workflows.some((w) => w.originalId !== w.id);
+        processedWorkflows = workflows.map((w) => ({
+          id: w.id,
+          yaml: needsRewrite ? rewriteWorkflowReferences(w.yaml, baseIdMapping) : w.yaml,
+        }));
+      }
+
+      return api.bulkCreateWorkflows({ workflows: processedWorkflows, overwrite });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workflows'] });
+    },
+  });
+
   return {
     updateWorkflow,
     deleteWorkflows,
     runWorkflow,
     runIndividualStep,
     cloneWorkflow,
+    preflightImportWorkflows,
+    importWorkflows,
   };
 }

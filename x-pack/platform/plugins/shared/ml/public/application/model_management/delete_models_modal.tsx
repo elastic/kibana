@@ -19,11 +19,12 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { TrainedModelItem, TrainedModelUIItem } from '../../../common/types/trained_models';
-import { isExistingModel } from '../../../common/types/trained_models';
-import { type WithRequired } from '../../../common/types/common';
+import type { TrainedModelItem, TrainedModelUIItem } from '@kbn/ml-common-types/trained_models';
+import { isExistingModel } from '@kbn/ml-common-types/trained_models';
+import { type WithRequired } from '@kbn/ml-common-types/common';
 import { DeleteSpaceAwareItemCheckModal } from '../components/delete_space_aware_item_check_modal';
 import { useMlKibana } from '../contexts/kibana';
 
@@ -40,6 +41,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose,
     },
   } = useMlKibana();
 
+  const modalTitleId = useGeneratedHtmlId();
   const [canDeleteModel, setCanDeleteModel] = useState(false);
   const [deletePipelines, setDeletePipelines] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -83,9 +85,10 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose,
       onClose={onClose.bind(null)}
       initialFocus="[name=cancelModelDeletion]"
       data-test-subj="mlModelsDeleteModal"
+      aria-labelledby={modalTitleId}
     >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
             id="xpack.ml.trainedModels.modelsList.deleteModal.header"
             defaultMessage="Delete {modelsCount, plural, one {{modelId}} other {# models}}?"

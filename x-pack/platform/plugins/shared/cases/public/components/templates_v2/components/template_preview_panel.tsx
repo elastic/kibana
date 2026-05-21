@@ -20,7 +20,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import * as i18n from '../../templates/translations';
+import * as i18n from '../translations';
 import type { ParsedTemplateEntry } from '../hooks/use_parse_yaml';
 import { TemplateFieldRenderer } from '../field_types/field_renderer';
 
@@ -155,7 +155,7 @@ export const TemplatePreviewPanel: React.FC<TemplatePreviewPanelProps> = ({
               <h4>{i18n.COLUMN_FIELDS}</h4>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <TemplateFieldRenderer parsedTemplate={parsedDefinition} />
+            <TemplateFieldRenderer parsedTemplate={parsedDefinition} owner={template.owner} />
           </>
         )}
       </EuiPanel>

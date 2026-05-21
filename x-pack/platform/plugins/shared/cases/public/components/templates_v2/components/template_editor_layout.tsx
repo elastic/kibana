@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
   ResizableLayout,
@@ -17,6 +17,7 @@ import {
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { TemplateYamlEditor } from './template_form';
 import { TemplatePreview } from './template_preview';
+import { ExtendsSelector } from './extends_selector';
 import { componentStyles } from './template_form_layout.styles';
 import { MIN_EDITOR_WIDTH, MIN_PREVIEW_WIDTH } from '../constants';
 
@@ -24,20 +25,24 @@ interface TemplateEditorLayoutProps {
   isLoading?: boolean;
   yamlValue: string;
   onYamlChange: (value: string) => void;
+  onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
   isYamlSaving: boolean;
   isYamlSaved: boolean;
   previewWidth: number;
   onPreviewWidthChange: (width: number) => void;
+  currentTemplateId?: string;
 }
 
 export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
   isLoading,
   yamlValue,
   onYamlChange,
+  onFieldDefaultChange,
   isYamlSaving,
   isYamlSaved,
   previewWidth,
   onPreviewWidthChange,
+  currentTemplateId,
 }) => {
   const styles = useMemoCss(componentStyles);
 
@@ -53,19 +58,30 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
     <ResizableLayout
       className="eui-fullHeight"
       flexPanel={
-        <div css={styles.editorPanel}>
-          <TemplateYamlEditor
-            value={yamlValue}
-            onChange={onYamlChange}
-            isSaving={isYamlSaving}
-            isSaved={isYamlSaved}
-          />
-        </div>
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="none"
+          css={css({ height: '100%', overflow: 'hidden' })}
+        >
+          <EuiFlexItem css={styles.editorPanel}>
+            <TemplateYamlEditor
+              value={yamlValue}
+              onChange={onYamlChange}
+              isSaving={isYamlSaving}
+              isSaved={isYamlSaved}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
       minFlexPanelSize={MIN_EDITOR_WIDTH}
       fixedPanel={
         <div css={styles.previewPanel}>
-          <TemplatePreview />
+          <ExtendsSelector
+            yamlValue={yamlValue}
+            onYamlChange={onYamlChange}
+            currentTemplateId={currentTemplateId}
+          />
+          <TemplatePreview onFieldDefaultChange={onFieldDefaultChange} />
         </div>
       }
       fixedPanelSize={previewWidth}

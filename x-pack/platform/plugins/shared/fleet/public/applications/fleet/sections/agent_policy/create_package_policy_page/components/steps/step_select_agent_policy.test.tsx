@@ -237,7 +237,7 @@ describe('stepStepSelectAgentPolicy', () => {
       });
       expect(
         result.getByText('Policy 1').closest('[data-test-subj="agentPolicyMultiItem"]')
-      ).toBeDisabled();
+      ).toHaveAttribute('aria-disabled', 'true');
     });
 
     test('should disable option if agent policy has apm package and logstash output', async () => {
@@ -262,9 +262,9 @@ describe('stepStepSelectAgentPolicy', () => {
       });
       expect(
         result.getByText('Policy 2').closest('[data-test-subj="agentPolicyMultiItem"]')
-      ).toBeDisabled();
+      ).toHaveAttribute('aria-disabled', 'true');
       expect(
-        result.getByTitle('Policy 2').querySelector('[data-euiicon-type="warningFilled"]')
+        result.getByTitle('Policy 2').querySelector('[data-euiicon-type="warningFill"]')
       ).toBeInTheDocument();
     });
   });

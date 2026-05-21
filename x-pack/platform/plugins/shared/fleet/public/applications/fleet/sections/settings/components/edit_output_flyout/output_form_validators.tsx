@@ -7,7 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { load } from 'js-yaml';
+
+import { validateSslPathInput, validateSslPathsCombo } from '../ssl_form_validators';
+export { validateSslPathInput, validateSslPathsCombo };
 
 const toSecretValidator =
   (validator: (value: string) => string[] | undefined) =>
@@ -217,19 +219,21 @@ export function validateLogstashHosts(value: string[]) {
   }
 }
 
-export function validateYamlConfig(value: string) {
+export type YamlParseFn = (value: string) => unknown;
+
+export const createValidateYamlConfig = (parse: YamlParseFn) => (value: string) => {
   try {
-    load(value);
+    parse(value);
     return;
   } catch (error) {
     return [
       i18n.translate('xpack.fleet.settings.outputForm.invalidYamlFormatErrorMessage', {
         defaultMessage: 'Invalid YAML: {reason}',
-        values: { reason: error.message },
+        values: { reason: (error as Error).message },
       }),
     ];
   }
-}
+};
 
 export function validateName(value: string) {
   if (!value || value === '') {
@@ -335,6 +339,7 @@ export function validateSSLCertificate(value: string) {
       }),
     ];
   }
+  return validateSslPathInput(value);
 }
 
 export function validateSSLKey(value: string) {
@@ -345,6 +350,7 @@ export function validateSSLKey(value: string) {
       }),
     ];
   }
+  return validateSslPathInput(value);
 }
 
 export const validateSSLKeySecret = toSecretValidator(validateSSLKey);

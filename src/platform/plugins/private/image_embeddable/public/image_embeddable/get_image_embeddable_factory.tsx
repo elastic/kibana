@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo } from 'react';
-import { BehaviorSubject, map, merge } from 'rxjs';
+import React, { useEffect } from 'react';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import {
@@ -27,7 +27,10 @@ import { IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS, IMAGE_EMBEDDABLE_TYPE } from '../.
 import type { ImageConfig, ImageEmbeddableApi } from '../types';
 
 export const getImageEmbeddableFactory = () => {
-  const imageEmbeddableFactory: EmbeddableFactory<ImageEmbeddableState, ImageEmbeddableApi> = {
+  const imageEmbeddableFactory: EmbeddablePublicDefinition<
+    ImageEmbeddableState,
+    ImageEmbeddableApi
+  > = {
     type: IMAGE_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({
       initializeDrilldownsManager,
@@ -38,17 +41,17 @@ export const getImageEmbeddableFactory = () => {
     }) => {
       const titleManager = initializeTitleManager(initialState);
 
-      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
+      const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
 
       const filesClient = filesService.filesClientFactory.asUnscoped<FileImageMetadata>();
-      const imageConfig$ = new BehaviorSubject<ImageConfig>(initialState.imageConfig);
+      const imageConfig$ = new BehaviorSubject<ImageConfig>(initialState.image_config);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
 
       function serializeState() {
         return {
           ...titleManager.getLatestState(),
           ...drilldownsManager.getLatestState(),
-          imageConfig: imageConfig$.getValue(),
+          image_config: imageConfig$.getValue(),
         };
       }
 
@@ -58,24 +61,27 @@ export const getImageEmbeddableFactory = () => {
         serializeState,
         anyStateChange$: merge(
           titleManager.anyStateChange$,
-          imageConfig$.pipe(map(() => undefined)),
+          imageConfig$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
           drilldownsManager.anyStateChange$
         ),
         getComparators: () => {
           return {
             ...drilldownsManager.comparators,
             ...titleComparators,
-            imageConfig: 'deepEquality',
+            image_config: 'deepEquality',
           };
         },
         onReset: (lastSaved) => {
           titleManager.reinitializeState(lastSaved);
           drilldownsManager.reinitializeState(lastSaved ?? {});
-          if (lastSaved) imageConfig$.next(lastSaved.imageConfig);
+          if (lastSaved) imageConfig$.next(lastSaved.image_config);
         },
       });
 
-      const embeddable = finalizeApi({
+      const embeddableApi = finalizeApi({
         ...titleManager.api,
         ...drilldownsManager.api,
         ...unsavedChangesApi,
@@ -108,18 +114,16 @@ export const getImageEmbeddableFactory = () => {
           }),
         serializeState,
       });
-      return {
-        api: embeddable,
-        Component: () => {
-          const privateImageEmbeddableApi = useMemo(() => {
-            /** Memoize the API so that the reference stays consistent and it can be used as a dependency */
-            return {
-              ...embeddable,
-              imageConfig$,
-              setDataLoading: (loading: boolean | undefined) => dataLoading$.next(loading),
-            };
-          }, []);
 
+      const privateImageEmbeddableApi = {
+        ...embeddableApi,
+        imageConfig$,
+        setDataLoading: (loading: boolean | undefined) => dataLoading$.next(loading),
+      };
+
+      return {
+        api: embeddableApi,
+        Component: () => {
           useEffect(() => {
             return () => {
               drilldownsManager.cleanup();

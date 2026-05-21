@@ -46,6 +46,7 @@ export function MitigationAccordion({
       <EuiPanel hasBorder grow={false}>
         <EuiAccordion
           id={accordionId}
+          buttonElement="div"
           buttonContent={<EuiLink>{title}</EuiLink>}
           paddingSize="none"
           initialIsOpen={initialIsOpen}

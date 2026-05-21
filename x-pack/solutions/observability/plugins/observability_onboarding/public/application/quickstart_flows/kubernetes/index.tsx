@@ -9,32 +9,56 @@ import React, { useEffect, useState } from 'react';
 import type { EuiStepStatus } from '@elastic/eui';
 import { EuiPanel, EuiSkeletonRectangle, EuiSkeletonText, EuiSpacer, EuiSteps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { EmptyPrompt } from '../shared/empty_prompt';
 import { CommandSnippet } from './command_snippet';
 import { DataIngestStatus } from './data_ingest_status';
 import { FeedbackButtons } from '../shared/feedback_buttons';
 import { useKubernetesFlow } from './use_kubernetes_flow';
+import { usePreExistingDataCheck } from '../shared/use_pre_existing_data_check';
 import { useWindowBlurDataMonitoringTrigger } from '../shared/use_window_blur_data_monitoring_trigger';
-import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 import { type IngestionMode } from '../shared/wired_streams_ingestion_selector';
+import { usePricingFeature } from '../shared/use_pricing_feature';
+import { ObservabilityOnboardingPricingFeature } from '../../../../common/pricing_features';
+import { WIRED_ECS_DATA_VIEW_SPEC } from '../shared/wired_streams_data_view';
+import type { ObservabilityOnboardingContextValue } from '../../../plugin';
+import type { ActionLink } from './data_ingest_status';
+
+const CLUSTER_OVERVIEW_DASHBOARD_ID = 'kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c';
 
 export const KubernetesPanel: React.FC = () => {
-  useFlowBreadcrumb({
-    text: i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.k8s', {
-      defaultMessage: 'Kubernetes: Logs & Metrics',
-    }),
-  });
   const { data, status, error, refetch } = useKubernetesFlow();
   const { onPageReady } = usePerformanceContext();
   const [ingestionMode, setIngestionMode] = useState<IngestionMode>('classic');
+  const metricsOnboardingEnabled = usePricingFeature(
+    ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
+  );
+  const {
+    services: { share },
+  } = useKibana<ObservabilityOnboardingContextValue>();
+  const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
+  const logsLocator = share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
+  const useWiredStreams = ingestionMode === 'wired';
+  const logsLocatorParams = useWiredStreams ? { dataViewSpec: WIRED_ECS_DATA_VIEW_SPEC } : {};
 
-  const isMonitoringStepActive = useWindowBlurDataMonitoringTrigger({
+  const [dataReceived, setDataReceived] = useState(false);
+
+  const hasPreExistingDataEarly = usePreExistingDataCheck({
+    flow: 'kubernetes',
+    onboardingId: data?.onboardingId,
+  });
+
+  const windowBlurred = useWindowBlurDataMonitoringTrigger({
     isActive: status === FETCH_STATUS.SUCCESS,
     onboardingFlowType: 'kubernetes',
     onboardingId: data?.onboardingId,
   });
+
+  const isMonitoringStepActive = windowBlurred || hasPreExistingDataEarly;
 
   useEffect(() => {
     if (data) {
@@ -49,6 +73,42 @@ export const KubernetesPanel: React.FC = () => {
   if (error !== undefined) {
     return <EmptyPrompt onboardingFlowType="kubernetes" error={error} onRetryClick={refetch} />;
   }
+
+  const kubernetesActionLinks: ActionLink[] = [
+    ...(metricsOnboardingEnabled
+      ? [
+          {
+            id: CLUSTER_OVERVIEW_DASHBOARD_ID,
+            label: i18n.translate(
+              'xpack.observability_onboarding.kubernetesPanel.exploreDashboard',
+              { defaultMessage: 'Explore Kubernetes cluster' }
+            ),
+            title: i18n.translate(
+              'xpack.observability_onboarding.kubernetesPanel.monitoringCluster',
+              {
+                defaultMessage: 'Overview your Kubernetes cluster with this pre-made dashboard',
+              }
+            ),
+            requires: 'metrics' as const,
+            href:
+              dashboardLocator?.getRedirectUrl({
+                dashboardId: CLUSTER_OVERVIEW_DASHBOARD_ID,
+              }) ?? '',
+          },
+        ]
+      : []),
+    {
+      id: 'logs',
+      title: i18n.translate('xpack.observability_onboarding.kubernetesPanel.logsTitle', {
+        defaultMessage: 'View and analyze your logs:',
+      }),
+      label: i18n.translate('xpack.observability_onboarding.kubernetesPanel.logsLabel', {
+        defaultMessage: 'Explore logs',
+      }),
+      requires: 'logs' as const,
+      href: logsLocator?.getRedirectUrl(logsLocatorParams) ?? '',
+    },
+  ];
 
   const steps = [
     {
@@ -88,9 +148,20 @@ export const KubernetesPanel: React.FC = () => {
           defaultMessage: 'Monitor your Kubernetes cluster',
         }
       ),
-      status: (isMonitoringStepActive ? 'current' : 'incomplete') as EuiStepStatus,
+      status: (dataReceived || hasPreExistingDataEarly
+        ? 'complete'
+        : isMonitoringStepActive
+        ? 'current'
+        : 'incomplete') as EuiStepStatus,
       children: isMonitoringStepActive && data && (
-        <DataIngestStatus onboardingId={data.onboardingId} ingestionMode={ingestionMode} />
+        <DataIngestStatus
+          onboardingId={data.onboardingId}
+          onboardingFlowType="kubernetes"
+          dataset="kubernetes"
+          integration="kubernetes"
+          actionLinks={kubernetesActionLinks}
+          onDataReceived={() => setDataReceived(true)}
+        />
       ),
     },
   ];

@@ -25,12 +25,14 @@ const VIEW_IN_LOGS = i18n.translate(
 
 interface ViewErrorsInLogsActionProps {
   actionId?: string;
+  scheduleId?: string;
   agentId: string;
   timestamp?: string;
 }
 
 const ViewErrorsInLogsActionComponent: React.FC<ViewErrorsInLogsActionProps> = ({
   actionId,
+  scheduleId,
   agentId,
   timestamp,
 }) => {
@@ -41,13 +43,15 @@ const ViewErrorsInLogsActionComponent: React.FC<ViewErrorsInLogsActionProps> = (
       const openInNewTab = !(!isModifiedEvent(event) && isLeftClickEvent(event));
 
       event.preventDefault();
+      // Scheduled pack errors reference schedule_id; live actions reference action_id.
+      const messageMatch = scheduleId ?? actionId;
       const queryString = stringify({
         logPosition: encode({
           end: timestamp,
           streamLive: false,
         }),
         logFilter: encode({
-          expression: `elastic_agent.id:${agentId} and (data_stream.dataset:elastic_agent or data_stream.dataset:elastic_agent.osquerybeat) and "${actionId}"`,
+          expression: `elastic_agent.id:${agentId} and (data_stream.dataset:elastic_agent or data_stream.dataset:elastic_agent.osquerybeat) and "${messageMatch}"`,
           kind: 'kuery',
         }),
       });
@@ -57,12 +61,12 @@ const ViewErrorsInLogsActionComponent: React.FC<ViewErrorsInLogsActionProps> = (
         openInNewTab,
       });
     },
-    [actionId, agentId, navigateToApp, timestamp]
+    [actionId, scheduleId, agentId, navigateToApp, timestamp]
   );
 
   return (
     <EuiToolTip content={VIEW_IN_LOGS} disableScreenReaderOutput>
-      <EuiButtonIcon iconType="search" onClick={handleClick} aria-label={VIEW_IN_LOGS} />
+      <EuiButtonIcon iconType="magnify" onClick={handleClick} aria-label={VIEW_IN_LOGS} />
     </EuiToolTip>
   );
 };
@@ -71,6 +75,7 @@ export const ViewErrorsInLogsAction = React.memo(ViewErrorsInLogsActionComponent
 
 interface ScheduledQueryErrorsTableProps {
   actionId?: string;
+  scheduleId?: string;
   agentIds?: string[];
   interval: number;
 }
@@ -83,10 +88,12 @@ const renderErrorMessage = (error: string) => (
 
 const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProps> = ({
   actionId,
+  scheduleId,
   interval,
 }) => {
   const { data: lastErrorsData } = usePackQueryErrors({
     actionId,
+    scheduleId,
     interval,
   });
 
@@ -99,11 +106,12 @@ const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProp
     (item: any) => (
       <ViewErrorsInLogsAction
         actionId={actionId}
+        scheduleId={scheduleId}
         agentId={item?.fields['elastic_agent.id'][0]}
         timestamp={item?.fields['event.ingested'][0]}
       />
     ),
-    [actionId]
+    [actionId, scheduleId]
   );
 
   const columns = useMemo(

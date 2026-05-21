@@ -52,7 +52,7 @@ export const UserLimitCallOut: React.FC<UserLimitCallOutProps> = ({
           />
         }
         color="warning"
-        iconType="alert"
+        iconType="warning"
         data-test-subj="privileged-user-limit-exceeded-callout"
       >
         <EuiText size="s">
@@ -94,7 +94,7 @@ export const UserLimitCallOut: React.FC<UserLimitCallOutProps> = ({
           />
         }
         color="warning"
-        iconType="alert"
+        iconType="warning"
         data-test-subj="privileged-user-near-limit-callout"
       >
         <EuiText size="s">

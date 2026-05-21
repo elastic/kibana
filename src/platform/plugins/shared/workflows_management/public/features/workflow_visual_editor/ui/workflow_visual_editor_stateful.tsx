@@ -12,8 +12,9 @@ import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowYaml } from '@kbn/workflows';
+import { parseWorkflowYamlToJSON } from '@kbn/workflows-yaml';
 import { WorkflowVisualEditor } from './workflow_visual_editor';
-import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml';
+import { connectorParamsSchemaResolver } from '../../../../common/lib/connector_params_schema_resolver';
 import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
 import {
@@ -32,7 +33,8 @@ export const WorkflowVisualEditorStateful = () => {
     }
     const result = parseWorkflowYamlToJSON(
       workflowYaml,
-      getWorkflowZodSchemaLoose(connectorsData.connectorTypes)
+      getWorkflowZodSchemaLoose(connectorsData.connectorTypes),
+      { connectorParamsSchemaResolver }
     );
     if (result.error) {
       return null;

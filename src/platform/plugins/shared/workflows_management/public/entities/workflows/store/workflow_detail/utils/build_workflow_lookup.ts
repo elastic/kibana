@@ -7,199 +7,84 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion */
+import type { RecursivePartial } from '@kbn/utility-types';
+import { isBuiltInStepProperty, type StepSelectionValues } from '@kbn/workflows';
+import { getValueFromValueNode, type StepInfo } from '@kbn/workflows-yaml';
+import { isRecord } from '../../../../../../common/lib/type_guards';
 
-import type { LineCounter } from 'yaml';
-import YAML from 'yaml';
-export interface StepInfo {
-  stepId: string;
-  stepType: string;
-  stepYamlNode: YAML.YAMLMap<unknown, unknown>;
-  lineStart: number;
-  lineEnd: number;
-  propInfos: Record<string, StepPropInfo>;
-  parentStepId?: string;
-}
+export {
+  buildWorkflowLookup,
+  inspectStep,
+  getValueFromValueNode,
+  type StepInfo,
+  type StepPropInfo,
+  type WorkflowLookup,
+} from '@kbn/workflows-yaml';
 
-export interface StepPropInfo {
-  path: string[];
-  keyNode: YAML.Scalar<unknown>;
-  /** Value node: always a scalar (leaf property). Intermediate map nodes are not recorded in propInfos. */
-  valueNode: YAML.Scalar<unknown>;
-}
-
-/**
- * Get plain JavaScript value from a step property value node (scalar).
- */
-export function getValueFromValueNode(valueNode: StepPropInfo['valueNode']): unknown {
-  if (!valueNode) return undefined;
-  return (valueNode as { value?: unknown }).value;
-}
-
-/**
- * Lookup table containing parsed workflow elements from a YAML document.
- * This interface serves as an index for quickly accessing workflow components
- * by their identifiers, along with metadata about their location in the document.
- *
- * @interface WorkflowLookup
- */
-export interface WorkflowLookup {
-  /** Map of step IDs to their corresponding step information and metadata */
-  steps: Record<string, StepInfo>;
-}
-
-/**
- * Parses a YAML document to build a lookup table of workflow elements.
- *
- * This function traverses the YAML document structure and extracts workflow steps,
- * creating an indexed collection for efficient access. Each step is mapped by its
- * identifier and includes metadata such as type, YAML node reference, and line
- * position information for editor integration.
- *
- * @param yamlDocument - The parsed YAML document containing workflow definition
- * @param model - Monaco editor text model for calculating line positions
- * @returns WorkflowLookup object containing indexed workflow elements
- *
- * @example
- * ```typescript
- * const yamlDoc = YAML.parseDocument(yamlContent);
- * const editorModel = monaco.editor.getModel(uri);
- * const lookup = buildWorkflowLookup(yamlDoc, editorModel);
- *
- * // Access a specific step
- * const stepInfo = lookup.steps['my-step-id'];
- * console.log(`Step type: ${stepInfo.stepType}, Lines: ${stepInfo.lineStart}-${stepInfo.lineEnd}`);
- * ```
- */
-export function buildWorkflowLookup(
-  yamlDocument: YAML.Document,
-  lineCounter: LineCounter
-): WorkflowLookup {
-  const steps: Record<string, StepInfo> = {};
-
-  if (!YAML.isMap(yamlDocument?.contents)) {
-    return {
-      steps: {},
-    };
-  }
-
-  // Only process the 'steps' section, not the entire document
-  // This prevents inputs (which also have 'name' and 'type') from being treated as steps
-  const stepsNode = (yamlDocument.contents as any).get('steps');
-  if (stepsNode) {
-    Object.assign(
-      steps,
-      inspectStep(stepsNode, lineCounter) // stepItems can be null if there are no steps defined yet
-    );
-  }
-
-  return {
-    steps,
-  };
-}
-
-const NESTED_STEP_KEYS = ['steps', 'else', 'fallback'];
-
-export function inspectStep(
-  node: any,
-  lineCounter: LineCounter,
-  parentStepId?: string
-): Record<string, StepInfo> {
-  const result: Record<string, StepInfo> = {};
-
-  let stepId: string | undefined;
-  let stepType: string | undefined;
-
-  if (YAML.isMap(node)) {
-    // First pass: collect stepId and stepType, and handle non-nested step properties
-    node.items.forEach((item) => {
-      if (YAML.isPair(item)) {
-        if (YAML.isScalar(item.key)) {
-          if (YAML.isScalar(item.value)) {
-            if (item.key.value === 'name') {
-              stepId = item.value.value as string;
-            } else if (item.key.value === 'type') {
-              stepType = item.value.value as string;
-            }
-          }
-        }
-        // For non-nested step keys (steps, else, fallback), we'll handle them in a second pass
-        // after we know the stepId. For other values, recurse with current stepId as parent.
-        const keyValue = YAML.isScalar(item.key) ? (item.key.value as string) : undefined;
-        if (!keyValue || !NESTED_STEP_KEYS.includes(keyValue)) {
-          const currentParentStepId = stepId ?? parentStepId;
-          Object.assign(result, inspectStep(item.value, lineCounter, currentParentStepId));
-        }
-      }
-    });
-
-    // Second pass: handle nested step keys (steps, else, fallback) with stepId as parentStepId
-    if (stepId) {
-      node.items.forEach((item) => {
-        if (YAML.isPair(item) && YAML.isScalar(item.key)) {
-          const keyValue = item.key.value as string;
-          if (NESTED_STEP_KEYS.includes(keyValue)) {
-            Object.assign(result, inspectStep(item.value, lineCounter, stepId));
-          }
-        }
-      });
+// Path segments come from YAML keys; use null-prototype objects so keys like "__proto__"
+// cannot resolve inherited accessors or pollute Object.prototype when nesting.
+function setNested(obj: Record<string, unknown>, segments: string[], value: unknown): void {
+  let current = obj;
+  for (let i = 0; i < segments.length - 1; i++) {
+    const seg = segments[i];
+    if (!isRecord(current[seg])) {
+      current[seg] = Object.create(null) as Record<string, unknown>;
     }
-  } else if (YAML.isSeq(node)) {
-    node.items.forEach((subItem) => {
-      Object.assign(result, inspectStep(subItem, lineCounter, parentStepId));
-    });
+    current = current[seg] as Record<string, unknown>;
   }
-
-  if (stepId && stepType && YAML.isMap(node)) {
-    const propNodes: Record<string, StepPropInfo> = {};
-    node.items.forEach((innerNode) => {
-      if (YAML.isPair(innerNode) && YAML.isScalar(innerNode.key)) {
-        if (!NESTED_STEP_KEYS.includes(innerNode.key.value as string)) {
-          Object.assign(propNodes, visitStepProps(innerNode));
-        }
-      }
-    });
-    const lineStart = lineCounter.linePos(node.range![0]).line;
-    const lineEnd = lineCounter.linePos(node.range![2] - 1).line;
-    result[stepId] = {
-      stepId,
-      stepType,
-      stepYamlNode: node,
-      lineStart,
-      lineEnd,
-      propInfos: propNodes,
-      parentStepId,
-    };
-  }
-
-  return result;
+  current[segments[segments.length - 1]] = value;
 }
 
 /**
- * Collects step property metadata for leaf values only.
- * Intermediate map nodes (e.g. `with.inputs` when it is a mapping) are not
- * recorded; only scalar leaves (e.g. `with.inputs.field1`) appear in the result.
- * So e.g. propInfos['with.inputs'] exists only when the value is a scalar (e.g.
- * a liquid template string), not when it is a map. Consumers can assume every
- * propInfo.valueNode is a Scalar.
+ * Whether a leaf dotted path (e.g. `config.proxy.ssl`) should be included for the given
+ * `valuePaths` (from `dependsOnValues`). Matches exact paths, ancestors, or descendants.
  */
-function visitStepProps(node: any, stack: string[] = []): Record<string, StepPropInfo> {
-  const result: Record<string, StepPropInfo> = {};
-  if (YAML.isMap(node.value)) {
-    stack.push(node.key.value);
-    node.value.items.forEach((childNode: any) => {
-      Object.assign(result, visitStepProps(childNode, stack));
-    });
-    stack.pop();
-  } else {
-    const path = [...stack, node.key.value];
-    const composedKey = path.join('.');
-    result[composedKey] = {
-      path,
-      keyNode: node.key,
-      valueNode: node.value,
-    };
+function leafPathMatchesValuePaths(dottedLeafKey: string, valuePaths: readonly string[]): boolean {
+  return valuePaths.some(
+    (vp) =>
+      dottedLeafKey === vp ||
+      dottedLeafKey.startsWith(`${vp}.`) ||
+      vp.startsWith(`${dottedLeafKey}.`)
+  );
+}
+
+/**
+ * Builds structured config/input values from a step's scalar leaf properties.
+ * Properties under the `with` block are placed in `input`; all others in `config`.
+ *
+ * When `valuePaths` is provided (e.g. from `selection.dependsOnValues`), only properties
+ * whose dotted `config.*` / `input.*` path matches are included — single pass over `propInfos`.
+ */
+export function buildStepSelectionValues(
+  step: StepInfo,
+  valuePaths?: readonly string[]
+): StepSelectionValues {
+  // Same null-prototype initialization as setNested (see comment there) — required to avoid prototype pollution.
+  const config = Object.create(null) as RecursivePartial<Record<string, unknown>>;
+  const input = Object.create(null) as RecursivePartial<Record<string, unknown>>;
+
+  const pathsToMatch = valuePaths && valuePaths.length > 0 ? valuePaths : undefined;
+  if (!pathsToMatch) {
+    return { config, input };
   }
 
-  return result;
+  for (const propInfo of Object.values(step.propInfos)) {
+    const rootKey = propInfo.path[0];
+    if (rootKey === 'with') {
+      const inputPath = propInfo.path.slice(1);
+      if (inputPath.length > 0) {
+        const dottedKey = `input.${inputPath.join('.')}`;
+        if (leafPathMatchesValuePaths(dottedKey, pathsToMatch)) {
+          setNested(input, inputPath, getValueFromValueNode(propInfo.valueNode));
+        }
+      }
+    } else if (typeof rootKey !== 'string' || !isBuiltInStepProperty(rootKey)) {
+      const dottedKey = `config.${propInfo.path.join('.')}`;
+      if (leafPathMatchesValuePaths(dottedKey, pathsToMatch)) {
+        setNested(config, propInfo.path, getValueFromValueNode(propInfo.valueNode));
+      }
+    }
+  }
+
+  return { config, input };
 }

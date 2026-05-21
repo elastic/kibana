@@ -8,24 +8,23 @@
 import React from 'react';
 import { type FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { LeftPanelContent } from '../shared/components/left_panel/left_panel_content';
-import type {
-  CspInsightLeftPanelSubTab,
-  EntityDetailsLeftPanelTab,
-} from '../shared/components/left_panel/left_panel_header';
+import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import { LeftPanelHeader } from '../shared/components/left_panel/left_panel_header';
 import { useSelectedTab, useTabs } from './hooks';
 
 export interface HostDetailsPanelProps extends Record<string, unknown> {
   isRiskScoreExist: boolean;
-  name: string;
+  /**
+   * Entity identifiers for the host (following entity store EUID logic)
+   */
+  hostName: string;
+  entityId: string;
   scopeId: string;
   hasMisconfigurationFindings?: boolean;
   hasVulnerabilitiesFindings?: boolean;
   hasNonClosedAlerts?: boolean;
-  path?: {
-    tab?: EntityDetailsLeftPanelTab;
-    subTab?: CspInsightLeftPanelSubTab;
-  };
+  entityStoreEntityId?: string;
+  path?: Partial<EntityDetailsPath>;
 }
 export interface HostDetailsExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'host_details';

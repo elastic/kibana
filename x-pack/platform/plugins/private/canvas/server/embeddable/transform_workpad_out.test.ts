@@ -13,6 +13,7 @@ import { embeddableService, logger } from '../kibana_services';
 
 import { transformWorkpadOut } from './transform_workpad_out';
 import { makeWorkpad, getDecodedConfig, getExpressionFunctionName } from './fixtures';
+import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
 
 const mockLensTransforms = {
   transformOut: jest.fn((config: any, references: SavedObjectReference[]) => {
@@ -38,7 +39,7 @@ jest.mock('../kibana_services', () => ({
       switch (type) {
         case 'lens-dashboard-app':
           return mockLensTransforms;
-        case 'visualization':
+        case 'legacy_vis':
           return mockVisualizationTransforms;
         case 'map':
           return mockMapTransforms;
@@ -101,10 +102,16 @@ describe('transformWorkpadOut', () => {
         timeRange: DEFAULT_TIME_RANGE,
         savedObjectId: 'embeddable-id',
       });
-      expect(embeddableService.getTransforms).toHaveBeenCalledWith('visualization');
+      expect(embeddableService.getTransforms).toHaveBeenCalledWith(VISUALIZE_EMBEDDABLE_TYPE);
       expect(mockVisualizationTransforms.transformOut).toHaveBeenCalledWith(
         { timeRange: DEFAULT_TIME_RANGE, savedObjectId: 'embeddable-id' },
-        []
+        [
+          {
+            id: 'embeddable-id',
+            name: 'savedObjectRef',
+            type: 'visualization',
+          },
+        ]
       );
     });
 
@@ -201,7 +208,13 @@ describe('legacy expressions', () => {
       expect(embeddableService.getTransforms).toHaveBeenCalledWith('lens-dashboard-app');
       expect(mockLensTransforms.transformOut).toHaveBeenCalledWith(
         { timeRange: DEFAULT_TIME_RANGE, savedObjectId: 'lens-id' },
-        []
+        [
+          {
+            id: 'lens-id',
+            name: 'savedObjectRef',
+            type: 'lens',
+          },
+        ]
       );
     });
   });
@@ -220,7 +233,7 @@ describe('legacy expressions', () => {
         timeRange: DEFAULT_TIME_RANGE,
         savedObjectId: 'vis-id',
       });
-      expect(embeddableService.getTransforms).toHaveBeenCalledWith('visualization');
+      expect(embeddableService.getTransforms).toHaveBeenCalledWith(VISUALIZE_EMBEDDABLE_TYPE);
       expect(mockVisualizationTransforms.transformOut).toHaveBeenCalledWith(
         { timeRange: DEFAULT_TIME_RANGE, savedObjectId: 'savedVisualization.id' },
         [{ id: 'vis-id', name: 'savedObjectRef', type: 'visualization' }]
@@ -241,7 +254,7 @@ describe('legacy expressions', () => {
         title: 'My Viz',
         savedObjectId: 'vis-id',
       });
-      expect(embeddableService.getTransforms).toHaveBeenCalledWith('visualization');
+      expect(embeddableService.getTransforms).toHaveBeenCalledWith(VISUALIZE_EMBEDDABLE_TYPE);
       expect(mockVisualizationTransforms.transformOut).toHaveBeenCalledWith(
         { timeRange: DEFAULT_TIME_RANGE, title: 'My Viz', savedObjectId: 'savedVisualization.id' },
         [{ id: 'vis-id', name: 'savedObjectRef', type: 'visualization' }]
@@ -261,7 +274,7 @@ describe('legacy expressions', () => {
       expect(getDecodedConfig(transformedWorkpad)).toEqual(
         expect.objectContaining({ timeRange: { from: 'now-7d', to: 'now' } })
       );
-      expect(embeddableService.getTransforms).toHaveBeenCalledWith('visualization');
+      expect(embeddableService.getTransforms).toHaveBeenCalledWith(VISUALIZE_EMBEDDABLE_TYPE);
       expect(mockVisualizationTransforms.transformOut).toHaveBeenCalledWith(
         { timeRange: { from: 'now-7d', to: 'now' }, savedObjectId: 'savedVisualization.id' },
         [{ id: 'vis-id', name: 'savedObjectRef', type: 'visualization' }]
@@ -284,7 +297,7 @@ describe('legacy expressions', () => {
           legendOpen: false,
         },
       });
-      expect(embeddableService.getTransforms).toHaveBeenCalledWith('visualization');
+      expect(embeddableService.getTransforms).toHaveBeenCalledWith(VISUALIZE_EMBEDDABLE_TYPE);
       expect(mockVisualizationTransforms.transformOut).toHaveBeenCalledWith(
         {
           timeRange: DEFAULT_TIME_RANGE,
@@ -308,7 +321,7 @@ describe('legacy expressions', () => {
         timeRange: DEFAULT_TIME_RANGE,
         savedObjectId: 'vis-id',
       });
-      expect(embeddableService.getTransforms).toHaveBeenCalledWith('visualization');
+      expect(embeddableService.getTransforms).toHaveBeenCalledWith(VISUALIZE_EMBEDDABLE_TYPE);
       expect(mockVisualizationTransforms.transformOut).toHaveBeenCalledWith(
         { timeRange: DEFAULT_TIME_RANGE, savedObjectId: 'savedVisualization.id' },
         [{ id: 'vis-id', name: 'savedObjectRef', type: 'visualization' }]
@@ -326,10 +339,16 @@ describe('legacy expressions', () => {
         timeRange: DEFAULT_TIME_RANGE,
         savedObjectId: 'vis-id',
       });
-      expect(embeddableService.getTransforms).toHaveBeenCalledWith('visualization');
+      expect(embeddableService.getTransforms).toHaveBeenCalledWith(VISUALIZE_EMBEDDABLE_TYPE);
       expect(mockVisualizationTransforms.transformOut).toHaveBeenCalledWith(
         { timeRange: DEFAULT_TIME_RANGE, savedObjectId: 'vis-id' },
-        []
+        [
+          {
+            id: 'vis-id',
+            name: 'savedObjectRef',
+            type: 'visualization',
+          },
+        ]
       );
     });
   });
@@ -469,7 +488,13 @@ describe('legacy expressions', () => {
       expect(embeddableService.getTransforms).toHaveBeenCalledWith('map');
       expect(mockMapTransforms.transformOut).toHaveBeenCalledWith(
         { timeRange: DEFAULT_TIME_RANGE, savedObjectId: 'map-id', hiddenLayers: [] },
-        []
+        [
+          {
+            id: 'map-id',
+            name: 'savedObjectRef',
+            type: 'map',
+          },
+        ]
       );
     });
   });

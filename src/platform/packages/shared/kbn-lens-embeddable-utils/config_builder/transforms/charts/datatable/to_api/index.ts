@@ -9,14 +9,14 @@
 import type { FormBasedLayer, DatatableVisualizationState, TextBasedLayer } from '@kbn/lens-common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import type { DatatableState } from '../../../../schema';
+import type { DatatableConfig } from '../../../../schema';
 import {
-  buildDatasetStateESQL,
-  buildDatasetStateNoESQL,
+  buildDataSourceStateESQL,
+  buildDataSourceStateNoESQL,
   generateApiLayer,
   isTextBasedLayer,
 } from '../../../utils';
-import { convertAppearanceToAPIFormat } from './appearance';
+import { convertStylingToAPIFormat } from './styling';
 import { convertDatatableColumnsToAPI } from './columns';
 
 export function buildVisualizationAPI(
@@ -26,22 +26,22 @@ export function buildVisualizationAPI(
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
-): DatatableState {
+): DatatableConfig {
   if (isTextBasedLayer(layer)) {
-    const dataset = buildDatasetStateESQL(layer);
+    const dataSource = buildDataSourceStateESQL(layer);
 
     const { columnIdMapping, ...columns } = convertDatatableColumnsToAPI(layer, visualization);
 
     return {
-      type: 'datatable',
-      dataset,
+      type: 'data_table',
+      data_source: dataSource,
       ...generateApiLayer(layer),
       ...columns,
-      ...convertAppearanceToAPIFormat(visualization, columnIdMapping),
+      ...convertStylingToAPIFormat(visualization, columnIdMapping),
     };
   }
 
-  const dataset = buildDatasetStateNoESQL(
+  const dataSource = buildDataSourceStateNoESQL(
     layer,
     layerId,
     adHocDataViews,
@@ -52,10 +52,10 @@ export function buildVisualizationAPI(
   const { columnIdMapping, ...columns } = convertDatatableColumnsToAPI(layer, visualization);
 
   return {
-    type: 'datatable',
-    dataset,
+    type: 'data_table',
+    data_source: dataSource,
     ...generateApiLayer(layer),
     ...columns,
-    ...convertAppearanceToAPIFormat(visualization, columnIdMapping),
+    ...convertStylingToAPIFormat(visualization, columnIdMapping),
   };
 }

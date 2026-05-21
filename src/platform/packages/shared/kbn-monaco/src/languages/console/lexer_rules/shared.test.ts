@@ -10,6 +10,7 @@
 import { monaco } from '../../../monaco_imports';
 import { lexerRules, consoleOutputLexerRules } from '.';
 import { consoleSharedLexerRules, matchTokensWithEOL } from './shared';
+import { ESQL_LANG_ID } from '../../esql/lib/constants';
 
 const CONSOLE_TEST_LANG_ID = 'console_test';
 const CONSOLE_OUTPUT_TEST_LANG_ID = 'console_output_test';
@@ -38,7 +39,7 @@ const getLineTokens = (
 };
 
 describe('Console highlighting', () => {
-  beforeAll(() => {
+  beforeAll(async () => {
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
       value: jest.fn().mockImplementation((query) => ({
@@ -53,12 +54,28 @@ describe('Console highlighting', () => {
       })),
     });
 
+    // Register a minimal ES|QL grammar for triple-quoted embedded highlighting tests.
+    monaco.languages.register({ id: ESQL_LANG_ID });
+    monaco.languages.setMonarchTokensProvider(ESQL_LANG_ID, {
+      ignoreCase: true,
+      tokenizer: {
+        root: [
+          [/\bFROM\b|\bDROP\b|\bWHERE\b|\bLIMIT\b/, 'keyword'],
+          [/[a-zA-Z_][\w]*/, 'identifier'],
+          [/\d+/, 'number'],
+          [/\s+/, ''],
+          [/./, ''],
+        ],
+      },
+    } as monaco.languages.IMonarchLanguage);
+
     monaco.languages.register({ id: CONSOLE_TEST_LANG_ID });
     monaco.languages.setMonarchTokensProvider(CONSOLE_TEST_LANG_ID, lexerRules);
     monaco.languages.register({ id: CONSOLE_OUTPUT_TEST_LANG_ID });
     monaco.languages.setMonarchTokensProvider(CONSOLE_OUTPUT_TEST_LANG_ID, consoleOutputLexerRules);
 
     // Trigger tokenizer creation.
+    monaco.editor.createModel('', ESQL_LANG_ID).dispose();
     monaco.editor.createModel('', CONSOLE_TEST_LANG_ID).dispose();
     monaco.editor.createModel('', CONSOLE_OUTPUT_TEST_LANG_ID).dispose();
   });
@@ -98,7 +115,7 @@ describe('Console highlighting', () => {
     expect(eventNameTokenType).not.toContain('text');
   });
 
-  it('returns to root after the top-level closing brace at end-of-line in the editor', () => {
+  it('highlights the next request method after the top-level closing brace in the editor', () => {
     const text = `GET _all
 {
   "a": {
@@ -114,6 +131,49 @@ GET _search`;
     const methodTokenType = getTokenTypeAtOffset(requestLineAfterJson, 0);
     expect(methodTokenType).toContain('method');
     expect(methodTokenType).not.toContain('text');
+  });
+
+  it('highlights the next request method after an indented top-level closing brace', () => {
+    const text = `POST kibana_sample_data_logs/_search
+  {
+    "query": {
+      "match_all": {}
+    }
+  }
+PUT _transform/my-managed-transform
+{
+  "source": {}
+}`;
+
+    const tokenizedLines = monaco.editor.tokenize(text, CONSOLE_TEST_LANG_ID);
+    const getLine = getLineTokens(tokenizedLines, text);
+
+    const putLine = getLine('PUT _transform/my-managed-transform');
+    const methodTokenType = getTokenTypeAtOffset(putLine, 0);
+    expect(methodTokenType).toContain('method');
+    expect(methodTokenType).not.toContain('text');
+  });
+
+  it('tokenizes intermediate closing braces as paren.rparen, not text', () => {
+    const text = `GET _all
+{
+  "a": {
+    "b": {
+      "c": 1
+    }
+  }
+}`;
+
+    const tokenizedLines = monaco.editor.tokenize(text, CONSOLE_TEST_LANG_ID);
+    const getLine = getLineTokens(tokenizedLines, text);
+
+    for (const line of ['  }', '}']) {
+      const tokens = getLine(line);
+      const braceType = getTokenTypeAtOffset(tokens, line.indexOf('}'));
+      expect(braceType).toContain('paren.rparen');
+      expect(braceType).not.toContain('text');
+      expect(braceType).not.toContain('invalid');
+    }
   });
 
   it('keeps nested braces and following JSON keys highlighted in output', () => {
@@ -209,14 +269,14 @@ describe('Lexer rule composition', () => {
     expect(stringifiedActions).not.toContain('@pop');
   });
 
-  it('json_root includes the Console-specific closing brace EOL rule', () => {
+  it('json_root includes the Console-specific closing brace rule', () => {
     const jsonRoot = (
       consoleSharedLexerRules.tokenizer as Record<string, monaco.languages.IMonarchLanguageRule[]>
     ).json_root;
 
     const hasRule = jsonRoot.some((rule) => {
       const regex = Array.isArray(rule) ? rule[0] : rule?.regex;
-      return regex instanceof RegExp && regex.source === '^}\\s*';
+      return regex instanceof RegExp && regex.source === '}';
     });
 
     expect(hasRule).toBe(true);
@@ -290,5 +350,29 @@ describe('Lexer rule composition', () => {
     );
     expect(bracketToken).toBeDefined();
     expect(bracketToken?.type).toContain('paren'); // brackets should be recognized (either paren or bracket type depending on the lexer)
+  });
+
+  it('highlights ES|QL keywords in triple-quoted "query" fields via the embedded grammar', () => {
+    const text = `POST /_query
+{
+  "query": """FROM logs | DROP message | WHERE age > 30 | LIMIT 10"""
+}`;
+
+    const tokenizedLines = monaco.editor.tokenize(text, CONSOLE_TEST_LANG_ID);
+    const getLine = getLineTokens(tokenizedLines, text);
+
+    const queryLineText = '  "query": """FROM logs | DROP message | WHERE age > 30 | LIMIT 10"""';
+    const queryLine = getLine(queryLineText);
+
+    for (const kw of ['FROM', 'DROP', 'WHERE', 'LIMIT']) {
+      const kwOffset = queryLineText.indexOf(kw);
+      const kwType = getTokenTypeAtOffset(queryLine, kwOffset);
+      expect(kwType).toContain('keyword');
+    }
+
+    // Closing brace must still be recognised after the triple-quoted block.
+    const closingBraceLine = getLine('}');
+    const closingBraceType = getTokenTypeAtOffset(closingBraceLine, 0);
+    expect(closingBraceType).toContain('paren.rparen');
   });
 });

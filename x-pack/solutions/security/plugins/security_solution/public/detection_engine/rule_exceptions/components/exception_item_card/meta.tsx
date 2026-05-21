@@ -89,7 +89,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
             button={
               <EuiButtonEmpty
                 onClick={onAffectedRulesClick}
-                iconType="list"
+                iconType="listBullet"
                 data-test-subj={`${dataTestSubj}-affectedRulesButton`}
               >
                 {i18n.AFFECTED_RULES(listAndReferences?.referenced_rules.length ?? 0)}
@@ -101,7 +101,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
             data-test-subj={`${dataTestSubj}-rulesPopover`}
             id={'rulesPopover'}
           >
-            <EuiContextMenuPanel size="s" css={referenceLinksContainerStyles} items={itemActions} />
+            <EuiContextMenuPanel css={referenceLinksContainerStyles} items={itemActions} />
           </EuiPopover>
         </EuiFlexItem>
       );
@@ -124,7 +124,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
               button={
                 <EuiButtonEmpty
                   onClick={onAffectedListsClick}
-                  iconType="list"
+                  iconType="listBullet"
                   data-test-subj={`${dataTestSubj}-affectedListsButton`}
                 >
                   {i18n.AFFECTED_LIST}
@@ -137,7 +137,6 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
               id={'listsPopover'}
             >
               <EuiContextMenuPanel
-                size="s"
                 css={referenceLinksContainerStyles}
                 items={[
                   <EuiContextMenuItem

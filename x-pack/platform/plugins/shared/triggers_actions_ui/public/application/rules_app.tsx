@@ -9,7 +9,7 @@ import React, { lazy } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import type {
-  ChromeBreadcrumb,
+  ChromeStart,
   CoreStart,
   I18nStart,
   ScopedHistory,
@@ -46,6 +46,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import type { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
 import type { Section } from './constants';
@@ -76,7 +77,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   spaces?: SpacesPluginStart;
   storage?: Storage;
   isCloud: boolean;
-  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+  setBreadcrumbs: ChromeStart['setBreadcrumbs'];
   actionTypeRegistry: ActionTypeRegistryContract;
   ruleTypeRegistry: RuleTypeRegistryContract;
   history: ScopedHistory;
@@ -95,6 +96,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   contentManagement?: ContentManagementPublicStart;
   uiActions?: UiActionsStart;
   cps?: CPSPluginStart;
+  inspector?: InspectorStart;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {
@@ -131,7 +133,10 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
 
   return (
     <ConnectorProvider
-      value={{ services: { validateEmailAddresses, enabledEmailServices }, isServerless }}
+      value={{
+        services: { validateEmailAddresses, enabledEmailServices },
+        isServerless,
+      }}
     >
       <Routes>
         <Route

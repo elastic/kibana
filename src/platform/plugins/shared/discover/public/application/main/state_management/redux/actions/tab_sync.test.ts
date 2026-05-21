@@ -7,17 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
+import type { ProjectRouting } from '@kbn/es-query';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
-import { internalStateActions, selectTabRuntimeState } from '..';
+import {
+  internalStateActions,
+  selectTab,
+  selectTabRuntimeState,
+  TabInitializationStatus,
+} from '..';
 import type { TabState } from '../types';
 import { getTabRuntimeStateMock } from '../__mocks__/runtime_state.mocks';
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
 import * as tabSyncApi from './tab_sync';
 import * as createTabPersistableStateObservableModule from '../../utils/create_tab_persistable_state_observable';
+import * as resolveDataViewModule from '../../utils/resolve_data_view';
 
 const { initializeAndSync, stopSyncing } = tabSyncApi;
 
@@ -48,6 +55,7 @@ const setup = async () => {
 
 describe('tab_sync actions', () => {
   beforeEach(() => {
+    jest.restoreAllMocks();
     jest.clearAllMocks();
   });
 
@@ -59,15 +67,93 @@ describe('tab_sync actions', () => {
       tabRuntimeState.unsubscribeFn$.next(previousUnsubscribeFn);
 
       const initializeAndSyncSpy = jest.spyOn(tabSyncApi, 'initializeAndSync');
-      const stopSyncingSpy = jest.spyOn(tabSyncApi, 'stopSyncing');
 
       await initializeSingleTab({ tabId });
 
       expect(initializeAndSyncSpy).toHaveBeenCalledWith({ tabId });
-      expect(stopSyncingSpy).toHaveBeenCalledWith({ tabId });
       expect(previousUnsubscribeFn).toHaveBeenCalled();
       expect(tabRuntimeState.unsubscribeFn$.getValue()).toStrictEqual(expect.any(Function));
       expect(tabRuntimeState.unsubscribeFn$.getValue()).not.toBe(previousUnsubscribeFn);
+    });
+
+    it('should not sync or apply global state when the tab is disconnected during initialization', async () => {
+      const originalLoadAndResolveDataView = resolveDataViewModule.loadAndResolveDataView;
+      const loadDataViewStarted = Promise.withResolvers<void>();
+      const releaseDataViewLoad = Promise.withResolvers<void>();
+      const { internalState, services, tabId, initializeSingleTab } = await setup();
+
+      jest
+        .spyOn(resolveDataViewModule, 'loadAndResolveDataView')
+        .mockImplementation(async (params) => {
+          loadDataViewStarted.resolve(undefined);
+          await releaseDataViewLoad.promise;
+
+          return originalLoadAndResolveDataView(params);
+        });
+
+      const initializeAndSyncSpy = jest.spyOn(tabSyncApi, 'initializeAndSync');
+      const fetchDataSpy = jest.spyOn(internalStateActions, 'fetchData');
+
+      const initializeSingleTabPromise = initializeSingleTab({
+        tabId,
+        skipWaitForDataFetching: true,
+      });
+
+      await loadDataViewStarted.promise;
+
+      internalState.dispatch(internalStateActions.disconnectTab({ tabId }));
+
+      expect(selectTab(internalState.getState(), tabId).initializationState).toEqual({
+        initializationStatus: TabInitializationStatus.Disconnected,
+      });
+
+      releaseDataViewLoad.resolve(undefined);
+      await initializeSingleTabPromise;
+
+      expect(selectTab(internalState.getState(), tabId).initializationState).toEqual({
+        initializationStatus: TabInitializationStatus.Disconnected,
+      });
+      expect(initializeAndSyncSpy).not.toHaveBeenCalled();
+      expect(fetchDataSpy).not.toHaveBeenCalled();
+      expect(selectTab(internalState.getState(), tabId).forceFetchOnSelect).toBe(true);
+      expect(services.filterManager.setGlobalFilters).not.toHaveBeenCalled();
+      expect(services.filterManager.setAppFilters).not.toHaveBeenCalled();
+      expect(services.data.query.queryString.setQuery).not.toHaveBeenCalled();
+      expect(services.timefilter.setTime).not.toHaveBeenCalled();
+      expect(services.timefilter.setRefreshInterval).not.toHaveBeenCalled();
+    });
+
+    it('should keep disconnected status when initialization rejects after the tab is disconnected', async () => {
+      const loadDataViewStarted = Promise.withResolvers<void>();
+      const rejectDataViewLoad = Promise.withResolvers<void>();
+      const { internalState, tabId, initializeSingleTab } = await setup();
+
+      jest.spyOn(resolveDataViewModule, 'loadAndResolveDataView').mockImplementation(async () => {
+        loadDataViewStarted.resolve(undefined);
+        await rejectDataViewLoad.promise;
+
+        throw new Error('boom');
+      });
+
+      const initializeSingleTabPromise = initializeSingleTab({
+        tabId,
+        skipWaitForDataFetching: true,
+      });
+
+      await loadDataViewStarted.promise;
+
+      internalState.dispatch(internalStateActions.disconnectTab({ tabId }));
+
+      expect(selectTab(internalState.getState(), tabId).initializationState).toEqual({
+        initializationStatus: TabInitializationStatus.Disconnected,
+      });
+
+      rejectDataViewLoad.resolve(undefined);
+      await initializeSingleTabPromise;
+
+      expect(selectTab(internalState.getState(), tabId).initializationState).toEqual({
+        initializationStatus: TabInitializationStatus.Disconnected,
+      });
     });
 
     it('should throw error when state container is not initialized', async () => {
@@ -82,7 +168,7 @@ describe('tab_sync actions', () => {
             tabId,
           })
         );
-      }).toThrow('State container is not initialized');
+      }).toThrow(/Data state container is not initialized/);
     });
   });
 
@@ -108,6 +194,31 @@ describe('tab_sync actions', () => {
   });
 
   describe('state observables subscriptions', () => {
+    it('should skip the initial CPS project routing emission and fetch on later changes', async () => {
+      const { services, tabId, initializeSingleTab } = await setup();
+      const cpsManager = services.cps?.cpsManager!;
+      const projectRouting$ = new BehaviorSubject<ProjectRouting>(undefined);
+      const getProjectRoutingSpy = jest
+        .spyOn(cpsManager, 'getProjectRouting$')
+        .mockReturnValue(projectRouting$);
+      const markNonActiveTabsForRefetchSpy = jest.spyOn(
+        internalStateActions,
+        'markNonActiveTabsForRefetch'
+      );
+      const fetchDataSpy = jest.spyOn(internalStateActions, 'fetchData');
+
+      await initializeSingleTab({ tabId });
+
+      expect(getProjectRoutingSpy).toHaveBeenCalled();
+      expect(markNonActiveTabsForRefetchSpy).not.toHaveBeenCalled();
+
+      fetchDataSpy.mockClear();
+      projectRouting$.next('next-project');
+
+      expect(markNonActiveTabsForRefetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchDataSpy).toHaveBeenCalledWith({ tabId });
+    });
+
     it('should subscribe to createTabPersistableStateObservable for syncing locally persisted tab state', async () => {
       const mockTabState$ = new Subject<
         Pick<TabState, 'appState' | 'globalState' | 'attributes'>

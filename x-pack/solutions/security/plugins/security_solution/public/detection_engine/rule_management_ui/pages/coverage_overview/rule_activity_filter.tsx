@@ -70,7 +70,7 @@ const RuleActivityFilterComponent = ({
       <EuiFilterButton
         data-test-subj="coverageOverviewRuleActivityFilterButton"
         isLoading={isLoading}
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         onClick={onButtonClick}
         isSelected={isPopoverOpen}
         hasActiveFilters={numActiveFilters > 0}
@@ -100,6 +100,7 @@ const RuleActivityFilterComponent = ({
           options={options}
           onChange={handleSelectableOnChange}
           renderOption={renderOptionLabel}
+          listProps={{ paddingSize: 's' }}
         >
           {(list) => (
             <div

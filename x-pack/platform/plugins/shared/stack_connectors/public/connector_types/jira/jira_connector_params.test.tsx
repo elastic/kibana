@@ -6,13 +6,18 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import JiraConnectorFields from './jira_connector_params';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { act, render, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
+  ...jest.requireActual(
+    '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
+  ),
+  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
+}));
 
 describe('JiraActionConnectorFields renders', () => {
   test('Jira connector fields are rendered', () => {
@@ -30,7 +35,7 @@ describe('JiraActionConnectorFields renders', () => {
       isDeprecated: false,
     };
 
-    const wrapper = mountWithIntl(
+    render(
       <ConnectorFormTestProvider connector={actionConnector}>
         <JiraConnectorFields
           readOnly={false}
@@ -40,10 +45,10 @@ describe('JiraActionConnectorFields renders', () => {
       </ConnectorFormTestProvider>
     );
 
-    expect(wrapper.find('[data-test-subj="config.apiUrl-input"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="config.projectKey-input"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="secrets.email-input"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="secrets.apiToken-input"]').length > 0).toBeTruthy();
+    expect(screen.getByTestId('config.apiUrl-input')).toBeInTheDocument();
+    expect(screen.getByTestId('config.projectKey-input')).toBeInTheDocument();
+    expect(screen.getByTestId('secrets.email-input')).toBeInTheDocument();
+    expect(screen.getByTestId('secrets.apiToken-input')).toBeInTheDocument();
   });
 
   describe('Validation', () => {
@@ -75,7 +80,7 @@ describe('JiraActionConnectorFields renders', () => {
         isDeprecated: false,
       };
 
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
           <JiraConnectorFields
             readOnly={false}
@@ -85,11 +90,9 @@ describe('JiraActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
-      waitFor(() => {
+      await waitFor(() => {
         expect(onSubmit).toBeCalledWith({
           data: {
             actionTypeId: '.jira',
@@ -98,6 +101,7 @@ describe('JiraActionConnectorFields renders', () => {
               apiUrl: 'https://test.com',
               projectKey: 'CK',
             },
+            id: 'jira',
             secrets: {
               email: 'email',
               apiToken: 'token',
@@ -143,7 +147,9 @@ describe('JiraActionConnectorFields renders', () => {
 
       await userEvent.click(res.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      });
     });
   });
 });

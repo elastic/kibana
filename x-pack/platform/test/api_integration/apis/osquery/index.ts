@@ -16,5 +16,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./privileges_check'));
     loadTestFile(require.resolve('./status'));
     loadTestFile(require.resolve('./live_queries'));
+    loadTestFile(require.resolve('./history_tags'));
+    loadTestFile(require.resolve('./unified_history'));
+    loadTestFile(require.resolve('./export_results'));
   });
 }

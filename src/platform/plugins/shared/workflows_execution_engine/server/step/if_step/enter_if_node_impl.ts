@@ -25,8 +25,8 @@ export class EnterIfNodeImpl implements NodeImplementation {
 
   public async run(): Promise<void> {
     this.stepExecutionRuntime.startStep();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const successors: any[] = this.workflowGraph.getDirectSuccessors(this.node.id);
+
+    const successors = this.workflowGraph.getDirectSuccessors(this.node.id);
 
     if (
       successors.some((node) => !['enter-then-branch', 'enter-else-branch'].includes(node.type))
@@ -47,11 +47,14 @@ export class EnterIfNodeImpl implements NodeImplementation {
     const elseNode = successors?.find(
       (node) => !Object.hasOwn(node, 'condition')
     ) as EnterConditionBranchNode;
-    const renderedCondition =
-      this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(thenNode.condition);
+    const context = this.stepExecutionRuntime.contextManager.getContext();
+    const renderedCondition = this.stepExecutionRuntime.contextManager.renderValueWithContext(
+      thenNode.condition,
+      context
+    );
     const evaluatedConditionResult = evaluateCondition(
       renderedCondition,
-      this.stepExecutionRuntime.contextManager.getContext(),
+      context,
       this.node.stepId
     );
     this.stepExecutionRuntime.setInput({

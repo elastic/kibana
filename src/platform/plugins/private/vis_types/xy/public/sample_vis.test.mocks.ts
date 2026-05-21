@@ -16,7 +16,7 @@ export const sampleAreaVis = {
     name: 'area',
     title: 'Area',
     description: 'Emphasize the quantity beneath a line chart',
-    icon: 'visArea',
+    icon: 'chartArea',
     stage: 'production',
     options: {
       showTimePicker: true,

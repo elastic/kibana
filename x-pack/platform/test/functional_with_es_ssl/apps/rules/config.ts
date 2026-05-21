@@ -10,15 +10,11 @@ import type { FtrConfigProviderContext } from '@kbn/test';
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const baseConfig = await readConfigFile(require.resolve('../../config.base.ts'));
 
-  // Get base serverArgs and append 'unifiedRulesPage' to enableExperimental array
   const baseServerArgs = baseConfig.get('kbnTestServer.serverArgs') as string[];
   const updatedServerArgs = baseServerArgs.map((arg) => {
     if (arg.startsWith('--xpack.trigger_actions_ui.enableExperimental=')) {
       const jsonValue = arg.replace('--xpack.trigger_actions_ui.enableExperimental=', '');
       const experimentalFeatures = JSON.parse(jsonValue) as string[];
-      if (!experimentalFeatures.includes('unifiedRulesPage')) {
-        experimentalFeatures.push('unifiedRulesPage');
-      }
       return `--xpack.trigger_actions_ui.enableExperimental=${JSON.stringify(
         experimentalFeatures
       )}`;

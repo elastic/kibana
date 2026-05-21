@@ -21,6 +21,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./policy_secrets')); // ~40s
 
     loadTestFile(require.resolve('./enrollment_api_keys/crud')); // ~ 20s
+    loadTestFile(require.resolve('./enrollment_api_keys/bulk_delete')); // ~ 20s
     loadTestFile(require.resolve('./enrollment_api_keys/privileges')); // ~ 20s
 
     // Data Streams
