@@ -10,9 +10,10 @@
  *
  * Colocated next to `uriPartsProcessorSchema` / `UriPartsProcessor` in
  * `types/processors/` because they define the shape of the processor's output
- * (default target, sub-field lists, success signal). They are consumed by the
- * ES|QL transpiler and the validation layer; the Ingest Pipeline transpiler
- * and the UI form do not need them.
+ * (default target, sub-field lists, success signal). Consumed by the ES|QL
+ * transpiler, the validation layer, and the Streams UI form (which uses
+ * `URI_PARTS_DEFAULT_TARGET` to pre-populate the target-prefix field so the
+ * form's default matches the transpilers' fallback).
  *
  * Runtime values living under `types/` has precedent — see
  * `types/utils/grok_to_regex.ts` for grok pattern helpers and constants.

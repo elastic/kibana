@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 import type { DocLinksStart } from '@kbn/core/public';
 import type { UriPartsProcessor } from '@kbn/streamlang';
-import { ALWAYS_CONDITION } from '@kbn/streamlang';
+import { ALWAYS_CONDITION, URI_PARTS_DEFAULT_TARGET } from '@kbn/streamlang';
 import type {
   ConfigDrivenProcessorConfiguration,
   FieldConfiguration,
@@ -24,7 +24,7 @@ export type UriPartsProcessorFormState = UriPartsProcessor;
 const defaultFormState: UriPartsProcessorFormState = {
   action: 'uri_parts' as const,
   from: '',
-  to: '',
+  to: URI_PARTS_DEFAULT_TARGET,
   keep_original: true,
   remove_if_successful: false,
   ignore_missing: true,
@@ -47,7 +47,7 @@ const fieldConfigurations: FieldConfiguration[] = [
   {
     field: 'to',
     type: 'string',
-    required: false,
+    required: true,
     label: i18n.translate(
       'xpack.streams.streamDetailView.managementTab.enrichment.processor.uriPartsTargetFieldLabel',
       { defaultMessage: 'Target prefix' }
@@ -55,11 +55,8 @@ const fieldConfigurations: FieldConfiguration[] = [
     helpText: (
       <FormattedMessage
         id="xpack.streams.streamDetailView.managementTab.enrichment.processor.uriPartsTargetFieldHelpText"
-        defaultMessage="Prefix where the extracted URI components are stored (e.g. {prefix}.scheme, {prefix}.domain, {prefix}.path). Defaults to {defaultPrefix} when empty."
-        values={{
-          prefix: <code>{'<prefix>'}</code>,
-          defaultPrefix: <code>{'url'}</code>,
-        }}
+        defaultMessage="Prefix where the extracted URI components are stored (e.g. {prefix}.scheme, {prefix}.domain, {prefix}.path)."
+        values={{ prefix: <code>{'<prefix>'}</code> }}
       />
     ),
   },
@@ -130,11 +127,6 @@ export const uriPartsProcessorConfig: ConfigDrivenProcessorConfiguration<
     );
   },
   defaultFormState,
-  // `to` is optional for uri_parts (defaults to "url"), but the shared config-driven
-  // helper special-cases `from`/`to` as always-required and passes empty strings
-  // through. That makes the DSL validator reject the step because
-  // StreamlangTargetField is non-empty. Strip the empty `to` here so the transpilers
-  // apply their default prefix.
   convertFormStateToConfig: (formState) => {
     const processor = getConvertFormStateToConfig<UriPartsProcessorFormState, UriPartsProcessor>(
       fieldConfigurations,
