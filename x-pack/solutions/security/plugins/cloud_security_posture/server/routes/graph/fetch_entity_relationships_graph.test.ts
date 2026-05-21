@@ -227,9 +227,6 @@ describe('fetchEntityRelationships', () => {
         '| KEEP actorId, actorEntityType, actorEntitySubType, actorEntityName, actorHostIps, actorDocData, relationship, relationshipNodeId, targetId, targetDocData'
       );
 
-      // Explicit LIMIT opts into the ES|QL hard cap
-      expect(query).toContain('LIMIT 10000');
-
       // Verify sourceFields are included in actor doc data
       expect(query).toContain('sourceFields');
     });

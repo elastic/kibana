@@ -13,9 +13,6 @@ import type { OriginEventId, EsQuery, EventEsqlRow } from './types';
 import { GRAPH_ACTOR_EUID_SOURCE_FIELDS, GRAPH_TARGET_EUID_SOURCE_FIELDS } from './constants';
 import type { EntityEnrichmentFields } from './fetch_entity_enrichment';
 
-// Expose the internal constant for tests
-const EVENTS_ESQL_LIMIT = 10000;
-
 describe('fetchEvents', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient();
   let logger: Logger;
@@ -180,8 +177,7 @@ describe('fetchEvents', () => {
       expect(query).toMatch(
         /\| KEEP _id, action, actorEntityId, targetEntityId, isOrigin, isOriginAlert, isAlert, pinned, docData, sourceIps, sourceCountryCodes, actorDocData, targetDocData/
       );
-      // Verify the explicit LIMIT opts into the ES|QL hard cap
-      expect(query).toContain(`LIMIT ${EVENTS_ESQL_LIMIT}`);
+      expect(query).toContain('LIMIT 1000');
     });
   });
 
@@ -443,20 +439,8 @@ const buildEventEsqlRow = (
 };
 
 describe('regroupEvents', () => {
-  let logger: Logger;
-
-  beforeEach(() => {
-    logger = {
-      trace: jest.fn(),
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-    } as unknown as Logger;
-  });
-
   it('returns empty array for empty input', () => {
-    const result = regroupEvents([], new Map(), logger);
+    const result = regroupEvents([], new Map());
     expect(result).toEqual([]);
   });
 
@@ -465,7 +449,7 @@ describe('regroupEvents', () => {
       actorEntityId: 'user:alice',
       targetEntityId: 'host:server1',
     });
-    const result = regroupEvents([record], new Map(), logger);
+    const result = regroupEvents([record], new Map());
 
     expect(result).toHaveLength(1);
     const [group] = result;
@@ -489,7 +473,7 @@ describe('regroupEvents', () => {
       ],
     ]);
 
-    const result = regroupEvents([record], enrichmentMap, logger);
+    const result = regroupEvents([record], enrichmentMap);
 
     expect(result).toHaveLength(1);
     const [group] = result;
@@ -528,7 +512,7 @@ describe('regroupEvents', () => {
       ],
     ]);
 
-    const result = regroupEvents([record1, record2, record3], enrichmentMap, logger);
+    const result = regroupEvents([record1, record2, record3], enrichmentMap);
 
     expect(result).toHaveLength(1);
     const [group] = result;
@@ -559,7 +543,7 @@ describe('regroupEvents', () => {
       ],
     ]);
 
-    const result = regroupEvents([record1, record2], enrichmentMap, logger);
+    const result = regroupEvents([record1, record2], enrichmentMap);
 
     expect(result).toHaveLength(2);
   });
@@ -575,7 +559,7 @@ describe('regroupEvents', () => {
     });
 
     // No enrichment so both stay in the same group (same null type)
-    const result = regroupEvents([record1, record2], new Map(), logger);
+    const result = regroupEvents([record1, record2], new Map());
 
     expect(result).toHaveLength(1);
     const [group] = result;
@@ -608,7 +592,7 @@ describe('regroupEvents', () => {
       ['user:bob', { name: 'Bob', type: 'user', subType: null, engineType: null, hostIps: [] }],
     ]);
 
-    const result = regroupEvents([record1, record2], enrichmentMap, logger);
+    const result = regroupEvents([record1, record2], enrichmentMap);
 
     expect(result).toHaveLength(1);
     expect(result[0].uniqueEventsCount).toBe(1);
@@ -624,26 +608,13 @@ describe('regroupEvents', () => {
       buildEventEsqlRow({ actorEntityId: 'user:alice', _id: 'alert-1', isAlert: true }), // dup
     ];
 
-    const result = regroupEvents(records, new Map(), logger);
+    const result = regroupEvents(records, new Map());
 
     expect(result).toHaveLength(1);
     expect(result[0].uniqueEventsCount).toBe(2); // evt-1, evt-2
     expect(result[0].uniqueAlertsCount).toBe(1); // alert-1
     expect(result[0].badge).toBe(5); // total rows
     expect(result[0].isAlert).toBe(true); // at least one alert in group
-  });
-
-  it('logs warn when records count equals EVENTS_ESQL_LIMIT', () => {
-    const records = Array.from({ length: EVENTS_ESQL_LIMIT }, (_, i) =>
-      buildEventEsqlRow({
-        actorEntityId: `user:entity${i}`,
-        _id: `doc-${i}`,
-      })
-    );
-
-    regroupEvents(records, new Map(), logger);
-
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(`${EVENTS_ESQL_LIMIT}`));
   });
 
   it('deduplicates actorsDocData and targetsDocData when same entity appears across merged rows', () => {
@@ -674,7 +645,7 @@ describe('regroupEvents', () => {
       ['host:c', { name: 'C', type: 'host', subType: null, engineType: null, hostIps: [] }],
     ]);
 
-    const result = regroupEvents([record1, record2], enrichmentMap, logger);
+    const result = regroupEvents([record1, record2], enrichmentMap);
 
     expect(result).toHaveLength(1);
     const [group] = result;
@@ -710,7 +681,7 @@ describe('regroupEvents', () => {
       ['host:c', { name: 'C', type: 'host', subType: null, engineType: null, hostIps: [] }],
     ]);
 
-    const result = regroupEvents([record1, record2], enrichmentMap, logger);
+    const result = regroupEvents([record1, record2], enrichmentMap);
 
     expect(result).toHaveLength(1);
     const [group] = result;
@@ -739,7 +710,7 @@ describe('regroupEvents', () => {
       pinned: 'user:charlie',
     });
 
-    const result = regroupEvents([recordA, recordB, recordC], new Map(), logger);
+    const result = regroupEvents([recordA, recordB, recordC], new Map());
 
     // 'zzz-action' DESC first, then 'mmm-action', then 'aaa-action'
     expect(result[0].action).toBe('zzz-action');
@@ -771,7 +742,7 @@ describe('enrichEventDocData', () => {
       actorEntityId: 'user:alice',
       targetEntityId: 'host:server1',
     });
-    const grouped = regroupEvents([record], new Map(), logger);
+    const grouped = regroupEvents([record], new Map());
     const result = enrichEventDocData(grouped, new Map());
 
     expect(result).toHaveLength(1);
@@ -796,7 +767,7 @@ describe('enrichEventDocData', () => {
       ],
     ]);
 
-    const grouped = regroupEvents([record], enrichmentMap, logger);
+    const grouped = regroupEvents([record], enrichmentMap);
     const result = enrichEventDocData(grouped, enrichmentMap);
 
     expect(result).toHaveLength(1);

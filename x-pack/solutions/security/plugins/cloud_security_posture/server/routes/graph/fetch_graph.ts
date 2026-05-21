@@ -172,12 +172,9 @@ export const fetchGraph = async ({
       : new Map<string, EntityEnrichmentFields>();
 
   return {
-    events: enrichEventDocData(
-      regroupEvents(eventsResult.records, enrichmentMap, logger),
-      enrichmentMap
-    ),
+    events: enrichEventDocData(regroupEvents(eventsResult.records, enrichmentMap), enrichmentMap),
     relationships: enrichRelationshipDocData(
-      regroupRelationships(relationshipsResult.records, enrichmentMap, logger),
+      regroupRelationships(relationshipsResult.records, enrichmentMap),
       enrichmentMap
     ),
     entities: enrichEntityRecords(entitiesResult.records, enrichmentMap),

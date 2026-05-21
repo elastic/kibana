@@ -34,12 +34,6 @@ interface BuildRelationshipsEsqlQueryParams {
   relationshipFields: readonly string[];
 }
 
-// ES|QL hard-caps result sets at `esql.query.result_truncation_max_size` (default 10,000).
-// We set LIMIT explicitly to opt into that ceiling — the default with no LIMIT clause is
-// `esql.query.result_truncation_default_size` (1,000). See
-// https://www.elastic.co/docs/reference/query-languages/esql/commands/limit
-const RELATIONSHIPS_ESQL_LIMIT = 10000;
-
 const RESOLUTION_RELATIONSHIP_FIELD = 'resolution.resolved_to' as const;
 
 /**
@@ -129,8 +123,7 @@ ${forkBranches}
   \`entity.name\` AS actorEntityName,
   \`host.ip\` AS actorHostIps
 | KEEP actorId, actorEntityType, actorEntitySubType, actorEntityName, actorHostIps, actorDocData, relationship, relationshipNodeId, targetId, targetDocData
-| SORT relationship ASC
-| LIMIT ${RELATIONSHIPS_ESQL_LIMIT}`;
+| SORT relationship ASC`;
 };
 
 /**
@@ -361,15 +354,8 @@ interface RelationshipGroup {
  */
 export const regroupRelationships = (
   records: RelationshipEsqlRow[],
-  enrichmentMap: Map<string, EntityEnrichmentFields>,
-  logger?: Logger
+  enrichmentMap: Map<string, EntityEnrichmentFields>
 ): RelationshipEdge[] => {
-  if (logger && records.length >= RELATIONSHIPS_ESQL_LIMIT) {
-    logger.warn(
-      `Graph relationships query hit the ES|QL ${RELATIONSHIPS_ESQL_LIMIT}-row cap; results may be incomplete`
-    );
-  }
-
   const groups = new Map<string, RelationshipGroup>();
 
   for (const record of records) {

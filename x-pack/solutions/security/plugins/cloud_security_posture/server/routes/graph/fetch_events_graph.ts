@@ -396,12 +396,6 @@ const buildActorSourceFieldsEsql = (): string =>
 const buildTargetSourceFieldsEsql = (): string =>
   buildSourceFieldsJson(GRAPH_TARGET_EUID_SOURCE_FIELDS, 'targetEntityId');
 
-// ES|QL hard-caps result sets at `esql.query.result_truncation_max_size` (default 10,000).
-// We set LIMIT explicitly to opt into that ceiling — the default with no LIMIT clause is
-// `esql.query.result_truncation_default_size` (1,000). See
-// https://www.elastic.co/docs/reference/query-languages/esql/commands/limit
-const EVENTS_ESQL_LIMIT = 10000;
-
 const buildEsqlQuery = ({
   indexPatterns,
   originEventIds,
@@ -477,7 +471,7 @@ ${buildPinnedEsql(pinnedIds)}
 | KEEP _id, action, actorEntityId, targetEntityId, isOrigin, isOriginAlert, isAlert, pinned, docData, sourceIps, sourceCountryCodes, actorDocData, targetDocData
 | EVAL pinnedSort = CASE(pinned IS NULL, 1, 0)
 | SORT action DESC, pinnedSort ASC, isOrigin
-| LIMIT ${EVENTS_ESQL_LIMIT}
+| LIMIT 1000
 | DROP pinnedSort`;
 
   return query;
@@ -518,15 +512,8 @@ interface EventGroup {
  */
 export const regroupEvents = (
   records: EventEsqlRow[],
-  enrichmentMap: Map<string, EntityEnrichmentFields>,
-  logger: Logger
+  enrichmentMap: Map<string, EntityEnrichmentFields>
 ): EventEdge[] => {
-  if (records.length >= EVENTS_ESQL_LIMIT) {
-    logger.warn(
-      `Graph events query hit the ES|QL ${EVENTS_ESQL_LIMIT}-row cap; results may be incomplete`
-    );
-  }
-
   const groups = new Map<string, EventGroup>();
 
   for (const record of records) {
