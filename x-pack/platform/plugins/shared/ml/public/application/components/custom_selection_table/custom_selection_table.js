@@ -45,7 +45,6 @@ function getError(error) {
 }
 
 export function CustomSelectionTable({
-  'aria-label': ariaLabel,
   checkboxDisabledCheck,
   columns,
   currentPage = 0,
@@ -59,6 +58,7 @@ export function CustomSelectionTable({
   setCurrentPaginationData,
   singleSelection,
   sortableProperties,
+  'aria-label': ariaLabel,
   tableItemId = 'id',
 }) {
   const [itemIdToSelectedMap, setItemIdToSelectedMap] = useState(getCurrentlySelectedItemIdsMap());
@@ -415,7 +415,6 @@ export function CustomSelectionTable({
 }
 
 CustomSelectionTable.propTypes = {
-  'aria-label': PropTypes.string,
   checkboxDisabledCheck: PropTypes.func,
   columns: PropTypes.array.isRequired,
   currentPage: PropTypes.number,
@@ -430,4 +429,5 @@ CustomSelectionTable.propTypes = {
   singleSelection: PropTypes.bool,
   sortableProperties: PropTypes.object,
   tableItemId: PropTypes.string,
+  'aria-label': PropTypes.string,
 };
