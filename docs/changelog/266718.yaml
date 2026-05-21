@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/266718
+issues:
+- https://github.com/elastic/kibana/issues/235834
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-05-20
+title: Persist flyout state across navigation

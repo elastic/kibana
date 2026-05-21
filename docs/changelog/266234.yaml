@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/266234
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-20
+areas:
+- AI and machine Learning
+title: Add support for ARM ELSER model during product doc installation (documentation, OpenAPI spec, Security Labs)

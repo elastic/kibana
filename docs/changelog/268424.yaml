@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/268424
+issues:
+- https://github.com/elastic/kibana/issues/260184
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-05-20
+areas:
+- Dashboards and visualizations
+title: Fix filters and drilldowns for columns whose field was renamed in the ES|QL query
