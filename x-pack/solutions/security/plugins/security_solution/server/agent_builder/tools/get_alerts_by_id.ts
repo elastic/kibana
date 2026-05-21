@@ -23,6 +23,9 @@ export const getAlertsById = async ({
   if (ids.length === 0) {
     return {};
   }
+  if (ids.length > 20) {
+    throw new Error(`getAlertsById: ids.length (${ids.length}) exceeds the maximum of 20`);
+  }
 
   const response = await esClient.search({
     index,

@@ -111,12 +111,7 @@ const formatInlineAttachments = async (
       (formatContent ? await formatContent(attachment, latest.data) : undefined) ??
       formatAttachmentContent(attachment, latest.data);
 
-    let effectiveMax = DEFAULT_MAX_CONTENT_LENGTH;
-    try {
-      effectiveMax = resolveMaxContentLength?.(attachment) ?? DEFAULT_MAX_CONTENT_LENGTH;
-    } catch {
-      // fall back to default if per-attachment resolution fails
-    }
+    const effectiveMax = resolveMaxContentLength?.(attachment) ?? DEFAULT_MAX_CONTENT_LENGTH;
     if (contentStr.length > effectiveMax) {
       contentStr =
         contentStr.substring(0, effectiveMax) +

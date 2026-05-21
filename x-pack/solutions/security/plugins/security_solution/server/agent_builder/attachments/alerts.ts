@@ -21,7 +21,7 @@ import { getAlertsById } from '../tools/get_alerts_by_id';
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
 export const bulkAlertsAttachmentDataSchema = securityAttachmentDataSchema.extend({
-  alertIds: z.array(z.string()),
+  alertIds: z.array(z.string()).min(1).max(20),
 });
 
 export type BulkAlertsAttachmentData = z.infer<typeof bulkAlertsAttachmentDataSchema>;
@@ -101,7 +101,7 @@ export const createBulkAlertsAttachmentType = (
 
 When the conversation has many batches (summary mode), the system shows metadata only. Read each batch before answering:
 - Each batch appears as <attachment attachment_id="<some-id>" type="security.alerts" ...> in the XML
-- Call the attachment read tool (attachments_read) and pass the attachment_id value directly as the "attachment_id" parameter
+- Call the attachment read tool (attachment_read) and pass the attachment_id value directly as the "attachment_id" parameter
 - Read ALL batches before forming conclusions
 
 Process each batch in order:

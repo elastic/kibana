@@ -136,18 +136,17 @@ describe('attachment_presentation', () => {
       expect(result.content.length).toBeGreaterThan(500);
     });
 
-    it('should fall back to default when resolveMaxContentLength throws', async () => {
+    it('should propagate when resolveMaxContentLength throws', async () => {
       const largeContent = 'x'.repeat(15000);
       const attachments = [createMockAttachment('1', 'text', largeContent)];
 
-      const result = await prepareAttachmentPresentation(attachments, {
-        resolveMaxContentLength: () => {
-          throw new Error('resolver error');
-        },
-      });
-
-      expect(result.content).toContain('[content truncated');
-      expect(result.content.length).toBeGreaterThan(500);
+      await expect(
+        prepareAttachmentPresentation(attachments, {
+          resolveMaxContentLength: () => {
+            throw new Error('resolver error');
+          },
+        })
+      ).rejects.toThrow('resolver error');
     });
 
     it('should handle visualization type as JSON', async () => {

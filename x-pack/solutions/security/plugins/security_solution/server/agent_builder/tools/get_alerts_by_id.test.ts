@@ -26,6 +26,16 @@ describe('getAlertsById', () => {
     expect(esClient.search).not.toHaveBeenCalled();
   });
 
+  it('throws when more than 20 ids are provided', async () => {
+    const esClient = makeClient([]);
+    const ids = Array.from({ length: 21 }, (_, i) => `id-${i}`);
+
+    await expect(getAlertsById({ esClient, index, ids })).rejects.toThrow(
+      'getAlertsById: ids.length (21) exceeds the maximum of 20'
+    );
+    expect(esClient.search).not.toHaveBeenCalled();
+  });
+
   it('returns hits keyed by _id with _source as the value', async () => {
     const source1 = { 'kibana.alert.rule.name': 'Rule A' };
     const source2 = { 'kibana.alert.rule.name': 'Rule B' };

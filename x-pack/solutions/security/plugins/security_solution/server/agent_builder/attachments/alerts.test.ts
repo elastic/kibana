@@ -63,10 +63,18 @@ describe('createBulkAlertsAttachmentType', () => {
       }
     });
 
-    it('returns valid with an empty alertIds array', async () => {
+    it('returns invalid with an empty alertIds array', async () => {
       const result = await attachmentType.validate({ alertIds: [] });
 
-      expect(result.valid).toBe(true);
+      expect(result.valid).toBe(false);
+    });
+
+    it('returns invalid when alertIds exceeds 20 entries', async () => {
+      const result = await attachmentType.validate({
+        alertIds: Array.from({ length: 21 }, (_, i) => `id-${i}`),
+      });
+
+      expect(result.valid).toBe(false);
     });
 
     it('returns invalid when alertIds field is missing', async () => {
