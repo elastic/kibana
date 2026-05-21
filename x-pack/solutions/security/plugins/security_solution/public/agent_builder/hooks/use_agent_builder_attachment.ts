@@ -25,6 +25,12 @@ export interface UseAgentBuilderAttachmentParams {
    */
   attachmentData: Record<string, unknown>;
   /**
+   * Human-readable description of the attachment. Used by the chat UI to display
+   * "Attachment added: {description}" on the user's input round — without this the
+   * label line renders blank.
+   */
+  attachmentDescription?: string;
+  /**
    * Prompt/input text for the agent builder conversation. When omitted the chat
    * opens with the attachment loaded and no pre-filled message.
    */
@@ -46,6 +52,7 @@ export const useAgentBuilderAttachment = ({
   attachmentId,
   attachmentType,
   attachmentData,
+  attachmentDescription,
   attachmentPrompt,
 }: UseAgentBuilderAttachmentParams): UseAgentBuilderAttachmentResult => {
   const { agentBuilder } = useKibana().services;
@@ -67,6 +74,7 @@ export const useAgentBuilderAttachment = ({
       id: attachmentId ?? `${attachmentType}-${Date.now()}`,
       type: attachmentType,
       data: attachmentData,
+      ...(attachmentDescription ? { description: attachmentDescription } : {}),
     };
 
     agentBuilder.openChat({
@@ -76,7 +84,14 @@ export const useAgentBuilderAttachment = ({
       attachments: [attachment],
       sessionTag: 'security',
     });
-  }, [attachmentId, attachmentType, attachmentData, attachmentPrompt, agentBuilder]);
+  }, [
+    attachmentId,
+    attachmentType,
+    attachmentData,
+    attachmentDescription,
+    attachmentPrompt,
+    agentBuilder,
+  ]);
 
   return {
     openAgentBuilderFlyout,

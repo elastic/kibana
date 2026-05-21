@@ -88,6 +88,7 @@ const buildFallbackVersionedAttachments = (attachments: Attachment[]): Versioned
     current_version: 1,
     active: true,
     hidden: attachment.hidden,
+    ...(attachment.description !== undefined ? { description: attachment.description } : {}),
   }));
 };
 

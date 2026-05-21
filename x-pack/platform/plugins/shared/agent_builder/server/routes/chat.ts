@@ -123,6 +123,14 @@ export function registerChatRoutes({
                 meta: { description: 'When true, the attachment will not be displayed in the UI.' },
               })
             ),
+            description: schema.maybe(
+              schema.string({
+                meta: {
+                  description:
+                    'Human-readable description of the attachment. Displayed in the chat as "Attachment added: {description}".',
+                },
+              })
+            ),
           },
           {
             validate: (attachment) => {

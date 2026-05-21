@@ -28,6 +28,13 @@ export interface Attachment<
    * Undefined for by-value attachments.
    */
   origin?: string;
+  /**
+   * Human-readable description of the attachment. Displayed in the chat as
+   * "Attachment added: {description}" in the user's input round. This field is
+   * carried through from AttachmentInput so that the optimistic render during
+   * streaming can show the label before the server persists the VersionedAttachment.
+   */
+  description?: string;
 }
 
 /**

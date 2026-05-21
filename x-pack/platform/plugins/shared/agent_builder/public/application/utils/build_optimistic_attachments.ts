@@ -67,6 +67,7 @@ export const buildOptimisticAttachments = ({
       data: (input.data ?? {}) as Record<string, unknown>,
       origin: input.origin,
       hidden: input.hidden,
+      ...(input.description !== undefined ? { description: input.description } : {}),
     });
     attachmentRefs.push({
       attachment_id: createdId,

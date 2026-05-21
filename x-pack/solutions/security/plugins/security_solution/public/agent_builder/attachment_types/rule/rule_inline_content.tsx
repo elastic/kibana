@@ -278,8 +278,11 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
           <EuiSpacer size="s" />
         </>
       ) : (
-        !isCurrentAttachment &&
-        isDirty && (
+        // "Modified" badge tracks the same condition as the action-button visibility:
+        // we show it on any card that is no longer the current attachment. A newer
+        // version of this rule exists further down in the conversation, so this card
+        // represents a stale snapshot — that's exactly what "Modified" communicates.
+        !isCurrentAttachment && (
           <>
             <EuiBadge color="warning">
               {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.modifiedBadge', {

@@ -50,7 +50,11 @@ jest.mock('../../../../common/lib/kibana');
 
 const mockKibanaServices = () => ({
   services: {
-    aiRuleCreation: { activateFormSync: mockActivateFormSync },
+    aiRuleCreation: {
+      activateFormSync: mockActivateFormSync,
+      setLastSavedRuleId: jest.fn(),
+    },
+    agentBuilder: undefined,
   },
 });
 
@@ -89,6 +93,7 @@ describe('AddRuleAttachmentToChatButton', () => {
     expect(attachment.attachmentType).toBe(SecurityAgentBuilderAttachments.rule);
     expect(attachment.attachmentData.text).toBe(JSON.stringify(ruleResponseMock));
     expect(attachment.attachmentData.attachmentLabel).toBe('My Rule');
+    expect(attachment.attachmentDescription).toBe('My Rule');
     expect(attachment.attachmentPrompt).toBe(RULE_EXPLORATION_ATTACHMENT_PROMPT);
     const newAttachmentProps = mockNewAgentBuilderAttachment.mock.calls[0][0];
     expect(newAttachmentProps.telemetry?.pathway).toBe('rule_details');
@@ -119,6 +124,7 @@ describe('AddRuleAttachmentToChatButton', () => {
         text: JSON.stringify({ name: 'Formatted Rule' }),
         attachmentLabel: 'Formatted Rule',
       },
+      attachmentDescription: 'Formatted Rule',
       attachmentPrompt: RULE_EXPLORATION_ATTACHMENT_PROMPT,
     });
 

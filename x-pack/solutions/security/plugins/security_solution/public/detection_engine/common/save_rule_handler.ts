@@ -23,7 +23,7 @@ import {
 } from '../../../common/constants';
 import { RULE_MANAGEMENT_RULES_URL_SEARCH } from '../../../common/api/detection_engine/rule_management/urls';
 import { createRule, updateRule } from '../rule_management/api/api';
-import { transformOutput } from './transforms';
+import { transformInput, transformOutput } from './transforms';
 import { securitySolutionQueryClient } from '../../common/containers/query_client/query_client_provider';
 import { RULE_MANAGEMENT_FILTERS_QUERY_KEY } from '../rule_management/api/hooks/use_fetch_rule_management_filters_query';
 import type { AiRuleCreationService } from './ai_rule_creation_store';
@@ -43,6 +43,13 @@ const stripReadOnlyFields = (rule: RuleResponse): RuleUpdateProps => {
     delete mutable[field];
   }
   return mutable as unknown as RuleUpdateProps;
+};
+
+// When updating by id, rule_id must not be present — the server rejects requests
+// with both fields set. Strip it so the PUT body only carries the id identifier.
+const stripRuleId = (rule: RuleUpdateProps): RuleUpdateProps => {
+  const { rule_id: _, ...rest } = rule as RuleUpdateProps & { rule_id?: string };
+  return rest as RuleUpdateProps;
 };
 
 export const createSaveRuleHandler = ({
@@ -79,7 +86,9 @@ export const createSaveRuleHandler = ({
       const isUpdate = !!savedRuleId;
       if (savedRuleId) {
         const ruleWithId = savedRuleId === rule.id ? rule : { ...rule, id: savedRuleId };
-        saved = await updateRule({ rule: transformOutput(stripReadOnlyFields(ruleWithId)) });
+        saved = await updateRule({
+          rule: transformOutput(stripRuleId(stripReadOnlyFields(ruleWithId))),
+        });
       } else {
         const { id: _id, ...createProps } = rule as RuleResponse & { id?: string };
         saved = await createRule({
@@ -108,6 +117,12 @@ export const createSaveRuleHandler = ({
         exact: false,
       });
       if (isUpdate) {
+        // Immediately push the saved rule into the detail-page cache so the rule details
+        // page reflects changes without waiting for a background refetch.
+        securitySolutionQueryClient.setQueryData(
+          ['GET', DETECTION_ENGINE_RULES_URL, saved.id],
+          transformInput(saved)
+        );
         securitySolutionQueryClient.invalidateQueries(['GET', DETECTION_ENGINE_RULES_URL], {
           exact: false,
         });
@@ -116,6 +131,9 @@ export const createSaveRuleHandler = ({
       agentBuilder?.addAttachment({
         id: SECURITY_RULE_ATTACHMENT_ID,
         type: SecurityAgentBuilderAttachments.rule,
+        // `description` is the user-facing label used by the chat's "Attachment added: …"
+        // line (see RoundAttachmentReferences). Without it the line shows up blank.
+        description: saved.name,
         data: { text: JSON.stringify(saved), attachmentLabel: saved.name },
       });
     } catch (err) {

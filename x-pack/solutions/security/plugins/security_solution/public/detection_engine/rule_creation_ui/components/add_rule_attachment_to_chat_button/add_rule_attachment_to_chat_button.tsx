@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
@@ -23,6 +23,7 @@ import {
 import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
 import type { AgentBuilderAddToChatTelemetry } from '../../../../agent_builder/hooks/use_report_add_to_chat';
 import { formatRule } from '../../pages/rule_creation/helpers';
+import { useKibana } from '../../../../common/lib/kibana';
 
 interface AddRuleAttachmentFromFormProps {
   defineStepData: DefineStepRule;
@@ -67,6 +68,22 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
     rule,
   } = props;
 
+  const { services } = useKibana();
+  const { agentBuilder, aiRuleCreation } = services;
+
+  // When this button is used on the rule details page (rule prop with an id), seed
+  // lastSavedRuleId so save_rule_handler's dirty-tracking subscription can fire.
+  // Re-seed on every conversation change because save_rule_handler resets it on switch.
+  const ruleId = rule?.id;
+  useEffect(() => {
+    if (!ruleId) return;
+    aiRuleCreation.setLastSavedRuleId(ruleId);
+    const conversationSub = agentBuilder?.events?.ui?.activeConversation$.subscribe(() => {
+      aiRuleCreation.setLastSavedRuleId(ruleId);
+    });
+    return () => conversationSub?.unsubscribe();
+  }, [ruleId, aiRuleCreation, agentBuilder]);
+
   // Format rule for AI assistant attachment from either form state or an existing rule response.
   const isFormBased =
     defineStepData != null &&
@@ -101,6 +118,10 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
         text: attachmentData,
         attachmentLabel,
       },
+      // Top-level VersionedAttachment.description used by the chat's
+      // "Attachment added: …" label (RoundAttachmentReferences). Without it
+      // the line shows up blank in the user's input round.
+      attachmentDescription: attachmentLabel,
     };
   }, [
     isFormBased,
