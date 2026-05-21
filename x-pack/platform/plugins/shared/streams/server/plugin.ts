@@ -25,7 +25,6 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { RulesClient, RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
-import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { StreamsConfig } from '../common/config';
 import {
   STREAMS_API_PRIVILEGES,
@@ -40,12 +39,11 @@ import { ContentService } from './lib/content/content_service';
 import { registerRules } from './lib/sig_events/rules/register_rules';
 import { getSigEventsTuningConfig } from './lib/sig_events/helpers/get_sig_events_tuning_config';
 import { AttachmentService } from './lib/streams/attachments/attachment_service';
-import { QueryService } from './lib/streams/assets/query/query_service';
 import {
-  isSignificantEventsAlertingV2Active,
-  logAlertingV2PluginUnavailable,
-  readSignificantEventsAlertingV2UiEnabled,
-} from './lib/sig_events/significant_events_alerting_v2';
+  KnowledgeIndicatorService,
+  initializeKnowledgeIndicatorsTemplate,
+  type KnowledgeIndicatorClient,
+} from './lib/streams/ki';
 import { StreamsService } from './lib/streams/service';
 import { EbtTelemetryService, StatsTelemetryService } from './lib/telemetry';
 import { streamsRouteRepository } from './routes';
@@ -57,9 +55,6 @@ import type {
 } from './types';
 import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
 import { backfillWiredStreamViews } from './lib/streams/esql_views/backfill_wired_stream_views';
-import { FeatureService } from './lib/streams/feature/feature_service';
-import type { FeatureClient } from './lib/streams/feature/feature_client';
-import type { QueryClient } from './lib/streams/assets/query/query_client';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { MemoryTriggerRegistry, discoveryCompletedTrigger } from './lib/memory/triggers';
@@ -155,10 +150,9 @@ export class StreamsPlugin
     const significantEventsServices = createSignificantEventsServices();
     const attachmentService = new AttachmentService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
-    const featureService = new FeatureService(core, this.logger);
     const insightService = new InsightService(core, this.logger);
     const contentService = new ContentService(core, this.logger);
-    const queryService = new QueryService(core, this.logger);
+    const knowledgeIndicatorService = new KnowledgeIndicatorService(core, this.logger);
     const taskService = new TaskService(plugins.taskManager);
     const getScopedClients = async ({
       request,
@@ -194,12 +188,6 @@ export class StreamsPlugin
         getSigEventsTuningConfig(globalUiSettingsClient, this.logger),
       ]);
 
-      let featureClientPromise: Promise<FeatureClient> | undefined;
-      const getFeatureClient = (): Promise<FeatureClient> => {
-        featureClientPromise ??= featureService.getClient(tuningConfig);
-        return featureClientPromise;
-      };
-
       const space = pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
       const significantEventsClients = createSignificantEventsClients({
@@ -208,66 +196,22 @@ export class StreamsPlugin
         space,
       });
 
-      let significantEventsAlertingV2StatePromise:
-        | Promise<{
-            alertingV2UiEnabled: boolean;
-            alertingV2Active: boolean;
-            alertingV2RulesClient?: RulesClientApi;
-          }>
-        | undefined;
-
-      const getSignificantEventsAlertingV2State = () => {
-        significantEventsAlertingV2StatePromise ??= (async () => {
-          const alertingV2UiEnabled = await readSignificantEventsAlertingV2UiEnabled(
-            uiSettingsClient,
-            this.logger
-          );
-          const alertingV2RulesClient = pluginsStart.alertingVTwo
-            ? await pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(
-                request,
-                DEFAULT_SPACE_ID
-              )
-            : undefined;
-
-          if (alertingV2UiEnabled && !alertingV2RulesClient) {
-            logAlertingV2PluginUnavailable(this.logger);
-          }
-
-          return {
-            alertingV2UiEnabled,
-            alertingV2Active: isSignificantEventsAlertingV2Active(
-              alertingV2UiEnabled,
-              alertingV2RulesClient
-            ),
-            alertingV2RulesClient,
-          };
-        })();
-        return significantEventsAlertingV2StatePromise;
-      };
-
-      let queryClientPromise: Promise<QueryClient> | undefined;
-      const getQueryClient = (): Promise<QueryClient> => {
-        queryClientPromise ??= (async () => {
-          const { alertingV2RulesClient } = await getSignificantEventsAlertingV2State();
+      let knowledgeIndicatorClientPromise: Promise<KnowledgeIndicatorClient> | undefined;
+      const getKnowledgeIndicatorClient = (): Promise<KnowledgeIndicatorClient> => {
+        knowledgeIndicatorClientPromise ??= (async () => {
           const rulesClient = await pluginsStart.alerting.getRulesClientWithRequestInSpace(
             request,
             DEFAULT_SPACE_ID,
             rulesClientOptions
           );
-          return queryService.getClient({
-            esClient: coreStart.elasticsearch.client.asInternalUser,
+          return knowledgeIndicatorService.getClient({
+            esClient: scopedClusterClient.asCurrentUser,
             soClient,
-            alertingRulesClient: rulesClient,
-            alertingV2RulesClient,
+            rulesClient,
             config: tuningConfig,
           });
         })();
-        return queryClientPromise;
-      };
-
-      const getAlertingV2RulesClient = async (): Promise<RulesClientApi | undefined> => {
-        const { alertingV2RulesClient } = await getSignificantEventsAlertingV2State();
-        return alertingV2RulesClient;
+        return knowledgeIndicatorClientPromise;
       };
 
       const license = await licensing.getLicense();
@@ -275,8 +219,7 @@ export class StreamsPlugin
 
       const streamsClient = await streamsService.getClient({
         attachmentClient,
-        getQueryClient,
-        getFeatureClient,
+        getKnowledgeIndicatorClient,
         esClient: scopedClusterClient.asCurrentUser,
         esClientAsInternalUser: coreStart.elasticsearch.client.asInternalUser,
         uiSettingsClient,
@@ -293,13 +236,11 @@ export class StreamsPlugin
         soClient,
         attachmentClient,
         streamsClient,
-        getFeatureClient,
+        getKnowledgeIndicatorClient,
         ...significantEventsClients,
         insightClient,
         inferenceClient,
         contentClient,
-        getQueryClient,
-        getAlertingV2RulesClient,
         fieldsMetadataClient,
         licensing,
         uiSettingsClient,
@@ -431,9 +372,7 @@ export class StreamsPlugin
 
     registerRoutes({ repository: streamsRouteRepository, ...routeRegistrationOptions });
 
-    registerFeatureFlags(core, this.logger, {
-      isAlertingV2PluginAvailable: 'alertingVTwo' in plugins,
-    });
+    registerFeatureFlags(core, this.logger);
 
     if (plugins.globalSearch) {
       plugins.globalSearch.registerResultProvider(
@@ -569,6 +508,17 @@ export class StreamsPlugin
     }).catch((error) => {
       this.logger.error(
         `Failed to initialize significant events templates: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    });
+
+    initializeKnowledgeIndicatorsTemplate({
+      esClient: core.elasticsearch.client.asInternalUser,
+      logger: this.logger,
+    }).catch((error) => {
+      this.logger.error(
+        `Failed to initialize knowledge indicators template: ${
           error instanceof Error ? error.message : String(error)
         }`
       );

@@ -8,38 +8,21 @@
 import type {
   AggregationsMultiBucketAggregateBase,
   AggregationsTermsAggregateBase,
-  QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { ChangePointType } from '@kbn/es-types/src';
 import type { StreamQuery, SignificantEventsGetResponse } from '@kbn/streams-schema';
 import { get, isArray, isEmpty, keyBy } from 'lodash';
 import type { QueryLink, SearchMode } from '../../../common/queries';
-import type { QueryClient, QueryLinkFilters } from '../streams/assets/query/query_client';
+import type { KnowledgeIndicatorClient, RuleUnbackedFilter } from '../streams/ki';
 import { parseError } from '../streams/errors/parse_error';
 import { SecurityError } from '../streams/errors/security_error';
 
-export interface AlertsSource {
-  index: string;
-  ruleIdField: string;
-  extraFilters?: QueryDslQueryContainer[];
+export interface QueryLinkFilters {
+  ruleUnbacked?: RuleUnbackedFilter;
+  queryIds?: string[];
+  minSeverityScore?: number;
 }
-
-export const V1_ALERTS_SOURCE: AlertsSource = {
-  index: '.alerts-streams.alerts-default',
-  ruleIdField: 'kibana.alert.rule.uuid',
-};
-
-/**
- * v2 breached signal rows only; v1 `.alerts-streams` indices do not use these fields.
- * Histograms bucket on `@timestamp`, which v2 sets to rule evaluation write time, not
- * source log time — see alerting_v2 `build_alert_events`.
- */
-export const V2_ALERTS_SOURCE: AlertsSource = {
-  index: '.rule-events',
-  ruleIdField: 'rule.id',
-  extraFilters: [{ term: { type: 'signal' } }, { term: { status: 'breached' } }],
-};
 
 const EMPTY_CHANGE_POINTS = { type: {} } as const;
 
@@ -52,28 +35,18 @@ export async function readSignificantEventsFromAlertsIndices(
     query?: string;
     filters?: QueryLinkFilters;
     searchMode?: SearchMode;
-    alertsSource?: AlertsSource;
   },
   dependencies: {
-    queryClient: QueryClient;
+    kiClient: KnowledgeIndicatorClient;
     scopedClusterClient: IScopedClusterClient;
   }
 ): Promise<SignificantEventsGetResponse> {
-  const { queryClient, scopedClusterClient } = dependencies;
-  const {
-    streamNames = [],
-    from,
-    to,
-    bucketSize,
-    query,
-    filters,
-    searchMode,
-    alertsSource = V1_ALERTS_SOURCE,
-  } = params;
+  const { kiClient, scopedClusterClient } = dependencies;
+  const { streamNames = [], from, to, bucketSize, query, filters, searchMode } = params;
 
   const queryLinks = query
-    ? await queryClient.findQueries(streamNames, query, filters, searchMode)
-    : await queryClient.getQueryLinks(streamNames, filters);
+    ? await kiClient.findQueries(streamNames, query, filters, searchMode)
+    : await kiClient.getQueryLinks(streamNames, filters);
 
   if (isEmpty(queryLinks)) {
     return { significant_events: [], aggregated_occurrences: [] };
@@ -107,7 +80,7 @@ export async function readSignificantEventsFromAlertsIndices(
         }>;
       }
     >({
-      index: alertsSource.index,
+      index: '.alerts-streams.alerts-default',
       query: {
         bool: {
           filter: [
@@ -121,10 +94,9 @@ export async function readSignificantEventsFromAlertsIndices(
             },
             {
               terms: {
-                [alertsSource.ruleIdField]: ruleIds,
+                'kibana.alert.rule.uuid': ruleIds,
               },
             },
-            ...(alertsSource.extraFilters ?? []),
           ],
         },
       },
@@ -141,7 +113,7 @@ export async function readSignificantEventsFromAlertsIndices(
         },
         by_rule: {
           terms: {
-            field: alertsSource.ruleIdField,
+            field: 'kibana.alert.rule.uuid',
             size: 10000,
           },
           aggs: {

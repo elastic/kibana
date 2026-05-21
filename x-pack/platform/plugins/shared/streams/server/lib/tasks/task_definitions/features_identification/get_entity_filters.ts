@@ -13,8 +13,14 @@ export function getEntityFilters(features: FeatureWithFilter[], maxFilters: numb
     return [];
   }
 
+  // Cap by recency: when `features.length > maxFilters` we want to keep the
+  // freshest entities (those still active in the current sampling window) so
+  // their negative filters actually subtract documents from the entity-filtered
+  // bucket. ISO timestamps sort lexicographically, so `localeCompare` on
+  // `updated_at` desc gives newest-first. Missing `updated_at` (shouldn't
+  // happen in practice — `kiClient.getFeatures` always populates it) sorts last.
   const capped = [...features]
-    .sort((a, b) => b.last_seen.localeCompare(a.last_seen))
+    .sort((a, b) => (b.updated_at ?? '').localeCompare(a.updated_at ?? ''))
     .slice(0, maxFilters);
   return capped.map(({ filter }) => filter);
 }

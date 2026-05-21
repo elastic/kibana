@@ -33,12 +33,12 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
   });
 
   it('creates query KI with provided id and upserts it', async () => {
-    const queryClient = {
-      upsert: jest.fn().mockResolvedValue(undefined),
+    const kiClient = {
+      upsertQuery: jest.fn().mockResolvedValue(undefined),
     };
 
     const result = await createQueryKnowledgeIndicatorToolHandler({
-      queryClient: queryClient as never,
+      kiClient: kiClient as never,
       definition: definition as never,
       queryInput: {
         id: 'provided-id',
@@ -51,7 +51,7 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
     });
 
     expect(result).toEqual({ id: 'provided-id' });
-    expect(queryClient.upsert).toHaveBeenCalledWith(
+    expect(kiClient.upsertQuery).toHaveBeenCalledWith(
       definition,
       expect.objectContaining({
         id: 'provided-id',
@@ -65,12 +65,12 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
   });
 
   it('generates id when missing', async () => {
-    const queryClient = {
-      upsert: jest.fn().mockResolvedValue(undefined),
+    const kiClient = {
+      upsertQuery: jest.fn().mockResolvedValue(undefined),
     };
 
     const result = await createQueryKnowledgeIndicatorToolHandler({
-      queryClient: queryClient as never,
+      kiClient: kiClient as never,
       definition: definition as never,
       queryInput: {
         title: 'Suspicious query',
@@ -81,7 +81,7 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
     });
 
     expect(result).toEqual({ id: 'generated-query-id' });
-    expect(queryClient.upsert).toHaveBeenCalledWith(
+    expect(kiClient.upsertQuery).toHaveBeenCalledWith(
       definition,
       expect.objectContaining({
         id: 'generated-query-id',
@@ -90,13 +90,13 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
   });
 
   it('throws when query upsert fails', async () => {
-    const queryClient = {
-      upsert: jest.fn().mockRejectedValue(new Error('upsert failed')),
+    const kiClient = {
+      upsertQuery: jest.fn().mockRejectedValue(new Error('upsert failed')),
     };
 
     await expect(
       createQueryKnowledgeIndicatorToolHandler({
-        queryClient: queryClient as never,
+        kiClient: kiClient as never,
         definition: definition as never,
         queryInput: {
           title: 'Suspicious query',

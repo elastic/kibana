@@ -29,6 +29,7 @@ import { DeleteTableItemsModal } from '../delete_table_items_modal';
 import { SparkPlot } from '../../../spark_plot';
 import { TableTitle } from '../../stream_detail_systems/table_title';
 import { getKnowledgeIndicatorItemId } from '../utils/get_knowledge_indicator_item_id';
+import { isFeatureExcluded } from '../utils/is_feature_excluded';
 import { getKnowledgeIndicatorType } from '../utils/get_knowledge_indicator_type';
 
 interface KnowledgeIndicatorsTableProps {
@@ -71,9 +72,9 @@ export function KnowledgeIndicatorsTable({
     return knowledgeIndicators.filter((knowledgeIndicator) => {
       const matchesStatusFilter =
         statusFilter === 'active'
-          ? knowledgeIndicator.kind === 'query' || !knowledgeIndicator.feature.excluded_at
+          ? knowledgeIndicator.kind === 'query' || !isFeatureExcluded(knowledgeIndicator.feature)
           : knowledgeIndicator.kind === 'feature' &&
-            Boolean(knowledgeIndicator.feature.excluded_at);
+            isFeatureExcluded(knowledgeIndicator.feature);
 
       if (!matchesStatusFilter) {
         return false;

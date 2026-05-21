@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { omit } from 'lodash';
 import type { InsightCore } from '@kbn/streams-schema';
-import type { Query } from '../../../../common/queries';
+import type { QueryLink } from '../../../../common/queries';
 import { parseError } from '../../streams/errors/parse_error';
 import { SecurityError } from '../../streams/errors/security_error';
 import { SUBMIT_INSIGHTS_TOOL_NAME, parseInsightsWithErrors } from './client/insight_tool';
@@ -55,13 +55,13 @@ export function extractInsightsFromResponse(
 }
 
 export async function collectQueryData({
-  query,
+  query: queryLink,
   esClient,
 }: {
-  query: Query;
+  query: QueryLink;
   esClient: ElasticsearchClient;
 }): Promise<QueryData | undefined> {
-  const { rule_id: ruleId } = query;
+  const { rule_id: ruleId } = queryLink;
 
   const currentResponse = await esClient
     .search<{ original_source: Record<string, unknown> }>({
@@ -116,8 +116,8 @@ export async function collectQueryData({
   });
 
   return {
-    title: query.query.title,
-    esql: query.query.esql.query,
+    title: queryLink.query.title,
+    esql: queryLink.query.esql.query,
     currentCount,
     sampleEvents,
   };

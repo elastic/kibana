@@ -121,7 +121,7 @@ describe('ki_feature_create tool', () => {
   it('tracks success telemetry when feature KI is created', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
 
-    const featureClient = {
+    const kiClient = {
       bulk: jest.fn().mockResolvedValue(undefined),
     };
 
@@ -138,7 +138,7 @@ describe('ki_feature_create tool', () => {
             },
           }),
         },
-        getFeatureClient: jest.fn().mockResolvedValue(featureClient),
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
         licensing: {},
         uiSettingsClient: {},
       } as unknown as RouteHandlerScopedClients;
@@ -179,7 +179,7 @@ describe('ki_feature_create tool', () => {
   it('tracks failure telemetry when feature KI creation fails', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
 
-    const featureClient = {
+    const kiClient = {
       bulk: jest.fn().mockRejectedValue(new Error('write failed')),
     };
 
@@ -196,7 +196,7 @@ describe('ki_feature_create tool', () => {
             },
           }),
         },
-        getFeatureClient: jest.fn().mockResolvedValue(featureClient),
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
         licensing: {},
         uiSettingsClient: {},
       } as unknown as RouteHandlerScopedClients;

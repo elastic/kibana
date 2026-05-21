@@ -111,7 +111,7 @@ export function createQueryKnowledgeIndicatorTool({
       let streamType: StreamType | 'unknown' = 'unknown';
 
       try {
-        const { streamsClient, getQueryClient, licensing, uiSettingsClient } =
+        const { streamsClient, getKnowledgeIndicatorClient, licensing, uiSettingsClient } =
           await getScopedClients({
             request,
           });
@@ -121,9 +121,9 @@ export function createQueryKnowledgeIndicatorTool({
         const definition = await streamsClient.getStream(streamName);
         streamType = getStreamTypeFromDefinition(definition);
 
-        const queryClient = await getQueryClient();
+        const kiClient = await getKnowledgeIndicatorClient();
         const { id } = await createQueryKnowledgeIndicatorToolHandler({
-          queryClient,
+          kiClient,
           definition,
           queryInput,
           logger,

@@ -11,25 +11,15 @@ import { isComputedFeature } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useFetchKnowledgeIndicators } from '../../../../../hooks/sig_events/use_fetch_knowledge_indicators';
-import { useDiscoveryFeaturesApi } from '../../../../../hooks/sig_events/use_discovery_features_api';
 import { useKnowledgeIndicatorsBulkDelete } from '../../../../../hooks/sig_events/use_knowledge_indicators_bulk_delete';
 import { useQueriesApi, type PromoteResult } from '../../../../../hooks/sig_events/use_queries_api';
 import { useInvalidatePromoteRelatedQueries } from '../../../../../hooks/sig_events/use_invalidate_promote_queries';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { getFormattedError } from '../../../../../util/errors';
-import { KI_ROW_ACTION_MUTATION_KEY } from '../../../stream_detail_significant_events_view/knowledge_indicator_actions_cell';
+import { KI_ROW_ACTION_MUTATION_KEY } from '../../../stream_detail_significant_events_view/hooks/use_knowledge_indicator_actions';
 import { getKnowledgeIndicatorItemId } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_item_id';
 import { matchesKnowledgeIndicatorFilters } from '../../../stream_detail_significant_events_view/utils/matches_knowledge_indicator_filters';
-import {
-  BULK_EXCLUDE_SUCCESS_TOAST_TITLE,
-  BULK_EXCLUDE_PARTIAL_TOAST_TITLE,
-  BULK_EXCLUDE_ERROR_TOAST_TITLE,
-  BULK_RESTORE_SUCCESS_TOAST_TITLE,
-  BULK_RESTORE_PARTIAL_TOAST_TITLE,
-  BULK_RESTORE_ERROR_TOAST_TITLE,
-  BULK_PROMOTE_SUCCESS_TOAST_TITLE,
-  BULK_PROMOTE_ERROR_TITLE,
-} from './translations';
+import { BULK_PROMOTE_SUCCESS_TOAST_TITLE, BULK_PROMOTE_ERROR_TITLE } from './translations';
 import { useKnowledgeIndicatorsUrlState } from './use_knowledge_indicators_url_state';
 
 export const getKnowledgeIndicatorTitle = (ki: KnowledgeIndicator): string =>
@@ -44,7 +34,6 @@ export function useKnowledgeIndicatorsTable() {
 
   const { knowledgeIndicators, occurrencesByQueryId, isLoading, isEmpty, refetch } =
     useFetchKnowledgeIndicators();
-  const { excludeFeaturesInBulk, restoreFeaturesInBulk } = useDiscoveryFeaturesApi();
   const { promote } = useQueriesApi();
   const invalidatePromoteRelatedQueries = useInvalidatePromoteRelatedQueries();
 
@@ -92,7 +81,6 @@ export function useKnowledgeIndicatorsTable() {
     },
   });
 
-  const [isBulkOperationInProgress, setIsBulkOperationInProgress] = useState(false);
   const isRowActionInProgress = useIsMutating({ mutationKey: KI_ROW_ACTION_MUTATION_KEY }) > 0;
 
   // Prune checkbox selections when items disappear from the data (e.g. after
@@ -138,68 +126,6 @@ export function useKnowledgeIndicatorsTable() {
     if (!page) return;
     setPagination({ pageIndex: page.index, pageSize: page.size });
   }, []);
-
-  const executeBulkFeatureOperation = useCallback(
-    async ({
-      operation,
-      successTitle,
-      partialTitle,
-      errorTitle,
-    }: {
-      operation: typeof excludeFeaturesInBulk;
-      successTitle: string;
-      partialTitle: string;
-      errorTitle: string;
-    }) => {
-      const features = selectedKnowledgeIndicators
-        .filter((ki) => ki.kind === 'feature')
-        .map((ki) => ki.feature);
-
-      if (features.length === 0) return;
-
-      setIsBulkOperationInProgress(true);
-      try {
-        const { failedCount } = await operation(features);
-        if (failedCount === 0) {
-          toasts.addSuccess({ title: successTitle });
-        } else {
-          toasts.addWarning({ title: partialTitle });
-        }
-        setSelectedKnowledgeIndicators([]);
-        closeFlyout();
-      } catch (error) {
-        toasts.addError(error instanceof Error ? error : new Error(String(error)), {
-          title: errorTitle,
-        });
-      } finally {
-        setIsBulkOperationInProgress(false);
-        refetch();
-      }
-    },
-    [closeFlyout, selectedKnowledgeIndicators, toasts, refetch]
-  );
-
-  const handleBulkExclude = useCallback(
-    () =>
-      executeBulkFeatureOperation({
-        operation: excludeFeaturesInBulk,
-        successTitle: BULK_EXCLUDE_SUCCESS_TOAST_TITLE,
-        partialTitle: BULK_EXCLUDE_PARTIAL_TOAST_TITLE,
-        errorTitle: BULK_EXCLUDE_ERROR_TOAST_TITLE,
-      }),
-    [executeBulkFeatureOperation, excludeFeaturesInBulk]
-  );
-
-  const handleBulkRestore = useCallback(
-    () =>
-      executeBulkFeatureOperation({
-        operation: restoreFeaturesInBulk,
-        successTitle: BULK_RESTORE_SUCCESS_TOAST_TITLE,
-        partialTitle: BULK_RESTORE_PARTIAL_TOAST_TITLE,
-        errorTitle: BULK_RESTORE_ERROR_TOAST_TITLE,
-      }),
-    [executeBulkFeatureOperation, restoreFeaturesInBulk]
-  );
 
   const bulkPromoteMutation = useMutation<PromoteResult, Error, string[]>({
     mutationFn: (queryIds) => promote({ queryIds }),
@@ -250,8 +176,7 @@ export function useKnowledgeIndicatorsTable() {
 
   const isBulkPromoteInProgress = bulkPromoteMutation.isLoading;
 
-  const isOperationInProgress =
-    isDeleting || isBulkOperationInProgress || isBulkPromoteInProgress || isRowActionInProgress;
+  const isOperationInProgress = isDeleting || isBulkPromoteInProgress || isRowActionInProgress;
 
   const { selectionContainsNonExcludable, isSelectionActionsDisabled, hasPromotableSelected } =
     useMemo(() => {
@@ -283,7 +208,6 @@ export function useKnowledgeIndicatorsTable() {
     setKnowledgeIndicatorsToDelete,
     pagination,
     isDeleting,
-    isBulkOperationInProgress,
     isBulkPromoteInProgress,
     isOperationInProgress,
     selectionContainsNonExcludable,
@@ -291,8 +215,6 @@ export function useKnowledgeIndicatorsTable() {
     isSelectionActionsDisabled,
     hasOnlyHiddenComputedFeatures,
     handleTableChange,
-    handleBulkExclude,
-    handleBulkRestore,
     deleteKnowledgeIndicatorsInBulk,
     handleBulkPromote,
     ...urlState,

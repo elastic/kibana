@@ -37,7 +37,7 @@ export async function getRuleExecutor(
   const { scopedClusterClient, alertWithPersistence } = services;
 
   // The executor cannot self-heal (no rulesClient access); cleanup is
-  // handled by syncQueries / the demotedToStats path in QueryClient.
+  // handled by syncQueries / the demotedToStats path in KnowledgeIndicatorClient.
   // This guard prevents wasted ES queries until the next sync cycle runs.
   if (hasStatsCommand(params.query)) {
     logger.error(

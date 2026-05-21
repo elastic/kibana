@@ -23,7 +23,7 @@ import {
   type ExcludedFeatureSummary,
   type IgnoredFeature,
 } from '@kbn/streams-ai';
-import type { FeatureClient } from '../../streams/feature/feature_client';
+import type { KnowledgeIndicatorClient } from '../../streams/ki';
 import { fetchSampleDocuments } from '../../tasks/task_definitions/features_identification/fetch_sample_documents';
 import { PromptsConfigService } from '../saved_objects/prompts_config_service';
 import type { SigEventsTuningConfig } from '../../../../common/sig_events_tuning_config';
@@ -44,7 +44,6 @@ type IterationTuningParams = Partial<
   Pick<
     SigEventsTuningConfig,
     | 'sample_size'
-    | 'feature_ttl_days'
     | 'entity_filtered_ratio'
     | 'diverse_ratio'
     | 'max_excluded_features_in_prompt'
@@ -238,7 +237,6 @@ async function runInferredIteration({
     max_entity_filters: maxEntityFilters = DEFAULT_SIG_EVENTS_TUNING_CONFIG.max_entity_filters,
     max_excluded_features_in_prompt:
       maxExcludedFeaturesInPrompt = DEFAULT_SIG_EVENTS_TUNING_CONFIG.max_excluded_features_in_prompt,
-    feature_ttl_days: featureTtlDays,
     maxPreviouslyIdentifiedFeatures = DEFAULT_MAX_PREVIOUSLY_IDENTIFIED_FEATURES,
   } = tuning;
 
@@ -312,7 +310,6 @@ async function runInferredIteration({
     discoveredFeatures,
     ignoredFeatures,
     excludedFeatures,
-    featureTtlDays,
     runId,
     logger,
   });
@@ -342,7 +339,7 @@ async function runInferredIteration({
 
 export interface IdentifyInferredFeaturesOptions {
   esClient: ElasticsearchClient;
-  featureClient: FeatureClient;
+  kiClient: KnowledgeIndicatorClient;
   soClient: SavedObjectsClientContract;
   inferenceClient: BoundInferenceClient;
   logger: Logger;
@@ -369,7 +366,7 @@ export interface IdentifyInferredFeaturesResult {
 
 export async function identifyInferredFeatures({
   esClient,
-  featureClient,
+  kiClient,
   soClient,
   inferenceClient,
   logger,
@@ -384,15 +381,19 @@ export async function identifyInferredFeatures({
   diverseOffset = 0,
   trackFeaturesIdentified,
 }: IdentifyInferredFeaturesOptions): Promise<IdentifyInferredFeaturesResult> {
-  const [
-    { hits: allFeatures },
-    { hits: excludedFeatures },
-    { featurePromptOverride: systemPrompt },
-  ] = await Promise.all([
-    featureClient.getFeatures(streamName),
-    featureClient.getExcludedFeatures(streamName),
+  // The unified KI data stream has no equivalent of `getExcludedFeatures` —
+  // exclusions were a soft-delete mechanism unique to the legacy storage.
+  // Tombstoned features no longer come back from `getFeatures`, so we feed the
+  // LLM an empty exclusions list. This is acceptable: callers that previously
+  // relied on the exclusion list to seed the LLM with "don't suggest this
+  // again" hints will lose that signal, which is an explicit trade-off of the
+  // clean-break migration documented in the plan.
+  const [{ hits: allFeatures }, { featurePromptOverride: systemPrompt }] = await Promise.all([
+    kiClient.getFeatures(streamName),
     new PromptsConfigService({ soClient, logger }).getPrompt(),
   ]);
+
+  const excludedFeatures: Feature[] = [];
 
   const discoveredFeatures = allFeatures.filter((f) => !isComputedFeature(f) && f.run_id === runId);
 
@@ -478,15 +479,15 @@ export async function identifyInferredFeatures({
 
   const allChanged = [...newFeatures, ...updatedFeatures];
   if (allChanged.length > 0) {
-    await featureClient.bulk(
+    await kiClient.bulk(
       streamName,
       allChanged.map((feature) => ({ index: { feature } }))
     );
   }
 
-  const discoveredMap = new Map(discoveredFeatures.map((f) => [f.uuid, f]));
+  const discoveredMap = new Map(discoveredFeatures.map((f) => [f.id, f]));
   for (const feature of allChanged) {
-    discoveredMap.set(feature.uuid, feature);
+    discoveredMap.set(feature.id, feature);
   }
 
   const iterationEntry: IterationResult = {

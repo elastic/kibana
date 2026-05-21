@@ -21,7 +21,7 @@ import type {
   WiredIngestStreamEffectiveFailureStore,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import type { AttachmentClient } from '../../../lib/streams/attachments/attachment_client';
-import type { QueryClient } from '../../../lib/streams/assets/query/query_client';
+import type { KnowledgeIndicatorClient } from '../../../lib/streams/ki';
 import type { StreamsClient } from '../../../lib/streams/client';
 import {
   getDataStreamLifecycle,
@@ -34,14 +34,14 @@ import { getEsqlView } from '../../../lib/streams/esql_views/manage_esql_views';
 
 export async function readStream({
   name,
-  queryClient,
+  kiClient,
   attachmentClient,
   streamsClient,
   scopedClusterClient,
   logger,
 }: {
   name: string;
-  queryClient: QueryClient;
+  kiClient: KnowledgeIndicatorClient;
   attachmentClient: AttachmentClient;
   streamsClient: StreamsClient;
   scopedClusterClient: IScopedClusterClient;
@@ -49,7 +49,7 @@ export async function readStream({
 }): Promise<Streams.all.GetResponse> {
   const [streamDefinition, { [name]: queryLinks }, attachments] = await Promise.all([
     streamsClient.getStream(name),
-    queryClient.getStreamToQueryLinksMap([name]),
+    kiClient.getStreamToQueryLinksMap([name]),
     attachmentClient.getAttachments(name),
   ]);
 

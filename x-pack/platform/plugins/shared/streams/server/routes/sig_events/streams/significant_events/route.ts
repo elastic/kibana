@@ -18,7 +18,6 @@ import { PromptsConfigService } from '../../../../lib/sig_events/saved_objects/p
 import { generateSignificantEventDefinitions } from '../../../../lib/sig_events/generate_significant_events';
 import { previewSignificantEvents } from '../../../../lib/sig_events/preview_significant_events';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/sig_events/read_significant_events_from_alerts_indices';
-import { resolveAlertsSource } from '../../../utils/resolve_alerts_source';
 import {
   getSignificantEventsResponse,
   previewSignificantEventsRequest,
@@ -183,8 +182,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
   }): Promise<SignificantEventsGetResponse> => {
     const {
       streamsClient,
-      getQueryClient,
-      getAlertingV2RulesClient,
+      getKnowledgeIndicatorClient,
       scopedClusterClient,
       licensing,
       uiSettingsClient,
@@ -197,11 +195,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
     const { name } = params.path;
     const { from, to, bucketSize, query, searchMode } = params.query;
 
-    const alertsSource = await resolveAlertsSource({
-      uiSettingsClient,
-      alertingV2RulesClient: await getAlertingV2RulesClient(),
-    });
-    const queryClient = await getQueryClient();
+    const kiClient = await getKnowledgeIndicatorClient();
     return readSignificantEventsFromAlertsIndices(
       {
         streamNames: [name],
@@ -210,9 +204,8 @@ const readStreamSignificantEventsRoute = createServerRoute({
         bucketSize,
         query,
         searchMode,
-        alertsSource,
       },
-      { queryClient, scopedClusterClient }
+      { kiClient, scopedClusterClient }
     );
   },
 });
@@ -283,8 +276,7 @@ const generateSignificantEventsRoute = createServerRoute({
       inferenceClient,
       uiSettingsClient,
       soClient,
-      getFeatureClient,
-      getQueryClient,
+      getKnowledgeIndicatorClient,
       scopedClusterClient,
     } = await getScopedClients({ request });
 
@@ -307,13 +299,12 @@ const generateSignificantEventsRoute = createServerRoute({
         })
       : undefined;
 
-    const [connector, definition, { significantEventsPromptOverride }, featureClient, queryClient] =
+    const [connector, definition, { significantEventsPromptOverride }, kiClient] =
       await Promise.all([
         inferenceClient.getConnectorById(connectorId),
         streamsClient.getStream(params.path.name),
         new PromptsConfigService({ soClient, logger }).getPrompt(),
-        getFeatureClient(),
-        getQueryClient(),
+        getKnowledgeIndicatorClient(),
       ]);
 
     return fromRxjs(
@@ -325,8 +316,7 @@ const generateSignificantEventsRoute = createServerRoute({
         },
         {
           inferenceClient,
-          featureClient,
-          queryClient,
+          kiClient,
           logger: logger.get('significant_events'),
           signal: getRequestAbortSignal(request),
           esClient: scopedClusterClient.asCurrentUser,

@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { NonEmptyString } from '@kbn/zod-helpers/v4';
 import { primitive } from '../shared/record_types';
+import type { Feature } from '../feature';
 import type { SignificantEventsResponse } from '../api/significant_events';
 
 export interface EsqlQuery {
@@ -115,14 +116,33 @@ export interface QueriesOccurrencesGetResponse {
   total_occurrences: number;
 }
 
+/**
+ * Wire shape for a query knowledge indicator. Identity is `(stream_name, query.id)`.
+ *
+ * Note: as part of the unified KI data stream migration, the legacy
+ * `asset.uuid` / `asset.id` / `asset.type` fields have been removed —
+ * the document `_id` is server-generated per revision and not surfaced.
+ */
 export interface QueryLink {
-  'asset.uuid': string;
-  'asset.type': 'query';
-  'asset.id': string;
   query: StreamQuery;
   stream_name: string;
   /** Whether a Kibana rule exists for this query. */
   rule_backed: boolean;
   /** The deterministic ID of the Kibana rule associated with this query. */
   rule_id: string;
+  /**
+   * ISO timestamp of the latest revision in storage. Bumped by every write,
+   * including no-op `syncQueries` reconciliation passes. Read-only at the
+   * domain layer.
+   */
+  updated_at?: string;
 }
+
+/**
+ * Unified knowledge indicator on the wire. Server callers use this when they
+ * need to handle both feature and query indicators uniformly. The discriminator
+ * is the root `type` field.
+ */
+export type KnowledgeIndicator =
+  | { type: 'feature'; feature: Feature }
+  | { type: 'query'; query: QueryLink };

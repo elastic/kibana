@@ -6,33 +6,41 @@
  */
 
 import { INFERRED_FEATURE_TYPES } from '@kbn/streams-schema';
-import { FEATURE_LAST_SEEN } from '../../streams/feature/fields';
-import type { FeatureClient } from '../../streams/feature/feature_client';
+import type { KnowledgeIndicatorClient } from '../../streams/ki';
 
 export interface ShouldIdentifyFeaturesResult {
   shouldIdentify: boolean;
 }
 
+/**
+ * Determine whether features identification should run for a stream by
+ * comparing the latest revision timestamp of any inferred feature against
+ * a threshold expressed in hours.
+ *
+ * The legacy implementation queried `feature.last_seen`, which existed only
+ * on inferred features and tracked the wall-clock of the most recent run.
+ * In the unified KI model that field is gone — the data stream's append-only
+ * `@timestamp` of the latest revision is now the same signal because every
+ * identification run writes a new revision (or a tombstone) for each feature.
+ */
 export async function shouldIdentifyFeatures({
-  featureClient,
+  kiClient,
   streamName,
   thresholdHours,
 }: {
-  featureClient: FeatureClient;
+  kiClient: KnowledgeIndicatorClient;
   streamName: string;
   thresholdHours: number;
 }): Promise<ShouldIdentifyFeaturesResult> {
-  const { hits } = await featureClient.getFeatures(streamName, {
-    type: [...INFERRED_FEATURE_TYPES],
-    limit: 1,
-    sort: [{ [FEATURE_LAST_SEEN]: { order: 'desc' } }],
+  const latest = await kiClient.getLatestRevisionTimestamp(streamName, {
+    types: [...INFERRED_FEATURE_TYPES],
   });
 
-  if (hits.length === 0) {
+  if (!latest) {
     return { shouldIdentify: true };
   }
 
-  const newestTimestamp = new Date(hits[0].last_seen).getTime();
+  const newestTimestamp = new Date(latest['@timestamp']).getTime();
 
   if (Number.isNaN(newestTimestamp)) {
     return { shouldIdentify: true };

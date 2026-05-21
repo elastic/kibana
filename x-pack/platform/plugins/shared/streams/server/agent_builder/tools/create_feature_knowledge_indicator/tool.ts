@@ -96,12 +96,13 @@ export function createFeatureKnowledgeIndicatorTool({
         }
       },
     },
-    handler: async ({ stream_name: streamName, ...featureInput }, context) => {
+    handler: async (toolParams, context) => {
       const { request } = context;
+      const streamName = toolParams.stream_name;
       let streamType: StreamType | 'unknown' = 'unknown';
 
       try {
-        const { streamsClient, getFeatureClient, licensing, uiSettingsClient } =
+        const { streamsClient, getKnowledgeIndicatorClient, licensing, uiSettingsClient } =
           await getScopedClients({
             request,
           });
@@ -110,11 +111,11 @@ export function createFeatureKnowledgeIndicatorTool({
         const definition = await streamsClient.getStream(streamName);
         streamType = getStreamTypeFromDefinition(definition);
 
-        const featureClient = await getFeatureClient();
-        const { id, uuid } = await createFeatureKnowledgeIndicatorToolHandler({
-          featureClient,
+        const kiClient = await getKnowledgeIndicatorClient();
+        const { id } = await createFeatureKnowledgeIndicatorToolHandler({
+          kiClient,
           streamName,
-          featureInput,
+          featureInput: toolParams,
           logger,
         });
 
@@ -134,7 +135,6 @@ export function createFeatureKnowledgeIndicatorTool({
                 stream_name: streamName,
                 feature: {
                   id,
-                  uuid,
                 },
                 acknowledged: true,
               },

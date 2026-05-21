@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 import { isComputedFeature, type Feature, type Streams } from '@kbn/streams-schema';
+import { isFeatureExcluded } from '../../components/sig_events/stream_detail_significant_events_view/utils/is_feature_excluded';
 import type { QueryFunctionContext } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
 import { useFetchErrorToast } from '../use_fetch_error_toast';
@@ -44,12 +45,12 @@ export const useStreamFeatures = (definition: Streams.all.Definition, deps: unkn
   );
 
   const features = useMemo(
-    () => allFeatures.filter((feature) => !feature.excluded_at),
+    () => allFeatures.filter((feature) => !isFeatureExcluded(feature)),
     [allFeatures]
   );
 
   const excludedFeatures = useMemo(
-    () => allFeatures.filter((feature) => !!feature.excluded_at),
+    () => allFeatures.filter((feature) => isFeatureExcluded(feature)),
     [allFeatures]
   );
 

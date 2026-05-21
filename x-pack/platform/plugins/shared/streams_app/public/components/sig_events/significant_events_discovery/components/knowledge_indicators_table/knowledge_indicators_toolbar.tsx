@@ -12,7 +12,6 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiSwitch,
-  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
@@ -29,10 +28,7 @@ import {
   SHOW_COMPUTED_LABEL,
   CLEAR_SELECTION_LABEL,
   DELETE_SELECTED_LABEL,
-  EXCLUDE_SELECTED_LABEL,
-  RESTORE_SELECTED_LABEL,
   TABLE_LABEL,
-  CANNOT_EXCLUDE_SELECTION_TOOLTIP,
   PROMOTE_SELECTED_LABEL,
 } from './translations';
 
@@ -53,11 +49,9 @@ interface KnowledgeIndicatorsToolbarProps {
   hideComputedTypes: boolean;
   pagination: { pageIndex: number; pageSize: number };
   selectedKnowledgeIndicators: KnowledgeIndicator[];
-  isBulkOperationInProgress: boolean;
   isBulkPromoteInProgress: boolean;
   isDeleting: boolean;
   isSelectionActionsDisabled: boolean;
-  selectionContainsNonExcludable: boolean;
   hasPromotableSelected: boolean;
   onSearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onStatusFilterChange: (filter: 'active' | 'excluded') => void;
@@ -66,8 +60,6 @@ interface KnowledgeIndicatorsToolbarProps {
   onSelectedStreamsChange: (streams: string[]) => void;
   onComputedToggleChange: (checked: boolean) => void;
   onClearSelection: () => void;
-  onBulkExclude: () => void;
-  onBulkRestore: () => void;
   onBulkPromote: () => void;
   onDeleteSelected: () => void;
 }
@@ -84,11 +76,9 @@ export function KnowledgeIndicatorsToolbar({
   hideComputedTypes,
   pagination,
   selectedKnowledgeIndicators,
-  isBulkOperationInProgress,
   isBulkPromoteInProgress,
   isDeleting,
   isSelectionActionsDisabled,
-  selectionContainsNonExcludable,
   hasPromotableSelected,
   onSearchChange,
   onStatusFilterChange,
@@ -97,8 +87,6 @@ export function KnowledgeIndicatorsToolbar({
   onSelectedStreamsChange,
   onComputedToggleChange,
   onClearSelection,
-  onBulkExclude,
-  onBulkRestore,
   onBulkPromote,
   onDeleteSelected,
 }: KnowledgeIndicatorsToolbarProps) {
@@ -189,29 +177,6 @@ export function KnowledgeIndicatorsToolbar({
             {CLEAR_SELECTION_LABEL}
           </EuiButtonEmpty>
         </EuiFlexItem>
-        {statusFilter === 'active' ? (
-          <EuiFlexItem grow={false}>
-            <BulkExcludeButton
-              isLoading={isBulkOperationInProgress}
-              isDisabled={isSelectionActionsDisabled || selectionContainsNonExcludable}
-              showTooltip={selectionContainsNonExcludable}
-              onClick={onBulkExclude}
-            />
-          </EuiFlexItem>
-        ) : (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconType="eye"
-              size="xs"
-              aria-label={RESTORE_SELECTED_LABEL}
-              isLoading={isBulkOperationInProgress}
-              isDisabled={isSelectionActionsDisabled}
-              onClick={onBulkRestore}
-            >
-              {RESTORE_SELECTED_LABEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        )}
         {selectedTypes.length === 1 && selectedTypes[0] === MATCH_QUERY_TYPE && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
@@ -243,37 +208,4 @@ export function KnowledgeIndicatorsToolbar({
       </EuiFlexGroup>
     </>
   );
-}
-
-function BulkExcludeButton({
-  isLoading: loading,
-  isDisabled,
-  showTooltip,
-  onClick,
-}: {
-  isLoading: boolean;
-  isDisabled: boolean;
-  showTooltip: boolean;
-  onClick: () => void;
-}) {
-  const button = (
-    <EuiButtonEmpty
-      iconType="eyeClosed"
-      color="warning"
-      size="xs"
-      aria-label={EXCLUDE_SELECTED_LABEL}
-      isLoading={loading}
-      isDisabled={isDisabled}
-      hasAriaDisabled={showTooltip}
-      onClick={onClick}
-    >
-      {EXCLUDE_SELECTED_LABEL}
-    </EuiButtonEmpty>
-  );
-
-  if (showTooltip) {
-    return <EuiToolTip content={CANNOT_EXCLUDE_SELECTION_TOOLTIP}>{button}</EuiToolTip>;
-  }
-
-  return button;
 }

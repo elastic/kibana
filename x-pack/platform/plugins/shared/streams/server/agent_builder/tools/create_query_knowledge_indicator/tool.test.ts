@@ -123,8 +123,8 @@ describe('ki_query_create tool', () => {
   it('tracks success telemetry when query KI is created', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
 
-    const queryClient = {
-      upsert: jest.fn().mockResolvedValue(undefined),
+    const kiClient = {
+      upsertQuery: jest.fn().mockResolvedValue(undefined),
     };
 
     const getScopedClients = jest.fn(async () => {
@@ -140,7 +140,7 @@ describe('ki_query_create tool', () => {
             },
           }),
         },
-        getQueryClient: jest.fn().mockResolvedValue(queryClient),
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
         licensing: {},
         uiSettingsClient: {},
       } as unknown as RouteHandlerScopedClients;
@@ -179,8 +179,8 @@ describe('ki_query_create tool', () => {
   it('tracks failure telemetry when query KI creation fails', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
 
-    const queryClient = {
-      upsert: jest.fn().mockRejectedValue(new Error('upsert failed')),
+    const kiClient = {
+      upsertQuery: jest.fn().mockRejectedValue(new Error('upsert failed')),
     };
 
     const getScopedClients = jest.fn(async () => {
@@ -196,7 +196,7 @@ describe('ki_query_create tool', () => {
             },
           }),
         },
-        getQueryClient: jest.fn().mockResolvedValue(queryClient),
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
         licensing: {},
         uiSettingsClient: {},
       } as unknown as RouteHandlerScopedClients;

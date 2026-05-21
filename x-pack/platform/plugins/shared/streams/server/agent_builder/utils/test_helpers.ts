@@ -14,7 +14,7 @@ import { TaskStatus } from '@kbn/streams-schema';
 import type { ZodObject } from '@kbn/zod/v4';
 import type { z } from '@kbn/zod/v4';
 import type { StreamsClient } from '../../lib/streams/client';
-import type { QueryClient } from '../../lib/streams/assets/query/query_client';
+import type { KnowledgeIndicatorClient } from '../../lib/streams/ki';
 import type { AttachmentClient } from '../../lib/streams/attachments/attachment_client';
 import type { RouteHandlerScopedClients, GetScopedClients } from '../../routes/types';
 import type { TaskClient } from '../../lib/tasks/task_client';
@@ -27,7 +27,11 @@ import type { StreamsTaskType } from '../../lib/tasks/task_definitions';
  */
 type ToolScopedClients = Pick<
   RouteHandlerScopedClients,
-  'streamsClient' | 'scopedClusterClient' | 'getQueryClient' | 'attachmentClient' | 'taskClient'
+  | 'streamsClient'
+  | 'scopedClusterClient'
+  | 'getKnowledgeIndicatorClient'
+  | 'attachmentClient'
+  | 'taskClient'
 >;
 
 /**
@@ -71,11 +75,15 @@ export const createMockGetScopedClients = () => {
     deleteStream: jest.fn().mockResolvedValue({ acknowledged: true, result: 'deleted' }),
   };
 
-  const queryClient: jest.Mocked<Pick<QueryClient, 'getAssets'>> = {
-    getAssets: jest.fn().mockResolvedValue([]),
+  const kiClient: jest.Mocked<
+    Pick<KnowledgeIndicatorClient, 'getQueryLinks' | 'getStreamToQueryLinksMap' | 'getFeatures'>
+  > = {
+    getQueryLinks: jest.fn().mockResolvedValue([]),
+    getStreamToQueryLinksMap: jest.fn().mockResolvedValue({}),
+    getFeatures: jest.fn().mockResolvedValue({ hits: [], total: 0 }),
   };
 
-  const getQueryClient = jest.fn().mockResolvedValue(queryClient);
+  const getKnowledgeIndicatorClient = jest.fn().mockResolvedValue(kiClient);
 
   const attachmentClient: jest.Mocked<Pick<AttachmentClient, 'getAttachments'>> = {
     getAttachments: jest.fn().mockResolvedValue([]),
@@ -96,7 +104,7 @@ export const createMockGetScopedClients = () => {
   } = {
     streamsClient,
     scopedClusterClient,
-    getQueryClient,
+    getKnowledgeIndicatorClient,
     attachmentClient,
     taskClient,
   };
@@ -110,7 +118,8 @@ export const createMockGetScopedClients = () => {
     streamsClient,
     esClient,
     scopedClusterClient,
-    getQueryClient,
+    getKnowledgeIndicatorClient,
+    kiClient,
     attachmentClient,
     taskClient,
   };

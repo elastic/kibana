@@ -23,8 +23,7 @@ import { isInferenceProviderError } from '@kbn/inference-common';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
 import type { StreamsClient } from '../streams/client';
-import type { FeatureClient } from '../streams/feature/feature_client';
-import type { QueryClient } from '../streams/assets/query/query_client';
+import type { KnowledgeIndicatorClient } from '../streams/ki';
 import type { EbtTelemetryClient } from '../telemetry';
 import { resolveConnectorForFeature } from '../../routes/utils/resolve_connector_for_feature';
 import { formatInferenceProviderError } from '../../routes/utils/create_connector_sse_error';
@@ -43,8 +42,7 @@ export interface GenerateKIQueriesDependencies {
   streamsClient: StreamsClient;
   inferenceClient: InferenceClient;
   soClient: SavedObjectsClientContract;
-  featureClient: FeatureClient;
-  queryClient: QueryClient;
+  kiClient: KnowledgeIndicatorClient;
   esClient: ElasticsearchClient;
   uiSettingsClient: IUiSettingsClient;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart | undefined;
@@ -68,8 +66,7 @@ export async function generateKIQueries(
     streamsClient,
     inferenceClient,
     soClient,
-    featureClient,
-    queryClient,
+    kiClient,
     esClient,
     uiSettingsClient,
     searchInferenceEndpoints,
@@ -115,8 +112,7 @@ export async function generateKIQueries(
     {
       inferenceClient,
       esClient,
-      featureClient,
-      queryClient,
+      kiClient,
       logger: logger.get('significant_events_generation'),
       signal,
       memoryTools,
