@@ -236,7 +236,13 @@ export const RuleDetailsPage = connector(
     clearEventsLoading,
     clearSelected,
   }: DetectionEngineComponentProps) {
-    const { application, cps, timelines: timelinesUi, spaces: spacesApi } = useKibana().services;
+    const {
+      application,
+      cps,
+      timelines: timelinesUi,
+      spaces: spacesApi,
+      aiRuleCreation,
+    } = useKibana().services;
     const {
       navigateToApp,
       capabilities: { actions },
@@ -366,6 +372,19 @@ export const RuleDetailsPage = connector(
         setRule(maybeRule);
       }
     }, [maybeRule]);
+
+    // Refresh the rule whenever a chat-initiated save completes so changes made
+    // via the AI assistant are immediately reflected on this page.
+    useEffect(() => {
+      let wasSaving = false;
+      const sub = aiRuleCreation.saving$.subscribe((isSaving) => {
+        if (wasSaving && !isSaving) {
+          refreshRule();
+        }
+        wasSaving = isSaving;
+      });
+      return () => sub.unsubscribe();
+    }, [aiRuleCreation, refreshRule]);
 
     useLegacyUrlRedirect({ rule, spacesApi });
 
