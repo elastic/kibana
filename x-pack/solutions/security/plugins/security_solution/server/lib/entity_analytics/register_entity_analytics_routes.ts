@@ -41,5 +41,7 @@ export const registerEntityAnalyticsRoutes = (routeDeps: EntityAnalyticsRoutesDe
     registerEntityResolutionRoutes(routeDeps);
   }
 
-  registerBehavioralSummaryRoutes(routeDeps);
+  if (routeDeps.config.experimentalFeatures.entityAnalyticsMlJobBehaviorMaintainer) {
+    registerBehavioralSummaryRoutes(routeDeps);
+  }
 };

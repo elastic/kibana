@@ -16,20 +16,14 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-export const GetBehavioralSummaryRequestParams = lazySchema(() =>
-  z.object({
-    entity_id: z.string().min(1),
-  })
-);
-export type GetBehavioralSummaryRequestParams = z.infer<typeof GetBehavioralSummaryRequestParams>;
-export type GetBehavioralSummaryRequestParamsInput = z.input<
-  typeof GetBehavioralSummaryRequestParams
->;
-
 export const BaselineBucket = lazySchema(() =>
   z.object({
     value: z.string(),
     docCount: z.number(),
+    /**
+     * Raw source documents from the datafeed index
+     */
+    topHits: z.array(z.unknown()).optional(),
   })
 );
 export type BaselineBucket = z.infer<typeof BaselineBucket>;
@@ -41,11 +35,17 @@ export const AnomalySummaryEntry = lazySchema(() =>
     byFieldName: z.string().nullable(),
     byFieldValue: z.string().nullable(),
     recordScore: z.number(),
+    /**
+     * ISO-8601 timestamp of the anomaly bucket
+     */
     timestamp: z.string(),
     actual: z.array(z.number()),
     typical: z.array(z.number()),
     baseline: z.array(BaselineBucket),
     sourceIndex: z.array(z.string()),
+    /**
+     * Populated if this entry partially failed
+     */
     error: z.string().optional(),
   })
 );
@@ -59,3 +59,16 @@ export const BehavioralSummaryResponse = lazySchema(() =>
   })
 );
 export type BehavioralSummaryResponse = z.infer<typeof BehavioralSummaryResponse>;
+
+export const GetBehavioralSummaryRequestParams = lazySchema(() =>
+  z.object({
+    entity_id: z.string().min(1),
+  })
+);
+export type GetBehavioralSummaryRequestParams = z.infer<typeof GetBehavioralSummaryRequestParams>;
+export type GetBehavioralSummaryRequestParamsInput = z.input<
+  typeof GetBehavioralSummaryRequestParams
+>;
+
+export const GetBehavioralSummaryResponse = lazySchema(() => BehavioralSummaryResponse);
+export type GetBehavioralSummaryResponse = z.infer<typeof GetBehavioralSummaryResponse>;

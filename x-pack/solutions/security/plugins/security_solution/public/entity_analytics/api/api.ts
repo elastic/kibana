@@ -17,6 +17,8 @@ import {
 import { compact } from 'lodash';
 import type { EntityDetailsHighlightsResponse } from '../../../common/api/entity_analytics/entity_details/highlights.gen';
 import { ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL } from '../../../common/entity_analytics/entity_analytics/constants';
+import type { BehavioralSummaryResponse } from '../../../common/api/entity_analytics';
+import { BEHAVIOR_DETAILS_INTERNAL_URL } from '../../../common/entity_analytics/behaviors/constants';
 import type {
   AssetCriticalityRecord,
   ConfigureRiskEngineSavedObjectRequestBodyInput,
@@ -698,6 +700,12 @@ export const useEntityAnalyticsRoutes = () => {
         body: JSON.stringify(params),
       });
 
+    const fetchBehavioralSummary = (entityId: string, signal?: AbortSignal) =>
+      http.fetch<BehavioralSummaryResponse>(
+        BEHAVIOR_DETAILS_INTERNAL_URL.replace('{entity_id}', encodeURIComponent(entityId)),
+        { version: API_VERSIONS.internal.v1, signal }
+      );
+
     const fetchEntityDetailsHighlights = (
       params: {
         entityType: string;
@@ -957,6 +965,7 @@ export const useEntityAnalyticsRoutes = () => {
       fetchEntitiesListV2,
       updateSavedObjectConfiguration,
       listPrivMonMonitoredIndices,
+      fetchBehavioralSummary,
       fetchEntityDetailsHighlights,
       fetchWatchlists,
       fetchLeads,

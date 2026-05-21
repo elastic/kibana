@@ -6,23 +6,16 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import type { BehavioralSummaryResponse } from '../../../../../common/api/entity_analytics';
-import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
 
 const BEHAVIORAL_SUMMARY_QUERY_KEY = 'behavioral_summary';
 
 export const useBehavioralSummary = (entityId?: string) => {
-  const { http } = useKibana().services;
+  const { fetchBehavioralSummary } = useEntityAnalyticsRoutes();
 
   return useQuery(
     [BEHAVIORAL_SUMMARY_QUERY_KEY, entityId],
-    async ({ signal }) => {
-      const encodedId = encodeURIComponent(entityId ?? '');
-      return http.fetch<BehavioralSummaryResponse>(
-        `/internal/entity_analytics/entities/${encodedId}/behavioral_summary`,
-        { version: '1', signal }
-      );
-    },
+    ({ signal }) => fetchBehavioralSummary(entityId ?? '', signal),
     { enabled: !!entityId }
   );
 };

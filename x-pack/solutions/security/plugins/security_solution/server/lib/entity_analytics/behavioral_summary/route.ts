@@ -10,12 +10,10 @@ import { z } from '@kbn/zod/v4';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AnomalySummaryEntry } from '../../../../common/api/entity_analytics';
 import { GetBehavioralSummaryRequestParams } from '../../../../common/api/entity_analytics';
-import { API_VERSIONS, APP_ID } from '../../../../common/constants';
+import { API_VERSIONS, APP_ID, BEHAVIOR_DETAILS_INTERNAL_URL } from '../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../types';
 import { getMlAdDetailsIndexName } from '../maintainers/behaviors/ml_anomaly_detection/constants';
-
-export const BEHAVIORAL_SUMMARY_URL =
-  '/internal/entity_analytics/entities/{entity_id}/behavioral_summary';
+import { withMinimumLicense } from '../utils/with_minimum_license';
 
 interface DetailsIndexDoc {
   entity: { id: string; type: string };
@@ -30,13 +28,22 @@ interface DetailsIndexDoc {
     by_field_name?: string;
     by_field_value?: string;
   };
-  baseline?: Array<{ value: string; doc_count: number }>;
+  baseline?: Array<{ value: string; doc_count: number; top_hits: unknown[] }>;
 }
 
 /**
  * Queries the ML AD details index for pre-computed anomaly records.
  * Returns the most recent anomaly per (job_id, detector_index) for the entity.
  */
+interface ByJobAggregation {
+  by_job: {
+    buckets: Array<{
+      key: string;
+      top_anomaly: { hits: { hits: Array<{ _source: DetailsIndexDoc }> } };
+    }>;
+  };
+}
+
 const getAnomaliesFromDetailsIndex = async ({
   esClient,
   detailsIndex,
@@ -46,49 +53,55 @@ const getAnomaliesFromDetailsIndex = async ({
   detailsIndex: string;
   entityId: string;
 }): Promise<AnomalySummaryEntry[]> => {
-  const resp = await esClient.search<DetailsIndexDoc>({
+  const resp = await esClient.search<DetailsIndexDoc, ByJobAggregation>({
     index: detailsIndex,
-    size: 1000,
-    sort: [{ '@timestamp': { order: 'desc' } }],
-    query: {
-      term: { 'entity.id': entityId },
+    size: 0,
+    query: { term: { 'entity.id': entityId } },
+    aggs: {
+      by_job: {
+        terms: { field: 'anomaly.job_id', size: 100 },
+        aggs: {
+          top_anomaly: {
+            top_hits: {
+              size: 1,
+              sort: [{ 'anomaly.record_score': { order: 'desc' } }],
+            },
+          },
+        },
+      },
     },
   });
 
-  // Keep only the most recent anomaly per (job_id, detector_index); hits are sorted desc by @timestamp
-  const seen = new Set<string>();
-  return resp.hits.hits.reduce<AnomalySummaryEntry[]>((entries, hit) => {
-    const source = hit._source;
-    if (!source) return entries;
+  return (resp.aggregations?.by_job.buckets ?? []).flatMap((bucket) => {
+    const source = bucket.top_anomaly.hits.hits[0]?._source;
+    if (!source) return [];
 
-    const key = `${source.anomaly.job_id}:${source.anomaly.detector_index}`;
-    if (seen.has(key)) return entries;
-    seen.add(key);
-
-    entries.push({
-      jobId: source.anomaly.job_id,
-      detectorIndex: source.anomaly.detector_index,
-      byFieldName: source.anomaly.by_field_name ?? null,
-      byFieldValue: source.anomaly.by_field_value ?? null,
-      recordScore: source.anomaly.record_score,
-      timestamp: new Date(source.anomaly.timestamp).toISOString(),
-      actual: source.anomaly.actual != null ? [source.anomaly.actual] : [],
-      typical: source.anomaly.typical != null ? [source.anomaly.typical] : [],
-      baseline: (source.baseline ?? []).map((b) => ({
-        value: b.value,
-        docCount: b.doc_count,
-      })),
-      sourceIndex: [],
-    });
-    return entries;
-  }, []);
+    return [
+      {
+        jobId: source.anomaly.job_id,
+        detectorIndex: source.anomaly.detector_index,
+        byFieldName: source.anomaly.by_field_name ?? null,
+        byFieldValue: source.anomaly.by_field_value ?? null,
+        recordScore: source.anomaly.record_score,
+        timestamp: new Date(source.anomaly.timestamp).toISOString(),
+        actual: source.anomaly.actual != null ? [source.anomaly.actual] : [],
+        typical: source.anomaly.typical != null ? [source.anomaly.typical] : [],
+        baseline: (source.baseline ?? []).map((b) => ({
+          value: b.value,
+          docCount: b.doc_count,
+          topHits: b.top_hits,
+        })),
+        sourceIndex: [],
+      },
+    ];
+  });
 };
 
 export const registerBehavioralSummaryRoutes = ({ router, logger }: EntityAnalyticsRoutesDeps) => {
   router.versioned
     .get({
       access: 'internal',
-      path: BEHAVIORAL_SUMMARY_URL,
+      path: BEHAVIOR_DETAILS_INTERNAL_URL,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -101,11 +114,10 @@ export const registerBehavioralSummaryRoutes = ({ router, logger }: EntityAnalyt
         validate: {
           request: {
             params: GetBehavioralSummaryRequestParams,
-            query: z.object({}).optional(),
           },
         },
       },
-      async (context, request, response) => {
+      withMinimumLicense(async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
         try {
           const { entity_id: entityId } = request.params;
@@ -136,6 +148,6 @@ export const registerBehavioralSummaryRoutes = ({ router, logger }: EntityAnalyt
             body: err instanceof Error ? err.message : String(err),
           });
         }
-      }
+      }, 'platinum')
     );
 };
