@@ -16,6 +16,7 @@ export {
   varsReducer,
   getInputEffectiveName,
   buildInputKey,
+  dataStreamUsesOtelInput,
 } from './package_to_package_policy';
 export type {
   DocumentationPageInput,
