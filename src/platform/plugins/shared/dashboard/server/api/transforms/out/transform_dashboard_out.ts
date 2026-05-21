@@ -90,7 +90,7 @@ export function transformDashboardOut(
   // try to maintain a consistent (alphabetical) order of keys
   return {
     dashboardState: {
-      ...(description && { description }),
+      description,
       ...(filters && { filters }),
       ...(Object.keys(options).length && { options }),
       panels,

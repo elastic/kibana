@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
+import { asCodeFilterSchema, type AsCodeFilter } from '@kbn/as-code-filters-schema';
 import { fromStoredFilters } from '@kbn/as-code-filters-transforms';
 import type { AsCodeQuery } from '@kbn/as-code-shared-schemas';
 import { toAsCodeQuery } from '@kbn/as-code-shared-transforms';
@@ -57,23 +57,39 @@ export function transformSearchSourceOut(
   let filters: AsCodeFilter[] | undefined;
   try {
     filters = fromStoredFilters(searchSource.filter, logger) ?? [];
-    schema.filters.validate({ filters });
+    filters = schema.filters.validate(filters);
   } catch (error) {
+    // drop all invalid filters
+    const { valid, invalid } = (filters ?? []).reduce(
+      (prev, filter) => {
+        try {
+          const result = asCodeFilterSchema.validate(filter);
+          return { valid: [...prev.valid, result], invalid: prev.invalid };
+        } catch (validationError) {
+          return { valid: prev.valid, invalid: [...prev.invalid, filter] };
+        }
+      },
+      {
+        valid: [],
+        invalid: [],
+      } as { valid: AsCodeFilter[]; invalid: any[] }
+    );
+    filters = valid;
+
     const warningMessage = `Unexpected error transforming filter state on read. Error: ${error.message}`;
     logger.warn(warningMessage);
     warnings.push({
       type: 'dropped_property',
       message: warningMessage,
       key: 'filters',
-      value: filters,
+      value: invalid,
     });
   }
 
   let query: AsCodeQuery | undefined;
   try {
     const storedQuery = searchSource.query ? migrateLegacyQuery(searchSource.query) : undefined;
-    query = toAsCodeQuery(storedQuery);
-    schema.query.validate({ query });
+    query = schema.query.validate(toAsCodeQuery(storedQuery));
   } catch (error) {
     const warningMessage = `Unexpected error transforming query state on read. Error: ${error.message}`;
     logger.warn(warningMessage);

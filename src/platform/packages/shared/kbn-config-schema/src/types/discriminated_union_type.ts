@@ -36,7 +36,7 @@ export class DiscriminatedUnionType<
   T extends PropsWithDiscriminator<Discriminator, Props>
 > extends Type<T> {
   private readonly discriminator: Discriminator;
-  public readonly discriminatedValues: string[];
+  private readonly discriminatedValues: string[];
   private readonly unionTypes: RTS;
   private readonly typeOptions?: UnionTypeOptions<T>;
 

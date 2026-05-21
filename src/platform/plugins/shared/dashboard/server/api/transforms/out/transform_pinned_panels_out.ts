@@ -137,8 +137,9 @@ function transformPanel(
           ...rest,
           config: transforms.transformOut(config, [], containerReferences, panel.id),
         } as DashboardPinnedPanel;
-        panelsStateSchema.validate([transformed]);
-        transformedPanels.push(transformed);
+        transformedPanels.push(
+          panelsStateSchema.validate([transformed]) as unknown as DashboardPinnedPanel
+        );
       } catch (e) {
         warnings.push({
           type: 'dropped_panel',

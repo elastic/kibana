@@ -108,12 +108,15 @@ function transformPanel(
     type === LENS_EMBEDDABLE_TYPE && isDashboardAppRequest ? 'lens-dashboard-app' : type;
 
   const transforms = embeddableService?.getTransforms(transformType);
-  const transformedPanelConfig =
+  let transformedPanelConfig =
     transforms?.transformOut?.(embeddableConfig, panelReferences, containerReferences) ??
     defaultTransform(embeddableConfig);
 
   const registeredSchemas = embeddableService ? embeddableService.getAllEmbeddableSchemas() : {};
-  registeredSchemas[transformType]?.schema?.validate(transformedPanelConfig);
+  if (registeredSchemas[transformType]?.schema) {
+    transformedPanelConfig =
+      registeredSchemas[transformType].schema.validate(transformedPanelConfig);
+  }
 
   return {
     grid: restOfGrid,
