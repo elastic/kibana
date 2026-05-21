@@ -52,6 +52,7 @@ import { useOverviewStatus } from '../../hooks/use_overview_status';
 import { MonitorEnabled } from '../../management/monitor_list_table/monitor_enabled';
 import { ConfigKey, EncryptedSyntheticsMonitor, OverviewStatusMetaData } from '../types';
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
+import { getMonitorSpaceToAppend } from '../../../../hooks/use_edit_monitor_locator';
 import { MonitorLocationSelect } from '../../../common/components/monitor_location_select';
 import { quietFetchOverviewStatusAction } from '../../../../state/overview_status';
 
@@ -262,14 +263,16 @@ export function MonitorDetailFlyout(props: Props) {
 
   const { space } = useKibanaSpace();
 
+  const { spaceId: crossSpaceId } = getMonitorSpaceToAppend(space, spaces);
+
   useEffect(() => {
     dispatch(
       getMonitorAction.get({
         monitorId: configId,
-        ...(space && spaces?.length && !spaces?.includes(space?.id) ? { spaceId: spaces[0] } : {}),
+        ...(crossSpaceId ? { spaceId: crossSpaceId } : {}),
       })
     );
-  }, [configId, dispatch, space, space?.id, spaces, upsertSuccess]);
+  }, [configId, crossSpaceId, dispatch, upsertSuccess]);
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 
