@@ -299,6 +299,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
       size="fill"
       onClose={onClose}
       aria-labelledby={QUERY_SANDBOX_TITLE_ID}
+      closeButtonProps={{ 'data-test-subj': 'querySandboxClose' }}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s" id={QUERY_SANDBOX_TITLE_ID}>
