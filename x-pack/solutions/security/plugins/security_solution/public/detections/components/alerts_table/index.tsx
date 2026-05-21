@@ -164,6 +164,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     data,
     http,
     notifications,
+    rendering,
     fieldFormats,
     application,
     licensing,
@@ -414,13 +415,14 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
       data,
       http,
       notifications,
+      rendering,
       fieldFormats,
       application,
       licensing,
       settings,
       cases,
     }),
-    [application, data, fieldFormats, http, licensing, notifications, settings, cases]
+    [application, data, fieldFormats, http, licensing, notifications, rendering, settings, cases]
   );
 
   /**
@@ -499,6 +501,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
               }
               cellActionsOptions={cellActionsOptions}
               showInspectButton
+              showCsvExportButton
               services={services}
               {...tablePropsOverrides}
             />
