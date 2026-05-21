@@ -475,12 +475,14 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
               responsive={false}
               style={{ marginTop: 8 }}
             >
-              <EuiFlexItem grow>
-                {uiState.yamlMode ? (
+              {uiState.yamlMode ? (
+                <EuiFlexItem grow={false}>
                   <EuiBadge color="hollow" data-test-subj="composeDiscoverYamlBadge">
                     {YAML_MODE_BADGE_LABEL}
                   </EuiBadge>
-                ) : (
+                </EuiFlexItem>
+              ) : (
+                <EuiFlexItem grow>
                   <HorizontalMinimalStepper
                     steps={steps.map(
                       (s, i): MinimalStep => ({
@@ -489,8 +491,8 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                       })
                     )}
                   />
-                )}
-              </EuiFlexItem>
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={false}>
                 <EuiButtonGroup
                   legend={EDIT_MODE_LEGEND}
