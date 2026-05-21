@@ -41,7 +41,7 @@ export const createHallucinationDetectionEvaluator = (
         `- Logic inversions (AND↔OR, negation flips)\n\n` +
         `Note: The following are expected and MUST NOT be flagged:\n` +
         `- ECS field name equivalents (e.g. src_ip → source.ip, EventCode → winlog.event_id)\n` +
-        `- Syntax differences due to SPL→ES|QL translation\n` +
+        `- Syntax differences due to ${sourceLabel}→ES|QL translation\n` +
         `- Index pattern selection based on source type/index names\n\n` +
         `Score YES if the ES|QL is faithful (no hallucinations). Score NO if it contains hallucinations.`,
     ]);
