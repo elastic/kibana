@@ -78,7 +78,7 @@ export const SaveModal = (props: Props) => {
         }}
         returnToOriginSwitchLabel={returnToOriginSwitchLabel}
         objectType={i18n.translate('xpack.lens.app.saveModalType', {
-          defaultMessage: 'Lens visualization',
+          defaultMessage: 'visualization',
         })}
         data-test-subj="lnsApp_saveModalOrigin"
       />
@@ -104,7 +104,7 @@ export const SaveModal = (props: Props) => {
         description: description || '',
       }}
       objectType={i18n.translate('xpack.lens.app.saveModalType', {
-        defaultMessage: 'Lens visualization',
+        defaultMessage: 'visualization',
       })}
       data-test-subj="lnsApp_saveModalDashboard"
       getOriginatingPath={getOriginatingPath}
