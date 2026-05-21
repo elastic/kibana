@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiButtonEmpty, EuiNotificationBadge, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { encode } from '@kbn/rison';
-import { useSiemReadinessGetCasesCountByTags } from '@kbn/siem-readiness';
+import { useSiemReadinessGetCasesCountByTags } from '../../hooks/use_siem_readiness_get_cases_count_by_tags';
 import { useBasePath } from '../../../common/lib/kibana';
 
 interface ViewCasesButtonProps {
