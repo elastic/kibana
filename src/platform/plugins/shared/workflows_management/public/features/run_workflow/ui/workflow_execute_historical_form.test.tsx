@@ -107,8 +107,11 @@ describe('WorkflowExecuteHistoricalForm', () => {
       mockUseWorkflowExecutions.mockReturnValue({
         data: { total: 0, results: [] },
       });
+      // `startedAt` is required so the date-range anchoring effect fires and clears
+      // `needsInitialExecutionDate`, allowing the consistency check to drop the
+      // selection that is missing from the current list.
       mockUseWorkflowExecution.mockReturnValue({
-        data: { id: 'exec-1', context: { inputs: {} } },
+        data: { id: 'exec-1', startedAt: '2024-06-01T12:00:00.000Z', context: { inputs: {} } },
         isLoading: false,
       });
       renderWithProviders(
@@ -161,8 +164,14 @@ describe('WorkflowExecuteHistoricalForm', () => {
 
   describe('no selection body', () => {
     it('should show select historical message when the selected execution is not in the current list', () => {
+      // `startedAt` lets the anchoring effect fire and unlocks the consistency
+      // check, which then clears the stale selection -> editor hides.
       mockUseWorkflowExecution.mockReturnValue({
-        data: { id: 'exec-1', context: { inputs: { x: 1 } } },
+        data: {
+          id: 'exec-1',
+          startedAt: '2024-06-01T12:00:00.000Z',
+          context: { inputs: { x: 1 } },
+        },
         isLoading: false,
       });
       mockUseWorkflowExecutions.mockReturnValue({
@@ -231,6 +240,26 @@ describe('WorkflowExecuteHistoricalForm', () => {
       );
 
       expect(defaultProps.setValue).toHaveBeenCalledWith(JSON.stringify({ foo: 'bar' }, null, 2));
+    });
+
+    it('should preserve initial execution selection while waiting to anchor the date range', () => {
+      // Empty list (the initial execution falls outside the default `now-1w`/`now` window)
+      // and execution data without `startedAt` so the anchoring effect returns early.
+      // `needsInitialExecutionDate` stays true and the consistency check must NOT clear
+      // the initial selection while we wait for the date range to be anchored.
+      mockUseWorkflowExecutions.mockReturnValue({
+        data: { total: 0, results: [] },
+      });
+      mockUseWorkflowExecution.mockReturnValue({
+        data: { id: 'exec-1', context: { inputs: { x: 1 } } },
+        isLoading: false,
+      });
+      renderWithProviders(
+        <WorkflowExecuteHistoricalForm {...defaultProps} initialExecutionId="exec-1" />
+      );
+
+      expect(screen.getByTestId('workflow-historical-json-editor')).toBeInTheDocument();
+      expect(defaultProps.setErrors).not.toHaveBeenCalledWith(NOT_READY_SENTINEL);
     });
 
     it('should anchor time range from initial execution startedAt when replaying', async () => {

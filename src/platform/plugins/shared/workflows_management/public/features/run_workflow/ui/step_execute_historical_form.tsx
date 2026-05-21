@@ -81,6 +81,9 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
     const [workflowExecutionId, setWorkflowExecutionId] = useState<string | null>(
       initialWorkflowRunId ?? null
     );
+    const [needsInitialExecutionDate, setNeedsInitialExecutionDate] = useState(
+      !!initialStepExecutionId
+    );
     const [startedAfter, setStartedAfter] = useState('now-1w');
     const [startedBefore, setStartedBefore] = useState('now');
     const getFormattedDateTime = useGetFormattedDateTime();
@@ -111,10 +114,20 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
       if (selectedStepExecutionMetadata) {
         setWorkflowExecutionId(selectedStepExecutionMetadata.workflowRunId);
       } else {
-        setWorkflowExecutionId(null);
-        setSelectedStepExecutionId(null);
+        // Preserve initial ID when waiting for initial execution data to load and pre-select the date range
+        if (!needsInitialExecutionDate || selectedStepExecutionId !== initialStepExecutionId) {
+          setWorkflowExecutionId(null);
+          setSelectedStepExecutionId(null);
+        }
       }
-    }, [isLoadingStepExecutions, selectedStepExecutionMetadata, selectedStepExecutionId]);
+    }, [
+      isLoadingStepExecutions,
+      selectedStepExecutionMetadata,
+      selectedStepExecutionId,
+      initialStepExecutionId,
+      initialWorkflowRunId,
+      needsInitialExecutionDate,
+    ]);
 
     const { data: selectedStepExecution, isLoading: isLoadingStepExecution } = useStepExecution(
       workflowExecutionId ?? '',
@@ -132,7 +145,7 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
 
     // Set the time range automatically when we have an initial step execution id
     useEffect(() => {
-      if (!initialStepExecutionId || selectedStepExecutionId !== initialStepExecutionId) {
+      if (!needsInitialExecutionDate || selectedStepExecutionId !== initialStepExecutionId) {
         return;
       }
       const startedAt = selectedStepExecution?.startedAt;
@@ -142,7 +155,13 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
       // Set the time range to the execution time and start 1 week in the past
       setStartedBefore(startedAt);
       setStartedAfter(moment(startedAt).subtract(1, 'week').toISOString());
-    }, [initialStepExecutionId, selectedStepExecutionId, selectedStepExecution?.startedAt]);
+      setNeedsInitialExecutionDate(false);
+    }, [
+      needsInitialExecutionDate,
+      initialStepExecutionId,
+      selectedStepExecutionId,
+      selectedStepExecution?.startedAt,
+    ]);
 
     // Populate the execution context when the execution data arrives
     useEffect(() => {
@@ -456,4 +475,3 @@ const translations = {
     defaultMessage: 'Loading step execution…',
   }),
 };
-

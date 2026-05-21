@@ -296,6 +296,77 @@ describe('StepExecuteHistoricalForm', () => {
       expect(defaultProps.setValue).not.toHaveBeenCalled();
     });
 
+    it('should preserve initial step execution selection while waiting to anchor the date range', () => {
+      // Step executions list is empty (initial step falls outside the default window) and
+      // the step execution data has no `startedAt`, so the anchoring effect returns early.
+      // `needsInitialExecutionDate` stays true and the reset effect must preserve the
+      // initial selection while we wait for the date range to be anchored.
+      mockUseWorkflowStepExecutions.mockReturnValue({
+        data: { total: 0, results: [] },
+      });
+      mockUseStepExecution.mockReturnValue({
+        data: { id: 'step-exec-1' },
+        isLoading: false,
+      });
+      mockUseWorkflowExecution.mockReturnValue({
+        data: { id: 'run-1', context: {} },
+        isLoading: false,
+      });
+      mockBuildContextOverrideFromExecution.mockReturnValue({ stepContext: {} });
+
+      renderWithProviders(
+        <StepExecuteHistoricalForm
+          {...defaultProps}
+          initialStepExecutionId="step-exec-1"
+          initialWorkflowRunId="run-1"
+          workflowGraph={{ nodes: [] } as any}
+        />
+      );
+
+      // Initial workflow run id and step execution id are preserved on the step-execution hook
+      expect(mockUseStepExecution).toHaveBeenCalledWith('run-1', 'step-exec-1', undefined);
+      // Editor still renders because the initial selection was not cleared
+      expect(screen.getByTestId('workflow-test-step-historical-json-editor')).toBeInTheDocument();
+    });
+
+    it('should clear initial selection after date range is anchored if it is missing from the list', async () => {
+      const startedAt = '2024-06-01T12:00:00.000Z';
+      // Step execution data exposes `startedAt`, so the anchoring effect fires and flips
+      // `needsInitialExecutionDate` to false. The step executions list still does not
+      // contain the initial step (mock returns empty regardless of the anchored range),
+      // so the reset effect must then clear both workflow run id and step execution id.
+      mockUseWorkflowStepExecutions.mockReturnValue({
+        data: { total: 0, results: [] },
+      });
+      mockUseStepExecution.mockReturnValue({
+        data: { id: 'step-exec-1', startedAt },
+        isLoading: false,
+      });
+      mockUseWorkflowExecution.mockReturnValue({
+        data: { id: 'run-1', context: {} },
+        isLoading: false,
+      });
+      mockBuildContextOverrideFromExecution.mockReturnValue({ stepContext: {} });
+
+      renderWithProviders(
+        <StepExecuteHistoricalForm
+          {...defaultProps}
+          initialStepExecutionId="step-exec-1"
+          initialWorkflowRunId="run-1"
+          workflowGraph={{ nodes: [] } as any}
+        />
+      );
+
+      await waitFor(() => {
+        expect(mockUseStepExecution).toHaveBeenCalledWith('', undefined, undefined);
+      });
+      // Once IDs are cleared, the editor visibility predicate
+      // (`selectedStepExecution.id === selectedStepExecutionId`) no longer holds.
+      expect(
+        screen.queryByTestId('workflow-test-step-historical-json-editor')
+      ).not.toBeInTheDocument();
+    });
+
     it('should anchor time range from initial step execution startedAt when replaying', async () => {
       const startedAt = '2024-06-01T12:00:00.000Z';
       mockUseStepExecution.mockReturnValue({

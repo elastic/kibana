@@ -63,6 +63,10 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
     const [selectedExecutionId, setSelectedExecutionId] = useState<string | null>(
       initialExecutionId ?? null
     );
+    const [needsInitialExecutionDate, setNeedsInitialExecutionDate] = useState(
+      !!initialExecutionId
+    );
+
     const [startedAfter, setStartedAfter] = useState('now-1w'); // default to 1 week ago
     const [startedBefore, setStartedBefore] = useState('now');
     const getFormattedDateTime = useGetFormattedDateTime();
@@ -108,16 +112,21 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
 
     // Consistency check to changing filters still includes the selected execution
     useEffect(() => {
-      if (!selectedExecutionId || isLoadingExecution || !executionsList) {
+      if (
+        !selectedExecutionId ||
+        needsInitialExecutionDate ||
+        isLoadingExecution ||
+        !executionsList
+      ) {
         return;
       }
       if (!executionsList.results.some((r) => r.id === selectedExecutionId)) {
         setSelectedExecutionId(null);
       }
-    }, [selectedExecutionId, executionsList, isLoadingExecution]);
+    }, [selectedExecutionId, executionsList, isLoadingExecution, needsInitialExecutionDate]);
 
     useEffect(() => {
-      if (!initialExecutionId || selectedExecutionId !== initialExecutionId) {
+      if (!needsInitialExecutionDate || selectedExecutionId !== initialExecutionId) {
         return;
       }
       const startedAt = selectedExecution?.startedAt;
@@ -127,7 +136,13 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
       // Set the time range to the execution time and start 1 week in the past
       setStartedBefore(startedAt);
       setStartedAfter(moment(startedAt).subtract(1, 'week').toISOString());
-    }, [initialExecutionId, selectedExecutionId, selectedExecution?.startedAt]);
+      setNeedsInitialExecutionDate(false);
+    }, [
+      needsInitialExecutionDate,
+      initialExecutionId,
+      selectedExecutionId,
+      selectedExecution?.startedAt,
+    ]);
 
     // Populate the loaded execution data and manage not-ready sentinel
     useEffect(() => {
@@ -374,4 +389,3 @@ const translations = {
     defaultMessage: 'Loading execution…',
   }),
 };
-
