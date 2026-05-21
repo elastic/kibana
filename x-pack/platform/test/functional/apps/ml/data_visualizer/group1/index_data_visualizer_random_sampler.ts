@@ -12,15 +12,21 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const browser = getService('browser');
-  async function goToSourceForIndexBasedDataVisualizer(sourceIndexOrSavedSearch: string) {
+  async function goToSourceForIndexBasedDataVisualizer(
+    sourceIndexOrSavedSearch: string,
+    isSavedSearch = false
+  ) {
     await ml.testExecution.logTestStep(`navigates to Data Visualizer page`);
     await ml.navigation.navigateToDataVisualizer();
 
-    await ml.testExecution.logTestStep(`loads the saved search selection page`);
+    await ml.testExecution.logTestStep(`loads the data visualizer page with source picker`);
     await ml.dataVisualizer.navigateToDataViewSelection();
 
     await ml.testExecution.logTestStep(`loads the index data visualizer page`);
-    await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(sourceIndexOrSavedSearch);
+    await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(
+      sourceIndexOrSavedSearch,
+      isSavedSearch
+    );
   }
   describe('index based random sampler controls', function () {
     this.tags(['ml']);
@@ -50,7 +56,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     describe('with small data sets', function () {
       it(`has random sampler 'on - automatic' by default`, async () => {
         await goToSourceForIndexBasedDataVisualizer(
-          farequoteDataViewTestData.sourceIndexOrSavedSearch
+          farequoteDataViewTestData.sourceIndexOrSavedSearch,
+          farequoteDataViewTestData.isSavedSearch
         );
 
         await ml.dataVisualizerIndexBased.assertRandomSamplingOption(
@@ -63,7 +70,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         await ml.dataVisualizerIndexBased.setRandomSamplingOption('dvRandomSamplerOptionOff');
 
         await goToSourceForIndexBasedDataVisualizer(
-          farequoteLuceneSearchTestData.sourceIndexOrSavedSearch
+          farequoteLuceneSearchTestData.sourceIndexOrSavedSearch,
+          farequoteLuceneSearchTestData.isSavedSearch
         );
         await ml.dataVisualizerIndexBased.assertRandomSamplingOption('dvRandomSamplerOptionOff');
       });

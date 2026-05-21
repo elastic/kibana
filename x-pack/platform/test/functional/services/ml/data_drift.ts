@@ -16,7 +16,7 @@ export function MachineLearningDataDriftProvider({
 }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['discover', 'header']);
+  const PageObjects = getPageObjects(['common', 'discover', 'header']);
   const elasticChart = getService('elasticChart');
   const browser = getService('browser');
   const comboBox = getService('comboBox');
@@ -33,10 +33,10 @@ export function MachineLearningDataDriftProvider({
     },
 
     async assertDataViewTitle(expectedTitle: string) {
-      const selector = 'mlDataDriftPageDataViewTitle';
+      const selector = 'mlDataSourceSelectorButton';
       await testSubjects.existOrFail(selector);
       await retry.tryForTime(5000, async () => {
-        const title = await testSubjects.getVisibleText(selector);
+        const title = await testSubjects.getAttribute(selector, 'title');
         expect(title).to.eql(
           expectedTitle,
           `Expected data drift page's data view title to be '${expectedTitle}' (got '${title}')`
@@ -242,8 +242,8 @@ export function MachineLearningDataDriftProvider({
     },
 
     async navigateToCreateNewDataViewPage() {
-      await retry.tryForTime(5000, async () => {
-        await testSubjects.click(`dataDriftCreateDataViewButton`);
+      await PageObjects.common.navigateToApp('ml', { path: 'data_drift_custom' });
+      await retry.tryForTime(10000, async () => {
         await testSubjects.existOrFail(`mlPageDataDriftCustomIndexPatterns`);
       });
     },

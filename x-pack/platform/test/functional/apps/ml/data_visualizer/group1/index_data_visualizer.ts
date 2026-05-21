@@ -32,7 +32,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         `${testData.suiteTitle} loads the index data visualizer page`
       );
       await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(
-        testData.sourceIndexOrSavedSearch
+        testData.sourceIndexOrSavedSearch,
+        testData.isSavedSearch
       );
       await headerPage.waitUntilLoadingHasFinished();
     });
@@ -231,7 +232,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           `${testData.suiteTitle} loads the index data visualizer page`
         );
         await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(
-          testData.sourceIndexOrSavedSearch
+          testData.sourceIndexOrSavedSearch,
+          testData.isSavedSearch
         );
 
         await ml.testExecution.logTestStep(`${testData.suiteTitle} loads data for full time range`);

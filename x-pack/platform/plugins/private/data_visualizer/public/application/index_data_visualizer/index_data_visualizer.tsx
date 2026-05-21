@@ -291,6 +291,7 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
     <UrlStateContextProvider value={{ searchString: urlSearchString, setUrlState }}>
       {currentDataView ? (
         <IndexDataVisualizerComponent
+          key={`${currentDataView.id}-${currentSavedSearch?.id ?? 'none'}`}
           currentDataView={currentDataView}
           currentSavedSearch={currentSavedSearch}
           currentSessionId={currentSessionId}

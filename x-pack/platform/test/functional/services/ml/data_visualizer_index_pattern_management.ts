@@ -19,45 +19,12 @@ export function MachineLearningDataVisualizerIndexPatternManagementProvider(
   const comboBox = getService('comboBox');
 
   return {
-    async assertIndexPatternManagementButtonExists() {
-      await testSubjects.existOrFail('dataVisualizerDataViewanagementButton');
-    },
-
-    async assertIndexPatternManagementMenuExists() {
-      await testSubjects.existOrFail('dataVisualizerDataViewManagementMenu');
-    },
-
     async assertIndexPatternFieldEditorExists() {
       await testSubjects.existOrFail('indexPatternFieldEditorForm', { timeout: 5000 });
     },
 
     async assertIndexPatternFieldEditorNotExist() {
       await testSubjects.missingOrFail('indexPatternFieldEditorForm', { timeout: 5000 });
-    },
-
-    async clickIndexPatternManagementButton() {
-      await retry.tryForTime(5000, async () => {
-        await testSubjects.clickWhenNotDisabledWithoutRetry(
-          'dataVisualizerDataViewManagementButton'
-        );
-        await this.assertIndexPatternManagementMenuExists();
-      });
-    },
-
-    async clickAddIndexPatternFieldAction() {
-      await retry.tryForTime(5000, async () => {
-        await this.assertIndexPatternManagementMenuExists();
-        await testSubjects.clickWhenNotDisabledWithoutRetry('dataVisualizerAddDataViewFieldAction');
-        await this.assertIndexPatternFieldEditorExists();
-      });
-    },
-
-    async clickManageIndexPatternAction() {
-      await retry.tryForTime(5000, async () => {
-        await this.assertIndexPatternManagementMenuExists();
-        await testSubjects.clickWhenNotDisabledWithoutRetry('dataVisualizerManageDataViewAction');
-        await testSubjects.existOrFail('editIndexPattern');
-      });
     },
 
     async assertIndexPatternFieldEditorFieldType(expectedIdentifier: string) {
@@ -74,14 +41,13 @@ export function MachineLearningDataVisualizerIndexPatternManagementProvider(
 
     async setIndexPatternFieldEditorFieldType(type: string) {
       await comboBox.set('typeField > comboBoxInput', type);
-
       await this.assertIndexPatternFieldEditorFieldType(type);
     },
 
     async addRuntimeField(name: string, script: string, fieldType: string) {
       await retry.tryForTime(15 * 1000, async () => {
-        await this.clickIndexPatternManagementButton();
-        await this.clickAddIndexPatternFieldAction();
+        await testSubjects.click('mlDataSourceSelectorButton');
+        await testSubjects.click('indexPattern-add-field');
 
         await this.assertIndexPatternFieldEditorExists();
         await fieldEditor.setName(name);

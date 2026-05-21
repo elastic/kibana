@@ -129,7 +129,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           `${farequoteKQLFiltersSearchTestData.suiteTitle} loads the data drift view`
         );
         await ml.jobSourceSelection.selectSourceForDataDrift(
-          farequoteKQLFiltersSearchTestData.sourceIndexOrSavedSearch
+          farequoteKQLFiltersSearchTestData.sourceIndexOrSavedSearch,
+          farequoteKQLFiltersSearchTestData.isSavedSearch
         );
         await assertDataDriftPageContent(farequoteKQLFiltersSearchTestData);
 

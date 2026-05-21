@@ -10,7 +10,7 @@ import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'reac
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IndexDataVisualizerSpec } from '@kbn/data-visualizer-plugin/public';
-import { useTimefilter } from '@kbn/ml-date-picker';
+import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 import { EuiEmptyPrompt, EuiHorizontalRule } from '@elastic/eui';
 import useMountedState from 'react-use/lib/useMountedState';
 import type {
@@ -224,6 +224,7 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean; isManagementContext: b
       DataViewPickerComponent={DataViewPicker}
       SavedObjectFinderComponent={SavedObjectFinder}
       filterEsql
+      onFieldSaved={() => mlTimefilterRefresh$.next({ lastRefresh: Date.now() })}
     />
   ) : undefined;
 

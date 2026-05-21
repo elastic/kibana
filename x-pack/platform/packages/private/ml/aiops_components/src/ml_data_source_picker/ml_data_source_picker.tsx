@@ -43,6 +43,8 @@ export interface MlDataSourcePickerProps {
   SavedObjectFinderComponent: MlOpenSessionFlyoutProps['SavedObjectFinderComponent'];
   /** When true, ES|QL-based sessions are hidden from the session picker */
   filterEsql?: boolean;
+  /** Called after a field is saved via the field editor */
+  onFieldSaved?: () => void;
 }
 
 export const MlDataSourcePicker: FC<MlDataSourcePickerProps> = ({
@@ -52,6 +54,7 @@ export const MlDataSourcePicker: FC<MlDataSourcePickerProps> = ({
   DataViewPickerComponent,
   SavedObjectFinderComponent,
   filterEsql = false,
+  onFieldSaved,
 }) => {
   const [savedDataViews, setSavedDataViews] = useState<DataViewListItem[]>([]);
   const [isOpenSessionPanelVisible, setOpenSessionPanelVisible] = useState(false);
@@ -107,11 +110,12 @@ export const MlDataSourcePicker: FC<MlDataSourcePickerProps> = ({
               ctx: { dataView: currentDataView },
               onSave: () => {
                 dataViews.getIdsWithTitle().then(setSavedDataViews);
+                onFieldSaved?.();
               },
             });
           }
         : undefined,
-    [canEditDataView, currentDataView, dataViewFieldEditor, dataViews]
+    [canEditDataView, currentDataView, dataViewFieldEditor, dataViews, onFieldSaved]
   );
 
   const triggerLabel = useMemo(
