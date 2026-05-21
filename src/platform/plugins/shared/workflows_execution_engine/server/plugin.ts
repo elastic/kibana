@@ -78,7 +78,10 @@ import {
   WORKFLOW_RUN_TASK_TYPE,
   WORKFLOW_SCHEDULED_TASK_TYPE,
 } from './workflow_task_manager/types';
-import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
+import {
+  getWorkflowGlobalTimeoutResumeTaskId,
+  WorkflowTaskManager,
+} from './workflow_task_manager/workflow_task_manager';
 import { createIndexes } from '../common';
 
 /**
@@ -1271,14 +1274,39 @@ export class WorkflowsExecutionEnginePlugin
         });
       }
 
-      await workflowTaskManager.scheduleImmediateResume({
+      // Schedule an immediate resume and call runSoon on its specific task ID
+      // so the parent workflow resumes as soon as possible.
+      //
+      // We intentionally avoid forceRunIdleTasks here because its ES _search
+      // query can return stale results: the global-timeout resume task
+      // scheduled by handleExecutionDelay may still appear in the search
+      // even after removeIfExists deletes it (ES eventual consistency).
+      // When forceRunIdleTasks calls runSoon on both the stale global-timeout
+      // task and the new immediate resume, the stale runSoon throws "not found",
+      // which propagates up and triggers the fallback scheduleImmediateResume
+      // in handlePostExecutionLoop — creating a second concurrent resume.
+      // Two concurrent resumes both reach the next workflow.execute step and
+      // call executeWorkflow, producing duplicate children. The second child
+      // is dropped by concurrency:drop, and the parent reads the skipped
+      // child and fails.
+      //
+      // By calling runSoon directly on the known task ID we guarantee exactly
+      // one resume runs, regardless of ES search consistency.
+      const { taskId } = await workflowTaskManager.scheduleImmediateResume({
         executionId,
         spaceId,
         fakeRequest: request,
       });
+      await workflowTaskManager.runSoon(taskId);
 
-      // Same idea as cancel: nudge TM so the resume task runs as soon as possible
-      await workflowTaskManager.forceRunIdleTasks(executionId);
+      // Best-effort removal of the global-timeout resume task. If it no
+      // longer exists (e.g. already consumed or never scheduled) we
+      // silently ignore the error. The timeout task has runAt far in the
+      // future so it won't interfere before it is garbage-collected, but
+      // removing it avoids a wasted resume attempt later.
+      await workflowTaskManager
+        .removeIfExists(getWorkflowGlobalTimeoutResumeTaskId(executionId))
+        .catch(() => {});
     };
 
     this.internalResumeWorkflowExecutionHandler = internalResumeWorkflowExecution;
