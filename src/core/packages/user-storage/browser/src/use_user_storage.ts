@@ -67,9 +67,12 @@ export function useUserStorage<T = unknown>(
     () => (defaultValue !== undefined ? client.get$<T>(key, defaultValue) : client.get$<T>(key)),
     [client, key, defaultValue]
   );
+  // Use peek (pure, no side effects) for the synchronous initial render value.
+  // The lazy fetch is triggered by the get$() subscription inside useObservable,
+  // which runs inside an effect after the first commit — safe under concurrent mode.
   const value = useObservable<T | undefined>(
     observable$,
-    defaultValue !== undefined ? client.get<T>(key, defaultValue) : client.get<T>(key)
+    defaultValue !== undefined ? client.peek<T>(key, defaultValue) : client.peek<T>(key)
   );
   const set = useCallback<UserStorageSetter<T>>(
     (newValue) => client.set<T>(key, newValue),

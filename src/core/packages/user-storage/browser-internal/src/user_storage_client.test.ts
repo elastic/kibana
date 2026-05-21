@@ -26,6 +26,29 @@ const buildClient = (initialValues: Record<string, unknown> = {}) => {
 };
 
 describe('UserStorageClient', () => {
+  describe('peek', () => {
+    it('returns cached values without triggering a lazy fetch', () => {
+      const { client, api } = buildClient({ a: 1 });
+
+      expect(client.peek('a')).toBe(1);
+      expect(api.get).not.toHaveBeenCalled();
+    });
+
+    it('returns undefined for a missing key without triggering a lazy fetch', () => {
+      const { client, api } = buildClient({});
+
+      expect(client.peek('missing')).toBeUndefined();
+      expect(api.get).not.toHaveBeenCalled();
+    });
+
+    it('returns defaultValue for a missing key without triggering a lazy fetch', () => {
+      const { client, api } = buildClient({});
+
+      expect(client.peek('missing', 'fallback')).toBe('fallback');
+      expect(api.get).not.toHaveBeenCalled();
+    });
+  });
+
   describe('get', () => {
     it('returns cached values seeded from initialValues', () => {
       const { client } = buildClient({ a: 1, b: 'two' });

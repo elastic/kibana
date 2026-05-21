@@ -36,8 +36,25 @@ export type UserStorageUpdate<T = unknown> =
  */
 export interface IUserStorageClient {
   /**
+   * Pure synchronous read from the local cache with no side effects.
+   * Returns `undefined` when no cached value exists for the key and no
+   * `defaultValue` is provided.
+   *
+   * Unlike `get`, `peek` never triggers a lazy fetch, making it safe to
+   * call during React render (which may be invoked multiple times before
+   * a commit under concurrent mode).
+   */
+  peek<T = unknown>(key: string): T | undefined;
+  peek<T = unknown>(key: string, defaultValue: T): T;
+
+  /**
    * Synchronous read from the local cache. Returns `undefined` when no cached
    * value exists for the key and no `defaultValue` is provided.
+   *
+   * For keys without `preload: true`, the first call for an uncached key
+   * triggers a fire-and-forget lazy HTTP fetch in the background. Prefer
+   * `peek` in render functions; use `get` in imperative / effect code where
+   * triggering the fetch on first access is the intended behaviour.
    */
   get<T = unknown>(key: string): T | undefined;
   get<T = unknown>(key: string, defaultValue: T): T;

@@ -60,6 +60,13 @@ export class UserStorageClient implements IUserStorageClient {
     });
   }
 
+  public peek<T = unknown>(key: string): T | undefined;
+  public peek<T = unknown>(key: string, defaultValue: T): T;
+  public peek<T = unknown>(key: string, defaultValue?: T): T | undefined {
+    const cached = this.cache[key];
+    return cached !== undefined ? (cached as T) : defaultValue;
+  }
+
   public get<T = unknown>(key: string): T | undefined;
   public get<T = unknown>(key: string, defaultValue: T): T;
   public get<T = unknown>(key: string, defaultValue?: T): T | undefined {
