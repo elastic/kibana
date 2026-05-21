@@ -34,6 +34,26 @@ export const NOT_DELETED_POST_GROUPING_WHERE: LatestSourceWhereCondition = esql.
 )} IS NULL OR ${esql.col('deleted')} == false`;
 
 /**
+ * Default read filter for feature KIs: hide both tombstones and excluded
+ * revisions. `excluded` lives at the document root (mirrors `deleted`) so
+ * the same shape can be applied to query KIs in the future without a
+ * mapping change.
+ */
+export const NOT_EXCLUDED_POST_GROUPING_WHERE: LatestSourceWhereCondition = esql.exp`(${esql.col(
+  'deleted'
+)} IS NULL OR ${esql.col('deleted')} == false) AND (${esql.col(
+  'excluded'
+)} IS NULL OR ${esql.col('excluded')} == false)`;
+
+/**
+ * Read filter that returns only excluded (and not deleted) revisions.
+ * Used by `getExcludedFeatures` and the keep-alive refresh path.
+ */
+export const EXCLUDED_ONLY_POST_GROUPING_WHERE: LatestSourceWhereCondition = esql.exp`(${esql.col(
+  'deleted'
+)} IS NULL OR ${esql.col('deleted')} == false) AND ${esql.col('excluded')} == true`;
+
+/**
  * Lightweight ES|QL probe: returns the latest `(stream.name, type, id)`
  * tuples for a stream (or set of streams), filtered by an optional pre-
  * grouping `WHERE` condition.

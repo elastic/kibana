@@ -120,6 +120,23 @@ async function runFeaturesIdentification(
   ]);
   taskLogger.debug(`Using connector ${connectorId} for knowledge indicator extraction`);
 
+  // Keep-alive: append a fresh excluded revision per currently-excluded
+  // feature so they don't age out under DSL retention (90d) between
+  // extraction runs (every ~10 min). Failure is a soft surface — the LLM
+  // call is the primary goal of this task.
+  try {
+    const { refreshed } = await kiClient.refreshExcludedFeatures(streamName);
+    if (refreshed > 0) {
+      taskLogger.debug(`Refreshed ${refreshed} excluded feature(s) for stream ${streamName}`);
+    }
+  } catch (err) {
+    taskLogger.warn(
+      `Failed to refresh excluded features for stream ${streamName}: ${
+        err instanceof Error ? err.message : String(err)
+      }`
+    );
+  }
+
   let hasTrackedIteration = false;
   const iterationResults: IterationResult[] = [];
   let discoveredFeatures: Feature[] = [];

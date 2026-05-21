@@ -7,5 +7,10 @@
 
 import type { Feature } from '@kbn/streams-schema';
 
-/** Soft-excluded features are no longer stored; tombstoned features are filtered server-side. */
-export const isFeatureExcluded = (feature: Feature): boolean => Boolean(feature.deleted);
+/**
+ * A feature is considered excluded when its latest revision carries the
+ * root-level `excluded: true` marker. The server merges active and excluded
+ * features into a single response when called with `include_excluded=true`;
+ * the UI then partitions them client-side using this helper.
+ */
+export const isFeatureExcluded = (feature: Feature): boolean => Boolean(feature.excluded);

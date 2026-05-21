@@ -172,7 +172,7 @@ describe('KnowledgeIndicatorSelectableFilter', () => {
     it('computes available values using filterCriteria', async () => {
       const kis = [
         makeFeatureKI({ type: 'entity', id: 'f1' }),
-        makeFeatureKI({ type: 'infrastructure', id: 'f2', deleted: true }),
+        makeFeatureKI({ type: 'infrastructure', id: 'f2', excluded: true }),
       ];
 
       await renderFilter({

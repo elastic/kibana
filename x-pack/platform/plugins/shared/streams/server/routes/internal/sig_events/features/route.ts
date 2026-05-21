@@ -29,7 +29,33 @@ const dateFromString = z.string().transform((input) => new Date(input));
 const includeExcludedQueryParam = z
   .union([z.boolean(), z.enum(['true', 'false'])])
   .optional()
-  .describe('Legacy no-op. Excluded features are no longer stored separately.');
+  .describe(
+    'When true, returns active and excluded features merged. When false or omitted, returns active features only (the default).'
+  );
+
+const parseIncludeExcluded = (value: boolean | 'true' | 'false' | undefined): boolean =>
+  value === true || value === 'true';
+
+const featureBulkOperationSchema = z.union([
+  z.object({ index: z.object({ feature: featureSchema }) }),
+  z.object({ delete: z.object({ id: z.string() }) }),
+  z.object({ exclude: z.object({ id: z.string() }) }),
+  z.object({ restore: z.object({ id: z.string() }) }),
+]);
+
+const featureBulkAcrossStreamsOperationSchema = z.union([
+  z.object({ delete: z.object({ id: z.string() }) }),
+  z.object({ exclude: z.object({ id: z.string() }) }),
+  z.object({ restore: z.object({ id: z.string() }) }),
+]);
+
+export const bulkFeaturesBodySchema = z.object({
+  operations: z.array(featureBulkOperationSchema),
+});
+
+export const bulkFeaturesAcrossStreamsBodySchema = z.object({
+  operations: z.array(featureBulkAcrossStreamsOperationSchema).min(1),
+});
 
 export const upsertFeatureRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/features',
@@ -165,10 +191,12 @@ export const listFeaturesRoute = createServerRoute({
     await streamsClient.ensureStream(params.path.name);
 
     const kiClient = await getKnowledgeIndicatorClient();
-    const { query, search_mode: searchMode } = params.query ?? {};
+    const { query, search_mode: searchMode, include_excluded: includeExcludedRaw } =
+      params.query ?? {};
+    const includeExcluded = parseIncludeExcluded(includeExcludedRaw);
     const { hits: features } = query
-      ? await kiClient.findFeatures(params.path.name, query, { searchMode })
-      : await kiClient.getFeatures(params.path.name);
+      ? await kiClient.findFeatures(params.path.name, query, { searchMode, includeExcluded })
+      : await kiClient.getFeatures(params.path.name, { includeExcluded });
 
     return { features };
   },
@@ -212,10 +240,12 @@ export const listAllFeaturesRoute = createServerRoute({
     const streamNames = streams.map((stream) => stream.name);
 
     const kiClient = await getKnowledgeIndicatorClient();
-    const { query, search_mode: searchMode } = params?.query ?? {};
+    const { query, search_mode: searchMode, include_excluded: includeExcludedRaw } =
+      params?.query ?? {};
+    const includeExcluded = parseIncludeExcluded(includeExcludedRaw);
     const { hits: features } = query
-      ? await kiClient.findFeatures(streamNames, query, { searchMode })
-      : await kiClient.getFeatures(streamNames);
+      ? await kiClient.findFeatures(streamNames, query, { searchMode, includeExcluded })
+      : await kiClient.getFeatures(streamNames, { includeExcluded });
 
     return { features };
   },
@@ -235,22 +265,7 @@ export const bulkFeaturesRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ name: z.string() }),
-    body: z.object({
-      operations: z.array(
-        z.union([
-          z.object({
-            index: z.object({
-              feature: featureSchema,
-            }),
-          }),
-          z.object({
-            delete: z.object({
-              id: z.string(),
-            }),
-          }),
-        ])
-      ),
-    }),
+    body: bulkFeaturesBodySchema,
   }),
   handler: async ({
     params,
@@ -278,6 +293,12 @@ export const bulkFeaturesRoute = createServerRoute({
       if ('index' in op) {
         return { index: { feature: op.index.feature } };
       }
+      if ('exclude' in op) {
+        return { exclude: { id: op.exclude.id } };
+      }
+      if ('restore' in op) {
+        return { restore: { id: op.restore.id } };
+      }
       return { delete: { type: 'feature', id: op.delete.id } };
     });
     await kiClient.bulk(name, kiOps);
@@ -302,9 +323,7 @@ export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     },
   },
   params: z.object({
-    body: z.object({
-      operations: z.array(z.object({ delete: z.object({ id: z.string() }) })).min(1),
-    }),
+    body: bulkFeaturesAcrossStreamsBodySchema,
   }),
   handler: async ({
     params,
@@ -322,13 +341,27 @@ export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
 
     const kiClient = await getKnowledgeIndicatorClient();
 
-    // Resolve id → stream_name server-side. Ids not found in storage are
-    // idempotent no-ops counted as `skipped` (matching the queries endpoint
-    // pattern).
-    const requestedIds = Array.from(new Set(params.body.operations.map((op) => op.delete.id)));
+    // Index requested ops by id so each id can be resolved to its stream
+    // and dispatched with the right verb. Excluded features must be visible
+    // to resolution: pass `includeExcluded=true` so a restore/delete on an
+    // already-excluded feature still finds the owning stream.
+    type FeatureBulkOp =
+      | { delete: { id: string } }
+      | { exclude: { id: string } }
+      | { restore: { id: string } };
+    const opById = new Map<string, FeatureBulkOp>();
+    for (const op of params.body.operations) {
+      const id = 'delete' in op ? op.delete.id : 'exclude' in op ? op.exclude.id : op.restore.id;
+      // Last write wins on duplicates — same as queries endpoint pattern.
+      opById.set(id, op);
+    }
+    const requestedIds = Array.from(opById.keys());
     const streams = await streamsClient.listStreams();
     const streamNames = streams.map((s) => s.name);
-    const { hits: resolved } = await kiClient.getFeatures(streamNames, { id: requestedIds });
+    const { hits: resolved } = await kiClient.getFeatures(streamNames, {
+      id: requestedIds,
+      includeExcluded: true,
+    });
 
     const resolvedIds = new Set(resolved.map((f) => f.id));
     const skippedFromLookup = requestedIds.length - resolvedIds.size;
@@ -347,9 +380,12 @@ export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
 
     for (const [streamName, ids] of Object.entries(byStream)) {
       try {
-        const ops: KIBulkOperation[] = ids.map((id) => ({
-          delete: { type: 'feature', id },
-        }));
+        const ops: KIBulkOperation[] = ids.map((id) => {
+          const op = opById.get(id)!;
+          if ('exclude' in op) return { exclude: { id } };
+          if ('restore' in op) return { restore: { id } };
+          return { delete: { type: 'feature', id } };
+        });
         const { applied, skipped: streamSkipped } = await kiClient.bulk(streamName, ops);
         succeeded += applied;
         skipped += streamSkipped;
