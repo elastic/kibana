@@ -22,7 +22,7 @@ export interface UserStorageClientParams {
 
 /**
  * Browser-side {@link IUserStorageClient}: a synchronous in-memory cache
- * seeded from server-injected metadata (for keys with `serverInject: true`),
+ * seeded from preloaded (server-injected) metadata (for keys with `preload: true`),
  * with HTTP-backed writes and per-key lazy fetching for non-injected keys.
  *
  * Lazy fetch behaviour:

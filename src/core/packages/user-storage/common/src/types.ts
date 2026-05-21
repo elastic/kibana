@@ -25,15 +25,15 @@ export interface UserStorageDefinition<T = unknown> {
    * first-paint time and embedded in the page HTML so the browser cache is
    * pre-populated before any JavaScript runs.
    *
-   * Keys without `serverInject: true` are loaded lazily: the browser cache
+   * Keys without `preload: true` are loaded lazily: the browser cache
    * starts empty for that key and the first `get(key)` / `get$(key)` call
    * triggers a per-key HTTP fetch to hydrate the cache.
    *
-   * Prefer `serverInject: true` only for keys whose values are needed on the
+   * Prefer `preload: true` only for keys whose values are needed on the
    * critical rendering path. Large or rarely-read payloads should remain lazy
    * to avoid bloating the initial HTML payload.
    */
-  serverInject?: boolean;
+  preload?: boolean;
 }
 
 /** A record of key → definition, passed to `register()`. */
@@ -44,7 +44,7 @@ export interface IUserStorageClient {
   /** Resolve a single key: returns the user override or the registered default. */
   get<T = unknown>(key: string): Promise<T>;
   /**
-   * Resolve all keys whose definition has `serverInject: true`, merging user
+   * Resolve all keys whose definition has `preload: true`, merging user
    * overrides with registered defaults. Used exclusively by the rendering
    * service to embed values in the initial HTML payload.
    */

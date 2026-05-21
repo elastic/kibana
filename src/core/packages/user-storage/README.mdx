@@ -66,11 +66,11 @@ The Zod schema runs:
 2. At every `set`, against the incoming value (rejects invalid writes with `400`).
 3. At every `get`, against the stored value. If the stored value fails to parse — usually because the schema has been narrowed since the value was written — the registered default is returned and a warning is logged. This means you can safely tighten a schema without writing a migration, but consumers should treat the resulting value reset as a possible UX outcome.
 
-### Server-rendered injection
+### Preloaded values
 
 By default, browser-side reads are **lazy**: the cache starts empty for a given key and the first `get(key)` / `get$(key)` call fires a `GET /internal/user_storage/{key}` request to hydrate it. While the request is in-flight `get(key)` returns `undefined` (or the provided `defaultValue`) and `get$(key)` emits `undefined` then emits again once the value arrives.
 
-For keys on the critical rendering path, opt in to **eager injection** by setting `serverInject: true` in the key's `UserStorageDefinition`. Core then calls `getForInjection()` during server-side rendering and embeds only the opted-in keys into `<kbn-injected-metadata>` under `userStorage.values`, so those values are available synchronously before the first React render without any in-browser fetch.
+For keys on the critical rendering path, opt in to **eager injection** by setting `preload: true` in the key's `UserStorageDefinition`. Core then calls `getForInjection()` during server-side rendering and embeds only the opted-in keys into `<kbn-injected-metadata>` under `userStorage.values`, so those values are available synchronously before the first React render without any in-browser fetch.
 
 ## Registering keys (server)
 
@@ -90,13 +90,13 @@ export class MyPlugin implements Plugin {
         }),
         defaultValue: { hidden: [], order: [] },
         scope: 'space',
-        serverInject: true, // embed in HTML at first paint; needed on the critical render path
+        preload: true, // embed in HTML at first paint; needed on the critical render path
       },
       'myPlugin:tour-dismissed': {
         schema: z.boolean(),
         defaultValue: false,
         scope: 'global',
-        // serverInject omitted — lazy-loaded on first access
+        // preload omitted — lazy-loaded on first access
       },
     });
   }
@@ -150,7 +150,7 @@ await core.userStorage.set('myPlugin:nav-layout', nextLayout);
 await core.userStorage.remove('myPlugin:tour-dismissed');
 ```
 
-Pass a `defaultValue` to `get(key, default)` so that consumers never see `undefined`. For keys with `serverInject: true` the cache is pre-populated at first paint so `get` is truly synchronous. For lazy-loaded keys, the first `get` triggers a background fetch and returns `undefined` (or `defaultValue`) until the response arrives.
+Pass a `defaultValue` to `get(key, default)` so that consumers never see `undefined`. For keys with `preload: true` the cache is pre-populated at first paint so `get` is truly synchronous. For lazy-loaded keys, the first `get` triggers a background fetch and returns `undefined` (or `defaultValue`) until the response arrives.
 
 The client also exposes RxJS observables for live updates and HTTP errors:
 

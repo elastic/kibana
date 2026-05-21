@@ -29,7 +29,7 @@ const buildClient = (definitions: Map<string, UserStorageDefinition>) => {
 };
 
 describe('UserStorageClient.getForInjection()', () => {
-  it('returns empty object when no definitions have serverInject: true', async () => {
+  it('returns empty object when no definitions have preload: true', async () => {
     const definitions = new Map<string, UserStorageDefinition>([
       ['space:a', { schema: z.string(), defaultValue: 'a-default', scope: 'space' }],
     ]);
@@ -41,12 +41,9 @@ describe('UserStorageClient.getForInjection()', () => {
     expect(result).toEqual({});
   });
 
-  it('only includes keys with serverInject: true, skipping non-injectable keys', async () => {
+  it('only includes keys with preload: true, skipping non-injectable keys', async () => {
     const definitions = new Map<string, UserStorageDefinition>([
-      [
-        'space:a',
-        { schema: z.string(), defaultValue: 'a-default', scope: 'space', serverInject: true },
-      ],
+      ['space:a', { schema: z.string(), defaultValue: 'a-default', scope: 'space', preload: true }],
       ['space:b', { schema: z.string(), defaultValue: 'b-default', scope: 'space' }],
     ]);
     const { client, savedObjectsClient } = buildClient(definitions);
@@ -69,11 +66,8 @@ describe('UserStorageClient.getForInjection()', () => {
 
   it('issues a single bulkGet covering both SO types when injectable keys span both scopes', async () => {
     const definitions = new Map<string, UserStorageDefinition>([
-      [
-        'space:a',
-        { schema: z.string(), defaultValue: 'a-default', scope: 'space', serverInject: true },
-      ],
-      ['global:b', { schema: z.number(), defaultValue: 0, scope: 'global', serverInject: true }],
+      ['space:a', { schema: z.string(), defaultValue: 'a-default', scope: 'space', preload: true }],
+      ['global:b', { schema: z.number(), defaultValue: 0, scope: 'global', preload: true }],
     ]);
     const { client, savedObjectsClient } = buildClient(definitions);
 
@@ -107,10 +101,7 @@ describe('UserStorageClient.getForInjection()', () => {
 
   it('only requests the scope(s) used by injectable keys', async () => {
     const definitions = new Map<string, UserStorageDefinition>([
-      [
-        'space:a',
-        { schema: z.string(), defaultValue: 'a-default', scope: 'space', serverInject: true },
-      ],
+      ['space:a', { schema: z.string(), defaultValue: 'a-default', scope: 'space', preload: true }],
       ['global:b', { schema: z.number(), defaultValue: 0, scope: 'global' }],
     ]);
     const { client, savedObjectsClient } = buildClient(definitions);
@@ -135,11 +126,8 @@ describe('UserStorageClient.getForInjection()', () => {
 
   it('returns defaults when bulkGet reports a missing doc via the error field', async () => {
     const definitions = new Map<string, UserStorageDefinition>([
-      [
-        'space:a',
-        { schema: z.string(), defaultValue: 'a-default', scope: 'space', serverInject: true },
-      ],
-      ['global:b', { schema: z.number(), defaultValue: 42, scope: 'global', serverInject: true }],
+      ['space:a', { schema: z.string(), defaultValue: 'a-default', scope: 'space', preload: true }],
+      ['global:b', { schema: z.number(), defaultValue: 42, scope: 'global', preload: true }],
     ]);
     const { client, savedObjectsClient } = buildClient(definitions);
 
@@ -172,10 +160,7 @@ describe('UserStorageClient.getForInjection()', () => {
 
   it('falls back to defaults and warns when a stored value fails schema validation', async () => {
     const definitions = new Map<string, UserStorageDefinition>([
-      [
-        'space:a',
-        { schema: z.string(), defaultValue: 'a-default', scope: 'space', serverInject: true },
-      ],
+      ['space:a', { schema: z.string(), defaultValue: 'a-default', scope: 'space', preload: true }],
     ]);
     const { client, savedObjectsClient, logger } = buildClient(definitions);
 
@@ -199,10 +184,7 @@ describe('UserStorageClient.getForInjection()', () => {
 
   it('propagates errors thrown by bulkGet itself (e.g. transport failure)', async () => {
     const definitions = new Map<string, UserStorageDefinition>([
-      [
-        'space:a',
-        { schema: z.string(), defaultValue: 'a-default', scope: 'space', serverInject: true },
-      ],
+      ['space:a', { schema: z.string(), defaultValue: 'a-default', scope: 'space', preload: true }],
     ]);
     const { client, savedObjectsClient } = buildClient(definitions);
 

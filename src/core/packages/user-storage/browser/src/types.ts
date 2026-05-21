@@ -25,8 +25,9 @@ export type UserStorageUpdate<T = unknown> =
 
 /**
  * Browser-side user storage client. Returns synchronously from an in-memory
- * cache that is seeded from server-injected metadata at first paint, and is
- * refreshed by `set` / `remove` after the corresponding HTTP write completes.
+ * cache that is seeded from preloaded (server-injected) metadata at first
+ * paint, and is refreshed by `set` / `remove` after the corresponding HTTP
+ * write completes.
  *
  * Distinct from the server-side `IUserStorageClient` (in
  * `@kbn/core-user-storage-common`) which is fully Promise-based.
