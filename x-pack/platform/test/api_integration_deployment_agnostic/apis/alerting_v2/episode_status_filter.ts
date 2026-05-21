@@ -116,6 +116,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       filterState: EpisodesFilterState
     ): Promise<Array<Record<string, unknown>>> {
       const esqlQuery = buildEpisodesQuery(
+        'default',
         { sortField: '@timestamp', sortDirection: 'desc' },
         filterState
       );
