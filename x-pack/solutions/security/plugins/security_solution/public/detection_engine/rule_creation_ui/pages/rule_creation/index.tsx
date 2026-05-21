@@ -223,7 +223,7 @@ const CreateRulePageComponent: React.FC<{}> = () => {
 
   const defineFieldsTransform = useExperimentalFeatureFieldsTransform<DefineStepRule>();
 
-  useAgentBuilderRuleCreation({
+  const { isAiRuleUpdateRef } = useAgentBuilderRuleCreation({
     defineStepForm,
     aboutStepForm,
     scheduleStepForm,
@@ -240,15 +240,26 @@ const CreateRulePageComponent: React.FC<{}> = () => {
 
   useEffect(() => {
     if (prevRuleType && prevRuleType !== ruleType) {
-      aboutStepForm.updateFieldValues({
-        threatIndicatorPath: isThreatMatchRuleValue ? DEFAULT_INDICATOR_SOURCE_PATH : undefined,
-      });
-      scheduleStepForm.updateFieldValues(
-        isThreatMatchRuleValue ? defaultThreatMatchSchedule : defaultSchedule
-      );
+      if (isAiRuleUpdateRef.current) {
+        isAiRuleUpdateRef.current = false;
+      } else {
+        aboutStepForm.updateFieldValues({
+          threatIndicatorPath: isThreatMatchRuleValue ? DEFAULT_INDICATOR_SOURCE_PATH : undefined,
+        });
+        scheduleStepForm.updateFieldValues(
+          isThreatMatchRuleValue ? defaultThreatMatchSchedule : defaultSchedule
+        );
+      }
     }
     setPrevRuleType(ruleType);
-  }, [aboutStepForm, scheduleStepForm, isThreatMatchRuleValue, prevRuleType, ruleType]);
+  }, [
+    aboutStepForm,
+    scheduleStepForm,
+    isThreatMatchRuleValue,
+    prevRuleType,
+    ruleType,
+    isAiRuleUpdateRef,
+  ]);
 
   const { starting: isStartingJobs, startMlJobs } = useStartMlJobs();
 
