@@ -396,6 +396,7 @@ export const DuplicateDetectionsFlyout: React.FC<DuplicateDetectionsFlyoutProps>
             {visibleEvents.length === 0 ? (
               <EuiFlexItem grow={false}>
                 <EuiCallOut
+                  announceOnMount
                   size="s"
                   iconType="filter"
                   title={i18n.translate(

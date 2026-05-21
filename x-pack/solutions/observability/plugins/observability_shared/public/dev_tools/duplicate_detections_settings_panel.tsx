@@ -542,6 +542,7 @@ export const DuplicateDetectionsSettingsPanel: React.FC<DuplicateDetectionsSetti
 
       {!settings.enabled && (
         <EuiCallOut
+          announceOnMount
           size="s"
           color="warning"
           iconType="pause"
