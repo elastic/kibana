@@ -99,6 +99,7 @@ export const createDetectionRulesClient = ({
             immutable: false,
           },
           mlAuthz,
+          changeTracking: args.changeTracking,
         });
       });
     },
@@ -113,11 +114,12 @@ export const createDetectionRulesClient = ({
             immutable: true,
           },
           mlAuthz,
+          changeTracking: args.changeTracking,
         });
       });
     },
 
-    async updateRule({ ruleUpdate }: UpdateRuleArgs): Promise<RuleResponse> {
+    async updateRule({ ruleUpdate, changeTracking }: UpdateRuleArgs): Promise<RuleResponse> {
       return withSecuritySpan('DetectionRulesClient.updateRule', async () => {
         return updateRule({
           actionsClient,
@@ -126,11 +128,12 @@ export const createDetectionRulesClient = ({
           mlAuthz,
           rulesAuthz,
           ruleUpdate,
+          changeTracking,
         });
       });
     },
 
-    async patchRule({ rulePatch }: PatchRuleArgs): Promise<RuleResponse> {
+    async patchRule({ rulePatch, changeTracking }: PatchRuleArgs): Promise<RuleResponse> {
       return withSecuritySpan('DetectionRulesClient.patchRule', async () => {
         return patchRule({
           actionsClient,
@@ -139,6 +142,7 @@ export const createDetectionRulesClient = ({
           mlAuthz,
           rulesAuthz,
           rulePatch,
+          changeTracking,
         });
       });
     },
@@ -149,13 +153,19 @@ export const createDetectionRulesClient = ({
       });
     },
 
-    async bulkDeleteRules({ ruleIds }: BulkDeleteRulesArgs): Promise<BulkDeleteRulesReturn> {
+    async bulkDeleteRules({
+      ruleIds,
+      changeTracking,
+    }: BulkDeleteRulesArgs): Promise<BulkDeleteRulesReturn> {
       return withSecuritySpan('DetectionRulesClient.bulkDeleteRules', async () => {
-        return bulkDeleteRules({ rulesClient, ruleIds });
+        return bulkDeleteRules({ rulesClient, ruleIds, changeTracking });
       });
     },
 
-    async upgradePrebuiltRule({ ruleAsset }: UpgradePrebuiltRuleArgs): Promise<RuleResponse> {
+    async upgradePrebuiltRule({
+      ruleAsset,
+      changeTracking,
+    }: UpgradePrebuiltRuleArgs): Promise<RuleResponse> {
       return withSecuritySpan('DetectionRulesClient.upgradePrebuiltRule', async () => {
         return upgradePrebuiltRule({
           actionsClient,
@@ -163,6 +173,7 @@ export const createDetectionRulesClient = ({
           ruleAsset,
           mlAuthz,
           prebuiltRuleAssetClient,
+          changeTracking,
         });
       });
     },
@@ -170,6 +181,7 @@ export const createDetectionRulesClient = ({
     async revertPrebuiltRule({
       ruleAsset,
       existingRule,
+      changeTracking,
     }: RevertPrebuiltRuleArgs): Promise<RuleResponse> {
       return withSecuritySpan('DetectionRulesClient.revertPrebuiltRule', async () => {
         return revertPrebuiltRule({
@@ -179,6 +191,7 @@ export const createDetectionRulesClient = ({
           mlAuthz,
           prebuiltRuleAssetClient,
           existingRule,
+          changeTracking,
         });
       });
     },
@@ -191,6 +204,7 @@ export const createDetectionRulesClient = ({
           importRulePayload: args,
           mlAuthz,
           prebuiltRuleAssetClient,
+          changeTracking: args.changeTracking,
         });
       });
     },

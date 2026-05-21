@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import { SecurityRuleChangeTrackingAction } from '../../../../../../common/api/detection_engine/rule_management/rule_change_tracking_action';
 import type { InstallPrebuiltRulesAndTimelinesResponse } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../types';
 import { getExistingPrepackagedRules } from '../../../rule_management/logic/search/get_existing_prepackaged_rules';
@@ -72,9 +73,14 @@ export const legacyCreatePrepackagedRules = async (
     mlAuthz
   );
 
+  const installChangeTracking = {
+    action: SecurityRuleChangeTrackingAction.ruleInstall,
+    bulkCount: rulesToInstall.length,
+  };
   const ruleCreationResult = await createPrebuiltRules(
     detectionRulesClient,
     rulesToInstall,
+    installChangeTracking,
     logger
   );
 
@@ -84,7 +90,11 @@ export const legacyCreatePrepackagedRules = async (
 
   const { result: timelinesResult } = await performTimelinesInstallation(context);
 
-  await upgradePrebuiltRules(detectionRulesClient, rulesToUpdate, logger);
+  const upgradeChangeTracking = {
+    action: SecurityRuleChangeTrackingAction.ruleUpgrade,
+    bulkCount: rulesToInstall.length,
+  };
+  await upgradePrebuiltRules(detectionRulesClient, rulesToUpdate, upgradeChangeTracking, logger);
 
   return {
     rules_installed: rulesToInstall.length,

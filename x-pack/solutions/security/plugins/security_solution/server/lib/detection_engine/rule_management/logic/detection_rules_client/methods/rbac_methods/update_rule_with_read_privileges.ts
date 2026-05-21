@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RuleChangeTracking } from '@kbn/alerting-types';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { camelCase } from 'lodash';
 import type { BulkEditResult } from '@kbn/alerting-plugin/server/rules_client/common/bulk_edit/types';
@@ -23,10 +24,12 @@ export const updateReadAuthEditRuleFields = async ({
   rulesClient,
   ruleUpdate,
   existingRule,
+  changeTracking,
 }: {
   rulesClient: RulesClient;
   ruleUpdate: ReadAuthRuleUpdateWithRuleSource;
   existingRule: RuleResponse;
+  changeTracking?: RuleChangeTracking;
 }): Promise<BulkEditResult<RuleParams>> => {
   const operations = Object.keys(ruleUpdate).map((field) => {
     const camelCasedField = camelCase(field) as ValidReadAuthEditFields; // RuleParams schema is camel cased
@@ -40,5 +43,6 @@ export const updateReadAuthEditRuleFields = async ({
   return rulesClient.bulkEditRuleParamsWithReadAuth<RuleParams>({
     ids: [existingRule.id],
     operations,
+    changeTracking,
   });
 };

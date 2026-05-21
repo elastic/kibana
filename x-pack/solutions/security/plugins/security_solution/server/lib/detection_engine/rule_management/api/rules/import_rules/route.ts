@@ -191,6 +191,9 @@ export const importRulesRoute = (
 
           const importRuleResponse = await importRules({
             ruleChunks,
+            changeTracking: {
+              bulkCount: validatedResponseActionsRules.length,
+            },
             overwriteRules: request.query.overwrite,
             allowMissingConnectorSecrets: !!actionConnectors.length,
             ruleSourceImporter,

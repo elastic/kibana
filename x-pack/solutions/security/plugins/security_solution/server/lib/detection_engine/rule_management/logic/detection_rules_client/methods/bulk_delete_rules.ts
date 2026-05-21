@@ -6,6 +6,7 @@
  */
 
 import { chunk } from 'lodash';
+import type { RuleChangeTracking } from '@kbn/alerting-types';
 import type { RulesClient, BulkOperationError } from '@kbn/alerting-plugin/server';
 import type { RuleObjectId } from '../../../../../../../common/api/detection_engine';
 import type { RuleAlertType } from '../../../../rule_schema';
@@ -18,18 +19,23 @@ const CHUNK_SIZE = 1000;
 interface BulkDeleteRulesParams {
   rulesClient: RulesClient;
   ruleIds: RuleObjectId[];
+  changeTracking?: Omit<RuleChangeTracking, 'action'>;
 }
 
 export const bulkDeleteRules = async ({
   rulesClient,
   ruleIds,
+  changeTracking,
 }: BulkDeleteRulesParams): Promise<{ rules: RuleAlertType[]; errors: BulkOperationError[] }> => {
   const chunks = chunk(ruleIds, CHUNK_SIZE);
   const allRules: RuleAlertType[] = [];
   const allErrors: BulkOperationError[] = [];
 
   for (const idsChunk of chunks) {
-    const { rules, errors } = await rulesClient.bulkDeleteRules({ ids: idsChunk });
+    const { rules, errors } = await rulesClient.bulkDeleteRules({
+      ids: idsChunk,
+      changeTracking: { bulkCount: changeTracking?.bulkCount ?? ruleIds.length },
+    });
     allRules.push(...(rules as RuleAlertType[]));
     allErrors.push(...errors);
   }

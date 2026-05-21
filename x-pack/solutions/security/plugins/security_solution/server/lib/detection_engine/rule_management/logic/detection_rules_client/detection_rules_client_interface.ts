@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RuleChangeTracking } from '@kbn/alerting-types';
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
 import type {
   RuleCreateProps,
@@ -39,18 +40,22 @@ export interface IDetectionRulesClient {
 
 export interface CreateCustomRuleArgs {
   params: RuleCreateProps;
+  changeTracking?: RuleChangeTracking;
 }
 
 export interface CreatePrebuiltRuleArgs {
   params: RuleCreateProps;
+  changeTracking?: RuleChangeTracking;
 }
 
 export interface UpdateRuleArgs {
   ruleUpdate: RuleUpdateProps;
+  changeTracking?: RuleChangeTracking;
 }
 
 export interface PatchRuleArgs {
   rulePatch: RulePatchProps;
+  changeTracking?: RuleChangeTracking;
 }
 
 export interface DeleteRuleArgs {
@@ -59,6 +64,7 @@ export interface DeleteRuleArgs {
 
 export interface BulkDeleteRulesArgs {
   ruleIds: RuleObjectId[];
+  changeTracking?: Omit<RuleChangeTracking, 'action'>;
 }
 
 export interface BulkDeleteRulesReturn {
@@ -68,11 +74,13 @@ export interface BulkDeleteRulesReturn {
 
 export interface UpgradePrebuiltRuleArgs {
   ruleAsset: PrebuiltRuleAsset;
+  changeTracking?: RuleChangeTracking;
 }
 
 export interface RevertPrebuiltRuleArgs {
   ruleAsset: PrebuiltRuleAsset;
   existingRule: RuleResponse;
+  changeTracking?: RuleChangeTracking;
 }
 
 export interface ImportRuleArgs {
@@ -80,6 +88,7 @@ export interface ImportRuleArgs {
   overrideFields?: { rule_source: RuleSource; immutable: boolean };
   overwriteRules?: boolean;
   allowMissingConnectorSecrets?: boolean;
+  changeTracking?: RuleChangeTracking;
 }
 
 export interface ImportRulesArgs {
@@ -87,6 +96,7 @@ export interface ImportRulesArgs {
   overwriteRules: boolean;
   ruleSourceImporter: IRuleSourceImporter;
   allowMissingConnectorSecrets?: boolean;
+  changeTracking?: RuleChangeTracking;
 }
 
 export interface GetHistoryForRuleArgs {

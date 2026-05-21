@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { RuleChangeTracking } from '@kbn/alerting-types';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
+import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/api/detection_engine/rule_management/rule_change_tracking_action';
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { PrebuiltRuleAsset } from '../../../../prebuilt_rules';
@@ -24,6 +26,7 @@ export const revertPrebuiltRule = async ({
   mlAuthz,
   existingRule,
   prebuiltRuleAssetClient,
+  changeTracking,
 }: {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
@@ -31,6 +34,7 @@ export const revertPrebuiltRule = async ({
   mlAuthz: MlAuthz;
   existingRule: RuleResponse;
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
+  changeTracking?: RuleChangeTracking;
 }): Promise<RuleResponse> => {
   await validateMlAuth(mlAuthz, ruleAsset.type);
   const updatedRule = await applyRuleUpdate({
@@ -49,6 +53,10 @@ export const revertPrebuiltRule = async ({
   const updatedInternalRule = await rulesClient.update({
     id: existingRule.id,
     data: convertRuleResponseToAlertingRule(updatedRuleWithMergedExceptions, actionsClient),
+    changeTracking: {
+      action: SecurityRuleChangeTrackingAction.ruleRevert,
+      ...changeTracking,
+    },
   });
 
   return convertAlertingRuleToRuleResponse(updatedInternalRule);

@@ -8,6 +8,7 @@
 import { pick } from 'lodash';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import { SecurityRuleChangeTrackingAction } from '../../../../../../common/api/detection_engine/rule_management/rule_change_tracking_action';
 import { SkipRuleInstallReason } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type {
   PerformRuleInstallationResponseBody,
@@ -110,6 +111,11 @@ export const performRuleInstallationHandler = async (
       ruleInstallQueue.push(...(await excludeLicenseRestrictedRules(allInstallableRules, mlAuthz)));
     }
 
+    const changeTracking = {
+      action: SecurityRuleChangeTrackingAction.ruleInstall,
+      bulkCount: ruleInstallQueue.length,
+    };
+
     const BATCH_SIZE = 100;
     while (ruleInstallQueue.length > 0) {
       const rulesToInstall = ruleInstallQueue.splice(0, BATCH_SIZE);
@@ -118,6 +124,7 @@ export const performRuleInstallationHandler = async (
       const { results, errors } = await createPrebuiltRules(
         detectionRulesClient,
         ruleAssets,
+        changeTracking,
         logger
       );
 

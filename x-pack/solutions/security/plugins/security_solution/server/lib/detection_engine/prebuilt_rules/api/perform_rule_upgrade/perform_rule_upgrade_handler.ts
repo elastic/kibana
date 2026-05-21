@@ -9,6 +9,7 @@ import { pick } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import type { Logger, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { SecurityRuleChangeTrackingAction } from '../../../../../../common/api/detection_engine/rule_management/rule_change_tracking_action';
 import { isRuleCustomized } from '../../../../../../common/detection_engine/rule_management/utils';
 import type {
   FullThreeWayRuleDiff,
@@ -221,9 +222,15 @@ export const performRuleUpgradeHandler = async (
           }))
         );
       } else {
+        const changeTracking = {
+          action: SecurityRuleChangeTrackingAction.ruleUpgrade,
+          bulkCount: modifiedPrebuiltRuleAssets.length,
+        };
+
         const { results: upgradeResults, errors: installationErrors } = await upgradePrebuiltRules(
           detectionRulesClient,
           modifiedPrebuiltRuleAssets,
+          changeTracking,
           logger
         );
         ruleErrors.push(...installationErrors);

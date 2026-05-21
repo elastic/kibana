@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type { RuleChangeTracking } from '@kbn/alerting-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 
@@ -39,6 +41,7 @@ interface UpdateRuleArguments {
   ruleUpdate: RuleUpdateProps;
   mlAuthz: MlAuthz;
   rulesAuthz: DetectionRulesAuthz;
+  changeTracking?: RuleChangeTracking;
 }
 
 export const updateRule = async ({
@@ -48,6 +51,7 @@ export const updateRule = async ({
   ruleUpdate,
   mlAuthz,
   rulesAuthz,
+  changeTracking,
 }: UpdateRuleArguments): Promise<RuleResponse> => {
   const { rule_id: ruleId, id } = ruleUpdate;
 
@@ -93,6 +97,7 @@ export const updateRule = async ({
         rulesClient,
         ruleUpdate: modifiedFields,
         existingRule,
+        changeTracking,
       });
 
     const updateErrors = formatBulkEditResultErrors(appliedUpdateWithReadPrivs);
@@ -114,6 +119,7 @@ export const updateRule = async ({
   const updatedRule = await rulesClient.update({
     id: existingRule.id,
     data: convertRuleResponseToAlertingRule(ruleWithUpdates, actionsClient),
+    changeTracking,
   });
 
   const { enabled } = await toggleRuleEnabledOnUpdate(rulesClient, existingRule, ruleWithUpdates);

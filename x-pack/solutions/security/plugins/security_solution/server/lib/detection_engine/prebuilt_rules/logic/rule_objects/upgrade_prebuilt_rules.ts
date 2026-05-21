@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RuleChangeTracking } from '@kbn/alerting-types';
 import type { Logger } from '@kbn/core/server';
 import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../../../common/constants';
 import { initPromisePool } from '../../../../../utils/promise_pool';
@@ -23,6 +24,7 @@ import type { IDetectionRulesClient } from '../../../rule_management/logic/detec
 export const upgradePrebuiltRules = async (
   detectionRulesClient: IDetectionRulesClient,
   rules: PrebuiltRuleAsset[],
+  changeTracking: RuleChangeTracking,
   logger: Logger
 ) =>
   withSecuritySpan('upgradePrebuiltRules', async () => {
@@ -35,6 +37,7 @@ export const upgradePrebuiltRules = async (
       executor: async (rule) => {
         return detectionRulesClient.upgradePrebuiltRule({
           ruleAsset: rule,
+          changeTracking,
         });
       },
     });

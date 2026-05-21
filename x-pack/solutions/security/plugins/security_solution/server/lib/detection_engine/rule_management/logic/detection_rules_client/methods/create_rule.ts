@@ -6,6 +6,7 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { RuleChangeTracking } from '@kbn/alerting-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../../../common';
@@ -27,6 +28,7 @@ interface CreateRuleOptions {
   rule: RuleCreateProps & { immutable: boolean };
   id?: string;
   allowMissingConnectorSecrets?: boolean;
+  changeTracking?: RuleChangeTracking;
 }
 
 export const createRule = async ({
@@ -36,6 +38,7 @@ export const createRule = async ({
   rule,
   id,
   allowMissingConnectorSecrets,
+  changeTracking,
 }: CreateRuleOptions): Promise<RuleResponse> => {
   await validateMlAuth(mlAuthz, rule.type);
 
@@ -50,7 +53,10 @@ export const createRule = async ({
 
   const createdRule = await rulesClient.create<RuleParams>({
     data: payload,
-    options: { id },
+    options: {
+      id,
+    },
+    changeTracking,
     allowMissingConnectorSecrets,
   });
 

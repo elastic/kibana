@@ -7,6 +7,7 @@
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import { SecurityRuleChangeTrackingAction } from '../../../../../../common/api/detection_engine/rule_management/rule_change_tracking_action';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import {
@@ -66,6 +67,9 @@ describe('DetectionRulesClient.createPrebuiltRule', () => {
             ruleId: params.rule_id,
             immutable: true,
           }),
+        }),
+        options: expect.objectContaining({
+          action: SecurityRuleChangeTrackingAction.ruleInstall,
         }),
       })
     );
