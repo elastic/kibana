@@ -27,7 +27,10 @@ export class TagAssignFlyout {
 
   async waitForResultsLoaded() {
     await this.resultList.waitFor({ state: 'visible' });
-    // EUI icons briefly lack alt text while loading their SVGs; wait for all of them.
-    await this.page.locator('[data-is-loading="true"]').waitFor({ state: 'hidden' });
+    // locator.waitFor() has strict mode and throws when multiple elements match — use
+    // waitForFunction instead so all simultaneously-loading icons are handled correctly.
+    await this.page.waitForFunction(
+      () => document.querySelectorAll('[data-is-loading="true"]').length === 0
+    );
   }
 }

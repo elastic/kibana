@@ -73,8 +73,13 @@ test.describe('Tags management — accessibility', { tag: tags.stateful.classic 
       await tagManagement.submitTagModal();
       await tagsTable.selectAllTags();
       await tagsTable.openBulkActionsMenu();
-      // Context menu item icons load SVGs asynchronously; wait before a11y check.
-      await page.locator('[data-is-loading="true"]').waitFor({ state: 'hidden' });
+      const bulkMenuIcons = page.locator('[data-is-loading="true"]');
+      try {
+        await bulkMenuIcons.waitFor({ state: 'attached', timeout: 2000 });
+      } catch {
+        // icons already cached
+      }
+      await bulkMenuIcons.waitFor({ state: 'hidden' });
       const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
       expect(violations).toStrictEqual([]);
     });
@@ -82,7 +87,13 @@ test.describe('Tags management — accessibility', { tag: tags.stateful.classic 
     await test.step('delete tags confirmation panel', async () => {
       await page.testSubj.click('actionBar-button-delete');
       await page.testSubj.locator('confirmModalConfirmButton').waitFor({ state: 'visible' });
-      await page.locator('[data-is-loading="true"]').waitFor({ state: 'hidden' });
+      const modalIcons = page.locator('[data-is-loading="true"]');
+      try {
+        await modalIcons.waitFor({ state: 'attached', timeout: 2000 });
+      } catch {
+        // icons already cached
+      }
+      await modalIcons.waitFor({ state: 'hidden' });
       const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
       expect(violations).toStrictEqual([]);
       await page.testSubj.click('confirmModalConfirmButton');
