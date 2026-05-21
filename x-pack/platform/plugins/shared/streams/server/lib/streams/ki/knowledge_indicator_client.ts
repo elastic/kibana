@@ -15,7 +15,7 @@ import type {
   QueryLink,
   StreamQuery,
 } from '@kbn/streams-schema';
-import { QUERY_TYPE_STATS, deriveQueryType } from '@kbn/streams-schema';
+import { QUERY_TYPE_STATS, deriveQueryType, isComputedFeature } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema/src/models/streams';
 import { isConditionComplete } from '@kbn/streamlang';
 import {
@@ -35,7 +35,12 @@ import {
   type StoredTombstone,
   type knowledgeIndicatorsMappings,
 } from './data_stream';
-import { andWhere, NOT_DELETED_POST_GROUPING_WHERE } from './esql_helpers';
+import {
+  andWhere,
+  NOT_DELETED_POST_GROUPING_WHERE,
+  NOT_EXCLUDED_POST_GROUPING_WHERE,
+  EXCLUDED_ONLY_POST_GROUPING_WHERE,
+} from './esql_helpers';
 import {
   runLatestSourceEsqlQuery,
   type LatestSourceWhereCondition,
@@ -65,10 +70,18 @@ interface KIBulkIndexQueryOperation {
 interface KIBulkDeleteOperation {
   delete: { type: KnowledgeIndicatorType; id: string };
 }
+interface KIBulkExcludeOperation {
+  exclude: { id: string };
+}
+interface KIBulkRestoreOperation {
+  restore: { id: string };
+}
 export type KIBulkOperation =
   | KIBulkIndexFeatureOperation
   | KIBulkIndexQueryOperation
-  | KIBulkDeleteOperation;
+  | KIBulkDeleteOperation
+  | KIBulkExcludeOperation
+  | KIBulkRestoreOperation;
 
 // ===== Storage helpers =====
 
@@ -94,9 +107,11 @@ function buildSearchEmbeddingQuery(
 function toStoredFeature(
   streamName: string,
   feature: Feature,
-  includeEmbedding: boolean
+  includeEmbedding: boolean,
+  overrides: { excluded?: boolean } = {}
 ): StoredFeatureKnowledgeIndicator {
   const embedding = buildSearchEmbeddingFeature(feature, streamName);
+  const excluded = overrides.excluded ?? feature.excluded;
   return {
     '@timestamp': new Date().toISOString(),
     id: feature.id,
@@ -107,6 +122,7 @@ function toStoredFeature(
     evidence: feature.evidence,
     'stream.name': streamName,
     deleted: feature.deleted,
+    ...(excluded !== undefined ? { excluded } : {}),
     run_id: feature.run_id,
     feature: {
       type: feature.type,
@@ -164,6 +180,20 @@ function tombstoneFromLatest(
   };
 }
 
+function tombstoneById(
+  streamName: string,
+  type: KnowledgeIndicatorType,
+  id: string
+): StoredTombstone {
+  return {
+    '@timestamp': new Date().toISOString(),
+    id,
+    type,
+    'stream.name': streamName,
+    deleted: true,
+  };
+}
+
 function fromStoredFeature(doc: StoredFeatureKnowledgeIndicator): Feature {
   return {
     id: doc.id,
@@ -181,6 +211,7 @@ function fromStoredFeature(doc: StoredFeatureKnowledgeIndicator): Feature {
     meta: doc.feature.meta,
     run_id: doc.run_id,
     deleted: doc.deleted,
+    excluded: doc.excluded,
     updated_at: doc['@timestamp'],
   };
 }
@@ -262,21 +293,51 @@ export class KnowledgeIndicatorClient {
       }
     }
 
-    // Resolve delete operations: append a tombstone keyed on (type, id).
-    const deleteOps = operations.filter((op): op is KIBulkDeleteOperation => 'delete' in op);
+    // Exclude requires a pre-read: the new revision must preserve the full
+    // feature payload so the Excluded tab can render it and downstream
+    // consumers (LLM dedup hint) have the fingerprint.
+    const excludeOps = operations.filter((op): op is KIBulkExcludeOperation => 'exclude' in op);
+    const excludeIds = new Set(excludeOps.map((op) => op.exclude.id));
+    const excludeLatest = excludeIds.size > 0 ? await this.fetchLatestFeatures(stream, [...excludeIds]) : [];
+    const excludableLatest: StoredFeatureKnowledgeIndicator[] = [];
+    let excludeSkipped = 0;
+    for (const id of excludeIds) {
+      const latest = excludeLatest.find((doc) => doc.id === id);
+      if (!latest) {
+        // Unknown id → no-op. Excluding an id that doesn't exist would
+        // create an orphan revision; treat as skipped.
+        excludeSkipped += 1;
+        continue;
+      }
+      const asFeature = fromStoredFeature(latest);
+      if (isComputedFeature(asFeature)) {
+        // Computed features are derived; excluding them is meaningless
+        // (they would be regenerated on the next run). Skip.
+        excludeSkipped += 1;
+        continue;
+      }
+      if (latest.excluded === true) {
+        // Already excluded — avoid churn revisions that would add no
+        // information and only consume retention.
+        excludeSkipped += 1;
+        continue;
+      }
+      excludableLatest.push(latest);
+    }
 
-    // For deletes we need the latest revision so that the tombstone preserves
-    // the typed payload contract (we don't strictly need any feature/query
-    // payload on a tombstone, but knowing the doc exists keeps `skipped`
-    // counts honest). Look them up server-side to filter out unknown ids.
-    const knownDeletes = await this.resolveExistingDeletes(stream, deleteOps);
-    const skipped = deleteOps.length - knownDeletes.length;
+    // Delete and restore both append a tombstone keyed on (type, id) without
+    // a pre-read. A tombstone carries identity only, not payload, so reading
+    // the latest revision adds no value — and tombstoning a non-existent id
+    // is harmless and idempotent.
+    const deleteOps = operations.filter((op): op is KIBulkDeleteOperation => 'delete' in op);
+    const restoreOps = operations.filter((op): op is KIBulkRestoreOperation => 'restore' in op);
 
     const indexOpsCount = operations.filter((op) => 'index' in op).length;
-    const totalApplied = indexOpsCount + knownDeletes.length;
+    const tombstoneCount = deleteOps.length + restoreOps.length;
+    const totalApplied = indexOpsCount + excludableLatest.length + tombstoneCount;
 
     if (totalApplied === 0) {
-      return { applied: 0, skipped };
+      return { applied: 0, skipped: excludeSkipped };
     }
 
     await bulkCreateWithInferenceFallback(this.deps.logger, ({ includeEmbedding }) => {
@@ -290,8 +351,18 @@ export class KnowledgeIndicatorClient {
           }
         }
       }
-      for (const known of knownDeletes) {
-        docs.push(tombstoneFromLatest(stream, known));
+      for (const latest of excludableLatest) {
+        const feature = fromStoredFeature(latest);
+        docs.push(toStoredFeature(stream, feature, includeEmbedding, { excluded: true }));
+      }
+      for (const op of deleteOps) {
+        docs.push(tombstoneById(stream, op.delete.type, op.delete.id));
+      }
+      for (const op of restoreOps) {
+        // Restore is implemented as a tombstone: the append-only payload
+        // of an excluded feature can be stale, so we drop the lineage and
+        // let the LLM redrive the feature on the next extraction cycle.
+        docs.push(tombstoneById(stream, KI_TYPE_FEATURE, op.restore.id));
       }
       return this.deps.dataStreamClient.create({
         space: this.deps.space,
@@ -300,7 +371,7 @@ export class KnowledgeIndicatorClient {
       });
     });
 
-    return { applied: totalApplied, skipped };
+    return { applied: totalApplied, skipped: excludeSkipped };
   }
 
   /**
@@ -334,6 +405,7 @@ export class KnowledgeIndicatorClient {
       id?: string[];
       minConfidence?: number;
       limit?: number;
+      includeExcluded?: boolean;
     } = {}
   ): Promise<{ hits: Feature[]; total: number }> {
     const streamNames = Array.isArray(streams) ? streams : [streams];
@@ -361,15 +433,78 @@ export class KnowledgeIndicatorClient {
       );
     }
 
+    // Default: hide both tombstones and excluded revisions. When the caller
+    // opts into `includeExcluded`, drop the excluded filter so the merged
+    // active+excluded set is returned (still without tombstones).
+    const postGroupingWhere = options.includeExcluded
+      ? NOT_DELETED_POST_GROUPING_WHERE
+      : NOT_EXCLUDED_POST_GROUPING_WHERE;
+
     const docs = await this.fetchLatestRevisions(
       streamNames,
       where,
       undefined,
-      NOT_DELETED_POST_GROUPING_WHERE
+      postGroupingWhere
     );
     const features = docs.filter(isStoredFeatureKnowledgeIndicator).map(fromStoredFeature);
     const limited = options.limit ? features.slice(0, options.limit) : features;
     return { hits: limited, total: features.length };
+  }
+
+  /**
+   * Returns the latest revision of every excluded (and not deleted) feature
+   * in the stream. Used by the feature-identification task to feed the LLM
+   * a "don't suggest these" hint and to keep excluded revisions alive under
+   * DSL retention.
+   */
+  async getExcludedFeatures(stream: string): Promise<{ hits: Feature[]; total: number }> {
+    const where = esql.exp`${esql.col('type')} == ${esql.str(KI_TYPE_FEATURE)}`;
+    const docs = await this.fetchLatestRevisions(
+      [stream],
+      where,
+      undefined,
+      EXCLUDED_ONLY_POST_GROUPING_WHERE
+    );
+    const features = docs
+      .filter(isStoredFeatureKnowledgeIndicator)
+      .map(fromStoredFeature)
+      .sort((a, b) => (b.updated_at ?? '').localeCompare(a.updated_at ?? ''));
+    return { hits: features, total: features.length };
+  }
+
+  /**
+   * Append a fresh excluded revision per currently-excluded feature so they
+   * don't age out under DSL retention. Called once per features-identification
+   * task invocation.
+   *
+   * Bypasses `bulk(...{ exclude })` because that path intentionally skips
+   * features whose latest is already excluded (to avoid churn on the user's
+   * exclude action) — but the keep-alive case is exactly the opposite: we
+   * want to refresh those revisions specifically.
+   */
+  async refreshExcludedFeatures(stream: string): Promise<{ refreshed: number }> {
+    const where = esql.exp`${esql.col('type')} == ${esql.str(KI_TYPE_FEATURE)}`;
+    const docs = await this.fetchLatestRevisions(
+      [stream],
+      where,
+      undefined,
+      EXCLUDED_ONLY_POST_GROUPING_WHERE
+    );
+    const latest = docs.filter(isStoredFeatureKnowledgeIndicator);
+    if (latest.length === 0) {
+      return { refreshed: 0 };
+    }
+    await bulkCreateWithInferenceFallback(this.deps.logger, ({ includeEmbedding }) => {
+      const refreshed = latest.map((doc) =>
+        toStoredFeature(stream, fromStoredFeature(doc), includeEmbedding, { excluded: true })
+      );
+      return this.deps.dataStreamClient.create({
+        space: this.deps.space,
+        refresh: 'wait_for',
+        documents: refreshed as Array<StoredKnowledgeIndicator & Record<string, unknown>>,
+      });
+    });
+    return { refreshed: latest.length };
   }
 
   async getFeature(stream: string, id: string): Promise<Feature> {
@@ -500,6 +635,7 @@ export class KnowledgeIndicatorClient {
       types?: KnowledgeIndicatorType[];
       searchMode?: SearchMode;
       limit?: number;
+      includeExcluded?: boolean;
     } = {}
   ): Promise<{ hits: KnowledgeIndicator[]; total: number }> {
     const streamNames = Array.isArray(streams) ? streams : [streams];
@@ -517,7 +653,7 @@ export class KnowledgeIndicatorClient {
   async findFeatures(
     streams: string | string[],
     query: string,
-    options: { searchMode?: SearchMode; limit?: number } = {}
+    options: { searchMode?: SearchMode; limit?: number; includeExcluded?: boolean } = {}
   ): Promise<{ hits: Feature[]; total: number }> {
     const { hits, total } = await this.findIndicators(streams, query, {
       ...options,
@@ -553,7 +689,7 @@ export class KnowledgeIndicatorClient {
     mode: SearchMode,
     streamNames: string[],
     queryText: string,
-    options: { types?: KnowledgeIndicatorType[]; limit?: number }
+    options: { types?: KnowledgeIndicatorType[]; limit?: number; includeExcluded?: boolean }
   ): Promise<{ hits: KnowledgeIndicator[]; total: number }> {
     // Phase 1: ES|QL latest-per-group reduction.
     let typeFilter: LatestSourceWhereCondition | undefined;
@@ -563,11 +699,17 @@ export class KnowledgeIndicatorClient {
       const literals = options.types.map((t) => esql.str(t));
       typeFilter = esql.exp`${esql.col('type')} IN (${literals})`;
     }
+    // Default: drop tombstones and excluded revisions. Queries don't write
+    // `excluded`, so the filter is a no-op for them. `includeExcluded`
+    // relaxes back to drop-tombstones-only.
+    const postGroupingWhere = options.includeExcluded
+      ? NOT_DELETED_POST_GROUPING_WHERE
+      : NOT_EXCLUDED_POST_GROUPING_WHERE;
     const docs = await this.fetchLatestRevisions(
       streamNames,
       typeFilter,
       undefined,
-      NOT_DELETED_POST_GROUPING_WHERE
+      postGroupingWhere
     );
     const docById = new Map(docs.map((d) => [`${d['stream.name']}:${d.type}:${d.id}`, d]));
 
@@ -1082,32 +1224,26 @@ export class KnowledgeIndicatorClient {
     return hits;
   }
 
-  private async resolveExistingDeletes(
+  /**
+   * Fetch the latest non-tombstoned feature revision for each `id` in the
+   * given stream. Used by the exclude path which must preserve the full
+   * payload on the new revision.
+   */
+  private async fetchLatestFeatures(
     stream: string,
-    deletes: KIBulkDeleteOperation[]
-  ): Promise<StoredKnowledgeIndicator[]> {
-    if (deletes.length === 0) return [];
-    const idsByType = new Map<KnowledgeIndicatorType, string[]>();
-    for (const op of deletes) {
-      const arr = idsByType.get(op.delete.type) ?? [];
-      arr.push(op.delete.id);
-      idsByType.set(op.delete.type, arr);
-    }
-
-    const results: StoredKnowledgeIndicator[] = [];
-    for (const [type, ids] of idsByType) {
-      const literals = ids.map((i) => esql.str(i));
-      const where = esql.exp`${esql.col('type')} == ${esql.str(type)} AND ${esql.col(
-        'stream.name'
-      )} == ${esql.str(stream)} AND ${esql.col('id')} IN (${literals})`;
-      const docs = await this.fetchLatestRevisions(
-        [stream],
-        where,
-        undefined,
-        NOT_DELETED_POST_GROUPING_WHERE
-      );
-      results.push(...docs);
-    }
-    return results;
+    ids: string[]
+  ): Promise<StoredFeatureKnowledgeIndicator[]> {
+    if (ids.length === 0) return [];
+    const literals = ids.map((i) => esql.str(i));
+    const where = esql.exp`${esql.col('type')} == ${esql.str(KI_TYPE_FEATURE)} AND ${esql.col(
+      'stream.name'
+    )} == ${esql.str(stream)} AND ${esql.col('id')} IN (${literals})`;
+    const docs = await this.fetchLatestRevisions(
+      [stream],
+      where,
+      undefined,
+      NOT_DELETED_POST_GROUPING_WHERE
+    );
+    return docs.filter(isStoredFeatureKnowledgeIndicator);
   }
 }

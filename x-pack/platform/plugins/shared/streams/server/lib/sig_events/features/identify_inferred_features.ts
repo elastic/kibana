@@ -381,19 +381,12 @@ export async function identifyInferredFeatures({
   diverseOffset = 0,
   trackFeaturesIdentified,
 }: IdentifyInferredFeaturesOptions): Promise<IdentifyInferredFeaturesResult> {
-  // The unified KI data stream has no equivalent of `getExcludedFeatures` —
-  // exclusions were a soft-delete mechanism unique to the legacy storage.
-  // Tombstoned features no longer come back from `getFeatures`, so we feed the
-  // LLM an empty exclusions list. This is acceptable: callers that previously
-  // relied on the exclusion list to seed the LLM with "don't suggest this
-  // again" hints will lose that signal, which is an explicit trade-off of the
-  // clean-break migration documented in the plan.
-  const [{ hits: allFeatures }, { featurePromptOverride: systemPrompt }] = await Promise.all([
-    kiClient.getFeatures(streamName),
-    new PromptsConfigService({ soClient, logger }).getPrompt(),
-  ]);
-
-  const excludedFeatures: Feature[] = [];
+  const [{ hits: allFeatures }, { hits: excludedFeatures }, { featurePromptOverride: systemPrompt }] =
+    await Promise.all([
+      kiClient.getFeatures(streamName),
+      kiClient.getExcludedFeatures(streamName),
+      new PromptsConfigService({ soClient, logger }).getPrompt(),
+    ]);
 
   const discoveredFeatures = allFeatures.filter((f) => !isComputedFeature(f) && f.run_id === runId);
 

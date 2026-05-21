@@ -42,6 +42,7 @@ export const knowledgeIndicatorsMappings = {
       },
     }),
     deleted: mappings.boolean(),
+    excluded: mappings.boolean(),
     run_id: mappings.keyword(),
     search_embedding: mappings.semanticText(),
     feature: mappings.object({
@@ -105,6 +106,7 @@ export interface StoredFeatureKnowledgeIndicator extends StoredKiRevisionIdentit
   tags?: string[];
   evidence?: string[];
   deleted?: boolean;
+  excluded?: boolean;
   run_id?: string;
   search_embedding?: string;
   feature: StoredFeature;
@@ -115,6 +117,7 @@ export interface StoredQueryKnowledgeIndicator extends StoredKiRevisionIdentity 
   title: string;
   description: string;
   evidence?: string[];
+  excluded?: boolean;
   search_embedding?: string;
   query: StoredQuery;
 }
@@ -161,7 +164,8 @@ export const knowledgeIndicatorsDataStream: DataStreamDefinition<
   StoredKnowledgeIndicator & Record<string, unknown>
 > = {
   name: KNOWLEDGE_INDICATORS_DATA_STREAM,
-  version: 1,
+  // v2: add root-level `excluded` boolean (ES|QL filters in esql_helpers.ts).
+  version: 2,
   hidden: true,
   template: {
     priority: 500,

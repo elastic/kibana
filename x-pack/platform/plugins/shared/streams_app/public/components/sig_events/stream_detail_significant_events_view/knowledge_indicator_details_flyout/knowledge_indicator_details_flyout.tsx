@@ -24,6 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import type { Feature } from '@kbn/streams-schema';
+import { isComputedFeature } from '@kbn/streams-schema';
 import { upperFirst } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { getConfidenceColor } from '../utils/get_confidence_color';
@@ -35,10 +36,13 @@ import { useRulesDemote } from '../hooks/use_queries_bulk_delete';
 import {
   useKnowledgeIndicatorActions,
   DELETE_LABEL,
+  EXCLUDE_LABEL,
+  RESTORE_LABEL,
   PROMOTE_LABEL,
 } from '../hooks/use_knowledge_indicator_actions';
 import { DeleteTableItemsModal } from '../delete_table_items_modal';
 import { getKnowledgeIndicatorStreamName } from '../utils/get_knowledge_indicator_stream_name';
+import { isFeatureExcluded } from '../utils/is_feature_excluded';
 import { KnowledgeIndicatorFeatureDetailsContent } from './knowledge_indicator_feature_details_content';
 import { KnowledgeIndicatorQueryDetailsContent } from './knowledge_indicator_query_details_content';
 
@@ -66,7 +70,12 @@ export function KnowledgeIndicatorDetailsFlyout({
     [features, streamName]
   );
 
-  const { promoteQuery, isMutating: isActionMutating } = useKnowledgeIndicatorActions({
+  const {
+    excludeFeature,
+    restoreFeature,
+    promoteQuery,
+    isMutating: isActionMutating,
+  } = useKnowledgeIndicatorActions({
     streamName,
     onSuccess: onClose,
   });
@@ -96,6 +105,39 @@ export function KnowledgeIndicatorDetailsFlyout({
     }
 
     const items: React.ReactElement[] = [];
+    const computed = isComputedFeature(knowledgeIndicator.feature);
+
+    if (!computed) {
+      if (isFeatureExcluded(knowledgeIndicator.feature)) {
+        items.push(
+          <EuiContextMenuItem
+            key="feature-restore"
+            icon="eye"
+            disabled={isMutating}
+            onClick={() => {
+              setIsActionsMenuOpen(false);
+              restoreFeature(knowledgeIndicator.feature.id);
+            }}
+          >
+            {RESTORE_LABEL}
+          </EuiContextMenuItem>
+        );
+      } else {
+        items.push(
+          <EuiContextMenuItem
+            key="feature-exclude"
+            icon="eyeClosed"
+            disabled={isMutating}
+            onClick={() => {
+              setIsActionsMenuOpen(false);
+              excludeFeature(knowledgeIndicator.feature.id);
+            }}
+          >
+            {EXCLUDE_LABEL}
+          </EuiContextMenuItem>
+        );
+      }
+    }
 
     items.push(
       <EuiContextMenuItem
@@ -113,7 +155,7 @@ export function KnowledgeIndicatorDetailsFlyout({
     );
 
     return items;
-  }, [isMutating, knowledgeIndicator]);
+  }, [excludeFeature, isMutating, knowledgeIndicator, restoreFeature]);
 
   const queryActionItems = useMemo(
     () =>
