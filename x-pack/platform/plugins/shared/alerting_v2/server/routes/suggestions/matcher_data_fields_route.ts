@@ -7,7 +7,7 @@
 
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { errorResponseSchema } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -33,11 +33,17 @@ export class MatcherDataFieldsRoute extends BaseAlertingRoute {
     summary: 'Get matcher data fields suggestions',
     description: 'Get suggestions for matcher data fields.',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      query: buildRouteValidationWithZod(matcherDataFieldsQuerySchema),
+      query: matcherDataFieldsQuerySchema,
     },
-  } as const;
+    response: {
+      400: {
+        body: () => errorResponseSchema,
+        description: 'Indicates invalid query parameters.',
+      },
+    },
+  };
 
   protected readonly routeName = 'matcher data fields suggestions';
 
