@@ -5,23 +5,18 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
-import { GETTING_STARTED_SESSIONSTORAGE_KEY } from '@kbn/search-shared-ui';
 
 import { AnalyticsEvents } from '../../common';
-import { useUsageTracker } from '../contexts/usage_tracker_context';
+import { useGettingStartedLoaded } from '../hooks/use_getting_started_loaded';
 import { SearchGettingStartedPageTemplate } from '../layout/page_template';
 
 import { ChatHeader } from './chat/chat_header';
 import { GettingStartedChatContent } from './chat/chat_content';
 
 export const SearchGettingStartedChatPage = () => {
-  const usageTracker = useUsageTracker();
-  useEffect(() => {
-    usageTracker.load(AnalyticsEvents.gettingStartedChatLoaded);
-    sessionStorage.setItem(GETTING_STARTED_SESSIONSTORAGE_KEY, 'true');
-  }, [usageTracker]);
+  useGettingStartedLoaded(AnalyticsEvents.gettingStartedChatLoaded);
 
   return (
     <SearchGettingStartedPageTemplate>
