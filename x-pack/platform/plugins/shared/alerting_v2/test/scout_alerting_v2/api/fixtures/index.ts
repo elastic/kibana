@@ -10,11 +10,9 @@ import type { ApiServicesFixture, EsClient, KbnClient, ScoutLogger } from '@kbn/
 import { ALERT_ACTIONS_DATA_STREAM } from '../../common/constants';
 import {
   getDataStreamApiService,
-  getInsightsApiService,
   getRulesApiService,
   getTaskExecutionsApiService,
   type DataStreamApiService,
-  type InsightsApiService,
   type RulesApiService,
   type RuleEventsApiService,
   type TaskExecutionsApiService,
@@ -27,7 +25,6 @@ export interface AlertingApiServices {
   rules: RulesApiService;
   ruleEvents: RuleEventsApiService;
   alertActions: DataStreamApiService;
-  insights: InsightsApiService;
   sourceIndex: SourceIndexApiService;
   taskExecutions: TaskExecutionsApiService;
 }
@@ -57,7 +54,6 @@ export const buildAlertingApiServices = ({
     log,
     dataStreamName: ALERT_ACTIONS_DATA_STREAM,
   }),
-  insights: getInsightsApiService({ esClient, log }),
   sourceIndex: getSourceIndexApiService({ esClient, log }),
   taskExecutions: getTaskExecutionsApiService({ esClient, log }),
 });

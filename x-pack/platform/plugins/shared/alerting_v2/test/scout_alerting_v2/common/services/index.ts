@@ -11,9 +11,6 @@ export { getRulesApiService } from './rules_api_service';
 export type { DataStreamApiService } from './data_stream_api_service';
 export { getDataStreamApiService } from './data_stream_api_service';
 
-export type { InsightsApiService, InsightSeed } from './insights_api_service';
-export { getInsightsApiService } from './insights_api_service';
-
 export type { RuleEventsApiService } from './rule_events_api_service';
 export { getRuleEventsApiService } from './rule_events_api_service';
 
