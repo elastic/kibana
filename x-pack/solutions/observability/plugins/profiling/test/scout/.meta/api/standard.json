@@ -1,5 +1,5 @@
 {
-  "sha1": "2f75b25175019498cbca6acd5503522a17dc4fdb",
+  "sha1": "00a766fc2a0a608d6f697821f88ffa885560c745",
   "tests": [
     {
       "id": "405beff6794306f-a54347ac1e57e7e",
@@ -88,29 +88,29 @@
     {
       "id": "8b3eca81b16d245-3ee5b04db1c974d",
       "title": "Collector integration is not installed collector integration missing",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_with_integrations.spec.ts",
-        "line": 24,
-        "column": 10
+        "line": 28,
+        "column": 12
       }
     },
     {
       "id": "8b3eca81b16d245-7029a2aca281cbb",
       "title": "Collector integration is not installed Symbolizer integration is not installed",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_with_integrations.spec.ts",
-        "line": 52,
-        "column": 10
+        "line": 59,
+        "column": 12
       }
     }
   ]
