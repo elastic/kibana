@@ -13,13 +13,15 @@ require('./setup_env');
 // restore < Node 16 default DNS lookup behavior
 require('./dns_ipv4_first');
 
-const { fromRoot } = require('@kbn/repo-info');
-const { enableCompileCache } = require('node:module');
+var fromRoot = require('@kbn/repo-info').fromRoot;
+var enableCompileCache = require('node:module').enableCompileCache;
 
 if (!process.env.NODE_DISABLE_COMPILE_CACHE) {
   process.env.NODE_COMPILE_CACHE =
     process.env.NODE_COMPILE_CACHE || fromRoot('data', 'node_compile_cache');
-  enableCompileCache?.();
+  if (enableCompileCache) {
+    enableCompileCache();
+  }
 }
 
 require('@kbn/babel-register').install();
