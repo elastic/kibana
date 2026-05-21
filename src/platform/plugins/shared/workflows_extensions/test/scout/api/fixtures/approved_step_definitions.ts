@@ -62,7 +62,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'data.map',
-    handlerHash: '79ddef521ebd6ae8278e5d9034b7005687e31c2e949796add213eff2ebd21d82',
+    handlerHash: '2eda52d265fc8683f625974f6909a5e0fb5ad6ee1eadd4ee89737ac5c8b4c8e1',
   },
   {
     id: 'data.parseJson',

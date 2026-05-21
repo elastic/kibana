@@ -16,6 +16,7 @@ export {
   varsReducer,
   getInputEffectiveName,
   buildInputKey,
+  dataStreamUsesOtelInput,
 } from './package_to_package_policy';
 export type {
   DocumentationPageInput,
@@ -137,6 +138,7 @@ export {
 export * from './cloud_connectors';
 
 export { validateSslCertPath } from './ssl_validators';
+export { getOtelCollectorDisplayName, getOtelCollectorConfigName } from './otel_collector';
 
 export { isNamespaceAllowedByPrefixes } from './namespace_prefixes';
 
