@@ -288,7 +288,8 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
       paddingBlock: euiTheme.size.xs,
     },
     '&.horizontalLayoutWrapper': {
-      height: '100%',
+      inlineSize: 'max-content',
+      blockSize: '100%',
       display: 'flex',
       flexWrap: 'nowrap',
       alignItems: 'center',
@@ -297,6 +298,6 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     // The internal list item wrapper has `width: 100%` which needs to be overridden
     // for the horizontal layout to look as expected
     '&.horizontalLayoutWrapper .euiListItemLayout__wrapper': {
-      width: 'auto',
+      inlineSize: 'auto',
     },
   });
