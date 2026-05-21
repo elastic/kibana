@@ -130,7 +130,7 @@ export const ALERT_SCENARIOS: Record<string, AlertScenario> = {
         rule_type_id: 'apm.transaction_duration',
         tags: [],
         params: {
-          threshold: 30,
+          threshold: 10,
           aggregationType: '95th' as TransactionDurationAggregationType,
           windowSize: 5,
           windowUnit: 'm',
