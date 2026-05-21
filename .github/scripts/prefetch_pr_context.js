@@ -116,6 +116,41 @@ const metadataQuery = `
   }
 `;
 
+const reviewCommentFields = `
+  id
+  databaseId
+  body
+  author {
+    __typename
+    login
+  }
+  authorAssociation
+  url
+  createdAt
+  updatedAt
+  path
+  position
+  originalPosition
+  diffHunk
+  outdated
+  commit {
+    oid
+  }
+  originalCommit {
+    oid
+  }
+  pullRequestReview {
+    databaseId
+    id
+    state
+    submittedAt
+  }
+  replyTo {
+    id
+    databaseId
+  }
+`;
+
 const reviewThreadsQuery = `
   query($owner: String!, $repo: String!, $number: Int!, $cursor: String) {
     repository(owner: $owner, name: $repo) {
@@ -132,42 +167,24 @@ const reviewThreadsQuery = `
             originalStartLine
             diffSide
             startDiffSide
-            comments(first: 100) {
-              nodes {
-                id
-                databaseId
-                body
-                author {
-                  __typename
-                  login
-                }
-                authorAssociation
-                url
-                createdAt
-                updatedAt
-                path
-                position
-                originalPosition
-                diffHunk
-                outdated
-                commit {
-                  oid
-                }
-                originalCommit {
-                  oid
-                }
-                pullRequestReview {
-                  databaseId
-                  id
-                  state
-                  submittedAt
-                }
-                replyTo {
-                  id
-                  databaseId
-                }
-              }
-            }
+          }
+          pageInfo {
+            hasNextPage
+            endCursor
+          }
+        }
+      }
+    }
+  }
+`;
+
+const reviewThreadCommentsQuery = `
+  query($threadId: ID!, $cursor: String) {
+    node(id: $threadId) {
+      ... on PullRequestReviewThread {
+        comments(first: 100, after: $cursor) {
+          nodes {
+            ${reviewCommentFields}
           }
           pageInfo {
             hasNextPage
@@ -236,7 +253,14 @@ const fetchReviewThreads = async ({ github, owner, repo, pullNumber }) => {
     });
     const page = result.repository.pullRequest.reviewThreads;
 
-    reviewThreads.push(...page.nodes);
+    for (const thread of page.nodes) {
+      reviewThreads.push({
+        ...thread,
+        comments: {
+          nodes: await fetchReviewThreadComments({ github, threadId: thread.id }),
+        },
+      });
+    }
 
     if (!page.pageInfo.hasNextPage) {
       break;
@@ -246,6 +270,29 @@ const fetchReviewThreads = async ({ github, owner, repo, pullNumber }) => {
   }
 
   return reviewThreads;
+};
+
+const fetchReviewThreadComments = async ({ github, threadId }) => {
+  const comments = [];
+  let cursor = '';
+
+  while (true) {
+    const result = await github.graphql(reviewThreadCommentsQuery, {
+      threadId,
+      cursor,
+    });
+    const page = result.node.comments;
+
+    comments.push(...page.nodes);
+
+    if (!page.pageInfo.hasNextPage) {
+      break;
+    }
+
+    cursor = page.pageInfo.endCursor ?? '';
+  }
+
+  return comments;
 };
 
 const getNullableStartLine = ({ startLine, line }) => (startLine === line ? null : startLine);
