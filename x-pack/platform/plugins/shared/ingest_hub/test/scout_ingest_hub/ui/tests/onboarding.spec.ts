@@ -17,7 +17,7 @@ test.describe('Onboarding app — FF enabled', { tag: tags.stateful.classic }, (
     await browserAuth.loginAsAdmin();
 
     await test.step('redirects to first step hash when no hash is present', async () => {
-      await page.goto('/app/onboarding/aws');
+      await page.gotoApp('onboarding/aws');
       await expect(page).toHaveURL(/#connect/);
     });
 
@@ -35,7 +35,7 @@ test.describe('Onboarding app — FF enabled', { tag: tags.stateful.classic }, (
     });
 
     await test.step('navigates directly to a step via hash', async () => {
-      await page.goto('/app/onboarding/aws#services');
+      await page.gotoApp('onboarding/aws#services');
       await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
     });
   });
