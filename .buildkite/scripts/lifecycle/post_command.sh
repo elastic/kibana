@@ -49,6 +49,14 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
 
   buildkite-agent artifact upload "$(printf '%s;' "${ARTIFACT_PATTERNS[@]}")"
 
+  if [[ "${BUILDKITE_PIPELINE_SLUG:-}" == "kibana-elasticsearch-snapshot-verify" ]]; then
+    if compgen -G '.es/*cluster-ftr*/logs' > /dev/null; then
+      ARCHIVE=".es/cluster-ftr-logs-${BUILDKITE_JOB_ID}.tar.gz"
+      tar -czf "$ARCHIVE" .es/*cluster-ftr*/logs 2>/dev/null || true
+      buildkite-agent artifact upload "$ARCHIVE"
+    fi
+  fi
+
   if [[ $BUILDKITE_COMMAND_EXIT_STATUS -ne 0 ]]; then
     if [[ $BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG == 'elasticsearch-serverless-intake' ]]; then
       echo "--- Run Failed Test Reporter (only junit)"
