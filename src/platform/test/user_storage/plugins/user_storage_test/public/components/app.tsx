@@ -19,11 +19,9 @@ const StringKeyValue = () => {
   const [lazyStringValue] = useUserStorage<string>('test:string_key_lazy');
   return (
     <>
-      <div data-test-subj="userStorageTest:preloaded-string-key-row">
+      <div data-test-subj="userStorageTest:string-key-row">
         <span>String key (preloaded): </span>
-        <span data-test-subj="userStorageTest:preloaded-string-key-value">
-          {preloadedStringValue}
-        </span>
+        <span data-test-subj="userStorageTest:string-key-value">{preloadedStringValue}</span>
       </div>
       <div data-test-subj="userStorageTest:lazy-string-key-row">
         <span>String key (lazy): </span>
