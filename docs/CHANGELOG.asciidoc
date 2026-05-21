@@ -141,8 +141,6 @@ Elastic Security solution::
 For the Elastic Security 8.19.16 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Elasticsearch solution::
 * Fixes behavioral analytics APIs to reject collection names longer than 1024 characters ({kibana-pull}266225[#266225]).
-Other::
-* Upgrades `hono` and `@hono/node-server` dependencies used by the Agent Builder MCP server ({kibana-pull}263794[#263794]).
 
 [[release-notes-8.19.15]]
 == {kib} 8.19.15
