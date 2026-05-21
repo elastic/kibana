@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { RuleChangeTracking } from '@kbn/alerting-types';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-
-import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/api/detection_engine/rule_management/rule_change_tracking_action';
+import type { SecurityRuleChangeTracking } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
+import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { PrebuiltRuleAsset } from '../../../../prebuilt_rules';
@@ -34,7 +33,7 @@ export const upgradePrebuiltRule = async ({
   ruleAsset: PrebuiltRuleAsset;
   mlAuthz: MlAuthz;
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
-  changeTracking?: RuleChangeTracking;
+  changeTracking?: SecurityRuleChangeTracking<never>;
 }): Promise<RuleResponse> => {
   await validateMlAuth(mlAuthz, ruleAsset.type);
 

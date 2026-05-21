@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { RuleChangeTracking } from '@kbn/alerting-types';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import { isEmpty, isEqual } from 'lodash';
 import type { BulkEditResult } from '@kbn/alerting-plugin/server/rules_client/common/bulk_edit/types';
+import type { SecurityRuleChangeTracking } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { DetectionRulesAuthz } from '../../../../../../../common/detection_engine/rule_management/authz';
 import type {
   RulePatchProps,
@@ -42,7 +42,7 @@ interface PatchRuleOptions {
   rulePatch: RulePatchProps;
   mlAuthz: MlAuthz;
   rulesAuthz: DetectionRulesAuthz;
-  changeTracking?: RuleChangeTracking;
+  changeTracking?: SecurityRuleChangeTracking;
 }
 
 export const patchRule = async ({

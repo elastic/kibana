@@ -7,7 +7,7 @@
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import { SecurityRuleChangeTrackingAction } from '../../../../../../common/api/detection_engine/rule_management/rule_change_tracking_action';
+import { SecurityRuleChangeTrackingAction } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 
 import {
   getCreateEqlRuleSchemaMock,
@@ -155,6 +155,8 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
           }),
           options: expect.objectContaining({
             id: installedRule.id, // id is maintained
+          }),
+          changeTracking: expect.objectContaining({
             action: SecurityRuleChangeTrackingAction.ruleUpgrade,
           }),
         })
@@ -226,7 +228,9 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
             }),
           }),
           id: installedRule.id,
-          action: SecurityRuleChangeTrackingAction.ruleUpgrade,
+          changeTracking: expect.objectContaining({
+            action: SecurityRuleChangeTrackingAction.ruleUpgrade,
+          }),
         })
       );
     });

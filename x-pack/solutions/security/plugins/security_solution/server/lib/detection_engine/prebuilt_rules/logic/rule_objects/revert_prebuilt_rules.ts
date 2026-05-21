@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleChangeTracking } from '@kbn/alerting-types';
+import type { SecurityRuleChangeTracking } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../../../common/constants';
 import { initPromisePool } from '../../../../../utils/promise_pool';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
@@ -22,7 +22,7 @@ import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
 export const revertPrebuiltRules = async (
   detectionRulesClient: IDetectionRulesClient,
   ruleVersions: RuleTriad[],
-  changeTracking?: RuleChangeTracking
+  changeTracking?: SecurityRuleChangeTracking<never>
 ) =>
   withSecuritySpan('revertPrebuiltRule', async () => {
     const result = await initPromisePool({

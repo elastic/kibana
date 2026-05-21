@@ -7,7 +7,6 @@
 
 import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { SecurityRuleChangeTrackingAction } from '../../../../../../common/api/detection_engine/rule_management/rule_change_tracking_action';
 import { getErrorMessage, getErrorStatusCode } from '../../../../../utils/error_helpers';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import {
@@ -119,7 +118,6 @@ export const revertPrebuiltRuleHandler = async (
     });
 
     const changeTracking = {
-      action: SecurityRuleChangeTrackingAction.ruleRevert,
       bulkCount: revertableRules.length,
     };
 

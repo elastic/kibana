@@ -7,7 +7,7 @@
 
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
-import { SecurityRuleChangeTrackingAction } from '../../../../../../common/api/detection_engine/rule_management/rule_change_tracking_action';
+import { SecurityRuleChangeTrackingAction } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import { createDetectionIndex } from '../../../routes/index/create_index_route';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../types';
 import { ELASTIC_SECURITY_RULE_ID } from '../../../../../../common';

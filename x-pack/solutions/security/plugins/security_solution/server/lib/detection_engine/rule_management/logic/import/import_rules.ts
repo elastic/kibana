@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleChangeTracking } from '@kbn/alerting-types';
+import type { SecurityRuleChangeTracking } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { RuleToImport } from '../../../../../../common/api/detection_engine';
 import { type ImportRuleResponse, createBulkErrorObject } from '../../../routes/utils';
 import type { IRuleSourceImporter } from './rule_source_importer';
@@ -30,7 +30,7 @@ export const importRules = async ({
   allowMissingConnectorSecrets,
 }: {
   ruleChunks: RuleToImport[][];
-  changeTracking?: RuleChangeTracking;
+  changeTracking?: SecurityRuleChangeTracking<never>;
   overwriteRules: boolean;
   detectionRulesClient: IDetectionRulesClient;
   ruleSourceImporter: IRuleSourceImporter;

@@ -6,8 +6,8 @@
  */
 
 import { chunk } from 'lodash';
-import type { RuleChangeTracking } from '@kbn/alerting-types';
 import type { RulesClient, BulkOperationError } from '@kbn/alerting-plugin/server';
+import type { SecurityRuleChangeTracking } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { RuleObjectId } from '../../../../../../../common/api/detection_engine';
 import type { RuleAlertType } from '../../../../rule_schema';
 
@@ -19,7 +19,7 @@ const CHUNK_SIZE = 1000;
 interface BulkDeleteRulesParams {
   rulesClient: RulesClient;
   ruleIds: RuleObjectId[];
-  changeTracking?: Omit<RuleChangeTracking, 'action'>;
+  changeTracking?: SecurityRuleChangeTracking<never>;
 }
 
 export const bulkDeleteRules = async ({

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { RuleChangeTracking } from '@kbn/alerting-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 
 import type { BulkEditResult } from '@kbn/alerting-plugin/server/rules_client/common/bulk_edit/types';
+import type { SecurityRuleChangeTracking } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { DetectionRulesAuthz } from '../../../../../../../common/detection_engine/rule_management/authz';
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
@@ -41,7 +41,7 @@ interface UpdateRuleArguments {
   ruleUpdate: RuleUpdateProps;
   mlAuthz: MlAuthz;
   rulesAuthz: DetectionRulesAuthz;
-  changeTracking?: RuleChangeTracking;
+  changeTracking?: SecurityRuleChangeTracking;
 }
 
 export const updateRule = async ({

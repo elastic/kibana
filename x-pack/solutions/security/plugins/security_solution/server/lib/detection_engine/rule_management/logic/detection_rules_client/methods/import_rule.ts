@@ -8,8 +8,8 @@
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
-import type { RuleChangeTracking } from '@kbn/alerting-types';
-import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/api/detection_engine/rule_management/rule_change_tracking_action';
+import type { SecurityRuleChangeTracking } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
+import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
@@ -28,7 +28,7 @@ interface ImportRuleOptions {
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
   importRulePayload: ImportRuleArgs;
   mlAuthz: MlAuthz;
-  changeTracking?: RuleChangeTracking;
+  changeTracking?: SecurityRuleChangeTracking;
 }
 
 export const importRule = async ({

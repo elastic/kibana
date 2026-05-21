@@ -6,9 +6,9 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { RuleChangeTracking } from '@kbn/alerting-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
+import type { SecurityRuleChangeTracking } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import { SERVER_APP_ID } from '../../../../../../../common';
 import type {
   RuleCreateProps,
@@ -28,7 +28,7 @@ interface CreateRuleOptions {
   rule: RuleCreateProps & { immutable: boolean };
   id?: string;
   allowMissingConnectorSecrets?: boolean;
-  changeTracking?: RuleChangeTracking;
+  changeTracking?: SecurityRuleChangeTracking;
 }
 
 export const createRule = async ({
