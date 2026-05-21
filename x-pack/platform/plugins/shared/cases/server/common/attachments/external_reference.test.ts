@@ -6,7 +6,11 @@
  */
 
 import { AttachmentType, ExternalReferenceStorageType } from '../../../common/types/domain';
-import { LEGACY_FILE_ATTACHMENT_TYPE, OSQUERY_ATTACHMENT_TYPE, INDICATOR_ATTACHMENT_TYPE } from '../../../common/constants';
+import {
+  LEGACY_FILE_ATTACHMENT_TYPE,
+  OSQUERY_ATTACHMENT_TYPE,
+  INDICATOR_ATTACHMENT_TYPE,
+} from '../../../common/constants';
 import { externalReferenceAttachmentTransformer } from './external_reference';
 
 const baseLegacyAttributes = {
