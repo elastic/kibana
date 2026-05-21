@@ -78,16 +78,11 @@ export const removeSidebarConversationListRow = ({
 };
 
 /**
- * Patch (or upsert) the title of a single sidebar list row.
+ * Patch the title of a single sidebar list row.
  *
  * Called by `onConversationCreated` when the chat stream emits the
  * `conversation_created` event and we receive the server-generated title that replaces
  * the placeholder "New conversation" set by `insertSidebarConversationListRow`.
- *
- * If the optimistic row was evicted by a background server refetch before this event
- * fired (e.g. the user opened the conversation list mid-stream and the server's response
- * returned a list that didn't include the not-yet-persisted conversation), the row is
- * re-inserted at the top with the real title rather than silently no-oping.
  */
 export const patchSidebarConversationListTitle = ({
   queryClient,
@@ -102,24 +97,13 @@ export const patchSidebarConversationListTitle = ({
 }) => {
   const key = agentConversationListKey(agentId);
   queryClient.setQueryData<ConversationWithoutRounds[] | undefined>(key, (prev) => {
-    // List was never loaded — don't create it from scratch; it will be fetched on next mount.
-    if (prev === undefined) return prev;
-
-    const exists = prev.some((c) => c.id === conversationId);
-    if (exists) {
-      let changed = false;
-      const next = prev.map((c) => {
-        if (c.id !== conversationId || c.title === title) return c;
-        changed = true;
-        return { ...c, title };
-      });
-      return changed ? next : prev;
-    }
-
-    // Row was evicted by a background server refetch; re-insert at top with the real title.
-    return [
-      buildSidebarConversationListRow({ id: conversationId, agent_id: agentId, title }),
-      ...prev,
-    ];
+    if (!prev?.length) return prev;
+    let changed = false;
+    const next = prev.map((c) => {
+      if (c.id !== conversationId || c.title === title) return c;
+      changed = true;
+      return { ...c, title };
+    });
+    return changed ? next : prev;
   });
 };
