@@ -274,6 +274,54 @@ describe('convert', () => {
     ).not.toHaveProperty('required');
   });
 
+  test('materializes function defaults once for referenced schemas', () => {
+    const defaultValue = jest.fn(() => ({ b: 'default' }));
+    const objectWithFunctionDefaultSchema = schema.object(
+      { b: schema.string() },
+      { defaultValue, meta: { id: 'objectWithFunctionDefaultSchema' } }
+    );
+
+    const converted = convert(
+      schema.object({ objectWithFunctionDefault: objectWithFunctionDefaultSchema })
+    );
+
+    expect(converted.schema).not.toHaveProperty('required');
+    expect(converted.shared.objectWithFunctionDefaultSchema.default).toEqual({ b: 'default' });
+    expect(defaultValue).toHaveBeenCalledTimes(1);
+  });
+
+  test('strips internal "x-oas-" markers from converted schemas', () => {
+    const referencedSchema = schema.object(
+      { value: schema.string() },
+      { meta: { id: 'optionalMarkerReferenceSchema' } }
+    );
+
+    const converted = convert(
+      schema.maybe(
+        schema.object({
+          inline: schema.maybe(
+            schema.object({
+              value: schema.string(),
+              value2: schema.number({ defaultValue: () => 42 }),
+              value3: schema.maybe(
+                schema.object({ foo: schema.string({ maxLength: 33 }) }, { meta: { id: 'Value3' } })
+              ),
+            })
+          ),
+          referenced: schema.maybe(referencedSchema),
+        })
+      )
+    );
+
+    const xOasKeys: string[] = [];
+    JSON.stringify(converted, (key, value) => {
+      if (typeof key === 'string' && key.startsWith('x-oas')) xOasKeys.push(key);
+      return value;
+    });
+
+    expect(xOasKeys).toEqual([]);
+  });
+
   test('does not leak maybe metadata into later uses of the same shared schema', () => {
     const sharedSchemas = new Map();
     const sharedSchema = schema.object(

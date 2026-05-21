@@ -37,30 +37,37 @@ export const joi2JsonInternal = (schema: Joi.Schema) => {
   return joiToJsonParse(schema, 'open-api');
 };
 
+// Based on how default values manifest from config-schema
+// having a default value as a function { defaultValue: () => undefined } means
+// config schema will treat that as the default value, so we stick to that as the map
+// for determining whether, at runtime, a given schema will default.
 const hasRuntimeOptionalMetadata = (description: Joi.Description): boolean => {
   const defaultValue = (description.flags as { default?: unknown } | undefined)?.default;
   const hasDefaultValue =
-    typeof defaultValue === 'function'
-      ? defaultValue() !== undefined
-      : defaultValue !== undefined &&
-        !(
-          typeof defaultValue === 'object' &&
-          defaultValue !== null &&
-          (defaultValue as { special?: unknown }).special === 'deep' &&
-          Object.keys(defaultValue).length === 1
-        );
+    defaultValue !== undefined &&
+    // see post_process_mutations/mutations/object.ts
+    !(
+      typeof defaultValue === 'object' &&
+      defaultValue !== null &&
+      (defaultValue as { special?: unknown }).special === 'deep' &&
+      Object.keys(defaultValue).length === 1
+    );
 
   return (
-    Boolean(
-      description.metas?.some((meta) => meta[metaFields.META_FIELD_X_OAS_OPTIONAL] === true)
-    ) || hasDefaultValue
+    hasDefaultValue ||
+    Boolean(description.metas?.some((meta) => meta[metaFields.META_FIELD_X_OAS_OPTIONAL] === true))
   );
 };
 
 const addInternalOptionalMarker = (
   schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject
 ): void => {
-  (schema as Record<string, unknown>)[metaFields.META_FIELD_X_OAS_OPTIONAL] = true;
+  Object.defineProperty(schema, metaFields.META_FIELD_X_OAS_OPTIONAL, {
+    configurable: true,
+    enumerable: false,
+    value: true,
+    writable: true,
+  });
 };
 
 const applyPropertyRuntimeMetadata = (
@@ -155,8 +162,21 @@ const applySharedSchemaRuntimeMetadata = (
   });
 };
 
-const removeInternalOptionalMarker = (schema: OpenAPIV3.SchemaObject): void => {
+const removeInternalOptionalMarker = (
+  schema: unknown,
+  seenSchemas: WeakSet<object> = new WeakSet()
+): void => {
+  if (!schema || typeof schema !== 'object') {
+    return;
+  }
+
+  if (seenSchemas.has(schema)) {
+    return;
+  }
+  seenSchemas.add(schema);
+
   delete (schema as Record<string, unknown>)[metaFields.META_FIELD_X_OAS_OPTIONAL];
+  Object.values(schema).forEach((value) => removeInternalOptionalMarker(value, seenSchemas));
 };
 
 export const parse = ({ schema, ctx = createCtx() }: ParseArgs) => {
@@ -178,6 +198,8 @@ export const parse = ({ schema, ctx = createCtx() }: ParseArgs) => {
     applyPropertyRuntimeMetadata(schema.describe(), result);
   }
   postProcessMutations({ schema: result, ctx });
-  Object.values(ctx.getSharedSchemas()).forEach(removeInternalOptionalMarker);
-  return { shared: ctx.getSharedSchemas(), result };
+  const shared = ctx.getSharedSchemas();
+  removeInternalOptionalMarker(result);
+  Object.values(shared).forEach((sharedSchema) => removeInternalOptionalMarker(sharedSchema));
+  return { shared, result };
 };
