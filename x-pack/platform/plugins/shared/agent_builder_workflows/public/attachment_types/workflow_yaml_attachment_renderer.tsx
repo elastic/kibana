@@ -40,6 +40,7 @@ interface WorkflowYamlAttachment {
   id: string;
   type: string;
   data: WorkflowYamlData;
+  origin?: string;
 }
 
 const extractErrorMessage = (error: unknown): string =>
@@ -52,6 +53,7 @@ interface SaveWorkflowParams {
   notifications: CoreStart['notifications'];
   yaml: string;
   workflowId?: string;
+  isPersisted: boolean;
   updateOrigin: CanvasRenderCallbacks['updateOrigin'];
   telemetry: WorkflowsBaseTelemetry;
   queryClient: QueryClient;
@@ -62,13 +64,14 @@ const saveWorkflow = async ({
   notifications,
   yaml,
   workflowId,
+  isPersisted,
   updateOrigin,
   telemetry,
   queryClient,
 }: SaveWorkflowParams): Promise<string | undefined> => {
   try {
     let savedId = workflowId;
-    if (workflowId) {
+    if (workflowId && isPersisted) {
       const result = await workflowApi.updateWorkflow(workflowId, { yaml });
       queryClient.invalidateQueries({ queryKey: ['workflows', workflowId] });
       telemetry.reportWorkflowUpdated({
@@ -79,7 +82,7 @@ const saveWorkflow = async ({
         aiAssisted: true,
       });
     } else {
-      const result = await workflowApi.createWorkflow({ yaml });
+      const result = await workflowApi.createWorkflow({ yaml, id: workflowId });
       savedId = result.id;
       await updateOrigin(result.id);
       telemetry.reportWorkflowCreated({
@@ -164,12 +167,15 @@ const WorkflowYamlCanvasContent: React.FC<{
   );
   const workflowId = savedWorkflowId ?? attachment.data.workflowId;
 
+  const isPersisted = Boolean(attachment.origin);
+
   const handleSave = useCallback(async () => {
     const id = await saveWorkflow({
       workflowApi,
       notifications,
       yaml: attachment.data.yaml,
       workflowId,
+      isPersisted,
       updateOrigin,
       telemetry,
       queryClient,
@@ -182,6 +188,7 @@ const WorkflowYamlCanvasContent: React.FC<{
     notifications,
     attachment.data.yaml,
     workflowId,
+    isPersisted,
     updateOrigin,
     telemetry,
     queryClient,
@@ -220,7 +227,7 @@ const WorkflowYamlCanvasContent: React.FC<{
 
     const buttons: ActionButton[] = [];
 
-    if (workflowId) {
+    if (workflowId && isPersisted) {
       if (canUpdateWorkflow) {
         buttons.push({
           label: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.override', {
@@ -252,7 +259,7 @@ const WorkflowYamlCanvasContent: React.FC<{
       });
     }
 
-    if (workflowId && !isOnWorkflowPage(workflowId) && canReadWorkflow) {
+    if (workflowId && isPersisted && !isOnWorkflowPage(workflowId) && canReadWorkflow) {
       buttons.push({
         label: i18n.translate('workflowsManagement.attachmentRenderers.workflowYaml.openInEditor', {
           defaultMessage: 'Open in editor',
@@ -270,6 +277,7 @@ const WorkflowYamlCanvasContent: React.FC<{
     ready,
     isSidebar,
     workflowId,
+    isPersisted,
     handleSave,
     handleSaveAsNew,
     isOnWorkflowPage,
@@ -334,7 +342,9 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
 
     getIcon: () => 'workflowsApp',
 
-    getActionButtons: ({ attachment, openCanvas }) => {
+    getActionButtons: ({ attachment, isCanvas, openCanvas }) => {
+      if (isCanvas) return [];
+
       const buttons: ActionButton[] = [];
 
       if (openCanvas) {
@@ -348,7 +358,11 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
         });
       }
 
-      if (attachment.data.workflowId && !isOnWorkflowPage(attachment.data.workflowId)) {
+      if (
+        attachment.data.workflowId &&
+        attachment.origin &&
+        !isOnWorkflowPage(attachment.data.workflowId)
+      ) {
         buttons.push({
           label: i18n.translate(
             'workflowsManagement.attachmentRenderers.workflowYaml.openInEditor',
