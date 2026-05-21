@@ -11,11 +11,21 @@ import { PluginStart } from '@kbn/core-di';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import { ComposeDiscoverFlyout } from '@kbn/alerting-v2-rule-form';
+import { ComposeDiscoverFlyout, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
 import type { ComposeDiscoverMode } from '@kbn/alerting-v2-rule-form';
 import type { RuleApiResponse } from '../services/rules_api';
 import { useCreateRule } from './use_create_rule';
 import { useUpdateRule } from './use_update_rule';
+
+const tryParseBuilderState = (query: string): { type: string; state: unknown } | null => {
+  for (const [type, definition] of Object.entries(RULE_BUILDER_REGISTRY)) {
+    if (definition.parseState) {
+      const state = definition.parseState(query);
+      if (state) return { type, state };
+    }
+  }
+  return null;
+};
 
 interface UseComposeDiscoverFlyoutOptions {
   createSuccessRedirectPath?: string;
@@ -35,6 +45,7 @@ export const useComposeDiscoverFlyout = ({
   const [flyoutMode, setFlyoutMode] = useState<ComposeDiscoverMode>('create');
   const [targetRule, setTargetRule] = useState<RuleApiResponse | null>(null);
   const [builderType, setBuilderType] = useState<string | null>(null);
+  const [initialBuilderState, setInitialBuilderState] = useState<unknown>(undefined);
   const historyKey = useMemo(() => Symbol('ruleAuthoring'), []);
   const createRuleMutation = useCreateRule();
   const updateRuleMutation = useUpdateRule();
@@ -47,6 +58,7 @@ export const useComposeDiscoverFlyout = ({
     setFlyoutOpen(false);
     setTargetRule(null);
     setBuilderType(null);
+    setInitialBuilderState(undefined);
   }, []);
 
   const openCreateFlyout = useCallback(() => {
@@ -60,20 +72,47 @@ export const useComposeDiscoverFlyout = ({
     setTargetRule(null);
     setFlyoutMode('create');
     setBuilderType(type);
+    setInitialBuilderState(undefined);
     setFlyoutOpen(true);
   }, []);
 
   const openEditFlyout = useCallback((rule: RuleApiResponse) => {
     setTargetRule(rule);
     setFlyoutMode('edit');
+
+    const query = rule.evaluation?.query?.base;
+    if (query) {
+      const match = tryParseBuilderState(query);
+      if (match) {
+        setBuilderType(match.type);
+        setInitialBuilderState(match.state);
+        setFlyoutOpen(true);
+        return;
+      }
+    }
+
     setBuilderType(null);
+    setInitialBuilderState(undefined);
     setFlyoutOpen(true);
   }, []);
 
   const openCloneFlyout = useCallback((rule: RuleApiResponse) => {
     setTargetRule(rule);
-    setBuilderType(null);
     setFlyoutMode('clone');
+
+    const query = rule.evaluation?.query?.base;
+    if (query) {
+      const match = tryParseBuilderState(query);
+      if (match) {
+        setBuilderType(match.type);
+        setInitialBuilderState(match.state);
+        setFlyoutOpen(true);
+        return;
+      }
+    }
+
+    setBuilderType(null);
+    setInitialBuilderState(undefined);
     setFlyoutOpen(true);
   }, []);
 
@@ -86,6 +125,7 @@ export const useComposeDiscoverFlyout = ({
       onClose={closeFlyout}
       services={ruleFormServices}
       builderType={builderType ?? undefined}
+      initialBuilderState={initialBuilderState}
       onCreateRule={(payload) =>
         createRuleMutation.mutate(payload, {
           onSuccess: () => {

@@ -13,6 +13,9 @@ export { ComposeDiscoverFlyout } from './flyout/compose_discover';
 export type { ComposeDiscoverFlyoutProps } from './flyout/compose_discover';
 export type { ComposeDiscoverMode } from './flyout/compose_discover/types';
 
+// Rule Builder registry
+export { RULE_BUILDER_REGISTRY } from './flyout/compose_discover/rule_builder';
+
 // Compose Discover sandbox — embeddable ES|QL editor + results panel (props-only)
 export { QuerySandboxFlyout, useSandboxDraft, draftToRuleQuery } from './flyout/compose_discover';
 export type {

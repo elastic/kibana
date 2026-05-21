@@ -141,6 +141,7 @@ export interface ComposeDiscoverFlyoutProps {
   /** True while a create/update mutation is in flight. */
   isSaving?: boolean;
   builderType?: string;
+  initialBuilderState?: unknown;
 }
 
 const FLYOUT_TITLE_ID = 'composeDiscoverFlyoutTitle';
@@ -224,6 +225,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   onUpdateRule,
   isSaving = false,
   builderType,
+  initialBuilderState,
 }) => {
   const isBuilderMode = Boolean(builderType);
   /*
@@ -249,6 +251,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
 
   const [builderState, setBuilderState] = useState<unknown>(() => {
     if (!builderType) return undefined;
+    if (initialBuilderState !== undefined) return initialBuilderState;
     const definition = RULE_BUILDER_REGISTRY[builderType];
     return definition ? definition.createDefaultState() : undefined;
   });

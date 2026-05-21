@@ -10,6 +10,7 @@ import type { RuleBuilderDefinition } from './types';
 import type { ThresholdFormValues } from './threshold_form_types';
 import { DEFAULT_THRESHOLD_FORM_VALUES } from './threshold_form_types';
 import { RuleBuilderAlertConditionStep } from './rule_builder_alert_condition_step';
+import { parseThresholdEsql } from './parse_threshold_esql';
 
 const defineBuilder = <TState>(def: RuleBuilderDefinition<TState>): RuleBuilderDefinition => {
   return def as RuleBuilderDefinition;
@@ -28,6 +29,7 @@ const thresholdDefinition = defineBuilder<ThresholdFormValues>({
       onBuilderStateChange: props.onBuilderStateChange,
     }),
   validate: (state) => state.queryCommitted,
+  parseState: parseThresholdEsql,
 });
 
 export const RULE_BUILDER_REGISTRY: Record<string, RuleBuilderDefinition> = {

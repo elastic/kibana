@@ -9,6 +9,7 @@ export type { RuleBuilderDefinition, RuleBuilderStepProps } from './types';
 export { RULE_BUILDER_REGISTRY } from './registry';
 export { RuleBuilderAlertConditionStep } from './rule_builder_alert_condition_step';
 export { buildThresholdEsql } from './build_threshold_esql';
+export { parseThresholdEsql } from './parse_threshold_esql';
 export type {
   ThresholdFormValues,
   StatDefinition,

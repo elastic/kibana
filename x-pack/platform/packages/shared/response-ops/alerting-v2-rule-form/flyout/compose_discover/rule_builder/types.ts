@@ -23,4 +23,5 @@ export interface RuleBuilderDefinition<TState = unknown> {
   createDefaultState: () => TState;
   renderStep: (props: RuleBuilderStepProps<TState>) => React.ReactNode;
   validate?: (state: ComposeDiscoverState) => boolean;
+  parseState?: (query: string) => TState | null;
 }
