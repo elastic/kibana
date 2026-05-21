@@ -19,9 +19,9 @@ import useToggle from 'react-use/lib/useToggle';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
-import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useIsUIAMEnabled } from '../../../hooks/use_is_uiam_enabled';
 import { useKibanaUrl } from '../../../hooks/use_kibana_url';
+import { useUiamOAuthClientManagement } from '../../../hooks/use_uiam_oauth_client_management';
 import { MCP_SERVER_PATH } from '../../../../../common/mcp';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
@@ -30,9 +30,9 @@ export const McpConnectionButton = () => {
   const { createAgentBuilderUrl } = useNavigation();
   const { kibanaUrl } = useKibanaUrl();
   const { docLinksService } = useAgentBuilderServices();
-  const experimental = useExperimentalFeatures();
   const isUIAMEnabled = useIsUIAMEnabled();
-  const showMcpClientManagement = experimental && isUIAMEnabled;
+  const isUiamOAuthClientManagementEnabled = useUiamOAuthClientManagement();
+  const showMcpClientManagement = isUIAMEnabled && isUiamOAuthClientManagementEnabled;
 
   const [isContextOpen, toggleContextOpen] = useToggle(false);
 
