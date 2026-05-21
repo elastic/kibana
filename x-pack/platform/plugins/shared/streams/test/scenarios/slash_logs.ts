@@ -27,7 +27,7 @@ import {
   getStableShortId,
   getRandomRange,
 } from './helpers/logs_mock_data';
-import { getAtIndexOrRandom } from './helpers/get_at_index_or_random';
+import { getAtIndexOrRandom } from '@kbn/synthtrace';
 
 const LINUX_PROCESSES = ['cron', 'sshd', 'systemd', 'nginx', 'apache2'];
 

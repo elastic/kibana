@@ -13,12 +13,12 @@ import type { InfraDocument } from '@kbn/synthtrace-client';
 import { infra, generateShortId } from '@kbn/synthtrace-client';
 
 import type { Scenario } from '@kbn/synthtrace';
-import { withClient } from '@kbn/synthtrace';
+import { withClient, getNumberOpt } from '@kbn/synthtrace';
 
 const scenario: Scenario<InfraDocument> = async (runOptions) => {
   return {
     generate: ({ range, clients: { infraEsClient } }) => {
-      const { numPods = 5 } = runOptions.scenarioOpts || {};
+      const numPods = getNumberOpt(runOptions.scenarioOpts, 'numPods', 5);
       const { logger } = runOptions;
 
       const PODS = Array(numPods)

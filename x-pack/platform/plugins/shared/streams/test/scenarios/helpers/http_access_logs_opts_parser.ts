@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getStringOpt } from './scenario_opts_helpers';
+import { getStringOpt } from '@kbn/synthtrace';
 import { parseStringToBoolean } from './logs_scenario_opts_parser';
 
 /**

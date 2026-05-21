@@ -15,7 +15,7 @@ import { flatten, random, times } from 'lodash';
 import type { Scenario } from '@kbn/synthtrace';
 import { getSynthtraceEnvironment } from '@kbn/synthtrace';
 import { withClient } from '@kbn/synthtrace';
-import { getNumberOpt } from './helpers/scenario_opts_helpers';
+import { getNumberOpt } from '@kbn/synthtrace';
 import { getRandomNameForIndex } from './helpers/random_names';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);

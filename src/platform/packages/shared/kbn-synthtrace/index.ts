@@ -40,6 +40,13 @@ export * from './src/scenarios/agent_builder';
 export { sigEvents } from './src/lib/service_graph_logs';
 
 export {
+  getNumberOpt,
+  getBooleanOpt,
+  getStringOpt,
+} from './src/scenarios/helpers/scenario_opts_helpers';
+export { getAtIndexOrRandom } from './src/scenarios/helpers/get_at_index_or_random';
+
+export {
   APM_METRICS_SERVICE_NAMES,
   APM_METRICS_DASHBOARD_SERVICES,
   APM_METRICS_NON_DASHBOARD_SERVICES,

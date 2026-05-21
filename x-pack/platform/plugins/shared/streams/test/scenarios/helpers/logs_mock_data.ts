@@ -10,7 +10,7 @@ import { ELASTIC_AGENT_NAMES } from '@kbn/elastic-agent-utils';
 import { faker } from '@faker-js/faker';
 import { randomInt } from 'crypto';
 import moment from 'moment';
-import { getAtIndexOrRandom } from './get_at_index_or_random';
+import { getAtIndexOrRandom } from '@kbn/synthtrace';
 
 const {
   internet: { ipv4, userAgent, httpMethod, httpStatusCode },

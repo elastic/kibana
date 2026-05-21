@@ -12,14 +12,14 @@
 import type { ApmFields, Instance } from '@kbn/synthtrace-client';
 import { apm } from '@kbn/synthtrace-client';
 import type { Scenario } from '@kbn/synthtrace';
-import { getSynthtraceEnvironment } from '@kbn/synthtrace';
+import { getSynthtraceEnvironment, getNumberOpt } from '@kbn/synthtrace';
 import { withClient } from '@kbn/synthtrace';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async (runOptions) => {
   const { logger } = runOptions;
-  const { numServices = 3 } = runOptions.scenarioOpts || {};
+  const numServices = getNumberOpt(runOptions.scenarioOpts, 'numServices', 3);
 
   return {
     generate: ({ range, clients: { apmEsClient } }) => {

@@ -16,7 +16,7 @@ import type { Scenario } from '@kbn/synthtrace';
 import { ComponentTemplateName } from '@kbn/synthtrace';
 import { getSynthtraceEnvironment } from '@kbn/synthtrace';
 import { withClient } from '@kbn/synthtrace';
-import { getNumberOpt } from './helpers/scenario_opts_helpers';
+import { getNumberOpt } from '@kbn/synthtrace';
 
 const ENVIRONMENTS = ['production', 'development'].map((env) =>
   getSynthtraceEnvironment(__filename, env)

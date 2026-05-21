@@ -25,7 +25,7 @@ export interface LogsScenarioOpts {
   isLogsDb: boolean;
 }
 
-import { getStringOpt } from './scenario_opts_helpers';
+import { getStringOpt } from '@kbn/synthtrace';
 
 export const parseLogsScenarioOpts = (
   scenarioOpts: Record<string, unknown> | undefined

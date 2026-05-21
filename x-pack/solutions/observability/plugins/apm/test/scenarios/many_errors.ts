@@ -14,7 +14,7 @@ import { apm } from '@kbn/synthtrace-client';
 import type { Scenario } from '@kbn/synthtrace';
 import { getSynthtraceEnvironment } from '@kbn/synthtrace';
 import { withClient } from '@kbn/synthtrace';
-import { getBooleanOpt } from './helpers/scenario_opts_helpers';
+import { getBooleanOpt } from '@kbn/synthtrace';
 import { getExceptionTypeForIndex } from './helpers/exception_types';
 import { getRandomNameForIndex } from './helpers/random_names';
 

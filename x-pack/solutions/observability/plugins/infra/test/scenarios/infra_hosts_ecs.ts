@@ -10,7 +10,7 @@ import { infra } from '@kbn/synthtrace-client';
 import { times } from 'lodash';
 import type { Scenario } from '@kbn/synthtrace';
 import { withClient } from '@kbn/synthtrace';
-import { getNumberOpt } from './helpers/scenario_opts_helpers';
+import { getNumberOpt } from '@kbn/synthtrace';
 
 /**
  * Generates ECS-compliant infrastructure host metrics.

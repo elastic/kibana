@@ -9,6 +9,13 @@
 
 import { randomInt } from 'crypto';
 
-// Utility function to get a random element from an array
-export const getAtIndexOrRandom = <T>(values: T[], index?: number) =>
-  values[index ?? randomInt(values.length)];
+/**
+ * Returns `values[index]` when index is provided, otherwise picks a uniformly random element.
+ * Throws if the array is empty to surface programming errors early.
+ */
+export const getAtIndexOrRandom = <T>(values: T[], index?: number): T => {
+  if (values.length === 0) {
+    throw new Error('getAtIndexOrRandom called with an empty array');
+  }
+  return values[index ?? randomInt(values.length)];
+};
