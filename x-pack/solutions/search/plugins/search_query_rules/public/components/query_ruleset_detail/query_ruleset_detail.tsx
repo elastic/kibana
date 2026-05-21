@@ -241,7 +241,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
             {
               text: (
                 <>
-                  <EuiIcon size="s" type="chevronSingleLeft" />{' '}
+                  <EuiIcon size="s" type="chevronSingleLeft" aria-hidden={true} />{' '}
                   {i18n.translate('xpack.queryRules.queryRulesetDetail.backButton', {
                     defaultMessage: 'Back',
                   })}
@@ -402,7 +402,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
                     panelPaddingSize="none"
                     anchorPosition="downLeft"
                   >
-                    <EuiContextMenuPanel size="s" items={items} />
+                    <EuiContextMenuPanel items={items} />
                   </EuiPopover>
                 </EuiFlexItem>
               </EuiFlexGroup>
