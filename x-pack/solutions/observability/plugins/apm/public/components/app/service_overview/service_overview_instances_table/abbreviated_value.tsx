@@ -20,15 +20,16 @@ interface AbbreviatedValueProps {
  * For example, "1.0 tpm" becomes: 1.0 <abbr title="transactions per minute">tpm</abbr>
  */
 export function AbbreviatedValue({ value, abbreviation, title }: AbbreviatedValueProps) {
-  if (!value.endsWith(abbreviation)) {
+  const suffix = ` ${abbreviation}`;
+  if (!value.endsWith(suffix)) {
     return <>{value}</>;
   }
 
-  const numericPart = value.slice(0, -abbreviation.length);
+  const numericPart = value.slice(0, -suffix.length);
 
   return (
     <>
-      {numericPart}
+      {numericPart}{' '}
       <abbr title={title}>{abbreviation}</abbr>
     </>
   );
