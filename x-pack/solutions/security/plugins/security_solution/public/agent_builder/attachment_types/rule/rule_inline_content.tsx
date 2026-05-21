@@ -38,7 +38,6 @@ import {
 } from '../../../common/components/link_to/redirect_to_detection_engine';
 import { FiltersDisplay } from './filters_display';
 import { RuleTypeDetails } from './rule_type_details';
-import { EmptyRuleContent } from './empty_rule_content';
 import { ScheduleDisplay } from './schedule_display';
 import {
   parseRuleFromAttachment,
@@ -250,7 +249,7 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
   ]);
 
   if (!rule) {
-    return <EmptyRuleContent />;
+    return null;
   }
 
   const query = 'query' in rule ? rule.query : undefined;
