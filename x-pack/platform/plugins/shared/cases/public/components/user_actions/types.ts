@@ -34,6 +34,7 @@ export interface UserActionTreeProps {
   actionsNavigation?: ActionsNavigation;
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   statusActionButton: JSX.Element | null;
+  attachActionButton?: JSX.Element | null;
   userActivityQueryParams: UserActivityParams;
   userActionsStats: CaseUserActionsStats;
 }
