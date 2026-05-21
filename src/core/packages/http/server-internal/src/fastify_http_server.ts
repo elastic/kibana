@@ -72,6 +72,7 @@ import { AuthHeadersStorage } from './auth_headers_storage';
 import { StaticAssets } from './static_assets';
 import {
   FastifyResponseAdapter,
+  finalizeReplySetCookieHeaders,
   flushPendingCookieWrites,
   stripCharsetFromNdjsonContentTypeHeader,
   syncNodeResponseHeadersToFastifyReply,
@@ -458,6 +459,7 @@ export class FastifyHttpServer {
     this.fastify.addHook('onSend', async (req, reply, payload) => {
       await flushPendingCookieWrites(req);
       syncNodeResponseHeadersToFastifyReply(reply);
+      finalizeReplySetCookieHeaders(reply);
       stripCharsetFromNdjsonContentTypeHeader(reply);
       return payload;
     });
@@ -1226,8 +1228,9 @@ export class FastifyHttpServer {
     try {
       const prevKibanaRequest = CoreKibanaRequest.from(prevCompat, undefined, false);
       const newKibanaRequest = CoreKibanaRequest.from(compat, undefined, false);
-      const { state } = this.authState.get(prevKibanaRequest);
-      if (state !== undefined) {
+      // `registerAuth` may call `toolkit.authenticated()` without `state`; WeakMap still records auth.
+      if (this.authState.isAuthenticated(prevKibanaRequest)) {
+        const { state } = this.authState.get(prevKibanaRequest);
         this.authState.set(newKibanaRequest, state);
       }
       const requestHeaders = this.authRequestHeaders.get(prevKibanaRequest);

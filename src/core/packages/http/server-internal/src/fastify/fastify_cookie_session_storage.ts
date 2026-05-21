@@ -20,6 +20,7 @@ import type {
 } from '@kbn/core-http-server';
 
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
+import { mergeSetCookieHeaderValues } from './fastify_set_cookie_merge';
 
 const IRON_DEFAULTS: iron.SealOptions = {
   ...iron.defaults,
@@ -51,63 +52,41 @@ const getRawHttpAccess = (kbnRequest: KibanaRequest): RawHttpAccess | null => {
     setCookies(cookieStrings) {
       if (!cookieStrings.length) return;
       if (fastifyReply && !fastifyReply.sent) {
-        const existing = fastifyReply.getHeader('set-cookie');
-        let merged: string[] = Array.isArray(existing)
-          ? existing.map(String)
-          : existing != null
-          ? [String(existing)]
-          : [];
-        for (const cookie of cookieStrings) {
-          const cookieName = cookie.split('=')[0];
-          const isClearing =
-            cookie.includes(`${cookieName}=;`) ||
-            cookie.includes(`${cookieName}=; Path=`) ||
-            /Max-Age=0/.test(cookie);
-          if (isClearing) {
-            merged = merged.filter(
-              (existingCookie) => !existingCookie.startsWith(`${cookieName}=`)
-            );
-          }
-          merged.push(cookie);
+        // Fastify appends `set-cookie` on each `header()` call; merge then replace (Hapi replaces).
+        const merged = mergeSetCookieHeaderValues(
+          fastifyReply.getHeader('set-cookie'),
+          cookieStrings
+        );
+        fastifyReply.removeHeader('set-cookie');
+        if (merged.length > 0) {
+          fastifyReply.header('set-cookie', merged);
         }
-        fastifyReply.header('set-cookie', merged);
+        if (!fastifyReply.raw.headersSent) {
+          fastifyReply.raw.removeHeader('Set-Cookie');
+        }
         return;
       }
-      if (!res || res.headersSent) {
-        return;
+      if (res && !res.headersSent) {
+        res.setHeader(
+          'Set-Cookie',
+          mergeSetCookieHeaderValues(res.getHeader('Set-Cookie'), cookieStrings)
+        );
       }
-      const existing = res.getHeader('Set-Cookie');
-      let merged: string[] = Array.isArray(existing)
-        ? existing.map(String)
-        : existing != null
-        ? [String(existing)]
-        : [];
-      for (const cookie of cookieStrings) {
-        const cookieName = cookie.split('=')[0];
-        const isClearing =
-          cookie.includes(`${cookieName}=;`) ||
-          cookie.includes(`${cookieName}=; Path=`) ||
-          /Max-Age=0/.test(cookie);
-        if (isClearing) {
-          merged = merged.filter((existingCookie) => !existingCookie.startsWith(`${cookieName}=`));
-        }
-        merged.push(cookie);
-      }
-      res.setHeader('Set-Cookie', merged);
     },
   };
 };
 
-const parseCookieHeader = (header: string | undefined, name: string): string | undefined => {
-  if (!header) return undefined;
+const parseAllCookieValuesForName = (header: string | undefined, name: string): string[] => {
+  if (!header) return [];
+  const values: string[] = [];
   for (const part of header.split(';')) {
     const eq = part.indexOf('=');
     if (eq < 0) continue;
     const k = part.slice(0, eq).trim();
     if (k !== name) continue;
-    return decodeURIComponent(part.slice(eq + 1).trim());
+    values.push(decodeURIComponent(part.slice(eq + 1).trim()));
   }
-  return undefined;
+  return values;
 };
 
 interface SerializeOptions {
@@ -148,25 +127,52 @@ class ScopedFastifyCookieSessionStorage<T extends object> implements SessionStor
     const access = getRawHttpAccess(this.request);
     if (!access) return null;
 
-    const sealed = parseCookieHeader(access.cookieHeader, this.cookieOptions.name);
-    if (!sealed) return null;
+    const sealedValues = parseAllCookieValuesForName(access.cookieHeader, this.cookieOptions.name);
+    if (sealedValues.length === 0) return null;
 
-    try {
-      const value = (await iron.unseal(
-        sealed,
-        this.cookieOptions.encryptionKey,
-        IRON_DEFAULTS
-      )) as T;
-      const result = this.cookieOptions.validate(value);
-      if (!result.isValid) {
-        this.clearWithPath(result.path ?? this.basePath);
-        return null;
+    const credentials: T[] = [];
+    for (const sealed of sealedValues) {
+      try {
+        const value = (await iron.unseal(
+          sealed,
+          this.cookieOptions.encryptionKey,
+          IRON_DEFAULTS
+        )) as T;
+        const result = this.cookieOptions.validate(value);
+        if (!result.isValid) {
+          this.clearWithPath(result.path ?? this.basePath);
+          return null;
+        }
+        credentials.push(value);
+      } catch (err) {
+        this.log.debug(`Failed to read session cookie: ${(err as Error)?.message ?? err}`);
       }
-      return value;
-    } catch (err) {
-      this.log.debug(`Failed to read session cookie: ${(err as Error)?.message ?? err}`);
+    }
+
+    if (credentials.length === 0) {
       return null;
     }
+
+    if (credentials.length === 1) {
+      return credentials[0];
+    }
+
+    if (credentials.length > 1) {
+      this.log.warn(
+        `Found multiple auth sessions. Found:[${credentials.length}] sessions. Checking equality...`
+      );
+      const [firstSession, ...rest] = credentials;
+      const allEqual = rest.every((session) => isDeepStrictEqual(session, firstSession));
+      if (allEqual) {
+        this.log.error(
+          `Found multiple auth sessions. Found:[${credentials.length}] equal sessions`
+        );
+        return firstSession;
+      }
+    }
+
+    this.log.error(`Found multiple auth sessions. Found:[${credentials.length}] unequal sessions`);
+    return null;
   }
 
   public async set(sessionValue: T, options?: SessionStorageSetOptions): Promise<void> {

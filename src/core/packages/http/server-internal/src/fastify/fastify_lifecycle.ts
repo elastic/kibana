@@ -412,6 +412,14 @@ export function adoptToFastifyOnPreResponse(fn: OnPreResponseHandler, log: Logge
             if (value !== undefined) reply.header(name, value);
           }
         }
+        if (typeof result.body === 'string') {
+          const trimmedBody = result.body.trimStart();
+          if (trimmedBody.startsWith('<!DOCTYPE') || trimmedBody.startsWith('<html')) {
+            // Route handlers may have already set `application/json` on 401 before onPreResponse
+            // rewrites the body to the unauthenticated HTML page (Hapi overwrites the type).
+            reply.type('text/html; charset=utf-8');
+          }
+        }
         return result.body;
       }
       throw new Error(

@@ -16,6 +16,7 @@ import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 import { isResponseError as isElasticsearchResponseError } from '@kbn/es-errors';
 import type { ResponseError, ResponseErrorAttributes } from '@kbn/core-http-server';
 import { KibanaResponse } from '@kbn/core-http-router-server-internal';
+import { mergeSetCookieHeaderValues } from './fastify_set_cookie_merge';
 
 /** Mirrors `getServerOptions` default `routes.cache` for Hapi (`@kbn/server-http-tools`). */
 const HAPI_DEFAULT_CACHE_CONTROL = 'private, no-cache, no-store, must-revalidate';
@@ -114,10 +115,62 @@ export async function flushPendingCookieWrites(req: FastifyRequest | undefined):
   app!.pendingCookieWrites = [];
 }
 
+const isClearingSessionCookie = (cookie: string): boolean =>
+  /Max-Age=0/.test(cookie) || /=;\s*Expires=Thu, 01 Jan 1970/.test(cookie);
+
+/**
+ * Hapi collapses multiple `Set-Cookie` writes for the same name into a single outgoing header.
+ * Fastify can accumulate clears + replacements or duplicate values; normalize before send.
+ *
+ * @internal
+ */
+export function finalizeReplySetCookieHeaders(reply: FastifyReply): void {
+  const existing = reply.getHeader('set-cookie');
+  if (existing === undefined) {
+    return;
+  }
+
+  let cookies = (Array.isArray(existing) ? existing : [existing]).map(String);
+  cookies = [...new Map(cookies.map((cookie) => [cookie, cookie])).values()];
+
+  const lastByName = new Map<string, string>();
+  for (const cookie of cookies) {
+    lastByName.set(cookie.split('=')[0], cookie);
+  }
+
+  const finalized: string[] = [];
+  for (const cookie of lastByName.values()) {
+    const name = cookie.split('=')[0];
+    if (isClearingSessionCookie(cookie)) {
+      const hasReplacement = [...lastByName.values()].some(
+        (other) => other.split('=')[0] === name && !isClearingSessionCookie(other)
+      );
+      if (hasReplacement) {
+        continue;
+      }
+    }
+    finalized.push(cookie);
+  }
+
+  reply.removeHeader('set-cookie');
+  if (finalized.length > 0) {
+    reply.header('set-cookie', finalized);
+  }
+  // Avoid sending duplicate `Set-Cookie` from both Fastify and `reply.raw`.
+  if (!reply.raw.headersSent) {
+    reply.raw.removeHeader('Set-Cookie');
+  }
+}
+
 /** @internal */
 export function syncNodeResponseHeadersToFastifyReply(reply: FastifyReply): void {
   const raw = reply.raw;
   if (!raw || typeof raw.getHeader !== 'function') {
+    return;
+  }
+  // Session storage writes via {@link FastifyReply#header}; only copy from `reply.raw` when
+  // legacy code set `Set-Cookie` on the Node response directly (avoid duplicating cookies).
+  if (reply.getHeader('set-cookie') !== undefined) {
     return;
   }
   const setCookie = raw.getHeader('Set-Cookie');
@@ -128,7 +181,7 @@ export function syncNodeResponseHeadersToFastifyReply(reply: FastifyReply): void
     (cookie): cookie is string => cookie !== undefined
   );
   if (cookies.length > 0) {
-    reply.header('set-cookie', cookies);
+    reply.header('set-cookie', mergeSetCookieHeaderValues(undefined, cookies));
   }
 }
 

@@ -15,6 +15,7 @@ import type { IncomingMessage } from 'http';
 import { KibanaResponse } from '@kbn/core-http-router-server-internal';
 import {
   FastifyResponseAdapter,
+  finalizeReplySetCookieHeaders,
   stripCharsetFromNdjsonContentTypeHeader,
   syncNodeResponseHeadersToFastifyReply,
 } from './fastify_response_adapter';
@@ -225,10 +226,92 @@ describe('FastifyResponseAdapter', () => {
     expect(reply.send).toHaveBeenCalledWith(body);
   });
 
+  it('finalizeReplySetCookieHeaders keeps only the session cookie when clear and set are present', () => {
+    const recordedHeaders = new Map<string, string | number | string[]>();
+
+    const reply = {
+      getHeader: (name: string) => recordedHeaders.get(name.toLowerCase()),
+      hasHeader: (name: string) => recordedHeaders.has(name.toLowerCase()),
+      header(name: string, value: string | number | string[]) {
+        recordedHeaders.set(name.toLowerCase(), value);
+      },
+      removeHeader(name: string) {
+        recordedHeaders.delete(name.toLowerCase());
+      },
+      raw: {
+        headersSent: false,
+        removeHeader: jest.fn(),
+      },
+    } as unknown as FastifyReply;
+
+    reply.header('set-cookie', [
+      'sid=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Secure; Path=/',
+      'sid=Fe26.2**session; HttpOnly; Secure; Path=/',
+    ]);
+
+    finalizeReplySetCookieHeaders(reply);
+
+    expect(recordedHeaders.get('set-cookie')).toEqual([
+      'sid=Fe26.2**session; HttpOnly; Secure; Path=/',
+    ]);
+    expect(reply.raw.removeHeader).toHaveBeenCalledWith('Set-Cookie');
+  });
+
+  it('finalizeReplySetCookieHeaders keeps distinct cookie names', () => {
+    const recordedHeaders = new Map<string, string | number | string[]>();
+
+    const reply = {
+      getHeader: (name: string) => recordedHeaders.get(name.toLowerCase()),
+      header(name: string, value: string | number | string[]) {
+        recordedHeaders.set(name.toLowerCase(), value);
+      },
+      removeHeader(name: string) {
+        recordedHeaders.delete(name.toLowerCase());
+      },
+      raw: {
+        headersSent: false,
+        removeHeader: jest.fn(),
+      },
+    } as unknown as FastifyReply;
+
+    reply.header('set-cookie', ['foo=1; Path=/', 'bar=2; Path=/']);
+
+    finalizeReplySetCookieHeaders(reply);
+
+    expect(recordedHeaders.get('set-cookie')).toEqual(['foo=1; Path=/', 'bar=2; Path=/']);
+  });
+
+  it('finalizeReplySetCookieHeaders deduplicates identical session cookies', () => {
+    const recordedHeaders = new Map<string, string | number | string[]>();
+
+    const reply = {
+      getHeader: (name: string) => recordedHeaders.get(name.toLowerCase()),
+      header(name: string, value: string | number | string[]) {
+        recordedHeaders.set(name.toLowerCase(), value);
+      },
+      removeHeader(name: string) {
+        recordedHeaders.delete(name.toLowerCase());
+      },
+      raw: {
+        headersSent: false,
+        removeHeader: jest.fn(),
+      },
+    } as unknown as FastifyReply;
+
+    const sessionCookie = 'sid=Fe26.2**session; HttpOnly; Secure; Path=/';
+    reply.header('set-cookie', [sessionCookie, sessionCookie]);
+
+    finalizeReplySetCookieHeaders(reply);
+
+    expect(recordedHeaders.get('set-cookie')).toEqual([sessionCookie]);
+    expect(reply.raw.removeHeader).toHaveBeenCalledWith('Set-Cookie');
+  });
+
   it('syncNodeResponseHeadersToFastifyReply preserves every Set-Cookie from the raw response', () => {
     const recordedHeaders = new Map<string, string | number | string[]>();
 
     const reply = {
+      getHeader: () => undefined,
       raw: {
         getHeader: (name: string) =>
           name.toLowerCase() === 'set-cookie'
