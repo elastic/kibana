@@ -23,6 +23,7 @@ export {
   createDetectionRuleTool,
   SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
 } from './create_detection_rule_tool';
+export { findRulesTool, SECURITY_FIND_RULES_TOOL_ID } from './find_rules_tool';
 export { pciScopeDiscoveryTool, PCI_SCOPE_DISCOVERY_TOOL_ID } from './pci_scope_discovery_tool';
 export { pciComplianceTool, PCI_COMPLIANCE_TOOL_ID } from './pci_compliance_tool';
 export { pciFieldMapperTool, PCI_FIELD_MAPPER_TOOL_ID } from './pci_field_mapper_tool';

@@ -9,6 +9,7 @@ import {
   createQuantitativeCorrectnessEvaluators,
   type DefaultEvaluators,
   type EvalsExecutorClient,
+  type EvaluationResult,
   type Example,
   type EvaluationDataset,
   createQuantitativeGroundednessEvaluator,
@@ -35,12 +36,25 @@ import {
 import type { AgentBuilderEvaluationChatClient } from './chat_client';
 import { extractSearchRetrievedDocs } from './rag_extractor';
 
+interface ToolCallAssertion {
+  /** The tool ID expected to have been called. */
+  id: string;
+  /** If the primary tool was not called, accept any of these tool IDs as satisfying the "tool was used" check (no criteria evaluated for alternatives). */
+  acceptableAlternativeToolIds?: string[];
+  /** Natural-language assertions about the tool call's arguments, judged by the criteria evaluator. */
+  criteria?: string[];
+}
+
 interface DatasetExample extends Example {
   input: {
     question: string;
   };
   output: {
     expected?: string;
+    /** Natural-language assertions that the final answer must satisfy. Judged independently by the criteria evaluator. */
+    criteria?: string[];
+    /** Tool-call assertions: each declared tool must have been called; optional per-call args criteria. */
+    toolCalls?: ToolCallAssertion[];
     groundTruth?: GroundTruth;
   };
   metadata?: {
@@ -59,6 +73,73 @@ export type EvaluateDataset = ({
 }) => Promise<void>;
 
 export type EvaluateExternalDataset = (datasetName: string) => Promise<void>;
+
+function getCalledToolIds(output: TaskOutput): string[] {
+  const calls = getToolCallSteps(output);
+  return [...new Set(calls.map((c) => c.tool_id).filter((id): id is string => Boolean(id)))];
+}
+
+async function evaluateToolCallAssertion(
+  assertion: ToolCallAssertion,
+  evaluators: DefaultEvaluators,
+  input: DatasetExample['input'],
+  output: TaskOutput,
+  metadata: DatasetExample['metadata']
+): Promise<EvaluationResult> {
+  const allCalls = getToolCallSteps(output);
+  const primary = allCalls.filter((c) => c.tool_id === assertion.id);
+  const alternatives = assertion.acceptableAlternativeToolIds ?? [];
+  const altCalled =
+    alternatives.length > 0 && alternatives.some((alt) => allCalls.some((c) => c.tool_id === alt));
+
+  if (primary.length === 0 && !altCalled) {
+    const called = getCalledToolIds(output);
+    const summary = called.length > 0 ? ` Called: [${called.join(', ')}]` : ' No tools called.';
+    return {
+      score: 0,
+      label: 'FAIL',
+      explanation: `Tool "${assertion.id}" was not called.${summary}`,
+    };
+  }
+
+  if (altCalled && primary.length === 0) {
+    return {
+      score: 1,
+      label: 'PASS',
+      explanation: `Primary tool "${assertion.id}" not called; an acceptable alternative was.`,
+    };
+  }
+
+  if (!assertion.criteria || assertion.criteria.length === 0) {
+    return {
+      score: 1,
+      label: 'PASS',
+      explanation: `Tool "${assertion.id}" was called.`,
+    };
+  }
+
+  const criteriaResult = await evaluators
+    .criteria(assertion.criteria)
+    .evaluate({ input, expected: { criteria: assertion.criteria }, output, metadata });
+
+  return {
+    score: criteriaResult.score ?? null,
+    label: criteriaResult.label ?? 'PASS',
+    explanation: `Tool "${assertion.id}" was called. ${criteriaResult.explanation ?? ''}`,
+  };
+}
+
+function combineToolCallResults(results: EvaluationResult[]): EvaluationResult {
+  const allPassed = results.every((r) => r.label === 'PASS' && (r.score ?? 0) > 0);
+  const numericScores = results.map((r) => r.score ?? 0);
+  const avg =
+    numericScores.length > 0 ? numericScores.reduce((a, b) => a + b, 0) / numericScores.length : 0;
+  return {
+    score: allPassed ? avg : 0,
+    label: allPassed ? 'PASS' : 'FAIL',
+    explanation: results.map((r) => r.explanation ?? '').join(' | '),
+  };
+}
 
 function configureExperiment({
   evaluators,
@@ -121,6 +202,45 @@ function configureExperiment({
   });
 
   const selectedEvaluators = selectEvaluators([
+    {
+      name: 'Criteria',
+      kind: 'LLM' as const,
+      evaluate: async ({ input, output, expected, metadata }) => {
+        const criteria = (expected as DatasetExample['output'])?.criteria ?? [];
+        if (criteria.length === 0) {
+          return { score: null, label: 'N/A', explanation: 'No criteria specified.' };
+        }
+        return evaluators.criteria(criteria).evaluate({
+          input,
+          expected: { criteria },
+          output,
+          metadata,
+        });
+      },
+    },
+    {
+      name: 'ToolCalls',
+      kind: 'LLM' as const,
+      evaluate: async ({ input, output, expected, metadata }) => {
+        const toolCalls = (expected as DatasetExample['output'])?.toolCalls ?? [];
+        if (toolCalls.length === 0) {
+          return { score: null, label: 'N/A', explanation: 'No tool call assertions specified.' };
+        }
+        const results: EvaluationResult[] = [];
+        for (const assertion of toolCalls) {
+          results.push(
+            await evaluateToolCallAssertion(
+              assertion,
+              evaluators,
+              input as DatasetExample['input'],
+              output as TaskOutput,
+              (metadata ?? undefined) as DatasetExample['metadata']
+            )
+          );
+        }
+        return combineToolCallResults(results);
+      },
+    },
     {
       name: 'ToolUsageOnly',
       kind: 'CODE' as const,
