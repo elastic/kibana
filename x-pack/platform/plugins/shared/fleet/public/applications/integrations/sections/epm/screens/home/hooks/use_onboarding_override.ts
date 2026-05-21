@@ -11,8 +11,10 @@ import { useStartServices } from '../../../../../hooks';
 
 import type { IntegrationCardItem } from '..';
 
-// Flag key from @kbn/ingest-hub-plugin common/constants
+// Keep in sync with @kbn/ingest-hub-plugin/common/constants
 const ONBOARDING_ENABLED_FLAG = 'ingestHub.onboardingEnabled';
+const AWS_TITLE = 'Amazon Web Services';
+const AWS_DESCRIPTION = 'Collect logs and metrics from Amazon Web Services (AWS).';
 
 const HIDDEN_TILE_NAMES = new Set(['aws']);
 const HIDDEN_TILE_IDS = new Set(['epr:aws']);
@@ -22,13 +24,7 @@ export function useOnboardingOverride() {
   const isOnboardingEnabled = featureFlags.getBooleanValue(ONBOARDING_ENABLED_FLAG, false);
 
   const navigateToOnboarding = useCallback(() => {
-    application.navigateToApp('onboarding', {
-      path: '/aws',
-      state: {
-        title: 'Amazon Web Services',
-        description: 'Collect logs and metrics from AWS services.',
-      },
-    });
+    application.navigateToApp('onboarding', { path: '/aws' });
   }, [application]);
 
   const applyOnboardingOverride = useMemo(() => {
@@ -43,10 +39,10 @@ export function useOnboardingOverride() {
 
       const onboardingAwsTile: IntegrationCardItem = {
         id: 'epr:aws',
-        title: 'Amazon Web Services',
-        description: 'Collect logs and metrics from AWS services.',
+        title: AWS_TITLE,
+        description: AWS_DESCRIPTION,
         icons: [{ type: 'eui', src: 'logoAWS' }],
-        url: '/app/onboarding/aws',
+        url: application.getUrlForApp('onboarding', { path: '/aws' }),
         integration: 'aws',
         name: 'aws-onboarding',
         version: '',
@@ -56,7 +52,7 @@ export function useOnboardingOverride() {
 
       return [onboardingAwsTile, ...filtered];
     };
-  }, [isOnboardingEnabled, navigateToOnboarding]);
+  }, [isOnboardingEnabled, navigateToOnboarding, application]);
 
   return { applyOnboardingOverride, isOnboardingEnabled };
 }
