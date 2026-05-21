@@ -94,6 +94,7 @@ const evaluateAsset = async (
     }
 
     const presentFields = new Set(Object.keys(fieldCaps.fields ?? {}));
+    // Every required field must have a mapping in at least one matched index
     const allPresent = requiredFields.every((field) => presentFields.has(field.name));
     if (!allPresent) {
       return { kind: 'missing_required_fields' };
@@ -108,6 +109,38 @@ const evaluateAsset = async (
     );
     return { kind: 'no_matching_indices' };
   }
+};
+
+const truncateDescription = (text: string, maxChars: number): string => {
+  if (text.length <= maxChars) {
+    return text;
+  }
+  const sliced = text.slice(0, maxChars);
+  const lastSentenceEnd = sliced.lastIndexOf('. ');
+  if (lastSentenceEnd > maxChars * 0.5) {
+    return sliced.slice(0, lastSentenceEnd + 1);
+  }
+  return `${sliced.trimEnd()}…`;
+};
+
+const stripTagPrefix = (tags: readonly string[], prefix: string): string[] =>
+  tags.filter((tag) => tag.startsWith(prefix)).map((tag) => tag.slice(prefix.length).trim());
+
+const buildRuleCard = (asset: PrebuiltRuleAsset) => {
+  const tags = asset.tags ?? [];
+  return {
+    rule_id: asset.rule_id,
+    name: asset.name,
+    description: truncateDescription(asset.description, 300),
+    severity: asset.severity,
+    domain: stripTagPrefix(tags, 'Domain: '),
+    os: stripTagPrefix(tags, 'OS: '),
+    data_sources: stripTagPrefix(tags, 'Data Source: '),
+    mitre_tactics: (asset.threat ?? []).map((entry) => ({
+      id: entry.tactic.id,
+      name: entry.tactic.name,
+    })),
+  };
 };
 
 const filterRunnableRules = async (
@@ -141,6 +174,125 @@ const filterRunnableRules = async (
   return result;
 };
 
+// ---- Pre-ranking ----
+//
+// Trims the runnable candidate set to a budgeted list, biased toward filling
+// kill-chain gaps. Each tactic earns "points" based on how many installed
+// rules already cover it (empty > sparse > covered); the budget is split
+// proportionally across tactics, clamped per-tactic to a [MIN, MAX] band,
+// and bounded by the number of available candidates. Within each tactic's
+// allocation, rules are ranked by risk_score desc. Rules mapped to multiple
+// tactics may be picked via any of them; the final list is deduped by
+// rule_id, so the total can come in under budget — that's fine.
+
+const RECOMMENDATION_BUDGET = 200;
+const MIN_PER_TACTIC = 3;
+const MAX_PER_TACTIC = 25;
+const TACTIC_WEIGHT_EMPTY = 3;
+const TACTIC_WEIGHT_SPARSE = 2;
+const TACTIC_WEIGHT_COVERED = 1;
+const SPARSE_INSTALLED_THRESHOLD = 3;
+
+interface PreRankResult {
+  recommendations: PrebuiltRuleAsset[];
+  allocationsByTactic: Record<string, number>;
+}
+
+const getTacticWeight = (installedCount: number): number => {
+  if (installedCount === 0) return TACTIC_WEIGHT_EMPTY;
+  if (installedCount <= SPARSE_INSTALLED_THRESHOLD) return TACTIC_WEIGHT_SPARSE;
+  return TACTIC_WEIGHT_COVERED;
+};
+
+const sortByRiskScoreDesc = (a: PrebuiltRuleAsset, b: PrebuiltRuleAsset): number => {
+  const aScore = typeof a.risk_score === 'number' ? a.risk_score : 0;
+  const bScore = typeof b.risk_score === 'number' ? b.risk_score : 0;
+  return bScore - aScore;
+};
+
+export const preRankCandidateRules = (
+  runnableRules: readonly PrebuiltRuleAsset[],
+  installedCoverageByTactic: Readonly<Record<string, { name: string; installed_count: number }>>,
+  budget: number = RECOMMENDATION_BUDGET
+): PreRankResult => {
+  // Bucket runnable rules by tactic. A rule mapped to multiple tactics appears
+  // in each bucket; dedupe within a single rule's threat[] in case it lists
+  // the same tactic twice (different techniques under the same tactic).
+  const candidatesByTactic = new Map<string, PrebuiltRuleAsset[]>();
+  for (const rule of runnableRules) {
+    const seen = new Set<string>();
+    for (const entry of rule.threat ?? []) {
+      const tacticId = entry.tactic.id;
+      if (seen.has(tacticId)) continue;
+      seen.add(tacticId);
+      const bucket = candidatesByTactic.get(tacticId) ?? [];
+      bucket.push(rule);
+      candidatesByTactic.set(tacticId, bucket);
+    }
+  }
+
+  // Consider any tactic that has candidates or installed rules.
+  const allTacticIds = new Set<string>([
+    ...candidatesByTactic.keys(),
+    ...Object.keys(installedCoverageByTactic),
+  ]);
+
+  // Compute weights and sum points across tactics that have at least one
+  // candidate. Tactics without candidates cannot be filled and shouldn't
+  // burn budget.
+  const tacticWeights = new Map<string, number>();
+  let totalPoints = 0;
+  for (const tacticId of allTacticIds) {
+    const installedCount = installedCoverageByTactic[tacticId]?.installed_count ?? 0;
+    const weight = getTacticWeight(installedCount);
+    tacticWeights.set(tacticId, weight);
+    if ((candidatesByTactic.get(tacticId)?.length ?? 0) > 0) {
+      totalPoints += weight;
+    }
+  }
+
+  // Allocate: proportional split, clamp to [MIN, MAX], bound by candidate count.
+  const allocations = new Map<string, number>();
+  for (const tacticId of allTacticIds) {
+    const candidateCount = candidatesByTactic.get(tacticId)?.length ?? 0;
+    if (candidateCount === 0) {
+      allocations.set(tacticId, 0);
+      continue;
+    }
+    const weight = tacticWeights.get(tacticId) ?? 0;
+    const proportional = totalPoints > 0 ? Math.floor((weight / totalPoints) * budget) : 0;
+    const clamped = Math.min(MAX_PER_TACTIC, Math.max(MIN_PER_TACTIC, proportional));
+    allocations.set(tacticId, Math.min(clamped, candidateCount));
+  }
+
+  // For each tactic, sort by risk_score desc and take its allocation.
+  const picks: PrebuiltRuleAsset[] = [];
+  for (const [tacticId, allocation] of allocations) {
+    if (allocation === 0) continue;
+    const bucket = candidatesByTactic.get(tacticId);
+    if (!bucket) continue;
+    picks.push(...[...bucket].sort(sortByRiskScoreDesc).slice(0, allocation));
+  }
+
+  // Dedupe by rule_id, preserving first occurrence. A rule that fills multiple
+  // tactics is emitted once; the per-tactic counts in the output may exceed
+  // the actual rule count, which is the expected accounting.
+  const seenRuleIds = new Set<string>();
+  const recommendations: PrebuiltRuleAsset[] = [];
+  for (const rule of picks) {
+    if (seenRuleIds.has(rule.rule_id)) continue;
+    seenRuleIds.add(rule.rule_id);
+    recommendations.push(rule);
+  }
+
+  const allocationsByTactic: Record<string, number> = {};
+  for (const [tacticId, allocation] of allocations) {
+    allocationsByTactic[tacticId] = allocation;
+  }
+
+  return { recommendations, allocationsByTactic };
+};
+
 export const recommendRulesToInstallTool = (
   core: CoreSetup<SecuritySolutionPluginStartDependencies, SecuritySolutionPluginStart>,
   logger: Logger
@@ -160,10 +312,26 @@ export const recommendRulesToInstallTool = (
       const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
       const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
 
-      const installedRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions();
+      const installedRules = await ruleObjectsClient.fetchInstalledRules();
       const installedRuleVersionsMap = new Map(
-        installedRuleVersions.map((version) => [version.rule_id, version])
+        installedRules.map((rule) => [rule.rule_id, rule])
       );
+
+      const installedCoverageByTactic: Record<string, { name: string; installed_count: number }> =
+        {};
+      for (const rule of installedRules) {
+        const seenTactics = new Set<string>();
+        for (const entry of rule.threat ?? []) {
+          const { id, name } = entry.tactic;
+          if (!seenTactics.has(id)) {
+            seenTactics.add(id);
+            if (!installedCoverageByTactic[id]) {
+              installedCoverageByTactic[id] = { name, installed_count: 0 };
+            }
+            installedCoverageByTactic[id].installed_count += 1;
+          }
+        }
+      }
 
       const installableVersions = await getInstallableRuleVersions(
         ruleAssetsClient,
@@ -181,30 +349,45 @@ export const recommendRulesToInstallTool = (
         filteredUnsupportedForV1,
       } = await filterRunnableRules(installableAssets, esClient.asCurrentUser, logger);
 
+      const { recommendations, allocationsByTactic } = preRankCandidateRules(
+        runnableRules,
+        installedCoverageByTactic
+      );
+
+      // Merge per-tactic allocation into the coverage diagnostic so the LLM
+      // sees both "what's already covered" and "how many candidates I'm
+      // sending for each tactic." Include every tactic that appears on either
+      // side (installed-only, candidate-only, or both).
+      const coverageWithAllocation: Record<
+        string,
+        { name: string; installed_count: number; allocation: number }
+      > = {};
+      const allTacticIds = new Set<string>([
+        ...Object.keys(installedCoverageByTactic),
+        ...Object.keys(allocationsByTactic),
+      ]);
+      for (const tacticId of allTacticIds) {
+        coverageWithAllocation[tacticId] = {
+          name: installedCoverageByTactic[tacticId]?.name ?? tacticId,
+          installed_count: installedCoverageByTactic[tacticId]?.installed_count ?? 0,
+          allocation: allocationsByTactic[tacticId] ?? 0,
+        };
+      }
+
       return {
         results: [
           {
             type: ToolResultType.other,
             data: {
-              installable_runnable_rules: runnableRules.map((asset) => ({
-                rule_id: asset.rule_id,
-                name: asset.name,
-                description: asset.description,
-                severity: asset.severity,
-                type: asset.type,
-                index_patterns: [...(getIndexPatterns(asset) ?? [])],
-                required_fields: (asset.required_fields ?? []).map((field) => ({
-                  name: field.name,
-                  type: field.type,
-                })),
-                tags: asset.tags ?? [],
-              })),
+              installable_runnable_rules: recommendations.map(buildRuleCard),
+              installed_coverage_by_tactic: coverageWithAllocation,
               stats: {
                 total_installable: installableAssets.length,
                 filtered_no_matching_indices: filteredNoMatchingIndices,
                 filtered_missing_required_fields: filteredMissingRequiredFields,
                 filtered_unsupported_for_v1: filteredUnsupportedForV1,
-                total_returned: runnableRules.length,
+                total_runnable: runnableRules.length,
+                total_recommended: recommendations.length,
               },
             },
           },
