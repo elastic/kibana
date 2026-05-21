@@ -412,6 +412,35 @@ describe('AttachmentStateManager', () => {
       expect(updated?.description).toBe('Explicit description');
     });
 
+    it('does not overwrite an existing description with an empty string', async () => {
+      await manager.add({
+        id: 'test-1',
+        type: 'text',
+        data: { content: 'v1' },
+        description: 'Existing description',
+      });
+
+      const updated = await manager.update('test-1', { description: '' });
+
+      expect(updated?.description).toBe('Existing description');
+    });
+
+    it('falls back to attachmentLabel when description is empty string', async () => {
+      await manager.add({
+        id: 'test-1',
+        type: 'labeled',
+        data: { content: 'v1' },
+        description: 'Existing description',
+      });
+
+      const updated = await manager.update('test-1', {
+        data: { content: 'v2', attachmentLabel: 'Carried label' },
+        description: '',
+      });
+
+      expect(updated?.description).toBe('Carried label');
+    });
+
     it('updates hidden without creating new version', async () => {
       await manager.add({ id: 'test-1', type: 'text', data: { content: 'test' }, hidden: false });
 

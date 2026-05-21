@@ -406,7 +406,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       throw new Error(`Cannot update deleted attachment "${id}"`);
     }
 
-    if (input.description !== undefined) {
+    if (input.description) {
       attachment.description = input.description;
       this.dirty = true;
     }
@@ -424,7 +424,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       const mergedData = mergeAttachmentUpdateData(currentVersion?.data, input.data);
       const validatedData = await this.validateAttachmentData(attachment.type, mergedData);
 
-      if (input.description === undefined) {
+      if (!input.description) {
         const carriedDescription = descriptionFromAttachmentLabel(validatedData);
         if (carriedDescription !== undefined) {
           attachment.description = carriedDescription;
