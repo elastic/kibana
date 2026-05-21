@@ -29,7 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         // The following features are composed of other features in a way that is
-        // specific to the search solution.
+        // specific to the vector DB solution.
         const compositeFeatureIds = [
           'dashboard',
           'dashboard_v2',
