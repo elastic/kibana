@@ -10,9 +10,12 @@ import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { z } from '@kbn/zod/v4';
-import { ruleResponseSchema } from '@kbn/alerting-v2-schemas';
+import {
+  ruleResponseSchema,
+  updateRuleBodySchema,
+  type UpdateRuleBody,
+} from '@kbn/alerting-v2-schemas';
 
-import { updateRuleDataSchema, type UpdateRuleData } from '../../lib/rules_client';
 import { RulesClient } from '../../lib/rules_client/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
@@ -34,7 +37,7 @@ export class UpdateRuleRoute extends BaseAlertingRoute {
   } as const;
   static validate = {
     request: {
-      body: buildRouteValidationWithZod(updateRuleDataSchema),
+      body: buildRouteValidationWithZod(updateRuleBodySchema),
       params: buildRouteValidationWithZod(ruleIdParamsSchema),
     },
     response: {
@@ -48,6 +51,10 @@ export class UpdateRuleRoute extends BaseAlertingRoute {
       404: {
         description: 'Indicates a rule with the given ID does not exist.',
       },
+      409: {
+        description:
+          'Indicates a version conflict, the rule was updated by another user since it was read.',
+      },
     },
   };
 
@@ -59,7 +66,7 @@ export class UpdateRuleRoute extends BaseAlertingRoute {
     private readonly request: KibanaRequest<
       z.infer<typeof ruleIdParamsSchema>,
       unknown,
-      UpdateRuleData
+      UpdateRuleBody
     >,
     @inject(RulesClient) private readonly rulesClient: RulesClient
   ) {
@@ -67,9 +74,12 @@ export class UpdateRuleRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
+    const { version, ...data } = this.request.body;
+
     const updated = await this.rulesClient.updateRule({
       id: this.request.params.id,
-      data: this.request.body,
+      data,
+      options: { version },
     });
 
     return this.ctx.response.ok({ body: updated });

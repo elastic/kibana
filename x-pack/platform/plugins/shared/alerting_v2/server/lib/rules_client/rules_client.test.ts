@@ -487,6 +487,108 @@ describe('RulesClient', () => {
         { version: 'WzEsMV0=', mergeAttributes: false }
       );
     });
+
+    it('uses the client-provided version when supplied', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'rule-id-occ',
+        attributes: baseSoAttrs,
+        version: 'WzSERVER=',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
+      });
+
+      await client.updateRule({
+        id: 'rule-id-occ',
+        data: { metadata: { name: 'occ name' } },
+        options: { version: 'WzCLIENT=' },
+      });
+
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        'rule-id-occ',
+        expect.any(Object),
+        { version: 'WzCLIENT=', mergeAttributes: false }
+      );
+    });
+
+    it('falls back to the server-read version when client omits version', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'rule-id-fallback',
+        attributes: baseSoAttrs,
+        version: 'WzSERVER=',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
+      });
+
+      await client.updateRule({
+        id: 'rule-id-fallback',
+        data: { metadata: { name: 'fallback name' } },
+      });
+
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        'rule-id-fallback',
+        expect.any(Object),
+        { version: 'WzSERVER=', mergeAttributes: false }
+      );
+    });
+
+    it('returns the new version from the SO update in the response', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'rule-id-new-ver',
+        attributes: baseSoAttrs,
+        version: 'WzOLD=',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
+      });
+
+      mockSavedObjectsClient.update.mockResolvedValueOnce({
+        id: 'rule-id-new-ver',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: baseSoAttrs,
+        references: [],
+        version: 'WzNEW=',
+      });
+
+      const res = await client.updateRule({
+        id: 'rule-id-new-ver',
+        data: { metadata: { name: 'whatever' } },
+      });
+
+      expect(res.version).toBe('WzNEW=');
+    });
+
+    it('throws 409 when the client-provided version is stale', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'rule-id-stale',
+        attributes: baseSoAttrs,
+        version: 'WzSERVER=',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
+      });
+
+      mockSavedObjectsClient.update.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, 'rule-id-stale')
+      );
+
+      await expect(
+        client.updateRule({
+          id: 'rule-id-stale',
+          data: {},
+          options: { version: 'WzCLIENT-STALE=' },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 409 },
+      });
+    });
   });
 
   describe('upsertRule', () => {
