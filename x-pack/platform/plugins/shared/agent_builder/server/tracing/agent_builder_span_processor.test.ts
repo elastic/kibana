@@ -182,7 +182,7 @@ describe('AgentBuilderSpanProcessor', () => {
     expect(mockBatch.onEnd).not.toHaveBeenCalled();
   });
 
-  it('onEnd creates a copy with SAMPLED flag and data_stream.dataset on resource', () => {
+  it('onEnd creates a copy with data_stream.dataset and strips tracking attribute', () => {
     const processor = new AgentBuilderSpanProcessor({
       exporter: createExporter(),
       scheduledDelayMillis: 1,
@@ -197,9 +197,13 @@ describe('AgentBuilderSpanProcessor', () => {
 
     expect(mockBatch.onEnd).toHaveBeenCalledTimes(1);
     const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
-    expect(exported.attributes).toEqual({ existing: 'keep-me' });
-    expect(exported.resource.attributes['data_stream.dataset']).toBe('agent_builder');
-    expect(exported.spanContext().traceFlags).toBe(TraceFlags.SAMPLED);
+    expect(exported.attributes).toEqual({
+      existing: 'keep-me',
+    });
+    expect(exported.resource.attributes).toEqual(
+      expect.objectContaining({ 'data_stream.dataset': 'agent_builder' })
+    );
+    expect(exported.spanContext().traceFlags).toBe(TraceFlags.NONE);
     expect(SHOULD_TRACK_ATTR in exported.attributes).toBe(false);
   });
 

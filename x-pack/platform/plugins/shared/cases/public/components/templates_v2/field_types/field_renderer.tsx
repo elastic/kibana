@@ -37,7 +37,8 @@ export const FieldsRenderer: FC<{
   resolvedFields: InlineField[];
   parentFieldNames?: Set<string>;
   parentTemplateName?: string;
-}> = ({ resolvedFields, parentFieldNames, parentTemplateName }) => {
+  onFieldConfirm?: () => void;
+}> = ({ resolvedFields, parentFieldNames, parentTemplateName, onFieldConfirm }) => {
   const { euiTheme } = useEuiTheme();
   const { control } = useFormContext();
 
@@ -99,6 +100,7 @@ export const FieldsRenderer: FC<{
           max: field.validation?.max,
           minLength: field.validation?.min_length,
           maxLength: field.validation?.max_length,
+          onConfirm: onFieldConfirm,
         };
 
         const isInherited = parentFieldNames?.has(field.name) ?? false;
