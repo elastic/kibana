@@ -53,8 +53,11 @@ export const createCloudConnectorHandler: FleetRequestHandler<
     // If external_id.value is a plain string, create a Fleet secret and replace with a reference.
     // This allows callers to pass raw values without knowing about internal secret storage.
     const requestBody = request.body ?? {};
-    const body = { ...requestBody, vars: { ...(requestBody.vars ?? {}) } };
-    const externalIdVar = body.vars.external_id as
+    const body = {
+      ...requestBody,
+      ...(requestBody.vars !== undefined ? { vars: { ...requestBody.vars } } : {}),
+    };
+    const externalIdVar = body.vars?.external_id as
       | { type?: string; value?: unknown; frozen?: boolean }
       | undefined;
     let createdSecretId: string | undefined;
