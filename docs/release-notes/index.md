@@ -34,7 +34,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 ### Fixes [kibana-9.4.2-fixes]
 
 **Alerting and cases**:
-* Fixes a bug that caused rules with large action parameter payloads to fail when saving or executing [#269467]({{kib-pull}}269467).
+* Fixes an issue that caused rules with large action parameter payloads to fail when saving or executing [#269467]({{kib-pull}}269467).
 * Fixes case workflow templates resolving from the wrong owner [#268719]({{kib-pull}}268719).
 * Fixes phrase search in the **All Cases** view [#266827]({{kib-pull}}266827).
 
