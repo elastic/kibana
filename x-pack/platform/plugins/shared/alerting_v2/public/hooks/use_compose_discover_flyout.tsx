@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
+import { i18n } from '@kbn/i18n';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -74,10 +75,10 @@ export const useComposeDiscoverFlyout = ({
     setFlyoutOpen(true);
   }, []);
 
-  const openEditFlyout = useCallback(
-    (rule: RuleApiResponse) => {
+  const openRuleFlyout = useCallback(
+    (rule: RuleApiResponse, mode: ComposeDiscoverMode) => {
       setTargetRule(rule);
-      setFlyoutMode('edit');
+      setFlyoutMode(mode);
 
       if (rule.builder_type) {
         const query = rule.evaluation?.query?.base;
@@ -89,8 +90,13 @@ export const useComposeDiscoverFlyout = ({
           return;
         }
         notifications.toasts.addInfo({
-          title: 'Rule opened in ES|QL mode',
-          text: 'This rule was created with a builder but its query has been modified. It can only be edited as ES|QL.',
+          title: i18n.translate('xpack.alertingV2.useComposeDiscoverFlyout.esqlFallbackTitle', {
+            defaultMessage: 'Rule opened in ES|QL mode',
+          }),
+          text: i18n.translate('xpack.alertingV2.useComposeDiscoverFlyout.esqlFallbackText', {
+            defaultMessage:
+              'This rule was created with a builder but its query has been modified. It can only be edited as ES|QL.',
+          }),
         });
       }
 
@@ -101,31 +107,14 @@ export const useComposeDiscoverFlyout = ({
     [notifications.toasts]
   );
 
+  const openEditFlyout = useCallback(
+    (rule: RuleApiResponse) => openRuleFlyout(rule, 'edit'),
+    [openRuleFlyout]
+  );
+
   const openCloneFlyout = useCallback(
-    (rule: RuleApiResponse) => {
-      setTargetRule(rule);
-      setFlyoutMode('clone');
-
-      if (rule.builder_type) {
-        const query = rule.evaluation?.query?.base;
-        const state = query ? tryParseBuilderState(rule.builder_type, query) : null;
-        if (state) {
-          setBuilderType(rule.builder_type);
-          setInitialBuilderState(state);
-          setFlyoutOpen(true);
-          return;
-        }
-        notifications.toasts.addInfo({
-          title: 'Rule opened in ES|QL mode',
-          text: 'This rule was created with a builder but its query has been modified. It can only be edited as ES|QL.',
-        });
-      }
-
-      setBuilderType(null);
-      setInitialBuilderState(undefined);
-      setFlyoutOpen(true);
-    },
-    [notifications.toasts]
+    (rule: RuleApiResponse) => openRuleFlyout(rule, 'clone'),
+    [openRuleFlyout]
   );
 
   const flyout = flyoutOpen ? (

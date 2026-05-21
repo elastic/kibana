@@ -15,6 +15,7 @@ import {
 } from '@elastic/esql';
 import type {
   ESQLCommand,
+  ESQLCommandOption,
   ESQLFunction,
   ESQLAstItem,
   ESQLSingleAstItem,
@@ -128,8 +129,9 @@ const parseStatsCommand = (
   const groupByFields: string[] = [];
 
   for (const arg of cmd.args) {
-    if (isOptionNode(arg as any) && (arg as any).name === 'by') {
-      for (const byArg of (arg as any).args) {
+    const singleArg = arg as ESQLSingleAstItem;
+    if (isOptionNode(singleArg) && (singleArg as ESQLCommandOption).name === 'by') {
+      for (const byArg of (singleArg as ESQLCommandOption).args) {
         const name = getColumnName(byArg);
         if (name) groupByFields.push(name);
       }
@@ -321,7 +323,7 @@ export const parseThresholdEsql = (query: string): ThresholdFormValues | null =>
 
   const sourceArg = fromCmd.args.find((a) => isSource(a as ESQLSingleAstItem));
   if (!sourceArg) return null;
-  const indexPattern = (sourceArg as any).name;
+  const indexPattern = (sourceArg as ESQLSingleAstItem & { name: string }).name;
   if (!indexPattern || typeof indexPattern !== 'string') return null;
   idx++;
 
