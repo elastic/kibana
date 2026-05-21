@@ -14,6 +14,8 @@ fi
 EXTRA_ARGS=${FTR_EXTRA_ARGS:-}
 test -z "$EXTRA_ARGS" || buildkite-agent meta-data set "ftr-extra-args" "$EXTRA_ARGS"
 
+FTR_RETRIES_PER_FILE=${FTR_RETRIES_PER_FILE:-0}
+
 export JOB="$FTR_CONFIG_GROUP_KEY"
 
 FAILED_CONFIGS_KEY="${BUILDKITE_STEP_ID}${FTR_CONFIG_GROUP_KEY}"
@@ -52,7 +54,7 @@ while read -r config; do
     continue;
   fi
 
-  FULL_COMMAND="node scripts/functional_tests --bail --config $config $EXTRA_ARGS"
+  FULL_COMMAND="node scripts/functional_tests --bail --retries-per-file=$FTR_RETRIES_PER_FILE --config $config $EXTRA_ARGS"
 
   # see if this config has already been executed successfully
   CONFIG_EXECUTION_KEY="${config}_executed"
@@ -91,6 +93,7 @@ while read -r config; do
   set +e;
   node ./scripts/functional_tests \
     --bail \
+    --retries-per-file="$FTR_RETRIES_PER_FILE" \
     --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
     --config="$config" \
     "$EXTRA_ARGS"

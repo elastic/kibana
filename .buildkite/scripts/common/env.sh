@@ -139,6 +139,9 @@ export TEST_GROUP_TYPE_UNIT="Jest Unit Tests"
 export TEST_GROUP_TYPE_INTEGRATION="Jest Integration Tests"
 export TEST_GROUP_TYPE_FUNCTIONAL="Functional Tests"
 
+# Number of automatic in-process retries per failed FTR spec file (ES + Kibana stay up)
+export FTR_RETRIES_PER_FILE="${FTR_RETRIES_PER_FILE:-1}"
+
 # tells the gh command what our default repo is
 export GH_REPO=github.com/elastic/kibana
 
