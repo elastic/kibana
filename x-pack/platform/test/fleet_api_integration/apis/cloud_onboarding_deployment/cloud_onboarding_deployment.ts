@@ -83,7 +83,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             provider: 'aws',
             connectorId: primaryConnectorId,
-            mechanisms: ['identity_federation'],
+            mechanisms: ['agentless'],
             services: ['cloudwatch_metrics'],
             serviceVars: {
               cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }],
@@ -94,7 +94,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.item).to.have.property('id');
         expect(body.item.provider).to.equal('aws');
         expect(body.item.connectorId).to.equal(primaryConnectorId);
-        expect(body.item.mechanisms).to.eql(['identity_federation']);
+        expect(body.item.mechanisms).to.eql(['agentless']);
         expect(body.item.services).to.eql(['cloudwatch_metrics']);
         expect(body.item.status).to.equal('pending');
         expect(body.item.attemptCount).to.equal(1);
@@ -212,7 +212,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             provider: 'aws',
             connectorId: primaryConnectorId,
-            mechanisms: ['identity_federation'],
+            mechanisms: ['agentless'],
             services: ['cloudwatch_metrics'],
             serviceVars: {
               cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }],
@@ -245,7 +245,7 @@ export default function (providerContext: FtrProviderContext) {
 
       before(async () => {
         // Create two deployments for the same connector
-        for (const mechanism of ['identity_federation', 'firehose'] as const) {
+        for (const mechanism of ['agentless', 'firehose'] as const) {
           const { body } = await supertest
             .post(BASE_URL)
             .set('kbn-xsrf', 'xxxx')
@@ -301,7 +301,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             provider: 'aws',
             connectorId: primaryConnectorId,
-            mechanisms: ['identity_federation'],
+            mechanisms: ['agentless'],
             services: ['cloudwatch_metrics'],
             serviceVars: {
               cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }],
@@ -421,7 +421,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             provider: 'aws',
             connectorId: defaultSpaceConnectorId,
-            mechanisms: ['identity_federation'],
+            mechanisms: ['agentless'],
             services: ['cloudtrail'],
           })
           .expect(200);
@@ -433,7 +433,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             provider: 'aws',
             connectorId: testSpaceConnectorId,
-            mechanisms: ['identity_federation'],
+            mechanisms: ['agentless'],
             services: ['cloudtrail'],
           })
           .expect(200);
@@ -504,7 +504,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             provider: 'aws',
             connectorId: primaryConnectorId,
-            mechanisms: ['identity_federation'],
+            mechanisms: ['agentless'],
             services: ['cloudwatch_metrics'],
             serviceVars: {
               cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }],

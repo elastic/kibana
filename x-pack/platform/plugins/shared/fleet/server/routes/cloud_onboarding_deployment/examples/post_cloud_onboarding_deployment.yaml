@@ -8,7 +8,7 @@ requestBody:
             provider: 'aws'
             connectorId: 'cloud-connector-id-1'
             mechanisms:
-              - 'identity_federation'
+              - 'agentless'
             services:
               - 'cloudwatch_metrics'
               - 'cloudtrail'
@@ -64,7 +64,7 @@ responses:
                 provider: 'aws'
                 connectorId: 'cloud-connector-id-1'
                 mechanisms:
-                  - 'identity_federation'
+                  - 'agentless'
                 services:
                   - 'cloudwatch_metrics'
                   - 'cloudtrail'

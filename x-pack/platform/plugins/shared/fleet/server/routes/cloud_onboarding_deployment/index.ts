@@ -85,7 +85,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       createCloudOnboardingDeploymentHandler
     );
 
-  // GET /api/fleet/cloud_onboarding_deployments/{deploymentId}
+  // GET /api/fleet/cloud_onboarding_deployments/{id}
   router.versioned
     .get({
       path: CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES.INFO_PATTERN,
@@ -189,7 +189,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       getCloudOnboardingDeploymentsByConnectorIdHandler
     );
 
-  // PUT /api/fleet/cloud_onboarding_deployments/{deploymentId}
+  // PUT /api/fleet/cloud_onboarding_deployments/{id}
   router.versioned
     .put({
       path: CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES.UPDATE_PATTERN,
@@ -243,7 +243,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       updateCloudOnboardingDeploymentHandler
     );
 
-  // DELETE /api/fleet/cloud_onboarding_deployments/{deploymentId}
+  // DELETE /api/fleet/cloud_onboarding_deployments/{id}
   router.versioned
     .delete({
       path: CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES.DELETE_PATTERN,

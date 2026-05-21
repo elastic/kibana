@@ -10,7 +10,7 @@ import type { CloudProvider } from './cloud_connector';
 export type { CloudProvider };
 
 export type CloudOnboardingDeploymentMechanism =
-  | 'identity_federation'
+  | 'agentless'
   | 'firehose'
   | 'cloud_forwarder'
   | 'agent_based';

@@ -16,15 +16,14 @@ const CloudOnboardingDeploymentProviderSchema = schema.oneOf(
 
 const CloudOnboardingDeploymentMechanismSchema = schema.oneOf(
   [
-    schema.literal('identity_federation'),
+    schema.literal('agentless'),
     schema.literal('firehose'),
     schema.literal('cloud_forwarder'),
     schema.literal('agent_based'),
   ],
   {
     meta: {
-      description:
-        'Delivery mechanism: identity_federation, firehose, cloud_forwarder, or agent_based.',
+      description: 'Delivery mechanism: agentless, firehose, cloud_forwarder, or agent_based.',
     },
   }
 );
@@ -105,7 +104,7 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
       maxSize: 100,
       meta: {
         description:
-          'Package policy IDs created for agentless services. Present only when identity_federation is in mechanisms.',
+          'Package policy IDs created for agentless services. Present only when agentless is in mechanisms.',
       },
     })
   ),

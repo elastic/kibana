@@ -11,7 +11,6 @@ import {
   CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
   CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
-import type { CloudOnboardingDeploymentMechanism } from '../../common/types/models/cloud_onboarding_deployment';
 import type { CloudOnboardingDeploymentSOAttributes } from '../types/so_attributes';
 
 import { cloudOnboardingDeploymentService } from './cloud_onboarding_deployment';
@@ -22,7 +21,7 @@ function makeAttributes(
   return {
     provider: 'aws',
     connectorId: 'conn-1',
-    mechanisms: ['identity_federation'],
+    mechanisms: ['agentless'],
     services: ['cloudtrail'],
     status: 'pending',
     attemptCount: 1,
@@ -71,7 +70,7 @@ describe('cloudOnboardingDeploymentService', () => {
       const result = await cloudOnboardingDeploymentService.create(soClient, {
         provider: 'aws',
         connectorId: 'conn-1',
-        mechanisms: ['identity_federation'],
+        mechanisms: ['agentless'],
         services: ['cloudtrail'],
         serviceVars: {},
       });
@@ -87,7 +86,7 @@ describe('cloudOnboardingDeploymentService', () => {
       );
       expect(result.id).toBe('deploy-1');
       expect(result.connectorId).toBe('conn-1');
-      expect(result.mechanisms).toEqual(['identity_federation']);
+      expect(result.mechanisms).toEqual(['agentless']);
       expect(result.status).toBe('pending');
       expect(result.attemptCount).toBe(1);
     });
@@ -118,7 +117,7 @@ describe('cloudOnboardingDeploymentService', () => {
         cloudOnboardingDeploymentService.create(soClient, {
           provider: 'aws',
           connectorId: 'conn-1',
-          mechanisms: ['identity_federation'],
+          mechanisms: ['agentless'],
           services: [],
           serviceVars: {},
         })
@@ -152,7 +151,7 @@ describe('cloudOnboardingDeploymentService', () => {
 
   describe('getByConnectorId', () => {
     it('returns all deployments for a connector using soClient PIT finder', async () => {
-      const attrs1 = makeAttributes({ mechanisms: ['identity_federation'] });
+      const attrs1 = makeAttributes({ mechanisms: ['agentless'] });
       const attrs2 = makeAttributes({ mechanisms: ['firehose'] });
 
       soClient.createPointInTimeFinder.mockReturnValue({
@@ -366,14 +365,12 @@ describe('cloudOnboardingDeploymentService', () => {
   // UC1: Identity Federation + CloudWatch Metrics + Agentless
   // UC2: Static Keys + CloudWatch Metrics + Agentless
   // UC3: Static Keys + CloudFront Logs + EDOT Cloud Forwarder
-  // UC4: Identity Federation + CloudFront Logs + Firehose
-  // UC5: Identity Federation + CloudFront Logs + EDOT Cloud Forwarder
   // UC6: Agent-Based + CloudWatch Metrics
   describe('use case scenarios', () => {
-    describe('UC1: identity_federation + cloudwatch_metrics + agentless', () => {
-      it('sets identity_federation mechanism and packagePolicyIds', async () => {
+    describe('UC1: agentless + cloudwatch_metrics + agentless', () => {
+      it('sets agentless mechanism and packagePolicyIds', async () => {
         const attrs = makeAttributes({
-          mechanisms: ['identity_federation'],
+          mechanisms: ['agentless'],
           services: ['cloudwatch_metrics'],
           serviceVars: { cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }] },
           packagePolicyIds: ['pkg-aws-001'],
@@ -384,7 +381,7 @@ describe('cloudOnboardingDeploymentService', () => {
         const result = await cloudOnboardingDeploymentService.create(soClient, {
           provider: 'aws',
           connectorId: 'conn-1',
-          mechanisms: ['identity_federation'],
+          mechanisms: ['agentless'],
           services: ['cloudwatch_metrics'],
           serviceVars: { cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }] },
         });
@@ -395,7 +392,7 @@ describe('cloudOnboardingDeploymentService', () => {
         );
         expect(result.status).toBe('pending');
         expect(result.attemptCount).toBe(1);
-        expect(result.mechanisms).toEqual(['identity_federation']);
+        expect(result.mechanisms).toEqual(['agentless']);
       });
     });
 
@@ -544,50 +541,6 @@ describe('cloudOnboardingDeploymentService', () => {
         );
         expect(result.agentPolicyId).toBe('agent-policy-123');
         expect(result.packagePolicyIds).toEqual(['pkg-policy-456']);
-      });
-    });
-
-    describe('UC4/UC5: identity_federation + cloudfront_logs + push mechanism', () => {
-      it.each([
-        ['firehose', ['identity_federation', 'firehose'] as CloudOnboardingDeploymentMechanism[]],
-        [
-          'cloud_forwarder',
-          ['identity_federation', 'cloud_forwarder'] as CloudOnboardingDeploymentMechanism[],
-        ],
-      ])('%s: sets push mechanism and no packagePolicyIds', async (_pushMechanism, mechanisms) => {
-        const attrs = makeAttributes({
-          mechanisms,
-          services: ['cloudfront_logs'],
-          serviceVars: {
-            cloudfront_logs: [
-              { regions: ['us-east-1', 'eu-west-1'], s3_bucket_arn: 'arn:aws:s3:::cf-logs' },
-            ],
-          },
-          packagePolicyIds: undefined,
-        });
-        soClient.create.mockResolvedValue(makeSOResponse(`deploy-${_pushMechanism}`, attrs));
-        mockGetByType(soClient, `deploy-${_pushMechanism}`, attrs);
-
-        const result = await cloudOnboardingDeploymentService.create(soClient, {
-          provider: 'aws',
-          connectorId: `conn-${_pushMechanism}`,
-          mechanisms,
-          services: ['cloudfront_logs'],
-          serviceVars: {
-            cloudfront_logs: [
-              { regions: ['us-east-1', 'eu-west-1'], s3_bucket_arn: 'arn:aws:s3:::cf-logs' },
-            ],
-          },
-        });
-
-        expect(soClient.create).toHaveBeenCalledWith(
-          CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-          expect.objectContaining({ status: 'pending', attemptCount: 1 })
-        );
-        expect(result.status).toBe('pending');
-        expect(result.attemptCount).toBe(1);
-        expect(result.mechanisms).toEqual(mechanisms);
-        expect(result.packagePolicyIds).toBeUndefined();
       });
     });
   });

@@ -12,7 +12,7 @@ export const CloudOnboardingDeploymentSchemaV1 = schema.object({
   connectorId: schema.string({ minLength: 1 }),
   mechanisms: schema.arrayOf(
     schema.oneOf([
-      schema.literal('identity_federation'),
+      schema.literal('agentless'),
       schema.literal('firehose'),
       schema.literal('cloud_forwarder'),
       schema.literal('agent_based'),

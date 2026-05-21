@@ -22,7 +22,7 @@ responses:
                 provider: 'aws'
                 connectorId: 'cloud-connector-id-1'
                 mechanisms:
-                  - 'identity_federation'
+                  - 'agentless'
                 deploymentId: 'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-onboarding/aaa-bbb-ccc'
                 deploymentName: 'elastic-aws-onboarding'
                 services:

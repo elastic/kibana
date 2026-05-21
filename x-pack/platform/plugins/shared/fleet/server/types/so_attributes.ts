@@ -348,7 +348,7 @@ export interface CloudOnboardingDeploymentSOAttributes {
   provider: CloudProvider;
   /** FK to fleet-cloud-connector — the AWS account connection this deployment belongs to. */
   connectorId: string;
-  /** Active delivery mechanisms included in this deployment's IaC stack (identity_federation, firehose, cloud_forwarder, agent_based). */
+  /** Active delivery mechanisms included in this deployment's IaC stack (agentless, firehose, cloud_forwarder, agent_based). */
   mechanisms: CloudOnboardingDeploymentMechanism[];
   /** Provider-specific deployment identifier. For AWS: the CloudFormation stack ARN. Set after the user deploys the stack. */
   deploymentId?: string;
@@ -364,9 +364,9 @@ export interface CloudOnboardingDeploymentSOAttributes {
   attemptCount: number;
   /** Per-service config arrays — serviceVars[serviceId] is an array where each entry represents one data source (region + S3 bucket + service-specific fields). Multiple entries support multiple buckets/sources for the same service. */
   serviceVars?: Record<string, Array<Record<string, unknown>>>;
-  /** Fleet package policy IDs — one per distinct integration package (e.g. one for 'aws', one for 'aws_bedrock'). Present when identity_federation is in mechanisms (agentless). For agent_based, the package policies are attached to the user-managed agent policy tracked in agentPolicyId. */
+  /** Fleet package policy IDs — one per distinct integration package (e.g. one for 'aws', one for 'aws_bedrock'). Present when agentless is in mechanisms. For agent_based, the package policies are attached to the user-managed agent policy tracked in agentPolicyId. */
   packagePolicyIds?: string[];
-  /** Agent policy ID for agent_based mechanism — the user-managed agent policy the package policies are attached to. In agentless (identity_federation), agentPolicyId equals packagePolicyId and is not stored separately. */
+  /** Agent policy ID for agent_based mechanism — the user-managed agent policy the package policies are attached to. In agentless, agentPolicyId equals packagePolicyId and is not stored separately. */
   agentPolicyId?: string;
   /** Elasticsearch API key ID for push mechanisms (firehose, cloud_forwarder). Set by the backend after key creation; used to identify the key for rotation/revocation. No package policy exists for push services. */
   apiKeyId?: string;
