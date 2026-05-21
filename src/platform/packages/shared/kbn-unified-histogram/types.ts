@@ -214,6 +214,12 @@ export interface UnifiedHistogramFetchParamsExternal {
    */
   relativeTimeRange?: TimeRange;
   /**
+   * Override for the time range used by the Lens embeddable for x-axis display.
+   * When set, Lens uses this for the chart's x-axis domain instead of timeRange.
+   * Useful when timeRange is intentionally wider than the desired display window.
+   */
+  displayTimeRange?: TimeRange;
+  /**
    * The ES|QL variables to use for the chart
    */
   esqlVariables?: ESQLControlVariable[];

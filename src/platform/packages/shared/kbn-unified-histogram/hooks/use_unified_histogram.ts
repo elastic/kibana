@@ -135,6 +135,10 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
           isChartAvailable,
           lensVisService,
           lensVisServiceState,
+          // preserve undefined when the original prop is absent so chart.tsx can derive disabled state
+          onBreakdownFieldChange: props.onBreakdownFieldChange
+            ? stateProps.onBreakdownFieldChange
+            : undefined,
         }
       : undefined;
   }, [

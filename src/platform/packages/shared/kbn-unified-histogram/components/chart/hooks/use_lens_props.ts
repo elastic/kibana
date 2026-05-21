@@ -27,6 +27,7 @@ export type LensProps = Pick<
   | 'executionContext'
   | 'onLoad'
   | 'lastReloadRequestTime'
+  | 'overrides'
 >;
 
 export const useLensProps = ({
@@ -50,6 +51,7 @@ export const useLensProps = ({
         lensProps: getLensProps({
           searchSessionId: fetchParams.searchSessionId,
           timeRange: fetchParams.timeRange,
+          displayTimeRange: fetchParams.displayTimeRange,
           esqlVariables: fetchParams.esqlVariables,
           attributes,
           onLoad,
@@ -78,6 +80,7 @@ export const useLensProps = ({
 export const getLensProps = ({
   searchSessionId,
   timeRange,
+  displayTimeRange,
   attributes,
   esqlVariables,
   onLoad,
@@ -85,6 +88,7 @@ export const getLensProps = ({
 }: {
   searchSessionId: string | undefined;
   timeRange: TimeRange;
+  displayTimeRange?: TimeRange;
   attributes: TypedLensByValueInput['attributes'];
   esqlVariables: ESQLControlVariable[] | undefined;
   onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
@@ -102,4 +106,14 @@ export const getLensProps = ({
   },
   onLoad,
   lastReloadRequestTime,
+  overrides: displayTimeRange
+    ? {
+        settings: {
+          xDomain: {
+            min: new Date(displayTimeRange.from).getTime(),
+            max: new Date(displayTimeRange.to).getTime(),
+          },
+        },
+      }
+    : undefined,
 });

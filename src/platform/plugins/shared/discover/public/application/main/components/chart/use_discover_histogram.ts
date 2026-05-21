@@ -17,6 +17,7 @@ import {
   canImportVisContext,
   UnifiedHistogramExternalVisContextStatus,
   UnifiedHistogramFetchStatus,
+  UnifiedHistogramSuggestionType,
   type UnifiedHistogramFetchParamsExternal,
 } from '@kbn/unified-histogram';
 import { intersection } from 'lodash';
@@ -27,6 +28,12 @@ import useLatest from 'react-use/lib/useLatest';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import {
+  buildForkFilterQuery,
+  computeComparisonTimeRange,
+  toAbsoluteRange,
+} from '../../utils/build_fork_comparison_query';
 import { useProfileAccessor } from '../../../../context_awareness';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -206,15 +213,67 @@ export const useDiscoverHistogram = (
   const filters = useCurrentTabSelector(selectTabCombinedFilters);
   const timeInterval = useAppStateSelector((state) => state.interval);
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
+  const timeComparisonEnabled = useAppStateSelector((state) => state.timeComparisonEnabled);
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
   const visContext = useCurrentTabSelector((tab) => tab.attributes.visContext);
+  const comparisonData = useMemo(() => {
+    if (
+      !isEsqlMode ||
+      !timeComparisonEnabled ||
+      !query ||
+      !isOfAggregateQueryType(query) ||
+      !dataView.timeFieldName ||
+      !timeRange
+    ) {
+      return null;
+    }
+    try {
+      const absRange = toAbsoluteRange(timeRange);
+      const previous = computeComparisonTimeRange(absRange);
+      return {
+        forkQuery: buildForkFilterQuery({
+          userQuery: query.esql,
+          timeField: dataView.timeFieldName,
+          current: absRange,
+          previous,
+        }),
+        // DSL prefilter from Lens uses timeRange; expand it to cover both periods so
+        // the previous period rows aren't filtered out before FORK runs.
+        combinedTimeRange: { from: previous.from, to: absRange.to },
+      };
+    } catch {
+      return null;
+    }
+  }, [isEsqlMode, timeComparisonEnabled, timeRange, query, dataView]);
 
   const getModifiedVisAttributesAccessor = useProfileAccessor('getModifiedVisAttributes');
   const getModifiedVisAttributes = useCallback<
     NonNullable<UnifiedHistogramFetchParamsExternal['getModifiedVisAttributes']>
   >(
-    (attributes) => getModifiedVisAttributesAccessor((params) => params.attributes)({ attributes }),
-    [getModifiedVisAttributesAccessor]
+    (attributes) => {
+      let result = getModifiedVisAttributesAccessor((params) => params.attributes)({ attributes });
+      if (comparisonData && result.visualizationType === 'lnsXY') {
+        const viz = result.state.visualization as {
+          preferredSeriesType?: string;
+          layers?: Array<Record<string, unknown>>;
+        };
+        result = {
+          ...result,
+          state: {
+            ...result.state,
+            visualization: {
+              ...viz,
+              preferredSeriesType: 'line',
+              layers: Array.isArray(viz?.layers)
+                ? viz.layers.map((layer) => ({ ...layer, seriesType: 'line' }))
+                : viz?.layers,
+            },
+          },
+        };
+      }
+      return result;
+    },
+    [comparisonData, getModifiedVisAttributesAccessor]
   );
 
   const collectedFetchParams: UnifiedHistogramFetchParamsExternal | undefined = useMemo(() => {
@@ -222,20 +281,21 @@ export const useDiscoverHistogram = (
       searchSessionId,
       requestAdapter: inspectorAdapters.requests,
       dataView,
-      query,
+      query: comparisonData ? { esql: comparisonData.forkQuery } : query,
       filters,
-      timeRange,
+      timeRange: comparisonData ? comparisonData.combinedTimeRange : timeRange,
+      displayTimeRange: comparisonData ? timeRange : undefined,
       relativeTimeRange,
-      breakdownField,
+      breakdownField: comparisonData ? '_fork' : breakdownField,
       timeInterval,
       esqlVariables,
       controlsState: getDefinedControlGroupState(currentTabControlState),
-      // visContext should be in sync with current query
       externalVisContext: isEsqlMode && canImportVisContext(visContext) ? visContext : undefined,
       getModifiedVisAttributes,
     };
   }, [
     breakdownField,
+    comparisonData,
     timeInterval,
     currentTabControlState,
     dataView,
@@ -251,7 +311,11 @@ export const useDiscoverHistogram = (
     getModifiedVisAttributes,
   ]);
 
+  const prevComparisonEnabledRef = useRef(!!comparisonData);
+
   const previousFetchParamsRef = useRef<UnifiedHistogramFetchParamsExternal | null>(null);
+
+  const forkColumn: DatatableColumn = { id: '_fork', name: '_fork', meta: { type: 'string' } };
 
   const triggerUnifiedHistogramFetch = useLatest(
     (latestFetchDetails: DiscoverLatestFetchDetails | undefined) => {
@@ -260,16 +324,30 @@ export const useDiscoverHistogram = (
         isEsqlMode,
       });
 
+      const columns = isEsqlMode
+        ? comparisonData
+          ? [...(esqlQueryColumns ?? []), forkColumn]
+          : esqlQueryColumns
+        : undefined;
+
       const nextFetchParams = {
         ...collectedFetchParams,
         abortController: latestFetchDetails?.abortController ?? getAbortController(),
-        columns: isEsqlMode ? esqlQueryColumns : undefined,
+        columns,
         table: isEsqlMode ? table : undefined,
       };
       previousFetchParamsRef.current = nextFetchParams;
       unifiedHistogramApi?.fetch(nextFetchParams);
     }
   );
+
+  useEffect(() => {
+    const isEnabled = !!comparisonData;
+    if (prevComparisonEnabledRef.current !== isEnabled) {
+      prevComparisonEnabledRef.current = isEnabled;
+      triggerUnifiedHistogramFetch.current(undefined);
+    }
+  }, [comparisonData, triggerUnifiedHistogramFetch]);
 
   /**
    * Data fetching
@@ -318,18 +396,41 @@ export const useDiscoverHistogram = (
     internalStateActions.setOverriddenVisContextAfterInvalidation
   );
 
+  // Tracks the most recent live vis context (including auto-generated ones not persisted to Redux).
+  // Needed for patching bar→line changes in comparison mode where Redux visContext is undefined
+  // until the user first saves manually.
+  const liveVisContextRef = useRef<UnifiedHistogramVisContext | undefined>(undefined);
+
   const onVisContextChanged = useCallback(
     (
       nextVisContext: UnifiedHistogramVisContext | undefined,
       externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
     ) => {
       switch (externalVisContextStatus) {
-        case UnifiedHistogramExternalVisContextStatus.manuallyCustomized:
+        case UnifiedHistogramExternalVisContextStatus.manuallyCustomized: {
           // if user customized the visualization manually
           // (only this action should trigger Unsaved changes badge)
+          let contextToSave = nextVisContext;
+          if (
+            comparisonData &&
+            canImportVisContext(nextVisContext) &&
+            canImportVisContext(liveVisContextRef.current)
+          ) {
+            contextToSave = {
+              ...nextVisContext,
+              suggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
+              attributes: {
+                ...nextVisContext.attributes,
+                state: {
+                  ...nextVisContext.attributes.state,
+                  query: liveVisContextRef.current.attributes.state.query,
+                },
+              },
+            };
+          }
           dispatch(
             updateAttributes({
-              attributes: { visContext: nextVisContext },
+              attributes: { visContext: contextToSave },
             })
           );
           dispatch(
@@ -338,6 +439,7 @@ export const useDiscoverHistogram = (
             })
           );
           break;
+        }
         case UnifiedHistogramExternalVisContextStatus.automaticallyOverridden:
           // if the visualization was invalidated as incompatible and rebuilt
           // (it will be used later for saving the visualization via Save button)
@@ -355,6 +457,10 @@ export const useDiscoverHistogram = (
               overriddenVisContextAfterInvalidation: undefined,
             })
           );
+          // track the live chart query so manuallyCustomized can patch it in comparison mode
+          if (canImportVisContext(nextVisContext)) {
+            liveVisContextRef.current = nextVisContext;
+          }
           break;
         case UnifiedHistogramExternalVisContextStatus.unknown:
           // using `{}` to overwrite the value inside the saved search SO during saving
@@ -366,18 +472,19 @@ export const useDiscoverHistogram = (
           break;
       }
     },
-    [dispatch, setOverriddenVisContextAfterInvalidation, updateAttributes]
+    [comparisonData, dispatch, setOverriddenVisContextAfterInvalidation, updateAttributes]
   );
 
   const onBreakdownFieldChange = useCallback<
     NonNullable<UseUnifiedHistogramProps['onBreakdownFieldChange']>
   >(
     (nextBreakdownField) => {
+      if (comparisonData) return;
       if (nextBreakdownField !== breakdownField) {
         dispatch(updateAppState({ appState: { breakdownField: nextBreakdownField } }));
       }
     },
-    [breakdownField, dispatch, updateAppState]
+    [breakdownField, comparisonData, dispatch, updateAppState]
   );
 
   const onTimeIntervalChange = useCallback<
@@ -409,7 +516,7 @@ export const useDiscoverHistogram = (
       disabledActions: histogramCustomization?.disabledActions,
       isChartLoading,
       onVisContextChanged: isEsqlMode ? onVisContextChanged : undefined,
-      onBreakdownFieldChange,
+      onBreakdownFieldChange: comparisonData ? undefined : onBreakdownFieldChange,
       onTimeIntervalChange,
     }),
     [

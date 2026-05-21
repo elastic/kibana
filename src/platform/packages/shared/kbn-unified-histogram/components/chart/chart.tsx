@@ -73,6 +73,7 @@ export interface UnifiedHistogramChartProps {
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
+  renderTimeComparison?: React.ReactNode;
 }
 
 const RequestStatusError: typeof RequestStatus.ERROR = 2;
@@ -96,6 +97,7 @@ export function UnifiedHistogramChart({
   onBreakdownFieldChange,
   onTotalHitsChange,
   onChartLoad,
+  renderTimeComparison,
   ...histogramProps
 }: UnifiedHistogramChartProps) {
   const lensVisServiceCurrentSuggestionContext = lensVisServiceState.currentSuggestionContext;
@@ -241,9 +243,11 @@ export function UnifiedHistogramChart({
             breakdown={breakdown}
             onBreakdownFieldChange={onBreakdownFieldChange}
             esqlColumns={isPlainRecord ? columns : undefined}
+            disabled={!onBreakdownFieldChange}
           />
         )}
       </div>,
+      renderTimeComparison ?? null,
     ],
     [
       chartVisible,
@@ -254,6 +258,7 @@ export function UnifiedHistogramChart({
       dataView,
       onBreakdownFieldChange,
       columns,
+      renderTimeComparison,
     ]
   );
 

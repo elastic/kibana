@@ -124,6 +124,7 @@ export interface DiscoverAppState {
    * Density of table
    */
   density?: DataGridDensity;
+  timeComparisonEnabled?: boolean;
 }
 
 export interface CascadedDocumentsState {

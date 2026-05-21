@@ -14,7 +14,11 @@ export type {
   UnifiedHistogramVisContext,
   UnifiedHistogramFetchParamsExternal,
 } from './types';
-export { UnifiedHistogramFetchStatus, UnifiedHistogramExternalVisContextStatus } from './types';
+export {
+  UnifiedHistogramFetchStatus,
+  UnifiedHistogramExternalVisContextStatus,
+  UnifiedHistogramSuggestionType,
+} from './types';
 
 export {
   UnifiedBreakdownFieldSelector,
