@@ -53,13 +53,17 @@ export interface EligibleStreamsResponse {
   };
 }
 
-const NumberFromString = z.string().transform((value) => {
-  const trimmed = value.trim();
-  if (trimmed === '') {
-    return undefined;
-  }
-  return Number(trimmed);
-});
+const NumberFromString = z
+  .string()
+  .optional()
+  .transform((value) => {
+    if (value === undefined) return undefined;
+    const trimmed = value.trim();
+    if (trimmed === '') {
+      return undefined;
+    }
+    return Number(trimmed);
+  });
 
 const eligibleStreamsRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_extraction/_eligible',
