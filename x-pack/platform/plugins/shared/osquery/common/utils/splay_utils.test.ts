@@ -7,6 +7,7 @@
 
 import { MAX_SPLAY_SECONDS } from '../schedule';
 import {
+  isSplayWithinHalfRecurrence,
   isSplayWithinMax,
   parseSplay,
   parseSplayPermissive,
@@ -50,6 +51,37 @@ describe('isSplayWithinMax', () => {
         unit: 'days' as unknown as 'seconds',
       })
     ).toBe(false);
+  });
+});
+
+describe('isSplayWithinHalfRecurrence', () => {
+  it('accepts splay at exactly half the recurrence', () => {
+    expect(isSplayWithinHalfRecurrence(300, 600)).toBe(true);
+  });
+
+  it('accepts splay below half the recurrence', () => {
+    expect(isSplayWithinHalfRecurrence(60, 600)).toBe(true);
+  });
+
+  it('rejects splay above half the recurrence', () => {
+    expect(isSplayWithinHalfRecurrence(301, 600)).toBe(false);
+  });
+
+  it('rejects non-positive splay', () => {
+    expect(isSplayWithinHalfRecurrence(0, 600)).toBe(false);
+    expect(isSplayWithinHalfRecurrence(-1, 600)).toBe(false);
+  });
+
+  it('rejects non-positive recurrence', () => {
+    expect(isSplayWithinHalfRecurrence(300, 0)).toBe(false);
+    expect(isSplayWithinHalfRecurrence(300, -1)).toBe(false);
+  });
+
+  it('rejects non-finite inputs', () => {
+    expect(isSplayWithinHalfRecurrence(NaN, 600)).toBe(false);
+    expect(isSplayWithinHalfRecurrence(300, NaN)).toBe(false);
+    expect(isSplayWithinHalfRecurrence(Infinity, 600)).toBe(false);
+    expect(isSplayWithinHalfRecurrence(300, Infinity)).toBe(false);
   });
 });
 

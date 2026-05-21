@@ -56,6 +56,30 @@ describe('Pack saved object model version 3 forward compatibility', () => {
     expect(() => (forwardCompatibility as ObjectType).validate(v3Doc)).not.toThrow();
   });
 
+  it('accepts a pack SO with per-query rrule override (no per-query interval)', () => {
+    const perQueryRruleDoc = {
+      name: 'per-query-rrule-pack',
+      enabled: true,
+      created_at: '2026-05-01T00:00:00.000Z',
+      created_by: 'elastic',
+      updated_at: '2026-05-01T00:00:00.000Z',
+      updated_by: 'elastic',
+      queries: [
+        {
+          id: 'q1',
+          query: 'SELECT * FROM users;',
+          schedule_type: 'rrule',
+          rrule_schedule: {
+            rrule: 'FREQ=DAILY',
+            start_date: '2026-05-01T00:00:00.000Z',
+          },
+        },
+      ],
+    };
+
+    expect(() => (forwardCompatibility as ObjectType).validate(perQueryRruleDoc)).not.toThrow();
+  });
+
   it('accepts a legacy pack SO without `schedule_type`', () => {
     const legacyDoc = {
       name: 'legacy-pack',

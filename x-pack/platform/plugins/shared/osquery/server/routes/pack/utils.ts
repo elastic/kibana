@@ -51,6 +51,39 @@ export interface SOPackQuery extends Omit<PackQueryInput, 'name'> {
   name: string;
 }
 
+// Default pick list for pack query SOs — byte-identical to the pre-rrule
+// shape. Used when `schedule_type` is unset (the only path under
+// `rruleScheduling: false`) and when a query inherits the pack's schedule in
+// interval mode.
+const INTERVAL_MODE_PICK = [
+  'name',
+  'query',
+  'interval',
+  'platform',
+  'version',
+  'snapshot',
+  'removed',
+  'timeout',
+  'schedule_id',
+  'start_date',
+] as const;
+
+// Same fields minus `interval` — used when a query opts into rrule mode. The
+// SO never carries both `interval` and `rrule_schedule` for one query (mutual
+// exclusivity is enforced by building two disjoint pick lists rather than
+// mutating one).
+const RRULE_MODE_PICK = [
+  'name',
+  'query',
+  'platform',
+  'version',
+  'snapshot',
+  'removed',
+  'timeout',
+  'schedule_id',
+  'start_date',
+] as const;
+
 export const convertPackQueriesToSO = (queries: Record<string, PackQueryInput>): SOPackQuery[] =>
   reduce(
     queries,
@@ -59,32 +92,13 @@ export const convertPackQueriesToSO = (queries: Record<string, PackQueryInput>):
         ? convertECSMappingToArray(value.ecs_mapping as Record<string, object>)
         : undefined;
 
-      // Default pick list (no `schedule_type` on the query): byte-identical to
-      // the pre-rrule-scheduling shape. `schedule_type` is undefined for every
-      // pack write that predates PR C wiring the new routes, so this is the
-      // only code path exercised under `rruleScheduling: false`. When the flag
-      // turns on, this is also the path taken by a query that inherits the
-      // pack's schedule without an explicit per-query override.
-      const baseFields = pick(value, [
-        'name',
-        'query',
-        'interval',
-        'platform',
-        'version',
-        'snapshot',
-        'removed',
-        'timeout',
-        'schedule_id',
-        'start_date',
-      ]);
+      const baseFields = pick(
+        value,
+        value.schedule_type === 'rrule' ? RRULE_MODE_PICK : INTERVAL_MODE_PICK
+      );
 
-      // Mutual exclusivity (only applies when `schedule_type` is set):
-      // - `'rrule'` → drop `interval` from the per-query SO, add rrule overrides.
-      // - `'interval'` → keep `interval`, stamp `schedule_type: 'interval'`.
-      // The SO never carries both `interval` and `rrule_schedule` on one query.
       let scheduleOverride: Partial<SOPackQuery> = {};
       if (value.schedule_type === 'rrule') {
-        delete (baseFields as Record<string, unknown>).interval;
         scheduleOverride = pick(value, ['schedule_type', 'rrule_schedule']);
       } else if (value.schedule_type === 'interval') {
         scheduleOverride = pick(value, ['schedule_type']);

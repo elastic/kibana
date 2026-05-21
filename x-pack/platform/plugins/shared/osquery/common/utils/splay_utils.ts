@@ -85,6 +85,24 @@ export const isSplayWithinMax = (state: SplayFormState): boolean => {
 };
 
 /**
+ * Schedule-aware splay validator. Osquerybeat rejects a splay greater than
+ * half the recurrence interval so the random delay window cannot overlap the
+ * next scheduled execution. Pure check — invoked by route validators
+ * that have both the splay and the recurrence interval at request time.
+ *
+ * Returns `false` for non-positive or non-finite inputs (defensive).
+ */
+export const isSplayWithinHalfRecurrence = (
+  splaySeconds: number,
+  recurrenceSeconds: number
+): boolean => {
+  if (!Number.isFinite(splaySeconds) || splaySeconds <= 0) return false;
+  if (!Number.isFinite(recurrenceSeconds) || recurrenceSeconds <= 0) return false;
+
+  return splaySeconds * 2 <= recurrenceSeconds;
+};
+
+/**
  * Serialize splay form state into a Go duration string consumed by osquerybeat
  * (e.g. `"30s"`, `"5m"`, `"1h"`). Rejects non-positive values, non-integer
  * values, and durations exceeding {@link MAX_SPLAY_SECONDS}.

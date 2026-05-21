@@ -90,6 +90,11 @@ export const packSavedObjectModelVersion3: SavedObjectsModelVersion = {
   ],
   schemas: {
     forwardCompatibility: packSchemaV3.extends({}, { unknowns: 'ignore' }),
+    // `create` is required for new model versions per #240919 (rollback support
+    // soft-enforced 2025-11-05). V1/V2 above predate that enforcement and are
+    // grandfathered. Intentionally permissive here: the pack root mapping is
+    // NOT `dynamic: false`, and V3 is additive-only — route handlers
+    // will validate the new fields, not this SO schema.
     create: schema.object({}, { unknowns: 'allow' }),
   },
 };
