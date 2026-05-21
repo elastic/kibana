@@ -11,6 +11,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 
 import {
+  DATA_STREAM_TYPE_VAR_NAME,
   FLEET_APM_PACKAGE,
   FLEET_CONNECTORS_PACKAGE,
   FLEET_UNIVERSAL_PROFILING_COLLECTOR_PACKAGE,
@@ -232,7 +233,11 @@ export function storedPackagePoliciesToAgentPermissions(
                     return;
                   }
 
-                  if (!stream.data_stream.type) {
+                  const effectiveStreamType =
+                    (stream.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value as string | undefined) ||
+                    stream.data_stream.type;
+
+                  if (!effectiveStreamType) {
                     if (inputAllowsDynamic) {
                       // Dynamic signal types input — type is resolved at runtime, skip
                       return;
@@ -257,7 +262,7 @@ export function storedPackagePoliciesToAgentPermissions(
                   const datasetIsPrefix = registryDs?.dataset_is_prefix;
 
                   const ds: DataStreamMeta = {
-                    type: stream.data_stream.type,
+                    type: effectiveStreamType,
                     dataset: applyOtelDatasetSuffixIfNeeded(rawDataset, {
                       isOtelInput,
                       dynamicDataset: stream.data_stream.elasticsearch?.dynamic_dataset,
