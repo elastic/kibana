@@ -329,7 +329,7 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
 
     await test.step('edit the saved panel inline from the dashboard', async () => {
       // Saving an ES|QL viz from Discover lands the dashboard already in edit mode,
-      // so only switch when the Edit button is actually present (view mode).
+      // so only switch when the Edit button is actually present.
       await pageObjects.dashboard.ensureEditMode();
       await pageObjects.dashboard.clickPanelAction(PANEL_ACTION_EDIT, visName);
       await expect(page.testSubj.locator(EDIT_FLYOUT_HEADER)).toBeVisible();
