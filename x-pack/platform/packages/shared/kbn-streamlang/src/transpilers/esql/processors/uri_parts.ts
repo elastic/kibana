@@ -95,9 +95,9 @@ export function convertUriPartsProcessorToESQL(processor: UriPartsProcessor): ES
   const {
     from,
     to = URI_PARTS_DEFAULT_TARGET,
-    keep_original: keepOriginal = true,
-    remove_if_successful: removeIfSuccessful = false,
-    ignore_missing: ignoreMissing = false,
+    keep_original = true,
+    remove_if_successful = false,
+    ignore_missing = false,
     where,
   } = processor;
 
@@ -113,7 +113,7 @@ export function convertUriPartsProcessorToESQL(processor: UriPartsProcessor): ES
   // silently drop. The cross-compat spec
   // (`missing source field with ignore_missing=false fails ingest and
   // drops the ES|QL row`) pins both halves of that contract.
-  const missingFieldFilter = buildIgnoreMissingFilter(ignoreMissing, from);
+  const missingFieldFilter = buildIgnoreMissingFilter(ignore_missing, from);
   if (missingFieldFilter) {
     commands.push(missingFieldFilter);
   }
@@ -162,10 +162,10 @@ export function convertUriPartsProcessorToESQL(processor: UriPartsProcessor): ES
   }
 
   const successGuard = isConditional ? where : undefined;
-  if (keepOriginal) {
+  if (keep_original) {
     commands.push(buildKeepOriginalEval(to, from, successGuard));
   }
-  if (removeIfSuccessful) {
+  if (remove_if_successful) {
     commands.push(buildRemoveIfSuccessfulEval(from, successGuard));
   }
 
