@@ -88,6 +88,9 @@ export interface WorkflowsPublicPluginStartAdditionalServices {
     telemetry: TelemetryServiceClient;
     agentBuilder?: AgentBuilderPluginStart;
     availability: AvailabilityService;
+    globalExecutionsView: {
+      enabled: boolean;
+    };
   };
 }
 

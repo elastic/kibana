@@ -323,6 +323,11 @@ describe('Execution Routes', () => {
           page: 2,
           size: 5,
           omitStepRuns: true,
+          finishedAfter: '2026-05-01T00:00:00.000Z',
+          finishedBefore: '2026-05-14T00:00:00.000Z',
+          sortField: 'finishedAt',
+          sortOrder: 'desc',
+          concurrencyGroupKey: 'streams-ki-onboarding-my-stream',
         },
       };
 
@@ -334,9 +339,14 @@ describe('Execution Routes', () => {
           statuses: ['running'],
           executionTypes: undefined,
           executedBy: undefined,
+          concurrencyGroupKey: 'streams-ki-onboarding-my-stream',
           page: 2,
           size: 5,
           omitStepRuns: true,
+          finishedAfter: '2026-05-01T00:00:00.000Z',
+          finishedBefore: '2026-05-14T00:00:00.000Z',
+          sortField: 'finishedAt',
+          sortOrder: 'desc',
         },
         'default'
       );
@@ -434,7 +444,11 @@ describe('Execution Routes', () => {
 
       await h(mockContext, request as any, mockResponse as any);
 
-      expect(mockApi.cancelWorkflowExecution).toHaveBeenCalledWith('ex-1', 'default');
+      expect(mockApi.cancelWorkflowExecution).toHaveBeenCalledWith(
+        'ex-1',
+        'default',
+        expect.anything()
+      );
       expect(mockResponse.ok).toHaveBeenCalled();
     });
 

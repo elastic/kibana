@@ -134,6 +134,7 @@ dependsOn:
   - '@kbn/observability-agent-builder-plugin'
   - '@kbn/agent-builder-browser'
   - '@kbn/core-analytics-browser'
+  - '@kbn/inspector-plugin'
 tags:
   - plugin
   - prod

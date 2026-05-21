@@ -70,7 +70,7 @@ export class DashboardMarkdownPlugin
         const { text, tags, limit } = searchRequest ?? {};
         if ((tags?.included ?? []).length) return []; // markdown does not support tags
         const result = await markdownClient.search({ per_page: limit, query: text });
-        return result.markdowns.map(({ id, data, meta }) => {
+        return result.data.map(({ id, data, meta }) => {
           return {
             type: MARKDOWN_SAVED_OBJECT_TYPE,
             id,

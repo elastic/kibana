@@ -21,7 +21,7 @@ import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 
 const sortFieldSchema = z
-  .enum(['name', 'createdAt', 'updatedAt', 'createdByUsername', 'updatedByUsername'])
+  .enum(['name', 'createdAt', 'updatedAt'])
   .describe('The available fields to sort action policies by.');
 
 const tagFilterItemSchema = z.string().min(1).max(128);

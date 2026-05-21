@@ -32,6 +32,7 @@ import {
   MOCK_IDP_LOGOUT_PATH,
   MOCK_IDP_REALM_NAME,
   MOCK_IDP_ROLE_MAPPING_NAME,
+  MOCK_IDP_SP_BASE_URL,
   MOCK_IDP_UIAM_COSMOS_DB_ACCESS_KEY,
   MOCK_IDP_UIAM_SIGNING_SECRET,
 } from './constants';
@@ -43,13 +44,10 @@ import { prefixWithEssuDev } from './jwt-codecs/encoder-prefix';
  * Creates XML metadata for our mock identity provider.
  *
  * This can be saved to file and used to configure Elasticsearch SAML realm.
- *
- * @param kibanaUrl Fully qualified URL where Kibana is hosted (including base path)
  */
-export async function createMockIdpMetadata(kibanaUrl: string) {
+export async function createMockIdpMetadata() {
   const signingKey = await readFile(KBN_CERT_PATH);
   const cert = new X509Certificate(signingKey);
-  const trimTrailingSlash = (url: string) => (url.endsWith('/') ? url.slice(0, -1) : url);
 
   return `<?xml version="1.0" encoding="UTF-8"?>
   <md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
@@ -64,9 +62,9 @@ export async function createMockIdpMetadata(kibanaUrl: string) {
         </ds:KeyInfo>
       </md:KeyDescriptor>
       <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-        Location="${trimTrailingSlash(kibanaUrl)}${MOCK_IDP_LOGOUT_PATH}" />
+        Location="${MOCK_IDP_SP_BASE_URL}${MOCK_IDP_LOGOUT_PATH}" />
       <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-        Location="${trimTrailingSlash(kibanaUrl)}${MOCK_IDP_LOGIN_PATH}" />
+        Location="${MOCK_IDP_SP_BASE_URL}${MOCK_IDP_LOGIN_PATH}" />
     </md:IDPSSODescriptor>
   </md:EntityDescriptor>
   `;
@@ -96,8 +94,6 @@ export async function createMockIdpMetadata(kibanaUrl: string) {
  * ```
  */
 export async function createSAMLResponse(options: {
-  /** Fully qualified URL where Kibana is hosted (including base path) */
-  kibanaUrl: string;
   /** ID from SAML authentication request */
   authnRequestId?: string;
   /** SP entity ID for AudienceRestriction (required by UIAM, optional for ES) */
@@ -149,7 +145,7 @@ export async function createSAMLResponse(options: {
         <saml:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
           <saml:SubjectConfirmationData NotOnOrAfter="${notOnOrAfter}" ${
     options.authnRequestId ? `InResponseTo="${options.authnRequestId}"` : ''
-  } Recipient="${options.kibanaUrl}" />
+  } Recipient="${MOCK_IDP_SP_BASE_URL}/api/security/saml/callback" />
         </saml:SubjectConfirmation>
       </saml:Subject>${conditionsXml}
       <saml:AuthnStatement AuthnInstant="${issueInstant}" SessionIndex="4464894646681600">
@@ -233,7 +229,7 @@ export async function createSAMLResponse(options: {
     `
     <samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" ID="_bdf1d51245ed0f71aa23" Version="2.0" IssueInstant="${issueInstant}" ${
       options.authnRequestId ? `InResponseTo="${options.authnRequestId}"` : ''
-    } Destination="${options.kibanaUrl}">
+    } Destination="${MOCK_IDP_SP_BASE_URL}/api/security/saml/callback">
       <saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">${MOCK_IDP_ENTITY_ID}</saml:Issuer>
       <samlp:Status>
         <samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success"/>

@@ -15,12 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { ReviewActionsWidget } from './review_actions_widget';
-import {
-  CODE_ADDED_CLASS,
-  GENERATING_HINT_CLASS,
-  LINE_REPLACED_CLASS,
-  useCommentToEsqlStyle,
-} from './comment_to_esql.styles';
+import { CODE_ADDED_CLASS, GENERATING_HINT_CLASS, LINE_REPLACED_CLASS } from '../editor_ai.styles';
 
 import {
   findTargetComment,
@@ -61,7 +56,6 @@ export const useCommentToEsql = ({
   clearGhostHintRef,
 }: UseCommentToEsqlParams) => {
   const { euiTheme } = useEuiTheme();
-  const commentToEsqlStyle = useCommentToEsqlStyle();
   const reviewStateRef = useRef<CommentReviewState | null>(null);
   const decorationsRef = useRef<monaco.editor.IEditorDecorationsCollection | undefined>(undefined);
   const widgetRef = useRef<ReviewActionsWidget | undefined>(undefined);
@@ -396,7 +390,6 @@ export const useCommentToEsql = ({
   ]);
 
   return {
-    commentToEsqlStyle,
     generateFromComment,
     isReviewActiveRef: reviewStateRef,
     isGeneratingRef,
