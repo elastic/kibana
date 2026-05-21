@@ -12,9 +12,14 @@ import parseArgs from 'minimist';
 import { upsertComment } from '#pipeline-utils';
 
 /**
- * Mirrors the report types in `@kbn/check-saved-objects-cli/src/findings`.
- * Inlined here so this Buildkite script keeps the same dependency surface as the
- * other notifiers (only `#pipeline-utils`).
+ * SOURCE OF TRUTH: packages/kbn-check-saved-objects-cli/src/findings/types.ts
+ *
+ * This interface is intentionally inlined rather than imported so that this
+ * Buildkite script keeps the same minimal dependency surface as the other
+ * notifiers (only `#pipeline-utils`, no Kibana package deps).
+ *
+ * When adding, removing, or changing fields in `SavedObjectsCheckFinding` or
+ * `SavedObjectsCheckReport` in the canonical file above, mirror the change here.
  */
 export interface SavedObjectsCheckFinding {
   ruleId: string;
@@ -28,6 +33,10 @@ export interface SavedObjectsCheckFinding {
    * A value without a leading `#` or `/` will produce a malformed URL.
    */
   docsAnchor?: string;
+  /** GCS URL of the regular (merge-base) baseline snapshot that triggered this finding. */
+  baselineUrl?: string;
+  /** GCS URL of the serverless baseline snapshot that triggered this finding. */
+  serverlessBaselineUrl?: string;
 }
 
 export interface SavedObjectsCheckReport {
@@ -100,7 +109,16 @@ See the [Saved Objects troubleshooting guide](${TROUBLESHOOTING_URL}) and the [m
     const bullets = findings
       .map((f) => {
         const fix = f.fixHint ? ` _Fix:_ ${f.fixHint}` : '';
-        return `- **[${f.ruleId}]** ${f.message}${fix} ([docs](${findingDocsLink(f)}))`;
+        const baselineLinks = [
+          f.baselineUrl ? `[baseline](${f.baselineUrl})` : null,
+          f.serverlessBaselineUrl ? `[serverless baseline](${f.serverlessBaselineUrl})` : null,
+        ]
+          .filter(Boolean)
+          .join(' ');
+        const links = `([docs](${findingDocsLink(f)}))${
+          baselineLinks ? ` (${baselineLinks})` : ''
+        }`;
+        return `- **[${f.ruleId}]** ${f.message}${fix} ${links}`;
       })
       .join('\n');
     sections.push(`${heading}\n${bullets}`);

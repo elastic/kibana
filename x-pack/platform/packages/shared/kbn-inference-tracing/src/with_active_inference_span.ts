@@ -7,8 +7,9 @@
 
 import { core } from '@elastic/opentelemetry-node/sdk';
 import { createWithActiveSpan, withActiveSpan } from '@kbn/tracing-utils';
-import { propagation, trace } from '@opentelemetry/api';
+import { propagation } from '@opentelemetry/api';
 import { createInferenceContext } from './create_inference_context';
+import { getInferenceTracer } from './inference_tracer_provider';
 import { EVAL_RUN_ID_BAGGAGE_KEY } from './baggage';
 import { IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME } from './root_inference_span';
 
@@ -18,36 +19,28 @@ import { IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME } from './root_inference_span';
  * a subset of spans to external systems like Phoenix.
  */
 
-const TRACER = trace.getTracer('inference');
-
-export const withActiveInferenceSpan = createWithActiveSpan(
-  {
-    tracer: TRACER,
-  },
-  (name, opts, ctx, cb) => {
-    if (core.isTracingSuppressed(ctx)) {
-      return cb();
-    }
-
-    const { context: parentContext, isRoot } = createInferenceContext();
-    const evalRunId = propagation
-      .getBaggage(parentContext)
-      ?.getEntry(EVAL_RUN_ID_BAGGAGE_KEY)?.value;
-
-    return withActiveSpan(
-      name,
-      {
-        ...opts,
-        attributes: {
-          ...opts.attributes,
-          [IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME]: isRoot,
-          ...(evalRunId ? { [EVAL_RUN_ID_BAGGAGE_KEY]: evalRunId } : {}),
-        },
-      },
-      parentContext,
-      (span) => {
-        return cb(span);
-      }
-    );
+export const withActiveInferenceSpan = createWithActiveSpan({}, (name, opts, ctx, cb) => {
+  if (core.isTracingSuppressed(ctx)) {
+    return cb();
   }
-);
+
+  const { context: parentContext, isRoot } = createInferenceContext();
+  const evalRunId = propagation.getBaggage(parentContext)?.getEntry(EVAL_RUN_ID_BAGGAGE_KEY)?.value;
+
+  return withActiveSpan(
+    name,
+    {
+      ...opts,
+      tracer: getInferenceTracer(),
+      attributes: {
+        ...opts.attributes,
+        [IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME]: isRoot,
+        ...(evalRunId ? { [EVAL_RUN_ID_BAGGAGE_KEY]: evalRunId } : {}),
+      },
+    },
+    parentContext,
+    (span) => {
+      return cb(span);
+    }
+  );
+});
