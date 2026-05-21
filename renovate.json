@@ -828,8 +828,7 @@
         "openapi-types",
         "ajv",
         "ajv-draft-04",
-        "ajv-formats",
-        "fast-uri"
+        "ajv-formats"
       ],
       "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],
