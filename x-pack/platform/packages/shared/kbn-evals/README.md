@@ -210,6 +210,35 @@ The CLI uses suite metadata from:
 .buildkite/pipelines/evals/evals.suites.json
 ```
 
+### On-demand evals (Buildkite)
+
+Run a single suite and model on any branch without opening a PR or waiting for the full Kibana PR pipeline:
+
+1. Open [kibana-evals-on-demand](https://buildkite.com/elastic/kibana-evals-on-demand) on Buildkite
+2. Click **New build**, select the branch (or commit) to evaluate
+3. Under **Environment variables** (in New build options), add the required variables below — one `KEY=value` per line. These are build-level env vars read by `run_suite.sh`.
+
+Pipeline registration: [`.buildkite/pipeline-resource-definitions/evals/kibana-evals-on-demand.yml`](../../../../../.buildkite/pipeline-resource-definitions/evals/kibana-evals-on-demand.yml).
+
+| Variable                  | Required           | Description                                                                                             |
+| ------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------- |
+| `EVAL_SUITE_ID`           | yes                | Suite id from `evals.suites.json`, e.g. `agent-builder`                                                 |
+| `EVAL_MODEL_GROUPS`       | yes                | Model group, e.g. `eis/openai-gpt-5.4`                                                                  |
+| `EVAL_INCLUDE_EIS_MODELS` | for `eis/*` models | Set to `1` when `EVAL_MODEL_GROUPS` uses `eis/...`                                                      |
+| `EVALUATION_CONNECTOR_ID` | no                 | LLM-as-judge connector id override (connector id, not `eis/...` model group)                            |
+| `EVAL_SERVER_CONFIG_SET`  | some suites        | From `serverConfigSet` on the suite entry in `evals.suites.json` (e.g. `evals_endpoint` for `endpoint`) |
+| `KIBANA_BUILD_ID`         | no                 | Reuse a Kibana build from another Buildkite job (skips the build step)                                  |
+
+The eval pipeline step sets `FTR_EIS_CCM=1` and `EVAL_FANOUT=1`; `KBN_EVALS=1` is set on the pipeline.
+
+Example environment variables for Agent Builder + one EIS model:
+
+```text
+EVAL_SUITE_ID=agent-builder
+EVAL_MODEL_GROUPS=eis/openai-gpt-5.4
+EVAL_INCLUDE_EIS_MODELS=1
+```
+
 ### CI labels
 
 Eval suites can be triggered in PR CI by adding GitHub labels:
@@ -763,11 +792,17 @@ This grants:
 
 Copy the returned `encoded` value and use it for all four secret fields in your vault config:
 
-| Config field                                     | Env variable              | Value              |
-| ------------------------------------------------ | ------------------------- | ------------------ |
-| `tracingEs.apiKey`                               | `TRACING_ES_API_KEY`      | `<encoded>`        |
-| `evaluationsKbn.apiKey`                          | `EVALUATIONS_KBN_API_KEY` | `<encoded>`        |
-| `tracingExporters[0].http.headers.Authorization` | via `TRACING_EXPORTERS`   | `ApiKey <encoded>` |
+| Config field | Env variable | Value |
+| ------------ | ------------ | ----- |
+
+# <<<<<<< HEAD
+
+| `evaluationsEs.apiKey` | `EVALUATIONS_ES_API_KEY` | `<encoded>` |
+
+> > > > > > > origin/main
+> > > > > > > | `tracingEs.apiKey` | `TRACING_ES_API_KEY` | `<encoded>` |
+> > > > > > > | `evaluationsKbn.apiKey` | `EVALUATIONS_KBN_API_KEY` | `<encoded>` |
+> > > > > > > | `tracingExporters[0].http.headers.Authorization` | via `TRACING_EXPORTERS` | `ApiKey <encoded>` |
 
 ### Using a Separate Kibana for Score Ingestion
 
