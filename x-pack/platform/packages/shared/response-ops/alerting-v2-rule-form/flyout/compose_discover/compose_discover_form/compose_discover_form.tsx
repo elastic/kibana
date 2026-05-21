@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import type {
   ComposeDiscoverState,
   ComposeDiscoverAction,
@@ -33,7 +34,9 @@ interface ComposeDiscoverFormProps {
 const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
   alertCondition: {
     id: 'alertCondition',
-    title: 'Alert Condition',
+    title: i18n.translate('xpack.alertingV2.composeDiscover.step.alertCondition', {
+      defaultMessage: 'Alert Condition',
+    }),
     render: (props) => (
       <AlertConditionStep state={props.state} dispatch={props.dispatch} services={props.services} />
     ),
@@ -41,13 +44,17 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
   },
   builderCondition: {
     id: 'builderCondition',
-    title: 'Alert Condition',
+    title: i18n.translate('xpack.alertingV2.composeDiscover.step.builderCondition', {
+      defaultMessage: 'Alert Condition',
+    }),
     render: () => null,
     validate: (_methods, s) => s.queryCommitted,
   },
   recoveryCondition: {
     id: 'recoveryCondition',
-    title: 'Recovery Condition',
+    title: i18n.translate('xpack.alertingV2.composeDiscover.step.recoveryCondition', {
+      defaultMessage: 'Recovery Condition',
+    }),
     render: (props) => (
       <RecoveryConditionStep
         state={props.state}
@@ -58,13 +65,17 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
   },
   details: {
     id: 'details',
-    title: 'Details & Artifacts',
+    title: i18n.translate('xpack.alertingV2.composeDiscover.step.details', {
+      defaultMessage: 'Details & Artifacts',
+    }),
     render: () => <DetailsAndArtifactsStep />,
     validate: async (methods) => methods.trigger(['metadata.name']),
   },
   notifications: {
     id: 'notifications',
-    title: 'Notifications',
+    title: i18n.translate('xpack.alertingV2.composeDiscover.step.notifications', {
+      defaultMessage: 'Notifications',
+    }),
     render: () => <NotificationsStep />,
   },
 };

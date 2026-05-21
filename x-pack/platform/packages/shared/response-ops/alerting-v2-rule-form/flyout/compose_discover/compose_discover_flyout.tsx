@@ -437,6 +437,12 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   );
 
   const handleSubmit = methods.handleSubmit((values) => {
+    if (builderType) {
+      const definition = RULE_BUILDER_REGISTRY[builderType];
+      if (definition?.validate && !definition.validate(uiState, builderState)) {
+        return;
+      }
+    }
     if (isCreate) {
       onCreateRule(composeFormToCreateRequest(values, builderType));
     } else if (ruleId && onUpdateRule) {
