@@ -51,6 +51,7 @@ export class DashboardMigrationClient {
       return acc;
     }, {});
 
+    const splunkResult = input.original_dashboard_export.result;
     const response = (await this.fetch(SIEM_DASHBOARD_MIGRATION_INVOKE_PATH, {
       method: 'POST',
       headers: { 'elastic-api-version': '1' },
@@ -58,7 +59,14 @@ export class DashboardMigrationClient {
         connector_id: connectorId,
         input: {
           id,
-          original_dashboard: input.original_dashboard_export,
+          original_dashboard: {
+            id: splunkResult.id,
+            vendor: 'splunk',
+            title: splunkResult.title,
+            description: splunkResult.description ?? '',
+            data: splunkResult['eai:data'],
+            format: 'xml',
+          },
           resources: resourcesByType,
         },
         ...(config ? { config } : {}),

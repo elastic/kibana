@@ -9,7 +9,7 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import { SIEM_DASHBOARD_MIGRATION_INVOKE_PATH } from '../../../../../common/siem_migrations/dashboards/constants';
-import type { SecuritySolutionPluginRouter } from '../../../../../types';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { authz } from './util/authz';
 import { withLicense } from '../../common/api/util/with_license';
 import type { MigrateDashboardConfig } from '../task/agent/types';
