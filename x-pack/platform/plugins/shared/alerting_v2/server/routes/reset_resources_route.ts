@@ -65,7 +65,6 @@ export class ResetResourcesRoute extends BaseAlertingRoute {
     access: 'internal',
     summary: 'Reset alerting v2 resources (temporary, pre-GA only)',
   } as const;
-  static validate = false as const;
 
   protected readonly routeName = 'reset alerting v2 resources';
 

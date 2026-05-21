@@ -131,9 +131,23 @@ export class WorkflowExecutionQueryService {
       must.push({ bool: { must_not: { exists: { field: 'stepId' } } } });
     }
 
+    if (params.finishedAfter || params.finishedBefore) {
+      must.push({
+        range: {
+          finishedAt: {
+            ...(params.finishedAfter ? { gte: params.finishedAfter } : {}),
+            ...(params.finishedBefore ? { lte: params.finishedBefore } : {}),
+          },
+        },
+      });
+    }
+
     const page = params.page ?? 1;
     const size = params.size ?? DEFAULT_PAGE_SIZE;
     const from = (page - 1) * size;
+    const sort = params.sortField
+      ? [{ [params.sortField]: { order: params.sortOrder ?? 'desc' } }]
+      : undefined;
 
     return searchWorkflowExecutions({
       esClient: this.deps.esClient,
@@ -143,6 +157,7 @@ export class WorkflowExecutionQueryService {
       size,
       from,
       page,
+      sort,
     });
   }
 
