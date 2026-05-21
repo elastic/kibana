@@ -45,9 +45,7 @@ export const durablePollStepDefinition = createPollServerStepDefinition({
     if (context.attempt < lastPollIndex) {
       const phase = context.attempt === 0 ? ('rendering' as const) : ('finalizing' as const);
       context.logger.debug(
-        `Report ${state.requestId}: ${phase} (poll ${
-          context.attempt + 1
-        }/${simulatedRenderPolls})`
+        `Report ${state.requestId}: ${phase} (poll ${context.attempt + 1}/${simulatedRenderPolls})`
       );
       return {
         state: {
@@ -68,5 +66,5 @@ export const durablePollStepDefinition = createPollServerStepDefinition({
     };
   },
   pollPolicy: { strategy: 'fixed', intervalMs: 2000 },
-  pollCeilings: { maxAttempts: 12, maxWaitMs: 60_000 },
+  pollCeilings: { maxAttempts: 12, maxWaitMs: 20_000 },
 });
