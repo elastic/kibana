@@ -39,19 +39,6 @@ describe('convertApplyColorTo', () => {
     });
   });
 
-  it('should set applyColorTo to the default when progress bar is enabled but applyColorTo is undefined', () => {
-    const state: MetricVisualizationState = {
-      ...baseState,
-      showBar: true,
-      maxAccessor: 'max-col',
-      applyColorTo: undefined,
-    };
-    expect(convertApplyColorTo(state)).toEqual({
-      ...state,
-      applyColorTo: LENS_METRIC_STATE_DEFAULTS.applyColorTo,
-    });
-  });
-
   it('should not modify state when applyColorTo is already set', () => {
     const state: MetricVisualizationState = {
       ...baseState,
@@ -61,7 +48,7 @@ describe('convertApplyColorTo', () => {
     expect(convertApplyColorTo(state)).toBe(state);
   });
 
-  it('should not modify state when applyColorTo, color, palette are all undefined and progress bar is not enabled', () => {
+  it('should not modify state when applyColorTo, color, and palette are all undefined', () => {
     const state: MetricVisualizationState = {
       ...baseState,
       applyColorTo: undefined,

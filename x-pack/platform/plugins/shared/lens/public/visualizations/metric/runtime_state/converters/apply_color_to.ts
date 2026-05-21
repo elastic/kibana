@@ -7,7 +7,6 @@
 
 import type { MetricVisualizationState } from '@kbn/lens-common';
 import { LENS_METRIC_STATE_DEFAULTS } from '@kbn/lens-common';
-import { showingBar } from '../../visualization';
 
 /**
  * Normalizes legacy saved states where `applyColorTo` was not yet persisted.
@@ -17,7 +16,7 @@ import { showingBar } from '../../visualization';
  * "background", so we make it explicit here.
  */
 export const convertApplyColorTo = (state: MetricVisualizationState): MetricVisualizationState => {
-  if (state.applyColorTo === undefined && (state.color || state.palette || showingBar(state))) {
+  if (state.applyColorTo === undefined && (state.color || state.palette)) {
     return { ...state, applyColorTo: LENS_METRIC_STATE_DEFAULTS.applyColorTo };
   }
   return state;
