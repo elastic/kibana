@@ -41,7 +41,7 @@ interface LogRuleChanges {
        *
        * Default: ruleSOs.length when not provided
        */ bulkCount?: number;
-    } & Record<string, number | boolean | string>;
+    } & Record<string, number | boolean | string | undefined>;
   };
 }
 
@@ -87,7 +87,7 @@ export async function logRuleChanges({
     await changeTrackingService.logBulk(changes, {
       action,
       spaceId,
-      ...(metadata ? { data: { metadata } } : {}),
+      ...(isEmptyObject(metadata ?? {}) ? {} : { data: { metadata } }),
     });
   } catch (e) {
     logger.warn(`Unable to log bulk rule changes for action "${action}": ${e}`);
@@ -108,4 +108,14 @@ function getRuleType(
   } catch (e) {
     logger.debug(`Unable to fetch "${alertTypeId}" rule type from RuleTypeRegistry: ${e}`);
   }
+}
+
+function isEmptyObject(obj: Record<string, unknown>): boolean {
+  for (const key in obj) {
+    if (obj[key] !== undefined) {
+      return false;
+    }
+  }
+
+  return true;
 }

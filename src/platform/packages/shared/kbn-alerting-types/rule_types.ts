@@ -31,6 +31,25 @@ export enum RuleChangeTrackingAction {
   ruleDelete = 'rule_delete',
 }
 
+/**
+ * Rule change tracking information.
+ * Contains information to be logged when change tracking is active.
+ */
+export interface RuleChangeTracking<ChangeAction extends string = string> {
+  /**
+   * Change action to be logged. RulesClient supports RuleChangeTrackingAction while
+   * consumers may use much wider actions spectrum. The action is indexed and searchable.
+   *
+   * Will use the default action for the current operation when omitted.
+   */
+  action?: ChangeAction;
+  /**
+   * Bulk operation rules count. Due to chunking the actual total number of rules isn't available
+   * inside RulesClient. Passing this number will result in logging in change tracking item's metadata.
+   */
+  bulkCount?: number;
+}
+
 export type ChangeTrackingAction = RuleChangeTrackingAction;
 
 export const ISO_WEEKDAYS = [1, 2, 3, 4, 5, 6, 7] as const;
