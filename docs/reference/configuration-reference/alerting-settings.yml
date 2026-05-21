@@ -1366,7 +1366,7 @@ groups:
         description: |
           An array of observability rule registration contexts whose alert indices should not be written to. Allowed values are `observability.logs`, `observability.metrics`, `observability.apm`, and `observability.uptime`.
         datatype: array of strings
-        default: "[]"
+        default: []
         applies_to:
           stack: ga
           ech: ga
