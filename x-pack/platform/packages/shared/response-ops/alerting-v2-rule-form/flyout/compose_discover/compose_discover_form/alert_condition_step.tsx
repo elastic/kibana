@@ -36,9 +36,15 @@ interface AlertConditionStepProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
+  onKindChange: (kind: 'signal' | 'alert') => void;
 }
 
-export function AlertConditionStep({ state, dispatch, services }: AlertConditionStepProps) {
+export function AlertConditionStep({
+  state,
+  dispatch,
+  services,
+  onKindChange,
+}: AlertConditionStepProps) {
   const { setValue, watch } = useFormContext<ComposeFormValues>();
   const isAlert = watch('kind') === 'alert';
   const timeField = watch('timeField') ?? '@timestamp';
@@ -115,8 +121,8 @@ export function AlertConditionStep({ state, dispatch, services }: AlertCondition
   }, [state.queryCommitted, committedQuery, groupFields.length, setValue]);
 
   const handleTrackingToggle = useCallback(() => {
-    setValue('kind', isAlert ? 'signal' : 'alert');
-  }, [isAlert, setValue]);
+    onKindChange(isAlert ? 'signal' : 'alert');
+  }, [isAlert, onKindChange]);
 
   // Callout when the heuristic split couldn't find a clear split point.
   // Only relevant after Apply (when the committed query is in composed format).
@@ -149,7 +155,7 @@ export function AlertConditionStep({ state, dispatch, services }: AlertCondition
           <EuiButton
             iconType="editorCodeBlock"
             isDisabled={state.childOpen}
-            onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step })}
+            onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert })}
             data-test-subj="composeDiscoverOpenEditor"
           >
             <FormattedMessage
@@ -166,7 +172,7 @@ export function AlertConditionStep({ state, dispatch, services }: AlertCondition
             size="s"
             iconType="editorCodeBlock"
             isDisabled={state.childOpen}
-            onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step })}
+            onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert })}
             data-test-subj="composeDiscoverEditQuery"
           >
             <FormattedMessage
@@ -221,7 +227,7 @@ export function AlertConditionStep({ state, dispatch, services }: AlertCondition
             size="s"
             iconType="editorCodeBlock"
             isDisabled={state.childOpen}
-            onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step })}
+            onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert })}
             data-test-subj="composeDiscoverEditQueries"
           >
             <FormattedMessage
