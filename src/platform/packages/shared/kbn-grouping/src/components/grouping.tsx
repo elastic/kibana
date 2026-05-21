@@ -21,6 +21,7 @@ import { defaultUnit, firstNonNullValue } from '../helpers';
 import { createGroupFilter, getNullGroupFilter } from '../containers/query/helpers';
 import { GroupPanel } from './accordion_panel';
 import { GroupStats } from './accordion_panel/group_stats';
+import { EmptyGroupingComponent } from './empty_results_panel';
 import { countCss, groupingContainerCss, groupingContainerCssLevel } from './styles';
 import { GROUPS_UNIT, NULL_GROUP } from './translations';
 import type { ParsedGroupingAggregation, GroupPanelRenderer, GetGroupStats } from './types';
