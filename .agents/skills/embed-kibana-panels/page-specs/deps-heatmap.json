@@ -1,0 +1,28 @@
+{
+  "title": "Dep Usage — Security Plugins",
+  "panels": [
+    {
+      "type": "heatmap",
+      "title": "Top external deps × plugins (sum of dependent files)",
+      "esql": "FROM kibana-dependency-usage | STATS total = SUM(dependent_file_count) BY dep, plugin_name | SORT total DESC | LIMIT 400",
+      "x": "dep",
+      "y": "plugin_name",
+      "value": "total",
+      "height": 700
+    },
+    {
+      "type": "bar",
+      "title": "Top 25 external dependencies by total file count",
+      "esql": "FROM kibana-dependency-usage | STATS total = SUM(dependent_file_count) BY dep | SORT total DESC | LIMIT 25",
+      "category": "dep",
+      "value": "total",
+      "height": 420
+    },
+    {
+      "type": "table",
+      "title": "Dependencies with Renovate owner and version",
+      "esql": "FROM kibana-dependency-usage | STATS total_files = SUM(dependent_file_count), plugin_count = COUNT_DISTINCT(plugin_name) BY dep, dep_declared_version, renovate_match_team, renovate_match_group, renovate_orphan | SORT total_files DESC | LIMIT 100",
+      "columns": ["dep", "dep_declared_version", "total_files", "plugin_count", "renovate_match_team", "renovate_match_group", "renovate_orphan"]
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "title": "Top deps × plugins (file count)",
+  "description": "Heatmap of top 20 external dependencies vs top 15 plugins, colored by sum of dependent_file_count",
+  "xField": "dep",
+  "yField": "plugin_name",
+  "valueField": "dependent_file_count",
+  "valueOperation": "sum",
+  "xSize": 20,
+  "ySize": 15,
+  "kuery": "",
+  "dataViewId": "c6fb7f6b-198e-489d-b56b-9988f1fe1c25"
+}
