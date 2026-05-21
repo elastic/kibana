@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import {
@@ -22,31 +22,17 @@ import {
 import {
   type AttachmentRenderProps,
   type InlineRenderCallbacks,
-  type ActionButton,
-  ActionButtonType,
 } from '@kbn/agent-builder-browser/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { RULES_UI_EDIT_PRIVILEGE } from '@kbn/security-solution-features/constants';
 import type { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
-import { hasCapabilities } from '../../../common/lib/capabilities';
-import { RULES_PATH, RULES_CREATE_PATH } from '../../../../common/constants';
-import {
-  getEditRuleUrl,
-  getRuleDetailsUrl,
-} from '../../../common/components/link_to/redirect_to_detection_engine';
 import { FiltersDisplay } from './filters_display';
 import { RuleTypeDetails } from './rule_type_details';
 import { ScheduleDisplay } from './schedule_display';
-import {
-  parseRuleFromAttachment,
-  getRuleTypeLabel,
-  getQueryLabel,
-  isOnRuleFormPage,
-} from './helpers';
+import { parseRuleFromAttachment, getRuleTypeLabel, getQueryLabel } from './helpers';
 import type { RuleAttachment } from './helpers';
 import { INDEX_FIELD_LABEL, RULE_TYPE_FIELD_LABEL } from './translations';
+import { useRuleActionButtons } from './use_rule_action_buttons';
 
 const SectionHeading: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <EuiText size="s">
@@ -142,99 +128,17 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
   const isCurrentAttachment = callbacks?.registerActionButtons !== undefined;
   const showButtons = isCurrentAttachment && !agentBusy;
 
-  // Per-card frozen save-button label. Captured the first time this card registers buttons
-  // and never updated afterwards, so user actions that mutate the attachment in place
-  // (e.g. clicking "Save rule" → save_rule_handler adds a new attachment version on the same
-  // attachment id, which reuses this React instance) cannot change the label on a card that
-  // is already mounted. Only a brand-new card from a subsequent agent round — which mounts
-  // a new RuleInlineContent instance — gets a fresh frozen label reflecting the post-save
-  // state.
-  const frozenSaveLabelRef = useRef<'save_rule' | 'save_changes' | null>(null);
-
-  // Destructure to get a stable reference — callbacks object literal is recreated every render.
-  const registerActionButtons = callbacks?.registerActionButtons;
-  useEffect(() => {
-    if (!registerActionButtons) return;
-    const canEditRules = hasCapabilities(application.capabilities, RULES_UI_EDIT_PRIVILEGE);
-    if (
-      !rule ||
-      !canEditRules ||
-      !showButtons ||
-      (rule.type === 'esql' && !uiSettings.get(ENABLE_ESQL))
-    ) {
-      registerActionButtons([]);
-      return;
-    }
-    const savedRuleId = rule.id ?? lastSavedRuleId ?? undefined;
-    // Disabled while saving, or after a successful save until the agent makes a change.
-    // savedRuleId === undefined means the rule has never been saved — always enabled.
-    const isClean = savedRuleId !== undefined && !isDirty;
-    // Freeze the label on first registration based on whether a saved rule exists *at the
-    // moment this card was created*. Cards created pre-first-save show "Save rule" forever;
-    // cards created after any save (i.e. the next attachment rendered by the agent) show
-    // "Save changes" forever. The disabled state still toggles dynamically via isClean.
-    if (frozenSaveLabelRef.current === null) {
-      frozenSaveLabelRef.current = savedRuleId ? 'save_changes' : 'save_rule';
-    }
-
-    const buttons: ActionButton[] = [
-      {
-        label: i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.openInForm', {
-          defaultMessage: 'Open in form',
-        }),
-        icon: 'pencil',
-        type: ActionButtonType.SECONDARY,
-        handler: () => {
-          aiRuleCreation.setAiCreatedRule(rule);
-          application.navigateToApp('securitySolutionUI', {
-            path: savedRuleId ? `${RULES_PATH}${getEditRuleUrl(savedRuleId)}` : RULES_CREATE_PATH,
-          });
-        },
-      },
-      {
-        label:
-          frozenSaveLabelRef.current === 'save_changes'
-            ? i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.saveChanges', {
-                defaultMessage: 'Save changes',
-              })
-            : i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.saveRule', {
-                defaultMessage: 'Save rule',
-              }),
-        icon: 'save',
-        type: ActionButtonType.PRIMARY,
-        disabled: isSaving || isClean,
-        handler: () => {
-          aiRuleCreation.requestSaveRule(rule);
-        },
-      },
-    ];
-    if (savedRuleId && !isOnRuleFormPage(window.location.pathname)) {
-      buttons.push({
-        label: i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.viewRule', {
-          defaultMessage: 'View rule',
-        }),
-        icon: 'popout',
-        type: ActionButtonType.SECONDARY,
-        handler: () => {
-          application.navigateToApp('securitySolutionUI', {
-            path: `${RULES_PATH}${getRuleDetailsUrl(savedRuleId)}`,
-          });
-        },
-      });
-    }
-
-    registerActionButtons(buttons);
-  }, [
+  useRuleActionButtons({
     rule,
-    isSaving,
-    isDirty,
-    lastSavedRuleId,
-    showButtons,
     aiRuleCreation,
     application,
     uiSettings,
-    registerActionButtons,
-  ]);
+    callbacks,
+    isDirty,
+    isSaving,
+    lastSavedRuleId,
+    showButtons,
+  });
 
   if (!rule) {
     return null;
