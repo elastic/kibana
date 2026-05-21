@@ -82,6 +82,7 @@ export const OneConsole = ({
   http: customHttp,
   notifications: customNotifications,
   storagePrefix,
+  defaultEditorContent,
 }: OneConsoleProps) => {
   const [apiLoaded, setApiLoaded] = useState(false);
 
@@ -260,6 +261,7 @@ export const OneConsole = ({
           config: {
             isDevMode: false,
             isPackagedEnvironment: true,
+            defaultEditorContent,
           },
         }}
       >

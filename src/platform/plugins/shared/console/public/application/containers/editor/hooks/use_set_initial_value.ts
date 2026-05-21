@@ -14,7 +14,7 @@ import { decompressFromEncodedURIComponent } from 'lz-string';
 import { i18n } from '@kbn/i18n';
 import { useEffect, useRef } from 'react';
 import { DEFAULT_INPUT_VALUE } from '../../../../../common/constants';
-import { useEditorActionContext } from '../../../contexts';
+import { useEditorActionContext, useServicesContext } from '../../../contexts';
 
 const httpsProtocol = 'https:';
 const elasticHostname = 'www.elastic.co';
@@ -52,6 +52,7 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
   const { localStorageValue, setValue, toasts } = params;
   const isInitialValueSet = useRef<boolean>(false);
   const editorDispatch = useEditorActionContext();
+  const { config } = useServicesContext();
 
   useEffect(() => {
     const ALLOWED_PATHS = ['/guide/', '/docs/'];
@@ -123,7 +124,7 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
     // Only set the value in the editor if an initial value hasn't been set yet
     if (!isInitialValueSet.current) {
       // Only set to default input value if the localstorage value is undefined
-      setValue(localStorageValue ?? DEFAULT_INPUT_VALUE);
+      setValue(localStorageValue ?? config.defaultEditorContent ?? DEFAULT_INPUT_VALUE);
       loadFromUrl();
       isInitialValueSet.current = true;
     }

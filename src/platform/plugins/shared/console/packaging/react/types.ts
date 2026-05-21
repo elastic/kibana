@@ -55,4 +55,11 @@ export interface OneConsoleProps {
    * this prefix — they remain shared across deployments.
    */
   storagePrefix?: string;
+  /**
+   * Text shown in the editor when no buffer is saved for this instance
+   * (first mount, or after the user clears everything and remounts). Defaults
+   * to Kibana's built-in welcome message. Consumers can pass a custom string
+   * to show product- or deployment-specific placeholder commands instead.
+   */
+  defaultEditorContent?: string;
 }
