@@ -64,6 +64,7 @@ describe('loadWorkflowsThunk', () => {
     expect(mockGetWorkflows).toHaveBeenCalledWith({
       size: 1000,
       page: 1,
+      managed: 'all',
     });
     expect(result.type).toBe('detail/loadWorkflowsThunk/fulfilled');
     expect(result.payload).toEqual({
