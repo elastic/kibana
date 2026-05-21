@@ -492,6 +492,10 @@ export interface ValidationErrors {
     message: string;
     type: { type: string };
   };
+  tsdbIncompatibleFunction: {
+    message: string;
+    type: { name: string };
+  };
 }
 
 export type ErrorTypes = keyof ValidationErrors;

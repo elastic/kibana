@@ -497,6 +497,13 @@ Expected one of:
         }),
         type: 'error',
       };
+    case 'tsdbIncompatibleFunction':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.tsdbIncompatibleFunction', {
+          defaultMessage: 'Function {name} is not supported in time series (TS) pipelines',
+          values: { name: out.name.toUpperCase() },
+        }),
+      };
   }
   return { message: '' };
 }
@@ -701,6 +708,9 @@ export const errors = {
       name: fn.name,
       locationName,
     }),
+
+  tsdbIncompatibleFunction: (fn: ESQLFunction): ESQLMessage =>
+    errors.byId('tsdbIncompatibleFunction', fn.location, { name: fn.name }),
 
   wrongNumberArgs: (fn: ESQLFunction, definition: FunctionDefinition): ESQLMessage => {
     const validArgCounts = new Set<number>();

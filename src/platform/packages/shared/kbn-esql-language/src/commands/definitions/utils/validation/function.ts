@@ -112,6 +112,11 @@ class FunctionValidator {
       return;
     }
 
+    if (isTimeseriesSourceCommand(this.ast) && this.definition.tsdbCompatible === false) {
+      this.report(errors.tsdbIncompatibleFunction(this.fn));
+      return;
+    }
+
     if (!this.allowedHere) {
       this.report(errors.functionNotAllowedHere(this.fn, this.location.displayName));
     }
