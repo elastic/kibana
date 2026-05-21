@@ -11,15 +11,9 @@ import type {
   CreateRuleData,
   UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
-import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import { DELAY_MODE } from '../types';
 import type { FormValues, StateTransition } from '../types';
-
-const NORMALIZED_ARTIFACT_TYPES = new Set([RUNBOOK_ARTIFACT_TYPE, DASHBOARD_ARTIFACT_TYPE]);
-
-const createArtifactId = (artifactType: string) =>
-  `${artifactType}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-type RuleArtifactPayload = Array<{ id: string; type: string; value: string }>;
+import { mapArtifacts, type RuleArtifactPayload } from './artifact_mappers';
 
 // ---------------------------------------------------------------------------
 // FormValues → API request
@@ -154,31 +148,6 @@ export interface RuleRequestCommon {
   };
   artifacts?: RuleArtifactPayload;
 }
-
-const mapArtifacts = (artifacts: FormValues['artifacts']): RuleRequestCommon['artifacts'] => {
-  const currentArtifacts = artifacts ?? [];
-
-  const normalizedArtifacts = currentArtifacts.flatMap((artifact) => {
-    if (!NORMALIZED_ARTIFACT_TYPES.has(artifact.type)) {
-      return [artifact];
-    }
-
-    const artifactValue = artifact.value.trim();
-    if (!artifactValue) {
-      return [];
-    }
-
-    return [
-      {
-        ...artifact,
-        id: artifact.id.trim() ? artifact.id : createArtifactId(artifact.type),
-        value: artifactValue,
-      },
-    ];
-  });
-
-  return normalizedArtifacts.length ? normalizedArtifacts : undefined;
-};
 
 /**
  * Maps `FormValues` to the common API request shape (snake_case) shared by

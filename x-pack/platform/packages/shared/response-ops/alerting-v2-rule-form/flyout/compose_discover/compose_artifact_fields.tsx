@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiFormRow } from '@elastic/eui';
+import { EuiFormRow, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DASHBOARD_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import { DashboardsSelector } from '@kbn/dashboards-selector';
@@ -66,15 +66,23 @@ export const ComposeRelatedDashboardsField: React.FC = () => {
     [artifacts, onChange]
   );
 
+  if (!uiActions) {
+    return null;
+  }
+
   return (
     <EuiFormRow
       label={i18n.translate('xpack.alertingV2.ruleForm.relatedDashboardsLabel', {
         defaultMessage: 'Related dashboards',
       })}
       fullWidth
-      labelAppend={i18n.translate('xpack.alertingV2.ruleForm.artifactFieldOptional', {
-        defaultMessage: 'optional',
-      })}
+      labelAppend={
+        <EuiText size="xs">
+          {i18n.translate('xpack.alertingV2.ruleForm.artifactFieldOptional', {
+            defaultMessage: 'optional',
+          })}
+        </EuiText>
+      }
     >
       <DashboardsSelector
         uiActions={uiActions}

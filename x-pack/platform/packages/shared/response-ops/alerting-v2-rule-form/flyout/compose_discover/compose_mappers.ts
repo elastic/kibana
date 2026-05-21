@@ -6,7 +6,7 @@
  */
 
 import type { RuleResponse, CreateRuleData, UpdateRuleData } from '@kbn/alerting-v2-schemas';
-import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
+import { mapArtifacts } from '../../form/utils/artifact_mappers';
 import type {
   ComposeFormValues,
   RuleQuery,
@@ -109,44 +109,6 @@ export function transformQueryOut(query: RuleQuery, kind?: RuleKind): TransformQ
 
   return result;
 }
-
-// ---------------------------------------------------------------------------
-// ComposeFormValues → API request
-// ---------------------------------------------------------------------------
-
-type RuleArtifactPayload = Array<{ id: string; type: string; value: string }>;
-
-const NORMALIZED_ARTIFACT_TYPES = new Set([RUNBOOK_ARTIFACT_TYPE, DASHBOARD_ARTIFACT_TYPE]);
-
-const createArtifactId = (artifactType: string) =>
-  `${artifactType}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-
-const mapArtifacts = (
-  artifacts: ComposeFormValues['artifacts']
-): RuleArtifactPayload | undefined => {
-  const currentArtifacts = artifacts ?? [];
-
-  const normalizedArtifacts = currentArtifacts.flatMap((artifact) => {
-    if (!NORMALIZED_ARTIFACT_TYPES.has(artifact.type)) {
-      return [artifact];
-    }
-
-    const artifactValue = artifact.value.trim();
-    if (!artifactValue) {
-      return [];
-    }
-
-    return [
-      {
-        ...artifact,
-        id: artifact.id.trim() ? artifact.id : createArtifactId(artifact.type),
-        value: artifactValue,
-      },
-    ];
-  });
-
-  return normalizedArtifacts.length ? normalizedArtifacts : undefined;
-};
 
 const DELAY_IMMEDIATE = 'immediate';
 const DELAY_BREACHES = 'breaches';

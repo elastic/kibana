@@ -20,7 +20,7 @@ export interface RuleFormServices {
   notifications: NotificationsStart;
   application: ApplicationStart;
   lens: LensPublicStart;
-  uiActions: UiActionsStart;
+  uiActions?: UiActionsStart;
 }
 
 export type RuleFormLayout = 'page' | 'flyout';

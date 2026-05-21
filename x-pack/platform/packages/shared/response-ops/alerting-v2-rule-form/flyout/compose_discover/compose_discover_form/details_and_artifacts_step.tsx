@@ -9,7 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { RuleDetailsFieldGroup } from '../../../form';
-import { AttachmentRunbookFieldGroup } from '../../../form/field_groups/attachment_runbook_field_group';
+import { RunbookArtifactField } from '../../../form/field_groups/runbook_artifact_field';
 import { ComposeRelatedDashboardsField } from '../compose_artifact_fields';
 
 export function DetailsAndArtifactsStep() {
@@ -30,7 +30,7 @@ export function DetailsAndArtifactsStep() {
       </EuiTitle>
       <EuiSpacer size="s" />
 
-      <AttachmentRunbookFieldGroup />
+      <RunbookArtifactField />
       <EuiSpacer size="m" />
       <ComposeRelatedDashboardsField />
     </>

@@ -13,8 +13,8 @@ import {
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiSplitPanel,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { useController, useFormContext } from 'react-hook-form';
@@ -22,7 +22,7 @@ import { RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import { RunbookField } from '../fields/runbook_field';
 import type { FormValues } from '../types';
 
-export const AttachmentRunbookFieldGroup: React.FC = () => {
+export const RunbookArtifactField: React.FC = () => {
   const { setValue, control } = useFormContext<FormValues>();
   const {
     field: { value: artifactsValue },
@@ -68,61 +68,57 @@ export const AttachmentRunbookFieldGroup: React.FC = () => {
 
   return (
     <>
-      <EuiFormRow
-        label={i18n.translate('xpack.alertingV2.ruleForm.runbookGroupTitle', {
-          defaultMessage: 'Runbook',
-        })}
-        fullWidth
-      >
-        <div>
-          {!hasRunbook ? (
-            <EuiButton
-              iconType="plusInCircle"
-              onClick={openRunbookModal}
-              size="s"
-              data-test-subj="addRunbookButton"
-              color="text"
-            >
-              {i18n.translate('xpack.alertingV2.ruleForm.addRunbookButton', {
-                defaultMessage: 'Add Runbook',
-              })}
-            </EuiButton>
-          ) : (
-            <EuiSplitPanel.Outer hasBorder={true} hasShadow={false}>
-              <EuiSplitPanel.Inner paddingSize="s">
-                <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
-                  <EuiFlexItem>
-                    <EuiText size="s">{runbookTitle}</EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-                      <EuiButtonIcon
-                        iconType="pencil"
-                        onClick={openRunbookModal}
-                        aria-label={i18n.translate('xpack.alertingV2.ruleForm.editRunbookButton', {
-                          defaultMessage: 'Edit Runbook',
-                        })}
-                        color="text"
-                      />
-                      <EuiButtonIcon
-                        iconType="trash"
-                        onClick={openDeleteConfirm}
-                        aria-label={i18n.translate(
-                          'xpack.alertingV2.ruleForm.deleteRunbookButton',
-                          {
-                            defaultMessage: 'Delete Runbook',
-                          }
-                        )}
-                        color="danger"
-                      />
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
+      <EuiText size="s">
+        <strong>
+          {i18n.translate('xpack.alertingV2.ruleForm.runbookGroupTitle', {
+            defaultMessage: 'Runbook',
+          })}
+        </strong>
+      </EuiText>
+      <EuiSpacer size="xs" />
+      {!hasRunbook ? (
+        <EuiButton
+          iconType="plusInCircle"
+          onClick={openRunbookModal}
+          size="s"
+          data-test-subj="addRunbookButton"
+          color="text"
+        >
+          {i18n.translate('xpack.alertingV2.ruleForm.addRunbookButton', {
+            defaultMessage: 'Add Runbook',
+          })}
+        </EuiButton>
+      ) : (
+        <EuiSplitPanel.Outer hasBorder={true} hasShadow={false}>
+          <EuiSplitPanel.Inner paddingSize="s">
+            <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem>
+                <EuiText size="s">{runbookTitle}</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+                  <EuiButtonIcon
+                    iconType="pencil"
+                    onClick={openRunbookModal}
+                    aria-label={i18n.translate('xpack.alertingV2.ruleForm.editRunbookButton', {
+                      defaultMessage: 'Edit Runbook',
+                    })}
+                    color="text"
+                  />
+                  <EuiButtonIcon
+                    iconType="trash"
+                    onClick={openDeleteConfirm}
+                    aria-label={i18n.translate('xpack.alertingV2.ruleForm.deleteRunbookButton', {
+                      defaultMessage: 'Delete Runbook',
+                    })}
+                    color="danger"
+                  />
                 </EuiFlexGroup>
-              </EuiSplitPanel.Inner>
-            </EuiSplitPanel.Outer>
-          )}
-        </div>
-      </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiSplitPanel.Inner>
+        </EuiSplitPanel.Outer>
+      )}
       <RunbookField isOpen={isRunbookModalOpen} onClose={closeRunbookModal} />
       {isDeleteConfirmOpen && (
         <EuiConfirmModal
