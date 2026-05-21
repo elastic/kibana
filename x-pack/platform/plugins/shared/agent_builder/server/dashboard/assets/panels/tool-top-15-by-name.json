@@ -1,0 +1,94 @@
+{
+  "type": "vis",
+  "embeddableConfig": {
+    "attributes": {
+      "visualizationType": "lnsXY",
+      "title": "Top 15 Tools by Count",
+      "state": {
+        "datasourceStates": {
+          "textBased": {
+            "layers": {
+              "bar_0": {
+                "index": "traces-agent_builder.otel-default-@timestamp",
+                "query": {
+                  "esql": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder\"\n| WHERE STARTS_WITH(name, \"Tool:\")\n| STATS `Tool Count` = COUNT(*) BY `Tool Name` = name\n| SORT `Tool Count` DESC\n| LIMIT 15"
+                },
+                "timeField": "@timestamp",
+                "columns": [
+                  {
+                    "columnId": "bar_x",
+                    "fieldName": "Tool Name",
+                    "meta": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "columnId": "bar_y_0",
+                    "fieldName": "Tool Count",
+                    "meta": {
+                      "type": "number"
+                    }
+                  }
+                ],
+                "ignoreGlobalFilters": false
+              }
+            }
+          }
+        },
+        "internalReferences": [
+          {
+            "type": "index-pattern",
+            "id": "traces-agent_builder.otel-default-@timestamp",
+            "name": "indexpattern-datasource-layer-bar_0"
+          }
+        ],
+        "visualization": {
+          "preferredSeriesType": "bar",
+          "legend": {
+            "isVisible": false,
+            "position": "right"
+          },
+          "layers": [
+            {
+              "layerId": "bar_0",
+              "accessors": [
+                "bar_y_0"
+              ],
+              "layerType": "data",
+              "seriesType": "bar",
+              "xAccessor": "bar_x",
+              "yConfig": [
+                {
+                  "axisMode": "left",
+                  "forAccessor": "bar_y_0"
+                }
+              ]
+            }
+          ]
+        },
+        "adHocDataViews": {
+          "traces-agent_builder.otel-default-@timestamp": {
+            "id": "traces-agent_builder.otel-default-@timestamp",
+            "title": "traces-agent_builder.otel-default",
+            "name": "traces-agent_builder.otel-default",
+            "timeFieldName": "@timestamp",
+            "sourceFilters": [],
+            "fieldFormats": {},
+            "runtimeFieldMap": {},
+            "fieldAttrs": {},
+            "allowNoIndex": false,
+            "allowHidden": false,
+            "type": "esql"
+          }
+        },
+        "query": {
+          "esql": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder\"\n| WHERE STARTS_WITH(name, \"Tool:\")\n| STATS `Tool Count` = COUNT(*) BY `Tool Name` = name\n| SORT `Tool Count` DESC\n| LIMIT 15"
+        },
+        "filters": []
+      },
+      "references": []
+    },
+    "references": [],
+    "drilldowns": []
+  }
+}

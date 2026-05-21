@@ -1,0 +1,71 @@
+{
+  "type": "vis",
+  "embeddableConfig": {
+    "attributes": {
+      "visualizationType": "lnsMetric",
+      "title": "ExecuteAgent Count",
+      "references": [],
+      "state": {
+        "datasourceStates": {
+          "textBased": {
+            "layers": {
+              "layer_0": {
+                "index": "traces-agent_builder.otel-default-@timestamp",
+                "query": {
+                  "esql": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder\"\n| WHERE name == \"ExecuteAgent\"\n| STATS `ExecuteAgent Count` = COUNT(*)"
+                },
+                "timeField": "@timestamp",
+                "columns": [
+                  {
+                    "columnId": "metric_accessor_metric",
+                    "fieldName": "ExecuteAgent Count",
+                    "label": "ExecuteAgent Count",
+                    "customLabel": true,
+                    "meta": {
+                      "type": "number"
+                    }
+                  }
+                ],
+                "ignoreGlobalFilters": false
+              }
+            }
+          }
+        },
+        "internalReferences": [
+          {
+            "type": "index-pattern",
+            "id": "traces-agent_builder.otel-default-@timestamp",
+            "name": "indexpattern-datasource-layer-layer_0"
+          }
+        ],
+        "visualization": {
+          "layerId": "layer_0",
+          "layerType": "data",
+          "metricAccessor": "metric_accessor_metric",
+          "showBar": false
+        },
+        "adHocDataViews": {
+          "traces-agent_builder.otel-default-@timestamp": {
+            "id": "traces-agent_builder.otel-default-@timestamp",
+            "title": "traces-agent_builder.otel-default",
+            "name": "traces-agent_builder.otel-default",
+            "timeFieldName": "@timestamp",
+            "sourceFilters": [],
+            "fieldFormats": {},
+            "runtimeFieldMap": {},
+            "fieldAttrs": {},
+            "allowNoIndex": false,
+            "allowHidden": false,
+            "type": "esql"
+          }
+        },
+        "query": {
+          "esql": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder\"\n| WHERE name == \"ExecuteAgent\"\n| STATS `ExecuteAgent Count` = COUNT(*)"
+        },
+        "filters": []
+      }
+    },
+    "references": [],
+    "drilldowns": []
+  }
+}

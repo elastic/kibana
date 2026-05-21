@@ -1,0 +1,124 @@
+{
+  "type": "vis",
+  "embeddableConfig": {
+    "attributes": {
+      "visualizationType": "lnsMetric",
+      "title": "Tool Span Success Rate %",
+      "references": [],
+      "state": {
+        "datasourceStates": {
+          "textBased": {
+            "layers": {
+              "layer_0": {
+                "index": "traces-agent_builder.otel-default-@timestamp",
+                "query": {
+                  "esql": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder\"\n| WHERE STARTS_WITH(name, \"Tool:\")\n| STATS total = COUNT(*), errors = COUNT(*) WHERE status.code == \"Error\"\n| EVAL `Tool Span Success Rate %` = ROUND((total - errors) / total * 100, 2)\n| KEEP `Tool Span Success Rate %`"
+                },
+                "timeField": "@timestamp",
+                "columns": [
+                  {
+                    "columnId": "metric_accessor_metric",
+                    "fieldName": "Tool Span Success Rate %",
+                    "label": "Tool Span Success Rate %",
+                    "customLabel": true,
+                    "params": {
+                      "format": {
+                        "id": "number",
+                        "params": {
+                          "decimals": 2,
+                          "suffix": "%",
+                          "compact": false
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "number"
+                    }
+                  }
+                ],
+                "ignoreGlobalFilters": false
+              }
+            }
+          }
+        },
+        "internalReferences": [
+          {
+            "type": "index-pattern",
+            "id": "traces-agent_builder.otel-default-@timestamp",
+            "name": "indexpattern-datasource-layer-layer_0"
+          }
+        ],
+        "visualization": {
+          "layerId": "layer_0",
+          "layerType": "data",
+          "metricAccessor": "metric_accessor_metric",
+          "palette": {
+            "type": "palette",
+            "name": "custom",
+            "params": {
+              "name": "custom",
+              "progression": "fixed",
+              "reverse": false,
+              "rangeMin": null,
+              "rangeMax": null,
+              "rangeType": "number",
+              "stops": [
+                {
+                  "color": "#f6726a",
+                  "stop": 90
+                },
+                {
+                  "color": "#fcd883",
+                  "stop": 99
+                },
+                {
+                  "color": "#24c292",
+                  "stop": null
+                }
+              ],
+              "colorStops": [
+                {
+                  "color": "#f6726a",
+                  "stop": null
+                },
+                {
+                  "color": "#fcd883",
+                  "stop": 90
+                },
+                {
+                  "color": "#24c292",
+                  "stop": 99
+                }
+              ],
+              "continuity": "all",
+              "steps": 3,
+              "maxSteps": 5
+            }
+          },
+          "showBar": false
+        },
+        "adHocDataViews": {
+          "traces-agent_builder.otel-default-@timestamp": {
+            "id": "traces-agent_builder.otel-default-@timestamp",
+            "title": "traces-agent_builder.otel-default",
+            "name": "traces-agent_builder.otel-default",
+            "timeFieldName": "@timestamp",
+            "sourceFilters": [],
+            "fieldFormats": {},
+            "runtimeFieldMap": {},
+            "fieldAttrs": {},
+            "allowNoIndex": false,
+            "allowHidden": false,
+            "type": "esql"
+          }
+        },
+        "query": {
+          "esql": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder\"\n| WHERE STARTS_WITH(name, \"Tool:\")\n| STATS total = COUNT(*), errors = COUNT(*) WHERE status.code == \"Error\"\n| EVAL `Tool Span Success Rate %` = ROUND((total - errors) / total * 100, 2)\n| KEEP `Tool Span Success Rate %`"
+        },
+        "filters": []
+      }
+    },
+    "references": [],
+    "drilldowns": []
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "type": "vis",
+  "embeddableConfig": {
+    "attributes": {
+      "visualizationType": "lnsXY",
+      "title": "Workflow Avg Duration Over Time",
+      "state": {
+        "datasourceStates": {
+          "textBased": {
+            "layers": {
+              "line_0": {
+                "index": "traces-agent_builder.otel-default-@timestamp",
+                "query": {
+                  "esql": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder\"\n| WHERE name == \"ExecuteWorkflow\"\n| EVAL duration_sec = duration / 1000000000.0\n| STATS `Avg Duration (s)` = ROUND(AVG(duration_sec), 2) BY `Time` = BUCKET(@timestamp, 75, ?_tstart, ?_tend)\n| SORT `Time`"
+                },
+                "timeField": "@timestamp",
+                "columns": [
+                  {
+                    "columnId": "line_x",
+                    "fieldName": "Time",
+                    "meta": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "columnId": "line_y_0",
+                    "fieldName": "Avg Duration (s)",
+                    "meta": {
+                      "type": "number"
+                    }
+                  }
+                ],
+                "ignoreGlobalFilters": false
+              }
+            }
+          }
+        },
+        "internalReferences": [
+          {
+            "type": "index-pattern",
+            "id": "traces-agent_builder.otel-default-@timestamp",
+            "name": "indexpattern-datasource-layer-line_0"
+          }
+        ],
+        "visualization": {
+          "preferredSeriesType": "line",
+          "legend": {
+            "isVisible": false,
+            "position": "right"
+          },
+          "layers": [
+            {
+              "layerId": "line_0",
+              "accessors": [
+                "line_y_0"
+              ],
+              "layerType": "data",
+              "seriesType": "line",
+              "xAccessor": "line_x",
+              "yConfig": [
+                {
+                  "axisMode": "left",
+                  "forAccessor": "line_y_0"
+                }
+              ]
+            }
+          ]
+        },
+        "adHocDataViews": {
+          "traces-agent_builder.otel-default-@timestamp": {
+            "id": "traces-agent_builder.otel-default-@timestamp",
+            "title": "traces-agent_builder.otel-default",
+            "name": "traces-agent_builder.otel-default",
+            "timeFieldName": "@timestamp",
+            "sourceFilters": [],
+            "fieldFormats": {},
+            "runtimeFieldMap": {},
+            "fieldAttrs": {},
+            "allowNoIndex": false,
+            "allowHidden": false,
+            "type": "esql"
+          }
+        },
+        "query": {
+          "esql": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder\"\n| WHERE name == \"ExecuteWorkflow\"\n| EVAL duration_sec = duration / 1000000000.0\n| STATS `Avg Duration (s)` = ROUND(AVG(duration_sec), 2) BY `Time` = BUCKET(@timestamp, 75, ?_tstart, ?_tend)\n| SORT `Time`"
+        },
+        "filters": []
+      },
+      "references": []
+    },
+    "references": [],
+    "drilldowns": []
+  }
+}

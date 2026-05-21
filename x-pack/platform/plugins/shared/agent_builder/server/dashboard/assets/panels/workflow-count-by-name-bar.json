@@ -1,0 +1,94 @@
+{
+  "type": "vis",
+  "embeddableConfig": {
+    "attributes": {
+      "visualizationType": "lnsXY",
+      "title": "Workflow Count by Name",
+      "state": {
+        "datasourceStates": {
+          "textBased": {
+            "layers": {
+              "bar_0": {
+                "index": "traces-agent_builder.otel-default-@timestamp",
+                "query": {
+                  "esql": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder\"\n| WHERE name == \"ExecuteWorkflow\"\n| STATS `Workflow Count` = COUNT(*) BY `Workflow` = attributes.workflow.name\n| SORT `Workflow Count` DESC"
+                },
+                "timeField": "@timestamp",
+                "columns": [
+                  {
+                    "columnId": "bar_x",
+                    "fieldName": "Workflow",
+                    "meta": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "columnId": "bar_y_0",
+                    "fieldName": "Workflow Count",
+                    "meta": {
+                      "type": "number"
+                    }
+                  }
+                ],
+                "ignoreGlobalFilters": false
+              }
+            }
+          }
+        },
+        "internalReferences": [
+          {
+            "type": "index-pattern",
+            "id": "traces-agent_builder.otel-default-@timestamp",
+            "name": "indexpattern-datasource-layer-bar_0"
+          }
+        ],
+        "visualization": {
+          "preferredSeriesType": "bar",
+          "legend": {
+            "isVisible": false,
+            "position": "right"
+          },
+          "layers": [
+            {
+              "layerId": "bar_0",
+              "accessors": [
+                "bar_y_0"
+              ],
+              "layerType": "data",
+              "seriesType": "bar",
+              "xAccessor": "bar_x",
+              "yConfig": [
+                {
+                  "axisMode": "left",
+                  "forAccessor": "bar_y_0"
+                }
+              ]
+            }
+          ]
+        },
+        "adHocDataViews": {
+          "traces-agent_builder.otel-default-@timestamp": {
+            "id": "traces-agent_builder.otel-default-@timestamp",
+            "title": "traces-agent_builder.otel-default",
+            "name": "traces-agent_builder.otel-default",
+            "timeFieldName": "@timestamp",
+            "sourceFilters": [],
+            "fieldFormats": {},
+            "runtimeFieldMap": {},
+            "fieldAttrs": {},
+            "allowNoIndex": false,
+            "allowHidden": false,
+            "type": "esql"
+          }
+        },
+        "query": {
+          "esql": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder\"\n| WHERE name == \"ExecuteWorkflow\"\n| STATS `Workflow Count` = COUNT(*) BY `Workflow` = attributes.workflow.name\n| SORT `Workflow Count` DESC"
+        },
+        "filters": []
+      },
+      "references": []
+    },
+    "references": [],
+    "drilldowns": []
+  }
+}

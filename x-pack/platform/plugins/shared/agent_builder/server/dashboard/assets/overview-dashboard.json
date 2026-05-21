@@ -1,0 +1,380 @@
+{
+  "definition_version": 1,
+  "title": "[Agent Builder] Overview Dashboard",
+  "description": "Comprehensive monitoring dashboard for Agent Builder OTel traces (data_stream.dataset: agent_builder) including token usage, cost, conversation volume, agent execution, tool calls, workflows, and LLM requests.",
+  "time_range": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "options": {
+    "auto_apply_filters": true,
+    "hide_panel_titles": false,
+    "use_margins": true,
+    "sync_cursor": true
+  },
+  "sections": [
+    {
+      "id": "token-usage-cost",
+      "title": "Token Usage & Cost",
+      "panels": [
+        {
+          "$ref": "panels/chatcomplete-token-usage-over-time.json",
+          "grid": {
+            "x": 0,
+            "y": 0,
+            "w": 48,
+            "h": 12
+          }
+        },
+        {
+          "$ref": "panels/chatcomplete-total-input-tokens-metric.json",
+          "grid": {
+            "x": 0,
+            "y": 12,
+            "w": 12,
+            "h": 5
+          }
+        },
+        {
+          "$ref": "panels/chatcomplete-total-output-tokens-metric.json",
+          "grid": {
+            "x": 12,
+            "y": 12,
+            "w": 12,
+            "h": 5
+          }
+        },
+        {
+          "$ref": "panels/chatcomplete-total-cost-metric.json",
+          "grid": {
+            "x": 24,
+            "y": 12,
+            "w": 12,
+            "h": 5
+          }
+        },
+        {
+          "$ref": "panels/chatcomplete-total-count-metric.json",
+          "grid": {
+            "x": 36,
+            "y": 12,
+            "w": 12,
+            "h": 5
+          }
+        },
+        {
+          "$ref": "panels/chatcomplete-cost-over-time.json",
+          "grid": {
+            "x": 0,
+            "y": 17,
+            "w": 48,
+            "h": 10
+          }
+        },
+        {
+          "$ref": "panels/chatcomplete-count-by-model-over-time.json",
+          "grid": {
+            "x": 0,
+            "y": 27,
+            "w": 24,
+            "h": 10
+          }
+        },
+        {
+          "$ref": "panels/chatcomplete-latency-by-provider-over-time.json",
+          "grid": {
+            "x": 24,
+            "y": 27,
+            "w": 24,
+            "h": 10
+          }
+        },
+        {
+          "$ref": "panels/chatcomplete-count-by-model-bar.json",
+          "grid": {
+            "x": 0,
+            "y": 37,
+            "w": 24,
+            "h": 10
+          }
+        },
+        {
+          "$ref": "panels/chatcomplete-count-by-provider-bar.json",
+          "grid": {
+            "x": 24,
+            "y": 37,
+            "w": 24,
+            "h": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "conversation-volume-latency",
+      "title": "Conversation Volume & Latency",
+      "panels": [
+        {
+          "$ref": "panels/converse-span-count-metric.json",
+          "grid": {
+            "x": 0,
+            "y": 0,
+            "w": 12,
+            "h": 5
+          }
+        },
+        {
+          "$ref": "panels/converse-avg-duration-metric.json",
+          "grid": {
+            "x": 12,
+            "y": 0,
+            "w": 12,
+            "h": 5
+          }
+        },
+        {
+          "$ref": "panels/converse-p95-duration-metric.json",
+          "grid": {
+            "x": 24,
+            "y": 0,
+            "w": 12,
+            "h": 5
+          }
+        },
+        {
+          "$ref": "panels/converse-max-duration-metric.json",
+          "grid": {
+            "x": 36,
+            "y": 0,
+            "w": 12,
+            "h": 5
+          }
+        },
+        {
+          "$ref": "panels/converse-count-over-time.json",
+          "grid": {
+            "x": 0,
+            "y": 5,
+            "w": 24,
+            "h": 10
+          }
+        },
+        {
+          "$ref": "panels/converse-avg-duration-over-time.json",
+          "grid": {
+            "x": 24,
+            "y": 5,
+            "w": 24,
+            "h": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "agent-execution",
+      "title": "Agent Execution Overview",
+      "panels": [
+        {
+          "$ref": "panels/execute-agent-count-metric.json",
+          "grid": {
+            "x": 0,
+            "y": 0,
+            "w": 12,
+            "h": 5
+          }
+        },
+        {
+          "$ref": "panels/execute-agent-avg-duration-metric.json",
+          "grid": {
+            "x": 12,
+            "y": 0,
+            "w": 12,
+            "h": 5
+          }
+        },
+        {
+          "$ref": "panels/execute-agent-p95-duration-metric.json",
+          "grid": {
+            "x": 24,
+            "y": 0,
+            "w": 12,
+            "h": 5
+          }
+        },
+        {
+          "$ref": "panels/execute-agent-max-duration-metric.json",
+          "grid": {
+            "x": 36,
+            "y": 0,
+            "w": 12,
+            "h": 5
+          }
+        },
+        {
+          "$ref": "panels/execute-agent-count-by-agent-over-time.json",
+          "grid": {
+            "x": 0,
+            "y": 5,
+            "w": 24,
+            "h": 10
+          }
+        },
+        {
+          "$ref": "panels/execute-agent-duration-by-agent-over-time.json",
+          "grid": {
+            "x": 24,
+            "y": 5,
+            "w": 24,
+            "h": 10
+          }
+        },
+        {
+          "$ref": "panels/execute-agent-count-by-agent-bar.json",
+          "grid": {
+            "x": 0,
+            "y": 15,
+            "w": 48,
+            "h": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "tool-calls",
+      "title": "Tool Call Frequency & Errors",
+      "panels": [
+        {
+          "$ref": "panels/tool-total-count-metric.json",
+          "grid": {
+            "x": 0,
+            "y": 0,
+            "w": 12,
+            "h": 5
+          }
+        },
+        {
+          "$ref": "panels/tool-error-count-metric.json",
+          "grid": {
+            "x": 12,
+            "y": 0,
+            "w": 12,
+            "h": 5
+          }
+        },
+        {
+          "$ref": "panels/tool-success-rate-metric.json",
+          "grid": {
+            "x": 24,
+            "y": 0,
+            "w": 12,
+            "h": 5
+          }
+        },
+        {
+          "$ref": "panels/tool-avg-duration-metric.json",
+          "grid": {
+            "x": 36,
+            "y": 0,
+            "w": 12,
+            "h": 5
+          }
+        },
+        {
+          "$ref": "panels/tool-count-by-name-over-time.json",
+          "grid": {
+            "x": 0,
+            "y": 5,
+            "w": 24,
+            "h": 10
+          }
+        },
+        {
+          "$ref": "panels/tool-count-by-status-over-time.json",
+          "grid": {
+            "x": 24,
+            "y": 5,
+            "w": 24,
+            "h": 10
+          }
+        },
+        {
+          "$ref": "panels/tool-top-15-by-name.json",
+          "grid": {
+            "x": 0,
+            "y": 15,
+            "w": 48,
+            "h": 12
+          }
+        }
+      ]
+    },
+    {
+      "id": "workflow-execution",
+      "title": "Workflow Execution",
+      "panels": [
+        {
+          "$ref": "panels/workflow-total-count-metric.json",
+          "grid": {
+            "x": 0,
+            "y": 0,
+            "w": 12,
+            "h": 5
+          }
+        },
+        {
+          "$ref": "panels/workflow-avg-duration-metric.json",
+          "grid": {
+            "x": 12,
+            "y": 0,
+            "w": 12,
+            "h": 5
+          }
+        },
+        {
+          "$ref": "panels/workflow-p95-duration-metric.json",
+          "grid": {
+            "x": 24,
+            "y": 0,
+            "w": 12,
+            "h": 5
+          }
+        },
+        {
+          "$ref": "panels/workflow-max-duration-metric.json",
+          "grid": {
+            "x": 36,
+            "y": 0,
+            "w": 12,
+            "h": 5
+          }
+        },
+        {
+          "$ref": "panels/workflow-count-by-name-over-time.json",
+          "grid": {
+            "x": 0,
+            "y": 5,
+            "w": 24,
+            "h": 10
+          }
+        },
+        {
+          "$ref": "panels/workflow-avg-duration-over-time.json",
+          "grid": {
+            "x": 24,
+            "y": 5,
+            "w": 24,
+            "h": 10
+          }
+        },
+        {
+          "$ref": "panels/workflow-count-by-name-bar.json",
+          "grid": {
+            "x": 0,
+            "y": 15,
+            "w": 48,
+            "h": 10
+          }
+        }
+      ]
+    }
+  ]
+}

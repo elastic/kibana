@@ -1,0 +1,104 @@
+{
+  "type": "vis",
+  "embeddableConfig": {
+    "attributes": {
+      "visualizationType": "lnsXY",
+      "title": "Total Token Usage Over Time by Model",
+      "state": {
+        "datasourceStates": {
+          "textBased": {
+            "layers": {
+              "area_stacked_0": {
+                "index": "traces-agent_builder.otel-default-@timestamp",
+                "query": {
+                  "esql": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder\"\n| WHERE name == \"ChatComplete\"\n| STATS `Total Tokens` = SUM(TO_LONG(attributes.gen_ai.usage.input_tokens)) + SUM(TO_LONG(attributes.gen_ai.usage.output_tokens)) BY `Time` = BUCKET(@timestamp, 75, ?_tstart, ?_tend), `Model` = attributes.gen_ai.request.model"
+                },
+                "timeField": "@timestamp",
+                "columns": [
+                  {
+                    "columnId": "area_stacked_x",
+                    "fieldName": "Time",
+                    "meta": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "columnId": "area_stacked_y_0",
+                    "fieldName": "Total Tokens",
+                    "meta": {
+                      "type": "number"
+                    }
+                  },
+                  {
+                    "columnId": "area_stacked_breakdown",
+                    "fieldName": "Model",
+                    "meta": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "ignoreGlobalFilters": false
+              }
+            }
+          }
+        },
+        "internalReferences": [
+          {
+            "type": "index-pattern",
+            "id": "traces-agent_builder.otel-default-@timestamp",
+            "name": "indexpattern-datasource-layer-area_stacked_0"
+          }
+        ],
+        "visualization": {
+          "preferredSeriesType": "area_stacked",
+          "legend": {
+            "isVisible": false,
+            "position": "right"
+          },
+          "layers": [
+            {
+              "layerId": "area_stacked_0",
+              "accessors": [
+                "area_stacked_y_0"
+              ],
+              "layerType": "data",
+              "seriesType": "area_stacked",
+              "xAccessor": "area_stacked_x",
+              "yConfig": [
+                {
+                  "axisMode": "left",
+                  "forAccessor": "area_stacked_y_0"
+                }
+              ],
+              "splitAccessors": [
+                "area_stacked_breakdown"
+              ]
+            }
+          ]
+        },
+        "adHocDataViews": {
+          "traces-agent_builder.otel-default-@timestamp": {
+            "id": "traces-agent_builder.otel-default-@timestamp",
+            "title": "traces-agent_builder.otel-default",
+            "name": "traces-agent_builder.otel-default",
+            "timeFieldName": "@timestamp",
+            "sourceFilters": [],
+            "fieldFormats": {},
+            "runtimeFieldMap": {},
+            "fieldAttrs": {},
+            "allowNoIndex": false,
+            "allowHidden": false,
+            "type": "esql"
+          }
+        },
+        "query": {
+          "esql": "FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND data_stream.dataset == \"agent_builder\"\n| WHERE name == \"ChatComplete\"\n| STATS `Total Tokens` = SUM(TO_LONG(attributes.gen_ai.usage.input_tokens)) + SUM(TO_LONG(attributes.gen_ai.usage.output_tokens)) BY `Time` = BUCKET(@timestamp, 75, ?_tstart, ?_tend), `Model` = attributes.gen_ai.request.model"
+        },
+        "filters": []
+      },
+      "references": []
+    },
+    "references": [],
+    "drilldowns": []
+  }
+}
