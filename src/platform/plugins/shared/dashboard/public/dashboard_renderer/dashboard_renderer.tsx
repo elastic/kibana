@@ -10,6 +10,7 @@
 import classNames from 'classnames';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
+import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiEmptyPrompt,
   EuiLoadingElastic,
@@ -21,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 import { apm } from '@elastic/apm-rum';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import type { TracksOverlays } from '@kbn/presentation-util';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 
@@ -55,7 +55,7 @@ export interface DashboardRendererProps {
    * Use `overlay` when the dashboard is embedded in a host that already uses a push flyout
    * (e.g. Agent Builder canvas).
    */
-  panelFlyoutType?: TracksOverlays['panelFlyoutType'];
+  panelFlyoutType?: EuiFlyoutProps['type'];
   /** Callback for redirecting within the dashboard application. */
   dashboardRedirect?: DashboardRedirect;
   /** Function that returns the creation options for the dashboard. */
