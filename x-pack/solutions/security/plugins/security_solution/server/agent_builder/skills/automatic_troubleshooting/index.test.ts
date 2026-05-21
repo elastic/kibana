@@ -69,13 +69,13 @@ describe('createAutomaticTroubleshootingSkill', () => {
   });
 
   describe('getInlineTools', () => {
-    it('returns three inline tools', () => {
+    it('returns four inline tools', () => {
       const skill = createAutomaticTroubleshootingSkill(mockEndpointAppContextService);
 
       const inlineTools = skill.getInlineTools?.();
 
       expect(inlineTools).toBeDefined();
-      expect(inlineTools).toHaveLength(3);
+      expect(inlineTools).toHaveLength(4);
     });
 
     it('includes get_package_configurations tool', async () => {
