@@ -263,10 +263,10 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip
-            content={i18n.translate(
-              'xpack.alertingV2.composeDiscover.querySandbox.searchTooltip',
-              { defaultMessage: 'Search ({shortcut})', values: { shortcut: RUN_SHORTCUT_LABEL } }
-            )}
+            content={i18n.translate('xpack.alertingV2.composeDiscover.querySandbox.searchTooltip', {
+              defaultMessage: 'Search ({shortcut})',
+              values: { shortcut: RUN_SHORTCUT_LABEL },
+            })}
           >
             <EuiButton
               size="s"
