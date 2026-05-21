@@ -17,10 +17,10 @@ import {
 import { compact } from 'lodash';
 import type { EntityDetailsHighlightsResponse } from '../../../common/api/entity_analytics/entity_details/highlights.gen';
 import { ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL } from '../../../common/entity_analytics/entity_analytics/constants';
-import type { BehavioralSummaryResponse } from '../../../common/api/entity_analytics';
 import { BEHAVIOR_DETAILS_INTERNAL_URL } from '../../../common/entity_analytics/behaviors/constants';
 import type {
   AssetCriticalityRecord,
+  BehavioralSummaryResponse,
   ConfigureRiskEngineSavedObjectRequestBodyInput,
   CreateEntitySourceResponse,
   CreatePrivilegesImportIndexResponse,

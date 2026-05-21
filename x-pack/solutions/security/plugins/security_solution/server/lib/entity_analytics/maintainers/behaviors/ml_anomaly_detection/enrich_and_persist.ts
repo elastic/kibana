@@ -71,6 +71,7 @@ export const enrichAndPersistAnomalies = async ({
           _id: anomaly._id,
           job_id: jobId,
           detector_index: anomaly.detectorIndex,
+          detector_function: anomaly.detectorFunction,
           timestamp: anomaly.timestamp,
           record_score: anomaly.recordScore,
           field_name: anomaly.fieldName,

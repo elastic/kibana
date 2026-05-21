@@ -192,6 +192,7 @@ describe('enrichAndPersistAnomalies', () => {
       _id: 'anomaly-hit-1',
       job_id: 'security-job-1',
       detector_index: 2,
+      detector_function: 'rare',
       timestamp: 1778241600000,
       record_score: 88,
       field_name: 'process.name',

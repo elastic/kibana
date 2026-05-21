@@ -7,6 +7,7 @@
 
 import { EuiHorizontalRule } from '@elastic/eui';
 import React from 'react';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { Entity } from '../../../../common/api/entity_analytics';
 import { ObservedDataSection } from './components/observed_data_section';
 import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_entity_resolution_license';
@@ -24,7 +25,7 @@ import type { ObservedEntityData } from '../shared/components/observed_entity/ty
 import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 import { VisualizationsSection } from '../shared/components/right/visualizations_section';
 import { ResolutionSection } from '../../../entity_analytics/components/entity_resolution/resolution_section';
-import { BehavioralBaselineSection } from './components/behavioral_baseline_section';
+import { BehaviorsSection } from '../../../entity_analytics/components/ml_anomalous_behaviors/behaviors_section';
 
 export type ObservedUserData = Omit<ObservedEntityData<UserItem>, 'anomalies'> & {
   entityRecord?: EntityStoreRecord | null;
@@ -65,13 +66,14 @@ export const UserPanelContent = ({
   prefetchedResolutionRisk,
 }: UserPanelContentProps) => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
+  const isBehaviorMaintainerEnabled = useIsExperimentalFeatureEnabled(
+    'entityAnalyticsMlJobBehaviorMaintainer'
+  );
 
-  // entity.behaviors.anomaly_job_ids is written by the ML anomaly detection maintainer
-  // but is not part of the public EntityField schema, so we access it via a cast
-  const anomalyJobIds = (
-    entityRecord?.entity?.behaviors as { anomaly_job_ids?: string[] } | undefined
-  )?.anomaly_job_ids;
-  const hasBehavioralData = !!anomalyJobIds?.length;
+  const anomalyJobIds =
+    (entityRecord?.entity?.behaviors as { anomaly_job_ids?: string[] } | undefined)
+      ?.anomaly_job_ids ?? [];
+  const hasBehavioralData = isBehaviorMaintainerEnabled === true && !!anomalyJobIds?.length;
 
   // Extract userName from identityFields for components that need a string
   // Priority: identityFields['user.name'] > identityFields[first key]
@@ -105,7 +107,7 @@ export const UserPanelContent = ({
         )}
       {entityStoreEntityId && hasBehavioralData && (
         <>
-          <BehavioralBaselineSection entityId={entityStoreEntityId} />
+          <BehaviorsSection entityId={entityStoreEntityId} />
           <EuiHorizontalRule margin="m" />
         </>
       )}

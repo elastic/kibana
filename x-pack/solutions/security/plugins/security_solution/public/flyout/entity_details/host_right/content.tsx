@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { Entity } from '../../../../common/api/entity_analytics';
 import { ObservedDataSection } from './components/observed_data_section';
 import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_entity_resolution_license';
@@ -23,6 +24,7 @@ import type { ObservedEntityData } from '../shared/components/observed_entity/ty
 import type { EntityRiskScore, HostItem } from '../../../../common/search_strategy';
 import { VisualizationsSection } from '../shared/components/right/visualizations_section';
 import { ResolutionSection } from '../../../entity_analytics/components/entity_resolution/resolution_section';
+import { BehaviorsSection } from '../../../entity_analytics/components/ml_anomalous_behaviors/behaviors_section';
 
 type ObservedHostData = Omit<ObservedEntityData<HostItem>, 'anomalies'>;
 
@@ -61,6 +63,14 @@ export const HostPanelContent = ({
   prefetchedResolutionRisk,
 }: HostPanelContentProps) => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
+  const isBehaviorMaintainerEnabled = useIsExperimentalFeatureEnabled(
+    'entityAnalyticsMlJobBehaviorMaintainer'
+  );
+
+  const anomalyJobIds =
+    (entityRecord?.entity?.behaviors as { anomaly_job_ids?: string[] } | undefined)
+      ?.anomaly_job_ids ?? [];
+  const hasBehavioralData = isBehaviorMaintainerEnabled === true && !!anomalyJobIds?.length;
 
   // Extract hostName from identityFields for components that need a string
   // Priority: identityFields['host.name'] > identityFields[first key]
@@ -92,6 +102,12 @@ export const HostPanelContent = ({
             <EuiHorizontalRule />
           </>
         )}
+      {entityStoreEntityId && hasBehavioralData && (
+        <>
+          <BehaviorsSection entityId={entityStoreEntityId} />
+          <EuiHorizontalRule margin="m" />
+        </>
+      )}
       {entityStoreEntityId && (
         <>
           <VisualizationsSection

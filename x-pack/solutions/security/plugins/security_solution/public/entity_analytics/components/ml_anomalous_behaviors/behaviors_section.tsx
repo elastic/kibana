@@ -16,14 +16,16 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiFontSize,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { AnomalySummaryEntry } from '../../../../../common/api/entity_analytics';
-import { useBehavioralSummary } from '../hooks/use_behavioral_summary';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { AnomalySummaryEntry } from '../../../../common/api/entity_analytics';
+import { useBehavioralSummary } from '../../api/hooks/use_behavioral_summary';
 
-interface Props {
+interface BehaviorsSectionProps {
   entityId: string;
 }
 
@@ -39,61 +41,54 @@ const getDotColor = (score: number): string => {
   return 'primary';
 };
 
-export const BehavioralBaselineSection: React.FC<Props> = ({ entityId }) => {
-  const { euiTheme } = useEuiTheme();
-  const accordionId = useGeneratedHtmlId({ prefix: 'behavioral_baseline' });
+export const BehaviorsSection: React.FC<BehaviorsSectionProps> = ({ entityId }) => {
+  const xxsFontSize = useEuiFontSize('xxs').fontSize;
   const { data } = useBehavioralSummary(entityId);
   const anomalies = data?.anomalies ?? [];
 
   if (!anomalies.length) return null;
 
-  const subduedOverline = css`
-    font-size: ${euiTheme.size.s};
-    font-weight: ${euiTheme.font.weight.bold};
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: ${euiTheme.colors.subduedText};
-  `;
-
-  const accordionCss = css`
-    .euiAccordion__childWrapper {
-      overflow: visible;
-    }
-  `;
-
   return (
     <EuiAccordion
-      id={accordionId}
-      initialIsOpen
-      css={accordionCss}
+      id={'entity_behaviors'}
       buttonContent={
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
-              <h4>{'Behavioral Baseline'}</h4>
+              <h3>
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.entityBehaviors.title"
+                  defaultMessage="Behaviors"
+                />
+              </h3>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiBadge color="success">{'ML'}</EuiBadge>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="primary">{`${anomalies.length} anomalies`}</EuiBadge>
+            <EuiBadge color="primary">
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.entityBehaviors.numAnomalies"
+                defaultMessage="{num} anomalies"
+                values={{ num: anomalies.length }}
+              />
+            </EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
       }
       extraAction={
-        <EuiText size="xs" color="subdued">
-          {'Last 90 days'}
-        </EuiText>
+        <span
+          data-test-subj="behaviorsSectionTimeRange"
+          css={css`
+            font-size: ${xxsFontSize};
+          `}
+        >
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.entityBehaviors.timeRange"
+            defaultMessage="Last 90 days"
+          />
+        </span>
       }
     >
       <EuiSpacer size="m" />
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="none">
-        <EuiFlexItem grow={false}>
-          <span css={subduedOverline}>{'Recent Anomalies'}</span>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
       {anomalies.map((anomaly, idx) => (
         <AnomalyRow key={`${anomaly.jobId}-${idx}`} anomaly={anomaly} />
       ))}

@@ -20,6 +20,7 @@ export const makeAnomaly = (overrides: Partial<AnomalyHit> = {}): AnomalyHit => 
   recordScore: 75,
   actual: 5,
   typical: 1,
+  detectorFunction: 'rare',
   ...overrides,
 });
 
@@ -53,6 +54,8 @@ export const makeHit = (
     sort?: unknown[];
     noSource?: boolean;
     noEntityId?: boolean;
+    detectorFunction?: string;
+    detectorFunctionDescription?: string;
   } = {}
 ) => {
   const {
@@ -69,6 +72,8 @@ export const makeHit = (
     sort = [timestamp, jobId, detectorIndex],
     noSource = false,
     noEntityId = false,
+    detectorFunction = 'rare',
+    detectorFunctionDescription = 'rare',
   } = overrides;
 
   return {
@@ -82,6 +87,8 @@ export const makeHit = (
           probability: 0.01,
           multi_bucket_impact: 0.5,
           timestamp,
+          function: detectorFunction,
+          function_description: detectorFunctionDescription,
           record_score: recordScore,
           initial_record_score: recordScore,
           bucket_span: 900,
@@ -90,8 +97,6 @@ export const makeHit = (
           by_field_value: byFieldValue,
           partition_field_name: 'host.name',
           partition_field_value: 'web-01',
-          function: 'rare',
-          function_description: 'rare',
           actual,
           typical,
         },

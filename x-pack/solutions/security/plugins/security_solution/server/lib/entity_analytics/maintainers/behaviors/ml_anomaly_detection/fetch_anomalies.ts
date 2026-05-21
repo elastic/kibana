@@ -18,6 +18,8 @@ interface RawAnomalyRecord {
   timestamp: number;
   job_id: string;
   detector_index: number;
+  function?: string;
+  function_description?: string;
   record_score: number;
   field_name?: string;
   by_field_name?: string;
@@ -108,6 +110,7 @@ export async function* streamAnomaliesForEntityBatch({
             entityId,
             jobId: src.job_id,
             detectorIndex: src.detector_index,
+            detectorFunction: src.function ?? '',
             timestamp: src.timestamp,
             recordScore: src.record_score,
             actual: src.actual[0],

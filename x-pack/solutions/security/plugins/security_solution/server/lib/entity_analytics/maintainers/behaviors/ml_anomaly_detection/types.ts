@@ -12,6 +12,7 @@ export interface AnomalyHit {
   entityId: string;
   jobId: string;
   detectorIndex: number;
+  detectorFunction: string;
   timestamp: number;
   recordScore: number;
   actual: number;
@@ -40,6 +41,7 @@ export interface EnrichedAnomalyRecord {
     _id: string;
     job_id: string;
     detector_index: number;
+    detector_function: string;
     timestamp: number;
     record_score: number;
     field_name?: string;

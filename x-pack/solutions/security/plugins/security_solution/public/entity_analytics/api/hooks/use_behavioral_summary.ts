@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
+import { useEntityAnalyticsRoutes } from '../api';
 
 const BEHAVIORAL_SUMMARY_QUERY_KEY = 'behavioral_summary';
 
