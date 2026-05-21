@@ -52,7 +52,7 @@ import type { AggregateParams } from '../application/rule/methods/aggregate/type
 import { aggregateRules } from '../application/rule/methods/aggregate';
 import type { DeleteRuleParams } from '../application/rule/methods/delete';
 import { deleteRule } from '../application/rule/methods/delete';
-import { BulkDeleteRulesParams } from '../application/rule/methods/bulk_delete/types';
+import type { BulkDeleteRulesParams } from '../application/rule/methods/bulk_delete/types';
 import { bulkDeleteRules } from '../application/rule/methods/bulk_delete';
 import type { BulkDisableRulesRequestBody } from '../application/rule/methods/bulk_disable';
 import { bulkDisableRules } from '../application/rule/methods/bulk_disable';
