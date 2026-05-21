@@ -824,7 +824,6 @@ describe('Helpers', () => {
         ])
       ).toEqual([]);
     });
-
   });
 
   describe('getOperatorOptions', () => {
