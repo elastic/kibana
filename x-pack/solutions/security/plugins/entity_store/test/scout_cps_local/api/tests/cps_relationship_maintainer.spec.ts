@@ -97,6 +97,44 @@ async function seedLocalUserEntity(
 }
 
 /**
+ * Polls GET /api/security/entity_store/status until the engine reports `running`,
+ * or throws on timeout. The INSTALL route returns success while the engine is
+ * still bootstrapping its backing indices and aliases (e.g. entities-latest-default),
+ * so a test that immediately writes/reads against those aliases races with the
+ * async setup and fails with `index_not_found_exception`.
+ */
+async function waitForEntityStoreRunning(
+  apiClient: {
+    get: (
+      url: string,
+      opts: { headers: Record<string, string>; responseType: 'json' }
+    ) => Promise<{ statusCode: number; body: unknown }>;
+  },
+  headers: Record<string, string>,
+  timeoutMs = 60_000
+): Promise<void> {
+  const start = Date.now();
+  let lastStatus: string | undefined;
+
+  while (Date.now() - start < timeoutMs) {
+    const response = await apiClient.get(ENTITY_STORE_ROUTES.public.STATUS, {
+      headers,
+      responseType: 'json',
+    });
+    const body = response.body as { status?: string } | undefined;
+    lastStatus = body?.status;
+    if (lastStatus === 'running') {
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+
+  throw new Error(
+    `Timed out after ${timeoutMs}ms waiting for entity store status=running (last status: ${lastStatus})`
+  );
+}
+
+/**
  * Polls the LATEST index until the given entity has a non-empty
  * `entity.relationships.accesses_frequently.ids` array, or throws on timeout.
  */
@@ -148,11 +186,27 @@ apiTest.describe(
       internalHeaders = { ...credentials.cookieHeader, ...INTERNAL_HEADERS };
 
       await kbnClient.uiSettings.update({ [FF_ENABLE_ENTITY_STORE_V2]: true });
-      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+
+      const installResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
         headers: defaultHeaders,
         responseType: 'json',
         body: {},
       });
+      expect([200, 201]).toContain(installResponse.statusCode);
+
+      // INSTALL returns before the engine finishes provisioning the latest alias —
+      // poll until status=running so seedLocalUserEntity has an alias to write into.
+      await waitForEntityStoreRunning(apiClient, defaultHeaders);
+
+      const initResponse = await apiClient.post(
+        ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT,
+        {
+          headers: internalHeaders,
+          responseType: 'json',
+          body: {},
+        }
+      );
+      expect([200, 201]).toContain(initResponse.statusCode);
     });
 
     apiTest.afterAll(async ({ apiClient, esClient, linkedProject }) => {
@@ -187,13 +241,7 @@ apiTest.describe(
           await ingestSshLogin(linkedProject.esClient, { userName, hostId, hostName });
         }
 
-        // Init maintainers and trigger the accesses run.
-        await apiClient.post(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT, {
-          headers: internalHeaders,
-          responseType: 'json',
-          body: {},
-        });
-
+        // Maintainers were inited in beforeAll; just trigger the accesses run here.
         await triggerMaintainerRun(apiClient, internalHeaders, ACCESSES_MAINTAINER_ID);
 
         // Wait for the relationship to land in the origin entity store.
