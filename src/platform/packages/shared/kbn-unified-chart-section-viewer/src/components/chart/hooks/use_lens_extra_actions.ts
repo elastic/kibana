@@ -81,7 +81,7 @@ const getExploreInDiscoverTabAction = (onExecute: () => void): Action => {
     type: 'actionButton',
     getDisplayName() {
       return i18n.translate('metricsExperience.lens.actions.exploreInDiscoverTab', {
-        defaultMessage: 'Explore',
+        defaultMessage: 'Open in a Discover tab',
       });
     },
     getIconType() {
