@@ -352,7 +352,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
               data-test-subj="apmSloExpandButton"
               data-event-element="sloExpandTable"
               iconType={expanded ? 'minimize' : 'maximize'}
-              color="text"
+              color="primary"
               size="xs"
               onClick={() => handleSloToggle(sloItem)}
               aria-label={
