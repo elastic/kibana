@@ -176,10 +176,7 @@ export const GlobalCaseFields = React.memo<GlobalCaseFieldsProps>(({ caseData, o
   );
 
   const templateRefNames = useMemo<ReadonlySet<string>>(
-    () =>
-      new Set(
-        (templateData?.definition.fields ?? []).filter(isRefField).map((f) => f.$ref)
-      ),
+    () => new Set((templateData?.definition.fields ?? []).filter(isRefField).map((f) => f.$ref)),
     [templateData]
   );
 
@@ -193,7 +190,13 @@ export const GlobalCaseFields = React.memo<GlobalCaseFieldsProps>(({ caseData, o
 
   // Suppress render while the template is loading to prevent a flash of a
   // global field that will be filtered out once the template definition arrives.
-  if (isLoading || isError || (caseData.template?.id && isLoadingTemplate) || !visibleGlobalFields.length) return null;
+  if (
+    isLoading ||
+    isError ||
+    (caseData.template?.id && isLoadingTemplate) ||
+    !visibleGlobalFields.length
+  )
+    return null;
 
   return (
     <>

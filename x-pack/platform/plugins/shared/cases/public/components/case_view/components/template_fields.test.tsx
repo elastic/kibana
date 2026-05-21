@@ -640,10 +640,7 @@ describe('GlobalCaseFields', () => {
     it('hides a global field that is already referenced via $ref in the template', () => {
       mockUseGetFieldDefinitions.mockReturnValue({
         data: {
-          fieldDefinitions: [
-            makeGlobalDef('incident_type'),
-            makeGlobalDef('environment'),
-          ],
+          fieldDefinitions: [makeGlobalDef('incident_type'), makeGlobalDef('environment')],
         },
         isLoading: false,
         isError: false,
@@ -668,10 +665,7 @@ describe('GlobalCaseFields', () => {
     it('shows a global field that is NOT referenced by the template', () => {
       mockUseGetFieldDefinitions.mockReturnValue({
         data: {
-          fieldDefinitions: [
-            makeGlobalDef('incident_type'),
-            makeGlobalDef('environment'),
-          ],
+          fieldDefinitions: [makeGlobalDef('incident_type'), makeGlobalDef('environment')],
         },
         isLoading: false,
         isError: false,

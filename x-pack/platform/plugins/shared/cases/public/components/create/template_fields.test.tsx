@@ -244,7 +244,9 @@ describe('CreateCaseTemplateFields', () => {
         templateId: 'template-1',
         definition: {
           name: 'Test Template',
-          fields: [{ name: 'hostname', control: 'INPUT_TEXT', type: 'keyword', label: 'Host Name' }],
+          fields: [
+            { name: 'hostname', control: 'INPUT_TEXT', type: 'keyword', label: 'Host Name' },
+          ],
         },
       },
       isLoading: false,

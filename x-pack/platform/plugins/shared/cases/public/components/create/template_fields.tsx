@@ -61,10 +61,7 @@ export const CreateCaseTemplateFields: React.FC = () => {
   // Fields referenced by the template via $ref are owned by the template section —
   // exclude them from the global section to avoid duplicate inputs.
   const templateRefNames = useMemo<ReadonlySet<string>>(
-    () =>
-      new Set(
-        (template?.definition?.fields ?? []).filter(isRefField).map((f) => f.$ref)
-      ),
+    () => new Set((template?.definition?.fields ?? []).filter(isRefField).map((f) => f.$ref)),
     [template]
   );
 
@@ -133,7 +130,10 @@ export const CreateCaseTemplateFields: React.FC = () => {
   }
 
   // Render nothing if there are no visible global fields and no template fields to show.
-  if (!visibleGlobalInlineFields.length && (!templateId || template?.definition?.fields === undefined)) {
+  if (
+    !visibleGlobalInlineFields.length &&
+    (!templateId || template?.definition?.fields === undefined)
+  ) {
     return (
       <>
         <EuiSpacer />
