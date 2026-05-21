@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../..',
-  roots: ['<rootDir>/x-pack/platform/packages/private/ml/aiops_change_point_detection'],
+  roots: ['<rootDir>/x-pack/platform/packages/shared/ml/aiops_change_point_detection'],
 };
