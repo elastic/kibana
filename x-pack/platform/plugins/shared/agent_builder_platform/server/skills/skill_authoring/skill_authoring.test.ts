@@ -14,16 +14,55 @@ import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachm
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { SKILL_ATTACHMENT_TYPE } from '../../../common/attachments';
 import { createSkillAttachmentType } from '../../attachment_types/skill';
+import { createListToolsTool } from './list_tools';
 import { createProposeSkillTool } from './propose_skill';
 import { createPatchSkillTool } from './patch_skill';
 
 /**
- * Build a minimal `ToolHandlerContext` carrying a real `AttachmentStateManager`.
- * We exercise the actual attachment validation pipeline (the same one the
- * production runner uses) so the tests catch any drift between the tool's
- * pre-flight Zod check and the attachment type's `validate`.
+ * Stub of `ToolProvider.list` that returns the configured tools as if they
+ * were the live registry. We only care about the fields the code under test
+ * actually reads (id, description, type, tags); the rest of the
+ * `ExecutableTool` surface is filled with no-op values to satisfy the type.
  */
-const createTestContext = (): {
+const stubToolProvider = (
+  registry: Array<{ id: string; description?: string; type?: string; tags?: string[] }>
+) => ({
+  list: jest.fn(async () =>
+    registry.map((t) => ({
+      id: t.id,
+      description: t.description ?? `Description for ${t.id}`,
+      type: t.type ?? 'builtin',
+      tags: t.tags ?? [],
+      readonly: true,
+      experimental: false,
+      configuration: {},
+      getSchema: async () => ({} as any),
+      execute: async () => ({} as any),
+    }))
+  ),
+  has: jest.fn(),
+  get: jest.fn(),
+});
+
+/**
+ * Default registry used by tests that don't care about the exact tool set.
+ * Includes `platform.core.execute_esql` so the existing propose/patch happy
+ * paths (which pass that id) continue to pass without per-test wiring.
+ */
+const DEFAULT_REGISTRY: Array<{ id: string; description?: string }> = [
+  { id: 'platform.core.execute_esql', description: 'Run an ES|QL query.' },
+];
+
+/**
+ * Build a minimal `ToolHandlerContext` carrying a real `AttachmentStateManager`
+ * and a stubbed `ToolProvider`. We exercise the actual attachment validation
+ * pipeline (the same one the production runner uses) so the tests catch any
+ * drift between the tool's pre-flight Zod check and the attachment type's
+ * `validate`.
+ */
+const createTestContext = (
+  registry: Array<{ id: string; description?: string }> = DEFAULT_REGISTRY
+): {
   context: ToolHandlerContext;
   attachments: ReturnType<typeof createAttachmentStateManager>;
 } => {
@@ -37,6 +76,8 @@ const createTestContext = (): {
 
   const context = {
     attachments,
+    toolProvider: stubToolProvider(registry),
+    request: {},
   } as unknown as ToolHandlerContext;
 
   return { context, attachments };
@@ -49,6 +90,46 @@ const validProposeInput = {
   content: '## When to Use\n\nUse this skill when triaging incidents.',
   tool_ids: ['platform.core.execute_esql'],
 };
+
+describe('list_tools tool', () => {
+  it('returns the registry projection with id and description only', async () => {
+    const tool = createListToolsTool();
+    const { context } = createTestContext([
+      { id: 'tool.a', description: 'First tool' },
+      { id: 'tool.b', description: 'Second tool' },
+    ]);
+
+    const result = (await tool.handler({}, context)) as ToolHandlerStandardReturn;
+
+    expect(result.results).toHaveLength(1);
+    expect(result.results[0].type).toBe(ToolResultType.other);
+
+    const data = result.results[0].data as {
+      tools: Array<Record<string, unknown>>;
+      total: number;
+      returned: number;
+      truncated: boolean;
+    };
+    expect(data.tools).toHaveLength(2);
+    expect(data.tools[0]).toEqual({ id: 'tool.a', description: 'First tool' });
+    expect(data.tools[1]).toEqual({ id: 'tool.b', description: 'Second tool' });
+    expect(data.total).toBe(2);
+    expect(data.returned).toBe(2);
+    expect(data.truncated).toBe(false);
+  });
+
+  it('returns an empty list cleanly when the registry has no tools', async () => {
+    const tool = createListToolsTool();
+    const { context } = createTestContext([]);
+
+    const result = (await tool.handler({}, context)) as ToolHandlerStandardReturn;
+
+    expect(result.results[0].type).toBe(ToolResultType.other);
+    const data = result.results[0].data as { tools: unknown[]; total: number };
+    expect(data.tools).toHaveLength(0);
+    expect(data.total).toBe(0);
+  });
+});
 
 describe('propose_skill tool', () => {
   it('creates a skill attachment with version 1 and returns its id', async () => {
@@ -85,6 +166,52 @@ describe('propose_skill tool', () => {
     expect(result.results).toHaveLength(1);
     expect(result.results[0].type).toBe(ToolResultType.error);
     expect(attachments.getActive()).toHaveLength(0);
+  });
+
+  it('rejects an unknown tool_id and returns the available_tools list for recovery', async () => {
+    const tool = createProposeSkillTool();
+    const { context, attachments } = createTestContext([
+      { id: 'real.tool.alpha', description: 'Alpha' },
+      { id: 'real.tool.beta', description: 'Beta' },
+    ]);
+
+    const result = (await tool.handler(
+      { ...validProposeInput, tool_ids: ['hallucinated.tool'] },
+      context
+    )) as ToolHandlerStandardReturn;
+
+    expect(result.results).toHaveLength(2);
+    expect(result.results[0].type).toBe(ToolResultType.error);
+    expect(result.results[1].type).toBe(ToolResultType.other);
+
+    const recovery = result.results[1].data as {
+      invalid_tool_ids: string[];
+      available_tools: Array<{ id: string }>;
+    };
+    expect(recovery.invalid_tool_ids).toEqual(['hallucinated.tool']);
+    expect(recovery.available_tools.map((t) => t.id)).toEqual([
+      'real.tool.alpha',
+      'real.tool.beta',
+    ]);
+
+    // Nothing should have been persisted.
+    expect(attachments.getActive()).toHaveLength(0);
+  });
+
+  it('accepts an empty tool_ids array without hitting the registry', async () => {
+    const tool = createProposeSkillTool();
+    // Empty registry — call would fail if the validator hit it, but with an
+    // empty tool_ids list we short-circuit and skip the registry call.
+    const { context, attachments } = createTestContext([]);
+
+    const result = (await tool.handler(
+      { ...validProposeInput, tool_ids: [] },
+      context
+    )) as ToolHandlerStandardReturn;
+
+    expect(result.results).toHaveLength(1);
+    expect(result.results[0].type).toBe(ToolResultType.other);
+    expect(attachments.getActive()).toHaveLength(1);
   });
 });
 
@@ -198,5 +325,34 @@ describe('patch_skill tool', () => {
     expect(
       (finalStored?.data.data as { referenced_content?: unknown[] }).referenced_content?.length ?? 0
     ).toBe(0);
+  });
+
+  it('rejects a patch that introduces an unknown tool_id and leaves the draft unchanged', async () => {
+    const { context, attachments, attachmentId } = await seedSkill();
+
+    const result = (await createPatchSkillTool().handler(
+      {
+        attachment_id: attachmentId,
+        tool_ids: ['hallucinated.tool'],
+      },
+      context
+    )) as ToolHandlerStandardReturn;
+
+    expect(result.results).toHaveLength(2);
+    expect(result.results[0].type).toBe(ToolResultType.error);
+    expect(result.results[1].type).toBe(ToolResultType.other);
+
+    const recovery = result.results[1].data as {
+      invalid_tool_ids: string[];
+      available_tools: Array<{ id: string }>;
+    };
+    expect(recovery.invalid_tool_ids).toEqual(['hallucinated.tool']);
+    expect(recovery.available_tools.map((t) => t.id)).toContain('platform.core.execute_esql');
+
+    // The draft's tool_ids should be untouched.
+    const stored = attachments.get(attachmentId);
+    expect((stored?.data.data as { tool_ids: string[] }).tool_ids).toEqual([
+      'platform.core.execute_esql',
+    ]);
   });
 });

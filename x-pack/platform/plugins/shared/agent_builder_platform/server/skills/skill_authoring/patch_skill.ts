@@ -12,6 +12,7 @@ import { skillCreateRequestSchema } from '@kbn/agent-builder-common';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { SKILL_ATTACHMENT_TYPE, type SkillAttachmentData } from '../../../common/attachments';
+import { validateToolIdsAgainstRegistry, formatInvalidToolIdsMessage } from './validate_tool_ids';
 
 const contentPatchSchema = z.object({
   find: z
@@ -66,7 +67,7 @@ const patchSkillSchema = z.object({
     .array(z.string())
     .optional()
     .describe(
-      'Replacement list of registry tool ids (max 5). Replaces the existing array entirely.'
+      'Replacement list of registry tool ids (max 5). Replaces the existing array entirely. Each id must exist in the tool registry — call `list_tools` first and copy ids verbatim. Inventing ids will cause this call to fail.'
     ),
   content_patches: z
     .array(contentPatchSchema)
@@ -146,7 +147,7 @@ export const createPatchSkillTool = (): BuiltinSkillBoundedTool<typeof patchSkil
   id: 'patch_skill',
   type: ToolType.builtin,
   description:
-    'Refine an existing `skill` attachment by applying targeted edits (rename, edit description, swap tool_ids, search-replace on `content` or referenced files, add/remove referenced files). Preferred over calling `propose_skill` again, which discards the draft history. After patching, re-render the draft via `<render_attachment id="ATTACHMENT_ID" />`.',
+    'Refine an existing `skill` attachment by applying targeted edits (rename, edit description, swap tool_ids, search-replace on `content` or referenced files, add/remove referenced files). Preferred over calling `propose_skill` again, which discards the draft history. If you are changing `tool_ids`, call `list_tools` first and pick ids verbatim from the result — invalid ids will cause this call to fail. After patching, re-render the draft via `<render_attachment id="ATTACHMENT_ID" />`.',
   schema: patchSkillSchema,
   confirmation: { askUser: 'never' },
   handler: async (input, context) => {
@@ -270,6 +271,25 @@ export const createPatchSkillTool = (): BuiltinSkillBoundedTool<typeof patchSkil
               .map((issue) => `${issue.path.join('.') || '<root>'}: ${issue.message}`)
               .join('; ')}`,
           }),
+        ],
+      };
+    }
+
+    const toolValidation = await validateToolIdsAgainstRegistry(context, validated.data.tool_ids);
+    if (!toolValidation.ok) {
+      return {
+        results: [
+          createErrorResult({
+            message: formatInvalidToolIdsMessage(toolValidation.invalidToolIds),
+          }),
+          {
+            tool_result_id: getToolResultId(),
+            type: ToolResultType.other,
+            data: {
+              invalid_tool_ids: toolValidation.invalidToolIds,
+              available_tools: toolValidation.availableTools,
+            },
+          },
         ],
       };
     }

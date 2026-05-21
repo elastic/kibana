@@ -9,20 +9,13 @@ import dedent from 'dedent';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { createProposeSkillTool } from './propose_skill';
 import { createPatchSkillTool } from './patch_skill';
+import { createListToolsTool } from './list_tools';
 
 const SKILL_AUTHORING_REFERENCE_NAME = 'skill-authoring-examples';
 
 /**
  * Built-in skill that teaches the agent how to author Agent Builder skills
- * conversationally. When the user asks for a new skill, the agent reads this
- * SKILL.md (which triggers `loadSkillToolsAfterRead` to expose
- * `propose_skill` and `patch_skill`), drafts the payload, captures it
- * as a `skill` attachment, and renders it inline so the user can review
- * and click "Create".
- *
- * The `content` follows the Anthropic skill-authoring guide structure:
- * front-loaded "When to use", concrete tools list, stepwise workflow, and a
- * companion reference file with full examples.
+ * conversationally.
  */
 export const skillAuthoringSkill = defineSkillType({
   id: 'skill-authoring',
@@ -46,12 +39,11 @@ Do **not** use this skill when:
 
 ## Available Tools
 
-After reading this SKILL.md, two inline tools become available:
+After reading this SKILL.md, three inline tools become available:
 
-- **propose_skill** — Captures a complete first-draft payload (id, name, description, content, tool_ids, optional referenced_content) as a versioned \`skill\` attachment in the conversation. Returns \`attachment_id\` and \`version\`.
-- **patch_skill** — Refines an existing draft by attachment_id. Supports field replacement (name, description, tool_ids), search-replace patches on \`content\`, and add/remove/patch operations on referenced files. Each call bumps the attachment version when content changes.
-
-You also have the regular tool registry available; use \`list_tools\` if you need to confirm a tool id exists before adding it to \`tool_ids\`.
+- **list_tools** — Enumerates every Agent Builder tool currently registered in this space, returning each tool's id and short description. **Call this before \`propose_skill\` and before any \`patch_skill\` call that changes \`tool_ids\`.** Pick ids verbatim from the result — never invent them.
+- **propose_skill** — Captures a complete first-draft payload (id, name, description, content, tool_ids, optional referenced_content) as a versioned \`skill\` attachment in the conversation. Returns \`attachment_id\` and \`version\`. If \`tool_ids\` contains any id that is not in the registry, the call fails and a second result includes \`invalid_tool_ids\` plus \`available_tools\` so you can recover via \`patch_skill\`.
+- **patch_skill** — Refines an existing draft by attachment_id. Supports field replacement (name, description, tool_ids), search-replace patches on \`content\`, and add/remove/patch operations on referenced files. Each call bumps the attachment version when content changes. Same \`tool_ids\` validation as \`propose_skill\`.
 
 ## Authoring Workflow
 
@@ -79,9 +71,10 @@ You also have the regular tool registry available; use \`list_tools\` if you nee
    - Keep it under ~400 lines. If the skill needs more detail, push code samples / long examples into a referenced file.
 
 5. **Pick the registry tools the skill needs.**
+   - **Always call \`list_tools\` first.** Never write \`tool_ids\` from memory — model-guessed ids like \`platform.core.execute_esql\` are usually fictional and will be rejected.
+   - Pick ids verbatim from the \`tools\` array in the \`list_tools\` result. Use the \`description\` field to match the user's intent.
    - Maximum **5** tool ids per skill. Keep this list focused on tools the skill *requires*; common platform tools like \`list_indices\` rarely need to be listed.
-   - Each id must already exist in the tool registry. If unsure, call \`list_tools\` first.
-   - If the user mentions a tool that doesn't exist, tell them so and offer to proceed without it.
+   - If the user mentions a tool that isn't in the list, tell them so and either suggest a similar one from the list or offer to proceed without it.
 
 6. **(Optional) Add referenced files for examples or reference snippets.**
    - Up to 100 files. Each file lives at \`[basePath]/[skill-name]/[relativePath]/[name].md\` in the agent filestore.
@@ -92,6 +85,7 @@ You also have the regular tool registry available; use \`list_tools\` if you nee
 7. **Call \`propose_skill\`.**
    - Pass the full payload in one shot.
    - On success the tool returns \`attachment_id\` and \`version\`.
+   - **On an "Unknown tool_ids" error:** the second result includes \`available_tools\`. Pick replacements from that list and call \`patch_skill\` with corrected \`tool_ids\` — do not re-call \`list_tools\` unless the user has added a new requirement. Apologize briefly to the user and explain what was swapped.
 
 8. **Render the draft inline.**
    - Immediately emit \`<render_attachment id="ATTACHMENT_ID" />\` (replacing \`ATTACHMENT_ID\` with the value from the tool result) so the user sees the draft card with **Create** / **Open in editor** buttons. Do not surround it with quotes or a code fence.
@@ -116,11 +110,28 @@ See the referenced file \`${SKILL_AUTHORING_REFERENCE_NAME}.md\` for a complete 
       content: dedent(`
 # Skill Authoring Examples
 
-## Example 1: full first-draft payload
+## Example 1: full first-draft flow (list → propose → render)
 
 User said: "Build me a skill that helps investigate slow ES|QL queries on logs indices."
 
-\`propose_skill\` payload:
+**Step 1.** Call \`list_tools\` to see what is actually registered. The result (truncated) includes:
+
+\`\`\`json
+{
+  "tools": [
+    { "id": "platform.core.execute_esql", "description": "Run an ES|QL query and return rows + timings." },
+    { "id": "platform.core.get_index_mapping", "description": "Return the field mapping for an index pattern." },
+    { "id": "platform.core.generate_esql", "description": "Convert natural language into an ES|QL query." }
+  ],
+  "total": 47,
+  "returned": 47,
+  "truncated": false
+}
+\`\`\`
+
+**Important:** the ids above are illustrative. In a real call, copy ids verbatim from the actual \`list_tools\` response — different deployments expose different tool sets, and the names are not guessable.
+
+**Step 2.** Call \`propose_skill\`, picking ids that appeared in the list above:
 
 \`\`\`json
 {
@@ -159,6 +170,8 @@ I drafted a skill called esql-query-debug with three associated tools. Review th
 ## Example 2: follow-up patch
 
 User said: "Drop the generate_esql tool and add a section about histogram() pitfalls."
+
+This patch removes an existing tool and edits content — no new tools are introduced, so there is no need to re-call \`list_tools\` (you would only re-list if the user asked to *add* a tool you didn't already have in the draft).
 
 \`patch_skill\` payload:
 
@@ -218,5 +231,5 @@ The model can then use the filestore tools to read \`./examples/slow-query-check
       `),
     },
   ],
-  getInlineTools: () => [createProposeSkillTool(), createPatchSkillTool()],
+  getInlineTools: () => [createListToolsTool(), createProposeSkillTool(), createPatchSkillTool()],
 });

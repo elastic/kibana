@@ -12,6 +12,7 @@ import { skillCreateRequestSchema } from '@kbn/agent-builder-common';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { SKILL_ATTACHMENT_TYPE, type SkillAttachmentData } from '../../../common/attachments';
+import { validateToolIdsAgainstRegistry, formatInvalidToolIdsMessage } from './validate_tool_ids';
 
 const referencedContentSchema = z.object({
   name: z
@@ -27,14 +28,6 @@ const referencedContentSchema = z.object({
   content: z.string().describe('Markdown content for this referenced file.'),
 });
 
-/**
- * Input schema for the `propose_skill` inline tool.
- *
- * Mirrors `skillCreateRequestSchema` from `@kbn/agent-builder-common` so the
- * draft can be shipped straight to `POST /api/agent_builder/skills` without
- * remapping. The tool re-runs the same Zod schema in its handler to surface
- * any constraint violation as a structured error result.
- */
 const proposeSkillSchema = z.object({
   id: z
     .string()
@@ -59,7 +52,7 @@ const proposeSkillSchema = z.object({
   tool_ids: z
     .array(z.string())
     .describe(
-      'Up to 5 registry tool IDs this skill needs access to. Each ID must already exist in the tool registry. Use `list_tools` first if you are unsure.'
+      'Up to 5 registry tool IDs this skill needs access to. Each ID must already exist in the tool registry — call `list_tools` first to enumerate valid ids and copy them verbatim. Inventing ids will cause this call to fail.'
     ),
   referenced_content: z
     .array(referencedContentSchema)
@@ -90,7 +83,7 @@ export const createProposeSkillTool = (): BuiltinSkillBoundedTool<typeof propose
   id: 'propose_skill',
   type: ToolType.builtin,
   description:
-    'Propose a new skill as an inline draft. Creates a versioned `skill` attachment containing the full skill payload (id, name, description, content, tool_ids, referenced_content). After this call, render the draft inline by emitting `<render_attachment id="ATTACHMENT_ID" />`. Use `patch_skill` to refine the draft instead of calling `propose_skill` again unless the user wants to start over.',
+    'Propose a new skill as an inline draft. Creates a versioned `skill` attachment containing the full skill payload (id, name, description, content, tool_ids, referenced_content). Before calling this, call `list_tools` so `tool_ids` references only ids that exist in the registry — invalid ids will cause this call to fail with the valid set returned for recovery. After this call, render the draft inline by emitting `<render_attachment id="ATTACHMENT_ID" />`. Use `patch_skill` to refine the draft instead of calling `propose_skill` again unless the user wants to start over.',
   schema: proposeSkillSchema,
   confirmation: { askUser: 'never' },
   handler: async (input, context) => {
@@ -110,6 +103,24 @@ export const createProposeSkillTool = (): BuiltinSkillBoundedTool<typeof propose
     }
 
     const data: SkillAttachmentData = parsed.data;
+    const toolValidation = await validateToolIdsAgainstRegistry(context, data.tool_ids);
+    if (!toolValidation.ok) {
+      return {
+        results: [
+          createErrorResult({
+            message: formatInvalidToolIdsMessage(toolValidation.invalidToolIds),
+          }),
+          {
+            tool_result_id: getToolResultId(),
+            type: ToolResultType.other,
+            data: {
+              invalid_tool_ids: toolValidation.invalidToolIds,
+              available_tools: toolValidation.availableTools,
+            },
+          },
+        ],
+      };
+    }
 
     try {
       const attachment = await attachments.add(
