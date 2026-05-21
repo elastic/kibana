@@ -45,8 +45,6 @@ export function MetricsExperienceStateProvider({
 
   const onDimensionsChange = useCallback(
     (nextDimensions: Dimension[]) => {
-      // eslint-disable-next-line no-console
-      console.log('[METRICS_DEBUG] onDimensionsChange → setCurrentPage(0)', nextDimensions);
       setCurrentPage(0);
       setSelectedDimensions(nextDimensions);
     },
