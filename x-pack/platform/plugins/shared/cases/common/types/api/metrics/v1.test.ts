@@ -95,12 +95,6 @@ describe('Metrics case', () => {
         },
       },
       connectors: { total: 1 },
-      actions: {
-        isolateHost: {
-          isolate: { total: 1 },
-          unisolate: { total: 2 },
-        },
-      },
       lifespan: {
         creationDate: new Date(0).toISOString(),
         closeDate: new Date(2).toISOString(),
@@ -161,45 +155,6 @@ describe('Metrics case', () => {
       const result = SingleCaseMetricsResponseSchema.safeParse({
         ...defaultRequest,
         connectors: { ...defaultRequest.connectors, foo: 'bar' },
-      });
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(defaultRequest);
-    });
-
-    it('strips unknown fields from actions', () => {
-      const result = SingleCaseMetricsResponseSchema.safeParse({
-        ...defaultRequest,
-        actions: { ...defaultRequest.actions, foo: 'bar' },
-      });
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(defaultRequest);
-    });
-
-    it('strips unknown fields from isolate hosts', () => {
-      const result = SingleCaseMetricsResponseSchema.safeParse({
-        ...defaultRequest,
-        actions: {
-          ...defaultRequest.actions,
-          isolateHost: {
-            ...defaultRequest.actions!.isolateHost,
-            isolate: { ...defaultRequest.actions!.isolateHost!.isolate, foo: 'bar' },
-          },
-        },
-      });
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(defaultRequest);
-    });
-
-    it('strips unknown fields from unisolate host', () => {
-      const result = SingleCaseMetricsResponseSchema.safeParse({
-        ...defaultRequest,
-        actions: {
-          ...defaultRequest.actions,
-          isolateHost: {
-            ...defaultRequest.actions!.isolateHost,
-            unisolate: { ...defaultRequest.actions!.isolateHost!.unisolate, foo: 'bar' },
-          },
-        },
       });
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(defaultRequest);
