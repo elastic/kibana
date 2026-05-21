@@ -110,6 +110,16 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('unified `osquery` POSTs', () => {
+      it('accepts a unified `osquery` payload (200)', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const patched = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: unifiedOsqueryPayload(),
+        });
+        expect(patched.comments?.length).to.be(1);
+      });
+
       it('returns 400 when metadata is missing a required field', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         await createComment({

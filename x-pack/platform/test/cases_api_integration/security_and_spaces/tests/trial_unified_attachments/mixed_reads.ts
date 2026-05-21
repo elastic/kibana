@@ -7,7 +7,8 @@
 
 import expect from '@kbn/expect';
 import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
-import { LENS_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common/constants';
+import { LENS_ATTACHMENT_TYPE, OSQUERY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common/constants';
+import type { AttachmentRequestV2 } from '@kbn/cases-plugin/common/types/api';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { postCaseReq, postCommentUserReq } from '../../../common/lib/mock';
 import {
@@ -141,6 +142,47 @@ export default ({ getService }: FtrProviderContext): void => {
         const ids = bulkResult.attachments.map((a: { id: string }) => a.id);
         expect(ids).to.contain(legacyId);
         expect(ids).to.contain(unifiedId);
+      });
+
+      it('bulk get retrieves osquery alongside a legacy user comment from both SO indices', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        // Legacy v1 user comment lands in cases-comments.
+        const legacyCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+        });
+        const legacyId = legacyCase.comments![0].id;
+
+        // Unified osquery lands in cases-attachments.
+        const osqueryCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            type: OSQUERY_ATTACHMENT_TYPE,
+            attachmentId: 'mixed-osquery-1',
+            metadata: { agentIds: ['agent-mixed'], queryId: 'mixed-query' },
+            owner: 'securitySolutionFixture',
+          } as AttachmentRequestV2,
+        });
+        const osqueryId = osqueryCase.comments!.find((c) => c.id !== legacyId)!.id;
+
+        const bulkResult = await bulkGetAttachments({
+          supertest,
+          caseId: postedCase.id,
+          savedObjectIds: [legacyId, osqueryId],
+        });
+
+        expect(bulkResult.attachments.length).to.be(2);
+        const byId = new Map<string, { type: string; externalReferenceAttachmentTypeId?: string }>(
+          bulkResult.attachments.map((a: { id: string; type: string }) => [a.id, a])
+        );
+        expect(byId.get(legacyId)!.type).to.be(AttachmentType.user);
+        // Osquery is projected back to the legacy externalReference shape on read.
+        const osqueryAttachment = byId.get(osqueryId)!;
+        expect(osqueryAttachment.type).to.be(AttachmentType.externalReference);
+        expect(osqueryAttachment.externalReferenceAttachmentTypeId).to.be(OSQUERY_ATTACHMENT_TYPE);
       });
 
       it('handles mixed legacy v1 and unified v2 payloads in bulk create', async () => {
