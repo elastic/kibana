@@ -57,8 +57,19 @@ describe('manageRuleTool', () => {
       expect(ctx.attachments.add).toHaveBeenCalledTimes(1);
       expect(ctx.attachments.update).not.toHaveBeenCalled();
       expect(result).toHaveProperty('results');
-      const { results } = result as { results: Array<{ type: string; data?: unknown }> };
+      const { results } = result as {
+        results: Array<{ type: string; data?: { ruleAttachment?: { ruleId?: string } } }>;
+      };
       expect(results[0].type).toBe(ToolResultType.other);
+
+      // Pre-assigned rule ID is returned in the tool result
+      expect(results[0].data?.ruleAttachment?.ruleId).toBeDefined();
+      expect(typeof results[0].data?.ruleAttachment?.ruleId).toBe('string');
+
+      // The attachment data stored via add() includes the pre-assigned rule ID
+      const addCall = ctx.attachments.add.mock.calls[0][0] as { data: { id?: string } };
+      expect(addCall.data.id).toBeDefined();
+      expect(addCall.data.id).toBe(results[0].data?.ruleAttachment?.ruleId);
     });
 
     it('passes esClient to executeRuleOperations for query validation', async () => {
@@ -166,18 +177,19 @@ describe('manageRuleTool', () => {
   });
 
   describe('logger severity', () => {
-    it('logs validation errors at warn level (not error)', async () => {
+    it('logs validation errors at debug level (not warn or error)', async () => {
       const ctx = createContext();
 
       await tool.handler({ operations: [{ operation: 'set_kind', kind: 'alert' }] }, ctx);
 
-      expect(ctx.logger.warn).toHaveBeenCalledWith(
+      expect(ctx.logger.debug).toHaveBeenCalledWith(
         expect.stringContaining('manage_rule tool: invalid input')
       );
+      expect(ctx.logger.warn).not.toHaveBeenCalled();
       expect(ctx.logger.error).not.toHaveBeenCalled();
     });
 
-    it('logs unexpected errors at error level (not warn)', async () => {
+    it('logs unexpected errors at warn level (not error)', async () => {
       const ctx = createContext();
       ctx.attachments.add.mockRejectedValueOnce(new Error('ES exploded'));
 
@@ -188,10 +200,10 @@ describe('manageRuleTool', () => {
         ctx
       );
 
-      expect(ctx.logger.error).toHaveBeenCalledWith(
+      expect(ctx.logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Error in manage_rule tool')
       );
-      expect(ctx.logger.warn).not.toHaveBeenCalled();
+      expect(ctx.logger.error).not.toHaveBeenCalled();
     });
   });
 });
