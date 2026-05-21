@@ -345,6 +345,59 @@ describe('getActionsColumn', () => {
     }
   );
 
+  describe('visibleRowLeadingControls forwarding', () => {
+    it('forwards visibleRowLeadingControls so 3 controls render inline when totalVisible=3', async () => {
+      const rowAdditionalLeadingControls: RowControlColumn[] = [
+        {
+          id: 'a',
+          render: (Control) => (
+            <Control data-test-subj="a" label="a" iconType="empty" onClick={jest.fn()} />
+          ),
+        },
+        {
+          id: 'b',
+          render: (Control) => (
+            <Control data-test-subj="b" label="b" iconType="empty" onClick={jest.fn()} />
+          ),
+        },
+        {
+          id: 'c',
+          render: (Control) => (
+            <Control data-test-subj="c" label="c" iconType="empty" onClick={jest.fn()} />
+          ),
+        },
+      ];
+
+      const result = getActionsColumn({
+        baseColumns: [],
+        rowAdditionalLeadingControls,
+        externalControlColumns: [],
+        visibleRowLeadingControls: 3,
+      });
+
+      render(
+        <UnifiedDataTableContext.Provider value={dataTableContextComplexMock}>
+          {result?.rowCellRender({
+            setCellProps: jest.fn(),
+            rowIndex: 0,
+            colIndex: 0,
+            columnId: 'actions',
+            isExpandable: false,
+            isExpanded: false,
+            isDetails: false,
+          })}
+        </UnifiedDataTableContext.Provider>
+      );
+
+      expect(screen.getByTestId('a')).toBeVisible();
+      expect(screen.getByTestId('b')).toBeVisible();
+      expect(screen.getByTestId('c')).toBeVisible();
+      expect(
+        screen.queryByTestId('unifiedDataTable_additionalRowControl_actionsMenu')
+      ).not.toBeInTheDocument();
+    });
+  });
+
   describe('given 4 row additional leading control columns', () => {
     const rowAdditionalLeadingControls: RowControlColumn[] = [
       {
