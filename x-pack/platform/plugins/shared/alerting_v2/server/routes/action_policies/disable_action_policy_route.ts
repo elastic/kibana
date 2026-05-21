@@ -50,6 +50,10 @@ export class DisableActionPolicyRoute extends BaseAlertingRoute {
         body: () => errorResponseSchema,
         description: 'Indicates an action policy with the given ID does not exist.',
       },
+      409: {
+        body: () => errorResponseSchema,
+        description: 'Indicates the action policy was concurrently updated by another caller.',
+      },
     },
   };
 

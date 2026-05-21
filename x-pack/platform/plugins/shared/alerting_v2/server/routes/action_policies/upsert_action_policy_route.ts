@@ -58,6 +58,15 @@ export class UpsertActionPolicyRoute extends BaseAlertingRoute {
         body: () => errorResponseSchema,
         description: 'Indicates invalid request parameters or body.',
       },
+      404: {
+        body: () => errorResponseSchema,
+        description: 'Indicates the action policy with the given ID does not exist.',
+      },
+      409: {
+        body: () => errorResponseSchema,
+        description:
+          'Indicates the action policy was created or updated concurrently by another caller.',
+      },
     },
   };
 

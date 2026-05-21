@@ -49,6 +49,10 @@ export class UpdateRuleRoute extends BaseAlertingRoute {
         body: () => errorResponseSchema,
         description: 'Indicates a rule with the given ID does not exist.',
       },
+      409: {
+        body: () => errorResponseSchema,
+        description: 'Indicates the rule was concurrently updated by another caller.',
+      },
     },
   };
 

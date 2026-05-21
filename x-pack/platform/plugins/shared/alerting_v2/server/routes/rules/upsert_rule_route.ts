@@ -54,6 +54,15 @@ export class UpsertRuleRoute extends BaseAlertingRoute {
         body: () => errorResponseSchema,
         description: 'Indicates an invalid schema or parameters.',
       },
+      404: {
+        body: () => errorResponseSchema,
+        description: 'Indicates the rule with the given ID does not exist.',
+      },
+      409: {
+        body: () => errorResponseSchema,
+        description:
+          'Indicates the rule was created or updated concurrently, or the request changes immutable fields.',
+      },
     },
   };
 
