@@ -165,6 +165,7 @@ const previouslyRegisteredTypes = [
   'siem-ui-timeline-note',
   'siem-ui-timeline-pinned-event',
   'slo',
+  'slo-composite',
   'slo-settings',
   'slo_template',
   'space',

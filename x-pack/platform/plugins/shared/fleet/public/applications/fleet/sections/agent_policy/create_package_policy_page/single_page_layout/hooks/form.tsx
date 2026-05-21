@@ -82,7 +82,7 @@ import { useYaml } from '../../../../../../../services';
 
 import { useAgentless, useSetupTechnology } from './setup_technology';
 
-const DEFAULT_AGENTLESS_LIMIT = 5;
+const DEFAULT_AGENTLESS_LIMIT = 50;
 
 export async function createAgentPolicy({
   packagePolicy,
