@@ -95,13 +95,13 @@ export function ServiceMapLegend({ controlIconCss }: ServiceMapLegendProps) {
       container: css`
         width: 200px;
       `,
-      circleIcon: css`
+      shapeIcon: css`
         flex-shrink: 0;
-        transform: scale(2);
-      `,
-      diamondIcon: css`
-        flex-shrink: 0;
-        transform: rotate(45deg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: ${euiTheme.size.base};
+        height: ${euiTheme.size.base};
       `,
       groupedContainer: css`
         position: relative;
@@ -176,13 +176,17 @@ export function ServiceMapLegend({ controlIconCss }: ServiceMapLegendProps) {
           <EuiFlexItem>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiIcon
-                  type="dot"
-                  size="m"
-                  color="subdued"
-                  css={styles.circleIcon}
-                  aria-hidden={true}
-                />
+                {/* TODO: Use new EuiIcon component when available */}
+                <div css={styles.shapeIcon} aria-hidden={true}>
+                  <svg viewBox="0 0 12 12" fill="none">
+                    <path
+                      fillRule="evenodd"
+                      clipRule="evenodd"
+                      d="M11.25 6C11.25 8.8995 8.8995 11.25 6 11.25C3.10051 11.25 0.75 8.8995 0.75 6C0.75 3.10051 3.10051 0.75 6 0.75C8.8995 0.75 11.25 3.10051 11.25 6ZM10.5 6C10.5 8.48528 8.48528 10.5 6 10.5C3.51472 10.5 1.5 8.48528 1.5 6C1.5 3.51472 3.51472 1.5 6 1.5C8.48528 1.5 10.5 3.51472 10.5 6Z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                </div>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="xs">
@@ -196,13 +200,15 @@ export function ServiceMapLegend({ controlIconCss }: ServiceMapLegendProps) {
           <EuiFlexItem>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiIcon
-                  type="stopFilled"
-                  size="m"
-                  color="subdued"
-                  css={styles.diamondIcon}
-                  aria-hidden={true}
-                />
+                {/* TODO: Use new EuiIcon component when available */}
+                <div css={styles.shapeIcon} aria-hidden={true}>
+                  <svg viewBox="0 0 12 12" fill="none">
+                    <path
+                      d="M6 1C6.33435 1 6.64657 1.11937 6.83203 1.31808L10.832 5.60379C11.056 5.84372 11.056 6.15628 10.832 6.39621L6.83203 10.6819C6.64657 10.8806 6.33435 11 6 11C5.66565 11 5.35343 10.8806 5.16797 10.6819L1.16795 6.39621C0.944017 6.15628 0.944017 5.84372 1.16795 5.60379L5.16797 1.31808L5.24316 1.24763C5.43175 1.09155 5.70732 1 6 1ZM1.99998 6L6 10.2857L10 6L6 1.71429L1.99998 6Z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                </div>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="xs">
@@ -217,13 +223,15 @@ export function ServiceMapLegend({ controlIconCss }: ServiceMapLegendProps) {
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
                 <div css={styles.groupedContainer}>
-                  <EuiIcon
-                    type="stopFilled"
-                    size="m"
-                    color="subdued"
-                    css={styles.diamondIcon}
-                    aria-hidden={true}
-                  />
+                  {/* TODO: Use new EuiIcon component when available */}
+                  <div css={styles.shapeIcon} aria-hidden={true}>
+                    <svg viewBox="0 0 12 12" fill="none">
+                      <path
+                        d="M6 1C6.33435 1 6.64657 1.11937 6.83203 1.31808L10.832 5.60379C11.056 5.84372 11.056 6.15628 10.832 6.39621L6.83203 10.6819C6.64657 10.8806 6.33435 11 6 11C5.66565 11 5.35343 10.8806 5.16797 10.6819L1.16795 6.39621C0.944017 6.15628 0.944017 5.84372 1.16795 5.60379L5.16797 1.31808L5.24316 1.24763C5.43175 1.09155 5.70732 1 6 1ZM1.99998 6L6 10.2857L10 6L6 1.71429L1.99998 6Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                  </div>
                   <EuiNotificationBadge css={styles.groupedBadge} aria-hidden={true}>
                     n
                   </EuiNotificationBadge>
