@@ -123,6 +123,14 @@ export function registerChatRoutes({
                 meta: { description: 'When true, the attachment will not be displayed in the UI.' },
               })
             ),
+            groupId: schema.maybe(
+              schema.string({
+                meta: {
+                  description:
+                    'Optional group identifier. Attachments sharing the same groupId are removed together in the UI.',
+                },
+              })
+            ),
           },
           {
             validate: (attachment) => {

@@ -6931,6 +6931,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/evals-suite-security-alert-triage@link:x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals-suite-security-automatic-migrations@link:x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations":
   version "0.0.0"
   uid ""
