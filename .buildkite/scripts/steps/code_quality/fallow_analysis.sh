@@ -5,74 +5,61 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 
 FALLOW_VERSION="2.76.0"
-
-SEARCH_DIRS=(
-  "x-pack/solutions/search"
-  "x-pack/solutions/vectordb"
-  "x-pack/solutions/workplaceai"
-  "x-pack/platform/plugins/shared/content_connectors"
-  "x-pack/platform/plugins/shared/inference"
-  "x-pack/platform/plugins/shared/inference_endpoint"
-  "x-pack/platform/plugins/shared/inference_workflows"
-  "x-pack/platform/plugins/shared/sample_data_ingest"
-  "x-pack/platform/plugins/shared/search_inference_endpoints"
-  "x-pack/platform/plugins/shared/agent_builder"
-  "x-pack/platform/plugins/shared/agent_builder_platform"
-  "x-pack/platform/plugins/shared/agent_builder_workflows"
-  "x-pack/platform/plugins/shared/agent_context_layer"
-)
+FALLOW_OWNERS=("@elastic/search-kibana" "@elastic/workchat-eng")
 
 echo "--- Install fallow v${FALLOW_VERSION}"
 npx --yes "fallow@${FALLOW_VERSION}" --version
 
-echo "--- Run fallow dead-code analysis"
+echo "--- Run fallow dead-code analysis (production, grouped by CODEOWNERS owner)"
 set +e
-DEAD_CODE_OUTPUT=$(npx "fallow@${FALLOW_VERSION}" dead-code --format json 2>&1)
+DEAD_CODE_OUTPUT=$(npx "fallow@${FALLOW_VERSION}" dead-code \
+  --group-by owner \
+  --production \
+  --format markdown \
+  --quiet \
+  2>&1)
 DEAD_CODE_EXIT=$?
 set -e
 echo "Exit code: $DEAD_CODE_EXIT"
 
-echo "--- Run fallow duplication analysis"
+echo "--- Run fallow health analysis (grouped by CODEOWNERS owner)"
 set +e
-DUPES_OUTPUT=$(npx "fallow@${FALLOW_VERSION}" dupes --format json 2>&1)
-DUPES_EXIT=$?
-set -e
-echo "Exit code: $DUPES_EXIT"
-
-echo "--- Run fallow health analysis"
-set +e
-HEALTH_OUTPUT=$(npx "fallow@${FALLOW_VERSION}" health --format json 2>&1)
+HEALTH_OUTPUT=$(npx "fallow@${FALLOW_VERSION}" health \
+  --group-by owner \
+  --format markdown \
+  --quiet \
+  2>&1)
 HEALTH_EXIT=$?
 set -e
 echo "Exit code: $HEALTH_EXIT"
 
-echo "--- Post Buildkite annotation"
+echo "--- Extract results for our teams"
 
-SCOPED_DIRS=""
-for dir in "${SEARCH_DIRS[@]}"; do
-  if [ -d "$dir" ]; then
-    SCOPED_DIRS+="- \`$dir\`\n"
+extract_owner_section() {
+  local output="$1"
+  local owner="$2"
+  echo "$output" | awk \
+    -v owner="## ${owner}" \
+    'found && /^## @elastic\// { exit } $0 ~ owner { found=1 } found { print }'
+}
+
+REPORT=""
+for owner in "${FALLOW_OWNERS[@]}"; do
+  dead_section=$(extract_owner_section "$DEAD_CODE_OUTPUT" "$owner")
+  health_section=$(extract_owner_section "$HEALTH_OUTPUT" "$owner")
+
+  if [ -n "$dead_section" ] || [ -n "$health_section" ]; then
+    REPORT+="### ${owner}\n\n"
+    [ -n "$dead_section" ] && REPORT+="**Dead code:**\n${dead_section}\n\n"
+    [ -n "$health_section" ] && REPORT+="**Health:**\n${health_section}\n\n"
   fi
 done
 
-buildkite-agent annotate --style info --context fallow-report << ANNOTATION
-## Fallow Code Quality Report
+if [ -z "$REPORT" ]; then
+  REPORT="No issues found for search-kibana and workchat-eng :tada:"
+fi
 
-**Scope (search-kibana + workchat-eng):**
-${SCOPED_DIRS}
----
-### Dead Code
-\`\`\`
-${DEAD_CODE_OUTPUT}
-\`\`\`
+echo "--- Post Buildkite annotation"
 
-### Duplication
-\`\`\`
-${DUPES_OUTPUT}
-\`\`\`
-
-### Health / Complexity
-\`\`\`
-${HEALTH_OUTPUT}
-\`\`\`
-ANNOTATION
+printf "## Fallow Code Quality Report\n\n%b\n\n[Full report in build logs]" "$REPORT" \
+  | buildkite-agent annotate --style info --context fallow-report
