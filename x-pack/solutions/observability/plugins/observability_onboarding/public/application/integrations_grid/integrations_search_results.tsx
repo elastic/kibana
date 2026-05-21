@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { AvailablePackagesHookType, IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { PackageList } from '../package_list/package_list';
 import { useCardUrlRewrite } from '../package_list_search_form/use_card_url_rewrite';
-import { useIntegrationTileCards } from './use_integration_tile_cards';
+import { useIntegrationTiles } from './use_integration_tiles';
 
 interface Props {
   searchInput: string;
@@ -66,7 +66,7 @@ const ResultsGrid = ({ useAvailablePackages, searchInput, customCards }: Results
 };
 
 export const IntegrationsSearchResults = ({ searchInput }: Props) => {
-  const customCards = useIntegrationTileCards();
+  const customCards = useIntegrationTiles();
   const hookRef = useRef<AvailablePackagesHookType | null>(null);
 
   const {

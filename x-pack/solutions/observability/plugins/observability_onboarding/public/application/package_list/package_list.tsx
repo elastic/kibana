@@ -18,7 +18,7 @@ interface Props {
   list: IntegrationCardItem[];
   searchTerm?: string;
   showCardLabels?: boolean;
-  backgroundColor?: string;
+  backgroundColor?: 'plain' | 'transparent';
 }
 
 export function PackageList({ list, searchTerm = '', showCardLabels, backgroundColor }: Props) {

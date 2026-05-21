@@ -21,12 +21,7 @@ function resolveIcon(logo: SupportedLogo, http: HttpStart): IntegrationCardItem[
     : { type: 'svg', src: http.staticAssets.getPluginAssetHref(`${logo}.svg`) };
 }
 
-/**
- * Maps the curated INTEGRATION_TILES into Fleet IntegrationCardItem[] so they
- * can be rendered inside Fleet's PackageListGrid alongside Fleet packages.
- * The cards are flagged isQuickstart so the grid shows the Quickstart badge.
- */
-export function useIntegrationTileCards(): IntegrationCardItem[] {
+export function useIntegrationTiles(): IntegrationCardItem[] {
   const {
     services: { http },
   } = useKibana<ObservabilityOnboardingAppServices>();

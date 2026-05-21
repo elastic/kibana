@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { useEuiTheme } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useIntegrationTileCards } from './use_integration_tile_cards';
+import { useIntegrationTiles } from './use_integration_tiles';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
@@ -22,7 +22,7 @@ jest.mock('@elastic/eui', () => ({
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseEuiTheme = useEuiTheme as jest.Mock;
 
-describe('useIntegrationTileCards', () => {
+describe('useIntegrationTiles', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseKibana.mockReturnValue({
@@ -38,7 +38,7 @@ describe('useIntegrationTileCards', () => {
   });
 
   it('returns cards flagged as quickstart under the observability category', () => {
-    const { result } = renderHook(() => useIntegrationTileCards());
+    const { result } = renderHook(() => useIntegrationTiles());
     expect(result.current[0]).toEqual(
       expect.objectContaining({
         id: expect.stringMatching(/^quickstart-/),
@@ -49,7 +49,7 @@ describe('useIntegrationTileCards', () => {
   });
 
   it('resolves logos to either EUI or SVG icon entries', () => {
-    const { result } = renderHook(() => useIntegrationTileCards());
+    const { result } = renderHook(() => useIntegrationTiles());
     const awsCard = result.current.find((card) => card.name === 'aws');
     const linuxCard = result.current.find((card) => card.name === 'linux');
     expect(awsCard?.icons).toEqual([{ type: 'eui', src: 'logoAWS' }]);
