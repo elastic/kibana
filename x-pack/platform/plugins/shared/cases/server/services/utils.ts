@@ -9,7 +9,7 @@ import type { ZodType } from '@kbn/zod/v4';
 import { decodeOrThrowZod } from '../common/runtime_types';
 
 export const bulkDecodeSOAttributes = <T>(
-  savedObjects: Array<{ id: string; attributes: T }>,
+  savedObjects: Array<{ id: string; attributes: unknown }>,
   schema: ZodType<T>
 ) => {
   const decodeRes = new Map<string, T>();

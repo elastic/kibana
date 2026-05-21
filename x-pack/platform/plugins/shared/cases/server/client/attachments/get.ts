@@ -17,8 +17,8 @@ import type { DocumentResponse, AttachmentsFindResponse } from '../../../common/
 import {
   DocumentResponseSchema,
   FindAttachmentsQueryParamsSchema,
+  AttachmentsFindResponseSchema,
 } from '../../../common/types/api';
-import { AttachmentsFindResponseSchemaV2 } from '../../../common/types/api/attachment/v2';
 import {
   AttachmentSchemaV2,
   AttachmentsSchemaV2,
@@ -176,7 +176,7 @@ export async function find(
 
     const res = transformComments(theComments);
 
-    return decodeOrThrowZod(AttachmentsFindResponseSchemaV2)(res);
+    return decodeOrThrowZod(AttachmentsFindResponseSchema)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to find comments case id: ${caseID}: ${error}`,
