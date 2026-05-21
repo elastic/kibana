@@ -278,6 +278,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               '.es(index=logstash-*, timefield=',
               'timelionCodeEditor'
             );
+            // wait for date fields to load
+            await common.sleep(500);
             // other suggestions might be shown for a short amount of time - retry until metric suggestions show up
             await retry.try(async () => {
               const suggestions = await timelion.getSuggestionItemsText();
