@@ -116,10 +116,14 @@ describe('createChangePointDataSourceProfileProvider', () => {
         category: DataSourceCategory.Default,
         pvalueColumnId: 'pvalue',
       };
-      const getConfig = provider.profile.getChartSectionConfiguration!(() => ({}), { context });
+      const getConfig = provider.profile.getChartSectionConfiguration!(() => ({} as never), {
+        context,
+      });
       const config = getConfig({ actions: {} } as never);
       expect(config.replaceDefaultChart).toBe(true);
-      expect(typeof config.renderChartSection).toBe('function');
+      if (config.replaceDefaultChart) {
+        expect(typeof config.renderChartSection).toBe('function');
+      }
     });
   });
 
