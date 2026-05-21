@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable } from 'rxjs';
-import type { MaybePromise } from '@kbn/utility-types';
 import { combineLatestWith, debounceTime, map, of, startWith } from 'rxjs';
 import type { HasSerializableState } from '../../has_serializable_state';
 import type { PublishesUnsavedChanges } from '../../publishes_unsaved_changes';
@@ -16,35 +14,30 @@ import { type StateComparators, areComparatorsEqual } from '../../../state_manag
 import { getTitle } from '../../titles/publishes_title';
 import { apiHasLastSavedChildState } from '../last_saved_child_state';
 import type { PresentationContainer } from '../presentation_container';
+import type { HasUniqueId } from '../../has_uuid';
+import type { HasParentApi } from '../../has_parent_api';
 const UNSAVED_CHANGES_DEBOUNCE = 100;
 
-export const initializeUnsavedChanges = <StateType extends object = object>({
+export const initializeStateApi = <StateType extends object = object>({
   uuid,
-  onReset,
+  applySerializedState,
   parentApi,
   getComparators,
   defaultState,
   serializeState,
   anyStateChange$,
-}: {
-  uuid: string;
-  parentApi: unknown;
-  anyStateChange$: Observable<void>;
-  serializeState: () => StateType;
-  getComparators: () => StateComparators<StateType>;
-  defaultState?: Partial<StateType>;
-  onReset?: (lastSavedPanelState?: StateType) => MaybePromise<void>;
-}): PublishesUnsavedChanges &
-  Pick<HasSerializableState<StateType>, 'anyStateChange$' | 'applySerializedState'> => {
-  const applySerializedState = async (state?: StateType) => {
-    await onReset?.(state);
-  };
-
+}: HasSerializableState<StateType> &
+  HasUniqueId &
+  HasParentApi & {
+    getComparators: () => StateComparators<StateType>;
+    defaultState?: Partial<StateType>;
+  }): PublishesUnsavedChanges & HasSerializableState<StateType> => {
   if (!apiHasLastSavedChildState<StateType>(parentApi)) {
     return {
       anyStateChange$,
       applySerializedState,
       hasUnsavedChanges$: of(false),
+      serializeState,
     };
   }
 
@@ -75,5 +68,5 @@ export const initializeUnsavedChanges = <StateType extends object = object>({
     })
   );
 
-  return { anyStateChange$, applySerializedState, hasUnsavedChanges$ };
+  return { anyStateChange$, applySerializedState, hasUnsavedChanges$, serializeState };
 };
