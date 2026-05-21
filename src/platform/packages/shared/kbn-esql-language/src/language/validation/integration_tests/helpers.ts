@@ -7,9 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  EsqlQueryRequest,
+  EsqlQueryResponse,
+  MappingProperty,
+} from '@elastic/elasticsearch/lib/api/types';
 import { createTestEsCluster } from '@kbn/test-es-server';
 import { ToolingLog } from '@kbn/tooling-log';
+import {
+  ESQL_NAMED_PARAMS_TYPE,
+  type ESQL_NUMERIC_DECIMAL_TYPES,
+  type ESQL_STRING_TYPES,
+} from '../../../commands/definitions/types';
 import {
   enrichFields as enrichFieldsHelper,
   fields as fieldsHelper,
@@ -21,9 +30,21 @@ import {
 const fields = [...fieldsHelper, { name: policies[0].matchField, type: 'keyword' }];
 const enrichFieldsRaw = [...enrichFieldsHelper, { name: policies[0].matchField, type: 'keyword' }];
 
-export type StringType = 'text' | 'keyword';
-export type NumberType = 'integer' | 'double' | 'long' | 'unsigned_long';
+type NumericDecimalType = (typeof ESQL_NUMERIC_DECIMAL_TYPES)[number];
+
+export type StringType = (typeof ESQL_STRING_TYPES)[number];
+export type NumberType =
+  | 'integer'
+  | Extract<NumericDecimalType, 'double' | 'long' | 'unsigned_long'>;
+export type DateType = 'date' | 'date_nanos';
 export type EsqlEnv = Awaited<ReturnType<typeof setupEsqlEnv>>;
+
+export interface MappingVariant {
+  name: string;
+  stringFieldType: StringType;
+  numberFieldType: NumberType;
+  dateFieldType: DateType;
+}
 
 export interface EsqlValidationTestCase {
   query: string;
@@ -32,18 +53,6 @@ export interface EsqlValidationTestCase {
 
 export interface EsqlValidationFixtures {
   testCases: EsqlValidationTestCase[];
-}
-
-interface EsqlResultColumn {
-  name: string;
-  type: string;
-}
-
-type EsqlResultRow = Array<string | null>;
-
-interface EsqlTable {
-  columns: EsqlResultColumn[];
-  values: EsqlResultRow[];
 }
 
 interface EsqlErrorResponse {
@@ -58,9 +67,38 @@ interface EsqlErrorResponse {
 }
 
 const nonIndexableFieldTypes = new Set(['date_period', 'null', 'time_duration', 'time_literal']);
+const timeRangeParams: NonNullable<EsqlQueryRequest['params']> = [
+  {
+    _tstart: '2026-04-20T23:00:00.000Z',
+  },
+  {
+    _tend: '2026-05-20T09:09:08.139Z',
+  },
+];
+
+const mappingVariantDimensions = {
+  stringFieldTypes: ['text', 'keyword'] satisfies StringType[],
+  numberFieldTypes: ['integer', 'long', 'double', 'unsigned_long'] satisfies NumberType[],
+  dateFieldTypes: ['date', 'date_nanos'] satisfies DateType[],
+};
+
+export const mappingVariants: MappingVariant[] = mappingVariantDimensions.stringFieldTypes.flatMap(
+  (stringFieldType) =>
+    mappingVariantDimensions.numberFieldTypes.flatMap((numberFieldType) =>
+      mappingVariantDimensions.dateFieldTypes.map((dateFieldType) => ({
+        name: `${stringFieldType} strings, ${numberFieldType} numbers, ${dateFieldType} dates`,
+        stringFieldType,
+        numberFieldType,
+        dateFieldType,
+      }))
+    )
+);
 
 const isIndexableField = ({ type }: { type: string }) =>
   !type.startsWith('counter_') && !nonIndexableFieldTypes.has(type);
+
+// Keep this local to avoid a circular package dependency on @kbn/esql-utils.
+const hasStartEndParams = (query: string) => /\?_tstart|\?_tend/i.test(query);
 
 const getEsqlErrorReason = (error: unknown): string => {
   const responseError = error as EsqlErrorResponse;
@@ -71,26 +109,18 @@ const getEsqlErrorReason = (error: unknown): string => {
   );
 };
 
-const getParams = (query: string) => {
-  if (!query.includes('_tstart') && !query.includes('_tend')) {
+const getParams = (query: string): NonNullable<EsqlQueryRequest['params']> => {
+  if (!hasStartEndParams(query)) {
     return [];
   }
 
-  return [
-    {
-      _tstart: '2025-02-23T23:00:00.000Z',
-    },
-    {
-      _tend: '2025-03-26T09:09:08.139Z',
-    },
-  ];
+  return timeRangeParams;
 };
 
 const createIndexRequest = (
   index: string,
   fieldList: Array<{ name: string; type: string }>,
-  stringType: StringType,
-  numberType: NumberType
+  mappingVariant: MappingVariant
 ) => {
   return {
     index,
@@ -99,10 +129,13 @@ const createIndexRequest = (
         let esType = type;
 
         if (type === 'string') {
-          esType = stringType;
+          esType = mappingVariant.stringFieldType;
         }
         if (type === 'number') {
-          esType = numberType;
+          esType = mappingVariant.numberFieldType;
+        }
+        if (type === 'date') {
+          esType = mappingVariant.dateFieldType;
         }
         if (type === 'cartesian_point') {
           esType = 'point';
@@ -113,7 +146,7 @@ const createIndexRequest = (
         if (type === 'aggregate_metric_double') {
           esType = 'double';
         }
-        if (type === 'function_named_parameters' || type === 'unsupported') {
+        if (type === ESQL_NAMED_PARAMS_TYPE || type === 'unsupported') {
           esType = 'integer_range';
         }
 
@@ -164,7 +197,7 @@ export const setupEsqlEnv = async () => {
     }
   };
 
-  const setupIndicesPolicies = async (stringFieldType: StringType, numberFieldType: NumberType) => {
+  const setupIndicesPolicies = async (mappingVariant: MappingVariant) => {
     await cleanup();
 
     const indexableFields = fields.filter(isIndexableField);
@@ -174,8 +207,7 @@ export const setupEsqlEnv = async () => {
         createIndexRequest(
           index,
           /unsupported/.test(index) ? unsupported_field : indexableFields,
-          stringFieldType,
-          numberFieldType
+          mappingVariant
         ),
         { ignore: [409] }
       );
@@ -184,12 +216,7 @@ export const setupEsqlEnv = async () => {
     for (const { sourceIndices, matchField } of policies.slice(0, 1)) {
       const enrichFields = [{ name: matchField, type: 'string' }].concat(enrichFieldsRaw);
       await es.indices.create(
-        createIndexRequest(
-          sourceIndices[0],
-          enrichFields.filter(isIndexableField),
-          stringFieldType,
-          numberFieldType
-        ),
+        createIndexRequest(sourceIndices[0], enrichFields.filter(isIndexableField), mappingVariant),
         {
           ignore: [409],
         }
@@ -215,18 +242,14 @@ export const setupEsqlEnv = async () => {
   const sendEsqlQuery = async (
     query: string
   ): Promise<{
-    resp: EsqlTable | undefined;
+    resp: EsqlQueryResponse | undefined;
     error: { message: string } | undefined;
   }> => {
     try {
       const params = getParams(query);
-      const resp = await es.transport.request<EsqlTable>({
-        method: 'POST',
-        path: '/_query',
-        body: {
-          query,
-          ...(params.length ? { params } : {}),
-        },
+      const resp = await es.esql.query({
+        query,
+        ...(params.length ? { params } : {}),
       });
       return { resp, error: undefined };
     } catch (error) {
