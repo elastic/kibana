@@ -19,6 +19,7 @@ export {
 } from './validation';
 export * from './action_policy_data_schema';
 export * from './action_policy_response_schema';
+export * from './action_policy_attachment_schema';
 export * from './alert_action_schema';
 export * from './bulk_operation_schema';
 export * from './rule_doctor_insights_schema';

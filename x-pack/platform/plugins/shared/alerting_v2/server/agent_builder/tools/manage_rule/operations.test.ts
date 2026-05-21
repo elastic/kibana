@@ -37,7 +37,13 @@ describe('executeRuleOperations', () => {
         query: 'FROM metrics-* | STATS avg(cpu) BY host.name | LIMIT 0',
         format: 'json',
       });
-      expect(result.evaluation?.query?.base).toBe('FROM metrics-* | STATS avg(cpu) BY host.name');
+      expect(result.data.evaluation?.query?.base).toBe(
+        'FROM metrics-* | STATS avg(cpu) BY host.name'
+      );
+      expect(result.queryColumns).toEqual([
+        { name: 'host.name', type: 'keyword' },
+        { name: 'cpu', type: 'double' },
+      ]);
     });
 
     it('throws with the ES error message when the query is invalid', async () => {
@@ -62,7 +68,8 @@ describe('executeRuleOperations', () => {
 
       const result = await executeRuleOperations({}, ops);
 
-      expect(result.evaluation?.query?.base).toBe('FROM metrics-* | STATS COUNT(*)');
+      expect(result.data.evaluation?.query?.base).toBe('FROM metrics-* | STATS COUNT(*)');
+      expect(result.queryColumns).toBeUndefined();
     });
   });
 
@@ -84,7 +91,7 @@ describe('executeRuleOperations', () => {
 
       const result = await executeRuleOperations({}, ops, esClient);
 
-      expect(result.grouping?.fields).toEqual(['host.name']);
+      expect(result.data.grouping?.fields).toEqual(['host.name']);
     });
 
     it('throws when grouping fields are not in query columns', async () => {
@@ -112,7 +119,7 @@ describe('executeRuleOperations', () => {
 
       const result = await executeRuleOperations({}, ops);
 
-      expect(result.grouping?.fields).toEqual(['service.name']);
+      expect(result.data.grouping?.fields).toEqual(['service.name']);
     });
   });
 
@@ -130,7 +137,7 @@ describe('executeRuleOperations', () => {
 
       const result = await executeRuleOperations({}, ops, undefined, { isNew: true });
 
-      expect(result.metadata?.name).toBe('My Rule');
+      expect(result.data.metadata?.name).toBe('My Rule');
     });
 
     it('throws when state_transition is set on a non-alert kind', async () => {
@@ -214,6 +221,70 @@ describe('executeRuleOperations', () => {
     });
   });
 
+  describe('validate operation', () => {
+    const validRule: Partial<RuleAttachmentData> = {
+      kind: 'alert',
+      metadata: { name: 'Test Rule', description: 'A test rule' },
+      schedule: { every: '5m', lookback: '10m' },
+      evaluation: { query: { base: 'FROM metrics-* | STATS COUNT(*)' } },
+      time_field: '@timestamp',
+      state_transition: null,
+    };
+
+    it('passes validation for a complete rule', async () => {
+      const ops: RuleOperation[] = [{ operation: 'validate' }];
+
+      const result = await executeRuleOperations(validRule, ops);
+
+      expect(result.data.kind).toBe('alert');
+    });
+
+    it('passes validation when validate follows mutation operations', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_metadata', name: 'My Rule' },
+        { operation: 'set_kind', kind: 'signal' },
+        { operation: 'set_schedule', every: '1m', lookback: '5m' },
+        { operation: 'set_query', base: 'FROM logs-* | STATS COUNT(*)' },
+        { operation: 'validate' },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.metadata?.name).toBe('My Rule');
+    });
+
+    it('throws RuleOperationValidationError when kind is missing', async () => {
+      const ops: RuleOperation[] = [{ operation: 'validate' }];
+
+      await expect(
+        executeRuleOperations({ metadata: { name: 'Test' }, schedule: { every: '5m' } }, ops)
+      ).rejects.toThrow(RuleOperationValidationError);
+    });
+
+    it('throws when metadata is missing', async () => {
+      const ops: RuleOperation[] = [{ operation: 'validate' }];
+
+      await expect(executeRuleOperations({ kind: 'alert' }, ops)).rejects.toThrow(
+        'Rule is not ready to save'
+      );
+    });
+
+    it('includes Zod issue paths in the error message', async () => {
+      const ops: RuleOperation[] = [{ operation: 'validate' }];
+
+      await expect(executeRuleOperations({}, ops)).rejects.toThrow(/kind:/);
+    });
+
+    it('does not persist changes when validate throws', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_metadata', name: 'Test' },
+        { operation: 'validate' },
+      ];
+
+      await expect(executeRuleOperations({}, ops)).rejects.toThrow(RuleOperationValidationError);
+    });
+  });
+
   describe('basic operations without ES client', () => {
     it('applies set_metadata', async () => {
       const ops: RuleOperation[] = [
@@ -222,7 +293,7 @@ describe('executeRuleOperations', () => {
 
       const result = await executeRuleOperations({}, ops);
 
-      expect(result.metadata).toEqual({
+      expect(result.data.metadata).toEqual({
         name: 'Test Rule',
         description: 'A test',
         tags: ['test'],
@@ -237,8 +308,8 @@ describe('executeRuleOperations', () => {
 
       const result = await executeRuleOperations(existing, ops);
 
-      expect(result.metadata?.name).toBe('New Name');
-      expect(result.metadata?.description).toBe('Old desc');
+      expect(result.data.metadata?.name).toBe('New Name');
+      expect(result.data.metadata?.description).toBe('Old desc');
     });
 
     it('applies set_kind', async () => {
@@ -246,7 +317,7 @@ describe('executeRuleOperations', () => {
 
       const result = await executeRuleOperations({}, ops);
 
-      expect(result.kind).toBe('alert');
+      expect(result.data.kind).toBe('alert');
     });
 
     it('applies set_schedule', async () => {
@@ -254,7 +325,7 @@ describe('executeRuleOperations', () => {
 
       const result = await executeRuleOperations({}, ops);
 
-      expect(result.schedule).toEqual({ every: '1m', lookback: '5m' });
+      expect(result.data.schedule).toEqual({ every: '1m', lookback: '5m' });
     });
   });
 });
