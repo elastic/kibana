@@ -28,8 +28,8 @@ import { getTestRunDetailLink } from '../../common/links/test_details_link';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { getErrorDetailsUrl } from '../monitor_errors/errors_list';
 import type {
-  EncryptedSyntheticsSavedMonitor,
   Ping,
+  SelectedSyntheticsMonitor,
   SyntheticsJourneyApiResponse,
 } from '../../../../../../common/runtime_types';
 import { ConfigKey, MonitorTypeEnum } from '../../../../../../common/runtime_types';
@@ -105,15 +105,15 @@ export const LastTestRunComponent = ({
           color="danger"
           iconType="warning"
         >
-          {isErrorDetails ? null : (
+          {isErrorDetails || !selectedLocation || !monitor?.[ConfigKey.CONFIG_ID] ? null : (
             <EuiButton
               data-test-subj="monitorTestRunViewErrorDetails"
               color="danger"
               href={getErrorDetailsUrl({
                 basePath,
-                configId: monitor?.[ConfigKey.CONFIG_ID]!,
-                locationId: selectedLocation!.id,
-                stateId: latestPing.state?.id!,
+                configId: monitor[ConfigKey.CONFIG_ID],
+                locationId: selectedLocation.id,
+                stateId: latestPing.state?.id ?? '',
                 spaceId,
               })}
             >
@@ -146,7 +146,7 @@ const PanelHeader = ({
   latestPing,
   loading,
 }: {
-  monitor: EncryptedSyntheticsSavedMonitor | null;
+  monitor: SelectedSyntheticsMonitor | null;
   latestPing?: Ping;
   loading: boolean;
 }) => {
