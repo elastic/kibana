@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-export const fnOperationTypeMapping: Record<string, string> = {
+import type { ChangePointAggregationFunction } from '@kbn/aiops-server-schemas/embeddables/change_point_chart';
+
+export const fnOperationTypeMapping: Record<ChangePointAggregationFunction, string> = {
   avg: 'average',
   max: 'max',
   min: 'min',
   sum: 'sum',
 } as const;
 
-export const DEFAULT_AGG_FUNCTION = 'avg';
+export const DEFAULT_AGG_FUNCTION: ChangePointAggregationFunction = 'avg';
 
 export const SPLIT_FIELD_CARDINALITY_LIMIT = 10000;
 
