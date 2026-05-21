@@ -33,6 +33,7 @@ import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
 import type { ClientPluginsStart } from '../../../../../../plugin';
 import { useMonitorDetail } from '../../../../hooks/use_monitor_detail';
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
+import { getMonitorSpaceToAppend } from '../../../../hooks/use_edit_monitor_locator';
 import type { LocationsStatus } from '../../../../hooks/use_status_by_location';
 import { useStatusByLocation } from '../../../../hooks/use_status_by_location';
 import {
@@ -264,14 +265,16 @@ export function MonitorDetailFlyout(props: Props) {
 
   const { space } = useKibanaSpace();
 
+  const { spaceId: crossSpaceId } = getMonitorSpaceToAppend(space, spaces);
+
   useEffect(() => {
     dispatch(
       getMonitorAction.get({
         monitorId: configId,
-        ...(space && spaces?.length && !spaces?.includes(space?.id) ? { spaceId: spaces[0] } : {}),
+        ...(crossSpaceId ? { spaceId: crossSpaceId } : {}),
       })
     );
-  }, [configId, dispatch, space, space?.id, spaces, upsertSuccess]);
+  }, [configId, crossSpaceId, dispatch, upsertSuccess]);
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 

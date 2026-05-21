@@ -154,7 +154,11 @@ export const MonitorDetailsPanel = ({
           <>
             <EuiDescriptionListTitle>{LOCATIONS_LABEL}</EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              <LocationsStatus configId={configId} monitorLocations={monitor.locations} />
+              <LocationsStatus
+                configId={configId}
+                monitorLocations={monitor.locations}
+                spaces={savedMonitor?.[ConfigKey.KIBANA_SPACES]}
+              />
             </EuiDescriptionListDescription>
           </>
         )}
