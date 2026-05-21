@@ -343,7 +343,7 @@ describe('ContentListTable', () => {
 
       render(
         <LoadingWrapper>
-          {/* Default columns when no item.onEdit/onDelete/onInspect: Name + UpdatedAt (Actions is omitted). */}
+          {/* Default columns when no item.actions handlers: Name + UpdatedAt (Actions is omitted). */}
           <ContentListTable title="Dashboards" />
         </LoadingWrapper>
       );

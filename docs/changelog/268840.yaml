@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/268840
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-14
+areas:
+- Discover and ES|QL
+title: "Fix error parsing for ES|QL conflict types"
