@@ -21,6 +21,17 @@ import { getConvertFormStateToConfig, getConvertProcessorToFormState } from '../
 
 export type UriPartsProcessorFormState = UriPartsProcessor;
 
+// Note on `ignore_missing: true` and `ignore_failure: true`:
+// UI-friendly defaults that intentionally diverge from the YAML/transpiler
+// defaults (both `false`, mirroring the Elasticsearch `uri_parts` ingest
+// processor and the ES|QL URI_PARTS command). The schema in `kbn-streamlang`
+// stays unopinionated (`z.optional(z.boolean())`) and the transpilers mirror
+// the ingest processor's documented contract; the form layer instead picks
+// the "skip docs without the source field / don't fail the pipeline" choice
+// most users expect when adding a step through the UI. This is the same
+// convention applied across config-driven processors in this directory
+// (grok, dissect, convert, replace, redact, …) — see also
+// `stream_detail_enrichment/utils.ts`.
 const defaultFormState: UriPartsProcessorFormState = {
   action: 'uri_parts' as const,
   from: '',
