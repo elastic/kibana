@@ -13,10 +13,10 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryClientProvider } from '@kbn/react-query';
 import { DASHBOARD_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { createTestQueryClient, createMockServices } from '../../test_utils';
-import { RuleFormProvider, type RuleFormServices } from '../../form/contexts';
-import type { ComposeFormValues } from './compose_form_types';
-import { ComposeRelatedDashboardsField } from './compose_artifact_fields';
+import { createMockServices, createTestQueryClient } from '../../test_utils';
+import { RuleFormProvider, type RuleFormServices } from '../contexts';
+import type { ComposeFormValues } from '../../flyout/compose_discover/compose_form_types';
+import { RelatedDashboardSelector } from './related_dashboard_selector';
 
 const BASE_COMPOSE_VALUES: ComposeFormValues = {
   kind: 'alert',
@@ -95,13 +95,13 @@ const createComposeFormWrapper = (
   };
 };
 
-describe('ComposeRelatedDashboardsField', () => {
+describe('RelatedDashboardSelector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('renders the related dashboards selector', () => {
-    render(<ComposeRelatedDashboardsField />, { wrapper: createComposeFormWrapper() });
+    render(<RelatedDashboardSelector />, { wrapper: createComposeFormWrapper() });
 
     expect(screen.getByText('Related dashboards')).toBeTruthy();
     expect(screen.getByPlaceholderText('Link related dashboards for investigation')).toBeTruthy();
@@ -110,7 +110,7 @@ describe('ComposeRelatedDashboardsField', () => {
   it('writes selected dashboards to artifacts', async () => {
     render(
       <>
-        <ComposeRelatedDashboardsField />
+        <RelatedDashboardSelector />
         <ArtifactValueSpy />
       </>,
       { wrapper: createComposeFormWrapper() }
@@ -130,7 +130,7 @@ describe('ComposeRelatedDashboardsField', () => {
   });
 
   it('debounces dashboard searches after the selector is focused', async () => {
-    render(<ComposeRelatedDashboardsField />, { wrapper: createComposeFormWrapper() });
+    render(<RelatedDashboardSelector />, { wrapper: createComposeFormWrapper() });
 
     const searchInput = screen.getByPlaceholderText('Link related dashboards for investigation');
     fireEvent.focus(searchInput);
@@ -158,7 +158,7 @@ describe('ComposeRelatedDashboardsField', () => {
   it('removes dashboard artifacts when the selection is cleared', async () => {
     render(
       <>
-        <ComposeRelatedDashboardsField />
+        <RelatedDashboardSelector />
         <ArtifactValueSpy />
       </>,
       {
@@ -182,7 +182,7 @@ describe('ComposeRelatedDashboardsField', () => {
   });
 
   it('does not render when uiActions is unavailable', () => {
-    render(<ComposeRelatedDashboardsField />, {
+    render(<RelatedDashboardSelector />, {
       wrapper: createComposeFormWrapper(BASE_COMPOSE_VALUES, {
         ...createMockServices(),
         uiActions: undefined,

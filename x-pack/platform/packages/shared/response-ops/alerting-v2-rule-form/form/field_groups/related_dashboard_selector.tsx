@@ -14,14 +14,17 @@ import { DASHBOARD_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { useDebounceFn } from '@kbn/react-hooks';
 import { useController, useFormContext } from 'react-hook-form';
-import { useRuleFormServices } from '../../form/contexts';
-import type { ComposeFormValues } from './compose_form_types';
+import { useRuleFormServices } from '../contexts';
 import { getDashboardsById, searchRelatedDashboard } from './search_related_dashboards';
+
+interface ArtifactsFormValues {
+  artifacts?: Array<{ id: string; type: string; value: string }>;
+}
 
 const SEARCH_DEBOUNCE_MS = 300;
 const SEARCH_DEBOUNCE_OPTIONS = { wait: SEARCH_DEBOUNCE_MS };
 
-const RelatedDashboardsSelector = ({
+const RelatedDashboardsComboBox = ({
   uiActions,
   dashboardsFormData,
   onChange,
@@ -127,12 +130,12 @@ const RelatedDashboardsSelector = ({
   );
 };
 
-export const ComposeRelatedDashboardsField: React.FC = () => {
-  const { control } = useFormContext<ComposeFormValues>();
+export const RelatedDashboardSelector: React.FC = () => {
+  const { control } = useFormContext<ArtifactsFormValues>();
   const { uiActions } = useRuleFormServices();
   const {
     field: { value: artifactsValue, onChange },
-  } = useController<ComposeFormValues, 'artifacts'>({
+  } = useController<ArtifactsFormValues, 'artifacts'>({
     name: 'artifacts',
     control,
   });
@@ -199,7 +202,7 @@ export const ComposeRelatedDashboardsField: React.FC = () => {
         </EuiText>
       }
     >
-      <RelatedDashboardsSelector
+      <RelatedDashboardsComboBox
         uiActions={uiActions}
         dashboardsFormData={dashboardsFormData}
         onChange={updateDashboardArtifacts}

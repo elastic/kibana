@@ -9,8 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { RuleDetailsFieldGroup } from '../../../form';
-import { RunbookArtifactField } from '../../../form/field_groups/runbook_artifact_field';
-import { ComposeRelatedDashboardsField } from '../compose_artifact_fields';
+import { RelatedDashboardSelector, RunbookArtifactField } from '../../../form/field_groups';
 
 export function DetailsAndArtifactsStep() {
   return (
@@ -32,7 +31,7 @@ export function DetailsAndArtifactsStep() {
 
       <RunbookArtifactField />
       <EuiSpacer size="m" />
-      <ComposeRelatedDashboardsField />
+      <RelatedDashboardSelector />
     </>
   );
 }
