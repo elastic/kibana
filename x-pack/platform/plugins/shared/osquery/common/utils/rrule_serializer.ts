@@ -11,6 +11,10 @@ import { Frequency, Weekday, type WeekdayStr } from '@kbn/rrule';
  * Subset of RFC 5545 RRULE parts that osquerybeat (`teambition/rrule-go`) understands
  * and that the osquery pack scheduler exposes via the UI.
  *
+ * Supported frequencies: `MINUTELY`, `HOURLY`, `DAILY`, `WEEKLY`, `MONTHLY`,
+ * `YEARLY`. `SECONDLY` is intentionally NOT supported — sub-minute scheduling
+ * is out of scope for the pack scheduler.
+ *
  * Notes:
  * - `freq` is required; everything else is optional.
  * - `_unknown` is a passthrough slot for parts the parser did not recognize. It
@@ -33,14 +37,13 @@ export interface RRuleFields {
   _unknown?: Record<string, string>;
 }
 
-const FREQUENCY_TO_STRING: Record<Frequency, string> = {
+const FREQUENCY_TO_STRING: Partial<Record<Frequency, string>> = {
   [Frequency.YEARLY]: 'YEARLY',
   [Frequency.MONTHLY]: 'MONTHLY',
   [Frequency.WEEKLY]: 'WEEKLY',
   [Frequency.DAILY]: 'DAILY',
   [Frequency.HOURLY]: 'HOURLY',
   [Frequency.MINUTELY]: 'MINUTELY',
-  [Frequency.SECONDLY]: 'SECONDLY',
 };
 
 const WEEKDAY_TO_STRING: Record<Weekday, WeekdayStr> = {
@@ -95,6 +98,15 @@ export const serializeRRule = (fields: RRuleFields): string => {
 
   if (_unknown) {
     for (const [key, value] of Object.entries(_unknown)) {
+      // Reject delimiter characters in unknown values: an unescaped `;`, `=`,
+      // or newline would corrupt the next parse and could let a malicious or
+      // malformed future-Kibana write smuggle synthetic parts past validation.
+      if (/[;=\n\r]/.test(value)) {
+        throw new Error(
+          `RRULE _unknown value for "${key}" contains forbidden delimiter character (;, =, \\n, \\r)`
+        );
+      }
+
       parts.push(`${key}=${value}`);
     }
   }

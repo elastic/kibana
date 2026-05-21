@@ -15,7 +15,6 @@ const STRING_TO_FREQUENCY: Record<string, Frequency> = {
   DAILY: Frequency.DAILY,
   HOURLY: Frequency.HOURLY,
   MINUTELY: Frequency.MINUTELY,
-  SECONDLY: Frequency.SECONDLY,
 };
 
 const STRING_TO_WEEKDAY: Record<WeekdayStr, Weekday> = {
@@ -28,7 +27,11 @@ const STRING_TO_WEEKDAY: Record<WeekdayStr, Weekday> = {
   SU: Weekday.SU,
 };
 
-const parseIntegerList = (value: string, partName: string): number[] => {
+const parseIntegerList = (
+  value: string,
+  partName: string,
+  validate?: (n: number) => boolean
+): number[] => {
   const items = value
     .split(',')
     .map((item) => item.trim())
@@ -40,9 +43,21 @@ const parseIntegerList = (value: string, partName: string): number[] => {
       throw new Error(`Invalid integer "${item}" in RRULE ${partName}`);
     }
 
+    if (validate && !validate(parsed)) {
+      throw new Error(`Value "${item}" is out of range for RRULE ${partName}`);
+    }
+
     return parsed;
   });
 };
+
+// BYMONTHDAY accepts 1..31 and -31..-1 (Nth-from-last day). Verified against
+// teambition/rrule-go validateBounds (plusMinus=true for "bymonthday"). RFC
+// 5545 §3.3.10 also permits the negative range.
+const isValidByMonthday = (n: number): boolean => (n >= 1 && n <= 31) || (n >= -31 && n <= -1);
+
+// BYMONTH is 1..12 only (no negative range per RFC 5545 §3.3.10).
+const isValidByMonth = (n: number): boolean => n >= 1 && n <= 12;
 
 const parseWeekdays = (value: string): Weekday[] =>
   value
@@ -126,10 +141,10 @@ export const parseRRule = (rrule: string): RRuleFields => {
         byweekday = parseWeekdays(rawValue);
         break;
       case 'BYMONTHDAY':
-        bymonthday = parseIntegerList(rawValue, 'BYMONTHDAY');
+        bymonthday = parseIntegerList(rawValue, 'BYMONTHDAY', isValidByMonthday);
         break;
       case 'BYMONTH':
-        bymonth = parseIntegerList(rawValue, 'BYMONTH');
+        bymonth = parseIntegerList(rawValue, 'BYMONTH', isValidByMonth);
         break;
       default:
         unknown[rawKey] = rawValue;

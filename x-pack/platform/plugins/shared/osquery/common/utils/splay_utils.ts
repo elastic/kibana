@@ -115,8 +115,11 @@ export const serializeSplay = (state: SplayFormState): string => {
  * can round-trip them through Kibana without rewriting — beats writes splay
  * via `time.ParseDuration` and may emit compound strings.
  *
- * Throws on values that match neither shape (e.g. `"5d"`, `"100ms"` outside
- * the compound vocabulary, empty string).
+ * Sub-second compound segments (`ms`, `us`, `µs`, `ns`) are accepted as
+ * `kind: 'compound'` for round-trip fidelity with `time.ParseDuration`, even
+ * though they are not meaningful at pack-scheduler resolution.
+ *
+ * Throws on values that match neither shape (e.g. `"5d"`, `""`, `"abc"`).
  */
 export const parseSplayPermissive = (duration: string): SplayParseResult => {
   if (typeof duration !== 'string') {

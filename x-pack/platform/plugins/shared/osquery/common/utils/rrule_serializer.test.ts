@@ -130,6 +130,36 @@ describe('serializeRRule', () => {
         /INTERVAL must be a positive integer/
       );
     });
+
+    it('throws on SECONDLY frequency (not in the supported subset)', () => {
+      expect(() => serializeRRule({ freq: Frequency.SECONDLY })).toThrowError(
+        /Invalid RRULE frequency/
+      );
+    });
+
+    it('throws when _unknown value contains ";"', () => {
+      expect(() =>
+        serializeRRule({ freq: Frequency.DAILY, _unknown: { WKST: 'MO;FOO=BAR' } })
+      ).toThrowError(/forbidden delimiter/);
+    });
+
+    it('throws when _unknown value contains "="', () => {
+      expect(() =>
+        serializeRRule({ freq: Frequency.DAILY, _unknown: { WKST: 'A=B' } })
+      ).toThrowError(/forbidden delimiter/);
+    });
+
+    it('throws when _unknown value contains "\\n"', () => {
+      expect(() =>
+        serializeRRule({ freq: Frequency.DAILY, _unknown: { WKST: 'A\nB' } })
+      ).toThrowError(/forbidden delimiter/);
+    });
+
+    it('throws when _unknown value contains "\\r"', () => {
+      expect(() =>
+        serializeRRule({ freq: Frequency.DAILY, _unknown: { WKST: 'A\rB' } })
+      ).toThrowError(/forbidden delimiter/);
+    });
   });
 
   describe('round-trip with parser', () => {

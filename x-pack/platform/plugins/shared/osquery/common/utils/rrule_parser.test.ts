@@ -141,6 +141,34 @@ describe('parseRRule', () => {
       expect(() => parseRRule('FREQ=BOGUS')).toThrowError(/Invalid RRULE FREQ/);
     });
 
+    it('throws on FREQ=SECONDLY (not in the supported subset)', () => {
+      expect(() => parseRRule('FREQ=SECONDLY')).toThrowError(/Invalid RRULE FREQ/);
+    });
+
+    it('throws when BYMONTH is out of [1,12]', () => {
+      expect(() => parseRRule('FREQ=YEARLY;BYMONTH=0')).toThrowError(/out of range/);
+      expect(() => parseRRule('FREQ=YEARLY;BYMONTH=13')).toThrowError(/out of range/);
+      expect(() => parseRRule('FREQ=YEARLY;BYMONTH=-1')).toThrowError(/out of range/);
+    });
+
+    it('accepts BYMONTH boundary values 1 and 12', () => {
+      expect(parseRRule('FREQ=YEARLY;BYMONTH=1').bymonth).toEqual([1]);
+      expect(parseRRule('FREQ=YEARLY;BYMONTH=12').bymonth).toEqual([12]);
+    });
+
+    it('throws when BYMONTHDAY is out of [-31,-1] ∪ [1,31]', () => {
+      expect(() => parseRRule('FREQ=MONTHLY;BYMONTHDAY=0')).toThrowError(/out of range/);
+      expect(() => parseRRule('FREQ=MONTHLY;BYMONTHDAY=32')).toThrowError(/out of range/);
+      expect(() => parseRRule('FREQ=MONTHLY;BYMONTHDAY=-32')).toThrowError(/out of range/);
+    });
+
+    it('accepts BYMONTHDAY boundary values 1, 31, -1, -31', () => {
+      expect(parseRRule('FREQ=MONTHLY;BYMONTHDAY=1').bymonthday).toEqual([1]);
+      expect(parseRRule('FREQ=MONTHLY;BYMONTHDAY=31').bymonthday).toEqual([31]);
+      expect(parseRRule('FREQ=MONTHLY;BYMONTHDAY=-1').bymonthday).toEqual([-1]);
+      expect(parseRRule('FREQ=MONTHLY;BYMONTHDAY=-31').bymonthday).toEqual([-31]);
+    });
+
     it('throws when a part is missing the "=" separator', () => {
       expect(() => parseRRule('FREQ=DAILY;BYDAY')).toThrowError(/missing "="/);
     });
