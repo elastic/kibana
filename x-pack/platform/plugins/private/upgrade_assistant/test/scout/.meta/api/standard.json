@@ -1,0 +1,241 @@
+{
+  "sha1": "6cc53a3d2e8312ede1a9eade4981138576b21ed1",
+  "tests": [
+    {
+      "id": "9991953b7104b9e-739f71e0a324a1a",
+      "title": "Upgrade Assistant cloud backup status API returns status based on the most recent snapshot",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/cloud_backup_status.spec.ts",
+        "line": 36,
+        "column": 12
+      }
+    },
+    {
+      "id": "9991953b7104b9e-2eaf1e345852500",
+      "title": "Upgrade Assistant cloud backup status API returns not-backed-up status without backups present",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/cloud_backup_status.spec.ts",
+        "line": 51,
+        "column": 12
+      }
+    },
+    {
+      "id": "f1267f7f445b3a2-6b81dec5e688d8c",
+      "title": "Upgrade Assistant cluster settings API removes cluster settings",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/cluster_settings.spec.ts",
+        "line": 33,
+        "column": 12
+      }
+    },
+    {
+      "id": "e381cf9f14d2574-e23500285ad0202",
+      "title": "Upgrade Assistant Elasticsearch deprecation logs API filters out deprecations from Elastic products",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/es_deprecation_logs.spec.ts",
+        "line": 30,
+        "column": 12
+      }
+    },
+    {
+      "id": "1742d9e03c5a9ec-6073cc1fb4f4962",
+      "title": "Upgrade Assistant Elasticsearch deprecations API returns forbidden for a user without privileges",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/es_deprecations.spec.ts",
+        "line": 17,
+        "column": 12
+      }
+    },
+    {
+      "id": "a071ef97df5b0c3-827b55d66b9ae66",
+      "title": "Upgrade Assistant node disk space API returns an array of nodes",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/node_disk_space.spec.ts",
+        "line": 25,
+        "column": 12
+      }
+    },
+    {
+      "id": "48357f7b315d056-275480fd12c6c9d",
+      "title": "Upgrade Assistant privileges API returns all privileges for an admin user",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/privileges.spec.ts",
+        "line": 25,
+        "column": 12
+      }
+    },
+    {
+      "id": "48357f7b315d056-1ac400a5b783687",
+      "title": "Upgrade Assistant privileges API returns missing index privileges for a user without index privileges",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/privileges.spec.ts",
+        "line": 35,
+        "column": 12
+      }
+    },
+    {
+      "id": "11a594bd7ce6d50-ea21b09dd240fc0",
+      "title": "Upgrade Assistant remote clusters API returns an array of remote clusters",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/remote_clusters.spec.ts",
+        "line": 50,
+        "column": 12
+      }
+    },
+    {
+      "id": "3097a6094294259-7e784737cbb464c",
+      "title": "Upgrade Assistant APIs indexes a reindex operation saved object with an immense error message",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/upgrade_assistant.spec.ts",
+        "line": 45,
+        "column": 12
+      }
+    },
+    {
+      "id": "3097a6094294259-d12037bb1d31133",
+      "title": "Upgrade Assistant APIs removes index settings",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/upgrade_assistant.spec.ts",
+        "line": 58,
+        "column": 12
+      }
+    },
+    {
+      "id": "3097a6094294259-7a78394a282a471",
+      "title": "Upgrade Assistant APIs returns an error when removing settings from a missing index",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/upgrade_assistant.spec.ts",
+        "line": 93,
+        "column": 12
+      }
+    },
+    {
+      "id": "3097a6094294259-bc1169ac03db380",
+      "title": "Upgrade Assistant APIs returns upgrade status",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/upgrade_assistant.spec.ts",
+        "line": 111,
+        "column": 12
+      }
+    },
+    {
+      "id": "3097a6094294259-a90a6589337d708",
+      "title": "Upgrade Assistant APIs returns upgrade status when upgrading to the next minor",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/upgrade_assistant.spec.ts",
+        "line": 121,
+        "column": 12
+      }
+    },
+    {
+      "id": "3097a6094294259-515eefb3368de33",
+      "title": "Upgrade Assistant APIs returns upgrade status when upgrading to the next major",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/upgrade_assistant.spec.ts",
+        "line": 131,
+        "column": 12
+      }
+    },
+    {
+      "id": "3097a6094294259-c608c985163e518",
+      "title": "Upgrade Assistant APIs returns forbidden when upgrading more than one major",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/upgrade_assistant.spec.ts",
+        "line": 144,
+        "column": 12
+      }
+    },
+    {
+      "id": "3097a6094294259-bbef59075362672",
+      "title": "Upgrade Assistant APIs returns forbidden when attempting to downgrade",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/api/tests/upgrade_assistant.spec.ts",
+        "line": 156,
+        "column": 12
+      }
+    }
+  ]
+}
