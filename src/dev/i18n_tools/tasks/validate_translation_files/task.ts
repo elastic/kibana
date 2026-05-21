@@ -15,7 +15,7 @@ import { removeUnusedTranslations } from './remove_unused_translations';
 import { removeOutdatedTranslations } from './remove_outdated_translations';
 import { updateTranslationFile } from './update_translation_file';
 import { ErrorReporter } from '../../utils/error_reporter';
-import { getLocalesFromFiles } from './get_locale_from_file';
+import { getLocalesFromFiles, getLocaleFromFile } from './get_locale_from_file';
 
 import type { TaskSignature } from '../../types';
 import { makeAbsolutePath } from '../../utils';
@@ -96,6 +96,7 @@ export const validateTranslationFiles: TaskSignature<TaskOptions> = (context, ta
                 formats: translationInput.formats,
                 namespacedTranslatedMessages,
                 targetFilePath: filePath,
+                locale: getLocaleFromFile(filePath),
               });
             } else if (errorReporter.hasErrors()) {
               // only throw if --fix is not set (or dry-run)

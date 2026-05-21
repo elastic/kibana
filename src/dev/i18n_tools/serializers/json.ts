@@ -10,8 +10,13 @@
 import { defaultEnFormats } from '@kbn/i18n/src/core';
 import type { Serializer, FileOutput } from './types';
 
-export const serializeToJson: Serializer = (messageDescriptors, formats = defaultEnFormats) => {
+export const serializeToJson: Serializer = (
+  messageDescriptors,
+  formats = defaultEnFormats,
+  locale?: string
+) => {
   const resultJsonObject: FileOutput = {
+    ...(locale ? { locale } : {}),
     formats,
     messages: {},
   };

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { readFile } from 'fs/promises';
+import { createReadStream } from 'fs';
+import { PassThrough } from 'stream';
 import { i18n, i18nLoader } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core-http-server';
@@ -78,22 +79,19 @@ export const registerTranslationsRoute = ({
             });
           }
 
-          let body: string;
+          let body: string | PassThrough;
           if (canonicalLocale.toLowerCase() === locale.toLowerCase()) {
             // Default locale: already in memory from server startup
             body = JSON.stringify(i18n.getTranslation());
           } else {
             const files = localeFileMap[canonicalLocale] ?? [];
             if (files.length === 1) {
-              // Single pre-merged file (standard case): inject locale field via string
-              // splice and serve without parsing or caching the content.
-              // Strip the outer braces and only add the comma when inner content exists,
-              // so an empty file ({}) doesn't produce the invalid {"locale":"xx",}.
-              const raw = await readFile(files[0], 'utf8');
-              const inner = raw.trim().slice(1, -1);
-              body = inner
-                ? `{"locale":${JSON.stringify(canonicalLocale)},${inner}}`
-                : `{"locale":${JSON.stringify(canonicalLocale)}}`;
+              // Single pre-merged file streamed directly. The i18n tooling
+              // (serializeToJson) always writes a top-level "locale" field, so we don't
+              // re-parse here. An empty `{}` file would be served as-is without a locale.
+              const stream = new PassThrough();
+              createReadStream(files[0]).pipe(stream);
+              body = stream;
             } else {
               // Multiple files (external plugin contributed translations): merge via
               // the loader and serve without caching.

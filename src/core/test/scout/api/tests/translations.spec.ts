@@ -42,6 +42,19 @@ apiTest.describe('translations', { tag: tags.deploymentAgnostic }, () => {
     }
   });
 
+  apiTest('serves a non-default locale file with the locale field intact', async ({ apiClient }) => {
+    const response = await apiClient.get('/translations/fr-FR.json', {
+      headers: {
+        ...INTERNAL_HEADERS,
+        ...credentials.apiKeyHeader,
+      },
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.locale).toBe('fr-FR');
+    expect(response).toHaveHeaders({ 'content-type': 'application/json; charset=utf-8' });
+  });
+
   apiTest('returns a 404 when not using the correct locale', async ({ apiClient }) => {
     const response = await apiClient.get('/translations/foo.json', {
       headers: {
