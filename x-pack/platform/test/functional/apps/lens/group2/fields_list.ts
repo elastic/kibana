@@ -191,6 +191,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.click(fieldId);
           // define a filter
           await filterBar.addFilter({ field: 'geo.src', operation: 'is', value: 'CN' });
+          await header.waitUntilLoadingHasFinished();
           await retry.waitFor('Wait for the filter to take effect', async () => {
             await testSubjects.click(fieldId);
             // check for top values chart has changed compared to the previous test
