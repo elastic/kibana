@@ -29,7 +29,8 @@ export const getLegendAction = (
   fieldFormats: LayersFieldFormats,
   formattedDatatables: DatatablesWithFormatInfo,
   titles: LayersAccessorsTitles,
-  singleTable?: boolean
+  singleTable?: boolean,
+  panelHasConfiguredDrilldowns?: boolean
 ): LegendAction =>
   React.memo(({ series: [xySeries] }) => {
     const series = xySeries as XYChartSeriesIdentifier;
@@ -119,6 +120,7 @@ export const getLegendAction = (
         onFilter={filterHandler}
         legendCellValueActions={legendCellValueActions}
         isComputedColumn={isComputedColumn}
+        panelHasConfiguredDrilldowns={panelHasConfiguredDrilldowns}
       />
     );
   });

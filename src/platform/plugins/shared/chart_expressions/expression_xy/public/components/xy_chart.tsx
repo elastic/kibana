@@ -158,6 +158,7 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   timeFormat: string;
   setChartSize: (chartSizeSpec: ChartSizeSpec) => void;
   shouldShowLegendAction?: (actionId: string) => boolean;
+  panelHasConfiguredDrilldowns?: boolean;
 };
 
 function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -221,6 +222,7 @@ export function XYChart({
   uiState,
   timeFormat,
   overrides,
+  panelHasConfiguredDrilldowns,
 }: XYChartRenderProps) {
   const {
     legend,
@@ -915,7 +917,8 @@ export function XYChart({
                       fieldFormats,
                       formattedDatatables,
                       titles,
-                      singleTable
+                      singleTable,
+                      panelHasConfiguredDrilldowns
                     )
                   : undefined
               }

@@ -41,13 +41,25 @@ export interface LegendActionPopoverProps {
    * When true, built-in Filter for / Filter out items are shown disabled.
    */
   isComputedColumn?: boolean;
+  /**
+   * When true, the disabled filter message also mentions that drill downs are unavailable.
+   */
+  panelHasConfiguredDrilldowns?: boolean;
 }
 
-const getEsqlComputedColumnFilterDisabledMessage = () =>
-  i18n.translate('expressionXY.legend.esqlComputedColumnFilterDisabledMessage', {
-    defaultMessage:
-      "You can't apply a filter from this value because it relies on a field created at query time.",
-  });
+const getEsqlComputedColumnFilterDisabledMessage = (
+  panelHasConfiguredDrilldowns: boolean = false
+) => {
+  return panelHasConfiguredDrilldowns
+    ? i18n.translate('expressionXY.legend.esqlComputedColumnFilterDrilldownDisabledMessage', {
+        defaultMessage:
+          "You can't apply a filter or drill down from this value because it relies on a field created at query time.",
+      })
+    : i18n.translate('expressionXY.legend.esqlComputedColumnFilterDisabledMessage', {
+        defaultMessage:
+          "You can't apply a filter from this value because it relies on a field created at query time.",
+      });
+};
 
 const LegendFilterDisabledMessage = ({ message }: { message: string }) => {
   const { euiTheme } = useEuiTheme();
@@ -73,6 +85,7 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
   onFilter,
   legendCellValueActions = [],
   isComputedColumn = false,
+  panelHasConfiguredDrilldowns = false,
 }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [ref, onClose] = useLegendAction<HTMLDivElement>();
@@ -106,7 +119,7 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
     ];
 
     const filterActionsDisabledMessage = isComputedColumn
-      ? getEsqlComputedColumnFilterDisabledMessage()
+      ? getEsqlComputedColumnFilterDisabledMessage(panelHasConfiguredDrilldowns)
       : undefined;
 
     const defaultFilterPanelItems = !hasFilterCellAction(legendCellValueActions)
@@ -160,7 +173,7 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
         ],
       },
     ];
-  }, [label, legendCellValueActions, onFilter, isComputedColumn]);
+  }, [label, legendCellValueActions, onFilter, isComputedColumn, panelHasConfiguredDrilldowns]);
 
   const Button = (
     <div

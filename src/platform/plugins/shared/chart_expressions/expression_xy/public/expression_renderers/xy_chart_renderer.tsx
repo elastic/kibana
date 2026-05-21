@@ -308,6 +308,7 @@ export const getXyChartRenderer = ({
             uiState={handlers.uiState as PersistedState}
             renderComplete={renderComplete}
             setChartSize={setChartSize}
+            panelHasConfiguredDrilldowns={handlers.panelHasConfiguredDrilldowns}
           />
         </div>
       </KibanaRenderContextProvider>,

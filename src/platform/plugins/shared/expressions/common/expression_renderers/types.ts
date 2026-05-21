@@ -86,7 +86,6 @@ export interface IInterpreterRenderHandlers {
   event(event: IInterpreterRenderEvent): void;
   hasCompatibleActions?(event: IInterpreterRenderEvent): Promise<boolean>;
   getCompatibleCellValueActions?(data: object[]): Promise<unknown[]>;
-  /** Lens / dashboard: whether the panel has at least one saved drilldown. */
   panelHasConfiguredDrilldowns?: boolean;
   getRenderMode(): RenderMode;
 
