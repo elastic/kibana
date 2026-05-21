@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import type { RelatedIntegrationRuleResponse, RelatedIntegration } from './types';
+import type { RelatedIntegrationRuleResponse, RelatedIntegration } from '@kbn/siem-readiness';
 import { useSiemReadinessApi } from './use_siem_readiness_api';
 
 export interface RuleIntegrationCoverage {
@@ -47,7 +47,6 @@ export const getRuleIntegrationCoverage = (
       return;
     }
 
-    // Current behavior: a rule is considered covered if ANY required integration is installed
     const hasInstalledIntegration = requiredIntegrations.some((pkg) => installedSet.has(pkg));
 
     if (hasInstalledIntegration) {

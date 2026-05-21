@@ -8,13 +8,8 @@
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-
-interface IndexDocCount {
-  index: string;
-  docCount: number;
-  exists: boolean;
-  error?: string;
-}
+import type { IndexDocCount } from '@kbn/siem-readiness';
+import { GET_SIEM_READINESS_MITRE_DATA_INDICES_DOCS_COUNT_API_PATH } from '@kbn/siem-readiness';
 
 interface IndicesDocCountsResponse {
   indices: IndexDocCount[];
@@ -29,7 +24,7 @@ export const useMitreAttackIndicesDocCounts = (ruleIndices: string[] = []) => {
       if (!ruleIndices.length) return [];
 
       const response = await http.post<IndicesDocCountsResponse>(
-        '/api/siem_readiness/mitre_data_indices_docs_count',
+        GET_SIEM_READINESS_MITRE_DATA_INDICES_DOCS_COUNT_API_PATH,
         {
           body: JSON.stringify({ indices: ruleIndices }),
         }

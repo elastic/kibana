@@ -8,7 +8,7 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { useQuery } from '@kbn/react-query';
-import type { CasesSearchResponse } from './types';
+import type { CasesSearchResponse } from '@kbn/siem-readiness';
 
 export const useSiemReadinessGetCasesCountByTags = (tags: string[]) => {
   const { http } = useKibana<CoreStart>().services;
@@ -28,6 +28,6 @@ export const useSiemReadinessGetCasesCountByTags = (tags: string[]) => {
         }),
       });
     },
-    enabled: tags.length > 0, // Only run query if tags are provided
+    enabled: tags.length > 0,
   });
 };
