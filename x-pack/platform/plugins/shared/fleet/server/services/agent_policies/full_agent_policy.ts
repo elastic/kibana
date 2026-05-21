@@ -166,9 +166,18 @@ export async function getFullAgentPolicy(
     const dataOutputProxy = dataOutput?.proxy_id
       ? proxies.find((p) => p.id === dataOutput.proxy_id)
       : undefined;
+
+    const packageOutputs = new Map<string, Output>();
+    for (const pkgPolicy of (agentPolicy.package_policies ?? []) as PackagePolicy[]) {
+      if (!pkgPolicy.output_id) continue;
+      const override = outputs.find((o) => o.id === pkgPolicy.output_id);
+      if (override) packageOutputs.set(pkgPolicy.id, override);
+    }
+
     otelcolConfig = generateOtelcolConfig({
       inputs: agentInputs,
       dataOutput,
+      packageOutputs,
       packageInfoCache,
       proxy: dataOutputProxy,
       logger,
