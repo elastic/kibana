@@ -187,7 +187,6 @@ class TagModal extends FtrService {
  */
 class TagAssignmentFlyout extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
-  private readonly find = this.ctx.getService('find');
 
   constructor(ctx: FtrProviderContext, private readonly page: TagManagementPageObject) {
     super(ctx);
