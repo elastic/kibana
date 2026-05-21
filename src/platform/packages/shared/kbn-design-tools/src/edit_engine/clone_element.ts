@@ -18,6 +18,7 @@ import {
   PSEUDO_CLASS_PREFIX,
 } from '../lib/constants';
 import { stripTruncationClasses, isTruncatedDeep } from './truncation_helpers';
+import { collectAllTextNodes } from './collect_text_nodes';
 import { tagColorTokens, colorToToken, toHex } from '../lib/dom/color_token_lookup';
 import { getTokenVar } from '../lib/dom/color_token_stylesheet';
 
@@ -749,17 +750,8 @@ export const buildElementMap = (
  */
 export const buildTextNodeMap = (original: HTMLElement, clone: HTMLElement): Map<Text, Text> => {
   const map = new Map<Text, Text>();
-  const walker = (root: Node): Text[] => {
-    const nodes: Text[] = [];
-    const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-    let node: Node | null;
-    while ((node = tw.nextNode())) {
-      nodes.push(node as Text);
-    }
-    return nodes;
-  };
-  const origTexts = walker(original);
-  const cloneTexts = walker(clone);
+  const origTexts = collectAllTextNodes(original);
+  const cloneTexts = collectAllTextNodes(clone);
   for (let i = 0; i < origTexts.length && i < cloneTexts.length; i++) {
     map.set(origTexts[i], cloneTexts[i]);
   }
