@@ -30,9 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show the profile data view', async () => {
-      await common.navigateToActualUrl('discover', undefined, {
-        ensureCurrentUrl: false,
-      });
+      await discover.navigateToApp('classic');
       expect(await dataViews.getSelectedName()).not.to.be('Example profile data view');
       await dataViews.switchTo('Example profile data view');
       await discover.waitUntilSearchingHasFinished();
@@ -94,9 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.importExport.unload(
           'src/platform/test/functional/fixtures/kbn_archiver/discover/context_awareness'
         );
-        await common.navigateToActualUrl('discover', undefined, {
-          ensureCurrentUrl: false,
-        });
+        await discover.navigateToApp('classic');
         expect(await dataViews.getSelectedName()).to.be('Example profile data view');
         await discover.waitUntilSearchingHasFinished();
         expect(await dataViews.isManaged()).to.be(true);
@@ -113,9 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.unload(
           'src/platform/test/functional/fixtures/es_archiver/discover/context_awareness'
         );
-        await common.navigateToActualUrl('discover', undefined, {
-          ensureCurrentUrl: false,
-        });
+        await discover.navigateToApp('classic');
         expect(await testSubjects.exists('kbnNoDataPage')).to.be(true);
       });
     });

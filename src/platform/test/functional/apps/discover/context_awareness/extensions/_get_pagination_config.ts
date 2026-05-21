@@ -68,9 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('data view mode', () => {
       it('should render single page pagination without page numbers', async () => {
-        await common.navigateToActualUrl('discover', undefined, {
-          ensureCurrentUrl: false,
-        });
+        await discover.navigateToApp('classic');
         await dataViews.switchTo('my-example-logs,logstash*');
         await discover.waitUntilSearchingHasFinished();
         await testSubjects.missingOrFail('tablePaginationPopoverButton');
@@ -79,9 +77,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should render default pagination with page numbers', async () => {
-        await common.navigateToActualUrl('discover', undefined, {
-          ensureCurrentUrl: false,
-        });
+        await discover.navigateToApp('classic');
         await dataViews.createFromSearchBar({
           name: 'lo', // Must be anything but log/logs, since pagination is disabled for log sources
           adHoc: true,

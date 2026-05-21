@@ -96,9 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     {
       name: 'classic',
       loadDefaultProfile: async () => {
-        await common.navigateToActualUrl('discover', undefined, {
-          ensureCurrentUrl: false,
-        });
+        await discover.navigateToApp('classic');
         await discover.waitUntilTabIsLoaded();
         await dataViews.switchToAndValidate('my-example-logs');
         await discover.waitUntilTabIsLoaded();

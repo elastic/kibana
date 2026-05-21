@@ -85,9 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('data view mode', () => {
       describe('root profile', () => {
         it('should render custom @timestamp', async () => {
-          await common.navigateToActualUrl('discover', undefined, {
-            ensureCurrentUrl: false,
-          });
+          await discover.navigateToApp('classic');
           await dataViews.switchTo('my-example-*');
           await discover.waitUntilSearchingHasFinished();
           const timestamps = await testSubjects.findAll('exampleRootProfileTimestamp');
@@ -99,9 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('data source profile', () => {
         it('should render custom @timestamp but not custom log.level', async () => {
-          await common.navigateToActualUrl('discover', undefined, {
-            ensureCurrentUrl: false,
-          });
+          await discover.navigateToApp('classic');
           await dataViews.switchTo('my-example-*');
           await discover.waitUntilSearchingHasFinished();
           await unifiedFieldList.clickFieldListItemAdd('@timestamp');
@@ -115,9 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should render custom @timestamp and custom log.level', async () => {
-          await common.navigateToActualUrl('discover', undefined, {
-            ensureCurrentUrl: false,
-          });
+          await discover.navigateToApp('classic');
           await dataViews.switchTo('my-example-logs');
           await discover.waitUntilSearchingHasFinished();
           await unifiedFieldList.clickFieldListItemAdd('@timestamp');

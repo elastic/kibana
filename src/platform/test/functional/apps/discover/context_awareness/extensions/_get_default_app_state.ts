@@ -142,9 +142,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('data view mode', () => {
       it('should render default state', async () => {
-        await common.navigateToActualUrl('discover', undefined, {
-          ensureCurrentUrl: false,
-        });
+        await discover.navigateToApp('classic');
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
         await dataViews.switchToAndValidate('my-example-logs');
@@ -158,9 +156,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should render default state when switching data views', async () => {
-        await common.navigateToActualUrl('discover', undefined, {
-          ensureCurrentUrl: false,
-        });
+        await discover.navigateToApp('classic');
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
         await dataViews.switchToAndValidate('my-example-*');
@@ -181,9 +177,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should reset default state when clicking "New"', async () => {
-        await common.navigateToActualUrl('discover', undefined, {
-          ensureCurrentUrl: false,
-        });
+        await discover.navigateToApp('classic');
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
         await dataViews.switchToAndValidate('my-example-logs');
@@ -209,9 +203,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.uiSettings.update({
           defaultColumns: ['bad_column', 'data_stream.type', 'message'],
         });
-        await common.navigateToActualUrl('discover', undefined, {
-          ensureCurrentUrl: false,
-        });
+        await discover.navigateToApp('classic');
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
         await dataViews.switchToAndValidate('my-example-logs');

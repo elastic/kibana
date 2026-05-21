@@ -162,9 +162,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('data view mode', () => {
       it('should not render custom doc viewer view', async () => {
-        await common.navigateToActualUrl('discover', undefined, {
-          ensureCurrentUrl: false,
-        });
+        await discover.navigateToApp('classic');
         await dataViews.switchTo('my-example-*');
         await discover.waitUntilTabIsLoaded();
         await dataGrid.clickRowToggle({ rowIndex: 0 });
@@ -176,9 +174,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should render custom doc viewer view', async () => {
-        await common.navigateToActualUrl('discover', undefined, {
-          ensureCurrentUrl: false,
-        });
+        await discover.navigateToApp('classic');
         await dataViews.switchTo('my-example-logs');
         await discover.waitUntilTabIsLoaded();
         await dataGrid.clickRowToggle({ rowIndex: 0 });
@@ -192,9 +188,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should render custom doc viewer header', async () => {
-        await common.navigateToActualUrl('discover', undefined, {
-          ensureCurrentUrl: false,
-        });
+        await discover.navigateToApp('classic');
         await dataViews.switchTo('my-example-logs');
         await discover.waitUntilTabIsLoaded();
         await dataGrid.clickRowToggle({ rowIndex: 0 });
@@ -205,9 +199,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should render custom doc viewer footer', async () => {
-        await common.navigateToActualUrl('discover', undefined, {
-          ensureCurrentUrl: false,
-        });
+        await discover.navigateToApp('classic');
         await dataViews.switchTo('my-example-logs');
         await discover.waitUntilTabIsLoaded();
         await dataGrid.clickRowToggle({ rowIndex: 0 });
@@ -218,9 +210,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should render restorable state doc viewer and preserve counter state in data view mode', async () => {
-        await common.navigateToActualUrl('discover', undefined, {
-          ensureCurrentUrl: false,
-        });
+        await discover.navigateToApp('classic');
         await dataViews.switchTo('my-example-logs');
         await discover.waitUntilTabIsLoaded();
         await dataGrid.clickRowToggle({
