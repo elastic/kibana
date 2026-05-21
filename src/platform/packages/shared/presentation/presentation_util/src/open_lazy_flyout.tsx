@@ -53,10 +53,9 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
   const { core, parentApi, loadContent, flyoutProps: allFlyoutProps } = params;
   const { focusedPanelId, triggerId, ...flyoutProps } = allFlyoutProps ?? {};
 
+  const ariaLabelledBy = flyoutProps?.['aria-labelledby'] ?? htmlId();
   const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
   const panelFlyoutTypeFromParent = overlayTracker?.panelFlyoutType;
-
-  const ariaLabelledBy = flyoutProps?.['aria-labelledby'] ?? htmlId();
   const type = flyoutProps?.type ?? panelFlyoutTypeFromParent ?? 'push';
   const ownFocus =
     flyoutProps?.ownFocus ?? (panelFlyoutTypeFromParent === 'overlay' ? false : true);

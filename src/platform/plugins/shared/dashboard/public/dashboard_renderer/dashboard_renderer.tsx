@@ -51,8 +51,9 @@ export interface DashboardRendererProps {
   /** Whether to show a plain spinner instead of the Elastic loading animation. */
   showPlainSpinner?: boolean;
   /**
-   * Flyout type for panel flyouts (Settings, Lens config, Inspect, etc.) opened from this dashboard.
-   * Use `overlay` when the dashboard is embedded in a host that already uses a push flyout (e.g. Agent Builder canvas).
+   * Flyout type for panel flyouts (Settings, Lens config, etc.) opened from this dashboard.
+   * Use `overlay` when the dashboard is embedded in a host that already uses a push flyout
+   * (e.g. Agent Builder canvas).
    */
   panelFlyoutType?: PanelFlyoutType;
   /** Callback for redirecting within the dashboard application. */
