@@ -19,7 +19,6 @@ import type { EndpointAuthz } from '../common/endpoint/types/authz';
 import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
 import type { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
-import { AssetInventoryDataClient } from './lib/asset_inventory/asset_inventory_data_client';
 import { createDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client';
 import type { IRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
 import { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
@@ -378,16 +377,6 @@ export class RequestContextFactory implements IRequestContextFactory {
           getSpaceId()
         );
       }),
-      getAssetInventoryClient: memoize(
-        () =>
-          new AssetInventoryDataClient({
-            logger: options.logger,
-            clusterClient: coreContext.elasticsearch.client,
-            uiSettingsClient: coreContext.uiSettings.client,
-            usageCollection: options.plugins.usageCollection,
-            coreStartPromise: core.getStartServices(),
-          })
-      ),
       getMlAuthz: memoize(() => {
         return mlAuthz;
       }),

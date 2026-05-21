@@ -28,9 +28,11 @@ export const EDOT_AGENT_NAMES = [
   'opentelemetry/php/elastic',
   'opentelemetry/python/elastic',
 ] as const;
+export const OTEL_AGENT_NAMES = ['opentelemetry/java/opentelemetry-java-instrumentation'] as const;
 
 const OPEN_TELEMETRY_AGENT_NAMES = [
   ...EDOT_AGENT_NAMES,
+  ...OTEL_AGENT_NAMES,
   ...OPEN_TELEMETRY_BASE_AGENT_NAMES,
   'opentelemetry/cpp',
   'opentelemetry/dotnet',

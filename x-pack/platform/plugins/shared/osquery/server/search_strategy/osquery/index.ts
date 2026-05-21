@@ -64,6 +64,18 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             ...('scheduleId' in request ? { scheduleId: request.scheduleId } : {}),
             ...('executionCount' in request ? { executionCount: request.executionCount } : {}),
             ...('esFilters' in request ? { esFilters: request.esFilters } : {}),
+            // exportResults factory fields — baseFilter is required and unique to this
+            // factory type, so its presence is a reliable discriminator for all six fields.
+            ...('baseFilter' in request
+              ? {
+                  baseFilter: request.baseFilter,
+                  pit: 'pit' in request ? request.pit : undefined,
+                  searchAfter: 'searchAfter' in request ? request.searchAfter : undefined,
+                  size: 'size' in request ? request.size : undefined,
+                  ecsMapping: 'ecsMapping' in request ? request.ecsMapping : undefined,
+                  trackTotalHits: 'trackTotalHits' in request ? request.trackTotalHits : undefined,
+                }
+              : {}),
           } as StrategyRequestType<T>;
 
           const dsl = queryFactory.buildDsl({
@@ -80,10 +92,23 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
               ? data.search.searchAsInternalUser
               : data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
 
+          // When a PIT is present ES rejects requests that also specify `index`,
+          // `allow_no_indices`, or `ignore_unavailable` (the PIT already encodes
+          // the index scope). Strip those fields from the params before the call
+          // while keeping `dsl.index` above for client-selection routing.
+          const esParams = dsl.pit
+            ? {
+                ...dsl,
+                index: undefined,
+                allow_no_indices: undefined,
+                ignore_unavailable: undefined,
+              }
+            : dsl;
+
           const searchLegacyIndex$ = es.search(
             {
               ...strictRequest,
-              params: dsl,
+              params: esParams,
             },
             options,
             deps

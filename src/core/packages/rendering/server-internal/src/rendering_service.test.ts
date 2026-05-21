@@ -17,6 +17,7 @@ import {
   getBrowserLoggingConfigMock,
   getApmConfigMock,
   getIsThemeBundledMock,
+  isRspackModeEnabledMock,
 } from './rendering_service.test.mocks';
 
 import { load } from 'cheerio';
@@ -139,6 +140,7 @@ function renderTestCases(
 
       expect(data).toMatchSnapshot(INJECTED_METADATA);
       expect(data.legacyMetadata.uiSettings.user).toEqual(userSettings); // user settings are injected
+      expect(uiSettings.client.getUserProvided).toHaveBeenCalledWith(true);
     });
 
     it('renders page with light color-scheme when dark mode is disabled', async () => {
@@ -196,6 +198,8 @@ function renderTestCases(
 
       expect(data).toMatchSnapshot(INJECTED_METADATA);
       expect(data.legacyMetadata.globalUiSettings.user).toEqual(userSettings); // user settings are injected
+      expect(uiSettings.client.getUserProvided).toHaveBeenCalledWith(true);
+      expect(uiSettings.globalClient.getUserProvided).toHaveBeenCalledWith(true);
     });
 
     it('renders "core" with excluded user settings', async () => {
@@ -224,6 +228,42 @@ function renderTestCases(
 
       expect(data).toMatchSnapshot(INJECTED_METADATA);
       expect(data.legacyMetadata.globalUiSettings.user).toEqual({}); // user settings are not injected
+    });
+
+    it('does not call getUserProvided for anonymous pages', async () => {
+      const [render] = await getRender();
+      await render(createKibanaRequest(), uiSettings, {
+        isAnonymousPage: true,
+      });
+
+      expect(uiSettings.client.getUserProvided).not.toHaveBeenCalled();
+      expect(uiSettings.globalClient.getUserProvided).not.toHaveBeenCalled();
+    });
+
+    it('does not resolve async default `getValue` for anonymous pages', async () => {
+      const getValue = jest.fn().mockResolvedValue('async-default');
+      uiSettings.client.getRegistered.mockReturnValue({
+        registered: { name: 'title', getValue },
+      });
+
+      const [render] = await getRender();
+      await render(createKibanaRequest(), uiSettings, {
+        isAnonymousPage: true,
+      });
+
+      expect(getValue).not.toHaveBeenCalled();
+    });
+
+    it('resolves async default `getValue` for non-anonymous pages', async () => {
+      const getValue = jest.fn().mockResolvedValue('async-default');
+      uiSettings.client.getRegistered.mockReturnValue({
+        registered: { name: 'title', getValue },
+      });
+
+      const [render] = await getRender();
+      await render(createKibanaRequest(), uiSettings);
+
+      expect(getValue).toHaveBeenCalledTimes(1);
     });
 
     it('calls `getCommonStylesheetPaths` with the correct parameters', async () => {
@@ -297,6 +337,7 @@ function renderTestCases(
       const dom = load(content);
       const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
       expect(data).toMatchSnapshot(INJECTED_METADATA);
+      expect(uiSettings.client.getUserProvided).toHaveBeenCalledWith(true);
     });
 
     it('renders feature flags overrides', async () => {
@@ -375,6 +416,7 @@ function renderTestCases(
       const dom = load(content);
       const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
       expect(data.i18n.translationsUrl).toEqual('http://foo.bar:1773/translations/en.json');
+      expect(uiSettings.client.getUserProvided).toHaveBeenCalledWith(true);
     });
 
     it('use the correct translation url when CDN is disabled', async () => {
@@ -394,6 +436,7 @@ function renderTestCases(
       expect(data.i18n.translationsUrl).toEqual(
         '/mock-server-basepath/translations/MOCK_HASH/en.json'
       );
+      expect(uiSettings.client.getUserProvided).toHaveBeenCalledWith(true);
     });
   });
 }
@@ -445,6 +488,7 @@ function renderDarkModeTestCases(
           darkMode: true,
           baseHref: '/mock-server-basepath',
         });
+        expect(uiSettings.client.getUserProvided).toHaveBeenCalledWith(true);
       });
 
       it('UserSettings darkMode === false should override the space setting', async () => {
@@ -469,6 +513,7 @@ function renderDarkModeTestCases(
           darkMode: false,
           baseHref: '/mock-server-basepath',
         });
+        expect(uiSettings.client.getUserProvided).toHaveBeenCalledWith(true);
       });
 
       it('Space setting value should be used if UsersSettings value is undefined', async () => {
@@ -491,6 +536,7 @@ function renderDarkModeTestCases(
           darkMode: false,
           baseHref: '/mock-server-basepath',
         });
+        expect(uiSettings.client.getUserProvided).toHaveBeenCalledWith(true);
       });
 
       it('config `theme:darkMode: true` setting should override User Settings theme `darkMode === false', async () => {
@@ -513,6 +559,7 @@ function renderDarkModeTestCases(
           darkMode: true,
           baseHref: '/mock-server-basepath',
         });
+        expect(uiSettings.client.getUserProvided).toHaveBeenCalledWith(true);
       });
 
       it('config `theme:darkMode: false` setting should override User Settings theme `darkMode === true', async () => {
@@ -535,6 +582,7 @@ function renderDarkModeTestCases(
           darkMode: false,
           baseHref: '/mock-server-basepath',
         });
+        expect(uiSettings.client.getUserProvided).toHaveBeenCalledWith(true);
       });
 
       it('config `theme:darkMode: false` setting should override User Settings theme `darkMode === undefined', async () => {
@@ -557,6 +605,7 @@ function renderDarkModeTestCases(
           darkMode: false,
           baseHref: '/mock-server-basepath',
         });
+        expect(uiSettings.client.getUserProvided).toHaveBeenCalledWith(true);
       });
 
       it('config `theme:darkMode: true` setting should override User Settings theme `darkMode === undefined', async () => {
@@ -579,6 +628,7 @@ function renderDarkModeTestCases(
           darkMode: true,
           baseHref: '/mock-server-basepath',
         });
+        expect(uiSettings.client.getUserProvided).toHaveBeenCalledWith(true);
       });
     });
   });
@@ -708,6 +758,65 @@ describe('RenderingService', () => {
 
       const renderResult = await render(createKibanaRequest(), uiSettings);
       expect(renderResult).toContain(',&quot;name&quot;:&quot;borealis&quot;');
+    });
+  });
+
+  describe('rspack mode metadata', () => {
+    let rspackService: RenderingService;
+
+    beforeEach(() => {
+      rspackService = new RenderingService(mockRenderingServiceParams);
+    });
+
+    afterEach(() => {
+      isRspackModeEnabledMock.mockReturnValue(false);
+    });
+
+    it('includes font preload links and font-display:swap when rspack mode is enabled', async () => {
+      isRspackModeEnabledMock.mockReturnValue(true);
+
+      const { render } = await rspackService.setup(mockRenderingSetupDeps);
+      rspackService.start(mockRenderingStartDeps);
+
+      const uiSettings = {
+        client: uiSettingsServiceMock.createClient(),
+        globalClient: uiSettingsServiceMock.createClient(),
+      };
+      uiSettings.client.getRegistered.mockReturnValue({});
+
+      const content = await render(createKibanaRequest(), uiSettings);
+      const dom = load(content);
+
+      const preloadLinks = dom('link[rel="preload"][as="font"]');
+      expect(preloadLinks.length).toBeGreaterThanOrEqual(3);
+
+      preloadLinks.each((_i, el) => {
+        const href = dom(el).attr('href');
+        expect(href).toContain('.woff2');
+      });
+
+      expect(content).toContain('font-display: swap');
+    });
+
+    it('does not include font preload links when rspack mode is disabled', async () => {
+      isRspackModeEnabledMock.mockReturnValue(false);
+
+      const { render } = await rspackService.setup(mockRenderingSetupDeps);
+      rspackService.start(mockRenderingStartDeps);
+
+      const uiSettings = {
+        client: uiSettingsServiceMock.createClient(),
+        globalClient: uiSettingsServiceMock.createClient(),
+      };
+      uiSettings.client.getRegistered.mockReturnValue({});
+
+      const content = await render(createKibanaRequest(), uiSettings);
+      const dom = load(content);
+
+      const preloadLinks = dom('link[rel="preload"][as="font"]');
+      expect(preloadLinks.length).toBe(0);
+
+      expect(content).not.toContain('font-display: swap');
     });
   });
 });

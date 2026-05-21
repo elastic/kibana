@@ -34,7 +34,7 @@ export function registerTelemetryRoute({ router, getSavedObjectsService }: Route
             schema.literal('clicked'),
             schema.literal('error'),
           ]),
-          metric: schema.string(),
+          metric: schema.string({ maxLength: 512 }),
         }),
       },
     },

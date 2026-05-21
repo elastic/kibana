@@ -31,11 +31,13 @@ import {
 import { useHistory } from 'react-router-dom';
 import type { DatasetSummary } from '@kbn/evals-common';
 import { useCreateDataset, useDatasets } from '../../hooks/use_evals_api';
+import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import * as i18n from './translations';
 
 export const DatasetsListPage: React.FC = () => {
   const history = useHistory();
   const { euiTheme } = useEuiTheme();
+  const { canManage } = useEvalsPermissions();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [isCreateFlyoutOpen, setIsCreateFlyoutOpen] = useState(false);
@@ -132,13 +134,15 @@ export const DatasetsListPage: React.FC = () => {
   return (
     <>
       <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
-        <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButton onClick={openCreateFlyout} fill iconType="plusInCircle">
-              {i18n.CREATE_DATASET_BUTTON}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {canManage ? (
+          <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={openCreateFlyout} fill iconType="plusInCircle">
+                {i18n.CREATE_DATASET_BUTTON}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : null}
         <EuiSpacer size="m" />
         {error ? (
           <EuiEmptyPrompt

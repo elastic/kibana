@@ -20,6 +20,7 @@ import {
 } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
+import { updateActionTagsResponseSchema } from './response_schemas';
 
 const updateActionTagsRequestParamsSchema = t.type({
   id: t.string,
@@ -61,6 +62,11 @@ export const updateActionTagsRoute = (
               typeof updateActionTagsRequestBodySchema,
               UpdateActionTagsRequestBodySchema
             >(updateActionTagsRequestBodySchema),
+          },
+          response: {
+            200: {
+              body: () => updateActionTagsResponseSchema,
+            },
           },
         },
       },

@@ -25,6 +25,7 @@ export interface EntityMaintainerResponse {
   taskStatus: string;
   interval: string;
   description: string | null;
+  nextRunAt: string | null;
   customState: Record<string, unknown> | null;
   runs: number;
   lastSuccessTimestamp: string | null;
@@ -39,14 +40,13 @@ interface RetryServiceLike {
   ) => Promise<void>;
 }
 
-const isMaintainerAlreadyRunningError = (error: unknown): boolean => {
-  if (!(error instanceof Error)) {
-    return false;
-  }
-
-  const message = error.message.toLowerCase();
-  return message.includes('currently running') || message.includes('failed to run task');
-};
+const isMaintainerStarted = (maintainer?: {
+  taskStatus?: string;
+  runs?: number;
+}): maintainer is { taskStatus: string; runs: number } =>
+  maintainer != null &&
+  maintainer.taskStatus != null &&
+  maintainer.taskStatus.toLowerCase() === 'started';
 
 export const entityMaintainerRouteHelpersFactory = (
   supertest: SuperTest.Agent,
@@ -68,13 +68,19 @@ export const entityMaintainerRouteHelpersFactory = (
   return {
     getMaintainers,
 
-    initMaintainers: async (expectStatusCode: number = 200) => {
+    initMaintainers: async ({
+      expectStatusCode = 200,
+      autoStart,
+    }: {
+      expectStatusCode?: number;
+      autoStart?: boolean;
+    } = {}) => {
       const response = await withHeaders(
         supertest.post(
           routeWithNamespace(ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT, namespace)
         )
       )
-        .send()
+        .send(autoStart === undefined ? {} : { autoStart })
         .expect((res) => {
           if (res.status !== expectStatusCode) {
             throw new Error(
@@ -88,6 +94,17 @@ export const entityMaintainerRouteHelpersFactory = (
     runMaintainer: async (id: string, expectStatusCode: number = 200) => {
       const route = ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN.replace('{id}', id);
       const response = await withHeaders(supertest.post(routeWithNamespace(route, namespace)))
+        .send()
+        .expect(expectStatusCode);
+      return response;
+    },
+
+    runMaintainerSync: async (id: string, expectStatusCode: number = 200) => {
+      const route = ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN.replace('{id}', id);
+      const response = await withHeaders(
+        supertest.post(routeWithNamespace(route, namespace)).query({ sync: 'true' })
+      )
+        .timeout(10 * 60 * 1000)
         .send()
         .expect(expectStatusCode);
       return response;
@@ -123,6 +140,7 @@ export const waitForMaintainerRun = async ({
   minRuns = 1,
   maintainerId = 'risk-score',
   timeoutMs = 60_000,
+  triggerRun = true,
 }: {
   retry: RetryServiceLike;
   routes: Pick<
@@ -132,9 +150,59 @@ export const waitForMaintainerRun = async ({
   minRuns?: number;
   maintainerId?: string;
   timeoutMs?: number;
+  triggerRun?: boolean;
 }): Promise<void> => {
-  // Capture current runs count so we wait for an actual NEW run,
-  // not a stale count from a previous test.
+  // Phase 1: Wait until the maintainer task exists and is started.
+  await retry.waitForWithTimeout(
+    `Entity maintainer "${maintainerId}" to be started`,
+    60_000,
+    async () => {
+      const response = await routes.getMaintainers(200, [maintainerId]);
+      const maintainer = response.body.maintainers.find(
+        (m: { id: string; taskStatus: string }) => m.id === maintainerId
+      );
+      return isMaintainerStarted(maintainer);
+    }
+  );
+
+  // Phase 2: Wait for any pending TM auto-run to complete. After
+  // startMaintainer (bulkEnable), TM may auto-run the task if runAt is in
+  // the past. We detect this by waiting until nextRunAt is in the future,
+  // which means any auto-run has completed and TM has set runAt to
+  // now + interval. We also require runs to be stable (unchanged across
+  // two consecutive polls) to handle the case where nextRunAt is already
+  // in the future (no auto-run pending).
+  let lastSeenRuns = -1;
+  await retry.waitForWithTimeout(
+    `Entity maintainer "${maintainerId}" to settle (no in-flight auto-run)`,
+    60_000,
+    async () => {
+      const response = await routes.getMaintainers(200, [maintainerId]);
+      const maintainer = response.body.maintainers.find(
+        (m: { id: string; runs: number; nextRunAt?: string | null }) => m.id === maintainerId
+      );
+      if (!maintainer) return false;
+
+      const nextRunAt = (maintainer as { nextRunAt?: string | null }).nextRunAt;
+      const isNextRunInFuture = nextRunAt != null && new Date(nextRunAt).getTime() > Date.now();
+
+      // If nextRunAt is in the future, TM won't auto-run. Confirm runs
+      // are also stable to be safe.
+      if (isNextRunInFuture) {
+        const runs = maintainer.runs;
+        if (runs === lastSeenRuns) return true;
+        lastSeenRuns = runs;
+        return false;
+      }
+
+      // nextRunAt is in the past — TM may be about to auto-run or is
+      // currently running. Keep waiting.
+      lastSeenRuns = -1;
+      return false;
+    }
+  );
+
+  // Capture baseline runs AFTER settling.
   let baselineRuns = 0;
   try {
     const baseline = await routes.getMaintainers(200, [maintainerId]);
@@ -146,49 +214,41 @@ export const waitForMaintainerRun = async ({
     // Maintainer may not exist yet
   }
 
-  let requiredNewRuns = minRuns;
-  let manualRunTriggered = false;
-  let alreadyRunningHandled = false;
+  // Phase 3: Trigger a new run and wait for it to complete.
+  // Since Phase 2 ensured nextRunAt is in the future (i.e. TM won't
+  // auto-run), calling runSoon is safe — there's no concurrent execution
+  // to cause a version_conflict_engine_exception.
+  const requiredNewRuns = minRuns;
+  let manualRunTriggered = !triggerRun;
 
   await retry.waitForWithTimeout(
     `Entity maintainer "${maintainerId}" to complete at least ${requiredNewRuns} new run(s) (baseline: ${baselineRuns})`,
     timeoutMs,
     async () => {
-      // Keep trying to trigger a manual run until the task accepts it.
-      // After stop/start a previous run may still be in-flight; when we
-      // see "already running" we need one extra completion but must keep
-      // retrying so we can trigger the additional run once the current
-      // one finishes.
-      if (!manualRunTriggered) {
-        try {
-          await routes.runMaintainer(maintainerId);
-          manualRunTriggered = true;
-        } catch (error) {
-          if (isMaintainerAlreadyRunningError(error)) {
-            if (!alreadyRunningHandled) {
-              requiredNewRuns += 1;
-              alreadyRunningHandled = true;
-            }
-          }
-        }
-      }
-
       const response = await routes.getMaintainers(200, [maintainerId]);
       const maintainer = response.body.maintainers.find(
         (m: { id: string; runs: number }) => m.id === maintainerId
       );
 
-      return maintainer !== undefined && maintainer.runs >= baselineRuns + requiredNewRuns;
+      if (!maintainer) return false;
+      if (maintainer.runs >= baselineRuns + requiredNewRuns) return true;
+
+      if (!manualRunTriggered) {
+        try {
+          await routes.runMaintainer(maintainerId);
+          manualRunTriggered = true;
+        } catch {
+          // Swallow — may race with a just-completed auto-run follow-up.
+        }
+      }
+
+      return false;
     }
   );
 
-  // runSoon (called above via runMaintainer) can cause the task manager to
-  // schedule an immediate follow-up run once the current one finishes.  If
-  // the caller stops the maintainer while that follow-up is still saving its
-  // state, a version_conflict_engine_exception wedges the task permanently.
-  // Wait for the runs count to stabilise across two consecutive polls so the
-  // task is idle before we hand control back.
-  let lastSeenRuns = -1;
+  // Phase 4: Wait for runs to stabilise so any follow-up run triggered by
+  // runSoon completes before we hand control back.
+  lastSeenRuns = -1;
   await retry.waitForWithTimeout(
     `Entity maintainer "${maintainerId}" to settle after run`,
     30_000,
@@ -229,6 +289,10 @@ export const cleanUpRiskScoreMaintainer = async ({
   const template = `.risk-score.risk-score-${namespace}-index-template`;
 
   await es.indices.deleteDataStream({ name: alias }, { ignore: [404] }).catch(addError);
+  // Also delete any regular index with the same name — a partially-failed
+  // cleanup can orphan a backing index that blocks data stream re-creation
+  // ("data stream [X] conflicts with index").
+  await es.indices.delete({ index: alias }, { ignore: [404] }).catch(addError);
   await es.indices.deleteIndexTemplate({ name: template }, { ignore: [404] }).catch(addError);
   await es.cluster
     .deleteComponentTemplate({ name: `.risk-score-mappings-${namespace}` }, { ignore: [404] })

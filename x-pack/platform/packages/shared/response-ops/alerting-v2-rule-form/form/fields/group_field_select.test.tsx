@@ -8,12 +8,27 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createFormWrapper, createMockServices } from '../../test_utils';
+import { useForm, FormProvider, useFormContext } from 'react-hook-form';
+import { QueryClientProvider } from '@kbn/react-query';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import {
+  createFormWrapper,
+  createMockServices,
+  defaultTestFormValues,
+  createTestQueryClient,
+} from '../../test_utils';
+import type { FormValues } from '../types';
+import { RuleFormProvider, type RuleFormServices } from '../contexts';
 import { GroupFieldSelect } from './group_field_select';
 import { useQueryColumns } from '../hooks/use_query_columns';
+import { getGroupByColumnsFromQuery } from '../hooks/use_default_group_by';
 
 jest.mock('../hooks/use_query_columns');
+jest.mock('../hooks/use_default_group_by', () => ({
+  getGroupByColumnsFromQuery: jest.fn(() => []),
+}));
 
+const mockGetGroupByColumnsFromQuery = jest.mocked(getGroupByColumnsFromQuery);
 const mockUseQueryColumns = jest.mocked(useQueryColumns);
 
 const mockServices = createMockServices();
@@ -146,16 +161,13 @@ describe('GroupFieldSelect', () => {
     const comboBox = screen.getByRole('combobox');
     await userEvent.click(comboBox);
 
-    // Select an option
-    await waitFor(() => {
-      expect(screen.getByText('host.name')).toBeInTheDocument();
+    // Select an option wrapped in waitFor to handle EuiComboBox transition timing
+    await waitFor(async () => {
+      await userEvent.click(screen.getByText('host.name'));
     });
 
-    await userEvent.click(screen.getByText('host.name'));
-
-    // Verify selection is shown
+    // Verify selection is shown as a badge/pill
     await waitFor(() => {
-      // The selected item should appear as a badge/pill
       const badges = screen.getAllByText('host.name');
       expect(badges.length).toBeGreaterThanOrEqual(1);
     });
@@ -189,5 +201,125 @@ describe('GroupFieldSelect', () => {
 
     // Component should still render, just with no options
     expect(screen.getByRole('combobox')).toBeInTheDocument();
+  });
+
+  describe('auto-populate from query BY clause', () => {
+    const QueryChanger = ({ newQuery }: { newQuery: string }) => {
+      const { setValue } = useFormContext<FormValues>();
+      return (
+        <button onClick={() => setValue('evaluation.query.base', newQuery)}>Change Query</button>
+      );
+    };
+
+    const renderWithQueryChanger = (
+      initialQuery: string,
+      newQuery: string,
+      initialGroupingFields?: string[],
+      services: RuleFormServices = mockServices
+    ) => {
+      const queryClient = createTestQueryClient();
+
+      const Wrapper = ({ children }: { children: React.ReactNode }) => {
+        const form = useForm<FormValues>({
+          defaultValues: {
+            ...defaultTestFormValues,
+            evaluation: { query: { base: initialQuery } },
+            grouping: initialGroupingFields ? { fields: initialGroupingFields } : undefined,
+          },
+        });
+
+        return (
+          <IntlProvider locale="en">
+            <QueryClientProvider client={queryClient}>
+              <FormProvider {...form}>
+                <RuleFormProvider services={services} meta={{ layout: 'page' }}>
+                  {children}
+                  <QueryChanger newQuery={newQuery} />
+                </RuleFormProvider>
+              </FormProvider>
+            </QueryClientProvider>
+          </IntlProvider>
+        );
+      };
+
+      return render(<GroupFieldSelect />, { wrapper: Wrapper });
+    };
+
+    it('auto-populates group fields when query BY clause changes', async () => {
+      mockUseQueryColumns.mockReturnValue({
+        data: [
+          { name: 'host.name', type: 'keyword' },
+          { name: 'service.name', type: 'keyword' },
+        ],
+        isLoading: false,
+        error: null,
+        isError: false,
+        isSuccess: true,
+        isFetching: false,
+        status: 'success',
+        fetchStatus: 'idle',
+      } as any);
+
+      mockGetGroupByColumnsFromQuery.mockImplementation((q: string) => {
+        if (q.includes('BY service.name')) return ['service.name'];
+        if (q.includes('BY host.name')) return ['host.name'];
+        return [];
+      });
+
+      renderWithQueryChanger(
+        'FROM logs-* | STATS count() BY host.name',
+        'FROM logs-* | STATS count() BY service.name',
+        ['host.name']
+      );
+
+      // Initially should show host.name (set via form defaults)
+      expect(screen.getByText('host.name')).toBeInTheDocument();
+
+      // Change query to use service.name in BY clause
+      await userEvent.click(screen.getByText('Change Query'));
+
+      // Should now show service.name (auto-populated from new BY clause)
+      await waitFor(() => {
+        expect(screen.getByText('service.name')).toBeInTheDocument();
+      });
+    });
+
+    it('clears group fields when BY clause is removed', async () => {
+      mockUseQueryColumns.mockReturnValue({
+        data: [
+          { name: 'host.name', type: 'keyword' },
+          { name: 'count', type: 'long' },
+        ],
+        isLoading: false,
+        error: null,
+        isError: false,
+        isSuccess: true,
+        isFetching: false,
+        status: 'success',
+        fetchStatus: 'idle',
+      } as any);
+
+      mockGetGroupByColumnsFromQuery.mockImplementation((q: string) => {
+        if (q.includes('BY host.name')) return ['host.name'];
+        return [];
+      });
+
+      renderWithQueryChanger(
+        'FROM logs-* | STATS count() BY host.name',
+        'FROM logs-* | STATS count()',
+        ['host.name']
+      );
+
+      // Initially should show host.name
+      expect(screen.getByText('host.name')).toBeInTheDocument();
+
+      // Change query to remove BY clause
+      await userEvent.click(screen.getByText('Change Query'));
+
+      // host.name should no longer be shown
+      await waitFor(() => {
+        expect(screen.queryByText('host.name')).not.toBeInTheDocument();
+      });
+    });
   });
 });

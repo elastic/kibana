@@ -14,50 +14,56 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { Model, BuildkiteMetadata } from '../common_attributes.gen';
 
+export const EvaluationRunSummary = lazySchema(() =>
+  z.object({
+    run_id: z.string(),
+    timestamp: z.string(),
+    suite_id: z.string().optional(),
+    dataset_id: z.string().nullable().optional(),
+    dataset_name: z.string().nullable().optional(),
+    task_model: Model.optional(),
+    evaluator_model: Model.optional(),
+    git_branch: z.string().nullable().optional(),
+    git_commit_sha: z.string().nullable().optional(),
+    total_repetitions: z.number().int().optional(),
+    ci: BuildkiteMetadata.optional(),
+  })
+);
 export type EvaluationRunSummary = z.infer<typeof EvaluationRunSummary>;
-export const EvaluationRunSummary = z.object({
-  run_id: z.string(),
-  timestamp: z.string(),
-  suite_id: z.string().optional(),
-  dataset_id: z.string().nullable().optional(),
-  dataset_name: z.string().nullable().optional(),
-  task_model: Model.optional(),
-  evaluator_model: Model.optional(),
-  git_branch: z.string().nullable().optional(),
-  git_commit_sha: z.string().nullable().optional(),
-  total_repetitions: z.number().int().optional(),
-  ci: BuildkiteMetadata.optional(),
-});
 
+export const GetEvaluationRunsRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Filter by suite ID
+     */
+    suite_id: z.string().optional(),
+    /**
+     * Filter by task model ID
+     */
+    model_id: z.string().optional(),
+    /**
+     * Filter by git branch
+     */
+    branch: z.string().optional(),
+    /**
+     * Filter by dataset ID
+     */
+    dataset_id: z.string().optional(),
+    page: z.coerce.number().int().min(1).optional().default(1),
+    per_page: z.coerce.number().int().min(1).max(100).optional().default(25),
+  })
+);
 export type GetEvaluationRunsRequestQuery = z.infer<typeof GetEvaluationRunsRequestQuery>;
-export const GetEvaluationRunsRequestQuery = z.object({
-  /**
-   * Filter by suite ID
-   */
-  suite_id: z.string().optional(),
-  /**
-   * Filter by task model ID
-   */
-  model_id: z.string().optional(),
-  /**
-   * Filter by git branch
-   */
-  branch: z.string().optional(),
-  /**
-   * Filter by dataset ID
-   */
-  dataset_id: z.string().optional(),
-  page: z.coerce.number().int().min(1).optional().default(1),
-  per_page: z.coerce.number().int().min(1).max(100).optional().default(25),
-});
 export type GetEvaluationRunsRequestQueryInput = z.input<typeof GetEvaluationRunsRequestQuery>;
 
+export const GetEvaluationRunsResponse = lazySchema(() =>
+  z.object({
+    runs: z.array(EvaluationRunSummary),
+    total: z.number().int(),
+  })
+);
 export type GetEvaluationRunsResponse = z.infer<typeof GetEvaluationRunsResponse>;
-export const GetEvaluationRunsResponse = z.object({
-  runs: z.array(EvaluationRunSummary),
-  total: z.number().int(),
-});

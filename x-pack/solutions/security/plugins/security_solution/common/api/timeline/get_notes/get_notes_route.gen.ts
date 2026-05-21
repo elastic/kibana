@@ -14,50 +14,97 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { Note } from '../model/components.gen';
 
 /**
- * Filter notes based on their association with a document or saved object.
- */
+  * How the note is associated with a Timeline saved object and/or an event (`eventId`). `all`: no association-based restriction from this parameter. `document_only`: document-linked notes (non-empty `eventId`) without timeline association in the API's internal sense; post-filtering drops notes without a usable `eventId`. `saved_object_only`: timeline notes with no linked event (`eventId` empty or absent); post-filtering keeps timeline-only notes. `document_and_saved_object`: notes on a timeline and linked to an event; post-filtering enforces a real `eventId`. `orphan`: not on a timeline and `eventId` is empty (stricter than missing `eventId` in some cases).
+
+  */
+export const AssociatedFilterType = lazySchema(() =>
+  z.enum(['all', 'document_only', 'saved_object_only', 'document_and_saved_object', 'orphan'])
+);
 export type AssociatedFilterType = z.infer<typeof AssociatedFilterType>;
-export const AssociatedFilterType = z.enum([
-  'all',
-  'document_only',
-  'saved_object_only',
-  'document_and_saved_object',
-  'orphan',
-]);
 export type AssociatedFilterTypeEnum = typeof AssociatedFilterType.enum;
 export const AssociatedFilterTypeEnum = AssociatedFilterType.enum;
 
+/**
+ * One document ID or an array of IDs (Elasticsearch `_id` of the event).
+ */
+export const DocumentIds = lazySchema(() => z.union([z.array(z.string()), z.string()]));
 export type DocumentIds = z.infer<typeof DocumentIds>;
-export const DocumentIds = z.union([z.array(z.string()), z.string()]);
 
+/**
+ * One Timeline saved object ID or an array of IDs.
+ */
+export const SavedObjectIds = lazySchema(() => z.union([z.array(z.string()), z.string()]));
 export type SavedObjectIds = z.infer<typeof SavedObjectIds>;
-export const SavedObjectIds = z.union([z.array(z.string()), z.string()]);
 
+export const GetNotesResult = lazySchema(() =>
+  z.object({
+    /**
+     * Number of notes returned (may be adjusted after the query when `associatedFilter` applies post-filtering).
+     */
+    totalCount: z.number(),
+    notes: z.array(Note),
+  })
+);
 export type GetNotesResult = z.infer<typeof GetNotesResult>;
-export const GetNotesResult = z.object({
-  totalCount: z.number(),
-  notes: z.array(Note),
-});
 
+export const GetNotesRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+      * Event document `_id` values to match against each note's `eventId`. When this parameter is present, the response is all matching notes (up to the server's hard limit), not a paged list using `page`/`perPage`.
+
+      */
+    documentIds: DocumentIds.optional(),
+    /**
+      * Timeline `savedObjectId` value(s). Returns notes that reference those timelines. When present, list-mode pagination parameters are not used; up to the server's hard limit of notes may be returned.
+
+      */
+    savedObjectIds: SavedObjectIds.optional(),
+    /**
+      * Page number for list mode (when `documentIds` and `savedObjectIds` are omitted). Passed as a string; default 1.
+
+      */
+    page: z.string().nullable().optional(),
+    /**
+      * Page size for list mode (when `documentIds` and `savedObjectIds` are omitted). Passed as a string; default 10.
+
+      */
+    perPage: z.string().nullable().optional(),
+    /**
+     * Search string for saved-objects find (list mode only).
+     */
+    search: z.string().nullable().optional(),
+    /**
+     * Field to sort by for saved-objects find (list mode only).
+     */
+    sortField: z.string().nullable().optional(),
+    /**
+     * Sort order (`asc` or `desc`) for saved-objects find (list mode only).
+     */
+    sortOrder: z.string().nullable().optional(),
+    /**
+      * Kuery filter string combined with other list-mode filters (for example `createdByFilter` or `associatedFilter`). Typed as a string for API compatibility; interpreted by the saved-objects layer (list mode only).
+
+      */
+    filter: z.string().nullable().optional(),
+    /**
+      * Kibana user profile **UID** (UUID). The server resolves the user's display identifiers and returns notes whose `createdBy` matches any of them (list mode only).
+
+      */
+    createdByFilter: z.string().nullable().optional(),
+    /**
+      * Restricts notes by how they relate to a Timeline and/or an event document (list mode only). Some values apply extra filtering after the query. Ignored when `documentIds` or `savedObjectIds` is used.
+
+      */
+    associatedFilter: AssociatedFilterType.optional(),
+  })
+);
 export type GetNotesRequestQuery = z.infer<typeof GetNotesRequestQuery>;
-export const GetNotesRequestQuery = z.object({
-  documentIds: DocumentIds.optional(),
-  savedObjectIds: SavedObjectIds.optional(),
-  page: z.string().nullable().optional(),
-  perPage: z.string().nullable().optional(),
-  search: z.string().nullable().optional(),
-  sortField: z.string().nullable().optional(),
-  sortOrder: z.string().nullable().optional(),
-  filter: z.string().nullable().optional(),
-  createdByFilter: z.string().nullable().optional(),
-  associatedFilter: AssociatedFilterType.optional(),
-});
 export type GetNotesRequestQueryInput = z.input<typeof GetNotesRequestQuery>;
 
+export const GetNotesResponse = lazySchema(() => GetNotesResult);
 export type GetNotesResponse = z.infer<typeof GetNotesResponse>;
-export const GetNotesResponse = GetNotesResult;

@@ -66,7 +66,6 @@ dependsOn:
   - '@kbn/es-errors'
   - '@kbn/content-connectors-plugin'
   - '@kbn/search-playground'
-  - '@kbn/utility-types'
   - '@kbn/index-management-shared-types'
   - '@kbn/deeplinks-search'
   - '@kbn/react-kibana-context-theme'
@@ -86,6 +85,7 @@ dependsOn:
   - '@kbn/charts-theme'
   - '@kbn/licensing-types'
   - '@kbn/deeplinks-management'
+  - '@kbn/ml-common-types'
   - '@kbn/react-kibana-context-render'
 tags:
   - plugin

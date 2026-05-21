@@ -881,20 +881,6 @@ export const COLUMN_QUERY_TIMES_TOOLTIP = i18n.translate(
   }
 );
 
-export const COLUMN_GAP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.columns.gap',
-  {
-    defaultMessage: 'Last Gap (if any)',
-  }
-);
-
-export const COLUMN_GAP_TOOLTIP_SEE_DOCUMENTATION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.columns.gapTooltipSeeDocsDescription',
-  {
-    defaultMessage: 'see documentation',
-  }
-);
-
 export const ENABLED_RULES = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.enabledRulesTitle',
   {

@@ -416,6 +416,17 @@ export const internalStateSlice = createSlice({
         }),
     },
 
+    setProfileStateFieldsToResetWithoutResetId: (
+      state,
+      action: TabAction<Pick<TabState['defaultProfileState'], 'fieldsToReset'>>
+    ) =>
+      withTab(state, action.payload, (tab) => {
+        tab.defaultProfileState = {
+          ...tab.defaultProfileState,
+          fieldsToReset: action.payload.fieldsToReset,
+        };
+      }),
+
     resetOnSavedSearchChange: (state, action: TabAction) =>
       withTab(state, action.payload, (tab) => {
         tab.overriddenVisContextAfterInvalidation = undefined;
@@ -662,7 +673,7 @@ const createMiddleware = (options: InternalStateDependencies) => {
   startListening({
     actionCreator: discardFlyoutsOnTabChange,
     effect: () => {
-      dismissFlyouts([DiscoverFlyouts.lensEdit, DiscoverFlyouts.metricInsights]);
+      dismissFlyouts([DiscoverFlyouts.lensEdit]);
     },
   });
 

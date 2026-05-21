@@ -9,8 +9,6 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { useLocation, useHistory } from 'react-router-dom';
 
-import { css } from '@emotion/react';
-
 import { useBreadcrumbs, useStartServices } from '../../../../hooks';
 import { NoEprCallout } from '../../components/no_epr_callout';
 import { categoryExists } from '../home';
@@ -47,7 +45,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     : useEmptyAllIntegrations;
   const {
     integrations,
-    isLoading: isLoadingCreatedIntegrations,
+    isInitialLoading: isLoadingCreatedIntegrations,
     isError: isCreatedIntegrationsError,
     refetch: refetchCreatedIntegrations,
   } = useGetAllIntegrationsHook();
@@ -125,13 +123,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
         onManageIntegrationsClick={onManageIntegrationsClick}
       />
       <EuiFlexItem grow={5}>
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="none"
-          css={css`
-            padding: 16px 8px;
-          `}
-        >
+        <EuiFlexGroup direction="column" gutterSize="none">
           {!isManageIntegrationsView && (
             <SearchAndFiltersBar
               categories={mainCategories}
@@ -148,12 +140,16 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
             }}
           >
             {isManageIntegrationsView ? (
-              <ManageIntegrationsTable
-                integrations={integrations}
-                isLoading={isLoadingCreatedIntegrations}
-                isError={isCreatedIntegrationsError}
-                onRefetch={refetchCreatedIntegrations}
-              />
+              <>
+                <EuiSpacer size="m" />
+                <ManageIntegrationsTable
+                  integrations={integrations}
+                  isLoading={isLoadingCreatedIntegrations}
+                  isError={isCreatedIntegrationsError}
+                  onRefetch={refetchCreatedIntegrations}
+                  prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled}
+                />
+              </>
             ) : filteredCards.length === 0 && !isLoading ? (
               <NoDataPrompt />
             ) : (
@@ -174,7 +170,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
 function useEmptyAllIntegrations() {
   return {
     integrations: [] as CreatedIntegrationRow[],
-    isLoading: false,
+    isInitialLoading: false,
     isError: false,
     error: null,
     refetch: () => {},

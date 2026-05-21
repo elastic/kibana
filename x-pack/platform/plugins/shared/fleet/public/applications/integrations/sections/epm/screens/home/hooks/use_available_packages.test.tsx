@@ -96,6 +96,7 @@ jest.mock('..', () => ({
     description: item.description || '',
     categories: item.categories || [],
     url: `/detail/${item.name}`,
+    supportsAgentless: item.supportsAgentless,
   }),
 }));
 
@@ -612,6 +613,105 @@ describe('useAvailablePackages', () => {
       );
 
       expect(result.current.eprCategoryLoadingError).toBe(error);
+    });
+  });
+
+  describe('allCards', () => {
+    it('should return allCards regardless of selectedCategory', () => {
+      mockUseBuildIntegrationsUrl.mockReturnValue({
+        initialSelectedCategory: 'web',
+        initialSubcategory: undefined,
+        initialOnlyAgentless: false,
+        setUrlandPushHistory: mockSetUrlandPushHistory,
+        setUrlandReplaceHistory: mockSetUrlandReplaceHistory,
+        getHref: mockGetHref,
+        getAbsolutePath: mockGetAbsolutePath,
+        searchParam: '',
+        addBasePath: mockAddBasePath,
+      });
+      mockUseGetPackagesQuery.mockReturnValue({
+        data: {
+          items: [
+            {
+              ...mockBasicPackage,
+              id: 'web-pkg',
+              name: 'web-pkg',
+              title: 'Web Pkg',
+              categories: ['web'],
+            },
+            {
+              ...mockBasicPackage,
+              id: 'sec-pkg',
+              name: 'sec-pkg',
+              title: 'Sec Pkg',
+              categories: ['security'],
+            },
+          ],
+        },
+        isLoading: false,
+        error: null,
+      });
+
+      const { result } = renderHook(() =>
+        useAvailablePackages({ prereleaseIntegrationsEnabled: false })
+      );
+
+      // filteredCards should be restricted to web category
+      expect(result.current.filteredCards).toHaveLength(1);
+      expect(result.current.filteredCards[0].categories).toContain('web');
+
+      // allCards should contain both packages regardless of category filter
+      expect(result.current.allCards).toHaveLength(2);
+    });
+
+    it('should return allCards regardless of onlyAgentlessFilter', () => {
+      mockUseAgentless.mockReturnValue({ isAgentlessEnabled: true });
+      mockUseBuildIntegrationsUrl.mockReturnValue({
+        initialSelectedCategory: '',
+        initialSubcategory: undefined,
+        initialOnlyAgentless: true,
+        setUrlandPushHistory: mockSetUrlandPushHistory,
+        setUrlandReplaceHistory: mockSetUrlandReplaceHistory,
+        getHref: mockGetHref,
+        getAbsolutePath: mockGetAbsolutePath,
+        searchParam: '',
+        addBasePath: mockAddBasePath,
+      });
+
+      const nonAgentlessPkg = {
+        ...mockBasicPackage,
+        id: 'regular',
+        name: 'regular',
+        title: 'Regular',
+      };
+      const agentlessPkg = {
+        ...mockBasicPackage,
+        id: 'agentless-only',
+        name: 'agentless-only',
+        title: 'Agentless Only',
+        supportsAgentless: true,
+      };
+
+      mockUseMergeEprPackagesWithReplacements.mockReturnValue([nonAgentlessPkg, agentlessPkg]);
+
+      // mapToCard mock preserves supportsAgentless from the item
+      jest.mock('..', () => ({
+        mapToCard: ({ item }: any) => ({
+          id: item.id,
+          title: item.title || item.name,
+          description: item.description || '',
+          categories: item.categories || [],
+          url: `/detail/${item.name}`,
+          supportsAgentless: item.supportsAgentless,
+        }),
+      }));
+
+      const { result } = renderHook(() =>
+        useAvailablePackages({ prereleaseIntegrationsEnabled: false })
+      );
+
+      // allCards should contain all packages regardless of agentless filter
+      expect(result.current.allCards).toHaveLength(2);
     });
   });
 

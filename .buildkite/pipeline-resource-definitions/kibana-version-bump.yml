@@ -22,6 +22,15 @@ spec:
       cancel_intermediate_builds: false
       branch_configuration: main
       pipeline_file: .buildkite/pipelines/version_bump.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite
+              - .node-version
+              - package.json
+              - tsconfig.base.json
+              - versions.json
+            cleanup_sparse_state: true
       provider_settings:
         trigger_mode: none
       repository: elastic/kibana

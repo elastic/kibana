@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 import type { HostsUncommonProcessesEdges } from '../../../../../common/search_strategy';
 import { hostsActions, hostsModel, hostsSelectors } from '../../store';
@@ -15,6 +16,7 @@ import { PaginatedTable } from '../../../components/paginated_table';
 import * as i18n from './translations';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { getUncommonColumnsCurated } from './columns';
+import { HostPanelKey } from '../../../../flyout/entity_details/shared/constants';
 
 const tableType = hostsModel.HostsTableType.uncommonProcesses;
 interface UncommonProcessTableProps {
@@ -63,6 +65,25 @@ const UncommonProcessTableComponent = React.memo<UncommonProcessTableProps>(
       getUncommonProcessesSelector(state, type)
     );
 
+    const { openFlyout } = useExpandableFlyoutApi();
+
+    const openHostFlyout = useCallback(
+      (hostName: string) => {
+        openFlyout({
+          right: {
+            id: HostPanelKey,
+            params: {
+              hostName,
+              contextID: tableType,
+              scopeId: tableType,
+              isPreviewMode: false,
+            },
+          },
+        });
+      },
+      [openFlyout]
+    );
+
     const updateLimitPagination = useCallback(
       (newLimit: number) =>
         dispatch(
@@ -87,7 +108,10 @@ const UncommonProcessTableComponent = React.memo<UncommonProcessTableProps>(
       [type, dispatch]
     );
 
-    const columns = useMemo(() => getUncommonColumnsCurated(type), [type]);
+    const columns = useMemo(
+      () => getUncommonColumnsCurated(type, openHostFlyout),
+      [type, openHostFlyout]
+    );
 
     return (
       <PaginatedTable

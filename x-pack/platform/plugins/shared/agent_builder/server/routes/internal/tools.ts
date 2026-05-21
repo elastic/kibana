@@ -275,7 +275,6 @@ export function registerInternalToolsRoutes({
       } = await listSearchSources({
         pattern,
         includeHidden: false,
-        includeKibanaIndices: false,
         excludeIndicesRepresentedAsAlias: true,
         excludeIndicesRepresentedAsDatastream: true,
         esClient,
@@ -609,7 +608,7 @@ export function registerInternalToolsRoutes({
       const connector = await actionsClient.get({ id: connectorId });
 
       if (connector.actionTypeId !== MCP_CONNECTOR_ID) {
-        response.badRequest({
+        return response.badRequest({
           body: {
             message: `Connector '${connectorId}' is not an MCP connector. Expected type '${MCP_CONNECTOR_ID}', got '${connector.actionTypeId}'`,
           },

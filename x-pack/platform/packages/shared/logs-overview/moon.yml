@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/core-theme-browser-mocks'
   - '@kbn/core-ui-settings-browser-mocks'
   - '@kbn/react-hooks'
+  - '@kbn/ml-common-types'
 tags:
   - shared-browser
   - package

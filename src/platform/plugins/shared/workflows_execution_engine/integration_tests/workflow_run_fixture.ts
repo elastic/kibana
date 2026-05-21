@@ -20,6 +20,7 @@ import type { WorkflowsExecutionEngineConfig } from '../server/config';
 import { resumeWorkflow } from '../server/execution_functions';
 import { mockContextDependencies } from '../server/execution_functions/__mock__/context_dependencies';
 import { runWorkflow } from '../server/execution_functions/run_workflow';
+import { workflowsExecutionEngineMock } from '../server/mocks';
 
 // Mock the repository classes so setupDependencies uses our mocks
 jest.mock('../server/repositories/workflow_execution_repository');
@@ -54,12 +55,17 @@ export class WorkflowRunFixture {
       allowedHosts: ['*'],
     },
     maxResponseSize: new ByteSizeValue(10 * 1024 * 1024), // 10mb default
+    eviction: {
+      minPayloadSize: new ByteSizeValue(10 * 1024), // 10kb default
+    },
     collectQueueMetrics: false,
   };
   public readonly fakeKibanaRequest = {} as KibanaRequest;
   public readonly workflowExecutionRepositoryMock = new WorkflowExecutionRepositoryMock();
   public readonly stepExecutionRepositoryMock = new StepExecutionRepositoryMock();
   public readonly taskManagerMock = TaskManagerMock.create();
+  public readonly workflowsExecutionEngineMock = workflowsExecutionEngineMock.createStart();
+  public readonly internalResumeWorkflowExecutionMock = jest.fn().mockResolvedValue(undefined);
 
   constructor() {
     // Mock repository constructors to return our mock instances
@@ -128,6 +134,8 @@ export class WorkflowRunFixture {
       logger: this.loggerMock,
       config: this.configMock,
       fakeRequest: this.fakeKibanaRequest,
+      workflowsExecutionEngine: this.workflowsExecutionEngineMock,
+      internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionMock,
     });
   }
 
@@ -140,6 +148,8 @@ export class WorkflowRunFixture {
       config: this.configMock,
       fakeRequest: this.fakeKibanaRequest,
       dependencies: this.dependencies,
+      workflowsExecutionEngine: this.workflowsExecutionEngineMock,
+      internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionMock,
     });
   }
 
@@ -182,6 +192,8 @@ export class WorkflowRunFixture {
       logger: this.loggerMock,
       config: this.configMock,
       fakeRequest: this.fakeKibanaRequest,
+      workflowsExecutionEngine: this.workflowsExecutionEngineMock,
+      internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionMock,
     });
   }
 

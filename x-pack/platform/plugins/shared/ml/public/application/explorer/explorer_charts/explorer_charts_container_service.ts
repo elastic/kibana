@@ -12,8 +12,8 @@
  * and manages the layout of the charts in the containing div.
  */
 
-import type { JobId } from '../../../../common/types/anomaly_detection_jobs';
-import type { SeriesConfigWithMetadata } from '../../../../common/types/results';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { SeriesConfigWithMetadata } from '@kbn/ml-common-types/results';
 
 export interface ExplorerChartSeriesErrorMessages {
   [key: string]: JobId[];

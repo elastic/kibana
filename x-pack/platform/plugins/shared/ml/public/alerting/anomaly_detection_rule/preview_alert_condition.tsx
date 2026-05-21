@@ -29,8 +29,8 @@ import {
   requiredValidator,
   timeIntervalInputValidator,
 } from '@kbn/ml-validators';
+import type { MlAnomalyDetectionAlertParams, PreviewResponse } from '@kbn/ml-common-types/alerts';
 import type { AlertingApiService } from '../../application/services/ml_api_service/alerting';
-import type { MlAnomalyDetectionAlertParams, PreviewResponse } from '../../../common/types/alerts';
 import { invalidTimeIntervalMessage } from '../../application/jobs/new_job/common/job_validator/util';
 import { ALERT_PREVIEW_SAMPLE_SIZE } from '../../../common/constants/alerts';
 

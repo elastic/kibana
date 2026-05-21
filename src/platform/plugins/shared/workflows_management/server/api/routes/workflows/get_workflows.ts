@@ -21,7 +21,7 @@ import {
 } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_READ_OR_READ_EXECUTIONS_SECURITY } from '../utils/route_security';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 const querySchema = schema.object({
   query: schema.maybe(schema.string({ meta: { description: 'Free-text search query.' } })),
@@ -46,6 +46,11 @@ const querySchema = schema.object({
       { meta: { description: 'Filter by tags.' } }
     )
   ),
+  managed: schema.maybe(
+    schema.oneOf([schema.literal('all'), schema.literal('managed'), schema.literal('unmanaged')], {
+      meta: { description: 'Filter by managed status. Defaults to "unmanaged".' },
+    })
+  ),
 });
 
 export function registerGetWorkflowsRoute({ router, api, spaces }: RouteDependencies) {
@@ -69,7 +74,7 @@ export function registerGetWorkflowsRoute({ router, api, spaces }: RouteDependen
         },
         validate: { request: { query: querySchema } },
       },
-      withLicenseCheck(async (context, request, response) => {
+      withAvailabilityCheck(async (context, request, response) => {
         try {
           if (request.authzResult?.[WorkflowsManagementApiActions.read] !== true) {
             return response.forbidden();
@@ -95,6 +100,7 @@ function prepareParams({
   createdBy,
   tags,
   query,
+  managed,
 }: TypeOf<typeof querySchema>): GetWorkflowsParams {
   return {
     query,
@@ -103,5 +109,6 @@ function prepareParams({
     enabled: enabled != null && !Array.isArray(enabled) ? [enabled] : enabled,
     createdBy: createdBy != null && !Array.isArray(createdBy) ? [createdBy] : createdBy,
     tags: tags != null && !Array.isArray(tags) ? [tags] : tags,
+    managedFilter: managed,
   };
 }

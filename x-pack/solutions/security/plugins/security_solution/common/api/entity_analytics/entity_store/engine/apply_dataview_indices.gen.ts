@@ -14,22 +14,44 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+/**
+ * The result of applying data view index changes to a single engine.
+ */
+export const EngineDataviewUpdateResult = lazySchema(() =>
+  z.object({
+    /**
+     * The entity type of the engine that was updated.
+     */
+    type: z.string(),
+    /**
+     * The changes applied to the engine.
+     */
+    changes: z
+      .object({
+        /**
+         * The updated list of index patterns now used by the engine.
+         */
+        indexPatterns: z.array(z.string()).optional(),
+      })
+      .optional(),
+  })
+);
 export type EngineDataviewUpdateResult = z.infer<typeof EngineDataviewUpdateResult>;
-export const EngineDataviewUpdateResult = z.object({
-  type: z.string(),
-  changes: z
-    .object({
-      indexPatterns: z.array(z.string()).optional(),
-    })
-    .optional(),
-});
 
+export const ApplyEntityEngineDataviewIndicesResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Whether all engines updated successfully.
+     */
+    success: z.boolean().optional(),
+    /**
+     * Per-engine update results.
+     */
+    result: z.array(EngineDataviewUpdateResult).optional(),
+  })
+);
 export type ApplyEntityEngineDataviewIndicesResponse = z.infer<
   typeof ApplyEntityEngineDataviewIndicesResponse
 >;
-export const ApplyEntityEngineDataviewIndicesResponse = z.object({
-  success: z.boolean().optional(),
-  result: z.array(EngineDataviewUpdateResult).optional(),
-});

@@ -58,6 +58,10 @@ export interface ResolveDataSourceProfileResult {
    * Whether the resolved data source profile differs from the previously active profile.
    */
   didProfileChange: boolean;
+  /**
+   * Whether it's the first data source profile resolved since the manager was created.
+   */
+  isFirstResolution: boolean;
 }
 
 export class ScopedProfilesManager {
@@ -97,7 +101,7 @@ export class ScopedProfilesManager {
     const isFirstResolution = this.prevDataSourceProfileParams === undefined;
 
     if (isEqual(this.prevDataSourceProfileParams, serializedParams)) {
-      return { didProfileChange: false };
+      return { didProfileChange: false, isFirstResolution };
     }
 
     const abortController = new AbortController();
@@ -116,7 +120,7 @@ export class ScopedProfilesManager {
     }
 
     if (abortController.signal.aborted) {
-      return { didProfileChange: false };
+      return { didProfileChange: false, isFirstResolution };
     }
 
     const didProfileChange =
@@ -127,7 +131,7 @@ export class ScopedProfilesManager {
     this.dataSourceContext$.next(context);
     this.prevDataSourceProfileParams = serializedParams;
 
-    return { didProfileChange };
+    return { didProfileChange, isFirstResolution };
   }
 
   /**

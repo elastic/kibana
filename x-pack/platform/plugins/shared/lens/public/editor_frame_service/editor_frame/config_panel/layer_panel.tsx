@@ -8,6 +8,8 @@
 import type { LensDatasourceId } from '@kbn/lens-common';
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { EMPTY } from 'rxjs';
+import { useObservable } from '@kbn/use-observable';
 import {
   EuiSpacer,
   EuiFlexGroup,
@@ -39,10 +41,14 @@ import { DraggableDimensionButton } from './buttons/draggable_dimension_button';
 import { useFocusUpdate } from './use_focus_update';
 import {
   useLensSelector,
+  useLensDispatch,
+  onActiveDataChange,
+  selectCanEditTextBasedQuery,
   selectIsFullscreenDatasource,
   selectResolvedDateRange,
   selectDatasourceStates,
 } from '../../../state_management';
+import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
 import { LENS_LAYER_TABS_CONTENT_ID } from '../../../app_plugin/shared/edit_on_the_fly/layer_tabs';
 import { FakeDimensionButton } from './buttons/fake_dimension_button';
@@ -98,8 +104,31 @@ export function LayerPanel(props: LayerPanelProps) {
   const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
 
   const datasourceStates = useLensSelector(selectDatasourceStates);
+  const canEditTextBasedQuery = useLensSelector(selectCanEditTextBasedQuery);
   const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
   const dateRange = useLensSelector(selectResolvedDateRange);
+  const dispatch = useLensDispatch();
+
+  // Sync the chart's finished-loading data into Redux so that downstream consumers
+  // (e.g. color mapping term lists) always have access to activeData.
+  // The default layer id mirrors WorkspacePanel#onData$ so the safety-net dispatch agrees
+  // with the canonical one on how single-table adapter output is keyed, and avoids
+  // re-keying the previous layer's table under the currently selected tab's layerId.
+  const isDataLoading = useObservable(editorProps.dataLoading$ ?? EMPTY);
+  const lensAdaptersRef = useRef(editorProps.lensAdapters);
+  lensAdaptersRef.current = editorProps.lensAdapters;
+  const [defaultLayerId] = Object.keys(framePublicAPI.datasourceLayers ?? {});
+
+  useEffect(() => {
+    if (isDataLoading !== false || !defaultLayerId) return;
+    const activeData = getActiveDataFromDatatable(
+      defaultLayerId,
+      lensAdaptersRef.current?.tables?.tables
+    );
+    if (Object.keys(activeData).length > 0) {
+      dispatch(onActiveDataChange({ activeData }));
+    }
+  }, [isDataLoading, dispatch, defaultLayerId]);
 
   useEffect(() => {
     // is undefined when the dimension panel is closed
@@ -295,6 +324,10 @@ export function LayerPanel(props: LayerPanelProps) {
     datasource?.isTextBasedLanguage() ||
     isOfAggregateQueryType(editorProps.attributes?.state.query) ||
     false;
+  const shouldRenderESQLEditor =
+    isTextBasedLanguage &&
+    canEditTextBasedQuery &&
+    isOfAggregateQueryType(editorProps.attributes?.state.query);
 
   const visualizationLayerSettings = useMemo(
     () =>
@@ -478,14 +511,16 @@ export function LayerPanel(props: LayerPanelProps) {
                 }}
               />
             )}
-            <ESQLEditor
-              uiSettings={core.uiSettings}
-              http={core.http}
-              isTextBasedLanguage={isTextBasedLanguage}
-              framePublicAPI={framePublicAPI}
-              layerId={layerId}
-              {...editorProps}
-            />
+            {shouldRenderESQLEditor ? (
+              <ESQLEditor
+                uiSettings={core.uiSettings}
+                http={core.http}
+                isTextBasedLanguage={isTextBasedLanguage}
+                framePublicAPI={framePublicAPI}
+                layerId={layerId}
+                {...editorProps}
+              />
+            ) : null}
             {activeVisualization.LayerPanelComponent && (
               <activeVisualization.LayerPanelComponent
                 {...{
@@ -760,7 +795,7 @@ export function LayerPanel(props: LayerPanelProps) {
           panelRef={(el) => (settingsPanelRef.current = el)}
           isFullscreen={false}
           label={i18n.translate('xpack.lens.editorFrame.layerSettingsTitle', {
-            defaultMessage: 'Layer settings',
+            defaultMessage: 'Settings',
           })}
           isOpen={isPanelSettingsOpen}
           handleClose={() => {

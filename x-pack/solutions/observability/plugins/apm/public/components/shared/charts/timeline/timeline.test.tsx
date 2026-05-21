@@ -9,9 +9,9 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import type { TimelineProps } from '.';
 import { TimelineAxisContainer, VerticalLinesContainer } from '.';
-import type { AgentMark } from '../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
 import { mockMoment, disableConsoleWarning } from '../../../../utils/test_helpers';
 import { renderWithTheme } from '../../../../utils/test_helpers';
+import type { AgentMark } from './marker/agent_marker';
 
 describe('Timeline Components', () => {
   let consoleMock: jest.SpyInstance;

@@ -25,6 +25,7 @@ export const SOLUTION_BUILDS: Solution[] = [
   { id: 'observability', artifact: 'observability' },
   { id: 'search', artifact: 'elasticsearch' },
   { id: 'security', artifact: 'security' },
+  { id: 'vectordb', artifact: 'vectordb' },
 ];
 
 export class Platform {

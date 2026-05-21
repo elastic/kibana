@@ -33,11 +33,11 @@ export const IdentificationSection: React.FC = () => {
       <EuiTitle size="xs">
         <h3>{flyoutLabels.identificationTitle}</h3>
       </EuiTitle>
-      <EuiSpacer size="xs" />
-      <EuiText size="xs" color="subdued">
+      <EuiSpacer size="s" />
+      <EuiText size="s" color="subdued" component="p">
         {flyoutLabels.identificationDescription}
       </EuiText>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
 
       <EuiFormRow
         label={flyoutLabels.nameLabel}
@@ -55,6 +55,7 @@ export const IdentificationSection: React.FC = () => {
               inputRef={ref}
               isInvalid={!!formState.errors.name}
               data-test-subj="editDetailsNameInput"
+              aria-label={flyoutLabels.nameLabel}
               fullWidth
             />
           )}
@@ -78,6 +79,7 @@ export const IdentificationSection: React.FC = () => {
               rows={3}
               isInvalid={!!formState.errors.description}
               data-test-subj="editDetailsDescriptionInput"
+              aria-label={flyoutLabels.descriptionLabel}
               fullWidth
             />
           )}
@@ -109,6 +111,7 @@ export const IdentificationSection: React.FC = () => {
                   inputRef={ref}
                   placeholder={flyoutLabels.avatarSymbolPlaceholder}
                   data-test-subj="editDetailsAvatarSymbolInput"
+                  aria-label={flyoutLabels.avatarSymbolLabel}
                   fullWidth
                 />
               )}
@@ -143,6 +146,7 @@ export const IdentificationSection: React.FC = () => {
                   placeholder={flyoutLabels.avatarColorPlaceholder}
                   fullWidth
                   data-test-subj="editDetailsAvatarColorPicker"
+                  aria-label={flyoutLabels.avatarColorLabel}
                 />
               )}
             />

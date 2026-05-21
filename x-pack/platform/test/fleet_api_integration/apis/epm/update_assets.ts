@@ -310,7 +310,7 @@ export default function (providerContext: FtrProviderContext) {
       } catch (err) {
         resDashboard2 = err;
       }
-      expect(resDashboard2.response.data.statusCode).equal(404);
+      expect(resDashboard2.status).equal(404);
       const resVis = await kibanaServer.savedObjects.get({
         type: 'visualization',
         id: 'sample_visualization',
@@ -325,7 +325,7 @@ export default function (providerContext: FtrProviderContext) {
       } catch (err) {
         resSearch = err;
       }
-      expect(resSearch.response.data.statusCode).equal(404);
+      expect(resSearch.status).equal(404);
       const resSearch2 = await kibanaServer.savedObjects.get({
         type: 'search',
         id: 'sample_search2',

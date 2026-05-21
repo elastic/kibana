@@ -34,6 +34,7 @@ export function createGenerateSignificantEventsPrompt({
       description: z.string(),
       available_feature_types: z.string(),
       computed_feature_instructions: z.string(),
+      existing_queries: z.string(),
     }),
   })
     .version({
@@ -121,8 +122,28 @@ export function createGenerateSignificantEventsPrompt({
                         type: 'string',
                       },
                     },
+                    replaces: {
+                      type: 'string',
+                      description:
+                        'If this query replaces an existing one (same detection intent but updated ES|QL), set this to the ID of the existing query from `existing_queries`.',
+                    },
+                    feature_ids: {
+                      type: 'array',
+                      items: {
+                        type: 'string',
+                      },
+                      description:
+                        'IDs of the features (from get_stream_features) that informed this query. Each ID must match a feature `id` returned by a previous get_stream_features call.',
+                    },
                   },
-                  required: ['esql', 'title', 'description', 'category', 'severity_score'],
+                  required: [
+                    'esql',
+                    'title',
+                    'description',
+                    'category',
+                    'severity_score',
+                    'feature_ids',
+                  ],
                 },
               },
             },

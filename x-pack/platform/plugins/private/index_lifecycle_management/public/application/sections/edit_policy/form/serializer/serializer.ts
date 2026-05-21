@@ -14,6 +14,7 @@ import { defaultPolicy, defaultRolloverAction } from '../../../../constants';
 import type { FormInternal } from '../../types';
 
 import { serializeMigrateAndAllocateActions } from './serialize_migrate_and_allocate_actions';
+import { excludeControlledRolloverThresholds } from './utils';
 
 export const createSerializer =
   (originalPolicy?: SerializedPolicy) =>
@@ -70,7 +71,13 @@ export const createSerializer =
          */
         if (isUsingRollover) {
           if (_meta.hot?.isUsingDefaultRollover) {
+            const existingRollover = hotPhaseActions.rollover;
+            const preservedRolloverFields = excludeControlledRolloverThresholds(
+              existingRollover ?? {}
+            );
+
             hotPhaseActions.rollover = cloneDeep(defaultRolloverAction);
+            Object.assign(hotPhaseActions.rollover, preservedRolloverFields);
           } else {
             // Rollover may not exist if editing an existing policy with initially no rollover configured
             if (!hotPhaseActions.rollover) {
@@ -183,6 +190,15 @@ export const createSerializer =
             ...hotPhaseActions.searchable_snapshot,
             snapshot_repository: searchableSnapshotMeta?.repository,
           };
+          if (hotPhaseActions.searchable_snapshot.force_merge_index === true) {
+            delete hotPhaseActions.searchable_snapshot.force_merge_index;
+          }
+          if (hotPhaseActions.searchable_snapshot.force_merge_index === false) {
+            delete hotPhaseActions.searchable_snapshot.force_merge_on_clone;
+          }
+          if (hotPhaseActions.searchable_snapshot.force_merge_on_clone === true) {
+            delete hotPhaseActions.searchable_snapshot.force_merge_on_clone;
+          }
         } else {
           delete hotPhaseActions.searchable_snapshot;
         }
@@ -330,6 +346,15 @@ export const createSerializer =
           ...coldPhase.actions.searchable_snapshot,
           snapshot_repository: searchableSnapshotMeta?.repository,
         };
+        if (coldPhase.actions.searchable_snapshot.force_merge_index === true) {
+          delete coldPhase.actions.searchable_snapshot.force_merge_index;
+        }
+        if (coldPhase.actions.searchable_snapshot.force_merge_index === false) {
+          delete coldPhase.actions.searchable_snapshot.force_merge_on_clone;
+        }
+        if (coldPhase.actions.searchable_snapshot.force_merge_on_clone === true) {
+          delete coldPhase.actions.searchable_snapshot.force_merge_on_clone;
+        }
       } else {
         delete coldPhase.actions.searchable_snapshot;
       }
@@ -375,6 +400,15 @@ export const createSerializer =
           ...frozenPhase.actions.searchable_snapshot,
           snapshot_repository: searchableSnapshotMeta?.repository,
         };
+        if (frozenPhase.actions.searchable_snapshot.force_merge_index === true) {
+          delete frozenPhase.actions.searchable_snapshot.force_merge_index;
+        }
+        if (frozenPhase.actions.searchable_snapshot.force_merge_index === false) {
+          delete frozenPhase.actions.searchable_snapshot.force_merge_on_clone;
+        }
+        if (frozenPhase.actions.searchable_snapshot.force_merge_on_clone === true) {
+          delete frozenPhase.actions.searchable_snapshot.force_merge_on_clone;
+        }
       } else {
         delete frozenPhase.actions.searchable_snapshot;
       }

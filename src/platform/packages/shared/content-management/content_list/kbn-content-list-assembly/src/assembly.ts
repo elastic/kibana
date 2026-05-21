@@ -12,6 +12,7 @@ import type { FC, ReactNode } from 'react';
 import type { ParsedItem, ParsedPart } from './parsing';
 import { parseDeclarativeChildren } from './parsing';
 import { createDeclarativeComponent, tagDeclarativeComponent } from './factory';
+import type { SkeletonOutput } from './skeleton';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Dev-mode warning helper
@@ -87,16 +88,24 @@ export interface PartFactory<
    * attributes into concrete output (e.g., an `EuiBasicTableColumn`).
    * The callback is stored internally and invoked by {@link resolve}.
    *
+   * Optionally provide a `skeleton` callback that describes the shape of a
+   * loading placeholder for this preset (used by renderers to draw a
+   * column-aware skeleton during initial load). When omitted, the renderer
+   * falls back to its own inference rules. See {@link resolveSkeleton}.
+   *
    * @template K - The preset name (inferred from `definition.name`).
    * @param definition - The preset definition.
    * @param definition.name - Preset name, constrained to `keyof TPresetMap`.
    * @param definition.resolve - Optional callback to resolve attributes into output.
    *   Return `undefined` to signal that the part should be skipped (e.g., disabled).
+   * @param definition.skeleton - Optional callback returning a skeleton shape
+   *   descriptor for this preset. Return `undefined` to defer to renderer inference.
    * @returns An `FC` whose props type is `TPresetMap[K]`.
    */
   createPreset: <K extends keyof TPresetMap & string>(definition: {
     name: K;
     resolve?: (attributes: TPresetMap[K], context: TContext) => TOutput | undefined;
+    skeleton?: (attributes: TPresetMap[K], context: TContext) => SkeletonOutput | undefined;
   }) => FC<TPresetMap[K]>;
 
   /**
@@ -114,6 +123,21 @@ export interface PartFactory<
   resolve: (part: ParsedPart, context: TContext) => TOutput | undefined;
 
   /**
+   * Resolve a parsed part into its skeleton shape descriptor by dispatching
+   * to the `skeleton` callback registered via `createPreset` or
+   * `createComponent`.
+   *
+   * Returns `undefined` when no skeleton resolver is registered for this
+   * preset or custom component — renderers should treat that as "fall back
+   * to inference" rather than an error.
+   *
+   * @param part - A parsed part from `parseChildren`.
+   * @param context - Context passed through to the skeleton callback.
+   * @returns The skeleton shape descriptor, or `undefined`.
+   */
+  resolveSkeleton: (part: ParsedPart, context: TContext) => SkeletonOutput | undefined;
+
+  /**
    * Parse React children and filter to this part type.
    *
    * Equivalent to calling `assembly.parseChildren(children)` and filtering
@@ -126,21 +150,27 @@ export interface PartFactory<
   parseChildren: (children: ReactNode) => ParsedPart[];
 
   /**
-   * Create a component without a preset (e.g., custom columns).
+   * Create a component without a preset (e.g., custom columns or custom filters).
    *
-   * Use this for parts that get their identity from `props.id` rather
-   * than a static preset name. Optionally provide a `resolve` callback
-   * to handle custom parts in `part.resolve()`, eliminating the need
-   * for manual casts in consumer code.
+   * Each call returns a **unique** `FC` reference. When a `resolve` or `skeleton`
+   * callback is provided, it is bound exclusively to that component reference.
+   * This means multiple `createComponent` calls for the same part — e.g. two
+   * `RecentsFilter` instances from different history sources — each dispatch to
+   * their own resolver independently. The resolver is looked up from the
+   * component function carried on the parsed part (`ParsedPart.componentType`),
+   * so there is no global shared slot that can be overwritten.
    *
    * @template P - The component's props type.
    * @param options - Optional configuration.
-   * @param options.resolve - Fallback resolver for parts without a preset.
+   * @param options.resolve - Resolver bound to this specific component instance.
    *   Return `undefined` to signal that the part should be skipped.
+   * @param options.skeleton - Skeleton resolver bound to this specific component instance.
+   *   Return `undefined` to defer to renderer inference.
    * @returns An `FC<P>` that returns `null`.
    */
   createComponent: <P>(options?: {
     resolve?: (attributes: P, context: TContext) => TOutput | undefined;
+    skeleton?: (attributes: P, context: TContext) => SkeletonOutput | undefined;
   }) => FC<P>;
 
   /**
@@ -306,15 +336,33 @@ export const defineAssembly = <const TName extends string>(config: {
       (attributes: Record<string, unknown>, context: TContext) => TOutput | undefined
     >();
 
-    // Fallback resolver for custom parts (registered via `createComponent`).
-    let customResolver:
-      | ((attributes: Record<string, unknown>, context: TContext) => TOutput | undefined)
-      | undefined;
+    // Parallel map of preset name → skeleton callback. Optional: presets
+    // omit `skeleton` when inference is good enough for them.
+    const skeletonResolvers = new Map<
+      string,
+      (attributes: Record<string, unknown>, context: TContext) => SkeletonOutput | undefined
+    >();
+
+    // Per-component resolver map: each `createComponent` call registers its
+    // resolver keyed by the unique FC it returns. This ensures two components
+    // from different `createComponent` calls (e.g. two `RecentsFilter`
+    // instances bound to different sources) each use their own resolver
+    // rather than the last-registered one.
+    const componentResolvers = new WeakMap<
+      (...args: unknown[]) => unknown,
+      (attributes: Record<string, unknown>, context: TContext) => TOutput | undefined
+    >();
+
+    const componentSkeletonResolvers = new WeakMap<
+      (...args: unknown[]) => unknown,
+      (attributes: Record<string, unknown>, context: TContext) => SkeletonOutput | undefined
+    >();
 
     return {
       createPreset: <K extends keyof TPresetMap & string>(definition: {
         name: K;
         resolve?: (attributes: TPresetMap[K], context: TContext) => TOutput | undefined;
+        skeleton?: (attributes: TPresetMap[K], context: TContext) => SkeletonOutput | undefined;
       }): FC<TPresetMap[K]> => {
         if (definition.resolve) {
           resolvers.set(
@@ -323,6 +371,16 @@ export const defineAssembly = <const TName extends string>(config: {
               attributes: Record<string, unknown>,
               context: TContext
             ) => TOutput | undefined
+          );
+        }
+
+        if (definition.skeleton) {
+          skeletonResolvers.set(
+            definition.name,
+            definition.skeleton as (
+              attributes: Record<string, unknown>,
+              context: TContext
+            ) => SkeletonOutput | undefined
           );
         }
 
@@ -336,10 +394,21 @@ export const defineAssembly = <const TName extends string>(config: {
       resolve: (part: ParsedPart, context: TContext): TOutput | undefined => {
         // Preset resolvers take priority.
         const resolver = part.preset ? resolvers.get(part.preset) : undefined;
-        if (resolver) return resolver(part.attributes, context);
+        if (resolver) {
+          return resolver(part.attributes, context);
+        }
 
-        // Fall back to the custom component resolver.
-        if (customResolver) return customResolver(part.attributes, context);
+        // Look up the resolver keyed to the exact component function that
+        // produced this part. This ensures that two `createComponent` calls
+        // with different `resolve` functions (e.g. two RecentsFilter instances
+        // bound to different sources) each dispatch to their own resolver
+        // rather than sharing the last-registered one.
+        if (part.componentType) {
+          const componentResolver = componentResolvers.get(part.componentType);
+          if (componentResolver) {
+            return componentResolver(part.attributes, context);
+          }
+        }
 
         if (process.env.NODE_ENV !== 'production') {
           // eslint-disable-next-line no-console
@@ -350,6 +419,28 @@ export const defineAssembly = <const TName extends string>(config: {
           );
         }
 
+        return undefined;
+      },
+
+      resolveSkeleton: (part: ParsedPart, context: TContext): SkeletonOutput | undefined => {
+        // Preset skeleton resolvers take priority.
+        const resolver = part.preset ? skeletonResolvers.get(part.preset) : undefined;
+        if (resolver) {
+          return resolver(part.attributes, context);
+        }
+
+        // Look up the skeleton resolver keyed to the exact component function,
+        // mirroring the per-component lookup in `resolve`.
+        if (part.componentType) {
+          const componentSkeletonResolver = componentSkeletonResolvers.get(part.componentType);
+          if (componentSkeletonResolver) {
+            return componentSkeletonResolver(part.attributes, context);
+          }
+        }
+
+        // Absence of a skeleton resolver is the expected normal case — most
+        // presets rely on the renderer's inference. Return `undefined` so
+        // callers know to fall back.
         return undefined;
       },
 
@@ -364,26 +455,38 @@ export const defineAssembly = <const TName extends string>(config: {
 
       createComponent: <P>(options?: {
         resolve?: (attributes: P, context: TContext) => TOutput | undefined;
+        skeleton?: (attributes: P, context: TContext) => SkeletonOutput | undefined;
       }): FC<P> => {
-        if (options?.resolve) {
-          if (process.env.NODE_ENV !== 'production' && customResolver) {
-            // eslint-disable-next-line no-console
-            console.warn(
-              `[${config.name}] createComponent({ resolve }) called more than once ` +
-                `for part "${partDefinition.name}". The previous custom resolver will be overwritten.`
-            );
-          }
-
-          customResolver = options.resolve as (
-            attributes: Record<string, unknown>,
-            context: TContext
-          ) => TOutput | undefined;
-        }
-
-        return createDeclarativeComponent<P>({
+        // Each call produces a unique component function. Resolvers are keyed
+        // to that function so that multiple `createComponent` calls for the
+        // same part (e.g. two RecentsFilter instances from different sources)
+        // each dispatch to their own resolver independently.
+        const component = createDeclarativeComponent<P>({
           assembly: config.name,
           part: partDefinition.name,
         });
+
+        if (options?.resolve) {
+          componentResolvers.set(
+            component as unknown as (...args: unknown[]) => unknown,
+            options.resolve as (
+              attributes: Record<string, unknown>,
+              context: TContext
+            ) => TOutput | undefined
+          );
+        }
+
+        if (options?.skeleton) {
+          componentSkeletonResolvers.set(
+            component as unknown as (...args: unknown[]) => unknown,
+            options.skeleton as (
+              attributes: Record<string, unknown>,
+              context: TContext
+            ) => SkeletonOutput | undefined
+          );
+        }
+
+        return component;
       },
 
       tagComponent: <C extends (...args: any[]) => null>(

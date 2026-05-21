@@ -21,9 +21,10 @@ jest.mock('@kbn/workflows-ui', () => ({
   })),
 }));
 
-// Mock normalizeFieldsToJsonSchema
+// Mock normalizeFieldsToJsonSchema; keep real getInputsFromDefinition for thunk behavior
 jest.mock('@kbn/workflows/spec/lib/field_conversion', () => ({
-  normalizeFieldsToJsonSchema: jest.fn((fields) => (fields ? { type: 'object' } : undefined)),
+  ...jest.requireActual('@kbn/workflows/spec/lib/field_conversion'),
+  getInputsFromDefinition: jest.fn((fields) => (fields ? { type: 'object' } : undefined)),
 }));
 
 describe('loadWorkflowsThunk', () => {
@@ -43,7 +44,9 @@ describe('loadWorkflowsThunk', () => {
         {
           id: 'wf-1',
           name: 'Workflow One',
-          definition: { inputs: [{ name: 'input1', type: 'string' }] },
+          definition: {
+            triggers: [{ type: 'manual', inputs: [{ name: 'input1', type: 'string' }] }],
+          },
         },
         {
           id: 'wf-2',

@@ -9,7 +9,7 @@
 
 import type { Scalar } from 'yaml';
 import { monaco } from '@kbn/monaco';
-import { PROPERTY_PATH_REGEX } from '../../../../../../../common/lib/regex';
+import { PROPERTY_PATH_REGEX } from '@kbn/workflows-yaml';
 
 export function wrapAsMonacoSuggestion(
   key: string,

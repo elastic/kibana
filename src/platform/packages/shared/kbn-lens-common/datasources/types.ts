@@ -112,6 +112,7 @@ export interface TextBasedLayer {
   columns: TextBasedLayerColumn[];
   timeField?: string;
   errors?: Error[];
+  ignoreGlobalFilters?: boolean;
 }
 
 export interface TextBasedPersistedState {
