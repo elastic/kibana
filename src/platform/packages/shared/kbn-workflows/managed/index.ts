@@ -25,7 +25,11 @@ export type ManagedWorkflowId = keyof ManagedWorkflowDefinitionById;
 type ManagedWorkflowDefinitionEntry = ManagedWorkflowDefinitionById[ManagedWorkflowId];
 
 export type ManagedWorkflowTemplateValuesById = {
-  [TId in ManagedWorkflowId]: ManagedWorkflowDefinitionById[TId] extends {
+  [TId in ManagedWorkflowId as ManagedWorkflowDefinitionById[TId] extends {
+    yamlTemplate: (values: infer _TValues) => string;
+  }
+    ? TId
+    : never]: ManagedWorkflowDefinitionById[TId] extends {
     yamlTemplate: (values: infer TValues) => string;
   }
     ? TValues
@@ -33,7 +37,9 @@ export type ManagedWorkflowTemplateValuesById = {
 };
 
 export type ManagedWorkflowTemplateValuesForId<TId extends ManagedWorkflowId> =
-  ManagedWorkflowTemplateValuesById[TId];
+  TId extends keyof ManagedWorkflowTemplateValuesById
+    ? ManagedWorkflowTemplateValuesById[TId]
+    : never;
 
 export const getManagedWorkflowDefinition = (id: string): ManagedWorkflowDefinition | undefined => {
   return managedWorkflowDefinitions.find(

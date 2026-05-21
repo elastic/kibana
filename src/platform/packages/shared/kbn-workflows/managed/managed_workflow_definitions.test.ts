@@ -20,7 +20,10 @@ const ManagedWorkflowSchema = WorkflowSchemaBase.extend({
 });
 
 type RegistryManagedWorkflowDefinition = (typeof managedWorkflowDefinitions)[number];
-type TemplateManagedWorkflowDefinition = RegistryManagedWorkflowDefinition & {
+type TemplateManagedWorkflowDefinition = Extract<
+  RegistryManagedWorkflowDefinition,
+  Record<'yamlTemplate', unknown>
+> & {
   yamlTemplate: (values: ManagedWorkflowTemplateValues) => string;
 };
 

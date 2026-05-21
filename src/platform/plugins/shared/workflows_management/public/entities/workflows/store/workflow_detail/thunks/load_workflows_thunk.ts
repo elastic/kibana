@@ -32,7 +32,11 @@ export const loadWorkflowsThunk = createAsyncThunk<
   const { http, notifications } = services;
   try {
     const api = new WorkflowApi(http);
-    const response = await api.getWorkflows({ size: MAX_WORKFLOWS_LOOKUP_SIZE, page: 1 });
+    const response = await api.getWorkflows({
+      size: MAX_WORKFLOWS_LOOKUP_SIZE,
+      page: 1,
+      managed: 'all',
+    });
 
     const workflowsMap: WorkflowsResponse['workflows'] = {};
     response.results.forEach((workflow) => {
