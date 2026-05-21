@@ -34,6 +34,7 @@ describe(
     let ruleName: string;
     let packId: string;
     let packName: string;
+    let loadedPackQueries: Record<string, { schedule_id?: string }>;
     const packData = packFixture();
     const multiQueryPackData = multiQueryPackFixture();
     before(() => {
@@ -43,6 +44,7 @@ describe(
       loadPack(packData).then((data) => {
         packId = data.saved_object_id;
         packName = data.name;
+        loadedPackQueries = data.queries;
       });
       loadPack(multiQueryPackData).then((data) => {
         multiQueryPackId = data.saved_object_id;
@@ -191,11 +193,13 @@ describe(
 
       cy.getBySel('ruleEditSubmitButton').click();
       cy.wait('@saveRuleSingleQuery', { timeout: 15000 }).should(({ request }) => {
+        const queryId = Object.keys(packData.queries)[0];
         const oneQuery = [
           {
             interval: 3600,
             query: 'select * from uptime;',
-            id: Object.keys(packData.queries)[0],
+            id: queryId,
+            schedule_id: loadedPackQueries[queryId].schedule_id,
           },
         ];
         expect(request.body.response_actions[0].params.queries).to.deep.equal(oneQuery);
