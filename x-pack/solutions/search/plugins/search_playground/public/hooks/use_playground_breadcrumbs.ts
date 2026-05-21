@@ -8,43 +8,51 @@
 import { useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 
 import { PLUGIN_PATH } from '../../common';
 import { useKibana } from './use_kibana';
 
+/**
+ * Sets breadcrumbs for the Playground app.
+ *
+ * In project chrome (serverless or solution spaces), the navigation tree provides
+ * the base path (e.g., "Data management > Relevance > Playground").
+ * In classic chrome, we need to set the full path manually.
+ */
 export const usePlaygroundBreadcrumbs = (playgroundName?: string) => {
-  const { cloud, http, searchNavigation } = useKibana().services;
-  const isServerless = cloud?.isServerlessEnabled ?? false;
+  const { http, searchNavigation, chrome } = useKibana().services;
+  const chromeStyle = chrome.getChromeStyle();
 
   useEffect(() => {
-    searchNavigation?.breadcrumbs.setSearchBreadCrumbs([
-      ...(isServerless
-        ? [] // Serverless is setting Build breadcrumb automatically
-        : [
-            {
-              text: i18n.translate('xpack.searchPlayground.breadcrumbs.build', {
-                defaultMessage: 'Build',
-              }),
-            },
-          ]),
-      {
+    const breadcrumbs: ChromeBreadcrumb[] = [];
+
+    // In classic chrome, we need to provide the full breadcrumb path.
+    // In project chrome, the navigation tree handles the base path automatically.
+    if (chromeStyle === 'classic') {
+      breadcrumbs.push({
+        text: i18n.translate('xpack.searchPlayground.breadcrumbs.build', {
+          defaultMessage: 'Build',
+        }),
+      });
+      breadcrumbs.push({
         text: i18n.translate('xpack.searchPlayground.breadcrumbs.playground', {
           defaultMessage: 'Playground',
         }),
         href: playgroundName !== undefined ? http.basePath.prepend(PLUGIN_PATH) : undefined,
-      },
-      ...(playgroundName !== undefined
-        ? [
-            {
-              text: playgroundName,
-            },
-          ]
-        : []),
-    ]);
+      });
+    }
+
+    if (playgroundName !== undefined) {
+      breadcrumbs.push({ text: playgroundName });
+    }
+
+    if (breadcrumbs.length > 0) {
+      searchNavigation?.breadcrumbs.setSearchBreadCrumbs(breadcrumbs);
+    }
 
     return () => {
-      // Clear breadcrumbs on unmount;
       searchNavigation?.breadcrumbs.clearBreadcrumbs();
     };
-  }, [http, searchNavigation, isServerless, playgroundName]);
+  }, [http, searchNavigation, chromeStyle, playgroundName]);
 };

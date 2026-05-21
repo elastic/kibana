@@ -70,7 +70,6 @@ export const useComparisonColumns = ({
           label: i18n.translate('unifiedDataTable.pinForComparison', {
             defaultMessage: 'Pin for comparison',
           }),
-          size: 'xs',
           onClick: () => {
             const newSelectedDocs = [...selectedDocIds];
             const index = newSelectedDocs.indexOf(docId);
@@ -90,7 +89,6 @@ export const useComparisonColumns = ({
           label: i18n.translate('unifiedDataTable.removeFromComparison', {
             defaultMessage: 'Remove from comparison',
           }),
-          size: 'xs',
           onClick: () => {
             replaceSelectedDocs(selectedDocIds.filter((id) => id !== docId));
           },

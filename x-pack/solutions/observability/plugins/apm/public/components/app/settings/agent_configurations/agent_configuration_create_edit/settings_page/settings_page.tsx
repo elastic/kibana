@@ -300,6 +300,7 @@ export function SettingsPage({
               {!isEditMode && isOtelCentralConfigAgent && (
                 <>
                   <EuiCallOut
+                    announceOnMount={false}
                     iconType="iInCircle"
                     title={i18n.translate(
                       'xpack.apm.agentConfig.settingsPage.otelCentralConfigDocumentation.title',

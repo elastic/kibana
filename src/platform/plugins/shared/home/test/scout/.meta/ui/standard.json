@@ -1,0 +1,130 @@
+{
+  "sha1": "aaf353227c251a7404922c549334c2f66f5676c8",
+  "tests": [
+    {
+      "id": "afd8b26596cdd7f-5bb39416912e9b9",
+      "title": "Add data tutorials tutorial directory should redirect to integrations app",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/home/test/scout/ui/tests/add_data.spec.ts",
+        "line": 14,
+        "column": 7
+      }
+    },
+    {
+      "id": "ba15d14af45912e-ecfeb661017daba",
+      "title": "Kibana Home - Accessibility home page has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/home/test/scout/ui/tests/home_a11y.spec.ts",
+        "line": 29,
+        "column": 7
+      }
+    },
+    {
+      "id": "ba15d14af45912e-94abb0d52581125",
+      "title": "Kibana Home - Accessibility sample data page has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/home/test/scout/ui/tests/home_a11y.spec.ts",
+        "line": 37,
+        "column": 7
+      }
+    },
+    {
+      "id": "0fe25eec7f256f4-31fddb5a1487efe",
+      "title": "Kibana navigation clicking on kibana logo should take you to home page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/home/test/scout/ui/tests/navigation.spec.ts",
+        "line": 26,
+        "column": 7
+      }
+    },
+    {
+      "id": "0fe25eec7f256f4-4c09c20fdb4eb54",
+      "title": "Kibana navigation browser back navigation preserves URL state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/home/test/scout/ui/tests/navigation.spec.ts",
+        "line": 36,
+        "column": 7
+      }
+    },
+    {
+      "id": "cd86684f5887976-3a4d86048b59510",
+      "title": "Sample data install/uninstall installs and uninstalls sample data via UI",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/home/test/scout/ui/tests/sample_data_install.spec.ts",
+        "line": 39,
+        "column": 7
+      }
+    },
+    {
+      "id": "df5ac36350b60b3-f6fd29706628462",
+      "title": "Sample data displays all registered sample data sets",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/home/test/scout/ui/tests/sample_data.spec.ts",
+        "line": 38,
+        "column": 7
+      }
+    },
+    {
+      "id": "df5ac36350b60b3-acc9db67bf742f9",
+      "title": "Sample data launches sample dashboards with expected panel counts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/home/test/scout/ui/tests/sample_data.spec.ts",
+        "line": 46,
+        "column": 7
+      }
+    },
+    {
+      "id": "df5ac36350b60b3-7024d75a196db4c",
+      "title": "Sample data flights dashboard renders visualizations correctly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/home/test/scout/ui/tests/sample_data.spec.ts",
+        "line": 59,
+        "column": 7
+      }
+    }
+  ]
+}

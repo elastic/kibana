@@ -115,6 +115,8 @@ Do not hardcode absolute times or now()-based ranges.
 
 ## Time Bucketing
 
+### FROM
+
 For time series charts, use auto buckets: \`BUCKET(<time field>, 75, ?_tstart, ?_tend)\` or \`TBUCKET(75, ?_tstart, ?_tend)\`, not hardcoded intervals like \`DATE_TRUNC(1 hour, <time field>)\`.
 Omit \`LIMIT\`; the bucket range already bounds the results.
 
@@ -124,9 +126,17 @@ e.g. with for a normal index with FROM and BUCKET:
 FROM logs | STATS count = COUNT() BY bucket = BUCKET(timestamp, 75, ?_tstart, ?_tend)
 \`\`\`
 
-or for a time-series datastream with TS and TBUCKET:
+### TS
+
+The visualization framework automatically adds the correct time range to the query for time series when using TS,
+meaning you **do not need** to filter using TRANGE manually.
+
+The only exception when you should use the variables to manually filter the timeframe with TS is for TBUCKET,
+
+e.g.
 
 \`\`\`esql
 TS logs-tsds | STATS count = COUNT() BY bucket = TBUCKET(75, ?_tstart, ?_tend)
 \`\`\`
-`;
+
+Also omit \`LIMIT\` (same reasons as with FROM).`;
