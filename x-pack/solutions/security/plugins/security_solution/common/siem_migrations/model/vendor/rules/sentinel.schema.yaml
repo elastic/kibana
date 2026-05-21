@@ -8,7 +8,7 @@ components:
   schemas:
     SentinelIso8601Duration:
       type: string
-      pattern: '^P(?=\d|T\d)(?:\d+Y)?(?:\d+M)?(?:\d+D)?(?:T(?=\d)(?:\d+H)?(?:\d+M)?(?:\d+S)?)?$'
+      pattern: '^P(?:(?:\d+Y(?:\d+M)?(?:\d+D)?|\d+M(?:\d+D)?|\d+D)(?:T(?:\d+H(?:\d+M)?(?:\d+S)?|\d+M(?:\d+S)?|\d+S))?|T(?:\d+H(?:\d+M)?(?:\d+S)?|\d+M(?:\d+S)?|\d+S))$'
       description: An ISO 8601 duration.
 
     SentinelRuleProperties:
@@ -28,12 +28,10 @@ components:
           type: string
           description: The KQL query for the rule
         queryFrequency:
-          allOf:
-            - $ref: '#/components/schemas/SentinelIso8601Duration'
+          $ref: '#/components/schemas/SentinelIso8601Duration'
           description: The frequency in ISO 8601 duration format for this alert rule to run.
         queryPeriod:
-          allOf:
-            - $ref: '#/components/schemas/SentinelIso8601Duration'
+          $ref: '#/components/schemas/SentinelIso8601Duration'
           description: The period in ISO 8601 duration format that this alert rule looks at.
         severity:
           type: string
