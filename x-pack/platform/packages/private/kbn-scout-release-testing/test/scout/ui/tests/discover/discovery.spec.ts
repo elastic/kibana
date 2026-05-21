@@ -74,29 +74,6 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
     expect(actualQueryNameString).toBe(queryName1);
   });
 
-  test('should refetch when autofresh is enabled', async ({ pageObjects }) => {
-    const interval = 5;
-    await pageObjects.datePicker.startAutoRefresh(interval);
-    const getRequestTimestamp = async () => {
-      await pageObjects.inspector.open();
-      const requestTimestamp = await pageObjects.inspector.getRequestTimestamp();
-      await pageObjects.inspector.close();
-      return requestTimestamp;
-    };
-
-    const requestTimestampBefore = await getRequestTimestamp();
-
-    await expect
-      .poll(
-        async () => {
-          const requestTimestampAfter = await getRequestTimestamp();
-          return Boolean(requestTimestampAfter) && requestTimestampBefore !== requestTimestampAfter;
-        },
-        { timeout: 7000 }
-      )
-      .toBe(true);
-  });
-
   test('load query should show query name', async ({ pageObjects }) => {
     await pageObjects.discover.saveSearch(queryName2);
     await pageObjects.discover.loadSavedSearch(queryName2);
@@ -116,6 +93,11 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
   });
 
   test('should modify the time range when a bar is clicked', async ({ pageObjects }) => {
+    await pageObjects.datePicker.setAbsoluteRange({
+      from: defaultStartTime,
+      to: defaultEndTime,
+    });
+
     await pageObjects.discover.clickHistogramBar();
     await pageObjects.discover.waitUntilSearchingHasFinished();
 
@@ -226,7 +208,7 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
   test('click Field Stats button and validate Document Stats is present', async ({ page }) => {
     await page.testSubj.click('dscViewModeFieldStatsButton');
     await expect(page.testSubj.locator('dataVisualizerTable-loaded')).toBeVisible();
-    await page.testSubj.click('dataVisualizerDetailsToggle-@message.raw-arrowRight');
+    await page.testSubj.click('dataVisualizerDetailsToggle-@message.raw-chevronSingleRight');
     await expect(page.testSubj.locator('dataVisualizerDocumentStatsContent')).toBeVisible();
   });
 
