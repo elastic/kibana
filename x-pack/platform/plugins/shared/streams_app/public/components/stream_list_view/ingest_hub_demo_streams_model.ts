@@ -5,14 +5,25 @@
  * 2.0.
  */
 
+/**
+ * A stream is the full topology: sources, pipeline (processing), routing, and destinations.
+ */
 export interface AwsMockStreamRow {
-  name: string;
-  parentName: string | null;
-  level: number;
-  docCount: number;
-  quality: 'good' | 'degraded' | 'poor';
-  histogramData: Array<{ x: number; y: number }>;
-  isRootStream: boolean;
+  readonly name: string;
+  readonly parentName: string | null;
+  readonly level: number;
+  readonly isWiredRoot: boolean;
+  readonly sourceCount: number;
+  readonly processingStepCount: number;
+  readonly routingStepCount: number;
+  readonly destinationCount: number;
+  readonly sourceTitle: string;
+  readonly sourceLogoUrl: string;
+  readonly docsPerSec: number;
+  readonly docCount: number;
+  readonly quality: 'good' | 'degraded' | 'poor';
+  readonly histogramData: Array<{ x: number; y: number }>;
+  readonly retentionDays: number;
 }
 
 export const MOCK_AWS_STREAMS_NOW = Date.now();
@@ -28,69 +39,3 @@ export const makeAwsMockSpark = (rate: number, points = 25): Array<{ x: number; 
     ),
   }));
 };
-
-export const AWS_MOCK_STREAMS: AwsMockStreamRow[] = [
-  {
-    name: 'logs',
-    parentName: null,
-    level: 0,
-    docCount: 6_964_800,
-    quality: 'good',
-    histogramData: makeAwsMockSpark(221),
-    isRootStream: true,
-  },
-  {
-    name: 'logs-aws.cloudwatch_logs-default',
-    parentName: 'logs',
-    level: 1,
-    docCount: 2_505_600,
-    quality: 'good',
-    histogramData: makeAwsMockSpark(87),
-    isRootStream: false,
-  },
-  {
-    name: 'logs-aws.vpcflow-default',
-    parentName: 'logs',
-    level: 1,
-    docCount: 1_612_800,
-    quality: 'good',
-    histogramData: makeAwsMockSpark(56),
-    isRootStream: false,
-  },
-  {
-    name: 'logs-aws.s3access-default',
-    parentName: 'logs',
-    level: 1,
-    docCount: 979_200,
-    quality: 'degraded',
-    histogramData: makeAwsMockSpark(34),
-    isRootStream: false,
-  },
-  {
-    name: 'logs-aws.cloudtrail-default',
-    parentName: 'logs',
-    level: 1,
-    docCount: 604_800,
-    quality: 'good',
-    histogramData: makeAwsMockSpark(21),
-    isRootStream: false,
-  },
-  {
-    name: 'logs-aws.elb_logs-default',
-    parentName: 'logs',
-    level: 1,
-    docCount: 432_000,
-    quality: 'good',
-    histogramData: makeAwsMockSpark(15),
-    isRootStream: false,
-  },
-  {
-    name: 'logs-aws.guardduty-default',
-    parentName: 'logs',
-    level: 1,
-    docCount: 230_400,
-    quality: 'good',
-    histogramData: makeAwsMockSpark(8),
-    isRootStream: false,
-  },
-];

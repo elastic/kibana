@@ -58,13 +58,15 @@ const iconGlyphClipCss = css`
 `;
 
 export interface IngestHubDemoStreamsFlowCardIconTileProps {
-  readonly iconType: IconType;
+  readonly iconType?: IconType;
+  readonly logoUrl?: string;
   /** When set, the good / degraded / poor icon-only badge is overlapped at the tile bottom-right. */
   readonly qualityStatus?: 'good' | 'degraded' | 'poor';
 }
 
 export function IngestHubDemoStreamsFlowCardIconTile({
-  iconType,
+  iconType = 'gear',
+  logoUrl,
   qualityStatus,
 }: IngestHubDemoStreamsFlowCardIconTileProps) {
   const { euiTheme } = useEuiTheme();
@@ -84,7 +86,11 @@ export function IngestHubDemoStreamsFlowCardIconTile({
         }}
       >
         <span css={iconGlyphClipCss}>
-          <EuiIcon type={iconType} size="m" title="" aria-hidden />
+          {logoUrl ? (
+            <img src={logoUrl} alt="" />
+          ) : (
+            <EuiIcon type={iconType} size="m" title="" aria-hidden />
+          )}
         </span>
       </div>
       {qualityStatus ? (

@@ -3437,14 +3437,14 @@ export const IngestHubPage: React.FC = () => {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    data-test-subj="observabilityOnboardingRenderStreamsViewCreateClassicStreamButton"
+                    data-test-subj="observabilityOnboardingRenderStreamsViewAddSourceButton"
                     size="s"
                     fill
                     onClick={() => services.application.navigateToApp?.('streams')}
                   >
                     {i18n.translate(
-                      'xpack.observabilityOnboarding.ingestHub.streams.createClassicStreamLabel',
-                      { defaultMessage: 'Create classic stream' }
+                      'xpack.observabilityOnboarding.ingestHub.streams.addSourceLabel',
+                      { defaultMessage: 'Add source' }
                     )}
                   </EuiButton>
                 </EuiFlexItem>

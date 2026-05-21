@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AppMountParameters, AppUpdater } from '@kbn/core/public';
+import type { AppDeepLink, AppMountParameters, AppUpdater } from '@kbn/core/public';
 import {
   APP_WRAPPER_CLASS,
   CoreScopedHistory,
@@ -18,13 +18,17 @@ import {
 import type { Logger } from '@kbn/logging';
 import { DataStreamsStatsService } from '@kbn/dataset-quality-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { DataSourcesCatalogFlyout } from './components/data_sources_view/data_sources_catalog_flyout';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { from, map, switchMap } from 'rxjs';
+import { combineLatest, from, map, switchMap } from 'rxjs';
 import { css } from '@emotion/css';
 import ReactDOM from 'react-dom';
+import {
+  getStarredStreams$,
+  toStarredStreamDeepLinkId,
+} from '../common/ingest_hub_starred_streams';
+import { DataSourcesCatalogFlyout } from './components/data_sources_view/data_sources_catalog_flyout';
 import type {
   ConfigSchema,
   StreamsAppPublicSetup,
@@ -40,14 +44,62 @@ import {
 import { StreamsAppContextProvider } from './components/streams_app_context_provider';
 import { StreamsTelemetryService } from './telemetry/service';
 import { StreamsAppLocatorDefinition } from '../common/locators';
-
 const StreamsApplication = dynamic(() =>
   import('./application').then((mod) => ({ default: mod.StreamsApplication }))
 );
 
+const STREAMS_APP_STATIC_DEEP_LINKS: AppDeepLink[] = [
+  {
+    id: 'streams-list',
+    title: i18n.translate('xpack.streams.nav.dataStreams', {
+      defaultMessage: 'All streams',
+    }),
+    path: '/',
+    visibleIn: [],
+  },
+  {
+    id: 'significant-events',
+    title: i18n.translate('xpack.streams.nav.significantEvents', {
+      defaultMessage: 'Significant events',
+    }),
+    path: '/',
+    visibleIn: [],
+  },
+  {
+    id: 'data-sources',
+    title: i18n.translate('xpack.streams.nav.dataSources', {
+      defaultMessage: 'Data sources',
+    }),
+    path: '/data-sources',
+    visibleIn: [],
+  },
+  {
+    id: 'content-packs',
+    title: i18n.translate('xpack.streams.nav.contentPacks', {
+      defaultMessage: 'Content Packs',
+    }),
+    path: '/content-packs',
+    visibleIn: [],
+  },
+  {
+    id: 'pipelines',
+    title: i18n.translate('xpack.streams.nav.pipelines', {
+      defaultMessage: 'Pipelines',
+    }),
+    path: '/pipelines',
+    visibleIn: [],
+  },
+];
+
 const StreamsListEmptyPromptLazy = dynamic(() =>
   import('./components/stream_list_view/streams_list_empty_prompt').then((mod) => ({
     default: mod.StreamsListEmptyPrompt,
+  }))
+);
+
+const AwsCatalogOnboardingWizardLazy = dynamic(() =>
+  import('./components/data_sources_view/aws_catalog_onboarding_wizard').then((mod) => ({
+    default: mod.AwsCatalogOnboardingWizard,
   }))
 );
 
@@ -162,45 +214,28 @@ export class StreamsAppPlugin
       appRoute: '/app/streams',
       category: DEFAULT_APP_CATEGORIES.management,
       order: 10000,
-      deepLinks: [
-        {
-          id: 'streams-list',
-          title: i18n.translate('xpack.streams.nav.dataStreams', {
-            defaultMessage: 'All streams',
-          }),
-          path: '/',
-          visibleIn: [],
-        },
-        {
-          id: 'significant-events',
-          title: i18n.translate('xpack.streams.nav.significantEvents', {
-            defaultMessage: 'Significant events',
-          }),
-          path: '/',
-          visibleIn: [],
-        },
-        {
-          id: 'data-sources',
-          title: i18n.translate('xpack.streams.nav.dataSources', {
-            defaultMessage: 'Data sources',
-          }),
-          path: '/data-sources',
-          visibleIn: [],
-        },
-      ],
+      deepLinks: STREAMS_APP_STATIC_DEEP_LINKS,
       updater$: from(startServicesPromise).pipe(
         switchMap(([_, pluginsStart]) =>
-          pluginsStart.streams.navigationStatus$.pipe(
-            map(({ status }): AppUpdater => {
-              return (app) => {
-                if (status !== 'enabled') {
+          combineLatest([pluginsStart.streams.navigationStatus$, getStarredStreams$()]).pipe(
+            map(([streamsStatus, starredStreamNames]): AppUpdater => {
+              return () => {
+                if (streamsStatus.status !== 'enabled') {
                   return {
                     visibleIn: [],
                   };
                 }
 
+                const starredDeepLinks: AppDeepLink[] = starredStreamNames.map((streamName) => ({
+                  id: toStarredStreamDeepLinkId(streamName),
+                  title: streamName,
+                  path: `/${streamName}`,
+                  visibleIn: [],
+                }));
+
                 return {
                   visibleIn: ['sideNav', 'globalSearch'],
+                  deepLinks: [...STREAMS_APP_STATIC_DEEP_LINKS, ...starredDeepLinks],
                 };
               };
             })
@@ -257,6 +292,8 @@ export class StreamsAppPlugin
 
     return {
       DataSourcesCatalogFlyout,
+      getStarredStreams$,
+      AwsCatalogOnboardingWizard: AwsCatalogOnboardingWizardLazy,
       renderEmbeddedStreamListView: (container: HTMLElement): (() => void) => {
         const services: StreamsAppServices = {
           dataStreamsClient: new DataStreamsStatsService()
@@ -305,6 +342,18 @@ export class StreamsAppPlugin
             >
               <StreamsListEmptyPromptLazy />
             </StreamsAppContextProvider>
+          ),
+          container
+        );
+        return () => ReactDOM.unmountComponentAtNode(container);
+      },
+      renderAwsCatalogOnboardingWizard: (
+        container: HTMLElement,
+        { onBackToCatalogue }: { onBackToCatalogue: () => void }
+      ): (() => void) => {
+        ReactDOM.render(
+          coreStart.rendering.addContext(
+            <AwsCatalogOnboardingWizardLazy onBackToCatalogue={onBackToCatalogue} />
           ),
           container
         );

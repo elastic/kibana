@@ -26,8 +26,12 @@ export function filterMockAwsStreamsBySearchQuery(
 
   const visible: AwsMockStreamRow[] = [];
   for (const row of rows) {
-    if (textSearch && !row.name.toLowerCase().includes(textSearch)) continue;
-    if (row.parentName && collapsed.has(row.parentName)) continue;
+    if (textSearch && !row.name.toLowerCase().includes(textSearch)) {
+      continue;
+    }
+    if (row.parentName && collapsed.has(row.parentName)) {
+      continue;
+    }
     if (
       qualityFilters.length > 0 &&
       !qualityFilters.some(

@@ -9,14 +9,15 @@ import type { RouteMap } from '@kbn/typed-react-router-config';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
-import { StreamsAppPageTemplate } from '../components/streams_app_page_template';
 import { StreamsAppRouterBreadcrumb } from '../components/streams_app_router_breadcrumb';
+import { StreamsAppPageTemplate } from '../components/streams_app_page_template';
 import { RedirectTo } from '../components/redirect_to';
 import { StreamListView } from '../components/stream_list_view';
 import { StreamDetailRoot } from '../components/stream_root';
 import { StreamDetailManagement } from '../components/data_management/stream_detail_management';
 import { SignificantEventsDiscoveryPage } from '../components/significant_events_discovery/page';
 import { DataSourcesView } from '../components/data_sources_view';
+import { ContentPacksView, PipelinesView } from '../components/streams_section_placeholder_view';
 
 /**
  * Optional time range query params.
@@ -70,6 +71,18 @@ const streamsAppRoutes = {
       },
       '/data-sources': {
         element: <DataSourcesView />,
+        params: t.partial({
+          query: timeRangeQueryParams,
+        }),
+      },
+      '/content-packs': {
+        element: <ContentPacksView />,
+        params: t.partial({
+          query: timeRangeQueryParams,
+        }),
+      },
+      '/pipelines': {
+        element: <PipelinesView />,
         params: t.partial({
           query: timeRangeQueryParams,
         }),

@@ -39,6 +39,10 @@ import { usePluginConfig } from '../../containers/plugin_config_context';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
 import { ReloadRequestTimeProvider } from '../../hooks/use_reload_request_time';
 import { OnboardingFlow } from '../../components/shared/templates/no_data_config';
+import {
+  AddDataCatalogFlyoutProvider,
+  useAddDataCatalogFlyout,
+} from '../../hooks/use_add_data_catalog_flyout';
 import { SurveySection } from './inventory_view/components/survey_section';
 import { useKibanaEnvironmentContext } from '../../hooks/use_kibana';
 
@@ -82,6 +86,7 @@ export const InfrastructurePage = () => {
       <ReactQueryProvider>
         <AlertPrefillProvider>
           <ReloadRequestTimeProvider>
+            <AddDataCatalogFlyoutProvider>
             <InfraMLCapabilitiesProvider>
               {setHeaderActionMenu && theme$ && (
                 <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
@@ -117,6 +122,11 @@ export const InfrastructurePage = () => {
                             exact
                           />
                           <HeaderLinkAddDataRoute path="/" onboardingFlow={OnboardingFlow.Infra} />
+                          <HeaderLinkAddDataRoute
+                            path="/explorer"
+                            onboardingFlow={OnboardingFlow.Infra}
+                            exact
+                          />
                         </Routes>
                       </EuiHeaderLinks>
                     </EuiFlexItem>
@@ -148,6 +158,7 @@ export const InfrastructurePage = () => {
                 />
               </Routes>
             </InfraMLCapabilitiesProvider>
+            </AddDataCatalogFlyoutProvider>
           </ReloadRequestTimeProvider>
         </AlertPrefillProvider>
       </ReactQueryProvider>
@@ -180,6 +191,7 @@ const HeaderLinkAddDataRoute = ({
   exact?: boolean;
 }) => {
   const { share } = useKibana<{ share: SharePublicStart }>().services;
+  const { useCatalogForAddData, openCatalog } = useAddDataCatalogFlyout();
   const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
   );
@@ -188,16 +200,22 @@ const HeaderLinkAddDataRoute = ({
     <Route
       path={path}
       exact={exact}
-      render={() => (
-        <EuiHeaderLink
-          href={onboardingLocator?.getRedirectUrl({
-            category: onboardingFlow === OnboardingFlow.Hosts ? 'host' : undefined,
-          })}
-          color="primary"
-        >
-          {ADD_DATA_LABEL}
-        </EuiHeaderLink>
-      )}
+      render={() =>
+        useCatalogForAddData ? (
+          <EuiHeaderLink color="primary" onClick={() => openCatalog('browse')}>
+            {ADD_DATA_LABEL}
+          </EuiHeaderLink>
+        ) : (
+          <EuiHeaderLink
+            href={onboardingLocator?.getRedirectUrl({
+              category: onboardingFlow === OnboardingFlow.Hosts ? 'host' : undefined,
+            })}
+            color="primary"
+          >
+            {ADD_DATA_LABEL}
+          </EuiHeaderLink>
+        )
+      }
     />
   );
 };

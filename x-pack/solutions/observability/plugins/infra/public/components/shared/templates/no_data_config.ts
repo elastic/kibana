@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { NoDataCardComponentProps } from '@kbn/shared-ux-card-no-data-types';
 import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
@@ -29,7 +30,8 @@ interface NoDataConfigDetails {
 const createCardConfig = (
   onboardingFlow: OnboardingFlow,
   locators: LocatorClient,
-  docsLink?: string
+  docsLink?: string,
+  onAddDataClick?: () => void
 ): NoDataCardComponentProps => {
   const onboardingLocator = locators.get<ObservabilityOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
@@ -44,7 +46,16 @@ const createCardConfig = (
           defaultMessage:
             'Start collecting data for your hosts to understand metric trends, explore logs and deep insight into their performance',
         }),
-        href: onboardingLocator?.getRedirectUrl({ category: onboardingFlow }),
+        href: onAddDataClick
+          ? '#'
+          : onboardingLocator?.getRedirectUrl({ category: onboardingFlow }),
+        onClick: onAddDataClick
+          ? (event: React.MouseEvent<HTMLAnchorElement>) => {
+              event.preventDefault();
+              event.stopPropagation();
+              onAddDataClick();
+            }
+          : undefined,
         buttonText: i18n.translate('xpack.infra.hostsViewPage.noData.card.buttonLabel', {
           defaultMessage: 'Add data',
         }),
@@ -55,7 +66,14 @@ const createCardConfig = (
       return {
         title: noMetricIndicesPromptTitle,
         description: noMetricIndicesPromptDescription,
-        href: onboardingLocator?.getRedirectUrl({}),
+        href: onAddDataClick ? '#' : onboardingLocator?.getRedirectUrl({}),
+        onClick: onAddDataClick
+          ? (event: React.MouseEvent<HTMLAnchorElement>) => {
+              event.preventDefault();
+              event.stopPropagation();
+              onAddDataClick();
+            }
+          : undefined,
         buttonText: i18n.translate('xpack.infra.hostsViewPage.noData.card.buttonLabel', {
           defaultMessage: 'Add data',
         }),
@@ -69,11 +87,12 @@ const getNoDataConfigDetails = ({
   onboardingFlow,
   locators,
   docsLink,
-}: NoDataConfigDetails): NoDataConfig => {
+  onAddDataClick,
+}: NoDataConfigDetails & { onAddDataClick?: () => void }): NoDataConfig => {
   return {
     action: {
       beats: {
-        ...createCardConfig(onboardingFlow, locators, docsLink),
+        ...createCardConfig(onboardingFlow, locators, docsLink, onAddDataClick),
       },
     },
   };
@@ -85,16 +104,18 @@ export const getNoDataConfig = ({
   locators,
   onboardingFlow,
   docsLink,
+  onAddDataClick,
 }: {
   hasData: boolean;
   loading: boolean;
   onboardingFlow?: OnboardingFlow;
   locators: LocatorClient;
   docsLink?: string;
+  onAddDataClick?: () => void;
 }): NoDataConfig | undefined => {
   if (!onboardingFlow || hasData || loading) {
     return;
   }
 
-  return getNoDataConfigDetails({ onboardingFlow, locators, docsLink });
+  return getNoDataConfigDetails({ onboardingFlow, locators, docsLink, onAddDataClick });
 };

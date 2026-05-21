@@ -43,6 +43,401 @@ export interface AwsService {
   badge?: string;
 }
 
+/**
+ * AWS integration matrix rows marked V1 (observability onboarding AWS wizard Version 1 only).
+ * @see aws_integration_matrix.ts
+ */
+export const AWS_SERVICES_VERSION1_MATRIX: AwsService[] = [
+  {
+    id: 'apigateway_logs',
+    name: 'AWS API Gateway logs',
+    logoUrl: `${AWS}/logo_apigateway.svg`,
+    category: 'Performance',
+    useCase: 'Ingest API Gateway access and execution logs',
+    description:
+      'Ship API Gateway access logs and execution logs from S3 or Amazon Data Firehose into Elastic for API traffic visibility.',
+    packageName: 'aws',
+  },
+  {
+    id: 'apigateway_metrics',
+    name: 'AWS API Gateway metrics',
+    logoUrl: `${AWS}/logo_apigateway.svg`,
+    category: 'Performance',
+    useCase: 'Monitor API latency, errors, and usage',
+    description:
+      'Collect API Gateway metrics via agentless polling to track latency, 4xx/5xx rates, and integration health.',
+    packageName: 'aws',
+    agentless: true,
+  },
+  {
+    id: 'cloudfront_logs',
+    name: 'AWS CloudFront',
+    logoUrl: `${AWS}/logo_cloudfront.svg`,
+    category: 'Reliability',
+    useCase: 'Ingest CDN access logs from S3 or Firehose',
+    description:
+      'Centralize CloudFront standard and real-time logs to analyze cache hit rates, origin errors, and edge latency.',
+    packageName: 'aws',
+  },
+  {
+    id: 'cloudtrail',
+    name: 'AWS CloudTrail',
+    logoUrl: `${AWS}/logo_cloudtrail.svg`,
+    category: 'Security',
+    useCase: 'Audit AWS API activity across accounts',
+    description:
+      'Collect CloudTrail management and data events to investigate changes, detect misuse, and support compliance.',
+    packageName: 'aws',
+    agentless: true,
+  },
+  {
+    id: 'cloudwatch_logs',
+    name: 'AWS CloudWatch Logs',
+    logoUrl: `${AWS}/logo_cloudwatch.svg`,
+    category: 'Infrastructure',
+    useCase: 'Stream log groups via Amazon Data Firehose',
+    description:
+      'Ingest CloudWatch log groups by delivery stream or prefix to correlate application and platform logs in Elastic.',
+    packageName: 'aws',
+  },
+  {
+    id: 'cloudwatch_metrics',
+    name: 'AWS CloudWatch Metrics',
+    logoUrl: `${AWS}/logo_cloudwatch.svg`,
+    category: 'Infrastructure',
+    useCase: 'Agentless metrics for AWS namespaces',
+    description:
+      'Poll CloudWatch metrics for selected namespaces and regions without agents to monitor AWS service health.',
+    packageName: 'aws',
+    agentless: true,
+  },
+  {
+    id: 'config',
+    name: 'AWS Config',
+    logoUrl: `${AWS}/logo-aws-config.svg`,
+    category: 'Compliance',
+    useCase: 'Track configuration changes and compliance',
+    description:
+      'Ingest AWS Config snapshots and change notifications to detect drift and misconfigurations.',
+    packageName: 'aws',
+    agentless: true,
+  },
+  {
+    id: 'dynamodb',
+    name: 'AWS DynamoDB',
+    logoUrl: `${AWS}/logo_dynamodb.svg`,
+    category: 'Performance',
+    useCase: 'Monitor table throughput and throttles',
+    description:
+      'Collect DynamoDB metrics for read/write capacity, throttled requests, and hot partitions.',
+    packageName: 'aws',
+    agentless: true,
+  },
+  {
+    id: 'ec2_logs',
+    name: 'AWS EC2 logs',
+    logoUrl: `${AWS}/logo_ec2.svg`,
+    category: 'Infrastructure',
+    useCase: 'Ingest EC2 system and application logs',
+    description:
+      'Ship EC2 logs from CloudWatch log groups or S3 to correlate host and workload issues with metrics.',
+    packageName: 'aws',
+    agentless: true,
+  },
+  {
+    id: 'ec2_metrics',
+    name: 'AWS EC2 metrics',
+    logoUrl: `${AWS}/logo_ec2.svg`,
+    category: 'Infrastructure',
+    useCase: 'Monitor CPU, network, and disk on instances',
+    description:
+      'Collect EC2 instance metrics agentlessly to spot overloaded hosts and capacity constraints.',
+    packageName: 'aws',
+    agentless: true,
+  },
+  {
+    id: 'ecs_metrics',
+    name: 'AWS ECS metrics',
+    logoUrl: `${AWS}/logo_ecs.svg`,
+    category: 'Infrastructure',
+    useCase: 'Track task CPU, memory, and service health',
+    description:
+      'Observe ECS cluster and service metrics to find failing tasks and resource pressure.',
+    packageName: 'aws',
+    agentless: true,
+  },
+  {
+    id: 'elb_logs',
+    name: 'AWS ELB logs',
+    logoUrl: `${AWS}/logo_elb.svg`,
+    category: 'Reliability',
+    useCase: 'Ingest load balancer access logs',
+    description:
+      'Centralize ALB/NLB/CLB access logs from S3 or Firehose for latency and error analysis.',
+    packageName: 'aws',
+  },
+  {
+    id: 'elb_metrics',
+    name: 'AWS ELB metrics',
+    logoUrl: `${AWS}/logo_elb.svg`,
+    category: 'Reliability',
+    useCase: 'Monitor target health and response codes',
+    description:
+      'Collect ELB metrics for unhealthy hosts, latency, and HTTP errors across load balancers.',
+    packageName: 'aws',
+    agentless: true,
+  },
+  {
+    id: 'emr_logs',
+    name: 'AWS EMR logs',
+    logoUrl: `${AWS}/logo_emr.svg`,
+    category: 'Infrastructure',
+    useCase: 'Ingest EMR log output from S3 or CloudWatch',
+    description:
+      'Bring EMR step and application logs into Elastic to debug jobs and cluster failures.',
+    packageName: 'aws',
+    agentless: true,
+  },
+  {
+    id: 'emr_metrics',
+    name: 'AWS EMR metrics',
+    logoUrl: `${AWS}/logo_emr.svg`,
+    category: 'Infrastructure',
+    useCase: 'Monitor cluster utilization and job progress',
+    description:
+      'Track EMR metrics for HDFS, YARN, and applications to optimize big data workloads.',
+    packageName: 'aws',
+    agentless: true,
+  },
+  {
+    id: 'firewall_logs',
+    name: 'AWS Network Firewall logs',
+    logoUrl: `${AWS}/logo_firewall.svg`,
+    category: 'Security',
+    useCase: 'Ingest firewall flow and alert logs',
+    description:
+      'Collect Network Firewall logs from S3 or Firehose to review blocks and VPC perimeter threats.',
+    packageName: 'aws',
+  },
+  {
+    id: 'firewall_metrics',
+    name: 'AWS Network Firewall metrics',
+    logoUrl: `${AWS}/logo_firewall.svg`,
+    category: 'Security',
+    useCase: 'Monitor firewall capacity and dropped packets',
+    description:
+      'Observe Network Firewall metrics for dropped traffic and capacity across VPC endpoints.',
+    packageName: 'aws',
+    agentless: true,
+  },
+  {
+    id: 'guardduty',
+    name: 'AWS GuardDuty',
+    logoUrl: `${AWS}/logo_guardduty.svg`,
+    category: 'Security',
+    useCase: 'Centralize threat and anomaly findings',
+    description:
+      'Ingest GuardDuty findings for compromised credentials, unusual API activity, and malware.',
+    packageName: 'aws',
+    agentless: true,
+  },
+  {
+    id: 'inspector',
+    name: 'AWS Inspector',
+    logoUrl: `${AWS}/logo_inspector.svg`,
+    category: 'Security',
+    useCase: 'Surface vulnerability and network reachability findings',
+    description:
+      'Collect Amazon Inspector findings to prioritize CVEs and exposure across EC2 and ECR workloads.',
+    packageName: 'aws',
+    agentless: true,
+  },
+  {
+    id: 'kafka_metrics',
+    name: 'AWS MSK Kafka metrics',
+    logoUrl: `${AWS}/logo_msk.svg`,
+    category: 'Reliability',
+    useCase: 'Monitor broker health and consumer lag',
+    description: 'Track MSK metrics for under-replicated partitions, disk, and consumer group lag.',
+    packageName: 'aws',
+    agentless: true,
+  },
+  {
+    id: 'kinesis',
+    name: 'AWS Kinesis',
+    logoUrl: `${AWS}/logo_kinesis.svg`,
+    category: 'Reliability',
+    useCase: 'Monitor stream throughput and iterator age',
+    description: 'Collect Kinesis Data Streams metrics to detect throttling and consumer lag.',
+    packageName: 'aws',
+    agentless: true,
+  },
+  {
+    id: 'lambda',
+    name: 'AWS Lambda metrics',
+    logoUrl: `${AWS}/logo_lambda.svg`,
+    category: 'Performance',
+    useCase: 'Monitor invocations, errors, and duration',
+    description: 'Collect Lambda metrics for cold starts, throttles, and concurrent executions.',
+    packageName: 'aws',
+    agentless: true,
+  },
+  {
+    id: 'lambda_logs',
+    name: 'AWS Lambda logs',
+    logoUrl: `${AWS}/logo_lambda.svg`,
+    category: 'Performance',
+    useCase: 'Ingest function logs from CloudWatch',
+    description:
+      'Ship Lambda log groups to Elastic to correlate errors and slow invocations with traces.',
+    packageName: 'aws',
+    agentless: true,
+  },
+  {
+    id: 'natgateway',
+    name: 'AWS NAT Gateway',
+    logoUrl: `${AWS}/logo_vpcflow.svg`,
+    category: 'Infrastructure',
+    useCase: 'Track egress usage and errors',
+    description:
+      'Observe NAT Gateway metrics for bytes, packets, and errors to control data transfer cost.',
+    packageName: 'aws',
+    agentless: true,
+  },
+  {
+    id: 'rds',
+    name: 'AWS RDS',
+    logoUrl: `${AWS}/logo_rds.svg`,
+    category: 'Performance',
+    useCase: 'Monitor connections, storage, and performance',
+    description: 'Collect RDS metrics for CPU, free storage, IOPS, and replica lag across engines.',
+    packageName: 'aws',
+    agentless: true,
+  },
+  {
+    id: 's3_daily_storage',
+    name: 'AWS S3 storage metrics',
+    logoUrl: `${AWS}/logo_s3.svg`,
+    category: 'Cost',
+    useCase: 'Track bucket size and object counts',
+    description:
+      'Ingest S3 daily storage metrics to find growth hotspots and optimize storage classes.',
+    packageName: 'aws',
+    agentless: true,
+  },
+  {
+    id: 'securityhub_findings',
+    name: 'AWS Security Hub findings',
+    logoUrl: `${AWS}/logo_securityhub.svg`,
+    category: 'Security',
+    useCase: 'Aggregate normalized security findings',
+    description:
+      'Centralize ASFF findings from integrated AWS services for triage and correlation in Elastic.',
+    packageName: 'aws',
+  },
+  {
+    id: 'securityhub_findings_full_posture',
+    name: 'AWS Security Hub full posture CSPM',
+    logoUrl: `${AWS}/logo_securityhub.svg`,
+    category: 'Compliance',
+    useCase: 'Cloud security posture and compliance controls',
+    description:
+      'Ingest Security Hub CSPM and posture findings to identify misconfigurations across accounts.',
+    packageName: 'aws',
+    agentless: true,
+  },
+  {
+    id: 'securityhub_insights',
+    name: 'AWS Security Hub insights',
+    logoUrl: `${AWS}/logo_securityhub.svg`,
+    category: 'Security',
+    useCase: 'Track insight results and trends',
+    description:
+      'Bring Security Hub insight results into Elastic for prioritized investigation workflows.',
+    packageName: 'aws',
+  },
+  {
+    id: 'waf',
+    name: 'AWS WAF',
+    logoUrl: `${AWS}/logo_waf.svg`,
+    category: 'Security',
+    useCase: 'Ingest WAF logs and blocked requests',
+    description:
+      'Collect AWS WAF logs to analyze blocked clients, rule matches, and application attacks.',
+    packageName: 'aws',
+  },
+  {
+    id: 'bedrock_guardrails',
+    name: 'AWS Bedrock Guardrails',
+    logoUrl: `${BEDROCK}/icon.svg`,
+    category: 'AI Ops',
+    useCase: 'Monitor guardrail invocations and policy outcomes',
+    description:
+      'Observe Bedrock Guardrails metrics for blocked prompts and policy violations in generative AI workloads.',
+    packageName: 'aws_bedrock',
+    agentless: true,
+    badge: 'Technical preview',
+  },
+  {
+    id: 'bedrock_knowledgebases',
+    name: 'AWS Bedrock Knowledge bases',
+    logoUrl: `${BEDROCK}/icon.svg`,
+    category: 'AI Ops',
+    useCase: 'Track retrieval and indexing health',
+    description:
+      'Collect metrics for Bedrock Knowledge Bases to monitor ingestion jobs and query performance.',
+    packageName: 'aws_bedrock',
+    agentless: true,
+    badge: 'Technical preview',
+  },
+  {
+    id: 'bedrock_runtime',
+    name: 'AWS Bedrock Runtime',
+    logoUrl: `${BEDROCK}/icon.svg`,
+    category: 'AI Ops',
+    useCase: 'Monitor model invocations and latency',
+    description:
+      'Ingest Bedrock runtime metrics for token usage, errors, and latency across foundation models.',
+    packageName: 'aws_bedrock',
+    agentless: true,
+    badge: 'Technical preview',
+  },
+  {
+    id: 'bedrock_agent_core',
+    name: 'AWS Bedrock Agent Core',
+    logoUrl: `${BEDROCK_AGENTCORE}/amazon_bedrock_agentcore.svg`,
+    category: 'AI Ops',
+    useCase: 'Observe agent runtime and tool execution',
+    description:
+      'Collect Bedrock Agent Core metrics for gateway traffic, memory access, and tool usage.',
+    packageName: 'aws_bedrock_agent_core',
+    agentless: true,
+    badge: 'Technical preview',
+  },
+];
+
+/** Log pipeline integrations for Version 1 browse tab (matrix `signalType` = logs). */
+export const AWS_VERSION1_LOGS_SERVICE_IDS: readonly string[] = [
+  'apigateway_logs',
+  'cloudfront_logs',
+  'cloudtrail',
+  'cloudwatch_logs',
+  'config',
+  'ec2_logs',
+  'elb_logs',
+  'emr_logs',
+  'firewall_logs',
+  'guardduty',
+  'inspector',
+  'lambda_logs',
+  'securityhub_findings',
+  'securityhub_findings_full_posture',
+  'securityhub_insights',
+  'waf',
+];
+
+export const AWS_VERSION1_LOGS_ID_SET: ReadonlySet<string> = new Set(AWS_VERSION1_LOGS_SERVICE_IDS);
+
 export const AWS_SERVICES: AwsService[] = [
   // ── Amazon prefixed ──
   { id: 'amazon_bedrock', name: 'Amazon Bedrock', logoUrl: `${BEDROCK}/icon.svg`, category: 'AI Ops', useCase: 'Track AI model usage, costs & latency across invocations', description: 'Monitor model invocation rates, token consumption, error rates, and latency to control AI spend and catch failures early.', packageName: 'aws_bedrock' },

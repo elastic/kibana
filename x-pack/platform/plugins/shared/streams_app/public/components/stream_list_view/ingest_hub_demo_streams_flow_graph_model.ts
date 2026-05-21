@@ -5,13 +5,26 @@
  * 2.0.
  */
 
+import type { IngestHubDemoStreamTopology } from '../ingest_hub_demo_stream_topology';
+import {
+  INGEST_HUB_DEMO_STREAMS_FLOW_CARD_WIDTH_PX,
+  INGEST_HUB_DEMO_STREAMS_FLOW_ROW_CARD_HEIGHT_PX,
+} from './ingest_hub_demo_streams_flow_card_layout';
+
+export {
+  INGEST_HUB_DEMO_STREAMS_FLOW_CARD_WIDTH_PX,
+  INGEST_HUB_DEMO_STREAMS_FLOW_ROW_CARD_HEIGHT_PX,
+} from './ingest_hub_demo_streams_flow_card_layout';
+export { INGEST_HUB_DEMO_STREAMS_FLOW_CARD_HEIGHT_PX } from './ingest_hub_demo_streams_flow_card_layout';
+export { INGEST_HUB_DEMO_STREAMS_FLOW_CARD_INSET_PX } from './ingest_hub_demo_streams_flow_card_layout';
+
 /** Point in canvas coordinates (same space as node boxes). */
 export interface FlowGraphPoint {
   readonly x: number;
   readonly y: number;
 }
 
-export type FlowGraphNodeKind = 'source' | 'branch' | 'stream';
+export type FlowGraphNodeKind = 'source' | 'processing' | 'routing' | 'branch' | 'stream';
 
 export interface FlowGraphNodeDef {
   readonly id: string;
@@ -20,40 +33,68 @@ export interface FlowGraphNodeDef {
   readonly y: number;
   readonly w: number;
   readonly h: number;
+  /** Index of the per-source stream flow this node belongs to. */
+  readonly flowIndex: number;
 }
 
 export interface FlowGraphEdgeDef {
   readonly id: string;
   readonly from: string;
   readonly to: string;
-  /** Polyline waypoints in layout space (2-point straight; 3+ orthogonal with rounded render). */
   readonly polyline: ReadonlyArray<FlowGraphPoint>;
 }
 
 export const INGEST_HUB_DEMO_STREAMS_FLOW_LAYOUT_HEIGHT = 400;
+/** @deprecated Use {@link INGEST_HUB_DEMO_STREAMS_FLOW_CARD_WIDTH_PX}. */
+export const INGEST_HUB_DEMO_STREAMS_FLOW_STEP_CARD_WIDTH_PX =
+  INGEST_HUB_DEMO_STREAMS_FLOW_CARD_WIDTH_PX;
+/** @deprecated Use {@link INGEST_HUB_DEMO_STREAMS_FLOW_ROW_CARD_HEIGHT_PX}. */
+export const INGEST_HUB_DEMO_STREAMS_FLOW_STEP_CARD_HEIGHT_PX =
+  INGEST_HUB_DEMO_STREAMS_FLOW_ROW_CARD_HEIGHT_PX;
+/** Minimum vertical space between adjacent stream flows on the canvas. */
+export const INGEST_HUB_DEMO_STREAMS_FLOW_ROW_GAP_PX = 56;
+export const INGEST_HUB_DEMO_STREAMS_FLOW_COLUMN_GAP_PX = 40;
 
-/** Fixed width for every flow canvas card (source, mid stream, destinations). */
-export const INGEST_HUB_DEMO_STREAMS_FLOW_CARD_WIDTH_PX = 250;
+const CARD_W = INGEST_HUB_DEMO_STREAMS_FLOW_CARD_WIDTH_PX;
+const ROW_H = INGEST_HUB_DEMO_STREAMS_FLOW_ROW_CARD_HEIGHT_PX;
+const ROW_GAP = INGEST_HUB_DEMO_STREAMS_FLOW_ROW_GAP_PX;
+const COL_GAP = INGEST_HUB_DEMO_STREAMS_FLOW_COLUMN_GAP_PX;
 
-const SOURCE_W = INGEST_HUB_DEMO_STREAMS_FLOW_CARD_WIDTH_PX;
-const RIGHT_COL_W = INGEST_HUB_DEMO_STREAMS_FLOW_CARD_WIDTH_PX;
-const MID_STREAM_W = INGEST_HUB_DEMO_STREAMS_FLOW_CARD_WIDTH_PX;
-
-const JOIN_W = 40;
-
-const MIN_LAYOUT_WIDTH = SOURCE_W + JOIN_W + MID_STREAM_W + JOIN_W + RIGHT_COL_W;
-
-/** Minimum `contentWidth` passed to `buildIngestHubDemoStreamsFlowLayout` (full graph width at scale 1). */
-export const INGEST_HUB_DEMO_STREAMS_FLOW_MIN_LAYOUT_WIDTH_PX = MIN_LAYOUT_WIDTH;
+/** Six equal-width cards per row (source + 3 pipeline + routing + destination) with minimum gaps. */
+export const INGEST_HUB_DEMO_STREAMS_FLOW_MIN_LAYOUT_WIDTH_PX = CARD_W * 6 + COL_GAP * 5;
 
 export interface IngestHubDemoStreamsFlowLayout {
   readonly layoutWidth: number;
   readonly layoutHeight: number;
   readonly nodes: readonly FlowGraphNodeDef[];
   readonly edges: readonly FlowGraphEdgeDef[];
+  readonly flowCount: number;
 }
 
-/** Branch targets end on the right so the spine is continuous across invisible join nodes. */
+export function getTopologySourceNodeId(flowIndex: number): string {
+  return `source_${flowIndex}`;
+}
+
+export function getTopologyDestNodeId(flowIndex: number): string {
+  return `dest_${flowIndex}`;
+}
+
+export function getTopologyProcessingNodeId(flowIndex: number, stepId: string): string {
+  return `processing_${flowIndex}_${stepId}`;
+}
+
+export function getTopologyRoutingNodeId(flowIndex: number): string {
+  return `routing_${flowIndex}`;
+}
+
+export function parseTopologyFlowNodeIndex(nodeId: string): number | null {
+  const match = nodeId.match(/^(?:source|dest|processing|routing)_(\d+)/);
+  if (!match) {
+    return null;
+  }
+  return Number.parseInt(match[1], 10);
+}
+
 function straightPolylineBetween(
   from: FlowGraphNodeDef,
   to: FlowGraphNodeDef
@@ -74,154 +115,140 @@ function straightPolylineBetween(
 }
 
 /**
- * Orthogonal path from the invisible fan hub (branch, right edge = bus) down/up then across to a
- * right-column stream. Each leg is unique so dashed connectors are not stacked on shared geometry.
+ * One horizontal stream flow per source: source → pipeline steps → routing → destination.
+ * Together these flows form the stream graph on the canvas.
  */
-function orthogonalFanHubToStream(
-  fanHub: FlowGraphNodeDef,
-  dest: FlowGraphNodeDef
-): ReadonlyArray<FlowGraphPoint> {
-  const hubR = fanHub.x + fanHub.w;
-  const hubCy = fanHub.y + fanHub.h / 2;
-  const destCy = dest.y + dest.h / 2;
-  /** Inline with the bus: straight run (avoids duplicate waypoints + stacked strokes on the hub). */
-  if (Math.abs(destCy - hubCy) < 1e-3) {
-    return [
-      { x: hubR, y: hubCy },
-      { x: dest.x, y: destCy },
-    ];
-  }
-  return [
-    { x: hubR, y: hubCy },
-    { x: hubR, y: destCy },
-    { x: dest.x, y: destCy },
+/** Column x positions for one stream flow row; gaps grow so the row spans `layoutWidth`. */
+function buildFlowRowColumnPositions(
+  layoutWidth: number,
+  processingStepCount: number
+): {
+  readonly sourceX: number;
+  readonly processingXs: readonly number[];
+  readonly routingX: number;
+  readonly destX: number;
+} {
+  const columnWidths = [
+    CARD_W,
+    ...Array.from({ length: processingStepCount }, () => CARD_W),
+    CARD_W,
+    CARD_W,
   ];
+  const gapCount = columnWidths.length - 1;
+  const fixedWidth = columnWidths.reduce((sum, width) => sum + width, 0);
+  const gapWidth = Math.max(COL_GAP, (layoutWidth - fixedWidth) / gapCount);
+
+  let cursorX = 0;
+  const columnXs: number[] = [];
+  for (let columnIndex = 0; columnIndex < columnWidths.length; columnIndex += 1) {
+    columnXs.push(cursorX);
+    cursorX += columnWidths[columnIndex] + (columnIndex < gapCount ? gapWidth : 0);
+  }
+
+  return {
+    sourceX: columnXs[0],
+    processingXs: columnXs.slice(1, 1 + processingStepCount),
+    routingX: columnXs[1 + processingStepCount],
+    destX: columnXs[columnXs.length - 1],
+  };
 }
 
-/**
- * Builds node positions and edge polylines for a given content width.
- * The spine uses straight segments. The fan uses an invisible `fan_hub` branch so the horizontal
- * bus from `dest_top` is a single edge (no triple-stacked dot strokes); each destination is one
- * orthogonal leg from the hub.
- * `contentWidth` should be the usable width inside the parent’s padding only (e.g. the ingest
- * canvas shell): the source’s left edge is at x = 0 and the right column’s right edge is at
- * layoutWidth. Four equal gaps distribute space between the source, mid stream slot, join slot,
- * and the right-hand destination column.
- */
-export function buildIngestHubDemoStreamsFlowLayout(
-  contentWidth: number
+export function buildStreamTopologyFlowLayout(
+  contentWidth: number,
+  topology: IngestHubDemoStreamTopology
 ): IngestHubDemoStreamsFlowLayout {
-  const layoutWidth = Math.max(MIN_LAYOUT_WIDTH, Math.floor(contentWidth));
-  const layoutHeight = INGEST_HUB_DEMO_STREAMS_FLOW_LAYOUT_HEIGHT;
+  const layoutWidth = Math.max(
+    INGEST_HUB_DEMO_STREAMS_FLOW_MIN_LAYOUT_WIDTH_PX,
+    Math.floor(contentWidth)
+  );
+  const flowCount = Math.min(topology.sources.length, topology.destinations.length);
 
-  const sourceX = 0;
-  const rightColX = layoutWidth - RIGHT_COL_W;
-  const sourceRight = sourceX + SOURCE_W;
-  const fixedBlocks = JOIN_W + MID_STREAM_W + JOIN_W;
-  const gapTotal = rightColX - sourceRight - fixedBlocks;
-  const gap = Math.max(0, gapTotal / 4);
+  const rowsBlockHeight = flowCount * ROW_H + (flowCount - 1) * ROW_GAP;
+  const layoutHeight = Math.max(INGEST_HUB_DEMO_STREAMS_FLOW_LAYOUT_HEIGHT, rowsBlockHeight + 48);
 
-  /** Horizontal offset of the former join1 slot (keeps card positions / MIN_LAYOUT_WIDTH math stable). */
-  const spineSlot1X = sourceRight + gap;
-  const destTopX = spineSlot1X + JOIN_W + gap;
-  const destTopR = destTopX + MID_STREAM_W;
-  /** Right edge of the former join2 slot (hub); keeps fan elbow math unchanged. */
-  const join2R = destTopR + JOIN_W;
+  const { sourceX, processingXs, routingX, destX } = buildFlowRowColumnPositions(
+    layoutWidth,
+    topology.processingSteps.length
+  );
 
-  const destTopY = 152;
-  const destTopH = 96;
-  const busY = destTopY + destTopH / 2;
+  const rowStartY = Math.max(24, (layoutHeight - rowsBlockHeight) / 2);
 
-  const fanGap = Math.max(0, rightColX - destTopR);
-  const xHub = fanGap === 0 ? join2R : destTopR + fanGap / 2;
-  const xElbow = Math.max(join2R, xHub);
+  const nodes: FlowGraphNodeDef[] = [];
+  const edges: FlowGraphEdgeDef[] = [];
 
-  /** Invisible join: right edge at the fan elbow so trunk + legs meet without overlapping paths. */
-  const fanHub: FlowGraphNodeDef = {
-    id: 'fan_hub',
-    kind: 'branch',
-    x: xElbow - JOIN_W,
-    y: busY - JOIN_W / 2,
-    w: JOIN_W,
-    h: JOIN_W,
-  };
+  for (let flowIndex = 0; flowIndex < flowCount; flowIndex += 1) {
+    const source = topology.sources[flowIndex];
+    const destination =
+      topology.destinations.find((dest) => dest.id === source.id) ??
+      topology.destinations[flowIndex];
+    const rowY = rowStartY + flowIndex * (ROW_H + ROW_GAP);
 
-  const nodes: readonly FlowGraphNodeDef[] = [
-    { id: 'source', kind: 'source', x: sourceX, y: destTopY, w: SOURCE_W, h: destTopH },
-    { id: 'dest_top', kind: 'stream', x: destTopX, y: destTopY, w: MID_STREAM_W, h: destTopH },
-    fanHub,
-    { id: 'dest_mid', kind: 'stream', x: rightColX, y: 48, w: RIGHT_COL_W, h: 88 },
-    { id: 'dest_errors', kind: 'stream', x: rightColX, y: 156, w: RIGHT_COL_W, h: 88 },
-    { id: 'dest_s3', kind: 'stream', x: rightColX, y: 264, w: RIGHT_COL_W, h: 88 },
-  ] as const;
+    const sourceId = getTopologySourceNodeId(flowIndex);
+    const destId = getTopologyDestNodeId(flowIndex);
+    const routingId = getTopologyRoutingNodeId(flowIndex);
 
-  const nodeMap = new Map(nodes.map((n) => [n.id, n]));
+    nodes.push({
+      id: sourceId,
+      kind: 'source',
+      x: sourceX,
+      y: rowY,
+      w: CARD_W,
+      h: ROW_H,
+      flowIndex,
+    });
 
-  const line = (fromId: string, toId: string): ReadonlyArray<FlowGraphPoint> => {
-    const fromN = nodeMap.get(fromId);
-    const toN = nodeMap.get(toId);
-    if (!fromN || !toN) {
-      return [
-        { x: 0, y: 0 },
-        { x: 0, y: 0 },
-      ];
+    const processingIds: string[] = [];
+    topology.processingSteps.forEach((step, stepIndex) => {
+      const id = getTopologyProcessingNodeId(flowIndex, step.id);
+      processingIds.push(id);
+      nodes.push({
+        id,
+        kind: 'processing',
+        x: processingXs[stepIndex] ?? routingX,
+        y: rowY,
+        w: CARD_W,
+        h: ROW_H,
+        flowIndex,
+      });
+    });
+
+    nodes.push({
+      id: routingId,
+      kind: 'routing',
+      x: routingX,
+      y: rowY,
+      w: CARD_W,
+      h: ROW_H,
+      flowIndex,
+    });
+
+    nodes.push({
+      id: destId,
+      kind: 'stream',
+      x: destX,
+      y: rowY,
+      w: CARD_W,
+      h: ROW_H,
+      flowIndex,
+    });
+
+    const chain = [sourceId, ...processingIds, routingId, destId];
+    for (let chainIndex = 0; chainIndex < chain.length - 1; chainIndex += 1) {
+      const fromId = chain[chainIndex];
+      const toId = chain[chainIndex + 1];
+      const fromN = nodes.find((n) => n.id === fromId);
+      const toN = nodes.find((n) => n.id === toId);
+      if (!fromN || !toN) {
+        continue;
+      }
+      edges.push({
+        id: `e_${fromId}_${toId}`,
+        from: fromId,
+        to: toId,
+        polyline: straightPolylineBetween(fromN, toN),
+      });
     }
-    return straightPolylineBetween(fromN, toN);
-  };
+  }
 
-  const plSourceDestTop = line('source', 'dest_top');
-  const plDestTopFanHub = line('dest_top', 'fan_hub');
-
-  const fanHubNode = nodeMap.get('fan_hub');
-  const destMidNode = nodeMap.get('dest_mid');
-  const destErrorsNode = nodeMap.get('dest_errors');
-  const destS3Node = nodeMap.get('dest_s3');
-
-  const plFanHubDestMid =
-    fanHubNode && destMidNode
-      ? orthogonalFanHubToStream(fanHubNode, destMidNode)
-      : line('fan_hub', 'dest_mid');
-  const plFanHubDestErrors =
-    fanHubNode && destErrorsNode
-      ? orthogonalFanHubToStream(fanHubNode, destErrorsNode)
-      : line('fan_hub', 'dest_errors');
-  const plFanHubDestS3 =
-    fanHubNode && destS3Node
-      ? orthogonalFanHubToStream(fanHubNode, destS3Node)
-      : line('fan_hub', 'dest_s3');
-
-  const edges: readonly FlowGraphEdgeDef[] = [
-    {
-      id: 'e_source_dest_top',
-      from: 'source',
-      to: 'dest_top',
-      polyline: plSourceDestTop,
-    },
-    {
-      id: 'e_dest_top_fan_hub',
-      from: 'dest_top',
-      to: 'fan_hub',
-      polyline: plDestTopFanHub,
-    },
-    {
-      id: 'e_fan_hub_dest_mid',
-      from: 'fan_hub',
-      to: 'dest_mid',
-      polyline: plFanHubDestMid,
-    },
-    {
-      id: 'e_fan_hub_dest_errors',
-      from: 'fan_hub',
-      to: 'dest_errors',
-      polyline: plFanHubDestErrors,
-    },
-    {
-      id: 'e_fan_hub_dest_s3',
-      from: 'fan_hub',
-      to: 'dest_s3',
-      polyline: plFanHubDestS3,
-    },
-  ] as const;
-
-  return { layoutWidth, layoutHeight, nodes, edges };
+  return { layoutWidth, layoutHeight, nodes, edges, flowCount };
 }

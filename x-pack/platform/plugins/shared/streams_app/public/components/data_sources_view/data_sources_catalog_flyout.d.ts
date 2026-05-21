@@ -16,7 +16,8 @@ export interface IntegrationTile {
     /** When true, renders a small "catalogue" suffix badge on the card */
     catalogue?: boolean;
 }
-export declare function DataSourcesCatalogFlyout({ onClose, onDataConnected, }: {
+export declare function DataSourcesCatalogFlyout({ onClose, onDataConnected, initialView, }: {
     onClose: () => void;
     onDataConnected: () => void;
+    initialView?: import('./catalog_modal_history').CatalogModalView;
 }): React.JSX.Element;

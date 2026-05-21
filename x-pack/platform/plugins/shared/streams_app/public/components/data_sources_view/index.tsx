@@ -36,117 +36,22 @@ import {
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
-import { CompactLogoIcon, DataSourcesCatalogFlyout } from './data_sources_catalog_flyout';
+import { DataSourcesCatalogFlyout } from './data_sources_catalog_flyout';
+import { CompactLogoIcon } from './compact_logo_icon';
 import { AssetImage } from '../asset_image';
+import {
+  AWS_LOGS_DEMO_DATA_SOURCES,
+  useIngestHubAwsLogsDemoActive,
+  useMarkIngestHubAwsLogsDemoActive,
+  type AwsLogsDemoDataSource,
+  type AwsLogsDemoDataSourceCategory,
+} from '../ingest_hub_aws_logs_demo_data';
 
-const ELASTIC_LOGOS = 'https://raw.githubusercontent.com/elastic/integrations/main/packages';
+type DataSource = AwsLogsDemoDataSource;
+type DataSourceStatus = DataSource['status'];
+type DataSourceCategory = AwsLogsDemoDataSourceCategory;
 
-type DataSourceStatus = 'active' | 'delayed' | 'stale';
-type DataSourceCategory =
-  | 'integration'
-  | 'input_package'
-  | 'asset'
-  | 'connector'
-  | 'api'
-  | 'custom';
-
-interface DataSource {
-  id: string;
-  name: string;
-  category: DataSourceCategory;
-  docsPerSec: number;
-  streamName: string;
-  logoUrl: string;
-  status: DataSourceStatus;
-  lastSeen: string;
-  detail: string;
-  dashboards?: number;
-  rules?: number;
-  hasUpdate?: boolean;
-  hasRollback?: boolean;
-}
-
-const DATA_SOURCES: DataSource[] = [
-  {
-    id: 'cloudwatch',
-    name: 'AWS CloudWatch Logs',
-    category: 'integration',
-    docsPerSec: 87,
-    streamName: 'logs-aws.cloudwatch_logs-default',
-    logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_cloudwatch.svg`,
-    status: 'active',
-    lastSeen: 'Just now',
-    detail: '14 log groups',
-    dashboards: 5,
-    rules: 12,
-  },
-  {
-    id: 'vpcflow',
-    name: 'Amazon VPC Flow Logs',
-    category: 'integration',
-    docsPerSec: 56,
-    streamName: 'logs-aws.vpcflow-default',
-    logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_vpcflow.svg`,
-    status: 'active',
-    lastSeen: 'Just now',
-    detail: '2 VPCs',
-    dashboards: 3,
-    rules: 7,
-  },
-  {
-    id: 's3',
-    name: 'Amazon S3 Access Logs',
-    category: 'input_package',
-    docsPerSec: 34,
-    streamName: 'logs-aws.s3access-default',
-    logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_s3.svg`,
-    status: 'delayed',
-    lastSeen: '23 min ago',
-    detail: '3 buckets',
-    hasUpdate: true,
-  },
-  {
-    id: 'cloudtrail',
-    name: 'AWS CloudTrail',
-    category: 'integration',
-    docsPerSec: 21,
-    streamName: 'logs-aws.cloudtrail-default',
-    logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_cloudtrail.svg`,
-    status: 'active',
-    lastSeen: 'Just now',
-    detail: 'Trail logs enabled',
-    dashboards: 2,
-    rules: 4,
-  },
-  {
-    id: 'elb',
-    name: 'AWS ELB Access Logs',
-    category: 'asset',
-    docsPerSec: 15,
-    streamName: 'logs-aws.elb_logs-default',
-    logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_elb.svg`,
-    status: 'active',
-    lastSeen: 'Just now',
-    detail: '4 load balancers',
-    dashboards: 1,
-    rules: 3,
-    hasRollback: true,
-  },
-  {
-    id: 'guardduty',
-    name: 'Amazon GuardDuty',
-    category: 'integration',
-    docsPerSec: 8,
-    streamName: 'logs-aws.guardduty-default',
-    logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_guardduty.svg`,
-    status: 'stale',
-    lastSeen: '2 h ago',
-    detail: 'Findings enabled',
-    dashboards: 4,
-    rules: 9,
-    hasUpdate: true,
-  },
-];
+const DATA_SOURCES: DataSource[] = AWS_LOGS_DEMO_DATA_SOURCES;
 
 const CATEGORY_CONFIG: Record<DataSourceCategory, { label: string }> = {
   integration: {
@@ -218,9 +123,8 @@ export function DataSourcesView() {
   const {
     core: { application },
   } = useKibana();
-  const [hasIngestedMockAwsData, setHasIngestedMockAwsData] = useState(
-    () => sessionStorage.getItem('ingestHub:dataAdded') === 'true'
-  );
+  const hasIngestedMockAwsData = useIngestHubAwsLogsDemoActive();
+  const markIngestHubAwsLogsDemoActive = useMarkIngestHubAwsLogsDemoActive();
   const [isCatalogOpen, setIsCatalogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategories, setActiveCategories] = useState<Set<DataSourceCategory>>(new Set());
@@ -228,9 +132,8 @@ export function DataSourcesView() {
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
 
   const handleDataConnected = useCallback(() => {
-    sessionStorage.setItem('ingestHub:dataAdded', 'true');
-    setHasIngestedMockAwsData(true);
-  }, []);
+    markIngestHubAwsLogsDemoActive();
+  }, [markIngestHubAwsLogsDemoActive]);
 
   const openCatalog = useCallback(() => setIsCatalogOpen(true), []);
   const closeCatalog = useCallback(() => setIsCatalogOpen(false), []);
@@ -280,16 +183,13 @@ export function DataSourcesView() {
             </EuiFlexItem>
           </EuiFlexGroup>
         }
-        description={i18n.translate('xpack.streams.dataSourcesView.pageDescription', {
-          defaultMessage: 'Browse and manage all data sources sending data to your streams.',
-        })}
         rightSideItems={
           hasIngestedMockAwsData
             ? [
                 <EuiButton
                   key="add-data"
+                  color="primary"
                   iconType="plusInCircle"
-                  fill
                   size="s"
                   onClick={openCatalog}
                 >

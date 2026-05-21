@@ -13,6 +13,10 @@ import { combineLatest, fromEvent, map, merge, of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { Location } from 'history';
+import {
+  getStarredStreams$,
+  toStarredStreamDeepLinkId,
+} from '@kbn/streams-app-plugin/common/ingest_hub_starred_streams';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 const title = i18n.translate(
   'xpack.observability.obltNav.headerSolutionSwitcher.obltSolutionTitle',
@@ -62,18 +66,41 @@ function getIngestHubVersion$() {
   );
 }
 
+function toAbsoluteHref(relativeUrl: string): string {
+  if (typeof document === 'undefined') {
+    return relativeUrl;
+  }
+  const anchor = document.createElement('a');
+  anchor.href = relativeUrl;
+  return anchor.href;
+}
+
+function isStreamDetailPath(
+  pathNameSerialized: string,
+  prepend: (path: string) => string,
+  streamName: string
+) {
+  const base = prepend('/app/streams');
+  const detailPrefix = `${base}/${streamName}`;
+  return pathNameSerialized === detailPrefix || pathNameSerialized.startsWith(`${detailPrefix}/`);
+}
+
 function createNavTree({
   streamsAvailable,
   showAiAssistant,
   isCloudEnabled,
   hideIngestHubDataManagement = false,
   aiSourceMapMode = false,
+  starredStreamNames = [],
+  toStreamDetailHref,
 }: {
   streamsAvailable?: boolean;
   showAiAssistant?: boolean;
   isCloudEnabled?: boolean;
   hideIngestHubDataManagement?: boolean;
   aiSourceMapMode?: boolean;
+  starredStreamNames?: readonly string[];
+  toStreamDetailHref: (streamName: string) => string;
 }) {
   const navTree: NavigationTreeDefinition = {
     body: [
@@ -154,7 +181,26 @@ function createNavTree({
                     {
                       link: 'streams:data-sources' as const,
                     },
+                    {
+                      link: 'streams:content-packs' as const,
+                    },
+                    {
+                      link: 'streams:pipelines' as const,
+                    },
                   ],
+                },
+                {
+                  id: 'streams_starred',
+                  title: i18n.translate('xpack.streams.nav.starred', {
+                    defaultMessage: 'Starred',
+                  }),
+                  children: starredStreamNames.map((streamName) => ({
+                    id: `streams_starred_${toStarredStreamDeepLinkId(streamName)}`,
+                    title: streamName,
+                    href: toAbsoluteHref(toStreamDetailHref(streamName)),
+                    getIsActive: ({ pathNameSerialized, prepend }) =>
+                      isStreamDetailPath(pathNameSerialized, prepend, streamName),
+                  })),
                 },
               ],
             },
@@ -797,9 +843,11 @@ export const createDefinition = (
     pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
     coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE),
     getIngestHubVersion$(),
+    pluginsStart.streamsApp?.getStarredStreams$() ?? getStarredStreams$(),
   ]).pipe(
-    map(([streamsStatus, chatExperience, ingestHubVersion]) =>
-      createNavTree({
+    map(([streamsStatus, chatExperience, ingestHubVersion, starredStreamNames]) => {
+      const prepend = coreStart.http.basePath.prepend.bind(coreStart.http.basePath);
+      return createNavTree({
         streamsAvailable: streamsStatus.status === 'enabled',
         showAiAssistant: chatExperience !== AIChatExperience.Agent,
         isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
@@ -808,8 +856,10 @@ export const createDefinition = (
           ingestHubVersion === 'agentUx' ||
           ingestHubVersion === 'aiSourceMap',
         aiSourceMapMode: ingestHubVersion === 'aiSourceMap',
-      })
-    )
+        starredStreamNames,
+        toStreamDetailHref: (streamName) => prepend(`/app/streams/${streamName}`),
+      });
+    })
   ),
   dataTestSubj: 'observabilitySideNav',
 });

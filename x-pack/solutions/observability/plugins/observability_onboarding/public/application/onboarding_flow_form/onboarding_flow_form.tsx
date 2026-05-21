@@ -34,7 +34,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { useSearchParams, useNavigate } from 'react-router-dom-v5-compat';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom-v5-compat';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
@@ -56,6 +56,10 @@ import {
   resolveVersion1HeaderCreateApiKeyTargetEndpointId,
   Version1ApiEndpointsHeaderCredentialSplit,
 } from '../version_1_api_endpoints_header_credential_split';
+import {
+  OPEN_AWS_CATALOG_OVERVIEW_LOCATION_STATE,
+  useDataSourcesCatalogFlyout,
+} from '../shared/use_data_sources_catalog_flyout';
 
 const allSections = [...SECTIONS];
 
@@ -79,6 +83,26 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   const [integrationSearch, setIntegrationSearch] = useState(searchParams.get('search') ?? '');
   const { euiTheme } = useEuiTheme();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { canOpenCatalog, openAwsOverview, catalogFlyout } = useDataSourcesCatalogFlyout();
+
+  const handleIntegrationTileClick = useCallback(
+    (tileId: string) => {
+      if (tileId === 'aws' && canOpenCatalog && openAwsOverview()) {
+        return;
+      }
+      navigate(`/add-data/${tileId}`);
+    },
+    [canOpenCatalog, navigate, openAwsOverview]
+  );
+
+  useEffect(() => {
+    const locationState = location.state as Record<string, unknown> | null;
+    if (locationState?.[OPEN_AWS_CATALOG_OVERVIEW_LOCATION_STATE] && canOpenCatalog) {
+      openAwsOverview();
+      navigate('.', { replace: true, state: {} });
+    }
+  }, [canOpenCatalog, location.state, navigate, openAwsOverview]);
 
   const createCollectionCardHandler = useCallback(
     (query: string) => () => {
@@ -292,7 +316,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                               logoDomain={tile.logoDomain}
                               logoUrl={tile.logoUrl}
                               layout="horizontal"
-                              onClick={() => navigate(`/add-data/${tile.id}`)}
+                              onClick={() => handleIntegrationTileClick(tile.id)}
                             />
                           ))}
                         </div>
@@ -329,7 +353,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                           layout="vertical"
                           hasBorder
                           paddingSize="none"
-                          onClick={() => navigate(`/add-data/${tile.id.replace('popular-', '')}`)}
+                          onClick={() => handleIntegrationTileClick(tile.id.replace('popular-', ''))}
                           css={css`
                             border-radius: 6px;
                             box-shadow: ${euiTheme.shadows.s};
@@ -1051,7 +1075,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                               logoDomain={tile.logoDomain}
                               logoUrl={tile.logoUrl}
                               layout="horizontal"
-                              onClick={() => navigate(`/add-data/${tile.id}`)}
+                              onClick={() => handleIntegrationTileClick(tile.id)}
                             />
                           ))}
                         </div>
@@ -1089,7 +1113,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                           layout="vertical"
                           hasBorder
                           paddingSize="none"
-                          onClick={() => navigate(`/add-data/${tile.id.replace('popular-', '')}`)}
+                          onClick={() => handleIntegrationTileClick(tile.id.replace('popular-', ''))}
                           css={css`
                             border-radius: 6px;
                             box-shadow: ${euiTheme.shadows.s};
@@ -1486,6 +1510,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
           </div>
         </div>
       )}
+      {catalogFlyout}
     </>
   );
 };

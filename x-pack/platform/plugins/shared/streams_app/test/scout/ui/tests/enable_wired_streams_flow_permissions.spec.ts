@@ -53,7 +53,7 @@ test.describe(
       await pageObjects.streams.goto();
 
       // Open settings
-      await page.getByTestId('streamsListViewCreateClassicStream-secondary-button').click();
+      await page.getByTestId('streamsListViewHeaderSplit-secondary-button').click();
       await page.getByTestId('streamsListViewSettingsMenuItem').click();
       await expect(page.getByTestId(WIRED_SWITCH)).toBeVisible();
 
@@ -70,7 +70,7 @@ test.describe(
       await pageObjects.streams.goto();
 
       // Open settings
-      await page.getByTestId('streamsListViewCreateClassicStream-secondary-button').click();
+      await page.getByTestId('streamsListViewHeaderSplit-secondary-button').click();
       await page.getByTestId('streamsListViewSettingsMenuItem').click();
       await expect(page.getByTestId(WIRED_SWITCH)).toBeVisible();
 
@@ -98,7 +98,7 @@ test.describe(
       await pageObjects.streams.verifyStreamsAreInTable(['logs.otel', 'logs.ecs']);
 
       // Open settings
-      await page.getByTestId('streamsListViewCreateClassicStream-secondary-button').click();
+      await page.getByTestId('streamsListViewHeaderSplit-secondary-button').click();
       await page.getByTestId('streamsListViewSettingsMenuItem').click();
       await expect(page.getByTestId(WIRED_SWITCH)).toBeVisible();
 
@@ -127,7 +127,7 @@ test.describe(
       await pageObjects.streams.verifyStreamsAreInTable(['logs.otel', 'logs.ecs']);
 
       // Open settings
-      await page.getByTestId('streamsListViewCreateClassicStream-secondary-button').click();
+      await page.getByTestId('streamsListViewHeaderSplit-secondary-button').click();
       await page.getByTestId('streamsListViewSettingsMenuItem').click();
       await expect(page.getByTestId(WIRED_SWITCH)).toBeVisible();
 

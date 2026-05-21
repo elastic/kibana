@@ -109,7 +109,8 @@ test.describe(
       try {
         await ensureClassicStreamIndexTemplate(esClient, templateName, indexPattern);
 
-        await page.getByRole('button', { name: 'Create classic stream' }).click();
+        await page.getByTestId('streamsListViewHeaderSplit-secondary-button').click();
+        await page.getByTestId('streamsListViewCreateStreamMenuItem').click();
 
         const flyout = page.getByTestId('create-classic-stream-flyout');
         await expect(flyout).toBeVisible();

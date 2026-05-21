@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useLayoutEffect } from 'react';
 import { css } from '@emotion/react';
-import { IntegrationDetailsFlyout, ingestHubHistoryKey } from './integration_details_flyout';
-import { AWS_SERVICES } from './aws_services_data';
-import integrationsHeaderImg from './assets/integrations-header.png';
 import {
   EuiBadge,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiCard,
   EuiEmptyPrompt,
   EuiFieldSearch,
@@ -20,21 +18,36 @@ import {
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
   EuiIcon,
+  EuiModal,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiPopover,
   EuiSelectable,
   EuiSideNav,
-  EuiSpacer,
   EuiText,
   EuiTitle,
   EuiHorizontalRule,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { AwsCatalogIntegrationDetailView } from './aws_catalog_integration_detail_view';
+import { AwsCatalogIntegrationHeader } from './aws_catalog_integration_header';
+import { AwsCatalogNestedFlow } from './aws_catalog_nested_flow';
+import {
+  getCatalogHistoryEntries,
+  getCatalogViewFromHistory,
+  type CatalogModalView,
+} from './catalog_modal_history';
+import { CatalogModalNavigation } from './catalog_modal_navigation';
+import { IntegrationDetailsFlyout } from './integration_details_flyout';
+import { AWS_SERVICES } from './aws_services_data';
+import { AWS_CATALOG_ENTRY_TILE } from './aws_catalog_entry_tile';
+import { CompactLogoIcon } from './compact_logo_icon';
+
+export { CompactLogoIcon } from './compact_logo_icon';
 
 // ─── Logo constants (copied from ingest_hub_components.tsx) ──────────────────
 
@@ -44,45 +57,33 @@ const CARD_LOGO_SIZE = 24;
 const CARD_LOGO_BG_PADDING = 8;
 const CARD_PADDING_PX = 16;
 
-const ELASTIC_LOGOS =
-  'https://raw.githubusercontent.com/elastic/integrations/main/packages';
+const ELASTIC_LOGOS = 'https://raw.githubusercontent.com/elastic/integrations/main/packages';
 const LOGO_FALLBACK = 'https://www.vectorlogo.zone/logos';
-
-// ─── Shared logo components (exact copies from ingest_hub_components.tsx) ────
-
-export const CompactLogoIcon: React.FC<{ src: string; alt: string }> = ({ src, alt }) => {
-  const { euiTheme } = useEuiTheme();
-  const [errored, setErrored] = useState(false);
-  const style: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: COMPACT_LOGO_SIZE + COMPACT_LOGO_BG_PADDING * 2,
-    height: COMPACT_LOGO_SIZE + COMPACT_LOGO_BG_PADDING * 2,
-    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-    borderRadius: 8,
-    border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-    flexShrink: 0,
-  };
-  return (
-    <div style={style}>
-      {errored ? (
-        <EuiIcon type="logoElastic" size="s" color="text" />
-      ) : (
-        <img
-          src={src}
-          alt={alt}
-          style={{ width: COMPACT_LOGO_SIZE, height: COMPACT_LOGO_SIZE, objectFit: 'contain' }}
-          onError={() => setErrored(true)}
-        />
-      )}
-    </div>
-  );
-};
 
 export const CardLogoIcon: React.FC<{ src: string; alt: string }> = ({ src, alt }) => {
   const { euiTheme } = useEuiTheme();
-  const [errored, setErrored] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
+
+  useLayoutEffect(() => {
+    setLoadFailed(false);
+    const probe = new Image();
+    let cancelled = false;
+    probe.onload = () => {
+      if (!cancelled) {
+        setLoadFailed(false);
+      }
+    };
+    probe.onerror = () => {
+      if (!cancelled) {
+        setLoadFailed(true);
+      }
+    };
+    probe.src = src;
+    return () => {
+      cancelled = true;
+    };
+  }, [src]);
+
   const style: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
@@ -95,14 +96,13 @@ export const CardLogoIcon: React.FC<{ src: string; alt: string }> = ({ src, alt 
   };
   return (
     <div style={style}>
-      {errored ? (
+      {loadFailed ? (
         <EuiIcon type="logoElastic" size="m" color="text" />
       ) : (
         <img
           src={src}
           alt={alt}
           style={{ width: CARD_LOGO_SIZE, height: CARD_LOGO_SIZE, objectFit: 'contain' }}
-          onError={() => setErrored(true)}
         />
       )}
     </div>
@@ -119,11 +119,28 @@ const CompactIntegrationCard: React.FC<{
 }> = ({ name, description, badge, logoUrl, onClick }) => {
   const { euiTheme } = useEuiTheme();
   const titleContent = badge ? (
-    <span css={css`display: flex; align-items: center; gap: 8px;`}>
+    <span
+      css={css`
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      `}
+    >
       {name}
       <EuiBadge
         color="default"
-        css={css`font-size:10px;line-height:1;padding:0 4px;height:18px;.euiBadge__content{padding:0;}.euiBadge__text{padding:0;}`}
+        css={css`
+          font-size: 10px;
+          line-height: 1;
+          padding: 0 4px;
+          height: 18px;
+          .euiBadge__content {
+            padding: 0;
+          }
+          .euiBadge__text {
+            padding: 0;
+          }
+        `}
       >
         {badge}
       </EuiBadge>
@@ -148,19 +165,61 @@ const CompactIntegrationCard: React.FC<{
         height: 100%;
         min-height: 74px;
         cursor: pointer;
-        .euiCard__top { min-width:0; flex-shrink:0; margin-block-end:0 !important; margin-inline-end:12px !important; }
-        .euiCard__content { min-width:0; overflow:hidden; }
-        .euiCard__main { min-width:0; overflow:hidden; }
-        .euiCard__content, .euiCard__children { margin-bottom:0; padding-bottom:0; }
-        .euiCard__title { min-width:0; overflow:hidden; font-family:${euiTheme.font.family}; font-weight:${euiTheme.font.weight.bold}; color:${euiTheme.colors.text}; }
-        .euiCard__title h4 { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-        .euiCard__description { display:none; }
+        box-shadow: none;
+        overflow: visible;
+        transition: box-shadow 150ms ease-in;
+        &:hover,
+        &:focus-within {
+          position: relative;
+          z-index: 1;
+          box-shadow: ${euiTheme.shadows.xs.down};
+        }
+        .euiCard__top {
+          min-width: 0;
+          flex-shrink: 0;
+          margin-block-end: 0 !important;
+          margin-inline-end: 12px !important;
+        }
+        .euiCard__content {
+          min-width: 0;
+          overflow: hidden;
+        }
+        .euiCard__main {
+          min-width: 0;
+          overflow: hidden;
+        }
+        .euiCard__content,
+        .euiCard__children {
+          margin-bottom: 0;
+          padding-bottom: 0;
+        }
+        .euiCard__title {
+          min-width: 0;
+          overflow: hidden;
+          font-family: ${euiTheme.font.family};
+          font-weight: ${euiTheme.font.weight.bold};
+          color: ${euiTheme.colors.text};
+        }
+        .euiCard__title h4 {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .euiCard__description {
+          display: none;
+        }
       `}
     >
       <EuiText
         size="xs"
         color="subdued"
-        css={css`display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.4em;`}
+        css={css`
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          min-height: 2.4em;
+        `}
       >
         {description || '\u00A0'}
       </EuiText>
@@ -192,13 +251,20 @@ const IntegrationCard: React.FC<{
         catalogue
       </EuiBadge>
     </span>
-  ) : name;
+  ) : (
+    name
+  );
   return (
     <div style={{ position: 'relative', height: '100%' }}>
       {badge && (
         <EuiBadge
           color="hollow"
-          css={css`position:absolute;top:8px;left:8px;z-index:1;`}
+          css={css`
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            z-index: 1;
+          `}
         >
           {badge}
         </EuiBadge>
@@ -214,26 +280,59 @@ const IntegrationCard: React.FC<{
         paddingSize="none"
         onClick={onClick}
         css={css`
-          border-radius:6px;
-          box-shadow:${euiTheme.shadows.s};
-          padding:${CARD_PADDING_PX}px;
+          border-radius: 6px;
+          box-shadow: ${euiTheme.shadows.s};
+          padding: ${CARD_PADDING_PX}px;
           ${badge ? `padding-top:${CARD_PADDING_PX + 24}px;` : ''}
           height:100%;
-          overflow:visible;
-          cursor:pointer;
-          transition:box-shadow 150ms ease-in;
-          &:hover, &:focus { box-shadow:${euiTheme.shadows.m}; }
-          .euiCard__top { display:flex; justify-content:center; margin-bottom:12px; }
-          .euiCard__content { text-align:center; min-width:0; }
-          .euiCard__content, .euiCard__children { margin-bottom:0; padding-bottom:0; }
-          .euiCard__title { font-family:${euiTheme.font.family}; font-weight:${euiTheme.font.weight.bold}; color:${euiTheme.colors.text}; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+          overflow: visible;
+          cursor: pointer;
+          transition: box-shadow 150ms ease-in;
+          &:hover,
+          &:focus {
+            position: relative;
+            z-index: 1;
+            box-shadow: ${euiTheme.shadows.xs.down};
+          }
+          .euiCard__top {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 12px;
+          }
+          .euiCard__content {
+            text-align: center;
+            min-width: 0;
+          }
+          .euiCard__content,
+          .euiCard__children {
+            margin-bottom: 0;
+            padding-bottom: 0;
+          }
+          .euiCard__title {
+            font-family: ${euiTheme.font.family};
+            font-weight: ${euiTheme.font.weight.bold};
+            color: ${euiTheme.colors.text};
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+          }
         `}
       >
         <EuiText
           size="s"
           color="subdued"
           style={{ marginTop: 4, marginBottom: 0 }}
-          css={css`min-height:2.8em;p{margin-bottom:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}`}
+          css={css`
+            min-height: 2.8em;
+            p {
+              margin-bottom: 0;
+              display: -webkit-box;
+              -webkit-line-clamp: 2;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+            }
+          `}
         >
           {description || '\u00A0'}
         </EuiText>
@@ -269,44 +368,134 @@ const SECTIONS: IntegrationSection[] = [
     title: 'Cloud',
     description: 'Monitor your cloud infrastructure',
     tiles: [
-      { id: 'aws', name: 'Amazon Web Services Collection', description: 'Collect logs and metrics from AWS services.', logoDomain: 'aws.amazon.com', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_aws.svg`, catalogue: true },
-      { id: 'gcp', name: 'Google Cloud Platform Collection', description: 'Monitor Google Cloud operations and resources.', logoDomain: 'cloud.google.com', logoUrl: `${ELASTIC_LOGOS}/gcp/img/logo_gcp.svg`, catalogue: true },
-      { id: 'azure', name: 'Azure Collection', description: 'Centralize Azure monitoring and alerting.', logoDomain: 'azure.microsoft.com', logoUrl: `${ELASTIC_LOGOS}/azure/img/logo_azure.svg` },
+      {
+        id: 'aws',
+        name: 'Amazon Web Services',
+        description: 'Collect logs and metrics from AWS services.',
+        logoDomain: 'aws.amazon.com',
+        logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_aws.svg`,
+      },
+      {
+        id: 'gcp',
+        name: 'Google Cloud Platform',
+        description: 'Monitor Google Cloud operations and resources.',
+        logoDomain: 'cloud.google.com',
+        logoUrl: `${ELASTIC_LOGOS}/gcp/img/logo_gcp.svg`,
+      },
+      {
+        id: 'azure',
+        name: 'Azure',
+        description: 'Centralize Azure monitoring and alerting.',
+        logoDomain: 'azure.microsoft.com',
+        logoUrl: `${ELASTIC_LOGOS}/azure/img/logo_azure.svg`,
+      },
     ],
   },
   {
     title: 'Containers',
     description: 'Monitor your containerised environments',
     tiles: [
-      { id: 'kubernetes', name: 'Kubernetes', description: 'Monitor pod health, resources, and deployments.', logoDomain: 'kubernetes.io', logoUrl: `${ELASTIC_LOGOS}/kubernetes/img/logo_kubernetes.svg` },
-      { id: 'docker', name: 'Docker', description: 'Collect container logs and metrics.', logoDomain: 'docker.com', logoUrl: `${ELASTIC_LOGOS}/docker/img/logo_docker.svg` },
-      { id: 'ecs', name: 'Amazon ECS', description: 'Track ECS and Fargate task metrics.', logoDomain: 'aws.amazon.com', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_ecs.svg` },
+      {
+        id: 'kubernetes',
+        name: 'Kubernetes',
+        description: 'Monitor pod health, resources, and deployments.',
+        logoDomain: 'kubernetes.io',
+        logoUrl: `${ELASTIC_LOGOS}/kubernetes/img/logo_kubernetes.svg`,
+      },
+      {
+        id: 'docker',
+        name: 'Docker',
+        description: 'Collect container logs and metrics.',
+        logoDomain: 'docker.com',
+        logoUrl: `${ELASTIC_LOGOS}/docker/img/logo_docker.svg`,
+      },
+      {
+        id: 'ecs',
+        name: 'Amazon ECS',
+        description: 'Track ECS and Fargate task metrics.',
+        logoDomain: 'aws.amazon.com',
+        logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_ecs.svg`,
+      },
     ],
   },
   {
     title: 'Host',
     description: 'Monitor your physical or virtual servers',
     tiles: [
-      { id: 'linux', name: 'Linux', description: 'Collect system metrics and logs from Linux servers.', logoDomain: 'linuxfoundation.org', logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/35/Tux.svg' },
-      { id: 'windows', name: 'Windows', description: 'Monitor event logs and performance counters.', logoDomain: 'microsoft.com', logoUrl: `${ELASTIC_LOGOS}/windows/img/logo_windows.svg` },
-      { id: 'macos', name: 'macOS', description: 'Collect logs and metrics from macOS endpoints.', logoDomain: 'apple.com', logoUrl: `${ELASTIC_LOGOS}/macos/img/macos-logo.svg` },
+      {
+        id: 'linux',
+        name: 'Linux',
+        description: 'Collect system metrics and logs from Linux servers.',
+        logoDomain: 'linuxfoundation.org',
+        logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/35/Tux.svg',
+      },
+      {
+        id: 'windows',
+        name: 'Windows',
+        description: 'Monitor event logs and performance counters.',
+        logoDomain: 'microsoft.com',
+        logoUrl: `${ELASTIC_LOGOS}/windows/img/logo_windows.svg`,
+      },
+      {
+        id: 'macos',
+        name: 'macOS',
+        description: 'Collect logs and metrics from macOS endpoints.',
+        logoDomain: 'apple.com',
+        logoUrl: `${ELASTIC_LOGOS}/macos/img/macos-logo.svg`,
+      },
     ],
   },
   {
     title: 'Applications',
     description: 'Monitor your application performance and logs',
     tiles: [
-      { id: 'opentelemetry', name: 'OpenTelemetry', description: 'Send traces, metrics, and logs via OTel SDK.', logoDomain: 'opentelemetry.io', logoUrl: 'https://opentelemetry.io/img/logos/opentelemetry-logo-nav.png' },
-      { id: 'prometheus', name: 'Prometheus', description: 'Scrape and visualize Prometheus metrics.', logoDomain: 'prometheus.io', logoUrl: `${ELASTIC_LOGOS}/prometheus/img/logo_prometheus.svg` },
-      { id: 'fluentbit', name: 'Fluent Bit', description: 'Forward logs from any source via Fluent Bit.', logoDomain: 'fluentbit.io', logoUrl: `${LOGO_FALLBACK}/fluentd/fluentd-icon.svg` },
+      {
+        id: 'opentelemetry',
+        name: 'OpenTelemetry',
+        description: 'Send traces, metrics, and logs via OTel SDK.',
+        logoDomain: 'opentelemetry.io',
+        logoUrl: 'https://opentelemetry.io/img/logos/opentelemetry-logo-nav.png',
+      },
+      {
+        id: 'prometheus',
+        name: 'Prometheus',
+        description: 'Scrape and visualize Prometheus metrics.',
+        logoDomain: 'prometheus.io',
+        logoUrl: `${ELASTIC_LOGOS}/prometheus/img/logo_prometheus.svg`,
+      },
+      {
+        id: 'fluentbit',
+        name: 'Fluent Bit',
+        description: 'Forward logs from any source via Fluent Bit.',
+        logoDomain: 'fluentbit.io',
+        logoUrl: `${LOGO_FALLBACK}/fluentd/fluentd-icon.svg`,
+      },
     ],
   },
 ];
 
 const SAAS_TILES: IntegrationTile[] = [
-  { id: 'confluence', name: 'Confluence', description: 'Index and search Confluence spaces, pages, and blog posts.', logoDomain: 'atlassian.com', logoUrl: `${ELASTIC_LOGOS}/atlassian_confluence/img/confluence-logo.svg` },
-  { id: 'salesforce', name: 'Salesforce', description: 'Collect Salesforce events, objects, and login activity.', logoDomain: 'salesforce.com', logoUrl: `${ELASTIC_LOGOS}/salesforce/img/salesforce.svg` },
-  { id: 'slack', name: 'Slack', description: 'Monitor Slack workspace audit logs and messages.', logoDomain: 'slack.com', logoUrl: `${ELASTIC_LOGOS}/slack/img/slack.svg` },
+  {
+    id: 'confluence',
+    name: 'Confluence',
+    description: 'Index and search Confluence spaces, pages, and blog posts.',
+    logoDomain: 'atlassian.com',
+    logoUrl: `${ELASTIC_LOGOS}/atlassian_confluence/img/confluence-logo.svg`,
+  },
+  {
+    id: 'salesforce',
+    name: 'Salesforce',
+    description: 'Collect Salesforce events, objects, and login activity.',
+    logoDomain: 'salesforce.com',
+    logoUrl: `${ELASTIC_LOGOS}/salesforce/img/salesforce.svg`,
+  },
+  {
+    id: 'slack',
+    name: 'Slack',
+    description: 'Monitor Slack workspace audit logs and messages.',
+    logoDomain: 'slack.com',
+    logoUrl: `${ELASTIC_LOGOS}/slack/img/slack.svg`,
+  },
 ];
 
 const AWS_INTEGRATION_TILES: IntegrationTile[] = AWS_SERVICES.map((s) => ({
@@ -318,91 +507,466 @@ const AWS_INTEGRATION_TILES: IntegrationTile[] = AWS_SERVICES.map((s) => ({
 }));
 
 const ALL_INTEGRATIONS: IntegrationTile[] = [
-  { id: 'activemq', name: 'ActiveMQ', description: 'Collect ActiveMQ logs and metrics.', logoDomain: 'activemq.apache.org', logoUrl: `${ELASTIC_LOGOS}/activemq/img/logo_activemq.svg` },
+  {
+    id: 'activemq',
+    name: 'ActiveMQ',
+    description: 'Collect ActiveMQ logs and metrics.',
+    logoDomain: 'activemq.apache.org',
+    logoUrl: `${ELASTIC_LOGOS}/activemq/img/logo_activemq.svg`,
+  },
   ...AWS_INTEGRATION_TILES,
-  { id: 'apache', name: 'Apache HTTP Server', description: 'Monitor Apache server logs and metrics.', logoDomain: 'httpd.apache.org', logoUrl: `${ELASTIC_LOGOS}/apache/img/logo_apache.svg` },
-  { id: 'apm', name: 'APM', description: 'Monitor app performance with traces and metrics.', logoDomain: 'elastic.co', logoUrl: `${ELASTIC_LOGOS}/apm/img/logo_apm.svg` },
-  { id: 'azure_monitor', name: 'Azure Monitor', description: 'Collect Azure Monitor metrics and logs.', logoDomain: 'azure.microsoft.com', logoUrl: `${ELASTIC_LOGOS}/azure/img/logo_azure.svg` },
-  { id: 'cassandra', name: 'Cassandra', description: 'Collect Cassandra logs and metrics.', logoDomain: 'cassandra.apache.org', logoUrl: `${ELASTIC_LOGOS}/cassandra/img/logo_cassandra.svg` },
-  { id: 'docker-int', name: 'Docker', description: 'Collect container logs and metrics.', logoDomain: 'docker.com', logoUrl: `${ELASTIC_LOGOS}/docker/img/logo_docker.svg` },
-  { id: 'elasticsearch-int', name: 'Elasticsearch', description: 'Monitor Elasticsearch cluster health.', logoDomain: 'elastic.co', logoUrl: `${ELASTIC_LOGOS}/elasticsearch/img/logo_elasticsearch.svg` },
-  { id: 'gcp_pubsub', name: 'Google Cloud Pub/Sub', description: 'Monitor Pub/Sub topic metrics.', logoDomain: 'cloud.google.com', logoUrl: `${ELASTIC_LOGOS}/gcp/img/logo_gcp.svg` },
-  { id: 'gcp_compute', name: 'Google Compute Engine', description: 'Collect Compute Engine instance metrics.', logoDomain: 'cloud.google.com', logoUrl: `${ELASTIC_LOGOS}/gcp/img/logo_gcp.svg` },
-  { id: 'haproxy', name: 'HAProxy', description: 'Monitor HAProxy load balancer metrics.', logoDomain: 'haproxy.org', logoUrl: `${ELASTIC_LOGOS}/haproxy/img/logo_haproxy.svg` },
-  { id: 'iis', name: 'IIS', description: 'Collect IIS web server logs and metrics.', logoDomain: 'microsoft.com', logoUrl: `${ELASTIC_LOGOS}/iis/img/logo_iis.svg` },
-  { id: 'kafka', name: 'Kafka', description: 'Monitor Kafka broker logs and metrics.', logoDomain: 'kafka.apache.org', logoUrl: `${ELASTIC_LOGOS}/kafka/img/logo_kafka.svg` },
-  { id: 'kubernetes-int', name: 'Kubernetes', description: 'Monitor clusters, pods, and deployments.', logoDomain: 'kubernetes.io', logoUrl: `${ELASTIC_LOGOS}/kubernetes/img/logo_kubernetes.svg` },
-  { id: 'mongodb', name: 'MongoDB', description: 'Monitor MongoDB database metrics.', logoDomain: 'mongodb.com', logoUrl: `${ELASTIC_LOGOS}/mongodb/img/logo_mongodb.svg` },
-  { id: 'mysql-int', name: 'MySQL', description: 'Collect MySQL database logs and metrics.', logoDomain: 'mysql.com', logoUrl: `${ELASTIC_LOGOS}/mysql/img/logo_mysql.svg` },
-  { id: 'nginx', name: 'Nginx', description: 'Monitor Nginx server logs and metrics.', logoDomain: 'nginx.org', logoUrl: `${ELASTIC_LOGOS}/nginx/img/logo_nginx.svg` },
-  { id: 'opentelemetry-int', name: 'OpenTelemetry', description: 'Send traces, metrics, and logs via OTel.', logoDomain: 'opentelemetry.io', logoUrl: 'https://opentelemetry.io/img/logos/opentelemetry-logo-nav.png' },
-  { id: 'postgresql', name: 'PostgreSQL', description: 'Collect PostgreSQL database metrics.', logoDomain: 'postgresql.org', logoUrl: `${ELASTIC_LOGOS}/postgresql/img/logo_postgresql.svg` },
-  { id: 'prometheus-int', name: 'Prometheus', description: 'Scrape and visualize Prometheus metrics.', logoDomain: 'prometheus.io', logoUrl: `${ELASTIC_LOGOS}/prometheus/img/logo_prometheus.svg` },
-  { id: 'rabbitmq', name: 'RabbitMQ', description: 'Monitor RabbitMQ queue metrics.', logoDomain: 'rabbitmq.com', logoUrl: `${ELASTIC_LOGOS}/rabbitmq/img/logo_rabbitmq.svg` },
-  { id: 'redis', name: 'Redis', description: 'Collect Redis server metrics.', logoDomain: 'redis.io', logoUrl: `${ELASTIC_LOGOS}/redis/img/logo_redis.svg` },
-  { id: 'system', name: 'System', description: 'Monitor host CPU, memory, and processes.', logoDomain: 'elastic.co', logoUrl: `${ELASTIC_LOGOS}/system/img/logo_system.svg` },
-  { id: 'zookeeper', name: 'ZooKeeper', description: 'Monitor ZooKeeper ensemble metrics.', logoDomain: 'zookeeper.apache.org', logoUrl: `${ELASTIC_LOGOS}/zookeeper/img/logo_zookeeper.svg` },
+  {
+    id: 'apache',
+    name: 'Apache HTTP Server',
+    description: 'Monitor Apache server logs and metrics.',
+    logoDomain: 'httpd.apache.org',
+    logoUrl: `${ELASTIC_LOGOS}/apache/img/logo_apache.svg`,
+  },
+  {
+    id: 'apm',
+    name: 'APM',
+    description: 'Monitor app performance with traces and metrics.',
+    logoDomain: 'elastic.co',
+    logoUrl: `${ELASTIC_LOGOS}/apm/img/logo_apm.svg`,
+  },
+  {
+    id: 'azure_monitor',
+    name: 'Azure Monitor',
+    description: 'Collect Azure Monitor metrics and logs.',
+    logoDomain: 'azure.microsoft.com',
+    logoUrl: `${ELASTIC_LOGOS}/azure/img/logo_azure.svg`,
+  },
+  {
+    id: 'cassandra',
+    name: 'Cassandra',
+    description: 'Collect Cassandra logs and metrics.',
+    logoDomain: 'cassandra.apache.org',
+    logoUrl: `${ELASTIC_LOGOS}/cassandra/img/logo_cassandra.svg`,
+  },
+  {
+    id: 'docker-int',
+    name: 'Docker',
+    description: 'Collect container logs and metrics.',
+    logoDomain: 'docker.com',
+    logoUrl: `${ELASTIC_LOGOS}/docker/img/logo_docker.svg`,
+  },
+  {
+    id: 'elasticsearch-int',
+    name: 'Elasticsearch',
+    description: 'Monitor Elasticsearch cluster health.',
+    logoDomain: 'elastic.co',
+    logoUrl: `${ELASTIC_LOGOS}/elasticsearch/img/logo_elasticsearch.svg`,
+  },
+  {
+    id: 'gcp_pubsub',
+    name: 'Google Cloud Pub/Sub',
+    description: 'Monitor Pub/Sub topic metrics.',
+    logoDomain: 'cloud.google.com',
+    logoUrl: `${ELASTIC_LOGOS}/gcp/img/logo_gcp.svg`,
+  },
+  {
+    id: 'gcp_compute',
+    name: 'Google Compute Engine',
+    description: 'Collect Compute Engine instance metrics.',
+    logoDomain: 'cloud.google.com',
+    logoUrl: `${ELASTIC_LOGOS}/gcp/img/logo_gcp.svg`,
+  },
+  {
+    id: 'haproxy',
+    name: 'HAProxy',
+    description: 'Monitor HAProxy load balancer metrics.',
+    logoDomain: 'haproxy.org',
+    logoUrl: `${ELASTIC_LOGOS}/haproxy/img/logo_haproxy.svg`,
+  },
+  {
+    id: 'iis',
+    name: 'IIS',
+    description: 'Collect IIS web server logs and metrics.',
+    logoDomain: 'microsoft.com',
+    logoUrl: `${ELASTIC_LOGOS}/iis/img/logo_iis.svg`,
+  },
+  {
+    id: 'kafka',
+    name: 'Kafka',
+    description: 'Monitor Kafka broker logs and metrics.',
+    logoDomain: 'kafka.apache.org',
+    logoUrl: `${ELASTIC_LOGOS}/kafka/img/logo_kafka.svg`,
+  },
+  {
+    id: 'kubernetes-int',
+    name: 'Kubernetes',
+    description: 'Monitor clusters, pods, and deployments.',
+    logoDomain: 'kubernetes.io',
+    logoUrl: `${ELASTIC_LOGOS}/kubernetes/img/logo_kubernetes.svg`,
+  },
+  {
+    id: 'mongodb',
+    name: 'MongoDB',
+    description: 'Monitor MongoDB database metrics.',
+    logoDomain: 'mongodb.com',
+    logoUrl: `${ELASTIC_LOGOS}/mongodb/img/logo_mongodb.svg`,
+  },
+  {
+    id: 'mysql-int',
+    name: 'MySQL',
+    description: 'Collect MySQL database logs and metrics.',
+    logoDomain: 'mysql.com',
+    logoUrl: `${ELASTIC_LOGOS}/mysql/img/logo_mysql.svg`,
+  },
+  {
+    id: 'nginx',
+    name: 'Nginx',
+    description: 'Monitor Nginx server logs and metrics.',
+    logoDomain: 'nginx.org',
+    logoUrl: `${ELASTIC_LOGOS}/nginx/img/logo_nginx.svg`,
+  },
+  {
+    id: 'opentelemetry-int',
+    name: 'OpenTelemetry',
+    description: 'Send traces, metrics, and logs via OTel.',
+    logoDomain: 'opentelemetry.io',
+    logoUrl: 'https://opentelemetry.io/img/logos/opentelemetry-logo-nav.png',
+  },
+  {
+    id: 'postgresql',
+    name: 'PostgreSQL',
+    description: 'Collect PostgreSQL database metrics.',
+    logoDomain: 'postgresql.org',
+    logoUrl: `${ELASTIC_LOGOS}/postgresql/img/logo_postgresql.svg`,
+  },
+  {
+    id: 'prometheus-int',
+    name: 'Prometheus',
+    description: 'Scrape and visualize Prometheus metrics.',
+    logoDomain: 'prometheus.io',
+    logoUrl: `${ELASTIC_LOGOS}/prometheus/img/logo_prometheus.svg`,
+  },
+  {
+    id: 'rabbitmq',
+    name: 'RabbitMQ',
+    description: 'Monitor RabbitMQ queue metrics.',
+    logoDomain: 'rabbitmq.com',
+    logoUrl: `${ELASTIC_LOGOS}/rabbitmq/img/logo_rabbitmq.svg`,
+  },
+  {
+    id: 'redis',
+    name: 'Redis',
+    description: 'Collect Redis server metrics.',
+    logoDomain: 'redis.io',
+    logoUrl: `${ELASTIC_LOGOS}/redis/img/logo_redis.svg`,
+  },
+  {
+    id: 'system',
+    name: 'System',
+    description: 'Monitor host CPU, memory, and processes.',
+    logoDomain: 'elastic.co',
+    logoUrl: `${ELASTIC_LOGOS}/system/img/logo_system.svg`,
+  },
+  {
+    id: 'zookeeper',
+    name: 'ZooKeeper',
+    description: 'Monitor ZooKeeper ensemble metrics.',
+    logoDomain: 'zookeeper.apache.org',
+    logoUrl: `${ELASTIC_LOGOS}/zookeeper/img/logo_zookeeper.svg`,
+  },
 ];
 
 const PACKAGES: IntegrationTile[] = [
-  { id: 'pkg-apache-otel', name: 'Apache HTTP Server', description: 'Collect Apache HTTP Server status metrics using OpenTelemetry Collector.', logoDomain: 'httpd.apache.org', logoUrl: `${ELASTIC_LOGOS}/apache/img/logo_apache.svg` },
-  { id: 'pkg-custom-wmi', name: 'Custom WMI', description: 'Custom WMI Input Package.', logoDomain: 'microsoft.com', logoUrl: `${ELASTIC_LOGOS}/windows/img/logo_windows.svg` },
-  { id: 'pkg-docker-otel', name: 'Docker', description: 'Collect Docker container metrics using OpenTelemetry Collector.', logoDomain: 'docker.com', logoUrl: `${ELASTIC_LOGOS}/docker/img/logo_docker.svg` },
-  { id: 'pkg-host-metrics-otel', name: 'Host Metrics', description: 'Collect system metrics using OpenTelemetry Collector.', logoDomain: 'opentelemetry.io', logoUrl: 'https://opentelemetry.io/img/logos/opentelemetry-logo-nav.png' },
-  { id: 'pkg-mysql-otel', name: 'MySQL', description: 'Collect MySQL metrics using OpenTelemetry Collector.', logoDomain: 'mysql.com', logoUrl: `${ELASTIC_LOGOS}/mysql/img/logo_mysql.svg` },
-  { id: 'pkg-nginx-otel', name: 'NGINX', description: 'NGINX OpenTelemetry Input Package.', logoDomain: 'nginx.org', logoUrl: `${ELASTIC_LOGOS}/nginx/img/logo_nginx.svg` },
-  { id: 'pkg-redis-otel', name: 'Redis', description: 'Redis OpenTelemetry Input Package.', logoDomain: 'redis.io', logoUrl: `${ELASTIC_LOGOS}/redis/img/logo_redis.svg` },
-  { id: 'pkg-statsd', name: 'StatsD', description: 'StatsD Input Package.', logoDomain: 'elastic.co', logoUrl: `${ELASTIC_LOGOS}/statsd/img/logo_statsd.svg` },
+  {
+    id: 'pkg-apache-otel',
+    name: 'Apache HTTP Server',
+    description: 'Collect Apache HTTP Server status metrics using OpenTelemetry Collector.',
+    logoDomain: 'httpd.apache.org',
+    logoUrl: `${ELASTIC_LOGOS}/apache/img/logo_apache.svg`,
+  },
+  {
+    id: 'pkg-custom-wmi',
+    name: 'Custom WMI',
+    description: 'Custom WMI Input Package.',
+    logoDomain: 'microsoft.com',
+    logoUrl: `${ELASTIC_LOGOS}/windows/img/logo_windows.svg`,
+  },
+  {
+    id: 'pkg-docker-otel',
+    name: 'Docker',
+    description: 'Collect Docker container metrics using OpenTelemetry Collector.',
+    logoDomain: 'docker.com',
+    logoUrl: `${ELASTIC_LOGOS}/docker/img/logo_docker.svg`,
+  },
+  {
+    id: 'pkg-host-metrics-otel',
+    name: 'Host Metrics',
+    description: 'Collect system metrics using OpenTelemetry Collector.',
+    logoDomain: 'opentelemetry.io',
+    logoUrl: 'https://opentelemetry.io/img/logos/opentelemetry-logo-nav.png',
+  },
+  {
+    id: 'pkg-mysql-otel',
+    name: 'MySQL',
+    description: 'Collect MySQL metrics using OpenTelemetry Collector.',
+    logoDomain: 'mysql.com',
+    logoUrl: `${ELASTIC_LOGOS}/mysql/img/logo_mysql.svg`,
+  },
+  {
+    id: 'pkg-nginx-otel',
+    name: 'NGINX',
+    description: 'NGINX OpenTelemetry Input Package.',
+    logoDomain: 'nginx.org',
+    logoUrl: `${ELASTIC_LOGOS}/nginx/img/logo_nginx.svg`,
+  },
+  {
+    id: 'pkg-redis-otel',
+    name: 'Redis',
+    description: 'Redis OpenTelemetry Input Package.',
+    logoDomain: 'redis.io',
+    logoUrl: `${ELASTIC_LOGOS}/redis/img/logo_redis.svg`,
+  },
+  {
+    id: 'pkg-statsd',
+    name: 'StatsD',
+    description: 'StatsD Input Package.',
+    logoDomain: 'elastic.co',
+    logoUrl: `${ELASTIC_LOGOS}/statsd/img/logo_statsd.svg`,
+  },
 ];
 
 const ASSET_TILES: IntegrationTile[] = [
-  { id: 'asset-apache-otel', name: 'Apache', description: 'Apache status metrics from OpenTelemetry Collector.', logoDomain: 'httpd.apache.org', logoUrl: `${ELASTIC_LOGOS}/apache/img/logo_apache.svg` },
-  { id: 'asset-aws-cloudtrail-otel', name: 'AWS CloudTrail', description: 'AWS CloudTrail Logs OpenTelemetry Assets.', logoDomain: 'aws.amazon.com', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_cloudtrail.svg` },
-  { id: 'asset-aws-elb-otel', name: 'AWS ELB', description: 'AWS ELB logs for OpenTelemetry Collector.', logoDomain: 'aws.amazon.com', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_elb.svg` },
-  { id: 'asset-aws-vpc-otel', name: 'AWS VPC Flow Logs', description: 'AWS VPC Flow Logs OpenTelemetry Assets.', logoDomain: 'aws.amazon.com', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_vpcflow.svg` },
-  { id: 'asset-docker-otel', name: 'Docker', description: 'Pre-built dashboard for OTel-native metrics of Docker hosts.', logoDomain: 'docker.com', logoUrl: `${ELASTIC_LOGOS}/docker/img/logo_docker.svg` },
-  { id: 'asset-k8s-otel', name: 'Kubernetes', description: 'Pre-built dashboard for OTel-native metrics from a Kubernetes cluster.', logoDomain: 'kubernetes.io', logoUrl: `${ELASTIC_LOGOS}/kubernetes/img/logo_kubernetes.svg` },
-  { id: 'asset-mysql-otel', name: 'MySQL', description: 'MySQL metrics for OpenTelemetry Collector.', logoDomain: 'mysql.com', logoUrl: `${ELASTIC_LOGOS}/mysql/img/logo_mysql.svg` },
-  { id: 'asset-nginx-otel', name: 'NGINX', description: 'NGINX metrics from OpenTelemetry Collector.', logoDomain: 'nginx.org', logoUrl: `${ELASTIC_LOGOS}/nginx/img/logo_nginx.svg` },
-  { id: 'asset-system-otel', name: 'System', description: 'Dashboards for the OpenTelemetry data collected with the hostmetrics receiver.', logoDomain: 'elastic.co', logoUrl: `${ELASTIC_LOGOS}/system/img/logo_system.svg` },
+  {
+    id: 'asset-apache-otel',
+    name: 'Apache',
+    description: 'Apache status metrics from OpenTelemetry Collector.',
+    logoDomain: 'httpd.apache.org',
+    logoUrl: `${ELASTIC_LOGOS}/apache/img/logo_apache.svg`,
+  },
+  {
+    id: 'asset-aws-cloudtrail-otel',
+    name: 'AWS CloudTrail',
+    description: 'AWS CloudTrail Logs OpenTelemetry Assets.',
+    logoDomain: 'aws.amazon.com',
+    logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_cloudtrail.svg`,
+  },
+  {
+    id: 'asset-aws-elb-otel',
+    name: 'AWS ELB',
+    description: 'AWS ELB logs for OpenTelemetry Collector.',
+    logoDomain: 'aws.amazon.com',
+    logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_elb.svg`,
+  },
+  {
+    id: 'asset-aws-vpc-otel',
+    name: 'AWS VPC Flow Logs',
+    description: 'AWS VPC Flow Logs OpenTelemetry Assets.',
+    logoDomain: 'aws.amazon.com',
+    logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_vpcflow.svg`,
+  },
+  {
+    id: 'asset-docker-otel',
+    name: 'Docker',
+    description: 'Pre-built dashboard for OTel-native metrics of Docker hosts.',
+    logoDomain: 'docker.com',
+    logoUrl: `${ELASTIC_LOGOS}/docker/img/logo_docker.svg`,
+  },
+  {
+    id: 'asset-k8s-otel',
+    name: 'Kubernetes',
+    description: 'Pre-built dashboard for OTel-native metrics from a Kubernetes cluster.',
+    logoDomain: 'kubernetes.io',
+    logoUrl: `${ELASTIC_LOGOS}/kubernetes/img/logo_kubernetes.svg`,
+  },
+  {
+    id: 'asset-mysql-otel',
+    name: 'MySQL',
+    description: 'MySQL metrics for OpenTelemetry Collector.',
+    logoDomain: 'mysql.com',
+    logoUrl: `${ELASTIC_LOGOS}/mysql/img/logo_mysql.svg`,
+  },
+  {
+    id: 'asset-nginx-otel',
+    name: 'NGINX',
+    description: 'NGINX metrics from OpenTelemetry Collector.',
+    logoDomain: 'nginx.org',
+    logoUrl: `${ELASTIC_LOGOS}/nginx/img/logo_nginx.svg`,
+  },
+  {
+    id: 'asset-system-otel',
+    name: 'System',
+    description: 'Dashboards for the OpenTelemetry data collected with the hostmetrics receiver.',
+    logoDomain: 'elastic.co',
+    logoUrl: `${ELASTIC_LOGOS}/system/img/logo_system.svg`,
+  },
 ];
 
 const CONNECTOR_TILES: IntegrationTile[] = [
-  { id: 'conn-s3', name: 'Amazon S3', description: 'Use a connector to sync from your Amazon S3 data source.', logoDomain: 'aws.amazon.com', logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_s3.svg` },
-  { id: 'conn-azure-blob', name: 'Azure Blob Storage', description: 'Use a connector to sync from your Azure Blob Storage data source.', logoDomain: 'azure.microsoft.com', logoUrl: `${ELASTIC_LOGOS}/azure/img/logo_azure.svg` },
-  { id: 'conn-confluence', name: 'Confluence', description: 'Use a connector to sync from your Confluence data source.', logoDomain: 'atlassian.com', logoUrl: `${ELASTIC_LOGOS}/atlassian_confluence/img/confluence-logo.svg` },
-  { id: 'conn-github', name: 'GitHub', description: 'Use a connector to sync data from your GitHub data source.', logoDomain: 'github.com', logoUrl: `${ELASTIC_LOGOS}/github/img/logo_github.svg` },
-  { id: 'conn-gcs', name: 'Google Cloud Storage', description: 'Use a connector to sync from your Google Cloud Storage data source.', logoDomain: 'cloud.google.com', logoUrl: `${ELASTIC_LOGOS}/gcp/img/logo_gcp.svg` },
-  { id: 'conn-jira', name: 'Jira', description: 'Use a connector to sync from your Jira data source.', logoDomain: 'atlassian.com', logoUrl: `${ELASTIC_LOGOS}/atlassian_jira/img/jira-logo.svg` },
-  { id: 'conn-mongodb', name: 'MongoDB', description: 'Use a connector to sync from your MongoDB data source.', logoDomain: 'mongodb.com', logoUrl: `${ELASTIC_LOGOS}/mongodb/img/logo_mongodb.svg` },
-  { id: 'conn-mysql', name: 'MySQL', description: 'Use a connector to sync from your MySQL data source.', logoDomain: 'mysql.com', logoUrl: `${ELASTIC_LOGOS}/mysql/img/logo_mysql.svg` },
-  { id: 'conn-postgresql', name: 'PostgreSQL', description: 'Use a connector to sync from your PostgreSQL data source.', logoDomain: 'postgresql.org', logoUrl: `${ELASTIC_LOGOS}/postgresql/img/logo_postgresql.svg` },
-  { id: 'conn-salesforce', name: 'Salesforce', description: 'Use a connector to sync from your Salesforce data source.', logoDomain: 'salesforce.com', logoUrl: `${ELASTIC_LOGOS}/salesforce/img/salesforce.svg` },
-  { id: 'conn-slack', name: 'Slack', description: 'Use a connector to sync from your Slack data source.', logoDomain: 'slack.com', logoUrl: `${ELASTIC_LOGOS}/slack/img/slack.svg` },
+  {
+    id: 'conn-s3',
+    name: 'Amazon S3',
+    description: 'Use a connector to sync from your Amazon S3 data source.',
+    logoDomain: 'aws.amazon.com',
+    logoUrl: `${ELASTIC_LOGOS}/aws/img/logo_s3.svg`,
+  },
+  {
+    id: 'conn-azure-blob',
+    name: 'Azure Blob Storage',
+    description: 'Use a connector to sync from your Azure Blob Storage data source.',
+    logoDomain: 'azure.microsoft.com',
+    logoUrl: `${ELASTIC_LOGOS}/azure/img/logo_azure.svg`,
+  },
+  {
+    id: 'conn-confluence',
+    name: 'Confluence',
+    description: 'Use a connector to sync from your Confluence data source.',
+    logoDomain: 'atlassian.com',
+    logoUrl: `${ELASTIC_LOGOS}/atlassian_confluence/img/confluence-logo.svg`,
+  },
+  {
+    id: 'conn-github',
+    name: 'GitHub',
+    description: 'Use a connector to sync data from your GitHub data source.',
+    logoDomain: 'github.com',
+    logoUrl: `${ELASTIC_LOGOS}/github/img/logo_github.svg`,
+  },
+  {
+    id: 'conn-gcs',
+    name: 'Google Cloud Storage',
+    description: 'Use a connector to sync from your Google Cloud Storage data source.',
+    logoDomain: 'cloud.google.com',
+    logoUrl: `${ELASTIC_LOGOS}/gcp/img/logo_gcp.svg`,
+  },
+  {
+    id: 'conn-jira',
+    name: 'Jira',
+    description: 'Use a connector to sync from your Jira data source.',
+    logoDomain: 'atlassian.com',
+    logoUrl: `${ELASTIC_LOGOS}/atlassian_jira/img/jira-logo.svg`,
+  },
+  {
+    id: 'conn-mongodb',
+    name: 'MongoDB',
+    description: 'Use a connector to sync from your MongoDB data source.',
+    logoDomain: 'mongodb.com',
+    logoUrl: `${ELASTIC_LOGOS}/mongodb/img/logo_mongodb.svg`,
+  },
+  {
+    id: 'conn-mysql',
+    name: 'MySQL',
+    description: 'Use a connector to sync from your MySQL data source.',
+    logoDomain: 'mysql.com',
+    logoUrl: `${ELASTIC_LOGOS}/mysql/img/logo_mysql.svg`,
+  },
+  {
+    id: 'conn-postgresql',
+    name: 'PostgreSQL',
+    description: 'Use a connector to sync from your PostgreSQL data source.',
+    logoDomain: 'postgresql.org',
+    logoUrl: `${ELASTIC_LOGOS}/postgresql/img/logo_postgresql.svg`,
+  },
+  {
+    id: 'conn-salesforce',
+    name: 'Salesforce',
+    description: 'Use a connector to sync from your Salesforce data source.',
+    logoDomain: 'salesforce.com',
+    logoUrl: `${ELASTIC_LOGOS}/salesforce/img/salesforce.svg`,
+  },
+  {
+    id: 'conn-slack',
+    name: 'Slack',
+    description: 'Use a connector to sync from your Slack data source.',
+    logoDomain: 'slack.com',
+    logoUrl: `${ELASTIC_LOGOS}/slack/img/slack.svg`,
+  },
 ];
 
 const API_INGESTION_TILES: IntegrationTile[] = [
-  { id: 'api-apm', name: 'APM', description: 'Send application performance data, traces, and errors using APM agents or OpenTelemetry.', logoDomain: 'elastic.co', logoUrl: `${ELASTIC_LOGOS}/apm/img/logo_apm.svg` },
-  { id: 'api-elasticsearch', name: 'Elasticsearch', description: 'Index and query observability data directly using the Elasticsearch API or bulk ingestion.', logoDomain: 'elastic.co', logoUrl: `${ELASTIC_LOGOS}/elasticsearch/img/logo_elasticsearch.svg` },
-  { id: 'api-kibana', name: 'Kibana', description: 'Access Kibana programmatically or embed dashboards using the Kibana API.', logoDomain: 'elastic.co', logoUrl: `${ELASTIC_LOGOS}/kibana/img/logo_kibana.svg` },
-  { id: 'api-ingest', name: 'Ingest', description: 'Send data from Beats, Logstash, or Fleet-managed agents to your Elastic deployment.', logoDomain: 'elastic.co', logoUrl: `${ELASTIC_LOGOS}/elastic/img/logo_elastic.svg` },
+  {
+    id: 'api-apm',
+    name: 'APM',
+    description:
+      'Send application performance data, traces, and errors using APM agents or OpenTelemetry.',
+    logoDomain: 'elastic.co',
+    logoUrl: `${ELASTIC_LOGOS}/apm/img/logo_apm.svg`,
+  },
+  {
+    id: 'api-elasticsearch',
+    name: 'Elasticsearch',
+    description:
+      'Index and query observability data directly using the Elasticsearch API or bulk ingestion.',
+    logoDomain: 'elastic.co',
+    logoUrl: `${ELASTIC_LOGOS}/elasticsearch/img/logo_elasticsearch.svg`,
+  },
+  {
+    id: 'api-kibana',
+    name: 'Kibana',
+    description: 'Access Kibana programmatically or embed dashboards using the Kibana API.',
+    logoDomain: 'elastic.co',
+    logoUrl: `${ELASTIC_LOGOS}/kibana/img/logo_kibana.svg`,
+  },
+  {
+    id: 'api-ingest',
+    name: 'Ingest',
+    description:
+      'Send data from Beats, Logstash, or Fleet-managed agents to your Elastic deployment.',
+    logoDomain: 'elastic.co',
+    logoUrl: `${ELASTIC_LOGOS}/elastic/img/logo_elastic.svg`,
+  },
 ];
 
-const INTEGRATION_CATEGORIES = ['AWS', 'Azure', 'Cloud', 'Containers', 'Database', 'Elastic Stack', 'Google Cloud', 'Network', 'OpenTelemetry', 'Operating Systems', 'Application', 'Kubernetes', 'Message Broker', 'Web Server'];
-const PACKAGE_CATEGORIES = ['OpenTelemetry', 'StatsD', 'Custom', 'Web Server', 'Database', 'Containers', 'System'];
-const ASSET_CATEGORIES = ['OpenTelemetry', 'AWS', 'GCP', 'Containers', 'Web Server', 'Database', 'System'];
-const CONNECTOR_CATEGORIES = ['Cloud storage', 'Database', 'SaaS', 'Productivity', 'Communication', 'Developer tools'];
+const INTEGRATION_CATEGORIES = [
+  'AWS',
+  'Azure',
+  'Cloud',
+  'Containers',
+  'Database',
+  'Elastic Stack',
+  'Google Cloud',
+  'Network',
+  'OpenTelemetry',
+  'Operating Systems',
+  'Application',
+  'Kubernetes',
+  'Message Broker',
+  'Web Server',
+];
+const PACKAGE_CATEGORIES = [
+  'OpenTelemetry',
+  'StatsD',
+  'Custom',
+  'Web Server',
+  'Database',
+  'Containers',
+  'System',
+];
+const ASSET_CATEGORIES = [
+  'OpenTelemetry',
+  'AWS',
+  'GCP',
+  'Containers',
+  'Web Server',
+  'Database',
+  'System',
+];
+const CONNECTOR_CATEGORIES = [
+  'Cloud storage',
+  'Database',
+  'SaaS',
+  'Productivity',
+  'Communication',
+  'Developer tools',
+];
 
 // ─── Main Flyout ─────────────────────────────────────────────────────────────
 
 export function DataSourcesCatalogFlyout({
   onClose,
   onDataConnected,
+  initialView = 'browse',
 }: {
   onClose: () => void;
   onDataConnected: () => void;
+  initialView?: CatalogModalView;
 }) {
   const { euiTheme } = useEuiTheme();
+  const catalogModalPanelId = useGeneratedHtmlId({ prefix: 'streamsDataSourcesCatalogModal' });
+  const catalogModalTitleId = useGeneratedHtmlId({ prefix: 'streamsDataSourcesCatalogModalTitle' });
 
   // Search & filter state
   const [search, setSearch] = useState('');
@@ -430,14 +994,47 @@ export function DataSourcesCatalogFlyout({
   const [isStatusOpen, setIsStatusOpen] = useState(false);
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [selectedTile, setSelectedTile] = useState<IntegrationTile | null>(null);
-
-  const handleTileClick = useCallback((tile: IntegrationTile) => {
-    setSelectedTile(tile);
+  const [viewHistory, setViewHistory] = useState<readonly CatalogModalView[]>(() => [initialView]);
+  const catalogNestedView = getCatalogViewFromHistory(viewHistory);
+  const catalogHistoryEntries = getCatalogHistoryEntries(viewHistory);
+  const navigateToView = useCallback((view: CatalogModalView) => {
+    setViewHistory((prev) => {
+      if (prev[prev.length - 1] === view) {
+        return prev;
+      }
+      return [...prev, view];
+    });
   }, []);
+
+  const goBackOne = useCallback(() => {
+    setViewHistory((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev));
+  }, []);
+
+  const jumpToHistoryIndex = useCallback((index: number) => {
+    setViewHistory((prev) => prev.slice(0, index + 1));
+  }, []);
+
+  const handleCatalogModalClose = useCallback(() => {
+    setViewHistory([initialView]);
+    onClose();
+  }, [initialView, onClose]);
+
+  const handleTileClick = useCallback(
+    (tile: IntegrationTile) => {
+      if (tile.id === 'aws') {
+        navigateToView('aws-overview');
+        return;
+      }
+      setSelectedTile(tile);
+    },
+    [navigateToView]
+  );
 
   const sideNavCss = css`
     overflow: hidden;
-    .euiSideNavItemButton__label { text-overflow: initial; }
+    .euiSideNavItemButton__label {
+      text-overflow: initial;
+    }
   `;
 
   // ── renderCompactGrid ──────────────────────────────────────────────────────
@@ -463,80 +1060,52 @@ export function DataSourcesCatalogFlyout({
     </div>
   );
 
-  // ── renderAddDataRecommendedContent (exact copy of IngestHub) ─────────────
+  // ── Recommended (sectioned tiles + SaaS)
 
   const renderRecommendedContent = () => (
-    <>
-      <EuiTitle size="xs"><h2>Recommendations</h2></EuiTitle>
-      <EuiSpacer size="xs" />
-      <EuiText size="s" color="subdued">
-        <p>Curated groups to help you find the right data sources for your environment. Open a category to browse the full catalogue.</p>
-      </EuiText>
-      <EuiSpacer size="xxl" />
-      {SECTIONS.map((section, idx) => {
-        const categoryMap: Record<string, string> = { Cloud: 'Cloud', Containers: 'Containers', Host: 'Operating Systems', Applications: 'Application' };
-        const integrationCategory = categoryMap[section.title] || section.title;
-        return (
-          <React.Fragment key={section.title}>
-            {idx > 0 && <div style={{ height: 40 }} />}
-            <EuiFlexGroup alignItems="baseline" gutterSize="xs" responsive={false} wrap={false}>
-              <EuiFlexItem grow={false} css={css`min-width:0;`}>
-                <EuiText size="s" color="subdued">
-                  <p style={{ margin: 0, display: 'inline' }}>{section.description}</p>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="s"
-                  flush="left"
-                  iconType="arrowRight"
-                  iconSide="right"
-                  css={css`& .euiButtonEmpty__content { gap: 0; }`}
-                  onClick={() => setSelectedCategory(`integration:${integrationCategory}`)}
-                >
-                  View all
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <div style={{ height: 8 }} />
-            {renderCompactGrid(section.tiles)}
-          </React.Fragment>
-        );
-      })}
+    <div
+      css={css`
+        padding: 4px;
+      `}
+    >
+      {SECTIONS.map((section, idx) => (
+        <React.Fragment key={section.title}>
+          {idx > 0 && <div style={{ height: 40 }} />}
+          <EuiTitle
+            size="xxs"
+            css={css`
+              color: ${euiTheme.colors.textSubdued};
+            `}
+          >
+            <h3>{section.title}</h3>
+          </EuiTitle>
+          <div style={{ height: 4 }} />
+          {renderCompactGrid(section.tiles)}
+        </React.Fragment>
+      ))}
       {SAAS_TILES.length > 0 && (
         <>
           <div style={{ height: 40 }} />
-          <EuiFlexGroup alignItems="baseline" gutterSize="xs" responsive={false} wrap={false}>
-            <EuiFlexItem grow={false} css={css`min-width:0;`}>
-              <EuiText size="s" color="subdued">
-                <p style={{ margin: 0, display: 'inline' }}>Monitor your cloud resources without installing an agent.</p>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                flush="left"
-                iconType="arrowRight"
-                iconSide="right"
-                css={css`& .euiButtonEmpty__content { gap: 0; }`}
-                onClick={() => setSetupOptions((prev) => prev.map((o) => ({ ...o, checked: o.label === 'Agentless' ? ('on' as const) : undefined })))}
-              >
-                View all
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <div style={{ height: 8 }} />
+          <EuiTitle
+            size="xxs"
+            css={css`
+              color: ${euiTheme.colors.textSubdued};
+            `}
+          >
+            <h3>SaaS Products</h3>
+          </EuiTitle>
+          <div style={{ height: 4 }} />
           {renderCompactGrid(SAAS_TILES)}
         </>
       )}
       <div style={{ height: 64 }} />
-    </>
+    </div>
   );
 
   // ── Filter toolbar ─────────────────────────────────────────────────────────
 
   const renderFilterToolbar = () => (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={false} style={{ marginBottom: 32 }}>
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={false}>
       <EuiFlexItem>
         <EuiFieldSearch
           placeholder="Search all..."
@@ -566,7 +1135,10 @@ export function DataSourcesCatalogFlyout({
             closePopover={() => setIsSetupOpen(false)}
             panelPaddingSize="none"
           >
-            <EuiSelectable options={setupOptions} onChange={(opts) => setSetupOptions(opts as typeof setupOptions)}>
+            <EuiSelectable
+              options={setupOptions}
+              onChange={(opts) => setSetupOptions(opts as typeof setupOptions)}
+            >
               {(list) => <div style={{ width: 200 }}>{list}</div>}
             </EuiSelectable>
           </EuiPopover>
@@ -587,7 +1159,10 @@ export function DataSourcesCatalogFlyout({
             closePopover={() => setIsSignalsOpen(false)}
             panelPaddingSize="none"
           >
-            <EuiSelectable options={signalsOptions} onChange={(opts) => setSignalsOptions(opts as typeof signalsOptions)}>
+            <EuiSelectable
+              options={signalsOptions}
+              onChange={(opts) => setSignalsOptions(opts as typeof signalsOptions)}
+            >
               {(list) => <div style={{ width: 200 }}>{list}</div>}
             </EuiSelectable>
           </EuiPopover>
@@ -608,7 +1183,10 @@ export function DataSourcesCatalogFlyout({
             closePopover={() => setIsStatusOpen(false)}
             panelPaddingSize="none"
           >
-            <EuiSelectable options={statusOptions} onChange={(opts) => setStatusOptions(opts as typeof statusOptions)}>
+            <EuiSelectable
+              options={statusOptions}
+              onChange={(opts) => setStatusOptions(opts as typeof statusOptions)}
+            >
               {(list) => <div style={{ width: 200 }}>{list}</div>}
             </EuiSelectable>
           </EuiPopover>
@@ -635,7 +1213,10 @@ export function DataSourcesCatalogFlyout({
             <EuiSelectable
               singleSelection
               options={sortOptions}
-              onChange={(opts) => { setSortOptions(opts as typeof sortOptions); setIsSortOpen(false); }}
+              onChange={(opts) => {
+                setSortOptions(opts as typeof sortOptions);
+                setIsSortOpen(false);
+              }}
             >
               {(list) => <div style={{ width: 200 }}>{list}</div>}
             </EuiSelectable>
@@ -666,13 +1247,21 @@ export function DataSourcesCatalogFlyout({
       selectedCategory === 'all'
         ? allItems
         : sectionKey === 'integration'
-        ? ALL_INTEGRATIONS.filter((t) => t.name.toLowerCase().includes(catValue.toLowerCase()) || t.logoDomain.toLowerCase().includes(catValue.toLowerCase())).map((t) => ({ ...t, badge: 'Integration' as string | undefined }))
+        ? ALL_INTEGRATIONS.filter(
+            (t) =>
+              t.name.toLowerCase().includes(catValue.toLowerCase()) ||
+              t.logoDomain.toLowerCase().includes(catValue.toLowerCase())
+          ).map((t) => ({ ...t, badge: 'Integration' as string | undefined }))
         : sectionKey === 'package'
         ? PACKAGES.map((t) => ({ ...t, badge: 'Input package' as string | undefined }))
         : sectionKey === 'asset'
-        ? ASSET_TILES.filter((t) => t.name.toLowerCase().includes(catValue.toLowerCase())).map((t) => ({ ...t, badge: 'Asset' as string | undefined }))
+        ? ASSET_TILES.filter((t) => t.name.toLowerCase().includes(catValue.toLowerCase())).map(
+            (t) => ({ ...t, badge: 'Asset' as string | undefined })
+          )
         : sectionKey === 'connector'
-        ? CONNECTOR_TILES.filter((t) => t.name.toLowerCase().includes(catValue.toLowerCase())).map((t) => ({ ...t, badge: 'Connector' as string | undefined }))
+        ? CONNECTOR_TILES.filter((t) => t.name.toLowerCase().includes(catValue.toLowerCase())).map(
+            (t) => ({ ...t, badge: 'Connector' as string | undefined })
+          )
         : sectionKey === 'all-integrations'
         ? ALL_INTEGRATIONS.map((t) => ({ ...t, badge: 'Integration' as string | undefined }))
         : sectionKey === 'all-packages'
@@ -686,7 +1275,11 @@ export function DataSourcesCatalogFlyout({
         : allItems;
 
     const matched = rawQ
-      ? allItems.filter((t) => t.name.toLowerCase().includes(rawQ) || (t.description?.toLowerCase().includes(rawQ) ?? false))
+      ? allItems.filter(
+          (t) =>
+            t.name.toLowerCase().includes(rawQ) ||
+            (t.description?.toLowerCase().includes(rawQ) ?? false)
+        )
       : byCategory;
 
     const activeSort = sortOptions.find((o) => o.checked === 'on')?.label;
@@ -696,24 +1289,8 @@ export function DataSourcesCatalogFlyout({
       return 0;
     });
 
-    const getHeader = () => {
-      if (rawQ) return { title: 'Search results', description: 'Matches across integrations, input packages, assets, connectors, and API ingestion.' };
-      if (selectedCategory === 'all-api-ingestion') return { title: 'API ingestion', description: 'Send data using APM, the Elasticsearch API, the Kibana API, or Beats, Logstash, and Fleet-managed agents.' };
-      if (selectedCategory === 'all-integrations' || selectedCategory.startsWith('integration:')) return { title: 'All integrations', description: 'Browse Elastic integrations to collect logs, metrics, and traces from your stack.' };
-      if (selectedCategory === 'all-packages' || selectedCategory.startsWith('package:')) return { title: 'All input packages', description: 'Input packages and collectors for OpenTelemetry, metrics, custom pipelines, and more.' };
-      if (selectedCategory === 'all-assets' || selectedCategory.startsWith('asset:')) return { title: 'All assets', description: 'Pre-built dashboards and assets for OpenTelemetry, cloud, and infrastructure data.' };
-      if (selectedCategory === 'all-connectors' || selectedCategory.startsWith('connector:')) return { title: 'All connectors', description: 'Connect external data sources—cloud storage, databases, SaaS, and productivity tools.' };
-      return { title: 'All catalogue', description: 'Complete catalogue of integrations, input packages, assets, connectors, and API ingestion.' };
-    };
-
-    const { title: catTitle, description: catDesc } = getHeader();
-
     return (
       <>
-        <EuiTitle size="xs"><h2>{catTitle}</h2></EuiTitle>
-        <EuiSpacer size="xs" />
-        <EuiText size="s" color="subdued"><p>{catDesc}</p></EuiText>
-        <EuiSpacer size="xxl" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
           {sorted.map((tile) => (
             <IntegrationCard
@@ -735,258 +1312,477 @@ export function DataSourcesCatalogFlyout({
 
   // ── Build accordion-style "click to select all" for expandable nav items ──
 
-  const browseAccordionSelectAll = (
-    allId: string,
-    isInSection: (c: string) => boolean
-  ) =>
+  const browseAccordionSelectAll =
+    (allId: string, isInSection: (c: string) => boolean) =>
     ({
       onClick,
       children,
       ...buttonProps
-    }: React.ComponentPropsWithoutRef<'button'> & { children?: React.ReactNode }) => (
-      <button
-        type="button"
-        {...buttonProps}
-        onClick={(e) => {
-          onClick?.(e);
-          if (!isInSection(selectedCategory)) setSelectedCategory(allId);
-        }}
-      >
-        {children}
-      </button>
-    );
+    }: React.ComponentPropsWithoutRef<'button'> & { children?: React.ReactNode }) =>
+      (
+        <button
+          type="button"
+          {...buttonProps}
+          onClick={(e) => {
+            onClick?.(e);
+            if (!isInSection(selectedCategory)) setSelectedCategory(allId);
+          }}
+        >
+          {children}
+        </button>
+      );
 
   const rawQ = search.trim().toLowerCase();
   const showRecommended = selectedCategory === 'all' && !rawQ;
 
-  return (
-  <>
-    <EuiFlyout
-      onClose={onClose}
-      ownFocus
-      type="overlay"
-      session="start"
-      historyKey={ingestHubHistoryKey}
-      flyoutMenuProps={{ title: 'Add data to Elastic Observability' }}
-      style={{ inlineSize: '72vw', maxInlineSize: '72vw' }}
+  const catalogModalSizingCss = css`
+    inline-size: min(1200px, calc(100vw - ${euiTheme.size.xl} * 2)) !important;
+    max-inline-size: min(1200px, calc(100vw - ${euiTheme.size.xl} * 2)) !important;
+    max-block-size: min(900px, calc(100vh - ${euiTheme.size.xl} * 2)) !important;
+    block-size: min(900px, calc(100vh - ${euiTheme.size.xl} * 2)) !important;
+    display: flex;
+    flex-direction: column;
+
+    & .euiModalHeader {
+      flex-shrink: 0;
+    }
+
+    &[data-has-catalog-navigation='true'] .euiModal__closeIcon {
+      display: none;
+    }
+
+    & .euiModalBody,
+    & .euiModalBody__overflow,
+    & .euiModalBody__overflowContent {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden !important;
+    }
+  `;
+
+  const catalogBrowseBodyCss = css`
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    width: 100%;
+    padding: 0;
+  `;
+
+  const catalogModalTitle =
+    catalogHistoryEntries[catalogHistoryEntries.length - 1]?.title ??
+    i18n.translate('xpack.streams.dataSources.catalogModal.flyoutTitle', {
+      defaultMessage: 'Add data to Elastic Observability',
+    });
+  const showCatalogNavigation = viewHistory.length > 1;
+
+  const renderCatalogModalBody = () => {
+    if (catalogNestedView === 'aws-overview') {
+      return <AwsCatalogIntegrationDetailView onAddAws={() => navigateToView('aws-setup')} />;
+    }
+
+    if (catalogNestedView === 'aws-setup') {
+      return (
+        <div
+          css={css`
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+          `}
+        >
+          <AwsCatalogIntegrationHeader
+            logoSrc={AWS_CATALOG_ENTRY_TILE.logoUrl ?? ''}
+            logoAlt={AWS_CATALOG_ENTRY_TILE.name}
+            title={AWS_CATALOG_ENTRY_TILE.name}
+          />
+          <AwsCatalogNestedFlow onBackToCatalogue={goBackOne} />
+        </div>
+      );
+    }
+
+    return <div css={catalogBrowseBodyCss}>{renderBrowseCatalogContent()}</div>;
+  };
+
+  const renderBrowseCatalogContent = () => (
+    <EuiFlexGroup
+      gutterSize="none"
+      alignItems="stretch"
       css={css`
-        inline-size: 72vw !important;
-        max-inline-size: 72vw !important;
-        animation-duration: 0s !important;
-        transition-duration: 0s !important;
-        .euiFlyout__closeButton { z-index: 10; }
-        [class*="euiFlyoutMenu__container"] {
-          border-block-end: none !important;
-          block-size: 0 !important;
-          padding: 0 !important;
-          min-height: 0 !important;
-          overflow: hidden !important;
-        }
-        & .euiFlyoutHeader {
-          padding: 40px !important;
-        }
-        & .euiFlyoutBody__overflowContent {
-          padding: 40px !important;
-        }
-        & .euiFlyoutFooter {
-          padding: 40px !important;
-        }
+        flex: 1;
+        min-height: 0;
+        width: 100%;
+        overflow: hidden;
+        padding: 0;
+        gap: calc(${euiTheme.size.xxl} + ${euiTheme.size.l});
       `}
     >
-      <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: 40,
-                height: 40,
-                backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-                borderRadius: 8,
-                border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-                flexShrink: 0,
-              }}
-            >
-              <img
-                src={integrationsHeaderImg}
-                alt="Add data"
-                style={{ width: 24, height: 24, objectFit: 'contain', display: 'block' }}
-              />
-            </div>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiTitle size="s">
-              <h2>Add data to Elastic Observability</h2>
-            </EuiTitle>
-            <EuiText size="s" color="subdued" style={{ marginTop: 4 }}>
-              Monitor your applications and infrastructure with powerful logs, metrics, traces,
-              and AI-driven insights
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody
-        >
-        {renderFilterToolbar()}
-
-        <EuiFlexGroup
-          gutterSize="none"
-          alignItems="flexStart"
-          css={css`gap: calc(${euiTheme.size.xxl} + ${euiTheme.size.l});`}
-        >
-          {/* Left sidebar nav */}
-          <EuiFlexItem
-            grow={false}
-            style={{
-              width: 190,
-              minWidth: 190,
-              maxWidth: 190,
-              position: 'sticky',
-              top: 0,
-              alignSelf: 'flex-start',
-            }}
-          >
-            <EuiSideNav
-              heading=""
-              headingProps={{ screenReaderOnly: true }}
-              css={sideNavCss}
-              items={[
+      {/* Left sidebar nav — fixed; only scrolls if taller than the modal body */}
+      <EuiFlexItem
+        grow={false}
+        style={{
+          width: 190,
+          minWidth: 190,
+          maxWidth: 190,
+        }}
+        css={css`
+          flex-shrink: 0;
+          min-height: 0;
+          overflow-y: auto;
+          background-color: ${euiTheme.colors.backgroundBasePlain};
+        `}
+      >
+        <EuiSideNav
+          heading=""
+          headingProps={{ screenReaderOnly: true }}
+          css={sideNavCss}
+          items={[
+            {
+              id: 'nav-root',
+              name: '',
+              forceOpen: true,
+              items: [
                 {
-                  id: 'nav-root',
-                  name: '',
-                  forceOpen: true,
+                  id: 'all',
+                  name: 'Recommended',
+                  icon: <EuiIcon type="starEmpty" size="m" />,
+                  isSelected: selectedCategory === 'all',
+                  onClick: () => setSelectedCategory('all'),
+                },
+                {
+                  id: 'nav-api-ingestion',
+                  name: 'API ingestion',
+                  icon: <EuiIcon type="editorCodeBlock" size="m" />,
+                  isSelected: selectedCategory === 'all-api-ingestion',
+                  onClick: () => setSelectedCategory('all-api-ingestion'),
+                },
+                {
+                  id: 'nav-integrations',
+                  name: 'Integrations',
+                  icon: <EuiIcon type="apps" size="m" />,
+                  renderItem: browseAccordionSelectAll(
+                    'all-integrations',
+                    (c) => c === 'all-integrations' || c.startsWith('integration:')
+                  ),
                   items: [
                     {
-                      id: 'all',
-                      name: 'Recommended',
-                      icon: <EuiIcon type="starEmpty" size="m" />,
-                      isSelected: selectedCategory === 'all',
-                      onClick: () => setSelectedCategory('all'),
+                      id: 'cat-int-all',
+                      name: 'All integrations',
+                      isSelected: selectedCategory === 'all-integrations',
+                      onClick: () => setSelectedCategory('all-integrations'),
                     },
+                    ...INTEGRATION_CATEGORIES.map((cat) => ({
+                      id: `cat-int-${cat.toLowerCase().replace(/\s+/g, '-')}`,
+                      name: cat,
+                      isSelected: selectedCategory === `integration:${cat}`,
+                      onClick: () => setSelectedCategory(`integration:${cat}`),
+                    })),
+                  ],
+                },
+                {
+                  id: 'nav-packages',
+                  name: 'Input packages',
+                  icon: <EuiIcon type="package" size="m" />,
+                  renderItem: browseAccordionSelectAll(
+                    'all-packages',
+                    (c) => c === 'all-packages' || c.startsWith('package:')
+                  ),
+                  items: [
                     {
-                      id: 'nav-api-ingestion',
-                      name: 'API ingestion',
-                      icon: <EuiIcon type="editorCodeBlock" size="m" />,
-                      isSelected: selectedCategory === 'all-api-ingestion',
-                      onClick: () => setSelectedCategory('all-api-ingestion'),
+                      id: 'cat-pkg-all',
+                      name: 'All input packages',
+                      isSelected: selectedCategory === 'all-packages',
+                      onClick: () => setSelectedCategory('all-packages'),
                     },
+                    ...PACKAGE_CATEGORIES.map((cat) => ({
+                      id: `cat-pkg-${cat.toLowerCase().replace(/\s+/g, '-')}`,
+                      name: cat,
+                      isSelected: selectedCategory === `package:${cat}`,
+                      onClick: () => setSelectedCategory(`package:${cat}`),
+                    })),
+                  ],
+                },
+                {
+                  id: 'nav-assets',
+                  name: 'Assets',
+                  icon: <EuiIcon type="layers" size="m" />,
+                  renderItem: browseAccordionSelectAll(
+                    'all-assets',
+                    (c) => c === 'all-assets' || c.startsWith('asset:')
+                  ),
+                  items: [
                     {
-                      id: 'nav-integrations',
-                      name: 'Integrations',
-                      icon: <EuiIcon type="apps" size="m" />,
-                      renderItem: browseAccordionSelectAll('all-integrations', (c) => c === 'all-integrations' || c.startsWith('integration:')),
-                      items: [
-                        { id: 'cat-int-all', name: 'All integrations', isSelected: selectedCategory === 'all-integrations', onClick: () => setSelectedCategory('all-integrations') },
-                        ...INTEGRATION_CATEGORIES.map((cat) => ({
-                          id: `cat-int-${cat.toLowerCase().replace(/\s+/g, '-')}`,
-                          name: cat,
-                          isSelected: selectedCategory === `integration:${cat}`,
-                          onClick: () => setSelectedCategory(`integration:${cat}`),
-                        })),
-                      ],
+                      id: 'cat-asset-all',
+                      name: 'All assets',
+                      isSelected: selectedCategory === 'all-assets',
+                      onClick: () => setSelectedCategory('all-assets'),
                     },
+                    ...ASSET_CATEGORIES.map((cat) => ({
+                      id: `cat-asset-${cat.toLowerCase().replace(/\s+/g, '-')}`,
+                      name: cat,
+                      isSelected: selectedCategory === `asset:${cat}`,
+                      onClick: () => setSelectedCategory(`asset:${cat}`),
+                    })),
+                  ],
+                },
+                {
+                  id: 'nav-connectors',
+                  name: 'Connectors',
+                  icon: <EuiIcon type="link" size="m" />,
+                  renderItem: browseAccordionSelectAll(
+                    'all-connectors',
+                    (c) => c === 'all-connectors' || c.startsWith('connector:')
+                  ),
+                  items: [
                     {
-                      id: 'nav-packages',
-                      name: 'Input packages',
-                      icon: <EuiIcon type="package" size="m" />,
-                      renderItem: browseAccordionSelectAll('all-packages', (c) => c === 'all-packages' || c.startsWith('package:')),
-                      items: [
-                        { id: 'cat-pkg-all', name: 'All input packages', isSelected: selectedCategory === 'all-packages', onClick: () => setSelectedCategory('all-packages') },
-                        ...PACKAGE_CATEGORIES.map((cat) => ({
-                          id: `cat-pkg-${cat.toLowerCase().replace(/\s+/g, '-')}`,
-                          name: cat,
-                          isSelected: selectedCategory === `package:${cat}`,
-                          onClick: () => setSelectedCategory(`package:${cat}`),
-                        })),
-                      ],
+                      id: 'cat-conn-all',
+                      name: 'All connectors',
+                      isSelected: selectedCategory === 'all-connectors',
+                      onClick: () => setSelectedCategory('all-connectors'),
                     },
+                    ...CONNECTOR_CATEGORIES.map((cat) => ({
+                      id: `cat-conn-${cat.toLowerCase().replace(/\s+/g, '-')}`,
+                      name: cat,
+                      isSelected: selectedCategory === `connector:${cat}`,
+                      onClick: () => setSelectedCategory(`connector:${cat}`),
+                    })),
+                  ],
+                },
+                {
+                  id: 'nav-divider-created',
+                  name: '',
+                  renderItem: () => <EuiHorizontalRule margin="xs" />,
+                },
+                {
+                  id: 'nav-your-created',
+                  name: 'Your created integrations',
+                  items: [
                     {
-                      id: 'nav-assets',
-                      name: 'Assets',
-                      icon: <EuiIcon type="layers" size="m" />,
-                      renderItem: browseAccordionSelectAll('all-assets', (c) => c === 'all-assets' || c.startsWith('asset:')),
-                      items: [
-                        { id: 'cat-asset-all', name: 'All assets', isSelected: selectedCategory === 'all-assets', onClick: () => setSelectedCategory('all-assets') },
-                        ...ASSET_CATEGORIES.map((cat) => ({
-                          id: `cat-asset-${cat.toLowerCase().replace(/\s+/g, '-')}`,
-                          name: cat,
-                          isSelected: selectedCategory === `asset:${cat}`,
-                          onClick: () => setSelectedCategory(`asset:${cat}`),
-                        })),
-                      ],
-                    },
-                    {
-                      id: 'nav-connectors',
-                      name: 'Connectors',
-                      icon: <EuiIcon type="link" size="m" />,
-                      renderItem: browseAccordionSelectAll('all-connectors', (c) => c === 'all-connectors' || c.startsWith('connector:')),
-                      items: [
-                        { id: 'cat-conn-all', name: 'All connectors', isSelected: selectedCategory === 'all-connectors', onClick: () => setSelectedCategory('all-connectors') },
-                        ...CONNECTOR_CATEGORIES.map((cat) => ({
-                          id: `cat-conn-${cat.toLowerCase().replace(/\s+/g, '-')}`,
-                          name: cat,
-                          isSelected: selectedCategory === `connector:${cat}`,
-                          onClick: () => setSelectedCategory(`connector:${cat}`),
-                        })),
-                      ],
-                    },
-                    {
-                      id: 'nav-divider-created',
+                      id: 'nav-your-created-prompt',
                       name: '',
-                      renderItem: () => <EuiHorizontalRule margin="xs" />,
-                    },
-                    {
-                      id: 'nav-your-created',
-                      name: 'Your created integrations',
-                      items: [
-                        {
-                          id: 'nav-your-created-prompt',
-                          name: '',
-                          isSelected: false,
-                          renderItem: () => (
-                            <EuiEmptyPrompt
-                              icon={<EuiIcon type="plusInCircle" size="m" color="subdued" />}
-                              title={<h3>Create your own integration</h3>}
-                              titleSize="xxxs"
-                              body={<EuiText size="xs" color="subdued">Build a custom integration that fits your specific requirements.</EuiText>}
-                              actions={[<EuiButtonEmpty size="xs" key="create">Create integration</EuiButtonEmpty>]}
-                              color="subdued"
-                              hasBorder
-                              paddingSize="s"
-                              css={css`max-width:100% !important;min-width:0 !important;width:100%;`}
-                            />
-                          ),
-                        },
-                      ],
+                      isSelected: false,
+                      renderItem: () => (
+                        <EuiEmptyPrompt
+                          icon={<EuiIcon type="plusInCircle" size="m" color="subdued" />}
+                          title={<h3>Create your own integration</h3>}
+                          titleSize="xxxs"
+                          body={
+                            <EuiText size="xs" color="subdued">
+                              Build a custom integration that fits your specific requirements.
+                            </EuiText>
+                          }
+                          actions={[
+                            <EuiButtonEmpty size="xs" key="create">
+                              Create integration
+                            </EuiButtonEmpty>,
+                          ]}
+                          color="subdued"
+                          hasBorder
+                          paddingSize="s"
+                          css={css`
+                            max-width: 100% !important;
+                            min-width: 0 !important;
+                            width: 100%;
+                          `}
+                        />
+                      ),
                     },
                   ],
                 },
-              ]}
-            />
-          </EuiFlexItem>
+              ],
+            },
+          ]}
+        />
+      </EuiFlexItem>
 
-          {/* Right content */}
-          <EuiFlexItem grow={1} style={{ minWidth: 0 }}>
-            {showRecommended ? renderRecommendedContent() : renderCatalogueGrid()}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutBody>
+      {/* Right content — filters fixed; only the tile grid scrolls */}
+      <EuiFlexItem
+        grow={1}
+        style={{ minWidth: 0 }}
+        css={css`
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+          min-height: 0;
+          overflow: hidden;
+        `}
+      >
+        <div
+          css={css`
+            flex-shrink: 0;
+            padding-block-end: 32px;
+            background-color: ${euiTheme.colors.backgroundBasePlain};
+          `}
+        >
+          {renderFilterToolbar()}
+        </div>
+        <div
+          css={css`
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            background-color: ${euiTheme.colors.backgroundBasePlain};
+            /* Room so card hover shadows are not clipped by the scroll viewport */
+            padding-inline: ${euiTheme.size.xs};
+            padding-block: ${euiTheme.size.xs};
+          `}
+        >
+          {showRecommended ? renderRecommendedContent() : renderCatalogueGrid()}
+        </div>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 
-    </EuiFlyout>
+  return (
+    <>
+      <EuiModal
+        id={catalogModalPanelId}
+        aria-labelledby={
+          catalogNestedView === 'aws-overview'
+            ? 'streamsAwsCatalogIntegrationDetailTitle'
+            : catalogNestedView === 'aws-setup'
+            ? 'streamsAwsCatalogIntegrationHeaderTitle'
+            : catalogModalTitleId
+        }
+        data-test-subj="streamsDataSourcesCatalogModal"
+        data-has-catalog-navigation={showCatalogNavigation ? 'true' : undefined}
+        onClose={handleCatalogModalClose}
+        maxWidth={false}
+        css={catalogModalSizingCss}
+      >
+        <EuiModalHeader
+          css={css`
+            ${showCatalogNavigation
+              ? css`
+                  padding: 0 !important;
+                `
+              : css`
+                  padding: 24px !important;
+                `}
+            ${catalogNestedView === 'browse'
+              ? css`
+                  position: relative;
+                  &::after {
+                    content: '';
+                    position: absolute;
+                    inset-inline: 24px;
+                    inset-block-end: 0;
+                    block-size: 1px;
+                    background-color: ${euiTheme.colors.borderBaseSubdued};
+                  }
+                `
+              : ''}
+          `}
+        >
+          {showCatalogNavigation ? (
+            <div
+              data-test-subj="streamsCatalogModalNavigationBar"
+              css={css`
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                width: 100%;
+                box-sizing: border-box;
+                padding-block-start: ${euiTheme.size.l};
+                padding-inline: ${euiTheme.size.l};
+                padding-block-end: ${euiTheme.size.l};
+              `}
+            >
+              <CatalogModalNavigation
+                history={catalogHistoryEntries}
+                onBack={goBackOne}
+                onSelectHistoryIndex={jumpToHistoryIndex}
+              />
+              <EuiButtonIcon
+                size="xs"
+                color="text"
+                iconType="cross"
+                aria-label={i18n.translate('xpack.streams.dataSources.catalogModal.closeAria', {
+                  defaultMessage: 'Close',
+                })}
+                data-test-subj="streamsCatalogModalClose"
+                onClick={handleCatalogModalClose}
+              />
+            </div>
+          ) : null}
+          {!showCatalogNavigation ? (
+            <EuiModalHeaderTitle id={catalogModalTitleId}>{catalogModalTitle}</EuiModalHeaderTitle>
+          ) : null}
+        </EuiModalHeader>
+        <EuiModalBody
+          css={
+            catalogNestedView === 'aws-overview'
+              ? css`
+                  padding: 0 !important;
+                  flex: 1;
+                  min-height: 0;
+                  overflow: hidden;
+                  display: flex;
+                  flex-direction: column;
 
-    {selectedTile && (
-      <IntegrationDetailsFlyout
-        tile={selectedTile}
-        onClose={() => setSelectedTile(null)}
-        onDataConnected={onDataConnected}
-        onCloseAll={() => {
-          setSelectedTile(null);
-          onClose();
-        }}
-      />
-    )}
-  </>
+                  & .euiModalBody__overflow {
+                    padding-block-start: 0 !important;
+                    padding-inline: ${euiTheme.size.l} !important;
+                    padding-block-end: ${euiTheme.size.l} !important;
+                    mask-image: none !important;
+                  }
+                `
+              : catalogNestedView === 'aws-setup'
+              ? css`
+                  padding: 0 !important;
+                  flex: 1;
+                  min-height: 0;
+                  overflow: hidden;
+                  display: flex;
+                  flex-direction: column;
+
+                  & .euiModalBody__overflow {
+                    padding-block-start: 0 !important;
+                    padding-inline: ${euiTheme.size.l} !important;
+                    padding-block-end: ${euiTheme.size.l} !important;
+                    mask-image: none !important;
+                  }
+                `
+              : css`
+                  padding: 0 !important;
+                  flex: 1;
+                  min-height: 0;
+                  overflow: hidden;
+                  display: flex;
+                  flex-direction: column;
+
+                  & .euiModalBody__overflow {
+                    padding: 0 !important;
+                    padding-inline: ${euiTheme.size.l} !important;
+                    padding-block: ${euiTheme.size.l} !important;
+                    mask-image: none !important;
+                  }
+
+                  & .euiModalBody__overflowContent {
+                    padding: 0 !important;
+                  }
+                `
+          }
+        >
+          {renderCatalogModalBody()}
+        </EuiModalBody>
+      </EuiModal>
+
+      {selectedTile && (
+        <IntegrationDetailsFlyout
+          tile={selectedTile}
+          onClose={() => setSelectedTile(null)}
+          onDataConnected={onDataConnected}
+          onCloseAll={() => {
+            setSelectedTile(null);
+            onClose();
+          }}
+        />
+      )}
+    </>
   );
 }

@@ -21,15 +21,15 @@ import {
   FlowCanvasDataProductTextBadge,
   type FlowCanvasDataProduct,
 } from './ingest_hub_demo_streams_flow_card_badge_row';
+import { IngestHubDemoStreamsFlowCardIconTile } from './ingest_hub_demo_streams_flow_card_icon_tile';
 import {
-  FLOW_CARD_QUALITY_BADGE_OVERFLOW_BELOW_ICON_TILE_PX,
-  IngestHubDemoStreamsFlowCardIconTile,
-} from './ingest_hub_demo_streams_flow_card_icon_tile';
+  INGEST_HUB_DEMO_STREAMS_FLOW_CARD_HEADER_TO_STATS_GAP_PX,
+  ingestHubDemoStreamsFlowCardBodyCss,
+  ingestHubDemoStreamsFlowCardPanelInsetStyle,
+} from './ingest_hub_demo_streams_flow_card_layout';
+import { ingestHubDemoStreamsFlowCardShellStyle } from './ingest_hub_demo_streams_flow_card_shell_styles';
 import { FlowCanvasTruncationTooltip } from './ingest_hub_demo_streams_flow_truncation_tooltip';
 
-const CARD_INSET_PX = 12;
-/** Vertical space from the header row (including quality badge overflow) to the stats row. */
-const CARD_HEADER_STATS_SECTION_GAP_PX = 12;
 /** Space between the icon tile and the title (design spec). */
 const HEADER_ICON_TITLE_GAP_PX = 12;
 /** Space between the truncated title and the Logs / Metrics badge cluster. */
@@ -37,6 +37,8 @@ const TITLE_TO_DATA_PRODUCT_BADGES_GAP_PX = 12;
 
 export interface IngestHubDemoStreamsFlowSourceCardProps {
   readonly title: string;
+  readonly roleLine?: string;
+  readonly logoUrl?: string;
   readonly metricsLine: string;
   /** When omitted, the card is treated as good quality. */
   readonly quality?: 'good' | 'degraded' | 'poor';
@@ -46,6 +48,8 @@ export interface IngestHubDemoStreamsFlowSourceCardProps {
 
 export function IngestHubDemoStreamsFlowSourceCard({
   title,
+  roleLine,
+  logoUrl,
   metricsLine,
   quality,
   dataProduct,
@@ -79,25 +83,15 @@ export function IngestHubDemoStreamsFlowSourceCard({
       border-radius: 6px;
       width: 100%;
       min-width: 0;
+      height: 100%;
+      box-sizing: border-box;
       overflow: hidden;
       border: ${euiTheme.border.width.thin} solid ${cardBorderColor};
     `,
     [cardBorderColor, euiTheme.border.width.thin]
   );
 
-  const cardBodyCss = useMemo(
-    () => css`
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      min-width: 0;
-      width: 100%;
-    `,
-    []
-  );
-
-  const statsRowMarginTopPx =
-    CARD_HEADER_STATS_SECTION_GAP_PX + FLOW_CARD_QUALITY_BADGE_OVERFLOW_BELOW_ICON_TILE_PX;
+  const cardBodyCss = useMemo(() => css(ingestHubDemoStreamsFlowCardBodyCss), []);
 
   const statsTextCss = useMemo(
     () => css`
@@ -107,15 +101,9 @@ export function IngestHubDemoStreamsFlowSourceCard({
   );
 
   return (
-    <div
-      style={{
-        width: '100%',
-        opacity: dimmed ? 0.38 : 1,
-        transition: 'opacity 120ms ease',
-      }}
-    >
+    <div style={ingestHubDemoStreamsFlowCardShellStyle(dimmed)}>
       <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" color="plain" css={panelCss}>
-        <div style={{ padding: CARD_INSET_PX }}>
+        <div style={ingestHubDemoStreamsFlowCardPanelInsetStyle}>
           <div css={cardBodyCss}>
             <EuiFlexGroup
               alignItems="center"
@@ -137,6 +125,7 @@ export function IngestHubDemoStreamsFlowSourceCard({
               >
                 <IngestHubDemoStreamsFlowCardIconTile
                   iconType="logoAWS"
+                  logoUrl={logoUrl}
                   qualityStatus={resolvedQuality}
                 />
               </EuiFlexItem>
@@ -173,6 +162,23 @@ export function IngestHubDemoStreamsFlowSourceCard({
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
+            {roleLine ? (
+              <EuiText
+                size="relative"
+                color="subdued"
+                component="p"
+                grow={false}
+                textAlign="left"
+                css={statsTextCss}
+                style={{
+                  ...rowEllipsis,
+                  marginTop: INGEST_HUB_DEMO_STREAMS_FLOW_CARD_HEADER_TO_STATS_GAP_PX,
+                  marginBottom: 0,
+                }}
+              >
+                {roleLine}
+              </EuiText>
+            ) : null}
             <EuiText
               size="relative"
               color="subdued"
@@ -182,7 +188,7 @@ export function IngestHubDemoStreamsFlowSourceCard({
               css={statsTextCss}
               style={{
                 ...rowEllipsis,
-                marginTop: statsRowMarginTopPx,
+                marginTop: roleLine ? 4 : INGEST_HUB_DEMO_STREAMS_FLOW_CARD_HEADER_TO_STATS_GAP_PX,
                 marginBottom: 0,
               }}
             >

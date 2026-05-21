@@ -195,6 +195,20 @@ const VersionSwitcherNavControl: React.FC<{
   const toolbarPanelShadowCss = toolbarPanelShadow.includes('box-shadow')
     ? toolbarPanelShadow.replace(/(box-shadow:[^;]+);/m, '$1 !important;')
     : toolbarPanelShadow;
+  /**
+   * Stack below EUI modal / mask levels so app modals (e.g. Streams "Add data") cover this toolbar.
+   */
+  const toolbarBaseZIndex = React.useMemo(() => {
+    const modalZ = Number(euiTheme.levels.modal);
+    const maskZ = Number(euiTheme.levels.mask);
+    const lowestFloating = Math.min(
+      Number.isFinite(modalZ) && modalZ > 0 ? modalZ : Number.POSITIVE_INFINITY,
+      Number.isFinite(maskZ) && maskZ > 0 ? maskZ : Number.POSITIVE_INFINITY
+    );
+    const base = lowestFloating === Number.POSITIVE_INFINITY ? 9000 : lowestFloating;
+    return Math.max(100, base - 2);
+  }, [euiTheme.levels.mask, euiTheme.levels.modal]);
+  const toolbarTooltipZIndex = toolbarBaseZIndex + 1;
   /** Matches `EuiButtonIcon` `size="xs"` height (`euiButtonSizeMap().xs.height`). */
   const toolbarControlHeight = euiTheme.size.l;
   const [active, setActive] = React.useState<IngestHubVersion>(versionStore.getSnapshot());
@@ -237,7 +251,6 @@ const VersionSwitcherNavControl: React.FC<{
     el.style.position = 'fixed';
     el.style.left = '50%';
     el.style.transform = 'translateX(-50%)';
-    el.style.zIndex = '2147483647';
     el.style.overflow = 'visible';
     document.body.appendChild(el);
     setPortalEl(el);
@@ -247,6 +260,13 @@ const VersionSwitcherNavControl: React.FC<{
       setPortalEl(null);
     };
   }, []);
+
+  React.useLayoutEffect(() => {
+    const el = toolbarPortalHostRef.current;
+    if (el) {
+      el.style.zIndex = String(toolbarBaseZIndex);
+    }
+  }, [toolbarBaseZIndex]);
 
   React.useLayoutEffect(() => {
     const el = toolbarPortalHostRef.current;
@@ -342,7 +362,7 @@ const VersionSwitcherNavControl: React.FC<{
 
   return ReactDOM.createPortal(
     <>
-      <style>{`.onboardingSwitcherTooltip { z-index: 2147483647 !important; }`}</style>
+      <style>{`.onboardingSwitcherTooltip { z-index: ${toolbarTooltipZIndex} !important; }`}</style>
       <style>{`
         #obsOnboardingToolbarPortal {
           overflow: visible;
@@ -413,7 +433,7 @@ const VersionSwitcherNavControl: React.FC<{
               fullWidth={false}
               aria-label="Onboarding experience version"
               popoverProps={{
-                zIndex: 2147483647,
+                zIndex: toolbarBaseZIndex,
                 repositionOnScroll: true,
                 panelMinWidth: 320,
               }}
@@ -475,7 +495,7 @@ const VersionSwitcherNavControl: React.FC<{
                   closePopover: () => setAnnotationsActionsMenuOpen(false),
                   anchorPosition: 'downRight',
                   panelPaddingSize: 'none',
-                  zIndex: 2147483647,
+                  zIndex: toolbarBaseZIndex,
                   repositionOnScroll: true,
                   children: <EuiContextMenuPanel size="s" items={annotationsMenuItems} />,
                 }}

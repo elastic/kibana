@@ -1,14 +1,22 @@
 export interface AwsMockStreamRow {
-    name: string;
-    parentName: string | null;
-    level: number;
-    docCount: number;
-    quality: 'good' | 'degraded' | 'poor';
-    histogramData: Array<{
+    readonly name: string;
+    readonly parentName: string | null;
+    readonly level: number;
+    readonly isWiredRoot: boolean;
+    readonly sourceCount: number;
+    readonly processingStepCount: number;
+    readonly routingStepCount: number;
+    readonly destinationCount: number;
+    readonly sourceTitle: string;
+    readonly sourceLogoUrl: string;
+    readonly docsPerSec: number;
+    readonly docCount: number;
+    readonly quality: 'good' | 'degraded' | 'poor';
+    readonly histogramData: Array<{
         x: number;
         y: number;
     }>;
-    isRootStream: boolean;
+    readonly retentionDays: number;
 }
 export declare const MOCK_AWS_STREAMS_NOW: number;
 export declare const MOCK_AWS_STREAMS_RANGE_MS: number;
@@ -16,4 +24,3 @@ export declare const makeAwsMockSpark: (rate: number, points?: number) => Array<
     x: number;
     y: number;
 }>;
-export declare const AWS_MOCK_STREAMS: AwsMockStreamRow[];

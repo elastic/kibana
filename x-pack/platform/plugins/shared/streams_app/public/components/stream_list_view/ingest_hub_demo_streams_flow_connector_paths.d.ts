@@ -10,6 +10,5 @@ import type { AwsMockStreamRow } from './ingest_hub_demo_streams_model';
 export declare const FLOW_CONNECTOR_DOT_DASH = "0 10";
 /**
  * Returns degraded/poor when the edge terminates on a stream card that uses that quality.
- * `dest_s3` is treated as neutral (matches destination card quality handling).
  */
-export declare function getEdgeDestinationQualitySeverity(edge: FlowGraphEdgeDef, leafByStreamNodeId: ReadonlyMap<string, AwsMockStreamRow>): 'degraded' | 'poor' | null;
+export declare function getEdgeDestinationQualitySeverity(edge: FlowGraphEdgeDef, streamByNodeId: ReadonlyMap<string, AwsMockStreamRow>): 'degraded' | 'poor' | null;

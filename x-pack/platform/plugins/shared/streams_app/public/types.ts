@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type React from 'react';
+import type { Observable } from 'rxjs';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { AppMountParameters } from '@kbn/core/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -77,9 +78,17 @@ export interface StreamsAppStartDependencies {
 
 export interface StreamsAppPublicSetup {}
 
+export type DataSourcesCatalogFlyoutInitialView = 'browse' | 'aws-overview' | 'aws-setup';
+
 export interface DataSourcesCatalogFlyoutProps {
   onClose: () => void;
   onDataConnected: () => void;
+  /** When set, the flyout opens on this view instead of the browse catalogue. */
+  initialView?: DataSourcesCatalogFlyoutInitialView;
+}
+
+export interface AwsCatalogOnboardingWizardRenderProps {
+  onBackToCatalogue: () => void;
 }
 
 export interface StreamsAppPublicStart {
@@ -98,4 +107,19 @@ export interface StreamsAppPublicStart {
    * flyout. Can be mounted directly in any React tree (no streamsApp context required).
    */
   DataSourcesCatalogFlyout: React.ComponentType<DataSourcesCatalogFlyoutProps>;
+  /**
+   * AWS catalog onboarding wizard (Select services → Configuration → Delivery config → Test connection).
+   * Same flow as the AWS path inside {@link DataSourcesCatalogFlyout}. Mount in any React tree.
+   */
+  AwsCatalogOnboardingWizard: React.ComponentType<AwsCatalogOnboardingWizardRenderProps>;
+  /**
+   * Renders the AWS catalog onboarding wizard (Select services → Configuration → Delivery config → Test connection).
+   * Same flow as the AWS path inside {@link DataSourcesCatalogFlyout}.
+   */
+  renderAwsCatalogOnboardingWizard: (
+    container: HTMLElement,
+    props: AwsCatalogOnboardingWizardRenderProps
+  ) => () => void;
+  /** Starred stream names from the All streams table; updates when the user toggles a star. */
+  getStarredStreams$: () => Observable<readonly string[]>;
 }

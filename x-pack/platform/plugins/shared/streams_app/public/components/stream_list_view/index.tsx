@@ -52,24 +52,10 @@ import { CreateQueryStreamFlyout } from '../query_streams/create_query_stream_fl
 import { getFormattedError } from '../../util/errors';
 import { DataSourcesCatalogFlyout } from '../data_sources_view/data_sources_catalog_flyout';
 import { useStreamsListHeaderDatePopoversRightCap } from './use_streams_list_header_date_popovers_right_cap';
-
-const useHasIngestedMockAwsData = () => {
-  const [hasData, setHasData] = React.useState(
-    () => sessionStorage.getItem('ingestHub:dataAdded') === 'true'
-  );
-
-  React.useEffect(() => {
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === 'ingestHub:dataAdded') {
-        setHasData(e.newValue === 'true');
-      }
-    };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
-  }, []);
-
-  return hasData;
-};
+import {
+  useIngestHubAwsLogsDemoActive,
+  useMarkIngestHubAwsLogsDemoActive,
+} from '../ingest_hub_aws_logs_demo_data';
 
 const ALL_STREAMS_MOCK_LIST_VIEW_MODE_KEY = 'streams:allStreams:mockListViewMode';
 
@@ -180,7 +166,8 @@ export function StreamListView() {
     }
   }, [streamsListFetch.loading, streamsListFetch.value, onPageReady]);
 
-  const hasIngestedMockAwsData = useHasIngestedMockAwsData();
+  const hasIngestedMockAwsData = useIngestHubAwsLogsDemoActive();
+  const markIngestHubAwsLogsDemoActive = useMarkIngestHubAwsLogsDemoActive();
   useStreamsListHeaderDatePopoversRightCap(hasIngestedMockAwsData && !isEmbedded);
 
   const [mockListViewMode, setMockListViewMode] = useLocalStorage<IngestHubDemoStreamsListViewMode>(
@@ -197,8 +184,8 @@ export function StreamListView() {
   const [isCatalogOpen, setIsCatalogOpen] = React.useState(false);
 
   const handleDataConnected = React.useCallback(() => {
-    sessionStorage.setItem('ingestHub:dataAdded', 'true');
-  }, []);
+    markIngestHubAwsLogsDemoActive();
+  }, [markIngestHubAwsLogsDemoActive]);
 
   return (
     <>
@@ -267,65 +254,78 @@ export function StreamListView() {
                   />
                 </EuiFlexItem>
               ) : null}
-              <EuiFlexItem grow={false}>
-                <EuiPopover
-                  isOpen={isCreateClassicStreamActionsOpen}
-                  closePopover={() => setIsCreateClassicStreamActionsOpen(false)}
-                  anchorPosition="downRight"
-                  panelPaddingSize="none"
-                  repositionOnScroll
-                  button={
-                    <SplitButton
-                      data-test-subj="streamsListViewCreateClassicStream"
-                      size="s"
-                      color="primary"
-                      fill={false}
-                      type="button"
-                      onClick={() => {
-                        setIsCreateClassicStreamActionsOpen(false);
-                        setIsClassicStreamCreationFlyoutOpen(true);
-                      }}
-                      disabled={!(canManageStreamsKibana && canManageClassicElasticsearch)}
-                      onSecondaryButtonClick={() =>
-                        setIsCreateClassicStreamActionsOpen((open) => !open)
-                      }
-                      secondaryButtonIcon="arrowDown"
-                      secondaryButtonAriaLabel={i18n.translate(
-                        'xpack.streams.streamsListView.createClassicStreamMoreActionsAriaLabel',
-                        {
-                          defaultMessage: 'More actions for create stream',
-                        }
-                      )}
-                    >
-                      {i18n.translate(
-                        'xpack.streams.streamsListView.createClassicStreamButtonLabel',
-                        {
-                          defaultMessage: 'Create classic stream',
-                        }
-                      )}
-                    </SplitButton>
-                  }
-                >
-                  <EuiContextMenuPanel
-                    size="s"
-                    items={[
-                      <EuiContextMenuItem
-                        key="settings"
-                        data-test-subj="streamsListViewSettingsMenuItem"
-                        icon="gear"
+              {hasIngestedMockAwsData ? (
+                <EuiFlexItem grow={false}>
+                  <EuiPopover
+                    isOpen={isCreateClassicStreamActionsOpen}
+                    closePopover={() => setIsCreateClassicStreamActionsOpen(false)}
+                    anchorPosition="downRight"
+                    panelPaddingSize="none"
+                    repositionOnScroll
+                    button={
+                      <SplitButton
+                        data-test-subj="streamsListViewHeaderSplit"
+                        size="s"
+                        color="primary"
+                        fill={false}
+                        type="button"
                         onClick={() => {
                           setIsCreateClassicStreamActionsOpen(false);
-                          setIsSettingsFlyoutOpen(true);
+                          setIsCatalogOpen(true);
                         }}
+                        disabled={!canManageStreamsKibana}
+                        onSecondaryButtonClick={() =>
+                          setIsCreateClassicStreamActionsOpen((open) => !open)
+                        }
+                        secondaryButtonIcon="arrowDown"
+                        secondaryButtonAriaLabel={i18n.translate(
+                          'xpack.streams.streamsListView.headerSplitMoreActionsAriaLabel',
+                          {
+                            defaultMessage: 'More stream actions',
+                          }
+                        )}
                       >
-                        {i18n.translate('xpack.streams.streamsListView.settingsButtonLabel', {
-                          defaultMessage: 'Settings',
+                        {i18n.translate('xpack.streams.streamsListView.addSourceButtonLabel', {
+                          defaultMessage: 'Add data',
                         })}
-                      </EuiContextMenuItem>,
-                    ]}
-                  />
-                </EuiPopover>
-              </EuiFlexItem>
+                      </SplitButton>
+                    }
+                  >
+                    <EuiContextMenuPanel
+                      size="s"
+                      items={[
+                        <EuiContextMenuItem
+                          key="create-stream"
+                          data-test-subj="streamsListViewCreateStreamMenuItem"
+                          icon="plusInCircle"
+                          disabled={!(canManageStreamsKibana && canManageClassicElasticsearch)}
+                          onClick={() => {
+                            setIsCreateClassicStreamActionsOpen(false);
+                            setIsClassicStreamCreationFlyoutOpen(true);
+                          }}
+                        >
+                          {i18n.translate('xpack.streams.streamsListView.createStreamMenuItemLabel', {
+                            defaultMessage: 'Create stream',
+                          })}
+                        </EuiContextMenuItem>,
+                        <EuiContextMenuItem
+                          key="settings"
+                          data-test-subj="streamsListViewSettingsMenuItem"
+                          icon="gear"
+                          onClick={() => {
+                            setIsCreateClassicStreamActionsOpen(false);
+                            setIsSettingsFlyoutOpen(true);
+                          }}
+                        >
+                          {i18n.translate('xpack.streams.streamsListView.settingsButtonLabel', {
+                            defaultMessage: 'Settings',
+                          })}
+                        </EuiContextMenuItem>,
+                      ]}
+                    />
+                  </EuiPopover>
+                </EuiFlexItem>
+              ) : null}
               {queryStreams?.enabled ? (
                 <EuiFlexItem grow={false}>
                   <CreateQueryStreamFlyout onQueryStreamCreated={streamsListFetch.refresh} />

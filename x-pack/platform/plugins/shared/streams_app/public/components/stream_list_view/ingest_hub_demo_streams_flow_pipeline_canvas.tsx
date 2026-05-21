@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { CSSProperties } from 'react';
 import React, {
   forwardRef,
   useCallback,
@@ -16,93 +15,82 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { EuiLink, useEuiTheme } from '@elastic/eui';
-import { css, keyframes } from '@emotion/css';
-import { i18n } from '@kbn/i18n';
-import type { AwsMockStreamRow } from './ingest_hub_demo_streams_model';
 import {
-  buildIngestHubDemoStreamsFlowLayout,
-  INGEST_HUB_DEMO_STREAMS_FLOW_CARD_WIDTH_PX,
+  EuiButtonGroup,
+  EuiButtonIcon,
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiPanel,
+  EuiSelect,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { css as cssClass, keyframes } from '@emotion/css';
+import { i18n } from '@kbn/i18n';
+import {
+  Background,
+  MiniMap,
+  Panel,
+  ReactFlow,
+  ReactFlowProvider,
+  useReactFlow,
+  type Node,
+  type NodeTypes,
+} from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
+import type { IngestHubDemoStreamTopology } from '../ingest_hub_demo_stream_topology';
+import {
+  buildStreamTopologyFlowLayout,
   INGEST_HUB_DEMO_STREAMS_FLOW_MIN_LAYOUT_WIDTH_PX,
 } from './ingest_hub_demo_streams_flow_graph_model';
-import { FLOW_CONNECTOR_DOT_DASH } from './ingest_hub_demo_streams_flow_connector_paths';
 import {
   computeFlowHighlightForHoveredEdge,
   mergeWaypointPolylineForHoveredEdge,
   polylineToSmoothPathD,
 } from './ingest_hub_demo_streams_flow_graph_highlight';
-import { inferFlowCanvasDataProduct } from './ingest_hub_demo_streams_flow_card_badge_row';
-import { IngestHubDemoStreamsFlowDestinationCard } from './ingest_hub_demo_streams_flow_destination_card';
-import { IngestHubDemoStreamsFlowSourceCard } from './ingest_hub_demo_streams_flow_source_card';
-import {
-  IngestHubDemoStreamsFlowPipelineCanvasMinimap,
-  type FlowPipelineCamera,
-} from './ingest_hub_demo_streams_flow_pipeline_canvas_minimap';
+import type { FlowCanvasCardSelection } from './ingest_hub_demo_streams_flow_card_selection';
+import { IngestHubDemoStreamsFlowCardDetailFlyout } from './ingest_hub_demo_streams_flow_card_detail_flyout';
+import { StreamsPipelineWorldContext } from './ingest_hub_demo_streams_flow_pipeline_world_context';
+import type { StreamsPipelineWorldContextValue } from './ingest_hub_demo_streams_flow_pipeline_world_context';
+import { StreamsPipelineWorldNode } from './ingest_hub_demo_streams_flow_pipeline_world_node';
 
-const STREAM_NODE_IDS = ['dest_top', 'dest_mid', 'dest_errors', 'dest_s3'] as const;
+/** Horizontal inset when fitting stream rows to the pane width. */
+const FIT_VIEW_HORIZONTAL_PADDING_RATIO = 0.02;
+/** Animated zoom / programmatic fit from toolbar (ms). Initial layout uses 0 to avoid a visible snap. */
+const FIT_VIEW_DURATION_MS = 200;
 
-const LAYOUT_MIN_SCALE = 0.08;
-const LAYOUT_MAX_SCALE = 2.5;
-
-/** Ctrl/meta + wheel: exp(-deltaPx × sensitivity). ~0.007 ≈ mid between gentle trackpad and old fixed 1.1× steps. */
-const WHEEL_ZOOM_SENSITIVITY = 0.0072;
-/** Max |Δy| in “pixel” space per event before exp() (dampens huge mouse-wheel lines). */
-const WHEEL_DELTA_Y_PIXEL_CAP = 100;
-/** Per-frame lerp toward target (higher ≈ closer to old instant zoom; <1 keeps a little ease). */
-const WHEEL_ZOOM_SMOOTHING = 0.68;
-/** Stop smoothing when this close to the target zoom. */
-const WHEEL_ZOOM_STOP_EPS = 0.0002;
-
-function normalizeWheelDeltaYPixels(e: WheelEvent): number {
-  let delta = e.deltaY;
-  if (e.deltaMode === WheelEvent.DOM_DELTA_LINE) {
-    delta *= 18;
-  } else if (e.deltaMode === WheelEvent.DOM_DELTA_PAGE) {
-    delta *= 640;
-  }
-  if (delta === 0) {
-    return 0;
-  }
-  return Math.max(-WHEEL_DELTA_Y_PIXEL_CAP, Math.min(WHEEL_DELTA_Y_PIXEL_CAP, delta));
-}
-
-const CONNECTOR_STROKE_WIDTH = 2.25;
-
-/** Dash repeat length for marching-ant animation (`stroke-dashoffset` steps this much). */
-const CONNECTOR_DASH_OFFSET_PERIOD = 10;
-
-/** Corner radius for smooth elbows (idle + merged trace — same geometry as hover). */
 const CONNECTOR_FLOW_CORNER_RADIUS = 18;
-
-/** Covers stacked round-cap dots where the fan trunk meets the three legs (matches ingest canvas). */
-const FAN_HUB_JOINT_MASK_RADIUS = 5.5;
 
 const connectorDashFlowKeyframes = keyframes`
   to {
-    stroke-dashoffset: ${-CONNECTOR_DASH_OFFSET_PERIOD};
+    stroke-dashoffset: -10;
   }
 `;
 
-const connectorPathHoveredClassName = css`
+const connectorPathHoveredClassName = cssClass`
   animation: ${connectorDashFlowKeyframes} 0.85s linear infinite;
 `;
 
-const DEFAULT_STREAM_TITLES: Record<(typeof STREAM_NODE_IDS)[number], string> = {
-  dest_top: 'metrics-aws.cloudwatch',
-  dest_mid: 'metrics-aws.cloudwatch.ec2',
-  dest_errors: 'metrics-aws.cloudwatch.ec2.errors',
-  dest_s3: 'S3 Bucket',
+const nodeTypes: NodeTypes = {
+  streamsPipelineWorld: StreamsPipelineWorldNode,
 };
 
-/** Fan legs into the right-hand destination column (hovering one isolates that flow). */
-const TERMINAL_DESTINATION_NODE_IDS = new Set(['dest_mid', 'dest_errors', 'dest_s3']);
-
 export interface IngestHubDemoStreamsFlowPipelineCanvasProps {
-  readonly visibleRoot: AwsMockStreamRow | undefined;
-  readonly visibleLeaves: readonly AwsMockStreamRow[];
+  /** Full stream topology rendered as the stream graph (sources → pipeline → routing → destinations). */
+  readonly topology: IngestHubDemoStreamTopology;
   readonly buildStreamHref: (streamName: string) => string;
   readonly onStreamNavigate: (streamName: string) => void;
-  readonly onCameraZoomChange?: (zoom: number) => void;
+  readonly onToggleFullscreen?: () => void;
+  readonly isFullscreen?: boolean;
+  /** Opens canvas settings (e.g. customize flyout) — renders the gear control when set. */
+  readonly onOpenCanvasSettings?: () => void;
 }
 
 export type IngestHubDemoStreamsFlowPipelineCanvasZoomPreset = 50 | 100 | 200;
@@ -114,42 +102,71 @@ export interface IngestHubDemoStreamsFlowPipelineCanvasRef {
   zoomToPreset: (preset: IngestHubDemoStreamsFlowPipelineCanvasZoomPreset) => void;
 }
 
-export const IngestHubDemoStreamsFlowPipelineCanvas = forwardRef<
+const IngestHubDemoStreamsFlowPipelineCanvasInner = forwardRef<
   IngestHubDemoStreamsFlowPipelineCanvasRef,
   IngestHubDemoStreamsFlowPipelineCanvasProps
->(function IngestHubDemoStreamsFlowPipelineCanvas(
-  { visibleRoot, visibleLeaves, buildStreamHref, onStreamNavigate, onCameraZoomChange },
+>(function IngestHubDemoStreamsFlowPipelineCanvasInner(
+  {
+    topology,
+    buildStreamHref,
+    onStreamNavigate,
+    onToggleFullscreen,
+    isFullscreen = false,
+    onOpenCanvasSettings,
+  },
   ref
 ) {
   const { euiTheme } = useEuiTheme();
+  const { zoomIn, zoomOut, getViewport, setViewport } = useReactFlow();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const hoverClearTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const [viewport, setViewport] = useState({ contentWidth: 852, contentHeight: 420 });
-  const viewportRef = useRef(viewport);
-  viewportRef.current = viewport;
+  const [paneSize, setPaneSize] = useState({ contentWidth: 852, contentHeight: 420 });
   const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null);
-  const [camera, setCamera] = useState<FlowPipelineCamera>({ x: 0, y: 0, zoom: 1 });
-  const cameraRef = useRef(camera);
-  cameraRef.current = camera;
-  const spaceHeldRef = useRef(false);
-  const panDragRef = useRef({
-    active: false,
-    startClientX: 0,
-    startClientY: 0,
-    startCamX: 0,
-    startCamY: 0,
-    pointerId: 0,
-  });
-  const wheelZoomAnchorRef = useRef<{
-    sx: number;
-    sy: number;
-    worldX: number;
-    worldY: number;
-  } | null>(null);
-  const wheelZoomTargetRef = useRef(1);
-  const wheelZoomRafRef = useRef<number | null>(null);
-  const [pointerInViewport, setPointerInViewport] = useState(false);
-  const [spacePressed, setSpacePressed] = useState(false);
+  const [findQuery, setFindQuery] = useState('');
+  const [presentation, setPresentation] = useState<'horizontal' | 'vertical'>('horizontal');
+  const [findMatchIndex, setFindMatchIndex] = useState(0);
+  const [isFilterPanelExpanded, setIsFilterPanelExpanded] = useState(false);
+  const [cardSelection, setCardSelection] = useState<FlowCanvasCardSelection | null>(null);
+  const cardFlyoutTitleId = useGeneratedHtmlId({ prefix: 'streamsFlowCanvasCardFlyout' });
+
+  const isMacLikePlatform = useMemo(() => {
+    if (typeof navigator === 'undefined') {
+      return false;
+    }
+    return /Mac|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  }, []);
+
+  const findInPageShortcutLabel = isMacLikePlatform ? '⌘K' : 'Ctrl+K';
+
+  const findSearchTotal = useMemo(() => {
+    const q = findQuery.trim().toLowerCase();
+    if (!q) {
+      return 0;
+    }
+    const sourceHits = topology.sources.filter(
+      (s) => s.title.toLowerCase().includes(q) || s.id.toLowerCase().includes(q)
+    ).length;
+    const destHits = topology.destinations.filter((d) => d.name.toLowerCase().includes(q)).length;
+    const stepHits =
+      topology.processingSteps.filter((s) => s.label.toLowerCase().includes(q)).length +
+      topology.routingSteps.filter((s) => s.label.toLowerCase().includes(q)).length;
+    return sourceHits + destHits + stepHits;
+  }, [findQuery, topology]);
+
+  const findCounterText = useMemo(() => {
+    if (findSearchTotal < 1) {
+      return '0/0';
+    }
+    return `${Math.min(findMatchIndex, findSearchTotal - 1) + 1}/${findSearchTotal}`;
+  }, [findMatchIndex, findSearchTotal]);
+
+  useEffect(() => {
+    setFindMatchIndex(0);
+  }, [findQuery]);
+
+  const toggleFilterPanel = useCallback(() => {
+    setIsFilterPanelExpanded((open) => !open);
+  }, []);
 
   const cancelHoverClear = useCallback(() => {
     if (hoverClearTimerRef.current !== undefined) {
@@ -183,13 +200,23 @@ export const IngestHubDemoStreamsFlowPipelineCanvas = forwardRef<
     clearEdgeHover();
   }, [clearEdgeHover]);
 
+  const onCardSelect = useCallback((selection: FlowCanvasCardSelection) => {
+    setCardSelection(selection);
+  }, []);
+
+  const closeCardFlyout = useCallback(() => {
+    setCardSelection(null);
+  }, []);
+
+  useEffect(() => () => cancelHoverClear(), [cancelHoverClear]);
+
   useEffect(() => {
     const el = containerRef.current;
     if (!el) {
       return;
     }
     const measure = () => {
-      setViewport({
+      setPaneSize({
         contentWidth: Math.max(1, Math.floor(el.clientWidth)),
         contentHeight: Math.max(1, Math.floor(el.clientHeight)),
       });
@@ -208,323 +235,37 @@ export const IngestHubDemoStreamsFlowPipelineCanvas = forwardRef<
     };
   }, []);
 
-  useEffect(() => () => cancelHoverClear(), [cancelHoverClear]);
-
   const layoutContentWidth = useMemo(
-    () => Math.max(INGEST_HUB_DEMO_STREAMS_FLOW_MIN_LAYOUT_WIDTH_PX, viewport.contentWidth),
-    [viewport.contentWidth]
+    () =>
+      Math.max(INGEST_HUB_DEMO_STREAMS_FLOW_MIN_LAYOUT_WIDTH_PX, Math.floor(paneSize.contentWidth)),
+    [paneSize.contentWidth]
   );
 
   const flowLayout = useMemo(
-    () => buildIngestHubDemoStreamsFlowLayout(layoutContentWidth),
-    [layoutContentWidth]
+    () => buildStreamTopologyFlowLayout(layoutContentWidth, topology),
+    [layoutContentWidth, topology]
   );
-  const flowLayoutRef = useRef(flowLayout);
-  flowLayoutRef.current = flowLayout;
 
-  const fitCameraToViewport = useCallback(
-    (
-      layout: { layoutWidth: number; layoutHeight: number },
-      vp: { contentWidth: number; contentHeight: number }
-    ): FlowPipelineCamera => {
-      const lw = layout.layoutWidth;
-      const lh = layout.layoutHeight;
-      const cw = vp.contentWidth;
-      const ch = vp.contentHeight;
-      const fit = Math.min(cw / lw, ch / lh) * 0.92;
-      const zoom = Math.min(LAYOUT_MAX_SCALE, Math.max(LAYOUT_MIN_SCALE, fit));
-      return { x: (cw - lw * zoom) / 2, y: (ch - lh * zoom) / 2, zoom };
+  /** Scale and position so stream rows span the pane width; vertical overflow is pannable. */
+  const fitLayoutToViewportWidth = useCallback(
+    (durationMs = 0) => {
+      const { layoutWidth, layoutHeight } = flowLayout;
+      const { contentWidth, contentHeight } = paneSize;
+      if (layoutWidth < 1 || contentWidth < 1) {
+        return;
+      }
+
+      const horizontalPadding = contentWidth * FIT_VIEW_HORIZONTAL_PADDING_RATIO;
+      const availableWidth = contentWidth - horizontalPadding * 2;
+      const zoom = availableWidth / layoutWidth;
+      const x = horizontalPadding;
+      const scaledHeight = layoutHeight * zoom;
+      const y = (contentHeight - scaledHeight) / 2;
+
+      setViewport({ x, y, zoom }, durationMs > 0 ? { duration: durationMs } : undefined);
     },
-    []
+    [flowLayout, paneSize, setViewport]
   );
-
-  /* eslint-disable react-hooks/exhaustive-deps -- refit when layout/viewport dimensions change; omit flowLayout/viewport object identity */
-  useLayoutEffect(() => {
-    setCamera(fitCameraToViewport(flowLayout, viewport));
-    return () => {
-      if (wheelZoomRafRef.current !== null) {
-        window.cancelAnimationFrame(wheelZoomRafRef.current);
-        wheelZoomRafRef.current = null;
-      }
-      wheelZoomAnchorRef.current = null;
-    };
-  }, [
-    fitCameraToViewport,
-    flowLayout.layoutHeight,
-    flowLayout.layoutWidth,
-    viewport.contentHeight,
-    viewport.contentWidth,
-  ]);
-  /* eslint-enable react-hooks/exhaustive-deps */
-
-  const applyZoomTowardViewportCenter = useCallback((nextZoom: number) => {
-    const vp = viewportRef.current;
-    const c = cameraRef.current;
-    const cx = vp.contentWidth / 2;
-    const cy = vp.contentHeight / 2;
-    const worldX = (cx - c.x) / c.zoom;
-    const worldY = (cy - c.y) / c.zoom;
-    const zoom = Math.min(LAYOUT_MAX_SCALE, Math.max(LAYOUT_MIN_SCALE, nextZoom));
-    setCamera({ zoom, x: cx - worldX * zoom, y: cy - worldY * zoom });
-  }, []);
-
-  const applyZoomRelative = useCallback(
-    (factor: number) => {
-      applyZoomTowardViewportCenter(cameraRef.current.zoom * factor);
-    },
-    [applyZoomTowardViewportCenter]
-  );
-
-  const applyZoomToFit = useCallback(() => {
-    setCamera(fitCameraToViewport(flowLayoutRef.current, viewportRef.current));
-  }, [fitCameraToViewport]);
-
-  useImperativeHandle(
-    ref,
-    () => ({
-      zoomIn: () => applyZoomRelative(1.15),
-      zoomOut: () => applyZoomRelative(1 / 1.15),
-      zoomToFit: () => applyZoomToFit(),
-      zoomToPreset: (preset) => {
-        const targetZoom = preset === 50 ? 0.5 : preset === 100 ? 1 : 2;
-        applyZoomTowardViewportCenter(targetZoom);
-      },
-    }),
-    [applyZoomRelative, applyZoomToFit, applyZoomTowardViewportCenter]
-  );
-
-  useEffect(() => {
-    onCameraZoomChange?.(camera.zoom);
-  }, [camera.zoom, onCameraZoomChange]);
-
-  const [canvasShortcutsActive, setCanvasShortcutsActive] = useState(false);
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) {
-      return;
-    }
-    const onFocusIn = () => {
-      setCanvasShortcutsActive(true);
-    };
-    const onFocusOut = (e: FocusEvent) => {
-      if (!el.contains(e.relatedTarget as Node | null)) {
-        setCanvasShortcutsActive(false);
-      }
-    };
-    el.addEventListener('focusin', onFocusIn);
-    el.addEventListener('focusout', onFocusOut);
-    return () => {
-      el.removeEventListener('focusin', onFocusIn);
-      el.removeEventListener('focusout', onFocusOut);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!pointerInViewport && !canvasShortcutsActive) {
-      return;
-    }
-    const onKeyDown = (e: KeyboardEvent) => {
-      const t = e.target as HTMLElement | null;
-      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) {
-        return;
-      }
-      const mod = e.metaKey || e.ctrlKey;
-      if (mod && (e.key === '=' || e.key === '+' || e.code === 'NumpadAdd')) {
-        e.preventDefault();
-        applyZoomRelative(1.15);
-        return;
-      }
-      if (mod && (e.key === '-' || e.key === '_' || e.code === 'NumpadSubtract')) {
-        e.preventDefault();
-        applyZoomRelative(1 / 1.15);
-        return;
-      }
-      if (mod && e.key === '0') {
-        e.preventDefault();
-        applyZoomTowardViewportCenter(1);
-        return;
-      }
-      if (e.shiftKey && !mod && e.code === 'Digit1') {
-        e.preventDefault();
-        applyZoomToFit();
-      }
-    };
-    window.addEventListener('keydown', onKeyDown, { capture: true });
-    return () => window.removeEventListener('keydown', onKeyDown, { capture: true });
-  }, [
-    pointerInViewport,
-    canvasShortcutsActive,
-    applyZoomRelative,
-    applyZoomTowardViewportCenter,
-    applyZoomToFit,
-  ]);
-
-  const viewportShellCss = useMemo(
-    () => css`
-      flex: 1;
-      min-height: 0;
-      width: 100%;
-      position: relative;
-      overflow: hidden;
-    `,
-    []
-  );
-
-  const viewportCenterCss = useMemo(
-    () => css`
-      position: absolute;
-      inset: 0;
-      overflow: hidden;
-      box-sizing: border-box;
-    `,
-    []
-  );
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) {
-      return;
-    }
-    const runWheelZoomFrame = () => {
-      wheelZoomRafRef.current = null;
-      const anchor = wheelZoomAnchorRef.current;
-      if (!anchor) {
-        return;
-      }
-      const c = cameraRef.current;
-      const target = wheelZoomTargetRef.current;
-      const nextZ = c.zoom + (target - c.zoom) * WHEEL_ZOOM_SMOOTHING;
-      const done = Math.abs(target - nextZ) <= WHEEL_ZOOM_STOP_EPS;
-      const z = done ? target : nextZ;
-      setCamera({
-        zoom: z,
-        x: anchor.sx - anchor.worldX * z,
-        y: anchor.sy - anchor.worldY * z,
-      });
-      if (!done) {
-        wheelZoomRafRef.current = window.requestAnimationFrame(runWheelZoomFrame);
-      }
-    };
-
-    const scheduleWheelZoomFrame = () => {
-      if (wheelZoomRafRef.current === null) {
-        wheelZoomRafRef.current = window.requestAnimationFrame(runWheelZoomFrame);
-      }
-    };
-
-    const onWheel = (e: WheelEvent) => {
-      if (e.ctrlKey || e.metaKey) {
-        e.preventDefault();
-        const rect = el.getBoundingClientRect();
-        const sx = e.clientX - rect.left;
-        const sy = e.clientY - rect.top;
-        const c = cameraRef.current;
-        const worldX = (sx - c.x) / c.zoom;
-        const worldY = (sy - c.y) / c.zoom;
-        const deltaPx = normalizeWheelDeltaYPixels(e);
-        if (deltaPx === 0) {
-          return;
-        }
-        const mult = Math.exp(-deltaPx * WHEEL_ZOOM_SENSITIVITY);
-        wheelZoomAnchorRef.current = { sx, sy, worldX, worldY };
-        wheelZoomTargetRef.current = Math.min(
-          LAYOUT_MAX_SCALE,
-          Math.max(LAYOUT_MIN_SCALE, c.zoom * mult)
-        );
-        scheduleWheelZoomFrame();
-        return;
-      }
-      e.preventDefault();
-      const c = cameraRef.current;
-      setCamera({ ...c, x: c.x - e.deltaX, y: c.y - e.deltaY });
-    };
-    el.addEventListener('wheel', onWheel, { passive: false });
-    return () => {
-      el.removeEventListener('wheel', onWheel);
-      if (wheelZoomRafRef.current !== null) {
-        window.cancelAnimationFrame(wheelZoomRafRef.current);
-        wheelZoomRafRef.current = null;
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.code !== 'Space' || !pointerInViewport) {
-        return;
-      }
-      const t = e.target as HTMLElement | null;
-      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) {
-        return;
-      }
-      e.preventDefault();
-      if (!e.repeat) {
-        spaceHeldRef.current = true;
-        setSpacePressed(true);
-      }
-    };
-    const onKeyUp = (e: KeyboardEvent) => {
-      if (e.code === 'Space') {
-        spaceHeldRef.current = false;
-        setSpacePressed(false);
-      }
-    };
-    window.addEventListener('keydown', onKeyDown, { capture: true });
-    window.addEventListener('keyup', onKeyUp, { capture: true });
-    return () => {
-      window.removeEventListener('keydown', onKeyDown, { capture: true });
-      window.removeEventListener('keyup', onKeyUp, { capture: true });
-    };
-  }, [pointerInViewport]);
-
-  const onViewportPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    const target = e.target as HTMLElement;
-    if (target.closest('[data-test-subj="streamsIngestHubFlowPipelineMinimap"]')) {
-      return;
-    }
-    if (e.button !== 0 && e.button !== 1) {
-      return;
-    }
-    if (e.button === 0 && !spaceHeldRef.current) {
-      return;
-    }
-    e.preventDefault();
-    panDragRef.current = {
-      active: true,
-      startClientX: e.clientX,
-      startClientY: e.clientY,
-      startCamX: cameraRef.current.x,
-      startCamY: cameraRef.current.y,
-      pointerId: e.pointerId,
-    };
-    containerRef.current?.setPointerCapture(e.pointerId);
-  }, []);
-
-  const onViewportPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    if (!panDragRef.current.active || e.pointerId !== panDragRef.current.pointerId) {
-      return;
-    }
-    const dx = e.clientX - panDragRef.current.startClientX;
-    const dy = e.clientY - panDragRef.current.startClientY;
-    setCamera({
-      ...cameraRef.current,
-      x: panDragRef.current.startCamX + dx,
-      y: panDragRef.current.startCamY + dy,
-    });
-  }, []);
-
-  const onViewportPointerUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    if (!panDragRef.current.active || e.pointerId !== panDragRef.current.pointerId) {
-      return;
-    }
-    panDragRef.current.active = false;
-    try {
-      containerRef.current?.releasePointerCapture(e.pointerId);
-    } catch {
-      // ignore
-    }
-  }, []);
 
   const highlight = useMemo(
     () => computeFlowHighlightForHoveredEdge(flowLayout.edges, hoveredEdgeId),
@@ -551,303 +292,614 @@ export const IngestHubDemoStreamsFlowPipelineCanvas = forwardRef<
     return polylineToSmoothPathD(mergedTracePolyline, CONNECTOR_FLOW_CORNER_RADIUS);
   }, [highlight?.multicastBranch, mergedTracePolyline]);
 
-  const leafByStreamNodeId = useMemo(() => {
-    const map = new Map<string, AwsMockStreamRow>();
-    STREAM_NODE_IDS.forEach((id, i) => {
-      const row = visibleLeaves[i];
-      if (row) {
-        map.set(id, row);
+  const worldContextValue = useMemo((): StreamsPipelineWorldContextValue => {
+    return {
+      euiTheme,
+      flowLayout,
+      topology,
+      highlight,
+      mergedTracePathD,
+      buildStreamHref,
+      onStreamNavigate,
+      onCardSelect,
+      onEdgeHitEnter,
+      scheduleHoverClear,
+      clearHoverOnCardEnter,
+      nodeDimmed,
+      connectorPathHoveredClassName,
+    };
+  }, [
+    buildStreamHref,
+    clearHoverOnCardEnter,
+    euiTheme,
+    flowLayout,
+    highlight,
+    mergedTracePathD,
+    nodeDimmed,
+    onCardSelect,
+    onEdgeHitEnter,
+    onStreamNavigate,
+    scheduleHoverClear,
+    topology,
+  ]);
+
+  const nodes = useMemo<Node[]>(
+    () => [
+      {
+        id: 'streams-pipeline-world',
+        type: 'streamsPipelineWorld',
+        position: { x: 0, y: 0 },
+        draggable: false,
+        selectable: false,
+        focusable: false,
+        data: {},
+        style: {
+          width: flowLayout.layoutWidth,
+          height: flowLayout.layoutHeight,
+        },
+      },
+    ],
+    [flowLayout.layoutHeight, flowLayout.layoutWidth]
+  );
+
+  useLayoutEffect(() => {
+    fitLayoutToViewportWidth(0);
+  }, [fitLayoutToViewportWidth]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      zoomIn: () => zoomIn({ duration: FIT_VIEW_DURATION_MS }),
+      zoomOut: () => zoomOut({ duration: FIT_VIEW_DURATION_MS }),
+      zoomToFit: () => fitLayoutToViewportWidth(FIT_VIEW_DURATION_MS),
+      zoomToPreset: (preset) => {
+        const targetZoom = preset === 50 ? 0.5 : preset === 100 ? 1 : 2;
+        const vp = getViewport();
+        setViewport({ ...vp, zoom: targetZoom }, { duration: FIT_VIEW_DURATION_MS });
+      },
+    }),
+    [fitLayoutToViewportWidth, getViewport, setViewport, zoomIn, zoomOut]
+  );
+
+  /** Vertical icon stack: plain panel, single border, horizontal dividers between controls. */
+  const canvasControlToolbarStackCss = useMemo(
+    () => css`
+      display: inline-flex;
+      flex-direction: column;
+      align-items: stretch;
+      background-color: ${euiTheme.colors.backgroundBasePlain};
+      border-radius: ${euiTheme.border.radius.medium};
+      border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+      overflow: hidden;
+      padding: 0;
+    `,
+    [euiTheme]
+  );
+
+  const canvasControlToolbarRowCss = useMemo(
+    () => css`
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+      padding: 0;
+      border-block-end: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+
+      &:last-child {
+        border-block-end: none;
       }
-    });
-    return map;
-  }, [visibleLeaves]);
 
-  const hoveredEdge = useMemo(
-    () => (hoveredEdgeId ? flowLayout.edges.find((e) => e.id === hoveredEdgeId) : undefined),
-    [flowLayout.edges, hoveredEdgeId]
+      .euiButtonIcon {
+        border-radius: 0;
+        inline-size: 32px;
+        min-inline-size: 32px;
+        block-size: 32px;
+        min-block-size: 32px;
+        padding-block: 0;
+        padding-inline: 0;
+      }
+    `,
+    [euiTheme]
   );
 
-  const terminalFanHoverActive = useMemo(
-    () => Boolean(highlight && hoveredEdge && TERMINAL_DESTINATION_NODE_IDS.has(hoveredEdge.to)),
-    [highlight, hoveredEdge]
+  /** Tighten top-left overlay; clip minimap so mask/viewport never paints past rounded bounds. */
+  const reactFlowCanvasChromeCss = useMemo(
+    () => cssClass`
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      position: relative;
+
+      .react-flow__panel.top.left {
+        margin: 0;
+        padding: 0;
+      }
+
+      .react-flow__panel.bottom.left {
+        overflow: hidden;
+        border-radius: ${euiTheme.border.radius.medium};
+      }
+
+      .react-flow__minimap,
+      .react-flow__minimap-svg {
+        display: block;
+        overflow: hidden;
+        max-width: 100%;
+        max-height: 100%;
+      }
+    `,
+    [euiTheme]
   );
 
-  /** Fan elbow (trunk → legs); small mask clears stacked default strokes at the only multi-edge join. */
-  const fanHubJointCenter = useMemo(() => {
-    const trunk = flowLayout.edges.find((e) => e.id === 'e_dest_top_fan_hub');
-    if (!trunk || trunk.polyline.length < 1) {
-      return null;
-    }
-    const p = trunk.polyline[trunk.polyline.length - 1];
-    return { x: p.x, y: p.y };
-  }, [flowLayout.edges]);
-
-  const sourceTitle = i18n.translate('xpack.streams.ingestHubFlowCanvas.sourceTitle', {
-    defaultMessage: 'AWS CloudWatch',
-  });
-  const sourceMetrics = i18n.translate('xpack.streams.ingestHubFlowCanvas.sourceMetrics', {
-    defaultMessage: '11.9k eps · 180ms',
-  });
-
-  const canvasAriaLabel = useMemo(
-    () =>
-      i18n.translate('xpack.streams.ingestHubFlowCanvas.canvasNavAria', {
-        defaultMessage:
-          'Streams flow canvas. Scroll or swipe to pan. Hold Control or Command and scroll to zoom. Hold Space and drag, or middle-click and drag, to pan.',
-      }),
+  const leftOverlayRowCss = useMemo(
+    () => css`
+      margin: 0;
+      padding: 0;
+      align-items: flex-start;
+    `,
     []
   );
 
-  const onMouseEnterViewport = useCallback(() => {
-    setPointerInViewport(true);
-  }, []);
+  const leftOverlayControlsColumnCss = useMemo(
+    () => css`
+      margin: 0;
+      padding: 0;
+      gap: 4px;
+    `,
+    []
+  );
 
-  const onMouseLeaveViewport = useCallback(() => {
-    setPointerInViewport(false);
-    spaceHeldRef.current = false;
-    setSpacePressed(false);
-    clearEdgeHover();
-  }, [clearEdgeHover]);
+  const minimapStyle = useMemo(
+    () => ({
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+      border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
+      borderRadius: euiTheme.border.radius.medium,
+      margin: 8,
+      width: 192,
+      height: 128,
+      overflow: 'hidden',
+      boxSizing: 'border-box',
+    }),
+    [euiTheme]
+  );
+
+  const enterFullscreenLabel = i18n.translate('xpack.streams.ingestHubFlowCanvas.enterFullscreen', {
+    defaultMessage: 'Enter full screen',
+  });
+  const exitFullscreenLabel = i18n.translate('xpack.streams.ingestHubFlowCanvas.exitFullscreen', {
+    defaultMessage: 'Exit full screen',
+  });
+  const zoomInLabel = i18n.translate('xpack.streams.ingestHubFlowCanvas.zoomIn', {
+    defaultMessage: 'Zoom in',
+  });
+  const zoomOutLabel = i18n.translate('xpack.streams.ingestHubFlowCanvas.zoomOut', {
+    defaultMessage: 'Zoom out',
+  });
+  const zoomToFitLabel = i18n.translate('xpack.streams.ingestHubFlowCanvas.zoomFit', {
+    defaultMessage: 'Fit map to view',
+  });
+  const showFiltersLabel = i18n.translate('xpack.streams.ingestHubFlowCanvas.showFilters', {
+    defaultMessage: 'Show filters',
+  });
+  const hideFiltersLabel = i18n.translate('xpack.streams.ingestHubFlowCanvas.hideFilters', {
+    defaultMessage: 'Hide filters',
+  });
+  const filtersPanelLabel = i18n.translate('xpack.streams.ingestHubFlowCanvas.filtersPanel', {
+    defaultMessage: 'Stream map filters',
+  });
+  const fullscreenUnavailableLabel = i18n.translate(
+    'xpack.streams.ingestHubFlowCanvas.fullscreenUnavailable',
+    {
+      defaultMessage: 'Fullscreen is not available for this canvas.',
+    }
+  );
+  const canvasSettingsLabel = i18n.translate('xpack.streams.ingestHubFlowCanvas.canvasSettings', {
+    defaultMessage: 'Canvas settings',
+  });
+  const findPrevLabel = i18n.translate('xpack.streams.ingestHubFlowCanvas.findPrevious', {
+    defaultMessage: 'Previous match',
+  });
+  const findNextLabel = i18n.translate('xpack.streams.ingestHubFlowCanvas.findNext', {
+    defaultMessage: 'Next match',
+  });
+
+  const fullscreenButtonLabel = isFullscreen ? exitFullscreenLabel : enterFullscreenLabel;
+
+  const bumpFindMatch = useCallback(
+    (delta: number) => {
+      setFindMatchIndex((i) => {
+        if (findSearchTotal < 1) {
+          return 0;
+        }
+        return (i + delta + findSearchTotal) % findSearchTotal;
+      });
+    },
+    [findSearchTotal]
+  );
+
+  const placeholderOption = useMemo(
+    () => ({
+      value: '',
+      text: i18n.translate('xpack.streams.ingestHubFlowCanvas.filterAny', {
+        defaultMessage: 'Any',
+      }),
+    }),
+    []
+  );
 
   return (
-    <div className={viewportShellCss}>
-      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- custom pan/zoom (Sketch-like) */}
-      <div
-        ref={containerRef}
-        role="application"
-        tabIndex={0}
-        aria-label={canvasAriaLabel}
-        onMouseEnter={onMouseEnterViewport}
-        onMouseLeave={onMouseLeaveViewport}
-        onPointerDown={onViewportPointerDown}
-        onPointerMove={onViewportPointerMove}
-        onPointerUp={onViewportPointerUp}
-        onPointerCancel={onViewportPointerUp}
-        data-test-subj="streamsIngestHubFlowPipelineCanvas"
-        className={viewportCenterCss}
-        style={{
-          outline: 'none',
-          cursor: spacePressed ? 'grab' : undefined,
-        }}
-      >
-        <div
-          style={{
-            position: 'absolute',
-            left: 0,
-            top: 0,
-            transform: `translate(${camera.x}px, ${camera.y}px) scale(${camera.zoom})`,
-            transformOrigin: '0 0',
-            width: flowLayout.layoutWidth,
-            height: flowLayout.layoutHeight,
-          }}
+    <div
+      ref={containerRef}
+      className={reactFlowCanvasChromeCss}
+      data-test-subj="streamsIngestHubFlowPipelineCanvas"
+    >
+      <StreamsPipelineWorldContext.Provider value={worldContextValue}>
+        <ReactFlow
+          style={{ width: '100%', height: '100%' }}
+          nodes={nodes}
+          edges={[]}
+          nodeTypes={nodeTypes}
+          minZoom={0.2}
+          maxZoom={3}
+          proOptions={{ hideAttribution: true }}
+          nodesDraggable={false}
+          nodesConnectable={false}
+          nodesFocusable={false}
+          edgesFocusable={false}
+          deleteKeyCode={null}
+          multiSelectionKeyCode={null}
         >
-          <svg
-            width={flowLayout.layoutWidth}
-            height={flowLayout.layoutHeight}
-            style={{
-              position: 'absolute',
-              inset: 0,
-              zIndex: 1,
-              pointerEvents: 'none',
-            }}
-            aria-hidden
-          >
-            {flowLayout.edges.map((edge) => {
-              const inFlow = !highlight || highlight.edgeIds.has(edge.id);
-              if (highlight && highlight.edgeIds.has(edge.id) && !highlight.multicastBranch) {
-                return null;
-              }
-              const hideOutsideFlow = Boolean(terminalFanHoverActive && highlight && !inFlow);
-              if (hideOutsideFlow) {
-                return null;
-              }
-              const dimOutsideFlow = Boolean(highlight && !inFlow && !terminalFanHoverActive);
-              const d = polylineToSmoothPathD(edge.polyline, CONNECTOR_FLOW_CORNER_RADIUS);
-              if (!d) {
-                return null;
-              }
-              const opacity = dimOutsideFlow ? 0.42 : 1;
-              const multicastActive = Boolean(
-                highlight?.multicastBranch && highlight.edgeIds.has(edge.id)
-              );
-              const stroke = multicastActive
-                ? euiTheme.colors.borderStrongPrimary
-                : euiTheme.colors.borderInteractiveFormsHoverProminent;
-              const dashAnimClass = multicastActive ? connectorPathHoveredClassName : undefined;
-              return (
-                <path
-                  key={`vis-${edge.id}`}
-                  d={d}
-                  fill="none"
-                  stroke={stroke}
-                  strokeWidth={CONNECTOR_STROKE_WIDTH}
-                  strokeDasharray={FLOW_CONNECTOR_DOT_DASH}
-                  strokeDashoffset={0}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  vectorEffect="nonScalingStroke"
-                  className={dashAnimClass}
-                  opacity={opacity}
-                  style={{
-                    transition: 'stroke 120ms ease, opacity 120ms ease, stroke-width 120ms ease',
-                  }}
-                />
-              );
-            })}
-            {fanHubJointCenter && !highlight?.multicastBranch ? (
-              <circle
-                key="fan-hub-joint-mask"
-                cx={fanHubJointCenter.x}
-                cy={fanHubJointCenter.y}
-                r={FAN_HUB_JOINT_MASK_RADIUS}
-                fill={euiTheme.colors.backgroundBaseSubdued}
-              />
-            ) : null}
-            {highlight && mergedTracePathD ? (
-              <path
-                key="vis-merged-flow-trace"
-                d={mergedTracePathD}
-                fill="none"
-                stroke={euiTheme.colors.borderStrongPrimary}
-                strokeWidth={CONNECTOR_STROKE_WIDTH}
-                strokeDasharray={FLOW_CONNECTOR_DOT_DASH}
-                strokeDashoffset={0}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                vectorEffect="nonScalingStroke"
-                className={connectorPathHoveredClassName}
-              />
-            ) : null}
-          </svg>
-
-          <svg
-            width={flowLayout.layoutWidth}
-            height={flowLayout.layoutHeight}
-            style={{ position: 'absolute', inset: 0, zIndex: 2 }}
-            aria-hidden
-          >
-            {flowLayout.edges.map((edge) => {
-              const inFlow = !highlight || highlight.edgeIds.has(edge.id);
-              const hideOutsideFlow = Boolean(terminalFanHoverActive && highlight && !inFlow);
-              const dim = Boolean(highlight && !inFlow && !terminalFanHoverActive);
-              return (
-                <path
-                  key={`hit-${edge.id}`}
-                  d={polylineToSmoothPathD(edge.polyline, CONNECTOR_FLOW_CORNER_RADIUS)}
-                  fill="none"
-                  stroke="transparent"
-                  strokeWidth={28}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  vectorEffect="nonScalingStroke"
-                  style={{
-                    pointerEvents: hideOutsideFlow ? 'none' : 'stroke',
-                    cursor: 'default',
-                    opacity: hideOutsideFlow ? 0 : dim ? 0.45 : 1,
-                  }}
-                  onMouseEnter={() => onEdgeHitEnter(edge.id)}
-                  onMouseLeave={scheduleHoverClear}
-                />
-              );
-            })}
-          </svg>
-
-          {flowLayout.nodes
-            .filter((node) => node.kind !== 'branch')
-            .map((node) => {
-              const dimmed = nodeDimmed(node.id);
-              const style: CSSProperties = {
-                position: 'absolute',
-                left: node.x,
-                top: node.y,
-                width: INGEST_HUB_DEMO_STREAMS_FLOW_CARD_WIDTH_PX,
-                height: 'max-content',
-                zIndex: 7,
-                pointerEvents: 'auto',
-                boxSizing: 'border-box',
-              };
-
-              if (node.kind === 'source') {
-                const sourceDataProduct = inferFlowCanvasDataProduct(
-                  visibleRoot?.name ?? 'logs-aws.cloudwatch_logs-default'
-                );
-                return (
-                  <div key={node.id} style={style} onMouseEnter={clearHoverOnCardEnter}>
-                    <IngestHubDemoStreamsFlowSourceCard
-                      title={sourceTitle}
-                      metricsLine={sourceMetrics}
-                      quality={visibleRoot?.quality}
-                      dataProduct={sourceDataProduct}
-                      dimmed={dimmed}
-                    />
-                  </div>
-                );
-              }
-
-              const streamKey = node.id as (typeof STREAM_NODE_IDS)[number];
-              const row = leafByStreamNodeId.get(node.id);
-              const defaultTitle = DEFAULT_STREAM_TITLES[streamKey] ?? node.id;
-              const titleNode = row ? (
-                <EuiLink
-                  href={buildStreamHref(row.name)}
-                  data-test-subj={`streamsFlowCanvasStreamLink-${row.name}`}
-                  onClick={(e: React.MouseEvent) => {
-                    e.preventDefault();
-                    onStreamNavigate(row.name);
-                  }}
+          <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
+          <Panel position="top-left" style={{ margin: 0, padding: 0 }}>
+            <EuiFlexGroup
+              direction="row"
+              gutterSize="none"
+              alignItems="flexStart"
+              responsive={false}
+              css={leftOverlayRowCss}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup
+                  direction="column"
+                  gutterSize="none"
+                  responsive={false}
+                  data-test-subj="streamsIngestHubFlowCanvasControls"
+                  css={leftOverlayControlsColumnCss}
                 >
-                  {row.name}
-                </EuiLink>
-              ) : (
-                <strong>{defaultTitle}</strong>
-              );
-              const dataProduct = inferFlowCanvasDataProduct(row?.name ?? defaultTitle);
-              const metricsLine = row
-                ? i18n.translate('xpack.streams.ingestHubFlowCanvas.streamMetricsFromRow', {
-                    defaultMessage: '30d · {eps} eps · 180ms',
-                    values: { eps: formatCompactEps(row.docCount) },
-                  })
-                : i18n.translate('xpack.streams.ingestHubFlowCanvas.streamMetricsDemo', {
-                    defaultMessage: '30d · 3k eps · 180ms',
-                  });
-              const quality = row?.quality;
-
-              return (
-                <div key={node.id} style={style} onMouseEnter={clearHoverOnCardEnter}>
-                  <IngestHubDemoStreamsFlowDestinationCard
-                    title={titleNode}
-                    titleTooltip={row?.name ?? defaultTitle}
-                    metricsLine={metricsLine}
-                    quality={streamKey === 'dest_s3' ? undefined : quality}
-                    dataProduct={dataProduct}
-                    trailingAction={undefined}
-                    dimmed={dimmed}
-                  />
-                </div>
-              );
-            })}
-        </div>
-        <IngestHubDemoStreamsFlowPipelineCanvasMinimap
-          worldWidth={flowLayout.layoutWidth}
-          worldHeight={flowLayout.layoutHeight}
-          viewportWidth={viewport.contentWidth}
-          viewportHeight={viewport.contentHeight}
-          camera={camera}
-          onCameraChange={setCamera}
-          nodes={flowLayout.nodes}
-          edges={flowLayout.edges}
-        />
-      </div>
+                  <EuiPanel
+                    paddingSize="none"
+                    hasBorder={false}
+                    hasShadow={false}
+                    color="plain"
+                    grow={false}
+                    css={canvasControlToolbarStackCss}
+                  >
+                    <EuiFlexGroup
+                      direction="column"
+                      gutterSize="none"
+                      alignItems="stretch"
+                      responsive={false}
+                    >
+                      <EuiFlexItem grow={false} css={canvasControlToolbarRowCss}>
+                        <EuiToolTip
+                          content={isFilterPanelExpanded ? hideFiltersLabel : showFiltersLabel}
+                          position="right"
+                        >
+                          <EuiButtonIcon
+                            display="empty"
+                            iconType="controlsHorizontal"
+                            size="s"
+                            color="text"
+                            aria-label={filtersPanelLabel}
+                            aria-expanded={isFilterPanelExpanded}
+                            onClick={toggleFilterPanel}
+                            data-test-subj="streamsIngestHubFlowCanvasFiltersToggle"
+                          />
+                        </EuiToolTip>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiPanel>
+                  <EuiPanel
+                    paddingSize="none"
+                    hasBorder={false}
+                    hasShadow={false}
+                    color="plain"
+                    grow={false}
+                    css={canvasControlToolbarStackCss}
+                  >
+                    <EuiFlexGroup
+                      direction="column"
+                      gutterSize="none"
+                      alignItems="stretch"
+                      responsive={false}
+                    >
+                      <EuiFlexItem grow={false} css={canvasControlToolbarRowCss}>
+                        <EuiButtonIcon
+                          display="empty"
+                          iconType="plus"
+                          size="s"
+                          color="text"
+                          aria-label={zoomInLabel}
+                          onClick={() => zoomIn({ duration: FIT_VIEW_DURATION_MS })}
+                          data-test-subj="streamsIngestHubFlowCanvasZoomIn"
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false} css={canvasControlToolbarRowCss}>
+                        <EuiButtonIcon
+                          display="empty"
+                          iconType="minus"
+                          size="s"
+                          color="text"
+                          aria-label={zoomOutLabel}
+                          onClick={() => zoomOut({ duration: FIT_VIEW_DURATION_MS })}
+                          data-test-subj="streamsIngestHubFlowCanvasZoomOut"
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false} css={canvasControlToolbarRowCss}>
+                        <EuiButtonIcon
+                          display="empty"
+                          iconType="expand"
+                          size="s"
+                          color="text"
+                          aria-label={zoomToFitLabel}
+                          onClick={() => {
+                            fitLayoutToViewportWidth(FIT_VIEW_DURATION_MS);
+                          }}
+                          data-test-subj="streamsIngestHubFlowCanvasFitToView"
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false} css={canvasControlToolbarRowCss}>
+                        {onToggleFullscreen ? (
+                          <EuiButtonIcon
+                            display="empty"
+                            iconType={isFullscreen ? 'fullScreenExit' : 'fullScreen'}
+                            size="s"
+                            color="text"
+                            aria-label={fullscreenButtonLabel}
+                            onClick={onToggleFullscreen}
+                            data-test-subj="streamsIngestHubFlowCanvasFullscreen"
+                          />
+                        ) : (
+                          <EuiToolTip
+                            content={fullscreenUnavailableLabel}
+                            position="right"
+                            disableScreenReaderOutput
+                          >
+                            <EuiButtonIcon
+                              display="empty"
+                              iconType="fullScreen"
+                              size="s"
+                              color="text"
+                              isDisabled
+                              aria-label={fullscreenUnavailableLabel}
+                              data-test-subj="streamsIngestHubFlowCanvasFullscreen"
+                            />
+                          </EuiToolTip>
+                        )}
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiPanel>
+                  {onOpenCanvasSettings ? (
+                    <EuiPanel
+                      paddingSize="none"
+                      hasBorder={false}
+                      hasShadow={false}
+                      color="plain"
+                      grow={false}
+                      css={canvasControlToolbarStackCss}
+                    >
+                      <EuiFlexGroup
+                        direction="column"
+                        gutterSize="none"
+                        alignItems="stretch"
+                        responsive={false}
+                      >
+                        <EuiFlexItem grow={false} css={canvasControlToolbarRowCss}>
+                          <EuiButtonIcon
+                            display="empty"
+                            iconType="gear"
+                            size="s"
+                            color="text"
+                            aria-label={canvasSettingsLabel}
+                            onClick={onOpenCanvasSettings}
+                            data-test-subj="streamsIngestHubFlowCanvasSettings"
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiPanel>
+                  ) : null}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              {isFilterPanelExpanded ? (
+                <EuiFlexItem grow={false}>
+                  <EuiPanel
+                    paddingSize="s"
+                    hasBorder
+                    color="plain"
+                    grow={false}
+                    aria-label={filtersPanelLabel}
+                    css={css`
+                      width: 280px;
+                      max-width: 280px;
+                    `}
+                  >
+                    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow>
+                        <EuiFieldSearch
+                          compressed
+                          value={findQuery}
+                          onChange={(e) => setFindQuery(e.target.value)}
+                          placeholder={i18n.translate(
+                            'xpack.streams.ingestHubFlowCanvas.findPlaceholderWithShortcut',
+                            {
+                              defaultMessage: 'Find in page ({shortcut})',
+                              values: { shortcut: findInPageShortcutLabel },
+                            }
+                          )}
+                          fullWidth
+                          isClearable
+                          aria-label={i18n.translate(
+                            'xpack.streams.ingestHubFlowCanvas.findInPage',
+                            {
+                              defaultMessage: 'Find in page',
+                            }
+                          )}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="s" color="subdued" css={css({ whiteSpace: 'nowrap' })}>
+                          {findCounterText}
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiFlexGroup gutterSize="none" responsive={false}>
+                          <EuiButtonIcon
+                            display="empty"
+                            iconType="arrowUp"
+                            size="xs"
+                            aria-label={findPrevLabel}
+                            isDisabled={findSearchTotal < 2}
+                            onClick={() => bumpFindMatch(-1)}
+                          />
+                          <EuiButtonIcon
+                            display="empty"
+                            iconType="arrowDown"
+                            size="xs"
+                            aria-label={findNextLabel}
+                            isDisabled={findSearchTotal < 2}
+                            onClick={() => bumpFindMatch(1)}
+                          />
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    <EuiSpacer size="s" />
+                    <EuiTitle size="xxxs">
+                      <span>
+                        {i18n.translate('xpack.streams.ingestHubFlowCanvas.filtersSectionTitle', {
+                          defaultMessage: 'Filters',
+                        })}
+                      </span>
+                    </EuiTitle>
+                    <EuiSpacer size="xs" />
+                    <EuiFormRow
+                      label={i18n.translate('xpack.streams.ingestHubFlowCanvas.connections', {
+                        defaultMessage: 'Connections',
+                      })}
+                      fullWidth
+                    >
+                      <EuiSelect compressed options={[placeholderOption]} value="" disabled />
+                    </EuiFormRow>
+                    <EuiSpacer size="xs" />
+                    <EuiFormRow
+                      label={i18n.translate('xpack.streams.ingestHubFlowCanvas.alertStatus', {
+                        defaultMessage: 'Alert status',
+                      })}
+                      fullWidth
+                    >
+                      <EuiSelect compressed options={[placeholderOption]} value="" disabled />
+                    </EuiFormRow>
+                    <EuiSpacer size="xs" />
+                    <EuiFormRow
+                      label={i18n.translate('xpack.streams.ingestHubFlowCanvas.sloStatus', {
+                        defaultMessage: 'SLO status',
+                      })}
+                      fullWidth
+                    >
+                      <EuiSelect compressed options={[placeholderOption]} value="" disabled />
+                    </EuiFormRow>
+                    <EuiSpacer size="xs" />
+                    <EuiFormRow
+                      label={i18n.translate('xpack.streams.ingestHubFlowCanvas.anomalySeverity', {
+                        defaultMessage: 'Anomaly severity',
+                      })}
+                      fullWidth
+                    >
+                      <EuiSelect compressed options={[placeholderOption]} value="" disabled />
+                    </EuiFormRow>
+                    <EuiSpacer size="s" />
+                    <EuiTitle size="xxxs">
+                      <span>
+                        {i18n.translate(
+                          'xpack.streams.ingestHubFlowCanvas.presentationSectionTitle',
+                          {
+                            defaultMessage: 'Presentation',
+                          }
+                        )}
+                      </span>
+                    </EuiTitle>
+                    <EuiSpacer size="xs" />
+                    <EuiButtonGroup
+                      legend={i18n.translate(
+                        'xpack.streams.ingestHubFlowCanvas.presentationLegend',
+                        {
+                          defaultMessage: 'Graph presentation',
+                        }
+                      )}
+                      buttonSize="compressed"
+                      isFullWidth
+                      options={[
+                        {
+                          id: 'horizontal',
+                          label: i18n.translate(
+                            'xpack.streams.ingestHubFlowCanvas.presentationHorizontal',
+                            {
+                              defaultMessage: 'Horizontal',
+                            }
+                          ),
+                          iconType: 'arrowRight',
+                        },
+                        {
+                          id: 'vertical',
+                          label: i18n.translate(
+                            'xpack.streams.ingestHubFlowCanvas.presentationVertical',
+                            {
+                              defaultMessage: 'Vertical',
+                            }
+                          ),
+                          iconType: 'arrowDown',
+                        },
+                      ]}
+                      idSelected={presentation}
+                      onChange={(id) => setPresentation(id as 'horizontal' | 'vertical')}
+                    />
+                  </EuiPanel>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          </Panel>
+          <MiniMap
+            position="bottom-left"
+            pannable
+            zoomable
+            nodeStrokeWidth={2}
+            nodeColor={() => euiTheme.colors.primary}
+            nodeStrokeColor={() => euiTheme.colors.primary}
+            maskColor="rgba(15, 20, 30, 0.12)"
+            maskStrokeWidth={0}
+            style={minimapStyle}
+          />
+        </ReactFlow>
+        {cardSelection ? (
+          <IngestHubDemoStreamsFlowCardDetailFlyout
+            selection={cardSelection}
+            topology={topology}
+            flyoutTitleId={cardFlyoutTitleId}
+            onClose={closeCardFlyout}
+            onStreamNavigate={onStreamNavigate}
+          />
+        ) : null}
+      </StreamsPipelineWorldContext.Provider>
     </div>
   );
 });
 
-function formatCompactEps(docCount: number): string {
-  if (docCount >= 1_000_000) {
-    return `${(docCount / 1_000_000).toFixed(1)}M`;
-  }
-  if (docCount >= 1_000) {
-    return `${Math.round(docCount / 1_000)}k`;
-  }
-  return String(docCount);
-}
+export const IngestHubDemoStreamsFlowPipelineCanvas = forwardRef<
+  IngestHubDemoStreamsFlowPipelineCanvasRef,
+  IngestHubDemoStreamsFlowPipelineCanvasProps
+>(function IngestHubDemoStreamsFlowPipelineCanvas(props, ref) {
+  return (
+    <ReactFlowProvider>
+      <IngestHubDemoStreamsFlowPipelineCanvasInner {...props} ref={ref} />
+    </ReactFlowProvider>
+  );
+});

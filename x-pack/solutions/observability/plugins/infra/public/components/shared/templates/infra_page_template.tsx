@@ -16,6 +16,7 @@ import { useMetricsDataViewContext, useSourceContext } from '../../../containers
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { ErrorCallout } from '../../error_callout';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
+import { useAddDataCatalogFlyout } from '../../../hooks/use_add_data_catalog_flyout';
 import type { OnboardingFlow } from './no_data_config';
 import { getNoDataConfig } from './no_data_config';
 
@@ -56,6 +57,7 @@ export const InfraPageTemplate = ({
     [onboardingFlow, dataSourceAvailability]
   );
 
+  const { useCatalogForAddData, openCatalog } = useAddDataCatalogFlyout();
   const hasData = !!data?.hasData;
   const noDataConfig = getNoDataConfig({
     hasData,
@@ -63,6 +65,7 @@ export const InfraPageTemplate = ({
     onboardingFlow,
     docsLink: docLinks.links.observability.guide,
     locators: share.url.locators,
+    onAddDataClick: useCatalogForAddData ? () => openCatalog('browse') : undefined,
   });
 
   const { setScreenContext } = observabilityAIAssistant?.service || {};

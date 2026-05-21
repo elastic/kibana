@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiBadge,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -34,16 +34,30 @@ import {
 } from './documents_cell_layout';
 import { MockAwsStreamQualityBadge } from './ingest_hub_demo_stream_quality_badge';
 import {
-  AWS_MOCK_STREAMS,
   MOCK_AWS_STREAMS_NOW,
   MOCK_AWS_STREAMS_RANGE_MS,
   type AwsMockStreamRow,
 } from './ingest_hub_demo_streams_model';
+import { AWS_LOGS_MOCK_STREAMS } from '../ingest_hub_aws_logs_demo_data';
 import { filterMockAwsStreamsBySearchQuery } from './ingest_hub_demo_streams_list_search';
+import {
+  toggleStarredStreamName,
+  useStarredStreamNames,
+} from '../../../common/ingest_hub_starred_streams';
 
-const MOCK_STREAMS = AWS_MOCK_STREAMS;
+const MOCK_STREAMS = AWS_LOGS_MOCK_STREAMS;
 const MOCK_NOW = MOCK_AWS_STREAMS_NOW;
 const MOCK_RANGE_MS = MOCK_AWS_STREAMS_RANGE_MS;
+
+const streamsTableRowStarCss = css`
+  [data-test-subj='streamsTable'] tbody tr [data-test-subj^='streamsStarStreamButton'] {
+    visibility: hidden;
+  }
+
+  [data-test-subj='streamsTable'] tbody tr:hover [data-test-subj^='streamsStarStreamButton'] {
+    visibility: visible;
+  }
+`;
 
 type MockStreamRow = AwsMockStreamRow;
 
@@ -124,6 +138,7 @@ export function MockAwsStreamsTable() {
   const { getStepPropsByStepId } = useStreamsTour();
   const router = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
+  const starredStreamNames = useStarredStreamNames();
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [sortDirection] = useState<Direction>('asc');
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 25 });
@@ -140,7 +155,7 @@ export function MockAwsStreamsTable() {
     });
   };
 
-  const filteredAndFlattened = React.useMemo(
+  const filteredStreams = React.useMemo(
     () => filterMockAwsStreamsBySearchQuery(MOCK_STREAMS, undefined, collapsed),
     [collapsed]
   );
@@ -154,8 +169,8 @@ export function MockAwsStreamsTable() {
   const streamsListStepProps = getStepPropsByStepId('streams_list');
 
   const renderNameColumnHeader = () => {
-    const nameLabel = i18n.translate('xpack.streams.mockStreamsTable.nameColumn', {
-      defaultMessage: 'Name',
+    const nameLabel = i18n.translate('xpack.streams.mockStreamsTable.streamColumn', {
+      defaultMessage: 'Stream',
     });
     const labelNode = streamsListStepProps ? (
       <EuiTourStep
@@ -190,6 +205,7 @@ export function MockAwsStreamsTable() {
       alignItems="stretch"
       responsive={false}
       data-test-subj="streamsMockAwsStreamsTable"
+      className={streamsTableRowStarCss}
     >
       <EuiFlexItem grow style={{ minHeight: 0 }}>
         <EuiInMemoryTable<MockStreamRow>
@@ -203,7 +219,14 @@ export function MockAwsStreamsTable() {
               render: (_: unknown, item: MockStreamRow) => {
                 const hasChildren = MOCK_STREAMS.some((s) => s.parentName === item.name);
                 const isCollapsed = collapsed.has(item.name);
-
+                const isStarred = starredStreamNames.includes(item.name);
+                const starLabel = isStarred
+                  ? i18n.translate('xpack.streams.mockStreamsTable.unstarStream', {
+                      defaultMessage: 'Remove from starred',
+                    })
+                  : i18n.translate('xpack.streams.mockStreamsTable.starStream', {
+                      defaultMessage: 'Add to starred',
+                    });
                 return (
                   <EuiFlexGroup
                     alignItems="center"
@@ -219,32 +242,7 @@ export function MockAwsStreamsTable() {
                           type={isCollapsed ? 'arrowRight' : 'arrowDown'}
                           color="text"
                           size="m"
-                          aria-label={
-                            isCollapsed
-                              ? i18n.translate(
-                                  'xpack.streams.mockStreamsTable.collapsedNodeAriaLabel',
-                                  {
-                                    defaultMessage: 'Expand {name}',
-                                    values: { name: item.name },
-                                  }
-                                )
-                              : i18n.translate(
-                                  'xpack.streams.mockStreamsTable.expandedNodeAriaLabel',
-                                  {
-                                    defaultMessage: 'Collapse {name}',
-                                    values: { name: item.name },
-                                  }
-                                )
-                          }
                           onClick={() => handleToggleCollapse(item.name)}
-                          tabIndex={0}
-                          role="button"
-                          onKeyDown={(e: React.KeyboardEvent) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                              e.preventDefault();
-                              handleToggleCollapse(item.name);
-                            }
-                          }}
                           style={{ cursor: 'pointer' }}
                         />
                       </EuiFlexItem>
@@ -253,7 +251,26 @@ export function MockAwsStreamsTable() {
                         <EuiIcon type="empty" color="text" size="m" aria-hidden />
                       </EuiFlexItem>
                     )}
-                    <EuiFlexGroup alignItems="center" gutterSize="s" responsive wrap>
+                    <EuiFlexItem
+                      grow={false}
+                      className={css`
+                        flex: 0 0 ${euiTheme.size.l};
+                        width: ${euiTheme.size.l};
+                      `}
+                    >
+                      <EuiButtonIcon
+                        data-test-subj={`streamsStarStreamButton-${item.name}`}
+                        iconType={isStarred ? 'starFilled' : 'starEmpty'}
+                        color={isStarred ? 'warning' : 'text'}
+                        aria-label={starLabel}
+                        onClick={(event: React.MouseEvent) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          toggleStarredStreamName(item.name);
+                        }}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
                       <EuiLink
                         data-test-subj={`streamsNameLink-${item.name}`}
                         href={router.link('/{key}', {
@@ -270,7 +287,7 @@ export function MockAwsStreamsTable() {
                       >
                         {item.name}
                       </EuiLink>
-                    </EuiFlexGroup>
+                    </EuiFlexItem>
                   </EuiFlexGroup>
                 );
               },
@@ -318,7 +335,7 @@ export function MockAwsStreamsTable() {
               align: 'right' as const,
               dataType: 'string',
               render: (_: unknown, item: MockStreamRow) =>
-                item.isRootStream ? (
+                item.isWiredRoot ? (
                   <EuiFlexGroup
                     alignItems="center"
                     justifyContent="flexEnd"
@@ -328,11 +345,6 @@ export function MockAwsStreamsTable() {
                   >
                     <EuiFlexItem grow={false}>
                       <EuiLink>logs_policy</EuiLink>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color="hollow">
-                        <EuiText size="s">ILM</EuiText>
-                      </EuiBadge>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 ) : (
@@ -362,7 +374,7 @@ export function MockAwsStreamsTable() {
             },
           ]}
           itemId="name"
-          items={filteredAndFlattened}
+          items={filteredStreams}
           sorting={{ sort: { field: 'name', direction: sortDirection } }}
           noItemsMessage={i18n.translate('xpack.streams.mockStreamsTable.noItems', {
             defaultMessage: 'No streams match your search.',

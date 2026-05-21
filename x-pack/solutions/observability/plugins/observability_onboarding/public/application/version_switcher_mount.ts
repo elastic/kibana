@@ -19,7 +19,8 @@ export const mountVersionSwitcherWidget = () => {
     position: 'fixed',
     bottom: '16px',
     left: '16px',
-    zIndex: '2147483647',
+    // Below typical EUI modal/mask stacking so ingested modals cover this widget (see toolbar portal in plugin.tsx).
+    zIndex: '8998',
     display: 'flex',
     alignItems: 'center',
     gap: '8px',

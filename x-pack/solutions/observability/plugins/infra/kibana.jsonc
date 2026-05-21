@@ -40,7 +40,8 @@
       "visTypeTimeseries",
       "apmDataAccess",
       "logsDataAccess",
-      "fieldsMetadata"
+      "fieldsMetadata",
+      "streamsApp"
     ],
     "optionalPlugins": [
       "spaces",
