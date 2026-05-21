@@ -31,13 +31,17 @@ export interface InternalDocViewerProps
   docViews: DocView[];
   initialTabId?: DocView['id'];
   onUpdateSelectedTabId?: (tabId: string | undefined) => void;
+  originDocType?: string;
 }
 
 const getFullTabId = (tabId: string) => `kbn_doc_viewer_tab_${tabId}`;
 const getOriginalTabId = (fullTabId: string) => fullTabId.replace('kbn_doc_viewer_tab_', '');
 
 const InternalDocViewer = forwardRef<InternalDocViewerApi, InternalDocViewerProps>(
-  ({ docViews, initialTabId, onUpdateSelectedTabId, reportEvent, ...renderProps }, ref) => {
+  (
+    { docViews, initialTabId, onUpdateSelectedTabId, reportEvent, originDocType, ...renderProps },
+    ref
+  ) => {
     const tabs = docViews
       .filter(({ enabled }) => enabled) // Filter out disabled doc views
       .map((docView: DocView) => ({
@@ -83,6 +87,7 @@ const InternalDocViewer = forwardRef<InternalDocViewerApi, InternalDocViewerProp
     useDocViewerTabViewedEvent({
       reportEvent,
       tabId: selectedTab ? getOriginalTabId(selectedTab.id) : undefined,
+      originDocType,
       hit: renderProps.hit,
       initialEventKey: initialDocViewerViewedEventKey,
       onEventKeyChange: setInitialDocViewerViewedEventKey,

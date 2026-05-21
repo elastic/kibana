@@ -707,30 +707,6 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                 "headerDarkBackground": "#0B1628",
                 "headerDarkSearchBorderColor": "#485975",
                 "headerDarkSectionItemBackgroundFocus": "#0A2342",
-                "listGroupItemBackgroundHover": Computed {
-                  "computer": [Function],
-                  "dependencies": Array [
-                    "colors.backgroundBaseInteractiveHover",
-                  ],
-                },
-                "listGroupItemBackgroundPrimaryActive": Computed {
-                  "computer": [Function],
-                  "dependencies": Array [
-                    "colors.backgroundBaseInteractiveSelect",
-                  ],
-                },
-                "listGroupItemBackgroundPrimaryHover": Computed {
-                  "computer": [Function],
-                  "dependencies": Array [
-                    "colors.backgroundBaseInteractiveHover",
-                  ],
-                },
-                "listGroupItemBackgroundSubduedActive": Computed {
-                  "computer": [Function],
-                  "dependencies": Array [
-                    "colors.backgroundBaseInteractiveSelect",
-                  ],
-                },
                 "loadingChartMonoBackground0": "#384861",
                 "loadingChartMonoBackground1": "#485975",
                 "loadingChartMonoBackground2": "#5A6D8C",
@@ -1139,30 +1115,6 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                 "headerDarkBackground": "#0B1628",
                 "headerDarkSearchBorderColor": "#485975",
                 "headerDarkSectionItemBackgroundFocus": "#0A2342",
-                "listGroupItemBackgroundHover": Computed {
-                  "computer": [Function],
-                  "dependencies": Array [
-                    "colors.backgroundBaseInteractiveHover",
-                  ],
-                },
-                "listGroupItemBackgroundPrimaryActive": Computed {
-                  "computer": [Function],
-                  "dependencies": Array [
-                    "colors.backgroundBaseInteractiveSelect",
-                  ],
-                },
-                "listGroupItemBackgroundPrimaryHover": Computed {
-                  "computer": [Function],
-                  "dependencies": Array [
-                    "colors.backgroundBaseInteractiveHover",
-                  ],
-                },
-                "listGroupItemBackgroundSubduedActive": Computed {
-                  "computer": [Function],
-                  "dependencies": Array [
-                    "colors.backgroundBaseInteractiveSelect",
-                  ],
-                },
                 "loadingChartMonoBackground0": "#E3E8F2",
                 "loadingChartMonoBackground1": "#CAD3E2",
                 "loadingChartMonoBackground2": "#B4C1D5",

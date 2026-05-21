@@ -16,6 +16,7 @@ plugins:
     - dashboard_markdown
     - data
     - data_views
+    - dev_tools
     - discover
     - discover_enhanced
     - entity_store
@@ -25,10 +26,12 @@ plugins:
     - flyoutSystemExamples
     - gen_ai_settings
     - global_search
+    - grokdebugger
     - index_management
     - infra
     - ingest_pipelines
     - intercepts
+    - home
     - kibana_overview
     - lens
     - logstash
@@ -45,18 +48,21 @@ plugins:
     - search_getting_started
     - search_homepage
     - search_inference_endpoints
+    - searchprofiler
     - security
     - security_solution
     - serverless_observability
     - share
     - slo
     - spaces
+    - stack_connectors
     - streams
     - streams_app
     - synthetics
     - task_manager
     - transform
     - triggers_actions_ui
+    - upgrade_assistant
     - uptime
     - ux
     - workflows_extensions

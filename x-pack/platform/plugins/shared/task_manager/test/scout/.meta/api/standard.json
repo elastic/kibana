@@ -1,101 +1,129 @@
 {
-  "sha1": "6c0dea0264f9b07f5859256ef261e0cd9c8fb02b",
+  "sha1": "e4e838d0e803e7be4051845fa83b6c724ac4cd12",
   "tests": [
     {
-      "id": "61070c0c401f9ab-03c8e0a7f9c921c",
-      "title": "Task Manager Schedule and Delete Routes schedule: creates a task and returns it",
+      "id": "eb284a668bfb2df-2953aa4df2b67e6",
+      "title": "Task Manager internal routes schedule: creates a task and returns it",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/task_schedule_and_delete.spec.ts",
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/internal_routes.spec.ts",
         "line": 31,
         "column": 12
       }
     },
     {
-      "id": "61070c0c401f9ab-85ab00d18644f8b",
-      "title": "Task Manager Schedule and Delete Routes schedule: creates a task with an interval schedule",
+      "id": "eb284a668bfb2df-e1d94daf83a29b1",
+      "title": "Task Manager internal routes schedule: creates a task with an interval schedule",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/task_schedule_and_delete.spec.ts",
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/internal_routes.spec.ts",
         "line": 56,
         "column": 12
       }
     },
     {
-      "id": "61070c0c401f9ab-d8443fc743b870a",
-      "title": "Task Manager Schedule and Delete Routes schedule: returns 400 when taskType is missing",
+      "id": "eb284a668bfb2df-85c696fac9f58ad",
+      "title": "Task Manager internal routes schedule: returns 400 when taskType is missing",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/task_schedule_and_delete.spec.ts",
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/internal_routes.spec.ts",
         "line": 84,
         "column": 12
       }
     },
     {
-      "id": "61070c0c401f9ab-eaa06d146064151",
-      "title": "Task Manager Schedule and Delete Routes schedule: returns 403 when called by a viewer",
+      "id": "eb284a668bfb2df-885a9742b7c3b73",
+      "title": "Task Manager internal routes schedule: returns 403 when called by a viewer",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/task_schedule_and_delete.spec.ts",
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/internal_routes.spec.ts",
         "line": 100,
         "column": 12
       }
     },
     {
-      "id": "61070c0c401f9ab-5f1d247e5ff9264",
-      "title": "Task Manager Schedule and Delete Routes delete: removes an existing task",
+      "id": "eb284a668bfb2df-48ade5ec6cc1c46",
+      "title": "Task Manager internal routes run_soon: returns 200 for an existing idle task",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/task_schedule_and_delete.spec.ts",
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/internal_routes.spec.ts",
         "line": 117,
         "column": 12
       }
     },
     {
-      "id": "61070c0c401f9ab-26cc781ecff2add",
-      "title": "Task Manager Schedule and Delete Routes delete: returns 404 for a non-existent task",
+      "id": "eb284a668bfb2df-9f4753225384ef3",
+      "title": "Task Manager internal routes run_soon: returns 403 when called by a viewer",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/task_schedule_and_delete.spec.ts",
-        "line": 145,
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/internal_routes.spec.ts",
+        "line": 146,
         "column": 12
       }
     },
     {
-      "id": "61070c0c401f9ab-d1dae81664af2a9",
-      "title": "Task Manager Schedule and Delete Routes delete: returns 403 when called by a viewer",
+      "id": "eb284a668bfb2df-4f258963666c002",
+      "title": "Task Manager internal routes delete: removes an existing task",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/task_schedule_and_delete.spec.ts",
-        "line": 155,
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/internal_routes.spec.ts",
+        "line": 156,
+        "column": 12
+      }
+    },
+    {
+      "id": "eb284a668bfb2df-3d903979f7edb7e",
+      "title": "Task Manager internal routes delete: returns 404 for a non-existent task",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/internal_routes.spec.ts",
+        "line": 184,
+        "column": 12
+      }
+    },
+    {
+      "id": "eb284a668bfb2df-c5f88d86aa71a59",
+      "title": "Task Manager internal routes delete: returns 403 when called by a viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/internal_routes.spec.ts",
+        "line": 194,
         "column": 12
       }
     }

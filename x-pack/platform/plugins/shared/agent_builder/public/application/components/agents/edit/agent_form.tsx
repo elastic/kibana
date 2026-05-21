@@ -613,11 +613,9 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                     }
                   >
                     <EuiContextMenuPanel
-                      size="s"
                       items={[
                         <EuiContextMenuItem
                           icon="comment"
-                          size="s"
                           disabled={isSaveDisabled}
                           onClick={handleSubmit(handleSaveAndChat)}
                         >
@@ -654,11 +652,9 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                   zIndex={Number(euiTheme.levels.header) - 1}
                 >
                   <EuiContextMenuPanel
-                    size="s"
                     items={[
                       <EuiContextMenuItem
                         icon="copy"
-                        size="s"
                         onClick={() => {
                           setContextMenuOpen(false);
                           navigateToAgentBuilderUrl(appPaths.agents.new, {
@@ -672,7 +668,6 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                       </EuiContextMenuItem>,
                       <EuiContextMenuItem
                         icon="trash"
-                        size="s"
                         css={css`
                           color: ${euiTheme.colors.textDanger};
                         `}

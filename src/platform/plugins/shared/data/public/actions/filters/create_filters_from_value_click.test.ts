@@ -279,6 +279,20 @@ describe('createFiltersFromClickEvent', () => {
         );
       });
 
+      test('returns no filters when a computed column name matches sourceField and an index field with that name exists', async () => {
+        table.columns[0].isComputedColumn = true;
+        mockFieldByName.mockReturnValue({
+          name: 'message',
+          filterable: true,
+        });
+
+        const filter = await createFilterESQL(table, 0, 0);
+
+        expect(mockFieldByName).toHaveBeenCalledTimes(1);
+        expect(mockFieldByName).toHaveBeenCalledWith('message');
+        expect(filter).toEqual([]);
+      });
+
       test('should create phrases filter for array value using sourceField for index field name', async () => {
         const mockFilterableField = {
           name: 'tags',

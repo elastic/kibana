@@ -15,7 +15,6 @@ import { HeaderPage } from '../header_page';
 import { EditableTitle } from '../header_page/editable_title';
 import { useCasesTitleBreadcrumbs } from '../use_breadcrumbs';
 import { CaseViewActivity } from './components/case_view_activity';
-import { CaseViewAlerts } from './components/case_view_alerts';
 import { CaseViewObservables } from './components/case_view_observables';
 import { CaseViewMetrics } from './metrics';
 import type { CaseViewPageProps } from './types';
@@ -43,16 +42,7 @@ const ATTACHMENT_TABS = [
 ];
 
 export const CaseViewPage = React.memo<CaseViewPageProps>(
-  ({
-    caseData,
-    refreshRef,
-    ruleDetailsNavigation,
-    actionsNavigation,
-    showAlertDetails,
-    useFetchAlertData,
-    onAlertsTableLoaded,
-    renderAlertsTable,
-  }) => {
+  ({ caseData, refreshRef, actionsNavigation }) => {
     const { features, unifiedAttachmentTypeRegistry } = useCasesContext();
     const { urlParams } = useUrlParams();
     const refreshCaseViewPage = useRefreshCaseViewPage();
@@ -108,6 +98,14 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
       return unifiedAttachmentTypeRegistry.get(eventType)?.getAttachmentTabViewObject?.()?.children;
     }, [unifiedAttachmentTypeRegistry, owner]);
 
+    const AlertTabComponent = useMemo(() => {
+      const alertType = toUnifiedAttachmentType('alert', owner);
+      if (!unifiedAttachmentTypeRegistry.has(alertType)) {
+        return undefined;
+      }
+      return unifiedAttachmentTypeRegistry.get(alertType)?.getAttachmentTabViewObject?.()?.children;
+    }, [unifiedAttachmentTypeRegistry, owner]);
+
     const FileTabComponent = useMemo(() => {
       if (!unifiedAttachmentTypeRegistry.has(FILE_ATTACHMENT_TYPE)) {
         return undefined;
@@ -156,12 +154,9 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
         <EuiFlexGroup data-test-subj={`case-view-tab-content-${activeTabId}`} alignItems="baseline">
           {activeTabId === CASE_VIEW_PAGE_TABS.ACTIVITY && (
             <CaseViewActivity
-              ruleDetailsNavigation={ruleDetailsNavigation}
               caseData={caseWithFilteredAttachments}
               searchTerm={searchTerm}
               actionsNavigation={actionsNavigation}
-              showAlertDetails={showAlertDetails}
-              useFetchAlertData={useFetchAlertData}
             />
           )}
           {ATTACHMENT_TABS.includes(activeTabId as CASE_VIEW_PAGE_TABS) && (
@@ -172,14 +167,14 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
               caseData={caseWithFilteredAttachments}
             >
               <>
-                {activeTabId === CASE_VIEW_PAGE_TABS.ALERTS && features.alerts.enabled && (
-                  <CaseViewAlerts
-                    key={caseWithFilteredAttachments.updatedAt}
-                    caseData={caseWithFilteredAttachments}
-                    renderAlertsTable={renderAlertsTable}
-                    onAlertsTableLoaded={onAlertsTableLoaded}
-                  />
-                )}
+                {activeTabId === CASE_VIEW_PAGE_TABS.ALERTS &&
+                  features.alerts.enabled &&
+                  AlertTabComponent != null && (
+                    <AlertTabComponent
+                      key={caseWithFilteredAttachments.updatedAt}
+                      caseData={caseWithFilteredAttachments}
+                    />
+                  )}
                 {activeTabId === CASE_VIEW_PAGE_TABS.EVENTS &&
                   features.events.enabled &&
                   EventTabComponent != null && (

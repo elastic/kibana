@@ -27,7 +27,7 @@ const ACCESSES_BUCKETING = {
   belowThresholdRelationship: 'accesses_infrequently',
 } as const;
 
-export const ACCESSES_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
+export const ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipIntegrationConfig[] = [
   {
     kind: 'bucketed',
     id: 'elastic_defend',
