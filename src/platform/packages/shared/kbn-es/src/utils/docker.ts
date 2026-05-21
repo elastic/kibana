@@ -365,7 +365,7 @@ export function getServerlessNodes(
         `discovery.seed_hosts=${n2}`,
 
         '--env',
-        'node.roles=["master","remote_cluster_client","ingest","index"]',
+        'node.roles=["master","remote_cluster_client","ingest","index","ml","transform"]',
       ],
       esArgs: [
         ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
@@ -386,7 +386,7 @@ export function getServerlessNodes(
         `discovery.seed_hosts=${n1}`,
 
         '--env',
-        'node.roles=["master","remote_cluster_client","search","ml","transform"]',
+        'node.roles=["master","remote_cluster_client","search"]',
       ],
       esArgs: [
         ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
