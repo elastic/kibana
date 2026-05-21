@@ -57,9 +57,9 @@ export function ContentFrameworkChart({
   }, [discoverLocator, esqlQuery, timefilter]);
 
   const openInDiscoverButtonLabel = i18n.translate(
-    'unifiedDocViewer.contentFramework.chart.openInDiscover',
+    'unifiedDocViewer.contentFramework.chart.openInDiscoverTab',
     {
-      defaultMessage: 'Open in Discover',
+      defaultMessage: 'Open in a Discover tab',
     }
   );
 
