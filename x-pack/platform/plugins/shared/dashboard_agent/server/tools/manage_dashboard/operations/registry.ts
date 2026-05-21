@@ -46,6 +46,7 @@ interface PrepareOperationExecutionParams {
   failures: OperationExecutionContext['failures'];
   resolvePanelsFromAttachments: OperationExecutionContext['resolvePanelsFromAttachments'];
   resolveVisualizationConfig?: OperationExecutionContext['resolveVisualizationConfig'];
+  getDefaultConnectorId: OperationExecutionContext['getDefaultConnectorId'];
 }
 
 export const prepareOperationExecution = async ({
@@ -54,6 +55,7 @@ export const prepareOperationExecution = async ({
   failures,
   resolvePanelsFromAttachments,
   resolveVisualizationConfig,
+  getDefaultConnectorId,
 }: PrepareOperationExecutionParams): Promise<OperationExecutionContext> => {
   const resolvedVisualizationCreationRequests = await resolveVisualizationCreationRequests({
     operations,
@@ -66,6 +68,7 @@ export const prepareOperationExecution = async ({
     resolvedVisualizationCreationRequests,
     resolvePanelsFromAttachments,
     resolveVisualizationConfig,
+    getDefaultConnectorId,
   };
 };
 

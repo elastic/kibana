@@ -27,6 +27,7 @@ interface ExecuteDashboardOperationsParams {
     attachmentInputs: Array<{ attachmentId: string; grid: AttachmentPanel['grid'] }>
   ) => { panels: AttachmentPanel[]; failures: VisualizationFailure[] };
   resolveVisualizationConfig?: ResolveVisualizationConfig;
+  getDefaultConnectorId: () => Promise<string>;
 }
 
 const createEmptyDashboardData = (): DashboardAttachmentData => ({
@@ -41,6 +42,7 @@ export const executeDashboardOperations = async ({
   logger,
   resolvePanelsFromAttachments,
   resolveVisualizationConfig,
+  getDefaultConnectorId,
 }: ExecuteDashboardOperationsParams): Promise<{
   dashboardData: DashboardAttachmentData;
   failures: VisualizationFailure[];
@@ -53,6 +55,7 @@ export const executeDashboardOperations = async ({
     logger,
     resolvePanelsFromAttachments,
     resolveVisualizationConfig,
+    getDefaultConnectorId,
     failures,
   });
 

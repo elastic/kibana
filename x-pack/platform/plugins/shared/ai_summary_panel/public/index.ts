@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export { manageDashboardTool } from './manage_dashboard';
-export { pinToDashboardTool } from './pin_to_dashboard';
+import { AiSummaryPanelPlugin } from './plugin';
+
+export { AI_SUMMARY_PANEL_EMBEDDABLE_TYPE } from '../common/constants';
+export type { AiSummaryPanelEmbeddableState } from '../server';
+
+export const plugin = () => new AiSummaryPanelPlugin();

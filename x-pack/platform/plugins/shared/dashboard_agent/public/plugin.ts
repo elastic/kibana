@@ -5,8 +5,14 @@
  * 2.0.
  */
 
+import type { Subscription } from 'rxjs';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { isToolUiEvent } from '@kbn/agent-builder-common';
+import {
+  DASHBOARD_PINNED_UI_EVENT,
+  type DashboardPinnedUiEventData,
+} from '@kbn/dashboard-agent-common';
 import type {
   DashboardAgentPluginPublicSetup,
   DashboardAgentPluginPublicStart,
@@ -14,6 +20,7 @@ import type {
   DashboardAgentPluginPublicStartDependencies,
 } from './types';
 import { registerDashboardAttachmentUiDefinition } from './attachment_types';
+import { showPinnedDashboardToast } from './show_pinned_dashboard_toast';
 
 export class DashboardAgentPlugin
   implements
@@ -25,6 +32,7 @@ export class DashboardAgentPlugin
     >
 {
   private cleanupAttachmentUi?: () => void;
+  private pinnedToastSubscription?: Subscription;
 
   constructor(_initContext: PluginInitializerContext) {}
 
@@ -39,14 +47,32 @@ export class DashboardAgentPlugin
     core: CoreStart,
     plugins: DashboardAgentPluginPublicStartDependencies
   ): DashboardAgentPluginPublicStart {
+    const locator = plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR);
+
     this.cleanupAttachmentUi = registerDashboardAttachmentUiDefinition({
       agentBuilder: plugins.agentBuilder,
       chrome: core.chrome,
       canWriteDashboards: core.application.capabilities.dashboard_v2?.showWriteControls === true,
-      dashboardLocator: plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR),
+      dashboardLocator: locator,
       unifiedSearch: plugins.unifiedSearch,
       data: plugins.data,
       dashboardPlugin: plugins.dashboard,
+    });
+
+    this.pinnedToastSubscription = plugins.agentBuilder.events.chat$.subscribe((event) => {
+      if (
+        isToolUiEvent<typeof DASHBOARD_PINNED_UI_EVENT, DashboardPinnedUiEventData>(
+          event,
+          DASHBOARD_PINNED_UI_EVENT
+        )
+      ) {
+        showPinnedDashboardToast({
+          dashboardId: event.data.data.dashboardId,
+          title: event.data.data.title,
+          core,
+          locator,
+        });
+      }
     });
 
     return {};
@@ -54,5 +80,6 @@ export class DashboardAgentPlugin
 
   public stop() {
     this.cleanupAttachmentUi?.();
+    this.pinnedToastSubscription?.unsubscribe();
   }
 }

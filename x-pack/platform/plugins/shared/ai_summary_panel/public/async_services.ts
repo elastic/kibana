@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { manageDashboardTool } from './manage_dashboard';
-export { pinToDashboardTool } from './pin_to_dashboard';
+export { aiSummaryPanelEmbeddableFactory } from './ai_summary_embeddable';

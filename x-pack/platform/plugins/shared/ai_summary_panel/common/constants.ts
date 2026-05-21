@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { manageDashboardTool } from './manage_dashboard';
-export { pinToDashboardTool } from './pin_to_dashboard';
+export const AI_SUMMARY_PANEL_EMBEDDABLE_TYPE = 'ai_summary_panel';
+export const AI_SUMMARY_PANEL_APP_NAME = 'AI Summary';

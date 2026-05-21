@@ -61,6 +61,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.streams}.create_partition`,
   `${internalNamespaces.streams}.delete_stream`,
 
+  // Dashboard
+  `${internalNamespaces.platformDashboard}.pin_to_dashboard`,
+
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
   `${internalNamespaces.workflows}.get_step_definitions`,
@@ -114,6 +117,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Platform – Dashboard
   'dashboard-management',
+  'ai-panel-authoring',
 
   // Platform – Discover
   'discover-data-analysis',

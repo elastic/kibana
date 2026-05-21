@@ -23,4 +23,5 @@ const dashboardTool = (toolName: string) => {
  */
 export const dashboardTools = {
   manageDashboard: dashboardTool('manage_dashboard'),
+  pinToDashboard: dashboardTool('pin_to_dashboard'),
 } as const;
