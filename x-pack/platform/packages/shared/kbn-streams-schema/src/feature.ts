@@ -9,10 +9,6 @@ import { z } from '@kbn/zod/v4';
 import { isEqual, uniq } from 'lodash';
 import { conditionSchema, type Condition } from '@kbn/streamlang';
 
-const featureStatus = ['active', 'stale', 'expired'] as const;
-export const featureStatusSchema = z.enum(featureStatus);
-export type FeatureStatus = z.infer<typeof featureStatusSchema>;
-
 export const DATASET_ANALYSIS_FEATURE_TYPE = 'dataset_analysis' as const;
 export const LOG_SAMPLES_FEATURE_TYPE = 'log_samples' as const;
 export const LOG_PATTERNS_FEATURE_TYPE = 'log_patterns' as const;
@@ -74,14 +70,21 @@ export const ignoredFeatureSchema = z.object({
 
 export type IgnoredFeature = z.infer<typeof ignoredFeatureSchema>;
 
+/**
+ * Server-side feature shape on the unified knowledge indicators data stream.
+ *
+ * Note: as part of the unified KI data stream migration, the legacy
+ * `uuid`, `status`, `last_seen`, `expires_at`, and `excluded_at` fields
+ * have been removed. Identity is now `(stream.name, type, id)` and revisions
+ * are append-only. `updated_at` is read-only at the domain layer — it is
+ * derived from the latest revision's `@timestamp` when reading and is not
+ * a property of the write payload (`BaseFeature`).
+ */
 export const featureSchema = baseFeatureSchema.and(
   z.object({
-    uuid: z.string(),
-    status: featureStatusSchema,
-    last_seen: z.string(),
-    expires_at: z.string().optional(),
-    excluded_at: z.string().optional(),
     run_id: z.string().optional(),
+    deleted: z.boolean().optional(),
+    updated_at: z.string().optional(),
   })
 );
 

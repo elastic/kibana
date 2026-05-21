@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export { FeatureClient } from './feature_client';
-export type { FeatureBulkOperation } from './feature_client';
-export type { StoredFeature } from './stored_feature';
+import type { Feature } from '@kbn/streams-schema';
+
+/** Soft-excluded features are no longer stored; tombstoned features are filtered server-side. */
+export const isFeatureExcluded = (feature: Feature): boolean => Boolean(feature.deleted);

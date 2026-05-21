@@ -15,15 +15,12 @@ import type { KnowledgeIndicatorFilterCriteria } from './utils/matches_knowledge
 
 function makeFeature(overrides: Partial<Feature> = {}): Feature {
   return {
-    uuid: 'feature-uuid',
     id: 'feature-id',
     stream_name: 'logs.test',
     type: 'entity',
     description: 'A feature',
     properties: {},
     confidence: 90,
-    status: 'active',
-    last_seen: new Date().toISOString(),
     ...overrides,
   };
 }
@@ -84,9 +81,9 @@ describe('KnowledgeIndicatorSelectableFilter', () => {
   describe('rendering', () => {
     it('renders button with label and correct filter counts', async () => {
       const kis = [
-        makeFeatureKI({ type: 'entity', id: 'f1', uuid: 'u1' }),
-        makeFeatureKI({ type: 'entity', id: 'f2', uuid: 'u2' }),
-        makeFeatureKI({ type: 'infrastructure', id: 'f3', uuid: 'u3' }),
+        makeFeatureKI({ type: 'entity', id: 'f1' }),
+        makeFeatureKI({ type: 'entity', id: 'f2' }),
+        makeFeatureKI({ type: 'infrastructure', id: 'f3' }),
       ];
 
       await renderFilter({ knowledgeIndicators: kis });
@@ -118,8 +115,8 @@ describe('KnowledgeIndicatorSelectableFilter', () => {
 
     it('shows active filter badge when items are selected', async () => {
       const kis = [
-        makeFeatureKI({ type: 'entity', id: 'f1', uuid: 'u1' }),
-        makeFeatureKI({ type: 'infrastructure', id: 'f2', uuid: 'u2' }),
+        makeFeatureKI({ type: 'entity', id: 'f1' }),
+        makeFeatureKI({ type: 'infrastructure', id: 'f2' }),
       ];
 
       await renderFilter({
@@ -135,8 +132,8 @@ describe('KnowledgeIndicatorSelectableFilter', () => {
   describe('popover interaction', () => {
     it('shows popover with selectable options on click', async () => {
       const kis = [
-        makeFeatureKI({ type: 'entity', id: 'f1', uuid: 'u1' }),
-        makeFeatureKI({ type: 'infrastructure', id: 'f2', uuid: 'u2' }),
+        makeFeatureKI({ type: 'entity', id: 'f1' }),
+        makeFeatureKI({ type: 'infrastructure', id: 'f2' }),
       ];
 
       await renderFilter({ knowledgeIndicators: kis });
@@ -152,8 +149,8 @@ describe('KnowledgeIndicatorSelectableFilter', () => {
     it('calls onSelectedChange with toggled selections', async () => {
       const onSelectedChange = jest.fn();
       const kis = [
-        makeFeatureKI({ type: 'entity', id: 'f1', uuid: 'u1' }),
-        makeFeatureKI({ type: 'infrastructure', id: 'f2', uuid: 'u2' }),
+        makeFeatureKI({ type: 'entity', id: 'f1' }),
+        makeFeatureKI({ type: 'infrastructure', id: 'f2' }),
       ];
 
       await renderFilter({ knowledgeIndicators: kis, onSelectedChange });
@@ -174,8 +171,8 @@ describe('KnowledgeIndicatorSelectableFilter', () => {
   describe('filtering logic', () => {
     it('computes available values using filterCriteria', async () => {
       const kis = [
-        makeFeatureKI({ type: 'entity', id: 'f1', uuid: 'u1' }),
-        makeFeatureKI({ type: 'infrastructure', id: 'f2', uuid: 'u2', excluded_at: '2024-01-01' }),
+        makeFeatureKI({ type: 'entity', id: 'f1' }),
+        makeFeatureKI({ type: 'infrastructure', id: 'f2', deleted: true }),
       ];
 
       await renderFilter({
@@ -193,9 +190,9 @@ describe('KnowledgeIndicatorSelectableFilter', () => {
 
     it('computes counts using filterCriteria plus searchTerm', async () => {
       const kis = [
-        makeFeatureKI({ type: 'entity', id: 'f1', uuid: 'u1', title: 'Alpha service' }),
-        makeFeatureKI({ type: 'entity', id: 'f2', uuid: 'u2', title: 'Beta service' }),
-        makeFeatureKI({ type: 'entity', id: 'f3', uuid: 'u3', title: 'Gamma processor' }),
+        makeFeatureKI({ type: 'entity', id: 'f1', title: 'Alpha service' }),
+        makeFeatureKI({ type: 'entity', id: 'f2', title: 'Beta service' }),
+        makeFeatureKI({ type: 'entity', id: 'f3', title: 'Gamma processor' }),
       ];
 
       await renderFilter({
@@ -213,7 +210,7 @@ describe('KnowledgeIndicatorSelectableFilter', () => {
 
     it('excludes KIs where getValue returns undefined', async () => {
       const kis = [
-        makeFeatureKI({ type: 'entity', id: 'f1', uuid: 'u1' }),
+        makeFeatureKI({ type: 'entity', id: 'f1' }),
         makeQueryKI({ id: 'q1' }),
       ];
 
@@ -230,7 +227,7 @@ describe('KnowledgeIndicatorSelectableFilter', () => {
 
   describe('getLabel', () => {
     it('uses identity by default', async () => {
-      const kis = [makeFeatureKI({ type: 'my_type', id: 'f1', uuid: 'u1' })];
+      const kis = [makeFeatureKI({ type: 'my_type', id: 'f1' })];
 
       await renderFilter({ knowledgeIndicators: kis });
 
@@ -242,7 +239,7 @@ describe('KnowledgeIndicatorSelectableFilter', () => {
     });
 
     it('applies custom getLabel to option labels', async () => {
-      const kis = [makeFeatureKI({ type: 'my_type', id: 'f1', uuid: 'u1' })];
+      const kis = [makeFeatureKI({ type: 'my_type', id: 'f1' })];
 
       await renderFilter({
         knowledgeIndicators: kis,
@@ -260,7 +257,7 @@ describe('KnowledgeIndicatorSelectableFilter', () => {
 
   describe('labels', () => {
     it('uses provided group label in the popover', async () => {
-      const kis = [makeFeatureKI({ type: 'entity', id: 'f1', uuid: 'u1' })];
+      const kis = [makeFeatureKI({ type: 'entity', id: 'f1' })];
 
       await renderFilter({
         knowledgeIndicators: kis,

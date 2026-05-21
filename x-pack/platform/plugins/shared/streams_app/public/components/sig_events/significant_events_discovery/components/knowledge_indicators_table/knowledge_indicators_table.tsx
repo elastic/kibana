@@ -114,10 +114,8 @@ export function KnowledgeIndicatorsTable() {
     setKnowledgeIndicatorsToDelete,
     pagination,
     isDeleting,
-    isBulkOperationInProgress,
     isBulkPromoteInProgress,
     isOperationInProgress,
-    selectionContainsNonExcludable,
     hasPromotableSelected,
     isSelectionActionsDisabled,
     hasOnlyHiddenComputedFeatures,
@@ -135,8 +133,6 @@ export function KnowledgeIndicatorsTable() {
     handleComputedToggleChange,
     handleSearchChange,
     handleTableChange,
-    handleBulkExclude,
-    handleBulkRestore,
     closeFlyout,
     toggleSelectedKnowledgeIndicator,
     deleteKnowledgeIndicatorsInBulk,
@@ -246,11 +242,9 @@ export function KnowledgeIndicatorsTable() {
         hideComputedTypes={hideComputedTypes}
         pagination={pagination}
         selectedKnowledgeIndicators={selectedKnowledgeIndicators}
-        isBulkOperationInProgress={isBulkOperationInProgress}
         isBulkPromoteInProgress={isBulkPromoteInProgress}
         isDeleting={isDeleting}
         isSelectionActionsDisabled={isSelectionActionsDisabled}
-        selectionContainsNonExcludable={selectionContainsNonExcludable}
         hasPromotableSelected={hasPromotableSelected}
         onSearchChange={handleSearchChange}
         onStatusFilterChange={handleStatusFilterChange}
@@ -259,8 +253,6 @@ export function KnowledgeIndicatorsTable() {
         onSelectedStreamsChange={handleSelectedStreamsChange}
         onComputedToggleChange={handleComputedToggleChange}
         onClearSelection={() => setSelectedKnowledgeIndicators([])}
-        onBulkExclude={handleBulkExclude}
-        onBulkRestore={handleBulkRestore}
         onBulkPromote={handleBulkPromote}
         onDeleteSelected={() => setKnowledgeIndicatorsToDelete(selectedKnowledgeIndicators)}
       />

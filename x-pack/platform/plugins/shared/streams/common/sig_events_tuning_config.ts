@@ -8,7 +8,6 @@
 export interface SigEventsTuningConfig {
   sample_size: number;
   max_iterations: number;
-  feature_ttl_days: number;
   entity_filtered_ratio: number;
   diverse_ratio: number;
   max_excluded_features_in_prompt: number;
@@ -20,7 +19,6 @@ export interface SigEventsTuningConfig {
 export const DEFAULT_SIG_EVENTS_TUNING_CONFIG: SigEventsTuningConfig = {
   sample_size: 20,
   max_iterations: 5,
-  feature_ttl_days: 30,
   entity_filtered_ratio: 0.4,
   diverse_ratio: 0.4,
   max_excluded_features_in_prompt: 10,

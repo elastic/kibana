@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { Feature, Streams } from '@kbn/streams-schema';
 import { generateAllComputedFeatures } from '@kbn/streams-ai';
-import type { FeatureClient } from '../../streams/feature/feature_client';
+import type { KnowledgeIndicatorClient } from '../../streams/ki';
 import { reconcileComputedFeatures } from './reconcile_features';
 
 export interface IdentifyComputedFeaturesOptions {
@@ -18,9 +18,8 @@ export interface IdentifyComputedFeaturesOptions {
   start: number;
   end: number;
   esClient: ElasticsearchClient;
-  featureClient: FeatureClient;
+  kiClient: KnowledgeIndicatorClient;
   logger: Logger;
-  featureTtlDays?: number;
   runId: string;
 }
 
@@ -30,9 +29,8 @@ export async function identifyComputedFeatures({
   start,
   end,
   esClient,
-  featureClient,
+  kiClient,
   logger,
-  featureTtlDays,
   runId,
 }: IdentifyComputedFeaturesOptions): Promise<Feature[]> {
   const computedFeatures = await generateAllComputedFeatures({
@@ -46,12 +44,11 @@ export async function identifyComputedFeatures({
   const reconciledComputedFeatures = reconcileComputedFeatures({
     computedFeatures,
     streamName,
-    featureTtlDays,
     runId,
   });
 
   if (reconciledComputedFeatures.length > 0) {
-    await featureClient.bulk(
+    await kiClient.bulk(
       streamName,
       reconciledComputedFeatures.map((feature) => ({ index: { feature } }))
     );

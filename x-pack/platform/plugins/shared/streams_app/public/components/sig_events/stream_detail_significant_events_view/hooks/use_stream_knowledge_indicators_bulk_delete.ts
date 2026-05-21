@@ -33,9 +33,9 @@ export function useStreamKnowledgeIndicatorsBulkDelete({
 
   const mutation = useMutation<void, Error, KnowledgeIndicator[]>({
     mutationFn: async (knowledgeIndicators) => {
-      const featureUuids = knowledgeIndicators
+      const featureIds = knowledgeIndicators
         .filter((knowledgeIndicator) => knowledgeIndicator.kind === 'feature')
-        .map((knowledgeIndicator) => knowledgeIndicator.feature.uuid);
+        .map((knowledgeIndicator) => knowledgeIndicator.feature.id);
 
       const queryIds = knowledgeIndicators
         .filter((knowledgeIndicator) => knowledgeIndicator.kind === 'query')
@@ -43,8 +43,8 @@ export function useStreamKnowledgeIndicatorsBulkDelete({
 
       const requests: Array<Promise<void>> = [];
 
-      if (featureUuids.length > 0) {
-        requests.push(deleteFeaturesInBulk(featureUuids));
+      if (featureIds.length > 0) {
+        requests.push(deleteFeaturesInBulk(featureIds));
       }
 
       if (queryIds.length > 0) {

@@ -10,17 +10,16 @@ import { searchKnowledgeIndicators } from './search';
 
 function makeFeature(overrides: Partial<Feature> = {}): Feature {
   return {
-    uuid: 'feature-uuid',
     id: 'feature-id',
     stream_name: 'logs.test',
     type: 'dataset_analysis',
     description: 'Feature description',
     properties: {},
     confidence: 90,
-    status: 'active',
-    last_seen: new Date().toISOString(),
+    deleted: false,
+    run_id: 'run-id',
     ...overrides,
-  };
+  } as Feature;
 }
 
 function makeStreamQuery(overrides: Partial<StreamQuery> = {}): StreamQuery {
@@ -46,9 +45,6 @@ describe('searchKnowledgeIndicators', () => {
           rule_backed: true,
           rule_id: 'rule-1',
           stream_name: 'logs.test',
-          'asset.uuid': 'asset-uuid',
-          'asset.type': 'query',
-          'asset.id': 'asset-id',
         },
       ],
     });
@@ -67,9 +63,6 @@ describe('searchKnowledgeIndicators', () => {
           rule_backed: false,
           rule_id: 'rule-1',
           stream_name: 'logs.test',
-          'asset.uuid': 'asset-uuid',
-          'asset.type': 'query',
-          'asset.id': 'asset-id',
         },
       ]
     );
@@ -142,27 +135,20 @@ describe('searchKnowledgeIndicators', () => {
         makeFeature({ id: 'f1', confidence: 10 }),
         makeFeature({ id: 'f2', confidence: 20 }),
       ],
-      getQueries: async (): Promise<QueryLink[]> =>
-        [
-          {
-            query: makeStreamQuery({ id: 'q1' }),
-            rule_backed: true,
-            rule_id: 'rule-1',
-            stream_name: 'logs.test',
-            'asset.uuid': 'asset-uuid',
-            'asset.type': 'query',
-            'asset.id': 'asset-id',
-          },
-          {
-            query: makeStreamQuery({ id: 'q2' }),
-            rule_backed: true,
-            rule_id: 'rule-2',
-            stream_name: 'logs.test',
-            'asset.uuid': 'asset-uuid',
-            'asset.type': 'query',
-            'asset.id': 'asset-id',
-          },
-        ] as QueryLink[],
+      getQueries: async (): Promise<QueryLink[]> => [
+        {
+          query: makeStreamQuery({ id: 'q1' }),
+          rule_backed: true,
+          rule_id: 'rule-1',
+          stream_name: 'logs.test',
+        },
+        {
+          query: makeStreamQuery({ id: 'q2' }),
+          rule_backed: true,
+          rule_id: 'rule-2',
+          stream_name: 'logs.test',
+        },
+      ],
     });
 
     expect(res.knowledge_indicators).toHaveLength(2);

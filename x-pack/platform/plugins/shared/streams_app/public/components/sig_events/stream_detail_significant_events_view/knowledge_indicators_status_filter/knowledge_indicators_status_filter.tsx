@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React, { useMemo } from 'react';
 import { matchesKnowledgeIndicatorFilters } from '../utils/matches_knowledge_indicator_filters';
+import { isFeatureExcluded } from '../utils/is_feature_excluded';
 
 interface KnowledgeIndicatorStatusFilterProps {
   knowledgeIndicators: KnowledgeIndicator[];
@@ -44,7 +45,7 @@ export function KnowledgeIndicatorsStatusFilter({
           return accumulator;
         }
 
-        if (ki.kind === 'feature' && ki.feature.excluded_at) {
+        if (ki.kind === 'feature' && isFeatureExcluded(ki.feature)) {
           accumulator.excluded += 1;
         } else {
           accumulator.active += 1;

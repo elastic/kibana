@@ -8,10 +8,18 @@
 import { esql, type ComposerQueryTagHole, type ComposerSortShorthand } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { ESQLSearchResponse } from '@kbn/es-types';
 import { type CommonSearchOptions } from './query_utils';
+import { runEsqlQuery } from './run_esql_query';
 
 export type LatestSourceWhereCondition = ESQLAstExpression & ComposerQueryTagHole;
+
+/**
+ * The grouping fields used to identify the "latest revision" per logical
+ * record. Accepts a single field (e.g. `discovery_id`), a 2-tuple
+ * (e.g. `[stream_name, alert_id]`), or a 3-tuple
+ * (e.g. `[stream.name, type, id]` for the unified KI data stream).
+ */
+export type LatestSourceGroupBy = string | [string, string] | [string, string, string];
 
 interface RunLatestSourceEsqlQueryArgs {
   esClient: ElasticsearchClient;
@@ -19,9 +27,17 @@ interface RunLatestSourceEsqlQueryArgs {
   options: CommonSearchOptions;
   index: string;
   where?: LatestSourceWhereCondition;
+  postGroupingWhere?: LatestSourceWhereCondition;
   sort?: ComposerSortShorthand[];
-  groupBy: string;
+  groupBy: LatestSourceGroupBy;
 }
+
+const buildGroupByCols = (groupBy: LatestSourceGroupBy) => {
+  if (typeof groupBy === 'string') {
+    return [esql.col(groupBy)];
+  }
+  return groupBy.map((field) => esql.col(field));
+};
 
 export const runLatestSourceEsqlQuery = async <T>({
   esClient,
@@ -29,6 +45,7 @@ export const runLatestSourceEsqlQuery = async <T>({
   options,
   index,
   where,
+  postGroupingWhere,
   sort,
   groupBy,
 }: RunLatestSourceEsqlQueryArgs): Promise<{ hits: T[] }> => {
@@ -46,13 +63,21 @@ export const runLatestSourceEsqlQuery = async <T>({
     query = query.where`${where}`;
   }
 
+  const groupByCols = buildGroupByCols(groupBy);
+
   // pick the latest events by group
-  query = query.pipe`INLINE STATS latest_ts = MAX(@timestamp) BY ${esql.col(groupBy)}`
+  query = query.pipe`INLINE STATS latest_ts = MAX(@timestamp) BY ${groupByCols}`
     .where`@timestamp == latest_ts`;
 
   // use _id as a tiebreak in case multiple events share the same timestamp
-  query = query.pipe`INLINE STATS tiebreaker_id = MAX(_id) BY ${esql.col(groupBy)}`
+  query = query.pipe`INLINE STATS tiebreaker_id = MAX(_id) BY ${groupByCols}`
     .where`_id == tiebreaker_id`;
+
+  // post-grouping filter (e.g. drop tombstones) — applied after the
+  // latest-per-group reduction so it operates on the latest revision only.
+  if (postGroupingWhere) {
+    query = query.where`${postGroupingWhere}`;
+  }
 
   if (sort?.length) {
     query = query.sort(sort[0], ...sort.slice(1));
@@ -60,9 +85,10 @@ export const runLatestSourceEsqlQuery = async <T>({
 
   query = query.keep('_source');
 
-  const response = (await esClient.esql.query({
-    query: query.print(),
-  })) as ESQLSearchResponse;
+  const response = await runEsqlQuery(esClient, query.print());
+  if (!response) {
+    return { hits: [] };
+  }
 
   const sourceIdx = response.columns.findIndex((c) => c.name === '_source');
   if (sourceIdx === -1) {
