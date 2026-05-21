@@ -21,6 +21,7 @@ import { FieldsRenderer } from '../templates_v2/field_types/field_renderer';
 import { useResolvedFields } from '../field_library/hooks/use_resolved_fields';
 import { useGetFieldDefinitions } from '../field_library/hooks/use_get_field_definitions';
 import { parseFieldDefinitionsToInlineFields, getFieldSnakeKey } from '../../../common/utils';
+import { isRefField } from '../../../common/types/domain/template/fields';
 import { TemplateFieldsValidationContext } from './template_fields_validation_context';
 
 type FormShape = Record<string, Record<string, unknown>>;
@@ -42,6 +43,8 @@ export const CreateCaseTemplateFields: React.FC = () => {
   });
 
   // Resolve global field definitions to inline fields and compute their snake keys.
+  // globalFieldKeys tracks ALL global fields for form-state preservation in useTemplateFormSync,
+  // even those hidden because the active template already renders them via $ref.
   const { globalInlineFields, globalFieldKeys } = useMemo(() => {
     const defs = globalFieldDefsData?.fieldDefinitions ?? [];
     const inlineFields = parseFieldDefinitionsToInlineFields(defs);
@@ -54,6 +57,21 @@ export const CreateCaseTemplateFields: React.FC = () => {
   });
 
   const { template, isLoading } = useTemplateFormSync(innerForm, globalFieldKeys);
+
+  // Fields referenced by the template via $ref are owned by the template section —
+  // exclude them from the global section to avoid duplicate inputs.
+  const templateRefNames = useMemo<ReadonlySet<string>>(
+    () =>
+      new Set(
+        (template?.definition?.fields ?? []).filter(isRefField).map((f) => f.$ref)
+      ),
+    [template]
+  );
+
+  const visibleGlobalInlineFields = useMemo(
+    () => globalInlineFields.filter((f) => !templateRefNames.has(f.name)),
+    [globalInlineFields, templateRefNames]
+  );
 
   // Mirror the inner RHF `extendedFields` slice into the parent form_lib field
   // on every change so the parent's submission picks up the latest values.
@@ -82,7 +100,7 @@ export const CreateCaseTemplateFields: React.FC = () => {
   );
 
   const globalFieldsFragment = useMemo(() => {
-    if (!globalInlineFields.length) return null;
+    if (!visibleGlobalInlineFields.length) return null;
     return (
       <>
         <EuiSpacer />
@@ -90,10 +108,10 @@ export const CreateCaseTemplateFields: React.FC = () => {
           <h4>{libI18n.GLOBAL_FIELDS_TITLE}</h4>
         </EuiTitle>
         <EuiSpacer />
-        <FieldsRenderer resolvedFields={globalInlineFields} />
+        <FieldsRenderer resolvedFields={visibleGlobalInlineFields} />
       </>
     );
-  }, [globalInlineFields]);
+  }, [visibleGlobalInlineFields]);
 
   const templateFieldsFragment = useMemo(() => {
     if (!templateId || template?.definition?.fields === undefined) return null;
@@ -114,8 +132,8 @@ export const CreateCaseTemplateFields: React.FC = () => {
     return null;
   }
 
-  // Render nothing if there are no global fields and no template fields to show.
-  if (!globalInlineFields.length && (!templateId || template?.definition?.fields === undefined)) {
+  // Render nothing if there are no visible global fields and no template fields to show.
+  if (!visibleGlobalInlineFields.length && (!templateId || template?.definition?.fields === undefined)) {
     return (
       <>
         <EuiSpacer />

@@ -195,6 +195,86 @@ describe('CreateCaseTemplateFields', () => {
     expect(screen.queryByText('Template not selected')).not.toBeInTheDocument();
   });
 
+  it('hides a global field from the global section when the template references it via $ref', () => {
+    mockUseFormData.mockReturnValue([{ templateId: 'template-1' }]);
+    mockUseTemplateFormSync.mockReturnValue({
+      template: {
+        templateId: 'template-1',
+        definition: {
+          name: 'Test Template',
+          fields: [
+            { $ref: 'incident_type' },
+            { name: 'hostname', control: 'INPUT_TEXT', type: 'keyword', label: 'Host Name' },
+          ],
+        },
+      },
+      isLoading: false,
+    });
+    mockUseGetFieldDefinitions.mockReturnValue({
+      data: {
+        fieldDefinitions: [
+          {
+            fieldDefinitionId: 'fd-1',
+            name: 'incident_type',
+            definition: yaml.dump({
+              name: 'incident_type',
+              type: 'keyword',
+              control: 'INPUT_TEXT',
+              label: 'Incident Type',
+            }),
+            owner: 'securitySolution',
+            applyToAllCases: true,
+          },
+        ],
+      },
+      isLoading: false,
+    });
+
+    renderWithTestingProviders(<CreateCaseTemplateFields />);
+
+    // The template references incident_type via $ref — it should not appear in the global section.
+    expect(screen.queryByText('Global fields')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('control-incident_type')).not.toBeInTheDocument();
+  });
+
+  it('shows a global field when it is NOT referenced by the template', () => {
+    mockUseFormData.mockReturnValue([{ templateId: 'template-1' }]);
+    mockUseTemplateFormSync.mockReturnValue({
+      template: {
+        templateId: 'template-1',
+        definition: {
+          name: 'Test Template',
+          fields: [{ name: 'hostname', control: 'INPUT_TEXT', type: 'keyword', label: 'Host Name' }],
+        },
+      },
+      isLoading: false,
+    });
+    mockUseGetFieldDefinitions.mockReturnValue({
+      data: {
+        fieldDefinitions: [
+          {
+            fieldDefinitionId: 'fd-1',
+            name: 'incident_type',
+            definition: yaml.dump({
+              name: 'incident_type',
+              type: 'keyword',
+              control: 'INPUT_TEXT',
+              label: 'Incident Type',
+            }),
+            owner: 'securitySolution',
+            applyToAllCases: true,
+          },
+        ],
+      },
+      isLoading: false,
+    });
+
+    renderWithTestingProviders(<CreateCaseTemplateFields />);
+
+    expect(screen.getByText('Global fields')).toBeInTheDocument();
+    expect(screen.getByTestId('control-incident_type')).toBeInTheDocument();
+  });
+
   it('syncs inner form changes to parent form under the CASE_EXTENDED_FIELDS key', () => {
     const setFieldValue = jest.fn();
     mockUseFormContext.mockReturnValue({ setFieldValue });

@@ -24,6 +24,7 @@ import {
   getFieldSnakeKey,
   parseFieldDefinitionsToInlineFields,
 } from '../../../../common/utils';
+import { isRefField } from '../../../../common/types/domain/template/fields';
 import * as libI18n from '../../field_library/translations';
 import type { OnUpdateFields } from '../types';
 
@@ -153,6 +154,9 @@ interface GlobalCaseFieldsProps {
 /**
  * Renders all field definitions that have `applyToAllCases: true` for the
  * case's owner, regardless of which template (if any) the case uses.
+ * Fields that are also referenced via `$ref` in the active template are
+ * excluded here — the template section owns their display and may apply
+ * name/default overrides.
  * Values are stored in `extended_fields` alongside template-specific fields.
  */
 export const GlobalCaseFields = React.memo<GlobalCaseFieldsProps>(({ caseData, onUpdateField }) => {
@@ -165,12 +169,31 @@ export const GlobalCaseFields = React.memo<GlobalCaseFieldsProps>(({ caseData, o
     applyToAllCases: true,
   });
 
-  const globalInlineFields = useMemo<InlineField[]>(
-    () => parseFieldDefinitionsToInlineFields(globalFieldDefsData?.fieldDefinitions ?? []),
-    [globalFieldDefsData]
+  // React Query deduplicates this fetch — TemplateFields makes the same call.
+  const { data: templateData, isLoading: isLoadingTemplate } = useGetTemplate(
+    caseData.template?.id,
+    caseData.template?.version
   );
 
-  if (isLoading || isError || !globalInlineFields.length) return null;
+  const templateRefNames = useMemo<ReadonlySet<string>>(
+    () =>
+      new Set(
+        (templateData?.definition.fields ?? []).filter(isRefField).map((f) => f.$ref)
+      ),
+    [templateData]
+  );
+
+  const visibleGlobalFields = useMemo<InlineField[]>(
+    () =>
+      parseFieldDefinitionsToInlineFields(globalFieldDefsData?.fieldDefinitions ?? []).filter(
+        (f) => !templateRefNames.has(f.name)
+      ),
+    [globalFieldDefsData, templateRefNames]
+  );
+
+  // Suppress render while the template is loading to prevent a flash of a
+  // global field that will be filtered out once the template definition arrives.
+  if (isLoading || isError || (caseData.template?.id && isLoadingTemplate) || !visibleGlobalFields.length) return null;
 
   return (
     <>
@@ -180,7 +203,7 @@ export const GlobalCaseFields = React.memo<GlobalCaseFieldsProps>(({ caseData, o
       </EuiTitle>
       <EuiSpacer size="s" />
       <TemplateFieldsFormReady
-        resolvedFields={globalInlineFields}
+        resolvedFields={visibleGlobalFields}
         extendedFields={caseData.extendedFields ?? {}}
         onUpdateField={onUpdateField}
       />
