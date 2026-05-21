@@ -103,7 +103,7 @@ Return a short structured result:
 Rules:
 
 - Never run `node scripts/backport`.
-- Never run `git push`; `create_pull_request` handles the staged PR request.
+- Never run `git push`; `create_pull_request` handles the PR request.
 - Never call `create_pull_request` without the `base` field or retry with a different base.
 - Never create draft PRs, placeholder PRs, manual-resolution PRs, or PRs that preserve conflict markers.
 - Never use a custom PR body. The body must match the Backport body template above exactly.
