@@ -143,6 +143,7 @@ export function AlertingPopoverAndFlyout({ canSaveAlerts, canReadAlerts, canRead
         closePopover={() => setPopoverOpen(false)}
         panelPaddingSize="none"
         anchorPosition="downRight"
+        aria-label={alertLabel}
       >
         <EuiContextMenu initialPanelId={0} panels={panels} />
       </EuiPopover>

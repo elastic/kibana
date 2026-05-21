@@ -38,6 +38,7 @@ export {
 } from '../../common/constants';
 
 export * from './page_paths';
+export * from './page_sizes';
 
 export const INDEX_NAME = INGEST_SAVED_OBJECT_INDEX;
 

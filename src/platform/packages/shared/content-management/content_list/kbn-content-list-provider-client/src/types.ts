@@ -8,26 +8,46 @@
  */
 
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
-import type { ContentListServices } from '@kbn/content-list-provider';
+import type { ContentListFeatures, ContentListServices } from '@kbn/content-list-provider';
+import type { ContentEditorKibanaDependencies } from '@kbn/content-management-content-editor';
+import type { ContentEditorConfig } from './content_editor';
 
 /**
- * UI settings accessor interface.
- *
- * Matches the minimal surface of `IUiSettingsClient` needed by the client provider.
+ * Kibana `CoreStart` slice required by {@link ContentEditorKibanaProvider}.
  */
-interface UiSettingsAccessor {
-  get: <T = unknown>(key: string) => T;
+export type ContentEditorKibanaCore = ContentEditorKibanaDependencies['core'];
+
+/**
+ * Kibana `CoreStart` slice required by {@link ContentListClientProvider}.\
+ */
+export type ContentListKibanaCore = ContentEditorKibanaCore & {
+  uiSettings: { get: <T = unknown>(key: string) => T };
+};
+
+/**
+ * Kibana `SavedObjectTaggingPluginStart` slice required by {@link ContentEditorKibanaProvider}.
+ */
+export type ContentListSavedObjectsTagging = ContentEditorKibanaDependencies['savedObjectsTagging'];
+
+/**
+ * Domain services required by {@link ContentListClientProvider}.
+ */
+export interface ContentListClientServices extends ContentListServices {
+  /**
+   * Optional Saved Objects Tagging plugin start contract. A full
+   * `SavedObjectTaggingPluginStart` value satisfies this structurally.
+   */
+  savedObjectsTagging?: ContentListSavedObjectsTagging;
 }
 
 /**
- * Services required by the client provider.
- *
- * Extends the base `ContentListServices` with `uiSettings`, which is used to read
- * the `savedObjects:perPage` and `savedObjects:listingLimit` settings.
+ * Feature configuration for {@link ContentListClientProvider}.
  */
-export interface ContentListClientServices extends ContentListServices {
-  /** UI settings accessor. Required for reading defaults like page size and listing limit. */
-  uiSettings: UiSettingsAccessor;
+export interface ContentListClientFeatures extends Omit<ContentListFeatures, 'contentEditor'> {
+  /**
+   * Content editor (metadata editing flyout) feature configuration.
+   */
+  contentEditor?: ContentEditorConfig;
 }
 
 /**
