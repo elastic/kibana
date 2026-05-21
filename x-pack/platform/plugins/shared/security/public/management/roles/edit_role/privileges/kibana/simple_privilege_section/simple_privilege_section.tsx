@@ -208,7 +208,6 @@ export class SimplePrivilegeSection extends Component<Props, State> {
                       ),
                     },
                   ]}
-                  hasDividers
                   valueOfSelected={kibanaPrivilege}
                 />
               )}

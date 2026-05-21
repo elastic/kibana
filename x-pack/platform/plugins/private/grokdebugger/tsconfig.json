@@ -7,6 +7,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "test/scout/**/*",
     "../../../../../typings/**/*",
   ],
   "kbn_references": [
@@ -20,6 +21,7 @@
     "@kbn/config-schema",
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render",
+    "@kbn/scout",
     "@kbn/licensing-plugin",
     "@kbn/licensing-types",
   ],

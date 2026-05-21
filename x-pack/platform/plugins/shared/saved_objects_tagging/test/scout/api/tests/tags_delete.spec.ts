@@ -83,6 +83,7 @@ apiTest.describe(
       });
 
       expect(bulkResponse).toHaveStatusCode(200);
+      expect(bulkResponse.body.saved_objects).toBeInstanceOf(Array);
 
       const [vis1, vis2] = bulkResponse.body.saved_objects;
 

@@ -9,18 +9,17 @@ import type { Logger } from '@kbn/logging';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { getSigEventsLogPatternsEsql } from './get_log_patterns';
 
-const createEsClient = (fields: Record<string, unknown> = { message: {} }) => {
-  const fieldCaps = jest.fn().mockResolvedValue({ fields });
+const createEsClient = (
+  columns: Array<{ name: string; type: string }> = [{ name: 'message', type: 'text' }]
+) => {
   const esql = jest.fn();
-  const rawEsqlQuery = jest.fn();
+  const rawEsqlQuery = jest.fn().mockResolvedValueOnce({ columns, values: [] });
 
   return {
     esClient: {
-      fieldCaps,
       esql,
       client: { esql: { query: rawEsqlQuery } },
     } as unknown as TracedElasticsearchClient,
-    fieldCaps,
     esql,
     rawEsqlQuery,
   };
@@ -69,7 +68,7 @@ describe('getSigEventsLogPatternsEsql', () => {
   });
 
   it('builds ES|QL count, categorize, and composite-key source fetch queries', async () => {
-    const { esClient, esql, rawEsqlQuery } = createEsClient({ 'body.text': {} });
+    const { esClient, esql, rawEsqlQuery } = createEsClient([{ name: 'body.text', type: 'text' }]);
     esql
       .mockResolvedValueOnce(countResponse(10))
       .mockResolvedValueOnce(pass1Response([[['logs-a:doc-1'], 10, 'error']]));
@@ -83,23 +82,29 @@ describe('getSigEventsLogPatternsEsql', () => {
       start: 100,
       end: 200,
       fields: ['body.text'],
+      kql: 'service.name:"checkout"',
       logger,
     });
 
     expect(esql.mock.calls[0]).toEqual([
       'count_docs_for_sigevents_log_patterns',
       expect.objectContaining({
-        query: 'FROM logs-* | STATS total = COUNT(*)',
+        query: 'FROM logs-* | WHERE KQL("service.name:\\"checkout\\"") | STATS total = COUNT(*)',
       }),
     ]);
     expect(esql.mock.calls[1]).toEqual([
       'categorize_sigevents_log_patterns',
       expect.objectContaining({
         query:
-          'FROM logs-* METADATA _index, _id | EVAL doc_key = CONCAT(_index, ":", _id) | STATS representative_key = TOP(doc_key, 1, "desc"), count = COUNT(*) BY pattern = CATEGORIZE(body.text) | SORT count DESC | LIMIT 1000',
+          'FROM logs-* METADATA _index, _id | EVAL doc_key = CONCAT(_index, ":", _id) | WHERE KQL("service.name:\\"checkout\\"") | STATS representative_key = TOP(doc_key, 1, "desc"), count = COUNT(*) BY pattern = CATEGORIZE(body.text) | SORT count DESC | LIMIT 1000',
       }),
     ]);
     expect(rawEsqlQuery.mock.calls[0]).toEqual([
+      expect.objectContaining({
+        query: 'FROM logs-* | LIMIT 0',
+      }),
+    ]);
+    expect(rawEsqlQuery.mock.calls[1]).toEqual([
       expect.objectContaining({
         query:
           'FROM logs-* METADATA _index, _id, _source | EVAL doc_key = CONCAT(_index, ":", _id) | WHERE doc_key IN ("logs-a:doc-1") | KEEP _index, _id, _source | LIMIT 1',
@@ -110,8 +115,8 @@ describe('getSigEventsLogPatternsEsql', () => {
     ]);
   });
 
-  it('short-circuits when field caps returns no eligible text fields', async () => {
-    const { esClient, esql } = createEsClient({});
+  it('short-circuits when schema returns no eligible text fields', async () => {
+    const { esClient, esql } = createEsClient([{ name: 'host.name', type: 'keyword' }]);
 
     const result = await getSigEventsLogPatternsEsql({
       esClient,
@@ -166,7 +171,10 @@ describe('getSigEventsLogPatternsEsql', () => {
   });
 
   it('sorts by count and deduplicates by sample', async () => {
-    const { esClient, esql, rawEsqlQuery } = createEsClient({ message: {}, 'body.text': {} });
+    const { esClient, esql, rawEsqlQuery } = createEsClient([
+      { name: 'message', type: 'text' },
+      { name: 'body.text', type: 'text' },
+    ]);
     esql
       .mockResolvedValueOnce(countResponse(10))
       .mockResolvedValueOnce(pass1Response([['logs-a:doc-1', 2, 'message low']]))
