@@ -48,6 +48,7 @@ describe('parse runTest flags', () => {
         "grep": undefined,
         "installDir": undefined,
         "logsDir": undefined,
+        "retriesPerFile": 0,
         "suiteFilters": Object {
           "exclude": Array [],
           "include": Array [],
@@ -60,6 +61,17 @@ describe('parse runTest flags', () => {
         "updateSnapshots": false,
       }
     `);
+  });
+
+  it('parses --retries-per-file', () => {
+    expect(test({ 'retries-per-file': '2' }).retriesPerFile).toBe(2);
+    expect(test({ 'retries-per-file': '0' }).retriesPerFile).toBe(0);
+    expect(() => test({ 'retries-per-file': '-1' })).toThrowErrorMatchingInlineSnapshot(
+      `"--retries-per-file must be a non-negative integer"`
+    );
+    expect(() => test({ 'retries-per-file': 'abc' })).toThrowErrorMatchingInlineSnapshot(
+      `"--retries-per-file must be a non-negative integer"`
+    );
   });
 
   it('allows combinations of config and journey', () => {
