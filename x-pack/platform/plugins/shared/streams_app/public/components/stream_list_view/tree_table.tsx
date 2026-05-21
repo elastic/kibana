@@ -20,6 +20,9 @@ import {
   EuiTourStep,
   EuiBadge,
   EuiToolTip,
+  EuiLoadingSpinner,
+  formatNumber,
+  EuiI18nNumber,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
@@ -34,6 +37,7 @@ import {
 } from '@kbn/streams-schema';
 import useAsync from 'react-use/lib/useAsync';
 import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useStreamsTour } from '../streams_tour';
 import type { TableRow, SortableField } from './utils';
 import {
@@ -55,6 +59,7 @@ import {
   useStreamDocCountsFetch,
 } from '../../hooks/use_streams_doc_counts_fetch';
 import { useTimefilter } from '../../hooks/use_timefilter';
+import { useStreamsIngestionRates } from '../../hooks/use_streams_ingestion_rates';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { RetentionColumn } from './retention_column';
 import { calculateDataQuality } from '../../util/calculate_data_quality';
@@ -69,6 +74,7 @@ import {
   CPS_DOCUMENTS_WARNING,
   DOCUMENTS_COLUMN_HEADER,
   FAILURE_STORE_PERMISSIONS_ERROR,
+  INGESTION_COLUMN_HEADER,
   STREAM_TYPE_FILTER_LABEL,
   STREAM_TYPE_CLASSIC_LABEL,
   STREAM_TYPE_WIRED_LABEL,
@@ -200,6 +206,18 @@ export function StreamsTreeTable({
   const docCountsLoaded = !!totalDocsResult.value;
   const qualityLoaded =
     !!totalDocsResult.value && !!degradedDocsResult.value && !!failedDocsResult.value;
+
+  const streamNamesWithData = React.useMemo(
+    () => streams.filter((s) => !!s.data_stream).map((s) => s.stream.name),
+    [streams]
+  );
+
+  const { ingestionByStream, ingestionLoaded } = useStreamsIngestionRates({
+    streamNames: streamNamesWithData,
+    timeStart: timeState.start,
+    timeEnd: timeState.end,
+    getStreamHistogram,
+  });
 
   // Sort order for data quality
   const qualityRank: Record<QualityIndicators, number> = {
@@ -547,6 +565,28 @@ export function StreamsTreeTable({
             ) : null,
         },
         {
+          field: 'ingestionRate',
+          name: INGESTION_COLUMN_HEADER,
+          width: '112px',
+          sortable: ingestionLoaded
+            ? (row: TableRow) => ingestionByStream[row.stream.name] ?? 0
+            : false,
+          align: 'right',
+          dataType: 'number',
+          render: (_: unknown, item: TableRow) => {
+            if (!item.data_stream) return null;
+            if (!ingestionLoaded) return <EuiLoadingSpinner size="s" />;
+            const rate = ingestionByStream[item.stream.name] ?? 0;
+            return (
+              <FormattedMessage
+                id="xpack.streams.ingestionColumn.cellValue"
+                defaultMessage="{ingestionRate} docs/s"
+                values={{ ingestionRate: <EuiI18nNumber value={rate} /> }}
+              />
+            );
+          },
+        },
+        {
           field: 'dataQuality',
           name: (
             <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -713,4 +753,10 @@ export function StreamsTreeTable({
       tableCaption={STREAMS_TABLE_CAPTION_ARIA_LABEL}
     />
   );
+}
+
+function formatDocsPerSec(value: number): string {
+  if (value >= 100) return formatNumber(value, '0,0');
+  if (value >= 1) return formatNumber(value, '0.[0]');
+  return formatNumber(value, '0.00');
 }

@@ -93,6 +93,11 @@ export const NO_RETENTION_LABEL = i18n.translate(
   { defaultMessage: 'No retention policy configured' }
 );
 
+export const INGESTION_COLUMN_HEADER = i18n.translate(
+  'xpack.streams.streamsTreeTable.ingestionColumnName',
+  { defaultMessage: 'Ingestion' }
+);
+
 export const STREAM_TYPE_FILTER_LABEL = i18n.translate(
   'xpack.streams.streamsTreeTable.streamTypeFilter.label',
   { defaultMessage: 'Type' }

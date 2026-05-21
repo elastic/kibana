@@ -20,7 +20,7 @@ import type { Direction } from '@elastic/eui';
 import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common/types';
 import { parseDurationInSeconds } from '../../util/parse_duration';
 
-const SORTABLE_FIELDS = ['nameSortKey', 'retentionMs'] as const;
+const SORTABLE_FIELDS = ['nameSortKey', 'retentionMs', 'ingestionRate'] as const;
 
 export type SortableField = (typeof SORTABLE_FIELDS)[number];
 
@@ -28,6 +28,7 @@ export interface EnrichedStream extends ListStreamDetail {
   nameSortKey: string;
   documentsCount: number;
   retentionMs: number;
+  ingestionRate: number;
   type: 'wired' | 'classic' | 'query';
   children?: EnrichedStream[];
 }
@@ -206,6 +207,7 @@ export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStrea
     nameSortKey,
     documentsCount: 0,
     retentionMs,
+    ingestionRate: 0,
     type: getStreamType(node.stream),
     ...(children && { children }),
   };
