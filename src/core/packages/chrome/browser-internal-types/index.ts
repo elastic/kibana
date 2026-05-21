@@ -91,6 +91,11 @@ export interface InternalChromeStart extends ChromeStart {
       overflowItemIds: string[];
       /** Default top-level item IDs before any user customization is applied. */
       defaultItemIds: string[];
+      /**
+       * Top-level body nodes the sidebar will actually render: home node excluded,
+       * hidden nodes removed, and panel-openers with no visible descendants pruned.
+       */
+      renderableNodes: ChromeProjectNavigationNode[];
     }>;
 
     /** Get an observable of the current project breadcrumbs. */

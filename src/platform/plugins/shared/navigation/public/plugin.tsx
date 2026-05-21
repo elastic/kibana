@@ -19,7 +19,7 @@ import type {
 } from '@kbn/core/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { Space } from '@kbn/spaces-plugin/public';
-import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
+import type { AppDeepLinkId, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { type SolutionId, type NavigationCustomization } from '@kbn/core-chrome-browser';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -336,30 +336,25 @@ export class NavigationPublicPlugin
     items: Array<{ id: string; title: string; hidden: boolean; icon?: string }>;
     defaultItemIds: string[];
   } {
-    let tree: any;
+    let renderableNodes: ChromeProjectNavigationNode[] = [];
     let overflowItemIds: string[] = [];
-    let defaultItemIds: string[] = [];
 
     chrome.project
       .getNavigation$()
       .subscribe((nav) => {
-        tree = nav.navigationTree;
+        renderableNodes = nav.renderableNodes;
         overflowItemIds = nav.overflowItemIds;
-        defaultItemIds = nav.defaultItemIds;
       })
       .unsubscribe();
 
-    if (!tree) return { items: [], defaultItemIds };
-
     const overflowSet = new Set(overflowItemIds);
-    const items = (tree.body as any[])
-      .filter((node) => node.renderAs !== 'home')
-      .map((node) => ({
-        id: node.id as string,
-        title: (node.title || node.id) as string,
-        hidden: overflowSet.has(node.id),
-        icon: node.icon as string | undefined,
-      }));
+    const defaultItemIds = renderableNodes.map((node) => node.id);
+    const items = renderableNodes.map((node) => ({
+      id: node.id,
+      title: (node.title ?? node.id) as string,
+      hidden: overflowSet.has(node.id),
+      icon: node.icon as string | undefined,
+    }));
 
     return { items, defaultItemIds };
   }

@@ -125,6 +125,11 @@ export const toNavigationItems = (
     'data-test-subj': logoNode ? getTestSubj(logoNode, ['nav-item-home']) : undefined,
   };
 
+  // TODO: The visibility checks below (sideNavStatus === 'hidden', empty panel-opener pruning,
+  // section-header flattening) duplicate logic already handled by `getRenderableNodes` in
+  // `@kbn/core-chrome-browser-internal`. Once a source of nodes is guaranteed to be pre-pruned
+  // (i.e. the `getNavigation$()` emission passes a clean tree), this function can be simplified
+  // to a pure shape-transformer with no visibility decisions.
   const toMenuItem = (navNode: ChromeProjectNavigationNode): MenuItem[] | MenuItem | null => {
     if (!navNode) return null;
 

@@ -41,7 +41,13 @@ import type { Location, History } from 'history';
 import deepEqual from 'react-fast-compare';
 import type { Logger } from '@kbn/logging';
 
-import { findActiveNodes, flattenNav, parseNavigationTree, stripQueryParams } from './utils';
+import {
+  findActiveNodes,
+  flattenNav,
+  parseNavigationTree,
+  getRenderableNodes,
+  stripQueryParams,
+} from './utils';
 import { buildBreadcrumbs } from './breadcrumbs';
 import { getCloudLinks } from './cloud_links';
 
@@ -61,6 +67,11 @@ interface ParsedNavigation {
   flattened: Record<string, ChromeProjectNavigationNode>;
   overflowItemIds: string[];
   defaultItemIds: string[];
+  /**
+   * Top-level body nodes the sidebar will actually render: home node excluded,
+   * hidden nodes removed, and panel-openers with no visible descendants pruned.
+   */
+  renderableNodes: ChromeProjectNavigationNode[];
 }
 
 export class ProjectNavigationService {
@@ -162,6 +173,7 @@ export class ProjectNavigationService {
               flattened: flattenNav(navigationTree),
               overflowItemIds,
               defaultItemIds,
+              renderableNodes: getRenderableNodes(navigationTreeUI.body),
             };
           }),
           catchError((err) => {
@@ -184,6 +196,7 @@ export class ProjectNavigationService {
           activeNodes: findActiveNodes(pathname, parsed.flattened, location, prependBasePath),
           overflowItemIds: parsed.overflowItemIds,
           defaultItemIds: parsed.defaultItemIds,
+          renderableNodes: parsed.renderableNodes,
         };
       }),
       distinctUntilChanged(deepEqual),
