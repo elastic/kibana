@@ -61,9 +61,6 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
   const ownFocus =
     flyoutProps?.ownFocus ?? (panelFlyoutTypeFromParent === 'overlay' ? false : true);
 
-  // eslint-disable-next-line prefer-const
-  let flyoutRef: ReturnType<CoreStart['overlays']['openFlyout']> | undefined;
-
   const onClose = () => {
     overlayTracker?.clearOverlays();
     flyoutRef?.close();
@@ -72,7 +69,7 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
     }
   };
 
-  flyoutRef = core.overlays.openFlyout(
+  const flyoutRef = core.overlays.openFlyout(
     toMountPoint(
       <LazyFlyout
         closeFlyout={onClose}
