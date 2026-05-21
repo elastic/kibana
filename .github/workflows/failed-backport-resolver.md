@@ -87,6 +87,7 @@ network:
     - defaults
     - github
     - registry.npmjs.org
+    - registry.yarnpkg.com
     - kibana-bazel-remote-h5qd3jkxkq-uc.a.run.app
     - elastic.litellm-prod.ai
 
