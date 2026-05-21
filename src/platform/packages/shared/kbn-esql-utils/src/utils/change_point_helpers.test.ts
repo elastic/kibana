@@ -118,42 +118,21 @@ describe('buildChangePointLineDataQuery', () => {
     expect(buildChangePointLineDataQuery(q)).toBe('FROM i | STATS m = AVG(x) BY t');
   });
 
-  it('uses FORK branch 0 by default', () => {
+  it('returns undefined when CHANGE_POINT only appears inside FORK branches', () => {
     const forkQuery = `FROM gallery-*
 | FORK
   ( WHERE referer == "http://a.com" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | SORT bucket | CHANGE_POINT avg_bytes ON bucket )
   ( WHERE referer == "http://b.com" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket )
 | WHERE type IS NOT NULL`;
-    const line = buildChangePointLineDataQuery(forkQuery);
-    expect(line).toContain('FROM gallery-*');
-    expect(line).toContain('WHERE referer == "http://a.com"');
-    expect(line).not.toContain('CHANGE_POINT');
-    expect(line).not.toContain('SORT bucket');
+    expect(buildChangePointLineDataQuery(forkQuery)).toBeUndefined();
   });
 
-  it('excludes commands after FORK (e.g. filter on change-point output)', () => {
+  it('returns undefined for top-level CHANGE_POINT after FORK', () => {
     const forkQuery = `FROM gallery-*
 | FORK
-  ( WHERE referer == "http://a.com" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket )
-| WHERE type IS NOT NULL`;
-    const line = buildChangePointLineDataQuery(forkQuery);
-    expect(line).toContain('FROM gallery-*');
-    expect(line).not.toContain('type IS NOT NULL');
-    expect(line).not.toContain('CHANGE_POINT');
-  });
-
-  it('preserves commands between source and FORK', () => {
-    const forkQuery = `FROM gallery-*
-| EVAL prep = 1
-| FORK
-  ( WHERE referer == "http://a.com" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket )
-  ( WHERE referer == "http://b.com" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket )`;
-    const line0 = buildChangePointLineDataQuery(forkQuery, { forkBranchIndex: 0 });
-    const line1 = buildChangePointLineDataQuery(forkQuery, { forkBranchIndex: 1 });
-    expect(line0).toContain('EVAL prep = 1');
-    expect(line0).toContain('http://a.com');
-    expect(line1).toContain('EVAL prep = 1');
-    expect(line1).toContain('http://b.com');
+  ( WHERE referer == "http://a.com" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) )
+| CHANGE_POINT avg_bytes ON bucket`;
+    expect(buildChangePointLineDataQuery(forkQuery)).toBeUndefined();
   });
 });
 
@@ -181,6 +160,10 @@ describe('appendEntityFiltersToChangePointLineEsql', () => {
       expect(formatEsqlLiteral('a"b')).toBe('"a\\"b"');
     });
 
+    it('escapes control characters in strings', () => {
+      expect(formatEsqlLiteral('a\nb\rc\td')).toBe('"a\\nb\\rc\\td"');
+    });
+
     it('formats finite numbers', () => {
       expect(formatEsqlLiteral(3.5)).toBe('3.5');
     });
@@ -192,6 +175,20 @@ describe('appendEntityFiltersToChangePointLineEsql', () => {
     it('formats Date as ISO string literal', () => {
       const d = new Date('2023-11-14T22:13:20.000Z');
       expect(formatEsqlLiteral(d)).toBe('"2023-11-14T22:13:20.000Z"');
+    });
+
+    it('returns undefined for null and undefined', () => {
+      expect(formatEsqlLiteral(null)).toBeUndefined();
+      expect(formatEsqlLiteral(undefined)).toBeUndefined();
+    });
+
+    it('formats bigint as unquoted literal', () => {
+      expect(formatEsqlLiteral(BigInt(42))).toBe('42');
+    });
+
+    it('formats non-finite numbers as quoted strings', () => {
+      expect(formatEsqlLiteral(NaN)).toBe('"NaN"');
+      expect(formatEsqlLiteral(Infinity)).toBe('"Infinity"');
     });
   });
 
@@ -244,6 +241,17 @@ describe('appendEntityFiltersToChangePointLineEsql', () => {
         'FROM gallery-* | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | EVAL clientip = "5.255.253.75"';
       expect(
         appendEntityFiltersToChangePointLineEsql(line, { clientip: '5.255.253.75' }, ['clientip'])
+      ).toBe(line);
+    });
+
+    it('skips all columns when WHERE constrains multiple entity columns via AND', () => {
+      const line =
+        'FROM idx | WHERE host == "pod-a" AND region == "us" | STATS m = AVG(x) BY t';
+      expect(
+        appendEntityFiltersToChangePointLineEsql(line, { host: 'pod-a', region: 'us' }, [
+          'host',
+          'region',
+        ])
       ).toBe(line);
     });
 

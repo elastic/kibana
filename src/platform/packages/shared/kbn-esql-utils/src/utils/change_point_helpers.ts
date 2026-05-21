@@ -10,27 +10,27 @@ import {
   Walker,
   Parser,
   WrappingPrettyPrinter,
-  BasicPrettyPrinter,
   isColumn,
   isBinaryExpression,
   isLiteral,
   isStringLiteral,
   isAssignment,
 } from '@elastic/esql';
-import { CommandNames, esqlCommandRegistry } from '@kbn/esql-language';
+import { CommandNames } from '@kbn/esql-language';
 import type {
   ESQLAstItem,
-  ESQLAstForkCommand,
   ESQLAstChangePointCommand,
   ESQLAstQueryExpression,
   ESQLAstCommand,
-  ESQLForkParens,
   ESQLIntegerLiteral,
   ESQLDecimalLiteral,
 } from '@elastic/esql/types';
+import { escapeStringValue } from './append_to_query/utils';
+import { sanitazeESQLInput } from './sanitaze_input';
 
 /**
- * Returns true if the ES|QL query contains a CHANGE_POINT command.
+ * Detects top-level CHANGE_POINT commands so the Discover profile only activates for direct
+ * change-point queries.
  * @param esql - The ES|QL query string
  */
 export const hasChangePointCommand = (esql?: string): boolean => {
@@ -46,6 +46,7 @@ export const hasChangePointCommand = (esql?: string): boolean => {
 /**
  * Output column names for the CHANGE_POINT command (type and pvalue).
  * Defaults are 'type' and 'pvalue' unless the query uses AS type_name, pvalue_name.
+ * These are needed to find annotation columns in the returned datatable.
  * @param esql - The ES|QL query string
  * @returns Object with typeColumn and pvalueColumn names, or undefined if no CHANGE_POINT command
  */
@@ -72,7 +73,8 @@ export const getChangePointOutputColumnNames = (
 
 /**
  * Metric (value) and time column names from the first CHANGE_POINT in the query (same rule as
- * {@link getChangePointOutputColumnNames}). FORK queries should use parallel naming across branches.
+ * {@link getChangePointOutputColumnNames}).
+ * These names are needed to build the supporting line-chart query and pick timestamps from rows.
  */
 export const getChangePointSeriesColumns = (
   esql?: string
@@ -94,6 +96,7 @@ export const getChangePointSeriesColumns = (
   }
 };
 
+// Converts AST literal nodes into comparable JS values so duplicate entity filters can be skipped.
 const literalNodeToComparable = (node: ESQLAstItem): unknown => {
   if (!isLiteral(node)) return undefined;
   if (isStringLiteral(node)) return node.valueUnquoted ?? node.value;
@@ -111,6 +114,7 @@ const literalNodeToComparable = (node: ESQLAstItem): unknown => {
   return undefined;
 };
 
+// Collects simple `column == literal` constraints from WHERE expressions.
 const collectEqualitiesFromWhereExpression = (
   expr: ESQLAstItem | undefined,
   columnIds: ReadonlySet<string>,
@@ -138,6 +142,7 @@ const collectEqualitiesFromWhereExpression = (
   }
 };
 
+// Finds entity columns already fixed by earlier WHERE or literal EVAL commands in the line query.
 const collectConstrainedColumnValues = (
   esql: string,
   columnIds: ReadonlySet<string>
@@ -178,6 +183,7 @@ const collectConstrainedColumnValues = (
   return out;
 };
 
+// Compares a datatable cell with an ES|QL literal while allowing common string/typed equivalents.
 const literalMatchesValue = (cell: unknown, literalValue: unknown): boolean => {
   if (literalValue === null) {
     return cell === null || cell === undefined;
@@ -202,13 +208,15 @@ const literalMatchesValue = (cell: unknown, literalValue: unknown): boolean => {
   return String(cell) === String(literalValue);
 };
 
+// Entity filters need readable identifiers when possible, and escaped backticks when not.
 export const formatEsqlIdentifier = (columnId: string): string => {
   if (/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(columnId)) {
     return columnId;
   }
-  return `\`${columnId.replace(/`/g, '``')}\``;
+  return sanitazeESQLInput(columnId) ?? `\`${columnId.replace(/`/g, '``')}\``;
 };
 
+// Entity values come from table data, so keep non-string literals typed and skip nullish values.
 export const formatEsqlLiteral = (value: unknown): string | undefined => {
   if (value === null || value === undefined) return undefined;
   if (typeof value === 'boolean') {
@@ -221,12 +229,12 @@ export const formatEsqlLiteral = (value: unknown): string | undefined => {
     return String(value);
   }
   if (typeof value === 'string') {
-    return `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+    return escapeStringValue(value);
   }
   if (value instanceof Date && !Number.isNaN(value.getTime())) {
-    return `"${value.toISOString()}"`;
+    return escapeStringValue(value.toISOString());
   }
-  return `"${String(value).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+  return escapeStringValue(String(value));
 };
 
 /**
@@ -254,6 +262,7 @@ export const appendEntityFiltersToChangePointLineEsql = (
   return predicates.length ? `${lineEsql} | WHERE ${predicates.join(' AND ')}` : lineEsql;
 };
 
+// Removes SORT immediately before CHANGE_POINT because Lens can sort the line data itself.
 const stripTrailingSortCommands = <T extends { name?: string }>(commands: T[]): T[] => {
   const next = [...commands];
   while (next.length > 0 && next[next.length - 1]?.name === 'sort') {
@@ -262,6 +271,7 @@ const stripTrailingSortCommands = <T extends { name?: string }>(commands: T[]): 
   return next;
 };
 
+// Pretty-printers may emit multiline ES|QL; normalize it for embedding in Lens attributes.
 const normalizePrintedEsql = (printed: string): string =>
   printed
     .split('\n')
@@ -269,59 +279,16 @@ const normalizePrintedEsql = (printed: string): string =>
     .filter((line) => line.length > 0)
     .join(' ');
 
-export interface BuildChangePointLineDataQueryOptions {
-  /** Zero-based FORK branch index when the pipeline uses FORK. Defaults to 0. */
-  forkBranchIndex?: number;
-}
-
 /**
  * Builds the ES|QL used as the Lens line-chart dataset: pipeline before CHANGE_POINT (trailing SORT
  * removed).
- *
- * **FORK:** Concatenates every command **before** the FORK (e.g. `FROM`, `EVAL`, …) with the
- * chosen branch's commands **before** `CHANGE_POINT`. Omits the FORK wrapper and any commands after
- * it (e.g. a trailing `WHERE` on change-point output). Using only `FROM` + branch was wrong for
- * non-first branches when pre-FORK commands exist, and dropped post-`FROM` preprocessing.
+ * FORK queries are intentionally unsupported for line-series extraction.
  */
-export const buildChangePointLineDataQuery = (
-  esql?: string,
-  options?: BuildChangePointLineDataQueryOptions
-): string | undefined => {
+export const buildChangePointLineDataQuery = (esql?: string): string | undefined => {
   if (!esql) return undefined;
   try {
     const { root } = Parser.parse(esql);
-    const forkIndex = root.commands.findIndex((c) => c.name === 'fork');
-
-    if (forkIndex >= 0) {
-      const forkCmd = root.commands[forkIndex] as ESQLAstForkCommand;
-      const forkArgs = forkCmd.args as ESQLForkParens[] | undefined;
-      if (!forkArgs?.length) return undefined;
-
-      const branchIndex = Math.min(Math.max(options?.forkBranchIndex ?? 0, 0), forkArgs.length - 1);
-      const branchParen = forkArgs[branchIndex];
-      const branchQuery = branchParen.child as ESQLAstQueryExpression;
-      if (branchQuery?.type !== 'query' || !branchQuery.commands) return undefined;
-
-      const cpIdx = branchQuery.commands.findIndex((c) => c.name === CommandNames.CHANGE_POINT);
-      if (cpIdx < 0) return undefined;
-
-      const prefixBeforeFork = root.commands.slice(0, forkIndex) as ESQLAstCommand[];
-      if (
-        !prefixBeforeFork.some((c) => esqlCommandRegistry.getSourceCommandNames().includes(c.name))
-      ) {
-        return undefined;
-      }
-
-      const branchBeforeChangePoint = stripTrailingSortCommands(
-        branchQuery.commands.slice(0, cpIdx) as ESQLAstCommand[]
-      );
-
-      const synthetic: ESQLAstQueryExpression = {
-        ...root,
-        commands: [...prefixBeforeFork, ...branchBeforeChangePoint],
-      };
-      return normalizePrintedEsql(BasicPrettyPrinter.print(synthetic));
-    }
+    if (root.commands.some((c) => c.name === 'fork')) return undefined;
 
     const cpIdx = root.commands.findIndex((c) => c.name === CommandNames.CHANGE_POINT);
     if (cpIdx < 0) return undefined;

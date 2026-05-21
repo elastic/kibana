@@ -77,7 +77,6 @@ export {
   appendEntityFiltersToChangePointLineEsql,
   formatEsqlIdentifier,
   formatEsqlLiteral,
-  type BuildChangePointLineDataQueryOptions,
   isComputedColumn,
   getQuerySummary,
   buildRenameSourceFieldMap,
