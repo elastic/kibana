@@ -12,7 +12,7 @@ import Path, { dirname } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { Suite, Test } from './fake_mocha_types';
-import type { Providers, Config } from './lib';
+import type { Providers, Config, RunTestsResult } from './lib';
 import {
   Lifecycle,
   ProviderCollection,
@@ -44,7 +44,7 @@ export class FunctionalTestRunner {
         : new EsVersion(esVersion);
   }
 
-  async run(abortSignal?: AbortSignal) {
+  async run(abortSignal?: AbortSignal): Promise<RunTestsResult | any> {
     const testStats = await this.getTestStats();
     const realServices =
       !testStats || (testStats.testCount > 0 && testStats.nonSkippedTestCount > 0);
@@ -84,6 +84,8 @@ export class FunctionalTestRunner {
         this.log.warning(
           'custom test runner defined, ignoring all mocha/suite/filtering related options'
         );
+        // Custom test runners pre-date the structured RunTestsResult return shape and may
+        // return whatever they want (e.g., env vars for Cypress orchestration). Pass it through.
         return (await providers.invokeProviderFn(customTestRunner)) || 0;
       }
 
@@ -117,19 +119,19 @@ export class FunctionalTestRunner {
       // the mocha object and writing a report file with similar structure to the json report
       // (just leave out some execution details like timing, retry and erros)
       if (this.config.get('mochaOpts.dryRun')) {
-        return this.simulateMochaDryRun(mocha);
+        return { failureCount: this.simulateMochaDryRun(mocha), failedFiles: [] };
       }
 
       if (abortSignal?.aborted) {
         this.log.warning('run aborted');
-        return;
+        return { failureCount: 0, failedFiles: [] };
       }
 
       if (realServices) {
         await lifecycle.beforeTests.trigger(mocha.suite);
         if (abortSignal?.aborted) {
           this.log.warning('run aborted');
-          return;
+          return { failureCount: 0, failedFiles: [] };
         }
       }
 

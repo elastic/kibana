@@ -117,7 +117,13 @@ export function runFtrCli() {
             JSON.stringify(await functionalTestRunner.getTestStats(), null, 2) + '\n'
           );
         } else {
-          const failureCount = await functionalTestRunner.run();
+          const result = await functionalTestRunner.run();
+          const failureCount =
+            result && typeof result === 'object' && typeof result.failureCount === 'number'
+              ? result.failureCount
+              : typeof result === 'number'
+              ? result
+              : 0;
           process.exitCode = failureCount ? 1 : 0;
         }
       } catch (err) {
