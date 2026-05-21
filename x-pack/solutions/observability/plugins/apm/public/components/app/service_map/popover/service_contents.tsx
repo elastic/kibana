@@ -9,7 +9,9 @@
 
 import { EuiButton, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useCallback } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ApmPluginStartDeps } from '../../../../plugin';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { isEdge } from './utils';
@@ -35,8 +37,12 @@ export function ServiceContents({
   environment,
   kuery,
   isEmbedded,
+  showFocusMap,
+  clearKueryOnNavigation,
 }: ContentsProps) {
   const apmRouter = useApmRouter();
+  const { services } = useKibana<ApmPluginStartDeps>();
+  const filterManager = services.data?.query?.filterManager;
   const { query } = useAnyOfApmParams(
     '/service-map',
     '/services/{serviceName}/service-map',
@@ -78,9 +84,21 @@ export function ServiceContents({
 
   const isLoading = status === FETCH_STATUS.LOADING;
 
+  // Clear all app-level filter pills when focusing a single service — the
+  // focused view starts fresh with only the service.name scope.
+  const handleFocusClick = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement>) => {
+      filterManager?.setAppFilters([]);
+      onFocusClick(event);
+    },
+    [filterManager, onFocusClick]
+  );
+
   if (!isServiceNode || !nodeData || !serviceName) {
     return null;
   }
+
+  const destinationKuery = clearKueryOnNavigation ? '' : kuery;
 
   const detailsUrl = apmRouter.link('/services/{serviceName}', {
     path: { serviceName },
@@ -88,7 +106,7 @@ export function ServiceContents({
       rangeFrom,
       rangeTo,
       environment,
-      kuery,
+      kuery: destinationKuery,
       comparisonEnabled,
       serviceGroup,
     },
@@ -100,7 +118,7 @@ export function ServiceContents({
       rangeFrom,
       rangeTo,
       environment,
-      kuery,
+      kuery: '',
       serviceGroup,
       comparisonEnabled,
     },
@@ -131,13 +149,13 @@ export function ServiceContents({
           })}
         </EuiButton>
       </EuiFlexItem>
-      {!isEmbedded && (
+      {(showFocusMap ?? !isEmbedded) && (
         <EuiFlexItem>
           <EuiButton
             data-test-subj="apmServiceContentsFocusMapButton"
             color="success"
             href={focusUrl}
-            onClick={onFocusClick}
+            onClick={handleFocusClick}
           >
             {i18n.translate('xpack.apm.serviceMap.focusMapButtonText', {
               defaultMessage: 'Focus map',

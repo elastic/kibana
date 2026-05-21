@@ -284,6 +284,8 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                         <>
                           <ResumeExecutionButton
                             executionId={workflowExecutionId}
+                            workflowId={stepExecution?.workflowId}
+                            stepStartedAt={stepExecution?.startedAt}
                             resumeMessage={resumeMessage}
                             resumeSchema={resumeSchema}
                             autoOpen={shouldAutoResume}

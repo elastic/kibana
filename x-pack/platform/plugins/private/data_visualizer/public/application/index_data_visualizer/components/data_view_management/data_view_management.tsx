@@ -89,7 +89,6 @@ export function DataVisualizerDataViewManagement(props: DataVisualizerDataViewMa
     >
       <EuiContextMenuPanel
         data-test-subj="dataVisualizerDataViewManagementMenu"
-        size="s"
         items={[
           <EuiContextMenuItem
             key="add"

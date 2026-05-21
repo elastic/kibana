@@ -40,7 +40,7 @@ export class WaitForInputStepImpl implements NodeImplementation {
     }
 
     if (this.stepExecutionRuntime.tryEnterWaitUntil(undefined, ExecutionStatus.WAITING_FOR_INPUT)) {
-      // Store step config as input so the record is self contained
+      // Store step config as input so the record is self-contained
       // consistent with every other step type & readable without a definition lookup
       const withConfig = this.node.configuration?.with;
       if (withConfig) {
@@ -65,8 +65,12 @@ export class WaitForInputStepImpl implements NodeImplementation {
   }
 
   private resume(): void {
-    const context = this.workflowRuntime.getWorkflowExecution().context;
+    const execution = this.workflowRuntime.getWorkflowExecution();
+    const context = execution.context;
     const resumeInput = context?.resumeInput as Record<string, unknown> | undefined;
+    const ctx = context as Record<string, unknown> | null | undefined;
+    const resumedBy = typeof ctx?.resumedBy === 'string' ? ctx.resumedBy : 'unknown';
+    const executionId = execution.id;
 
     this.stepExecutionRuntime.finishStep(resumeInput);
 
@@ -76,8 +80,17 @@ export class WaitForInputStepImpl implements NodeImplementation {
       this.stepExecutionRuntime.updateWorkflowExecution({ context: restContext });
     }
 
-    this.workflowLogger.logDebug(`Step '${this.node.stepId}' resumed with human input`, {
-      event: { action: 'hitl:resumed' },
+    this.workflowLogger.logDebug(`Workflow ${executionId} resumed by ${resumedBy}`, {
+      event: {
+        action: 'hitl:resumed',
+        category: ['workflow'],
+        outcome: 'success',
+        provider: 'workflow-engine',
+      },
+      labels: {
+        responder: resumedBy,
+        execution_id: executionId,
+      },
     });
 
     this.workflowRuntime.navigateToNextNode();

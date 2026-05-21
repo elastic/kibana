@@ -26,6 +26,7 @@ import {
   createSAMLResponse,
   MOCK_IDP_LOGIN_PATH,
   MOCK_IDP_LOGOUT_PATH,
+  MOCK_IDP_SP_BASE_URL,
   projectTypeToAlias,
 } from '@kbn/mock-idp-utils';
 import { parseSAMLRequest } from '@kbn/mock-idp-utils/src/utils';
@@ -84,6 +85,30 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
       const logger = initializerContext.logger.get();
       const config = initializerContext.config.get<ConfigType>();
       const router = core.http.createRouter();
+
+      core.http.registerOnPreResponse((r, p, t) => {
+        // We only care about 302 redirects to the Mock IDP login/logout pages.
+        const location = p.headers?.location;
+        if (
+          p.statusCode !== 302 ||
+          typeof location !== 'string' ||
+          !location.startsWith(`${MOCK_IDP_SP_BASE_URL}/mock_idp/`)
+        ) {
+          return t.next();
+        }
+
+        // Rewrite to a path-only Location so the browser resolves the redirect against its own
+        // origin - that way the redirect just works regardless of where Kibana is actually served
+        // from (dev proxy with a random base path, custom port, HTTPS, a reverse proxy, …) and
+        // ES SAML realm config does not need to know the real Kibana URL.
+        return t.next({
+          headers: {
+            location: `${core.http.basePath.serverBasePath}${location.slice(
+              MOCK_IDP_SP_BASE_URL.length
+            )}`,
+          },
+        });
+      });
 
       core.http.resources.register(
         {
@@ -157,14 +182,6 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
           },
         },
         async (context, request, response) => {
-          // `getServerInfo()` returns the inner Kibana port, not the proxy ES sees.
-          let baseUrl = core.http.basePath.publicBaseUrl;
-          if (!baseUrl) {
-            const { protocol, hostname, port } = core.http.getServerInfo();
-            baseUrl = `${protocol}://${hostname}:${port}${core.http.basePath.serverBasePath}`;
-          }
-          const kibanaAcsUrl = `${baseUrl.replace(/\/+$/, '')}/api/security/saml/callback`;
-
           const serverlessOptions = plugins.cloud?.serverless
             ? {
                 serverless: {
@@ -181,15 +198,12 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
               logger.info(`Sending SAML response for request ID: ${samlRequestInfo.requestId}`);
             }
 
-            const destinationUrl = samlRequestInfo?.acsUrl ?? kibanaAcsUrl;
-
             const parsed = new URL(request.body.url, 'https://localhost');
             const relayState = parsed.searchParams.get('RelayState') ?? undefined;
 
             return response.ok({
               body: {
                 SAMLResponse: await createSAMLResponse({
-                  kibanaUrl: destinationUrl,
                   username: request.body.username,
                   full_name: request.body.full_name ?? undefined,
                   email: request.body.email ?? undefined,
@@ -200,7 +214,6 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
                   ...(samlRequestInfo?.issuer ? { spEntityId: samlRequestInfo.issuer } : {}),
                   ...serverlessOptions,
                 }),
-                ...(samlRequestInfo?.acsUrl ? { acsUrl: samlRequestInfo.acsUrl } : {}),
                 ...(relayState ? { RelayState: relayState } : {}),
               },
             });

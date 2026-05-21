@@ -14,6 +14,6 @@ if [[ ! -d .moon/cache ]]; then
 else
   tar -cf ~/moon-cache.tar.zst -I 'zstd -19 -T0' .moon/cache || echo "Failed to archive moon cache"
   cd ~/
-  buildkite-agent artifact upload moon-cache.tar.zst || echo "Failed to upload moon cache"
+  upload_tmp_artifact ~/moon-cache.tar.zst moon-cache.tar.zst "$BUILDKITE_BUILD_ID" || echo "Failed to upload moon cache"
   echo "Moon cache archived as moon-cache.tar.zst"
 fi

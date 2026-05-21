@@ -28,7 +28,7 @@ import {
   StarredColumn,
   CreatedByColumn,
 } from './column';
-import { Action as BaseAction, EditAction, DeleteAction, InspectAction } from './action';
+import { Action as BaseAction, EditAction, DeleteAction, ContentEditorAction } from './action';
 import { useColumns, useSorting, useSelection } from './hooks';
 import { TableSkeleton } from './skeleton/table_skeleton';
 import { WIDE_VIEWPORT_NAME_BREAKPOINT_PX } from './breakpoints';
@@ -412,7 +412,7 @@ export const Column = Object.assign(BaseColumn, {
 export const Action = Object.assign(BaseAction, {
   Edit: EditAction,
   Delete: DeleteAction,
-  Inspect: InspectAction,
+  ContentEditor: ContentEditorAction,
 });
 
 export const ContentListTable = Object.assign(ContentListTableComponent, {

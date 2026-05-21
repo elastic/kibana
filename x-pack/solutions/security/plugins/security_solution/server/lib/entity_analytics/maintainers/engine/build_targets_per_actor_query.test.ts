@@ -264,6 +264,54 @@ describe('buildTargetsPerActorQuery (targets per actor)', () => {
     });
   });
 
+  // Regression for the same shape of bug fixed in Step 1: when a config
+  // supplies `customActor`, the engine-injected userIdFilter (the
+  // `AND (...)` clause that follows `esqlWhereClause`) must be derived from
+  // `customActor.fields` rather than hardcoded to ECS `user.*`. Otherwise
+  // standard/bucketed configs that opt into a custom actor identity would
+  // silently produce zero rows in Step 2.
+  describe('customActor userId existence gate (no ECS user.* dependency)', () => {
+    const customField = 'custom.actor.field';
+    const customActorConfig: RelationshipIntegrationConfig = {
+      ...commWithUserConfig,
+      customActor: {
+        fields: [customField],
+        evalOverride: `CONCAT("user:", ${customField}, "@custom")`,
+      },
+    };
+
+    it('does NOT include the ECS user-EUID-exists ES|QL filter when customActor is set', () => {
+      const query = buildTargetsPerActorQuery(customActorConfig, 'default');
+      expect(query).not.toContain(`AND (${USER_ESQL_EXISTS})`);
+    });
+
+    it('emits an "any of customActor.fields is non-empty" ES|QL gate immediately after the integration WHERE clause', () => {
+      const multiFieldConfig: RelationshipIntegrationConfig = {
+        ...commWithUserConfig,
+        customActor: {
+          fields: ['custom.actor.one', 'custom.actor.two'],
+          evalOverride: 'CONCAT("user:", custom.actor.one, "@custom")',
+        },
+      };
+      const query = buildTargetsPerActorQuery(multiFieldConfig, 'default');
+      expect(query).toContain('`custom.actor.one` IS NOT NULL');
+      expect(query).toContain('`custom.actor.one` != ""');
+      expect(query).toContain('`custom.actor.two` IS NOT NULL');
+      expect(query).toContain('`custom.actor.two` != ""');
+    });
+
+    it('keeps the requireTargetEntityIdExists target-EUID gate independent of customActor', () => {
+      const query = buildTargetsPerActorQuery(
+        { ...customActorConfig, targetEntityType: 'host', requireTargetEntityIdExists: true },
+        'default'
+      );
+      // Target-side gate is parameterized by targetEntityType, so the
+      // host-EUID gate is still present even though the actor is custom.
+      expect(query).toContain(`AND (${HOST_ESQL_EXISTS})`);
+      expect(query).not.toContain(`AND (${USER_ESQL_EXISTS})`);
+    });
+  });
+
   // Regression guard for an ES|QL quirk where `WHERE col IS NOT NULL`
   // evaluates to FALSE for every row when `col` is produced by CONCAT() over
   // a CASE() with nested CASE arms (as the user EUID actorEval does). Using

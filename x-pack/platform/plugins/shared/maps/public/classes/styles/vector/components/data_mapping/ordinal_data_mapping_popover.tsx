@@ -241,8 +241,6 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
             options={dataMappingOptions}
             valueOfSelected={props.dataMappingFunction}
             onChange={onDataMappingFunctionChange}
-            itemLayoutAlign="top"
-            hasDividers
           />
         </EuiFormRow>
 

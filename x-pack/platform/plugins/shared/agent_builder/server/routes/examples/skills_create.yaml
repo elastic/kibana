@@ -1,0 +1,55 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        createSkillRequestExample:
+          description: "Example request to create a user-defined skill"
+          value:
+            id: my-custom-skill
+            name: Custom Analysis Skill
+            description: A skill for performing custom data analysis.
+            content: "You are an expert data analyst. Use the available tools to query and analyze data."
+            tool_ids:
+              - platform.core.search
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          createSkillResponseExample:
+            description: "Example response returning the created skill"
+            value:
+              id: my-custom-skill
+              name: Custom Analysis Skill
+              description: A skill for performing custom data analysis.
+              content: "You are an expert data analyst. Use the available tools to query and analyze data."
+              tool_ids:
+                - platform.core.search
+              readonly: false
+              experimental: false
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+      -X POST "https://${KIBANA_URL}/api/agent_builder/skills" \
+      -H "Authorization: ApiKey ${API_KEY}" \
+      -H "kbn-xsrf: true" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "id": "my-custom-skill",
+        "name": "Custom Analysis Skill",
+        "description": "A skill for performing custom data analysis.",
+        "content": "You are an expert data analyst.",
+        "tool_ids": ["platform.core.search"]
+      }'
+- lang: Console
+  source: |
+    POST kbn:/api/agent_builder/skills
+    {
+      "id": "my-custom-skill",
+      "name": "Custom Analysis Skill",
+      "description": "A skill for performing custom data analysis.",
+      "content": "You are an expert data analyst.",
+      "tool_ids": ["platform.core.search"]
+    }

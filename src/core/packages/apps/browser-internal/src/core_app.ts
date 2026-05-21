@@ -44,6 +44,8 @@ export interface CoreAppsServiceStartDeps {
 }
 
 export class CoreAppsService {
+  private docLinks?: DocLinksStart;
+
   constructor(private readonly coreContext: CoreContext) {}
 
   public setup({ application, http, injectedMetadata, notifications }: CoreAppsServiceSetupDeps) {
@@ -62,6 +64,7 @@ export class CoreAppsService {
     if (injectedMetadata.getAnonymousStatusPage()) {
       http.anonymousPaths.register('/status');
     }
+    const getDocLinks = () => this.docLinks;
     application.register(this.coreContext.coreId, {
       id: 'status',
       title: 'Server Status',
@@ -69,7 +72,7 @@ export class CoreAppsService {
       chromeless: true,
       visibleIn: [],
       mount(params: AppMountParameters) {
-        return renderStatusApp(params, { http, notifications });
+        return renderStatusApp(params, { http, notifications, getDocLinks });
       },
     });
   }
@@ -82,6 +85,8 @@ export class CoreAppsService {
     uiSettings,
     ...startDeps
   }: CoreAppsServiceStartDeps) {
+    this.docLinks = docLinks;
+
     if (!application.history) {
       return;
     }
