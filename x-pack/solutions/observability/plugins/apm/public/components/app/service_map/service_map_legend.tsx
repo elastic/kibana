@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   EuiButtonIcon,
   EuiPopover,
@@ -81,17 +81,12 @@ interface ServiceMapLegendProps {
   controlIconCss: SerializedStyles;
 }
 
-export function ServiceMapLegend({ controlIconCss }: ServiceMapLegendProps) {
-  const [isOpen, setIsOpen] = useState(false);
+const useLegendStyles = () => {
   const { euiTheme } = useEuiTheme();
-  const legendTitleId = useGeneratedHtmlId({ prefix: 'serviceMapLegendTitle' });
-  const { docLinks } = useApmPluginContext().core;
 
-  const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
-  const close = useCallback(() => setIsOpen(false), []);
-
-  const styles = useMemo(
-    () => ({
+  return {
+    euiTheme,
+    styles: {
       container: css`
         width: 200px;
       `,
@@ -137,9 +132,18 @@ export function ServiceMapLegend({ controlIconCss }: ServiceMapLegendProps) {
       docsLink: css`
         font-size: ${euiTheme.size.m};
       `,
-    }),
-    [euiTheme]
-  );
+    },
+  };
+};
+
+export function ServiceMapLegend({ controlIconCss }: ServiceMapLegendProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const { euiTheme, styles } = useLegendStyles();
+  const legendTitleId = useGeneratedHtmlId({ prefix: 'serviceMapLegendTitle' });
+  const { docLinks } = useApmPluginContext().core;
+
+  const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
+  const close = useCallback(() => setIsOpen(false), []);
 
   return (
     <EuiPopover
