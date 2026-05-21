@@ -9,7 +9,12 @@
 
 import dateMath from '@elastic/datemath';
 import type { TimeRange } from '@kbn/data-plugin/common';
-import { formatEsqlIdentifier, formatEsqlLiteral } from '@kbn/esql-utils';
+import {
+  formatEsqlIdentifier,
+  formatEsqlLiteral,
+  getSourceCommandFromESQLQuery,
+  getIndexPatternFromESQLQuery,
+} from '@kbn/esql-utils';
 import type { ChangePointCardModel } from './derive_change_point_cards';
 
 // Resolves any time range bound (absolute ISO or relative expression) to epoch milliseconds.
@@ -33,17 +38,23 @@ export const buildFocusedViewRawQuery = (
   lineEsql: string,
   entityValues: Readonly<Record<string, string>>
 ): string | undefined => {
-  const fromClause = lineEsql.match(/^FROM[^|]+/i)?.[0]?.trim();
-  if (!fromClause) return undefined;
+  try {
+    const sourceCommand = getSourceCommandFromESQLQuery(lineEsql);
+    const indexPattern = getIndexPatternFromESQLQuery(lineEsql);
+    if (!sourceCommand || !indexPattern) return undefined;
+    const fromClause = `${sourceCommand} ${indexPattern}`;
 
-  const predicates = Object.entries(entityValues)
-    .map(([col, val]) => {
-      const lit = formatEsqlLiteral(val);
-      return lit !== undefined ? `${formatEsqlIdentifier(col)} == ${lit}` : undefined;
-    })
-    .filter((p): p is string => p !== undefined);
+    const predicates = Object.entries(entityValues)
+      .map(([col, val]) => {
+        const lit = formatEsqlLiteral(val);
+        return lit !== undefined ? `${formatEsqlIdentifier(col)} == ${lit}` : undefined;
+      })
+      .filter((p): p is string => p !== undefined);
 
-  return predicates.length > 0 ? `${fromClause} | WHERE ${predicates.join(' AND ')}` : fromClause;
+    return predicates.length > 0 ? `${fromClause} | WHERE ${predicates.join(' AND ')}` : fromClause;
+  } catch {
+    return undefined;
+  }
 };
 
 /**

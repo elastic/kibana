@@ -93,14 +93,12 @@ export const createChangePointDataSourceProfileProvider =
 
       const columnNames = getChangePointOutputColumnNames(query.esql);
       const pvalueColumnId = columnNames?.pvalueColumn ?? 'pvalue';
-      const typeColumnId = columnNames?.typeColumn ?? 'type';
 
       return {
         isMatch: true,
         context: {
           category: DataSourceCategory.Default,
           pvalueColumnId,
-          typeColumnId,
         },
       };
     },

@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  buildChangePointCards,
-  formatAnnotationTimestamp,
-  hasChangePointChartCards,
-} from './derive_change_point_cards';
+import { buildChangePointCards, formatAnnotationTimestamp } from './derive_change_point_cards';
 
 describe('derive_change_point_cards', () => {
   describe('formatAnnotationTimestamp', () => {
@@ -130,67 +126,6 @@ describe('derive_change_point_cards', () => {
       expect(cards![0].lineEsql).toContain('| WHERE host == "a"');
       expect(cards![1].lineEsql).toContain('| WHERE host == "b"');
       expect(cards![0].lineEsql).not.toContain('| WHERE host == "b"');
-    });
-
-    it('hasChangePointChartCards matches whether buildChangePointCards returns cards', () => {
-      const esqlLocal =
-        'FROM idx | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket';
-      const tableWithCp = {
-        type: 'datatable' as const,
-        columns: [
-          { id: 'bucket', name: 'bucket', meta: { type: 'date' as const } },
-          { id: 'avg_bytes', name: 'avg_bytes', meta: { type: 'number' as const } },
-          { id: 'type', name: 'type', meta: { type: 'string' as const } },
-          { id: 'pvalue', name: 'pvalue', meta: { type: 'number' as const } },
-        ],
-        rows: [
-          {
-            bucket: '2023-11-15T00:00:00.000Z',
-            avg_bytes: 14,
-            type: 'mean_shift',
-            pvalue: 0.001,
-          },
-        ],
-      };
-      expect(hasChangePointChartCards({ table: tableWithCp, esql: esqlLocal })).toBe(true);
-      expect(Boolean(buildChangePointCards({ table: tableWithCp, esql: esqlLocal })?.length)).toBe(
-        true
-      );
-
-      expect(hasChangePointChartCards({ table: undefined, esql: esqlLocal })).toBe(false);
-      expect(buildChangePointCards({ table: undefined, esql: esqlLocal })).toBeUndefined();
-    });
-
-    it('hasChangePointChartCards returns false for split query when all groups lack annotations', () => {
-      // Regression: groups.size > 0 is not enough — every group must have at least one valid
-      // annotation (row with parseable timestamp + type/pvalue in non-BY mode) or buildChangePointCards
-      // returns undefined for split queries.
-      const esqlWithHost =
-        'FROM idx | STATS avg_bytes = AVG(bytes) BY host, bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket';
-      const tableNoAnnotations = {
-        type: 'datatable' as const,
-        columns: [
-          { id: 'host', name: 'host', meta: { type: 'string' as const } },
-          { id: 'bucket', name: 'bucket', meta: { type: 'date' as const } },
-          { id: 'avg_bytes', name: 'avg_bytes', meta: { type: 'number' as const } },
-          { id: 'type', name: 'type', meta: { type: 'string' as const } },
-          { id: 'pvalue', name: 'pvalue', meta: { type: 'number' as const } },
-        ],
-        rows: [
-          // Both entity groups have rows but no valid change-point annotations (type empty / pvalue null).
-          { host: 'a', bucket: '2023-11-15T00:00:00.000Z', avg_bytes: 10, type: '', pvalue: null },
-          { host: 'b', bucket: '2023-11-16T00:00:00.000Z', avg_bytes: 20, type: '', pvalue: null },
-        ],
-      };
-
-      const cards = buildChangePointCards({ table: tableNoAnnotations, esql: esqlWithHost });
-      // Builder skips all groups → returns undefined.
-      expect(cards).toBeUndefined();
-
-      // Predicate must agree with the builder.
-      expect(hasChangePointChartCards({ table: tableNoAnnotations, esql: esqlWithHost })).toBe(
-        false
-      );
     });
 
     it('skips annotation markers when type is set but pvalue is null', () => {

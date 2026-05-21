@@ -123,12 +123,12 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
         name: e.name,
         datetime: e.datetime,
         icon: 'triangle',
-        color: '#BD271E',
+        color: euiTheme.colors.danger,
       })),
     };
 
     return [seriesLayer, annotationLayer];
-  }, [card.annotationEvents, timeColumn, valueColumn]);
+  }, [card.annotationEvents, euiTheme.colors.danger, timeColumn, valueColumn]);
 
   // If any annotation falls before the Discover time range, extend `from` so Lens doesn't clip it.
   // fetchParams.timeRange is always resolved to absolute ISO by processFetchParams, so the

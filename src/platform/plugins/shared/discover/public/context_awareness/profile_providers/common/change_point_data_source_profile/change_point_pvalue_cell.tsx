@@ -12,29 +12,11 @@ import type { FC } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
-
-/** Impact level from p-value: lower p-value = more extreme change */
-export type PvalueImpactLevel = 'high' | 'moderate' | 'minimal';
-
-// We currently don't show anything if the significance is greater than 0.03 IIRC
-const PVALUE_THRESHOLDS: Array<{ max: number; level: PvalueImpactLevel }> = [
-  { max: 0.0001, level: 'high' },
-  { max: 0.005, level: 'moderate' },
-  { max: 0.03, level: 'minimal' },
-];
-
-function getImpactLevel(pvalue: number): PvalueImpactLevel {
-  for (const { max, level } of PVALUE_THRESHOLDS) {
-    if (pvalue < max) return level;
-  }
-  return 'minimal';
-}
-
-const IMPACT_LEVEL_COLORS: Record<PvalueImpactLevel, string> = {
-  high: 'danger',
-  moderate: 'warning',
-  minimal: 'primary',
-};
+import {
+  getPvalueImpactLevel,
+  PVALUE_IMPACT_COLORS,
+  type PvalueImpactLevel,
+} from '@kbn/change-point-chart-viewer';
 
 const IMPACT_LEVEL_LABELS: Record<PvalueImpactLevel, string> = {
   high: i18n.translate('discover.contextAwareness.changePointPvalueCell.impactHigh', {
@@ -74,12 +56,12 @@ export const ChangePointPvalueCell: FC<ChangePointPvalueCellProps> = ({
     return null;
   }
 
-  const level = getImpactLevel(pvalue);
+  const level = getPvalueImpactLevel(pvalue);
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" wrap={false} responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiBadge color={IMPACT_LEVEL_COLORS[level]} title={String(pvalue)}>
+        <EuiBadge color={PVALUE_IMPACT_COLORS[level]} title={String(pvalue)}>
           {IMPACT_LEVEL_LABELS[level]}
         </EuiBadge>
       </EuiFlexItem>

@@ -10,7 +10,7 @@
 /** Significance tier derived from a change-point pvalue. Lower pvalue = more significant. */
 export type PvalueImpactLevel = 'high' | 'moderate' | 'minimal';
 
-// Thresholds match the Discover results table (change_point_pvalue_cell.tsx).
+// Canonical thresholds; consumed by change_point_badge.tsx and Discover's change_point_pvalue_cell.tsx.
 const PVALUE_THRESHOLDS: Array<{ max: number; level: PvalueImpactLevel }> = [
   { max: 0.0001, level: 'high' },
   { max: 0.005, level: 'moderate' },

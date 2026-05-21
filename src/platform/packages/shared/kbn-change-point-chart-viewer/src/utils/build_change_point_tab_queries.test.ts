@@ -55,6 +55,21 @@ describe('buildFocusedViewRawQuery', () => {
     const result = buildFocusedViewRawQuery('NOT A VALID ESQL QUERY', { host: 'web-01' });
     expect(result).toBeUndefined();
   });
+
+  it('handles multiline / pretty-printed queries with leading whitespace', () => {
+    const multilineEsql =
+      '\n  FROM zookeeper-service\n  | STATS avg_bytes=AVG(event.duration) BY day=BUCKET(@timestamp, 1d)';
+    const result = buildFocusedViewRawQuery(multilineEsql, {});
+    expect(result).toBe('FROM zookeeper-service');
+  });
+
+  it('handles multiple indices (AST normalises comma spacing)', () => {
+    const multiIndexEsql =
+      'FROM foo-1, foo-2 | STATS avg_bytes=AVG(event.duration) BY day=BUCKET(@timestamp, 1d)';
+    const result = buildFocusedViewRawQuery(multiIndexEsql, { host: 'web-01' });
+    // AST strips whitespace around commas; both indices are preserved.
+    expect(result).toBe('FROM foo-1,foo-2 | WHERE host == "web-01"');
+  });
 });
 
 // Pin "now" so that datemath expressions like "now-30d" resolve to known values.

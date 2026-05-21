@@ -36,6 +36,22 @@ jest.mock('./utils/get_esql_query', () => ({
   getEsqlQuery: jest.fn().mockReturnValue('FROM logs-* | CHANGE_POINT count ON @timestamp'),
 }));
 
+// Stub out ChangePointExperienceGridContent so happy-path tests don't need Lens.
+jest.mock('./change_point_experience_grid_content', () => ({
+  ChangePointExperienceGridContent: () => (
+    <div data-test-subj="changePointExperienceGridContent">grid content stub</div>
+  ),
+}));
+
+// Render EuiDelayRender children immediately to avoid timer flakiness in loading tests.
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  return {
+    ...actual,
+    EuiDelayRender: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+  };
+});
+
 // Minimal fetchParams with only the fields the grid reads directly.
 const fetchParams = {
   query: { esql: 'FROM logs-* | CHANGE_POINT count ON @timestamp' },
@@ -44,6 +60,16 @@ const fetchParams = {
   relativeTimeRange: { from: 'now-15m', to: 'now' },
   filters: [],
   esqlVariables: [],
+} as unknown as UnifiedChangePointGridProps['fetchParams'];
+
+const fetchParamsWithRows = {
+  ...fetchParams,
+  table: {
+    columns: [{ id: '@timestamp' }, { id: 'count' }, { id: 'type' }, { id: 'pvalue' }],
+    rows: [
+      { '@timestamp': '2024-01-15T00:00:00.000Z', count: 5, type: 'mean_shift', pvalue: 0.001 },
+    ],
+  },
 } as unknown as UnifiedChangePointGridProps['fetchParams'];
 
 const minimalProps = {
@@ -108,5 +134,72 @@ describe('ChangePointExperienceGrid error boundary integration', () => {
     expect(screen.getByTestId('sectionErrorBoundaryPromptHeader')).toBeInTheDocument();
     // The normal grid output should not be present.
     expect(screen.queryByText('No change points detected.')).not.toBeInTheDocument();
+  });
+});
+
+describe('ChangePointExperienceGrid UI states', () => {
+  const { buildChangePointCards, getChangePointSeriesColumns } = {
+    buildChangePointCards: () =>
+      jest.requireMock('./utils/derive_change_point_cards').buildChangePointCards,
+    getChangePointSeriesColumns: () =>
+      jest.requireMock('@kbn/esql-utils').getChangePointSeriesColumns,
+  };
+
+  afterEach(() => {
+    buildChangePointCards().mockReturnValue([]);
+    getChangePointSeriesColumns().mockReturnValue(undefined);
+  });
+
+  it('shows "No results yet" when not loading and table has no rows', () => {
+    render(
+      <ChangePointExperienceGrid
+        {...minimalProps}
+        fetchParams={fetchParams}
+        isChartLoading={false}
+      />
+    );
+    expect(screen.getByText('No results yet')).toBeInTheDocument();
+  });
+
+  it('shows "No change point series to chart" when table has rows but no cards', () => {
+    buildChangePointCards().mockReturnValue([]);
+    getChangePointSeriesColumns().mockReturnValue(undefined);
+    render(
+      <ChangePointExperienceGrid
+        {...minimalProps}
+        fetchParams={fetchParamsWithRows}
+        isChartLoading={false}
+      />
+    );
+    expect(screen.getByText('No change point series to chart')).toBeInTheDocument();
+  });
+
+  it('shows a skeleton when loading and table has no rows', () => {
+    render(
+      <ChangePointExperienceGrid
+        {...minimalProps}
+        fetchParams={fetchParams}
+        isChartLoading={true}
+      />
+    );
+    // EuiSkeletonText renders multiple lines; at least one should be present.
+    const skeleton = document.querySelector('.euiSkeletonText');
+    expect(skeleton).not.toBeNull();
+  });
+
+  it('renders grid content when table has rows and cards are available', () => {
+    buildChangePointCards().mockReturnValue([{ id: 'card-1', title: 'Series 1' }]);
+    getChangePointSeriesColumns().mockReturnValue({
+      valueColumn: 'count',
+      timeColumn: '@timestamp',
+    });
+    render(
+      <ChangePointExperienceGrid
+        {...minimalProps}
+        fetchParams={fetchParamsWithRows}
+        isChartLoading={false}
+      />
+    );
+    expect(screen.getByTestId('changePointExperienceGridContent')).toBeInTheDocument();
   });
 });

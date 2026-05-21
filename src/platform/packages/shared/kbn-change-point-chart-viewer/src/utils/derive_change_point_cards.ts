@@ -263,49 +263,6 @@ const getChangePointCardsBuildContext = (params: {
   };
 };
 
-/**
- * Cheap gate for whether {@link buildChangePointCards} would return at least one card.
- *
- * - No-split (no entity columns): true whenever a line query can be built from the ES|QL, even
- *   if the result table has no rows yet. The chart always renders so the source data line is
- *   visible regardless of whether any change points were detected.
- * - Split (entity columns present via BY clause or heuristic): true when at least one entity
- *   group contains at least one valid annotation event (row with a parseable timestamp and, for
- *   non-BY mode, a non-empty type and defined pvalue). Mirrors the skip logic in
- *   {@link buildChangePointCards} so the predicate never returns `true` when the builder would
- *   return `undefined`.
- */
-export const hasChangePointChartCards = (params: {
-  table: Datatable | undefined;
-  esql: string;
-}): boolean => {
-  const ctx = getChangePointCardsBuildContext(params);
-  if (!ctx) return false;
-
-  // No-split: show a chart even when the result table has no rows (e.g. no change points found).
-  if (ctx.entityColumnIds.length === 0) {
-    return Boolean(buildChangePointLineDataQuery(ctx.esql));
-  }
-
-  // Split: require a buildable line query AND at least one group with a valid annotation.
-  // This mirrors the `if (isSplitQuery && annotationEvents.length === 0) continue` guard and the
-  // timestamp checks inside buildChangePointCards, ensuring the predicate and the builder agree.
-  if (!buildChangePointLineDataQuery(ctx.esql)) return false;
-
-  for (const { rows } of ctx.groups.values()) {
-    for (const row of rows) {
-      const isAnnotation = ctx.isByMode
-        ? true
-        : isChangePointTableRow(row, ctx.typeColumnId, ctx.pvalueColumnId);
-      if (!isAnnotation) continue;
-      const timeCell = pickTimestampCell(row, ctx.timeColumn, ctx.table, ctx.timestampReservedIds);
-      if (formatAnnotationTimestamp(timeCell) !== undefined) return true;
-    }
-  }
-
-  return false;
-};
-
 export const buildChangePointCards = (params: {
   table: Datatable | undefined;
   esql: string;
