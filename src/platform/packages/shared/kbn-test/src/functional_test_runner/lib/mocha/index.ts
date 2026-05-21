@@ -12,3 +12,5 @@
 export { setupMocha } from './setup_mocha';
 // @internal
 export { runTests } from './run_tests';
+// @internal
+export type { RunTestsResult } from './run_tests';

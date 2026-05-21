@@ -13,6 +13,8 @@ export * from './config';
 export * from './providers';
 // @internal
 export { runTests, setupMocha } from './mocha';
+// @internal
+export type { RunTestsResult } from './mocha';
 export * from './docker_servers';
 export { SuiteTracker } from './suite_tracker';
 export { DedicatedTaskRunner } from './dedicated_task_runner';

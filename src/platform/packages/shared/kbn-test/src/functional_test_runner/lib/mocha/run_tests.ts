@@ -9,22 +9,44 @@
 
 import * as Rx from 'rxjs';
 import type { Lifecycle } from '../lifecycle';
-import type { Mocha } from '../../fake_mocha_types';
+import type { Mocha, Runnable } from '../../fake_mocha_types';
+
+export interface RunTestsResult {
+  failureCount: number;
+  failedFiles: string[];
+}
 
 /**
- *  Run the tests that have already been loaded into
- *  mocha. aborts tests on 'cleanup' lifecycle runs
- *
- *  @param  {Lifecycle} lifecycle
- *  @param  {ToolingLog} log
- *  @param  {Mocha} mocha
- *  @return {Promise<Number>} resolves to the number of test failures
+ *  Run the tests that have already been loaded into mocha. Aborts tests on
+ *  'cleanup' lifecycle runs. Resolves with the count of mocha failures and
+ *  the unique list of spec files that contained a failing test or hook.
  */
-export async function runTests(lifecycle: Lifecycle, mocha: Mocha, abortSignal?: AbortSignal) {
+export async function runTests(
+  lifecycle: Lifecycle,
+  mocha: Mocha,
+  abortSignal?: AbortSignal
+): Promise<RunTestsResult> {
+  const failedFiles = new Set<string>();
+
   let runComplete = false;
   const runner = mocha.run(() => {
     runComplete = true;
   });
+
+  const recordFailure = (runnable: Runnable) => {
+    // Walk up to the runnable's parent suite if the runnable itself has no
+    // file (true for hooks attached to nested describes that inherit from
+    // their parent suite).
+    let node: Runnable | undefined = runnable;
+    while (node && !node.file) {
+      node = node.parent;
+    }
+    if (node?.file) {
+      failedFiles.add(node.file);
+    }
+  };
+
+  runner.on('fail', recordFailure);
 
   Rx.race(
     lifecycle.cleanup.before$,
@@ -39,8 +61,12 @@ export async function runTests(lifecycle: Lifecycle, mocha: Mocha, abortSignal?:
     },
   });
 
-  return new Promise((resolve) => {
-    const respond = () => resolve(runner.failures);
+  return new Promise<RunTestsResult>((resolve) => {
+    const respond = () =>
+      resolve({
+        failureCount: runner.failures as unknown as number,
+        failedFiles: [...failedFiles],
+      });
 
     // if there are no tests, mocha.run() is sync
     // and the 'end' event can't be listened to

@@ -18,6 +18,7 @@ export {
   runCheckFtrConfigsCli,
   DedicatedTaskRunner,
 } from './lib';
+export type { RunTestsResult } from './lib';
 export * from './cli';
 export * from './lib/docker_servers';
 export * from './public_types';
