@@ -10,8 +10,8 @@
 import type { LoopBreakNode, WorkflowGraph } from '@kbn/workflows/graph';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../../../workflow_context_manager/step_execution_runtime_factory';
+import type { StepIoService } from '../../../workflow_context_manager/step_io_service';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { WorkflowExecutionState } from '../../../workflow_context_manager/workflow_execution_state';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
 import { LoopBreakNodeImpl } from '../loop_break_node_impl';
 
@@ -21,7 +21,7 @@ describe('LoopBreakNodeImpl', () => {
   let wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager;
   let workflowLogger: IWorkflowEventLogger;
   let stepExecutionRuntimeFactory: StepExecutionRuntimeFactory;
-  let workflowExecutionState: WorkflowExecutionState;
+  let stepIoService: StepIoService;
   let workflowGraph: WorkflowGraph;
   let underTest: LoopBreakNodeImpl;
 
@@ -53,9 +53,9 @@ describe('LoopBreakNodeImpl', () => {
 
     stepExecutionRuntimeFactory = {} as StepExecutionRuntimeFactory;
 
-    workflowExecutionState = {
+    stepIoService = {
       evictStaleLoopOutputs: jest.fn(),
-    } as unknown as WorkflowExecutionState;
+    } as unknown as StepIoService;
 
     workflowGraph = {
       getInnerStepIds: jest.fn().mockReturnValue(new Set(['innerAction'])),
@@ -67,7 +67,7 @@ describe('LoopBreakNodeImpl', () => {
       wfExecutionRuntimeManager,
       workflowLogger,
       stepExecutionRuntimeFactory,
-      workflowExecutionState,
+      stepIoService,
       workflowGraph
     );
   });
@@ -98,8 +98,6 @@ describe('LoopBreakNodeImpl', () => {
     underTest.run();
 
     expect(workflowGraph.getInnerStepIds).toHaveBeenCalledWith('my_loop');
-    expect(workflowExecutionState.evictStaleLoopOutputs).toHaveBeenCalledWith(
-      new Set(['innerAction'])
-    );
+    expect(stepIoService.evictStaleLoopOutputs).toHaveBeenCalledWith(new Set(['innerAction']));
   });
 });

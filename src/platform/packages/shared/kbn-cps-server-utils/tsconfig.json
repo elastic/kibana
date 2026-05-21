@@ -8,6 +8,7 @@
     "../../../../../typings/**/*",
   ],
   "kbn_references": [
+    "@kbn/core-elasticsearch-server",
     "@kbn/spaces-utils",
   ],
   "exclude": [

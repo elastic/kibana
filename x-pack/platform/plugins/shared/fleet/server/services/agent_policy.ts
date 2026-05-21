@@ -8,7 +8,6 @@ import apm from 'elastic-apm-node';
 import { withActiveSpan } from '@kbn/tracing-utils';
 import { groupBy, isEqual, keyBy, omit, pick, uniq } from 'lodash';
 import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
-import { dump } from 'js-yaml';
 import pMap from 'p-map';
 import { lt, minVersion, gt } from 'semver';
 import type {
@@ -33,6 +32,8 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import { withSpan } from '@kbn/apm-utils';
+
+import yaml from 'yaml';
 
 import { copyPackagePolicy } from '../../common/services/copy_package_policy_utils';
 
@@ -146,9 +147,9 @@ import { bulkInstallPackages, getPackageInfo } from './epm/packages';
 import { ensureInstalledPackage } from './epm/packages/install';
 import { getAgentsByKuery, unenrollForAgentPolicyId } from './agents';
 import {
+  getCompiledVersionsForAgentPolicy,
   getPackagePolicySavedObjectType,
   packagePolicyService,
-  getCompiledVersionsForAgentPolicy,
 } from './package_policy';
 import { incrementPackagePolicyCopyName } from './package_policies';
 import { outputService } from './output';
@@ -1505,20 +1506,30 @@ class AgentPolicyService {
   public async bumpAllAgentPoliciesForOutput(
     esClient: ElasticsearchClient,
     outputId: string,
-    options?: { user?: AuthenticatedUser }
+    options?: { isDefault?: boolean; isDefaultMonitoring?: boolean; user?: AuthenticatedUser }
   ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
     const useSpaceAwareness = await isSpaceAwarenessEnabled();
     const internalSoClientWithoutSpaceExtension =
       appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
     const savedObjectType = await getAgentPolicySavedObjectType();
-    // All agent policies directly using output
+    const escapedId = escapeSearchQueryPhrase(outputId);
+    const filterClauses = [
+      `(${savedObjectType}.attributes.data_output_id:${escapedId} OR ${savedObjectType}.attributes.monitoring_output_id:${escapedId})`,
+    ];
+    if (options?.isDefault) {
+      filterClauses.push(`(NOT ${savedObjectType}.attributes.data_output_id:*)`);
+    }
+    if (options?.isDefaultMonitoring) {
+      filterClauses.push(`(NOT ${savedObjectType}.attributes.monitoring_output_id:*)`);
+    }
+    const filter = filterClauses.join(' OR ');
+
     const agentPoliciesUsingOutput =
       await internalSoClientWithoutSpaceExtension.find<AgentPolicySOAttributes>({
         type: savedObjectType,
         fields: ['revision', 'data_output_id', 'monitoring_output_id', 'namespaces'],
-        searchFields: ['data_output_id', 'monitoring_output_id'],
-        search: escapeSearchQueryPhrase(outputId),
+        filter,
         perPage: SO_SEARCH_LIMIT,
         namespaces: ['*'],
       });
@@ -1562,28 +1573,6 @@ class AgentPolicyService {
         ...agentPoliciesUsingOutput.saved_objects,
         ...agentPoliciesOfPackagePoliciesUsingOutput.saved_objects,
       ],
-      options
-    );
-  }
-
-  public async bumpAllAgentPolicies(
-    esClient: ElasticsearchClient,
-    options?: { user?: AuthenticatedUser }
-  ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
-    const internalSoClientWithoutSpaceExtension =
-      appContextService.getInternalUserSOClientWithoutSpaceExtension();
-    const savedObjectType = await getAgentPolicySavedObjectType();
-    const currentPolicies =
-      await internalSoClientWithoutSpaceExtension.find<AgentPolicySOAttributes>({
-        type: savedObjectType,
-        fields: ['name', 'revision', 'namespaces'],
-        perPage: SO_SEARCH_LIMIT,
-        namespaces: ['*'],
-      });
-
-    return this._bumpPolicies(
-      internalSoClientWithoutSpaceExtension,
-      currentPolicies.saved_objects,
       options
     );
   }
@@ -2133,7 +2122,7 @@ class AgentPolicyService {
         },
       };
 
-      const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, dump);
+      const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, yaml);
       const updateManifestVersion = elasticAgentStandaloneManifest.replace('VERSION', agentVersion);
       const fixedAgentYML = configMapYaml.replace('agent.yml:', 'agent.yml: |-');
       return [fixedAgentYML, updateManifestVersion].join('\n');
@@ -2221,17 +2210,23 @@ class AgentPolicyService {
   public async bumpAllAgentPoliciesForDownloadSource(
     esClient: ElasticsearchClient,
     downloadSourceId: string,
-    options?: { user?: AuthenticatedUser }
+    options?: { isDefault?: boolean; user?: AuthenticatedUser }
   ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
     const internalSoClientWithoutSpaceExtension =
       appContextService.getInternalUserSOClientWithoutSpaceExtension();
     const savedObjectType = await getAgentPolicySavedObjectType();
+    const escapedId = escapeSearchQueryPhrase(downloadSourceId);
+    const filterClauses = [`(${savedObjectType}.attributes.download_source_id:${escapedId})`];
+    if (options?.isDefault) {
+      filterClauses.push(`(NOT ${savedObjectType}.attributes.download_source_id:*)`);
+    }
+    const filter = filterClauses.join(' OR ');
+
     const currentPolicies =
       await internalSoClientWithoutSpaceExtension.find<AgentPolicySOAttributes>({
         type: savedObjectType,
         fields: ['revision', 'download_source_id', 'namespaces'],
-        searchFields: ['download_source_id'],
-        search: escapeSearchQueryPhrase(downloadSourceId),
+        filter,
         perPage: SO_SEARCH_LIMIT,
         namespaces: ['*'],
       });
@@ -2246,18 +2241,25 @@ class AgentPolicyService {
   public async bumpAllAgentPoliciesForFleetServerHosts(
     esClient: ElasticsearchClient,
     fleetServerHostId: string,
-    options?: { user?: AuthenticatedUser }
+    options?: { isDefault?: boolean; user?: AuthenticatedUser }
   ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
     const internalSoClientWithoutSpaceExtension =
       appContextService.getInternalUserSOClientWithoutSpaceExtension();
     const savedObjectType = await getAgentPolicySavedObjectType();
+    const escapedId = escapeSearchQueryPhrase(fleetServerHostId);
+    const filterClauses = [`(${savedObjectType}.attributes.fleet_server_host_id:${escapedId})`];
+    if (options?.isDefault) {
+      filterClauses.push(`(NOT ${savedObjectType}.attributes.fleet_server_host_id:*)`);
+    }
+    const filter = filterClauses.join(' OR ');
+
     const currentPolicies =
       await internalSoClientWithoutSpaceExtension.find<AgentPolicySOAttributes>({
         type: savedObjectType,
         fields: ['revision', 'fleet_server_host_id', 'namespaces'],
-        searchFields: ['fleet_server_host_id'],
-        search: escapeSearchQueryPhrase(fleetServerHostId),
+        filter,
         perPage: SO_SEARCH_LIMIT,
+        namespaces: ['*'],
       });
 
     return this._bumpPolicies(
@@ -2405,7 +2407,7 @@ class AgentPolicyService {
       findRequest: {
         type: savedObjectType,
         perPage,
-        sortField: 'created_at',
+        sortField: 'updated_at',
         sortOrder: 'asc',
         fields: ['id', 'name'],
         filter: kuery ? normalizeKuery(savedObjectType, kuery) : undefined,
@@ -2431,7 +2433,7 @@ class AgentPolicyService {
       perPage = 1000,
       kuery,
       sortOrder = 'asc',
-      sortField = 'created_at',
+      sortField = 'updated_at',
       fields = [],
       spaceId = undefined,
     }: FetchAllAgentPoliciesOptions = {}
@@ -2760,9 +2762,17 @@ class AgentPolicyService {
 
     logger.info(`${VERIFY_PERMISSIONS_TASK} Deploying verifier policy ${agentPolicy.id}`);
 
-    await this.deployPolicy(soClient, agentPolicy.id, undefined, {
-      throwOnAgentlessError: true,
-    });
+    try {
+      await this.deployPolicy(soClient, agentPolicy.id, undefined, {
+        throwOnAgentlessError: true,
+      });
+    } catch (err) {
+      logger.error(
+        `${VERIFY_PERMISSIONS_TASK} Failed to deploy verifier policy ${agentPolicy.id}, rolling back: ${err}`
+      );
+      await this.deleteVerifierPolicy(soClient, esClient, agentPolicy.id);
+      throw err;
+    }
 
     return { policyId: agentPolicy.id };
   }
@@ -2805,7 +2815,7 @@ function buildVerifierCredentialVars(
   } else if (provider === 'gcp') {
     const gcpVars = connectorVars as GcpCloudConnectorVars;
     vars.credentials_service_account_email = gcpVars.service_account;
-    vars.credentials_workload_identity_provider = gcpVars.audience;
+    vars.credentials_audience = gcpVars.audience;
   }
 
   return vars;

@@ -153,6 +153,48 @@ describe('FindSLO', () => {
     });
   });
 
+  describe('orphan summary documents (SDH #6202)', () => {
+    it('decrements total by the number of summary rows whose slo.id has no SO', async () => {
+      const slo = createSLO();
+      // Summary search reports 4 hits total; one row has a real SO, three are orphans.
+      mockSummarySearchClient.search.mockResolvedValueOnce({
+        total: 4,
+        perPage: 25,
+        page: 1,
+        results: [
+          summaryResultFor(slo),
+          summaryResultFor({ id: 'orphan-1' } as SLODefinition),
+          summaryResultFor({ id: 'orphan-2' } as SLODefinition),
+          summaryResultFor({ id: 'orphan-3' } as SLODefinition),
+        ],
+      });
+      mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
+
+      const result = await findSLO.execute({});
+
+      expect(result.total).toBe(1);
+      expect(result.results).toHaveLength(1);
+    });
+
+    it('clamps total to 0 if every row on the page is an orphan', async () => {
+      mockSummarySearchClient.search.mockResolvedValueOnce({
+        total: 2,
+        perPage: 25,
+        page: 1,
+        results: [
+          summaryResultFor({ id: 'orphan-1' } as SLODefinition),
+          summaryResultFor({ id: 'orphan-2' } as SLODefinition),
+        ],
+      });
+      mockRepository.findAllByIds.mockResolvedValueOnce([]);
+
+      const result = await findSLO.execute({});
+
+      expect(result.total).toBe(0);
+      expect(result.results).toHaveLength(0);
+    });
+  });
+
   describe('validation', () => {
     beforeEach(() => {
       const slo = createSLO();
@@ -183,25 +225,27 @@ function summarySearchResult(slo: SLODefinition): Paginated<SummaryResult> {
     total: 1,
     perPage: 25,
     page: 1,
-    results: [
-      {
-        sloId: slo.id,
-        instanceId: slo.groupBy === ALL_VALUE ? ALL_VALUE : 'host-abcde',
-        groupings: {},
-        summary: {
-          status: 'HEALTHY',
-          sliValue: 0.9999,
-          errorBudget: {
-            initial: 0.001,
-            consumed: 0.1,
-            remaining: 0.9,
-            isEstimated: false,
-          },
-          fiveMinuteBurnRate: 0,
-          oneHourBurnRate: 0,
-          oneDayBurnRate: 0,
-        },
+    results: [summaryResultFor(slo)],
+  };
+}
+
+function summaryResultFor(slo: Pick<SLODefinition, 'id'> & Partial<SLODefinition>): SummaryResult {
+  return {
+    sloId: slo.id,
+    instanceId: slo.groupBy === ALL_VALUE ? ALL_VALUE : 'host-abcde',
+    groupings: {},
+    summary: {
+      status: 'HEALTHY',
+      sliValue: 0.9999,
+      errorBudget: {
+        initial: 0.001,
+        consumed: 0.1,
+        remaining: 0.9,
+        isEstimated: false,
       },
-    ],
+      fiveMinuteBurnRate: 0,
+      oneHourBurnRate: 0,
+      oneDayBurnRate: 0,
+    },
   };
 }

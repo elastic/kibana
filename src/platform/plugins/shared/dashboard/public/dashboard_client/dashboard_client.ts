@@ -13,7 +13,11 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DeleteResult } from '@kbn/content-management-plugin/common';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsResolveResponse } from '@kbn/core/server';
-import type { DashboardSearchRequestParams, DashboardSearchResponseBody } from '../../server';
+import type {
+  DashboardSearchRequestParams,
+  DashboardSearchResponseBody,
+  DashboardState,
+} from '../../server';
 import {
   DASHBOARD_API_PATH,
   DASHBOARD_API_VERSION,
@@ -24,7 +28,6 @@ import {
 import type {
   DashboardCreateResponseBody,
   DashboardReadResponseBody,
-  DashboardState,
   DashboardUpdateResponseBody,
 } from '../../server';
 import { coreServices } from '../services/kibana_services';

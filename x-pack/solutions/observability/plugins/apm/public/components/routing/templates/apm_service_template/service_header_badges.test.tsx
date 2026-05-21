@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ServiceHeaderBadges } from './service_header_badges';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
@@ -17,6 +17,7 @@ jest.mock('../../../../context/service_slo/use_service_slo_context', () => ({
   useServiceSloContext: () => mockUseServiceSloContext(),
 }));
 
+const mockNavigateToUrl = jest.fn();
 const mockUseApmPluginContext = jest.fn();
 jest.mock('../../../../context/apm_plugin/use_apm_plugin_context', () => ({
   useApmPluginContext: () => mockUseApmPluginContext(),
@@ -63,22 +64,28 @@ function setupMocks({
   isAlertingAvailable = true,
   canReadAlerts = true,
   canReadSlos = true,
+  canReadMlJobs = false,
   alertsCount = 0,
+  anomalyScore,
   sloFetchStatus = FETCH_STATUS.SUCCESS as string,
   mostCriticalSloStatus = { status: 'healthy' as const, count: 0 },
 }: {
   isAlertingAvailable?: boolean;
   canReadAlerts?: boolean;
   canReadSlos?: boolean;
+  canReadMlJobs?: boolean;
   alertsCount?: number;
+  anomalyScore?: number;
   sloFetchStatus?: string;
   mostCriticalSloStatus?: { status: string; count: number };
 } = {}) {
   mockUseApmPluginContext.mockReturnValue({
     core: {
       application: {
+        navigateToUrl: mockNavigateToUrl,
         capabilities: {
           slo: { read: canReadSlos },
+          ml: { canGetJobs: canReadMlJobs },
           apm: {
             'alerting:show': canReadAlerts,
             'alerting:save': canReadAlerts,
@@ -96,10 +103,17 @@ function setupMocks({
     sloFetchStatus,
   });
 
-  mockUseFetcher.mockReturnValue({
-    data: { alertsCount },
-    status: FETCH_STATUS.SUCCESS,
-  });
+  // `ServiceHeaderBadges` calls `useFetcher` twice: alerts count, then anomaly score.
+  mockUseFetcher.mockReset();
+  mockUseFetcher
+    .mockReturnValueOnce({
+      data: { alertsCount },
+      status: FETCH_STATUS.SUCCESS,
+    })
+    .mockReturnValueOnce({
+      data: { anomalyScore },
+      status: FETCH_STATUS.SUCCESS,
+    });
 
   mockKibanaServices.mockReturnValue({
     services: {
@@ -111,6 +125,7 @@ function setupMocks({
 describe('ServiceHeaderBadges', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockNavigateToUrl.mockClear();
   });
 
   it('shows alerts badge when there are active alerts', () => {
@@ -122,12 +137,13 @@ describe('ServiceHeaderBadges', () => {
     expect(badge).toHaveTextContent('5');
   });
 
-  it('shows alerts badge with correct href', () => {
+  it('navigates to alerts tab via SPA when the alerts badge is clicked', () => {
     setupMocks({ alertsCount: 3 });
     renderBadges();
 
     const badge = screen.getByTestId('serviceHeaderAlertsBadge');
-    expect(badge).toHaveAttribute('href', '/services/test-service/alerts');
+    fireEvent.click(badge);
+    expect(mockNavigateToUrl).toHaveBeenCalledWith('/services/test-service/alerts');
   });
 
   it('hides alerts badge when alertsCount is 0', () => {
@@ -212,5 +228,47 @@ describe('ServiceHeaderBadges', () => {
     const badge = screen.getByTestId('apmSloBadge');
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveAttribute('data-slo-status', 'violated');
+  });
+
+  it('shows anomalies badge when ML jobs can be read and a score is returned', () => {
+    setupMocks({
+      canReadMlJobs: true,
+      alertsCount: 0,
+      anomalyScore: 82,
+      mostCriticalSloStatus: { status: 'noSLOs', count: 0 },
+      sloFetchStatus: FETCH_STATUS.NOT_INITIATED,
+    });
+    renderBadges();
+
+    expect(screen.getByTestId('serviceHeaderAnomaliesBadge')).toBeInTheDocument();
+    expect(screen.getByText(/Critical \(82\)/)).toBeInTheDocument();
+  });
+
+  it('hides anomalies badge when ML jobs cannot be read even if anomaly score data is present', () => {
+    setupMocks({
+      canReadMlJobs: false,
+      alertsCount: 0,
+      anomalyScore: 80,
+      mostCriticalSloStatus: { status: 'noSLOs', count: 0 },
+      sloFetchStatus: FETCH_STATUS.NOT_INITIATED,
+    });
+    const { container } = renderBadges();
+
+    expect(screen.queryByTestId('serviceHeaderAnomaliesBadge')).not.toBeInTheDocument();
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('hides anomalies badge when ML can be read but no anomaly score is available', () => {
+    setupMocks({
+      canReadMlJobs: true,
+      alertsCount: 0,
+      anomalyScore: undefined,
+      mostCriticalSloStatus: { status: 'noSLOs', count: 0 },
+      sloFetchStatus: FETCH_STATUS.NOT_INITIATED,
+    });
+    const { container } = renderBadges();
+
+    expect(screen.queryByTestId('serviceHeaderAnomaliesBadge')).not.toBeInTheDocument();
+    expect(container.firstChild).toBeNull();
   });
 });

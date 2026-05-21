@@ -15,7 +15,7 @@ jest.mock('@kbn/share-plugin/public', () => ({
   downloadFileAs: jest.fn(),
 }));
 
-jest.mock('../../../common/lib/yaml', () => ({
+jest.mock('@kbn/workflows-yaml', () => ({
   stringifyWorkflowDefinition: (def: unknown) => `stringified:${JSON.stringify(def)}`,
 }));
 

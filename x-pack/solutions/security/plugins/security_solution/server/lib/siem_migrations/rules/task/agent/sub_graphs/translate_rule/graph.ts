@@ -74,7 +74,9 @@ export function getTranslateRuleGraph({
 
 const translatableRouter = (state: TranslateRuleState) => {
   if (
-    (state.original_rule.vendor === 'splunk' && !state.inline_query) ||
+    ((state.original_rule.vendor === 'splunk' ||
+      state.original_rule.vendor === 'microsoft-sentinel') &&
+      !state.inline_query) ||
     (state.original_rule.vendor === 'qradar' && !state.nl_query)
   ) {
     return 'translationResult';

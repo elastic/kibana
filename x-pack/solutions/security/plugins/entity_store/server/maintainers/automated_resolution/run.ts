@@ -17,7 +17,7 @@ import type {
   AggregationsStringTermsBucket,
   AggregationsTopHitsAggregate,
 } from '@elastic/elasticsearch/lib/api/types';
-import { getEntitiesAlias, ENTITY_LATEST } from '../../../common';
+import { getLatestEntitiesIndexName } from '../../../common';
 import type { ResolutionClient } from '../../domain/resolution';
 import { getFieldValue } from '../../../common/domain/euid/commons';
 import { ENTITY_ID_FIELD } from '../../../common/domain/definitions/common_fields';
@@ -43,7 +43,7 @@ export interface RunDeps {
 
 export async function runAutomatedResolution(deps: RunDeps): Promise<AutomatedResolutionState> {
   const { state, namespace, esClient, logger, resolutionClient, abortController } = deps;
-  const index = getEntitiesAlias(ENTITY_LATEST, namespace);
+  const index = getLatestEntitiesIndexName(namespace);
 
   // Step 1: Collect new email values
   const { values, maxTimestamp } = await collectNewEmailValues(esClient, index, state);
@@ -302,7 +302,7 @@ async function resolveMatchBuckets(
           .map((e) => e.entityId);
         if (aliasIds.length === 0) continue;
 
-        const result = await resolutionClient.linkEntities(targetId, aliasIds);
+        const result = await resolutionClient.linkEntities(targetId, aliasIds, { refresh: false });
         resolutionsCreated += result.linked.length;
       } else if (unresolvedEntities.length >= 2) {
         // New group: pick target via namespace priority, link the rest
@@ -311,7 +311,9 @@ async function resolveMatchBuckets(
           .filter((e) => e.entityId !== targetEntity.entityId)
           .map((e) => e.entityId);
 
-        const result = await resolutionClient.linkEntities(targetEntity.entityId, aliasIds);
+        const result = await resolutionClient.linkEntities(targetEntity.entityId, aliasIds, {
+          refresh: false,
+        });
         resolutionsCreated += result.linked.length;
       }
       // else: only 1 unresolved, no existing targets → no match, skip

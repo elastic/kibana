@@ -23,6 +23,10 @@ import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import type { MlAnomalyDetectionAlert } from '@kbn/alerts-as-data-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { mlAnomalyDetectionAlertParamsSchema } from '@kbn/response-ops-rule-params/anomaly_detection';
+import type {
+  InfluencerAnomalyAlertDoc,
+  FormattedRecordAnomalyAlertDoc,
+} from '@kbn/ml-common-types/alerts';
 import {
   ALERT_ANOMALY_DETECTION_JOB_ID,
   ALERT_ANOMALY_IS_INTERIM,
@@ -36,8 +40,6 @@ import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
 import type { MlAnomalyDetectionAlertParams } from '../../routes/schemas/alerting_schema';
 import type { RegisterAlertParams } from './register_ml_alerts';
-import type { InfluencerAnomalyAlertDoc } from '../../../common/types/alerts';
-import { type RecordAnomalyAlertDoc } from '../../../common/types/alerts';
 import type { AnomalyDetectionRuleState } from './alerting_service';
 
 /**
@@ -68,7 +70,7 @@ export type AnomalyDetectionAlertContext = AnomalyDetectionAlertBaseContext & {
   timestamp: number;
   score: number;
   isInterim: boolean;
-  topRecords: RecordAnomalyAlertDoc[];
+  topRecords: FormattedRecordAnomalyAlertDoc[];
   topInfluencers?: InfluencerAnomalyAlertDoc[];
 };
 

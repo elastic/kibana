@@ -22,6 +22,7 @@ import type {
 } from '../../../registry/types';
 import { Location } from '../../../registry/types';
 import type { SupportedDataType } from '../../types';
+import type { FunctionDefinitionTypes } from '../../types';
 import { filterFunctionDefinitions, getAllFunctions, getFunctionSuggestion } from '../functions';
 import { SuggestionCategory } from '../../../../language/autocomplete/utils/sorting/types';
 import { buildConstantsDefinitions, getCompatibleLiterals, getDateLiterals } from '../literals';
@@ -109,6 +110,7 @@ interface FunctionSuggestionOptions {
   addSpaceAfterFunction?: boolean;
   constantGeneratingOnly?: boolean;
   suggestOnlyName?: boolean;
+  functionTypes?: FunctionDefinitionTypes[];
 }
 
 interface GetFunctionsSuggestionsParams {
@@ -132,6 +134,7 @@ export function getFunctionsSuggestions({
     suggestOnlyName = false,
     addSpaceAfterFunction = false,
     constantGeneratingOnly = false,
+    functionTypes,
   } = options;
 
   const predicates = {
@@ -144,7 +147,7 @@ export function getFunctionsSuggestions({
   const activeProduct = context?.activeProduct;
 
   let filteredFunctions = filterFunctionDefinitions(
-    getAllFunctions({ includeOperators: false }),
+    getAllFunctions({ includeOperators: false, type: functionTypes }),
     predicates,
     hasMinimumLicenseRequired,
     activeProduct
@@ -389,18 +392,7 @@ function createMultiCommand(
   };
 }
 
-export function getLookupIndexCreateSuggestion(
-  innerText: string,
-  indexName?: string
-): ISuggestionItem {
-  const start = indexName ? innerText.lastIndexOf(indexName) : -1;
-  const rangeToReplace =
-    indexName && start !== -1
-      ? {
-          start,
-          end: start + indexName.length,
-        }
-      : undefined;
+export function getLookupIndexCreateSuggestion(indexName?: string): ISuggestionItem {
   return {
     label: indexName
       ? i18n.translate(
@@ -445,8 +437,6 @@ export function getLookupIndexCreateSuggestion(
 
       arguments: [{ indexName }],
     },
-
-    rangeToReplace,
 
     incomplete: true,
   } as ISuggestionItem;

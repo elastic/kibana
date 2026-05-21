@@ -42,7 +42,6 @@ interface JourneyTargetGroups {
 const journeyTargetGroups: JourneyTargetGroups = {
   kibanaStartAndLoad: ['login'],
   daily: [
-    'web_logs_dashboard_long_running',
     'web_logs_dashboard_esql_long_running',
     'web_logs_dashboard',
     'data_stress_test_lens_esql',
@@ -55,11 +54,11 @@ const journeyTargetGroups: JourneyTargetGroups = {
     'many_fields_transform',
     'tsdb_logs_data_visualizer',
     'many_fields_esql_editor',
+    'metrics_experience_grid',
   ],
   crud: ['tags_listing_page', 'dashboard_listing_page'],
   dashboard: [
     'web_logs_dashboard',
-    'web_logs_dashboard_long_running',
     'web_logs_dashboard_esql',
     'web_logs_dashboard_esql_long_running',
     'flight_dashboard',
@@ -80,7 +79,7 @@ const journeyTargetGroups: JourneyTargetGroups = {
     'data_stress_test_lens_esql',
   ],
   ml: ['aiops_log_rate_analysis', 'many_fields_transform', 'tsdb_logs_data_visualizer'],
-  observability: ['apm_service_inventory', 'infra_hosts_view'],
+  observability: ['apm_service_inventory', 'infra_hosts_view_ecs', 'infra_hosts_view_semconv'],
   security: ['cloud_security_dashboard'],
   streams: [
     'streams_listing_page',
@@ -90,6 +89,7 @@ const journeyTargetGroups: JourneyTargetGroups = {
     'streams_field_mapping',
     'streams_wired_hierarchy',
   ],
+  metricsExperience: ['metrics_experience_grid'],
 };
 
 const readFilesRecursively = (dir: string, callback: Function) => {

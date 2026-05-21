@@ -21,9 +21,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { capitalize } from 'lodash';
+import { usePhaseColors } from '@kbn/data-lifecycle-phases';
 import { formatBytes } from '../../helpers/format_bytes';
 import { LifecyclePhaseButton } from './lifecycle_phase_button';
-import { isZeroAge } from '../../helpers/format_size_units';
+import { isZeroAge } from '../../../../../../util/format_size_units';
 
 interface BaseLifecyclePhaseProps {
   color?: string;
@@ -60,6 +61,7 @@ export type LifecyclePhaseProps = DeleteLifecyclePhaseProps | StandardLifecycleP
 
 export const LifecyclePhase = (props: LifecyclePhaseProps) => {
   const { euiTheme } = useEuiTheme();
+  const phaseColors = usePhaseColors();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const {
@@ -86,7 +88,7 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
   const isDelete = props.isDelete === true;
   const prefix = testSubjPrefix ? `${testSubjPrefix}-` : '';
 
-  const phaseColor = isDelete ? euiTheme.colors.backgroundBaseSubdued : color;
+  const phaseColor = isDelete ? phaseColors.delete : color;
 
   const handleClick = () => {
     if (isEditLifecycleFlyoutOpen) {

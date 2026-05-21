@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { Fragment, useCallback, useMemo, useRef, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -46,14 +46,16 @@ import { dictionaryValidator } from '@kbn/ml-validators';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
 import useObservable from 'react-use/lib/useObservable';
-import type { NLPSettings } from '../../../common/constants/app';
-
 import {
   isModelDownloadItem,
   isNLPModelItem,
+  isSearchOnlyModel,
   type TrainedModelDeploymentStatsResponse,
-} from '../../../common/types/trained_models';
-import { type CloudInfo, getNewJobLimits } from '../services/ml_server_info';
+} from '@kbn/ml-common-types/trained_models';
+import type { CloudInfo } from '@kbn/ml-common-types/ml_server_info';
+import type { NLPSettings } from '../../../common/constants/app';
+
+import { getNewJobLimits } from '../services/ml_server_info';
 import { DeploymentParamsMapper } from './deployment_params_mapper';
 
 import type { HttpService } from '../services/http_service';
@@ -78,6 +80,8 @@ interface DeploymentSetupProps {
   showNodeInfo: boolean;
   disableAdaptiveResourcesControl?: boolean;
   deploymentParamsMapper: DeploymentParamsMapper;
+  /** When true, hides ingest/search optimization (always search-optimized) and shows rerank warnings */
+  isSearchOnly?: boolean;
 }
 
 /**
@@ -107,6 +111,22 @@ export interface DeploymentParamsUI {
 }
 
 const sliderPalette = euiPaletteCool(3);
+
+export const RERANK_WARNING_DESCRIPTION = i18n.translate(
+  'xpack.ml.trainedModels.modelsList.startDeployment.rerankWarningDescription',
+  {
+    defaultMessage:
+      'Rerank models are memory intensive and can require at least 8 GB of memory on the ML node, especially when running alongside other hosted models.',
+  }
+);
+
+export const RERANK_WARNING_SERVERLESS_DESCRIPTION = i18n.translate(
+  'xpack.ml.trainedModels.modelsList.startDeployment.rerankWarningServerlessDescription',
+  {
+    defaultMessage:
+      'Rerank models are resource intensive and increase ML processing usage, especially when running alongside other hosted models.',
+  }
+);
 
 /**
  * Dict for vCPU levels.
@@ -148,6 +168,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
   deploymentParamsMapper,
   cloudInfo,
   showNodeInfo,
+  isSearchOnly = false,
 }) => {
   const deploymentIdUpdated = useRef(false);
 
@@ -487,58 +508,88 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
 
       <EuiSpacer size="m" />
 
-      <EuiFormRow hasChildLabel={true} fullWidth>
-        <EuiFormFieldset
-          legend={{
-            children: (
-              <FormattedMessage
-                id="xpack.ml.trainedModels.modelsList.startDeployment.optimizeThreadsPerAllocationLabel"
-                defaultMessage="Optimize this model deployment for your use case:"
-              />
-            ),
-          }}
-        >
-          {optimizedOptions.map((v) => {
-            return (
-              <Fragment key={v.value}>
-                <EuiCheckableCard
-                  id={v.value}
-                  disabled={isUpdate}
-                  label={
-                    <EuiText size={'s'}>
-                      <EuiFlexGroup alignItems={'baseline'} gutterSize={'s'}>
-                        <EuiFlexItem grow={false}>
-                          <strong>{v.label}</strong>
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>{v.description}</EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiText>
-                  }
-                  value={v.value}
-                  checked={config.optimized === v.value}
-                  onChange={() => {
-                    onConfigChange({
-                      ...config,
-                      ...(deploymentIdUpdated.current
-                        ? {}
-                        : {
-                            // rename deployment ID based on the optimized value
-                            deploymentId: config.deploymentId?.replace(
-                              /_[a-zA-Z]+$/,
-                              v.value === 'optimizedForIngest' ? '_ingest' : '_search'
-                            ),
-                          }),
-                      optimized: v.value,
-                    });
-                  }}
-                  data-test-subj={`mlModelsStartDeploymentModalOptimized_${v.value}`}
+      {!isSearchOnly ? (
+        <EuiFormRow hasChildLabel={true} fullWidth>
+          <EuiFormFieldset
+            legend={{
+              children: (
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.modelsList.startDeployment.optimizeThreadsPerAllocationLabel"
+                  defaultMessage="Optimize this model deployment for your use case:"
                 />
-                <EuiSpacer size="m" />
-              </Fragment>
-            );
-          })}
-        </EuiFormFieldset>
-      </EuiFormRow>
+              ),
+            }}
+          >
+            {optimizedOptions.map((v) => {
+              return (
+                <Fragment key={v.value}>
+                  <EuiCheckableCard
+                    id={v.value}
+                    disabled={isUpdate}
+                    label={
+                      <EuiText size={'s'}>
+                        <EuiFlexGroup alignItems={'baseline'} gutterSize={'s'}>
+                          <EuiFlexItem grow={false}>
+                            <strong>{v.label}</strong>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>{v.description}</EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiText>
+                    }
+                    value={v.value}
+                    checked={config.optimized === v.value}
+                    onChange={() => {
+                      onConfigChange({
+                        ...config,
+                        ...(deploymentIdUpdated.current
+                          ? {}
+                          : {
+                              // rename deployment ID based on the optimized value
+                              deploymentId: config.deploymentId?.replace(
+                                /_[a-zA-Z]+$/,
+                                v.value === 'optimizedForIngest' ? '_ingest' : '_search'
+                              ),
+                            }),
+                        optimized: v.value,
+                      });
+                    }}
+                    data-test-subj={`mlModelsStartDeploymentModalOptimized_${v.value}`}
+                  />
+                  <EuiSpacer size="m" />
+                </Fragment>
+              );
+            })}
+          </EuiFormFieldset>
+        </EuiFormRow>
+      ) : null}
+
+      {isSearchOnly ? (
+        <>
+          <EuiCallOut
+            announceOnMount
+            title={
+              showNodeInfo
+                ? i18n.translate(
+                    'xpack.ml.trainedModels.modelsList.startDeployment.rerankWarningTitle',
+                    { defaultMessage: 'Plan for 8 GB on the ML node' }
+                  )
+                : i18n.translate(
+                    'xpack.ml.trainedModels.modelsList.startDeployment.rerankWarningServerlessTitle',
+                    { defaultMessage: 'Plan for higher ML resource use' }
+                  )
+            }
+            color="warning"
+            iconType="warning"
+            size="s"
+            data-test-subj="mlModelsStartDeploymentModalRerankWarning"
+          >
+            <p>
+              {showNodeInfo ? RERANK_WARNING_DESCRIPTION : RERANK_WARNING_SERVERLESS_DESCRIPTION}
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
 
       <EuiAccordion
         id={'modelDeploymentAdvancedSettings'}
@@ -703,6 +754,8 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
 
   const isModelNotDownloaded = model ? isModelDownloadItem(model) : true;
 
+  const isSearchOnly = model ? isSearchOnlyModel(model) : undefined;
+
   const getDefaultParams = useCallback((): DeploymentParamsUI => {
     const defaultVCPUUsage: DeploymentParamsUI['vCPUUsage'] = showNodeInfo ? 'medium' : 'low';
 
@@ -713,29 +766,46 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
       adaptiveResources: true,
     } as const;
 
-    if (isModelNotDownloaded) {
-      return defaultParams;
-    }
+    const searchParams = {
+      ...defaultParams,
+      deploymentId: `${modelId}_search`,
+      optimized: 'optimizedForSearch',
+    } as const;
+
+    // model observable hasn't resolved yet; will update config once isSearchOnly is known.
+    if (isSearchOnly === undefined) return defaultParams;
+
+    if (isSearchOnly) return searchParams;
+
+    if (isModelNotDownloaded) return defaultParams;
 
     const uiParams = isNLPModelItem(model)
-      ? model?.stats?.deployment_stats.map((v) =>
+      ? model.stats?.deployment_stats.map((v) =>
           deploymentParamsMapper.mapApiToUiDeploymentParams(v)
         )
       : [];
 
-    return uiParams?.some((v) => v.optimized === 'optimizedForIngest')
-      ? {
-          deploymentId: `${modelId}_search`,
-          optimized: 'optimizedForSearch',
-          vCPUUsage: defaultVCPUUsage,
-          adaptiveResources: true,
-        }
+    return uiParams.some((v) => v.optimized === 'optimizedForIngest')
+      ? searchParams
       : defaultParams;
-  }, [deploymentParamsMapper, isModelNotDownloaded, model, modelId, showNodeInfo]);
+  }, [deploymentParamsMapper, isModelNotDownloaded, model, modelId, showNodeInfo, isSearchOnly]);
 
   const modalTitleId = useGeneratedHtmlId();
 
-  const [config, setConfig] = useState<DeploymentParamsUI>(initialParams ?? getDefaultParams());
+  const [config, setConfig] = useState<DeploymentParamsUI>(
+    () => initialParams ?? getDefaultParams()
+  );
+
+  useEffect(
+    function syncResolvedModelDefaults() {
+      if (initialParams !== undefined || model === undefined || isSearchOnly !== true) {
+        return;
+      }
+
+      setConfig(getDefaultParams());
+    },
+    [initialParams, model, isSearchOnly, getDefaultParams]
+  );
 
   const deploymentIdValidator = useMemo(() => {
     if (isUpdate || !isNLPModelItem(model)) {
@@ -825,6 +895,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
           onConfigChange={setConfig}
           errors={errors}
           isUpdate={isUpdate}
+          isSearchOnly={isSearchOnly}
           disableAdaptiveResourcesControl={
             !showNodeInfo || nlpSettings.modelDeployment?.allowStaticAllocations === false
           }
@@ -890,7 +961,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
           form={'startDeploymentForm'}
           onClick={onConfigChange.bind(null, config)}
           fill
-          disabled={Object.keys(errors).length > 0}
+          disabled={Object.keys(errors).length > 0 || (!isUpdate && isSearchOnly === undefined)}
           data-test-subj={'mlModelsStartDeploymentModalStartButton'}
         >
           {isUpdate ? (

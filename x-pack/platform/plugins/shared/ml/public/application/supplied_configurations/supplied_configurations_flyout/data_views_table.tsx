@@ -12,12 +12,12 @@ import React, { useCallback } from 'react';
 import type { EuiTableFieldDataColumnType, EuiTableActionsColumnType } from '@elastic/eui';
 import { EuiButtonEmpty, EuiInMemoryTable } from '@elastic/eui';
 
-import { useMlKibana, useMlManagementLocator } from '../../contexts/kibana';
-import { ML_PAGES } from '../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type {
   RecognizeModuleResult,
   RecognizeModuleResultDataView,
-} from '../../../../common/types/modules';
+} from '@kbn/ml-common-types/modules';
+import { useMlKibana, useMlManagementLocator } from '../../contexts/kibana';
 
 interface Props {
   matchingDataViews: RecognizeModuleResult;

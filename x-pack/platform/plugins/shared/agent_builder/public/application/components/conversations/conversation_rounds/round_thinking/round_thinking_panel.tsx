@@ -63,23 +63,40 @@ export const RoundThinkingPanel = ({
   const [showFlyout, setShowFlyout] = useState(false);
   const [showTraceFlyout, setShowTraceFlyout] = useState(false);
 
-  const TraceWaterfallComponent = services.plugins.evals?.TraceWaterfall;
-  const isExperimentalEnabled = useExperimentalFeatures();
-
   const traceId = useMemo(() => {
     const id = rawRound.trace_id;
     if (!id) return undefined;
     return Array.isArray(id) ? id[0] : id;
   }, [rawRound.trace_id]);
 
-  const showTraceButton = isExperimentalEnabled && !!TraceWaterfallComponent && !!traceId;
+  const addToDatasetAction = services.plugins.evals?.getAddToDatasetAction
+    ? services.plugins.evals.getAddToDatasetAction({
+        initialExample: {
+          input: {
+            round: rawRound,
+          },
+          output: {
+            steps,
+          },
+          metadata: {
+            source: 'agent_builder',
+            trace_id: traceId ?? null,
+          },
+        },
+      })
+    : null;
+  const isExperimentalEnabled = useExperimentalFeatures();
 
+  const showTraceButton = isExperimentalEnabled && !!traceId;
+  const showAddToDatasetButton = isExperimentalEnabled && addToDatasetAction != null;
+
+  const shadowStyles = useEuiShadow('l');
   const containerStyles = css`
     background-color: ${euiTheme.colors.backgroundBasePlain};
     ${borderRadiusXlStyles}
     border: ${isLoading ? `1px solid ${euiTheme.colors.borderStrongPrimary}` : 'none'};
     padding: ${euiTheme.size.base};
-    ${useEuiShadow('l')};
+    ${shadowStyles};
   `;
 
   const toggleFlyout = () => {
@@ -127,6 +144,18 @@ export const RoundThinkingPanel = ({
                 <InputOutputTokensDisplay modelUsage={rawRound.model_usage} />
               </EuiFlexGroup>
               <EuiFlexGroup responsive={false} gutterSize="s" justifyContent="flexEnd">
+                {showAddToDatasetButton && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      iconType={addToDatasetAction?.iconType}
+                      color="text"
+                      iconSide="left"
+                      onClick={addToDatasetAction?.onClick}
+                    >
+                      {addToDatasetAction?.label}
+                    </EuiButton>
+                  </EuiFlexItem>
+                )}
                 {showTraceButton && (
                   <EuiFlexItem grow={false}>
                     <EuiButton
@@ -150,12 +179,8 @@ export const RoundThinkingPanel = ({
         )}
       </EuiFlexGroup>
       <RoundFlyout isOpen={showFlyout} onClose={toggleFlyout} rawRound={rawRound} />
-      {showTraceFlyout && TraceWaterfallComponent && traceId && (
-        <TraceFlyout
-          traceId={traceId}
-          onClose={() => setShowTraceFlyout(false)}
-          TraceWaterfall={TraceWaterfallComponent}
-        />
+      {showTraceFlyout && traceId && (
+        <TraceFlyout traceId={traceId} onClose={() => setShowTraceFlyout(false)} />
       )}
     </>
   );

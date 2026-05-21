@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { newConversationId } from './new_conversation';
-
 export const appPaths = {
   root: '/',
 
@@ -14,8 +12,7 @@ export const appPaths = {
   agent: {
     root: ({ agentId }: { agentId: string }) => `/agents/${agentId}`,
     conversations: {
-      new: ({ agentId }: { agentId: string }) =>
-        `/agents/${agentId}/conversations/${newConversationId}`,
+      new: ({ agentId }: { agentId: string }) => `/agents/${agentId}/conversations/new`,
       byId: ({ agentId, conversationId }: { agentId: string; conversationId: string }) =>
         `/agents/${agentId}/conversations/${conversationId}`,
     },
@@ -40,6 +37,7 @@ export const appPaths = {
     plugins: '/manage/plugins',
     pluginDetails: ({ pluginId }: { pluginId: string }) => `/manage/plugins/${pluginId}`,
     connectors: '/manage/connectors',
+    mcpClients: '/manage/tools/mcp_clients',
   },
 
   // Legacy paths - redirect to new structure via LegacyConversationRedirect

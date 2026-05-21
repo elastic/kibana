@@ -33,6 +33,10 @@ const STATUS_REASONS: Record<
     'The agent policy referenced by this private location no longer exists.',
   [PrivateLocationHealthStatusValue.MissingLocation]:
     'The monitor references a private location that no longer exists.',
+  [PrivateLocationHealthStatusValue.MissingAgents]:
+    'No Fleet agents are enrolled in the agent policy for this private location.',
+  [PrivateLocationHealthStatusValue.UnhealthyAgent]:
+    'All Fleet agents enrolled in the agent policy for this private location are unhealthy or offline.',
 };
 
 interface FoundMonitor {
@@ -47,6 +51,18 @@ export class MonitorIntegrationHealthApi {
     private readonly monitorConfigRepository: MonitorConfigRepository,
     private readonly spaceId: string
   ) {}
+
+  /**
+   * Returns the monitor id used to look up Fleet package policies for this monitor.
+   * Prefers `MONITOR_QUERY_ID` when present; otherwise falls back to the saved object id.
+   * Project monitors store a journey-based id in `MONITOR_QUERY_ID` (e.g. `journey-project-namespace`),
+   * which differs from `so.id`.
+   *
+   * @param so Saved object for the synthetics monitor.
+   */
+  private static getMonitorPolicyId(so: SavedObject<EncryptedSyntheticsMonitorAttributes>): string {
+    return so.attributes[ConfigKey.MONITOR_QUERY_ID] || so.id;
+  }
 
   async getHealth(monitorIds: string[]): Promise<MonitorsHealthResponse> {
     const { foundMonitors, errors } = await this.fetchMonitors(monitorIds);
@@ -68,30 +84,34 @@ export class MonitorIntegrationHealthApi {
     const referencedAgentPolicyIds = [
       ...new Set(allPrivateLocations.map((loc) => loc.agentPolicyId)),
     ];
-    const [existingPackagePoliciesMap, existingAgentPoliciesMap] = await Promise.all([
-      this.getExistingPackagePoliciesMap(
-        this.getExpectedPackagePolicyIds(foundMonitors, privateLocationAPI, allSpaces)
-      ),
-      this.getExistingAgentPoliciesMap(referencedAgentPolicyIds),
-    ]);
+    const [existingPackagePoliciesMap, existingAgentPoliciesMap, agentStatusMap] =
+      await Promise.all([
+        this.getExistingPackagePoliciesMap(
+          this.getExpectedPackagePolicyIds(foundMonitors, privateLocationAPI, allSpaces)
+        ),
+        this.getExistingAgentPoliciesMap(referencedAgentPolicyIds),
+        this.getAgentStatusMap(referencedAgentPolicyIds),
+      ]);
 
     const existingPoliciesArray = [...existingPackagePoliciesMap.values()];
 
     const monitors: MonitorHealthStatus[] = foundMonitors.map(({ so }) => {
       const locations = so.attributes[ConfigKey.LOCATIONS] ?? [];
       const privateLocations = locations.filter((loc) => !loc.isServiceManaged);
+      const monitorPolicyId = MonitorIntegrationHealthApi.getMonitorPolicyId(so);
+      const policyConfig = {
+        origin: so.attributes[ConfigKey.MONITOR_SOURCE_TYPE],
+        id: monitorPolicyId,
+      };
 
       // Status checks are ordered by root-cause severity (most fundamental first).
       // Only the first matching status is returned per location — downstream issues
       // are moot when a more fundamental problem exists.
       //
-      // Priority: missing_location > missing_agent_policy > missing_package_policy > healthy
+      // Priority: missing_location > missing_agent_policy > missing_package_policy > missing_agents > unhealthy_agent > healthy
       const locationStatuses: PrivateLocationHealthStatus[] = privateLocations.map((loc) => {
         const existingPrivateLocation = allPrivateLocationsMap.get(loc.id);
-        const newFormatPolicyId = privateLocationAPI.getPolicyId(
-          { origin: so.attributes[ConfigKey.MONITOR_SOURCE_TYPE], id: so.id },
-          loc.id
-        );
+        const newFormatPolicyId = privateLocationAPI.getPolicyId(policyConfig, loc.id);
 
         if (!existingPrivateLocation) {
           return MonitorIntegrationHealthApi.buildLocationStatus(
@@ -114,7 +134,7 @@ export class MonitorIntegrationHealthApi {
 
         const { hasNewFormatPolicyId, hasAnyLegacyPolicyId, legacyPolicyIds } =
           privateLocationAPI.getPolicyIdFormatInfo(
-            { id: so.id },
+            { id: monitorPolicyId },
             loc.id,
             existingPoliciesArray,
             allSpaces
@@ -132,6 +152,28 @@ export class MonitorIntegrationHealthApi {
 
         const resolvedPolicyId = hasNewFormatPolicyId ? newFormatPolicyId : legacyPolicyIds[0];
         const expectedAgentPolicyId = existingPrivateLocation.agentPolicyId;
+
+        const agentStatus = agentStatusMap.get(expectedAgentPolicyId);
+        if (agentStatus !== undefined) {
+          if (agentStatus.total === 0) {
+            return MonitorIntegrationHealthApi.buildLocationStatus(
+              loc.id,
+              existingPrivateLocation.label,
+              PrivateLocationHealthStatusValue.MissingAgents,
+              resolvedPolicyId,
+              expectedAgentPolicyId
+            );
+          }
+          if (agentStatus.online === 0) {
+            return MonitorIntegrationHealthApi.buildLocationStatus(
+              loc.id,
+              existingPrivateLocation.label,
+              PrivateLocationHealthStatusValue.UnhealthyAgent,
+              resolvedPolicyId,
+              expectedAgentPolicyId
+            );
+          }
+        }
 
         return MonitorIntegrationHealthApi.buildLocationStatus(
           loc.id,
@@ -190,14 +232,14 @@ export class MonitorIntegrationHealthApi {
     for (const { so } of foundMonitors) {
       const locations = so.attributes[ConfigKey.LOCATIONS] ?? [];
       const privateLocations = locations.filter((loc) => !loc.isServiceManaged);
+      const monitorPolicyId = MonitorIntegrationHealthApi.getMonitorPolicyId(so);
+      const policyConfig = {
+        origin: so.attributes[ConfigKey.MONITOR_SOURCE_TYPE],
+        id: monitorPolicyId,
+      };
 
       for (const loc of privateLocations) {
-        ids.add(
-          privateLocationAPI.getPolicyId(
-            { origin: so.attributes[ConfigKey.MONITOR_SOURCE_TYPE], id: so.id },
-            loc.id
-          )
-        );
+        ids.add(privateLocationAPI.getPolicyId(policyConfig, loc.id));
         for (const legacyId of privateLocationAPI.getLegacyPolicyIdsForAllSpaces(
           so.id,
           loc.id,
@@ -237,6 +279,26 @@ export class MonitorIntegrationHealthApi {
       { ignoreMissing: true, withPackagePolicies: false }
     );
     return new Map((existingAgentPolicies ?? []).map((policy) => [policy.id, policy]));
+  }
+
+  private async getAgentStatusMap(
+    agentPolicyIds: string[]
+  ): Promise<Map<string, { total: number; online: number }>> {
+    if (agentPolicyIds.length === 0) {
+      return new Map();
+    }
+
+    const entries = await Promise.all(
+      agentPolicyIds.map(async (policyId) => {
+        const status =
+          await this.server.fleet.agentService.asInternalUser.getAgentStatusForAgentPolicy(
+            policyId
+          );
+        return [policyId, { total: status.active, online: status.online }] as const;
+      })
+    );
+
+    return new Map(entries);
   }
 
   private static buildLocationStatus(

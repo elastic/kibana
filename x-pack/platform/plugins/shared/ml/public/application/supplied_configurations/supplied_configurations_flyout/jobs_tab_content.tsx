@@ -17,7 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
-import type { Module, ModuleJob, ModuleDatafeed } from '../../../../common/types/modules';
+import type { Module, ModuleJob, ModuleDatafeed } from '@kbn/ml-common-types/modules';
 
 interface Props {
   module: Module;

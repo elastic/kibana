@@ -12,11 +12,10 @@ import Fs from 'fs/promises';
 import { existsSync } from 'fs';
 import Path from 'path';
 
-import FormData from 'form-data';
-import { isAxiosResponseError } from '@kbn/dev-utils';
 import { createFailError } from '@kbn/dev-cli-errors';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { KbnClientRequesterError } from './kbn_client_requester_error';
 
 import type { KbnClientRequester, ReqOptions } from './kbn_client_requester';
 import { uriencode } from './kbn_client_requester';
@@ -63,8 +62,18 @@ export class KbnClientImportExport {
     const objects = await parseArchive(src);
     this.log.info('importing', objects.length, 'saved objects', { space: options?.space });
 
+    // Use the native (WHATWG) FormData + Blob so fetch handles the multipart
+    // boundary itself. The legacy `form-data` package produced a Node Readable
+    // stream with a hand-rolled boundary, that worked with axios but is brittle
+    // with undici's fetch (the request helper would JSON.stringify the stream).
     const formData = new FormData();
-    formData.append('file', objects.map((obj) => JSON.stringify(obj)).join('\n'), 'import.ndjson');
+    formData.append(
+      'file',
+      new Blob([objects.map((obj) => JSON.stringify(obj)).join('\n')], {
+        type: 'application/ndjson',
+      }),
+      'import.ndjson'
+    );
 
     const query = options?.createNewCopies ? { createNewCopies: true } : { overwrite: true };
 
@@ -74,7 +83,6 @@ export class KbnClientImportExport {
       path: '/api/saved_objects/_import',
       query,
       body: formData,
-      headers: formData.getHeaders(),
     });
 
     if (resp.data.success) {
@@ -159,15 +167,13 @@ export class KbnClientImportExport {
         path: space ? uriencode`/s/${space}` + options.path : options.path,
       });
     } catch (error) {
-      if (!isAxiosResponseError(error)) {
-        throw error;
+      // Translate KbnClientRequesterError into a "expected" CLI failure so the
+      // dev tooling doesn't dump a noisy stack trace for plain HTTP errors. The
+      // request URL and response body are already part of `error.message`.
+      if (error instanceof KbnClientRequesterError && error.status !== undefined) {
+        throw createFailError(error.message);
       }
-
-      throw createFailError(
-        `${error.response.status} resp: ${inspect(error.response.data)}\nreq: ${inspect(
-          error.config
-        )}`
-      );
+      throw error;
     }
   }
 }

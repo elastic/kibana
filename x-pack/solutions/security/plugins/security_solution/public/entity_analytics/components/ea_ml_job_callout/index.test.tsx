@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 
-import type { MlSummaryJob } from '@kbn/ml-plugin/public';
+import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import { TestProviders } from '../../../common/mock';
 import { useInstalledSecurityJobs } from '../../../common/components/ml/hooks/use_installed_security_jobs';
 import { EaMlJobCallout } from '.';

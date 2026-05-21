@@ -53,6 +53,7 @@ import { validateFieldMappings } from './build_integration/validate_fields';
 
 /**
  * Derives the integration status from its data streams.
+ * - 'failed' if integration previously had data streams but all were deleted
  * - 'approved' if all data streams are completed and there is at least one
  * - 'completed' if all data streams are completed
  * - 'failed' if any data stream has failed
@@ -64,7 +65,7 @@ function deriveIntegrationStatus(
   dataStreams: DataStreamAttributes[]
 ): TaskStatus {
   if (dataStreams.length === 0) {
-    return 'pending' as TaskStatus;
+    return 'failed' as TaskStatus;
   }
 
   const statuses = dataStreams.map((ds) => ds.job_info?.status);
@@ -131,7 +132,6 @@ export class AutomaticImportService {
   private taskManagerSetup: TaskManagerSetupContract;
   private taskManagerService: TaskManagerService;
   private logger: Logger;
-
   constructor(
     loggerFactory: LoggerFactory,
     savedObjectsServiceSetup: SavedObjectsServiceSetup,
@@ -196,6 +196,9 @@ export class AutomaticImportService {
           last_updated_by: authenticatedUser.username,
           last_updated_at: new Date().toISOString(),
           status: wasApproved ? TASK_STATUSES.completed : existing.status,
+          ...(integrationParams.connectorId != null
+            ? { connector_id: integrationParams.connectorId }
+            : {}),
           metadata: {
             ...existing.metadata,
             version: newVersion,
@@ -238,10 +241,12 @@ export class AutomaticImportService {
       logo: integrationSO.metadata.logo,
       description: integrationSO.metadata.description,
       version: integrationSO.metadata.version,
+      connectorId: integrationSO.connector_id,
       createdBy: integrationSO.created_by,
       createdByProfileUid: integrationSO.created_by_profile_uid,
       status: deriveIntegrationStatus(integrationSO, dataStreamsSO),
       dataStreams: dataStreamsResponses,
+      categories: integrationSO.metadata.categories,
     };
     return integrationResponse;
   }
@@ -268,6 +273,7 @@ export class AutomaticImportService {
           logo: integration.metadata.logo,
           description: integration.metadata.description,
           version: integration.metadata.version,
+          connectorId: integration.connector_id,
           createdBy: integration.created_by,
           createdByProfileUid: integration.created_by_profile_uid,
           status: deriveIntegrationStatus(integration, dataStreams),

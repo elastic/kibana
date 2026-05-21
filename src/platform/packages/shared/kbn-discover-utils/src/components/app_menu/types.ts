@@ -22,6 +22,7 @@ export enum AppMenuActionId {
   export = 'export',
   alerts = 'alerts',
   inspect = 'inspect',
+  switchLanguageMode = 'switchLanguageMode',
   createRule = 'createRule',
   backgroundsearch = 'backgroundSearch',
   manageRulesAndConnectors = 'manageRulesAndConnectors',
@@ -32,7 +33,6 @@ export enum AppMenuActionId {
  */
 export interface DiscoverAppMenuContext extends Record<string, unknown> {
   onFinishAction: () => void;
-  parentTestId?: string;
 }
 
 /**

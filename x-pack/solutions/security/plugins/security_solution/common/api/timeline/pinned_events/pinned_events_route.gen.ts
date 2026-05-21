@@ -14,39 +14,43 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { PinnedEvent } from '../model/components.gen';
 
+export const PersistPinnedEventResponse = lazySchema(() =>
+  z.union([
+    PinnedEvent,
+    z.object({
+      /**
+       * Indicates whether the event was successfully unpinned
+       */
+      unpinned: z.boolean(),
+    }),
+  ])
+);
 export type PersistPinnedEventResponse = z.infer<typeof PersistPinnedEventResponse>;
-export const PersistPinnedEventResponse = z.union([
-  PinnedEvent,
+
+export const PersistPinnedEventRouteRequestBody = lazySchema(() =>
   z.object({
     /**
-     * Indicates whether the event was successfully unpinned
+     * The `_id` of the associated event for this pinned event.
      */
-    unpinned: z.boolean(),
-  }),
-]);
-
+    eventId: z.string(),
+    /**
+     * The `savedObjectId` of the timeline that you want this pinned event unpinned from.
+     */
+    timelineId: z.string(),
+    /**
+     * The `savedObjectId` of the pinned event you want to unpin.
+     */
+    pinnedEventId: z.string().nullable().optional(),
+  })
+);
 export type PersistPinnedEventRouteRequestBody = z.infer<typeof PersistPinnedEventRouteRequestBody>;
-export const PersistPinnedEventRouteRequestBody = z.object({
-  /**
-   * The `_id` of the associated event for this pinned event.
-   */
-  eventId: z.string(),
-  /**
-   * The `savedObjectId` of the timeline that you want this pinned event unpinned from.
-   */
-  timelineId: z.string(),
-  /**
-   * The `savedObjectId` of the pinned event you want to unpin.
-   */
-  pinnedEventId: z.string().nullable().optional(),
-});
 export type PersistPinnedEventRouteRequestBodyInput = z.input<
   typeof PersistPinnedEventRouteRequestBody
 >;
 
+export const PersistPinnedEventRouteResponse = lazySchema(() => PersistPinnedEventResponse);
 export type PersistPinnedEventRouteResponse = z.infer<typeof PersistPinnedEventRouteResponse>;
-export const PersistPinnedEventRouteResponse = PersistPinnedEventResponse;

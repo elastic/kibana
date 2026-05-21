@@ -239,4 +239,17 @@ describe('ExpressionRow', () => {
         ) ?? [];
     expect(valueMatch).toBeTruthy();
   });
+
+  it('should include inclusive range comparators in threshold options', async () => {
+    const { wrapper, update } = await setup(expression as InventoryMetricConditions);
+    wrapper.find('button[data-test-subj="thresholdPopover"]').simulate('click');
+    await update();
+
+    const comparatorOptionValues = wrapper
+      .find('select[data-test-subj="comparatorOptionsComboBox"] option')
+      .map((option) => option.prop('value'));
+
+    expect(comparatorOptionValues).toContain(COMPARATORS.BETWEEN_INCLUSIVE);
+    expect(comparatorOptionValues).toContain(COMPARATORS.NOT_BETWEEN_INCLUSIVE);
+  });
 });

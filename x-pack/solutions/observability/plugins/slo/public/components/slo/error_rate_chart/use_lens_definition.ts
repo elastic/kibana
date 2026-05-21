@@ -137,7 +137,7 @@ export function useLensDefinition({
                       },
                       lineWidth: 2,
                       color: euiTheme.colors.danger,
-                      icon: 'warning',
+                      icon: 'alert',
                     },
                     {
                       type: 'manual',
@@ -176,7 +176,7 @@ export function useLensDefinition({
                     },
                     lineWidth: 2,
                     color: euiTheme.colors.danger,
-                    icon: 'warning',
+                    icon: 'alert',
                   },
                 ],
                 ignoreGlobalFilters: true,

@@ -86,7 +86,7 @@ const dateRange = {
   toDate: '2022-04-17T08:25:00.000Z',
 };
 
-const queryBaseState = {
+const queryBaseState: TextBasedPrivateState = {
   layers: {
     a: {
       columns: [
@@ -114,7 +114,7 @@ const queryBaseState = {
     { id: '2', title: 'my-fake-restricted-pattern' },
     { id: '3', title: 'my-compatible-pattern' },
   ],
-} as unknown as TextBasedPrivateState;
+};
 
 describe('Textbased Data Source', () => {
   let baseState: TextBasedPrivateState;
@@ -974,6 +974,31 @@ describe('Textbased Data Source', () => {
       ).toEqual(null);
     });
 
+    it('should set ignoreGlobalFilters in the esql expression when the layer has it enabled', () => {
+      const stateWithIgnoreFilters = {
+        ...queryBaseState,
+        layers: {
+          a: {
+            ...queryBaseState.layers.a,
+            ignoreGlobalFilters: true,
+          },
+        },
+      } as unknown as TextBasedPrivateState;
+
+      const expression = TextBasedDatasource.toExpression(
+        stateWithIgnoreFilters,
+        'a',
+        indexPatterns,
+        dateRange,
+        new Date()
+      );
+
+      expect(expression).toHaveProperty(
+        'chain.2.arguments',
+        expect.objectContaining({ ignoreGlobalFilters: [true] })
+      );
+    });
+
     it('should generate an expression for an SQL query', async () => {
       expect(
         TextBasedDatasource.toExpression(queryBaseState, 'a', indexPatterns, dateRange, new Date())
@@ -994,6 +1019,9 @@ describe('Textbased Data Source', () => {
               "arguments": Object {
                 "descriptionForInspector": Array [
                   "This request queries Elasticsearch to fetch the data for the visualization.",
+                ],
+                "ignoreGlobalFilters": Array [
+                  false,
                 ],
                 "locale": Array [
                   "en",

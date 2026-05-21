@@ -174,6 +174,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'securitySolution:enableAlertsAndAttacksAlignment': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'search:includeFrozen': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -619,10 +623,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:apmUseUnifiedTraceWaterfall': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:profilingShowErrorFrames': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -728,12 +728,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable Significant events discovery in Streams.',
     },
   },
-  'observability:streamsEnableAttachments': {
-    type: 'boolean',
-    _meta: {
-      description: 'Enable Streams attachments tab.',
-    },
-  },
   'observability:streamsEnableContentPacks': {
     type: 'boolean',
     _meta: {
@@ -752,10 +746,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable ES|QL views for wired streams',
     },
   },
-  'observability:streamsEnableOverviewPage': {
+  'observability:streamsEnableDraftStreams': {
     type: 'boolean',
     _meta: {
-      description: 'Enable the Streams management Overview tab',
+      description: 'Enable draft streams with read-time ES|QL views',
     },
   },
   'observability:streamsSigEventsIndexPatterns': {
@@ -763,6 +757,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: {
       description:
         'Comma-separated index patterns used for Significant Events stream filtering and analysis.',
+    },
+  },
+  'observability:streamsEnableMemory': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable memory in Streams',
     },
   },
   'observability:enableDiagnosticMode': {
@@ -808,6 +808,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: {
       description: 'Non-default value of setting.',
+    },
+  },
+  'genAiSettings:tokenUsageTracking': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable token usage tracking in Kibana',
     },
   },
 };

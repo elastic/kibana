@@ -8,7 +8,7 @@
  */
 
 import type { WorkflowYaml } from '@kbn/workflows';
-import { WorkflowValidationError } from '../../common/lib/errors';
+import { WorkflowValidationError } from '@kbn/workflows-yaml';
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
 
 describe('Workflow Step Validation Integration', () => {

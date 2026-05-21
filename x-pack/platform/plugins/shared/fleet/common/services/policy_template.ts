@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import {
   DATASET_VAR_NAME,
+  DATA_STREAM_TYPE_VAR_NAME,
   dataTypes,
   OTEL_COLLECTOR_INPUT_TYPE,
   USE_APM_VAR_NAME,
@@ -41,6 +42,21 @@ const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
   multi: false,
   required: true,
   show_user: true,
+};
+
+export const DATA_STREAM_TYPE_VAR: RegistryVarsEntry = {
+  name: DATA_STREAM_TYPE_VAR_NAME,
+  type: 'text',
+  title: i18n.translate('xpack.fleet.policyTemplate.dataStreamTypeVar.title', {
+    defaultMessage: 'Data stream type',
+  }),
+  description: i18n.translate('xpack.fleet.policyTemplate.dataStreamTypeVar.description', {
+    defaultMessage:
+      'Set the type for your data stream. Valid values are logs, metrics, traces, and synthetics.',
+  }),
+  multi: false,
+  required: false,
+  show_user: false,
 };
 
 export const DATA_STREAM_USE_APM_VAR: RegistryVarsEntry = {
@@ -199,17 +215,12 @@ export function getNormalizedDataStreams(
   }
 
   return policyTemplates.map((policyTemplate) => {
-    const isOtelDynamicSignalTypes = policyTemplate.dynamic_signal_types === true;
-    // Packages with dynamic_signal_types defer dataset routing to the ES exporter (via scope.name
-    // or explicit data_stream.* attrs). Use 'generic.otel' as the default so any fallback lands
-    // in the generic OTel data streams rather than a policy-template-named data stream.
-    const dataset =
-      datasetName ||
-      (isOtelDynamicSignalTypes
-        ? 'generic.otel'
-        : createDefaultDatasetName(packageInfo, policyTemplate));
+    const dataset = datasetName || createDefaultDatasetName(packageInfo, policyTemplate);
 
     let vars = addDatasetVarIfNotPresent(policyTemplate.vars, policyTemplate.name);
+    if (shouldIncludeDataStreamTypeVar(policyTemplate.dynamic_signal_types === true)) {
+      vars = addDataStreamTypeVarIfNotPresent(vars, policyTemplate.type);
+    }
     if (
       shouldIncludeUseAPMVar(
         policyTemplate.input,
@@ -293,6 +304,26 @@ export const addUseAPMVarIfNotPresent = (vars?: RegistryVarsEntry[]): RegistryVa
     return newVars;
   } else {
     return [...newVars, DATA_STREAM_USE_APM_VAR];
+  }
+};
+
+export const shouldIncludeDataStreamTypeVar = (isDynamicSignalTypes: boolean): boolean =>
+  !isDynamicSignalTypes;
+
+export const addDataStreamTypeVarIfNotPresent = (
+  vars?: RegistryVarsEntry[],
+  defaultType?: string
+): RegistryVarsEntry[] => {
+  const newVars = vars ?? [];
+
+  const isDataStreamTypeVarAlreadyAdded = newVars.find(
+    (varEntry) => varEntry.name === DATA_STREAM_TYPE_VAR_NAME
+  );
+
+  if (isDataStreamTypeVarAlreadyAdded) {
+    return newVars;
+  } else {
+    return [...newVars, { ...DATA_STREAM_TYPE_VAR, ...(defaultType && { default: defaultType }) }];
   }
 };
 

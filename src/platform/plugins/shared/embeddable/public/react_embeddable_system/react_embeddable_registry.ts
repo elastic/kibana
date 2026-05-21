@@ -8,24 +8,37 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DefaultEmbeddableApi, EmbeddableFactory } from './types';
+import type { DefaultEmbeddableApi, EmbeddablePublicDefinition } from './types';
 
-const registry: { [key: string]: () => Promise<EmbeddableFactory<any, any>> } = {};
+const registry: { [key: string]: () => Promise<EmbeddablePublicDefinition<any, any>> } = {};
+
+export const TYPE_REGEX = /^[a-z_]+$/; // lowercase letters and underscores
+
+let isSetupComplete = false;
 
 /**
- * Registers a new React embeddable factory. This should be called at plugin start time.
+ * Registers an embeddable public defintion. This should be called at plugin setup time.
+ * Be sure to register an embeddable server definition for this type.
  *
- * @param type The key to register the factory under.
- * @param getFactory an async function that gets the factory definition for this key. This should always async import the
+ * @param type The key to register the embeddable public defintion. Part of public "dashboards as code" REST API.
+ * Must be lower case, snake cased, and concise.
+ * @param getEmbeddable an async function that gets the factory definition for this key. This should always async import the
  * actual factory definition file to avoid polluting page load.
  */
-export const registerReactEmbeddableFactory = <
+export const registerEmbeddablePublicDefinition = <
   SerializedState extends object = object,
   Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
 >(
   type: string,
-  getFactory: () => Promise<EmbeddableFactory<SerializedState, Api>>
+  getEmbeddableDefinition: () => Promise<EmbeddablePublicDefinition<SerializedState, Api>>
 ) => {
+  if (isSetupComplete)
+    throw new Error(
+      i18n.translate('embeddableApi.reactEmbeddable.setCompleteError', {
+        defaultMessage:
+          'Embeddables must be registered during plugin setup phase. Do not register embeddables asynchronously',
+      })
+    );
   if (registry[type] !== undefined)
     throw new Error(
       i18n.translate('embeddableApi.reactEmbeddable.factoryAlreadyExistsError', {
@@ -33,21 +46,26 @@ export const registerReactEmbeddableFactory = <
         values: { key: type },
       })
     );
-  registry[type] = getFactory;
+
+  if (!TYPE_REGEX.test(type))
+    throw new Error(
+      i18n.translate('embeddableApi.reactEmbeddable.invalidTypeError', {
+        defaultMessage: 'Type must be lower case and snake cased.',
+      })
+    );
+
+  registry[type] = getEmbeddableDefinition;
 };
 
-export const getReactEmbeddableFactory = async <
+export const getEmbeddableDefinition = async <
   SerializedState extends object = object,
   Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
 >(
   key: string
-): Promise<EmbeddableFactory<SerializedState, Api>> => {
-  if (registry[key] === undefined)
-    throw new Error(
-      i18n.translate('embeddableApi.reactEmbeddable.factoryNotFoundError', {
-        defaultMessage: 'No embeddable factory found for type: {key}',
-        values: { key },
-      })
-    );
-  return registry[key]();
+): Promise<EmbeddablePublicDefinition<SerializedState, Api> | undefined> => {
+  return registry[key]?.();
 };
+
+export function closeSetup() {
+  isSetupComplete = true;
+}

@@ -195,16 +195,8 @@ describe('registerAlertingV2UsageCollector', () => {
             _meta: { description: 'Number of rules with no data handling configured.' },
             type: 'long',
           },
-          count_with_query_condition: {
-            _meta: { description: 'Number of rules with a query condition.' },
-            type: 'long',
-          },
           count_with_recovery_policy: {
             _meta: { description: 'Number of rules with a recovery policy.' },
-            type: 'long',
-          },
-          count_with_recovery_query_condition: {
-            _meta: { description: 'Number of rules with a recovery query condition.' },
             type: 'long',
           },
           dispatcher_executions_count_24hr: {
@@ -255,15 +247,15 @@ describe('registerAlertingV2UsageCollector', () => {
             type: 'boolean',
           },
           min_created_at: { _meta: { description: 'Earliest rule creation date.' }, type: 'date' },
-          notification_policies_avg_group_by_fields_count: {
-            _meta: { description: 'Average number of group by fields per notification policy.' },
+          action_policies_avg_group_by_fields_count: {
+            _meta: { description: 'Average number of group by fields per action policy.' },
             type: 'float',
           },
-          notification_policies_count: {
-            _meta: { description: 'Total number of notification policies.' },
+          action_policies_count: {
+            _meta: { description: 'Total number of action policies.' },
             type: 'long',
           },
-          notification_policies_count_by_throttle_interval: {
+          action_policies_count_by_throttle_interval: {
             items: {
               name: {
                 _meta: { description: 'Throttle interval duration string.' },
@@ -271,24 +263,24 @@ describe('registerAlertingV2UsageCollector', () => {
               },
               value: {
                 _meta: {
-                  description: 'Number of notification policies with this throttle interval.',
+                  description: 'Number of action policies with this throttle interval.',
                 },
                 type: 'long',
               },
             },
             type: 'array',
           },
-          notification_policies_count_with_group_by: {
-            _meta: { description: 'Number of notification policies with group by.' },
+          action_policies_count_with_group_by: {
+            _meta: { description: 'Number of action policies with group by.' },
             type: 'long',
           },
-          notification_policies_count_with_matcher: {
-            _meta: { description: 'Number of notification policies with a matcher.' },
+          action_policies_count_with_matcher: {
+            _meta: { description: 'Number of action policies with a matcher.' },
             type: 'long',
           },
-          notification_policies_unique_workflow_count: {
+          action_policies_unique_workflow_count: {
             _meta: {
-              description: 'Number of unique workflows referenced by notification policies.',
+              description: 'Number of unique workflows referenced by action policies.',
             },
             type: 'long',
           },

@@ -8,10 +8,11 @@
  */
 
 import { DurationFormat } from './duration';
-import { HTML_CONTEXT_TYPE } from '../content_types';
+import { TEXT_CONTEXT_TYPE } from '../content_types';
+import { expectReactElementWithNull, expectReactElementAsArray } from '../test_utils';
 
 describe('Duration Format', () => {
-  test('handles missing values in html context', () => {
+  test('handles missing values', () => {
     const duration = new DurationFormat(
       {
         inputFormat: 'seconds',
@@ -19,12 +20,40 @@ describe('Duration Format', () => {
       },
       jest.fn()
     );
-    expect(duration.convert(null, HTML_CONTEXT_TYPE)).toBe(
-      '<span class="ffString__emptyValue">(null)</span>'
+    expect(duration.convert(null, TEXT_CONTEXT_TYPE)).toBe('(null)');
+    expect(duration.convert(undefined, TEXT_CONTEXT_TYPE)).toBe('(null)');
+    expectReactElementWithNull(duration.reactConvert(null));
+    expectReactElementWithNull(duration.reactConvert(undefined));
+  });
+
+  test('returns a plain string for a numeric duration', () => {
+    const formatter = new DurationFormat(
+      { inputFormat: 'seconds', outputFormat: 'humanize' },
+      jest.fn()
     );
-    expect(duration.convert(undefined, HTML_CONTEXT_TYPE)).toBe(
-      '<span class="ffString__emptyValue">(null)</span>'
+
+    expect(formatter.convert(60, TEXT_CONTEXT_TYPE)).toBe('a minute');
+    expect(formatter.reactConvert(60)).toBe('a minute');
+  });
+
+  test('wraps a multi-value array with bracket notation', () => {
+    const formatter = new DurationFormat(
+      { inputFormat: 'seconds', outputFormat: 'humanize' },
+      jest.fn()
     );
+
+    expect(formatter.convert([60, 3600], TEXT_CONTEXT_TYPE)).toBe('["a minute","an hour"]');
+    expectReactElementAsArray(formatter.reactConvert([60, 3600]), ['a minute', 'an hour']);
+  });
+
+  test('returns the single element without brackets for a one-element array', () => {
+    const formatter = new DurationFormat(
+      { inputFormat: 'seconds', outputFormat: 'humanize' },
+      jest.fn()
+    );
+
+    expect(formatter.convert([60], TEXT_CONTEXT_TYPE)).toBe('["a minute"]');
+    expect(formatter.reactConvert([60])).toBe('a minute');
   });
 
   testCase({
@@ -597,7 +626,13 @@ describe('Duration Format', () => {
           },
           jest.fn()
         );
-        expect(duration.convert(input)).toBe(output);
+        expect(duration.convert(input, TEXT_CONTEXT_TYPE)).toBe(output);
+
+        if (output === '(null)') {
+          expectReactElementWithNull(duration.reactConvert(input));
+        } else {
+          expect(duration.reactConvert(input)).toBe(output);
+        }
       });
     });
   }

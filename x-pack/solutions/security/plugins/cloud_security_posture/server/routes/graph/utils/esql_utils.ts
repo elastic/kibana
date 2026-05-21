@@ -132,7 +132,7 @@ export const buildLookupJoinEsql = (lookupIndexName: string): string => {
 | RENAME actorEntityName    = entity.name
 | RENAME actorEntityType    = entity.type
 | RENAME actorEntitySubType = entity.sub_type
-| RENAME actorHostIp        = host.ip
+| INLINE STATS actorHostIp = VALUES(TO_STRING(host.ip)) // Extract host IPs as string type
 | RENAME actorLookupEntityId = entity.id
 | RENAME actorEntityEngineType = entity.EngineMetadata.Type
 
@@ -141,7 +141,7 @@ export const buildLookupJoinEsql = (lookupIndexName: string): string => {
 | RENAME targetEntityName    = entity.name
 | RENAME targetEntityType    = entity.type
 | RENAME targetEntitySubType = entity.sub_type
-| RENAME targetHostIp        = host.ip
+| INLINE STATS targetHostIp = VALUES(TO_STRING(host.ip)) // Extract host IPs as string type
 | RENAME targetLookupEntityId = entity.id
 | RENAME targetEntityEngineType = entity.EngineMetadata.Type`;
 };

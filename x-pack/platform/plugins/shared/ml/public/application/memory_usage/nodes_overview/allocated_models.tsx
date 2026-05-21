@@ -23,7 +23,7 @@ import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type {
   AllocatedModel,
   NodeDeploymentStatsResponse,
-} from '../../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { useEnabledFeatures } from '../../contexts/ml';
 
@@ -131,7 +131,13 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
             {i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.allocationHeader', {
               defaultMessage: 'Allocation',
             })}
-            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+            <EuiIcon
+              aria-hidden={true}
+              size="s"
+              color="subdued"
+              type="question"
+              className="eui-alignTop"
+            />
           </span>
         </EuiToolTip>
       ),
@@ -189,7 +195,13 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
                 defaultMessage: 'Throughput',
               }
             )}
-            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+            <EuiIcon
+              aria-hidden={true}
+              size="s"
+              color="subdued"
+              type="question"
+              className="eui-alignTop"
+            />
           </span>
         </EuiToolTip>
       ),
@@ -225,7 +237,13 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
               </span>
             </EuiFlexItem>
             <EuiFlexItem grow={false} css={{ minWidth: euiTheme.euiTheme.size.m }}>
-              <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+              <EuiIcon
+                aria-hidden={true}
+                size="s"
+                color="subdued"
+                type="question"
+                className="eui-alignTop"
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiToolTip>

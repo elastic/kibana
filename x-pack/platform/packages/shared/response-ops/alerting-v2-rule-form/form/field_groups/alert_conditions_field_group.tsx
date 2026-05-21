@@ -26,7 +26,7 @@ import { RecoveryDelayField } from '../fields/recovery_delay_field';
  * - A dropdown to select recovery type (no_breach vs. custom query)
  * - When `query` type is selected:
  *     uses RecoveryBaseQueryOnlyField (full ES|QL editor with "not same as eval" validation)
- * - Recovery delay (recovering state transition: immediate / breaches / duration)
+ * - Recovery delay (recovering state transition: immediate / recoveries / duration)
  */
 export const AlertConditionsFieldGroup = () => {
   const { control } = useFormContext<FormValues>();

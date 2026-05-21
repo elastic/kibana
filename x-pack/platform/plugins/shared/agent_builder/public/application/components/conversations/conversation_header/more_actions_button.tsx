@@ -11,13 +11,19 @@ import {
   EuiPopover,
   EuiContextMenuPanel,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useNavigation } from '../../../hooks/use_navigation';
-import { useAgentId } from '../../../hooks/use_conversation';
+import {
+  useAgentId,
+  useConversation,
+  useConversationRounds,
+} from '../../../hooks/use_conversation';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
+import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useKibana } from '../../../hooks/use_kibana';
 import { appPaths } from '../../../utils/app_paths';
 import { DeleteConversationModal } from '../delete_conversation_modal';
@@ -49,6 +55,18 @@ const fullscreenLabels = {
   fullScreen: i18n.translate('xpack.agentBuilder.conversationActions.fullScreen', {
     defaultMessage: 'Open in full screen',
   }),
+  fullScreenDisabledTooltip: i18n.translate(
+    'xpack.agentBuilder.conversationActions.fullScreenDisabledTooltip',
+    {
+      defaultMessage: 'Full-screen mode is available once this conversation has been created.',
+    }
+  ),
+  addToDataset: i18n.translate('xpack.agentBuilder.conversationActions.addToDataset', {
+    defaultMessage: 'Add conversation to dataset',
+  }),
+  emptyMessage: i18n.translate('xpack.agentBuilder.conversationActions.emptyMessage', {
+    defaultMessage: '(no message)',
+  }),
 };
 
 interface MoreActionsButtonProps {
@@ -64,11 +82,67 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
   const { isEmbeddedContext } = useConversationContext();
   const conversationId = useConversationId();
   const { manageAgents } = useUiPrivileges();
+  const isExperimentalEnabled = useExperimentalFeatures();
+  const { conversation } = useConversation();
+  const conversationRounds = useConversationRounds();
 
   const {
-    services: { application },
+    services: { application, plugins },
   } = useKibana();
   const hasAccessToGenAiSettings = useHasConnectorsAllPrivileges();
+
+  const getAddToDatasetAction = plugins.evals?.getAddToDatasetAction;
+
+  const completedRounds = useMemo(() => {
+    return conversationRounds.flatMap((round, roundIndex) => {
+      if (!round.response?.message) return [];
+      return [{ round, roundIndex }];
+    });
+  }, [conversationRounds]);
+
+  const onAddConversationToDataset = useCallback(() => {
+    if (!getAddToDatasetAction) return;
+
+    setIsPopoverOpen(false);
+    getAddToDatasetAction({
+      label: fullscreenLabels.addToDataset,
+      title: fullscreenLabels.addToDataset,
+      initialExamples: completedRounds.map(({ round, roundIndex }) => {
+        const message =
+          typeof round.input?.message === 'string' && round.input.message.trim()
+            ? round.input.message.trim()
+            : fullscreenLabels.emptyMessage;
+
+        const shortMessage = message.length > 80 ? `${message.slice(0, 77).trimEnd()}…` : message;
+
+        const traceId =
+          round.trace_id == null
+            ? null
+            : Array.isArray(round.trace_id)
+            ? round.trace_id[0] ?? null
+            : round.trace_id;
+
+        return {
+          label: i18n.translate('xpack.agentBuilder.conversationActions.turnLabel', {
+            defaultMessage: 'Turn {turn}: {message}',
+            values: { turn: roundIndex + 1, message: shortMessage },
+          }),
+          input: { round },
+          output: { steps: round.steps },
+          metadata: {
+            source: 'agent_builder',
+            conversation_id: conversation?.id ?? null,
+            turn_index: roundIndex,
+            trace_id: traceId,
+          },
+          selected: true,
+        };
+      }),
+    })?.onClick();
+  }, [completedRounds, conversation?.id, getAddToDatasetAction]);
+
+  const showAddToDatasetItem =
+    isExperimentalEnabled && plugins.evals?.canAddToDataset && completedRounds.length > 0;
 
   const closePopover = () => {
     setIsPopoverOpen(false);
@@ -80,6 +154,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
 
   const handleOpenFullScreen = useCallback(() => {
     if (!application) return;
+    if (!conversationId) return;
 
     setIsPopoverOpen(false);
     onCloseSidebar?.();
@@ -91,11 +166,34 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
     navigateToAgentBuilderUrl(path);
   }, [application, agentId, conversationId, navigateToAgentBuilderUrl, onCloseSidebar]);
 
+  const fullScreenMenuItemLabel = useMemo(() => {
+    if (conversationId) {
+      return fullscreenLabels.fullScreen;
+    }
+    return (
+      <EuiToolTip content={fullscreenLabels.fullScreenDisabledTooltip}>
+        <span tabIndex={0}>{fullscreenLabels.fullScreen}</span>
+      </EuiToolTip>
+    );
+  }, [conversationId]);
+
+  const addToDatasetMenuItem = showAddToDatasetItem
+    ? [
+        <EuiContextMenuItem
+          key="addConversationToDataset"
+          icon="beaker"
+          data-test-subj="agentBuilderAddConversationToDataset"
+          onClick={onAddConversationToDataset}
+        >
+          {fullscreenLabels.addToDataset}
+        </EuiContextMenuItem>,
+      ]
+    : [];
+
   const embeddedContextMenuItems = [
     <EuiContextMenuItem
       key="view-current-agent"
       icon="info"
-      size="s"
       disabled={!manageAgents}
       onClick={closePopover}
       href={agentId ? createAgentBuilderUrl(appPaths.agent.overview({ agentId })) : undefined}
@@ -107,11 +205,11 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
           <EuiContextMenuItem
             key="full-screen"
             icon="fullScreen"
-            size="s"
+            disabled={!conversationId}
             data-test-subj="agentBuilderFullScreenMenuItem"
             onClick={handleOpenFullScreen}
           >
-            {fullscreenLabels.fullScreen}
+            {fullScreenMenuItemLabel}
           </EuiContextMenuItem>,
         ]
       : []),
@@ -128,13 +226,13 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
           </EuiContextMenuItem>,
         ]
       : []),
+    ...addToDatasetMenuItem,
   ];
 
   const fullscreenMenuItems = [
     <EuiContextMenuItem
       key="view-current-agent"
       icon="info"
-      size="s"
       disabled={!manageAgents}
       onClick={closePopover}
       href={agentId ? createAgentBuilderUrl(appPaths.agent.overview({ agentId })) : undefined}
@@ -154,6 +252,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
           </EuiContextMenuItem>,
         ]
       : []),
+    ...addToDatasetMenuItem,
   ];
 
   const menuItems = isEmbeddedContext ? embeddedContextMenuItems : fullscreenMenuItems;
@@ -177,7 +276,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
         anchorPosition="downCenter"
         aria-label={fullscreenLabels.actionsAriaLabel}
       >
-        <EuiContextMenuPanel size="s" items={menuItems} />
+        <EuiContextMenuPanel items={menuItems} />
         <EuiSpacer size="s" />
       </EuiPopover>
       <DeleteConversationModal

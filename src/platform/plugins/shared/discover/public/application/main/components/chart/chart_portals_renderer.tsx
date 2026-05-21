@@ -213,7 +213,7 @@ const UnifiedHistogramWrapper = ({ panelsToggle }: UnifiedHistogramChartProps) =
     setUnifiedHistogramApi(unifiedHistogram.api);
   }, [setUnifiedHistogramApi, unifiedHistogram.api]);
 
-  const { renderCustomChartToggleActions } = useUnifiedHistogramCommon({
+  const { renderToggleActions } = useUnifiedHistogramCommon({
     currentTabId,
     layoutProps: unifiedHistogram.layoutProps,
     panelsToggle,
@@ -226,7 +226,7 @@ const UnifiedHistogramWrapper = ({ panelsToggle }: UnifiedHistogramChartProps) =
   return (
     <UnifiedHistogramChart
       {...unifiedHistogram.chartProps}
-      renderCustomChartToggleActions={renderCustomChartToggleActions}
+      renderToggleActions={renderToggleActions}
     />
   );
 };
@@ -252,6 +252,9 @@ const CustomChartSectionWrapper = ({
   });
 
   const metricsGridState = useCurrentTabSelector((state) => state.uiState.metricsGrid);
+  const isTabSelected = useInternalStateSelector(
+    (state) => state.tabs.unsafeCurrentId === currentTabId
+  );
   const setMetricsGridState = useCurrentTabAction(internalStateActions.setMetricsGridState);
   const onInitialStateChange = useCallback(
     (newMetricsGridState: Partial<UnifiedMetricsGridRestorableState>) => {
@@ -280,7 +283,7 @@ const CustomChartSectionWrapper = ({
     ]
   );
 
-  const { renderCustomChartToggleActions } = useUnifiedHistogramCommon({
+  const { renderToggleActions } = useUnifiedHistogramCommon({
     currentTabId,
     layoutProps,
     panelsToggle,
@@ -306,11 +309,13 @@ const CustomChartSectionWrapper = ({
       {chartSectionConfig.renderChartSection({
         histogramCss,
         chartToolbarCss,
-        renderToggleActions: renderCustomChartToggleActions,
+        renderToggleActions,
         fetch$,
         fetchParams,
         isComponentVisible,
+        isTabSelected,
         ...unifiedHistogramProps,
+        setLensRequestAdapter: api.setLensRequestAdapter,
         initialState: metricsGridState,
         onInitialStateChange,
       })}

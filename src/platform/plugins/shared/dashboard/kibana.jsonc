@@ -46,7 +46,6 @@
       "kibanaReact",
       "kibanaUtils",
       "presentationUtil",
-      "presentationPanel",
       "savedObjects"
     ]
   }

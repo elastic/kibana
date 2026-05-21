@@ -8,16 +8,23 @@
 import { memoize } from 'lodash';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import React from 'react';
-import type { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type { UnifiedValueAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescriptionList } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
+import {
+  normalizeChangePointChartLegacyFields,
+  type RawChangePointChartState,
+} from '../../common/embeddables/change_point_chart/normalize_legacy_state';
 import type {
   ChangePointDetectionProps,
   ChangePointDetectionSharedComponent,
 } from '../shared_components/change_point_detection';
+
+// Pre-9.5 case attachments stored time_range as timeRange.
+type RawAttachmentState = RawChangePointChartState & { timeRange?: TimeRange };
 
 export const initComponent = memoize(
   (
@@ -25,19 +32,23 @@ export const initComponent = memoize(
     ChangePointDetectionComponent: ChangePointDetectionSharedComponent
   ) => {
     return React.memo(
-      (props: PersistableStateAttachmentViewProps) => {
-        const { persistableStateAttachmentState } = props;
-
+      (props: UnifiedValueAttachmentViewProps) => {
         const dataFormatter = fieldFormats.deserialize({
           id: FIELD_FORMAT_IDS.DATE,
         });
 
-        const rawState = persistableStateAttachmentState as unknown as Record<string, unknown>;
-        const timeRange = (rawState.time_range ?? rawState.timeRange) as TimeRange;
+        const rawState = props.data.state as RawAttachmentState;
+        const normalized = normalizeChangePointChartLegacyFields(rawState);
         const inputProps = {
-          ...(persistableStateAttachmentState as unknown as ChangePointDetectionProps),
-          timeRange,
-        };
+          timeRange: rawState.time_range ?? rawState.timeRange,
+          viewType: normalized.view_type,
+          dataViewId: normalized.data_view_id,
+          fn: normalized.aggregation_function,
+          metricField: normalized.metric_field,
+          splitField: normalized.split_field,
+          partitions: normalized.partitions,
+          maxSeriesToPlot: normalized.max_series_to_plot,
+        } as ChangePointDetectionProps;
 
         const listItems = [
           {
@@ -60,11 +71,7 @@ export const initComponent = memoize(
           </>
         );
       },
-      (prevProps, nextProps) =>
-        deepEqual(
-          prevProps.persistableStateAttachmentState,
-          nextProps.persistableStateAttachmentState
-        )
+      (prevProps, nextProps) => deepEqual(prevProps.data.state, nextProps.data.state)
     );
   }
 );

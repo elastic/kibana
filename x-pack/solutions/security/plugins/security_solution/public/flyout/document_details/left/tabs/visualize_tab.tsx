@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import React, { memo, useState, useCallback, useEffect } from 'react';
+import React, { memo, useMemo, useState, useCallback, useEffect } from 'react';
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/button/button_group/button_group';
-import { useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   uiMetricService,
   GRAPH_INVESTIGATION,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { useStableExpandableFlyoutState } from '../../../shared/hooks/use_stable_expandable_flyout_state';
 import { useDocumentDetailsContext } from '../../shared/context';
 import {
   VISUALIZE_TAB_BUTTON_GROUP_TEST_ID,
@@ -27,7 +28,7 @@ import { SESSION_VIEW_ID, SessionView } from '../components/session_view';
 import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { GRAPH_ID, GraphVisualization } from '../components/graph_visualization';
-import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
+import { useGraphPreview } from '../../../../flyout_v2/document/main/hooks/use_graph_preview';
 import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
 import { METRIC_TYPE } from '../../../../common/lib/telemetry';
 
@@ -86,9 +87,9 @@ const graphVisualizationButton: EuiButtonGroupOptionProps = {
  * Visualize view displayed in the document details expandable flyout left section
  */
 export const VisualizeTab = memo(() => {
-  const { getFieldsData, dataAsNestedObject, dataFormattedForFieldBrowser } =
-    useDocumentDetailsContext();
-  const panels = useExpandableFlyoutState();
+  const { searchHit } = useDocumentDetailsContext();
+  const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
+  const panels = useStableExpandableFlyoutState();
   const [activeVisualizationId, setActiveVisualizationId] = useState(
     panels.left?.path?.subTab ?? SESSION_VIEW_ID
   );
@@ -106,11 +107,7 @@ export const VisualizeTab = memo(() => {
   );
 
   // Decide whether to show the graph preview or not
-  const { shouldShowGraph, hasGraphData } = useGraphPreview({
-    getFieldsData,
-    ecsData: dataAsNestedObject,
-    dataFormattedForFieldBrowser,
-  });
+  const { shouldShowGraph, hasGraphData } = useGraphPreview({ hit });
 
   // Show upsell when event has graph data but license is insufficient (ESS only)
   const GraphVisualizationUpsell = useUpsellingComponent('graph_visualization');

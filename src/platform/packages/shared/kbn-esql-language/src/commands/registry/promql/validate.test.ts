@@ -164,19 +164,8 @@ describe('PROMQL Validation', () => {
       );
     });
 
-    test.each([
-      [
-        'unknown metric name reports unknown column',
-        'PROMQL index=timeseries_index step=5m start=?_tstart end=?_tend (rate(bytess[5m]))',
-        ['Unknown column "bytess"'],
-      ],
-      [
-        'unknown metric name without index reports unknown column',
-        'PROMQL step=5m (rate(bytes))',
-        ['Unknown column "bytes"'],
-      ],
-    ])('%s', (_title, query, expected) => {
-      promqlExpectErrors(query, expected);
+    test('unknown metric name does not report an error', () => {
+      promqlExpectErrors('PROMQL step=5m start=?_tstart end=?_tend (rate(unknown_metric[5m]))', []);
     });
 
     test('grouping is not allowed on non-aggregation functions', () => {

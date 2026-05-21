@@ -68,7 +68,6 @@ dependsOn:
   - '@kbn/react-kibana-mount'
   - '@kbn/logging'
   - '@kbn/presentation-publishing'
-  - '@kbn/presentation-panel-plugin'
   - '@kbn/content-management-table-list-view-common'
   - '@kbn/shared-ux-utility'
   - '@kbn/core-test-helpers-model-versions'
@@ -122,10 +121,12 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/as-code-shared-schemas'
   - '@kbn/as-code-shared-transforms'
-  - '@kbn/core-http-common'
-  - '@kbn/core-http-server-mocks'
   - '@kbn/core-http-browser'
   - '@kbn/lens-common'
+  - '@kbn/dashboard-navigation-options-common'
+  - '@kbn/dashboard-navigation-options-components'
+  - '@kbn/dashboard-navigation-options-schema'
+  - '@kbn/as-code-shared-telemetry'
 tags:
   - plugin
   - prod
@@ -135,7 +136,6 @@ tags:
 fileGroups:
   src:
     - '*.ts'
-    - .storybook/**/*.ts
     - common/**/*
     - public/**/*
     - server/**/*

@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DotKeysOf, DotObject } from '@kbn/utility-types';
-import type { StepPropertyHandler } from '@kbn/workflows';
+import type { EditorHandlers } from '@kbn/workflows/types/latest';
 import type { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../common';
 
@@ -49,47 +48,4 @@ export interface PublicStepDefinition<
    * Property handlers for the step.
    */
   editorHandlers?: EditorHandlers<Input, Output, Config>;
-}
-
-/**
- * Editor handlers type that maintains type safety while allowing variance
- */
-export interface EditorHandlers<
-  Input extends z.ZodType = z.ZodType,
-  Output extends z.ZodType = z.ZodType,
-  Config extends z.ZodObject = z.ZodObject
-> {
-  config?: EditorHandlersConfig<Config>;
-  input?: EditorHandlersInput<Input>;
-  dynamicSchema?: DynamicSchema<Input, Output, Config>;
-}
-
-export type EditorHandlersConfig<Config extends z.ZodObject = z.ZodObject> = {
-  [K in DotKeysOf<z.infer<Config>>]?: StepPropertyHandler<DotObject<z.infer<Config>>[K]>;
-};
-
-export type EditorHandlersInput<Input extends z.ZodType = z.ZodType> = Input extends z.ZodObject
-  ? {
-      [K in DotKeysOf<z.infer<Input>>]?: StepPropertyHandler<DotObject<z.infer<Input>>[K]>;
-    }
-  : {};
-
-/**
- * Dynamic schema handlers for a step
- */
-export interface DynamicSchema<
-  Input extends z.ZodType = z.ZodType,
-  Output extends z.ZodType = z.ZodType,
-  Config extends z.ZodObject = z.ZodObject
-> {
-  /**
-   * Dynamic Zod schema for validating step output based on input.
-   * Allows for more flexible output structure based on the specific input provided.
-   * @param input The input data for the step.
-   * @returns A Zod schema defining structure and validation rules for the output of the step.
-   */
-  getOutputSchema?(params: {
-    input: z.infer<Input>;
-    config: z.infer<Config>;
-  }): z.ZodType<z.infer<Output>>;
 }

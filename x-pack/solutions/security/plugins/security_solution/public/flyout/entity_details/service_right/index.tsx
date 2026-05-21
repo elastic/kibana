@@ -5,23 +5,25 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { noop } from 'lodash/fp';
 import { useEntityStoreEuidApi, FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
 import { EuiSpacer } from '@elastic/eui';
+import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import type { ESQuery } from '../../../../common/typed_json';
 import { buildEntityNameFilter, type RiskSeverity } from '../../../../common/search_strategy';
 import { useUiSetting } from '../../../common/lib/kibana';
 import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import type { Refetch } from '../../../common/types';
+import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
 import { useCalculateEntityRiskScore } from '../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { FlyoutLoading } from '../../shared/components/flyout_loading';
+import { FlyoutLoading } from '../../../flyout_v2/shared/components/flyout_loading';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { ServicePanelContent } from './content';
 import { ServicePanelHeader } from './header';
@@ -57,15 +59,15 @@ const FIRST_RECORD_PAGINATION = {
   querySize: 1,
 };
 
-export const ServicePanel = ({
+export const ServicePanel = memo(function ServicePanel({
   contextID,
   scopeId,
   entityId,
   serviceName,
   isPreviewMode = false,
-}: ServicePanelProps) => {
+}: ServicePanelProps) {
   const safeContextID = contextID ?? scopeId ?? 'service-panel';
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const serviceStoreIdentityFields = useMemo(
     () => (!entityId && serviceName ? { 'service.name': serviceName } : undefined),
     [entityId, serviceName]
@@ -118,6 +120,10 @@ export const ServicePanel = ({
     { onSuccess: refetchRiskScore }
   );
 
+  const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('service', {
+    onSuccess: calculateEntityRiskScore,
+  });
+
   useQueryInspector({
     deleteQuery,
     inspect,
@@ -129,6 +135,11 @@ export const ServicePanel = ({
 
   const entityStoreEntityId = entityStoreV2Enabled
     ? entityFromStoreResult.entityRecord?.entity?.id
+    : undefined;
+
+  const onCriticalitySave = entityFromStoreResult.entityRecord
+    ? (level: CriticalityLevelWithUnassigned) =>
+        updateAssetCriticalityLevel(level, entityFromStoreResult.entityRecord)
     : undefined;
 
   const openDetailsPanel = useNavigateToServiceDetails({
@@ -196,6 +207,7 @@ export const ServicePanel = ({
           <EntitySummaryGrid
             entityRecord={entityFromStoreResult.entityRecord}
             criticalityLevel={entityFromStoreResult.entityRecord?.asset?.criticality}
+            onCriticalitySave={onCriticalitySave}
           />
         )}
         {tabsNode}
@@ -220,6 +232,6 @@ export const ServicePanel = ({
       </FlyoutBody>
     </>
   );
-};
+});
 
 ServicePanel.displayName = 'ServicePanel';

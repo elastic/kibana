@@ -220,6 +220,25 @@ agentBuilderSetup.tools.register({
 });
 ```
 
+### Marking a tool as experimental
+
+Individual built-in tools (and other static tool registrations) can be flagged as experimental by setting `experimental: true` on the registration.
+Experimental tools are only visible and usable when the `agentBuilder:experimentalFeatures` uiSetting is enabled.
+
+**Example:**
+
+```ts
+agentBuilder.tools.register({
+  id: 'platform.experimental.my-tool',
+  type: ToolType.builtin,
+  description: 'An experimental tool only visible when experimental features are on',
+  tags: [],
+  schema: z.object({}),
+  experimental: true,
+  handler: async () => ({ results: [] }),
+});
+```
+
 ## Registering built-in agents
 
 ### Registering the agent
@@ -422,6 +441,12 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
     );
   },
 
+  // Optional: preferred width of the canvas flyout in full-screen context.
+  // Accepts any valid CSS width value (e.g. '600px', '40vw').
+  // Defaults to '50vw' when not specified. Has no effect in sidebar context
+  // or on narrow viewports (where the canvas always fills available width).
+  canvasWidth: '600px',
+
   // Expanded view rendered in the canvas flyout
   renderCanvasContent: ({ attachment }) => (
     <EuiCodeBlock fontSize="m" lineNumbers isCopyable>
@@ -490,6 +515,21 @@ The `getActionButtons` params include flags to customize behavior per viewport:
 - **`isCanvas`** - `true` when rendered in the canvas flyout (expanded view)
 - **`openCanvas`** - Callback to open canvas mode; `undefined` when already in canvas
 - **`openSidebarConversation`** - Callback to open the agent builder sidebar with the current conversation loaded; `undefined` when already in the sidebar
+
+#### Canvas flyout width
+
+By default the canvas flyout opens at `50vw` in full-screen context. You can override this per attachment type using the optional `canvasWidth` property on `AttachmentUIDefinition`:
+
+```ts
+export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
+  // ...
+  canvasWidth: '600px', // any valid CSS width value
+};
+```
+
+- Accepts any valid CSS width string: `'600px'`, `'40vw'`, `'80%'`, etc.
+- Has no effect in sidebar context — the canvas always fills available width there.
+- Has no effect on narrow viewports (below the `l` EUI breakpoint, ~992px) — the canvas switches to overlay mode and fills available width regardless of this setting.
 
 #### Opening the sidebar from attachments
 
@@ -754,62 +794,175 @@ const myAttachmentType: AttachmentTypeDefinition<'my_type', MyContent> = {
 
 Refer to [`AttachmentStaleCheckResult`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/stale_check.ts) for the result types returned by the stale check API.
 
-#### Attachment lifecycle hook: onAttachmentMount
+## Chat integration and pending attachments
 
-The `onAttachmentMount` lifecycle hook allows you to run side effects when an attachment is mounted to a conversation, and clean them up when the attachment is removed.
+Plugins can integrate with the active chat surface (the embeddable sidebar and the full-page routed chat) through the `agentBuilder` start contract.
 
-**When to use `onAttachmentMount`:**
+This is useful when the surrounding application wants to attach page context only under specific conditions, and react when the active chat binds to a new or existing conversation.
 
-- Setting up subscriptions that should live for the duration of the attachment's presence in the conversation
-- Syncing attachment state with external systems
-- Any side effect that needs cleanup when the attachment is removed
+A **pending attachment** is a client-only attachment attached to the active conversation that has not yet been persisted to a round; it lives in the chat UI until the user submits the next message, at which point it is sent with that round and persisted.
 
-**Important:** This hook is called once per attachment (not per version). The framework tracks attachment presence at the conversation level, so you don't need to handle deduplication.
+### `setChatConfig(...)`
 
-**Parameters:**
+> **Scope:** sidebar only.
+
+`setChatConfig(...)` configures the next sidebar open, or updates the active sidebar if it is already open.
+
+It supports the regular embeddable conversation props, including:
+
+- `newConversation` - force the sidebar to start a fresh conversation instead of restoring the persisted one
+- `attachments` - pre-populate the pending attachment list for the active sidebar conversation
+
+Use `clearChatConfig()` to remove that runtime configuration.
+
+#### `newConversation`
+
+Set `newConversation: true` when the sidebar must always bind to a fresh conversation:
 
 ```ts
-interface AttachmentLifecycleParams<TAttachment> {
-  /** The attachment instance */
-  attachment: TAttachment;
-  /** The conversation ID containing this attachment */
-  conversationId: string;
-  /** Whether the attachment is rendered in the sidebar context */
-  isSidebar: boolean;
+agentBuilder.setChatConfig({
+  newConversation: true,
+});
+```
+
+#### `attachments`
+
+Set `attachments` when you want the sidebar to open with one or more pending attachments already present:
+
+```ts
+agentBuilder.setChatConfig({
+  attachments: [
+    {
+      id: 'my-context',
+      type: 'my_type',
+      data: { ... },
+    },
+  ],
+});
+```
+
+### `addAttachment(...)`
+
+> **Scope:** sidebar only. If no sidebar is open, the call is silently ignored.
+
+`addAttachment(...)` adds or updates a pending attachment in the active sidebar conversation.
+
+```ts
+agentBuilder.addAttachment({
+  id: 'my-pending-context',
+  type: 'my_type',
+  data: { ... },
+  origin: 'saved-object-id',
+});
+```
+
+Pending attachments added through `agentBuilder.addAttachment(...)` can include an `origin` string, just like other attachment inputs sent to the Agent Builder APIs. Use this when your pending attachment already corresponds to a persistent resource (for example, a saved object-backed dashboard or visualization), and your attachment type expects `origin` to be present.
+
+## Events
+
+The `agentBuilder` start contract exposes observables on the `events.ui` namespace that let plugins react to the chat surface lifecycle (currently the active conversation binding).
+
+### Observing sidebar open state
+
+If you need to know whether the Agent Builder sidebar is currently open, subscribe to the core chrome sidebar primitive and match on the `agentBuilder` app id:
+
+```ts
+useEffect(() => {
+  const sub = chrome.sidebar.getCurrentAppId$().subscribe((appId) => {
+    const isOpen = appId === 'agentBuilder';
+    // react to the {isOpen} value
+  });
+
+  return () => sub.unsubscribe();
+}, [chrome.sidebar]);
+```
+
+### `events.ui.activeConversation$`
+
+Use `events.ui.activeConversation$` when you need to react to the conversation currently bound to the active chat surface.
+
+The non-null payload is:
+
+- `id?: string` - the currently bound conversation id, or `undefined` when the chat is currently bound to a new conversation
+- `conversation?: Conversation` - the fully loaded conversation when it has been successfully fetched (undefined for new conversations, while loading, or on fetch errors)
+
+```ts
+class MyPlugin {
+  private conversationSubscription?: Subscription;
+
+  start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
+    this.conversationSubscription = agentBuilder.events.ui.activeConversation$.subscribe((change) => {
+      if (!change) {
+        // No chat surface currently bound — tear down local state.
+        return;
+      }
+
+      const { id, conversation } = change;
+
+      if (!id) {
+        agentBuilder.addAttachment({
+          id: 'my-pending-context',
+          type: 'my_type',
+          data: { ... },
+        });
+        return;
+      }
+
+      const hasMyAttachment = conversation?.attachments?.some(
+        (attachment) => attachment.id === 'my-pending-context'
+      );
+
+      if (!hasMyAttachment) {
+        // Handle the switch away from the pending attachment in your plugin state.
+      }
+    });
+  }
+
+  stop() {
+    this.conversationSubscription?.unsubscribe();
+  }
 }
 ```
 
-**Example: Syncing attachment origin when a dashboard is saved**
+### Chat events: per-conversation streams
 
-```tsx
-export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
-  getLabel: () => 'My attachment',
-  getIcon: () => 'document',
+`events.chat$` exposes a hot observable of every chat event from every in-flight
+conversation. Concurrent per-conversation streams are now supported, so this stream
+interleaves events across conversations, and most event payloads do not carry a
+`conversation_id` you can filter on directly. **`chat$` is deprecated.**
 
-  onAttachmentMount: ({ attachment, conversationId }) => {
-    // Set up a subscription when the attachment is added
-    const subscription = someObservable$.subscribe((newValue) => {
-      if (newValue !== attachment.origin) {
-        // Update the attachment's origin using the plugin API
-        agentBuilder.updateAttachmentOrigin(conversationId, attachment.id, newValue);
-      }
-    });
+Use `events.getChatEvents$(conversationId)` instead. It returns a hot observable
+scoped to a single conversation — every event is tagged with the conversation that
+produced it, and the returned stream filters to the matching tag.
 
-    // Return cleanup function - called when the attachment is removed from the conversation
-    return () => {
-      subscription.unsubscribe();
-    };
-  },
+```ts
+// Before — works only when a single conversation streams at a time.
+agentBuilder.events.chat$
+  .pipe(filter(isRoundCompleteEvent))
+  .subscribe((event) => { ... });
 
-  // ... other definition properties
-};
+// After — scope to a known conversation id.
+agentBuilder.events
+  .getChatEvents$(conversationId)
+  .pipe(filter(isRoundCompleteEvent))
+  .subscribe((event) => { ... });
+
+// After — scope to whichever conversation the chat surface is currently focused on.
+agentBuilder.events.ui.activeConversation$
+  .pipe(
+    filter((c): c is ActiveConversation => c?.id != null),
+    switchMap((c) => agentBuilder.events.getChatEvents$(c.id!))
+  )
+  .subscribe((event) => { ... });
 ```
 
-**Cleanup behavior:**
+`switchMap` cancels the previous per-conversation subscription whenever the active
+conversation changes — e.g. when a consumer follows the user's focus.
 
-- The cleanup function is called when the attachment is removed from the conversation
-- It's also called when the conversation component unmounts (e.g., navigating away)
-- If `onAttachmentMount` returns `undefined` or `void`, no cleanup is performed
+All chat in Kibana is initiated through the agent_builder UI (sidebar, embeddable,
+or full-page chat), and the UI generates a client-side conversation UUID before
+each request. Plugins consuming this contract have access to that id via
+`events.ui.activeConversation$` and can pass it straight to `getChatEvents$`.
 
 ## Registering skills
 
@@ -903,7 +1056,7 @@ does; the skill tells it *when* to do it.
 
 ### Marking a skill as experimental
 
-Individual built-in skills can be flagged as experimental by setting `experimental: true` on their definition. 
+Individual built-in skills can be flagged as experimental by setting `experimental: true` on their definition.
 Experimental skills are only visible and usable when the `agentBuilder:experimentalFeatures` uiSetting is enabled.
 
 **Example:**
@@ -1134,6 +1287,12 @@ Return `undefined` if the item can no longer be resolved. The `sml_attach`
 tool will report a per-item error to the AI agent without failing the entire
 call.
 
+You may include an optional `description` string on the object returned from
+`toAttachment`. It is stored on the conversation
+attachment and shown in the Agent Builder UI (for example, the “Attachment
+added: …” line). If you omit it, a default label is derived from the SML
+document’s type and title.
+
 ##### `fetchFrequency` — Choose an appropriate interval
 
 - High-churn data (alerts, logs): `5m`–`10m`
@@ -1160,4 +1319,134 @@ setupDeps.agentBuilder.sml.registerType(visualizationSmlType);
 ```
 
 The full implementation is ~130 lines and serves as the reference for new types.
+
+## Streams lifecycle (frontend)
+
+The chat streaming layer lives across two folders:
+
+- `public/application/context/streaming/` — the lifted provider, its context hook, the
+  send/regenerate and resume mutation hooks, the chat-events subscriber, and shared types.
+- `public/application/hooks/` — the per-conversation convenience hook
+  (`use_conversation_stream.ts`) and the "any stream active?" derived hook
+  (`use_is_any_conversation_streaming.ts`). They live here because they compose
+  `useConversation` (a sibling in `hooks/`) with the streaming context.
+
+This section documents how mutations, lifted state, and the React Query cache fit
+together. Read this before touching any of: `streaming_context.tsx`,
+`use_send_message_mutation.ts`, `use_resume_round_mutation.ts`,
+`use_subscribe_to_chat_events.ts`, `use_conversation_stream.ts`,
+`use_is_any_conversation_streaming.ts`.
+
+### The lift
+
+`<StreamingProvider>` is mounted **once** above the routes/sidebar:
+
+- Routed app: in `mount.tsx`, above `<AgentBuilderRoutes>`. The sidebar is part of the
+  routes, so it can read streaming state directly.
+- Embeddable: in `embeddable_conversations_provider.tsx`, one provider per embeddable
+  instance because each instance has its own `QueryClient`.
+
+The sidebar uses `useStreamingContext()` directly. `useIsAnyConversationStreaming()`
+is derived from the same context and is used by the page-leave guard and the
+embeddable welcome-message dismiss — both genuinely care about "is anything in
+flight, anywhere?". Anything inside the conversation tree should use the per-conversation
+scoped hook, `useConversationStream()` (in `hooks/use_conversation_stream.ts`).
+
+
+### Lifted state
+
+`StreamingProvider` owns two slices with split lifecycles:
+
+- `activeStreams: Map<conversationId, { type, agentReasoning }>` — one entry per
+  in-flight stream. Set synchronously when each mutation kicks off; deleted in the
+  mutation's `finally`. Multiple entries can coexist — concurrent streams are
+  supported, one per conversation. Native `Map` rather than `Record` because the
+  same key shape pairs with the `Map<conversationId, AbortController>` ref each
+  mutation hook holds, and `cancelAllStreams` iterates this map's keys.
+- `byConversationId: Record<string, StreamRecord>` — per-conversation
+  `pendingMessage`, `error`, `errorSteps`. Persists across stream end so a user
+  can hit Retry after a failure. Mutated via immer; lifecycle is unrelated to
+  in-flight streams so it stayed a plain record.
+
+### Mutations: single-scope `mutationFn`
+
+`useSendMessageMutation` and `useResumeRoundMutation` use a **single-scope `mutationFn`
+with `try / catch / finally`**, not React Query's lifecycle methods (`onMutate`,
+`onSuccess`, `onError`, `onSettled`). The shape is:
+
+```ts
+mutationFn: async (vars) => {
+  // setup phase (sync, before any await): seed the optimistic round, set pending message.
+  // Note: `activeStream` is set by the provider's `mutateSendMessage` wrapper *before*
+  // `mutate()` returns — not here.
+  const streamActions = createConversationActions({ conversationId: vars.conversationId, ... });
+
+  try {
+    await subscribeToChatEvents({ events$, conversationActions: streamActions, ... });
+    // success cleanup
+  } catch (err) {
+    // error cleanup
+    throw err;
+  } finally {
+    // cleanup: invalidate cache (skipped if round paused on HITL),
+    // delete this conversation's `activeStreams` entry, delete its abort controller.
+  }
+}
+```
+
+Each mutation hook holds a `Map<conversationId, AbortController>` ref so concurrent
+streams have independent cancel signals. The map is keyed by `vars.conversationId`,
+the cancel helper takes the same key, and the `finally` block deletes only the
+entry it installed (compared by reference so a re-mutate's controller isn't
+clobbered).
+
+**Why not lifecycle methods?** Streams aren't typical mutations — the bulk of the work
+happens *during* `mutationFn`, with state mutations flowing for many seconds. Splitting
+the work across lifecycle callbacks forces you to bridge state between scopes via refs
+or React Query's `context` return — neither is clean for streaming. With single-scope,
+`streamActions` and `vars` are visible throughout. No refs to bridge phases. Reads
+top-to-bottom.
+
+### Each conversation owns its streaming lifecycle
+
+Every `mutationFn` invocation builds its **own** `streamActions` instance via
+`createConversationActions({ conversationId: vars.conversationId, ... })`. That instance
+is closure-bound to the mutation's conversation id. **Stream events target the
+conversation the mutation was started for, regardless of where the user has navigated.**
+
+If the user submits on conversation A and immediately switches to B, the stream events
+keep writing to A's cache. B loads cleanly from the server.
+
+### Per-conversation `useConversation` gate
+
+`useConversation` is disabled for a conversation when (a) a stream is currently writing
+to its cache, or (b) the cache shows it's paused on a HITL prompt. The cache is
+authoritative in both cases, so a refetch would race with optimistic chunks (streaming)
+or with the resume mutation about to fire on Approve (HITL). Other conversations stay
+free to refetch — switch to conversation B while A streams and B loads cleanly. See the
+inline comment on the `enabled` predicate for details.
+
+### Concurrent streams
+
+The app supports concurrent per-conversation streams. Submitting on conversation B
+while A is mid-stream starts a second stream alongside A — A keeps writing to its
+cache, B writes to its own. Cancelling one doesn't affect the other.
+
+What this means in practice:
+
+- **Submit gate** (`conversation_input.tsx`) is per-conversation: `isResponseLoading`
+  from `useConversationStream()`. The new-conversation route (`/conversations/new`) has
+  no `conversationId`, so `isResponseLoading` is `false` and submit is always
+  allowed there even while other conversations stream.
+- **HITL Approve / Cancel gate** (`round_layout.tsx`) is per-conversation:
+  `isResponseLoading && !isResuming`. Other in-flight conversations cannot
+  corrupt this conversation's cache because `streamActions` are closure-bound
+  to `vars.conversationId`.
+- **Per-conversation cancel** is wired through `cancelStream(id)` on the context.
+  The mutation hooks hold `Map<conversationId, AbortController>` refs so cancels
+  hit only the targeted controller.
+- **Page-leave guard** is the lone remaining global check. If any stream is in
+  flight when the user navigates away, a confirm dialog appears; on confirm,
+  `cancelAllStreams()` aborts every controller in the map before the platform
+  proceeds.
 

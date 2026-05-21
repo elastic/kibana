@@ -24,7 +24,7 @@ import type {
   DataLayerType,
   ReferenceLineLayerType,
   AnnotationLayerByValueType,
-  XYState,
+  XYConfig,
 } from '../../../schema/charts/xy';
 import { addLayerColumn, generateLayer } from '../../utils';
 import {
@@ -39,7 +39,7 @@ import {
 } from './helpers';
 import { fromMetricAPItoLensState } from '../../columns/metric';
 import { fromBucketLensApiToLensState } from '../../columns/buckets';
-import { fromColorMappingAPIToLensState } from '../../coloring';
+import { fromColorMappingAPIToLensState, isAutoColor } from '../../coloring';
 import { processMetricColumnsWithReferences } from '../utils';
 
 const X_ACCESSOR = 'x';
@@ -78,22 +78,22 @@ export function getValueColumns(
   ];
 }
 
-function buildDataLayer(config: XYState, layer: DataLayerType, i: number): XYDataLayerConfig {
+function buildDataLayer(config: XYConfig, layer: DataLayerType, i: number): XYDataLayerConfig {
   const seriesTypeLabel = (
     layer.type.includes('percentage') ? `${layer.type}_stacked` : layer.type
   ) as SeriesType;
 
   const yConfig = layer.y.map<YConfig>((yMetric, index) => {
-    const axisId = yMetric?.axis_id ?? 'y';
-    const anchor = config.axis?.[axisId]?.anchor ?? (axisId === 'secondary_y' ? 'end' : 'start');
-    const axisMode = anchor === 'end' ? 'right' : 'left';
+    const onAxis = yMetric?.axis ?? 'y';
+    const axisMode = onAxis === 'y2' ? 'right' : 'left';
     return {
-      ...(yMetric.color?.color ? { color: yMetric.color?.color } : {}),
+      ...(yMetric.color && !isAutoColor(yMetric.color) ? { color: yMetric.color?.color } : {}),
       axisMode,
       forAccessor: getAccessorNameForXY(layer, METRIC_ACCESSOR_PREFIX, index),
     };
   });
   const meaningFulYConfig = yConfig.filter((y) => Object.values(y).length > 1);
+
   return {
     layerId: getIdForLayer(layer, i),
     accessors: yConfig.map(({ forAccessor }) => forAccessor),
@@ -134,7 +134,9 @@ function buildByValueAnnotationLayer(
             endTimestamp: String(annotation.interval.to),
           },
           outside: annotation.fill === 'outside',
-          color: annotation.color?.color,
+          ...(annotation.color && !isAutoColor(annotation.color)
+            ? { color: annotation.color.color }
+            : {}),
           label: annotation.label ?? 'Event',
           ...(annotation.visible != null ? { isHidden: !annotation.visible } : {}),
         };
@@ -147,7 +149,9 @@ function buildByValueAnnotationLayer(
             type: 'point_in_time',
             timestamp: String(annotation.timestamp),
           },
-          color: annotation.color?.color,
+          ...(annotation.color && !isAutoColor(annotation.color)
+            ? { color: annotation.color.color }
+            : {}),
           label: annotation.label ?? 'Event',
           ...(annotation.visible != null ? { isHidden: !annotation.visible } : {}),
           ...(annotation.text?.visible != null ? { textVisibility: annotation.text.visible } : {}),
@@ -167,7 +171,9 @@ function buildByValueAnnotationLayer(
           language: toLensStateFilterLanguage(annotation.query.language),
         },
         label: annotation.label ?? 'Event',
-        color: annotation.color?.color,
+        ...(annotation.color && !isAutoColor(annotation.color)
+          ? { color: annotation.color.color }
+          : {}),
         ...(annotation.visible != null ? { isHidden: !annotation.visible } : {}),
         timeField: annotation.time_field,
         ...(annotation.extra_fields ? { extraFields: annotation.extra_fields } : {}),
@@ -191,8 +197,7 @@ function buildReferenceLineLayer(
   i: number
 ): XYReferenceLineLayerConfig {
   const yConfig = layer.thresholds.map<YConfig>((threshold, index) => {
-    const axisMode =
-      threshold.axis_id === 'secondary_y' ? 'right' : threshold.axis_id === 'x' ? 'bottom' : 'left';
+    const axisMode = threshold.axis === 'y2' ? 'right' : threshold.axis === 'x' ? 'bottom' : 'left';
     return {
       icon: xyIconCompat.toState(threshold.icon),
       iconPosition: threshold.position,
@@ -200,7 +205,7 @@ function buildReferenceLineLayer(
       lineStyle: threshold.stroke_dash,
       textVisibility: threshold.text?.visible,
       fill: threshold.fill,
-      color: threshold.color?.color,
+      ...(threshold.color && !isAutoColor(threshold.color) ? { color: threshold.color.color } : {}),
       axisMode,
       forAccessor: getAccessorNameForXY(layer, REFERENCE_LINE_ACCESSOR_PREFIX, index),
     };
@@ -214,7 +219,7 @@ function buildReferenceLineLayer(
 }
 
 export function buildXYLayer(
-  config: XYState,
+  config: XYConfig,
   layer: unknown,
   i: number,
   dataViewId: string,

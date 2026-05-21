@@ -12,6 +12,10 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 
 export class ConnectorExecutor {
+  // The lifespan of this cache is one workflow execution, then it gets destroyed
+  // the probability of connectors change is pretty low in this span so it should be acceptable
+  private allConnectorsCache: Map<string, ConnectorWithExtraFindData> | undefined;
+
   constructor(private actionsClient: ActionsClient) {}
 
   // Execute a regular connector with a saved object. It will resolve the connector ID from saved objects.
@@ -82,6 +86,13 @@ export class ConnectorExecutor {
   }
 
   private async resolveConnectorId(connectorNameOrId: string): Promise<string> {
+    if (this.allConnectorsCache) {
+      const connector = this.allConnectorsCache.get(connectorNameOrId);
+      if (connector) {
+        return connector.id;
+      }
+    }
+
     // Prefer direct ID lookup: try to fetch by ID first, which is unambiguous
     try {
       const connector = await this.actionsClient.get({ id: connectorNameOrId });
@@ -90,8 +101,13 @@ export class ConnectorExecutor {
       // Not found by ID -- fall through to name-based lookup
     }
 
-    const allConnectors = await this.actionsClient.getAll();
-    const connectors = allConnectors.filter(
+    if (!this.allConnectorsCache) {
+      const allConnectors = await this.actionsClient.getAll();
+      this.allConnectorsCache = new Map(
+        allConnectors.map((connector) => [connector.id, connector])
+      );
+    }
+    const connectors = Array.from(this.allConnectorsCache.values()).filter(
       (c: ConnectorWithExtraFindData) => c.name === connectorNameOrId
     );
 

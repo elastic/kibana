@@ -19,3 +19,7 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { WorkflowsServerPluginSetup, WorkflowsServerPluginStart } from './types';
+export type {
+  BulkScheduleWorkflowItem,
+  WorkflowsManagementApi,
+} from './api/workflows_management_api';

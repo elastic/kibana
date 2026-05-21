@@ -197,7 +197,7 @@ describe('test getDataStateContainer', () => {
 
       jest
         .spyOn(scopedProfilesManager$.getValue(), 'resolveDataSourceProfile')
-        .mockResolvedValue({ didProfileChange: true });
+        .mockResolvedValue({ didProfileChange: true, isFirstResolution: true });
 
       toolkit.internalState.dispatch(
         internalStateActions.assignNextDataView({
@@ -269,7 +269,7 @@ describe('test getDataStateContainer', () => {
       jest.spyOn(scopedProfilesManager, 'resolveDataSourceProfile').mockImplementation(async () => {
         currentContexts = incomingContexts;
 
-        return { didProfileChange: true };
+        return { didProfileChange: true, isFirstResolution: false };
       });
 
       toolkit.internalState.dispatch(
@@ -383,6 +383,87 @@ describe('test getDataStateContainer', () => {
       stateContainer.internalState.dispatch(
         stateContainer.injectCurrentTab(internalStateActions.stopSyncing)()
       );
+    });
+
+    it('should fall back to shared layout state when switching to a new profile without layout overrides', async () => {
+      const services = createDiscoverServicesMock();
+      services.storage.get = jest.fn((key: string) => {
+        if (key === 'discover:chartHidden') {
+          return true;
+        }
+
+        if (key === 'discover:tableHidden') {
+          return false;
+        }
+
+        return undefined;
+      });
+
+      const toolkit = getDiscoverInternalStateMock({ services });
+
+      await toolkit.initializeTabs();
+
+      const tabId = toolkit.getCurrentTab().id;
+      const fetchDocumentsDeferred = Promise.withResolvers<{ records: never[] }>();
+
+      mockFetchDocuments.mockImplementation(() => fetchDocumentsDeferred.promise);
+
+      const { scopedProfilesManager$ } = selectTabRuntimeState(toolkit.runtimeStateManager, tabId);
+      const scopedProfilesManager = scopedProfilesManager$.getValue();
+      const initialContexts = scopedProfilesManager.getContexts();
+      const incomingContexts = {
+        ...initialContexts,
+        dataSourceContext: {
+          ...initialContexts.dataSourceContext,
+          profileId: 'incoming-profile-id',
+        },
+      };
+      let currentContexts = initialContexts;
+
+      jest.spyOn(scopedProfilesManager, 'getContexts').mockImplementation(() => currentContexts);
+      const resolveDataSourceProfileSpy = jest
+        .spyOn(scopedProfilesManager, 'resolveDataSourceProfile')
+        .mockImplementation(async () => {
+          currentContexts = incomingContexts;
+
+          return { didProfileChange: true, isFirstResolution: false };
+        });
+
+      toolkit.internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId,
+          appState: {
+            hideChart: false,
+            hideTable: false,
+          },
+        })
+      );
+      toolkit.internalState.dispatch(
+        internalStateActions.setProfileStateFieldsToReset({
+          tabId,
+          fieldsToReset: 'none',
+        })
+      );
+
+      await toolkit.initializeSingleTab({
+        tabId,
+        skipWaitForDataFetching: true,
+      });
+
+      await waitFor(() => {
+        expect(resolveDataSourceProfileSpy).toHaveBeenCalled();
+        expect(toolkit.getCurrentTab().appState.hideChart).toBe(true);
+        expect(toolkit.getCurrentTab().appState.hideTable).toBe(false);
+      });
+
+      fetchDocumentsDeferred.resolve({ records: [] });
+      await toolkit.waitForDataFetching({ tabId });
+
+      expect(toolkit.getCurrentTab().defaultProfileState.fieldsToReset).toEqual('none');
+      expect(toolkit.getCurrentTab().appState.columns).toEqual(['default_column']);
+      expect(toolkit.getCurrentTab().appState.hideChart).toBe(true);
+      expect(toolkit.getCurrentTab().appState.hideTable).toBe(false);
+      expect(toolkit.getCurrentTab().appState.rowHeight).toBeUndefined();
     });
 
     it('should not update app state from default profile state', async () => {

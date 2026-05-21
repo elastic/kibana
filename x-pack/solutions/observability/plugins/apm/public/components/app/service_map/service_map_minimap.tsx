@@ -10,9 +10,9 @@ import { MiniMap } from '@xyflow/react';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { getSeverityColor } from '../../../../common/anomaly_detection';
 import type { ServiceMapNode } from '../../../../common/service_map';
 import { isServiceNodeData } from '../../../../common/service_map';
-import { getServiceHealthStatusColor } from '../../../../common/service_health_status';
 
 export function ServiceMapMinimap() {
   const { euiTheme } = useEuiTheme();
@@ -20,9 +20,9 @@ export function ServiceMapMinimap() {
   const nodeColor = useCallback(
     (node: ServiceMapNode) => {
       if (isServiceNodeData(node.data)) {
-        const { healthStatus } = node.data.serviceAnomalyStats ?? {};
-        if (healthStatus) {
-          return getServiceHealthStatusColor(euiTheme, healthStatus);
+        const { anomalyScore } = node.data.serviceAnomalyStats ?? {};
+        if (anomalyScore !== undefined) {
+          return getSeverityColor(anomalyScore);
         }
         return euiTheme.colors.primary;
       }

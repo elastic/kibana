@@ -123,6 +123,10 @@ describe('metric visualization', () => {
       expect(visualization.initialize(() => 'some-id')).toEqual({
         layerId: 'some-id',
         layerType: LayerTypes.DATA,
+        titlesTextAlign: 'left',
+        primaryPosition: 'bottom',
+        primaryAlign: 'right',
+        secondaryAlign: 'right',
       });
     });
 
@@ -972,7 +976,6 @@ describe('metric visualization', () => {
               "metric": Array [
                 "metric-col-id",
               ],
-              "palette": Array [],
               "primaryAlign": Array [
                 "right",
               ],

@@ -33,6 +33,7 @@ export const EPM_API_ROUTES = {
   BULK_UNINSTALL_INFO_PATTERN: `${EPM_PACKAGES_MANY}/_bulk_uninstall/{taskId}`,
   BULK_ROLLBACK_PATTERN: `${EPM_PACKAGES_MANY}/_bulk_rollback`,
   BULK_ROLLBACK_INFO_PATTERN: `${EPM_PACKAGES_MANY}/_bulk_rollback/{taskId}`,
+  BULK_NAMESPACE_CUSTOMIZATION_PATTERN: `${EPM_PACKAGES_MANY}/_bulk_namespace_customization`,
   LIST_PATTERN: EPM_PACKAGES_MANY,
   INSTALLED_LIST_PATTERN: EPM_PACKAGES_INSTALLED,
   LIMITED_LIST_PATTERN: `${EPM_PACKAGES_MANY}/limited`,
@@ -181,6 +182,8 @@ export const AGENT_API_ROUTES = {
   CANCEL_ACTIONS_PATTERN: `${API_ROOT}/agents/actions/{actionId}/cancel`,
   UNENROLL_PATTERN: `${API_ROOT}/agents/{agentId}/unenroll`,
   BULK_UNENROLL_PATTERN: `${API_ROOT}/agents/bulk_unenroll`,
+  REMOVE_COLLECTOR_PATTERN: `${API_ROOT}/agents/{agentId}/remove_collector`,
+  BULK_REMOVE_COLLECTORS_PATTERN: `${API_ROOT}/agents/bulk_remove_collectors`,
   REASSIGN_PATTERN: `${API_ROOT}/agents/{agentId}/reassign`,
   BULK_REASSIGN_PATTERN: `${API_ROOT}/agents/bulk_reassign`,
   REQUEST_DIAGNOSTICS_PATTERN: `${API_ROOT}/agents/{agentId}/request_diagnostics`,
@@ -213,6 +216,7 @@ export const ENROLLMENT_API_KEY_ROUTES = {
   LIST_PATTERN: `${API_ROOT}/enrollment_api_keys`,
   INFO_PATTERN: `${API_ROOT}/enrollment_api_keys/{keyId}`,
   DELETE_PATTERN: `${API_ROOT}/enrollment_api_keys/{keyId}`,
+  BULK_DELETE_PATTERN: `${API_ROOT}/enrollment_api_keys/_bulk_delete`,
 };
 
 export const UNINSTALL_TOKEN_ROUTES = {

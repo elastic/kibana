@@ -19,12 +19,17 @@ export const allowedExperimentalValues = Object.freeze({
    *   - Introduces search input and users filter
    *   - Introduces scheduled responses support
    */
-  queryHistoryRework: false,
+  queryHistoryRework: true,
   /**
    * Replaces the legacy EuiDataGrid results table with UnifiedDataTable,
    * adding KQL search, document flyout, per-row actions, and column curation.
    */
-  unifiedDataTable: false,
+  unifiedDataTable: true,
+  /**
+   * Enables the "Export Results" button and server-side streaming export endpoints
+   * for downloading osquery results as NDJSON, JSON, or CSV files.
+   */
+  exportResults: false,
 });
 
 type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };

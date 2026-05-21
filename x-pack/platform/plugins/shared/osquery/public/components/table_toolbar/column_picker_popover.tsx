@@ -17,6 +17,10 @@ const COLUMNS_LABEL = i18n.translate('xpack.osquery.tableToolbar.columnsLabel', 
   defaultMessage: 'Columns',
 });
 
+const LIST_PROPS = {
+  paddingSize: 's' as const,
+};
+
 export interface ColumnConfig {
   id: string;
   label: string;
@@ -87,8 +91,14 @@ const ColumnPickerPopoverComponent: React.FC<ColumnPickerPopoverProps> = ({
       panelPaddingSize="none"
       repositionOnScroll
       panelProps={panelProps}
+      aria-label={COLUMNS_LABEL}
     >
-      <EuiSelectable aria-label={COLUMNS_LABEL} options={selectableOptions} onChange={handleChange}>
+      <EuiSelectable
+        aria-label={COLUMNS_LABEL}
+        options={selectableOptions}
+        listProps={LIST_PROPS}
+        onChange={handleChange}
+      >
         {(list) => (
           <div style={POPOVER_CONTENT_STYLE}>
             <EuiPopoverTitle paddingSize="s">{COLUMNS_LABEL}</EuiPopoverTitle>

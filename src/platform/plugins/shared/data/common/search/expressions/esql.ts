@@ -28,6 +28,7 @@ import {
   mapVariableToColumn,
   isComputedColumn,
   getQuerySummary,
+  buildRenameSourceFieldMap,
 } from '@kbn/esql-utils';
 import { zipObject } from 'lodash';
 import type { Observable } from 'rxjs';
@@ -157,7 +158,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
     fn(
       input,
       { query, timeField, locale, titleForInspector, descriptionForInspector, ignoreGlobalFilters },
-      { abortSignal, inspectorAdapters, getKibanaRequest, getSearchSessionId }
+      { abortSignal, inspectorAdapters, getKibanaRequest, getSearchSessionId, getExecutionContext }
     ) {
       return defer(() =>
         getStartDependencies(() => {
@@ -225,7 +226,8 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               ...(delayFilter ? [delayFilter] : []),
             ];
 
-            params.filter = buildEsQuery(undefined, input.query || [], filters, esQueryConfigs);
+            const inputQuery = ignoreGlobalFilters ? [] : input.query || [];
+            params.filter = buildEsQuery(undefined, inputQuery, filters, esQueryConfigs);
           }
 
           let startTime = Date.now();
@@ -253,7 +255,6 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
 
             return request;
           };
-
           return search<
             IKibanaSearchRequest<ESQLSearchParams>,
             IKibanaSearchResponse<ESQLSearchResponse>
@@ -264,6 +265,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               strategy: ESQL_ASYNC_SEARCH_STRATEGY,
               sessionId: getSearchSessionId(),
               projectRouting: input?.projectRouting,
+              executionContext: getExecutionContext(),
             }
           ).pipe(
             catchError((error) => {
@@ -368,6 +370,11 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           // Get query summary to identify computed columns
           const querySummary = getQuerySummary(query);
 
+          const renameSourceFieldMap: Map<string, string> | null = querySummary.renamedColumnsPairs
+            ?.size
+            ? buildRenameSourceFieldMap(query)
+            : null;
+
           const allColumns =
             (body.all_columns ?? body.columns)?.map(({ name, type, original_types }) => {
               const originalTypes = original_types ?? [];
@@ -375,6 +382,9 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               const kibanaFieldType = hasConflict
                 ? KBN_FIELD_TYPES.CONFLICT
                 : esFieldTypeToKibanaFieldType(type);
+
+              const sourceField = renameSourceFieldMap?.get(name) ?? name;
+
               return {
                 id: name,
                 name,
@@ -387,11 +397,11 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                           appliedTimeRange,
                           params: {},
                           indexPattern,
-                          sourceField: name,
+                          sourceField,
                         }
                       : {
                           indexPattern,
-                          sourceField: name,
+                          sourceField,
                         },
                   params: {
                     id: kibanaFieldType,

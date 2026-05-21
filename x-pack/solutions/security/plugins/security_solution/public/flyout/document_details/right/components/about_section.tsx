@@ -13,33 +13,30 @@ import {
   type EsHitRecord,
   getFieldValue,
 } from '@kbn/discover-utils';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { FLYOUT_STORAGE_KEYS } from '../../../../flyout_v2/document/constants/local_storage';
+import { FLYOUT_STORAGE_KEYS } from '../../../../flyout_v2/document/main/constants/local_storage';
 import { ExpandableSection } from '../../../../flyout_v2/shared/components/expandable_section';
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { RULE_PREVIEW_BANNER, RulePreviewPanelKey } from '../../../rule_details/right';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { DocumentDetailsAlertReasonPanelKey } from '../../shared/constants/panel_keys';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
-import { EventKind } from '../../../../flyout_v2/document/constants/event_kinds';
+import { EventKind } from '../../../../flyout_v2/document/main/constants/event_kinds';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { isEcsAllowedValue } from '../../../../flyout_v2/document/utils/event_utils';
-import { EventCategoryDescription } from '../../../../flyout_v2/document/components/event_category_description';
-import { EventKindDescription } from '../../../../flyout_v2/document/components/event_kind_description';
-import { EventRenderer } from '../../../../flyout_v2/document/components/event_renderer';
+import { isEcsAllowedValue } from '../../../../flyout_v2/document/main/utils/event_utils';
+import { EventCategoryDescription } from '../../../../flyout_v2/document/main/components/event_category_description';
+import { EventKindDescription } from '../../../../flyout_v2/document/main/components/event_kind_description';
+import { EventRenderer } from '../../../../flyout_v2/document/main/components/event_renderer';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
-import { AlertDescription } from '../../../../flyout_v2/document/components/alert_description';
+import { AlertDescription } from '../../../../flyout_v2/document/main/components/alert_description';
 import {
   ABOUT_SECTION_TEST_ID,
   ABOUT_SECTION_TITLE,
-} from '../../../../flyout_v2/document/components/about_section';
-import { AlertStatus } from '../../../../flyout_v2/document/components/alert_status';
-import {
-  ALERT_REASON_BANNER,
-  AlertReason,
-} from '../../../../flyout_v2/document/components/alert_reason';
-import { MitreAttack } from '../../../../flyout_v2/document/components/mitre_attack';
+} from '../../../../flyout_v2/document/main/components/about_section';
+import { AlertStatus } from '../../../../flyout_v2/document/main/components/alert_status';
+import { AlertReason } from '../../../../flyout_v2/document/main/components/alert_reason';
+import { MitreAttack } from '../../../../flyout_v2/document/main/components/mitre_attack';
 
 const KEY = 'about';
 
@@ -54,7 +51,6 @@ export const AboutSection = memo(() => {
   const {
     dataAsNestedObject,
     dataFormattedForFieldBrowser,
-    eventId,
     indexName,
     isRulePreview,
     scopeId,
@@ -70,6 +66,8 @@ export const AboutSection = memo(() => {
     [searchHit]
   );
 
+  const isRemoteDocument = useMemo(() => isNonLocalIndexName(indexName), [indexName]);
+
   const eventKind = useMemo(() => getFieldValue(hit, 'event.kind') as string, [hit]);
   const eventKindInECS = eventKind && isEcsAllowedValue('event.kind', eventKind);
 
@@ -79,8 +77,11 @@ export const AboutSection = memo(() => {
     defaultValue: true,
   });
 
-  const ruleSummaryDisabled =
-    isEmpty(ruleName) || isEmpty(ruleId) || isRulePreview || !canReadRules;
+  const ruleSummaryDisabled = useMemo(
+    () =>
+      isEmpty(ruleName) || isEmpty(ruleId) || isRulePreview || !canReadRules || isRemoteDocument,
+    [canReadRules, isRemoteDocument, isRulePreview, ruleId, ruleName]
+  );
 
   const openRulePreview = useCallback(() => {
     openPreviewPanel({
@@ -97,22 +98,6 @@ export const AboutSection = memo(() => {
     });
   }, [openPreviewPanel, scopeId, ruleId, telemetry]);
 
-  const openAlertReasonPreview = useCallback(() => {
-    openPreviewPanel({
-      id: DocumentDetailsAlertReasonPanelKey,
-      params: {
-        id: eventId,
-        indexName,
-        scopeId,
-        banner: ALERT_REASON_BANNER,
-      },
-    });
-    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-      location: scopeId,
-      panel: 'preview',
-    });
-  }, [eventId, indexName, openPreviewPanel, scopeId, telemetry]);
-
   const content =
     eventKind === EventKind.signal ? (
       <>
@@ -121,7 +106,7 @@ export const AboutSection = memo(() => {
           onShowRuleSummary={openRulePreview}
           ruleSummaryDisabled={ruleSummaryDisabled}
         />
-        <AlertReason hit={hit} onShowFullReason={openAlertReasonPreview} />
+        <AlertReason hit={hit} />
         <MitreAttack hit={hit} />
         <AlertStatus hit={hit} />
       </>
@@ -145,7 +130,7 @@ export const AboutSection = memo(() => {
       title={ABOUT_SECTION_TITLE}
       localStorageKey={FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS}
       sectionId={KEY}
-      gutterSize="s"
+      gutterSize="none"
       data-test-subj={ABOUT_SECTION_TEST_ID}
     >
       {content}
