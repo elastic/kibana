@@ -6,11 +6,9 @@
  */
 
 import type { CriteriaWithPagination } from '@elastic/eui';
-import { useDebouncedValue } from '@kbn/react-hooks';
 import { useIsMutating, useMutation } from '@kbn/react-query';
-import { COMPUTED_FEATURE_TYPES, isComputedFeature } from '@kbn/streams-schema';
+import { isComputedFeature } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
-import type React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useFetchKnowledgeIndicators } from '../../../../../hooks/sig_events/use_fetch_knowledge_indicators';
 import { useKnowledgeIndicatorsBulkDelete } from '../../../../../hooks/sig_events/use_knowledge_indicators_bulk_delete';
@@ -20,17 +18,12 @@ import { useKibana } from '../../../../../hooks/use_kibana';
 import { getFormattedError } from '../../../../../util/errors';
 import { KI_ROW_ACTION_MUTATION_KEY } from '../../../stream_detail_significant_events_view/hooks/use_knowledge_indicator_actions';
 import { getKnowledgeIndicatorItemId } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_item_id';
-import { getKnowledgeIndicatorStreamName } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_stream_name';
-import { getKnowledgeIndicatorSubtype } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_subtype';
 import { matchesKnowledgeIndicatorFilters } from '../../../stream_detail_significant_events_view/utils/matches_knowledge_indicator_filters';
-import { getKnowledgeIndicatorType } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_type';
 import {
   BULK_PROMOTE_SUCCESS_TOAST_TITLE,
   BULK_PROMOTE_ERROR_TITLE,
 } from './translations';
-
-const SEARCH_DEBOUNCE_MS = 300;
-const COMPUTED_FEATURE_TYPES_SET = new Set<string>(COMPUTED_FEATURE_TYPES);
+import { useKnowledgeIndicatorsUrlState } from './use_knowledge_indicators_url_state';
 
 export const getKnowledgeIndicatorTitle = (ki: KnowledgeIndicator): string =>
   ki.kind === 'feature' ? ki.feature.title ?? ki.feature.id : ki.query.title ?? ki.query.id;
@@ -47,18 +40,6 @@ export function useKnowledgeIndicatorsTable() {
   const { promote } = useQueriesApi();
   const invalidatePromoteRelatedQueries = useInvalidatePromoteRelatedQueries();
 
-  const [tableSearchValue, setTableSearchValue] = useState('');
-  const debouncedSearchTerm = useDebouncedValue(tableSearchValue, SEARCH_DEBOUNCE_MS)
-    .trim()
-    .toLowerCase();
-  const [statusFilter, setStatusFilter] = useState<'active' | 'excluded'>('active');
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
-  const [selectedSubtypes, setSelectedSubtypes] = useState<string[]>([]);
-  const [selectedStreams, setSelectedStreams] = useState<string[]>([]);
-  const [hideComputedTypes, setHideComputedTypes] = useState(true);
-
-  const [selectedKnowledgeIndicator, setSelectedKnowledgeIndicator] =
-    useState<KnowledgeIndicator | null>(null);
   const [selectedKnowledgeIndicators, setSelectedKnowledgeIndicators] = useState<
     KnowledgeIndicator[]
   >([]);
@@ -66,6 +47,34 @@ export function useKnowledgeIndicatorsTable() {
     KnowledgeIndicator[]
   >([]);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 25 });
+
+  const resetPagination = useCallback(() => {
+    setPagination((current) => {
+      if (current.pageIndex === 0) return current;
+      return { ...current, pageIndex: 0 };
+    });
+  }, []);
+
+  const clearSelection = useCallback(() => {
+    setSelectedKnowledgeIndicators([]);
+  }, []);
+
+  const urlState = useKnowledgeIndicatorsUrlState({
+    knowledgeIndicators,
+    isLoading,
+    resetPagination,
+    clearSelection,
+  });
+
+  const {
+    debouncedSearchTerm,
+    statusFilter,
+    selectedTypes,
+    selectedSubtypes,
+    selectedStreams,
+    hideComputedTypes,
+    closeFlyout,
+  } = urlState;
 
   const { deleteKnowledgeIndicatorsInBulk, isDeleting } = useKnowledgeIndicatorsBulkDelete({
     onSuccess: () => {
@@ -77,83 +86,17 @@ export function useKnowledgeIndicatorsTable() {
 
   const isRowActionInProgress = useIsMutating({ mutationKey: KI_ROW_ACTION_MUTATION_KEY }) > 0;
 
-  const selectedKnowledgeIndicatorId = selectedKnowledgeIndicator
-    ? getKnowledgeIndicatorItemId(selectedKnowledgeIndicator)
-    : undefined;
-
-  // Prune flyout and checkbox selections when items disappear from the data
-  // (e.g. after deletion or external refetch). Only depends on the raw data
-  // array — filter changes don't invalidate selections.
+  // Prune checkbox selections when items disappear from the data (e.g. after
+  // deletion or external refetch). The flyout is driven purely from the URL so
+  // it does not need explicit pruning here.
   useEffect(() => {
     const validIds = new Set(knowledgeIndicators.map(getKnowledgeIndicatorItemId));
-
-    setSelectedKnowledgeIndicator((current) => {
-      if (!current) return current;
-      return validIds.has(getKnowledgeIndicatorItemId(current)) ? current : null;
-    });
 
     setSelectedKnowledgeIndicators((current) => {
       const pruned = current.filter((ki) => validIds.has(getKnowledgeIndicatorItemId(ki)));
       return pruned.length === current.length ? current : pruned;
     });
   }, [knowledgeIndicators]);
-
-  // Cross-filter pruning: when one filter changes, the other filters' selected
-  // values may no longer have any matching KIs. For example, if the user selects
-  // type "keyword" and stream "logs", then changes status to "excluded" where no
-  // "keyword" KIs exist, the type filter should drop "keyword" automatically.
-  // Each filter dimension is computed independently of its own current selection
-  // but *with* the other filters applied.
-  useEffect(() => {
-    const availableTypes = new Set<string>();
-    const availableSubtypes = new Set<string>();
-    const availableStreams = new Set<string>();
-
-    for (const ki of knowledgeIndicators) {
-      if (
-        matchesKnowledgeIndicatorFilters(ki, {
-          statusFilter,
-          selectedStreams,
-          hideComputedTypes,
-        })
-      ) {
-        availableTypes.add(getKnowledgeIndicatorType(ki));
-      }
-      if (
-        matchesKnowledgeIndicatorFilters(ki, {
-          statusFilter,
-          selectedTypes,
-          selectedStreams,
-          hideComputedTypes,
-        })
-      ) {
-        const subtype = getKnowledgeIndicatorSubtype(ki);
-        if (subtype) availableSubtypes.add(subtype);
-      }
-      if (
-        matchesKnowledgeIndicatorFilters(ki, {
-          statusFilter,
-          selectedTypes,
-          hideComputedTypes,
-        })
-      ) {
-        availableStreams.add(getKnowledgeIndicatorStreamName(ki));
-      }
-    }
-
-    setSelectedTypes((current) => {
-      const pruned = current.filter((t) => availableTypes.has(t));
-      return pruned.length === current.length ? current : pruned;
-    });
-    setSelectedSubtypes((current) => {
-      const pruned = current.filter((s) => availableSubtypes.has(s));
-      return pruned.length === current.length ? current : pruned;
-    });
-    setSelectedStreams((current) => {
-      const pruned = current.filter((s) => availableStreams.has(s));
-      return pruned.length === current.length ? current : pruned;
-    });
-  }, [knowledgeIndicators, statusFilter, selectedTypes, selectedStreams, hideComputedTypes]);
 
   const filteredKnowledgeIndicators = useMemo(() => {
     const filtered = knowledgeIndicators.filter((ki) =>
@@ -181,80 +124,6 @@ export function useKnowledgeIndicatorsTable() {
     selectedStreams,
     hideComputedTypes,
   ]);
-
-  const resetPagination = useCallback(() => {
-    setPagination((current) => {
-      if (current.pageIndex === 0) return current;
-      return { ...current, pageIndex: 0 };
-    });
-  }, []);
-
-  const handleStatusFilterChange = useCallback(
-    (filter: 'active' | 'excluded') => {
-      setStatusFilter(filter);
-      setSelectedKnowledgeIndicators([]);
-      resetPagination();
-    },
-    [resetPagination]
-  );
-
-  const handleSelectedTypesChange = useCallback(
-    (types: string[]) => {
-      setSelectedTypes(types);
-      setSelectedSubtypes([]);
-      resetPagination();
-    },
-    [resetPagination]
-  );
-
-  const handleSelectedSubtypesChange = useCallback(
-    (subtypes: string[]) => {
-      setSelectedSubtypes(subtypes);
-      resetPagination();
-    },
-    [resetPagination]
-  );
-
-  const handleSelectedStreamsChange = useCallback(
-    (streams: string[]) => {
-      setSelectedStreams(streams);
-      resetPagination();
-    },
-    [resetPagination]
-  );
-
-  const handleComputedToggleChange = useCallback(
-    (checked: boolean) => {
-      const shouldHide = !checked;
-      setHideComputedTypes(shouldHide);
-      if (shouldHide) {
-        setSelectedTypes((current) =>
-          current.filter((type) => !COMPUTED_FEATURE_TYPES_SET.has(type))
-        );
-      }
-      resetPagination();
-    },
-    [resetPagination]
-  );
-
-  const handleSearchChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setTableSearchValue(event.target.value);
-      resetPagination();
-    },
-    [resetPagination]
-  );
-
-  const closeFlyout = useCallback(() => {
-    setSelectedKnowledgeIndicator(null);
-  }, []);
-
-  const toggleSelectedKnowledgeIndicator = useCallback((ki: KnowledgeIndicator) => {
-    setSelectedKnowledgeIndicator((current) => {
-      if (!current) return ki;
-      return getKnowledgeIndicatorItemId(current) === getKnowledgeIndicatorItemId(ki) ? null : ki;
-    });
-  }, []);
 
   const handleTableChange = useCallback(({ page }: CriteriaWithPagination<KnowledgeIndicator>) => {
     if (!page) return;
@@ -337,8 +206,6 @@ export function useKnowledgeIndicatorsTable() {
     isEmpty,
     refetch,
     filteredKnowledgeIndicators,
-    selectedKnowledgeIndicator,
-    selectedKnowledgeIndicatorId,
     selectedKnowledgeIndicators,
     setSelectedKnowledgeIndicators,
     knowledgeIndicatorsToDelete,
@@ -351,23 +218,9 @@ export function useKnowledgeIndicatorsTable() {
     hasPromotableSelected,
     isSelectionActionsDisabled,
     hasOnlyHiddenComputedFeatures,
-    tableSearchValue,
-    debouncedSearchTerm,
-    statusFilter,
-    selectedTypes,
-    selectedSubtypes,
-    selectedStreams,
-    hideComputedTypes,
-    handleStatusFilterChange,
-    handleSelectedTypesChange,
-    handleSelectedSubtypesChange,
-    handleSelectedStreamsChange,
-    handleComputedToggleChange,
-    handleSearchChange,
     handleTableChange,
-    closeFlyout,
-    toggleSelectedKnowledgeIndicator,
     deleteKnowledgeIndicatorsInBulk,
     handleBulkPromote,
+    ...urlState,
   };
 }
