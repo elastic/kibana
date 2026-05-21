@@ -2,7 +2,7 @@
 
 Shared utilities and constants for instrumenting click events in Kibana using Event-Based Telemetry (EBT). Click events are reported to the `ebt-kibana-browser` index; clicks carrying `data-ebt-action` are also indexed into `ebt-kibana-browser-click-with-action` as structured, queryable fields.
 
-For instrumentation guidelines, naming conventions, and patterns: [EBT Click Tracking Guidelines](<GUIDELINES_URL>)
+For instrumentation guidelines, naming conventions, and patterns: `elastic/observability-dev: docs/obs-exploration/telemetry/ebt/ebt-click-tracking-guidelines.md`
 
 ## How click tracking works
 
