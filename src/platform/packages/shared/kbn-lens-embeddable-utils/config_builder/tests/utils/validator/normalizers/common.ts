@@ -419,14 +419,12 @@ export const getCommonNormalizer = <T extends LensAttributes>(
     attributes.state.datasourceStates = stripUndefined({
       textBased: normalizeDatasourceState(attributes.state.datasourceStates.textBased, (ds) => {
         for (const layer of Object.values(ds.layers)) {
-          layer.columns = layer.columns
-            .map((column) => {
-              return {
-                ...column,
-                columnId: columnIdMap.get(column.columnId) ?? column.columnId,
-              };
-            })
-            .sort((a, b) => a.columnId.localeCompare(b.columnId));
+          layer.columns = layer.columns.map((column) => {
+            return {
+              ...column,
+              columnId: columnIdMap.get(column.columnId) ?? column.columnId,
+            };
+          });
 
           if (layer.timeField) {
             layer.timeField = undefined; // not saved in API re-derived at runtime
@@ -454,7 +452,13 @@ export const getCommonNormalizer = <T extends LensAttributes>(
                   columnRemapping.find(([oldColumn]) => oldColumn === colId)?.[1] ?? colId
               );
 
-            layer.columnOrder.sort();
+            // Datatable uses its own canonical (rows → splits → metrics) sort in
+            // the datatable normalizer. For every other chart, alphabetical
+            // canonicalization is fine because column order does not drive
+            // rendering.
+            if (attributes.visualizationType !== 'lnsDatatable') {
+              layer.columnOrder.sort();
+            }
 
             // apply defaults
             layer.sampling = layer.sampling ?? LENS_SAMPLING_DEFAULT_VALUE;
@@ -508,15 +512,11 @@ export const getCommonNormalizer = <T extends LensAttributes>(
 
     attributes.state.needsRefresh = attributes.state.needsRefresh ?? false;
 
-    Object.values(attributes.state.datasourceStates.formBased?.layers ?? {}).forEach((layer) => {
-      layer.columnOrder.sort();
-    });
-
-    Object.values(attributes.state.datasourceStates.textBased?.layers ?? {}).forEach((layer) => {
-      layer.columns.sort((a: { columnId: string }, b: { columnId: string }) =>
-        a.columnId.localeCompare(b.columnId)
-      );
-    });
+    if (attributes.visualizationType !== 'lnsDatatable') {
+      Object.values(attributes.state.datasourceStates.formBased?.layers ?? {}).forEach((layer) => {
+        layer.columnOrder.sort();
+      });
+    }
 
     return attributes;
   },
