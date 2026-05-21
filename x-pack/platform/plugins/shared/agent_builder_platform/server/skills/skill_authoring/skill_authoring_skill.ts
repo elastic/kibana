@@ -123,9 +123,7 @@ User said: "Build me a skill that helps investigate slow ES|QL queries on logs i
     { "id": "platform.core.get_index_mapping", "description": "Return the field mapping for an index pattern." },
     { "id": "platform.core.generate_esql", "description": "Convert natural language into an ES|QL query." }
   ],
-  "total": 47,
-  "returned": 47,
-  "truncated": false
+  "total": 47
 }
 \`\`\`
 

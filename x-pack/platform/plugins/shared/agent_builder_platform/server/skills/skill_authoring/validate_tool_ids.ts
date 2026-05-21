@@ -6,7 +6,7 @@
  */
 
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
-import { MAX_TOOLS_RETURNED, projectListedTool, type ListedTool } from './list_tools';
+import { projectListedTool, type ListedTool } from './list_tools';
 
 /**
  * Result of validating a list of candidate `tool_ids` against the live tool
@@ -38,7 +38,7 @@ export const validateToolIdsAgainstRegistry = async (
   return {
     ok: false,
     invalidToolIds,
-    availableTools: tools.slice(0, MAX_TOOLS_RETURNED).map(projectListedTool),
+    availableTools: tools.map(projectListedTool),
   };
 };
 

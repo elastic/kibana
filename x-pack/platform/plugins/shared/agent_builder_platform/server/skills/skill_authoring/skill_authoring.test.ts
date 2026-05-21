@@ -107,15 +107,11 @@ describe('list_tools tool', () => {
     const data = result.results[0].data as {
       tools: Array<Record<string, unknown>>;
       total: number;
-      returned: number;
-      truncated: boolean;
     };
     expect(data.tools).toHaveLength(2);
     expect(data.tools[0]).toEqual({ id: 'tool.a', description: 'First tool' });
     expect(data.tools[1]).toEqual({ id: 'tool.b', description: 'Second tool' });
     expect(data.total).toBe(2);
-    expect(data.returned).toBe(2);
-    expect(data.truncated).toBe(false);
   });
 
   it('returns an empty list cleanly when the registry has no tools', async () => {

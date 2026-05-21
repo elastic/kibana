@@ -13,14 +13,6 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { ExecutableTool } from '@kbn/agent-builder-server';
 
 /**
- * Maximum number of tools returned in a single `list_tools` call.
- * Tool catalogs grow over time and the model only needs enough to pick
- * 1-5 ids for the skill being authored; capping keeps the response
- * compact and predictable.
- */
-export const MAX_TOOLS_RETURNED = 200;
-
-/**
  * Compact projection used both by `list_tools` and by the
  * `available_tools` field returned in `propose_skill` / `patch_skill`
  * validation errors.
@@ -59,8 +51,7 @@ export const createListToolsTool = (): BuiltinSkillBoundedTool<typeof listToolsS
 
     try {
       const tools = await toolProvider.list({ request });
-      const truncated = tools.length > MAX_TOOLS_RETURNED;
-      const projected = tools.slice(0, MAX_TOOLS_RETURNED).map(projectListedTool);
+      const projected = tools.map(projectListedTool);
 
       return {
         results: [
@@ -69,9 +60,7 @@ export const createListToolsTool = (): BuiltinSkillBoundedTool<typeof listToolsS
             type: ToolResultType.other,
             data: {
               tools: projected,
-              total: tools.length,
-              returned: projected.length,
-              truncated,
+              total: projected.length,
             },
           },
         ],
@@ -90,19 +79,14 @@ export const createListToolsTool = (): BuiltinSkillBoundedTool<typeof listToolsS
     if (toolReturn.results.length === 0) return undefined;
     const result = toolReturn.results[0];
     if (!isOtherResult(result)) return undefined;
-    const data = result.data as { total?: number; returned?: number; truncated?: boolean };
+    const data = result.data as { total?: number };
     const total = data.total ?? 0;
-    const returned = data.returned ?? 0;
     return [
       {
         ...result,
         data: {
-          summary: data.truncated
-            ? `Listed ${returned} of ${total} available tools (truncated).`
-            : `Listed ${returned} available tools.`,
+          summary: `Listed ${total} available tools.`,
           total,
-          returned,
-          truncated: data.truncated ?? false,
         },
       },
     ];
