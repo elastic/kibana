@@ -348,7 +348,7 @@ const cleanupReplayArtifacts = async ({
         settings: { 'index.default_pipeline': previousDefaultPipeline },
       });
     } catch {
-      log.debug('Failed to restore default_pipeline');
+      log.warning('Failed to restore default_pipeline');
     }
   }
 
@@ -356,36 +356,37 @@ const cleanupReplayArtifacts = async ({
     try {
       await esClient.indices.delete({ index: indexName, ignore_unavailable: true });
     } catch {
-      log.debug(`Failed to delete temp index: ${indexName}`);
+      log.warning(`Failed to delete temp index: ${indexName}`);
     }
   }
 
   try {
     await esClient.ingest.deletePipeline({ id: pipelineName });
   } catch {
-    log.debug('Failed to delete timestamp pipeline');
+    log.warning('Failed to delete timestamp pipeline');
   }
 
   try {
     await esClient.snapshot.deleteRepository({ name: repoName });
   } catch {
-    log.debug('Failed to delete snapshot repository');
+    log.warning('Failed to delete snapshot repository');
   }
 };
 
-export async function deleteTemporaryReplayIndices(
+export const deleteTemporaryReplayIndices = async (
   esClient: Client,
   log: ToolingLog
-): Promise<void> {
+): Promise<void> => {
   try {
     await esClient.indices.delete({
       index: `${REPLAY_TEMP_PREFIX}*`,
       ignore_unavailable: true,
+      allow_no_indices: true,
     });
   } catch {
-    log.debug('Failed to delete temporary replay indices');
+    log.warning('Failed to delete temporary replay indices');
   }
-}
+};
 
 /**
  * Replays a snapshot into the managed `logs` ES stream by setting a
