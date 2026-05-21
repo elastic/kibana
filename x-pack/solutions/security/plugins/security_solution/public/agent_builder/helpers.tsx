@@ -6,6 +6,7 @@
  */
 
 import { pick } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { TimelineItem } from '@kbn/response-ops-alerts-table/types';
 
@@ -31,6 +32,7 @@ export const alertsToAttachmentInputs = (
   alertItems: TimelineItem[]
 ): BulkAlertsAttachmentInput[] => {
   const totalLabel = `${alertItems.length} Alert${alertItems.length !== 1 ? 's' : ''}`;
+  const groupId = uuidv4();
   const batches: BulkAlertsAttachmentInput[] = [];
   for (let i = 0; i < alertItems.length; i += DEFAULT_ALERTS_BATCH_SIZE) {
     const batch = alertItems.slice(i, i + DEFAULT_ALERTS_BATCH_SIZE);
@@ -38,6 +40,7 @@ export const alertsToAttachmentInputs = (
       type: SecurityAgentBuilderAttachments.alerts,
       data: { alertIds: batch.map((a) => a._id), ...(i === 0 && { attachmentLabel: totalLabel }) },
       ...(i > 0 && { hidden: true }),
+      groupId,
     });
   }
   return batches;

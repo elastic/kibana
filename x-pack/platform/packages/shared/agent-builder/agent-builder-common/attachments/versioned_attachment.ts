@@ -153,6 +153,13 @@ export interface AttachmentInput<
   hidden?: boolean;
   /** Whether the attachment should be read-only */
   readonly?: boolean;
+  /**
+   * Groups this attachment with others that share the same groupId.
+   * When a visible attachment is removed, all hidden siblings with the same groupId
+   * are removed together — used for multi-batch attachments (e.g. bulk alert sets)
+   * that show a single chip but consist of several underlying attachment objects.
+   */
+  groupId?: string;
 }
 
 // Zod schemas for validation
@@ -208,6 +215,7 @@ export const attachmentInputSchema = z.object({
   description: z.string().optional(),
   hidden: z.boolean().optional(),
   readonly: z.boolean().optional(),
+  groupId: z.string().optional(),
 });
 
 export const attachmentDiffSchema = z.object({

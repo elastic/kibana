@@ -93,9 +93,14 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
   }, []);
 
   const removeAttachment = useCallback((attachmentIndex: number) => {
-    setAttachments((prevAttachments) =>
-      prevAttachments?.filter((_, index) => index !== attachmentIndex)
-    );
+    setAttachments((prevAttachments) => {
+      if (!prevAttachments) return prevAttachments;
+      const target = prevAttachments[attachmentIndex];
+      if (target?.groupId) {
+        return prevAttachments.filter((a) => a.groupId !== target.groupId);
+      }
+      return prevAttachments.filter((_, index) => index !== attachmentIndex);
+    });
   }, []);
 
   const contextValue = useMemo(

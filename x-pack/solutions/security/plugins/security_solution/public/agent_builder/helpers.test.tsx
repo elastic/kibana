@@ -49,6 +49,22 @@ describe('alertsToAttachmentInputs', () => {
     expect(result[0].data?.alertIds).toHaveLength(20);
     expect(result[1].data?.alertIds).toHaveLength(5);
   });
+
+  it('all batches share the same groupId', () => {
+    const items = Array.from({ length: 25 }, (_, i) => makeItem(`id-${i}`));
+    const result = alertsToAttachmentInputs(items);
+
+    expect(result[0].groupId).toBeDefined();
+    expect(result[0].groupId).toBe(result[1].groupId);
+  });
+
+  it('groupId differs between separate calls', () => {
+    const items = Array.from({ length: 5 }, (_, i) => makeItem(`id-${i}`));
+    const first = alertsToAttachmentInputs(items);
+    const second = alertsToAttachmentInputs(items);
+
+    expect(first[0].groupId).not.toBe(second[0].groupId);
+  });
 });
 
 describe('stringifyEssentialAlertData', () => {

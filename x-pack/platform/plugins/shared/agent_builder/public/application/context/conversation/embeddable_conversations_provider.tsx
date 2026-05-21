@@ -202,10 +202,15 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   }, []);
 
   const removeAttachment = useCallback((attachmentIndex: number) => {
-    setCurrentProps((prevProps) => ({
-      ...prevProps,
-      attachments: prevProps.attachments?.filter((_, index) => index !== attachmentIndex),
-    }));
+    setCurrentProps((prevProps) => {
+      const prev = prevProps.attachments;
+      if (!prev) return prevProps;
+      const target = prev[attachmentIndex];
+      const next = target?.groupId
+        ? prev.filter((a) => a.groupId !== target.groupId)
+        : prev.filter((_, index) => index !== attachmentIndex);
+      return { ...prevProps, attachments: next };
+    });
   }, []);
 
   const setAgentId = useCallback((id: string) => {
