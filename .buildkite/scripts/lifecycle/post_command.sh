@@ -55,9 +55,25 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
       node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" 'target/junit/**/*.xml'\
         --no-github-update --no-index-errors
     else
-      echo "--- Run Failed Test Reporter"
+      echo "--- Run Failed Test Reporter (JUnit)"
       node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" \
-        'target/junit/**/*.xml' \
+        'target/junit/**/*.xml'
+
+      # Scout: only update GitHub once a Scout lane has failed in at least 2 attempts
+      # of the current build. The counter is set by run_test_lane.sh on real test
+      # failures (exit 10) and is not incremented by agent-lost retries (exit -1).
+      # BK annotations are still produced because target/test_failures artifacts are
+      # generated regardless of --no-github-update.
+      SCOUT_REAL_FAIL_COUNT=0
+      if [[ -n "${BUILDKITE_STEP_KEY:-}" ]]; then
+        SCOUT_REAL_FAIL_COUNT=$(buildkite-agent meta-data get "${BUILDKITE_STEP_KEY}_real_fail_count" --default "0" 2>/dev/null || echo 0)
+      fi
+      SCOUT_GH_FLAG="--no-github-update"
+      if [[ "$SCOUT_REAL_FAIL_COUNT" -ge 2 ]]; then
+        SCOUT_GH_FLAG=""
+      fi
+      echo "--- Run Failed Test Reporter (Scout, real_fail_count=$SCOUT_REAL_FAIL_COUNT)"
+      node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" $SCOUT_GH_FLAG \
         '.scout/reports/scout-playwright-test-failures-*/scout-failures-*.ndjson'
     fi
   fi

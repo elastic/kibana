@@ -271,5 +271,15 @@ done
 print_summary
 
 if [[ ${#FAILED[@]} -gt 0 ]]; then
+  # Track how many lane attempts ended with real test failures (exit 10).
+  # Agent-lost retries (exit -1) never reach this block, so they don't bump the counter.
+  # post_command.sh uses this counter to skip GitHub issue updates until the same lane
+  # has failed in at least 2 attempts of the current build.
+  if [[ -n "${BUILDKITE_STEP_KEY:-}" ]]; then
+    REAL_FAIL_COUNT_KEY="${BUILDKITE_STEP_KEY}_real_fail_count"
+    PREV_REAL_FAIL_COUNT=$(buildkite-agent meta-data get "$REAL_FAIL_COUNT_KEY" --default "0" 2>/dev/null || echo 0)
+    NEXT_REAL_FAIL_COUNT=$((PREV_REAL_FAIL_COUNT + 1))
+    buildkite-agent meta-data set "$REAL_FAIL_COUNT_KEY" "$NEXT_REAL_FAIL_COUNT"
+  fi
   exit 10
 fi
