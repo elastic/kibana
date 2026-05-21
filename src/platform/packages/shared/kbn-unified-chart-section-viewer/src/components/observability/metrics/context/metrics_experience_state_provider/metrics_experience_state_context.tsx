@@ -53,8 +53,6 @@ export function MetricsExperienceStateProvider({
 
   const onPageChange = useCallback(
     (page: number) => {
-      // eslint-disable-next-line no-console
-      console.log('[METRICS_DEBUG] onPageChange', page);
       setCurrentPage(page);
     },
     [setCurrentPage]
