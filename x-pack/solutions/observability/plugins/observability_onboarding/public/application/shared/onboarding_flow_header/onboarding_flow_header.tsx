@@ -9,11 +9,11 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import {
+  EuiAvatar,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageTemplate,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -22,7 +22,7 @@ import {
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { useHistory, useLocation } from 'react-router-dom';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import { LogoIcon, type SupportedLogo } from '../logo_icon';
+import { useIconForLogo, type SupportedLogo } from '../logo_icon';
 
 export interface OnboardingFlowHeaderProps {
   title: string;
@@ -55,16 +55,11 @@ export const OnboardingFlowHeader: React.FC<OnboardingFlowHeaderProps> = ({
     history,
     `${returnTo}${location.search}`
   );
+  const iconFromLogo = useIconForLogo(logo);
+  const avatarIconType = euiIconType ?? iconFromLogo;
 
   return (
-    <EuiPageTemplate.Section
-      grow={false}
-      paddingSize="xl"
-      restrictWidth
-      css={css`
-        border-bottom: ${euiTheme.border.thin};
-      `}
-    >
+    <EuiPageTemplate.Section grow={false} paddingSize="xl" restrictWidth bottomBorder="extended">
       <EuiButtonEmpty
         iconType="chevronSingleLeft"
         flush="left"
@@ -79,34 +74,28 @@ export const OnboardingFlowHeader: React.FC<OnboardingFlowHeaderProps> = ({
       </EuiButtonEmpty>
       <EuiSpacer size="m" />
       <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiPanel
-            hasBorder
-            color="subdued"
-            paddingSize="m"
-            grow={false}
-            css={css`
-              border-radius: 14px;
-            `}
-          >
-            <LogoIcon
-              logo={logo}
-              euiIconType={euiIconType}
+        {avatarIconType && (
+          <EuiFlexItem grow={false}>
+            <EuiAvatar
+              name=""
+              iconType={avatarIconType}
+              color={euiTheme.colors.backgroundBaseSubdued}
+              type="space"
               size="xl"
+              aria-hidden
               css={css`
-                width: 40px;
-                height: 40px;
-                display: block;
+                border-radius: 14px;
+                border: ${euiTheme.border.thin};
               `}
             />
-          </EuiPanel>
-        </EuiFlexItem>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           <EuiTitle size="l">
             <h1>{title}</h1>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <EuiText size="m">
+          <EuiText size="m" color="subdued">
             <p>{subtitle}</p>
           </EuiText>
         </EuiFlexItem>
