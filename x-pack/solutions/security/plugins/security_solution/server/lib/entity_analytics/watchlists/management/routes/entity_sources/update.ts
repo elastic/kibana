@@ -71,10 +71,13 @@ export const updateEntitySourceRoute = (
             const newType = request.body.type ?? currentSource.type;
             const isNowIndex = newType === 'index';
 
-            if (request.body.indexPattern && isNowIndex) {
+            const indexPatternToCheck = isNowIndex
+              ? request.body.indexPattern ?? currentSource.indexPattern
+              : undefined;
+            if (indexPatternToCheck) {
               const hasPrivilege = await checkIndexReadPrivilege(
                 core.elasticsearch.client.asCurrentUser,
-                request.body.indexPattern
+                indexPatternToCheck
               );
               if (!hasPrivilege) {
                 return siemResponse.error({

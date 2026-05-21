@@ -20,6 +20,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { useDebounceFn } from '@kbn/react-hooks';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -32,6 +33,7 @@ import { useFetchWatchlistIndices } from './hooks/use_fetch_watchlist_indices';
 import { useRuleBasedSourceState, ENTITY_FIELD_OPTIONS } from './hooks/use_rule_based_source_state';
 import { useDataViewSetup } from './hooks/use_data_view_setup';
 import { useEntityAnalyticsRoutes } from '../../../entity_analytics/api/api';
+import { useKibana } from '../../../common/lib/kibana';
 import {
   WATCHLIST_ENTITY_FIELD_ARIA_LABEL,
   WATCHLIST_ENTITY_FIELD_PLACEHOLDER,
@@ -125,6 +127,9 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
   const { dataView, filters, filterManager } = useDataViewSetup();
   const queryClient = useQueryClient();
   const { updateWatchlistEntitySource } = useEntityAnalyticsRoutes();
+  const {
+    notifications: { toasts },
+  } = useKibana().services;
 
   const refreshApiKeyMutation = useMutation({
     mutationFn: () => {
@@ -139,6 +144,23 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['watchlist-entity-sources', watchlistId]);
+    },
+    onError: (error: Error) => {
+      const errorMessage =
+        'body' in error &&
+        error.body &&
+        typeof error.body === 'object' &&
+        'message' in error.body &&
+        typeof error.body.message === 'string'
+          ? error.body.message
+          : undefined;
+      toasts.addError(error, {
+        title: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.watchlists.flyout.reauthorizeErrorTitle',
+          { defaultMessage: 'Failed to re-authorize' }
+        ),
+        toastMessage: errorMessage,
+      });
     },
   });
 
