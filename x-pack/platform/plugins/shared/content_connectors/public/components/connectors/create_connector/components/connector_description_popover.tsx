@@ -104,6 +104,9 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.contentConnectors.createConnector.infoPopover.ariaLabel', {
+        defaultMessage: 'Connector description',
+      })}
       anchorPosition="upCenter"
       button={
         <EuiButtonIcon

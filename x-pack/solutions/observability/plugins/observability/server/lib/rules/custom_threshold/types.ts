@@ -15,6 +15,7 @@ import type {
 import type { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
 import type {
   ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_TIME_RANGE,
   ALERT_EVALUATION_VALUES,
   ALERT_GROUP,
   ALERT_GROUPING,
@@ -86,6 +87,7 @@ export type CustomThresholdAlert = Omit<
   // Defining a custom type for this because the schema generation script doesn't allow explicit null values
   [ALERT_EVALUATION_VALUES]?: Array<number | null>;
   [ALERT_EVALUATION_THRESHOLD]?: Array<number | null>;
+  [ALERT_EVALUATION_TIME_RANGE]?: { gte: string; lte: string };
   [ALERT_GROUP]?: Group[];
   [ALERT_GROUPING]?: Record<string, string>;
 };
