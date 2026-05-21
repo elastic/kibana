@@ -99,6 +99,11 @@ export const createBulkAlertsAttachmentType = (
   getAgentDescription: () =>
     `You have access to security alerts provided in one or more batches. Each attachment contains a batch of up to 20 alerts with full field data.
 
+When the conversation has many batches (summary mode), the system shows metadata only. Read each batch before answering:
+- Each batch appears as <attachment attachment_id="<some-id>" type="security.alerts" ...> in the XML
+- Call the attachment read tool (attachments_read) and pass the attachment_id value directly as the "attachment_id" parameter
+- Read ALL batches before forming conclusions
+
 Process each batch in order:
 1. Extract _id, kibana.alert.rule.name, severity, risk_score, host.name, user.name, and MITRE fields.
 2. Note entities (hosts, users) and patterns within the batch.

@@ -128,7 +128,7 @@ const formatInlineAttachments = async (
     attachmentElements.push({
       tagName: 'attachment',
       attributes: {
-        id: attachment.id,
+        attachment_id: attachment.id,
         type: attachment.type,
         version: latest.version,
         description: attachment.description,
@@ -161,7 +161,7 @@ const formatSummaryAttachments = (attachments: VersionedAttachment[]): string =>
       {
         tagName: 'attachment',
         attributes: {
-          id: attachment.id,
+          attachment_id: attachment.id,
           type: attachment.type,
           version: latest.version,
           estimated_tokens: latest.estimated_tokens,
@@ -179,7 +179,7 @@ const formatSummaryAttachments = (attachments: VersionedAttachment[]): string =>
         {
           tagName: 'note',
           children: [
-            'Too many attachments to show inline. Use attachment_read(id) to access content.',
+            'Too many attachments to show inline. Use attachment_read(attachment_id) to access content.',
           ],
         },
         ...attachmentElements,
@@ -218,13 +218,13 @@ export const getConversationAttachmentsSection = (
   const instructions =
     presentation.mode === 'inline'
       ? `You can:
-- Read attachments using attachment_read(id) to get full content if truncated
+- Read attachments using attachment_read(attachment_id) to get full content if truncated
 - Update attachments using attachment_update(id, data) to modify content
 - Add new attachments using attachment_add(type, data) to store information
 
-If you see "[content truncated, use attachment_read for full content]", you MUST call attachment_read(id) to get the complete content before analyzing or referencing that attachment.`
+If you see "[content truncated, use attachment_read for full content]", you MUST call attachment_read(attachment_id) to get the complete content before analyzing or referencing that attachment.`
       : `You MUST use attachment tools to access content:
-- Read attachments using attachment_read(id) to see the content
+- Read attachments using attachment_read(attachment_id) to see the content
 - Update attachments using attachment_update(id, data) to modify content
 - Add new attachments using attachment_add(type, data) to store information
 - List all attachments using attachment_list() for an overview
