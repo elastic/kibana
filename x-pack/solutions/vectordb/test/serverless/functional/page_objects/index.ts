@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../../..',
-  roots: ['<rootDir>/x-pack/platform/packages/private/ml/aiops_change_point_detection'],
+import { pageObjects as svlPlatformPageObjects } from '@kbn/test-suites-xpack-platform/serverless/functional/page_objects';
+
+export const pageObjects = {
+  ...svlPlatformPageObjects,
+  // VectorDB Solution serverless FTR page objects
 };
