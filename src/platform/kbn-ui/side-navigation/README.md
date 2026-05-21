@@ -12,54 +12,66 @@
 
 ### Overview
 
-Solution-focused left-side navigation is Kibana's default chrome navigation pattern. It pairs a **primary menu** (icons and labels) with an optional **secondary menu** (child destinations and related content). Users switch between **expanded** and **collapsed** modes to balance wayfinding and workspace width.
+Solution-focused side navigation is Kibana's default way to help users find their way around. It has two parts: a **primary menu** on the left (top-level sections with icons and labels) and an optional **secondary panel** (the child pages and sub-sections of wherever you currently are). Together they keep users oriented as they move through a solution.
 
-Kibana also supports a legacy classic navigation; new work should use this pattern. See [modes](./wiki/product/modes.md).
+Kibana also has a legacy "classic" navigation style — new work should use the solution-focused pattern instead. See [modes](./wiki/product/modes.md).
 
-### Problem it solves
+### What it solves
 
-- Reduces perceived complexity by displaying fewer top-level navigation items.
-- Keeps context-specific destinations reachable without leaving the current solution area.
-- Provides a consistent shell across Elasticsearch, Observability, and Security so users can move between solutions with familiar placement and behavior.
-- Supports collapsed mode to increase available width for flyouts, AI Assistant, and content navigation.
+- Keeps the top-level list short, so Kibana doesn't feel overwhelming at first glance.
+- Surfaces only the destinations relevant to the current solution (Observability, Security, Elasticsearch, and so on) instead of one giant flat list.
+- Lets users collapse the nav when they need more screen space — handy for flyouts, the AI Assistant, or just focusing on content.
+- Gives all solutions a consistent shell, so users feel familiar as they move between them.
 
 ### When to use
 
-- Building or updating a Kibana **solution** application shell (Observability, Security, Elasticsearch, and similar).
-- Organizing IA where a small set of top-level contexts each owns many child pages.
-- When users benefit from a persistent secondary panel (expanded mode) or hover popovers (collapsed mode).
+Use this when you're building or updating a Kibana solution shell (Observability, Security, Elasticsearch, and similar) and you have a meaningful set of top-level destinations, each with their own child pages.
 
 ### When not to use
 
-- **In-page navigation only** — use tabs, breadcrumbs, or page-level links when the scope is a single feature area.
-- **Marketing or announcements** — place these as in-page messages, What's New, or contextual cues; not in the secondary menu. See [secondary menu](./wiki/product/secondary-menu.md).
-- **Very shallow IA** (two or three sibling pages) — consider tabs or a landing page with links instead of a sparse secondary panel.
-- **Classic Kibana chrome** — avoid mixing patterns on the same deployment without an explicit migration plan.
+- **Within a single feature area** — use tabs, breadcrumbs, or page-level links instead.
+- **Very flat IA** (two or three sibling pages) — a landing page with links or just tabs is simpler.
+- **Product announcements or marketing** — put those in What's New, in-page messages, or contextual cues. The secondary menu is not a bulletin board. See [secondary menu](./wiki/product/secondary-menu.md).
+- **Classic Kibana chrome** — avoid mixing both styles on the same deployment without a migration plan.
 
 ### Anatomy
 
-| Expanded mode | Collapsed mode |
-| --- | --- |
-| ![Expanded mode](./wiki/assets/expanded_mode.png) | ![Collapsed mode](./wiki/assets/collapsed_mode.png) |
-
 | Part | Role |
 | --- | --- |
-| [Solution logo / home](./wiki/product/primary-menu.md#solution-logo) | Returns to the solution home; excluded from the "More" item count. |
-| [Primary menu (top)](./wiki/product/primary-menu.md) | Top-level contexts; icons + labels in expanded mode. |
-| [Primary menu (bottom / footer)](./wiki/product/footer.md) | Utilities (for example Settings); labels hidden in expanded mode. |
-| [Secondary menu / side panel](./wiki/product/secondary-menu.md) | Child items and optional sections; persistent in expanded mode. |
-| [Popover](./wiki/product/primary-menu.md#popover-behavior) | Secondary content on hover when collapsed, or before a parent is selected. |
-| [More menu](./wiki/product/more-menu.md) | Overflow for items that do not fit vertically or exceed the item cap. |
-| [Collapse control](./wiki/product/modes.md#collapse-and-expand) | Toggles expanded vs collapsed primary chrome. |
+| [Solution logo / home](./wiki/product/primary-menu.md#solution-logo) | Returns to the solution home; not counted toward the overflow limit. |
+| [Primary menu (top)](./wiki/product/primary-menu.md) | Top-level destinations — icons and labels when expanded, icons only when collapsed. |
+| [Primary menu (bottom / footer)](./wiki/product/footer.md) | Utility items like Settings; labels stay hidden even in expanded mode. |
+| [Secondary menu / side panel](./wiki/product/secondary-menu.md) | Child pages and sections for the selected primary item. Stays open in expanded mode, appears on hover in collapsed. |
+| [Popover](./wiki/product/primary-menu.md#popover-behavior) | Shows secondary content on hover when collapsed, or when no parent item is selected yet. |
+| [More menu](./wiki/product/more-menu.md) | Catches primary items that don't fit — either because the list exceeds 12 items, or the window is too short to show them all. |
+| [Collapse control](./wiki/product/modes.md#collapse-and-expand) | Toggles between expanded and collapsed mode. |
 
 ### Behavior
 
-- **Expanded (default):** Primary labels visible; secondary panel stays open while navigating its items. See [modes](./wiki/product/modes.md).
-- **Collapsed:** Primary shows icons only; secondary appears on hover (except selected-item rules). See [primary menu interactions](./wiki/product/primary-menu.md#interaction-matrix).
-- **Active state:** Exactly one primary item reflects the current location; secondary highlights the current page when shown. See [active state](./wiki/product/active-state.md).
-- **Responsive:** Navigation forces collapsed on small breakpoints; overflow folds into **More** when height is insufficient. Engineering details: [architecture](./wiki/engineering/architecture.md).
+| Expanded (default) | Collapsed |
+| --- | --- |
+| ![Expanded mode](./wiki/assets/expanded_mode.png) | ![Collapsed mode](./wiki/assets/collapsed_mode.png) |
 
-Further product detail: [content and labels](./wiki/product/content-and-labels.md) · [badges](./wiki/product/badges.md) · [listing pages](./wiki/product/listing-pages.md) (planned).
+**Expanded vs collapsed**
+
+In expanded mode the primary menu shows icons and labels, and the secondary panel stays open as you navigate. In collapsed mode only icons are visible; the secondary content appears as a popover on hover — except for the currently selected item, which keeps its panel pinned. The nav automatically switches to collapsed at small viewport sizes (xs/s breakpoints). See [modes](./wiki/product/modes.md).
+
+**Active state**
+
+Exactly one primary item is active at a time, always reflecting the user's current location. The secondary menu highlights the current page when it's visible. See [active state](./wiki/product/active-state.md).
+
+**Overflow (More menu)**
+
+When the primary list has more than 12 items, or when the window is too short to show them all, extra items are tucked into a "More" entry at the bottom. This adjusts live as the nav container is resized — no manual threshold needed. See [more menu](./wiki/product/more-menu.md).
+
+**Content guidelines**
+
+- Up to 12 items at the top of the primary menu, up to 5 at the bottom (3 or fewer is recommended).
+- Labels should be sentence case, ideally one word, and no longer than 10–11 characters.
+- "Discover" and "Dashboards" are always the first two items after the logo, across all solutions.
+- Secondary menu item names must match their page headers exactly.
+
+Further detail: [content and labels](./wiki/product/content-and-labels.md) · [badges](./wiki/product/badges.md) · [listing pages](./wiki/product/listing-pages.md) (planned).
 
 ---
 
