@@ -161,7 +161,7 @@ test.describe.serial(
       });
     });
 
-    test('navigating to /host/linux falls back to the V1 landing on the same path when V2 is disabled', async ({
+    test('navigating to /host/linux redirects to the V1 landing root when V2 is disabled', async ({
       apiServices,
       page,
       pageObjects,
@@ -173,7 +173,7 @@ test.describe.serial(
       await pageObjects.onboarding.useCaseGridByTestId.waitFor({ state: 'visible' });
       await expect(pageObjects.hostV2.v2LandingWrapper).toHaveCount(0);
       await expect(pageObjects.hostV2.layout('linux')).toHaveCount(0);
-      await expect(page).toHaveURL(/\/host\/linux/);
+      await expect(page).not.toHaveURL(/\/host\//);
     });
   }
 );
