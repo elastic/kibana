@@ -211,12 +211,24 @@ function GraphInner({
 
   useEffect(() => {
     setNodes(nodesWithContextHighlight);
-    setEdges(
-      applyEdgeHighlighting(edgesAfterFilters, {
-        selectedNodeId: selectedEdgeForPopoverRef.current ? null : selectedNodeIdRef.current,
-        selectedEdgeId: selectedEdgeForPopoverRef.current,
-      })
-    );
+
+    const highlightedEdges = applyEdgeHighlighting(edgesAfterFilters, {
+      selectedNodeId: selectedEdgeForPopoverRef.current ? null : selectedNodeIdRef.current,
+      selectedEdgeId: selectedEdgeForPopoverRef.current,
+    });
+
+    const edgesWithContextHighlight = highlightedServiceName
+      ? highlightedEdges.map((edge) => ({
+          ...edge,
+          data: {
+            ...edge.data,
+            sourceContextHighlight: edge.source === highlightedServiceName,
+            targetContextHighlight: edge.target === highlightedServiceName,
+          },
+        }))
+      : highlightedEdges;
+
+    setEdges(edgesWithContextHighlight as ServiceMapEdgeType[]);
 
     if (nodesAfterFilters.length > 0) {
       const timer = setTimeout(() => fitView(getFitViewOptions()), FIT_VIEW_DEFER_MS);
@@ -231,6 +243,7 @@ function GraphInner({
     applyEdgeHighlighting,
     getFitViewOptions,
     nodesAfterFilters.length,
+    highlightedServiceName,
   ]);
 
   const handleNodeClick: NodeMouseHandler<ServiceMapNode> = useCallback(
