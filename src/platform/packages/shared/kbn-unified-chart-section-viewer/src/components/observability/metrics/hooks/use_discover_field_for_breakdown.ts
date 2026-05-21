@@ -23,6 +23,8 @@ export function useDiscoverFieldForBreakdown(
 
     // Update selection
     if (matchingDimension) {
+      // eslint-disable-next-line no-console
+      console.log('[METRICS_DEBUG] syncBreakdownFieldToDimensions', breakdownField, matchingDimension);
       onDimensionsChange(
         [
           ...selectedDimensions.filter((dimension) => dimension.name !== matchingDimension.name),

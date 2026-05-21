@@ -45,13 +45,22 @@ export function MetricsExperienceStateProvider({
 
   const onDimensionsChange = useCallback(
     (nextDimensions: Dimension[]) => {
+      // eslint-disable-next-line no-console
+      console.log('[METRICS_DEBUG] onDimensionsChange → setCurrentPage(0)', nextDimensions);
       setCurrentPage(0);
       setSelectedDimensions(nextDimensions);
     },
     [setCurrentPage, setSelectedDimensions]
   );
 
-  const onPageChange = useCallback((page: number) => setCurrentPage(page), [setCurrentPage]);
+  const onPageChange = useCallback(
+    (page: number) => {
+      // eslint-disable-next-line no-console
+      console.log('[METRICS_DEBUG] onPageChange', page);
+      setCurrentPage(page);
+    },
+    [setCurrentPage]
+  );
 
   const onSearchTermChange = useCallback(
     (term: string) => {

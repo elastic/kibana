@@ -21,6 +21,8 @@ interface PaginationProps {
 export const Pagination = ({ totalPages, currentPage, onPageChange }: PaginationProps) => {
   useEffect(() => {
     if (totalPages > 0 && currentPage >= totalPages) {
+      // eslint-disable-next-line no-console
+      console.log('[METRICS_DEBUG] Pagination safety reset', { currentPage, totalPages });
       onPageChange(totalPages - 1);
     }
   }, [currentPage, totalPages, onPageChange]);
