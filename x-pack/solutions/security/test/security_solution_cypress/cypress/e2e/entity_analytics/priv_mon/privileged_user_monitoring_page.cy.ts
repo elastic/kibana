@@ -18,6 +18,7 @@ describe(
         kbnServerArgs: [
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'disable:entityAnalyticsEntityStoreV2',
+            'disable:entityAnalyticsWatchlistEnabled',
           ])}`,
           '--uiSettings.overrides.securitySolution:entityStoreEnableV2=false',
         ],
