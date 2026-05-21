@@ -40,14 +40,6 @@ interface LatestPingSource {
   kibanaUrl?: string;
 }
 
-interface LocationBucketSource {
-  observer?: {
-    geo?: {
-      name?: string;
-    };
-  };
-}
-
 /**
  * Synthesize a {@link RemoteSyntheticsMonitor} for a monitor that lives on a
  * remote cluster (CCS) by querying remote heartbeat indices via Cross-Cluster
@@ -65,7 +57,9 @@ interface LocationBucketSource {
  *     monitors, configId otherwise).
  *   - size: 1, sort `@timestamp desc` → latest ping supplies name/type/tags/remote.
  *   - terms agg on `observer.name` (the location id field in ping documents)
- *     with sub `top_hits` for `observer.geo.name` (the human-readable label)
+ *     with sub `terms` agg (size: 1) for `observer.geo.name` (the human-readable
+ *     label, wildcard-typed so top_metrics cannot collect it; same pattern used
+ *     server-side in overview_status_service for the same reason)
  *     → full set of locations the monitor has run from on the remote cluster.
  *
  * Three terminal states (see contract in `RemoteSyntheticsMonitor` JSDoc):
@@ -108,16 +102,15 @@ export const useRemoteMonitor = ({
           terms: {
             // observer.name is the location id field in ping documents
             // (observer.geo.name is the human-readable label, resolved below
-            // via a top_hits sub-agg because it is a wildcard-typed field
-            // and can't be aggregated on directly).
+            // via a terms sub-agg because it is a wildcard-typed field).
             field: 'observer.name',
             size: 100,
           },
           aggs: {
             label: {
-              top_hits: {
+              terms: {
+                field: 'observer.geo.name',
                 size: 1,
-                _source: { includes: ['observer.geo.name'] },
               },
             },
           },
@@ -136,10 +129,10 @@ export const useRemoteMonitor = ({
     const ping = data.hits.hits[0]._source as LatestPingSource;
     const buckets = data.aggregations?.locations?.buckets ?? [];
     const locations = buckets.map((bucket) => {
-      const labelSource = bucket.label.hits.hits[0]?._source as LocationBucketSource | undefined;
+      const labelKey = bucket.label?.buckets?.[0]?.key;
       return {
         id: String(bucket.key),
-        label: labelSource?.observer?.geo?.name ?? String(bucket.key),
+        label: labelKey != null ? String(labelKey) : String(bucket.key),
       };
     });
 

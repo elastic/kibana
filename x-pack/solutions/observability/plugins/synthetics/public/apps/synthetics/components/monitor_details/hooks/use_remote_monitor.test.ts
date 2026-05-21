@@ -51,12 +51,13 @@ describe('useRemoteMonitor', () => {
       const params = useEsSearchMock.mock.calls[0][0];
       expect(params.query.bool.filter).toEqual([{ term: { config_id: 'config-xyz' } }]);
       expect(params.sort).toEqual([{ '@timestamp': 'desc' }]);
-      // observer.name is the location id; observer.geo.name is the wildcard
-      // label resolved via the top_hits sub-aggregation.
+      // observer.name is the location id; observer.geo.name is wildcard-typed
+      // so the label is resolved via a terms sub-agg
       expect(params.aggs.locations.terms.field).toBe('observer.name');
-      expect(params.aggs.locations.aggs.label.top_hits._source.includes).toEqual([
-        'observer.geo.name',
-      ]);
+      expect(params.aggs.locations.aggs.label.terms).toEqual({
+        field: 'observer.geo.name',
+        size: 1,
+      });
     });
   });
 
@@ -105,20 +106,12 @@ describe('useRemoteMonitor', () => {
                 {
                   key: 'us-east',
                   doc_count: 12,
-                  label: {
-                    hits: {
-                      hits: [{ _source: { observer: { geo: { name: 'US East' } } } }],
-                    },
-                  },
+                  label: { buckets: [{ key: 'US East', doc_count: 12 }] },
                 },
                 {
                   key: 'eu-west',
                   doc_count: 8,
-                  label: {
-                    hits: {
-                      hits: [{ _source: { observer: { geo: { name: 'EU West' } } } }],
-                    },
-                  },
+                  label: { buckets: [{ key: 'EU West', doc_count: 8 }] },
                 },
               ],
             },
@@ -223,7 +216,7 @@ describe('useRemoteMonitor', () => {
           },
           aggregations: {
             locations: {
-              buckets: [{ key: 'orphaned-location', doc_count: 1, label: { hits: { hits: [] } } }],
+              buckets: [{ key: 'orphaned-location', doc_count: 1, label: { buckets: [] } }],
             },
           },
         },
