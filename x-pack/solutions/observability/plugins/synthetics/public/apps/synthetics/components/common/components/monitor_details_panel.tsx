@@ -174,7 +174,7 @@ export const MonitorDetailsPanel = ({
               <LocationsStatus
                 configId={configId}
                 monitorLocations={monitor.locations}
-                spaces={monitor.spaces}
+                spaces={savedMonitor?.[ConfigKey.KIBANA_SPACES]}
               />
             </EuiDescriptionListDescription>
           </>
