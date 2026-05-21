@@ -7,14 +7,20 @@
 
 import { useCallback, useMemo } from 'react';
 
+import { i18n } from '@kbn/i18n';
+
 import { useStartServices } from '../../../../../hooks';
 
 import type { IntegrationCardItem } from '..';
 
 // Keep in sync with @kbn/ingest-hub-plugin/common/constants
 const ONBOARDING_ENABLED_FLAG = 'ingestHub.onboardingEnabled';
-const AWS_TITLE = 'Amazon Web Services';
-const AWS_DESCRIPTION = 'Collect logs and metrics from Amazon Web Services (AWS).';
+const AWS_TITLE = i18n.translate('xpack.ingestHub.awsOnboardingTitle', {
+  defaultMessage: 'Amazon Web Services',
+});
+const AWS_DESCRIPTION = i18n.translate('xpack.ingestHub.awsOnboardingDescription', {
+  defaultMessage: 'Collect logs and metrics from Amazon Web Services (AWS).',
+});
 
 const HIDDEN_TILE_NAMES = new Set(['aws']);
 const HIDDEN_TILE_IDS = new Set(['epr:aws']);

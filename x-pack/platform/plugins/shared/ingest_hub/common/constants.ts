@@ -16,6 +16,6 @@ export const AWS_ONBOARDING_TITLE = i18n.translate('xpack.ingestHub.awsOnboardin
 export const AWS_ONBOARDING_DESCRIPTION = i18n.translate(
   'xpack.ingestHub.awsOnboardingDescription',
   {
-    defaultMessage: 'Collect logs and metrics from AWS services.',
+    defaultMessage: 'Collect logs and metrics from Amazon Web Services (AWS).',
   }
 );
