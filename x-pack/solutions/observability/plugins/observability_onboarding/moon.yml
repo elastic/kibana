@@ -57,6 +57,7 @@ dependsOn:
   - '@kbn/ingest-hub-plugin'
   - '@kbn/shared-ux-utility'
   - '@kbn/core-elasticsearch-server'
+  - '@kbn/dashboard-plugin'
 tags:
   - plugin
   - prod
