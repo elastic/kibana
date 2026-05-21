@@ -9,8 +9,8 @@
  * Deterministic eval: attachment_read compliance for bulk alert batches.
  *
  * When >5 attachments are present the framework switches to summary mode, showing
- * only metadata and instructing the LLM to call `attachment_read(id)` per batch
- * before answering. This eval verifies the LLM follows that instruction.
+ * only metadata and instructing the LLM to call `attachment_read(attachment_id)`
+ * per batch before answering. This eval verifies the LLM follows that instruction.
  *
  * No real alert data is required. Synthetic IDs trigger summary mode and the
  * format() function returns "not found" for each — enough for the LLM to see
@@ -30,7 +30,7 @@ import { attachmentTools, agentBuilderDefaultAgentId } from '@kbn/agent-builder-
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core/public';
-import { evaluate as base } from '../../src/evaluate';
+import { evaluate as base } from '../src/evaluate';
 
 // ── Dataset constants ──────────────────────────────────────────────────────────
 
