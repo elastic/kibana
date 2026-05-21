@@ -203,6 +203,7 @@ export interface FunctionFilterPredicates {
   returnTypes?: string[];
   ignored?: string[];
   allowed?: string[];
+  isTimeseriesSource?: boolean;
 }
 
 // PromQL Function Definition Types
