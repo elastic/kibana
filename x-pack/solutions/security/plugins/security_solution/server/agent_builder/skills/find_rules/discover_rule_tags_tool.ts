@@ -6,52 +6,46 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { StartServicesAccessor } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { TAGS_FIELD } from '../../../../common/detection_engine/rule_management/rule_fields';
 import { findRules } from '../../../lib/detection_engine/rule_management/logic/search/find_rules';
-import {
-  andGroupSchema,
-  buildAggregationResult,
-  buildFullFilter,
-  EXCLUDE_DESCRIPTION,
-  FILTER_DESCRIPTION,
-  GROUP_BY_TERMS_SIZE,
-  type FindRulesToolDeps,
-  type TermsAggregationResult,
-} from './rule_filter';
+import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 
 export const DISCOVER_RULE_TAGS_INLINE_TOOL_ID = 'security.discover_rule_tags';
 
-export const discoverRuleTagsSchema = z
-  .object({
-    filter: z.array(andGroupSchema).optional().describe(FILTER_DESCRIPTION),
-    exclude: z.array(andGroupSchema).optional().describe(EXCLUDE_DESCRIPTION),
-  })
-  .strict();
+const GROUP_BY_TERMS_SIZE = 500;
+
+export const discoverRuleTagsSchema = z.object({}).strict();
+
+interface DiscoverRuleTagsToolDeps {
+  getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>;
+  logger: Logger;
+}
 
 export const createDiscoverRuleTagsInlineTool = ({
   getStartServices,
   logger,
-}: FindRulesToolDeps): BuiltinSkillBoundedTool<typeof discoverRuleTagsSchema> => ({
+}: DiscoverRuleTagsToolDeps): BuiltinSkillBoundedTool<typeof discoverRuleTagsSchema> => ({
   id: DISCOVER_RULE_TAGS_INLINE_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Discover available tag values across Security detection rules. ' +
-    'Returns tag names and their rule counts — use this before filtering by tag in `security.find_rules`. ' +
+    'Discover available tag values across all Security detection rules. ' +
+    'Returns tag names and their rule counts. ' +
+    'Call this before filtering by tag in `security.find_rules`. ' +
     'Does NOT return rule names or metadata.',
   schema: discoverRuleTagsSchema,
-  handler: async (input, { request }) => {
+  handler: async (_input, { request }) => {
     try {
       const [, startPlugins] = await getStartServices();
       const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
 
-      const kqlFilter = buildFullFilter(input.filter, input.exclude);
-
       const findResult = await findRules({
         rulesClient,
-        filter: kqlFilter,
+        filter: undefined,
         perPage: 0,
         page: 1,
         sortField: undefined,
@@ -62,17 +56,26 @@ export const createDiscoverRuleTagsInlineTool = ({
         },
       });
 
+      const aggResult = findResult.aggregations as
+        | { by_field?: { buckets?: Array<{ key: string; doc_count: number }>; sum_other_doc_count?: number } }
+        | undefined;
+      const buckets = aggResult?.by_field?.buckets ?? [];
+      const otherDocCount = aggResult?.by_field?.sum_other_doc_count ?? 0;
+      const truncationHint =
+        otherDocCount > 0
+          ? ` There are additional groups beyond the top ${buckets.length} (sum_other_doc_count=${otherDocCount}). Surface this limitation to the user before saying a value does not exist.`
+          : '';
+
       return {
         results: [
           {
             type: ToolResultType.other,
             data: {
-              ...buildAggregationResult({
-                label: 'tags',
-                message: 'Discovered rule tag values',
-                aggResult: findResult.aggregations as TermsAggregationResult | undefined,
-              }),
-              mode: 'tag_discovery',
+              message: `Discovered rule tag values (${buckets.length} groups).${truncationHint}`,
+              field: 'tags',
+              groups: buckets.map((b) => ({ value: b.key, count: b.doc_count })),
+              truncated: otherDocCount > 0,
+              otherDocCount,
             },
           },
         ],

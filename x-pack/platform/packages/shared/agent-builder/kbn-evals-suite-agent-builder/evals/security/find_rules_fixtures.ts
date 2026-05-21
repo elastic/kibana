@@ -271,9 +271,14 @@ function buildRuleBody(rule: SeededRule): Record<string, unknown> {
   }
 }
 
+interface CreatedRule {
+  id: string;
+  ruleId: string;
+  name: string;
+}
+
 export interface SeededFixtures {
-  ruleIds: string[];
-  ruleNames: string[];
+  rules: CreatedRule[];
   cleanup: () => Promise<void>;
 }
 
@@ -319,30 +324,32 @@ export async function seedFindRulesFixtures({
 
   log.info(`[find-rules eval] Seeding ${SEEDED_RULES.length} detection rules...`);
 
-  const ruleIds: string[] = [];
-  const ruleNames: string[] = [];
+  const rules: CreatedRule[] = [];
 
-  for (const rule of SEEDED_RULES) {
+  for (const seed of SEEDED_RULES) {
     try {
-      const response = await kbnClient.request<{ id: string; name: string }>({
+      const response = await kbnClient.request<{ id: string; name: string; rule_id: string }>({
         path: DETECTION_RULES_URL,
         method: 'POST',
-        body: buildRuleBody(rule),
+        body: buildRuleBody(seed),
       });
-      ruleIds.push(response.data.id);
-      ruleNames.push(response.data.name);
+      rules.push({
+        id: response.data.id,
+        ruleId: response.data.rule_id,
+        name: response.data.name,
+      });
     } catch (err) {
-      log.error(`[find-rules eval] Failed to create rule "${rule.name}": ${err.message}`);
+      log.error(`[find-rules eval] Failed to create rule "${seed.name}": ${err.message}`);
       throw err;
     }
   }
 
-  log.info(`[find-rules eval] Created ${ruleIds.length} rules`);
+  log.info(`[find-rules eval] Created ${rules.length} rules`);
 
   // Inject synthetic alerts: 30 attributed to rule #0 (Suspicious PowerShell), 20 to rule #4 (Brute Force).
   // These two become the unambiguous "noisiest rules" for tests on alert volume.
-  const noisyRule0 = { id: ruleIds[0], name: ruleNames[0] };
-  const noisyRule4 = { id: ruleIds[4], name: ruleNames[4] };
+  const noisyRule0 = rules[0];
+  const noisyRule4 = rules[4];
 
   const alerts: Array<Record<string, unknown>> = [];
   for (let i = 0; i < 30; i++) {
@@ -359,6 +366,8 @@ export async function seedFindRulesFixtures({
   });
 
   log.info(`[find-rules eval] Indexed ${alerts.length} synthetic alerts (30 + 20)`);
+
+  const ruleIds = rules.map((r) => r.id);
 
   const cleanup = async () => {
     log.info('[find-rules eval] Cleaning up seeded rules and alerts (scoped)...');
@@ -389,19 +398,15 @@ export async function seedFindRulesFixtures({
     log.info('[find-rules eval] Cleanup complete');
   };
 
-  return { ruleIds, ruleNames, cleanup };
+  return { rules, cleanup };
 }
 
-function buildAlertDoc(rule: { id: string; name: string }, seq: number): Record<string, unknown> {
+function buildAlertDoc(rule: CreatedRule, seq: number): Record<string, unknown> {
   const timestamp = new Date(Date.now() - seq * 60_000).toISOString();
   return {
     '@timestamp': timestamp,
-    // `kibana.alert.rule.uuid` is the alerting Saved Object UUID. The noisy-rules flow
-    // aggregates alerts by this field, then translates UUIDs back into rule names via
-    // `find_rules` with `{ ruleUuid: "<uuid>" }`. The same UUID identifies the rule in the
-    // event log (`kibana.saved_objects.id`), so this is the single identifier to use
-    // across alerts/rules/event-log lookups.
     'kibana.alert.rule.uuid': rule.id,
+    'kibana.alert.rule.rule_id': rule.ruleId,
     'kibana.alert.rule.name': rule.name,
     'kibana.alert.rule.consumer': 'siem',
     'kibana.alert.rule.producer': 'siem',

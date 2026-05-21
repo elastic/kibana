@@ -18,7 +18,7 @@ import {
   DISCOVER_RULE_TAGS_INLINE_TOOL_ID,
   discoverRuleTagsSchema,
 } from './discover_rule_tags_tool';
-import { buildFullFilter } from './rule_filter';
+import { buildToolFilter } from './find_rules_tool';
 
 const createMockDeps = () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
@@ -133,14 +133,12 @@ describe('findRulesSkill', () => {
     expect(skill.content).toContain('How many enabled vs disabled?');
   });
 
-  it('content teaches the array-of-arrays filter shape (outer=OR, inner=AND)', () => {
+  it('content documents flat filter parameters', () => {
     const { getStartServices, mockLogger } = createMockDeps();
     const skill = createFindRulesSkill({ getStartServices, logger: mockLogger });
-    expect(skill.content).toMatch(/outer array = OR/);
-    expect(skill.content).toMatch(/inner array = AND/);
-    expect(skill.content).toMatch(/one atomic fact/);
-    expect(skill.content).toContain('[[{ severity: "critical" }, { tag: "MITRE" }]]');
-    expect(skill.content).toContain('exclude: [[{ tag: "Custom" }]]');
+    expect(skill.content).toMatch(/All filter parameters are flat and optional/);
+    expect(skill.content).toContain('severity: ["critical", "high"]');
+    expect(skill.content).toContain('excludeTags: ["Custom"]');
   });
 
   it('content requires tag discovery before tag filtering', () => {
@@ -148,198 +146,147 @@ describe('findRulesSkill', () => {
     const skill = createFindRulesSkill({ getStartServices, logger: mockLogger });
     expect(skill.content).toMatch(/Before filtering by tag/i);
     expect(skill.content).toMatch(/exact tag values/i);
+    expect(skill.content).toMatch(/with `\{\}`/i);
     expect(skill.content).toContain('security.find_rules');
   });
 
-  it('content teaches UUID translation for the noisy-rules flow', () => {
+  it('content teaches ruleId lookup for the noisy-rules flow', () => {
     const { getStartServices, mockLogger } = createMockDeps();
     const skill = createFindRulesSkill({ getStartServices, logger: mockLogger });
-    expect(skill.content).toMatch(/kibana\.alert\.rule\.uuid/);
-    expect(skill.content).toContain('{ ruleUuid:');
-    expect(skill.content).toMatch(/NOT.*kibana\.alert\.rule\.name/i);
+    expect(skill.content).toMatch(/kibana\.alert\.rule\.rule_id/);
+    expect(skill.content).toContain('ruleId');
   });
 });
+
 describe('findRulesSchema', () => {
-  it('accepts filter-only queries', () => {
-    expect(findRulesSchema.safeParse({ filter: [[{ severity: 'critical' }]] }).success).toBe(true);
-  });
-
-  it('does not accept tagDiscovery or countBy (those live on separate tools)', () => {
-    expect(findRulesSchema.safeParse({ tagDiscovery: true }).success).toBe(false);
-    expect(findRulesSchema.safeParse({ countBy: 'enabled' }).success).toBe(false);
-    expect(findRulesSchema.safeParse({ groupBy: 'tags' }).success).toBe(false);
-  });
-});
-describe('discoverRuleTagsSchema', () => {
-  it('accepts an empty call (discover all tags)', () => {
-    expect(discoverRuleTagsSchema.safeParse({}).success).toBe(true);
-  });
-
-  it('accepts a filter to scope discovery', () => {
-    expect(discoverRuleTagsSchema.safeParse({ filter: [[{ severity: 'critical' }]] }).success).toBe(
+  it('accepts flat filter parameters', () => {
+    expect(findRulesSchema.safeParse({ severity: ['critical'] }).success).toBe(true);
+    expect(findRulesSchema.safeParse({ enabled: true, ruleSource: 'custom' }).success).toBe(true);
+    expect(findRulesSchema.safeParse({ tags: ['MITRE'], excludeTags: ['Custom'] }).success).toBe(
       true
     );
   });
 
   it('rejects unknown parameters', () => {
-    expect(discoverRuleTagsSchema.safeParse({ perPage: 10 }).success).toBe(false);
-    expect(discoverRuleTagsSchema.safeParse({ tagDiscovery: true }).success).toBe(false);
+    expect(findRulesSchema.safeParse({ tagDiscovery: true }).success).toBe(false);
+    expect(findRulesSchema.safeParse({ countBy: 'enabled' }).success).toBe(false);
+    expect(findRulesSchema.safeParse({ groupBy: 'tags' }).success).toBe(false);
   });
 });
 
-describe('buildFullFilter', () => {
-  describe('empty input', () => {
-    it('returns undefined when both filter and exclude are absent', () => {
-      expect(buildFullFilter(undefined, undefined)).toBeUndefined();
-      expect(buildFullFilter([], [])).toBeUndefined();
-    });
+describe('discoverRuleTagsSchema', () => {
+  it('accepts an empty call (discover all tags)', () => {
+    expect(discoverRuleTagsSchema.safeParse({}).success).toBe(true);
   });
 
-  describe('single AndGroup, single atomic condition', () => {
-    it('builds enabled clause', () => {
-      expect(buildFullFilter([[{ enabled: true }]], undefined)).toBe(
-        'alert.attributes.enabled: true'
-      );
-      expect(buildFullFilter([[{ enabled: false }]], undefined)).toBe(
-        'alert.attributes.enabled: false'
-      );
-    });
-
-    it('builds ruleSource clause', () => {
-      expect(buildFullFilter([[{ ruleSource: 'custom' }]], undefined)).toBe(
-        'alert.attributes.params.immutable: false'
-      );
-      expect(buildFullFilter([[{ ruleSource: 'prebuilt' }]], undefined)).toBe(
-        'alert.attributes.params.immutable: true'
-      );
-    });
-
-    it('builds severity clause', () => {
-      expect(buildFullFilter([[{ severity: 'critical' }]], undefined)).toBe(
-        'alert.attributes.params.severity: "critical"'
-      );
-    });
-
-    it('builds ruleType clause', () => {
-      expect(buildFullFilter([[{ ruleType: 'query' }]], undefined)).toBe(
-        'alert.attributes.params.type: ("query")'
-      );
-      expect(buildFullFilter([[{ ruleType: 'saved_query' }]], undefined)).toBe(
-        'alert.attributes.params.type: ("saved_query")'
-      );
-    });
-
-    it('builds tag clause', () => {
-      expect(buildFullFilter([[{ tag: 'MITRE' }]], undefined)).toBe(
-        'alert.attributes.tags:("MITRE")'
-      );
-    });
-
-    it('builds riskScoreMin clause', () => {
-      expect(buildFullFilter([[{ riskScoreMin: 70 }]], undefined)).toBe(
-        'alert.attributes.params.risk_score >= 70'
-      );
-    });
-
-    it('builds mitreTechnique clause', () => {
-      expect(buildFullFilter([[{ mitreTechnique: 'T1059' }]], undefined)).toBe(
-        'alert.attributes.params.threat.technique.id: "T1059"'
-      );
-      expect(buildFullFilter([[{ mitreTechnique: 'T1059.001' }]], undefined)).toBe(
-        'alert.attributes.params.threat.technique.subtechnique.id: "T1059.001"'
-      );
-    });
-
-    it('builds ruleUuid clause', () => {
-      expect(
-        buildFullFilter([[{ ruleUuid: '57fc3dd0-4383-4396-98e7-2bbfe6cde41f' }]], undefined)
-      ).toBe('alert.id: "alert:57fc3dd0-4383-4396-98e7-2bbfe6cde41f"');
-    });
-
-    it('builds nameContains: single-term uses wildcard on .keyword (UI parity)', () => {
-      expect(buildFullFilter([[{ nameContains: 'PowerShell' }]], undefined)).toBe(
-        'alert.attributes.name.keyword: *PowerShell*'
-      );
-    });
-
-    it('builds nameContains: multi-term uses exact phrase on .name (UI parity)', () => {
-      expect(buildFullFilter([[{ nameContains: 'PowerShell Encoded' }]], undefined)).toBe(
-        'alert.attributes.name: "PowerShell Encoded"'
-      );
-    });
+  it('rejects all parameters (strict empty-object schema)', () => {
+    expect(discoverRuleTagsSchema.safeParse({ severity: ['critical'] }).success).toBe(false);
+    expect(discoverRuleTagsSchema.safeParse({ enabled: true }).success).toBe(false);
   });
 
-  describe('AND within an AndGroup (multiple atomic conditions)', () => {
-    it('joins two conditions with AND', () => {
-      expect(buildFullFilter([[{ enabled: true }, { severity: 'critical' }]], undefined)).toBe(
-        'alert.attributes.enabled: true AND alert.attributes.params.severity: "critical"'
-      );
-    });
-
-    it('expresses "tagged MITRE AND tagged Custom" — the key new capability', () => {
-      expect(buildFullFilter([[{ tag: 'MITRE' }, { tag: 'Custom' }]], undefined)).toBe(
-        'alert.attributes.tags:("MITRE") AND alert.attributes.tags:("Custom")'
-      );
-    });
-
+  it('rejects tag parameters because discovery must enumerate available tags first', () => {
+    expect(discoverRuleTagsSchema.safeParse({ tags: ['MITRE'] }).success).toBe(false);
+    expect(discoverRuleTagsSchema.safeParse({ excludeTags: ['Custom'] }).success).toBe(false);
   });
 
-  describe('multiple AndGroups (OR between groups)', () => {
-    it('joins two AndGroups with OR and parenthesizes each', () => {
-      expect(
-        buildFullFilter(
-          [
-            [{ severity: 'critical' }, { tag: 'MITRE' }],
-            [{ severity: 'high' }, { tag: 'Custom' }],
-          ],
-          undefined
-        )
-      ).toBe(
-        '(alert.attributes.params.severity: "critical" AND alert.attributes.tags:("MITRE")) OR ' +
-          '(alert.attributes.params.severity: "high" AND alert.attributes.tags:("Custom"))'
-      );
-    });
+  it('rejects unknown parameters', () => {
+    expect(discoverRuleTagsSchema.safeParse({ perPage: 10 }).success).toBe(false);
+  });
+});
 
-    it('expresses "critical OR high severity" via two single-condition groups', () => {
-      expect(buildFullFilter([[{ severity: 'critical' }], [{ severity: 'high' }]], undefined)).toBe(
-        '(alert.attributes.params.severity: "critical") OR ' +
-          '(alert.attributes.params.severity: "high")'
-      );
-    });
+describe('buildToolFilter', () => {
+  it('returns undefined when no parameters are provided', () => {
+    expect(buildToolFilter({})).toBeUndefined();
   });
 
-  describe('exclude', () => {
-    it('wraps a single exclude AndGroup in NOT', () => {
-      expect(buildFullFilter(undefined, [[{ tag: 'Custom' }]])).toBe(
-        'NOT (alert.attributes.tags:("Custom"))'
-      );
-    });
-
-    it('combines filter + exclude with AND NOT', () => {
-      expect(buildFullFilter([[{ tag: 'MITRE' }]], [[{ tag: 'Custom' }]])).toBe(
-        '(alert.attributes.tags:("MITRE")) AND NOT (alert.attributes.tags:("Custom"))'
-      );
-    });
+  it('builds enabled clause', () => {
+    expect(buildToolFilter({ enabled: true })).toContain('alert.attributes.enabled: true');
+    expect(buildToolFilter({ enabled: false })).toContain('alert.attributes.enabled: false');
   });
 
-  describe('KQL escaping', () => {
-    it('escapes special characters in nameContains', () => {
-      expect(buildFullFilter([[{ nameContains: 'a"b' }]], undefined)).toBe(
-        'alert.attributes.name.keyword: *a\\"b*'
-      );
-    });
+  it('builds ruleSource clause', () => {
+    expect(buildToolFilter({ ruleSource: 'custom' })).toContain(
+      'alert.attributes.params.immutable: false'
+    );
+    expect(buildToolFilter({ ruleSource: 'prebuilt' })).toContain(
+      'alert.attributes.params.immutable: true'
+    );
+  });
 
-    it('escapes special characters in a tag', () => {
-      expect(buildFullFilter([[{ tag: 'tag:with:colons' }]], undefined)).toBe(
-        'alert.attributes.tags:("tag:with:colons")'
-      );
-    });
+  it('builds severity clause with single value', () => {
+    expect(buildToolFilter({ severity: ['critical'] })).toContain(
+      'alert.attributes.params.severity: "critical"'
+    );
+  });
 
-    it('escapes parentheses and quotes', () => {
-      expect(buildFullFilter([[{ tag: '(weird "tag")' }]], undefined)).toBe(
-        'alert.attributes.tags:("(weird \\"tag\\")")'
-      );
-    });
+  it('builds severity clause with OR for multiple values', () => {
+    const result = buildToolFilter({ severity: ['critical', 'high'] });
+    expect(result).toContain(
+      '(alert.attributes.params.severity: "critical" OR alert.attributes.params.severity: "high")'
+    );
+  });
+
+  it('builds ruleType clause', () => {
+    expect(buildToolFilter({ ruleType: ['query'] })).toContain(
+      'alert.attributes.params.type: ("query")'
+    );
+  });
+
+  it('builds ruleType clause with OR for multiple values', () => {
+    expect(buildToolFilter({ ruleType: ['query', 'eql'] as never })).toContain(
+      'alert.attributes.params.type: ("query" OR "eql")'
+    );
+  });
+
+  it('builds tags clause', () => {
+    expect(buildToolFilter({ tags: ['MITRE'] })).toContain('alert.attributes.tags:("MITRE")');
+  });
+
+  it('builds tags clause with AND for multiple values', () => {
+    expect(buildToolFilter({ tags: ['MITRE', 'Custom'] })).toContain(
+      'alert.attributes.tags:("MITRE" AND "Custom")'
+    );
+  });
+
+  it('builds excludeTags clause with NOT for each tag', () => {
+    const result = buildToolFilter({ excludeTags: ['Custom'] });
+    expect(result).toContain('NOT alert.attributes.tags:("Custom")');
+  });
+
+  it('builds mitreTechnique clause for technique ID', () => {
+    expect(buildToolFilter({ mitreTechnique: 'T1059' })).toContain(
+      'alert.attributes.params.threat.technique.id: "T1059"'
+    );
+  });
+
+  it('builds mitreTechnique clause for subtechnique ID', () => {
+    expect(buildToolFilter({ mitreTechnique: 'T1059.001' })).toContain(
+      'alert.attributes.params.threat.technique.subtechnique.id: "T1059.001"'
+    );
+  });
+
+  it('builds ruleId clause', () => {
+    expect(buildToolFilter({ ruleId: 'my-rule-id-123' })).toContain(
+      'alert.attributes.params.ruleId: "my-rule-id-123"'
+    );
+  });
+
+  it('builds nameContains clause via existing search term logic', () => {
+    const result = buildToolFilter({ nameContains: 'PowerShell' });
+    expect(result).toContain('alert.attributes.name.keyword: *PowerShell*');
+  });
+
+  it('ANDs multiple parameters together', () => {
+    const result = buildToolFilter({ enabled: true, severity: ['critical'] });
+    expect(result).toContain('alert.attributes.enabled: true');
+    expect(result).toContain('alert.attributes.params.severity: "critical"');
+    expect(result).toContain(' AND ');
+  });
+
+  it('combines tags with excludeTags', () => {
+    const result = buildToolFilter({ tags: ['MITRE'], excludeTags: ['Custom'] });
+    expect(result).toContain('alert.attributes.tags:("MITRE")');
+    expect(result).toContain('NOT alert.attributes.tags:("Custom")');
   });
 });
 
@@ -361,55 +308,17 @@ describe('findRules inline tool handler', () => {
     expect(toolDef.id).toBe(FIND_RULES_INLINE_TOOL_ID);
   });
 
-  it('passes a structured filter through as KQL to rulesClient.find', async () => {
+  it('passes flat filter parameters through as KQL to rulesClient.find', async () => {
     const { toolDef, findMock, mockEsClient, mockLogger, mockRequest } = await setup();
     findMock.mockResolvedValue({ total: 1, data: [] });
     const ctx = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
 
-    await toolDef.handler({ filter: [[{ enabled: true }, { severity: 'critical' }]] }, ctx);
+    await toolDef.handler({ enabled: true, severity: ['critical'] }, ctx);
 
     expect(findMock).toHaveBeenCalledTimes(1);
     const args = findMock.mock.calls[0][0];
-    expect(args.options.filter).toContain(
-      '(alert.attributes.enabled: true AND alert.attributes.params.severity: "critical")'
-    );
-    expect(args.options.filter).toContain('alert.attributes.alertTypeId: siem.queryRule');
-  });
-
-  it('plumbs a ruleUuid condition through to rulesClient.find as canonical SO-UUID filter and returns the matched rule', async () => {
-    const { toolDef, findMock, mockEsClient, mockLogger, mockRequest } = await setup();
-    const ruleUuid = '57fc3dd0-4383-4396-98e7-2bbfe6cde41f';
-    const fakeRule = {
-      id: ruleUuid,
-      name: 'Suspicious PowerShell Execution',
-      tags: ['MITRE'],
-      enabled: true,
-      alertTypeId: 'siem.queryRule',
-      params: { rule_id: 'rl-static-12345', severity: 'critical', risk_score: 99, type: 'query' },
-      updatedAt: '2026-01-01T00:00:00Z',
-    };
-    findMock.mockResolvedValue({ total: 1, data: [fakeRule] });
-
-    const result = await toolDef.handler(
-      { filter: [[{ ruleUuid }]] },
-      createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
-    );
-
-    expect(findMock).toHaveBeenCalledTimes(1);
-    const args = findMock.mock.calls[0][0];
-    expect(args.options.filter).toContain(`alert.id: "alert:${ruleUuid}"`);
-    expect(args.options.filter).toContain('alert.attributes.alertTypeId: siem.queryRule');
-
-    const data = result.results[0].data as {
-      total: number;
-      rules: Array<{ id: string; ruleId: unknown; name: string }>;
-    };
-    expect(data.total).toBe(1);
-    expect(data.rules[0]).toMatchObject({
-      id: fakeRule.id,
-      ruleId: 'rl-static-12345',
-      name: fakeRule.name,
-    });
+    expect(args.options.filter).toContain('alert.attributes.enabled: true');
+    expect(args.options.filter).toContain('alert.attributes.params.severity: "critical"');
   });
 
   it('handles camelCase params from the Alerting framework (real Detection Engine storage)', async () => {
@@ -426,7 +335,7 @@ describe('findRules inline tool handler', () => {
     findMock.mockResolvedValue({ total: 1, data: [fakeRule] });
 
     const result = await toolDef.handler(
-      { filter: [[{ enabled: true }]] },
+      { enabled: true },
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     );
 
@@ -436,24 +345,6 @@ describe('findRules inline tool handler', () => {
     };
     expect(data.rules[0].ruleId).toBe('rl-camel');
     expect(data.rules[0].riskScore).toBe(75);
-  });
-
-  it('supports OR-of-AND-groups of ruleUuid conditions (multi-rule translation)', async () => {
-    const { toolDef, findMock, mockEsClient, mockLogger, mockRequest } = await setup();
-    findMock.mockResolvedValue({ total: 0, data: [] });
-
-    const uuidA = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
-    const uuidB = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
-
-    await toolDef.handler(
-      { filter: [[{ ruleUuid: uuidA }], [{ ruleUuid: uuidB }]] },
-      createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
-    );
-
-    const args = findMock.mock.calls[0][0];
-    expect(args.options.filter).toContain(
-      `(alert.id: "alert:${uuidA}") OR (alert.id: "alert:${uuidB}")`
-    );
   });
 
   it('maps severity sortField to params.severity', async () => {
@@ -488,7 +379,7 @@ describe('findRules inline tool handler', () => {
     findMock.mockRejectedValue(new Error('boom'));
 
     const result = await toolDef.handler(
-      { filter: [[{ enabled: true }]] },
+      { enabled: true },
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     );
 
@@ -496,12 +387,12 @@ describe('findRules inline tool handler', () => {
     expect(result.results[0].data.message).toContain('boom');
   });
 
-  it('hints at security.discover_rule_tags when zero results and the filter used a tag condition', async () => {
+  it('hints at security.discover_rule_tags when zero results and the filter used tags', async () => {
     const { toolDef, findMock, mockEsClient, mockLogger, mockRequest } = await setup();
     findMock.mockResolvedValue({ total: 0, data: [] });
 
     const result = await toolDef.handler(
-      { filter: [[{ tag: 'Network Security' }]] },
+      { tags: ['Network Security'] },
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     );
 
@@ -511,12 +402,12 @@ describe('findRules inline tool handler', () => {
     expect(message).toContain('may not exist');
   });
 
-  it('hints at general exploration when zero results without a tag condition', async () => {
+  it('hints at general exploration when zero results without a tag filter', async () => {
     const { toolDef, findMock, mockEsClient, mockLogger, mockRequest } = await setup();
     findMock.mockResolvedValue({ total: 0, data: [] });
 
     const result = await toolDef.handler(
-      { filter: [[{ severity: 'critical' }]] },
+      { severity: ['critical'] },
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     );
 
@@ -570,7 +461,6 @@ describe('discoverRuleTags inline tool handler', () => {
     );
     expect(findMock.mock.calls[0][0].options.aggs.by_field.terms.size).toBe(500);
     expect(result.results[0].type).toBe(ToolResultType.other);
-    expect(result.results[0].data.mode).toBe('tag_discovery');
     expect(result.results[0].data.groups).toEqual([{ value: 'MITRE', count: 3 }]);
     expect(result.results[0].data.truncated).toBe(false);
   });
@@ -602,24 +492,6 @@ describe('discoverRuleTags inline tool handler', () => {
     expect(data.otherDocCount).toBe(47);
     expect(data.message).toContain('additional groups beyond');
     expect(data.message).toContain('sum_other_doc_count=47');
-  });
-
-  it('applies filter to scope tag discovery', async () => {
-    const { toolDef, findMock, mockEsClient, mockLogger, mockRequest } = await setup();
-    findMock.mockResolvedValue({
-      total: 0,
-      data: [],
-      aggregations: { by_field: { buckets: [] } },
-    });
-
-    await toolDef.handler(
-      { filter: [[{ severity: 'critical' }]] },
-      createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
-    );
-
-    expect(findMock.mock.calls[0][0].options.filter).toContain(
-      'alert.attributes.params.severity: "critical"'
-    );
   });
 
   it('returns an error result when rulesClient.find throws', async () => {

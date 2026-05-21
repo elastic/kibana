@@ -29,7 +29,7 @@ export const createFindRulesSkill = ({
     basePath: 'skills/security/rules',
     description:
       'Discover, list, rank, and count Security detection rules. ' +
-      'Filter by tags, MITRE technique, severity, rule type, risk score, name, or enabled state. ' +
+      'Filter by tags, MITRE technique, severity, rule type, name, or enabled state. ' +
       'Read-only.',
     content: `# Find Detection Rules
 
@@ -57,7 +57,7 @@ This skill has two inline tools — pick the one that matches the user's intent:
 | \`security.find_rules\` | List, filter, sort rules, answer simple total-count questions | Rule names + metadata + total |
 | \`security.discover_rule_tags\` | Discover available tag values | Tag buckets + counts |
 
-**Default to \`security.find_rules\`** for rule-list queries and simple total-count questions. Exception: before using any \`{ tag: "..." }\` filter, call \`security.discover_rule_tags\` first and choose exact tag values from the result.
+**Default to \`security.find_rules\`** for rule-list queries and simple total-count questions. Exception: before using any \`tags\` filter, call \`security.discover_rule_tags\` first and choose exact tag values from the result.
 
 ## Grounding
 
@@ -71,12 +71,12 @@ Tag values are environment-specific. Even widely-used names like "MITRE" may be 
 
 Call \`security.discover_rule_tags\` before any tag-name or category filter. This includes explicit tag names like "MITRE" and vague category text such as "network rules", "endpoint rules", or "Windows rules".
 
-Do NOT call \`security.discover_rule_tags\` when the user filters only by severity, risk score, enabled state, name, rule type, or MITRE ID. Those filters work directly — just pass them in \`security.find_rules\` and get rule names back.
+Do NOT call \`security.discover_rule_tags\` when the user filters only by severity, enabled state, name, rule type, or MITRE ID. Those filters work directly — just pass them in \`security.find_rules\`.
 
 Before filtering by tag:
-1. Call \`security.discover_rule_tags\` to list available tag values.
+1. Call \`security.discover_rule_tags\` with \`{}\` to list available tag values.
 2. Choose exact tag values from the result.
-3. Call \`security.find_rules\` with \`{ tag: "<exact value>" }\` in the filter.
+3. Call \`security.find_rules\` with \`tags: ["<exact value>"]\`.
 
 If no returned tag matches the user's intent, say so and mention the closest available values.
 
@@ -84,33 +84,27 @@ Structured MITRE IDs are exempt: use \`{ mitreTechnique: "T1059" }\` directly in
 
 ## Noisy Rules
 
-Call \`security.alerts\` to aggregate by \`kibana.alert.rule.uuid\`, then call \`security.find_rules\` with \`{ ruleUuid: "<uuid>" }\` to translate UUIDs into rule names and metadata.
-
-Use \`ruleUuid\` for the alerting saved object UUID (\`kibana.alert.rule.uuid\`), not the static detection-engine \`ruleId\`. Do not aggregate noisy rules by \`kibana.alert.rule.name\`; names are not guaranteed unique.
+Call \`security.alerts\` to aggregate by \`kibana.alert.rule.rule_id\`, then call \`security.find_rules\` with \`{ ruleId: "<id>" }\` to look up matching rule details.
 
 ## Count Questions
 
 For simple count questions, call \`security.find_rules\` with the relevant filter and answer from \`total\`. Use a small \`perPage\` such as 1 if the user only wants the count.
 
 Examples:
-- "How many enabled custom rules?" -> \`filter: [[{ enabled: true }, { ruleSource: "custom" }]]\`
-- "How many enabled vs disabled?" -> call \`security.find_rules\` twice: once with \`{ enabled: true }\`, once with \`{ enabled: false }\`
+- "How many enabled custom rules?" -> \`{ enabled: true, ruleSource: "custom", perPage: 1 }\`
+- "How many enabled vs disabled?" -> call twice: once with \`{ enabled: true, perPage: 1 }\`, once with \`{ enabled: false, perPage: 1 }\`
 
-## Filter Shape
+## Filtering
 
-Both inline tools share the same structured filter, never raw KQL.
+All filter parameters are flat and optional. Non-array parameters are ANDed together. Array parameters (\`severity\`, \`ruleType\`, \`tags\`) are ORed within the field.
 
-- \`filter: AndGroup[]\`: outer array = OR
-- \`exclude: AndGroup[]\`: same shape, rules matching any group are excluded
-- \`AndGroup = Condition[]\`: inner array = AND
-- \`Condition\`: one atomic fact, one field per object
-
-Supported conditions: \`enabled\`, \`ruleSource\`, \`severity\`, \`ruleType\`, \`tag\`, \`mitreTechnique\`, \`nameContains\`, \`riskScoreMin\`, \`ruleUuid\`.
+Parameters: \`nameContains\`, \`enabled\`, \`ruleSource\`, \`severity\`, \`ruleType\`, \`tags\`, \`excludeTags\`, \`mitreTechnique\`, \`ruleId\`.
 
 Examples:
-- AND: \`filter: [[{ severity: "critical" }, { tag: "MITRE" }]]\`
-- OR: \`filter: [[{ severity: "critical" }], [{ severity: "high" }]]\`
-- Exclude: \`filter: [[{ tag: "MITRE" }]]\`, \`exclude: [[{ tag: "Custom" }]]\`
+- Enabled critical rules: \`{ enabled: true, severity: ["critical"] }\`
+- Critical or high severity: \`{ severity: ["critical", "high"] }\`
+- MITRE-tagged, exclude Custom: \`{ tags: ["MITRE"], excludeTags: ["Custom"] }\`
+- Custom query rules: \`{ ruleSource: "custom", ruleType: ["query"] }\`
 
 ## Rendering
 

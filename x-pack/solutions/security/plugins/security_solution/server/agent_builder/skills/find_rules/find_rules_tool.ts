@@ -6,23 +6,30 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { StartServicesAccessor } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
+import { type as detectionRuleType } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { findRules } from '../../../lib/detection_engine/rule_management/logic/search/find_rules';
+import { prepareKQLStringParam } from '../../../../common/utils/kql';
 import {
-  andGroupSchema,
-  buildFullFilter,
-  EXCLUDE_DESCRIPTION,
-  FILTER_DESCRIPTION,
-  type AndGroup,
-  type FindRulesToolDeps,
-} from './rule_filter';
-
-export { buildFullFilter } from './rule_filter';
+  convertRulesFilterToKQL,
+  convertRuleTagsToKQL,
+} from '../../../../common/detection_engine/rule_management/rule_filtering';
+import {
+  PARAMS_RULE_ID_FIELD,
+  PARAMS_SEVERITY_FIELD,
+  RULE_PARAMS_FIELDS,
+} from '../../../../common/detection_engine/rule_management/rule_fields';
+import { findRules } from '../../../lib/detection_engine/rule_management/logic/search/find_rules';
+import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 
 export const FIND_RULES_INLINE_TOOL_ID = 'security.find_rules';
 
+const SEVERITY_VALUES = ['critical', 'high', 'medium', 'low'] as const;
+const RULE_TYPE_VALUES = Object.keys(detectionRuleType.keys) as [Type, ...Type[]];
 const SORT_FIELDS = [
   'name',
   'updatedAt',
@@ -34,15 +41,47 @@ const SORT_FIELDS = [
 
 export const findRulesSchema = z
   .object({
-    filter: z.array(andGroupSchema).optional().describe(FILTER_DESCRIPTION),
-    exclude: z.array(andGroupSchema).optional().describe(EXCLUDE_DESCRIPTION),
+    nameContains: z.string().min(1).optional().describe('Search rules by name.'),
+    enabled: z.boolean().optional().describe('Match enabled (true) or disabled (false) rules.'),
+    ruleSource: z
+      .enum(['custom', 'prebuilt'])
+      .optional()
+      .describe('"custom" = user-authored, "prebuilt" = Elastic-shipped.'),
+    severity: z
+      .array(z.enum(SEVERITY_VALUES))
+      .optional()
+      .describe('Severity levels to include (OR). E.g. ["critical", "high"].'),
+    ruleType: z
+      .array(z.enum(RULE_TYPE_VALUES))
+      .optional()
+      .describe('Rule types to include (OR). E.g. ["query", "eql"].'),
+    tags: z
+      .array(z.string().min(1))
+      .optional()
+      .describe('Exact tag values (AND). Discover values first via `security.discover_rule_tags`.'),
+    excludeTags: z
+      .array(z.string().min(1))
+      .optional()
+      .describe('Exclude rules with any of these tags.'),
+    mitreTechnique: z
+      .string()
+      .regex(/^T\d{4}(\.\d{3})?$/i)
+      .optional()
+      .describe('MITRE technique ID, e.g. "T1059" or "T1059.001".'),
+    ruleId: z
+      .string()
+      .min(1)
+      .optional()
+      .describe(
+        'Detection rule signature ID. Use after aggregating alerts by `kibana.alert.rule.rule_id`.'
+      ),
     perPage: z
       .number()
       .int()
       .min(1)
       .max(100)
       .default(20)
-      .describe('Maximum number of rules to return (1-100). Set to N for "top N" queries.'),
+      .describe('Maximum rules to return (1-100). Set to N for "top N" queries.'),
     sortField: z
       .enum(SORT_FIELDS)
       .optional()
@@ -52,6 +91,70 @@ export const findRulesSchema = z
     sortOrder: z.enum(['asc', 'desc']).default('desc').describe('Sort direction (default desc).'),
   })
   .strict();
+
+// ---- Filter building ----
+//
+// Delegates to convertRulesFilterToKQL() for parameters it supports
+// (nameContains, enabled, ruleSource, tags, ruleType), and appends extra KQL
+// for parameters it doesn't (severity, mitreTechnique, ruleId, excludeTags).
+
+interface FilterInput {
+  nameContains?: string;
+  enabled?: boolean;
+  ruleSource?: 'custom' | 'prebuilt';
+  severity?: string[];
+  ruleType?: Type[];
+  tags?: string[];
+  excludeTags?: string[];
+  mitreTechnique?: string;
+  ruleId?: string;
+}
+
+export function buildToolFilter(params: FilterInput): string | undefined {
+  const baseKql = convertRulesFilterToKQL({
+    filter: params.nameContains,
+    enabled: params.enabled,
+    showCustomRules: params.ruleSource === 'custom',
+    showElasticRules: params.ruleSource === 'prebuilt',
+    tags: params.tags,
+    includeRuleTypes: params.ruleType,
+  });
+
+  const extra: string[] = [];
+
+  if (params.severity?.length) {
+    const parts = params.severity.map(
+      (s) => `${PARAMS_SEVERITY_FIELD}: ${prepareKQLStringParam(s)}`
+    );
+    extra.push(parts.length === 1 ? parts[0] : `(${parts.join(' OR ')})`);
+  }
+
+  if (params.mitreTechnique) {
+    const field = params.mitreTechnique.includes('.')
+      ? RULE_PARAMS_FIELDS.SUBTECHNIQUE_ID
+      : RULE_PARAMS_FIELDS.TECHNIQUE_ID;
+    extra.push(`${field}: ${prepareKQLStringParam(params.mitreTechnique)}`);
+  }
+
+  if (params.ruleId) {
+    extra.push(`${PARAMS_RULE_ID_FIELD}: ${prepareKQLStringParam(params.ruleId)}`);
+  }
+
+  if (params.excludeTags?.length) {
+    const parts = params.excludeTags.map((t) => `NOT ${convertRuleTagsToKQL([t])}`);
+    extra.push(parts.join(' AND '));
+  }
+
+  const allParts = [...(baseKql ? [baseKql] : []), ...extra];
+  return allParts.length > 0 ? allParts.join(' AND ') : undefined;
+}
+
+// ---- Tool handler ----
+
+interface FindRulesToolDeps {
+  getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>;
+  logger: Logger;
+}
 
 type RuleFromFind = Awaited<ReturnType<typeof findRules>>['data'][number];
 
@@ -69,10 +172,6 @@ function summarizeRule(rule: RuleFromFind) {
     type: params.type,
     updatedAt: rule.updatedAt,
   };
-}
-
-function hasTagCondition(groups: AndGroup[] | undefined): boolean {
-  return Boolean(groups?.some((g) => g.some((c) => 'tag' in c)));
 }
 
 function buildNoResultsHint(total: number, hasTagFilter: boolean): string {
@@ -98,7 +197,7 @@ export const createFindRulesInlineTool = ({
       const [, startPlugins] = await getStartServices();
       const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
 
-      const kqlFilter = buildFullFilter(input.filter, input.exclude);
+      const kqlFilter = buildToolFilter(input);
       const { perPage, sortField, sortOrder } = input;
 
       const findResult = await findRules({
@@ -112,7 +211,7 @@ export const createFindRulesInlineTool = ({
       });
 
       const rules = findResult.data.map(summarizeRule);
-      const hasTagFilter = hasTagCondition(input.filter) || hasTagCondition(input.exclude);
+      const hasTagFilter = Boolean(input.tags?.length || input.excludeTags?.length);
 
       const ruleNames = rules.map((r) => r.name).join(', ');
       const baseMessage =
