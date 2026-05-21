@@ -54,29 +54,37 @@ export const createGetDocViewer =
     return {
       ...prevDocViewer,
       docViewsRegistry: (registry) => {
+        const cpsManager = services.cps?.cpsManager;
+
+        const RenderLogOverview = (props: DocViewRenderProps) => {
+          const [routing, setRouting] = useState(() => cpsManager?.getProjectRouting());
+          useEffect(() => {
+            const subscription = cpsManager?.getProjectRouting$().subscribe(setRouting);
+            return () => subscription?.unsubscribe();
+          }, []);
+          const cpsHasLinkedProjects =
+            (cpsManager?.getTotalProjectCount() ?? 0) > 1 && routing !== PROJECT_ROUTING.ORIGIN;
+          return (
+            <LogOverviewTab
+              logOverviewContext$={context.logOverviewContext$}
+              logsAIAssistantFeature={logsAIAssistantFeature}
+              logsAIInsightFeature={logsAIInsightFeature}
+              streamsFeature={streamsFeature}
+              cpsHasLinkedProjects={cpsHasLinkedProjects}
+              indexes={indexes}
+              docViewActions={params.actions}
+              {...props}
+            />
+          );
+        };
+
         registry.add({
           id: 'doc_view_logs_overview',
           title: i18n.translate('discover.docViews.logsOverview.title', {
             defaultMessage: 'Log overview',
           }),
           order: 0,
-          render: (props: DocViewRenderProps) => {
-            const cpsHasLinkedProjects =
-              (services.cps?.cpsManager?.getTotalProjectCount() ?? 0) > 1 &&
-              services.cps?.cpsManager?.getProjectRouting() !== PROJECT_ROUTING.ORIGIN;
-            return (
-              <LogOverviewTab
-                logOverviewContext$={context.logOverviewContext$}
-                logsAIAssistantFeature={logsAIAssistantFeature}
-                logsAIInsightFeature={logsAIInsightFeature}
-                streamsFeature={streamsFeature}
-                cpsHasLinkedProjects={cpsHasLinkedProjects}
-                indexes={indexes}
-                docViewActions={params.actions}
-                {...props}
-              />
-            );
-          },
+          render: RenderLogOverview,
         });
 
         return prevDocViewer.docViewsRegistry(registry);
