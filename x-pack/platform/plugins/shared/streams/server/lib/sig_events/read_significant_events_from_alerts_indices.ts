@@ -22,11 +22,8 @@ const ALERTS_INDEX = '.alerts-streams.alerts-default';
 // Kept as an empty stub until the consumer-side schema/usage is removed.
 const EMPTY_CHANGE_POINTS = { type: {} } as const;
 
-// Rules with no firings in the requested window (and the "alerts index missing"
-// early-bail path) emit an empty occurrences array, mirroring the pre-ES|QL DSL
-// `notFoundSignificantEvents` branch. Downstream consumers (sparkline, reducers,
-// `formatLastOccurredAt`, `.some(p => p.y > 0)`) all handle `[]` correctly, so a
-// single shared reference keeps the wire shape consistent across both paths.
+// Shared empty array for rules with no firings and the alerts-index-missing path
+// — mirrors the pre-ES|QL DSL `notFoundSignificantEvents` behaviour.
 const EMPTY_OCCURRENCES: Array<{ date: string; count: number }> = [];
 
 export async function readSignificantEventsFromAlertsIndices(
@@ -70,8 +67,7 @@ export async function readSignificantEventsFromAlertsIndices(
   const esqlUnit = ESQL_UNITS[unit] ?? unit;
   const intervalMs = value * (MS_PER_UNIT[unit] ?? 1000);
 
-  // Inline one literal per value — passing the array as a single composer hole
-  // renders as a non-list ES|QL parameter and silently matches nothing.
+  // ES|QL `IN (?param)` does not expand array params — emit one literal per value.
   const ruleIdLiterals = ruleIds.map((id) => esql.str(id));
   const ruleUuidCol = esql.col(['kibana', 'alert', 'rule', 'uuid']);
 
@@ -97,10 +93,8 @@ export async function readSignificantEventsFromAlertsIndices(
         { cause: err instanceof Error ? err : new Error(String(err)) }
       );
     }
-    // Alerts index doesn't exist yet (no rules have fired) — surface an empty
-    // response. Mirrors the per-rule "not found" shape so consumers see the same
-    // `occurrences: []` regardless of whether the index is missing or the rule
-    // simply produced no firings.
+    // Alerts index missing (no rules have fired yet) → same empty shape as
+    // a per-rule "not found".
     if (type === 'verification_exception') {
       return buildEmptyResponse(queryLinks);
     }
@@ -142,10 +136,7 @@ export async function readSignificantEventsFromAlertsIndices(
     intervalMs
   );
 
-  // Rules absent from the ES|QL result set (never fired in the window) emit `[]`
-  // rather than a zero-filled series — mirrors the pre-ES|QL DSL behaviour
-  // (`notFoundSignificantEvents` branch) and matches what `buildEmptyResponse`
-  // emits when the alerts index is missing entirely. See EMPTY_OCCURRENCES note.
+  // Rules with no firings get `[]`, not a zero-filled series — see EMPTY_OCCURRENCES.
   const significantEvents = queryLinks.map((queryLink) => {
     const sparse = sparseByRule.get(queryLink.rule_id);
     return {

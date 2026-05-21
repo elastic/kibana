@@ -38,7 +38,6 @@ import {
   FEATURE_SEARCH_EMBEDDING,
 } from './fields';
 import type { FeatureStorageSettings } from './storage_settings';
-import { featureStorageSettings } from './storage_settings';
 import type { StoredFeature } from './stored_feature';
 import { StatusError } from '../errors/status_error';
 import { bulkWithInferenceFallback } from '../errors/bulk_with_inference_fallback';
@@ -51,8 +50,6 @@ import {
 } from '../../../../common/sig_events_tuning_config';
 
 const SEARCH_SIZE_LIMIT = 10_000;
-
-const FEATURES_INDEX = featureStorageSettings.name;
 
 function escapeWildcard(input: string): string {
   return input.replace(/[\\*?]/g, '\\$&');
@@ -327,11 +324,9 @@ export class FeatureClient {
 
     const sortField = options.sortBy === 'lastSeen' ? FEATURE_LAST_SEEN : FEATURE_CONFIDENCE;
     const size = options.limit ?? 10_000;
-    const query = esql.from([FEATURES_INDEX], ['_id', '_source']).pipe`SORT ${col(sortField)} DESC`
-      .limit(size)
-      .print('basic');
     const response = await this.clients.storageClient.esql({
-      query,
+      metadata: ['_id', '_source'],
+      buildPipeline: (q) => q.pipe`SORT ${col(sortField)} DESC`.limit(size),
       filter: { bool: { filter: filterClauses } },
     });
 
@@ -339,12 +334,11 @@ export class FeatureClient {
   }
 
   async getFeature(stream: string, uuid: string) {
-    const query = esql.from([FEATURES_INDEX], ['_id', '_source']).where`_id == ${esql.str(
-      uuid
-    )} AND ${col(STREAM_NAME)} == ${esql.str(stream)}`
-      .limit(1)
-      .print('basic');
-    const response = await this.clients.storageClient.esql({ query });
+    const response = await this.clients.storageClient.esql({
+      metadata: ['_id', '_source'],
+      buildPipeline: (q) =>
+        q.where`_id == ${esql.str(uuid)} AND ${col(STREAM_NAME)} == ${esql.str(stream)}`.limit(1),
+    });
 
     const sourceIdx = getSourceColumnIndex(response);
     const row = sourceIdx !== -1 ? response.values[0] : undefined;
@@ -369,10 +363,10 @@ export class FeatureClient {
     }
 
     const idLiterals = uuids.map((id) => esql.str(id));
-    const query = esql.from([FEATURES_INDEX], ['_id', '_source']).where`_id IN (${idLiterals})`
-      .limit(uuids.length)
-      .print('basic');
-    const response = await this.clients.storageClient.esql({ query });
+    const response = await this.clients.storageClient.esql({
+      metadata: ['_id', '_source'],
+      buildPipeline: (q) => q.where`_id IN (${idLiterals})`.limit(uuids.length),
+    });
 
     const idIdx = getColumnIndex(response, '_id');
     const sourceIdx = getSourceColumnIndex(response);
@@ -402,14 +396,13 @@ export class FeatureClient {
   }
 
   async getExcludedFeatures(stream: string): Promise<{ hits: Feature[] }> {
-    const query = esql.from([FEATURES_INDEX], ['_id', '_source']).where`${col(
-      STREAM_NAME
-    )} == ${esql.str(stream)} AND ${col(FEATURE_EXCLUDED_AT)} IS NOT NULL`.pipe`SORT ${col(
-      FEATURE_EXCLUDED_AT
-    )} DESC`
-      .limit(10_000)
-      .print('basic');
-    const response = await this.clients.storageClient.esql({ query });
+    const response = await this.clients.storageClient.esql({
+      metadata: ['_id', '_source'],
+      buildPipeline: (q) =>
+        q.where`${col(STREAM_NAME)} == ${esql.str(stream)} AND ${col(
+          FEATURE_EXCLUDED_AT
+        )} IS NOT NULL`.pipe`SORT ${col(FEATURE_EXCLUDED_AT)} DESC`.limit(10_000),
+    });
 
     return { hits: mapSourceRows<StoredFeature, Feature>(response, fromStorage) };
   }
@@ -470,11 +463,9 @@ export class FeatureClient {
     limit?: number
   ): Promise<{ hits: Feature[] }> {
     const size = limit ?? SEARCH_SIZE_LIMIT;
-    const baseQuery = esql.from([FEATURES_INDEX], ['_id', '_source']);
-    const esqlQuery = appendKeywordEsqlPipeline(baseQuery, query, size).print('basic');
-
     const response = await this.clients.storageClient.esql({
-      query: esqlQuery,
+      metadata: ['_id', '_source'],
+      buildPipeline: (q) => appendKeywordEsqlPipeline(q, query, size),
       filter: { bool: { filter } },
     });
 
@@ -596,11 +587,13 @@ export class FeatureClient {
       idsToValidate.length > 0
         ? await (async () => {
             const idLiterals = idsToValidate.map((id) => esql.str(id));
-            const query = esql.from([FEATURES_INDEX], ['_id', '_source'])
-              .where`_id IN (${idLiterals}) AND ${col(STREAM_NAME)} == ${esql.str(stream)}`
-              .limit(idsToValidate.length)
-              .print('basic');
-            const response = await this.clients.storageClient.esql({ query });
+            const response = await this.clients.storageClient.esql({
+              metadata: ['_id', '_source'],
+              buildPipeline: (q) =>
+                q.where`_id IN (${idLiterals}) AND ${col(STREAM_NAME)} == ${esql.str(
+                  stream
+                )}`.limit(idsToValidate.length),
+            });
             const idIdx = getColumnIndex(response, '_id');
             const sourceIdx = getSourceColumnIndex(response);
             if (idIdx === -1 || sourceIdx === -1) return [];

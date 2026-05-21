@@ -382,11 +382,11 @@ describe('StorageIndexAdapter - esql method', () => {
     loggerMock = createLoggerMock();
   });
 
-  it('forwards query and returns ES|QL response', async () => {
+  it('renders FROM + caller pipeline and returns the ES|QL response', async () => {
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
 
-    const result = await client.esql({ query: 'FROM test_index | LIMIT 1' });
+    const result = await client.esql({ buildPipeline: (q) => q.limit(1) });
 
     expect(esqlQuery).toHaveBeenCalledWith(
       expect.objectContaining({ query: 'FROM test_index | LIMIT 1', format: 'json' })
@@ -394,17 +394,36 @@ describe('StorageIndexAdapter - esql method', () => {
     expect(result).toEqual(mockEsqlResponse);
   });
 
+  it('emits a METADATA clause when metadata is provided', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await client.esql({
+      metadata: ['_id', '_source'],
+      buildPipeline: (q) => q.limit(1),
+    });
+
+    expect(esqlQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: 'FROM test_index METADATA _id, _source | LIMIT 1',
+      })
+    );
+  });
+
   it('forwards params to esClient.esql.query', async () => {
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
 
     const params = [{ p: '*foo*' }];
-    await client.esql({ query: 'FROM test_index | WHERE foo LIKE ?p | LIMIT 5', params });
+    await client.esql({
+      buildPipeline: (q) => q.pipe`WHERE foo LIKE ?p`.limit(5),
+      params,
+    });
 
     expect(esqlQuery).toHaveBeenCalledWith(expect.objectContaining({ params }));
   });
 
-  it('returns empty response when index does not exist (404 path)', async () => {
+  it('returns empty response when the storage index does not exist (404 path)', async () => {
     const notFoundError = new errors.ResponseError({
       statusCode: 404,
       headers: {},
@@ -417,22 +436,19 @@ describe('StorageIndexAdapter - esql method', () => {
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
 
-    const result = await client.esql({ query: 'FROM test_index | LIMIT 1' });
+    const result = await client.esql({ buildPipeline: (q) => q.limit(1) });
 
     expect(result).toEqual({ columns: [], values: [] });
   });
 
-  it('returns empty response for ES|QL verification_exception with Unknown index', async () => {
+  it('returns empty response for 400 verification_exception with Unknown index', async () => {
     const unknownIndexError = new errors.ResponseError({
       statusCode: 400,
       headers: {},
       warnings: [],
       meta: {} as TransportResult['meta'],
       body: {
-        error: {
-          type: 'verification_exception',
-          reason: 'Unknown index [missing_index]',
-        },
+        error: { type: 'verification_exception', reason: 'Unknown index [test_index]' },
       },
     } as TransportResult);
     esqlQuery.mockRejectedValueOnce(unknownIndexError);
@@ -440,41 +456,18 @@ describe('StorageIndexAdapter - esql method', () => {
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
 
-    const result = await client.esql({ query: 'FROM test_index | LIMIT 1' });
-
+    const result = await client.esql({ buildPipeline: (q) => q.limit(1) });
     expect(result).toEqual({ columns: [], values: [] });
   });
 
-  it.each([
-    [
-      'FROM other_index | LIMIT 1',
-      'StorageClientEsql query must target storage index [test_index], got [other_index]',
-    ],
-    [
-      'FROM test_index, other_index | LIMIT 1',
-      'StorageClientEsql query must target storage index [test_index], got [test_index, other_index]',
-    ],
-    ['ROW foo = "bar"', 'StorageClientEsql query must include a FROM command'],
-    ['FROM | LIMIT 1', 'StorageClientEsql query could not be parsed'],
-  ])('rejects out-of-scope ES|QL query: %s', async (query, message) => {
-    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
-    const client = adapter.getClient();
-
-    await expect(client.esql({ query })).rejects.toThrow(message);
-    expect(esqlQuery).not.toHaveBeenCalled();
-  });
-
-  it('rethrows ES|QL verification_exception errors that are not Unknown index', async () => {
+  it('rethrows non-404 errors (verification_exception, etc.)', async () => {
     const verificationError = new errors.ResponseError({
       statusCode: 400,
       headers: {},
       warnings: [],
       meta: {} as TransportResult['meta'],
       body: {
-        error: {
-          type: 'verification_exception',
-          reason: 'Unknown column [foo]',
-        },
+        error: { type: 'verification_exception', reason: 'Unknown column [foo]' },
       },
     } as TransportResult);
     esqlQuery.mockRejectedValueOnce(verificationError);
@@ -482,22 +475,21 @@ describe('StorageIndexAdapter - esql method', () => {
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
 
-    await expect(client.esql({ query: 'FROM test_index | LIMIT 1' })).rejects.toThrow(
+    await expect(client.esql({ buildPipeline: (q) => q.limit(1) })).rejects.toThrow(
       'verification_exception'
     );
   });
 
-  it('applies migrateSource to _source column when migrateSource option is configured', async () => {
+  it('applies migrateSource to _source column when metadata includes _source', async () => {
     const rawSource = { foo: 'bar', version: 0 };
     const migratedSource = { foo: 'bar', version: 1 };
-    const esqlWithSourceResponse = {
+    esqlQuery.mockResolvedValueOnce({
       columns: [
         { name: '_source', type: 'unsupported' },
         { name: 'foo', type: 'keyword' },
       ],
       values: [[rawSource, 'bar']],
-    };
-    esqlQuery.mockResolvedValueOnce(esqlWithSourceResponse);
+    });
 
     const migrateSource = jest.fn().mockReturnValue(migratedSource);
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
@@ -505,19 +497,41 @@ describe('StorageIndexAdapter - esql method', () => {
     });
     const client = adapter.getClient();
 
-    const result = await client.esql({ query: 'FROM test_index METADATA _source | LIMIT 1' });
+    const result = await client.esql({
+      metadata: ['_source'],
+      buildPipeline: (q) => q.limit(1),
+    });
 
     expect(migrateSource).toHaveBeenCalledWith(rawSource);
     expect(result.values[0][0]).toEqual(migratedSource);
   });
 
-  it('skips migrateSource when migrateSource: false is passed', async () => {
+  it('skips migrateSource when metadata does not include _source (even with migrateSource configured)', async () => {
     const rawSource = { foo: 'bar', version: 0 };
-    const esqlWithSourceResponse = {
+    esqlQuery.mockResolvedValueOnce({
       columns: [{ name: '_source', type: 'unsupported' }],
       values: [[rawSource]],
-    };
-    esqlQuery.mockResolvedValueOnce(esqlWithSourceResponse);
+    });
+
+    const migrateSource = jest.fn().mockReturnValue({ foo: 'bar', version: 1 });
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
+      migrateSource,
+    });
+    const client = adapter.getClient();
+
+    // metadata omitted — even if a `_source` column shows up in the response,
+    // the adapter must not touch it (caller did not opt in).
+    await client.esql({ buildPipeline: (q) => q.limit(1) });
+
+    expect(migrateSource).not.toHaveBeenCalled();
+  });
+
+  it('skips migrateSource when migrateSource: false is passed', async () => {
+    const rawSource = { foo: 'bar', version: 0 };
+    esqlQuery.mockResolvedValueOnce({
+      columns: [{ name: '_source', type: 'unsupported' }],
+      values: [[rawSource]],
+    });
 
     const migrateSource = jest.fn().mockReturnValue({ foo: 'bar', version: 1 });
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
@@ -526,7 +540,8 @@ describe('StorageIndexAdapter - esql method', () => {
     const client = adapter.getClient();
 
     const result = await client.esql({
-      query: 'FROM test_index METADATA _source | LIMIT 1',
+      metadata: ['_source'],
+      buildPipeline: (q) => q.limit(1),
       migrateSource: false,
     });
 
@@ -534,32 +549,20 @@ describe('StorageIndexAdapter - esql method', () => {
     expect(result.values[0][0]).toEqual(rawSource);
   });
 
-  it('forwards filter to esClient.esql.query', async () => {
+  it('forwards filter and transport options to esClient.esql.query', async () => {
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
 
     const filter = {
       bool: { filter: [{ range: { '@timestamp': { gte: 'now-1h' } } }] },
     };
-    await client.esql({ query: 'FROM test_index | LIMIT 5', filter });
-
-    expect(esqlQuery).toHaveBeenCalledWith(expect.objectContaining({ filter }));
-  });
-
-  it('forwards transport options to esClient.esql.query', async () => {
-    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
-    const client = adapter.getClient();
-
     const transportOptions: StorageTransportOptions = {
       maxResponseSize: 50 * 1024 * 1024,
       requestTimeout: 30_000,
     };
-    await client.esql({ query: 'FROM test_index | LIMIT 1' }, transportOptions);
+    await client.esql({ buildPipeline: (q) => q.limit(5), filter }, transportOptions);
 
-    expect(esqlQuery).toHaveBeenCalledWith(
-      expect.objectContaining({ query: 'FROM test_index | LIMIT 1' }),
-      transportOptions
-    );
+    expect(esqlQuery).toHaveBeenCalledWith(expect.objectContaining({ filter }), transportOptions);
   });
 
   it('awaits ensureMappingsBeforeReading before issuing the ES|QL query', async () => {
@@ -579,7 +582,7 @@ describe('StorageIndexAdapter - esql method', () => {
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
 
-    const esqlPromise = client.esql({ query: 'FROM test_index | LIMIT 1' });
+    const esqlPromise = client.esql({ buildPipeline: (q) => q.limit(1) });
 
     // Microtask flush; the adapter should still be waiting on the alias lookup,
     // so esql.query must not have been issued yet.

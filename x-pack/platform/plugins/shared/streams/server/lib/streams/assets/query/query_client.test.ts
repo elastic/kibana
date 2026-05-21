@@ -8,6 +8,7 @@
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { BulkOperationError, type IStorageClient } from '@kbn/storage-adapter';
+import { esql } from '@elastic/esql';
 import type { StreamQuery, Streams } from '@kbn/streams-schema';
 import { QUERY_TYPE_STATS } from '@kbn/streams-schema/src/queries';
 import { DEFAULT_SIG_EVENTS_TUNING_CONFIG } from '../../../../../common/sig_events_tuning_config';
@@ -139,6 +140,18 @@ const toEsqlSourceResponse = (docs: Array<Record<string, unknown>>) => ({
   columns: [{ name: '_source', type: 'unsupported' as const }],
   values: docs.map((doc) => [doc]),
 });
+
+/** Renders the ES|QL string from a mocked `storageClient.esql` call. */
+const renderEsqlCallQuery = (call: {
+  metadata?: string[];
+  buildPipeline: (q: ReturnType<typeof esql.from>) => unknown;
+}): string => {
+  const base =
+    call.metadata && call.metadata.length > 0
+      ? esql.from(['test_index'], call.metadata)
+      : esql.from(['test_index']);
+  return (call.buildPipeline(base) as ReturnType<typeof esql.from>).print('basic');
+};
 
 // ==================== Tests ====================
 
@@ -559,7 +572,7 @@ describe('QueryClient backward compatibility', () => {
       await client.findQueries(['logs.target'], 'authentication', undefined, 'keyword');
 
       expect(storageClient.esql).toHaveBeenCalledTimes(1);
-      const rendered = storageClient.esql.mock.calls[0][0].query as string;
+      const rendered = renderEsqlCallQuery(storageClient.esql.mock.calls[0][0]);
 
       // Must use the AND-only COALESCE form, not the OR form that depends on
       // composer-stripped syntactic parens.
@@ -580,7 +593,7 @@ describe('QueryClient backward compatibility', () => {
         'keyword'
       );
 
-      const rendered = storageClient.esql.mock.calls[0][0].query as string;
+      const rendered = renderEsqlCallQuery(storageClient.esql.mock.calls[0][0]);
       expect(rendered).toEqual(expect.stringContaining('COALESCE(rule_backed, TRUE) == TRUE'));
       expect(rendered).not.toMatch(/rule_backed\s+IS\s+NULL/i);
     });
@@ -597,7 +610,7 @@ describe('QueryClient backward compatibility', () => {
         'keyword'
       );
 
-      const rendered = storageClient.esql.mock.calls[0][0].query as string;
+      const rendered = renderEsqlCallQuery(storageClient.esql.mock.calls[0][0]);
       expect(rendered).toMatch(/rule_backed\s*==\s*FALSE/i);
       expect(rendered).not.toEqual(expect.stringContaining('COALESCE'));
       expect(rendered).not.toMatch(/rule_backed\s+IS\s+NULL/i);

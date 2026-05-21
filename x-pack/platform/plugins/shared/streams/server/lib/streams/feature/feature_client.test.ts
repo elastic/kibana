@@ -32,6 +32,7 @@ import {
   FEATURE_EXCLUDED_AT,
   FEATURE_SEARCH_EMBEDDING,
 } from './fields';
+import { esql } from '@elastic/esql';
 import { FeatureClient, buildSearchEmbeddingText } from './feature_client';
 import type { FeatureStorageSettings } from './storage_settings';
 import type { StoredFeature } from './stored_feature';
@@ -50,6 +51,18 @@ const createMockStorageClient = () => ({
   get: jest.fn(),
   existsIndex: jest.fn(),
 });
+
+/** Renders the ES|QL string from a mocked `storageClient.esql` call. */
+const renderEsqlCallQuery = (call: {
+  metadata?: string[];
+  buildPipeline: (q: ReturnType<typeof esql.from>) => unknown;
+}): string => {
+  const base =
+    call.metadata && call.metadata.length > 0
+      ? esql.from(['test_index'], call.metadata)
+      : esql.from(['test_index']);
+  return (call.buildPipeline(base) as ReturnType<typeof esql.from>).print('basic');
+};
 
 const createFeatureClient = ({
   storageClient = createMockStorageClient(),
@@ -289,7 +302,7 @@ describe('FeatureClient', () => {
       const { client, storageClient } = createFeatureClient();
       await client.getFeatures('logs.test');
 
-      const query = storageClient.esql.mock.calls[0][0].query as string;
+      const query = renderEsqlCallQuery(storageClient.esql.mock.calls[0][0]);
       expect(query).toContain(`SORT ${FEATURE_CONFIDENCE} DESC`);
     });
   });
@@ -335,7 +348,7 @@ describe('FeatureClient', () => {
       const { client, storageClient } = createFeatureClient();
       await client.getExcludedFeatures('logs.test');
 
-      const { query } = storageClient.esql.mock.calls[0][0];
+      const query = renderEsqlCallQuery(storageClient.esql.mock.calls[0][0]);
       expect(query).toContain('IS NOT NULL');
       expect(query).toContain('"logs.test"');
     });
@@ -344,7 +357,7 @@ describe('FeatureClient', () => {
       const { client, storageClient } = createFeatureClient();
       await client.getExcludedFeatures('logs.test');
 
-      const query = storageClient.esql.mock.calls[0][0].query as string;
+      const query = renderEsqlCallQuery(storageClient.esql.mock.calls[0][0]);
       expect(query).toContain(`SORT ${FEATURE_EXCLUDED_AT} DESC`);
     });
   });
@@ -535,7 +548,7 @@ describe('FeatureClient', () => {
 
       expect(storageClient.esql).toHaveBeenCalledTimes(1);
       const args = storageClient.esql.mock.calls[0][0];
-      expect(args.query).toBeDefined();
+      expect(args.buildPipeline).toBeDefined();
       expect(storageClient.search).not.toHaveBeenCalled();
     });
 
@@ -587,7 +600,7 @@ describe('FeatureClient', () => {
       expect(storageClient.esql).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('falling back to keyword'));
       const fallbackArgs = storageClient.esql.mock.calls[0][0];
-      expect(fallbackArgs.query).toBeDefined();
+      expect(fallbackArgs.buildPipeline).toBeDefined();
     });
 
     it('passes the limit through to the LIMIT clause', async () => {
@@ -597,9 +610,8 @@ describe('FeatureClient', () => {
         limit: 25,
       });
 
-      // Composer inlines the limit value into the query — no separate params array.
-      const args = storageClient.esql.mock.calls[0][0];
-      expect(args.query).toMatch(/LIMIT\s+25\b/);
+      const rendered = renderEsqlCallQuery(storageClient.esql.mock.calls[0][0]);
+      expect(rendered).toMatch(/LIMIT\s+25\b/);
     });
   });
 

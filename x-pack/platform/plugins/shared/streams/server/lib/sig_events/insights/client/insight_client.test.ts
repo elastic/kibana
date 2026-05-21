@@ -18,7 +18,20 @@ import type { Insight } from '@kbn/streams-schema';
 import { InsightClient } from './insight_client';
 import { INSIGHT_IMPACT, INSIGHT_IMPACT_LEVEL, INSIGHT_GENERATED_AT } from './fields';
 import type { InsightStorageSettings } from './storage_settings';
+import { esql } from '@elastic/esql';
 import { StatusError } from '../../../streams/errors/status_error';
+
+/** Renders the ES|QL string from a mocked `storageClient.esql` call. */
+const renderEsqlCallQuery = (call: {
+  metadata?: string[];
+  buildPipeline: (q: ReturnType<typeof esql.from>) => unknown;
+}): string => {
+  const base =
+    call.metadata && call.metadata.length > 0
+      ? esql.from(['test_index'], call.metadata)
+      : esql.from(['test_index']);
+  return (call.buildPipeline(base) as ReturnType<typeof esql.from>).print('basic');
+};
 
 describe('InsightClient', () => {
   const createMockStorageClient = (): jest.Mocked<
@@ -90,10 +103,8 @@ describe('InsightClient', () => {
 
       const result = await client.get('test-id');
 
-      // Composer inlines string literals into the query — no separate params array.
-      expect(mockStorageClient.esql).toHaveBeenCalledWith(
-        expect.objectContaining({ query: expect.stringContaining('"test-id"') })
-      );
+      const rendered = renderEsqlCallQuery(mockStorageClient.esql.mock.calls[0][0]);
+      expect(rendered).toContain('"test-id"');
       expect(result.id).toEqual('test-id');
       expect(result.title).toEqual('Test Insight');
     });
@@ -123,13 +134,8 @@ describe('InsightClient', () => {
 
       const result = await client.list();
 
-      expect(mockStorageClient.esql).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: expect.stringContaining(
-            `SORT ${INSIGHT_IMPACT_LEVEL} ASC, ${INSIGHT_GENERATED_AT} DESC`
-          ),
-        })
-      );
+      const rendered = renderEsqlCallQuery(mockStorageClient.esql.mock.calls[0][0]);
+      expect(rendered).toContain(`SORT ${INSIGHT_IMPACT_LEVEL} ASC, ${INSIGHT_GENERATED_AT} DESC`);
       expect(mockStorageClient.search).not.toHaveBeenCalled();
       expect(result.insights).toHaveLength(1);
       expect(result.total).toEqual(1);
@@ -171,10 +177,8 @@ describe('InsightClient', () => {
 
       const result = await client.delete('test-id');
 
-      // Composer inlines string literals into the query — no separate params array.
-      expect(mockStorageClient.esql).toHaveBeenCalledWith(
-        expect.objectContaining({ query: expect.stringContaining('"test-id"') })
-      );
+      const rendered = renderEsqlCallQuery(mockStorageClient.esql.mock.calls[0][0]);
+      expect(rendered).toContain('"test-id"');
       expect(mockStorageClient.delete).toHaveBeenCalledWith({ id: 'test-id' });
       expect(result).toEqual({ acknowledged: true });
     });

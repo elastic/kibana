@@ -21,6 +21,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { EsqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { TransportRequestOptions } from '@elastic/transport';
+import type { ComposerQuery } from '@elastic/esql';
 import type { ESQLSearchResponse, InferSearchResponseOf } from '@kbn/es-types';
 import type { StorageFieldTypeOf, StorageMappingProperty } from './types';
 
@@ -151,20 +152,30 @@ export type StorageClientGet<TDocumentType extends { _id?: string } = never> = (
 
 export type StorageClientExistsIndex = () => Promise<boolean>;
 
+/**
+ * Executes an ES|QL query against the storage adapter's index. The adapter
+ * owns the `FROM`/`METADATA` prefix and applies the same read-side guarantees
+ * as `search`/`get`; the caller supplies the post-FROM pipeline via
+ * `buildPipeline`.
+ */
 export type StorageClientEsql = (
-  request: {
-    /** Full ES|QL query string, including the `FROM <index>` prefix — the adapter does not prepend it. */
-    query: string;
-    /** Named ES|QL params; required for any user-derived value or `LIKE` pattern. */
-    params?: EsqlQueryRequest['params'];
-    /** DSL query ANDed with the ES|QL pipeline (e.g. time-range gates, stream-name scoping). */
-    filter?: QueryDslQueryContainer;
-    drop_null_columns?: boolean;
-    /** When true (default), `maybeMigrateSource` is applied to each `_source` column. */
-    migrateSource?: boolean;
-  },
+  request: StorageClientEsqlRequest,
   transportOptions?: StorageTransportOptions
 ) => Promise<ESQLSearchResponse>;
+
+export interface StorageClientEsqlRequest {
+  /** Chains the post-FROM pipeline on the adapter-supplied `ComposerQuery`. */
+  buildPipeline: (query: ComposerQuery) => ComposerQuery;
+  /** METADATA fields for the auto-generated `FROM` clause (e.g. `['_id', '_source']`). */
+  metadata?: string[];
+  /** Named ES|QL params (use for user-derived values and `LIKE` patterns). */
+  params?: EsqlQueryRequest['params'];
+  /** DSL query ANDed with the pipeline. */
+  filter?: QueryDslQueryContainer;
+  drop_null_columns?: boolean;
+  /** Apply `maybeMigrateSource` to the `_source` column (default true; no-op without `metadata: ['_source', ...]`). */
+  migrateSource?: boolean;
+}
 
 export interface InternalIStorageClient<TDocumentType extends { _id?: string } = never> {
   search: StorageClientSearch<TDocumentType>;

@@ -10,11 +10,9 @@ import { esql } from '@elastic/esql';
 import type { IStorageClient } from '@kbn/storage-adapter';
 import type { Insight, InsightImpactLevel } from '@kbn/streams-schema';
 import { INSIGHT_IMPACT, INSIGHT_IMPACT_LEVEL, INSIGHT_GENERATED_AT } from './fields';
-import { insightStorageSettings, type InsightStorageSettings } from './storage_settings';
+import type { InsightStorageSettings } from './storage_settings';
 import { StatusError } from '../../../streams/errors/status_error';
 import { col, getSourceColumnIndex } from '../../../streams/helpers/esql';
-
-const INSIGHTS_INDEX = insightStorageSettings.name;
 
 interface InsightBulkIndexOperation {
   index: Insight;
@@ -53,9 +51,8 @@ export class InsightClient {
    */
   async get(id: string): Promise<Insight> {
     const response = await this.clients.storageClient.esql({
-      query: esql.from([INSIGHTS_INDEX], ['_id', '_source']).where`_id == ${esql.str(id)}`
-        .limit(1)
-        .print('basic'),
+      metadata: ['_id', '_source'],
+      buildPipeline: (q) => q.where`_id == ${esql.str(id)}`.limit(1),
     });
 
     const sourceIdx = getSourceColumnIndex(response);
@@ -84,11 +81,11 @@ export class InsightClient {
     }
 
     const response = await this.clients.storageClient.esql({
-      query: esql.from([INSIGHTS_INDEX], ['_id', '_source']).pipe`SORT ${col(
-        INSIGHT_IMPACT_LEVEL
-      )} ASC, ${col(INSIGHT_GENERATED_AT)} DESC`
-        .limit(10000)
-        .print('basic'),
+      metadata: ['_id', '_source'],
+      buildPipeline: (q) =>
+        q.pipe`SORT ${col(INSIGHT_IMPACT_LEVEL)} ASC, ${col(INSIGHT_GENERATED_AT)} DESC`.limit(
+          10000
+        ),
       ...(filterClauses.length > 0 ? { filter: { bool: { filter: filterClauses } } } : {}),
     });
 
@@ -124,14 +121,12 @@ export class InsightClient {
     });
 
     if (deleteIds.length > 0) {
-      // Inline one literal per value — passing the array as a single composer hole
-      // renders as a non-list ES|QL parameter and silently matches nothing.
+      // ES|QL `IN (?param)` does not expand array params — emit one literal per value.
       const idLiterals = deleteIds.map((id) => esql.str(id));
 
       const existingResponse = await this.clients.storageClient.esql({
-        query: esql.from([INSIGHTS_INDEX], ['_id', '_source']).where`_id IN (${idLiterals})`
-          .limit(deleteIds.length)
-          .print('basic'),
+        metadata: ['_id', '_source'],
+        buildPipeline: (q) => q.where`_id IN (${idLiterals})`.limit(deleteIds.length),
       });
 
       const idIdx = existingResponse.columns.findIndex((column) => column.name === '_id');
