@@ -10,6 +10,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import {
   DEVTOOL_HIDDEN_ATTR,
+  DEVTOOL_CLONE_HIDDEN_ATTR,
   DEVTOOL_MANAGED_ATTR,
   INHERITED_CSS_PROPS,
   BACKGROUND_CSS_PROPS,
@@ -19,25 +20,10 @@ import {
 } from '../lib/constants';
 import { stripTruncationClasses, isTruncatedDeep } from './truncation_helpers';
 import { collectAllTextNodes } from './collect_text_nodes';
+import { hasNoWrapTextInChain } from './text_layout_helpers';
 import { tagColorTokens, colorToToken, toHex } from '../lib/dom/color_token_lookup';
 import { getTokenVar } from '../lib/dom/color_token_stylesheet';
-
-/**
- * Set a CSS property with `!important` priority.
- *
- * Cloned elements retain their original CSS classes, which may include
- * Emotion-generated rules that use `!important` (e.g. EUI's euiCard__icon
- * sets a centering transform). Plain inline style assignments are silently
- * overridden by those rules, so we must use `setProperty` with the
- * `'important'` priority flag to guarantee our values win.
- *
- * @param el - The target element.
- * @param prop - The CSS property name.
- * @param value - The CSS value to set.
- */
-export const setImportant = (el: HTMLElement, prop: string, value: string): void => {
-  el.style.setProperty(prop, value, 'important');
-};
+import { setImportant } from '../lib/dom/set_important';
 
 /**
  * Hides an element visually while preserving its layout position.
@@ -112,14 +98,17 @@ export const unfreezeChildren = (
 const unfreezeAncestors = (
   el: HTMLElement,
   property: 'width' | 'height',
-  root?: HTMLElement | null
+  root?: HTMLElement | null,
+  includeRoot = false
 ): void => {
   const maxProp = property === 'width' ? 'max-width' : 'max-height';
   let ancestor = el.parentElement;
   let depth = 0;
-  while (ancestor && ancestor !== root?.parentElement && depth < MAX_TREE_DEPTH) {
+  while (ancestor && depth < MAX_TREE_DEPTH) {
+    if (root && ancestor === root && !includeRoot) break;
     ancestor.style.removeProperty(property);
     ancestor.style.removeProperty(maxProp);
+    if (root && ancestor === root) break;
     ancestor = ancestor.parentElement;
     depth++;
   }
@@ -164,13 +153,31 @@ export const reflowAfterStyleChange = (
  * Unfreeze a text node's parent and its descendants after a text content,
  * font-size, or font-weight change so the parent resizes to fit.
  *
+ * When `root` is provided, ancestors between `parent` and `root` are also
+ * unfrozen so nested text edits can expand container chains.
+ *
  * @param parent - The parent element containing the changed text node.
+ * @param root - Optional clone root for ancestor unfreezing.
  */
-export const reflowAfterTextChange = (parent: HTMLElement): void => {
+export const reflowAfterTextChange = (parent: HTMLElement, root?: HTMLElement | null): void => {
+  const shouldUnfreezeRootWidth = shouldUnfreezeRootWidthForText(parent, root);
   parent.style.removeProperty('width');
   parent.style.removeProperty('height');
   unfreezeChildren(parent, 'width');
   unfreezeChildren(parent, 'height');
+  unfreezeAncestors(parent, 'width', root, shouldUnfreezeRootWidth);
+  // Let managed roots grow vertically to avoid post-edit text overflow.
+  // Root width stays fixed for wrapping text, but is unfrozen in
+  // no-wrap contexts so content can grow horizontally.
+  unfreezeAncestors(parent, 'height', root, true);
+};
+
+const shouldUnfreezeRootWidthForText = (
+  parent: HTMLElement,
+  root?: HTMLElement | null
+): boolean => {
+  if (!root) return false;
+  return hasNoWrapTextInChain(parent, root, MAX_TREE_DEPTH);
 };
 
 /**
@@ -197,8 +204,10 @@ export const reflowManagedStyle = (element: HTMLElement, cssProp: string): void 
  * @param parent - The parent element of the changed text node.
  */
 export const reflowManagedText = (parent: HTMLElement | null): void => {
-  if (parent?.closest(`[${DEVTOOL_MANAGED_ATTR}]`)) {
-    reflowAfterTextChange(parent);
+  if (!parent) return;
+  const managedRoot = parent.closest(`[${DEVTOOL_MANAGED_ATTR}]`);
+  if (managedRoot instanceof HTMLElement) {
+    reflowAfterTextChange(parent, managedRoot);
   }
 };
 
@@ -246,13 +255,16 @@ const collectAncestorDims = (
   el: HTMLElement,
   property: 'width' | 'height',
   root: HTMLElement | null | undefined,
-  out: DimensionRecord[]
+  out: DimensionRecord[],
+  includeRoot = false
 ): void => {
   const maxProp = property === 'width' ? 'max-width' : 'max-height';
   let ancestor = el.parentElement;
-  while (ancestor && ancestor !== root?.parentElement) {
+  while (ancestor) {
+    if (root && ancestor === root && !includeRoot) break;
     recordDim(ancestor, property, out);
     recordDim(ancestor, maxProp, out);
+    if (root && ancestor === root) break;
     ancestor = ancestor.parentElement;
   }
 };
@@ -262,14 +274,23 @@ const collectAncestorDims = (
  * will remove. Call BEFORE reflow to capture state for undo/revert.
  *
  * @param parent - The parent element containing text nodes.
+ * @param root - Optional clone root for ancestor collection.
  * @returns Dimension records to pass to {@link restoreDimensions}.
  */
-export const collectTextReflowDimensions = (parent: HTMLElement): DimensionRecord[] => {
+export const collectTextReflowDimensions = (
+  parent: HTMLElement,
+  root?: HTMLElement | null
+): DimensionRecord[] => {
+  const shouldCaptureRootWidth = shouldUnfreezeRootWidthForText(parent, root);
   const out: DimensionRecord[] = [];
   recordDim(parent, 'width', out);
   recordDim(parent, 'height', out);
   collectChildDims(parent, 'width', out);
   collectChildDims(parent, 'height', out);
+  collectAncestorDims(parent, 'width', root, out, shouldCaptureRootWidth);
+  // Match reflowAfterTextChange behavior: root width stays fixed, but root
+  // height may be unfrozen and must be restorable on undo/revert.
+  collectAncestorDims(parent, 'height', root, out, true);
   return out;
 };
 
@@ -583,7 +604,7 @@ export const copyStylesDeep = (
   applyPseudoStyle(original, clone, '::before');
   applyPseudoStyle(original, clone, '::after');
 
-  const hadTruncationClass = stripTruncationClasses(clone);
+  const hadTruncationClass = stripTruncationClasses(clone, original);
 
   const shouldPinDimensions = !isRoot && !hadTruncationClass;
   if (shouldPinDimensions) {
@@ -611,10 +632,10 @@ export const copyStylesDeep = (
 };
 
 /**
- * Check whether the target or any descendant has a truncation class, and if
- * so temporarily append the clone to the body to measure its natural
- * `scrollWidth`. When the clone is wider than `rect`, update both the clone's
- * CSS width and the returned rect.
+ * Check whether the target or any descendant has truncation and, if so,
+ * temporarily append the clone to the body to measure its natural
+ * `scrollWidth` and `scrollHeight`. When the clone is larger than `rect` in
+ * either axis, update the clone's CSS dimensions and the returned rect.
  *
  * @param target - The original element to check for truncation.
  * @param clone - The cloned element to measure.
@@ -632,12 +653,19 @@ export const widenForTruncation = (
   document.body.appendChild(clone);
   try {
     const naturalWidth = clone.scrollWidth;
-    if (naturalWidth > rect.width) {
-      const w = Math.ceil(naturalWidth);
-      setImportant(clone, 'width', `${w}px`);
-      return new DOMRect(rect.x, rect.y, w, rect.height);
+    const naturalHeight = clone.scrollHeight;
+    const nextWidth = naturalWidth > rect.width ? Math.ceil(naturalWidth) : rect.width;
+    const nextHeight = naturalHeight > rect.height ? Math.ceil(naturalHeight) : rect.height;
+
+    if (nextWidth > rect.width) {
+      setImportant(clone, 'width', `${nextWidth}px`);
     }
-    return rect;
+    if (nextHeight > rect.height) {
+      setImportant(clone, 'height', `${nextHeight}px`);
+    }
+
+    const changed = nextWidth !== rect.width || nextHeight !== rect.height;
+    return changed ? new DOMRect(rect.x, rect.y, nextWidth, nextHeight) : rect;
   } finally {
     document.body.removeChild(clone);
     clone.style.visibility = 'visible';
@@ -671,7 +699,7 @@ export const cloneElement = (
     hidden.style.visibility = 'hidden';
     hidden.style.pointerEvents = 'none';
     hidden.removeAttribute(DEVTOOL_HIDDEN_ATTR);
-    hidden.dataset.cloneHidden = '';
+    hidden.setAttribute(DEVTOOL_CLONE_HIDDEN_ATTR, 'true');
   }
 
   setImportant(clone, 'position', 'fixed');
@@ -708,7 +736,7 @@ const MAX_CLONE_ELEMENTS = 2000;
  */
 const fixCloneVisibility = (el: HTMLElement, depth = 0): void => {
   if (depth > MAX_TREE_DEPTH) return;
-  if ('cloneHidden' in el.dataset) return;
+  if (el.hasAttribute(DEVTOOL_CLONE_HIDDEN_ATTR)) return;
   if (el.style.visibility === 'hidden') el.style.visibility = 'visible';
   if (el.style.pointerEvents === 'none') el.style.pointerEvents = '';
   for (let i = 0; i < el.children.length; i++) {

@@ -49,6 +49,9 @@ export const DEVTOOL_LIBRARY_ID_ATTR = 'data-devtool-library-id';
 /** Marks an original element hidden by the edit overlay. Stores the original inline transform. */
 export const DEVTOOL_HIDDEN_ATTR = 'data-devtool-hidden';
 
+/** Marks a managed clone descendant that must remain hidden in clone/preview trees. */
+export const DEVTOOL_CLONE_HIDDEN_ATTR = 'data-clone-hidden';
+
 /** Marks an element that should be excluded from measurement/selection. */
 export const DEVTOOL_IGNORE_ATTR = 'data-devtool-ignore';
 

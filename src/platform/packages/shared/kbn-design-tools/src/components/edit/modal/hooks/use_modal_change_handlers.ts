@@ -218,14 +218,7 @@ export const useModalChangeHandlers = ({
             });
           }
         }
-        draft.pushBatch(
-          batch,
-          collectStyleReflowDimensions(
-            cloneEl,
-            property,
-            cloneRef.current?.firstElementChild as HTMLElement | null
-          )
-        );
+        draft.pushBatch(batch, collectStyleReflowDimensions(cloneEl, property, cloneRef.current));
       } else {
         const batch: DraftEdit[] = [dimensionEdit];
 
@@ -262,21 +255,10 @@ export const useModalChangeHandlers = ({
           }
         }
 
-        draft.pushBatch(
-          batch,
-          collectStyleReflowDimensions(
-            cloneEl,
-            property,
-            cloneRef.current?.firstElementChild as HTMLElement | null
-          )
-        );
+        draft.pushBatch(batch, collectStyleReflowDimensions(cloneEl, property, cloneRef.current));
       }
 
-      reflowAfterStyleChange(
-        cloneEl,
-        property,
-        cloneRef.current?.firstElementChild as HTMLElement | null
-      );
+      reflowAfterStyleChange(cloneEl, property, cloneRef.current);
       refreshOverlayRef.current();
     },
     [selectedElement, draft, elementMapRef, cloneRef, originalDimensionsRef]
@@ -321,22 +303,24 @@ export const useModalChangeHandlers = ({
         updates.fontSize !== undefined ||
         updates.fontWeight !== undefined;
       const cloneParent = mapping.clone.parentElement;
+      const cloneRoot = cloneRef.current?.firstElementChild;
+      const reflowRoot = cloneRoot instanceof HTMLElement ? cloneRoot : null;
       const dims =
         needsReflow && cloneParent instanceof HTMLElement
-          ? collectTextReflowDimensions(cloneParent)
+          ? collectTextReflowDimensions(cloneParent, reflowRoot)
           : undefined;
 
       if (edits.length === 1) draft.push(edits[0], dims);
       else if (edits.length > 1) draft.pushBatch(edits, dims);
 
       if (needsReflow && cloneParent instanceof HTMLElement) {
-        reflowAfterTextChange(cloneParent);
+        reflowAfterTextChange(cloneParent, reflowRoot);
       }
 
       setTextEntries((prev) => prev.map((e, i) => (i === index ? { ...e, ...updates } : e)));
       refreshOverlayRef.current();
     },
-    [draft, textNodeMap, setTextEntries]
+    [cloneRef, draft, textNodeMap, setTextEntries]
   );
 
   const handleTextNodeFocus = useCallback(

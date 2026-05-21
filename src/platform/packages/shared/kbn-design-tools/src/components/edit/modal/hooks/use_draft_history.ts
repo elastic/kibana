@@ -16,8 +16,9 @@ import type {
   DraftTextEdit,
   DraftMediaEdit,
 } from '../../../../lib/history/draft_history';
-import { setImportant, restoreDimensions } from '../../../../edit_engine/clone_element';
+import { restoreDimensions } from '../../../../edit_engine/clone_element';
 import type { DimensionRecord } from '../../../../edit_engine/clone_element';
+import { setImportant } from '../../../../lib/dom/set_important';
 import { applySourceAttribute } from '../../library/eui_icon_cache';
 
 interface DraftEntry extends StackEntry {

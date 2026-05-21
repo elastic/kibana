@@ -18,13 +18,13 @@ import {
   restoreDimensions,
   deduplicateSvgIds,
   roundRect,
-  setImportant,
   softHideElement,
   restoreHiddenElement,
   cloneElement,
   copyStylesDeep,
   widenForTruncation,
 } from './clone_element';
+import { setImportant } from '../lib/dom/set_important';
 import { DEVTOOL_HIDDEN_ATTR, DEVTOOL_MANAGED_ATTR } from '../lib/constants';
 import '../lib/tests/mocks';
 
@@ -142,14 +142,16 @@ describe('reflowAfterStyleChange', () => {
     const root = document.createElement('div');
     const child = document.createElement('div');
     wrapper.style.width = '500px';
+    root.style.setProperty('max-width', '300px');
     root.style.width = '300px';
     wrapper.appendChild(root);
     root.appendChild(child);
 
     reflowAfterStyleChange(child, 'width', root);
-    // Root is unfrozen (it's inside the boundary)
-    expect(root.style.width).toBe('');
-    // Wrapper is outside the boundary — untouched
+    // Root is the boundary and should stay fixed
+    expect(root.style.width).toBe('300px');
+    expect(root.style.getPropertyValue('max-width')).toBe('300px');
+    // Wrapper is outside the boundary and untouched
     expect(wrapper.style.width).toBe('500px');
   });
 });
@@ -169,6 +171,47 @@ describe('reflowAfterTextChange', () => {
     expect(parent.style.height).toBe('');
     expect(child.style.width).toBe('');
     expect(child.style.height).toBe('');
+  });
+
+  it('should unfreeze ancestors up to root when root is provided', () => {
+    const root = document.createElement('div');
+    const mid = document.createElement('div');
+    const parent = document.createElement('div');
+    setImportant(mid, 'width', '300px');
+    setImportant(mid, 'height', '200px');
+    root.appendChild(mid);
+    mid.appendChild(parent);
+
+    reflowAfterTextChange(parent, root);
+    expect(mid.style.width).toBe('');
+    expect(mid.style.height).toBe('');
+  });
+
+  it('should not unfreeze ancestors past root boundary', () => {
+    const wrapper = document.createElement('div');
+    const root = document.createElement('div');
+    const parent = document.createElement('div');
+    setImportant(wrapper, 'width', '500px');
+    setImportant(root, 'width', '300px');
+    setImportant(root, 'height', '200px');
+    wrapper.appendChild(root);
+    root.appendChild(parent);
+
+    reflowAfterTextChange(parent, root);
+    expect(root.style.width).toBe('300px');
+    expect(root.style.height).toBe('');
+    expect(wrapper.style.width).toBe('500px');
+  });
+
+  it('should unfreeze root width for no-wrap text contexts', () => {
+    const root = document.createElement('div');
+    const parent = document.createElement('span');
+    setImportant(root, 'width', '123px');
+    setImportant(parent, 'white-space', 'nowrap');
+    root.appendChild(parent);
+
+    reflowAfterTextChange(parent, root);
+    expect(root.style.width).toBe('');
   });
 });
 
@@ -253,6 +296,41 @@ describe('collectTextReflowDimensions', () => {
 
     const dims = collectTextReflowDimensions(parent);
     expect(dims).toHaveLength(0);
+  });
+
+  it('should capture ancestor dimensions up to root', () => {
+    const root = document.createElement('div');
+    const mid = document.createElement('div');
+    const parent = document.createElement('div');
+    setImportant(mid, 'width', '280px');
+    setImportant(mid, 'height', '120px');
+    setImportant(root, 'height', '400px');
+    root.appendChild(mid);
+    mid.appendChild(parent);
+
+    const dims = collectTextReflowDimensions(parent, root);
+    expect(dims).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ element: mid, property: 'width', value: '280px' }),
+        expect.objectContaining({ element: mid, property: 'height', value: '120px' }),
+        expect.objectContaining({ element: root, property: 'height', value: '400px' }),
+      ])
+    );
+  });
+
+  it('should capture root width for no-wrap text contexts', () => {
+    const root = document.createElement('div');
+    const parent = document.createElement('span');
+    setImportant(root, 'width', '123px');
+    setImportant(parent, 'white-space', 'nowrap');
+    root.appendChild(parent);
+
+    const dims = collectTextReflowDimensions(parent, root);
+    expect(dims).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ element: root, property: 'width', value: '123px' }),
+      ])
+    );
   });
 });
 
@@ -512,6 +590,45 @@ describe('widenForTruncation', () => {
     const result = widenForTruncation(target, clone, rect);
 
     expect(result.width).toBe(134);
+
+    target.remove();
+  });
+
+  it('should increase height when natural scrollHeight exceeds rect height', () => {
+    const target = document.createElement('span');
+    target.classList.add('eui-textTruncate');
+    document.body.appendChild(target);
+
+    const clone = document.createElement('span');
+    Object.defineProperty(clone, 'scrollWidth', { value: 90, configurable: true });
+    Object.defineProperty(clone, 'scrollHeight', { value: 78, configurable: true });
+
+    const rect = new DOMRect(0, 0, 100, 40);
+    const result = widenForTruncation(target, clone, rect);
+
+    expect(result.width).toBe(100);
+    expect(result.height).toBe(78);
+    expect(clone.style.getPropertyValue('height')).toBe('78px');
+
+    target.remove();
+  });
+
+  it('should increase both width and height when both natural dimensions exceed rect', () => {
+    const target = document.createElement('span');
+    target.classList.add('eui-textTruncate');
+    document.body.appendChild(target);
+
+    const clone = document.createElement('span');
+    Object.defineProperty(clone, 'scrollWidth', { value: 161, configurable: true });
+    Object.defineProperty(clone, 'scrollHeight', { value: 79, configurable: true });
+
+    const rect = new DOMRect(0, 0, 100, 40);
+    const result = widenForTruncation(target, clone, rect);
+
+    expect(result.width).toBe(161);
+    expect(result.height).toBe(79);
+    expect(clone.style.getPropertyValue('width')).toBe('161px');
+    expect(clone.style.getPropertyValue('height')).toBe('79px');
 
     target.remove();
   });

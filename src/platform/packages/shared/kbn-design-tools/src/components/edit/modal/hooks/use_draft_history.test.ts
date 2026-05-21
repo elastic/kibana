@@ -15,7 +15,7 @@ import type {
   DraftMediaEdit,
 } from '../../../../lib/history/draft_history';
 import type { DimensionRecord } from '../../../../edit_engine/clone_element';
-import { setImportant } from '../../../../edit_engine/clone_element';
+import { setImportant } from '../../../../lib/dom/set_important';
 
 describe('useDraftHistory', () => {
   const makeStyleEdit = (overrides: Partial<DraftStyleEdit> = {}): DraftStyleEdit => {

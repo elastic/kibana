@@ -13,6 +13,12 @@ import { useDraftHistory } from './use_draft_history';
 import type { TextNodeEntry } from '../text_node_editor';
 import type { MediaEditorEntry } from '../media_editor';
 import type { DraftHistoryResult } from './use_draft_history';
+import {
+  collectStyleReflowDimensions,
+  collectTextReflowDimensions,
+  reflowAfterStyleChange,
+  reflowAfterTextChange,
+} from '../../../../edit_engine/clone_element';
 
 jest.mock('../../../../edit_engine/clone_element', () => ({
   reflowAfterStyleChange: jest.fn(),
@@ -216,6 +222,26 @@ describe('useModalChangeHandlers', () => {
       expect(widthEdit).toBeUndefined();
       expect(heightEdit).toBeUndefined();
     });
+
+    it('should use preview wrapper as style reflow root boundary', () => {
+      jest.clearAllMocks();
+      const { result: draftResult } = renderHook(() => useDraftHistory());
+      const args = createArgs();
+      const selected = args.selectedElement as HTMLElement;
+      const cloneEl = args.elementMapRef.current.get(selected) as HTMLElement;
+      const wrapper = document.createElement('div');
+      wrapper.appendChild(cloneEl);
+      args.cloneRef.current = wrapper;
+
+      const { result } = renderHook(() =>
+        useModalChangeHandlers({ ...args, draft: draftResult.current })
+      );
+
+      act(() => result.current.handleDimensionChange('padding', '20px'));
+
+      expect(collectStyleReflowDimensions).toHaveBeenCalledWith(cloneEl, 'padding', wrapper);
+      expect(reflowAfterStyleChange).toHaveBeenCalledWith(cloneEl, 'padding', wrapper);
+    });
   });
 
   describe('handleMediaChange', () => {
@@ -286,6 +312,29 @@ describe('useModalChangeHandlers', () => {
       act(() => result.current.handleTextNodeChange(99, { text: 'world' }));
 
       expect(draftResult.current.state.canUndo).toBe(false);
+    });
+
+    it('should use inner clone root as text reflow root boundary', () => {
+      jest.clearAllMocks();
+      const { result: draftResult } = renderHook(() => useDraftHistory());
+      const args = createArgs();
+      const wrapper = document.createElement('div');
+      const selected = args.selectedElement as HTMLElement;
+      const cloneEl = args.elementMapRef.current.get(selected) as HTMLElement;
+      wrapper.appendChild(cloneEl);
+      args.cloneRef.current = wrapper;
+
+      const cloneTextNode = args.textNodeMap.current[0].clone;
+      const textParent = cloneTextNode.parentElement as HTMLElement;
+
+      const { result } = renderHook(() =>
+        useModalChangeHandlers({ ...args, draft: draftResult.current })
+      );
+
+      act(() => result.current.handleTextNodeChange(0, { text: 'world' }));
+
+      expect(collectTextReflowDimensions).toHaveBeenCalledWith(textParent, cloneEl);
+      expect(reflowAfterTextChange).toHaveBeenCalledWith(textParent, cloneEl);
     });
   });
 
