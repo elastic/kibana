@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/scout'
   - '@kbn/inference-common'
+  - '@kbn/test'
 tags:
   - functional-tests
   - package
