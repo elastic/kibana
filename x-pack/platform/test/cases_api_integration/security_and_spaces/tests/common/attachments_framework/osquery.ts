@@ -107,6 +107,41 @@ export default ({ getService }: FtrProviderContext): void => {
           expectedHttpCode: 400,
         });
       });
+
+      it('persists the legacy externalReference shape on cases-comments', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const patched = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: legacyOsqueryPayload(),
+        });
+        const commentId = patched.comments![0].id;
+
+        const esResponse = await getSOFromKibanaIndex({
+          es,
+          soType: CASE_COMMENT_SAVED_OBJECT,
+          soId: commentId,
+        });
+
+        const source = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT] as Record<
+          string,
+          unknown
+        >;
+        expect(source).to.be.ok();
+        // Legacy externalReference shape is stored as-is on cases-comments and
+        // must not pick up any unified-only fields.
+        expect(source.type).to.be('externalReference');
+        expect(source.externalReferenceAttachmentTypeId).to.be('osquery');
+        expect(source.externalReferenceId).to.be('action-1');
+        expect(source.externalReferenceMetadata).to.eql({
+          actionId: 'action-1',
+          agentIds: ['agent-1'],
+          queryId: 'query-1',
+        });
+        expect(source.attachmentId).to.be(undefined);
+        expect(source.metadata).to.be(undefined);
+        expect(source.data).to.be(undefined);
+      });
     });
 
     describe('unified `osquery` POSTs', () => {
