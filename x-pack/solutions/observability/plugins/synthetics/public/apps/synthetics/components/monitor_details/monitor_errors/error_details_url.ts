@@ -10,15 +10,19 @@ export const getErrorDetailsUrl = ({
   configId,
   stateId,
   locationId,
+  spaceId,
 }: {
   stateId: string;
   basePath: string;
   configId: string;
   locationId?: string;
+  spaceId?: string;
 }) => {
-  const path = `${basePath}/app/synthetics/monitor/${configId}/errors/${stateId}`;
-  if (!locationId) {
-    return path;
-  }
-  return `${path}?locationId=${encodeURIComponent(locationId)}`;
+  const params = new URLSearchParams();
+  if (locationId) params.set('locationId', locationId);
+  if (spaceId) params.set('spaceId', spaceId);
+  const search = params.toString();
+  return `${basePath}/app/synthetics/monitor/${configId}/errors/${stateId}${
+    search ? `?${search}` : ''
+  }`;
 };
