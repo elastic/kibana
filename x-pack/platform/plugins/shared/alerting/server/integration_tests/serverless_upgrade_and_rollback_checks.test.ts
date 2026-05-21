@@ -13,6 +13,62 @@ import { uniq } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { setupTestServers } from './lib';
+
+/**
+ * Resolves lazy schema proxies (from @kbn/zod lazySchema) in a schema tree.
+ *
+ * lazySchema() wraps schemas in a Proxy whose target is `{}`, so
+ * Object.getPrototypeOf(proxy) === Object.prototype. Zod v4's toJSONSchema
+ * uses a Map keyed by schema identity: when a Proxy is registered but the
+ * closure inside processJSONSchema captures the real materialized instance,
+ * the Map lookup fails and crashes with "Cannot set properties of undefined".
+ *
+ * We fix this by replacing each lazy proxy with a fresh real instance created
+ * via `new zod.constr(zod.def)`, and recursing into object shapes and
+ * intersection sides where nested proxies may live.
+ */
+function resolveSchemaProxies(schema: z.ZodType): z.ZodType {
+  if (!schema || typeof schema !== 'object') return schema;
+
+  const zod = (
+    schema as unknown as {
+      _zod?: { def?: { type?: string }; constr?: new (def: unknown) => z.ZodType };
+    }
+  )._zod;
+  if (!zod?.def) return schema;
+
+  // Lazy proxies have Object.prototype as their prototype (their target is `{}`),
+  // whereas real Zod schema instances have a class prototype.
+  if (Object.getPrototypeOf(schema) === Object.prototype) {
+    // Materialize a fresh real instance. The fresh instance's processJSONSchema
+    // closure captures the new `inst`, so ctx.seen lookups succeed.
+    return new zod.constr!(zod.def);
+  }
+
+  const def = zod.def as Record<string, unknown>;
+  switch (def.type) {
+    case 'intersection': {
+      const left = resolveSchemaProxies(def.left as z.ZodType);
+      const right = resolveSchemaProxies(def.right as z.ZodType);
+      if (left === def.left && right === def.right) return schema;
+      return new zod.constr!({ ...def, left, right });
+    }
+    case 'object': {
+      const shape = def.shape as Record<string, z.ZodType>;
+      const newShape: Record<string, z.ZodType> = {};
+      let changed = false;
+      for (const key of Object.keys(shape)) {
+        const resolved = resolveSchemaProxies(shape[key]);
+        newShape[key] = resolved;
+        if (resolved !== shape[key]) changed = true;
+      }
+      if (!changed) return schema;
+      return new zod.constr!({ ...def, shape: newShape });
+    }
+    default:
+      return schema;
+  }
+}
 import type { RuleTypeRegistry } from '../rule_type_registry';
 
 jest.mock('../rule_type_registry', () => {
@@ -71,8 +127,7 @@ const ruleTypesInSecurityProjects: string[] = [
   'siem.newTermsRule',
 ];
 
-// Failing: See https://github.com/elastic/kibana/issues/235899
-describe.skip('Serverless upgrade and rollback checks', () => {
+describe('Serverless upgrade and rollback checks', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
   let ruleTypeRegistry: RuleTypeRegistry;
@@ -112,8 +167,10 @@ describe.skip('Serverless upgrade and rollback checks', () => {
         const schema = ruleType.schemas.params.schema;
         let jsonSchema: Record<string, unknown>;
         if (schema && typeof schema === 'object' && '_zod' in schema) {
-          // Zod v4 schema
-          const { $schema, ...rest } = z.toJSONSchema(schema as z.ZodType, {
+          // Zod v4 schema — resolve lazy proxies before conversion to avoid
+          // a Map identity mismatch inside Zod's toJSONSchema internals.
+          const resolvedSchema = resolveSchemaProxies(schema as z.ZodType);
+          const { $schema, ...rest } = z.toJSONSchema(resolvedSchema, {
             unrepresentable: 'any',
             io: 'input',
             reused: 'ref',
