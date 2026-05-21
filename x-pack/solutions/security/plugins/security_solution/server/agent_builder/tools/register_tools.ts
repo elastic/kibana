@@ -16,6 +16,7 @@ import { createDetectionRuleTool } from './create_detection_rule_tool';
 import { pciComplianceTool } from './pci_compliance_tool';
 import { pciScopeDiscoveryTool } from './pci_scope_discovery_tool';
 import { pciFieldMapperTool } from './pci_field_mapper_tool';
+import { registerSiemReadinessTools } from './siem_readiness';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
 /**
@@ -28,7 +29,8 @@ export const registerTools = async (
   agentBuilder: AgentBuilderPluginSetup,
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
-  experimentalFeatures: ExperimentalFeatures
+  experimentalFeatures: ExperimentalFeatures,
+  isServerless: boolean = false
 ) => {
   agentBuilder.tools.register(entityRiskScoreTool(core, logger));
   agentBuilder.tools.register(attackDiscoverySearchTool(core, logger));
@@ -43,4 +45,6 @@ export const registerTools = async (
     agentBuilder.tools.register(pciComplianceTool(core, logger));
     agentBuilder.tools.register(pciFieldMapperTool(core, logger));
   }
+
+  registerSiemReadinessTools(agentBuilder, core, logger, isServerless);
 };
