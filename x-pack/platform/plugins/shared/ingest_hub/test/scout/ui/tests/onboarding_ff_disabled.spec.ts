@@ -14,7 +14,7 @@ test.describe('Onboarding app — FF disabled (default)', { tag: tags.stateful.c
     await browserAuth.loginAsAdmin();
     await page.gotoApp('onboarding');
 
-    await expect(page.testSubj.locator('onboardingApp')).toBeHidden();
-    expect(page.url()).not.toContain('/app/onboarding');
+    await expect(page).not.toHaveURL(/\/app\/onboarding/);
+    await expect(page.testSubj.locator('onboardingShell')).toBeHidden();
   });
 });
