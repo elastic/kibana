@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
@@ -136,13 +136,9 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment(ruleAttachment);
 
-  const handleClick = useCallback(() => {
-    openAgentBuilderFlyout();
-  }, [openAgentBuilderFlyout]);
-
   return (
     <NewAgentBuilderAttachment
-      onClick={handleClick}
+      onClick={openAgentBuilderFlyout}
       telemetry={{
         pathway,
         attachments: ['rule'],
