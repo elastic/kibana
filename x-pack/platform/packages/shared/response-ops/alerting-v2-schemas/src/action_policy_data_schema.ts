@@ -155,19 +155,6 @@ export const validateTypeAndRuleId = (payload: ValidationPayload) => {
   }
 };
 
-export const actionPolicyTypeAndRuleIdSchema = z
-  .object({
-    type: actionPolicyTypeSchema
-      .default('global')
-      .describe('The action policy type. Defaults to "global" when omitted.'),
-    ruleId: z
-      .string()
-      .min(1)
-      .optional()
-      .describe('The rule this policy is attached to. Required when type is "single_rule".'),
-  })
-  .check(validateTypeAndRuleId);
-
 export type ActionPolicyDestination = z.infer<typeof actionPolicyDestinationSchema>;
 
 export const snoozeActionPolicyBodySchema = z.object({
@@ -234,35 +221,50 @@ export const bulkActionActionPoliciesBodySchema = z.object({
 
 export type BulkActionActionPoliciesBody = z.infer<typeof bulkActionActionPoliciesBodySchema>;
 
-export const createActionPolicyDataSchema = actionPolicyTypeAndRuleIdSchema
-  .extend({
-    name: z.string().min(1).max(MAX_NAME_LENGTH).describe('The name of the action policy.'),
-    description: z
-      .string()
-      .max(MAX_DESCRIPTION_LENGTH)
-      .describe('A description of the action policy.'),
-    destinations: z
-      .array(actionPolicyDestinationSchema)
-      .min(1, 'At least one destination must be provided')
-      .max(MAX_DESTINATIONS)
-      .describe('The list of destinations. At least one is required.'),
-    matcher: z
-      .string()
-      .max(MAX_KQL_LENGTH)
-      .optional()
-      .describe('A KQL query string to match alerts.'),
-    groupBy: z
-      .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
-      .max(MAX_GROUPING_FIELDS)
-      .optional()
-      .describe('The fields used to group alerts.'),
-    tags: tagsSchema.optional().describe('Tags for categorizing the action policy.'),
-    groupingMode: groupingModeSchema
-      .optional()
-      .describe('The grouping mode for alert notifications.'),
-    throttle: throttleSchema.optional().describe('The throttle configuration for notifications.'),
-  })
-  .check(validateGroupingModeAndStrategy);
+const createActionPolicyDataBaseSchema = z.object({
+  name: z.string().min(1).max(MAX_NAME_LENGTH).describe('The name of the action policy.'),
+  description: z
+    .string()
+    .max(MAX_DESCRIPTION_LENGTH)
+    .describe('A description of the action policy.'),
+  type: actionPolicyTypeSchema
+    .default('global')
+    .describe('The action policy type. Defaults to "global" when omitted.'),
+  ruleId: z
+    .string()
+    .min(1)
+    .optional()
+    .describe('The rule this policy is attached to. Required when type is "single_rule".'),
+  destinations: z
+    .array(actionPolicyDestinationSchema)
+    .min(1, 'At least one destination must be provided')
+    .max(MAX_DESTINATIONS)
+    .describe('The list of destinations. At least one is required.'),
+  matcher: z
+    .string()
+    .max(MAX_KQL_LENGTH)
+    .optional()
+    .describe('A KQL query string to match alerts.'),
+  groupBy: z
+    .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
+    .max(MAX_GROUPING_FIELDS)
+    .optional()
+    .describe('The fields used to group alerts.'),
+  tags: tagsSchema.optional().describe('Tags for categorizing the action policy.'),
+  groupingMode: groupingModeSchema
+    .optional()
+    .describe('The grouping mode for alert notifications.'),
+  throttle: throttleSchema.optional().describe('The throttle configuration for notifications.'),
+});
+
+export const createActionPolicyDataSchema = createActionPolicyDataBaseSchema.check(
+  validateGroupingModeAndStrategy,
+  validateTypeAndRuleId
+);
+
+export const actionPolicyTypeAndRuleIdSchema = createActionPolicyDataBaseSchema
+  .pick({ type: true, ruleId: true })
+  .check(validateTypeAndRuleId);
 
 export type CreateActionPolicyData = z.infer<typeof createActionPolicyDataSchema>;
 // Caller-facing shape: `type` is optional because the schema defaults it to 'global'.
