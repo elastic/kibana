@@ -139,5 +139,10 @@ export { RULE_PREBUILD_DESCRIPTION_FIELDS } from './application/sections/rule_de
 
 export { RuleQueryInspector } from './application/components/rule_query_inspector';
 export type { RuleQueryInspectorProps } from './application/components/rule_query_inspector';
+export { loadRuleQueryInspector } from './application/lib/rule_api/inspect_query';
+export type {
+  QueryInspectorResult,
+  QueryInspectorResponse,
+} from './application/lib/rule_api/inspect_query';
 
 export { getIsExperimentalFeatureEnabled } from './common/get_experimental_features';

@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import {
   EuiButton,
   EuiContextMenuItem,
@@ -23,8 +24,9 @@ import {
   ALERT_RULE_UUID,
   ALERT_STATUS_ACTIVE,
   ALERT_UUID,
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
-import { RuleQueryInspector } from '@kbn/triggers-actions-ui-plugin/public';
+import { loadRuleQueryInspector } from '@kbn/triggers-actions-ui-plugin/public';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public/types';
 import { OBSERVABILITY_ALERT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 
@@ -104,6 +106,76 @@ function AddToCaseContextMenuItem({
   );
 }
 
+const INSPECT_SUPPORTED_RULE_TYPES = new Set([OBSERVABILITY_THRESHOLD_RULE_TYPE_ID]);
+
+const INSPECT_TITLE = i18n.translate('xpack.observability.alertDetails.inspectTitle', {
+  defaultMessage: 'Inspect',
+});
+
+const INSPECT_ERROR_TITLE = i18n.translate('xpack.observability.alertDetails.inspectErrorTitle', {
+  defaultMessage: 'Unable to load query',
+});
+
+function InspectRuleQueryMenuItem({
+  ruleId,
+  ruleTypeId,
+  alertId,
+  closePopover,
+}: {
+  ruleId: string;
+  ruleTypeId: string;
+  alertId?: string;
+  closePopover: () => void;
+}) {
+  const {
+    services: { http, inspector, notifications },
+  } = useKibana();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleInspect = useCallback(async () => {
+    if (!inspector) return;
+
+    closePopover();
+    setIsLoading(true);
+    try {
+      const result = await loadRuleQueryInspector({ http, ruleId, mode: 'execute', alertId });
+      const adapter = new RequestAdapter();
+      for (const query of result.queries) {
+        const name = query.label ?? query.index ?? 'Query';
+        const req = adapter.start(name);
+        req.json(query.request);
+        if (query.response) {
+          req.ok({ json: query.response });
+        }
+      }
+      inspector.open({ requests: adapter }, { title: INSPECT_TITLE });
+    } catch (e) {
+      notifications.toasts.addError(e instanceof Error ? e : new Error(String(e)), {
+        title: INSPECT_ERROR_TITLE,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [http, inspector, notifications, ruleId, alertId, closePopover]);
+
+  if (!INSPECT_SUPPORTED_RULE_TYPES.has(ruleTypeId) || !inspector) {
+    return null;
+  }
+
+  return (
+    <EuiContextMenuItem
+      icon="inspect"
+      onClick={handleInspect}
+      disabled={isLoading}
+      data-test-subj="ruleQueryInspectorButton"
+    >
+      {i18n.translate('xpack.observability.alertDetails.inspect', {
+        defaultMessage: 'Inspect',
+      })}
+    </EuiContextMenuItem>
+  );
+}
+
 export interface HeaderActionsProps extends AlertDetailsRuleFormFlyoutBaseProps {
   alert: TopAlert | null;
   alertIndex?: string;
@@ -158,15 +230,6 @@ export function HeaderActions({
     <ObsCasesContext>
       <>
         <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
-          {alert?.fields[ALERT_RULE_UUID] && alert?.fields[ALERT_RULE_TYPE_ID] && (
-            <EuiFlexItem grow={false}>
-              <RuleQueryInspector
-                ruleId={alert.fields[ALERT_RULE_UUID]}
-                ruleTypeId={alert.fields[ALERT_RULE_TYPE_ID]}
-                alertId={alert.fields[ALERT_UUID]}
-              />
-            </EuiFlexItem>
-          )}
           <EuiFlexItem grow={false}>
             <EuiPopover
               panelPaddingSize="none"
@@ -247,6 +310,15 @@ export function HeaderActions({
                     defaultMessage: 'Mark as untracked',
                   })}
                 </EuiContextMenuItem>
+                <EuiHorizontalRule margin="none" />
+                {alert?.fields[ALERT_RULE_UUID] && alert?.fields[ALERT_RULE_TYPE_ID] && (
+                  <InspectRuleQueryMenuItem
+                    ruleId={alert.fields[ALERT_RULE_UUID]}
+                    ruleTypeId={alert.fields[ALERT_RULE_TYPE_ID]}
+                    alertId={alert.fields[ALERT_UUID]}
+                    closePopover={handleClosePopover}
+                  />
+                )}
                 <EuiHorizontalRule margin="none" />
                 <EuiContextMenuItem
                   icon="link"
