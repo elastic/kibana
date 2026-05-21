@@ -9,16 +9,15 @@
 
 export const DURABLE_STEP_STATE_KEY = '__durableStepState';
 
-export type DurableStepState = {
+export interface DurableStepState {
   customState?: Record<string, unknown>;
-  initialRunState?: { isRun: boolean };
+  initialStartState?: { isStart: boolean };
   pollState?: { attempt: number; nextPollAt: string; lastPollAt: string };
   startedAt?: string;
-};
+}
 
-export const getDurableState = (
-  persisted: Record<string, unknown> | undefined
-): DurableStepState => (persisted?.[DURABLE_STEP_STATE_KEY] ?? {}) as DurableStepState;
+export const getDurableState = (persisted: Record<string, unknown> | undefined): DurableStepState =>
+  (persisted?.[DURABLE_STEP_STATE_KEY] ?? {}) as DurableStepState;
 
 export interface TestNode {
   stepId: string;

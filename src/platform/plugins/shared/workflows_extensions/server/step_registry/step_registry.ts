@@ -9,15 +9,22 @@
 
 import type { Logger } from '@kbn/logging';
 import type { z } from '@kbn/zod/v4';
-import type { ServerStepDefinition } from './types';
-import type { ServerStepDefinitionOrLoader } from '../types';
+import {
+  applyPollDefaults,
+  DEFAULT_POLL_CEILINGS,
+  isPollStepDefinition,
+  pollCeilingsAreDefault,
+  type RegisteredStepDefinition,
+  validateStepDefinitionShape,
+} from './types';
+import type { RegisteredStepDefinitionOrLoader } from '../types';
 
 /**
  * Registry for server-side workflow step implementations.
  * Stores step handlers and definitions.
  */
 export class ServerStepRegistry {
-  private readonly registry = new Map<string, ServerStepDefinition>();
+  private readonly registry = new Map<string, RegisteredStepDefinition>();
   private readonly pending = new Set<Promise<void>>(); // Stores promises that are either in progress or have been rejected
 
   constructor(private readonly logger: Logger) {}
@@ -31,7 +38,7 @@ export class ServerStepRegistry {
     Input extends z.ZodType = z.ZodType,
     Output extends z.ZodType = z.ZodType,
     Config extends z.ZodObject = z.ZodObject
-  >(definitionOrLoader: ServerStepDefinitionOrLoader<Input, Output, Config>): void {
+  >(definitionOrLoader: RegisteredStepDefinitionOrLoader<Input, Output, Config>): void {
     if (typeof definitionOrLoader === 'function') {
       const promise = definitionOrLoader()
         .then((definition) => {
@@ -61,13 +68,22 @@ export class ServerStepRegistry {
     Input extends z.ZodType = z.ZodType,
     Output extends z.ZodType = z.ZodType,
     Config extends z.ZodObject = z.ZodObject
-  >(definition: ServerStepDefinition<Input, Output, Config>): void {
+  >(definition: RegisteredStepDefinition<Input, Output, Config>): void {
     if (this.registry.has(definition.id)) {
       throw new Error(
         `Step definition for type "${definition.id}" is already registered. Each step type must have a unique definition.`
       );
     }
-    this.registry.set(definition.id, definition);
+    validateStepDefinitionShape(definition);
+    const shouldWarnDefaultCeilings =
+      isPollStepDefinition(definition) && pollCeilingsAreDefault(definition);
+    const stored = isPollStepDefinition(definition) ? applyPollDefaults(definition) : definition;
+    if (shouldWarnDefaultCeilings) {
+      this.logger.warn(
+        `Step "${stored.id}" registered without explicit pollCeilings; using defaults maxAttempts=${DEFAULT_POLL_CEILINGS.maxAttempts}, maxWaitMs=${DEFAULT_POLL_CEILINGS.maxWaitMs}.`
+      );
+    }
+    this.registry.set(stored.id, stored);
   }
 
   /**
@@ -75,7 +91,7 @@ export class ServerStepRegistry {
    * @param stepTypeId - The step type identifier
    * @returns The step definition, or undefined if not found
    */
-  public get(stepTypeId: string): ServerStepDefinition | undefined {
+  public get(stepTypeId: string): RegisteredStepDefinition | undefined {
     return this.registry.get(stepTypeId);
   }
 
@@ -92,7 +108,7 @@ export class ServerStepRegistry {
    * Get all registered step definitions.
    * @returns Array of registered step definitions
    */
-  public getAll(): ServerStepDefinition[] {
+  public getAll(): RegisteredStepDefinition[] {
     return Array.from(this.registry.values());
   }
 

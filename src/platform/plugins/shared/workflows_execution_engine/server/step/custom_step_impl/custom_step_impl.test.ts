@@ -126,7 +126,8 @@ describe('CustomStepImpl', () => {
     it('constructs PollPolicyStepHandler for poll-only definitions', () => {
       const mocks = createMocks();
       const stepDefinition = {
-        poll: { handler: jest.fn(), policy: { strategy: 'fixed', intervalMs: 1000 } },
+        poll: jest.fn(),
+        pollPolicy: { strategy: 'fixed', intervalMs: 1000 },
       };
 
       buildImpl(stepDefinition, mocks);
@@ -141,11 +142,12 @@ describe('CustomStepImpl', () => {
       expect(MockedOneShotStepDefinitionHandler).not.toHaveBeenCalled();
     });
 
-    it('constructs PollPolicyStepHandler for run + poll definitions', () => {
+    it('constructs PollPolicyStepHandler for start + poll definitions', () => {
       const mocks = createMocks();
       const stepDefinition = {
-        run: jest.fn(),
-        poll: { handler: jest.fn(), policy: { strategy: 'fixed', intervalMs: 1000 } },
+        start: jest.fn(),
+        poll: jest.fn(),
+        pollPolicy: { strategy: 'fixed', intervalMs: 1000 },
       };
 
       buildImpl(stepDefinition, mocks);
@@ -157,7 +159,7 @@ describe('CustomStepImpl', () => {
     it('throws when the definition has no handler or poll lifecycle', () => {
       const mocks = createMocks();
 
-      expect(() => buildImpl({ run: jest.fn() }, mocks)).toThrow(/Unknown step definition type/);
+      expect(() => buildImpl({ start: jest.fn() }, mocks)).toThrow(/Unknown step definition type/);
     });
   });
 
@@ -184,7 +186,8 @@ describe('CustomStepImpl', () => {
       mockPollRun.mockResolvedValue(runResult);
 
       const impl = buildImpl({
-        poll: { handler: jest.fn(), policy: { strategy: 'fixed', intervalMs: 1000 } },
+        poll: jest.fn(),
+        pollPolicy: { strategy: 'fixed', intervalMs: 1000 },
       });
       const result = await (impl as any)._run({});
 
@@ -237,7 +240,8 @@ describe('CustomStepImpl', () => {
       mockPollOnCancel.mockResolvedValue(undefined);
 
       const impl = buildImpl({
-        poll: { handler: jest.fn(), policy: { strategy: 'fixed', intervalMs: 1000 } },
+        poll: jest.fn(),
+        pollPolicy: { strategy: 'fixed', intervalMs: 1000 },
       });
       await impl.onCancel();
 

@@ -10,10 +10,10 @@
 import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { ServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { createBaseHandlerContext } from './create_base_handler_context';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
 import type { RunStepResult } from '../../node_implementation';
-import { createBaseHandlerContext } from './create_base_handler_context';
 import type { CustomStepDefinitionHandler } from '../types';
 
 interface LastRunParams {

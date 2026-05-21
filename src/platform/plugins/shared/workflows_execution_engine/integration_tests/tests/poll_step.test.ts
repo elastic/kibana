@@ -9,7 +9,7 @@
 
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
 import { ExecutionStatus, StepCategory } from '@kbn/workflows';
-import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { createPollServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { z } from '@kbn/zod/v4';
 import { FakeConnectors } from '../mocks/actions_plugin_mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
@@ -17,45 +17,41 @@ import { WorkflowRunFixture } from '../workflow_run_fixture';
 /** Next wake-up must be >5s so the engine schedules `workflow:resume` instead of in-process sleep. */
 const LONG_POLL_MS = 6_000;
 
-const pollOnlyStep = createServerStepDefinition({
+const pollOnlyStep = createPollServerStepDefinition({
   id: 'integration.pollOnly',
   category: StepCategory.Kibana,
   label: 'Poll-only (integration)',
   description: 'Completes after two poll invocations',
   inputSchema: z.object({}),
   outputSchema: z.object({ pollsUsed: z.number() }),
-  poll: {
-    handler: async ({ state }) => {
-      const count = (state as { count?: number } | undefined)?.count ?? 0;
-      if (count + 1 >= 2) {
-        return { output: { pollsUsed: count + 1 } };
-      }
-      return { state: { count: count + 1 } };
-    },
-    policy: { strategy: 'fixed', intervalMs: LONG_POLL_MS },
-    ceilings: { maxAttempts: 10, maxWaitMs: 120_000 },
+  poll: async ({ state }) => {
+    const count = (state as { count?: number } | undefined)?.count ?? 0;
+    if (count + 1 >= 2) {
+      return { output: { pollsUsed: count + 1 } };
+    }
+    return { state: { count: count + 1 } };
   },
+  pollPolicy: { strategy: 'fixed', intervalMs: LONG_POLL_MS },
+  pollCeilings: { maxAttempts: 10, maxWaitMs: 120_000 },
 });
 
-const runThenPollStep = createServerStepDefinition({
+const startThenPollStep = createPollServerStepDefinition({
   id: 'integration.runThenPoll',
   category: StepCategory.Kibana,
-  label: 'Run + poll (integration)',
-  description: 'Run seeds state; poll flips ready then completes',
+  label: 'Start + poll (integration)',
+  description: 'Start seeds state; poll flips ready then completes',
   inputSchema: z.object({}),
   outputSchema: z.object({ done: z.literal(true) }),
-  run: async () => ({ state: { ready: false as boolean } }),
-  poll: {
-    handler: async ({ state }) => {
-      const s = state as { ready: boolean } | undefined;
-      if (s?.ready) {
-        return { output: { done: true as const } };
-      }
-      return { state: { ready: true } };
-    },
-    policy: { strategy: 'fixed', intervalMs: LONG_POLL_MS },
-    ceilings: { maxAttempts: 10, maxWaitMs: 120_000 },
+  start: async () => ({ state: { ready: false as boolean } }),
+  poll: async ({ state }) => {
+    const s = state as { ready: boolean } | undefined;
+    if (s?.ready) {
+      return { output: { done: true as const } };
+    }
+    return { state: { ready: true } };
   },
+  pollPolicy: { strategy: 'fixed', intervalMs: LONG_POLL_MS },
+  pollCeilings: { maxAttempts: 10, maxWaitMs: 120_000 },
 });
 
 const wireStepMocks = (fixture: WorkflowRunFixture) => {
@@ -65,7 +61,7 @@ const wireStepMocks = (fixture: WorkflowRunFixture) => {
         return pollOnlyStep;
       }
       if (id === 'integration.runThenPoll') {
-        return runThenPollStep;
+        return startThenPollStep;
       }
       return undefined;
     }
@@ -140,7 +136,7 @@ steps:
     });
   });
 
-  describe('run + poll step schedules resume then completes', () => {
+  describe('start + poll step schedules resume then completes', () => {
     let workflowRunFixture: WorkflowRunFixture;
 
     beforeAll(async () => {
@@ -152,7 +148,7 @@ steps:
     type: slack
     connector-id: ${FakeConnectors.slack1.name}
     with:
-      message: 'Before run+poll'
+      message: 'Before start+poll'
 
   - name: runPollStep
     type: integration.runThenPoll
@@ -162,7 +158,7 @@ steps:
     type: slack
     connector-id: ${FakeConnectors.slack2.name}
     with:
-      message: 'After run+poll'
+      message: 'After start+poll'
 `;
       jest.clearAllMocks();
       await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
@@ -178,7 +174,7 @@ steps:
 
     describe('after resume', () => {
       beforeAll(async () => {
-        // First resume: first poll invocation (after `run` hand-off). Second
+        // First resume: first poll invocation (after `start` hand-off). Second
         // resume: second poll returns output and the workflow continues.
         await workflowRunFixture.resumeWorkflow();
         await workflowRunFixture.resumeWorkflow();

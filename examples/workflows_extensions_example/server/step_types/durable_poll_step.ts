@@ -21,7 +21,7 @@ const authorStateSchema = z.object({
 export const durablePollStepDefinition = createPollServerStepDefinition({
   ...durablePollStepCommonDefinition,
   stateSchema: authorStateSchema,
-  run: async ({ input, logger }) => {
+  start: async ({ input, logger }) => {
     const requestId = `rpt_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
     logger.info(`Queued async report ${requestId} for ${input.indexPattern}`);
     return {
@@ -33,42 +33,40 @@ export const durablePollStepDefinition = createPollServerStepDefinition({
       },
     };
   },
-  poll: {
-    handler: async (context) => {
-      const { simulatedRenderPolls } = context.input;
-      const state = context.state;
+  poll: async (context) => {
+    const { simulatedRenderPolls } = context.input;
+    const state = context.state;
 
-      if (!state) {
-        throw new Error('Poll ran before run() seeded durable state — check engine wiring.');
-      }
+    if (!state) {
+      throw new Error('Poll ran before start() seeded durable state — check engine wiring.');
+    }
 
-      const lastPollIndex = simulatedRenderPolls - 1;
-      if (context.attempt < lastPollIndex) {
-        const phase = context.attempt === 0 ? ('rendering' as const) : ('finalizing' as const);
-        context.logger.debug(
-          `Report ${state.requestId}: ${phase} (poll ${
-            context.attempt + 1
-          }/${simulatedRenderPolls})`
-        );
-        return {
-          state: {
-            ...state,
-            phase,
-          },
-        };
-      }
-
-      context.logger.info(`Report ${state.requestId}: ready after ${context.attempt + 1} poll(s)`);
+    const lastPollIndex = simulatedRenderPolls - 1;
+    if (context.attempt < lastPollIndex) {
+      const phase = context.attempt === 0 ? ('rendering' as const) : ('finalizing' as const);
+      context.logger.debug(
+        `Report ${state.requestId}: ${phase} (poll ${
+          context.attempt + 1
+        }/${simulatedRenderPolls})`
+      );
       return {
-        output: {
-          requestId: state.requestId,
-          documentDownloadPath: `/internal/example/reports/${state.requestId}.ndjson`,
-          totalHits: 42,
-          generatedAt: new Date().toISOString(),
+        state: {
+          ...state,
+          phase,
         },
       };
-    },
-    policy: { strategy: 'fixed', intervalMs: 2000 },
-    ceilings: { maxAttempts: 12, maxWaitMs: 60_000 },
+    }
+
+    context.logger.info(`Report ${state.requestId}: ready after ${context.attempt + 1} poll(s)`);
+    return {
+      output: {
+        requestId: state.requestId,
+        documentDownloadPath: `/internal/example/reports/${state.requestId}.ndjson`,
+        totalHits: 42,
+        generatedAt: new Date().toISOString(),
+      },
+    };
   },
+  pollPolicy: { strategy: 'fixed', intervalMs: 2000 },
+  pollCeilings: { maxAttempts: 12, maxWaitMs: 60_000 },
 });

@@ -21,7 +21,7 @@ import type {
   WorkflowsClientProvider,
 } from '@kbn/workflows/server/types';
 import type { z } from '@kbn/zod/v4';
-import type { ServerStepDefinition } from './step_registry/types';
+import type { RegisteredStepDefinition, ServerStepDefinition } from './step_registry/types';
 import type { CommonTriggerDefinition } from '../common';
 import type { WorkflowsExtensionsStartContract } from '../common/types';
 
@@ -41,7 +41,7 @@ export interface WorkflowsExtensionsServerPluginSetup {
    * @param definition - The step server-side definition
    * @throws Error if definition for the same step type ID is already registered
    */
-  registerStepDefinition(definition: ServerStepDefinitionOrLoader): void;
+  registerStepDefinition(definition: RegisteredStepDefinitionOrLoader): void;
 
   /**
    * Register a workflow trigger definition.
@@ -66,7 +66,7 @@ export interface WorkflowsExtensionsServerPluginSetup {
  * Exposes step definitions (from common contract) and trigger definitions.
  */
 export type WorkflowsExtensionsServerPluginStart =
-  WorkflowsExtensionsStartContract<ServerStepDefinition> & {
+  WorkflowsExtensionsStartContract<RegisteredStepDefinition> & {
     /**
      * Get all registered trigger definitions.
      * @returns Array of all registered trigger definitions
@@ -100,6 +100,14 @@ export type ServerStepDefinitionOrLoader<
 > =
   | ServerStepDefinition<Input, Output, Config>
   | (() => Promise<ServerStepDefinition<Input, Output, Config> | undefined>);
+
+export type RegisteredStepDefinitionOrLoader<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject
+> =
+  | RegisteredStepDefinition<Input, Output, Config>
+  | (() => Promise<RegisteredStepDefinition<Input, Output, Config> | undefined>);
 
 /**
  * Dependencies for the server plugin start phase.

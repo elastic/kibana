@@ -9,7 +9,12 @@
 
 import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
-import type { PollStepDefinition, ServerStepDefinition } from '@kbn/workflows-extensions/server';
+import {
+  isPollStepDefinition,
+  type PollStepDefinition,
+  type RegisteredStepDefinition,
+  type ServerStepDefinition,
+} from '@kbn/workflows-extensions/server';
 
 import { OneShotStepDefinitionHandler, PollPolicyStepHandler } from './step_definition_handlers';
 import type { CustomStepDefinitionHandler } from './types';
@@ -39,7 +44,7 @@ export class CustomStepImpl
 
   constructor(
     private node: AtomicGraphNode,
-    private stepDefinition: ServerStepDefinition | PollStepDefinition,
+    private stepDefinition: RegisteredStepDefinition,
     stepExecutionRuntime: StepExecutionRuntime,
     connectorExecutor: ConnectorExecutor,
     workflowExecutionRuntime: WorkflowExecutionRuntimeManager,
@@ -97,10 +102,7 @@ export class CustomStepImpl
   }
 
   private resolveStepHandler(): CustomStepDefinitionHandler {
-    if (
-      ('run' in this.stepDefinition && 'poll' in this.stepDefinition) ||
-      'poll' in this.stepDefinition
-    ) {
+    if (isPollStepDefinition(this.stepDefinition)) {
       return new PollPolicyStepHandler(
         this.stepDefinition as PollStepDefinition,
         this.node,

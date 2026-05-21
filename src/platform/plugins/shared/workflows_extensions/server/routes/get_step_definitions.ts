@@ -10,7 +10,7 @@
 import type { IRouter } from '@kbn/core/server';
 import { createSHA256Hash } from '@kbn/crypto';
 import type { ServerStepRegistry } from '../step_registry';
-import type { ServerStepDefinition } from '../step_registry/types';
+import { isPollStepDefinition, type RegisteredStepDefinition } from '../step_registry/types';
 
 const ROUTE_PATH = '/internal/workflows_extensions/step_definitions';
 
@@ -53,29 +53,32 @@ export function registerGetStepDefinitionsRoute(
  * every callable that the step author writes:
  *
  * - The legacy `handler` (when present)
- * - The new `run` phase
- * - The `poll.handler`
+ * - The `start` phase (when present)
+ * - The root-level `poll` function
  * - The `onCancel` cleanup
  *
  * Backward compatibility: steps that use only the legacy `handler` field
- * (no `onCancel`, `run`, or `poll`) produce the same hash as before, so the
+ * (no `onCancel`, `start`, or `poll`) produce the same hash as before, so the
  * existing approved fixture stays valid for unchanged legacy steps.
  *
- * Newer shapes (with `run`/`poll`/`onCancel`) join all present implementations
- * with a delimiter so adding a poll lifecycle to an existing step changes the
+ * Newer shapes (with `start`/`poll`/`onCancel`) join all present implementations
+ * with a delimiter so adding poll support to an existing step changes the
  * hash and triggers re-approval.
  */
-function hashStepImplementation(definition: ServerStepDefinition): string {
-  const { handler, run, poll, onCancel } = definition;
+function hashStepImplementation(definition: RegisteredStepDefinition): string {
+  const handler = 'handler' in definition ? definition.handler : undefined;
+  const start = 'start' in definition ? definition.start : undefined;
+  const poll = isPollStepDefinition(definition) ? definition.poll : undefined;
+  const { onCancel } = definition;
 
-  if (handler && !run && !poll && !onCancel) {
+  if (handler && !start && !poll && !onCancel) {
     return createSHA256Hash(handler.toString());
   }
 
   const parts = [
     handler?.toString() ?? '',
-    run?.toString() ?? '',
-    poll?.handler.toString() ?? '',
+    start?.toString() ?? '',
+    poll?.toString() ?? '',
     onCancel?.toString() ?? '',
   ];
   return createSHA256Hash(parts.join('\n--\n'));

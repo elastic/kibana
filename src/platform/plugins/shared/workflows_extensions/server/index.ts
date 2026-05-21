@@ -46,16 +46,16 @@ export {
 export type {
   ServerStepDefinition,
   PollOnlyStepDefinition,
-  RunPlusPollStepDefinition,
+  StartPlusPollStepDefinition,
   PollStepDefinition,
+  RegisteredStepDefinition,
   StepHandler,
   StepHandlerContext,
   StepHandlerResult,
   OnCancelHandler,
-  RunWithHandoffHandler,
+  StartWithHandoffHandler,
   PollHandler,
   PollContext as PollHandlerContext,
-  PollLifecycle,
   PollPolicy,
   PollCeilings,
   PhaseDoneResult,
@@ -63,6 +63,8 @@ export type {
   DurablePhaseResult,
   PollContinueResult,
 } from './step_registry/types';
+
+export { isPollStepDefinition } from './step_registry/types';
 
 export {
   createServerStepDefinition,
