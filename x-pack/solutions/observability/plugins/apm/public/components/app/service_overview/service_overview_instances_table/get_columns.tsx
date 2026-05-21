@@ -21,6 +21,7 @@ import {
   asPercent,
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
+import { AbbreviatedValue } from './abbreviated_value';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { MetricOverviewLink } from '../../../shared/links/apm/metric_overview_link';
 import { ListMetric } from '../../../shared/list_metric';
@@ -111,7 +112,13 @@ export function getColumns({
         return (
           <ListMetric
             color={currentPeriodColor}
-            valueLabel={asMillisecondDuration(latency)}
+            valueLabel={
+              <AbbreviatedValue
+                value={asMillisecondDuration(latency)}
+                abbreviation="ms"
+                title="milliseconds"
+              />
+            }
             hideSeries={!shouldShowSparkPlots}
             isLoading={detailedStatsLoading}
             series={currentPeriodTimestamp}
@@ -145,7 +152,13 @@ export function getColumns({
             compact
             color={currentPeriodColor}
             hideSeries={!shouldShowSparkPlots}
-            valueLabel={asTransactionRate(throughput)}
+            valueLabel={
+              <AbbreviatedValue
+                value={asTransactionRate(throughput)}
+                abbreviation="tpm"
+                title="transactions per minute"
+              />
+            }
             isLoading={detailedStatsLoading}
             series={currentPeriodTimestamp}
             comparisonSeries={
