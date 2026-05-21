@@ -39,7 +39,7 @@ import {
 } from './constants';
 import { getTargetEuidEsqlEvaluation } from './target_euid';
 import { SECURITY_ALERTS_PARTIAL_IDENTIFIER } from '../../../common/constants';
-import type { EsQuery, OriginEventId, EventEdge } from './types';
+import type { EsQuery, OriginEventId, EventEdge, EventEsqlRow } from './types';
 import type { EntityEnrichmentFields } from './fetch_entity_enrichment';
 
 interface BuildEsqlQueryParams {
@@ -76,7 +76,7 @@ export const fetchEvents = async ({
   spaceId: string;
   esQuery?: EsQuery;
   pinnedIds?: string[];
-}): Promise<EsqlToRecords<EventEdge>> => {
+}): Promise<EsqlToRecords<EventEsqlRow>> => {
   const originAlertIds = originEventIds.filter((originEventId) => originEventId.isAlert);
 
   // FROM clause currently doesn't support parameters, Therefore, we validate the index patterns to prevent injection attacks.
@@ -109,7 +109,6 @@ export const fetchEvents = async ({
       columnar: false,
       filter: buildDslFilter(eventIds, showUnknownTarget, start, end, esQuery),
       query,
-      // @ts-ignore - types are not up to date
       params: [
         ...originEventIds.map((originEventId, idx) => ({ [`og_id${idx}`]: originEventId.id })),
         ...originEventIds
@@ -118,7 +117,7 @@ export const fetchEvents = async ({
         ...(pinnedIds ?? []).map((id, idx) => ({ [`pinned_id${idx}`]: id })),
       ],
     })
-    .toRecords<EventEdge>();
+    .toRecords<EventEsqlRow>();
 };
 
 const buildDslFilter = (
@@ -397,7 +396,11 @@ const buildActorSourceFieldsEsql = (): string =>
 const buildTargetSourceFieldsEsql = (): string =>
   buildSourceFieldsJson(GRAPH_TARGET_EUID_SOURCE_FIELDS, 'targetEntityId');
 
-const EVENTS_ESQL_LIMIT = 50000;
+// ES|QL hard-caps result sets at `esql.query.result_truncation_max_size` (default 10,000).
+// We set LIMIT explicitly to opt into that ceiling — the default with no LIMIT clause is
+// `esql.query.result_truncation_default_size` (1,000). See
+// https://www.elastic.co/docs/reference/query-languages/esql/commands/limit
+const EVENTS_ESQL_LIMIT = 10000;
 
 const buildEsqlQuery = ({
   indexPatterns,
@@ -449,6 +452,7 @@ ${buildPinnedEsql(pinnedIds)}
       : 'false'
   }
 | EVAL isAlert = _index LIKE "*${SECURITY_ALERTS_PARTIAL_IDENTIFIER}*"
+| EVAL action = event.action
 // Aggregate document's data for popover expansion and metadata enhancements
 // We format it as JSON string, the best alternative so far. Tried to use tuple using MV_APPEND
 // but it flattens the data and we lose the structure
@@ -467,34 +471,10 @@ ${buildPinnedEsql(pinnedIds)}
         : ''
     }
   "}")
-// Group by actor and target entity IDs (entity-ID level).
-// TypeScript re-groups by type/subtype after enrichment, restoring current behavior.
-| STATS badge = COUNT(*),
-  uniqueEventsCount = COUNT_DISTINCT(CASE(isAlert == false, _id, null)),
-  uniqueAlertsCount = COUNT_DISTINCT(CASE(isAlert == true, _id, null)),
-  isAlert = MV_MAX(VALUES(isAlert)),
-  docs = VALUES(docData),
-  sourceIps = MV_DEDUPE(VALUES(sourceIps)),
-  sourceCountryCodes = MV_DEDUPE(VALUES(sourceCountryCodes)),
-  // label node ID based on document IDs - ensures deduplication by documents, not actor-target pairs
-  labelNodeId = CASE(
-    MV_COUNT(VALUES(_id)) == 1, TO_STRING(VALUES(_id)),
-    MD5(MV_CONCAT(MV_SORT(VALUES(_id)), ","))
-  ),
-  // actor attributes - single value since we group BY actorEntityId
-  actorNodeId = TO_STRING(actorEntityId),
-  actorIdsCount = COUNT_DISTINCT(actorEntityId),
-  actorsDocData = VALUES(actorDocData),
-  // target attributes - single value since we group BY targetEntityId
-  targetNodeId = CASE(targetEntityId IS NULL, null, TO_STRING(targetEntityId)),
-  targetIdsCount = COUNT_DISTINCT(targetEntityId),
-  targetsDocData = VALUES(targetDocData)
-    BY action = event.action,
-      actorEntityId,
-      targetEntityId,
-      isOrigin,
-      isOriginAlert,
-      pinned
+// Per-triple rows. All grouping (action × actor/target type × origin/pinned)
+// happens in TypeScript via regroupEvents. STATS … BY (action, actorEntityId, targetEntityId, …)
+// would inflate row count beyond ES|QL's 10,000-row hard cap on dense graphs.
+| KEEP _id, action, actorEntityId, targetEntityId, isOrigin, isOriginAlert, isAlert, pinned, docData, sourceIps, sourceCountryCodes, actorDocData, targetDocData
 | EVAL pinnedSort = CASE(pinned IS NULL, 1, 0)
 | SORT action DESC, pinnedSort ASC, isOrigin
 | LIMIT ${EVENTS_ESQL_LIMIT}
@@ -511,46 +491,50 @@ interface EventGroup {
   targetSubType: string | null;
   isOrigin: boolean;
   isOriginAlert: boolean;
-  pinned: string | null | undefined;
+  pinned: string | null;
   badge: number;
-  uniqueEventsCount: number;
-  uniqueAlertsCount: number;
   isAlert: boolean;
-  docs: string[];
-  sourceIps: string[];
-  sourceCountryCodes: string[];
-  actorEntityIds: string[];
-  actorsDocData: string[];
-  targetEntityIds: string[];
-  targetsDocData: string[];
-  labelNodeId: string;
+  docIds: Set<string>;
+  alertDocIds: Set<string>;
+  nonAlertDocIds: Set<string>;
+  docs: Set<string>;
+  sourceIps: Set<string>;
+  sourceCountryCodes: Set<string>;
+  actorEntityIds: Set<string>;
+  targetEntityIds: Set<string>;
+  actorsDocData: Set<string>;
+  targetsDocData: Set<string>;
 }
 
 /**
- * Re-groups entity-ID-level ESQL rows by (action, actorType, actorSubType, targetType,
- * targetSubType, isOrigin, isOriginAlert, pinned), using entity store enrichment to determine
- * group keys and compute node IDs/names/hostIps. Does NOT rebuild docData — raw ESQL strings
- * are passed through as-is. Use enrichEventDocData to apply docData rebuilding.
+ * Groups per-triple ESQL rows by (action, actorType, actorSubType, targetType, targetSubType,
+ * isOrigin, isOriginAlert, pinned) using entity-store enrichment for type/sub_type. All
+ * aggregation (badge, uniqueEventsCount, uniqueAlertsCount, sourceIps/countries, docs/dedupe,
+ * actor/target node IDs, host IP collection) happens here in TypeScript — the ES|QL query
+ * intentionally returns raw triples to keep row count below the 10,000-row hard cap.
+ *
+ * Does NOT rebuild docData — raw ESQL JSON strings are passed through as-is. Use
+ * enrichEventDocData afterwards to apply entity-store enrichment to docData payloads.
  */
 export const regroupEvents = (
-  records: EventEdge[],
+  records: EventEsqlRow[],
   enrichmentMap: Map<string, EntityEnrichmentFields>,
   logger: Logger
 ): EventEdge[] => {
   if (records.length >= EVENTS_ESQL_LIMIT) {
     logger.warn(
-      `Graph event records reached the ES|QL LIMIT (${EVENTS_ESQL_LIMIT}); badge counts and docs may be under-reported`
+      `Graph events query hit the ES|QL ${EVENTS_ESQL_LIMIT}-row cap; results may be incomplete`
     );
   }
 
   const groups = new Map<string, EventGroup>();
 
   for (const record of records) {
-    const actorId = record.actorEntityId ?? null;
-    const targetId = record.targetEntityId ?? null;
+    const actorId = record.actorEntityId;
     if (!actorId) continue; // actorEntityId is required
+    const targetId = record.targetEntityId ?? null;
 
-    const actorEnrichment = actorId ? enrichmentMap.get(actorId) : undefined;
+    const actorEnrichment = enrichmentMap.get(actorId);
     const targetEnrichment = targetId ? enrichmentMap.get(targetId) : undefined;
 
     const actorType = actorEnrichment?.type ?? null;
@@ -558,6 +542,7 @@ export const regroupEvents = (
     const targetType = targetEnrichment?.type ?? null;
     const targetSubType = targetEnrichment?.subType ?? null;
 
+    const pinned = record.pinned ?? null;
     const groupKey = JSON.stringify([
       record.action,
       actorType,
@@ -566,24 +551,12 @@ export const regroupEvents = (
       targetSubType,
       record.isOrigin,
       record.isOriginAlert,
-      record.pinned ?? null,
+      pinned,
     ]);
 
-    const existing = groups.get(groupKey);
-    const docs = castArray(record.docs ?? []).filter((d): d is string => d != null);
-    const sourceIps = castArray(record.sourceIps ?? []).filter((d): d is string => d != null);
-    const sourceCountryCodes = castArray(record.sourceCountryCodes ?? []).filter(
-      (d): d is string => d != null
-    );
-    const actorsDocData = castArray(record.actorsDocData ?? []).filter(
-      (d): d is string => d != null
-    );
-    const targetsDocData = castArray(record.targetsDocData ?? []).filter(
-      (d): d is string => d != null
-    );
-
-    if (!existing) {
-      groups.set(groupKey, {
+    let group = groups.get(groupKey);
+    if (!group) {
+      group = {
         action: record.action,
         actorType,
         actorSubType,
@@ -591,43 +564,49 @@ export const regroupEvents = (
         targetSubType,
         isOrigin: record.isOrigin,
         isOriginAlert: record.isOriginAlert,
-        pinned: record.pinned,
-        badge: record.badge,
-        uniqueEventsCount: record.uniqueEventsCount,
-        uniqueAlertsCount: record.uniqueAlertsCount,
-        isAlert: Boolean(record.isAlert),
-        docs,
-        sourceIps,
-        sourceCountryCodes,
-        actorEntityIds: [actorId],
-        actorsDocData,
-        targetEntityIds: targetId ? [targetId] : [],
-        targetsDocData,
-        labelNodeId: record.labelNodeId,
-      });
-    } else {
-      existing.badge += record.badge;
-      existing.isAlert = existing.isAlert || Boolean(record.isAlert);
-      existing.docs.push(...docs);
-      existing.sourceIps.push(...sourceIps);
-      existing.sourceCountryCodes.push(...sourceCountryCodes);
-      if (!existing.actorEntityIds.includes(actorId)) {
-        existing.actorEntityIds.push(actorId);
-      }
-      existing.actorsDocData.push(...actorsDocData);
-      if (targetId && !existing.targetEntityIds.includes(targetId)) {
-        existing.targetEntityIds.push(targetId);
-      }
-      existing.targetsDocData.push(...targetsDocData);
+        pinned,
+        badge: 0,
+        isAlert: false,
+        docIds: new Set(),
+        alertDocIds: new Set(),
+        nonAlertDocIds: new Set(),
+        docs: new Set(),
+        sourceIps: new Set(),
+        sourceCountryCodes: new Set(),
+        actorEntityIds: new Set(),
+        targetEntityIds: new Set(),
+        actorsDocData: new Set(),
+        targetsDocData: new Set(),
+      };
+      groups.set(groupKey, group);
     }
+
+    group.badge += 1;
+    group.isAlert = group.isAlert || Boolean(record.isAlert);
+    if (record._id) {
+      group.docIds.add(record._id);
+      (record.isAlert ? group.alertDocIds : group.nonAlertDocIds).add(record._id);
+    }
+    if (record.docData) group.docs.add(record.docData);
+    for (const ip of castArray(record.sourceIps ?? []).filter((v): v is string => v != null)) {
+      group.sourceIps.add(ip);
+    }
+    for (const cc of castArray(record.sourceCountryCodes ?? []).filter(
+      (v): v is string => v != null
+    )) {
+      group.sourceCountryCodes.add(cc);
+    }
+    group.actorEntityIds.add(actorId);
+    if (targetId) group.targetEntityIds.add(targetId);
+    if (record.actorDocData) group.actorsDocData.add(record.actorDocData);
+    if (record.targetDocData) group.targetsDocData.add(record.targetDocData);
   }
 
   const result = Array.from(groups.values()).map((group): EventEdge => {
-    const actorEntityIds = [...new Set(group.actorEntityIds)];
-    const targetEntityIds = [...new Set(group.targetEntityIds)];
+    const actorEntityIds = [...group.actorEntityIds];
+    const targetEntityIds = [...group.targetEntityIds];
 
     const actorNodeId = actorEntityIds.length === 1 ? actorEntityIds[0] : hashIds(actorEntityIds);
-
     const targetNodeId =
       targetEntityIds.length === 0
         ? null
@@ -635,26 +614,9 @@ export const regroupEvents = (
         ? targetEntityIds[0]
         : hashIds(targetEntityIds);
 
-    // Recompute labelNodeId from all document _ids embedded in docs JSON
-    const allDocIds = [
-      ...new Set(
-        group.docs
-          .map((docStr) => {
-            try {
-              return (JSON.parse(docStr) as { id?: string }).id ?? null;
-            } catch {
-              return null;
-            }
-          })
-          .filter((id): id is string => id != null)
-      ),
-    ];
+    const docIds = [...group.docIds];
     const labelNodeId =
-      allDocIds.length === 0
-        ? group.labelNodeId
-        : allDocIds.length === 1
-        ? allDocIds[0]
-        : hashIds(allDocIds);
+      docIds.length === 0 ? '' : docIds.length === 1 ? docIds[0] : hashIds(docIds);
 
     const actorNames = actorEntityIds
       .map((id) => enrichmentMap.get(id)?.name)
@@ -670,40 +632,22 @@ export const regroupEvents = (
       ...new Set(targetEntityIds.flatMap((id) => enrichmentMap.get(id)?.hostIps ?? [])),
     ];
 
-    const uniqueSourceIps = [...new Set(group.sourceIps)];
-    const uniqueSourceCountryCodes = [...new Set(group.sourceCountryCodes)];
-
-    // Recompute unique counts from the accumulated docs (Fix 1 — avoids double-counting on merge)
-    const parsedDocs = group.docs
-      .map((s) => {
-        try {
-          return JSON.parse(s) as { id?: string; type?: string };
-        } catch {
-          return null;
-        }
-      })
-      .filter((d): d is { id: string; type?: string } => !!d?.id);
-    const uniqueEventsCount = new Set(parsedDocs.filter((d) => d.type !== 'alert').map((d) => d.id))
-      .size;
-    const uniqueAlertsCount = new Set(parsedDocs.filter((d) => d.type === 'alert').map((d) => d.id))
-      .size;
+    const sourceIps = [...group.sourceIps];
+    const sourceCountryCodes = [...group.sourceCountryCodes];
 
     return {
       action: group.action,
       badge: group.badge,
-      uniqueEventsCount,
-      uniqueAlertsCount,
+      uniqueEventsCount: group.nonAlertDocIds.size,
+      uniqueAlertsCount: group.alertDocIds.size,
       isAlert: group.isAlert,
       isOrigin: group.isOrigin,
       isOriginAlert: group.isOriginAlert,
       pinned: group.pinned,
       labelNodeId,
-      // Deduplicate: old ESQL VALUES() was a set; TS accumulation can repeat entries when the
-      // same entity appears in multiple (actorEntityId, targetEntityId) rows that merge into one group.
-      docs: [...new Set(group.docs)],
-      sourceIps: uniqueSourceIps.length > 0 ? uniqueSourceIps : undefined,
-      sourceCountryCodes:
-        uniqueSourceCountryCodes.length > 0 ? uniqueSourceCountryCodes : undefined,
+      docs: [...group.docs],
+      sourceIps: sourceIps.length > 0 ? sourceIps : undefined,
+      sourceCountryCodes: sourceCountryCodes.length > 0 ? sourceCountryCodes : undefined,
       actorNodeId,
       actorIdsCount: actorEntityIds.length,
       actorEntityType: group.actorType,
@@ -711,7 +655,7 @@ export const regroupEvents = (
       actorEntityName:
         actorNames.length === 0 ? null : actorNames.length === 1 ? actorNames[0] : actorNames,
       actorHostIps: actorHostIps.length > 0 ? actorHostIps : undefined,
-      actorsDocData: [...new Set(group.actorsDocData)],
+      actorsDocData: [...group.actorsDocData],
       targetNodeId,
       targetIdsCount: targetEntityIds.length,
       targetEntityType: group.targetType,
@@ -719,19 +663,16 @@ export const regroupEvents = (
       targetEntityName:
         targetNames.length === 0 ? null : targetNames.length === 1 ? targetNames[0] : targetNames,
       targetHostIps: targetHostIps.length > 0 ? targetHostIps : undefined,
-      targetsDocData: [...new Set(group.targetsDocData)],
+      targetsDocData: [...group.targetsDocData],
     };
   });
 
   result.sort((a, b) => {
-    // action DESC
     if (a.action > b.action) return -1;
     if (a.action < b.action) return 1;
-    // pinned ASC (pinned first)
     const aPinned = a.pinned ? 0 : 1;
     const bPinned = b.pinned ? 0 : 1;
     if (aPinned !== bPinned) return aPinned - bPinned;
-    // isOrigin DESC
     return (b.isOrigin ? 1 : 0) - (a.isOrigin ? 1 : 0);
   });
 

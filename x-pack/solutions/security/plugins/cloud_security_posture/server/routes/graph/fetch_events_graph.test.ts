@@ -9,12 +9,12 @@ import { createHash } from 'crypto';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchEvents, regroupEvents, enrichEventDocData } from './fetch_events_graph';
 import type { Logger } from '@kbn/core/server';
-import type { OriginEventId, EsQuery, EventEdge } from './types';
+import type { OriginEventId, EsQuery, EventEsqlRow } from './types';
 import { GRAPH_ACTOR_EUID_SOURCE_FIELDS, GRAPH_TARGET_EUID_SOURCE_FIELDS } from './constants';
 import type { EntityEnrichmentFields } from './fetch_entity_enrichment';
 
 // Expose the internal constant for tests
-const EVENTS_ESQL_LIMIT = 50000;
+const EVENTS_ESQL_LIMIT = 10000;
 
 describe('fetchEvents', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -156,7 +156,7 @@ describe('fetchEvents', () => {
       expect(query).not.toContain('LOOKUP JOIN');
     });
 
-    it('should group STATS BY actorEntityId and targetEntityId', async () => {
+    it('projects per-triple rows via KEEP for TypeScript-side regrouping', async () => {
       const validIndexPatterns = ['valid_index'];
       const params = {
         esClient,
@@ -176,14 +176,12 @@ describe('fetchEvents', () => {
       const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
       const query = esqlCallArgs[0].query;
 
-      // Must group BY actor and target entity IDs (not type/subtype — those come from enrichment)
-      expect(query).toContain('BY action = event.action');
-      expect(query).toContain('actorEntityId');
-      expect(query).toContain('targetEntityId');
-
-      // Must NOT group by type/subtype since those come from enrichment
-      expect(query).not.toMatch(/BY.*actorEntityType/);
-      expect(query).not.toMatch(/BY.*actorEntitySubType/);
+      // Verify the KEEP projection lists all per-triple fields TS regrouping consumes
+      expect(query).toMatch(
+        /\| KEEP _id, action, actorEntityId, targetEntityId, isOrigin, isOriginAlert, isAlert, pinned, docData, sourceIps, sourceCountryCodes, actorDocData, targetDocData/
+      );
+      // Verify the explicit LIMIT opts into the ES|QL hard cap
+      expect(query).toContain(`LIMIT ${EVENTS_ESQL_LIMIT}`);
     });
   });
 
@@ -420,29 +418,29 @@ describe('fetchEvents', () => {
   });
 });
 
-// Helper to build a minimal EventEdge for tests
-const buildEventEdge = (
-  overrides: Partial<EventEdge> & Pick<EventEdge, 'actorEntityId'>
-): EventEdge => ({
-  badge: 1,
-  action: 'test-action',
-  actorNodeId: overrides.actorEntityId ?? 'actor-id',
-  actorIdsCount: 1,
-  targetNodeId: overrides.targetEntityId ?? null,
-  targetIdsCount: overrides.targetEntityId ? 1 : 0,
-  docs: ['{"id":"doc-1","type":"event"}'],
-  isAlert: false,
-  isOrigin: false,
-  isOriginAlert: false,
-  uniqueEventsCount: 1,
-  uniqueAlertsCount: 0,
-  labelNodeId: 'doc-1',
-  actorsDocData: [`{"id":"${overrides.actorEntityId}","type":"entity","sourceFields":{}}`],
-  targetsDocData: overrides.targetEntityId
-    ? [`{"id":"${overrides.targetEntityId}","type":"entity","sourceFields":{}}`]
-    : [],
-  ...overrides,
-});
+// Helper to build a minimal EventEsqlRow (per-triple ESQL output) for tests
+let nextRowId = 0;
+const buildEventEsqlRow = (
+  overrides: Partial<EventEsqlRow> & Pick<EventEsqlRow, 'actorEntityId'>
+): EventEsqlRow => {
+  const _id = overrides._id ?? `doc-${++nextRowId}`;
+  return {
+    _id,
+    action: 'test-action',
+    actorEntityId: overrides.actorEntityId,
+    targetEntityId: overrides.targetEntityId ?? null,
+    isOrigin: false,
+    isOriginAlert: false,
+    isAlert: false,
+    pinned: null,
+    docData: `{"id":"${_id}","type":"event"}`,
+    actorDocData: `{"id":"${overrides.actorEntityId}","type":"entity","sourceFields":{}}`,
+    targetDocData: overrides.targetEntityId
+      ? `{"id":"${overrides.targetEntityId}","type":"entity","sourceFields":{}}`
+      : '',
+    ...overrides,
+  };
+};
 
 describe('regroupEvents', () => {
   let logger: Logger;
@@ -462,8 +460,11 @@ describe('regroupEvents', () => {
     expect(result).toEqual([]);
   });
 
-  it('single record with no enrichment produces one group with null actorEntityType and raw docData passed through', () => {
-    const record = buildEventEdge({ actorEntityId: 'user:alice', targetEntityId: 'host:server1' });
+  it('single record with no enrichment produces one group with null actorEntityType and actorDocData passed through', () => {
+    const record = buildEventEsqlRow({
+      actorEntityId: 'user:alice',
+      targetEntityId: 'host:server1',
+    });
     const result = regroupEvents([record], new Map(), logger);
 
     expect(result).toHaveLength(1);
@@ -472,12 +473,15 @@ describe('regroupEvents', () => {
     expect(group.actorEntityType).toBeNull();
 
     // Raw docData should be passed through unchanged (no entity object built yet)
-    expect(group.actorsDocData).toEqual(record.actorsDocData);
-    expect(group.targetsDocData).toEqual(record.targetsDocData);
+    expect(group.actorsDocData).toEqual([record.actorDocData]);
+    expect(group.targetsDocData).toEqual([record.targetDocData]);
   });
 
   it('single record with enrichment produces correct actorEntityType and actorEntitySubType', () => {
-    const record = buildEventEdge({ actorEntityId: 'user:alice', targetEntityId: 'host:server1' });
+    const record = buildEventEsqlRow({
+      actorEntityId: 'user:alice',
+      targetEntityId: 'host:server1',
+    });
     const enrichmentMap = new Map<string, EntityEnrichmentFields>([
       [
         'user:alice',
@@ -493,28 +497,28 @@ describe('regroupEvents', () => {
     expect(group.actorEntitySubType).toBe('admin');
 
     // Raw docData still passed through (no entity object built yet)
-    expect(group.actorsDocData).toEqual(record.actorsDocData);
+    expect(group.actorsDocData).toEqual([record.actorDocData]);
   });
 
-  it('two records with same action but different actorEntityIds in same type group are merged into one group with MD5 actorNodeId', () => {
-    const record1 = buildEventEdge({
+  it('badge counts the number of per-triple rows merged into a group', () => {
+    // Three per-triple rows: alice→server1 (once), bob→server1 (twice).
+    // All collapse into one (user, host) group → badge = 3.
+    const record1 = buildEventEsqlRow({
       actorEntityId: 'user:alice',
       targetEntityId: 'host:server1',
-      badge: 1,
-      uniqueEventsCount: 1,
-      uniqueAlertsCount: 0,
-      docs: ['{"id":"doc-alice","type":"event"}'],
+      _id: 'doc-1',
     });
-    const record2 = buildEventEdge({
+    const record2 = buildEventEsqlRow({
       actorEntityId: 'user:bob',
       targetEntityId: 'host:server1',
-      badge: 2,
-      uniqueEventsCount: 2,
-      uniqueAlertsCount: 0,
-      docs: ['{"id":"doc-bob","type":"event"}'],
+      _id: 'doc-2',
+    });
+    const record3 = buildEventEsqlRow({
+      actorEntityId: 'user:bob',
+      targetEntityId: 'host:server1',
+      _id: 'doc-3',
     });
 
-    // Both actors map to type 'user', so they share the same group key
     const enrichmentMap = new Map<string, EntityEnrichmentFields>([
       ['user:alice', { name: 'Alice', type: 'user', subType: null, engineType: null, hostIps: [] }],
       ['user:bob', { name: 'Bob', type: 'user', subType: null, engineType: null, hostIps: [] }],
@@ -524,13 +528,13 @@ describe('regroupEvents', () => {
       ],
     ]);
 
-    const result = regroupEvents([record1, record2], enrichmentMap, logger);
+    const result = regroupEvents([record1, record2, record3], enrichmentMap, logger);
 
     expect(result).toHaveLength(1);
     const [group] = result;
     expect(group.badge).toBe(3);
 
-    // actorNodeId should be SHA-256 of sorted IDs joined by ","
+    // actorNodeId should be SHA-256 of sorted unique entity IDs joined by ","
     const expectedNodeId = createHash('sha256')
       .update(['user:alice', 'user:bob'].sort().join(','))
       .digest('hex');
@@ -538,8 +542,11 @@ describe('regroupEvents', () => {
   });
 
   it('two records with different actorType (after enrichment) produce two separate groups', () => {
-    const record1 = buildEventEdge({ actorEntityId: 'user:alice', targetEntityId: 'host:server1' });
-    const record2 = buildEventEdge({
+    const record1 = buildEventEsqlRow({
+      actorEntityId: 'user:alice',
+      targetEntityId: 'host:server1',
+    });
+    const record2 = buildEventEsqlRow({
       actorEntityId: 'host:webserver',
       targetEntityId: 'host:server1',
     });
@@ -557,19 +564,14 @@ describe('regroupEvents', () => {
     expect(result).toHaveLength(2);
   });
 
-  it('labelNodeId is MD5 of sorted doc IDs when multiple docs', () => {
-    const record1 = buildEventEdge({
+  it('labelNodeId is SHA-256 of sorted document _ids when multiple docs', () => {
+    const record1 = buildEventEsqlRow({
       actorEntityId: 'user:alice',
-      docs: ['{"id":"doc-a","type":"event"}'],
-      labelNodeId: 'doc-a',
+      _id: 'doc-a',
     });
-    const record2 = buildEventEdge({
+    const record2 = buildEventEsqlRow({
       actorEntityId: 'user:alice',
-      docs: ['{"id":"doc-b","type":"event"}'],
-      labelNodeId: 'doc-b',
-      badge: 2,
-      uniqueEventsCount: 2,
-      uniqueAlertsCount: 0,
+      _id: 'doc-b',
     });
 
     // No enrichment so both stay in the same group (same null type)
@@ -585,20 +587,19 @@ describe('regroupEvents', () => {
   });
 
   it('does not double-count uniqueEventsCount when same document expands to multiple actor EUIDs of same type', () => {
-    const sharedDoc = '{"id":"shared-doc-1","type":"event"}';
-    const record1 = buildEventEdge({
+    // Same _id appears in two rows (one event MV_EXPANDed to alice and bob actors).
+    // After regroup, uniqueEventsCount dedupes on _id → 1, not 2.
+    const record1 = buildEventEsqlRow({
       actorEntityId: 'user:alice',
       targetEntityId: 'host:server1',
-      docs: [sharedDoc],
-      uniqueEventsCount: 1,
-      uniqueAlertsCount: 0,
+      _id: 'shared-doc-1',
+      isAlert: false,
     });
-    const record2 = buildEventEdge({
+    const record2 = buildEventEsqlRow({
       actorEntityId: 'user:bob',
       targetEntityId: 'host:server1',
-      docs: [sharedDoc],
-      uniqueEventsCount: 1,
-      uniqueAlertsCount: 0,
+      _id: 'shared-doc-1',
+      isAlert: false,
     });
 
     // Both actors map to type 'user', so they share the same group key
@@ -610,16 +611,33 @@ describe('regroupEvents', () => {
     const result = regroupEvents([record1, record2], enrichmentMap, logger);
 
     expect(result).toHaveLength(1);
-    // The same doc appears in both records but should only be counted once
     expect(result[0].uniqueEventsCount).toBe(1);
     expect(result[0].uniqueAlertsCount).toBe(0);
   });
 
+  it('uniqueAlertsCount counts unique alert _ids; uniqueEventsCount counts unique non-alert _ids', () => {
+    const records = [
+      buildEventEsqlRow({ actorEntityId: 'user:alice', _id: 'evt-1', isAlert: false }),
+      buildEventEsqlRow({ actorEntityId: 'user:alice', _id: 'evt-2', isAlert: false }),
+      buildEventEsqlRow({ actorEntityId: 'user:alice', _id: 'evt-1', isAlert: false }), // dup
+      buildEventEsqlRow({ actorEntityId: 'user:alice', _id: 'alert-1', isAlert: true }),
+      buildEventEsqlRow({ actorEntityId: 'user:alice', _id: 'alert-1', isAlert: true }), // dup
+    ];
+
+    const result = regroupEvents(records, new Map(), logger);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].uniqueEventsCount).toBe(2); // evt-1, evt-2
+    expect(result[0].uniqueAlertsCount).toBe(1); // alert-1
+    expect(result[0].badge).toBe(5); // total rows
+    expect(result[0].isAlert).toBe(true); // at least one alert in group
+  });
+
   it('logs warn when records count equals EVENTS_ESQL_LIMIT', () => {
     const records = Array.from({ length: EVENTS_ESQL_LIMIT }, (_, i) =>
-      buildEventEdge({
+      buildEventEsqlRow({
         actorEntityId: `user:entity${i}`,
-        docs: [`{"id":"doc-${i}","type":"event"}`],
+        _id: `doc-${i}`,
       })
     );
 
@@ -630,24 +648,24 @@ describe('regroupEvents', () => {
 
   it('deduplicates actorsDocData and targetsDocData when same entity appears across merged rows', () => {
     // Scenario: actor A acts on targets B and C (both host type).
-    // Initial STATS produces 2 rows: (A,B) and (A,C).
+    // ES|QL emits 2 per-triple rows: (A,B) and (A,C).
     // After re-grouping by (userType, hostType), they merge.
     // Actor A's docData should appear only ONCE, not twice.
     const actorDoc = '{"id":"user:alice","type":"entity","sourceFields":{}}';
     const targetBDoc = '{"id":"host:b","type":"entity","sourceFields":{}}';
     const targetCDoc = '{"id":"host:c","type":"entity","sourceFields":{}}';
 
-    const record1 = buildEventEdge({
+    const record1 = buildEventEsqlRow({
       actorEntityId: 'user:alice',
       targetEntityId: 'host:b',
-      actorsDocData: [actorDoc],
-      targetsDocData: [targetBDoc],
+      actorDocData: actorDoc,
+      targetDocData: targetBDoc,
     });
-    const record2 = buildEventEdge({
+    const record2 = buildEventEsqlRow({
       actorEntityId: 'user:alice',
       targetEntityId: 'host:c',
-      actorsDocData: [actorDoc],
-      targetsDocData: [targetCDoc],
+      actorDocData: actorDoc,
+      targetDocData: targetCDoc,
     });
 
     const enrichmentMap = new Map<string, EntityEnrichmentFields>([
@@ -672,16 +690,18 @@ describe('regroupEvents', () => {
   });
 
   it('deduplicates docs when same document appears across merged rows', () => {
-    const sharedDoc = '{"id":"shared-_id","type":"event","index":".alerts"}';
-    const record1 = buildEventEdge({
+    const sharedDocData = '{"id":"shared-_id","type":"event","index":".alerts"}';
+    const record1 = buildEventEsqlRow({
       actorEntityId: 'user:alice',
       targetEntityId: 'host:b',
-      docs: [sharedDoc],
+      _id: 'shared-_id',
+      docData: sharedDocData,
     });
-    const record2 = buildEventEdge({
+    const record2 = buildEventEsqlRow({
       actorEntityId: 'user:alice',
       targetEntityId: 'host:c',
-      docs: [sharedDoc],
+      _id: 'shared-_id',
+      docData: sharedDocData,
     });
 
     const enrichmentMap = new Map<string, EntityEnrichmentFields>([
@@ -695,24 +715,24 @@ describe('regroupEvents', () => {
     expect(result).toHaveLength(1);
     const [group] = result;
 
-    // sharedDoc appears in both rows but should appear only once after dedup
-    expect((group.docs as string[]).filter((d) => d === sharedDoc).length).toBe(1);
+    // sharedDocData appears in both rows but should appear only once after dedup
+    expect((group.docs as string[]).filter((d) => d === sharedDocData).length).toBe(1);
   });
 
   it('sorts groups by action DESC then pinned ASC then isOrigin DESC', () => {
-    const recordA = buildEventEdge({
+    const recordA = buildEventEsqlRow({
       actorEntityId: 'user:alice',
       action: 'aaa-action',
       isOrigin: false,
       pinned: null,
     });
-    const recordB = buildEventEdge({
+    const recordB = buildEventEsqlRow({
       actorEntityId: 'user:bob',
       action: 'zzz-action',
       isOrigin: true,
       pinned: null,
     });
-    const recordC = buildEventEdge({
+    const recordC = buildEventEsqlRow({
       actorEntityId: 'user:charlie',
       action: 'mmm-action',
       isOrigin: false,
@@ -747,7 +767,10 @@ describe('enrichEventDocData', () => {
   });
 
   it('rebuilds actorsDocData with availableInEntityStore=false when no enrichment', () => {
-    const record = buildEventEdge({ actorEntityId: 'user:alice', targetEntityId: 'host:server1' });
+    const record = buildEventEsqlRow({
+      actorEntityId: 'user:alice',
+      targetEntityId: 'host:server1',
+    });
     const grouped = regroupEvents([record], new Map(), logger);
     const result = enrichEventDocData(grouped, new Map());
 
@@ -762,7 +785,10 @@ describe('enrichEventDocData', () => {
   });
 
   it('rebuilds actorsDocData with availableInEntityStore=true and metadata when enrichment found', () => {
-    const record = buildEventEdge({ actorEntityId: 'user:alice', targetEntityId: 'host:server1' });
+    const record = buildEventEsqlRow({
+      actorEntityId: 'user:alice',
+      targetEntityId: 'host:server1',
+    });
     const enrichmentMap = new Map<string, EntityEnrichmentFields>([
       [
         'user:alice',

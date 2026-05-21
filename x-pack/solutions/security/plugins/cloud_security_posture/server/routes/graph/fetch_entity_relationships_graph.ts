@@ -26,13 +26,19 @@ import {
   hashIds,
   rebuildDocData,
 } from './utils';
-import type { EntityId, EntityRecord, RelationshipEdge } from './types';
+import type { EntityId, EntityRecord, RelationshipEdge, RelationshipEsqlRow } from './types';
 import type { EntityEnrichmentFields } from './fetch_entity_enrichment';
 
 interface BuildRelationshipsEsqlQueryParams {
   indexName: string;
   relationshipFields: readonly string[];
 }
+
+// ES|QL hard-caps result sets at `esql.query.result_truncation_max_size` (default 10,000).
+// We set LIMIT explicitly to opt into that ceiling — the default with no LIMIT clause is
+// `esql.query.result_truncation_default_size` (1,000). See
+// https://www.elastic.co/docs/reference/query-languages/esql/commands/limit
+const RELATIONSHIPS_ESQL_LIMIT = 10000;
 
 const RESOLUTION_RELATIONSHIP_FIELD = 'resolution.resolved_to' as const;
 
@@ -112,33 +118,19 @@ ${forkBranches}
     ${concatJsonObjectPropertyEsqlExprSafe('id', '_target_id')},
     ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', 'entity')},
   ${JSON_OBJECT_END})
-// Group by actor entity, relationship, and individual target entity ID.
-// TypeScript re-groups by target type/subtype after enrichment, restoring current behavior.
-| STATS badge = COUNT(*),
-  // Actor entity grouping
-  actorIds = VALUES(entity.id),
-  actorNodeId = CASE(
-    MV_COUNT(VALUES(entity.id)) == 1, TO_STRING(VALUES(entity.id)),
-    MD5(MV_CONCAT(MV_SORT(VALUES(entity.id)), ","))
-  ),
-  actorIdsCount = COUNT_DISTINCT(entity.id),
-  actorsDocData = VALUES(actorDocData),
-  actorEntityType = VALUES(entity.type),
-  actorEntitySubType = VALUES(entity.sub_type),
-  actorEntityName = VALUES(entity.name),
-  actorHostIps = VALUES(host.ip),
-  // Target entity grouping - single target per row (re-grouped by type/subtype in TypeScript)
-  targetNodeId = TO_STRING(_target_id),
+// Per-triple rows. All grouping (actor × relationship × target type/sub_type) happens in
+// TypeScript via regroupRelationships. STATS … BY (entity.id, relationship, _target_id)
+// would inflate row count beyond ES|QL's 10,000-row hard cap on dense entity stores.
+| EVAL actorId = TO_STRING(entity.id),
   targetId = TO_STRING(_target_id),
-  targetIds = VALUES(_target_id),
-  targetIdsCount = COUNT_DISTINCT(_target_id),
-  targetsDocData = VALUES(targetDocData)
-    BY entity.id, relationship, _target_id
-// Compute relationshipNodeId for deduplication (similar to labelNodeId for events)
-// Multiple records with different target types share the same relationshipNodeId
-| EVAL relationshipNodeId = CONCAT(TO_STRING(entity.id), "-", relationship)
-// Sort by relationship alphabetically to ensure deterministic ordering
-| SORT relationship ASC`;
+  relationshipNodeId = CONCAT(TO_STRING(entity.id), "-", relationship)
+| RENAME \`entity.type\` AS actorEntityType,
+  \`entity.sub_type\` AS actorEntitySubType,
+  \`entity.name\` AS actorEntityName,
+  \`host.ip\` AS actorHostIps
+| KEEP actorId, actorEntityType, actorEntitySubType, actorEntityName, actorHostIps, actorDocData, relationship, relationshipNodeId, targetId, targetDocData
+| SORT relationship ASC
+| LIMIT ${RELATIONSHIPS_ESQL_LIMIT}`;
 };
 
 /**
@@ -207,7 +199,7 @@ export const fetchEntityRelationships = async ({
   entityIds: EntityId[];
   spaceId: string;
   entityStoreIndexExists: boolean;
-}): Promise<EsqlToRecords<RelationshipEdge>> => {
+}): Promise<EsqlToRecords<RelationshipEsqlRow>> => {
   if (!entityStoreIndexExists) {
     return { columns: [], records: [] };
   }
@@ -230,7 +222,7 @@ export const fetchEntityRelationships = async ({
       filter,
       query,
     })
-    .toRecords<RelationshipEdge>();
+    .toRecords<RelationshipEsqlRow>();
 
   logger.trace(`Fetched [${response.records.length}] relationship records`);
 
@@ -298,8 +290,7 @@ export const fetchEntities = async ({
     .esql({
       columnar: false,
       query: esqlQuery,
-      // @ts-ignore - types are not up to date
-      params: [...entityIds.map((entity, idx) => ({ [`entityId${idx}`]: entity.id }))],
+      params: entityIds.map((entity, idx) => ({ [`entityId${idx}`]: entity.id })),
     })
     .toRecords<EntityRecord>();
 
@@ -344,84 +335,88 @@ const buildSourceFieldsJson = (fields: EuidSourceFields): string => {
 };
 
 interface RelationshipGroup {
-  actorNodeId: string;
-  actorIds: string[];
-  actorIdsCount: number;
+  actorId: string;
   actorEntityType: string | null | undefined;
   actorEntitySubType: string | null | undefined;
   actorEntityName: string | string[] | null | undefined;
-  actorHostIps: string[] | undefined;
-  actorsDocData: string[];
+  actorHostIps: Set<string>;
+  actorsDocData: Set<string>;
   relationship: string;
   relationshipNodeId: string;
   targetType: string | null;
   targetSubType: string | null;
   badge: number;
-  targetIds: string[];
-  targetsDocData: string[];
+  targetIds: Set<string>;
+  targetsDocData: Set<string>;
 }
 
 /**
- * Re-groups entity-ID-level relationship rows by (actorNodeId, relationship, targetType,
- * targetSubType), using entity store enrichment to determine group keys and compute
- * targetNodeId/targetEntityName/targetHostIps. Does NOT rebuild docData — raw ESQL strings
- * are passed through as-is. Use enrichRelationshipDocData to apply docData rebuilding.
+ * Groups per-triple relationship rows by (actorId, relationship, targetType, targetSubType)
+ * using entity-store enrichment for target type/sub_type. Actor type/sub_type and name come
+ * directly off the row (the entity store IS the actor source). All aggregation (badge,
+ * actorIdsCount, targetIdsCount, targetIds collection, host IPs) is computed in TypeScript.
+ *
+ * Does NOT rebuild docData — raw ESQL JSON strings are passed through as-is. Use
+ * enrichRelationshipDocData afterwards to apply entity-store enrichment to docData payloads.
  */
 export const regroupRelationships = (
-  records: RelationshipEdge[],
-  enrichmentMap: Map<string, EntityEnrichmentFields>
+  records: RelationshipEsqlRow[],
+  enrichmentMap: Map<string, EntityEnrichmentFields>,
+  logger?: Logger
 ): RelationshipEdge[] => {
+  if (logger && records.length >= RELATIONSHIPS_ESQL_LIMIT) {
+    logger.warn(
+      `Graph relationships query hit the ES|QL ${RELATIONSHIPS_ESQL_LIMIT}-row cap; results may be incomplete`
+    );
+  }
+
   const groups = new Map<string, RelationshipGroup>();
 
   for (const record of records) {
-    const targetId = record.targetId ?? null;
-    const targetEnrichment = targetId ? enrichmentMap.get(targetId) : undefined;
+    const actorId = record.actorId;
+    if (!actorId) continue;
+    const targetId = record.targetId;
+    if (!targetId) continue;
+
+    const targetEnrichment = enrichmentMap.get(targetId);
     const targetType = targetEnrichment?.type ?? null;
     const targetSubType = targetEnrichment?.subType ?? null;
 
-    const groupKey = JSON.stringify([
-      record.actorNodeId,
-      record.relationship,
-      targetType,
-      targetSubType,
-    ]);
+    const groupKey = JSON.stringify([actorId, record.relationship, targetType, targetSubType]);
 
-    const targetsDocData = castArray(record.targetsDocData ?? []).filter(
-      (d): d is string => d != null
-    );
-
-    const existing = groups.get(groupKey);
-    if (!existing) {
-      groups.set(groupKey, {
-        actorNodeId: record.actorNodeId,
-        actorIds: castArray(record.actorIds ?? []).filter(Boolean) as string[],
-        actorIdsCount: record.actorIdsCount,
+    let group = groups.get(groupKey);
+    if (!group) {
+      group = {
+        actorId,
         actorEntityType: record.actorEntityType,
         actorEntitySubType: record.actorEntitySubType,
         actorEntityName: record.actorEntityName,
-        actorHostIps: record.actorHostIps
-          ? (castArray(record.actorHostIps).filter(Boolean) as string[])
-          : undefined,
-        actorsDocData: castArray(record.actorsDocData ?? []).filter((d): d is string => d != null),
+        actorHostIps: new Set(
+          castArray(record.actorHostIps ?? []).filter((v): v is string => v != null)
+        ),
+        actorsDocData: record.actorDocData ? new Set([record.actorDocData]) : new Set(),
         relationship: record.relationship,
         relationshipNodeId: record.relationshipNodeId,
         targetType,
         targetSubType,
-        badge: record.badge,
-        targetIds: targetId ? [targetId] : [],
-        targetsDocData,
-      });
-    } else {
-      existing.badge += record.badge;
-      if (targetId && !existing.targetIds.includes(targetId)) {
-        existing.targetIds.push(targetId);
-      }
-      existing.targetsDocData.push(...targetsDocData);
+        badge: 0,
+        targetIds: new Set(),
+        targetsDocData: new Set(),
+      };
+      groups.set(groupKey, group);
+    }
+
+    group.badge += 1;
+    group.targetIds.add(targetId);
+    if (record.targetDocData) group.targetsDocData.add(record.targetDocData);
+    if (record.actorDocData) group.actorsDocData.add(record.actorDocData);
+    for (const ip of castArray(record.actorHostIps ?? []).filter((v): v is string => v != null)) {
+      group.actorHostIps.add(ip);
     }
   }
 
   return Array.from(groups.values()).map((group): RelationshipEdge => {
-    const targetIds = [...new Set(group.targetIds)];
+    const targetIds = [...group.targetIds];
     const targetNodeId =
       targetIds.length === 0 ? '' : targetIds.length === 1 ? targetIds[0] : hashIds(targetIds);
 
@@ -431,16 +426,17 @@ export const regroupRelationships = (
     const targetHostIps = [
       ...new Set(targetIds.flatMap((id) => enrichmentMap.get(id)?.hostIps ?? [])),
     ];
+    const actorHostIps = [...group.actorHostIps];
 
     return {
       badge: group.badge,
-      actorNodeId: group.actorNodeId,
-      actorIdsCount: group.actorIdsCount,
+      actorNodeId: group.actorId,
+      actorIdsCount: 1,
       actorEntityType: group.actorEntityType,
       actorEntitySubType: group.actorEntitySubType,
       actorEntityName: group.actorEntityName,
-      actorHostIps: group.actorHostIps,
-      actorsDocData: group.actorsDocData,
+      actorHostIps: actorHostIps.length > 0 ? actorHostIps : undefined,
+      actorsDocData: [...group.actorsDocData],
       targetNodeId,
       targetIdsCount: targetIds.length,
       targetEntityType: group.targetType,
@@ -448,10 +444,10 @@ export const regroupRelationships = (
       targetEntityName:
         targetNames.length === 0 ? null : targetNames.length === 1 ? targetNames[0] : targetNames,
       targetHostIps: targetHostIps.length > 0 ? targetHostIps : undefined,
-      targetsDocData: group.targetsDocData,
+      targetsDocData: [...group.targetsDocData],
       relationship: group.relationship,
       relationshipNodeId: group.relationshipNodeId,
-      actorIds: group.actorIds,
+      actorIds: [group.actorId],
       targetIds,
     };
   });

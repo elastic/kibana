@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchEntityEnrichment } from './fetch_entity_enrichment';
 import type { Logger } from '@kbn/core/server';
@@ -14,6 +15,7 @@ describe('fetchEntityEnrichment', () => {
   let logger: Logger;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     logger = {
       trace: jest.fn(),
       debug: jest.fn(),
@@ -23,7 +25,7 @@ describe('fetchEntityEnrichment', () => {
     } as unknown as Logger;
   });
 
-  afterEach(() => jest.resetAllMocks());
+  afterEach(() => jest.restoreAllMocks());
 
   it('returns empty map when entityIds is empty', async () => {
     const result = await fetchEntityEnrichment({
@@ -205,73 +207,95 @@ describe('fetchEntityEnrichment', () => {
     expect(esClient.asInternalUser.helpers.esql).toHaveBeenCalledTimes(2);
   });
 
-  it('throws when a chunk fails after one retry', async () => {
-    const transient = Object.assign(new Error('connection reset'), { name: 'ConnectionError' });
-    (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
-      toRecords: jest.fn().mockRejectedValue(transient),
+  describe('retry behavior (p-retry with isRetryableEsClientError)', () => {
+    // p-retry uses real setTimeout for backoff; mock it so tests don't wait seconds.
+    beforeEach(() => {
+      jest.useFakeTimers({ doNotFake: ['nextTick', 'queueMicrotask'] });
     });
 
-    await expect(
-      fetchEntityEnrichment({
-        esClient,
-        logger,
-        entityIds: ['user:alice'],
-        spaceId: 'default',
-        entityStoreIndexExists: true,
-      })
-    ).rejects.toBe(transient);
-    // Initial attempt + one retry on the same chunk
-    expect(esClient.asInternalUser.helpers.esql).toHaveBeenCalledTimes(2);
-  });
+    afterEach(() => {
+      jest.useRealTimers();
+    });
 
-  it('retries transient errors once and returns full map', async () => {
-    const transient = Object.assign(new Error('upstream timeout'), { name: 'TimeoutError' });
-    const successRecord = {
-      'entity.id': 'user:alice',
-      'entity.name': 'Alice',
-      'entity.type': 'user',
-      'entity.sub_type': null,
-      'entity.EngineMetadata.Type': null,
-      'host.ip': null,
-    };
-    (esClient.asInternalUser.helpers.esql as unknown as jest.Mock)
-      .mockReturnValueOnce({
+    it('throws when a chunk fails after exhausting retries', async () => {
+      // retries: 3 in the p-retry config → 1 initial + 3 retries = 4 calls before throwing.
+      const transient = new EsErrors.ConnectionError('connection reset', {} as never);
+      (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
         toRecords: jest.fn().mockRejectedValue(transient),
-      })
-      .mockReturnValueOnce({
-        toRecords: jest.fn().mockResolvedValue({ records: [successRecord] }),
       });
 
-    const result = await fetchEntityEnrichment({
-      esClient,
-      logger,
-      entityIds: ['user:alice'],
-      spaceId: 'default',
-      entityStoreIndexExists: true,
-    });
-    expect(esClient.asInternalUser.helpers.esql).toHaveBeenCalledTimes(2);
-    expect(result.get('user:alice')?.name).toBe('Alice');
-  });
-
-  it('does not retry non-transient errors', async () => {
-    const permanent = Object.assign(new Error('bad request'), {
-      name: 'ResponseError',
-      meta: { statusCode: 400 },
-    });
-    (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
-      toRecords: jest.fn().mockRejectedValue(permanent),
-    });
-
-    await expect(
-      fetchEntityEnrichment({
+      // Attach the rejection assertion BEFORE flushing timers to avoid an unhandled
+      // rejection between the synchronous first attempt and the timer-flush microtask.
+      const promise = fetchEntityEnrichment({
         esClient,
         logger,
         entityIds: ['user:alice'],
         spaceId: 'default',
         entityStoreIndexExists: true,
-      })
-    ).rejects.toBe(permanent);
-    expect(esClient.asInternalUser.helpers.esql).toHaveBeenCalledTimes(1);
+      });
+      const expectation = expect(promise).rejects.toBe(transient);
+      await jest.runAllTimersAsync();
+      await expectation;
+      expect(esClient.asInternalUser.helpers.esql).toHaveBeenCalledTimes(4);
+    });
+
+    it('retries transient errors and returns full map on subsequent success', async () => {
+      const transient = new EsErrors.TimeoutError('upstream timeout', {} as never);
+      const successRecord = {
+        'entity.id': 'user:alice',
+        'entity.name': 'Alice',
+        'entity.type': 'user',
+        'entity.sub_type': null,
+        'entity.EngineMetadata.Type': null,
+        'host.ip': null,
+      };
+      (esClient.asInternalUser.helpers.esql as unknown as jest.Mock)
+        .mockReturnValueOnce({
+          toRecords: jest.fn().mockRejectedValue(transient),
+        })
+        .mockReturnValueOnce({
+          toRecords: jest.fn().mockResolvedValue({ records: [successRecord] }),
+        });
+
+      const promise = fetchEntityEnrichment({
+        esClient,
+        logger,
+        entityIds: ['user:alice'],
+        spaceId: 'default',
+        entityStoreIndexExists: true,
+      });
+      await jest.runAllTimersAsync();
+      const result = await promise;
+      expect(esClient.asInternalUser.helpers.esql).toHaveBeenCalledTimes(2);
+      expect(result.get('user:alice')?.name).toBe('Alice');
+    });
+
+    it('does not retry non-transient errors', async () => {
+      // 400 is not in isRetryableEsClientError's retry-status set; onFailedAttempt
+      // re-throws to abort, so we expect a single call and the original error.
+      const permanent = new EsErrors.ResponseError({
+        statusCode: 400,
+        body: { error: 'bad request' },
+        headers: {},
+        warnings: null,
+        meta: {} as never,
+      });
+      (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
+        toRecords: jest.fn().mockRejectedValue(permanent),
+      });
+
+      const promise = fetchEntityEnrichment({
+        esClient,
+        logger,
+        entityIds: ['user:alice'],
+        spaceId: 'default',
+        entityStoreIndexExists: true,
+      });
+      const expectation = expect(promise).rejects.toBe(permanent);
+      await jest.runAllTimersAsync();
+      await expectation;
+      expect(esClient.asInternalUser.helpers.esql).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('handles array host.ip values', async () => {

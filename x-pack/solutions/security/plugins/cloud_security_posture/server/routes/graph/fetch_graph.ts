@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { castArray } from 'lodash';
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
 import { fetchEvents, regroupEvents, enrichEventDocData } from './fetch_events_graph';
@@ -23,7 +22,9 @@ import type {
   EntityId,
   OriginEventId,
   EventEdge,
+  EventEsqlRow,
   RelationshipEdge,
+  RelationshipEsqlRow,
   EntityRecord,
 } from './types';
 
@@ -47,8 +48,8 @@ export interface FetchGraphResult {
   entities: EntityRecord[];
 }
 
-const emptyEventsResult: EsqlToRecords<EventEdge> = { columns: [], records: [] };
-const emptyRelationshipsResult: EsqlToRecords<RelationshipEdge> = { columns: [], records: [] };
+const emptyEventsResult: EsqlToRecords<EventEsqlRow> = { columns: [], records: [] };
+const emptyRelationshipsResult: EsqlToRecords<RelationshipEsqlRow> = { columns: [], records: [] };
 const emptyEntitiesResult: EsqlToRecords<EntityRecord> = { columns: [], records: [] };
 
 /**
@@ -149,9 +150,7 @@ export const fetchGraph = async ({
     if (r.targetEntityId) allEntityIds.add(r.targetEntityId);
   }
   for (const r of relationshipsResult.records) {
-    for (const id of castArray(r.actorIds ?? [])) {
-      if (id) allEntityIds.add(id as string);
-    }
+    if (r.actorId) allEntityIds.add(r.actorId);
     if (r.targetId) allEntityIds.add(r.targetId);
   }
   for (const r of entitiesResult.records) {
@@ -178,7 +177,7 @@ export const fetchGraph = async ({
       enrichmentMap
     ),
     relationships: enrichRelationshipDocData(
-      regroupRelationships(relationshipsResult.records, enrichmentMap),
+      regroupRelationships(relationshipsResult.records, enrichmentMap, logger),
       enrichmentMap
     ),
     entities: enrichEntityRecords(entitiesResult.records, enrichmentMap),

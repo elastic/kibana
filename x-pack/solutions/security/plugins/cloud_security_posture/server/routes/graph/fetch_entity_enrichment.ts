@@ -6,8 +6,10 @@
  */
 
 import { chunk } from 'lodash';
+import pRetry from 'p-retry';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
+import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
 import { GRAPH_ACTOR_EUID_SOURCE_FIELDS, TYPED_ENTITY_PREFIXES } from './constants';
 
 export interface EntityEnrichmentFields {
@@ -77,29 +79,6 @@ const buildSourceFields = (
   return result;
 };
 
-const TRANSIENT_RETRY_DELAY_MS = 200;
-const TRANSIENT_STATUS_CODES = new Set([502, 503, 504]);
-
-const isTransientError = (err: unknown): boolean => {
-  if (err == null || typeof err !== 'object') return false;
-  const name = (err as { name?: string }).name;
-  if (name === 'ConnectionError' || name === 'TimeoutError') return true;
-  const meta = (err as { meta?: { statusCode?: number } }).meta;
-  // No meta → raw network/abort error (ECONNRESET etc.); treat as transient.
-  if (meta == null) return true;
-  return meta.statusCode != null && TRANSIENT_STATUS_CODES.has(meta.statusCode);
-};
-
-const withTransientRetry = async <T>(fn: () => Promise<T>): Promise<T> => {
-  try {
-    return await fn();
-  } catch (err) {
-    if (!isTransientError(err)) throw err;
-    await new Promise((resolve) => setTimeout(resolve, TRANSIENT_RETRY_DELAY_MS));
-    return await fn();
-  }
-};
-
 /**
  * Fetches enrichment metadata for a set of entity IDs from the local entity store.
  *
@@ -110,11 +89,14 @@ const withTransientRetry = async <T>(fn: () => Promise<T>): Promise<T> => {
  * `entityStoreIndexExists` is the result of a single upstream existence check
  * (see fetchGraph). Returns an empty map when the index is absent or no IDs were given.
  *
- * Atomic: chunks run in parallel and each is retried once on transient errors
- * (ConnectionError / TimeoutError / 5xx / raw network). If any chunk still fails the
- * rejection propagates and the caller's graph request fails — matching the original
- * LOOKUP JOIN all-or-nothing semantics and avoiding silent type/subtype group drift in
- * downstream regroup* logic.
+ * Atomic: chunks run in parallel and each is wrapped in `p-retry` for the standard
+ * Kibana transient-ES retry behavior (matches the pattern used by event_log / fleet /
+ * cases). Retries only on `isRetryableEsClientError` (NoLivingConnections /
+ * ConnectionError / TimeoutError / 408/410/429/502/503/504); other errors short-circuit
+ * via `onFailedAttempt` so authz/validation failures don't get retried. If a chunk still
+ * fails after retries, the rejection propagates and the caller's graph request fails —
+ * matching the original LOOKUP JOIN all-or-nothing semantics and avoiding silent
+ * type/subtype group drift in downstream regroup* logic.
  */
 export const fetchEntityEnrichment = async ({
   esClient,
@@ -148,24 +130,41 @@ FROM ${indexName}
         EXTRA_SOURCE_FIELD_COLUMNS.length > 0 ? ', ' + EXTRA_SOURCE_FIELD_COLUMNS.join(', ') : ''
       }`;
 
-      const response = await withTransientRetry(() =>
-        esClient.asInternalUser.helpers
-          .esql({
-            columnar: false,
-            query,
-            // @ts-ignore - types are not up to date
-            params: entityIdChunk.map((id, i) => ({ [`entityId${i}`]: id })),
-          })
-          .toRecords<
-            {
-              'entity.id': string;
-              'entity.name'?: string | null;
-              'entity.type'?: string | null;
-              'entity.sub_type'?: string | null;
-              'entity.EngineMetadata.Type'?: string | null;
-              'host.ip'?: string | string[] | null;
-            } & Record<string, unknown>
-          >()
+      const response = await pRetry(
+        () =>
+          esClient.asInternalUser.helpers
+            .esql({
+              columnar: false,
+              query,
+              params: entityIdChunk.map((id, i) => ({ [`entityId${i}`]: id })),
+            })
+            .toRecords<
+              {
+                'entity.id': string;
+                'entity.name'?: string | null;
+                'entity.type'?: string | null;
+                'entity.sub_type'?: string | null;
+                'entity.EngineMetadata.Type'?: string | null;
+                'host.ip'?: string | string[] | null;
+              } & Record<string, unknown>
+            >(),
+        {
+          // Same retry shape used by event_log / alerting (~2s, 4s, 8s with jitter,
+          // capped at 30s, total 4 attempts).
+          minTimeout: 2000,
+          maxTimeout: 30000,
+          retries: 3,
+          factor: 2,
+          randomize: true,
+          onFailedAttempt: (err) => {
+            // Re-throwing here aborts further retries — used to skip non-transient
+            // errors (authz, validation, etc.). p-retry preserves the thrown error.
+            if (!isRetryableEsClientError(err)) throw err;
+            logger.warn(
+              `Retrying entity enrichment after transient ES error: ${err.message} (${err.retriesLeft} retries left)`
+            );
+          },
+        }
       );
 
       for (const record of response.records) {
