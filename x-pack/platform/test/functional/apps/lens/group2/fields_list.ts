@@ -196,6 +196,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 .replace(',', ''),
               10
             );
+            // close the popover
+            await testSubjects.click(fieldId);
             return newValuesCount < valuesCount;
           });
         });
