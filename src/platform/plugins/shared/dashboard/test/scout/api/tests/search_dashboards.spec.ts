@@ -87,6 +87,24 @@ apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => 
     expect(response.body.dashboards).toHaveLength(10);
   });
 
+  apiTest('should allow users to sort dashboards by updated_at', async ({ apiClient }) => {
+    const response = await apiClient.get(
+      buildUrl({ per_page: 10, sort_field: 'updated_at', sort_order: 'desc' }),
+      {
+        headers: {
+          ...COMMON_HEADERS,
+          ...viewerCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      }
+    );
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.total).toBe(101);
+    expect(response.body.dashboards).toHaveLength(10);
+    expect(response.body.dashboards[0].id).toBe('test-dashboard-99');
+  });
+
   apiTest(
     'should allow users to paginate through the list of dashboards',
     async ({ apiClient }) => {

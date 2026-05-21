@@ -55,6 +55,8 @@ async function searchDashboards(search?: string): Promise<Dashboard[]> {
       search: {
         query: search,
         per_page: 30,
+        sort_field: 'updated_at',
+        sort_order: 'desc',
       },
       trigger: { id: 'searchDashbaords' },
     } as ActionExecutionContext);
