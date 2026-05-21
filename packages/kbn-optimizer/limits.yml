@@ -9,7 +9,7 @@ pageLoadAssetSize:
   aiops: 15227
   alerting: 22371
   alertingVTwo: 76778
-  apm: 28027
+  apm: 54371
   apmSourcesAccess: 2278
   automaticImport: 18629
   banners: 4006
@@ -45,7 +45,7 @@ pageLoadAssetSize:
   dataViews: 66000
   dataVisualizer: 32727
   developerToolbar: 5000
-  devTools: 8109
+  devTools: 8107
   discover: 30501
   discoverEnhanced: 5353
   discoverShared: 2322
@@ -56,7 +56,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 6524
   enterpriseSearch: 37565
   entityStore: 9718
-  esql: 21193
+  esql: 29547
   esqlDataGrid: 10209
   esUiShared: 101220
   evals: 6375
@@ -78,7 +78,7 @@ pageLoadAssetSize:
   files: 6037
   filesManagement: 5208
   fileUpload: 22957
-  fleet: 230612
+  fleet: 229970
   genAiSettings: 6342
   globalSearch: 6890
   globalSearchBar: 26122
@@ -168,12 +168,12 @@ pageLoadAssetSize:
   securitySolutionEss: 38689
   securitySolutionServerless: 52082
   serverless: 7412
-  serverlessObservability: 19104
+  serverlessObservability: 19200
   serverlessSearch: 26287
-  serverlessVectordb: 4389
+  serverlessVectordb: 7618
   serverlessWorkplaceAI: 4855
   sessionView: 47912
-  share: 64066
+  share: 64059
   slo: 40437
   snapshotRestore: 22068
   spaces: 28871
@@ -188,7 +188,7 @@ pageLoadAssetSize:
   transform: 16515
   triggersActionsUi: 123512
   uiActions: 35180
-  unifiedDocViewer: 15000
+  unifiedDocViewer: 16519
   unifiedSearch: 19500
   upgradeAssistant: 6898
   uptime: 48171
@@ -211,6 +211,6 @@ pageLoadAssetSize:
   visualizationListing: 5148
   visualizations: 52092
   watcher: 10485
-  workflowsExtensions: 38938
-  workflowsManagement: 38954
+  workflowsExtensions: 43032
+  workflowsManagement: 39968
   workplaceAIApp: 6234

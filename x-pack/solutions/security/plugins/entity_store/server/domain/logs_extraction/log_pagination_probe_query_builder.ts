@@ -78,6 +78,8 @@ export type LogPaginationCursor =
       hasLogsToProcess: true;
       logsPaginationCursor: PaginationParams;
       isLastLogsPage: boolean;
+      /** Raw log count in this slice: `min(total_logs, maxLogsPerPage)`. Used for volume-cap accounting. */
+      sliceLogCount: number;
     };
 
 export function interpretLogPaginationCursorRows(
@@ -94,5 +96,6 @@ export function interpretLogPaginationCursorRows(
     hasLogsToProcess: true,
     logsPaginationCursor,
     isLastLogsPage: missingLogsToProcess <= maxLogsPerPage,
+    sliceLogCount: Math.min(missingLogsToProcess, maxLogsPerPage),
   };
 }

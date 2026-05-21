@@ -25,6 +25,7 @@ export enum ExecutionStatus {
   PENDING = 'pending',
   WAITING = 'waiting',
   WAITING_FOR_INPUT = 'waiting_for_input',
+  WAITING_FOR_CHILD = 'waiting_for_child',
   RUNNING = 'running',
 
   // Done
@@ -49,6 +50,7 @@ export const NonTerminalExecutionStatuses: readonly ExecutionStatus[] = [
   ExecutionStatus.PENDING,
   ExecutionStatus.WAITING,
   ExecutionStatus.WAITING_FOR_INPUT,
+  ExecutionStatus.WAITING_FOR_CHILD,
   ExecutionStatus.RUNNING,
 ] as const;
 
@@ -58,6 +60,10 @@ export enum ExecutionType {
 }
 export type ExecutionTypeUnion = `${ExecutionType}`;
 export const ExecutionTypeValues = Object.values(ExecutionType);
+
+export const WorkflowExecutionSortFields = ['createdAt', 'finishedAt'] as const;
+export type WorkflowExecutionSortField = (typeof WorkflowExecutionSortFields)[number];
+export type WorkflowExecutionSortOrder = 'asc' | 'desc';
 
 /**
  * An interface representing the state of a step scope during workflow execution.
