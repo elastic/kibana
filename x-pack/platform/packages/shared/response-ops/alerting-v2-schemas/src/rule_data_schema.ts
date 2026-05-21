@@ -125,7 +125,9 @@ export const recoveryPolicySchema = z
       .describe('Recovery query configuration; required when type is "query".'),
   })
   .strict()
-  .describe('Recovery detection configuration.');
+  .describe(
+    'Recovery detection configuration. Optional: rules without a recovery policy never emit recovery events.'
+  );
 
 /** State transition (optional, alert-only) */
 

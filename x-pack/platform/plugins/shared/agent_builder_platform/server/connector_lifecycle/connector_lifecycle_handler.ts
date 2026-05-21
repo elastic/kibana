@@ -7,7 +7,7 @@
 
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import type { Logger } from '@kbn/logging';
-import { AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type {
   ConnectorLifecyclePostCreateParams,
   ConnectorLifecyclePostDeleteParams,
@@ -47,7 +47,7 @@ export function createConnectorLifecycleHandler(deps: ConnectorLifecycleHandlerD
         const soClient = coreStart.savedObjects.getScopedClient(request);
         const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
         const isExperimentalFeaturesEnabled = await uiSettingsClient.get<boolean>(
-          AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID
+          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
         );
         if (!isExperimentalFeaturesEnabled) return;
 

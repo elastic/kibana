@@ -1144,6 +1144,11 @@ describe('autocomplete', () => {
 
   describe('IN operator with lists', () => {
     testSuggestions('FROM a | WHERE integerField IN (doubleField /', [{ text: ',' }]);
+
+    testSuggestions(
+      'FROM kibana_sample_data_logs | WHERE agent NOT IN (FROM kibana_sample_data_logs)/',
+      ['AND $0', 'OR $0', '| ']
+    );
   });
 
   describe('Replacement ranges are attached when needed', () => {
