@@ -26,6 +26,11 @@ describe('Execution Routes', () => {
     workflows: Promise.resolve({
       isWorkflowsAvailable: true,
       emitEvent: jest.fn(),
+      managedWorkflows: {
+        install: jest.fn(),
+        uninstall: jest.fn(),
+        execute: jest.fn(),
+      },
     }),
     licensing: Promise.resolve({
       license: {
@@ -444,7 +449,11 @@ describe('Execution Routes', () => {
 
       await h(mockContext, request as any, mockResponse as any);
 
-      expect(mockApi.cancelWorkflowExecution).toHaveBeenCalledWith('ex-1', 'default');
+      expect(mockApi.cancelWorkflowExecution).toHaveBeenCalledWith(
+        'ex-1',
+        'default',
+        expect.anything()
+      );
       expect(mockResponse.ok).toHaveBeenCalled();
     });
 
