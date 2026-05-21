@@ -167,8 +167,9 @@ export function getPageApi() {
       const existsInNextLayout = nextLayout.some(({ id }) => id === uuid);
       if (existsInNextLayout) {
         const child = currentChildren[uuid];
-        if (apiHasSerializableState(child)) {
-          void child.applySerializedState(nextChildState[uuid]);
+        const nextState = nextChildState[uuid];
+        if (apiHasSerializableState(child) && nextState) {
+          void child.applySerializedState(nextState);
         }
       } else {
         // if reset resulted in panel removal, we need to update the list of children
