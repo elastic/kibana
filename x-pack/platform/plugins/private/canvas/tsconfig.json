@@ -81,7 +81,8 @@
     "@kbn/shared-ux-utility",
     "@kbn/saved-search-plugin",
     "@kbn/lens-common",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/std"
   ],
   "exclude": ["target/**/*"]
 }
