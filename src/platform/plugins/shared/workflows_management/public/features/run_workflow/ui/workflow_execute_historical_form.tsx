@@ -374,4 +374,3 @@ const translations = {
     defaultMessage: 'Loading execution…',
   }),
 };
-

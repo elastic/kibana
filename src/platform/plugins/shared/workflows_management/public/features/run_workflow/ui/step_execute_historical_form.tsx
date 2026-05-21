@@ -456,4 +456,3 @@ const translations = {
     defaultMessage: 'Loading step execution…',
   }),
 };
-
