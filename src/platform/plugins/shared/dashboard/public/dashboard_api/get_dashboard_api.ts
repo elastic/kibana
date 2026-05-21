@@ -10,6 +10,7 @@
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject, merge, Subject } from 'rxjs';
 import { v4 } from 'uuid';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import type { DashboardState } from '../../common/types';
 import { initializeAccessControlManager } from './access_control_manager';
