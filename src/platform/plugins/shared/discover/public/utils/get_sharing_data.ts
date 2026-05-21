@@ -52,10 +52,7 @@ export async function getSharingData(
   searchSource.removeField('aggs');
   searchSource.removeField('size');
 
-  const query = (state.query ?? currentSearchSource.getField('query')) as
-    | AggregateQuery
-    | Query
-    | undefined;
+  const query = state.query ?? currentSearchSource.getField('query');
 
   // in ES|QL mode this `columns` array will be used only to generate CSV for Dashboard panels (CSV v2)
   // in Classic mode this `columns` array will be used to generate CSV for both Discover page and Dashboard panels (CSV v1)
