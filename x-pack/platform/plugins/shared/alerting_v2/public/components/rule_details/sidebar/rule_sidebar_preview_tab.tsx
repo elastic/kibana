@@ -36,13 +36,10 @@ const RuleSidebarPreviewTabInner: React.FC = () => {
   const [dateStart, setDateStart] = useState('now-15m');
   const [dateEnd, setDateEnd] = useState('now');
 
-  const handleDateRangeChange = useCallback(
-    (range: { dateStart: string; dateEnd: string }) => {
-      setDateStart(range.dateStart);
-      setDateEnd(range.dateEnd);
-    },
-    []
-  );
+  const handleDateRangeChange = useCallback((range: { dateStart: string; dateEnd: string }) => {
+    setDateStart(range.dateStart);
+    setDateEnd(range.dateEnd);
+  }, []);
 
   return (
     <RuleFormProvider services={services}>

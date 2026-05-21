@@ -59,9 +59,7 @@ jest.mock('./compose_discover_tabs', () => ({
 }));
 
 jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: ({ value }: { value: string }) => (
-    <pre data-test-subj="mockCodeEditor">{value}</pre>
-  ),
+  CodeEditor: ({ value }: { value: string }) => <pre data-test-subj="mockCodeEditor">{value}</pre>,
   ESQL_LANG_ID: 'esql',
 }));
 

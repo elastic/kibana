@@ -131,10 +131,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
       ? [query.base, query.blocks.breach].filter(Boolean).join('\n')
       : query.breach;
 
-  const handleQueryChange = useCallback(
-    (v: string) => updateQuery({ breach: v }),
-    [updateQuery]
-  );
+  const handleQueryChange = useCallback((v: string) => updateQuery({ breach: v }), [updateQuery]);
 
   const tabProps: QuerySandboxProps['tabProps'] = useMemo(() => {
     if (!tabs?.length) return undefined;
