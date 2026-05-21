@@ -20,6 +20,7 @@ import type {
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { Space } from '@kbn/spaces-plugin/public';
 import type { AppDeepLinkId, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import { getNavigationNodeIcon } from '@kbn/core-chrome-browser';
 import { type SolutionId, type NavigationCustomization } from '@kbn/core-chrome-browser';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -353,7 +354,7 @@ export class NavigationPublicPlugin
       id: node.id,
       title: (node.title ?? node.id) as string,
       hidden: overflowSet.has(node.id),
-      icon: node.icon as string | undefined,
+      icon: getNavigationNodeIcon(node),
     }));
 
     return { items, defaultItemIds };

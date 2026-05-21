@@ -59,3 +59,5 @@ export type {
   SidebarStart,
   GlobalSearchConfig,
 } from './src';
+
+export { getNavigationNodeIcon, NAVIGATION_NODE_ICON_FALLBACK, AppDeepLinkIdToIcon } from './src';

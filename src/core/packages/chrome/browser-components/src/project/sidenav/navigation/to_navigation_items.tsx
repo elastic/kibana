@@ -11,6 +11,7 @@ import type {
   ChromeProjectNavigationNode,
   NavigationTreeDefinitionUI,
 } from '@kbn/core-chrome-browser';
+import { getNavigationNodeIcon, NAVIGATION_NODE_ICON_FALLBACK } from '@kbn/core-chrome-browser';
 import classnames from 'classnames';
 import type {
   MenuItem,
@@ -21,7 +22,6 @@ import type {
 } from '@kbn/ui-side-navigation/types';
 import { toSentenceCase } from '@kbn/shared-ux-label-formatter';
 
-import { AppDeepLinkIdToIcon } from './known_icons_mappings';
 import type { PanelStateManager } from './panel_state_manager';
 import { isActiveFromUrl } from './utils/is_active_from_url';
 
@@ -119,7 +119,7 @@ export const toNavigationItems = (
 
   const logoItem: SideNavLogo = {
     href: warnIfMissing(logoNode, 'href', '/missing-href-😭'),
-    iconType: getIcon(logoNode),
+    iconType: getNavigationNodeIcon(logoNode),
     id: warnIfMissing(logoNode, 'id', 'kibana'),
     label: warnIfMissing(logoNode, 'title', 'Kibana'),
     'data-test-subj': logoNode ? getTestSubj(logoNode, ['nav-item-home']) : undefined,
@@ -127,9 +127,9 @@ export const toNavigationItems = (
 
   // TODO: The visibility checks below (sideNavStatus === 'hidden', empty panel-opener pruning,
   // section-header flattening) duplicate logic already handled by `getRenderableNodes` in
-  // `@kbn/core-chrome-browser-internal`. Once a source of nodes is guaranteed to be pre-pruned
-  // (i.e. the `getNavigation$()` emission passes a clean tree), this function can be simplified
-  // to a pure shape-transformer with no visibility decisions.
+  // `@kbn/core-chrome-browser-internal`. Icon resolution uses the shared `getNavigationNodeIcon`
+  // from `@kbn/core-chrome-browser`. Once `getNavigation$()` passes a pre-pruned tree, this
+  // function can be simplified to a pure shape-transformer with no visibility decisions.
   const toMenuItem = (navNode: ChromeProjectNavigationNode): MenuItem[] | MenuItem | null => {
     if (!navNode) return null;
 
@@ -242,7 +242,7 @@ export const toNavigationItems = (
     return {
       id: navNode.id,
       label: toSentenceCase(warnIfMissing(navNode, 'title', 'Missing Title 😭')),
-      iconType: getIcon(navNode),
+      iconType: getNavigationNodeIcon(navNode),
       href: itemHref,
       sections: secondarySections,
       'data-test-subj': getTestSubj(navNode),
@@ -376,7 +376,9 @@ function warnAboutDuplicateIcons(
   const icons = [logoItem, ...primaryItems, ...footerItems]
     .filter(
       (item) =>
-        item.iconType && item.iconType !== FALLBACK_ICON && typeof item.iconType === 'string'
+        item.iconType &&
+        item.iconType !== NAVIGATION_NODE_ICON_FALLBACK &&
+        typeof item.iconType === 'string'
     )
     .map((item) => String(item.iconType));
 
@@ -477,7 +479,6 @@ function warnAboutTooManyNewItems(primaryItems: MenuItem[], footerItems: MenuIte
   });
 }
 
-const FALLBACK_ICON = 'broom' as const;
 /**
  * Finds an item href based on the last active item history for a panel opener.
  * @param panelId - The panel opener node id
@@ -548,28 +549,4 @@ const getPanelOpenerHref = (
   }
 
   return firstAvailableHref ?? 'missing-href-😭';
-};
-
-const getIcon = (node: ChromeProjectNavigationNode | null): string => {
-  if (node?.icon) {
-    return node.icon as string;
-  }
-
-  if (node && AppDeepLinkIdToIcon[node.id]) {
-    return AppDeepLinkIdToIcon[node.id];
-  }
-
-  if (node?.deepLink?.euiIconType) {
-    return node.deepLink.euiIconType;
-  }
-
-  if (node?.deepLink?.icon) {
-    return node.deepLink.icon;
-  }
-
-  warnOnce(
-    `No icon found for node "${node?.id}". Expected iconV2, icon, deepLink.euiIconType, deepLink.icon or a known deep link id. Using fallback icon "broom".`
-  );
-
-  return FALLBACK_ICON;
 };

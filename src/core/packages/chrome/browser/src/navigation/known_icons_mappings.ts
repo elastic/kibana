@@ -8,7 +8,7 @@
  */
 
 import type { IconType } from '@elastic/eui';
-import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
+import type { AppDeepLinkId } from '../project_navigation';
 
 // TODO: move this to core as part of deep link registration
 export const AppDeepLinkIdToIcon: Record<string, string> = {

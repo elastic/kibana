@@ -305,6 +305,9 @@ const initNavNode = <
  * TODO: Once this is the established source of truth, `toNavigationItems` in
  * `@kbn/core-chrome-browser-components` can be simplified to consume this
  * pre-pruned list rather than re-filtering inside `toMenuItem`.
+ *
+ * Icon resolution for the same nodes is shared via `getNavigationNodeIcon` in
+ * `@kbn/core-chrome-browser` (not here — components cannot depend on this package).
  */
 export const getRenderableNodes = (
   nodes: ChromeProjectNavigationNode[]
