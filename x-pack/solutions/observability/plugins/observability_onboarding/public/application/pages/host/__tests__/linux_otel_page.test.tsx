@@ -176,6 +176,14 @@ describe('HostLinuxOtelPage', () => {
     );
   });
 
+  it('drops the osType pin under wired streams since the streams pipeline does not project host.os.type onto docs', () => {
+    useTimeWindowDataDetectionMock.mockClear();
+    renderPage(['/host/linux?ingestion=wired']);
+    expect(useTimeWindowDataDetectionMock).toHaveBeenCalledWith(
+      expect.objectContaining({ extraQueryParams: undefined })
+    );
+  });
+
   it('activates monitoring on pre-existing data alone, while keeping install/start steps rendered', () => {
     usePreExistingDataCheckMock.mockReturnValue(true);
     useWindowBlurDataMonitoringTriggerMock.mockReturnValue(false);

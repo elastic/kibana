@@ -152,6 +152,14 @@ describe('HostWindowsOtelPage', () => {
     );
   });
 
+  it('drops the osType pin under wired streams since the streams pipeline does not project host.os.type onto docs', () => {
+    useTimeWindowDataDetectionMock.mockClear();
+    renderWindowsOtelPage(['/host/windows?ingestion=wired']);
+    expect(useTimeWindowDataDetectionMock).toHaveBeenCalledWith(
+      expect.objectContaining({ extraQueryParams: undefined })
+    );
+  });
+
   it('renders an inline EmptyPrompt and drops the start + visualize steps when setup errors', () => {
     const previous = useFetcherMock.getMockImplementation();
     useFetcherMock.mockReturnValue({

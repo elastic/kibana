@@ -141,8 +141,12 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
   }, [isMonitoringStepActive, sessionStartTime]);
 
   const onboardingId = setupData?.onboardingId;
+  const useWiredStreams = ingestionMode === 'wired';
   // OTel semantic-convention `host.os.type` filter so cross-OS ingest in the
-  // same cluster can't complete an unrelated session.
+  // same cluster can't complete an unrelated session. Skipped for wired
+  // streams because the streams pipeline does not project host.os.type onto
+  // the indexed docs, and wired streams are already per-stream-name isolated
+  // so cross-OS bleed-through isn't a risk there.
   const hostOsTypeFilter: Record<HostOs, string> = {
     linux: 'linux',
     mac: 'darwin',
@@ -157,7 +161,7 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
     flowType: 'otel_logs',
     onboardingId: onboardingId ?? '',
     endpoint: '/internal/observability_onboarding/otel_host/has-data',
-    extraQueryParams: { osType: hostOsTypeFilter[os] },
+    extraQueryParams: useWiredStreams ? undefined : { osType: hostOsTypeFilter[os] },
     keepExtraParamsOnFallback: true,
   });
 
@@ -172,7 +176,6 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
 
   const logsLocator = share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
   const hostsLocator = share.url.locators.get('HOSTS_LOCATOR');
-  const useWiredStreams = ingestionMode === 'wired';
   const logsLocatorParams = useMemo<LogsLocatorParams>(
     () => (useWiredStreams ? { dataViewSpec: WIRED_OTEL_DATA_VIEW_SPEC } : {}),
     [useWiredStreams]
