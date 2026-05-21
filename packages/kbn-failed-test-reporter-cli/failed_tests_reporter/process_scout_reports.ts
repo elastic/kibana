@@ -116,7 +116,11 @@ export async function processScoutReports(
         existingIssue.github.body = newBody;
         failure.githubIssue = url;
         failure.failureCount = updateGithub ? newCount : newCount - 1;
-        log.info(`Updated existing Scout issue: ${url} (fail count: ${newCount})`);
+        if (updateGithub) {
+          log.info(`Updated existing Scout issue: ${url} (fail count: ${newCount})`);
+        } else {
+          log.info(`(dry-run) Would update existing Scout issue: ${url} (fail count: ${newCount})`);
+        }
         updateScoutHtmlReport({ log, reportDir, failure, reportUpdate });
         continue;
       }
@@ -133,6 +137,8 @@ export async function processScoutReports(
       if (updateGithub) {
         log.info(`Created new Scout issue: ${newIssue.html_url}`);
         failure.githubIssue = newIssue.html_url;
+      } else {
+        log.info(`(dry-run) Would create new Scout issue for: ${failure.classname} - ${failure.name}`);
       }
       failure.failureCount = updateGithub ? 1 : 0;
       updateScoutHtmlReport({ log, reportDir, failure, reportUpdate });
