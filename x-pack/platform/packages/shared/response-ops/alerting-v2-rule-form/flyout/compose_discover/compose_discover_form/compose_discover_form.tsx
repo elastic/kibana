@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { useWatch } from 'react-hook-form';
 import type {
   ComposeDiscoverState,
   ComposeDiscoverAction,
@@ -14,6 +15,7 @@ import type {
   StepDefinition,
 } from '../types';
 import { getStepIds } from '../use_compose_discover_state';
+import type { ComposeFormValues } from '../compose_form_types';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 import { AlertConditionStep } from './alert_condition_step';
 import { RecoveryConditionStep } from './recovery_condition_step';
@@ -25,6 +27,7 @@ interface ComposeDiscoverFormProps {
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
   onRecoveryTypeChange: (type: RecoveryType) => void;
+  onKindChange: (kind: 'signal' | 'alert') => void;
 }
 
 const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
@@ -34,7 +37,12 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
       defaultMessage: 'Alert Condition',
     }),
     render: (props) => (
-      <AlertConditionStep state={props.state} dispatch={props.dispatch} services={props.services} />
+      <AlertConditionStep
+        state={props.state}
+        dispatch={props.dispatch}
+        services={props.services}
+        onKindChange={props.onKindChange}
+      />
     ),
     validate: (_methods, s) => s.queryCommitted,
   },
@@ -68,20 +76,23 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
   },
 };
 
-export const getSteps = (tracking: boolean): StepDefinition[] =>
-  getStepIds(tracking).map((id) => STEP_REGISTRY[id]);
+export const getSteps = (isAlert: boolean): StepDefinition[] =>
+  getStepIds(isAlert).map((id) => STEP_REGISTRY[id]);
 
 export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({
   state,
   dispatch,
   services,
   onRecoveryTypeChange,
+  onKindChange,
 }) => {
-  const steps = getSteps(state.tracking);
+  const isAlert = useWatch<ComposeFormValues, 'kind'>({ name: 'kind' }) === 'alert';
+  const steps = getSteps(isAlert);
   return steps[state.step].render({
     state,
     dispatch,
     services,
     onRecoveryTypeChange,
+    onKindChange,
   });
 };
