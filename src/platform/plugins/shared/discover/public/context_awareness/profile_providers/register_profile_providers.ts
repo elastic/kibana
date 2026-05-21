@@ -125,7 +125,7 @@ const createDataSourceProfileProviders = (providerServices: ProfileProviderServi
   createDeprecationLogsDataSourceProfileProvider(),
   createMetricsDataSourceProfileProvider(),
   createSparklineDataSourceProfileProvider(providerServices),
-  createHighlightDataSourceProfileProvider(providerServices),
+  createHighlightDataSourceProfileProvider(),
   ...createObservabilityLogsDataSourceProfileProviders(providerServices),
   ...createObservabilityTracesDataSourceProfileProviders(providerServices),
 ];
