@@ -38,9 +38,10 @@ describe('useHostCount', () => {
       typeof useUnifiedSearchHooks.useUnifiedSearchContext
     >;
 
-  const mockUseUnifiedContext = (searchCriteria: any) => {
+  const mockUseUnifiedContext = (searchCriteria: any, isReady = true) => {
     useUnifiedSearchContextMock.mockReturnValue({
       buildQuery: jest.fn(() => 'query'),
+      isReady,
       parsedDateRange: { from: '', to: '' },
       searchCriteria,
     } as unknown as ReturnType<typeof useUnifiedSearchHooks.useUnifiedSearchContext>);
@@ -200,6 +201,68 @@ describe('useHostCount', () => {
       await renderHook(() => useHostCount());
 
       expect(telemetryMock.reportHostsViewTotalHostCountRetrieved).not.toHaveBeenCalled();
+    });
+  });
+
+  // P5.5 — guards against a regression where /api/infra/host/count fires
+  // twice on initial load: once before the data view / preferred schema
+  // resolve and again once they do. `useFetcher` treats a synchronously-
+  // returned `undefined` as "do not initiate", so the hook's fetcher
+  // callback must short-circuit while `isReady` is false.
+  describe('initial-load gate', () => {
+    const captureFetcherCallback = () => {
+      const captured: { callback?: (callApi: jest.Mock) => unknown } = {};
+      (useFetcher as jest.Mock).mockImplementation((cb) => {
+        captured.callback = cb;
+        return { data: undefined, status: FETCH_STATUS.NOT_INITIATED, error: null };
+      });
+      return captured;
+    };
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('does not initiate the fetcher while the unified search context is not ready', async () => {
+      const captured = captureFetcherCallback();
+
+      mockUseUnifiedContext(
+        {
+          query: { query: null },
+          filters: [],
+          panelFilters: [],
+          preferredSchema: 'ecs',
+        },
+        false
+      );
+
+      await renderHook(() => useHostCount());
+
+      expect(captured.callback).toBeDefined();
+      expect(captured.callback!(jest.fn())).toBeUndefined();
+    });
+
+    it('returns a promise from the fetcher callback once the unified search context is ready', async () => {
+      const captured = captureFetcherCallback();
+      const response = { count: 7, entityType: 'host' as const };
+      const callApi = jest.fn().mockResolvedValue(response);
+
+      mockUseUnifiedContext(
+        {
+          query: { query: null },
+          filters: [],
+          panelFilters: [],
+          preferredSchema: 'ecs',
+        },
+        true
+      );
+
+      await renderHook(() => useHostCount());
+
+      const result = captured.callback!(callApi);
+      expect(result).toBeInstanceOf(Promise);
+      await expect(result).resolves.toEqual(response);
+      expect(callApi).toHaveBeenCalledWith('/api/infra/host/count', expect.any(Object));
     });
   });
 });

@@ -17,6 +17,8 @@ import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import { useInfraMLCapabilitiesContext } from '../../../../containers/ml/infra_ml_capabilities';
 import type { HostsViewQuerySubmittedParams } from '../../../../services/telemetry';
 import { useTimeRange } from '../../../../hooks/use_time_range';
+import { useTimeRangeMetadataContext } from '../../../../hooks/use_time_range_metadata';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useReloadRequestTimeContext } from '../../../../hooks/use_reload_request_time';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { telemetryTimeRangeFormatter } from '../../../../../common/formatters/telemetry_time_range';
@@ -60,6 +62,8 @@ export const useUnifiedSearch = () => {
   const [error, setError] = useState<Error | null>(null);
   const [searchCriteria, setSearch] = useHostsUrlState();
   const { metricsView, refetch: refetchMetricsView } = useMetricsDataViewContext();
+  const { data: timeRangeMetadata, status: timeRangeMetadataStatus } =
+    useTimeRangeMetadataContext();
   const { updateReloadRequestTime } = useReloadRequestTimeContext();
   const { updateTopbarMenuVisibilityBySchema } = useInfraMLCapabilitiesContext();
   const { services } = useKibanaContextForPlugin();
@@ -273,9 +277,47 @@ export const useUnifiedSearch = () => {
     );
   }, [getDateRangeAsTimestamp, searchCriteria, telemetry]);
 
+  // P5.5 — first-paint double-fire gate for downstream data fetchers
+  // (`useHostsView` / `useHostCount`).
+  //
+  // Two upstream resolutions settle asynchronously on first load. Each one
+  // would otherwise change the `useFetcher` payload identity and force the
+  // host endpoints to fire twice (the first response is aborted client-side,
+  // but ES still pays for the work):
+  //
+  //   1. `metricsView?.dataViewReference` — undefined until the saved-object
+  //      data view resolves; once defined, `buildQuery`'s identity changes,
+  //      which changes the payload memos in `useHostsView` / `useHostCount`.
+  //   2. The `time_range_metadata` fetch — until it settles, `SearchBar` has
+  //      no signal to flip `searchCriteria.preferredSchema` from `null` to a
+  //      concrete schema, and that flip also changes the payload.
+  //
+  // The schema half of the gate has two terminal states:
+  //
+  //   a. `searchCriteria.preferredSchema` is set (typical path: cluster has
+  //      host data, the `SearchBar` effect flipped the URL state to the
+  //      detected schema, or the user saved a preference). Gate opens.
+  //   b. The metadata fetch settled AND we know no schema will ever be set —
+  //      either `time_range_metadata` reported zero available schemas
+  //      (genuinely empty cluster) or the fetch itself failed. Gate also
+  //      opens so the empty state / degraded render can surface; without
+  //      this branch the fetch would block indefinitely on those clusters.
+  //
+  // Gating on the value alone (`preferredSchema != null`) regresses (b);
+  // gating on `!isPending` alone regresses (a) by firing once before
+  // `SearchBar` has flipped the URL state.
+  const schemaSettled =
+    searchCriteria.preferredSchema != null ||
+    timeRangeMetadataStatus === FETCH_STATUS.FAILURE ||
+    (timeRangeMetadataStatus === FETCH_STATUS.SUCCESS &&
+      (timeRangeMetadata?.schemas?.length ?? 0) === 0);
+
+  const isReady = metricsView?.dataViewReference != null && schemaSettled;
+
   return {
     error,
     buildQuery,
+    isReady,
     onSubmit,
     parsedDateRange,
     getDateRangeAsTimestamp,

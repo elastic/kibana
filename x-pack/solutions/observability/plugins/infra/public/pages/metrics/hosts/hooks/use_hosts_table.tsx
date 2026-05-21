@@ -44,6 +44,20 @@ import { buildCombinedAssetFilter } from '../../../../utils/filters/build';
 import { AddDataTroubleshootingPopover } from '../components/table/add_data_troubleshooting_popover';
 import { useUnifiedSearchContext } from './use_unified_search';
 
+// P10 — server-side sort fields. Anything in this set is already ranked by
+// Phase A and the table renders `items` as-is; anything outside falls back
+// to the legacy client-side sort on the visible page.
+const SERVER_SIDE_SORT_FIELDS = new Set<string>([
+  'host.name',
+  'cpuV2',
+  'normalizedLoad1m',
+  'memory',
+  'memoryFree',
+  'diskSpaceUsage',
+  'rxV2',
+  'txV2',
+]);
+
 /**
  * Columns and items types
  */
@@ -232,14 +246,17 @@ export const useHostsTable = () => {
     [detailsItemId, items]
   );
 
+  // P10 — server-side sort + pagination. Phase A already returns the page
+  // slice in the right order, so `currentPage` is just `items` for any sort
+  // field the server understands. For client-only sort fields
+  // (`alertsCount`, `title`) we apply the same in-place sort the table used
+  // to do — bounded to ≤ 20 rows so it's free.
   const currentPage = useMemo(() => {
-    const { pageSize = 0, pageIndex = 0 } = pagination;
-
-    const endIndex = (pageIndex + 1) * pageSize;
-    const startIndex = pageIndex * pageSize;
-
-    return items.sort(sortTableData(sorting)).slice(startIndex, endIndex);
-  }, [items, pagination, sorting]);
+    if (!sorting.field || SERVER_SIDE_SORT_FIELDS.has(sorting.field)) {
+      return items;
+    }
+    return [...items].sort(sortTableData(sorting));
+  }, [items, sorting]);
 
   const showNetworkColumns = searchCriteria.preferredSchema !== 'semconv';
   const metricColumnsWidth = useMemo(() => {

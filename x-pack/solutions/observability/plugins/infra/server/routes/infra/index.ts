@@ -14,15 +14,21 @@ import {
   GetInfraEntityCountRequestBodyPayloadRT,
   GetInfraEntityCountResponsePayloadRT,
   GetInfraEntityCountRequestParamsPayloadRT,
+  GetHostsListRequestBodyPayloadRT,
+  GetHostsListResponsePayloadRT,
+  GetHostsMetricsRequestBodyPayloadRT,
+  GetHostsMetricsResponsePayloadRT,
 } from '../../../common/http_api/infra';
 import type { InfraBackendLibs } from '../../lib/infra_types';
 import { getInfraAlertsClient } from '../../lib/helpers/get_infra_alerts_client';
 import { getHosts } from './lib/host/get_hosts';
 import { getHostsCount } from './lib/host/get_hosts_count';
+import { getHostsList } from './lib/host/get_hosts_list';
+import { getHostsMetrics } from './lib/host/get_hosts_metrics';
 import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 import { withInspect } from '../../lib/helpers/with_inspect';
 import { getApmDataAccessClient } from '../../lib/helpers/get_apm_data_access_client';
-import { DEFAULT_SCHEMA } from '../../../common/constants';
+import { DEFAULT_SCHEMA, MAX_HOSTS_PER_METRICS_REQUEST } from '../../../common/constants';
 import type { InfraEntityMetricType } from '../../../common/http_api/infra';
 
 const InspectQueryRT = rt.exact(rt.partial({ _inspect: jsonRt.pipe(rt.boolean) }));
@@ -124,6 +130,106 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
         entityType,
         count,
       });
+    })
+  );
+
+  // P10 — Phase A: ranked host name list + alerts on the visible page.
+  framework.registerRoute(
+    {
+      method: 'post',
+      path: '/api/metrics/infra/host/list',
+      validate: {
+        body: createRouteValidationFunction(GetHostsListRequestBodyPayloadRT),
+        query: createRouteValidationFunction(InspectQueryRT),
+      },
+    },
+    withInspect(async (context, request) => {
+      const { from, to, limit, query, schema = DEFAULT_SCHEMA, sort, page } = request.body;
+
+      const apmDataAccessClient = getApmDataAccessClient({ request, libs, context });
+
+      const [infraMetricsClient, alertsClient, apmDataAccessServices] = await Promise.all([
+        getInfraMetricsClient({ request, libs, context }),
+        getInfraAlertsClient({ libs, request }),
+        apmDataAccessClient.getServices(),
+      ]);
+
+      const result = await getHostsList({
+        from,
+        to,
+        limit,
+        query,
+        schema,
+        sort,
+        page,
+        infraMetricsClient,
+        alertsClient,
+        apmDataAccessServices,
+      });
+
+      return GetHostsListResponsePayloadRT.encode(result);
+    })
+  );
+
+  // P10 — Phase B: metadata + metric values for the visible page (≤ 20).
+  framework.registerRoute(
+    {
+      method: 'post',
+      path: '/api/metrics/infra/host/metrics',
+      validate: {
+        body: createRouteValidationFunction(GetHostsMetricsRequestBodyPayloadRT),
+        query: createRouteValidationFunction(InspectQueryRT),
+      },
+    },
+    withInspect(async (context, request) => {
+      const { from, to, names, metrics, query, schema = DEFAULT_SCHEMA } = request.body;
+
+      // Per-request hosts cap. Derived from the UI's
+      // `HOSTS_TABLE_PAGE_SIZE_OPTIONS` (max value) so adding a new page-
+      // size option to the table will widen the cap automatically. The
+      // actual query cost is driven by `names.length` — Phase B asks ES
+      // for exactly the hosts in this list, no more and no less — so a
+      // client picking 5 rows per page sends 5 names and gets 5-host work.
+      if (names.length > MAX_HOSTS_PER_METRICS_REQUEST) {
+        throw Object.assign(
+          new Error(
+            `Phase B is page-bounded: at most ${MAX_HOSTS_PER_METRICS_REQUEST} host names per request (received ${names.length}).`
+          ),
+          { statusCode: 400 }
+        );
+      }
+
+      // Note: the legacy `rxV2` / `txV2` semconv guardrail (derivative-on-
+      // histogram blew `max_buckets` on large fleets) doesn't apply to this
+      // endpoint. Phase B expresses both directions via filter-in-agg
+      // averages of `metrics.system.network.io` over the page-bounded set
+      // (≤ MAX_HOSTS_PER_METRICS_REQUEST hosts), so `max_buckets` is no
+      // longer reachable.
+      //
+      // The TS-based `RATE(...)` form would be more correct (per-time-
+      // series counter reset detection) but the engine currently rejects
+      // filter-in-aggregation inside `TS` pipelines, so we use the `FROM`
+      // shape for the whole Phase B query — see `get_hosts_metrics.ts`.
+
+      const apmDataAccessClient = getApmDataAccessClient({ request, libs, context });
+
+      const [infraMetricsClient, apmDataAccessServices] = await Promise.all([
+        getInfraMetricsClient({ request, libs, context }),
+        apmDataAccessClient.getServices(),
+      ]);
+
+      const result = await getHostsMetrics({
+        infraMetricsClient,
+        apmDataAccessServices,
+        from,
+        to,
+        names,
+        metrics,
+        query,
+        schema,
+      });
+
+      return GetHostsMetricsResponsePayloadRT.encode(result);
     })
   );
 };

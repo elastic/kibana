@@ -155,7 +155,7 @@ describe('KpiCharts', () => {
         hostNodes: [],
         loading: false,
         error: undefined,
-      });
+      } as unknown as ReturnType<typeof useHostsViewContext>);
 
       renderKpiCharts();
 
@@ -170,7 +170,7 @@ describe('KpiCharts', () => {
         hostNodes: [],
         loading: true,
         error: undefined,
-      });
+      } as unknown as ReturnType<typeof useHostsViewContext>);
 
       renderKpiCharts();
 

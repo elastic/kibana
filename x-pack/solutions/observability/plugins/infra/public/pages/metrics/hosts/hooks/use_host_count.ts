@@ -17,7 +17,7 @@ import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetch
 import { useUnifiedSearchContext } from './use_unified_search';
 
 export const useHostCount = () => {
-  const { buildQuery, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
+  const { buildQuery, isReady, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
   const { data: timeRangeMetadata, status: timeRangeMetadataStatus } =
     useTimeRangeMetadataContext();
   const {
@@ -41,15 +41,21 @@ export const useHostCount = () => {
   );
 
   const { data, status, error } = useFetcher(
-    async (callApi) => {
-      const response = await callApi('/api/infra/host/count', {
-        method: 'POST',
-        body: payload,
-      });
+    // P5.5 — return `undefined` (not a Promise) until prerequisites settle
+    // so `useFetcher` skips the initial double-fire. See the `isReady`
+    // comment in `use_unified_search.ts`.
+    (callApi) => {
+      if (!isReady) return;
+      return (async () => {
+        const response = await callApi('/api/infra/host/count', {
+          method: 'POST',
+          body: payload,
+        });
 
-      return decodeOrThrow(GetInfraEntityCountResponsePayloadRT)(response);
+        return decodeOrThrow(GetInfraEntityCountResponsePayloadRT)(response);
+      })();
     },
-    [payload]
+    [isReady, payload]
   );
 
   useEffect(() => {

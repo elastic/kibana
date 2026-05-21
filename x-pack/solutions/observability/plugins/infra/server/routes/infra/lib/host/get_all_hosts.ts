@@ -85,6 +85,35 @@ export const getAllHosts = async ({
           },
           aggs: {
             ...metricAggregations,
+            // P3 — kept as-is by design.
+            //
+            // The intuitive optimisation (`terms(size: 1)`) is materially
+            // cheaper but returns the *most-frequent* value within the
+            // window, which is wrong whenever the host's metadata changed
+            // mid-window (e.g. cloud migration, IP rotation) — the user
+            // expects the *latest* value, especially because metadata
+            // exclusion filters (`cloud.provider != aws`) compare against
+            // this materialised value. The "best of both worlds" candidate
+            // `terms(size:1, order: { latest_ts: desc }) > max(@timestamp)`
+            // was tested empirically and came out ~10 % slower than the
+            // current shape at 24h / 500 hosts (response size grows ~50 %
+            // because every bucket carries the ordering sub-agg). See
+            // PROPOSALS.md §P3 and REPORT.md for the full ablation table.
+            //
+            // The shape — `filter:{exists} > top_metrics(latest, size:1)` —
+            // preserves the "latest non-null value of the field" semantic
+            // that every consumer of the `metadata[]` array depends on,
+            // including the post-fetch exclusion filter in `getHosts`. The
+            // `filter` wrapper handles the legacy edge case where the most
+            // recent sample lacks the metadata field but older samples have
+            // it: it restricts to docs that have it, then `top_metrics`
+            // picks the latest among those.
+            //
+            // Phase B is bounded by `limit` (today: 500), so this shape pays
+            // O(limit × 3) `top_metrics` evaluations. P12 (page-bounded
+            // metadata fetch) collapses that to O(20 × 3) by running the
+            // metadata aggs only for the visible page; once P12 lands, this
+            // shape's cost drops by ~25× without any semantic compromise.
             hostOsName: {
               filter: {
                 exists: {

@@ -81,3 +81,28 @@ export const SNAPSHOT_API_MAX_METRICS = 20;
 export const SCHEMA_SELECTOR_DOCS_LINK = 'https://ela.st/schema-selector-hosts';
 
 export const MAX_HOST_COUNT_LIMIT = 10000;
+
+// P10 — page-size contract shared by the Phase A `/host/list` and Phase B
+// `/host/metrics` endpoints and the Hosts UI table.
+//
+// `HOSTS_TABLE_PAGE_SIZE_OPTIONS` is the source of truth for what page
+// sizes the UI offers; the table's EuiBasicTable picks one of these for the
+// "rows per page" dropdown and sends the chosen value down to Phase A in
+// `page.size` and (transitively) to Phase B via `names.length`. Phase B's
+// per-host work scales linearly with `names.length`, so this list is also
+// what bounds the maximum query cost a single Phase B call can incur —
+// `MAX_HOSTS_PER_METRICS_REQUEST` below is derived from it so the two can
+// never drift.
+//
+// Order matters: smallest first; `HOSTS_TABLE_DEFAULT_PAGE_SIZE` is the
+// initial selection for a fresh URL state.
+export const HOSTS_TABLE_PAGE_SIZE_OPTIONS = [5, 10, 20] as const;
+export const HOSTS_TABLE_DEFAULT_PAGE_SIZE = 10;
+
+// Defence-in-depth upper bound on `names.length` for Phase B. Derived from
+// the UI's page-size options so a future product change (e.g. adding a "50
+// rows per page" option) automatically widens the server cap without a
+// second edit. Sending more than this is treated as a malformed client and
+// rejected at the route validator — Phase B's cost model assumes the page
+// bound holds.
+export const MAX_HOSTS_PER_METRICS_REQUEST = Math.max(...HOSTS_TABLE_PAGE_SIZE_OPTIONS);

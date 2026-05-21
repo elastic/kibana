@@ -10,8 +10,7 @@ import { pipe } from 'fp-ts/pipeable';
 import { fold } from 'fp-ts/Either';
 import { constant, identity } from 'fp-ts/function';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import deepEqual from 'fast-deep-equal';
-import { useReducer } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
 import { DEFAULT_PAGE_SIZE, LOCAL_STORAGE_PAGE_SIZE_KEY } from '../constants';
 
@@ -58,15 +57,43 @@ export const useHostsTableUrlState = (): [TableProperties, TablePropertiesUpdate
     urlStateKey: HOST_TABLE_PROPERTIES_URL_STATE_KEY,
   });
 
-  const [properties, setProperties] = useReducer(reducer, urlState);
-  if (!deepEqual(properties, urlState)) {
-    setUrlState(properties);
-    if (localStoragePageSize !== properties.pagination.pageSize) {
-      setLocalStoragePageSize(properties.pagination.pageSize);
-    }
-  }
+  // P10 — partial-merge setter. The previous implementation used a private
+  // `useReducer` to materialise table state into local React state and then
+  // mirror it back to the URL via a render-time `setUrlState(...)`. That
+  // shape only works for a *single* consumer: when more than one component
+  // calls this hook (`useHostsView` reads sorting/pagination for the Phase A
+  // / Phase B fetchers; `useHostsTable` reads & writes the same fields for
+  // the EUI table), each consumer ends up with its own `useReducer`
+  // instance. As soon as one consumer dispatches a write, its reducer
+  // diverges from the URL — and the *other* consumer's reducer (still on
+  // the previous value) immediately writes its stale state back to the URL
+  // on the next render, kicking off an infinite ping-pong (observed as a
+  // browser freeze when clicking the CPU column header).
+  //
+  // The URL is already the single source of truth — `useUrlState`'s setter
+  // accepts a function that receives the latest decoded URL state, so we
+  // can express the same partial-merge semantics without any local React
+  // state at all. Every consumer reads from the same URL and writes through
+  // the same merge function; no divergence is possible.
+  const setProperties: TablePropertiesUpdater = useCallback(
+    (patch) => {
+      setUrlState((prev) => reducer(prev ?? GET_DEFAULT_TABLE_PROPERTIES, patch));
+    },
+    [setUrlState]
+  );
 
-  return [properties, setProperties];
+  // Keep `localStorage` in sync with the URL's page size so a fresh tab
+  // opens at the user's last choice. Side-effect lives in `useEffect`
+  // (not in render) for the same reason as above — running it during render
+  // is fine for a single consumer but turns into duplicate writes when
+  // multiple components share this hook.
+  useEffect(() => {
+    if (localStoragePageSize !== urlState.pagination.pageSize) {
+      setLocalStoragePageSize(urlState.pagination.pageSize);
+    }
+  }, [urlState.pagination.pageSize, localStoragePageSize, setLocalStoragePageSize]);
+
+  return [urlState, setProperties];
 };
 
 const PaginationRT = rt.partial({ pageIndex: rt.number, pageSize: rt.number });

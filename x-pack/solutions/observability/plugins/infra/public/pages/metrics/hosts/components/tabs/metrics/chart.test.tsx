@@ -141,7 +141,7 @@ describe('Chart', () => {
         hostNodes: [],
         loading: false,
         error: undefined,
-      });
+      } as unknown as ReturnType<typeof useHostsViewContext>);
 
       await renderChart();
 
@@ -156,7 +156,7 @@ describe('Chart', () => {
         hostNodes: [],
         loading: true,
         error: undefined,
-      });
+      } as unknown as ReturnType<typeof useHostsViewContext>);
 
       await renderChart();
 
