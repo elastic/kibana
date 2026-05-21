@@ -98,7 +98,9 @@ export const isAwsCloudConnectorVars = (
 export function isAwsCredentials(
   credentials: CloudConnectorCredentials
 ): credentials is AwsCloudConnectorCredentials {
-  return 'roleArn' in credentials;
+  return (
+    'cloudConnectorId' in credentials || 'roleArn' in credentials || 'externalId' in credentials
+  );
 }
 
 export const isAzureCloudConnectorVars = (
@@ -232,43 +234,64 @@ export const updateInputVarsWithAwsCredentials = (
 
   const updatedInputVars: PackagePolicyConfigRecord = { ...inputVars };
 
-  if (inputCredentials?.roleArn !== undefined) {
-    if (updatedInputVars.role_arn) {
-      updatedInputVars.role_arn = {
-        ...updatedInputVars.role_arn,
-        value: inputCredentials.roleArn,
-      };
-    }
-    if (updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN]) {
-      updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN] = {
-        ...updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN],
-        value: inputCredentials.roleArn,
-      };
-    }
-  } else {
+  // Full clear only when credentials are removed entirely (see updateInputVarsWithCredentials).
+  if (inputCredentials === undefined) {
     if (updatedInputVars.role_arn) {
       updatedInputVars.role_arn = { value: undefined };
     }
     if (updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN]) {
       updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN] = { value: undefined };
     }
-  }
-
-  if (inputCredentials?.externalId !== undefined) {
-    if (updatedInputVars.external_id) {
-      updatedInputVars.external_id = { value: inputCredentials.externalId };
-    }
-    if (updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID]) {
-      updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID] = {
-        value: inputCredentials.externalId,
-      };
-    }
-  } else {
     if (updatedInputVars.external_id) {
       updatedInputVars.external_id = { value: undefined };
     }
     if (updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID]) {
       updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID] = { value: undefined };
+    }
+    return updatedInputVars;
+  }
+
+  if ('roleArn' in inputCredentials) {
+    if (inputCredentials.roleArn !== undefined) {
+      if (updatedInputVars.role_arn) {
+        updatedInputVars.role_arn = {
+          ...updatedInputVars.role_arn,
+          value: inputCredentials.roleArn,
+        };
+      }
+      if (updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN]) {
+        updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN] = {
+          ...updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN],
+          value: inputCredentials.roleArn,
+        };
+      }
+    } else {
+      if (updatedInputVars.role_arn) {
+        updatedInputVars.role_arn = { value: undefined };
+      }
+      if (updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN]) {
+        updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN] = { value: undefined };
+      }
+    }
+  }
+
+  if ('externalId' in inputCredentials) {
+    if (inputCredentials.externalId !== undefined) {
+      if (updatedInputVars.external_id) {
+        updatedInputVars.external_id = { value: inputCredentials.externalId };
+      }
+      if (updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID]) {
+        updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID] = {
+          value: inputCredentials.externalId,
+        };
+      }
+    } else {
+      if (updatedInputVars.external_id) {
+        updatedInputVars.external_id = { value: undefined };
+      }
+      if (updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID]) {
+        updatedInputVars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID] = { value: undefined };
+      }
     }
   }
 

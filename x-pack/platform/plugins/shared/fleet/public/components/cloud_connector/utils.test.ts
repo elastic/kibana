@@ -87,6 +87,18 @@ describe('updateInputVarsWithCredentials - AWS support', () => {
     expect(result?.['aws.role_arn']).toEqual({ value: undefined });
   });
 
+  it('should preserve role_arn when reusing an existing connector by id only', () => {
+    const credentials: CloudConnectorCredentials = {
+      cloudConnectorId: 'existing-connector-123',
+    };
+
+    const result = updateInputVarsWithCredentials(mockInputVars, credentials);
+
+    expect(result?.role_arn?.value).toBe('arn:aws:iam::123456789012:role/OriginalRole');
+    expect(result?.['aws.role_arn']?.value).toBe('arn:aws:iam::123456789012:role/OriginalRole');
+    expect(result?.external_id?.value).toBe('original-external-id');
+  });
+
   it('should clear external_id fields when externalId is undefined', () => {
     const credentials: CloudConnectorCredentials = {
       roleArn: 'arn:aws:iam::123456789012:role/UpdatedRole',

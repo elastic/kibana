@@ -188,10 +188,15 @@ export const CloudConnectorSelector = ({
           typeof connector.vars.external_id?.value === 'string'
             ? connector.vars.external_id.value
             : connector.vars.external_id?.value;
+        const roleArnValue = connector.vars.role_arn?.value;
+        // Only include credential fields when defined — passing roleArn/externalId as
+        // explicit undefined clears input vars and breaks form validation (Save stays disabled).
         setCredentials({
-          roleArn: connector.vars.role_arn?.value,
-          externalId: externalIdValue,
           cloudConnectorId: connector.id,
+          ...(roleArnValue !== undefined && roleArnValue !== '' ? { roleArn: roleArnValue } : {}),
+          ...(externalIdValue !== undefined && externalIdValue !== ''
+            ? { externalId: externalIdValue }
+            : {}),
         });
       } else if (isAzureCloudConnectorVars(connector.vars, provider)) {
         setCredentials({
