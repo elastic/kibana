@@ -1049,7 +1049,6 @@ const isWildcardStringEntry = (
 export const hasWrongOperatorWithWildcard = (
   items: ExceptionsBuilderReturnExceptionItem[]
 ): boolean =>
-  // eslint-disable-next-line array-callback-return
   flattenExceptionEntries(items).some((e) => {
     if (e.type !== 'list' && 'value' in e && e.value != null) {
       return validateHasWildcardWithWrongOperator({
@@ -1057,6 +1056,7 @@ export const hasWrongOperatorWithWildcard = (
         value: e.value,
       });
     }
+    return false;
   });
 
 export const hasEscaping = (

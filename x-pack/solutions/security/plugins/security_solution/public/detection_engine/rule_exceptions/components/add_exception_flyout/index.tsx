@@ -599,11 +599,15 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
           onSetErrorExists={setConditionsValidationError}
           getExtendedFields={getExtendedFields}
         />
-        <EuiFlexGroup direction="column" gutterSize="s">
-          {wildcardWarningExists && <WildCardWithWrongOperatorCallout />}
-          {malformedMatchesValueExists && <MalformedMatchesValueCallout />}
-          {partialCodeSignatureWarningExists && <PartialCodeSignatureCallout />}
-        </EuiFlexGroup>
+        {(wildcardWarningExists ||
+          malformedMatchesValueExists ||
+          partialCodeSignatureWarningExists) && (
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {wildcardWarningExists && <WildCardWithWrongOperatorCallout />}
+            {malformedMatchesValueExists && <MalformedMatchesValueCallout />}
+            {partialCodeSignatureWarningExists && <PartialCodeSignatureCallout />}
+          </EuiFlexGroup>
+        )}
         {listType !== ExceptionListTypeEnum.ENDPOINT && !sharedListToAddTo?.length && (
           <>
             <EuiHorizontalRule />

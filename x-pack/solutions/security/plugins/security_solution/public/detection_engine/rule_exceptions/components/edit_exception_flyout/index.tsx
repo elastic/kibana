@@ -457,11 +457,15 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           onSetErrorExists={setConditionsValidationError}
           getExtendedFields={getExtendedFields}
         />
-        <EuiFlexGroup direction="column" gutterSize="s">
-          {wildcardWarningExists && <WildCardWithWrongOperatorCallout />}
-          {malformedMatchesValueExists && <MalformedMatchesValueCallout />}
-          {partialCodeSignatureWarningExists && <PartialCodeSignatureCallout />}
-        </EuiFlexGroup>
+        {(wildcardWarningExists ||
+          malformedMatchesValueExists ||
+          partialCodeSignatureWarningExists) && (
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {wildcardWarningExists && <WildCardWithWrongOperatorCallout />}
+            {malformedMatchesValueExists && <MalformedMatchesValueCallout />}
+            {partialCodeSignatureWarningExists && <PartialCodeSignatureCallout />}
+          </EuiFlexGroup>
+        )}
         {!openedFromListDetailPage && listType === ExceptionListTypeEnum.DETECTION && (
           <>
             <EuiHorizontalRule />
