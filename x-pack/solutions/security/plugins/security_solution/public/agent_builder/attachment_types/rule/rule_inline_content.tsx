@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import {
@@ -132,26 +132,14 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
     aiRuleCreation.lastSavedRuleId$,
     aiRuleCreation.getLastSavedRuleId()
   );
-  // Synchronous initial values avoid a one-render lag (useObservable subscribes in an effect,
-  // so without this it would render the default on the first render even if the
-  // BehaviorSubject already holds a non-default value).
-  const currentSeq = useObservable(
-    aiRuleCreation.currentAttachmentSeq$,
-    aiRuleCreation.getCurrentAttachmentSeq()
-  );
   const agentBusy = useObservable(aiRuleCreation.agentBusy$, false);
 
   const rule = useMemo(() => parseRuleFromAttachment(attachment), [attachment]);
 
-  // Claim a sequence number on mount. useState's lazy initializer runs once per component
-  // lifecycle, so each card receives a unique, monotonically increasing seq. Cards in chat
-  // mount oldest → newest, so the newest card ends up with the highest seq and is "current".
-  const [mySeq] = useState(() => aiRuleCreation.claimAsCurrentAttachment());
-
-  // Only the card with the highest seq exposes action buttons, and only when the agent isn't
-  // currently in a reasoning/streaming round (which would cause buttons to flicker as
-  // transient events arrive). All other cards are display-only.
-  const isCurrentAttachment = mySeq === currentSeq;
+  // The platform passes registerActionButtons only for the card showing the latest attachment
+  // version. Use that as the proxy for "is this the current card" — no need for a separate
+  // seq counter.
+  const isCurrentAttachment = callbacks?.registerActionButtons !== undefined;
   const showButtons = isCurrentAttachment && !agentBusy;
 
   // Per-card frozen save-button label. Captured the first time this card registers buttons
