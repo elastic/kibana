@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { Actions } from './actions';
+import { ToolingLog } from '@kbn/tooling-log';
+
+export const logger = new ToolingLog({ level: 'info', writeTo: process.stdout });
