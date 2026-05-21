@@ -105,13 +105,13 @@ describe('useWorkflowStepExecutions', () => {
     );
   });
 
-  it('should pass start and end time range to query params', async () => {
+  it('should pass startedAfter and startedBefore time range to query params', async () => {
     const { result } = renderHook(
       () =>
         useWorkflowStepExecutions({
           workflowId: 'wf-1',
-          start: 'now-1w',
-          end: 'now',
+          startedAfter: 'now-1w',
+          startedBefore: 'now',
         }),
       { wrapper: createQueryClientWrapper(queryClient) }
     );
@@ -121,8 +121,8 @@ describe('useWorkflowStepExecutions', () => {
     expect(mockGetWorkflowStepExecutions).toHaveBeenCalledWith(
       'wf-1',
       expect.objectContaining({
-        start: 'now-1w',
-        end: 'now',
+        startedAfter: 'now-1w',
+        startedBefore: 'now',
       })
     );
   });

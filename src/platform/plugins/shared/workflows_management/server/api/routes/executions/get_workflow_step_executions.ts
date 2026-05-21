@@ -59,7 +59,7 @@ export function registerGetWorkflowStepExecutionsRoute({ router, api, spaces }: 
                   meta: { description: 'Number of results per page.' },
                 })
               ),
-              start: schema.maybe(
+              startedAfter: schema.maybe(
                 schema.string({
                   meta: {
                     description:
@@ -67,7 +67,7 @@ export function registerGetWorkflowStepExecutionsRoute({ router, api, spaces }: 
                   },
                 })
               ),
-              end: schema.maybe(
+              startedBefore: schema.maybe(
                 schema.string({
                   meta: {
                     description:
@@ -92,8 +92,8 @@ export function registerGetWorkflowStepExecutionsRoute({ router, api, spaces }: 
             includeOutput: query.includeOutput ?? false,
             page: query.page,
             size: query.size,
-            start: query.start,
-            end: query.end,
+            startedAfter: query.startedAfter,
+            startedBefore: query.startedBefore,
           };
 
           return response.ok({

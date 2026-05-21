@@ -63,16 +63,16 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
     const [selectedExecutionId, setSelectedExecutionId] = useState<string | null>(
       initialExecutionId ?? null
     );
-    const [start, setStart] = useState('now-1w'); // default to 1 week ago
-    const [end, setEnd] = useState('now');
+    const [startedAfter, setStartedAfter] = useState('now-1w'); // default to 1 week ago
+    const [startedBefore, setStartedBefore] = useState('now');
     const getFormattedDateTime = useGetFormattedDateTime();
 
     const { data: executionsList, isInitialLoading: isLoadingExecutions } = useWorkflowExecutions({
       workflowId: workflowId ?? null,
       omitStepRuns: true,
       size: 100,
-      start,
-      end,
+      startedAfter,
+      startedBefore,
     });
 
     const executionOptions: EuiComboBoxOptionOption<string>[] = useMemo(() => {
@@ -125,8 +125,8 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
         return;
       }
       // Set the time range to the execution time and start 1 week in the past
-      setEnd(startedAt);
-      setStart(moment(startedAt).subtract(1, 'week').toISOString());
+      setStartedBefore(startedAt);
+      setStartedAfter(moment(startedAt).subtract(1, 'week').toISOString());
     }, [initialExecutionId, selectedExecutionId, selectedExecution?.startedAt]);
 
     // Populate the loaded execution data and manage not-ready sentinel
@@ -162,9 +162,9 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
     }, [inputsValidator, value, setErrors]);
 
     const handleTimeChange = useCallback(
-      ({ start: nextStart, end: nextEnd }: { start: string; end: string }) => {
-        setStart(nextStart);
-        setEnd(nextEnd);
+      ({ start: nextStartedAfter, end: nextStartedBefore }: { start: string; end: string }) => {
+        setStartedAfter(nextStartedAfter);
+        setStartedBefore(nextStartedBefore);
       },
       []
     );
@@ -231,8 +231,8 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
             <EuiFlexItem grow={false}>
               <EuiFormRow hasEmptyLabelSpace>
                 <EuiSuperDatePicker
-                  start={start}
-                  end={end}
+                  start={startedAfter}
+                  end={startedBefore}
                   onTimeChange={handleTimeChange}
                   showUpdateButton={false}
                   width="auto"
@@ -343,7 +343,6 @@ function getTriggerTypeLabel(context?: Record<string, unknown>): string {
   if (event?.documents) return TRIGGER_TABS_LABELS.index;
   return TRIGGER_TABS_LABELS.manual;
 }
-
 const translations = {
   getRunLabel: (dateTime: string, timeAgo: string, stepDuration: string, stepId?: string) => {
     return i18n.translate('workflows.workflowExecuteModal.replayOptionLabel', {
@@ -375,3 +374,4 @@ const translations = {
     defaultMessage: 'Loading execution…',
   }),
 };
+

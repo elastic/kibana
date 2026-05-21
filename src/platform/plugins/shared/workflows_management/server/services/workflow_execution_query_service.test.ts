@@ -142,11 +142,11 @@ describe('WorkflowExecutionQueryService', () => {
       expect(stepIdFilter).toBeDefined();
     });
 
-    it('adds startedAt range filter when start and end are provided', async () => {
+    it('adds startedAt range filter when startedAfter and startedBefore are provided', async () => {
       mockEsClient.search.mockResolvedValue(emptyResponse as any);
 
       await service.getWorkflowExecutions(
-        { workflowId: 'wf-1', start: 'now-1w', end: 'now' },
+        { workflowId: 'wf-1', startedAfter: 'now-1w', startedBefore: 'now' },
         'default'
       );
 
@@ -158,7 +158,47 @@ describe('WorkflowExecutionQueryService', () => {
       expect(rangeClause.range.startedAt.lte).toMatch(/^\d{4}-/);
     });
 
-    it('does not add startedAt range when start and end are omitted', async () => {
+    it('adds finishedAt range filter (datemath) when finishedAfter and finishedBefore are provided', async () => {
+      mockEsClient.search.mockResolvedValue(emptyResponse as any);
+
+      await service.getWorkflowExecutions(
+        { workflowId: 'wf-1', finishedAfter: 'now-1w', finishedBefore: 'now' },
+        'default'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      const must = call.query.bool.must;
+      const rangeClause = must.find((clause: any) => clause.range?.finishedAt);
+      expect(rangeClause).toBeDefined();
+      expect(rangeClause.range.finishedAt.gte).toMatch(/^\d{4}-/);
+      expect(rangeClause.range.finishedAt.lte).toMatch(/^\d{4}-/);
+    });
+
+    it('adds finishedAt range filter when finish bounds are absolute ISO timestamps', async () => {
+      mockEsClient.search.mockResolvedValue(emptyResponse as any);
+
+      await service.getWorkflowExecutions(
+        {
+          workflowId: 'wf-1',
+          finishedAfter: '2026-05-01T00:00:00.000Z',
+          finishedBefore: '2026-05-14T00:00:00.000Z',
+        },
+        'default'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      const must = call.query.bool.must;
+      expect(must).toContainEqual({
+        range: {
+          finishedAt: {
+            gte: '2026-05-01T00:00:00.000Z',
+            lte: '2026-05-14T00:00:00.000Z',
+          },
+        },
+      });
+    });
+
+    it('does not add startedAt or finishedAt range when time bounds are omitted', async () => {
       mockEsClient.search.mockResolvedValue(emptyResponse as any);
 
       await service.getWorkflowExecutions({ workflowId: 'wf-1' }, 'default');
@@ -166,6 +206,28 @@ describe('WorkflowExecutionQueryService', () => {
       const call = mockEsClient.search.mock.calls[0][0] as any;
       const must = call.query.bool.must;
       expect(must.some((clause: any) => clause.range?.startedAt)).toBe(false);
+      expect(must.some((clause: any) => clause.range?.finishedAt)).toBe(false);
+    });
+
+    it('uses createdAt desc as the default sort', async () => {
+      mockEsClient.search.mockResolvedValue(emptyResponse as any);
+
+      await service.getWorkflowExecutions({ workflowId: 'wf-1' }, 'default');
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      expect(call.sort).toEqual([{ createdAt: 'desc' }]);
+    });
+
+    it('uses explicit execution sort when provided', async () => {
+      mockEsClient.search.mockResolvedValue(emptyResponse as any);
+
+      await service.getWorkflowExecutions(
+        { workflowId: 'wf-1', sortField: 'finishedAt', sortOrder: 'desc' },
+        'default'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      expect(call.sort).toEqual([{ finishedAt: { order: 'desc' } }]);
     });
 
     it('uses default page size and page 1 when not specified', async () => {
@@ -307,7 +369,7 @@ describe('WorkflowExecutionQueryService', () => {
       expect(call._source?.excludes).toBeUndefined();
     });
 
-    it('adds startedAt range when start and end are provided', async () => {
+    it('adds startedAt range when startedAfter and startedBefore are provided', async () => {
       mockEsClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } } as any);
 
       await service.searchStepExecutions(
@@ -315,8 +377,8 @@ describe('WorkflowExecutionQueryService', () => {
           workflowId: 'wf-1',
           includeInput: true,
           includeOutput: true,
-          start: 'now-1w',
-          end: 'now',
+          startedAfter: 'now-1w',
+          startedBefore: 'now',
         },
         'default'
       );

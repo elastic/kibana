@@ -323,6 +323,12 @@ describe('Execution Routes', () => {
           page: 2,
           size: 5,
           omitStepRuns: true,
+          startedAfter: 'now-1w',
+          startedBefore: 'now',
+          finishedAfter: '2026-05-01T00:00:00.000Z',
+          finishedBefore: '2026-05-14T00:00:00.000Z',
+          sortField: 'finishedAt',
+          sortOrder: 'desc',
           concurrencyGroupKey: 'streams-ki-onboarding-my-stream',
         },
       };
@@ -339,29 +345,12 @@ describe('Execution Routes', () => {
           page: 2,
           size: 5,
           omitStepRuns: true,
-        }),
-        'default'
-      );
-    });
-
-    it('should forward start and end query params to api.getWorkflowExecutions', async () => {
-      mockApi.getWorkflowExecutions.mockResolvedValue({ executions: [] });
-      const h = handler('GET', path)!;
-      const request = {
-        params: { workflowId: 'wf-1' },
-        query: {
-          start: 'now-1w',
-          end: 'now',
-        },
-      };
-
-      await h(mockContext, request as any, mockResponse as any);
-
-      expect(mockApi.getWorkflowExecutions).toHaveBeenCalledWith(
-        expect.objectContaining({
-          workflowId: 'wf-1',
-          start: 'now-1w',
-          end: 'now',
+          startedAfter: 'now-1w',
+          startedBefore: 'now',
+          finishedAfter: '2026-05-01T00:00:00.000Z',
+          finishedBefore: '2026-05-14T00:00:00.000Z',
+          sortField: 'finishedAt',
+          sortOrder: 'desc',
         }),
         'default'
       );
@@ -404,15 +393,15 @@ describe('Execution Routes', () => {
       );
     });
 
-    it('should forward start and end query params to api.searchStepExecutions', async () => {
+    it('should forward startedAfter and startedBefore query params to api.searchStepExecutions', async () => {
       mockApi.searchStepExecutions.mockResolvedValue({ stepExecutions: [] });
       const h = handler('GET', path)!;
       const request = {
         params: { workflowId: 'wf-1' },
         query: {
           stepId: 's1',
-          start: 'now-1w',
-          end: 'now',
+          startedAfter: 'now-1w',
+          startedBefore: 'now',
         },
       };
 
@@ -422,8 +411,8 @@ describe('Execution Routes', () => {
         expect.objectContaining({
           workflowId: 'wf-1',
           stepId: 's1',
-          start: 'now-1w',
-          end: 'now',
+          startedAfter: 'now-1w',
+          startedBefore: 'now',
         }),
         'default'
       );
@@ -484,7 +473,11 @@ describe('Execution Routes', () => {
 
       await h(mockContext, request as any, mockResponse as any);
 
-      expect(mockApi.cancelWorkflowExecution).toHaveBeenCalledWith('ex-1', 'default');
+      expect(mockApi.cancelWorkflowExecution).toHaveBeenCalledWith(
+        'ex-1',
+        'default',
+        expect.anything()
+      );
       expect(mockResponse.ok).toHaveBeenCalled();
     });
 

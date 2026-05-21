@@ -9,7 +9,13 @@
 
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useInfiniteQuery, type UseInfiniteQueryOptions } from '@kbn/react-query';
-import type { ExecutionStatus, ExecutionType, WorkflowExecutionListDto } from '@kbn/workflows';
+import type {
+  ExecutionStatus,
+  ExecutionType,
+  WorkflowExecutionListDto,
+  WorkflowExecutionSortField,
+  WorkflowExecutionSortOrder,
+} from '@kbn/workflows';
 import { useWorkflowsApi } from '@kbn/workflows-ui';
 
 const DEFAULT_PAGE_SIZE = 100;
@@ -28,10 +34,14 @@ interface UseWorkflowExecutionsParams {
   size?: number;
   /** Whether to omit single-step runs from the results. */
   omitStepRuns?: boolean;
-  /** Datemath start of the time range filter (e.g. 'now-1d') applied to startedAt. */
-  start?: string;
-  /** Datemath end of the time range filter (e.g. 'now') applied to startedAt. */
-  end?: string;
+  /** Datemath lower bound for filtering by startedAt (e.g. 'now-1w'). */
+  startedAfter?: string;
+  /** Datemath upper bound for filtering by startedAt (e.g. 'now'). */
+  startedBefore?: string;
+  finishedAfter?: string;
+  finishedBefore?: string;
+  sortField?: WorkflowExecutionSortField;
+  sortOrder?: WorkflowExecutionSortOrder;
 }
 
 export function useWorkflowExecutions(
@@ -42,7 +52,16 @@ export function useWorkflowExecutions(
       unknown,
       WorkflowExecutionListDto,
       WorkflowExecutionListDto,
-      (string | number | ExecutionStatus[] | ExecutionType[] | string[] | null | undefined)[]
+      (
+        | string
+        | number
+        | boolean
+        | ExecutionStatus[]
+        | ExecutionType[]
+        | string[]
+        | null
+        | undefined
+      )[]
     >,
     'queryKey' | 'queryFn' | 'getNextPageParam'
   > = {}
@@ -62,8 +81,16 @@ export function useWorkflowExecutions(
           ? { executedBy: params.executedBy }
           : {}),
         ...(params.omitStepRuns != null && { omitStepRuns: params.omitStepRuns }),
-        ...(params.start != null && params.start !== '' ? { start: params.start } : {}),
-        ...(params.end != null && params.end !== '' ? { end: params.end } : {}),
+        ...(params.startedAfter != null && params.startedAfter !== ''
+          ? { startedAfter: params.startedAfter }
+          : {}),
+        ...(params.startedBefore != null && params.startedBefore !== ''
+          ? { startedBefore: params.startedBefore }
+          : {}),
+        ...(params.finishedAfter ? { finishedAfter: params.finishedAfter } : {}),
+        ...(params.finishedBefore ? { finishedBefore: params.finishedBefore } : {}),
+        ...(params.sortField ? { sortField: params.sortField } : {}),
+        ...(params.sortOrder ? { sortOrder: params.sortOrder } : {}),
         page: pageParam,
         size: currentSize,
       });
@@ -75,8 +102,12 @@ export function useWorkflowExecutions(
       params.executionTypes,
       params.executedBy,
       params.omitStepRuns,
-      params.start,
-      params.end,
+      params.startedAfter,
+      params.startedBefore,
+      params.finishedAfter,
+      params.finishedBefore,
+      params.sortField,
+      params.sortOrder,
       currentSize,
     ]
   );
@@ -110,8 +141,13 @@ export function useWorkflowExecutions(
       params.statuses,
       params.executionTypes,
       params.executedBy,
-      params.start,
-      params.end,
+      params.omitStepRuns,
+      params.startedAfter,
+      params.startedBefore,
+      params.finishedAfter,
+      params.finishedBefore,
+      params.sortField,
+      params.sortOrder,
       currentSize,
     ],
     queryFn,

@@ -81,8 +81,8 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
     const [workflowExecutionId, setWorkflowExecutionId] = useState<string | null>(
       initialWorkflowRunId ?? null
     );
-    const [start, setStart] = useState('now-1w');
-    const [end, setEnd] = useState('now');
+    const [startedAfter, setStartedAfter] = useState('now-1w');
+    const [startedBefore, setStartedBefore] = useState('now');
     const getFormattedDateTime = useGetFormattedDateTime();
 
     const workflowId = useSelector(selectWorkflowId);
@@ -92,8 +92,8 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
         workflowId: workflowId ?? null,
         stepId,
         size: 100,
-        start,
-        end,
+        startedAfter,
+        startedBefore,
       });
 
     const selectedStepExecutionMetadata = useMemo(
@@ -140,8 +140,8 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
         return;
       }
       // Set the time range to the execution time and start 1 week in the past
-      setEnd(startedAt);
-      setStart(moment(startedAt).subtract(1, 'week').toISOString());
+      setStartedBefore(startedAt);
+      setStartedAfter(moment(startedAt).subtract(1, 'week').toISOString());
     }, [initialStepExecutionId, selectedStepExecutionId, selectedStepExecution?.startedAt]);
 
     // Populate the execution context when the execution data arrives
@@ -250,9 +250,9 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
     ]);
 
     const handleTimeChange = useCallback(
-      ({ start: nextStart, end: nextEnd }: { start: string; end: string }) => {
-        setStart(nextStart);
-        setEnd(nextEnd);
+      ({ start: nextStartedAfter, end: nextStartedBefore }: { start: string; end: string }) => {
+        setStartedAfter(nextStartedAfter);
+        setStartedBefore(nextStartedBefore);
       },
       []
     );
@@ -321,8 +321,8 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
             <EuiFlexItem grow={false}>
               <EuiFormRow hasEmptyLabelSpace>
                 <EuiSuperDatePicker
-                  start={start}
-                  end={end}
+                  start={startedAfter}
+                  end={startedBefore}
                   onTimeChange={handleTimeChange}
                   showUpdateButton={false}
                   width="auto"
@@ -425,7 +425,6 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
   }
 );
 StepExecuteHistoricalForm.displayName = 'StepExecuteHistoricalForm';
-
 const translations = {
   getRunLabel: (stepType: string, dateTime: string, timeAgo: string, stepDuration: string) =>
     i18n.translate('workflows.testStepModal.replayOptionLabel', {
@@ -457,3 +456,4 @@ const translations = {
     defaultMessage: 'Loading step execution…',
   }),
 };
+

@@ -123,9 +123,9 @@ export interface SearchStepExecutionsParams {
   page?: number;
   size?: number;
   /** Datemath lower bound for filtering by startedAt. */
-  start?: string;
+  startedAfter?: string;
   /** Datemath upper bound for filtering by startedAt. */
-  end?: string;
+  startedBefore?: string;
 }
 
 export interface GetAvailableConnectorsParams {
@@ -583,10 +583,11 @@ export class WorkflowsManagementApi {
 
   public async cancelWorkflowExecution(
     workflowExecutionId: string,
-    spaceId: string
+    spaceId: string,
+    request?: KibanaRequest
   ): Promise<void> {
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
-    return workflowsExecutionEngine.cancelWorkflowExecution(workflowExecutionId, spaceId);
+    return workflowsExecutionEngine.cancelWorkflowExecution(workflowExecutionId, spaceId, request);
   }
 
   public async cancelAllActiveWorkflowExecutions(

@@ -85,8 +85,8 @@ describe('WorkflowExecuteHistoricalForm', () => {
           workflowId: 'workflow-1',
           omitStepRuns: true,
           size: 100,
-          start: 'now-1w',
-          end: 'now',
+          startedAfter: 'now-1w',
+          startedBefore: 'now',
         })
       );
     });
@@ -264,9 +264,9 @@ describe('WorkflowExecuteHistoricalForm', () => {
         expect(
           calls.some(
             (arg) =>
-              arg.end === startedAt &&
-              typeof arg.start === 'string' &&
-              arg.start.startsWith('2024-05-25')
+              arg.startedBefore === startedAt &&
+              typeof arg.startedAfter === 'string' &&
+              arg.startedAfter.startsWith('2024-05-25')
           )
         ).toBe(true);
       });

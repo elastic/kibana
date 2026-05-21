@@ -29,6 +29,8 @@ import type {
   WorkflowExecutionDto,
   WorkflowExecutionHistoryModel,
   WorkflowExecutionListDto,
+  WorkflowExecutionSortField,
+  WorkflowExecutionSortOrder,
   WorkflowListDto,
   WorkflowStatsDto,
 } from '@kbn/workflows';
@@ -74,12 +76,16 @@ export interface SearchWorkflowExecutionsParams {
   executedBy?: string[];
   concurrencyGroupKey?: string;
   omitStepRuns?: boolean;
+  finishedAfter?: string;
+  finishedBefore?: string;
+  sortField?: WorkflowExecutionSortField;
+  sortOrder?: WorkflowExecutionSortOrder;
   page?: number;
   size?: number;
   /** Datemath lower bound for filtering by startedAt. */
-  start?: string;
+  startedAfter?: string;
   /** Datemath upper bound for filtering by startedAt. */
-  end?: string;
+  startedBefore?: string;
 }
 
 export class WorkflowsService {

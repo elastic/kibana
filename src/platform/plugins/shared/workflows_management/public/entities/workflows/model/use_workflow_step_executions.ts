@@ -27,10 +27,10 @@ interface UseWorkflowStepExecutionsParams {
   size?: number;
   /** Page number. */
   page?: number;
-  /** Datemath start of the time range filter (e.g. 'now-1d') applied to startedAt. */
-  start?: string;
-  /** Datemath end of the time range filter (e.g. 'now') applied to startedAt. */
-  end?: string;
+  /** Datemath lower bound of the time range filter (e.g. 'now-1d') applied to startedAt. */
+  startedAfter?: string;
+  /** Datemath upper bound of the time range filter (e.g. 'now') applied to startedAt. */
+  startedBefore?: string;
 }
 
 export function useWorkflowStepExecutions(params: UseWorkflowStepExecutionsParams) {
@@ -44,8 +44,8 @@ export function useWorkflowStepExecutions(params: UseWorkflowStepExecutionsParam
       params.stepId,
       params.page,
       params.size,
-      params.start,
-      params.end,
+      params.startedAfter,
+      params.startedBefore,
     ],
     queryFn: async () => {
       if (!params.workflowId) {
@@ -55,8 +55,12 @@ export function useWorkflowStepExecutions(params: UseWorkflowStepExecutionsParam
         ...(params.stepId ? { stepId: params.stepId } : {}),
         page: params.page,
         size: params.size ?? 100,
-        ...(params.start != null && params.start !== '' ? { start: params.start } : {}),
-        ...(params.end != null && params.end !== '' ? { end: params.end } : {}),
+        ...(params.startedAfter != null && params.startedAfter !== ''
+          ? { startedAfter: params.startedAfter }
+          : {}),
+        ...(params.startedBefore != null && params.startedBefore !== ''
+          ? { startedBefore: params.startedBefore }
+          : {}),
       });
     },
     enabled: params.workflowId !== null,

@@ -43,8 +43,8 @@ jest.mock('./compose_discover_form', () => {
   };
 });
 
-jest.mock('./compose_discover_child', () => ({
-  ComposeDiscoverChild: () => <div data-test-subj="composeDiscoverChildMock" />,
+jest.mock('./query_sandbox_flyout', () => ({
+  QuerySandboxFlyout: () => <div data-test-subj="composeDiscoverChildMock" />,
 }));
 
 jest.mock('./use_esql_providers', () => ({
