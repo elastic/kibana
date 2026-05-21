@@ -66,8 +66,6 @@ export function useDimensionsWipe({
     if (pruned.length === selectedDimensions.length) {
       return;
     }
-    // eslint-disable-next-line no-console
-    console.log('[METRICS_DEBUG] useDimensionsWipe pruning', { selected: selectedDimensions, pruned });
     onSelectedDimensionsChange(pruned);
 
     const breakdownSurvived =

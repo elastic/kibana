@@ -64,8 +64,12 @@ export function MetricsExperienceStateProvider({
 
   const onSearchTermChange = useCallback(
     (term: string) => {
-      setCurrentPage(0);
-      setSearchTerm(term);
+      setSearchTerm((prevTerm) => {
+        if (prevTerm !== term) {
+          setCurrentPage(0);
+        }
+        return term;
+      });
     },
     [setSearchTerm, setCurrentPage]
   );
