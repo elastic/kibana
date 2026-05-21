@@ -64,10 +64,12 @@ let capturedHandler: (
   res: KibanaResponseFactory
 ) => Promise<unknown>;
 
-const mockAddVersion = jest.fn().mockImplementation((_opts: unknown, handler: typeof capturedHandler) => {
-  capturedHandler = handler;
-  return { addVersion: mockAddVersion };
-});
+const mockAddVersion = jest
+  .fn()
+  .mockImplementation((_opts: unknown, handler: typeof capturedHandler) => {
+    capturedHandler = handler;
+    return { addVersion: mockAddVersion };
+  });
 
 const mockPost = jest.fn().mockReturnValue({ addVersion: mockAddVersion });
 const mockVersioned = { post: mockPost };
@@ -90,9 +92,7 @@ describe('registerSiemRuleMigrationsInvokeRoute', () => {
   });
 
   it('registers a versioned POST route', () => {
-    expect(mockPost).toHaveBeenCalledWith(
-      expect.objectContaining({ access: 'internal' })
-    );
+    expect(mockPost).toHaveBeenCalledWith(expect.objectContaining({ access: 'internal' }));
     expect(mockAddVersion).toHaveBeenCalledWith(
       expect.objectContaining({ version: '1' }),
       expect.any(Function)
@@ -126,10 +126,7 @@ describe('registerSiemRuleMigrationsInvokeRoute', () => {
       const req = makeRequest({ config });
       await capturedHandler(mockContext, req, mockRes);
 
-      expect(mockExecute).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'rule-1' }),
-        config
-      );
+      expect(mockExecute).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }), config);
       expect(mockRes.ok).toHaveBeenCalledWith({ body: { output } });
     });
 
