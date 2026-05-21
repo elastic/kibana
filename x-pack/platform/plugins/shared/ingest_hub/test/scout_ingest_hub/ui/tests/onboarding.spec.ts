@@ -30,7 +30,7 @@ test.describe('Onboarding app — FF enabled', { tag: tags.stateful.classic }, (
     });
 
     await test.step('renders 5 step indicators', async () => {
-      const steps = page.testSubj.locator('onboardingStepIndicator-');
+      const steps = page.locator('[data-test-subj^="onboardingStepIndicator-"]');
       await expect(steps).toHaveCount(5);
     });
 

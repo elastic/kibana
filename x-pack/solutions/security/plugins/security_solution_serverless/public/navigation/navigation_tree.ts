@@ -96,7 +96,7 @@ export const createNavigationTree = async (
       defaultNavigationTree.ml(),
       {
         id: SecurityPageName.onboarding,
-        link: securityLink(SecurityPageName.onboarding),
+        link: 'onboarding' as AppDeepLinkId,
         sideNavStatus: 'hidden',
       },
     ],
