@@ -9,13 +9,3 @@
  * Attachment type identifier for dashboard state
  */
 export const DASHBOARD_ATTACHMENT_TYPE = 'platform.dashboard.dashboard_state';
-
-/**
- * UI event emitted when a panel is pinned to a new dashboard via the pin_to_dashboard tool.
- */
-export const DASHBOARD_PINNED_UI_EVENT = 'dashboard_panel_pinned' as const;
-
-export interface DashboardPinnedUiEventData {
-  dashboardId: string;
-  title: string;
-}

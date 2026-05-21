@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-export {
-  DASHBOARD_ATTACHMENT_TYPE,
-  DASHBOARD_PINNED_UI_EVENT,
-  type DashboardPinnedUiEventData,
-} from './constants';
+export { DASHBOARD_ATTACHMENT_TYPE } from './constants';
 
 export {
   panelGridSchema,
