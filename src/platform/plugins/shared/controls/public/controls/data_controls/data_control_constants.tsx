@@ -101,7 +101,7 @@ export const DataControlEditorStrings = {
       },
       getValuesSourceToggleLabel: () =>
         i18n.translate('controls.controlGroup.manageControl.valuesSourceToggleLabel', {
-          defaultMessage: 'Pre-filter field values by a query',
+          defaultMessage: 'Pre-filter field values with a query',
         }),
       getDefaultValuesQuery: (dataView: DataView | undefined, fieldName?: string) =>
         dataView

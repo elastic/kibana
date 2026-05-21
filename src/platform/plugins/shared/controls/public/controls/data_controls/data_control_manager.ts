@@ -254,7 +254,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
       if (!query) {
         throw new Error(
           i18n.translate('controls.dataControl.esqlMissingQuery', {
-            defaultMessage: 'ES|QL control is missing a query',
+            defaultMessage: 'Variable control is missing a query',
           })
         );
       }
