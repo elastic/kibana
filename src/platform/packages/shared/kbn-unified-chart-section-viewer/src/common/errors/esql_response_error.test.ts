@@ -12,6 +12,7 @@ import {
   EsqlResponseError,
   extractEsqlEmbeddedError,
   formatErrorCause,
+  isEsqlResponseError,
 } from './esql_response_error';
 
 describe('formatErrorCause', () => {
@@ -30,6 +31,27 @@ describe('formatErrorCause', () => {
         root_cause: [{ type: 'index_not_found_exception', reason: 'no such index [metrics-*]' }],
       })
     ).toBe('index_not_found_exception: no such index [metrics-*]');
+  });
+
+  it('joins multiple root_cause entries with newlines', () => {
+    expect(
+      formatErrorCause({
+        root_cause: [
+          { type: 'index_not_found_exception', reason: 'no such index [cluster-a:metrics-*]' },
+          { type: 'index_not_found_exception', reason: 'no such index [cluster-b:metrics-*]' },
+        ],
+      })
+    ).toBe(
+      'index_not_found_exception: no such index [cluster-a:metrics-*]\nindex_not_found_exception: no such index [cluster-b:metrics-*]'
+    );
+  });
+
+  it('returns message from caused_by when type, reason, and root_cause are missing', () => {
+    expect(
+      formatErrorCause({
+        caused_by: { type: 'illegal_argument_exception', reason: 'invalid query' },
+      })
+    ).toBe('illegal_argument_exception: invalid query');
   });
 
   it('returns generic message for empty error object', () => {
@@ -137,5 +159,16 @@ describe('EsqlResponseError', () => {
     );
 
     expect(err.status).toBe(400);
+  });
+});
+
+describe('isEsqlResponseError', () => {
+  it('returns true for EsqlResponseError instances', () => {
+    expect(isEsqlResponseError(new EsqlResponseError({ type: 'x', reason: 'y' }))).toBe(true);
+  });
+
+  it('returns false for other errors', () => {
+    expect(isEsqlResponseError(new Error('network'))).toBe(false);
+    expect(isEsqlResponseError(undefined)).toBe(false);
   });
 });
