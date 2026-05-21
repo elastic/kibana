@@ -27,14 +27,7 @@ echo '--- Update Scout Test Config Manifests'
 node scripts/scout.js update-test-config-manifests --concurrencyLimit 3
 
 echo "--- Discover Playwright Configs (target=$SCOUT_DISCOVERY_TARGET)"
-# --include-excluded: the planner needs to see configs from scout_ci_config.yml's
-# excluded_configs list so that the Flaky Test Runner can target them directly
-# (the regular PR CI still respects the exclusion via discover_playwright_configs.sh).
-node scripts/scout discover-playwright-configs \
-  --include-custom-servers \
-  --include-excluded \
-  --target "$SCOUT_DISCOVERY_TARGET" \
-  --save
+node scripts/scout discover-playwright-configs --include-custom-servers --target "$SCOUT_DISCOVERY_TARGET" --save
 cp .scout/test_configs/scout_playwright_configs.json scout_playwright_configs.json
 buildkite-agent artifact upload "scout_playwright_configs.json"
 upload_tmp_artifact scout_playwright_configs.json scout_playwright_configs.json "$BUILDKITE_BUILD_ID"
