@@ -359,3 +359,43 @@ class SchemaBuilder {
     return schema.arrayOf(schema.boolean());  // $ Alert
   }
 }
+
+// =============================================================================
+// NON-EXCLUDED CONTEXTS: These look like non-route usage but SHOULD still fire.
+// Response schemas, common/ schemas, and schemas in route files must stay flagged
+// because they often coexist with request payload schemas in the same file.
+// =============================================================================
+
+// BAD: Response schema in a route file — still flagged (same file as request schemas)
+router.versioned.post({
+  path: '/api/edge/response-array',
+  access: 'internal',
+}).addVersion({
+  version: '1',
+  validate: {
+    request: {
+      body: schema.object({
+        ids: schema.arrayOf(schema.string(), { maxSize: 100 }),
+      }),
+    },
+    response: {
+      200: {
+        body: () => schema.object({
+          results: schema.arrayOf(schema.string()),  // $ Alert
+        }),
+      },
+    },
+  },
+}, handler);
+
+// BAD: Shared schema in a "common" module — still flagged (used by routes)
+const sharedCommonSchema = schema.object({
+  tags: schema.arrayOf(schema.string()),  // $ Alert
+});
+
+// BAD: Schema in a helper function used by route handlers — still flagged
+function buildRouteSchema() {
+  return schema.object({
+    items: schema.arrayOf(schema.number()),  // $ Alert
+  });
+}

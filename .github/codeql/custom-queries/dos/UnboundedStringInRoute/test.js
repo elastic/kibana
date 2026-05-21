@@ -642,3 +642,49 @@ router.post({
     }),
   },
 }, handler);
+
+// =============================================================================
+// NON-EXCLUDED CONTEXTS: These look like non-route usage but SHOULD still fire.
+// Response schemas, common/ schemas, and schemas in route files must stay flagged
+// because they often coexist with request payload schemas in the same file.
+// =============================================================================
+
+// BAD: Response schema in a route file — still flagged (same file as request schemas)
+router.versioned.post({
+  path: '/api/edge/response-schema',
+  access: 'internal',
+}).addVersion({
+  version: '1',
+  validate: {
+    request: {
+      body: schema.object({
+        query: schema.string({ maxLength: 256 }),
+      }),
+    },
+    response: {
+      200: {
+        body: () => schema.object({
+          result: schema.string(),  // $ Alert
+        }),
+      },
+    },
+  },
+}, handler);
+
+// BAD: Shared schema in a "common" module — still flagged (used by routes)
+const sharedCommonSchema = schema.object({
+  name: schema.string(),  // $ Alert
+  tag: schema.string(),  // $ Alert
+});
+
+// BAD: Schema exported for use in routes — still flagged
+export const routeBodySchema = z.object({
+  description: z.string(),  // $ Alert
+});
+
+// BAD: Schema in a helper function used by route handlers — still flagged
+function buildRouteSchema() {
+  return schema.object({
+    filter: schema.string(),  // $ Alert
+  });
+}

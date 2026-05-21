@@ -17,7 +17,7 @@ The query targets:
 - `schema.string()` calls missing the `maxLength` option in the first argument
 - `z.string()` calls without a `.max()` in the method chain
 
-It excludes configuration files (`config.ts`) and plugin entry points (`server/index.ts`) as these typically handle trusted internal configuration rather than external user input.
+It uses a shared exclusion list (defined in `KibanaDoSExclusions.qll`) to skip files whose schemas are known to never validate HTTP request payloads, such as saved-object attribute schemas, plugin configuration, UI settings definitions, content-management layer schemas, and similar structural/data-at-rest categories. See that file for the full set of excluded path patterns.
 
 ## Recommendation
 
@@ -135,6 +135,19 @@ const goodSchema = z.object({
   filter: z.string().max(1024),
 });
 ```
+
+## False positives and suppression
+
+This query intentionally casts a wide net — it flags all unbounded `schema.string()` and `z.string()` calls except those in file paths that are clearly non-payload contexts. Some findings will be in schemas that validate route **responses**, saved-object attributes in shared files, or other non-request-payload contexts. These are expected false positives.
+
+To suppress a legitimate false positive, add a `codeql[...]` comment on the line above the flagged call:
+
+```javascript
+// codeql[js/kibana/unbounded-string-in-schema] response schema — not user input
+schema.string()
+```
+
+The exclusion list in `KibanaDoSExclusions.qll` is maintained conservatively and may be updated as new non-payload schema patterns are identified. If you encounter a false positive that affects an entire file category (not a one-off), consider proposing an addition to the shared exclusion library rather than adding per-line suppressions.
 
 ## References
 

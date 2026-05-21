@@ -23,3 +23,6 @@
 | test.js:347:18:347:48 | schema. ... mber()) | This schema.arrayOf() call does not specify a maxSize. Unbounded input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxSize: N } as the second argument. |
 | test.js:353:10:353:40 | schema. ... ring()) | This schema.arrayOf() call does not specify a maxSize. Unbounded input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxSize: N } as the second argument. |
 | test.js:359:12:359:43 | schema. ... lean()) | This schema.arrayOf() call does not specify a maxSize. Unbounded input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxSize: N } as the second argument. |
+| test.js:384:19:384:49 | schema. ... ring()) | This schema.arrayOf() call does not specify a maxSize. Unbounded input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxSize: N } as the second argument. |
+| test.js:393:9:393:39 | schema. ... ring()) | This schema.arrayOf() call does not specify a maxSize. Unbounded input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxSize: N } as the second argument. |
+| test.js:399:13:399:43 | schema. ... mber()) | This schema.arrayOf() call does not specify a maxSize. Unbounded input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxSize: N } as the second argument. |

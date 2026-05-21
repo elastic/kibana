@@ -14,6 +14,7 @@
  */
 
 import javascript
+import dos.KibanaDoSExclusions
 
 /**
  * Gets the local variable bound to 'schema' imported from '@kbn/config-schema'
@@ -84,20 +85,6 @@ class ZodStringCall extends CallExpr {
   }
 }
 
-/**
- * Identifies files that should be excluded from analysis:
- * - config.ts files (plugin configuration, not request validation)
- * - index.ts files at plugin server root (typically re-exports)
- */
-predicate isInExcludedFile(Expr e) {
-  e.getFile().getBaseName() = "config.ts"
-  or
-  (
-    e.getFile().getBaseName() = "index.ts" and
-    e.getFile().getRelativePath().regexpMatch(".*/plugins/[^/]+(/[^/]+)?/server/index\\.ts")
-  )
-}
-
 from CallExpr stringCall, string message
 where
   (
@@ -109,5 +96,5 @@ where
     not stringCall.(ZodStringCall).hasMax() and
     message = "This z.string() call does not specify a .max() constraint. Unbounded string input can cause Denial of Service (DoS) vulnerabilities. Consider adding .max(N) to the method chain."
   ) and
-  not isInExcludedFile(stringCall)
+  not shouldExcludeFileFromDoSRules(stringCall)
 select stringCall, message
