@@ -49,7 +49,7 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
 
   buildkite-agent artifact upload "$(printf '%s;' "${ARTIFACT_PATTERNS[@]}")"
 
-  if [[ "${BUILDKITE_PIPELINE_SLUG:-}" == "kibana-elasticsearch-snapshot-verify" ]]; then
+  if [[ "${UPLOAD_CLUSTER_LOGS:-}" =~ ^(1|true)$ ]]; then
     if compgen -G '.es/*cluster-ftr*/logs' > /dev/null; then
       ARCHIVE=".es/cluster-ftr-logs-${BUILDKITE_JOB_ID}.tar.gz"
       tar -czf "$ARCHIVE" .es/*cluster-ftr*/logs 2>/dev/null || true
