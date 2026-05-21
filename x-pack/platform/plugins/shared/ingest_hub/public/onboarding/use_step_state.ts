@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { ONBOARDING_STEPS } from './steps';
 
@@ -19,6 +19,8 @@ function buildDefaultState(): StepState {
 export function useStepState(integrationId: string) {
   const storageKey = `onboarding.${integrationId}.stepState`;
   const [state, setState] = useSessionStorage<StepState>(storageKey, buildDefaultState());
+  const stateRef = useRef(state);
+  stateRef.current = state;
 
   const completedSteps = useMemo(
     () =>
@@ -32,9 +34,10 @@ export function useStepState(integrationId: string) {
 
   const markStepComplete = useCallback(
     (stepId: string) => {
-      setState({ ...state, [stepId]: 'complete' });
+      const next = { ...stateRef.current, [stepId]: 'complete' as StepStatus };
+      setState(next);
     },
-    [state, setState]
+    [setState]
   );
 
   const resetSteps = useCallback(() => {
