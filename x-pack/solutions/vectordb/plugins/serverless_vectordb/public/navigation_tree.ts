@@ -75,6 +75,10 @@ export function createNavigationTree({
         breadcrumbStatus: 'hidden',
       },
       {
+        icon: 'productAgent',
+        link: 'agent_builder',
+      },
+      {
         link: 'discover',
         icon: 'productDiscover',
       },
@@ -86,17 +90,36 @@ export function createNavigationTree({
           isEditingFromDashboard(location, pathNameSerialized, prepend),
       },
       {
-        icon: 'productAgent',
-        link: 'agent_builder',
-      },
-      {
         link: 'workflows',
       },
       {
         children: [
           {
+            children: [
+              { link: 'management:index_management', breadcrumbStatus: 'hidden' },
+              { link: 'management:index_lifecycle_management', breadcrumbStatus: 'hidden' },
+              { link: 'management:snapshot_restore', breadcrumbStatus: 'hidden' },
+              { link: 'management:transform', breadcrumbStatus: 'hidden' },
+              { link: 'management:rollup_jobs', breadcrumbStatus: 'hidden' },
+              { link: 'management:data_quality', breadcrumbStatus: 'hidden' },
+              { link: 'management:data_usage', breadcrumbStatus: 'hidden' },
+            ],
+            title: i18n.translate('xpack.serverlessVectordb.nav.ingest.indices.title', {
+              defaultMessage: 'Indices and data streams',
+            }),
+          },
+          {
+            children: [
+              { link: 'management:ingest_pipelines', breadcrumbStatus: 'hidden' },
+              { link: 'management:pipelines', breadcrumbStatus: 'hidden' },
+            ],
+            title: i18n.translate('xpack.serverlessVectordb.nav.ingest.pipelines.title', {
+              defaultMessage: 'Ingest',
+            }),
+          },
+          {
             id: 'ml_overview',
-            title: '',
+            title: MACHINE_LEARNING_TITLE,
             children: [
               { link: 'ml:overview' },
               { link: 'ml:dataVisualizer' },
@@ -152,48 +175,6 @@ export function createNavigationTree({
               { link: 'ml:changePointDetections' },
               { link: 'ml:changePointDetectionsPage', sideNavStatus: 'hidden' },
             ],
-          },
-        ],
-        icon: 'productML',
-        id: 'machine_learning',
-        renderAs: 'panelOpener',
-        title: MACHINE_LEARNING_TITLE,
-      },
-      {
-        children: [
-          {
-            children: [
-              { link: 'management:index_management', breadcrumbStatus: 'hidden' },
-              { link: 'management:index_lifecycle_management', breadcrumbStatus: 'hidden' },
-              { link: 'management:snapshot_restore', breadcrumbStatus: 'hidden' },
-              { link: 'management:transform', breadcrumbStatus: 'hidden' },
-              { link: 'management:rollup_jobs', breadcrumbStatus: 'hidden' },
-              { link: 'management:data_quality', breadcrumbStatus: 'hidden' },
-              { link: 'management:data_usage', breadcrumbStatus: 'hidden' },
-            ],
-            title: i18n.translate('xpack.serverlessVectordb.nav.ingest.indices.title', {
-              defaultMessage: 'Indices and data streams',
-            }),
-          },
-          {
-            children: [
-              { link: 'management:ingest_pipelines', breadcrumbStatus: 'hidden' },
-              { link: 'management:pipelines', breadcrumbStatus: 'hidden' },
-            ],
-            title: i18n.translate('xpack.serverlessVectordb.nav.ingest.pipelines.title', {
-              defaultMessage: 'Ingest',
-            }),
-          },
-          {
-            children: [
-              { link: 'searchSynonyms:synonyms' },
-              { link: 'searchQueryRules' },
-              { link: 'searchPlayground' },
-            ],
-            id: 'search_relevance',
-            title: i18n.translate('xpack.serverlessVectordb.nav.ingest.relevance.title', {
-              defaultMessage: 'Relevance',
-            }),
           },
         ],
         icon: 'database',
