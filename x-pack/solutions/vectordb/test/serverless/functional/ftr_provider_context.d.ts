@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export const MAX_SERIES = 50;
+import type { GenericFtrProviderContext } from '@kbn/test';
 
-export const DEFAULT_SERIES = 6;
+import type { services } from './services';
+import type { pageObjects } from './page_objects';
+
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;
