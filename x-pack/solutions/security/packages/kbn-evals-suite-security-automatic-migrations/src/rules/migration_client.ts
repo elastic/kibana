@@ -36,10 +36,10 @@ export interface InvokeRuleOutput {
   };
   translation_result?: 'full' | 'partial' | 'untranslatable';
   comments?: Array<{ message: string; created_at: string; created_by: string }>;
-  inline_query?: string;  // Splunk inlined SPL
-  nl_query?: string;      // QRadar natural-language query
+  inline_query?: string; // Splunk inlined SPL
+  nl_query?: string; // QRadar natural-language query
   semantic_query?: string;
-  messages?: unknown[];   // BaseMessage[] — tool call history
+  messages?: unknown[]; // BaseMessage[] — tool call history
 }
 
 export interface RuleMigrationResult {

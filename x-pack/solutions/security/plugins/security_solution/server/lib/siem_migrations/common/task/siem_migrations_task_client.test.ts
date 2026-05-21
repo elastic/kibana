@@ -532,7 +532,10 @@ describe('RuleMigrationsTaskClient', () => {
         currentUser,
         dependencies
       );
-      const invoker = await client.createInvoker('connector-1', { abortController, vendor: 'splunk' });
+      const invoker = await client.createInvoker('connector-1', {
+        abortController,
+        vendor: 'splunk',
+      });
       const input = { foo: 'bar' };
       const extraConfig = { configurable: { skipPrebuiltRulesMatching: true } };
       await invoker.execute(input as never, extraConfig);
@@ -554,7 +557,10 @@ describe('RuleMigrationsTaskClient', () => {
         currentUser,
         dependencies
       );
-      const invoker = await client.createInvoker('connector-1', { abortController, vendor: 'splunk' });
+      const invoker = await client.createInvoker('connector-1', {
+        abortController,
+        vendor: 'splunk',
+      });
 
       const input = { id: 'r1' };
       const configWithMetadata = { metadata: { evalsInvoke: false, other: 'data' } };
