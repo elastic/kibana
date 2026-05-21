@@ -130,7 +130,6 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
     streamAdvancedVars,
     sections,
     isUpgrade = false,
-    isAgentless = false,
     showDescriptionColumn = true,
   }) => {
     // Showing advanced options toggle state
