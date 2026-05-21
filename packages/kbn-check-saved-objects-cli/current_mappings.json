@@ -422,7 +422,8 @@
     "dynamic": false,
     "properties": {
       "builder_type": {
-        "type": "keyword"
+        "type": "keyword",
+        "ignore_above": 256
       },
       "createdAt": {
         "type": "date"
