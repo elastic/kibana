@@ -8,6 +8,7 @@
 import {
   SECURITY_ENDPOINT_ATTACHMENT_TYPE,
   SECURITY_EVENT_ATTACHMENT_TYPE,
+  INDICATOR_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common';
 
 import { registerCaseAttachments } from './register';
@@ -38,6 +39,19 @@ describe('registerCaseAttachments', () => {
 
     expect(framework.registerUnified).toHaveBeenCalledWith(
       expect.objectContaining({ id: SECURITY_EVENT_ATTACHMENT_TYPE })
+    );
+  });
+
+  it('registers the unified indicator attachment type with the zod schema', () => {
+    const framework = buildFramework();
+
+    registerCaseAttachments(framework);
+
+    expect(framework.registerUnified).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: INDICATOR_ATTACHMENT_TYPE,
+        schema: expect.anything(),
+      })
     );
   });
 

@@ -9,10 +9,12 @@ import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 
 import { getEndpointAttachmentType } from './endpoint';
 import { getEventAttachmentType } from './event';
+import { getIndicatorAttachmentType } from './indicator';
 
 export const registerCaseAttachments = (
   attachmentFramework: CasesServerSetup['attachmentFramework']
 ): void => {
   attachmentFramework.registerUnified(getEndpointAttachmentType());
   attachmentFramework.registerUnified(getEventAttachmentType());
+  attachmentFramework.registerUnified(getIndicatorAttachmentType());
 };
