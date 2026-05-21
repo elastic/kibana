@@ -503,34 +503,32 @@ export function getEuidEsqlEvaluationParts(
   }
 
   // Multi-branch: pre-compute each branch's condition AND ranking formula as named columns,
-  // then use them in a CASE so both operands are plain Attributes → CaseEagerEvaluator (vectorized).
-  // Without pre-computing the formula, CASE(Attribute[bool], CONCAT(...)) still uses
-  // CaseLazyEvaluator because the value expression is complex (not a simple Attribute).
+  // then compose a single multi-arm CASE over plain Attribute references.
+  // This preserves "first-matched-branch wins, even if its formula is NULL" semantics —
+  // matching getEuidEsqlEvaluation, memory.ts, dsl.ts, kql.ts, and getEffectiveEuidRanking.
+  // (A COALESCE of per-branch single-arm CASEs would fall through to the next branch when the
+  // matched branch's formula is NULL, diverging from the intended semantics.)
   const precomputeAssignments: string[] = [];
-  const branchAssignments: string[] = [];
-  const branchVarNames: string[] = [];
+  const caseParts: string[] = [];
   for (const [i, branch] of branches.entries()) {
-    const varName = `_euid_branch_${i}`;
-    branchVarNames.push(varName);
     const rankingFormula = buildRankingCaseEsql(branch.ranking);
+    const formulaVar = `_euid_branch_${i}_formula`;
     if (branch.when) {
       const whenCondition = conditionToESQL(branch.when);
       const condVar = `_euid_branch_${i}_cond`;
-      const formulaVar = `_euid_branch_${i}_formula`;
       precomputeAssignments.push(`${condVar} = (${whenCondition})`);
       precomputeAssignments.push(`${formulaVar} = ${rankingFormula}`);
-      branchAssignments.push(`${varName} = CASE(${condVar}, ${formulaVar})`);
+      caseParts.push(`${condVar}, ${formulaVar}`);
     } else {
-      branchAssignments.push(`${varName} = ${rankingFormula}`);
+      precomputeAssignments.push(`${formulaVar} = ${rankingFormula}`);
+      caseParts.push(`TRUE, ${formulaVar}`);
     }
   }
 
   const precomputePrelude =
     precomputeAssignments.length > 0 ? `| EVAL ${precomputeAssignments.join(',\n ')}` : null;
-  const branchPrelude = `| EVAL ${branchAssignments.join(',\n ')}`;
-  const combinedPrelude = [prelude, precomputePrelude, branchPrelude].filter(Boolean).join('\n');
-  const idLogic =
-    branchVarNames.length === 1 ? branchVarNames[0] : `COALESCE(${branchVarNames.join(', ')})`;
+  const combinedPrelude = [prelude, precomputePrelude].filter(Boolean).join('\n');
+  const idLogic = `CASE(${caseParts.join(',\n')}, NULL)`;
   return {
     prelude: combinedPrelude,
     expression: appendTypeIdIfNeeded(entityType, idLogic, mustPrependTypeId),

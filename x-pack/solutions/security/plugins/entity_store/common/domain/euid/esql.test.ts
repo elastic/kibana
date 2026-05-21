@@ -290,10 +290,12 @@ describe('getEuidEsqlEvaluationParts', () => {
     );
   });
 
-  it('returns _present + _n prelude and COALESCE(CONCAT) expression for user', () => {
+  it('returns _present + _n prelude and multi-arm CASE expression for user', () => {
     const { prelude, expression } = getEuidEsqlEvaluationParts('user');
 
-    // Prelude now includes: present booleans, branch condition pre-compute, and branch formulas.
+    // Prelude: present booleans + present_or_null aliases, then branch condition and formulas.
+    // All branch arms are precomputed as Attribute columns so the final CASE operands are plain
+    // Attributes, enabling CaseEagerEvaluator (vectorized) in ES|QL.
     expect(normalize(prelude!)).toBe(
       normalize(
         `| EVAL user_name_present = user.name IS NOT NULL AND user.name != "",
@@ -309,15 +311,27 @@ describe('getEuidEsqlEvaluationParts', () => {
                user_id_present_or_null = CASE(user_id_present, user.id),
                user_domain_present_or_null = CASE(user_domain_present, user.domain)
 | EVAL _euid_branch_0_cond = (COALESCE(\`entity.namespace\` == "local", FALSE)),
-       _euid_branch_0_formula = CONCAT(user_name_present_or_null, "@", host_id_present_or_null, "@", entity_namespace_present_or_null)
-| EVAL _euid_branch_0 = CASE(_euid_branch_0_cond, _euid_branch_0_formula),
-       _euid_branch_1 = COALESCE(CONCAT(user_email_present_or_null, "@", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, "@", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, "@", user_domain_present_or_null, "@", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, "@", entity_namespace_present_or_null))`
+       _euid_branch_0_formula = CONCAT(user_name_present_or_null, "@", host_id_present_or_null, "@", entity_namespace_present_or_null),
+       _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, "@", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, "@", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, "@", user_domain_present_or_null, "@", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, "@", entity_namespace_present_or_null))`
       )
     );
-    // Expression is now COALESCE of the pre-computed branch variables.
+    // Expression uses a single multi-arm CASE to preserve "first-matched-branch wins, even if NULL"
+    // semantics — matching getEuidEsqlEvaluation, memory.ts, dsl.ts, kql.ts, and getEffectiveEuidRanking.
     expect(normalize(expression)).toBe(
-      normalize(`CONCAT("user:", COALESCE(_euid_branch_0, _euid_branch_1))`)
+      normalize(
+        `CONCAT("user:", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
+TRUE, _euid_branch_1_formula, NULL))`
+      )
     );
+  });
+
+  it('expression for multi-branch entity uses CASE not COALESCE of branch variables', () => {
+    // Contract: the parts builder must use a multi-arm CASE (first-matched-branch-wins semantics)
+    // rather than COALESCE(branch_0, branch_1, ...) which would fall through to the next branch
+    // when the matched branch's formula evaluates to NULL.
+    const { expression } = getEuidEsqlEvaluationParts('user');
+    expect(expression).not.toMatch(/COALESCE\(_euid_branch_/);
+    expect(expression).toMatch(/CASE\(_euid_branch_0_cond,\s*_euid_branch_0_formula,\s*TRUE,/);
   });
 });
 

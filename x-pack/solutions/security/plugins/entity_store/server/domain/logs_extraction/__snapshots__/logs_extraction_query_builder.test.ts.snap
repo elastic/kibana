@@ -1512,10 +1512,10 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
  user_id_present_or_null = CASE(user_id_present, user.id),
  user_domain_present_or_null = CASE(user_domain_present, user.domain)
 | EVAL _euid_branch_0_cond = (COALESCE(\`entity.namespace\` == \\"local\\", FALSE)),
- _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null)
-| EVAL _euid_branch_0 = CASE(_euid_branch_0_cond, _euid_branch_0_formula),
- _euid_branch_1 = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null))
-| EVAL recent.entity.EngineMetadata.UntypedId = COALESCE(_euid_branch_0, _euid_branch_1)
+ _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
+ _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null))
+| EVAL recent.entity.EngineMetadata.UntypedId = CASE(_euid_branch_0_cond, _euid_branch_0_formula,
+TRUE, _euid_branch_1_formula, NULL)
 | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
