@@ -8,8 +8,11 @@
  */
 
 import type { DataViewsPublicPluginStart, MatchedItem } from '@kbn/data-views-plugin/public';
+import type { Logger } from '@kbn/logging';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { useExternalServices } from '../../../context/external_services';
+import { ERROR_TYPE } from '../../../log_labels';
+import { toLoggable } from '../../../utils/logger_utils';
 
 // Tag key emitted by data_views.getIndices() / responseToItemArray for plain
 // indices (vs data streams). Coupled to that plugin's response shape.
@@ -47,12 +50,14 @@ export const useMetricSourceKind = ({
   name,
   fallback,
 }: UseMetricSourceKindParams): UseMetricSourceKindResult => {
-  const dataViewsService = useExternalServices()?.dataViews;
+  const externalServices = useExternalServices();
+  const dataViewsService = externalServices?.dataViews;
+  const logger = externalServices?.logger;
 
   const { value } = useAbortableAsync<ClassifiedSource | undefined>(async () => {
     if (!dataViewsService || !name) return undefined;
-    return resolveSourceKind(dataViewsService, name);
-  }, [dataViewsService, name]);
+    return resolveSourceKind(dataViewsService, name, logger);
+  }, [dataViewsService, name, logger]);
 
   // Guard against stale results: `useAbortableAsync` keeps the previous value
   // while a new request is in flight, so without this check we could briefly
@@ -89,7 +94,8 @@ export const resetMetricSourceKindCache = () => {
 
 const resolveSourceKind = async (
   dataViewsService: DataViewsPublicPluginStart,
-  name: string
+  name: string,
+  logger: Logger | undefined
 ): Promise<ClassifiedSource> => {
   let pending = cache.get(name);
   if (!pending) {
@@ -109,9 +115,13 @@ const resolveSourceKind = async (
   }
   try {
     return { name, kind: await pending };
-  } catch {
-    // TODO: add monitoring/telemetry to track resolution failures
-    // (https://github.com/elastic/kibana/issues/265117)
+  } catch (error) {
+    logger?.error(toLoggable(error), {
+      labels: {
+        error_type: ERROR_TYPE.METRIC_SOURCE_KIND_RESOLUTION_FAILURE,
+        source_name: name,
+      },
+    });
     return { name, kind: undefined };
   }
 };
