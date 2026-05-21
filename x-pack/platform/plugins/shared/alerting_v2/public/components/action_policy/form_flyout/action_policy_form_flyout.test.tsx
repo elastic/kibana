@@ -175,10 +175,8 @@ describe('ActionPolicyFormFlyout', () => {
       snoozedUntil: null,
       destinations: [{ type: 'workflow', id: 'workflow-2' }],
       createdBy: 'elastic',
-      createdByUsername: 'elastic',
       createdAt: '2026-03-01T10:00:00.000Z',
       updatedBy: 'elastic',
-      updatedByUsername: 'elastic',
       updatedAt: '2026-03-01T10:00:00.000Z',
       auth: {
         owner: 'elastic',
