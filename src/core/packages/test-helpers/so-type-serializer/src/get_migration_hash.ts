@@ -16,6 +16,7 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import {
   extractMigrationInfo,
+  hashStoredSchema,
   normalizeForHash,
   type SavedObjectTypeMigrationInfo,
   type ModelVersionSummary,
@@ -150,13 +151,18 @@ export const getMigrationHash = (soType: SavedObjectsType): SavedObjectTypeMigra
 };
 
 const serializeModelVersion = (modelVersion: ModelVersionSummary): string => {
-  const schemas = [modelVersion.schemas.forwardCompatibility, modelVersion.schemas.create];
+  // Schemas are stored as objects (Joi describe() output) since the format change.
+  // We hash them back to strings so getMigrationHash stays stable across the transition.
+  const schemasHash = [
+    hashStoredSchema(modelVersion.schemas.forwardCompatibility),
+    hashStoredSchema(modelVersion.schemas.create),
+  ].join(',');
   return [
     modelVersion.version,
     modelVersion.modelVersionHash,
     modelVersion.changeTypes.join(','),
     modelVersion.hasTransformation,
-    schemas.join(','),
+    schemasHash,
     ...modelVersion.newMappings,
   ].join('|');
 };
