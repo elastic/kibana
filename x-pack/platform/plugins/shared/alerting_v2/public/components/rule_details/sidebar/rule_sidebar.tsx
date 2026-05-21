@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RuleSidebarConditionsTab } from './rule_sidebar_conditions_tab';
+import { RuleSidebarPreviewTab } from './rule_sidebar_preview_tab';
 import { RuleSidebarRunbookTab } from './rule_sidebar_runbook_tab';
 
 const SIDEBAR_TAB_OPTIONS = [
@@ -24,6 +25,13 @@ const SIDEBAR_TAB_OPTIONS = [
       defaultMessage: 'Conditions',
     }),
     'data-test-subj': 'sidebarConditionsTab',
+  },
+  {
+    id: 'queryPreview',
+    label: i18n.translate('xpack.alertingV2.sidebar.queryPreviewTab', {
+      defaultMessage: 'Query preview',
+    }),
+    'data-test-subj': 'sidebarQueryPreviewTab',
   },
   {
     id: 'runbook',
@@ -65,7 +73,9 @@ export const RuleSidebar: React.FC = () => {
 
       <EuiHorizontalRule margin="m" />
 
-      {selectedTab === 'conditions' ? <RuleSidebarConditionsTab /> : <RuleSidebarRunbookTab />}
+      {selectedTab === 'conditions' && <RuleSidebarConditionsTab />}
+      {selectedTab === 'queryPreview' && <RuleSidebarPreviewTab />}
+      {selectedTab === 'runbook' && <RuleSidebarRunbookTab />}
     </div>
   );
 };
