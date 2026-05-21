@@ -183,6 +183,10 @@ export function createChromeApi({
       get isEnabled() {
         return isNextChrome(featureFlags);
       },
+      globalSearch: {
+        get$: () => state.globalSearch.$,
+        set: (config) => state.globalSearch.set(config),
+      },
     },
     sidebar,
   };
