@@ -693,7 +693,6 @@ export const ESSENTIAL_ALERT_FIELDS: string[] = [
   'kibana.alert.risk_score',
   'kibana.alert.rule.name',
   'kibana.alert.rule.rule_id',
-  'kibana.alert.rule.uuid',
   'kibana.alert.rule.description',
   'kibana.alert.rule.category',
   'kibana.alert.rule.references',
