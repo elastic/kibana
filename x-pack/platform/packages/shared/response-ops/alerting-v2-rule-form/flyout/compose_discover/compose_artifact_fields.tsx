@@ -9,6 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiFormRow, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DASHBOARD_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import { DashboardsSelector } from '@kbn/dashboards-selector';
 import { useController, useFormContext } from 'react-hook-form';
@@ -67,6 +68,8 @@ export const ComposeRelatedDashboardsField: React.FC = () => {
   );
 
   if (!uiActions) {
+    // Compose Discover always provides uiActions; this guard protects non-Compose/custom consumers
+    // of the shared RuleFormServices type where uiActions is optional.
     return null;
   }
 
@@ -78,9 +81,10 @@ export const ComposeRelatedDashboardsField: React.FC = () => {
       fullWidth
       labelAppend={
         <EuiText size="xs">
-          {i18n.translate('xpack.alertingV2.ruleForm.artifactFieldOptional', {
-            defaultMessage: 'optional',
-          })}
+          <FormattedMessage
+            id="xpack.alertingV2.ruleForm.artifactFieldOptional"
+            defaultMessage="optional"
+          />
         </EuiText>
       }
     >
