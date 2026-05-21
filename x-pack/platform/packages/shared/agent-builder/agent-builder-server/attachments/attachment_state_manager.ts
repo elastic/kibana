@@ -158,6 +158,28 @@ export interface CreateAttachmentStateManagerOptions {
   getTypeDefinition: (type: string) => AttachmentTypeDefinition | undefined;
 }
 
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const mergeAttachmentUpdateData = (existing: unknown, incoming: unknown): unknown => {
+  if (isPlainObject(existing) && isPlainObject(incoming)) {
+    return { ...existing, ...incoming };
+  }
+  return incoming;
+};
+
+const descriptionFromAttachmentLabel = (data: unknown): string | undefined => {
+  if (!isPlainObject(data)) {
+    return undefined;
+  }
+  const attachmentLabel = data.attachmentLabel;
+  if (typeof attachmentLabel !== 'string') {
+    return undefined;
+  }
+  const trimmed = attachmentLabel.trim();
+  return trimmed || undefined;
+};
+
 /**
  * Private implementation of AttachmentStateManager.
  */
@@ -343,13 +365,18 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       estimated_tokens: tokens,
     };
 
+    const resolvedDescription =
+      input.description !== undefined
+        ? input.description
+        : descriptionFromAttachmentLabel(validatedData);
+
     const attachment: VersionedAttachment = {
       id,
       type: input.type,
       versions: [version],
       current_version: 1,
       active: true,
-      ...(input.description && { description: input.description }),
+      ...(resolvedDescription !== undefined ? { description: resolvedDescription } : {}),
       ...(input.hidden !== undefined && { hidden: input.hidden }),
       readonly: input.readonly ?? this.getDefaultReadonly(input.type),
       ...(input.origin !== undefined && { origin: input.origin }),
@@ -393,9 +420,19 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     }
 
     if (input.data !== undefined) {
-      const validatedData = await this.validateAttachmentData(attachment.type, input.data);
-      const newHash = hashContent(validatedData);
       const currentVersion = getLatestVersion(attachment);
+      const mergedData = mergeAttachmentUpdateData(currentVersion?.data, input.data);
+      const validatedData = await this.validateAttachmentData(attachment.type, mergedData);
+
+      if (input.description === undefined) {
+        const carriedDescription = descriptionFromAttachmentLabel(validatedData);
+        if (carriedDescription !== undefined) {
+          attachment.description = carriedDescription;
+          this.dirty = true;
+        }
+      }
+
+      const newHash = hashContent(validatedData);
 
       // Only create new version if content actually changed
       if (!currentVersion || currentVersion.content_hash !== newHash) {

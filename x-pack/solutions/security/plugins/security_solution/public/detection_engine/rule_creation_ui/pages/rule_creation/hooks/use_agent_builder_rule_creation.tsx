@@ -145,7 +145,9 @@ export const useAgentBuilderRuleCreation = ({
         type: SecurityAgentBuilderAttachments.rule,
         // `description` is the user-facing label used by the chat's "Attachment added: …"
         // line (see RoundAttachmentReferences). Without it the line shows up blank.
-        description: label,
+        // Guard against empty string — the server update path treats "" as a valid value and
+        // would overwrite a previously-set description with blank.
+        ...(label ? { description: label } : {}),
         data: {
           text: JSON.stringify(ruleData),
           attachmentLabel: label,
@@ -286,7 +288,7 @@ export const useAgentBuilderRuleCreation = ({
         const ruleToSync = syncRuleIdRef.current
           ? { ...formattedRule, id: syncRuleIdRef.current }
           : formattedRule;
-        addRuleAttachment(ruleToSync, ruleToSync.name ?? 'Rule');
+        addRuleAttachment(ruleToSync, ruleToSync.name || 'Rule');
         // Any reach of this branch means the form changed (the effect's deps are the form
         // data objects). Mark dirty so the chat's "Save changes" button becomes enabled —
         // user-initiated form edits should be just as savable from chat as agent edits.

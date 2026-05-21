@@ -63,6 +63,12 @@ describe('AttachmentStateManager', () => {
           },
           format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
         } as any;
+      case 'labeled':
+        return {
+          id: 'labeled',
+          validate: (input: unknown) => ({ valid: true, data: input as any }),
+          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+        } as any;
       case 'screen_context':
         return {
           id: 'screen_context',
@@ -350,6 +356,62 @@ describe('AttachmentStateManager', () => {
       expect(updated?.versions).toHaveLength(1);
     });
 
+    it('carries description from attachmentLabel on add when description is omitted', async () => {
+      const added = await manager.add({
+        id: 'test-1',
+        type: 'labeled',
+        data: { content: 'v1', attachmentLabel: 'Initial label' },
+      });
+
+      expect(added.description).toBe('Initial label');
+    });
+
+    it('merges partial data updates and preserves attachmentLabel', async () => {
+      await manager.add({
+        id: 'test-1',
+        type: 'labeled',
+        data: { content: 'v1', attachmentLabel: 'Initial label' },
+        description: 'Initial label',
+      });
+
+      const updated = await manager.update('test-1', {
+        data: { content: 'v2' },
+      });
+
+      expect(updated?.versions[1].data).toEqual({
+        content: 'v2',
+        attachmentLabel: 'Initial label',
+      });
+      expect(updated?.description).toBe('Initial label');
+    });
+
+    it('updates description when attachmentLabel is carried in the update', async () => {
+      await manager.add({ id: 'test-1', type: 'labeled', data: { content: 'v1' } });
+
+      const updated = await manager.update('test-1', {
+        data: { content: 'v2', attachmentLabel: 'Updated label' },
+      });
+
+      expect(updated?.description).toBe('Updated label');
+      expect(updated?.current_version).toBe(2);
+    });
+
+    it('does not overwrite explicit description when attachmentLabel is present', async () => {
+      await manager.add({
+        id: 'test-1',
+        type: 'labeled',
+        data: { content: 'v1' },
+        description: 'Existing description',
+      });
+
+      const updated = await manager.update('test-1', {
+        data: { content: 'v2', attachmentLabel: 'Updated label' },
+        description: 'Explicit description',
+      });
+
+      expect(updated?.description).toBe('Explicit description');
+    });
+
     it('updates hidden without creating new version', async () => {
       await manager.add({ id: 'test-1', type: 'text', data: { content: 'test' }, hidden: false });
 
@@ -372,13 +434,13 @@ describe('AttachmentStateManager', () => {
       expect(manager.hasChanges()).toBe(true);
     });
 
-    it('throws when updating invalid data for a built-in type', async () => {
+    it('throws when merged update data is invalid for a built-in type', async () => {
       await manager.add({
         id: 'test-1',
         type: 'screen_context',
         data: { url: 'http://example.com' },
       });
-      await expect(manager.update('test-1', { data: {} as any })).rejects.toThrow(
+      await expect(manager.update('test-1', { data: { url: undefined } as any })).rejects.toThrow(
         'Invalid attachment data for type "screen_context"'
       );
     });

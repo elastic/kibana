@@ -32,7 +32,7 @@ export const createAttachmentUpdateTool = ({
   id: attachmentTools.update,
   type: ToolType.builtin,
   description:
-    'Update the content of an existing attachment. This creates a new version if the content changed. Use this to modify data you previously stored.',
+    'Update the content of an existing attachment. This creates a new version if the content changed. Object data is merged with the current version (partial updates preserve existing fields such as attachmentLabel). Use this to modify data you previously stored.',
   schema: attachmentUpdateSchema,
   tags: ['attachment'],
   handler: async ({ attachment_id: attachmentId, data, description }) => {

@@ -77,9 +77,16 @@ Follow these steps exactly. Every step is MANDATORY:
 2. **Parse** the \`text\` field (stringified JSON of the rule).
 3. **Modify** only the fields the user asked to change. Do not add or remove other fields.
 4. **Re-stringify the ENTIRE rule object** — never send partial updates.
-5. **Call \`attachment_update\`** to persist the change:
+5. **Call \`attachment_update\`** to persist the change. Always carry through \`attachmentLabel\` (the rule \`name\`) and \`description\` (same as \`attachmentLabel\`, or \`Rule: <name>\`) so the chat label stays visible:
 \`\`\`
-attachment_update({ attachment_id: "ATTACHMENT_ID", data: { text: "<full stringified rule JSON>" } })
+attachment_update({
+  attachment_id: "ATTACHMENT_ID",
+  description: "Suspicious PowerShell Execution",
+  data: {
+    text: "<full stringified rule JSON>",
+    attachmentLabel: "Suspicious PowerShell Execution"
+  }
+})
 \`\`\`
 - Render the latest version of the attachment inline.
 
