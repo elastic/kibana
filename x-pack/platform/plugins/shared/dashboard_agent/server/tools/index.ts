@@ -6,4 +6,3 @@
  */
 
 export { manageDashboardTool } from './manage_dashboard';
-export { pinToDashboardTool } from './pin_to_dashboard';

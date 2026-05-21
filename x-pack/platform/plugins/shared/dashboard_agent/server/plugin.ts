@@ -21,7 +21,6 @@ import type {
 import { registerSkills } from './skills';
 import { createDashboardAttachmentType } from './attachment_types';
 import { createDashboardSmlType } from './sml_types';
-import { pinToDashboardTool } from './tools';
 
 export class DashboardAgentPlugin
   implements
@@ -54,7 +53,6 @@ export class DashboardAgentPlugin
       }) as Parameters<typeof setupDeps.agentBuilder.attachments.registerType>[0]
     );
     setupDeps.agentContextLayer.registerType(createDashboardSmlType({ getDashboardClient }));
-    setupDeps.agentBuilder.tools.register(pinToDashboardTool());
     registerSkills(setupDeps.agentBuilder);
     return {};
   }

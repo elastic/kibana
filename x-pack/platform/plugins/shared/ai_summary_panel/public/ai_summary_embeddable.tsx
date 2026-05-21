@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { DefaultEmbeddableApi, EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
+import type {
+  DefaultEmbeddableApi,
+  EmbeddablePublicDefinition,
+} from '@kbn/embeddable-plugin/public';
 import {
   initializeTitleManager,
   titleComparators,
@@ -25,122 +28,124 @@ type AiSummaryPanelApi = DefaultEmbeddableApi<AiSummaryPanelEmbeddableState> & H
 import { AiSummaryComponent } from './components/ai_summary_component';
 import { EditAiPanelFlyout } from './components/edit_ai_panel_flyout';
 
-export const aiSummaryPanelEmbeddableFactory: EmbeddablePublicDefinition<AiSummaryPanelEmbeddableState, AiSummaryPanelApi> =
-  {
-    type: AI_SUMMARY_PANEL_EMBEDDABLE_TYPE,
-    buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-      const titleManager = initializeTitleManager(initialState);
-      const prompt$ = new BehaviorSubject<string>(initialState.prompt ?? '');
-      const content$ = new BehaviorSubject<string>(initialState.content ?? '');
-      const esqlQuery$ = new BehaviorSubject<string | undefined>(initialState.esqlQuery);
-      const isEditFlyoutOpen$ = new BehaviorSubject<boolean>(false);
+export const aiSummaryPanelEmbeddableFactory: EmbeddablePublicDefinition<
+  AiSummaryPanelEmbeddableState,
+  AiSummaryPanelApi
+> = {
+  type: AI_SUMMARY_PANEL_EMBEDDABLE_TYPE,
+  buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+    const titleManager = initializeTitleManager(initialState);
+    const prompt$ = new BehaviorSubject<string>(initialState.prompt ?? '');
+    const content$ = new BehaviorSubject<string>(initialState.content ?? '');
+    const esqlQuery$ = new BehaviorSubject<string | undefined>(initialState.esqlQuery);
+    const isEditFlyoutOpen$ = new BehaviorSubject<boolean>(false);
 
-      const serializeState = (): AiSummaryPanelEmbeddableState => ({
-        ...titleManager.getLatestState(),
-        prompt: prompt$.getValue(),
-        content: content$.getValue(),
-        esqlQuery: esqlQuery$.getValue(),
-      });
+    const serializeState = (): AiSummaryPanelEmbeddableState => ({
+      ...titleManager.getLatestState(),
+      prompt: prompt$.getValue(),
+      content: content$.getValue(),
+      esqlQuery: esqlQuery$.getValue(),
+    });
 
-      const unsavedChangesApi = initializeUnsavedChanges<AiSummaryPanelEmbeddableState>({
-        uuid,
-        parentApi,
-        serializeState,
-        anyStateChange$: merge(
-          titleManager.anyStateChange$,
-          content$.pipe(
-            skip(1),
-            map(() => undefined)
-          ),
-          prompt$.pipe(
-            skip(1),
-            map(() => undefined)
-          )
+    const unsavedChangesApi = initializeUnsavedChanges<AiSummaryPanelEmbeddableState>({
+      uuid,
+      parentApi,
+      serializeState,
+      anyStateChange$: merge(
+        titleManager.anyStateChange$,
+        content$.pipe(
+          skip(1),
+          map(() => undefined)
         ),
-        getComparators: () => ({
-          ...titleComparators,
-          prompt: 'referenceEquality',
-          content: 'referenceEquality',
-          esqlQuery: 'referenceEquality',
-        }),
-        onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved ?? {});
-          prompt$.next(lastSaved?.prompt ?? '');
-          content$.next(lastSaved?.content ?? '');
-          esqlQuery$.next(lastSaved?.esqlQuery);
-        },
-      });
+        prompt$.pipe(
+          skip(1),
+          map(() => undefined)
+        )
+      ),
+      getComparators: () => ({
+        ...titleComparators,
+        prompt: 'referenceEquality',
+        content: 'referenceEquality',
+        esqlQuery: 'referenceEquality',
+      }),
+      onReset: (lastSaved) => {
+        titleManager.reinitializeState(lastSaved ?? {});
+        prompt$.next(lastSaved?.prompt ?? '');
+        content$.next(lastSaved?.content ?? '');
+        esqlQuery$.next(lastSaved?.esqlQuery);
+      },
+    });
 
-      const api = finalizeApi({
-        ...unsavedChangesApi,
-        ...titleManager.api,
-        serializeState,
-        onEdit: async () => {
-          isEditFlyoutOpen$.next(true);
-        },
-        isEditingEnabled: () => true,
-        getTypeDisplayName: () => 'AI Panel',
-      });
+    const api = finalizeApi({
+      ...unsavedChangesApi,
+      ...titleManager.api,
+      serializeState,
+      onEdit: async () => {
+        isEditFlyoutOpen$.next(true);
+      },
+      isEditingEnabled: () => true,
+      getTypeDisplayName: () => 'AI Panel',
+    });
 
-      return {
-        api,
-        Component: function AiSummaryPanelComponent() {
-          const [title, hideTitle, prompt, esqlQuery, isEditFlyoutOpen] =
-            useBatchedPublishingSubjects(
-              titleManager.api.title$,
-              titleManager.api.hideTitle$,
-              prompt$,
-              esqlQuery$,
-              isEditFlyoutOpen$
-            );
-
-          const [generationVersion, setGenerationVersion] = useState(0);
-          const [timeRange, setTimeRange] = useState<TimeRange | undefined>(
-            apiPublishesTimeRange(parentApi)
-              ? parentApi.timeRange$.getValue() ?? undefined
-              : undefined
+    return {
+      api,
+      Component: function AiSummaryPanelComponent() {
+        const [title, hideTitle, prompt, esqlQuery, isEditFlyoutOpen] =
+          useBatchedPublishingSubjects(
+            titleManager.api.title$,
+            titleManager.api.hideTitle$,
+            prompt$,
+            esqlQuery$,
+            isEditFlyoutOpen$
           );
 
-          useEffect(() => {
-            if (!apiPublishesReload(parentApi)) return;
-            const sub = parentApi.reload$.subscribe(() => {
-              setGenerationVersion((v) => v + 1);
-            });
-            return () => sub.unsubscribe();
-          }, []);
+        const [generationVersion, setGenerationVersion] = useState(0);
+        const [timeRange, setTimeRange] = useState<TimeRange | undefined>(
+          apiPublishesTimeRange(parentApi)
+            ? parentApi.timeRange$.getValue() ?? undefined
+            : undefined
+        );
 
-          useEffect(() => {
-            if (!apiPublishesTimeRange(parentApi)) return;
-            const sub = parentApi.timeRange$.subscribe((tr) => setTimeRange(tr ?? undefined));
-            return () => sub.unsubscribe();
-          }, []);
+        useEffect(() => {
+          if (!apiPublishesReload(parentApi)) return;
+          const sub = parentApi.reload$.subscribe(() => {
+            setGenerationVersion((v) => v + 1);
+          });
+          return () => sub.unsubscribe();
+        }, []);
 
-          return (
-            <>
-              <AiSummaryComponent
-                title={title}
-                hideTitle={hideTitle}
+        useEffect(() => {
+          if (!apiPublishesTimeRange(parentApi)) return;
+          const sub = parentApi.timeRange$.subscribe((tr) => setTimeRange(tr ?? undefined));
+          return () => sub.unsubscribe();
+        }, []);
+
+        return (
+          <>
+            <AiSummaryComponent
+              title={title}
+              hideTitle={hideTitle}
+              prompt={prompt}
+              esqlQuery={esqlQuery}
+              timeRange={timeRange}
+              generationVersion={generationVersion}
+            />
+            {isEditFlyoutOpen && (
+              <EditAiPanelFlyout
                 prompt={prompt}
                 esqlQuery={esqlQuery}
                 timeRange={timeRange}
-                generationVersion={generationVersion}
+                onSave={(newPrompt, newEsqlQuery) => {
+                  prompt$.next(newPrompt);
+                  esqlQuery$.next(newEsqlQuery);
+                  setGenerationVersion((v) => v + 1);
+                }}
+                onClose={() => isEditFlyoutOpen$.next(false)}
               />
-              {isEditFlyoutOpen && (
-                <EditAiPanelFlyout
-                  prompt={prompt}
-                  esqlQuery={esqlQuery}
-                  timeRange={timeRange}
-                  onSave={(newPrompt, newEsqlQuery) => {
-                    prompt$.next(newPrompt);
-                    esqlQuery$.next(newEsqlQuery);
-                    setGenerationVersion((v) => v + 1);
-                  }}
-                  onClose={() => isEditFlyoutOpen$.next(false)}
-                />
-              )}
-            </>
-          );
-        },
-      };
-    },
-  };
+            )}
+          </>
+        );
+      },
+    };
+  },
+};
