@@ -256,6 +256,44 @@ describe('WorkflowCrudService', () => {
     });
   });
 
+  describe('getManagedWorkflowDocumentsAllSpaces', () => {
+    it('filters managed workflow documents by plugin id when provided', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'system-workflow',
+              _source: makeSource({ managed: true, managedBy: 'testPlugin' }),
+            },
+          ],
+        },
+      });
+
+      const service = new WorkflowCrudService(deps);
+      const result = await service.getManagedWorkflowDocumentsAllSpaces({
+        pluginId: 'testPlugin',
+      });
+
+      expect(result).toEqual([
+        {
+          id: 'system-workflow',
+          source: expect.objectContaining({ managedBy: 'testPlugin' }),
+        },
+      ]);
+      expect(client.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: expect.objectContaining({
+              must: [{ term: { managed: true } }, { term: { managedBy: 'testPlugin' } }],
+              must_not: [{ exists: { field: 'deleted_at' } }],
+            }),
+          },
+        })
+      );
+    });
+  });
+
   describe('createWorkflow', () => {
     const validYaml = [
       'name: My Workflow',

@@ -1,5 +1,5 @@
 {
-  "sha1": "42179970de75a2ea072213c9d9d62f6b0cc49e0f",
+  "sha1": "c8b7cb1bbaec21c9c251ff6ac155b02e1549f6a0",
   "tests": [
     {
       "id": "f9d2b70425d8a75-d70fe63df1204d1",
@@ -459,7 +459,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_get_all.spec.ts",
-        "line": 60,
+        "line": 61,
         "column": 10
       }
     },
@@ -473,7 +473,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_security_get_all.spec.ts",
-        "line": 94,
+        "line": 96,
         "column": 10
       }
     },
@@ -639,7 +639,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/api/tests/tags_usage_collector.spec.ts",
-        "line": 34,
+        "line": 33,
         "column": 12
       }
     }
