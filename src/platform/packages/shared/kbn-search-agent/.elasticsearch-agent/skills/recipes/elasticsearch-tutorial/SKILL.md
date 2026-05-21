@@ -81,6 +81,8 @@ Each step response contains exactly:
 6. **One sentence** describing the expected outcome in prose — never paste expected JSON output.
 7. **Stop.** Do not preview or include the next step.
 
+Before presenting a WRITE snippet, look up the specific field types and API endpoints it uses in the doc tool. Check for constraints — minimums, maximums, required fields, supported combinations. Your sample values must satisfy these constraints.
+
 Keep each step to ~3–6 lines of prose plus the snippet. If the user wants all steps at once, point them to the static console tutorials in `api-tutorials/` instead.
 
 ## Isolation and naming
