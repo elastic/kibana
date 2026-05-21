@@ -138,7 +138,7 @@ Data ingestion and Fleet::
 * Fixes Fleet background tasks failing when paginating agent policies sorted on the non-existent `created_at` field ({kibana-pull}267285[#267285]).
 * Fixes the **IP Location** processor in **Ingest pipelines** selecting the wrong database when a local `.mmdb` filename matches a managed database display name ({kibana-pull}265740[#265740]).
 Elastic Security solution::
-For the Elastic Security 8.19.16 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+For the Elastic Security 8.19.16 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Elasticsearch solution::
 * Fixes behavioral analytics APIs to reject collection names longer than 1024 characters ({kibana-pull}266225[#266225]).
 Other::
