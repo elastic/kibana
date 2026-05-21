@@ -421,7 +421,9 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
           const compose = formValuesFromYamlToCompose(result.values);
           methods.reset(compose);
           syncSandbox();
-          dispatch({ type: 'COMMIT_QUERY' });
+          if (getBreachQuery(compose.query).trim()) {
+            dispatch({ type: 'COMMIT_QUERY' });
+          }
         }
         // No syncSandbox() on parse-failure path: the debounced parse always calls
         // methods.reset() + syncSandbox() together, so RHF and sandbox state are already in
@@ -585,7 +587,9 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
             ) : (
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={onClose}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
+                  <EuiButtonEmpty onClick={onClose} data-test-subj="composeDiscoverCancel">
+                    {CANCEL_BUTTON_LABEL}
+                  </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="s" responsive={false}>

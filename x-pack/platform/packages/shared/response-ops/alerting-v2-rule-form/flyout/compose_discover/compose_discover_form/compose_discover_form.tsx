@@ -37,7 +37,7 @@ interface ComposeDiscoverFormProps {
 const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
   alertCondition: {
     id: 'alertCondition',
-    title: i18n.translate('xpack.alertingV2.composeDiscover.step.alertCondition', {
+    title: i18n.translate('xpack.alertingV2.composeDiscover.alertCondition.stepTitle', {
       defaultMessage: 'Alert Condition',
     }),
     render: (props) => (
@@ -60,7 +60,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
   },
   recoveryCondition: {
     id: 'recoveryCondition',
-    title: i18n.translate('xpack.alertingV2.composeDiscover.step.recoveryCondition', {
+    title: i18n.translate('xpack.alertingV2.composeDiscover.recoveryCondition.stepTitle', {
       defaultMessage: 'Recovery Condition',
     }),
     render: (props) => (
@@ -73,7 +73,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
   },
   details: {
     id: 'details',
-    title: i18n.translate('xpack.alertingV2.composeDiscover.step.details', {
+    title: i18n.translate('xpack.alertingV2.composeDiscover.details.stepTitle', {
       defaultMessage: 'Details & Artifacts',
     }),
     render: () => <DetailsAndArtifactsStep />,
@@ -81,7 +81,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
   },
   notifications: {
     id: 'notifications',
-    title: i18n.translate('xpack.alertingV2.composeDiscover.step.notifications', {
+    title: i18n.translate('xpack.alertingV2.composeDiscover.notifications.stepTitle', {
       defaultMessage: 'Notifications',
     }),
     render: () => <NotificationsStep />,
