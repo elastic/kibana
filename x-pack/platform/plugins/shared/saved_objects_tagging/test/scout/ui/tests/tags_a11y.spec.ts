@@ -73,13 +73,9 @@ test.describe('Tags management — accessibility', { tag: tags.stateful.classic 
       await tagManagement.submitTagModal();
       await tagsTable.selectAllTags();
       await tagsTable.openBulkActionsMenu();
-      const bulkMenuIcons = page.locator('[data-is-loading="true"]');
-      try {
-        await bulkMenuIcons.waitFor({ state: 'attached', timeout: 2000 });
-      } catch {
-        // icons already cached
-      }
-      await bulkMenuIcons.waitFor({ state: 'hidden' });
+      await page.waitForFunction(
+        () => document.querySelectorAll('[data-is-loading="true"]').length === 0
+      );
       const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
       expect(violations).toStrictEqual([]);
     });
@@ -87,13 +83,9 @@ test.describe('Tags management — accessibility', { tag: tags.stateful.classic 
     await test.step('delete tags confirmation panel', async () => {
       await page.testSubj.click('actionBar-button-delete');
       await page.testSubj.locator('confirmModalConfirmButton').waitFor({ state: 'visible' });
-      const modalIcons = page.locator('[data-is-loading="true"]');
-      try {
-        await modalIcons.waitFor({ state: 'attached', timeout: 2000 });
-      } catch {
-        // icons already cached
-      }
-      await modalIcons.waitFor({ state: 'hidden' });
+      await page.waitForFunction(
+        () => document.querySelectorAll('[data-is-loading="true"]').length === 0
+      );
       const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
       expect(violations).toStrictEqual([]);
       await page.testSubj.click('confirmModalConfirmButton');
