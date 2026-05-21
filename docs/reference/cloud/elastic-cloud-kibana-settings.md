@@ -1,6 +1,9 @@
 ---
 mapped_pages:
   - https://www.elastic.co/guide/en/cloud/current/ec-manage-kibana-settings.html#ec-kibana-config
+applies_to:
+  deployment:
+    ech: ga
 ---
 
 # Elastic Cloud Kibana settings [ec-manage-kibana-settings]
