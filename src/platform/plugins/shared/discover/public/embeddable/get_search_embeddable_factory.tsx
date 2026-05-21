@@ -20,7 +20,7 @@ import type { FetchContext } from '@kbn/presentation-publishing';
 import {
   initializeTimeRangeManager,
   initializeTitleManager,
-  initializeUnsavedChanges,
+  initializeStateApi,
   timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,
@@ -155,7 +155,7 @@ export const getSearchEmbeddableFactory = ({
         dataLoading$,
       });
 
-      const unsavedChangesApi = initializeUnsavedChanges<SearchEmbeddablePanelApiState>({
+      const stateApi = initializeStateApi<SearchEmbeddablePanelApiState>({
         uuid,
         parentApi,
         defaultState,
@@ -186,19 +186,18 @@ export const getSearchEmbeddableFactory = ({
             nonPersistedDisplayOptions: 'skip',
           };
         },
-        onReset: async (lastSaved) => {
-          drilldownsManager.reinitializeState(lastSaved ?? {});
-          timeRangeManager.reinitializeState(lastSaved);
-          titleManager.reinitializeState(lastSaved);
-          if (lastSaved) {
-            const lastSavedRuntimeState = await deserializeState({
-              serializedState: lastSaved,
-              discoverServices,
-            });
+        applySerializedState: async (nextState) => {
+          drilldownsManager.reinitializeState(nextState);
+          timeRangeManager.reinitializeState(nextState);
+          titleManager.reinitializeState(nextState);
+          
+          const nextRuntimeState = await deserializeState({
+            serializedState: nextState,
+            discoverServices,
+          });
 
-            selectedTabId$.next(lastSavedRuntimeState.selectedTabId);
-            await searchEmbeddable.reinitializeState(lastSavedRuntimeState);
-          }
+          selectedTabId$.next(nextRuntimeState.selectedTabId);
+          await searchEmbeddable.reinitializeState(nextRuntimeState);
           inlineEditingApi.stopInlineEditing();
         },
       });
@@ -216,7 +215,7 @@ export const getSearchEmbeddableFactory = ({
       });
 
       const api: SearchEmbeddableApi = finalizeApi({
-        ...unsavedChangesApi,
+        ...stateApi,
         ...titleManager.api,
         ...searchEmbeddable.api,
         ...timeRangeManager.api,
@@ -270,7 +269,6 @@ export const getSearchEmbeddableFactory = ({
         hasLibraryItemWithTitle,
         getSerializedStateByValue: () => serialize(undefined),
         getSerializedStateByReference: (newId: string) => serialize(newId),
-        serializeState: () => serialize(savedObjectId$.getValue()),
         getInspectorAdapters: () => searchEmbeddable.stateManager.inspectorAdapters.getValue(),
         supportedTriggers: () => {
           return [ON_OPEN_PANEL_MENU];
