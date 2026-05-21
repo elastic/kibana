@@ -8,11 +8,10 @@
  */
 
 import getopts from 'getopts';
-import { promises as fs, createWriteStream, createReadStream } from 'fs';
+import { promises as fs } from 'fs';
 import { relative } from 'path';
 import { spawn } from 'child_process';
 import { createHash } from 'crypto';
-import { pipeline } from 'stream/promises';
 import Table from 'cli-table3';
 import chalk from 'chalk';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -22,6 +21,7 @@ import { tmpdir } from 'os';
 import { getJestConfigs } from './configs/get_jest_configs';
 import { isInBuildkite, markConfigCompleted, isConfigCompleted } from './buildkite_checkpoint';
 import { parseShardAnnotation, annotateConfigWithShard } from './shard_config';
+import { createLogBuffer } from './util/log_buffer';
 
 interface JestConfigResult {
   config: string;
@@ -227,6 +227,7 @@ async function runConfigs(
 
   const slowTestsDir = `${tmpdir()}/kibana-jest-slow-tests`;
   await fs.mkdir(slowTestsDir, { recursive: true });
+  const logBufferKind = getLogBufferKind();
 
   await new Promise<void>((resolveAll) => {
     const wallStart = Date.now();
@@ -280,26 +281,25 @@ async function runConfigs(
           },
           stdio: ['ignore', 'pipe', 'pipe'],
         });
-        // Buffer output to a per-config temp file rather than an in-memory string;
-        // a noisy Jest run can exceed V8's ~512 MiB string limit (RangeError:
-        // Invalid string length) when concatenated. The file is streamed back out
-        // to log on exit and then unlinked.
-        const outputFile = `${slowTestsDir}/output-${configHash}${shardSuffix}-${Date.now()}.log`;
-        const outputStream = createWriteStream(outputFile);
+        const outputFilePath =
+          logBufferKind === 'file'
+            ? `${slowTestsDir}/output-${configHash}${shardSuffix}-${Date.now()}.log`
+            : '';
+        const logBuffer = createLogBuffer({ kind: logBufferKind, outputFilePath });
         let stdoutEnded = false;
         let stderrEnded = false;
-        let outputClosed = false;
+        let outputFinalized = false;
         const failedTestsCollector = createFailedTestsCollector();
 
         const onChunk = (d: Buffer) => {
-          outputStream.write(d);
+          logBuffer.append(d);
           failedTestsCollector.feed(d);
         };
-        const maybeCloseOutput = () => {
-          if (stdoutEnded && stderrEnded && !outputClosed) {
-            outputClosed = true;
+        const maybeFinalizeOutput = () => {
+          if (stdoutEnded && stderrEnded && !outputFinalized) {
+            outputFinalized = true;
             failedTestsCollector.flush();
-            outputStream.end();
+            void logBuffer.finalize();
           }
         };
 
@@ -307,11 +307,11 @@ async function runConfigs(
         proc.stderr.on('data', onChunk);
         proc.stdout.on('end', () => {
           stdoutEnded = true;
-          maybeCloseOutput();
+          maybeFinalizeOutput();
         });
         proc.stderr.on('end', () => {
           stderrEnded = true;
-          maybeCloseOutput();
+          maybeFinalizeOutput();
         });
 
         // Use 'exit' (not 'close') to avoid hanging if a grandchild process
@@ -330,18 +330,11 @@ async function runConfigs(
             const code = c == null ? 1 : c;
             const durationMs = Date.now() - start;
 
-            // Ensure the write stream is finalized (forces close even if one of
-            // the pipes never emitted 'end' within the drain window).
-            if (!outputClosed) {
-              outputClosed = true;
+            if (!outputFinalized) {
+              outputFinalized = true;
               failedTestsCollector.flush();
-              outputStream.end();
             }
-            await new Promise<void>((res) => {
-              if ((outputStream as any).closed) return res();
-              outputStream.once('finish', () => res());
-              outputStream.once('error', () => res());
-            });
+            await logBuffer.finalize();
 
             const failedTests = code !== 0 ? failedTestsCollector.failedTests : [];
 
@@ -359,17 +352,8 @@ async function runConfigs(
               log.write(`+++ ❌ ${relConfigPath} (${sec}s) - FAILED\n`);
             }
 
-            try {
-              await pipeline(createReadStream(outputFile), process.stdout, { end: false });
-              process.stdout.write('\n');
-            } catch {
-              // Best-effort flush; if the file is missing or unreadable, fall through.
-            }
-            try {
-              await fs.unlink(outputFile);
-            } catch {
-              // Best-effort cleanup.
-            }
+            await logBuffer.writeToLog();
+            await logBuffer.dispose();
 
             const proceed = () => {
               // Log how many configs are left to complete (after checkpoint is written)
@@ -627,4 +611,16 @@ function writeConfigDiscoverySummary(
     'Empty configs:',
     emptyConfigs.map((c) => c)
   );
+}
+
+/**
+ * Jest integration tests might produce a lot of output, so we use a file buffer by default.
+ * @returns 'file' or 'memory'
+ */
+function getLogBufferKind(): 'file' | 'memory' {
+  const override = process.env.JEST_LOG_BUFFER;
+  if (override === 'file' || override === 'memory') {
+    return override;
+  }
+  return process.env.TEST_TYPE === 'integration' ? 'file' : 'memory';
 }

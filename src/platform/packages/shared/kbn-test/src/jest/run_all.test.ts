@@ -106,6 +106,8 @@ describe('run_all.ts', () => {
 
     // Reset process.env
     delete process.env.JEST_MAX_PARALLEL;
+    delete process.env.JEST_LOG_BUFFER;
+    delete process.env.TEST_TYPE;
     delete process.env.BUILDKITE;
     delete process.env.BUILDKITE_STEP_ID;
     delete process.env.BUILDKITE_PARALLEL_JOB;
