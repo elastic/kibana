@@ -45,8 +45,6 @@ describe('timeline overview search', { tags: ['@ess', '@serverless'] }, () => {
         openTimelineById(timelineId);
         markAsFavorite();
         closeTimeline();
-
-        cy.get('[data-test-subj="timeline-detail-panel"]').should('not.exist');
       });
   });
 

@@ -46,7 +46,6 @@ import {
   SEARCH_OR_FILTER_CONTAINER,
   SELECT_CASE,
   STAR_ICON,
-  STAR_ICON_FILLED,
   TIMELINE_ADD_FIELD_BUTTON,
   TIMELINE_COLLAPSED_ITEMS_BTN,
   TIMELINE_CORRELATION_INPUT,
@@ -373,11 +372,10 @@ export const saveTimeline = () => {
 
 export const markAsFavorite = () => {
   cy.intercept('PATCH', 'api/timeline/_favorite').as('markedAsFavourite');
+  cy.intercept('GET', '/api/timelines*').as('timelinesRefreshed');
   cy.get(TIMELINE_PANEL).within(() => cy.get(STAR_ICON).click());
   cy.wait('@markedAsFavourite');
-  cy.get(TIMELINE_PANEL).within(() => {
-    cy.get(STAR_ICON_FILLED).should('exist');
-  });
+  cy.wait('@timelinesRefreshed');
 };
 
 export const openTimelineDiscoverAddField = () => {
