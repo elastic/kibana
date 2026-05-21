@@ -45,6 +45,7 @@ export interface PackQueryFormData {
   platform?: string | undefined;
   version?: string[] | undefined;
   ecs_mapping: ECSMapping;
+  schedule_id?: string;
 }
 
 const deserializer = (payload: PackSOQueryFormData): PackQueryFormData => ({

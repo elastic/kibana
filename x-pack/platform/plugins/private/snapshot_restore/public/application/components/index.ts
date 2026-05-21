@@ -27,3 +27,4 @@ export type { ExecuteRetention } from './retention_execute_modal_provider';
 export { RetentionExecuteModalProvider } from './retention_execute_modal_provider';
 export { PolicyForm } from './policy_form';
 export { FeatureStatesFormField } from './feature_states_form_field';
+export { ConfirmDefaultRepositoryModal } from './confirm_default_repository_modal';

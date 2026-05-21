@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
@@ -51,6 +51,7 @@ export function SignificantEventsDiscoveryPage() {
   const router = useStreamsAppRouter();
   const {
     core: {
+      application: { getUrlForApp },
       notifications: { toasts },
     },
   } = useKibana();
@@ -181,6 +182,17 @@ export function SignificantEventsDiscoveryPage() {
                   defaultMessage: 'Significant Events',
                 })}
               </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                href={getUrlForApp('observability', { path: '/nightshift' })}
+                iconType="moon"
+                size="s"
+              >
+                {i18n.translate('xpack.streams.significantEventsDiscovery.nightshiftButtonLabel', {
+                  defaultMessage: 'Nightshift',
+                })}
+              </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         }

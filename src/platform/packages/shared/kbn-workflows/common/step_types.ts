@@ -18,3 +18,14 @@ export const isExecuteAsyncStepType = (stepType: string | undefined): boolean =>
 
 export const isExecuteStepType = (stepType: string | undefined): boolean =>
   isExecuteSyncStepType(stepType) || isExecuteAsyncStepType(stepType);
+
+export type ParentWorkflowInvocation = 'sync' | 'async';
+
+export const isSyncParentInvocation = (
+  context: Record<string, unknown> | undefined
+): context is Record<string, unknown> & {
+  parentWorkflowInvocation: 'sync';
+  parentWorkflowExecutionId: string;
+} =>
+  context?.parentWorkflowInvocation === 'sync' &&
+  typeof context?.parentWorkflowExecutionId === 'string';

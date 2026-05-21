@@ -11,28 +11,36 @@ import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { apiTest } from '../../common/fixtures';
 import { esResourcesEndpoint } from '../../common/fixtures/constants';
 
-apiTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/253221
+apiTest.describe.skip(
   'APM integration not installed but setup completed',
   { tag: tags.stateful.classic },
   () => {
     let viewerApiCreditials: RoleApiCredentials;
     let adminApiCreditials: RoleApiCredentials;
 
-    apiTest.beforeAll(async ({ profilingHelper, profilingSetup, requestAuth }) => {
-      // Full cleanup of all profiling data streams and indices left by other specs
-      // (e.g. has_setup_with_data). The previous deleteByQuery on profiling-events-*
-      // was insufficient: hasProfilingData() searches `profiling*`, which includes
-      // stackframes, stacktraces, executables, and hosts.
-      await profilingSetup.cleanup();
-
+    apiTest.beforeAll(async ({ profilingHelper, profilingSetup, esClient, requestAuth }) => {
       await profilingHelper.installPolicies();
       await profilingSetup.setupResources();
 
-      // setupResources() is asynchronous — poll until the status converges to
-      // has_setup: true, has_data: false before running the actual tests.
+      // Delete documents (not indices) so has_data becomes false while has_setup
+      // stays true. Runs inside the poll because shards of newly-created
+      // .profiling-* data streams may still be initializing right after
+      // setupResources(), causing search_phase_execution_exception.
       await expect
         .poll(
           async () => {
+            try {
+              await esClient.deleteByQuery({
+                index: 'profiling-events-*',
+                query: { match_all: {} },
+                ignore_unavailable: true,
+                refresh: true,
+                conflicts: 'proceed',
+              });
+            } catch {
+              return false;
+            }
             const status = await profilingSetup.checkStatus();
             return status.has_setup === true && status.has_data === false;
           },
@@ -40,13 +48,18 @@ apiTest.describe(
             timeout: 30_000,
             intervals: [500, 1000, 2000, 4000],
             message:
-              'Profiling status did not converge to has_setup: true, has_data: false after cleanup + setupResources',
+              'Profiling status did not converge to has_setup: true, has_data: false after deleting profiling documents',
           }
         )
         .toBe(true);
 
       viewerApiCreditials = await requestAuth.getApiKey('viewer');
       adminApiCreditials = await requestAuth.getApiKey('admin');
+    });
+
+    apiTest.afterAll(async ({ profilingSetup, profilingHelper }) => {
+      await profilingHelper.cleanupPolicies();
+      await profilingSetup.cleanup();
     });
 
     apiTest('Admin user', async ({ apiClient }) => {
