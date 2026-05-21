@@ -8,8 +8,8 @@
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
+  errorResponseSchema,
   updateInsightStatusParamsSchema,
   updateInsightStatusBodySchema,
   type UpdateInsightStatusParams,
@@ -35,10 +35,20 @@ export class UpdateInsightStatusRoute extends BaseAlertingRoute {
   static routeOptions = {
     summary: 'Update a Rule Doctor insight status',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      params: buildRouteValidationWithZod(updateInsightStatusParamsSchema),
-      body: buildRouteValidationWithZod(updateInsightStatusBodySchema),
+      params: updateInsightStatusParamsSchema,
+      body: updateInsightStatusBodySchema,
+    },
+    response: {
+      400: {
+        body: () => errorResponseSchema,
+        description: 'Indicates an invalid schema or parameters.',
+      },
+      404: {
+        body: () => errorResponseSchema,
+        description: 'Indicates the insight with the given ID does not exist.',
+      },
     },
   };
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, of, Subject } from 'rxjs';
 import type { ChromeStart } from '@kbn/core/public';
 import type { DashboardApi, DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { DashboardSaveEvent } from '@kbn/dashboard-plugin/public';
@@ -112,39 +112,18 @@ const createMockDashboardApi = (
 } => {
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
   const onSave$ = new Subject<DashboardSaveEvent>();
-  const layout$ = new BehaviorSubject({});
-  const title$ = new BehaviorSubject<string>('');
-  const description$ = new BehaviorSubject<string | undefined>('');
   const filters$ = new BehaviorSubject<undefined>(undefined);
   const query$ = new BehaviorSubject<undefined>(undefined);
   const timeRange$ = new BehaviorSubject<undefined>(undefined);
-  const projectRouting$ = new BehaviorSubject<undefined>(undefined);
-  const hideTitle$ = new BehaviorSubject<boolean>(false);
-  const hideBorder$ = new BehaviorSubject<boolean>(false);
-  const children$ = new BehaviorSubject<Record<string, unknown>>({});
-  const settings = {
-    autoApplyFilters$: new BehaviorSubject<boolean>(true),
-    syncColors$: new BehaviorSubject<boolean>(true),
-    syncCursor$: new BehaviorSubject<boolean>(true),
-    syncTooltips$: new BehaviorSubject<boolean>(true),
-    useMargins$: new BehaviorSubject<boolean>(true),
-  };
   const setState = jest.fn();
   const getSerializedState = jest.fn().mockReturnValue({ attributes: { title: '', panels: [] } });
   return {
+    anyStateChange$: of(),
     savedObjectId$,
     onSave$,
-    layout$,
-    title$,
-    description$,
     filters$,
     query$,
     timeRange$,
-    projectRouting$,
-    hideTitle$,
-    hideBorder$,
-    children$,
-    settings,
     setState,
     getSerializedState,
     setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),

@@ -120,6 +120,19 @@ describe('buildRuleSoFilter', () => {
         'Invalid filter field "unknown"'
       );
     });
+
+    it('attaches INVALID_FILTER_FIELD code and allowed_fields in details', () => {
+      expect(() => buildRuleSoFilter('unknown_field: value')).toThrow(
+        expect.objectContaining({
+          isBoom: true,
+          output: expect.objectContaining({ statusCode: 400 }),
+          data: expect.objectContaining({
+            code: 'INVALID_FILTER_FIELD',
+            details: expect.objectContaining({ field: 'unknown_field' }),
+          }),
+        })
+      );
+    });
   });
 
   describe('wildcard / exists patterns', () => {
@@ -149,6 +162,25 @@ describe('buildRuleSoFilter', () => {
 
       expect(() => buildRuleSoFilter('kind: signal')).toThrow(
         'Unsupported KQL function "unknown_function" in filter'
+      );
+    });
+
+    it('attaches UNSUPPORTED_FILTER_FUNCTION code with the offending function name', () => {
+      fromKueryExpressionMock.mockImplementationOnce((...args: unknown[]) => {
+        const ast = jest.requireActual('@kbn/es-query').fromKueryExpression(...args);
+        ast.function = 'unknown_function';
+        return ast;
+      });
+
+      expect(() => buildRuleSoFilter('kind: signal')).toThrow(
+        expect.objectContaining({
+          isBoom: true,
+          output: expect.objectContaining({ statusCode: 400 }),
+          data: {
+            code: 'UNSUPPORTED_FILTER_FUNCTION',
+            details: { function: 'unknown_function' },
+          },
+        })
       );
     });
   });

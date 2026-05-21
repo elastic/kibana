@@ -105,6 +105,11 @@ function getWorkflowsConnectorTypeArgs(
         enabled: workflow.enabled,
         definition: workflow.definition,
         yaml: workflow.yaml,
+        ...(workflow.managed === true ? { managed: true } : {}),
+        ...(typeof workflow.managedBy === 'string' ? { managedBy: workflow.managedBy } : {}),
+        ...(typeof workflow.originManagedWorkflowId === 'string'
+          ? { originManagedWorkflowId: workflow.originManagedWorkflowId }
+          : {}),
       };
 
       // Run the workflow, @tb: maybe switch to scheduler?
@@ -134,6 +139,11 @@ function getWorkflowsConnectorTypeArgs(
         enabled: workflow.enabled,
         definition: workflow.definition,
         yaml: workflow.yaml,
+        ...(workflow.managed === true ? { managed: true } : {}),
+        ...(typeof workflow.managedBy === 'string' ? { managedBy: workflow.managedBy } : {}),
+        ...(typeof workflow.originManagedWorkflowId === 'string'
+          ? { originManagedWorkflowId: workflow.originManagedWorkflowId }
+          : {}),
       };
 
       return workflowsManagementApi.scheduleWorkflow(
