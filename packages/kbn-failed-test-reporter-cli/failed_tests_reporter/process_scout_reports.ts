@@ -138,7 +138,9 @@ export async function processScoutReports(
         log.info(`Created new Scout issue: ${newIssue.html_url}`);
         failure.githubIssue = newIssue.html_url;
       } else {
-        log.info(`(dry-run) Would create new Scout issue for: ${failure.classname} - ${failure.name}`);
+        log.info(
+          `(dry-run) Would create new Scout issue for: ${failure.classname} - ${failure.name}`
+        );
       }
       failure.failureCount = updateGithub ? 1 : 0;
       updateScoutHtmlReport({ log, reportDir, failure, reportUpdate });
