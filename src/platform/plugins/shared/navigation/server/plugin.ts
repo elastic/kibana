@@ -8,13 +8,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type {
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  PluginInitializerContext,
-  Logger,
-} from '@kbn/core/server';
+import type { CoreSetup, Plugin, PluginInitializerContext, Logger } from '@kbn/core/server';
 
 import type {
   NavigationServerSetup,
@@ -69,20 +63,20 @@ export class NavigationServerPlugin
         schema: navCustomizationSchema,
         defaultValue: { moves: [], hidden: [] },
         scope: 'space',
-        serverInject: true,
+        preload: true,
       },
       [NAV_CALLOUT_DISMISSED_STORAGE_KEY]: {
         schema: z.boolean(),
         defaultValue: false,
         scope: 'global',
-        serverInject: true,
+        preload: true,
       },
     });
 
     return {};
   }
 
-  start(core: CoreStart, plugins: NavigationServerStartDependencies) {
+  start() {
     return {};
   }
 }
