@@ -1027,49 +1027,43 @@ export const getMappingConflictsInfo = (field: DataViewField): FieldConflictsInf
   return conflicts;
 };
 
+/** Flattens exception items into a single list of leaf entries, expanding nested entry children. */
+const flattenExceptionEntries = (
+  items: Array<Pick<ExceptionsBuilderReturnExceptionItem, 'entries'>>
+): BuilderEntry[] =>
+  items
+    .flatMap((item) => item.entries)
+    .flatMap((item) => (item.type === 'nested' ? item.entries : item));
+
+/** Narrows a BuilderEntry to one that uses the wildcard operator with a string value. */
+const isWildcardStringEntry = (
+  builderEntry: BuilderEntry
+): builderEntry is BuilderEntry & { type: 'wildcard'; value: string } =>
+  builderEntry.type === 'wildcard' &&
+  'value' in builderEntry &&
+  typeof builderEntry.value === 'string';
+
 /**
  * Given an exceptions list, determine if any entries have an "IS" operator with a wildcard value
  */
 export const hasWrongOperatorWithWildcard = (
   items: ExceptionsBuilderReturnExceptionItem[]
-): boolean => {
-  // flattens array of multiple entries added with OR
-  const multipleEntries = items.flatMap((item) => item.entries);
-  // flattens nested entries
-  const allEntries = multipleEntries.flatMap((item) => {
-    if (item.type === 'nested') {
-      return item.entries;
-    }
-    return item;
-  });
-
-  // eslint-disable-next-line array-callback-return
-  return allEntries.some((e) => {
-    if (e.type !== 'list' && 'value' in e) {
+): boolean =>
+  flattenExceptionEntries(items).some((e) => {
+    if (e.type !== 'list' && 'value' in e && e.value != null) {
       return validateHasWildcardWithWrongOperator({
         operator: e.type,
         value: e.value,
       });
     }
+    return false;
   });
-};
 
 export const hasEscaping = (
   items: Array<Pick<ExceptionsBuilderReturnExceptionItem, 'entries'>>,
   osTypes: ExceptionsBuilderReturnExceptionItem['os_types'] = ['linux']
-): boolean => {
-  // flattens array of multiple entries added with OR
-  const multipleEntries = items.flatMap((item) => item.entries);
-  // flattens nested entries
-  const allEntries = multipleEntries.flatMap((item) => {
-    if (item.type === 'nested') {
-      return item.entries;
-    }
-    return item;
-  });
-
-  return allEntries.some((builderEntry) => hasEntryEscaping(builderEntry, osTypes));
-};
+): boolean =>
+  flattenExceptionEntries(items).some((builderEntry) => hasEntryEscaping(builderEntry, osTypes));
 
 export const hasEntryEscaping = (
   builderEntry: BuilderEntry,
@@ -1102,6 +1096,29 @@ export const hasEntryEscaping = (
     builderEntry.value.includes('\\*') ||
     builderEntry.value.includes('\\?')
   );
+};
+
+// Detect `matches` entries with escaped wildcard metacharacters (\* or \?). Uses a negative
+// lookbehind so that \\* (double-backslash path separator + wildcard) does not trigger — only
+// a lone \* or \? (escaped metacharacter) fires the warning.
+const ESCAPED_WILDCARD_REGEX = /(?<!\\)\\[*?]/;
+
+export const getMalformedMatchesFields = (
+  items: ExceptionsBuilderReturnExceptionItem[]
+): string[] => {
+  const flattenedEntries = flattenExceptionEntries(items);
+
+  return flattenedEntries.reduce<string[]>((result, builderEntry) => {
+    if (
+      isWildcardStringEntry(builderEntry) &&
+      builderEntry.field !== '' &&
+      ESCAPED_WILDCARD_REGEX.test(builderEntry.value)
+    ) {
+      return [...result, builderEntry.field];
+    }
+
+    return result;
+  }, []);
 };
 
 /**
