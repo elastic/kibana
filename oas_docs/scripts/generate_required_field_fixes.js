@@ -162,18 +162,9 @@ function generateActions(bugs) {
       )}"`
     );
     lines.push('    remove: true');
-<<<<<<< HEAD
     if (correctRequired.length > 0) {
       lines.push(`  - target: "${target}"`);
-      lines.push('    description: "Restore required array without x-oas-optional fields"');
-=======
-    lines.push(`  - target: "${target}"`);
-    lines.push('    description: "Restore required array without optional fields"');
-    if (correctRequired.length === 0) {
-      lines.push('    update:');
-      lines.push('      required: []');
-    } else {
->>>>>>> main
+      lines.push('    description: "Restore required array without optional fields"');
       lines.push('    update:');
       lines.push('      required:');
       correctRequired.forEach((f) => lines.push(`        - ${JSON.stringify(f)}`));
