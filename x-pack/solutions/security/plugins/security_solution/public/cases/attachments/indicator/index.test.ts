@@ -6,29 +6,27 @@
  */
 
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
-import { generateMockFileIndicator } from '../../../../../common/threat_intelligence/types/indicator';
-import type { IndicatorAttachmentMetadata } from './attachments';
-import {
-  generateIndicatorAttachmentsMetadata,
-  generateIndicatorAttachmentsWithoutOwner,
-} from './attachments';
+import { INDICATOR_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import type { Indicator } from '../../../../common/threat_intelligence/types/indicator';
+import { generateMockFileIndicator } from '../../../../common/threat_intelligence/types/indicator';
+import type { IndicatorAttachmentMetadata } from '.';
+import { generateIndicatorAttachmentsMetadata, generateIndicatorAttachmentsWithoutOwner } from '.';
 
 describe('generateIndicatorAttachmentsWithoutOwner', () => {
-  it('should return empty array if external reference id is empty', () => {
-    const externalReferenceId: string = '';
+  it('should return empty array if indicator id is empty', () => {
+    const indicatorId: string = '';
     const metadata: IndicatorAttachmentMetadata = {
       indicatorName: 'indicatorName',
       indicatorType: 'file',
       indicatorFeedName: 'Filebeat] AbuseCH Malwar',
     };
 
-    const result = generateIndicatorAttachmentsWithoutOwner(externalReferenceId, metadata);
+    const result = generateIndicatorAttachmentsWithoutOwner(indicatorId, metadata);
     expect(result.length).toBe(0);
   });
 
-  it('should return the correct object', () => {
-    const externalReferenceId = 'abc123';
+  it('should return a unified `indicator` attachment payload', () => {
+    const indicatorId = 'abc123';
     const metadata: IndicatorAttachmentMetadata = {
       indicatorName: 'indicatorName',
       indicatorType: 'file',
@@ -36,10 +34,16 @@ describe('generateIndicatorAttachmentsWithoutOwner', () => {
     };
 
     const result: CaseAttachmentsWithoutOwner = generateIndicatorAttachmentsWithoutOwner(
-      externalReferenceId,
+      indicatorId,
       metadata
     );
-    expect(result.length).toBe(1);
+    expect(result).toEqual([
+      {
+        type: INDICATOR_ATTACHMENT_TYPE,
+        attachmentId: indicatorId,
+        metadata,
+      },
+    ]);
   });
 });
 
