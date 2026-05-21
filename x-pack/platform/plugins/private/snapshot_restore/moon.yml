@@ -41,6 +41,7 @@ dependsOn:
   - '@kbn/code-editor-mock'
   - '@kbn/react-kibana-context-render'
   - '@kbn/licensing-types'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod

@@ -25,6 +25,7 @@ export enum ExecutionStatus {
   PENDING = 'pending',
   WAITING = 'waiting',
   WAITING_FOR_INPUT = 'waiting_for_input',
+  WAITING_FOR_CHILD = 'waiting_for_child',
   RUNNING = 'running',
 
   // Done
@@ -49,6 +50,7 @@ export const NonTerminalExecutionStatuses: readonly ExecutionStatus[] = [
   ExecutionStatus.PENDING,
   ExecutionStatus.WAITING,
   ExecutionStatus.WAITING_FOR_INPUT,
+  ExecutionStatus.WAITING_FOR_CHILD,
   ExecutionStatus.RUNNING,
 ] as const;
 
@@ -58,6 +60,10 @@ export enum ExecutionType {
 }
 export type ExecutionTypeUnion = `${ExecutionType}`;
 export const ExecutionTypeValues = Object.values(ExecutionType);
+
+export const WorkflowExecutionSortFields = ['createdAt', 'finishedAt'] as const;
+export type WorkflowExecutionSortField = (typeof WorkflowExecutionSortFields)[number];
+export type WorkflowExecutionSortOrder = 'asc' | 'desc';
 
 /**
  * An interface representing the state of a step scope during workflow execution.
@@ -95,6 +101,9 @@ export interface EsWorkflowExecution {
   spaceId: string;
   id: string;
   workflowId: string;
+  managed?: boolean;
+  managedBy?: string | null;
+  originManagedWorkflowId?: string | null;
   isTestRun: boolean;
   status: ExecutionStatus;
   context: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -256,6 +265,9 @@ export const EsWorkflowSchema = z.object({
   name: z.string(),
   description: z.string().optional(),
   enabled: z.boolean(),
+  managed: z.boolean().optional(),
+  managedBy: z.string().nullable().optional(),
+  originManagedWorkflowId: z.string().nullable().optional(),
   tags: z.array(z.string()),
   createdAt: z.date(),
   createdBy: z.string(),
@@ -366,6 +378,11 @@ export interface WorkflowDetailDto {
   name: string;
   description?: string;
   enabled: boolean;
+  managed?: boolean;
+  managedBy?: string | null;
+  definitionHash?: string | null;
+  originManagedWorkflowId?: string | null;
+  lifecycle?: 'static' | 'dynamic' | null;
   createdAt: string;
   createdBy: string;
   lastUpdatedAt: string;
@@ -385,6 +402,8 @@ export interface WorkflowListItemDto {
   name: string;
   description: string;
   enabled: boolean;
+  managed?: boolean;
+  managedBy?: string | null;
   definition: WorkflowYaml | null;
   createdAt: string;
   history?: WorkflowExecutionHistoryModel[];
@@ -399,7 +418,17 @@ export interface WorkflowListDto {
   results: WorkflowListItemDto[];
 }
 export interface WorkflowExecutionEngineModel
-  extends Pick<EsWorkflow, 'id' | 'name' | 'enabled' | 'definition' | 'yaml'> {
+  extends Pick<
+    EsWorkflow,
+    | 'id'
+    | 'name'
+    | 'enabled'
+    | 'definition'
+    | 'yaml'
+    | 'managed'
+    | 'managedBy'
+    | 'originManagedWorkflowId'
+  > {
   isTestRun?: boolean;
   spaceId?: string;
 }

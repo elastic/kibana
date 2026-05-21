@@ -6,6 +6,7 @@
  */
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiPopover, EuiListGroup } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import { DatasetQualityLink } from './dataset_quality_link';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
@@ -52,6 +53,9 @@ export const LegendAction: React.FC<LegendActionProps> = React.memo(
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiPopover
+          aria-label={i18n.translate('xpack.dataUsage.legendAction.popoverAriaLabel', {
+            defaultMessage: 'Data stream actions',
+          })}
           data-test-subj="legendActionPopover"
           button={
             <EuiFlexGroup gutterSize="s" alignItems="center">
