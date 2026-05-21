@@ -60,44 +60,14 @@ This is especially important when:
 
 ### Step 3: Create or Modify the Rule
 
-There are three cases. Choose the right path based on what the user is asking:
+If you are creating a new rule, use the following:
+- **Creating a new rule**: ALWAYS use the \`security.create_detection_rule\` tool. Pass a natural language description of the detection rule to create. The tool handles rule creation AND attachment update automatically. Do NOT call \`attachment_update\`.
+- after calling the \`security.create_detection_rule\` tool, move to step 4.
+- render the latest version of the attachment inline.
 
----
 
-#### Case A — Creating a new rule
-
-ALWAYS use the \`security.create_detection_rule\` tool. Pass a natural language description. The tool handles rule creation AND attachment creation automatically. Do NOT call \`attachment_update\` or \`attachment_add\` — these will fail with an unknown type error.
-
-After the tool returns, render the latest version of the attachment inline and move to Step 4.
-
----
-
-#### Case B — Rewriting or regenerating the query of an existing rule
-
-Use this path when the user asks to rewrite, regenerate, or significantly change the detection query (e.g., "rewrite the query to also detect X", "regenerate the query using Y index").
-
-1. **Read the latest attachment** — call \`attachment_read\`.
-2. **Parse** the \`text\` field (stringified JSON of the rule).
-3. **Call \`security.create_detection_rule\`** passing:
-   - \`user_query\`: a natural language description of the new query intent
-   - \`existing_rule\`: the full current rule object (parsed JSON from the attachment) — this seeds the graph so non-query fields (severity, risk_score, name, tags, etc.) are preserved as the base
-   - \`attachment_id\`: the attachment ID from the attachment read result — this causes the tool to update the attachment in place rather than create a new one
-
-   Example call:
-   \`\`\`
-   security.create_detection_rule({
-     user_query: "detect ...",
-     existing_rule: <full parsed rule object from attachment>,
-     attachment_id: "ATTACHMENT_ID"
-   })
-   \`\`\`
-4. After the tool returns, render the latest version of the attachment inline.
-
----
-
-#### Case C — Editing specific fields of an existing rule
-
-Use this path for any field change that does NOT require regenerating the query: tags, severity, risk_score, name, description, MITRE ATT&CK mappings, schedule (interval/from), enabled, index patterns, etc.
+When asked to edit or update the rule or any field of the rule, use the following:
+**Editing an existing rule** (changing fields like tags, severity, description, schedule, MITRE ATT&CK, index patterns, query, etc.):
 
 When the user says "add to the rule", "edit the rule", "change the rule", "update the rule", or any variation — they ALWAYS mean the **rule attachment**. The rule lives inside the attachment's \`text\` field as stringified JSON. There is no other rule object.
 
@@ -335,18 +305,6 @@ User says: "Add the tags Network and Lateral Movement to the rule"
    \`\`\`
 7. Render: \`<render_attachment id="ATTACHMENT_ID" version="VERSION" />\`
 
-## Limitations
-
-When a user asks what you can or cannot do, or what limitations exist, communicate these clearly:
-
-- **Rule type**: Only ES|QL rules are supported. EQL, KQL, threshold, ML, and other rule types cannot be created.
-- **Data requirement**: Rule generation requires relevant data in your Elasticsearch indices. If no matching index or field data is found, the rule cannot be created.
-- **Severity and risk score**: These default to \`low\` / \`21\`. They are not AI-adapted based on threat context — ask to change them and they will be updated via \`attachment_update\`.
-- **MITRE ATT&CK**: Mappings are generated from the model's knowledge and validated against local data. They may not reflect the very latest ATT&CK version.
-- **Interruption**: Once rule generation starts, it runs to completion. The stop button cancels streaming output but not the underlying tool execution.
-
----
-
 ## CRITICAL INSTRUCTIONS — READ CAREFULLY
 
 1. "The rule" ALWAYS refers to the rule attachment. Any request to add, edit, change, or update the rule means modifying the attachment.
@@ -354,8 +312,6 @@ When a user asks what you can or cannot do, or what limitations exist, communica
 3. ALWAYS read the attachment before modifying it.
 4. ALWAYS re-stringify the FULL rule object — never send partial updates.
 5. **ALWAYS render the attachment inline after EVERY modification** — this is the most important rule. Every single call to \`security.create_detection_rule\` or \`attachment_update\` MUST be followed by \`<render_attachment id="ATTACHMENT_ID" version="VERSION" />\` using the version from the tool result. NEVER omit this. The user cannot see changes without it.
-6. ALWAYS use \`security.create_detection_rule\` when creating a new rule (Case A) or rewriting the query of an existing rule (Case B — pass \`existing_rule\` + \`attachment_id\`).
-7. Use \`attachment_update\` ONLY for editing specific non-query fields of an existing rule (Case C: tags, severity, schedule, MITRE, name, description, etc.).
-8. NEVER call \`attachment_add\` for security detection rules under any circumstances. It does not support the \`security.rule\` attachment type and will always fail.
-8. When in doubt whether a change is a "query rewrite" or a "field edit", use Case B (route through \`security.create_detection_rule\`). Never attempt to hand-edit the \`query\` field directly — the ES|QL generation graph handles index discovery and query validation.
+6. ALWAYS use \`security.create_detection_rule\` when creating a new rule.
+7. Use \`attachment_update\` for editing existing rules (field-level changes like tags, severity, schedule, etc.).
 `;
