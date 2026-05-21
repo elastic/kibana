@@ -232,9 +232,6 @@ get_config_status() {
 }
 
 display_test_load_ids_in_order_of_execution() {
-  echo ""
-  echo "Test loads in this lane ran in the following order:"
-  echo ""
   local load_count=${#LOAD_IDS[@]}
   local idx_width=${#load_count}
   local idx_sep
@@ -252,29 +249,21 @@ display_test_load_ids_in_order_of_execution() {
 
 # Print a summary of test results
 print_summary() {
-  echo "+++ Scout Test Lane Summary"
-  echo "✅ Passed: ${#PASSED[@]} run(s)"
-  echo "❌ Failed: ${#FAILED[@]} run(s)"
-  echo "⏩️ Skipped: ${#SKIPPED[@]} run(s)"
-
-  if [[ ${#SKIPPED[@]} -gt 0 ]]; then
-    echo ""
-    echo "Skipped run(s) (passed in a previous attempt):"
-    printf '  %s\n' "${SKIPPED[@]}"
-  fi
-
-  if [[ ${#PASSED[@]} -gt 0 ]]; then
-    echo ""
-    echo "Passed run(s):"
-    printf '  %s\n' "${PASSED[@]}"
-  fi
-
-  if [[ ${#FAILED[@]} -gt 0 ]]; then
-    echo ""
-    echo "Failed run(s):"
-    printf '  %s\n' "${FAILED[@]}"
-    display_test_load_ids_in_order_of_execution
-  fi
+  echo "+++ Lane summary"
+  echo "Test server configuration:"
+  echo "  Arch: $SCOUT_TEST_TARGET_ARCH"
+  echo "  Domain: $SCOUT_TEST_TARGET_DOMAIN"
+  echo "  Server config set: $SCOUT_TEST_SERVER_CONFIG_SET"
+  echo ""
+  echo "Test count by status:"
+  [[ ${#PASSED[@]}   -gt 0 ]] && echo "✅  Passed: ${#PASSED[@]}"
+  [[ ${#FAILED[@]}   -gt 0 ]] && echo "❌  Failed: ${#FAILED[@]}"
+  [[ ${#SKIPPED[@]}  -gt 0 ]] && echo "⏩️ Skipped: ${#SKIPPED[@]}"
+  echo ""
+  echo "Test loads ran in the following order:"
+  echo ""
+  display_test_load_ids_in_order_of_execution
+  echo ""
 }
 
 #
