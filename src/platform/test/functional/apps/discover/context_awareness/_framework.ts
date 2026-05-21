@@ -62,6 +62,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await common.navigateToActualUrl('discover', undefined, {
             ensureCurrentUrl: false,
           });
+          if (await discover.isInEsqlMode()) {
+            await discover.selectDataViewMode();
+          }
           await discover.waitUntilSearchingHasFinished();
           await dataViews.switchToAndValidate('my-example-logs');
           await discover.waitUntilSearchingHasFinished();

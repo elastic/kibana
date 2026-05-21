@@ -68,6 +68,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
+        if (await PageObjects.discover.isInEsqlMode()) {
+          await PageObjects.discover.selectDataViewMode();
+        }
         await dataViews.createFromSearchBar({
           name: 'lo', // Must be anything but log/logs, since pagination is disabled for log sources
           adHoc: true,
