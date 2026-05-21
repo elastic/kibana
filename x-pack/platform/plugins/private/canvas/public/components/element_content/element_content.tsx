@@ -46,15 +46,17 @@ export const ElementContent = (props: Props) => {
       return;
     }
 
-    getCanvasExpressionService().getRenderer(renderable.as).then(fn => {
-      if (!canceled) {
-        setRenderFunction(fn);
-      }
-    });
+    getCanvasExpressionService()
+      .getRenderer(renderable.as)
+      .then((fn) => {
+        if (!canceled) {
+          setRenderFunction(fn);
+        }
+      });
 
     return () => {
       canceled = true;
-    }
+    };
   }, [renderable]);
 
   if (!state || !renderable || !renderFunction) {

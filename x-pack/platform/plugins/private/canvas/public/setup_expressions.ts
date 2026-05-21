@@ -7,10 +7,10 @@
 
 import type { CoreSetup } from '@kbn/core/public';
 import { serializeProvider } from '@kbn/expressions-plugin/common';
+import { asyncForEach } from '@kbn/std';
 import { API_ROUTE_FUNCTIONS } from '../common/lib/constants';
 
 import type { CanvasSetupDeps } from './plugin';
-import { asyncForEach } from '@kbn/std';
 
 let cached: Promise<void> | null = null;
 
