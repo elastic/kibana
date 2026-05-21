@@ -821,9 +821,7 @@ describe('ruleType', () => {
         ],
         values: [],
       };
-      ruleServices.getAsyncSearchClient().search.mockResolvedValueOnce(
-        searchResult
-      );
+      ruleServices.getAsyncSearchClient().search.mockResolvedValueOnce(searchResult);
 
       await invokeExecutor({ params, ruleServices });
       expect(ruleServices.alertsClient.report).not.toHaveBeenCalled();
@@ -843,9 +841,7 @@ describe('ruleType', () => {
           ['timestamp', 'message'],
         ],
       };
-      ruleServices.getAsyncSearchClient().search.mockResolvedValueOnce(
-        searchResult
-      );
+      ruleServices.getAsyncSearchClient().search.mockResolvedValueOnce(searchResult);
 
       await invokeExecutor({ params, ruleServices });
 
@@ -870,7 +866,7 @@ describe('ruleType', () => {
 });
 
 function generateResults(
-  docs: Array<{ 'time-field': unknown;[key: string]: unknown }>,
+  docs: Array<{ 'time-field': unknown; [key: string]: unknown }>,
   includeTieBreaker = false,
   skipSortOnFirst = false
 ): ESSearchResponse<unknown, ESSearchRequest> {
@@ -882,10 +878,10 @@ function generateResults(
     ...(skipSortOnFirst && index === 0
       ? {}
       : {
-        sort: (includeTieBreaker
-          ? ['FaslK3QBySSL_rrj9zM5', doc['time-field']]
-          : [doc['time-field']]) as string[],
-      }),
+          sort: (includeTieBreaker
+            ? ['FaslK3QBySSL_rrj9zM5', doc['time-field']]
+            : [doc['time-field']]) as string[],
+        }),
     _source: doc,
   }));
   return {
