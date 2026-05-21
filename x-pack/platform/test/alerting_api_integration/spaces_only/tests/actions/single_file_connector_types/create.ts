@@ -95,7 +95,7 @@ export default function createSingleFileConnectorTest({ getService }: FtrProvide
         .expect(400);
 
       expect(response.body.message).to.eql(
-        `error validating connector type secrets: ✖ Invalid input\n  → at authType`
+        `error validating connector type secrets: ✖ Invalid discriminator value. Expected 'none' | 'basic' | 'api_key_header'\n  → at authType`
       );
     });
 
