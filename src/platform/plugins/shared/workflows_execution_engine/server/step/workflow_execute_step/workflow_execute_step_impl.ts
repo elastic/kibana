@@ -78,7 +78,18 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
     const { 'workflow-id': workflowId, inputs = {} } = renderedWith;
     const mappedInputs =
       typeof inputs === 'object' && inputs !== null ? (inputs as Record<string, unknown>) : {};
-    return { workflowId: String(workflowId), inputs: mappedInputs };
+    return { workflowId: String(workflowId ?? ''), inputs: mappedInputs };
+  }
+
+  private assertValidWorkflowId(workflowId: string): void {
+    if (workflowId.trim().length > 0) {
+      return;
+    }
+
+    const { node, stepExecutionRuntime } = this.init;
+    throw new Error(
+      `${node.type} step "${node.stepId}" in workflow "${stepExecutionRuntime.workflowExecution.workflowId}" rendered an empty workflow-id.`
+    );
   }
 
   /**
@@ -125,6 +136,8 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
     const executor = node.type === 'workflow.execute' ? this.syncExecutor : this.asyncExecutor;
 
     try {
+      this.assertValidWorkflowId(workflowId);
+
       const rawDepth = stepExecutionRuntime.workflowExecution.context?.parentDepth;
       const currentDepth = (typeof rawDepth === 'number' ? rawDepth : -1) + 1;
       const maxWorkflowDepth = this.init.config.maxWorkflowDepth;
@@ -178,7 +191,8 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
 
     await this.init.workflowsExecutionEngine.cancelWorkflowExecution(
       executionId,
-      this.init.spaceId
+      this.init.spaceId,
+      this.init.request
     );
   }
 

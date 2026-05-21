@@ -38,6 +38,7 @@ import { KnowledgeIndicatorsTypeFilter } from './knowledge_indicators_type_filte
 import { RulesTable } from './rules_table';
 import { LoadingPanel } from '../../loading_panel';
 import { getKnowledgeIndicatorItemId } from './utils/get_knowledge_indicator_item_id';
+import { getFeaturesFromKIs } from './utils/get_features_from_kis';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -159,6 +160,9 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       ),
     [knowledgeIndicators]
   );
+
+  const features = useMemo(() => getFeaturesFromKIs(knowledgeIndicators), [knowledgeIndicators]);
+
   const selectedKnowledgeIndicatorId = selectedKnowledgeIndicator
     ? getKnowledgeIndicatorItemId(selectedKnowledgeIndicator)
     : undefined;
@@ -305,6 +309,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
           knowledgeIndicator={selectedKnowledgeIndicator}
           occurrencesByQueryId={occurrencesByQueryId}
           onClose={closeFlyout}
+          features={features}
         />
       ) : null}
     </>

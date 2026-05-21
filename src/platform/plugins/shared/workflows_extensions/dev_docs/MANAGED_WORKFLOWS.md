@@ -15,12 +15,12 @@ This guide covers:
 
 ## Concepts
 
-| Concept | Meaning |
-|---|---|
-| **Definition** | Code-owned descriptor: `id`, `pluginId`, `version`, `yaml` or `yamlTemplate`, `management` policy. Lives in `@kbn/workflows/managed`. |
-| **Owner plugin** | Plugin that owns a definition (`pluginId`). Drives reconciliation and orphan cleanup. |
-| **Installed document** | Persisted workflow in `.workflows-*` indices, identified by `workflowId` + `spaceId`. |
-| **Reserved namespace** | All managed definition ids start with `system-`. The platform rejects this prefix for user-defined workflows. |
+| Concept                | Meaning                                                                                                                               |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **Definition**         | Code-owned descriptor: `id`, `pluginId`, `version`, `yaml` or `yamlTemplate`, `management` policy. Lives in `@kbn/workflows/managed`. |
+| **Owner plugin**       | Plugin that owns a definition (`pluginId`). Drives reconciliation and orphan cleanup.                                                 |
+| **Installed document** | Persisted workflow in `.workflows-*` indices, identified by `workflowId` + `spaceId`.                                                 |
+| **Reserved namespace** | All managed definition ids start with `system-`. The platform rejects this prefix for user-defined workflows.                         |
 
 Concrete flow:
 
@@ -73,10 +73,10 @@ Client surface:
 
 ## 3) When to install
 
-| When | Use it for |
-|---|---|
-| `setup()` | Never. Registration only. |
-| `start()` | Baseline/static workflows you always want available. |
+| When                                 | Use it for                                                                                   |
+| ------------------------------------ | -------------------------------------------------------------------------------------------- |
+| `setup()`                            | Never. Registration only.                                                                    |
+| `start()`                            | Baseline/static workflows you always want available.                                         |
 | On-demand (any time after `start()`) | Per-entity / per-tenant / per-space instances created in response to user or system actions. |
 
 The same `install` API is used in both cases — there is no separate "deferred" or "post-start" entry point. As long as the plugin-scoped client has been initialized (see step 2), you can call `managed.install(...)` whenever you have the inputs you need (e.g., once a referenced entity exists, once a user enables a feature, once another plugin emits an event).
@@ -128,18 +128,22 @@ Reconciliation tracks installs at the **full document identity** level: `${workf
 **Example:**
 
 Previous startup installed:
+
 - `system-monitor-host-a` in space `prod`
 - `system-monitor-host-b` in space `prod`
 - `system-monitor-host-a` in space `staging`
 
 This startup only installs:
+
 - `system-monitor-host-b` in space `prod`
 
 After `ready()`: the two instances that were not re-installed (`system-monitor-host-a:prod` and `system-monitor-host-a:staging`) are removed.
 
-### Dynamic workflows are excluded
+### Dynamic workflows are excluded from cleanup
 
-Reconciliation only targets documents whose definition has `lifecycle: 'static'`. Dynamic workflows are never auto-cleaned — their lifecycle is explicitly managed by the owning plugin via `install`/`uninstall`.
+Orphan reconciliation only targets documents whose definition has `lifecycle: 'static'`. Dynamic workflows are never auto-cleaned — their create/remove lifecycle is explicitly managed by the owning plugin via `install`/`uninstall`.
+
+Dynamic workflows with `versionStrategy: 'auto'` are still eligible for startup upgrades: when the owning plugin calls `ready()`, persisted dynamic instances for that plugin are re-applied from the current registry definition while preserving their stored template values.
 
 ## 4) Space-scoped vs global installs
 
@@ -214,11 +218,11 @@ To create the same managed workflow as multiple distinct instances, callers must
 
 ### Recommended patterns
 
-| Use case | Suffix to use |
-|---|---|
-| One instance per space | the space id (e.g., `'my-space'`) |
+| Use case                | Suffix to use                                         |
+| ----------------------- | ----------------------------------------------------- |
+| One instance per space  | the space id (e.g., `'my-space'`)                     |
 | One instance per entity | a stable entity id (e.g., `'host-42'`, `'rule-uuid'`) |
-| One instance per tenant | the tenant id |
+| One instance per tenant | the tenant id                                         |
 
 Because the suffix is part of the persisted id, the resulting `workflowId` is **deterministic** and re-derivable. Callers can invoke a per-entity workflow later without storing an `entity → workflowId` (or `space → workflowId`) mapping.
 
@@ -256,14 +260,14 @@ management: {
 }
 ```
 
-| Field | Value | Behavior |
-|---|---|---|
-| `lifecycle` | `static` | Baseline workflow that must be installed every startup before `ready()`. Any persisted static instance not re-installed during the startup window is removed by reconciliation. |
-| `lifecycle` | `dynamic` | Instance-like workflow created on-demand from runtime context (per entity / tenant / etc.). Not auto-removed by per-plugin reconciliation — lifecycle is explicitly managed by the owning plugin via `install`/`uninstall`. |
-| `versionStrategy` | `auto` | Startup reconciliation may re-apply updates when the definition version changes. |
-| `versionStrategy` | `on_adopt` | Startup never auto-upgrades. Updates only happen on explicit `install`. |
-| `enablement` | `enforced` | Managed updates always re-apply enabled state from the definition. |
-| `enablement` | `restorable` | User-driven enabled/disabled state is preserved across managed updates. |
+| Field             | Value        | Behavior                                                                                                                                                                                                                |
+| ----------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lifecycle`       | `static`     | Baseline workflow that must be installed every startup before `ready()`. Any persisted static instance not re-installed during the startup window is removed by reconciliation.                                         |
+| `lifecycle`       | `dynamic`    | Instance-like workflow created on-demand from runtime context (per entity / tenant / etc.). Not auto-removed by per-plugin reconciliation, but startup upgrades are applied when paired with `versionStrategy: 'auto'`. |
+| `versionStrategy` | `auto`       | Startup reconciliation may re-apply updates when the installed managed workflow differs from the current definition.                                                                                                    |
+| `versionStrategy` | `on_adopt`   | Startup never auto-upgrades. Updates only happen on explicit `install`.                                                                                                                                                 |
+| `enablement`      | `enforced`   | Managed updates always re-apply enabled state from the definition.                                                                                                                                                      |
+| `enablement`      | `restorable` | User-driven enabled/disabled state is preserved across managed updates.                                                                                                                                                 |
 
 Choosing rules of thumb:
 
@@ -279,8 +283,8 @@ Key distinction: **static** workflows are declarative — the set installed at s
 All managed workflow definitions live in `@kbn/workflows/managed`, organized as **one file per plugin** under the `definitions/` directory. Adding a new definition is a three-step change in that package:
 
 1. **Create or update the plugin's definition file** in `managed/definitions/<your_plugin>.ts`. Declare the id as a `const` and the definition, and export both — the id is the value other code uses to call `install` / `uninstall` / `execute`, and tests reference it.
-2. **Register the definition** by adding it to the `managedWorkflowDefinitions` array in `managed/index.ts`. The platform discovers definitions through this registry (e.g., for orphan cleanup and auto-update reconciliation), so a definition that isn't in this list does not exist as far as the platform is concerned.
-3. **Re-export the id** from `managed/index.ts` so consumers import it from the package entry point (`@kbn/workflows/managed`) rather than from internal paths.
+2. **Register the definition** by adding it to the `managedWorkflowDefinitions` array in `managed/definitions/index.ts`. The platform discovers definitions through this registry (e.g., for orphan cleanup and auto-update reconciliation), so a definition that isn't in this list does not exist as far as the platform is concerned.
+3. **Re-export the id** from `managed/definitions/index.ts`; the package entry point forwards those exports so consumers import ids from `@kbn/workflows/managed` rather than from internal paths.
 
 ```ts
 // packages/kbn-workflows/managed/definitions/my_plugin.ts
@@ -296,8 +300,8 @@ export const MY_WORKFLOW: ManagedWorkflowDefinition = {
 ```
 
 ```ts
-// packages/kbn-workflows/managed/index.ts
-import { MY_WORKFLOW, MY_WORKFLOW_ID } from './definitions/my_plugin';
+// packages/kbn-workflows/managed/definitions/index.ts
+import { MY_WORKFLOW, MY_WORKFLOW_ID } from './my_plugin';
 
 export const managedWorkflowDefinitions = [
   // ...existing definitions
@@ -466,19 +470,19 @@ Although a global workflow is visible from every space, each execution is stampe
 
 Because there is a **single persisted document** for a global workflow, any edit (YAML, name, tags, description) or enable/disable toggle **affects all spaces immediately**. There is no per-space override mechanism today. Plugin authors should be aware of this when choosing global vs space-scoped installs:
 
-| Action | Scope |
-|---|---|
+| Action                  | Scope                        |
+| ----------------------- | ---------------------------- |
 | Edit YAML / name / tags | All spaces (single document) |
-| Enable / disable | All spaces (single document) |
-| Execute | Space that triggered the run |
-| View execution results | Only the triggering space |
+| Enable / disable        | All spaces (single document) |
+| Execute                 | Space that triggered the run |
+| View execution results  | Only the triggering space    |
 
 > **Future consideration:** Per-space overrides (e.g., enabling a global workflow only in certain spaces) are not yet supported. If your workflow needs per-space enablement control, use space-scoped installs with one document per space instead.
 
 ## 11) Rollout checklist
 
 1. Add the definition in `@kbn/workflows/managed` with the correct `pluginId`, a `system-` id, and `version: 1`; export the id as a const.
-2. Add the definition to `managedWorkflowDefinitions` in `managed/index.ts`, and re-export the id from the package barrel.
+2. Add the definition to `managedWorkflowDefinitions` in `managed/definitions/index.ts`, and re-export the id from that definitions barrel.
 3. Register the owner plugin id in `setup()`.
 4. Initialize the plugin-scoped client in `start()`.
 5. Install baseline (static) workflows at `start()`. Use on-demand installs (the same `install` API) for dynamic instances.

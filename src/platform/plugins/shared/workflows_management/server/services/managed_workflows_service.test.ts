@@ -312,6 +312,31 @@ describe('ManagedWorkflowsService', () => {
       expect(crudService.indexWorkflowDocument).not.toHaveBeenCalled();
     });
 
+    it('skips on_adopt updates during the startup window even when template values change', async () => {
+      const definition = createTemplateDefinition({
+        management: { versionStrategy: 'on_adopt' },
+      });
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
+        createVersionedDocument(
+          createWorkflowSource({
+            definitionHash: definitionHash(definition.yamlTemplate.toString()),
+            managedTemplateValues: { recipient: 'Original', enabled: true },
+            yaml: workflowYaml({ name: 'Managed Workflow - Original', enabled: true }),
+          })
+        )
+      );
+
+      await service.installManagedWorkflow(
+        WORKFLOW_ID,
+        { spaceId: SPACE_ID, values: { recipient: 'Changed', enabled: false } },
+        definition.pluginId
+      );
+
+      expect(crudService.indexWorkflowDocument).not.toHaveBeenCalled();
+    });
+
     it('applies on_adopt updates after the plugin is ready', async () => {
       const definition = createDefinition({
         management: { versionStrategy: 'on_adopt' },
@@ -423,7 +448,7 @@ describe('ManagedWorkflowsService', () => {
       const orphanDefinition = createDefinition({ id: 'system-orphan' });
       const dynamicDefinition = createDefinition({
         id: 'system-dynamic',
-        management: { lifecycle: 'dynamic' },
+        management: { lifecycle: 'dynamic', versionStrategy: 'on_adopt' },
       });
       mockManagedWorkflowDefinitions = [installedDefinition, orphanDefinition, dynamicDefinition];
       const { crudService, service } = createService();
@@ -455,21 +480,159 @@ describe('ManagedWorkflowsService', () => {
             lifecycle: 'dynamic',
           }),
         },
+      ]);
+
+      await service.pluginReady(PLUGIN_ID);
+
+      expect(crudService.getManagedWorkflowDocumentsAllSpaces).toHaveBeenCalledWith({
+        pluginId: PLUGIN_ID,
+      });
+      expect(crudService.deleteWorkflows).toHaveBeenCalledTimes(1);
+      expect(crudService.deleteWorkflows).toHaveBeenCalledWith(['system-orphan'], SPACE_ID, {
+        force: true,
+      });
+    });
+
+    it('auto-updates dynamic workflows with auto version strategy at startup', async () => {
+      const definition = createDefinition({
+        id: 'system-dynamic',
+        version: 2,
+        yaml: workflowYaml({ name: 'Updated Dynamic Workflow', enabled: true }),
+        management: {
+          lifecycle: 'dynamic',
+          versionStrategy: 'auto',
+          enablement: 'restorable',
+        },
+      });
+      const existingSource = createWorkflowSource({
+        enabled: false,
+        yaml: workflowYaml({ name: 'Old Dynamic Workflow', enabled: false }),
+        definition: { name: 'Old Dynamic Workflow', enabled: false } as WorkflowYaml,
+        definitionHash: 'old-hash',
+        lifecycle: 'dynamic',
+        managedVersion: 1,
+        originManagedWorkflowId: definition.id,
+      });
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+      crudService.getManagedWorkflowDocumentsAllSpaces.mockResolvedValue([
         {
-          id: 'system-other-plugin',
+          id: definition.id,
+          source: existingSource,
+        },
+      ]);
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
+        createVersionedDocument(existingSource)
+      );
+
+      await service.pluginReady(PLUGIN_ID);
+
+      const indexedDocument = getIndexedDocument(crudService);
+      expect(indexedDocument.enabled).toBe(false);
+      expect(indexedDocument.lifecycle).toBe('dynamic');
+      expect(indexedDocument.managedVersion).toBe(2);
+      expect(indexedDocument.definitionHash).toBe(definitionHash(definition.yaml));
+      expect(indexedDocument.yaml).toContain('name: Updated Dynamic Workflow');
+      expect(indexedDocument.yaml).toContain('enabled: false');
+      expect(crudService.indexWorkflowDocument).toHaveBeenCalledWith(
+        definition.id,
+        expect.objectContaining({
+          managedVersion: 2,
+          lifecycle: 'dynamic',
+          originManagedWorkflowId: definition.id,
+        }),
+        { ifSeqNo: 7, ifPrimaryTerm: 13 }
+      );
+    });
+
+    it('preserves template values when auto-updating dynamic workflows at startup', async () => {
+      const definition = createTemplateDefinition({
+        id: 'system-dynamic-template',
+        management: { lifecycle: 'dynamic', versionStrategy: 'auto' },
+      });
+      const templateValues: TemplateValues = { recipient: 'Persisted Override', enabled: false };
+      const existingSource = createWorkflowSource({
+        enabled: false,
+        yaml: workflowYaml({ name: 'Old Dynamic Workflow', enabled: false }),
+        definition: { name: 'Old Dynamic Workflow', enabled: false } as WorkflowYaml,
+        definitionHash: 'old-hash',
+        lifecycle: 'dynamic',
+        managedTemplateValues: templateValues,
+        originManagedWorkflowId: definition.id,
+      });
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+      crudService.getManagedWorkflowDocumentsAllSpaces.mockResolvedValue([
+        {
+          id: `${definition.id}-instance`,
+          source: existingSource,
+        },
+      ]);
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
+        createVersionedDocument(existingSource)
+      );
+
+      await service.pluginReady(PLUGIN_ID);
+
+      const indexedDocument = getIndexedDocument(crudService);
+      expect(indexedDocument.managedTemplateValues).toEqual(templateValues);
+      expect(indexedDocument.yaml).toContain('Managed Workflow - Persisted Override');
+      expect(indexedDocument.yaml).toContain('enabled: false');
+      expect(crudService.indexWorkflowDocument).toHaveBeenCalledWith(
+        `${definition.id}-instance`,
+        expect.objectContaining({
+          lifecycle: 'dynamic',
+          managedTemplateValues: templateValues,
+          originManagedWorkflowId: definition.id,
+        }),
+        { ifSeqNo: 7, ifPrimaryTerm: 13 }
+      );
+    });
+
+    it('does not auto-update dynamic workflows with on_adopt version strategy at startup', async () => {
+      const definition = createDefinition({
+        id: 'system-dynamic',
+        version: 2,
+        management: { lifecycle: 'dynamic', versionStrategy: 'on_adopt' },
+      });
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+
+      await service.pluginReady(PLUGIN_ID);
+
+      expect(crudService.getManagedWorkflowDocumentsAllSpaces).not.toHaveBeenCalled();
+      expect(crudService.indexWorkflowDocument).not.toHaveBeenCalled();
+    });
+
+    it('does not update on_adopt templated dynamic workflows during startup reconciliation', async () => {
+      const autoDefinition = createDefinition({
+        id: 'system-dynamic-auto',
+        management: { lifecycle: 'dynamic', versionStrategy: 'auto' },
+      });
+      const onAdoptDefinition = createTemplateDefinition({
+        id: 'system-dynamic-on-adopt',
+        management: { lifecycle: 'dynamic', versionStrategy: 'on_adopt' },
+      });
+      const templateValues: TemplateValues = { recipient: 'Persisted Override', enabled: false };
+      mockManagedWorkflowDefinitions = [autoDefinition, onAdoptDefinition];
+      const { crudService, service } = createService();
+      crudService.getManagedWorkflowDocumentsAllSpaces.mockResolvedValue([
+        {
+          id: `${onAdoptDefinition.id}-instance`,
           source: createWorkflowSource({
-            managedBy: 'otherPlugin',
-            originManagedWorkflowId: orphanDefinition.id,
+            enabled: false,
+            definitionHash: 'old-hash',
+            lifecycle: 'dynamic',
+            managedTemplateValues: templateValues,
+            originManagedWorkflowId: onAdoptDefinition.id,
           }),
         },
       ]);
 
       await service.pluginReady(PLUGIN_ID);
 
-      expect(crudService.deleteWorkflows).toHaveBeenCalledTimes(1);
-      expect(crudService.deleteWorkflows).toHaveBeenCalledWith(['system-orphan'], SPACE_ID, {
-        force: true,
-      });
+      expect(crudService.getWorkflowDocumentWithVersion).not.toHaveBeenCalled();
+      expect(crudService.indexWorkflowDocument).not.toHaveBeenCalled();
     });
 
     it('is idempotent when called more than once', async () => {

@@ -27,6 +27,7 @@ The plugin registers a `setvar` step that allows you to set variables in the wor
 ### Server Configuration
 
 The server configuration includes:
+
 - `id` - Unique step identifier
 - `inputSchema` - JSON Schema for input validation
 - `outputSchema` - JSON Schema for output validation
@@ -35,6 +36,7 @@ The server configuration includes:
 ### Public Configuration
 
 The public configuration includes:
+
 - `id` - Must match server-side ID
 - `inputSchema` - Must match server-side schema
 - `outputSchema` - Must match server-side schema
@@ -52,14 +54,14 @@ steps:
     type: workflows_step_example.setvar
     with:
       variables:
-        myVar: "Hello World"
+        myVar: 'Hello World'
         count: 42
         enabled: true
-  
+
   - name: use_vars
     type: console.log
     with:
-      message: "{{ steps.set_vars.output.variables.myVar }}"
+      message: '{{ steps.set_vars.output.variables.myVar }}'
 ```
 
 ## Event-driven trigger and emitEvent
@@ -100,7 +102,7 @@ The plugin also demonstrates **managed workflow** registration — a code-owned 
 ### How it works
 
 1. **Define** the workflow in the plugin's definition file under `@kbn/workflows/managed/definitions/` with `yamlTemplate` for install-time parameterization.
-2. **Register** in the central `@kbn/workflows/managed` registry in `managed/index.ts` (required for orphan cleanup and auto-update reconciliation).
+2. **Register** in the central `@kbn/workflows/managed` registry in `managed/definitions/index.ts` (required for orphan cleanup and auto-update reconciliation).
 3. **Declare ownership** during setup via `registerManagedWorkflowOwner(pluginId)`.
 4. **Install** during start via `initManagedWorkflowsClient(pluginId)` → `client.install(id, { spaceId, values })`.
 
@@ -148,4 +150,3 @@ steps:
 2. **Handler Function**: The handler receives validated input and the step execution runtime context, and returns output conforming to the output schema.
 
 3. **Metadata Registration**: The public plugin registers UI metadata that helps users understand and use the step in the workflow editor.
-
