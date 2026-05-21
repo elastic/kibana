@@ -75,11 +75,31 @@ export const useHostsTableUrlState = (): [TableProperties, TablePropertiesUpdate
   // can express the same partial-merge semantics without any local React
   // state at all. Every consumer reads from the same URL and writes through
   // the same merge function; no divergence is possible.
+  //
+  // Important quirk of `useUrlState`: when the URL has no `tableProperties`
+  // query parameter yet, the functional setter receives `{}` (an empty
+  // object literal) — *not* the hook's `defaultState`. A naive `prev ??
+  // defaults` doesn't catch that because `{}` isn't nullish, so the first
+  // write would emit only the patched field to the URL, the strict io-ts
+  // decoder would reject the incomplete shape, and subsequent reads would
+  // silently fall back to `defaultState` (the user sees sorting / pagination
+  // never update). We seed the reducer with a full default state merged
+  // over `prev` so the URL always carries the complete `TableState` shape.
   const setProperties: TablePropertiesUpdater = useCallback(
     (patch) => {
-      setUrlState((prev) => reducer(prev ?? GET_DEFAULT_TABLE_PROPERTIES, patch));
+      setUrlState((prev) => {
+        const seed: TableProperties = {
+          ...GET_DEFAULT_TABLE_PROPERTIES,
+          pagination: {
+            ...GET_DEFAULT_TABLE_PROPERTIES.pagination,
+            pageSize: localStoragePageSize ?? DEFAULT_PAGE_SIZE,
+          },
+          ...(prev ?? {}),
+        };
+        return reducer(seed, patch);
+      });
     },
-    [setUrlState]
+    [setUrlState, localStoragePageSize]
   );
 
   // Keep `localStorage` in sync with the URL's page size so a fresh tab
