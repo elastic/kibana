@@ -390,16 +390,14 @@ export const SpaceAssignedRolesTable = ({
                       }
                     >
                       <EuiContextMenu
-                        size="s"
                         initialPanelId={0}
                         panels={[
                           {
                             id: 0,
-                            size: 's',
                             width: 180,
                             items: [
                               {
-                                icon: <EuiIcon type="trash" color="danger" />,
+                                icon: <EuiIcon type="trash" color="danger" aria-hidden={true} />,
                                 name: (
                                   <EuiTextColor color="danger">
                                     {i18n.translate(

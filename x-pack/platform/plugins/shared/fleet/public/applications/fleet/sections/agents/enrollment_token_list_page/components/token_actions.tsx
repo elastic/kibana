@@ -14,7 +14,7 @@ import { useStartServices, sendDeleteOneEnrollmentAPIKey } from '../../../../hoo
 import { HierarchicalActionsMenu } from '../../components';
 import type { MenuItem } from '../../components';
 
-import { ConfirmRevokeModal, ConfirmDeleteModal } from './confirm_bulk_action_modal';
+import { ConfirmRevokeModal, ConfirmDeleteModal } from './confirm_action_modal';
 
 export type BulkAction = 'delete' | 'revoke';
 
@@ -37,27 +37,34 @@ export const TokenActions: React.FunctionComponent<{
 }> = ({ apiKey, refresh }) => {
   const { notifications } = useStartServices();
   const [pendingAction, setPendingAction] = useState<BulkAction | null>(null);
+  const [isActionInProgress, setIsActionInProgress] = useState(false);
 
   const onCancelAction = () => setPendingAction(null);
 
   const onConfirmRevoke = async () => {
+    if (isActionInProgress) return;
+    setIsActionInProgress(true);
     try {
       const res = await sendDeleteOneEnrollmentAPIKey(apiKey.id);
       if (res.error) throw res.error;
     } catch (err) {
       notifications.toasts.addError(err as Error, { title: 'Error' });
     }
+    setIsActionInProgress(false);
     setPendingAction(null);
     refresh();
   };
 
   const onConfirmDelete = async () => {
+    if (isActionInProgress) return;
+    setIsActionInProgress(true);
     try {
       const res = await sendDeleteOneEnrollmentAPIKey(apiKey.id, { forceDelete: true });
       if (res.error) throw res.error;
     } catch (err) {
       notifications.toasts.addError(err as Error, { title: 'Error' });
     }
+    setIsActionInProgress(false);
     setPendingAction(null);
     refresh();
   };
@@ -65,10 +72,20 @@ export const TokenActions: React.FunctionComponent<{
   return (
     <>
       {pendingAction === 'revoke' && (
-        <ConfirmRevokeModal count={1} onCancel={onCancelAction} onConfirm={onConfirmRevoke} />
+        <ConfirmRevokeModal
+          count={1}
+          onCancel={onCancelAction}
+          onConfirm={onConfirmRevoke}
+          isLoading={isActionInProgress}
+        />
       )}
       {pendingAction === 'delete' && (
-        <ConfirmDeleteModal count={1} onCancel={onCancelAction} onConfirm={onConfirmDelete} />
+        <ConfirmDeleteModal
+          count={1}
+          onCancel={onCancelAction}
+          onConfirm={onConfirmDelete}
+          isLoading={isActionInProgress}
+        />
       )}
       <HierarchicalActionsMenu
         items={getTokenActionItems({

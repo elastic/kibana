@@ -105,7 +105,7 @@ export const AgentPolicyOutputsSummary: React.FC<{
               })}
             </EuiPopoverTitle>
             <div style={{ width: '280px' }}>
-              <EuiListGroup listItems={listItems} color="primary" size="s" gutterSize="none" />
+              <EuiListGroup listItems={listItems} color="primary" />
             </div>
           </EuiPopover>
         </EuiFlexItem>

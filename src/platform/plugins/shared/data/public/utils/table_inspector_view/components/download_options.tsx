@@ -169,6 +169,9 @@ class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownlo
         closePopover={this.closePopover}
         panelPaddingSize="none"
         repositionOnScroll
+        aria-label={i18n.translate('data.inspector.table.downloadOptionsPopover.ariaLabel', {
+          defaultMessage: 'Download options',
+        })}
       >
         <EuiContextMenuPanel className="eui-textNoWrap" items={items} />
       </EuiPopover>

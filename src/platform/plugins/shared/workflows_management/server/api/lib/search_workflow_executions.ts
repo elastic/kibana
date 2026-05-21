@@ -91,6 +91,7 @@ function transformToWorkflowExecutionListModel(
           workflowId: source.workflowId,
           triggeredBy: source.triggeredBy,
           executedBy: source.executedBy ?? source.createdBy,
+          concurrencyGroupKey: source.concurrencyGroupKey,
         });
       }
       return acc;
