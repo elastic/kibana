@@ -6,6 +6,7 @@
  */
 
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import type { ComposeFormValues } from './compose_form_types';
 import {
   transformQueryIn,
@@ -332,6 +333,63 @@ describe('composeFormToCreateRequest', () => {
     expect(result.state_transition).toEqual(
       expect.objectContaining({ pending_count: 3, pending_timeframe: '10m' })
     );
+  });
+
+  it('trims runbook and dashboard artifacts', () => {
+    const values: ComposeFormValues = {
+      ...baseFormValues,
+      artifacts: [
+        { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: '  Runbook steps  ' },
+        { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: '  dashboard-123  ' },
+      ],
+    };
+
+    const result = composeFormToCreateRequest(values);
+
+    expect(result.artifacts).toEqual([
+      { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: 'Runbook steps' },
+      { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: 'dashboard-123' },
+    ]);
+  });
+
+  it('removes empty runbook and dashboard artifacts while preserving other artifacts', () => {
+    const values: ComposeFormValues = {
+      ...baseFormValues,
+      artifacts: [
+        { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: '   ' },
+        { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: '' },
+        { id: 'other-id', type: 'other', value: 'kept' },
+      ],
+    };
+
+    const result = composeFormToCreateRequest(values);
+
+    expect(result.artifacts).toEqual([{ id: 'other-id', type: 'other', value: 'kept' }]);
+  });
+
+  it('generates missing IDs for runbook and dashboard artifacts', () => {
+    const values: ComposeFormValues = {
+      ...baseFormValues,
+      artifacts: [
+        { id: '', type: RUNBOOK_ARTIFACT_TYPE, value: 'Runbook steps' },
+        { id: '', type: DASHBOARD_ARTIFACT_TYPE, value: 'dashboard-123' },
+      ],
+    };
+
+    const result = composeFormToCreateRequest(values);
+
+    expect(result.artifacts).toEqual([
+      expect.objectContaining({
+        id: expect.stringMatching(/^runbook-/),
+        type: RUNBOOK_ARTIFACT_TYPE,
+        value: 'Runbook steps',
+      }),
+      expect.objectContaining({
+        id: expect.stringMatching(/^dashboard-/),
+        type: DASHBOARD_ARTIFACT_TYPE,
+        value: 'dashboard-123',
+      }),
+    ]);
   });
 });
 

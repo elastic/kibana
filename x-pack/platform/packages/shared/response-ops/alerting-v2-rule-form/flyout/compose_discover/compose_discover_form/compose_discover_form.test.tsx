@@ -62,15 +62,19 @@ describe('step validation', () => {
     });
   });
 
-  describe('steps without validate', () => {
+  describe('step registry', () => {
     it('recoveryCondition has no validate function', () => {
       const recoveryStep = getSteps(true).find((s) => s.id === 'recoveryCondition')!;
       expect(recoveryStep.validate).toBeUndefined();
     });
 
-    it('notifications has no validate function', () => {
-      const notificationsStep = getSteps(false).find((s) => s.id === 'notifications')!;
-      expect(notificationsStep.validate).toBeUndefined();
+    it('does not include the placeholder notifications step', () => {
+      expect(getSteps(false).map((step) => step.id)).toEqual(['alertCondition', 'details']);
+      expect(getSteps(true).map((step) => step.id)).toEqual([
+        'alertCondition',
+        'recoveryCondition',
+        'details',
+      ]);
     });
   });
 });

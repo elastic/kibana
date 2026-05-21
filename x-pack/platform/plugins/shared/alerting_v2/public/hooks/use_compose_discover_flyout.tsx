@@ -11,6 +11,7 @@ import { PluginStart } from '@kbn/core-di';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ComposeDiscoverFlyout } from '@kbn/alerting-v2-rule-form';
 import type { ComposeDiscoverMode } from '@kbn/alerting-v2-rule-form';
 import type { RuleApiResponse } from '../services/rules_api';
@@ -30,6 +31,7 @@ export const useComposeDiscoverFlyout = ({
   const data = useService(PluginStart('data')) as DataPublicPluginStart;
   const dataViews = useService(PluginStart('dataViews')) as DataViewsPublicPluginStart;
   const lens = useService(PluginStart('lens')) as LensPublicStart;
+  const uiActions = useService(PluginStart('uiActions')) as UiActionsStart;
 
   const [flyoutOpen, setFlyoutOpen] = useState(false);
   const [flyoutMode, setFlyoutMode] = useState<ComposeDiscoverMode>('create');
@@ -38,8 +40,8 @@ export const useComposeDiscoverFlyout = ({
   const createRuleMutation = useCreateRule();
   const updateRuleMutation = useUpdateRule();
   const ruleFormServices = useMemo(
-    () => ({ http, data, dataViews, notifications, application, lens }),
-    [http, data, dataViews, notifications, application, lens]
+    () => ({ http, data, dataViews, notifications, application, lens, uiActions }),
+    [http, data, dataViews, notifications, application, lens, uiActions]
   );
 
   const closeFlyout = useCallback(() => {

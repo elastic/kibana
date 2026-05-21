@@ -13,16 +13,14 @@ import {
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiSplitPanel,
-  EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { useController, useFormContext } from 'react-hook-form';
 import { RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import { RunbookField } from '../fields/runbook_field';
 import type { FormValues } from '../types';
-import { FieldGroup } from './field_group';
 
 export const AttachmentRunbookFieldGroup: React.FC = () => {
   const { setValue, control } = useFormContext<FormValues>();
@@ -70,35 +68,26 @@ export const AttachmentRunbookFieldGroup: React.FC = () => {
 
   return (
     <>
-      <FieldGroup
-        title={i18n.translate('xpack.alertingV2.ruleForm.attachmentsGroupTitle', {
-          defaultMessage: 'Attachments',
+      <EuiFormRow
+        label={i18n.translate('xpack.alertingV2.ruleForm.runbookGroupTitle', {
+          defaultMessage: 'Runbook',
         })}
-        defaultOpen={false}
+        fullWidth
       >
-        {!hasRunbook ? (
-          <EuiButton
-            iconType="plusInCircle"
-            onClick={openRunbookModal}
-            size="s"
-            data-test-subj="addRunbookButton"
-            color="text"
-          >
-            {i18n.translate('xpack.alertingV2.ruleForm.addRunbookButton', {
-              defaultMessage: 'Add Runbook',
-            })}
-          </EuiButton>
-        ) : (
-          <>
-            <EuiTitle size="xxs">
-              <h3>
-                {i18n.translate('xpack.alertingV2.ruleForm.runbookTitle', {
-                  defaultMessage: 'Runbook',
-                })}
-              </h3>
-            </EuiTitle>
-
-            <EuiSpacer size="s" />
+        <div>
+          {!hasRunbook ? (
+            <EuiButton
+              iconType="plusInCircle"
+              onClick={openRunbookModal}
+              size="s"
+              data-test-subj="addRunbookButton"
+              color="text"
+            >
+              {i18n.translate('xpack.alertingV2.ruleForm.addRunbookButton', {
+                defaultMessage: 'Add Runbook',
+              })}
+            </EuiButton>
+          ) : (
             <EuiSplitPanel.Outer hasBorder={true} hasShadow={false}>
               <EuiSplitPanel.Inner paddingSize="s">
                 <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
@@ -131,9 +120,9 @@ export const AttachmentRunbookFieldGroup: React.FC = () => {
                 </EuiFlexGroup>
               </EuiSplitPanel.Inner>
             </EuiSplitPanel.Outer>
-          </>
-        )}
-      </FieldGroup>
+          )}
+        </div>
+      </EuiFormRow>
       <RunbookField isOpen={isRunbookModalOpen} onClose={closeRunbookModal} />
       {isDeleteConfirmOpen && (
         <EuiConfirmModal

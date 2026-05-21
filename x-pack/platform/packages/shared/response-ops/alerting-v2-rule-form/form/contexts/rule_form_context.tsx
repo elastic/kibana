@@ -11,6 +11,7 @@ import type { ApplicationStart, HttpStart, NotificationsStart } from '@kbn/core/
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 export interface RuleFormServices {
   http: HttpStart;
@@ -19,6 +20,7 @@ export interface RuleFormServices {
   notifications: NotificationsStart;
   application: ApplicationStart;
   lens: LensPublicStart;
+  uiActions: UiActionsStart;
 }
 
 export type RuleFormLayout = 'page' | 'flyout';
