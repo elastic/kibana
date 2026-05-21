@@ -7,17 +7,43 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
+import type { CodeEditorProps } from '@kbn/code-editor';
 import JsonCodeEditor from './json_code_editor';
+import React from 'react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 
-it('returns the `JsonCodeEditor` component', () => {
-  const value = {
-    _index: 'test',
-    _type: 'doc',
-    _id: 'foo',
-    _score: 1,
-    _source: { test: 123 },
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
+
+  const CodeEditorMock = (props: CodeEditorProps) => (
+    <pre data-test-subj="mockCodeEditor">{props.value}</pre>
+  );
+
+  return {
+    ...original,
+    CodeEditor: CodeEditorMock,
   };
-  expect(shallow(<JsonCodeEditor json={value} />)).toMatchSnapshot();
+});
+
+describe('JsonCodeEditor', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('returns the `JsonCodeEditor` component', () => {
+    const value = {
+      _index: 'test',
+      _type: 'doc',
+      _id: 'foo',
+      _score: 1,
+      _source: { test: 123 },
+    };
+
+    renderWithI18n(<JsonCodeEditor json={value} />);
+
+    const editor = screen.getByTestId('mockCodeEditor');
+    expect(editor).toBeVisible();
+    expect(editor.textContent).toBe(JSON.stringify(value, null, 2));
+  });
 });
