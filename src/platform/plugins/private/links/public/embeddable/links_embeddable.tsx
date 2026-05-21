@@ -89,8 +89,7 @@ export const getLinksEmbeddableFactory = () => {
       const stateApi = initializeStateApi<LinksEmbeddableState>({
         uuid,
         parentApi,
-        serializeState: () =>
-          isByReference ? serializeByReference(refId) : serializeByValue(),
+        serializeState: () => (isByReference ? serializeByReference(refId) : serializeByValue()),
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           layout$.pipe(

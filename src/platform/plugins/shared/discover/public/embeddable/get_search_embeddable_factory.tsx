@@ -190,7 +190,7 @@ export const getSearchEmbeddableFactory = ({
           drilldownsManager.reinitializeState(nextState);
           timeRangeManager.reinitializeState(nextState);
           titleManager.reinitializeState(nextState);
-          
+
           const nextRuntimeState = await deserializeState({
             serializedState: nextState,
             discoverServices,

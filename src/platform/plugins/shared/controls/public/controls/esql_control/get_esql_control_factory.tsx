@@ -65,10 +65,11 @@ export const getESQLControlFactory = <
       const stateApi = initializeStateApi<typeof initialState>({
         uuid,
         parentApi,
-        serializeState: () => ({
-          ...selections.getLatestState(),
-          ...labelManager.getLatestState(),
-        } as typeof initialState),
+        serializeState: () =>
+          ({
+            ...selections.getLatestState(),
+            ...labelManager.getLatestState(),
+          } as typeof initialState),
         anyStateChange$: merge(labelManager.anyStateChange$, selections.anyStateChange$),
         getComparators: () => {
           return {

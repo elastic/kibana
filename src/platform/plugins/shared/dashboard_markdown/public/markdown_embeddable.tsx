@@ -102,8 +102,7 @@ export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
     const stateApi = initializeStateApi<MarkdownEmbeddableState>({
       uuid,
       parentApi,
-      serializeState: () =>
-        isByReference ? serializeByReference(libraryId) : serializeByValue(),
+      serializeState: () => (isByReference ? serializeByReference(libraryId) : serializeByValue()),
       anyStateChange$: merge(
         titleManager.anyStateChange$,
         content$.pipe(

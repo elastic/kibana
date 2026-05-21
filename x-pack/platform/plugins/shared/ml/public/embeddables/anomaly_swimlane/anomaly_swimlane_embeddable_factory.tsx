@@ -129,11 +129,12 @@ export const getAnomalySwimLaneEmbeddableFactory = (
       const stateApi = initializeStateApi<AnomalySwimLaneEmbeddableState>({
         uuid,
         parentApi,
-        serializeState: () => ({
-          ...titleManager.getLatestState(),
-          ...timeRangeManager.getLatestState(),
-          ...swimlaneManager.getLatestState(),
-        } as AnomalySwimLaneEmbeddableState),
+        serializeState: () =>
+          ({
+            ...titleManager.getLatestState(),
+            ...timeRangeManager.getLatestState(),
+            ...swimlaneManager.getLatestState(),
+          } as AnomalySwimLaneEmbeddableState),
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           timeRangeManager.anyStateChange$,
