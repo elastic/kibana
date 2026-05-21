@@ -229,6 +229,8 @@ async function runConfigs(
   await fs.mkdir(slowTestsDir, { recursive: true });
   const logBufferKind = getLogBufferKind();
 
+  log.info(`Using ${logBufferKind} log buffer for Jest output`);
+
   await new Promise<void>((resolveAll) => {
     const wallStart = Date.now();
 
