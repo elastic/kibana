@@ -78,6 +78,62 @@ export const getCommonFieldDescriptions = (
   }),
 ];
 
+/**
+ * Returns the three `newestValue` field registrations for one embedding slot:
+ * the `dense_vector` field itself, the source-version tag (`<field>_source`),
+ * and the embedded-at timestamp.
+ *
+ * @param prefix - The entity-type prefix used throughout `getEntityFieldsDescriptions`
+ *   (e.g. `user.entity` or `entity`). Becomes the leading part of the ES source path.
+ * @param relativeField - Path relative to both `${prefix}.` (in source) and `entity.`
+ *   (in destination). Examples:
+ *   - Primary slot: `'resolution.embedding'`
+ *   - Secondary slot: `'resolution.embeddings.e5_384'`
+ * @param dims - Number of dimensions for the `dense_vector` mapping. Must match the
+ *   inference endpoint's output dims — **immutable after index creation**.
+ * @param embeddedAtRelativeField - Optional override for the timestamp sibling's
+ *   relative path. Defaults to `${relativeField}_at`. The primary slot uses
+ *   `'resolution.embedded_at'` (legacy naming) instead of the default
+ *   `'resolution.embedding_at'`, so callers must pass this override explicitly.
+ *
+ * @example Primary slot (keeps existing live-mapping paths verbatim):
+ * ```ts
+ * ...embeddingSlotFields(prefix, 'resolution.embedding', 1024, 'resolution.embedded_at')
+ * ```
+ *
+ * @example Secondary slot (new model / recipe):
+ * ```ts
+ * ...embeddingSlotFields(prefix, 'resolution.embeddings.e5_384', 384)
+ * ```
+ */
+export function embeddingSlotFields(
+  prefix: string,
+  relativeField: string,
+  dims: number,
+  embeddedAtRelativeField = `${relativeField}_at`
+): EntityField[] {
+  return [
+    newestValue({
+      source: `${prefix}.${relativeField}`,
+      destination: `entity.${relativeField}`,
+      mapping: { type: 'dense_vector', dims, index: true, similarity: 'cosine' },
+      allowAPIUpdate: true,
+    }),
+    newestValue({
+      source: `${prefix}.${relativeField}_source`,
+      destination: `entity.${relativeField}_source`,
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    newestValue({
+      source: `${prefix}.${embeddedAtRelativeField}`,
+      destination: `entity.${embeddedAtRelativeField}`,
+      mapping: { type: 'date' },
+      allowAPIUpdate: true,
+    }),
+  ];
+}
+
 export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
   const prefix = rootField ? `${rootField}.entity` : 'entity';
 
@@ -202,6 +258,129 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
+
+    // RESOLUTION PROVENANCE ------------------------------------------------
+    // Phase 3 of er-v2-embedding-resolution-design.md §8. Triplet that
+    // attributes each `resolved_to` link back to the maintainer that wrote it
+    // so the UI legend (design §10) can render "Linked via embeddings, 91%"
+    // instead of an unattributed chip.
+    //
+    // - resolved_by: closed string set (`rule | embedding | csv | manual` for
+    //   v1; Phase 4 reserves the compound values `embedding+rerank` and
+    //   `embedding+llm`). The field stays `keyword` either way.
+    // - score: similarity / confidence in [0, 1]. Convention: 1.0 for
+    //   `rule | manual` (deterministic), kNN cosine for `embedding`.
+    // - model_id: inference endpoint id that produced the score (e.g.
+    //   `.jina-embeddings-v5-text-small`). Empty for `rule | manual`.
+    newestValue({
+      source: `${prefix}.relationships.resolution.resolved_by`,
+      destination: 'entity.relationships.resolution.resolved_by',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    newestValue({
+      source: `${prefix}.relationships.resolution.score`,
+      destination: 'entity.relationships.resolution.score',
+      mapping: { type: 'float' },
+      allowAPIUpdate: true,
+    }),
+    newestValue({
+      source: `${prefix}.relationships.resolution.model_id`,
+      destination: 'entity.relationships.resolution.model_id',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+
+    // PARALLEL RESOLUTION (er-v2-parallel-resolution-rfc.md) -----------------
+    // Per-source opinion slots so the rule and embedding maintainers can each
+    // form a verdict for the same alias instead of racing on the single
+    // top-level `resolved_to`. Inert until the
+    // `entityAnalyticsParallelResolution` feature flag flips on — sparse
+    // keyword/date fields cost nothing when unset, so they can ship to every
+    // index regardless of flag state.
+    //
+    // Merge policy is implemented in
+    // server/domain/resolution/parallel_resolution.ts; it computes
+    // `effective_to` and `divergent` from the by_* slots on every write.
+    // Legacy `resolved_to` / `resolved_by` / `score` / `model_id` are kept in
+    // sync with `effective_to` so existing queries keep working through the
+    // deprecation window.
+    newestValue({
+      source: `${prefix}.relationships.resolution.by_rule.resolved_to`,
+      destination: 'entity.relationships.resolution.by_rule.resolved_to',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    newestValue({
+      source: `${prefix}.relationships.resolution.by_rule.resolved_at`,
+      destination: 'entity.relationships.resolution.by_rule.resolved_at',
+      mapping: { type: 'date' },
+      allowAPIUpdate: true,
+    }),
+    newestValue({
+      source: `${prefix}.relationships.resolution.by_embedding.resolved_to`,
+      destination: 'entity.relationships.resolution.by_embedding.resolved_to',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    newestValue({
+      source: `${prefix}.relationships.resolution.by_embedding.score`,
+      destination: 'entity.relationships.resolution.by_embedding.score',
+      mapping: { type: 'float' },
+      allowAPIUpdate: true,
+    }),
+    newestValue({
+      source: `${prefix}.relationships.resolution.by_embedding.model_id`,
+      destination: 'entity.relationships.resolution.by_embedding.model_id',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    newestValue({
+      source: `${prefix}.relationships.resolution.by_embedding.resolved_at`,
+      destination: 'entity.relationships.resolution.by_embedding.resolved_at',
+      mapping: { type: 'date' },
+      allowAPIUpdate: true,
+    }),
+    newestValue({
+      source: `${prefix}.relationships.resolution.by_manual.resolved_to`,
+      destination: 'entity.relationships.resolution.by_manual.resolved_to',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    newestValue({
+      source: `${prefix}.relationships.resolution.by_manual.resolved_at`,
+      destination: 'entity.relationships.resolution.by_manual.resolved_at',
+      mapping: { type: 'date' },
+      allowAPIUpdate: true,
+    }),
+    newestValue({
+      source: `${prefix}.relationships.resolution.effective_to`,
+      destination: 'entity.relationships.resolution.effective_to',
+      mapping: { type: 'keyword' },
+      allowAPIUpdate: true,
+    }),
+    newestValue({
+      source: `${prefix}.relationships.resolution.divergent`,
+      destination: 'entity.relationships.resolution.divergent',
+      mapping: { type: 'boolean' },
+      allowAPIUpdate: true,
+    }),
+
+    // RESOLUTION EMBEDDINGS ------------------------------------------------
+    // Phase 1 of er-v2-embedding-resolution-design.md. Vector + provenance for
+    // the semantic identity-matching maintainer. Written only by the
+    // embedding-resolution maintainer; readable by anyone via _source / kNN.
+    //
+    // LOCK-IN: 1024 dims matches the EIS .jina-embeddings-v5-text-small
+    // endpoint (the default for xpack.securitySolution.entityResolution.
+    // embedding.inferenceId). Changing model dims requires a full reindex of
+    // entities-latest-<ns> — dense_vector.dims is immutable after mapping.
+    //
+    // Additional slots (secondary models / recipes) can be registered by
+    // calling embeddingSlotFields(prefix, 'resolution.embeddings.<slot>', dims).
+    // Each slot gets its own dense_vector field; no reindex of existing slots.
+    ...embeddingSlotFields(prefix, 'resolution.embedding', 1024, 'resolution.embedded_at'),
+
     newestValue({
       source: `${prefix}.relationships.resolution.risk.calculated_level`,
       destination: 'entity.relationships.resolution.risk.calculated_level',

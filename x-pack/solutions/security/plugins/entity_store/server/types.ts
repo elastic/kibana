@@ -85,6 +85,18 @@ export interface EntityStoreStartContract {
 
 export interface EntityStoreSetupContract {
   registerEntityMaintainer: RegisterEntityMaintainer;
+  /**
+   * Toggle parallel rule + embedding entity resolution for the built-in
+   * `automated-resolution` (rule) maintainer. Wired from the
+   * `entityAnalyticsParallelResolution` experimental flag in the
+   * security_solution plugin and read by the rule maintainer's run hook on
+   * each invocation. Calling this AFTER setup is a no-op (registration is
+   * already locked in); callers should invoke during their own setup phase.
+   *
+   * Independent of the embedding maintainer's parallel toggle — that one
+   * is wired through `createEmbeddingResolutionMaintainerConfig` directly.
+   */
+  setParallelResolutionEnabled: (enabled: boolean) => void;
 }
 
 export type EntityStoreCoreSetup = CoreSetup<EntityStoreStartPlugins, EntityStoreStartContract>;

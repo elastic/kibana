@@ -87,8 +87,26 @@ export const searchDocById = async (esClient: EsClient, id: string) => {
 interface SeedUserEntityOptions {
   entityId: string;
   namespace: string;
-  email: string | string[];
+  /**
+   * Optional. When omitted the seeded entity will have no `user.email` field,
+   * which makes it invisible to the automated-resolution matcher (used to
+   * exercise the "no email" gap from the er-v2-9.4 PoC fixture set).
+   */
+  email?: string | string[];
   timestamp?: string;
+  /**
+   * Optional override for `user.name`. Defaults to `entityId` (preserves
+   * pre-existing test behavior).
+   */
+  userName?: string;
+  /** Optional realistic field — does NOT affect rules-based matching. */
+  fullName?: string;
+  /** Optional realistic field — does NOT affect rules-based matching. */
+  userId?: string;
+  /** Optional realistic field — does NOT affect rules-based matching. */
+  groupName?: string;
+  /** Optional realistic field — does NOT affect rules-based matching. */
+  hostName?: string;
 }
 
 /**
@@ -99,34 +117,68 @@ interface SeedUserEntityOptions {
  * Uses esClient.index() instead of the CRUD API because the CRUD API nests
  * `entity` under `user.entity`, breaking automated resolution queries that
  * expect `entity.id` at the document root.
+ *
+ * `email` is optional so callers can construct fixtures that exercise the
+ * "no email" branch of the auto-resolver (entity is invisible to the matcher).
+ * The richer optional fields (`fullName`, `userId`, `groupName`, `hostName`)
+ * exist for realism in the er-v2-9.4 PoC fixture set; the matcher itself
+ * still only looks at `user.email`.
  */
 export const seedUserEntity = async (
   esClient: EsClient,
-  { entityId, namespace, email, timestamp }: SeedUserEntityOptions
+  {
+    entityId,
+    namespace,
+    email,
+    timestamp,
+    userName,
+    fullName,
+    userId,
+    groupName,
+    hostName,
+  }: SeedUserEntityOptions
 ) => {
   const ts = timestamp ?? new Date().toISOString();
+  const userBlock: Record<string, unknown> = {
+    name: userName ?? entityId,
+  };
+  if (email !== undefined) {
+    userBlock.email = email;
+  }
+  if (fullName !== undefined) {
+    userBlock.full_name = fullName;
+  }
+  if (userId !== undefined) {
+    userBlock.id = userId;
+  }
+
+  const body: Record<string, unknown> = {
+    entity: {
+      id: entityId,
+      name: entityId,
+      EngineMetadata: { Type: 'user' },
+      namespace,
+      lifecycle: {
+        first_seen: ts,
+        last_seen: ts,
+      },
+    },
+    user: userBlock,
+    '@timestamp': ts,
+  };
+  if (groupName !== undefined) {
+    body.group = { name: groupName };
+  }
+  if (hostName !== undefined) {
+    body.host = { name: hostName };
+  }
+
   await esClient.index({
     index: LATEST_ALIAS,
     id: hashEuid(entityId),
     refresh: 'wait_for',
     pipeline: '_none',
-    body: {
-      entity: {
-        id: entityId,
-        name: entityId,
-        EngineMetadata: { Type: 'user' },
-        namespace,
-        lifecycle: {
-          first_seen: ts,
-          last_seen: ts,
-        },
-      },
-      user: {
-        email,
-        name: entityId,
-      },
-      '@timestamp': ts,
-    },
+    body,
   });
 };
 

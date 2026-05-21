@@ -21,6 +21,12 @@ describe('buildUpdatesComponentTemplate', () => {
         developer: {
           pipelineDebugMode: false,
         },
+        embeddingResolution: {
+          inferenceId: '.jina-embeddings-v5-text-small',
+          threshold: 0.85,
+          k: 10,
+          numCandidates: 100,
+        },
       },
     });
 

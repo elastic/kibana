@@ -19,6 +19,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { getLatestEntitiesIndexName } from '../../../common';
 import type { ResolutionClient } from '../../domain/resolution';
+import { perSourceResolvedToField } from '../../domain/resolution/parallel_resolution';
 import { getFieldValue } from '../../../common/domain/euid/commons';
 import { ENTITY_ID_FIELD } from '../../../common/domain/definitions/common_fields';
 import type { AutomatedResolutionState, MatchBucket, EntityHit } from './types';
@@ -29,6 +30,7 @@ const NAMESPACE_PRIORITY = ['active_directory', 'okta', 'entra_id'];
 const PAGE_SIZE = 10_000;
 const ENGINE_METADATA_TYPE_FIELD = 'entity.EngineMetadata.Type';
 const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
+const BY_RULE_RESOLVED_TO_FIELD = perSourceResolvedToField('rule');
 const ENTITY_NAMESPACE_FIELD = 'entity.namespace';
 const TOP_HITS_SIZE = 100;
 
@@ -39,14 +41,38 @@ export interface RunDeps {
   logger: Logger;
   resolutionClient: ResolutionClient;
   abortController: AbortController;
+  /**
+   * When true, the "already-resolved" filter swaps from
+   * `entity.relationships.resolution.resolved_to` (legacy single slot) to
+   * `entity.relationships.resolution.by_rule.resolved_to` so this
+   * maintainer continues to process entities that the embedding maintainer
+   * has already linked. Links are stamped via `linkEntities({ source:
+   * 'rule' })` so the merge layer can compute `effective_to` / `divergent`.
+   * Wired from the `entityAnalyticsParallelResolution` flag.
+   */
+  parallelResolutionEnabled?: boolean;
 }
 
 export async function runAutomatedResolution(deps: RunDeps): Promise<AutomatedResolutionState> {
-  const { state, namespace, esClient, logger, resolutionClient, abortController } = deps;
+  const {
+    state,
+    namespace,
+    esClient,
+    logger,
+    resolutionClient,
+    abortController,
+    parallelResolutionEnabled = false,
+  } = deps;
   const index = getLatestEntitiesIndexName(namespace);
+  const resolvedToField = parallelResolutionEnabled ? BY_RULE_RESOLVED_TO_FIELD : RESOLVED_TO_FIELD;
 
   // Step 1: Collect new email values
-  const { values, maxTimestamp } = await collectNewEmailValues(esClient, index, state);
+  const { values, maxTimestamp } = await collectNewEmailValues(
+    esClient,
+    index,
+    state,
+    resolvedToField
+  );
 
   if (values.length === 0) {
     logger.debug('No new email values found, skipping resolution');
@@ -64,7 +90,7 @@ export async function runAutomatedResolution(deps: RunDeps): Promise<AutomatedRe
   }
 
   // Step 2: Find matching groups (batched)
-  const matchBuckets = await findMatchingGroups(esClient, index, values, logger);
+  const matchBuckets = await findMatchingGroups(esClient, index, values, logger, resolvedToField);
   logger.debug(`Step 2: Found ${matchBuckets.length} match groups`);
 
   if (abortController.signal.aborted) {
@@ -76,7 +102,8 @@ export async function runAutomatedResolution(deps: RunDeps): Promise<AutomatedRe
   const { resolutionsCreated, skippedAmbiguousBuckets, failedBuckets } = await resolveMatchBuckets(
     resolutionClient,
     matchBuckets,
-    logger
+    logger,
+    parallelResolutionEnabled
   );
   logger.info(
     `Completed: ${resolutionsCreated} resolutions created, ${skippedAmbiguousBuckets} ambiguous buckets skipped, ${failedBuckets} buckets failed`
@@ -97,7 +124,8 @@ export async function runAutomatedResolution(deps: RunDeps): Promise<AutomatedRe
 async function collectNewEmailValues(
   esClient: ElasticsearchClient,
   index: string,
-  state: AutomatedResolutionState
+  state: AutomatedResolutionState,
+  resolvedToField: string
 ): Promise<{ values: string[]; maxTimestamp: string }> {
   const allValues: string[] = [];
   let afterKey: AggregationsCompositeAggregateKey | undefined;
@@ -114,7 +142,7 @@ async function collectNewEmailValues(
         },
       },
     },
-    { bool: { must_not: { exists: { field: RESOLVED_TO_FIELD } } } },
+    { bool: { must_not: { exists: { field: resolvedToField } } } },
   ];
 
   if (state.lastProcessedTimestamp) {
@@ -169,7 +197,8 @@ async function findMatchingGroups(
   esClient: ElasticsearchClient,
   index: string,
   values: string[],
-  logger: Logger
+  logger: Logger,
+  resolvedToField: string
 ): Promise<MatchBucket[]> {
   const allBuckets: MatchBucket[] = [];
 
@@ -202,7 +231,7 @@ async function findMatchingGroups(
           terms: { field: MATCH_FIELD, min_doc_count: 2, size: PAGE_SIZE },
           aggs: {
             unresolved: {
-              filter: { bool: { must_not: { exists: { field: RESOLVED_TO_FIELD } } } },
+              filter: { bool: { must_not: { exists: { field: resolvedToField } } } },
               aggs: {
                 hits: {
                   top_hits: {
@@ -213,9 +242,9 @@ async function findMatchingGroups(
               },
             },
             existing_targets: {
-              filter: { exists: { field: RESOLVED_TO_FIELD } },
+              filter: { exists: { field: resolvedToField } },
               aggs: {
-                target_ids: { terms: { field: RESOLVED_TO_FIELD, size: PAGE_SIZE } },
+                target_ids: { terms: { field: resolvedToField, size: PAGE_SIZE } },
               },
             },
           },
@@ -276,11 +305,26 @@ async function findMatchingGroups(
 async function resolveMatchBuckets(
   resolutionClient: ResolutionClient,
   buckets: MatchBucket[],
-  logger: Logger
+  logger: Logger,
+  parallelResolutionEnabled: boolean
 ): Promise<{ resolutionsCreated: number; skippedAmbiguousBuckets: number; failedBuckets: number }> {
   let resolutionsCreated = 0;
   let skippedAmbiguousBuckets = 0;
   let failedBuckets = 0;
+
+  // In parallel mode, route writes through the source-aware
+  // `linkEntities({ source: 'rule' })` path so the merge layer computes
+  // `effective_to` / `divergent` from existing per-source verdicts.
+  const writeOptions = parallelResolutionEnabled
+    ? {
+        refresh: false as const,
+        provenance: { resolved_by: 'rule' as const },
+        source: 'rule' as const,
+      }
+    : {
+        refresh: false as const,
+        provenance: { resolved_by: 'rule' as const },
+      };
 
   for (const bucket of buckets) {
     try {
@@ -302,7 +346,7 @@ async function resolveMatchBuckets(
           .map((e) => e.entityId);
         if (aliasIds.length === 0) continue;
 
-        const result = await resolutionClient.linkEntities(targetId, aliasIds, { refresh: false });
+        const result = await resolutionClient.linkEntities(targetId, aliasIds, writeOptions);
         resolutionsCreated += result.linked.length;
       } else if (unresolvedEntities.length >= 2) {
         // New group: pick target via namespace priority, link the rest
@@ -311,9 +355,11 @@ async function resolveMatchBuckets(
           .filter((e) => e.entityId !== targetEntity.entityId)
           .map((e) => e.entityId);
 
-        const result = await resolutionClient.linkEntities(targetEntity.entityId, aliasIds, {
-          refresh: false,
-        });
+        const result = await resolutionClient.linkEntities(
+          targetEntity.entityId,
+          aliasIds,
+          writeOptions
+        );
         resolutionsCreated += result.linked.length;
       }
       // else: only 1 unresolved, no existing targets → no match, skip

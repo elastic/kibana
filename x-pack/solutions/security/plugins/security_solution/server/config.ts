@@ -198,6 +198,38 @@ export const configSchema = schema.object({
       developer: schema.object({
         pipelineDebugMode: schema.boolean({ defaultValue: false }),
       }),
+      /**
+       * Embedding-resolution maintainer settings
+       * ([.claude/er-v2-embedding-resolution-design.md]). Phase 2: embed-only.
+       *
+       * LOCK-IN: the default `inferenceId` must report `dimensions: 1024` —
+       * `entity.resolution.embedding` is mapped as `dense_vector dims=1024` in
+       * entity_store/common/domain/definitions/common_fields.ts and that
+       * mapping is immutable after index creation. Overriding to a model with
+       * different dims requires a matching `common_fields.ts` change AND a
+       * full reindex of entities-latest-<ns>.
+       */
+      embeddingResolution: schema.object({
+        inferenceId: schema.string({ defaultValue: '.jina-embeddings-v5-text-small' }),
+        /**
+         * Cosine-similarity threshold for embedding-driven linking. Anything
+         * below is recorded as `skippedBelowThreshold` and not linked. Default
+         * 0.85 per design §9. Operators can lower to investigate recall on
+         * their corpus, raise to tighten precision.
+         */
+        threshold: schema.number({ min: 0, max: 1, defaultValue: 0.85 }),
+        /**
+         * `k` for the per-entity kNN search. Caps the number of neighbours
+         * the apply-links step inspects. Default 10 per design §7.
+         */
+        k: schema.number({ min: 1, defaultValue: 10 }),
+        /**
+         * `num_candidates` for the per-entity kNN search. The HNSW search
+         * pool size — higher = more accurate but more expensive. Default
+         * 100 per design §7.
+         */
+        numCandidates: schema.number({ min: 1, defaultValue: 100 }),
+      }),
     }),
     monitoring: schema.object({
       privileges: schema.object({

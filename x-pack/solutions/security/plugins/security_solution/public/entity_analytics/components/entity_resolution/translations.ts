@@ -164,3 +164,98 @@ export const ENTITY_HAS_ALIASES_ERROR = i18n.translate(
       'This entity already belongs to another resolution group. Unlink it from its current group before adding it here.',
   }
 );
+
+export const RESOLVED_BY_COLUMN = i18n.translate(
+  'xpack.securitySolution.entityResolution.columns.resolvedBy',
+  { defaultMessage: 'Linked by' }
+);
+
+export const RESOLVED_BY_RULE_LABEL = i18n.translate(
+  'xpack.securitySolution.entityResolution.resolvedBy.ruleLabel',
+  { defaultMessage: 'Rule' }
+);
+
+export const RESOLVED_BY_CSV_LABEL = i18n.translate(
+  'xpack.securitySolution.entityResolution.resolvedBy.csvLabel',
+  { defaultMessage: 'CSV' }
+);
+
+export const RESOLVED_BY_MANUAL_LABEL = i18n.translate(
+  'xpack.securitySolution.entityResolution.resolvedBy.manualLabel',
+  { defaultMessage: 'Manual' }
+);
+
+export const resolvedByEmbeddingLabel = (percent: number): string =>
+  i18n.translate('xpack.securitySolution.entityResolution.resolvedBy.embeddingLabel', {
+    defaultMessage: 'Embedding {percent}%',
+    values: { percent },
+  });
+
+export const RESOLVED_BY_EMBEDDING_LABEL_NO_SCORE = i18n.translate(
+  'xpack.securitySolution.entityResolution.resolvedBy.embeddingLabelNoScore',
+  { defaultMessage: 'Embedding' }
+);
+
+export const resolvedByEmbeddingRerankLabel = (percent: number): string =>
+  i18n.translate('xpack.securitySolution.entityResolution.resolvedBy.embeddingRerankLabel', {
+    defaultMessage: 'Embedding+rerank {percent}%',
+    values: { percent },
+  });
+
+export const RESOLVED_BY_EMBEDDING_RERANK_LABEL_NO_SCORE = i18n.translate(
+  'xpack.securitySolution.entityResolution.resolvedBy.embeddingRerankLabelNoScore',
+  { defaultMessage: 'Embedding+rerank' }
+);
+
+export const resolvedByEmbeddingLlmLabel = (percent: number): string =>
+  i18n.translate('xpack.securitySolution.entityResolution.resolvedBy.embeddingLlmLabel', {
+    defaultMessage: 'Embedding+LLM {percent}%',
+    values: { percent },
+  });
+
+export const RESOLVED_BY_EMBEDDING_LLM_LABEL_NO_SCORE = i18n.translate(
+  'xpack.securitySolution.entityResolution.resolvedBy.embeddingLlmLabelNoScore',
+  { defaultMessage: 'Embedding+LLM' }
+);
+
+export const resolvedByTooltipWithModel = ({
+  model,
+  score,
+}: {
+  model: string;
+  score: string;
+}): string =>
+  i18n.translate('xpack.securitySolution.entityResolution.resolvedBy.tooltipWithModel', {
+    defaultMessage: 'Model: {model} · Score: {score}',
+    values: { model, score },
+  });
+
+export const resolvedByTooltipScoreOnly = (score: string): string =>
+  i18n.translate('xpack.securitySolution.entityResolution.resolvedBy.tooltipScoreOnly', {
+    defaultMessage: 'Score: {score}',
+    values: { score },
+  });
+
+export const RESOLUTION_DIVERGENT_LABEL = i18n.translate(
+  'xpack.securitySolution.entityResolution.resolvedBy.divergentLabel',
+  { defaultMessage: 'Diverges' }
+);
+
+export const resolutionDivergenceTooltip = ({
+  ruleTarget,
+  embeddingTarget,
+  embeddingPercent,
+}: {
+  ruleTarget?: string;
+  embeddingTarget?: string;
+  embeddingPercent?: string;
+}): string =>
+  i18n.translate('xpack.securitySolution.entityResolution.resolvedBy.divergenceTooltip', {
+    defaultMessage:
+      'Sources disagree. Rule: {ruleTarget}. Embedding: {embeddingTarget}{embeddingPercentSuffix}.',
+    values: {
+      ruleTarget: ruleTarget ?? '—',
+      embeddingTarget: embeddingTarget ?? '—',
+      embeddingPercentSuffix: embeddingPercent ? ` (${embeddingPercent}%)` : '',
+    },
+  });

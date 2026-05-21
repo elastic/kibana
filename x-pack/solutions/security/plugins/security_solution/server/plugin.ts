@@ -18,6 +18,7 @@ import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-types';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
+import { createEmbeddingResolutionMaintainerConfig } from '@kbn/entity-store/server';
 
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
@@ -363,6 +364,45 @@ export class Plugin implements ISecuritySolutionPlugin {
     if (!experimentalFeatures.entityStoreDisabled) {
       plugins.entityStore?.registerEntityMaintainer(accessesFrequentlyMaintainer);
       plugins.entityStore?.registerEntityMaintainer(communicatesWithMaintainer);
+
+      // Phase 2/3 of er-v2-embedding-resolution-design.md — embedding-resolution
+      // maintainer. Two independent flags:
+      //
+      // - `…EmbedOnly` (Phase 2): write vectors without linking. Lets ops
+      //   warm the index for offline analysis or kNN exploration.
+      // - `…Enabled` (Phase 3): also auto-link above-threshold neighbours.
+      //
+      // `…Enabled` implies the embed step (linking has nothing to operate on
+      // without a vector). When both are off, the maintainer is not even
+      // registered. Prerequisite either way: EIS must be connected at
+      // {KBN}/app/cloud_connect so the configured `_inference` endpoint
+      // exists; otherwise the maintainer no-ops with a warn.
+      const embeddingResolutionLinkingEnabled =
+        experimentalFeatures.entityAnalyticsEmbeddingResolutionEnabled;
+      const embeddingResolutionRegistered =
+        embeddingResolutionLinkingEnabled ||
+        experimentalFeatures.entityAnalyticsEmbeddingResolutionEmbedOnly;
+      // Parallel rule + embedding ER (RFC: er-v2-parallel-resolution-rfc.md).
+      // Off by default; when on, both maintainers route writes through the
+      // per-source `by_<source>.*` slots and the merge layer keeps the
+      // legacy mirrors in sync. The rule maintainer reads the toggle via
+      // the EntityStore setup contract; the embedding maintainer takes it
+      // as a constructor argument since its registration runs here.
+      const parallelResolutionEnabled = experimentalFeatures.entityAnalyticsParallelResolution;
+      plugins.entityStore?.setParallelResolutionEnabled(parallelResolutionEnabled);
+      if (embeddingResolutionRegistered) {
+        const embedConfig = config.entityAnalytics.entityStore.embeddingResolution;
+        plugins.entityStore?.registerEntityMaintainer(
+          createEmbeddingResolutionMaintainerConfig({
+            inferenceId: embedConfig.inferenceId,
+            linkingEnabled: embeddingResolutionLinkingEnabled,
+            threshold: embedConfig.threshold,
+            k: embedConfig.k,
+            numCandidates: embedConfig.numCandidates,
+            parallelResolutionEnabled,
+          })
+        );
+      }
 
       registerEntityStoreFieldRetentionEnrichTask({
         getStartServices: core.getStartServices,

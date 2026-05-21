@@ -12,17 +12,27 @@ import { defaultOptions } from '../constants';
 
 describe('getUnitedEntityDefinition', () => {
   const defaultIndexPatterns = ['test*'];
+  // Shared test config — must satisfy the full EntityStoreConfig schema,
+  // including the embedding-resolution settings that are required even
+  // though no test below exercises them.
+  const baseConfig = {
+    syncDelay: duration(60, 'seconds'),
+    frequency: duration(60, 'seconds'),
+    developer: { pipelineDebugMode: false as const },
+    embeddingResolution: {
+      inferenceId: '.jina-embeddings-v5-text-small',
+      threshold: 0.85,
+      k: 10,
+      numCandidates: 100,
+    },
+  };
   describe('host', () => {
     const description = createEngineDescription({
       entityType: 'host',
       namespace: 'test',
       requestParams: defaultOptions,
       defaultIndexPatterns,
-      config: {
-        syncDelay: duration(60, 'seconds'),
-        frequency: duration(60, 'seconds'),
-        developer: { pipelineDebugMode: false },
-      },
+      config: baseConfig,
     });
 
     it('mapping', () => {
@@ -44,11 +54,7 @@ describe('getUnitedEntityDefinition', () => {
       namespace: 'test',
       requestParams: defaultOptions,
       defaultIndexPatterns,
-      config: {
-        syncDelay: duration(60, 'seconds'),
-        frequency: duration(60, 'seconds'),
-        developer: { pipelineDebugMode: false },
-      },
+      config: baseConfig,
     });
 
     it('mapping', () => {
@@ -68,11 +74,7 @@ describe('getUnitedEntityDefinition', () => {
       namespace: 'test',
       requestParams: defaultOptions,
       defaultIndexPatterns,
-      config: {
-        syncDelay: duration(60, 'seconds'),
-        frequency: duration(60, 'seconds'),
-        developer: { pipelineDebugMode: false },
-      },
+      config: baseConfig,
     });
 
     it('mapping', () => {
@@ -93,11 +95,7 @@ describe('getUnitedEntityDefinition', () => {
       namespace: 'test',
       requestParams: defaultOptions,
       defaultIndexPatterns,
-      config: {
-        syncDelay: duration(60, 'seconds'),
-        frequency: duration(60, 'seconds'),
-        developer: { pipelineDebugMode: false },
-      },
+      config: baseConfig,
     });
 
     it('mapping', () => {
