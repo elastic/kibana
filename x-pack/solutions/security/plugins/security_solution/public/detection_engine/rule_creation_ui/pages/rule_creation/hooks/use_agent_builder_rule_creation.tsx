@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { MutableRefObject } from 'react';
 import { useEffect, useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
@@ -79,12 +78,6 @@ interface UseAgentBuilderRuleCreationParams {
    * (showing "Save changes", not "Save rule").
    */
   existingRuleId?: string;
-  /**
-   * Assign `current` to a no-arg function that focuses the desired step after the form is filled
-   * from agent chat (e.g. `() => goToStep(RuleStep.ruleActions)`). Uses a ref so the parent can
-   * wire this after `goToStep` is defined.
-   */
-  onAiCreatedRuleAppliedRef?: MutableRefObject<(() => void | Promise<void>) | undefined>;
 }
 
 interface UseAgentBuilderRuleCreationResult {
@@ -102,7 +95,6 @@ export const useAgentBuilderRuleCreation = ({
   actionsStepData,
   actionTypeRegistry,
   existingRuleId,
-  onAiCreatedRuleAppliedRef,
 }: UseAgentBuilderRuleCreationParams): UseAgentBuilderRuleCreationResult => {
   const { services } = useKibana();
   const { agentBuilder, aiRuleCreation, telemetry } = services;
@@ -177,7 +169,7 @@ export const useAgentBuilderRuleCreation = ({
   );
 
   const updateFormFromChat = useCallback(
-    (rule: RuleResponse) => {
+    (rule: RuleResponse, { silent = false }: { silent?: boolean } = {}) => {
       const stepsData = getStepsData({ rule: { ...ruleDefaultMetadataFields, ...rule } });
 
       const session = aiRuleCreation.getSession() ?? aiRuleCreation.startSession();
@@ -201,18 +193,18 @@ export const useAgentBuilderRuleCreation = ({
       scheduleStepForm.updateFieldValues(stepsData.scheduleRuleData);
       actionsStepForm.updateFieldValues(stepsData.ruleActionsData);
 
-      addSuccess({
-        title: i18n.translate(
-          'xpack.securitySolution.detectionEngine.ruleCreation.agentBuilder.formUpdatedTitle',
-          { defaultMessage: 'Rule form updated' }
-        ),
-        text: i18n.translate(
-          'xpack.securitySolution.detectionEngine.ruleCreation.agentBuilder.formUpdatedText',
-          { defaultMessage: 'The form has been updated with the AI-generated rule.' }
-        ),
-      });
-
-      onAiCreatedRuleAppliedRef?.current?.();
+      if (!silent) {
+        addSuccess({
+          title: i18n.translate(
+            'xpack.securitySolution.detectionEngine.ruleCreation.agentBuilder.formUpdatedTitle',
+            { defaultMessage: 'Rule form updated' }
+          ),
+          text: i18n.translate(
+            'xpack.securitySolution.detectionEngine.ruleCreation.agentBuilder.formUpdatedText',
+            { defaultMessage: 'The form has been updated with the AI-generated rule.' }
+          ),
+        });
+      }
     },
     [
       defineStepForm,
@@ -223,7 +215,6 @@ export const useAgentBuilderRuleCreation = ({
       aiRuleCreation,
       existingRuleId,
       telemetry,
-      onAiCreatedRuleAppliedRef,
     ]
   );
 
@@ -271,7 +262,7 @@ export const useAgentBuilderRuleCreation = ({
       }
       // Do NOT call addRuleAttachment here — the agent already owns the attachment;
       // the debounced form→agent sync (below) will push any subsequent user edits back.
-      updateFormFromChatRef.current(parsed);
+      updateFormFromChatRef.current(parsed, { silent: true });
     });
     return () => subscription.unsubscribe();
   }, [agentBuilder, aiRuleCreation]);
