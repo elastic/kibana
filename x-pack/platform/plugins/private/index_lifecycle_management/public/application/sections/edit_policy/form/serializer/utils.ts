@@ -13,12 +13,15 @@ const CONTROLLED_ROLLOVER_THRESHOLDS: ReadonlyArray<string> = [
   'max_primary_shard_size',
   'max_primary_shard_docs',
   'max_size',
+  'min_age',
+  'min_docs',
+  'min_primary_shard_size',
+  'min_primary_shard_docs',
+  'min_size',
 ] satisfies Array<keyof RolloverAction>;
 
 /**
- * When switching to recommended defaults, we intentionally reset the rollover
- * thresholds controlled by the UI, but preserve any additional keys that the
- * UI does not manage (e.g. min_* settings).
+ * Preserve rollover keys not controlled by the UI when resetting controlled thresholds.
  */
 export const excludeControlledRolloverThresholds = (rolloverAction: RolloverAction) =>
   Object.entries(rolloverAction).reduce<Record<string, unknown>>((acc, [key, value]) => {

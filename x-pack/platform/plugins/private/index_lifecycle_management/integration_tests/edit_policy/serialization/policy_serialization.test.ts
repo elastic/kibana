@@ -88,11 +88,8 @@ describe('<EditPolicy /> serialization', () => {
       });
 
       const actions = await setupTest();
+      await actions.hot.setIndexPriority('99');
 
-      // Set max docs to test whether we keep the unknown fields in that object after serializing
-      await actions.rollover.setMaxDocs('1000');
-      // Remove the delete phase to ensure that we also correctly remove data
-      await actions.togglePhase('delete');
       await actions.savePolicy();
       await waitFor(() => expect(httpSetup.post).toHaveBeenCalled());
 
@@ -108,7 +105,9 @@ describe('<EditPolicy /> serialization', () => {
                   rollover: {
                     unknown_setting: 123, // Made up setting that should stay preserved
                     max_size: '50gb',
-                    max_docs: 1000,
+                  },
+                  set_priority: {
+                    priority: 99,
                   },
                 },
               },
@@ -119,6 +118,17 @@ describe('<EditPolicy /> serialization', () => {
                   set_priority: {
                     priority: 22,
                     unknown_setting: true,
+                  },
+                },
+              },
+              delete: {
+                min_age: '15d',
+                actions: {
+                  wait_for_snapshot: {
+                    policy: 'test-snapshot-policy',
+                  },
+                  delete: {
+                    delete_searchable_snapshot: true,
                   },
                 },
               },
@@ -223,11 +233,15 @@ describe('<EditPolicy /> serialization', () => {
     });
 
     test('setting all values', async () => {
-      actions.rollover.toggleDefault();
       await actions.rollover.setMaxSize('123', 'mb');
       await actions.rollover.setMaxDocs('123');
       await actions.rollover.setMaxAge('123', 'h');
       await actions.rollover.setMaxPrimaryShardDocs('123');
+      await actions.rollover.setMinSize('12', 'mb');
+      await actions.rollover.setMinDocs('12');
+      await actions.rollover.setMinAge('12', 'h');
+      await actions.rollover.setMinPrimaryShardDocs('12');
+      await actions.rollover.setMinPrimaryShardSize('12', 'mb');
       actions.hot.toggleForceMerge();
       await actions.hot.setForcemergeSegmentsCount('123');
       actions.hot.setBestCompression(true);
@@ -251,9 +265,14 @@ describe('<EditPolicy /> serialization', () => {
                   rollover: {
                     max_age: '123h',
                     max_primary_shard_size: '50gb',
-                    max_primary_shard_docs: 123,
-                    max_docs: 123,
                     max_size: '123mb',
+                    max_docs: 123,
+                    max_primary_shard_docs: 123,
+                    min_size: '12mb',
+                    min_docs: 12,
+                    min_age: '12h',
+                    min_primary_shard_docs: 12,
+                    min_primary_shard_size: '12mb',
                   },
                   forcemerge: {
                     max_num_segments: 123,
@@ -291,7 +310,6 @@ describe('<EditPolicy /> serialization', () => {
 
     // Setting downsample disables setting readonly so we test this separately
     test('setting downsample', async () => {
-      actions.rollover.toggleDefault();
       actions.hot.downsample.toggle();
       await actions.hot.downsample.setDownsampleInterval('2', 'h');
 
@@ -307,7 +325,6 @@ describe('<EditPolicy /> serialization', () => {
     });
 
     test('disabling rollover', async () => {
-      actions.rollover.toggleDefault();
       actions.rollover.toggle();
 
       await actions.savePolicy();

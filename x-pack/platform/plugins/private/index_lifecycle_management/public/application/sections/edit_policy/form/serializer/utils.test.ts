@@ -20,7 +20,7 @@ describe('excludeControlledRolloverThresholds', () => {
     expect(result).toEqual({});
   });
 
-  it('preserves min_* fields', () => {
+  it('removes all UI-controlled min_* thresholds', () => {
     const result = excludeControlledRolloverThresholds({
       max_age: '30d',
       min_age: '1d',
@@ -30,13 +30,7 @@ describe('excludeControlledRolloverThresholds', () => {
       min_primary_shard_docs: 50,
     });
 
-    expect(result).toEqual({
-      min_age: '1d',
-      min_docs: 100,
-      min_size: '10gb',
-      min_primary_shard_size: '5gb',
-      min_primary_shard_docs: 50,
-    });
+    expect(result).toEqual({});
   });
 
   it('preserves unknown fields not managed by the UI', () => {

@@ -39,7 +39,6 @@ describe('<EditPolicy /> rollover', () => {
 
   test('hides forcemerge when rollover is disabled', async () => {
     const rolloverActions = createRolloverActions();
-    rolloverActions.rollover.toggleDefault();
     rolloverActions.rollover.toggle();
     expect(screen.queryByTestId('hot-forceMergeSwitch')).not.toBeInTheDocument();
   });
@@ -50,7 +49,6 @@ describe('<EditPolicy /> rollover', () => {
 
   test('hides shrink input when rollover is disabled', async () => {
     const rolloverActions = createRolloverActions();
-    rolloverActions.rollover.toggleDefault();
     rolloverActions.rollover.toggle();
     expect(screen.queryByTestId('hot-shrinkSwitch')).not.toBeInTheDocument();
   });
@@ -61,7 +59,6 @@ describe('<EditPolicy /> rollover', () => {
 
   test('hides readonly input when rollover is disabled', async () => {
     const rolloverActions = createRolloverActions();
-    rolloverActions.rollover.toggleDefault();
     rolloverActions.rollover.toggle();
     expect(screen.queryByTestId('hot-readonlySwitch')).not.toBeInTheDocument();
   });
@@ -71,7 +68,6 @@ describe('<EditPolicy /> rollover', () => {
     expect(screen.getByTestId('searchableSnapshotField-hot')).toBeInTheDocument();
 
     const rolloverActions = createRolloverActions();
-    rolloverActions.rollover.toggleDefault();
     rolloverActions.rollover.toggle();
     await togglePhase('cold');
 
@@ -95,7 +91,6 @@ describe('<EditPolicy /> rollover', () => {
     const rolloverActions = createRolloverActions();
     const togglePhase = createTogglePhaseAction();
 
-    rolloverActions.rollover.toggleDefault();
     rolloverActions.rollover.toggle();
 
     await togglePhase('warm');

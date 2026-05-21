@@ -14,3 +14,9 @@ export { MaxAgeField } from './max_age_field';
 export { MaxDocumentCountField } from './max_document_count_field';
 
 export { MaxIndexSizeField } from './max_index_size_field';
+
+export {
+  RolloverFields,
+  RolloverRestrictionFields,
+  RolloverTriggerFields,
+} from './rollover_rule_fields';
