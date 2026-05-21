@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiToolTip } from '@elastic/eui';
+import { EuiPanel, EuiToolTip } from '@elastic/eui';
 import { CheckBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { UseField, useFormData } from '../../../../shared_imports';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from './fields';
@@ -33,22 +33,25 @@ export const ThresholdAlertSuppressionEdit = memo(function ThresholdAlertSuppres
     ? i18n.enableSuppressionForFields(suppressionFieldNames)
     : i18n.SUPPRESS_ALERTS;
 
+  const checkboxLabel = labelAppend ? (
+    <>
+      {labelText} {labelAppend}
+    </>
+  ) : (
+    labelText
+  );
+
   const content = (
     <>
-      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-        <EuiFlexItem grow={true}>
-          <UseField
-            path={THRESHOLD_ALERT_SUPPRESSION_ENABLED}
-            component={CheckBoxField}
-            componentProps={{
-              idAria: 'thresholdAlertSuppressionEnabled',
-              'data-test-subj': 'thresholdAlertSuppressionEnabled',
-            }}
-            euiFieldProps={{ label: labelText, disabled }}
-          />
-        </EuiFlexItem>
-        {labelAppend && <EuiFlexItem grow={false}>{labelAppend}</EuiFlexItem>}
-      </EuiFlexGroup>
+      <UseField
+        path={THRESHOLD_ALERT_SUPPRESSION_ENABLED}
+        component={CheckBoxField}
+        componentProps={{
+          idAria: 'thresholdAlertSuppressionEnabled',
+          'data-test-subj': 'thresholdAlertSuppressionEnabled',
+        }}
+        euiFieldProps={{ label: checkboxLabel, disabled }}
+      />
       <EuiPanel paddingSize="m" hasShadow={false}>
         <SuppressionDurationSelector
           onlyPerTimePeriod
