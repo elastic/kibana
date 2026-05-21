@@ -10,6 +10,7 @@ import { SECURITY_ENDPOINT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 
 import { validateEndpointAttachmentMetadata } from './endpoint_metadata_schema';
 import { getEventAttachmentType } from './event';
+import { getIndicatorAttachmentType } from './indicator';
 
 /**
  * Legacy external-reference attachment type id used by clients that pre-date the
@@ -43,4 +44,5 @@ export const registerCaseAttachments = (
   });
 
   attachmentFramework.registerUnified(getEventAttachmentType());
+  attachmentFramework.registerUnified(getIndicatorAttachmentType());
 };
