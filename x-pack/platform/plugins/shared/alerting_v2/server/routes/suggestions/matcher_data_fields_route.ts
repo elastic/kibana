@@ -22,7 +22,7 @@ const matcherDataFieldsQuerySchema = z.object({
 
 const matcherDataFieldsResponseSchema = z
   .array(z.string())
-  .description('The list of available matcher data field names.');
+  .describe('The list of available matcher data field names.');
 
 @injectable()
 export class MatcherDataFieldsRoute extends BaseAlertingRoute {
