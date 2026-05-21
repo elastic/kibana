@@ -39,6 +39,7 @@ const createMonitorSO = (
   opts: {
     name?: string;
     origin?: string;
+    monitorQueryId?: string;
     locations?: Array<{ id: string; label?: string; isServiceManaged: boolean }>;
   } = {}
 ): SavedObject<EncryptedSyntheticsMonitorAttributes> =>
@@ -47,6 +48,7 @@ const createMonitorSO = (
     attributes: {
       [ConfigKey.NAME]: opts.name ?? `Monitor ${id}`,
       [ConfigKey.MONITOR_SOURCE_TYPE]: opts.origin ?? SourceType.UI,
+      [ConfigKey.MONITOR_QUERY_ID]: opts.monitorQueryId ?? id,
       [ConfigKey.LOCATIONS]: opts.locations ?? [],
     },
   } as unknown as SavedObject<EncryptedSyntheticsMonitorAttributes>);
@@ -464,6 +466,45 @@ describe('MonitorIntegrationHealthApi', () => {
 
       const result = await api.getHealth(['mon-1']);
 
+      expect(result.monitors[0].privateLocations[0].status).toBe(
+        PrivateLocationHealthStatusValue.Healthy
+      );
+      expect(result.monitors[0].privateLocations[0].packagePolicyId).toBe(expectedPolicyId);
+    });
+
+    it('uses MONITOR_QUERY_ID when it differs from the saved object id', async () => {
+      const privateLoc = createPrivateLocation('priv-loc-1', 'agent-policy-1');
+      const monitorQueryId = 'journey-project-default';
+      const so = createMonitorSO('so-uuid', {
+        origin: SourceType.PROJECT,
+        monitorQueryId,
+        locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
+      });
+
+      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
+
+      const expectedPolicyId = `${monitorQueryId}-priv-loc-1`;
+      const wrongPolicyId = `so-uuid-priv-loc-1`;
+      const packagePolicy = createPackagePolicy(expectedPolicyId, ['agent-policy-1']);
+      const fleetGetByIDs = jest.fn().mockResolvedValue([packagePolicy]);
+
+      const api = buildApi({
+        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
+        fleetGetByIDs,
+      });
+
+      const result = await api.getHealth(['so-uuid']);
+
+      expect(fleetGetByIDs).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.arrayContaining([expectedPolicyId]),
+        expect.anything()
+      );
+      expect(fleetGetByIDs).not.toHaveBeenCalledWith(
+        expect.anything(),
+        expect.arrayContaining([wrongPolicyId]),
+        expect.anything()
+      );
       expect(result.monitors[0].privateLocations[0].status).toBe(
         PrivateLocationHealthStatusValue.Healthy
       );
