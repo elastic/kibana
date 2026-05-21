@@ -8,8 +8,8 @@
 import crypto from 'crypto';
 import type { EsClient, ObltWorkerFixtures } from '@kbn/scout-oblt';
 
-const ALERTS_INDEX = '.internal.alerts-observability.metrics.alerts-default-000001';
-const ALERTS_ALIAS = '.alerts-observability.metrics.alerts-default';
+const ALERTS_INDEX_PATTERN = '.alerts-observability.metrics.alerts-*';
+const ALERTS_WRITE_TARGET = '.alerts-observability.metrics.alerts-default';
 
 const RULE_TAG = 'infra-hosts-scout-test';
 
@@ -91,52 +91,6 @@ export const ingestAlertsData = async ({
 
   const ruleUuid = ruleResponse.data.id;
 
-  const aliasOrIndexExists = await esClient.indices.exists({ index: ALERTS_ALIAS });
-  const backingIndexExists = await esClient.indices.exists({ index: ALERTS_INDEX });
-
-  if (!aliasOrIndexExists && !backingIndexExists) {
-    await esClient.indices.create({
-      index: ALERTS_INDEX,
-      settings: {
-        number_of_shards: 1,
-        number_of_replicas: 0,
-      },
-      aliases: {
-        [ALERTS_ALIAS]: { is_write_index: true },
-      },
-      mappings: {
-        dynamic: false,
-        properties: {
-          '@timestamp': { type: 'date' },
-          'host.name': { type: 'keyword' },
-          'event.action': { type: 'keyword' },
-          'event.kind': { type: 'keyword' },
-          'kibana.alert.duration.us': { type: 'long' },
-          'kibana.alert.end': { type: 'date' },
-          'kibana.alert.instance.id': { type: 'keyword' },
-          'kibana.alert.reason': { type: 'text' },
-          'kibana.alert.rule.category': { type: 'keyword' },
-          'kibana.alert.rule.consumer': { type: 'keyword' },
-          'kibana.alert.rule.name': { type: 'keyword' },
-          'kibana.alert.rule.producer': { type: 'keyword' },
-          'kibana.alert.rule.rule_type_id': { type: 'keyword' },
-          'kibana.alert.rule.uuid': { type: 'keyword' },
-          'kibana.alert.start': { type: 'date' },
-          'kibana.alert.status': { type: 'keyword' },
-          'kibana.alert.time_range': {
-            type: 'date_range',
-            format: 'epoch_millis||strict_date_optional_time',
-          },
-          'kibana.alert.uuid': { type: 'keyword' },
-          'kibana.alert.workflow_status': { type: 'keyword' },
-          'kibana.space_ids': { type: 'keyword' },
-          'kibana.version': { type: 'keyword' },
-          tags: { type: 'keyword' },
-        },
-      },
-    });
-  }
-
   const alertDocs: Array<{ hostName: string; status: 'active' | 'recovered' }> = [];
 
   // 6 active alerts: 2 for each of the first 3 hosts
@@ -151,9 +105,8 @@ export const ingestAlertsData = async ({
   alertDocs.push({ hostName: hosts[2], status: 'recovered' });
   alertDocs.push({ hostName: hosts[0], status: 'recovered' });
 
-  const writeTarget = aliasOrIndexExists ? ALERTS_ALIAS : ALERTS_INDEX;
   const operations = alertDocs.flatMap((doc) => [
-    { create: { _index: writeTarget } },
+    { create: { _index: ALERTS_WRITE_TARGET } },
     createAlertDocument({
       hostName: doc.hostName,
       status: doc.status,
@@ -183,27 +136,14 @@ export const cleanAlertsData = async ({
 }): Promise<void> => {
   await apiServices.alerting.cleanup.deleteRulesByTags([RULE_TAG]);
 
-  const backingIndexExists = await esClient.indices.exists({ index: ALERTS_INDEX });
-  if (backingIndexExists) {
-    const aliasResponse = await esClient.indices
-      .getAlias({ index: ALERTS_INDEX })
-      .catch(() => null);
-    const weOwnTheIndex =
-      aliasResponse != null && ALERTS_ALIAS in (aliasResponse[ALERTS_INDEX]?.aliases ?? {});
-
-    if (weOwnTheIndex) {
-      await esClient.indices.delete({ index: ALERTS_INDEX });
-      return;
-    }
-  }
-
   await esClient
     .deleteByQuery({
-      index: ALERTS_ALIAS,
+      index: ALERTS_INDEX_PATTERN,
       query: {
         term: { tags: RULE_TAG },
       },
       refresh: true,
+      conflicts: 'proceed',
     })
     .catch(() => {});
 };

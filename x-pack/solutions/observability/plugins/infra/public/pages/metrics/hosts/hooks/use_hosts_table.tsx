@@ -42,7 +42,7 @@ import { TABLE_COLUMN_LABEL, TABLE_CONTENT_LABEL } from '../translations';
 import { METRICS_TOOLTIP } from '../../../../common/visualizations';
 import { buildCombinedAssetFilter } from '../../../../utils/filters/build';
 import { AddDataTroubleshootingPopover } from '../components/table/add_data_troubleshooting_popover';
-import { METRIC_NOT_AVAILABLE_LABEL } from '../../../../components/asset_details/translations';
+import { NOT_AVAILABLE_LABEL } from '../../../../components/asset_details/translations';
 import { useUnifiedSearchContext } from './use_unified_search';
 
 /**
@@ -80,7 +80,7 @@ const buildMetricCell = (
     if (!hasSystemMetrics) {
       return <AddDataTroubleshootingPopover />;
     }
-    return METRIC_NOT_AVAILABLE_LABEL;
+    return NOT_AVAILABLE_LABEL;
   }
 
   return formatMetric(formatType, value);
