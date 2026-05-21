@@ -36,9 +36,6 @@ export const REMOVED_TYPES: string[] = [
 
   // removed in https://github.com/elastic/kibana/pull/250218
   'logs-data-telemetry',
-
-  // removed in https://github.com/elastic/kibana/pull/269976
-  'risk_engine:risk_scoring',
 ];
 
 export const SHARED_CONCURRENCY_TASKS: string[][] = [
