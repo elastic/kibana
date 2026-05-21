@@ -13,12 +13,19 @@ import { getColumnsWithHighlights, type EsqlColumnHighlight } from '@kbn/esql-ut
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
-import type { ProfileProviderServices } from '../../profile_provider_services';
 import { getHighlightCellRenderer } from './highlight_cell_renderer';
 
-export const createHighlightDataSourceProfileProvider = (
-  services: ProfileProviderServices
-): DataSourceProfileProvider<{
+/**
+ * ES|QL highlight profile.
+ *
+ * Adds support for highlighting matching text on the Discover data table in columns that are built using a highlighting algorithm.
+ * Example:
+ * ```
+ * FROM books | EVAL snippets = TOP_SNIPPETS(description, "Tolkien", { "highlight": true })
+ * ```
+ * Will highlight text wrapped in <em/> in the `snippets` column.
+ */
+export const createHighlightDataSourceProfileProvider = (): DataSourceProfileProvider<{
   columnsWithHighlights: EsqlColumnHighlight[];
 }> => ({
   profileId: 'highlight-data-source-profile',

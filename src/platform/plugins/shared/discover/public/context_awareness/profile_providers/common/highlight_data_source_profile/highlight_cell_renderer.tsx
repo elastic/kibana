@@ -7,30 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import type { EsqlColumnHighlight } from '@kbn/esql-utils';
 
 export type HighlightTags = Pick<EsqlColumnHighlight, 'preTag' | 'postTag'>;
+interface HighlightedTextProps {
+  value: string;
+  tags: HighlightTags;
+}
 
+/**
+ * Renders a string with highlight tags as React nodes.
+ */
 export function getHighlightCellRenderer(value: unknown, highlightTags: HighlightTags) {
   if (value === undefined) {
     return '-';
   }
   if (typeof value !== 'string') {
-    return value;
+    return String(value);
   }
-  return <>{stringToHighlightedReactNode(value, highlightTags)}</>;
+  return <MemoizedHighlightedText value={value} tags={highlightTags} />;
 }
 
-/**
- * Converts a string with TOP_SNIPPETS highlight markup into React nodes.
- */
-export const stringToHighlightedReactNode = (
-  value: string,
-  { preTag, postTag }: HighlightTags
-): React.ReactNode => {
+const HighlightedText = function HighlightedText({
+  value,
+  tags: { preTag, postTag },
+}: HighlightedTextProps) {
   if (!value.includes(preTag)) {
-    return value;
+    return <>{value}</>;
   }
 
   const nodes: React.ReactNode[] = [];
@@ -65,8 +69,16 @@ export const stringToHighlightedReactNode = (
   }
 
   if (nodes.length === 1) {
-    return nodes[0];
+    return <>{nodes[0]}</>;
   }
 
   return <>{nodes}</>;
 };
+
+const MemoizedHighlightedText = memo(
+  HighlightedText,
+  (prevProps, nextProps) =>
+    prevProps.value === nextProps.value &&
+    prevProps.tags.preTag === nextProps.tags.preTag &&
+    prevProps.tags.postTag === nextProps.tags.postTag
+);
