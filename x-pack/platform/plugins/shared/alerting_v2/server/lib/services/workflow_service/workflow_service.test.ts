@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 import type { LoggerService } from '../logger_service/logger_service';
@@ -14,13 +13,12 @@ import { WorkflowService } from './workflow_service';
 
 type WorkflowsExtensionsStart = ReturnType<typeof workflowsExtensionsMock.createStart>;
 
-const TRIGGER_ID = 'alerting_v2.episode-assigned';
+const TRIGGER_ID = 'alertingV2.episodeAssigned';
 const PAYLOAD = { episodeId: 'episode-1' } as const;
 
 describe('WorkflowService', () => {
   let workflowsExtensions: WorkflowsExtensionsStart;
   let loggerService: LoggerService;
-  let mockLogger: jest.Mocked<Logger>;
   let service: WorkflowService;
   let mockEmitEvent: jest.Mock;
 
@@ -32,7 +30,7 @@ describe('WorkflowService', () => {
       emitEvent: mockEmitEvent,
     });
 
-    ({ loggerService, mockLogger } = createLoggerService());
+    ({ loggerService } = createLoggerService());
 
     service = new WorkflowService(workflowsExtensions, loggerService);
   });

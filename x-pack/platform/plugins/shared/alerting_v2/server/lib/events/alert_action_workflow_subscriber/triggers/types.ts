@@ -16,7 +16,7 @@ import type { AlertActionEvent } from '../../alert_action_event_publisher/events
  * the codebase for a single trigger:
  *
  *  - `eventType`  — the bus event-type discriminator that produces this trigger.
- *  - `triggerId`  — the workflows-extensions trigger id (e.g. `alerting_v2.episode-assigned`).
+ *  - `triggerId`  — the workflows-extensions trigger id (e.g. `alertingV2.episodeAssigned`).
  *  - `definition` — the `ServerTriggerDefinition` registered with workflows-extensions
  *                   (carries the Zod payload schema downstream emits must satisfy).
  *  - `toPayload`  — pure function from the bus event shape to the

@@ -7,6 +7,8 @@
 
 import { esql } from '@elastic/esql';
 import Boom from '@hapi/boom';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import { Request } from '@kbn/core-di-server';
 import { inject, injectable } from 'inversify';
 import { groupBy, omit } from 'lodash';
 import type {
@@ -18,6 +20,7 @@ import {
   type AlertAction,
 } from '../../resources/datastreams/alert_actions';
 import { ALERT_EVENTS_DATA_STREAM } from '../../resources/datastreams/alert_events';
+import { AlertActionEventPublisher } from '../events/alert_action_event_publisher/alert_action_event_publisher';
 import { queryResponseToRecords } from '../services/query_service/query_response_to_records';
 import { type QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
@@ -31,7 +34,10 @@ export class AlertActionsClient {
   constructor(
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
     @inject(StorageServiceScopedToken) private readonly storageService: StorageServiceContract,
-    @inject(UserService) private readonly userService: UserServiceContract
+    @inject(UserService) private readonly userService: UserServiceContract,
+    @inject(Request) private readonly request: KibanaRequest,
+    @inject(AlertActionEventPublisher)
+    private readonly alertActionEventPublisher: AlertActionEventPublisher
   ) {}
 
   public async createAction(params: {
@@ -46,13 +52,14 @@ export class AlertActionsClient {
       }),
     ]);
 
-    await this.bulkIndexActions([
-      this.buildAlertActionDocument({
-        action: params.action,
-        alertEvent,
-        userProfileUid,
-      }),
-    ]);
+    const doc = this.buildAlertActionDocument({
+      action: params.action,
+      alertEvent,
+      userProfileUid,
+    });
+
+    await this.bulkIndexActions([doc]);
+    this.alertActionEventPublisher.emitEpisodeActions(this.request, [doc]);
   }
 
   public async createBulkActions(
@@ -88,6 +95,7 @@ export class AlertActionsClient {
 
     if (docs.length > 0) {
       await this.bulkIndexActions(docs);
+      this.alertActionEventPublisher.emitEpisodeActions(this.request, docs);
     }
 
     return { processed: docs.length, total: actions.length };

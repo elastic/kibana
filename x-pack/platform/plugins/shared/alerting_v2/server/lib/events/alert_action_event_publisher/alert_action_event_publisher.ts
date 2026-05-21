@@ -6,7 +6,9 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { inject, injectable } from 'inversify';
+import type { AlertAction } from '../../../resources/datastreams/alert_actions';
 import type { EventBus } from '../event_bus';
 import {
   AlertingDomainEventBusToken,
@@ -20,37 +22,12 @@ import {
 } from './events';
 
 /**
- * Caller-friendly inputs shared by every `emit*` method on the publisher.
- *
- * Each method extends this with its event-specific payload fields, kept
- * flat so callers construct a single object rather than a nested
- * `{ envelope, payload }` shape. The publisher does the lift.
- */
-export interface BaseEmitAlertActionParams {
-  readonly groupHash: string;
-  readonly episodeId: string;
-  readonly ruleId: string;
-  readonly spaceId: string;
-  /** Actor user-profile uid, or `null` for internal/system actors. */
-  readonly actorUid: string | null;
-  /**
-   * ISO timestamp of when the action occurred. Defaults to
-   * `new Date().toISOString()` when omitted.
-   */
-  readonly occurredAt?: string;
-}
-
-/** Caller-friendly parameters for {@link AlertActionEventPublisherContract.emitEpisodeAssigned}. */
-export interface EmitEpisodeAssignedParams extends BaseEmitAlertActionParams {
-  /** New assignee user-profile uid, or `null` when unassigning. */
-  readonly assigneeUid: string | null;
-}
-
-/**
  * Public contract for the alert-action event publisher.
  *
- * One method per concrete event. Additional `emit*` methods will be added
- * as the other alert-action types (ack, snooze, tag, …) start publishing.
+ * Persistence callers ({@link AlertActionsClient}) use
+ * {@link AlertActionEventPublisherContract.emitEpisodeAction} as the single
+ * entry point. The publisher dispatches by `action_type` to typed `emit*`
+ * methods that build the canonical bus event shape.
  *
  * Every method takes the publishing call site's `KibanaRequest` as its
  * first argument. The request is propagated on the bus as
@@ -60,7 +37,13 @@ export interface EmitEpisodeAssignedParams extends BaseEmitAlertActionParams {
  * even though the bus dispatches asynchronously.
  */
 export interface AlertActionEventPublisherContract {
-  emitEpisodeAssigned(request: KibanaRequest, params: EmitEpisodeAssignedParams): void;
+  /** Convenience batch wrapper over the possible emit methods. */
+  emitEpisodeActions(request: KibanaRequest, actions: readonly AlertAction[]): void;
+  /**
+   * Publishes an `episode.assigned` domain event for a persisted assign action.
+   * No-op when `assignee_uid` is null (unassign).
+   */
+  emitEpisodeAssigned(request: KibanaRequest, action: AlertAction): void;
 }
 
 /**
@@ -68,15 +51,9 @@ export interface AlertActionEventPublisherContract {
  * {@link EventBus}.
  *
  * Owns the construction of the canonical event shape (envelope + payload).
- * Each `emit*` method:
- *
- *  1. Lifts the common envelope from the caller's flat params via
- *     {@link AlertActionEventPublisher#buildEnvelope}, including the
- *     `occurredAt` timestamp default.
- *  2. Builds the event-specific `payload`.
- *  3. Tags the result with the event's `type` discriminator and
- *     publishes it alongside the publishing `KibanaRequest` as the bus's
- *     {@link AlertingPublisherContext}.
+ * Each `emit*` method builds the event-specific shape and publishes it
+ * alongside the publishing `KibanaRequest` as the bus's
+ * {@link AlertingPublisherContext}.
  *
  * Publishing is fire-and-forget — `publish` returns synchronously and
  * subscriber work runs on the next event-loop iteration. See
@@ -95,26 +72,42 @@ export class AlertActionEventPublisher implements AlertActionEventPublisherContr
     private readonly eventBus: EventBus<AlertingDomainEvent, AlertingPublisherContext>
   ) {}
 
-  public emitEpisodeAssigned(request: KibanaRequest, params: EmitEpisodeAssignedParams): void {
+  public emitEpisodeActions(request: KibanaRequest, actions: readonly AlertAction[]): void {
+    for (const action of actions) {
+      switch (action.action_type) {
+        case ALERT_EPISODE_ACTION_TYPE.ASSIGN:
+          this.emitEpisodeAssigned(request, action);
+          return;
+        default:
+          return;
+      }
+    }
+  }
+
+  public emitEpisodeAssigned(request: KibanaRequest, action: AlertAction): void {
+    if (action.assignee_uid == null) {
+      return;
+    }
+
     const event: EpisodeAssignedEvent = {
       type: EPISODE_ASSIGNED_EVENT_TYPE,
-      ...this.buildEnvelope(params),
+      ...this.buildEnvelopeFromAction(action),
       payload: {
-        assigneeUid: params.assigneeUid,
+        assigneeUid: action.assignee_uid,
       },
     };
 
     this.eventBus.publish(event, { request });
   }
 
-  private buildEnvelope(common: BaseEmitAlertActionParams): AlertActionEventEnvelope {
+  private buildEnvelopeFromAction(action: AlertAction): AlertActionEventEnvelope {
     return {
-      occurredAt: common.occurredAt ?? new Date().toISOString(),
-      groupHash: common.groupHash,
-      episodeId: common.episodeId,
-      ruleId: common.ruleId,
-      spaceId: common.spaceId,
-      actorUid: common.actorUid,
+      occurredAt: action['@timestamp'] ?? new Date().toISOString(),
+      groupHash: action.group_hash,
+      episodeId: action.episode_id!,
+      ruleId: action.rule_id,
+      spaceId: action.space_id,
+      actorUid: action.actor,
     };
   }
 }

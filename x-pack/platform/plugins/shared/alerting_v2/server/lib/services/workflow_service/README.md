@@ -45,9 +45,7 @@ Typical usage:
 ```ts
 @injectable()
 class SomeSubscriber {
-  constructor(
-    @inject(WorkflowServiceToken) private readonly workflows: WorkflowServiceContract
-  ) {}
+  constructor(@inject(WorkflowServiceToken) private readonly workflows: WorkflowServiceContract) {}
 
   async onEvent(event: SomeDomainEvent, ctx: { request: KibanaRequest }) {
     await this.workflows.emitEvent(ctx.request, 'alerting_v2.some-trigger', {
@@ -60,7 +58,7 @@ class SomeSubscriber {
 `emitEvent()` takes:
 
 - `request`: the auth and space context to run under
-- `triggerId`: the workflows trigger id, for example `alerting_v2.episode-assigned`
+- `triggerId`: the workflows trigger id, for example `alertingV2.episodeAssigned`
 - `payload`: a plain object that must conform to the trigger's registered Zod schema
 
 If workflows is unavailable for that request, the service logs a debug message and drops the emit.
