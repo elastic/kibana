@@ -39,12 +39,20 @@ export const HIGH_SEVERITY_THRESHOLD = 60;
 
 export const queryTypeSchema = z.enum([QUERY_TYPE_MATCH, QUERY_TYPE_STATS]);
 
+export const queryFeatureSchema = z.object({
+  id: z.string(),
+  run_id: z.string().optional(),
+});
+
+export type QueryFeature = z.infer<typeof queryFeatureSchema>;
+
 export interface StreamQuery extends StreamQueryBase {
   type: QueryType;
   esql: EsqlQuery;
   // from 0 to 100. aligned with anomaly detection scoring
   severity_score?: number;
   evidence?: string[];
+  features?: QueryFeature[];
 }
 
 const streamQueryBaseSchema = z.object({
@@ -62,6 +70,7 @@ export const streamQuerySchema: z.Schema<StreamQuery> = streamQueryBaseSchema.ex
   type: queryTypeSchema.default(QUERY_TYPE_MATCH),
   severity_score: z.number().optional(),
   evidence: z.array(z.string()).optional(),
+  features: z.array(queryFeatureSchema).optional(),
   esql: esqlQuerySchema,
 });
 

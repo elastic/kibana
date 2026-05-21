@@ -12,6 +12,8 @@ import { useStartServices } from '../../../../hooks';
 import { ExperimentalFeaturesService } from '../../../../services';
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
+import { FLEET_PAGE_SIZE_OPTIONS } from '../../../../constants';
+
 import { useFetchAgentsData } from './use_fetch_agents_data';
 
 jest.mock('../../../../../../services/experimental_features');
@@ -179,7 +181,7 @@ describe('useFetchAgentsData', () => {
     );
 
     expect(result?.current.page).toEqual({ index: 0, size: 20 });
-    expect(result?.current.pageSizeOptions).toEqual([20, 50, 100, 200]);
+    expect(result?.current.pageSizeOptions).toEqual([...FLEET_PAGE_SIZE_OPTIONS]);
   });
 
   it('sync querystring kuery with current search', async () => {
