@@ -20,5 +20,11 @@ export const modelVersion1: SavedObjectsModelVersion = {
         },
       },
     },
+    {
+      type: 'data_backfill',
+      backfillFn: (doc) => ({
+        attributes: { applyToAllCases: doc.attributes.applyToAllCases ?? false },
+      }),
+    },
   ],
 };

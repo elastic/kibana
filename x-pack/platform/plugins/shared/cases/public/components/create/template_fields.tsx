@@ -32,7 +32,11 @@ export const CreateCaseTemplateFields: React.FC = () => {
   const ownerStr = Array.isArray(owner) ? owner[0] : owner;
 
   // Fetch applyToAllCases field definitions for this owner.
-  const { data: globalFieldDefsData, isLoading: isLoadingGlobalDefs } = useGetFieldDefinitions({
+  const {
+    data: globalFieldDefsData,
+    isLoading: isLoadingGlobalDefs,
+    isError: isGlobalDefsError,
+  } = useGetFieldDefinitions({
     owner: ownerStr,
     applyToAllCases: true,
   });
@@ -106,7 +110,7 @@ export const CreateCaseTemplateFields: React.FC = () => {
     );
   }, [templateId, template, templateFields]);
 
-  if (isLoading || isLoadingFields || isLoadingGlobalDefs) {
+  if (isLoading || isLoadingFields || isLoadingGlobalDefs || isGlobalDefsError) {
     return null;
   }
 

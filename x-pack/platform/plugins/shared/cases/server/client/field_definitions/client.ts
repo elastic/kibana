@@ -49,6 +49,9 @@ export const createFieldDefinitionsSubClient = (
   const fieldDefinitionsSubClient: FieldDefinitionsSubClient = {
     getFieldDefinitions: async (params: FieldDefinitionsFindRequest) => {
       const owners = params.owner ? castArray(params.owner) : [];
+      if (owners.length === 0) {
+        throw Boom.badRequest('owner is required');
+      }
       await authorization.ensureAuthorized({
         operation: Operations.manageTemplate,
         entities: owners.map((owner) => ({ owner, id: owner })),
@@ -92,6 +95,8 @@ export const createFieldDefinitionsSubClient = (
       return fieldDefinitionsService.createFieldDefinition(input);
     },
 
+    // Field definitions are library-level objects, not case-level objects. They are
+    // not part of any case's audit trail so no UserAction is created for mutations.
     updateFieldDefinition: async (id: string, input: UpdateFieldDefinitionInput) => {
       const fieldDef = await fieldDefinitionsService.getFieldDefinition(id);
       await authorization.ensureAuthorized({

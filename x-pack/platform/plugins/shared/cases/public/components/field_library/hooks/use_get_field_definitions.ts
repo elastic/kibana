@@ -22,11 +22,13 @@ export const useGetFieldDefinitions = ({
   applyToAllCases?: boolean;
 } = {}): UseQueryResult<FieldDefinitionsFindResponse> => {
   const toasts = useToasts();
+  const hasOwner = Array.isArray(owner) ? owner.length > 0 : owner !== undefined;
 
   return useQuery(
     casesQueriesKeys.fieldDefinitionsList({ owner, applyToAllCases }),
     ({ signal }) => getFieldDefinitions({ owner, applyToAllCases, signal }),
     {
+      enabled: hasOwner,
       keepPreviousData: true,
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {

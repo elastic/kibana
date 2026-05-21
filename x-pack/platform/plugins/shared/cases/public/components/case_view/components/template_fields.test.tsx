@@ -573,6 +573,18 @@ describe('GlobalCaseFields', () => {
     expect(container.textContent).toBe('');
   });
 
+  it('renders nothing when the field definitions query errors', () => {
+    mockUseGetFieldDefinitions.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+    });
+    const { container } = render(
+      <GlobalCaseFields caseData={caseData} onUpdateField={globalOnUpdateField} />
+    );
+    expect(container.textContent).toBe('');
+  });
+
   it('renders nothing when there are no applyToAllCases definitions', () => {
     mockUseGetFieldDefinitions.mockReturnValue({
       data: { fieldDefinitions: [] },

@@ -230,6 +230,95 @@ describe('useTemplateFormSync', () => {
     expect(result.current.template).toBeUndefined();
   });
 
+  describe('globalFieldKeys preservation', () => {
+    const GLOBAL_KEY = 'incident_type_as_keyword';
+    const GLOBAL_VALUE = 'outage';
+
+    it('preserves global field values when template is deselected', () => {
+      mockUseFormData.mockReturnValue([{ templateId: 'template-1' }]);
+      mockUseGetTemplate.mockReturnValue({ data: mockTemplate, isLoading: false });
+      // Seed a current global field value in the inner form
+      (innerForm.getValues as jest.Mock).mockReturnValue({
+        [CASE_EXTENDED_FIELDS]: { [GLOBAL_KEY]: GLOBAL_VALUE },
+      });
+
+      const { rerender } = renderHook(() => useTemplateFormSync(innerForm, new Set([GLOBAL_KEY])));
+
+      (innerForm.reset as jest.Mock).mockClear();
+      mockUseFormData.mockReturnValue([{ templateId: '' }]);
+      mockUseGetTemplate.mockReturnValue({ data: undefined, isLoading: false });
+
+      rerender();
+
+      expect(innerForm.reset).toHaveBeenCalledWith({
+        [CASE_EXTENDED_FIELDS]: { [GLOBAL_KEY]: GLOBAL_VALUE },
+      });
+    });
+
+    it('preserves global field values when switching between templates', () => {
+      mockUseFormData.mockReturnValue([{ templateId: 'template-2' }]);
+      mockUseGetTemplate.mockReturnValue({
+        data: mockTemplateWithExtendedFields,
+        isLoading: false,
+      });
+      // Seed a current global field value in the inner form
+      (innerForm.getValues as jest.Mock).mockReturnValue({
+        [CASE_EXTENDED_FIELDS]: { [GLOBAL_KEY]: GLOBAL_VALUE },
+      });
+
+      const { rerender } = renderHook(() => useTemplateFormSync(innerForm, new Set([GLOBAL_KEY])));
+
+      (innerForm.reset as jest.Mock).mockClear();
+
+      const differentTemplate = {
+        templateId: 'template-3',
+        templateVersion: 1,
+        definition: {
+          name: 'Different Template',
+          fields: [
+            {
+              name: 'other_field',
+              type: 'keyword',
+              control: 'INPUT_TEXT',
+              metadata: { default: 'other value' },
+            },
+          ],
+        },
+      };
+      mockUseFormData.mockReturnValue([{ templateId: 'template-3' }]);
+      mockUseGetTemplate.mockReturnValue({ data: differentTemplate, isLoading: false });
+
+      rerender();
+
+      expect(innerForm.reset).toHaveBeenCalledWith({
+        [CASE_EXTENDED_FIELDS]: {
+          [GLOBAL_KEY]: GLOBAL_VALUE,
+          other_field_as_keyword: 'other value',
+        },
+      });
+    });
+
+    it('does NOT preserve keys absent from globalFieldKeys when deselecting template', () => {
+      mockUseFormData.mockReturnValue([{ templateId: 'template-1' }]);
+      mockUseGetTemplate.mockReturnValue({ data: mockTemplate, isLoading: false });
+      (innerForm.getValues as jest.Mock).mockReturnValue({
+        [CASE_EXTENDED_FIELDS]: { [GLOBAL_KEY]: GLOBAL_VALUE, template_only_key: 'drop me' },
+      });
+
+      const { rerender } = renderHook(() => useTemplateFormSync(innerForm, new Set([GLOBAL_KEY])));
+
+      (innerForm.reset as jest.Mock).mockClear();
+      mockUseFormData.mockReturnValue([{ templateId: '' }]);
+      mockUseGetTemplate.mockReturnValue({ data: undefined, isLoading: false });
+
+      rerender();
+
+      const resetCall = (innerForm.reset as jest.Mock).mock.calls[0][0];
+      expect(resetCall[CASE_EXTENDED_FIELDS]).toHaveProperty(GLOBAL_KEY, GLOBAL_VALUE);
+      expect(resetCall[CASE_EXTENDED_FIELDS]).not.toHaveProperty('template_only_key');
+    });
+  });
+
   describe('extended fields', () => {
     it('applies default values for extended fields into the inner form when template has fields', () => {
       mockUseFormData.mockReturnValue([{ templateId: 'template-2' }]);

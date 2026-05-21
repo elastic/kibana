@@ -42,6 +42,29 @@ describe('createFieldDefinitionsSubClient', () => {
     clientArgs.authorization.ensureAuthorized.mockResolvedValue();
   });
 
+  describe('getFieldDefinitions', () => {
+    it('throws 400 when no owner is provided', async () => {
+      await expect(client.getFieldDefinitions({})).rejects.toThrow('owner is required');
+      expect(clientArgs.authorization.ensureAuthorized).not.toHaveBeenCalled();
+      expect(
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitions
+      ).not.toHaveBeenCalled();
+    });
+
+    it('returns field definitions for a valid owner', async () => {
+      const so = makeFieldDefinitionSO();
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [so.attributes],
+        total: 1,
+      });
+
+      const result = await client.getFieldDefinitions({ owner: 'securitySolution' });
+
+      expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalled();
+      expect(result.fieldDefinitions).toHaveLength(1);
+    });
+  });
+
   describe('createFieldDefinition', () => {
     const input = {
       name: 'my_field',

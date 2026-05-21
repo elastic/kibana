@@ -156,7 +156,11 @@ interface GlobalCaseFieldsProps {
  * Values are stored in `extended_fields` alongside template-specific fields.
  */
 export const GlobalCaseFields = React.memo<GlobalCaseFieldsProps>(({ caseData, onUpdateField }) => {
-  const { data: globalFieldDefsData, isLoading } = useGetFieldDefinitions({
+  const {
+    data: globalFieldDefsData,
+    isLoading,
+    isError,
+  } = useGetFieldDefinitions({
     owner: caseData.owner,
     applyToAllCases: true,
   });
@@ -166,7 +170,7 @@ export const GlobalCaseFields = React.memo<GlobalCaseFieldsProps>(({ caseData, o
     [globalFieldDefsData]
   );
 
-  if (isLoading || !globalInlineFields.length) return null;
+  if (isLoading || isError || !globalInlineFields.length) return null;
 
   return (
     <>
