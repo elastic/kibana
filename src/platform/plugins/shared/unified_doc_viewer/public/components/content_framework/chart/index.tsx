@@ -9,9 +9,9 @@
 
 import React, { useMemo } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { getUnifiedDocViewerServices } from '../../../plugin';
+import { OPEN_IN_DISCOVER_LABEL } from '../../observability/traces/common/constants';
 
 export interface ContentFrameworkChartProps {
   title: string;
@@ -56,13 +56,6 @@ export function ContentFrameworkChart({
     return url;
   }, [discoverLocator, esqlQuery, timefilter]);
 
-  const openInDiscoverButtonLabel = i18n.translate(
-    'unifiedDocViewer.contentFramework.chart.openInADiscoverTab',
-    {
-      defaultMessage: 'Open in a Discover tab',
-    }
-  );
-
   return (
     <EuiFlexGroup
       direction="column"
@@ -96,11 +89,11 @@ export function ContentFrameworkChart({
               <EuiButtonEmpty
                 iconType="discoverApp"
                 href={discoverUrl}
-                aria-label={openInDiscoverButtonLabel}
+                aria-label={OPEN_IN_DISCOVER_LABEL}
                 data-test-subj="ContentFrameworkChartOpenInDiscover"
                 size="xs"
               >
-                {openInDiscoverButtonLabel}
+                {OPEN_IN_DISCOVER_LABEL}
               </EuiButtonEmpty>
             </EuiFlexItem>
           )}
