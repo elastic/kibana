@@ -33,7 +33,7 @@ export function useAccumulatedTriggerEventSearchPages(
     setAccumulatedHits((prev) => {
       const seen = new Set(prev.map((h) => h.id));
       const appended = searchResult.hits.filter((h) => !seen.has(h.id));
-      return appended.length === 0 ? prev : [...prev, ...appended];
+      return appended.length === 0 ? prev : prev.concat(appended);
     });
   }, [searchResult, pageIndex, isPreviousData]);
 
