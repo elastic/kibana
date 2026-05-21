@@ -119,9 +119,9 @@ describe('CasePostRequestSchema', () => {
   });
 
   it('rejects whitespace-only description (limitedStringSchema parity)', () => {
-    expect(parseErrors(CasePostRequestSchema, { ...validPostRequest, description: '   ' })).toContain(
-      'The description field cannot be an empty string.'
-    );
+    expect(
+      parseErrors(CasePostRequestSchema, { ...validPostRequest, description: '   ' })
+    ).toContain('The description field cannot be an empty string.');
   });
 
   it('rejects more than MAX_TAGS_PER_CASE tags', () => {

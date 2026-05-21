@@ -57,7 +57,10 @@ describe('schema', () => {
 
     it('fails when given an array larger than the limit of one item', () => {
       expect(
-        parseErrors(limitedArraySchema({ codec: NonEmptyString, fieldName, min: 1, max: 1 }), ['a', 'b'])
+        parseErrors(limitedArraySchema({ codec: NonEmptyString, fieldName, min: 1, max: 1 }), [
+          'a',
+          'b',
+        ])
       ).toEqual(['The length of the field foobar is too long. Array must be of length <= 1.']);
     });
 
@@ -96,13 +99,15 @@ describe('schema', () => {
     });
 
     it('fails when given string is larger than maximum', () => {
-      expect(parseErrors(limitedStringSchema({ fieldName, min: 1, max: 5 }), 'Hello there!!')).toEqual([
-        'The length of the foo is too long. The maximum length is 5.',
-      ]);
+      expect(
+        parseErrors(limitedStringSchema({ fieldName, min: 1, max: 5 }), 'Hello there!!')
+      ).toEqual(['The length of the foo is too long. The maximum length is 5.']);
     });
 
     it('succeeds when given string within limit', () => {
-      expect(parseErrors(limitedStringSchema({ fieldName, min: 1, max: 50 }), 'Hello!!')).toEqual([]);
+      expect(parseErrors(limitedStringSchema({ fieldName, min: 1, max: 50 }), 'Hello!!')).toEqual(
+        []
+      );
     });
 
     it('succeeds when given string is empty and minimum is 0', () => {
@@ -118,7 +123,9 @@ describe('schema', () => {
     });
 
     it('succeeds when trimmed length is within maximum (trailing whitespace ignored)', () => {
-      expect(parseErrors(limitedStringSchema({ fieldName, min: 0, max: 5 }), 'Hello  ')).toEqual([]);
+      expect(parseErrors(limitedStringSchema({ fieldName, min: 0, max: 5 }), 'Hello  ')).toEqual(
+        []
+      );
     });
   });
 
@@ -146,7 +153,9 @@ describe('schema', () => {
     });
 
     it(`fails when page > ${MAX_DOCS_PER_PAGE}`, () => {
-      expect(parseErrors(paginationSchema({ maxPerPage: 3 }), { page: MAX_DOCS_PER_PAGE + 1 })).toEqual([
+      expect(
+        parseErrors(paginationSchema({ maxPerPage: 3 }), { page: MAX_DOCS_PER_PAGE + 1 })
+      ).toEqual([
         'The number of documents is too high. Paginating through more than 10000 documents is not possible.',
       ]);
     });
@@ -160,7 +169,9 @@ describe('schema', () => {
     });
 
     it('accepts numeric strings for page/perPage', () => {
-      expect(parseErrors(paginationSchema({ maxPerPage: 3 }), { page: '1', perPage: '2' })).toEqual([]);
+      expect(parseErrors(paginationSchema({ maxPerPage: 3 }), { page: '1', perPage: '2' })).toEqual(
+        []
+      );
     });
 
     it('rejects non-numeric strings for page/perPage (NumberFromString parity)', () => {

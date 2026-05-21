@@ -10,7 +10,7 @@ import { v4 } from 'uuid';
 import Boom from '@hapi/boom';
 
 import { MAX_OBSERVABLES_PER_CASE } from '../../../common/constants';
-import type { Case, Observable } from '../../../common/types/domain';
+import type { Observable } from '../../../common/types/domain';
 import { UserActionTypes, CaseSchema } from '../../../common/types/domain';
 import {
   type AddObservableRequest,

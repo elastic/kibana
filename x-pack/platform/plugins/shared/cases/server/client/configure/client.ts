@@ -435,8 +435,9 @@ export async function create(
   } = clientArgs;
 
   try {
-    const validatedConfigurationRequest =
-      decodeWithExcessOrThrowZod(ConfigurationRequestSchema)(configRequest);
+    const validatedConfigurationRequest = decodeWithExcessOrThrowZod(ConfigurationRequestSchema)(
+      configRequest
+    );
 
     validateDuplicatedKeysInRequest({
       requestFields: validatedConfigurationRequest.customFields,

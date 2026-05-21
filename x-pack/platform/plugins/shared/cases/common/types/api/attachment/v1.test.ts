@@ -94,9 +94,9 @@ describe('AttachmentRequestSchema', () => {
     });
 
     it('rejects whitespace-only comment (limitedStringSchema parity)', () => {
-      expect(parseErrors(AttachmentRequestSchema, { ...validUserComment, comment: '   ' })).toContain(
-        'The comment field cannot be an empty string.'
-      );
+      expect(
+        parseErrors(AttachmentRequestSchema, { ...validUserComment, comment: '   ' })
+      ).toContain('The comment field cannot be an empty string.');
     });
 
     it(`rejects a comment longer than MAX_COMMENT_LENGTH (${MAX_COMMENT_LENGTH})`, () => {
