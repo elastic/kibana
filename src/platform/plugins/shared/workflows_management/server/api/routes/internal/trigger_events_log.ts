@@ -10,11 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import { KQLSyntaxError } from '@kbn/es-query';
 import type { RouteDependencies } from '../types';
-import {
-  INTERNAL_API_VERSION,
-  MAX_ARRAY_PARAM_SIZE,
-  MAX_PAGE_SIZE,
-} from '../utils/route_constants';
+import { INTERNAL_API_VERSION, MAX_PAGE_SIZE } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_EXECUTION_READ_SECURITY } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
@@ -34,9 +30,6 @@ export function registerTriggerEventsLogRoutes(deps: RouteDependencies) {
         validate: {
           request: {
             body: schema.object({
-              triggerIds: schema.maybe(
-                schema.arrayOf(schema.string(), { maxSize: MAX_ARRAY_PARAM_SIZE })
-              ),
               kql: schema.maybe(schema.string()),
               from: schema.maybe(schema.string()),
               to: schema.maybe(schema.string()),
@@ -50,11 +43,10 @@ export function registerTriggerEventsLogRoutes(deps: RouteDependencies) {
         try {
           const spaceId = spaces.getSpaceId(request);
           const { triggerEvents } = await service.getWorkflowsExecutionEngine();
-          const { triggerIds, kql, from: fromTs, to: toTs, page, size } = request.body;
+          const { kql, from: fromTs, to: toTs, page, size } = request.body;
 
           const result = await triggerEvents.searchTriggerEventLog({
             spaceId,
-            triggerIds,
             kql,
             from: fromTs,
             to: toTs,

@@ -234,9 +234,10 @@ describe('WorkflowExecuteEventForm', () => {
 
     await findByTestId('workflowTriggerEventsTable');
     expect(getByTestId('workflowTriggerEventsTable')).toBeInTheDocument();
+    expect(getByTestId('query-input')).toHaveValue('triggerId: "custom.trigger"');
     expect(mockUseQueryTriggerEvents).toHaveBeenCalledWith(
       expect.objectContaining({
-        triggerIds: ['custom.trigger'],
+        kql: 'triggerId: "custom.trigger"',
         page: 1,
         size: 50,
         from: TIMEPICKER_FALLBACK.from,
@@ -244,7 +245,6 @@ describe('WorkflowExecuteEventForm', () => {
       }),
       expect.objectContaining({ enabled: true })
     );
-    expect(mockUseQueryTriggerEvents.mock.calls[0][0]).not.toHaveProperty('kql');
   });
 
   it('uses TIMEPICKER_FALLBACK when timefilter getTimeDefaults returns undefined', async () => {
@@ -298,7 +298,7 @@ describe('WorkflowExecuteEventForm', () => {
     );
   });
 
-  it('sends workflow triggerIds when submitted KQL does not reference triggerId', async () => {
+  it('sends only the KQL visible in the search bar after submit', async () => {
     const { findByTestId, getByTestId } = render(
       <TestWrapper>
         <WorkflowExecuteEventForm
@@ -320,12 +320,11 @@ describe('WorkflowExecuteEventForm', () => {
       const lastParams = calls[calls.length - 1][0] as Record<string, unknown>;
       expect(lastParams).toMatchObject({
         kql: 'eventId: e1',
-        triggerIds: ['custom.trigger'],
       });
     });
   });
 
-  it('passes every custom trigger id from the workflow as API triggerIds to useQueryTriggerEvents', async () => {
+  it('scopes search KQL to every custom trigger id from the workflow', async () => {
     const definitionWithTwoCustomTriggers = {
       ...baseDefinition,
       triggers: [
@@ -349,7 +348,7 @@ describe('WorkflowExecuteEventForm', () => {
     await findByTestId('workflowTriggerEventsTable');
     expect(mockUseQueryTriggerEvents).toHaveBeenCalledWith(
       expect.objectContaining({
-        triggerIds: ['workflow.execution.failed', 'cases.created'],
+        kql: 'triggerId: ("workflow.execution.failed" or "cases.created")',
       }),
       expect.objectContaining({ enabled: true })
     );

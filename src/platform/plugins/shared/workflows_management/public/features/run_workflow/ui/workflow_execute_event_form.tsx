@@ -71,7 +71,7 @@ import {
   useTriggerEventGridScrollLoadMore,
 } from './workflow_execute_event_form_infinite_list';
 import {
-  doesSubmittedKqlReferenceTriggerIdField,
+  buildDefaultTriggerEventSearchQuery,
   getWorkflowCustomTriggerTypeIds,
 } from './workflow_execute_modal_helpers';
 import { WorkflowTriggerEventDataGridCellPopover } from './workflow_trigger_event_data_grid_cell_popover';
@@ -573,8 +573,12 @@ export const WorkflowExecuteEventForm = ({
     [customTriggerTypeIds]
   );
 
-  const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
-  const [submittedQuery, setSubmittedQuery] = useState<Query>({ query: '', language: 'kuery' });
+  const [query, setQuery] = useState<Query>(() =>
+    buildDefaultTriggerEventSearchQuery(getWorkflowCustomTriggerTypeIds(definition))
+  );
+  const [submittedQuery, setSubmittedQuery] = useState<Query>(() =>
+    buildDefaultTriggerEventSearchQuery(getWorkflowCustomTriggerTypeIds(definition))
+  );
   const [timeRange, setTimeRange] = useState<TimeRange>(
     () => services.data?.query?.timefilter?.timefilter?.getTimeDefaults?.() ?? TIMEPICKER_FALLBACK
   );
@@ -594,9 +598,10 @@ export const WorkflowExecuteEventForm = ({
   }, []);
 
   useEffect(() => {
-    setQuery({ query: '', language: 'kuery' });
-    setSubmittedQuery({ query: '', language: 'kuery' });
-  }, [customTriggerIdsKey]);
+    const defaultQuery = buildDefaultTriggerEventSearchQuery(customTriggerTypeIds);
+    setQuery(defaultQuery);
+    setSubmittedQuery(defaultQuery);
+  }, [customTriggerIdsKey, customTriggerTypeIds]);
 
   useEffect(() => {
     const dataViews = services.dataViews;
@@ -662,21 +667,16 @@ export const WorkflowExecuteEventForm = ({
     eventDrivenExecutionEnabled && !isEventConfigLoading && Boolean(services.http);
 
   const searchParams = useMemo(() => {
-    const kqlTrimmed = submittedQuery.query.trim();
-    const kqlForRequest = kqlTrimmed || undefined;
-    const kqlAlreadyScopesTriggerId =
-      kqlTrimmed.length > 0 && doesSubmittedKqlReferenceTriggerIdField(kqlTrimmed);
+    const submittedKql =
+      typeof submittedQuery.query === 'string' ? submittedQuery.query.trim() : '';
     return {
-      ...(kqlAlreadyScopesTriggerId || customTriggerTypeIds.length === 0
-        ? {}
-        : { triggerIds: customTriggerTypeIds }),
-      ...(kqlForRequest !== undefined ? { kql: kqlForRequest } : {}),
+      ...(submittedKql.length > 0 ? { kql: submittedKql } : {}),
       from: timeRange.from,
       to: timeRange.to,
       page: pageIndex + 1,
       size: PAGE_SIZE,
     };
-  }, [customTriggerTypeIds, submittedQuery.query, timeRange.from, timeRange.to, pageIndex]);
+  }, [submittedQuery, timeRange.from, timeRange.to, pageIndex]);
 
   const {
     data: searchResult,
@@ -702,7 +702,7 @@ export const WorkflowExecuteEventForm = ({
      * (isPreviousData false on the first paint), the accumulator applies hits and this reset
      * would clear them afterward with no dependency change, leaving the grid empty.
      */
-  }, [definition, submittedQuery.query, timeRange.from, timeRange.to, setAccumulatedHits]);
+  }, [definition, submittedQuery, timeRange.from, timeRange.to, setAccumulatedHits]);
 
   const handleLoadMoreTriggerEventPage = useCallback(() => {
     setPageIndex((p) => p + 1);

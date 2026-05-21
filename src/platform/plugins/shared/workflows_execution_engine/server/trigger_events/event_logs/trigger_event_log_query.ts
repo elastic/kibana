@@ -18,7 +18,6 @@ import type {
 
 export interface SearchTriggerEventLogParams {
   spaceId: string;
-  triggerIds?: string[];
   kql?: string;
   from?: string;
   to?: string;
@@ -92,12 +91,6 @@ const buildTriggerEventLogQueryClauses = (
           ...(params.to !== undefined ? { lte: params.to } : {}),
         },
       },
-    });
-  }
-
-  if (params.triggerIds !== undefined && params.triggerIds.length > 0) {
-    filter.push({
-      terms: { triggerId: params.triggerIds },
     });
   }
 

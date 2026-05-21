@@ -19,6 +19,7 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type {
+  TriggerEventsContract,
   WorkflowsExecutionEnginePluginSetup,
   WorkflowsExecutionEnginePluginStart,
 } from './types';

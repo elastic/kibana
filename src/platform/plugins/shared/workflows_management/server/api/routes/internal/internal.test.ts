@@ -24,7 +24,6 @@ describe('Internal Routes', () => {
   /** Matches {@link registerTriggerEventsLogRoutes} → execution engine `searchTriggerEventLog`. */
   interface TriggerEventLogSearchCall {
     spaceId: string;
-    triggerIds?: string[];
     kql?: string;
     from?: string;
     to?: string;
@@ -160,7 +159,7 @@ describe('Internal Routes', () => {
   it('forwards trigger event log search params to the execution engine', async () => {
     const response = httpServerMock.createResponseFactory();
     const request = httpServerMock.createKibanaRequest({
-      body: { triggerIds: ['t1'], kql: 'triggerId : x', page: 2, size: 25 },
+      body: { kql: 'triggerId : x', page: 2, size: 25 },
     });
 
     await routeHandlers[`POST:/internal/workflows/trigger_events/_search`].handler(
@@ -171,7 +170,6 @@ describe('Internal Routes', () => {
 
     expect(mockSearchTriggerEventLog).toHaveBeenCalledWith({
       spaceId: 'default',
-      triggerIds: ['t1'],
       kql: 'triggerId : x',
       from: undefined,
       to: undefined,

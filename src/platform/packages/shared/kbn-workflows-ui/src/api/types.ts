@@ -126,7 +126,6 @@ export interface WorkflowsConfig {
 }
 
 export interface SearchTriggerEventLogParams {
-  triggerIds?: string[];
   kql?: string;
   from?: string;
   to?: string;

@@ -240,7 +240,6 @@ describe('WorkflowApi', () => {
   describe('searchTriggerEvents', () => {
     it('should call POST /internal/workflows/trigger_events/_search with body', async () => {
       const params = {
-        triggerIds: ['t1'],
         kql: 'eventId: "e1"',
         from: '2025-01-01',
         to: '2025-12-31',

@@ -11,7 +11,8 @@ import type { WorkflowYaml } from '@kbn/workflows';
 import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
 import type { NormalizedWorkflowInputs } from './workflow_execute_modal_helpers';
 import {
-  doesSubmittedKqlReferenceTriggerIdField,
+  buildDefaultTriggerEventSearchQuery,
+  buildWorkflowTriggerScopeKql,
   getFallbackTriggerTab,
   getWorkflowCustomTriggerTypeIds,
   hasCustomEventTrigger,
@@ -106,36 +107,35 @@ describe('getWorkflowCustomTriggerTypeIds', () => {
   });
 });
 
-describe('doesSubmittedKqlReferenceTriggerIdField', () => {
-  it('returns false for empty or whitespace', () => {
-    expect(doesSubmittedKqlReferenceTriggerIdField('')).toBe(false);
-    expect(doesSubmittedKqlReferenceTriggerIdField('   ')).toBe(false);
+describe('buildWorkflowTriggerScopeKql', () => {
+  it('returns undefined when there are no trigger ids', () => {
+    expect(buildWorkflowTriggerScopeKql([])).toBeUndefined();
   });
 
-  it('returns true when the root triggerId field is used', () => {
-    expect(doesSubmittedKqlReferenceTriggerIdField('triggerId: "cases.created"')).toBe(true);
-    expect(doesSubmittedKqlReferenceTriggerIdField('eventId: x or triggerId: *')).toBe(true);
+  it('quotes a single custom trigger id', () => {
+    expect(buildWorkflowTriggerScopeKql(['custom.trigger'])).toBe('triggerId: "custom.trigger"');
   });
 
-  it('returns true for subfields under triggerId', () => {
-    expect(doesSubmittedKqlReferenceTriggerIdField('triggerId.keyword: foo')).toBe(true);
+  it('builds an OR clause for multiple trigger ids', () => {
+    expect(buildWorkflowTriggerScopeKql(['workflow.execution.failed', 'cases.created'])).toBe(
+      'triggerId: ("workflow.execution.failed" or "cases.created")'
+    );
+  });
+});
+
+describe('buildDefaultTriggerEventSearchQuery', () => {
+  it('seeds the KQL bar with workflow trigger scope', () => {
+    expect(buildDefaultTriggerEventSearchQuery(['custom.trigger'])).toEqual({
+      query: 'triggerId: "custom.trigger"',
+      language: 'kuery',
+    });
   });
 
-  it('returns false when only other fields are used', () => {
-    expect(doesSubmittedKqlReferenceTriggerIdField('eventId: e1')).toBe(false);
-    expect(doesSubmittedKqlReferenceTriggerIdField('payload.caseId: x')).toBe(false);
-  });
-
-  it('returns false for free-text KQL with no field clauses', () => {
-    expect(doesSubmittedKqlReferenceTriggerIdField('opbeans')).toBe(false);
-  });
-
-  it('returns false for malformed KQL', () => {
-    expect(doesSubmittedKqlReferenceTriggerIdField('triggerId:')).toBe(false);
-  });
-
-  it('returns false when triggerId appears only inside another field name', () => {
-    expect(doesSubmittedKqlReferenceTriggerIdField('payload.triggerId: x')).toBe(false);
+  it('uses an empty query when the workflow has no custom triggers', () => {
+    expect(buildDefaultTriggerEventSearchQuery([])).toEqual({
+      query: '',
+      language: 'kuery',
+    });
   });
 });
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getKqlFieldNamesFromExpression } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { isTriggerType } from '@kbn/workflows';
 import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
@@ -91,19 +91,26 @@ export function getWorkflowCustomTriggerTypeIds(definition: WorkflowYaml | null)
 
 const ROOT_TRIGGER_ID_FIELD = 'triggerId';
 
-export function doesSubmittedKqlReferenceTriggerIdField(kql: string): boolean {
-  const trimmed = kql.trim();
-  if (!trimmed) {
-    return false;
+function escapeKueryQuotedValue(value: string): string {
+  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
+/** KQL that scopes search to the workflow's custom trigger type ids. */
+export function buildWorkflowTriggerScopeKql(triggerIds: readonly string[]): string | undefined {
+  if (triggerIds.length === 0) {
+    return undefined;
   }
-  try {
-    const fields = getKqlFieldNamesFromExpression(trimmed);
-    return fields.some(
-      (field) => field === ROOT_TRIGGER_ID_FIELD || field.startsWith(`${ROOT_TRIGGER_ID_FIELD}.`)
-    );
-  } catch {
-    return false;
+  if (triggerIds.length === 1) {
+    return `${ROOT_TRIGGER_ID_FIELD}: "${escapeKueryQuotedValue(triggerIds[0])}"`;
   }
+  const orClause = triggerIds.map((id) => `"${escapeKueryQuotedValue(id)}"`).join(' or ');
+  return `${ROOT_TRIGGER_ID_FIELD}: (${orClause})`;
+}
+
+/** Default SearchBar query: workflow trigger scope visible and editable in the KQL bar. */
+export function buildDefaultTriggerEventSearchQuery(workflowTriggerIds: readonly string[]): Query {
+  const scopeKql = buildWorkflowTriggerScopeKql(workflowTriggerIds);
+  return { query: scopeKql ?? '', language: 'kuery' };
 }
 
 export function getDefaultTrigger(definition: WorkflowYaml | null): WorkflowTriggerTab {
