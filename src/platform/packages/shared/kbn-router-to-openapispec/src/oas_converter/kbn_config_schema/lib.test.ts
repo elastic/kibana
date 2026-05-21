@@ -8,6 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { OpenAPIV3 } from 'openapi-types';
 import {
   is,
   convert,
@@ -290,6 +291,70 @@ describe('convert', () => {
     expect(defaultValue).toHaveBeenCalledTimes(1);
   });
 
+  test('does not require maybe referenced fields in array item schemas', () => {
+    const timeRangeSchema = schema.object(
+      {
+        from: schema.string(),
+        to: schema.string(),
+      },
+      { meta: { id: 'arrayItemTimeRangeSchema' } }
+    );
+
+    const converted = convert(
+      schema.object({
+        dashboards: schema.arrayOf(
+          schema.object({
+            data: schema.object({
+              time_range: schema.maybe(timeRangeSchema),
+              title: schema.string(),
+            }),
+          })
+        ),
+      })
+    );
+
+    const dashboardsSchema = converted.schema.properties!.dashboards as OpenAPIV3.ArraySchemaObject;
+    const dashboardItemSchema = dashboardsSchema.items as OpenAPIV3.SchemaObject;
+    const dataSchema = dashboardItemSchema.properties!.data as OpenAPIV3.SchemaObject;
+
+    expect(dataSchema.required).toEqual(['title']);
+  });
+
+  test('does not require maybe referenced fields in shared array item schemas', () => {
+    const timeRangeSchema = schema.object(
+      {
+        from: schema.string(),
+        to: schema.string(),
+      },
+      { meta: { id: 'sharedArrayItemTimeRangeSchema' } }
+    );
+    const dashboardSchema = schema.object(
+      {
+        data: schema.object({
+          time_range: schema.maybe(timeRangeSchema),
+          title: schema.string(),
+        }),
+      },
+      { meta: { id: 'sharedArrayItemDashboardSchema' } }
+    );
+
+    const converted = convert(
+      schema.object({
+        dashboards: schema.arrayOf(dashboardSchema),
+      })
+    );
+
+    const dashboardsSchema = converted.schema.properties!.dashboards as OpenAPIV3.ArraySchemaObject;
+    const dashboardItemSchema = converted.shared
+      .sharedArrayItemDashboardSchema as OpenAPIV3.SchemaObject;
+    const dataSchema = dashboardItemSchema.properties!.data as OpenAPIV3.SchemaObject;
+
+    expect(dashboardsSchema.items).toEqual({
+      $ref: '#/components/schemas/sharedArrayItemDashboardSchema',
+    });
+    expect(dataSchema.required).toEqual(['title']);
+  });
+
   test('strips internal "x-oas-" markers from converted schemas', () => {
     const referencedSchema = schema.object(
       { value: schema.string() },
@@ -301,11 +366,22 @@ describe('convert', () => {
         schema.object({
           inline: schema.maybe(
             schema.object({
-              value: schema.string(),
+              value: schema.arrayOf(schema.maybe(schema.string())),
               value2: schema.number({ defaultValue: () => 42 }),
               value3: schema.maybe(
                 schema.object({ foo: schema.string({ maxLength: 33 }) }, { meta: { id: 'Value3' } })
               ),
+              value4: schema.oneOf([schema.string(), schema.maybe(schema.number())]),
+              value5: schema.discriminatedUnion('type', [
+                schema.object(
+                  { type: schema.literal('1'), value: schema.maybe(schema.number()) },
+                  { meta: { id: 'one' } }
+                ),
+                schema.object(
+                  { type: schema.literal('2'), value: schema.maybe(schema.string()) },
+                  { meta: { id: 'two' } }
+                ),
+              ]),
             })
           ),
           referenced: schema.maybe(referencedSchema),

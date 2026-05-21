@@ -59,9 +59,9 @@ const hasRuntimeOptionalMetadata = (description: Joi.Description): boolean => {
   );
 };
 
-const addInternalOptionalMarker = (
-  schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject
-): void => {
+type Schema = OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject;
+
+const addInternalOptionalMarker = (schema: Schema): void => {
   Object.defineProperty(schema, metaFields.META_FIELD_X_OAS_OPTIONAL, {
     configurable: true,
     enumerable: false,
@@ -70,9 +70,87 @@ const addInternalOptionalMarker = (
   });
 };
 
+type DescriptionWithContainers = Joi.Description & {
+  keys?: Record<string, Joi.Description>;
+  matches?: Array<{
+    schema?: Joi.Description;
+    then?: Joi.Description;
+    otherwise?: Joi.Description;
+    switch?: Array<{ then?: Joi.Description; otherwise?: Joi.Description }>;
+  }>;
+  items?: Joi.Description[];
+  rules?: Array<{ args?: { key?: Joi.Description; value?: Joi.Description } }>;
+  whens?: Array<{ then?: Joi.Description; otherwise?: Joi.Description }>;
+};
+
+const arrayContainers = ['allOf', 'oneOf', 'anyOf'] as const;
+
+const applyRuntimeMetadataToContainer = (
+  descriptions: Joi.Description[],
+  schemas: Schema[] | undefined
+): void => {
+  if (!schemas) {
+    return;
+  }
+
+  descriptions.forEach((childDescription, index) => {
+    const childSchema = schemas[index];
+    if (childSchema) {
+      applyPropertyRuntimeMetadata(childDescription, childSchema);
+    }
+  });
+};
+
+const isDescription = (
+  description: Joi.Description | undefined
+): description is Joi.Description => {
+  return Boolean(description);
+};
+
+const getMatchDescriptions = (matches: DescriptionWithContainers['matches']): Joi.Description[] => {
+  if (!matches) {
+    return [];
+  }
+
+  return matches.flatMap((match) => {
+    const descriptions = [
+      match.schema,
+      match.then,
+      match.otherwise,
+      ...(match.switch?.flatMap((switchCase) => [switchCase.then, switchCase.otherwise]) ?? []),
+    ];
+
+    return descriptions.filter(isDescription);
+  });
+};
+
+const getWhenDescriptions = (whens: DescriptionWithContainers['whens']): Joi.Description[] => {
+  if (!whens) {
+    return [];
+  }
+
+  return whens.flatMap((when) => [when.then, when.otherwise].filter(isDescription));
+};
+
+const getRuleDescriptions = (rules: DescriptionWithContainers['rules']): Joi.Description[] => {
+  return rules?.flatMap(({ args }) => [args?.key, args?.value].filter(isDescription)) ?? [];
+};
+
+const getChildDescriptions = (description: Joi.Description): Joi.Description[] => {
+  const { keys, items, matches, rules, whens } = description as DescriptionWithContainers;
+
+  return [
+    ...Object.values(keys ?? {}),
+    ...(items ?? []),
+    ...getMatchDescriptions(matches),
+    ...getRuleDescriptions(rules),
+    ...getWhenDescriptions(whens),
+  ];
+};
+
 const applyPropertyRuntimeMetadata = (
   description: Joi.Description,
-  openApiSchema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject
+  openApiSchema: Schema
 ): void => {
   if (isReferenceObject(openApiSchema)) {
     if (hasRuntimeOptionalMetadata(description)) {
@@ -81,17 +159,42 @@ const applyPropertyRuntimeMetadata = (
     return;
   }
 
-  const { keys } = description as Joi.Description & { keys?: Record<string, Joi.Description> };
+  const { keys, items, matches, rules, whens } = description as DescriptionWithContainers;
   if (keys && openApiSchema.properties) {
     for (const [key, childDescription] of Object.entries(keys)) {
-      const childSchema = openApiSchema.properties[key] as
-        | OpenAPIV3.SchemaObject
-        | OpenAPIV3.ReferenceObject
-        | undefined;
+      const childSchema = openApiSchema.properties[key] as Schema | undefined;
       if (childSchema) {
         applyPropertyRuntimeMetadata(childDescription, childSchema);
       }
     }
+  }
+
+  if (items?.[0] && openApiSchema.type === 'array') {
+    applyPropertyRuntimeMetadata(
+      items[0],
+      (openApiSchema as OpenAPIV3.ArraySchemaObject).items as Schema
+    );
+  }
+
+  const matchDescriptions = getMatchDescriptions(matches);
+  const whenDescriptions = getWhenDescriptions(whens);
+  for (const arrayContainer of arrayContainers) {
+    const childSchemas = openApiSchema[arrayContainer] as Schema[] | undefined;
+    applyRuntimeMetadataToContainer(matchDescriptions, childSchemas);
+    applyRuntimeMetadataToContainer(whenDescriptions, childSchemas);
+  }
+
+  if (!openApiSchema.oneOf && !openApiSchema.anyOf && !openApiSchema.allOf) {
+    const [singleMatchDescription] = matchDescriptions;
+    if (matchDescriptions.length === 1 && singleMatchDescription) {
+      applyPropertyRuntimeMetadata(singleMatchDescription, openApiSchema);
+    }
+  }
+
+  const additionalProperties = openApiSchema.additionalProperties;
+  const valueDescription = rules?.find(({ args }) => args?.value)?.args?.value;
+  if (valueDescription && additionalProperties && typeof additionalProperties === 'object') {
+    applyPropertyRuntimeMetadata(valueDescription, additionalProperties as Schema);
   }
 };
 
@@ -104,61 +207,8 @@ const applySharedSchemaRuntimeMetadata = (
     applyPropertyRuntimeMetadata(description, sharedSchemas[id]);
   }
 
-  const { keys, matches, items, rules, whens } = description as Joi.Description & {
-    keys?: Record<string, Joi.Description>;
-    matches?: Array<{
-      schema?: Joi.Description;
-      then?: Joi.Description;
-      otherwise?: Joi.Description;
-      switch?: Array<{ then?: Joi.Description; otherwise?: Joi.Description }>;
-    }>;
-    items?: Joi.Description[];
-    rules?: Array<{ args?: { key?: Joi.Description; value?: Joi.Description } }>;
-    whens?: Array<{ then?: Joi.Description; otherwise?: Joi.Description }>;
-  };
-
-  Object.values(keys ?? {}).forEach((childDescription) => {
+  getChildDescriptions(description).forEach((childDescription) => {
     applySharedSchemaRuntimeMetadata(childDescription, sharedSchemas);
-  });
-  matches?.forEach(({ schema: matchedDescription }) => {
-    if (matchedDescription) {
-      applySharedSchemaRuntimeMetadata(matchedDescription, sharedSchemas);
-    }
-  });
-  matches?.forEach((match) => {
-    if (match.then) {
-      applySharedSchemaRuntimeMetadata(match.then, sharedSchemas);
-    }
-    if (match.otherwise) {
-      applySharedSchemaRuntimeMetadata(match.otherwise, sharedSchemas);
-    }
-    match.switch?.forEach((switchCase) => {
-      if (switchCase.then) {
-        applySharedSchemaRuntimeMetadata(switchCase.then, sharedSchemas);
-      }
-      if (switchCase.otherwise) {
-        applySharedSchemaRuntimeMetadata(switchCase.otherwise, sharedSchemas);
-      }
-    });
-  });
-  items?.forEach((itemDescription) => {
-    applySharedSchemaRuntimeMetadata(itemDescription, sharedSchemas);
-  });
-  rules?.forEach(({ args }) => {
-    if (args?.key) {
-      applySharedSchemaRuntimeMetadata(args.key, sharedSchemas);
-    }
-    if (args?.value) {
-      applySharedSchemaRuntimeMetadata(args.value, sharedSchemas);
-    }
-  });
-  whens?.forEach((when) => {
-    if (when.then) {
-      applySharedSchemaRuntimeMetadata(when.then, sharedSchemas);
-    }
-    if (when.otherwise) {
-      applySharedSchemaRuntimeMetadata(when.otherwise, sharedSchemas);
-    }
   });
 };
 
