@@ -7,7 +7,7 @@
 
 import type { api } from '@elastic/opentelemetry-node/sdk';
 import { resources, tracing } from '@elastic/opentelemetry-node/sdk';
-import { isInferenceSpan } from '@kbn/inference-tracing';
+import { isAgentBuilderSpan } from './with_agent_builder_context';
 
 const SHOULD_TRACK_ATTR = '_agent_builder_should_track';
 const AGENT_BUILDER_DATASET_RESOURCE = resources.resourceFromAttributes({
@@ -38,7 +38,7 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
     if (!this.isEnabled()) {
       return;
     }
-    if (isInferenceSpan(span, parentContext)) {
+    if (isAgentBuilderSpan(span, parentContext)) {
       span.setAttribute(SHOULD_TRACK_ATTR, true);
       this.batchProcessor.onStart(span, parentContext);
     }
