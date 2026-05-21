@@ -45150,6 +45150,7 @@ groups:
     annotations:
       code_generation:
         metric_value_type: double
+        exclude: true
   - id: metric.k8s.container.cpu.limit.current
     type: metric
     brief: Maximum CPU resource limit currently configured for a running container.
@@ -45255,6 +45256,7 @@ groups:
     annotations:
       code_generation:
         metric_value_type: double
+        exclude: true
   - id: metric.k8s.container.cpu.request.current
     type: metric
     brief: CPU resource requested currently configured for a running container.

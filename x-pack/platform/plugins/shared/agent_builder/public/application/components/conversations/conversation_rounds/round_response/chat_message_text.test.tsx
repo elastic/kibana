@@ -88,7 +88,12 @@ function createStartDependencies() {
     cloud: {},
     share: {},
     uiActions: {},
-  } as AgentBuilderStartDependencies;
+    unifiedSearch: {
+      ui: {
+        SearchBar: () => null,
+      },
+    },
+  } as unknown as AgentBuilderStartDependencies;
 }
 
 function getAST(markdown: string) {

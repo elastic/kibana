@@ -47,24 +47,7 @@ open target/coverage/jest/index.html
 
 ## API integration testing
 
-API tests are separated in two suites:
-
-- a basic license test suite
-- a trial license test suite (the equivalent of gold+)
-
-This requires separate test servers and test runners.
-
-### Basic
-
-```
-# Start server
-node scripts/functional_tests_server --config x-pack/solutions/observability/test/observability_api_integration/basic/config.ts
-
-# Run tests
-node scripts/functional_test_runner --config x-pack/solutions/observability/test/observability_api_integration/basic/config.ts
-```
-
-The API tests for "basic" are located in `x-pack/solutions/observability/test/observability_api_integration/basic/tests`.
+API tests run under a trial license (the equivalent of gold+). Basic-license behavior is covered by unit tests (see `server/lib/annotations/create_annotations_client.test.ts`).
 
 ### Trial
 
