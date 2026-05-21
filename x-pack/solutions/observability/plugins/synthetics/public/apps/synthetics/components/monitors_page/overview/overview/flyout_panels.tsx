@@ -125,6 +125,7 @@ export const FlyoutLastTestRun = ({
         <>
           <EuiSpacer size="s" />
           <EuiCallOut
+            announceOnMount
             data-test-subj="flyoutLastTestRunErrorCallout"
             title={latestPing.error.message}
             size="s"
