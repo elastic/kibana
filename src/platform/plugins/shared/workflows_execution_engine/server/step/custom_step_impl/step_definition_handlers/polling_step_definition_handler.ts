@@ -9,7 +9,11 @@
 
 import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
-import { DEFAULT_POLL_CEILINGS } from '@kbn/workflows-extensions/server';
+import {
+  DEFAULT_POLL_CEILINGS,
+  isPollOnlyStepDefinition,
+  isStartPlusPollStepDefinition,
+} from '@kbn/workflows-extensions/server';
 import type {
   DurablePhaseResult,
   PollCeilings,
@@ -72,9 +76,12 @@ export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
   ): Promise<RunStepResult> {
     let res;
 
-    if ('start' in this.stepDefinition && !this.getDurableStepState().initialStartState?.isStart) {
+    if (
+      isStartPlusPollStepDefinition(this.stepDefinition) &&
+      !this.getDurableStepState().initialStartState?.isStart
+    ) {
       res = await this.handleStart(input, rawInput, config);
-    } else if (typeof this.stepDefinition.poll === 'function') {
+    } else if (isPollOnlyStepDefinition(this.stepDefinition)) {
       res = await this.handlePoll(input, rawInput, config);
     } else {
       throw new Error(`Step "${this.node.stepType}" has no "start" or "poll" phase.`);
@@ -88,7 +95,7 @@ export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
     rawInput: unknown,
     config: Record<string, unknown>
   ): Promise<DurablePhaseResult> {
-    if (!('start' in this.stepDefinition)) {
+    if (!isStartPlusPollStepDefinition(this.stepDefinition)) {
       throw new Error(`Step "${this.node.stepType}" has no "start" phase.`);
     }
 

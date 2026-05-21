@@ -10,7 +10,12 @@
 import type { IRouter } from '@kbn/core/server';
 import { createSHA256Hash } from '@kbn/crypto';
 import type { ServerStepRegistry } from '../step_registry';
-import { isPollStepDefinition, type RegisteredStepDefinition } from '../step_registry/types';
+import {
+  type CommonServerStepDefinition,
+  isOneShotStepDefinition,
+  isPollOnlyStepDefinition,
+  isStartPlusPollStepDefinition,
+} from '../step_registry/types';
 
 const ROUTE_PATH = '/internal/workflows_extensions/step_definitions';
 
@@ -49,37 +54,37 @@ export function registerGetStepDefinitionsRoute(
 }
 
 /**
- * Builds a stable SHA-256 fingerprint of a step's implementation, covering
- * every callable that the step author writes:
+ * Builds a stable SHA-256 fingerprint of a step's author-written callables for
+ * the Scout approval fixture (`approved_step_definitions.ts`).
  *
- * - The legacy `handler` (when present)
- * - The `start` phase (when present)
- * - The root-level `poll` function
- * - The `onCancel` cleanup
+ * Hashing is mode-specific (mutually exclusive shapes):
  *
- * Backward compatibility: steps that use only the legacy `handler` field
- * (no `onCancel`, `start`, or `poll`) produce the same hash as before, so the
- * existing approved fixture stays valid for unchanged legacy steps.
+ * - **Single-shot** (`createServerStepDefinition` with `handler` only): SHA-256 of
+ *   `handler.toString()`. Unchanged from the original approval flow so legacy steps
+ *   keep their existing approved hashes.
+ * - **Poll-only** (`createPollServerStepDefinition` without `start`): SHA-256 of
+ *   `poll.toString()` only.
+ * - **Start + poll** (`createPollServerStepDefinition` with `start` and `poll`):
+ *   SHA-256 of `start` and `poll` source joined with `\n--\n` (order: start, then poll).
  *
- * Newer shapes (with `start`/`poll`/`onCancel`) join all present implementations
- * with a delimiter so adding poll support to an existing step changes the
- * hash and triggers re-approval.
+ * `pollPolicy`, `pollCeilings`, and `onCancel` are not hashed — only the phase
+ * functions that implement step behavior. Changing policy/ceilings or cancel cleanup
+ * without editing `poll` / `start` / `handler` does not change the hash.
  */
-function hashStepImplementation(definition: RegisteredStepDefinition): string {
-  const handler = 'handler' in definition ? definition.handler : undefined;
-  const start = 'start' in definition ? definition.start : undefined;
-  const poll = isPollStepDefinition(definition) ? definition.poll : undefined;
-  const { onCancel } = definition;
-
-  if (handler && !start && !poll && !onCancel) {
-    return createSHA256Hash(handler.toString());
+function hashStepImplementation(definition: CommonServerStepDefinition): string {
+  if (isStartPlusPollStepDefinition(definition)) {
+    return createSHA256Hash(
+      [definition.start.toString(), definition.poll.toString()].join('\n--\n')
+    );
   }
 
-  const parts = [
-    handler?.toString() ?? '',
-    start?.toString() ?? '',
-    poll?.toString() ?? '',
-    onCancel?.toString() ?? '',
-  ];
-  return createSHA256Hash(parts.join('\n--\n'));
+  if (isPollOnlyStepDefinition(definition)) {
+    return createSHA256Hash(definition.poll.toString());
+  }
+
+  if (isOneShotStepDefinition(definition)) {
+    return createSHA256Hash(definition.handler.toString());
+  }
+
+  throw new Error(`Unknown step definition type: ${JSON.stringify(definition)}`);
 }

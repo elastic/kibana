@@ -48,23 +48,29 @@ export type {
   PollOnlyStepDefinition,
   StartPlusPollStepDefinition,
   PollStepDefinition,
-  RegisteredStepDefinition,
   StepHandler,
   StepHandlerContext,
   StepHandlerResult,
   OnCancelHandler,
   StartWithHandoffHandler,
   PollHandler,
-  PollContext as PollHandlerContext,
+  PollHandlerContext,
   PollPolicy,
   PollCeilings,
   PhaseDoneResult,
   PhaseErrorResult,
   DurablePhaseResult,
   PollContinueResult,
+  CommonServerStepDefinition,
+  RegisteredStepDefinition,
 } from './step_registry/types';
 
-export { isPollStepDefinition } from './step_registry/types';
+export {
+  isOneShotStepDefinition,
+  isPollStepDefinition,
+  isStartPlusPollStepDefinition,
+  isPollOnlyStepDefinition,
+} from './step_registry/types';
 
 export {
   createServerStepDefinition,
