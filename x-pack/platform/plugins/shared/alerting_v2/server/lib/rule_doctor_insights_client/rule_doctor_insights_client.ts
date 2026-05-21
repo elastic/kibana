@@ -16,6 +16,7 @@ import {
   type RuleDoctorInsightDoc,
   type RuleDoctorInsightStatus,
 } from '../../resources/indices/rule_doctor_insights';
+import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
 import type { ListInsightsParams, ListInsightsResult, BulkIndexInsightsResult } from './types';
 
 const DEFAULT_PAGE_SIZE = 20;
@@ -64,7 +65,10 @@ export class RuleDoctorInsightsClient {
 
     const hit = response.hits.hits[0];
     if (!hit?._source) {
-      throw Boom.notFound(`Insight ${insightId} not found`);
+      throw Boom.notFound(`Insight ${insightId} not found`, {
+        code: ALERTING_V2_ERROR_CODES.INSIGHT_NOT_FOUND,
+        details: { insight_id: insightId },
+      });
     }
 
     return hit._source;
@@ -89,7 +93,10 @@ export class RuleDoctorInsightsClient {
 
     const hit = response.hits.hits[0];
     if (!hit?._id) {
-      throw Boom.notFound(`Insight ${insightId} not found`);
+      throw Boom.notFound(`Insight ${insightId} not found`, {
+        code: ALERTING_V2_ERROR_CODES.INSIGHT_NOT_FOUND,
+        details: { insight_id: insightId },
+      });
     }
 
     await this.esClient.update({
