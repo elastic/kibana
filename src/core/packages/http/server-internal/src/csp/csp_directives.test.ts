@@ -146,6 +146,67 @@ describe('CspDirectives', () => {
       );
     });
 
+    describe('report_only.connect_src', () => {
+      it('adds values only to the report-only connect-src directive, not the enforced one', () => {
+        const config = cspConfig.schema.validate({
+          report_only: { connect_src: ['https://report-only-connect.test'] },
+        });
+        const directives = CspDirectives.fromConfig(config);
+        const { enforceHeader, reportOnlyHeader } = directives.getCspHeadersByDisposition();
+
+        expect(enforceHeader).not.toContain('connect-src');
+        expect(reportOnlyHeader).toContain('https://report-only-connect.test');
+      });
+
+      it('does not affect the enforced header when report_only.connect_src is set', () => {
+        const config = cspConfig.schema.validate({
+          report_only: {
+            connect_src: [
+              'https://report-only-connect-a.test',
+              'https://report-only-connect-b.test',
+            ],
+          },
+        });
+        const directives = CspDirectives.fromConfig(config);
+        const { enforceHeader } = directives.getCspHeadersByDisposition();
+
+        expect(enforceHeader).not.toContain('report-only-connect');
+      });
+
+      it('appends to the existing report-only connect-src defaults', () => {
+        const config = cspConfig.schema.validate({
+          report_only: { connect_src: ['https://report-only-connect.test'] },
+        });
+        const directives = CspDirectives.fromConfig(config);
+        const { reportOnlyHeader } = directives.getCspHeadersByDisposition();
+
+        // Default report-only connect-src entries must still be present
+        expect(reportOnlyHeader).toContain("'self'");
+        expect(reportOnlyHeader).toContain('telemetry.elastic.co');
+        // And the user-supplied value is appended
+        expect(reportOnlyHeader).toContain('https://report-only-connect.test');
+      });
+
+      it('can be combined with top-level connect_src in the enforced header independently', () => {
+        const config = cspConfig.schema.validate({
+          connect_src: ['https://enforced-connect.test'],
+          report_only: { connect_src: ['https://report-only-connect.test'] },
+        });
+        const directives = CspDirectives.fromConfig(config);
+        const { enforceHeader, reportOnlyHeader } = directives.getCspHeadersByDisposition();
+
+        // enforced-connect.test appears only in the enforced header
+        expect(enforceHeader).toContain('https://enforced-connect.test');
+        expect(enforceHeader).not.toContain('https://report-only-connect.test');
+        // report-only-connect.test appears only in the report-only header
+        expect(reportOnlyHeader).toContain('https://report-only-connect.test');
+        // enforced-connect.test is also mirrored into report-only: because default-src 'none'
+        // is always present in the report-only rules, addDirectiveValue() automatically copies
+        // every enforced child-of-default-src value into the report-only policy.
+        expect(reportOnlyHeader).toContain('https://enforced-connect.test');
+      });
+    });
+
     it('merges additional CSP configs as expected', () => {
       const config = cspConfig.schema.validate({
         connect_src: ['*.foo.bar'], // should de-dupe these

@@ -32,7 +32,6 @@ import type {
 import {
   ActionsAttachmentPayloadRt,
   AlertAttachmentPayloadRt,
-  AttachmentType,
   EventAttachmentPayloadRt,
   ExternalReferenceNoSOAttachmentPayloadRt,
   ExternalReferenceSOAttachmentPayloadRt,
@@ -802,16 +801,12 @@ export const buildAttachmentRequestFromFileJSON = ({
 }: {
   owner: string;
   fileMetadata: FileJSON;
-}): AttachmentRequest => ({
+}): AttachmentRequestV2 => ({
   owner,
-  type: AttachmentType.externalReference,
-  externalReferenceId: fileMetadata.id,
-  externalReferenceStorage: {
-    type: ExternalReferenceStorageType.savedObject,
+  type: FILE_ATTACHMENT_TYPE,
+  attachmentId: fileMetadata.id,
+  metadata: {
     soType: FILE_SO_TYPE,
-  },
-  externalReferenceAttachmentTypeId: FILE_ATTACHMENT_TYPE,
-  externalReferenceMetadata: {
     files: [
       {
         name: fileMetadata.name,

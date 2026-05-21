@@ -54,7 +54,6 @@ const ContextMenuContent = ({ items, closePopover }: ContextMenuProps) => {
             <EuiContextMenuItem
               key={i}
               icon={item.icon}
-              size="s"
               href={item.href}
               onClick={item.onClick}
               data-test-subj={item['data-test-subj']}
@@ -119,7 +118,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
       .sort(({ order: orderA = Infinity }, { order: orderB = Infinity }) => orderA - orderB)
       .map(({ label, iconType, href, onClick, content }: UserMenuLink) => ({
         name: label,
-        icon: <EuiIcon type={iconType} size="m" />,
+        icon: <EuiIcon type={iconType} size="m" aria-hidden={true} />,
         href,
         onClick,
         'data-test-subj': `userMenuLink__${label}`,
@@ -139,7 +138,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
           defaultMessage="Edit profile"
         />
       ),
-      icon: <EuiIcon type="user" size="m" />,
+      icon: <EuiIcon type="user" size="m" aria-hidden={true} />,
       href: editProfileUrl,
       onClick: () => {
         setIsPopoverOpen(false);
@@ -163,7 +162,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
         defaultMessage="Log out"
       />
     ),
-    icon: <EuiIcon type="logOut" size="m" />,
+    icon: <EuiIcon type="logOut" size="m" aria-hidden={true} />,
     href: logoutUrl,
     'data-test-subj': 'logoutLink',
   });

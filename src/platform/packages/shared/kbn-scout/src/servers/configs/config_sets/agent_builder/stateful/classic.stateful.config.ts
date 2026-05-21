@@ -41,7 +41,6 @@ export const servers: ScoutServerConfig = {
         },
       ])}`,
       '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
-      '--uiSettings.overrides.agentContextLayer:experimentalFeatures=true',
       '--feature_flags.overrides.aiAssistant.aiAgents.enabled=true',
       '--uiSettings.overrides.aiAssistant:preferredChatExperience=agent',
       `--xpack.agentBuilder.githubBaseUrl=http://localhost:${AGENT_BUILDER_GITHUB_MOCK_PORT}`,

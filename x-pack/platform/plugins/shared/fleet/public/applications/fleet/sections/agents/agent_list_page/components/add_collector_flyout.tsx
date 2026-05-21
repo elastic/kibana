@@ -81,6 +81,12 @@ async function fetchOpampPolicy(spaceId?: string): Promise<any | null> {
   return res?.data?.item || null;
 }
 
+// OpAMP collectors run as a managed service; default to a 1-day inactivity timeout so
+// disconnected collectors flip to inactive promptly even if they don't cleanly report
+// AgentDisconnect. The Elastic Agent default of 2 weeks is too long for the collector
+// lifecycle. Tracking: https://github.com/elastic/ingest-dev/issues/7567
+const OPAMP_INACTIVITY_TIMEOUT_SECONDS = 24 * 60 * 60;
+
 async function createOpampPolicyWithHook(spaceId?: string): Promise<any> {
   return sendCreateAgentPolicyForRq({
     name: OPAMP_POLICY_NAME,
@@ -88,6 +94,7 @@ async function createOpampPolicyWithHook(spaceId?: string): Promise<any> {
     namespace: 'default',
     description: 'Agent policy for OpAMP collectors',
     is_managed: true,
+    inactivity_timeout: OPAMP_INACTIVITY_TIMEOUT_SECONDS,
   });
 }
 

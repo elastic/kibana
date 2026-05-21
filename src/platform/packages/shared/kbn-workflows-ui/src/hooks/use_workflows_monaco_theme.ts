@@ -58,6 +58,7 @@ export function useWorkflowsMonacoTheme() {
           transparentize(euiTheme.colors.primary, 0.1)
         ).hex(),
         'editorGutter.background': '#00000000',
+        'editorGutter.foldingControlForeground': euiTheme.colors.textSubdued,
         'minimap.background': '#00000000',
         'diffEditor.unchangedRegionBackground': '#00000000',
         'diffEditor.unchangedRegionForeground': euiTheme.colors.textSubdued,
