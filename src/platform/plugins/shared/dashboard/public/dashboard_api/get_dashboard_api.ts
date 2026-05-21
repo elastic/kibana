@@ -8,7 +8,7 @@
  */
 
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, merge, Subject } from 'rxjs';
 import { v4 } from 'uuid';
 
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
@@ -156,10 +156,12 @@ export function getDashboardApi({
     const { panels, pinned_panels } = layoutManager.internalApi.serializeLayout();
     const unifiedSearchState = unifiedSearchManager.internalApi.getState();
     const projectRoutingState = projectRoutingManager?.internalApi.getState();
+    const accessControlState = accessControlManager.internalApi.getState();
     return {
       ...settingsManager.internalApi.serializeSettings(),
       ...unifiedSearchState,
       ...projectRoutingState,
+      ...accessControlState,
       panels,
       pinned_panels,
     } satisfies DashboardState;
@@ -187,6 +189,12 @@ export function getDashboardApi({
     ...timesliceManager.api,
     ...pauseFetchManager.api,
     ...initializeTrackContentfulRender(),
+    anyStateChange$: merge(
+      settingsManager.internalApi.anyStateChange$,
+      unifiedSearchManager.internalApi.anyStateChange$,
+      layoutManager.internalApi.anyStateChange$,
+      ...(projectRoutingManager ? [projectRoutingManager.internalApi.anyStateChange$] : [])
+    ),
     executionContext: {
       type: 'dashboard',
       description: settingsManager.api.title$.value,
@@ -282,7 +290,6 @@ export function getDashboardApi({
     setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),
     type: DASHBOARD_API_TYPE as 'dashboard',
     uuid: v4(),
-    getPassThroughContext: () => creationOptions?.getPassThroughContext?.(),
     createdBy: readResult?.meta?.created_by,
     user,
     // TODO: accessControl$ and changeAccessMode should be moved to internalApi

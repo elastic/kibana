@@ -7,15 +7,14 @@
 
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useQuery } from '@kbn/react-query';
-import type { PrivMonPrivilegesResponse } from '../../../../common/api/entity_analytics';
+import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_analytics';
 import { useEntityAnalyticsRoutes } from '../api';
 
-// TODO: update to WATCHLISTS privileges route when backend is implemented; https://github.com/elastic/security-team/issues/16102
 export const useWatchlistsPrivileges = () => {
-  const { fetchWatchlistPrivileges } = useEntityAnalyticsRoutes();
-  return useQuery<PrivMonPrivilegesResponse, SecurityAppError>({
-    queryKey: ['GET', 'FETCH_WATCHLIST_PRIVILEGES'],
-    queryFn: fetchWatchlistPrivileges,
+  const { fetchWatchlistsPrivileges } = useEntityAnalyticsRoutes();
+  return useQuery<EntityAnalyticsPrivileges, SecurityAppError>({
+    queryKey: ['GET', 'FETCH_WATCHLISTS_PRIVILEGES'],
+    queryFn: fetchWatchlistsPrivileges,
     retry: 0,
   });
 };

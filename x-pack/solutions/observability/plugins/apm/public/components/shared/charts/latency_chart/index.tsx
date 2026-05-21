@@ -15,7 +15,7 @@ import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useTransactionLatencyChartsFetcher } from '../../../../hooks/use_transaction_latency_chart_fetcher';
 import { TimeseriesChartWithContext } from '../timeseries_chart_with_context';
 import { getMaxY, getResponseTimeTickFormatter } from '../transaction_charts/helper';
-import { MLHeader } from '../transaction_charts/ml_header';
+import { OpenAnomalies } from '../../links/machine_learning_links/open_anomalies';
 import * as urlHelpers from '../../links/url_helpers';
 import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
 import { useEnvironmentsContext } from '../../../../context/environments_context/use_environments_context';
@@ -111,7 +111,7 @@ export function LatencyChart({ height, kuery }: Props) {
   ]);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem>
@@ -140,32 +140,38 @@ export function LatencyChart({ height, kuery }: Props) {
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <OpenInDiscover
-              variant="iconButton"
-              dataTestSubj="apmLatencyChartOpenInDiscover"
-              label={i18n.translate('xpack.apm.latencyChart.openTracesInDiscover', {
-                defaultMessage: 'Open traces in Discover',
-              })}
-              indexType="traces"
-              rangeFrom={rangeFrom}
-              rangeTo={rangeTo}
-              queryParams={{
-                kuery,
-                serviceName,
-                environment,
-                transactionName: transactionName ?? undefined,
-                transactionType,
-                sortDirection: 'DESC',
-              }}
-            />
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <OpenAnomalies
+                  dataTestSubj="apmLatencyChartOpenAnomalies"
+                  hasValidMlLicense={license?.getFeature('ml').isAvailable}
+                  mlJobId={preferredAnomalyTimeseries?.jobId}
+                  detectorType={AnomalyDetectorType.txLatency}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <OpenInDiscover
+                  variant="iconButton"
+                  dataTestSubj="apmLatencyChartOpenInDiscover"
+                  label={i18n.translate('xpack.apm.latencyChart.openTracesInDiscover', {
+                    defaultMessage: 'Open traces in Discover',
+                  })}
+                  indexType="traces"
+                  rangeFrom={rangeFrom}
+                  rangeTo={rangeTo}
+                  queryParams={{
+                    kuery,
+                    serviceName,
+                    environment,
+                    transactionName: transactionName ?? undefined,
+                    transactionType,
+                    sortDirection: 'DESC',
+                  }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <MLHeader
-          hasValidMlLicense={license?.getFeature('ml').isAvailable}
-          mlJobId={preferredAnomalyTimeseries?.jobId}
-        />
       </EuiFlexItem>
       <EuiFlexItem>
         <TimeseriesChartWithContext

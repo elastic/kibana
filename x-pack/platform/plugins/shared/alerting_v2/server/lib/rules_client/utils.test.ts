@@ -11,6 +11,8 @@ import {
   transformCreateRuleBodyToRuleSoAttributes,
   transformRuleSoAttributesToRuleApiResponse,
   buildUpdateRuleAttributes,
+  assertImmutableUnchanged,
+  pickImmutable,
 } from './utils';
 
 const serverFields = {
@@ -156,6 +158,49 @@ describe('utils', () => {
       const response = transformRuleSoAttributesToRuleApiResponse('rule-rt-1', soAttrs);
 
       expect(response.metadata.description).toBe('Round-trip desc');
+    });
+  });
+
+  describe('assertImmutableUnchanged', () => {
+    it('does not throw when all immutable fields match the existing rule', () => {
+      const existing = createRuleSoAttributes({ kind: 'alert' });
+
+      expect(() =>
+        assertImmutableUnchanged({ ...baseCreateData, kind: 'alert' }, existing)
+      ).not.toThrow();
+    });
+
+    it('throws Boom.conflict (409) when an immutable field differs', () => {
+      const existing = createRuleSoAttributes({ kind: 'alert' });
+
+      expect(() =>
+        assertImmutableUnchanged({ ...baseCreateData, kind: 'signal' }, existing)
+      ).toThrow(
+        expect.objectContaining({
+          isBoom: true,
+          output: expect.objectContaining({ statusCode: 409 }),
+          message: 'Some fields cannot be changed after creation: kind.',
+        })
+      );
+    });
+  });
+
+  describe('pickImmutable', () => {
+    it('returns only the fields declared in IMMUTABLE_RULE_FIELDS', () => {
+      const existing = createRuleSoAttributes({ kind: 'signal' });
+
+      expect(pickImmutable(existing)).toEqual({ kind: 'signal' });
+    });
+
+    it('preserves immutable fields when spread last over a mutated copy', () => {
+      const existing = createRuleSoAttributes({ kind: 'alert' });
+      // Simulate an earlier step in a builder that incorrectly mutates an
+      // immutable field. `pickImmutable(existing)` spread last must restore it.
+      const buggyIntermediate = { ...existing, kind: 'signal' as const };
+
+      const next = { ...buggyIntermediate, ...pickImmutable(existing) };
+
+      expect(next.kind).toBe('alert');
     });
   });
 });

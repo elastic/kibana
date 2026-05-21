@@ -13,7 +13,7 @@ import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
 
 export const DedicatedIndexSwitch: FC = () => {
-  const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
+  const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const [useDedicatedIndex, setUseDedicatedIndex] = useState(jobCreator.useDedicatedIndex);
 
   useEffect(() => {
@@ -21,6 +21,13 @@ export const DedicatedIndexSwitch: FC = () => {
     jobCreatorUpdate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [useDedicatedIndex]);
+
+  useEffect(() => {
+    if (jobCreator.useDedicatedIndex !== useDedicatedIndex) {
+      setUseDedicatedIndex(jobCreator.useDedicatedIndex);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobCreatorUpdated]);
 
   function toggleModelPlot() {
     setUseDedicatedIndex(!useDedicatedIndex);

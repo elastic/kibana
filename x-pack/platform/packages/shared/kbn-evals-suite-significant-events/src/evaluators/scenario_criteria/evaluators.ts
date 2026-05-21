@@ -12,7 +12,7 @@ export interface CreateScenarioCriteriaLlmEvaluatorOptions<
   TTaskOutput extends TaskOutput = TaskOutput
 > {
   criteriaFn: (criteria: EvaluationCriterion[]) => Evaluator<TExample, TTaskOutput>;
-  criteria: EvaluationCriterion[];
+  criteria?: EvaluationCriterion[];
   transformOutput?: (output: TTaskOutput) => TTaskOutput;
   name?: string;
 }
@@ -23,8 +23,13 @@ export interface CreateScenarioCriteriaLlmEvaluatorOptions<
  * infrastructure context"). Delegates to the provided {@link criteriaFn} which
  * typically binds to `evaluators.criteria()` from `@kbn/evals`.
  *
+ * When {@link criteria} is provided, those static criteria are used for every example.
+ * When omitted, the evaluator reads criteria dynamically from `expected.criteria`,
+ * allowing a single evaluator instance to handle examples with different criteria
+ * in a batched `runExperiment` call.
+ *
  * @param criteriaFn  Factory that builds a criteria evaluator from a list of criteria.
- * @param criteria    The scenario-specific evaluation criteria to judge against.
+ * @param criteria    Static evaluation criteria. When omitted, read from `expected.criteria` per example.
  * @param transformOutput  Optional transform applied to the raw output before it is
  *  sent to the criteria evaluator. Use this when the evaluator
  *  output wraps the relevant data (e.g. `{ features: [...] }`).
@@ -34,7 +39,7 @@ export const createScenarioCriteriaLlmEvaluator = <
   TTaskOutput extends TaskOutput = TaskOutput
 >({
   name = 'scenario_criteria',
-  criteria = [],
+  criteria,
   criteriaFn,
   transformOutput,
 }: CreateScenarioCriteriaLlmEvaluatorOptions<TExample, TTaskOutput>): Evaluator<
@@ -45,8 +50,10 @@ export const createScenarioCriteriaLlmEvaluator = <
   kind: 'LLM' as const,
   evaluate: async (params) => {
     const { input, output, expected, metadata } = params;
+    const resolvedCriteria =
+      criteria ?? (expected as Record<string, unknown> | null)?.criteria ?? [];
 
-    return criteriaFn(criteria).evaluate({
+    return criteriaFn(resolvedCriteria as EvaluationCriterion[]).evaluate({
       input,
       expected,
       output: transformOutput ? transformOutput(output) : output,

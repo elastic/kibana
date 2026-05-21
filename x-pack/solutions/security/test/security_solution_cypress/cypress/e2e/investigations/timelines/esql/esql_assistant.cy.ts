@@ -84,7 +84,7 @@ describe(
       it('should properly propagate esql query to discover when Timeline was not opened before', () => {
         openAssistant();
         cy.get('[data-test-subj="messageText"]')
-          .find('button[aria-label="Investigate in timeline"]')
+          .find('button[aria-label="Investigate in Timeline"]')
           .click();
         cy.contains('[data-test-subj="kibanaCodeEditor"]', `${ESQL_QUERY} | limit 1`);
         updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
@@ -97,7 +97,7 @@ describe(
         goToEsqlTab();
         openAssistant();
         cy.get('[data-test-subj="messageText"]')
-          .find('button[aria-label="Investigate in timeline"]')
+          .find('button[aria-label="Investigate in Timeline"]')
           .click();
         cy.contains('[data-test-subj="kibanaCodeEditor"]', `${ESQL_QUERY} | limit 1`);
         updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
@@ -125,7 +125,7 @@ describe(
         );
         cy.get('[data-test-subj="submit-chat"]').click();
         cy.get('[data-test-subj="messageText"]')
-          .find('button[aria-label="Investigate in timeline"]')
+          .find('button[aria-label="Investigate in Timeline"]')
           .click();
         cy.contains('[data-test-subj="timelineQueryInput"]', KQL_QUERY);
         cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').filter(':visible').click();
@@ -152,7 +152,7 @@ describe(
         );
         cy.get('[data-test-subj="submit-chat"]').click();
         cy.get('[data-test-subj="messageText"]')
-          .find('button[aria-label="Investigate in timeline"]')
+          .find('button[aria-label="Investigate in Timeline"]')
           .click();
         cy.contains('[data-test-subj="eqlQueryBarTextInput"]', `${EQL_QUERY}`);
         cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').filter(':visible').click();

@@ -98,7 +98,7 @@ export const getMonitorDetailsRoute = (
 const getMonitorsBreadcrumb = (syntheticsPath: string) => ({
   text: (
     <>
-      <EuiIcon size="s" type="chevronSingleLeft" />{' '}
+      <EuiIcon size="s" type="chevronSingleLeft" aria-hidden={true} />{' '}
       <FormattedMessage
         id="xpack.synthetics.monitorSummaryRoute.monitorBreadcrumb"
         defaultMessage="Monitors"

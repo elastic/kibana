@@ -10,8 +10,6 @@ import {
   ExternalServiceSimulator,
   getExternalServiceSimulatorPath,
 } from '@kbn/actions-simulators-plugin/server/plugin';
-import type { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
-import type { User } from '../../../../../common/types';
 import {
   Space1AllAtSpace1,
   GlobalReadAtSpace1,
@@ -19,26 +17,7 @@ import {
 } from '../../../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-
-const RETURN_URL = 'https://localhost:5601/app/connectors';
-
-async function login(
-  supertestWithoutAuth: SupertestWithoutAuthProviderType,
-  user: User
-): Promise<string> {
-  const response = await supertestWithoutAuth
-    .post('/internal/security/login')
-    .set('kbn-xsrf', 'xxx')
-    .send({
-      providerType: 'basic',
-      providerName: 'basic',
-      currentURL: '/',
-      params: { username: user.username, password: user.password },
-    })
-    .expect(200);
-
-  return response.header['set-cookie'][0];
-}
+import { login, RETURN_URL } from './oauth_test_helpers';
 
 export default function oAuthStartFlowTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

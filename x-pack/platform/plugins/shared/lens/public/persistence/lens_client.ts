@@ -8,8 +8,7 @@
 import type { HttpStart } from '@kbn/core/public';
 import { buildPath } from '@kbn/core-http-browser';
 import type { Reference } from '@kbn/content-management-utils';
-import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
-import type { LensApiState } from '@kbn/lens-embeddable-utils/config_builder/schema';
+import type { LensApiConfig, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 
 import type { LensSavedObjectAttributes } from '@kbn/lens-common';
 import { LENS_INTERNAL_VIS_API_PATH, LENS_INTERNAL_API_VERSION } from '../../common/constants';
@@ -23,11 +22,7 @@ import {
   type LensSearchRequestQuery,
   type LensSearchResponseBody,
 } from '../../server';
-import type {
-  LensCreateRequestQuery,
-  LensItemMeta,
-  LensUpdateRequestQuery,
-} from '../../server/api/routes/types';
+import type { LensItemMeta, LensUpdateRequestQuery } from '../../server/api/routes/types';
 import { getLensBuilder } from '../lazy_builder';
 
 export interface LensItemResponse<M extends Record<string, string | boolean> = {}> {
@@ -66,7 +61,7 @@ export class LensClient {
     const chartType = this.builder?.getType(data);
 
     if (this.builder?.isEnabled && this.builder?.isSupported(chartType)) {
-      const config = data as LensApiState;
+      const config = data as LensApiConfig;
       return {
         item: {
           ...this.builder.fromAPIFormat(config),
@@ -93,8 +88,7 @@ export class LensClient {
 
   async create(
     { description, visualizationType, state, title, version }: LooseLensAttributes,
-    references: Reference[],
-    options: LensCreateRequestQuery = {}
+    references: Reference[]
   ): Promise<LensItemResponse> {
     if (visualizationType === null) {
       throw new Error('Missing visualization type');
@@ -124,13 +118,12 @@ export class LensClient {
       LENS_INTERNAL_VIS_API_PATH,
       {
         body: JSON.stringify(body),
-        query: options,
         version: LENS_INTERNAL_API_VERSION,
       }
     );
 
     if (useApiFormat && this.builder) {
-      const config = data as LensApiState;
+      const config = data as LensApiConfig;
       return {
         item: {
           ...rest,
@@ -195,7 +188,7 @@ export class LensClient {
     );
 
     if (useApiFormat && this.builder) {
-      const config = data as LensApiState;
+      const config = data as LensApiConfig;
       return {
         item: {
           ...rest,
@@ -255,7 +248,7 @@ export class LensClient {
       const chartType = this.builder?.getType(data);
 
       if (this.builder?.isEnabled && this.builder?.isSupported(chartType)) {
-        const config = data as LensApiState;
+        const config = data as LensApiConfig;
         return {
           id,
           ...this.builder.fromAPIFormat(config),

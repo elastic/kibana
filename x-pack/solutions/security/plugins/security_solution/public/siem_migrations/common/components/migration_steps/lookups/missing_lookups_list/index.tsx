@@ -141,6 +141,10 @@ const CONFIGS: Record<MigrationSource, ConfigSetting> = {
     tooltip: i18n.COPY_REFERENCE_SET_NAME_TOOLTIP,
     label: i18n.CLEAR_EMPTY_REFERENCE_SET_TOOLTIP,
   },
+  [MigrationSource.SENTINEL]: {
+    tooltip: i18n.COPY_WATCHLIST_NAME_TOOLTIP,
+    label: i18n.CLEAR_EMPTY_WATCHLIST_TOOLTIP,
+  },
 };
 const CopyLookupNameButton = React.memo<CopyLookupNameButtonProps>(
   ({ lookupName, onCopied, copy, migrationSource }) => {

@@ -8,6 +8,7 @@
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../common/constants';
 import {
   createToolHandlerContext,
@@ -22,11 +23,8 @@ jest.mock('@kbn/agent-builder-genai-utils/tools', () => ({
 
 describe('alertsTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
-  const mockModelProvider = {
-    getDefaultModel: jest.fn().mockResolvedValue({ model: 'test-model' }),
-    getModel: jest.fn(),
-    getUsageStats: jest.fn().mockReturnValue({ calls: [] }),
-  };
+  const mockModelProvider = agentBuilderMocks.createModelProvider();
+  mockModelProvider.getDefaultModel.mockResolvedValue({ model: 'test-model' } as never);
   const mockEvents = {
     reportProgress: jest.fn(),
     sendUiEvent: jest.fn(),
@@ -120,7 +118,7 @@ describe('alertsTool', () => {
       await tool.handler(
         { query: 'find all alerts' },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-          modelProvider: mockModelProvider as ToolHandlerContext['modelProvider'],
+          modelProvider: mockModelProvider,
           events: mockEvents as ToolHandlerContext['events'],
         })
       );
@@ -144,7 +142,7 @@ describe('alertsTool', () => {
       await tool.handler(
         { query: 'find all alerts' },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-          modelProvider: mockModelProvider as ToolHandlerContext['modelProvider'],
+          modelProvider: mockModelProvider,
           events: mockEvents as ToolHandlerContext['events'],
           spaceId: 'custom-space',
         })
@@ -161,7 +159,7 @@ describe('alertsTool', () => {
       await tool.handler(
         { query: 'find alerts', index: '.alerts-security.alerts-custom' },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-          modelProvider: mockModelProvider as ToolHandlerContext['modelProvider'],
+          modelProvider: mockModelProvider,
           events: mockEvents as ToolHandlerContext['events'],
         })
       );
@@ -184,7 +182,7 @@ describe('alertsTool', () => {
       await tool.handler(
         { query: 'find alerts', index: '.alerts-security.alerts-default' },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-          modelProvider: mockModelProvider as ToolHandlerContext['modelProvider'],
+          modelProvider: mockModelProvider,
           events: mockEvents as ToolHandlerContext['events'],
         })
       );
@@ -202,7 +200,7 @@ describe('alertsTool', () => {
       await tool.handler(
         { query: 'how many alerts', index: '.alerts-security.alerts-default', isCount: true },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-          modelProvider: mockModelProvider as ToolHandlerContext['modelProvider'],
+          modelProvider: mockModelProvider,
           events: mockEvents as ToolHandlerContext['events'],
         })
       );
@@ -220,7 +218,7 @@ describe('alertsTool', () => {
       await tool.handler(
         { query: 'find documents', index: 'custom-index' },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-          modelProvider: mockModelProvider as ToolHandlerContext['modelProvider'],
+          modelProvider: mockModelProvider,
           events: mockEvents as ToolHandlerContext['events'],
         })
       );
@@ -237,7 +235,7 @@ describe('alertsTool', () => {
       await tool.handler(
         { query: 'test query', index: '.alerts-security.alerts-default', isCount: true },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-          modelProvider: mockModelProvider as ToolHandlerContext['modelProvider'],
+          modelProvider: mockModelProvider,
           events: mockEvents as ToolHandlerContext['events'],
         })
       );
@@ -255,7 +253,7 @@ describe('alertsTool', () => {
       const result = await tool.handler(
         { query: 'find alerts' },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-          modelProvider: mockModelProvider as ToolHandlerContext['modelProvider'],
+          modelProvider: mockModelProvider,
           events: mockEvents as ToolHandlerContext['events'],
         })
       );

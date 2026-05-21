@@ -112,6 +112,7 @@ const StreamsAlertOptional = rt.partial({
   'kibana.alert.rule.tags': schemaStringArray,
   'kibana.alert.scheduled_action.date': schemaString,
   'kibana.alert.scheduled_action.group': schemaString,
+  'kibana.alert.severity': schemaString,
   'kibana.alert.severity_improving': schemaBoolean,
   'kibana.alert.start': schemaDate,
   'kibana.alert.time_range': schemaDateRange,
@@ -122,6 +123,8 @@ const StreamsAlertOptional = rt.partial({
   'kibana.alert.workflow_assignee_ids': schemaStringArray,
   'kibana.alert.workflow_status': schemaString,
   'kibana.alert.workflow_tags': schemaStringArray,
+  'kibana.cps_scope.expression': schemaString,
+  'kibana.cps_scope.linked_projects': schemaUnknownArray,
   'kibana.version': schemaString,
   tags: schemaStringArray,
 });

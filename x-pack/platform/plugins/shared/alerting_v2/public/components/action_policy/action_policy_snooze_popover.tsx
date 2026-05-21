@@ -1,0 +1,95 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { EuiButton, EuiButtonIcon, EuiPopover, EuiToolTip } from '@elastic/eui';
+import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
+import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
+import { isSnoozed } from './is_snoozed';
+import {
+  ActionPolicySnoozeForm,
+  formatSnoozeDate,
+  formatSnoozeFullDate,
+} from './action_policy_snooze_form';
+
+interface ActionPolicySnoozePopoverProps {
+  policy: ActionPolicyResponse;
+  onSnooze: (id: string, snoozedUntil: string) => void;
+  onCancelSnooze: (id: string) => void;
+  isLoading: boolean;
+  isDisabled?: boolean;
+}
+
+export const ActionPolicySnoozePopover = ({
+  policy,
+  onSnooze,
+  onCancelSnooze,
+  isLoading,
+  isDisabled = false,
+}: ActionPolicySnoozePopoverProps) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const snoozed = isSnoozed(policy.snoozedUntil);
+
+  const togglePopover = () => setIsPopoverOpen((prev) => !prev);
+  const closePopover = () => setIsPopoverOpen(false);
+
+  const triggerButton = snoozed ? (
+    <EuiToolTip
+      content={i18n.translate('xpack.alertingV2.actionPolicy.snooze.snoozedUntilTooltip', {
+        defaultMessage: 'Snoozed until {date}',
+        values: { date: formatSnoozeFullDate(policy.snoozedUntil!) },
+      })}
+    >
+      <EuiButton
+        iconType="bellSlash"
+        color="accent"
+        // @ts-expect-error - size "xs" is not a valid prop for EuiButton
+        size="xs"
+        onClick={togglePopover}
+        isLoading={isLoading}
+        isDisabled={isDisabled}
+      >
+        {formatSnoozeDate(policy.snoozedUntil!)}
+      </EuiButton>
+    </EuiToolTip>
+  ) : (
+    <EuiButtonIcon
+      iconType="bell"
+      color="text"
+      aria-label={i18n.translate('xpack.alertingV2.actionPolicy.snooze.ariaLabel', {
+        defaultMessage: 'Snooze action policy',
+      })}
+      onClick={togglePopover}
+      isLoading={isLoading}
+      isDisabled={isDisabled}
+    />
+  );
+
+  return (
+    <EuiPopover
+      button={triggerButton}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      anchorPosition="downLeft"
+      panelPaddingSize="m"
+      panelStyle={{ width: 320 }}
+    >
+      <ActionPolicySnoozeForm
+        isSnoozed={snoozed}
+        onApplySnooze={(snoozedUntil) => {
+          onSnooze(policy.id, snoozedUntil);
+          closePopover();
+        }}
+        onCancelSnooze={() => {
+          onCancelSnooze(policy.id);
+          closePopover();
+        }}
+      />
+    </EuiPopover>
+  );
+};

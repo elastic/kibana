@@ -14,40 +14,46 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const TracingProject = lazySchema(() =>
+  z.object({
+    name: z.string(),
+    trace_count: z.number().int(),
+    error_rate: z.number().optional(),
+    p50_latency_ms: z.number().optional(),
+    p99_latency_ms: z.number().optional(),
+    total_tokens: z.number().int().optional(),
+    last_trace_time: z.string(),
+  })
+);
 export type TracingProject = z.infer<typeof TracingProject>;
-export const TracingProject = z.object({
-  name: z.string(),
-  trace_count: z.number().int(),
-  error_rate: z.number().optional(),
-  p50_latency_ms: z.number().optional(),
-  p99_latency_ms: z.number().optional(),
-  total_tokens: z.number().int().optional(),
-  last_trace_time: z.string(),
-});
 
+export const GetTracingProjectsRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Start of time range (ISO 8601)
+     */
+    from: z.string().optional(),
+    /**
+     * End of time range (ISO 8601)
+     */
+    to: z.string().optional(),
+    /**
+     * Filter projects by name (case-insensitive substring match)
+     */
+    name: z.string().optional(),
+    page: z.coerce.number().int().min(1).optional().default(1),
+    per_page: z.coerce.number().int().min(1).max(100).optional().default(25),
+  })
+);
 export type GetTracingProjectsRequestQuery = z.infer<typeof GetTracingProjectsRequestQuery>;
-export const GetTracingProjectsRequestQuery = z.object({
-  /**
-   * Start of time range (ISO 8601)
-   */
-  from: z.string().optional(),
-  /**
-   * End of time range (ISO 8601)
-   */
-  to: z.string().optional(),
-  /**
-   * Filter projects by name (case-insensitive substring match)
-   */
-  name: z.string().optional(),
-  page: z.coerce.number().int().min(1).optional().default(1),
-  per_page: z.coerce.number().int().min(1).max(100).optional().default(25),
-});
 export type GetTracingProjectsRequestQueryInput = z.input<typeof GetTracingProjectsRequestQuery>;
 
+export const GetTracingProjectsResponse = lazySchema(() =>
+  z.object({
+    projects: z.array(TracingProject),
+    total: z.number().int(),
+  })
+);
 export type GetTracingProjectsResponse = z.infer<typeof GetTracingProjectsResponse>;
-export const GetTracingProjectsResponse = z.object({
-  projects: z.array(TracingProject),
-  total: z.number().int(),
-});

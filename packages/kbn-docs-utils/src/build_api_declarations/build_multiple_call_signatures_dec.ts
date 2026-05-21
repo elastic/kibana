@@ -8,11 +8,16 @@
  */
 
 import type { Node, Signature } from 'ts-morph';
+import { Node as MorphNode } from 'ts-morph';
 import type { ApiDeclaration } from '../types';
 import { TypeKind } from '../types';
 import { buildApiDeclaration } from './build_api_declaration';
 import { buildBasicApiDeclaration } from './build_basic_api_declaration';
-import { getJSDocParamComment, getJSDocReturnTagComment } from './js_doc_utils';
+import {
+  getJSDocParamComment,
+  getJSDocReturnTagComment,
+  getPluginContextForNode,
+} from './js_doc_utils';
 import type { BuildApiDecOpts } from './types';
 import { buildApiId, getOptsForChildWithName } from './utils';
 
@@ -31,28 +36,29 @@ export const buildMultipleCallSignaturesDec = (
   signatures: Signature[],
   opts: BuildApiDecOpts
 ): ApiDeclaration => {
+  const pluginContext = getPluginContextForNode(node, opts);
+
   // Use the first signature to extract parameter children for documentation.
   // This is a reasonable default since overloads typically share common parameters.
   const primarySignature = signatures[0];
 
   const children = primarySignature.getParameters().reduce((kids, p, index) => {
     const declarations = p.getDeclarations();
-    if (declarations.length === 1) {
+    if (declarations.length >= 1) {
+      const decl = declarations[0];
+
+      // TypeScript uses synthetic names like `__0` for destructured parameters.
+      // Prefer the written name from the ParameterDeclaration when available.
+      const symbolName = p.getName();
+      const writtenName = MorphNode.isParameterDeclaration(decl) ? decl.getName() : symbolName;
+      const lookupNames = writtenName !== symbolName ? [writtenName, symbolName] : [symbolName];
+
       kids.push({
-        ...buildApiDeclaration(declarations[0], {
-          ...getOptsForChildWithName(p.getName(), opts),
+        ...buildApiDeclaration(decl, {
+          ...getOptsForChildWithName(writtenName, opts),
           id: buildApiId(`$${index + 1}`, opts.id),
         }),
-        description: getJSDocParamComment(node, p.getName()),
-      });
-    } else if (declarations.length > 1) {
-      // Use the first declaration when multiple exist (common with overloads).
-      kids.push({
-        ...buildApiDeclaration(declarations[0], {
-          ...getOptsForChildWithName(p.getName(), opts),
-          id: buildApiId(`$${index + 1}`, opts.id),
-        }),
-        description: getJSDocParamComment(node, p.getName()),
+        description: getJSDocParamComment(node, lookupNames, pluginContext),
       });
     }
     return kids;
@@ -61,7 +67,7 @@ export const buildMultipleCallSignaturesDec = (
   return {
     ...buildBasicApiDeclaration(node, opts),
     type: TypeKind.FunctionKind,
-    returnComment: getJSDocReturnTagComment(node),
+    returnComment: getJSDocReturnTagComment(node, pluginContext),
     children,
   };
 };

@@ -7,6 +7,7 @@
 
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
 
 export interface InferenceEndpoint {
   inferenceId: string;
@@ -14,12 +15,7 @@ export interface InferenceEndpoint {
   service: string;
   serviceSettings?: Record<string, unknown>;
   // Fix this typing when ES response is updated to include metadata
-  metadata: {
-    display?: {
-      name?: string;
-      creator?: string;
-    };
-  };
+  metadata?: EisInferenceEndpointMetadata;
 }
 
 /**

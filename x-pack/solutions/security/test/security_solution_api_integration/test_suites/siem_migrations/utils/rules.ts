@@ -27,9 +27,11 @@ import {
   SIEM_RULE_MIGRATIONS_INTEGRATIONS_STATS_PATH,
   SIEM_RULE_MIGRATION_RULES_ENHANCE_PATH,
   SIEM_RULE_MIGRATION_QRADAR_RULES_PATH,
+  SIEM_RULE_MIGRATION_SENTINEL_RULES_PATH,
 } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
 import type {
   CreateQRadarRuleMigrationRulesRequestBody,
+  CreateSentinelRuleMigrationRulesRequestBody,
   RuleMigrationEnhanceRuleResponse,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import {
@@ -85,6 +87,12 @@ export interface CreateRuleMigrationQradarRulesParams extends RequestParams {
   /* The id is necessary only for batching the migration creation in multiple requests */
   migrationId: string;
   payload: CreateQRadarRuleMigrationRulesRequestBody;
+}
+
+export interface CreateRuleMigrationSentinelRulesParams extends RequestParams {
+  /* The id is necessary only for batching the migration creation in multiple requests */
+  migrationId: string;
+  payload: CreateSentinelRuleMigrationRulesRequestBody;
 }
 
 export interface UpdateRulesParams extends MigrationRequestParams {
@@ -215,6 +223,26 @@ export const ruleMigrationRouteHelpersFactory = (supertest: SuperTest.Agent) => 
       expectStatusCode = 200,
     }: CreateRuleMigrationQradarRulesParams): Promise<{ body: null }> => {
       const route = replaceParams(SIEM_RULE_MIGRATION_QRADAR_RULES_PATH, {
+        migration_id: migrationId,
+      });
+      const response = await supertest
+        .post(route)
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(payload);
+
+      assertStatusCode(expectStatusCode, response);
+
+      return response;
+    },
+
+    addSentinelRulesToMigration: async ({
+      migrationId,
+      payload,
+      expectStatusCode = 200,
+    }: CreateRuleMigrationSentinelRulesParams): Promise<{ body: null }> => {
+      const route = replaceParams(SIEM_RULE_MIGRATION_SENTINEL_RULES_PATH, {
         migration_id: migrationId,
       });
       const response = await supertest

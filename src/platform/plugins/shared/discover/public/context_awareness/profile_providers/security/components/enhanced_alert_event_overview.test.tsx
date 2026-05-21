@@ -15,16 +15,6 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EnhancedAlertEventOverview } from './enhanced_alert_event_overview';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 
-const mockRefetchNext = jest.fn();
-
-jest.mock('../../../../application/main/state_management/redux', () => ({
-  useCurrentTabDataStateContainer: () => ({
-    refetch$: {
-      next: mockRefetchNext,
-    },
-  }),
-}));
-
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
     id: '1',

@@ -9,23 +9,26 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RiskScoreDataClient } from '../../risk_score/risk_score_data_client';
 import { createRiskScoreModule } from './risk_score_module';
 import type { LeadEntity } from '../types';
+import { PRIVILEGED_USER_WATCHLIST_ID } from './utils';
 
 const createEntityWithRisk = (
   type: string,
   name: string,
   scoreNorm: number,
   level: string,
-  privileged = false
+  privileged = false,
+  id: string = `${type}:${name}`
 ): LeadEntity => ({
   record: {
     entity: {
-      id: `euid-${name}`,
+      id,
       name,
       type,
       risk: { calculated_score_norm: scoreNorm, calculated_level: level },
-      attributes: { privileged },
+      attributes: { watchlists: privileged ? [PRIVILEGED_USER_WATCHLIST_ID] : [] },
     },
   } as never,
+  id,
   type,
   name,
 });
@@ -216,11 +219,29 @@ describe('RiskScoreModule', () => {
       const escalations = observations.filter((o) => o.type.startsWith('risk_escalation'));
       expect(escalations).toHaveLength(0);
     });
+
+    it('emits current-score observations and omits historical escalations when no historical buckets are returned', async () => {
+      // Simulates the legacy-writer scenario where every doc was filtered out
+      // by `<entityType>.risk.id_field === "entity.id"`. The module should still
+      // produce its current-score observation and must not throw.
+      const entity = createEntityWithRisk('user', 'alice', 90, 'Critical');
+      riskScoreDataClient.getDailyAverageRiskScoreNormSeries.mockResolvedValue(new Map());
+
+      const module = createRiskScoreModule({
+        riskScoreDataClient: riskScoreDataClient as unknown as RiskScoreDataClient,
+        logger,
+      });
+      const observations = await module.collect([entity]);
+
+      expect(observations.find((o) => o.type === 'high_risk_score')).toBeDefined();
+      expect(observations.filter((o) => o.type.startsWith('risk_escalation'))).toHaveLength(0);
+    });
   });
 
   it('skips entities without risk data', async () => {
     const entity: LeadEntity = {
-      record: { entity: { id: 'euid-no-risk', name: 'no-risk', type: 'user' } } as never,
+      record: { entity: { id: 'user:no-risk', name: 'no-risk', type: 'user' } } as never,
+      id: 'user:no-risk',
       type: 'user',
       name: 'no-risk',
     };
@@ -232,5 +253,20 @@ describe('RiskScoreModule', () => {
     const observations = await module.collect([entity]);
 
     expect(observations).toHaveLength(0);
+  });
+
+  it('queries the data client with the entity EUID, not the display name', async () => {
+    const entity = createEntityWithRisk('user', 'alice', 80, 'High', false, 'user:alice@hosta');
+    const module = createRiskScoreModule({
+      riskScoreDataClient: riskScoreDataClient as unknown as RiskScoreDataClient,
+      logger,
+    });
+
+    await module.collect([entity]);
+
+    expect(riskScoreDataClient.getDailyAverageRiskScoreNormSeries).toHaveBeenCalledWith({
+      entityType: 'user',
+      entityIds: ['user:alice@hosta'],
+    });
   });
 });

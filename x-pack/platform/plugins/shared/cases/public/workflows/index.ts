@@ -7,6 +7,7 @@
 
 // import { createCreateCaseFromTemplateStepDefinition } from './create_case_from_template';
 import type { CasesPublicSetupDependencies } from '../types';
+import { registerCasesTriggerDefinitions } from './triggers';
 
 export function registerCasesSteps(
   workflowsExtensions: CasesPublicSetupDependencies['workflowsExtensions']
@@ -35,10 +36,9 @@ export function registerCasesSteps(
     import('./simple_steps').then((m) => m.updateCasesStepDefinition)
   );
 
-  // TODO: enable once https://github.com/elastic/security-team/issues/15982 has been resolved
-  // workflowsExtensions.registerStepDefinition(() =>
-  //   import('./set_custom_field').then((m) => m.setCustomFieldStepDefinition)
-  // );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./set_custom_field').then((m) => m.setCustomFieldStepDefinition)
+  );
 
   workflowsExtensions.registerStepDefinition(() =>
     import('./simple_steps').then((m) => m.findCasesStepDefinition)
@@ -97,7 +97,7 @@ export function registerCasesSteps(
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./simple_steps').then((m) => m.setCategoryStepDefinition)
+    import('./set_category').then((m) => m.setCategoryStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
@@ -120,6 +120,13 @@ export function registerCasesSteps(
     import('./simple_steps').then((m) => m.getCasesStepDefinition)
   );
 
-  // Leaving this in for now. We need to get support for reflective value lookup first.
-  // workflowsExtensions.registerStepDefinition(createCreateCaseFromTemplateStepDefinition());
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./create_case_from_template').then((m) => m.createCreateCaseFromTemplateStepDefinition)
+  );
+}
+
+export function registerCasesWorkflowTriggers(
+  workflowsExtensions: CasesPublicSetupDependencies['workflowsExtensions']
+) {
+  registerCasesTriggerDefinitions(workflowsExtensions);
 }

@@ -33,6 +33,14 @@ export const uiSettingsFixture = coreWorkerFixtures.extend<{}, { uiSettings: UiS
             'timepicker:timeDefaults': `{ "from": "${utcFrom}", "to": "${untcTo}"}`,
           });
         },
+
+        setKibanaTimeZoneToUTC: async () => {
+          await kbnClient.uiSettings.update({ 'dateFormat:tz': 'UTC' });
+        },
+
+        resetKibanaTimeZone: async () => {
+          await kbnClient.uiSettings.unset('dateFormat:tz');
+        },
       };
 
       log.serviceLoaded('uiSettings');

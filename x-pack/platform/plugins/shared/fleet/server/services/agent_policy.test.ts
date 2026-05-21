@@ -1035,39 +1035,6 @@ describe('Agent policy', () => {
     });
   });
 
-  describe('bumpAllAgentPolicies', () => {
-    it('should call scheduleDeployAgentPoliciesTask with updated event once', async () => {
-      const soClient = getSavedObjectMock({
-        revision: 1,
-        monitoring_enabled: ['metrics'],
-      });
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValueOnce(
-        soClient
-      );
-      await agentPolicyService.bumpAllAgentPolicies(esClient, undefined);
-
-      expect(soClient.bulkUpdate).toHaveBeenCalledWith(
-        [
-          expect.objectContaining({
-            attributes: expect.objectContaining({
-              monitoring_enabled: ['metrics'],
-            }),
-            id: 'agent-policy-id',
-            namespace: undefined,
-            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
-            version: undefined,
-          }),
-        ],
-        expect.objectContaining({
-          namespace: 'default',
-        })
-      );
-
-      expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledTimes(1);
-    });
-  });
-
   describe('bumpAllAgentPoliciesForOutput', () => {
     it('should call scheduleDeployAgentPoliciesTask with updated event once', async () => {
       const soClient = getSavedObjectMock({
@@ -1081,6 +1048,138 @@ describe('Agent policy', () => {
       await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, 'output-id-123');
 
       expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledTimes(1);
+    });
+
+    it('should include policies inheriting default data output when isDefault is true', async () => {
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'policy-inheriting',
+            type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+            attributes: { revision: 1 },
+            score: 1,
+            references: [],
+          },
+        ],
+        total: 1,
+        per_page: 10000,
+        page: 1,
+      } as any);
+
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        per_page: 10000,
+        page: 1,
+      } as any);
+
+      soClient.bulkUpdate.mockResolvedValue({ saved_objects: [] } as any);
+
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValue(
+        soClient
+      );
+
+      await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, 'output-id-123', {
+        isDefault: true,
+      });
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: expect.stringContaining(
+            `NOT ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.attributes.data_output_id:*`
+          ),
+        })
+      );
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: expect.not.stringContaining('monitoring_output_id:*'),
+        })
+      );
+    });
+
+    it('should include policies inheriting default monitoring output when isDefaultMonitoring is true', async () => {
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        per_page: 10000,
+        page: 1,
+      } as any);
+
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        per_page: 10000,
+        page: 1,
+      } as any);
+
+      soClient.bulkUpdate.mockResolvedValue({ saved_objects: [] } as any);
+
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValue(
+        soClient
+      );
+
+      await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, 'output-id-123', {
+        isDefaultMonitoring: true,
+      });
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: expect.stringContaining(
+            `NOT ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.attributes.monitoring_output_id:*`
+          ),
+        })
+      );
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: expect.not.stringContaining(
+            `NOT ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.attributes.data_output_id:*`
+          ),
+        })
+      );
+    });
+
+    it('should only match explicit references when no default flags are set', async () => {
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        per_page: 10000,
+        page: 1,
+      } as any);
+
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        per_page: 10000,
+        page: 1,
+      } as any);
+
+      soClient.bulkUpdate.mockResolvedValue({ saved_objects: [] } as any);
+
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValue(
+        soClient
+      );
+
+      await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, 'output-id-123');
+
+      const findCall = soClient.find.mock.calls[0][0] as any;
+      expect(findCall.filter).toContain('data_output_id:"output-id-123"');
+      expect(findCall.filter).toContain('monitoring_output_id:"output-id-123"');
+      expect(findCall.filter).not.toContain('NOT');
     });
 
     it('should handle package policies using output when space awareness is not enabled', async () => {
@@ -1331,6 +1430,126 @@ describe('Agent policy', () => {
       await agentPolicyService.bumpAllAgentPoliciesForDownloadSource(esClient, 'test-id-1');
 
       expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledTimes(1);
+    });
+
+    it('should include policies inheriting default when isDefault is true', async () => {
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        per_page: 10000,
+        page: 1,
+      } as any);
+
+      soClient.bulkUpdate.mockResolvedValue({ saved_objects: [] } as any);
+
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValue(
+        soClient
+      );
+
+      await agentPolicyService.bumpAllAgentPoliciesForDownloadSource(esClient, 'ds-id-123', {
+        isDefault: true,
+      });
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: expect.stringContaining(
+            `NOT ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.attributes.download_source_id:*`
+          ),
+        })
+      );
+    });
+
+    it('should only match explicit references when no default flag is set', async () => {
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        per_page: 10000,
+        page: 1,
+      } as any);
+
+      soClient.bulkUpdate.mockResolvedValue({ saved_objects: [] } as any);
+
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValue(
+        soClient
+      );
+
+      await agentPolicyService.bumpAllAgentPoliciesForDownloadSource(esClient, 'ds-id-123');
+
+      const findCall = soClient.find.mock.calls[0][0] as any;
+      expect(findCall.filter).toContain('download_source_id:"ds-id-123"');
+      expect(findCall.filter).not.toContain('NOT');
+    });
+  });
+
+  describe('bumpAllAgentPoliciesForFleetServerHosts', () => {
+    it('should include policies inheriting default when isDefault is true', async () => {
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        per_page: 10000,
+        page: 1,
+      } as any);
+
+      soClient.bulkUpdate.mockResolvedValue({ saved_objects: [] } as any);
+
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValue(
+        soClient
+      );
+
+      await agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(esClient, 'fsh-id-123', {
+        isDefault: true,
+      });
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: expect.stringContaining(
+            `NOT ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.attributes.fleet_server_host_id:*`
+          ),
+          namespaces: ['*'],
+        })
+      );
+    });
+
+    it('should only match explicit references when no default flag is set', async () => {
+      jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 0,
+        per_page: 10000,
+        page: 1,
+      } as any);
+
+      soClient.bulkUpdate.mockResolvedValue({ saved_objects: [] } as any);
+
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValue(
+        soClient
+      );
+
+      await agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(esClient, 'fsh-id-123');
+
+      const findCall = soClient.find.mock.calls[0][0] as any;
+      expect(findCall.filter).toContain('fleet_server_host_id:"fsh-id-123"');
+      expect(findCall.filter).not.toContain('NOT');
+      expect(findCall.namespaces).toEqual(['*']);
     });
   });
 
@@ -2378,7 +2597,7 @@ describe('Agent policy', () => {
           expect.objectContaining({
             type: AGENT_POLICY_SAVED_OBJECT_TYPE,
             perPage: 1000,
-            sortField: 'created_at',
+            sortField: 'updated_at',
             sortOrder: 'asc',
             fields: ['id', 'name'],
             filter: undefined,
@@ -2398,7 +2617,7 @@ describe('Agent policy', () => {
           expect.objectContaining({
             type: AGENT_POLICY_SAVED_OBJECT_TYPE,
             perPage: 13,
-            sortField: 'created_at',
+            sortField: 'updated_at',
             sortOrder: 'asc',
             fields: ['id', 'name'],
             filter: 'one=two',
@@ -2442,7 +2661,7 @@ describe('Agent policy', () => {
           expect.objectContaining({
             type: AGENT_POLICY_SAVED_OBJECT_TYPE,
             perPage: 1000,
-            sortField: 'created_at',
+            sortField: 'updated_at',
             sortOrder: 'asc',
             fields: [],
             filter: undefined,
@@ -2460,7 +2679,7 @@ describe('Agent policy', () => {
           expect.objectContaining({
             type: AGENT_POLICY_SAVED_OBJECT_TYPE,
             perPage: 1000,
-            sortField: 'created_at',
+            sortField: 'updated_at',
             sortOrder: 'asc',
             fields: [],
             filter: undefined,
@@ -3052,11 +3271,11 @@ describe('Agent policy', () => {
         type: 'text',
         value: 'sa@project.iam.gserviceaccount.com',
       });
-      const expectedWifValue =
+      const expectedAudienceValue =
         '//iam.googleapis.com/projects/123/locations/global/workloadIdentityPools/pool/providers/prov';
-      expect(vars.credentials_workload_identity_provider).toEqual({
+      expect(vars.credentials_audience).toEqual({
         type: 'text',
-        value: expectedWifValue,
+        value: expectedAudienceValue,
       });
       expect(vars.credentials_role_arn).toBeUndefined();
     });
@@ -3120,6 +3339,26 @@ describe('Agent policy', () => {
       ).rejects.toThrow('validation error');
 
       expect(deploySpy).not.toHaveBeenCalled();
+    });
+
+    it('should roll back the verifier policy and re-throw when deployPolicy fails', async () => {
+      jest
+        .spyOn(agentPolicyService, 'deployPolicy')
+        .mockRejectedValueOnce(new Error('agentless provisioning limit'));
+      const deleteSpy = jest
+        .spyOn(agentPolicyService, 'deleteVerifierPolicy')
+        .mockResolvedValue(undefined);
+
+      await expect(
+        agentPolicyService.createVerifierPolicy(
+          soClient,
+          esClient,
+          baseConnector as any,
+          baseVerificationInfo
+        )
+      ).rejects.toThrow('agentless provisioning limit');
+
+      expect(deleteSpy).toHaveBeenCalledWith(soClient, esClient, 'mocked');
     });
 
     it('should propagate secret_references from created package policy', async () => {

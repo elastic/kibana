@@ -11,7 +11,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { DimensionsSelector } from './dimensions_selector';
-import type { Dimension } from '../../types';
+import type { Dimension, ParsedMetricItem } from '../../types';
 import {
   MAX_DIMENSIONS_SELECTIONS,
   METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
@@ -37,42 +37,65 @@ jest.mock('@kbn/shared-ux-toolbar-selector', () => {
       popoverContentBelowSearch?: React.ReactNode;
       'data-test-subj'?: string;
       singleSelection?: boolean;
-    }) => (
-      <div data-test-subj={dataTestSubj}>
-        <div
-          data-test-subj={`${dataTestSubj}Button`}
-          data-tooltip-content={buttonTooltipContent ? 'true' : 'false'}
-        >
-          {buttonLabel}
-          {buttonTooltipContent && (
-            <div data-test-subj={`${dataTestSubj}ButtonTooltip`}>{buttonTooltipContent}</div>
-          )}
+    }) => {
+      // Simulate the real ToolbarSelector multi-selection semantics: clicking
+      // an option toggles its checked state and emits the full array of
+      // currently-checked options. For single selection, emit just the clicked
+      // option. This matches the behaviour implemented in toolbar_selector.tsx
+      // so that tests exercise the component's handleChange with the same
+      // payload shape it receives at runtime.
+      const handleOptionClick = (clickedOption: any) => {
+        if (clickedOption.disabled) return;
+        if (singleSelection) {
+          onChange?.(clickedOption);
+          return;
+        }
+        const wasChecked = clickedOption.checked === 'on';
+        const nextSelected = options
+          .filter((option) => {
+            if (option.value === clickedOption.value) return !wasChecked;
+            return option.checked === 'on';
+          })
+          .map((option) => ({ ...option, checked: 'on' }));
+        onChange?.(nextSelected);
+      };
+      return (
+        <div data-test-subj={dataTestSubj}>
+          <div
+            data-test-subj={`${dataTestSubj}Button`}
+            data-tooltip-content={buttonTooltipContent ? 'true' : 'false'}
+          >
+            {buttonLabel}
+            {buttonTooltipContent && (
+              <div data-test-subj={`${dataTestSubj}ButtonTooltip`}>{buttonTooltipContent}</div>
+            )}
+          </div>
+          <div data-test-subj={`${dataTestSubj}Popover`}>
+            {popoverContentBelowSearch}
+            {options.map((option) => (
+              <div
+                key={option.key}
+                data-test-subj={`${dataTestSubj}Option-${option.value}`}
+                data-disabled={String(option.disabled)}
+                data-checked={option.checked}
+                onClick={() => handleOptionClick(option)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleOptionClick(option);
+                  }
+                }}
+                role="option"
+                aria-selected={option.checked === 'on'}
+                tabIndex={option.disabled ? -1 : 0}
+              >
+                {option.label}
+              </div>
+            ))}
+          </div>
         </div>
-        <div data-test-subj={`${dataTestSubj}Popover`}>
-          {popoverContentBelowSearch}
-          {options.map((option) => (
-            <div
-              key={option.key}
-              data-test-subj={`${dataTestSubj}Option-${option.value}`}
-              data-disabled={String(option.disabled)}
-              data-checked={option.checked}
-              onClick={() => !option.disabled && onChange?.(option)}
-              onKeyDown={(e) => {
-                if ((e.key === 'Enter' || e.key === ' ') && !option.disabled) {
-                  e.preventDefault();
-                  onChange?.(option);
-                }
-              }}
-              role="option"
-              aria-selected={option.checked === 'on'}
-              tabIndex={option.disabled ? -1 : 0}
-            >
-              {option.label}
-            </div>
-          ))}
-        </div>
-      </div>
-    ),
+      );
+    },
   };
 });
 
@@ -110,20 +133,12 @@ const mockDimensions: Dimension[] = [
   { name: 'cloud.availability_zone' },
 ] as Dimension[];
 
-const mockFields = [
-  { dimensions: [mockDimensions[0], mockDimensions[1]] },
-  { dimensions: [mockDimensions[0], mockDimensions[2]] },
-  { dimensions: [mockDimensions[1], mockDimensions[3]] },
-  { dimensions: [mockDimensions[0], mockDimensions[1], mockDimensions[2]] },
-];
-
 const renderWithIntl = (component: React.ReactElement) => {
   return render(<IntlProvider>{component}</IntlProvider>);
 };
 
 describe('DimensionsSelector', () => {
   const defaultProps = {
-    fields: mockFields,
     dimensions: mockDimensions,
     selectedDimensions: [],
     onChange: jest.fn(),
@@ -384,6 +399,258 @@ describe('DimensionsSelector', () => {
       );
       const selector = screen.getByTestId(METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ);
       expect(selector).toBeInTheDocument();
+    });
+  });
+
+  describe('Selected dimensions not in applicable set (race-condition guard)', () => {
+    // A selected dimension must stay visible in the picker even when it is
+    // not in `dimensions` — e.g. the latest METRICS_INFO response narrowed
+    // the applicable set and dropped it. Without this the count badge can
+    // disagree with the visible checkmarks.
+    const applicableOnly = [{ name: 'b' }, { name: 'c' }] as Dimension[];
+    const orphanPlusApplicable = [{ name: 'a' }, { name: 'b' }] as Dimension[];
+
+    it('shows selected dimensions even when they are not in the dimensions prop', () => {
+      renderWithIntl(
+        <DimensionsSelector
+          {...defaultProps}
+          dimensions={applicableOnly}
+          selectedDimensions={orphanPlusApplicable}
+        />
+      );
+
+      const orphanOption = screen.getByTestId(
+        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-a`
+      );
+      const applicableOption = screen.getByTestId(
+        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-b`
+      );
+      expect(orphanOption).toBeInTheDocument();
+      expect(applicableOption).toBeInTheDocument();
+      expect(orphanOption).toHaveAttribute('data-checked', 'on');
+      expect(applicableOption).toHaveAttribute('data-checked', 'on');
+    });
+
+    it('reflects both orphan and applicable selections in the popover count', () => {
+      renderWithIntl(
+        <DimensionsSelector
+          {...defaultProps}
+          dimensions={applicableOnly}
+          selectedDimensions={orphanPlusApplicable}
+        />
+      );
+      const popover = screen.getByTestId(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Popover`);
+      expect(popover).toHaveTextContent('2 dimensions selected');
+
+      const button = screen.getByTestId(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Button`);
+      expect(button).toHaveTextContent('2');
+    });
+
+    it('renders orphan selections before applicable options', () => {
+      renderWithIntl(
+        <DimensionsSelector
+          {...defaultProps}
+          dimensions={applicableOnly}
+          selectedDimensions={orphanPlusApplicable}
+        />
+      );
+      const optionElements = screen.getAllByRole('option');
+      const names = optionElements.map((el) => el.textContent);
+      // Orphan selection 'a' should come before applicable options 'b'/'c'.
+      expect(names.indexOf('a')).toBeLessThan(names.indexOf('b'));
+      expect(names.indexOf('a')).toBeLessThan(names.indexOf('c'));
+    });
+
+    it('sorts multiple orphan selections alphabetically amongst themselves', () => {
+      const dimensions = [{ name: 'z' }] as Dimension[];
+      const selected = [{ name: 'q' }, { name: 'a' }, { name: 'z' }] as Dimension[];
+
+      renderWithIntl(
+        <DimensionsSelector
+          {...defaultProps}
+          dimensions={dimensions}
+          selectedDimensions={selected}
+        />
+      );
+
+      const optionElements = screen.getAllByRole('option');
+      const names = optionElements.map((el) => el.textContent);
+      // Orphan selections a, q should appear before applicable z, and in
+      // alphabetical order relative to each other.
+      expect(names).toEqual(['a', 'q', 'z']);
+    });
+
+    it('deselecting an orphan selection calls onChange with the remaining selections', async () => {
+      const onChange = jest.fn();
+      renderWithIntl(
+        <DimensionsSelector
+          {...defaultProps}
+          dimensions={applicableOnly}
+          selectedDimensions={orphanPlusApplicable}
+          onChange={onChange}
+        />
+      );
+
+      const orphanOption = screen.getByTestId(
+        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-a`
+      );
+      // Toggle off the orphan. The mock toolbar selector re-invokes onChange
+      // with the whole list of still-checked options; it reports the clicked
+      // option as `checked: 'on'` in its payload, so we need to verify the
+      // real component's handleChange strips off the toggled-off option.
+      fireEvent.click(orphanOption);
+
+      await waitFor(() => {
+        expect(onChange).toHaveBeenCalled();
+      });
+      // The last call should not contain dimension 'a' any longer.
+      const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1];
+      const names = lastCall[0].map((d: Dimension) => d.name);
+      expect(names).not.toContain('a');
+      expect(names).toContain('b');
+    });
+
+    it('renders only applicable options when no orphan selections exist', () => {
+      renderWithIntl(
+        <DimensionsSelector
+          {...defaultProps}
+          dimensions={applicableOnly}
+          selectedDimensions={[{ name: 'b' }] as Dimension[]}
+        />
+      );
+
+      expect(
+        screen.queryByTestId(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-a`)
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByTestId(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-b`)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-c`)
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe('Optimistic filter via metricItems', () => {
+    // Once a selection is made, the picker must immediately hide dimensions
+    // that no metric carrying that selection supports — without waiting for
+    // the server round-trip — so rapid multi-select can't reach an empty grid.
+    const environment = { name: 'environment' } as Dimension;
+    const region = { name: 'region' } as Dimension;
+    const hostName = { name: 'host.name' } as Dimension;
+
+    const buildMetricItem = (
+      metricName: string,
+      dimensionFields: Dimension[]
+    ): ParsedMetricItem => ({
+      metricName,
+      dataStream: 'metrics-test',
+      units: [],
+      metricTypes: [],
+      fieldTypes: [],
+      dimensionFields,
+    });
+
+    // cpu.usage carries `environment` + `host.name`.
+    // network.bytes_in carries `region` + `host.name`.
+    // No metric carries both `environment` and `region`.
+    const metricItems: ParsedMetricItem[] = [
+      buildMetricItem('cpu.usage', [environment, hostName]),
+      buildMetricItem('network.bytes_in', [region, hostName]),
+    ];
+
+    const applicableDimensions: Dimension[] = [environment, region, hostName];
+
+    it('hides dimensions not supported by any metric carrying the current selection', () => {
+      renderWithIntl(
+        <DimensionsSelector
+          {...defaultProps}
+          dimensions={applicableDimensions}
+          selectedDimensions={[environment]}
+          metricItems={metricItems}
+        />
+      );
+
+      // `region` is disjoint from `environment` (no single metric carries
+      // both) so the picker must hide it optimistically, before the debounced
+      // onChange fires and the server responds.
+      expect(
+        screen.queryByTestId(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-region`)
+      ).not.toBeInTheDocument();
+
+      expect(
+        screen.getByTestId(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-environment`)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-host.name`)
+      ).toBeInTheDocument();
+    });
+
+    it('without metricItems, falls back to the full dimensions list', () => {
+      // The prop is optional; callers that don't provide it get the options
+      // straight from `dimensions`, no client-side narrowing.
+      renderWithIntl(
+        <DimensionsSelector
+          {...defaultProps}
+          dimensions={applicableDimensions}
+          selectedDimensions={[environment]}
+        />
+      );
+
+      expect(
+        screen.getByTestId(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-environment`)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-region`)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-host.name`)
+      ).toBeInTheDocument();
+    });
+
+    it('orphan selections still surface even with the optimistic filter', () => {
+      // The optimistic filter operates on applicable options; a selected
+      // dimension that isn't in metricItems still renders (checked) so the
+      // count stays consistent and the user can back out.
+      const orphan = { name: 'orphan.field' } as Dimension;
+
+      renderWithIntl(
+        <DimensionsSelector
+          {...defaultProps}
+          dimensions={applicableDimensions}
+          selectedDimensions={[environment, orphan]}
+          metricItems={metricItems}
+        />
+      );
+
+      const orphanOption = screen.getByTestId(
+        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-orphan.field`
+      );
+      expect(orphanOption).toBeInTheDocument();
+      expect(orphanOption).toHaveAttribute('data-checked', 'on');
+    });
+
+    it('no selection means the full applicable list is shown', () => {
+      // With nothing selected there's no metric subset to constrain to, so
+      // every applicable dimension must remain available.
+      renderWithIntl(
+        <DimensionsSelector
+          {...defaultProps}
+          dimensions={applicableDimensions}
+          selectedDimensions={[]}
+          metricItems={metricItems}
+        />
+      );
+
+      expect(
+        screen.getByTestId(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-environment`)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-region`)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-host.name`)
+      ).toBeInTheDocument();
     });
   });
 });

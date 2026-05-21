@@ -81,9 +81,10 @@ export function getConnectorTypeSuggestions(
     // Only use display names for dynamic connectors (not elasticsearch.* or kibana.*)
     const isDynamicConnector =
       !connectorType.startsWith('elasticsearch.') && !connectorType.startsWith('kibana.');
+    const shortName = connector?.summary || connector?.description;
     const displayName =
-      isDynamicConnector && connector?.description
-        ? connector.description.replace(' connector', '').replace(' (no instances configured)', '')
+      isDynamicConnector && shortName
+        ? shortName.replace(' connector', '').replace(' (no instances configured)', '')
         : connectorType;
 
     return {
@@ -97,7 +98,7 @@ export function getConnectorTypeSuggestions(
         ? `Elasticsearch API - ${connectorType.replace('elasticsearch.', '')}`
         : connectorType.startsWith('kibana.')
         ? `Kibana API - ${connectorType.replace('kibana.', '')}`
-        : connector?.description || `Workflow connector - ${connectorType}`,
+        : connector?.description || connector?.summary || `Workflow connector - ${connectorType}`,
       filterText: connectorType,
       sortText: `!${connectorType}`, // Priority prefix to sort before default suggestions
       preselect: false,

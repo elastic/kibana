@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { getDatabaseValue, getDatabaseText } from './utils';
+import {
+  getDatabaseOptionLabel,
+  getDatabaseText,
+  getDatabaseValue,
+  normalizeMmdbFilename,
+} from './utils';
 
 describe('getDatabaseValue', () => {
   it('should return the value for a given database text for maxmind', () => {
@@ -56,5 +61,40 @@ describe('getDatabaseText', () => {
     const databaseValue = 'standard_location';
     const result = getDatabaseText(databaseValue);
     expect(result).toBe('IP Geolocation');
+  });
+});
+
+describe('normalizeMmdbFilename', () => {
+  it('should add .mmdb when missing', () => {
+    expect(normalizeMmdbFilename('GeoLite2-City')).toBe('GeoLite2-City.mmdb');
+  });
+
+  it('should keep a single .mmdb suffix', () => {
+    expect(normalizeMmdbFilename('GeoLite2-City.mmdb')).toBe('GeoLite2-City.mmdb');
+  });
+
+  it('should collapse repeated .mmdb suffixes', () => {
+    expect(normalizeMmdbFilename('GeoLite2-City.mmdb.mmdb')).toBe('GeoLite2-City.mmdb');
+  });
+});
+
+describe('getDatabaseOptionLabel', () => {
+  it('should return the database filename for local databases', () => {
+    expect(getDatabaseOptionLabel({ type: 'local', name: 'GeoLite2-City' })).toBe(
+      'GeoLite2-City.mmdb'
+    );
+    expect(getDatabaseOptionLabel({ type: 'local', name: 'GeoLite2-City.mmdb' })).toBe(
+      'GeoLite2-City.mmdb'
+    );
+  });
+
+  it('should return translated text for known managed databases', () => {
+    expect(getDatabaseOptionLabel({ type: 'maxmind', name: 'standard_asn' })).toBe('ASN');
+  });
+
+  it('should fallback to name when no translation exists', () => {
+    expect(getDatabaseOptionLabel({ type: 'maxmind', name: 'something_else' })).toBe(
+      'something_else'
+    );
   });
 });

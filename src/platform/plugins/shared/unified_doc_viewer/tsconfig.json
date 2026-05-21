@@ -59,6 +59,7 @@
     "@kbn/lens-embeddable-utils",
     "@kbn/restorable-state",
     "@kbn/lens-common",
+    "@kbn/ebt-click",
   ],
   "exclude": ["target/**/*"]
 }

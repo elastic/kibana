@@ -19,7 +19,6 @@ import type {
   HasLastSavedChildState,
   HasSections,
   HasSerializedChildState,
-  PassThroughContext,
   PresentationContainer,
   PublishesSettings,
   TrackContentfulRender,
@@ -92,9 +91,6 @@ export interface DashboardCreationOptions {
    */
   getInitialInput?: () => DashboardInitializationState;
 
-  /** Returns context to pass through to child embeddables. */
-  getPassThroughContext?: PassThroughContext['getPassThroughContext'];
-
   /** Returns embeddables to add to the dashboard on load. */
   getIncomingEmbeddables?: () => EmbeddablePackageState[] | undefined;
 
@@ -158,7 +154,6 @@ export type DashboardApi = CanExpandPanels &
   HasSerializedChildState &
   HasType<typeof DASHBOARD_API_TYPE> &
   HasUniqueId &
-  PassThroughContext &
   PresentationContainer &
   PublishesDataLoading &
   PublishesDataViews &
@@ -178,6 +173,12 @@ export type DashboardApi = CanExpandPanels &
   TrackContentfulRender &
   TracksOverlays &
   PublishesOnSave & {
+    /*
+     * Emits on any dashboard state change
+     *
+     * Recommend to debounce when subscribing
+     */
+    anyStateChange$: Observable<void>;
     asyncResetToLastSavedState: () => Promise<void>;
     fullScreenMode$: PublishingSubject<boolean>;
     focusedPanelId$: PublishingSubject<string | undefined>;
@@ -189,7 +190,7 @@ export type DashboardApi = CanExpandPanels &
     };
     getDashboardPanelFromId: (id: string) => {
       type: string;
-      grid: GridData;
+      grid?: GridData;
       serializedState: object;
     };
     hasOverlays$: PublishingSubject<boolean>;
@@ -235,6 +236,8 @@ export type DashboardApi = CanExpandPanels &
     createdBy?: string;
     user?: DashboardUser;
     isAccessControlEnabled?: boolean;
+
+    addIncomingEmbeddables: (embeddables?: EmbeddablePackageState[]) => void;
   };
 
 export interface DashboardInternalApi {

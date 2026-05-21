@@ -1024,6 +1024,8 @@ class OutputService {
         originalOutput.type === outputType.RemoteElasticsearch
       ) {
         (updateData as Nullable<OutputSoBaseAttributes>).write_to_logs_streams = null;
+        (updateData as Nullable<OutputSoBaseAttributes>).otel_exporter_config_yaml = null;
+        (updateData as Nullable<OutputSoBaseAttributes>).otel_disable_beatsauth = null;
       }
 
       if (data.type === outputType.Logstash) {
@@ -1252,7 +1254,10 @@ class OutputService {
           { preset },
           { fromPreconfiguration: true }
         );
-        await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id);
+        await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id, {
+          isDefault: output.is_default,
+          isDefaultMonitoring: output.is_default_monitoring,
+        });
       },
       {
         concurrency: MAX_CONCURRENT_BACKFILL_OUTPUTS_PRESETS,

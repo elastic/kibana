@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState, useRef } from 'react';
+import type { EuiPageHeaderProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { OnboardingFlow } from '../../../components/shared/templates/no_data_config';
@@ -114,23 +116,33 @@ const MetricsExplorerContent = () => {
     <InfraPageTemplate
       onboardingFlow={OnboardingFlow.Infra}
       pageHeader={{
-        pageTitle: metricsExplorerTitle,
-        rightSideItems: [<SavedViews viewState={viewState} />],
+        pageTitle: (
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>{metricsExplorerTitle}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <SavedViews viewState={viewState} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+        rightSideItems: [],
+        color: 'subdued' as unknown as EuiPageHeaderProps['color'],
+        children: (
+          <MetricsExplorerToolbar
+            timeRange={timeRange}
+            options={options}
+            chartOptions={chartOptions}
+            onRefresh={refresh}
+            onTimeChange={handleTimeChange}
+            onGroupByChange={handleGroupByChange}
+            onFilterQuerySubmit={handleFilterQuerySubmit}
+            onMetricsChange={handleMetricsChange}
+            onAggregationChange={handleAggregationChange}
+            onChartOptionsChange={setChartOptions}
+          />
+        ),
       }}
     >
       <MetricsInDiscoverCallout timeRange={timeRange} />
-      <MetricsExplorerToolbar
-        timeRange={timeRange}
-        options={options}
-        chartOptions={chartOptions}
-        onRefresh={refresh}
-        onTimeChange={handleTimeChange}
-        onGroupByChange={handleGroupByChange}
-        onFilterQuerySubmit={handleFilterQuerySubmit}
-        onMetricsChange={handleMetricsChange}
-        onAggregationChange={handleAggregationChange}
-        onChartOptionsChange={setChartOptions}
-      />
       {error ? (
         <NoData
           titleText="Whoops!"

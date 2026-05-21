@@ -8,19 +8,12 @@
 import { EuiSpacer } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
-import styled from 'styled-components';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
 import { NetflowRenderer } from '../netflow';
 import { SuricataSignature } from './suricata_signature';
 import { SuricataRefs } from './suricata_refs';
-
-const Details = styled.div`
-  margin: 5px 0;
-`;
-
-Details.displayName = 'Details';
 
 export const SuricataDetails = React.memo<{
   data: Ecs;
@@ -31,7 +24,7 @@ export const SuricataDetails = React.memo<{
 
   if (signatureId != null && signature != null) {
     return (
-      <Details>
+      <div css={{ margin: '5px 0' }}>
         <SuricataSignature
           scopeId={scopeId}
           id={data._id}
@@ -41,7 +34,7 @@ export const SuricataDetails = React.memo<{
         <SuricataRefs signatureId={signatureId} />
         <EuiSpacer size="s" />
         <NetflowRenderer data={data} timelineId={scopeId} />
-      </Details>
+      </div>
     );
   } else {
     return null;

@@ -25,6 +25,7 @@ description: Use when creating, updating, debugging, or reviewing Scout UI tests
 ## Non-negotiable conventions
 
 - **Tags are required**: Scout validates UI test tags at runtime. Ensure each test has at least one supported tag (typically by tagging the top-level `test.describe(...)` / `spaceTest.describe(...)`, e.g. `tags.deploymentAgnostic`, `tags.stateful.classic`, or `tags.performance`).
+- **No `@` in test titles**: Playwright treats `@word` in test/describe titles as tags. Do not use `@` followed by word characters in titles (e.g., `@timestamp`, `@elastic`). This causes Scout tag validation to fail with "Unsupported tag(s) found". Rephrase the title instead (e.g., use `timestamp field` instead of `@timestamp`).
 - **Prefer one suite per file**: keep a single top-level `test.describe(...)` (sequential) or `spaceTest.describe(...)` (parallel) and avoid nested `describe` blocks where possible.
 - **UI actions live in page objects**; assertions stay in the spec.
 - **Use APIs for setup/teardown**: prefer `apiServices`/`kbnClient`/`esArchiver` in hooks over clicking through the UI.
@@ -52,6 +53,7 @@ description: Use when creating, updating, debugging, or reviewing Scout UI tests
 - Use `spaceTest` so you can access `scoutSpace` for worker-isolated saved objects + UI settings.
 - Pre-ingest shared ES data in `parallel_tests/global.setup.ts` via `globalSetupHook(...)`.
   - Only **worker** fixtures are available there (no `page`, `browserAuth`, `pageObjects`).
+- Reset Elasticsearch/Kibana state once after the suite via `globalTeardownHook(...)` in `parallel_tests/global.teardown.ts` (optional, opt-in by file presence). For state that does need resetting, use `esClient`/`kbnClient`/`apiServices`. See `references/scout-ui-parallelism.md`.
 - Cleanup space-scoped mutations in `afterAll` (`scoutSpace.savedObjects.cleanStandardList()`, unset UI settings you set).
 
 ## Extending fixtures

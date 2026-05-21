@@ -11,7 +11,7 @@ import { DownloadSourceSchema } from '../models';
 
 export const GetOneDownloadSourcesRequestSchema = {
   params: schema.object({
-    sourceId: schema.string(),
+    sourceId: schema.string({ meta: { description: 'The ID of the download source' } }),
   }),
 };
 
@@ -23,14 +23,14 @@ export const PostDownloadSourcesRequestSchema = {
 
 export const PutDownloadSourcesRequestSchema = {
   params: schema.object({
-    sourceId: schema.string(),
+    sourceId: schema.string({ meta: { description: 'The ID of the download source' } }),
   }),
   body: DownloadSourceSchema,
 };
 
 export const DeleteDownloadSourcesRequestSchema = {
   params: schema.object({
-    sourceId: schema.string(),
+    sourceId: schema.string({ meta: { description: 'The ID of the download source' } }),
   }),
 };
 

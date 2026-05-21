@@ -19,7 +19,7 @@ spec:
       description: 'Builds and deploys a Kibana serverless project from a PR'
     spec:
       env:
-        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'false'
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'false'
 
       allow_rebuilds: false
       branch_configuration: main

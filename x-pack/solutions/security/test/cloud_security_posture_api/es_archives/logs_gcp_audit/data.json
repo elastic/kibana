@@ -2004,3 +2004,39 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "entities-host-multiple-ips-event",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T13:00:00.000Z",
+      "host": {
+        "id": "host-with-multiple-ips-actor",
+        "entity": {
+          "id": "host:host-with-multiple-ips-actor"
+        },
+        "target": {
+          "id": "host-with-multiple-ips-target",
+          "entity": {
+            "id": "host:host-with-multiple-ips-target"
+          }
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "partial-data-project-id"
+        },
+        "provider": "gcp"
+      },
+      "event": {
+        "action": "google.compute.v1.Instances.start",
+        "id": "entities-host-multiple-ips-event-id",
+        "kind": "event",
+        "outcome": "success"
+      }
+    }
+  }
+}

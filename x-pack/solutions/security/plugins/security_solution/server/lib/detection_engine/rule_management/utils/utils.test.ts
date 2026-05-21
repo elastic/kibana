@@ -5,19 +5,27 @@
  * 2.0.
  */
 
+jest.mock('../logic/search/get_gap_filtered_rule_ids');
+
 import { partition } from 'lodash/fp';
 import { Readable } from 'stream';
 import type { RuleAction } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { PartialRule } from '@kbn/alerting-plugin/server';
+import type { PartialRule, RulesClient } from '@kbn/alerting-plugin/server';
+import { gapFillStatus } from '@kbn/alerting-plugin/common/constants/gap_status';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import type { RuleToImport } from '../../../../../common/api/detection_engine/rule_management';
+import {
+  MAX_RULES_WITH_GAPS_LIMIT_REACHED_WARNING_TYPE,
+  MAX_RULES_WITH_GAPS_TO_FETCH,
+} from '../../../../../common/constants';
 import { getCreateRulesSchemaMock } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import type { ThreatMapping } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { requestContextMock } from '../../routes/__mocks__';
 import { getOutputRuleAlertForRest } from '../../routes/__mocks__/utils';
 import {
   getIdError,
+  resolveGapPreFilter,
   transformFindAlerts,
   transform,
   transformAlertsToRules,
@@ -35,8 +43,13 @@ import { getMlRuleParams, getQueryRuleParams, getThreatRuleParams } from '../../
 
 import { createPromiseFromRuleImportStream } from '../logic/import/create_promise_from_rule_import_stream';
 import { internalRuleToAPIResponse } from '../logic/detection_rules_client/converters/internal_rule_to_api_response';
+import { getGapFilteredRuleIds } from '../logic/search/get_gap_filtered_rule_ids';
 
 type PromiseFromStreams = RuleToImport | Error;
+
+const mockGetGapFilteredRuleIds = getGapFilteredRuleIds as jest.MockedFunction<
+  typeof getGapFilteredRuleIds
+>;
 
 const createMockImportRule = async (rule: ReturnType<typeof getCreateRulesSchemaMock>) => {
   const ndJsonStream = new Readable({
@@ -310,6 +323,67 @@ describe('utils', () => {
       );
 
       expect(output.warnings).toEqual(warnings);
+    });
+  });
+
+  describe('resolveGapPreFilter', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    test('returns rule ids and empty warnings when results are not truncated', async () => {
+      mockGetGapFilteredRuleIds.mockResolvedValue({
+        ruleIds: ['rule-a', 'rule-b'],
+        truncated: false,
+      });
+
+      const result = await resolveGapPreFilter({
+        rulesClient: {} as RulesClient,
+        filter: 'alert.attributes.enabled: true',
+        sortField: 'name',
+        sortOrder: 'asc',
+        gapFillStatuses: [gapFillStatus.UNFILLED],
+        gapsRangeStart: '2024-01-01T00:00:00.000Z',
+        gapsRangeEnd: '2024-01-02T00:00:00.000Z',
+        excludedReasons: [],
+        schedulerId: 'scheduler-1',
+      });
+
+      expect(result).toEqual({
+        ruleIds: ['rule-a', 'rule-b'],
+        warnings: [],
+      });
+
+      expect(mockGetGapFilteredRuleIds).toHaveBeenCalledWith(
+        expect.objectContaining({
+          maxRuleIds: MAX_RULES_WITH_GAPS_TO_FETCH,
+          gapRange: {
+            start: '2024-01-01T00:00:00.000Z',
+            end: '2024-01-02T00:00:00.000Z',
+          },
+          gapFillStatuses: [gapFillStatus.UNFILLED],
+        })
+      );
+    });
+
+    test('adds a truncation warning when getGapFilteredRuleIds returns truncated', async () => {
+      mockGetGapFilteredRuleIds.mockResolvedValue({
+        ruleIds: ['rule-a'],
+        truncated: true,
+      });
+
+      const result = await resolveGapPreFilter({
+        rulesClient: {} as RulesClient,
+        filter: undefined,
+        gapFillStatuses: [gapFillStatus.UNFILLED],
+        gapsRangeStart: '2024-01-01T00:00:00.000Z',
+        gapsRangeEnd: '2024-01-02T00:00:00.000Z',
+      });
+
+      expect(result.ruleIds).toEqual(['rule-a']);
+      expect(result.warnings).toHaveLength(1);
+      expect(result.warnings[0].type).toBe(MAX_RULES_WITH_GAPS_LIMIT_REACHED_WARNING_TYPE);
+      expect(result.warnings[0].message).toContain(String(MAX_RULES_WITH_GAPS_TO_FETCH));
     });
   });
 

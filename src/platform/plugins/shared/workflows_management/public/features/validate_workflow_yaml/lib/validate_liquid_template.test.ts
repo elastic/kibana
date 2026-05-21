@@ -8,14 +8,13 @@
  */
 
 import { parseDocument } from 'yaml';
+import type { LiquidValidationError } from '@kbn/workflows-yaml';
+import { validateLiquidTemplate as validateLiquidTemplateCommon } from '@kbn/workflows-yaml';
 import { validateLiquidTemplate } from './validate_liquid_template';
-import type { LiquidValidationError } from '../../../../common/lib/validate_liquid_template';
 
-jest.mock('../../../../common/lib/validate_liquid_template', () => ({
+jest.mock('@kbn/workflows-yaml', () => ({
   validateLiquidTemplate: jest.fn(),
 }));
-
-import { validateLiquidTemplate as validateLiquidTemplateCommon } from '../../../../common/lib/validate_liquid_template';
 
 const mockValidateLiquidTemplateCommon = validateLiquidTemplateCommon as jest.MockedFunction<
   typeof validateLiquidTemplateCommon

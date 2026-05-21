@@ -9,7 +9,7 @@ export const gridLayoutPrompt = `## Panel Layout
 
 The dashboard uses a **48-column grid**. On a 16:9 screen, roughly **20–24 rows** are visible without scrolling. Aim for **8–12 panels above the fold**.
 
-Every \`add_panels_from_attachments\` item requires \`grid: { x, y, w, h }\`. The origin \`(0, 0)\` is the top-left corner.
+Every \`add_panels.panels[]\` item and every \`add_section.panels[]\` item requires \`grid: { x, y, w, h }\`. The origin \`(0, 0)\` is the top-left corner.
 
 ### Grid sizes by chart type
 
