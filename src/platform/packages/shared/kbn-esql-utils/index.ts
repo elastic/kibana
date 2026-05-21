@@ -78,6 +78,10 @@ export {
   convertFiltersToESQLExpression,
   convertQueryToESQLExpression,
   injectWhereClauseAfterSourceCommand,
+  getColumnsWithHighlights,
+  DEFAULT_HIGHLIGHT_PRE_TAG,
+  DEFAULT_HIGHLIGHT_POST_TAG,
+  type EsqlColumnHighlight,
   type ESQLStatsQueryMeta,
 } from './src';
 
