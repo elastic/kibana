@@ -12,7 +12,7 @@ import {
   IngestScoresRequestBody,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { PLUGIN_ID } from '../../../common';
+import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
 const SCORE_INGEST_PAYLOAD_CAP_BYTES = 5 * 1024 * 1024;
@@ -65,7 +65,7 @@ export const registerIngestScoresRoute = ({ router, logger }: RouteDependencies)
         },
       },
       security: {
-        authz: { requiredPrivileges: [PLUGIN_ID] },
+        authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.manage] },
       },
       summary: 'Ingest evaluation scores',
     })
