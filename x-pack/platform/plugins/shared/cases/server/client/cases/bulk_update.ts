@@ -461,9 +461,7 @@ export const bulkUpdate = async (
   const isCasesAttachmentsEnabled = config.attachments?.enabled === true;
 
   try {
-    const rawQuery = decodeWithExcessOrThrowZod(CasesPatchRequestSchema)(
-      cases
-    ) as CasesPatchRequest;
+    const rawQuery = decodeWithExcessOrThrowZod(CasesPatchRequestSchema)(cases);
     const query = emptyCasesAssigneesSanitizer(rawQuery);
     const caseIds = query.cases.map((q) => q.id);
     const myCases = await caseService.getCases({
@@ -695,9 +693,7 @@ export const bulkUpdate = async (
 
     await notificationService.bulkNotifyAssignees(casesAndAssigneesToNotifyForAssignment);
 
-    const updatedCasesResponse = decodeOrThrowZod(PatchCasesResponseSchema)(
-      returnUpdatedCase
-    ) as CasesPatchResponse;
+    const updatedCasesResponse = decodeOrThrowZod(PatchCasesResponseSchema)(returnUpdatedCase);
     const updatedFieldsByCaseId = casesToUpdate.reduce<Map<string, string[]>>(
       (acc, { updateReq }) => {
         // Keep first occurrence for duplicate ids handling.

@@ -49,9 +49,7 @@ export const search = async (
   } = clientArgs;
 
   try {
-    const paramArgs = decodeWithExcessOrThrowZod(CasesSearchRequestSchema)(
-      params
-    ) as CasesSearchRequest;
+    const paramArgs = decodeWithExcessOrThrowZod(CasesSearchRequestSchema)(params);
     const configArgs = paramArgs.owner ? { owner: paramArgs.owner } : {};
     const configurations = await casesClient.configure.get(configArgs);
     const customFieldsConfiguration: CustomFieldsConfiguration = configurations
@@ -192,7 +190,7 @@ export const search = async (
 
     res.cases = enrichCasesWithFieldLabels(res.cases, templateSOs);
 
-    return decodeOrThrowZod(CasesFindResponseSchema)(res) as CasesFindResponse;
+    return decodeOrThrowZod(CasesFindResponseSchema)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to find cases: ${JSON.stringify(params)}: ${error}`,

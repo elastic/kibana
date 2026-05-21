@@ -23,9 +23,7 @@ export const getCasesMetrics = async (
   const { logger } = clientArgs;
 
   try {
-    const queryParams = decodeWithExcessOrThrowZod(CasesMetricsRequestSchema)(
-      params
-    ) as CasesMetricsRequest;
+    const queryParams = decodeWithExcessOrThrowZod(CasesMetricsRequestSchema)(params);
 
     const handlers = buildHandlers(queryParams, casesClient, clientArgs);
 
@@ -39,7 +37,7 @@ export const getCasesMetrics = async (
       return merge(acc, metric);
     }, {}) as CasesMetricsResponse;
 
-    return decodeOrThrowZod(CasesMetricsResponseSchema)(mergedResults) as CasesMetricsResponse;
+    return decodeOrThrowZod(CasesMetricsResponseSchema)(mergedResults);
   } catch (error) {
     throw createCaseError({
       logger,

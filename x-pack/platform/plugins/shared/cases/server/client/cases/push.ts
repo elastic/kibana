@@ -358,7 +358,7 @@ export const push = async (
       }),
     });
 
-    return decodeOrThrowZod(CaseSchema)(res) as Case;
+    return decodeOrThrowZod(CaseSchema)(res);
   } catch (error) {
     throw createCaseError({ message: `Failed to push case: ${error}`, error, logger });
   }

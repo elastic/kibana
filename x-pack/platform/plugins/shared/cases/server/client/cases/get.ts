@@ -171,9 +171,7 @@ export const getCasesByAlertID = async (
       totals: getAttachmentTotalsForCaseId(caseInfo.id, commentStats),
     }));
 
-    return decodeOrThrowZod(GetRelatedCasesByAlertResponseSchema)(
-      res
-    ) as GetRelatedCasesByAlertResponse;
+    return decodeOrThrowZod(GetRelatedCasesByAlertResponseSchema)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to get case IDs using alert ID: ${alertID} options: ${JSON.stringify(
@@ -256,7 +254,7 @@ export const get = async (
               }
             : {}),
         })
-      ) as Case;
+      );
     }
 
     const theComments = (await caseService.getAllCaseComments({
@@ -276,7 +274,7 @@ export const get = async (
       totalEvents: countEventsForID({ comments: theComments }),
     });
 
-    return decodeOrThrowZod(CaseSchema)(res) as Case;
+    return decodeOrThrowZod(CaseSchema)(res);
   } catch (error) {
     throw createCaseError({ message: `Failed to get case id: ${id}: ${error}`, error, logger });
   }
@@ -321,7 +319,7 @@ export const resolve = async (
         case: flattenCaseSavedObject({
           savedObject: resolvedSavedObject,
         }),
-      }) as CaseResolveResponse;
+      });
     }
 
     const theComments = (await caseService.getAllCaseComments({
@@ -344,7 +342,7 @@ export const resolve = async (
       }),
     };
 
-    return decodeOrThrowZod(CaseResolveResponseSchema)(res) as CaseResolveResponse;
+    return decodeOrThrowZod(CaseResolveResponseSchema)(res);
   } catch (error) {
     throw createCaseError({ message: `Failed to resolve case id: ${id}: ${error}`, error, logger });
   }
@@ -413,7 +411,7 @@ export async function getReporters(
       filter,
     });
 
-    return decodeOrThrowZod(GetReportersResponseSchema)(reporters) as User[];
+    return decodeOrThrowZod(GetReportersResponseSchema)(reporters);
   } catch (error) {
     throw createCaseError({ message: `Failed to get reporters: ${error}`, error, logger });
   }

@@ -11,8 +11,8 @@ import {
   MAX_COMMENT_LENGTH,
   MAX_DELETE_FILES,
 } from '../../../constants';
-import type { ZodType } from '@kbn/zod/v4';
 import { DeepStrict } from '@kbn/zod-helpers';
+import { parseErrors } from '../../../test_helpers/zod_schema_test_utils';
 import { AttachmentType, ExternalReferenceStorageType } from '../../domain/attachment/v1';
 import {
   AttachmentPatchRequestSchema,
@@ -21,12 +21,6 @@ import {
   BulkDeleteFileAttachmentsRequestSchema,
   BulkGetAttachmentsRequestSchema,
 } from './v1';
-
-const errors = (schema: ZodType<unknown>, value: unknown): string[] => {
-  const result = schema.safeParse(value);
-  if (result.success) return [];
-  return result.error.issues.map((i) => i.message);
-};
 
 const validUserComment = {
   type: AttachmentType.user,
@@ -94,20 +88,20 @@ describe('AttachmentRequestSchema', () => {
     });
 
     it('rejects an empty comment string', () => {
-      expect(errors(AttachmentRequestSchema, { ...validUserComment, comment: '' })).toContain(
+      expect(parseErrors(AttachmentRequestSchema, { ...validUserComment, comment: '' })).toContain(
         'The comment field cannot be an empty string.'
       );
     });
 
     it('rejects whitespace-only comment (limitedStringSchema parity)', () => {
-      expect(errors(AttachmentRequestSchema, { ...validUserComment, comment: '   ' })).toContain(
+      expect(parseErrors(AttachmentRequestSchema, { ...validUserComment, comment: '   ' })).toContain(
         'The comment field cannot be an empty string.'
       );
     });
 
     it(`rejects a comment longer than MAX_COMMENT_LENGTH (${MAX_COMMENT_LENGTH})`, () => {
       const comment = 'a'.repeat(MAX_COMMENT_LENGTH + 1);
-      expect(errors(AttachmentRequestSchema, { ...validUserComment, comment })).toContain(
+      expect(parseErrors(AttachmentRequestSchema, { ...validUserComment, comment })).toContain(
         `The length of the comment is too long. The maximum length is ${MAX_COMMENT_LENGTH}.`
       );
     });
@@ -163,7 +157,7 @@ describe('AttachmentRequestSchema', () => {
     });
 
     it('rejects an empty actions comment', () => {
-      expect(errors(AttachmentRequestSchema, { ...validActions, comment: '' })).toContain(
+      expect(parseErrors(AttachmentRequestSchema, { ...validActions, comment: '' })).toContain(
         'The comment field cannot be an empty string.'
       );
     });
@@ -289,7 +283,7 @@ describe('BulkCreateAttachmentsRequestSchema', () => {
 
   it(`rejects more than MAX_BULK_CREATE_ATTACHMENTS (${MAX_BULK_CREATE_ATTACHMENTS}) items`, () => {
     const items = Array(MAX_BULK_CREATE_ATTACHMENTS + 1).fill(validUserComment);
-    expect(errors(BulkCreateAttachmentsRequestSchema, items)).toContain(
+    expect(parseErrors(BulkCreateAttachmentsRequestSchema, items)).toContain(
       `The length of the field attachments is too long. Array must be of length <= ${MAX_BULK_CREATE_ATTACHMENTS}.`
     );
   });
@@ -303,26 +297,26 @@ describe('BulkDeleteFileAttachmentsRequestSchema', () => {
   });
 
   it('rejects an empty ids array', () => {
-    expect(errors(BulkDeleteFileAttachmentsRequestSchema, { ids: [] })).toContain(
+    expect(parseErrors(BulkDeleteFileAttachmentsRequestSchema, { ids: [] })).toContain(
       'The length of the field ids is too short. Array must be of length >= 1.'
     );
   });
 
   it(`rejects more than MAX_DELETE_FILES (${MAX_DELETE_FILES}) ids`, () => {
     const ids = Array(MAX_DELETE_FILES + 1).fill('id');
-    expect(errors(BulkDeleteFileAttachmentsRequestSchema, { ids })).toContain(
+    expect(parseErrors(BulkDeleteFileAttachmentsRequestSchema, { ids })).toContain(
       `The length of the field ids is too long. Array must be of length <= ${MAX_DELETE_FILES}.`
     );
   });
 
   it('rejects an empty-string id (NonEmptyString parity)', () => {
-    expect(errors(BulkDeleteFileAttachmentsRequestSchema, { ids: [''] })).toContain(
+    expect(parseErrors(BulkDeleteFileAttachmentsRequestSchema, { ids: [''] })).toContain(
       'string must have length >= 1'
     );
   });
 
   it('rejects a whitespace-only id (NonEmptyString parity)', () => {
-    expect(errors(BulkDeleteFileAttachmentsRequestSchema, { ids: ['   '] })).toContain(
+    expect(parseErrors(BulkDeleteFileAttachmentsRequestSchema, { ids: ['   '] })).toContain(
       'string must have length >= 1'
     );
   });
@@ -334,14 +328,14 @@ describe('BulkGetAttachmentsRequestSchema', () => {
   });
 
   it('rejects an empty ids array', () => {
-    expect(errors(BulkGetAttachmentsRequestSchema, { ids: [] })).toContain(
+    expect(parseErrors(BulkGetAttachmentsRequestSchema, { ids: [] })).toContain(
       'The length of the field ids is too short. Array must be of length >= 1.'
     );
   });
 
   it(`rejects more than MAX_BULK_GET_ATTACHMENTS (${MAX_BULK_GET_ATTACHMENTS}) ids`, () => {
     const ids = Array(MAX_BULK_GET_ATTACHMENTS + 1).fill('id');
-    expect(errors(BulkGetAttachmentsRequestSchema, { ids })).toContain(
+    expect(parseErrors(BulkGetAttachmentsRequestSchema, { ids })).toContain(
       `The length of the field ids is too long. Array must be of length <= ${MAX_BULK_GET_ATTACHMENTS}.`
     );
   });

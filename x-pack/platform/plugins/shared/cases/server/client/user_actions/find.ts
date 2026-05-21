@@ -64,7 +64,7 @@ export const find = async (
       total: userActions.total,
     };
 
-    return decodeOrThrowZod(UserActionFindResponseSchema)(res) as UserActionFindResponse;
+    return decodeOrThrowZod(UserActionFindResponseSchema)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to find user actions for case id: ${caseId}: ${error}`,

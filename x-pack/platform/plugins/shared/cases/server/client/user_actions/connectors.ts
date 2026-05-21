@@ -63,7 +63,7 @@ export const getConnectors = async (
       logger,
     });
 
-    return decodeOrThrowZod(GetCaseConnectorsResponseSchema)(res) as GetCaseConnectorsResponse;
+    return decodeOrThrowZod(GetCaseConnectorsResponseSchema)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to retrieve the case connectors case id: ${caseId}: ${error}`,

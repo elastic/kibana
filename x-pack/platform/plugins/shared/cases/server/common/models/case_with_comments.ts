@@ -659,7 +659,7 @@ export class CaseCommentModel {
         ...this.formatForEncoding(comments.total),
       };
 
-      return decodeOrThrowZod(CaseSchema)(caseResponse) as Case;
+      return decodeOrThrowZod(CaseSchema)(caseResponse);
     } catch (error) {
       throw createCaseError({
         message: `Failed encoding the commentable case, case id: ${this.caseInfo.id}: ${error}`,

@@ -160,7 +160,7 @@ export const replaceCustomField = async (
       builtUserActions,
     });
 
-    return decodeOrThrowZod(CaseCustomFieldSchema)(updatedCustomField) as CaseCustomField;
+    return decodeOrThrowZod(CaseCustomFieldSchema)(updatedCustomField);
   } catch (error) {
     throw createCaseError({
       message: `Failed to replace customField, id: ${customFieldId} of case: ${caseId} version:${request.caseVersion} : ${error}`,

@@ -106,7 +106,7 @@ export const getUsers = async (
       reporter: reporterResponse[0],
     };
 
-    return decodeOrThrowZod(GetCaseUsersResponseSchema)(results) as GetCaseUsersResponse;
+    return decodeOrThrowZod(GetCaseUsersResponseSchema)(results);
   } catch (error) {
     throw createCaseError({
       message: `Failed to retrieve the case users case id: ${caseId}: ${error}`,

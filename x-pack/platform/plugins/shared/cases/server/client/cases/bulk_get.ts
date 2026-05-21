@@ -71,7 +71,7 @@ export const bulkGet = async (
     const errors = constructErrors(soBulkGetErrors, unauthorizedCases);
     const res = { cases: flattenedCases, errors };
 
-    return decodeOrThrowZod(CasesBulkGetResponseSchema)(res) as CasesBulkGetResponse;
+    return decodeOrThrowZod(CasesBulkGetResponseSchema)(res);
   } catch (error) {
     const ids = params.ids ?? [];
     throw createCaseError({

@@ -49,7 +49,7 @@ export const create = async (
   } = clientArgs;
 
   try {
-    const rawQuery = decodeWithExcessOrThrowZod(CasePostRequestSchema)(data) as CasePostRequest;
+    const rawQuery = decodeWithExcessOrThrowZod(CasePostRequestSchema)(data);
     const query = emptyCaseAssigneesSanitizer(rawQuery);
     const configurations = await casesClient.configure.get({ owner: data.owner });
     const customFieldsConfiguration = configurations[0]?.customFields;
@@ -174,7 +174,7 @@ export const create = async (
       savedObject: newCase,
     });
 
-    const createdCase = decodeOrThrowZod(CaseSchema)(res) as Case;
+    const createdCase = decodeOrThrowZod(CaseSchema)(res);
 
     clientArgs.casesEventBus?.emitCaseCreated(clientArgs.request, {
       caseId: createdCase.id,

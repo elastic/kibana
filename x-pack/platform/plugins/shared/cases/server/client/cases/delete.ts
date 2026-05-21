@@ -39,7 +39,7 @@ export async function deleteCases(
   } = clientArgs;
 
   try {
-    const caseIds = decodeWithExcessOrThrowZod(CasesDeleteRequestSchema)(ids) as CasesDeleteRequest;
+    const caseIds = decodeWithExcessOrThrowZod(CasesDeleteRequestSchema)(ids);
     const cases = await caseService.getCases({ caseIds });
     const entities = new Map<string, OwnerEntity>();
 

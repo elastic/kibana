@@ -10,12 +10,12 @@ import { decodeOrThrowZod } from '../common/runtime_types';
 
 export const bulkDecodeSOAttributes = <T>(
   savedObjects: Array<{ id: string; attributes: T }>,
-  schema: ZodType<unknown>
+  schema: ZodType<T>
 ) => {
   const decodeRes = new Map<string, T>();
 
   for (const so of savedObjects) {
-    decodeRes.set(so.id, decodeOrThrowZod(schema)(so.attributes) as T);
+    decodeRes.set(so.id, decodeOrThrowZod(schema)(so.attributes));
   }
 
   return decodeRes;

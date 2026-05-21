@@ -47,9 +47,7 @@ export const find = async (
   } = clientArgs;
 
   try {
-    const paramArgs = decodeWithExcessOrThrowZod(CasesFindRequestWithCustomFieldsSchema)(
-      params
-    ) as CasesFindRequestWithCustomFields;
+    const paramArgs = decodeWithExcessOrThrowZod(CasesFindRequestWithCustomFieldsSchema)(params);
     const configArgs = paramArgs.owner ? { owner: paramArgs.owner } : {};
     const configurations = await casesClient.configure.get(configArgs);
     const customFieldsConfiguration: CustomFieldsConfiguration = configurations
@@ -152,7 +150,7 @@ export const find = async (
       countClosedCases: statusStats.closed,
     });
 
-    return decodeOrThrowZod(CasesFindResponseSchema)(res) as CasesFindResponse;
+    return decodeOrThrowZod(CasesFindResponseSchema)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to find cases: ${JSON.stringify(params)}: ${error}`,

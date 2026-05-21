@@ -76,9 +76,7 @@ export const addObservable = async (
   licensingService.notifyUsage(LICENSING_CASE_OBSERVABLES_FEATURE);
 
   try {
-    const paramArgs = decodeWithExcessOrThrowZod(AddObservableRequestSchema)(
-      params
-    ) as AddObservableRequest;
+    const paramArgs = decodeWithExcessOrThrowZod(AddObservableRequestSchema)(params);
     const retrievedCase = await caseService.getCase({ id: caseId });
     await ensureUpdateAuthorized(authorization, retrievedCase);
 
@@ -139,7 +137,7 @@ export const addObservable = async (
       },
     });
 
-    return decodeOrThrowZod(CaseSchema)(res) as Case;
+    return decodeOrThrowZod(CaseSchema)(res);
   } catch (error) {
     throw Boom.badRequest(`Failed to add observable: ${error}`);
   }
@@ -169,9 +167,7 @@ export const updateObservable = async (
   licensingService.notifyUsage(LICENSING_CASE_OBSERVABLES_FEATURE);
 
   try {
-    const paramArgs = decodeWithExcessOrThrowZod(UpdateObservableRequestSchema)(
-      params
-    ) as UpdateObservableRequest;
+    const paramArgs = decodeWithExcessOrThrowZod(UpdateObservableRequestSchema)(params);
     const retrievedCase = await caseService.getCase({ id: caseId });
     await ensureUpdateAuthorized(authorization, retrievedCase);
 
@@ -231,7 +227,7 @@ export const updateObservable = async (
       },
     });
 
-    return decodeOrThrowZod(CaseSchema)(res) as Case;
+    return decodeOrThrowZod(CaseSchema)(res);
   } catch (error) {
     throw Boom.badRequest(`Failed to update observable: ${error}`);
   }
@@ -318,9 +314,7 @@ export const bulkAddObservables = async (
   licensingService.notifyUsage(LICENSING_CASE_OBSERVABLES_FEATURE);
 
   try {
-    const paramArgs = decodeWithExcessOrThrowZod(BulkAddObservablesRequestSchema)(
-      params
-    ) as BulkAddObservablesRequest;
+    const paramArgs = decodeWithExcessOrThrowZod(BulkAddObservablesRequestSchema)(params);
     const retrievedCase = await caseService.getCase({ id: paramArgs.caseId });
     await ensureUpdateAuthorized(authorization, retrievedCase);
 
@@ -380,7 +374,7 @@ export const bulkAddObservables = async (
       },
     });
 
-    return decodeOrThrowZod(CaseSchema)(res) as Case;
+    return decodeOrThrowZod(CaseSchema)(res);
   } catch (error) {
     throw Boom.badRequest(`Failed to add observable: ${error}`);
   }

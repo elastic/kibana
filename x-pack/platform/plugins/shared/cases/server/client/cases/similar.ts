@@ -80,9 +80,7 @@ export const similar = async (
   }
 
   try {
-    const paramArgs = decodeWithExcessOrThrowZod(SimilarCasesSearchRequestSchema)(
-      params
-    ) as SimilarCasesSearchRequest;
+    const paramArgs = decodeWithExcessOrThrowZod(SimilarCasesSearchRequestSchema)(params);
     const retrievedCase = await caseService.getCase({ id: caseId });
 
     const availableObservableTypesMap = await getAvailableObservableTypesMap(
@@ -159,7 +157,7 @@ export const similar = async (
       total: cases.total,
     };
 
-    return decodeOrThrowZod(CasesSimilarResponseSchema)(res) as CasesSimilarResponse;
+    return decodeOrThrowZod(CasesSimilarResponseSchema)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to find cases: ${JSON.stringify(params)}: ${error}`,

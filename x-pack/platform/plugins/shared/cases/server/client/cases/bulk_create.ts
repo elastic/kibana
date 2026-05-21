@@ -55,9 +55,7 @@ export const bulkCreate = async (
   } = clientArgs;
 
   try {
-    const decodedData = decodeWithExcessOrThrowZod(BulkCreateCasesRequestSchema)(
-      data
-    ) as BulkCreateCasesRequest;
+    const decodedData = decodeWithExcessOrThrowZod(BulkCreateCasesRequestSchema)(data);
     const configurations = await casesClient.configure.get();
 
     const customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration> = new Map(
@@ -164,7 +162,7 @@ export const bulkCreate = async (
 
     const createdCasesResponse = decodeOrThrowZod(BulkCreateCasesResponseSchema)({
       cases: res,
-    }) as BulkCreateCasesResponse;
+    });
 
     createdCasesResponse.cases.forEach((createdCase) => {
       clientArgs.casesEventBus?.emitCaseCreated(clientArgs.request, {

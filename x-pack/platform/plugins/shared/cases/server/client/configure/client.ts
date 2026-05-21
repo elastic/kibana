@@ -252,7 +252,7 @@ export async function get(
       }
     );
 
-    return decodeOrThrowZod(ConfigurationsSchema)(configurations) as Configurations;
+    return decodeOrThrowZod(ConfigurationsSchema)(configurations);
   } catch (error) {
     throw createCaseError({ message: `Failed to get case configure: ${error}`, error, logger });
   }
@@ -304,9 +304,7 @@ export async function update(
   } = clientArgs;
 
   try {
-    const request = decodeWithExcessOrThrowZod(ConfigurationPatchRequestSchema)(
-      req
-    ) as ConfigurationPatchRequest;
+    const request = decodeWithExcessOrThrowZod(ConfigurationPatchRequestSchema)(req);
 
     validateDuplicatedKeysInRequest({
       requestFields: request.customFields,
@@ -413,7 +411,7 @@ export async function update(
       id: patch.id,
     };
 
-    return decodeOrThrowZod(ConfigurationSchema)(res) as Configuration;
+    return decodeOrThrowZod(ConfigurationSchema)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to get patch configure in route: ${error}`,
@@ -437,9 +435,8 @@ export async function create(
   } = clientArgs;
 
   try {
-    const validatedConfigurationRequest = decodeWithExcessOrThrowZod(ConfigurationRequestSchema)(
-      configRequest
-    ) as ConfigurationRequest;
+    const validatedConfigurationRequest =
+      decodeWithExcessOrThrowZod(ConfigurationRequestSchema)(configRequest);
 
     validateDuplicatedKeysInRequest({
       requestFields: validatedConfigurationRequest.customFields,
@@ -550,7 +547,7 @@ export async function create(
       id: post.id,
     };
 
-    return decodeOrThrowZod(ConfigurationSchema)(res) as Configuration;
+    return decodeOrThrowZod(ConfigurationSchema)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to create case configuration: ${error}`,

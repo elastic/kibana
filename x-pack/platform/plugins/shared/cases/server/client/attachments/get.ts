@@ -109,7 +109,7 @@ export const getAllDocumentsAttachedToCase = async (
 
     const res = normalizeDocumentResponse(documents);
 
-    return decodeOrThrowZod(DocumentResponseSchema)(res) as DocumentResponse;
+    return decodeOrThrowZod(DocumentResponseSchema)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to get documents attached to case id: ${caseId}: ${error}`,
@@ -176,7 +176,7 @@ export async function find(
 
     const res = transformComments(theComments);
 
-    return decodeOrThrowZod(AttachmentsFindResponseSchemaV2)(res) as AttachmentsFindResponse;
+    return decodeOrThrowZod(AttachmentsFindResponseSchemaV2)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to find comments case id: ${caseID}: ${error}`,
@@ -212,7 +212,7 @@ export async function get(
 
     const res = flattenAttachmentSavedObject(comment);
 
-    return decodeOrThrowZod(AttachmentSchemaV2)(res) as AttachmentV2;
+    return decodeOrThrowZod(AttachmentSchemaV2)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to get comment case id: ${caseID} attachment id: ${savedObjectId}: ${error}`,
@@ -258,7 +258,7 @@ export async function getAll(
 
     const res = flattenAttachmentSavedObjects(comments.saved_objects);
 
-    return decodeOrThrowZod(AttachmentsSchemaV2)(res) as AttachmentsV2;
+    return decodeOrThrowZod(AttachmentsSchemaV2)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to get all comments case id: ${caseID}: ${error}`,

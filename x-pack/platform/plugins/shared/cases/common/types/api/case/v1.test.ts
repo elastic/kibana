@@ -21,8 +21,8 @@ import {
   MAX_TAGS_PER_CASE,
   MAX_TITLE_LENGTH,
 } from '../../../constants';
-import type { ZodType } from '@kbn/zod/v4';
 import { DeepStrict } from '@kbn/zod-helpers';
+import { parseErrors } from '../../../test_helpers/zod_schema_test_utils';
 import { CaseSeverity, CaseStatuses } from '../../domain/case/v1';
 import { ConnectorTypes } from '../../domain/connector/v1';
 import { CustomFieldTypes } from '../../domain/custom_field/v1';
@@ -34,12 +34,6 @@ import {
   CasesPatchRequestSchema,
   CasesSearchRequestSchema,
 } from './v1';
-
-const errors = (schema: ZodType<unknown>, value: unknown): string[] => {
-  const result = schema.safeParse(value);
-  if (result.success) return [];
-  return result.error.issues.map((i) => i.message);
-};
 
 const validPostRequest: CasePostRequest = {
   description: 'A description',
@@ -102,7 +96,7 @@ describe('CasePostRequestSchema', () => {
 
   it('rejects more than MAX_ASSIGNEES_PER_CASE assignees', () => {
     const assignees = Array(MAX_ASSIGNEES_PER_CASE + 1).fill({ uid: 'foobar' });
-    expect(errors(CasePostRequestSchema, { ...validPostRequest, assignees })).toContain(
+    expect(parseErrors(CasePostRequestSchema, { ...validPostRequest, assignees })).toContain(
       `The length of the field assignees is too long. Array must be of length <= ${MAX_ASSIGNEES_PER_CASE}.`
     );
   });
@@ -119,41 +113,41 @@ describe('CasePostRequestSchema', () => {
 
   it('rejects description exceeding MAX_DESCRIPTION_LENGTH', () => {
     const description = 'a'.repeat(MAX_DESCRIPTION_LENGTH + 1);
-    expect(errors(CasePostRequestSchema, { ...validPostRequest, description })).toContain(
+    expect(parseErrors(CasePostRequestSchema, { ...validPostRequest, description })).toContain(
       `The length of the description is too long. The maximum length is ${MAX_DESCRIPTION_LENGTH}.`
     );
   });
 
   it('rejects whitespace-only description (limitedStringSchema parity)', () => {
-    expect(errors(CasePostRequestSchema, { ...validPostRequest, description: '   ' })).toContain(
+    expect(parseErrors(CasePostRequestSchema, { ...validPostRequest, description: '   ' })).toContain(
       'The description field cannot be an empty string.'
     );
   });
 
   it('rejects more than MAX_TAGS_PER_CASE tags', () => {
     const tags = Array(MAX_TAGS_PER_CASE + 1).fill('foobar');
-    expect(errors(CasePostRequestSchema, { ...validPostRequest, tags })).toContain(
+    expect(parseErrors(CasePostRequestSchema, { ...validPostRequest, tags })).toContain(
       `The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_PER_CASE}.`
     );
   });
 
   it('rejects a tag exceeding MAX_LENGTH_PER_TAG', () => {
     const tags = ['a'.repeat(MAX_LENGTH_PER_TAG + 1)];
-    expect(errors(CasePostRequestSchema, { ...validPostRequest, tags })).toContain(
+    expect(parseErrors(CasePostRequestSchema, { ...validPostRequest, tags })).toContain(
       `The length of the tag is too long. The maximum length is ${MAX_LENGTH_PER_TAG}.`
     );
   });
 
   it('rejects title exceeding MAX_TITLE_LENGTH', () => {
     const title = 'a'.repeat(MAX_TITLE_LENGTH + 1);
-    expect(errors(CasePostRequestSchema, { ...validPostRequest, title })).toContain(
+    expect(parseErrors(CasePostRequestSchema, { ...validPostRequest, title })).toContain(
       `The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}.`
     );
   });
 
   it('rejects category exceeding MAX_CATEGORY_LENGTH', () => {
     const category = 'a'.repeat(MAX_CATEGORY_LENGTH + 1);
-    expect(errors(CasePostRequestSchema, { ...validPostRequest, category })).toContain(
+    expect(parseErrors(CasePostRequestSchema, { ...validPostRequest, category })).toContain(
       `The length of the category is too long. The maximum length is ${MAX_CATEGORY_LENGTH}.`
     );
   });
@@ -164,7 +158,7 @@ describe('CasePostRequestSchema', () => {
       type: CustomFieldTypes.TEXT,
       value: 'v',
     });
-    expect(errors(CasePostRequestSchema, { ...validPostRequest, customFields })).toContain(
+    expect(parseErrors(CasePostRequestSchema, { ...validPostRequest, customFields })).toContain(
       `The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}.`
     );
   });
@@ -243,7 +237,7 @@ describe('CasePatchRequestSchema', () => {
   });
 
   it('rejects whitespace-only title (length-bounded fields enforce trim parity)', () => {
-    expect(errors(CasePatchRequestSchema, { ...validPatch, title: '   ' })).toContain(
+    expect(parseErrors(CasePatchRequestSchema, { ...validPatch, title: '   ' })).toContain(
       'The title field cannot be an empty string.'
     );
   });
@@ -257,14 +251,14 @@ describe('CasesPatchRequestSchema', () => {
   });
 
   it('rejects an empty cases array', () => {
-    expect(errors(CasesPatchRequestSchema, { cases: [] })).toContain(
+    expect(parseErrors(CasesPatchRequestSchema, { cases: [] })).toContain(
       'The length of the field cases is too short. Array must be of length >= 1.'
     );
   });
 
   it(`rejects more than ${MAX_CASES_TO_UPDATE} cases`, () => {
     const cases = Array(MAX_CASES_TO_UPDATE + 1).fill(validPatch);
-    expect(errors(CasesPatchRequestSchema, { cases })).toContain(
+    expect(parseErrors(CasesPatchRequestSchema, { cases })).toContain(
       `The length of the field cases is too long. Array must be of length <= ${MAX_CASES_TO_UPDATE}.`
     );
   });
@@ -291,7 +285,7 @@ describe('CasesFindRequestSchema', () => {
   });
 
   it(`rejects perPage above MAX_CASES_PER_PAGE (${MAX_CASES_PER_PAGE})`, () => {
-    expect(errors(CasesFindRequestSchema, { perPage: MAX_CASES_PER_PAGE + 1 })).toContain(
+    expect(parseErrors(CasesFindRequestSchema, { perPage: MAX_CASES_PER_PAGE + 1 })).toContain(
       `The provided perPage value is too high. The maximum allowed perPage value is ${MAX_CASES_PER_PAGE}.`
     );
   });
@@ -320,28 +314,28 @@ describe('CasesFindRequestSchema', () => {
 
   it(`rejects category array with ${MAX_CATEGORY_FILTER_LENGTH + 1} items`, () => {
     const category = Array(MAX_CATEGORY_FILTER_LENGTH + 1).fill('x');
-    expect(errors(CasesFindRequestSchema, { category })).toContain(
+    expect(parseErrors(CasesFindRequestSchema, { category })).toContain(
       `The length of the field category is too long. Array must be of length <= ${MAX_CATEGORY_FILTER_LENGTH}.`
     );
   });
 
   it(`rejects tags array with ${MAX_TAGS_FILTER_LENGTH + 1} items`, () => {
     const tags = Array(MAX_TAGS_FILTER_LENGTH + 1).fill('x');
-    expect(errors(CasesFindRequestSchema, { tags })).toContain(
+    expect(parseErrors(CasesFindRequestSchema, { tags })).toContain(
       `The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_FILTER_LENGTH}.`
     );
   });
 
   it(`rejects assignees array with ${MAX_ASSIGNEES_FILTER_LENGTH + 1} items`, () => {
     const assignees = Array(MAX_ASSIGNEES_FILTER_LENGTH + 1).fill('x');
-    expect(errors(CasesFindRequestSchema, { assignees })).toContain(
+    expect(parseErrors(CasesFindRequestSchema, { assignees })).toContain(
       `The length of the field assignees is too long. Array must be of length <= ${MAX_ASSIGNEES_FILTER_LENGTH}.`
     );
   });
 
   it(`rejects reporters array with ${MAX_REPORTERS_FILTER_LENGTH + 1} items`, () => {
     const reporters = Array(MAX_REPORTERS_FILTER_LENGTH + 1).fill('x');
-    expect(errors(CasesFindRequestSchema, { reporters })).toContain(
+    expect(parseErrors(CasesFindRequestSchema, { reporters })).toContain(
       `The length of the field reporters is too long. Array must be of length <= ${MAX_REPORTERS_FILTER_LENGTH}.`
     );
   });
