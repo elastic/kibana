@@ -541,7 +541,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'agentBuilder:uiamOAuthClientManagement': {
     type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
+    _meta: {
+      description:
+        'Whether UIAM OAuth client management endpoints and the Agent Builder MCP Clients UI are enabled.',
+    },
   },
   'workflows:ui:enabled': {
     type: 'boolean',
