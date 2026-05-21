@@ -219,7 +219,6 @@
         "@playwright/test",
         "playwright",
         "pngjs",
-        "qs",
         "rxjs-marbles",
         "sharp",
         "superagent",
@@ -1839,7 +1838,8 @@
       "groupName": "polyfills",
       "matchDepNames": [
         "blob-polyfill",
-        "core-js"
+        "core-js",
+        "qs"
       ],
       "matchDepPatterns": [
         "polyfill"
