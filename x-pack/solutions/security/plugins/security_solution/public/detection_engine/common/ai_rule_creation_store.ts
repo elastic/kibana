@@ -18,6 +18,9 @@ export interface AiRuleCreationSession {
 export class AiRuleCreationService {
   private readonly saveRuleSubject = new Subject<RuleResponse>();
   private readonly lastSavedRuleIdSubject = new BehaviorSubject<string | null>(null);
+  // Page-level rule id — set on mount by whichever page knows the rule (details, editing).
+  // Unlike lastSavedRuleId, this is never reset by conversation switches; only by unmount.
+  private readonly existingRuleIdSubject = new BehaviorSubject<string | null>(null);
   private readonly dirtySubject = new BehaviorSubject<boolean>(false);
   private readonly savingSubject = new BehaviorSubject<boolean>(false);
   private readonly aiRuleSubject = new BehaviorSubject<RuleResponse | null>(null);
@@ -73,6 +76,14 @@ export class AiRuleCreationService {
     return this.lastSavedRuleIdSubject.getValue();
   };
 
+  public setExistingRuleId = (id: string | null): void => {
+    this.existingRuleIdSubject.next(id);
+  };
+
+  public getExistingRuleId = (): string | null => {
+    return this.existingRuleIdSubject.getValue();
+  };
+
   public markDirty = (): void => {
     this.dirtySubject.next(true);
   };
@@ -103,6 +114,7 @@ export class AiRuleCreationService {
 
   public reset = (): void => {
     this.lastSavedRuleIdSubject.next(null);
+    this.existingRuleIdSubject.next(null);
     this.dirtySubject.next(false);
     this.savingSubject.next(false);
     this.aiRuleSubject.next(null);

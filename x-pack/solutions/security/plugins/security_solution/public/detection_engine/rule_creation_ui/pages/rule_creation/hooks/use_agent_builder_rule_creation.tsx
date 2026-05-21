@@ -111,24 +111,12 @@ export const useAgentBuilderRuleCreation = ({
     return () => subscription.unsubscribe();
   }, [aiRuleCreation]);
 
-  // On the edit-rule page the rule has obviously already been saved, but
-  // `lastSavedRuleId` in the store starts as null because nothing in this React tree has
-  // gone through `save_rule_handler` yet. Seed it from `existingRuleId` so the dirty-
-  // tracking subscription in save_rule_handler (gated on `lastSavedId !== null`) actually
-  // fires when the agent edits the rule in chat — without this, "Save changes" stays
-  // permanently disabled on the edit page.
-  //
-  // Also re-seed on every active-conversation change: save_rule_handler resets
-  // lastSavedRuleId to null when the user switches conversations, which would otherwise
-  // wipe our seed on this page.
+  // Tell save_rule_handler which rule this page is editing. Unlike lastSavedRuleId, this
+  // is not reset on conversation switches — it's stable for the lifetime of the page.
   useEffect(() => {
-    if (!existingRuleId) return;
-    aiRuleCreation.setLastSavedRuleId(existingRuleId);
-    const conversationSub = agentBuilder?.events?.ui?.activeConversation$.subscribe(() => {
-      aiRuleCreation.setLastSavedRuleId(existingRuleId);
-    });
-    return () => conversationSub?.unsubscribe();
-  }, [existingRuleId, aiRuleCreation, agentBuilder]);
+    aiRuleCreation.setExistingRuleId(existingRuleId ?? null);
+    return () => aiRuleCreation.setExistingRuleId(null);
+  }, [existingRuleId, aiRuleCreation]);
 
   // Track whether the agent is mid-round so attachment cards can hide their action buttons
   // during reasoning/streaming. Any agent-activity event marks busy; roundComplete clears it.

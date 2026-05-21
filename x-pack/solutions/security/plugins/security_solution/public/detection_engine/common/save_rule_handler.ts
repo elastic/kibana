@@ -79,10 +79,15 @@ export const createSaveRuleHandler = ({
 
     try {
       let saved: RuleResponse;
-      // The server-side attachment store doesn't receive the API-assigned id after a save
-      // (addAttachment only updates client-side props). Fall back to lastSavedRuleId so
-      // subsequent saves after agent edits use the update path instead of creating duplicates.
-      const savedRuleId = rule.id ?? aiRuleCreation.getLastSavedRuleId() ?? undefined;
+      // Resolve the rule id to determine create vs update:
+      // 1. rule.id — present when the attachment JSON already carries a server id
+      // 2. lastSavedRuleId — set after a successful save in this session
+      // 3. existingRuleId — set on mount by the page that knows the rule (details/editing)
+      const savedRuleId =
+        rule.id ??
+        aiRuleCreation.getLastSavedRuleId() ??
+        aiRuleCreation.getExistingRuleId() ??
+        undefined;
       const isUpdate = !!savedRuleId;
       if (savedRuleId) {
         const ruleWithId = savedRuleId === rule.id ? rule : { ...rule, id: savedRuleId };
@@ -102,8 +107,7 @@ export const createSaveRuleHandler = ({
             })
           : i18n.translate('xpack.securitySolution.saveRuleHandler.savedTitle', {
               defaultMessage: 'Rule saved',
-            }),
-        { toastLifeTimeMs: 2000 }
+            })
       );
 
       aiRuleCreation.setLastSavedRuleId(saved.id);
@@ -156,11 +160,12 @@ export const createSaveRuleHandler = ({
   // create_detection_rule (which also replaces the attachment's content).
   const dirtySub = agentBuilder?.events.chat$.subscribe((event) => {
     if (!isRoundCompleteEvent(event)) return;
-    const lastSavedId = aiRuleCreation.getLastSavedRuleId();
     const ruleAttachment = event.data.attachments?.find(
       (a) => a.type === SecurityAgentBuilderAttachments.rule
     );
-    if (lastSavedId !== null && ruleAttachment) {
+    const hasKnownRule =
+      aiRuleCreation.getLastSavedRuleId() !== null || aiRuleCreation.getExistingRuleId() !== null;
+    if (hasKnownRule && ruleAttachment) {
       aiRuleCreation.markDirty();
     }
   });

@@ -69,20 +69,15 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
   } = props;
 
   const { services } = useKibana();
-  const { agentBuilder, aiRuleCreation } = services;
+  const { aiRuleCreation } = services;
 
-  // When this button is used on the rule details page (rule prop with an id), seed
-  // lastSavedRuleId so save_rule_handler's dirty-tracking subscription can fire.
-  // Re-seed on every conversation change because save_rule_handler resets it on switch.
+  // Tell save_rule_handler which rule this page is about. Stable for the page lifetime —
+  // not reset on conversation switches (unlike lastSavedRuleId).
   const ruleId = rule?.id;
   useEffect(() => {
-    if (!ruleId) return;
-    aiRuleCreation.setLastSavedRuleId(ruleId);
-    const conversationSub = agentBuilder?.events?.ui?.activeConversation$.subscribe(() => {
-      aiRuleCreation.setLastSavedRuleId(ruleId);
-    });
-    return () => conversationSub?.unsubscribe();
-  }, [ruleId, aiRuleCreation, agentBuilder]);
+    aiRuleCreation.setExistingRuleId(ruleId ?? null);
+    return () => aiRuleCreation.setExistingRuleId(null);
+  }, [ruleId, aiRuleCreation]);
 
   // Format rule for AI assistant attachment from either form state or an existing rule response.
   const isFormBased =
