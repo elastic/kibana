@@ -245,8 +245,7 @@ describe('appendEntityFiltersToChangePointLineEsql', () => {
     });
 
     it('skips all columns when WHERE constrains multiple entity columns via AND', () => {
-      const line =
-        'FROM idx | WHERE host == "pod-a" AND region == "us" | STATS m = AVG(x) BY t';
+      const line = 'FROM idx | WHERE host == "pod-a" AND region == "us" | STATS m = AVG(x) BY t';
       expect(
         appendEntityFiltersToChangePointLineEsql(line, { host: 'pod-a', region: 'us' }, [
           'host',
