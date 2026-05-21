@@ -11,7 +11,7 @@
 const ebtElement = {
   appRoot: 'agentBuilder.app',
   pageContent: 'agentBuilder.pageContent',
-  SIDEBAR: 'agentBuilder.sidebar',
+  sidebar: 'agentBuilder.sidebar',
   flyout: 'agentBuilder.flyout',
 } as const;
 

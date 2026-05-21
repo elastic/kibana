@@ -90,7 +90,7 @@ const AgentListHeader: React.FC = () => {
           {...(manageAgents ? { href: createAgentHref } : { disabled: true })}
           data-test-subj="agentBuilderAgentSelectorNewAgentButton"
           {...getEbtProps({
-            element: AGENT_BUILDER_UI_EBT.element.SIDEBAR,
+            element: AGENT_BUILDER_UI_EBT.element.sidebar,
             action: AGENT_BUILDER_UI_EBT.action.navSidebar.NEW_AGENT,
           })}
         >
@@ -119,7 +119,7 @@ const AgentListFooter: React.FC = () => {
         size="s"
         data-test-subj="agentBuilderAgentSelectorManageAgentsButton"
         {...getEbtProps({
-          element: AGENT_BUILDER_UI_EBT.element.SIDEBAR,
+          element: AGENT_BUILDER_UI_EBT.element.sidebar,
           action: AGENT_BUILDER_UI_EBT.action.navSidebar.MANAGE_ALL_AGENTS_CLICK,
         })}
       >
@@ -179,7 +179,7 @@ export const AgentSelectorDropdown: React.FC<AgentSelectorDropdownProps> = ({
       onClick={() => setIsPopoverOpen((v) => !v)}
       data-test-subj="agentBuilderAgentSelectorButton"
       {...getEbtProps({
-        element: AGENT_BUILDER_UI_EBT.element.SIDEBAR,
+        element: AGENT_BUILDER_UI_EBT.element.sidebar,
         action: AGENT_BUILDER_UI_EBT.action.navSidebar.AGENT_SELECTOR_OPEN,
       })}
     >
@@ -227,7 +227,7 @@ export const AgentSelectorDropdown: React.FC<AgentSelectorDropdownProps> = ({
         <EuiFlexItem
           grow={false}
           {...getEbtProps({
-            element: AGENT_BUILDER_UI_EBT.element.SIDEBAR,
+            element: AGENT_BUILDER_UI_EBT.element.sidebar,
             action: AGENT_BUILDER_UI_EBT.action.navSidebar.AGENT_SWITCH,
           })}
         >

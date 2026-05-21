@@ -145,7 +145,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
           setIsRenameModalOpen(true);
         }}
         {...getEbtProps({
-          element: AGENT_BUILDER_UI_EBT.element.SIDEBAR,
+          element: AGENT_BUILDER_UI_EBT.element.sidebar,
           action: AGENT_BUILDER_UI_EBT.action.conversationList.RENAME_CONVERSATION,
         })}
       >
@@ -163,7 +163,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
           setIsDeleteModalOpen(true);
         }}
         {...getEbtProps({
-          element: AGENT_BUILDER_UI_EBT.element.SIDEBAR,
+          element: AGENT_BUILDER_UI_EBT.element.sidebar,
           action: AGENT_BUILDER_UI_EBT.action.conversationList.DELETE_CONVERSATION,
         })}
       >
@@ -187,7 +187,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
       }}
       data-test-subj={`agentBuilderSidebarConversationMenu-${conversationId}`}
       {...getEbtProps({
-        element: AGENT_BUILDER_UI_EBT.element.SIDEBAR,
+        element: AGENT_BUILDER_UI_EBT.element.sidebar,
         action: AGENT_BUILDER_UI_EBT.action.conversationList.OPEN_CONVERSATION_MENU,
       })}
     />
@@ -216,7 +216,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
               onItemClick?.();
             }}
             {...getEbtProps({
-              element: AGENT_BUILDER_UI_EBT.element.SIDEBAR,
+              element: AGENT_BUILDER_UI_EBT.element.sidebar,
               action: AGENT_BUILDER_UI_EBT.action.conversationList.CONVERSATION_RESUME,
             })}
           >

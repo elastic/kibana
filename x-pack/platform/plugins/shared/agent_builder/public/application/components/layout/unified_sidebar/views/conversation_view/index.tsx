@@ -206,7 +206,7 @@ export const ConversationSidebarView: React.FC = () => {
                             onClick={handlePressNewConversation}
                             data-test-subj="agentBuilderSidebarNewConversationButton"
                             {...getEbtProps({
-                              element: AGENT_BUILDER_UI_EBT.element.SIDEBAR,
+                              element: AGENT_BUILDER_UI_EBT.element.sidebar,
                               action:
                                 AGENT_BUILDER_UI_EBT.action.conversationList.CONVERSATION_START,
                             })}
@@ -225,7 +225,7 @@ export const ConversationSidebarView: React.FC = () => {
                             disabled={!hasConversations}
                             data-test-subj="agentBuilderSidebarSearchChatsButton"
                             {...getEbtProps({
-                              element: AGENT_BUILDER_UI_EBT.element.SIDEBAR,
+                              element: AGENT_BUILDER_UI_EBT.element.sidebar,
                               action:
                                 AGENT_BUILDER_UI_EBT.action.conversationList.CONVERSATION_SEARCH,
                             })}

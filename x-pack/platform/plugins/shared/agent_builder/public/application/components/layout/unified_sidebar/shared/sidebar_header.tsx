@@ -101,7 +101,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
                 navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }));
               }}
               {...getEbtProps({
-                element: AGENT_BUILDER_UI_EBT.element.SIDEBAR,
+                element: AGENT_BUILDER_UI_EBT.element.sidebar,
                 action: AGENT_BUILDER_UI_EBT.action.conversationList.CONVERSATION_START,
               })}
             />
@@ -130,7 +130,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
                 navigate(appPaths.agent.root({ agentId: getLastAgentId() }));
               }}
               {...getEbtProps({
-                element: AGENT_BUILDER_UI_EBT.element.SIDEBAR,
+                element: AGENT_BUILDER_UI_EBT.element.sidebar,
                 action: AGENT_BUILDER_UI_EBT.action.navSidebar.SIDEBAR_LAYER_TRANSITION,
                 detail: AGENT_BUILDER_UI_EBT.detail.layerTransition.BACK_CLICK,
               })}

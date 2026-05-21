@@ -57,7 +57,7 @@ export const SidebarNavList: React.FC<SidebarNavListProps> = ({ items, isActive,
               css={isActive(item.path) ? activeLinkStyles : baseLinkStyles}
               onClick={onItemClick}
               {...getEbtProps({
-                element: AGENT_BUILDER_UI_EBT.element.SIDEBAR,
+                element: AGENT_BUILDER_UI_EBT.element.sidebar,
                 action: AGENT_BUILDER_UI_EBT.action.navSidebar.SIDEBAR_NAVIGATION_CLICK,
                 detail: item.path.split('/').filter(Boolean).pop() ?? item.path,
               })}

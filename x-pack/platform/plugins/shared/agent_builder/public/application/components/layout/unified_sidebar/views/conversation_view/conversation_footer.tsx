@@ -43,7 +43,7 @@ export const ConversationFooter: React.FC = () => {
             navigateToAgentBuilderUrl(appPaths.manage.agents);
           }}
           {...getEbtProps({
-            element: AGENT_BUILDER_UI_EBT.element.SIDEBAR,
+            element: AGENT_BUILDER_UI_EBT.element.sidebar,
             action: AGENT_BUILDER_UI_EBT.action.navSidebar.SIDEBAR_LAYER_TRANSITION,
             detail: AGENT_BUILDER_UI_EBT.detail.layerTransition.MANAGE_CLICK,
           })}

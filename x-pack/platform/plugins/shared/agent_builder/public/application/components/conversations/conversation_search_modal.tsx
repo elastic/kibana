@@ -115,7 +115,7 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
                 }}
                 data-test-subj={`agentBuilderConversationSearchResult-${conversation.id}`}
                 {...getEbtProps({
-                  element: AGENT_BUILDER_UI_EBT.element.SIDEBAR,
+                  element: AGENT_BUILDER_UI_EBT.element.sidebar,
                   action: AGENT_BUILDER_UI_EBT.action.conversationList.CONVERSATION_RESUME,
                 })}
               >
